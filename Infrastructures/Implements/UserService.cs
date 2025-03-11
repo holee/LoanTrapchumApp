@@ -1,0 +1,594 @@
+﻿using Applications.Constants.Authorizations;
+using Applications.Extensions.Identity;
+using Applications.Interfaces.Identity;
+using Applications.Requests.Identity;
+using Applications.Responses;
+using Applications.Responses.Auths;
+using Applications.Responses.Paginations;
+using Applications.Responses.ViewModels.Auths;
+using Domains.Models.Files;
+using Infrastructures.Data;
+using Mapster;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+namespace Infrastructures.Implements;
+
+public class UserService : IUserService
+{
+    private readonly UserDataContext _userContext;
+    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly SignInManager<ApplicationUser> _signinManager;
+    private readonly RoleManager<ApplicationRole> _roleManager;
+    private readonly IWebHostEnvironment _env;
+    public UserService(UserManager<ApplicationUser> userManager,
+         RoleManager<ApplicationRole> roleManager,
+         UserDataContext userContext,
+         IWebHostEnvironment env,
+         SignInManager<ApplicationUser> signinManager)
+    {
+        _userManager = userManager;
+        _roleManager = roleManager;
+        _userContext = userContext;
+        _env = env;
+        _signinManager = signinManager;
+    }
+    public async Task<Result> CreateUserAsync(RegisterRequest model)
+    {
+        var existingUser = await GetUserByName(model.Username);
+
+        if (existingUser is not null)
+        {
+            return Result.Failure(ErrorResponse.Failure($"{model.Username} Already Exist."));
+        }
+        var userWithSameEmail = await _userManager.FindByEmailAsync(model.Email!);
+
+        if (userWithSameEmail is not null)
+        {
+            return Result.Failure(ErrorResponse.Failure("{model.Email} Email Already Exist."));
+        }
+
+        var user = new ApplicationUser
+        {
+            UserName = model.Username ?? model.Email,
+            Email = model.Email,
+            BranchRefId = model.BranchRefId,
+            NameRefId = model.EmployeeId,
+            IsActive = true
+        };
+
+        if (model.FileUpload is not null)
+        {
+
+            var uploadResult = await UploadFile(model.FileUpload);
+
+            if (uploadResult.IsSuccess)
+            {
+                var fileResult = uploadResult.Data;
+
+                var userProfile = new UserProfiles
+                {
+                    FileName = fileResult?.FileName,
+                    FileTitle = fileResult?.FileName,
+                    FileUrl = fileResult?.FileUrl,
+                    IsActive = true
+                };
+
+                user.UserProfiles.Add(userProfile);
+            }
+        }
+
+        var result = await _userManager.CreateAsync(user, model.Password!);
+
+        if (!result.Succeeded)
+        {
+            var errors = result.Errors.Select(x => x.Description).ToList();
+            return Result.Failure(ErrorResponse.Failure(errors));
+        }
+
+        if (!await _userManager.IsInRoleAsync(user, model.RoleName!))
+        {
+            var assignRole = await _userManager.AddToRoleAsync(user, model.RoleName!);
+            if (!assignRole.Succeeded)
+            {
+                var errors = assignRole.Errors.Select(x => x.Description).ToList();
+                return Result.Failure(ErrorResponse.Failure(errors));
+            }
+        }
+
+        return Result.Success();
+
+    }
+    public async Task<Result<IEnumerable<VUser>>> GetUsersAsync(string? userId, string? filter = null)
+    {
+        var queries = _userContext.Database
+                                .SqlQuery<VUser>($"SELECT * FROM vUsers")
+                                .Where(x => x.IsActive == true);
+
+        if (!string.IsNullOrWhiteSpace(filter))
+        {
+            queries = queries.Where(x => EF.Functions.Like(x.UserName!, $"%{filter}%")
+                                    || EF.Functions.Like(x.Email!, $"%{filter}%"));
+        }
+        if (string.IsNullOrEmpty(userId))
+        {
+            queries = queries.Where(u => u.Id == userId);
+        }
+
+        var users = await queries.AsNoTracking().ToListAsync();
+
+        return Result.Success<IEnumerable<VUser>>(users);
+
+    }
+    public async Task<Result<Pager<VUser>>> GetUsersAsync(QueryParam param, string? userId)
+    {
+        var queries = _userContext.Database.SqlQuery<VUser>($"SELECT * FROM vUsers");
+        if (!param.IsIncludeInActive)
+        {
+            queries = queries.Where(x => x.IsActive == true);
+        }
+
+        if (!string.IsNullOrWhiteSpace(param.Filter))
+        {
+            queries = queries.Where(x => EF.Functions.Like(x.UserName!, $"%{param.Filter}%")
+                                      || EF.Functions.Like(x.Email!, $"%{param.Filter}%"));
+        }
+
+        if (param.SortDescending)
+        {
+            queries = queries.OrderByDescending(p => EF.Property<object>(p, param.SortColumn));
+        }
+
+        if (!string.IsNullOrEmpty(userId))
+        {
+            queries = queries.Where(u => u.Id == userId);
+        }
+        var counts = await queries.CountAsync();
+
+        var users = await queries.Skip(param.PageIndex)
+                            .Take(param.PageSize)
+                            .AsNoTracking()
+                            .ToListAsync();
+
+        return Result.Success<Pager<VUser>>(new(users, counts));
+    }
+    public async Task<Pager<UserDto>> GetUsersAsync(int pageIndex, int pageSize, string sortColumn, bool includeInactive = false, string? filter = null)
+    {
+        var queries = _userManager.Users;
+
+        if (!includeInactive)
+        {
+            queries = queries.Where(x => x.IsActive == true);
+        }
+        if (!string.IsNullOrWhiteSpace(filter))
+        {
+            queries = queries.Where(x => x.UserName!.Contains(filter)
+                                    || x.Email!.Contains(filter))
+                              .Where(x => x.IsActive == true);
+        }
+        var userList = new List<UserDto>();
+
+        if (queries.Any())
+        {
+            foreach (var user in queries)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+                var userDto = new UserDto();
+                userList.Add(userDto);
+            }
+        }
+
+        var counts = userList.Count();
+        var items = userList.Skip(pageIndex).Take(pageSize).ToList();
+        return new Pager<UserDto>
+        {
+            Count = counts,
+            Items = items
+        };
+
+    }
+    public async Task<Result<UserDto>> GetUsertById(string? userId)
+    {
+
+        ArgumentException.ThrowIfNullOrWhiteSpace(userId, nameof(userId));
+
+        var user = await _userManager.FindByIdAsync(userId);
+
+        if (user is not null)
+        {
+            var roles = await _userManager.GetRolesAsync(user);
+
+            return Result.Success(new UserDto(user.Id.ToString(), user.UserName!, user.Email!, roles.First(), user.IsActive!.Value));
+
+        }
+        return Result.Failure<UserDto>(ErrorResponse.NullValue);
+    }
+    public async Task<Result> ChangePassword(ChangePasswordDto req)
+    {
+
+        var existingUser = await _userManager.FindByIdAsync(req.UserId.ToString());
+
+        if (existingUser is null)
+        {
+            return Result.Failure(ErrorResponse.Failure("There is no any user in the system."));
+        }
+
+        var changePasswordResult = await _userManager.ChangePasswordAsync(existingUser, req.CurrentPassword, req.NewPassword);
+
+        if (!changePasswordResult.Succeeded)
+        {
+            var errors = changePasswordResult.Errors.Select(x => x.Description).ToList();
+
+            return Result.Failure(ErrorResponse.Failure(errors));
+        }
+        return Result.Success();
+    }
+    public async Task<Result> UpdateUserRoleAsync(UserRoleDtoUpdate req)
+    {
+
+        var existingUser = await _userManager.FindByIdAsync(req.UserId.ToString());
+
+        if (existingUser is null)
+        {
+            return Result.Failure(ErrorResponse.NotFound("There is no any user in the system."));
+        }
+        var existingRoles = await _userManager.GetRolesAsync(existingUser);
+
+        if (existingRoles.Any())
+        {
+            await _userManager.RemoveFromRolesAsync(existingUser, existingRoles);
+        }
+
+        var result = await _userManager.AddToRoleAsync(existingUser, req.RoleName);
+
+        if (!result.Succeeded)
+        {
+            var errors = result.Errors.Select(x => x.Description).ToList();
+
+            return Result.Failure(ErrorResponse.Failure(errors));
+
+        }
+
+        return Result.Success("Role was changed.");
+
+    }
+    public async Task<Result> ChangeProfile(string userId, FileUploadModel model)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user is null)
+        {
+            return Result.Failure(ErrorResponse.NotFound("There is no any user selected."));
+        }
+
+        if (model is not null)
+        {
+
+            var uploadResult = await UploadFile(model);
+
+            if (uploadResult.IsSuccess)
+            {
+                var fileResult = uploadResult.Data;
+                var userProfile = new UserProfiles
+                {
+                    FileName = fileResult?.FileName,
+                    FileTitle = fileResult?.FileName,
+                    FileUrl = fileResult?.FileUrl,
+                    IsActive = true,
+                    UserRefId = userId
+                };
+
+                _userContext.UserProfiles.Add(userProfile);
+
+                await _userContext.SaveChangesAsync();
+
+                return Result.Success("User Profile was changed");
+            }
+        }
+        return Result.Failure(ErrorResponse.NotFound("There is no any user selected."));
+
+    }
+    public Task<Result> LockUserAccount(string email)
+    {
+        throw new NotImplementedException();
+    }
+    public async Task<Result> EditUserAsync(string userId, EditUserDto model)
+    {
+
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+
+        if (user is null)
+        {
+            return Result.Failure(ErrorResponse.NotFound("User Not Found"));
+        }
+        else
+        {
+            user.Email = model.Email;
+            user.UserName = model.UserName;
+            user.IsActive = model.IsActive;
+            var editResult = await _userManager.UpdateAsync(user);
+            if (!editResult.Succeeded)
+            {
+                var errors = editResult.Errors.Select(x => x.Description).ToList();
+                return Result.Failure(ErrorResponse.Failure("400", errors));
+            }
+
+        }
+        return Result.Success("User Was Edited Success fully.");
+    }
+    public async Task<Result<UserPermissions>> GetUserPermissionsAsync(string? userId)
+    {
+
+        ArgumentException.ThrowIfNullOrWhiteSpace(userId, nameof(userId));
+
+        var userInDb = await _userManager.FindByIdAsync(userId);
+
+        if (userInDb is null)
+        {
+            return Result.Failure<UserPermissions>(ErrorResponse.NotFound("There is any users in the system."));
+        }
+
+        var allPermissions = ApplicationPermissions.UserPermissions;//  UserLevelPermissions.AllUserPermissions;
+        var userPermissions = new UserPermissions(userId, []);
+        var currentUserClaims = await GetUserClaimssAsync(userId);
+        var userPermissionsNames = allPermissions.Select(p => p.For).ToList();
+        var currentUserClaimsValues = currentUserClaims.Select(crc => crc.ClaimValue).ToList();
+        var currentlyAssignedUserClaimsNames = userPermissionsNames
+                                                    .Intersect(currentUserClaimsValues)
+                                                    .ToList();
+        foreach (var permission in allPermissions)
+        {
+            if (currentlyAssignedUserClaimsNames.Any(carc => carc == permission.For))
+            {
+                userPermissions.Permissions!.Add(new UserPermissionViewModel
+                {
+                    UserId = userId,
+                    ClaimType = AppClaim.Permission,
+                    ClaimValue = permission.For,
+                    Group = permission.Group,
+                    IsAssignedToRole = true
+                });
+            }
+            else
+            {
+                userPermissions.Permissions!.Add(new UserPermissionViewModel
+                {
+                    UserId = userId,
+                    ClaimType = AppClaim.Permission,
+                    ClaimValue = permission.For,
+                    Group = permission.Group,
+                    IsAssignedToRole = false
+                });
+            }
+        }
+        return await Result.SuccessAsync(userPermissions);
+    }
+    public async Task<Result> AddOrRemovedUserPermissionsAsync(string? userId, UserPermissionRequest permission)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(userId, nameof(userId));
+
+        var userInDb = await _userManager.FindByIdAsync(userId);
+
+        if (userInDb is null)
+        {
+            return Result.Failure(ErrorResponse.NotFound("No Role Found."));
+        }
+
+        var permissionsToBeAssigned = permission!.Permissions!
+                                                 .Where(rc => rc.IsAssignedToRole == true)
+                                                    .ToList();
+
+        var currentlyAssignedClaims = await _userManager.GetClaimsAsync(userInDb);
+
+        // Drop
+        foreach (var claim in currentlyAssignedClaims)
+        {
+            await _userManager.RemoveClaimAsync(userInDb, claim);
+        }
+        // Add
+        foreach (var claim in permissionsToBeAssigned)
+        {
+            var mappedUserClaim = claim.Adapt<ApplicationUserClaim>();
+
+            await _userContext.UserClaims.AddAsync(mappedUserClaim);
+        }
+        await _userContext.SaveChangesAsync();
+        return Result.Success("Permissions were addedd successfully.");
+    }
+    public async Task<Result<UserViewModel>> GetUserRolesAsync(string? userId)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(userId, nameof(userId));
+
+        var userInDb = await _userManager.FindByIdAsync(userId);
+
+        if (userInDb is null)
+        {
+            return Result.Failure<UserViewModel>(ErrorResponse.NotFound("No Role Found."));
+        }
+        var roleViewmodels = new List<UserRolesViewModel>();
+        var useViewModel = new UserViewModel
+        {
+            UserId = userInDb.Id.ToString(),
+            UserName = userInDb.UserName!
+        };
+        foreach (var role in _roleManager.Roles)
+        {
+            var roleViewmodel = new UserRolesViewModel
+            {
+                RoleId = role.Id,
+                RoleName = role.Name,
+            };
+
+            if (await _userManager.IsInRoleAsync(userInDb, role.Name!))
+            {
+                roleViewmodel.IsSelected = true;
+            }
+            else
+            {
+                roleViewmodel.IsSelected = false;
+            }
+            roleViewmodels.Add(roleViewmodel);
+        }
+        if (roleViewmodels.Any())
+        {
+            useViewModel.UserRoles.AddRange(roleViewmodels);
+        }
+        return Result.Success(useViewModel);
+    }
+    public async Task<Result> AddOrRemovedUserRolesAsync(List<UserRolesViewModel> model, string userId)
+    {
+        var userInDb = await _userManager.FindByIdAsync(userId);
+
+        if (userInDb is null)
+        {
+            return Result.Failure(ErrorResponse.NotFound("user not found."));
+        }
+
+        var roles = await _userManager.GetRolesAsync(userInDb);
+
+        var removedRoleResult = await _userManager.RemoveFromRolesAsync(userInDb, roles);
+
+        if (!removedRoleResult.Succeeded)
+        {
+            var error = removedRoleResult.Errors.Select(x => x.Description).First();
+            return Result.Failure(ErrorResponse.ServerError(error));
+        }
+
+        var newSelectedRoles = model.Where(x => x.IsSelected == true)
+                                    .Select(x => x.RoleName).ToList();
+
+        if (!newSelectedRoles.Any())
+        {
+            return Result.Failure(ErrorResponse.NotFound("no any roles selected."));
+        }
+
+        var applyNewRoleResult = await _userManager.AddToRolesAsync(userInDb, newSelectedRoles!);
+
+        if (!applyNewRoleResult.Succeeded)
+        {
+            var error = applyNewRoleResult.Errors
+                                    .Select(x => x.Description)
+                                    .First();
+            return Result.Failure(ErrorResponse.ServerError(error));
+        }
+
+        return Result.Success("user role was updated.");
+    }
+    private async Task<IList<UserPermissionViewModel>> GetUserClaimssAsync(string userId)
+    {
+        var userClaims = await _userContext.UserClaims
+                                     .Where(x => x.UserId == userId)
+                                     .AsNoTracking()
+                                     .ToListAsync();
+
+        if (userClaims.Any())
+        {
+            var mappUserPermissions = userClaims.Adapt<IList<UserPermissionViewModel>>();
+            return mappUserPermissions;
+        }
+        return [];
+    }
+    private async Task<Result<FileModel>> UploadFile(FileUploadModel fileUpload)
+    {
+        if (string.IsNullOrEmpty(fileUpload.FileName) && fileUpload.FileContent.Length == 0)
+        {
+            var errorResp = Result.Failure<FileModel>(ErrorResponse.NotFound("no file selected"));
+            return errorResp;
+
+        }
+
+        if (!AllowedFileSize(fileUpload.FileSize))
+        {
+            var errorResp = Result.Failure<FileModel>(ErrorResponse.Validation("400", ["File size is exceed the maximum size."]));
+            return errorResp;
+        }
+
+        if (!AllowedExtension(fileUpload.FileName))
+        {
+            var errorResp = Result.Failure<FileModel>(ErrorResponse.Validation("400", ["file extension is not allow."]));
+            return errorResp;
+        }
+
+        string newFileName = $"{Guid.NewGuid()}{fileUpload.Extension}";
+
+        var uploadPath = Path.Combine(_env.WebRootPath, "documents/files");
+
+        if (!Directory.Exists(uploadPath))
+        {
+            Directory.CreateDirectory(uploadPath);
+        }
+
+        var filePath = Path.Combine(uploadPath, newFileName);
+
+        using var fileStream = new FileStream(filePath, FileMode.Create);
+
+        await fileStream.WriteAsync(fileUpload.FileContent, 0, fileUpload.FileContent.Length);
+
+        //var imageUrl = $"{_httpContext.HttpContext?.Request.Scheme}://{_httpContext.HttpContext?.Request.Host}/documents/files/{newFileName}";
+
+        var imageUrl = "";
+
+        var uploadResult = new FileModel(fileUpload.FileName, newFileName, imageUrl);
+
+        return Result.Success(uploadResult);
+    }
+    private bool AllowedExtension(string fileName)
+    {
+
+        string[] allowExtentions = [".png", ".jpg", ".jpeg", ".pdf", ".doc", ".docx", ".xls", ".xlsx"];
+
+        string fileExt = Path.GetExtension(fileName).ToLower();
+
+        return allowExtentions.Contains(fileExt);
+
+    }
+    private bool AllowedFileSize(long fileSize = 30_000_000)
+    {
+        return fileSize > 0 && fileSize < 30_000_000;
+    }
+    public async Task<IEnumerable<Claim>> GetClaimsAsync(ApplicationUser user)
+    {
+        var userClaims = await _userManager.GetClaimsAsync(user);
+
+        var roles = await _userManager.GetRolesAsync(user);
+
+        var roleClaims = new List<Claim>();
+        var permissionClaims = new List<Claim>();
+
+        //if (user.BranchRefId > 0 || !roles.Contains(SystemRole.SuperAdmin))
+        //{
+        //    var branchResponse = await _branchService.GetBrachStatus(user.BranchRefId!.Value);
+        //    var branchState = branchResponse.IsSuccess ? branchResponse.Data : new();
+        //    var status = branchState!.IsOpen ? "1" : "0";
+        //    roleClaims.Add(new("Status", status));
+        //    roleClaims.Add(new("BranchId", $"{user.BranchRefId}"));
+        //}
+
+        foreach (var role in roles)
+        {
+            roleClaims.Add(new Claim(ClaimTypes.Role, role));
+            var currentRole = await _roleManager.FindByNameAsync(role);
+            var allPermissionsForCurrentRole = await _roleManager.GetClaimsAsync(currentRole!);
+            permissionClaims.AddRange(allPermissionsForCurrentRole);
+        }
+        var claims = new List<Claim>
+            {
+                new (ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new(ClaimTypes.Email, user.Email!),
+                new(ClaimTypes.Name, user.UserName!),
+                new(ClaimTypes.MobilePhone, user.PhoneNumber ?? string.Empty),
+                new Claim(JwtRegisteredClaimNames.Sub, user.Email!)
+            }
+        .Union(userClaims)
+        .Union(roleClaims)
+        .Union(permissionClaims);
+        return claims;
+    }
+
+
+    public async Task<ApplicationUser?> GetUserById(string userId) => await _userManager.FindByIdAsync(userId);
+    public async Task<ApplicationUser?> GetUserByEmail(string email) => await _userManager.FindByEmailAsync(email);
+    public async Task<ApplicationUser?> GetUserByName(string name) => await _userManager.FindByNameAsync(name);
+
+}

@@ -1,0 +1,21 @@
+﻿using Applications.Requests.Identity;
+using FluentValidation;
+
+namespace Applications.Requests.Validations.Auths
+{
+    public class ChangedPasswordValidator : AbstractValidator<ChangePasswordDto>
+    {
+        public ChangedPasswordValidator()
+        {
+            RuleFor(x => x.UserId).NotEmpty().WithMessage("User Id is required")
+                                .GreaterThan(0).WithMessage("Please select user id.");
+            RuleFor(x => x.CurrentPassword).NotEmpty().WithMessage("Please enter new password")
+                                           .MinimumLength(4).WithMessage("Password length is not meet requirement.");
+            RuleFor(x => x.NewPassword).NotEmpty().WithMessage("Please enter new password")
+                                           .MinimumLength(4).WithMessage("Password length is not meet requirement.");
+            RuleFor(x => x.ConfirmPassword).NotEmpty().WithMessage("Please enter new password")
+                                           .MinimumLength(4).WithMessage("Password length is not meet requirement.")
+                                           .Equal("NewPassword").WithMessage("New Password and Confirm Password not same.");
+        }
+    }
+}

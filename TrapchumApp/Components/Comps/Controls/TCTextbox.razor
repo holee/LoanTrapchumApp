@@ -1,0 +1,61 @@
+﻿@using System.Linq.Expressions
+@using Applications.Interfaces.Branches
+
+@if (Orientation is Orientation.Horizontal)
+{
+    <div class="row">
+        <label for="@Id" class="col-sm-2 col-form-label">@Label</label>
+        <div class="col-sm-10">
+            <RadzenTextBox Value="@Value"
+                           ValueExpression="@ValueExpression"
+                           Change="OnChanged"
+                           @oninput="TextChanged"
+                           onclick="this.querySelector('.rz-numeric-input').select()"
+                           class="w-100"
+                           id="@Id"
+                           ValueChanged="ValueChanged" />
+
+            @if (ShowError)
+            {
+                <div class="invalid-feedback">
+                    <ValidationMessage For="@ValueExpression" />
+                </div>
+            }
+        </div>
+    </div>
+
+}
+else
+{
+    <div class="mb-3">
+        <label for="@Id" class="form-label">@Label</label>
+        <RadzenTextBox Value="@Value"
+                       ValueExpression="@ValueExpression"
+                       Change="OnChanged"
+                       @oninput="TextChanged"
+                       onclick="this.querySelector('.rz-numeric-input').select()"
+                       class="form-control w-100"
+                       id="@Id"
+                       ValueChanged="ValueChanged" />
+        @if (ShowError)
+        {
+            <div class="invalid-feedback">
+                <ValidationMessage For="@ValueExpression" />
+            </div>
+        }
+    </div>
+}
+
+
+@code {
+    [Parameter] public string Id { get; set; } = Guid.NewGuid().ToString();
+    [Parameter] public string? Value { get; set; }
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public bool ShowError { get; set; } = false;
+    [Parameter] public Orientation Orientation { get; set; } = Orientation.Horizontal;
+    [Parameter] public TextAlign TextAlign { get; set; } = TextAlign.Left;
+    [Parameter] public EventCallback<string?> ValueChanged { get; set; }
+    [Parameter] public Expression<Func<string>>? ValueExpression { get; set; }
+    [Parameter] public EventCallback<string> OnChanged { get; set; }
+    [Parameter] public EventCallback<ChangeEventArgs> TextChanged { get; set; }
+}

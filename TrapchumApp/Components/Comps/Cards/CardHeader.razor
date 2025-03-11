@@ -1,0 +1,8 @@
+﻿@using Applications.Interfaces.Branches
+<div class="card-header @(HeaderCssClass)">
+    @ChildContent
+</div>
+@code {
+    [Parameter] public string? HeaderCssClass { get; set; } = null;
+    [Parameter] public RenderFragment? ChildContent { set; get; } = null;
+}

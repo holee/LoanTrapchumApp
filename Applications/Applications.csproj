@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Requests\Customers\" />
+    <Folder Include="Requests\Employees\" />
+    <Folder Include="Bases\" />
+    <Folder Include="Requests\Vendors\" />
+    <Folder Include="Responses\Customers\" />
+    <Folder Include="Responses\Employees\" />
+    <Folder Include="Responses\Identity\" />
+    <Folder Include="Responses\Transactions\" />
+    <Folder Include="Responses\Vendors\" />
+    <Folder Include="Responses\ViewModels\Trans\" />
+    <Folder Include="Responses\ViewModels\Users\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Interfaces\Currencies\ICurrencyService.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="11.11.0" />
+    <PackageReference Include="Mapster" Version="7.4.0" />
+    <PackageReference Include="Mapster.DependencyInjection" Version="1.0.1" />
+    <PackageReference Include="Mapster.EFCore" Version="5.1.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.3.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Domains\Domains.csproj" />
+  </ItemGroup>
+
+</Project>

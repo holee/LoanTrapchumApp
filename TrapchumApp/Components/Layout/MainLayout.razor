@@ -1,0 +1,97 @@
+﻿@using Applications.Interfaces.Branches
+@inherits LayoutComponentBase
+<RadzenLayout>
+    <RadzenHeader>
+        <RadzenStack Orientation="Orientation.Horizontal"
+                     JustifyContent="JustifyContent.SpaceBetween"
+                     AlignItems="AlignItems.Center" Gap="0">
+            <RadzenStack Orientation="Orientation.Horizontal"
+                         JustifyContent="JustifyContent.SpaceBetween"
+                         AlignItems="AlignItems.Center">
+                <RadzenSidebarToggle Click="@(() => sidebarExpanded = !sidebarExpanded)" />
+            </RadzenStack>
+            <RadzenStack Orientation="Orientation.Horizontal"
+                         JustifyContent="JustifyContent.SpaceBetween"
+                         AlignItems="AlignItems.Center">
+                <AuthorizeView>
+                    <Authorized>
+                    </Authorized>
+                </AuthorizeView>
+            </RadzenStack>
+        </RadzenStack>
+    </RadzenHeader>
+    <RadzenSidebar Responsive="false" Style="width: max-content;">
+        <RadzenPanelMenu DisplayStyle="@(sidebarExpanded ? MenuItemDisplayStyle.IconAndText : MenuItemDisplayStyle.Icon)">
+            <RadzenPanelMenuItem Text="សហគ្រាសបញ្ចាំទ្រព្យជុំ" Icon="dashboard" />
+        </RadzenPanelMenu>
+        <RadzenPanelMenu DisplayStyle="@(sidebarExpanded ? MenuItemDisplayStyle.IconAndText : MenuItemDisplayStyle.Icon)" ShowArrow="sidebarExpanded">
+            <RadzenPanelMenuItem Text="Dashboard" Icon="dashboard" Path="/" />
+            <AuthorizeView>
+                <Authorized>
+                  
+                </Authorized>
+            </AuthorizeView>
+            <AuthorizeView>
+                <Authorized>
+                    <RadzenPanelMenuItem Text="Departments" Icon="auto_awesome">
+                        <RadzenPanelMenuItem Text="Departments List" Path="/Departments" Icon="list" />
+                    </RadzenPanelMenuItem>
+                </Authorized>
+            </AuthorizeView>
+            <AuthorizeView>
+                <Authorized>
+                    <RadzenPanelMenuItem Text="Bussiness Insight" Icon="dataset">
+                        <RadzenPanelMenuItem Icon="lists" Path="#">
+                            Bussiness Perf.
+                        </RadzenPanelMenuItem>
+                        <RadzenPanelMenuItem Icon="lists" Path="#">
+                            Business Insight
+                        </RadzenPanelMenuItem>
+                    </RadzenPanelMenuItem>
+                </Authorized>
+            </AuthorizeView>
+            <AuthorizeView>
+                <Authorized>
+                </Authorized>
+            </AuthorizeView>
+            <AuthorizeView>
+                <Authorized>
+                </Authorized>
+            </AuthorizeView>
+            <AuthorizeView>
+                <Authorized>
+                </Authorized>
+            </AuthorizeView>
+            <AuthorizeView>
+                <Authorized>
+                </Authorized>
+            </AuthorizeView>
+            <AuthorizeView>
+                <Authorized>
+                </Authorized>
+            </AuthorizeView>
+            <AuthorizeView>
+                <Authorized>
+                    
+                </Authorized>
+            </AuthorizeView>
+        </RadzenPanelMenu>
+    </RadzenSidebar>
+    <RadzenBody>
+        @Body
+    </RadzenBody>
+</RadzenLayout>
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+</div>
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
+</div>
+@code{
+    bool sidebarExpanded = true;
+}

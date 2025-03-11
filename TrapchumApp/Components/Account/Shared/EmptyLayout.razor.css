@@ -1,0 +1,15 @@
+﻿.page-login {
+    width: 400px;
+    margin: 0 auto;
+}
+
+    .page-login input {
+        font-size: 10pt;
+    }
+
+    .page-login img {
+        position: relative;
+        width: 70%;
+        padding-bottom: 15px;
+        margin: 15px auto;
+    }

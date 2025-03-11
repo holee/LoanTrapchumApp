@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Models\Lists\Names\**" />
+    <EmbeddedResource Remove="Models\Lists\Names\**" />
+    <None Remove="Models\Lists\Names\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Models\Customers\" />
+    <Folder Include="Models\Entities\" />
+    <Folder Include="Models\Employees\" />
+    <Folder Include="Models\Trans\" />
+    <Folder Include="Models\Users\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="14.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.DataAnnotations.Validation" Version="3.2.0-rc1.20223.4" />
+    <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="9.0.2" />
+    <PackageReference Include="MiniExcel" Version="1.38.0" />
+  </ItemGroup>
+
+</Project>

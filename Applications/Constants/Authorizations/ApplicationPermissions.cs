@@ -1,0 +1,112 @@
+﻿using System.Collections.ObjectModel;
+
+namespace Applications.Constants.Authorizations;
+
+public class ApplicationPermissions
+{
+    private static readonly AppPermission[] _all = new AppPermission[]
+    {
+        new(Modules.Branches,Feature.Read, Group.ManagementHierarchy, "Create Branch",true),
+        new(Modules.Branches,Feature.Create, Group.Administrator, "Create Branch"),
+        new(Modules.Branches,Feature.Update, Group.Administrator, "Update Branch"),
+        new(Modules.Branches,Feature.Delete, Group.Administrator, "Delete Branch"),
+        new(Modules.Departments,Feature.Read, Group.Administrator, "Create Department",true),
+        new(Modules.Departments,Feature.Create, Group.Administrator, "Update Department"),
+        new(Modules.Departments,Feature.Update, Group.Administrator, "Delete Department"),
+        new(Modules.Departments,Feature.Delete, Group.Administrator, "Delete Department"),
+        new(Modules.Collaterals,Feature.Read, Group.ManagementHierarchy, "Read Collateral",true),
+        new(Modules.Collaterals,Feature.Create,Group.ManagementHierarchy, "Create Collateral",true),
+        new(Modules.Collaterals,Feature.Update,Group.ManagementHierarchy, "Update Collateral"),
+        new(Modules.Collaterals,Feature.Delete,Group.ManagementHierarchy, "Delete Collateral"),
+        new(Modules.Currencies,Feature.Read, Group.ManagementHierarchy, "Read Currency",true),
+        new(Modules.Currencies,Feature.Create, Group.Administrator, "Create Currency"),
+        new(Modules.Currencies,Feature.Update, Group.Administrator, "Update Currency"),
+        new(Modules.Currencies,Feature.Delete, Group.Administrator, "Delete Currency"),
+        new(Modules.Employees,Feature.Read, Group.ManagementHierarchy, "Read Employees",true),
+        new(Modules.Employees,Feature.Create, Group.Administrator, "Create Employees",true),
+        new(Modules.Employees,Feature.Update, Group.Administrator, "Update Employees",true),
+        new(Modules.Employees,Feature.Delete, Group.Administrator, "Delete Employees"),
+        new(Modules.Vendors,Feature.Read, Group.ManagementHierarchy, "Read Vendor",true),
+        new(Modules.Vendors,Feature.Update, Group.ManagementHierarchy, "Update Vendor",true),
+        new(Modules.Vendors,Feature.Create, Group.ManagementHierarchy, "Create Vendor",true),
+        new(Modules.Vendors,Feature.Delete, Group.ManagementHierarchy, "Delete Vendor"),
+        new(Modules.Customers,Feature.Read, Group.ManagementHierarchy, "Read Customer",true),
+        new(Modules.Customers,Feature.Create, Group.ManagementHierarchy, "Create Customer",true),
+        new(Modules.Customers,Feature.Update, Group.ManagementHierarchy, "Update Customer",true),
+        new(Modules.Customers,Feature.Delete, Group.ManagementHierarchy, "Delete Customer"),
+        new(Modules.OtherNames,Feature.Read, Group.ManagementHierarchy, "Read OtherName", true),
+        new(Modules.OtherNames,Feature.Create, Group.ManagementHierarchy, "Create OtherName", true),
+        new(Modules.OtherNames,Feature.Update, Group.ManagementHierarchy, "Update OtherName", true),
+        new(Modules.OtherNames,Feature.Delete,Group.ManagementHierarchy, "Delete OtherName"),
+        new(Modules.Roles,Feature.Read, Group.ManagementHierarchy, "Read Roles"),
+        new(Modules.Roles,Feature.Create, Group.Administrator, "Create Roles"),
+        new(Modules.Roles,Feature.Update, Group.Administrator, "Update Roles"),
+        new(Modules.Roles,Feature.Delete, Group.Administrator, "Delete Roles"),
+        new(Modules.Roles,RoleActionType.Grant, Group.Administrator, "Assign Permissions to role"),
+        new(Modules.Users,Feature.Read, Group.Administrator, "Read Users"),
+        new(Modules.Users,Feature.Create, Group.Administrator, "Create Users"),
+        new(Modules.Users,Feature.Update, Group.Administrator, "Update Users"),
+        new(Modules.Users,Feature.Delete, Group.Administrator, "Delete Users"),
+        new(Modules.Users,UserActionType.Grant, Group.Administrator, "Assign Permissions to role"),
+        new(Modules.Journals,Feature.Read, Group.ManagementHierarchy, "Read Journal", true),
+        new(Modules.Journals,Feature.Create, Group.ManagementHierarchy, "Create Journal", true),
+        new(Modules.Journals,Feature.Update, Group.ManagementHierarchy, "Update Journal", true),
+        new(Modules.Journals,Feature.Delete, Group.ManagementHierarchy, "Delete Journal", true),
+        new(Modules.Ledgers,Feature.Read, Group.ManagementHierarchy, "Read Ledger", true),
+        new(Modules.Ledgers,Feature.Create, Group.ManagementHierarchy, "Create Ledger", true),
+        new(Modules.Ledgers,Feature.Update, Group.ManagementHierarchy, "Update Ledger", true),
+        new(Modules.Ledgers,Feature.Delete, Group.ManagementHierarchy, "Delete Ledger", true),
+        new(Modules.Loans,Feature.Read, Group.ManagementHierarchy, "Read Loan", true),
+        new(Modules.Loans,Feature.Create, Group.ManagementHierarchy, "Create Loan", true),
+        new(Modules.Loans,Feature.Update, Group.ManagementHierarchy, "Update Loan", true),
+        new(Modules.Loans,Feature.Delete, Group.ManagementHierarchy, "Delete Loan", true),
+        new(Modules.Loans,Feature.Reschedule, Group.ManagementHierarchy, "Reschedule Loan", true),
+        new(Modules.LoanRequest,Feature.Read, Group.ManagementHierarchy, "Read Loan Request", true),
+        new(Modules.LoanRequest,Feature.Create, Group.ManagementHierarchy, "Create Loan Request", true),
+        new(Modules.LoanRequest,Feature.Update, Group.ManagementHierarchy, "Update Loan Request", true),
+        new(Modules.LoanRequest,Feature.Delete, Group.ManagementHierarchy, "Delete Loan Request", true),
+        new(Modules.LoanRequest,Feature.Disburse, Group.ManagementHierarchy, "Reject Loan Request", true),
+        new(Modules.LoanRequest,Feature.RejectRequest, Group.ManagementHierarchy, "Reject Loan Request", true),
+        new(Modules.LoanRequest,Feature.ApproveRequest, Group.ManagementHierarchy, "Approve Request Loan", true),
+        new(Modules.Repayments,Feature.Read, Group.ManagementHierarchy, "Request Loan", true),
+        new(Modules.Repayments,Feature.Create, Group.ManagementHierarchy, "Request Loan", true),
+        new(Modules.Repayments,Feature.Update, Group.ManagementHierarchy, "Request Loan", true),
+        new(Modules.Repayments,Feature.Delete, Group.ManagementHierarchy, "Request Loan", true),
+        new(Modules.Repayments,Feature.MultiplePayment, Group.ManagementHierarchy, "Allow Multiple Payment", true),
+        new(Modules.Repayments,Feature.PayOff, Group.ManagementHierarchy, "Allow Pay Off Loan Schedule", true),
+        new(Modules.Transactions,Feature.Read, Group.ManagementHierarchy, "Read Transaction", true),
+        new(Modules.Transactions,Feature.Create, Group.ManagementHierarchy, "Create Transaction", true),
+        new(Modules.Transactions,Feature.Update, Group.ManagementHierarchy, "Update Transaction", true),
+        new(Modules.Transactions,Feature.Delete, Group.ManagementHierarchy, "Delete Transaction", true),
+        new(Modules.Transactions,Feature.VaultIn, Group.ManagementHierarchy, "Start ValaultOut", true),
+        new(Modules.Transactions,Feature.VaultOut,Group.ManagementHierarchy, "Start ValaultOut", true),
+        new(Modules.Transactions,Feature.OpenBranch, Group.ManagementHierarchy, "Open branch for operation", true),
+        new(Modules.Transactions,Feature.CloseBranch, Group.ManagementHierarchy, "Close Branch", true),
+        new(Modules.Transactions,Feature.ExchangeMoney, Group.ManagementHierarchy, "Money exchange", true),
+        new(Modules.Reports,Feature.Delete, Group.ManagementHierarchy, "Delete Report", true),
+        new(Modules.Reports,Feature.Read, Group.ManagementHierarchy, "Read Report", true),
+        new(Modules.Reports,Feature.Create, Group.ManagementHierarchy, "Create Report", true),
+        new(Modules.Reports,Feature.Update, Group.ManagementHierarchy, "Update Report", true),
+        new(Modules.AccountsDashboard,Feature.Read, Group.ManagementHierarchy, "Show Manage Account Menu",true),
+        new(Modules.AdministratorsDashboard,Feature.Read, Group.ManagementHierarchy, "Show Administrator Menu"),
+        new(Modules.BranchesDashboard,Feature.Read, Group.ManagementHierarchy, "Show Manage Branch State Menu",true),
+        new(Modules.CreditOfficersDashboard,Feature.Read, Group.ManagementHierarchy, "Show Credit Officer Menu",true),
+        new(Modules.CurrenciesDashboard,Feature.Read, Group.ManagementHierarchy, "Show Currency Menu"),
+        new(Modules.OperatedPerson,Feature.Read, Group.ManagementHierarchy, "Show Operated Person Menu"),
+        new(Modules.LoansDashboard,Feature.Read, Group.ManagementHierarchy, "Show Manage Loan Menu",true),
+        new(Modules.Reports,Feature.Read, Group.ManagementHierarchy, "Show Manage Report Menu",true),
+        new(Modules.SettingsDashboard,Feature.Read, Group.ManagementHierarchy, "Show Setting"),
+        new(Modules.DepartmentsDashboard,Feature.Read, Group.ManagementHierarchy, "Show Department"),
+
+    };
+
+    public static IReadOnlyList<AppPermission> AllPermissions { get; } = new ReadOnlyCollection<AppPermission>(_all.ToArray());
+    public static IReadOnlyList<AppPermission> AdminRolePermissions { get; } = new ReadOnlyCollection<AppPermission>(_all.Where(p => p.IsBasic == false).ToArray());
+    public static IReadOnlyList<AppPermission> DashboardPermission { get; } = new ReadOnlyCollection<AppPermission>(_all.Where(p => p.Module == Modules.AdministratorsDashboard).ToArray());
+    public static IReadOnlyList<AppPermission> AdminDashboard { get; } = new ReadOnlyCollection<AppPermission>(_all.Where(p => p.Module == Modules.AdministratorsDashboard).ToArray());
+    public static IReadOnlyList<AppPermission> CoDashboard { get; } = new ReadOnlyCollection<AppPermission>(_all.Where(p => p.Group == Modules.CreditOfficersDashboard).ToArray());
+    public static IReadOnlyList<AppPermission> AccountDashboard { get; } = new ReadOnlyCollection<AppPermission>(_all.Where(p => p.Module == Modules.AccountsDashboard && p.Module == Modules.AccountsDashboard).ToArray());
+    public static IReadOnlyList<AppPermission> UserPermissions { get; } = new ReadOnlyCollection<AppPermission>(_all.Where(p => p.IsBasic == true).ToArray());
+
+
+}

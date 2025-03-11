@@ -1,0 +1,43 @@
+﻿@using Applications.Interfaces.Branches
+<div class="input-group input-group-@size @CssClass">
+    @if (Start is not null)
+    {
+        <span class="input-group-text">@Start</span>
+    }
+    @if (ChildContent is not null)
+    {
+        @ChildContent
+    }
+    @if (End is not null)
+    {
+        <span class="input-group-text">@End</span>
+    }
+</div>
+
+@code {
+    private string size = "sm";
+    [Parameter]
+    public string CssClass { get; set; } = string.Empty;
+    [Parameter]
+    public RenderFragment? Start { get; set; }
+    [Parameter]
+    public RenderFragment? End { get; set; }
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+    [Parameter]
+    public InputSize Size { get; set; } = InputSize.Default;
+
+    protected override void OnParametersSet()
+    {
+        size = Size switch
+        {
+            InputSize.Small => "sm",
+            InputSize.Medium => "md",
+            InputSize.Large => "lg",
+            _ => "md"
+        };
+        base.OnParametersSet();
+    }
+
+
+}

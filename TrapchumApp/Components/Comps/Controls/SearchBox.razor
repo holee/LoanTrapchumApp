@@ -1,0 +1,39 @@
+﻿@using System.Linq.Expressions
+@using Applications.Interfaces.Branches
+@inherits ComponentBase
+<RadzenFormField>
+    <Start>
+        <RadzenIcon Icon="search" />
+    </Start>
+    <ChildContent>
+        <RadzenTextBox Value="@Value"
+                       ValueExpression="@ValueExpression"
+                       Change="Changed"
+                       @oninput="OnTextChanged"
+                       class="w-100"
+                       id="@Id"
+                       @key="@Id"
+                       Name="@Name"
+                       Placeholder="@Placeholder"
+                       ValueChanged="ValueChanged" />
+    </ChildContent>
+</RadzenFormField>
+
+@code {
+    [Parameter] public string Id { get; set; } = Guid.NewGuid().ToString("N");
+    [Parameter] public string Name { get; set; } = Guid.NewGuid().ToString("N");
+    [Parameter] public string? Value { get; set; }
+    [Parameter] public string Placeholder { get; set; } = "Search...";
+    [Parameter] public TextAlign TextAlign { get; set; } = TextAlign.Left;
+    [Parameter] public EventCallback<string?> ValueChanged { get; set; }
+    [Parameter] public Expression<Func<string>>? ValueExpression { get; set; }
+    [Parameter] public EventCallback<string> Changed { get; set; }
+    [Parameter] public EventCallback<string> SearchChanged { get; set; }
+    async Task OnTextChanged(ChangeEventArgs e)
+    {
+        var value = e.Value?.ToString() ?? string.Empty;
+        await SearchChanged.InvokeAsync(value);
+    }
+
+
+}
