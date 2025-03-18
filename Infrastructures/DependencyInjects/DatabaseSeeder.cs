@@ -1,8 +1,7 @@
-﻿using Infrastructures.Seeds;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Infrastructures.DependencyInjections
+namespace Infrastructures.DependencyInjects
 {
 
     public static class DatabaseSeeder

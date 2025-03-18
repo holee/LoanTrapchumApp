@@ -1,10 +1,15 @@
 ﻿using Applications.Extensions.Identity;
 using Applications.Interfaces.Addresses;
+using Applications.Interfaces.Banks;
 using Applications.Interfaces.Branches;
+using Applications.Interfaces.Currencies;
+using Applications.Interfaces.Customers;
 using Applications.Interfaces.Employees;
 using Applications.Interfaces.Identity;
-using CoreBussiness.Implements;
-using Infrastructures.Data;
+using Applications.Interfaces.Lists;
+using Applications.Interfaces.setting;
+using Applications.Interfaces.Transactions;
+using Infrastructures.DataAccess;
 using Infrastructures.Implements;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -12,7 +17,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace Infrastructures.DependencyInjections
+namespace Infrastructures.DependencyInjects
 {
     public static class IndentityServiceInjection
     {
@@ -21,15 +26,14 @@ namespace Infrastructures.DependencyInjections
             services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
-            });
+            }, ServiceLifetime.Transient);
 
-            services.AddDbContext<UserDataContext>(options =>
+            services.AddDbContextPool<UserDataContext>(options =>
             {
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
             });
             //services.AddHttpContextAccessor();
             services.AddScoped<Seeds.DatabaseSeeder>();
-            services.AddAuthorization();
             services.AddAuthentication(options =>
             {
                 options.DefaultScheme = IdentityConstants.ApplicationScheme;
@@ -43,12 +47,27 @@ namespace Infrastructures.DependencyInjections
                 .AddSignInManager()
                 .AddDefaultTokenProviders();
 
-
-            services.TryAddScoped<IUserService, UserService>();
-            services.TryAddScoped<ILoginService, LoginService>();
-            services.TryAddScoped<IBranchService, BranchService>();
-            services.TryAddScoped<IEmployeeService, EmployeeService>();
-            services.TryAddScoped<IAddressService, AddressService>();
+            services.TryAddTransient<IForiegnCurrencyExchange, ForiegnCurrencyExchange>();
+            services.TryAddTransient<IJournalService, JournalService>();
+            services.TryAddTransient<ISpotRateService, SpotRateService>();
+            services.TryAddTransient<ILedgerService, LedgerService>();
+            services.TryAddTransient<IUserService, UserService>();
+            services.TryAddTransient<IRoleService, RoleService>();
+            services.TryAddTransient<IOpenBranchService, OpenBranchService>();
+            services.TryAddTransient<ILoginService, LoginService>();
+            services.TryAddTransient<IBranchService, BranchService>();
+            services.TryAddTransient<IBankService, BankService>();
+            services.TryAddTransient<IDepartmentService, DepartmentService>();
+            services.TryAddTransient<IEmployeeService, EmployeeService>();
+            services.TryAddTransient<IEntityNameService, EntityNameService>();
+            services.TryAddTransient<IAddressService, AddressService>();
+            services.TryAddTransient<ICashVaultService, CashVaultService>();
+            services.TryAddTransient<ICustomerService, CustomerService>();
+            services.TryAddTransient<ICurrencyService, CurrencyService>();
+            services.TryAddTransient<ICreditAgentService, CreditAgentService>();
+            services.TryAddTransient<ICustomerIncomeExpendService, CustomerIncomeExpendService>();
+            services.TryAddTransient<ISettingService, SettingService>();
+            services.TryAddTransient<IDapperConnectionFactory, DapperConnectionFactory>();
             return services;
 
         }

@@ -1,0 +1,75 @@
+﻿@using Applications.Requests.Transactions.Journals
+<PageTitle>Journal Details</PageTitle>
+
+<div class="card">
+    <div class="card-header bg-primary">
+
+        <div class="d-flex justify-content-between">
+            <span>Journal Entry Details</span>
+            <strong @onclick="SelectedIndex" class="text-danger" style="cursor:pointer">X</strong>
+        </div>
+    </div>
+    <div class="card-body">
+        <table class="table table-bordered table-sm">
+            <tr>
+                <th class="w-25">Referrence Num</th>
+                <td>@JournalEntry?.ReferrenceNum</td>
+            </tr>
+            <tr>
+                <th>Journal Date</th>
+                <td>@String.Format("{0:dd-MMM-yyyy hh:mm tt}", JournalEntry?.JournalDate) </td>
+            </tr>
+            <tr>
+                <th>Journal Type</th>
+                <td>@JournalEntry?.JournalType</td>
+            </tr>
+            <tr>
+                <th>Description</th>
+                <td>@JournalEntry?.JournalDesc</td>
+            </tr>
+        </table>
+        <div class="mt-2">
+            <RadzenDataGrid GridLines="DataGridGridLines.Both"
+                            Density="Density.Compact"
+                            AllowAlternatingRows="true"
+                            AllowFiltering="false"
+                            AllowSorting="false"
+                            ColumnWidth="15rem"
+                            RowSelect="RowSelecting"
+                            RowRender="RowClickEventArg"
+                            TItem="JournalLineDto"
+                            Style="--rz-grid-header-background-color:var(--rz-base-200);"
+                            Data="@JournalEntry!.JournalEntryLines">
+                <Columns>
+                    <RadzenDataGridColumn Width="6rem" Property="LedgerName" Context="j" Title="#" Sortable="false">
+                        <Template>
+                            @(JournalEntry!.JournalEntryLines!.IndexOf(j) + 1)
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Width="10rem" Property="LedgerName" Title="Account" Sortable="false" />
+                    <RadzenDataGridColumn Width="8rem" Property="Debit" Title="Debit" TextAlign="TextAlign.Right" Sortable="false" />
+                    <RadzenDataGridColumn Width="8rem" Property="Credit" Title="Credit" TextAlign="TextAlign.Right" Sortable="false" />
+                    <RadzenDataGridColumn Width="8rem" Property="Amount" Title="Amount" TextAlign="TextAlign.Right" Sortable="false" Context="journal">
+                        <Template>
+                            @(Math.Abs(journal.Amount!.Value))
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Property="JournalLineDesc" Title="Description" Sortable="false" />
+                </Columns>
+            </RadzenDataGrid>
+        </div>
+    </div>
+    <div class="card-footer">
+        <div class="d-flex justify-content-end">
+            <RadzenButton Icon="close"
+                          Click="SelectedIndex"
+                          ButtonStyle="ButtonStyle.Danger"
+                          Size="Radzen.ButtonSize.Small"
+                          Text="Close" />
+        </div>
+
+    </div>
+</div>
+
+
+

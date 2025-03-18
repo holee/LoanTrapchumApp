@@ -5,13 +5,13 @@ using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Journals;
 using Domains.Models.Journals;
 using Domains.Models.Transaction;
-using Infrastructures.Data;
+using Infrastructures.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace CoreBussiness.Implements;
+namespace Infrastructures.Implements;
 
-public class JournalService : IJournalServiceImpl
+public class JournalService : IJournalService
 {
     private readonly ApplicationDbContext _context;
     private ILogger<JournalService> _logger;
@@ -20,7 +20,7 @@ public class JournalService : IJournalServiceImpl
         this._context = context;
         this._logger = logger;
     }
-    public async Task<Result<string>> CreateOrUpdateJournalAsync(long journalId, JournalEntry journalEntry)
+    public async Task<Result<string>> CreateOrUpdateJournalAsync(long? journalId, JournalEntry journalEntry)
     {
         _logger.LogInformation("Attempt to create Journal");
         //context.Database.BeginTransaction();
@@ -115,7 +115,7 @@ public class JournalService : IJournalServiceImpl
 
 
 
-    public async Task<Result<string>> UpdateJournalAsync(long id, LoanTransaction jTrx)
+    public async Task<Result<string>> UpdateJournalAsync(long? id, LoanTransaction jTrx)
     {
         try
         {
@@ -140,7 +140,7 @@ public class JournalService : IJournalServiceImpl
             trx.JournalEntry!.TotalCr = jTrx.JournalEntry?.JournalEntryLines?.Sum(x => x.Credit);
             trx.JournalEntry!.JournalLineCount = count - 1;
             trx.JournalEntry.JournalEntryLines = jTrx.JournalEntry!.JournalEntryLines;
-           
+
             _context.Update(trx);
 
             await _context.SaveChangesAsync();
@@ -158,7 +158,7 @@ public class JournalService : IJournalServiceImpl
         }
     }
 
-    public async Task<bool> DeleteJournalAsync(long id)
+    public async Task<Result<string>> DeleteJournalAsync(long? id)
     {
         try
         {
@@ -166,19 +166,26 @@ public class JournalService : IJournalServiceImpl
 
             var journalEntry = await _context.JournalEntries.FirstOrDefaultAsync(x => x.JournalId == id);
 
-            if (journalEntry is null) return false;
+            if (journalEntry is null)
+            {
+                return Result.Failure<string>(ErrorResponse.NotFound(Messages.DataNotFound));
+
+            }
 
             _context.JournalEntries.Remove(journalEntry);
 
             await _context.SaveChangesAsync();
 
             _context.Database.CommitTransaction();
-            return true;
+
+            return Result.Success(Messages.DataDeleted);
+
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             _context.Database.RollbackTransaction();
-            throw;
+
+            return Result.Failure<string>(ErrorResponse.ServerError(ex.Message));
         }
     }
 
@@ -220,7 +227,7 @@ public class JournalService : IJournalServiceImpl
 
     }
 
-    public async Task<IEnumerable<JournalEntry>> FindJournalsAsync(long journalId = 0, string? q = null)
+    public async Task<IEnumerable<JournalEntry>> FindJournalsAsync(long? journalId = 0, string? q = null)
     {
 
         IQueryable<JournalEntry> queries = _context.JournalEntries
@@ -248,7 +255,7 @@ public class JournalService : IJournalServiceImpl
 
     }
 
-    public async Task<JournalEntry?> FindJournalByIdAsync(long id)
+    public async Task<JournalEntry?> FindJournalByIdAsync(long? id)
     {
         var journal = _context.JournalEntries
                                 .Where(x => x.JournalId == id)
@@ -270,7 +277,7 @@ public class JournalService : IJournalServiceImpl
         return await journalTypes.AsNoTracking().ToListAsync() ?? Enumerable.Empty<JournalType>();
     }
 
-    public async Task<IEnumerable<VNameList>> FindNameLists(long id = 0, int takeRows = 0, string? q = null)
+    public async Task<IEnumerable<VNameList>> FindNameLists(long? id = 0, int takeRows = 0, string? q = null)
     {
         IQueryable<VNameList> queries = _context.NameLists;
 
@@ -295,6 +302,8 @@ public class JournalService : IJournalServiceImpl
 
         return await queries.AsNoTracking().ToListAsync();
     }
+
+
 }
 
 //public async Task<JournalEntry?> FindJournal(Expression<Func<JournalEntry, bool>> expression, params string[] includes)

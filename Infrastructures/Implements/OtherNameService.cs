@@ -1,4 +1,4 @@
-﻿using Applications.Enums;
+﻿using Applications.Enumerations;
 using Applications.Interfaces.Lists;
 using Applications.Requests.Lists.Entities;
 using Applications.Responses;
@@ -10,11 +10,11 @@ using Domains.Models.Lists.Customers;
 using Domains.Models.Lists.Employees;
 using Domains.Models.Lists.Vendors;
 using FluentValidation;
-using Infrastructures.Data;
+using Infrastructures.DataAccess;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 
-namespace CoreBussiness.Implements
+namespace Infrastructures.Implements
 {
     public class OtherNameService : IOtherNameService
     {
@@ -52,7 +52,8 @@ namespace CoreBussiness.Implements
                 if (!validatorResult.IsValid)
                 {
                     var errors = validatorResult.Errors.Select(er => er.ErrorMessage).ToList();
-                    return Result.Failure<string>(ErrorResponse.Validation("400", errors));
+                    var errString = string.Join(Environment.NewLine, errors);
+                    return Result.Failure<string>(ErrorResponse.Validation(errString));
                 }
                 _context.Add(othername);
                 await _context.SaveChangesAsync();
@@ -61,7 +62,7 @@ namespace CoreBussiness.Implements
             }
             catch (Exception ex)
             {
-                return Result.Failure<string>(ErrorResponse.Validation("500", [$"{ex.Message}"]));
+                return Result.Failure<string>(ErrorResponse.Validation($"{ex.Message}"));
             }
         }
 

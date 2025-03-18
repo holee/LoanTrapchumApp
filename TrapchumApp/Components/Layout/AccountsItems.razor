@@ -1,0 +1,29 @@
+﻿<RadzenPanelMenuItem Text="Accounts" Icon="deployed_code_account" Visible="IsBranchOpen">
+    <RadzenPanelMenuItem Text="Ledger" Icon="finance" Path="/App/Account/Ledgers" />
+    <RadzenPanelMenuItem Text="Home" Icon="finance" Path="/Home" />
+    <RadzenPanelMenuItem Text="G. Journal Entry" Path="/App/Account/Journals" Icon="data_table" />
+    <RadzenPanelMenuItem Text="Bank Reconcile" Icon="source_environment" />
+</RadzenPanelMenuItem>
+<RadzenPanelMenuItem Text="Budget" Icon="deployed_code_account" Visible="IsBranchOpen">
+    <RadzenPanelMenuItem Text="Vendor" Icon="finance" />
+    <RadzenPanelMenuItem Text="Expense" Icon="data_table" />
+    <RadzenPanelMenuItem Text="Payment Voucher" Icon="source_environment" />
+</RadzenPanelMenuItem>
+<RadzenPanelMenuItem Text="Payroll" Icon="deployed_code_account" Visible="IsBranchOpen">
+    <RadzenPanelMenuItem Text="Employee" Icon="finance" />
+    <RadzenPanelMenuItem Text="Taxation" Icon="data_table" />
+    <RadzenPanelMenuItem Text="E-Filing" Icon="source_environment" />
+</RadzenPanelMenuItem>
+
+@code {
+    [Parameter, EditorRequired]
+    public bool IsBranchOpen { get; set; } = false;
+
+    void GoAccount()
+    {
+        //RedirectManager.RedirectTo("/App/Account/Journals");
+        NavigationManager.NavigateTo("/App/Account/Journals");
+    }
+
+    
+}

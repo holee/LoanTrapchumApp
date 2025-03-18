@@ -1,0 +1,4 @@
+﻿::deep .rz-cell-data {
+    overflow: visible;
+    z-index: 1000;
+}

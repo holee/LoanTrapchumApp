@@ -4,21 +4,21 @@ using Domains.Models.Lists;
 
 namespace Applications.Services.Lists
 {
-    public sealed class SalutationService : ISalutationService
+    public sealed class SalutationService(ISalutationService sService) : ISalutationService
     {
-        public Task<Result<string>> AddSalution(Salutation salutation)
+        public async Task<Result<string>> AddSalution(Salutation salutation)
         {
-            throw new NotImplementedException();
+           return await sService.AddSalution(salutation);
         }
 
-        public Task<Result<string>> DeleteSalution(int id)
+        public async Task<Result<string>> DeleteSalution(int id)
         {
-            throw new NotImplementedException();
+            return await sService.DeleteSalution(id);
         }
 
-        public Task<Result<IEnumerable<Salutation>>> GetSalutions(string? q = null)
+        public async Task<Result<IEnumerable<Salutation>>> GetSalutions(string? q = null)
         {
-            throw new NotImplementedException();
+            return await sService.GetSalutions(q);    
         }
     }
 }

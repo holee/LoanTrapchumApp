@@ -1,0 +1,118 @@
+﻿<PageTitle>Collaterals Detail</PageTitle>
+<Containers Fluid>
+    <BCard>
+        <CardHeader>
+            <div class="d-flex justify-content-between">
+                <span>Collateral Information</span>
+                <strong @onclick="CloseTab" class="text-danger" style="cursor:pointer">X</strong>
+            </div>
+        </CardHeader>
+        <CardBody>
+            @if (Model is not null)
+            {
+                <table class="tbl table table-sm table-bordered">
+                    <tr>
+                        <th class="w-25">Customer</th>
+                        <td>
+                            <RadzenStack Orientation="Orientation.Horizontal"
+                                         AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                                <strong>
+                                    @Model?.CustomerName
+                                </strong>
+                                <RadzenButton Click="AddCollateralByCustomer"
+                                              Size="Radzen.ButtonSize.Small"
+                                              Icon="add"
+                                              Text="Add Collateral"
+                                              ButtonStyle="ButtonStyle.Success" />
+
+                            </RadzenStack>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="w-25">Register Date</th>
+                        <td>@Model?.RegisterDate</td>
+                    </tr>
+                    <tr>
+                        <th class="w-25">Document Site</th>
+                        <td>@Model?.DocumentKeeping</td>
+                    </tr>
+                    <tr>
+                        <th class="w-25">Remark</th>
+                        <td>@Model?.Remark</td>
+                    </tr>
+
+                </table>
+                <RadzenDataGrid TItem="CollateralLineDto"
+                                GridLines="DataGridGridLines.Both"
+                                Data="CollateralLines">
+                    <Columns>
+                        <RadzenDataGridColumn Title="#" Property="ReferenceNo" />
+                        <RadzenDataGridColumn Title="Collateral Number" Property="CollateralNo" Sortable="false" />
+                        <RadzenDataGridColumn Title="Category" Property="TypeName" Sortable="false" />
+                        <RadzenDataGridColumn Title="Sub Category" Property="SubTypeName" Sortable="false" />
+                        <RadzenDataGridColumn Title="Owner" Property="OwnerName" Sortable="false" />
+                        <RadzenDataGridColumn Title="Size" Property="Size" Sortable="false" />
+                        <RadzenDataGridColumn Title="Qty" Property="Quantity" Sortable="false" />
+                        <RadzenDataGridColumn TextAlign="TextAlign.End" Title="Market Price" Property="MarketPrice" Sortable="false" />
+                        <RadzenDataGridColumn TextAlign="TextAlign.End" Title="Pawn Price" Property="PawnPrice" Sortable="false" />
+                        <RadzenDataGridColumn TextAlign="TextAlign.End" Title="Hot Price" Property="HotPrice" Sortable="false" />
+                        <RadzenDataGridColumn TextAlign="TextAlign.Center" Title="Status" Sortable="false">
+                            <Template>
+                                <RadzenSwitch @bind-Value="context.IsAvailable"
+                                              Disabled></RadzenSwitch>
+                            </Template>
+                        </RadzenDataGridColumn>
+                    </Columns>
+                </RadzenDataGrid>
+            }
+            else
+            {
+                <div class="text-center align-content-center text-danger"><span>Data not found!</span></div>
+            }
+            }
+        </CardBody>
+        <CardFooter>
+            <RadzenStack Orientation="Orientation.Horizontal"
+                         JustifyContent="JustifyContent.End"
+                         AlignItems="AlignItems.Center">
+                <RadzenButton Text="Close"
+                              Icon="close"
+                              ButtonStyle="ButtonStyle.Danger"
+                              Size="Radzen.ButtonSize.Small"
+                              Click="CloseTab" />
+            </RadzenStack>
+        </CardFooter>
+    </BCard>
+</Containers>
+
+@code {
+    [Parameter]
+    public EventCallback Close { get; set; }
+    [Parameter]
+    public EventCallback<long?> AddMoreCollateral { get; set; }
+    [Parameter]
+    public CollateralDto? Model { get; set; } = new();
+    async Task CloseTab()
+    {
+        await Close.InvokeAsync();
+    }
+    [Parameter] public long CustomerId { get; set; }
+    [Parameter]
+    public LoanCustomerQuery? SelectedCustomer { get; set; }
+    [Parameter]
+    public IQueryable<CollateralLineDto>? CollateralLines { get; set; }
+
+    private async Task AddCollateralByCustomer()
+    {
+        if (Model!.CollateralId <= 0)
+        {
+            NotificationService.Notify(Radzen.NotificationSeverity.Warning, "", "Try getting data not found!");
+            return;
+        }
+        await AddMoreCollateral.InvokeAsync(Model.CollateralId);
+        Console.WriteLine("Click...!");
+        StateHasChanged();
+    }
+
+
+}

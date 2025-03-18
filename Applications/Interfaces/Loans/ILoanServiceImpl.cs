@@ -1,4 +1,4 @@
-﻿using Applications.Enums;
+﻿using Applications.Enumerations;
 using Applications.Requests.Loans;
 using Applications.Responses;
 using Applications.Responses.Paginations;

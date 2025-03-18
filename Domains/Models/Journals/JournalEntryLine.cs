@@ -3,8 +3,8 @@
 public sealed class JournalEntryLine
 {
     public int JournalLineId { get; set; }
-    public long? JournalRefId { get; set; }
-    public long? LaonRefId { get; set; }
+    public Guid? JournalRefId { get; set; }
+    public long? LoanRefId { get; set; }
     public long? EntityNameRefId { get; set; }
     public string? EntityName { get; set; } = string.Empty;
     public int LineSeq { get; set; } = 1;

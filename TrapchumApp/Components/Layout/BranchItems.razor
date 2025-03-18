@@ -1,0 +1,16 @@
+﻿<RadzenPanelMenuItem Text="Branches" Icon="auto_awesome">
+    <RadzenPanelMenuItem Text="Branches List"
+                         Icon="color_lens"
+                         Visible="IsAdminOnly"
+                         Path="/App/Branches" />
+    <RadzenPanelMenuItem Text="Open/Close Branch"
+                         Icon="lock_open_right"
+                         Visible="@IsAccountOnly"
+                         Path="@($"/Branches/OpenBranch?BranchId={BranchId}&UserId={UserId}")" />
+    <RadzenPanelMenuItem Text="Cash Valutl In/Out"
+                         Icon="check_in_out"
+                         Visible="@IsAccountOnly"
+                         Path="@($"/Transaction/CashVault?BranchId={BranchId}&UserId={UserId}")" />
+
+</RadzenPanelMenuItem>
+

@@ -1,0 +1,2 @@
+﻿namespace Applications.Extensions.LoanCalculators;
+

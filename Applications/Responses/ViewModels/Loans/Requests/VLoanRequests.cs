@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using Domains.Models.Lists.Customers;
 
 namespace Applications.Responses.ViewModels.Loans.Requests;
 
@@ -13,7 +12,7 @@ public sealed class VLoanRequests
     public int? Installments { get; set; }
     public string? InstallmentType { get; set; }
     public string? RepaymentMode { get; set; }
-    public long? AprovedUserId { get; set; }
+    public string? AprovedUserId { get; set; }
     public DateTime? AprovedDate { get; set; }
     public string? Summiter { get; set; }
     public string? Remark { get; set; }
@@ -23,7 +22,7 @@ public sealed class VLoanRequests
     public int? StatusId { get; set; }
     public string? Status { get; set; }
     public long CreditAgentId { get; set; }
-    public long? UserRequestId { get; set; } 
+    public string? UserRequestId { get; set; } 
     public string? UserName { get; set; }
     public int? BankId { get; set; }
     public int? BranchId { get; set; }

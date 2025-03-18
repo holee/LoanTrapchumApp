@@ -4,7 +4,6 @@ namespace Applications.Extensions.Identity;
 
 public class ApplicationUser:IdentityUser
 {
-    public Guid Id { get; set; }
     public long? NameRefId { get; set; }
     public int? BranchRefId { get; set; } 
     public bool? IsActive { get; set; } = true;

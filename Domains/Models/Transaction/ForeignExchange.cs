@@ -6,6 +6,7 @@
         public Guid ActivityMainGroupId { get; set; }
         public long? StaffRefId { get; set; }
         public long? TranRefId { get; set; }
+        public Guid? TransactionRefId { get; set; }
         public long? NameRefId { get; set; }
         public int? BankRefId { get; set; }
         public int? BranchRefId { get; set; }   
@@ -23,9 +24,9 @@
         public int? GainAndLostLedgerRefId { get; set; }
         public decimal? GainAndLostAmount { get; set; }
         public int? FxepaLedgerRefId { get; set; }
-        public decimal? FxepaAmount { get; set; }
+        public decimal? FXEPA_Amount { get; set; }
         public int? FxpaLedgerRefId { get; set; }
-        public decimal? FxpaAmount { get; set; }
+        public decimal? FXPA_Amount { get; set; }
         public string? Narration { get; set; }
         public string? Remark { get; set; }
         public bool? Ispl { get; set; }

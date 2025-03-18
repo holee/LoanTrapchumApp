@@ -19,5 +19,6 @@ namespace Applications.Responses.Message
         public const string DataInUse = "Data is in use.";
         public const string DataNotInUse = "Data is not in use.";
         public const string DataExist = "Data already exist.";
+        public const string Example = "Ledger {0} already in used.";
     }
 }

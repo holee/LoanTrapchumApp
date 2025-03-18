@@ -1,0 +1,135 @@
+﻿@using Applications.Interfaces.Branches
+<RadzenStack Gap="1rem" Orientation="Radzen.Orientation.Vertical" JustifyContent="Radzen.JustifyContent.SpaceBetween" Style="height: 100%;">
+    <RadzenTemplateForm TItem="BranchDtoUpdate" Data=@model Submit=@OnSubmit>
+        <RadzenStack>
+
+            <RadzenTabs RenderMode="TabRenderMode.Client" @bind-SelectedIndex=@selectedIndex>
+                <Tabs>
+                    <RadzenTabsItem Text="Branch">
+                        <RadzenRow>
+                            <RadzenColumn Size="9">
+                                <RadzenColumn Size="12" SizeMD="6" SizeLG="3">
+                                    <RadzenFormField Text="Branch Name*" Variant="Variant.Flat" Style="width:100%">
+                                        <RadzenTextBox Name="BranchName" @bind-Value="model.BranchName" Style="width:100%" />
+                                        <RadzenRequiredValidator Component="BranchName" Text="Branch name is required" Style="position: absolute" />
+                                    </RadzenFormField>
+                                </RadzenColumn>
+                            </RadzenColumn>
+                            <RadzenColumn Size="3">
+                                <RadzenCheckBox @bind-Value=@model.IsActive Name="CheckBox1" />
+                                <RadzenLabel Text="IsActive" Component="CheckBox1" Style="margin-left: 8px; vertical-align: middle;" />
+                            </RadzenColumn>
+                        </RadzenRow>
+                        <RadzenRow>
+                            <RadzenColumn Size="12">
+                                <RadzenColumn Size="12" SizeMD="6" SizeLG="3">
+                                    <RadzenFormField Text="Description" Variant="Variant.Flat" Style="width:100%;margin-top:10px">
+                                        <RadzenTextBox Name="Description" @bind-Value="model.Description" Style="width:100%" />
+
+                                    </RadzenFormField>
+                                </RadzenColumn>
+                            </RadzenColumn>
+
+                        </RadzenRow>
+                    </RadzenTabsItem>
+                    <RadzenTabsItem Text="Address">
+                        <div>
+                            <RadzenFormField Text="Select Country" Style="width: 100%;" Variant="Variant.Outlined">
+                                <RadzenDropDown @ref=@radzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.Contains" AllowFiltering="true"
+                                                Data=@Countries TextProperty="DesInKhmer" ValueProperty="DesInKhmer" AllowClear="true" @bind-Value="@model.CountryName" Style="width: 100%;" Name="DropDownFiltering" />
+                            </RadzenFormField>
+                        </div>
+                        <div class="">
+                            <RadzenFormField Text="Select City" Style="width: 100%;" Variant="Variant.Outlined">
+                                <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.Contains" AllowFiltering="true"
+                                                Data=@Cities AllowClear="true" @bind-Value="@model.City" Style="width: 100%;" Name="DropDownFiltering" />
+                            </RadzenFormField>
+                        </div>
+                        <div class="">
+                            <RadzenFormField Text="Select Province" Style="width: 100%;" Variant="Variant.Outlined">
+                                <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.Contains" AllowFiltering="true"
+                                                Data=@ProvinceList AllowClear="true"
+                                                TextProperty="ProInKhmer"
+                                                TValue="ProvinceDto"
+                                                ValueChanged="x=>SelectProvince(x)"
+                                                Style="width: 100%;"
+                                                Value="SelectedProvince"
+                                                Name="DropDownFiltering">
+
+                                </RadzenDropDown>
+
+                            </RadzenFormField>
+                        </div>
+                        <div class="">
+                            <RadzenFormField Text="Select District" Style="width: 100%;" Variant="Variant.Outlined">
+                                <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.Contains" AllowFiltering="true"
+                                                Data=@DistrictList AllowClear="true"
+                                                TextProperty="DisInKhmer"
+                                                TValue="DistrictDto"
+                                                ValueChanged="x=>SelectDistrict(x)"
+                                                Style="width: 100%;"
+                                                Value="SelectedDistrict"
+                                                Name="DropDownFiltering2">
+
+                                </RadzenDropDown>
+
+                            </RadzenFormField>
+                        </div>
+                        <div class="">
+                            <RadzenFormField Text="Select Commune" Style="width: 100%;" Variant="Variant.Outlined">
+                                <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.Contains" AllowFiltering="true"
+                                                Data=@CommuneList AllowClear="true"
+                                                TextProperty="ComInKhmer"
+                                                TValue="CommuneDto"
+                                                ValueChanged="x=>SelectCommune(x)"
+                                                Style="width: 100%;"
+                                                Value="SelectedCommune"
+                                                Name="DropDownFiltering3">
+
+                                </RadzenDropDown>
+
+                            </RadzenFormField>
+                        </div>
+                        <div class="">
+                            <RadzenFormField Text="Select Village" Style="width: 100%;" Variant="Variant.Outlined">
+                                <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.Contains" AllowFiltering="true"
+                                                Data=@VillageList AllowClear="true"
+                                                TextProperty="VilInKhmer"
+                                                TValue="VillageDto"
+                                                Style="width: 100%;"
+                                                @bind-value="SelectedVillage"
+                                                Name="DropDownFiltering3">
+
+                                </RadzenDropDown>
+
+                            </RadzenFormField>
+                        </div>
+                    </RadzenTabsItem>
+
+                </Tabs>
+            </RadzenTabs>
+
+
+        </RadzenStack>
+        <RadzenStack Orientation="Radzen.Orientation.Horizontal" class="mt-2" JustifyContent="Radzen.JustifyContent.End" Gap="0.5rem">
+            <RadzenButton ButtonType="Radzen.ButtonType.Submit"
+                          Text="Save"
+                          ButtonStyle="ButtonStyle.Primary"
+                          Icon="save"></RadzenButton>
+            <RadzenButton Click="@((args) => DialogService!.Close(true))"
+                          Variant="Variant.Flat"
+                          Text="Close"
+                          Icon="cancel"
+                          ButtonStyle="ButtonStyle.Secondary" />
+        </RadzenStack>
+    </RadzenTemplateForm>
+</RadzenStack>
+
+@code {
+    int selectedIndex = 0;
+    RadzenDropDown<string> radzenDropDown = default!;
+}
+
+
+
+

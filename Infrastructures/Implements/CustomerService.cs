@@ -8,11 +8,11 @@ using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Dapper;
 using Domains.Models.Lists.Customers;
-using Infrastructures.Data;
+using Infrastructures.DataAccess;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
-namespace CoreBussiness.Implements;
+namespace Infrastructures.Implements;
 
 public class CustomerService : ICustomerService
 {

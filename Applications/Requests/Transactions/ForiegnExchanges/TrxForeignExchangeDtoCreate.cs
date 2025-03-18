@@ -5,7 +5,7 @@ public abstract class TransactionBase
 {
     public int TranTypeRefId { get; set; }
     public string? TransactionTypeName { get; set; }
-    public long? UserRefId { get; set; }
+    public string? UserRefId { get; set; }
 }
 
 

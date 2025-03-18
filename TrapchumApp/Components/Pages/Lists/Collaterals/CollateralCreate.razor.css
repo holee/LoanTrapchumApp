@@ -1,0 +1,12 @@
+﻿::deep .rz-spinner {
+    height: var(--input-text-sm);
+}
+
+table tr,table td,table th{
+    text-align:left;
+    vertical-align:middle;
+}
+
+::deep .rz-grid-table thead > tr, ::deep .rz-grid-table thead th {
+    background-color:red;
+}

@@ -1,12 +1,13 @@
 ﻿using Applications.Extensions.Identity;
 using Applications.Interfaces.setting;
 using Applications.Responses;
+using Domains.Models.Identity;
 using Domains.Models.Loans;
 using Domains.Models.Settings;
-using Infrastructures.Data;
+using Infrastructures.DataAccess;
 using Microsoft.EntityFrameworkCore;
 
-namespace CoreBussiness.Implements
+namespace Infrastructures.Implements
 {
     public class SettingService(ApplicationDbContext context) : ISettingService
     {

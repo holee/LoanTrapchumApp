@@ -5,13 +5,13 @@ using Applications.Responses.Message;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Ledgers;
 using Domains.Models.Journals;
-using Infrastructures.Data;
+using Infrastructures.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace CoreBussiness.Implements;
+namespace Infrastructures.Implements;
 
-public class LedgerService : ILedgerServiceImpl
+public class LedgerService : ILedgerService
 {
     private readonly ApplicationDbContext _context;
     private readonly ILogger<LedgerService> _logger;
@@ -57,7 +57,7 @@ public class LedgerService : ILedgerServiceImpl
         }
     }
 
-    public async Task<Result<string>> DeleteLedger(int id)
+    public async Task<Result<string>> DeleteLedger(int? id)
     {
 
         _logger.LogInformation("try to delete ledger.....");
@@ -68,13 +68,13 @@ public class LedgerService : ILedgerServiceImpl
 
             if (usedLedgers.Any())
             {
-                return Result.Failure<string>(ErrorResponse.Validation("400", ["ledger already in used."]));
+                return Result.Failure<string>(ErrorResponse.Conflict(Messages.DataExist));
             }
             var parentLedger = _context.Ledgers.Where(x => x.ParentRefId.Equals(id));
 
             if (parentLedger.Any())
             {
-                return Result.Failure<string>(ErrorResponse.Validation("400", ["ledger already in used."]));
+                return Result.Failure<string>(ErrorResponse.ServerError("ledger already in used."));
             }
 
             var ledger = await _context.Ledgers.FirstOrDefaultAsync(x => x.LedgerId == id);
@@ -98,7 +98,7 @@ public class LedgerService : ILedgerServiceImpl
         }
     }
 
-    public async Task<Result<Ledger>> FindLedgerByIdAsync(int ledgerId)
+    public async Task<Result<Ledger>> FindLedgerByIdAsync(int? ledgerId)
     {
         _logger.LogInformation("Retrieving Ledgers......!");
         try
@@ -147,7 +147,7 @@ public class LedgerService : ILedgerServiceImpl
     }
 
 
-    public async Task<Result<LedgerType>> FindLedgerTypeById(int ledgerTypeId)
+    public async Task<Result<LedgerType>> FindLedgerTypeById(int? ledgerTypeId)
     {
 
         IQueryable<LedgerType> queries = _context.LedgerTypes.Where(x => x.LedgerTypeId == ledgerTypeId);
@@ -162,7 +162,7 @@ public class LedgerService : ILedgerServiceImpl
         return Result.Success(item);
     }
 
-    public async Task<Pager<VLedger>> GetLedgersAsync(int pageIndex, int pageSize,
+    public async Task<Pager<VLedger>> GetLedgersAsync(int? pageIndex, int? pageSize,
         string sortColumn,
         bool sortDescending = false,
         int currencyId = 0,
@@ -202,8 +202,8 @@ public class LedgerService : ILedgerServiceImpl
 
 
         var counts = await queries.CountAsync();
-        var items = await queries.Skip(pageIndex)
-                                .Take(pageSize)
+        var items = await queries.Skip(pageIndex!.Value)
+                                .Take(pageSize!.Value)
                                 .AsNoTracking()
                                 .ToListAsync();
         return new Pager<VLedger>
@@ -213,7 +213,7 @@ public class LedgerService : ILedgerServiceImpl
         };
     }
 
-    public async Task<Result<IEnumerable<VLedger>>> GetLedgersAsync(int ledgerId = 0, int currencyId = 1,
+    public async Task<Result<IEnumerable<VLedger>>> GetLedgersAsync(int? ledgerId = 0, int? currencyId = 1,
         string? q = null)
     {
 

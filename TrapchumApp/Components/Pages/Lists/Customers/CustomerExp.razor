@@ -1,0 +1,142 @@
+﻿<RadzenDataGrid Data="Items"
+                GridLines="DataGridGridLines.Both"
+                Responsive
+                IsLoading="isLoading"
+                Style="--rz-grid-header-background-color:var(--rz-base-200);min-height:20rem;height:20rem;max-height:30rem;"
+                Density="Density.Compact">
+
+    <HeaderTemplate>
+        @if (ShowAdd)
+        {
+            <RadzenButton Text="Expense"
+                          Click="AddExpenseModal"
+                          Icon="add"
+                          ButtonStyle="ButtonStyle.Primary"
+                          Size="Radzen.ButtonSize.Small" />
+        }
+        @if (ShowReload)
+        {
+            <RadzenButton Click="RefreshIncome"
+                          Icon="refresh"
+                          ButtonStyle="ButtonStyle.Secondary"
+                          class="ml-2"
+                          Size="Radzen.ButtonSize.Small" />
+        }
+    </HeaderTemplate>
+    <Columns>
+        <RadzenDataGridColumn Property="ExpendId" Context="c" Title="#" Width="3rem">
+            <Template>
+                @c.ExpendId
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Context="c"
+                              Width="20rem"
+                              Property="ExpenseTitle" Title="Expense">
+            <Template>
+                @c.ExpenseTitle
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Context="c"
+                              Width="10rem"
+                              TextAlign="TextAlign.Right"
+                              Property="expendAmount" Title="Amount">
+            <Template>
+                @c?.ExpendAmount
+            </Template>
+            <FooterTemplate>
+                <strong>
+                    @Items!.Sum(x => x.ExpendAmount)
+                </strong>
+            </FooterTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Context="c"
+                              Property="ExDescription" Title="Description">
+            <Template>
+                @c.ExDescription
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+    <LoadingTemplate>
+        <RadzenProgressBarCircular ProgressBarStyle="ProgressBarStyle.Primary" Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+    </LoadingTemplate>
+</RadzenDataGrid>
+
+@code {
+    [Parameter] public long? CustomerId { get; set; } = 0;
+    [Parameter] public bool ShowAdd { get; set; } = false;
+    [Parameter] public bool ShowReload { get; set; } = false;
+    [Parameter] public IEnumerable<VCustomerExpenses> Items { get; set; } = [];
+    bool isLoading = false;
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        await GetCustomerExpense(CustomerId);
+    }
+
+    async Task GetCustomerExpense(long? customerId)
+    {
+
+        isLoading = true;
+
+        if (CustomerId > 0)
+        {
+            var resp = await _customerService.GetCustomerExpensesAsync(customerId);
+
+            if (resp.IsSuccess)
+            {
+                Items = resp.Data!;
+                isLoading = false;
+            }
+        }
+
+        isLoading = false;
+
+        StateHasChanged();
+    }
+
+
+
+    async void RefreshIncome()
+    {
+        await GetCustomerExpense(CustomerId);
+
+    }
+
+    protected async void AddExpenseModal()
+    {
+
+        if (CustomerId <= 0)
+        {
+            NotificationService.Notify(NotificationSeverity.Info, "Please select cusotmer..");
+            return;
+        }
+
+        var options = new Radzen.DialogOptions
+            {
+                Width = "50vw",
+                Resizable = false,
+                Draggable = true,
+            };
+        var parameters = new Dictionary<string, object?>
+            {
+                { "CustomerId",CustomerId}
+            };
+        bool result = await DialogService.OpenAsync<CustomerModalExpense>("Add Expense", parameters, options);
+
+        if (bool.TryParse(result.ToString(), out bool success) && success)
+        {
+            await GetCustomerExpense(CustomerId);
+        }
+
+    }
+
+
+
+
+
+
+
+
+
+}

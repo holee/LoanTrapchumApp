@@ -1,0 +1,40 @@
+﻿<AuthorizeView>
+    <Authorized>
+        <li class="rz-navigation-item">
+            <div class="rz-navigation-item-wrapper">
+                <form action="Account/Logout" method="post">
+                    <AntiforgeryToken />
+                    <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+                    <button type="submit" class="nav-link rz-navigation-item-link">
+                        <i class="notranslate rzi rz-navigation-item-icon">logout</i>
+                        <span class="rz-navigation-item-text">
+                            Logout
+                        </span>
+                    </button>
+                </form>
+            </div>
+        </li>
+    </Authorized>
+</AuthorizeView>
+@code {
+    private string? currentUrl;
+
+    protected override void OnInitialized()
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+}
+
+}

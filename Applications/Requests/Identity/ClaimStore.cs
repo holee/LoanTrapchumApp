@@ -1,5 +1,5 @@
 ﻿using System.Security.Claims;
-using Applications.Enums;
+using Applications.Extensions.Identity.Enumerations;
 
 namespace Applications.Requests.Identity
 {

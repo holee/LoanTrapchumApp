@@ -1,0 +1,38 @@
+﻿<RadzenDataGrid Data="Notes"
+                Responsive
+                TItem="VCustomerNotes"
+                PagerHorizontalAlign="HorizontalAlign.Right"
+                AllowPaging="true"
+                PageSize="10"
+                AllowSorting="false"
+                GridLines="DataGridGridLines.Both"
+                ColumnWidth="15rem"
+                Density="Density.Compact">
+    <HeaderTemplate>
+        <RadzenButton ButtonStyle="ButtonStyle.Primary"
+                      Click="AddNewNote"
+                      Size="Radzen.ButtonSize.Small" Icon="add" Text="Add Note"></RadzenButton>
+    </HeaderTemplate>
+    <Columns>
+        <RadzenDataGridColumn Width="10rem"
+                              Title="Agent Name"
+                              Property="CreditAgentName"></RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="Description" Property="Description"></RadzenDataGridColumn>
+        <RadzenDataGridColumn Width="6rem" Title="Created" Property="Created">
+            <Template>
+                @context.Created!.Value.ToShortDateString()
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+@code {
+    [Parameter]
+    public IEnumerable<VCustomerNotes> Notes { get; set; } = [];
+    [Parameter]
+    public EventCallback AddNote { get; set; }
+
+    async Task AddNewNote()
+    {
+        await AddNote.InvokeAsync();
+    }
+}

@@ -2,12 +2,15 @@
 {
     public class CashManagement
     {
+
+        public Guid Id { get; set; } 
         public long CashManagementId { get; set; }
         public int? BankRefId { get; set; } 
         public long? StaffRefId { get; set; }
         public int? CurrencyRefId { get; set; }
         public int? BranchRefId { get; set; }
         public long? TranRefId { get; set; }
+        public Guid? TransactionRefId { get; set; } 
         public decimal? Amount { get; set; }
         public decimal? Balance { get; set; }
         public int? CashStatusRefId { get; set; }

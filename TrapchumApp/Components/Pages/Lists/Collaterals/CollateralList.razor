@@ -1,0 +1,251 @@
+﻿@page "/Collaterals"
+@using TCLMS.Shared.Entities.Models.Lists.Customers
+@attribute [Authorize]
+<PageTitle>Collateral</PageTitle>
+<RadzenProgressBar Value="100" Visible="IsProgress" ProgressBarStyle="ProgressBarStyle.Info" Style="height:1px" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+<Containers Fluid>
+    <RadzenTabs @ref="tabs" RenderMode="TabRenderMode.Client" Change="IndexChanged" @bind-SelectedIndex="selectedIndex">
+        <Tabs>
+            <RadzenTabsItem Text="Collateral List">
+                <RadzenRow AlignItems="AlignItems.Center" class="rz-my-2">
+                    <RadzenColumn Size="9">
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
+                            <PageDropDown />
+                            <RadzenButton Size="Radzen.ButtonSize.ExtraSmall"
+                                          ButtonStyle="ButtonStyle.Primary"
+                                          Icon="refresh"
+                                          Click="Reload" />
+                        </RadzenStack>
+                    </RadzenColumn>
+                    <RadzenColumn Size="3">
+                        <RadzenStack Orientation="Orientation.Horizontal"
+                                     AlignItems="AlignItems.Center"
+                                     JustifyContent="Radzen.JustifyContent.End">
+                            <RadzenFormField AllowFloatingLabel="false">
+                                <Start>
+                                    <RadzenIcon Icon="search" />
+                                </Start>
+                                <ChildContent>
+                                    <RadzenTextBox Style="height:2rem;line-height:1rem"
+                                                   Placeholder="Search here..."
+                                                   @bind-Value="searchText"
+                                                   @oninput="@((e)=>OnSearch(e))" />
+                                </ChildContent>
+                            </RadzenFormField>
+
+                        </RadzenStack>
+                    </RadzenColumn>
+                </RadzenRow>
+                <BCard>
+                    <CardBody>
+                        <RadzenDataGrid Responsive
+                                        GridLines="DataGridGridLines.Horizontal"
+                                        Density="Density.Compact"
+                                        Data="Collaterals">
+
+                            <Columns>
+                                <RadzenDataGridColumn Title="#" Property="CustomerId" Context="c">
+                                    <Template>
+                                        @(Collaterals.IndexOf(c) + 1)
+                                    </Template>
+                                </RadzenDataGridColumn>
+                                <RadzenDataGridColumn Property="RegisterDate" Title="Date" Context="c">
+                                    <Template>
+                                        @c.RegisterDate.DayFirst()
+                                    </Template>
+                                </RadzenDataGridColumn>
+                                <RadzenDataGridColumn Property="CustomerName" Title="Customer" />
+                                <RadzenDataGridColumn Property="CustomerName" Title="Remark" />
+                                <RadzenDataGridColumn Property="CustomerId" Title="Action" Context="c">
+                                    <Template>
+                                        <RadzenButton Size="Radzen.ButtonSize.ExtraSmall"
+                                                      Icon="more_vert"
+                                                      Variant="Variant.Text"
+                                                      Click="@((args)=>ShowContextMenuWithContent(args,c.CustomerId!.Value))" />
+                                    </Template>
+                                </RadzenDataGridColumn>
+                            </Columns>
+                        </RadzenDataGrid>
+                    </CardBody>
+                </BCard>
+            </RadzenTabsItem>
+        </Tabs>
+    </RadzenTabs>
+
+
+
+</Containers>
+
+@code {
+    bool IsShowDetails = false;
+    bool IsShowAdd = false;
+    bool IsProgress = false;
+    RadzenTabs? tabs;
+    List<TabItems> tabItems = [];
+    int tabIndex = 1;
+    int selectedIndex = 0;
+    public CollateralDto? Collateral { get; set; } = new();
+    public IQueryable<CollateralLineDto>? CollateralLines { get; set; }
+    private CollateralDto? SelectedCollateral = new();
+    private LoanCustomerQuery? SelectedCustomers = new();
+    protected long CollateralId = 0;
+    protected IEnumerable<VCustomerList> custlist = [];
+    protected IEnumerable<CustomerCollateral>? cusName = [];
+    protected CustomerCollateral? SelectedCustomer = new();
+    protected IEnumerable<CollateralTypeDto> collateralTypes = [];
+    protected IEnumerable<CollateralSubTypeDto> collateralProperties = [];
+    protected IEnumerable<CollateralSubTypeDto> collateralPersonals = [];
+
+    void SearchCollateral()
+    {
+        GetCollaterals(searchText);
+        StateHasChanged();
+    }
+    void ShowContextMenuWithContent(MouseEventArgs args, long id)
+    {
+        ContextMenuService.Open(args, ds =>
+    @<RadzenMenu Style="font-size:0.8rem;">
+        <RadzenMenuItem Click="@(()=>AddDetailsTab(id))" Icon="info" Text="Details" Value="@id"></RadzenMenuItem>
+    </RadzenMenu>
+    );
+    }
+    async Task AddedMoreCollateral(long? Id)
+    {
+        try
+        {
+            var response = await CustomerService.GetCustomersAsync(0, 25, CustomerInActive, false);
+
+            if (response.IsSuccess)
+            {
+                custlist = response.Data!;
+
+                cusName = custlist.Select(x => new CustomerCollateral
+                    {
+                        CustomerId = x.CustomerId,
+                        Name = x.AltName,
+                    });
+            }
+            collateralTypes = await CollateralNewService.GetCollateralType();
+            collateralProperties = await CollateralNewService.GetCollateralSubTypes(1);
+            collateralPersonals = await CollateralNewService.GetCollateralSubTypes(3);
+            IsShowAdd = true;
+            selectedIndex = 1;
+            tabs!.Reload();
+            var collateral = await CollateralNewService.GetCollateralById(Id!.Value);
+            if (collateral is not null)
+            {
+                CollateralId = collateral!.CollateralId!.Value;
+                SelectedCollateral!.CollateralId = collateral!.CollateralId;
+                SelectedCustomer!.CustomerId = collateral!.CollateralId.Value;
+                SelectedCustomer!.Name = collateral!.CustomerName;
+                SelectedCollateral.CustomerName = collateral.CustomerName;
+                SelectedCollateral.CollateralLines = collateral!.CollateralLines;
+                SelectedCollateral.Remark = collateral!.Remark;
+                SelectedCollateral.DocumentKeeping = collateral!.DocumentKeeping;
+                SelectedCollateral.RegisterDate = collateral!.RegisterDate;
+
+            }
+            StateHasChanged();
+
+            // IsProgress = false;
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(Radzen.NotificationSeverity.Error, "Exception", ex!.Message);
+            Console.WriteLine(ex.Message);
+            // IsProgress = false;
+
+        }
+        await InvokeAsync(StateHasChanged);
+    }
+    async void AddNewTab()
+    {
+        // IsProgress = true;
+        try
+        {
+            IsShowAdd = true;
+            selectedIndex = 1;
+            tabs!.Reload();
+            SelectedCollateral = new();
+            SelectedCustomer = new();
+            var response = await CustomerService.GetCustomersAsync(0, 25, CustomerInActive, false);
+            if (response.IsSuccess)
+            {
+                custlist = response.Data!;
+                if (custlist.Any())
+                {
+                    cusName = custlist.Select(x => new CustomerCollateral
+                        {
+                            CustomerId = x.CustomerId,
+                            Name = x.AltName,
+                        });
+                }
+            }
+            collateralTypes = await CollateralNewService.GetCollateralType();
+            collateralProperties = await CollateralNewService.GetCollateralSubTypes(1);
+            collateralPersonals = await CollateralNewService.GetCollateralSubTypes(3);
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(Radzen.NotificationSeverity.Error, "Exception", ex!.Message);
+            Console.WriteLine(ex.Message);
+            // IsProgress = false;
+
+        }
+
+    }
+    async void AddDetailsTab(long customerId)
+    {
+        try
+        {
+            Collateral = await _collateralService.GetCollateralById(customerId);
+            if (Collateral is not null)
+            {
+                SelectedCustomers!.CustomerId = Collateral.CollateralId!.Value;
+                SelectedCustomers.AltName = Collateral.CustomerName;
+                CollateralLines = Collateral.CollateralLines!.AsQueryable();
+                IsShowDetails = true;
+                selectedIndex = 2;
+                tabs!.Reload();
+                StateHasChanged();
+            }
+            else
+            {
+                NotificationService.Notify(NotificationSeverity.Warning, "", "Try getting data not found!");
+
+            }
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "", ex.InnerException!.Message);
+
+        }
+
+    }
+    void IndexChanged(int index)
+    {
+        selectedIndex = index;
+    }
+    void CloseDetail()
+    {
+        IsShowDetails = false;
+        selectedIndex = 0;
+        StateHasChanged();
+    }
+    void RemoveTab()
+    {
+        IsShowAdd = false;
+        selectedIndex = 0;
+        StateHasChanged();
+        // if (tabItems.Count > 0 && selectedIndex > 0)
+        // {
+        //     tabItems.RemoveAt(selectedIndex);
+        // }
+        // if (tabItems.Count == 0)
+        // {
+        //     selectedIndex = 0;
+        // }
+    }
+
+}

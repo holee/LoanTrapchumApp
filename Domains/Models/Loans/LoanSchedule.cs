@@ -4,6 +4,7 @@
     {
         public long LoanScheduleId { get; set; }
         public long? LoanRefId { get; set; }
+        public Guid? LoanDisbursementRefId { get; set; }
         public long? AgentRefId { get; set; }
         public int? BranchId { get; set; }
         public int? InstallmentNo { get; set; }

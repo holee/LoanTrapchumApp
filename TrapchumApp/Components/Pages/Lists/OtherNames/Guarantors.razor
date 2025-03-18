@@ -1,0 +1,630 @@
+﻿@using TCLMS.Shared.Entities.ViewModels.OtherNames
+@page "/Customers/Guarantors"
+<PageTitle>Guarantor</PageTitle>
+<RadzenCard>
+    <RadzenTabs @ref="tabs"
+                RenderMode="TabRenderMode.Server"
+                SelectedIndexChanged="SelectTabChanged"
+                SelectedIndex="selectedTabIndex">
+        <Tabs>
+            <RadzenTabsItem Text="All">
+                <RadzenRow AlignItems="AlignItems.Center" class="m-2">
+                    <RadzenColumn Size="2">
+                        <RadzenStack AlignItems="AlignItems.Center"
+                                     JustifyContent="JustifyContent.SpaceBetween"
+                                     Orientation="Orientation.Horizontal">
+                            <div class="dropdown-center">
+                                <RadzenButton class="rz-background-color-base-100"
+                                              ButtonType="Radzen.ButtonType.Button"
+                                              Size="Radzen.ButtonSize.Small"
+                                              ButtonStyle="ButtonStyle.Light"
+                                              data-bs-toggle="dropdown"
+                                              Shade="Shade.Darker"
+                                              aria-expanded="false">
+                                    Show @(pageSize) rows
+                                </RadzenButton>
+                                <ul class="dropdown-menu">
+                                    <li><button onclick="@(()=>ChangedPageSize(10))" class="btn-sm dropdown-item" type="button">10 Rows</button></li>
+                                    <li><button onclick="@(()=>ChangedPageSize(25))" class="btn-sm dropdown-item" type="button">25 Rows</button></li>
+                                    <li><button onclick="@(()=>ChangedPageSize(50))" class="btn-sm dropdown-item" type="button">50 Rows</button></li>
+                                    <li><button onclick="@(()=>ChangedPageSize(100))" class="btn-sm dropdown-item" type="button">100 Rows</button></li>
+                                </ul>
+                            </div>
+                        </RadzenStack>
+                    </RadzenColumn>
+                    <RadzenColumn Size="5" Offset="5">
+                        <RadzenStack AlignItems="AlignItems.Center"
+                                     JustifyContent="JustifyContent.End"
+                                     Orientation="Orientation.Horizontal">
+                            <RadzenFormField AllowFloatingLabel="false">
+                                <Start>
+                                    <RadzenIcon Icon="search" />
+                                </Start>
+                                <ChildContent>
+                                    <RadzenTextBox Change="SearchTextChanged"
+                                                   @bind-Value="filterText" />
+                                </ChildContent>
+                            </RadzenFormField>
+                            <div class="rz-text-align-center">
+                                <RadzenCheckBox TValue="bool"
+                                                Name="IncludeInActive"
+                                                @bind-Value:after="IncludeInactiveCheckedChanged"
+                                                @bind-Value="includeInactive" />
+                                <RadzenLabel Text="Include Active Loan" Component="IncludeInActive" />
+                            </div>
+                        </RadzenStack>
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenDataGrid Data="guarantors"
+                                GridLines="DataGridGridLines.Both"
+                                Density="Density.Compact"
+                                ShowPagingSummary="true"
+                                AllowAlternatingRows="true"
+                                IsLoading="isLoading"
+                                AllowPaging="true"
+                                PagerHorizontalAlign="HorizontalAlign.Right"
+                                Count="@counts"
+                                PageSize="pageSize"
+                                LoadData="LoadGuarantors">
+                    <HeaderTemplate>
+                        <RadzenButton Text="New"
+                                      Icon="add"
+                                      Size="Radzen.ButtonSize.Small"
+                                      Click="AddGuarantorTab"
+                                      ButtonStyle="ButtonStyle.Primary">
+                        </RadzenButton>
+                    </HeaderTemplate>
+                    <Columns>
+                        <RadzenDataGridColumn Width="4rem"
+                                              Property="id" Title="#" Context="g">
+                            <Template>
+                                @(guarantors.ToList().IndexOf(g) + 1)
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Property="GuarantorName" Title="Name" Sortable="true" />
+                        <RadzenDataGridColumn Property="Phone" Title="Phone" />
+                        <RadzenDataGridColumn Context="g" Property="ProInKhmer" Title="Address">
+                            <Template>
+                                @g.ToString()
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TextAlign="TextAlign.Center"
+                                              Width="5rem"
+                                              Context="g"
+                                              Title="Loan Active">
+                            <Template>
+                                <RadzenCheckBox @bind-Value="g.IsActive" />
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Width="10rem" Context="g" Title="Actions">
+                            <Template>
+                                <RadzenButton Size="Radzen.ButtonSize.ExtraSmall"
+                                              Icon="more_vert"
+                                              Variant="Variant.Text"
+                                              Click="@((args)=>ShowContextMenuWithContent(args,g.Id))" />
+                            </Template>
+                        </RadzenDataGridColumn>
+                    </Columns>
+                </RadzenDataGrid>
+            </RadzenTabsItem>
+            <RadzenTabsItem Text="New Guarantor" Visible="ShowAddTab" Icon="person_add_alt">
+                <EditForm Model="model" OnValidSubmit="OnSaveChanges">
+                    <Microsoft.AspNetCore.Components.Forms.ValidationSummary />
+                    <FluentValidationValidator DisableAssemblyScanning="false"></FluentValidationValidator>
+                    <RadzenRow AlignItems="AlignItems.Center" class="mb-2">
+                        <RadzenColumn Size="2">
+                            <RadzenLabel>Contact Name</RadzenLabel>
+                        </RadzenColumn>
+                        <RadzenColumn Size="10">
+                            <RadzenRow AlignItems="AlignItems.Center">
+                                <RadzenColumn Size="5">
+                                    <RadzenTextBox @bind-Value="model.Name"
+                                                   @bind-Value:after="SetFirstName"
+                                                   class="w-100"
+                                                   Placeholder="Your Name" />
+                                    <ValidationMessage For="@(()=>model.Name)"></ValidationMessage>
+                                </RadzenColumn>
+                                <RadzenColumn Size="5">
+                                    <RadzenTextBox @bind-Value="model.AltName"
+                                                   class="w-100"
+                                                   Placeholder="Alternative Name" />
+                                    <ValidationMessage For="@(()=>model.AltName)"></ValidationMessage>
+                                </RadzenColumn>
+                                <RadzenColumn Size="2">
+                                    <RadzenCheckBox TValue="bool" @bind-Value="model.IsActive">
+                                        @if (model.IsActive)
+                                        {
+                                            @("Is Active")
+                                        }
+                                        else
+                                        {
+                                            @("Is InActive")
+                                        }
+
+                                    </RadzenCheckBox>
+                                </RadzenColumn>
+                            </RadzenRow>
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenTabs>
+                        <Tabs>
+                            <RadzenTabsItem Text="Contact Info">
+                                <RadzenRow AlignItems="AlignItems.Center" class="mb-2">
+                                    <RadzenColumn Size="2">
+                                        <RadzenLabel>Contact Name</RadzenLabel>
+                                    </RadzenColumn>
+                                    <RadzenColumn Size="10">
+                                        <RadzenRow AlignItems="AlignItems.Center">
+                                            <RadzenColumn Size="2">
+                                                <RadzenDropDown TValue="string"
+                                                                Data="StorageConstant.Salutations"
+                                                                TextProperty="label"
+                                                                ValueProperty="value"
+                                                                class="w-100"
+                                                                @bind-Value="model.Sex">
+                                                </RadzenDropDown>
+                                                <ValidationMessage For="@(()=>model.Sex)" />
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="4">
+                                                <RadzenTextBox Placeholder="Firstname..."
+                                                               class="w-100"
+                                                               @bind-Value="model.FirstName" />
+                                                <ValidationMessage For="@(()=>model.FirstName)" />
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="2">
+                                                <RadzenTextBox class="w-100"
+                                                               Placeholder="Middle Name..."
+                                                               @bind-Value="model.MiddleName" />
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="4">
+                                                <RadzenTextBox class="w-100"
+                                                               Placeholder="Last Name"
+                                                               @bind-Value="model.LastName" />
+                                            </RadzenColumn>
+                                        </RadzenRow>
+                                    </RadzenColumn>
+                                </RadzenRow>
+                                <RadzenRow AlignItems="AlignItems.Center" class="mb-2">
+                                    <RadzenColumn Size="2">
+                                        <RadzenLabel>Contact Number</RadzenLabel>
+                                    </RadzenColumn>
+                                    <RadzenColumn Size="10">
+                                        <RadzenRow AlignItems="AlignItems.Center">
+                                            <RadzenColumn Size="4">
+                                                <RadzenTextBox Placeholder="Phone Number"
+                                                               class="w-100"
+                                                               @bind-Value="model.Phone" />
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="4">
+                                                <RadzenTextBox Placeholder="Alternate Phone"
+                                                               class="w-100"
+                                                               @bind-Value="model.AltPhone" />
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="4">
+                                                <RadzenTextBox Placeholder="Email..."
+                                                               class="w-100"
+                                                               @bind-Value="model.EmailAddress" />
+                                            </RadzenColumn>
+                                        </RadzenRow>
+                                    </RadzenColumn>
+                                </RadzenRow>
+                                <RadzenRow AlignItems="AlignItems.Center" class="mb-2">
+                                    <RadzenColumn Size="2">
+                                        <RadzenLabel>Note</RadzenLabel>
+                                    </RadzenColumn>
+                                    <RadzenColumn Size="10">
+                                        <RadzenTextArea class="w-100"
+                                                        @bind-Value="model.Description"></RadzenTextArea>
+                                    </RadzenColumn>
+                                </RadzenRow>
+                            </RadzenTabsItem>
+                            <RadzenTabsItem Text="Address Info">
+                                <RadzenRow AlignItems="AlignItems.Center" class="mb-2">
+                                    <RadzenColumn Size="6">
+                                        <RadzenRow AlignItems="AlignItems.Center">
+                                            <RadzenColumn Size="3">
+                                                <RadzenLabel>Province</RadzenLabel>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="9">
+                                                <RadzenDropDown TValue="int?"
+                                                                Data="provinceList"
+                                                                @bind-Value="model.ProvinceRefId"
+                                                                TextProperty="ProInKhmer"
+                                                                ValueProperty="ProvinceID"
+                                                                class="w-100"
+                                                                SelectedItemChanged="GetDistrictByProvince">
+                                                </RadzenDropDown>
+                                            </RadzenColumn>
+                                        </RadzenRow>
+                                    </RadzenColumn>
+                                    <RadzenColumn Size="6">
+                                        <RadzenRow AlignItems="AlignItems.Center">
+                                            <RadzenColumn Size="3">
+                                                <RadzenLabel>District</RadzenLabel>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="9">
+                                                <RadzenDropDown TValue="int?"
+                                                                Data="districtList"
+                                                                TextProperty="DisInKhmer"
+                                                                ValueProperty="DistrictId"
+                                                                @bind-Value="model.DistrictRefId"
+                                                                class="w-100"
+                                                                SelectedItemChanged="GeCommunesByDistrict">
+                                                </RadzenDropDown>
+                                            </RadzenColumn>
+                                        </RadzenRow>
+                                    </RadzenColumn>
+                                </RadzenRow>
+                                <RadzenRow AlignItems="AlignItems.Center" class="mb-2">
+                                    <RadzenColumn Size="6">
+                                        <RadzenRow AlignItems="AlignItems.Center">
+                                            <RadzenColumn Size="3">
+                                                <RadzenLabel>Commune</RadzenLabel>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="9">
+                                                <RadzenDropDown TValue="int?"
+                                                                @bind-Value="model.CommuneRefId"
+                                                                Data="communeList"
+                                                                TextProperty="ComInKhmer"
+                                                                ValueProperty="CommuneId"
+                                                                class="w-100"
+                                                                SelectedItemChanged="GetVillagesByCommune">
+                                                </RadzenDropDown>
+                                            </RadzenColumn>
+                                        </RadzenRow>
+                                    </RadzenColumn>
+                                    <RadzenColumn Size="6">
+                                        <RadzenRow AlignItems="AlignItems.Center">
+                                            <RadzenColumn Size="3">
+                                                <RadzenLabel>Village</RadzenLabel>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="9">
+                                                <RadzenDropDown Data="villageList"
+                                                                TextProperty="VilInKhmer"
+                                                                ValueProperty="VillageID"
+                                                                Name="DropDownVillDescription"
+                                                                class="w-100"
+                                                                SelectedItemChanged="GetVillagesName"
+                                                                @bind-Value="model.VillageRefId">
+                                                </RadzenDropDown>
+                                            </RadzenColumn>
+                                        </RadzenRow>
+                                    </RadzenColumn>
+                                </RadzenRow>
+                            </RadzenTabsItem>
+                        </Tabs>
+                    </RadzenTabs>
+                    <RadzenStack Orientation="Radzen.Orientation.Horizontal"
+                                 AlignItems="AlignItems.Center"
+                                 Gap="1rem"
+                                 JustifyContent="Radzen.JustifyContent.End">
+                        <RadzenButton ButtonStyle="ButtonStyle.Success"
+                                      Icon="save"
+                                      Text="Save"
+                                      ButtonType="Radzen.ButtonType.Submit"
+                                      Size="Radzen.ButtonSize.Small" />
+                        <RadzenButton ButtonStyle="ButtonStyle.Danger"
+                                      Icon="cancel"
+                                      Text="Close"
+                                      Click="CloseGuarantorTab"
+                                      Size="Radzen.ButtonSize.Small" />
+                    </RadzenStack>
+                </EditForm>
+            </RadzenTabsItem>
+            <RadzenTabsItem Text="Details" Visible="ShowDetailTab" Icon="info">
+                <GuarantorDetails Id="SelectedGuarantorId" Refresh="Refresh">
+                    <RadzenButton ButtonStyle="ButtonStyle.Danger"
+                                  Icon="cancel"
+                                  Text="Close"
+                                  Click="CloseGuarantorTab"
+                                  Size="Radzen.ButtonSize.Small" />
+                </GuarantorDetails>
+            </RadzenTabsItem>
+            <RadzenTabsItem Text="Edit" Visible="ShowEditTab" Icon="edit">
+                <GuarantorDetails Id="SelectedGuarantorId" Refresh="Refresh">
+                    <RadzenButton ButtonStyle="ButtonStyle.Danger"
+                                  Icon="cancel"
+                                  Text="Close"
+                                  Click="CloseGuarantorTab"
+                                  Size="Radzen.ButtonSize.Small" />
+                </GuarantorDetails>
+            </RadzenTabsItem>
+        </Tabs>
+    </RadzenTabs>
+</RadzenCard>
+
+@code {
+    bool includeInactive = false;
+    string? filterText = "";
+    int pageIndex = 1;
+    int pageSize = 10;
+    string sortColumn = "Name";
+    bool sortDescending = false;
+    int counts = 0;
+    bool isLoading = false;
+    bool ShowAddTab = false;
+    bool ShowDetailTab = false;
+    bool ShowEditTab = false;
+    RadzenTabs tabs = default!;
+    int selectedTabIndex = 0;
+    long SelectedGuarantorId = 0;
+    IEnumerable<VGuarantor> guarantors = [];
+    IEnumerable<ProvinceDto>? provinceList = [];
+    IEnumerable<CommuneDto>? communeList = [];
+    IEnumerable<DistrictDto>? districtList = [];
+    IEnumerable<VillageDto>? villageList = [];
+    EntityNameDtoCreate model = new EntityNameDtoCreate();
+    void ShowContextMenuWithContent(MouseEventArgs args, long id)
+    {
+        ContextMenuService.Open(args, ds =>
+    @<RadzenMenu Style="font-size:0.8rem;">
+        <RadzenMenuItem Icon="info"
+                        Click="@(()=>GetGuarantorDetails(id))"
+                        Text="Guarantor Details" Value="@id"></RadzenMenuItem>
+        <RadzenMenuItem Icon="edit"
+                        Click="@(()=>GetEditGuarantor(id))"
+                        Text="Edit" Value="@id"></RadzenMenuItem>
+        <RadzenMenuItem Icon="delete"
+                        Click="@(()=>DeleteGuarantorAsync(id))"
+                        Text="Delete" Value="@id"></RadzenMenuItem>
+    </RadzenMenu>
+    );
+    }
+
+    void ChangedPageSize(int page)
+    {
+        pageSize = page;
+    }
+
+
+
+
+
+
+    async void SearchTextChanged()
+    {
+        await GetGuarantors();
+    }
+
+    async Task AddGuarantorTab()
+    {
+        if (!ShowAddTab)
+        {
+            ShowAddTab = true;
+            provinceList = await _addressService!.GetAllProvinceAsync();
+            model.Sex = "mr";
+        }
+        selectedTabIndex = 1;
+        tabs.Reload();
+    }
+
+    void AddDetailGuarantorTab()
+    {
+
+
+        if (!ShowDetailTab)
+        {
+            ShowDetailTab = true;
+        }
+        selectedTabIndex = 2;
+        tabs.Reload();
+    }
+
+    void Refresh() { }
+
+
+    void SelectTabChanged(int index)
+    {
+        Console.WriteLine(index);
+    }
+
+    void CloseGuarantorTab()
+    {
+        if (ShowAddTab && selectedTabIndex == 1)
+        {
+            ShowAddTab = false;
+            provinceList = [];
+            model.Sex = "";
+        }
+        if (ShowDetailTab && selectedTabIndex == 2)
+        {
+            ShowDetailTab = false;
+        }
+        selectedTabIndex = 0;
+    }
+    //NavigationManager.NavigateTo($"/Customers/Guarantors/{id}/Details");
+    void GetGuarantorDetails(long id)
+    {
+        ContextMenuService.Close();
+        if (!ShowDetailTab)
+        {
+            ShowDetailTab = true;
+        }
+        SelectedGuarantorId = id;
+        selectedTabIndex = 2;
+        tabs.Reload();
+        Refresh();
+    }
+
+    async void GetEditGuarantor(long id)
+    {
+        ContextMenuService.Close();
+
+        var param = new Dictionary<string, object>
+        {
+            {"NameId",id}
+        };
+        var options = new DialogOptions
+            {
+                Width = "80rem",
+                Height = "30rem",
+                Resizable = true,
+                Draggable = true
+            };
+
+        var result = await DialogService.OpenAsync<GuarantorEdit>($"Edit Guarantor #{id}", param, options);
+
+        if (((bool)result) == true)
+        {
+            await GetGuarantors();
+        }
+    }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await GetGuarantors();
+    }
+    async Task GetGuarantors()
+    {
+        isLoading = true;
+        var param = new QueryParam(pageIndex, pageSize, sortColumn, sortDescending, includeInactive, filterText);
+        var guarantorResp = await _gService.GetGuarantors(param);
+        if (guarantorResp.IsSuccess)
+        {
+            guarantors = guarantorResp.Data.Items;
+            counts = guarantorResp.Data.Count;
+        }
+        isLoading = false;
+
+        StateHasChanged();
+    }
+
+    async Task LoadGuarantors(LoadDataArgs e)
+    {
+        pageIndex = e.Skip!.Value;
+        if (!string.IsNullOrEmpty(e.OrderBy))
+        {
+            sortColumn = e.OrderBy.Split(" ")[0];
+            string dir = e.OrderBy.Split(" ")[1];
+            sortDescending = dir.Contains("asc") ? false : true;
+        }
+        await GetGuarantors();
+
+    }
+    async Task ShowGuarantorModal()
+    {
+        var options = new DialogOptions
+            {
+                Width = "60rem",
+                Height = "30rem",
+                Draggable = true,
+                AutoFocusFirstElement = true
+            };
+        var modalResult = await DialogService.OpenAsync<GuarantorAddModal>("Guarantor", options: options);
+
+        if (bool.TryParse(modalResult, out bool result) && result == true)
+        {
+            await GetGuarantors();
+        }
+
+    }
+    async Task IncludeInactiveCheckedChanged()
+    {
+        await GetGuarantors();
+    }
+
+
+    protected async Task OnSaveChanges()
+    {
+        model.EntType = "Other Name";
+        var resultResponse = await _gService.CreateGaurantorAsync(model);
+
+        if (resultResponse.IsSuccess)
+        {
+            NotificationService.Notify(Radzen.NotificationSeverity.Success, resultResponse.Data!.Message);
+            ShowAddTab = false;
+            selectedTabIndex = 0;
+            //tabs.Reload();
+        }
+        else
+        {
+            var error = resultResponse.Errors!.FirstOrDefault();
+            NotificationService.Notify(Radzen.NotificationSeverity.Error, error);
+        }
+    }
+
+
+
+    protected async Task DeleteGuarantorAsync(long id)
+    {
+
+        if (id <= 0)
+        {
+            NotificationService.Notify(NotificationSeverity.Warning, "there is no any data selected.");
+            return;
+        }
+
+        var confirm = await DialogService.Confirm($"do you want to delete guarantor with #{id}",
+                                            "Delete", new ConfirmOptions
+                                                {
+                                                    OkButtonText = "Ok",
+                                                    CancelButtonText = "Cancel"
+                                                });
+        if (confirm == false) return;
+
+        var resultResponse = await _gService.DeleteAsync(id);
+
+        if (resultResponse.IsSuccess)
+        {
+            NotificationService.Notify(Radzen.NotificationSeverity.Success, resultResponse.Data!.Message);
+            ShowAddTab = false;
+            selectedTabIndex = 0;
+            await GetGuarantors();
+            tabs.Reload();
+        }
+        else
+        {
+            var error = resultResponse.Errors!.FirstOrDefault();
+            NotificationService.Notify(Radzen.NotificationSeverity.Error, error);
+        }
+    }
+
+    async void GetDistrictByProvince(object e)
+    {
+        if (e is not null)
+        {
+            model.ProInKhmer = ((ProvinceDto)e).ProInKhmer;
+            var id = ((ProvinceDto)e).ProvinceID;
+            districtList = await _addressService!.GetDistrictByProvinceAsync(id);
+        }
+        StateHasChanged();
+    }
+    async void GeCommunesByDistrict(object e)
+    {
+        if (e is not null)
+        {
+            model.DisInKhmer = ((DistrictDto)e).DisInKhmer;
+            var id = ((DistrictDto)e).DistrictId;
+            communeList = await _addressService!.GetCommuneByDistricteAsync(id);
+        }
+        StateHasChanged();
+    }
+    void Cancel()
+    {
+        DialogService.Close(false);
+    }
+    async void GetVillagesByCommune(object e)
+    {
+        if (e is not null)
+        {
+            model.ComInKhmer = ((CommuneDto)e).ComInKhmer;
+            var id = ((CommuneDto)e).CommuneId;
+            villageList = await _addressService!.GetVillageByCommuneAsync(id);
+        }
+        StateHasChanged();
+    }
+    void GetVillagesName(object e)
+    {
+        if (e is not null)
+        {
+            model.VilInKhmer = ((VillageDto)e).VilInKhmer;
+        }
+        StateHasChanged();
+    }
+    void SetFirstName()
+    {
+        model.FirstName = model.Name;
+    }
+}

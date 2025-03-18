@@ -3,12 +3,12 @@ using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Currencies;
 using Domains.Models.Transaction;
-using Infrastructures.Data;
+using Infrastructures.DataAccess;
 using Microsoft.EntityFrameworkCore;
 
-namespace CoreBussiness.Implements
+namespace Infrastructures.Implements
 {
-    public class ForiegnCurrencyExchange : IForiegnCurrencyExchangeImpl
+    public sealed class ForiegnCurrencyExchange : IForiegnCurrencyExchange
     {
         private readonly ApplicationDbContext _context;
 

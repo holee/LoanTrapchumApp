@@ -1,4 +1,4 @@
-﻿using Applications.Enums;
+﻿using Applications.Enumerations;
 using Applications.Interfaces.Loans;
 using Applications.Requests.Loans;
 using Applications.Requests.Loans.LoanRequests;
@@ -10,16 +10,15 @@ using Applications.Responses.ViewModels.Loans.Requests;
 using Dapper;
 using Domains.Models.Collaterals;
 using Domains.Models.Lists;
-using Domains.Models.Lists.Customers;
 using Domains.Models.Loans;
-using Infrastructures.Data;
+using Infrastructures.DataAccess;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace CoreBussiness.Implements;
+namespace Infrastructures.Implements;
 
-public class LoanRequestService(ApplicationDbContext context, ILogger<LoanRequestService> logger, IDapperConnectionFactory dapperFactory) : ILoanRequestServiceImpl
+public class LoanRequestService(ApplicationDbContext context, ILogger<LoanRequestService> logger, IDapperConnectionFactory dapperFactory) : ILoanRequestService
 {
     public async Task<Result<string>> CreateLoanRequestAsync(LoanRequest request)
     {
@@ -201,7 +200,7 @@ public class LoanRequestService(ApplicationDbContext context, ILogger<LoanReques
 
     }
 
-    public async Task<Result<IEnumerable<VLoanRequestCollateralLines>>> GetLoanRequestCollateralAsync(int? branchId, long? loanRequestId)
+    public async Task<Result<IEnumerable<VLoanRequestCollateralLines>>> GetLoanRequestCollateralAsync(int? branchId, Guid? loanRequestId)
     {
         logger.LogInformation("try to create new loan request");
         try
@@ -233,14 +232,14 @@ public class LoanRequestService(ApplicationDbContext context, ILogger<LoanReques
 
     }
 
-    public async Task<Result<string>> DeleteLoanRequestCollateralAsync(int? branchId, long? loanRequestId, long? collateralLinkId)
+    public async Task<Result<string>> DeleteLoanRequestCollateralAsync(int? branchId, Guid? loanRequestId, long? collateralLinkId)
     {
         logger.LogInformation("try to delete guarantors");
         try
         {
 
             var existingRequest = await context.LoanRequests
-                                    .Where(x => x.Id == loanRequestId && x.BranchRefId == branchId)
+                                    .Where(x => x.LoanRequestId == loanRequestId && x.BranchRefId == branchId)
                                     .FirstOrDefaultAsync();
 
             if (existingRequest is not null && existingRequest.LoanRequestStatusRefId == (int)RequestStatus.Completed)
@@ -347,7 +346,7 @@ public class LoanRequestService(ApplicationDbContext context, ILogger<LoanReques
         }
 
     }
-    public async Task<Result<IEnumerable<VLoanRequestGuarantors>>> GetLoanRequestGuarantorAsync(long loanRequestId, int branchId, long customerId)
+    public async Task<Result<IEnumerable<VLoanRequestGuarantors>>> GetLoanRequestGuarantorAsync(Guid loanRequestId, int branchId, long customerId)
     {
         logger.LogInformation("try to get guarantors");
         try
@@ -376,14 +375,14 @@ public class LoanRequestService(ApplicationDbContext context, ILogger<LoanReques
         }
 
     }
-    public async Task<Result<string>> DeleteLoanRequestGuarantorAsync(long? loanRequestId, int? branchId, long? guarantorLinkId)
+    public async Task<Result<string>> DeleteLoanRequestGuarantorAsync(Guid? loanRequestId, int? branchId, long? guarantorLinkId)
     {
         logger.LogInformation("try to delete guarantors");
         try
         {
 
             var existingRequest = await context.LoanRequests
-                                    .Where(x => x.Id == loanRequestId && x.BranchRefId == branchId)
+                                    .Where(x => x.LoanRequestId == loanRequestId && x.BranchRefId == branchId)
                                     .FirstOrDefaultAsync();
 
             if (existingRequest is not null && existingRequest.LoanRequestStatusRefId == (int)RequestStatus.Completed)
@@ -518,14 +517,14 @@ public class LoanRequestService(ApplicationDbContext context, ILogger<LoanReques
         }
 
     }
-    public async Task<Result<string>> DeleteLoanRequestDocumentAsync(long? loanRequestId, int? branchId, long? documentId)
+    public async Task<Result<string>> DeleteLoanRequestDocumentAsync(Guid? loanRequestId, int? branchId, long? documentId)
     {
         logger.LogInformation("try to delete guarantors");
         try
         {
 
             var existingRequest = await context.LoanRequests
-                                    .Where(x => x.Id == loanRequestId && x.BranchRefId == branchId)
+                                    .Where(x => x.LoanRequestId == loanRequestId && x.BranchRefId == branchId)
                                     .FirstOrDefaultAsync();
 
             if (existingRequest is not null && existingRequest.LoanRequestStatusRefId == (int)RequestStatus.Completed)
@@ -573,7 +572,7 @@ public class LoanRequestService(ApplicationDbContext context, ILogger<LoanReques
     /// <param name="param"></param>
     /// <returns></returns>
 
-    public async Task<Pager<VLoanRequests>> GetLoanRequestsAsync(long userId, int branchId, RequestStatus requestStatus, QueryParam param)
+    public async Task<Pager<VLoanRequests>> GetLoanRequestsAsync(string userId, int branchId, RequestStatus requestStatus, QueryParam param)
     {
         IQueryable<VLoanRequests> resultQueries = context.Database
                                                  .SqlQuery<VLoanRequests>($@"SELECT * FROM VLoanReuests WHERE BranchId={branchId}");
@@ -601,7 +600,7 @@ public class LoanRequestService(ApplicationDbContext context, ILogger<LoanReques
                 break;
         }
 
-        if (userId > 0)
+        if (!string.IsNullOrEmpty(userId))
         {
             resultQueries = resultQueries.Where(x => x.AprovedUserId == userId || x.UserRequestId == userId);
         }
@@ -661,13 +660,13 @@ public class LoanRequestService(ApplicationDbContext context, ILogger<LoanReques
 
 
     }
-  
+
     /// <summary>
     /// Loan Request Actions
     /// </summary>
     /// <param name="req"></param>
     /// <returns></returns>
-    
+
     public async Task<Result<string>> ChangedLoanRequestAsync(LoanChangeStatusDtoCreate req)
     {
 

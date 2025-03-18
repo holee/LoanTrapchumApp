@@ -36,7 +36,7 @@ namespace Applications.Requests.Validations.Loans
             RuleFor(c => c.InterestRate).GreaterThan(0)
                                     .WithMessage("Please input interest rate");
             RuleFor(c => c.AprovedUserId).NotEmpty().WithMessage("Please select approval user")
-                                       .GreaterThan(0).WithMessage("Please select approval user");
+                                         .WithMessage("Please select approval user");
             RuleFor(c => c.Circle).GreaterThan(0).WithMessage("Circle is required.");
         }
     }

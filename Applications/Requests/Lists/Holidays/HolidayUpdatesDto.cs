@@ -2,6 +2,6 @@
 {
     public class HolidayUpdatesDto :HolidayCreateDto
     {
-        public long Id { get; set; }
+
     }
 }

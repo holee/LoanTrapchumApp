@@ -2,10 +2,10 @@
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Domains.Models.Lists;
-using Infrastructures.Data;
+using Infrastructures.DataAccess;
 using Microsoft.EntityFrameworkCore;
 
-namespace CoreBussiness.Implements
+namespace Infrastructures.Implements
 {
     public class HolidayService : IHolidayService
     {
@@ -178,7 +178,7 @@ namespace CoreBussiness.Implements
             }
             catch (Exception ex)
             {
-                return Result.Failure<string>(ErrorResponse.Failure("500", [$"{ex.InnerException!.Message}"]));
+                return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
             }
         }
 
@@ -199,7 +199,7 @@ namespace CoreBussiness.Implements
             }
             catch (Exception ex)
             {
-                return Result.Failure<string>(ErrorResponse.Failure("500", [$"{ex.InnerException!.Message}"]));
+                return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
             }
         }
 
@@ -216,7 +216,7 @@ namespace CoreBussiness.Implements
             }
             catch (Exception ex)
             {
-                return Result.Failure<string>(ErrorResponse.Failure("500", [$"{ex.InnerException!.Message}"]));
+                return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
             }
         }
     }

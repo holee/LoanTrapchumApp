@@ -3,7 +3,7 @@ using Applications.Responses.ViewModels.Customers;
 using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Requests;
 
-namespace Domains.Models.Lists.Customers;
+namespace Applications.Responses;
 
 public sealed class VCustomerList
 {

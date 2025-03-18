@@ -3,6 +3,7 @@
 @using Applications.Extensions.Identity
 @using Applications.Interfaces
 @using Applications.Interfaces.Branches
+@using Applications.Interfaces.Identity
 @using Applications.Requests.Identity
 @using Applications.Services.Identity
 @using Infrastructures.Implements
@@ -19,6 +20,28 @@
 @using TrapchumApp.Components.Comps
 @using TrapchumApp.Components.Comps.Cards
 @using static Microsoft.AspNetCore.Components.Web.RenderMode
-@inject IBranchService  _branchService
+@using Applications.Requests.Lists.Addreses;
+@using Applications.Requests.Lists.Currency;
+@using Applications.Requests.Lists.Entities;
+@using Microsoft.AspNetCore.Authorization
+@using Applications.Constants.Authorizations
+@using Applications.Extensions.Identity.Authorizations.Attributes
+@using Blazored.FluentValidation
+@using Applications.Extensions.Maths
+@using TrapchumApp.Components.Comps.Controls
+@using Applications.Responses.ViewModels.Departments
+@using Domains.Models.Lists
+@using Applications.Responses.ViewModels.Auths
+@using TrapchumApp.Components.Account
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@* @attribute [ExcludeFromInteractiveRouting] *@
+@inject IJSRuntime js
+@inject IAuthorizationService _authorizeService;
+@inject IBranchService _branchService
 @inject NotificationService NotificationService
 @inject DialogService DialogService
+@inject NavigationManager NavigationManager
+@inject ContextMenuService ContextMenuService
+@inject TooltipService tooltipService
+@inject IdentityRedirectManager RedirectManager
+@inject ILoginService loginService

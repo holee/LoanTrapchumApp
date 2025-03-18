@@ -19,32 +19,32 @@ public class LoginService(UserManager<ApplicationUser> userManager, SignInManage
 
             if (user is null)
             {
-                return Result.Failure<string>(ErrorResponse.NotFound(ErrorCode.NotFound, "Invalid Email or UsreName."));
+                return Result.Failure<string>(ErrorResponse.NotFound("Invalid Email or UsreName."));
             }
 
             if (user!.IsActive == false)
             {
-                return Result.Failure<string>(ErrorResponse.NotFound(ErrorCode.NotFound, "Current User is not Active."));
+                return Result.Failure<string>(ErrorResponse.NotFound("Current User is not Active."));
             }
 
             var isPasswordChecked = await userManager.CheckPasswordAsync(user, request.Password);
 
             if (!isPasswordChecked)
             {
-                return Result.Failure<string>(ErrorResponse.NotFound(ErrorCode.NotFound, "Invalid Password."));
+                return Result.Failure<string>(ErrorResponse.NotFound("Invalid Password."));
             }
 
-            var result = await signinManager.PasswordSignInAsync(user, request.Password, false, false);
+            var result = await signinManager.PasswordSignInAsync(user, request.Password, request.RememberMe, false);
 
             if (!result.Succeeded)
             {
-                return Result.Failure<string>(ErrorResponse.ServerError(ErrorCode.ServerError, "Something went wrong with login."));
+                return Result.Failure<string>(ErrorResponse.ServerError("Something went wrong with login."));
             }
             return Result.Success("Login Success");
         }
         catch (Exception ex)
         {
-            return Result.Failure<string>(ErrorResponse.ServerError(ErrorCode.NotFound, ex.Message));
+            return Result.Failure<string>(ErrorResponse.ServerError(ex.Message));
         }
 
 

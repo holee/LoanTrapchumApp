@@ -1,0 +1,8 @@
+﻿<RadzenPanelMenuItem Text="Reports" Icon="summarize" Visible="IsBranchOpen">
+    <RadzenPanelMenuItem Text="Themes" Icon="color_lens" />
+    <RadzenPanelMenuItem Text="Colors" Icon="invert_colors" />
+</RadzenPanelMenuItem>
+@code {
+     [Parameter,EditorRequired]
+    public bool IsBranchOpen { get; set; } = false;
+}

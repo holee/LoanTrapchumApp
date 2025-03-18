@@ -35,7 +35,9 @@ namespace TrapchumApp.Components.Account.Pages
             if (result.IsSuccess)
             {
                 Logger.LogInformation("User logged in.");
-                RedirectManager.RedirectTo(ReturnUrl);
+
+                // RedirectManager.RedirectTo(ReturnUrl);
+                NavigationManager.NavigateTo(ReturnUrl!, true);
             }
             else
             {

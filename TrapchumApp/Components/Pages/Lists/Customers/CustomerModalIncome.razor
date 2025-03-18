@@ -1,0 +1,245 @@
+﻿@using ApplicationServices.Interfaces
+<RadzenStack AlignItems="AlignItems.Center"
+             Wrap="FlexWrap.Wrap"
+             Orientation="Orientation.Horizontal">
+
+    <RadzenDataGrid Data="@Incomes"
+                    Responsive
+                    TItem="VCustomerIncomes"
+                    @ref="incomeGrid"
+                    GridLines="DataGridGridLines.Both"
+                    ColumnWidth="10rem"
+                    Density="Density.Compact">
+        <HeaderTemplate>
+            <RadzenButton Variant="Variant.Flat"
+                          Click="InsertedRow"
+                          ButtonStyle="ButtonStyle.Success"
+                          Icon="add_circle"
+                          Size="Radzen.ButtonSize.ExtraSmall" />
+        </HeaderTemplate>
+        <Columns>
+            <RadzenDataGridColumn Context="c" Title="#" Width="2rem" TextAlign="TextAlign.Center">
+                <Template>
+                    <input type="hidden" value="@c.IncomeId" />
+                    @{
+                        var index = Incomes?.IndexOf(c) + 1;
+                    }
+                    @index
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Context="c" Title="IncomeSource" Property="IncomeSource">
+                <Template>
+                    @c.IncomeSource
+                </Template>
+                <EditTemplate>
+                    <RadzenTextBox @bind-Value="c.IncomeSource"
+                                   class="w-100"
+                                   Style="height:2rem;line-height:1rem;" />
+                </EditTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Width="8rem"
+                                  Context="c" TextAlign="TextAlign.Right"
+                                  Title="Amount"
+                                  Property="IncomeAmount">
+                <Template>
+                    @c.IncomeAmount
+                </Template>
+                <EditTemplate>
+                    <RadzenNumeric TValue="decimal?"
+                                   @bind-Value="c.IncomeAmount"
+                                   class="w-100"
+                                   Format="#,##0.00"
+                                   ShowUpDown="false"
+                                   Style="height:2rem;line-height:1rem;" />
+                </EditTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Context="c" Title="Description" Property="InDescription">
+                <Template>
+                    @c.InDescription
+                </Template>
+                <EditTemplate>
+                    <RadzenTextBox @bind-Value="c.InDescription" class="w-100"
+                                   Style="height:2rem;line-height:1rem;" />
+                </EditTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TextAlign="TextAlign.Center" Context="c" Title="Action" Width="4rem">
+                <Template>
+                    <RadzenButton Variant="Variant.Flat"
+                                  Icon="edit"
+                                  ButtonStyle="ButtonStyle.Primary"
+                                  Click="@(()=>EditRow(c))"
+                                  @onclick:stopPropagation="true"
+                                  Size="Radzen.ButtonSize.ExtraSmall" />
+                    <RadzenButton Variant="Variant.Flat"
+                                  Icon="delete"
+                                  ButtonStyle="ButtonStyle.Danger"
+                                  Click="@(()=>DeleteRow(c))"
+                                  @onclick:stopPropagation="true"
+                                  Size="Radzen.ButtonSize.ExtraSmall" />
+                </Template>
+                <EditTemplate>
+                    <RadzenButton Variant="Variant.Flat"
+                                  Icon="check"
+                                  Click="@(()=>SaveRow(c))"
+                                  ButtonStyle="ButtonStyle.Success"
+                                  @onclick:stopPropagation="true"
+                                  Size="Radzen.ButtonSize.ExtraSmall" />
+                    <RadzenButton Variant="Variant.Flat"
+                                  Icon="close"
+                                  ButtonStyle="ButtonStyle.Warning"
+                                  Click="@(()=>CancelEdit(c))"
+                                  @onclick:stopPropagation="true"
+                                  Size="Radzen.ButtonSize.ExtraSmall" />
+
+                </EditTemplate>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+</RadzenStack>
+<RadzenStack Orientation="Orientation.Horizontal"
+             class="mt-3"
+             AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+    <RadzenButton Text="Save"
+                  Click="SaveChanged"
+                  Icon="save"
+                  ButtonStyle="ButtonStyle.Success"
+                  Size="Radzen.ButtonSize.Small" />
+    <RadzenButton Text="Close"
+                  Click="Close"
+                  Icon="cancel"
+                  ButtonStyle="ButtonStyle.Danger"
+                  Size="Radzen.ButtonSize.Small" />
+</RadzenStack>
+@code {
+    List<CustomerIncomeDtoCreate> CustomerIncomes = new List<CustomerIncomeDtoCreate>();
+    List<VCustomerIncomes> Incomes = [];
+    [Parameter] public long? CustomerId { get; set; }
+    RadzenDataGrid<VCustomerIncomes> incomeGrid = default!;
+    List<VCustomerIncomes> insertGrid = [];
+    private void AddNewRow()
+    {
+        CustomerIncomes?.Add(new CustomerIncomeDtoCreate());
+    }
+    private void RemoveRow(CustomerIncomeDtoCreate row)
+    {
+        CustomerIncomes?.Remove(row);
+    }
+
+    protected override void OnInitialized()
+    {
+        AddNewRow();
+        AddNewRow();
+        AddNewRow();
+        AddNewRow();
+        base.OnInitialized();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await GetCustomerIncome(CustomerId);
+    }
+
+    private void Close()
+    {
+        DialogService.Close(false);
+    }
+
+    async Task GetCustomerIncome(long? customerId)
+    {
+        var resp = await _customerService.GetCustomerIncomesAsync(customerId);
+        if (resp.IsSuccess)
+        {
+            Incomes = resp.Data!.ToList();
+        }
+    }
+
+
+
+    private bool isValid = true;
+
+    async Task SaveChanged()
+    {
+        try
+        {
+            var model = Incomes.Where(x => x.IncomeAmount > 0)
+                                .Select(x => new CustomerIncomeDtoCreate(x.IncomeId, CustomerId, x.IncomeSource, x.IncomeAmount, x.InDescription))
+                                .ToList();
+            //NotificationService.Notify(NotificationSeverity.Success, Incomes.Count().ToString());
+
+            if (!model.Any()) return;
+
+            var response = await _customerService.AddIncomesAsync(CustomerId, model);
+
+            if (response.IsSuccess)
+            {
+                NotificationService.Notify(NotificationSeverity.Success, response.Data!.Message);
+                DialogService.Close(true);
+            }
+            else
+            {
+                var error = response.Errors!.FirstOrDefault();
+
+                NotificationService.Notify(NotificationSeverity.Error, error);
+
+            }
+        }
+        catch (Exception ex)
+        {
+            await Console.Out.WriteLineAsync(ex.Message);
+        }
+    }
+
+    void Reset()
+    {
+        insertGrid.Clear();
+    }
+
+    void Reset(VCustomerIncomes income)
+    {
+        Incomes.Remove(income);
+    }
+
+    async void InsertedRow()
+    {
+        var income = new VCustomerIncomes();
+        Incomes.Add(income);
+        await incomeGrid.InsertRow(income);
+    }
+
+    async Task DeleteRow(VCustomerIncomes income)
+    {
+        Reset(income);
+        if (Incomes.Contains(income))
+        {
+            await incomeGrid.Reload();
+        }
+        else
+        {
+            incomeGrid.CancelEditRow(income);
+            await incomeGrid.Reload();
+        }
+    }
+
+
+    void CancelEdit(VCustomerIncomes income)
+    {
+        Reset(income);
+        incomeGrid.CancelEditRow(income);
+    }
+
+    async Task SaveRow(VCustomerIncomes income)
+    {
+
+        if (income.IncomeId <= 0)
+        {
+
+        }
+        await incomeGrid.UpdateRow(income);
+    }
+
+    async Task EditRow(VCustomerIncomes income)
+    {
+        await incomeGrid.EditRow(income);
+    }
+}

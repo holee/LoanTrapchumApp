@@ -4,12 +4,12 @@ using Applications.Responses.Message;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Categories;
 using Domains.Models.Loans;
-using Infrastructures.Data;
+using Infrastructures.DataAccess;
 using Microsoft.EntityFrameworkCore;
 
-namespace CoreBussiness.Implements
+namespace Infrastructures.Implements
 {
-    public class LoanCategoryService(ApplicationDbContext context) : ILoanCategoryServiceImpl
+    public class LoanCategoryService(ApplicationDbContext context) : ILoanCategoryService
     {
         public async Task<IEnumerable<LoanCategory>> GetLoanCategories(string? q = null)
         {

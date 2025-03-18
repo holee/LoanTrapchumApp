@@ -1,0 +1,29 @@
+﻿using Applications.Responses.ViewModels.Collaterals;
+using Applications.Responses.ViewModels.Loans.Requests;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace Infrastructures.DataAccess.Configurations.Collaterals
+{
+    public class VCollateralConfig : IEntityTypeConfiguration<VCollateral>
+    {
+        public void Configure(EntityTypeBuilder<VCollateral> builder)
+        {
+            builder.ToView("VCollateralList");
+            builder.HasNoKey();
+            builder.Property(x => x.RegisterDate).HasColumnType("DATE");
+            builder.Property(x => x.Remark).HasMaxLength(200);
+            builder.Property(x => x.CustomerName).HasMaxLength(100);
+        }
+    }
+
+
+    public class VLoanCollateralLineConfig : IEntityTypeConfiguration<VLoanRequestCollateralLines> 
+    {
+        public void Configure(EntityTypeBuilder<VLoanRequestCollateralLines> builder)
+        {
+            builder.ToView("VLoanCollaterals");
+            builder.HasNoKey();
+        }
+    }
+}

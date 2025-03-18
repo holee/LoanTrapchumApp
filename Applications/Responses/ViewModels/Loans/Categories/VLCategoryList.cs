@@ -9,7 +9,7 @@
         public string? Code { get; set; }
         public int? EditSeq { get; set; }
         public bool? IsActive { get; set; }
-        public string IsInUse { get; set; }
+        public string? IsInUse { get; set; }
 
     }
 }

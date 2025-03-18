@@ -5,10 +5,13 @@ namespace Domains.Models.Loans;
 public sealed class Loan : BaseEntity
 {
     public long Id { get; set; }
+    public Guid LoanDisbursementsId { get; set; }
     public long? LoanRequestId { get; set; }
+    public Guid? LoanRequestRefId { get; set; } 
     public long? CustomerRefId { get; set; }
     public long? UserRefId { get; set; }
-    public long? TranxRefId { get; set; }  
+    public long? TranxRefId { get; set; }
+    public Guid? TransactionRefId { get; set; }
     public Guid LoanId { get; set; } = Guid.NewGuid();
     public Guid? AccIdInsurance { get; set; }
     public Guid? LinkWithAccountRefId { get; set; }

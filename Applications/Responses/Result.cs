@@ -14,44 +14,7 @@ public class Result
         IsSuccess = isSuccess;
         Errors = error;
     }
-
-    public bool HasError(string? key, out string message)
-    {
-        message = string.Empty;
-
-        if (!HasError(key))
-        {
-            return false;
-        }
-
-        if (!string.IsNullOrEmpty(key) && Errors.Errors!.ContainsKey(key))
-        {
-            message = Errors!.Errors[key]!.First();
-            return true;
-        }
-
-        var errors = Errors.Errors?.Values.FirstOrDefault();
-
-        if (errors!.Any())
-        {
-            message = errors!.First();
-            return true;
-        }
-
-        return false;
-
-
-
-    }
-    private bool HasError(string? key = null)
-    {
-        if (string.IsNullOrEmpty(key))
-        {
-            return Errors.Errors!.Any();
-        }
-        return !IsSuccess && Errors.Errors!.ContainsKey(key);
-    }
-    public string ErrMessage => !IsSuccess ? Errors.Message : string.Empty;
+    public string ErrMessage => !IsSuccess ? Errors.ErrMessage : string.Empty;
     public bool IsSuccess { get; }
     public ErrorResponse Errors { get; }
     public static Result<T> Success<T>(T data) => new(true, ErrorResponse.None, data);

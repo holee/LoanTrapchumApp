@@ -3,12 +3,12 @@ using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Products;
 using Domains.Models.Loans;
-using Infrastructures.Data;
+using Infrastructures.DataAccess;
 using Microsoft.EntityFrameworkCore;
 
-namespace CoreBussiness.Implements
+namespace Infrastructures.Implements
 {
-    public class LoanProductService : ILoanProductServiceImpl
+    public class LoanProductService : ILoanProductService
     {
         private readonly ApplicationDbContext _context;
 

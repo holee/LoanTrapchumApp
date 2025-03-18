@@ -1,0 +1,42 @@
+﻿using Applications.Requests.Identity;
+using Applications.Requests.Journals;
+using Applications.Requests.Lists.Currency;
+using Applications.Requests.Lists.Customers;
+using Applications.Requests.Lists.Employees;
+using Applications.Requests.Lists.Entities;
+using Applications.Requests.Loans;
+using Applications.Requests.SysSettings;
+using Applications.Requests.Validations.Auths;
+using Applications.Requests.Validations.Currencies;
+using Applications.Requests.Validations.Customers;
+using Applications.Requests.Validations.Employees;
+using Applications.Requests.Validations.Loans;
+using Applications.Requests.Validations.NameEntities;
+using Applications.Requests.Validations.Transactions;
+using FluentValidation;
+using Microsoft.Extensions.DependencyInjection;
+namespace Applications.Validations
+{
+    public static class ValidationServiceExtensions
+    {
+        public static IServiceCollection AddValidationServiceInjections(this IServiceCollection services)
+        {
+            services.AddTransient<IValidator<RoleCreateDto>, RoleCreateDtoValidator>();
+            services.AddTransient<IValidator<RegisterRequest>, RegisterRequestValidator>();
+            services.AddTransient<IValidator<TokenRequest>, TokenRequestValidator>();
+            services.AddTransient<IValidator<EntityNameDtoCreate>, EntityNameDtoCreateValidator>();
+            services.AddTransient<IValidator<EmployeeDtoCreate>, EmployeeDtoCreateValidator>();
+            services.AddTransient<IValidator<EmployeeDtoUpdate>, EmployeeDtoUpdateValidator>();
+            services.AddTransient<IValidator<CustomerDtoCreate>, CustomerDtoCreateValidator>();
+            services.AddTransient<IValidator<CustomerDtoUpdate>, CustomerDtoUpdateValidator>();
+            services.AddTransient<IValidator<LoanDtoCreate>, LoanCreateDtoValidator>();
+            services.AddTransient<IValidator<LedgerCreateDto>, LedegerCreateDtoValidator>();
+            services.AddTransient<IValidator<LedgerUpdateDto>, LedegerUpdateDtoValidator>();
+            services.AddTransient<IValidator<ChangePasswordDto>, ChangedPasswordValidator>();
+            services.AddTransient<IValidator<UserLoanSizeDtoCreate>, UserLoanSizeDtoCreateValidater>();
+            services.AddTransient<IValidator<LoanRequestDtoCreate>, LoanRequestValidator>();
+            services.AddTransient<IValidator<ExchangeDtoCreate>, CurrencyExchangeValidator>();
+            return services;
+        }
+    }
+}

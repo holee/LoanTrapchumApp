@@ -11,16 +11,11 @@ public static class ClaimPrincipleExtension
 
     public static string? GetUserName(this ClaimsPrincipal claimsPrincipal)
                        => claimsPrincipal.FindFirst(ClaimTypes.Name)?.Value;
-    public static long GetId(this ClaimsPrincipal claimsPrincipal)
+    public static string? GetId(this ClaimsPrincipal claimsPrincipal)
     {
         var value = claimsPrincipal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        if (long.TryParse(value, out var id))
-        {
-            return id;
-        }
-
-        return default;
+        return value;
     }
 
     public static string? GetRole(this ClaimsPrincipal claimsPrincipal)

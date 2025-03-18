@@ -1,9 +1,9 @@
 ﻿using Applications.Interfaces.Lists;
 using Domains.Models.Lists;
-using Infrastructures.Data;
+using Infrastructures.DataAccess;
 using Microsoft.EntityFrameworkCore;
 
-namespace CoreBussiness.Implements
+namespace Infrastructures.Implements
 {
     public class OccupationService: IOccupationService
     {

@@ -2,10 +2,10 @@
 using Applications.Responses;
 using Applications.Responses.ViewModels.Currencies;
 using Domains.Models.Transaction;
-using Infrastructures.Data;
+using Infrastructures.DataAccess;
 using Microsoft.EntityFrameworkCore;
 
-namespace CoreBussiness.Implements
+namespace Infrastructures.Implements
 {
     public class CashService:ICashServiceImpl
     {

@@ -6,6 +6,7 @@ namespace Domains.Models.Transaction
     {
         public long CmdId { get; set; }
         public long? CmRefId { get; set; }
+        public Guid? CashmanagmentRefId { get; set; } 
         public long? TranRefId { get; set; }
         public int? BankRefId { get; set; }
         public int? BranchRefId { get; set; }

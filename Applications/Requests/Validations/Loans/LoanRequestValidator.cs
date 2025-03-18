@@ -12,7 +12,7 @@ public class LoanRequestValidator : AbstractValidator<LoanRequestDtoCreate>
         RuleFor(x => x.CurrencyRefId).NotEmpty().WithMessage("Please select currency.")
                                     .GreaterThan(0).WithMessage("Please select currency");
         RuleFor(x => x.AprovedUserId).NotEmpty().WithMessage("Please select Aproved User.")
-                                    .GreaterThan(0).WithMessage("Please select Aproved User");
+                                     .WithMessage("Please select Aproved User");
         RuleFor(x => x.RequestAmount).NotEmpty().WithMessage("Principle must be has value.")
                                      .GreaterThan(0).WithMessage("Principle value must be greater than Zero");
         RuleFor(x => x.AdminFeeRate).NotEmpty().WithMessage("AdminFee rate must has value.")

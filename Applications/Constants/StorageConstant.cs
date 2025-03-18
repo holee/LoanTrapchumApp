@@ -1,6 +1,6 @@
 ﻿using Applications.Constants.Others;
 using Applications.Responses.ViewModels.Options;
-using Domains.Models.Auth;
+using Domains.Models.Identity;
 
 namespace Applications.Constants
 {

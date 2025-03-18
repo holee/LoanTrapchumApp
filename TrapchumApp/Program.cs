@@ -1,10 +1,16 @@
 using Applications.DependencyInjections;
 using Applications.Extensions.Identity;
-using Infrastructures.DependencyInjections;
+using Applications.Validations;
+using Infrastructures.DependencyInjects;
+using Mapster;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Server.Circuits;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Radzen;
+using TrapchumApp;
 using TrapchumApp.Components;
 using TrapchumApp.Components.Account;
 var builder = WebApplication.CreateBuilder(args);
@@ -13,15 +19,19 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddRadzenComponents();
+builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddApplicationServices();
+builder.Services.AddValidationServiceInjections();
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-
+builder.Services.AddMapster();
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+builder.Services.AddScoped<UserServiceImpl>();
+builder.Services.TryAddEnumerable(ServiceDescriptor.Scoped<CircuitHandler, UserCircuitHandler>());
 
 var app = builder.Build();
 
@@ -39,10 +49,13 @@ else
 
 app.UseHttpsRedirection();
 
-
 app.UseAntiforgery();
 
 app.MapStaticAssets();
+
+//app.UseAuthentication();
+//app.UseAuthorization();
+
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
@@ -50,3 +63,11 @@ app.MapRazorComponents<App>()
 app.MapAdditionalIdentityEndpoints();
 
 app.Run();
+
+
+//builder.Services.AddScoped<CookieEvent>();
+//builder.Services.ConfigureApplicationCookie(options =>
+//{
+//    options.EventsType=typeof(CookieEvent);
+//builder.Services.AddScoped<IClaimsTransformation, MinimalClaimsTransformation>();
+//});

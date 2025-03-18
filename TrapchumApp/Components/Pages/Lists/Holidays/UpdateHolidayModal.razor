@@ -1,0 +1,104 @@
+﻿@using TCLMS.Shared.Entities.Dtos.Lists.Holidays
+<RadzenStack Orientation="Orientation.Horizontal"
+             AlignItems="AlignItems.Center">
+    <RadzenStack Orientation="Orientation.Horizontal" class="w-100">
+        <RadzenDatePicker Inline
+                          DateFormat="dd/MM/yyyy"
+                          Placeholder="select holiday date"
+                          @bind-Value="selectedDates"
+                          @bind-Value:format="yyyy/MM/dd"
+                          @bind-Value:after="SelectedDateChanged">
+        </RadzenDatePicker>
+    </RadzenStack>
+    <RadzenStack Orientation="Orientation.Horizontal" class="w-100">
+        <RadzenRow AlignItems="AlignItems.Center">
+            <RadzenColumn Size="2">
+                <RadzenLabel>Description</RadzenLabel>
+            </RadzenColumn>
+            <RadzenColumn Size="9">
+                <RadzenTextArea Rows="10"
+                                Placeholder="Descriptions"
+                                @bind-Value="model.Description" />
+            </RadzenColumn>
+            <RadzenColumn Size="1">
+                <div class="rz-p-12 rz-text-align-center">
+                    <RadzenCheckBox @bind-Value="model.Status" Name="IsActive" />
+                    <RadzenLabel Text="IsActive" Component="IsActive" Style="margin-left: 8px; vertical-align: middle;" />
+                </div>
+            </RadzenColumn>
+        </RadzenRow>
+    </RadzenStack>
+</RadzenStack>
+<RadzenStack Orientation="Orientation.Horizontal"
+             AlignItems="AlignItems.Center">
+    <table class="table table-sm">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Date</th>
+                <th>Descriptions</th>
+                <th>IsActive</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in listvm.OrderBy(e => e.HolidayName) ?? Enumerable.Empty<HolidayDto>())
+            {
+                var index = listvm.OrderBy(e => e.HolidayName).ToList().IndexOf(item) + 1;
+                <tr>
+                    <td>@index</td>
+                    <td>@item.HolidayName!.Value.ToString("dd/MM/yyyy")</td>
+                    <td>@item.Description</td>
+                    <td>
+                        <RadzenCheckBox TValue="bool?"
+                                        @bind-Value="item.Status" Disabled>
+                        </RadzenCheckBox>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</RadzenStack>
+
+<RadzenStack AlignItems="AlignItems.Center"
+             JustifyContent="JustifyContent.End">
+    <RadzenButton Text="Set"
+                  Icon="add"
+                  ButtonStyle="ButtonStyle.Success"
+                  Click="FormValidSubmit"
+                  Size="Radzen.ButtonSize.Small" />
+    <RadzenButton Text="Close"
+                  Icon="BtnIconType.None"
+                  ButtonStyle="ButtonStyle.Danger"
+                  Click="Close"
+                  Size="Radzen.ButtonSize.Small" />
+</RadzenStack>
+
+@code {
+    IReadOnlyList<DateTime?> selectedDates = [];
+    private IEnumerable<HolidayDto> listvm = new List<HolidayDto>();
+
+    private async void SelectedDateChanged()
+    {
+        if (selectedDates.Any())
+        {
+           // SelectedDate = selectedDates.OrderByDescending(x => x).FirstOrDefault();
+        }
+        else
+        {
+           // SelectedDate = null;
+        }
+
+       // await GetHolidays(SelectedDate);
+
+        if (listvm.Any())
+        {
+            selectedDates = listvm.Select(x => x.HolidayName).ToList();
+        }
+        else
+        {
+            selectedDates.ToList().Clear();
+        }
+
+
+    }
+}

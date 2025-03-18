@@ -4,7 +4,7 @@ using Domains.Models.Transaction;
 
 namespace Applications.Interfaces.setting
 {
-    public interface ISysServiceImpl
+    public interface ISysService 
     {
         Task<IEnumerable<CollateralType>> GetCollateralTypes(string? q = null);
         Task<IEnumerable<LoanTermType>> GetLoanTerms(string? q = null);

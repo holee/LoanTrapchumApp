@@ -3,12 +3,12 @@ using Applications.Responses;
 using Applications.Responses.ViewModels.Customers;
 using Dapper;
 using Domains.Models.Lists.Customers;
-using Infrastructures.Data;
+using Infrastructures.DataAccess;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace CoreBussiness.Implements
+namespace Infrastructures.Implements
 {
     public class CustomerIncomeExpendService : ICustomerIncomeExpendService
     {

@@ -1,4 +1,4 @@
-﻿using Applications.Enums;
+﻿using Applications.Enumerations;
 using Applications.Requests.Loans;
 using Applications.Requests.Loans.LoanRequests;
 using Applications.Responses;

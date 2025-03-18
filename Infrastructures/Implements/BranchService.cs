@@ -1,35 +1,27 @@
-﻿using Applications.Extensions.Identity;
+﻿using Applications.Constants.Tables;
 using Applications.Interfaces.Branches;
+using Applications.Requests.Lists.Entities;
 using Applications.Responses;
 using Applications.Responses.Paginations;
+using Applications.Responses.ViewModels.Auths;
 using Applications.Responses.ViewModels.Branches;
+using Dapper;
 using Domains.Models.Lists;
-using Infrastructures.Data;
-using Microsoft.AspNetCore.Identity;
+using Infrastructures.DataAccess;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructures.Implements;
 
-public class BranchService : IBranchService
+public class BranchService(ApplicationDbContext context, IDapperConnectionFactory dapperConnection) : IBranchService
 {
-    private readonly ApplicationDbContext _context;
-    private readonly UserManager<ApplicationUser> _userManager;
-    private readonly RoleManager<ApplicationRole> _roleManager;
-    public BranchService(ApplicationDbContext context,
-        UserManager<ApplicationUser> userManager,
-        RoleManager<ApplicationRole> roleManager)
-    {
-        _context = context;
-        _userManager = userManager;
-        _roleManager = roleManager;
-    }
     public async Task<Result> Create(Branch branch)
     {
         try
         {
-            _context.Branches.Add(branch);
+            context.Branches.Add(branch);
 
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
 
             return Result.Success("New branch was created.");
         }
@@ -40,20 +32,20 @@ public class BranchService : IBranchService
 
     }
 
-    public async Task<Result> Delete(int id)
+    public async Task<Result> DeleteAsync(int? id)
     {
         try
         {
-            var branch = await _context.Branches.AsNoTracking().Where(x => x.BranchId == id).FirstOrDefaultAsync();
+            var branch = await context.Branches.AsNoTracking().Where(x => x.BranchId == id).FirstOrDefaultAsync();
 
             if (branch is null)
             {
                 return Result.Failure<string>(ErrorResponse.NotFound("There is no branch found."));
             }
 
-            _context.Branches.Remove(branch);
+            context.Branches.Remove(branch);
 
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
 
             return Result.Success("One branch was delete");
         }
@@ -67,7 +59,7 @@ public class BranchService : IBranchService
     {
         try
         {
-            var existingBranch = _context.Branches.FirstOrDefault(x => x.BranchId == branch.BranchId);
+            var existingBranch = context.Branches.FirstOrDefault(x => x.BranchId == branch.BranchId);
 
 
             if (existingBranch is null)
@@ -80,9 +72,9 @@ public class BranchService : IBranchService
             }
 
 
-            _context.Entry(existingBranch).CurrentValues.SetValues(branch);
+            context.Entry(existingBranch).CurrentValues.SetValues(branch);
 
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
 
             return Result.Success("One branch was updated");
         }
@@ -93,11 +85,11 @@ public class BranchService : IBranchService
     }
 
 
-    public async Task<Result> UpdateStatusAsync(int branchId)
+    public async Task<Result> UpdateStatusAsync(int? branchId)
     {
         try
         {
-            var existingBranch = await _context.Branches.AsNoTracking().FirstOrDefaultAsync(x => x.BranchId == branchId);
+            var existingBranch = await context.Branches.AsNoTracking().FirstOrDefaultAsync(x => x.BranchId == branchId);
 
             if (existingBranch is null)
             {
@@ -106,9 +98,9 @@ public class BranchService : IBranchService
 
             existingBranch!.IsActive = existingBranch.IsActive ? false : true;
 
-            _context.Branches.Update(existingBranch);
+            context.Branches.Update(existingBranch);
 
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
 
             return Result.Success("Branch was updated successfully!");
 
@@ -118,9 +110,9 @@ public class BranchService : IBranchService
             return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
         }
     }
-    public async Task<Result<Branch>> GetBranchById(int id)
+    public async Task<Result<Branch>> GetBranchById(int? id)
     {
-        var branch = await _context.
+        var branch = await context.
                     Branches
                     .AsNoTracking()
                     .FirstOrDefaultAsync(x => x.BranchId == id);
@@ -137,7 +129,7 @@ public class BranchService : IBranchService
         bool includeInactive = false,
         string? filter = null)
     {
-        IQueryable<VBranch> query = _context.VBranchs.OrderByDescending(x => x.BranchName);
+        IQueryable<VBranch> query = context.VBranchs.OrderByDescending(x => x.BranchName);
 
         if (includeInactive)
         {
@@ -164,7 +156,7 @@ public class BranchService : IBranchService
 
     public async Task<Pager<VBranch>> GetBranchesAsync(QueryParam param)
     {
-        IQueryable<VBranch> query = _context.VBranchs;
+        IQueryable<VBranch> query = context.VBranchs;
 
         if (param.IsIncludeInActive == true)
             query = query.IgnoreQueryFilters();
@@ -191,7 +183,7 @@ public class BranchService : IBranchService
 
     public async Task<Result<IEnumerable<VBranch>>> GetBranchesAsync(int branchId = 0, int take = 0, string? filter = null)
     {
-        IQueryable<VBranch> queries = _context.VBranchs.OrderBy(x => x.BranchName);
+        IQueryable<VBranch> queries = context.VBranchs.OrderBy(x => x.BranchName);
 
         if (!queries.Any())
         {
@@ -215,26 +207,33 @@ public class BranchService : IBranchService
 
         return Result.Success<IEnumerable<VBranch>>(items);
     }
-    public async Task<Result<IEnumerable<VBranch>>> GetBranchesByUser(long userId, int branchId = 0)
+    public async Task<Result<IEnumerable<VBranch>>> GetBranchesByUser(string userId, int? branchId = 0)
     {
-        var user = await _userManager.FindByIdAsync(userId.ToString());
 
-        if (user is null)
+        if (string.IsNullOrEmpty(userId))
         {
             return Result.Failure<IEnumerable<VBranch>>(ErrorResponse.NotFound("No User found in the branch."));
         }
 
-        IQueryable<VBranch> queries = _context.VBranchs;
 
-        if (user.NameRefId > 0)
+        using var db = dapperConnection.CreateConnection();
+
+        var user = await db.QueryFirstAsync<VUser>($"SELECT * FROM {TableConstant.VUsers} WHERE id=@userId;", new
         {
-            queries = queries.Where(x => x.BranchId == user.BranchRefId);
+            UserId = userId,
+        });
+
+        IQueryable<VBranch> queries = context.VBranchs;
+
+        if (user.EmployeeId > 0)
+        {
+            queries = queries.Where(x => x.BranchId == branchId);
         }
 
         if (branchId > 0)
         {
 
-            queries = queries.Where(x => x.BranchId == user.BranchRefId);
+            queries = queries.Where(x => x.BranchId == branchId);
 
         }
 
@@ -242,9 +241,9 @@ public class BranchService : IBranchService
         return Result.Success<IEnumerable<VBranch>>(await queries.AsNoTracking().ToListAsync());
     }
 
-    public async Task<Result<ResultStatus>> GetBrachStatus(int branchRefId)
+    public async Task<Result<ResultStatus>> GetBrachStatus(int? branchRefId)
     {
-        var branch = await _context.VBranchs.Where(x => x.BranchId == branchRefId).FirstOrDefaultAsync();
+        var branch = await context.VBranchs.Where(x => x.BranchId == branchRefId).FirstOrDefaultAsync();
         if (branch is null)
         {
             return Result.Failure<ResultStatus>(ErrorResponse.NotFound("There is no any branch found."));
@@ -255,11 +254,11 @@ public class BranchService : IBranchService
     }
 
 
-    public async Task<Result<Branch>> GetBranchForVault(int id)
+    public async Task<Result<Branch>> GetBranchForVault(int? id)
     {
         try
         {
-            var branch = await _context.
+            var branch = await context.
                     Branches.IgnoreAutoIncludes()
                     .AsNoTracking()
                     .FirstOrDefaultAsync(x => x.BranchId == id);
@@ -277,5 +276,18 @@ public class BranchService : IBranchService
         }
     }
 
+    public async Task<Result<BranchDtoUpdate>> GetUpdateBranchById(int? branchId)
+    {
+        var existingBranch = await context.
+                    Branches
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(x => x.BranchId == branchId);
+        if (existingBranch is null)
+        {
+            return Result.Failure<BranchDtoUpdate>(ErrorResponse.NotFound("There is no any branch found."));
+        }
+        var item = existingBranch.Adapt<BranchDtoUpdate>();
 
+        return Result.Success(item);
+    }
 }

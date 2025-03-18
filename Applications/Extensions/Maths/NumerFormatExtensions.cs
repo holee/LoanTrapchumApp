@@ -1,23 +1,15 @@
-﻿namespace Applications.Extensions.Maths
+﻿using Microsoft.AspNetCore.Components;
+
+namespace Applications.Extensions.Maths
 {
     public static class NumerFormatExtensions
     {
 
-        public static string Format(this decimal? d, string formatter = "N2")
+        public static string FormatN(this decimal? d, string formatter)
         {
             var formatStringValue = d ?? 0;
             return string.Format($"{{0:{formatter}}}", formatStringValue);
 
         }
-
-        public static string Format(this decimal d, string formatter = "N2")
-        {
-            var formatStringValue = d;
-            return string.Format($"{{0:{formatter}}}", formatStringValue);
-
-        }
-
-
-
     }
 }

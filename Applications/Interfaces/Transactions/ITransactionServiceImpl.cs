@@ -1,7 +1,7 @@
 ﻿namespace Applications.Interfaces.Transactions
 {
-    public interface ITransactionServiceImpl  
+    public interface ITransactionService  
     {
-        Task<IEnumerable<dynamic>> GetAllTransactionsTypesAsync();   
+         
     }
 }

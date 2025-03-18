@@ -1,0 +1,11 @@
+﻿<RadzenPanelMenuItem Text="Operated Person" Icon="list_alt" Visible="@Visible">
+    <RadzenPanelMenuItem Text="Customers" Icon="group" Path="/App/Customers" />
+    <RadzenPanelMenuItem Text="Employees" Icon="person" Path="/App/Employees" />
+    <RadzenPanelMenuItem Text="Vendors" Icon="supervisor_account" Path="/App/Vendors" />
+    <RadzenPanelMenuItem Text="Guarantors" Icon="contact_page" Path="/App/Guarantors" />
+    <RadzenPanelMenuItem Text="Other Names" Icon="contacts" Path="/App/Guarantors" />
+</RadzenPanelMenuItem>
+@code {
+    [Parameter]
+    public bool Visible { get; set; } = false;
+}

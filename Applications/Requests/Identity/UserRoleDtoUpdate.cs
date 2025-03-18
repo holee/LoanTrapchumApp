@@ -2,10 +2,10 @@
 {
     public sealed class UserRoleDtoUpdate
     {
-        public long UserId { get; set; }
+        public string UserId { get; set; }
         public string RoleName { get; set; }
 
-        public UserRoleDtoUpdate(long userId, string roleName)
+        public UserRoleDtoUpdate(string userId, string roleName)
         {
             UserId = userId;
             RoleName = roleName;
@@ -13,8 +13,8 @@
 
         public UserRoleDtoUpdate()
         {
-            UserId = 0;
-            RoleName= string.Empty; 
+            UserId = string.Empty;
+            RoleName = string.Empty;
         }
     }
 

@@ -1,11 +1,12 @@
-﻿using Applications.Requests.Lists.Currency;
+﻿using Applications.Interfaces.Currencies;
+using Applications.Requests.Lists.Currency;
 using Applications.Responses;
+using Applications.Responses.Message;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Currencies;
-using Applications.Services;
 using Applications.Services.Currencies;
 using Domains.Models.Currencies;
-using Infrastructures.Data;
+using Infrastructures.DataAccess;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructures.Implements;
@@ -17,11 +18,11 @@ public class CurrencyService : ICurrencyService
     {
         _context = context;
     }
-    public async Task<Currency> GetCurrencyWithSpotRates(int id)
+    public async Task<Currency> GetCurrencyWithSpotRates(int? currencyId)
     {
         var currency = await _context.Currencies
                                     .Include(sp => sp.SpotRates)
-                                    .Where(c => c.CurrencyId == id)
+                                    .Where(c => c.CurrencyId == currencyId)
                                     .FirstOrDefaultAsync();
         return currency ?? default!;
     }
@@ -47,15 +48,18 @@ public class CurrencyService : ICurrencyService
             queries = queries.OrderByDescending(x => EF.Property<object>(x, param.SortColumn));
         }
 
-        queries = queries.Skip(param.PageIndex).Take(param.PageSize);
-
         var counts = await queries.CountAsync();
 
-        return new Pager<VCurrenciesList>(await queries.AsNoTracking().ToListAsync(), counts);
+        var items = await queries.Skip(param.PageIndex)
+                          .Take(param.PageSize)
+                          .AsNoTracking()
+                          .ToListAsync();
+
+        return new Pager<VCurrenciesList>(items, counts);
     }
 
 
-    public async Task<Result<VCurrenciesList>> GetCurrencyAsync(int currencyId)
+    public async Task<Result<VCurrenciesList>> GetCurrencyAsync(int? currencyId)
     {
         IQueryable<VCurrenciesList> queries = _context.VCurrenciesList
                                                     .Where(c => c.CurrencyId == currencyId);
@@ -81,7 +85,7 @@ public class CurrencyService : ICurrencyService
         return await queries.AsNoTracking().ToListAsync();
     }
 
-    public async Task<Result<IEnumerable<Currency>>> GetCurrencies(int currencyId,string? q=null)
+    public async Task<Result<IEnumerable<Currency>>> GetCurrencies(int? currencyId, string? q = null)
     {
         IQueryable<Currency> queries = _context.Currencies;
 
@@ -90,9 +94,9 @@ public class CurrencyService : ICurrencyService
             queries = queries.Where(x => EF.Functions.Like(x.Description, $"%{q}%"));
         }
 
-        if(currencyId > 0)
+        if (currencyId > 0)
         {
-            queries = queries.Where(x => x.CurrencyId==currencyId);
+            queries = queries.Where(x => x.CurrencyId == currencyId);
         }
 
         var currencies = await queries.AsNoTracking().ToListAsync();
@@ -144,7 +148,7 @@ public class CurrencyService : ICurrencyService
 
 
     }
-    public async Task<Result<Pager<VCurrencyNotes>>> GetCurrencyNotes(int currencyId, QueryParam param)
+    public async Task<Result<Pager<VCurrencyNotes>>> GetCurrencyNotes(int? currencyId, QueryParam param)
     {
         IQueryable<VCurrencyNotes> queries = _context.VCurrencyNotes
                                                       .Where(x => x.CurrencyRefId == currencyId);
@@ -229,7 +233,7 @@ public class CurrencyService : ICurrencyService
         }
 
     }
-    public async Task<Result> AddNote(int currencyId, CurrencyCounter model)
+    public async Task<Result> AddNote(int? currencyId, CurrencyCounter model)
     {
         try
         {
@@ -273,7 +277,7 @@ public class CurrencyService : ICurrencyService
     }
 
 
-    public async Task<Result> ActivateOrDeactivateNote(int noteId, NoteActivateDto model)
+    public async Task<Result> ActivateOrDeactivateNote(int? noteId, NoteActivateDto model)
     {
         try
         {
@@ -297,7 +301,7 @@ public class CurrencyService : ICurrencyService
 
     }
 
-    public async Task<Result<IEnumerable<VCurrencyNotes>>> GetCurrecyNotes(int branchId)
+    public async Task<Result<IEnumerable<VCurrencyNotes>>> GetCurrencyNotes(int? branchId)
     {
         var queries = _context.Database
                              .SqlQuery<VCurrencyNotes>($"SELECT * FROM fGetCurrencyNotesByBranch({branchId})");
@@ -312,7 +316,7 @@ public class CurrencyService : ICurrencyService
 
     }
 
-    public async Task<Result<IEnumerable<VCurrencyNotes>>> GetCurrecyNotes(int currencyId, int branchId)
+    public async Task<Result<IEnumerable<VCurrencyNotes>>> GetCurrencyNotes(int? currencyId, int? branchId)
     {
         var currencyQueries = _context.Database.SqlQuery<VCurrencyNotes>($"SELECT * FROM fGetCurrencyNotes({currencyId},{branchId})");
 
@@ -328,7 +332,7 @@ public class CurrencyService : ICurrencyService
     }
 
 
-    public async Task<IEnumerable<VCurrencyNotes>> GetCurrecyNotesss(int branchRefId)
+    public async Task<IEnumerable<VCurrencyNotes>> GetCurrecyNotesss(int? branchRefId)
     {
         var currencyNotes = _context.Database.SqlQuery<VCurrencyNotes>($"EXEC sprGetCurrencyNotes @branchId={branchRefId}");
 
@@ -336,5 +340,17 @@ public class CurrencyService : ICurrencyService
 
     }
 
+    public async Task<Result<Currency>> GetCurrencyById(int? id)
+    {
+        var currency = await _context.Currencies
+                                    .Where(x => x.CurrencyId == id)
+                                    .AsNoTracking()
+                                    .FirstOrDefaultAsync();
+        if (currency is null)
+        {
+            return Result.Failure<Currency>(ErrorResponse.NotFound(Messages.DataNotFound));
+        }
 
+        return Result.Success<Currency>(currency);
+    }
 }

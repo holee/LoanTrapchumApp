@@ -1,0 +1,25 @@
+﻿<tr @key="@Item" class="align-middle" id="@Id">
+    <td class="text-end">@Item.CurrencyNoteValue</td>
+    <td class="text-end">
+        @Item.QOnHand
+    </td>
+    <td>
+        <IntNumbers Min="0"
+                    @bind-Value="Item.Quantity"
+                    OnValueChanged="CalculateByQuantity" />
+    </td>
+    <td>
+        <TCNumbers Min="0"
+                   Format="@sp"
+                   OnValueChanged="CalculateByAmount"
+                   MouseLeave="MouseLeaved"
+                   @bind-Value="Item.TotalValue" />
+
+    </td>
+    <td class="text-end">
+        @Item.TotalQuantity
+    </td>
+    <td class="text-end">
+         @Item.TotalValue.Format(CurrencyId)
+    </td>
+</tr>

@@ -1,6 +1,6 @@
 ﻿using System.Security.Claims;
-using Applications.Enums;
 using Applications.Extensions.Identity.Authorizations.AuthorizeRequirements;
+using Applications.Extensions.Identity.Enumerations;
 using Microsoft.AspNetCore.Authorization;
 
 namespace Applications.Extensions.Identity.Authorizations.AuthorizeHandlers

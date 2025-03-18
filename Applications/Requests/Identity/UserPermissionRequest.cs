@@ -2,8 +2,8 @@
 
 namespace Applications.Requests.Identity;
 
-public class UserPermissionRequest(long userId, List<UserPermissionViewModel> permissions)
+public class UserPermissionRequest(string userId, List<UserPermissionViewModel> permissions)
 {
-    public long UserId { get; } = userId;
+    public string UserId { get; } = userId;
     public List<UserPermissionViewModel> Permissions { get; } = permissions;  
 }

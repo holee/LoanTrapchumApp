@@ -3,17 +3,19 @@ using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Departments;
 using Domains.Models.Lists;
-using Infrastructures.Data;
+using Infrastructures.DataAccess;
 using Microsoft.EntityFrameworkCore;
 
-namespace CoreBussiness.Implements;
+namespace Infrastructures.Implements;
 
 public class DepartmentService : IDepartmentService
 {
     private readonly ApplicationDbContext _context;
-    public DepartmentService(ApplicationDbContext app)
+    private readonly IDapperConnectionFactory dapperFactory;
+    public DepartmentService(ApplicationDbContext app, IDapperConnectionFactory dapperConnectionFactory)
     {
         this._context = app;
+        this.dapperFactory = dapperConnectionFactory;
     }
 
     public async Task<Result<string>> CreateAsync(Department req)

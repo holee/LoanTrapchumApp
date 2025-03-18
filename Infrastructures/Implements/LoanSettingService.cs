@@ -1,9 +1,9 @@
 ﻿using Applications.Interfaces.Loans;
 using Domains.Models.Loans;
-using Infrastructures.Data;
+using Infrastructures.DataAccess;
 using Microsoft.EntityFrameworkCore;
 
-namespace CoreBussiness.Implements
+namespace Infrastructures.Implements
 {
     public class LoanSettingService : ILoanSettingServiceImpl
     {

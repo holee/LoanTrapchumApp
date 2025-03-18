@@ -1,5 +1,4 @@
-﻿using Applications.Extensions.Identity;
-using Domains.Models.Auth;
+﻿
 using Microsoft.AspNetCore.Identity;
 
 namespace Applications.Extensions.Identity.Authorizations.Services

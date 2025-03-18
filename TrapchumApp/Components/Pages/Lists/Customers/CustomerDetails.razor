@@ -1,0 +1,385 @@
+﻿@page "/Customers/Details/{CustomerId:long}"
+@using TCLMS.Front.Components.Modals
+@using TCLMS.Front.Pages.Transactions.Loans.LoanRequests
+<SectionContent SectionName="Progressbar">
+    <RadzenProgressBar Value="100" ShowValue="false"
+                       Mode="ProgressBarMode.Indeterminate"
+                       Visible="IsLoading"
+                       ProgressBarStyle="ProgressBarStyle.Danger" />
+</SectionContent>
+<Containers Fluid CssClass="m-0 p-0">
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" class="mb-1">
+        <RadzenButton Icon="@collapseIcon"
+                      data-bs-toggle="collapse"
+                      data-bs-target="#collapseExample"
+                      aria-expanded="@collapse"
+                      aria-controls="collapseExample"
+                      Click="CollapseButton"
+                      Shade="Shade.Lighter"
+                      Size="Radzen.ButtonSize.ExtraSmall"
+                      ButtonStyle="ButtonStyle.Primary">
+        </RadzenButton>
+        <RadzenText TagName="TagName.H6">@Customer.AltName</RadzenText>
+    </RadzenStack>
+    <div class="card card-body rz-background-color-base-100 collapse show mt-0" id="collapseExample">
+        <RadzenRow>
+            <RadzenColumn Size="2">
+                <RadzenStack Orientation="Orientation.Vertical"
+                             AlignItems="AlignItems.Center"
+                             Wrap="FlexWrap.Wrap"
+                             class="rz-mx-auto"
+                             JustifyContent="JustifyContent.Center">
+                    <RadzenImage Path="@Customer.Photo"
+                                 Style="width:10rem;height:10rem;border-radius:50%;object-fit:cover;"
+                                 AlternateText="Customer">
+                    </RadzenImage>
+                    <RadzenStack AlignItems="AlignItems.Center"
+                                 Orientation="Orientation.Horizontal"
+                                 JustifyContent="JustifyContent.SpaceBetween">
+                        <LinkButton Path="@($"/Customers/{@CustomerId}/Update")"
+                                    Text="Edit" />
+                        <RadzenButton ButtonType="Radzen.ButtonType.Button"
+                                      Size="Radzen.ButtonSize.ExtraSmall"
+                                      Text="Delete"
+                                      Icon="delete"
+                                      ButtonStyle="ButtonStyle.Danger">
+                        </RadzenButton>
+                    </RadzenStack>
+                </RadzenStack>
+            </RadzenColumn>
+            <RadzenColumn Size="10">
+                <table class="table table-sm">
+                    <tbody>
+                        <tr>
+                            <th class="rz-background-color-base-100 w-25">Name</th>
+                            <td>
+                                @Customer!.AltName ( @Customer?.FullName )
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="rz-background-color-base-100 w-25">Salutation</th>
+                            <td>
+                                @Customer!.Salutation
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="rz-background-color-base-100 w-25">Phone</th>
+                            <td>
+                                @Customer.Phone
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="rz-background-color-base-100 w-25">Occupation</th>
+                            <td>
+                                @Customer?.Circle
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="rz-background-color-base-100 w-25">Address</th>
+                            <td>
+                                @Customer?.ToString()
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </RadzenColumn>
+        </RadzenRow>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <RadzenTabs RenderMode="TabRenderMode.Server"
+                        @bind-SelectedIndex:after="SelectedTabIndexChanged"
+                        @bind-SelectedIndex="selectedIndex">
+                <Tabs>
+                    <RadzenTabsItem Text="Loan Request">
+                        <RadzenDataGrid Data="VLoanRequests"
+                                        Responsive
+                                        Density="Density.Compact">
+                            <HeaderTemplate>
+                                <AuthorizeView Policy="@LoanRequestsPolicies.Request">
+                                    <Authorized>
+                                        <RadzenButton Icon="add"
+                                                      Click="AddLoanRequest"
+                                                      ButtonStyle="ButtonStyle.Primary"
+                                                      Size="Radzen.ButtonSize.Small"
+                                                      Text="Add Loan Request"></RadzenButton>
+                                    </Authorized>
+                                </AuthorizeView>
+                            </HeaderTemplate>
+                            <Columns>
+
+                            </Columns>
+                        </RadzenDataGrid>
+                    </RadzenTabsItem>
+                    <RadzenTabsItem Text="Collaterals">
+                        <CollateralsCustomer CustomerId="CustomerId" ShowAdd="true" />
+                    </RadzenTabsItem>
+                    <RadzenTabsItem Text="Income & Expense">
+                        <RadzenRow AlignItems="AlignItems.Center"
+                                   Gap="1rem">
+                            <RadzenColumn Size="6">
+                                <CustomerInc CustomerId="@CustomerId" ShowAdd="true" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="6">
+                                <CustomerExp CustomerId="@CustomerId" ShowAdd="true" />
+                            </RadzenColumn>
+                        </RadzenRow>
+                    </RadzenTabsItem>
+                    <RadzenTabsItem Text="Loan History">
+                        <RadzenDataGrid GridLines="DataGridGridLines.Both"
+                                        Responsive
+                                        Density="Density.Compact"
+                                        PagerHorizontalAlign="HorizontalAlign.Right"
+                                        AllowPaging="true"
+                                        PageSize="10"
+                                        AllowSorting="false"
+                                        Data="VLoanDisbursements">
+                            <Columns>
+                                <RadzenDataGridColumn Property="LoanDate"
+                                                      Title="#"
+                                                      Sortable="false">
+                                    <Template>
+
+                                    </Template>
+                                </RadzenDataGridColumn>
+                                <RadzenDataGridColumn Title="LoanDate"
+                                                      Context="c"
+                                                      Sortable="false">
+                                    <Template>
+                                        @c.RegisterDate!.Value.ToShortDateString()
+                                    </Template>
+
+                                </RadzenDataGridColumn>
+                                <RadzenDataGridColumn Title="Priciple"
+                                                      Context="c"
+                                                      Sortable="false">
+                                    <Template>
+                                        @c.Amount.Format(c.CurrencyId)
+                                    </Template>
+
+                                </RadzenDataGridColumn>
+                                <RadzenDataGridColumn Title="Interest"
+                                                      Sortable="false">
+                                    <Template>
+                                        @context.InterestRate
+                                    </Template>
+                                </RadzenDataGridColumn>
+                                <RadzenDataGridColumn Title="Fee"
+                                                      Context="c"
+                                                      Sortable="false">
+                                    <Template>
+                                        @c.CollectionFeeRate
+                                    </Template>
+                                </RadzenDataGridColumn>
+                                <RadzenDataGridColumn Title="Last Payment"
+                                                      Context="c"
+                                                      Sortable="false">
+                                    <Template>
+                                        @c.LastPaymentDate!.Value.ToShortDateString()
+                                    </Template>
+                                </RadzenDataGridColumn>
+                                <RadzenDataGridColumn Title="Statust"
+                                                      Context="c"
+                                                      Sortable="false">
+                                    <Template>
+                                        @c.LoanStatus
+                                    </Template>
+                                </RadzenDataGridColumn>
+                                <RadzenDataGridColumn Title="Action">
+                                </RadzenDataGridColumn>
+                            </Columns>
+                        </RadzenDataGrid>
+                    </RadzenTabsItem>
+                    <RadzenTabsItem Text="Activities">
+                        <h1>Activity</h1>
+                    </RadzenTabsItem>
+                    <RadzenTabsItem Text="Notes">
+                        <CustomerNotes AddNote="AddNote"
+                                       Notes="CustomerNotes"></CustomerNotes>
+                    </RadzenTabsItem>
+                </Tabs>
+            </RadzenTabs>
+        </div>
+        <div class="card-footer">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
+                         Gap="1rem"
+                         JustifyContent="JustifyContent.End">
+                <RadzenButton Text="Close"
+                              Icon="cancel"
+                              Click="CloseTab"
+                              ButtonStyle="ButtonStyle.Danger"
+                              Size="Radzen.ButtonSize.Small">
+                </RadzenButton>
+            </RadzenStack>
+        </div>
+    </div>
+</Containers>
+@code {
+    [CascadingParameter]
+    Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+    bool isCollateralTab = false;
+    RadzenTabs tabs = default!;
+    int selectedIndex = 0;
+    bool collapse = false;
+    bool IsLoading = false;
+    string collapseIcon = "expand_less";
+    void CollapseButton()
+    {
+        collapse = !collapse;
+        collapseIcon = collapse ? "expand_more" : "expand_less";
+    }
+    async void SelectedTabIndexChanged()
+    {
+        if (selectedIndex == 0)
+        {
+
+        }
+        if (selectedIndex == 1)
+        {
+            await GetCustomerCollateralLines();
+        }
+        if (selectedIndex == 2)
+        {
+            await GetCustomerIncomeAndExpense();
+        }
+        if (selectedIndex == 3)
+        {
+            await GetCustomerIncomeAndExpense();
+        }
+        if (selectedIndex == 4)
+        {
+            await GetCustomerLoanHistory();
+        }
+        if (selectedIndex == 5)
+        {
+            await GetCustomerNotes();
+        }
+
+        StateHasChanged();
+    }
+
+    async Task AddNote()
+    {
+        var auth = await AuthenticationState;
+        var userId = auth.User!.GetId();
+        await DialogService.OpenAsync<CustomerNoteAdd>("New Note", new Dictionary<string, object>
+            {
+                {"CustomerId",CustomerId},
+                { "UserId",userId}
+            });
+
+    }
+
+    protected async Task AddCollateral()
+    {
+        if (CustomerId == 0)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Please selected customer first");
+            return;
+        }
+
+        var parameters = new Dictionary<string, object> {
+            {"CustomerId", CustomerId }
+        };
+
+        var options = new DialogOptions
+            {
+                Width = "90vw",
+                Draggable = true,
+                Resizable = false
+            };
+
+
+        var result = await DialogService.OpenAsync<CollateralModalAdd>("Add Collateral", parameters, options);
+
+        if (bool.TryParse(result, out bool success) && success)
+        {
+            var collateral = await _collateralService.GetCollateralById(CustomerId);
+        }
+
+    }
+
+    protected async Task AddLoanRequest()
+    {
+        if (CustomerId == 0)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Please selected customer first");
+            return;
+        }
+        var auth = await AuthenticationState;
+        var branchId = auth.User.GetBranchId();
+        var userId = auth.User.GetId();
+        var uri = new Dictionary<string, object?>
+        {
+            {"BranchId",branchId},
+            {"UserId",userId}
+        }.AddQueryString($"/Loan/Request/{CustomerId}/Create");
+        NavigationManager.NavigateTo(uri);
+    }
+
+    async void OpenLoadRequestDialogue()
+    {
+        var auth = await AuthenticationState;
+        var branchId = auth.User.GetBranchId();
+        var userId = auth.User.GetId();
+        var param = new Dictionary<string, object>
+        {
+            {"BranchId",branchId},
+            {"UserId",userId},
+            {"CustomerId",CustomerId}
+        };
+        var options = new DialogOptions
+            {
+                Width = "90vw",
+                Resizable = true
+            };
+        await DialogService.OpenAsync<LoanRequestCreateModal>("Loan Request", param, options);
+    }
+
+
+
+
+
+}
+
+
+
+@* <RadzenDataGrid GridLines="DataGridGridLines.Both"
+                Responsive
+                TItem="VCollateralLines"
+                Density="Density.Compact"
+                Data="CollateralLines">
+    <HeaderTemplate>
+        <RadzenButton Icon="add"
+                      Click="AddCollateral"
+                      ButtonStyle="ButtonStyle.Primary"
+                      Size="Radzen.ButtonSize.Small"
+                      Text="Add Collaterals"></RadzenButton>
+    </HeaderTemplate>
+    <Columns>
+        <RadzenDataGridColumn Title="ReferenceNo"
+                              Context="c">
+            <Template>
+                @c.ReferenceNo
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="Type Name"
+                              Context="c">
+            <Template>
+                @c.TypeName
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="Owner Name"
+                              Context="c">
+            <Template>
+                @c.OwnerName
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="Location"
+                              Context="c">
+            <Template>
+                @c.Location
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid> *@

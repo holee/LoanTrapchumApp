@@ -4,10 +4,10 @@ using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Responses.ViewModels.Employees;
 using Domains.Models.Loans;
-using Infrastructures.Data;
+using Infrastructures.DataAccess;
 using Microsoft.EntityFrameworkCore;
 
-namespace CoreBussiness.Implements
+namespace Infrastructures.Implements
 {
     public class CreditAgentService : ICreditAgentService
     {
@@ -15,7 +15,7 @@ namespace CoreBussiness.Implements
 
         public CreditAgentService(ApplicationDbContext context)
         {
-            this._context = context;
+            _context = context;
         }
 
         public async Task<Result> AddCreditAgent(long employeeId, LoanCreditAgent req)

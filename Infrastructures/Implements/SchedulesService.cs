@@ -2,9 +2,9 @@
 using Applications.Responses;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Dapper;
-using Infrastructures.Data;
+using Infrastructures.DataAccess;
 
-namespace CoreBussiness.Implements
+namespace Infrastructures.Implements
 {
     public class SchedulesService : ISchedulesServiceImpl
     {

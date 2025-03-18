@@ -1,0 +1,126 @@
+﻿@page "/Customers/Guarantors/{Id:long}/Details"
+<PageTitle>Guarantor</PageTitle>
+<Containers Fluid>
+    <table class="table">
+        <tbody>
+            <tr>
+                <th class="rz-background-color-base-100 w-25">Name</th>
+                <td>
+                    @Guarantor.GuarantorName
+                </td>
+            </tr>
+            <tr>
+                <th class="rz-background-color-base-100 w-25">Sex</th>
+                <td>
+                    @Guarantor.Sex
+                </td>
+            </tr>
+            <tr>
+                <th class="rz-background-color-base-100 w-25">Phone</th>
+                <td>
+                    @Guarantor.Phone
+                </td>
+            </tr>
+            <tr>
+                <th class="rz-background-color-base-100 w-25">NumberOfLoan</th>
+                <td>
+                    @Guarantor.NumberOfLoan
+                </td>
+            </tr>
+            <tr>
+                <th class="rz-background-color-base-100 w-25 w-25">Address</th>
+                <td>
+                    @Guarantor.ToString()
+                </td>
+            </tr>
+            <tr>
+                <th class="rz-background-color-base-100">Status</th>
+                <td>
+                    <RadzenCheckBox Value="@Guarantor.IsActive" ReadOnly />
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <RadzenTabs>
+        <Tabs>
+            <RadzenTabsItem Text="Loans">
+                <RadzenDataGrid Responsive
+                                AllowAlternatingRows
+                                GridLines="DataGridGridLines.Both"
+                                TItem="VLoanGuarantors"
+                                Density="Density.Compact"
+                                Data="LoanGuarantors">
+                    <Columns>
+                        <RadzenDataGridColumn Title="#" Property="@(nameof(VLoanGuarantors.Id))" Context="g">
+                            <Template>
+                                @(LoanGuarantors.ToList().IndexOf(g) + 1)
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Title="CreditAgent" Property="@(nameof(VLoanGuarantors.CreditAgentKhmerName))" />
+                        <RadzenDataGridColumn Title="Customer" Property="@(nameof(VLoanGuarantors.CustomerKhmerName))" />
+                        <RadzenDataGridColumn Title="Installment" Property="@(nameof(VLoanGuarantors.InstallmentName))" />
+                        <RadzenDataGridColumn Title="Principle"
+                                              TextAlign="TextAlign.Right"
+                                              Property="@(nameof(VLoanGuarantors.Principle))" Context="g">
+                            <Template>
+                                @g.Principle.Format(g.CurrencyId)
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                              Title="#" Property="@(nameof(VLoanGuarantors.InterestRate))" />
+                        <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                              Title="#" Property="@(nameof(VLoanGuarantors.AdminFeeRate))" />
+                        <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                              Title="#" Property="@(nameof(VLoanGuarantors.CollectionFeeRate))" />
+                    </Columns>
+
+                </RadzenDataGrid>
+            </RadzenTabsItem>
+        </Tabs>
+    </RadzenTabs>
+    @if (ChildContent is not null)
+    {
+        <RadzenStack Orientation="Orientation.Horizontal"
+                     JustifyContent="JustifyContent.End"
+                     class="mt-2"
+                     Gap="1rem"
+                     AlignItems="AlignItems.Center">
+            @ChildContent
+        </RadzenStack>
+    }
+</Containers>
+<div class="container-fluid">
+</div>
+@code {
+    [Parameter] public long Id { get; set; }
+    [Parameter] public EventCallback Refresh { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    VGuarantor? Guarantor = new VGuarantor();
+    IEnumerable<VLoanGuarantors> LoanGuarantors = [];
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        var resultResponse = await _gService.GetGuarantor(Id, false, true);
+
+        if (resultResponse.IsSuccess)
+        {
+            Guarantor = resultResponse.Data!;
+            LoanGuarantors = resultResponse.Data!.LoanGuarantors;
+            return;
+        }
+
+        var message = resultResponse.Errors!.First();
+
+        NotificationService.Notify(NotificationSeverity.Error, message);
+    }
+
+    private async void Reload()
+    {
+        await OnInitializedAsync();
+
+        await Refresh.InvokeAsync();
+
+        StateHasChanged();
+    }
+}

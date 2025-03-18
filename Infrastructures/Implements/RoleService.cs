@@ -6,18 +6,15 @@ using Applications.Responses;
 using Applications.Responses.Auths;
 using Applications.Responses.ViewModels.Auths;
 using FluentValidation;
-using Infrastructures.Data;
+using Infrastructures.DataAccess;
 using Mapster;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace CoreBussiness.Implements;
+namespace Infrastructures.Implements;
 
 public class RoleService(
-    RoleManager<ApplicationRole> roleManager,
-    UserDataContext context,
-    IValidator<RoleCreateDto> validator)
-    : IRoleServiceImpl
+    RoleManager<ApplicationRole> roleManager, UserDataContext context, IValidator<RoleCreateDto> validator) : IRoleService
 {
     public async Task<Result> CreateAsync(RoleCreateDto role)
     {
@@ -26,7 +23,8 @@ public class RoleService(
         if (!validationResult.IsValid)
         {
             var errors = validationResult.Errors.Select(err => err.ErrorMessage).ToList();
-            return Result.Failure(ErrorResponse.Validation("400", errors));
+            var errString = string.Join(Environment.NewLine, errors);
+            return Result.Failure(ErrorResponse.Validation(errString));
         }
         var existingRole = await roleManager.FindByNameAsync(role.RoleName!);
 
@@ -46,8 +44,8 @@ public class RoleService(
         if (!result.Succeeded)
         {
             var errors = result.Errors.Select(x => x.Description).ToList();
-
-            return Result.Failure(ErrorResponse.Validation("400", errors));
+            var errString = string.Join(Environment.NewLine, errors);
+            return Result.Failure(ErrorResponse.Validation(errString));
 
         }
         return Result.Success();
@@ -83,7 +81,7 @@ public class RoleService(
         return Result.Success("Role permissions updated successfully.");
     }
 
-    public async Task<Result<IEnumerable<RoleDto>>> GetRolesAsync(string? id, string? name = null)
+    public async Task<Result<IEnumerable<RoleDto>>> GetRolesAsync(string? roleId = null, string? name = null)
     {
         var queries = roleManager.Roles
                                .Where(x => x.IsActive)
@@ -95,9 +93,9 @@ public class RoleService(
                                    Description = x.Description
                                });
 
-        if (!string.IsNullOrEmpty(id))
+        if (!string.IsNullOrEmpty(roleId))
         {
-            queries = queries.Where(x => x.Id == id);
+            queries = queries.Where(x => x.Id == roleId);
         }
 
         if (!string.IsNullOrEmpty(name))

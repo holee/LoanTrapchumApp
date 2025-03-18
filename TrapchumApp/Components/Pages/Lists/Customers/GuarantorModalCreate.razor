@@ -1,0 +1,148 @@
+﻿@using TCLMS.Shared.Entities.ViewModels.Vendors
+<div class="container-fluid">
+</div>
+<div>
+    <RadzenRow AlignItems="AlignItems.Center">
+        <RadzenButton Click="ShowGuarantorModal"
+                      Icon="add"
+                      Text="Add New Guarantor"
+                      ButtonStyle="ButtonStyle.Primary" Size="Radzen.ButtonSize.Small">
+        </RadzenButton>
+    </RadzenRow>
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
+        <div class="container-fluid">
+            <div class="input-group">
+                <span class="input-group-text"></span>
+                <RadzenDropDownDataGrid Data="Guarantors"
+                                        TValue="VGuarantorsAvailable"
+                                        Placeholder="Guarantor Name"
+                                        ValueChanged="SelectGuarantorChanged"
+                                        Value="selectedGuarantor"
+                                        TextProperty="@nameof(VGuarantorsAvailable.Name)"
+                                        ValueProperty="@nameof(VGuarantorsAvailable.Id)"
+                                        ValueExpression="@(()=>selectedGuarantor)">
+                </RadzenDropDownDataGrid>
+            </div>
+        </div>
+    </RadzenStack>
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Sex</th>
+                    <th>Phone</th>
+                    <th>Address</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in SelectedGuarantors!)
+                {
+                    var index = SelectedGuarantors!.ToList().IndexOf(item) + 1;
+                    <tr>
+                        <td>@index</td>
+                        <td>@item.Name</td>
+                        <td>@item.Sex</td>
+                        <td>@item.Phone</td>
+                        <td>@item.ProInKhmer</td>
+                        <td>
+                            <RadzenButton Variant="Variant.Outlined"
+                                          Size="Radzen.ButtonSize.Small"
+                                          Click="@(()=>RemoveGuarantor(item))"
+                                          Icon="delete"
+                                          ButtonStyle="ButtonStyle.Danger">
+                            </RadzenButton>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </RadzenStack>
+</div>
+<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
+             JustifyContent="JustifyContent.End">
+    <RadzenButton Size="Radzen.ButtonSize.Small"
+                  ButtonStyle="ButtonStyle.Success"
+                  Icon="check_circle"
+                  Text="Ok"
+                  Click="CloseModal">
+    </RadzenButton>
+    <RadzenButton Size="Radzen.ButtonSize.Small"
+                  ButtonStyle="ButtonStyle.Danger"
+                  Icon="cancel"
+                  Text="Close"
+                  Click="@(()=>DialogService.Close(false))">
+
+    </RadzenButton>
+</RadzenStack>
+@code {
+
+    private IEnumerable<VGuarantor> Guarantors = Enumerable.Empty<VGuarantor>();
+    [Parameter]
+    public HashSet<VGuarantorsAvailable>? SelectedGuarantors { get; set; } = new();
+    [Parameter]
+    public Func<HashSet<VGuarantorsAvailable>, Task<bool>> OnValidated { get; set; } = default!;
+    [Parameter]
+    public Func<HashSet<VGuarantorsAvailable>, Task> OnSucceed { get; set; } = default!;
+    VGuarantorsAvailable? selectedGuarantor;
+    bool isValid = false;
+    private VGuarantorsAvailable guarantor = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var gResponse = await _gService.GetGuarantors(0); //_customerService.GetGuarantorsAsync();
+     
+        if (gResponse.IsSuccess)
+        {
+            Guarantors = gResponse.Data!;
+        }
+        else
+        {
+            Guarantors = [];
+        }
+
+        await base.OnInitializedAsync();
+    }
+    Task<IEnumerable<VGuarantor>> SearchGuarantors(string? filter = null)
+    {
+        var guarantors = Guarantors.Where(x => x.GuarantorName!.ToLower().Contains(filter!.ToLower()));
+        return Task.FromResult(guarantors);
+    }
+
+    void CloseModal()
+    {
+        DialogService.Close(false);
+    }
+    void AddSelectedGuarantor()
+    {
+        if (selectedGuarantor is not null)
+        {
+            SelectedGuarantors!.Add(selectedGuarantor);
+            selectedGuarantor = null;
+        }
+        StateHasChanged();
+    }
+    void RemoveGuarantor(VGuarantorsAvailable g)
+    {
+        SelectedGuarantors!.Remove(g);
+        StateHasChanged();
+    }
+
+
+    void SelectGuarantorChanged(VGuarantorsAvailable guarantorsAvailable)
+    {
+        selectedGuarantor = guarantorsAvailable!;
+        Console.WriteLine(guarantorsAvailable!.Name);
+    }
+
+    async Task ShowGuarantorModal()
+    {
+        await DialogService.OpenAsync<GuarantorAddModal>("Guarantor");
+    }
+
+    bool IsSuccess = false;
+
+
+
+}

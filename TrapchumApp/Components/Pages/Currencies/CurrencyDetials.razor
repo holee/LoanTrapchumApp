@@ -1,0 +1,99 @@
+﻿@page "/Account/Currencies/{Id:int}"
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header">
+            <RadzenStack Orientation="Orientation.Horizontal"
+                         AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                <b>CURRENCY INFORMATION</b>
+                <input type="hidden" @bind="Currency!.CurrencyId" />
+                <RadzenButton Text="Close"
+                              Size="ButtonSize.ExtraSmall"
+                              Icon="back"
+                              ButtonStyle="ButtonStyle.Danger"
+                              Click="Close"></RadzenButton>
+            </RadzenStack>
+        </div>
+        <div class="card-body">
+            <RadzenStack AlignItems="AlignItems.Center">
+                <input type="hidden" @bind="Currency.CurrencyId" />
+                <div class="card">
+                    <div class="card-header">
+                        <RadzenRow AlignItems="AlignItems.Center">
+                            <RadzenColumn Size="6">
+                                <RadzenRow AlignItems="AlignItems.Center">
+                                    <RadzenColumn Size="3">
+                                        <RadzenLabel>Currency Name</RadzenLabel>
+                                    </RadzenColumn>
+                                    <RadzenColumn Size="6">
+                                        <RadzenTextArea @bind-Text="Currency.Description"
+                                                        Disabled />
+                                    </RadzenColumn>
+                                    <RadzenColumn Size="6">
+                                        <RadzenCheckBox TValue="bool" @bind-Value="Currency.IsActive" Disabled>
+                                            @(Currency.IsActive ? "Currency Is Active" : "Currency Is Inactive")
+                                        </RadzenCheckBox>
+                                    </RadzenColumn>
+                                </RadzenRow>
+                                <RadzenRow AlignItems="AlignItems.Center">
+                                    <RadzenColumn Size="6">
+                                        <RadzenLabel>Currency Code</RadzenLabel>
+                                    </RadzenColumn>
+                                    <RadzenColumn Size="6">
+                                        <RadzenTextBox @bind-Text="Currency.CurrencyCode"
+                                                       Disabled />
+                                    </RadzenColumn>
+                                </RadzenRow>
+                                <RadzenRow AlignItems="AlignItems.Center">
+                                    <RadzenColumn Size="6">
+                                        <RadzenCheckBox TValue="bool" @bind-Value="Currency.IsBaseCurrency" Disabled>
+                                            Is Base Currency
+                                        </RadzenCheckBox>
+                                    </RadzenColumn>
+                                </RadzenRow>
+                            </RadzenColumn>
+                        </RadzenRow>
+                    </div>
+                </div>
+            </RadzenStack>
+            <RadzenStack>
+                @if (!Currency!.IsBaseCurrency)
+                {
+                    <div class="card">
+                        <div class="card-header">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>As Of Date</th>
+                                        <th class="text-end">Spot Rate</th>
+                                        <th class="text-end">Buying Rate</th>
+                                        <th class="text-end">Selling Rate</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in currencySpotRates ?? Enumerable.Empty<CurrencyDtoSpotRate>())
+                                    {
+                                        var rowNumber = currencySpotRates?.IndexOf(item);
+                                        var colorClass = (item == selectedSpotRate) ? "table-success" : "";
+                                        <tr class="@(colorClass)"
+                                            style="cursor:pointer;" @onclick="@(()=>SelectedRow(item))">
+                                            <td>@(rowNumber + 1)</td>
+                                            <td>@item.TransactionDate?.ToString("dd/MM/yyyy")</td>
+                                            <td class="text-end">@item.SpotRate</td>
+                                            <td class="text-end">@item.BuyingRate</td>
+                                            <td class="text-end">@item.SellingRate</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                            <div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </RadzenStack>
+        </div>
+    </div>
+</div>
+
+

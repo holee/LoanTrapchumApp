@@ -1,0 +1,123 @@
+﻿<RadzenDataGrid GridLines="DataGridGridLines.Both"
+                Responsive
+                TItem="VCollateralLines"
+                Density="Density.Compact"
+                Style="--rz-grid-header-background-color:var(--rz-base-200);min-height:20rem;height:20rem;max-height:20rem;"
+                Data="CollateralLines">
+    <HeaderTemplate>
+        @if (ShowAdd)
+        {
+            <RadzenButton Size="Radzen.ButtonSize.Small"
+                          Click="Add"
+                          Icon="add"
+                          Text="Add New"
+                          ButtonStyle="ButtonStyle.Primary"></RadzenButton>
+        }
+    </HeaderTemplate>
+    <Columns>
+        <RadzenDataGridColumn Title="ReferenceNo" Property="ReferenceNo" Context="c" />
+        <RadzenDataGridColumn Title="Type Name" Property="TypeName" Context="c" />
+        <RadzenDataGridColumn Title="Owner Name" Property="OwnerName" Context="c" />
+        <RadzenDataGridColumn Title="Location" Property="Location" Context="c" />
+        <RadzenDataGridColumn Title="Hot Price" Context="c" TextAlign="TextAlign.Right">
+            <Template>
+                @c.HotPrice
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="Hot Price" Context="c" TextAlign="TextAlign.Right">
+            <Template>
+                @c.MarketPrice
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="Hot Price" Context="c" TextAlign="TextAlign.Right">
+            <Template>
+                @c.PawnPrice
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="Size" Property="Size" Sortable="false" />
+        <RadzenDataGridColumn Width="3rem" Title="Qty" Property="Quantity" Sortable="false" />
+        <RadzenDataGridColumn Width="3.5rem" Context="c" TextAlign="TextAlign.Center" Title="Status" Sortable="false">
+            <Template>
+                <RadzenSwitch @bind-Value="c.IsAvailable"
+                              Disabled></RadzenSwitch>
+            </Template>
+        </RadzenDataGridColumn>
+        @if (ShowCommand)
+        {
+            <RadzenDataGridColumn Width="3.5rem" Context="c" TextAlign="TextAlign.Center" Title="Status" Sortable="false">
+                <Template>
+                    <RadzenButton Size="Radzen.ButtonSize.ExtraSmall"
+                                  ButtonStyle="ButtonStyle.Primary"
+                                  Shade="Shade.Lighter"
+                                  Text="Add" />
+                </Template>
+            </RadzenDataGridColumn>
+        }
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+    [Parameter]
+    public long? CustomerId { get; set; } = 0;
+    [Parameter]
+    public bool ShowAdd { get; set; } = true;
+    [Parameter]
+    public bool ShowCommand { get; set; } = false;
+    [Parameter]
+    public EventCallback Reload { get; set; }
+
+    IEnumerable<VCollateralLines> CollateralLines = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetCustomerCollaterals();
+
+        await base.OnInitializedAsync();
+    }
+
+    async void Add()
+    {
+        if (CustomerId == 0)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Please selected customer first");
+            return;
+        }
+
+        var parameters = new Dictionary<string, object?> {
+
+            {"CustomerId", CustomerId }
+        };
+
+        var options = new DialogOptions
+            {
+                Width = "90vw",
+                Draggable = true,
+                Resizable = false
+            };
+
+
+        var result = await DialogService.OpenAsync<CollateralModalAdd>("Add Collateral", parameters, options);
+
+        if (bool.TryParse(result, out bool success) && success)
+        {
+            var collateral = await _collateralService.GetCollateralById(CustomerId);
+        }
+    }
+
+    async void CollateralReload()
+    {
+        await Reload.InvokeAsync();
+        await GetCustomerCollaterals();
+
+    }
+
+    async Task GetCustomerCollaterals()
+    {
+        var resp = await _customerService.GetCustomerCollateralLineAsync(CustomerId);
+
+        if (resp.IsSuccess)
+        {
+            CollateralLines = resp.Data!;
+        }
+    }
+}

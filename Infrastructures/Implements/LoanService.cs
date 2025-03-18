@@ -1,5 +1,5 @@
 ﻿using System.Data;
-using Applications.Enums;
+using Applications.Enumerations;
 using Applications.Interfaces.Loans;
 using Applications.Requests.Loans;
 using Applications.Responses;
@@ -11,12 +11,12 @@ using Dapper;
 using Domains.Models.Lists.CreditAgents;
 using Domains.Models.Loans;
 using Domains.Models.Transaction;
-using Infrastructures.Data;
+using Infrastructures.DataAccess;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace CoreBussiness.Implements
+namespace Infrastructures.Implements
 {
     public class LoanService : ILoanServiceImpl
     {

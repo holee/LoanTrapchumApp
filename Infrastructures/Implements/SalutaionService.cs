@@ -1,10 +1,10 @@
 ﻿using Applications.Interfaces.Lists;
 using Applications.Responses;
 using Domains.Models.Lists;
-using Infrastructures.Data;
+using Infrastructures.DataAccess;
 using Microsoft.EntityFrameworkCore;
 
-namespace CoreBussiness.Implements
+namespace Infrastructures.Implements
 {
     public class SalutaionService : ISalutationService
     {
@@ -17,8 +17,9 @@ namespace CoreBussiness.Implements
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(salutation.Title)) {
-                    return Result.Failure<string>(ErrorResponse.Validation("Title", ["Title field is required."]));                
+                if (string.IsNullOrWhiteSpace(salutation.Title))
+                {
+                    return Result.Failure<string>(ErrorResponse.Validation("Title field is required."));
                 }
                 var sal = await _context.Salutations.AnyAsync(x => x.Title == salutation.Title);
                 if (sal)
@@ -48,7 +49,7 @@ namespace CoreBussiness.Implements
 
                 if (id > 0)
                 {
-                    var result=await _context.Salutations.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+                    var result = await _context.Salutations.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
                     _context.Salutations.Remove(result!);
                     await _context.SaveChangesAsync();
                     return Result.Success(new string("Title was deleted."));
@@ -70,7 +71,7 @@ namespace CoreBussiness.Implements
                 queries = queries.Where(x => EF.Functions.Like(x.Title!, $"%{q}%") ||
                                              EF.Functions.Like(EF.Functions.Collate(x.Id.ToString(), "Khmer_100_CI_AI_SC_UTF8"), $"%{q}%"));
             }
-            var result= await queries.AsNoTracking().ToListAsync();
+            var result = await queries.AsNoTracking().ToListAsync();
 
             return Result.Success<IEnumerable<Salutation>>(result);
 

@@ -1,0 +1,73 @@
+﻿@using Applications.ApplicationPolicies
+@using Applications.Extensions.Identity.Authorizations.Extensions
+<RadzenPanelMenuItem Text="Loan Management" Icon="dataset" Visible="IsAdminOnly">
+    <RadzenPanelMenuItem Text="Guarantor" Icon="how_to_reg" Path="/App/Customers/Guarantors" />
+    <RadzenPanelMenuItem Text="Credit Officer" Icon="switch_account" Path="/App/Employees/CreditAgents" />
+    <RadzenPanelMenuItem Text="Loan Product" Icon="inventory_2" Path="/App/Loan/LoanProducts" />
+    <RadzenPanelMenuItem Text="Loan Category" Icon="lists" Path="/App/Loan/LoanCategories" />
+    <RadzenPanelMenuItem Text="Holidays" Icon="calendar_add_on" Path="/App/Holidays" />
+    <RadzenPanelMenuItem Text="Change Credit Agent" Icon="invert_colors" Path="@changeCreditUrl" />
+    <RadzenPanelMenuItem Text="Collaterals" Icon="invert_colors" Path="/App/Customer/Collaterals" />
+    <RadzenPanelMenuItem Text="Loan Request" Icon="request_quote" Path="@loanRequestUrl" />
+    <RadzenPanelMenuItem Text="Customers" Icon="group" Path="/App/Customers" />
+</RadzenPanelMenuItem>
+<RadzenPanelMenuItem Text="Loan Management" Icon="dataset" Visible="@(IsAccountOnly && BranchState)">
+    <RadzenPanelMenuItem Text="Loans"
+                         Icon="lists" Path="@($"/App/Loans?BranchId={BranchId}&UserId={UserId}")" />
+    <RadzenPanelMenuItem Text="Schedules" Icon="schedule" Path="@clientDuePayUrl" />
+    <RadzenPanelMenuItem Text="Loan Write Off" Icon="person_off" Path="/App/Loans/WriteOff" />
+    <RadzenPanelMenuItem Text="Loan Request"
+                         Visible="canReadLoanRequest"
+                         Icon="request_quote" Path="@loanRequestUrl" />
+    <RadzenPanelMenuItem Text="Customers" Icon="group" Path="/App/Customers" />
+</RadzenPanelMenuItem>
+<RadzenPanelMenuItem Text="Loan Management" Icon="dataset" Visible="@IsCreditAgentOnly">
+    <RadzenPanelMenuItem Text="Loan Request"
+                         Visible="canReadLoanRequest"
+                         Icon="request_quote" Path="@loanRequestUrl" />
+    <RadzenPanelMenuItem Text="Customers" Icon="group" Path="/App/Customers" />
+</RadzenPanelMenuItem>
+<RadzenPanelMenuItem Text="Loan Management" Icon="dataset" Visible="@IsManagerOnly">
+    <RadzenPanelMenuItem Text="Loan Request"
+                         Visible="canReadLoanRequest"
+                         Icon="request_quote" Path="@loanRequestUrl" />
+</RadzenPanelMenuItem>
+@code {
+    [Parameter] public int BranchId { get; set; } = 0;
+    [Parameter] public string UserId { get; set; } = string.Empty;
+    [Parameter] public bool BranchState { get; set; } = false;
+    [CascadingParameter] private Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+    string loanRequestUrl = "";
+    string changeCreditUrl = "";
+    string clientDuePayUrl = "";
+    bool IsAccountOnly = false;
+    bool IsAdminOnly = false;
+    bool IsCreditAgentOnly = false;
+    bool IsManagerOnly = false;
+    bool canReadLoanRequest = false;
+    protected override void OnParametersSet()
+    {
+        changeCreditUrl = $"/App/Loan/CreditAgent/Changed?BranchId={BranchId}&UserId={UserId}";
+        loanRequestUrl = $"/App/Loan/Request/?BranchId={BranchId}&UserId={UserId}";
+        clientDuePayUrl = $"/App/Loans/Schedules?BranchId={BranchId}&UserId={UserId}";
+        base.OnParametersSet();
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await AuthenticationState;
+
+        var user = state.User;
+
+        IsAccountOnly = await _authorizeService.MustHasPermissionAsync(user, Policies.AccountOnly);
+
+        IsAdminOnly = await _authorizeService.MustHasPermissionAsync(user, Policies.AdminOnly);
+
+        IsCreditAgentOnly = await _authorizeService.MustHasPermissionAsync(user, Policies.CreditOfficerOnly);
+
+        IsManagerOnly = await _authorizeService.MustHasPermissionAsync(user, Policies.ManagerOnly);
+
+        canReadLoanRequest = await _authorizeService.MustHasPermissionAsync(user, AppPermission.RuleFor(Modules.LoanRequest, Feature.Read));
+
+        await base.OnInitializedAsync();
+    }
+}

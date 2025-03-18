@@ -34,7 +34,7 @@ public sealed class LoanRequestDtoCreate
     public decimal? CollectionFeeRate { get; set; }
     public int? Circle { get; set; } = 1;
     public int? ApprovalLevel { get; set; }
-    public long? AprovedUserId { get; set; }
+    public string? AprovedUserId { get; set; }
     public DateTime? AprovedDate { get; set; } = DateTime.UtcNow;
     public string? ApprovedBy { get; set; }
     public string? Summiter { get; set; }

@@ -1,13 +1,14 @@
 ﻿using Applications.Interfaces.Transactions;
 using Applications.Responses;
+using Applications.Responses.Message;
 using Applications.Responses.ViewModels.Currencies;
 using Domains.Models.Transaction;
-using Infrastructures.Data;
+using Infrastructures.DataAccess;
 using Microsoft.EntityFrameworkCore;
 
-namespace CoreBussiness.Implements
+namespace Infrastructures.Implements
 {
-    public class CashVaultService : ICashVaultServiceImpl
+    public class CashVaultService : ICashVaultService
     {
         private readonly ApplicationDbContext _context;
 
@@ -55,7 +56,7 @@ namespace CoreBussiness.Implements
             }
         }
 
-        public async Task<IEnumerable<ViewModelCurrencyNotes>> GetCurrencyNotesAsync(int branchId)
+        public async Task<IEnumerable<ViewModelCurrencyNotes>> GetCurrencyNotesAsync(int? branchId)
         {
             IQueryable<ViewModelCurrencyNotes> results = _context.Database.SqlQuery<ViewModelCurrencyNotes>($@"SELECT * FROM fGetCurrencyNotesByBranch({branchId})");
             var notes = await results.Where(x => x.IsActive == true)
@@ -84,6 +85,19 @@ namespace CoreBussiness.Implements
 
         }
 
+        public async Task<Result<IEnumerable<VCashVaults>>> GetCashVaultsAsync(int? branchId)
+        {
+            var results = await _context.Database
+                                                 .SqlQuery<VCashVaults>($@"SELECT * FROM VCashVaults")
+                                                 .Where(x => x.BankRefId == branchId)
+                                                 .AsNoTracking()
+                                                 .ToListAsync();
+            if (!results.Any())
+            {
+                return Result.Failure<IEnumerable<VCashVaults>>(ErrorResponse.NotFound(Messages.DataNotFound));
+            }
 
+            return Result.Success<IEnumerable<VCashVaults>>(results);
+        }
     }
 }

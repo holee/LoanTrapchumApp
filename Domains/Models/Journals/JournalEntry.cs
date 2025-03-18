@@ -5,6 +5,8 @@ namespace Domains.Models.Journals;
 public class JournalEntry:BaseEntity
 {
     public long JournalId { get; set; }
+    public Guid JournalEntryId { get; set; }
+    public Guid? TransactionsRefId { get; set; }
     public Guid? JournalCode { get; set; }=Guid.NewGuid();
     public int? BranchRefId { get; set; }
     public int? BankRefId { get; set; } 

@@ -33,7 +33,7 @@ public sealed class VEmployees
     public string? BranchName { get; set; } = string.Empty;
     public int? DepartmentId { get; set; }
     public string? DepartmentName { get; set; } = string.Empty;
-    public long? UserId { get; set; }
+    public string? UserId { get; set; }
     public string? UserName { get; set; }
     public override string ToString()
     {

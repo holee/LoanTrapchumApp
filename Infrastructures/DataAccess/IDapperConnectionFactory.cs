@@ -1,6 +1,6 @@
 using System.Data;
 
-namespace Infrastructures.Data;
+namespace Infrastructures.DataAccess;
 
 public interface IDapperConnectionFactory
 {

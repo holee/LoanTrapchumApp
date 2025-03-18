@@ -6,6 +6,7 @@ namespace Domains.Models.Loans;
 public sealed class LoanRequest : BaseEntity
 {
     public long Id { get; set; }
+    public Guid LoanRequestId { get; set; }
     public long? CustomerRefId { get; set; }
     public int? LoanRequestStatusRefId { get; set; }
     public int? BranchRefId { get; set; }

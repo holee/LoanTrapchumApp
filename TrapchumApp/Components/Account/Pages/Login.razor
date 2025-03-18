@@ -1,16 +1,14 @@
 ﻿@page "/Account/Login"
-
+<PageTitle>Login</PageTitle>
+@attribute [AllowAnonymous]
 @using System.ComponentModel.DataAnnotations
 @using Applications.Interfaces.Branches
+@using Applications.Interfaces.Identity
 @using Microsoft.AspNetCore.Authentication
 @using Microsoft.AspNetCore.Identity
 @layout EmptyLayout
-@inject SignInManager<ApplicationUser> SignInManager
 @inject ILogger<Login> Logger
-@inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
-@inject ILoginServiceImpl loginService
-<PageTitle>Log in</PageTitle>
 <RadzenCard Style="background-color: #eeeeee94;">
     <RadzenStack Style="text-align:center;width:100%;">
         <RadzenImage Path="/assets/logo/tch_Logo.png" Text="Company Logo" />

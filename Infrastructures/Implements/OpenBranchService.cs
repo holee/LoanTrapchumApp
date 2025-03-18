@@ -2,16 +2,17 @@
 using Applications.Responses;
 using Applications.Responses.ViewModels.Currencies;
 using Domains.Models.Transaction;
-using Infrastructures.Data;
+using Infrastructures.DataAccess;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 
-namespace CoreBussiness.Implements
+namespace Infrastructures.Implements
 {
-    public class OpenBranchService(ApplicationDbContext context) : IOpenBranchServiceImpl
+    public class OpenBranchService(ApplicationDbContext context) : IOpenBranchService
     {
 
 
-        public async Task<Result<IEnumerable<VCashVaultBalance>>> GetCashVaultBalance(int branchRefId)
+        public async Task<Result<IEnumerable<VCashVaultBalance>>> GetCashVaultBalance(int? branchRefId)
         {
             var queries = await context.Database
                             .SqlQuery<VCashVaultBalance>($"SELECT * FROM VCashVaultBalances WHERE BranchRefId={branchRefId}")
@@ -35,11 +36,12 @@ namespace CoreBussiness.Implements
             return Result.Success<IEnumerable<VCashVaultBalance>>(queries);
         }
 
-        public async Task<Result<string>> OpenBranchAsync(LoanTransaction transaction)
+        public async Task<Result<string>> OpenBranchAsync(LoanTransaction tranx)
         {
 
             try
             {
+                var transaction = tranx.Adapt<LoanTransaction>();
                 transaction.TransactionDate = DateTime.UtcNow;
                 context.LoanTransaction.Add(transaction);
                 await context.SaveChangesAsync();
@@ -58,6 +60,7 @@ namespace CoreBussiness.Implements
 
             try
             {
+
                 var branchId = transaction.OpenBranch!.BranchRefId!.Value;
                 var closeDate = transaction.TransactionDate!.Value;
                 if (!(await IsAllreadyVaultIn(branchId, closeDate)))

@@ -1,7 +1,9 @@
 ﻿using Applications.Interfaces.Addresses;
+using Applications.Requests.Lists.Addreses;
 using Applications.Responses;
 using Domains.Models.Addresses;
-using Infrastructures.Data;
+using Infrastructures.DataAccess;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructures.Implements;
@@ -14,7 +16,7 @@ public class AddressService : IAddressService
     {
         _context = context;
     }
-    public async Task<IEnumerable<Province>> GetsProvinces(string? expression)
+    public async Task<IEnumerable<ProvinceDto>> GetsProvinces(string? expression)
     {
         IQueryable<Province> query = _context.Provinces;
 
@@ -24,30 +26,48 @@ public class AddressService : IAddressService
             x.ProInKhmer != null && x.ProInKhmer.Contains(expression) ||
             x.ProDescription != null && x.ProDescription.Contains(expression));
         }
-        return await query.AsNoTracking().ToListAsync();
+
+
+        var items = await query.ProjectToType<ProvinceDto>()
+                        .AsNoTracking()
+                       .ToListAsync();
+
+        return items;
     }
-    public async Task<Province?> GetsProvinceById(int id)
+    public async Task<Province?> GetsProvinceById(int? id)
     {
         IQueryable<Province> query = _context.Provinces;
         return await query.AsNoTracking().FirstOrDefaultAsync(x => x.ProvinceId == id);
     }
 
-    public async Task<IEnumerable<District>> GetDistrictsByProvince(int provinceId)
+    public async Task<IEnumerable<DistrictDto>> GetDistrictsByProvinceId(int? provinceId)
     {
-        IQueryable<District> query = _context.Districts.Where(x => x.ProvinceRefId == provinceId);
-        return await query.AsNoTracking().ToListAsync();
+        var queries = await _context.Districts
+                                .Where(x => x.ProvinceRefId == provinceId)
+                                .ProjectToType<DistrictDto>()
+                                .AsNoTracking()
+                                .ToListAsync();
+        return queries;
     }
 
-    public async Task<IEnumerable<Commune>> GetCommunesByDistrict(int districtId)
+    public async Task<IEnumerable<CommuneDto>> GetCommunesByDistrictId(int? districtId)
     {
-        IQueryable<Commune> query = _context.Communes.Where(x => x.DistrictRefId == districtId);
-        return await query.AsNoTracking().ToListAsync();
+        var queries = await _context.Communes
+                            .Where(x => x.DistrictRefId == districtId)
+                            .ProjectToType<CommuneDto>()
+                            .AsNoTracking()
+                            .ToListAsync();
+        return queries;
     }
 
-    public async Task<IEnumerable<Village>> GetVillagesByCommune(int communeId)
+    public async Task<IEnumerable<VillageDto>> GetVillagesByCommuneId(int? communeId)
     {
-        IQueryable<Village> query = _context.Villages.Where(x => x.CommuneRefId == communeId);
-        return await query.AsNoTracking().ToListAsync();
+        var queries = await _context.Villages
+                        .Where(x => x.CommuneRefId == communeId)
+                        .ProjectToType<VillageDto>()
+                        .AsNoTracking()
+                        .ToListAsync();
+        return queries;
     }
 
     public async Task<IEnumerable<Country>> GetCountries(string? searchText = null)
@@ -114,7 +134,7 @@ public class AddressService : IAddressService
     }
 
 
-    public async Task<IEnumerable<Country>> GetCountries(int countryId)
+    public async Task<IEnumerable<Country>> GetCountries(int? countryId)
     {
         IQueryable<Country> query = _context.Countries;
 

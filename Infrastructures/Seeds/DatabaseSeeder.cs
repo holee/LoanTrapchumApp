@@ -1,9 +1,9 @@
 ﻿using Applications.Constants.Authentications;
 using Applications.Constants.Authorizations;
-using Applications.Enums;
 using Applications.Extensions.Identity;
+using Applications.Extensions.Identity.Enumerations;
 using Applications.Helpers;
-using Infrastructures.Data;
+using Infrastructures.DataAccess;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 

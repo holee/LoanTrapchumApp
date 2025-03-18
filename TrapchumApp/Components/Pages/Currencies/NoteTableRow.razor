@@ -1,0 +1,18 @@
+﻿@using Applications.Responses.ViewModels.Currencies
+<tr>
+    <td>@(RowNumber + 1)</td>
+    <td>
+        <input @bind="Item.Id" type="hidden" />
+        @Item?.CurrencyName
+    </td>
+    <td>@Item?.CurrencyCode</td>
+    <td>@((int?)Item?.CurrencyValue)</td>
+    <td>@(Item?.Quantity ?? 0)</td>
+    <td>@Item?.Description</td>
+    <td>
+        <RadzenSwitch @bind-Value:after="makeInactiveOrActive"
+                      @bind-Value="Item.IsActive" />
+    </td>
+</tr>
+
+

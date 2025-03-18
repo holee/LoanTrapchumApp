@@ -1,0 +1,138 @@
+﻿<div class="card">
+    <div class="card-header bg-primary">
+        <div class="d-flex justify-content-between">
+            <span>New Employee</span>
+            <strong @onclick="CloseTab" class="text-danger" style="cursor:pointer">X</strong>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table">
+                <tbody>
+                    <tr>
+                        <th class="w-25 rz-background-color-base-100">Name</th>
+                        <td>
+                            @Model!.FirstName @Model!.LastName
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="w-25 rz-background-color-base-100">Date Of Birth</th>
+                        <td>
+                            @string.Format("{0:dd-MMM-yyyy}", Model?.DateOfBirth)
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="w-25 rz-background-color-base-100">Gender</th>
+                        <td>
+                            @Model?.Gender
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="w-25 rz-background-color-base-100">Marrital Status</th>
+                        <td>
+                            @Model?.MarritalStatus
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="w-25 rz-background-color-base-100">Nationality</th>
+                        <td>
+                            @Model?.Nationality
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="w-25 rz-background-color-base-100">Phone</th>
+                        <td>
+                            @Model?.Phone / @Model?.AltPhone (Alt Phone)
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="w-25 rz-background-color-base-100"> Email</th>
+                        <td>
+                            @Model?.EmailAddress
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="w-25 rz-background-color-base-100">Address</th>
+                        <td>
+                            @Model?.ProInKhmer @Model?.DisInKhmer @Model?.ComInKhmer @Model?.VilInKhmer
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="w-25 rz-background-color-base-100">Hire Date</th>
+                        <td>
+                            @string.Format("{0:dd MMM yyyy}", Model?.HireDate)
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="w-25 rz-background-color-base-100">End Date</th>
+                        <td>
+                            @string.Format("{0:dd MMM yyyy}", Model?.EndDate)
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="w-25 rz-background-color-base-100">Job Title</th>
+                        <td>
+                            @Model?.Occupation
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="w-25 rz-background-color-base-100">Department</th>
+                        <td>
+                            @Model?.Department?.DepartmentName
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="w-25 rz-background-color-base-100">Branch</th>
+                        <td>
+                            @Model?.Branch?.BranchName
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <th class="w-25 rz-background-color-base-100">Description</th>
+                        <td>
+                            @Model?.Description
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer">
+        <div class="d-flex justify-content-between">
+            <div>
+                <label class="text-muted">Created: @string.Format("{0:dd MMM yyyy hh:mm tt}", Model?.CreatedDT) Modified: @string.Format("{0:dd MMM yyyy hh:mm tt}", Model?.ModifiedDT)</label>
+            </div>
+            <div>
+                <RadzenButton Text="Cancel"
+                              Icon="close"
+                              Click="CloseTab"
+                              Size="Radzen.ButtonSize.Small"
+                              ButtonStyle="ButtonStyle.Danger"
+                              ButtonType="Radzen.ButtonType.Button" />
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+
+
+@code {
+    string? imageFile = "";
+    [Parameter]
+    public EventCallback Close { get; set; }
+    [Parameter]
+    public EventCallback Edit { get; set; }
+    [Parameter]
+    public EmployeeDto? Model { get; set; } = new();
+    async Task CloseTab()
+    {
+        await Close.InvokeAsync();
+    }
+    async Task EditTab()
+    {
+        await Edit.InvokeAsync();
+    }
+}
+

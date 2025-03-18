@@ -4,6 +4,7 @@
     {
         public long OpenBranchId { get; set; }
         public long? TranRefId { get; set; }
+        public Guid? TransactionRefId { get; set; }
         public int? BankRefId { get; set; } 
         public int? BranchRefId { get; set; }
         public long? LoginLogId { get; set; }

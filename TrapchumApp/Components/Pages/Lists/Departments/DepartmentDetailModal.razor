@@ -1,0 +1,31 @@
+﻿<div class="container-fluid">
+    <RadzenStack Orientation="Radzen.Orientation.Horizontal"
+                 AlignItems="AlignItems.Center">
+        <table class="table table-sm">
+            <tbody>
+                <tr>
+                    <th class="table-light">Name</th>
+                    <td>@department!.DepartmentName</td>
+                </tr>
+                <tr>
+                    <th class="table-light">Description</th>
+                    <td>@department!.Description</td>
+                </tr>
+            </tbody>
+        </table>
+    </RadzenStack>
+    <RadzenStack Orientation="Radzen.Orientation.Horizontal"
+                 AlignItems="AlignItems.Center"
+                 JustifyContent="Radzen.JustifyContent.End">
+        <RadzenButton ButtonStyle="ButtonStyle.Danger"
+                      Icon="cancel"
+                      Text="Close"
+                      Click="@(()=>DialogService.Close(false))"
+                      Variant="Variant.Flat"
+                      Size="Radzen.ButtonSize.Small">
+        </RadzenButton>
+    </RadzenStack>
+</div>
+
+
+

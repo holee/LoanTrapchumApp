@@ -4,12 +4,12 @@ using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Currencies;
 using Domains.Models.Currencies;
-using Infrastructures.Data;
+using Infrastructures.DataAccess;
 using Microsoft.EntityFrameworkCore;
 
-namespace CoreBussiness.Implements;
+namespace Infrastructures.Implements;
 
-public class SpotRateService : ISpotRateServiceImpl
+public class SpotRateService : ISpotRateService
 {
 
     private readonly ApplicationDbContext _context;

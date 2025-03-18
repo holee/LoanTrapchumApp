@@ -1,5 +1,5 @@
 ﻿using System.Data;
-using Applications.Enums;
+using Applications.Enumerations;
 using Applications.Interfaces.Loans;
 using Applications.Requests.Loans;
 using Applications.Responses;
@@ -9,12 +9,12 @@ using Applications.Responses.ViewModels.Loans.Schedules;
 using Dapper;
 using Domains.Models.Loans;
 using Domains.Models.Transaction;
-using Infrastructures.Data;
+using Infrastructures.DataAccess;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 
-namespace CoreBussiness.Implements;
-public class LoanPaymentService : ILoanPaymentServiceImpl
+namespace Infrastructures.Implements;
+public class LoanPaymentService : ILoanPaymentService
 {
     private readonly ApplicationDbContext _context;
     public LoanPaymentService(ApplicationDbContext context)

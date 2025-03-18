@@ -1,6 +1,6 @@
 ﻿using Applications.Interfaces.Banks;
 using Domains.Models.Currencies;
-using Infrastructures.Data;
+using Infrastructures.DataAccess;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructures.Implements

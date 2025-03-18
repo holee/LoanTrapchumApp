@@ -18,10 +18,10 @@ public sealed class ForeignExchangeDtoCreate
     public decimal? SpotRate { get; set; }
     public int? GainAndLostLedgerRefId { get; set; }
     public decimal? GainAndLostAmount { get; set; }
-    public int? FxepaLedgerRefId { get; set; }
-    public decimal? FxepaAmount { get; set; }
-    public int? FxpaLedgerRefId { get; set; }
-    public decimal? FxpaAmount { get; set; }
+    public int? FXEPA_LedgerRefId { get; set; }
+    public decimal? FXEPA_Amount { get; set; }
+    public int? FXPA_LedgerRefId { get; set; }
+    public decimal? FXPA_Amount { get; set; }
     public string? Remark { get; set; }
 
 }

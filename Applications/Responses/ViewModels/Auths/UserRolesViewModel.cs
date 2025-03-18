@@ -2,7 +2,12 @@
 {
     public class UserRolesViewModel
     {
-        public UserRolesViewModel(){}
+        public UserRolesViewModel()
+        {
+            RoleId = string.Empty;
+            RoleName = string.Empty;
+            IsSelected = false;
+        }
         public UserRolesViewModel(string roleId, string userId, string? roleName, bool isSelected)
         {
             RoleId = roleId;

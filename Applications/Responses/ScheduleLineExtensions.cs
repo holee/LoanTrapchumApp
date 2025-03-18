@@ -1,6 +1,7 @@
-﻿using Applications.Enums;
+﻿using Applications.Enumerations;
 using Applications.Requests.Loans;
-namespace Domains.Models.Loans;
+using Domains.Models.Loans;
+namespace Applications.Responses;
 
 public static class ScheduleLineExtensions
 {

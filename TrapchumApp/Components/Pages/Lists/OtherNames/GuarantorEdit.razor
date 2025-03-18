@@ -1,0 +1,406 @@
+﻿@using TCLMS.Shared.Entities.Dtos.Lists.OtherNames
+<EditForm Model="model" OnValidSubmit="OnSaveChanges">
+    <Microsoft.AspNetCore.Components.Forms.ValidationSummary />
+    <FluentValidationValidator DisableAssemblyScanning="false"></FluentValidationValidator>
+    <RadzenRow AlignItems="AlignItems.Center" class="mb-2">
+        <RadzenColumn Size="2">
+            <RadzenLabel>Contact Name</RadzenLabel>
+        </RadzenColumn>
+        <RadzenColumn Size="10">
+            <RadzenRow AlignItems="AlignItems.Center">
+                <RadzenColumn Size="5">
+                    <RadzenTextBox @bind-Value="model.Name"
+                                   @bind-Value:after="SetFirstName"
+                                   class="w-100"
+                                   Placeholder="Your Name" />
+                    <ValidationMessage For="@(()=>model.Name)"></ValidationMessage>
+                </RadzenColumn>
+                <RadzenColumn Size="5">
+                    <RadzenTextBox @bind-Value="model.AltName"
+                                   class="w-100"
+                                   Placeholder="Alternative Name" />
+                    <ValidationMessage For="@(()=>model.AltName)"></ValidationMessage>
+                </RadzenColumn>
+                <RadzenColumn Size="2">
+                    <RadzenCheckBox TValue="bool" @bind-Value="model.IsActive">
+                        @if (model.IsActive)
+                        {
+                            @("Is Active")
+                        }
+                        else
+                        {
+                            @("Is InActive")
+                        }
+
+                    </RadzenCheckBox>
+                </RadzenColumn>
+            </RadzenRow>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenTabs>
+        <Tabs>
+            <RadzenTabsItem Text="Contact Info">
+                <RadzenRow AlignItems="AlignItems.Center" class="mb-2">
+                    <RadzenColumn Size="2">
+                        <RadzenLabel>Contact Name</RadzenLabel>
+                    </RadzenColumn>
+                    <RadzenColumn Size="10">
+                        <RadzenRow AlignItems="AlignItems.Center">
+                            <RadzenColumn Size="2">
+                                <RadzenDropDown TValue="string"
+                                                Data="StorageConstant.Salutations"
+                                                TextProperty="label"
+                                                ValueProperty="value"
+                                                class="w-100"
+                                                @bind-Value="model.Sex">
+                                </RadzenDropDown>
+                                <ValidationMessage For="@(()=>model.Sex)" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="4">
+                                <RadzenTextBox Placeholder="Firstname..."
+                                               class="w-100"
+                                               @bind-Value="model.FirstName" />
+                                <ValidationMessage For="@(()=>model.FirstName)" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="2">
+                                <RadzenTextBox class="w-100"
+                                               Placeholder="Middle Name..."
+                                               @bind-Value="model.MiddleName" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="4">
+                                <RadzenTextBox class="w-100"
+                                               Placeholder="Last Name"
+                                               @bind-Value="model.LastName" />
+                            </RadzenColumn>
+                        </RadzenRow>
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow AlignItems="AlignItems.Center" class="mb-2">
+                    <RadzenColumn Size="2">
+                        <RadzenLabel>Contact Number</RadzenLabel>
+                    </RadzenColumn>
+                    <RadzenColumn Size="10">
+                        <RadzenRow AlignItems="AlignItems.Center">
+                            <RadzenColumn Size="4">
+                                <RadzenTextBox Placeholder="Phone Number"
+                                               class="w-100"
+                                               @bind-Value="model.Phone" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="4">
+                                <RadzenTextBox Placeholder="Alternate Phone"
+                                               class="w-100"
+                                               @bind-Value="model.AltPhone" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="4">
+                                <RadzenTextBox Placeholder="Email..."
+                                               class="w-100"
+                                               @bind-Value="model.EmailAddress" />
+                            </RadzenColumn>
+                        </RadzenRow>
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow AlignItems="AlignItems.Center" class="mb-2">
+                    <RadzenColumn Size="2">
+                        <RadzenLabel>Note</RadzenLabel>
+                    </RadzenColumn>
+                    <RadzenColumn Size="10">
+                        <RadzenTextArea class="w-100"
+                                        @bind-Value="model.Description"></RadzenTextArea>
+                    </RadzenColumn>
+                </RadzenRow>
+            </RadzenTabsItem>
+            <RadzenTabsItem Text="Address Info">
+                <RadzenRow AlignItems="AlignItems.Center" class="mb-2">
+                    <RadzenColumn Size="6">
+                        <RadzenRow AlignItems="AlignItems.Center">
+                            <RadzenColumn Size="3">
+                                <RadzenLabel>Province</RadzenLabel>
+                            </RadzenColumn>
+                            <RadzenColumn Size="9">
+                                <RadzenDropDown TValue="int?"
+                                                Data="ProvinceList"
+                                                @bind-Value="model.ProvinceRefId"
+                                                TextProperty="ProInKhmer"
+                                                ValueProperty="ProvinceID"
+                                                class="w-100"
+                                                SelectedItemChanged="GetDistrictByProvince">
+                                </RadzenDropDown>
+                            </RadzenColumn>
+                        </RadzenRow>
+                    </RadzenColumn>
+                    <RadzenColumn Size="6">
+                        <RadzenRow AlignItems="AlignItems.Center">
+                            <RadzenColumn Size="3">
+                                <RadzenLabel>District</RadzenLabel>
+                            </RadzenColumn>
+                            <RadzenColumn Size="9">
+                                <RadzenDropDown TValue="int?"
+                                                Data="DistrictList"
+                                                TextProperty="DisInKhmer"
+                                                ValueProperty="DistrictId"
+                                                @bind-Value="model.DistrictRefId"
+                                                class="w-100"
+                                                SelectedItemChanged="GeCommunesByDistrict">
+                                </RadzenDropDown>
+                            </RadzenColumn>
+                        </RadzenRow>
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow AlignItems="AlignItems.Center" class="mb-2">
+                    <RadzenColumn Size="6">
+                        <RadzenRow AlignItems="AlignItems.Center">
+                            <RadzenColumn Size="3">
+                                <RadzenLabel>Commune</RadzenLabel>
+                            </RadzenColumn>
+                            <RadzenColumn Size="9">
+                                <RadzenDropDown TValue="int?"
+                                                @bind-Value="model.CommuneRefId"
+                                                Data="CommuneList"
+                                                TextProperty="ComInKhmer"
+                                                ValueProperty="CommuneId"
+                                                class="w-100"
+                                                SelectedItemChanged="GetVillagesByCommune">
+                                </RadzenDropDown>
+                            </RadzenColumn>
+                        </RadzenRow>
+                    </RadzenColumn>
+                    <RadzenColumn Size="6">
+                        <RadzenRow AlignItems="AlignItems.Center">
+                            <RadzenColumn Size="3">
+                                <RadzenLabel>Village</RadzenLabel>
+                            </RadzenColumn>
+                            <RadzenColumn Size="9">
+                                <RadzenDropDown Data="VillageList"
+                                                TextProperty="VilInKhmer"
+                                                ValueProperty="VillageID"
+                                                Name="DropDownVillDescription"
+                                                class="w-100"
+                                                SelectedItemChanged="GetVillagesName"
+                                                @bind-Value="model.VillageRefId">
+                                </RadzenDropDown>
+                            </RadzenColumn>
+                        </RadzenRow>
+                    </RadzenColumn>
+                </RadzenRow>
+            </RadzenTabsItem>
+        </Tabs>
+    </RadzenTabs>
+    <RadzenStack Orientation="Radzen.Orientation.Horizontal"
+                 AlignItems="AlignItems.Center"
+                 Gap="1rem"
+                 JustifyContent="Radzen.JustifyContent.End">
+        <RadzenButton ButtonStyle="ButtonStyle.Success"
+                      Icon="save"
+                      Text="Save"
+                      ButtonType="Radzen.ButtonType.Submit"
+                      Size="Radzen.ButtonSize.Small" />
+        <RadzenButton ButtonStyle="ButtonStyle.Danger"
+                      Icon="cancel"
+                      Text="Close"
+                      Click="@(()=>DialogService.Close(false))"
+                      Size="Radzen.ButtonSize.Small" />
+    </RadzenStack>
+</EditForm>
+@code {
+
+    [Parameter] public long NameId { get; set; }
+    IEnumerable<ProvinceDto>? ProvinceList = [];
+    IEnumerable<CommuneDto>? CommuneList = [];
+    IEnumerable<DistrictDto>? DistrictList = [];
+    IEnumerable<VillageDto>? VillageList = [];
+    ProvinceDto? SelectedProvince { get; set; }
+    DistrictDto? SelectedDistrict { get; set; }
+    CommuneDto? SelectedCommune { get; set; }
+    VillageDto? SelectedVillage { get; set; }
+    EntityNameDtoUpdate model { get; set; } = new();
+    private CustomValidation? customValidation;
+    protected List<string> salutations = ["Mr.", "Mrs.", "Miss.", "Others"];
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        var resp = await _gService.GetEditGuarantorAsync(NameId);
+
+        if (resp.IsSuccess)
+        {
+            model = resp.Data!;
+            ProvinceList = await _addressService.GetAllProvinceAsync();
+            if (model.ProvinceRefId > 0)
+            {
+                DistrictList = await _addressService.GetDistrictByProvinceAsync(model.ProvinceRefId);
+            }
+            if (model.DistrictRefId > 0)
+            {
+                CommuneList = await _addressService.GetCommuneByDistricteAsync(model.DistrictRefId);
+            }
+            if (model.CommuneRefId > 0)
+            {
+                VillageList = await _addressService.GetVillageByCommuneAsync(model.CommuneRefId);
+            }
+        }
+        else
+        {
+            var message = resp.Errors!.First();
+            NotificationService.Notify(NotificationSeverity.Error, message);
+        }
+
+    }
+
+    protected async Task OnSaveChanges()
+    {
+        try
+        {
+            model.EntType = "Other Name";
+            var resultResponse = await _gService.UpdateAsync(NameId, model);
+            if (resultResponse.IsSuccess)
+            {
+                NotificationService.Notify(Radzen.NotificationSeverity.Success, resultResponse.Data!.Message);
+                DialogService.Close(true);
+            }
+            else
+            {
+                var error = resultResponse.Errors!.FirstOrDefault();
+                NotificationService.Notify(Radzen.NotificationSeverity.Error, error);
+            }
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(Radzen.NotificationSeverity.Error, "Exception", ex.Message);
+
+        }
+
+    }
+    async void SelectProvince(ProvinceDto e)
+    {
+        SelectedProvince = e;
+        if (SelectedProvince is not null)
+        {
+            DistrictList = await _addressService!.GetDistrictByProvinceAsync(SelectedProvince.ProvinceID);
+        }
+        else
+        {
+            SelectedProvince = null;
+            DistrictList = null;
+        }
+        StateHasChanged();
+
+    }
+    async Task SelectDistrict(DistrictDto e)
+    {
+        if (e is not null)
+        {
+            SelectedDistrict = e;
+            CommuneList = await _addressService!.GetCommuneByDistricteAsync(SelectedDistrict.DistrictId);
+        }
+        else
+        {
+            SelectedDistrict = null;
+            CommuneList = null;
+        }
+        StateHasChanged();
+    }
+    async Task SelectCommune(CommuneDto e)
+    {
+        if (e is not null)
+        {
+            SelectedCommune = e;
+            VillageList = await _addressService!.GetVillageByCommuneAsync(SelectedCommune.CommuneId);
+        }
+        else
+        {
+            SelectedCommune = null;
+            VillageList = null;
+        }
+        StateHasChanged();
+    }
+    void SelectVillage(VillageDto e)
+    {
+        if (e is not null)
+        {
+            SelectedVillage = e;
+        }
+        else
+        {
+            SelectedVillage = null;
+        }
+        StateHasChanged();
+    }
+    //Salutation implements
+    [Parameter] public IEnumerable<string> Salutations { get; set; } = [];
+    protected string? newSalution = "";
+    protected async Task AddNewSalutation(KeyboardEventArgs e)
+    {
+        if (e.Code == "Enter")
+        {
+            await _salutationService.AddSalution(new Salutation
+                {
+                    Title = newSalution
+                });
+            await GetSalutations();
+        }
+    }
+    protected void OnTextChangedSalution(ChangeEventArgs e)
+    {
+        newSalution = e?.Value?.ToString();
+    }
+    private async Task GetSalutations()
+    {
+        var salutations = await _salutationService.GetSalutions();
+        if (salutations.IsSuccess)
+        {
+            Salutations = salutations!.Data!.Select(x => x.Title!).ToList();
+        }
+        else
+        {
+            Salutations = [];
+        }
+
+    }
+
+
+    async void GetDistrictByProvince(object e)
+    {
+        if (e is not null)
+        {
+            model.ProInKhmer = ((ProvinceDto)e).ProInKhmer;
+            var id = ((ProvinceDto)e).ProvinceID;
+            DistrictList = await _addressService!.GetDistrictByProvinceAsync(id);
+        }
+        StateHasChanged();
+    }
+    async void GeCommunesByDistrict(object e)
+    {
+        if (e is not null)
+        {
+            model.DisInKhmer = ((DistrictDto)e).DisInKhmer;
+            var id = ((DistrictDto)e).DistrictId;
+            CommuneList = await _addressService!.GetCommuneByDistricteAsync(id);
+        }
+        StateHasChanged();
+    }
+
+    async void GetVillagesByCommune(object e)
+    {
+        if (e is not null)
+        {
+            model.ComInKhmer = ((CommuneDto)e).ComInKhmer;
+            var id = ((CommuneDto)e).CommuneId;
+            VillageList = await _addressService!.GetVillageByCommuneAsync(id);
+        }
+        StateHasChanged();
+    }
+    void GetVillagesName(object e)
+    {
+        if (e is not null)
+        {
+            model.VilInKhmer = ((VillageDto)e).VilInKhmer;
+        }
+        StateHasChanged();
+    }
+
+    void SetFirstName()
+    {
+        model.FirstName = model.Name;
+    }
+}

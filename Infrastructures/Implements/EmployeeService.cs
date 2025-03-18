@@ -3,10 +3,10 @@ using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Employees;
 using Domains.Models.Lists.Employees;
-using Infrastructures.Data;
+using Infrastructures.DataAccess;
 using Microsoft.EntityFrameworkCore;
 
-namespace CoreBussiness.Implements;
+namespace Infrastructures.Implements;
 
 public class EmployeeService : IEmployeeService
 {

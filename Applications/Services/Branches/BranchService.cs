@@ -1,8 +1,10 @@
 ﻿using Applications.Interfaces.Branches;
+using Applications.Requests.Lists.Entities;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Branches;
 using Domains.Models.Lists;
+using Mapster;
 
 namespace Applications.Services.Branches
 {
@@ -20,17 +22,17 @@ namespace Applications.Services.Branches
             return await _branchService.Create(branch);
         }
 
-        public async Task<Result> Delete(int id)
+        public async Task<Result> DeleteAsync(int? id)
         {
-            return await _branchService.Delete(id);
+            return await _branchService.DeleteAsync(id);
         }
 
-        public async Task<Result<ResultStatus>> GetBrachStatus(int branchRefId)
+        public async Task<Result<ResultStatus>> GetBrachStatus(int? branchRefId)
         {
             return await _branchService.GetBrachStatus(branchRefId);
         }
 
-        public async Task<Result<Branch>> GetBranchById(int id)
+        public async Task<Result<Branch>> GetBranchById(int? id)
         {
             return await _branchService.GetBranchById(id);
         }
@@ -50,14 +52,19 @@ namespace Applications.Services.Branches
             return await _branchService.GetBranchesAsync(branchId, take, filter);
         }
 
-        public async Task<Result<IEnumerable<VBranch>>> GetBranchesByUser(long userId, int branchId = 0)
+        public async Task<Result<IEnumerable<VBranch>>> GetBranchesByUser(string userId, int? branchId = 0)
         {
             return await _branchService.GetBranchesByUser(userId, branchId);
         }
 
-        public async Task<Result<Branch>> GetBranchForVault(int id)
+        public async Task<Result<Branch>> GetBranchForVault(int? id)
         {
             return await _branchService.GetBranchForVault(id);
+        }
+
+        public async Task<Result<BranchDtoUpdate>> GetUpdateBranchById(int? branchId)
+        {
+            return await _branchService.GetUpdateBranchById(branchId);
         }
 
         public async Task<Result> Update(Branch branch)
@@ -65,9 +72,11 @@ namespace Applications.Services.Branches
             return await _branchService.Update(branch);
         }
 
-        public async Task<Result> UpdateStatusAsync(int branchId)
+        public async Task<Result> UpdateStatusAsync(int? branchId)
         {
             return await _branchService.UpdateStatusAsync(branchId);
         }
+
+
     }
 }

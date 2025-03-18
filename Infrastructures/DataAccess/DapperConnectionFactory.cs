@@ -2,27 +2,14 @@ using System.Data;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 
-namespace Infrastructures.Data;
+namespace Infrastructures.DataAccess;
 
-public class DapperConnectionFactory : IDapperConnectionFactory
+public class DapperConnectionFactory(IConfiguration config) : IDapperConnectionFactory
 {
-    private readonly IConfiguration _configuration;
-    private string? connectionString = string.Empty;
-    public DapperConnectionFactory(IConfiguration configuration)
-    {
-        _configuration = configuration;
-        connectionString = _configuration.GetConnectionString("Connection");
-    }
-    public IDbConnection CreateConnection()
-    {
-        var connection = new SqlConnection(connectionString);
-        connection.Open();
-        return connection;
-    }
-
+    public IDbConnection CreateConnection() => new SqlConnection(config.GetConnectionString("DefaultConnection"));
     public async Task<IDbConnection> CreateConnectionAsync(CancellationToken token = default)
     {
-        var connection = new SqlConnection(connectionString);
+        var connection = new SqlConnection(config.GetConnectionString("DefaultConnection"));
         await connection.OpenAsync(token);
         return connection;
     }

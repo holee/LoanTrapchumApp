@@ -1,16 +1,16 @@
 ﻿using System.Data;
-using Applications.Enums;
+using Applications.Enumerations;
 using Applications.Interfaces.Loans;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Payments;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Dapper;
-using Infrastructures.Data;
+using Infrastructures.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace CoreBussiness.Implements
+namespace Infrastructures.Implements
 {
     public class LoanScheduleService : ILoanScheduleServiceImpl
     {

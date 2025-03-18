@@ -1,0 +1,216 @@
+﻿@using ApplicationServices.Interfaces
+<RadzenDataGrid Data="@Expenses"
+                Responsive
+                TItem="VCustomerExpenses"
+                @ref="incomeGrid"
+                GridLines="DataGridGridLines.Both"
+                Density="Density.Compact">
+    <HeaderTemplate>
+        <RadzenButton Variant="Variant.Flat"
+                      Click="InsertedRow"
+                      ButtonStyle="ButtonStyle.Success"
+                      Icon="add_circle"
+                      Size="Radzen.ButtonSize.ExtraSmall" />
+    </HeaderTemplate>
+    <Columns>
+        <RadzenDataGridColumn Context="c" Title="#" Width="2rem" TextAlign="TextAlign.Center">
+            <Template>
+                <input type="hidden" value="@c.ExpendId" />
+                @{
+                    var index = Expenses?.IndexOf(c) + 1;
+                }
+                @index
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Context="c" Title="IncomeSource" Property="IncomeSource">
+            <Template>
+                @c.ExpenseTitle
+            </Template>
+            <EditTemplate>
+                <RadzenTextBox @bind-Value="c.ExpenseTitle"
+                               class="w-100"
+                               Style="height:2rem;line-height:1rem;" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Width="8rem"
+                              Context="c" TextAlign="TextAlign.Right" Title="Amount" Property="IncomeAmount">
+            <Template>
+                @c.ExpendAmount
+            </Template>
+            <EditTemplate>
+                <RadzenNumeric TValue="decimal?"
+                               @bind-Value="c.ExpendAmount"
+                               class="w-100"
+                               Format="#,##0.00"
+                               ShowUpDown="true"
+                               Style="height:2rem;line-height:1rem;" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Context="c" Title="Description" Property="InDescription">
+            <Template>
+                @c.ExDescription
+            </Template>
+            <EditTemplate>
+                <RadzenTextBox @bind-Value="c.ExDescription" class="w-100" Style="height:2rem;line-height:1rem;" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TextAlign="TextAlign.Center" Context="c" Title="Action" Width="4rem">
+            <Template>
+                <RadzenButton Variant="Variant.Flat"
+                              Icon="edit"
+                              ButtonStyle="ButtonStyle.Primary"
+                              Click="@(()=>EditRow(c))"
+                              @onclick:stopPropagation="true"
+                              Size="Radzen.ButtonSize.ExtraSmall" />
+                <RadzenButton Variant="Variant.Flat"
+                              Icon="delete"
+                              ButtonStyle="ButtonStyle.Danger"
+                              Click="@(()=>DeleteRow(c))"
+                              @onclick:stopPropagation="true"
+                              Size="Radzen.ButtonSize.ExtraSmall" />
+            </Template>
+            <EditTemplate>
+                <RadzenButton Variant="Variant.Flat"
+                              Icon="check"
+                              Click="@(()=>SaveRow(c))"
+                              ButtonStyle="ButtonStyle.Success"
+                              @onclick:stopPropagation="true"
+                              Size="Radzen.ButtonSize.ExtraSmall" />
+                <RadzenButton Variant="Variant.Flat"
+                              Icon="close"
+                              ButtonStyle="ButtonStyle.Warning"
+                              Click="@(()=>CancelEdit(c))"
+                              @onclick:stopPropagation="true"
+                              Size="Radzen.ButtonSize.ExtraSmall" />
+
+            </EditTemplate>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+<RadzenStack Orientation="Orientation.Horizontal"
+             class="mt-3"
+             AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+    <RadzenButton Text="Save"
+                  Click="SaveChanged"
+                  Icon="save"
+                  ButtonStyle="ButtonStyle.Success"
+                  Size="Radzen.ButtonSize.Small" />
+    <RadzenButton Text="Close"
+                  Click="Close"
+                  Icon="cancel"
+                  ButtonStyle="ButtonStyle.Danger"
+                  Size="Radzen.ButtonSize.Small" />
+</RadzenStack>
+@code {
+
+    List<CustomerExpenseDtoCreate> CustomerExpenses = new List<CustomerExpenseDtoCreate>();
+    RadzenDataGrid<VCustomerExpenses> incomeGrid = default!;
+    List<VCustomerExpenses> Expenses = [];
+    [Parameter] public long CustomerId { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await GetCustomerIncome(CustomerId);
+    }
+
+    async Task GetCustomerIncome(long? customerId)
+    {
+        var resp = await _customerService.GetCustomerExpensesAsync(customerId);
+        if (resp.IsSuccess)
+        {
+            Expenses = resp.Data!.ToList();
+        }
+    }
+
+    private void Close()
+    {
+        DialogService.Close(false);
+    }
+
+    private bool isValid = true;
+
+    async Task SaveChanged()
+    {
+        try
+        {
+            var model = Expenses.Where(x => x.ExpendAmount > 0)
+                              .Select(x => new CustomerExpenseDtoCreate(x.ExpendId, CustomerId, x.ExpenseTitle, x.ExpendAmount, x.ExDescription))
+                              .ToList();
+
+            if (!model.Any()) return;
+
+            var response = await _customerService.AddExpensesAsync(CustomerId, model);
+
+            if (response.IsSuccess)
+            {
+                NotificationService.Notify(NotificationSeverity.Success, response.Data!.Message);
+                DialogService.Close(true);
+            }
+            else
+            {
+                var error = response.Errors!.FirstOrDefault();
+                NotificationService.Notify(NotificationSeverity.Error, error);
+            }
+        }
+        catch (Exception ex)
+        {
+            await Console.Out.WriteLineAsync(ex.Message);
+        }
+    }
+
+
+    void Reset()
+    {
+
+    }
+
+    void Reset(VCustomerExpenses income)
+    {
+        Expenses.Remove(income);
+    }
+
+    async void InsertedRow()
+    {
+        var income = new VCustomerExpenses();
+        Expenses.Add(income);
+        await incomeGrid.InsertRow(income);
+    }
+
+    async Task DeleteRow(VCustomerExpenses income)
+    {
+        Reset(income);
+        if (Expenses.Contains(income))
+        {
+            await incomeGrid.Reload();
+        }
+        else
+        {
+            incomeGrid.CancelEditRow(income);
+            await incomeGrid.Reload();
+        }
+    }
+
+
+    void CancelEdit(VCustomerExpenses income)
+    {
+        Reset(income);
+        incomeGrid.CancelEditRow(income);
+    }
+
+    async Task SaveRow(VCustomerExpenses income)
+    {
+        await incomeGrid.UpdateRow(income);
+    }
+
+    async Task EditRow(VCustomerExpenses income)
+    {
+        await incomeGrid.EditRow(income);
+    }
+
+
+
+
+
+
+}
+

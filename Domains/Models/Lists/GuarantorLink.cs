@@ -7,7 +7,7 @@ namespace Domains.Models.Lists
         public long Id { get; set; } 
         public long? EntityNameRefId { get; set; }
         public int? BranchId { get; set; }
-        public long? LoanRequestRefId { get; set; } 
+        public Guid? LoanRequestRefId { get; set; } 
         public bool? IsActive { get; set; } = true;
         public EntityName? Guarantor { get; set; }
         public LoanRequest? LoanRequest { get; set; }

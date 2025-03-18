@@ -1,0 +1,72 @@
+﻿@page "/Account/Users/{UserId:long}/Loan"
+<Containers Fluid CssClass="rz-background-color-base-200 p-2">
+    <EditForm Model="model" OnValidSubmit="HandleFormSubmit">
+        <FluentValidationValidator DisableAssemblyScanning="true"></FluentValidationValidator>
+        <RadzenRow AlignItems="AlignItems.Center" class="my-1">
+            <RadzenColumn Size="3" SizeMD="3">
+                <RadzenLabel Component="MinLoanSize">Min Laon Size</RadzenLabel>
+            </RadzenColumn>
+            <RadzenColumn Size="9" SizeMD="9">
+                <RadzenNumeric @bind-Value="model.MinLoanSize"
+                               class="w-100" Min="0"
+                               Format="#,##0.00"
+                               Name="MinLoanSize"
+                               TextAlign="TextAlign.End"
+                               ShowUpDown="false" />
+                <ValidationMessage For="@(()=>model.MinLoanSize)"></ValidationMessage>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow AlignItems="AlignItems.Center" class="my-1">
+            <RadzenColumn Size="3" SizeMD="3">
+                <RadzenLabel Component="MaxLoanSize">Min Laon Size</RadzenLabel>
+            </RadzenColumn>
+            <RadzenColumn Size="9" SizeMD="9">
+                <RadzenNumeric @bind-Value="model.MaxLoanSize"
+                               class="w-100" Min="0"
+                               Name="MaxLoanSize"
+                               TextAlign="TextAlign.End"
+                               ShowUpDown="false"
+                               Format="#,##0.00" />
+                <ValidationMessage For="@(()=>model.MaxLoanSize)"></ValidationMessage>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow AlignItems="AlignItems.Center" class="my-1">
+            <RadzenColumn Size="3" SizeMD="3">
+                <RadzenLabel Component="StartDate">Valid From</RadzenLabel>
+            </RadzenColumn>
+            <RadzenColumn Size="9" SizeMD="9">
+                <RadzenDatePicker @bind-Value="model.StartDate"
+                               class="w-100"
+                               Name="StartDate"
+                               DateFormat="dd/MM/yyyy" />
+                <ValidationMessage For="@(()=>model.StartDate)"></ValidationMessage>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow AlignItems="AlignItems.Center" class="my-1">
+            <RadzenColumn Size="3" SizeMD="3">
+                <RadzenLabel Component="Description">Description</RadzenLabel>
+            </RadzenColumn>
+            <RadzenColumn Size="9" SizeMD="9">
+                <RadzenTextArea @bind-Value="model.Description" class="w-100" Min="0" Name="Description">
+
+                </RadzenTextArea>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenStack Gap="1rem" AlignItems="AlignItems.Center"
+                     JustifyContent="JustifyContent.End"
+                     Orientation="Orientation.Horizontal">
+            <RadzenButton Icon="save"
+                         ButtonType="Radzen.ButtonType.Submit"
+                          Size="Radzen.ButtonSize.ExtraSmall"
+                          Text="Save"
+                          ButtonStyle="ButtonStyle.Success"></RadzenButton>
+            <RadzenButton Icon="cancel"
+                          Size="Radzen.ButtonSize.ExtraSmall"
+                          Text="Cancel"
+                          Click="@(()=>DialogService.Close(false))"
+                          ButtonStyle="ButtonStyle.Danger"></RadzenButton>
+        </RadzenStack>
+    </EditForm>
+</Containers>
+
+

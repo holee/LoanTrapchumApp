@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace Infrastructures.Data
+namespace Infrastructures.DataAccess
 {
     public class UserDataContext : IdentityDbContext<ApplicationUser, ApplicationRole, string>
     {

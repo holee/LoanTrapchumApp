@@ -1,4 +1,4 @@
-﻿using Applications.Enums;
+﻿using Applications.Enumerations;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Schedules;

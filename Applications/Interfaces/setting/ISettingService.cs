@@ -1,5 +1,6 @@
 ﻿using Applications.Extensions.Identity;
 using Applications.Responses;
+using Domains.Models.Identity;
 using Domains.Models.Loans;
 using Domains.Models.Settings;
 

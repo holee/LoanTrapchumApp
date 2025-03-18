@@ -1,4 +1,6 @@
-﻿namespace Applications.Requests.Identity;
+﻿using Applications.Extensions.Identity;
+
+namespace Applications.Requests.Identity;
 
 public sealed class UserDto
 {
@@ -8,6 +10,7 @@ public sealed class UserDto
         Email = string.Empty;
         Role = string.Empty;
         IsActive = false;
+        Roles = [];
     }
     public UserDto(string id, string userName, string email, string roles, bool isActive)
     {
@@ -23,4 +26,6 @@ public sealed class UserDto
     public string Email { get; set; } = string.Empty;
     public string Role { get; set; } = string.Empty;
     public bool IsActive { get; set; } = false;
+    public List<string> Roles { get; set; } = [];
+    public UserProfiles? Profile { get; set; }
 }

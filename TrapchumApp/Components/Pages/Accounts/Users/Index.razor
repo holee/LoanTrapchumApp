@@ -1,0 +1,178 @@
+﻿@page "/App/Account/Users"
+@inject IdentityRedirectManager RedirectManager
+@attribute [Authorize(Roles = "SuperAdmin,Admin")]
+<Containers Fluid>
+    <RadzenTabs RenderMode="TabRenderMode.Server">
+        <Tabs>
+            <RadzenTabsItem Text="Users" Icon="group">
+                <PageDropDown PageSizeChanged="PageSizeChanged"
+                              OnTextChanged="OnUserTextChanges"
+                              ShowSearchBox="true">
+                    <LeftChildContent>
+                        <RadzenButton Icon="person_add"
+                                      ButtonStyle="ButtonStyle.Primary"
+                                      Size="Radzen.ButtonSize.Small"
+                                      Click="AddUserAccount"
+                                      Text="Add New User" />
+                    </LeftChildContent>
+                    <RightChildContent>
+
+                    </RightChildContent>
+                </PageDropDown>
+                <RadzenDataGrid GridLines="DataGridGridLines.Both"
+                                AllowAlternatingRows
+                                AllowSorting="true"
+                                AllowPaging="true"
+                                AllowRowSelectOnRowClick="true"
+                                @bind-Value="Users"
+                                SelectionMode="DataGridSelectionMode.Single"
+                                Density="Density.Compact"
+                                ColumnWidth="10rem"
+                                PageSize="pageSize"
+                                Count="@counts"
+                                IsLoading="isLoading"
+                                LoadData="LoadAllUsers"
+                                Style="height:30rem;min-height:30rem;max-height:40rem"
+                                ShowPagingSummary="true"
+                                PagerHorizontalAlign="HorizontalAlign.Right"
+                                Data="AllUsers">
+                    <Columns>
+                        <RadzenDataGridColumn Width="4rem"
+                                              Property="@(nameof(VUser.Id))" Title="#" Context="u">
+                            <Template>
+                                @(AllUsers?.ToList().IndexOf(u) + 1)
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Property="@(nameof(VUser.UserName))" Title="User Name" />
+                        <RadzenDataGridColumn Property="@(nameof(VUser.Email))" Title="Email" />
+                        <RadzenDataGridColumn Property="@(nameof(VUser.RoleName))" Title="Role" />
+                        <RadzenDataGridColumn Property="@(nameof(VUser.BranchName))" Title="Branch" />
+                        <RadzenDataGridColumn Width="4rem" Sortable="false"
+                                              TextAlign="TextAlign.Center"
+                                              Property="@(nameof(VUser.Id))" Title="Status" Context="u">
+                            <Template>
+                                <RadzenCheckBox Value="@u.IsActive" />
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Width="6rem" Sortable="false" Property="@(nameof(VUser.Id))" Title="Action" Context="u">
+                            <Template>
+                                <RadzenButton Size="Radzen.ButtonSize.ExtraSmall"
+                                              Icon="more_vert"
+                                              Variant="Variant.Text"
+                                              Click="@((args)=>ShowContextMenu(args,u.Id))" />
+                            </Template>
+                        </RadzenDataGridColumn>
+                    </Columns>
+                </RadzenDataGrid>
+            </RadzenTabsItem>
+        </Tabs>
+    </RadzenTabs>
+</Containers>
+
+@code {
+
+    void ShowContextMenu(MouseEventArgs args, string userId)
+    {
+        ContextMenuService.Open(args, ds =>@<RadzenMenu Style="font-size:0.8rem;">
+        <RadzenMenuItem Icon="manage_accounts"
+                        Click="@(()=>ManageAccount(userId))"
+                        Text="Manage User"
+                        Value="@userId" />
+        <RadzenMenuItem Icon="manage_accounts"
+                        Click="@(()=>ManageUserLoanSize(userId))"
+                        Text="Set User Loan Size"
+                        Value="@userId" />
+    </RadzenMenu>
+    );
+    }
+    async void OnUserTextChanges(string e)
+    {
+        filterText = e ?? string.Empty;
+        await LoadAllUsers(0, filterText);
+    }
+    void PageSizeChanged(int size)
+    {
+        pageSize = size;
+    }
+
+    void MangagePermissions(string userId)
+    {
+        var redirectUrl = $"/Administrator/Users/{userId}/Permissions";
+
+        RedirectManager.RedirectTo(redirectUrl);
+    }
+
+    async void SelectedTabChanged(int index)
+    {
+        selectedTabIndex = index;
+        if (index == 0)
+        {
+            await LoadAllUsers();
+        }
+    }
+
+    void ManageAccount(string userId)
+    {
+        ContextMenuService.Close();
+
+        if (authenticatedUserId == userId)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Not Allow");
+            return;
+        }
+
+        NavigationManager.NavigateTo($"/App/Account/{userId}/Users");
+    }
+
+    async void ManageUserLoanSize(string userId)
+    {
+        ContextMenuService.Close();
+        var options = new DialogOptions
+            {
+                WrapperCssClass = "rz-m-0 rz-p-2 rz-background-color-base-100"
+            };
+        var param = new Dictionary<string, object?>
+        {
+            {"UserId",userId}
+        };
+
+        bool dialogueResult = await DialogService.OpenAsync<SetUserLoanSize>("Loan Size", param, options);
+
+    }
+
+
+
+    void Cancel()
+    {
+        selectedTabIndex = 0;
+        model = new();
+    }
+
+
+    async Task AddUserAccount()
+    {
+
+        var options = new DialogOptions
+            {
+                ContentCssClass = "rz-mt-3 rz-background-color-base-100"
+            };
+
+        bool result = await DialogService.OpenAsync<UserCreateModal>("New User", options: options);
+
+        if (true)
+        {
+            await LoadAllUsers(0, filterText);
+        }
+    }
+
+
+
+
+
+
+
+
+
+}
+
+

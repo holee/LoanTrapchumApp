@@ -16,7 +16,7 @@ namespace Applications.Requests.Transactions.CashManagements
             CurrencyRefName = currencyRefName;
             CurrencyNoteRefId = currencyNoteRefId;
             CurrencyNoteValue = currencyNoteValue;
-            //Quantity = quantity;
+            Quantity = quantity;
         }
 
         public int? BankRefId { get; set; }
@@ -25,19 +25,19 @@ namespace Applications.Requests.Transactions.CashManagements
         public string? CurrencyRefName { get; set; }
         public int? CurrencyNoteRefId { get; set; }
         public int? CurrencyNoteValue { get; set; }
-
-
         [NotMapped]
         public int? QOnHand { get; set; } = 0;
         [NotMapped]
         public int? Quantity
         {
-            get
-            {
-                return Quantity == 0 ? QOnHand : Quantity + QOnHand;
-            }
+            get;
+            set;
         }
-        //public int? Quantity { get; set; } = 0;
+        [NotMapped]
+        public int? TotalQuantity
+        {
+            get => Quantity == 0 ? QOnHand : Quantity + QOnHand;
+        }
         [NotMapped]
         public decimal? TotalValue { get; set; } = 0;
         [NotMapped]

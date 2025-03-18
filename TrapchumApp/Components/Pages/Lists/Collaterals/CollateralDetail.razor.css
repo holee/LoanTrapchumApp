@@ -1,0 +1,10 @@
+﻿table.tbl th{
+    background-color:#F1F1F4 !important;
+    vertical-align:middle;
+    text-align:end;
+    padding:0.4rem 0.5rem 0.4rem 0;
+}
+table.tbl td {
+    vertical-align: middle;
+    text-align: start;
+}

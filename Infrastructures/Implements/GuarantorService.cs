@@ -6,11 +6,11 @@ using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.OtherNames;
 using Domains.Models.Lists;
 using FluentValidation;
-using Infrastructures.Data;
+using Infrastructures.DataAccess;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 
-namespace CoreBussiness.Implements;
+namespace Infrastructures.Implements;
 public class GuarantorService : IGuarantorService
 {
     private readonly ApplicationDbContext _context;
@@ -31,7 +31,8 @@ public class GuarantorService : IGuarantorService
             if (!validatorResult.IsValid)
             {
                 var errors = validatorResult.Errors.Select(er => er.ErrorMessage).ToList();
-                return Result.Failure<string>(ErrorResponse.Validation("400", errors));
+                var errString = string.Join(Environment.NewLine, errors);
+                return Result.Failure<string>(ErrorResponse.ServerError(errString));
             }
 
             _context.OtherNames.Add(othername);
@@ -69,7 +70,7 @@ public class GuarantorService : IGuarantorService
                                     .AsNoTracking();
             if (existingLoan.Any())
             {
-                return Result.Failure<string>(ErrorResponse.Validation("409", ["this guarantor is in used."]));
+                return Result.Failure<string>(ErrorResponse.ServerError("this guarantor is in used."));
             }
 
             var result = _context.OtherNames.SingleOrDefault(er => er.EntId == id);

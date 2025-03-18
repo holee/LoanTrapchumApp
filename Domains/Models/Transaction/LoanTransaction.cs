@@ -5,6 +5,8 @@ namespace Domains.Models.Transaction;
 public class LoanTransaction : BaseEntity
 {
     public long TranId { get; set; }
+
+    public Guid TransactionsId { get; set; }
     public Guid? TranCode { get; set; }
     public int? TranTypeRefId { get; set; }
     public string TransactionTypeName { get; set; } = string.Empty;
