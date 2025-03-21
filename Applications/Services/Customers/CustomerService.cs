@@ -7,26 +7,26 @@ using Domains.Models.Lists.Customers;
 
 namespace Applications.Services.Customers;
 
-public sealed class CustomerService : ICustomerService
+public interface ICustomerServiceImpl
 {
-    private readonly ICustomerService _cusService;
+    
+}
 
-    public CustomerService(ICustomerService cusService)
-    {
-        _cusService = cusService;
-    }
 
+
+public sealed class CustomerService(ICustomerService cusService) : ICustomerServiceImpl
+{
     public async Task<Result<string>> AddOrUpdateCustomerAsync(Customer customer)
     {
-        return await _cusService.AddOrUpdateCustomerAsync(customer);
+        return await cusService.AddOrUpdateCustomerAsync(customer);
     }
 
     public async Task<Result<string>> DeleteCustomerAsync(long customerId)
     {
-        return await _cusService.DeleteCustomerAsync(customerId);
+        return await cusService.DeleteCustomerAsync(customerId);
     }
 
-    public Task<Result<Customer>> GetCustomerAsync(long customerId, params string[] includes)
+    public Task<Result<Customer>> GetCustomerByIdAsync(long customerId, params string[] includes)
     {
         throw new NotImplementedException();
     }
