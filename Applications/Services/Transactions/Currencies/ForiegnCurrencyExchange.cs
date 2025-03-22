@@ -4,15 +4,18 @@ using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Currencies;
 using Domains.Models.Transaction;
+using Mapster;
 
 namespace Applications.Services.Transactions.Currencies
 {
-    public sealed class ForiegnCurrencyExchange(IForiegnCurrencyExchange frExchange) : IForiegnCurrencyExchange
+    public sealed class ForiegnCurrencyExchange(IForiegnCurrencyExchange frExchange) : IForiegnCurrencyExchangeImpl
     {
 
-        public async Task<Result<string>> Exchange(LoanTransaction transaction)
+        public async Task<Result<string>> Exchange(TrxForeignExchangeDtoCreate transaction)
         {
-            return await frExchange.Exchange(transaction);
+
+            var model = transaction.Adapt<LoanTransaction>();
+            return await frExchange.Exchange(model);
         }
 
         public async Task<Pager<VttCurrencyExchanges>> GetCurrencyExchange(int branchId, int pageIndex, int pageSize, DateTime? transactionDate = null)

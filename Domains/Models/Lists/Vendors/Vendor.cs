@@ -1,4 +1,6 @@
-﻿namespace Domains.Models.Lists.Vendors;
+﻿using Domains.Models.Bases;
+
+namespace Domains.Models.Lists.Vendors;
 
 public sealed class Vendor : BaseAddress
 {

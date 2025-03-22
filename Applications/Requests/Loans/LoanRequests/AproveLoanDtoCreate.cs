@@ -1,9 +1,9 @@
 ﻿namespace Applications.Requests.Loans.LoanRequests;
 
-public class AproveLoanDtoCreate : RequestDtoBase
+public class AproveLoanDtoCreate : RequestDtoBaseCreate
 {
-    public AproveLoanDtoCreate(int? branchId, long? customerId, 
-        long? loanRequestId, 
+    public AproveLoanDtoCreate(int? branchId, Guid? customerId, 
+        Guid? loanRequestId, 
         decimal? aprovedAmount,
         decimal? adminFeeAmount,
         DateTime? aprovedDate,

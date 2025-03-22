@@ -1,0 +1,113 @@
+﻿@using Applications.Extensions.DateTimes
+@using Applications.Responses.ViewModels.Loans.Payments
+<RadzenDataGrid Data="Repayments"
+                Responsive
+                GridLines="DataGridGridLines.Horizontal"
+                Density="Density.Compact"
+                AllowAlternatingRows="true"
+                RowSelect="RowSelectedChanged"
+                Style="min-height:30rem;height:30rem;max-height:35rem;"
+                TItem="VSchedulePaid">
+    <Columns>
+        <RadzenDataGridColumn Property="@(nameof(VSchedulePaid.InstallmentNo))"
+                              Title="#"
+                              Width="4rem"
+                              TextAlign="TextAlign.Center"
+                              Sortable="false" />
+        <RadzenDataGridColumn Property="@(nameof(VSchedulePaid.PaymentDate))"
+                              Title="Date"
+                              Sortable="false">
+            <Template>
+                @context!.PaymentDate.DayFirst()
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="@(nameof(VSchedulePaid.TotalDay))"
+                              Title="TotalDays"
+                              TextAlign="TextAlign.Right"
+                              Sortable="false" />
+        <RadzenDataGridColumn Property="@(nameof(VSchedulePaid.Principal))"
+                              Title="Principal"
+                              TextAlign="TextAlign.Right"
+                              Sortable="false">
+            <Template>
+                @(string.Format("{0:#,#00.00}", context.Principal))
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="@(nameof(VSchedulePaid.Interest))"
+                              Title="Interest"
+                              TextAlign="TextAlign.Right"
+                              Sortable="false">
+            <Template>
+                @(string.Format("{0:#,#00.00}", context!.Interest))
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="@(nameof(VSchedulePaid.CollectionFee))"
+                              Title="Eff. Fee"
+                              TextAlign="TextAlign.Right"
+                              Sortable="false">
+            <Template>
+                @context!.CollectionFee.Format(CurrencyId)
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="@(nameof(VSchedulePaid.OtherCharge))"
+                              Title="Penalty"
+                              TextAlign="TextAlign.Right"
+                              Sortable="false">
+            <Template>
+                @context!.OtherCharge.Format(CurrencyId)
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="@(nameof(VSchedulePaid.TotalPay))"
+                              Title="Total"
+                              TextAlign="TextAlign.Right"
+                              Sortable="false">
+            <Template>
+                @(string.Format("{0:#,#00.00}", context.TotalPay))
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="@(nameof(VSchedulePaid.LoanOutstanding))"
+                              Title="OutStanding"
+                              TextAlign="TextAlign.Right"
+                              Sortable="false">
+            <Template>
+                @context!.LoanOutstanding.Format(CurrencyId)
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="@(nameof(VSchedulePaid.Status))"
+                              Title="Status"
+                              Context="c"
+                              TextAlign="TextAlign.Center"
+                              Sortable="false">
+            <Template>
+                <RadzenBadge BadgeStyle="BadgeStyle.Success"
+                             Shade="Shade.Darker"
+                             Variant="Variant.Outlined"
+                             Text="@c.Status"
+                             Style="font-size:0.6rem;"
+                             IsPill="true">
+                </RadzenBadge>
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+    <EmptyTemplate>
+        <RadzenStack AlignItems="AlignItems.Center"
+                     Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End">
+            <strong>There is no any payemnt yet.....!</strong>
+        </RadzenStack>
+    </EmptyTemplate>
+</RadzenDataGrid>
+@if (ShowCloseButton)
+{
+    <RadzenStack AlignItems="AlignItems.Center"
+                 JustifyContent="JustifyContent.End"
+                 Orientation="Orientation.Horizontal"
+                 Gap="1rem" class="mt-2 mb-2">
+        <RadzenButton Text="Close"
+                      ButtonStyle="ButtonStyle.Danger"
+                      Size="Radzen.ButtonSize.Small"
+                      Click="closePage"
+                      Icon="cancel">
+        </RadzenButton>
+    </RadzenStack>
+}
+

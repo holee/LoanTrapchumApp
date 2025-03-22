@@ -13,9 +13,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Models\Customers\" />
-    <Folder Include="Models\Entities\" />
-    <Folder Include="Models\Employees\" />
     <Folder Include="Models\Trans\" />
     <Folder Include="Models\Users\" />
   </ItemGroup>

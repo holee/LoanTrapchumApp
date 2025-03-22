@@ -23,9 +23,19 @@ namespace Applications.Services.Settings
             return await sSeting.Delete(id);
         }
 
+        public Task<Result<string>> Delete(int? id)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<Result<IEnumerable<AprovePerson>>> GetAproveUserAsync(int branchId, string? filterValue = null)
         {
             return await sSeting.GetAproveUserAsync(branchId, filterValue);
+        }
+
+        public Task<Result<IEnumerable<AprovePerson>>> GetAproveUserAsync(int? branchId, string? filterValue = null)
+        {
+            throw new NotImplementedException();
         }
 
         public async Task<Result<SysSettings>> GetSysSettingByCode(string code)
@@ -36,6 +46,11 @@ namespace Applications.Services.Settings
         public async Task<Result<SysSettings>> GetSysSettingByCode(int id)
         {
             return await sSeting.GetSysSettingByCode(id);
+        }
+
+        public Task<Result<SysSettings>> GetSysSettingByCode(int? id)
+        {
+            throw new NotImplementedException();
         }
 
         public async Task<Result<IEnumerable<SysSettings>>> GetSysSettings(string? filterValue = null)

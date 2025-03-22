@@ -79,7 +79,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Journals
             var resp = await _journalService.FindJournalTypesAsync(null);
             if (resp != null)
             {
-                JournalTypes = resp.AdaptMany<JournalTypeDto>();
+                JournalTypes = resp.Maps<JournalTypeDto>();
             }
             StateHasChanged();
         }

@@ -1,0 +1,77 @@
+﻿@using AppilcationServices.Interfaces
+
+<div class="card">
+    <div class="card-header bg-primary">
+        <div class="d-flex justify-content-between">
+            <span>Category Details: @category?.LoancategoryCode <span><RadzenCheckBox ReadOnly @bind-Value="category!.IsActive" /></span></span>
+            <strong @onclick="ClosedTab" class="text-danger" style="cursor:pointer">X</strong>
+        </div>
+    </div>
+    <div class="card-body">
+        <div>
+            <div class="table-responsive">
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <th class="w-25 rz-background-color-base-100">Category Name</th>
+                            <td>
+                                @category!.LoancategoryCode
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="w-25 rz-background-color-base-100">Description</th>
+                            <td>
+                                @category.Description
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="w-25 rz-background-color-base-100">Description-Khmer</th>
+                            <td>
+                                @category.DesInKhmer
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="w-25 rz-background-color-base-100">Code</th>
+                            <td>
+                                @category.Code
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="w-25 rz-background-color-base-100">Record Status</th>
+                            <td>
+                                <RadzenCheckBox ReadOnly @bind-Value="category!.IsActive" />
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="card-footer ">
+        <div class="d-flex justify-content-between">
+            <div>
+                <label class="text-muted">Created: @string.Format("{0:dd MMM yyyy hh:mm tt}", category?.CreatedDT) Modified: @string.Format("{0:dd MMM yyyy hh:mm tt}", category?.ModifiedDT)</label>
+            </div>
+            <div>
+                <RadzenButton ButtonStyle="ButtonStyle.Danger"
+                              Icon="BtnIconType.Close"
+                              Text="Close"
+                              Click="@ClosedTab"
+                              Size="ButtonSize.Small" />
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+
+@code {
+    [Parameter] public EventCallback<int> CloseTab { get; set; }
+    async void ClosedTab()
+    {
+        await CloseTab.InvokeAsync(0);
+        StateHasChanged();
+    }
+}

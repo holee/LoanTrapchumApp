@@ -1,0 +1,99 @@
+﻿@page "/Loans/Customer/{LoanId:long}/PayOff"
+@using Applications.Requests.Loans.Payments
+<PageTitle>PayOff</PageTitle>
+<Containers Fluid>
+    <RadzenRow AlignItems="AlignItems.Center">
+        <RadzenColumn Size="4">
+            <RadzenLabel>Principle</RadzenLabel>
+        </RadzenColumn>
+        <RadzenColumn Size="8">
+            <RadzenNumeric TextAlign="TextAlign.End"
+                           TValue="decimal?"
+                           ShowUpDown="false"
+                           class="w-auto"
+                           Format="#,##0.00"
+                           Style="height:var(--input-text-sm)"
+                           onclick="this.querySelector('.rz-numeric-input').select()"
+                           Disabled="!isPaidNow"
+                           Min="0"
+                           Max="@SelectedSchedule?.LeftPrinciple"
+                           @oninput="PrincipleAmountValueChanged"
+                           @bind-Value="paymentCreate!.RecievePrincipleAmount">
+            </RadzenNumeric>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow AlignItems="AlignItems.Center">
+        <RadzenColumn Size="4">
+            <RadzenLabel>Penlaty</RadzenLabel>
+        </RadzenColumn>
+        <RadzenColumn Size="8">
+            <RadzenNumeric TextAlign="TextAlign.End"
+                           TValue="decimal?"
+                           ShowUpDown="false"
+                           class="w-auto"
+                           Format="#,##0.00"
+                           Style="height:var(--input-text-sm)"
+                           onclick="this.querySelector('.rz-numeric-input').select()"
+                           Disabled="!isPaidNow"
+                           Min="0"
+                           Max="@SelectedSchedule?.LeftPrinciple"
+                           @oninput="PrincipleAmountValueChanged"
+                           @bind-Value="paymentCreate!.RecievePrincipleAmount">
+            </RadzenNumeric>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow AlignItems="AlignItems.Center">
+        <RadzenColumn Size="4">         
+                <RadzenLabel>Total</RadzenLabel>
+        </RadzenColumn>
+        <RadzenColumn Size="8">
+            <RadzenNumeric TextAlign="TextAlign.End"
+                           TValue="decimal?"
+                           ShowUpDown="false"
+                           class="w-auto"
+                           Format="#,##0.00"
+                           Style="height:var(--input-text-sm)"
+                           onclick="this.querySelector('.rz-numeric-input').select()"
+                           Disabled="!isPaidNow"
+                           Min="0"
+                           Max="@SelectedSchedule?.LeftPrinciple"
+                           @oninput="PrincipleAmountValueChanged"
+                           @bind-Value="paymentCreate!.RecievePrincipleAmount">
+            </RadzenNumeric>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow AlignItems="AlignItems.Center">
+        <RadzenColumn Size="4">
+            <RadzenLabel>Aproved By</RadzenLabel>
+        </RadzenColumn>
+        <RadzenColumn Size="8">
+            <RadzenTextBox @bind-Value="receiptNo"
+                           class="w-100"
+                           Style="height:var(--input-text-sm)" />
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow AlignItems="AlignItems.Center">
+        <RadzenColumn Size="4">
+            <RadzenLabel>Reciept No</RadzenLabel>
+        </RadzenColumn>
+        <RadzenColumn Size="8">
+            <RadzenTextBox @bind-Value="receiptNo"
+                           class="w-100"
+                           Style="height:var(--input-text-sm)" />
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenStack Orientation="Radzen.Orientation.Horizontal"
+                 JustifyContent="Radzen.JustifyContent.End"
+                 class="mt-2"
+                 Gap="1rem"
+                 AlignItems="AlignItems.Center">
+        <RadzenButton Icon="save"
+                      Size="Radzen.ButtonSize.Small"
+                      ButtonStyle="ButtonStyle.Success"
+                      Click="ApplySchedulePayment"
+                      Text="Applied Payment" />
+        <RadzenLink Path="@($"/Loans?BranchId={BranchId}&UserId={UserId}")"
+                    Text="Cancel" />
+    </RadzenStack>
+</Containers>
+

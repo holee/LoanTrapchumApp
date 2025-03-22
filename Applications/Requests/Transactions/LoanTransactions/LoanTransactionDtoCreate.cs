@@ -6,6 +6,6 @@ public class LoanTransactionDtoCreate
     public int? TranTypeRefId { get; set; }
     public string TransactionTypeName { get; set; } = string.Empty;
     public DateTime? TransactionDate { get; set; } = DateTime.Now;
-    public long? UserRefId { get; set; }
+    public Guid? UserRefId { get; set; }
     public ICollection<TrxCashManagementDtoCreate>? CashManagements { get; set; } = [];
 }

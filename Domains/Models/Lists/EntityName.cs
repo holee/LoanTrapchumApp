@@ -1,8 +1,10 @@
-﻿namespace Domains.Models.Lists
+﻿using Domains.Models.Bases;
+
+namespace Domains.Models.Lists
 {
-    public sealed class EntityName:BaseAddress
+    public sealed class EntityName : BaseAddress
     {
-        public long EntId { get; set; }
+        public Guid EntId { get; set; }
         public string? Name { get; set; } = default!;
         public string? AltName { get; set; } = string.Empty;
         public string? EntType { get; set; } = string.Empty;
@@ -18,6 +20,6 @@
         public bool IsActive { get; set; } = true;
         public string? Description { get; set; } = string.Empty;
         public List<GuarantorLink> GuarantorsLink { get; set; } = [];
-        
+
     }
 }

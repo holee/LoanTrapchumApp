@@ -1,0 +1,140 @@
+﻿@page "/Loan/Request/{LoanRequestId:long}/Review"
+@using TrapchumApp.Components.Pages.Lists.Customers
+<PageTitle>Reviews</PageTitle>
+<Containers Fluid CssClass="p-2">
+    <Card>
+        <CardHeader>
+            <strong>Loan Request Review</strong>
+        </CardHeader>
+        <CardBody>
+            <Containers Fluid>
+                <table class="table table-bordered">
+                    <tbody>
+                        <tr>
+                            <th class="w-25" style="background-color:#F1F1F4">ចំនួនទឹកប្រាក់ស្នើរសុំ</th>
+                            <td class="text-end w-25">
+                                @data?.RequestAmount.Format(data.CurrencyId)
+                            </td>
+                            <th class="w-25" style="background-color:#F1F1F4">ប្រភេទបង់រំលោះ</th>
+                            <td>
+                                @data?.RepaymentMode
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="w-25 align-middle" style="background-color:#F1F1F4">ចំនួនទឹកប្រាក់ផ្តល់</th>
+                            <td class="align-middle">
+                                <RadzenNumeric Format="#,##0.00"
+                                               Min="0"
+                                               ShowUpDown="false"
+                                               TextAlign="TextAlign.End"
+                                               Style="height:2rem;"
+                                               @oninput="CalculateAdminFeeAmount"
+                                               class="w-100"
+                                               onclick="this.querySelector('.rz-numeric-input').select()"
+                                               @bind-Value="aprovedAmount" />
+                            </td>
+                            <th class="w-25" style="background-color:#F1F1F4">ប្រភេទកម្ចី</th>
+                            <td>
+                                @data?.LoanCategoryName
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="w-25" style="background-color:#F1F1F4">អត្រាសេវារដ្ឋបាល</th>
+                            <td class="text-end">
+                                @data?.AdminFeeRate
+                            </td>
+                            <th class="w-25" style="background-color:#F1F1F4">សេវារដ្ឋបាល</th>
+                            <td>
+                                @adminFeeAmount.Format(data?.CurrencyId)
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="w-25" style="background-color:#F1F1F4">ប្រាក់ប្រសិទ្ធិភាព</th>
+                            <td class="text-end">
+                                @data?.CollectionFeeRate (%)
+                            </td>
+                            <th class="w-25" style="background-color:#F1F1F4">ថ្ងៃបង់ប្រាក់លើកដំបូង</th>
+                            <td>
+                                @data?.FirstPaymentDate.DayFirst()
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="w-25" style="background-color:#F1F1F4">អត្រាការប្រាក់</th>
+                            <td class="text-end">
+                                @data?.InterestRate (%)
+                            </td>
+                            <th class="w-25" style="background-color:#F1F1F4">ថ្ងៃខ្ចីប្រាក់</th>
+                            <td>
+                                @data?.RequestDate.DayFirst()
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="w-25" style="background-color:#F1F1F4">រយៈពេលខ្ចីប្រាក់</th>
+                            <td>
+                                @data?.Installments @data?.InstallmentType
+                            </td>
+                            <th class="w-25" style="background-color:#F1F1F4">ខ្ចីលើកទី</th>
+                            <td class="text-end">
+                                @data?.Circle
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </Containers>
+            <RadzenTabs RenderMode="TabRenderMode.Client">
+                <Tabs>
+                    <RadzenTabsItem Text="ព័ត៌មានអតិថិជន">
+                        <LoanRequestCustomer Customer="@data?.Customer" />
+                    </RadzenTabsItem>
+                    <RadzenTabsItem Text="ទ្រព្យបញ្ចាំនិងអ្នកធានា">
+                        <LoanCollateralLine CollateralLines="@data?.Collaterals" />
+                        <LoanRequestGaurantor Guarantors="@data?.Guarantors" />
+                    </RadzenTabsItem>
+                    <RadzenTabsItem Text="ចំណូលនិងចំណាយ">
+                        <RadzenRow AlignItems="AlignItems.Center"
+                                   Gap="1rem">
+                            <RadzenColumn Size="6">
+                                <CustomerInc Items="@data!.Customer.CustomerIncomes" ShowAdd="false" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="6">
+                                <CustomerExp Items="@data!.Customer.CustomerExpenses" />
+                            </RadzenColumn>
+                        </RadzenRow>
+                    </RadzenTabsItem>
+                    <RadzenTabsItem Text="ឯកសារផ្សេងៗ">
+                        <LoanRequestDocument Documents="@data?.Documents.ToList()" ShowUpload="false" />
+                    </RadzenTabsItem>
+                </Tabs>
+            </RadzenTabs>
+        </CardBody>
+        <CardFooter>
+            <RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal"
+                         JustifyContent="JustifyContent.End">
+                @if (data is not null && (data.StatusId == 2 || data.StatusId == 3))
+                {
+                    <RadzenButton ButtonStyle="ButtonStyle.Success"
+                                  Click="SaveLoanRequest"
+                                  Size="Radzen.ButtonSize.Small"
+                                  Icon="save"
+                                  Text="Save" />
+                    <RadzenButton ButtonStyle="ButtonStyle.Secondary"
+                                  Click="AprovedLoanRequest"
+                                  Size="Radzen.ButtonSize.Small"
+                                  Icon="paid"
+                                  Text="Aprove" />
+                    <RadzenButton ButtonStyle="ButtonStyle.Danger"
+                                  Size="Radzen.ButtonSize.Small"
+                                  Icon="do_not_disturb_on"
+                                  Text="Denied" />
+                    <RadzenButton ButtonStyle="ButtonStyle.Primary"
+                                  Size="Radzen.ButtonSize.Small"
+                                  Icon="fact_check"
+                                  Text="Rechecked" />
+                }
+                <RadzenLink Icon="arrow_back"
+                            Path="@($"/Loan/Request?BranchId={BranchId}&UserId={UserId}")">Back</RadzenLink>
+            </RadzenStack>
+
+        </CardFooter>
+    </Card>
+</Containers>

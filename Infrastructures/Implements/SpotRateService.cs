@@ -64,7 +64,6 @@ public class SpotRateService : ISpotRateService
     {
         try
         {
-            int rowAffect = 0;
 
             foreach (var rate in rates)
             {
@@ -76,7 +75,7 @@ public class SpotRateService : ISpotRateService
                 {
                     try
                     {
-                        rowAffect += _context.SpotRates.Where(prop => prop.TransactionDate == rate.TransactionDate
+                        _context.SpotRates.Where(prop => prop.TransactionDate == rate.TransactionDate
                                                      && prop.CurrencyRefId == rate.CurrencyRefId)
                                             .ExecuteUpdate(prop => prop
                                                     .SetProperty(x => x.SpotRate, rate.SpotRate)
@@ -85,7 +84,7 @@ public class SpotRateService : ISpotRateService
                     }
                     catch (Exception ex)
                     {
-                         return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}"));
+                        return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}"));
                     }
                 }
                 else
@@ -93,7 +92,7 @@ public class SpotRateService : ISpotRateService
                     try
                     {
                         _context.SpotRates.Add(rate);
-                        rowAffect += await _context.SaveChangesAsync();
+                        await _context.SaveChangesAsync();
                     }
                     catch (Exception ex)
                     {

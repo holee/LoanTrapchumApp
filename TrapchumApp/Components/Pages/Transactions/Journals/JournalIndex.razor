@@ -1,6 +1,6 @@
 ﻿@page "/App/Account/Journals"
 @* @attribute [MustHasPermission(Modules.Transactions,Feature.VaultIn)] *@
-@attribute [Authorize(Roles ="Account")]
+@* @attribute [Authorize(Roles ="Account")] *@
 @using Applications.Responses.ViewModels.Journals
 <PageTitle>Journal list</PageTitle>
 <RadzenTabs @bind-SelectedIndex="@selectedIndex" Change="e=>TabChanged(e)" @ref="tb">

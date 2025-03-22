@@ -1,4 +1,4 @@
-﻿using Applications.Requests.Loans;
+﻿using Applications.Requests.Loans.Disbursements;
 using FluentValidation;
 namespace Applications.Validations.Loans
 {

@@ -1,0 +1,163 @@
+﻿@page "/LoanProducts"
+@using Applications.Responses.ViewModels.Loans.Products
+@using TCLMS.Shared.Entities.ViewModels.Loans.Products
+<PageTitle>Loan Products</PageTitle>
+<RadzenTabs @ref="tabs" RenderMode="TabRenderMode.Client" @bind-SelectedIndex="SelectIndex">
+    <Tabs>
+        <RadzenTabsItem Text="Loan Products">
+            <div class="">
+                <div class="card">
+                    <div class="card-header">
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
+                        JustifyContent="JustifyContent.SpaceBetween">
+                            <RadzenButton Click="OnCreate" Disabled
+                            Icon="add"
+                            Text="New LoanProduct"
+                            ButtonStyle="ButtonStyle.Success" Size="Radzen.ButtonSize.Small">
+                            </RadzenButton>
+                            <span>
+                                <RadzenCheckBox @bind-Value="InActive"
+                                @bind-Value:after="OnIsActive" />
+                                Include inactive
+                            </span>
+                        </RadzenStack>
+                    </div>
+                    <div class="card-body">
+                        <RadzenStack AlignItems="AlignItems.Center"
+                        JustifyContent="Radzen.JustifyContent.SpaceBetween"
+                        Orientation="Radzen.Orientation.Horizontal"
+                        Wrap="Radzen.FlexWrap.Wrap">
+                            <RadzenStack JustifyContent="Radzen.JustifyContent.Start" Style="width:15%" Orientation="Radzen.Orientation.Horizontal">
+                                <RadzenDropDown TValue="int"
+                                @bind-Value="pageSize"
+                                Data="SelectedRow"
+                                PopupStyle="10"
+                                FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                Style="width: 100%; max-width: 100px;height:34px;font-size:14px"
+                                Name="DropDownBindValue" />
+                                <div>
+                                    <RadzenButton Size="ButtonSize.Small"
+                                    Icon="BtnIconType.Reload"
+                                    Click="Reload"
+                                    ButtonStyle="ButtonStyle.Primary" />
+                                </div>
+                            </RadzenStack>
+
+
+                            <RadzenStack Style="width:25%" JustifyContent="Radzen.JustifyContent.End">
+                                <RadzenFormField AllowFloatingLabel="false">
+                                    <Start>
+                                        <RadzenIcon Icon="search" />
+                                    </Start>
+                                    <ChildContent>
+                                        <RadzenTextBox Placeholder="Search here..."
+                                        Style="width:100%;height:34px;font-size:14px"
+                                        @oninput="PerformSearch"
+                                        @bind-Value="searchText" />
+                                    </ChildContent>
+                                </RadzenFormField>
+
+                            </RadzenStack>
+                        </RadzenStack>
+
+                        <div class="mt-2">
+                            <RadzenDataGrid GridLines="DataGridGridLines.Horizontal"
+                            Count="@counts"
+                            PageSize="@pageSize"
+                            AllowPaging="true"
+                            ShowPagingSummary="true"
+                            Density="Density.Compact"
+                            PagerHorizontalAlign="HorizontalAlign.Right"
+                            AllowSorting="true"
+                            IsLoading="isLoading"
+                            LoadData="LoadData"
+                            Data="VLProducts">
+                                <Columns>
+                                    <RadzenDataGridColumn Title="#" Context="h">
+                                        <Template>
+                                            @(VLProducts!.ToList()!.IndexOf(h) + 1)
+                                        </Template>
+                                    </RadzenDataGridColumn>
+
+                                    <RadzenDataGridColumn Title="Product Code" Property="p=>p.LoanProductCode" />
+                                    <RadzenDataGridColumn Title="Product Name" Property="p=>p.LoanProductName" />
+                                    <RadzenDataGridColumn Title="Loan Size" Property="p=>p.LoanSize" />
+                                    <RadzenDataGridColumn Title="Currency" Property="p=>p.CurrencyCode" />
+                                    <RadzenDataGridColumn Title="Installment" Property="p=>p.Installments" />
+                                    <RadzenDataGridColumn Title="Status" Sortable="false" Context="c">
+                                        <Template>
+
+                                            <RadzenCheckBox TValue="bool" @bind-Value="c.IsActive"
+                                            Change="@((arg)=>DeactiveOrActive(arg,c))" />
+                                        </Template>
+                                    </RadzenDataGridColumn>
+                                    <RadzenDataGridColumn Title="Actions" Sortable="false" Context="c">
+                                        <Template>
+                                            <RadzenButton Size="Radzen.ButtonSize.ExtraSmall"
+                                            Icon="more_vert"
+                                            Variant="Variant.Text"
+                                            Click="@((args)=>ShowContextMenuWithContent(args,c))" />
+                                        </Template>
+                                    </RadzenDataGridColumn>
+                                </Columns>
+                            </RadzenDataGrid>
+                            @* <QuickGrid Items="@VLProducts"
+                                       Class="table table-hover table-sm table-bordered"
+                                       Pagination="@pagination">
+                                <TemplateColumn Title="#" Context="em"
+                                                Sortable="true"
+                                                IsDefaultSortColumn="true"
+                                                InitialSortDirection="Microsoft.AspNetCore.Components.QuickGrid.SortDirection.Descending">
+                                    <strong>
+                                        @{
+                                            var rowNumber = VLProducts!.ToList().IndexOf(em) + 1;
+                                        }
+                                        @rowNumber
+                                    </strong>
+                                </TemplateColumn>
+                                <PropertyColumn Property="@(c => c.LoanProductCode)" Title="Product Code" Sortable="true" />
+                                <PropertyColumn Property="@(c => c.LoanProductName)" Title="Product Name" Sortable="true" />
+                                <PropertyColumn Property="@(c => c.LoanSize)" Title="Loan Size" Sortable="true" />
+                                <PropertyColumn Property="@(c => c.CurrencyCode)" Title="Currency" Sortable="true" />
+                                <PropertyColumn Property="@(c => c.Installments)" Title="Installment" Sortable="true" />
+                                <TemplateColumn Context="c" Title="Active" Sortable="false">
+                                    <RadzenCheckBox TValue="bool" @bind-Value="c.IsActive"
+                                                  Change="@((arg)=>DeactiveOrActive(arg,c))" />
+                                </TemplateColumn>
+                                <TemplateColumn Title="Actions" Context="c" Align="Align.Center">
+                                    <RadzenButton Size="Radzen.ButtonSize.ExtraSmall"
+                                                  Icon="more_vert"
+                                                  Variant="Variant.Text"
+                                                  Click="@((args)=>ShowContextMenuWithContent(args,c))" />
+
+
+                                </TemplateColumn>
+                            </QuickGrid> *@
+                        </div>
+
+                        @*  <Microsoft.AspNetCore.Components.QuickGrid.Paginator State="@pagination" /> *@
+
+                    </div>
+
+                </div>
+            </div>
+        </RadzenTabsItem>
+        <RadzenTabsItem Text="Loan Product Details" Visible="IsDetails">
+            <LPModalDetail model="DetailModel" CloseTab="CloseTabs" />
+        </RadzenTabsItem>
+    </Tabs>
+</RadzenTabs>
+
+@code {
+    void ShowContextMenuWithContent(MouseEventArgs args, VlProductList e)
+    {
+        ContextMenuService.Open(args, ds =>
+    @<RadzenMenu Style="font-size:0.8rem;">
+
+        <RadzenMenuItem Click="@(()=>LPDetails(e.LoanProductId))" Icon="info" Text="Details" Value="@e"></RadzenMenuItem>
+        <RadzenMenuItem Click="@(()=>OnEdit(e))" Disabled Icon="edit" Text="Edit" Value="@e"></RadzenMenuItem>
+        <RadzenMenuItem Click="@(()=>OnDelete(e))" Icon="delete" Text="Delete" Value="@e"></RadzenMenuItem>
+    </RadzenMenu>
+    );
+    }
+}

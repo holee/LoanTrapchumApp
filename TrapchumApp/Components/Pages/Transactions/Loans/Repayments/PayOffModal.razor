@@ -1,0 +1,1068 @@
+﻿@using TCLMS.Shared.Entities.Dtos.Transactions.LoanTransactions
+@using TCLMS.Shared.Entities.Helpers.Extensions
+@using TCLMS.Shared.Entities.Models.Settings
+<div class="container-fluid rz-background-color-base-100">
+        <RadzenRow AlignItems="AlignItems.Center" class="rz-px-1 rz-py-2 rz-m-0">
+            <RadzenColumn Size="5">
+                <RadzenBadge BadgeStyle="BadgeStyle.Light" Shade="Shade.Dark">
+                    <RadzenStack Orientation="Orientation.Horizontal"
+                                 AlignItems="AlignItems.Center"
+                                 Gap="0.25rem"
+                                 Style="padding: 0.4rem 0.25rem 0.4rem 0; text-transform: none;">
+                        Paid Amount
+                        <strong style="font-size:1rem;color:black;">
+                            @(originalPaidAmount.Format(CurrencyId))
+                        </strong>
+                    </RadzenStack>
+                </RadzenBadge>
+            </RadzenColumn>
+            <RadzenColumn Size="4">
+                <RadzenBadge BadgeStyle="BadgeStyle.Light" Shade="Shade.Dark">
+                    <RadzenStack Orientation="Orientation.Horizontal"
+                                 AlignItems="AlignItems.Center"
+                                 Gap="0.25rem"
+                                 Style="padding: 0.4rem 0.25rem 0.4rem 0; text-transform: none;">
+                        Penalty Amount
+                        <strong style="font-size:1rem;color:black;">
+                            @(originalPenaltyAmount.Format(CurrencyId))
+                        </strong>
+                    </RadzenStack>
+                </RadzenBadge>
+            </RadzenColumn>
+            <RadzenColumn Size="3">
+                <RadzenStack Orientation="Orientation.Horizontal"
+                             JustifyContent="JustifyContent.End"
+                             AlignItems="AlignItems.Center">
+                    <RadzenButton Click="RestoreDefault"
+                                  ButtonStyle="ButtonStyle.Primary"
+                                  Text="Set Default"
+                                  Size="Radzen.ButtonSize.Small">
+                    </RadzenButton>
+                </RadzenStack>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+            <RadzenColumn Size="4"></RadzenColumn>
+            <RadzenColumn Size="4">
+                <RadzenBadge BadgeStyle="BadgeStyle.Info" Shade="Shade.Dark" class="w-100">
+                    <RadzenStack Orientation="Orientation.Horizontal"
+                                 AlignItems="AlignItems.Center"
+                                 JustifyContent="JustifyContent.Center"
+                                 Gap="0.25rem"
+                                 Style="padding: 0.2rem 0.25rem 0.2rem 0; text-transform:uppercase;">
+                        <strong>USD</strong>
+                    </RadzenStack>
+                </RadzenBadge>
+            </RadzenColumn>
+            <RadzenColumn Size="4">
+                <RadzenBadge BadgeStyle="BadgeStyle.Info" Shade="Shade.Dark" class="w-100">
+                    <RadzenStack Orientation="Orientation.Horizontal"
+                                 AlignItems="AlignItems.Center"
+                                 JustifyContent="JustifyContent.Center"
+                                 Gap="0.25rem"
+                                 Style="padding: 0.2rem 0.25rem 0.2rem 0; text-transform: uppercase;">
+                        <strong>KHR</strong>
+                    </RadzenStack>
+                </RadzenBadge>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+            <RadzenColumn Size="4">
+                <RadzenLabel>Penalty Amount</RadzenLabel>
+            </RadzenColumn>
+            <RadzenColumn Size="8">
+                <RadzenNumeric TValue="decimal?"
+                               @bind-Value="penaltyAmount"
+                               onclick="this.querySelector('.rz-numeric-input').select()"
+                               TextAlign="TextAlign.End"
+                               class="w-100"
+                               Format="#,##0.00"
+                               Style="height:var(--input-text-sm)"
+                               Min="0"
+                               @oninput="CalculatePenaltyAmount"
+                               Disabled="@(penaltyAmount<=0)"
+                               ShowUpDown="false" />
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+            <RadzenColumn Size="4">
+                <RadzenLabel>Total Amount</RadzenLabel>
+            </RadzenColumn>
+            <RadzenColumn Size="8">
+                <RadzenNumeric TValue="decimal?"
+                               @bind-Value="TotalPaidAmount"
+                               onclick="this.querySelector('.rz-numeric-input').select()"
+                               ShowUpDown="false"
+                               TextAlign="TextAlign.End"
+                               class="w-100"
+                               Disabled
+                               Min="0"
+                               Style="height:var(--input-text-sm)"
+                               Format="#,##0.00" />
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+            <RadzenColumn Size="4">
+                <RadzenLabel>
+                    Recieve Amount
+                </RadzenLabel>
+            </RadzenColumn>
+            <RadzenColumn Size="4">
+                <RadzenNumeric TValue="decimal?"
+                               ShowUpDown="false"
+                               class="w-100"
+                               onclick="this.querySelector('.rz-numeric-input').select()"
+                               @bind-Value="receiveAmountUsd"
+                               Format="#,##0.00"
+                               Style="height:var(--input-text-sm)"
+                               Min="0"
+                               @oninput="ReceivePaymentUSDChanged"
+                               TextAlign="TextAlign.End" />
+            </RadzenColumn>
+            <RadzenColumn Size="4">
+                <RadzenNumeric TValue="decimal?"
+                               ShowUpDown="false"
+                               Format="#,##0.00"
+                               @bind-Value="receiveAmountKhr"
+                               @oninput="ReceivePaymentKHRChanged"
+                               Disabled="@(CurrencyId==2)"
+                               Min="0"
+                               Style="height:var(--input-text-sm)"
+                               onclick="this.querySelector('.rz-numeric-input').select()"
+                               class="w-100"
+                               TextAlign="TextAlign.End" />
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+            <RadzenColumn Size="4">
+                <RadzenLabel>Change</RadzenLabel>
+            </RadzenColumn>
+            <RadzenColumn Size="4">
+                <RadzenNumeric TValue="decimal?"
+                               @bind-Value="changedAmountUSD"
+                               TextAlign="TextAlign.End"
+                               class="w-100"
+                               Format="#,##0.00"
+                               onclick="this.querySelector('.rz-numeric-input').select()"
+                               Min="0"
+                               Disabled="@(receiveAmountKhr > 0 && receiveAmountUsd > 0)"
+                               Style="cursor:not-allowed;height:var(--input-text-sm)"
+                               @oninput="TextUsdAmountChanged"
+                               ShowUpDown="false">
+                </RadzenNumeric>
+            </RadzenColumn>
+            <RadzenColumn Size="4">
+                <RadzenNumeric TValue="decimal?"
+                               @bind-Value="changedAmountKHR"
+                               TextAlign="TextAlign.End"
+                               Disabled
+                               Style="cursor:not-allowed;height:var(--input-text-sm)"
+                               class="w-100"
+                               Min="0"
+                               Format="#,##0.00"
+                               ShowUpDown="false">
+                </RadzenNumeric>
+            </RadzenColumn>
+        </RadzenRow>
+        <input type="hidden" @bind="originalExchangeAmountUSD" />
+        <input type="hidden" @bind="originalExchangeAmountKHR" />
+        <input type="hidden" @bind="buyingRate" />
+        <input type="hidden" @bind="sellingRate" />
+        <input type="hidden" @bind="spotRate" />
+        <input type="hidden" @bind="buyAmount" />
+        <input type="hidden" @bind="sellAmount" />
+        <input type="hidden" @bind="spotRateAmount" />
+        <input type="hidden" @bind="gainOrLostAmount" />
+</div>
+<RadzenStack Orientation="Radzen.Orientation.Horizontal"
+             AlignItems="AlignItems.Center"
+             class="mt-3"
+             JustifyContent="Radzen.JustifyContent.End"
+             Gap="1rem">
+    <RadzenButton ButtonStyle="ButtonStyle.Success"
+                  Size="Radzen.ButtonSize.Small"
+                  Icon="save"
+                  Text="Recieve Payment"
+                  IsBusy="isBusy"
+                  Click="OnSaveChanges">
+    </RadzenButton>
+    <RadzenButton Size="Radzen.ButtonSize.Small"
+                  ButtonStyle="ButtonStyle.Danger"
+                  Icon="cancel"
+                  Text="Close"
+                  Click="@CloseModal">
+    </RadzenButton>
+</RadzenStack>
+
+@code {
+
+    [Parameter] public int CurrencyId { get; set; }
+    [Parameter] public long CreditAgentId { get; set; }
+    [Parameter] public long UserId { get; set; }
+    [Parameter] public long LoanId { get; set; }
+    [Parameter] public int BranchId { get; set; }
+    [Parameter] public string CustomerName { get; set; } = string.Empty;
+    [Parameter] public string ReceiptNo { get; set; } = string.Empty;
+    [Parameter] public List<LoanRepaymentLineDtoCreate> LoanRepaymentLines { get; set; } = [];
+    [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+    VCurrenciesList? selectedCurrency;
+    TrxForeignExchangeDtoCreate model = new TrxForeignExchangeDtoCreate();
+    ForeignExchangeDtoCreate c = new ForeignExchangeDtoCreate();
+    LoanRepaymentDtoCreate LoanRepayment { get; set; } = new();
+    IEnumerable<VCurrenciesList> Currencies = [];
+    IEnumerable<SysSettings> settings = [];
+    decimal? receiveAmountUsd = 0;
+    decimal? receiveAmountKhr = 0;
+    decimal? changedAmountUSD = 0;
+    decimal? changedAmountKHR = 0;
+    decimal? penaltyAmount = 0;
+    decimal exchangeRate = 0;
+    decimal? buyAmount = 0;
+    decimal? sellAmount = 0;
+    decimal? spotRateAmount = 0;
+    decimal? spotRateExhcangeAmount = 0;
+    decimal? buyExchangeAmount = 0;
+    decimal? sellExchangeAmount = 0;
+    decimal? TotalPaidAmount = 0;
+    decimal? originalExchangeAmountUSD = 0;
+    decimal? originalExchangeAmountKHR = 0;
+    decimal? gainOrLostAmount = 0;
+    decimal? buyingRate = 0;
+    decimal? sellingRate = 0;
+    decimal? spotRate = 0;
+    decimal? exchangedSpotRateAmount = 0;
+    decimal? exchangeGainAndLostAmount = 0;
+    decimal? originalPaidAmount = 0;
+    decimal? originalPenaltyAmount = 0;
+    decimal? FXEPA_Amount = 0;
+    decimal? FXPA_Amount = 0;
+    int gainLedgerRefId = 0;
+    int lostLedgerRefId = 0;
+    int buyLedgerRefId = 0;
+    int sellLedgerRefId = 0;
+    int buyCurrencyRefId = 0;
+    int sellCurrencyRefId = 0;
+    bool isChangeAvailable = false;
+    bool isSelled = false;
+    bool isBuy = true;
+    bool isBusy = false;
+    bool disableButton = true;
+    bool isPaymentExchanged = false;
+    bool isExchangedChanged = false;
+    protected override async Task OnParametersSetAsync()
+    {
+        var currencyResponse = await _currencyService.GetCurrency(1);
+        if (currencyResponse.IsSuccess)
+        {
+            selectedCurrency = currencyResponse.Data!;
+            buyingRate = currencyResponse.Data!.BuyingRate;
+            sellingRate = currencyResponse.Data!.SellingRate;
+            spotRate = currencyResponse.Data!.SpotRate;
+        }
+        var resultSetting = await _settingsServiceImpl.GetSettings();
+        if (resultSetting.IsSuccess)
+        {
+            settings = resultSetting.Data!;
+            gainLedgerRefId = settings.FirstOrDefault(p => p.Code == "FXGAIN-KHR")!.Value.ToNumer<int>();
+            lostLedgerRefId = settings.FirstOrDefault(p => p.Code == "FXLOSS-KHR")!.Value.ToNumer<int>();
+            buyLedgerRefId = settings.FirstOrDefault(p => p.Code == "FXEPA-USD")!.Value.ToNumer<int>();
+            sellLedgerRefId = settings.FirstOrDefault(p => p.Code == "FXPA-KHR")!.Value.ToNumer<int>();
+        }
+        await base.OnParametersSetAsync();
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        if (LoanRepaymentLines.Any())
+        {
+            penaltyAmount = LoanRepaymentLines.Sum(x => x.PenaltyAmount);
+            originalPenaltyAmount = penaltyAmount;
+            TotalPaidAmount = LoanRepaymentLines.Total();
+            originalPaidAmount = LoanRepaymentLines.TotalAmountWithPenalty();
+        }
+        if (CurrencyId == 1)
+        {
+            receiveAmountKhr = TotalPaidAmount;
+        }
+        else
+        {
+            receiveAmountUsd = TotalPaidAmount;
+        }
+        await base.OnInitializedAsync();
+    }
+    void CloseModal()
+    {
+        DialogService.Close(false);
+    }
+    async Task OnSaveChanges()
+    {
+        try
+        {
+            if (receiveAmountKhr <= 0 && receiveAmountUsd <= 0)
+            {
+                NotificationService.Notify(NotificationSeverity.Error, "Please provide payment amount.");
+                return;
+            }
+            var tran = new LoanTransactionDtoCreate
+                {
+                    TransactionDate = DateTime.Now,
+                    TransactionTypeName = "Loan Principal Repayment",
+                    TranTypeRefId = 20,
+                    UserRefID = UserId
+                };
+            LoanRepayment.LoanRefId = LoanId;
+            LoanRepayment.CreditAgentRefId = CreditAgentId;
+            LoanRepayment.PayDate = DateTime.Now;
+            LoanRepayment.Principle = LoanRepaymentLines.TotalPaidPrincipleAmount();
+            LoanRepayment.Interest = LoanRepaymentLines.TotalPaidInterestAmount();
+            LoanRepayment.CollectionFeeAmount = LoanRepaymentLines.TotalPaidCollectionFeeAmount();
+            LoanRepayment.PenaltyAmount = LoanRepaymentLines.TotalPaidPenaltyAmount();
+            LoanRepayment.SubTotal = LoanRepaymentLines.Total();
+            LoanRepayment.OfficialReceiptNo = ReceiptNo;
+            LoanRepayment.LoanRepaymentLines = LoanRepaymentLines;
+            LoanRepayment.LoanTransaction = tran;
+            LoanRepayment.BranchRefId = BranchId;
+            LoanRepayment.UserRefId = UserId;
+            LoanRepayment.CurrencyRefId = CurrencyId;
+            if (TotalPaidAmount > 0)
+            {
+                var tranxCashManagement = new TrxCashManagementDtoCreate()
+                    {
+                        CurrencyRefId = CurrencyId,
+                        TransactionDate = DateTime.Now,
+                        BusinessDate = DateTime.Now,
+                        CashStatusRefId = 2,
+                        BankRefId = 11,
+                        StaffRefId = UserId,
+                        Amount = TotalPaidAmount,
+                    };
+                LoanRepayment.LoanTransaction!.CashManagements!.Add(tranxCashManagement);
+            }
+            if (isPaymentExchanged)
+            {
+                var currencyExchanges = new ForeignExchangeDtoCreate
+                    {
+                        StaffRefId = UserId,
+                        StaffAuthRefId = UserId,
+                        BranchRefId = BranchId,
+                        BankRefId = 11,
+                        BuyAmount = buyAmount,
+                        SellAmount = sellAmount,
+                        BuyCurrencyRefId = buyCurrencyRefId,
+                        SellCurrencyRefId = sellCurrencyRefId,
+                        ExchangeRate = exchangeRate,
+                        BuyLedgerRefId = buyLedgerRefId,
+                        SellLedgerRefId = sellLedgerRefId,
+                        GainAndLostAmount = gainOrLostAmount,
+                        GainAndLostLedgerRefId = gainOrLostAmount < 0 ? lostLedgerRefId : gainLedgerRefId,
+                        SpotRate = selectedCurrency!.SpotRate,
+                    };
+                model.ForeignExchanges!.Add(currencyExchanges);
+            }
+            if (isExchangedChanged)
+            {
+                var currencyExchanges = new ForeignExchangeDtoCreate
+                    {
+                        StaffRefId = UserId,
+                        StaffAuthRefId = UserId,
+                        BankRefId = 11,
+                        BuyAmount = buyExchangeAmount,
+                        BranchRefId = BranchId,
+                        SellAmount = sellExchangeAmount,
+                        BuyCurrencyRefId = 1,
+                        SellCurrencyRefId = 2,
+                        ExchangeRate = exchangeRate,
+                        BuyLedgerRefId = buyLedgerRefId,
+                        SellLedgerRefId = sellLedgerRefId,
+                        GainAndLostAmount = gainOrLostAmount,
+                        GainAndLostLedgerRefId = gainOrLostAmount < 0 ? lostLedgerRefId : gainLedgerRefId,
+                        SpotRate = spotRate
+                    };
+                model.ForeignExchanges!.Add(currencyExchanges);
+            }
+            var confirmOption = new ConfirmOptions
+                {
+                    CancelButtonText = "Cancel",
+                    OkButtonText = "Yes",
+                };
+
+            string message = $"Receive money from {CustomerName} with amount {TotalPaidAmount}";
+            var confirmPayment = await DialogService.Confirm(message, "Payment", confirmOption);
+
+            if (confirmPayment == false) return;
+
+            model.UserRefID = UserId;
+            model.TranTypeRefId = 67;
+            model.TransactionTypeName = "Currency Foreign Exchange";
+            LoanRepayment.ForeignExchangeTrx = model;
+            var result = await _repaymentService.RecievePayment(LoanRepayment);
+
+            if (result.IsSuccess)
+            {
+                DialogService.Close(true);
+            }
+            else
+            {
+                NotificationService.Notify(NotificationSeverity.Error, result.Data!.Message);
+            }
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, ex.Message);
+        }
+    }
+
+    void ReceivePaymentUSDChanged(decimal? amount)
+    {
+        if (amount < 0 && TotalPaidAmount <= 0)
+        {
+            receiveAmountUsd = 0;
+            receiveAmountKhr = 0;
+            NotificationService.Notify(NotificationSeverity.Error, "please input apply amount.");
+            return;
+        }
+        if ((CurrencyId == 1 || CurrencyId == 2) && amount < 0 && TotalPaidAmount > 0)
+        {
+            receiveAmountKhr = 0;
+            changedAmountKHR = 0;
+            receiveAmountUsd = 0;
+            changedAmountUSD = 0;
+            isPaymentExchanged = false;
+            NotificationService.Notify(NotificationSeverity.Error, "please input apply amount.");
+            return;
+        }
+        ///no currency exchange occur
+        if (CurrencyId == 2 && amount > 0 && amount >= TotalPaidAmount)
+        {
+            changedAmountUSD = amount - TotalPaidAmount;
+            originalExchangeAmountUSD = changedAmountUSD;
+            receiveAmountKhr = 0;
+            changedAmountKHR = 0;
+            originalExchangeAmountKHR = 0;
+            isPaymentExchanged = false;
+            buyExchangeAmount = 0;
+            sellExchangeAmount = 0;
+            gainOrLostAmount = 0;
+            spotRateAmount = 0;
+            buyAmount = 0;
+            sellAmount = 0;
+            isChangeAvailable = changedAmountUSD > 0 ? true : false;
+            return;
+        }
+
+
+        //curency exchange occur
+        if (CurrencyId == 2 && amount > 0 && amount < TotalPaidAmount)
+        {
+            //sell usd to customer
+            var sellUsdAmount = TotalPaidAmount - amount;
+            //sell dollar to customer and buy riels from  customer
+            var totalKhrAmount = (sellUsdAmount * sellingRate).RoundUpKhr(2);
+            //get spot rate amount
+            spotRateAmount = sellUsdAmount * spotRate;
+            //get gain or lost amount
+            gainOrLostAmount = totalKhrAmount - spotRateAmount;
+            sellAmount = sellUsdAmount;
+            buyAmount = receiveAmountKhr = totalKhrAmount;
+            exchangeRate = sellingRate!.Value;
+            isPaymentExchanged = true;
+            changedAmountUSD = 0;
+            changedAmountKHR = 0;
+            originalExchangeAmountKHR = 0;
+            originalExchangeAmountUSD = 0;
+            return;
+        }
+
+        //curency exchange occur
+        if (CurrencyId == 2 && amount == 0 && TotalPaidAmount > 0)
+        {
+
+            var totalKhrAmount = (TotalPaidAmount * sellingRate).RoundUpKhr(2);
+            //sell dollar to customer and buy riels from  customer
+            sellAmount = TotalPaidAmount;
+            sellCurrencyRefId = 2;
+            //buy amount
+            buyAmount = receiveAmountKhr = totalKhrAmount;
+            buyCurrencyRefId = 1;
+            //get spot rate amount
+            spotRateAmount = TotalPaidAmount * spotRate;
+            //get gain or lost amount
+            gainOrLostAmount = totalKhrAmount - spotRateAmount;
+            exchangeRate = sellingRate!.Value;
+            isPaymentExchanged = true;
+            changedAmountUSD = 0;
+            changedAmountKHR = 0;
+            originalExchangeAmountKHR = 0;
+            originalExchangeAmountUSD = 0;
+            return;
+        }
+
+        //Payment currency is riels
+
+        if (CurrencyId == 1 && amount < 0)
+        {
+            RestoreDefault();
+            return;
+        }
+        if (CurrencyId == 1 && (amount == 0 || receiveAmountUsd == 0))
+        {
+            receiveAmountKhr = TotalPaidAmount;
+            changedAmountKHR = 0;
+            changedAmountUSD = 0;
+            buyAmount = 0;
+            sellAmount = 0;
+            gainOrLostAmount = 0;
+            exchangeGainAndLostAmount = 0;
+            receiveAmountUsd = 0;
+            spotRate = 0;
+            return;
+        }
+
+        if (CurrencyId == 1 && amount > 0 && TotalPaidAmount > 0)
+        {
+            //buy us dollar
+            var totalKhrAmount = (amount * buyingRate).RoundDownKhr(2);
+            if (totalKhrAmount < TotalPaidAmount)
+            {
+                //amount is dollar
+                buyAmount = amount;
+                buyCurrencyRefId = 2;
+                //calculate left khmer riels  amount
+                receiveAmountKhr = TotalPaidAmount - totalKhrAmount;
+                //calculate selling amount
+                sellAmount = totalKhrAmount;
+                sellCurrencyRefId = 1;
+                //Calculate for spot rate amount
+                spotRateAmount = amount * spotRate;
+                //Calculate for gain and lost
+                gainOrLostAmount = spotRateAmount - totalKhrAmount;
+                //set exchange rate
+                exchangeRate = buyingRate!.Value;
+                changedAmountKHR = 0;
+                changedAmountUSD = 0;
+                isPaymentExchanged = true;
+                return;
+            }
+            else
+            {
+
+                receiveAmountKhr = 0;
+                changedAmountKHR = totalKhrAmount - TotalPaidAmount;
+                originalExchangeAmountKHR = changedAmountKHR;
+                changedAmountUSD = 0;
+                //assign buy usd amount
+                buyAmount = amount;
+                buyCurrencyRefId = 2;
+                //assign khr amount.
+                sellAmount = totalKhrAmount;
+                sellCurrencyRefId = 1;
+                //calculate spot rate amount.
+                spotRateAmount = amount * spotRate;
+                //calculate gain and lost
+                gainOrLostAmount = spotRateAmount - TotalPaidAmount;
+                //set exchange rate
+                exchangeRate = buyingRate!.Value;
+                isPaymentExchanged = true;
+                return;
+            }
+        }
+    }
+    void ReceivePaymentUSDChanged(ChangeEventArgs e)
+    {
+        decimal amount = e.Value!.ToNumer<decimal>();
+
+        if (amount < 0 && TotalPaidAmount <= 0)
+        {
+            receiveAmountUsd = 0;
+            receiveAmountKhr = 0;
+            NotificationService.Notify(NotificationSeverity.Error, "please input apply amount.");
+            return;
+        }
+        if ((CurrencyId == 1 || CurrencyId == 2) && amount < 0 && TotalPaidAmount > 0)
+        {
+            receiveAmountKhr = 0;
+            changedAmountKHR = 0;
+            receiveAmountUsd = 0;
+            changedAmountUSD = 0;
+            isPaymentExchanged = false;
+            NotificationService.Notify(NotificationSeverity.Error, "please input apply amount.");
+            return;
+        }
+        ///no currency exchange occur
+        if (CurrencyId == 2 && amount > 0 && amount >= TotalPaidAmount)
+        {
+            changedAmountUSD = amount - TotalPaidAmount;
+            originalExchangeAmountUSD = changedAmountUSD;
+            receiveAmountKhr = 0;
+            changedAmountKHR = 0;
+            originalExchangeAmountKHR = 0;
+            isPaymentExchanged = false;
+            buyExchangeAmount = 0;
+            sellExchangeAmount = 0;
+            gainOrLostAmount = 0;
+            spotRateAmount = 0;
+            buyAmount = 0;
+            sellAmount = 0;
+            isChangeAvailable = changedAmountUSD > 0 ? true : false;
+            return;
+        }
+
+
+        //curency exchange occur
+        if (CurrencyId == 2 && amount > 0 && amount < TotalPaidAmount)
+        {
+            //sell usd to customer
+            var sellUsdAmount = TotalPaidAmount - amount;
+            //sell dollar to customer and buy riels from  customer
+            var totalKhrAmount = (sellUsdAmount * sellingRate).RoundUpKhr(2);
+            //get spot rate amount
+            spotRateAmount = sellUsdAmount * spotRate;
+            //get gain or lost amount
+            gainOrLostAmount = totalKhrAmount - spotRateAmount;
+            sellAmount = sellUsdAmount;
+            buyAmount = receiveAmountKhr = totalKhrAmount;
+            exchangeRate = sellingRate!.Value;
+            isPaymentExchanged = true;
+            changedAmountUSD = 0;
+            changedAmountKHR = 0;
+            originalExchangeAmountKHR = 0;
+            originalExchangeAmountUSD = 0;
+            return;
+        }
+
+        //curency exchange occur
+        if (CurrencyId == 2 && amount == 0 && TotalPaidAmount > 0)
+        {
+
+            var totalKhrAmount = (TotalPaidAmount * sellingRate).RoundUpKhr(2);
+            //sell dollar to customer and buy riels from  customer
+            sellAmount = TotalPaidAmount;
+            sellCurrencyRefId = 2;
+            //buy amount
+            buyAmount = receiveAmountKhr = totalKhrAmount;
+            buyCurrencyRefId = 1;
+            //get spot rate amount
+            spotRateAmount = TotalPaidAmount * spotRate;
+            //get gain or lost amount
+            gainOrLostAmount = totalKhrAmount - spotRateAmount;
+            exchangeRate = sellingRate!.Value;
+            isPaymentExchanged = true;
+            changedAmountUSD = 0;
+            changedAmountKHR = 0;
+            originalExchangeAmountKHR = 0;
+            originalExchangeAmountUSD = 0;
+            return;
+        }
+
+        //Payment currency is riels
+
+        if (CurrencyId == 1 && amount < 0)
+        {
+            RestoreDefault();
+            return;
+        }
+        if (CurrencyId == 1 && (amount == 0 || receiveAmountUsd == 0))
+        {
+            receiveAmountKhr = TotalPaidAmount;
+            changedAmountKHR = 0;
+            changedAmountUSD = 0;
+            buyAmount = 0;
+            sellAmount = 0;
+            gainOrLostAmount = 0;
+            exchangeGainAndLostAmount = 0;
+            receiveAmountUsd = 0;
+            spotRate = 0;
+            return;
+        }
+
+        if (CurrencyId == 1 && amount > 0 && TotalPaidAmount > 0)
+        {
+            //buy us dollar
+            var totalKhrAmount = (amount * buyingRate).RoundDownKhr(2);
+            if (totalKhrAmount < TotalPaidAmount)
+            {
+                //amount is dollar
+                buyAmount = amount;
+                buyCurrencyRefId = 2;
+                //calculate left khmer riels  amount
+                receiveAmountKhr = TotalPaidAmount - totalKhrAmount;
+                //calculate selling amount
+                sellAmount = totalKhrAmount;
+                sellCurrencyRefId = 1;
+                //Calculate for spot rate amount
+                spotRateAmount = amount * spotRate;
+                //Calculate for gain and lost
+                gainOrLostAmount = spotRateAmount - totalKhrAmount;
+                //set exchange rate
+                exchangeRate = buyingRate!.Value;
+                changedAmountKHR = 0;
+                changedAmountUSD = 0;
+                isPaymentExchanged = true;
+                return;
+            }
+            else
+            {
+
+                receiveAmountKhr = 0;
+                changedAmountKHR = totalKhrAmount - TotalPaidAmount;
+                originalExchangeAmountKHR = changedAmountKHR;
+                changedAmountUSD = 0;
+                //assign buy usd amount
+                buyAmount = amount;
+                buyCurrencyRefId = 2;
+                //assign khr amount.
+                sellAmount = totalKhrAmount;
+                sellCurrencyRefId = 1;
+                //calculate spot rate amount.
+                spotRateAmount = amount * spotRate;
+                //calculate gain and lost
+                gainOrLostAmount = spotRateAmount - TotalPaidAmount;
+                //set exchange rate
+                exchangeRate = buyingRate!.Value;
+                isPaymentExchanged = true;
+                return;
+            }
+        }
+    }
+    void ReceivePaymentKHRChanged(decimal? amount)
+    {
+        if (amount < 0)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "please input apply amount.");
+            SetDefualt();
+            return;
+        }
+        //no exchange occure
+        if (CurrencyId == 1 && amount >= 0 && amount >= TotalPaidAmount)
+        {
+
+            changedAmountKHR = amount - TotalPaidAmount;
+            originalExchangeAmountKHR = amount - TotalPaidAmount;
+            isPaymentExchanged = false;
+            receiveAmountUsd = 0;
+            changedAmountUSD = 0;
+            gainOrLostAmount = 0;
+            exchangeGainAndLostAmount = 0;
+            return;
+        }
+
+        if (CurrencyId == 1 && amount >= 0 && amount < TotalPaidAmount)
+        {
+            var leftKhrAmount = TotalPaidAmount - amount;
+            //buy dollar from customer
+            var buyAmount = (leftKhrAmount / buyingRate).RoundUsd(2);
+            receiveAmountUsd = buyAmount;
+            buyCurrencyRefId = 2;
+            //set sell amount
+            sellAmount = leftKhrAmount;
+            sellCurrencyRefId = 1;
+            //set spot rate amoun
+            spotRateAmount = buyAmount * spotRate;
+            //set gain or lost amount
+            gainOrLostAmount = spotRateAmount - leftKhrAmount;
+            changedAmountUSD = 0;
+            changedAmountKHR = 0;
+            isPaymentExchanged = true;
+            return;
+        }
+
+    }
+    void ReceivePaymentKHRChanged(ChangeEventArgs e)
+    {
+        var amount = e.Value!.ToNumer<decimal>();
+
+        if (amount < 0)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "please input apply amount.");
+            SetDefualt();
+            return;
+        }
+        //no exchange occure
+        if (CurrencyId == 1 && amount >= 0 && amount >= TotalPaidAmount)
+        {
+
+            changedAmountKHR = amount - TotalPaidAmount;
+            originalExchangeAmountKHR = amount - TotalPaidAmount;
+            isPaymentExchanged = false;
+            receiveAmountUsd = 0;
+            changedAmountUSD = 0;
+            gainOrLostAmount = 0;
+            exchangeGainAndLostAmount = 0;
+            return;
+        }
+
+        if (CurrencyId == 1 && amount >= 0 && amount < TotalPaidAmount)
+        {
+            var leftKhrAmount = TotalPaidAmount - amount;
+            //buy dollar from customer
+            var buyAmount = (leftKhrAmount / buyingRate).RoundUsd(2);
+            receiveAmountUsd = buyAmount;
+            buyCurrencyRefId = 2;
+            //set sell amount
+            sellAmount = leftKhrAmount;
+            sellCurrencyRefId = 1;
+            //set spot rate amoun
+            spotRateAmount = buyAmount * spotRate;
+            //set gain or lost amount
+            gainOrLostAmount = spotRateAmount - leftKhrAmount;
+            changedAmountUSD = 0;
+            changedAmountKHR = 0;
+            isPaymentExchanged = true;
+            return;
+        }
+
+    }
+    void TextUsdAmountChanged(decimal? amount)
+    {
+
+        if (amount > 0 && originalExchangeAmountUSD == 0 && originalExchangeAmountKHR == 0)
+        {
+            changedAmountUSD = 0;
+            changedAmountKHR = 0;
+            amount = 0;
+            isExchangedChanged = false;
+            return;
+        }
+        if ((amount < 0 && originalExchangeAmountUSD > 0 && originalExchangeAmountKHR <= 0) ||
+           (amount < 0 && originalExchangeAmountKHR > 0 && originalExchangeAmountUSD <= 0) ||
+            (originalExchangeAmountUSD > 0 && amount > originalExchangeAmountUSD) ||
+            (originalExchangeAmountKHR > 0 && amount > originalExchangeAmountKHR))
+        {
+            changedAmountUSD = originalExchangeAmountUSD;
+            changedAmountKHR = originalExchangeAmountKHR;
+            isExchangedChanged = false;
+            amount = 0;
+            NotificationService.Notify(NotificationSeverity.Info, "please verify amount again.");
+            return;
+        }
+        if (originalExchangeAmountKHR > 0 && originalExchangeAmountKHR < (10 * sellingRate))
+        {
+            changedAmountUSD = 0;
+            changedAmountKHR = originalExchangeAmountKHR;
+            NotificationService.Notify(NotificationSeverity.Info, "You dont have enough money to exchange.");
+            return;
+        }
+
+        if (originalExchangeAmountKHR > 0 && originalExchangeAmountUSD == 0)
+        {
+            //Sell dollar to customer
+            var KhrAmount = (amount * sellingRate).RoundUpKhr(2);
+
+            if (KhrAmount > originalExchangeAmountKHR)
+            {
+                changedAmountKHR = originalExchangeAmountKHR;
+                changedAmountUSD = 0;
+                sellExchangeAmount = 0;
+                buyExchangeAmount = 0;
+                exchangedSpotRateAmount = 0;
+                exchangeGainAndLostAmount = 0;
+                amount = 0;
+                isExchangedChanged = false;
+                return;
+            }
+            else
+            {
+                changedAmountKHR = originalExchangeAmountKHR - KhrAmount;
+                //set sell currency amount
+                sellExchangeAmount = amount;
+                sellCurrencyRefId = 2;
+                //set buy khr amount from customer
+                buyExchangeAmount = KhrAmount;
+                buyCurrencyRefId = 1;
+                //calculate spot amount
+                exchangedSpotRateAmount = amount * spotRate;
+                //set exchange gain and lost
+                exchangeGainAndLostAmount = KhrAmount - exchangedSpotRateAmount;
+                isExchangedChanged = true;
+                return;
+            }
+        }
+        if (originalExchangeAmountUSD > 0 && originalExchangeAmountKHR == 0)
+        {
+            //buy dollar from customer
+            changedAmountKHR = ((originalExchangeAmountUSD - amount) * buyingRate).RoundDownKhr(2);
+            sellExchangeAmount = changedAmountKHR;
+            sellCurrencyRefId = 1;
+            //buy dollar
+            buyExchangeAmount = originalExchangeAmountUSD - amount;
+            buyCurrencyRefId = 2;
+            //Spot amount
+            spotRateExhcangeAmount = buyExchangeAmount * spotRate;
+            exchangeGainAndLostAmount = changedAmountKHR - spotRateExhcangeAmount;
+            isExchangedChanged = true;
+            return;
+        }
+
+
+    }
+    void TextUsdAmountChanged(ChangeEventArgs e)
+    {
+        var amount = e.Value!.ToNumer<decimal>();
+
+        if (amount > 0 && originalExchangeAmountUSD == 0 && originalExchangeAmountKHR == 0)
+        {
+            changedAmountUSD = 0;
+            changedAmountKHR = 0;
+            amount = 0;
+            isExchangedChanged = false;
+            return;
+        }
+        if ((amount < 0 && originalExchangeAmountUSD > 0 && originalExchangeAmountKHR <= 0) ||
+           (amount < 0 && originalExchangeAmountKHR > 0 && originalExchangeAmountUSD <= 0) ||
+            (originalExchangeAmountUSD > 0 && amount > originalExchangeAmountUSD) ||
+            (originalExchangeAmountKHR > 0 && amount > originalExchangeAmountKHR))
+        {
+            changedAmountUSD = originalExchangeAmountUSD;
+            changedAmountKHR = originalExchangeAmountKHR;
+            isExchangedChanged = false;
+            amount = 0;
+            NotificationService.Notify(NotificationSeverity.Info, "please verify amount again.");
+            return;
+        }
+        if (originalExchangeAmountKHR > 0 && originalExchangeAmountKHR < (10 * sellingRate))
+        {
+            changedAmountUSD = 0;
+            changedAmountKHR = originalExchangeAmountKHR;
+            NotificationService.Notify(NotificationSeverity.Info, "You dont have enough money to exchange.");
+            return;
+        }
+
+        if (originalExchangeAmountKHR > 0 && originalExchangeAmountUSD == 0)
+        {
+            //Sell dollar to customer
+            var KhrAmount = (amount * sellingRate).RoundUpKhr(2);
+
+            if (KhrAmount > originalExchangeAmountKHR)
+            {
+                changedAmountKHR = originalExchangeAmountKHR;
+                changedAmountUSD = 0;
+                sellExchangeAmount = 0;
+                buyExchangeAmount = 0;
+                exchangedSpotRateAmount = 0;
+                exchangeGainAndLostAmount = 0;
+                amount = 0;
+                isExchangedChanged = false;
+                return;
+            }
+            else
+            {
+                changedAmountKHR = originalExchangeAmountKHR - KhrAmount;
+                //set sell currency amount
+                sellExchangeAmount = amount;
+                sellCurrencyRefId = 2;
+                //set buy khr amount from customer
+                buyExchangeAmount = KhrAmount;
+                buyCurrencyRefId = 1;
+                //calculate spot amount
+                exchangedSpotRateAmount = amount * spotRate;
+                //set exchange gain and lost
+                exchangeGainAndLostAmount = KhrAmount - exchangedSpotRateAmount;
+                isExchangedChanged = true;
+                return;
+            }
+        }
+        if (originalExchangeAmountUSD > 0 && originalExchangeAmountKHR == 0)
+        {
+            //buy dollar from customer
+            changedAmountKHR = ((originalExchangeAmountUSD - amount) * buyingRate).RoundDownKhr(2);
+            sellExchangeAmount = changedAmountKHR;
+            sellCurrencyRefId = 1;
+            //buy dollar
+            buyExchangeAmount = originalExchangeAmountUSD - amount;
+            buyCurrencyRefId = 2;
+            //Spot amount
+            spotRateExhcangeAmount = buyExchangeAmount * spotRate;
+            exchangeGainAndLostAmount = changedAmountKHR - spotRateExhcangeAmount;
+            isExchangedChanged = true;
+            return;
+        }
+
+
+    }
+    void CalculatePenaltyAmount(decimal? amount)
+    {
+        if (amount < 0)
+        {
+            penaltyAmount = originalPenaltyAmount;
+            return;
+        }
+        if (amount > originalPenaltyAmount)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "input amount must be less than penalty amount.");
+            RestoreDefault();
+            return;
+        }
+        else
+        {
+            TotalPaidAmount = originalPaidAmount + penaltyAmount;
+            SetDefualt();
+        }
+
+    }
+    void CalculatePenaltyAmount(ChangeEventArgs e)
+    {
+
+        var amount = e.Value?.ToNumer<decimal>();
+
+        if (amount < 0)
+        {
+            penaltyAmount = originalPenaltyAmount;
+            return;
+        }
+        if (amount > originalPenaltyAmount)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "input amount must be less than penalty amount.");
+            RestoreDefault();
+            return;
+        }
+        else
+        {
+            TotalPaidAmount = originalPaidAmount + penaltyAmount;
+            SetDefualt();
+        }
+
+    }
+    void SetDefualt()
+    {
+        changedAmountKHR = 0.00M;
+        changedAmountUSD = 0.00M;
+        receiveAmountKhr = 0.00M;
+        receiveAmountUsd = 0.00M;
+        changedAmountKHR = 0.00M;
+        changedAmountUSD = 0.00M;
+        receiveAmountKhr = 0.00M;
+        receiveAmountUsd = 0.00M;
+        buyAmount = 0;
+        sellAmount = 0;
+        buyExchangeAmount = 0;
+        sellExchangeAmount = 0;
+        spotRateAmount = 0;
+    }
+    void RestoreDefault()
+    {
+        changedAmountKHR = 0.00M;
+        changedAmountUSD = 0.00M;
+        changedAmountKHR = 0.00M;
+        changedAmountUSD = 0.00M;
+        buyAmount = 0;
+        sellAmount = 0;
+        buyExchangeAmount = 0;
+        sellExchangeAmount = 0;
+        spotRateAmount = 0;
+        TotalPaidAmount = originalPaidAmount + originalPenaltyAmount;
+        penaltyAmount = originalPenaltyAmount;
+        gainOrLostAmount = 0;
+        exchangeGainAndLostAmount = 0;
+        if (CurrencyId == 1)
+        {
+            receiveAmountKhr = TotalPaidAmount;
+            receiveAmountUsd = 0.00M;
+        }
+        else
+        {
+            receiveAmountUsd = TotalPaidAmount;
+            receiveAmountKhr = 0.00M;
+        }
+    }
+}
+
+

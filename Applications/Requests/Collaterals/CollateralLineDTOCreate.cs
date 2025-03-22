@@ -2,7 +2,7 @@
 
 public sealed class CollateralLineDtoCreate 
 {
-    public long CollateralRefId { get; set; }
+    public Guid? CollateralRefId { get; set; }
     public string? TypeName { get; set; }
     public string? SubTypeName { get; set; }
     public string? ReferenceNo { get; set; }

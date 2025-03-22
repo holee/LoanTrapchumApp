@@ -1,12 +1,8 @@
 ﻿namespace Applications.Requests.Collaterals
 {
-    public class CollateralDtoCreate
+    public sealed class CollateralDtoCreate
     {
-        public CollateralDtoCreate()
-        {
-            CollateralLines = new List<CollateralLineDtoCreate>();
-        }
-        public long CollateralId { get; set; }
+        public Guid CollateralId { get; set; }
         public DateTime? RegisterDate { get; set; }
         public long? CustomerRefId { get; set; }
         public string? CustomerName { get; set; }

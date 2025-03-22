@@ -1,4 +1,4 @@
-﻿using Applications.Requests.Loans;
+﻿using Applications.Requests.Loans.Payments;
 using Applications.Responses;
 using Applications.Responses.ViewModels.Loans.Payments;
 

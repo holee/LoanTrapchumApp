@@ -26,7 +26,7 @@ public class CustomerService : ICustomerService
         _context = context;
         _db = dapperService;
     }
-    public async Task<Result<IEnumerable<VCustomerList>>> GetCustomersAsync(long customerId, int take = 0,
+    public async Task<Result<IEnumerable<VCustomerList>>> GetCustomersAsync(Guid? customerId, int take = 0,
         bool includeInactive = false,
         bool exceptActiveLoan = true,
         string? searchTerm = null)
@@ -47,16 +47,16 @@ public class CustomerService : ICustomerService
         {
             customerQueries = customerQueries.Where(x => (EF.Functions.Like(x.FullName!, $"%{searchTerm}%") ||
                                               EF.Functions.Like(x.AltName!, $"%{searchTerm}%") ||
-                                              EF.Functions.Like(EF.Functions.Collate(x.CustomerId!.ToString(), "Khmer_100_CI_AI_SC_UTF8"), $"%{searchTerm}%") ||
+                                              EF.Functions.Like(EF.Functions.Collate(x.Id!.ToString(), "Khmer_100_CI_AI_SC_UTF8"), $"%{searchTerm}%") ||
                                               EF.Functions.Like(x.Phone!, $"%{searchTerm}%")));
         }
-        if (customerId > 0)
+        if (customerId.HasValue)
         {
             customerQueries = customerQueries.Where(x => x.CustomerId == customerId);
         }
         if (take > 0)
         {
-            customerQueries = customerQueries.Take(take).OrderBy(x => x.CustomerId);
+            customerQueries = customerQueries.Take(take).OrderBy(x => x.Id);
         }
 
         if (!customerQueries.Any())
@@ -81,7 +81,7 @@ public class CustomerService : ICustomerService
         if (!string.IsNullOrEmpty(q.Filter))
         {
             queries = queries.Where(x => (EF.Functions.Like(x.FullName!, $"%{q.Filter}%") ||
-                                              EF.Functions.Like(EF.Functions.Collate(x.CustomerId.ToString(), "Khmer_100_CI_AI_SC_UTF8"), $"%{q.Filter}%") ||
+                                              EF.Functions.Like(EF.Functions.Collate(x.Id.ToString(), "Khmer_100_CI_AI_SC_UTF8"), $"%{q.Filter}%") ||
                                               EF.Functions.Like(x.AltName!, $"%{q.Filter}%") ||
                                               EF.Functions.Like(x.Phone!, $"%{q.Filter}%")));
         }
@@ -102,7 +102,7 @@ public class CustomerService : ICustomerService
             Count = count,
         };
     }
-    public async Task<Result<Customer>> GetCustomerByIdAsync(long customerId)
+    public async Task<Result<Customer>> GetCustomerByIdAsync(Guid? customerId)
     {
         IQueryable<Customer> customersQuery = _context.Customers
                                             .Include(x => x.Collateral)
@@ -116,14 +116,14 @@ public class CustomerService : ICustomerService
         }
         var customer = await customersQuery
                         .AsNoTracking()
-                        .FirstOrDefaultAsync(x => x.CustomerId == customerId);
+                        .FirstOrDefaultAsync(x => x.CustomerCode == customerId);
 
         return Result.Success<Customer>(customer!);
     }
-    public async Task<Result<Customer>> GetCustomerAsync(long customerId, params string[] includes)
+    public async Task<Result<Customer>> GetCustomerByIdAsync(Guid? customerId, params string[] includes)
     {
         IQueryable<Customer> customersQuery = _context.Customers
-                                                      .Where(x => x.CustomerId == customerId);
+                                                      .Where(x => x.CustomerCode == customerId);
         if (includes.Any())
         {
             foreach (var includeProp in includes)
@@ -141,7 +141,7 @@ public class CustomerService : ICustomerService
 
         return Result.Success(customer!);
     }
-    public async Task<Result<VCustomerList>> GetCustomerForRequestLoanAsync(long customerId)
+    public async Task<Result<VCustomerList>> GetCustomerForRequestLoanAsync(Guid? customerId)
     {
         IQueryable<VCustomerList> customersQuery = _context.CustomerLists
                                                       .Where(x => x.CustomerId == customerId);
@@ -155,7 +155,7 @@ public class CustomerService : ICustomerService
 
         return Result.Success(customer!);
     }
-    public async Task<Result<VCustomerList>> GetCustomerDetailsByIdAsync(long customerId)
+    public async Task<Result<VCustomerList>> GetCustomerDetailsByIdAsync(Guid? customerId)
     {
         var db = await _db.CreateConnectionAsync();
         var results = await db.QueryMultipleAsync("spGetCustomerDetails", new
@@ -179,7 +179,7 @@ public class CustomerService : ICustomerService
         customer.CollateralLines = collaterallines ?? [];
         return Result.Success(customer);
     }
-    public async Task<Result<VCustomerList>> GetCustomerDetailsById(long customerId, bool include = false)
+    public async Task<Result<VCustomerList>> GetCustomerDetailsById(Guid? customerId, bool include = false)
     {
         try
         {
@@ -214,13 +214,13 @@ public class CustomerService : ICustomerService
                                             VCustomerList>("spGetCustomerDetailsById",
                                             (customer, loan, loanRequest, collateralLine, customerIncome, customerExpense, customerNote) =>
                                             {
-                                                if (coustmerDictionary.TryGetValue(customer.CustomerId, out var existingCustomer))
+                                                if (coustmerDictionary.TryGetValue(customer.Id, out var existingCustomer))
                                                 {
                                                     customer = existingCustomer;
                                                 }
                                                 else
                                                 {
-                                                    coustmerDictionary.Add(customer.CustomerId, customer);
+                                                    coustmerDictionary.Add(customer.Id, customer);
                                                 }
                                                 customer.Loans.Add(loan);
                                                 customer.LoanRequests.Add(loanRequest);
@@ -250,7 +250,7 @@ public class CustomerService : ICustomerService
             return Result.Failure<VCustomerList>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
         }
     }
-    public async Task<Result<IEnumerable<VCollateralLines>>> GetCustomerCollateralLines(long customerId,bool includeInUsed=false)
+    public async Task<Result<IEnumerable<VCollateralLines>>> GetCustomerCollateralLines(Guid? customerId,bool includeInUsed=false)
     {
         var queries = _context.Database.SqlQuery<VCollateralLines>($"SELECT * FROM VCollateralLines WHERE CollateralId={customerId}");
 
@@ -268,7 +268,7 @@ public class CustomerService : ICustomerService
 
         return Result.Success<IEnumerable<VCollateralLines>>(items);
     }
-    public async Task<Result<IEnumerable<VLoanDisbursments>>> GetCustomerLoanHistoryAsync(long customerId)
+    public async Task<Result<IEnumerable<VLoanDisbursments>>> GetCustomerLoanHistoryAsync(Guid? customerId)
     {
         using var db = _context.Database.GetDbConnection();
 
@@ -280,12 +280,12 @@ public class CustomerService : ICustomerService
 
         return Result.Success<IEnumerable<VLoanDisbursments>>(loanHistoriesResult);
     }
-    public async Task<Result<string>> DeleteCustomerAsync(long customerId)
+    public async Task<Result<string>> DeleteCustomerAsync(Guid? customerId)
     {
         try
         {
             var customer = await _context.Customers
-                                        .FirstOrDefaultAsync(x => x.CustomerId == customerId);
+                                        .FirstOrDefaultAsync(x => x.CustomerCode == customerId);
             if (customer is null)
             {
                 return Result.Failure<string>(ErrorResponse.NotFound("There is no Customer in the List."));
@@ -360,12 +360,12 @@ public class CustomerService : ICustomerService
         }
 
     }
-    public async Task<Result<string>> MakeCustomerInActiveAsync(long customerId, int editSeq = 0, bool isActive = true)
+    public async Task<Result<string>> MakeCustomerInActiveAsync(Guid? customerId, int editSeq = 0, bool isActive = true)
     {
         try
         {
             var increaseEdit = editSeq + 1;
-            var updatedRows = await _context.Customers.Where(x => x.CustomerId == customerId && x.EditSeq == editSeq)
+            var updatedRows = await _context.Customers.Where(x => x.CustomerCode == customerId && x.EditSeq == editSeq)
                                   .ExecuteUpdateAsync(prop => prop
                                                               .SetProperty(x => x.IsActive, isActive)
                                                               .SetProperty(x => x.EditSeq, increaseEdit));

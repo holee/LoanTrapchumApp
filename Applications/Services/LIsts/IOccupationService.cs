@@ -3,7 +3,8 @@ using Domains.Models.Lists;
 
 namespace Applications.Services.Lists
 {
-    public sealed class OccupationService(IOccupationService oService) : IOccupationService
+
+    public sealed class OccupationService(IOccupationService oService) : IOccupationServiceImpl
     {
         public async Task<IEnumerable<Occupation>> FindAllOccupationsAsync(string? expression = null)
         {

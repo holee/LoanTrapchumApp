@@ -1,10 +1,10 @@
-﻿using Applications.Requests.Loans;
+﻿using Applications.Requests.Loans.Disbursements;
 
 namespace Applications.Responses.ViewModels.Loans.Requests;
 
 public static class VLoanRequestsDocumentsExtension
 {
-    public static List<LoanDocumentDtoCreate> LoanDocumentDtoCreate(this List<VLoanRequestsDocuments> docs, int branchId, long loanRequestId)
+    public static List<LoanDocumentDtoCreate> LoanDocumentDtoCreate(this List<VLoanRequestsDocuments> docs, int? branchId, Guid? loanRequestId)
     {
         return docs?.Select(f => new LoanDocumentDtoCreate
         {

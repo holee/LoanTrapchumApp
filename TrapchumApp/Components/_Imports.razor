@@ -15,16 +15,21 @@
 @using Microsoft.JSInterop
 @using Radzen
 @using Radzen.Blazor
+@using Applications.Extensions
+@using Applications.Responses.ViewModels.Options
 @using TrapchumApp
 @using TrapchumApp.Components
 @using TrapchumApp.Components.Comps
 @using TrapchumApp.Components.Comps.Cards
+@using Applications.Extensions.DateTimes
+@using Applications.Responses.ViewModels.Loans.Schedules
 @using static Microsoft.AspNetCore.Components.Web.RenderMode
 @using Applications.Requests.Lists.Addreses;
 @using Applications.Requests.Lists.Currency;
 @using Applications.Requests.Lists.Entities;
 @using Microsoft.AspNetCore.Authorization
 @using Applications.Constants.Authorizations
+@using Microsoft.AspNetCore.Components.Sections
 @using Applications.Extensions.Identity.Authorizations.Attributes
 @using Blazored.FluentValidation
 @using Applications.Extensions.Maths
@@ -33,8 +38,8 @@
 @using Domains.Models.Lists
 @using Applications.Responses.ViewModels.Auths
 @using TrapchumApp.Components.Account
+@using Applications.Constants
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]
-@* @attribute [ExcludeFromInteractiveRouting] *@
 @inject IJSRuntime js
 @inject IAuthorizationService _authorizeService;
 @inject IBranchService _branchService

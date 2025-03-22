@@ -1,0 +1,227 @@
+﻿@using TCLMS.Front.Components.Buttons
+
+<EditForm Model="model" OnValidSubmit="OnSaveNew">
+   @*  <ModalBody>
+        <DataAnnotationsValidator />
+        <Blazorise.Row Class="mt-3">
+             <Blazorise.Column ColumnSize="ColumnSize.Is3.OnDesktop">
+                <FieldLabel ColumnSize="ColumnSize.IsFull.OnDesktop">Loan Product Code</FieldLabel>
+             </Blazorise.Column>
+             <Blazorise.Column ColumnSize="ColumnSize.Is9.OnDesktop">
+                <Field Horizontal  ColumnSize="ColumnSize.Is12.OnDesktop">
+                    
+                     <FieldBody>
+                         <Blazorise.Row>
+                             <Blazorise.Column ColumnSize="ColumnSize.Is9.OnDesktop">
+                                 <TextEdit Placeholder="Code..." MaxLength="50" @bind-Text="model.LoanProductCode" />
+                             </Blazorise.Column>
+                             <Blazorise.Column TextAlignment="TextAlignment.End" ColumnSize="ColumnSize.Is3.OnDesktop">
+                                    <Check TValue="bool?" @bind-Checked="model.IsActive">
+                                     @(model.IsActive.Value ? "Is Active" : "Is Inactive")
+                                    </Check>
+
+
+                            </Blazorise.Column>
+                        </Blazorise.Row>
+                        <FieldHelp>
+                            <ValidationMessage For="@(()=>model.LoanProductCode)" />
+                        </FieldHelp>
+                    </FieldBody>
+
+                </Field>
+             </Blazorise.Column>
+         </Blazorise.Row>
+         <Blazorise.Row>
+             <Blazorise.Column ColumnSize="ColumnSize.Is3.OnDesktop">
+                 <FieldLabel ColumnSize="ColumnSize.IsFull.OnDesktop">Loan Product Name</FieldLabel>
+             </Blazorise.Column>
+             <Blazorise.Column ColumnSize="ColumnSize.Is9.OnDesktop">
+                 <Field Horizontal ColumnSize="ColumnSize.Is12.OnDesktop">
+                     <FieldBody ColumnSize="ColumnSize.Is9.OnDesktop">
+                        <TextEdit Placeholder="Loan Product Name" MaxLength="250" @bind-Text="model.LoanProductName"/>             
+                     <FieldHelp>
+                         <ValidationMessage For="@(()=>model.LoanProductName)" />
+                     </FieldHelp>
+                     </FieldBody>
+                 </Field>
+             </Blazorise.Column>
+         </Blazorise.Row>
+         <Blazorise.Row>
+             <Blazorise.Column ColumnSize="ColumnSize.Is3.OnDesktop">
+                 <FieldLabel ColumnSize="ColumnSize.IsFull.OnDesktop">Loan Size</FieldLabel>
+             </Blazorise.Column>
+             <Blazorise.Column ColumnSize="ColumnSize.Is5.OnDesktop">
+                 <Field Horizontal>
+                     
+                     <FieldBody ColumnSize="ColumnSize.Is12.OnDesktop">
+                         <TextEdit Placeholder="Loan Size" MaxLength="20" @bind-Text="model.LoanSize" />
+                     </FieldBody>
+                     <FieldHelp>
+                         <ValidationMessage For="@(()=>model.LoanSize)" />
+                     </FieldHelp>
+                 </Field>
+             </Blazorise.Column>
+             <Blazorise.Column ColumnSize="ColumnSize.Is4.OnDesktop">
+                 <Field Horizontal>
+
+                    <FieldLabel ColumnSize="ColumnSize.Is3.OnDesktop">Currency</FieldLabel>
+                    <FieldBody ColumnSize="ColumnSize.Is8.OnDesktop">
+                        <NumericEdit TValue="int?" @bind-Value="model.CurrencyRefId"/>
+                         
+                        <FieldHelp>
+                            <ValidationMessage For="@(()=>model.CurrencyRefId)" />
+                        </FieldHelp>
+                     </FieldBody>
+                    
+                 </Field>
+             </Blazorise.Column>
+         </Blazorise.Row>
+        <Blazorise.Row>
+            <Blazorise.Column ColumnSize="ColumnSize.Is3.OnDesktop">
+                <FieldLabel ColumnSize="ColumnSize.IsFull.OnDesktop">Installment</FieldLabel>
+            </Blazorise.Column>
+            <Blazorise.Column ColumnSize="ColumnSize.Is4.OnDesktop">
+                <Field Horizontal>
+
+                    <FieldBody ColumnSize="ColumnSize.Is12.OnDesktop">
+                        <TextEdit Placeholder="Installment" MaxLength="15" @bind-Text="model.Installments" />
+                    </FieldBody>
+                    <FieldHelp>
+                        <ValidationMessage For="@(()=>model.Installments)" />
+                    </FieldHelp>
+                </Field>
+            </Blazorise.Column>
+            <Blazorise.Column ColumnSize="ColumnSize.Is5.OnDesktop">
+                <Field Horizontal>
+                    <FieldBody >
+                        <TextEdit Placeholder="Installment type" MaxLength="50" @bind-Text="model.InstallmentType"/>
+                    </FieldBody>
+                    <FieldHelp>
+                        <ValidationMessage For="@(()=>model.InstallmentType)" />
+                    </FieldHelp>
+                </Field>
+            </Blazorise.Column>
+        </Blazorise.Row>
+        <Blazorise.Row>
+            <Blazorise.Column ColumnSize="ColumnSize.Is3.OnDesktop">
+                <FieldLabel ColumnSize="ColumnSize.IsFull.OnDesktop">Interest Rate</FieldLabel>
+            </Blazorise.Column>
+            <Blazorise.Column ColumnSize="ColumnSize.Is9.OnDesktop">
+                <Field Horizontal>
+                    <FieldBody ColumnSize="ColumnSize.Is12.OnDesktop">
+                        <TextEdit Placeholder="Interest rate" MaxLength="15" @bind-Text="model.InterestRate" />
+                    </FieldBody>
+                    <FieldHelp>
+                        <ValidationMessage For="@(()=>model.InterestRate)" />
+                    </FieldHelp>
+                </Field>
+            </Blazorise.Column>
+            
+        </Blazorise.Row>
+        <Blazorise.Row>
+            <Blazorise.Column ColumnSize="ColumnSize.Is3.OnDesktop">
+                <FieldLabel ColumnSize="ColumnSize.IsFull.OnDesktop">Repayment Mode</FieldLabel>
+            </Blazorise.Column>
+            <Blazorise.Column ColumnSize="ColumnSize.Is9.OnDesktop">
+                <Field Horizontal>
+                    <FieldBody ColumnSize="ColumnSize.Is12.OnDesktop">
+                        <TextEdit Placeholder="Repayment mode" MaxLength="15" @bind-Text="model.RepaymentMode" />
+                    </FieldBody>
+                    <FieldHelp>
+                        <ValidationMessage For="@(()=>model.RepaymentMode)" />
+                    </FieldHelp>
+                </Field>
+            </Blazorise.Column>
+
+        </Blazorise.Row>
+        <Blazorise.Row>
+            <Blazorise.Column ColumnSize="ColumnSize.Is3.OnDesktop">
+                <FieldLabel ColumnSize="ColumnSize.IsFull.OnDesktop">Origination Fee</FieldLabel>
+            </Blazorise.Column>
+            <Blazorise.Column ColumnSize="ColumnSize.Is9.OnDesktop">
+                <Field Horizontal>
+                    <FieldBody ColumnSize="ColumnSize.Is12.OnDesktop">
+                        <TextEdit Placeholder="Origination fee" MaxLength="20" @bind-Text="model.OriginationFees" />
+                    </FieldBody>
+                    <FieldHelp>
+                        <ValidationMessage For="@(()=>model.OriginationFees)" />
+                    </FieldHelp>
+                </Field>
+            </Blazorise.Column>
+
+        </Blazorise.Row>
+        <Blazorise.Row>
+            <Blazorise.Column ColumnSize="ColumnSize.Is3.OnDesktop">
+                <FieldLabel ColumnSize="ColumnSize.IsFull.OnDesktop">Arrear Rate</FieldLabel>
+            </Blazorise.Column>
+            <Blazorise.Column ColumnSize="ColumnSize.Is9.OnDesktop">
+                <Field Horizontal>
+                    <FieldBody ColumnSize="ColumnSize.Is12.OnDesktop">
+                        <TextEdit Placeholder="Arrear rate" MaxLength="15" @bind-Text="model.ArrearRate" />
+                    </FieldBody>
+                    <FieldHelp>
+                        <ValidationMessage For="@(()=>model.ArrearRate)" />
+                    </FieldHelp>
+                </Field>
+            </Blazorise.Column>
+
+        </Blazorise.Row>
+        <Blazorise.Row>
+            <Blazorise.Column ColumnSize="ColumnSize.Is3.OnDesktop">
+                <FieldLabel ColumnSize="ColumnSize.IsFull.OnDesktop">Loan BFLFOL</FieldLabel>
+            </Blazorise.Column>
+            <Blazorise.Column ColumnSize="ColumnSize.Is5.OnDesktop">
+                <Field Horizontal>
+                    <FieldBody ColumnSize="ColumnSize.Is12.OnDesktop">
+                        <Select TValue="int?" @bind-SelectedValue="model.LoanBFLFOLId">
+                            <SelectItem Value="1">Loan BFLFOL</SelectItem>
+                            
+                        </Select>
+                    </FieldBody>
+                    <FieldHelp>
+                        <ValidationMessage For="@(()=>model.LoanBFLFOLId)" />
+                    </FieldHelp>
+                </Field>
+            </Blazorise.Column>
+            <Blazorise.Column ColumnSize="ColumnSize.Is4.OnDesktop">
+                <Field Horizontal>
+                    <FieldBody ColumnSize="ColumnSize.Is12.OnDesktop">
+                        <Select TValue="int?" @bind-SelectedValue="model.LoanAPTId">
+                            <SelectItem Value="1">Loan APT</SelectItem>
+                        </Select>
+                    </FieldBody>
+                    <FieldHelp>
+                        <ValidationMessage For="@(()=>model.LoanAPTId)" />
+                    </FieldHelp>
+                </Field>
+            </Blazorise.Column>
+        </Blazorise.Row>
+    </ModalBody>
+    <ModalFooter>
+        <TButton Color="Kalor.Success"
+                 Icon="BtnIconType.Save"
+                 Text="Save New"
+                 Size="BtnSize.Small" 
+                 Role="BtnType.Submit"
+                 />
+        <TButton Color="Kalor.Danger"
+                 Icon="BtnIconType.Close"
+                 Text="Cancel"
+                 Click="@Cancel"
+                 Size="BtnSize.Small" />
+    </ModalFooter> *@
+</EditForm>
+@code {
+
+    string selectedTab = "info";
+
+    private Task OnSelectedTabChanged(string name)
+    {
+        selectedTab = name;
+
+        return Task.CompletedTask;
+    }
+
+}
+
+

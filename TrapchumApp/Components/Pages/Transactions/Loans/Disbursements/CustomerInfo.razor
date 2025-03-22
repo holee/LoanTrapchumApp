@@ -1,0 +1,52 @@
+﻿<table class="table table-sm table-bordered">
+    <tbody>
+        <tr>
+            <th style="background-color:#F1F1F4" class="w-25">ឈ្មោះជាឡាតាំង</th>
+            <td>
+                @SelectedCustomer?.FullName
+            </td>
+        </tr>
+        <tr>
+            <th style="background-color:#F1F1F4" class="w-25">អត្តសញ្ញាប័ណ្ណ</th>
+            <td>
+                @SelectedCustomer?.IDCard
+            </td>
+        </tr>
+        <tr>
+            <th style="background-color:#F1F1F4" class="w-25">ថ្ងៃខែឆ្នាំកំណើត</th>
+            <td>
+                @SelectedCustomer?.DateOfBirth
+            </td>
+        </tr>
+        <tr>
+            <th style="background-color:#F1F1F4" class="w-25">លេខទូរសព្ទ</th>
+            <td>
+                @SelectedCustomer?.Phone
+            </td>
+        </tr>
+        <tr>
+            <th style="background-color:#F1F1F4" class="w-25">លើកទី</th>
+            <td>
+                @SelectedCustomer?.Circle
+            </td>
+        </tr>
+        <tr>
+            <th style="background-color:#F1F1F4" class="w-25">Status</th>
+            <td>
+                <RadzenCheckBox TValue="bool"
+                                @bind-Value="SelectedCustomer!.IsLoanActive">
+                </RadzenCheckBox>
+            </td>
+        </tr>
+        <tr>
+            <th style="background-color:#F1F1F4" class="w-25">អាស័យដ្ឋាន</th>
+            <td>
+                @SelectedCustomer?.ToString()
+            </td>
+        </tr>
+    </tbody>
+</table>
+@code {
+    [Parameter]
+    public VCustomerList SelectedCustomer { get; set; } = new();
+}

@@ -1,4 +1,5 @@
-﻿using Domains.Models.Transaction;
+﻿using Domains.Models.Bases;
+using Domains.Models.Transaction;
 
 namespace Domains.Models.Loans;
 
@@ -8,7 +9,7 @@ public sealed class Loan : BaseEntity
     public Guid LoanDisbursementsId { get; set; }
     public long? LoanRequestId { get; set; }
     public Guid? LoanRequestRefId { get; set; } 
-    public long? CustomerRefId { get; set; }
+    public Guid? CustomerRefId { get; set; }
     public long? UserRefId { get; set; }
     public long? TranxRefId { get; set; }
     public Guid? TransactionRefId { get; set; }

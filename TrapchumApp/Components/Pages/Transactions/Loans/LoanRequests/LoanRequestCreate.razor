@@ -1,0 +1,299 @@
+﻿@page "/Loan/{CustomerId:long}/Customer/{LoanRequestId:long}/Request"
+@page "/Loan/{CustomerId:long}/Customer/Request"
+@page "/Loan/Customer/Request"
+@using System.Web
+<PageTitle>Create</PageTitle>
+<SectionContent SectionName="Progressbar">
+    <RadzenProgressBar ShowValue="false"
+                       Value="100" Mode="ProgressBarMode.Indeterminate"
+                       ProgressBarStyle="ProgressBarStyle.Info"
+                       Visible="isLoading" />
+</SectionContent>
+<div class="rz-background-color-base-200">
+    <Card BodyCssClass="rz-background-color-base-200">
+        <CardBody>
+            <EditForm Model="model" @ref="editForm">
+                <FluentValidationValidator DisableAssemblyScanning="true" />
+                <RadzenTabs SelectedIndexChanged="SelectTabIndexChanged">
+                    <Tabs>
+                        <RadzenTabsItem Text="សំណើរ">
+                            <RadzenFieldset>
+                                <RadzenRow AlignItems="AlignItems.Center">
+                                    <RadzenColumn Size="12" SizeMD="6">
+                                        <RadzenRow AlignItems="AlignItems.Center" class="my-1">
+                                            <RadzenColumn Size="4">
+                                                <RadzenLabel>អតិថិជន</RadzenLabel>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="8">
+                                                <RadzenRow AlignItems="AlignItems.Start">
+                                                    <RadzenColumn Size="12">
+                                                        <RadzenDropDownDataGrid class="w-100"
+                                                                                Style="cursor:pointer"
+                                                                                @bind-Value="model.CustomerRefId"
+                                                                                SelectedItemChanged="SelectCustomerChanged"
+                                                                                Data="Customers"
+                                                                                ValueProperty="CustomerId"
+                                                                                TextProperty="AltName"
+                                                                                AllowColumnResize="true"
+                                                                                Multiple="false"
+                                                                                ShowSearch="false"
+                                                                                LoadData="LoadCustomers"
+                                                                                Density="Density.Compact"
+                                                                                PageSize="10"
+                                                                                Disabled="@(LoanRequestId.NotEmpty()  && CustomerId.NotEmpty())"
+                                                                                AllowRowSelectOnRowClick="true"
+                                                                                Name="DropDownCustomer">
+                                                            <Columns>
+                                                                <RadzenDropDownDataGridColumn Visible="false" Property="CustomerId" Title="Id" />
+                                                                <RadzenDropDownDataGridColumn Property="AltName" Title="Name" Width="200px" />
+                                                                <RadzenDropDownDataGridColumn Property="Phone" Title="Phone" Width="100px" />
+                                                            </Columns>
+                                                        </RadzenDropDownDataGrid>
+                                                    </RadzenColumn>
+                                                    <ValidationMessage For="@(()=>model.CustomerRefId)" />
+                                                </RadzenRow>
+                                            </RadzenColumn>
+                                        </RadzenRow>
+                                        <RadzenRow AlignItems="AlignItems.Start" class="my-1">
+                                            <RadzenColumn Size="4">
+                                                <RadzenLabel>ចំនួនទឹកប្រាក់ស្នើរសុំ</RadzenLabel>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="5">
+                                                <TCNumbers OnValueChanged="PrincipleValueChanged"
+                                                           Disabled="CustomerId.NotEmpty()"
+                                                           @bind-Value="model.RequestAmount" />
+                                                <ValidationMessage For="@(()=>model.RequestAmount)" />
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="3">
+                                                <RadzenDropDown Data="StorageConstant.CurrencyTpes"
+                                                                class="w-100"
+                                                                TValue="int?"
+                                                                TextProperty="@nameof(Items.Label)"
+                                                                ValueProperty="@nameof(Items.Value)"
+                                                                SelectedItemChanged="CurrencySelectedChanged"
+                                                                @bind-Value="model.CurrencyRefId">
+                                                </RadzenDropDown>
+                                            </RadzenColumn>
+                                        </RadzenRow>
+                                        <RadzenRow AlignItems="AlignItems.Center" class="my-1">
+                                            <RadzenColumn Size="4">
+                                                <RadzenLabel>អ្នកយល់ព្រម</RadzenLabel>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="8">
+                                                <RadzenDropDownDataGrid TextProperty="FullName"
+                                                                        Density="Density.Compact"
+                                                                        ValueProperty="UserId"
+                                                                        ShowSearch="false"
+                                                                        TValue="string"
+                                                                        class="w-100"
+                                                                        @bind-Value="model.AprovedUserId"
+                                                                        Data="AprovedPeople">
+                                                    <Columns>
+                                                        <RadzenDropDownDataGridColumn Property="FullName" Title="Name" />
+                                                        <RadzenDropDownDataGridColumn Property="BranchName" Title="BranchName" />
+                                                    </Columns>
+                                                </RadzenDropDownDataGrid>
+                                                <ValidationMessage For="@(()=>model.AprovedUserId)" />
+                                            </RadzenColumn>
+                                        </RadzenRow>
+                                        <RadzenRow AlignItems="AlignItems.Center" class="my-1">
+                                            <RadzenColumn Size="4">
+                                                <RadzenLabel>ប្រាក់ប្រសិទ្ធិភាព</RadzenLabel>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="4" class="input-group">
+                                                <TCNumbers @bind-Value="model.CollectionFeeRate" />
+                                                <span class="input-group-text">%</span>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="4" class="input-group input-group-sm">
+                                                <RadzenDropDown Data="StorageConstant.OtherChargedModes"
+                                                                class="form-select"
+                                                                TextProperty="@nameof(Items.Label)"
+                                                                SelectedItemChanged="SelectedChargeModeChanged"
+                                                                ValueProperty="@nameof(Items.Value)"
+                                                                @bind-Value="model.CollectionFeeModeId">
+                                                </RadzenDropDown>
+                                                <span class="input-group-text">/Month</span>
+                                            </RadzenColumn>
+                                        </RadzenRow>
+                                        <RadzenRow AlignItems="AlignItems.Center" class="my-1">
+                                            <RadzenColumn Size="4">
+                                                <RadzenLabel>អត្រាការប្រាក់</RadzenLabel>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="8" class="input-group input-group-sm">
+                                                <TCNumbers @bind-Value="model.InterestRate" />
+                                                <span class="input-group-text">%</span>
+                                            </RadzenColumn>
+                                            <ValidationMessage For="@(()=>model.InterestRate)" />
+                                        </RadzenRow>
+                                        <RadzenRow AlignItems="AlignItems.Start" class="my-1">
+                                            <RadzenColumn Size="4">
+                                                <RadzenLabel>សេវារដ្ឋបាល</RadzenLabel>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="4" class="input-group input-group-sm">
+                                                <TCNumbers OnValueChanged="CalculateAdminFeeAmount"
+                                                           @bind-Value="model.AdminFeeRate" />
+                                                <span class="input-group-text">%</span>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="4">
+                                                <TCNumbers Disabled="true" @bind-Value="model.AdminFeeAmount" />
+                                            </RadzenColumn>
+                                            <ValidationMessage For="@(()=>model.AdminFeeRate)" />
+                                            <ValidationMessage For="@(()=>model.AdminFeeAmount)" />
+                                        </RadzenRow>
+                                        <RadzenRow AlignItems="AlignItems.Center" class="mt-1">
+                                            <RadzenColumn Size="4">
+                                                <RadzenLabel>រយៈពេលខ្ចីប្រាក់</RadzenLabel>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="4">
+                                                <IntInput @bind-Value:after="PeriodChanged"
+                                                          Disabled="false"
+                                                          @bind-Value="model.Installments" />
+                                                <ValidationMessage For="@(()=>model.Installments)" />
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="4">
+                                                <RadzenDropDown TextProperty="@nameof(Items.Label)"
+                                                                ValueProperty="@nameof(Items.Value)"
+                                                                @bind-Value="model.InstallmentTypeId"
+                                                                class="w-100"
+                                                                Multiple="false"
+                                                                SelectedItemChanged="SelectedInstallmentChanged"
+                                                                Data="StorageConstant.InstallmentTypes">
+                                                </RadzenDropDown>
+                                            </RadzenColumn>
+                                        </RadzenRow>
+                                    </RadzenColumn>
+                                    <RadzenColumn Size="12" SizeMD="6">
+                                        <RadzenRow AlignItems="AlignItems.Center" class="my-1">
+                                            <RadzenColumn Size="4">
+                                                <RadzenLabel>ប្រភេទបង់រំលោះ</RadzenLabel>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="6">
+                                                <RadzenDropDown TValue="int?"
+                                                                @bind-Value="model.RepaymentModeRefId"
+                                                                class="w-100"
+                                                                TextProperty="@nameof(Items.Label)"
+                                                                ValueProperty="@nameof(Items.Value)"
+                                                                SelectedItemChanged="RepaymentModeSelectedChanged"
+                                                                Data="StorageConstant.RepaymentModes">
+                                                </RadzenDropDown>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="2">
+                                                <RadzenNumeric Disabled="@(model.RepaymentModeRefId !=1)"
+                                                               @bind-Value="model.PayEvery"
+                                                               onclick="this.querySelector('.rz-numeric-input').select()"
+                                                               class="w-100"
+                                                               Min="1"
+                                                               TValue="int?" />
+                                            </RadzenColumn>
+                                        </RadzenRow>
+                                        <RadzenRow AlignItems="AlignItems.Center" class="my-1">
+                                            <RadzenColumn Size="4">
+                                                <RadzenLabel>ខ្ចីលើកទី</RadzenLabel>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="8">
+                                                <RadzenNumeric class="w-100" @bind-Value="model.Circle" Min="1" Disabled />
+                                            </RadzenColumn>
+                                        </RadzenRow>
+                                        <RadzenRow AlignItems="AlignItems.Center" class="my-1">
+                                            <RadzenColumn Size="4">
+                                                <RadzenLabel>ប្រភេទកម្ចី</RadzenLabel>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="8">
+                                                <RadzenDropDown @bind-Value="model.LoanCategoryRefId"
+                                                                TextProperty="LoancategoryCode"
+                                                                ValueProperty="LoanCategoryId"
+                                                                AllowFiltering="true"
+                                                                class="w-100"
+                                                                Data="loanCategories">
+                                                </RadzenDropDown>
+                                                <ValidationMessage For="()=>model.LoanCategoryRefId" />
+                                            </RadzenColumn>
+                                        </RadzenRow>
+                                        <RadzenRow AlignItems="AlignItems.Center" class="my-1">
+                                            <RadzenColumn Size="4">
+                                                <RadzenLabel>ថ្ងៃខ្ចីប្រាក់</RadzenLabel>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="8">
+                                                <TCDatePicker @bind-Value="model.RequestDate"
+                                                              Changed="@((args)=>ChangedDate(args))" />
+                                            </RadzenColumn>
+                                        </RadzenRow>
+                                        <RadzenRow AlignItems="AlignItems.Center" class="my-1">
+                                            <RadzenColumn Size="4">
+                                                <RadzenLabel>ថ្ងៃបង់ប្រាក់លើកដំបូង</RadzenLabel>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="8">
+                                                <TCDatePicker @bind-Value="model.FirstPaymentDate" />
+                                            </RadzenColumn>
+                                        </RadzenRow>
+                                        <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+                                            <RadzenColumn Size="4">
+                                                <RadzenLabel>កំណត់សម្គាល់</RadzenLabel>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="8">
+                                                <RadzenTextArea class="w-100" @bind-Value="model.Remark" />
+                                            </RadzenColumn>
+                                        </RadzenRow>
+                                    </RadzenColumn>
+                                </RadzenRow>
+                            </RadzenFieldset>
+                            <RadzenFieldset>
+                                <LoanRequestCollaterals CustomerId="CustomerId"
+                                                        ShowAdd="true"
+                                                        ShowRemove="true"
+                                                        @ref="CollateralRef"
+                                                        Add="AddCollaterals"
+                                                        RemoveCollateral="RemovedCollateral"
+                                                        Collaterals="CollateralLines" />
+
+                                <LoanRequestGaurantor Guarantors="Guarantors"
+                                                      ShowAdd="true"
+                                                      Add="AddGuarantors"
+                                                      ShowRemove="true"
+                                                      Remove="RemoveGaurantor"
+                                                      @ref="GuarantorRef" />
+                                <LoanRequestDocument Documents="@Documents"
+                                                     UploadDocument="@HandleFileDialogue"
+                                                     RemoveDocument="RemoveFile"
+                                                     @ref="DocumentRef"
+                                                     ShowDelete="true" />
+                            </RadzenFieldset>
+                        </RadzenTabsItem>
+                        <RadzenTabsItem Text="អតិថិជន">
+                            <RadzenFieldset>
+                                <CustomerRequest CustomerId="CustomerId" Customer="SelectedCustomer" />
+                            </RadzenFieldset>
+                        </RadzenTabsItem>
+                    </Tabs>
+                </RadzenTabs>
+            </EditForm>
+        </CardBody>
+        <CardFooter>
+            <RadzenStack class="mt-2"
+                         Orientation="Radzen.Orientation.Horizontal"
+                         JustifyContent="Radzen.JustifyContent.End"
+                         Gap="0.5rem"
+                         AlignItems="AlignItems.Center">
+
+                <RadzenButton Disabled="model.RequestAmount <=0"
+                              Size="Radzen.ButtonSize.Small"
+                              Click="HandleCreateNew"
+                              Text="Save"
+                              Icon="save"
+                              ButtonStyle="ButtonStyle.Primary" />
+                <RadzenButton Disabled="model.RequestAmount <=0"
+                              Size="Radzen.ButtonSize.Small"
+                              Click="HandleCreateRequest"
+                              Text="Request"
+                              Icon="save"
+                              ButtonStyle="ButtonStyle.Success" />
+                <RadzenLink Path="@($"/Loan/Request?BranchId={BranchId}&UserId={UserId}")"
+                            Text="Back" />
+            </RadzenStack>
+        </CardFooter>
+    </Card>
+</div>
+
+
+
+

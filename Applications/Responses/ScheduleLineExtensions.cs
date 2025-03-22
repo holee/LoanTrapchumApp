@@ -1,5 +1,5 @@
 ﻿using Applications.Enumerations;
-using Applications.Requests.Loans;
+using Applications.Requests.Loans.Disbursements;
 using Domains.Models.Loans;
 namespace Applications.Responses;
 

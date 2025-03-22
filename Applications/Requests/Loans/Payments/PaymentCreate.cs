@@ -1,6 +1,4 @@
-﻿using Applications.Requests.Loans;
-
-namespace Applications.Requests.Loans.Payments
+﻿namespace Applications.Requests.Loans.Payments
 {
     public sealed class PaymentCreate
     {

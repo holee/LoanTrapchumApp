@@ -1,0 +1,47 @@
+﻿@using AppilcationServices.Interfaces
+@* <TableRow>
+    <TableRowCell>@Index</TableRowCell>
+        <TableRowCell>@CreditAgent?.FirstName</TableRowCell>
+        <TableRowCell>@CreditAgent?.LastName</TableRowCell>
+        <TableRowCell>@CreditAgent?.AltName</TableRowCell>
+        <TableRowCell>@CreditAgent?.BranchName</TableRowCell>
+       <TableRowCell>@CreditAgent?.Phone</TableRowCell>
+        <TableRowCell>
+            <input type="hidden" @bind="CreditAgent.EditSeq" />
+            <input type="hidden" @bind="CreditAgent.LoanCreditAgentId" />
+            <Switch 
+                CheckedChanged="OnCheckChanged" 
+                Background="Background.Danger"
+                TValue="bool"
+                    Checked="CreditAgent.IsRemove"
+                    CheckedExpression="@(()=>CreditAgent.IsRemove)" />
+        </TableRowCell>
+</TableRow> *@
+
+    @code {
+    [Inject] protected ICreditAgentServiceImpl CreditAgentService { get; set; } = default!;
+    [Parameter] public int Index { get; set; } = 1;
+    [Parameter] public VCreditAgent CreditAgent { get; set; } = default!;
+    [Parameter] public EventCallback<VCreditAgent> Remove { get; set; }
+
+    async Task OnCheckChanged(bool x)
+    {
+        CreditAgent.IsRemove = x;
+
+        var creditDto = new LoanCreditAgentDtoActivate
+            {
+                IsRemove = x,
+                EditSeq = CreditAgent.EditSeq,
+                EmployeeRefId = CreditAgent.Id,
+            };
+        var respnse = await CreditAgentService.ActivateAndDeactivateCreditAgent(CreditAgent.Id, creditDto);
+        if (respnse.IsSuccess)
+        {
+            await Remove.InvokeAsync(CreditAgent);
+        }
+        else
+        {
+        }
+    }
+    
+}

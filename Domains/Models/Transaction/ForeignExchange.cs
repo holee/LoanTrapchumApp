@@ -1,4 +1,6 @@
-﻿namespace Domains.Models.Transaction
+﻿using Domains.Models.Bases;
+
+namespace Domains.Models.Transaction
 {
     public sealed class ForeignExchange :BaseEntity
     {

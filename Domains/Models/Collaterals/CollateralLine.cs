@@ -5,7 +5,7 @@ namespace Domains.Models.Collaterals;
 public sealed class CollateralLine
 {
     public long Id { get; set; }
-    public long? CollateralRefId { get; set; }
+    public Guid? CollateralRefId { get; set; }
     public int? CategoryRefId { get; set; }
     public string? TypeName { get; set; }
     public int? SubCategoryRefId { get; set; }

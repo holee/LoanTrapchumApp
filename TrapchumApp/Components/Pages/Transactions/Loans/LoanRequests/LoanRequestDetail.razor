@@ -1,0 +1,46 @@
+﻿@page "/Loan/Request/{LoanRequestId:long}/Details"
+@using TrapchumApp.Components.Pages.Lists.Customers
+<PageTitle>Reviews</PageTitle>
+<Containers Fluid CssClass="p-2">
+    <Card>
+        <CardHeader>
+            <strong>Loan Request Review</strong>
+        </CardHeader>
+        <CardBody>
+            <Containers Fluid>
+                <LoanRequestDetails Data="@data" />
+            </Containers>
+            <RadzenTabs RenderMode="TabRenderMode.Server">
+                <Tabs>
+                    <RadzenTabsItem Text="ព័ត៌មានអតិថិជន">
+                        <LoanRequestCustomer Customer="@data?.Customer" />
+                    </RadzenTabsItem>
+                    <RadzenTabsItem Text="ទ្រព្យបញ្ចាំនិងអ្នកធានា">
+                        <LoanCollateralLine CollateralLines="@data?.Collaterals" />
+                        <LoanRequestGaurantor Guarantors="@data?.Guarantors" />
+                    </RadzenTabsItem>
+                    <RadzenTabsItem Text="ចំណូលនិងចំណាយ">
+                        <RadzenRow AlignItems="AlignItems.Center">
+                            <RadzenColumn Size="12" SizeMD="6" SizeSM="12">
+                                <CustomerInc Items="@data!.Customer.CustomerIncomes" ShowAdd="false" />
+                                <CustomerExp Items="@data!.Customer.CustomerExpenses" ShowAdd="false" />
+                            </RadzenColumn>
+                        </RadzenRow>
+                    </RadzenTabsItem>
+                    <RadzenTabsItem Text="ឯកសារផ្សេងៗ">
+                        <LoanRequestDocument Documents="@data?.Documents.ToList()" ShowUpload="false" />
+                    </RadzenTabsItem>
+                </Tabs>
+            </RadzenTabs>
+        </CardBody>
+        <CardFooter>
+            <RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal"
+                         JustifyContent="JustifyContent.End">
+                <RadzenLink Icon="arrow_back"
+                            Path="@($"/Loan/Request?BranchId={BranchId}&UserId={UserId}")">Back</RadzenLink>
+            </RadzenStack>
+
+        </CardFooter>
+    </Card>
+</Containers>
+

@@ -1,0 +1,149 @@
+﻿<PageDropDown PageSizeChanged="ChangedPageSize"
+              OnTextChanged="TextLoanSearchChanged"
+              ShowSearchBox="true">
+    <RightChildContent>
+        <RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal">
+            <RadzenCheckBox TValue="bool"
+                            @bind-Value="includeInactive"
+                            @bind-Value:after="CheckedIncludeChanged"
+                            Name="IncludeInactive" />
+            <RadzenLabel Text="Include Inactive"
+                         Component="IncludeInactive" class="rz-ms-2" />
+        </RadzenStack>
+    </RightChildContent>
+</PageDropDown>
+<RadzenDataGrid Data="ScheduleItems"
+                TItem="VSchedule"
+                Count="@counts"
+                PageSize="pageSize"
+                Density="Density.Compact"
+                GridLines="DataGridGridLines.Both"
+                LoadData="LoadData"
+                AllowSorting="true"
+                Responsive="true"
+                RowSelect="@RowSelected"
+                PagerPosition="PagerPosition.Bottom"
+                ShowPagingSummary="true"
+                PagerHorizontalAlign="HorizontalAlign.Right"
+                IsLoading="isLoading"
+                Style="min-height:30rem;height:30rem;max-height:35rem;"
+                AllowRowSelectOnRowClick="true"
+                AllowPaging="true">
+    <Columns>
+        <RadzenDataGridColumn Context="p"
+                              Width="3rem"
+                              Title="#"
+                              Sortable="false">
+            <Template>
+                @(ScheduleItems.IndexOf(p) + 1)
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="PaymentDate"
+                              Context="p"
+                              Title="Date"
+                              Sortable="true">
+            <Template>
+                @p.PaymentDate.DayFirst()
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Context="p"
+                              Property="AltName"
+                              Title="Name"
+                              Sortable="true">
+            <Template>
+                @p.AltName
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Context="p"
+                              Title="Principle"
+                              Property="LeftPrinciple"
+                              TextAlign="TextAlign.Right"
+                              Sortable="true">
+            <Template>
+                @p.LeftPrinciple.Format(p.CurrencyId)
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Context="p"
+                              Title="Interest"
+                              Property="LeftInterestAmount"
+                              TextAlign="TextAlign.Right"
+                              Sortable="true">
+            <Template>
+                @p.LeftInterestAmount
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Context="p"
+                              Title="CollectionFee Amount"
+                              Property="LeftCollectionFeeAmount"
+                              TextAlign="TextAlign.Right"
+                              Sortable="true">
+            <Template>
+                @p.LeftCollectionFeeAmount
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Context="p"
+                              Title="Total Payment"
+                              Property="TotalPay"
+                              TextAlign="TextAlign.Right"
+                              Sortable="true">
+            <Template>
+                @p.TotalPay.Format(p.CurrencyId)
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Context="p"
+                              Title="OutStanding"
+                              Property="LoanOutstanding"
+                              TextAlign="TextAlign.Right"
+                              Sortable="true">
+            <Template>
+                @p.LoanOutstanding.Format(p.CurrencyId)
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Context="p"
+                              Title="Status"
+                              Property="LoanStatus"
+                              Width="6rem"
+                              TextAlign="TextAlign.Center"
+                              Sortable="true">
+            <Template>
+                @p.ScheduleStatus
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Context="p"
+                              Title="Actions"
+                              Width="6rem"
+                              TextAlign="TextAlign.Start"
+                              Sortable="true">
+            <Template>
+                <RadzenButton Size="Radzen.ButtonSize.ExtraSmall"
+                              Icon="more_vert"
+                              Variant="Variant.Text"
+                              Click="@((args)=>ShowContextMenuWithContent(args,p))" />
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+    <LoadingTemplate>
+        <RadzenProgressBarCircular Visible="isProgess" ShowValue="false"
+                           ProgressBarStyle="ProgressBarStyle.Primary"
+                           Mode="ProgressBarMode.Determinate"></RadzenProgressBarCircular>
+    </LoadingTemplate>
+</RadzenDataGrid>
+@code {
+    void ShowContextMenuWithContent(MouseEventArgs args, VSchedule p)
+    {
+        ContextMenuService.Open(args, ds =>@<RadzenMenu Style="font-size:0.8rem;">
+
+        <RadzenMenuItem Icon="money"
+                        Click="@(()=>GetPaymentSchedules(p))"
+                        Text="Recieve Payment"></RadzenMenuItem>
+        <RadzenMenuItem Icon="paid"
+                        Click="@(()=>CustomerPayOff(p))"
+                        Text="PayOff"></RadzenMenuItem>
+
+    </RadzenMenu>
+
+    );
+    }
+
+
+}

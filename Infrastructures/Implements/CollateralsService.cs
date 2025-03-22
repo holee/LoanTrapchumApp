@@ -1,14 +1,16 @@
 ﻿using Applications.Interfaces.Lists;
 using Applications.Responses;
+using Applications.Responses.Collaterals;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Collaterals;
 using Domains.Models.Collaterals;
 using Infrastructures.DataAccess;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructures.Implements;
 
-public class CollateralsService : ICollateralsServiceImpl
+public class CollateralsService : ICollateralsService
 {
     private readonly ApplicationDbContext _context;
     public CollateralsService(ApplicationDbContext context)
@@ -16,7 +18,7 @@ public class CollateralsService : ICollateralsServiceImpl
         this._context = context;
     }
 
-    public async Task<IEnumerable<CollateralSubType?>> GetCollateralSubTypes(int? id = 0, string? searchText = null)
+    public async Task<IEnumerable<CollateralSubTypeResponse>> GetCollateralSubTypes(int? id, string? searchText = null)
     {
         IQueryable<CollateralSubType> queries = _context.CollateralSubTypes;
 
@@ -30,20 +32,21 @@ public class CollateralsService : ICollateralsServiceImpl
             queries = queries.Where(x => EF.Functions.Like(x.CollateralSubTypeName!, $"%{searchText}%") ||
                                      EF.Functions.Like(x.Id.ToString()!, $"%{searchText}$"));
         }
-        return await queries.AsNoTracking().ToListAsync();
+        return await queries.ProjectToType<CollateralSubTypeResponse>().AsNoTracking().ToListAsync();
     }
 
-    public async Task<IEnumerable<CollateralType?>> GetCollateralTypes(bool includeInactive = false)
+    public async Task<IEnumerable<CollateralTypeResponse>> GetCollateralTypes(bool includeInactive = false)
     {
         IQueryable<CollateralType> query = _context.CollateralTypes;
+
         if (!includeInactive)
         {
             query = query.Where(x => x.IsActive == true);
         }
-        return await query.AsNoTracking().ToListAsync();
+        return await query.ProjectToType<CollateralTypeResponse>().AsNoTracking().ToListAsync();
     }
 
-    public async Task<IEnumerable<CollateralType?>> GetCollateralTypes(int? collateralTypeId = 0, string? q = null)
+    public async Task<IEnumerable<CollateralTypeResponse>> GetCollateralTypes(int? collateralTypeId = 0, string? q = null)
     {
         IQueryable<CollateralType> query = _context.CollateralTypes;
         if (collateralTypeId > 0)
@@ -55,14 +58,9 @@ public class CollateralsService : ICollateralsServiceImpl
         {
             query = query.Where(x => EF.Functions.Like(x.CollateralTypeCode!, $"%{q}%"));
         }
-        return await query.AsNoTracking().ToListAsync();
+        return await query.ProjectToType<CollateralTypeResponse>().AsNoTracking().ToListAsync();
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="customerId"></param>
-    /// <returns></returns>
 
     public async Task<IEnumerable<VCollateral>> GetsCollateralAysnc(string? q = null)
     {
@@ -112,7 +110,7 @@ public class CollateralsService : ICollateralsServiceImpl
 
 
 
-    public async Task<Result<Collateral>> GetCollateralByIdAsync(long collateralId)
+    public async Task<Result<CollateralResponse>> GetCollateralByIdAsync(Guid? collateralId)
     {
         try
         {
@@ -122,42 +120,57 @@ public class CollateralsService : ICollateralsServiceImpl
 
             if (!response.Any())
             {
-                return Result.Failure<Collateral>(ErrorResponse.NotFound("there is no any data found"));
+                return Result.Failure<CollateralResponse>(ErrorResponse.NotFound("there is no any data found"));
             }
 
-            var item = await response.FirstAsync();
+            var item = await response.ProjectToType<CollateralResponse>()
+                                    .AsNoTracking()
+                                    .FirstOrDefaultAsync();
+            if (item is null)
+            {
+                return Result.Failure<CollateralResponse>(ErrorResponse.NotFound("there is no any data found"));
+
+            }
 
             return Result.Success(item);
 
         }
         catch (Exception ex)
         {
-            return Result.Failure<Collateral>(ErrorResponse.NotFound($"{ex.Message}"));
+            return Result.Failure<CollateralResponse>(ErrorResponse.NotFound($"{ex.Message}"));
         }
 
     }
 
-    public async Task<Result<Collateral>> GetCollateralByCustomerAsync(long customerId)
+    public async Task<Result<CollateralResponse>> GetCollateralByCustomerAsync(Guid? customerId)
     {
         var response = _context.Collaterals
                         .Include(x => x.CollateralLines)
                         .Where(x => x.CollateralId == customerId);
 
-        var collateral = await response.AsNoTracking().FirstOrDefaultAsync();
+        var collateral = await response.AsNoTracking()
+                                        .ProjectToType<CollateralResponse>()
+                                        .FirstOrDefaultAsync();
 
         if (collateral is null)
         {
-            return Result.Failure<Collateral>(ErrorResponse.NotFound("no collateral found"));
+            return Result.Failure<CollateralResponse>(ErrorResponse.NotFound("no collateral found"));
         }
+
+
         return Result.Success(collateral);
     }
-    public async Task<IEnumerable<CollateralLine>> GetCollateralLinesAsync(long collateralId)
+    public async Task<IEnumerable<CollateralLineResponse>> GetCollateralLinesAsync(Guid? collateralId)
     {
         var results = _context.CollateralLines.Where(x => x.CollateralRefId == collateralId);
-        return await results.AsNoTracking().ToListAsync();
+
+        var lines = await results.ProjectToType<CollateralLineResponse>()
+                            .AsNoTracking().ToListAsync();
+
+        return lines;
     }
 
-    public async Task<Result> InsertOrUpdate(Collateral req)
+    public async Task<Result<string>> InsertOrUpdate(Collateral req)
     {
         try
         {
@@ -204,7 +217,7 @@ public class CollateralsService : ICollateralsServiceImpl
         }
         catch (Exception ex)
         {
-            return Result.Failure(ErrorResponse.ServerError($"{ex.Message}"));
+            return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}"));
         }
 
 

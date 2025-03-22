@@ -1,4 +1,5 @@
-﻿<RadzenDataGrid Data="Items"
+﻿@using Applications.Responses.ViewModels.Customers
+<RadzenDataGrid Data="Items"
                 GridLines="DataGridGridLines.Both"
                 Responsive
                 IsLoading="isLoading"
@@ -61,82 +62,4 @@
     </LoadingTemplate>
 </RadzenDataGrid>
 
-@code {
-    [Parameter] public long? CustomerId { get; set; } = 0;
-    [Parameter] public bool ShowAdd { get; set; } = false;
-    [Parameter] public bool ShowReload { get; set; } = false;
-    [Parameter] public IEnumerable<VCustomerExpenses> Items { get; set; } = [];
-    bool isLoading = false;
-    protected override async Task OnInitializedAsync()
-    {
-        await base.OnInitializedAsync();
 
-        await GetCustomerExpense(CustomerId);
-    }
-
-    async Task GetCustomerExpense(long? customerId)
-    {
-
-        isLoading = true;
-
-        if (CustomerId > 0)
-        {
-            var resp = await _customerService.GetCustomerExpensesAsync(customerId);
-
-            if (resp.IsSuccess)
-            {
-                Items = resp.Data!;
-                isLoading = false;
-            }
-        }
-
-        isLoading = false;
-
-        StateHasChanged();
-    }
-
-
-
-    async void RefreshIncome()
-    {
-        await GetCustomerExpense(CustomerId);
-
-    }
-
-    protected async void AddExpenseModal()
-    {
-
-        if (CustomerId <= 0)
-        {
-            NotificationService.Notify(NotificationSeverity.Info, "Please select cusotmer..");
-            return;
-        }
-
-        var options = new Radzen.DialogOptions
-            {
-                Width = "50vw",
-                Resizable = false,
-                Draggable = true,
-            };
-        var parameters = new Dictionary<string, object?>
-            {
-                { "CustomerId",CustomerId}
-            };
-        bool result = await DialogService.OpenAsync<CustomerModalExpense>("Add Expense", parameters, options);
-
-        if (bool.TryParse(result.ToString(), out bool success) && success)
-        {
-            await GetCustomerExpense(CustomerId);
-        }
-
-    }
-
-
-
-
-
-
-
-
-
-}

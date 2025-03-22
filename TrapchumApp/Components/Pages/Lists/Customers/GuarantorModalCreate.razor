@@ -1,6 +1,4 @@
-﻿@using TCLMS.Shared.Entities.ViewModels.Vendors
-<div class="container-fluid">
-</div>
+﻿@using Applications.Responses.ViewModels.Vendors
 <div>
     <RadzenRow AlignItems="AlignItems.Center">
         <RadzenButton Click="ShowGuarantorModal"
@@ -76,73 +74,4 @@
 
     </RadzenButton>
 </RadzenStack>
-@code {
 
-    private IEnumerable<VGuarantor> Guarantors = Enumerable.Empty<VGuarantor>();
-    [Parameter]
-    public HashSet<VGuarantorsAvailable>? SelectedGuarantors { get; set; } = new();
-    [Parameter]
-    public Func<HashSet<VGuarantorsAvailable>, Task<bool>> OnValidated { get; set; } = default!;
-    [Parameter]
-    public Func<HashSet<VGuarantorsAvailable>, Task> OnSucceed { get; set; } = default!;
-    VGuarantorsAvailable? selectedGuarantor;
-    bool isValid = false;
-    private VGuarantorsAvailable guarantor = new();
-
-    protected override async Task OnInitializedAsync()
-    {
-        var gResponse = await _gService.GetGuarantors(0); //_customerService.GetGuarantorsAsync();
-     
-        if (gResponse.IsSuccess)
-        {
-            Guarantors = gResponse.Data!;
-        }
-        else
-        {
-            Guarantors = [];
-        }
-
-        await base.OnInitializedAsync();
-    }
-    Task<IEnumerable<VGuarantor>> SearchGuarantors(string? filter = null)
-    {
-        var guarantors = Guarantors.Where(x => x.GuarantorName!.ToLower().Contains(filter!.ToLower()));
-        return Task.FromResult(guarantors);
-    }
-
-    void CloseModal()
-    {
-        DialogService.Close(false);
-    }
-    void AddSelectedGuarantor()
-    {
-        if (selectedGuarantor is not null)
-        {
-            SelectedGuarantors!.Add(selectedGuarantor);
-            selectedGuarantor = null;
-        }
-        StateHasChanged();
-    }
-    void RemoveGuarantor(VGuarantorsAvailable g)
-    {
-        SelectedGuarantors!.Remove(g);
-        StateHasChanged();
-    }
-
-
-    void SelectGuarantorChanged(VGuarantorsAvailable guarantorsAvailable)
-    {
-        selectedGuarantor = guarantorsAvailable!;
-        Console.WriteLine(guarantorsAvailable!.Name);
-    }
-
-    async Task ShowGuarantorModal()
-    {
-        await DialogService.OpenAsync<GuarantorAddModal>("Guarantor");
-    }
-
-    bool IsSuccess = false;
-
-
-
-}

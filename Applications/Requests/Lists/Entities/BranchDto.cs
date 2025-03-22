@@ -1,4 +1,4 @@
-﻿using Domains.Models;
+﻿using Domains.Models.Bases;
 using Domains.Models.Currencies;
 using Domains.Models.Lists.Employees;
 

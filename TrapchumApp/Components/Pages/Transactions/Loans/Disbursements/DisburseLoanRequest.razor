@@ -1,0 +1,144 @@
+﻿@page "/Loan/Disbursment/{LoanRequestId:long}/Customer/{CustomerId}"
+@using TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
+<PageTitle>Reviews</PageTitle>
+<Containers Fluid>
+    <Card CssClass="mt-2">
+        <CardHeader>
+            <strong>Loan Request Review</strong>
+        </CardHeader>
+        <CardBody>
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
+                <LoanRequestDetails Data="@data" />
+            </RadzenStack>
+            <RadzenTabs RenderMode="TabRenderMode.Client">
+                <Tabs>
+                    <RadzenTabsItem Text="ព័ត៌មានអតិថិជន">
+                      @*   <LoanCustomer Customer="@data?.Customer" /> *@
+                    </RadzenTabsItem>
+                    <RadzenTabsItem Text="ទ្រព្យបញ្ចាំនិងអ្នកធារនា">
+                        @* <LoanCollateralLine CollateralLines="@data?.Collaterals" />
+                        <LoanGaurantor Guarantors="@data?.Guarantors" /> *@
+                    </RadzenTabsItem>
+                    <RadzenTabsItem Text="ចំណូលនិងចំណាយ">
+                        <RadzenRow AlignItems="AlignItems.Center"
+                                   Gap="1rem">
+                            <RadzenColumn Size="6">
+                                <RadzenDataGrid Data="@data!.Customer.CustomerIncomes"
+                                                GridLines="DataGridGridLines.Both"
+                                                Responsive
+                                                Style="--rz-grid-header-background-color:var(--rz-base-200);min-height:20rem;height:20rem;max-height:30rem;"
+                                                Density="Density.Compact">
+                                    <Columns>
+                                        <RadzenDataGridColumn Property="IncomeId" Context="c" Title="#" Width="3rem">
+                                            <Template>
+                                                @c.IncomeId
+                                            </Template>
+                                        </RadzenDataGridColumn>
+                                        <RadzenDataGridColumn Context="c"
+                                                              Property="IncomeSource"
+                                                              Width="20rem"
+                                                              Title="Income Source">
+                                            <Template>
+                                                @c.IncomeSource
+                                            </Template>
+                                        </RadzenDataGridColumn>
+                                        <RadzenDataGridColumn Context="c"
+                                                              Width="10rem"
+                                                              Property="IncomeAmount"
+                                                              TextAlign="TextAlign.Right"
+                                                              Title="Amount">
+                                            <Template>
+                                                @c?.IncomeAmount
+                                            </Template>
+                                            <FooterTemplate>
+                                                <strong>
+                                                    @data?.Customer.CustomerIncomes.Sum(x => x.IncomeAmount)
+                                                </strong>
+                                            </FooterTemplate>
+                                        </RadzenDataGridColumn>
+                                        <RadzenDataGridColumn Context="c"
+                                                              Property="InDescription"
+                                                              Title="Description">
+                                            <Template>
+                                                @c.InDescription
+                                            </Template>
+                                        </RadzenDataGridColumn>
+                                    </Columns>
+                                    <LoadingTemplate>
+                                        <RadzenProgressBarCircular ProgressBarStyle="ProgressBarStyle.Primary" Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+                                    </LoadingTemplate>
+                                </RadzenDataGrid>
+                            </RadzenColumn>
+                            <RadzenColumn Size="6">
+                                <RadzenDataGrid Data="@data!.Customer.CustomerExpenses"
+                                                GridLines="DataGridGridLines.Both"
+                                                Responsive
+                                                Style="--rz-grid-header-background-color:var(--rz-base-200);min-height:20rem;height:20rem;max-height:30rem;"
+                                                Density="Density.Compact">
+
+                                    <Columns>
+                                        <RadzenDataGridColumn Property="ExpendId" Context="c" Title="#" Width="3rem">
+                                            <Template>
+                                                @c.ExpendId
+                                            </Template>
+                                        </RadzenDataGridColumn>
+                                        <RadzenDataGridColumn Context="c"
+                                                              Width="20rem"
+                                                              Property="ExpenseTitle" Title="Expense">
+                                            <Template>
+                                                @c.ExpenseTitle
+                                            </Template>
+                                        </RadzenDataGridColumn>
+                                        <RadzenDataGridColumn Context="c"
+                                                              Width="10rem"
+                                                              TextAlign="TextAlign.Right"
+                                                              Property="expendAmount" Title="Amount">
+                                            <Template>
+                                                @c?.ExpendAmount
+                                            </Template>
+                                            <FooterTemplate>
+                                                <strong>
+                                                    @data?.Customer.CustomerExpenses.Sum(x => x.ExpendAmount)
+                                                </strong>
+                                            </FooterTemplate>
+                                        </RadzenDataGridColumn>
+                                        <RadzenDataGridColumn Context="c"
+                                                              Property="ExDescription" Title="Description">
+                                            <Template>
+                                                @c.ExDescription
+                                            </Template>
+                                        </RadzenDataGridColumn>
+                                    </Columns>
+                                    <LoadingTemplate>
+                                        <RadzenProgressBarCircular ProgressBarStyle="ProgressBarStyle.Primary" Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+                                    </LoadingTemplate>
+                                </RadzenDataGrid>
+                            </RadzenColumn>
+                        </RadzenRow>
+                    </RadzenTabsItem>
+                    <RadzenTabsItem Text="ឯកសារផ្សេងៗ">
+
+                    </RadzenTabsItem>
+                </Tabs>
+            </RadzenTabs>
+        </CardBody>
+        <CardFooter>
+            <RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal"
+                         JustifyContent="JustifyContent.End">
+                <RadzenButton ButtonStyle="ButtonStyle.Success"
+                              Size="Radzen.ButtonSize.Small"
+                              Icon="save"
+                              Text="Disburse Now" />
+                <RadzenButton ButtonStyle="ButtonStyle.Primary"
+                              Size="Radzen.ButtonSize.Small"
+                              Icon="fact_check"
+                              Text="Rechecked" />
+                <RadzenLink Path="/Loan/Request" Text="Back" />
+            </RadzenStack>
+
+        </CardFooter>
+    </Card>
+</Containers>
+
+
+

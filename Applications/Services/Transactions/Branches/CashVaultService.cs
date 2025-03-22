@@ -1,7 +1,9 @@
 ﻿using Applications.Interfaces.Transactions;
+using Applications.Requests.Transactions.LoanTransactions;
 using Applications.Responses;
 using Applications.Responses.ViewModels.Currencies;
 using Domains.Models.Transaction;
+using Mapster;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,16 +12,22 @@ using System.Threading.Tasks;
 
 namespace Applications.Services.Transactions.Branches
 {
-    public sealed class CashVaultService(ICashVaultService cService) : ICashVaultService
+
+    public sealed class CashVaultService(ICashVaultService cService) : ICashVaultServiceImpl
     {
-        public async Task<Result> CreateCashManagementAsync(LoanTransaction cashTrsansaction)
+        public async Task<Result> CreateCashManagementAsync(LoanTransactionDtoCreate cashTrsansaction)
         {
-            return await cService.CreateCashManagementAsync(cashTrsansaction);
+
+            var req = cashTrsansaction.Adapt<LoanTransaction>();
+
+            return await cService.CreateCashManagementAsync(req);
         }
 
-        public async Task<Result> CreateCashVaultAsync(LoanTransaction transaction)
+        public async Task<Result> CreateCashVaultAsync(LoanTransactionDtoCreate transaction)
         {
-            return await cService.CreateCashVaultAsync(transaction);
+            var req = transaction.Adapt<LoanTransaction>();
+
+            return await cService.CreateCashVaultAsync(req);
         }
 
         public Task<Result<IEnumerable<VCashVaults>>> GetCashVaultsAsync(int? branchId)

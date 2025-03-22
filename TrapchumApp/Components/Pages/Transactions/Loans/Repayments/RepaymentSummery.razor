@@ -1,0 +1,39 @@
+﻿@* <div class="container">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>ថ្ងៃបង់ប្រាក់</th>
+                <th>ប្រាក់ដើម</th>
+                <th>ការប្រាក់</th>
+                <th>ប្រាក់ប្រសិទ្ធិភាព</th>
+                <th>ប្រាក់ពិន័យ</th>
+                <th>សរុបប្រាក់</th>
+                <th>Lines</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var value in RepaymentLists!)
+            {
+                var period = RepaymentLists.IndexOf(value) + 1;
+                <tr>
+                    <td>@period</td>
+                    <td>@value?.PayDate!.Value.ToString("dd-MM-yyyy")</td>
+                    <td>@value?.Principle</td>
+                    <td>@value?.Interest</td>
+                    <td>@value?.OtherInterest</td>
+                    <td>@value?.OtherCharged</td>
+                    <td>
+                        @value?.SubTotal
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+</div> *@
+
+@code {
+
+}

@@ -1,0 +1,71 @@
+﻿@using TCLMS.Shared.Entities.ViewModels.Loans.Schedules
+<RadzenRow AlignItems="AlignItems.Center">
+    <RadzenColumn Size="3">
+        <RadzenRow AlignItems="AlignItems.Center">
+            <RadzenColumn Size="5">
+                <RadzenLabel>ប្រាក់ដើម</RadzenLabel>
+            </RadzenColumn>
+            <RadzenColumn Size="7">
+                <RadzenNumeric Disabled
+                               TextAlign="TextAlign.End"
+                               ShowUpDown="false"
+                               class="w-100"
+                               Format="#,##0.00"
+                               Style="height:var(--input-text-sm)"
+                               Value="@SelectedSchedule?.LeftPrinciple" />
+            </RadzenColumn>
+        </RadzenRow>
+    </RadzenColumn>
+    <RadzenColumn Size="3">
+        <RadzenRow AlignItems="AlignItems.Center">
+            <RadzenColumn Size="4">
+                <RadzenLabel>ការប្រាក់</RadzenLabel>
+            </RadzenColumn>
+            <RadzenColumn Size="8">
+                <RadzenNumeric Disabled
+                               TextAlign="TextAlign.End"
+                               class="w-100"
+                               Style="height:var(--input-text-sm)"
+                               ShowUpDown="false"
+                               Format="#,##0.00"
+                               Value="@SelectedSchedule?.LeftInterestAmount" />
+            </RadzenColumn>
+        </RadzenRow>
+    </RadzenColumn>
+    <RadzenColumn Size="3">
+        <RadzenRow AlignItems="AlignItems.Center">
+            <RadzenColumn Size="5">
+                <RadzenLabel>ប្រាក់ប្រសិទ្ធិភាព</RadzenLabel>
+            </RadzenColumn>
+            <RadzenColumn Size="7">
+                <RadzenNumeric Disabled
+                               TextAlign="TextAlign.End"
+                               class="w-100"
+                               ShowUpDown="false"
+                               Format="#,##0.00"
+                               Style="height:var(--input-text-sm)"
+                               Value="@SelectedSchedule?.LeftCollectionFeeAmount" />
+            </RadzenColumn>
+        </RadzenRow>
+    </RadzenColumn>
+    <RadzenColumn Size="3">
+        <RadzenRow AlignItems="AlignItems.Center">
+            <RadzenColumn Size="5">
+                <RadzenLabel>ប្រាក់សរុប</RadzenLabel>
+            </RadzenColumn>
+            <RadzenColumn Size="7">
+                <RadzenNumeric Disabled
+                               TextAlign="TextAlign.End"
+                               class="w-100"
+                               ShowUpDown="false"
+                               Format="#,##0.00"
+                               Style="height:var(--input-text-sm)"
+                               Value="@SelectedSchedule?.LeftAmount" />
+            </RadzenColumn>
+        </RadzenRow>
+    </RadzenColumn>
+</RadzenRow>
+@code {
+    [Parameter, EditorRequired]
+    public VSchedule? SelectedSchedule { get; set; }
+}

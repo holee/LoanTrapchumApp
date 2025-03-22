@@ -1,4 +1,5 @@
-﻿using Applications.Requests.Loans;
+﻿using Applications.Requests.Loans.Disbursements;
+using Applications.Requests.Loans.LoanRequests;
 using Applications.Responses.ViewModels.Loans.Requests;
 
 namespace Applications.Helpers

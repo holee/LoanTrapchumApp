@@ -1,0 +1,29 @@
+﻿@using Applications.Enumerations
+@using Applications.Responses.ViewModels.Loans.Requests
+@if (LoanRequest?.StatusId == (int)RequestStatus.Aprove)
+{
+    <a href="@requestLoanUrl">
+        <RadzenBadge Variant="Variant.Flat"
+                     BadgeStyle="BadgeStyle.Primary"
+                     Style="font-size:0.5rem;"
+                     Text="Disburse"></RadzenBadge>
+    </a>
+}
+else
+{
+    <RadzenBadge Variant="Variant.Text"
+                 BadgeStyle="BadgeStyle.Secondary"
+                 Text="@LoanRequest?.Status"></RadzenBadge>
+}
+@code {
+    [Parameter, EditorRequired] public VLoanRequests? LoanRequest { get; set; }
+    [Parameter, EditorRequired] public int? BranchId { get; set; }
+    [Parameter, EditorRequired] public long? UserId { get; set; }
+    string? requestLoanUrl = "";
+    protected override void OnParametersSet()
+    {
+        requestLoanUrl = $"/Loan/Disbursement/Create?BranchId={BranchId}&UserId={UserId}&CustomerRequestId={LoanRequest?.CustomerId}&LoanRequestId={LoanRequest?.LoanRequestId}";
+
+        base.OnParametersSet();
+    }
+}

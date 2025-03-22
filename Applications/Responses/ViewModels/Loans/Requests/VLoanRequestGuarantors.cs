@@ -5,9 +5,9 @@ public sealed class VLoanRequestGuarantors
 
     public long? Id { get; set; }
     public int? BranchId { get; set; }
-    public long? LoanRequestId { get; set; }
-    public long? CustomerId { get; set; } 
-    public long? EntId { get; set; }
+    public Guid? LoanRequestId { get; set; }
+    public Guid? CustomerId { get; set; } 
+    public Guid? EntId { get; set; }
     public string? CurrencyId { get; set; }
     public string? FullName { get; set; }
     public string? AltName { get; set; }

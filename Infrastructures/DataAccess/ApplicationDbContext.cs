@@ -12,6 +12,7 @@ using Applications.Responses.ViewModels.Ledgers;
 using Applications.Responses.ViewModels.Loans;
 using Domains.Models;
 using Domains.Models.Addresses;
+using Domains.Models.Bases;
 using Domains.Models.Collaterals;
 using Domains.Models.Currencies;
 using Domains.Models.Journals;

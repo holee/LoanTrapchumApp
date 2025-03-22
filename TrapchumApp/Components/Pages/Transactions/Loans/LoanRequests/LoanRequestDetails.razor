@@ -1,0 +1,180 @@
+﻿@using Applications.Responses
+@using Applications.Responses.ViewModels.Loans.Requests
+<Containers Fluid>
+    <table class="table table-bordered">
+        <tbody>
+            <tr>
+                <th class="w-25" style="background-color:#F1F1F4">ចំនួនទឹកប្រាក់ស្នើរសុំ</th>
+                <td class="text-end">
+                    @Data?.RequestAmount.Format(Data.CurrencyId)
+                </td>
+                <th class="w-25" style="background-color:#F1F1F4">ប្រភេទបង់រំលោះ</th>
+                <td>
+                    @Data?.RepaymentMode
+                </td>
+            </tr>
+            <tr>
+                <th class="w-25" style="background-color:#F1F1F4">ខ្ចីលើកទី</th>
+                <td class="text-end">
+                    @Data?.Circle
+                </td>
+                <th class="w-25" style="background-color:#F1F1F4">រយៈពេលខ្ចីប្រាក់</th>
+                <td>
+                    @Data?.Installments @Data?.InstallmentType
+                </td>
+            </tr>
+            <tr>
+                <th class="w-25" style="background-color:#F1F1F4">ប្រាក់ប្រសិទ្ធិភាព</th>
+                <td class="text-end">
+                    @Data?.CollectionFeeRate (%)
+                </td>
+                <th class="w-25" style="background-color:#F1F1F4">ប្រភេទកម្ចី</th>
+                <td>
+                    @Data?.LoanCategoryName
+                </td>
+            </tr>
+            <tr>
+                <th class="w-25" style="background-color:#F1F1F4">អត្រាការប្រាក់</th>
+                <td class="text-end">
+                    @Data?.InterestRate (%)
+                </td>
+                <th class="w-25" style="background-color:#F1F1F4">ថ្ងៃខ្ចីប្រាក់</th>
+                <td>
+                    @Data?.RequestDate.DayFirst()
+                </td>
+            </tr>
+            <tr>
+                <th class="w-25" style="background-color:#F1F1F4">សេវារដ្ឋបាល</th>
+                <td class="text-end">
+                    @Data?.AdminFeeAmount.Format(Data?.CurrencyId)
+                </td>
+                <th class="w-25" style="background-color:#F1F1F4">ថ្ងៃបង់ប្រាក់លើកដំបូង</th>
+                <td>
+                    @Data?.FirstPaymentDate.DayFirst()
+                </td>
+            </tr>
+            <tr>
+                <th class="w-25" style="background-color:#F1F1F4">ស្ថានភាព</th>
+                <td class="text-end">
+                    @Data?.Status
+                </td>
+                <th class="w-25" style="background-color:#F1F1F4">ថ្ងៃពិនិត្យ</th>
+                <td>
+                    @Data?.AprovedDate.DayFirst()
+                </td>
+            </tr>
+            <tr>
+                <th class="w-25" style="background-color:#F1F1F4">មន្ត្រីស្នើរសុំ</th>
+                <td class="text-end">
+                    @Data?.Summiter
+                </td>
+                <th class="w-25" style="background-color:#F1F1F4">អ្នកអនុម័ត្ត</th>
+                <td>
+                    @Data?.AprovedBy
+                </td>
+            </tr>
+        </tbody>
+    </table>
+   @*  <table class="table table-bordered">
+        <tbody>
+            <tr>
+                <th style="background-color:#F1F1F4" class="w-25">
+                    Customer Name
+                </th>
+                <td>
+                    @Customer?.AltName ( @Customer?.FullName )
+                </td>
+            </tr>
+            <tr>
+                <th style="background-color:#F1F1F4" class="w-25">
+                    Phone
+                </th>
+                <td>
+                    @Customer?.Phone
+                </td>
+            </tr>
+            <tr>
+                <th style="background-color:#F1F1F4" class="w-25">DateOfBirth</th>
+                <td>
+                    <span>
+                        @Customer?.DateOfBirth
+                    </span>
+
+                </td>
+            </tr>
+            <tr>
+                <th style="background-color:#F1F1F4" class="w-25">
+                    Occupation
+                </th>
+                <td>
+                    <span>
+                        @Customer?.Occupation
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <th style="background-color:#F1F1F4" class="w-25">ID Card</th>
+                <td>
+                    @Customer?.IDCard
+                </td>
+            </tr>
+            <tr>
+                <th style="background-color:#F1F1F4" class="w-25">
+                    Circle
+                </th>
+                <td>
+                    @Customer?.Circle
+                </td>
+            </tr>
+            <tr>
+                <th style="background-color:#F1F1F4" class="w-25">
+                    Salutation
+                </th>
+                <td>
+                    @Customer?.Salutation
+                </td>
+            </tr>
+            <tr>
+                <th style="background-color:#F1F1F4" class="w-25">
+                    Address
+                </th>
+                <td>
+                    @Customer?.ToString()
+                </td>
+            </tr>
+            <tr>
+                <th style="background-color:#F1F1F4" class="w-25">Income</th>
+                <td>@Customer?.CustomerIncomes.Sum(x => x.IncomeAmount)</td>
+            </tr>
+            <tr>
+                <th style="background-color:#F1F1F4" class="w-25">Expend</th>
+                <td>
+                    @Customer?.CustomerExpenses.Sum(x => x.ExpendAmount)
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <RadzenRow AlignItems="AlignItems.Center">
+        <RadzenColumn Size="12" SizeMD="6">
+            <BCard>
+                <CardHeader>
+                    <strong>Income</strong>
+                </CardHeader>
+                <CardBody>
+                    <CustomerInc CustomerId="CustomerId" ShowAdd="true" ShowReload="false" />
+                </CardBody>
+            </BCard>
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeMD="6">
+            <BCard>
+                <CardHeader>
+                    <strong>Expense</strong>
+                </CardHeader>
+                <CardBody>
+                    <CustomerExp CustomerId="CustomerId" ShowAdd="true" ShowReload="false" />
+                </CardBody>
+            </BCard>
+        </RadzenColumn>
+    </RadzenRow> *@
+</Containers>
+

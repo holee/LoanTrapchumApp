@@ -1,0 +1,90 @@
+﻿@using Applications.Responses.ViewModels.Loans.Requests
+@using TCLMS.Front.Pages.Lists.OtherNames
+<Card>
+    <CardHeader>
+        <RadzenStack Orientation="Orientation.Horizontal"
+                     JustifyContent="JustifyContent.SpaceBetween"
+                     AlignItems="AlignItems.Center">
+            <strong>Guarantors Information</strong>
+            @if (ShowAdd)
+            {
+                <RadzenButton Text="Add"
+                              ButtonStyle="ButtonStyle.Primary"
+                              Icon="add"
+                              Click="@ClickedAdd"
+                              Size="Radzen.ButtonSize.ExtraSmall"
+                              ButtonType="Radzen.ButtonType.Button"></RadzenButton>
+            }
+        </RadzenStack>
+    </CardHeader>
+    <CardBody>
+        <RadzenDataGrid Data="Guarantors"
+                        GridLines="DataGridGridLines.Both"
+                        TItem="VLoanRequestGuarantors"
+                        Density="Density.Compact"
+                        @ref="gridGuarantors"
+                        PagerHorizontalAlign="HorizontalAlign.Right"
+                        Style="min-height:15rem;height:15rem;max-height:15rem;">
+            <Columns>
+                <RadzenDataGridColumn Context="g"
+                                      Property="@(nameof(VLoanRequestGuarantors.EntId))"
+                                      Width="3rem"
+                                      Title="#"
+                                      Sortable="false">
+                    <Template>
+                        @(Guarantors.ToList().IndexOf(g) + 1)
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Width="15rem" Property="@(nameof(VLoanRequestGuarantors.FullName))" Title="Name" Sortable="false" />
+                <RadzenDataGridColumn Width="10rem" Property="@(nameof(VLoanRequestGuarantors.Phone))" Title="Phone" Sortable="false" />
+                <RadzenDataGridColumn Context="g" Title="Address">
+                    <Template>
+                        @g.ToString()
+                    </Template>
+                </RadzenDataGridColumn>
+                @if (ShowRemove)
+                {
+                    <RadzenDataGridColumn Context="g" TextAlign="TextAlign.Center"
+                                          Width="4rem" Property="ProInKhmer"
+                                          Title="Action">
+                        <Template>
+                            <RadzenButton Icon="delete"
+                                          Shade="Shade.Lighter"
+                                          Click="@(()=>ClickedRevmove(g))"
+                                          Size="Radzen.ButtonSize.ExtraSmall"
+                                          Variant="Variant.Outlined" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                }
+            </Columns>
+        </RadzenDataGrid>
+    </CardBody>
+</Card>
+@code {
+    [Parameter] public IEnumerable<VLoanRequestGuarantors> Guarantors { get; set; } = [];
+    [Parameter] public bool ShowAdd { get; set; } = false;
+    [Parameter] public bool ShowRemove { get; set; } = false;
+    [Parameter] public EventCallback Add { get; set; }
+    [Parameter] public EventCallback Reload { get; set; }
+    [Parameter] public EventCallback<VLoanRequestGuarantors> Remove { get; set; }
+
+    RadzenDataGrid<VLoanRequestGuarantors> gridGuarantors = default!;
+
+    async void ClickedAdd()
+    {
+        await Add.InvokeAsync();
+        //await Reload.InvokeAsync();
+        //await gridGuarantors.Reload();
+    }
+    async void ClickedRevmove(VLoanRequestGuarantors g)
+    {
+        await Remove.InvokeAsync(g);
+        //await gridGuarantors.Reload();
+    }
+
+    public async Task GuarantorReload()
+    {
+        await gridGuarantors.Reload();
+    }
+
+}

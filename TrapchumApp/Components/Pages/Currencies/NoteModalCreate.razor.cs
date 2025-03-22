@@ -32,7 +32,7 @@ namespace TrapchumApp.Components.Pages.Currencies
             var currenciesResponse = await _currencyService.GetCurrencies(0);
             if (currenciesResponse.IsSuccess)
             {
-                Currencies = currenciesResponse.Data!.AdaptMany<CurrencyDto>();
+                Currencies = currenciesResponse.Data!.Maps<CurrencyDto>();
             }
 
             await base.OnInitializedAsync();

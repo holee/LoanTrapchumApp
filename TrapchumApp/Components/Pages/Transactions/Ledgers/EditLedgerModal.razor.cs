@@ -108,7 +108,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Ledgers
 
             if ((resp.IsSuccess))
             {
-                LedgerTypes = resp.Data!.AdaptMany<LedgerTypeDto>();
+                LedgerTypes = resp.Data!.Maps<LedgerTypeDto>();
             }
             else
             {
@@ -119,7 +119,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Ledgers
 
             if (currenciesRsponse.IsSuccess)
             {
-                Currencies = currenciesRsponse.Data?.AdaptMany<CurrencyDto>();
+                Currencies = currenciesRsponse.Data?.Maps<CurrencyDto>();
             }
 
             await base.OnParametersSetAsync();

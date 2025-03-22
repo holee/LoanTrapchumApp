@@ -1,30 +1,42 @@
+using Applications.Interfaces.Customers;
+using Applications.Requests.Collaterals;
+using Applications.Responses;
+using Applications.Responses.Collaterals;
+using Applications.Services.LIsts;
+using Mapster;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
-using TCLMS.Shared.Entities.Dtos.Collaterals;
-using TCLMS.Shared.Entities.Models.Lists.Customers;
 
-namespace TCLMS.Front.Pages.Lists.Collaterals
+namespace TrapchumApp.Components.Pages.Lists.Collaterals
 {
-    public partial class CollateralCreateTab 
+    public partial class CollateralCreateTab
     {
-        [Parameter] public long? CustomerId { get; set; } = 0;
+        private readonly ICollateralsServiceImpl _collateralService;
+        private readonly ICustomerService _customerService;
+        public CollateralCreateTab(ICollateralsServiceImpl collateralsService, ICustomerService cuCustomerService)
+        {
+            _collateralService = collateralsService;
+            _customerService = cuCustomerService;
+        }
+
+        [Parameter] public Guid? CustomerId { get; set; }
         [Parameter] public string? CustomerName { get; set; } = string.Empty;
         IEnumerable<VCustomerList>? custlist = new List<VCustomerList>();
         IEnumerable<CustomerCollateral> cusName = [];
-        IEnumerable<CollateralTypeDto> CollateralTypes = [];
-        IEnumerable<CollateralSubTypeDto> CollateralProperties = [];
-        IEnumerable<CollateralSubTypeDto> CollateralPersonals = [];
-        IEnumerable<CollateralSubTypeDto> allSubTypes = [];
-        List<CollateralLineDto> Properties = [];
-        List<CollateralLineDto> Personals = [];
+        IEnumerable<CollateralTypeResponse> CollateralTypes = [];
+        IEnumerable<CollateralSubTypeResponse> CollateralProperties = [];
+        IEnumerable<CollateralSubTypeResponse> CollateralPersonals = [];
+        IEnumerable<CollateralSubTypeResponse> allSubTypes = [];
+        List<CollateralLineResponse> Properties = [];
+        List<CollateralLineResponse> Personals = [];
         EditForm editForm { get; set; } = default!;
         CollateralTypeDto? SelectCollateralType;
-        CollateralDto model { get; set; } = new();
+        CollateralDtoCreate model { get; set; } = new();
 
-        long CollateralId = 0;
+        Guid? CollateralId;
         protected override async Task OnInitializedAsync()
         {
-            CollateralTypes = await _collateralService.GetCollateralType(0);
+            CollateralTypes = await _collateralService.GetCollateralTypes(0);
             CollateralProperties = await _collateralService.GetCollateralSubTypes(1);
             CollateralPersonals = await _collateralService.GetCollateralSubTypes(3);
             await GetCollateralLineByCustomer();
@@ -44,7 +56,7 @@ namespace TCLMS.Front.Pages.Lists.Collaterals
 
         protected override async Task OnParametersSetAsync()
         {
-            var customerResponse = await _customerService.GetCustomerAsync(CustomerId);
+            var customerResponse = await _customerService.GetCustomerByIdAsync(CustomerId);
 
             if (customerResponse.IsSuccess)
             {
@@ -57,17 +69,17 @@ namespace TCLMS.Front.Pages.Lists.Collaterals
 
         protected async Task GetCollateralLineByCustomer()
         {
-            if(CustomerId == 0)
+            if (CustomerId.HasValue)
             {
                 return;
             }
-            var customerResult = await _collateralService.GetCustomerCollateralById(CustomerId);
+            var customerResult = await _collateralService.GetCollateralByCustomerAsync(CustomerId);
 
             if (customerResult.IsSuccess)
             {
                 var collateral = customerResult.Data!;
                 CollateralId = CustomerId!.Value;
-                model!.CollateralId = CustomerId;
+                model!.CollateralId = CustomerId.Value;
                 model.CustomerName = CustomerName;
                 model.Remark = collateral!.Remark;
                 model.DocumentKeeping = collateral!.DocumentKeeping;
@@ -83,7 +95,7 @@ namespace TCLMS.Front.Pages.Lists.Collaterals
             {
                 CollateralId = 0;
                 model!.CustomerName = CustomerName;
-                model.CollateralId = CustomerId;
+                model.CollateralId = CustomerId.Value;
                 model.Remark = "";
                 model.DocumentKeeping = "";
                 model.RegisterDate = DateTime.Now;
@@ -94,7 +106,7 @@ namespace TCLMS.Front.Pages.Lists.Collaterals
         {
             if (collateralTypeId == 3)
             {
-                Personals.Add(new CollateralLineDto
+                Personals.Add(new CollateralLineResponse
                 {
                     CategoryRefId = collateralTypeId,
                     TypeName = "Personal"
@@ -104,7 +116,7 @@ namespace TCLMS.Front.Pages.Lists.Collaterals
             }
             else
             {
-                Properties.Add(new CollateralLineDto
+                Properties.Add(new CollateralLineResponse
                 {
                     CategoryRefId = collateralTypeId,
                     TypeName = "Property"
@@ -113,9 +125,9 @@ namespace TCLMS.Front.Pages.Lists.Collaterals
             }
 
         }
-        private void Remove(CollateralLineDto row, int type = 3)
+        private void Remove(CollateralLineResponse row, int type = 3)
         {
-            if ((type == 3))
+            if (type == 3)
             {
                 Personals.Remove(row);
                 personalGrid.Reload();
@@ -134,7 +146,7 @@ namespace TCLMS.Front.Pages.Lists.Collaterals
         {
             allSubTypes = await _collateralService.GetCollateralSubTypes();
 
-            List<CollateralLineDto> lines = new List<CollateralLineDto>
+            List<CollateralLineResponse> lines = new List<CollateralLineResponse>
             {
 
             }.Union(Properties.Where(x => x.SubCategoryRefId > 0))
@@ -151,9 +163,9 @@ namespace TCLMS.Front.Pages.Lists.Collaterals
                 }
             });
 
-            model.CollateralLines = lines;
+            model.CollateralLines = lines.Adapt<List<CollateralLineDtoCreate>>();
 
-            if (CustomerId == 0)
+            if (!CustomerId.HasValue)
             {
                 NotificationService.Notify(Radzen.NotificationSeverity.Warning, "Empty Selected", "Please select customer first");
                 return;
@@ -161,17 +173,18 @@ namespace TCLMS.Front.Pages.Lists.Collaterals
             editForm.EditContext?.Validate();
             try
             {
-                var response = await _collateralService.CreateCollateral(CollateralId, model);
+                var response = await _collateralService.InsertOrUpdate(model);
+
                 if (response.IsSuccess)
                 {
 
-                    NotificationService.Notify(Radzen.NotificationSeverity.Success, response.Data!.Message);
+                    NotificationService.Notify(Radzen.NotificationSeverity.Success, response.Data);
                     model = new();
                     await SaveChanged.InvokeAsync();
                 }
                 else
                 {
-                    NotificationService.Notify(Radzen.NotificationSeverity.Error, response.Data!.Message);
+                    NotificationService.Notify(Radzen.NotificationSeverity.Error, response.ErrMessage);
                 }
             }
             catch (Exception ex)

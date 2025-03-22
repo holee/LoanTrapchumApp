@@ -1,6 +1,6 @@
 ﻿using Applications.Enumerations;
 using Applications.Interfaces.Loans;
-using Applications.Requests.Loans;
+using Applications.Requests.Loans.CreditAgents;
 using Applications.Requests.Loans.LoanRequests;
 using Applications.Responses;
 using Applications.Responses.Paginations;
@@ -149,7 +149,7 @@ public class LoanRequestService(ApplicationDbContext context, ILogger<LoanReques
         try
         {
             var existingRequest = await context.LoanRequests
-                                    .Where(x => x.Id == req.LoanRequestId && x.CustomerRefId == req.CustomerId && x.BranchRefId == req.BranchId)
+                                    .Where(x => x.LoanRequestId == req.LoanRequestId && x.CustomerRefId == req.CustomerId && x.BranchRefId == req.BranchId)
                                     .Include(c => c.CollateralLinesLink)
                                             .ThenInclude(x => x.CollateralLine)
                                     .FirstOrDefaultAsync();
@@ -289,7 +289,7 @@ public class LoanRequestService(ApplicationDbContext context, ILogger<LoanReques
         try
         {
             var existingRequest = await context.LoanRequests
-                                    .Where(x => x.Id == request.LoanRequestId &&
+                                    .Where(x => x.LoanRequestId == request.LoanRequestId &&
                                                 x.CustomerRefId == request.CustomerRefId &&
                                                 x.BranchRefId == request.BranchRefId)
                                     .Include(g => g.GuarantorsLink!)
@@ -435,7 +435,7 @@ public class LoanRequestService(ApplicationDbContext context, ILogger<LoanReques
         {
 
             var existingRequest = await context.LoanRequests
-                                    .Where(x => x.Id == request.LoanRequestId &&
+                                    .Where(x => x.LoanRequestId == request.LoanRequestId &&
                                                 x.CustomerRefId == request.CustomerRefId &&
                                                 x.BranchRefId == request.BranchRefId)
                                     .Include(x => x.LoanDocuments)
@@ -700,7 +700,7 @@ public class LoanRequestService(ApplicationDbContext context, ILogger<LoanReques
         try
         {
             var existingLoanRequest = await context.LoanRequests
-                       .Where(x => x.Id == req.LoanRequestId &&
+                       .Where(x => x.LoanRequestId == req.LoanRequestId &&
                                    x.BranchRefId == req.BranchId &&
                                    x.CustomerRefId == req.CustomerId
                        ).FirstOrDefaultAsync();
@@ -713,7 +713,7 @@ public class LoanRequestService(ApplicationDbContext context, ILogger<LoanReques
             var lastEditSequent = existingLoanRequest!.EditSeq + 1;
 
             var updateResult = await context.LoanRequests
-                                            .Where(x => x.Id == req.LoanRequestId && x.BranchRefId == req.BranchId)
+                                            .Where(x => x.LoanRequestId == req.LoanRequestId && x.BranchRefId == req.BranchId)
                                             .ExecuteUpdateAsync(
                                                     prop => prop.SetProperty(p => p.LoanRequestStatusRefId, (int)RequestStatus.Aprove)
                                                                 .SetProperty(p => p.ModifiedDt, DateTime.UtcNow)
@@ -739,7 +739,7 @@ public class LoanRequestService(ApplicationDbContext context, ILogger<LoanReques
         try
         {
             var existingLoanRequest = await context.LoanRequests
-                        .Where(x => x.Id == req.LoanRequestId && x.BranchRefId == req.BranchId)
+                        .Where(x => x.LoanRequestId == req.LoanRequestId && x.BranchRefId == req.BranchId)
                         .FirstOrDefaultAsync();
 
             if (existingLoanRequest is null)
@@ -750,7 +750,7 @@ public class LoanRequestService(ApplicationDbContext context, ILogger<LoanReques
             var lastEditSequent = existingLoanRequest!.EditSeq + 1;
 
             var updateResult = await context.LoanRequests
-                                            .Where(x => x.Id == req.LoanRequestId && x.BranchRefId == req.BranchId)
+                                            .Where(x => x.LoanRequestId == req.LoanRequestId && x.BranchRefId == req.BranchId)
                                             .ExecuteUpdateAsync(
                                                     prop => prop.SetProperty(p => p.LoanRequestStatusRefId, (int)RequestStatus.Denied)
                                                                 .SetProperty(p => p.ModifiedDt, DateTime.UtcNow)
@@ -776,7 +776,7 @@ public class LoanRequestService(ApplicationDbContext context, ILogger<LoanReques
     {
 
         var existingLoanRequest = await context.LoanRequests
-                        .Where(x => x.Id == req.LoanRequestId &&
+                        .Where(x => x.LoanRequestId == req.LoanRequestId &&
                                x.BranchRefId == req.BranchId &&
                                x.CustomerRefId == req.CustomerId
                         ).FirstOrDefaultAsync();
@@ -790,7 +790,7 @@ public class LoanRequestService(ApplicationDbContext context, ILogger<LoanReques
         var lastEditSequent = existingLoanRequest!.EditSeq + 1;
 
         var updateResult = await context.LoanRequests
-                                        .Where(x => x.Id == req.LoanRequestId && x.BranchRefId == req.BranchId)
+                                        .Where(x => x.LoanRequestId == req.LoanRequestId && x.BranchRefId == req.BranchId)
                                         .ExecuteUpdateAsync(
                                                 prop => prop.SetProperty(p => p.LoanRequestStatusRefId, (int)RequestStatus.Rechecked)
                                                             .SetProperty(p => p.ModifiedDt, DateTime.UtcNow)
@@ -805,11 +805,11 @@ public class LoanRequestService(ApplicationDbContext context, ILogger<LoanReques
 
 
     }
-    public async Task<Result<string>> VerifiedLoanRequestAsync(RequestDtoBase req)
+    public async Task<Result<string>> VerifiedLoanRequestAsync(RequestDtoBaseCreate req)
     {
 
         var existingLoanRequest = await context.LoanRequests
-                        .Where(x => x.Id == req.LoanRequestId && x.BranchRefId == req.BranchId && x.CustomerRefId == req.CustomerId).FirstOrDefaultAsync();
+                        .Where(x => x.LoanRequestId == req.LoanRequestId && x.BranchRefId == req.BranchId && x.CustomerRefId == req.CustomerId).FirstOrDefaultAsync();
 
         if (existingLoanRequest is null)
         {
@@ -820,7 +820,7 @@ public class LoanRequestService(ApplicationDbContext context, ILogger<LoanReques
         var lastEditSequent = existingLoanRequest!.EditSeq + 1;
 
         var updateResult = await context.LoanRequests
-                                        .Where(x => x.Id == req.LoanRequestId && x.BranchRefId == req.BranchId)
+                                        .Where(x => x.LoanRequestId == req.LoanRequestId && x.BranchRefId == req.BranchId)
                                         .ExecuteUpdateAsync(
                                                 prop => prop.SetProperty(p => p.LoanRequestStatusRefId, (int)RequestStatus.Verified)
                                                             .SetProperty(p => p.ModifiedDt, DateTime.UtcNow)
@@ -834,11 +834,11 @@ public class LoanRequestService(ApplicationDbContext context, ILogger<LoanReques
 
 
     }
-    public async Task<Result<string>> AppliedLoanRequestAsync(RequestDtoBase req)
+    public async Task<Result<string>> AppliedLoanRequestAsync(RequestDtoBaseCreate req)
     {
 
         var existingLoanRequest = await context.LoanRequests
-                        .Where(x => x.Id == req.LoanRequestId &&
+                        .Where(x => x.LoanRequestId == req.LoanRequestId &&
                                x.BranchRefId == req.BranchId &&
                                x.CustomerRefId == req.CustomerId
                         ).FirstOrDefaultAsync();
@@ -852,7 +852,7 @@ public class LoanRequestService(ApplicationDbContext context, ILogger<LoanReques
         var lastEditSequent = existingLoanRequest!.EditSeq + 1;
 
         var updateResult = await context.LoanRequests
-                                        .Where(x => x.Id == req.LoanRequestId && x.BranchRefId == req.BranchId)
+                                        .Where(x => x.LoanRequestId == req.LoanRequestId && x.BranchRefId == req.BranchId)
                                         .ExecuteUpdateAsync(
                                                 prop => prop.SetProperty(p => p.LoanRequestStatusRefId, (int)RequestStatus.Requested)
                                                             .SetProperty(p => p.ModifiedDt, DateTime.UtcNow)
@@ -877,7 +877,7 @@ public class LoanRequestService(ApplicationDbContext context, ILogger<LoanReques
     private async Task<VCustomerList> GetLoanCustomer(long customerId)
     {
         var customer = await context.CustomerLists
-                                .Where(c => c.CustomerId == customerId)
+                                .Where(c => c.Id == customerId)
                                 .AsNoTracking()
                                 .FirstOrDefaultAsync();
 
@@ -941,254 +941,23 @@ public class LoanRequestService(ApplicationDbContext context, ILogger<LoanReques
         return loanDocuments ?? [];
     }
 
+    public Task<Result<VLoanRequests>> GetLoanRequestByCustomerAsync(int? branchId, Guid? customerId, Guid? loanRequestId, bool include)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Result<IEnumerable<VLoanRequestGuarantors>>> GetLoanRequestGuarantorAsync(int? branchId, Guid? loanRequestId, Guid? customerId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Result<IEnumerable<VLoanRequestsDocuments>>> GetLoanRequestDocumentAsync(Guid? loanRequestId, int? branchId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Pager<VLoanRequests>> GetLoanRequestsAsync(Guid? userId, int? branchId, RequestStatus requestStatus, QueryParam param)
+    {
+        throw new NotImplementedException();
+    }
 }
-
-//public async Task<Result<LoanRequest>> GetLoanRequestAsync(long customerId, long loanRequestId, int branchId = 0, bool include = false)
-//{
-//    if (!include)
-//    {
-//        var existing = context.LoanRequests.Where(x => x.Id == loanRequestId && x.CustomerRefId == customerId);
-
-//        if (branchId > 0)
-//        {
-//            existing = existing.Where(x => x.BranchRefId == branchId);
-//        }
-
-//        if (!existing.Any())
-//        {
-//            return Result.Failure<LoanRequest>(Error.NotFound("404", ["no loan request found."]));
-//        }
-
-//        var item = await existing.AsNoTracking().FirstAsync();
-
-//        return Result.Success(item);
-//    }
-
-//    var existingRequest = context.LoanRequests
-//                                .Where(x => x.Id == loanRequestId && x.CustomerRefId == customerId)
-//                                .Include(c => c.CollateralLinesLink)
-//                                        .ThenInclude(x => x.CollateralLine)
-//                                .Include(g => g.GuarantorsLink)
-//                                        .ThenInclude(x => x.Guarantor)
-//                                .Include(x => x.LoanDocuments)
-//                                .AsNoTracking();
-//    if (branchId > 0)
-//    {
-//        existingRequest = existingRequest.Where(x => x.BranchRefId == branchId);
-//    }
-
-//    if (!existingRequest.Any())
-//    {
-//        return Result.Failure<LoanRequest>(Error.NotFound("404", ["no loan request found."]));
-//    }
-
-//    var item1 = await existingRequest.AsNoTracking().FirstAsync();
-
-//    return Result.Success(item1);
-
-//}
-
-
-//public async Task<Result<VLoanRequests>> GetLoanRequestAsync(int branchId, long customerId, long loanRequestId, int statusId, long AprovedUserId = 0)
-//{
-//    IQueryable<VLoanRequests> resultQueries = context.Database
-//                                             .SqlQuery<VLoanRequests>($"SELECT * FROM VLoanReuests")
-//                                             .Where(x => x.BranchId == branchId && x.CustomerId == customerId);
-
-//    if (loanRequestId > 0)
-//    {
-
-//        resultQueries = resultQueries.Where(x => x.LoanRequestId == loanRequestId);
-//    }
-
-//    if (statusId > 0)
-//    {
-//        resultQueries = resultQueries.Where(x => x.StatusId == statusId);
-//    }
-
-//    if (AprovedUserId > 0)
-//    {
-//        resultQueries = resultQueries.Where(x => x.AprovedUserId == AprovedUserId);
-//    }
-
-//    if (!resultQueries.Any()) return Result.Failure<VLoanRequests>(Error.NotFound("404", [$"data not found."]));
-
-//    var item = await resultQueries.FirstAsync();
-
-//    return Result.Success<VLoanRequests>(item);
-
-//}
-
-
-//public async Task<Result<string>> AppliedLoanRequestAsync(RequestDtoBase req, RequestStatus requestStatus)
-//{
-
-//    var existingLoanRequest = await context.LoanRequests
-//                    .Where(x => x.Id == req.LoanRequestId &&
-//                           x.BranchRefId == req.BranchId &&
-//                           x.CustomerRefId == req.CustomerId
-//                    ).FirstOrDefaultAsync();
-
-//    if (existingLoanRequest is null)
-//    {
-//        return Result.Failure<string>(Error.NotFound("404", [$"no data founds,"]));
-
-//    }
-
-//    var lastEditSequent = existingLoanRequest!.EditSeq + 1;
-
-//    var updateResult = await context.LoanRequests
-//                                    .Where(x => x.Id == req.LoanRequestId && x.BranchRefId == req.BranchId)
-//                                    .ExecuteUpdateAsync(
-//                                            prop => prop.SetProperty(p => p.LoanRequestStatusRefId, (int)RequestStatus.Requested)
-//                                                        .SetProperty(p => p.ModifiedDT, DateTime.UtcNow)
-//                                                        .SetProperty(p => p.Memo, req.Memo)
-//                                                        .SetProperty(p => p.EditSeq, lastEditSequent));
-
-//    return updateResult > 0 ?
-//                        Result.Success<string>(new("Loan Request was Aproved"))
-//                        :
-//                        Result.Failure<string>(Error.ServerError("500", [$"cannot be aproved the loan Request."]));
-
-
-//}
-
-
-
-//public async Task<Pager<VLoanRequests>> GetLoanRequestsAsync(long aproveUserId, long credetAgentId, int statusId, int branchId, QueryParam param)
-//{
-//    IQueryable<VLoanRequests> resultQueries = context.Database
-//                                             .SqlQuery<VLoanRequests>($"SELECT * FROM VLoanReuests");
-
-//    if (!string.IsNullOrEmpty(param.Filter))
-//    {
-//        resultQueries = resultQueries.Where(x => EF.Functions.Like(x.BranchName!, $"%{param.Filter}%") ||
-//                                 EF.Functions.Like(x.AltName!, $"%{param.Filter}%") ||
-//                                 EF.Functions.Like(x.FullName!, $"%{param.Filter}%"));
-//    }
-
-//    if (branchId > 0)
-//    {
-//        resultQueries = resultQueries.Where(x => x.BranchId == branchId);
-//    }
-
-//    if (statusId > 0)
-//    {
-//        resultQueries = resultQueries.Where(x => x.StatusId == statusId);
-//    }
-
-//    if (aproveUserId > 0)
-//    {
-
-//        resultQueries = resultQueries.Where(x => x.AprovedUserId == aproveUserId);
-
-//    }
-
-//    if (credetAgentId > 0)
-//    {
-//        resultQueries = resultQueries.Where(x => x.UserRequestId == credetAgentId);
-//    }
-
-//    if (param.SortDescending)
-//    {
-//        resultQueries = resultQueries.OrderByDescending(x => EF.Property<object>(x, param.SortColumn));
-//    }
-
-//    var counts = await resultQueries.CountAsync();
-
-//    var items = await resultQueries.Skip(param.PageIndex).Take(param.PageSize).AsNoTracking().ToListAsync();
-
-//    return new Pager<VLoanRequests>(items, counts);
-
-//}
-
-
-
-//public async Task<Result<IEnumerable<VLoanRequests>>> GetLoanRequestsAsync(long AprovedId, string? filter = null)
-//{
-//    IQueryable<VLoanRequests> resultQueries = context.Database.SqlQuery<VLoanRequests>($"SELECT * FROM VLoanReuests");
-
-//    if (!string.IsNullOrEmpty(filter))
-//    {
-//        resultQueries = resultQueries.Where(x => EF.Functions.Like(x.BranchName!, $"{filter}") ||
-//                                                 EF.Functions.Like(x.AltName!, $"{filter}") ||
-//                                                 EF.Functions.Like(x.FullName!, $"{filter}"));
-//    }
-
-//    if (AprovedId > 0)
-//    {
-//        resultQueries = resultQueries.Where(x => x.CreditAgentId == AprovedId);
-//    }
-
-//    var items = await resultQueries.AsNoTracking().ToListAsync();
-
-//    if (items.Any()) return Result.Failure<IEnumerable<VLoanRequests>>(Error.NotFound("500", [$"no data found."]));
-
-//    return Result.Success<IEnumerable<VLoanRequests>>(items);
-
-//}
-
-
-//public async Task<Result<LoanRequest>> GetLoanRequestAsync(int branchId, long customerId, long LoanRequestId)
-//{
-//    var queries = context.LoanRequests.Where(x => x.BranchRefId == branchId &&
-//                                                  x.CustomerRefId == customerId &&
-//                                                  x.Id == LoanRequestId)
-//                                      .Include(x => x.CollateralLinesLink)
-//                                      .Include(x => x.GuarantorsLink)
-//                                      .AsSplitQuery()
-//                                      .AsNoTracking();
-
-//    if (!queries.Any())
-//    {
-//        return Result.Failure<LoanRequest>(Error.NotFound("404", [$"no data found."]));
-//    }
-
-//    var item = await queries.FirstOrDefaultAsync();
-
-//    return Result.Success<LoanRequest>(item!);
-
-//}
-
-
-//public async Task<Pager<VLoanRequests>> GetLoanRequestsAsync(long userId, int statusId, int branchId, QueryParam param)
-//{
-//    IQueryable<VLoanRequests> resultQueries = context.Database
-//                                             .SqlQuery<VLoanRequests>($@"SELECT * FROM VLoanReuests WHERE BranchId={branchId}");
-
-//    if (!string.IsNullOrEmpty(param.Filter))
-//    {
-//        resultQueries = resultQueries.Where(x => EF.Functions.Like(x.BranchName!, $"%{param.Filter}%") ||
-//                                                 EF.Functions.Like(x.AltName!, $"%{param.Filter}%") ||
-//                                                 EF.Functions.Like(x.FullName!, $"%{param.Filter}%"));
-//    }
-
-//    if (statusId == 2)
-//    {
-//        resultQueries = resultQueries.Where(x => x.StatusId == 2 || x.StatusId == 1);
-//    }
-
-//    if (userId > 0)
-//    {
-//        resultQueries = resultQueries.Where(x => x.AprovedUserId == userId || x.UserRequestId == userId);
-//    }
-
-//    if (param.SortDescending)
-//    {
-//        resultQueries = resultQueries.OrderByDescending(x => EF.Property<object>(x, param.SortColumn));
-//    }
-
-//    var counts = await resultQueries.CountAsync();
-
-//    var items = await resultQueries.Skip(param.PageIndex).Take(param.PageSize).AsNoTracking().ToListAsync();
-
-//    return new Pager<VLoanRequests>(items, counts);
-
-//}
-
-
-
-//var gurantorIds = request.Guarantors?.Select(x => x.EntId).ToList();
-//var customerIds = request.CollateralLines?.Select(x => x.CustomerRefId).ToList();
-//var existingGuarantors = context.OtherNames.Where(x => gurantorIds!.Contains(x.EntId)).AsNoTracking().ToList();
-//var exstingCollaterals = context.CollateralLines.Where(x => customerIds!.Contains(x.CustomerRefId)).AsNoTracking().ToList();

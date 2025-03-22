@@ -1,4 +1,4 @@
-﻿@using TCLMS.Shared.Entities.Dtos.Collaterals.NewCollaterals
+﻿@using Applications.Responses.Collaterals
 <RadzenCard>
     <EditForm Model="model" @ref="editForm">
         <DataAnnotationsValidator />
@@ -61,7 +61,7 @@
             <Tabs>
                 <RadzenTabsItem Text="Property">
                     <RadzenDataGrid Density="Density.Compact"
-                                    TItem="CollateralLineDto"
+                                    TItem="CollateralLineResponse"
                                     Responsive
                                     ColumnWidth="15rem"
                                     @ref="propertiesGrid"
@@ -179,7 +179,7 @@
                 </RadzenTabsItem>
                 <RadzenTabsItem Text="Personal">
                     <RadzenDataGrid Density="Density.Compact"
-                                    TItem="CollateralLineDto"
+                                    TItem="CollateralLineResponse"
                                     Responsive
                                     ColumnWidth="15rem"
                                     @ref="personalGrid"
@@ -307,8 +307,8 @@
 </RadzenCard>
 
 @code {
-    RadzenDataGrid<CollateralLineDto> personalGrid = default!;
-    RadzenDataGrid<CollateralLineDto> propertiesGrid = default!;
+    RadzenDataGrid<CollateralLineResponse> personalGrid = default!;
+    RadzenDataGrid<CollateralLineResponse> propertiesGrid = default!;
 
     [Parameter]
     public EventCallback Close { get; set; }
@@ -318,186 +318,3 @@
         await Close.InvokeAsync();
     }
 }
-@* <table class="table table-sm table-borderless">
-    <thead class="bg-light">
-        <tr>
-            <th class="w-auto">#</th>
-            <th class="w-auto">Category</th>
-            <th class="w-auto">Collateral Number</th>
-            <th class="w-auto">Owner</th>
-            <th class="w-auto">Size</th>
-            <th style="width:3rem;">Qty</th>
-            <th style="width:5rem;">Market Price</th>
-            <th style="width:5rem;">Hot Priec</th>
-            <th style="width:5rem;">PawnPrice</th>
-            <th class="text-end">
-                <TButton Size="BtnSize.Small" Icon="BtnIconType.Plus" Color="Kalor.Success" Click="@(()=>AddNewRow(1))" />
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (model?.CollateralLines!.Count > 0)
-        {
-
-            var properties = model?.CollateralLines!
-            .Where(x => x.TypeName == "Property")
-            .ToList();
-
-            @for (int x = 0; x < properties?.Count; x++)
-            {
-                var row = x;
-                var currentrow = x + 1;
-                <tr>
-                    <td>
-                        @currentrow
-                        <input type="hidden" @bind="properties[row]!.Id" />
-                        <input type="hidden" @bind="properties[row]!.CollateralRefId" />
-                    </td>
-                    <td>
-                        <RadzenDropDown TValue="int?"
-                                        Data="CollateralProperties"
-                                        TextProperty="CollateralSubTypeName"
-                                        ValueProperty="Id"
-                                        @bind-Value="properties[row].SubCategoryRefId">
-                        </RadzenDropDown>
-                    </td>
-                    <td>
-                        <RadzenTextBox @bind-Value="properties[row]!.CollateralNo"></RadzenTextBox>
-                    </td>
-                    <td>
-                        <RadzenTextBox Placeholder="Owner"
-                                       @bind-Value="properties[row]!.OwnerName"></RadzenTextBox>
-                    </td>
-                    <td>
-                        <RadzenTextBox Placeholder="Size"
-                                       @bind-Value="properties[row]!.Size" />
-                    </td>
-                    <td>
-                        <RadzenNumeric Placeholder="Qty"
-                                       ShowUpDown="false"
-                                       Min="0"
-                                       @bind-Value="properties[row]!.Quantity" />
-                    </td>
-                    <td>
-                        <RadzenNumeric @bind-Value="properties[row]!.MarketPrice"
-                                       ShowUpDown="false"
-                                       Min="0"
-                                       TextAlign="TextAlign.End" />
-                    </td>
-                    <td>
-                        <RadzenNumeric @bind-Value="properties[row]!.HotPrice"
-                                       ShowUpDown="false"
-                                       Min="0"
-                                       TextAlign="TextAlign.End" />
-                    </td>
-                    <td>
-                        <RadzenNumeric @bind-Value="properties[row]!.PawnPrice"
-                                       ShowUpDown="false"
-                                       Min="0"
-                                       TextAlign="TextAlign.End" />
-                    </td>
-                    <td>
-                        <RadzenButton Click="@(()=>Remove(properties[row]))"
-                                      ButtonStyle="ButtonStyle.Danger"
-                                      Icon="remove"
-                                      Size="Radzen.ButtonSize.Small">
-                        </RadzenButton>
-                    </td>
-                </tr>
-            }
-
-        }
-    </tbody>
-</table> *@
-@* <table class="table table-sm table-borderless">
-    <thead class="bg-light">
-        <tr>
-            <th class="w-auto">#</th>
-            <th class="w-auto">Category</th>
-            <th class="w-auto">Collateral Number</th>
-            <th class="w-auto">Owner</th>
-            <th class="w-auto">Size</th>
-            <th style="width:3rem;">Qty</th>
-            <th style="width:5rem;">Market Price</th>
-            <th style="width:5rem;">Hot Priec</th>
-            <th style="width:5rem;">PawnPrice</th>
-            <th>
-                <TButton Size="BtnSize.Small" Icon="BtnIconType.Plus"
-                         Color="Kalor.Success" Click="@(()=>AddNewRow(3))" />
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (model.CollateralLines?.Count > 0)
-        {
-            var people = model.CollateralLines
-            .Where(x => x.TypeName == "Personal")
-            .ToList();
-            @for (int x = 0; x < people?.Count; x++)
-            {
-                var row = x;
-                var currentrow = x + 1;
-                <tr>
-                    <td>
-                        @currentrow
-                        <input type="hidden" @bind="people[row]!.Id" />
-                        <input type="hidden" @bind="people[row]!.CollateralRefId" />
-                    </td>
-                    <td>
-                        <RadzenDropDown TValue="int?"
-                                        Data="CollateralPersonals"
-                                        TextProperty="CollateralSubTypeName"
-                                        ValueProperty="Id"
-                                        @bind-Value:after="SelectedPeopleChanged"
-                                        @bind-Value="people[row].SubCategoryRefId">
-                        </RadzenDropDown>
-                    </td>
-                    <td>
-                        <RadzenTextBox @bind-Value="people[row].CollateralNo"></RadzenTextBox>
-                    </td>
-                    <td>
-                        <RadzenTextBox Placeholder="Owner"
-                                       @bind-Value="people[row].OwnerName"></RadzenTextBox>
-                    </td>
-                    <td>
-                        <RadzenTextBox Placeholder="Size"
-                                       @bind-Value="people[row].Size"></RadzenTextBox>
-                    </td>
-                    <td>
-                        <RadzenNumeric ShowUpDown="false"
-                                       Min="0"
-                                       Placeholder="Qty"
-                                       @bind-Value="people[row].Quantity" />
-                    </td>
-                    <td>
-                        <RadzenNumeric ShowUpDown="false"
-                                       @bind-Value="people[row].MarketPrice"
-                                       Min="0"
-                                       Placeholder="Market Price"
-                                       TextAlign="TextAlign.End" />
-                    </td>
-                    <td>
-                        <RadzenNumeric @bind-Value="people[row].HotPrice"
-                                       Min="0"
-                                       Placeholder="Hot Price"
-                                       TextAlign="TextAlign.End" />
-                    </td>
-                    <td>
-                        <RadzenNumeric ShowUpDown="false"
-                                       Min="0"
-                                       Placeholder="Pawn Price"
-                                       @bind-Value="people[row].PawnPrice"
-                                       TextAlign="TextAlign.End" />
-                    </td>
-                    <td class="text-end">
-                        <RadzenButton Click="@(()=>Remove(people[row]))"
-                                      Icon="remove"
-                                      ButtonStyle="ButtonStyle.Danger" Size="Radzen.ButtonSize.Small">
-                        </RadzenButton>
-                    </td>
-
-                </tr>
-            }
-        }
-    </tbody>
-</table> *@

@@ -1,0 +1,52 @@
+﻿<table class="table table-sm">
+    <tbody>
+        <tr>
+            <td class="rz-background-color-base-100 w-2">Name</td>
+            <th>@LoanSchedule?.AltName</th>
+            <td class="rz-background-color-base-100">Address</td>
+            <th>@LoanSchedule?.Address</th>
+        </tr>
+        <tr>
+            <td class="rz-background-color-base-100">Contract</td>
+            <th>@LoanSchedule?.CurrencyName</th>
+            <td class="rz-background-color-base-100">Amount</td>
+            <th>
+                @(string.Format("{0:#,###.00}", LoanSchedule?.Amount))
+            </th>
+            <td class="rz-background-color-base-100">Phone</td>
+            <th>@LoanSchedule?.Phone</th>
+        </tr>
+        <tr>
+            <td class="rz-background-color-base-100">Account Number</td>
+            <th>@LoanSchedule?.PaidPrinciple</th>
+            <td class="rz-background-color-base-100">Expiry Date</td>
+            <th>
+                @(string.Format("{0:dd/MM/yyyy}", LoanSchedule?.LastPaymentDate))
+            </th>
+            <td class="rz-background-color-base-100">Interest Rate</td>
+            <th>@LoanSchedule?.InterestRate</th>
+        </tr>
+        <tr>
+            <td class="rz-background-color-base-100">Date</td>
+            <th>
+                @(string.Format("{0:dd/MM/yyyy}", LoanSchedule?.RegisterDate))
+            </th>
+            <td class="rz-background-color-base-100">Agent</td>
+            <th>@LoanSchedule?.AgentName</th>
+            <td class="rz-background-color-base-100">Phone</td>
+            <th>@LoanSchedule?.AgentPhone</th>
+        </tr>
+        <tr>
+            <td class="rz-background-color-base-100">Period</td>
+            <th>@LoanSchedule?.Period (Months)</th>
+            <td class="rz-background-color-base-100">Office</td>
+            <th>Trapchum</th>
+            <td class="rz-background-color-base-100">Circle</td>
+            <th>@LoanSchedule?.Circle</th>
+        </tr>
+    </tbody>
+</table>
+@code {
+    [Parameter]
+    public VLoanDisbursments LoanSchedule { get; set; } = new();
+}

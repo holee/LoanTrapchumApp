@@ -1,0 +1,36 @@
+﻿@using Applications.Enumerations
+@using Applications.Responses.ViewModels.Loans.Requests
+
+        @if (LoanRequest?.StatusId == (int)RequestStatus.New)
+        {
+            <NavLink href="@loanRequestUrl">
+                <RadzenBadge Variant="Variant.Filled"
+                             Style="font-size:0.7rem;"
+                             Text="Request" BadgeStyle="BadgeStyle.Secondary" />
+            </NavLink>
+        }
+        else
+        {
+            <RadzenBadge class="rz-ms-2"
+                         Text="@LoanRequest?.Status"
+                         Variant="Variant.Text"
+                         Style="font-size:0.7rem;"
+                         BadgeStyle="BadgeStyle.Success" />
+        }
+@code {
+    [Parameter, EditorRequired]
+    public VLoanRequests? LoanRequest { get; set; }
+    [Parameter, EditorRequired]
+    public int? BranchId { get; set; }
+    [Parameter, EditorRequired]
+    public Guid? CreditAgentId { get; set; }
+    string loanRequestDetailsUrl = "";
+    string loanRequestUrl = "";
+    protected override void OnParametersSet()
+    {
+        loanRequestDetailsUrl = $"/Loan/{LoanRequest?.CustomerId}/Request/{LoanRequest?.LoanRequestId}?BranchId={BranchId}&UserId={CreditAgentId}";
+        loanRequestUrl = $"/Loan/Customer/{LoanRequest?.CustomerId}/Request/{LoanRequest?.LoanRequestId}?BranchId={BranchId}&UserId={CreditAgentId}";
+        base.OnParametersSet();
+    }
+}
+

@@ -1,0 +1,178 @@
+﻿@using TCLMS.Shared.Entities.ViewModels.Auths
+<Containers Fluid CssClass="rz-background-color-base-100 rz-p-2">
+    <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
+        <RadzenColumn Size="3">
+            Customer
+        </RadzenColumn>
+        <RadzenColumn Size="9">
+            <RadzenDropDownDataGrid TValue="long"
+                                    Data="@Customers"
+                                    TextProperty="AltName"
+                                    class="w-100"
+                                    Value="@CustomerId"
+                                    Disabled="true"
+                                    ValueProperty="CustomerId">
+            </RadzenDropDownDataGrid>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
+        <RadzenColumn Size="3">
+            Request By
+        </RadzenColumn>
+        <RadzenColumn Size="9">
+            <RadzenDropDownDataGrid TValue="long"
+                                    Data="@RequestUsers"
+                                    TextProperty="FullName"
+                                    Value="RequestUserId"
+                                    Disabled="true"
+                                    class="w-100"
+                                    ValueProperty="Id">
+            </RadzenDropDownDataGrid>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
+        <RadzenColumn Size="3">
+            Branch
+        </RadzenColumn>
+        <RadzenColumn Size="9">
+            <RadzenDropDownDataGrid TValue="int"
+                                    Data="@Branches"
+                                    TextProperty="@(nameof(BranchDto.BranchName))"
+                                    Value="@BranchId"
+                                    class="w-100"
+                                    Disabled="true"
+                                    ValueProperty="@(nameof(BranchDto.BranchId))">
+            </RadzenDropDownDataGrid>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
+        <RadzenColumn Size="3">
+            Amount
+        </RadzenColumn>
+        <RadzenColumn Size="9">
+            <RadzenNumeric Disabled class="w-100" Value="@Amount" ShowUpDown="false" />
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
+        <RadzenColumn Size="3">
+            Accept By
+        </RadzenColumn>
+        <RadzenColumn Size="9">
+            <RadzenDropDownDataGrid TValue="long"
+                                    Data="@AcceptUsers"
+                                    TextProperty="FullName"
+                                    Value="UserId"
+                                    class="w-100"
+                                    Disabled="true"
+                                    ValueProperty="Id">
+            </RadzenDropDownDataGrid>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
+        <RadzenColumn Size="3">
+            Note
+        </RadzenColumn>
+        <RadzenColumn Size="9">
+            <RadzenTextArea class="w-100" @bind-Value="memo" />
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End"
+                 Orientation="Orientation.Horizontal">
+        <RadzenButton Text="Save"
+                      ButtonStyle="ButtonStyle.Success"
+                      Click="LoanRequestVerified"
+                      Size="Radzen.ButtonSize.Small"
+                      Icon="save"></RadzenButton>
+        <RadzenButton Text="Close"
+                      ButtonStyle="ButtonStyle.Danger"
+                      Size="Radzen.ButtonSize.Small"
+                      Variant="Variant.Text"
+                      Click="@(()=>DialogService.Close(false))"
+                      Icon="cancel"></RadzenButton>
+    </RadzenStack>
+</Containers>
+
+@code {
+
+    [Parameter]
+    public long CustomerId { get; set; }
+    [Parameter]
+    public long RequestUserId { get; set; }
+    [Parameter]
+    public int BranchId { get; set; }
+    [Parameter]
+    public decimal? Amount { get; set; } = 0;
+    [Parameter]
+    public long LoanRequestId { get; set; } = 0;
+    [Parameter]
+    public long AprovedUserId { get; set; } = 0;
+    IEnumerable<VUser> RequestUsers = [];
+    IEnumerable<VCustomerList> Customers = [];
+    IEnumerable<BranchDto> Branches = [];
+    IEnumerable<VUser> AcceptUsers = [];
+    string memo = "";
+    long UserId;
+
+    protected override void OnParametersSet()
+    {
+        UserId = _stateProvider.AuthenticationStateUser.GetId();
+        base.OnParametersSet();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetAllData();
+        await base.OnInitializedAsync();
+    }
+    async Task GetAllData()
+    {
+        var empRsp = await _userService.GetUsersAsync(RequestUserId, string.Empty);
+
+        if (empRsp.IsSuccess)
+        {
+            RequestUsers = empRsp.Data!;
+        }
+        var custResp = await _customerService.GetCustomersAsync(CustomerId, 1);
+
+        if (custResp.IsSuccess)
+        {
+            Customers = custResp.Data!;
+        }
+        var branchResp = await _branchService.GetBranchesAsync(BranchId);
+
+        if (branchResp.IsSuccess)
+        {
+            Branches = branchResp.Data!;
+        }
+
+        var userResp = await _userService.GetUsersAsync(UserId);
+
+        if (userResp.IsSuccess)
+        {
+            AcceptUsers = userResp.Data!;
+        }
+
+        StateHasChanged();
+    }
+
+    async void LoanRequestVerified()
+    {
+        var resp = await _loanRequestService.ApplyLoanRequest(new RequestDtoBase(BranchId, CustomerId, LoanRequestId, memo));
+
+        if (resp.IsSuccess)
+        {
+            NotificationService.Notify(NotificationSeverity.Success, resp.Data!.Message);
+            DialogService.Close(true);
+        }
+        else
+        {
+            var errorMessage = resp.Errors!.First();
+            NotificationService.Notify(NotificationSeverity.Error, errorMessage);
+        }
+    }
+
+
+
+
+
+}

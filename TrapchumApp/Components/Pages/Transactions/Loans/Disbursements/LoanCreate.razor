@@ -1,0 +1,213 @@
+﻿@page "/Loan/Disbursement/Create"
+@using TCLMS.Front.Pages.Transactions.Loans.LoanRequests
+<PageTitle>New Loan Disbursment</PageTitle>
+<SectionContent SectionName="Progressbar">
+    <RadzenProgressBar Visible="IsLoading" Value="100"
+                       ProgressBarStyle="ProgressBarStyle.Danger"
+                       ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+</SectionContent>
+<Containers CssClass="rz-m-0 rz-p-0 rz-background-color-base-200" Fluid>
+    <BCard CssClass="rz-background-color-base-200">
+        <CardBody>
+            <RadzenTabs @bind-SelectedIndex="selectedTabIndex" RenderMode="TabRenderMode.Client">
+                <Tabs>
+                    <RadzenTabsItem Text="ព័ត៌មានប្រាក់កម្ចី" Icon="add">
+                        <div class="rz-m-0 rz-p-0">
+                            <EditForm Model="model" @ref="editForm">
+                                <input type="hidden" @bind-value="penaltyRate" />
+                                <table class="table table-bordered">
+                                    <tbody>
+                                        <tr>
+                                            <th style="background-color:#F1F1F4" class="w-25">Customer</th>
+                                            <td>
+                                                <input type="hidden" @bind="model.CustomerRefId" />
+                                                @model?.CustomerName
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th style="background-color:#F1F1F4" class="w-25">Currency</th>
+                                            <td>
+                                                <input type="hidden" @bind="model!.CustomerRefId" />
+                                                <span>@model?.CurrencyName</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th style="background-color:#F1F1F4" class="w-25">Principle</th>
+                                            <td>
+                                                @model?.Principle.Format(model.CurrencyRefId)
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th style="background-color:#F1F1F4" class="w-25">Installment Type</th>
+                                            <td>
+                                                <input type="hidden" @bind="model!.InstallmentType" />
+                                                @model?.InstallmentType
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th style="background-color:#F1F1F4" class="w-25">Repayment Mode</th>
+                                            <td>
+                                                <input type="hidden" @bind="model!.RepaymentModeRefId" />
+                                                <span>
+                                                    @model?.RepaymentModeName
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th style="background-color:#F1F1F4" class="w-25">Installments</th>
+                                            <td>
+                                                <input type="hidden" @bind="model!.Installments" />
+                                                @model?.Installments @model?.InstallmentName
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th style="background-color:#F1F1F4" class="w-25">Pay Every</th>
+                                            <td>
+                                                <input type="hidden" @bind="model!.PayEvery" />
+                                                @model?.PayEvery @model?.InstallmentName
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th style="background-color:#F1F1F4" class="w-25">Interest Rate</th>
+                                            <td>
+                                                <input type="hidden" @bind="model!.InterestRate" />
+                                                <span>
+                                                    @model?.InterestRate
+                                                    <i>%</i>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th style="background-color:#F1F1F4" class="w-25">Effective Fee Rate</th>
+                                            <td>
+                                                <input type="hidden" @bind="model!.CollectionFeeRate" />
+                                                <input type="hidden" @bind="model!.OtherChargeId" />
+                                                <span>
+                                                    @model?.CollectionFeeRate
+                                                    <i>%</i>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th style="background-color:#F1F1F4" class="w-25">Admin Fee Amount</th>
+                                            <td>
+                                                <input type="hidden" @bind="model!.AdminFeeRate" />
+                                                <span>
+                                                    @model?.AdminFeeAmount
+                                                </span>
+
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th style="background-color:#F1F1F4" class="w-25">Circle</th>
+                                            <td>
+                                                <input type="hidden" @bind="model!.Circle" />
+                                                <span>
+                                                    @model?.Circle
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th style="background-color:#F1F1F4" class="w-25">Loan Category</th>
+                                            <td>
+                                                <input type="hidden" @bind="model!.LoanCategoryRefId" />
+                                                @model?.LoanCategoryName
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th style="background-color:#F1F1F4" class="w-25">Agent Name</th>
+                                            <td>
+                                                <input type="hidden" @bind="model!.CreditAgentRefId" />
+                                                @model?.CreditAgentName
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th style="background-color:#F1F1F4" class="w-25">Start Date</th>
+                                            <td>
+                                                <input type="hidden" @bind="model!.StartDate" />
+                                                @model?.StartDate
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th style="background-color:#F1F1F4" class="w-25">First Payment</th>
+                                            <td>
+                                                <input type="hidden" @bind="model!.FirstPaymentDate" />
+                                                @model?.FirstPaymentDate
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th style="background-color:#F1F1F4" class="w-25">Last Payment</th>
+                                            <td>
+                                                <input type="hidden" @bind="model!.LastPaymentDate" />
+                                                @model?.LastPaymentDate
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th style="background-color:#F1F1F4" class="w-25">Note</th>
+                                            <td>
+                                                <RadzenTextArea class="w-100" @bind-Value="model!.Remark"></RadzenTextArea>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </EditForm>
+                        </div>
+                    </RadzenTabsItem>
+                    <RadzenTabsItem Text="អ្នកធានានិងទ្រព្យបញ្ចាំ" Icon="inventory">
+                        <LoanRequestCollaterals CustomerId="CustomerRequestId"
+                                                Collaterals="@req.Collaterals?.ToList()"
+                                                ShowAdd="false" />
+                        <LoanRequestGaurantor Guarantors="@req.Guarantors" ShowAdd="false" />
+                        <LoanRequestDocument Documents="@req.Documents.ToList()" ShowUpload="false" />
+                    </RadzenTabsItem>
+                    <RadzenTabsItem Text="Preview" Icon="preview">
+                        <LoanSchedules Schedules="previewSchedule"
+                                       CurrencyId="model.CurrencyRefId" />
+                    </RadzenTabsItem>
+                </Tabs>
+            </RadzenTabs>
+        </CardBody>
+        <CardFooter>
+            <RadzenStack Gap="1rem"
+                         Orientation="Radzen.Orientation.Horizontal"
+                         JustifyContent="Radzen.JustifyContent.End"
+                         class="py-2"
+                         AlignItems="AlignItems.Center">
+                <RadzenButton Click="ShowLoanPreviews"
+                              Size="Radzen.ButtonSize.Small"
+                              Icon="preview"
+                              ButtonStyle="ButtonStyle.Primary" Text="Preview" />
+                <RadzenButton Size="Radzen.ButtonSize.Small"
+                              Click="HandleFormSubmit"
+                              Text="Disburse Now"
+                              Icon="save"
+                              ButtonStyle="ButtonStyle.Success" />
+                <RadzenLink Icon="arrow_back"
+                            Path="@($"/Loan/Request/?BranchId={BranchId}&UserId={UserId}")"
+                            Text="Back" />
+            </RadzenStack>
+        </CardFooter>
+    </BCard>
+</Containers>
+@code {
+    [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+    bool collapse = false;
+    string collapseIcon = "expand_more";
+    bool isVible = false;
+    int selectedTabIndex = 0;
+    bool isProgressing = false;
+    bool isCollateralTab = false;
+    bool isPreviewScheduleTab = false;
+    bool IsLoading = false;
+    RadzenTabs tb = default!;
+    List<int> tabCounts = [0];
+    IEnumerable<LoanScheduleDtoCreate> previewSchedule = [];
+    protected LoanDtoCreate model = new LoanDtoCreate();
+    protected DateTime? RegisterDate = DateTime.Now;
+    protected int SelectedCollectionFee = 1;
+    protected decimal? TotalAdminFee = 0;
+    protected int SelectedPeriodName = 1;
+    protected IEnumerable<VBranch> Branches = Enumerable.Empty<VBranch>();
+
+}
+

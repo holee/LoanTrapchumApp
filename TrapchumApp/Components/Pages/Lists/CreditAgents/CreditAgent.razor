@@ -1,0 +1,302 @@
+﻿@page "/Employees/CreditAgents"
+@using TCLMS.Front.Pages.Admins.Users
+<RadzenCard>
+    <RadzenTabs SelectedIndex="selectedTabIndex"
+                SelectedIndexChanged="SelectedTabChanged"
+                @ref="tabs"
+                RenderMode="TabRenderMode.Server">
+        <Tabs>
+            <RadzenTabsItem Text="All" Icon="people_alt">
+                <RadzenRow AlignItems="AlignItems.Center" RowGap="0.5rem" class="mb-2">
+                    <RadzenColumn Size="2">
+                        <RadzenStack AlignItems="AlignItems.Center"
+                                     JustifyContent="JustifyContent.Start"
+                                     Orientation="Orientation.Horizontal">
+                            <div class="dropdown-center">
+                                <RadzenButton class="rz-background-color-base-100"
+                                              ButtonType="Radzen.ButtonType.Button"
+                                              Size="Radzen.ButtonSize.Small"
+                                              ButtonStyle="ButtonStyle.Light"
+                                              data-bs-toggle="dropdown"
+                                              Shade="Shade.Darker"
+                                              aria-expanded="false">
+                                    Show @(pageSize) rows
+                                </RadzenButton>
+                                <ul class="dropdown-menu">
+                                    <li><button onclick="@(()=>ChangedPageSize(10))" class="btn-sm dropdown-item" type="button">10 Rows</button></li>
+                                    <li><button onclick="@(()=>ChangedPageSize(25))" class="btn-sm dropdown-item" type="button">25 Rows</button></li>
+                                    <li><button onclick="@(()=>ChangedPageSize(50))" class="btn-sm dropdown-item" type="button">50 Rows</button></li>
+                                    <li><button onclick="@(()=>ChangedPageSize(100))" class="btn-sm dropdown-item" type="button">100 Rows</button></li>
+                                </ul>
+                            </div>
+                        </RadzenStack>
+                    </RadzenColumn>
+                    <RadzenColumn Size="4">
+                        <RadzenStack AlignItems="AlignItems.Center"
+                                     JustifyContent="JustifyContent.Center"
+                                     Orientation="Orientation.Horizontal">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    Branch
+                                </span>
+                                <RadzenDropDown TValue="int"
+                                                TextProperty="BranchName"
+                                                ValueProperty="BranchId"
+                                                Data="Branches"
+                                                Style="width:75%"
+                                                @bind-Value:after="SelectedBranchChanged"
+                                                @bind-Value="BranchId">
+                                </RadzenDropDown>
+                            </div>
+                        </RadzenStack>
+                    </RadzenColumn>
+                    <RadzenColumn Size="6">
+                        <RadzenStack AlignItems="AlignItems.Center"
+                                     JustifyContent="JustifyContent.End"
+                                     Orientation="Orientation.Horizontal">
+                            <RadzenFormField AllowFloatingLabel="false" Variant="Variant.Outlined">
+                                <Start>
+                                    <RadzenIcon Icon="search" />
+                                </Start>
+                                <ChildContent>
+                                    <RadzenTextBox @bind-Value="searchText"
+                                                   @bind-Value:after="GetSearchChandged"
+                                                   Placeholder="Search Credit Agent Here.." />
+                                </ChildContent>
+                            </RadzenFormField>
+                        </RadzenStack>
+
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenStack AlignItems="AlignItems.Center"
+                             JustifyContent="JustifyContent.Center"
+                             Orientation="Orientation.Horizontal">
+                    <RadzenDataGrid Data="CreditAgents"
+                                    Density="Density.Compact"
+                                    AllowPaging="true"
+                                    ShowPagingSummary="true"
+                                    PageSize="pageSize"
+                                    PagerHorizontalAlign="HorizontalAlign.Right"
+                                    LoadData="LoadData"
+                                    IsLoading="isLoading"
+                                    Count="@counts"
+                                    style="--rz-grid-header-background-color:var(--rz-base-200);"
+                                    GridLines="DataGridGridLines.Both">
+                        <HeaderTemplate>
+                            <RadzenStack Orientation="Orientation.Horizontal"
+                                         AlignItems="AlignItems.Center"
+                                         JustifyContent="JustifyContent.SpaceBetween">
+                                <RadzenButton Text="Credit Officer"
+                                              Click="AddCreditAgentTab"
+                                              ButtonStyle="ButtonStyle.Primary"
+                                              Icon="add"
+                                              Size="Radzen.ButtonSize.Small" />
+                            </RadzenStack>
+                        </HeaderTemplate>
+                        <Columns>
+                            <RadzenDataGridColumn Property="LoanCreditAgentId"
+                                                  Title="#"
+                                                  Width="3rem"
+                                                  Context="em">
+                                <Template>
+                                    <strong>
+                                        @{
+                                            var rowNumber = CreditAgents!.IndexOf(em) + 1;
+                                        }
+                                        @rowNumber
+                                    </strong>
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn Property="FirstName" Title="First Name" Sortable="true" />
+                            <RadzenDataGridColumn Property="LastName" Title="Last Name" Sortable="true" />
+                            <RadzenDataGridColumn Property="Phone" Title="Phone" Sortable="false" />
+                            <RadzenDataGridColumn Property="BranchName" Title="Branch" Sortable="true" />
+                            <RadzenDataGridColumn Width="5rem" Context="c" Title="Remove" Sortable="false">
+                                <Template>
+                                    <CreditAgentSwitch Reload="Reload" CreditAgent="@c" />
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn Width="5rem"
+                                                  TextAlign="TextAlign.Center"
+                                                  Context="c" Title="Remove" Sortable="false">
+                                <Template>
+                                    <RadzenButton ButtonStyle="ButtonStyle.Primary"
+                                                  Size="Radzen.ButtonSize.ExtraSmall"
+                                                  Click="@(()=>AddUserAccount(c))"
+                                                  Icon="person_add" />
+                                </Template>
+                            </RadzenDataGridColumn>
+                        </Columns>
+                    </RadzenDataGrid>
+                </RadzenStack>
+            </RadzenTabsItem>
+            <RadzenTabsItem Text="New C.O" Visible="ShowAddedTab" Icon="person_add">
+                <RadzenStack AlignItems="AlignItems.Center"
+                             Orientation="Orientation.Horizontal"
+                             class="mb-2"
+                             JustifyContent="JustifyContent.End">
+                    <RadzenFormField>
+                        <Start>
+                            <RadzenIcon Icon="search" />
+                        </Start>
+                        <ChildContent>
+                            <RadzenTextBox Placeholder="Search Employee"
+                                           @bind-Value="searchText"
+                                           @bind-Value:after="SearchCreditAgent" />
+                        </ChildContent>
+                    </RadzenFormField>
+                </RadzenStack>
+                <RadzenDataGrid TItem="VEmployeeCreateCreditAgent"
+                                PageSize="10"
+                                ColumnWidth="10rem"
+                                style="--rz-grid-header-background-color:var(--rz-base-200);"
+                                Density="Density.Compact"
+                                Data="CreditAgentPageList">
+                    <Columns>
+                        <RadzenDataGridColumn Property="FirstName" Title="First Name" />
+                        <RadzenDataGridColumn Property="LastName" Title="Last Name" />
+                        <RadzenDataGridColumn Property="Gender" Title="Gender" />
+                        <RadzenDataGridColumn Property="BranchName" Title="Branch Name" />
+                        <RadzenDataGridColumn Width="6rem" Title="Action" Sortable="false">
+                            <Template>
+                                <RadzenButton Size="Radzen.ButtonSize.ExtraSmall"
+                                              Click="@(()=>AddCreditAgent(context!.EmployeeId!.Value))"
+                                              Variant="Variant.Text"
+                                              Text="Make C.O"
+                                              ButtonStyle="ButtonStyle.Primary"
+                                              Icon="person_add" />
+                            </Template>
+                        </RadzenDataGridColumn>
+                    </Columns>
+                </RadzenDataGrid>
+            </RadzenTabsItem>
+        </Tabs>
+    </RadzenTabs>
+    <RadzenStack AlignItems="AlignItems.Center"
+                 JustifyContent="JustifyContent.End"
+                 Gap="1rem"
+                 class="mt-2"
+                 Orientation="Orientation.Horizontal">
+        <RadzenButton Text="Close"
+                      Icon="cancel"
+                      Size="Radzen.ButtonSize.Small"
+                      Click="RemoveTab"
+                      ButtonStyle="ButtonStyle.Danger" />
+    </RadzenStack>
+</RadzenCard>
+@code {
+    int BranchId;
+    string? BranchName;
+    [Parameter] public int Index { get; set; } = 1;
+    bool isLoading = false;
+    bool ShowAddedTab = false;
+    RadzenTabs tabs = default!;
+    LoanCreditAgentDtoCreate model = new LoanCreditAgentDtoCreate();
+    IEnumerable<VEmployeeCreateCreditAgent> CreditAgentPageList = [];
+    int selectedTabIndex = 0;
+    private async Task AddCreditAgent(long id)
+    {
+
+        bool? confirm = await DialogService.Confirm($"do you want make Employee #{id} as C.O?",
+                                "Confirm",
+                                 new ConfirmOptions
+                                     {
+                                         OkButtonText = "Ok",
+                                         CancelButtonText = "Cancel"
+                                     });
+        if (confirm == false) return;
+        var response = await _creditAgentService.AddCreditAgent(id, model);
+        if (response!.IsSuccess)
+        {
+            NotificationService.Notify(NotificationSeverity.Success, response.Message);
+            ShowAddedTab = false;
+            selectedTabIndex = 0;
+            await GetCreditAgents(searchText);
+            tabs.Reload();
+        }
+    }
+
+    void ChangedPageSize(int page)
+    {
+        pageSize = page;
+    }
+
+
+
+
+    async void SelectedTabChanged(int index)
+    {
+        selectedTabIndex = index;
+        if (selectedTabIndex == 1)
+        {
+            await LoadPageList();
+        }
+    }
+
+    async Task AddCreditAgentTab()
+    {
+        if (!ShowAddedTab)
+        {
+            ShowAddedTab = true;
+            await LoadPageList();
+        }
+        selectedTabIndex = 1;
+        tabs.Reload();
+    }
+    void RemoveTab()
+    {
+        if (selectedTabIndex == 1 && ShowAddedTab)
+        {
+            ShowAddedTab = false;
+        }
+        selectedTabIndex = 0;
+    }
+
+    async Task SearchCreditAgent()
+    {
+        await LoadPageList(searchText);
+    }
+
+    async Task LoadPageList(string? filter = null)
+    {
+        CreditAgentPageList = await _creditAgentService.GetEmployeeForCreateCreditAgents(filter);
+    }
+
+    async Task ShowDialogue()
+    {
+        var options = new DialogOptions
+            {
+                Width = "80rem",
+                Height = "30rem"
+            };
+        await DialogService.OpenAsync<CreditAgentDialog>("Credit Agent", options: options);
+    }
+    async void Reload()
+    {
+        await GetCreditAgents(searchText);
+    }
+
+
+    async Task AddUserAccount(VCreditAgent c)
+    {
+
+        var options = new DialogOptions
+            {
+                Width = "620px",
+                ContentCssClass = "rz-mt-3 rz-background-color-base-100"
+            };
+
+        var param = new Dictionary<string, object?>
+        {
+            {"EmployeeId",c.EmployeeRefId},
+            {"BranchId",c.BranchId}
+        };
+        var result = await DialogService.OpenAsync<CreditAgentUserCreate>("New User", param, options: options);
+
+        if (bool.TryParse(result, out bool success) && success)
+        {
+
+        }
+    }
+
+}

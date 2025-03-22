@@ -102,7 +102,7 @@ namespace Infrastructures.Implements
         }
         public async Task<IEnumerable<EntityName>> GetAllAsync(string? searchTerm, string sortField = "AltName", string sortOrder = "ASC", bool isActive = false)
         {
-            IQueryable<EntityName> entities = _context.OtherNames.Where(x => x.EntType == "Other Name").OrderByDynamic(sortField, sortOrder);
+            IQueryable<EntityName> entities = _context.OtherNames.Where(x => x.EntType == "Other Name").SortBy(sortField, sortOrder);
             if (isActive == false)
             {
                 entities = entities.Where(x => x.IsActive == true);
@@ -115,7 +115,7 @@ namespace Infrastructures.Implements
                                         x.MiddleName!.StartsWith(searchTerm, StringComparison.CurrentCultureIgnoreCase) ||
                                         x.LastName!.StartsWith(searchTerm, StringComparison.CurrentCultureIgnoreCase) ||
                                         x.Sex!.StartsWith(searchTerm, StringComparison.CurrentCultureIgnoreCase) ||
-                                        x.Phone!.StartsWith(searchTerm, StringComparison.CurrentCultureIgnoreCase)).OrderByDynamic(sortField, sortOrder);
+                                        x.Phone!.StartsWith(searchTerm, StringComparison.CurrentCultureIgnoreCase)).SortBy(sortField, sortOrder);
             }
             var items = await entities.AsNoTracking().ToListAsync() ?? [];
 

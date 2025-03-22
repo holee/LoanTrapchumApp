@@ -1,0 +1,4 @@
+﻿table tbody th {
+    background-color: var(--rz-base-100);
+    vertical-align:middle;
+}

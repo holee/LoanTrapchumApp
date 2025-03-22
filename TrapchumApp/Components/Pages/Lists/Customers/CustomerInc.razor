@@ -1,8 +1,9 @@
-﻿<RadzenDataGrid Data="Items"
+﻿@using Applications.Responses.ViewModels.Customers
+<RadzenDataGrid Data="Items"
                 GridLines="DataGridGridLines.Both"
                 Responsive
                 IsLoading="isLoading"
-                Style="--rz-grid-header-background-color:var(--rz-base-200);min-height:20rem;height:20rem;max-height:30rem;"
+                Style="min-height:20rem;height:20rem;max-height:30rem;"
                 Density="Density.Compact">
     <HeaderTemplate>
         @if (ShowAdd)
@@ -63,76 +64,4 @@
         <RadzenProgressBarCircular ProgressBarStyle="ProgressBarStyle.Primary" Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
     </LoadingTemplate>
 </RadzenDataGrid>
-@code {
 
-    [Parameter] public long? CustomerId { get; set; } = 0;
-    [Parameter] public bool ShowAdd { get; set; } = true;
-    [Parameter] public bool ShowReload { get; set; } = false;
-    [Parameter] public IEnumerable<VCustomerIncomes> Items { get; set; } = [];
-    bool isLoading = false;
-    protected override async Task OnInitializedAsync()
-    {
-        await GetCustomerIncomes(CustomerId);
-
-        await base.OnInitializedAsync();
-    }
-
-    async Task GetCustomerIncomes(long? customerId)
-    {
-
-        isLoading = true;
-
-        if (customerId > 0)
-        {
-            var resp = await _customerService.GetCustomerIncomesAsync(customerId);
-
-            if (resp.IsSuccess)
-            {
-                Items = resp.Data!;
-                isLoading = false;
-            };
-        }
-
-        isLoading = false;
-
-        StateHasChanged();
-    }
-
-    async void RefreshIncome()
-    {
-        await GetCustomerIncomes(CustomerId);
-
-    }
-
-    protected async void AddInComeModal()
-    {
-
-        if (CustomerId <= 0)
-        {
-            NotificationService.Notify(NotificationSeverity.Info, "Please select cusotmer..");
-            return;
-        }
-
-        var options = new Radzen.DialogOptions
-            {
-                Width = "50vw",
-                Resizable = false,
-                Draggable = true,
-            };
-
-        var param = new Dictionary<string, object?>
-            {
-                { "CustomerId",CustomerId }
-            };
-
-        bool result = await DialogService.OpenAsync<CustomerModalIncome>("Add Income", param, options);
-
-        if (bool.TryParse(result.ToString(), out bool success) && success)
-        {
-            await GetCustomerIncomes(CustomerId);
-        }
-
-    }
-
-
-}

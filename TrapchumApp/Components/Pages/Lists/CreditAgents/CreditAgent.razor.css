@@ -1,0 +1,6 @@
+﻿::deep table.rz-grid-table thead tr, ::deep table.rz-grid-table thead th {
+    --rz-grid-header-background-color: var(--rz-success-light) !important;
+}
+.rz-grid-table .rz-state-highlight {
+    cursor: pointer;
+}

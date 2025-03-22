@@ -1,0 +1,76 @@
+﻿@page "/Loan/Customer/{CustomerId:long}/Request/{LoanRequestId:long}"
+<PageTitle>Loan Request</PageTitle>
+<SectionContent SectionName="Progressbar">
+    <RadzenProgressBar ProgressBarStyle="ProgressBarStyle.Danger"
+                       Visible="@isLoading" ShowValue="false"
+                       Value="100"
+                       Mode="ProgressBarMode.Indeterminate" />
+</SectionContent>
+<div class="rz-background-color-base-200">
+    <Card BodyCssClass="rz-background-color-base-200">
+        <CardBody>
+            <RadzenTabs RenderMode="TabRenderMode.Client">
+                <Tabs>
+                    <RadzenTabsItem Text="សំណើរ">
+                        <RadzenFieldset>
+                            <LoanRequestDetails Data="@data"
+                                                LoanRequestId="@LoanRequestId"
+                                                BranchId="@BranchId"
+                                                CustomerId="CustomerId" />
+                        </RadzenFieldset>
+                    </RadzenTabsItem>
+                    <RadzenTabsItem Text="Guarantors & Collaterals">
+                        <LoanRequestCollaterals CustomerId="CustomerId"
+                                                ShowAdd="true"
+                                                ShowRemove="true"
+                                                Add="@AddCollaterals"
+                                                @ref="@CollateralRef"
+                                                RemoveCollateral="@RemoveCollateral"
+                                                Collaterals="Collaterals" />
+                        <LoanRequestGaurantor Add="@AddGuarantors"
+                                              Guarantors="Guarantors"
+                                              ShowAdd="true"
+                                              ShowRemove="true"
+                                              @ref="@GuarantorRef"
+                                              Remove="RemoveGuarantor" />
+                        <LoanRequestDocument Documents="@Documents"
+                                             RemoveDocument="@Remove"
+                                             @ref="DocumentRef"
+                                             UploadDocument="@HandleFileDialogue"
+                                             ShowDelete="true" />
+                    </RadzenTabsItem>
+                    <RadzenTabsItem Text="តេស្តសាកល្បង">
+                        <LoanSchedules Schedules="previewSchedule"
+                                       CurrencyId="model.CurrencyRefId" />
+                    </RadzenTabsItem>
+                </Tabs>
+            </RadzenTabs>
+        </CardBody>
+        <CardFooter>
+            <RadzenStack class="mt-2"
+                         Orientation="Radzen.Orientation.Horizontal"
+                         JustifyContent="Radzen.JustifyContent.End"
+                         Gap="0.5rem"
+                         AlignItems="AlignItems.Center">
+                @if (!IsAccepted)
+                {
+                    <LinkButton Icon="edit_note"
+                                Text="Edit"
+                                Path="@editUrl" />
+                    <RadzenButton Size="Radzen.ButtonSize.ExtraSmall"
+                                  Click="@(()=>CreateLoanRequest(data))"
+                                  Text="Request"
+                                  Icon="save"
+                                  ButtonStyle="ButtonStyle.Success" />
+                }
+                <RadzenLink Path="@backUrl"
+                            Text="Back" />
+            </RadzenStack>
+        </CardFooter>
+    </Card>
+</div>
+
+
+
+
+

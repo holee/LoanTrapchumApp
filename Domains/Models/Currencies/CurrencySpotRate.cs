@@ -1,4 +1,6 @@
-﻿namespace Domains.Models.Currencies
+﻿using Domains.Models.Bases;
+
+namespace Domains.Models.Currencies
 {
     public class CurrencySpotRate : BaseEntity
     {

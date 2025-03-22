@@ -1,0 +1,9 @@
+﻿/*::deep .rz-lookup-search-input
+{
+    height:32px;
+    background-color:rebeccapurple;
+}
+::deep .rz-grid-table thead tr, ::deep .rz-grid-table thead th {
+    background-color: var(--rz-success-light) !important;
+}
+*/

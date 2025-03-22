@@ -1,0 +1,38 @@
+﻿@using AppilcationServices.Interfaces
+<input type="hidden" @bind="CreditAgent.EditSeq" />
+<input type="hidden" @bind="CreditAgent.EmployeeRefId" />
+<RadzenCheckBox TValue="bool"
+                Change="OnCheckChanged"
+                Value="CreditAgent.IsRemove" />
+
+
+@code {
+    [Inject] protected ICreditAgentServiceImpl CreditAgentService { get; set; } = default!;
+    [Parameter] public VCreditAgent CreditAgent { get; set; } = default!;
+    [Parameter] public EventCallback Reload { get; set; }
+    async Task OnCheckChanged(bool x)
+    {
+        var confirm = await DialogService.Confirm("do you want to remove C.O from list?", "Confirm");
+        if (confirm == false) return;
+        CreditAgent.IsRemove = x;
+        var creditDto = new LoanCreditAgentDtoActivate
+            {
+                IsRemove = x,
+                EditSeq = CreditAgent.EditSeq,
+                EmployeeRefId = CreditAgent.EmployeeRefId,
+            };
+        var respnse = await CreditAgentService.ActivateAndDeactivateCreditAgent(CreditAgent.EmployeeRefId!.Value, creditDto);
+        if (respnse!.IsSuccess)
+        {
+            NotificationService.Notify(NotificationSeverity.Success, "", respnse.Message);
+            await Reload.InvokeAsync();
+        }
+        else
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "", respnse.Message);
+
+        }
+        StateHasChanged();
+    }
+
+}

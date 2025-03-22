@@ -1,8 +1,8 @@
-﻿@using TCLMS.Shared.Entities.Dtos.Lists.OtherNames
+﻿@using Applications.Requests.Lists.OtherNames
 <div class="card">
     <div class="card-header bg-primary">
         <div class="d-flex justify-content-between">
-            <span>Name Details: @model!.Sex @model?.Name <span><RadzenCheckBox @bind-Value="model.IsActive" /></span></span>
+            <span>Name Details: @model!.Sex @model?.Name <span><RadzenCheckBox @bind-Value="model!.IsActive" /></span></span>
             <strong @onclick="SelectedIndex" class="text-danger" style="cursor:pointer">X</strong>
         </div>
     </div>
@@ -69,14 +69,10 @@
     <div class="card-footer ">
         <div class="d-flex justify-content-between">
             <div>
-                <label class="text-muted">Created: @string.Format("{0:dd MMM yyyy hh:mm tt}", model?.CreatedDT) Modified: @string.Format("{0:dd MMM yyyy hh:mm tt}", model?.ModifiedDT)</label>
+                <label class="text-muted">Created: @string.Format("{0:dd MMM yyyy hh:mm tt}", model?.CreatedDt) Modified: @string.Format("{0:dd MMM yyyy hh:mm tt}", model?.ModifiedDt)</label>
             </div>
             <div>
-                <TButton Click="SelectedIndex"
-                         Text="Close"
-                         Icon="BtnIconType.Close"
-                         Size="BtnSize.Small"
-                         Color="Kalor.Danger" />
+                <RadzenButton Click="SelectedIndex" Size="ButtonSize.Small" Text="Close" Icon="cancel" />
             </div>
         </div>
 
@@ -86,8 +82,7 @@
 
 @code {
     [Parameter] public EntNameDto? model { get; set; }
-    [Parameter]
-    public EventCallback<int> SelectIndex { get; set; }
+    [Parameter] public EventCallback<int> SelectIndex { get; set; }
 
     protected async Task SelectedIndex()
     {

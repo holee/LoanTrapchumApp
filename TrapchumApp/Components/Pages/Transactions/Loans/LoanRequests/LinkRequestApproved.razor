@@ -1,0 +1,36 @@
+﻿@using Applications.Enumerations
+@using Applications.Responses.ViewModels.Loans.Requests
+@if (LoanRequest?.StatusId == (int)RequestStatus.Requested || LoanRequest?.StatusId == (int)RequestStatus.Verified)
+{
+    <NavLink href="@loanRequestUrl">
+        <RadzenBadge Variant="Variant.Filled"
+                     Style="font-size:0.7rem;"
+                     Text="Check" BadgeStyle="BadgeStyle.Secondary" />
+    </NavLink>
+}
+else
+{
+    <NavLink href="@loanRequestDetailsUrl">
+        <RadzenBadge Variant="Variant.Text"
+                     Style="font-size:0.7rem;"
+                     Text="@LoanRequest?.Status" BadgeStyle="BadgeStyle.Secondary" />
+    </NavLink>
+}
+
+
+@code {
+    [Parameter] public VLoanRequests? LoanRequest { get; set; }
+    [Parameter] public Guid? UserId { get; set; }
+    [Parameter] public int? BranchId { get; set; }
+    string loanRequestUrl = "";
+    string loanRequestDetailsUrl = "";
+
+    protected override void OnParametersSet()
+    {
+
+        loanRequestUrl = $"/Loan/Request/{LoanRequest?.LoanRequestId}/Review?BranchId={BranchId}&CustomerId={LoanRequest?.CustomerId}&UserId={UserId}";
+        loanRequestDetailsUrl = $"/Loan/Request/{LoanRequest?.LoanRequestId}/Details?CustomerId={LoanRequest?.CustomerId}&BranchId={BranchId}&UserId={UserId}";
+        base.OnParametersSet();
+    }
+
+}

@@ -1,4 +1,5 @@
 using Applications.Requests.Loans;
+using Applications.Requests.Loans.LoanRequests;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Domains.Models.Loans;
 
@@ -6,7 +7,7 @@ namespace Applications.Responses;
 
 public static class LoanDocumentsExtensions
 {
-    public static LoanRequestDocuments ToLoanRequestDocuments(long customerId, long loanRequestId, int branchId, IEnumerable<VLoanRequestsDocuments> doc)
+    public static LoanRequestDocuments ToLoanRequestDocuments(Guid? customerId, Guid? loanRequestId, int? branchId, IEnumerable<VLoanRequestsDocuments> doc)
     {
         return new LoanRequestDocuments
         {

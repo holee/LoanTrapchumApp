@@ -1,4 +1,5 @@
-﻿using Domains.Models.Lists.Employees;
+﻿using Domains.Models.Bases;
+using Domains.Models.Lists.Employees;
 
 namespace Domains.Models.Loans;
 

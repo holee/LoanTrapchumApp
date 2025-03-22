@@ -1,18 +1,29 @@
-﻿using ApplicationServices.Interfaces;
+﻿using Applications.Interfaces.Customers;
+using Applications.Responses;
+using Applications.Responses.Lists.Customers;
+using Applications.Responses.ViewModels.Collaterals;
+using Applications.Responses.ViewModels.Customers;
+using Applications.Responses.ViewModels.Loans;
+using Applications.Responses.ViewModels.Loans.Requests;
+using Applications.Services.Customers;
 using Microsoft.AspNetCore.Components;
-using TCLMS.Shared.Entities.Dtos.Lists.Customers;
-using TCLMS.Shared.Entities.Models.Lists.Customers;
-using TCLMS.Shared.Entities.ViewModels.Collaterals;
-using TCLMS.Shared.Entities.ViewModels.Customers;
-using TCLMS.Shared.Entities.ViewModels.Loans;
 
-namespace TCLMS.Front.Pages.Lists.Customers
+namespace TrapchumApp.Components.Pages.Lists.Customers
 {
     public partial class CustomerDetails
     {
-        [Parameter] public long CustomerId { get; set; }
+
+        private readonly ICustomerServiceImpl _customerService;
+        private readonly ICustomerIncomeExpendService _customerIncomeService;
+        public CustomerDetails(ICustomerServiceImpl customerService, ICustomerIncomeExpendService customerIncomeService)
+        {
+            _customerService = customerService;
+            _customerIncomeService = customerIncomeService;
+        }
+
+        [Parameter] public Guid? CustomerId { get; set; }
         [Parameter] public EventCallback Close { get; set; }
-        protected CustomerDto? EntCustomer { get; set; } = new();
+        protected CustomerReponse? EntCustomer { get; set; } = new();
         protected VCustomerList Customer = new();
         protected IEnumerable<VCollateralLines> CollateralLines = [];
         protected IEnumerable<VLoanRequests> VLoanRequests = [];
@@ -27,7 +38,7 @@ namespace TCLMS.Front.Pages.Lists.Customers
 
                 IsLoading = true;
 
-                var response = await _customerService.GetCustomerDetailsAsync(CustomerId);
+                var response = await _customerService.GetCustomerDetailsByIdAsync(CustomerId);
 
                 if (response.IsSuccess)
                 {
@@ -37,9 +48,8 @@ namespace TCLMS.Front.Pages.Lists.Customers
                 }
                 else
                 {
-                    var error = response.Errors!.FirstOrDefault();
 
-                    NotificationService.Notify(Radzen.NotificationSeverity.Error, error);
+                    NotificationService.Notify(Radzen.NotificationSeverity.Error, response.ErrMessage);
                 }
 
                 IsLoading = false;
@@ -68,7 +78,7 @@ namespace TCLMS.Front.Pages.Lists.Customers
                 Height = "25rem",
                 Resizable = false,
                 Draggable = true,
-            }, parameters: new Dictionary<string, object>
+            }, parameters: new Dictionary<string, object?>
             {
                 { "CustomerId",CustomerId }
             });
@@ -81,7 +91,7 @@ namespace TCLMS.Front.Pages.Lists.Customers
                 Height = "25rem",
                 Resizable = false,
                 Draggable = true,
-            }, parameters: new Dictionary<string, object>
+            }, parameters: new Dictionary<string, object?>
             {
                 { "CustomerId",CustomerId }
             });
@@ -97,25 +107,23 @@ namespace TCLMS.Front.Pages.Lists.Customers
 
         async Task GetCustomerNotes()
         {
-            var noteResponse = await _customerService.GetCusomerNotesAsync(CustomerId, 0);
+            var noteResponse = await _customerService.GetCusomerNotesAsyn(CustomerId, 0);
 
             if (noteResponse.IsSuccess)
             {
-                CustomerNotes = noteResponse.Data!;
+                //CustomerNotes = noteResponse.Data!;
             }
             else
             {
                 CustomerNotes = [];
 
-                var error = noteResponse.Errors!.FirstOrDefault();
-
-                NotificationService.Notify(Radzen.NotificationSeverity.Error, error);
+                NotificationService.Notify(Radzen.NotificationSeverity.Error, noteResponse.ErrMessage);
             }
         }
 
         async Task GetCustomerLoanHistory()
         {
-            var historyResponse = await _customerService.GetCustomerLoanHostoryAsync(CustomerId);
+            var historyResponse = await _customerService.GetCustomerLoanHistoryAsync(CustomerId);
 
             if (historyResponse.IsSuccess)
             {
@@ -129,7 +137,7 @@ namespace TCLMS.Front.Pages.Lists.Customers
 
         async Task GetCustomerCollateralLines()
         {
-            var collateralResponse = await _customerService.GetCustomerCollateralLineAsync(CustomerId);
+            var collateralResponse = await _customerService.GetCustomerCollateralLines(CustomerId);
 
             if (collateralResponse.IsSuccess)
             {
@@ -144,9 +152,9 @@ namespace TCLMS.Front.Pages.Lists.Customers
 
         async Task GetCustomerIncomeAndExpense()
         {
-            var incomeResponse = await _customerService.GetCustomerIncomesAsync(CustomerId);
+            var incomeResponse = await _customerIncomeService.GetCustomerCustomerIncomes(CustomerId);
 
-            var expenseResponse = await _customerService.GetCustomerExpensesAsync(CustomerId);
+            var expenseResponse = await _customerIncomeService.GetCustomerCustomerExpenses(CustomerId);
 
             if (incomeResponse.IsSuccess)
             {

@@ -1,9 +1,9 @@
 ﻿namespace Applications.Requests.Loans.LoanRequests;
 
 
-public sealed class RecheckedRequestDtoCreate : RequestDtoBase
+public sealed class RecheckedRequestDtoCreate : RequestDtoBaseCreate
 {
-    public RecheckedRequestDtoCreate(int? branchId, long? customerId, long? loanRequestId, DateTime? checkedDate, string? memo)
+    public RecheckedRequestDtoCreate(int? branchId, Guid? customerId, Guid? loanRequestId, DateTime? checkedDate, string? memo)
         : base(branchId, customerId, loanRequestId, memo)
     {
         CheckedDate = checkedDate;

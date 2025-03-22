@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Domains.Models;
+using Domains.Models.Bases;
 
 namespace Applications.Requests.Lists.Vendors
 {

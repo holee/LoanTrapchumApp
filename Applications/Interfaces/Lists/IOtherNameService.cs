@@ -18,6 +18,7 @@ namespace Applications.Interfaces.Lists
         Task<Result<string>> ConvertToCustomerAsync(long id, Customer customer);
         Task<Result<string>> ConvertToVendorAsync(long id, Vendor vendor);
         Task<EntityName?> GetByIdAsync(long id);
+        Task<EntityName?> GetByIdAsync(Guid? id);
         Task<EntityName?> GetDetailAsync(long id);
         Task<IEnumerable<EntityName>> GetAllAsync(string? searchTerm, string sortField, string sortOrder, bool isActive = false);
         Task<Result<string>> CreateGaurantorAsync(EntityName othername);

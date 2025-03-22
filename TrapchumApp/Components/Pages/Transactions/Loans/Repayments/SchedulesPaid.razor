@@ -1,0 +1,112 @@
+@using Radzen.Blazor.Rendering
+@using TCLMS.Shared.Entities.ViewModels.Loans.Schedules
+<PageDropDown PageSizeChanged="ChangedPageSize"
+              ShowSearchBox="false"
+              ShowReload="false">
+</PageDropDown>
+<RadzenDataGrid AllowPaging="true"
+                AllowAlternatingRows="true"
+                AllowRowSelectOnRowClick="true"
+                AllowSorting="false"
+                PagerHorizontalAlign="HorizontalAlign.Right"
+                Density="Density.Compact"
+                IsLoading="isLoading"
+                GridLines="DataGridGridLines.Both"
+                PageSize="pageSize"
+                ShowPagingSummary="true"
+                RowSelect="RowSelecting"
+                TItem="VSchedule"
+                Style="min-height:30rem;height:30rem;max-height:40rem;"
+                Data="PaymentSchedules">
+    <Columns>
+        <RadzenDataGridColumn Title="#"
+                              Width="2rem"
+                              Context="p">
+            <Template>
+                @p.InstallmentNo
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="Payment Date"
+                              Width="8rem"
+                              Property="PaymentDate"
+                              Context="p">
+            <Template>
+                @(string.Format("{0:dd/MM/yyyy}", p.PaymentDate))
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="Principle"
+                              Width="8rem"
+                              Property="Principal"
+                              Context="p">
+            <Template>
+                @p.Principle.FormatUp(2, p.CurrencyId!.Value)
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="Interest"
+                              Width="8rem"
+                              Property="Interest"
+                              Context="p">
+            <Template>
+                @p.Interest.FormatUp(2, p.CurrencyId!.Value)
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="Collection Fee"
+                              Width="8rem"
+                              Property="CollectionFee"
+                              Context="p">
+            <Template>
+                @p.CollectionFee.Format(p.CurrencyId)
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="Penalty"
+                              Width="8rem"
+                              Property="PenaltyAmount"
+                              Context="p">
+            <Template>
+                @if (p.PenaltyAmount > 0)
+                {
+                    <strong class="text-danger">
+                        @p.PenaltyAmount.FormatUp(2, p.CurrencyId!.Value)
+                    </strong>
+                }
+                else
+                {
+                    @p.PenaltyAmount.FormatUp(2, p.CurrencyId!.Value)
+                }
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="Total"
+                              Width="8rem"
+                              Property="TotalPay"
+                              Context="p">
+            <Template>
+                @p.TotalPay.Format(p.CurrencyId)
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="Actions"
+                              Width="5rem"
+                              TextAlign="TextAlign.Center"
+                              Context="p">
+            <Template>
+                <RadzenButton Size="Radzen.ButtonSize.ExtraSmall"
+                              Icon="more_vert"
+                              Variant="Variant.Text"
+                              Click="@((args)=>ShowContextMenu(args,p))" />
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+<Popup @ref="@popup" Lazy="true" class="my-popup">
+   <ScheduleDetails CurrencyId="1" BranchId="@BranchId" LoanId="@LoanId" ScheduleId="@ScheduleId" />
+</Popup>
+@code {
+    void ShowContextMenu(MouseEventArgs args, VSchedule p)
+    {
+        ContextMenuService.Open(args, ds =>@<RadzenMenu Style="font-size:0.8rem;">
+        <RadzenMenuItem Icon="info_i"
+                        Click="@((args)=>ShowScheduleDetails(p))"
+                        Text="Show Details" />
+    </RadzenMenu>
+    );
+    }
+}

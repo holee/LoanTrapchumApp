@@ -1,0 +1,86 @@
+﻿@using Radzen.Blazor.Rendering
+@using TCLMS.Shared.Entities.ViewModels.Loans.Payments
+<table class="table table-bordered table-sm">
+    <thead>
+        <tr>
+            <th class="w-25 rz-background-color-base-100">Principle</th>
+            <td>
+                @schedule.Principle.Format(CurrencyId)
+            </td>
+        </tr>
+        <tr>
+            <th class="w-25 rz-background-color-base-100">Interest</th>
+            <td>
+                @schedule.Interest.Format(CurrencyId)
+            </td>
+        </tr>
+        <tr>
+            <th class="w-25 rz-background-color-base-100">Collection Fee</th>
+            <td>
+                @schedule.CollectionFee.Format(CurrencyId)
+            </td>
+        </tr>
+        <tr>
+            <th class="w-25 rz-background-color-base-100">Payment Date</th>
+            <td>
+                @schedule.PaymentDate.DayFirst()
+            </td>
+        </tr>
+    </thead>
+</table>
+<RadzenDataGrid Data="PaymentLines"
+                Responsive="true"
+                Density="Density.Compact"
+                TItem="VPaymentLines">
+    <Columns>
+        <RadzenDataGridColumn Title="#" Property="@nameof(VPaymentLines.Id)" Width="3rem" />
+        <RadzenDataGridColumn Title="PaidPrinciple" Property="@nameof(VPaymentLines.PaidPrinciple)"
+                              Context="c"
+                              Width="10rem">
+            <Template>
+                @c?.PaidPrinciple?.Format(CurrencyId)
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="PaidInterest"
+                              Context="c"
+                              Property="@nameof(VPaymentLines.PaidInterest)" Width="10rem">
+            <Template>
+                @c?.PaidInterest?.Format(CurrencyId)
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="PaidCollectionFee"
+                              Context="c"
+                              Property="@nameof(VPaymentLines.PaidCollectionFee)" Width="8rem">
+            <Template>
+                @c?.PaidCollectionFee?.Format(CurrencyId)
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="PenaltyAmount"
+                              Context="c"
+                              Property="@nameof(VPaymentLines.PenaltyAmount)" Width="8rem">
+            <Template>
+                @c?.PenaltyAmount?.Format(CurrencyId)
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="SubTotal"
+                              Context="c"
+                              Property="@nameof(VPaymentLines.SubTotal)" Width="8rem">
+            <Template>
+                @c?.SubTotal?.Format(CurrencyId)
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="Total"
+                              Context="c"
+                              Property="@nameof(VPaymentLines.Total)" Width="8rem">
+            <Template>
+                @c?.Total?.Format(CurrencyId)
+            </Template>
+            <FooterTemplate>
+                @PaymentLines.Sum(x=>x.Total).Format(CurrencyId)
+            </FooterTemplate>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+@code {
+
+}

@@ -9,10 +9,16 @@ namespace Applications.Extensions.mappers
 {
     public static class MapsterExtensions
     {
-        public static IEnumerable<T> AdaptMany<T>(this object obj) where T : class
+        public static IEnumerable<T> Maps<T>(this object obj) where T : class
         {
             return obj.Adapt<IEnumerable<T>>(); 
         }
+
+        public static List<T> MapList<T>(this object obj) where T : class
+        {
+            return obj.Adapt<List<T>>();
+        }
+
 
     }
 }

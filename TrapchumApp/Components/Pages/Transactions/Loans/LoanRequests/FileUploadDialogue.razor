@@ -1,0 +1,72 @@
+﻿<RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Drag and drop files to upload</RadzenText>
+<RadzenUpload ChooseText="Drag and drop here or click to choose files"
+              Multiple="true"
+              Auto="false"
+              @ref="@radzenUpload"
+              Accept=".jpg,.jpeg,.png,.doc,.docx,.pdf,.xls,.xlsx"
+              Change="SelectedsFilesChanged"
+              InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "select file" }})"
+              Progress=@(args => OnProgress(args, "Drag and drop files to upload"))
+              Style="width: 100%" />
+<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End">
+    <RadzenButton Size="Radzen.ButtonSize.Small"
+                  Icon="upload"
+                  Text="Save"
+                  Click="@HandleUploadFiles"
+                  class="rz-mt-8" />
+</RadzenStack>
+@code {
+    IEnumerable<FileInfo> UploadFiles = [];
+    const long maxFileSize = 30_000_000;
+    RadzenUpload radzenUpload = default!;
+    void OnProgress(UploadProgressArgs args, string name)
+    {
+        if (args.Progress == 100)
+        {
+            foreach (var file in args.Files)
+            {
+
+            }
+        }
+    }
+    void SelectedsFilesChanged(UploadChangeEventArgs args)
+    {
+        UploadFiles = [];
+        if (args.Files.Any())
+        {
+            UploadFiles = args.Files.Select(x => x).ToList();
+        }
+        StateHasChanged();
+    }
+    async Task HandleUploadFiles()
+    {
+        using var content = new MultipartFormDataContent();
+
+        if (UploadFiles.Count() > 0)
+        {
+            foreach (var file in UploadFiles)
+            {
+                var fileContent = new StreamContent(file.OpenReadStream(maxFileSize));
+                fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(file.ContentType);
+                content.Add(content: fileContent, name: "\"files\"", fileName: file.Name);
+            }
+            var resp = await _fileUploadService.UploadFiles(content);
+
+            if (!resp.IsSuccess)
+            {
+                var message = resp.Errors?.First();
+                NotificationService.Notify(NotificationSeverity.Info, message);
+                return;
+            }
+            UploadFiles = [];
+            DialogService.Close(resp.Data);
+
+        }
+        else
+        {
+            NotificationService.Notify(NotificationSeverity.Info, "No file selected");
+        }
+
+    }
+
+}

@@ -8,13 +8,8 @@
 
   <ItemGroup>
     <Folder Include="Extensions\Identity\Constants\" />
-    <Folder Include="Requests\Customers\" />
-    <Folder Include="Requests\Employees\" />
     <Folder Include="Bases\" />
     <Folder Include="Requests\Vendors\" />
-    <Folder Include="Responses\Customers\" />
-    <Folder Include="Responses\Employees\" />
-    <Folder Include="Responses\Identity\" />
     <Folder Include="Responses\Transactions\" />
     <Folder Include="Responses\Vendors\" />
     <Folder Include="Responses\ViewModels\Trans\" />

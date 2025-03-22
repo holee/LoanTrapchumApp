@@ -1,4 +1,6 @@
-﻿namespace Domains.Models.Loans
+﻿using Domains.Models.Bases;
+
+namespace Domains.Models.Loans
 {
     public class UserLoanSize:BaseEntity
     {

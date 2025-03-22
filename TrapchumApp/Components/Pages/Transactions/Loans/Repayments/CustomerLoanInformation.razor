@@ -1,0 +1,94 @@
+﻿<div class="card mb-0">
+    <div class="card-header rz-background-color-info-lighter">
+        <RadzenStack Orientation="Orientation.Horizontal" 
+        AlignItems="AlignItems.Center"
+        JustifyContent="JustifyContent.Normal">
+            <strong>
+                  <RadzenLink Text="Loan Details" Path="@($"/Loans/Details/{LoanSchedule.Id}?BranchId={LoanSchedule.BranchId}&CreditAgentId={LoanSchedule.CreditAgentRefId}&CurrencyId={LoanSchedule.CurrencyId}&UserId={userId}")" />
+            </Strong>
+            <RadzenButton 
+            Icon="@collapseIcon"
+            data-bs-toggle="collapse" 
+            data-bs-target="#collapseExample" 
+            aria-expanded="@collapse" 
+            aria-controls="collapseExample"
+            Click="CollapseButton"
+            Size="Radzen.ButtonSize.ExtraSmall" 
+            ButtonStyle="ButtonStyle.Primary">
+            </RadzenButton>
+          
+        </RadzenStack>
+    </div>
+    <div class="card-body rz-background-color-base-100 collapse mt-0 mb-2" id="collapseExample">
+        <table class="table table-sm">
+            <tbody>
+                <tr>
+                    <td class="rz-background-color-base-100 w-2">Name</td>
+                    <th>@LoanSchedule?.AltName</th>
+                    <td class="rz-background-color-base-100">Address</td>
+                    <th>@LoanSchedule?.Address</th>
+                </tr>
+                <tr>
+                    <td class="rz-background-color-base-100">Contract</td>
+                    <th>@LoanSchedule?.CurrencyName</th>
+                    <td class="rz-background-color-base-100">Amount</td>
+                    <th>
+                        @(string.Format("{0:#,###.00}", LoanSchedule?.Amount))
+                    </th>
+                    <td class="rz-background-color-base-100">Phone</td>
+                    <th>@LoanSchedule?.Phone</th>
+                </tr>
+                <tr>
+                    <td class="rz-background-color-base-100">Account Number</td>
+                    <th>@LoanSchedule?.PaidPrinciple</th>
+                    <td class="rz-background-color-base-100">Expiry Date</td>
+                    <th>
+                        @(string.Format("{0:dd/MM/yyyy}", LoanSchedule?.LastPaymentDate))
+                    </th>
+                    <td class="rz-background-color-base-100">Interest Rate</td>
+                    <th>@LoanSchedule?.InterestRate</th>
+                </tr>
+                <tr>
+                    <td class="rz-background-color-base-100">Date</td>
+                    <th>
+                        @(string.Format("{0:dd/MM/yyyy}", LoanSchedule?.RegisterDate))
+                    </th>
+                    <td class="rz-background-color-base-100">Agent</td>
+                    <th>@LoanSchedule?.AgentName</th>
+                    <td class="rz-background-color-base-100">Phone</td>
+                    <th>@LoanSchedule?.AgentPhone</th>
+                </tr>
+                <tr>
+                    <td class="rz-background-color-base-100">Period</td>
+                    <th>@LoanSchedule?.Period (Months)</th>
+                    <td class="rz-background-color-base-100">Office</td>
+                    <th>Trapchum</th>
+                    <td class="rz-background-color-base-100">Circle</td>
+                    <th>@LoanSchedule?.Circle</th>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter] 
+    Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+    [Parameter] public VLoanDisbursments LoanSchedule { get; set; } = new();
+    bool collapse = false;
+    string collapseIcon = "expand_more";
+    long userId = 0;
+    void CollapseButton()
+    {
+        collapse = !collapse;
+        collapseIcon = collapse ? "expand_more" : "expand_less";
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        var auth =await AuthenticationState;
+        userId = auth.User.GetId();
+    }
+
+}

@@ -1,4 +1,4 @@
-﻿using Domains.Models;
+﻿using Domains.Models.Bases;
 
 namespace Applications.Requests.Lists.Addreses
 {

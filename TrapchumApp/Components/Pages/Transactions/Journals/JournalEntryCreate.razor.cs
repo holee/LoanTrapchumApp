@@ -61,14 +61,14 @@ public partial class JournalEntryCreate
 
         if (currenciesRsponse.IsSuccess)
         {
-            Currencies = currenciesRsponse.Data!.AdaptMany<CurrencyDto>();
+            Currencies = currenciesRsponse.Data!.Maps<CurrencyDto>();
         }
 
         var journalTypes = await jnService.FindJournalTypesAsync(null);
 
         if (journalTypes.Any())
         {
-            JournalTypes = journalTypes.AdaptMany<JournalTypeDto>();
+            JournalTypes = journalTypes.Maps<JournalTypeDto>();
         }
 
 

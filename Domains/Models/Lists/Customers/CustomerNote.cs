@@ -1,4 +1,6 @@
-﻿namespace Domains.Models.Lists.Customers
+﻿using Domains.Models.Bases;
+
+namespace Domains.Models.Lists.Customers
 {
     public class CustomerNote :BaseEntity
     {

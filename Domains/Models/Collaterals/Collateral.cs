@@ -5,7 +5,7 @@ namespace Domains.Models.Collaterals;
 
 public sealed class Collateral
 {
-    public long? CollateralId { get; set; }
+    public Guid? CollateralId { get; set; }
     public DateTime? RegisterDate { get; set; }
     public string? CustomerName { get; set; }
     public string? DocumentKeeping { get; set; } = string.Empty;

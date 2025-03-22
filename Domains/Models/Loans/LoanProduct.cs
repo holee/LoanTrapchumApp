@@ -1,4 +1,5 @@
-﻿using Domains.Models.Currencies;
+﻿using Domains.Models.Bases;
+using Domains.Models.Currencies;
 
 namespace Domains.Models.Loans
 {

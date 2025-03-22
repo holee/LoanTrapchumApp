@@ -1,4 +1,5 @@
-﻿using Domains.Models.Collaterals;
+﻿using Domains.Models.Bases;
+using Domains.Models.Collaterals;
 using Domains.Models.Loans;
 
 namespace Domains.Models.Lists.Customers;
@@ -6,6 +7,7 @@ namespace Domains.Models.Lists.Customers;
 
 public sealed class Customer : BaseAddress
 {
+    public Guid Id { get; set; } 
     public long CustomerId { get; set; }
     public Guid? CustomerCode { get; set; } = Guid.NewGuid();
     public string? FirstName { get; set; }

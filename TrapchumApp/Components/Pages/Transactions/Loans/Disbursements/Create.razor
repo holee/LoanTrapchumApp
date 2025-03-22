@@ -1,0 +1,926 @@
+﻿@page "/Loan/Disbursement/Create/poly"
+<PageTitle>New Loan Disbursment</PageTitle>
+
+<Containers CssClass="rz-m-0 rz-p-0 rz-background-color-base-200" Fluid>
+    <BCard CssClass="rz-background-color-base-200">
+        <CardBody>
+            <RadzenTabs RenderMode="TabRenderMode.Server"
+                        @ref="tb"
+                        Change="SelectedTabChanged"
+                        @bind-SelectedIndex="selectedTabIndex">
+                <Tabs>
+                    <RadzenTabsItem Text="ព័ត៌មានប្រាក់កម្ចី" Icon="add">
+                        <div class="rz-m-0 rz-p-0">
+                            <EditForm Model="model" @ref="editForm">
+                                <input type="hidden" @bind-value="penaltyRate" />
+                                <RadzenRow AlignItems="AlignItems.Center">
+                                    <RadzenColumn Size="6">
+                                        <RadzenRow AlignItems="AlignItems.Center">
+                                            <RadzenColumn Size="3">
+                                                <RadzenLabel>អតិថិជន</RadzenLabel>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="9">
+                                                <RadzenDropDownDataGrid class="w-100"
+                                                                        Style="cursor:pointer"
+                                                                        Value="model.CustomerRefId"
+                                                                        Data="CustomersList"
+                                                                        TextProperty="AltName"
+                                                                        ValueProperty="CustomerId"
+                                                                        AllowColumnResize="true"
+                                                                        Disabled="@(CustomerRequestId>0)"
+                                                                        Multiple="false"
+                                                                        ShowSearch="false"
+                                                                        LoadData="LoadCustomers"
+                                                                        AllowClear="true"
+                                                                        ShowAdd="true"
+                                                                        Density="Density.Compact"
+                                                                        PageSize="10"
+                                                                        TValue="VCustomerList"
+                                                                        AllowRowSelectOnRowClick="true"
+                                                                        SelectedItemChanged="SelectedCustomerValueChanged"
+                                                                        Name="DropDownCustomer">
+                                                    <Columns>
+                                                        <RadzenDropDownDataGridColumn Visible="false" Property="CustomerId" Title="Id" Width="5px" />
+                                                        <RadzenDropDownDataGridColumn Property="AltName" Title="Name" Width="200px" />
+                                                        <RadzenDropDownDataGridColumn Property="Phone" Title="Phone" Width="100px" />
+                                                        <RadzenDropDownDataGridColumn Property="Address" Title="Address" Width="200px" />
+                                                    </Columns>
+                                                </RadzenDropDownDataGrid>
+                                            </RadzenColumn>
+                                        </RadzenRow>
+                                    </RadzenColumn>
+                                </RadzenRow>
+                                <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+                                    <RadzenColumn Size="6">
+                                        <RadzenRow AlignItems="AlignItems.Center">
+                                            <RadzenColumn Size="3">
+                                                <RadzenLabel>ចំនួនទឹកប្រាក់កម្ចី</RadzenLabel>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="6">
+                                                <RadzenNumeric TextAlign="TextAlign.End"
+                                                               class="w-100"
+                                                               @bind-Value="model.Principle"
+                                                               onclick="this.querySelector('.rz-numeric-input').select()"
+                                                               Min="0.00M"
+                                                               TValue="decimal?"
+                                                               @oninput="PrincipleTextChanged"
+                                                               Disabled="@(selectedCustomer!.CustomerId<=0)"
+                                                               ShowUpDown="false">
+                                                </RadzenNumeric>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="3">
+                                                <RadzenDropDown Data="StorageConstant.CurrencyTpes"
+                                                                class="w-100"
+                                                                TextProperty="label"
+                                                                ValueProperty="index"
+                                                                @bind-Value="model.CurrencyRefId">
+                                                </RadzenDropDown>
+                                            </RadzenColumn>
+                                        </RadzenRow>
+                                    </RadzenColumn>
+                                    <RadzenColumn Size="6">
+                                        <RadzenRow AlignItems="AlignItems.Center">
+                                            <RadzenColumn Size="3">
+                                                <RadzenLabel>ប្រាក់ប្រសិទ្ធិភាព</RadzenLabel>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="5" class="input-group">
+                                                <RadzenNumeric ShowUpDown="false"
+                                                               TextAlign="TextAlign.End"
+                                                               Min="0.00M"
+                                                               class="form-control"
+                                                               onclick="this.querySelector('.rz-numeric-input').select()"
+                                                               Disabled="@(selectedCustomer!.CustomerId<=0)"
+                                                               @bind-Value="model.CollectionFeeRate"
+                                                               TValue="decimal?" />
+                                                <span class="input-group-text">%</span>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="4" class="input-group">
+                                                <RadzenDropDown Data="StorageConstant.OtherChargedModes"
+                                                                TextProperty="label"
+                                                                class="form-select"
+                                                                ValueProperty="index"
+                                                                @bind-Value="SelectedCollectionFee">
+                                                </RadzenDropDown>
+                                                <span class="input-group-text">/Month</span>
+                                            </RadzenColumn>
+                                        </RadzenRow>
+                                    </RadzenColumn>
+                                </RadzenRow>
+                                <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+                                    <RadzenColumn Size="6">
+                                        <RadzenRow AlignItems="AlignItems.Center">
+                                            <RadzenColumn Size="3">
+                                                <RadzenLabel>អត្រាការប្រាក់</RadzenLabel>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="9" class="input-group">
+                                                <RadzenNumeric TValue="decimal?"
+                                                               Disabled="@(selectedCustomer!.CustomerId<=0)"
+                                                               Format="#.00"
+                                                               TextAlign="TextAlign.End"
+                                                               class="form-control"
+                                                               Min="0.00M"
+                                                               onclick="this.querySelector('.rz-numeric-input').select()"
+                                                               ShowUpDown="false"
+                                                               @bind-Value="model.InterestRate" />
+                                                <span class="input-group-text">%</span>
+                                            </RadzenColumn>
+                                        </RadzenRow>
+                                    </RadzenColumn>
+                                    <RadzenColumn Size="6">
+                                        <RadzenRow AlignItems="AlignItems.Center">
+                                            <RadzenColumn Size="3">
+                                                <RadzenLabel>Admin Fee</RadzenLabel>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="5" class="input-group">
+                                                <RadzenNumeric TextAlign="TextAlign.End"
+                                                               class="form-control"
+                                                               ShowUpDown="false"
+                                                               Disabled="@(selectedCustomer!.CustomerId<=0)"
+                                                               @bind-Value="model.AdminFeeRate"
+                                                               Min="0.00M"
+                                                               onclick="this.querySelector('.rz-numeric-input').select()"
+                                                               @bind-Value:after="CalculateAdminFeeAmount"
+                                                               TValue="decimal?" />
+                                                <span class="input-group-text">%</span>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="4">
+                                                <RadzenNumeric TextAlign="TextAlign.End"
+                                                               ShowUpDown="false"
+                                                               onclick="this.querySelector('.rz-numeric-input').select()"
+                                                               Disabled="@(selectedCustomer!.CustomerId<=0)"
+                                                               @bind-Value="model.AdminFeeAmount"
+                                                               TValue="decimal?" />
+                                            </RadzenColumn>
+                                        </RadzenRow>
+                                    </RadzenColumn>
+                                </RadzenRow>
+                                <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+                                    <RadzenColumn Size="6">
+                                        <RadzenRow AlignItems="AlignItems.Center">
+                                            <RadzenColumn Size="3">
+                                                <RadzenLabel>រយៈពេលខ្ចីប្រាក់</RadzenLabel>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="6">
+                                                <RadzenNumeric Disabled="@(selectedCustomer!.CustomerId<=0)"
+                                                               TextAlign="TextAlign.End"
+                                                               ShowUpDown="false"
+                                                               class="w-100"
+                                                               @bind-Value="model.Installments"
+                                                               @bind-Value:after="PeriodChanged"
+                                                               onclick="this.querySelector('.rz-numeric-input').select()"
+                                                               Min="0.00M"
+                                                               TValue="int?">
+                                                </RadzenNumeric>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="3">
+                                                <RadzenDropDown TextProperty="InstallmentTypeCode"
+                                                                ValueProperty="InstallmentTypeId"
+                                                                @bind-Value="model.InstallmentTypeId"
+                                                                class="w-100"
+                                                                Multiple="false"
+                                                                Disabled="@(selectedCustomer!.CustomerId<=0)"
+                                                                SelectedItemChanged="SelectedInstallmentChanged"
+                                                                Data="LoanInstallments">
+                                                </RadzenDropDown>
+                                            </RadzenColumn>
+                                        </RadzenRow>
+                                    </RadzenColumn>
+                                    <RadzenColumn Size="6">
+                                        <RadzenRow AlignItems="AlignItems.Center">
+                                            <RadzenColumn Size="3">
+                                                <RadzenLabel>ប្រភេទបង់រំលោះ</RadzenLabel>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="6">
+                                                <RadzenDropDown TValue="int?"
+                                                                @bind-Value="model.RepaymentModeRefId"
+                                                                @bind-Value:after="SelectionChanged"
+                                                                class="w-100"
+                                                                TextProperty="RepaymentModeCode"
+                                                                ValueProperty="RepaymentModeId"
+                                                                Data="LoanRepaymentModes">
+                                                </RadzenDropDown>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="3">
+                                                <RadzenNumeric Disabled="@(model.RepaymentModeRefId !=1)"
+                                                               @bind-Value="model.PayEvery"
+                                                               onclick="this.querySelector('.rz-numeric-input').select()"
+                                                               class="w-100"
+                                                               Min="1"
+                                                               TValue="int?" />
+                                            </RadzenColumn>
+                                        </RadzenRow>
+                                    </RadzenColumn>
+                                </RadzenRow>
+                                <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+                                    <RadzenColumn Size="6">
+                                        <RadzenRow AlignItems="AlignItems.Center">
+                                            <RadzenColumn Size="3">
+                                                <RadzenLabel>ថ្ងៃខ្ចីប្រាក់</RadzenLabel>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="9">
+                                                <RadzenDatePicker @bind-Value="model.StartDate"
+                                                                  @bind-Value:after="ChangedDate"
+                                                                  @bind-Value:format="yyyy/MMM/dd"
+                                                                  DateFormat="dd/MM/yyyy"
+                                                                  Min="DateTime.Now"
+                                                                  class="w-100"
+                                                                  Name="StartDate"
+                                                                  ShowCalendarWeek />
+                                            </RadzenColumn>
+                                        </RadzenRow>
+                                    </RadzenColumn>
+                                    <RadzenColumn Size="6">
+                                        <RadzenRow AlignItems="AlignItems.Center">
+                                            <RadzenColumn Size="3">
+                                                <RadzenLabel>ឈ្មោះភ្នាក់ងារ</RadzenLabel>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="9">
+                                                <RadzenDropDown @bind-Value="model.CreditAgentRefId"
+                                                                TextProperty="Name"
+                                                                AllowFiltering="true"
+                                                                ValueProperty="Id"
+                                                                class="w-100"
+                                                                Data="CreditAgents">
+                                                </RadzenDropDown>
+                                            </RadzenColumn>
+                                        </RadzenRow>
+                                    </RadzenColumn>
+                                </RadzenRow>
+                                <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+                                    <RadzenColumn Size="6">
+                                        <RadzenRow AlignItems="AlignItems.Center">
+                                            <RadzenColumn Size="3">
+                                                <RadzenLabel>ថ្ងៃបង់ប្រាក់លើកដំបូង</RadzenLabel>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="9">
+                                                <RadzenDatePicker @bind-Value="model.FirstPaymentDate"
+                                                                  @bind-Value:after="ChangedFirstPayment"
+                                                                  @bind-Value:format="yyyy/MMM/dd"
+                                                                  DateFormat="dd/MM/yyyy"
+                                                                  Name="FirstPaymentDate"
+                                                                  class="w-100"
+                                                                  Min="DateTime.Now"
+                                                                  ShowCalendarWeek />
+                                            </RadzenColumn>
+                                        </RadzenRow>
+                                    </RadzenColumn>
+                                    <RadzenColumn Size="6">
+                                        <RadzenRow AlignItems="AlignItems.Center">
+                                            <RadzenColumn Size="3">
+                                                <RadzenLabel>ប្រភេទកម្ចី</RadzenLabel>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="9">
+                                                <RadzenDropDown @bind-Value="model.LoanCategoryRefId"
+                                                                TextProperty="LoancategoryCode"
+                                                                ValueProperty="LoanCategoryId"
+                                                                AllowFiltering="true"
+                                                                class="w-100"
+                                                                Data="loanCategories">
+                                                </RadzenDropDown>
+                                            </RadzenColumn>
+                                        </RadzenRow>
+                                    </RadzenColumn>
+                                </RadzenRow>
+                                <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+                                    <RadzenColumn Size="6">
+                                        <RadzenRow AlignItems="AlignItems.Center">
+                                            <RadzenColumn Size="3">
+                                                <RadzenLabel>ខ្ចីលើកទី</RadzenLabel>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="9">
+                                                <RadzenNumeric ShowUpDown="false"
+                                                               TValue="int"
+                                                               class="w-100"
+                                                               Disabled
+                                                               @bind-Value="model.Circle"
+                                                               Placeholder="Enter or clear value" />
+                                            </RadzenColumn>
+                                        </RadzenRow>
+                                    </RadzenColumn>
+                                    <RadzenColumn Size="6">
+                                        <RadzenRow AlignItems="AlignItems.Center">
+                                            <RadzenColumn Size="3">
+                                                <RadzenLabel>Guarantor</RadzenLabel>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="9">
+                                                <RadzenDropDownDataGrid class="w-100"
+                                                                        @ref="grid"
+                                                                        @bind-Value="SelectedGuarantors"
+                                                                        Data="Guarantors"
+                                                                        AllowColumnResize="true"
+                                                                        TextProperty="GuarantorName"
+                                                                        ShowSearch="false"
+                                                                        Chips="true"
+                                                                        Multiple="true"
+                                                                        LoadData="SearchGaurantors"
+                                                                        PageSize="10"
+                                                                        Add="AddGuarantorModals"
+                                                                        Density="Density.Compact"
+                                                                        AllowRowSelectOnRowClick="true"
+                                                                        Name="DropDownGuarantors">
+                                                    <Columns>
+                                                        <RadzenDropDownDataGridColumn Width="60px" Sortable="false">
+                                                            <HeaderTemplate>
+                                                                <RadzenCheckBox InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "select all" }})"
+                                                                                Disabled="@(!grid!.AllowSelectAll)"
+                                                                                TriState="false"
+                                                                                TValue="bool"
+                                                                                Value="@(Guarantors!.Any(c => SelectedGuarantors !=null && SelectedGuarantors.Contains(c)))"
+                                                                                Change="@(args =>CkeckedGuarantorsChanged(args))" />
+                                                            </HeaderTemplate>
+                                                            <Template Context="data">
+                                                                <RadzenCheckBox InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "select item" }})"
+                                                                                TriState="false"
+                                                                                TValue="bool"
+                                                                                Value="@(SelectedGuarantors != null && SelectedGuarantors.Contains(((VGuarantor)data)))"
+                                                                                Change="@(args => grid!.SelectItem(data))" @onclick:stopPropagation />
+                                                            </Template>
+                                                        </RadzenDropDownDataGridColumn>
+                                                        <RadzenDropDownDataGridColumn Property="Id" Title="Id" Width="50px" Visible="false" />
+                                                        <RadzenDropDownDataGridColumn Property="GuarantorName" Title="Name" Width="200px" />
+                                                        <RadzenDropDownDataGridColumn Property="Phone" Title="Phone" Width="100px" />
+                                                    </Columns>
+                                                </RadzenDropDownDataGrid>
+                                            </RadzenColumn>
+                                        </RadzenRow>
+                                    </RadzenColumn>
+                                </RadzenRow>
+                                <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+                                    <RadzenColumn Size="6">
+                                        <RadzenRow AlignItems="AlignItems.Center">
+                                            <RadzenColumn Size="3">
+                                                <RadzenLabel>កំណត់សម្គាល់</RadzenLabel>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="9">
+                                                <RadzenTextArea class="w-100"
+                                                                @bind-Value="model.Remark" />
+                                            </RadzenColumn>
+                                        </RadzenRow>
+                                    </RadzenColumn>
+                                    <RadzenColumn Size="6">
+                                        <RadzenRow AlignItems="AlignItems.Center">
+                                            <RadzenColumn Size="3">
+                                                <RadzenLabel>Collateral</RadzenLabel>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="9">
+                                                <RadzenDropDownDataGrid class="w-100"
+                                                                        @ref="gridCols"
+                                                                        @bind-Value="SelectedCollateralLines"
+                                                                        Data="CollateralLines"
+                                                                        AllowColumnResize="false"
+                                                                        ShowSearch="false"
+                                                                        Chips="true"
+                                                                        Multiple="true"
+                                                                        Density="Density.Compact"
+                                                                        AllowRowSelectOnRowClick="true"
+                                                                        TextProperty="ReferenceNo"
+                                                                        Name="DropDownCollateralLines">
+                                                    <Columns>
+                                                        <RadzenDropDownDataGridColumn Width="60px" Sortable="false">
+                                                            <HeaderTemplate>
+                                                                <RadzenCheckBox InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "select all" }})"
+                                                                                Disabled="@(!gridCols!.AllowSelectAll)"
+                                                                                TriState="false"
+                                                                                TValue="bool"
+                                                                                Value="@(CollateralLines!.Any(c => SelectedCollateralLines !=null && SelectedCollateralLines.Contains(c)))"
+                                                                                Change="@(args => CkeckedCollateralsChanged(args))" />
+                                                            </HeaderTemplate>
+                                                            <Template Context="data">
+                                                                <RadzenCheckBox InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "select item" }})"
+                                                                                TriState="false"
+                                                                                TValue="bool"
+                                                                                Value="@(SelectedCollateralLines != null && SelectedCollateralLines.Contains(((CollateralLineDtoCreate)data)))"
+                                                                                Change="@(args => gridCols!.SelectItem(data))"
+                                                                @onclick:stopPropagation />
+                                                            </Template>
+                                                        </RadzenDropDownDataGridColumn>
+                                                        <RadzenDropDownDataGridColumn Property="Id" Title="Id" Width="50px" Visible="false" />
+                                                        <RadzenDropDownDataGridColumn Property="OwnerName" Title="OwnerName" Width="100px" />
+                                                        <RadzenDropDownDataGridColumn Property="ReferenceNo" Title="ReferenceNo" Width="200px" />
+                                                    </Columns>
+                                                </RadzenDropDownDataGrid>
+                                            </RadzenColumn>
+                                        </RadzenRow>
+                                    </RadzenColumn>
+                                </RadzenRow>
+                            </EditForm>
+                            <RadzenStack class="mt-2"
+                                         Orientation="Radzen.Orientation.Horizontal"
+                                         JustifyContent="Radzen.JustifyContent.End"
+                                         Gap="0.5rem"
+                                         AlignItems="AlignItems.Center">
+                                <RadzenButton Disabled="model.Principle <=0"
+                                              Click="ShowLoanPreviews"
+                                              Size="Radzen.ButtonSize.Small"
+                                              Icon="preview"
+                                              ButtonStyle="ButtonStyle.Primary" Text="Preview" />
+                                <RadzenButton Disabled="model.Principle <=0"
+                                              Size="Radzen.ButtonSize.Small"
+                                              Click="SubmitForm"
+                                              Text="Save & New"
+                                              Icon="save"
+                                              ButtonStyle="ButtonStyle.Success" />
+                                <RadzenLink Icon="arrow_back"
+                                            Path="@($"/Loans?BranchId={BranchId}&UserId={UserId}")"
+                                            Text="Back" />
+                            </RadzenStack>
+                        </div>
+                    </RadzenTabsItem>
+                    <RadzenTabsItem Text="ព័ត៌មានអតិថិជន" Icon="info">
+                        <RadzenRow AlignItems="AlignItems.Center" Gap="0">
+                            <RadzenColumn Size="12" SizeMD="12">
+                                <CustomerInfo SelectedCustomer="selectedCustomer" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="12">
+                                <table class="table table-sm table-bordered">
+                                    <tbody>
+                                        <tr>
+                                            <th style="background-color:#F1F1F4" class="w-25">Principle</th>
+                                            <td>
+                                                @model?.Principle.Format(model.CurrencyRefId)
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th style="background-color:#F1F1F4" class="w-25">អត្រការប្រាក់</th>
+                                            <td>
+                                                <span>@model?.InterestRate </span>
+                                                <i>%</i>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th style="background-color:#F1F1F4" class="w-25">ប្រាក់ប្រសិទ្ធភាព</th>
+                                            <td>
+                                                <span>
+                                                    @model?.CollectionFeeRate
+                                                </span>
+                                                <i>%</i>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th style="background-color:#F1F1F4" class="w-25">ប្រាក់រដ្ឋបាល</th>
+                                            <td>
+                                                @model?.AdminFeeAmount.Format(model.CurrencyRefId)
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th style="background-color:#F1F1F4" class="w-25">ថ្ងៃបង់ប្រាក់លើទីមួយ</th>
+                                            <td>
+                                                @model?.FirstPaymentDate
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th style="background-color:#F1F1F4" class="w-25">ថ្ងៃបង់ប្រាក់ចុងក្រោយ</th>
+                                            <td>
+                                                @model?.LastPaymentDate
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th style="background-color:#F1F1F4" class="w-25">ប្រភេទសងប្រាក់</th>
+                                            <td>
+                                                @model?.InstallmentType
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </RadzenColumn>
+                        </RadzenRow>
+                    </RadzenTabsItem>
+                    <RadzenTabsItem Text="ទ្រព្យបញ្ចាំ" Icon="inventory">
+                        @if (model.CustomerRefId > 0)
+                        {
+                            <CollateralsCustomer CustomerId="model.CustomerRefId" />
+                        }
+                        else
+                        {
+                            <RadzenStack Orientation="Orientation.Horizontal"
+                                         AlignItems="AlignItems.Center"
+                                         style="min-height:25rem;height:25rem;max-height:100vh;"
+                                         JustifyContent="JustifyContent.Center">
+                                <RadzenText TagName="TagName.H4" TextAlign="TextAlign.Center"
+                                            TextStyle="TextStyle.DisplayH4">
+                                    There is no customer selected yet!.
+                                </RadzenText>
+                            </RadzenStack>
+                        }
+                    </RadzenTabsItem>
+                    <RadzenTabsItem Text="Preview" Icon="preview">
+                        @if (previewSchedule.Any())
+                        {
+                            <PreviewSchedules Schedules="previewSchedule"
+                                              CurrencyId="model.CurrencyRefId" />
+                        }
+                        else
+                        {
+                            <RadzenStack Orientation="Orientation.Horizontal"
+                                         AlignItems="AlignItems.Center"
+                                         Style="min-height:25rem;height:25rem;max-height:100vh;"
+                                         JustifyContent="JustifyContent.Center">
+                                <RadzenText TagName="TagName.H4" TextAlign="TextAlign.Center"
+                                            TextStyle="TextStyle.DisplayH4">
+                                    There is no schedule to preview.
+                                </RadzenText>
+                            </RadzenStack>
+                        }
+                    </RadzenTabsItem>
+                </Tabs>
+            </RadzenTabs>
+        </CardBody>
+    </BCard>
+</Containers>
+@code {
+    bool collapse = false;
+    string collapseIcon = "expand_more";
+    bool isVible = false;
+    int selectedTabIndex = 0;
+    bool isProgressing = false;
+    bool isCollateralTab = false;
+    bool isPreviewScheduleTab = false;
+    RadzenTabs tb = default!;
+    List<int> tabCounts = [0];
+    RadzenDropDownDataGrid<IEnumerable<VGuarantor>?> grid = default!;
+    RadzenDropDownDataGrid<IEnumerable<CollateralLineDtoCreate>?> gridCols = default!;
+    IEnumerable<LoanScheduleDtoCreate> previewSchedule = [];
+    [CascadingParameter]
+    Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+    protected GuarantorDtoCreate guarantorDtoCreate = new GuarantorDtoCreate();
+    protected LoanDtoCreate model = new LoanDtoCreate();
+    protected IEnumerable<VGuarantor>? SelectedGuarantors = [];
+    protected IEnumerable<CollateralLineDtoCreate>? SelectedCollateralLines = [];
+    protected List<CollateralDto>? Collaterals { get; set; } = new();
+    protected DateTime? RegisterDate = DateTime.Now;
+    protected int SelectedCollectionFee = 1;
+    protected decimal? TotalAdminFee = 0;
+    protected int SelectedPeriodName = 1;
+    protected IEnumerable<VBranch> Branches = Enumerable.Empty<VBranch>();
+    int installId = 1;
+    string branchName = "";
+    string customerName = "";
+
+    async void SaveThenClose()
+    {
+        await GetCollaterals(selectedCustomer!.CustomerId);
+        await gridCols.Reload();
+    }
+    void SelectedTabChanged(int index)
+    {
+        selectedTabIndex = index;
+    }
+    void CollapseButton()
+    {
+        collapse = !collapse;
+        collapseIcon = collapse ? "expand_more" : "expand_less";
+    }
+    void CkeckedGuarantorsChanged(bool args)
+    {
+        SelectedGuarantors = args ? grid!.View.Cast<VGuarantor>().Select(c => c) : SelectedGuarantors = [];
+    }
+    void CkeckedCollateralsChanged(bool args)
+    {
+        SelectedCollateralLines = args ? gridCols!.View.Cast<CollateralLineDtoCreate>().Select(c => c) : SelectedCollateralLines = [];
+    }
+
+    void PrincipleTextChanged(decimal? principle)
+    {
+        if (principle is null || principle < 0)
+        {
+            NotificationService.Notify(NotificationSeverity.Warning, "Invalid principle input");
+            model.Principle = 0.00M;
+            return;
+        }
+
+        if (principle <= 50000)
+        {
+            model.CurrencyRefId = 2;
+            model.AdminFeeAmount = (model.Principle!.Value * (model.AdminFeeRate!.Value / 100)).RoundUp(2);
+        }
+        else
+        {
+            model.CurrencyRefId = 1;
+            model.AdminFeeAmount = (model.Principle!.Value * (model.AdminFeeRate!.Value / 100)).RoundUp(-2);
+        }
+    }
+
+
+    void PrincipleTextChanged(ChangeEventArgs e)
+    {
+        var principle = e.Value!.ToNumer<decimal>();
+        if (principle <= 0)
+        {
+            NotificationService.Notify(NotificationSeverity.Warning, "Invalid principle input");
+            model.Principle = 0.00M;
+            return;
+        }
+
+        if (principle <= 50000)
+        {
+            model.CurrencyRefId = 2;
+            model.AdminFeeAmount = (principle * (model.AdminFeeRate!.Value / 100)).RoundUp(2);
+        }
+        else
+        {
+            model.CurrencyRefId = 1;
+            model.AdminFeeAmount = (principle * (model.AdminFeeRate!.Value / 100)).RoundUp(-2);
+        }
+    }
+
+    void TabCollateralTab()
+    {
+        if (selectedCustomer!.CustomerId == 0)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Please selected customer first");
+            return;
+        }
+        if (!isCollateralTab)
+        {
+            isCollateralTab = true;
+            tabCounts.Add(2);
+        }
+        selectedTabIndex = 2;
+    }
+
+    void CloseTab()
+    {
+        if (selectedTabIndex == 0) return;
+
+        if (selectedTabIndex == 1)
+        {
+            isPreviewScheduleTab = false;
+
+            tabCounts.Remove(1);
+
+        }
+        if (selectedTabIndex == 2)
+        {
+            isCollateralTab = false;
+            tabCounts.Remove(2);
+        }
+        selectedTabIndex = tabCounts.Count - 1;
+        //tb.Reload();
+
+    }
+
+
+
+    void ShowLoanPreviews()
+    {
+        if (model.Principle == 0) return;
+        selectedTabIndex = 3;
+        var calculator = SelectLoanType(model.RepaymentModeRefId);
+        calculator.PayEvery = model.PayEvery!.Value;
+        calculator.EffectiveRate = model.CollectionFeeRate!.Value;
+        calculator.StartDate = model.StartDate!.Value;
+        calculator.FirstPayment = model.FirstPaymentDate!.Value;
+        calculator.CollectionFeeMode = SelectedCollectionFee;
+        calculator.InstallmentTypeId = model.InstallmentTypeId!.Value;
+        calculator.CurrencyId = model.CurrencyRefId!.Value;
+        var schedule = calculator.Calculate(model.Installments!.Value, model.InterestRate!.Value, model.Principle!.Value);
+        previewSchedule = schedule.Select(x => new LoanScheduleDtoCreate
+            {
+                InstallmentNo = x.InstallmentNo,
+                PaymentDate = x.PaymentDate,
+                Principal = x.Principal,
+                Interest = x.Interest,
+                CollectionFee = x.CollectionFeeAmount,
+                LoanOutstanding = x.OutStanding,
+                TotalDay = x.TotalDay,
+                TotalPay = x.TotalPay,
+                AgentRefId = selectCreditAgent!.Id,
+                RepaymentModeRefId = model.RepaymentModeRefId,
+                ScheduleStatusRefId = 2
+
+            }).ToList();
+    }
+
+    protected Task ShowGaurantorModal()
+    {
+        return Task.CompletedTask;
+
+    }
+    protected async Task ShowCollateralModal()
+    {
+        if (selectedCustomer!.CustomerId == 0)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Please selected customer first");
+            return;
+        }
+
+        var options = new DialogOptions
+            {
+                Width = "50rem",
+                Height = "35rem",
+                Draggable = true,
+                Resizable = true
+            };
+
+        var param = new Dictionary<string, object>{
+            {"SelectedCustomer",selectedCustomer! }
+        };
+
+        var result = await DialogService.OpenAsync<CollateralModalAdd>("Collateral", param, options);
+
+        if (bool.TryParse(result, out bool success) && success)
+        {
+            var collateral = await _collateralService.GetCollateralById(selectedCustomer!.CustomerId);
+
+            if (collateral is not null)
+            {
+                CollateralLines = collateral.CollateralLines!.Select(x => new CollateralLineDtoCreate
+                    {
+                        CollateralRefId = x.Id,
+                        SubTypeName = x.SubTypeName,
+                        TypeName = x.TypeName,
+                        CollateralNo = x.CollateralNo,
+                        ReferenceNo = x.ReferenceNo
+                    });
+
+                StateHasChanged();
+            };
+        }
+
+    }
+
+    void ChangedDate()
+    {
+        if (installId == 1)
+        {
+            firstPayment = model.StartDate!.Value.AddMonths(1);
+        }
+        if (installId == 2)
+        {
+            firstPayment = model.StartDate!.Value.AddDays(14);
+        }
+        if (installId == 3)
+        {
+            firstPayment = model.StartDate!.Value.AddDays(7);
+        }
+        if (installId == 4)
+        {
+            firstPayment = model.StartDate!.Value.AddDays(1);
+        }
+
+        HolidayHelper.SetHoliday(Holidays, ref firstPayment);
+
+        model.FirstPaymentDate = firstPayment;
+
+    }
+    void SelectionChanged()
+    {
+        if (model.RepaymentModeRefId != 1)
+        {
+            model.PayEvery = 1;
+        }
+        else
+        {
+            model.PayEvery = 4;
+        }
+    }
+    void CalculateAdminFeeAmount()
+    {
+        if (model.CurrencyRefId == 1)
+        {
+            model.AdminFeeAmount = (model.Principle!.Value * (model.AdminFeeRate!.Value / 100)).RoundUp(-2);
+        }
+        else
+        {
+            model.AdminFeeAmount = (model.Principle!.Value * (model.AdminFeeRate!.Value / 100)).RoundUp(2);
+        }
+
+
+    }
+    void SelectedInstallmentChanged(object arg)
+    {
+        if (arg is not null)
+        {
+            var installType = (LoanInstallmentTypeDto)arg;
+            installId = installType.InstallmentTypeId;
+            model.PeriodName = installType.InstallmentTypeId switch
+            {
+                1 => "Months",
+                2 => "2 Weeks",
+                3 => "Weeks",
+                _ => "Days"
+            };
+            model.InstallmentType = installType.InstallmentTypeCode;
+            model.Period = model.Installments;
+            ChangedDate();
+        }
+
+
+    }
+    void SelectedPeriodChanged()
+    {
+        ChangedDate();
+    }
+    async Task PeriodChanged()
+    {
+        await GetHolidays(model.Installments!.Value);
+    }
+    async Task SearchGaurantors(LoadDataArgs arg)
+    {
+        var filter = arg.Filter ?? string.Empty;
+
+        var gResponse = await _gService!.GetGuarantors(0, false, filter);
+
+        if (gResponse.IsSuccess)
+        {
+            Guarantors = gResponse.Data!;
+        }
+        else
+        {
+            Guarantors = [];
+        }
+
+    }
+    void ChangedFirstPayment()
+    {
+        firstPayment = model.FirstPaymentDate!.Value;
+
+        if (firstPayment < model.StartDate || firstPayment < DateTime.Now)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "First Payment must greater than Current Date");
+            return;
+        }
+        HolidayHelper.SetHoliday(Holidays, ref firstPayment);
+        model.FirstPaymentDate = firstPayment;
+    }
+}
+
+
+@*     <RadzenStack AlignItems="AlignItems.Center"
+                 Orientation="Orientation.Vertical"
+                 class="w-100 rz-m-0 rz-p-0"
+                 Gap="0">
+        <div class="card card-header w-100 m-0 rz-background-color-info-lighter">
+            <RadzenStack AlignItems="AlignItems.Center"
+                         Orientation="Orientation.Horizontal"
+                         JustifyContent="JustifyContent.Normal">
+                <strong>ព័ត៌មានអតិថិជន</strong>
+                <RadzenButton Size="Radzen.ButtonSize.ExtraSmall"
+                              Icon="@collapseIcon"
+                              data-bs-toggle="collapse"
+                              data-bs-target="#collapseExample"
+                              aria-expanded="@collapse"
+                              aria-controls="collapseExample"
+                              Click="CollapseButton"></RadzenButton>
+            </RadzenStack>
+        </div>
+        <div class="rz-background-color-base-100 collapse mt-0 w-100" id="collapseExample">
+            <RadzenRow AlignItems="AlignItems.Center" Gap="1rem">
+                <RadzenColumn Size="6">
+                    <CustomerInfo SelectedCustomer="selectedCustomer" />
+                </RadzenColumn>
+                <RadzenColumn Size="6">
+                    <table class="table table-sm table-bordered">
+                        <tbody>
+                            <tr>
+                                <th style="background-color:#F1F1F4" class="w-25">Principle</th>
+                                <td>
+                                    @model?.Principle.Format(model.CurrencyRefId)
+                                </td>
+                            </tr>
+                            <tr>
+                                <th style="background-color:#F1F1F4" class="w-25">អត្រការប្រាក់</th>
+                                <td>
+                                    <span>@model?.InterestRate </span>
+                                    <i>%</i>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th style="background-color:#F1F1F4" class="w-25">ប្រាក់ប្រសិទ្ធភាព</th>
+                                <td>
+                                    <span>
+                                        @model?.CollectionFeeRate
+                                    </span>
+                                    <i>%</i>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th style="background-color:#F1F1F4" class="w-25">ប្រាក់រដ្ឋបាល</th>
+                                <td>
+                                    @model?.AdminFeeAmount.Format(model.CurrencyRefId)
+                                </td>
+                            </tr>
+                            <tr>
+                                <th style="background-color:#F1F1F4" class="w-25">ថ្ងៃបង់ប្រាក់លើទីមួយ</th>
+                                <td>
+                                    @model?.FirstPaymentDate
+                                </td>
+                            </tr>
+                            <tr>
+                                <th style="background-color:#F1F1F4" class="w-25">ថ្ងៃបង់ប្រាក់ចុងក្រោយ</th>
+                                <td>
+                                    @model?.LastDate
+                                </td>
+                            </tr>
+                            <tr>
+                                <th style="background-color:#F1F1F4" class="w-25">ប្រភេទសងប្រាក់</th>
+                                <td>
+                                    @model?.InstallmentType
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </RadzenColumn>
+            </RadzenRow>
+        </div>
+    </RadzenStack> *@

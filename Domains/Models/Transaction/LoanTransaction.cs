@@ -1,4 +1,5 @@
-﻿using Domains.Models.Journals;
+﻿using Domains.Models.Bases;
+using Domains.Models.Journals;
 
 namespace Domains.Models.Transaction;
 

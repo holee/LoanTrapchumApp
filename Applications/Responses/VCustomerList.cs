@@ -7,8 +7,8 @@ namespace Applications.Responses;
 
 public sealed class VCustomerList
 {
-    public long CustomerId { get; set; }
-    public Guid? CustomerCode { get; set; }
+    public long Id { get; set; }
+    public Guid? CustomerId { get; set; }
     public string? FirstName { get; set; }
     public string? MiddleName { get; set; }
     public string? LastName { get; set; }

@@ -1,0 +1,48 @@
+﻿@using Applications.Responses.ViewModels.Loans.Requests
+<BCard>
+    <CardHeader>
+        <strong>Collaterals</strong>
+    </CardHeader>
+    <CardBody>
+        <RadzenDataGrid GridLines="DataGridGridLines.Both"
+                        Responsive
+                        TItem="VLoanRequestCollateralLines"
+                        Density="Density.Compact"
+                        Style="--rz-grid-header-background-color:var(--rz-base-200);min-height:20rem;height:20rem;max-height:20rem;"
+                        Data="CollateralLines">
+            <Columns>
+                <RadzenDataGridColumn Title="ReferenceNo" Property="@(nameof(VLoanRequestCollateralLines.ReferenceNo))" Context="c" />
+                <RadzenDataGridColumn Title="Type Name" Property="@(nameof(VLoanRequestCollateralLines.TypeName))" Context="c" />
+                <RadzenDataGridColumn Title="Owner Name" Property="@(nameof(VLoanRequestCollateralLines.OwnerName))" Context="c" />
+                <RadzenDataGridColumn Title="Location" Property="@(nameof(VLoanRequestCollateralLines.Location))" Context="c" />
+                <RadzenDataGridColumn Title="Hot Price" Context="c" TextAlign="TextAlign.Right">
+                    <Template>
+                        @c.HotPrice
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Title="Hot Price" Context="c" TextAlign="TextAlign.Right">
+                    <Template>
+                        @c.MarketPrice
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Title="Hot Price" Context="c" TextAlign="TextAlign.Right">
+                    <Template>
+                        @c.PawnPrice
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
+    </CardBody>
+</BCard>
+@code {
+    [Parameter] public EventCallback<IEnumerable<VLoanRequestCollateralLines>> SendData { get; set; }
+    [Parameter] public IEnumerable<VLoanRequestCollateralLines> CollateralLines { get; set; } = [];
+    RadzenDataGrid<VLoanRequestCollateralLines> gridColaterals = default!;
+    private async void LoadData()
+    {
+        await SendData.InvokeAsync(CollateralLines);
+        await gridColaterals.Reload();
+    }
+
+
+}

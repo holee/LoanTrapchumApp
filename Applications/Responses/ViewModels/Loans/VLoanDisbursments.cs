@@ -5,7 +5,7 @@ namespace Applications.Responses.ViewModels.Loans;
 
 public sealed class VLoanDisbursments 
 {
-    public long? Id { get; set; }
+    public Guid? Id { get; set; }
     public string? ContractNumber { get; set; }
     public Guid? LoanId { get; set; }
     public int? BranchId { get; set; }

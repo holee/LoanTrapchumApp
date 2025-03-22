@@ -1,10 +1,10 @@
-﻿using Domains.Models;
+﻿using Domains.Models.Bases;
 
 namespace Applications.Requests.Lists.OtherNames;
 
 public class EntNameDto : BaseAddress
 {
-    public long EntId { get; set; }
+    public Guid EntId { get; set; }
     public string? Name { get; set; } = default!;
     public string? AltName { get; set; } = string.Empty;
     public string? EntType { get; set; } = string.Empty;

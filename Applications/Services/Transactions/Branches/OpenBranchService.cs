@@ -3,14 +3,18 @@ using Applications.Requests.Transactions.OpenBranches;
 using Applications.Responses;
 using Applications.Responses.ViewModels.Currencies;
 using Domains.Models.Transaction;
+using Mapster;
 
 namespace Applications.Services.Transactions.Branches
 {
-    public sealed class OpenBranchService(IOpenBranchService obService) : IOpenBranchService
+
+    public sealed class OpenBranchService(IOpenBranchService obService) : IOpenBranchServiceImpl
     {
-        public async Task<Result<string>> CloseBranchAsync(LoanTransaction transaction)
+        public async Task<Result<string>> CloseBranchAsync(CloseBranchDtoUpdate transaction)
         {
-            return await obService.CloseBranchAsync(transaction);
+            var req = transaction.Adapt<LoanTransaction>();
+
+            return await obService.CloseBranchAsync(req);
         }
 
         public async Task<Result<IEnumerable<VCashVaultBalance>>> GetCashVaultBalance(int? branchRefId)
@@ -18,9 +22,11 @@ namespace Applications.Services.Transactions.Branches
             return await obService.GetCashVaultBalance(branchRefId);
         }
 
-        public async Task<Result<string>> OpenBranchAsync(LoanTransaction transaction)
+        public async Task<Result<string>> OpenBranchAsync(OpenBranchDtoCreate transaction)
         {
-            return await obService.OpenBranchAsync(transaction);
+            var req = transaction.Adapt<LoanTransaction>();
+
+            return await obService.OpenBranchAsync(req);
         }
     }
 }

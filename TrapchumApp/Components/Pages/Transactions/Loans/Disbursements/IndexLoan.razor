@@ -1,0 +1,49 @@
+﻿@page "/Loans"
+@using Applications.Responses.ViewModels.Loans
+@using TCLMS.Front.Pages.Transactions.Loans.Repayments
+@using TCLMS.Shared.Entities.ViewModels.Vendors
+<PageTitle>All</PageTitle>
+@attribute [Authorize]
+<RadzenTabs TabPosition="Radzen.TabPosition.Top" RenderMode="TabRenderMode.Server" SelectedIndex="0">
+    <Tabs>
+        <RadzenTabsItem Text="All Loans">
+            <Template>
+                <span class="rz-ms-2">
+                    All Loans
+                    <RadzenBadge BadgeStyle="BadgeStyle.Secondary" IsPill="@true" Text="@loanCount.ToString()" class="rz-ms-1" />
+                </span>
+            </Template>
+            <ChildContent>
+                <AllLoansTab GetLoanChanged="GetLoanCount" BranchId="@BranchId" UserId="@UserId" />
+            </ChildContent>
+        </RadzenTabsItem>
+    </Tabs>
+</RadzenTabs>
+
+@code {
+    void ShowContextMenuWithContent(MouseEventArgs args, VLoanDisbursments p)
+    {
+        ContextMenuService.Open(args, ds =>@<RadzenMenu Style="font-size:0.8rem;">
+        <RadzenMenuItem Icon="money"
+                        Click="@(()=>GetPaymentSchedules(p))"
+                        Text="Recieve Payment"></RadzenMenuItem>
+        <RadzenMenuItem Icon="paid"
+                        Click="@(()=>CustomerPayOff(p))"
+                        Text="PayOff"></RadzenMenuItem>
+        <RadzenMenuItem Icon="change_circle"
+                        Click="@(()=>ChangeCreditAgent(p))"
+                        Text="Change Credit Agent"></RadzenMenuItem>
+        <RadzenMenuItem Icon="info"
+                        Click="@(()=>GetLoanDetails(p))"
+                        Text="Loan Details"></RadzenMenuItem>
+        <RadzenMenuItem Icon="file_download"
+                        Click="@(()=>DownLoadScheduleAsExcel(p.Id!.Value,p.BranchId!.Value))"
+                        Text="Export Loan to Excel" />
+        <RadzenMenuItem Icon="picture_as_pdf"
+                        Click="@(()=>DownLoadScheduleAsPdf(p.Id!.Value,p.BranchId!.Value))"
+                        Text="Export Loan to Pdf" />
+    </RadzenMenu>
+    );
+    }
+
+}

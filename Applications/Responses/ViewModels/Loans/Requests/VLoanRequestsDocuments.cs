@@ -3,7 +3,7 @@
 public sealed class VLoanRequestsDocuments
 {
     public long Id { get; set; }
-    public long? LoanRequestId { get; set; }
+    public Guid? LoanRequestId { get; set; }
     public int? BranchId { get; set; }
     public string? OriginalName { get; set; }
     public string? NewFileName { get; set; }

@@ -6,11 +6,11 @@ namespace Applications.Interfaces.Customers
 {
     public interface ICustomerIncomeExpendService
     {
-        Task<Result> AddExpensesAsync(long customerRefId, List<CustomerExpense> req);
-        Task<Result> AddIncomesAsync(long customerRefId, List<CustomerIncome> req);
-        Task<Result> AddOrUpdateExpensesAsync(long customerId, List<CustomerExpense> req);
-        Task<Result> AddOrUpdateIncomesAsync(long customerId, List<CustomerIncome> req);
-        Task<Result<IEnumerable<VCustomerExpenses>>> GetCustomerCustomerExpenses(long customerId);
-        Task<Result<IEnumerable<VCustomerIncomes>>> GetCustomerCustomerIncomes(long customerId);
+        Task<Result> AddExpensesAsync(Guid? customerRefId, List<CustomerExpense> req);
+        Task<Result> AddIncomesAsync(Guid? customerRefId, List<CustomerIncome> req);
+        Task<Result> AddOrUpdateExpensesAsync(Guid? customerId, List<CustomerExpense> req);
+        Task<Result> AddOrUpdateIncomesAsync(Guid? customerId, List<CustomerIncome> req);
+        Task<Result<IEnumerable<VCustomerExpenses>>> GetCustomerCustomerExpenses(Guid? customerId);
+        Task<Result<IEnumerable<VCustomerIncomes>>> GetCustomerCustomerIncomes(Guid? customerId);
     }
 }

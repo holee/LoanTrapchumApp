@@ -1,4 +1,5 @@
-﻿using Domains.Models.Collaterals;
+﻿using Domains.Models.Bases;
+using Domains.Models.Collaterals;
 using Domains.Models.Lists;
 
 namespace Domains.Models.Loans;
@@ -7,7 +8,7 @@ public sealed class LoanRequest : BaseEntity
 {
     public long Id { get; set; }
     public Guid LoanRequestId { get; set; }
-    public long? CustomerRefId { get; set; }
+    public Guid? CustomerRefId { get; set; }
     public int? LoanRequestStatusRefId { get; set; }
     public int? BranchRefId { get; set; }
     public long? RequestUserRefId { get; set; }

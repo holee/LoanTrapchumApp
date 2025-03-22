@@ -7,10 +7,10 @@ namespace Applications.Services.Loans
 {
     public interface ILoanScheduleService
     {
-        Task<Result<VSchedule>> GetSchedulesByIdAsync(long? loanId, int? branchId, long? scheduleId);
-        Task<Pager<VSchedule>> GetLoanScheduleByIdAsync(long? loanId, int? branchId, ScheduleStatus status = ScheduleStatus.All, QueryParam? param = null);
-        Task<Pager<VSchedule>> GetLoanSchedulesByPaymentDateAsync(DateTimeOffset? paymentDate, int? branchId, bool isIncludeLate = false, bool isLateOnly = false, QueryParam? param = null);
-       
+        Task<Result<VSchedule>> GetSchedulesByIdAsync(Guid? loanId, int? branchId, long? scheduleId);
+        Task<Pager<VSchedule>> GetLoanScheduleByIdAsync(Guid? loanId, int? branchId, ScheduleStatus status = ScheduleStatus.All, QueryParam? param = null);
+        Task<Pager<VSchedule>> GetLoanSchedulesByPaymentDateAsync(int? branchId, DateTimeOffset? paymentDate, bool isIncludeLate = false, bool isLateOnly = false, QueryParam? param = null);
+
     }
 
 }
