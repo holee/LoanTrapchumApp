@@ -8,7 +8,7 @@ public class LoanRequestValidator : AbstractValidator<LoanRequestDtoCreate>
     public LoanRequestValidator()
     {
         RuleFor(x => x.CustomerRefId).NotEmpty().WithMessage("Please select customer.")
-                                     .GreaterThan(0).WithMessage("Please select cusotmer");
+                                     .NotNull().WithMessage("Please select cusotmer");
         RuleFor(x => x.CurrencyRefId).NotEmpty().WithMessage("Please select currency.")
                                     .GreaterThan(0).WithMessage("Please select currency");
         RuleFor(x => x.AprovedUserId).NotEmpty().WithMessage("Please select Aproved User.")

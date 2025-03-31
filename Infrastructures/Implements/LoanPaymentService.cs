@@ -129,7 +129,7 @@ public class LoanPaymentService : ILoanPaymentService
         return Result.Success(repaymentLines);
     }
 
-    private void SetLoanScheduleComplete(int? branchId, long? loanId, long? scheduleId, int? installmentId)
+    private void SetLoanScheduleComplete(int? branchId, Guid? loanId, long? scheduleId, int? installmentId)
     {
         var leftAmount = _context.Database
                                 .SqlQuery<VSchedule?>($"""
@@ -149,7 +149,7 @@ public class LoanPaymentService : ILoanPaymentService
                 .ExecuteUpdate(x => x.SetProperty(p => p.ScheduleStatusRefId, statusId));
     }
 
-    async Task CloseLoanSchedule(int? branchId, long? loanId)
+    async Task CloseLoanSchedule(int? branchId, Guid? loanId)
     {
         var existingLoans = await _context.Database
                                     .SqlQuery<VLoanDisbursments>($"""
@@ -164,7 +164,7 @@ public class LoanPaymentService : ILoanPaymentService
         if (existingLoans.Any())
         {
             _context.LoanDisbursments
-                 .Where(x => x.Id == loanId & x.BranchRefId == branchId)
+                 .Where(x => x.LoanDisbursementsId == loanId & x.BranchRefId == branchId)
                  .ExecuteUpdate(p => p.SetProperty(x => x.LoanStatusRefId, (int)LoanStatuses.Close));
         }
     }

@@ -4,8 +4,14 @@
 @using Applications.Interfaces
 @using Applications.Interfaces.Branches
 @using Applications.Interfaces.Identity
+@using Applications.Interfaces.Lists
 @using Applications.Requests.Identity
+@using Applications.Services.Addresses
+@using Applications.Services.Currencies
+@using Applications.Services.Customers
+@using Applications.Services.Employees
 @using Applications.Services.Identity
+@using Applications.Services.Loans
 @using Infrastructures.Implements
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Components.Forms
@@ -21,12 +27,14 @@
 @using TrapchumApp.Components
 @using TrapchumApp.Components.Comps
 @using TrapchumApp.Components.Comps.Cards
+@using Applications.Responses.ViewModels.Customers
 @using Applications.Extensions.DateTimes
 @using Applications.Responses.ViewModels.Loans.Schedules
 @using static Microsoft.AspNetCore.Components.Web.RenderMode
 @using Applications.Requests.Lists.Addreses;
 @using Applications.Requests.Lists.Currency;
 @using Applications.Requests.Lists.Entities;
+@using Applications.Extensions.Identity.Policies
 @using Microsoft.AspNetCore.Authorization
 @using Applications.Constants.Authorizations
 @using Microsoft.AspNetCore.Components.Sections
@@ -38,11 +46,11 @@
 @using Domains.Models.Lists
 @using Applications.Responses.ViewModels.Auths
 @using TrapchumApp.Components.Account
+@using Applications.Services.Branches
 @using Applications.Constants
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]
 @inject IJSRuntime js
 @inject IAuthorizationService _authorizeService;
-@inject IBranchService _branchService
 @inject NotificationService NotificationService
 @inject DialogService DialogService
 @inject NavigationManager NavigationManager
@@ -50,3 +58,11 @@
 @inject TooltipService tooltipService
 @inject IdentityRedirectManager RedirectManager
 @inject ILoginService loginService
+@inject IAddressServiceImpl _addressService;
+@inject IEmployeeServiceImpl _employeeService;
+@inject IBranchServiceImpl _branchService
+@inject IUserService _userService
+@inject ICustomerServiceImpl _customerService
+@inject ICurrencyServiceImpl _curService
+@inject ILoanRequestServiceImpl _loanRequestService
+@inject ISalutationService _salutationService

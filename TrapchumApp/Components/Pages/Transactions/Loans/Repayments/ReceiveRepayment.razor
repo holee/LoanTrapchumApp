@@ -1,12 +1,9 @@
 ﻿@page "/Loans/{LoanId:long}/Schedules"
-@using TCLMS.Shared.Entities.Helpers.Extensions
-@using TCLMS.Shared.Entities.ViewModels.Loans
-@using TCLMS.Shared.Entities.ViewModels.Loans.Schedules
-@using static TCLMS.Shared.Entities.ApplicationPolicies.Policies
+@using static Applications.ApplicationPolicies.Policies
 <PageTitle>Repayment</PageTitle>
 <Containers Fluid>
     <CustomerLoanInformation LoanSchedule="LoanSchedule" />
-    <BCard>
+    <Card>
         <CardHeader>
             <RadzenStack Orientation="Orientation.Horizontal"
                          JustifyContent="JustifyContent.SpaceBetween"
@@ -48,7 +45,7 @@
                                 AllowRowSelectOnRowClick="allowRowSelected"
                                 IsLoading="isLoading"
                                 @ref="gridSchedule"
-                                Style="--rz-grid-header-background-color:var(--rz-base-200);cursor:pointer;height:20rem">
+                                Style="cursor:pointer;height:20rem">
                     <Columns>
                         <RadzenDataGridColumn Width="3.5rem"
                                               TextAlign="TextAlign.Center"
@@ -310,7 +307,7 @@
                 @if (isAllowMultiplePayment)
                 {
                     <RadzenFieldset Text="ព័ត‌៌មានទូទាត់ប្រាក់" class="mt-2">
-                        <PaymentLines @ref="@paymentLinesRef" Remove="@OnRemoveAdded" LoanRepaymentLines="loanRepaymentLines" />
+                        <PaymentLines @ref="@paymentLinesRef" Remove="@OnRemoveAdded" LoanRepaymentLines="LoanRepaymentLines" />
                     </RadzenFieldset>
 
                 }
@@ -340,5 +337,5 @@
                             Text="Cancel" />
             </RadzenStack>
         </CardFooter>
-    </BCard>
+    </Card>
 </Containers>

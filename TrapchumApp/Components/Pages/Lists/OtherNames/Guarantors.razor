@@ -1,5 +1,4 @@
-﻿@using TCLMS.Shared.Entities.ViewModels.OtherNames
-@page "/Customers/Guarantors"
+﻿@page "/App/Customers/Guarantors"
 <PageTitle>Guarantor</PageTitle>
 <RadzenCard>
     <RadzenTabs @ref="tabs"
@@ -15,8 +14,8 @@
                                      Orientation="Orientation.Horizontal">
                             <div class="dropdown-center">
                                 <RadzenButton class="rz-background-color-base-100"
-                                              ButtonType="Radzen.ButtonType.Button"
-                                              Size="Radzen.ButtonSize.Small"
+                                              ButtonType="ButtonType.Button"
+                                              Size="ButtonSize.Small"
                                               ButtonStyle="ButtonStyle.Light"
                                               data-bs-toggle="dropdown"
                                               Shade="Shade.Darker"
@@ -69,7 +68,7 @@
                     <HeaderTemplate>
                         <RadzenButton Text="New"
                                       Icon="add"
-                                      Size="Radzen.ButtonSize.Small"
+                                      Size="ButtonSize.Small"
                                       Click="AddGuarantorTab"
                                       ButtonStyle="ButtonStyle.Primary">
                         </RadzenButton>
@@ -98,10 +97,10 @@
                         </RadzenDataGridColumn>
                         <RadzenDataGridColumn Width="10rem" Context="g" Title="Actions">
                             <Template>
-                                <RadzenButton Size="Radzen.ButtonSize.ExtraSmall"
+                                <RadzenButton Size="ButtonSize.ExtraSmall"
                                               Icon="more_vert"
                                               Variant="Variant.Text"
-                                              Click="@((args)=>ShowContextMenuWithContent(args,g.Id))" />
+                                              Click="@(args=>ShowContextMenuWithContent(args,g.Id))" />
                             </Template>
                         </RadzenDataGridColumn>
                     </Columns>
@@ -294,20 +293,20 @@
                             </RadzenTabsItem>
                         </Tabs>
                     </RadzenTabs>
-                    <RadzenStack Orientation="Radzen.Orientation.Horizontal"
+                    <RadzenStack Orientation="Orientation.Horizontal"
                                  AlignItems="AlignItems.Center"
                                  Gap="1rem"
-                                 JustifyContent="Radzen.JustifyContent.End">
+                                 JustifyContent="JustifyContent.End">
                         <RadzenButton ButtonStyle="ButtonStyle.Success"
                                       Icon="save"
                                       Text="Save"
-                                      ButtonType="Radzen.ButtonType.Submit"
-                                      Size="Radzen.ButtonSize.Small" />
+                                      ButtonType="ButtonType.Submit"
+                                      Size="ButtonSize.Small" />
                         <RadzenButton ButtonStyle="ButtonStyle.Danger"
                                       Icon="cancel"
                                       Text="Close"
                                       Click="CloseGuarantorTab"
-                                      Size="Radzen.ButtonSize.Small" />
+                                      Size="ButtonSize.Small" />
                     </RadzenStack>
                 </EditForm>
             </RadzenTabsItem>
@@ -317,7 +316,7 @@
                                   Icon="cancel"
                                   Text="Close"
                                   Click="CloseGuarantorTab"
-                                  Size="Radzen.ButtonSize.Small" />
+                                  Size="ButtonSize.Small" />
                 </GuarantorDetails>
             </RadzenTabsItem>
             <RadzenTabsItem Text="Edit" Visible="ShowEditTab" Icon="edit">
@@ -326,35 +325,15 @@
                                   Icon="cancel"
                                   Text="Close"
                                   Click="CloseGuarantorTab"
-                                  Size="Radzen.ButtonSize.Small" />
+                                  Size="ButtonSize.Small" />
                 </GuarantorDetails>
             </RadzenTabsItem>
         </Tabs>
     </RadzenTabs>
 </RadzenCard>
 
-@code {
-    bool includeInactive = false;
-    string? filterText = "";
-    int pageIndex = 1;
-    int pageSize = 10;
-    string sortColumn = "Name";
-    bool sortDescending = false;
-    int counts = 0;
-    bool isLoading = false;
-    bool ShowAddTab = false;
-    bool ShowDetailTab = false;
-    bool ShowEditTab = false;
-    RadzenTabs tabs = default!;
-    int selectedTabIndex = 0;
-    long SelectedGuarantorId = 0;
-    IEnumerable<VGuarantor> guarantors = [];
-    IEnumerable<ProvinceDto>? provinceList = [];
-    IEnumerable<CommuneDto>? communeList = [];
-    IEnumerable<DistrictDto>? districtList = [];
-    IEnumerable<VillageDto>? villageList = [];
-    EntityNameDtoCreate model = new EntityNameDtoCreate();
-    void ShowContextMenuWithContent(MouseEventArgs args, long id)
+@code{
+    void ShowContextMenuWithContent(MouseEventArgs args, Guid? id)
     {
         ContextMenuService.Open(args, ds =>
     @<RadzenMenu Style="font-size:0.8rem;">
@@ -369,262 +348,5 @@
                         Text="Delete" Value="@id"></RadzenMenuItem>
     </RadzenMenu>
     );
-    }
-
-    void ChangedPageSize(int page)
-    {
-        pageSize = page;
-    }
-
-
-
-
-
-
-    async void SearchTextChanged()
-    {
-        await GetGuarantors();
-    }
-
-    async Task AddGuarantorTab()
-    {
-        if (!ShowAddTab)
-        {
-            ShowAddTab = true;
-            provinceList = await _addressService!.GetAllProvinceAsync();
-            model.Sex = "mr";
-        }
-        selectedTabIndex = 1;
-        tabs.Reload();
-    }
-
-    void AddDetailGuarantorTab()
-    {
-
-
-        if (!ShowDetailTab)
-        {
-            ShowDetailTab = true;
-        }
-        selectedTabIndex = 2;
-        tabs.Reload();
-    }
-
-    void Refresh() { }
-
-
-    void SelectTabChanged(int index)
-    {
-        Console.WriteLine(index);
-    }
-
-    void CloseGuarantorTab()
-    {
-        if (ShowAddTab && selectedTabIndex == 1)
-        {
-            ShowAddTab = false;
-            provinceList = [];
-            model.Sex = "";
-        }
-        if (ShowDetailTab && selectedTabIndex == 2)
-        {
-            ShowDetailTab = false;
-        }
-        selectedTabIndex = 0;
-    }
-    //NavigationManager.NavigateTo($"/Customers/Guarantors/{id}/Details");
-    void GetGuarantorDetails(long id)
-    {
-        ContextMenuService.Close();
-        if (!ShowDetailTab)
-        {
-            ShowDetailTab = true;
-        }
-        SelectedGuarantorId = id;
-        selectedTabIndex = 2;
-        tabs.Reload();
-        Refresh();
-    }
-
-    async void GetEditGuarantor(long id)
-    {
-        ContextMenuService.Close();
-
-        var param = new Dictionary<string, object>
-        {
-            {"NameId",id}
-        };
-        var options = new DialogOptions
-            {
-                Width = "80rem",
-                Height = "30rem",
-                Resizable = true,
-                Draggable = true
-            };
-
-        var result = await DialogService.OpenAsync<GuarantorEdit>($"Edit Guarantor #{id}", param, options);
-
-        if (((bool)result) == true)
-        {
-            await GetGuarantors();
-        }
-    }
-
-
-    protected override async Task OnInitializedAsync()
-    {
-        await base.OnInitializedAsync();
-        await GetGuarantors();
-    }
-    async Task GetGuarantors()
-    {
-        isLoading = true;
-        var param = new QueryParam(pageIndex, pageSize, sortColumn, sortDescending, includeInactive, filterText);
-        var guarantorResp = await _gService.GetGuarantors(param);
-        if (guarantorResp.IsSuccess)
-        {
-            guarantors = guarantorResp.Data.Items;
-            counts = guarantorResp.Data.Count;
-        }
-        isLoading = false;
-
-        StateHasChanged();
-    }
-
-    async Task LoadGuarantors(LoadDataArgs e)
-    {
-        pageIndex = e.Skip!.Value;
-        if (!string.IsNullOrEmpty(e.OrderBy))
-        {
-            sortColumn = e.OrderBy.Split(" ")[0];
-            string dir = e.OrderBy.Split(" ")[1];
-            sortDescending = dir.Contains("asc") ? false : true;
-        }
-        await GetGuarantors();
-
-    }
-    async Task ShowGuarantorModal()
-    {
-        var options = new DialogOptions
-            {
-                Width = "60rem",
-                Height = "30rem",
-                Draggable = true,
-                AutoFocusFirstElement = true
-            };
-        var modalResult = await DialogService.OpenAsync<GuarantorAddModal>("Guarantor", options: options);
-
-        if (bool.TryParse(modalResult, out bool result) && result == true)
-        {
-            await GetGuarantors();
-        }
-
-    }
-    async Task IncludeInactiveCheckedChanged()
-    {
-        await GetGuarantors();
-    }
-
-
-    protected async Task OnSaveChanges()
-    {
-        model.EntType = "Other Name";
-        var resultResponse = await _gService.CreateGaurantorAsync(model);
-
-        if (resultResponse.IsSuccess)
-        {
-            NotificationService.Notify(Radzen.NotificationSeverity.Success, resultResponse.Data!.Message);
-            ShowAddTab = false;
-            selectedTabIndex = 0;
-            //tabs.Reload();
-        }
-        else
-        {
-            var error = resultResponse.Errors!.FirstOrDefault();
-            NotificationService.Notify(Radzen.NotificationSeverity.Error, error);
-        }
-    }
-
-
-
-    protected async Task DeleteGuarantorAsync(long id)
-    {
-
-        if (id <= 0)
-        {
-            NotificationService.Notify(NotificationSeverity.Warning, "there is no any data selected.");
-            return;
-        }
-
-        var confirm = await DialogService.Confirm($"do you want to delete guarantor with #{id}",
-                                            "Delete", new ConfirmOptions
-                                                {
-                                                    OkButtonText = "Ok",
-                                                    CancelButtonText = "Cancel"
-                                                });
-        if (confirm == false) return;
-
-        var resultResponse = await _gService.DeleteAsync(id);
-
-        if (resultResponse.IsSuccess)
-        {
-            NotificationService.Notify(Radzen.NotificationSeverity.Success, resultResponse.Data!.Message);
-            ShowAddTab = false;
-            selectedTabIndex = 0;
-            await GetGuarantors();
-            tabs.Reload();
-        }
-        else
-        {
-            var error = resultResponse.Errors!.FirstOrDefault();
-            NotificationService.Notify(Radzen.NotificationSeverity.Error, error);
-        }
-    }
-
-    async void GetDistrictByProvince(object e)
-    {
-        if (e is not null)
-        {
-            model.ProInKhmer = ((ProvinceDto)e).ProInKhmer;
-            var id = ((ProvinceDto)e).ProvinceID;
-            districtList = await _addressService!.GetDistrictByProvinceAsync(id);
-        }
-        StateHasChanged();
-    }
-    async void GeCommunesByDistrict(object e)
-    {
-        if (e is not null)
-        {
-            model.DisInKhmer = ((DistrictDto)e).DisInKhmer;
-            var id = ((DistrictDto)e).DistrictId;
-            communeList = await _addressService!.GetCommuneByDistricteAsync(id);
-        }
-        StateHasChanged();
-    }
-    void Cancel()
-    {
-        DialogService.Close(false);
-    }
-    async void GetVillagesByCommune(object e)
-    {
-        if (e is not null)
-        {
-            model.ComInKhmer = ((CommuneDto)e).ComInKhmer;
-            var id = ((CommuneDto)e).CommuneId;
-            villageList = await _addressService!.GetVillageByCommuneAsync(id);
-        }
-        StateHasChanged();
-    }
-    void GetVillagesName(object e)
-    {
-        if (e is not null)
-        {
-            model.VilInKhmer = ((VillageDto)e).VilInKhmer;
-        }
-        StateHasChanged();
-    }
-    void SetFirstName()
-    {
-        model.FirstName = model.Name;
     }
 }

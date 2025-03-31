@@ -11,7 +11,7 @@
                                  Orientation="Orientation.Horizontal"
                                  JustifyContent="JustifyContent.SpaceBetween">
                         <RadzenButton Icon="add"
-                                      Size="Radzen.ButtonSize.Small"
+                                      Size="ButtonSize.Small"
                                       Text="Vendor"
                                       Click="AddTabOtherName"
                                       ButtonStyle="ButtonStyle.Primary" />
@@ -23,13 +23,13 @@
                 </CardHeader>
                 <CardBody>
                     <RadzenStack Style="margin-bottom:10px"
-                                 JustifyContent="Radzen.JustifyContent.SpaceBetween"
-                                 Orientation="Radzen.Orientation.Horizontal"
-                                 Wrap="Radzen.FlexWrap.Wrap">
+                                 JustifyContent="JustifyContent.SpaceBetween"
+                                 Orientation="Orientation.Horizontal"
+                                 Wrap="FlexWrap.Wrap">
                         <PageDropDown PageSizeChanged="PageSizeChanged"
                                       Reload="Reload"
                                       ShowReload="true" />
-                        <RadzenStack Style="width:25%" JustifyContent="Radzen.JustifyContent.End">
+                        <RadzenStack Style="width:25%" JustifyContent="JustifyContent.End">
                             <RadzenFormField AllowFloatingLabel="false">
                                 <Start>
                                     <RadzenIcon Icon="search" />
@@ -47,7 +47,7 @@
                                     Density="Density.Compact"
                                     Responsive
                                     Count="@counts"
-                                    Style="--rz-grid-header-background-color:var(--rz-base-200);height:30rem;min-height:30rem;max-height:45rem;"
+                                    Style="height:30rem;min-height:30rem;max-height:45rem;"
                                     PageSize="@pageSize"
                                     LoadData="@LoadData"
                                     ColumnWidth="15rem"
@@ -72,16 +72,16 @@
                                                   Title="Status" Property="@(nameof(VVendor.EntId))" Context="v">
                                 <Template>
                                     <RadzenCheckBox TValue="bool"
-                                                    Change="@((arg)=>DeactiveOrActive(arg,v))"
+                                                    Change="@(arg=>DeactiveOrActive(arg,v))"
                                                     @bind-Value="v.IsActive" />
                                 </Template>
                             </RadzenDataGridColumn>
                             <RadzenDataGridColumn Width="8rem" Sortable="false" Title="Actions" Property="@(nameof(VVendor.EntId))" Context="v">
                                 <Template>
-                                    <RadzenButton Size="Radzen.ButtonSize.ExtraSmall"
+                                    <RadzenButton Size="ButtonSize.ExtraSmall"
                                                   Icon="more_vert"
                                                   Variant="Variant.Text"
-                                                  Click="@((args)=>ShowContextMenuWithContent(args,v))" />
+                                                  Click="@(args=>ShowContextMenuWithContent(args,v))" />
                                 </Template>
                             </RadzenDataGridColumn>
                         </Columns>

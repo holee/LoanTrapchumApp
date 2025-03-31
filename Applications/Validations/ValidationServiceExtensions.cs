@@ -9,11 +9,11 @@ using Applications.Requests.Loans.LoanRequests;
 using Applications.Requests.SysSettings;
 using Applications.Requests.Validations.Auths;
 using Applications.Requests.Validations.Currencies;
-using Applications.Requests.Validations.Customers;
 using Applications.Requests.Validations.Employees;
 using Applications.Requests.Validations.Loans;
 using Applications.Requests.Validations.NameEntities;
 using Applications.Requests.Validations.Transactions;
+using Applications.Validations.Customers;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 namespace Applications.Validations
@@ -37,6 +37,7 @@ namespace Applications.Validations
             services.AddTransient<IValidator<UserLoanSizeDtoCreate>, UserLoanSizeDtoCreateValidater>();
             services.AddTransient<IValidator<LoanRequestDtoCreate>, LoanRequestValidator>();
             services.AddTransient<IValidator<ExchangeDtoCreate>, CurrencyExchangeValidator>();
+            services.AddTransient<IValidator<CustomerActivityDtoCreate>, CustomerActivityDtoCreateValidator>();
             return services;
         }
     }

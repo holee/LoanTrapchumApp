@@ -1,25 +1,46 @@
 using Applications.Extensions;
+using Applications.Requests.Loans.Disbursements;
+using Applications.Responses.ViewModels.Branches;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Applications.Services.Loans;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Forms;
 using Radzen;
+using Radzen.Blazor;
 namespace TrapchumApp.Components.Pages.Transactions.Loans.Disbursements;
 
 public partial class LoanCreate
 {
+    private readonly ILoanServiceImpl _loanService;
 
-    private readonly ILoanRequestServiceImpl _loanRequestService;
-
-    public LoanCreate(ILoanRequestServiceImpl loanRequestService)
+    public LoanCreate(ILoanServiceImpl loanService)
     {
-        _loanRequestService = loanRequestService;
+        _loanService = loanService;
     }
 
+    [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+    bool collapse = false;
+    string collapseIcon = "expand_more";
+    bool isVible = false;
+    int selectedTabIndex = 0;
+    bool isProgressing = false;
+    bool isCollateralTab = false;
+    bool isPreviewScheduleTab = false;
+    bool IsLoading = false;
+    RadzenTabs tb = default!;
+    List<int> tabCounts = [0];
+    IEnumerable<LoanScheduleDtoCreate> previewSchedule = [];
+    protected LoanDtoCreate model = new LoanDtoCreate();
+    protected DateTime? RegisterDate = DateTime.Now;
+    protected int SelectedCollectionFee = 1;
+    protected decimal? TotalAdminFee = 0;
+    protected int SelectedPeriodName = 1;
+    protected IEnumerable<VBranchResponse> Branches = [];
     [Parameter, SupplyParameterFromQuery] public int BranchId { get; set; }
     [Parameter, SupplyParameterFromQuery] public Guid? UserId { get; set; }
-    [Parameter, SupplyParameterFromQuery] public Guid? CustomerRequestId { get; set; } = 0;
-    [Parameter, SupplyParameterFromQuery] public Guid LoanRequestId { get; set; } = 0;
+    [Parameter, SupplyParameterFromQuery] public Guid? CustomerRequestId { get; set; } = Guid.Empty;
+    [Parameter, SupplyParameterFromQuery] public Guid LoanRequestId { get; set; } = Guid.Empty;
     VLoanRequests req = new VLoanRequests();
     DateTime firstPayment;
     EditForm editForm = default!;
@@ -73,7 +94,7 @@ public partial class LoanCreate
             var app = builder.Build(param);
             previewSchedule = app.SetHoliday(Holidays)
                                  .Calculate(model.Installments, model.InterestRate, model.Principle)
-                                  .ToSchedules(BranchId, model.RepaymentModeRefId);
+                                  .ToSchedules(BranchId, Guid.Empty, model.RepaymentModeRefId);
             selectedTabIndex = 2;
         }
     }
@@ -106,17 +127,20 @@ public partial class LoanCreate
         try
         {
             editForm.EditContext!.Validate();
+
             model.LoanSchedules = scheduleDto.ToList();
-            var createResponse = await _loanRequestService!.CreateLoanAsync(model);
-            if (!createResponse.IsSuccess)
+
+            var rsp = await _loanService!.CreateLoanAsync(model);
+
+            if (!rsp.IsSuccess)
             {
-                var error = createResponse.Errors!.FirstOrDefault();
-                NotificationService.Notify(NotificationSeverity.Error, error);
+                NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
+
                 return;
             }
             else
             {
-                NotificationService.Notify(NotificationSeverity.Success, createResponse.Data!.Message);
+                NotificationService.Notify(NotificationSeverity.Success, rsp.Data);
             }
         }
         catch (Exception ex)

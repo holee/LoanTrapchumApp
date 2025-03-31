@@ -1,6 +1,8 @@
-﻿<PageTitle>Collaterals Detail</PageTitle>
+﻿@using Applications.Responses.Collaterals
+@using Applications.Requests.Collaterals
+<PageTitle>Collaterals Detail</PageTitle>
 <Containers Fluid>
-    <BCard>
+    <Card>
         <CardHeader>
             <div class="d-flex justify-content-between">
                 <span>Collateral Information</span>
@@ -42,7 +44,7 @@
                     </tr>
 
                 </table>
-                <RadzenDataGrid TItem="CollateralLineDto"
+                <RadzenDataGrid TItem="CollateralLineResponse"
                                 GridLines="DataGridGridLines.Both"
                                 Data="CollateralLines">
                     <Columns>
@@ -82,37 +84,6 @@
                               Click="CloseTab" />
             </RadzenStack>
         </CardFooter>
-    </BCard>
+    </Card>
 </Containers>
 
-@code {
-    [Parameter]
-    public EventCallback Close { get; set; }
-    [Parameter]
-    public EventCallback<long?> AddMoreCollateral { get; set; }
-    [Parameter]
-    public CollateralDto? Model { get; set; } = new();
-    async Task CloseTab()
-    {
-        await Close.InvokeAsync();
-    }
-    [Parameter] public long CustomerId { get; set; }
-    [Parameter]
-    public LoanCustomerQuery? SelectedCustomer { get; set; }
-    [Parameter]
-    public IQueryable<CollateralLineDto>? CollateralLines { get; set; }
-
-    private async Task AddCollateralByCustomer()
-    {
-        if (Model!.CollateralId <= 0)
-        {
-            NotificationService.Notify(Radzen.NotificationSeverity.Warning, "", "Try getting data not found!");
-            return;
-        }
-        await AddMoreCollateral.InvokeAsync(Model.CollateralId);
-        Console.WriteLine("Click...!");
-        StateHasChanged();
-    }
-
-
-}

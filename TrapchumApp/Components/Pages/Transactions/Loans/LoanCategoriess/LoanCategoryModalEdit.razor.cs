@@ -1,15 +1,22 @@
-using AppilcationServices.Interfaces;
+using Applications.Interfaces.Loans;
+using Applications.Requests.Loans;
+using Applications.Services.Loans;
 using Microsoft.AspNetCore.Components;
-using TCLMS.Shared.Entities.Dtos.Loans;
 
-namespace TCLMS.Front.Pages.Transactions.Loans.LoanCategoriess
+namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanCategoriess
 {
     public partial class LoanCategoryModalEdit
     {
         [Parameter] public int Id { get; set; }
-        [Inject] private ILoanCategoryService? service { get; set; }
 
-        [Parameter] public LoanCategoryDTOUpdate? model { get; set; }
+        private readonly ILoanCategoryServiceImpl service;
+
+        public LoanCategoryModalEdit(ILoanCategoryServiceImpl service)
+        {
+            this.service = service;
+        }
+
+        [Parameter] public LoanCategoryDtoUpdate model { get; set; } = new();
         protected bool IsActive = false;
         protected void Cancel() => DialogService.Close(false);
         private bool isValid = true;
@@ -22,16 +29,15 @@ namespace TCLMS.Front.Pages.Transactions.Loans.LoanCategoriess
             try
             {
                 var result = await service!.GetForEditAsync(Id);
-                if (result != null && model!.EditSeq == result.EditSeq)
+
+                if (result is not null && model!.EditSeq != result.EditSeq)
                 {
-                    if (await service.UpdateAsync(Id, model))
-                    {
-                        NotificationService.Notify(Radzen.NotificationSeverity.Success, "Updated", "Loan Category created successfully!");
 
-
-                    }
                 }
-                else
+
+                var req = await service.UpdateAsync(model);
+
+                if (!req.IsSuccess)
                 {
 
                 }

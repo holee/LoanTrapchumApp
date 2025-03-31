@@ -16,5 +16,20 @@ namespace Applications.Interfaces.Addresses
         Task<IEnumerable<string>> GetCities(string? filter = null); 
         Task<Result> AddCity(City city);
         Task<Result> UpdateCity(City city);
+
+        Task<IEnumerable<T>> GetsProvinces<T>(string? expression)
+            where T : class;
+
+        Task<IEnumerable<T>> GetDistrictsByProvinceId<T>(int? provinceId)
+            where T : class;
+
+        Task<IEnumerable<T>> GetCommunesByDistrictId<T>(int? districtId)
+            where T : class;
+
+        Task<IEnumerable<T>> GetVillagesByCommuneId<T>(int? communeId)
+            where T : class;
+
+        Task<T?> GetsProvinceById<T>(int? id)
+            where T : class;
     }
 }

@@ -1,15 +1,12 @@
 ﻿@page "/Loans/Repayment/{LoanId:long}/Multiple"
-@using TCLMS.Shared.Entities.Helpers.Extensions
-@using TCLMS.Shared.Entities.ViewModels.Loans
-@using TCLMS.Shared.Entities.ViewModels.Loans.Schedules
 @* @attribute [Authorize(Policy=@Policies.AllowMultiplePayment) ]*@
 <PageTitle>Repayment</PageTitle>
 <div class="container-fluid">
     <SectionContent SectionName="BranchName">
-        @SelectedBranch.BranchName
+        @_selectedBranchResponse.BranchName
     </SectionContent>
     <CustomerLoanInformation LoanSchedule="LoanSchedule" />
-    <BCard>
+    <Card>
         <CardHeader>
             <RadzenStack Orientation="Orientation.Horizontal"
                          JustifyContent="JustifyContent.SpaceBetween"
@@ -157,7 +154,7 @@
                             Text="Cancel" />
             </RadzenStack>
         </CardFooter>
-    </BCard>
+    </Card>
 
 </div>
 @code {

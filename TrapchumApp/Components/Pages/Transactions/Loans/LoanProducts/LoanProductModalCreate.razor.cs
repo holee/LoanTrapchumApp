@@ -1,19 +1,25 @@
-using AppilcationServices.Interfaces;
-using ApplicationServices.Interfaces;
-using Microsoft.AspNetCore.Components;
-using TCLMS.Shared.Entities.Dtos.Lists.Currency;
-using TCLMS.Shared.Entities.Dtos.Loans;
-using TCLMS.Shared.Entities.ViewModels.Currencies;
+using Applications.Extensions.mappers;
+using Applications.Interfaces.Currencies;
+using Applications.Requests.Lists.Currency;
+using Applications.Requests.Loans.Products;
+using Applications.Services.Loans;
 
-namespace TCLMS.Front.Pages.Transactions.Loans.LoanProducts
+namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanProducts
 {
     public partial class LoanProductModalCreate
     {
-        [Inject] private ILoanProductService? Service { get; set; }
+        private readonly ILoanProductServiceImpl _loanProductService;
+        private readonly ICurrencyService _currencyService;
 
-        protected LoanProductDTOCreate model =new LoanProductDTOCreate();
+        public LoanProductModalCreate(ICurrencyService currencyService, ILoanProductServiceImpl loanProductService)
+        {
+            _currencyService = currencyService;
+            _loanProductService = loanProductService;
+        }
 
-        protected IEnumerable<CurrencyDto> _currencies = [];
+        protected LoanProductDtoCreate model = new LoanProductDtoCreate();
+
+        protected IEnumerable<CurrencyResponse> _currencies = [];
 
         protected bool IsActive = false;
 
@@ -24,7 +30,7 @@ namespace TCLMS.Front.Pages.Transactions.Loans.LoanProducts
 
             if (currenciesRsponse.IsSuccess)
             {
-                _currencies = currenciesRsponse.Data!;
+                _currencies = currenciesRsponse.Data!.Maps<CurrencyResponse>();
             }
             await base.OnInitializedAsync();
         }
@@ -34,7 +40,9 @@ namespace TCLMS.Front.Pages.Transactions.Loans.LoanProducts
             {
                 if (model.CurrencyRefId is null)
                     model.CurrencyRefId = 2;
+
                 var result = await _loanProductService.CreateAsync(model);
+
                 if (result.IsSuccess)
                 {
                     //Toaster.Success("Loan Product created successfully!", "Creating", config =>
@@ -42,10 +50,11 @@ namespace TCLMS.Front.Pages.Transactions.Loans.LoanProducts
                     //    config.ShowProgressBar = false;
                     //    config.ShowCloseIcon = true;
                     //});
-                  
+
                 }
 
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 NotificationService.Notify(Radzen.NotificationSeverity.Error, ex.Message);
             }

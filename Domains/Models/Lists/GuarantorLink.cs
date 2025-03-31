@@ -6,7 +6,7 @@ namespace Domains.Models.Lists
     public class GuarantorLink:BaseEntity 
     {
         public long Id { get; set; } 
-        public long? EntityNameRefId { get; set; }
+        public Guid? EntityNameRefId { get; set; }
         public int? BranchId { get; set; }
         public Guid? LoanRequestRefId { get; set; } 
         public bool? IsActive { get; set; } = true;

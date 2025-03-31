@@ -24,7 +24,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Ledgers
 
         [Parameter] public int Id { get; set; }
         IEnumerable<LedgerTypeDto>? LedgerTypes = [];
-        IEnumerable<CurrencyDto>? Currencies = [];
+        IEnumerable<CurrencyResponse>? Currencies = [];
         IEnumerable<VLedger>? FilterLedgers = [];
         LedgerUpdateDto model = new LedgerUpdateDto();
         EditForm? editForm;
@@ -119,7 +119,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Ledgers
 
             if (currenciesRsponse.IsSuccess)
             {
-                Currencies = currenciesRsponse.Data?.Maps<CurrencyDto>();
+                Currencies = currenciesRsponse.Data?.Maps<CurrencyResponse>();
             }
 
             await base.OnParametersSetAsync();
@@ -150,7 +150,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Ledgers
 
         protected async Task CurrencySelectedChanged(object param)
         {
-            var currencyId = ((CurrencyDto)param).CurrencyId;
+            var currencyId = ((CurrencyResponse)param).CurrencyId;
 
             if (!model.IsMainGl && currencyId == tempCurrencyId)
             {

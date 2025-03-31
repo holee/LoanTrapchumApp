@@ -25,8 +25,6 @@ using Domains.Models.Settings;
 using Domains.Models.Transaction;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-
 namespace Infrastructures.DataAccess
 {
     public class ApplicationDbContext : DbContext
@@ -49,7 +47,7 @@ namespace Infrastructures.DataAccess
             builder.HasDbFunction(typeof(ApplicationDbContext).GetMethod(nameof(GetCurrencyNotes), new[] { typeof(int) })!);
 
             builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-
+            
         }
 
         private void ProcessSaveChangedAsync()
@@ -164,6 +162,7 @@ namespace Infrastructures.DataAccess
         public DbSet<District> Districts { get; set; }
         public DbSet<Commune> Communes { get; set; }
         public DbSet<CustomerNote> CustomerNote { get; set; }
+        public DbSet<CustomerActivity> CustomerActivites { get; set; } 
         public DbSet<Village> Villages { get; set; }
         public DbSet<Nationality> Nationalities { get; set; }
         public DbSet<Ledger> Ledgers { get; set; }
@@ -210,13 +209,14 @@ namespace Infrastructures.DataAccess
         public DbSet<LoanDocuments> LoanDocuments { get; set; }
         public DbSet<LoanChangedCa> LoanChangedCa { get; set; }
         public DbSet<SysSettings> AppSettings { get; set; }
+        public DbSet<EntityNames> EntityNames { get; set; } 
 
         /// <summary>
         /// Link to Views
         /// </summary>
         public DbSet<VCurrenciesList> VCurrenciesList { get; set; }
         public DbSet<VCurrencyNotes> VCurrencyNotes { get; set; }
-        public DbSet<VBranch> VBranchs { get; set; }
+        public DbSet<VBranchResponse> VBranchs { get; set; }
         public DbSet<VDepartment> VDepartments { get; set; }
         public DbSet<VSpotRate> VSpotRates { get; set; }
         public DbSet<VLoanDisbursments> VLoanDisbursements { get; set; }

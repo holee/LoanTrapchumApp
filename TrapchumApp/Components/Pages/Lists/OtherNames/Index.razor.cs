@@ -1,3 +1,4 @@
+using Applications.Extensions;
 using Applications.Interfaces.Addresses;
 using Applications.Interfaces.Lists;
 using Applications.Requests.Lists.Addreses;
@@ -17,10 +18,6 @@ namespace TrapchumApp.Components.Pages.Lists.OtherNames;
 
 public partial class Index
 {
-
-    private readonly IAddressService _addressService;
-
-    private readonly ISalutationService _salutationService;
     private readonly IOtherNameServiceImpl _otherNameService;
 
     IEnumerable<VOtherNames> Names = [];
@@ -177,9 +174,9 @@ public partial class Index
     //protected bool includeInactive = false;
     List<int> SelectedRow = [10, 20, 50, 100];
     IQueryable<EntNameDto> names;
-    protected async Task ShowEdit(long id)
+    protected async Task ShowEdit(Guid? id)
     {
-        if (id != 0)
+        if (id.IsNotNullOrEmpty())
         {
             try
             {
@@ -229,7 +226,7 @@ public partial class Index
         }
     }
 
-    protected async Task ConvertToCustomer(long? id)
+    protected async Task ConvertToCustomer(Guid? id)
     {
         var confirm = (bool)await DialogService.Confirm("Are you sure!, you want to this other name to customer?", "Changing Entity",
             new ConfirmOptions { OkButtonText = "Yes", CancelButtonText = "No" });
@@ -447,16 +444,14 @@ public partial class Index
     }
     protected EntNameDto? OtherNames = new();
 
-    public Index(IAddressService addressService, ISalutationService salutationService, IOtherNameServiceImpl otherNameService)
+    public Index(IOtherNameServiceImpl otherNameService)
     {
-        _addressService = addressService;
-        _salutationService = salutationService;
         _otherNameService = otherNameService;
     }
 
-    protected async Task DisplayDetail(long e)
+    protected async Task DisplayDetail(Guid? e)
     {
-        if (e != 0)
+        if (e.IsNotNullOrEmpty())
         {
             try
             {

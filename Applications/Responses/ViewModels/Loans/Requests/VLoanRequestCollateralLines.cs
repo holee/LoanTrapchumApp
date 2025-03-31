@@ -3,11 +3,11 @@
 public sealed class VLoanRequestCollateralLines
 {
     public long? Id { get; set; }
-    public long? LoanId { get; set; }
+    public Guid? LoanId { get; set; }
     public int? BranchId { get; set; }
-    public long? LoanRequestId { get; set; }
+    public Guid? LoanRequestId { get; set; }
     public long? CollateralLineId { get; set; }
-    public long? CollateralId { get; set; }
+    public Guid? CollateralId { get; set; }
     public string? CollateralNo { get; set; }
     public string? ReferenceNo { get; set; }
     public string? Location { get; set; }

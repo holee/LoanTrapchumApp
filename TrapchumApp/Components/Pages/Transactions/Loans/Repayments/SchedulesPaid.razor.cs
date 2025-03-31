@@ -12,8 +12,8 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
     {
         [Parameter] public int BranchId { get; set; } = 0;
         [Parameter] public int CurrencyId { get; set; } = 1;
-        [Parameter] public long UserId { get; set; } = 0;
-        [Parameter] public long LoanId { get; set; } = 0;
+        [Parameter] public Guid? UserId { get; set; } = Guid.Empty;
+        [Parameter] public Guid? LoanId { get; set; } = Guid.Empty;
 
         IList<VSchedule> PaymentSchedules = [];
         bool isLoading = false;
@@ -33,7 +33,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
         void ShowCustomerPayment(VSchedule p)
         {
 
-            var parameters = new Dictionary<string, object>{
+            var parameters = new Dictionary<string, object?>{
                         { "LoanPayment",p},
                         { "CurrencyId",p.CurrencyId!.Value },
                         { "LoanId",p.LoanId!.Value },

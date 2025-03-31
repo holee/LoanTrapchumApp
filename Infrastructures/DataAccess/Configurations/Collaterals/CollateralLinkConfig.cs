@@ -8,7 +8,7 @@ namespace Infrastructures.DataAccess.Configurations.Collaterals
     {
         public void Configure(EntityTypeBuilder<CollateralLink> builder)
         {
-            builder.ToTable("lt_loanCollateralLinks");
+            builder.ToTable("lt_collateralLinks");
             builder.HasKey(x => x.Id);
             builder.Property(x => x.Id).ValueGeneratedOnAdd();
             builder.Property(x => x.IsActive).HasDefaultValue(true);

@@ -26,7 +26,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Disbursements
         private List<VLoanDisbursments> LoanItems = [];
         private IList<VLoanDisbursments> SelectedLoans = [];
         private string? filter = string.Empty;
-        protected IEnumerable<VBranch> Branches = [];
+        protected IEnumerable<VBranchResponse> Branches = [];
         protected IEnumerable<VSchedulePaid> PaidSchedules = [];
         private int selectedBranchId;
         bool branchStatus = false;

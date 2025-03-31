@@ -10,11 +10,6 @@ namespace TrapchumApp.Components.Layout
     {
         [CascadingParameter]
         Task<AuthenticationState> AuthenticateState { get; set; } = default!;
-        private readonly IBranchService _brService;
-        public MainLayout(IBranchService brService)
-        {
-            _brService = brService;
-        }
 
         bool sidebarExpanded = true;
         string? userId = string.Empty;
@@ -35,7 +30,7 @@ namespace TrapchumApp.Components.Layout
 
         async Task getBranchId(string userId)
         {
-            var branchResult = await _branchService.GetBranchesByUser(userId);
+            var branchResult = await _branchService.GetBranchesByUser(userId,0);
 
             if (branchResult.IsSuccess)
             {

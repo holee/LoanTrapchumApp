@@ -18,25 +18,4 @@
     </RadzenStack> 
 </EditForm>
 
-@code {
-    [Parameter] public long CustomerId { get; set; }
-    [Parameter] public long UserId { get; set; }
-    bool isBusy = false;
-    private CustomerNoteDtoCreate model = new();
 
-    async void FormSubmit()
-    {
-        isBusy = true;
-
-        model.CustomerRefId = CustomerId;
-        model.CreditAgentRefId = UserId;
-        var noteResponse = await _customerService.AddCusomerNoteAsync(model);
-
-        if (noteResponse.IsSuccess)
-        {
-            isBusy = false;
-            DialogService.Close(false);
-        }
-
-    }
-}

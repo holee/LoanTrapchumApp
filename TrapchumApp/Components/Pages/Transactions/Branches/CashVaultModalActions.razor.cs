@@ -1,3 +1,4 @@
+using Applications.Extensions;
 using Applications.Interfaces.Currencies;
 using Applications.Interfaces.Transactions;
 using Applications.Requests.Lists.Currency;
@@ -12,7 +13,6 @@ namespace TrapchumApp.Components.Pages.Transactions.Branches
 {
     public partial class CashVaultModalActions
     {
-        [Inject] ICurrencyService curService { get; set; } = default!;
         [Inject] ICashVaultService caVaultService { get; set; } = default!;
 
         [CascadingParameter]
@@ -20,13 +20,13 @@ namespace TrapchumApp.Components.Pages.Transactions.Branches
         [Parameter, SupplyParameterFromQuery] public string UserId { get; set; } = string.Empty;
         [Parameter, SupplyParameterFromQuery] public int BranchId { get; set; }
 
-        protected IEnumerable<BankDto>? bankList = [];
+        protected IEnumerable<BankResponse>? bankList = [];
 
         private IEnumerable<VCashVaults>? vCashVaults = [];
 
-        protected IEnumerable<VBranch> Branches = [];
+        protected IEnumerable<VBranchResponse> Branches = [];
 
-        protected BankDto? bank;
+        protected BankResponse? bank;
 
         protected BranchDto? branch;
 
@@ -52,7 +52,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Branches
 
                 //canVaultIn = await _authorizeService.MustHasPermissionAsync(user, TranxPolicies.VaultIn);
 
-                var branchResponse = await _branchService.GetBranchesByUser(UserId);
+                var branchResponse = await _branchService.GetBranchesByUser(UserId,0);
 
                 if (branchResponse.IsSuccess)
                 {

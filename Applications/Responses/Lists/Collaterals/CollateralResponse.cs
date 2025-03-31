@@ -2,7 +2,7 @@
 
 public class CollateralResponse
 {
-    public long? CollateralId { get; set; }
+    public Guid? CollateralId { get; set; }
     public DateTime? RegisterDate { get; set; } = DateTime.Now;
     public string? CustomerName { get; set; }
     public string? DocumentKeeping { get; set; }

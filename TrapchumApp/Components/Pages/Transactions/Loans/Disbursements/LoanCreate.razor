@@ -1,5 +1,5 @@
 ﻿@page "/Loan/Disbursement/Create"
-@using TCLMS.Front.Pages.Transactions.Loans.LoanRequests
+@using TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 <PageTitle>New Loan Disbursment</PageTitle>
 <SectionContent SectionName="Progressbar">
     <RadzenProgressBar Visible="IsLoading" Value="100"
@@ -7,7 +7,7 @@
                        ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
 </SectionContent>
 <Containers CssClass="rz-m-0 rz-p-0 rz-background-color-base-200" Fluid>
-    <BCard CssClass="rz-background-color-base-200">
+    <Card CssClass="rz-background-color-base-200">
         <CardBody>
             <RadzenTabs @bind-SelectedIndex="selectedTabIndex" RenderMode="TabRenderMode.Client">
                 <Tabs>
@@ -187,27 +187,7 @@
                             Text="Back" />
             </RadzenStack>
         </CardFooter>
-    </BCard>
+    </Card>
 </Containers>
-@code {
-    [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
-    bool collapse = false;
-    string collapseIcon = "expand_more";
-    bool isVible = false;
-    int selectedTabIndex = 0;
-    bool isProgressing = false;
-    bool isCollateralTab = false;
-    bool isPreviewScheduleTab = false;
-    bool IsLoading = false;
-    RadzenTabs tb = default!;
-    List<int> tabCounts = [0];
-    IEnumerable<LoanScheduleDtoCreate> previewSchedule = [];
-    protected LoanDtoCreate model = new LoanDtoCreate();
-    protected DateTime? RegisterDate = DateTime.Now;
-    protected int SelectedCollectionFee = 1;
-    protected decimal? TotalAdminFee = 0;
-    protected int SelectedPeriodName = 1;
-    protected IEnumerable<VBranch> Branches = Enumerable.Empty<VBranch>();
 
-}
 

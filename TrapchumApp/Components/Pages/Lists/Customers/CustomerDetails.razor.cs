@@ -1,29 +1,189 @@
-﻿using Applications.Interfaces.Customers;
+﻿using Applications.Extensions;
+using Applications.Interfaces.Customers;
 using Applications.Responses;
 using Applications.Responses.Lists.Customers;
 using Applications.Responses.ViewModels.Collaterals;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Requests;
-using Applications.Services.Customers;
+using Applications.Services.LIsts;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
+using Radzen.Blazor;
+using Radzen;
+using TrapchumApp.Components.Pages.Lists.Collaterals;
+using TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests;
+using Applications.Extensions.Identity;
+using Applications.Extensions.Web;
+using Applications.Services.Customers;
+using System.Threading.Tasks;
 
 namespace TrapchumApp.Components.Pages.Lists.Customers
 {
     public partial class CustomerDetails
     {
-
-        private readonly ICustomerServiceImpl _customerService;
-        private readonly ICustomerIncomeExpendService _customerIncomeService;
-        public CustomerDetails(ICustomerServiceImpl customerService, ICustomerIncomeExpendService customerIncomeService)
+        private readonly IIncomeExpendServiceImpl _customerIncomeService;
+        private readonly ICollateralsServiceImpl _collateralService;
+        public CustomerDetails(IIncomeExpendServiceImpl customerIncomeService, ICollateralsServiceImpl collateralService)
         {
-            _customerService = customerService;
             _customerIncomeService = customerIncomeService;
+            _collateralService = collateralService;
         }
+        [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+        bool isCollateralTab = false;
+        RadzenTabs tabs = default!;
+        int selectedIndex = 0;
+        bool collapse = false;
+        bool IsLoading = false;
+        string collapseIcon = "expand_less";
+        void CollapseButton()
+        {
+            collapse = !collapse;
+            collapseIcon = collapse ? "expand_more" : "expand_less";
+        }
+        async void SelectedTabIndexChanged()
+        {
+            if (selectedIndex == 0)
+            {
+
+            }
+            if (selectedIndex == 1)
+            {
+                await GetCustomerCollateralLines();
+            }
+            if (selectedIndex == 2)
+            {
+                await GetCustomerIncomeAndExpense();
+                await GetCustomerIncomeAndExpense();
+            }
+            if (selectedIndex == 3)
+            {
+                await GetCustomerLoanHistory();
+            }
+            if (selectedIndex == 5)
+            {
+                await GetCustomerNotes();
+            }
+
+            StateHasChanged();
+        }
+
+
+        async Task DeleteCustomer()
+        {
+            var rsp=await _customerService.DeleteCustomerAsync(CustomerId);
+
+            if(rsp.IsSuccess)
+            {
+                NavigationManager.NavigateTo("/App/Customers");
+
+                return;
+            }
+
+            NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
+
+        }
+
+
+
+        async Task AddNote()
+        {
+            var auth = await AuthenticationState;
+
+            if (auth.User.Identity!.IsAuthenticated==false)
+            {
+                return;
+            }
+                var userId = auth.User!.GetId()!.ToGuid();
+
+                await DialogService.OpenAsync<CustomerNoteAdd>("New Note", new Dictionary<string, object?>
+                                    {
+                                        {"CustomerId",CustomerId},
+                                        { "UserId",userId}
+                                    });
+  
+        }
+
+        protected async Task AddCollateral()
+        {
+            if (CustomerId.IsNullOrEmpty())
+            {
+                NotificationService.Notify(NotificationSeverity.Error, "Please selected customer first");
+                return;
+            }
+
+            var parameters = new Dictionary<string, object?> {
+            {"CustomerId", CustomerId }
+        };
+
+            var options = new DialogOptions
+            {
+                Width = "90vw",
+                Draggable = true,
+                Resizable = false
+            };
+
+
+            var result = await DialogService.OpenAsync<CollateralModalAdd>("Add Collateral", parameters, options);
+
+            if (bool.TryParse(result, out bool success) && success)
+            {
+                var collateral = await _collateralService.GetCollateralByIdAsync(CustomerId);
+            }
+
+        }
+
+        protected async Task AddLoanRequest()
+        {
+            if (CustomerId.IsNullOrEmpty())
+            {
+                NotificationService.Notify(NotificationSeverity.Error, "Please selected customer first");
+                return;
+            }
+            var auth = await AuthenticationState;
+
+            var branchId = 1;// auth.User.getBranchId;
+
+            var userId = auth.User.GetId();
+
+            var uri = new Dictionary<string, object?>
+        {
+            {"BranchId",branchId},
+            {"UserId",userId}
+        }.AddQueryString($"/Loan/Request/{CustomerId}/Create");
+            NavigationManager.NavigateTo(uri);
+        }
+
+        async void OpenLoadRequestDialogue()
+        {
+            var auth = await AuthenticationState;
+
+            var branchId = 1;// auth.User.GetBranchId();
+
+            var userId = auth.User.GetId();
+
+            var param = new Dictionary<string, object?>
+        {
+            {"BranchId",branchId},
+            {"UserId",userId},
+            {"CustomerId",CustomerId}
+        };
+            var options = new DialogOptions
+            {
+                Width = "90vw",
+                Resizable = true
+            };
+            await DialogService.OpenAsync<LoanRequestCreateModal>("Loan Request", param, options);
+        }
+
+
+
+
+
 
         [Parameter] public Guid? CustomerId { get; set; }
         [Parameter] public EventCallback Close { get; set; }
-        protected CustomerReponse? EntCustomer { get; set; } = new();
+        protected CustomerResponse? EntCustomer { get; set; } = new();
         protected VCustomerList Customer = new();
         protected IEnumerable<VCollateralLines> CollateralLines = [];
         protected IEnumerable<VLoanRequests> VLoanRequests = [];
@@ -38,7 +198,7 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
 
                 IsLoading = true;
 
-                var response = await _customerService.GetCustomerDetailsByIdAsync(CustomerId);
+                var response = await _customerService.GetCustomerDetailsByIdAsync(CustomerId,false);
 
                 if (response.IsSuccess)
                 {
@@ -49,7 +209,7 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
                 else
                 {
 
-                    NotificationService.Notify(Radzen.NotificationSeverity.Error, response.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Error, response.ErrMessage);
                 }
 
                 IsLoading = false;
@@ -107,11 +267,11 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
 
         async Task GetCustomerNotes()
         {
-            var noteResponse = await _customerService.GetCusomerNotesAsyn(CustomerId, 0);
+            var noteResponse = await _customerService.GetCusomerNotesAsync(CustomerId);
 
             if (noteResponse.IsSuccess)
             {
-                //CustomerNotes = noteResponse.Data!;
+                CustomerNotes = noteResponse.Data!;
             }
             else
             {
@@ -152,6 +312,7 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
 
         async Task GetCustomerIncomeAndExpense()
         {
+
             var incomeResponse = await _customerIncomeService.GetCustomerCustomerIncomes(CustomerId);
 
             var expenseResponse = await _customerIncomeService.GetCustomerCustomerExpenses(CustomerId);

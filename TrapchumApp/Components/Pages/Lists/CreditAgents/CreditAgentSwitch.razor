@@ -1,4 +1,6 @@
-﻿@using AppilcationServices.Interfaces
+﻿@using Applications.Requests.Loans.CreditAgents
+@using Applications.Services.Lists
+
 <input type="hidden" @bind="CreditAgent.EditSeq" />
 <input type="hidden" @bind="CreditAgent.EmployeeRefId" />
 <RadzenCheckBox TValue="bool"
@@ -21,15 +23,17 @@
                 EditSeq = CreditAgent.EditSeq,
                 EmployeeRefId = CreditAgent.EmployeeRefId,
             };
-        var respnse = await CreditAgentService.ActivateAndDeactivateCreditAgent(CreditAgent.EmployeeRefId!.Value, creditDto);
+        var respnse = await CreditAgentService.ActivateOrDeactivateCreditAgent(creditDto);
+
         if (respnse!.IsSuccess)
         {
-            NotificationService.Notify(NotificationSeverity.Success, "", respnse.Message);
+            NotificationService.Notify(NotificationSeverity.Success, "");
+
             await Reload.InvokeAsync();
         }
         else
         {
-            NotificationService.Notify(NotificationSeverity.Error, "", respnse.Message);
+            NotificationService.Notify(NotificationSeverity.Error, respnse.ErrMessage);
 
         }
         StateHasChanged();

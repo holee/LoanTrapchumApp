@@ -9,10 +9,10 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
 {
     public partial class CustomerInc
     {
-        private readonly ICustomerIncomeExpendService _customerService;
-        public CustomerInc(ICustomerIncomeExpendService customerService)
+        private readonly IIncomeExpendServiceImpl _incomeExpendServiceImpl;
+        public CustomerInc(IIncomeExpendServiceImpl customerService)
         {
-            _customerService = customerService;
+            _incomeExpendServiceImpl = customerService;
         }
 
         [Parameter] public Guid? CustomerId { get; set; }
@@ -34,7 +34,7 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
 
             if (customerId.NotEmpty())
             {
-                var resp = await _customerService.GetCustomerCustomerIncomes(customerId);
+                var resp = await _incomeExpendServiceImpl.GetCustomerCustomerIncomes(customerId);
 
                 if (resp.IsSuccess)
                 {
@@ -58,7 +58,7 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
         protected async void AddInComeModal()
         {
 
-            if (CustomerId.NotEmpty())
+            if (CustomerId.IsNullOrEmpty())
             {
                 NotificationService.Notify(NotificationSeverity.Info, "Please select cusotmer..");
                 return;
@@ -76,9 +76,9 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
                 { "CustomerId",CustomerId }
             };
 
-            bool result = await DialogService.OpenAsync<CustomerModalIncome>("Add Income", param, options);
+            bool? result = await DialogService.OpenAsync<CustomerModalIncome>("Add Income", param, options);
 
-            if (bool.TryParse(result.ToString(), out bool success) && success)
+            if (result==true)
             {
                 await GetCustomerIncomes(CustomerId);
             }

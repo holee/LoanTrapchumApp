@@ -14,15 +14,6 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 {
     public partial class LoanRequestReview
     {
-
-        private readonly IUserService _userService;
-        private readonly ILoanRequestServiceImpl _loanRequestService;
-        public LoanRequestReview(IUserService userService, ILoanRequestServiceImpl loanRequestService)
-        {
-            _userService = userService;
-            _loanRequestService = loanRequestService;
-        }
-
         [CascadingParameter] Task<AuthenticationState> State { get; set; } = default!;
         [Parameter, EditorRequired] public Guid? LoanRequestId { get; set; }
         [Parameter, SupplyParameterFromQuery] public Guid? CustomerId { get; set; }

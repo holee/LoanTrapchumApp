@@ -1,4 +1,5 @@
-﻿@using AppilcationServices.Interfaces
+﻿@using Applications.Requests.Loans.CreditAgents
+@using Applications.Services.Lists
 @* <TableRow>
     <TableRowCell>@Index</TableRowCell>
         <TableRowCell>@CreditAgent?.FirstName</TableRowCell>
@@ -18,30 +19,4 @@
         </TableRowCell>
 </TableRow> *@
 
-    @code {
-    [Inject] protected ICreditAgentServiceImpl CreditAgentService { get; set; } = default!;
-    [Parameter] public int Index { get; set; } = 1;
-    [Parameter] public VCreditAgent CreditAgent { get; set; } = default!;
-    [Parameter] public EventCallback<VCreditAgent> Remove { get; set; }
 
-    async Task OnCheckChanged(bool x)
-    {
-        CreditAgent.IsRemove = x;
-
-        var creditDto = new LoanCreditAgentDtoActivate
-            {
-                IsRemove = x,
-                EditSeq = CreditAgent.EditSeq,
-                EmployeeRefId = CreditAgent.Id,
-            };
-        var respnse = await CreditAgentService.ActivateAndDeactivateCreditAgent(CreditAgent.Id, creditDto);
-        if (respnse.IsSuccess)
-        {
-            await Remove.InvokeAsync(CreditAgent);
-        }
-        else
-        {
-        }
-    }
-    
-}

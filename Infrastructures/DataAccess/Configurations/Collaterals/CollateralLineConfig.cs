@@ -1,4 +1,5 @@
-﻿using Domains.Models.Collaterals;
+﻿using Applications.Extensions;
+using Domains.Models.Collaterals;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -19,5 +20,8 @@ public class CollateralLineConfig : IEntityTypeConfiguration<CollateralLine>
         builder.Property(x => x.OwnerName).HasMaxLength(200);
         builder.Property(x => x.Description).HasMaxLength(200);
         builder.Property(x => x.WareHouse).HasMaxLength(200);
+        
+        builder.Property(p=>p.CollateralRefId)
+            .HasConversion(TypeConversions.GuidConversion);
     }
 }

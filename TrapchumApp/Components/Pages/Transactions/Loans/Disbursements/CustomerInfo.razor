@@ -1,4 +1,5 @@
-﻿<table class="table table-sm table-bordered">
+﻿@using Applications.Responses
+<table class="table table-sm table-bordered">
     <tbody>
         <tr>
             <th style="background-color:#F1F1F4" class="w-25">ឈ្មោះជាឡាតាំង</th>
@@ -9,7 +10,7 @@
         <tr>
             <th style="background-color:#F1F1F4" class="w-25">អត្តសញ្ញាប័ណ្ណ</th>
             <td>
-                @SelectedCustomer?.IDCard
+                @SelectedCustomer?.IdCard
             </td>
         </tr>
         <tr>
@@ -48,5 +49,5 @@
 </table>
 @code {
     [Parameter]
-    public VCustomerList SelectedCustomer { get; set; } = new();
+    public VCustomerList? SelectedCustomer { get; set; } = new();
 }

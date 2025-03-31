@@ -1,15 +1,16 @@
-using AppilcationServices.Interfaces;
+using Applications.Interfaces.Loans;
+using Applications.Requests.Loans.Products;
 using Microsoft.AspNetCore.Components;
-using TCLMS.Shared.Entities.Dtos.Loans;
 
-namespace TCLMS.Front.Pages.Transactions.Loans.LoanProducts
+namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanProducts
 {
     public partial class LoanProductModalEdit
     {
         [Parameter] public int Id { get; set; }
         [Inject] private ILoanProductService? service { get; set; }
 
-        protected LoanProductDTOUpdate model = new LoanProductDTOUpdate();
+        protected LoanProductDtoUpdate model = new LoanProductDtoUpdate();
+
         protected bool IsActive = false;
 
         protected async Task OnSaveChanges()

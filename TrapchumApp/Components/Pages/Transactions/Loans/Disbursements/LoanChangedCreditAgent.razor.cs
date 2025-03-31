@@ -1,3 +1,4 @@
+using Applications.Extensions;
 using Applications.Requests.Loans.CreditAgents;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Responses.ViewModels.Loans;
@@ -20,7 +21,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Disbursements
         }
 
         [Parameter]
-        public long LoanId { get; set; }
+        public Guid? LoanId { get; set; }
         [Parameter, SupplyParameterFromQuery]
         public long CustomerId { get; set; }
         [Parameter, SupplyParameterFromQuery]
@@ -28,12 +29,12 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Disbursements
         [Parameter, SupplyParameterFromQuery]
         public long CurrencyId { get; set; }
         [Parameter, SupplyParameterFromQuery]
-        public long CreditAgentId { get; set; }
+        public Guid? CreditAgentId { get; set; }
         [Parameter, SupplyParameterFromQuery]
-        public long UserId { get; set; }
+        public Guid? UserId { get; set; }
 
         IEnumerable<VCreditAgent> CreditAgents = [];
-        long newCreditAgentId = 0;
+        Guid? newCreditAgentId = Guid.Empty;
         VLoanDisbursments existingLoan = new();
         protected override async Task OnInitializedAsync()
         {
@@ -69,14 +70,13 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Disbursements
 
         async Task ChangedCreditAgent()
         {
-            if (newCreditAgentId <= 0)
+            if (newCreditAgentId.IsNullOrEmpty())
             {
                 NotificationService.Notify(NotificationSeverity.Error, "Please select new credit agent.");
                 return;
             }
 
             var model = new List<LoanChangedCaDtoCreate>{
-
                      new(LoanId, CreditAgentId, newCreditAgentId, UserId, UserId)
              };
 

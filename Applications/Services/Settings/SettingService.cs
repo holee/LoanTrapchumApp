@@ -6,51 +6,42 @@ using Domains.Models.Settings;
 
 namespace Applications.Services.Settings
 {
-    public sealed class SettingService(ISettingService sSeting) : ISettingService
+
+
+    public sealed class SettingService(ISettingService sSeting) : ISettingServiceImpl
     {
         public async Task<Result<string>> ApplyUserLoanSizeAsync(UserLoanSize model)
         {
             return await sSeting.ApplyUserLoanSizeAsync(model);
         }
 
-        public async Task<Result<string>> DeActivateUserLoanSizeAsync(long? id)
+
+        public async Task<Result<string>> DeActivateUserLoanSizeAsync(Guid? id)
         {
             return await sSeting.DeActivateUserLoanSizeAsync(id);
         }
 
-        public async Task<Result<string>> Delete(int id)
+
+
+        public async Task<Result<string>> Delete(Guid? id)
         {
             return await sSeting.Delete(id);
         }
 
-        public Task<Result<string>> Delete(int? id)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<Result<IEnumerable<AprovePerson>>> GetAproveUserAsync(int branchId, string? filterValue = null)
-        {
-            return await sSeting.GetAproveUserAsync(branchId, filterValue);
-        }
-
-        public Task<Result<IEnumerable<AprovePerson>>> GetAproveUserAsync(int? branchId, string? filterValue = null)
-        {
-            throw new NotImplementedException();
-        }
+        // public async Task<Result<IEnumerable<AprovePerson>>> GetAproveUserAsync(int? branchId, string? filterValue = null)
+        // {
+        //     return await sSeting.GetAproveUserAsync(branchId, filterValue);
+        // }
 
         public async Task<Result<SysSettings>> GetSysSettingByCode(string code)
         {
             return await sSeting.GetSysSettingByCode(code);
         }
 
-        public async Task<Result<SysSettings>> GetSysSettingByCode(int id)
+
+        public async Task<Result<SysSettings>> GetSysSettingByCode(int? id)
         {
             return await sSeting.GetSysSettingByCode(id);
-        }
-
-        public Task<Result<SysSettings>> GetSysSettingByCode(int? id)
-        {
-            throw new NotImplementedException();
         }
 
         public async Task<Result<IEnumerable<SysSettings>>> GetSysSettings(string? filterValue = null)

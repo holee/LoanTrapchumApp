@@ -1,27 +1,33 @@
+using Applications.Extensions.mappers;
+using Applications.Extensions.Maths;
+using Applications.Extensions.NumberExtions;
+using Applications.Interfaces.Loans;
+using Applications.Requests.Loans.Payments;
+using Applications.Requests.SysSettings;
+using Applications.Requests.Transactions.ForiegnExchanges;
+using Applications.Requests.Transactions.LoanTransactions;
+using Applications.Responses.ViewModels.Currencies;
+using Applications.Services.Settings;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Radzen;
-using TCLMS.Front.Core.Authorizations;
-using TCLMS.Shared.Entities.Dtos.Loans;
-using TCLMS.Shared.Entities.Dtos.Loans.Payments;
-using TCLMS.Shared.Entities.Dtos.Transactions;
-using TCLMS.Shared.Entities.Dtos.Transactions.ForiegnExchanges;
-using TCLMS.Shared.Entities.Dtos.Transactions.LoanTransactions;
-using TCLMS.Shared.Entities.Helpers.Extensions;
-using TCLMS.Shared.Entities.Models.Settings;
-using TCLMS.Shared.Entities.ViewModels.Currencies;
-using TrapchumApp.Components.Pages.Transactions;
-using TrapchumApp.Components.Pages.Transactions.Loans;
-
-namespace TCLMS.Front.Pages.Transactions.Loans.Repayments
+namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
 {
     public partial class PaymentModal
     {
+        private readonly ISettingServiceImpl _settingService;
+
+        private readonly ILoanPaymentService _loanPaymentService;
+        public PaymentModal(ISettingServiceImpl settingService, ILoanPaymentService loanPaymentService)
+        {
+            _settingService = settingService;
+            _loanPaymentService = loanPaymentService;
+        }
 
         [Parameter] public int CurrencyId { get; set; }
-        [Parameter] public long CreditAgentId { get; set; }
-        [Parameter] public long UserId { get; set; }
-        [Parameter] public long LoanId { get; set; }
+        [Parameter] public Guid? CreditAgentId { get; set; }
+        [Parameter] public Guid? UserId { get; set; }
+        [Parameter] public Guid? LoanId { get; set; }
         [Parameter] public int BranchId { get; set; }
         [Parameter] public string CustomerName { get; set; } = string.Empty;
         [Parameter] public string ReceiptNo { get; set; } = string.Empty;
@@ -67,7 +73,7 @@ namespace TCLMS.Front.Pages.Transactions.Loans.Repayments
         bool isExchangedChanged = false;
         protected override async Task OnParametersSetAsync()
         {
-            var currencyResponse = await _currencyService.GetCurrency(1);
+            var currencyResponse = await _curService.GetCurrencyAsync(1);
 
             if (currencyResponse.IsSuccess)
             {
@@ -76,10 +82,10 @@ namespace TCLMS.Front.Pages.Transactions.Loans.Repayments
                 sellingRate = currencyResponse.Data!.SellingRate;
                 spotRate = currencyResponse.Data!.SpotRate;
             }
-            var resultSetting = await _settingsServiceImpl.GetSettings();
+            var resultSetting = await _settingService.GetSysSettings();
             if (resultSetting.IsSuccess)
             {
-                settings = resultSetting.Data!;
+                settings = resultSetting.Data!.Maps<SysSettings>();
                 gainLedgerRefId = settings.FirstOrDefault(p => p.Code == "FXGAIN-KHR")!.Value.ToNumer<int>();
                 lostLedgerRefId = settings.FirstOrDefault(p => p.Code == "FXLOSS-KHR")!.Value.ToNumer<int>();
                 buyLedgerRefId = settings.FirstOrDefault(p => p.Code == "FXEPA-USD")!.Value.ToNumer<int>();
@@ -87,7 +93,7 @@ namespace TCLMS.Front.Pages.Transactions.Loans.Repayments
             }
             await base.OnParametersSetAsync();
         }
-        
+
         void CloseModal()
         {
             DialogService.Close(false);
@@ -108,7 +114,7 @@ namespace TCLMS.Front.Pages.Transactions.Loans.Repayments
                     TransactionDate = DateTime.Now,
                     TransactionTypeName = "Loan Principal Repayment",
                     TranTypeRefId = 20,
-                    UserRefID = UserId
+                    UserRefId = UserId
                 };
                 LoanRepayment.LoanRefId = LoanId;
                 LoanRepayment.CreditAgentRefId = CreditAgentId;
@@ -133,7 +139,7 @@ namespace TCLMS.Front.Pages.Transactions.Loans.Repayments
                         BusinessDate = DateTime.Now,
                         CashStatusRefId = 2,
                         BankRefId = 11,
-                        StaffRefId = UserId,
+                        //StaffRefId = UserId,
                         Amount = PaymentCreate.TotalAmountWithPenalty,
                     };
                     LoanRepayment.LoanTransaction!.CashManagements!.Add(tranxCashManagement);
@@ -142,8 +148,8 @@ namespace TCLMS.Front.Pages.Transactions.Loans.Repayments
                 {
                     var currencyExchanges = new ForeignExchangeDtoCreate
                     {
-                        StaffRefId = UserId,
-                        StaffAuthRefId = UserId,
+                        //StaffRefId = UserId,
+                        //StaffAuthRefId = UserId,
                         BranchRefId = BranchId,
                         BankRefId = 11,
                         BuyAmount = buyAmount,
@@ -163,8 +169,8 @@ namespace TCLMS.Front.Pages.Transactions.Loans.Repayments
                 {
                     var currencyExchanges = new ForeignExchangeDtoCreate
                     {
-                        StaffRefId = UserId,
-                        StaffAuthRefId = UserId,
+                        //StaffRefId = UserId,
+                        //StaffAuthRefId = UserId,
                         BankRefId = 11,
                         BuyAmount = buyExchangeAmount,
                         BranchRefId = BranchId,
@@ -192,12 +198,12 @@ namespace TCLMS.Front.Pages.Transactions.Loans.Repayments
 
                 if (confirmPayment == false) return;
 
-                model.UserRefID = UserId;
+                model.UserRefId = UserId;
                 model.TranTypeRefId = 67;
                 model.TransactionTypeName = "Currency Foreign Exchange";
                 LoanRepayment.ForeignExchangeTrx = model;
-              
-                var result = await _repaymentService.RecievePayment(LoanRepayment);
+
+                var result = await _loanPaymentService.RecievePayment(LoanRepayment);
 
                 if (result.IsSuccess)
                 {
@@ -205,7 +211,7 @@ namespace TCLMS.Front.Pages.Transactions.Loans.Repayments
                 }
                 else
                 {
-                    NotificationService.Notify(NotificationSeverity.Error, result.Data!.Message);
+                    NotificationService.Notify(NotificationSeverity.Error, result.ErrMessage);
                 }
             }
             catch (Exception ex)
@@ -433,10 +439,10 @@ namespace TCLMS.Front.Pages.Transactions.Loans.Repayments
                 isExchangedChanged = false;
                 return;
             }
-            if ((amount < 0 && originalExchangeAmountUSD > 0 && originalExchangeAmountKHR <= 0) ||
-               (amount < 0 && originalExchangeAmountKHR > 0 && originalExchangeAmountUSD <= 0) ||
-                (originalExchangeAmountUSD > 0 && amount > originalExchangeAmountUSD) ||
-                (originalExchangeAmountKHR > 0 && amount > originalExchangeAmountKHR))
+            if (amount < 0 && originalExchangeAmountUSD > 0 && originalExchangeAmountKHR <= 0 ||
+               amount < 0 && originalExchangeAmountKHR > 0 && originalExchangeAmountUSD <= 0 ||
+                originalExchangeAmountUSD > 0 && amount > originalExchangeAmountUSD ||
+                originalExchangeAmountKHR > 0 && amount > originalExchangeAmountKHR)
             {
                 PaymentCreate.ChangeUsdAmount = originalExchangeAmountUSD;
                 PaymentCreate.ChangeKhrAmount = originalExchangeAmountKHR;
@@ -445,7 +451,7 @@ namespace TCLMS.Front.Pages.Transactions.Loans.Repayments
                 NotificationService.Notify(NotificationSeverity.Info, "please verify amount again.");
                 return;
             }
-            if (originalExchangeAmountKHR > 0 && originalExchangeAmountKHR < (10 * sellingRate))
+            if (originalExchangeAmountKHR > 0 && originalExchangeAmountKHR < 10 * sellingRate)
             {
                 PaymentCreate.ChangeUsdAmount = 0;
                 PaymentCreate.ChangeKhrAmount = originalExchangeAmountKHR;

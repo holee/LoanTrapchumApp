@@ -1,4 +1,5 @@
 ﻿using Applications.Interfaces.Loans;
+using Applications.Requests.Loans;
 using Applications.Responses;
 using Applications.Responses.Message;
 using Applications.Responses.Paginations;
@@ -175,6 +176,11 @@ namespace Infrastructures.Implements
             {
                 return Result.Failure<string>(ErrorResponse.NotFound($"{ex.InnerException!.Message}"));
             }
+        }
+
+        public Task<LoanCategoryDtoUpdate?> GetForEditAsync(int id)
+        {
+            throw new NotImplementedException();
         }
     }
 }

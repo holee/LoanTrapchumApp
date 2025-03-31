@@ -9,7 +9,7 @@ namespace Applications.Validations.Loans
         {
             RuleFor(c => c.CustomerRefId).NotEmpty()
                                             .WithMessage("Please select customer")
-                                         .GreaterThan(0)
+                                         .NotNull()
                                             .WithMessage("Please selet customer");
             RuleFor(c => c.RequestAmount).NotEmpty()
                                             .WithMessage("Please request amount.")

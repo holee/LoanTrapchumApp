@@ -1,30 +1,32 @@
 using Microsoft.AspNetCore.Components;
-using TCLMS.Shared.Entities.Dtos.Lists;
-using TCLMS.Shared.Entities.Dtos.Lists.Entities;
-using TCLMS.Shared.Entities.Dtos.Lists.Addreses;
 using Microsoft.AspNetCore.Components.Forms;
-using TCLMS.Shared.Entities.Models.Addresses;
-using Microsoft.AspNetCore.Components.Web;
-using TCLMS.Shared.Entities.Models.Loans;
-using System.Net.Http.Json;
-using TCLMS.Shared.Entities.Dtos.Lists.Employees;
-using TCLMS.Shared.Entities.Models.Files;
+using Applications.Requests.Lists.Employees;
+using Domains.Models.Files;
+using Applications.Requests.Lists.Addreses;
+using Applications.Requests.Lists.Entities;
+using Domains.Models.Addresses;
+using Domains.Models.Lists;
+using Applications.Interfaces.Employees;
+using Applications.Requests.Lists.OtherNames;
+using Applications.Responses.Lists.Entities;
+using Applications.Services.Employees;
 
-namespace TCLMS.Front.Pages.Lists.Employees
+namespace TrapchumApp.Components.Pages.Lists.Employees
 {
     public partial class CreateEmployee
     {
+        
         [Parameter] public IEnumerable<ProvinceDto> Provinces { get; set; } = [];
         [Parameter] public IEnumerable<BranchDto> Branches { get; set; } = []; 
         [Parameter] public IEnumerable<DepartmentDto> Departments { get; set; } = [];
         [Parameter] public IEnumerable<Country> Countries { get; set; } = [];
         [Parameter] public IEnumerable<Nationality> Nationalities { get; set; } = [];
-        [Parameter] public IEnumerable<StOcupationDto> Occuptions { get; set; } = [];
+        [Parameter] public IEnumerable<OcupationResponse> Occuptions { get; set; } = [];
         [Parameter] public IEnumerable<string> Cities { get; set; } = [];
         [Parameter] public EventCallback Close { get; set; }
         [Inject] private HttpClient? http { get; set; }
         
-        protected EmployeeDtoCreate model = new EmployeeDtoCreate();
+        protected EntityNamesCreate model = new EntityNamesCreate();
         protected FileModel? fileModelDTO;
         protected EditForm? editForm;
         protected string? strText = "";
@@ -43,18 +45,17 @@ namespace TCLMS.Front.Pages.Lists.Employees
             try
             {
                 model.EntType = "Employee";
-                var createResponse = await _employeeService.CreateEmployee(model);
+                var createResponse = await _employeeService.CreateAsync(model);
 
                 if (createResponse.IsSuccess)
                 {
-                    NotificationService.Notify(Radzen.NotificationSeverity.Success, createResponse.Data!.Message);
+                    NotificationService.Notify(Radzen.NotificationSeverity.Success, createResponse.Data);
                     model = new();
                     Reload();
                 }
                 else
                 {
-                    var error = createResponse.Errors!.FirstOrDefault();
-                    NotificationService.Notify(Radzen.NotificationSeverity.Error, error);
+                    NotificationService.Notify(Radzen.NotificationSeverity.Error, createResponse.ErrMessage);
                 }
             }
             catch (Exception ex)

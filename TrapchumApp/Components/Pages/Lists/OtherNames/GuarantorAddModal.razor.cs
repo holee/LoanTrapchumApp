@@ -8,11 +8,9 @@ using Mapster;
 namespace TrapchumApp.Components.Pages.Lists.OtherNames;
 public partial class GuarantorAddModal
 {
-    private readonly IAddressService _addressService;
     private readonly IGuarantorService _gService;
-    public GuarantorAddModal(IAddressService addressService, IGuarantorService guarantorService)
+    public GuarantorAddModal(IGuarantorService guarantorService)
     {
-        _addressService = addressService;
         _gService = guarantorService;
     }
 

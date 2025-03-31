@@ -8,7 +8,6 @@ namespace TrapchumApp.Components.Pages.Lists.Branches
 {
     public partial class BranchList
     {
-        [Inject] IEmployeeService? EmployeeService { get; set; }
         protected string searchText { get; set; } = string.Empty;
         int pageIndex = 0;
         int counts = 0;
@@ -19,7 +18,7 @@ namespace TrapchumApp.Components.Pages.Lists.Branches
         bool sortDescending = false;
         string sortColumn = "Id";
         bool isLoading = false;
-        IEnumerable<VBranch>? Branches;
+        IEnumerable<VBranchResponse>? Branches;
         IEnumerable<RowNumber>? rowNumbers;
         protected async Task PerformSearch(ChangeEventArgs e)
         {
@@ -42,12 +41,12 @@ namespace TrapchumApp.Components.Pages.Lists.Branches
         {
             await GetBranches(searchText);
         }
-        async Task OnCheckChanged(VBranch branch)
+        async Task OnCheckChanged(VBranchResponse branchResponse)
         {
             try
             {
 
-                var resultResponse = await _branchService!.UpdateStatusAsync(branch.BranchId);
+                var resultResponse = await _branchService!.UpdateStatusAsync(branchResponse.BranchId);
 
                 if (resultResponse!.IsSuccess)
                 {
@@ -104,7 +103,7 @@ namespace TrapchumApp.Components.Pages.Lists.Branches
             await GetBranches(searchText);
 
         }
-        protected async Task OnDetail(VBranch? branch)
+        protected async Task OnDetail(VBranchResponse? branch)
         {
             var resultModal = await DialogService!.OpenAsync<BranchDetailModal>("Branch Details",
                new Dictionary<string, object> { { "Id", branch!.BranchId } },
@@ -121,7 +120,7 @@ namespace TrapchumApp.Components.Pages.Lists.Branches
             }
             await InvokeAsync(StateHasChanged);
         }
-        protected async Task OnEdit(VBranch? branch)
+        protected async Task OnEdit(VBranchResponse? branch)
         {
 
             var resultModal = await DialogService!.OpenAsync<Update>("Edit Branch",
@@ -158,7 +157,7 @@ namespace TrapchumApp.Components.Pages.Lists.Branches
             }
         }
 
-        async Task OnDelete(VBranch? branch)
+        async Task OnDelete(VBranchResponse? branch)
         {
 
             if ((bool)await DialogService!.Confirm("Branch deleted will not be able to recover, would you like to continue?", "Delete Branch",
@@ -167,7 +166,7 @@ namespace TrapchumApp.Components.Pages.Lists.Branches
             {
                 try
                 {
-                    var responseResult = await EmployeeService!.GetEmployeesAsync(0, branch!.BranchId, true);
+                    var responseResult = await _employeeService!.GetEmployeesAsync(null, branch!.BranchId, true);
 
                     if (!responseResult.IsSuccess) return;
 

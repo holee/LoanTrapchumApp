@@ -1,9 +1,6 @@
 ﻿@page "/Loans/Details/{LoanId:long}"
 @using Radzen.Blazor.Rendering
-@using TCLMS.Front.Pages.Transactions.Loans.Repayments
-@using TCLMS.Shared.Entities.Models.Loans
-@using TCLMS.Shared.Entities.ViewModels.Loans
-@using TCLMS.Shared.Entities.ViewModels.Loans.Schedules
+@using TrapchumApp.Components.Pages.Transactions.Loans.Disbursements
 <PageTitle>Loan Details</PageTitle>
 <RadzenProgressBar Value="100" Visible="isVible" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
 <div class="container-fluid">
@@ -51,7 +48,7 @@
         </div>
     </div>
     <RadzenCard class="rz-background-color-base-100 collapse mt-0" id="collapseExample">
-        <LoanInfos LoanSchedule="loanSchedule" />
+        <LoanInfos LoanSchedule="loanSchedule"  />
     </RadzenCard>  
     <div class="card">
         <div class="card-body">
@@ -184,13 +181,13 @@
                                         @context.LoanOutstanding.Format(CurrencyId)
                                     </Template>
                                 </RadzenDataGridColumn>
-                                <RadzenDataGridColumn Property="@(nameof(VScheduleVM.ScheduleStatus))"
+                                <RadzenDataGridColumn Property="@(nameof(VScheduleVm.ScheduleStatus))"
                                 Title="Status"
                                 Width="4rem"
                                 TextAlign="TextAlign.Center"
                                 Sortable="false">
                                 </RadzenDataGridColumn>
-                                <RadzenDataGridColumn Property="@(nameof(VScheduleVM.ScheduleStatus))"
+                                <RadzenDataGridColumn Property="@(nameof(VScheduleVm.ScheduleStatus))"
                                 Title="Action"
                                 Context="s"
                                 Width="3rem"

@@ -1,6 +1,7 @@
 using Applications.Extensions;
 using Applications.Interfaces.Customers;
 using Applications.Responses.ViewModels.Customers;
+using Applications.Services.Customers;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 
@@ -9,14 +10,14 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
     public partial class CustomerExp
     {
 
-        private readonly ICustomerIncomeExpendService _customerService;
+        private readonly IIncomeExpendServiceImpl _incomeExpendServiceImpl;
 
-        public CustomerExp(ICustomerIncomeExpendService customerService)
+        public CustomerExp(IIncomeExpendServiceImpl incomeExpendServiceImpl)
         {
-            _customerService = customerService;
+            _incomeExpendServiceImpl = incomeExpendServiceImpl;
         }
 
-        [Parameter] public Guid? CustomerId { get; set; } = 0;
+        [Parameter] public Guid? CustomerId { get; set; } = Guid.Empty;
         [Parameter] public bool ShowAdd { get; set; } = false;
         [Parameter] public bool ShowReload { get; set; } = false;
         [Parameter] public IEnumerable<VCustomerExpenses> Items { get; set; } = [];
@@ -35,7 +36,7 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
 
             if (CustomerId.NotEmpty())
             {
-                var resp = await _customerService.GetCustomerCustomerExpenses(customerId);
+                var resp = await _incomeExpendServiceImpl.GetCustomerCustomerExpenses(customerId);
 
                 if (resp.IsSuccess)
                 {

@@ -2,6 +2,6 @@
 
 public class CustomerCollateral
 {
-    public long CustomerId { get; set; }
+    public Guid? CustomerId { get; set; }
     public string? Name { get; set; }    
 }

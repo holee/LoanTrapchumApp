@@ -3,7 +3,8 @@
                 GridLines="DataGridGridLines.Both"
                 Responsive
                 IsLoading="isLoading"
-                Style="--rz-grid-header-background-color:var(--rz-base-200);min-height:20rem;height:20rem;max-height:30rem;"
+                ColumnWidth="10rem"
+                Style="height:20rem;max-height:30rem;"
                 Density="Density.Compact">
 
     <HeaderTemplate>
@@ -31,7 +32,7 @@
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Context="c"
-                              Width="20rem"
+                              Width="10rem"
                               Property="ExpenseTitle" Title="Expense">
             <Template>
                 @c.ExpenseTitle

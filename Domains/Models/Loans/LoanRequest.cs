@@ -17,7 +17,7 @@ public sealed class LoanRequest : BaseEntity
     public int? LoanCategoryRefId { get; set; }
     public int? BankRefId { get; set; }
     public int? LoanProductRefId { get; set; }
-    public long? CreditAgentRefId { get; set; }
+    public Guid? CreditAgentRefId { get; set; }
     public string? InstallmentName { get; set; }
     public int InstallmentTypeId { get; set; }
     public int PayEvery { get; set; } = 1;

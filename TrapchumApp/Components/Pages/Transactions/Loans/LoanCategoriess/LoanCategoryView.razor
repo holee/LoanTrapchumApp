@@ -1,8 +1,8 @@
-﻿@page "/LoanCategories"
-@using TCLMS.Shared.Entities.ViewModels.Loans.Categories
+﻿@page "/App/Loan/LoanCategories"
+@using Applications.Responses.ViewModels.Loans.Categories
 <PageTitle>Loan Categories</PageTitle>
 <div>
-    <RadzenTabs @ref="tabs" @bind-SelectedIndex="SelectIndex" Change="e=>TabChanged(e)" RenderMode="Radzen.TabRenderMode.Client">
+    <RadzenTabs @ref="tabs" @bind-SelectedIndex="SelectIndex" Change="e=>TabChanged(e)" RenderMode="TabRenderMode.Client">
         <Tabs>
             <RadzenTabsItem Text="Loan Category">
 
@@ -21,10 +21,10 @@
                         </div>
                         <div class="card-body">
                             <RadzenStack AlignItems="AlignItems.Center"
-                                         JustifyContent="Radzen.JustifyContent.SpaceBetween"
-                                         Orientation="Radzen.Orientation.Horizontal"
-                                         Wrap="Radzen.FlexWrap.Wrap">
-                                <RadzenStack JustifyContent="Radzen.JustifyContent.Start" Style="width:15%" Orientation="Radzen.Orientation.Horizontal">
+                                         JustifyContent="JustifyContent.SpaceBetween"
+                                         Orientation="Orientation.Horizontal"
+                                         Wrap="FlexWrap.Wrap">
+                                <RadzenStack JustifyContent="JustifyContent.Start" Style="width:15%" Orientation="Orientation.Horizontal">
                                     <RadzenDropDown TValue="int"
                                                     @bind-Value="pageSize"
                                                     Data="SelectedRow"
@@ -41,7 +41,7 @@
                                 </RadzenStack>
 
 
-                                <RadzenStack Style="width:25%" JustifyContent="Radzen.JustifyContent.End">
+                                <RadzenStack Style="width:25%" JustifyContent="JustifyContent.End">
                                     <RadzenFormField AllowFloatingLabel="false">
                                         <Start>
                                             <RadzenIcon Icon="search" />
@@ -89,10 +89,10 @@
                                         </RadzenDataGridColumn>
                                         <RadzenDataGridColumn Title="Actions" Sortable="false" Context="c">
                                             <Template>
-                                                <RadzenButton Size="Radzen.ButtonSize.ExtraSmall"
+                                                <RadzenButton Size="ButtonSize.ExtraSmall"
                                                               Icon="more_vert"
                                                               Variant="Variant.Text"
-                                                              Click="@((args)=>ShowContextMenuWithContent(args,c))" />
+                                                              Click="@(args=>ShowContextMenuWithContent(args,c))" />
                                             </Template>
                                         </RadzenDataGridColumn>
                                     </Columns>
@@ -120,159 +120,17 @@
 
 </div>
 @code {
-    int pageSize = 10;
-    bool sortDescending = false;
-    string sortColumn = "Id";
-    bool isLoading = false;
-    int counts = 0;
-    RadzenTabs? tabs;
-    private bool IsNew = false;
-    private bool IsEdit = false;
-    private bool IsDetails = false;
-    [Parameter] public int SelectIndex { get; set; } = 0;
-    protected LoanCategoryDTOUpdate? modelEdit = new();
-    protected LoanCategoryDto? detailsModel = new();
-    void ShowContextMenuWithContent(MouseEventArgs args, VLCategoryList? loanCategory)
+    void ShowContextMenuWithContent(MouseEventArgs args, VlCategoryList? loanCategory)
     {
         ContextMenuService.Open(args, ds =>
     @<RadzenMenu Style="font-size:0.8rem;">
 
-        <RadzenMenuItem Click="@(()=>Details(loanCategory!.LoanCategoryID))" Icon="info" Text="Details" Value="@loanCategory"></RadzenMenuItem>
-        <RadzenMenuItem Click="@(()=>EditCategory(loanCategory!.LoanCategoryID))" Icon="edit" Text="Edit" Value="@loanCategory"></RadzenMenuItem>
+        <RadzenMenuItem Click="@(()=>Details(loanCategory!.LoanCategoryId))" Icon="info" Text="Details" Value="@loanCategory"></RadzenMenuItem>
+        <RadzenMenuItem Click="@(()=>EditCategory(loanCategory!.LoanCategoryId))" Icon="edit" Text="Edit" Value="@loanCategory"></RadzenMenuItem>
         <RadzenMenuItem Click="@(()=>OnDelete(loanCategory))" Icon="delete" Text="Delete" Value="@loanCategory"></RadzenMenuItem>
     </RadzenMenu>
     );
     }
-    async void MenuClicked(RadzenSplitButtonItem args, VLCategoryList? loanCategory)
-    {
-        if (args is not null)
-        {
-            if (args.Value == "1")
-            {
-                await Details(loanCategory!.LoanCategoryID);
-                return;
-            }
-            if (args.Value == "2")
-            {
-                EditCategory(loanCategory!.LoanCategoryID);
-                return;
-            }
-            if (args.Value == "3")
-            {
-                await OnDelete(loanCategory);
-                return;
-            }
-
-        }
-        return;
-    }
-    void TabChanged(int e)
-    {
-        SelectIndex = e;
-        StateHasChanged();
-
-    }
-    void AddNewCategory()
-    {
-        IsNew = true;
-        SelectIndex = 1;
-        tabs!.Reload();
-    }
-    async void EditCategory(int id)
-    {
-        try
-        {
-
-            modelEdit = await service!.GetForEditAsync(id);
-            IsEdit = true;
-            SelectIndex = 2;
-            StateHasChanged();
-            tabs!.Reload();
-            ContextMenuService.Close();
-
-        }
-        catch (Exception ex)
-        {
-            NotificationService.Notify(Radzen.NotificationSeverity.Error, "Exception", ex.Message);
-            ContextMenuService.Close();
-
-        }
-    }
-    async Task Details(int Id)
-    {
-        try
-        {
-            var result = await service!.GetByIdAsync(Id);
-            if (result is not null)
-            {
-                detailsModel = result;
-
-                IsDetails = true;
-                SelectIndex = 3;
-                tabs!.Reload();
-            }
-            ContextMenuService.Close();
-            StateHasChanged();
-        }
-        catch (Exception ex)
-        {
-            NotificationService.Notify(Radzen.NotificationSeverity.Error, "Exception", ex.Message);
-            ContextMenuService.Close();
-
-        }
-    }
-    void CloseTabs(int e)
-    {
-        if (SelectIndex == 1)
-        {
-            IsNew = false;
-        }
-        else if (SelectIndex == 2)
-        {
-            IsEdit = false;
-        }
-        else if (SelectIndex == 3)
-        {
-            IsDetails = false;
-        }
-        SelectIndex = 0;
-        StateHasChanged();
-    }
 }
 
 
-               @* <QuickGrid Items="@vLCategories"
-                                           Class="table table-hover table-sm table-bordered mt-2"
-                                           Pagination="@pagination">
-                                    <TemplateColumn Title="#" Context="em"
-                                                    Sortable="true"
-                                                    IsDefaultSortColumn="true"
-                                                    InitialSortDirection="Microsoft.AspNetCore.Components.QuickGrid.SortDirection.Descending">
-                                        <strong>
-                                            @{
-                                                var rowNumber = vLCategories!.ToList().IndexOf(em) + 1;
-                                            }
-                                            @rowNumber
-                                        </strong>
-                                    </TemplateColumn>
-                                    <PropertyColumn Property="@(c => c.LoancategoryCode)" Title="Category" Sortable="true" />
-                                    <PropertyColumn Property="@(c => c.Description)" Title="Description" Sortable="true" />
-                                    <PropertyColumn Property="@(c => c.DesInKhmer)" Title="Description-Khmer" Sortable="true" />
-                                    <PropertyColumn Property="@(c => c.Code)" Sortable="true" />
-                                    <TemplateColumn Context="c" Title="Active" Sortable="false">
-                                        <ChildContent>
-                                            <RadzenCheckBox TValue="bool?"
-                                                            Value="c.IsActive"
-                                                            Change="@(()=>DeactiveOrActive(c))" />
-                                        </ChildContent>
-
-                                    </TemplateColumn>
-                                    <TemplateColumn Title="Actions" Context="c" Align="Align.Center">
-                                        <RadzenButton Size="Radzen.ButtonSize.ExtraSmall"
-                                                      Icon="more_vert"
-                                                      Variant="Variant.Text"
-                                                      Click="@((args)=>ShowContextMenuWithContent(args,c))" />
-
-
-                                    </TemplateColumn>
-                                </QuickGrid> *@

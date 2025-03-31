@@ -17,7 +17,7 @@ public partial class JournalEntryCreate
 {
     protected JournalEntryDtoCreate jLe = new JournalEntryDtoCreate();
     protected List<JournalLineDtoCreate> JournalLines = new List<JournalLineDtoCreate>();
-    protected IEnumerable<CurrencyDto>? Currencies { get; set; }
+    protected IEnumerable<CurrencyResponse>? Currencies { get; set; }
     protected IEnumerable<JournalTypeDto>? JournalTypes { get; set; }
     protected IEnumerable<VLedger>? Ledgers = [];
     protected IEnumerable<VNameList> nameLists = [];
@@ -61,7 +61,7 @@ public partial class JournalEntryCreate
 
         if (currenciesRsponse.IsSuccess)
         {
-            Currencies = currenciesRsponse.Data!.Maps<CurrencyDto>();
+            Currencies = currenciesRsponse.Data!.Maps<CurrencyResponse>();
         }
 
         var journalTypes = await jnService.FindJournalTypesAsync(null);

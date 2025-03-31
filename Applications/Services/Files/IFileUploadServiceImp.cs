@@ -1,0 +1,14 @@
+﻿using Applications.Responses;
+using Domains.Models.Files;
+
+namespace Applications.Services.Files
+{
+    public interface IFileUploadServiceImp
+    {
+        Task<Result<string>> RemovedUploadFile(string? removedFile = null);
+        Task<Result<FileModel>> UploadFile(MultipartFormDataContent content);
+        Task<Result<FileModel>> UploadFile(FileUploadModel model);
+        Task<Result<IEnumerable<FileModel>>> UploadFiles(MultipartFormDataContent content);
+    }
+
+}

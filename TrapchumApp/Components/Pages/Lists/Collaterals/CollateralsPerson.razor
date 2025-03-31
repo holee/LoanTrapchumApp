@@ -1,13 +1,13 @@
-﻿<RadzenDataGrid Density="Density.Compact"
-                TItem="CollateralLineDto"
+﻿@using Applications.Responses.Collaterals
+<RadzenDataGrid Density="Density.Compact"
+                TItem="CollateralLineResponse"
                 Responsive
                 ColumnWidth="15rem"
                 @ref="personalGrid"
-                Style="--rz-grid-header-background-color:var(--rz-base-200)"
                 EditMode="editMode"
                 Data="Personals">
     <HeaderTemplate>
-        <RadzenButton Size="Radzen.ButtonSize.Small"
+        <RadzenButton Size="ButtonSize.Small"
                       ButtonStyle="ButtonStyle.Primary"
                       Icon="add_circle"
                       Click="@InsertRow"
@@ -116,44 +116,4 @@
     </Columns>
 </RadzenDataGrid>
 
-@code {
-    [Parameter]
-    public List<CollateralLineDto> Personals { get; set; } = [];
-    [Parameter]
-    public EventCallback<CollateralLineDto> ClickedSave{ get; set; }
-    RadzenDataGrid<CollateralLineDto> personalGrid = default!;
-    DataGridEditMode editMode = DataGridEditMode.Multiple;
-    IEnumerable<CollateralSubTypeDto> CollateralPersonals { get; set; } = [];
-    protected override async Task OnInitializedAsync()
-    {
-        CollateralPersonals = await _collateralService.GetCollateralSubTypes(3);
-        await base.OnInitializedAsync();
-    }
 
-    void Reset()
-    {
-        Personals.Clear();
-    }
-
-    void Reset(CollateralLineDto order)
-    {
-        Personals.Remove(order);
-    }
-
-    void OnCreateRow(CollateralLineDto order)
-    {
-        Personals.Remove(order);
-    }
-    async Task InsertRow()
-    {
-        if (editMode == DataGridEditMode.Single)
-        {
-            Reset();
-        }
-        var order = new CollateralLineDto();
-        Personals.Add(order);
-        await personalGrid.InsertRow(order);
-    }
-
-
-}

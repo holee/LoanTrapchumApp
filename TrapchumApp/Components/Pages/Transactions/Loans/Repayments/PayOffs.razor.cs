@@ -1,5 +1,7 @@
 using Applications.Extensions;
+using Applications.Extensions.NumberExtions;
 using Applications.Interfaces.Currencies;
+using Applications.Interfaces.Loans;
 using Applications.Requests.Loans.Payments;
 using Applications.Requests.Transactions.ForiegnExchanges;
 using Applications.Responses.ViewModels.Branches;
@@ -17,10 +19,11 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
     {
 
         private readonly ICurrencyService _currencyService;
-
-        public PayOffs(ICurrencyService currencyService)
+        private readonly ILoanPaymentService _repaymentService;
+        public PayOffs(ICurrencyService currencyService,  ILoanPaymentService loanPaymentService)
         {
             _currencyService = currencyService;
+            _repaymentService = loanPaymentService;
         }
 
         [Parameter] public long LoanId { get; set; }
@@ -35,13 +38,13 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
         List<LoanRepaymentDto> RepaymentLists = [];
         List<LoanRepaymentLineDtoCreate> loanRepaymentLines = [];
         LoanRepaymentDtoCreate LoanRepayment = new();
-        IEnumerable<VBranch> Branches = [];
+        IEnumerable<VBranchResponse> Branches = [];
         VSchedule? SelectedSchedule = new();
         List<VSchedule>? selectedRepayments = [];
         VLoanDisbursments? LoanSchedule = new();
         TrxForeignExchangeDtoCreate model = new TrxForeignExchangeDtoCreate();
         ForeignExchangeDtoCreate c = new ForeignExchangeDtoCreate();
-        IEnumerable<VCurrenciesList> Currencies = Enumerable.Empty<VCurrenciesList>();
+        IEnumerable<VCurrenciesList> Currencies = [];
         VCurrenciesList? selectedCurrency = new();
         RadzenDataGrid<VSchedule> gridSchedule = default!;
         RadzenDataGrid<LoanRepaymentLineDtoCreate> gridLoanPaymentLines = default!;
@@ -74,19 +77,19 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
 
             await GetCustomerPaymentSchedulesByLoanIdAsync(1);
 
-            var branchResponse = await _branchService.GetBranchesByUser(UserId!.ToString());
+            var branchResponse = await _branchService.GetBranchesByUser(UserId!.ToString(),0);
 
             if (branchResponse.IsSuccess)
             {
                 Branches = branchResponse.Data!;
             }
 
-            Currencies = await _currencyService.GetCurrencies();
-
-            if (Currencies.Any())
-            {
-                selectedCurrency = Currencies.FirstOrDefault(x => x.CurrencyId == 1);
-            }
+            // Currencies = await _currencyService.GetCurrencies();
+            //
+            // if (Currencies.Any())
+            // {
+            //     selectedCurrency = Currencies.FirstOrDefault(x => x.CurrencyId == 1);
+            // }
 
             await base.OnInitializedAsync();
         }
@@ -276,30 +279,30 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
             {
                 isLoading = true;
 
-                var responseSchedule = await _repaymentService.GetPaymentSchedulesAsync(LoanId, BranchId, status);
+                // var responseSchedule = await _repaymentService.GetPaymentSchedulesAsync(LoanId, BranchId, status);
+                //
+                // if (responseSchedule.IsSuccess)
+                // {
+                //     schedules = responseSchedule.Data!;
+                //     SelectedSchedules = schedules.Take(1).ToList();
+                //     if (SelectedSchedules.Any() && !isAllowMultiplePayment)
+                //     {
+                //         SetSelectedSchedule(SelectedSchedules.FirstOrDefault());
+                //     }
+                // }
 
-                if (responseSchedule.IsSuccess)
-                {
-                    schedules = responseSchedule.Data!;
-                    SelectedSchedules = schedules.Take(1).ToList();
-                    if (SelectedSchedules.Any() && !isAllowMultiplePayment)
-                    {
-                        SetSelectedSchedule(SelectedSchedules.FirstOrDefault());
-                    }
-                }
-
-                var responseResult = await _loanDisbursementService.GetLoanByIdAsync(LoanId, BranchId);
-
-                if (responseResult.IsSuccess)
-                {
-                    LoanSchedule = responseResult.Data!;
-                }
-                else
-                {
-                    LoanSchedule = new();
-                    var error = responseResult.Errors!.FirstOrDefault();
-                    NotificationService.Notify(NotificationSeverity.Error, error);
-                }
+                // var responseResult = await _loanDisbursementService.GetLoanByIdAsync(LoanId, BranchId);
+                //
+                // if (responseResult.IsSuccess)
+                // {
+                //     LoanSchedule = responseResult.Data!;
+                // }
+                // else
+                // {
+                //     LoanSchedule = new();
+                //     var error = responseResult.Errors!.FirstOrDefault();
+                //     NotificationService.Notify(NotificationSeverity.Error, error);
+                // }
 
 
                 isLoading = false;

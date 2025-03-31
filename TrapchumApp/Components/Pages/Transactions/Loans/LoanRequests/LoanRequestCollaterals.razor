@@ -99,7 +99,7 @@
             var collateralLines = results.Select(c => new VLoanRequestCollateralLines
                 {
                     CollateralLineId = c.Id,
-                    CollateralId = c.CollateralId,
+                    CollateralId = c.CollateralId!.ToGuid(),
                     OwnerName = c.OwnerName,
                     ReferenceNo = c.ReferenceNo,
                 }).ToList();

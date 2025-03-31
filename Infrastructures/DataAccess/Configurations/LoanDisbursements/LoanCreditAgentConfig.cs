@@ -14,9 +14,11 @@ namespace Infrastructures.DataAccess.Configurations.LoanDisbursements
             builder.Property(x => x.IsRemove).HasColumnType("BIT");
             builder.Property(x => x.CreatedDt).HasColumnType("DATETIME");
             builder.Property(x => x.ModifiedDt).HasColumnType("DATETIME");
+            
             builder.HasOne(x => x.Employee)
                    .WithOne(x => x.LoanCreditAgent)
                    .HasForeignKey<LoanCreditAgent>(x => x.EmployeeRefId);
+            
             builder.HasMany(x => x.LoanRequests)
                 .WithOne(x => x.LoanCreditAgent)
                 .HasForeignKey(x => x.CreditAgentRefId);

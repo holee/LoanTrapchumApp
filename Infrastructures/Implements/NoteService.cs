@@ -60,7 +60,7 @@ namespace Infrastructures.Implements
 
                 IQueryable<VCustomerNotes> noteQueries = _context.Database
                                                 .SqlQuery<VCustomerNotes>($"SELECT * FROM VCustomerNotes")
-                                                .Where(x => x.CustomerRefId == customerId);
+                                                .Where(x => x.CustomerRefId == customerId.ToString());
                 if (noteId > 0)
                 {
                     noteQueries = noteQueries.Where(x => x.NoteId == noteId);

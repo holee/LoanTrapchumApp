@@ -8,13 +8,6 @@ namespace TrapchumApp.Components.Pages.Accounts.Users
     public partial class UserChangePassword
     {
         [Parameter] public string UserId { get; set; } = string.Empty;
-        private readonly IUserService _userService;
-
-        public UserChangePassword(IUserService userService)
-        {
-            _userService = userService;
-        }
-
         ChangePasswordDto model = new();
         protected async Task SubmitOnValid()
         {

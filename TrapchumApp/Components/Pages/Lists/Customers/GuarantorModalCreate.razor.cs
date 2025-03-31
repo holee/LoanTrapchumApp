@@ -25,7 +25,7 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
 
         protected override async Task OnInitializedAsync()
         {
-            var gResponse = await _gService.GetGuarantorsAsync(0); //_customerService.GetGuarantorsAsync();
+            var gResponse = await _gService.GetGuarantorsAsync(Guid.Empty); //_customerService.GetGuarantorsAsync();
 
             if (gResponse.IsSuccess)
             {

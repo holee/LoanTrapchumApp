@@ -1,13 +1,13 @@
 ﻿namespace Applications.Responses.Auths
 {
-    public class AprovePerson
+    public sealed class AprovePerson
     {
         public AprovePerson()
         {
         }
 
         public AprovePerson(
-            long userId, string? userName, int branchId, string? branchName, string? fullName, decimal? minLoanSize, decimal? maxLoanSize, DateTime? startDate, string? description)
+            Guid? userId, string? userName, int branchId, string? branchName, string? fullName, decimal? minLoanSize, decimal? maxLoanSize, DateTime? startDate, string? description)
         {
             UserId = userId;
             UserName = userName;
@@ -20,7 +20,7 @@
             Description = description;
         }
 
-        public long UserId { get; set; }
+        public Guid? UserId { get; set; }
         public string? UserName { get; set; }
         public int BranchId { get; set; }
         public string? BranchName { get; set; }

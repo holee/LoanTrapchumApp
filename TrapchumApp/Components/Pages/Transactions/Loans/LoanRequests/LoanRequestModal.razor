@@ -1,5 +1,4 @@
-﻿@using TCLMS.Shared.Entities.ViewModels.Auths
-<Containers Fluid CssClass="rz-background-color-base-100 rz-p-2">
+﻿<Containers Fluid CssClass="rz-background-color-base-100 rz-p-2">
     <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
         <RadzenColumn Size="3">
             Customer
@@ -92,87 +91,4 @@
     </RadzenStack>
 </Containers>
 
-@code {
 
-    [Parameter]
-    public long CustomerId { get; set; }
-    [Parameter]
-    public long RequestUserId { get; set; }
-    [Parameter]
-    public int BranchId { get; set; }
-    [Parameter]
-    public decimal? Amount { get; set; } = 0;
-    [Parameter]
-    public long LoanRequestId { get; set; } = 0;
-    [Parameter]
-    public long AprovedUserId { get; set; } = 0;
-    IEnumerable<VUser> RequestUsers = [];
-    IEnumerable<VCustomerList> Customers = [];
-    IEnumerable<BranchDto> Branches = [];
-    IEnumerable<VUser> AcceptUsers = [];
-    string memo = "";
-    long UserId;
-
-    protected override void OnParametersSet()
-    {
-        UserId = _stateProvider.AuthenticationStateUser.GetId();
-        base.OnParametersSet();
-    }
-
-    protected override async Task OnInitializedAsync()
-    {
-        await GetAllData();
-        await base.OnInitializedAsync();
-    }
-    async Task GetAllData()
-    {
-        var empRsp = await _userService.GetUsersAsync(RequestUserId, string.Empty);
-
-        if (empRsp.IsSuccess)
-        {
-            RequestUsers = empRsp.Data!;
-        }
-        var custResp = await _customerService.GetCustomersAsync(CustomerId, 1);
-
-        if (custResp.IsSuccess)
-        {
-            Customers = custResp.Data!;
-        }
-        var branchResp = await _branchService.GetBranchesAsync(BranchId);
-
-        if (branchResp.IsSuccess)
-        {
-            Branches = branchResp.Data!;
-        }
-
-        var userResp = await _userService.GetUsersAsync(UserId);
-
-        if (userResp.IsSuccess)
-        {
-            AcceptUsers = userResp.Data!;
-        }
-
-        StateHasChanged();
-    }
-
-    async void LoanRequestVerified()
-    {
-        var resp = await _loanRequestService.ApplyLoanRequest(new RequestDtoBase(BranchId, CustomerId, LoanRequestId, memo));
-
-        if (resp.IsSuccess)
-        {
-            NotificationService.Notify(NotificationSeverity.Success, resp.Data!.Message);
-            DialogService.Close(true);
-        }
-        else
-        {
-            var errorMessage = resp.Errors!.First();
-            NotificationService.Notify(NotificationSeverity.Error, errorMessage);
-        }
-    }
-
-
-
-
-
-}

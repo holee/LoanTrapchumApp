@@ -14,13 +14,6 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 {
     public partial class LoanRequestRequested
     {
-        private readonly ILoanRequestServiceImpl _loanRequestService;
-
-        public LoanRequestRequested(ILoanRequestServiceImpl loanRequestService)
-        {
-            _loanRequestService = loanRequestService;
-        }
-
         [CascadingParameter]
         Task<AuthenticationState> AuthenticationState { get; set; } = default!;
         [Parameter] public int BranchId { get; set; }

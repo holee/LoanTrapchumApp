@@ -1,3 +1,4 @@
+using Applications.Extensions;
 using Applications.Interfaces.Addresses;
 using Applications.Interfaces.Lists;
 using Applications.Interfaces.Vendors;
@@ -15,12 +16,10 @@ namespace TrapchumApp.Components.Pages.Lists.Vendors
 {
     public partial class Index
     {
-        readonly IAddressService _addressService;
         readonly IVendorService _vendorService;
         readonly IOtherNameService _otherNameService;
-        public Index(IAddressService addressService, IVendorService vendorService, IOtherNameService otherNameService)
+        public Index(IVendorService vendorService, IOtherNameService otherNameService)
         {
-            _addressService = addressService;
             _vendorService = vendorService;
             _otherNameService = otherNameService;
         }
@@ -50,7 +49,7 @@ namespace TrapchumApp.Components.Pages.Lists.Vendors
         bool sortDescending = false;
         bool includeInactive = false;
         bool isLoading = false;
-        long vendorId = 0;
+        Guid? vendorId = Guid.Empty;
         protected override async Task OnInitializedAsync()
         {
             try
@@ -110,19 +109,19 @@ namespace TrapchumApp.Components.Pages.Lists.Vendors
             await GetVendors(q);
 
         }
-        void ShowEdit(long id)
+        void ShowEdit(Guid? id)
         {
-            NavigationManager.NavigateTo($"/trapchum/vendors/{id}/edit");
+            NavigationManager.NavigateTo($"/App/Vendors/{id}/Edit");
         }
 
-        void SelectedId(long id)
+        void SelectedId(Guid? id)
         {
             vendorId = id;
         }
 
-        protected async Task DisplayDetail(long e)
+        protected async Task DisplayDetail(Guid? e)
         {
-            if (e != 0)
+            if (e.IsNotNullOrEmpty())
             {
                 try
                 {
@@ -146,7 +145,7 @@ namespace TrapchumApp.Components.Pages.Lists.Vendors
 
             }
         }
-        async Task OnDelete(long id)
+        async Task OnDelete(Guid? id)
         {
             ContextMenuService.Close();
             var confirm = (bool)await DialogService.Confirm("Other Name deleted will not be able to recover, would you like to continue?", "Delete Other Name",

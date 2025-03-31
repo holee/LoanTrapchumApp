@@ -1,10 +1,13 @@
-﻿@page "/Customers/{id:long}/Edit"
-<div class="card">
-    <div class="card-header">
+﻿@page "/App/Customers/{CustomerId:guid}/Edit"
+@using Applications.Requests.Lists.Customers
+<PageTitle>Customer</PageTitle>
+<Card>
+    <CardBody>
         <EditForm Model="model" @ref="editForm">
+            <input type="hidden" value="@model.CustomerId" />
             <RadzenAccordion Multiple="true">
                 <Items>
-                    <RadzenAccordionItem Text="Customer" Icon="support_agent">
+                    <RadzenAccordionItem Text="Customer" Icon="support_agent" Selected="true">
                         <RadzenRow>
                             <RadzenColumn Size="6">
                                 <div class="row mb-2">
@@ -160,7 +163,7 @@
                                     </label>
                                     <div class="col-sm-9">
                                         <RadzenUpload Auto="false"
-                                                      Change="@(args=>OnImageChange(args,"Upload"))"
+                                                      Change="@(args=>HandleFileUpload(args,"Upload"))"
                                                       Progress=@(args => OnProgress(args, "Manual Upload"))
                                                       class="w-100"
                                                       InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "select file" }})">
@@ -170,7 +173,7 @@
                             </RadzenColumn>
                         </RadzenRow>
                     </RadzenAccordionItem>
-                    <RadzenAccordionItem Text="Spouse" Icon="diversity_1">
+                    <RadzenAccordionItem Text="Spouse" Icon="diversity_1" Selected="@(model.MarritalStatus=="Single"?false:true)">
                         <RadzenRow>
                             <RadzenColumn Size="6">
                                 <div class="row mb-2">
@@ -292,11 +295,11 @@
                                     <label class="col-sm-3 col-form-label">Province</label>
                                     <div class="col-sm-9">
                                         <RadzenDropDown class="w-100"
-                                                        Data="Provinces"
+                                                        Data="ProvinceList"
                                                         Placeholder="Search Province"
                                                         AllowFiltering="true"
-                                                        TextProperty="ProInKhmer"
-                                                        ValueProperty="ProvinceID"
+                                                        TextProperty="@nameof(ProvinceDto.ProInKhmer)"
+                                                        ValueProperty="@nameof(ProvinceDto.ProvinceId)"
                                                         @bind-Value:after="GetDistrictsByprovince"
                                                         FilterOperator="StringFilterOperator.Contains"
                                                         FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
@@ -311,8 +314,8 @@
                                                         Data="CommuneList"
                                                         Placeholder="Search Province"
                                                         AllowFiltering="true"
-                                                        TextProperty="ComInKhmer"
-                                                        ValueProperty="CommuneId"
+                                                        TextProperty="@nameof(CommuneDto.ComInKhmer)"
+                                                        ValueProperty="@nameof(CommuneDto.CommuneId)"
                                                         @bind-Value:after="GetVillagesByCommune"
                                                         FilterOperator="StringFilterOperator.Contains"
                                                         FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
@@ -344,8 +347,8 @@
                                                         Data="DistrictList"
                                                         Placeholder="Search Province"
                                                         AllowFiltering="true"
-                                                        TextProperty="DisInKhmer"
-                                                        ValueProperty="DistrictId"
+                                                        TextProperty="@nameof(DistrictDto.DisInKhmer)"
+                                                        ValueProperty="@nameof(DistrictDto.DistrictId)"
                                                         @bind-Value:after="GetCommunesByDistrict"
                                                         FilterOperator="StringFilterOperator.Contains"
                                                         FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
@@ -358,13 +361,13 @@
                                     <div class="col-sm-9">
                                         <RadzenDropDown class="w-100"
                                                         Data="VillageList"
-                                                        Placeholder="Search Province"
+                                                        Placeholder="Search Village"
                                                         AllowFiltering="true"
-                                                        TextProperty="VilInKhmer"
-                                                        ValueProperty="VillageID"
+                                                        TextProperty="@nameof(VillageDto.VilInKhmer)"
+                                                        ValueProperty="@nameof(VillageDto.VillageId)"
                                                         FilterOperator="StringFilterOperator.Contains"
                                                         FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-                                                        @bind-Value="model.CommuneRefId"></RadzenDropDown>
+                                                        @bind-Value="model.VillageRefId"></RadzenDropDown>
                                     </div>
                                 </div>
                             </RadzenColumn>
@@ -373,8 +376,8 @@
                 </Items>
             </RadzenAccordion>
         </EditForm>
-    </div>
-    <div class="card-footer">
+    </CardBody>
+    <CardFooter>
         <RadzenStack Orientation="Radzen.Orientation.Horizontal"
                      AlignItems="AlignItems.Center"
                      Gap="1rem"
@@ -384,196 +387,10 @@
                           ButtonStyle="ButtonStyle.Success"
                           Text="Save"
                           Icon="save" />
-            <RadzenButton Click="Close"
-                          Size="Radzen.ButtonSize.Small"
-                          Text="Close"
-                          ButtonStyle="ButtonStyle.Danger"
-                          Icon="cancel" />
+            <RadzenLink Path="/App/Customers" Icon="arrow_back" Text="Back" />
         </RadzenStack>
-    </div>
-</div>
+    </CardFooter>
+</Card>
 
 
-@code {
-    [Parameter] public long id { get; set; }
-    [Parameter] public IEnumerable<ProvinceDto> Provinces { get; set; } = [];
-    [Parameter] public IEnumerable<string> Salutations { get; set; } = [];
-    [Parameter] public IEnumerable<string> Cities { get; set; } = [];
-    [Parameter] public IEnumerable<string> Countries { get; set; } = [];
-    [Parameter] public EventCallback<int?> SelectedValueChanged { get; set; }
-    protected CustomerDtoUpdate model = new();
-    protected IEnumerable<ProvinceDto>? ProvinceList = [];
-    protected IEnumerable<DistrictDto> DistrictList = [];
-    protected IEnumerable<CommuneDto> CommuneList = [];
-    protected IEnumerable<VillageDto> VillageList = [];
-    protected IEnumerable<StOcupationDto>? Occupations = [];
-    protected EditForm editForm = default!;
-    private IEnumerable<string> Statuses = ["Single", "Married", "Divorced", "Widow"];
-    private bool IsLoading = true;
-    protected string? newSalution = "";
-    string city = "";
-    void OnChanged(ChangeEventArgs e)
-    {
-        city = e!.Value!.ToString()!;
-    }
-    async Task OnKeyPress(KeyboardEventArgs e)
-    {
-        if (e.Code == "Enter")
-        {
-            await _addressService.AddCity(new CityDtoCreate
-                {
-                    CityName = city
-                });
-            Cities = await _addressService.GetCities();
-        }
 
-    }
-
-    void OnProgress(UploadProgressArgs args, string name)
-    {
-        if (args.Progress == 100)
-        {
-            foreach (var file in args.Files)
-            {
-
-            }
-        }
-    }
-    void OnImageChange(UploadChangeEventArgs args, string name)
-    {
-        if (args.Files.Count() == 0) return;
-        var imageFile = args.Files.FirstOrDefault();
-        model.Photo = imageFile!.Name;
-    }
-
-
-    protected override async Task OnInitializedAsync()
-    {
-        try
-        {
-            ProvinceList = await _addressService.GetAllProvinceAsync();
-            Occupations = await _occupationService.GetOccupationsAsync();
-            ProvinceList = await _addressService.GetAllProvinceAsync();
-            //model = await _customerService.GetCustomerUpdateAsync(id);
-            if (model is not null)
-            {
-                if (model!.ProvinceRefId!.HasValue)
-                {
-                    this.DistrictList = await _addressService.GetDistrictByProvinceAsync(model?.ProvinceRefId);
-                }
-                if (model!.DistrictRefId.HasValue)
-                {
-                    this.CommuneList = await _addressService.GetCommuneByDistricteAsync(model?.DistrictRefId);
-                }
-                if (model!.CommuneRefId.HasValue)
-                {
-                    this.VillageList = await _addressService.GetVillageByCommuneAsync(model?.CommuneRefId);
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-
-        }
-        await base.OnInitializedAsync();
-    }
-
-    void Close() => DialogService.Close(false);
-
-    protected async Task FormSubmit()
-    {
-        editForm.EditContext?.Validate();
-        try
-        {
-            model!.EnType = "Customer";
-            var response = await _customerService.UpdateCustomerAsync(id, model);
-            if (response.IsSuccess)
-            {
-                NotificationService.Notify(NotificationSeverity.Success, response.Data!.Message);
-            }
-            else
-            {
-
-                var message = response.Errors!.FirstOrDefault();
-
-                NotificationService.Notify(NotificationSeverity.Error, message);
-            }
-
-        }
-        catch (Exception ex)
-        {
-            NotificationService.Notify(NotificationSeverity.Error, ex.InnerException?.Message);
-        }
-    }
-
-    protected async void SelectedDistrictsByprovince()
-    {
-        DistrictList = await _addressService.GetDistrictByProvinceAsync(model!.ProvinceRefId);
-    }
-    protected async void SelectedCommunesByDistrict()
-    {
-        CommuneList = await _addressService.GetCommuneByDistricteAsync(model!.DistrictRefId);
-    }
-
-    protected async void SelectedVillagesByCommune()
-    {
-        VillageList = await _addressService.GetVillageByCommuneAsync(model!.CommuneRefId);
-    }
-
-    private async Task GetCountries()
-    {
-        var countries = await _addressService.GetCountries(105);
-        Countries = countries.Where(x => x.CountryId == 105)
-                             .Select(x => x.DesInKhmer!)
-                             .ToList();
-    }
-
-    private async Task GetCities()
-    {
-        Cities = await _addressService.GetCities();
-    }
-
-    protected async void GetDistrictsByprovince()
-    {
-        DistrictList = await _addressService.GetDistrictByProvinceAsync(model!.ProvinceRefId);
-        StateHasChanged();
-    }
-    protected async void GetCommunesByDistrict()
-    {
-        CommuneList = await _addressService.GetCommuneByDistricteAsync(model!.DistrictRefId);
-        StateHasChanged();
-    }
-
-    protected async void GetVillagesByCommune()
-    {
-        VillageList = await _addressService.GetVillageByCommuneAsync(model!.CommuneRefId);
-        StateHasChanged();
-    }
-
-    protected async Task AddNewSalutation(KeyboardEventArgs e)
-    {
-        if (e.Code == "Enter")
-        {
-            await _salutationService.AddSalution(new Salutation
-                {
-                    Title = newSalution
-                });
-            await GetSalutations();
-        }
-    }
-    protected void OnTextChangedSalution(ChangeEventArgs e)
-    {
-        newSalution = e?.Value?.ToString();
-    }
-
-
-    private async Task GetSalutations()
-    {
-        var salutations = await _salutationService.GetSalutions();
-        Salutations = salutations.IsSuccess
-                             ? salutations!.Data!.Select(x => x.Title!).ToList()
-                             : Salutations = [];
-    }
-
-
-}

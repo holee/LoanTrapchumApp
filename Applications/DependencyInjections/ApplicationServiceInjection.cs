@@ -1,14 +1,8 @@
 ﻿using Applications.Constants.Authorizations;
 using Applications.Extensions.Identity.Policies;
-using Applications.Interfaces.Addresses;
 using Applications.Interfaces.Banks;
-using Applications.Interfaces.Branches;
-using Applications.Interfaces.Currencies;
-using Applications.Interfaces.Customers;
-using Applications.Interfaces.Employees;
 using Applications.Interfaces.Identity;
 using Applications.Interfaces.Lists;
-using Applications.Interfaces.setting;
 using Applications.Interfaces.Transactions;
 using Applications.Services.Addresses;
 using Applications.Services.Banks;
@@ -16,8 +10,11 @@ using Applications.Services.Branches;
 using Applications.Services.Currencies;
 using Applications.Services.Customers;
 using Applications.Services.Employees;
+using Applications.Services.Files;
 using Applications.Services.Identity;
 using Applications.Services.Lists;
+using Applications.Services.LIsts;
+using Applications.Services.Loans;
 using Applications.Services.Settings;
 using Applications.Services.Transactions.Branches;
 using Applications.Services.Transactions.Currencies;
@@ -32,9 +29,10 @@ namespace Applications.DependencyInjections
     {
         //void InterceptAfterHttp(object sender, HttpClientInterceptorEventArgs e);
     }
+
     public static class ApplicationServiceInjection
     {
-        internal static void RegisterPermissionClaims(AuthorizationOptions options)
+        private static void RegisterPermissionClaims(AuthorizationOptions options)
         {
             foreach (var permission in ApplicationPermissions.AllPermissions)
             {
@@ -123,15 +121,18 @@ namespace Applications.DependencyInjections
 
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
-            services.TryAddTransient<IAddressService, AddressService>();
-            services.TryAddTransient<IBranchService, BranchService>();
+            services.TryAddTransient<IAddressServiceImpl, AddressService>();
+            services.TryAddTransient<IBranchServiceImpl, BranchService>();
             services.TryAddTransient<IBankService, BankService>();
             services.TryAddTransient<IOpenBranchServiceImpl, OpenBranchService>();
-            services.TryAddTransient<ICurrencyService, CurrencyService>();
+            services.TryAddTransient<ICurrencyServiceImpl, CurrencyService>();
             services.TryAddTransient<ICustomerServiceImpl, CustomerService>();
-            services.TryAddTransient<ICustomerIncomeExpendService, CustomerIncomeExpendService>();
+            services.TryAddTransient<IIncomeExpendServiceImpl, CustomerIncomeExpendService>();
+            services.TryAddTransient<IHolidayServiceImpl, HolidayService>();
             services.TryAddTransient<ICreditAgentServiceImpl, CreditAgentService>();
-            services.TryAddTransient<IEmployeeService, EmployeeService>();
+            services.TryAddTransient<ICollateralsServiceImpl, CollateralsService>();
+            services.TryAddTransient<IEmployeeServiceImpl, EmployeeService>();
+            services.TryAddTransient<IFileUploadServiceImp, FileUploadService>();
             services.TryAddTransient<IDepartmentServiceImpl, DepartmentService>();
             services.TryAddTransient<IEntityNameService, EntityNameService>();
             services.TryAddTransient<ICreditAgentServiceImpl, CreditAgentService>();
@@ -140,9 +141,16 @@ namespace Applications.DependencyInjections
             services.TryAddTransient<IForiegnCurrencyExchangeImpl, ForiegnCurrencyExchange>();
             services.TryAddTransient<IJournalService, JournalService>();
             services.TryAddTransient<ILedgerService, LedgerService>();
+            services.TryAddTransient<ILoanRequestServiceImpl, LoanRequestService>();
+            services.TryAddTransient<ILoanServiceImpl, LoanService>();
+            services.TryAddTransient<ILoanSettingServiceImpl, LoanSettingService>();
+            services.TryAddTransient<INationalityServiceImpl, NationalityService>();
+            services.TryAddTransient<IOccupationServiceImpl, OccupationService>();
             services.TryAddTransient<IRoleService, RoleService>();
             services.TryAddTransient<ISpotRateServiceImpl, SpotRateService>();
-            services.TryAddTransient<ISettingService, SettingService>();
+            services.TryAddTransient<ISettingServiceImpl, SettingService>();
+            services.TryAddTransient<ISalutationServiceImpl, SalutationService>();
+            services.TryAddTransient<IFileUploadServiceImp, FileUploadService>();
             services.AddAuthorizationCore(option => RegisterPermissionClaims(option));
             return services;
 

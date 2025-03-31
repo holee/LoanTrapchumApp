@@ -4,7 +4,7 @@
         AlignItems="AlignItems.Center"
         JustifyContent="JustifyContent.Normal">
             <strong>
-                  <RadzenLink Text="Loan Details" Path="@($"/Loans/Details/{LoanSchedule.Id}?BranchId={LoanSchedule.BranchId}&CreditAgentId={LoanSchedule.CreditAgentRefId}&CurrencyId={LoanSchedule.CurrencyId}&UserId={userId}")" />
+                  <RadzenLink Text="Loan Details" Path="@($"/Loans/Details/{LoanSchedule.Id}?BranchId={LoanSchedule.BranchId}&CreditAgentId={LoanSchedule.CreditAgentRefId}&CurrencyId={LoanSchedule.CurrencyId}&UserId={UserId}")" />
             </Strong>
             <RadzenButton 
             Icon="@collapseIcon"
@@ -71,24 +71,4 @@
     </div>
 </div>
 
-@code {
-    [CascadingParameter] 
-    Task<AuthenticationState> AuthenticationState { get; set; } = default!;
-    [Parameter] public VLoanDisbursments LoanSchedule { get; set; } = new();
-    bool collapse = false;
-    string collapseIcon = "expand_more";
-    long userId = 0;
-    void CollapseButton()
-    {
-        collapse = !collapse;
-        collapseIcon = collapse ? "expand_more" : "expand_less";
-    }
 
-    protected override async Task OnInitializedAsync()
-    {
-        await base.OnInitializedAsync();
-        var auth =await AuthenticationState;
-        userId = auth.User.GetId();
-    }
-
-}

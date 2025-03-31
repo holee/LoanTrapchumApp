@@ -21,7 +21,7 @@ public class RegisterRequestValidator : AbstractValidator<RegisterRequest>
                                 .NotNull()
                                 .WithMessage("Please Select Employee Branch.");
         RuleFor(x => x.EmployeeId)
-                            .GreaterThan(0)
+                            .NotNull()
                             .WithMessage("Please select employee.")
                             .NotNull()
                             .WithMessage("Please Select Employee.");

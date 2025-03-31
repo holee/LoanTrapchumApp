@@ -1,5 +1,4 @@
-﻿@page "/Customers/{CustomerId:long?}/Update"
-@using TCLMS.Front.Components.Buttons.enums
+﻿@page "/Customers/{CustomerId:guid?}/Update"
 <PageTitle>Customer Update</PageTitle>
 <SectionContent SectionName="Progressbar">
     <RadzenProgressBar Value="100" ShowValue="false"
@@ -9,7 +8,7 @@
 </SectionContent>
 <EditForm Model="model" @ref="editForm">
     <FluentValidationValidator DisableAssemblyScanning="true"></FluentValidationValidator>
-    <BCard>
+    <Card>
         <CardHeader>
             <strong>Customer</strong>
         </CardHeader>
@@ -182,8 +181,8 @@
                 </RadzenColumn>
             </RadzenRow>
         </CardBody>
-    </BCard>
-    <BCard>
+    </Card>
+    <Card>
         <CardHeader>
             <strong>Address</strong>
         </CardHeader>
@@ -301,7 +300,7 @@
                 </RadzenColumn>
             </RadzenRow>
         </CardBody>
-    </BCard>
+    </Card>
     @if (model.MarritalStatus != "Single")
     {
         <BCard>
@@ -433,119 +432,7 @@
     </RadzenStack>
 </EditForm>
 
-@code {
-    string selectedTab = "info";
-    string city = "";
-    private Task OnSelectedTabChanged(string name)
-    {
-        selectedTab = name;
-        return Task.CompletedTask;
-    }
-    void OnChanged(ChangeEventArgs e)
-    {
-        city = e!.Value!.ToString()!;
-    }
-    void OnProgress(UploadProgressArgs args, string name)
-    {
-        if (args.Progress == 100)
-        {
-            foreach (var file in args.Files)
-            {
 
-            }
-        }
-    }
-    async Task OnImageChange(UploadChangeEventArgs args, string name)
-    {
-        if (args.Files.Count() == 0) return;
-
-        var file = args.Files.FirstOrDefault();
-
-        if (file is null) return;
-
-        using var ms = new MemoryStream();
-
-        await file.OpenReadStream().CopyToAsync(ms);
-        var fileName = file.Name;
-        var fileExtension = Path.GetExtension(file.Name);
-        var fileSize = file.Size;
-        var fileUpload = new FileUploadModel(fileName, fileExtension, fileSize, ms.ToArray());
-        var resp = await _fileUploadService.UploadFile(fileUpload);
-        if (!resp.IsSuccess)
-        {
-            var message = resp.Errors?.First();
-            NotificationService.Notify(NotificationSeverity.Info, message);
-            return;
-        }
-
-        model.Photo = resp.Data?.FileUrl;
-        StateHasChanged();
-    }
-    async Task OnKeyPress(KeyboardEventArgs e)
-    {
-        if (e.Code == "Enter")
-        {
-            await _addressService.AddCity(new CityDtoCreate
-                {
-                    CityName = city
-                });
-            Cities = await _addressService.GetCities();
-        }
-
-    }
-    async void SelectedProvinceChanged(object arg)
-    {
-        if (arg is not null)
-        {
-            model.ProInKhmer = ((ProvinceDto)arg).ProInKhmer;
-            Districts = await _addressService!.GetDistrictByProvinceAsync(((ProvinceDto)arg).ProvinceID);
-            StateHasChanged();
-        }
-
-    }
-    async void SelectedDistrictChanged(object arg)
-    {
-        if (arg is not null)
-        {
-            model.DisInKhmer = ((DistrictDto)arg).DisInKhmer;
-            Communes = await _addressService!.GetCommuneByDistricteAsync(((DistrictDto)arg).DistrictId);
-            StateHasChanged();
-        }
-    }
-    async void SelectedCommuneChanged(object arg)
-    {
-        if (arg is not null)
-        {
-            model.ComInKhmer = ((CommuneDto)arg).ComInKhmer;
-            Villages = await _addressService!.GetVillageByCommuneAsync(((CommuneDto)arg).CommuneId);
-            StateHasChanged();
-        }
-
-    }
-    void SelectedVillageChanged(object arg)
-    {
-        if (arg is not null)
-        {
-            model.VilInKhmer = ((VillageDto)arg).VilInKhmer;
-            StateHasChanged();
-        }
-
-    }
-
-
-    async Task GetAdditionalInformation()
-    {
-        Nationalities = await _nationalityService!.GetAllAsync();
-
-        Provinces = await _addressService.GetAllProvinceAsync();
-
-        Occupations = await _employeeService!.GetOccupationsAsync("Position");
-
-        Countries = await _addressService.GetCountries(105);
-
-        Cities = await _addressService.GetCities();
-    }
-}
 
 
 

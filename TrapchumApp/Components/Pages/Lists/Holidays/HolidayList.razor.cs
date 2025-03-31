@@ -1,10 +1,18 @@
+using Applications.Interfaces.Lists;
+using Domains.Models.Lists;
 using Microsoft.AspNetCore.Components;
-using TCLMS.Shared.Entities.Models.Loans;
 
-namespace TCLMS.Front.Pages.Lists.Holidays
+namespace TrapchumApp.Components.Pages.Lists.Holidays
 {
     public partial class HolidayList
     {
+        private readonly IHolidayService _holidayService;
+
+        public HolidayList(IHolidayService holidayService)
+        {
+            this._holidayService = holidayService;
+        }
+
         protected string? searchField = string.Empty;
         protected int holiid;
         protected bool isActive = false;
@@ -34,7 +42,7 @@ namespace TCLMS.Front.Pages.Lists.Holidays
             isLoading = true;
             try
             {
-                var gridItems = await _holidayService.GetsHolidays(pageIndex, pageSize, sortColumn, IsPreviousSelected, sortDescending, q);
+                var gridItems = await _holidayService.GetHolidays(pageIndex, pageSize, sortColumn, IsPreviousSelected, sortDescending, q);
                 HolidaysList = gridItems.Items;
                 counts = gridItems.Count;
                 isLoading = false;
@@ -92,11 +100,11 @@ namespace TCLMS.Front.Pages.Lists.Holidays
                 if (deleteResponse.IsSuccess)
                 {
                     await OnInitializedAsync();
-                    NotificationService.Notify(Radzen.NotificationSeverity.Success, deleteResponse.Data!.Message);
+                    NotificationService.Notify(Radzen.NotificationSeverity.Success, deleteResponse.Data);
                 }
                 else
                 {
-                    NotificationService.Notify(Radzen.NotificationSeverity.Error, "Can not delete");
+                    NotificationService.Notify(Radzen.NotificationSeverity.Error, deleteResponse.ErrMessage);
                 }
                 StateHasChanged();
                 ContextMenuService.Close();
@@ -129,13 +137,15 @@ namespace TCLMS.Front.Pages.Lists.Holidays
         {
 
             holidayvm.Status = false;
-            var message = await _holidayService.ActivateOrDeactivate(id, holidayvm);
-            if (message!.IsSuccess)
-            {
-                NotificationService.Notify(Radzen.NotificationSeverity.Success, message.Message);
-            }
-            else
-                NotificationService.Notify(Radzen.NotificationSeverity.Error, message.Message);
+            //var message = await _holidayService.ActivateOrDeactivat(id, holidayvm);
+            //if (message!.IsSuccess)
+            //{
+            //    NotificationService.Notify(Radzen.NotificationSeverity.Success, message.Message);
+            //}
+            //else
+            //    NotificationService.Notify(Radzen.NotificationSeverity.Error, message.Message);
+            
+            
             await Task.CompletedTask;
         }
     }

@@ -12,13 +12,10 @@ namespace TrapchumApp.Components.Pages.Accounts.Users
     public partial class UserCreateModal
     {
         private readonly IRoleService _roleService;
-        private readonly IUserService _userService;
-        private readonly IEmployeeService _empService;
-        public UserCreateModal(IRoleService roleService, IUserService userService, IEmployeeService employeeService)
+        
+        public UserCreateModal(IRoleService roleService)
         {
             _roleService = roleService;
-            _userService = userService;
-            _empService = employeeService;
         }
 
         RegisterRequest model = new RegisterRequest();
@@ -35,7 +32,7 @@ namespace TrapchumApp.Components.Pages.Accounts.Users
 
             roles = selectedRoles?.Data?.Select(r => r.RoleName) ?? [];
 
-            var employeeResponse = await _empService.GetEmployeesAsync(0, 0);
+            var employeeResponse = await _employeeService.GetEmployeesAsync(null, 0);
 
             if (employeeResponse.IsSuccess)
             {
@@ -58,7 +55,7 @@ namespace TrapchumApp.Components.Pages.Accounts.Users
         {
             if (model.BranchRefId > 0)
             {
-                var employeeResponse = await _empService.GetEmployeesAsync(0, model.BranchRefId);
+                var employeeResponse = await _employeeService.GetEmployeesAsync(null, model.BranchRefId);
                 if (employeeResponse.IsSuccess)
                 {
                     bEmployees = employeeResponse.Data!;
@@ -70,7 +67,7 @@ namespace TrapchumApp.Components.Pages.Accounts.Users
             }
             model.Username = "";
             model.Email = "";
-            model.EmployeeId = 0;
+            model.EmployeeId = Guid.Empty;
         }
 
         protected async void SubmitForm()
@@ -116,7 +113,7 @@ namespace TrapchumApp.Components.Pages.Accounts.Users
             {
                 model.Username = "";
                 model.Email = "";
-                model.EmployeeId = 0;
+                model.EmployeeId = Guid.Empty;
             }
         }
 

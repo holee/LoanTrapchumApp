@@ -134,7 +134,7 @@ namespace Infrastructures.Seeds
                 EmailConfirmed = false,
                 PhoneNumberConfirmed = false,
                 BranchRefId = 0,
-                NameRefId = 0,
+                NameRefId = Guid.Empty,
             };
             if (!await _userManager.Users.AnyAsync(u => u.Email == adminUser.Email))
             {
@@ -163,7 +163,7 @@ namespace Infrastructures.Seeds
                 EmailConfirmed = false,
                 PhoneNumberConfirmed = false,
                 BranchRefId = 0,
-                NameRefId = 0,
+                NameRefId = Guid.Empty,
             };
             if (!await _userManager.Users.AnyAsync(u => u.Email == adminUser.Email))
             {

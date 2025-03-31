@@ -12,28 +12,24 @@ namespace TrapchumApp.Components.Pages.Accounts.Users
 {
     public partial class CreditAgentUserCreate
     {
-        [Parameter] public long EmployeeId { get; set; } = 0;
+        [Parameter] public Guid? EmployeeId { get; set; } = Guid.Empty;
         [Parameter] public int BranchId { get; set; } = 0;
         RegisterRequest model = new RegisterRequest();
         EditForm form = default!;
         IEnumerable<BranchDto> Branches = [];
         IEnumerable<string?> roles = [];
         IEnumerable<VEmployees> Employees = [];
-
-        private readonly IEmployeeService _empService;
+        
         private readonly IRoleService _roleService;
-        private readonly IUserService _userService;
-        public CreditAgentUserCreate(IEmployeeService empService, IRoleService roleService, IUserService userService)
+        public CreditAgentUserCreate(IRoleService roleService)
         {
-            _empService = empService;
             _roleService = roleService;
-            _userService = userService;
         }
 
         protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
-            var employeeResponse = await _empService.GetEmployeesAsync(EmployeeId, BranchId);
+            var employeeResponse = await _employeeService.GetEmployeesAsync(EmployeeId, BranchId);
             var branchResponse = await _branchService.GetBranchesAsync(BranchId, 1, false);
             var getRoles = await _roleService.GetRolesAsync();
 
@@ -100,7 +96,7 @@ namespace TrapchumApp.Components.Pages.Accounts.Users
             {
                 model.Username = "";
                 model.Email = "";
-                model.EmployeeId = 0;
+                model.EmployeeId = Guid.Empty;
                 model.Password = "Pa$$w0rd";
                 model.ConfirmPassword = "Pa$$w0rd";
             }

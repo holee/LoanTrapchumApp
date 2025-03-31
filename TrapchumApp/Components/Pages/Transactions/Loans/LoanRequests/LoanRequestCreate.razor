@@ -1,19 +1,21 @@
-﻿@page "/Loan/{CustomerId:long}/Customer/{LoanRequestId:long}/Request"
-@page "/Loan/{CustomerId:long}/Customer/Request"
-@page "/Loan/Customer/Request"
+﻿@page "/App/Loan/{CustomerId:long}/Customer/{LoanRequestId:long}/Request"
+@page "/App/Loan/{CustomerId:long}/Customer/Request"
+@page "/App/Loan/Customer/Request"
+@using Domains.Models.Lists.Customers
+@using Radzen.Blazor.Rendering
 @using System.Web
 <PageTitle>Create</PageTitle>
 <SectionContent SectionName="Progressbar">
     <RadzenProgressBar ShowValue="false"
                        Value="100" Mode="ProgressBarMode.Indeterminate"
                        ProgressBarStyle="ProgressBarStyle.Info"
-                       Visible="isLoading" />
+                       Visible="isLoading"/>
 </SectionContent>
 <div class="rz-background-color-base-200">
-    <Card BodyCssClass="rz-background-color-base-200">
-        <CardBody>
+    <Card>
+        <CardBody BodyCssClass="rz-background-color-base-200">
             <EditForm Model="model" @ref="editForm">
-                <FluentValidationValidator DisableAssemblyScanning="true" />
+                <FluentValidationValidator DisableAssemblyScanning="true"/>
                 <RadzenTabs SelectedIndexChanged="SelectTabIndexChanged">
                     <Tabs>
                         <RadzenTabsItem Text="សំណើរ">
@@ -25,6 +27,29 @@
                                                 <RadzenLabel>អតិថិជន</RadzenLabel>
                                             </RadzenColumn>
                                             <RadzenColumn Size="8">
+                                                <input type="hidden" value="@customerId"/>
+                                                <RadzenTextBox @ref="textBox" Value="@FullName" @oninput="@OnInput"
+                                                               @onclick="@(args => popup.ToggleAsync(textBox.Element))"
+                                                               @onkeydown=@OnKeyDown/>
+                                                <Popup @ref=popup id="popup" AutoFocusFirstElement="false"
+                                                       class="my-popup">
+                                                    <RadzenDataGrid @ref="grid" id="grid" TItem="VCustomerList"
+                                                                    Data="@Customers" RowSelect="@OnRowSelect"
+                                                                    AllowSorting="true" Style="height:360px">
+                                                        <Columns>
+                                                            <RadzenDataGridColumn
+                                                                Property="@nameof(VCustomerList.CustomerId)"
+                                                                Title="CustomerID"/>
+                                                            <RadzenDataGridColumn
+                                                                Property="@nameof(VCustomerList.FullName)"
+                                                                Title="FullName"/>
+                                                            <RadzenDataGridColumn
+                                                                Property="@nameof(VCustomerList.AltName)" Title="Name"/>
+                                                            <RadzenDataGridColumn
+                                                                Property="@nameof(VCustomerList.Phone)" Title="Phone"/>
+                                                        </Columns>
+                                                    </RadzenDataGrid>
+                                                </Popup>
                                                 <RadzenRow AlignItems="AlignItems.Start">
                                                     <RadzenColumn Size="12">
                                                         <RadzenDropDownDataGrid class="w-100"
@@ -40,17 +65,23 @@
                                                                                 LoadData="LoadCustomers"
                                                                                 Density="Density.Compact"
                                                                                 PageSize="10"
-                                                                                Disabled="@(LoanRequestId.NotEmpty()  && CustomerId.NotEmpty())"
+                                                                                Disabled="@(LoanRequestId.NotEmpty() && CustomerId.NotEmpty())"
                                                                                 AllowRowSelectOnRowClick="true"
                                                                                 Name="DropDownCustomer">
                                                             <Columns>
-                                                                <RadzenDropDownDataGridColumn Visible="false" Property="CustomerId" Title="Id" />
-                                                                <RadzenDropDownDataGridColumn Property="AltName" Title="Name" Width="200px" />
-                                                                <RadzenDropDownDataGridColumn Property="Phone" Title="Phone" Width="100px" />
+                                                                <RadzenDropDownDataGridColumn Visible="false"
+                                                                                              Property="CustomerId"
+                                                                                              Title="Id"/>
+                                                                <RadzenDropDownDataGridColumn Property="AltName"
+                                                                                              Title="Name"
+                                                                                              Width="200px"/>
+                                                                <RadzenDropDownDataGridColumn Property="Phone"
+                                                                                              Title="Phone"
+                                                                                              Width="100px"/>
                                                             </Columns>
                                                         </RadzenDropDownDataGrid>
                                                     </RadzenColumn>
-                                                    <ValidationMessage For="@(()=>model.CustomerRefId)" />
+                                                    <ValidationMessage For="@(() => model.CustomerRefId)"/>
                                                 </RadzenRow>
                                             </RadzenColumn>
                                         </RadzenRow>
@@ -61,8 +92,8 @@
                                             <RadzenColumn Size="5">
                                                 <TCNumbers OnValueChanged="PrincipleValueChanged"
                                                            Disabled="CustomerId.NotEmpty()"
-                                                           @bind-Value="model.RequestAmount" />
-                                                <ValidationMessage For="@(()=>model.RequestAmount)" />
+                                                           @bind-Value="model.RequestAmount"/>
+                                                <ValidationMessage For="@(() => model.RequestAmount)"/>
                                             </RadzenColumn>
                                             <RadzenColumn Size="3">
                                                 <RadzenDropDown Data="StorageConstant.CurrencyTpes"
@@ -89,11 +120,12 @@
                                                                         @bind-Value="model.AprovedUserId"
                                                                         Data="AprovedPeople">
                                                     <Columns>
-                                                        <RadzenDropDownDataGridColumn Property="FullName" Title="Name" />
-                                                        <RadzenDropDownDataGridColumn Property="BranchName" Title="BranchName" />
+                                                        <RadzenDropDownDataGridColumn Property="FullName" Title="Name"/>
+                                                        <RadzenDropDownDataGridColumn Property="BranchName"
+                                                                                      Title="BranchName"/>
                                                     </Columns>
                                                 </RadzenDropDownDataGrid>
-                                                <ValidationMessage For="@(()=>model.AprovedUserId)" />
+                                                <ValidationMessage For="@(() => model.AprovedUserId)"/>
                                             </RadzenColumn>
                                         </RadzenRow>
                                         <RadzenRow AlignItems="AlignItems.Center" class="my-1">
@@ -101,7 +133,7 @@
                                                 <RadzenLabel>ប្រាក់ប្រសិទ្ធិភាព</RadzenLabel>
                                             </RadzenColumn>
                                             <RadzenColumn Size="4" class="input-group">
-                                                <TCNumbers @bind-Value="model.CollectionFeeRate" />
+                                                <TCNumbers @bind-Value="model.CollectionFeeRate"/>
                                                 <span class="input-group-text">%</span>
                                             </RadzenColumn>
                                             <RadzenColumn Size="4" class="input-group input-group-sm">
@@ -120,10 +152,10 @@
                                                 <RadzenLabel>អត្រាការប្រាក់</RadzenLabel>
                                             </RadzenColumn>
                                             <RadzenColumn Size="8" class="input-group input-group-sm">
-                                                <TCNumbers @bind-Value="model.InterestRate" />
+                                                <TCNumbers @bind-Value="model.InterestRate"/>
                                                 <span class="input-group-text">%</span>
                                             </RadzenColumn>
-                                            <ValidationMessage For="@(()=>model.InterestRate)" />
+                                            <ValidationMessage For="@(() => model.InterestRate)"/>
                                         </RadzenRow>
                                         <RadzenRow AlignItems="AlignItems.Start" class="my-1">
                                             <RadzenColumn Size="4">
@@ -131,14 +163,14 @@
                                             </RadzenColumn>
                                             <RadzenColumn Size="4" class="input-group input-group-sm">
                                                 <TCNumbers OnValueChanged="CalculateAdminFeeAmount"
-                                                           @bind-Value="model.AdminFeeRate" />
+                                                           @bind-Value="model.AdminFeeRate"/>
                                                 <span class="input-group-text">%</span>
                                             </RadzenColumn>
                                             <RadzenColumn Size="4">
-                                                <TCNumbers Disabled="true" @bind-Value="model.AdminFeeAmount" />
+                                                <TCNumbers Disabled="true" @bind-Value="model.AdminFeeAmount"/>
                                             </RadzenColumn>
-                                            <ValidationMessage For="@(()=>model.AdminFeeRate)" />
-                                            <ValidationMessage For="@(()=>model.AdminFeeAmount)" />
+                                            <ValidationMessage For="@(() => model.AdminFeeRate)"/>
+                                            <ValidationMessage For="@(() => model.AdminFeeAmount)"/>
                                         </RadzenRow>
                                         <RadzenRow AlignItems="AlignItems.Center" class="mt-1">
                                             <RadzenColumn Size="4">
@@ -147,8 +179,8 @@
                                             <RadzenColumn Size="4">
                                                 <IntInput @bind-Value:after="PeriodChanged"
                                                           Disabled="false"
-                                                          @bind-Value="model.Installments" />
-                                                <ValidationMessage For="@(()=>model.Installments)" />
+                                                          @bind-Value="model.Installments"/>
+                                                <ValidationMessage For="@(() => model.Installments)"/>
                                             </RadzenColumn>
                                             <RadzenColumn Size="4">
                                                 <RadzenDropDown TextProperty="@nameof(Items.Label)"
@@ -178,12 +210,12 @@
                                                 </RadzenDropDown>
                                             </RadzenColumn>
                                             <RadzenColumn Size="2">
-                                                <RadzenNumeric Disabled="@(model.RepaymentModeRefId !=1)"
+                                                <RadzenNumeric Disabled="@(model.RepaymentModeRefId != 1)"
                                                                @bind-Value="model.PayEvery"
                                                                onclick="this.querySelector('.rz-numeric-input').select()"
                                                                class="w-100"
                                                                Min="1"
-                                                               TValue="int?" />
+                                                               TValue="int?"/>
                                             </RadzenColumn>
                                         </RadzenRow>
                                         <RadzenRow AlignItems="AlignItems.Center" class="my-1">
@@ -191,7 +223,8 @@
                                                 <RadzenLabel>ខ្ចីលើកទី</RadzenLabel>
                                             </RadzenColumn>
                                             <RadzenColumn Size="8">
-                                                <RadzenNumeric class="w-100" @bind-Value="model.Circle" Min="1" Disabled />
+                                                <RadzenNumeric class="w-100" @bind-Value="model.Circle" Min="1"
+                                                               Disabled/>
                                             </RadzenColumn>
                                         </RadzenRow>
                                         <RadzenRow AlignItems="AlignItems.Center" class="my-1">
@@ -206,7 +239,7 @@
                                                                 class="w-100"
                                                                 Data="loanCategories">
                                                 </RadzenDropDown>
-                                                <ValidationMessage For="()=>model.LoanCategoryRefId" />
+                                                <ValidationMessage For="()=>model.LoanCategoryRefId"/>
                                             </RadzenColumn>
                                         </RadzenRow>
                                         <RadzenRow AlignItems="AlignItems.Center" class="my-1">
@@ -215,7 +248,7 @@
                                             </RadzenColumn>
                                             <RadzenColumn Size="8">
                                                 <TCDatePicker @bind-Value="model.RequestDate"
-                                                              Changed="@((args)=>ChangedDate(args))" />
+                                                              Changed="@((args) => ChangedDate(args))"/>
                                             </RadzenColumn>
                                         </RadzenRow>
                                         <RadzenRow AlignItems="AlignItems.Center" class="my-1">
@@ -223,7 +256,7 @@
                                                 <RadzenLabel>ថ្ងៃបង់ប្រាក់លើកដំបូង</RadzenLabel>
                                             </RadzenColumn>
                                             <RadzenColumn Size="8">
-                                                <TCDatePicker @bind-Value="model.FirstPaymentDate" />
+                                                <TCDatePicker @bind-Value="model.FirstPaymentDate"/>
                                             </RadzenColumn>
                                         </RadzenRow>
                                         <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
@@ -231,7 +264,7 @@
                                                 <RadzenLabel>កំណត់សម្គាល់</RadzenLabel>
                                             </RadzenColumn>
                                             <RadzenColumn Size="8">
-                                                <RadzenTextArea class="w-100" @bind-Value="model.Remark" />
+                                                <RadzenTextArea class="w-100" @bind-Value="model.Remark"/>
                                             </RadzenColumn>
                                         </RadzenRow>
                                     </RadzenColumn>
@@ -244,24 +277,24 @@
                                                         @ref="CollateralRef"
                                                         Add="AddCollaterals"
                                                         RemoveCollateral="RemovedCollateral"
-                                                        Collaterals="CollateralLines" />
+                                                        Collaterals="CollateralLines"/>
 
                                 <LoanRequestGaurantor Guarantors="Guarantors"
                                                       ShowAdd="true"
                                                       Add="AddGuarantors"
                                                       ShowRemove="true"
                                                       Remove="RemoveGaurantor"
-                                                      @ref="GuarantorRef" />
+                                                      @ref="GuarantorRef"/>
                                 <LoanRequestDocument Documents="@Documents"
                                                      UploadDocument="@HandleFileDialogue"
                                                      RemoveDocument="RemoveFile"
                                                      @ref="DocumentRef"
-                                                     ShowDelete="true" />
+                                                     ShowDelete="true"/>
                             </RadzenFieldset>
                         </RadzenTabsItem>
                         <RadzenTabsItem Text="អតិថិជន">
                             <RadzenFieldset>
-                                <CustomerRequest CustomerId="CustomerId" Customer="SelectedCustomer" />
+                                <CustomerRequest CustomerId="CustomerId" Customer="SelectedCustomer"/>
                             </RadzenFieldset>
                         </RadzenTabsItem>
                     </Tabs>
@@ -280,15 +313,15 @@
                               Click="HandleCreateNew"
                               Text="Save"
                               Icon="save"
-                              ButtonStyle="ButtonStyle.Primary" />
+                              ButtonStyle="ButtonStyle.Primary"/>
                 <RadzenButton Disabled="model.RequestAmount <=0"
                               Size="Radzen.ButtonSize.Small"
                               Click="HandleCreateRequest"
                               Text="Request"
                               Icon="save"
-                              ButtonStyle="ButtonStyle.Success" />
+                              ButtonStyle="ButtonStyle.Success"/>
                 <RadzenLink Path="@($"/Loan/Request?BranchId={BranchId}&UserId={UserId}")"
-                            Text="Back" />
+                            Text="Back"/>
             </RadzenStack>
         </CardFooter>
     </Card>
@@ -296,4 +329,60 @@
 
 
 
+@code
+{
 
+    RadzenTextBox textBox;
+    string value = "";
+    Guid? customerId = Guid.Empty;
+    string? FullName = "";
+    IEnumerable<VCustomerList> customers;
+    Popup popup;
+    RadzenDataGrid<VCustomerList> grid;
+
+    async Task OnRowSelect(VCustomerList customer)
+    {
+        value = "";
+        customerId = customer.CustomerId;
+        FullName = customer.FullName;
+        await popup.CloseAsync();
+    }
+
+
+    int selectedIndex = 0;
+
+    async Task OnInput(ChangeEventArgs args)
+    {
+        selectedIndex = 0;
+        //customerId = value = $"{args.Value}";
+        await grid.Reload();
+    }
+
+    async Task OnKeyDown(KeyboardEventArgs args)
+    {
+        var items = Customers;
+
+        var popupOpened = await js.InvokeAsync<bool>("Radzen.popupOpened", "popup");
+
+        var key = args.Code != null ? args.Code : args.Key;
+
+        if (!args.AltKey && (key == "ArrowDown" || key == "ArrowUp"))
+        {
+            var result = await js.InvokeAsync<int[]>("Radzen.focusTableRow", "grid", key, selectedIndex, null, false);
+            selectedIndex = result.First();
+        }
+        else if (args.AltKey && key == "ArrowDown" || key == "Enter" || key == "NumpadEnter")
+        {
+            if (popupOpened && (key == "Enter" || key == "NumpadEnter"))
+            {
+                customerId = items.ElementAtOrDefault(selectedIndex)?.CustomerId;
+            }
+
+            await popup.ToggleAsync(textBox.Element);
+        }
+        else if (key == "Escape" || key == "Tab")
+        {
+            await popup.CloseAsync();
+        }
+    }
+}

@@ -3,7 +3,7 @@
 public sealed class VCollateralLines
 {
     public long? Id { get; set; }
-    public long CollateralId { get; set; }
+    public string? CollateralId { get; set; }
     public DateTime? RegisterDate { get; set; } 
     public string? Remark { get; set; }
     public string? CollateralNo { get; set; }

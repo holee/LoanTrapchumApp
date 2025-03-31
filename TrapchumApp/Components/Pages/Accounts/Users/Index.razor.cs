@@ -182,7 +182,7 @@ public partial class Index
     {
         if (model.BranchRefId > 0)
         {
-            var employeeResponse = await _empService.GetEmployeesAsync(0, model.BranchRefId);
+            var employeeResponse = await _empService.GetEmployeesAsync(Guid.Empty, model.BranchRefId);
             if (employeeResponse.IsSuccess)
             {
                 bEmployees = employeeResponse.Data!;
@@ -194,7 +194,7 @@ public partial class Index
         }
         model.Username = "";
         model.Email = "";
-        model.EmployeeId = 0;
+        model.EmployeeId = Guid.Empty;
     }
     protected void SelectedEmployeeChanged()
     {
@@ -214,7 +214,7 @@ public partial class Index
         {
             model.Username = "";
             model.Email = "";
-            model.EmployeeId = 0;
+            model.EmployeeId = Guid.Empty;
         }
         Console.WriteLine(selectedEmployee!.EmployeeId);
     }

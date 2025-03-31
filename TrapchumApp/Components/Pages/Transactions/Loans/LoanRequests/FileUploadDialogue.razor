@@ -50,16 +50,16 @@
                 fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(file.ContentType);
                 content.Add(content: fileContent, name: "\"files\"", fileName: file.Name);
             }
-            var resp = await _fileUploadService.UploadFiles(content);
-
-            if (!resp.IsSuccess)
-            {
-                var message = resp.Errors?.First();
-                NotificationService.Notify(NotificationSeverity.Info, message);
-                return;
-            }
-            UploadFiles = [];
-            DialogService.Close(resp.Data);
+            // var resp = await _fileUploadService.UploadFiles(content);
+            //
+            // if (!resp.IsSuccess)
+            // {
+            //     var message = resp.Errors?.First();
+            //     NotificationService.Notify(NotificationSeverity.Info, message);
+            //     return;
+            // }
+            // UploadFiles = [];
+            // DialogService.Close(resp.Data);
 
         }
         else

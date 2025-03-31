@@ -1,10 +1,13 @@
-﻿using Domains.Models.Lists;
+﻿using Applications.Responses.Paginations;
+using Domains.Models.Lists;
 
 namespace Applications.Interfaces.Lists
 {
     public interface IOccupationService
     {
-        Task<Occupation?> FindOccupationAsync(int id);
-        Task<IEnumerable<Occupation>> FindAllOccupationsAsync(string? expression = null);
+        Task<Occupation?> GetOccupationByIdAsync(int? id);
+        Task<IEnumerable<Occupation>> GetOccupationsAsync(string? expression = null);
+        Task<Pager<T>> GetOccupations<T>(int? id, string? term = null);
+
     }
 }

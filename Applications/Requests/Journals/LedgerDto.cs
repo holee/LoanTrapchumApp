@@ -16,6 +16,6 @@ public sealed class LedgerDto
     public bool IsMainGl { get; set; } = false;
     public string? Description { get; set; }
     public LedgerTypeDto? LedgerType { get; set; }
-    public CurrencyDto?   Currency { get; set; }
+    public CurrencyResponse?   Currency { get; set; }
     public ICollection<JournalLineDto>? JournalEntryLines { get; set; } 
 }

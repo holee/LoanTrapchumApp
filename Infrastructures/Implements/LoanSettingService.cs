@@ -1,11 +1,14 @@
 ﻿using Applications.Interfaces.Loans;
+using Applications.Responses.Auths;
+using Applications.Responses.ViewModels.Auths;
 using Domains.Models.Loans;
 using Infrastructures.DataAccess;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructures.Implements
 {
-    public class LoanSettingService : ILoanSettingServiceImpl
+    public sealed class LoanSettingService : ILoanSettingService
     {
         private readonly ApplicationDbContext _context;
         private readonly IDapperConnectionFactory _db;
@@ -75,8 +78,27 @@ namespace Infrastructures.Implements
 
             return await query.AsNoTracking().ToListAsync();
         }
-       
-       
+
+        public async Task<IEnumerable<AprovePerson>> GetAprovedUserAsync(int? branchId, string? filter = null)
+        {
+            IQueryable<VUser> queries = _context.Database
+                                                .SqlQuery<VUser>($"SELECT * FROM vUsers WHERE BranchId={branchId} AND IsActive=CAST(1 AS BIT)");
+
+            if (!string.IsNullOrEmpty(filter))
+            {
+                queries = queries.Where(x => EF.Functions.Like(x.UserName!, $"%{filter}%") ||
+                                             EF.Functions.Like(x.FirstName!, $"%{filter}%") ||
+                                             EF.Functions.Like(x.LastName!, $"%{filter}%"));
+            }
+
+            var aprovedPersons = await queries
+                                              .ProjectToType<AprovePerson>()
+                                              .AsNoTracking()
+                                              .ToListAsync();
+
+            return aprovedPersons;
+
+        }
     }
 
 }

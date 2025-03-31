@@ -2,7 +2,7 @@
 {
     public class EntVendorDtoChangeStatus
     {
-        public long VendorId { get; set; }
+        public Guid? VendorId { get; set; }
         public bool IsActive { get; set; } = false;
         public int EditSeq { get; set; } = 0;
     }

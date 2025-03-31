@@ -64,7 +64,7 @@ namespace Infrastructures.Implements
                     CurrencyRefId = req.CurrencyRefId,
                     CashStatusRefId = 2,
                     Remark = "Cash goes through transaction",
-                    StaffRefId = req.UserRefId,
+                    //StaffRefId = req.UserRefId,
                     Receive = "N",
                     Reject = "N",
                     TransactionDate = req.RegisterDate,
@@ -84,7 +84,7 @@ namespace Infrastructures.Implements
                 await _context.Customers.Where(x => x.CustomerId == req.CustomerRefId)
                                         .ExecuteUpdateAsync(p => p.SetProperty(x => x.IsLoanActive, true));
 
-                await _context.LoanRequests.Where(x => x.Id == req.LoanRequestId && x.CustomerRefId == req.CustomerRefId)
+                await _context.LoanRequests.Where(x => x.LoanRequestId == req.LoanRequestId && x.CustomerRefId == req.CustomerRefId)
                                            .ExecuteUpdateAsync(prop => prop.SetProperty(p => p.LoanRequestStatusRefId, 7));
 
 
@@ -124,7 +124,7 @@ namespace Infrastructures.Implements
         public async Task<Result<string>> ChangedCreditAgent(int branchId, LoanChangedCaDtoCreate req)
         {
 
-            var exstingLoan = _context.LoanDisbursments.Where(x => x.Id == req.LoanRefId && x.BranchRefId == branchId && x.CreditAgentRefId == req.OldCreditAgentRefId);
+            var exstingLoan = _context.LoanDisbursments.Where(x => x.LoanDisbursementsId == req.LoanRefId && x.BranchRefId == branchId && x.CreditAgentRefId == req.OldCreditAgentRefId);
 
             if (!exstingLoan.Any())
             {
@@ -140,7 +140,7 @@ namespace Infrastructures.Implements
                 await _context.SaveChangesAsync();
                 var editSeq = exstingLoan.First().EditSeq + 1;
                 _context.LoanDisbursments
-                        .Where(x => x.Id == req.LoanRefId &&
+                        .Where(x => x.LoanDisbursementsId == req.LoanRefId &&
                                     x.BranchRefId == branchId &&
                                     x.CreditAgentRefId == req.OldCreditAgentRefId)
                         .ExecuteUpdate(prop => prop.SetProperty(p => p.CreditAgentRefId, req.NewCreditAgentRefId)

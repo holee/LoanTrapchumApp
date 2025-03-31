@@ -2,7 +2,7 @@
 
 public sealed class VVendor
 {
-    public long EntId { get; set; }
+    public Guid? EntId { get; set; }
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
     public string? AltName { get; set; }

@@ -1,27 +1,40 @@
 using Applications.Interfaces.Customers;
 using Applications.Requests.Collaterals;
+using Applications.Requests.Lists.Collaterals;
 using Applications.Responses;
 using Applications.Responses.Collaterals;
+using Applications.Responses.ViewModels.Customers;
 using Applications.Services.LIsts;
 using Mapster;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
+using Radzen.Blazor;
 
 namespace TrapchumApp.Components.Pages.Lists.Collaterals
 {
     public partial class CollateralCreateTab
     {
         private readonly ICollateralsServiceImpl _collateralService;
-        private readonly ICustomerService _customerService;
-        public CollateralCreateTab(ICollateralsServiceImpl collateralsService, ICustomerService cuCustomerService)
+
+        public CollateralCreateTab(ICollateralsServiceImpl collateralsService)
         {
             _collateralService = collateralsService;
-            _customerService = cuCustomerService;
         }
 
+        RadzenDataGrid<CollateralLineResponse> personalGrid = default!;
+        RadzenDataGrid<CollateralLineResponse> propertiesGrid = default!;
+        [Parameter]
+        public EventCallback Close { get; set; }
+        [Parameter]
+        public EventCallback SaveChanged { get; set; }
+
+        async void CloseTab()
+        {
+            await Close.InvokeAsync();
+        }
         [Parameter] public Guid? CustomerId { get; set; }
         [Parameter] public string? CustomerName { get; set; } = string.Empty;
-        IEnumerable<VCustomerList>? custlist = new List<VCustomerList>();
+        IEnumerable<VCustomerList> custlist = [];
         IEnumerable<CustomerCollateral> cusName = [];
         IEnumerable<CollateralTypeResponse> CollateralTypes = [];
         IEnumerable<CollateralSubTypeResponse> CollateralProperties = [];
@@ -30,10 +43,11 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
         List<CollateralLineResponse> Properties = [];
         List<CollateralLineResponse> Personals = [];
         EditForm editForm { get; set; } = default!;
-        CollateralTypeDto? SelectCollateralType;
+        CollateralTypeResponse? SelectCollateralType;
         CollateralDtoCreate model { get; set; } = new();
 
-        Guid? CollateralId;
+        Guid? CollateralId = Guid.Empty;
+
         protected override async Task OnInitializedAsync()
         {
             CollateralTypes = await _collateralService.GetCollateralTypes(0);
@@ -43,6 +57,7 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
             allSubTypes = await _collateralService.GetCollateralSubTypes();
             await base.OnInitializedAsync();
         }
+
         string? q = string.Empty;
         protected string? strText = "";
 
@@ -51,7 +66,6 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
 
         void SelectedPeopleChanged()
         {
-
         }
 
         protected override async Task OnParametersSetAsync()
@@ -60,7 +74,7 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
 
             if (customerResponse.IsSuccess)
             {
-                CustomerName = customerResponse!.Data!.AltName;
+                CustomerName = customerResponse!.Data!.EntityNames.AltName;
             }
 
             await base.OnParametersSetAsync();
@@ -73,6 +87,7 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
             {
                 return;
             }
+
             var customerResult = await _collateralService.GetCollateralByCustomerAsync(CustomerId);
 
             if (customerResult.IsSuccess)
@@ -85,17 +100,17 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
                 model.DocumentKeeping = collateral!.DocumentKeeping;
                 model.RegisterDate = collateral!.RegisterDate;
                 Personals = collateral.CollateralLines
-                              .Where(x => x.TypeName == "Personal")
-                              .ToList();
+                    .Where(x => x.TypeName == "Personal")
+                    .ToList();
                 Properties = collateral.CollateralLines
-                                .Where(x => x.TypeName == "Property")
-                                .ToList();
+                    .Where(x => x.TypeName == "Property")
+                    .ToList();
             }
             else
             {
-                CollateralId = 0;
+                CollateralId = Guid.Empty;
                 model!.CustomerName = CustomerName;
-                model.CollateralId = CustomerId.Value;
+                model.CollateralId = CustomerId;
                 model.Remark = "";
                 model.DocumentKeeping = "";
                 model.RegisterDate = DateTime.Now;
@@ -123,8 +138,8 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
                 });
                 propertiesGrid.Reload();
             }
-
         }
+
         private void Remove(CollateralLineResponse row, int type = 3)
         {
             if (type == 3)
@@ -137,7 +152,6 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
                 Properties.Remove(row);
                 propertiesGrid.Reload();
             }
-
         }
 
         ////
@@ -147,11 +161,10 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
             allSubTypes = await _collateralService.GetCollateralSubTypes();
 
             List<CollateralLineResponse> lines = new List<CollateralLineResponse>
-            {
-
-            }.Union(Properties.Where(x => x.SubCategoryRefId > 0))
-            .Union(Personals.Where(x => x.SubCategoryRefId > 0))
-            .ToList();
+                {
+                }.Union(Properties.Where(x => x.SubCategoryRefId > 0))
+                .Union(Personals.Where(x => x.SubCategoryRefId > 0))
+                .ToList();
 
             lines!.ForEach(x =>
             {
@@ -167,17 +180,18 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
 
             if (!CustomerId.HasValue)
             {
-                NotificationService.Notify(Radzen.NotificationSeverity.Warning, "Empty Selected", "Please select customer first");
+                NotificationService.Notify(Radzen.NotificationSeverity.Warning, "Empty Selected",
+                    "Please select customer first");
                 return;
             }
+
             editForm.EditContext?.Validate();
             try
             {
-                var response = await _collateralService.InsertOrUpdate(model);
+                var response = await _collateralService.CreateAsync(model);
 
                 if (response.IsSuccess)
                 {
-
                     NotificationService.Notify(Radzen.NotificationSeverity.Success, response.Data);
                     model = new();
                     await SaveChanged.InvokeAsync();
@@ -190,12 +204,10 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
             catch (Exception ex)
             {
                 NotificationService.Notify(Radzen.NotificationSeverity.Error, ex.Message);
-
             }
         }
 
         #region codes
-
 
         //model!.CollateralLines!.Add(new CollateralLineDTO
         //{
@@ -376,6 +388,7 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
         //        NotificationService.Notify(Radzen.NotificationSeverity.Error, ex.Message);
         //    }
         //}
+
         #endregion
     }
 }

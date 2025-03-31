@@ -1,4 +1,5 @@
-﻿@page "/Customers/Guarantors/{Id:long}/Details"
+﻿@page "/App/Customers/Guarantors/{Id:long}/Details"
+@using Applications.Responses.ViewModels.Loans
 <PageTitle>Guarantor</PageTitle>
 <Containers Fluid>
     <table class="table">
@@ -6,37 +7,37 @@
             <tr>
                 <th class="rz-background-color-base-100 w-25">Name</th>
                 <td>
-                    @Guarantor.GuarantorName
+                    @Guarantor?.GuarantorName
                 </td>
             </tr>
             <tr>
                 <th class="rz-background-color-base-100 w-25">Sex</th>
                 <td>
-                    @Guarantor.Sex
+                    @Guarantor?.Sex
                 </td>
             </tr>
             <tr>
                 <th class="rz-background-color-base-100 w-25">Phone</th>
                 <td>
-                    @Guarantor.Phone
+                    @Guarantor?.Phone
                 </td>
             </tr>
             <tr>
                 <th class="rz-background-color-base-100 w-25">NumberOfLoan</th>
                 <td>
-                    @Guarantor.NumberOfLoan
+                    @Guarantor?.NumberOfLoan
                 </td>
             </tr>
             <tr>
                 <th class="rz-background-color-base-100 w-25 w-25">Address</th>
                 <td>
-                    @Guarantor.ToString()
+                    @Guarantor?.ToString()
                 </td>
             </tr>
             <tr>
                 <th class="rz-background-color-base-100">Status</th>
                 <td>
-                    <RadzenCheckBox Value="@Guarantor.IsActive" ReadOnly />
+                    <RadzenCheckBox Value="@Guarantor?.IsActive" ReadOnly />
                 </td>
             </tr>
         </tbody>

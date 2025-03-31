@@ -1,4 +1,5 @@
 ﻿using Applications.Responses;
+using Applications.Responses.ViewModels.Customers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

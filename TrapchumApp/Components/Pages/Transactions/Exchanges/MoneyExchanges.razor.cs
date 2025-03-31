@@ -1,3 +1,4 @@
+using Applications.Extensions;
 using Applications.Extensions.Maths;
 using Applications.Extensions.NumberExtions;
 using Applications.Interfaces.Currencies;
@@ -247,7 +248,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Exchanges
                 isBusy = false;
                 return;
             }
-            model.UserRefId = UserId;
+            model.UserRefId = UserId.ToGuid();
             model.TranTypeRefId = 67;
             model.TransactionTypeName = "Currency Foreign Exchange";
             //c.StaffRefId = UserId;

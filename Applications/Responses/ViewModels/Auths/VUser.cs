@@ -8,12 +8,13 @@ public class VUser
     public string? Email { get; set; }
     public string? UserName { get; set; }
     public string? RoleName { get; set; }
-    public long? EmployeeId { get; set; }
+    public Guid? EmployeeRefId { get; set; }
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
 
     [NotMapped]
     public string? FullName => $"{FirstName} {LastName}";
+    
     public string? Gender { get; set; }
     public int? BranchId { get; set; }
     public string? BranchName { get; set; }

@@ -14,11 +14,14 @@ namespace Applications.Interfaces.Branches
         Task<Result> UpdateStatusAsync(int? branchId);
         Task<Result> DeleteAsync(int? id);
         Task<Result<Branch>> GetBranchById(int? id);
+        Task<Result<T>> GetBranchById<T>(int? id);
         Task<Result<Branch>> GetBranchForVault(int? id);
-        Task<Result<IEnumerable<VBranch>>> GetBranchesByUser(string userId,int? branchId=0); 
-        Task<Pager<VBranch>> GetBranchesAsync(QueryParam param);
+        Task<Result<IEnumerable<VBranchResponse>>> GetBranchesByUser(string userId, int? branchId);
+        Task<Pager<VBranchResponse>> GetBranchesAsync(QueryParam param);
         Task<Result<ResultStatus>> GetBrachStatus(int? branchRefId);
-        Task<Result<IEnumerable<VBranch>>> GetBranchesAsync(int branchId = 0, int pageSize = 0, bool includeInactive = false, string? filter = null);
-        Task<Result<IEnumerable<VBranch>>> GetBranchesAsync(int branchId = 0, int take = 0, string? filter = null);
+        Task<Result<IEnumerable<VBranchResponse>>> GetBranchesAsync(int? branchId = 0, int? pageSize = 0, bool includeInactive = false, string? filter = null);
+        Task<Result<IEnumerable<T>>> GetBranchesAsync<T>(int? branchId, int? pageSize,
+            bool includeInactive = false, string? filter = null)
+            where T : class;
     }
 }

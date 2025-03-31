@@ -1,9 +1,12 @@
-﻿using Domains.Models.Bases;
+﻿using System.ComponentModel.DataAnnotations;
+using Domains.Models.Bases;
 
 namespace Domains.Models.Lists
 {
     public sealed class EntityName : BaseAddress
     {
+        
+        [Key]
         public Guid EntId { get; set; }
         public string? Name { get; set; } = default!;
         public string? AltName { get; set; } = string.Empty;

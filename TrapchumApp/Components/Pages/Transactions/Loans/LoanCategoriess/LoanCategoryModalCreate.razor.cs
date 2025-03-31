@@ -1,17 +1,26 @@
-using AppilcationServices.Interfaces;
+using Applications.Requests.Loans;
+using Applications.Services.Loans;
 using Microsoft.AspNetCore.Components;
-using TCLMS.Shared.Entities.Dtos.Loans;
+using Radzen;
 
-namespace TCLMS.Front.Pages.Transactions.Loans.LoanCategoriess
+namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanCategoriess
 {
     public partial class LoanCategoryModalCreate
     {
-        [Inject] private ILoanCategoryService? service { get; set; }
+        private readonly ILoanCategoryServiceImpl service;
 
-        protected LoanCategoryDTOCreate model = new LoanCategoryDTOCreate();
+        public LoanCategoryModalCreate(ILoanCategoryServiceImpl service)
+        {
+            this.service = service;
+        }
+
+        LoanCategoryDtoCreate model = new LoanCategoryDtoCreate();
+
         protected bool IsActive = false;
-        protected void Cancel() => DialogService.Close(false);
+        //protected void Cancel() => DialogService.Close(false);
+
         private string? messageName = "";
+
         private string? messageCode = "";
 
         protected async Task OnSaveNew()
@@ -19,30 +28,31 @@ namespace TCLMS.Front.Pages.Transactions.Loans.LoanCategoriess
             try
             {
                 var result = await service!.CreateAsync(model);
+
                 if (result.IsSuccess)
                 {
-                    NotificationService.Notify(Radzen.NotificationSeverity.Success, "Created", "Loan Category created successfully!");
+                    NotificationService.Notify(NotificationSeverity.Success, "Created", "Loan Category created successfully!");
                     model = new();
                     messageName = "";
                     messageCode = "";
                 }
                 else
                 {
-                    if (result.Status == 2)
-                    {
-                        messageName = result.Title;
+                    //if (result.Status == 2)
+                    //{
+                    //    messageName = result.Title;
 
-                    }
-                    else if (result.Status == 3)
-                    {
-                        messageName = "";
-                        messageCode = result.Title;
-                    }
+                    //}
+                    //else if (result.Status == 3)
+                    //{
+                    //    messageName = "";
+                    //    messageCode = result.Title;
+                    //}
                 }
             }
             catch (Exception ex)
             {
-                NotificationService.Notify(Radzen.NotificationSeverity.Error, "Exception", ex.Message);
+                NotificationService.Notify(NotificationSeverity.Error, "Exception", ex.Message);
             }
         }
     }

@@ -1,14 +1,13 @@
-﻿using Applications.Requests.Collaterals;
-using Applications.Requests.Lists.Entities;
-using Applications.Requests.Loans;
+﻿using Applications.Requests.Lists.Entities;
+using Applications.Responses.Collaterals;
 using Applications.Responses.Loans.Disbursements;
 
 namespace Applications.Responses.Loans.LoanRequests
 {
     public sealed class LoanRequestResponse
     {
-        public long Id { get; set; }
-        public long? CustomerRefId { get; set; }
+        public Guid? Id { get; set; }
+        public string? CustomerRefId { get; set; } 
         public int? LoanRequestStatusRefId { get; set; }
         public int? BranchRefId { get; set; }
         public long? RequestUserRefId { get; set; }
@@ -43,6 +42,6 @@ namespace Applications.Responses.Loans.LoanRequests
         public string? OtherChargName { get; set; } = string.Empty;
         public ICollection<LoanDocumentsResponse>? LoanDocuments { get; set; } = [];
         public ICollection<OtherNameDto>? Guarantors { get; set; } = [];
-        public ICollection<CollateralLineDto> CollateralLines { get; set; } = [];
+        public ICollection<CollateralLineResponse> CollateralLines { get; set; } = [];
     }
 }

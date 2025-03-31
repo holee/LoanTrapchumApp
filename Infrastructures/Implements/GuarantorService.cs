@@ -1,3 +1,4 @@
+using Applications.Extensions;
 using Applications.Interfaces.Lists;
 using Applications.Requests.Lists.Entities;
 using Applications.Responses;
@@ -60,7 +61,7 @@ public class GuarantorService : IGuarantorService
             return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}"));
         }
     }
-    public async Task<Result<string>> DeleteGaurantorAsync(long id)
+    public async Task<Result<string>> DeleteGaurantorAsync(Guid? id)
     {
         try
         {
@@ -92,7 +93,7 @@ public class GuarantorService : IGuarantorService
             return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}"));
         }
     }
-    public async Task<Result<EntityName>> GetGuarantorByIdAsync(long id)
+    public async Task<Result<EntityName>> GetGuarantorByIdAsync(Guid? id)
     {
         var guarantors = _context.OtherNames.Where(x => x.EntId == id);
 
@@ -140,7 +141,7 @@ public class GuarantorService : IGuarantorService
         return Result.Success(new Pager<VGuarantor>(items, counts));
 
     }
-    public async Task<Result<IEnumerable<VGuarantor>>> GetGuarantorsAsync(long id, bool allGuarantors = true, string? q = null)
+    public async Task<Result<IEnumerable<VGuarantor>>> GetGuarantorsAsync(Guid? id, bool allGuarantors = true, string? q = null)
     {
 
         var guarantors = _context.Database.SqlQuery<VGuarantor>($"SELECT * FROM VGuarantors");
@@ -154,7 +155,7 @@ public class GuarantorService : IGuarantorService
         {
             guarantors = guarantors.Where(x => x.IsActive == false);
         }
-        if (id > 0)
+        if (id.IsNotNullOrEmpty())
         {
             guarantors = guarantors.Where(x => x.Id == id);
         }
@@ -169,7 +170,7 @@ public class GuarantorService : IGuarantorService
 
     }
 
-    public async Task<Result<VGuarantor>> GetGuarantorByIdAsync(long id, bool allGuarantors = false, bool include = true)
+    public async Task<Result<VGuarantor>> GetGuarantorByIdAsync(Guid? id, bool allGuarantors = false, bool include = true)
     {
         var guarantors = _context.Database.SqlQuery<VGuarantor>($"SELECT * FROM VGuarantors");
 
@@ -177,7 +178,7 @@ public class GuarantorService : IGuarantorService
         {
             guarantors = guarantors.Where(x => x.IsActive == false);
         }
-        if (id > 0)
+        if (id.IsNotNullOrEmpty())
         {
             guarantors = guarantors.Where(x => x.Id == id);
         }

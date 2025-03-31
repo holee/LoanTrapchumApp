@@ -1,28 +1,34 @@
+using Applications.Extensions.mappers;
+using Applications.Requests.Lists.Holidays;
+using Applications.Services.Lists;
 using Microsoft.AspNetCore.Components;
-using TCLMS.Shared.Entities.Dtos.Lists.Holidays;
-using TCLMS.Shared.Entities.Models.Lists.Employees;
-
-namespace TCLMS.Front.Pages.Lists.Holidays
+namespace TrapchumApp.Components.Pages.Lists.Holidays
 {
     public partial class CreateHolidayModal
     {
 
+        private readonly IHolidayServiceImpl _holidayService;
+
+        public CreateHolidayModal(IHolidayServiceImpl holidayService)
+        {
+            _holidayService = holidayService;
+        }
 
         private List<HolidayCreateDto> model = new List<HolidayCreateDto>();
-        private HolidayCreateDto? modelDTO = new();
+        private HolidayCreateDto modelDTO = new();
         private IEnumerable<HolidayDto> listvm = new List<HolidayDto>();
 
         DateTime currentdt = DateTime.Now;
-        bool IsMultiYear=false;
+        bool IsMultiYear = false;
         bool IsDisible = true;
         bool visibled = false;
         //DateTime? selectedDates=DateTime.Now;
         protected DateTime? SelectedDate;
-        protected List<DateTime?>? Years=[];
-        protected DateTime Year=DateTime.Now;
-        protected int? endYear=null;
- 
-        
+        protected List<DateTime?>? Years = [];
+        protected DateTime Year = DateTime.Now;
+        protected int? endYear = null;
+
+
         protected override async Task OnInitializedAsync()
         {
             SelectedDate = DateTime.Now;
@@ -33,7 +39,7 @@ namespace TCLMS.Front.Pages.Lists.Holidays
         }
         protected override async Task OnParametersSetAsync()
         {
-            
+
             await base.OnParametersSetAsync();
         }
         void MultiYear()
@@ -48,11 +54,12 @@ namespace TCLMS.Front.Pages.Lists.Holidays
                 IsDisible = true;
                 return;
             }
-            
+
         }
-        private async void SelectedDateChanged()
+        private void SelectedDateChanged()
         {
             modelDTO.Status = true;
+
             if (listvm.Any())
             {
 
@@ -90,7 +97,7 @@ namespace TCLMS.Front.Pages.Lists.Holidays
                 {
                     if (endYear > 20)
                     {
-                        NotificationService.Notify(Radzen.NotificationSeverity.Warning, "Over Year","Create Multi-Year support between 1 to 20 years");
+                        NotificationService.Notify(Radzen.NotificationSeverity.Warning, "Over Year", "Create Multi-Year support between 1 to 20 years");
                         return;
                     }
                     Year = SelectedDate!.Value;
@@ -108,19 +115,18 @@ namespace TCLMS.Front.Pages.Lists.Holidays
 
                 }
                 modelDTO!.HolidayName = SelectedDate;
-                var e = await _holidayService.CreateHoliday(modelDTO);
-                if (e.IsSuccess == true)
+                var rsp = await _holidayService.CreateHoliday(modelDTO);
+                if (rsp.IsSuccess == true)
                 {
 
                     await GetHolidays(modelDTO.HolidayName);
-                    NotificationService.Notify(Radzen.NotificationSeverity.Success, e.Data!.Message);
+                    NotificationService.Notify(Radzen.NotificationSeverity.Success, rsp.Data);
                     modelDTO = new();
-                    visibled=false;
+                    visibled = false;
                 }
                 else
                 {
-                    var error = e.Errors!.FirstOrDefault();
-                    NotificationService.Notify(Radzen.NotificationSeverity.Error, error);
+                    NotificationService.Notify(Radzen.NotificationSeverity.Error, rsp.ErrMessage);
                     modelDTO = new();
                     visibled = false;
 
@@ -139,8 +145,12 @@ namespace TCLMS.Front.Pages.Lists.Holidays
         {
             try
             {
-                listvm = await _holidayService.GetHolidays(dt);
-                
+                var rsp = await _holidayService.GetHolidays(dt);
+                if (rsp.Any())
+                {
+                    listvm = rsp.Maps<HolidayDto>();
+                }
+
             }
             catch (Exception e)
             {
@@ -166,7 +176,7 @@ namespace TCLMS.Front.Pages.Lists.Holidays
                     if (deleteResponse.IsSuccess)
                     {
                         await GetHolidays(SelectedDate);
-                        NotificationService.Notify(Radzen.NotificationSeverity.Success, deleteResponse.Data!.Message);
+                        NotificationService.Notify(Radzen.NotificationSeverity.Success, deleteResponse.Data);
                     }
                     else
                     {
@@ -181,6 +191,41 @@ namespace TCLMS.Front.Pages.Lists.Holidays
                 }
 
             }
+        }
+
+
+        [Parameter] public EventCallback Closed { get; set; }
+        void DateChangedEvt(DateTime? d)
+        {
+            Console.WriteLine(d!.Value);
+        }
+        private async Task CloseTab()
+        {
+            await Closed.InvokeAsync();
+        }
+
+        void OnSelectRow(HolidayDto holiday)
+        {
+            if (holiday != null)
+            {
+                SelectedDate = holiday.HolidayName;
+                modelDTO.Id = holiday.Id;
+                modelDTO.HolidayName = holiday.HolidayName;
+                modelDTO.Description = holiday.Description;
+                modelDTO.Status = holiday.Status;
+            }
+        }
+        async void ChangedDate(DateTime dt)
+        {
+            Console.WriteLine("Change date...:" + dt.ToLongDateString());
+            if (dt.Month != currentdt.Month)
+            {
+                await GetHolidays(dt);
+                modelDTO = new();
+                currentdt = dt;
+            }
+            StateHasChanged();
+
         }
     }
 }

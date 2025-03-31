@@ -38,7 +38,7 @@ public sealed class Loan : BaseEntity
     public int? InstallmentTypeId { get; set; }
     public int? DaysExceed { get; set; }
     public int? FundId { get; set; }
-    public long? CreditAgentRefId { get; set; }
+    public Guid? CreditAgentRefId { get; set; }
     public int? GracePeriodNo { get; set; }
     public int? GracePeriodTypeRefId { get; set; }
     public int? PaidInstallment { get; set; }

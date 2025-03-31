@@ -1,5 +1,4 @@
-﻿@using TCLMS.Shared.Entities.Dtos.Lists.Holidays
-<RadzenStack Orientation="Orientation.Horizontal"
+﻿<RadzenStack Orientation="Orientation.Horizontal"
              AlignItems="AlignItems.Center">
     <RadzenStack Orientation="Orientation.Horizontal" class="w-100">
         <RadzenDatePicker Inline
@@ -41,7 +40,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var item in listvm.OrderBy(e => e.HolidayName) ?? Enumerable.Empty<HolidayDto>())
+            @foreach (var item in listvm.OrderBy(e => e.HolidayName))
             {
                 var index = listvm.OrderBy(e => e.HolidayName).ToList().IndexOf(item) + 1;
                 <tr>
@@ -73,32 +72,4 @@
                   Size="Radzen.ButtonSize.Small" />
 </RadzenStack>
 
-@code {
-    IReadOnlyList<DateTime?> selectedDates = [];
-    private IEnumerable<HolidayDto> listvm = new List<HolidayDto>();
 
-    private async void SelectedDateChanged()
-    {
-        if (selectedDates.Any())
-        {
-           // SelectedDate = selectedDates.OrderByDescending(x => x).FirstOrDefault();
-        }
-        else
-        {
-           // SelectedDate = null;
-        }
-
-       // await GetHolidays(SelectedDate);
-
-        if (listvm.Any())
-        {
-            selectedDates = listvm.Select(x => x.HolidayName).ToList();
-        }
-        else
-        {
-            selectedDates.ToList().Clear();
-        }
-
-
-    }
-}

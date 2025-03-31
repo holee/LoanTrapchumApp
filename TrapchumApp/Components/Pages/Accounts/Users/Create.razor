@@ -2,7 +2,7 @@
     <EditForm Model="model" @ref="form">
         <FluentValidationValidator DisableAssemblyScanning="true" />
         <RadzenStack Gap="0.5rem;"
-                     Orientation="Radzen.Orientation.Vertical">
+                     Orientation="Orientation.Vertical">
             <div class="row">
                 <div class="col-sm-2 col-form-label">Branch</div>
                 <div class="col-sm-10">
@@ -74,19 +74,19 @@
             </div>
         </RadzenStack>
         <RadzenStack AlignItems="AlignItems.Center"
-                     Orientation="Radzen.Orientation.Horizontal"
-                     JustifyContent="Radzen.JustifyContent.End"
+                     Orientation="Orientation.Horizontal"
+                     JustifyContent="JustifyContent.End"
                      class="rz-my-3">
             <RadzenButton ButtonStyle="ButtonStyle.Success"
                           Click="SubmitForm"
                           Icon="save"
                           Text="Save"
-                          Size="Radzen.ButtonSize.Small" />
+                          Size="ButtonSize.Small" />
             <RadzenButton ButtonStyle="ButtonStyle.Danger"
                           Icon="close"
                           Text="Cancel"
                           Click="@(()=>DialogService.Close(false))"
-                          Size="Radzen.ButtonSize.Small" />
+                          Size="ButtonSize.Small" />
         </RadzenStack>
     </EditForm>
 </RadzenCard>

@@ -1,7 +1,7 @@
 using Applications.Enumerations;
 using Applications.Extensions;
 using Applications.Extensions.LoanCalculators;
-using Applications.Requests.Collaterals;
+using Applications.Requests.Lists.Collaterals;
 using Applications.Requests.Lists.Entities.Guarantors;
 using Applications.Requests.Loans.CreditAgents;
 using Applications.Requests.Loans.Disbursements;
@@ -26,13 +26,6 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 {
     public partial class LoanRequestEdit
     {
-        private readonly ILoanRequestServiceImpl _loanRequestService;
-
-        public LoanRequestEdit(ILoanRequestServiceImpl loanRequestService)
-        {
-            _loanRequestService = loanRequestService;
-        }
-
         [Parameter, SupplyParameterFromQuery] public int BranchId { get; set; }
         [Parameter, SupplyParameterFromQuery] public Guid? UserId { get; set; }
         [Parameter] public Guid? CustomerId { get; set; }
@@ -47,7 +40,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
         IEnumerable<SelectedCreditAgent>? CreditAgents = [];
         IEnumerable<CollateralLineDtoCreate>? CollateralLines = [];
         IEnumerable<CollateralLineDtoCreate>? SelectedCollateralLines = [];
-        IEnumerable<VBranch> Branches = Enumerable.Empty<VBranch>();
+        IEnumerable<VBranchResponse> Branches = Enumerable.Empty<VBranchResponse>();
         List<VLoanRequestGuarantors> Guarantors = [];
         List<VLoanRequestCollateralLines> Collaterals = [];
         List<VLoanRequestsDocuments> Documents = [];
@@ -260,7 +253,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
             var collateralLines = results.Select(c => new VLoanRequestCollateralLines
             {
                 CollateralLineId = c.Id,
-                CollateralId = c.CollateralId,
+                CollateralId = c.CollateralId!.ToGuid(),
                 TypeName = c.TypeName,
                 OwnerName = c.OwnerName,
                 ReferenceNo = c.ReferenceNo,

@@ -1,9 +1,10 @@
-﻿<RadzenDataGrid Density="Density.Compact"
-                TItem="CollateralLineDto"
+﻿@using Applications.Responses.Collaterals
+@using Applications.Requests.Collaterals
+<RadzenDataGrid Density="Density.Compact"
+                TItem="CollateralLineResponse"
                 Responsive
                 ColumnWidth="15rem"
                 @ref="propertiesGrid"
-                Style="--rz-grid-header-background-color:var(--rz-base-200)"
                 Data="Properties">
     <HeaderTemplate>
         <RadzenButton Size="Radzen.ButtonSize.Small"
@@ -120,13 +121,4 @@
         </RadzenDataGridColumn>
     </Columns>
 </RadzenDataGrid>
-@code {
-    RadzenDataGrid<CollateralLineDto> propertiesGrid = default!;
-    IEnumerable<CollateralSubTypeDto> CollateralProperties = [];
-    List<CollateralLineDto> Properties = [];
-    void SelectedPeopleChanged()
-    {
 
-    }
-
-}

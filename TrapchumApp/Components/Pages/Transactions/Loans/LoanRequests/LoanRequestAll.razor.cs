@@ -61,7 +61,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
             {"BranchId",BranchId},
             {"UserId",UserId},
             { "ActionMode",ActionMode.Create}
-        }.AddQueryString($"/Loan/Customer/Request");
+        }.AddQueryString($"/App/Loan/Customer/Request");
             base.OnParametersSet();
         }
 
@@ -105,14 +105,14 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 
         async Task GetLoanRequestAsync()
         {
-            if (CanDisburseLoan)
-            {
+            // if (CanDisburseLoan)
+            // {
                 await GetLoanRequestAsync(null);
-            }
-            else
-            {
-                await GetLoanRequestAsync(UserId);
-            }
+            // }
+            // else
+            // {
+            //     await GetLoanRequestAsync(UserId);
+            // }
         }
 
 

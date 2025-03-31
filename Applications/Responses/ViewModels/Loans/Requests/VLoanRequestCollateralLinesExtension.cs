@@ -1,10 +1,11 @@
-﻿using Domains.Models.Collaterals;
+﻿using Applications.Requests.Lists.Collaterals;
+using Domains.Models.Collaterals;
 
 namespace Applications.Responses.ViewModels.Loans.Requests;
 
 public static class VLoanRequestCollateralLinesExtension
 {
-    public static List<CollateralLinkDtoCreate> CollateralLinkDtoCreate(this IEnumerable<VLoanRequestCollateralLines> cols, int branchId, long loanRequestId)
+    public static List<CollateralLinkDtoCreate> CollateralLinkDtoCreate(this IEnumerable<VLoanRequestCollateralLines> cols, int branchId, Guid? loanRequestId)
     {
         return cols.Select(c => new CollateralLinkDtoCreate
         {

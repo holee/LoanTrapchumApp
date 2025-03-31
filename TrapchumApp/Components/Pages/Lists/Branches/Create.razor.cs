@@ -20,13 +20,13 @@ namespace TrapchumApp.Components.Pages.Lists.Branches
         protected IEnumerable<CommuneDto>? communeList;
         protected IEnumerable<DistrictDto>? districtList;
         protected IEnumerable<VillageDto>? villageList;
-        protected IEnumerable<BankDto>? bankList;
+        protected IEnumerable<BankResponse>? bankList;
         protected IEnumerable<string>? Cities;
         protected ProvinceDto? SelectedProvince;
         protected DistrictDto? SelectedDistrict;
         protected CommuneDto? SelectedCommune;
         protected VillageDto? SelectedVillage;
-        protected BankDto? SelectedBank;
+        protected BankResponse? SelectedBank;
         protected IEnumerable<Country>? Countries = new List<Country>();
         protected IEnumerable<string>? strCountries = new List<string>();
 
@@ -39,7 +39,7 @@ namespace TrapchumApp.Components.Pages.Lists.Branches
             var results = await bankService!.GetAllAsync();
             if (results.Any())
             {
-                bankList = results.Adapt<IEnumerable<BankDto>>();
+                bankList = results.Adapt<IEnumerable<BankResponse>>();
             }
             await base.OnInitializedAsync();
         }

@@ -10,7 +10,7 @@ public sealed class RegisterRequest
     public string ConfirmPassword { get; set; } = string.Empty;
     public string RoleName { get; set; } = string.Empty;
     public int BranchRefId { get; set; } = 0;
-    public long EmployeeId { get; set; } = 0;
+    public Guid? EmployeeId { get; set; } = Guid.Empty;
     public FileUploadModel? FileUpload { get; set; }
 
 }

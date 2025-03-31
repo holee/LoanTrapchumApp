@@ -1,3 +1,4 @@
+using Applications.Extensions;
 using Applications.Extensions.Identity;
 using Applications.Extensions.Maths;
 using Applications.Extensions.NumberExtions;
@@ -34,8 +35,8 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
     };
         [Parameter] public VSchedule LoanPayment { set; get; } = new();
         [Parameter] public int CurrencyId { set; get; } = 1;
-        [Parameter] public long LoanId { set; get; }
-        [Parameter] public long CreditAgentId { set; get; }
+        [Parameter] public Guid? LoanId { set; get; }
+        [Parameter] public Guid? CreditAgentId { set; get; }
         [Parameter] public Guid? UserId { set; get; }
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
         decimal? appliedAmountUSD = 0;
@@ -91,7 +92,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
 
         void GetTotalPaidAmount()
         {
-            if (LoanPayment.LoanId == 0) return;
+            if (LoanPayment.LoanId.IsNullOrEmpty()) return;
             paidAmount = LoanPayment.TotalPay;
             penaltyAmount = LoanPayment.PenaltyAmount.RoundUp(2, CurrencyId);
             totalPenaltyAmount = penaltyAmount;

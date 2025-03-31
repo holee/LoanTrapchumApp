@@ -23,7 +23,7 @@ public partial class PaymentDetails
     [Parameter, SupplyParameterFromQuery] public int BranchId { get; set; }
     [Parameter, SupplyParameterFromQuery] public int CurrencyId { get; set; }
     [Parameter, SupplyParameterFromQuery] public long CreditAgentId { get; set; }
-    [Parameter, SupplyParameterFromQuery] public long UserId { get; set; }
+    [Parameter, SupplyParameterFromQuery] public Guid? UserId { get; set; }
     [Parameter] public Guid LoanId { get; set; }
     private VLoanDisbursments? loanSchedule = new();
     IList<VSchedule> SelectedSchedules = [];
@@ -251,7 +251,7 @@ public partial class PaymentDetails
         }
         if (item.Value == "3")//recieve payment
         {
-            NavigationManager.NavigateTo($@"/Loans/Repayment/{LoanId}?BranchId={BranchId}&CreditAgentId={CreditAgentId}&CurrencyId={CurrencyId}&UserId={userId}");
+            NavigationManager.NavigateTo($@"/Loans/Repayment/{LoanId}?BranchId={BranchId}&CreditAgentId={CreditAgentId}&CurrencyId={CurrencyId}&UserId={UserId}");
             return;
         }
     }

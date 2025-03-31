@@ -33,7 +33,7 @@
                         @*  </RadzenFormField> *@
 
                     </div>
-                    
+
                     <div class="col-md-3 text-md-end mt-3">
                         <RadzenLabel>Record Status</RadzenLabel>
                     </div>
@@ -46,7 +46,7 @@
             <div class="card-header bg-primary">Optional Informations: <span class="text-sm">All below fields are optional</span></div>
             <div class="card-body">
                 <div class="row">
-                   
+
                     <div class="col-md-3 text-md-end mt-3">
                         <RadzenLabel>First Name</RadzenLabel>
                     </div>
@@ -90,9 +90,9 @@
                                                aria-labelledby="DropDownEditLabel" />
                             </ValueTemplate>
                         </RadzenDropDown>
-                       
+
                     </div>
-                   
+
                     <div class="col-md-3 text-md-end mt-3">
                         <RadzenLabel>Contact Number</RadzenLabel>
                     </div>
@@ -136,10 +136,10 @@
                     </span>
                     <div class="text-center">
                         <strong class="text-white" style="cursor:pointer;" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne">Click here</strong>
-                        
+
                     </div>
                 </div>
-                
+
             </div>
             <div class="accordion accordion-flush" id="accordionFlushExample">
                 <div class="accordion-item">
@@ -147,7 +147,7 @@
                     <div id="flush-collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
                         <div class="accordion-body">
                             <div class="row">
-                                
+
                                 <div class="col-md-3 text-md-end mt-3">
                                     <RadzenLabel>Province</RadzenLabel>
                                 </div>
@@ -228,17 +228,19 @@
             </div>
             <div class="d-flex justify-content-end my-3 gap-3 mr-3">
                 <div>
-                    <TButton Color="Kalor.Success"
-                             Size="BtnSize.Small"
-                             Icon="BtnIconType.Save"
-                             Role="BtnType.Submit"
-                             Text="Save" />
+                    <RadzenButton ButtonStyle="ButtonStyle.Success"
+                                  Size="ButtonSize.ExtraSmall"
+                                  Icon="save"
+                                  ButtonType="ButtonType.Submit"
+                                  Text="Save" />
                 </div>
                 <div>
-                    <TButton Click="SelectedIndex"
-                             Color="Kalor.Danger"
-                             Icon="BtnIconType.Back" Text="Cancel"
-                             Size="BtnSize.Small" />
+                    <RadzenButton ButtonStyle="ButtonStyle.Danger"
+                                  Size="ButtonSize.ExtraSmall"
+                                  Icon="save"
+                                  Click="SelectedIndex"
+                                  ButtonType="ButtonType.Submit"
+                                  Text="Save" />
                 </div>
             </div>
         </div>

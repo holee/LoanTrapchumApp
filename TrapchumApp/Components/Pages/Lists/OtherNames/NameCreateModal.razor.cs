@@ -1,20 +1,24 @@
-using AppilcationServices.Interfaces;
-using ApplicationServices.Interfaces;
+using Applications.Interfaces.Addresses;
+using Applications.Interfaces.Lists;
+using Applications.Requests.Lists.Addreses;
+using Applications.Requests.Lists.OtherNames;
+using Applications.Services.Lists;
+using Domains.Models.Lists;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
-using TCLMS.Front.Core.Validations;
-using TCLMS.Shared.Entities.Constants.Others;
-using TCLMS.Shared.Entities.Dtos.Lists;
-using TCLMS.Shared.Entities.Dtos.Lists.Addreses;
-using TCLMS.Shared.Entities.Dtos.Lists.OtherNames;
-using TCLMS.Shared.Entities.Models.Lists;
 
-namespace TCLMS.Front.Pages.Lists.OtherNames
+namespace TrapchumApp.Components.Pages.Lists.OtherNames
 {
     public partial class NameCreateModal
     {
+        private readonly IOtherNameServiceImpl _otherNameService;
+        public NameCreateModal(IOtherNameServiceImpl otherNameService)
+        {
+            _otherNameService = otherNameService;
+        }
+
         private EntNameDtoCreate model = new EntNameDtoCreate();
-        private CustomValidation? customValidation;
+
         [Parameter] public IEnumerable<ProvinceDto>? ProvinceList { get; set; }
         [Parameter] public IEnumerable<CommuneDto>? CommuneList { get; set; }
         [Parameter] public IEnumerable<DistrictDto>? DistrictList { get; set; }
@@ -49,7 +53,7 @@ namespace TCLMS.Front.Pages.Lists.OtherNames
                 model.EntType = "Other Name";
                 model.CountryName = "Cambodia";
                 model.City = SelectedProvince?.ProDescription;
-                model.ProvinceRefId = SelectedProvince?.ProvinceID;
+                model.ProvinceRefId = SelectedProvince?.ProvinceId;
                 model.ProDescription = SelectedProvince?.ProDescription;
                 model.ProInKhmer = SelectedProvince?.ProInKhmer;
                 model.DistrictRefId = SelectedDistrict?.DistrictId;
@@ -61,7 +65,9 @@ namespace TCLMS.Front.Pages.Lists.OtherNames
                 model.VillageRefId = SelectedVillage?.VillageId;
                 model.VillDescription = SelectedVillage?.VillDescription;
                 model.VilInKhmer = SelectedVillage?.VilInKhmer;
+
                 var message = await _otherNameService!.CreateAsync(model);
+
                 if (message.IsSuccess)
                 {
                     NotificationService.Notify(Radzen.NotificationSeverity.Success, "Other Name", "Other Name created successfully!");
@@ -87,7 +93,7 @@ namespace TCLMS.Front.Pages.Lists.OtherNames
             if (SelectedProvince is not null)
             {
 
-                DistrictList = await _addressService!.GetDistrictByProvinceAsync(SelectedProvince.ProvinceID);
+                DistrictList = await _addressService!.GetDistrictsByProvinceId(SelectedProvince.ProvinceId);
             }
             else
             {
@@ -102,7 +108,7 @@ namespace TCLMS.Front.Pages.Lists.OtherNames
             if (e is not null)
             {
                 SelectedDistrict = e;
-                CommuneList = await _addressService!.GetCommuneByDistricteAsync(SelectedDistrict.DistrictId);
+                CommuneList = await _addressService!.GetCommunesByDistrictId(SelectedDistrict.DistrictId);
             }
             else
             {
@@ -116,7 +122,7 @@ namespace TCLMS.Front.Pages.Lists.OtherNames
             if (e is not null)
             {
                 SelectedCommune = e;
-                VillageList = await _addressService!.GetVillageByCommuneAsync(SelectedCommune.CommuneId);
+                VillageList = await _addressService!.GetVillagesByCommuneId(SelectedCommune.CommuneId);
             }
             else
             {

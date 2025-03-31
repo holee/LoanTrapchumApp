@@ -5,8 +5,10 @@ using Applications.Interfaces.Branches;
 using Applications.Interfaces.Currencies;
 using Applications.Interfaces.Customers;
 using Applications.Interfaces.Employees;
+using Applications.Interfaces.Files;
 using Applications.Interfaces.Identity;
 using Applications.Interfaces.Lists;
+using Applications.Interfaces.Loans;
 using Applications.Interfaces.setting;
 using Applications.Interfaces.Transactions;
 using Infrastructures.DataAccess;
@@ -51,9 +53,12 @@ namespace Infrastructures.DependencyInjects
             services.TryAddTransient<IJournalService, JournalService>();
             services.TryAddTransient<ISpotRateService, SpotRateService>();
             services.TryAddTransient<ILedgerService, LedgerService>();
+            services.TryAddTransient<ILoanService, LoanService>();
+            services.TryAddTransient<ILoanRequestService, LoanRequestService>();
             services.TryAddTransient<IUserService, UserService>();
             services.TryAddTransient<IRoleService, RoleService>();
             services.TryAddTransient<IOpenBranchService, OpenBranchService>();
+            services.TryAddTransient<IOccupationService, OccupationService>();
             services.TryAddTransient<ILoginService, LoginService>();
             services.TryAddTransient<IBranchService, BranchService>();
             services.TryAddTransient<IBankService, BankService>();
@@ -62,12 +67,19 @@ namespace Infrastructures.DependencyInjects
             services.TryAddTransient<IEntityNameService, EntityNameService>();
             services.TryAddTransient<IAddressService, AddressService>();
             services.TryAddTransient<ICashVaultService, CashVaultService>();
+            services.TryAddTransient<ICashVaultService, CashVaultService>();
             services.TryAddTransient<ICustomerService, CustomerService>();
+            services.TryAddTransient<ICollateralsService, CollateralsService>();
             services.TryAddTransient<ICurrencyService, CurrencyService>();
             services.TryAddTransient<ICreditAgentService, CreditAgentService>();
             services.TryAddTransient<ICustomerIncomeExpendService, CustomerIncomeExpendService>();
+            services.TryAddTransient<IHolidayService, HolidayService>();
             services.TryAddTransient<ISettingService, SettingService>();
-            services.TryAddTransient<IDapperConnectionFactory, DapperConnectionFactory>();
+            services.TryAddTransient<ILoanSettingService, LoanSettingService>();
+            services.TryAddTransient<ISalutationService,SalutaionService>();
+            services.TryAddTransient<INationalityService,NationalityService>();
+            services.TryAddTransient<IFileUploadService, FileUploadService>();
+            services.AddScoped<IDapperConnectionFactory, DapperConnectionFactory>();
             return services;
 
         }

@@ -18,7 +18,7 @@ namespace Infrastructures.Implements
             _context = context;
         }
 
-        public async Task<Result> AddCreditAgent(long employeeId, LoanCreditAgent req)
+        public async Task<Result> AddCreditAgent(Guid? employeeId, LoanCreditAgent req)
         {
             try
             {
@@ -41,7 +41,7 @@ namespace Infrastructures.Implements
                 if (emp is null)
                     return Result.Failure(ErrorResponse.NotFound("There is no employee selected yet!."));
 
-                emp.AddCreditAgent(req);
+                emp.LoanCreditAgent = req;
 
                 await _context.SaveChangesAsync();
 
@@ -151,13 +151,22 @@ namespace Infrastructures.Implements
             }
             return await queries.AsNoTracking().ToListAsync();
         }
-        private bool IsAlreadyCreditAgent(long empId)
+        private bool IsAlreadyCreditAgent(Guid? empId)
         {
             return _context.LoanCreditAgents
                             .Where(x => x.EmployeeRefId == empId)
                                 .Any();
         }
 
+        Task<Result<string>> ICreditAgentService.AddCreditAgent(long employeeRefId, LoanCreditAgent req)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<Result<string>> ICreditAgentService.ActivateOrDeactivateCreditAgent(LoanCreditAgent req)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
 

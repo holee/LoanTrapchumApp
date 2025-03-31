@@ -15,7 +15,7 @@ namespace TrapchumApp.Components.Pages.Lists.OtherNames
             _gService = guarantorService;
         }
 
-        [Parameter] public long Id { get; set; }
+        [Parameter] public Guid? Id { get; set; }
         [Parameter] public EventCallback Refresh { get; set; }
         [Parameter] public RenderFragment? ChildContent { get; set; }
         VGuarantor? Guarantor = new VGuarantor();
@@ -24,7 +24,7 @@ namespace TrapchumApp.Components.Pages.Lists.OtherNames
         {
             await base.OnInitializedAsync();
 
-            var resultResponse = await _gService.GetGuarantorsAsync(Id, false, true);
+            var resultResponse = await _gService.GetGuarantorByIdAsync(Id, false);
 
             if (resultResponse.IsSuccess)
             {
@@ -32,10 +32,8 @@ namespace TrapchumApp.Components.Pages.Lists.OtherNames
                 LoanGuarantors = resultResponse.Data!.LoanGuarantors;
                 return;
             }
-
-            var message = resultResponse.Errors!.First();
-
-            NotificationService.Notify(NotificationSeverity.Error, message);
+            
+            NotificationService.Notify(NotificationSeverity.Error, resultResponse.ErrMessage);
         }
 
         private async void Reload()

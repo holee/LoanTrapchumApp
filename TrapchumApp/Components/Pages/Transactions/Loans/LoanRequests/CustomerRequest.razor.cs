@@ -1,19 +1,13 @@
 using Applications.Extensions;
 using Applications.Interfaces.Customers;
 using Applications.Responses;
+using Applications.Responses.ViewModels.Customers;
 using Microsoft.AspNetCore.Components;
 
 namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 {
     public partial class CustomerRequest
     {
-        private readonly ICustomerService _customerService;
-
-        public CustomerRequest(ICustomerService customerService)
-        {
-            _customerService = customerService;
-        }
-
         [Parameter] public Guid? CustomerId { get; set; }
         [Parameter] public VCustomerList? Customer { get; set; } = new();
         protected override async Task OnParametersSetAsync()

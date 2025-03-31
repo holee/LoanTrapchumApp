@@ -1,10 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using Applications.Responses.ViewModels.Customers;
 
 namespace Applications.Responses.ViewModels.Loans.Requests;
 
 public sealed class VLoanRequests
 {
-    public long LoanRequestId { get; set; }
+    public Guid? LoanRequestId { get; set; }
     public DateTime? RequestDate { get; set; }
     public decimal? RequestAmount { get; set; }
     public decimal? AprovedAmount { get; set; } 
@@ -21,13 +22,13 @@ public sealed class VLoanRequests
     public string? CurrencyName { get; set; }
     public int? StatusId { get; set; }
     public string? Status { get; set; }
-    public long CreditAgentId { get; set; }
-    public string? UserRequestId { get; set; } 
+    public Guid? CreditAgentId { get; set; }
+    public Guid? UserRequestId { get; set; } 
     public string? UserName { get; set; }
     public int? BankId { get; set; }
     public int? BranchId { get; set; }
     public string? BranchName { get; set; }
-    public long? CustomerId { get; set; }
+    public Guid? CustomerId { get; set; }
     public string? AltName { get; set; }
     public string? FullName { get; set; }
     public decimal? AdminFeeRate { get; set; }

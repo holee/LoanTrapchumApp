@@ -10,11 +10,8 @@ namespace Applications.Services.Settings
     {
         Task<Result<string>> ApplyUserLoanSizeAsync(UserLoanSize model);
         Task<Result<string>> DeActivateUserLoanSizeAsync(Guid? id);
-        Task<Result<string>> Delete(int id);
-        Task<Result<string>> Delete(int? id);
-        Task<Result<IEnumerable<AprovePerson>>> GetAproveUserAsync(int branchId, string? filterValue = null);
-        Task<Result<IEnumerable<AprovePerson>>> GetAproveUserAsync(int? branchId, string? filterValue = null);
-        Task<Result<SysSettings>> GetSysSettingByCode(int id);
+        Task<Result<string>> Delete(Guid? id);
+        // Task<Result<IEnumerable<AprovePerson>>> GetAproveUserAsync(int? branchId, string? filterValue = null);
         Task<Result<SysSettings>> GetSysSettingByCode(int? id);
         Task<Result<SysSettings>> GetSysSettingByCode(string code);
         Task<Result<IEnumerable<SysSettings>>> GetSysSettings(string? filterValue = null);
@@ -34,12 +31,7 @@ namespace Applications.Services.Settings
             throw new NotImplementedException();
         }
 
-        public Task<Result<string>> Delete(int id)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<Result<string>> Delete(int? id)
+        public Task<Result<string>> Delete(Guid? id)
         {
             throw new NotImplementedException();
         }
@@ -55,11 +47,6 @@ namespace Applications.Services.Settings
         }
 
         public Task<Result<SysSettings>> GetSysSettingByCode(string code)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<Result<SysSettings>> GetSysSettingByCode(int id)
         {
             throw new NotImplementedException();
         }

@@ -1,16 +1,43 @@
 ﻿using Applications.Interfaces.Loans;
+using Applications.Requests.Loans.Products;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Products;
 using Domains.Models.Loans;
+using Mapster;
 
 namespace Applications.Services.Loans
 {
-    public sealed class LoanProductService(ILoanProductService pService) : ILoanProductService
+    public interface ILoanProductServiceImpl
     {
-        public async Task<Result<string>> CreateAsync(LoanProduct model)
+        Task<Result<string>> CreateAsync(LoanProductDtoCreate model);
+        Task<Result<string>> UpdateAsync(LoanProductDtoUpdate model);
+        Task<Result<string>> DeleteAsync(int id);
+        Task<Result<IEnumerable<LoanProduct>>> GetAllAsyc(string? searches = null);
+        Task<Result<IEnumerable<VlProductList>>> GetAllListAsyc(bool includeinactive = false, string? searches = null);
+        Task<PaginatedList<VlProductList>> GetAllPagingAsyc(QueryParam param, bool isActive = false, string? searches = null);
+        Task<Result<LoanProduct>> GetByFieldAsync(string? fields = null);
+        Task<Result<LoanProduct>> GetByIdAsync(int id);
+
+    }
+
+
+    public sealed class LoanProductService(ILoanProductService pService) : ILoanProductServiceImpl
+    {
+        public async Task<Result<string>> CreateAsync(LoanProductDtoCreate model)
         {
-            return await pService.CreateAsync(model);
+
+            var req = model.Adapt<LoanProduct>();
+
+
+            return await pService.CreateAsync(req);
+        }
+
+        public async Task<Result<string>> UpdateAsync(LoanProductDtoUpdate model)
+        {
+            var req = model.Adapt<LoanProduct>();
+
+            return await pService.ModifyAsync(req);
         }
 
         public async Task<Result<string>> DeleteAsync(int id)
@@ -43,9 +70,6 @@ namespace Applications.Services.Loans
             return await pService.GetByIdAsync(id);
         }
 
-        public async Task<Result<string>> ModifyAsync(LoanProduct model)
-        {
-            return await pService.ModifyAsync(model);
-        }
+
     }
 }

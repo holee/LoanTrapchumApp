@@ -1,9 +1,12 @@
-﻿namespace Applications.Responses.Collaterals;
+﻿using Domains.Models.Collaterals;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Applications.Responses.Collaterals;
 
 public sealed class CollateralLineResponse
 {
     public long Id { get; set; }
-    public long? CollateralRefId { get; set; }
+    public Guid? CollateralRefId { get; set; }
     public int? CategoryRefId { get; set; }
     public string? TypeName { get; set; }
     public int? SubCategoryRefId { get; set; }
@@ -22,4 +25,7 @@ public sealed class CollateralLineResponse
     public decimal? HotPrice { get; set; } = 0.00M;
     public decimal? PawnPrice { get; set; } = 0.00M;
     public string? Description { get; set; }
+
+    
+
 }

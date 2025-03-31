@@ -1,8 +1,9 @@
-﻿<RadzenDataGrid GridLines="DataGridGridLines.Both"
+﻿@using Applications.Responses.ViewModels.Collaterals
+<RadzenDataGrid GridLines="DataGridGridLines.Both"
                 Responsive
                 TItem="VCollateralLines"
                 Density="Density.Compact"
-                Style="--rz-grid-header-background-color:var(--rz-base-200);min-height:20rem;height:20rem;max-height:20rem;"
+                Style="min-height:20rem;height:20rem;max-height:20rem;"
                 Data="CollateralLines">
     <HeaderTemplate>
         @if (ShowAdd)
@@ -56,68 +57,4 @@
     </Columns>
 </RadzenDataGrid>
 
-@code {
-    [Parameter]
-    public long? CustomerId { get; set; } = 0;
-    [Parameter]
-    public bool ShowAdd { get; set; } = true;
-    [Parameter]
-    public bool ShowCommand { get; set; } = false;
-    [Parameter]
-    public EventCallback Reload { get; set; }
 
-    IEnumerable<VCollateralLines> CollateralLines = [];
-
-    protected override async Task OnInitializedAsync()
-    {
-        await GetCustomerCollaterals();
-
-        await base.OnInitializedAsync();
-    }
-
-    async void Add()
-    {
-        if (CustomerId == 0)
-        {
-            NotificationService.Notify(NotificationSeverity.Error, "Please selected customer first");
-            return;
-        }
-
-        var parameters = new Dictionary<string, object?> {
-
-            {"CustomerId", CustomerId }
-        };
-
-        var options = new DialogOptions
-            {
-                Width = "90vw",
-                Draggable = true,
-                Resizable = false
-            };
-
-
-        var result = await DialogService.OpenAsync<CollateralModalAdd>("Add Collateral", parameters, options);
-
-        if (bool.TryParse(result, out bool success) && success)
-        {
-            var collateral = await _collateralService.GetCollateralById(CustomerId);
-        }
-    }
-
-    async void CollateralReload()
-    {
-        await Reload.InvokeAsync();
-        await GetCustomerCollaterals();
-
-    }
-
-    async Task GetCustomerCollaterals()
-    {
-        var resp = await _customerService.GetCustomerCollateralLineAsync(CustomerId);
-
-        if (resp.IsSuccess)
-        {
-            CollateralLines = resp.Data!;
-        }
-    }
-}

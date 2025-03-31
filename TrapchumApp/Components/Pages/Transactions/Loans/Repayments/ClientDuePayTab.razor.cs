@@ -28,7 +28,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
         private List<VSchedule> ScheduleItems = [];
         private IList<VLoanDisbursments> SelectedLoans = [];
-        protected IEnumerable<VBranch> Branches = [];
+        protected IEnumerable<VBranchResponse> Branches = [];
         protected IEnumerable<VSchedulePaid> PaidSchedules = [];
         protected string filterText = string.Empty;
         int counts = 0;

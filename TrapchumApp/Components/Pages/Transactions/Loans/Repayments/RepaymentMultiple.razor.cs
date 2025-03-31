@@ -1,5 +1,4 @@
-﻿using Applications.Enumerations;
-using Applications.Interfaces.Currencies;
+﻿using Applications.Interfaces.Currencies;
 using Applications.Interfaces.Loans;
 using Applications.Requests.Loans.Payments;
 using Applications.Requests.Transactions.ForiegnExchanges;
@@ -7,12 +6,10 @@ using Applications.Responses.ViewModels.Branches;
 using Applications.Responses.ViewModels.Currencies;
 using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Schedules;
-using Applications.Services.Loans;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Radzen;
 using Radzen.Blazor;
-using TrapchumApp.Components.Pages.Transactions;
 
 namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments;
 
@@ -29,8 +26,8 @@ public partial class RepaymentMultiple
     List<LoanRepaymentLineDtoCreate> loanRepaymentLines = [];
     LoanRepaymentLineDtoCreate? LineStore = new();
     LoanRepaymentDtoCreate LoanRepayment = new();
-    IEnumerable<VBranch> Branches = [];
-    VBranch SelectedBranch = new();
+    IEnumerable<VBranchResponse> Branches = [];
+    VBranchResponse _selectedBranchResponse = new();
     VSchedule? selectedRepayment = new();
     List<VSchedule>? selectedRepayments = [];
     DateTime paymentDate = DateTime.Now;
@@ -60,12 +57,10 @@ public partial class RepaymentMultiple
 
     private readonly ILoanService _loanService;
     private readonly ILoanPaymentService _paymentService;
-    private readonly ICurrencyService _curService;
-    public RepaymentMultiple(ILoanService scheduleService, ILoanPaymentService paymentService, ICurrencyService currencyService)
+    public RepaymentMultiple(ILoanService scheduleService, ILoanPaymentService paymentService)
     {
         _loanService = scheduleService;
         _paymentService = paymentService;
-        _curService = currencyService;
     }
 
 

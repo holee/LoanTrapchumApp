@@ -1,5 +1,5 @@
 //using MiniExcelLibs;
-using TCLMS.Shared.Entities.Dtos.Lists.Holidays;
+using Applications.Requests.Lists.Holidays;
 
 namespace TCLMS.Front.Pages.Lists.Holidays
 {
@@ -45,6 +45,7 @@ namespace TCLMS.Front.Pages.Lists.Holidays
                 HolidayName = modelDTO.HolidayName,
                 Description = modelDTO.Description
             });
+            await Task.CompletedTask;
         }
         private void DeleteEvent(HolidayCreateDto modelV)
         {

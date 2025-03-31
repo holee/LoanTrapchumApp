@@ -73,7 +73,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
 
                 var param = new QueryParam(pageIndex, pageSize, sortColumn, sortDescending, filterText);
 
-                var responseData = await _scheduleService.GetLoanSchedulesByPaymentDateAsync(paymentDate, BranchId, true, true, param);
+                var responseData = await _scheduleService.GetLoanSchedulesByPaymentDateAsync(BranchId, paymentDate, true, true, param);
 
                 LatePaymentSchedules = responseData.Items;
 

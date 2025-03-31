@@ -9,9 +9,9 @@ public interface IGuarantorService
 
     Task<Result<string>> CreateGaurantorAsync(EntityName othername);
     Task<Result<string>> UpdateGaurantorAsync(EntityName othername);
-    Task<Result<string>> DeleteGaurantorAsync(long id);
+    Task<Result<string>> DeleteGaurantorAsync(Guid? id);
     Task<Result<Pager<VGuarantor>>> GetGuarantorsAsync(QueryParam param);
-    Task<Result<IEnumerable<VGuarantor>>> GetGuarantorsAsync(long id = 0, bool allGuarantors = true, string? q = null);
-    Task<Result<EntityName>> GetGuarantorByIdAsync(long id);
-    Task<Result<VGuarantor>> GetGuarantorByIdAsync(long id, bool allGuarantors = false, bool include = true);
+    Task<Result<IEnumerable<VGuarantor>>> GetGuarantorsAsync(Guid? id, bool allGuarantors = true, string? q = null);
+    Task<Result<EntityName>> GetGuarantorByIdAsync(Guid? id);
+    Task<Result<VGuarantor>> GetGuarantorByIdAsync(Guid? id, bool allGuarantors = false, bool include = true);
 }

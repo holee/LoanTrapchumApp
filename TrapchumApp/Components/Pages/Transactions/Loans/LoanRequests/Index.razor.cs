@@ -13,14 +13,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 {
     public partial class Index
     {
-
-        private readonly ILoanRequestServiceImpl _loanRequestService;
-
-        public Index(ILoanRequestServiceImpl loanRequestService)
-        {
-            _loanRequestService = loanRequestService;
-        }
-
+        
         [CascadingParameter]
         Task<AuthenticationState> AuthenticationState { get; set; } = default!;
         [Parameter, SupplyParameterFromQuery] public int BranchId { get; set; }

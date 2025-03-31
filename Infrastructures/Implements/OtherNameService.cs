@@ -67,7 +67,7 @@ namespace Infrastructures.Implements
         }
 
 
-        public async Task<Result<string>> DeleteAsync(long othernameId)
+        public async Task<Result<string>> DeleteAsync(Guid? othernameId)
         {
             try
             {
@@ -148,12 +148,12 @@ namespace Infrastructures.Implements
         }
 
 
-        public async Task<EntityName?> GetByIdAsync(long id)
+        public async Task<EntityName?> GetByIdAsync(Guid? id)
         {
             return await _context.OtherNames.AsNoTracking().FirstOrDefaultAsync(x => x.EntId == id);
         }
 
-        public Task<EntityName?> GetDetailAsync(long id)
+        public Task<EntityName?> GetDetailAsync(Guid? id)
         {
             throw new NotImplementedException();
         }
@@ -163,7 +163,7 @@ namespace Infrastructures.Implements
             return await _context.SaveChangesAsync();
         }
 
-        public async Task<Result<string>> ConvertToOtherNameAsync(long id, EntityName othername)
+        public async Task<Result<string>> ConvertToOtherNameAsync(Guid? id, EntityName othername)
         {
             try
             {
@@ -183,7 +183,7 @@ namespace Infrastructures.Implements
             }
         }
 
-        public async Task<Result<string>> ConvertToCustomerAsync(long id, Customer customer)
+        public async Task<Result<string>> ConvertToCustomerAsync(Guid? id, Customer customer)
         {
             var transaction = _context.Database.BeginTransaction();
             try
@@ -204,7 +204,7 @@ namespace Infrastructures.Implements
                 return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}."));
             }
         }
-        public async Task<Result<string>> ConvertToVendorAsync(long otherNameId, Vendor vendor)
+        public async Task<Result<string>> ConvertToVendorAsync(Guid? otherNameId, Vendor vendor)
         {
             try
             {
@@ -226,7 +226,7 @@ namespace Infrastructures.Implements
             }
         }
 
-        public async Task<Result<string>> ConvertToEmployeeAsync(long id, Employee employee)
+        public async Task<Result<string>> ConvertToEmployeeAsync(Guid? id, Employee employee)
         {
             var transaction = _context.Database.BeginTransaction();
             try
@@ -247,7 +247,7 @@ namespace Infrastructures.Implements
             }
         }
 
-        public async Task<Result<string>> UpdateStatusAsync(long othernameId)
+        public async Task<Result<string>> UpdateStatusAsync(Guid? othernameId)
         {
             try
             {
@@ -262,5 +262,7 @@ namespace Infrastructures.Implements
                 return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}"));
             }
         }
+
+       
     }
 }

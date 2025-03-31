@@ -1,11 +1,12 @@
 ﻿using Applications.Interfaces.Lists;
 using Domains.Models.Lists;
 using Infrastructures.DataAccess;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructures.Implements
 {
-    public class NationalityService: INationalityService
+    public class NationalityService : INationalityService
     {
         private readonly ApplicationDbContext _context;
 
@@ -14,26 +15,50 @@ namespace Infrastructures.Implements
             this._context = context;
         }
 
-        public async Task<IEnumerable<Nationality>> GetNationalities(string? searchText=null)
+        public async Task<IEnumerable<Nationality>> GetNationalities(string? searchText = null)
         {
             IQueryable<Nationality> queries = _context.Nationalities;
             if (!string.IsNullOrEmpty(searchText))
             {
-                queries=queries.Where(x=>x.NationalityName !=null && x.NationalityName.Contains(searchText,StringComparison.InvariantCultureIgnoreCase) ||
-                                          x.NationalityCode != null && x.NationalityCode.Contains(searchText, StringComparison.InvariantCultureIgnoreCase));   
+                queries = queries.Where(x => x.NationalityName != null && x.NationalityName.Contains(searchText, StringComparison.InvariantCultureIgnoreCase) ||
+                                          x.NationalityCode != null && x.NationalityCode.Contains(searchText, StringComparison.InvariantCultureIgnoreCase));
             }
 
-            return await queries.AsNoTracking().ToListAsync();  
+            return await queries.AsNoTracking().ToListAsync();
         }
-        public async Task<IEnumerable<Nationality>> GetNationalities(int id=12) 
+        public async Task<IEnumerable<Nationality>> GetNationalities(int id = 12)
         {
             IQueryable<Nationality> queries = _context.Nationalities;
             if (id > 0)
             {
-                queries = queries.Where(x => x.NationalityId==id);
+                queries = queries.Where(x => x.NationalityId == id);
             }
 
             return await queries.AsNoTracking().ToListAsync();
+        }
+
+        public async Task<IEnumerable<T>> GetNationalities<T>(int? id, string? searchText = null)
+            where T : class
+        {
+            IQueryable<Nationality> queries = _context.Nationalities;
+
+            if (id > 0)
+            {
+                queries = queries.Where(x => x.NationalityId == id);
+            }
+
+            if (!string.IsNullOrEmpty(searchText))
+            {
+                queries = queries.Where(n => EF.Functions.Like(n.NationalityName, $"%{searchText}%") ||
+                                         EF.Functions.Like(n.NationalityCode, $"%{searchText}%"));
+            }
+
+            var items = await queries
+                                    .ProjectToType<T>()
+                                    .AsNoTracking().ToListAsync();
+
+
+            return items;
         }
     }
 }

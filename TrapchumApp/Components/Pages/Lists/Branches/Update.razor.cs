@@ -23,13 +23,13 @@ namespace TrapchumApp.Components.Pages.Lists.Branches
         protected IEnumerable<CommuneDto>? CommuneList;
         protected IEnumerable<DistrictDto>? DistrictList;
         protected IEnumerable<VillageDto>? VillageList;
-        protected IEnumerable<BankDto>? bankList;
+        protected IEnumerable<BankResponse>? bankList;
         protected IEnumerable<string>? Cities;
         protected ProvinceDto? SelectedProvince;
         protected DistrictDto? SelectedDistrict;
         protected CommuneDto? SelectedCommune;
         protected VillageDto? SelectedVillage;
-        protected BankDto? SelectedBank;
+        protected BankResponse? SelectedBank;
         protected IEnumerable<Country>? Countries = new List<Country>();
         protected IEnumerable<string>? strCountries = new List<string>();
         protected override async Task OnInitializedAsync()

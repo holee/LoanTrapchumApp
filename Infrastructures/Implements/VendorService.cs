@@ -22,7 +22,7 @@ namespace Infrastructures.Implements
         {
             try
             {
-                if (vendor.EntId == 0 && !CheckVendorName(vendor.Name!))
+                if (vendor.EntId == Guid.Empty && !CheckVendorName(vendor.Name!))
                 {
                     _context.Vendors.Add(vendor);
                 }
@@ -82,7 +82,7 @@ namespace Infrastructures.Implements
         }
 
 
-        public async Task<Result<string>> DeleteAsync(long id)
+        public async Task<Result<string>> DeleteAsync(Guid? id)
         {
             try
             {
@@ -117,7 +117,7 @@ namespace Infrastructures.Implements
         }
 
 
-        public async Task<Result<EntityName>> GetVendorByIdAsync(long vendorId, bool include)
+        public async Task<Result<EntityName>> GetVendorByIdAsync(Guid? vendorId, bool include)
         {
             var vendor = await _context.Vendors.FirstOrDefaultAsync(x => x.EntId == vendorId);
 
@@ -128,7 +128,7 @@ namespace Infrastructures.Implements
             return Result.Success(vendor);
         }
 
-        public async Task<Result<VVendor>> GetVendorByIdAsync(long vendorId)
+        public async Task<Result<VVendor>> GetVendorByIdAsync(Guid? vendorId)
         {
             var vendor = await _context.Database.SqlQuery<VVendor>($"SELECT * FROM VVendors")
                                         .FirstOrDefaultAsync(v => v.EntId == vendorId);
@@ -165,7 +165,7 @@ namespace Infrastructures.Implements
         }
 
 
-        private bool VendorExist(long id, int editSeq)
+        private bool VendorExist(Guid? id, int editSeq)
         {
             var vendors = _context.Vendors
                                     .Where(v => v.EntId == id && v.EditSeq == editSeq);
@@ -181,7 +181,7 @@ namespace Infrastructures.Implements
 
         }
 
-        private bool CheckVendorName(long id, string name)
+        private bool CheckVendorName(Guid? id, string name)
         {
             var vendors = _context.Vendors
                                     .Where(v => v.Name!.ToLower() == name.ToLower() && v.EntId != id);

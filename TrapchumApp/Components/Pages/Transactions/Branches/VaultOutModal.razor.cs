@@ -29,8 +29,8 @@ namespace TrapchumApp.Components.Pages.Transactions.Branches
         private decimal? total = 0;
         private string? messageAlert;
         private bool visible = false;
-        protected IEnumerable<CurrencyDto>? CurrencyList { get; set; }
-        protected CurrencyDto? Currency { get; set; } = new CurrencyDto();
+        protected IEnumerable<CurrencyResponse>? CurrencyList { get; set; }
+        protected CurrencyResponse? Currency { get; set; } = new CurrencyResponse();
 
         protected override async Task OnInitializedAsync()
         {
@@ -70,7 +70,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Branches
 
             var currency = await curService.GetCurrencyById(CurrencyId);
 
-            Currency = currency.Adapt<CurrencyDto>();
+            Currency = currency.Adapt<CurrencyResponse>();
 
             if (Currency?.CurrencyCode == "KHR")
                 sp = "#,#0";
@@ -333,7 +333,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Branches
             if (obj is not null)
             {
 
-                var selectedResult = (CurrencyDto)obj;
+                var selectedResult = (CurrencyResponse)obj;
                 Console.WriteLine(CurrencyId);
             }
 

@@ -1,4 +1,5 @@
-﻿using Applications.Responses;
+﻿using Applications.Requests.Loans;
+using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Categories;
 using Domains.Models.Loans;
@@ -13,6 +14,7 @@ namespace Applications.Interfaces.Loans
         Task<IEnumerable<VlCategoryList>> GetListCategories(bool includeinactive=false,string? q = null);
         Task<PaginatedList<VlCategoryList>> GetAllPaginAsync(QueryParam param, bool isActive = false, string? q = null);
         Task<LoanCategory?> GetLoanCategory(int id);
+        Task<LoanCategoryDtoUpdate?> GetForEditAsync(int id);
         Task<Result<string>> Update(LoanCategory cat);
         Task<Result<string>> UpdateStatus(int id);
         Task<bool> NameExist(string? name);

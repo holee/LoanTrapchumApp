@@ -3,6 +3,7 @@
                 GridLines="DataGridGridLines.Both"
                 Responsive
                 IsLoading="isLoading"
+                ColumnWidth="10rem"
                 Style="min-height:20rem;height:20rem;max-height:30rem;"
                 Density="Density.Compact">
     <HeaderTemplate>
@@ -25,14 +26,13 @@
 
     </HeaderTemplate>
     <Columns>
-        <RadzenDataGridColumn Property="IncomeId" Context="c" Title="#" Width="3rem">
+        <RadzenDataGridColumn OrderIndex="0" Property="IncomeId" Context="c" Title="#" Width="3rem">
             <Template>
                 @c.IncomeId
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Context="c"
                               Property="IncomeSource"
-                              Width="20rem"
                               Title="Income Source">
             <Template>
                 @c.IncomeSource

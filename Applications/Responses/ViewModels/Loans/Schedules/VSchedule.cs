@@ -15,7 +15,7 @@ public sealed class VSchedule
     public Guid? CustomerCode { get; set; }
     public string? FullName { get; set; }
     public string? AltName { get; set; }
-    public long? LoanId { get; set; }
+    public Guid? LoanId { get; set; }
     public int BranchId { get; set; }
     public int? CurrencyId { get; set; }
     public int? InstallmentNo { get; set; }

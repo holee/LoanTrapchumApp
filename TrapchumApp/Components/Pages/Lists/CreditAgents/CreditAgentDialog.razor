@@ -1,14 +1,11 @@
-﻿@using AppilcationServices.Interfaces
-@using ApplicationServices.Interfaces
-@using TCLMS.Shared.Entities.Paginations
-
-<div class="card">
-    <div class="card-header">
+﻿@using Applications.Responses.ViewModels.Employees
+<Card>
+    <CardHeader>
         <RadzenTextBox Placeholder="Search Employee"
                        @bind-Value="searchText"
                        @bind-Value:after="SearchCreditAgent" />
-    </div>
-    <div class="card">
+    </CardHeader>
+    <CardBody>
         <RadzenDataGrid TItem="VEmployeeCreateCreditAgent"
                         PageSize="10"
                         ColumnWidth="10rem"
@@ -22,7 +19,7 @@
                 <RadzenDataGridColumn Title="EmployeeId" Sortable="false">
                     <Template>
                         <RadzenButton Size="Radzen.ButtonSize.ExtraSmall"
-                                      Click="@(()=>AddCreditAgent(context!.EmployeeId!.Value))"
+                                      Click="@(()=>AddCreditAgent(context!.EmployeeId))"
                                       Variant="Variant.Text"
                                       Text="Make C.O"
                                       ButtonStyle="ButtonStyle.Primary"
@@ -31,10 +28,8 @@
                 </RadzenDataGridColumn>
             </Columns>
         </RadzenDataGrid>
-    </div>
-</div>
-
-
+    </CardBody>
+</Card>
 <RadzenStack Orientation="Orientation.Horizontal"
              AlignItems="AlignItems.Center"
              JustifyContent="JustifyContent.End">
@@ -44,76 +39,4 @@
                   Variant="Variant.Text"
                   ButtonStyle="ButtonStyle.Danger" />
 </RadzenStack>
-@code {
-    protected IEnumerable<EntEmployeeDto> Employees { get; set; } = [];
-    private LoanCreditAgentDtoCreate model = new LoanCreditAgentDtoCreate();
-    private IEnumerable<VEmployeeCreateCreditAgent> CreditAgentPageList = [];
-    private List<VEmployeeCreateCreditAgent> CreditAgents = [];
-    [Parameter] public long Id { get; set; }
-    [Parameter] public Func<bool, Task<bool>> onVildated { get; set; } = default!;
-    [Parameter] public Func<bool, Task> OnSuccess { get; set; } = default!;
-    [Inject] protected IEmployeeService EmployeeService { get; set; } = default!;
-    [Inject] protected ICreditAgentServiceImpl CreditAgentService { get; set; } = default!;
 
-    private bool isValid = true;
-    private string? searchText = "";
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadPageList();
-        await base.OnInitializedAsync();
-    }
-    async Task SearchCreditAgent()
-    {
-        await LoadPageList(searchText);
-    }
-
-    private async Task AddCreditAgent(long id)
-    {
-        try
-        {
-            var response = await CreditAgentService.AddCreditAgent(id, model);
-            if (response!.IsSuccess)
-            {
-                if (onVildated is not null)
-                {
-                    isValid = await onVildated(response.IsSuccess);
-                }
-                if (!isValid) return;
-                await OnSuccess(response.IsSuccess);
-
-                await LoadPageList(searchText);
-            }
-            else
-            {
-
-            }
-        }
-        catch (Exception ex)
-        {
-
-        }
-
-    }
-
-
-    async Task LoadPageList(string? filter = null)
-    {
-        try
-        {
-            CreditAgentPageList = await CreditAgentService.GetEmployeeForCreateCreditAgents(filter);
-        }
-        catch (Exception ex)
-        {
-
-        }
-    }
-
-
-
-    async Task CloseModal()
-    {
-        await Task.CompletedTask;
-    }
-
-
-}

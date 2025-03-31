@@ -2,14 +2,14 @@
 
 public sealed class LoanDtoCreate
 {
-    public long? LoanRequestId { get; set; }
+    public Guid? LoanRequestId { get; set; }
     public int? LoanStatusRefId { get; set; }
     public int? BranchId { get; set; } 
     public int? RepaymentModeRefId { get; set; }
     public int? LoanSubTypeRefId { get; set; }
     public int? LoanCategoryRefId { get; set; }
     public int? BankRefId { get; set; } = 11;
-    public long? UserRefId { get; set; }
+    public Guid? UserRefId { get; set; }
     public int? LoanProductRefId { get; set; }
     public string? LoanAccountCode { get; set; }
     public decimal? Principle { get; set; } = 0;
@@ -24,8 +24,8 @@ public sealed class LoanDtoCreate
     public DateTime? LastPaymentDate { get; set; }
     public int? TermTypeId { get; set; }
     public int? InstallmentTypeId { get; set; }
-    public long? CreditAgentRefId { get; set; }
-    public long? CustomerRefId { get; set; }
+    public Guid? CreditAgentRefId { get; set; }
+    public Guid? CustomerRefId { get; set; }
     public DateTime? RegisterDate { get; set; }
     public int? PayEvery { get; set; }
     public decimal? AdminFeeRate { get; set; }

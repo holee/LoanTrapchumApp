@@ -1,107 +1,103 @@
-﻿@using TCLMS.Front.Components.Buttons
-
-<div class="card">
-    <div class="card-header bg-primary">
-        <div class="d-flex justify-content-between">
-            <span>Product Details: @model?.LoanProductName <span><RadzenCheckBox ReadOnly @bind-Value="model!.IsActive" /></span></span>
-            <strong @onclick="ClosedTab" class="text-danger" style="cursor:pointer">X</strong>
-        </div>
+﻿
+<div class="card-header bg-primary">
+    <div class="d-flex justify-content-between">
+        <span>Product Details: @model?.LoanProductName <span><RadzenCheckBox ReadOnly @bind-Value="model!.IsActive" /></span></span>
+        <strong @onclick="ClosedTab" class="text-danger" style="cursor:pointer">X</strong>
     </div>
-    <div class="card-body">
-        <div>
-            <div class="table-responsive">
-                <table class="table">
-                    <tbody>
-                        <tr>
-                            <th class="w-25 rz-background-color-base-100">Product Name</th>
-                            <td>
-                                @model!.LoanProductName
-                            </td>
-                        </tr>
-                        <tr>
-                            <th class="w-25 rz-background-color-base-100">Product Code</th>
-                            <td>
-                                @model!.LoanProductCode
-                            </td>
-                        </tr>
-                        <tr>
-                            <th class="w-25 rz-background-color-base-100">Currency</th>
-                            <td>
-                                @model!.Currency!.CurrencyCode
-                            </td>
-                        </tr>
-                        <tr>
-                            <th class="w-25 rz-background-color-base-100">Loan Size</th>
-                            <td>
-                                @model!.LoanSize
-                            </td>
-                        </tr>
-                        <tr>
-                            <th class="w-25 rz-background-color-base-100">Installments</th>
-                            <td>
-                                @model!.Installments
-                            </td>
-                        </tr>
-                        <tr>
-                            <th class="w-25 rz-background-color-base-100">Installment Type</th>
-                            <td>
-                                @model!.InstallmentType
-                            </td>
-                        </tr>
-                        <tr>
-                            <th class="w-25 rz-background-color-base-100">Interest Rate</th>
-                            <td>
-                                @model!.InterestRate
-                            </td>
-                        </tr>
-                        <tr>
-                            <th class="w-25 rz-background-color-base-100">Repayment Mode</th>
-                            <td>
-                                @model!.RepaymentMode
-                            </td>
-                        </tr>
-                        <tr>
-                            <th class="w-25 rz-background-color-base-100">Origination Fee</th>
-                            <td>
-                                @model!.OriginationFees
-                            </td>
-                        </tr>
-                        <tr>
-                            <th class="w-25 rz-background-color-base-100">Arrear Rate</th>
-                            <td>
-                                @model!.ArrearRate
-                            </td>
-                        </tr>
-                       @*  <tr>
+</div>
+<div class="card-body">
+    <div>
+        <div class="table-responsive">
+            <table class="table">
+                <tbody>
+                    <tr>
+                        <th class="w-25 rz-background-color-base-100">Product Name</th>
+                        <td>
+                            @model!.LoanProductName
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="w-25 rz-background-color-base-100">Product Code</th>
+                        <td>
+                            @model!.LoanProductCode
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="w-25 rz-background-color-base-100">Currency</th>
+                        <td>
+                            @model!.Currency!.CurrencyCode
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="w-25 rz-background-color-base-100">Loan Size</th>
+                        <td>
+                            @model!.LoanSize
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="w-25 rz-background-color-base-100">Installments</th>
+                        <td>
+                            @model!.Installments
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="w-25 rz-background-color-base-100">Installment Type</th>
+                        <td>
+                            @model!.InstallmentType
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="w-25 rz-background-color-base-100">Interest Rate</th>
+                        <td>
+                            @model!.InterestRate
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="w-25 rz-background-color-base-100">Repayment Mode</th>
+                        <td>
+                            @model!.RepaymentMode
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="w-25 rz-background-color-base-100">Origination Fee</th>
+                        <td>
+                            @model!.OriginationFees
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="w-25 rz-background-color-base-100">Arrear Rate</th>
+                        <td>
+                            @model!.ArrearRate
+                        </td>
+                    </tr>
+                    @*  <tr>
                             <th class="w-25 rz-background-color-base-100">Currency</th>
                             <td>
                                 @model!.Currency!.CurrencyCode
                             </td>
                         </tr> *@
-                    </tbody>
-                </table>
-            </div>
+                </tbody>
+            </table>
         </div>
-    </div>
-    <div class="card-footer ">
-        <div class="d-flex justify-content-between">
-            <div>
-                <label class="text-muted">Created: @string.Format("{0:dd MMM yyyy hh:mm tt}", model?.CreatedDT) Modified: @string.Format("{0:dd MMM yyyy hh:mm tt}", model?.ModifiedDT)</label>
-            </div>
-            <div>
-                <TButton Color="Kalor.Danger"
-                         Icon="BtnIconType.Close"
-                         Text="Close"
-                         Click="@ClosedTab"
-                         Size="BtnSize.Small" />
-            </div>
-        </div>
-
-
     </div>
 </div>
+<div class="card-footer ">
+    <div class="d-flex justify-content-between">
+        <div>
+            <label class="text-muted">Created: @string.Format("{0:dd MMM yyyy hh:mm tt}", model?.CreatedDt) Modified: @string.Format("{0:dd MMM yyyy hh:mm tt}", model?.ModifiedDt)</label>
+        </div>
+        <div>
+            <RadzenButton ButtonStyle="ButtonStyle.Danger"
+                          Icon="cancel"
+                          Text="Close"
+                          Click="@ClosedTab"
+                          Size="ButtonSize.ExtraSmall" />
+        </div>
+    </div>
 
-@code{
+
+</div>
+@code {
     [Parameter] public EventCallback<int> CloseTab { get; set; }
     async void ClosedTab()
     {

@@ -12,7 +12,7 @@ namespace TrapchumApp.Components.Pages.Currencies
     {
         [Inject] ICurrencyService CurrencyServiceImpl { get; set; } = default!;
         [Inject] ISpotRateService spotRateService { get; set; } = default!;
-        private CurrencyDto Currency { get; set; } = new();
+        private CurrencyResponse Currency { get; set; } = new();
 
         private CurrencyDtoSpotRateCreate SpotRateDtoCreate = new CurrencyDtoSpotRateCreate();
         private List<CurrencyDtoSpotRate> currencySpotRates { get; set; } = default!;
@@ -64,7 +64,7 @@ namespace TrapchumApp.Components.Pages.Currencies
                 var curResult = await CurrencyServiceImpl.GetCurrencyById(Id);
                 if (curResult.IsSuccess)
                 {
-                    Currency = curResult.Data.Adapt<CurrencyDto>();
+                    Currency = curResult.Data.Adapt<CurrencyResponse>();
                 }
                 await ChangePageIndex(pageIndex);
             }

@@ -37,7 +37,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
         IList<VSchedule> PaymentSchedulesOnDate = [];
         IEnumerable<VSchedule> LateSchedules = [];
         IList<VSchedule> SelectedPaymentSchedules = [];
-        IEnumerable<VBranch> Branches = [];
+        IEnumerable<VBranchResponse> Branches = [];
         DateTime paymentDate = DateTime.Now;
         VSchedule? SelectedSchedule = new();
         string? filterText = "";
@@ -47,7 +47,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
         int selectedTabIndex = 0;
         List<int> tabcounts = [0];
         int currencyId = 0;
-        long loanId = 0;
+        Guid? loanId = Guid.Empty;
         int installmentNo = 0;
 
 

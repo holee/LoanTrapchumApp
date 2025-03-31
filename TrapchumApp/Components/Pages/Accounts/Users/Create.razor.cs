@@ -13,13 +13,9 @@ public partial class Create
 {
 
     private readonly IRoleService _roleService;
-    private readonly IEmployeeService _employeeService;
-    private readonly IUserService _userService;
-    public Create(IRoleService roleService, IEmployeeService employeeService, IUserService userService)
+    public Create(IRoleService roleService)
     {
         _roleService = roleService;
-        _employeeService = employeeService;
-        _userService = userService;
     }
     RegisterRequest model = new RegisterRequest();
     readonly JwtSecurityTokenHandler jwtSecurityTokenHandler = new();
@@ -33,7 +29,6 @@ public partial class Create
     IEnumerable<BranchDto> Branches = Enumerable.Empty<BranchDto>();
     IEnumerable<VEmployees> bEmployees = Enumerable.Empty<VEmployees>();
     BranchDto SelectedBranch = default!;
-
     protected override async Task OnInitializedAsync()
     {
         try
@@ -45,14 +40,14 @@ public partial class Create
                 roles = roleResult?.Data?.Select(r => r.RoleName) ?? [];
             }
 
-            var employeeResponse = await _employeeService.GetEmployeesAsync(0, 0);
+            var employeeResponse = await _employeeService.GetEmployeesAsync(Guid.Empty, 0);
 
             if (employeeResponse.IsSuccess)
             {
                 Employees = employeeResponse.Data!;
             }
 
-            var branchResponse = await _branchService.GetBranchesAsync(0, 0, false);
+            var branchResponse = await _branchService.GetBranchesAsync(0, 0);
 
             if (branchResponse!.IsSuccess)
             {
@@ -73,7 +68,7 @@ public partial class Create
     {
         if (model.BranchRefId > 0)
         {
-            var employeeResponse = await _employeeService.GetEmployeesAsync(0, model.BranchRefId);
+            var employeeResponse = await _employeeService.GetEmployeesAsync(Guid.Empty, model.BranchRefId);
 
             if (employeeResponse.IsSuccess)
             {
@@ -86,7 +81,7 @@ public partial class Create
         }
         model.Username = "";
         model.Email = "";
-        model.EmployeeId = 0;
+        model.EmployeeId = Guid.Empty;
     }
     protected void SelectedEmployeeChanged()
     {
@@ -107,7 +102,7 @@ public partial class Create
         {
             model.Username = "";
             model.Email = "";
-            model.EmployeeId = 0;
+            model.EmployeeId = Guid.Empty;
         }
         Console.WriteLine(selectedEmployee!.EmployeeId);
     }

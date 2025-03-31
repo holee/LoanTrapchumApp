@@ -20,11 +20,9 @@ public partial class UserManagement
     bool isBusy = false;
     UserRoleDtoUpdate formRequest = new();
     string? message = string.Empty;
-    private readonly IUserService _userService;
     private readonly IRoleService _roleService;
-    public UserManagement(IUserService userService, IRoleService roleService)
+    public UserManagement(IRoleService roleService)
     {
-        _userService = userService;
         _roleService = roleService;
     }
 

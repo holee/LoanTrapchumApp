@@ -4,7 +4,7 @@ namespace Applications.Responses.ViewModels.Employees;
 
 public sealed class VEmployees
 {
-    public long EmployeeId { get; set; }
+    public Guid? EmployeeId { get; set; }
     public string? FirstName { get; set; }=string.Empty;
     public string? LastName { get; set; } = string.Empty;
     public string? AltName { get; set; } = string.Empty;

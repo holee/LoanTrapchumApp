@@ -26,7 +26,7 @@ namespace Applications.Extensions
 
         public static bool NotEmpty(this Guid value)
         {
-            return value.ToString().Length > 0;
+            return !value.NotEmpty();
         }
 
 
@@ -36,8 +36,10 @@ namespace Applications.Extensions
             {
                 return result;
             }
+
             return Guid.Empty;
         }
+
         public static Guid ToGuid(this string value)
         {
             if (string.IsNullOrEmpty(value)) return Guid.Empty;
@@ -46,6 +48,7 @@ namespace Applications.Extensions
             {
                 return result;
             }
+
             return Guid.Empty;
         }
     }

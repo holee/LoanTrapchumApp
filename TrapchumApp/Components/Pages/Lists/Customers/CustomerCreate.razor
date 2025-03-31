@@ -1,12 +1,12 @@
-﻿@page "/Customers/Create"
+﻿@page "/App/Customers/Create"
 <Containers Fluid>
     <EditForm Model="model" @ref="editForm">
         <FluentValidationValidator DisableAssemblyScanning="true"></FluentValidationValidator>
-        <BCard HeaderCssClass="bg-primary" BodyCssClass="rz-background-color-base-200">
-            <CardHeader>
+        <Card>
+            <CardHeader HeaderCssClass="rz-background-color-base-200">
                 <strong>Customer</strong>
             </CardHeader>
-            <CardBody>
+            <CardBody BodyCssClass="rz-background-color-base-100">
                 <RadzenRow AlignItems="AlignItems.Center">
                     <RadzenColumn Size="3">
                         <RadzenRow AlignItems="AlignItems.Center">
@@ -14,20 +14,17 @@
                                 <RadzenLabel>Name</RadzenLabel>
                             </RadzenColumn>
                             <RadzenColumn Size="6">
-                                <RadzenDropDown @bind-Value="model.Salutation"
+                                <RadzenDropDown 
                                                 Chips="true"
+                                                AllowFiltering="true"
                                                 Name="DropDownSalutions"
                                                 Style="width: 100%;"
                                                 TValue="string"
+                                                FilterOperator="StringFilterOperator.Contains"
                                                 Placeholder="Salutation"
+                                                @bind-Value="model.Salutation"
                                                 Data="Salutations">
-                                    @*  <ValueTemplate Context="s">
-                                        <RadzenTextBox @bind-Value="model.Salutation"
-                                                       @onkeydown="AddNewSalutation"
-                                                       @oninput="OnTextChangedSalution"
-                                                       class="w-100"
-                                                       aria-labelledby="DropDownEditLabel" />
-                                    </ValueTemplate> *@
+                                    Data="Salutations">
                                 </RadzenDropDown>
                             </RadzenColumn>
                         </RadzenRow>
@@ -37,8 +34,8 @@
                             <RadzenColumn Size="12">
                                 <RadzenTextBox @bind-Value="model.FirstName"
                                                class="w-100"
-                                               Placeholder="First name..." />
-                                <ValidationMessage For="@(()=>model.FirstName)" />
+                                               Placeholder="First name..."/>
+                                <ValidationMessage For="@(() => model.FirstName)"/>
                             </RadzenColumn>
                         </RadzenRow>
                     </RadzenColumn>
@@ -47,7 +44,7 @@
                             <RadzenColumn Size="12">
                                 <RadzenTextBox @bind-Value="model.MiddleName"
                                                class="w-100"
-                                               Placeholder="Middle Name..." />
+                                               Placeholder="Middle Name..."/>
                             </RadzenColumn>
                         </RadzenRow>
                     </RadzenColumn>
@@ -56,8 +53,8 @@
                             <RadzenColumn Size="12">
                                 <RadzenTextBox @bind-Value="model.LastName"
                                                class="w-100"
-                                               Placeholder="Last Name.." />
-                                <ValidationMessage For="@(()=>model.LastName)" />
+                                               Placeholder="Last Name.."/>
+                                <ValidationMessage For="@(() => model.LastName)"/>
                             </RadzenColumn>
                         </RadzenRow>
                     </RadzenColumn>
@@ -71,7 +68,7 @@
                             <RadzenColumn Size="9">
                                 <RadzenTextBox @bind-Value="model.AltName"
                                                class="w-100"
-                                               Placeholder="ឈ្មោះខ្មែរ..." />
+                                               Placeholder="ឈ្មោះខ្មែរ..."/>
                             </RadzenColumn>
                         </RadzenRow>
                     </RadzenColumn>
@@ -126,7 +123,7 @@
                             <RadzenColumn Size="9">
                                 <RadzenTextBox class="w-100"
                                                @bind-Value="model.Phone"
-                                               Placeholder="Mobile phone..." />
+                                               Placeholder="Mobile phone..."/>
                             </RadzenColumn>
                         </RadzenRow>
                         <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
@@ -134,7 +131,7 @@
                             <RadzenColumn Size="9">
                                 <RadzenTextBox class="w-100"
                                                @bind-Value="model.EmailAddress"
-                                               Placeholder="Email Address" />
+                                               Placeholder="Email Address"/>
                             </RadzenColumn>
                         </RadzenRow>
                         <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
@@ -142,7 +139,7 @@
                             <RadzenColumn Size="9">
                                 <RadzenTextBox class="w-100"
                                                @bind-Value="model.PassportId"
-                                               Placeholder="Passport...." />
+                                               Placeholder="Passport...."/>
                             </RadzenColumn>
                         </RadzenRow>
                         <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
@@ -150,7 +147,7 @@
                             <RadzenColumn Size="9">
                                 <RadzenTextBox class="w-100"
                                                @bind-Value="model.Nationality"
-                                               Placeholder="Nationality...." />
+                                               Placeholder="Nationality...."/>
                             </RadzenColumn>
                         </RadzenRow>
                     </RadzenColumn>
@@ -160,14 +157,14 @@
                                 <RadzenColumn Size="3">
                                     <RadzenImage Path="@model.Photo"
                                                  class="rz-p-0 rz-m-0"
-                                                 Style="width:4.5rem;height:4.5rem;" />
+                                                 Style="width:4.5rem;height:4.5rem;"/>
                                 </RadzenColumn>
                                 <RadzenColumn Size="9">
                                     <RadzenUpload Change=@(args => HandleFileUpload(args, "Single file upload"))
                                                   Auto="false"
                                                   Progress=@(args => OnProgress(args, "Single file upload"))
                                                   Style="width: 100%"
-                                                  InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "select file" }})">
+                                                  InputAttributes="@(new Dictionary<string, object> { { "aria-label", "select file" } })">
                                     </RadzenUpload>
                                 </RadzenColumn>
                             </RadzenRow>
@@ -175,12 +172,12 @@
                     </RadzenColumn>
                 </RadzenRow>
             </CardBody>
-        </BCard>
-        <BCard HeaderCssClass="bg-primary" BodyCssClass="rz-background-color-base-200">
-            <CardHeader>
+        </Card>
+        <Card CssClass="rz-mt-2">
+            <CardHeader HeaderCssClass="rz-background-color-base-200">
                 <strong>Address</strong>
             </CardHeader>
-            <CardBody>
+            <CardBody BodyCssClass="rz-background-color-base-100">
                 <RadzenRow AlignItems="AlignItems.Center">
                     <RadzenColumn Size="6">
                         <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
@@ -209,7 +206,7 @@
                                                 Placeholder="Search Province"
                                                 AllowFiltering="true"
                                                 TextProperty="ProInKhmer"
-                                                ValueProperty="ProvinceID"
+                                                ValueProperty="ProvinceId"
                                                 SelectedItemChanged="SelectedProvinceChanged"
                                                 FilterOperator="StringFilterOperator.Contains"
                                                 FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
@@ -294,14 +291,14 @@
                     </RadzenColumn>
                 </RadzenRow>
             </CardBody>
-        </BCard>
+        </Card>
         @if (model.MarritalStatus != "Single")
         {
-            <BCard HeaderCssClass="rz-background-color-base-200" BodyCssClass="rz-background-color-base-200">
-                <CardHeader>
+            <Card CssClass="rz-mt-2">
+                <CardHeader HeaderCssClass="rz-background-color-base-200">
                     <strong>Spouse</strong>
                 </CardHeader>
-                <CardBody>
+                <CardBody BodyCssClass="rz-background-color-base-100">
                     <RadzenRow AlignItems="AlignItems.Center">
                         <RadzenColumn Size="6">
                             <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
@@ -311,7 +308,7 @@
                                 <RadzenColumn Size="9">
                                     <RadzenTextBox @bind-Value="model.SpouseName"
                                                    class="w-100"
-                                                   Placeholder="Spouse name" />
+                                                   Placeholder="Spouse name"/>
                                 </RadzenColumn>
                             </RadzenRow>
                             <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
@@ -321,7 +318,7 @@
                                 <RadzenColumn Size="9">
                                     <RadzenTextBox @bind-Value="model.SpouseNationality"
                                                    class="w-100"
-                                                   Placeholder="Spouse Nationality" />
+                                                   Placeholder="Spouse Nationality"/>
                                 </RadzenColumn>
                             </RadzenRow>
                             <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
@@ -331,7 +328,7 @@
                                 <RadzenColumn Size="9">
                                     <RadzenTextBox @bind-Value="model.SpousePassport"
                                                    class="w-100"
-                                                   Placeholder="Spouse Passport" />
+                                                   Placeholder="Spouse Passport"/>
                                 </RadzenColumn>
                             </RadzenRow>
                             <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
@@ -341,7 +338,7 @@
                                 <RadzenColumn Size="9">
                                     <RadzenTextBox @bind-Value="model.SpousePhoneNo"
                                                    class="w-100"
-                                                   Placeholder="Spouse Phone" />
+                                                   Placeholder="Spouse Phone"/>
                                 </RadzenColumn>
                             </RadzenRow>
                         </RadzenColumn>
@@ -385,7 +382,7 @@
                                                    class="w-100"
                                                    Min="0"
                                                    Max="12"
-                                                   @bind-Value="model.Dependents" />
+                                                   @bind-Value="model.Dependents"/>
                                 </RadzenColumn>
                             </RadzenRow>
                             <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
@@ -397,214 +394,33 @@
                                                    Min="0"
                                                    Max="12"
                                                    class="w-100"
-                                                   @bind-Value="model.NoOfChildren" />
+                                                   @bind-Value="model.NoOfChildren"/>
                                 </RadzenColumn>
                             </RadzenRow>
                         </RadzenColumn>
                     </RadzenRow>
                 </CardBody>
-            </BCard>
+            </Card>
         }
-        <RadzenStack Orientation="Radzen.Orientation.Horizontal"
+        <RadzenStack Orientation="Orientation.Horizontal"
                      AlignItems="AlignItems.Center"
                      Gap="1rem"
-                     JustifyContent="Radzen.JustifyContent.End">
+                     class="rz-mt-2"
+                     JustifyContent="JustifyContent.End">
             <RadzenButton Click="FormSubmit"
-                          Size="Radzen.ButtonSize.Small"
+                          Size="ButtonSize.Small"
                           ButtonStyle="ButtonStyle.Success"
                           Text="Save"
-                          Icon="save" />
+                          Icon="save"/>
             <RadzenButton Click="Close"
-                          Size="Radzen.ButtonSize.Small"
+                          Size="ButtonSize.Small"
                           Text="Close"
                           ButtonStyle="ButtonStyle.Danger"
-                          Icon="cancel" />
+                          Icon="cancel"/>
         </RadzenStack>
     </EditForm>
 </Containers>
-@code {
 
-    IEnumerable<Nationality> Nationalities { get; set; } = [];
-    IEnumerable<string> Statuses = ["Single", "Married", "Divorced", "Widow"];
-    RadzenFileInput<string> fileUpload = default!;
-    string selectedTab = "info";
-    string city = "";
-    const long maxFileSize = 30_000_000;
-    void OnChange(byte[] args, string name)
-    {
-        // using var content = new MultipartFormDataContent();
-        // var ms = new MemoryStream(args);
-        // var fileContent = new StreamContent(ms);
-        // fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(file.ContentType);
-        // content.Add(content: fileContent, name: "\"files\"", fileName: fileUpload.Name);
-        // _fileUploadService.UploadFile(content);
-
-        // Console.WriteLine(args);
-    }
-
-    void OnError(UploadErrorEventArgs args, string name)
-    {
-
-    }
-    private Task OnSelectedTabChanged(string name)
-    {
-        selectedTab = name;
-        return Task.CompletedTask;
-    }
-    void OnChanged(ChangeEventArgs e)
-    {
-        city = e!.Value!.ToString()!;
-    }
-    void OnProgress(UploadProgressArgs args, string name)
-    {
-        if (args.Progress == 100)
-        {
-            foreach (var file in args.Files)
-            {
-
-            }
-        }
-    }
-    async Task HandleFileUpload(UploadChangeEventArgs args, string name)
-    {
-        if (args.Files.Count() == 0)
-        {
-            NotificationService.Notify(NotificationSeverity.Info, "No file is selected.");
-            return;
-        }
-        var file = args.Files.FirstOrDefault();
-
-        if (file is null)
-        {
-            NotificationService.Notify(NotificationSeverity.Info, "File is null");
-            return;
-        }
-
-        var ms = new MemoryStream();
-
-        await file.OpenReadStream().CopyToAsync(ms);
-
-        string fileName = file.Name;
-
-        string fileExtension = Path.GetExtension(fileName);
-
-        long fileSize = file.Size;
-
-        var uploadFile = new FileUploadModel(fileName, fileExtension, fileSize, ms.ToArray());
-
-        var resp = await _fileUploadService.UploadFile(uploadFile);
-
-        if (!resp.IsSuccess)
-        {
-            var message = resp.Errors?.First();
-
-            NotificationService.Notify(NotificationSeverity.Info, message);
-
-            return;
-        }
-
-        model.Photo = resp.Data?.FileUrl;
-
-        StateHasChanged();
-
-    }
-
-    async Task OnKeyPress(KeyboardEventArgs e)
-    {
-        if (e.Code == "Enter")
-        {
-            await _addressService.AddCity(new CityDtoCreate
-                {
-                    CityName = city
-                });
-            Cities = await _addressService.GetCities();
-        }
-
-    }
-    async Task GetAdditionalInformation()
-    {
-        Nationalities = await _nationalityService!.GetAllAsync();
-
-        Provinces = await _addressService.GetAllProvinceAsync();
-
-        Occupations = await _employeeService!.GetOccupationsAsync("Position");
-
-        Countries = await _addressService.GetCountries(105);
-
-        Cities = await _addressService.GetCities();
-    }
-    async void SelectedProvinceChanged(object arg)
-    {
-        if (arg is not null)
-        {
-            model.ProInKhmer = ((ProvinceDto)arg).ProInKhmer;
-            Districts = await _addressService!.GetDistrictByProvinceAsync(((ProvinceDto)arg).ProvinceID);
-            StateHasChanged();
-        }
-
-    }
-    async void SelectedDistrictChanged(object arg)
-    {
-        if (arg is not null)
-        {
-            model.DisInKhmer = ((DistrictDto)arg).DisInKhmer;
-            Communes = await _addressService!.GetCommuneByDistricteAsync(((DistrictDto)arg).DistrictId);
-            StateHasChanged();
-        }
-
-    }
-    async void SelectedCommuneChanged(object arg)
-    {
-        if (arg is not null)
-        {
-            model.ComInKhmer = ((CommuneDto)arg).ComInKhmer;
-            Villages = await _addressService!.GetVillageByCommuneAsync(((CommuneDto)arg).CommuneId);
-            StateHasChanged();
-        }
-
-    }
-    void SelectedVillageChanged(object arg)
-    {
-        if (arg is not null)
-        {
-            model.VilInKhmer = ((VillageDto)arg).VilInKhmer;
-            StateHasChanged();
-        }
-
-    }
-    private async Task GetCities()
-    {
-        Cities = await _addressService.GetCities();
-    }
-    private async Task GetOccupation()
-    {
-        Occupations = await _occupationService.GetOccupationsAsync();
-    }
-    private async Task GetProvinces()
-    {
-        Provinces = await _addressService.GetAllProvinceAsync();
-    }
-    private async Task GetCountries()
-    {
-        var countries = await _addressService.GetCountries();
-        Countries = countries.Where(x => x.CountryId == 105).ToList();
-    }
-    private async Task GetSalutations()
-    {
-        var salutations = await _salutationService.GetSalutions();
-
-        if (salutations.IsSuccess)
-        {
-            Salutations = salutations!.Data!.Select(x => x.Title!).ToList();
-        }
-        else
-        {
-            Salutations = [];
-        }
-    }
-
-
-}
 
 
 

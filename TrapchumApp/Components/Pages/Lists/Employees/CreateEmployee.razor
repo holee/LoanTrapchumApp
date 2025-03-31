@@ -1,10 +1,12 @@
 ﻿@using Radzen
 @using Radzen.Blazor
 @using System.Collections.Generic
+@using Applications.Requests.Lists.Employees
+@using Applications.Requests.Lists.OtherNames
 @using System.ComponentModel.DataAnnotations
-@page "/Employees/Create"
+@page "/App/Employees/Create"
 <PageTitle>New Employee</PageTitle>
-<RadzenTemplateForm TItem="EmployeeDtoCreate" Data=@model Submit=@FormValidSubmit>
+<RadzenTemplateForm TItem="EntityNamesCreate" Data="@model" Submit="@FormValidSubmit">
     <BCard BodyCssClass="rz-background-color-base-200 rz-m-0 rz-p-0">
         <CardBody>
             <ValidationSummary />
@@ -18,8 +20,8 @@
                     <div class="row">
                         <div class="col-md-2">
                             <div>
-                                <RadzenCheckBox TValue="bool" @bind-Value=model.IsActive Name="CheckBox1" />
-                                @(model.IsActive ? " Is Active" : " Is Inactive")
+                                <RadzenCheckBox TValue="bool?" @bind-Value=model.IsActive Name="CheckBox1" />
+                                @(model.IsActive==true ? " Is Active" : " Is Inactive")
                             </div>
                         </div>
                         <div class="col-md-10">
@@ -455,7 +457,7 @@
                                                                 ValueProperty="DepartmentId"
                                                                 Style="width: 100%;"
                                                                 Name="Department"
-                                                                @bind-Value="model.DepartmentRefID"
+                                                                @bind-Value="model.DepartmentRefId"
                                                                 Placeholder="Select department">
                                                 </RadzenDropDown>
                                             </RadzenColumn>
@@ -547,7 +549,7 @@
         if (arg is not null)
         {
             model.ProInKhmer = ((ProvinceDto)arg).ProInKhmer;
-            Districts = await _addressService!.GetDistrictByProvinceAsync(((ProvinceDto)arg).ProvinceID);
+            Districts = await _addressService!.GetDistrictsByProvinceId(((ProvinceDto)arg).ProvinceId);
             StateHasChanged();
         }
 
@@ -557,7 +559,7 @@
         if (arg is not null)
         {
             model.DisInKhmer = ((DistrictDto)arg).DisInKhmer;
-            Communes = await _addressService!.GetCommuneByDistricteAsync(((DistrictDto)arg).DistrictId);
+            Communes = await _addressService!.GetCommunesByDistrictId(((DistrictDto)arg).DistrictId);
             StateHasChanged();
         }
 
@@ -567,7 +569,7 @@
         if (arg is not null)
         {
             model.ComInKhmer = ((CommuneDto)arg).ComInKhmer;
-            Villages = await _addressService!.GetVillageByCommuneAsync(((CommuneDto)arg).CommuneId);
+            Villages = await _addressService!.GetVillagesByCommuneId(((CommuneDto)arg).CommuneId);
             StateHasChanged();
         }
 

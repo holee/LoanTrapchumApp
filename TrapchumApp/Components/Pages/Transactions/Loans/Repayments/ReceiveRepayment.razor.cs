@@ -13,7 +13,6 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Radzen;
 using Radzen.Blazor;
 using TCLMS.Front.Pages.Transactions.Loans;
-using TrapchumApp.Components.Pages.Transactions.Loans;
 
 namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments;
 
@@ -40,9 +39,9 @@ public partial class ReceiveRepayment
     DateTime paymentDate = DateTime.UtcNow;
     List<VSchedule> schedules { get; set; } = [];
     List<LoanRepaymentDto> RepaymentLists = [];
-    List<LoanRepaymentLineDtoCreate> loanRepaymentLines = [];
+    List<LoanRepaymentLineDtoCreate> LoanRepaymentLines = [];
     LoanRepaymentDtoCreate LoanRepayment = new();
-    IEnumerable<VBranch> Branches = [];
+    IEnumerable<VBranchResponse> Branches = [];
     VSchedule? SelectedSchedule = new();
     List<VSchedule>? selectedRepayments = [];
     VLoanDisbursments? LoanSchedule = new();
@@ -96,24 +95,24 @@ public partial class ReceiveRepayment
         }
         if (!isAllowMultiplePayment && isPaidNow)
         {
-            loanRepaymentLines.Clear();
+            LoanRepaymentLines.Clear();
 
             var line = SelectedSchedule?.ToPaymentLine(recievePayment);
 
             if (line is not null)
             {
-                loanRepaymentLines.Add(line);
+                LoanRepaymentLines.Add(line);
             }
         }
 
-        if (loanRepaymentLines.Count <= 0)
+        if (LoanRepaymentLines.Count <= 0)
         {
             NotificationService.Notify(NotificationSeverity.Error, "There is any schedule selected yet!");
 
             return;
         }
 
-        PaymentCreate create = loanRepaymentLines.ToPaymentCreate(CurrencyId);
+        PaymentCreate create = LoanRepaymentLines.ToPaymentCreate(CurrencyId);
 
         var options = new DialogOptions
         {
@@ -123,7 +122,7 @@ public partial class ReceiveRepayment
         };
 
         var parameters = new Dictionary<string, object?>{
-                {"LoanRepaymentLines" , loanRepaymentLines},
+                {"LoanRepaymentLines" , LoanRepaymentLines},
                 {"CurrencyId" , CurrencyId},
                 {"PaymentCreate" ,create},
                 {"LoanId" , LoanId},
@@ -144,7 +143,7 @@ public partial class ReceiveRepayment
 
             await GetCustomerSchedulesAsync(ScheduleStatus.Unpaid);
 
-            loanRepaymentLines.Clear();
+            LoanRepaymentLines.Clear();
 
             await gridSchedule.Reload();
 
@@ -210,7 +209,7 @@ public partial class ReceiveRepayment
         isPaidNow = false;
         btnDisabled = true;
         DeSelectedSchedule();
-        loanRepaymentLines.Clear();
+        LoanRepaymentLines.Clear();
         Clear();
         await gridSchedule.Reload();
     }
@@ -228,7 +227,7 @@ public partial class ReceiveRepayment
             return;
         }
 
-        if (index > 0 && SelectedSchedules.Count > loanRepaymentLines!.Count && !s.Selected)
+        if (index > 0 && SelectedSchedules.Count > LoanRepaymentLines!.Count && !s.Selected)
         {
 
             s.Selected = false;
@@ -269,7 +268,7 @@ public partial class ReceiveRepayment
         {
             s.Selected = arg;
             gridSchedule.SelectRow(s, false);
-            var removeSchedule = loanRepaymentLines.Where(x => x.InstallmentNo == s.InstallmentNo).FirstOrDefault();
+            var removeSchedule = LoanRepaymentLines.Where(x => x.InstallmentNo == s.InstallmentNo).FirstOrDefault();
             if (removeSchedule is not null)
             {
                 OnRemoveAdded(removeSchedule);
@@ -373,7 +372,7 @@ public partial class ReceiveRepayment
             return;
         }
 
-        if (loanRepaymentLines.Any(x => x.InstallmentNo == s!.InstallmentNo))
+        if (LoanRepaymentLines.Any(x => x.InstallmentNo == s!.InstallmentNo))
         {
             SetDefaultValue();
             SelectedSchedule = s;
@@ -439,7 +438,7 @@ public partial class ReceiveRepayment
 
     async void OnPaid()
     {
-        if (SelectedSchedule is not null && loanRepaymentLines.Any(x => x.InstallmentNo == SelectedSchedule!.InstallmentNo))
+        if (SelectedSchedule is not null && LoanRepaymentLines.Any(x => x.InstallmentNo == SelectedSchedule!.InstallmentNo))
         {
             SetDefaultValue();
             return;
@@ -455,7 +454,7 @@ public partial class ReceiveRepayment
 
             schedules[selectedIndex].Selected = true;
 
-            loanRepaymentLines.Add(line);
+            LoanRepaymentLines.Add(line);
 
             await paymentLinesRef.ReLoad();
 
@@ -470,7 +469,7 @@ public partial class ReceiveRepayment
     {
         DeSelectedSchedule();
         Clear();
-        loanRepaymentLines.Clear();
+        LoanRepaymentLines.Clear();
         SelectedSchedules = [];
         SelectedSchedule = new();
         disableIsPaidNow = true;
@@ -479,17 +478,17 @@ public partial class ReceiveRepayment
 
     void OnRemoveAdded(LoanRepaymentLineDtoCreate value)
     {
-        var removeIndex = loanRepaymentLines.IndexOf(value);
+        var removeIndex = LoanRepaymentLines.IndexOf(value);
 
-        if (removeIndex < loanRepaymentLines.Count - 1)
+        if (removeIndex < LoanRepaymentLines.Count - 1)
         {
             NotificationService.Notify(NotificationSeverity.Error, "Cannot remove first schedule.");
             return;
         }
 
-        if (removeIndex == loanRepaymentLines.Count - 1)
+        if (removeIndex == LoanRepaymentLines.Count - 1)
         {
-            loanRepaymentLines.RemoveAt(removeIndex);
+            LoanRepaymentLines.RemoveAt(removeIndex);
 
             var changedSchedule = SelectedSchedules!.Where(x => x.InstallmentNo == value.InstallmentNo).FirstOrDefault();
 
@@ -503,7 +502,7 @@ public partial class ReceiveRepayment
 
             }
 
-            totalPaidAmount = loanRepaymentLines.Total();
+            totalPaidAmount = LoanRepaymentLines.Total();
 
         }
     }

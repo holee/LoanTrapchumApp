@@ -12,7 +12,7 @@ public class LoanTransaction : BaseEntity
     public int? TranTypeRefId { get; set; }
     public string TransactionTypeName { get; set; } = string.Empty;
     public DateTime? TransactionDate { get; set; }=DateTime.Now;
-    public long? UserRefId { get; set; }
+    public Guid? UserRefId { get; set; }
     public bool? IsActive { get; set; } = true;
     public JournalEntry? JournalEntry { get; set; }
     public OpenBranch? OpenBranch { get; set; }

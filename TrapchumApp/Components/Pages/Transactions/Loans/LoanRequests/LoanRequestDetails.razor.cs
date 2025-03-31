@@ -1,5 +1,6 @@
 using Applications.Extensions;
 using Applications.Responses;
+using Applications.Responses.ViewModels.Customers;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Applications.Services.Customers;
 using Applications.Services.Loans;
@@ -9,16 +10,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 {
     public partial class LoanRequestDetails
     {
-
-        private readonly ICustomerServiceImpl _customerService;
-        private readonly ILoanRequestServiceImpl _loanRequestService;
-
-        public LoanRequestDetails(ICustomerServiceImpl customerService, ILoanRequestServiceImpl loanRequestService)
-        {
-            _customerService = customerService;
-            _loanRequestService = loanRequestService;
-        }
-
+        
         [Parameter] public Guid? LoanRequestId { get; set; }
         [Parameter] public Guid? CustomerId { get; set; }
         [Parameter] public int BranchId { get; set; }

@@ -1,4 +1,4 @@
-﻿@using TCLMS.Shared.Entities.Dtos.Collaterals.NewCollaterals
+﻿@using Applications.Responses.Collaterals;
 <Containers Fluid>
     <EditForm Model="model" @ref="editForm">
         <DataAnnotationsValidator />
@@ -57,7 +57,7 @@
             <Tabs>
                 <RadzenTabsItem Text="Property">
                     <RadzenDataGrid Density="Density.Compact"
-                                    TItem="CollateralLineDto"
+                                    TItem="CollateralLineResponse"
                                     Responsive
                                     ColumnWidth="15rem"
                                     @ref="propertiesGrid"
@@ -73,10 +73,8 @@
                         <Columns>
                             <RadzenDataGridColumn Property="Id" Title="#" Width="2rem">
                                 <Template Context="c">
-                                    @c.Id
                                     <input type="hidden" @bind="c.Id" />
                                     <input type="hidden" @bind="c.CollateralRefId" />
-                                    @(Properties.IndexOf(c) + 1)
                                 </Template>
                             </RadzenDataGridColumn>
                             <RadzenDataGridColumn Property="SubCategoryRefId" Title="Category" Context="c">
@@ -230,7 +228,7 @@
                 </RadzenTabsItem>
                 <RadzenTabsItem Text="Personal">
                     <RadzenDataGrid Density="Density.Compact"
-                                    TItem="CollateralLineDto"
+                                    TItem="CollateralLineResponse"
                                     Responsive
                                     ColumnWidth="15rem"
                                     @ref="personalGrid"
@@ -246,10 +244,9 @@
                         <Columns>
                             <RadzenDataGridColumn Property="Id" Title="#" Width="2rem">
                                 <Template Context="c">
-                                    @c.Id
                                     <input type="hidden" @bind="c.Id" />
                                     <input type="hidden" @bind="c.CollateralRefId" />
-                                    @(Personals.IndexOf(c) + 1)
+                                    <input type="hidden" @bind="c.CategoryRefId" />
                                 </Template>
                             </RadzenDataGridColumn>
                             <RadzenDataGridColumn Property="SubCategoryRefId" Title="Category" Context="c">
@@ -408,12 +405,3 @@
                       Click="CloseDialogue" />
     </RadzenStack>
 </Containers>
-
-@code {
-
-    
-
-
-
-
-}

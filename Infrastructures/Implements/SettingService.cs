@@ -146,6 +146,29 @@ namespace Infrastructures.Implements
 
         }
 
+        public Task<Result<string>> Delete(int? id)
+        {
+            throw new NotImplementedException();
+        }
 
+        public Task<Result<SysSettings>> GetSysSettingByCode(int? id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Result<IEnumerable<AprovePerson>>> GetAproveUserAsync(int? branchId, string? filterValue = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Result<string>> Delete(Guid? id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Result<string>> DeActivateUserLoanSizeAsync(Guid? id)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

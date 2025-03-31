@@ -6,7 +6,7 @@ public class CustomerExpenseDtoCreate
     {
     }
 
-    public CustomerExpenseDtoCreate(long id, long? customerRefId, string? expenseTitle, decimal? amount, string? description)
+    public CustomerExpenseDtoCreate(long id, Guid? customerRefId, string? expenseTitle, decimal? amount, string? description)
     {
         Id = id;
         CustomerRefId = customerRefId;
@@ -16,7 +16,7 @@ public class CustomerExpenseDtoCreate
     }
 
     public long Id { get; set; }
-    public long? CustomerRefId { get; set; } 
+    public Guid? CustomerRefId { get; set; } 
     public string? ExpenseTitle { get; set; }
     public decimal? Amount { get; set; } 
     public string? Description { get; set; }

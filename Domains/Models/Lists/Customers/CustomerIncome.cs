@@ -3,7 +3,7 @@
     public class CustomerIncome
     {
         public long Id { get; set; }
-        public long? CustomerRefId { get; set; }
+        public Guid? CustomerRefId { get; set; }
         public string? IncomeSource { get; set; }
         public decimal? Amount { get; set; }
         public string? Description { get; set; }

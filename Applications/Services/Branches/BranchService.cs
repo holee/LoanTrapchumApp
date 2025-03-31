@@ -8,73 +8,82 @@ using Mapster;
 
 namespace Applications.Services.Branches
 {
-    public sealed class BranchService : IBranchService
+    public interface IBranchServiceImpl
     {
-        private readonly IBranchService _branchService;
-
-        public BranchService(IBranchService branchService)
-        {
-            _branchService = branchService;
-        }
-
+        Task<Result> Create(Branch branch);
+        Task<Result> DeleteAsync(int? id);
+        Task<Result<ResultStatus>> GetBrachStatus(int? branchRefId);
+        Task<Result<Branch>> GetBranchById(int? id);
+        Task<Pager<VBranchResponse>> GetBranchesAsync(QueryParam param);
+        Task<Result<IEnumerable<VBranchResponse>>> GetBranchesAsync(int branchId = 0, int pageSize = 0, bool includeInactive = false, string? filter = null);
+        Task<Result<IEnumerable<VBranchResponse>>> GetBranchesAsync(int? branchId = 0, int? pageSize = 0, bool includeInactive = false, string? filter = null);
+        Task<Result<IEnumerable<VBranchResponse>>> GetBranchesByUser(string userId, int? branchId = 0);
+        Task<Result<Branch>> GetBranchForVault(int? id);
+        Task<Result<BranchDtoUpdate>> GetUpdateBranchById(int? branchId);
+        Task<Result> Update(Branch branch);
+        Task<Result> UpdateStatusAsync(int? branchId);
+    }
+    public sealed class BranchService(IBranchService branchService) : IBranchServiceImpl
+    {
         public async Task<Result> Create(Branch branch)
         {
-            return await _branchService.Create(branch);
+            return await branchService.Create(branch);
         }
 
         public async Task<Result> DeleteAsync(int? id)
         {
-            return await _branchService.DeleteAsync(id);
+            return await branchService.DeleteAsync(id);
         }
 
         public async Task<Result<ResultStatus>> GetBrachStatus(int? branchRefId)
         {
-            return await _branchService.GetBrachStatus(branchRefId);
+            return await branchService.GetBrachStatus(branchRefId);
         }
 
         public async Task<Result<Branch>> GetBranchById(int? id)
         {
-            return await _branchService.GetBranchById(id);
+            return await branchService.GetBranchById(id);
         }
 
-        public async Task<Pager<VBranch>> GetBranchesAsync(QueryParam param)
+        public async Task<Pager<VBranchResponse>> GetBranchesAsync(QueryParam param)
         {
-            return await _branchService.GetBranchesAsync(param);
+            return await branchService.GetBranchesAsync(param);
         }
 
-        public async Task<Result<IEnumerable<VBranch>>> GetBranchesAsync(int branchId = 0, int pageSize = 0, bool includeInactive = false, string? filter = null)
+        public async Task<Result<IEnumerable<VBranchResponse>>> GetBranchesAsync(int branchId = 0, int pageSize = 0, bool includeInactive = false, string? filter = null)
         {
-            return await _branchService.GetBranchesAsync(branchId, pageSize, includeInactive, filter);
+            return await branchService.GetBranchesAsync(branchId, pageSize, includeInactive, filter);
         }
 
-        public async Task<Result<IEnumerable<VBranch>>> GetBranchesAsync(int branchId = 0, int take = 0, string? filter = null)
+
+        public Task<Result<IEnumerable<VBranchResponse>>> GetBranchesAsync(int? branchId = 0, int? pageSize = 0, bool includeInactive = false, string? filter = null)
         {
-            return await _branchService.GetBranchesAsync(branchId, take, filter);
+            throw new NotImplementedException();
         }
 
-        public async Task<Result<IEnumerable<VBranch>>> GetBranchesByUser(string userId, int? branchId = 0)
+        public async Task<Result<IEnumerable<VBranchResponse>>> GetBranchesByUser(string userId, int? branchId = 0)
         {
-            return await _branchService.GetBranchesByUser(userId, branchId);
+            return await branchService.GetBranchesByUser(userId, branchId);
         }
 
         public async Task<Result<Branch>> GetBranchForVault(int? id)
         {
-            return await _branchService.GetBranchForVault(id);
+            return await branchService.GetBranchForVault(id);
         }
 
         public async Task<Result<BranchDtoUpdate>> GetUpdateBranchById(int? branchId)
         {
-            return await _branchService.GetUpdateBranchById(branchId);
+            return await branchService.GetUpdateBranchById(branchId);
         }
 
         public async Task<Result> Update(Branch branch)
         {
-            return await _branchService.Update(branch);
+            return await branchService.Update(branch);
         }
 
         public async Task<Result> UpdateStatusAsync(int? branchId)
         {
-            return await _branchService.UpdateStatusAsync(branchId);
+            return await branchService.UpdateStatusAsync(branchId);
         }
 
 

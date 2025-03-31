@@ -1,16 +1,23 @@
-﻿using AppilcationServices.Interfaces;
+﻿using Applications.Extensions.mappers;
+using Applications.Requests.Lists.Entities;
+using Applications.Responses.ViewModels.Customers;
+using Applications.Services.Lists;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Radzen;
-using TCLMS.Shared.Entities.Dtos.Lists;
-using TCLMS.Shared.Entities.Dtos.Lists.Entities;
-using TCLMS.Shared.Entities.ViewModels.Customers;
-namespace TCLMS.Front.Pages.CreditAgents;
+namespace TrapchumApp.Components.Pages.Lists.CreditAgents;
 
 public partial class CreditAgent
 {
+    private readonly ICreditAgentServiceImpl _creditAgentService;
+
+    public CreditAgent(ICreditAgentServiceImpl creditAgentService)
+    {
+        _creditAgentService = creditAgentService;
+    }
+
     protected bool includeInactive = false;
-    protected IEnumerable<EntEmployeeDto> Employees { get; set; } = new List<EntEmployeeDto>();
+    protected IEnumerable<EntEmployeeDto> Employees { get; set; } = [];
     protected List<VCreditAgent>? CreditAgents { get; set; }
 
     protected string? searchText = "";
@@ -20,7 +27,7 @@ public partial class CreditAgent
     List<BranchDto> Branches = [];
     protected string? UserId { get; set; }
     int pageIndex = 0;
-    int pageSize =10;
+    int pageSize = 10;
     string sortColumn = "FirstName";
     bool sortDescending = false;
     int counts = 0;
@@ -32,7 +39,8 @@ public partial class CreditAgent
 
             if (branchResponse.IsSuccess)
             {
-                Branches = branchResponse.Data!.ToList();
+                Branches = branchResponse.Data!.MapList<BranchDto>();
+
                 Branches.Add(new BranchDto
                 {
                     BranchId = 0,

@@ -1,7 +1,4 @@
-﻿@using TCLMS.Shared.Entities.Dtos.Lists.OtherNames
-@using TCLMS.Shared.Entities.Dtos.Lists.Vendors
-
-<div class="card">
+﻿<div class="card">
     <div class="card-header bg-primary">
         <div class="d-flex justify-content-between">
             <span>Name Details: @model!.Salution @model?.Name <span class="ml-4"><RadzenCheckBox ReadOnly @bind-Value="model!.IsActive" /></span></span>
@@ -42,7 +39,7 @@
                             <td>
                                 @model.CompanyName
                             </td>
-                        </tr> 
+                        </tr>
                         <tr>
                             <th class="w-25 rz-background-color-base-100">Job Title</th>
                             <td>
@@ -87,15 +84,10 @@
     <div class="card-footer ">
         <div class="d-flex justify-content-between">
             <div>
-                <label class="text-muted">Created: @string.Format("{0:dd MMM yyyy hh:mm tt}", model?.CreatedDT) Modified: @string.Format("{0:dd MMM yyyy hh:mm tt}", model?.ModifiedDT)</label>
+                <label class="text-muted">Created: @string.Format("{0:dd MMM yyyy hh:mm tt}", model?.CreatedDt) Modified: @string.Format("{0:dd MMM yyyy hh:mm tt}", model?.ModifiedDt)</label>
             </div>
             <div>
-
-                <TButton Click="SelectedIndex"
-                         Text="Close"
-                         Icon="BtnIconType.Close"
-                         Size="BtnSize.Small"
-                         Color="Kalor.Danger" />
+                <RadzenButton Text="Text" Size="ButtonSize.Small" Click="SelectedIndex"></RadzenButton>
             </div>
 
         </div>
@@ -105,28 +97,6 @@
 </div>
 
 
-@code {
 
-    [Inject] IVendorServiceImpl? VendorService { get; set; }
-    [Parameter] public VendorDTO? model { get; set; } = new();
-    [Parameter] public long Id { get; set; }
-    [Parameter]
-    public EventCallback<int> SelectIndex { get; set; }
-
-    protected async void SelectedIndex()
-    {
-        await SelectIndex.InvokeAsync(0);
-    }
-
-    protected override async Task OnInitializedAsync()
-    {
-        await base.OnInitializedAsync();
-    }
-
-    void ShowList()
-    {
-        // ModalService!.Hide();
-    }
-}
 
 

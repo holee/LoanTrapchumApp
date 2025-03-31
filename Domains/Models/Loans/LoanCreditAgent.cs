@@ -6,7 +6,7 @@ namespace Domains.Models.Loans;
 public sealed class LoanCreditAgent:BaseEntity
 {
     public int Id { get; set; }
-    public long EmployeeRefId { get; set; }
+    public Guid? EmployeeRefId { get; set; }
     public int? CreditAssistant { get; set; }
     public int? SubManager { get; set; }
     public int? Manager { get; set; }

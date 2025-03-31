@@ -25,8 +25,8 @@ namespace TrapchumApp.Components.Pages.Transactions.Branches
         int? CurrencyId;
         decimal? totalAmount = 0;
         decimal total = 0;
-        IEnumerable<CurrencyDto>? CurrencyList = [];
-        CurrencyDto? Currency = new CurrencyDto();
+        IEnumerable<CurrencyResponse>? CurrencyList = [];
+        CurrencyResponse? Currency = new CurrencyResponse();
 
         protected override async Task OnParametersSetAsync()
         {
@@ -46,7 +46,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Branches
 
                 if (currencies.IsSuccess)
                 {
-                    CurrencyList = currencies.Data.Adapt<IEnumerable<CurrencyDto>>();
+                    CurrencyList = currencies.Data.Adapt<IEnumerable<CurrencyResponse>>();
 
                     Currency = CurrencyList!.FirstOrDefault();
 
@@ -200,7 +200,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Branches
             if (obj is not null)
             {
 
-                var selectedResult = (CurrencyDto)obj;
+                var selectedResult = (CurrencyResponse)obj;
 
                 OnGetCurrencyNote(selectedResult.CurrencyId);
 

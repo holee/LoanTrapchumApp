@@ -104,6 +104,11 @@ namespace Applications.Services.Loans
             return await reqService.GetLoanRequestsAsync(userId, branchId, requestStatus, param);
         }
 
+        public Task<Result<VLoanRequests>> GetLoanRequestsAsync(int? branchId, Guid? customerId, Guid? loanRequestId, bool v)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<Result<string>> RecheckedLoanRequestAsync(RecheckedRequestDtoCreate req)
         {
             return await reqService.RecheckedLoanRequestAsync(req);

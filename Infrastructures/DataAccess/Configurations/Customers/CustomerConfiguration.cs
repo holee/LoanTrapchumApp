@@ -11,10 +11,6 @@ public class CustomerConfiguration : IEntityTypeConfiguration<Customer>
 
         builder.ToTable("lt_entcustomers");
         builder.HasKey(x => x.CustomerId);
-        builder.Property(x => x.CustomerId).ValueGeneratedOnAdd();
-        builder.Property(p => p.PassportId).HasMaxLength(20);
-        builder.Property(p => p.Nationality).HasMaxLength(20);
-        builder.Property(p => p.CompanyName).HasMaxLength(100);
         builder.Property(p => p.Dependents).HasMaxLength(100);
         builder.Property(p => p.NoOfChildren).HasDefaultValue(0);
         builder.Property(p => p.Income).HasPrecision(18, 2);
@@ -25,8 +21,6 @@ public class CustomerConfiguration : IEntityTypeConfiguration<Customer>
         builder.Property(p => p.SpousePassport).HasMaxLength(20);
         builder.Property(p => p.SpousePhoneNo).HasMaxLength(20);
         builder.Property(p => p.SpouseOccupation).HasMaxLength(100);
-        builder.Property(p => p.Description).HasMaxLength(300);
-        builder.Property(p => p.Occupation).HasMaxLength(100);
 
         builder.HasOne(x => x.Collateral)
                  .WithOne(x=>x.Customer)

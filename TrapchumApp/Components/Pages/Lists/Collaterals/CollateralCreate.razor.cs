@@ -1,8 +1,9 @@
-using Applications.Interfaces.Customers;
-using Applications.Interfaces.Lists;
+using Applications.Extensions;
 using Applications.Requests.Collaterals;
+using Applications.Requests.Lists.Collaterals;
 using Applications.Responses;
 using Applications.Responses.Collaterals;
+using Applications.Responses.ViewModels.Customers;
 using Applications.Services.LIsts;
 using Mapster;
 using Microsoft.AspNetCore.Components;
@@ -14,16 +15,14 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
     {
 
         readonly ICollateralsServiceImpl _cService;
-        readonly ICustomerService _customerService;
-        public CollateralCreate(ICollateralsServiceImpl collateralService, ICustomerService customerService)
+        public CollateralCreate(ICollateralsServiceImpl collateralService)
         {
             _cService = collateralService;
-            _customerService = customerService;
         }
 
-        [Parameter] public long CustomerId { get; set; }
+        [Parameter] public Guid? CustomerId { get; set; }
         [Parameter] public string? CustomerName { get; set; } = string.Empty;
-        IEnumerable<VCustomerList>? custlist = new List<VCustomerList>();
+        IEnumerable<VCustomerList> custlist = [];
         IEnumerable<CustomerCollateral> cusName = [];
         IEnumerable<CollateralTypeResponse> CollateralTypes = [];
         IEnumerable<CollateralSubTypeResponse> CollateralProperties = [];
@@ -32,10 +31,10 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
         List<CollateralLineResponse> Properties = [];
         List<CollateralLineResponse> Personals = [];
         EditForm editForm { get; set; } = default!;
-        CollateralTypeDto? SelectCollateralType;
+        CollateralTypeResponse? SelectCollateralType;
         CollateralDtoCreate model { get; set; } = new();
 
-        long CollateralId = 0;
+        Guid? CollateralId = Guid.Empty;
         protected override async Task OnInitializedAsync()
         {
             CollateralTypes = await _cService.GetCollateralTypes(0);
@@ -62,7 +61,7 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
 
             if (customerResponse.IsSuccess)
             {
-                CustomerName = customerResponse!.Data!.AltName;
+                CustomerName = customerResponse!.Data!.EntityNames.AltName;
             }
 
             await base.OnParametersSetAsync();
@@ -92,7 +91,7 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
             }
             else
             {
-                CollateralId = 0;
+                CollateralId = Guid.Empty;
                 model!.CustomerName = CustomerName;
                 model.CollateralId = CustomerId;
                 model.Remark = "";
@@ -164,7 +163,7 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
 
             model.CollateralLines = lines.Adapt<List<CollateralLineDtoCreate>>();
 
-            if (CustomerId == 0)
+            if (CustomerId.IsNullOrEmpty())
             {
                 NotificationService.Notify(Radzen.NotificationSeverity.Warning, "Empty Selected", "Please select customer first");
                 return;
@@ -172,7 +171,7 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
             editForm.EditContext?.Validate();
             try
             {
-                var response = await _cService.InsertOrUpdate(model);
+                var response = await _cService.CreateAsync(model);
                 if (response.IsSuccess)
                 {
 
@@ -190,189 +189,6 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
 
             }
         }
-
-        #region codes
-
-
-        //model!.CollateralLines!.Add(new CollateralLineDTO
-        //{
-        //    CategoryRefId = collateralTypeId,
-        //    TypeName = collateralTypeId == 3 ? "Personal" : "Property"
-        //});
-
-
-        //model!.CollateralLines!.ForEach(x =>
-        //{
-        //    var subType = allSubTypes!.Where(a => a.Id == x.SubCategoryRefId).FirstOrDefault();
-        //    if (subType is not null)
-        //    {
-        //        x.SubTypeName = subType.CollateralSubTypeName;
-        //    }
-        //});
-        //protected async Task SelectCustomerChanged()
-        //{
-        //    var collateral = await _collateralService.GetCollateralById(CustomerId);
-        //    if (collateral is not null)
-        //    {
-        //        CollateralId = CustomerId;
-        //        model!.CustomerRefId = CustomerId;
-        //        model.CustomerName = CustomerName;
-        //        model.CollateralLines = collateral!.CollateralLines;
-        //        model.Remark = collateral!.Remark;
-        //        model.DocumentKeeping = collateral!.DocumentKeeping;
-        //        model.RegisterDate = collateral!.RegisterDate;
-        //    }
-        //    else
-        //    {
-        //        CollateralId = 0;
-        //        model!.CustomerName = CustomerName;
-        //        model.CustomerRefId = CustomerId;
-        //        model.Remark = "";
-        //        model.DocumentKeeping = "";
-        //        model.RegisterDate = DateTime.Now;
-        //        model.CollateralLines!.Clear();
-        //    }
-        //    await InvokeAsync(StateHasChanged);
-        //}
-        //protected async Task SearchCustomer(string searchText = "")
-        //{
-        //    strText = searchText;
-        //    custlist = await _customerService.GetCustomersAsync(25, includeisactive, false, searchText);
-        //    cusName = custlist!.Select(x => new CustomerCollateral
-        //    {
-        //        CustomerId = x.CustomerId,
-        //        Name = x.AltName,
-        //    }).Take(50).ToList();
-        //    StateHasChanged();
-        //}
-        //[Parameter]
-        //public LoanCustomerQuery? SelectedCustomer { get; set; }
-        //[Parameter]
-        //public long CollateralId { get; set; } = 0;
-        //[Inject] IToaster Toaster { get; set; } = default!;
-        //[Inject] ICollateralNew _service { get; set; } = default!;
-        //[Inject] ICustomerServiceImpl _cusService { get; set; } = default!;
-
-        //protected IEnumerable<LoanCustomerQuery>? cusName = Enumerable.Empty<LoanCustomerQuery>();
-        //protected EditForm editForm { get; set; } = default!;
-
-        //protected CollateralDto model = new CollateralDto();
-
-        //private IEnumerable<CollateralTypeDto> CollateralTypeDtos = [];
-        //private IEnumerable<CollateralSubTypeDto> collateralProperties = [];
-        //private IEnumerable<CollateralSubTypeDto> collateralPersonals = [];
-        //protected CollateralTypeDto? SelectCollateralType;
-        //private IEnumerable<CollateralSubTypeDto>? allSubTypes = [];
-        //private void Close() => DialogService.Close(false);
-        //[Parameter] public Func<bool, Task<bool>> onVildated { get; set; } = default!;
-        //[Parameter] public Func<bool, Task> OnSuccess { get; set; } = default!;
-        ////Onstartup
-        //protected async override Task OnInitializedAsync()
-        //{
-        //    try
-        //    {
-        //        CollateralTypeDtos = await _service.GetCollateralType();
-        //        collateralProperties = await _service.GetCollateralSubTypes(1);
-        //        collateralPersonals = await _service.GetCollateralSubTypes(3);
-        //        await GetCollateralLineByCustomer(SelectedCustomer!.CustomerId);
-        //        allSubTypes = await _service.GetCollateralSubTypes();
-        //        model.RegisterDate = DateTime.UtcNow;
-
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Toaster.Warning(ex.Message, "Collateral", config =>
-        //        {
-        //            config.ShowProgressBar = false;
-        //            config.ShowCloseIcon = true;
-        //        });
-        //    }
-        //    await base.OnInitializedAsync();
-        //}
-        ////===================================
-
-        ///// <summary>
-        ///// customer control
-        ///// </summary>
-        //string? q = string.Empty;
-        //protected string? strText = "";
-        //bool includeisactive = false;
-
-        //string selectedTab = "property";
-        //private Task OnSelectedTabChanged(string name)
-        //{
-        //    selectedTab = name;
-        //    return Task.CompletedTask;
-        //}
-        //private void AddNewRow(int collateralTypeId)
-        //{
-        //    model.CollateralLines!.Add(new CollateralLineDTO
-        //    {
-        //        CategoryRefId = collateralTypeId,
-        //        TypeName = collateralTypeId == 3 ? "Personal" : "Property"
-        //    });
-        //}
-        //protected async Task GetCollateralLineByCustomer(long customerId)
-        //{
-        //    var customerResult = await _service.GetCollateralById(customerId);
-        //    if (customerResult is not null)
-        //    {
-        //        CollateralId = customerResult!.CustomerRefId!.Value;
-        //        model.CustomerRefId = customerResult!.CustomerRefId;
-        //        model.CustomerName = SelectedCustomer!.AltName;
-        //        model.CustomerRefId = SelectedCustomer.CustomerId;
-        //        model.Remark = customerResult!.Remark;
-        //        model.DocumentKeeping = customerResult!.DocumentKeeping;
-        //        model.RegisterDate = customerResult!.RegisterDate;
-        //        model.CollateralLines = customerResult!.CollateralLines;
-        //    }
-        //    else
-        //    {
-        //        CollateralId = 0;
-        //        model.CustomerName = SelectedCustomer!.AltName;
-        //        model.CustomerRefId = SelectedCustomer.CustomerId;
-        //        model.Remark = "";
-        //        model.DocumentKeeping = "";
-        //        model.RegisterDate = DateTime.Now;
-        //    }
-        //}
-        //private void Remove(CollateralLineDTO row)
-        //{
-        //    model?.CollateralLines!.Remove(row);
-        //}
-
-        //////
-        /////create method
-        //protected async Task FormValidate()
-        //{
-        //    model.CollateralLines!.ForEach(x =>
-        //    {
-        //        var subType = allSubTypes!.Where(a => a.Id == x.SubCategoryRefId).FirstOrDefault();
-        //        if (subType is not null)
-        //        {
-        //            x.SubTypeName = subType.CollateralSubTypeName;
-        //        }
-        //    });
-
-        //    editForm.EditContext?.Validate();
-        //    try
-        //    {
-        //        var data = await _service.CreateCollateral(CollateralId, model);
-        //        if (data.IsSuccess)
-        //        {
-        //            NotificationService.Notify(Radzen.NotificationSeverity.Success, data.Message);
-        //            DialogService.Close(true);
-        //        }
-        //        else
-        //        {
-        //            NotificationService.Notify(Radzen.NotificationSeverity.Error, data.Message);
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        NotificationService.Notify(Radzen.NotificationSeverity.Error, ex.Message);
-        //    }
-        //}
-        #endregion
+  
     }
 }

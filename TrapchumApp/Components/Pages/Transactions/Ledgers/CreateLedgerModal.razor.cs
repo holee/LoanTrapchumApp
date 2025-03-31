@@ -23,7 +23,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Ledgers
 
         EditForm editForm = default!;
         IEnumerable<LedgerTypeDto>? LedgerTypes = [];
-        IEnumerable<CurrencyDto>? Currencies = [];
+        IEnumerable<CurrencyResponse>? Currencies = [];
         IEnumerable<VLedger>? FilterLedgers = [];
         bool IsSubTypeOf { get; set; }
         LedgerCreateDto model = new();
@@ -78,7 +78,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Ledgers
         {
             if (o is not null)
             {
-                selectedCurrencyId = ((CurrencyDto)o).CurrencyId;
+                selectedCurrencyId = ((CurrencyResponse)o).CurrencyId;
             }
             else
             {
@@ -154,7 +154,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Ledgers
 
                 if (currenciesRsponse.IsSuccess)
                 {
-                    Currencies = currenciesRsponse.Data!.Adapt<IEnumerable<CurrencyDto>>();
+                    Currencies = currenciesRsponse.Data!.Adapt<IEnumerable<CurrencyResponse>>();
                 }
                 await GetLedgers(selectedCurrencyId);
             }

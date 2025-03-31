@@ -8,8 +8,8 @@ namespace Applications.Interfaces.Lists
 {
     public interface ICreditAgentService
     {
-        Task<Result> AddCreditAgent(long employeeRefId, LoanCreditAgent req);
-        Task<Result> ActivateOrDeactivateCreditAgent(LoanCreditAgent req);
+        Task<Result<string>> AddCreditAgent(long employeeRefId, LoanCreditAgent req);
+        Task<Result<string>> ActivateOrDeactivateCreditAgent(LoanCreditAgent req);
         Task<IEnumerable<VCreditAgent>> GetCreditAgents(bool includeInactive=false, string? query = null);
         Task<Result> UpdateCreditAgent(int id, LoanCreditAgent req);
         Task<IEnumerable<VEmployeeCreateCreditAgent>> GetEmployeeCreateCreditAgents(string? query = null);

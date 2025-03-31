@@ -23,7 +23,7 @@ namespace TrapchumApp.Components.Pages.Currencies
 
         CurrencyNoteDtoCreate model = new CurrencyNoteDtoCreate();
         EditForm? editForm;
-        IEnumerable<CurrencyDto> Currencies = new List<CurrencyDto>();
+        IEnumerable<CurrencyResponse> Currencies = new List<CurrencyResponse>();
         void Close() => DialogService.Close(false);
         protected override async Task OnInitializedAsync()
         {
@@ -32,7 +32,7 @@ namespace TrapchumApp.Components.Pages.Currencies
             var currenciesResponse = await _currencyService.GetCurrencies(0);
             if (currenciesResponse.IsSuccess)
             {
-                Currencies = currenciesResponse.Data!.Maps<CurrencyDto>();
+                Currencies = currenciesResponse.Data!.Maps<CurrencyResponse>();
             }
 
             await base.OnInitializedAsync();

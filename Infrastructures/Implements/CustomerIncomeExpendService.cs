@@ -4,7 +4,7 @@ using Applications.Responses.ViewModels.Customers;
 using Dapper;
 using Domains.Models.Lists.Customers;
 using Infrastructures.DataAccess;
-using Microsoft.Data.SqlClient;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -13,174 +13,13 @@ namespace Infrastructures.Implements
     public class CustomerIncomeExpendService : ICustomerIncomeExpendService
     {
         private readonly ApplicationDbContext _context;
+
         private readonly ILogger<CustomerIncomeExpendService> _logger;
 
         public CustomerIncomeExpendService(ApplicationDbContext context, ILogger<CustomerIncomeExpendService> logger)
         {
             _context = context;
             _logger = logger;
-        }
-
-        public async Task<Result> AddIncomesAsync(long customerRefId, List<CustomerIncome> req)
-        {
-            try
-            {
-                _logger.LogInformation("Adding income...");
-
-                var customer = await _context.Customers
-                                            .Include(x => x.CustomerIncomes)
-                                            .FirstOrDefaultAsync(x => x.CustomerId == customerRefId);
-                if (customer is null)
-                {
-                    return Result.Failure(ErrorResponse.NotFound("no customer is selected"));
-                }
-
-                customer.CustomerIncomes = req;
-
-                await _context.SaveChangesAsync();
-
-                return Result.Success("customer income was added.");
-
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, ex.Message);
-                return Result.Failure(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
-            }
-
-
-        }
-
-        public async Task<Result> AddOrUpdateIncomesAsync(long customerId, List<CustomerIncome> req)
-        {
-            try
-            {
-                _logger.LogInformation("Adding income...");
-
-                var customer = await _context.Customers
-                                            .Include(x => x.CustomerIncomes)
-                                            .FirstOrDefaultAsync(x => x.CustomerId == customerId);
-                if (customer is null)
-                {
-                    return Result.Failure(ErrorResponse.NotFound("no customer is selected"));
-                }
-
-
-                foreach (var item in req)
-                {
-                    var existingIncomes = customer.CustomerIncomes?.Where(x => x.Id == item.Id)
-                                                                 .FirstOrDefault();
-
-                    if (existingIncomes is null || existingIncomes.Id == 0)
-                    {
-                        customer.CustomerIncomes?.Add(item);
-                    }
-                    else
-                    {
-                        _context.Entry(existingIncomes).CurrentValues.SetValues(item);
-                    }
-                }
-
-                foreach (var item in customer.CustomerIncomes!)
-                {
-                    if (!req.Any(x => x.Id == item.Id))
-                    {
-                        _context.Remove(item);
-                    }
-
-                }
-                //customer?.CustomerIncomes?.AddRange(req);
-
-                await _context.SaveChangesAsync();
-
-                return Result.Success("customer income was added.");
-
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, ex.Message);
-                return Result.Failure(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
-            }
-
-
-        }
-
-        public async Task<Result> AddExpensesAsync(long customerRefId, List<CustomerExpense> req)
-        {
-            try
-            {
-                _logger.LogInformation("Adding income...");
-
-                var customer = await _context
-                              .Customers
-                              .Include(x => x.CustomerExpenses)
-                              .FirstOrDefaultAsync(x => x.CustomerId == customerRefId);
-
-                if (customer is null)
-                {
-                    return Result.Failure(ErrorResponse.NotFound("no customer is selected"));
-                }
-                customer.CustomerExpenses = req;
-                await _context.SaveChangesAsync();
-
-                return Result.Success("customer expense was added.");
-            }
-            catch (SqlException ex)
-            {
-                _logger.LogError(ex, ex.Message);
-                return Result.Failure(ErrorResponse.ServerError("{ex.InnerException!.Message}"));
-            }
-
-        }
-
-        public async Task<Result> AddOrUpdateExpensesAsync(long customerId, List<CustomerExpense> req)
-        {
-            try
-            {
-                _logger.LogInformation("Adding income...");
-
-                var existingCustomer = await _context.Customers
-                                            .Include(x => x.CustomerExpenses)
-                                            .FirstOrDefaultAsync(x => x.CustomerId == customerId);
-
-                if (existingCustomer is null)
-                {
-                    return Result.Failure(ErrorResponse.NotFound("no customer is selected"));
-                }
-
-                foreach (var item in req)
-                {
-                    var existingExpense = existingCustomer.CustomerExpenses?.Where(x => x.Id == item.Id)
-                                                                 .FirstOrDefault();
-
-                    if (existingExpense is null || existingExpense.Id == 0)
-                    {
-                        existingCustomer.CustomerExpenses?.Add(item);
-                    }
-                    else
-                    {
-                        _context.Entry(existingExpense).CurrentValues.SetValues(item);
-                    }
-                }
-
-                foreach (var item in existingCustomer.CustomerExpenses!)
-                {
-                    if (!req.Any(x => x.Id == item.Id))
-                    {
-                        _context.Remove(item);
-                    }
-
-                }
-                await _context.SaveChangesAsync();
-
-                return Result.Success("customer expense was added.");
-            }
-            catch (SqlException ex)
-            {
-                _logger.LogError(ex, ex.Message);
-                return Result.Failure(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
-            }
-
         }
 
         public async Task<Result<IEnumerable<VCustomerIncomes>>> GetCustomerCustomerIncomes(long customerId)
@@ -212,7 +51,238 @@ namespace Infrastructures.Implements
             return Result.Success<IEnumerable<VCustomerExpenses>>(expensesResult);
         }
 
+        public async Task<Result> AddExpensesAsync(Guid? customerRefId, List<CustomerExpense> req)
+        {
+            try
+            {
+                _logger.LogInformation("Adding income...");
 
+                var customer = await _context
+                              .Customers
+                              .Include(x => x.CustomerExpenses)
+                              .FirstOrDefaultAsync(x => x.CustomerId == customerRefId);
+
+                if (customer is null)
+                {
+                    return Result.Failure(ErrorResponse.NotFound("no customer is selected"));
+                }
+                customer.CustomerExpenses = req;
+                await _context.SaveChangesAsync();
+
+                return Result.Success("customer expense was added.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return Result.Failure(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
+            }
+
+        }
+
+        public async Task<Result> AddIncomesAsync(Guid? customerRefId, List<CustomerIncome> req)
+        {
+            try
+            {
+                _logger.LogInformation("Adding income...");
+
+                var customer = await _context.Customers
+                                            .Include(x => x.CustomerIncomes)
+                                            .FirstOrDefaultAsync(x => x.CustomerId == customerRefId);
+                if (customer is null)
+                {
+                    return Result.Failure(ErrorResponse.NotFound("no customer is selected"));
+                }
+
+                customer.CustomerIncomes = req;
+
+                await _context.SaveChangesAsync();
+
+                return Result.Success("customer income was added.");
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return Result.Failure(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
+            }
+
+
+        }
+
+        public async Task<Result> AddOrUpdateExpensesAsync(Guid? customerId, List<CustomerExpense> req)
+        {
+            try
+            {
+                _logger.LogInformation("Adding income...");
+
+                var existingCustomer = await _context.Customers
+                                            .Include(x => x.CustomerExpenses)
+                                            .FirstOrDefaultAsync(x => x.CustomerId == customerId);
+
+                if (existingCustomer is null)
+                {
+                    return Result.Failure(ErrorResponse.NotFound("no customer is selected"));
+                }
+
+                _context.Entry(existingCustomer).CurrentValues.SetValues(req);
+
+                foreach (var item in req)
+                {
+                    var existingExpense = existingCustomer.CustomerExpenses?.Where(x => x.Id == item.Id)
+                                                                 .FirstOrDefault();
+
+                    if (existingExpense is null || existingExpense.Id == 0)
+                    {
+                        existingCustomer.CustomerExpenses?.Add(item);
+                    }
+                    else
+                    {
+                        _context.Entry(existingExpense).CurrentValues.SetValues(item);
+                    }
+                }
+
+                foreach (var item in existingCustomer.CustomerExpenses!)
+                {
+                    if (!req.Any(x => x.Id == item.Id))
+                    {
+                        _context.Remove(item);
+                    }
+
+                }
+                await _context.SaveChangesAsync();
+
+                return Result.Success("customer expense was added.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return Result.Failure(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
+            }
+        }
+
+        public async Task<Result> AddOrUpdateIncomesAsync(Guid? customerId, List<CustomerIncome> req)
+        {
+            try
+            {
+                _logger.LogInformation("Adding income...");
+
+                var existingCustomer = await _context.Customers
+                                            .Include(x => x.CustomerIncomes)
+                                            .FirstOrDefaultAsync(x => x.CustomerId == customerId);
+                if (existingCustomer is null)
+                {
+                    return Result.Failure(ErrorResponse.NotFound("no customer is selected"));
+                }
+
+                _context.Entry(existingCustomer).CurrentValues.SetValues(req);
+
+                foreach (var item in req)
+                {
+                    var existingIncomes = existingCustomer.CustomerIncomes?.Where(x => x.Id == item.Id)
+                                                                 .FirstOrDefault();
+
+                    if (existingIncomes is null || existingIncomes.Id == 0)
+                    {
+                        existingCustomer.CustomerIncomes?.Add(item);
+                    }
+                    else
+                    {
+                        _context.Entry(existingIncomes).CurrentValues.SetValues(item);
+                    }
+                }
+
+                foreach (var item in existingCustomer.CustomerIncomes!)
+                {
+                    if (!req.Any(x => x.Id == item.Id))
+                    {
+                        _context.Remove(item);
+                    }
+
+                }
+
+                await _context.SaveChangesAsync();
+
+                return Result.Success("customer income was added.");
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return Result.Failure(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
+            }
+
+
+        }
+
+        public async Task<Result<IEnumerable<VCustomerExpenses>>> GetCustomerCustomerExpenses(Guid? customerId)
+        {
+            var expense = await _context.Database.SqlQuery<VCustomerExpenses>($"SELECT * FROM VCustomerExpenses WHERE CustomerRefId={customerId.ToString()}")
+                                 .AsNoTracking()
+                                 .ToListAsync();
+
+
+            if (expense is null)
+            {
+                return Result.Failure<IEnumerable<VCustomerExpenses>>(ErrorResponse.NotFound("No expense found"));
+            }
+
+            return Result.Success<IEnumerable<VCustomerExpenses>>(expense);
+
+        }
+
+  
+        public async Task<Result<IEnumerable<VCustomerIncomes>>> GetCustomerCustomerIncomes(Guid? customerId)
+        {
+            var incomes = await _context.Database
+                                    .SqlQuery<VCustomerIncomes>($"SELECT * FROM VCustomerIncomes WHERE CustomerRefId={customerId.ToString()}")
+                                    .AsNoTracking()
+                                 .ToListAsync();
+
+
+            if (incomes is null)
+            {
+                return Result.Failure<IEnumerable<VCustomerIncomes>>(ErrorResponse.NotFound("No expense found"));
+            }
+
+            return Result.Success<IEnumerable<VCustomerIncomes>>(incomes);
+        }
+
+
+        public async Task<Result<IEnumerable<T>>> GetCustomerCustomerIncomes<T>(Guid? customerId)
+            where T : class
+        {
+            var incomes = await _context.CustomerIncomes
+                                 .Where(x => x.CustomerRefId == customerId)
+                                 .ProjectToType<T>()
+                                 .AsNoTracking()
+                                 .ToListAsync();
+
+            if (incomes is null)
+            {
+                return Result.Failure<IEnumerable<T>>(ErrorResponse.NotFound("No expense found"));
+            }
+
+            return Result.Success<IEnumerable<T>>(incomes);
+        }
+
+        public async Task<Result<IEnumerable<T>>> GetCustomerCustomerExpenses<T>(Guid? customerId)
+      where T : class
+        {
+            var expense = await _context.CustomerExpenses
+                                 .Where(x => x.CustomerRefId == customerId)
+                                 .ProjectToType<T>()
+                                 .AsNoTracking()
+                                 .ToListAsync();
+
+
+            if (expense is null)
+            {
+                return Result.Failure<IEnumerable<T>>(ErrorResponse.NotFound("No expense found"));
+            }
+
+            return Result.Success<IEnumerable<T>>(expense);
+
+        }
 
     }
 }

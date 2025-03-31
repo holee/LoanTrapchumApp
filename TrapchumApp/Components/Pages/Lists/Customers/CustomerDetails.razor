@@ -1,12 +1,6 @@
-﻿@page "/Customers/Details/{CustomerId:long}"
-@using TCLMS.Front.Components.Modals
-@using TCLMS.Front.Pages.Transactions.Loans.LoanRequests
-<SectionContent SectionName="Progressbar">
-    <RadzenProgressBar Value="100" ShowValue="false"
-                       Mode="ProgressBarMode.Indeterminate"
-                       Visible="IsLoading"
-                       ProgressBarStyle="ProgressBarStyle.Danger" />
-</SectionContent>
+﻿@page "/App/Customers/{CustomerId:guid}/Details"
+@using TrapchumApp.Components.Pages.Lists.Collaterals
+@using TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 <Containers Fluid CssClass="m-0 p-0">
     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" class="mb-1">
         <RadzenButton Icon="@collapseIcon"
@@ -36,12 +30,14 @@
                     <RadzenStack AlignItems="AlignItems.Center"
                                  Orientation="Orientation.Horizontal"
                                  JustifyContent="JustifyContent.SpaceBetween">
-                        <LinkButton Path="@($"/Customers/{@CustomerId}/Update")"
+                        <RadzenLink Path="@($"/App/Customers/{@CustomerId}/Edit")"
+                                    Icon="edit"
                                     Text="Edit" />
                         <RadzenButton ButtonType="Radzen.ButtonType.Button"
                                       Size="Radzen.ButtonSize.ExtraSmall"
                                       Text="Delete"
                                       Icon="delete"
+                                      Click="DeleteCustomer"
                                       ButtonStyle="ButtonStyle.Danger">
                         </RadzenButton>
                     </RadzenStack>
@@ -96,7 +92,7 @@
                                         Responsive
                                         Density="Density.Compact">
                             <HeaderTemplate>
-                                <AuthorizeView Policy="@LoanRequestsPolicies.Request">
+                                <AuthorizeView>
                                     <Authorized>
                                         <RadzenButton Icon="add"
                                                       Click="AddLoanRequest"
@@ -191,7 +187,7 @@
                         </RadzenDataGrid>
                     </RadzenTabsItem>
                     <RadzenTabsItem Text="Activities">
-                        <h1>Activity</h1>
+                      <CustomerActivities CustomerId="@CustomerId" ShowAdd="true" />
                     </RadzenTabsItem>
                     <RadzenTabsItem Text="Notes">
                         <CustomerNotes AddNote="AddNote"
@@ -214,172 +210,3 @@
         </div>
     </div>
 </Containers>
-@code {
-    [CascadingParameter]
-    Task<AuthenticationState> AuthenticationState { get; set; } = default!;
-    bool isCollateralTab = false;
-    RadzenTabs tabs = default!;
-    int selectedIndex = 0;
-    bool collapse = false;
-    bool IsLoading = false;
-    string collapseIcon = "expand_less";
-    void CollapseButton()
-    {
-        collapse = !collapse;
-        collapseIcon = collapse ? "expand_more" : "expand_less";
-    }
-    async void SelectedTabIndexChanged()
-    {
-        if (selectedIndex == 0)
-        {
-
-        }
-        if (selectedIndex == 1)
-        {
-            await GetCustomerCollateralLines();
-        }
-        if (selectedIndex == 2)
-        {
-            await GetCustomerIncomeAndExpense();
-        }
-        if (selectedIndex == 3)
-        {
-            await GetCustomerIncomeAndExpense();
-        }
-        if (selectedIndex == 4)
-        {
-            await GetCustomerLoanHistory();
-        }
-        if (selectedIndex == 5)
-        {
-            await GetCustomerNotes();
-        }
-
-        StateHasChanged();
-    }
-
-    async Task AddNote()
-    {
-        var auth = await AuthenticationState;
-        var userId = auth.User!.GetId();
-        await DialogService.OpenAsync<CustomerNoteAdd>("New Note", new Dictionary<string, object>
-            {
-                {"CustomerId",CustomerId},
-                { "UserId",userId}
-            });
-
-    }
-
-    protected async Task AddCollateral()
-    {
-        if (CustomerId == 0)
-        {
-            NotificationService.Notify(NotificationSeverity.Error, "Please selected customer first");
-            return;
-        }
-
-        var parameters = new Dictionary<string, object> {
-            {"CustomerId", CustomerId }
-        };
-
-        var options = new DialogOptions
-            {
-                Width = "90vw",
-                Draggable = true,
-                Resizable = false
-            };
-
-
-        var result = await DialogService.OpenAsync<CollateralModalAdd>("Add Collateral", parameters, options);
-
-        if (bool.TryParse(result, out bool success) && success)
-        {
-            var collateral = await _collateralService.GetCollateralById(CustomerId);
-        }
-
-    }
-
-    protected async Task AddLoanRequest()
-    {
-        if (CustomerId == 0)
-        {
-            NotificationService.Notify(NotificationSeverity.Error, "Please selected customer first");
-            return;
-        }
-        var auth = await AuthenticationState;
-        var branchId = auth.User.GetBranchId();
-        var userId = auth.User.GetId();
-        var uri = new Dictionary<string, object?>
-        {
-            {"BranchId",branchId},
-            {"UserId",userId}
-        }.AddQueryString($"/Loan/Request/{CustomerId}/Create");
-        NavigationManager.NavigateTo(uri);
-    }
-
-    async void OpenLoadRequestDialogue()
-    {
-        var auth = await AuthenticationState;
-        var branchId = auth.User.GetBranchId();
-        var userId = auth.User.GetId();
-        var param = new Dictionary<string, object>
-        {
-            {"BranchId",branchId},
-            {"UserId",userId},
-            {"CustomerId",CustomerId}
-        };
-        var options = new DialogOptions
-            {
-                Width = "90vw",
-                Resizable = true
-            };
-        await DialogService.OpenAsync<LoanRequestCreateModal>("Loan Request", param, options);
-    }
-
-
-
-
-
-}
-
-
-
-@* <RadzenDataGrid GridLines="DataGridGridLines.Both"
-                Responsive
-                TItem="VCollateralLines"
-                Density="Density.Compact"
-                Data="CollateralLines">
-    <HeaderTemplate>
-        <RadzenButton Icon="add"
-                      Click="AddCollateral"
-                      ButtonStyle="ButtonStyle.Primary"
-                      Size="Radzen.ButtonSize.Small"
-                      Text="Add Collaterals"></RadzenButton>
-    </HeaderTemplate>
-    <Columns>
-        <RadzenDataGridColumn Title="ReferenceNo"
-                              Context="c">
-            <Template>
-                @c.ReferenceNo
-            </Template>
-        </RadzenDataGridColumn>
-        <RadzenDataGridColumn Title="Type Name"
-                              Context="c">
-            <Template>
-                @c.TypeName
-            </Template>
-        </RadzenDataGridColumn>
-        <RadzenDataGridColumn Title="Owner Name"
-                              Context="c">
-            <Template>
-                @c.OwnerName
-            </Template>
-        </RadzenDataGridColumn>
-        <RadzenDataGridColumn Title="Location"
-                              Context="c">
-            <Template>
-                @c.Location
-            </Template>
-        </RadzenDataGridColumn>
-    </Columns>
-</RadzenDataGrid> *@

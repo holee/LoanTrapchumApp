@@ -1,5 +1,4 @@
-﻿@page "/OtherNames/List"
-@page "/trapchum/othernames"
+﻿@page "/App/Othernames"
 @using Applications.Responses.ViewModels.OtherNames
 @using Applications.Responses.ViewModels.Vendors
 <PageTitle>Names</PageTitle>
@@ -48,7 +47,7 @@
                                     Density="Density.Compact"
                                     Responsive
                                     Count="@counts"
-                                    Style="--rz-grid-header-background-color:var(--rz-base-200);height:30rem;min-height:30rem;max-height:45rem;"
+                                    Style="height:30rem;min-height:30rem;max-height:45rem;"
                                     PageSize="@pageSize"
                                     LoadData="@LoadData"
                                     ColumnWidth="15rem"

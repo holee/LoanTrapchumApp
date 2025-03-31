@@ -1,4 +1,4 @@
-﻿using Applications.Requests.Collaterals;
+﻿using Applications.Requests.Lists.Collaterals;
 using Applications.Requests.Lists.Entities.Guarantors;
 using Domains.Models.Loans;
 

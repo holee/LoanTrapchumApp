@@ -1,22 +1,151 @@
-using AppilcationServices.Interfaces;
+using Applications.Interfaces.Loans;
+using Applications.Requests.Loans;
+using Applications.Responses.Loans.Disbursements;
+using Applications.Responses.ViewModels.Loans.Categories;
+using Mapster;
 using Microsoft.AspNetCore.Components;
 using Radzen;
-using TCLMS.Shared.Entities.Paginations;
-using TCLMS.Shared.Entities.ViewModels.Loans.Categories;
+using Radzen.Blazor;
 
-namespace TCLMS.Front.Pages.Transactions.Loans.LoanCategoriess
+namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanCategoriess
 {
     public partial class LoanCategoryView
     {
-        [Inject] private ILoanCategoryService? service { get; set; }
-        protected List<VLCategoryList?> loanCategories { get; set; } = null!;
-        protected string? searchText { get; set; } = string.Empty;
+        private readonly ILoanCategoryService? _catService;
+
+        public LoanCategoryView(ILoanCategoryService? service)
+        {
+            this._catService = service;
+        }
+
+        List<VlCategoryList?> loanCategories = [];
+        protected string? searchText = string.Empty;
+
         protected bool InActive = false;
-        IQueryable<VLCategoryList>? vLCategories;
+
+        List<VlCategoryList>? vLCategories = [];
+
         List<int> SelectedRow = [10, 20, 50, 100];
 
 
+        int pageSize = 10;
+        bool sortDescending = false;
+        string sortColumn = "Id";
+        bool isLoading = false;
+        int counts = 0;
+        RadzenTabs? tabs;
+        private bool IsNew = false;
+        private bool IsEdit = false;
+        private bool IsDetails = false;
+        [Parameter] public int SelectIndex { get; set; } = 0;
+        protected LoanCategoryDtoUpdate? modelEdit = new();
+        protected LoanCategoryResponse? detailsModel = new();
 
+        async void MenuClicked(RadzenSplitButtonItem args, VlCategoryList? loanCategory)
+        {
+            if (args is not null)
+            {
+                if (args.Value == "1")
+                {
+                    await Details(loanCategory!.LoanCategoryId);
+                    return;
+                }
+                if (args.Value == "2")
+                {
+                    EditCategory(loanCategory!.LoanCategoryId);
+                    return;
+                }
+                if (args.Value == "3")
+                {
+                    await OnDelete(loanCategory);
+                    return;
+                }
+
+            }
+            return;
+        }
+        void TabChanged(int e)
+        {
+            SelectIndex = e;
+            StateHasChanged();
+
+        }
+        void AddNewCategory()
+        {
+            IsNew = true;
+            SelectIndex = 1;
+            tabs!.Reload();
+        }
+        async void EditCategory(int id)
+        {
+            try
+            {
+
+                modelEdit = await _catService!.GetForEditAsync(id);
+
+                IsEdit = true;
+
+                SelectIndex = 2;
+
+                StateHasChanged();
+
+                tabs!.Reload();
+
+                ContextMenuService.Close();
+
+            }
+            catch (Exception ex)
+            {
+                NotificationService.Notify(Radzen.NotificationSeverity.Error, "Exception", ex.Message);
+                ContextMenuService.Close();
+
+            }
+        }
+        async Task Details(int Id)
+        {
+            try
+            {
+                var result = await _catService!.GetLoanCategory(Id);
+
+                if (result is not null)
+                {
+                    detailsModel = result.Adapt<LoanCategoryResponse>();
+
+                    IsDetails = true;
+
+                    SelectIndex = 3;
+
+                    tabs!.Reload();
+                }
+
+                ContextMenuService.Close();
+
+                StateHasChanged();
+            }
+            catch (Exception ex)
+            {
+                NotificationService.Notify(Radzen.NotificationSeverity.Error, "Exception", ex.Message);
+                ContextMenuService.Close();
+
+            }
+        }
+        void CloseTabs(int e)
+        {
+            if (SelectIndex == 1)
+            {
+                IsNew = false;
+            }
+            else if (SelectIndex == 2)
+            {
+                IsEdit = false;
+            }
+            else if (SelectIndex == 3)
+            {
+                IsDetails = false;
+            }
+            SelectIndex = 0;
+            StateHasChanged();
+        }
         protected async void Reload()
         {
             await OnInitializedAsync();
@@ -32,19 +161,21 @@ namespace TCLMS.Front.Pages.Transactions.Loans.LoanCategoriess
             //}
             searchText = e.Filter!.ToString()!;
 
-            vLCategories = vLCategories!.Where(x => x.LoancategoryCode!.ToLower().Contains(searchText.ToLower(), StringComparison.CurrentCultureIgnoreCase) ||
-            x.DesInKhmer!.ToLower().Contains(searchText.ToLower(), StringComparison.CurrentCultureIgnoreCase) ||
-            x.Code!.ToLower().Contains(searchText.ToLower(), StringComparison.CurrentCultureIgnoreCase) ||
-            x.Description!.ToLower().Contains(searchText.ToLower(), StringComparison.CurrentCultureIgnoreCase));
+            //vLCategories = vLCategories!.Where(x => x.LoancategoryCode!.ToLower().Contains(searchText.ToLower(), StringComparison.CurrentCultureIgnoreCase) ||
+            //x.DesInKhmer!.ToLower().Contains(searchText.ToLower(), StringComparison.CurrentCultureIgnoreCase) ||
+            //x.Code!.ToLower().Contains(searchText.ToLower(), StringComparison.CurrentCultureIgnoreCase) ||
+            //x.Description!.ToLower().Contains(searchText.ToLower(), StringComparison.CurrentCultureIgnoreCase));
             await InvokeAsync(StateHasChanged);
         }
         protected async void PerformSearch(ChangeEventArgs e)
         {
             searchText = e.Value!.ToString()!;
-            vLCategories = vLCategories!.Where(x => x.LoancategoryCode!.ToLower().Contains(searchText.ToLower(), StringComparison.CurrentCultureIgnoreCase) ||
-            x.DesInKhmer!.ToLower().Contains(searchText.ToLower(), StringComparison.CurrentCultureIgnoreCase) ||
-            x.Code!.ToLower().Contains(searchText.ToLower(), StringComparison.CurrentCultureIgnoreCase) ||
-            x.Description!.ToLower().Contains(searchText.ToLower(), StringComparison.CurrentCultureIgnoreCase));
+
+            //vLCategories = vLCategories!.Where(x => x.LoancategoryCode!.ToLower().Contains(searchText.ToLower(), StringComparison.CurrentCultureIgnoreCase) ||
+            //                            x.DesInKhmer!.ToLower().Contains(searchText.ToLower(), StringComparison.CurrentCultureIgnoreCase) ||
+            //                            x.Code!.ToLower().Contains(searchText.ToLower(), StringComparison.CurrentCultureIgnoreCase) ||
+            //                            x.Description!.ToLower().Contains(searchText.ToLower(), StringComparison.CurrentCultureIgnoreCase));
+
             await InvokeAsync(StateHasChanged);
 
         }
@@ -56,29 +187,29 @@ namespace TCLMS.Front.Pages.Transactions.Loans.LoanCategoriess
             await InvokeAsync(StateHasChanged);
         }
 
-        protected async Task DeactiveOrActive(VLCategoryList category)
+        protected async Task DeactiveOrActive(VlCategoryList category)
         {
             try
             {
-                var message = await service!.UpdateStatus(category.LoanCategoryID);
-                if (message.IsSuccess)
+                var rsp = await _catService!.UpdateStatus(category.LoanCategoryId);
+
+                if (rsp.IsSuccess)
                 {
-                    NotificationService.Notify(Radzen.NotificationSeverity.Success, "Loan Category",message.Data!.Message);
+                    NotificationService.Notify(NotificationSeverity.Success, "Loan Category", rsp.Data);
                     vLCategories!.ToList().Remove(category);
                     await OnInitializedAsync();
                     await InvokeAsync(StateHasChanged);
                 }
                 else
                 {
-                    var error = message.Errors!.FirstOrDefault();
-                    NotificationService.Notify(NotificationSeverity.Error, error);
+                    NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
                     return;
                 }
-                    
+
             }
             catch (Exception ex)
             {
-                NotificationService.Notify(Radzen.NotificationSeverity.Error, "Exception", ex.InnerException!.Message);
+                NotificationService.Notify(NotificationSeverity.Error, "Exception", ex.InnerException!.Message);
                 await OnInitializedAsync();
             }
             await Task.CompletedTask;
@@ -87,25 +218,27 @@ namespace TCLMS.Front.Pages.Transactions.Loans.LoanCategoriess
         {
             try
             {
-                var results = await service!.GetAllListAsync(InActive, null);
-                if (results.IsSuccess)
+                var results = await _catService!.GetListCategories(InActive, null);
+
+                if (results.Any())
                 {
-                    vLCategories = results!.Data!.AsQueryable()!;
-                    counts=vLCategories.Count();
+                    vLCategories = results.ToList();
+
+                    counts = vLCategories.Count();
                 }
             }
             catch (Exception ex)
             {
-                NotificationService.Notify(Radzen.NotificationSeverity.Error, "Exception", ex.InnerException!.Message);
+                NotificationService.Notify(NotificationSeverity.Error, "Exception", ex.InnerException!.Message);
             }
             await base.OnInitializedAsync();
         }
-        protected async Task OnDetail(VLCategoryList? loanCategory)
+        protected async Task OnDetail(VlCategoryList? loanCategory)
         {
 
             await Task.CompletedTask;
         }
-        protected async Task OnEdit(VLCategoryList? loanCategory)
+        protected async Task OnEdit(VlCategoryList? loanCategory)
         {
 
             await Task.CompletedTask;
@@ -116,12 +249,12 @@ namespace TCLMS.Front.Pages.Transactions.Loans.LoanCategoriess
             await Task.CompletedTask;
 
         }
-        
-        async Task OnDelete(VLCategoryList? loanCategory)
+
+        async Task OnDelete(VlCategoryList? loanCategory)
         {
 
             if (await DialogService!.Confirm("Loan Category deleted will not be able to recover, would you like to continue?", "Delete Loan Category",
-                new Radzen.ConfirmOptions
+                new ConfirmOptions
                 {
                     OkButtonText = "OK",
                     CancelButtonText = "Cancel",
@@ -135,19 +268,20 @@ namespace TCLMS.Front.Pages.Transactions.Loans.LoanCategoriess
                     if (loanCategory!.IsInUse == "true")
                     {
                         if (await DialogService!.Confirm("Loan Category you are trying to delete has started its operation, so you cannot delete it. Make inactive is strongly recommmended!", "Delete Loan Category",
-                        new Radzen.ConfirmOptions
+                        new ConfirmOptions
                         {
                             OkButtonText = "OK",
                             CancelButtonText = "Cancel",
                         }) == true)
                         {
-                            var message = await service!.UpdateStatus(loanCategory.LoanCategoryID);
+                            var message = await _catService!.UpdateStatus(loanCategory.LoanCategoryId);
                             if (message.IsSuccess)
                             {
-                                NotificationService.Notify(Radzen.NotificationSeverity.Success, "Update Loan Category", "Loan Category was made inactive!");
+                                NotificationService.Notify(NotificationSeverity.Success, "Update Loan Category", "Loan Category was made inactive!");
 
                                 await OnInitializedAsync();
-                            };
+                            }
+                            ;
                             ContextMenuService.Close();
 
                             return;
@@ -155,12 +289,13 @@ namespace TCLMS.Front.Pages.Transactions.Loans.LoanCategoriess
                     }
                     else
                     {
-                        var isDe = await service!.DeleteAsync(loanCategory.LoanCategoryID);
+                        var isDe = await _catService!.Delete(loanCategory.LoanCategoryId);
+
                         if (isDe.IsSuccess)
                         {
-                            NotificationService.Notify(Radzen.NotificationSeverity.Success, "Delete Loan Category", "Loan category was deleted successfully.");
+                            NotificationService.Notify(NotificationSeverity.Success, "Delete Loan Category", "Loan category was deleted successfully.");
 
-            ContextMenuService.Close();
+                            ContextMenuService.Close();
 
                             await OnInitializedAsync();
                         }
@@ -168,7 +303,7 @@ namespace TCLMS.Front.Pages.Transactions.Loans.LoanCategoriess
                 }
                 catch (Exception ex)
                 {
-                    NotificationService.Notify(Radzen.NotificationSeverity.Error, "Exception", ex.InnerException!.Message);
+                    NotificationService.Notify(NotificationSeverity.Error, "Exception", ex.InnerException!.Message);
                     ContextMenuService.Close();
 
                 }

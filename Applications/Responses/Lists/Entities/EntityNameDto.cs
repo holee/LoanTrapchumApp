@@ -1,4 +1,5 @@
 ﻿using Applications.Requests.Lists.Addreses;
+using Applications.Responses.Lists.Addreses;
 using Domains.Models.Bases;
 
 namespace Applications.Requests.Lists.Entities;
@@ -17,7 +18,7 @@ public class EntityNameDto:BaseEntity
     public string? EmailAddress { get; set; }
     public string? Phone { get; set; }
     public bool? IsActive { get; set; }
-    public AddressDto? Address { get; set; }
+    public AddressResponse? Address { get; set; }
 }
 
 

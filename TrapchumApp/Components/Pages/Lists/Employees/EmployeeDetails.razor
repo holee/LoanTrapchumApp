@@ -101,7 +101,7 @@
     <div class="card-footer">
         <div class="d-flex justify-content-between">
             <div>
-                <label class="text-muted">Created: @string.Format("{0:dd MMM yyyy hh:mm tt}", Model?.CreatedDT) Modified: @string.Format("{0:dd MMM yyyy hh:mm tt}", Model?.ModifiedDT)</label>
+                <label class="text-muted">Created: @string.Format("{0:dd MMM yyyy hh:mm tt}", Model?.CreatedDt) Modified: @string.Format("{0:dd MMM yyyy hh:mm tt}", Model?.ModifiedDt)</label>
             </div>
             <div>
                 <RadzenButton Text="Cancel"
@@ -115,24 +115,4 @@
         
     </div>
 </div>
-
-
-
-@code {
-    string? imageFile = "";
-    [Parameter]
-    public EventCallback Close { get; set; }
-    [Parameter]
-    public EventCallback Edit { get; set; }
-    [Parameter]
-    public EmployeeDto? Model { get; set; } = new();
-    async Task CloseTab()
-    {
-        await Close.InvokeAsync();
-    }
-    async Task EditTab()
-    {
-        await Edit.InvokeAsync();
-    }
-}
 

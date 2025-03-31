@@ -10,9 +10,9 @@ namespace Applications.Interfaces.Vendors
     {
         Task<Result<string>> ChangeVendorStatus(EntVendorDtoChangeStatus req);
         Task<Result<string>> CreateOrUpdate(EntityName vendor);
-        Task<Result<string>> DeleteAsync(long vendorId);
-        Task<Result<EntityName>> GetVendorByIdAsync(long vendorId, bool include);
-        Task<Result<VVendor>> GetVendorByIdAsync(long vendorId);
+        Task<Result<string>> DeleteAsync(Guid? vendorId);
+        Task<Result<EntityName>> GetVendorByIdAsync(Guid? vendorId, bool include);
+        Task<Result<VVendor>> GetVendorByIdAsync(Guid? vendorId);
         Task<Pager<VVendor>> GetVendorsAsync(QueryParam q);
     }
 }

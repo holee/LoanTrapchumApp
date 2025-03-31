@@ -11,6 +11,8 @@ namespace Applications.Interfaces.Customers
         Task<Result> AddOrUpdateExpensesAsync(Guid? customerId, List<CustomerExpense> req);
         Task<Result> AddOrUpdateIncomesAsync(Guid? customerId, List<CustomerIncome> req);
         Task<Result<IEnumerable<VCustomerExpenses>>> GetCustomerCustomerExpenses(Guid? customerId);
+        Task<Result<IEnumerable<T>>> GetCustomerCustomerExpenses<T>(Guid? customerId) where T : class;
         Task<Result<IEnumerable<VCustomerIncomes>>> GetCustomerCustomerIncomes(Guid? customerId);
+        Task<Result<IEnumerable<T>>> GetCustomerCustomerIncomes<T>(Guid? customerId) where T : class;
     }
 }

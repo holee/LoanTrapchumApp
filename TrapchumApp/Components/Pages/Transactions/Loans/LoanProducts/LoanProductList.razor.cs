@@ -1,5 +1,5 @@
 using Applications.Interfaces.Loans;
-using Applications.Requests.Loans.Products;
+using Applications.Responses.Loans.Disbursements;
 using Applications.Responses.ViewModels.Loans.Products;
 using Microsoft.AspNetCore.Components;
 using Radzen;
@@ -21,7 +21,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanProducts
         private bool IsNew = false;
         private bool IsEdit = false;
         private bool IsDetails = false;
-        protected LoanProductDto? DetailModel = new();
+        protected LoanProductResponse? DetailModel = new();
 
         async Task LPDetails(int Id)
         {

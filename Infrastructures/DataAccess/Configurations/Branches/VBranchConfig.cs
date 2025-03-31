@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructures.DataAccess.Configurations.Branches;
 
-public class VBranchConfig : IEntityTypeConfiguration<VBranch>
+public class VBranchConfig : IEntityTypeConfiguration<VBranchResponse>
 {
-    public void Configure(EntityTypeBuilder<VBranch> builder)
+    public void Configure(EntityTypeBuilder<VBranchResponse> builder)
     {
         builder.ToView("VBranches");
         builder.HasNoKey();
