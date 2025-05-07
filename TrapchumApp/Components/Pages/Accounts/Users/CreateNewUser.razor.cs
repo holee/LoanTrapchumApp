@@ -1,57 +1,57 @@
-﻿using Applications.Interfaces.Employees;
-using Applications.Interfaces.Identity;
+﻿using Applications.Interfaces.Identity;
 using Applications.Requests.Identity;
 using Applications.Requests.Lists.Entities;
+using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Employees;
 using Mapster;
 using Microsoft.AspNetCore.Components.Forms;
 using Radzen;
-using System.IdentityModel.Tokens.Jwt;
+
 namespace TrapchumApp.Components.Pages.Accounts.Users;
 
 public partial class Create
 {
-
     private readonly IRoleService _roleService;
+
     public Create(IRoleService roleService)
     {
         _roleService = roleService;
     }
+
     RegisterRequest model = new RegisterRequest();
-    readonly JwtSecurityTokenHandler jwtSecurityTokenHandler = new();
-    string? token = string.Empty;
     bool IsSuccess = false;
     bool IsVisible = false;
     string? message = "";
     EditForm form = default!;
     IEnumerable<string?> roles = new List<string>();
-    IEnumerable<VEmployees> Employees = new List<VEmployees>();
-    IEnumerable<BranchDto> Branches = Enumerable.Empty<BranchDto>();
-    IEnumerable<VEmployees> bEmployees = Enumerable.Empty<VEmployees>();
+    IEnumerable<VEmployeeList> Employees = [];
+    IEnumerable<BranchDto> Branches = [];
+    IEnumerable<VEmployeeList> bEmployees = [];
     BranchDto SelectedBranch = default!;
+
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            var roleResult = await _roleService.GetRolesAsync();
+            var roleResult = await _roleService.GetRolesAsync(String.Empty);
 
             if (roleResult.IsSuccess)
             {
-                roles = roleResult?.Data?.Select(r => r.RoleName) ?? [];
+                roles = roleResult?.Data ?? [];
             }
 
-            var employeeResponse = await _employeeService.GetEmployeesAsync(Guid.Empty, 0);
+            var employeeResponse = await _employeeService.GetEmployeesAsync(string.Empty, 0);
 
             if (employeeResponse.IsSuccess)
             {
                 Employees = employeeResponse.Data!;
             }
 
-            var branchResponse = await _branchService.GetBranchesAsync(0, 0);
+            var branchResponse = await _branchService.GetBranchesAsync<BranchDto>(0, new QueryParam(0, 25, string.Empty));
 
             if (branchResponse!.IsSuccess)
             {
-                Branches = branchResponse.Data!.Adapt<IEnumerable<BranchDto>>();
+                Branches = branchResponse.Data.Items;
             }
             else
             {
@@ -62,13 +62,15 @@ public partial class Create
         {
             NotificationService.Notify(NotificationSeverity.Error, ex.Message);
         }
+
         await base.OnInitializedAsync();
     }
+
     protected async Task SelectBranchChanged()
     {
         if (model.BranchRefId > 0)
         {
-            var employeeResponse = await _employeeService.GetEmployeesAsync(Guid.Empty, model.BranchRefId);
+            var employeeResponse = await _employeeService.GetEmployeesAsync(string.Empty, model.BranchRefId);
 
             if (employeeResponse.IsSuccess)
             {
@@ -79,13 +81,14 @@ public partial class Create
         {
             model.BranchRefId = 0;
         }
+
         model.Username = "";
         model.Email = "";
-        model.EmployeeId = Guid.Empty;
+        model.EmployeeId = string.Empty;
     }
+
     protected void SelectedEmployeeChanged()
     {
-
         var selectedEmployee = bEmployees.FirstOrDefault(x => x.EmployeeId == model.EmployeeId);
 
         if (selectedEmployee is not null)
@@ -102,8 +105,9 @@ public partial class Create
         {
             model.Username = "";
             model.Email = "";
-            model.EmployeeId = Guid.Empty;
+            model.EmployeeId = string.Empty;
         }
+
         Console.WriteLine(selectedEmployee!.EmployeeId);
     }
 
@@ -124,17 +128,12 @@ public partial class Create
             }
             else
             {
-
             }
-
         }
         catch (Exception ex)
         {
             IsSuccess = false;
             NotificationService.Notify(NotificationSeverity.Error, ex.Message);
         }
-
-
     }
-
 }

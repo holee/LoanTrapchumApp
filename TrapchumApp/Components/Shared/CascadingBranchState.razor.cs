@@ -1,5 +1,4 @@
-﻿using Applications.Interfaces.Branches;
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 using System.Text.Json;
 
 namespace TrapchumApp.Components.Shared
@@ -9,39 +8,43 @@ namespace TrapchumApp.Components.Shared
         [Parameter]
         public RenderFragment ChildContent { get; set; } = default!;
 
-        private bool _branchState;
+        private bool _state;
 
         public bool BranchState
         {
-            get => _branchState;
+            get => _state;
 
             set
             {
-                _branchState = value;
+                _state = value;
+
                 StateHasChanged();
             }
         }
 
-        public async Task GetBranchState(int branchId)
+        public async Task GetBranchState(int? branchId)
         {
             var branchStateResponse = await _branchService.GetBrachStatus(branchId);
 
             if (branchStateResponse.IsSuccess)
             {
-                _branchState = branchStateResponse.Data!.IsOpen;
+                _state = branchStateResponse.Data!.IsOpen;
             }
             else
             {
-                _branchState = false;
+                _state = false;
             }
 
         }
 
         public IAppStateService CopyState()
         {
-            var state = (IAuthStateService)this;
+            var state = (IAppStateService)this;
+
             var json = JsonSerializer.Serialize(state);
+
             var copy = JsonSerializer.Deserialize<AppStateService>(json);
+
             return copy!;
         }
 
