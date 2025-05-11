@@ -1,5 +1,4 @@
-﻿@page "/Transaction/CashVault"
-@using Applications.Extensions.Maths
+﻿@page "/App/Branches/{BranchId:int}/CashVault"
 @using Applications.Responses.ViewModels.Currencies
 <PageTitle>Cash vault</PageTitle>
 <Containers Fluid>
@@ -7,19 +6,19 @@
         <RadzenStack Orientation="Orientation.Horizontal"
                      AlignItems="AlignItems.Center"
                      class="rz-mb-1"
-                     JustifyContent="Radzen.JustifyContent.End">
+                     JustifyContent="JustifyContent.End">
             @if (canVaultOut)
             {
                 <RadzenButton Icon="lock_open"
                               Click="OnCashVaultOut"
-                              Size="Radzen.ButtonSize.Small"
+                              Size="ButtonSize.Small"
                               Text="Vault Out" ButtonStyle="ButtonStyle.Success" />
             }
             @if (canVaultIn)
             {
                 <RadzenButton ButtonStyle="ButtonStyle.Danger"
                               Disabled="IsDisabled"
-                              Size="Radzen.ButtonSize.Small"
+                              Size="ButtonSize.Small"
                               Icon="lock"
                               Text="Vault In"
                               Click="OnCashVaultIn" />

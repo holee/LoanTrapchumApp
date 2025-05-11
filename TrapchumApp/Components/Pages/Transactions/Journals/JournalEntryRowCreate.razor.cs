@@ -1,26 +1,23 @@
 ﻿using Applications.Interfaces.Transactions;
 using Applications.Requests.Transactions.Journals;
+using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Journals;
 using Applications.Responses.ViewModels.Ledgers;
-using Applications.Responses.ViewModels.OtherNames;
+using Applications.Services.Lists;
+using Applications.Services.Transactions.Journals;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
+using Radzen;
 
 namespace TrapchumApp.Components.Pages.Transactions.Journals;
 
-public partial class JournalEntryRowCreate
+public partial class JournalEntryRowCreate(
+    ILedgerServiceImpl ledgerService,
+    IJournalServiceImpl journalService,
+    IOtherNameServiceImpl nameService)
 {
-
-    private readonly ILedgerService _LedgerService;
-    private readonly IJournalService _JournalService;
-    public JournalEntryRowCreate(ILedgerService ledgerService, IJournalService journalService)
-    {
-        _LedgerService = ledgerService;
-        _JournalService = journalService;
-    }
-
-    [Parameter, EditorRequired] public JournalLineDtoCreate JournalLine { get; set; } = new();
+    [Parameter] public JournalLineDtoCreate JournalLine { get; set; } = new();
     [Parameter] public IEnumerable<VNameList> NameData { get; set; } = [];
     [Parameter] public IEnumerable<JournalLineDtoCreate> JournalLineList { get; set; } = [];
     [Parameter] public IEnumerable<VLedger>? LedgerData { get; set; } = [];
@@ -32,11 +29,12 @@ public partial class JournalEntryRowCreate
     [Parameter] public int JournalLineSeq { get; set; } = 1;
     [Parameter] public EventCallback TotalValue { get; set; }
     [Parameter] public int RowIndex { get; set; } = 0;
-    protected IEnumerable<EntityNameVm>? EntityNames { get; set; } = [];
+
     protected async void AddNewRow()
     {
         await AddRow.InvokeAsync();
     }
+
     protected async void RemoveRow()
     {
         await RemovedRow.InvokeAsync(JournalLine);
@@ -46,19 +44,28 @@ public partial class JournalEntryRowCreate
     {
         await TotalValue.InvokeAsync();
     }
+
+    async Task LoanNameData(LoadDataArgs args)
+    {
+        var filter = args.Filter ?? string.Empty;
+        await GetNameLists(null, filter);
+    }
+
     protected void GetCreditAmount(JournalLineDtoCreate journalLine)
     {
         if (journalLine.Credit > 0)
         {
             var credit = JournalLineList.LastOrDefault();
+            
             if (credit!.Credit > 0)
             {
                 AddNewRow();
+                
                 StateHasChanged();
             }
         }
-
     }
+
     protected void GetDebitAmount(JournalLineDtoCreate journalLine)
     {
         if (journalLine.Debit > 0)
@@ -68,31 +75,35 @@ public partial class JournalEntryRowCreate
             {
                 AddNewRow();
                 StateHasChanged();
-
             }
         }
-
     }
-    decimal? SavedValue = 0;
+
+    decimal? _savedValue = 0;
+
     protected async void DebitValidate(JournalLineDtoCreate journalLine)
     {
         GetDebitAmount(journalLine);
+        
         await DebitValidated.InvokeAsync(journalLine);
-
     }
+
     protected async void CreditValidate(JournalLineDtoCreate journalLine)
     {
         GetCreditAmount(journalLine);
+        
         await CreditValidated.InvokeAsync(journalLine);
-
     }
-    int AccAPCount = 0;
-    bool isFocusDebit = false;
-    bool isFocusCredit = false;
+
+    int _accApCount = 0;
+    bool _isFocusDebit = false;
+    bool _isFocusCredit = false;
+
     protected void OnNextPerform(JournalLineDtoCreate journalLine)
     {
         js.InvokeVoidAsync("", "");
     }
+
     void OnNedLine(KeyboardEventArgs eventArgs)
     {
         if (eventArgs.Key == "Enter" || eventArgs.Key == "NumpadEnter")
@@ -100,15 +111,49 @@ public partial class JournalEntryRowCreate
             if (JournalLine!.LedgerRefId > 0)
             {
                 AddNewRow();
-
             }
-
         }
     }
+
+    void ShowAdd(ElementReference elementReference, TooltipOptions? options = null) =>
+        tooltipService!.Open(elementReference, "Adding new row", options);
+
+    void ShowDelete(ElementReference elementReference, TooltipOptions? options = null) =>
+        tooltipService!.Open(elementReference, "Romove row", options);
+
+    private void SelectedName(object? arg)
+    {
+        var name = ((VNameList)arg!)?.FullName;
+
+        if (name != null)
+        {
+            JournalLine.EntityName = name;
+        }
+    }
+
+    private async void SelectedItemChange()
+    {
+        var ledger = LedgerData!.Where(x => x.LedgerId == JournalLine.LedgerRefId).FirstOrDefault();
+
+        if (ledger != null)
+        {
+            JournalLine.LedgerName = ledger.LedgerName;
+        }
+
+        if (RowIndex == 1)
+        {
+        }
+        else if (RowIndex > 1)
+        {
+            await ReCalculateTotal.InvokeAsync(JournalLine);
+        }
+    }
+
     protected void OnGetSavedValue(JournalLineDtoCreate journalLine)
     {
         GetTotalValue();
     }
+
     protected void OnBalanceTotal(JournalLineDtoCreate journalLine)
     {
         if (journalLine.Credit > 0 || journalLine.Debit > 0)
@@ -119,7 +164,26 @@ public partial class JournalEntryRowCreate
             }
         }
     }
-    VNameList? nameList;
+
+    VNameList? _nameList;
+
+    private async Task GetNameLists(string? id, string? searchText = null)
+    {
+        var param = new QueryParam(1, 10, string.Empty, true, false, searchText);
+
+        NameLists = await nameService.GetNameLists<VNameList>(id, param);
+
+        StateHasChanged();
+    }
+
+    IEnumerable<VNameList> NameLists = [];
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetNameLists(null);
+        await base.OnInitializedAsync();
+    }
 
     protected async Task<bool> ValidateNameType(JournalLineDtoCreate journalLine)
     {
@@ -129,44 +193,48 @@ public partial class JournalEntryRowCreate
             {
                 return false;
             }
-            var ledgerResp = await _LedgerService!.FindLedgerByIdAsync(journalLine.LedgerRefId);
-            var names = await _JournalService!.FindNameLists(journalLine.EntityNameRefId);
-            if (names.Any())
+
+            var ledgerResp = await ledgerService!.FindLedgerByIdAsync(journalLine.LedgerRefId);
+
+            await GetNameLists(journalLine.EntityNameRefId);
+
+            if (NameLists.Any())
             {
-                nameList = names.FirstOrDefault();
-                journalLine.EntityName = nameList?.FullName;
+                _nameList = NameLists.FirstOrDefault();
+
+                journalLine.EntityName = _nameList?.FullName;
             }
             else
             {
-                nameList = null;
+                _nameList = null;
             }
 
             if (ledgerResp.IsSuccess)
             {
-
                 var ledger = ledgerResp.Data;
 
                 if (ledger?.LedgerType?.LedgerTypeCode?.ToUpper() == "ACCOUNTS PAYABLE")
                 {
-                    AccAPCount++;
+                    _accApCount++;
                     //check vendor
-                    if (nameList?.EntType?.ToUpper() != "VENDOR" || journalLine.EntityNameRefId == null)
+                    if (_nameList?.EntType?.ToUpper() != "VENDOR" || journalLine.EntityNameRefId == null)
                     {
                         return false;
                     }
-
                 }
+
                 if (ledger?.LedgerType?.LedgerTypeCode?.ToUpper() == "ACCOUNTS RECEIVABLE")
                 {
                     //check customer
-                    AccAPCount++;
-                    if (nameList?.EntType?.ToUpper() != "CUSTOMER" || journalLine.EntityNameRefId == null)
+                    _accApCount++;
+                    if (_nameList?.EntType?.ToUpper() != "CUSTOMER" || journalLine.EntityNameRefId == null)
                     {
                         return false;
                     }
                 }
             }
-            if (AccAPCount > 1)
+
+            if (_accApCount > 1)
             {
                 //You cannot use more than A/R or A/P account in the same transaction.
                 return false;
@@ -178,9 +246,6 @@ public partial class JournalEntryRowCreate
         catch
         {
             return true;
-
         }
-
     }
-
 }

@@ -6,8 +6,8 @@ namespace Applications.Services.Transactions.Branches
 {
     public interface IOpenBranchServiceImpl
     {
-        Task<Result<string>> CloseBranchAsync(CloseBranchDtoUpdate transaction);
+        Task<Result<string>> CloseBranchAsync(TransactionCloseBranchDto transaction);
         Task<Result<IEnumerable<VCashVaultBalance>>> GetCashVaultBalance(int? branchRefId);
-        Task<Result<string>> OpenBranchAsync(OpenBranchDtoCreate transaction);
+        Task<Result<string>> OpenBranchAsync(OpenBranchTransactionDto transaction); 
     }
 }

@@ -42,7 +42,7 @@ namespace Infrastructures.Implements
                 var cash = transaction?.CashManagements?.FirstOrDefault();
                 cash?.CashManagementDetails?.ForEach(x =>
                 {
-                    x.TranRefId = transaction!.TranId;
+                    x.TransactionRefId = transaction!.TransactionsId;
                 });
                 _context.Update(transaction!);
                 await _context.SaveChangesAsync();

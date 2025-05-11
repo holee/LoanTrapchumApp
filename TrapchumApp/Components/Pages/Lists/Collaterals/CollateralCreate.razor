@@ -1,4 +1,4 @@
-﻿@using Applications.Responses.Collaterals
+﻿@using Applications.Responses.Lists.Collaterals
 <RadzenCard>
     <EditForm Model="model" @ref="editForm">
         <DataAnnotationsValidator />
@@ -13,7 +13,7 @@
                         <RadzenColumn Size="7">
                             <RadzenTextBox Disabled
                                            class="w-100"
-                                           @bind-Value="CustomerName" />
+                                           @bind-Value="model.CustomerName" />
                             <ValidationMessage For="@(()=>model.CollateralId)" />
                         </RadzenColumn>
                     </RadzenRow>
@@ -61,13 +61,13 @@
             <Tabs>
                 <RadzenTabsItem Text="Property">
                     <RadzenDataGrid Density="Density.Compact"
-                                    TItem="CollateralLineResponse"
+                                    TItem="VCollateralLines"
                                     Responsive
                                     ColumnWidth="15rem"
                                     @ref="propertiesGrid"
                                     Data="Properties">
                         <HeaderTemplate>
-                            <RadzenButton Size="Radzen.ButtonSize.Small"
+                            <RadzenButton Size="ButtonSize.Small"
                                           ButtonStyle="ButtonStyle.Primary"
                                           Click="@(()=>AddNewRow(1))"
                                           Icon="add_circle"
@@ -77,7 +77,8 @@
                             <RadzenDataGridColumn Property="Id" Title="#" Width="2rem">
                                 <Template Context="c">
                                     <input type="hidden" @bind="c.Id" />
-                                    <input type="hidden" @bind="c.CollateralRefId" />
+                                    <input type="hidden" @bind="c.CollateralId" />
+                                    <input type="hidden" @bind="c.CategoryRefId" />
                                     @(Personals.IndexOf(c) + 1)
                                 </Template>
                             </RadzenDataGridColumn>
@@ -169,7 +170,7 @@
                                     <RadzenButton Click="@(()=>Remove(c,1))"
                                                   Icon="remove"
                                                   ButtonStyle="ButtonStyle.Danger"
-                                                  Size="Radzen.ButtonSize.ExtraSmall">
+                                                  Size="ButtonSize.ExtraSmall">
                                     </RadzenButton>
                                 </Template>
                             </RadzenDataGridColumn>
@@ -179,13 +180,13 @@
                 </RadzenTabsItem>
                 <RadzenTabsItem Text="Personal">
                     <RadzenDataGrid Density="Density.Compact"
-                                    TItem="CollateralLineResponse"
+                                    TItem="VCollateralLines"
                                     Responsive
                                     ColumnWidth="15rem"
                                     @ref="personalGrid"
                                     Data="Personals">
                         <HeaderTemplate>
-                            <RadzenButton Size="Radzen.ButtonSize.Small"
+                            <RadzenButton Size="ButtonSize.Small"
                                           ButtonStyle="ButtonStyle.Primary"
                                           Click="@(()=>AddNewRow(3))"
                                           Icon="add_circle"
@@ -195,7 +196,8 @@
                             <RadzenDataGridColumn Property="Id" Title="#" Width="2rem">
                                 <Template Context="c">
                                     <input type="hidden" @bind="c.Id" />
-                                    <input type="hidden" @bind="c.CollateralRefId" />
+                                    <input type="hidden" @bind="c.CollateralId" />
+                                    <input type="hidden" @bind="c.CategoryRefId" />
                                     @(Personals.IndexOf(c) + 1)
                                 </Template>
                             </RadzenDataGridColumn>
@@ -279,7 +281,7 @@
                                     <RadzenButton Click="@(()=>Remove(c,3))"
                                                   Icon="remove"
                                                   ButtonStyle="ButtonStyle.Danger"
-                                                  Size="Radzen.ButtonSize.ExtraSmall">
+                                                  Size="ButtonSize.ExtraSmall">
                                     </RadzenButton>
                                 </Template>
                             </RadzenDataGridColumn>
@@ -296,19 +298,19 @@
         <RadzenButton Text="Save"
                       Icon="save"
                       ButtonStyle="ButtonStyle.Success"
-                      Size="Radzen.ButtonSize.Small"
+                      Size="ButtonSize.Small"
                       Click="FormValidate" />
         <RadzenButton Text="Close"
                       Icon="close"
                       ButtonStyle="ButtonStyle.Danger"
-                      Size="Radzen.ButtonSize.Small"
+                      Size="ButtonSize.Small"
                       Click="CloseTab" />
     </RadzenStack>
 </RadzenCard>
 
 @code {
-    RadzenDataGrid<CollateralLineResponse> personalGrid = default!;
-    RadzenDataGrid<CollateralLineResponse> propertiesGrid = default!;
+    RadzenDataGrid<VCollateralLines> personalGrid = default!;
+    RadzenDataGrid<VCollateralLines> propertiesGrid = default!;
 
     [Parameter]
     public EventCallback Close { get; set; }

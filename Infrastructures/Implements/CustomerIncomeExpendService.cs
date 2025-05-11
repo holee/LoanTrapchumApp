@@ -16,42 +16,14 @@ namespace Infrastructures.Implements
 
         private readonly ILogger<CustomerIncomeExpendService> _logger;
 
-        public CustomerIncomeExpendService(ApplicationDbContext context, ILogger<CustomerIncomeExpendService> logger)
+        private readonly IDapperConnectionFactory connectionFactory;
+        public CustomerIncomeExpendService(ApplicationDbContext context, ILogger<CustomerIncomeExpendService> logger, IDapperConnectionFactory connectionFactory)
         {
             _context = context;
             _logger = logger;
+            this.connectionFactory = connectionFactory;
         }
-
-        public async Task<Result<IEnumerable<VCustomerIncomes>>> GetCustomerCustomerIncomes(long customerId)
-        {
-
-            using var db = _context.Database.GetDbConnection();
-
-            var sql = @"SELECT * FROM VCustomerIncomes WHERE CustomerRefId=@customerId";
-
-            var incomes = db.Query<VCustomerIncomes>(sql, new { @customerId = customerId })
-                             .ToList();
-
-            var incomeResult = await Task.FromResult(incomes);
-
-            return Result.Success<IEnumerable<VCustomerIncomes>>(incomeResult);
-        }
-        public async Task<Result<IEnumerable<VCustomerExpenses>>> GetCustomerCustomerExpenses(long customerId)
-        {
-
-            using var db = _context.Database.GetDbConnection();
-
-            var sql = @"SELECT * FROM VCustomerExpenses WHERE CustomerRefId=@customerId";
-
-            var expenses = db.Query<VCustomerExpenses>(sql, new { @customerId = customerId })
-                              .ToList();
-
-            var expensesResult = await Task.FromResult(expenses);
-
-            return Result.Success<IEnumerable<VCustomerExpenses>>(expensesResult);
-        }
-
-        public async Task<Result> AddExpensesAsync(Guid? customerRefId, List<CustomerExpense> req)
+        public async Task<Result> AddExpensesAsync(string? customerRefId, List<CustomerExpense> req)
         {
             try
             {
@@ -79,7 +51,7 @@ namespace Infrastructures.Implements
 
         }
 
-        public async Task<Result> AddIncomesAsync(Guid? customerRefId, List<CustomerIncome> req)
+        public async Task<Result> AddIncomesAsync(string? customerRefId, List<CustomerIncome> req)
         {
             try
             {
@@ -109,7 +81,7 @@ namespace Infrastructures.Implements
 
         }
 
-        public async Task<Result> AddOrUpdateExpensesAsync(Guid? customerId, List<CustomerExpense> req)
+        public async Task<Result> AddOrUpdateExpensesAsync(string? customerId, List<CustomerExpense> req)
         {
             try
             {
@@ -160,7 +132,7 @@ namespace Infrastructures.Implements
             }
         }
 
-        public async Task<Result> AddOrUpdateIncomesAsync(Guid? customerId, List<CustomerIncome> req)
+        public async Task<Result> AddOrUpdateIncomesAsync(string? customerId, List<CustomerIncome> req)
         {
             try
             {
@@ -214,41 +186,40 @@ namespace Infrastructures.Implements
 
         }
 
-        public async Task<Result<IEnumerable<VCustomerExpenses>>> GetCustomerCustomerExpenses(Guid? customerId)
+        public async Task<Result<IEnumerable<VCustomerExpenses>>> GetCustomerCustomerExpenses(string? customerId)
         {
-            var expense = await _context.Database.SqlQuery<VCustomerExpenses>($"SELECT * FROM VCustomerExpenses WHERE CustomerRefId={customerId.ToString()}")
-                                 .AsNoTracking()
-                                 .ToListAsync();
 
+            using var db = connectionFactory.CreateConnection();
+
+            var expense = await db.QueryAsync<VCustomerExpenses>($"SELECT * FROM VCustomerExpenses WHERE CustomerRefId=@customerId",new { customerId});
 
             if (expense is null)
             {
                 return Result.Failure<IEnumerable<VCustomerExpenses>>(ErrorResponse.NotFound("No expense found"));
             }
 
-            return Result.Success<IEnumerable<VCustomerExpenses>>(expense);
+            return Result.Success(expense);
 
         }
 
-  
-        public async Task<Result<IEnumerable<VCustomerIncomes>>> GetCustomerCustomerIncomes(Guid? customerId)
-        {
-            var incomes = await _context.Database
-                                    .SqlQuery<VCustomerIncomes>($"SELECT * FROM VCustomerIncomes WHERE CustomerRefId={customerId.ToString()}")
-                                    .AsNoTracking()
-                                 .ToListAsync();
 
+        public async Task<Result<IEnumerable<VCustomerIncomes>>> GetCustomerCustomerIncomes(string? customerId)
+        {
+
+            using var db = connectionFactory.CreateConnection();
+
+            var incomes = await db.QueryAsync<VCustomerIncomes>($"SELECT * FROM VCustomerIncomes WHERE CustomerRefId=@customerId", new { customerId });
 
             if (incomes is null)
             {
                 return Result.Failure<IEnumerable<VCustomerIncomes>>(ErrorResponse.NotFound("No expense found"));
             }
 
-            return Result.Success<IEnumerable<VCustomerIncomes>>(incomes);
+            return Result.Success(incomes);
         }
 
 
-        public async Task<Result<IEnumerable<T>>> GetCustomerCustomerIncomes<T>(Guid? customerId)
+        public async Task<Result<IEnumerable<T>>> GetCustomerCustomerIncomes<T>(string? customerId)
             where T : class
         {
             var incomes = await _context.CustomerIncomes
@@ -265,16 +236,14 @@ namespace Infrastructures.Implements
             return Result.Success<IEnumerable<T>>(incomes);
         }
 
-        public async Task<Result<IEnumerable<T>>> GetCustomerCustomerExpenses<T>(Guid? customerId)
-      where T : class
+        public async Task<Result<IEnumerable<T>>> GetCustomerCustomerExpenses<T>(string? customerId)
+                    where T : class
         {
             var expense = await _context.CustomerExpenses
                                  .Where(x => x.CustomerRefId == customerId)
                                  .ProjectToType<T>()
                                  .AsNoTracking()
                                  .ToListAsync();
-
-
             if (expense is null)
             {
                 return Result.Failure<IEnumerable<T>>(ErrorResponse.NotFound("No expense found"));

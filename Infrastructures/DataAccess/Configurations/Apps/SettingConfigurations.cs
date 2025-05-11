@@ -1,12 +1,12 @@
-﻿using Applications.Requests.SysSettings;
+﻿using Domains.Models.Settings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructures.DataAccess.Configurations.Apps
 {
-    public class SettingConfigurations : IEntityTypeConfiguration<SysSettings>
+    public class SettingConfigurations : IEntityTypeConfiguration<AppSettings>
     {
-        public void Configure(EntityTypeBuilder<SysSettings> builder)
+        public void Configure(EntityTypeBuilder<AppSettings> builder)
         {
             builder.ToTable("lt_settings");
             builder.HasKey(x => x.Id);

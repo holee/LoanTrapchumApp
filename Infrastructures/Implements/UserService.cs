@@ -15,6 +15,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Infrastructures.DataAccess;
 using Applications.Responses.Message;
+using Applications.Extensions;
 namespace Infrastructures.Implements;
 
 public sealed class UserService : IUserService
@@ -24,17 +25,20 @@ public sealed class UserService : IUserService
     private readonly SignInManager<ApplicationUser> _signinManager;
     private readonly RoleManager<ApplicationRole> _roleManager;
     private readonly IWebHostEnvironment _env;
+    private readonly IDbContextFactory<UserDataContext> _dbContextFactory;
     public UserService(UserManager<ApplicationUser> userManager,
          RoleManager<ApplicationRole> roleManager,
          UserDataContext userContext,
          IWebHostEnvironment env,
-         SignInManager<ApplicationUser> signinManager)
+         SignInManager<ApplicationUser> signinManager,
+         IDbContextFactory<UserDataContext> dbContextFactory)
     {
         _userManager = userManager;
         _roleManager = roleManager;
         _userContext = userContext;
         _env = env;
         _signinManager = signinManager;
+        _dbContextFactory = dbContextFactory;
     }
     public async Task<Result<string>> CreateUserAsync(RegisterRequest model)
     {
@@ -111,108 +115,51 @@ public sealed class UserService : IUserService
     }
     public async Task<Result<IEnumerable<VUser>>> GetUsersAsync(string? userId, string? filter = null)
     {
-        var queries = _userContext.Database
+
+        await using var context =await _dbContextFactory.CreateDbContextAsync();
+
+        var queries = await context.Database
                                 .SqlQuery<VUser>($"SELECT * FROM vUsers")
-                                .Where(x => x.IsActive == true);
-
-        if (!string.IsNullOrWhiteSpace(filter))
-        {
-            queries = queries.Where(x => EF.Functions.Like(x.UserName!, $"%{filter}%")
-                                    || EF.Functions.Like(x.Email!, $"%{filter}%"));
-        }
-        if (string.IsNullOrEmpty(userId))
-        {
-            queries = queries.Where(u => u.Id == userId);
-        }
-
-        var users = await queries.AsNoTracking().ToListAsync();
-
-        return Result.Success<IEnumerable<VUser>>(users);
+                                .Where(x => x.IsActive == true)
+                                .WhereIf(!string.IsNullOrWhiteSpace(filter),
+                                                    x => EF.Functions.Like(x.UserName!, $"%{filter}%") ||
+                                                         EF.Functions.Like(x.Email!, $"%{filter}%"))
+                                .WhereIf(!string.IsNullOrEmpty(userId), u => u.Id == userId)
+                                .AsNoTracking()
+                                .ToListAsync();
+        return Result.Success<IEnumerable<VUser>>(queries);
 
     }
     public async Task<Result<Pager<VUser>>> GetUsersAsync(QueryParam param, string? userId)
     {
-        var queries = _userContext.Database.SqlQuery<VUser>($"SELECT * FROM vUsers");
-        if (!param.IsIncludeInActive)
-        {
-            queries = queries.Where(x => x.IsActive == true);
-        }
 
-        if (!string.IsNullOrWhiteSpace(param.Filter))
-        {
-            queries = queries.Where(x => EF.Functions.Like(x.UserName!, $"%{param.Filter}%")
-                                      || EF.Functions.Like(x.Email!, $"%{param.Filter}%"));
-        }
+        await using var context = await _dbContextFactory.CreateDbContextAsync();
 
-        if (param.SortDescending)
-        {
-            queries = queries.OrderByDescending(p => EF.Property<object>(p, param.SortColumn));
-        }
+        var queries = context.Database
+                            .SqlQuery<VUser>($"SELECT * FROM vUsers")
+                            .WhereIf(!param.IsIncludeInActive, x => x.IsActive == true)
+                            .WhereIf(!string.IsNullOrWhiteSpace(param.Filter), e => EF.Functions.Like(e.UserName!, $"%{param.Filter}%") ||
+                                                                                    EF.Functions.Like(e.Email!, $"%{param.Filter}%"))
+                            .WhereIf(userId.IsNotNullOrEmpty(), u => u.Id == userId)
+                            .OrderByDescendingIf(param.SortDescending, p => EF.Property<object>(p, param.SortColumn));
 
-        if (!string.IsNullOrEmpty(userId))
-        {
-            queries = queries.Where(u => u.Id == userId);
-        }
+
         var counts = await queries.CountAsync();
 
-        var users = await queries.Skip(param.PageIndex)
-                            .Take(param.PageSize)
+        if (param.PageSize > 0)
+        {
+            queries = queries.Skip(param.PageNumber).Take(param.PageSize);
+        }
+
+
+        var users = await queries
                             .AsNoTracking()
                             .ToListAsync();
 
         return Result.Success<Pager<VUser>>(new(users, counts));
     }
-    public async Task<Pager<UserDto>> GetUsersAsync(int pageIndex, int pageSize, string sortColumn, bool includeInactive = false, string? filter = null)
-    {
-        var queries = _userManager.Users;
 
-        if (!includeInactive)
-        {
-            queries = queries.Where(x => x.IsActive == true);
-        }
-        if (!string.IsNullOrWhiteSpace(filter))
-        {
-            queries = queries.Where(x => x.UserName!.Contains(filter)
-                                    || x.Email!.Contains(filter))
-                              .Where(x => x.IsActive == true);
-        }
-        var userList = new List<UserDto>();
 
-        if (queries.Any())
-        {
-            foreach (var user in queries)
-            {
-                var roles = await _userManager.GetRolesAsync(user);
-                var userDto = new UserDto();
-                userList.Add(userDto);
-            }
-        }
-
-        var counts = userList.Count();
-        var items = userList.Skip(pageIndex).Take(pageSize).ToList();
-        return new Pager<UserDto>
-        {
-            Count = counts,
-            Items = items
-        };
-
-    }
-    public async Task<Result<UserDto>> GetUserByIdAsync(string? userId)
-    {
-
-        ArgumentException.ThrowIfNullOrWhiteSpace(userId, nameof(userId));
-
-        var user = await _userManager.FindByIdAsync(userId);
-
-        if (user is not null)
-        {
-            var roles = await _userManager.GetRolesAsync(user);
-
-            return Result.Success(new UserDto(user.Id.ToString(), user.UserName!, user.Email!, roles.First(), user.IsActive!.Value));
-
-        }
-        return Result.Failure<UserDto>(ErrorResponse.NullValue);
-    }
     public async Task<Result> ChangePassword(ChangePasswordDto req)
     {
 
@@ -640,5 +587,7 @@ public sealed class UserService : IUserService
 
         return Result.Success(userResponse);
     }
-
+    
+    
+    
 }

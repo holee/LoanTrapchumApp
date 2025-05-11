@@ -1,4 +1,3 @@
-using Applications.Extensions.Identity;
 using Applications.Responses.ViewModels.Loans;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;

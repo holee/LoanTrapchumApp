@@ -6,7 +6,7 @@ namespace Applications.Responses;
 public static class ScheduleLineExtensions
 {
     public static IEnumerable<LoanScheduleDtoCreate> ToSchedules(this IEnumerable<ScheduleLine> source,
-        int? branchId,Guid? creditAgentId,int? repaymentModeId = 2, 
+        int? branchId,string? creditAgentId,int? repaymentModeId = 2, 
         ScheduleStatus status = ScheduleStatus.Unpaid)
     {
 
@@ -24,7 +24,7 @@ public static class ScheduleLineExtensions
             LoanOutstanding = x.OutStanding,
             TotalDay = x.TotalDay,
             TotalPay = x.TotalPay,
-            AgentRefId = creditAgentId ?? Guid.Empty,
+            AgentRefId = creditAgentId ?? string.Empty,
             RepaymentModeRefId = repaymentModeId ?? 1,
             ScheduleStatusRefId = (int)status,
         });
@@ -44,7 +44,7 @@ public static class ScheduleLineExtensions
             LoanOutstanding = x.OutStanding,
             TotalDay = x.TotalDay,
             TotalPay = x.TotalPay,
-            AgentRefId = Guid.Empty,
+            AgentRefId = string.Empty,
             RepaymentModeRefId = repaymentModeId,
             ScheduleStatusRefId = (int)status,
         });

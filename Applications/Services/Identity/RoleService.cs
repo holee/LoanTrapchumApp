@@ -5,7 +5,17 @@ using Applications.Responses.Auths;
 
 namespace Applications.Services.Identity
 {
-    public sealed class RoleService(IRoleService roleService) : IRoleService
+    public interface IRoleServiceImpl
+    {
+        Task<Result> AddRolePermissions(RolePermissionRequest permission);
+        Task<Result> CreateAsync(RoleCreateDto role);
+        Task<Result<RolePermissions>> GetPermissionsByRoleAsync(string roleId);
+        Task<Result<RoleDto>> GetRoleByIdAsync(string id);
+        Task<Result<IEnumerable<RoleDto>>> GetRolesAsync(string? roleId, string? roleName = null);
+        Task<Result<IEnumerable<string>>> GetRolesAsync(string? name = null);
+    }
+
+    public sealed class RoleService(IRoleService roleService) : IRoleServiceImpl
     {
         public async Task<Result> AddRolePermissions(RolePermissionRequest permission)
         {
@@ -27,9 +37,14 @@ namespace Applications.Services.Identity
             return await roleService.GetRoleByIdAsync(id);
         }
 
-        public async Task<Result<IEnumerable<RoleDto>>> GetRolesAsync(string? roleId = null, string? roleName = null)
+        public async Task<Result<IEnumerable<RoleDto>>> GetRolesAsync(string? roleId, string? roleName = null)
         {
-            return await roleService.GetRolesAsync(roleId, roleName);
+            return await roleService.GetRolesAsync(roleId!, roleName);
+        }
+
+        public async Task<Result<IEnumerable<string>>> GetRolesAsync(string? name = null)
+        {
+            return await roleService.GetRolesAsync(name);
         }
     }
 }

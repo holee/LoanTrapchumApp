@@ -1,6 +1,4 @@
 using Applications.Extensions;
-using Applications.Interfaces.Customers;
-using Applications.Responses;
 using Applications.Responses.ViewModels.Customers;
 using Microsoft.AspNetCore.Components;
 
@@ -8,17 +6,21 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 {
     public partial class CustomerRequest
     {
-        [Parameter] public Guid? CustomerId { get; set; }
+        [Parameter] public string? CustomerId { get; set; }
         [Parameter] public VCustomerList? Customer { get; set; } = new();
-        protected override async Task OnParametersSetAsync()
+        protected override async Task OnInitializedAsync()
         {
-            if (CustomerId.NotEmpty())
+            if (CustomerId.IsNotNullOrEmpty())
             {
                 await GetCustomerLoanReuqest(CustomerId);
             }
-            await base.OnParametersSetAsync();
+            await base.OnInitializedAsync();
         }
-        async Task GetCustomerLoanReuqest(Guid? customerId)
+
+
+
+
+        async Task GetCustomerLoanReuqest(string? customerId)
         {
             var resp = await _customerService.GetCustomerForRequestLoanAsync(customerId);
 

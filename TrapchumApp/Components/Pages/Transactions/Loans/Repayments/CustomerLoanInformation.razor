@@ -4,7 +4,7 @@
         AlignItems="AlignItems.Center"
         JustifyContent="JustifyContent.Normal">
             <strong>
-                  <RadzenLink Text="Loan Details" Path="@($"/Loans/Details/{LoanSchedule.Id}?BranchId={LoanSchedule.BranchId}&CreditAgentId={LoanSchedule.CreditAgentRefId}&CurrencyId={LoanSchedule.CurrencyId}&UserId={UserId}")" />
+                  <RadzenLink Text="Loan Details" Path="@($"/Loans/Details/{LoanSchedule.LoanId}?BranchId={LoanSchedule.BranchId}&CreditAgentId={LoanSchedule.CreditAgentRefId}&CurrencyId={LoanSchedule.CurrencyId}&UserId={UserId}")" />
             </Strong>
             <RadzenButton 
             Icon="@collapseIcon"
@@ -13,7 +13,7 @@
             aria-expanded="@collapse" 
             aria-controls="collapseExample"
             Click="CollapseButton"
-            Size="Radzen.ButtonSize.ExtraSmall" 
+            Size="ButtonSize.ExtraSmall" 
             ButtonStyle="ButtonStyle.Primary">
             </RadzenButton>
           

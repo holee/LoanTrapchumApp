@@ -207,6 +207,27 @@ namespace Applications.Extensions.Maths
                 _ => (MarkupString)string.Format("{0:#,00.00} {1}", d, "&#6107;"),
             };
         }
+
+
+        public static MarkupString Format(this decimal? d, CurrenciesType type)
+        {
+            return type switch
+            {
+                CurrenciesType.Khr => (MarkupString)string.Format("{0:#,00.00} {1}", d, "&#6107;"),
+                CurrenciesType.Usd => (MarkupString)string.Format("{0:#,00.00} {1}", d, "&dollar;"),
+                _ => (MarkupString)string.Format("{0:#,00.00} {1}", d, "&#6107;"),
+            };
+        }
+
+        public static string Formats(this decimal? d, int? currencyId)
+        {
+            return currencyId switch
+            {
+                1 => string.Format(UserCulture(CurrenciesType.Khr), "{0:C}", d),
+                2 => string.Format(UserCulture(CurrenciesType.Usd), "{0:C}", d),
+                _ => string.Format(UserCulture(CurrenciesType.Khr), "{0:C}", d),
+            };
+        }
         private static CultureInfo UserCulture(CurrenciesType type)
         {
             return type switch

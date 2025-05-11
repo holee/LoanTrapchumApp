@@ -5,6 +5,12 @@ namespace Applications.Extensions.Identity.Policies
 {
     public static class LoanPolicies
     {
+        private const string prefix = "loans";
+        public const string Create = $"{prefix}.{nameof(Create)}";
+        public const string Update = $"{prefix}.{nameof(Update)}";
+        public const string Delete = $"{prefix}.{nameof(Delete)}";
+        public const string Read = $"{prefix}.{nameof(Read)}";
+
         private static string read = AppPermission.RuleFor(Modules.Loans, Feature.Read);
         private static string create = AppPermission.RuleFor(Modules.Loans, Feature.Create);
         private static string update = AppPermission.RuleFor(Modules.Loans, Feature.Update);

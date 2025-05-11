@@ -24,5 +24,8 @@ namespace Applications.Interfaces.Currencies
        
         Task<IEnumerable<VCurrencyNotes>> GetCurrecyNotesss(int? branchRefId);
         Task<Result<VCurrenciesList>> GetCurrencyAsync(int? currencyId);
+
+        Task<Result<IEnumerable<T>>> GetCurrencies<T>(int? currencyId, string? q = null)
+            where T : class, new();
     }
 }

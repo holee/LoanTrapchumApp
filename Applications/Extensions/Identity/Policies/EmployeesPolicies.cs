@@ -5,6 +5,11 @@ namespace Applications.Extensions.Identity.Policies;
 
 public static class EmployeesPolicies
 {
+    private const string prefix = "employees";
+    public const string Create = $"{prefix}.{nameof(Create)}";
+    public const string Read = $"{prefix}.{nameof(Read)}";
+    public const string Update = $"{prefix}.{nameof(Update)}";
+    public const string Delete = $"{prefix}.{nameof(Delete)}";
     private static string read = AppPermission.RuleFor(Modules.Employees, Feature.Read);
     private static string update = AppPermission.RuleFor(Modules.Employees, Feature.Update);
     private static string create = AppPermission.RuleFor(Modules.Employees, Feature.Create);

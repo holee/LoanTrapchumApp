@@ -2,13 +2,13 @@
 
 namespace Applications.Requests.Lists.Collaterals;
 
-public sealed class CollateralLineDtoCreate 
+public sealed class CollateralLineDtoCreate
 {
-    public long? Id { get; set; } 
+    public long? Id { get; set; }
     public Guid? CollateralRefId { get; set; }
     public int? CategoryRefId { get; set; }
-    public int SubCategoryRefId { get; set; }
     public string? TypeName { get; set; }
+    public int SubCategoryRefId { get; set; }
     public string? SubTypeName { get; set; }
     public string? ReferenceNo { get; set; }
     public string? CollateralNo { get; set; }
@@ -24,5 +24,7 @@ public sealed class CollateralLineDtoCreate
     public decimal? MarketPrice { get; set; }
     public decimal? HotPrice { get; set; }
     public decimal? PawnPrice { get; set; }
-    
+    public DateTime? RegisterDate { get; set; }
+    public bool IsUsed { get; set; } = false;
+
 }

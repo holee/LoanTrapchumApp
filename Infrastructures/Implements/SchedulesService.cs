@@ -6,7 +6,7 @@ using Infrastructures.DataAccess;
 
 namespace Infrastructures.Implements
 {
-    public class SchedulesService : ISchedulesServiceImpl
+    public class SchedulesService : ISchedulesService
     {
         private readonly IDapperConnectionFactory _connectionFactory;
 
@@ -16,13 +16,13 @@ namespace Infrastructures.Implements
         }
 
 
-        public async Task<Result<VCustomerSchedules>> GetCustomerSechedule(long loanId, long customerId, int branchId)
+        public async Task<Result<LoanScheduleVm>> GetCustomerSechedule(long loanId, long customerId, int branchId)
         {
             var connection = _connectionFactory.CreateConnection();
 
             var sql = "SELECT * FROM VCustomerLoans WHERE LoanId=@LoanId AND CustomerId=@customerId AND BranchId=@branchId";
 
-            var loan = await connection.QueryFirstOrDefaultAsync<VCustomerSchedules>(sql, new
+            var loan = await connection.QueryFirstOrDefaultAsync<LoanScheduleVm>(sql, new
             {
                 loanId,
                 customerId,
@@ -31,22 +31,22 @@ namespace Infrastructures.Implements
 
             if (loan is null)
             {
-                return Result.Failure<VCustomerSchedules>(ErrorResponse.NotFound("No Schedule to print."));
+                return Result.Failure<LoanScheduleVm>(ErrorResponse.NotFound("No Schedule to print."));
             }
 
             var sql1 = @$"SELECT 
-                           {nameof(VLoanSchedules.InstallmentNo)},
-                           {nameof(VLoanSchedules.CurrencyId)},
-                           {nameof(VLoanSchedules.PaymentDate)},
-                           {nameof(VLoanSchedules.TotalDay)},
-                           {nameof(VLoanSchedules.Principal)},
-                           {nameof(VLoanSchedules.Interest)},
-                           {nameof(VLoanSchedules.TotalPay)},
-                           {nameof(VLoanSchedules.LoanOutstanding)}
+                           {nameof(ScheduleViewModel.InstallmentNo)},
+                           {nameof(ScheduleViewModel.CurrencyId)},
+                           {nameof(ScheduleViewModel.PaymentDate)},
+                           {nameof(ScheduleViewModel.TotalDay)},
+                           {nameof(ScheduleViewModel.Principal)},
+                           {nameof(ScheduleViewModel.Interest)},
+                           {nameof(ScheduleViewModel.TotalPay)},
+                           {nameof(ScheduleViewModel.LoanOutstanding)}
                         FROM VCustomerLoanSchedules s WHERE s.LoanId=@LoanId AND s.CustomerId=@customerId AND s.BranchId=@branchId
                         ";
 
-            var schedules = await connection.QueryAsync<VLoanSchedules>(sql1, new
+            var schedules = await connection.QueryAsync<ScheduleViewModel>(sql1, new
             {
                 loanId,
                 customerId,
@@ -58,7 +58,7 @@ namespace Infrastructures.Implements
                 loan.LoanSchedules = schedules.ToList();
             }
 
-            return Result.Success<VCustomerSchedules>(loan);
+            return Result.Success<LoanScheduleVm>(loan);
 
         }
     }

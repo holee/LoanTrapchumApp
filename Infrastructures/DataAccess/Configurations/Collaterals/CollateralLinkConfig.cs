@@ -14,7 +14,9 @@ namespace Infrastructures.DataAccess.Configurations.Collaterals
             builder.Property(x => x.IsActive).HasDefaultValue(true);
             builder.Property(x => x.CreatedDt).HasDefaultValueSql("GETDATE()");
             builder.Property(x => x.ModifiedDt).HasDefaultValueSql("GETDATE()");
-
+            builder.Property(x => x.Description).HasMaxLength(450);
+            builder.Property(x => x.CollateralRefId).HasMaxLength(250);
+            builder.Property(x => x.LoanRequestRefId).HasMaxLength(250);
 
             builder.HasOne(x => x.CollateralLine)
                 .WithMany(x => x.CollateralLinesLink)

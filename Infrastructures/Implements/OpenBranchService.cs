@@ -8,12 +8,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructures.Implements
 {
-    public class OpenBranchService(ApplicationDbContext context) : IOpenBranchService
+    public class OpenBranchService(ApplicationDbContext context, IDbContextFactory<DataContext> contextFactory) : IOpenBranchService
     {
-
 
         public async Task<Result<IEnumerable<VCashVaultBalance>>> GetCashVaultBalance(int? branchRefId)
         {
+
+            using var context = await contextFactory.CreateDbContextAsync();
+
             var queries = await context.Database
                             .SqlQuery<VCashVaultBalance>($"SELECT * FROM VCashVaultBalances WHERE BranchRefId={branchRefId}")
                             .AsNoTracking()
@@ -41,6 +43,7 @@ namespace Infrastructures.Implements
 
             try
             {
+                await using var context = await contextFactory.CreateDbContextAsync();
                 var transaction = tranx.Adapt<LoanTransaction>();
                 transaction.TransactionDate = DateTime.UtcNow;
                 context.LoanTransaction.Add(transaction);
@@ -60,7 +63,7 @@ namespace Infrastructures.Implements
 
             try
             {
-
+                await using var context = await contextFactory.CreateDbContextAsync();
                 var branchId = transaction.OpenBranch!.BranchRefId!.Value;
                 var closeDate = transaction.TransactionDate!.Value;
                 if (!(await IsAllreadyVaultIn(branchId, closeDate)))

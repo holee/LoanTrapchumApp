@@ -1,10 +1,4 @@
-﻿using Applications.Constants.Authorizations;
-using Applications.Extensions.Identity.Policies;
-using Applications.Interfaces.Banks;
-using Applications.Interfaces.Identity;
-using Applications.Interfaces.Lists;
-using Applications.Interfaces.Transactions;
-using Applications.Services.Addresses;
+﻿using Applications.Services.Addresses;
 using Applications.Services.Banks;
 using Applications.Services.Branches;
 using Applications.Services.Currencies;
@@ -19,139 +13,53 @@ using Applications.Services.Settings;
 using Applications.Services.Transactions.Branches;
 using Applications.Services.Transactions.Currencies;
 using Applications.Services.Transactions.Journals;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using static Applications.ApplicationPolicies.Policies;
 namespace Applications.DependencyInjections
 {
-    public interface ITransient
-    {
-        //void InterceptAfterHttp(object sender, HttpClientInterceptorEventArgs e);
-    }
-
     public static class ApplicationServiceInjection
     {
-        private static void RegisterPermissionClaims(AuthorizationOptions options)
-        {
-            foreach (var permission in ApplicationPermissions.AllPermissions)
-            {
-                options.AddPolicy(permission.For, policy => policy.RequireClaim(AppClaim.Permission, permission.For));
-            }
-            foreach (var permission in UserLevelPermissions.AllUserPermissions)
-            {
-                options.AddPolicy(permission.Name, policy => policy.RequireClaim(AppClaim.Permission, permission.Name));
-            }
-
-            options.AddPolicy(RepaymentPolicies.PayOff, PaymentsPolicies.CanPayOff());
-            options.AddPolicy(RepaymentPolicies.MultiplePayment, PaymentsPolicies.CanPayMultiple());
-            options.AddPolicy(RepaymentPolicies.Create, PaymentsPolicies.CanCreate());
-            options.AddPolicy(RepaymentPolicies.Read, PaymentsPolicies.CanRead());
-            options.AddPolicy(RepaymentPolicies.Update, PaymentsPolicies.CanUpdate());
-            options.AddPolicy(RepaymentPolicies.Delete, PaymentsPolicies.CanDelete());
-            options.AddPolicy(LoanRequestsPolicies.Read, LoanRequestPolicies.CanRead());
-            options.AddPolicy(LoanRequestsPolicies.Create, LoanRequestPolicies.CanCreate());
-            options.AddPolicy(LoanRequestsPolicies.Request, LoanRequestPolicies.CanRequest());
-            options.AddPolicy(LoanRequestsPolicies.Update, LoanRequestPolicies.CanUpdate());
-            options.AddPolicy(LoanRequestsPolicies.Delete, LoanRequestPolicies.CanDelete());
-            options.AddPolicy(LoanRequestsPolicies.Approve, LoanRequestPolicies.CanAproveRequest());
-            options.AddPolicy(LoanRequestsPolicies.Reject, LoanRequestPolicies.CanRejectRequest());
-            options.AddPolicy(LoanRequestsPolicies.Disburse, LoanRequestPolicies.CanDisburseLoan());
-            options.AddPolicy(LoansPolicies.Read, LoanPolicies.CanRead());
-            options.AddPolicy(LoansPolicies.Create, LoanPolicies.CanCreate());
-            options.AddPolicy(LoansPolicies.Update, LoanPolicies.CanUpdate());
-            options.AddPolicy(LoansPolicies.Delete, LoanPolicies.CanDelete());
-            options.AddPolicy(DashboardsPolicies.ShowBranchDashboard, DashboardPolicies.CanShowBranchDashboard());
-            options.AddPolicy(DashboardsPolicies.ShowLoanDashboard, DashboardPolicies.CanShowLoanDashboard());
-            options.AddPolicy(DashboardsPolicies.ShowAccountDashboard, DashboardPolicies.CanShowAccountDashboard());
-            options.AddPolicy(DashboardsPolicies.ShowReportDashboard, DashboardPolicies.CanShowReportDashboard());
-            options.AddPolicy(DashboardsPolicies.ShowAdminDashboard, DashboardPolicies.CanShowAdminDashboard());
-            options.AddPolicy(AdminOnly, AppPolicies.IsAdminOnly());
-            options.AddPolicy(AccountOnly, AppPolicies.IsAccountOnly());
-            options.AddPolicy(CreditOfficerOnly, AppPolicies.IsCreditOfficerOnly());
-            options.AddPolicy(ManagerOnly, AppPolicies.IsManagerOnly());
-            options.AddPolicy(CustomerPolicies.Read, CustomersPolicies.CanRead());
-            options.AddPolicy(CustomerPolicies.Create, CustomersPolicies.CanCreate());
-            options.AddPolicy(CustomerPolicies.Update, CustomersPolicies.CanUpdate());
-            options.AddPolicy(CustomerPolicies.Delete, CustomersPolicies.CanDelete());
-            options.AddPolicy(EmployeePolicies.Read, CustomersPolicies.CanRead());
-            options.AddPolicy(EmployeePolicies.Create, CustomersPolicies.CanCreate());
-            options.AddPolicy(EmployeePolicies.Update, CustomersPolicies.CanUpdate());
-            options.AddPolicy(EmployeePolicies.Delete, CustomersPolicies.CanDelete());
-            options.AddPolicy(BranchPolicies.Read, BranchesPolicies.CanRead());
-            options.AddPolicy(BranchPolicies.Create, BranchesPolicies.CanCreate());
-            options.AddPolicy(BranchPolicies.Update, BranchesPolicies.CanUpdate());
-            options.AddPolicy(BranchPolicies.Delete, BranchesPolicies.CanDelete());
-            options.AddPolicy(BranchPolicies.ShowBranch, BranchesPolicies.CanDelete());
-            options.AddPolicy(TranxPolicies.Read, TranxsPolicies.CanRead());
-            options.AddPolicy(TranxPolicies.Create, TranxsPolicies.CanCreate());
-            options.AddPolicy(TranxPolicies.Update, TranxsPolicies.CanUpdate());
-            options.AddPolicy(TranxPolicies.Delete, TranxsPolicies.CanDelete());
-            options.AddPolicy(TranxPolicies.VaultOut, TranxsPolicies.CanVaultOut());
-            options.AddPolicy(TranxPolicies.VaultIn, TranxsPolicies.CanVaultIn());
-            options.AddPolicy(TranxPolicies.OpenBranch, TranxsPolicies.CanOpenBranch());
-            options.AddPolicy(TranxPolicies.CloseBranch, TranxsPolicies.CanClosedBranch());
-
-        }
-        internal static IServiceCollection AddTransientServices(this IServiceCollection services)
-        {
-            var transientServices = typeof(ITransient);
-
-            var types = transientServices
-                .Assembly
-                .GetExportedTypes()
-                .Where(t => t.IsClass && !t.IsAbstract)
-                .Select(t => new
-                {
-                    Service = t.GetInterface($"I{t.Name}"),
-                    Implementation = t
-                })
-                .Where(t => t.Service != null);
-
-            foreach (var type in types)
-            {
-                if (transientServices.IsAssignableFrom(type.Service))
-                {
-                    services.AddTransient(type.Service, type.Implementation);
-                }
-            }
-
-            return services;
-        }
-
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
-            services.TryAddTransient<IAddressServiceImpl, AddressService>();
-            services.TryAddTransient<IBranchServiceImpl, BranchService>();
-            services.TryAddTransient<IBankService, BankService>();
-            services.TryAddTransient<IOpenBranchServiceImpl, OpenBranchService>();
-            services.TryAddTransient<ICurrencyServiceImpl, CurrencyService>();
-            services.TryAddTransient<ICustomerServiceImpl, CustomerService>();
-            services.TryAddTransient<IIncomeExpendServiceImpl, CustomerIncomeExpendService>();
-            services.TryAddTransient<IHolidayServiceImpl, HolidayService>();
-            services.TryAddTransient<ICreditAgentServiceImpl, CreditAgentService>();
-            services.TryAddTransient<ICollateralsServiceImpl, CollateralsService>();
-            services.TryAddTransient<IEmployeeServiceImpl, EmployeeService>();
-            services.TryAddTransient<IFileUploadServiceImp, FileUploadService>();
-            services.TryAddTransient<IDepartmentServiceImpl, DepartmentService>();
-            services.TryAddTransient<IEntityNameService, EntityNameService>();
-            services.TryAddTransient<ICreditAgentServiceImpl, CreditAgentService>();
-            services.TryAddTransient<ILoginService, LoginService>();
-            services.TryAddTransient<IUserService, UserService>();
-            services.TryAddTransient<IForiegnCurrencyExchangeImpl, ForiegnCurrencyExchange>();
-            services.TryAddTransient<IJournalService, JournalService>();
-            services.TryAddTransient<ILedgerService, LedgerService>();
-            services.TryAddTransient<ILoanRequestServiceImpl, LoanRequestService>();
-            services.TryAddTransient<ILoanServiceImpl, LoanService>();
-            services.TryAddTransient<ILoanSettingServiceImpl, LoanSettingService>();
-            services.TryAddTransient<INationalityServiceImpl, NationalityService>();
-            services.TryAddTransient<IOccupationServiceImpl, OccupationService>();
-            services.TryAddTransient<IRoleService, RoleService>();
-            services.TryAddTransient<ISpotRateServiceImpl, SpotRateService>();
-            services.TryAddTransient<ISettingServiceImpl, SettingService>();
-            services.TryAddTransient<ISalutationServiceImpl, SalutationService>();
-            services.TryAddTransient<IFileUploadServiceImp, FileUploadService>();
-            services.AddAuthorizationCore(option => RegisterPermissionClaims(option));
+            services.AddTransient<IAddressServiceImpl, AddressService>();
+            services.AddTransient<IBranchServiceImpl, BranchService>();
+            services.AddTransient<IBankServiceImpl, BankService>();
+            services.AddTransient<IOpenBranchServiceImpl, OpenBranchService>();
+            services.AddTransient<ICurrencyServiceImpl, CurrencyService>();
+            services.AddTransient<ICashVaultServiceImpl, CashVaultService>();
+            services.AddTransient<ICustomerServiceImpl, CustomerService>();
+            services.AddTransient<IIncomeExpendServiceImpl, CustomerIncomeExpendService>();
+            services.AddTransient<IHolidayServiceImpl, HolidayService>();
+            services.AddTransient<ICreditAgentServiceImpl, CreditAgentService>();
+            services.AddTransient<ICollateralsServiceImpl, CollateralsService>();
+            services.AddTransient<IEmployeeServiceImpl, EmployeeService>();
+            services.AddTransient<IFileUploadServiceImp, FileUploadService>();
+            services.AddTransient<IDepartmentServiceImpl, DepartmentService>();
+            services.AddTransient<IEntityNameServiceImpl, EntityNameService>();
+            services.AddTransient<ICreditAgentServiceImpl, CreditAgentService>();
+            services.AddTransient<ILoginServiceImpl, LoginService>();
+            services.AddTransient<IUserServiceImpl, UserService>();
+            services.AddTransient<IForiegnCurrencyExchangeImpl, ForiegnCurrencyExchange>();
+            services.AddTransient<IJournalServiceImpl, JournalService>();
+            services.AddTransient<ILedgerServiceImpl, LedgerService>();
+            services.AddTransient<ILoanRequestServiceImpl, LoanRequestService>();
+            services.AddTransient<ILoanServiceImpl, LoanService>();
+            services.AddTransient<ILoanScheduleServiceImpl, LoanScheduleService>();
+            services.AddTransient<ILoanCategoryServiceImpl, LoanCategoryService>();
+            services.AddTransient<ILoanProductServiceImpl, LoanProductService>();
+            services.AddTransient<ILoanPaymentServiceImpl, LoanPaymentService>();
+            services.AddTransient<ILoanSettingServiceImpl, LoanSettingService>();
+            services.AddTransient<INationalityServiceImpl, NationalityService>();
+            services.AddTransient<IOccupationServiceImpl, OccupationService>();
+            services.AddTransient<IOtherNameServiceImpl, OtherNameService>();
+            services.AddTransient<IPrintPdfServiceImpl, PrintPdfServiceImpl>();
+            services.AddTransient<IGuarantorServiceImpl, GuarantorService>();
+            services.AddTransient<IRoleServiceImpl, RoleService>();
+            services.AddTransient<ISpotRateServiceImpl, SpotRateService>();
+            services.AddTransient<ISettingServiceImpl, SettingService>();
+            services.AddTransient<ISalutationServiceImpl, SalutationService>();
+            services.AddTransient<IVendorServiceImpl, VendorService>();
+            services.AddTransient<IFileUploadServiceImp, FileUploadService>();
+            services.AddTransient<IPrintExelServiceImpl, PrintExelServiceImpl>();
             return services;
 
         }

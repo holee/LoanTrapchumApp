@@ -3,7 +3,7 @@
 @if (LoanRequest?.StatusId == (int)RequestStatus.Aprove)
 {
     <a href="@requestLoanUrl">
-        <RadzenBadge Variant="Variant.Flat"
+        <RadzenBadge Variant="Variant.Text"
                      BadgeStyle="BadgeStyle.Primary"
                      Style="font-size:0.5rem;"
                      Text="Disburse"></RadzenBadge>
@@ -11,18 +11,23 @@
 }
 else
 {
-    <RadzenBadge Variant="Variant.Text"
-                 BadgeStyle="BadgeStyle.Secondary"
-                 Text="@LoanRequest?.Status"></RadzenBadge>
+    <NavLink href="@loanRequestDetailsUrl">
+        <RadzenBadge Variant="Variant.Text"
+                     BadgeStyle="BadgeStyle.Secondary"
+                     Text="Details"></RadzenBadge>
+    </NavLink>
+
 }
 @code {
     [Parameter, EditorRequired] public VLoanRequests? LoanRequest { get; set; }
     [Parameter, EditorRequired] public int? BranchId { get; set; }
-    [Parameter, EditorRequired] public Guid? UserId { get; set; } 
+    [Parameter, EditorRequired] public string? UserId { get; set; }  
     string? requestLoanUrl = "";
+    string? loanRequestDetailsUrl = "";
     protected override void OnParametersSet()
     {
-        requestLoanUrl = $"/Loan/Disbursement/Create?BranchId={BranchId}&UserId={UserId}&CustomerRequestId={LoanRequest?.CustomerId}&LoanRequestId={LoanRequest?.LoanRequestId}";
+        loanRequestDetailsUrl = $"App/Loan/{BranchId}/Branches/Request/Details?UserId={UserId}&CustomerId={LoanRequest?.CustomerId}&LoanRequestId={LoanRequest?.LoanRequestId}";
+        requestLoanUrl = $"/Loan/Disbursement/CreateNewUser?BranchId={BranchId}&UserId={UserId}&CustomerRequestId={LoanRequest?.CustomerId}&LoanRequestId={LoanRequest?.LoanRequestId}";
 
         base.OnParametersSet();
     }

@@ -1,5 +1,5 @@
-﻿using Applications.Requests.Lists.Entities;
-using Applications.Responses.Collaterals;
+﻿using Applications.Responses.Lists.Collaterals;
+using Applications.Responses.Lists.Entities;
 using Applications.Responses.Loans.Disbursements;
 
 namespace Applications.Responses.Loans.LoanRequests
@@ -42,6 +42,6 @@ namespace Applications.Responses.Loans.LoanRequests
         public string? OtherChargName { get; set; } = string.Empty;
         public ICollection<LoanDocumentsResponse>? LoanDocuments { get; set; } = [];
         public ICollection<OtherNameDto>? Guarantors { get; set; } = [];
-        public ICollection<CollateralLineResponse> CollateralLines { get; set; } = [];
+        public ICollection<VCollateralLines> CollateralLines { get; set; } = [];
     }
 }

@@ -1,66 +1,71 @@
-﻿@using Applications.Responses.ViewModels.Customers
-<RadzenDataGrid Data="Items"
-                GridLines="DataGridGridLines.Both"
-                Responsive
-                IsLoading="isLoading"
-                ColumnWidth="10rem"
-                Style="height:20rem;max-height:30rem;"
-                Density="Density.Compact">
-
+﻿<RadzenFieldset>
     <HeaderTemplate>
-        @if (ShowAdd)
-        {
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
+            <RadzenIcon Icon="payments" /><b>Expense</b>
+        </RadzenStack>
+    </HeaderTemplate>
+    <ChildContent>
+        <RadzenStack AlignItems="AlignItems.Center"
+                     Gap="1rem" Orientation="Orientation.Horizontal"
+                     JustifyContent="JustifyContent.End"
+                     Visible="@ShowCommand"
+                     class="rz-mb-2">
             <RadzenButton Text="Expense"
                           Click="AddExpenseModal"
                           Icon="add"
+                          Visible="@(ShowAdd && ShowCommand)"
                           ButtonStyle="ButtonStyle.Primary"
-                          Size="Radzen.ButtonSize.Small" />
-        }
-        @if (ShowReload)
-        {
+                          Size="ButtonSize.ExtraSmall" />
             <RadzenButton Click="RefreshIncome"
                           Icon="refresh"
                           ButtonStyle="ButtonStyle.Secondary"
                           class="ml-2"
-                          Size="Radzen.ButtonSize.Small" />
-        }
-    </HeaderTemplate>
-    <Columns>
-        <RadzenDataGridColumn Property="ExpendId" Context="c" Title="#" Width="3rem">
-            <Template>
-                @c.ExpendId
-            </Template>
-        </RadzenDataGridColumn>
-        <RadzenDataGridColumn Context="c"
-                              Width="10rem"
-                              Property="ExpenseTitle" Title="Expense">
-            <Template>
-                @c.ExpenseTitle
-            </Template>
-        </RadzenDataGridColumn>
-        <RadzenDataGridColumn Context="c"
-                              Width="10rem"
-                              TextAlign="TextAlign.Right"
-                              Property="expendAmount" Title="Amount">
-            <Template>
-                @c?.ExpendAmount
-            </Template>
-            <FooterTemplate>
-                <strong>
-                    @Items!.Sum(x => x.ExpendAmount)
-                </strong>
-            </FooterTemplate>
-        </RadzenDataGridColumn>
-        <RadzenDataGridColumn Context="c"
-                              Property="ExDescription" Title="Description">
-            <Template>
-                @c.ExDescription
-            </Template>
-        </RadzenDataGridColumn>
-    </Columns>
-    <LoadingTemplate>
-        <RadzenProgressBarCircular ProgressBarStyle="ProgressBarStyle.Primary" Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
-    </LoadingTemplate>
-</RadzenDataGrid>
-
-
+                          Visible="@(ShowReload && ShowCommand)"
+                          Size="ButtonSize.ExtraSmall" />
+        </RadzenStack>
+        <RadzenDataGrid Data="Items"
+                        GridLines="DataGridGridLines.Both"
+                        Responsive
+                        IsLoading="isLoading"
+                        ColumnWidth="10rem"
+                        Style="height:20rem;max-height:30rem;"
+                        Density="Density.Compact">
+            <Columns>
+                <RadzenDataGridColumn Property="ExpendId" Context="c" Title="#" Width="3rem">
+                    <Template>
+                        @c.ExpendId
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Context="c"
+                                      Width="10rem"
+                                      Property="ExpenseTitle" Title="Expense">
+                    <Template>
+                        @c.ExpenseTitle
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Context="c"
+                                      Width="10rem"
+                                      TextAlign="TextAlign.Right"
+                                      Property="expendAmount" Title="Amount">
+                    <Template>
+                        @c?.ExpendAmount
+                    </Template>
+                    <FooterTemplate>
+                        <strong>
+                            @Items!.Sum(x => x.ExpendAmount)
+                        </strong>
+                    </FooterTemplate>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Context="c"
+                                      Property="ExDescription" Title="Description">
+                    <Template>
+                        @c.ExDescription
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+            <LoadingTemplate>
+                <RadzenProgressBarCircular ProgressBarStyle="ProgressBarStyle.Primary" Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+            </LoadingTemplate>
+        </RadzenDataGrid>
+    </ChildContent>
+</RadzenFieldset>

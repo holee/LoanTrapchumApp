@@ -66,8 +66,18 @@ namespace Infrastructures.DataAccess.Configurations.LoanDisbursements
                                    .HasDefaultValue(0.00M);
             builder.Property(x => x.BatchName).HasMaxLength(400);
 
-            builder.Property(x => x.LoanDisbursementRefId)
-                .HasConversion(ConversionExts.GuidConversion);
+            builder.Property(x => x.LoanRefId).HasMaxLength(250);
+
+            builder.Property(x => x.AgentRefId).HasMaxLength(250);
+
+
+            builder.Property(x=>x.PaymentDate).HasColumnType("DATETIME")
+                                                 .HasConversion(
+                                                        v => v.HasValue ? v.Value.UtcDateTime : (DateTime?)null,
+                                                        v => v.HasValue ? new DateTimeOffset(v.Value, TimeSpan.Zero) : (DateTimeOffset?)null
+                                                    );
+
+            //    .HasConversion(ConversionExts.GuidConversion);
 
         }
     }

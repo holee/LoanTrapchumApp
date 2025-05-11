@@ -1,16 +1,22 @@
 using System.Security.Claims;
 using System.Text.Json;
 using Applications.Extensions.Identity;
+using Applications.Responses.ViewModels.Loans.Schedules;
+using Applications.Schedules;
+using Applications.Services.Loans;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using QuestPDF.Fluent;
+
 namespace TrapchumApp.Components.Account;
 
 internal static class IdentityComponentsEndpointRouteBuilderExtensions
 {
     // These endpoints are required by the Identity Razor components defined in the /Components/Account/Pages directory of this project.
-    public static IEndpointConventionBuilder MapAdditionalIdentityEndpoints(this IEndpointRouteBuilder endpoints)
+    public static async Task<IEndpointConventionBuilder> MapAdditionalIdentityEndpoints(this IEndpointRouteBuilder endpoints)
     {
+
         ArgumentNullException.ThrowIfNull(endpoints);
 
         var accountGroup = endpoints.MapGroup("/Account");
@@ -20,6 +26,7 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
             [FromForm] string returnUrl) =>
         {
             await signInManager.SignOutAsync();
+
             return TypedResults.LocalRedirect($"~/{returnUrl}");
         });
 
@@ -35,6 +42,7 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
             [FromServices] AuthenticationStateProvider authenticationStateProvider) =>
         {
             var user = await userManager.GetUserAsync(context.User);
+
             if (user is null)
             {
                 return Results.NotFound($"Unable to load user with ID '{userManager.GetUserId(context.User)}'.");
@@ -45,8 +53,10 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
 
             // Only include personal data for download
             var personalData = new Dictionary<string, string>();
+
             var personalDataProps = typeof(ApplicationUser).GetProperties().Where(
                 prop => Attribute.IsDefined(prop, typeof(PersonalDataAttribute)));
+
             foreach (var p in personalDataProps)
             {
                 personalData.Add(p.Name, p.GetValue(user)?.ToString() ?? "null");
@@ -66,8 +76,112 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
             context.Response.Headers.TryAdd("Content-Disposition", "attachment; filename=PersonalData.json");
 
             return TypedResults.File(fileBytes, contentType: "application/json", fileDownloadName: "PersonalData.json");
+
+
         });
+
+
+
+        var reportGroup = endpoints.MapGroup("/Reports");
+
+
+        reportGroup.MapGet("/Schedules/{loanId}/{customerId}/{branchId:int}", async ([FromServices] ILoanScheduleServiceImpl _schedulesService,
+                                                string? loanId, string? customerId, int? branchId) =>
+        {
+
+            var rsp = await _schedulesService.GetLoanSchedulesAsync(branchId, loanId, customerId);
+
+            var loanWithScedules = new LoanScheduleVm();
+
+            if (rsp.IsSuccess)
+            {
+                loanWithScedules = rsp.Data;
+            }
+
+            var doc = new SchedulePdfService(loanWithScedules!);
+
+            var stream = doc.GeneratePdf();
+
+            return TypedResults.File(stream, contentType: "application/pdf");
+
+        });
+
+
+        reportGroup.MapGet("/Schedules/{loanId}/{branchId:int}", async ([FromServices] IPrintPdfServiceImpl printer, string loanId, int branchId) =>
+        {
+            var rsp = await printer.DownLoadScheduleAsPdf(loanId, branchId);
+
+            return TypedResults.File(rsp.Data!, contentType: "application/pdf");
+
+        });
+
+
+        reportGroup.MapGet("/Schedules/{loanId}/{branchId:int}/Exel", async ([FromServices] IPrintPdfServiceImpl printer,
+            [FromServices] IWebHostEnvironment env, [FromServices] IPrintExelServiceImpl exel, string loanId, int branchId) =>
+        {
+
+            var rsp = await exel.DownLoadScheduleAsExcel(loanId, branchId);
+
+            if (!rsp.IsSuccess)
+            {
+                return Results.NoContent();
+            }
+
+            var ms = rsp.Data ?? Stream.Null;
+
+            return Results.File(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"{loanId}.xlsx");
+
+        });
+
+
+
+
+
+        await Task.CompletedTask;
 
         return accountGroup;
     }
 }
+
+
+//reportGroup.MapGet("/Schedules/Pdf/{loanId}/{customerId}/{branchId:int}", async ([FromServices] IWebHostEnvironment env,
+//                                            [FromServices] ILoanScheduleServiceImpl _schedulesService,
+//                                            string ? loanId, string? customerId, int? branchId) =>
+//{
+
+
+//        var scheduleResponse = await _schedulesService.GetLoanSchedulesAsync(branchId,loanId, customerId);
+
+
+//        var loanWithSchedules = scheduleResponse.Data;
+
+//        var html = await RazorTemplateEngine.RenderAsync("Views/Schedule.cshtml", loanWithSchedules);
+
+//        var playwright = await Playwright.CreateAsync();
+
+//        var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
+//        {
+//            Headless = true,
+//        });
+
+//        var path = Path.Combine(env.WebRootPath, "Files/Pdfs");
+
+//        var page = await browser.NewPageAsync();
+
+//        await page.SetContentAsync(html);
+
+//        var filePath = Path.Combine(path, "schedule.pdf");
+
+//        await page.PdfAsync(new PagePdfOptions
+//        {
+//            Format = "A4",
+//            Path = filePath,
+//        });
+
+//        await page.CloseAsync();
+
+//        var stream = new FileStream(filePath, FileMode.Open);
+
+//        return TypedResults.File(stream, contentType: "application/pdf");
+
+//});

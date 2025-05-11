@@ -1,6 +1,6 @@
 ﻿namespace Domains.Models.Settings;
 
-public sealed class SysSettings
+public sealed class AppSettings
 {
     public int Id { get; set; }
     public string Code { get; set; } = default!;

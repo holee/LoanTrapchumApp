@@ -1,48 +1,68 @@
-using Applications.Extensions.mappers;
-using Applications.Requests.Lists.Addreses;
-using Applications.Requests.Lists.Entities;
-using Applications.Requests.Lists.OtherNames;
-using Applications.Responses.Lists.Entities;
-using Applications.Services.Lists;
-using Domains.Models.Addresses;
-using Domains.Models.Lists;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
+using Domains.Models.Files;
+using Applications.Requests.Lists.Addreses;
+using Applications.Requests.Lists.Entities;
+using Domains.Models.Addresses;
+using Domains.Models.Lists;
+using Applications.Requests.Lists.OtherNames;
+using Applications.Responses.Lists.Entities;
+using Applications.Responses.Paginations;
+using Applications.Interfaces.Lists;
+using Applications.Services.Lists;
+using Radzen;
 using Microsoft.AspNetCore.Components.Web;
+using Domains.Models.Bases;
 
 namespace TrapchumApp.Components.Pages.Lists.Employees
 {
     public partial class EmployeeEdit
     {
+        [Parameter] public EventCallback<bool> OnClose { get; set; }
+        [Parameter] public string? EmployeeId { get; set; }
+        private readonly INationalityServiceImpl _nationalityService;
         private readonly IDepartmentServiceImpl _departmentService;
-        [Parameter] public IEnumerable<ProvinceDto> Provinces { get; set; } = [];
-        [Parameter] public IEnumerable<BranchDto> Branches { get; set; } = [];
-        [Parameter] public IEnumerable<DepartmentDto> Departments { get; set; } = [];
-        [Parameter] public IEnumerable<Country> Countries { get; set; } = [];
-        [Parameter] public IEnumerable<Nationality> Nationalities { get; set; } = [];
-        [Parameter] public IEnumerable<OcupationResponse> Occuptions { get; set; } = [];
-        [Parameter] public IEnumerable<string> Cities { get; set; } = [];
-        [Parameter] public EventCallback Close { get; set; }
-        [Parameter] public EntityNamesCreate model { get; set; } = new();
-        protected IEnumerable<CommuneDto>? Communes;
-        protected IEnumerable<DistrictDto>? Districts;
-        protected IEnumerable<VillageDto>? Villages;
+        private readonly ISalutationServiceImpl _salutationService;
+        public EmployeeEdit(INationalityServiceImpl nationalityService,
+                              IDepartmentServiceImpl departmentService,
+                              ISalutationServiceImpl salutationService)
+        {
+            _nationalityService = nationalityService;
+            _departmentService = departmentService;
+            _salutationService = salutationService;
+        }
+
+        long? fileSize;
+        IEnumerable<DistrictDto> Districts = [];
+        IEnumerable<CommuneDto> Communes = [];
+        IEnumerable<VillageDto> Villages = [];
+        IEnumerable<ProvinceDto> Provinces = [];
+        IEnumerable<BranchDto> Branches = [];
+        IEnumerable<DepartmentDto> Departments = [];
+        IEnumerable<Country> Countries = [];
+        IEnumerable<Nationality> Nationalities = [];
+        IEnumerable<OcupationResponse> Occuptions = [];
+        IEnumerable<string> Cities = [];
+        protected EntityNamesCreate model = new EntityNamesCreate();
+        protected FileModel? fileModelDTO;
         protected EditForm? editForm;
         protected string? strText = "";
         protected bool IsActive = false;
-
-        protected async void SelectedProvinceChanged(object arg)
+        private IEnumerable<int> relations = new List<int> { 1, 2, 3, 4 };
+        private IEnumerable<string> supervisors = new List<string> { "Supervisor", "Manager", "CEO" };
+        private IEnumerable<string> genders = new List<string> { "Male", "Female", "Other" };
+        private IEnumerable<string> maritalStatuses = new List<string> { "Single", "Married", "Divorced", "Widowed" };
+        async void SelectedProvinceChanged(object arg)
         {
             if (arg is not null)
             {
                 model.ProInKhmer = ((ProvinceDto)arg).ProInKhmer;
-
                 Districts = await _addressService!.GetDistrictsByProvinceId(((ProvinceDto)arg).ProvinceId);
                 StateHasChanged();
             }
-        }
 
-        protected async void SelectedDistrictChanged(object arg)
+        }
+        async void SelectedDistrictChanged(object arg)
         {
             if (arg is not null)
             {
@@ -50,9 +70,9 @@ namespace TrapchumApp.Components.Pages.Lists.Employees
                 Communes = await _addressService!.GetCommunesByDistrictId(((DistrictDto)arg).DistrictId);
                 StateHasChanged();
             }
-        }
 
-        protected async void SelectedCommuneChanged(object arg)
+        }
+        async void SelectedCommuneChanged(object arg)
         {
             if (arg is not null)
             {
@@ -60,188 +80,173 @@ namespace TrapchumApp.Components.Pages.Lists.Employees
                 Villages = await _addressService!.GetVillagesByCommuneId(((CommuneDto)arg).CommuneId);
                 StateHasChanged();
             }
-        }
 
-        protected void SelectedVillageChanged(object arg)
+        }
+        void SelectedVillageChanged(object arg)
         {
             if (arg is not null)
             {
                 model.VilInKhmer = ((VillageDto)arg).VilInKhmer;
                 StateHasChanged();
             }
+
         }
+
+        void OnProgress(UploadProgressArgs args, string name)
+        {
+            if (args.Progress == 100)
+            {
+                foreach (var file in args.Files)
+                {
+
+                }
+            }
+        }
+        void SetFirstNameToName()
+        {
+            model.Name = model.FirstName;
+        }
+
+        void OnChange(string value, string name)
+        {
+
+        }
+
+        void OnError(UploadErrorEventArgs args, string name)
+        {
+        }
+
+        [Parameter] public EventCallback Reloaded { get; set; }
+
+        async void Reload()
+        {
+            await Reloaded.InvokeAsync();
+        }
+        private async Task CloseTab()
+        {
+            await OnClose.InvokeAsync(false);
+        }
+        IEnumerable<string> Salutations { get; set; } = [];
+
+        protected string? newSalution = "";
+        protected async Task AddNewSalutation(KeyboardEventArgs e)
+        {
+            if (e.Code == "Enter")
+            {
+                await _salutationService.AddSalution(new Salutation
+                {
+                    Title = newSalution
+                });
+                await GetSalutations();
+            }
+        }
+        protected void OnTextChangedSalution(ChangeEventArgs e)
+        {
+            newSalution = e?.Value?.ToString();
+        }
+        private async Task GetSalutations()
+        {
+            var salutations = await _salutationService.GetsSalutions();
+
+            if (salutations.IsSuccess)
+            {
+                Salutations = salutations!.Data ?? [];
+            }
+            else
+            {
+                Salutations = [];
+            }
+
+        }
+
+
+        protected override async Task OnInitializedAsync()
+        {
+            await GetAdditionalInformation();
+
+            await GetEditEmployee();
+
+            await base.OnInitializedAsync();
+        }
+
+
+        async Task GetEditEmployee()
+        {
+            var rsp = await _employeeService.GetEmployeeForUpdate(EmployeeId);
+
+            if (rsp.IsSuccess)
+            {
+                model = rsp.Data!;
+            }
+
+            Districts = model is not null && model.ProvinceRefId == 0 ? [] : await _addressService.GetDistrictsByProvinceId(model?.ProvinceRefId);
+            Communes = model is not null && model.DistrictRefId == 0 ? [] : await _addressService.GetCommunesByDistrictId(model?.DistrictRefId);
+            Villages = model is not null && model.CommuneRefId == 0 ? [] : await _addressService.GetVillagesByCommuneId(model?.CommuneRefId);
+
+        }
+
+        async Task GetAdditionalInformation()
+        {
+            var results = await _branchService.GetBranchesAsync<BranchDto>(0, new QueryParam(0, 25, string.Empty));
+
+            if (results.IsSuccess)
+            {
+                Branches = results!.Data!.Items;
+            }
+            var deptResponse = await _departmentService.GetDepartments<DepartmentDto>(0, 0);
+
+            if (deptResponse.IsSuccess)
+            {
+                Departments = deptResponse.Data!;
+            }
+
+            Nationalities = await _nationalityService!.GetNationalities();
+
+            Provinces = await _addressService.GetsProvinces();
+
+            Occuptions = await _employeeService!.GetOccupationsAsync("Position");
+
+            var rsp = await _addressService.GetCountries(105);
+
+            if (rsp.IsSuccess)
+            {
+                Countries = rsp.Data ?? [];
+            }
+
+            Cities = await _addressService.GetCities();
+
+            await GetSalutations();
+
+            StateHasChanged();
+        }
+
+
 
         protected async Task FormValidSubmit()
         {
             try
             {
-                editForm?.EditContext?.Validate();
 
-                model.Name = model.FirstName;
+                var createResponse = await _employeeService.UpdateAsync(model);
 
-                var updateResponse = await _employeeService.UpdateAsync(model);
-
-                if (updateResponse.IsSuccess)
+                if (createResponse.IsSuccess)
                 {
-                    NotificationService.Notify(Radzen.NotificationSeverity.Success, updateResponse.Data);
-                    model = new();
+                    NotificationService.Notify(NotificationSeverity.Success, createResponse.Data);
+
                     await CloseTab();
 
                     Reload();
                 }
                 else
                 {
-                    NotificationService.Notify(Radzen.NotificationSeverity.Error, updateResponse.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Error, createResponse.ErrMessage);
                 }
             }
             catch (Exception ex)
             {
-                NotificationService.Notify(Radzen.NotificationSeverity.Success, ex.Message);
-            }
-        }
-
-        bool clickedEmploymen = true;
-
-        async Task LoadEmployment()
-        {
-            if (clickedEmploymen)
-            {
-                var results = await _branchService!.GetBranchesAsync(0, 0, false);
-
-                if (results.IsSuccess)
-                {
-                    Branches = results!.Data!.Maps<BranchDto>();
-                }
-
-                var deptResponse = await _departmentService!.GetDepartments(0, 0);
-
-                if (deptResponse.IsSuccess)
-                {
-                    Departments = deptResponse.Data!.Maps<DepartmentDto>();
-                }
-
-                Occuptions = await _employeeService!.GetOccupationsAsync("Position");
-
-                clickedEmploymen = false;
-
-                StateHasChanged();
-            }
-        }
-
-        bool clicked = true;
-
-        async Task LoadAddress()
-        {
-            if (clicked)
-            {
-                OnInitialized();
+                NotificationService.Notify(NotificationSeverity.Error, ex.Message);
             }
 
-            clicked = false;
-            await InvokeAsync(StateHasChanged);
         }
-
-        protected override async void OnInitialized()
-        {
-            Provinces = await _addressService.GetsProvinces();
-            Countries = await _addressService.GetCountries(105);
-            Cities = await _addressService.GetCities();
-            if (model is not null)
-            {
-                if (model.DistrictRefId.HasValue)
-                {
-                    Districts = await _addressService.GetDistrictsByProvinceId(model?.ProvinceRefId);
-                }
-
-                if (model!.DistrictRefId.HasValue)
-                {
-                    Communes = await _addressService.GetCommunesByDistrictId(model?.DistrictRefId);
-                }
-
-                if (model!.DistrictRefId.HasValue)
-                {
-                    Villages = await _addressService.GetVillagesByCommuneId(model?.CommuneRefId);
-                }
-
-                await InvokeAsync(StateHasChanged);
-            }
-
-            base.OnInitialized();
-        }
-
-        protected void OnToList()
-        {
-            NavigationManager?.NavigateTo("/Employees/List");
-        }
-
-        protected async Task AddCity(KeyboardEventArgs e)
-        {
-            if (e.Code == "Enter")
-            {
-                var city = new CityDtoCreate { CityName = strText };
-
-                var message = await _addressService.AddCity(city);
-
-                if (message!.IsSuccess)
-                {
-                    Cities = await _addressService.GetCities();
-
-                    StateHasChanged();
-                }
-            }
-        }
-
-        protected void SearchCities(ChangeEventArgs e)
-        {
-            if (e.Value is not null)
-            {
-                strText = e?.Value?.ToString();
-            }
-        }
-
-        private ElementReference _input;
-
-        [Inject]
-        //public IFileReaderService? FileReaderService { get; set; }
-        //[Inject]
-        public HttpClient? http { get; set; }
-
-        string? ImgUrl;
-
-        public EmployeeEdit(IDepartmentServiceImpl departmentService)
-        {
-            _departmentService = departmentService;
-        }
-
-        //private async Task HandleSelected()
-        //{
-
-        //    foreach (var file in await FileReaderService!.CreateReference(_input).EnumerateFilesAsync())
-        //    {
-        //        if (file != null)
-        //        {
-        //            var fileInfo = await file.ReadFileInfoAsync();
-        //            using (var ms = await file.CreateMemoryStreamAsync(4 * 1024))
-        //            {
-        //                var content = new MultipartFormDataContent();
-        //                content.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data");
-        //                content.Add(new StreamContent(ms, Convert.ToInt32(ms.Length)), "image", fileInfo.Name);
-        //                var postResult = await http!.PostAsync("https://localhost:7237/api/Files", content);
-        //                var postContent = await postResult.Content.ReadAsStringAsync();
-        //                if (!postResult.IsSuccessStatusCode)
-        //                {
-        //                    throw new ApplicationException(postContent);
-        //                }
-        //                else
-        //                {
-        //                    ImgUrl = Path.Combine("https://localhost:7237/", postContent);
-        //                    model.Photo = ImgUrl;
-
-        //                }
-        //                await InvokeAsync(StateHasChanged);
-        //            }
-        //        }
-        //    }
-        //}
     }
 }

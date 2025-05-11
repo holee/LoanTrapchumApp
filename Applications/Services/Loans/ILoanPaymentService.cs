@@ -5,9 +5,18 @@ using Applications.Responses.ViewModels.Loans.Payments;
 
 namespace Applications.Services.Loans;
 
-public sealed class LoanPaymentService(ILoanPaymentService lnService) : ILoanPaymentService
+
+public interface ILoanPaymentServiceImpl
 {
-    public async Task<Result<IEnumerable<VLoanPaymentLines>>> GetPaymentLinesAsync(int? branchId, long? loanRefId, int? installmentNo)
+    Task<Result<IEnumerable<VLoanPaymentLines>>> GetPaymentLinesAsync(int? branchId, string? loanRefId, int? installmentNo);
+    Task<Result<string>> RecievePayment(LoanRepaymentDtoCreate req);
+}
+
+
+
+public sealed class LoanPaymentService(ILoanPaymentService lnService) : ILoanPaymentServiceImpl
+{
+    public async Task<Result<IEnumerable<VLoanPaymentLines>>> GetPaymentLinesAsync(int? branchId, string? loanRefId, int? installmentNo)
     {
         return await lnService.GetPaymentLinesAsync(branchId, loanRefId, installmentNo);    
     }

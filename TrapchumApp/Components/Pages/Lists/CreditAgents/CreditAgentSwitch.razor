@@ -1,12 +1,10 @@
 ﻿@using Applications.Requests.Loans.CreditAgents
-@using Applications.Services.Lists
 
 <input type="hidden" @bind="CreditAgent.EditSeq" />
 <input type="hidden" @bind="CreditAgent.EmployeeRefId" />
 <RadzenCheckBox TValue="bool"
                 Change="OnCheckChanged"
                 Value="CreditAgent.IsRemove" />
-
 
 @code {
     [Inject] protected ICreditAgentServiceImpl CreditAgentService { get; set; } = default!;
@@ -25,9 +23,9 @@
             };
         var respnse = await CreditAgentService.ActivateOrDeactivateCreditAgent(creditDto);
 
-        if (respnse!.IsSuccess)
+        if (respnse.IsSuccess)
         {
-            NotificationService.Notify(NotificationSeverity.Success, "");
+            NotificationService.Notify(NotificationSeverity.Success,respnse.Data);
 
             await Reload.InvokeAsync();
         }

@@ -6,13 +6,14 @@ using Applications.Requests.Lists.Employees;
 using Applications.Requests.Lists.Entities;
 using Applications.Requests.Loans.Disbursements;
 using Applications.Requests.Loans.LoanRequests;
-using Applications.Requests.SysSettings;
+using Applications.Requests.Settings;
 using Applications.Requests.Validations.Auths;
 using Applications.Requests.Validations.Currencies;
 using Applications.Requests.Validations.Employees;
 using Applications.Requests.Validations.Loans;
 using Applications.Requests.Validations.NameEntities;
 using Applications.Requests.Validations.Transactions;
+using Applications.Validations.Branches;
 using Applications.Validations.Customers;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,6 +23,7 @@ namespace Applications.Validations
     {
         public static IServiceCollection AddValidationServiceInjections(this IServiceCollection services)
         {
+            services.AddTransient<IValidator<BranchDtoCreate>, BranchDtoCreateValidator>();
             services.AddTransient<IValidator<RoleCreateDto>, RoleCreateDtoValidator>();
             services.AddTransient<IValidator<RegisterRequest>, RegisterRequestValidator>();
             services.AddTransient<IValidator<TokenRequest>, TokenRequestValidator>();

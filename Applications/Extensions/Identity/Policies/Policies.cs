@@ -1,6 +1,6 @@
 ﻿namespace Applications.ApplicationPolicies;
 
-public static partial class Policies
+public static class RolePolicies  
 {
     public const string AdminOnly = nameof(AdminOnly);
     public const string AccountOnly = nameof(AccountOnly);

@@ -1,10 +1,11 @@
 ﻿using Applications.Requests.Loans.Disbursements;
+using Applications.Requests.Loans.LoanRequests;
 
 namespace Applications.Responses.ViewModels.Loans.Requests;
 
 public static class VLoanRequestsDocumentsExtension
 {
-    public static List<LoanDocumentDtoCreate> LoanDocumentDtoCreate(this List<VLoanRequestsDocuments> docs, int? branchId, Guid? loanRequestId)
+    public static List<LoanDocumentDtoCreate> LoanDocumentDtoCreate(this List<VLoanRequestsDocuments> docs, int? branchId, string? loanRequestId)
     {
         return docs?.Select(f => new LoanDocumentDtoCreate
         {
@@ -24,7 +25,7 @@ public static class VLoanRequestsDocumentsExtension
         {
             Id = f.Id,
             LoanRequestId = f.LoanRequestId,
-            BranchId = f.BranchId,
+            BranchId = f.BranchRefId,
             OriginalName = f.OriginalName,
             NewFileName = f.NewFileName,
             FileUrl = f.FileUrl,

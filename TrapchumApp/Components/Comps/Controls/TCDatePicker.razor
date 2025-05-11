@@ -1,5 +1,4 @@
 ﻿@using System.Linq.Expressions
-@using Applications.Interfaces.Branches
 @if (!string.IsNullOrEmpty(Text))
 {
     @if (Orientation == Orientation.Horizontal)
@@ -46,7 +45,7 @@
 
     }
 }else{
-    <RadzenDatePicker InputClass="w-100"
+    <RadzenDatePicker InputClass="rz-w-100"
                       Value="@Value"
                       Change="@Changed"
                       ValueChanged="@ValueChanged"

@@ -5,8 +5,7 @@ namespace Domains.Models.Loans;
 
 public sealed class LoanCreditAgent:BaseEntity
 {
-    public int Id { get; set; }
-    public Guid? EmployeeRefId { get; set; }
+    public string? EmployeeRefId { get; set; }
     public int? CreditAssistant { get; set; }
     public int? SubManager { get; set; }
     public int? Manager { get; set; }
@@ -14,5 +13,4 @@ public sealed class LoanCreditAgent:BaseEntity
     public int? HeadOffice { get; set; }
     public bool? IsRemove { get; set; }=false;
     public Employee?  Employee { get; set; }
-    public ICollection<LoanRequest> LoanRequests { get; set; } = []; 
 }

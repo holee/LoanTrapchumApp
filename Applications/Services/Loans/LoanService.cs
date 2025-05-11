@@ -6,25 +6,14 @@ using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Schedules;
+using Applications.Schedules;
 using Domains.Models.Loans;
+using Mapster;
+using QuestPDF.Fluent;
 
 namespace Applications.Services.Loans
 {
-    public interface ILoanServiceImpl
-    {
-        Task<Result<string>> ChangedCreditAgent(int? branchId, LoanChangedCaDtoCreate req);
-        Task<Result<string>> ChangedCreditAgent(int? branchId, List<LoanChangedCaDtoCreate> req);
-        Task<Result<string>> CreateLoanAsync(LoanDtoCreate disbursement);
-        Task<Result<string>> DeleteAsync(long loanId, int branchId);
-        Task<Stream> DownLoadScheduleAsExcel(Guid? loanId, int? branchId);
-        Task<Stream> DownLoadScheduleAsPdf(Guid? loanId, int? branchId);
-        Task<Result<VLoanDisbursments>> GetLoanByIdAsync(Guid loanId, int branchId, ScheduleStatus status);
-        Task<Pager<VLoanDisbursments>> GetLoansAsync(int? branchId, Guid? creditAgentId, LoanStatuses status = LoanStatuses.Active, QueryParam? param = null);
-        Task<Pager<VLoanDisbursments>> GetLoansAsync(int branchId, Guid? customerRequestId, Guid loanRequestId, bool v);
-        Task<Result<IEnumerable<VSchedule>>> GetPaymentSchedulesByLoanId(long? loanId, int? branchId, ScheduleStatus status = ScheduleStatus.All);
-        Task<Result<string>> UpdateAsync(Loan disbursement);
-    }
-    public sealed class LoanService : ILoanServiceImpl
+    public sealed class LoanService(ILoanService loanService) : ILoanServiceImpl
     {
         public Task<Result<string>> ChangedCreditAgent(int? branchId, LoanChangedCaDtoCreate req)
         {
@@ -36,49 +25,69 @@ namespace Applications.Services.Loans
             throw new NotImplementedException();
         }
 
-        public Task<Result<string>> CreateLoanAsync(LoanDtoCreate disbursement)
+        public async Task<Result<string>> CreateLoanAsync(LoanDtoCreate disbursement)
+        {
+            return await loanService.CreateLoanAsync(disbursement);
+        }
+
+        public Task<Result<string>> UpdateAsync(LoanDisbursment disbursement)
+        {
+            throw new NotImplementedException();
+        }
+        public Task<Result<string>> DeleteAsync(string? loanId, int? branchId)
         {
             throw new NotImplementedException();
         }
 
-        public Task<Result<string>> DeleteAsync(long loanId, int branchId)
+        public Task<Stream> DownLoadScheduleAsExcel(string? loanId, int? branchId)
         {
             throw new NotImplementedException();
         }
 
-        public Task<Stream> DownLoadScheduleAsExcel(Guid? loanId, int? branchId)
+        public async Task<Result<Stream>> DownLoadScheduleAsPdf(string? loanId, int? branchId)
         {
-            throw new NotImplementedException();
+
+            var rsp = await loanService.GetLoanByIdAsync(loanId, branchId, ScheduleStatus.All);
+
+            if (rsp.IsSuccess)
+            {
+
+                var item = rsp.Data.Adapt<LoanScheduleVm>();
+
+                var pdf = new SchedulePdfService(item);
+
+                var stream = new MemoryStream(pdf.GeneratePdf());
+
+                return Result.Success<Stream>(stream);
+
+            }
+
+            return Result.Failure<Stream>(ErrorResponse.NotFound(""));
         }
 
-        public Task<Stream> DownLoadScheduleAsPdf(Guid? loanId, int? branchId)
+        public async Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus status,bool include=false)
         {
-            throw new NotImplementedException();
+            return await loanService.GetLoanByIdAsync(loanId, branchId, status,include);
         }
 
-        public Task<Result<VLoanDisbursments>> GetLoanByIdAsync(Guid loanId, int branchId, ScheduleStatus status)
+        public async Task<Pager<VLoanDisbursments>> GetLoansAsync(int? branchId, string? userId, LoanStatuses status = LoanStatuses.Active, QueryParam? param = null)
         {
-            throw new NotImplementedException();
+            return await loanService.GetLoansAsync(branchId, userId, status, param);
         }
 
-        public Task<Pager<VLoanDisbursments>> GetLoansAsync(int? branchId, Guid? creditAgentId, LoanStatuses status = LoanStatuses.Active, QueryParam? param = null)
+        public async Task<Result<byte[]>> ExportScheduleAsPdf(string? loanId, int? branchId)
         {
-            throw new NotImplementedException();
-        }
+            var rsp = await loanService.GetLoanByIdAsync(loanId, branchId, ScheduleStatus.All);
 
-        public Task<Pager<VLoanDisbursments>> GetLoansAsync(int branchId, Guid? customerRequestId, Guid loanRequestId, bool v)
-        {
-            throw new NotImplementedException();
-        }
+            if (!rsp.IsSuccess)
+            {
+                return Result.Failure<byte[]>(ErrorResponse.NotFound("No Schedule to print"));
+            }
+            var item = rsp.Data.Adapt<LoanScheduleVm>();
 
-        public Task<Result<IEnumerable<VSchedule>>> GetPaymentSchedulesByLoanId(long? loanId, int? branchId, ScheduleStatus status = ScheduleStatus.All)
-        {
-            throw new NotImplementedException();
-        }
+            var pdf = new SchedulePdfService(item);
 
-        public Task<Result<string>> UpdateAsync(Loan disbursement)
-        {
-            throw new NotImplementedException();
+            return Result.Success(pdf.GeneratePdf());
         }
     }
 

@@ -1,18 +1,15 @@
 ﻿@using System.Net.Http
 @using System.Net.Http.Json
 @using Applications.Extensions.Identity
-@using Applications.Interfaces
-@using Applications.Interfaces.Branches
-@using Applications.Interfaces.Identity
-@using Applications.Interfaces.Lists
 @using Applications.Requests.Identity
 @using Applications.Services.Addresses
 @using Applications.Services.Currencies
 @using Applications.Services.Customers
 @using Applications.Services.Employees
 @using Applications.Services.Identity
+@using Applications.Services.Lists
 @using Applications.Services.Loans
-@using Infrastructures.Implements
+@using Applications.Extensions.Identity.Enumerations
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Routing
@@ -48,7 +45,7 @@
 @using TrapchumApp.Components.Account
 @using Applications.Services.Branches
 @using Applications.Constants
-@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@attribute [Authorize]
 @inject IJSRuntime js
 @inject IAuthorizationService _authorizeService;
 @inject NotificationService NotificationService
@@ -57,12 +54,11 @@
 @inject ContextMenuService ContextMenuService
 @inject TooltipService tooltipService
 @inject IdentityRedirectManager RedirectManager
-@inject ILoginService loginService
+@inject ILoginServiceImpl loginService
 @inject IAddressServiceImpl _addressService;
 @inject IEmployeeServiceImpl _employeeService;
 @inject IBranchServiceImpl _branchService
-@inject IUserService _userService
+@inject IUserServiceImpl _userService
 @inject ICustomerServiceImpl _customerService
 @inject ICurrencyServiceImpl _curService
 @inject ILoanRequestServiceImpl _loanRequestService
-@inject ISalutationService _salutationService

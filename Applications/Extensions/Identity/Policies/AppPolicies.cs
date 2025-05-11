@@ -1,4 +1,5 @@
-﻿using Applications.Extensions.Identity.Enumerations;
+﻿using Applications.Constants.Authorizations;
+using Applications.Extensions.Identity.Enumerations;
 using Microsoft.AspNetCore.Authorization;
 
 namespace Applications.Extensions.Identity.Policies;

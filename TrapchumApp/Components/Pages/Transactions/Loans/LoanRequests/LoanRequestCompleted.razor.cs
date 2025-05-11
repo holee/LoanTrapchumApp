@@ -7,7 +7,6 @@ using Applications.Services.Loans;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Components.Web;
 using Radzen;
 
 namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
@@ -24,7 +23,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
         [CascadingParameter]
         Task<AuthenticationState> AuthenticationState { get; set; } = default!;
         [Parameter] public int BranchId { get; set; }
-        [Parameter] public Guid? CreditAgentId { get; set; }
+        [Parameter] public string? CreditAgentId { get; set; }
         bool CanRequestLoan { get; set; } = false;
         bool CanDisburseLoan { get; set; } = false;
         bool CanAprovedLoan { get; set; } = false;
@@ -44,9 +43,9 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
         {
 
             var auth = await AuthenticationState;
-            CanRequestLoan = (await _authorizeService.AuthorizeAsync(auth.User, LoanRequestPolicies.CanCreate())).Succeeded;
-            CanDisburseLoan = (await _authorizeService.AuthorizeAsync(auth.User, LoanRequestPolicies.CanDisburseLoan())).Succeeded;
-            CanAprovedLoan = (await _authorizeService.AuthorizeAsync(auth.User, LoanRequestPolicies.CanAproveRequest())).Succeeded;
+            CanRequestLoan = (await _authorizeService.AuthorizeAsync(auth.User, RequestsPolicies.CanCreate())).Succeeded;
+            CanDisburseLoan = (await _authorizeService.AuthorizeAsync(auth.User, RequestsPolicies.CanDisburseLoan())).Succeeded;
+            CanAprovedLoan = (await _authorizeService.AuthorizeAsync(auth.User, RequestsPolicies.CanAproveRequest())).Succeeded;
             await GetLoanRequestAsync();
 
             await base.OnInitializedAsync();
@@ -96,7 +95,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 
         }
 
-        async Task GetLoanRequest(Guid? userId)
+        async Task GetLoanRequest(string? userId)
         {
             isLoading = true;
 
@@ -127,7 +126,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 
         async void PageChanged(int size)
         {
-            this.pageSize = size;
+            pageSize = size;
             await GetLoanRequestAsync();
 
         }

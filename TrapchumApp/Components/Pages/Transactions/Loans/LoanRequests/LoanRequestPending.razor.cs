@@ -1,7 +1,6 @@
 using Applications.Enumerations;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Requests;
-using Applications.Services.Loans;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 
@@ -10,7 +9,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
     public partial class LoanRequestPending
     {
         [Parameter] public int BranchId { get; set; } = 0;
-        [Parameter] public Guid? UserId { get; set; } = Guid.Empty;
+        [Parameter] public string? UserId { get; set; } = string.Empty;
         bool isLoading = false;
         IEnumerable<VLoanRequests> LoanRequests = [];
         int counts = 0;

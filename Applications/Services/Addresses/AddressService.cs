@@ -11,7 +11,7 @@ namespace Applications.Services.Addresses
         Task<Result> AddCity(CityDtoCreate city);
         Task<IEnumerable<string>> GetCities(string? filter = null);
         Task<IEnumerable<CommuneDto>> GetCommunesByDistrictId(int? districtId);
-        Task<IEnumerable<Country>> GetCountries(int? countryId = 105);
+        Task<Result<IEnumerable<Country>>> GetCountries(int? countryId = 105);
         Task<IEnumerable<Country>> GetCountries(string? filter = null);
         Task<IEnumerable<DistrictDto>> GetDistrictsByProvinceId(int? provinceId);
         Task<Province?> GetsProvinceById(int? id);
@@ -60,7 +60,7 @@ namespace Applications.Services.Addresses
             return await addressService.GetCountries(filter);
         }
 
-        public async Task<IEnumerable<Country>> GetCountries(int? countryId = 105)
+        public async Task<Result<IEnumerable<Country>>> GetCountries(int? countryId = 105)
         {
             return await addressService.GetCountries(countryId);
         }

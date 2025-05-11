@@ -8,6 +8,7 @@ using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Requests.Loans.Payments;
 using Applications.Enumerations;
 using Applications.Services.Loans;
+using Applications.Calculations;
 
 namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments;
 public partial class PaymentDetails
@@ -20,13 +21,16 @@ public partial class PaymentDetails
     }
 
     [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
-    [Parameter, SupplyParameterFromQuery] public int BranchId { get; set; }
+    [Parameter] public int BranchId { get; set; }
+    [Parameter] public string? LoanId { get; set; }
     [Parameter, SupplyParameterFromQuery] public int CurrencyId { get; set; }
-    [Parameter, SupplyParameterFromQuery] public long CreditAgentId { get; set; }
-    [Parameter, SupplyParameterFromQuery] public Guid? UserId { get; set; }
-    [Parameter] public Guid LoanId { get; set; }
+    [Parameter, SupplyParameterFromQuery] public string? CreditAgentId { get; set; }
+    [Parameter, SupplyParameterFromQuery] public string? UserId { get; set; }
+   
     private VLoanDisbursments? loanSchedule = new();
+
     IList<VSchedule> SelectedSchedules = [];
+
     bool collapse = false;
     string collapseIcon = "expand_more";
     bool isVible = false;
@@ -127,7 +131,9 @@ public partial class PaymentDetails
     void GetPaymentSchedules()
     {
         ContextMenuService.Close();
+
         NavigationManager.NavigateTo($"/Loans/{LoanId}/Schedules?BranchId={BranchId}&CreditAgentId={CreditAgentId}&CurrencyId={CurrencyId}&UserId={UserId}");
+        
         return;
     }
 
@@ -148,7 +154,7 @@ public partial class PaymentDetails
     {
         isVible = true;
 
-        var resultResponse = await _dService.GetLoanByIdAsync(LoanId, BranchId, status);
+        var resultResponse = await _dService.GetLoanByIdAsync(LoanId, BranchId, status,true);
 
         if (resultResponse.IsSuccess)
         {
@@ -208,53 +214,19 @@ public partial class PaymentDetails
         await base.OnInitializedAsync();
     }
 
-    private async Task DownLoadScheduleAsExcel(Guid loanRefId)
+    private async Task DownLoadScheduleAsExcel(string loanRefId)
     {
         var stream = await _dService.DownLoadScheduleAsExcel(loanRefId, BranchId);
         using var streamRef = new DotNetStreamReference(stream: stream);
         await js.InvokeVoidAsync("downloadFileFromStream", "Schedule.xlsx", streamRef);
     }
 
-    private async Task DownLoadScheduleAsPdf(Guid loanRefId)
+    private async Task DownLoadScheduleAsPdf(string loanRefId)
     {
         var stream = await _dService.DownLoadScheduleAsPdf(loanRefId, BranchId);
 
-        using var streamRef = new DotNetStreamReference(stream: stream);
+        //using var streamRef = new DotNetStreamReference(stream: stream);
 
-        await js.InvokeVoidAsync("downloadFileFromStream", "Schedule.pdf", streamRef);
+        //await js.InvokeVoidAsync("downloadFileFromStream", "Schedule.pdf", streamRef);
     }
-
-    void CollapseButton()
-    {
-        collapse = !collapse;
-        collapseIcon = collapse ? "expand_more" : "expand_less";
-    }
-
-    async void OnSplitButtonClicked(RadzenSplitButtonItem item)
-    {
-        if (item is null) return;
-
-        var Auth = await AuthenticationState;
-
-       // var userId = Auth.User.GetId();
-
-        if (item.Value == "1")//export as excel
-        {
-            await DownLoadScheduleAsExcel(LoanId);
-            return;
-        }
-
-        if (item.Value == "2") //export as pdf
-        {
-            await DownLoadScheduleAsPdf(LoanId);
-            return;
-        }
-        if (item.Value == "3")//recieve payment
-        {
-            NavigationManager.NavigateTo($@"/Loans/Repayment/{LoanId}?BranchId={BranchId}&CreditAgentId={CreditAgentId}&CurrencyId={CurrencyId}&UserId={UserId}");
-            return;
-        }
-    }
-
-
 }

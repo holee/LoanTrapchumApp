@@ -22,7 +22,7 @@ namespace Domains.Models.Lists
         public string? IdCard { get; set; } = string.Empty;
         public bool IsActive { get; set; } = true;
         public string? Description { get; set; } = string.Empty;
-        public List<GuarantorLink> GuarantorsLink { get; set; } = [];
+       // public List<LoanGuarantorLink> GuarantorsLink { get; set; } = [];
 
     }
 }

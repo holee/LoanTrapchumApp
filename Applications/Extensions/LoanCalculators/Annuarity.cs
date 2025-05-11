@@ -33,7 +33,7 @@ public sealed class Annuarity : LoanCaloulator, ICalculator
 
         decimal beginBalance = 0, lastBalance = 0;
 
-        DateTime paymentDate = FirstPayment;
+        DateTimeOffset? paymentDate = FirstPayment;
 
         beginBalance = lastBalance = amount;
 
@@ -51,18 +51,23 @@ public sealed class Annuarity : LoanCaloulator, ICalculator
 
             beginBalance = lastBalance;
 
-            DateTime previusDate;
+            DateTimeOffset? previusDate;
 
             if (i == 1)
             {
                 previusDate = StartDate;
+
                 totalDays = TotalDays(previusDate, FirstPayment);
+
             }
             if (i > 1)
             {
                 previusDate = loanScheduleLines[i - 2].PaymentDate!.Value;
+
                 paymentDate = SetPaymentDate(previusDate);
+
                 SetHoliday(ref paymentDate);
+
                 totalDays = TotalDays(previusDate, paymentDate);
             }
             if (CollectionFeeMode == 1)
@@ -73,7 +78,9 @@ public sealed class Annuarity : LoanCaloulator, ICalculator
             {
                 effAmount = CalcEffective(beginBalance, EffectiveRate, totalDays);
             }
+
             interest = CalcInterest(beginBalance, rate, totalDays);
+
             totalPay = TotalPay(principleAndInterestAmount, effAmount);
 
             if (i < period)
@@ -113,7 +120,7 @@ public sealed class Annuarity : LoanCaloulator, ICalculator
 
         decimal beginBalance = 0, lastBalance = 0;
 
-        DateTime paymentDate = FirstPayment;
+        DateTimeOffset? paymentDate = FirstPayment;
 
         beginBalance = lastBalance = amount!.Value;
 
@@ -126,18 +133,24 @@ public sealed class Annuarity : LoanCaloulator, ICalculator
             var totalDays = 0;
             var principal = 0.00M;
             beginBalance = lastBalance;
-            DateTime previusDate;
+            DateTimeOffset? previusDate;
             if (i == 1)
             {
                 previusDate = StartDate;
+
                 totalDays = TotalDays(previusDate, FirstPayment);
+
             }
             if (i > 1)
             {
                 previusDate = loanScheduleLines[i - 2].PaymentDate!.Value;
+
                 paymentDate = SetPaymentDate(previusDate);
+
                 SetHoliday(ref paymentDate);
+
                 totalDays = TotalDays(previusDate, paymentDate);
+
             }
             if (CollectionFeeMode == 1)
             {
@@ -147,17 +160,21 @@ public sealed class Annuarity : LoanCaloulator, ICalculator
             {
                 effAmount = CalcEffective(beginBalance, EffectiveRate, totalDays);
             }
+
             interest = CalcInterest(beginBalance, monthlyRate!.Value, totalDays);
+
             totalPay = TotalPay(principleAndInterestAmount, effAmount);
 
             if (i < periodInMonth)
             {
                 principal = principleAndInterestAmount - interest;
+
                 lastBalance = LastBalance(beginBalance, principal);
             }
             if (i >= periodInMonth)
             {
                 principal = beginBalance;
+
                 lastBalance = 0;
             }
 
@@ -180,7 +197,7 @@ public sealed class Annuarity : LoanCaloulator, ICalculator
     }
    
     
-    public override List<ScheduleLine> Calculate(int? periodInMonth, decimal? monthlyRate, decimal? amount, DateTime firstPayment)
+    public override List<ScheduleLine> Calculate(int? periodInMonth, decimal? monthlyRate, decimal? amount, DateTimeOffset? firstPayment)
     {
         List<ScheduleLine> loanScheduleLines = [];
 
@@ -188,7 +205,7 @@ public sealed class Annuarity : LoanCaloulator, ICalculator
 
         decimal beginBalance = 0, lastBalance = 0;
 
-        DateTime paymentDate = firstPayment;
+        DateTimeOffset? paymentDate = firstPayment;
 
         beginBalance = lastBalance = amount!.Value;
 
@@ -206,7 +223,7 @@ public sealed class Annuarity : LoanCaloulator, ICalculator
 
             beginBalance = lastBalance;
 
-            DateTime previusDate;
+            DateTimeOffset? previusDate;
 
             if (i == 1)
             {
@@ -218,9 +235,13 @@ public sealed class Annuarity : LoanCaloulator, ICalculator
             if (i > 1)
             {
                 previusDate = loanScheduleLines[i - 2].PaymentDate!.Value;
+
                 paymentDate = SetPaymentDate(previusDate);
+
                 SetHoliday(ref paymentDate);
+
                 totalDays = TotalDays(previusDate, paymentDate);
+
             }
             if (CollectionFeeMode == 1)
             {
@@ -230,12 +251,15 @@ public sealed class Annuarity : LoanCaloulator, ICalculator
             {
                 effAmount = CalcEffective(beginBalance, EffectiveRate, totalDays);
             }
+
             interest = CalcInterest(beginBalance, monthlyRate!.Value, totalDays);
+
             totalPay = TotalPay(principleAndInterestAmount, effAmount);
 
             if (i < periodInMonth)
             {
                 principal = principleAndInterestAmount - interest;
+
                 lastBalance = LastBalance(beginBalance, principal);
             }
             if (i >= periodInMonth)

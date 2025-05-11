@@ -9,13 +9,13 @@ namespace Applications.Services.LIsts
 {
     public interface IVendorServiceImpl
     {
-        Task<Result<string>> ChangeVendorStatus(EntVendorDtoChangeStatus req);
-        Task<Result<string>> CreateAsync(EntNameDtoCreate vendor);
-        Task<Result<string>> UpdateAsync(EntNameDtoUpdate vendor);
-        Task<Result<string>> DeleteAsync(Guid? vendorId);
-        Task<Result<VVendor>> GetVendorByIdAsync(Guid? vendorId);
-        Task<Result<EntityName>> GetVendorByIdAsync(Guid? vendorId, bool include);
-        Task<Pager<VVendor>> GetVendorsAsync(QueryParam q);
-        Task<Result<EntNameDtoUpdate>> GetEditVendorAsync(Guid? vendorId);
+        //Task<Result<string>> ChangeVendorStatus(EntVendorDtoChangeStatus req);
+        Task<Result<string>> CreateAsync(EntityNamesCreate vendor);
+        Task<Result<string>> UpdateAsync(EntityNamesCreate vendor);
+        Task<Result<string>> DeleteAsync(string? vendorId);
+        Task<Result<VendorVm>> GetVendorByIdAsync(string? vendorId);
+        Task<Result<EntityNames>> GetVendorByIdAsync(string? vendorId, bool include);
+        Task<Pager<VendorVm>> GetVendorsAsync(QueryParam q);
+        Task<Result<EntityNamesCreate>> GetEditVendorAsync(string? vendorId);
     }
 }

@@ -7,11 +7,12 @@ namespace Applications.Interfaces.Lists;
 public interface IGuarantorService
 {
 
-    Task<Result<string>> CreateGaurantorAsync(EntityName othername);
-    Task<Result<string>> UpdateGaurantorAsync(EntityName othername);
-    Task<Result<string>> DeleteGaurantorAsync(Guid? id);
+    Task<Result<string>> CreateGaurantorAsync(EntityNames othername);
+    Task<Result<string>> UpdateGaurantorAsync(EntityNames othername);
+    Task<Result<string>> DeleteGaurantorAsync(string? id);
     Task<Result<Pager<VGuarantor>>> GetGuarantorsAsync(QueryParam param);
-    Task<Result<IEnumerable<VGuarantor>>> GetGuarantorsAsync(Guid? id, bool allGuarantors = true, string? q = null);
-    Task<Result<EntityName>> GetGuarantorByIdAsync(Guid? id);
-    Task<Result<VGuarantor>> GetGuarantorByIdAsync(Guid? id, bool allGuarantors = false, bool include = true);
+    Task<Result<IEnumerable<VGuarantor>>> GetGuarantorsAsync(string? id, bool allGuarantors = true, string? q = null);
+    Task<Result<EntityNames>> GetGuarantorByIdAsync(string? id);
+    Task<Result<VGuarantor>> GetGuarantorByIdAsync(string? id, bool allGuarantors = false, bool include = true);
+    Task<Pager<VGuarantor>> GetGuarantorsAsync(string? id, QueryParam q);
 }

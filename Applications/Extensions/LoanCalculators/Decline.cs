@@ -26,20 +26,26 @@ public sealed class Decline : LoanCaloulator, ICalculator
 
         decimal beginBalance = 0, lastBalance = 0;
 
-        DateTime paymentDate = FirstPayment;
+        DateTimeOffset? paymentDate = FirstPayment;
 
         beginBalance = lastBalance = amount;
 
         for (int i = 1; i <= period; i++)
         {
             var totalPay = 0.00M;
+
             var interest = 0.00M;
+
             var totalDays = 0;
+
             beginBalance = lastBalance;
-            DateTime previusDate;
+
+            DateTimeOffset? previusDate;
+
             if (i == 1)
             {
                 previusDate = StartDate;
+
                 totalDays = TotalDays(previusDate, FirstPayment);
             }
             if (i > 1)
@@ -107,7 +113,7 @@ public sealed class Decline : LoanCaloulator, ICalculator
 
         decimal beginBalance = 0, lastBalance = 0;
 
-        DateTime paymentDate = FirstPayment;
+        DateTimeOffset? paymentDate = FirstPayment;
 
         beginBalance = lastBalance = _amount;
 
@@ -117,7 +123,7 @@ public sealed class Decline : LoanCaloulator, ICalculator
             var interest = 0.00M;
             var totalDays = 0;
             beginBalance = lastBalance;
-            DateTime previusDate;
+            DateTimeOffset? previusDate;
             if (i == 1)
             {
                 previusDate = StartDate;
@@ -126,8 +132,11 @@ public sealed class Decline : LoanCaloulator, ICalculator
             if (i > 1)
             {
                 previusDate = loanScheduleLines[i - 2].PaymentDate!.Value;
+
                 paymentDate = SetPaymentDate(previusDate); //StartDate.AddMonths(i);
+
                 SetHoliday(ref paymentDate);
+
                 totalDays = TotalDays(previusDate, paymentDate);
             }
             if (CollectionFeeMode == 1)
@@ -166,7 +175,7 @@ public sealed class Decline : LoanCaloulator, ICalculator
         return loanScheduleLines;
     }
 
-    public override List<ScheduleLine> Calculate(int? periodInMonth, decimal? monthlyRate, decimal? amount, DateTime firstPayment)
+    public override List<ScheduleLine> Calculate(int? periodInMonth, decimal? monthlyRate, decimal? amount, DateTimeOffset? firstPayment=null)
     {
         List<ScheduleLine> loanScheduleLines = [];
 
@@ -182,28 +191,37 @@ public sealed class Decline : LoanCaloulator, ICalculator
 
         decimal beginBalance = 0, lastBalance = 0;
 
-        DateTime paymentDate = firstPayment;
+        DateTimeOffset? paymentDate = firstPayment;
 
         beginBalance = lastBalance = _amount;
 
         for (int i = 1; i <= period; i++)
         {
             var totalPay = 0.00M;
+
             var interest = 0.00M;
+
             var totalDays = 0;
+
             beginBalance = lastBalance;
-            DateTime previusDate;
+
+            DateTimeOffset? previusDate;
             if (i == 1)
             {
                 previusDate = StartDate;
+
                 totalDays = TotalDays(previusDate, FirstPayment);
             }
             if (i > 1)
             {
                 previusDate = loanScheduleLines[i - 2].PaymentDate!.Value;
+
                 paymentDate = SetPaymentDate(previusDate); //StartDate.AddMonths(i);
+
                 SetHoliday(ref paymentDate);
+
                 totalDays = TotalDays(previusDate, paymentDate);
+
             }
             if (CollectionFeeMode == 1)
             {
@@ -214,7 +232,9 @@ public sealed class Decline : LoanCaloulator, ICalculator
                 effAmount = CalcEffective(beginBalance, EffectiveRate, totalDays);
             }
             interest = CalcInterest(beginBalance, rate, totalDays);
+
             totalPay = TotalPay(principalPaid, interest, effAmount);
+
             if (i < period)
             {
                 lastBalance = LastBalance(beginBalance, principalPaid);

@@ -1,4 +1,4 @@
-﻿using Applications.Requests.Lists.Entities;
+﻿using Applications.Responses.Lists.Entities;
 namespace Applications.Responses.Loans.LoanRequests;
 
 public sealed class LoanCreditAgentResponse

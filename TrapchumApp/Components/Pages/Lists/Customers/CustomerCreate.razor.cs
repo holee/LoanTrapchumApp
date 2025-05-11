@@ -1,12 +1,6 @@
-﻿using Applications.Interfaces.Files;
-using Applications.Interfaces.Lists;
-using Applications.Requests.Lists;
-using Applications.Requests.Lists.Addreses;
-using Applications.Requests.Lists.Customers;
-using Applications.Requests.Lists.Entities;
+﻿using Applications.Requests.Lists.Addreses;
 using Applications.Requests.Lists.OtherNames;
 using Applications.Responses.Lists.Entities;
-using Applications.Services.Customers;
 using Domains.Models.Addresses;
 using Domains.Models.Files;
 using Domains.Models.Lists;
@@ -26,11 +20,13 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
         private readonly IFileUploadServiceImp _fileUploadService;
         private readonly INationalityServiceImpl _nationalityService;
         private readonly IOccupationServiceImpl _occupationService;
-        public CustomerCreate(IFileUploadServiceImp fileUploadService, INationalityServiceImpl ationalityService, IOccupationServiceImpl occupationService)
+        private readonly ISalutationServiceImpl _salutationService;
+        public CustomerCreate(IFileUploadServiceImp fileUploadService, INationalityServiceImpl ationalityService, IOccupationServiceImpl occupationService, ISalutationServiceImpl salutationService)
         {
             _fileUploadService = fileUploadService;
             _nationalityService = ationalityService;
             _occupationService = occupationService;
+            _salutationService = salutationService;
         }
 
         [Parameter] public EventCallback Closed { get; set; } = default!;
@@ -170,8 +166,12 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
 
             Occupations = await _employeeService!.GetOccupationsAsync("Position");
 
-            Countries = await _addressService.GetCountries(105);
+            var rsp = await _addressService.GetCountries(105);
 
+            if(rsp.IsSuccess)
+            {
+                Countries = rsp.Data ?? [];
+            }   
             Cities = await _addressService.GetCities();
         }
         async void SelectedProvinceChanged(object arg)
@@ -234,7 +234,12 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
         }
         private async Task GetCountries()
         {
-            Countries = await _addressService.GetCountries(105);
+            var rsp = await _addressService.GetCountries(105);
+
+            if (rsp.IsSuccess)
+            {
+                Countries = rsp.Data ?? [];
+            }
         }
         private async Task GetSalutations()
         {
@@ -255,8 +260,6 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
         private void AssignImageUrl(string imgUrl) => model.Photo = imgUrl ?? string.Empty;
         protected async void FormSubmit()
         {
-            editForm?.EditContext?.Validate();
-
             try
             {
                 model.EntType = "Customer";

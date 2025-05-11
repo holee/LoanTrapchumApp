@@ -9,7 +9,7 @@
                       Click="InsertedRow"
                       ButtonStyle="ButtonStyle.Success"
                       Icon="add_circle"
-                      Size="Radzen.ButtonSize.ExtraSmall" />
+                      Size="ButtonSize.ExtraSmall" />
     </HeaderTemplate>
     <Columns>
         <RadzenDataGridColumn Context="c" Title="#" Width="2rem" TextAlign="TextAlign.Center">
@@ -60,13 +60,13 @@
                               ButtonStyle="ButtonStyle.Primary"
                               Click="@(()=>EditRow(c))"
                               @onclick:stopPropagation="true"
-                              Size="Radzen.ButtonSize.ExtraSmall" />
+                              Size="ButtonSize.ExtraSmall" />
                 <RadzenButton Variant="Variant.Flat"
                               Icon="delete"
                               ButtonStyle="ButtonStyle.Danger"
                               Click="@(()=>DeleteRow(c))"
                               @onclick:stopPropagation="true"
-                              Size="Radzen.ButtonSize.ExtraSmall" />
+                              Size="ButtonSize.ExtraSmall" />
             </Template>
             <EditTemplate>
                 <RadzenButton Variant="Variant.Flat"
@@ -74,13 +74,13 @@
                               Click="@(()=>SaveRow(c))"
                               ButtonStyle="ButtonStyle.Success"
                               @onclick:stopPropagation="true"
-                              Size="Radzen.ButtonSize.ExtraSmall" />
+                              Size="ButtonSize.ExtraSmall" />
                 <RadzenButton Variant="Variant.Flat"
                               Icon="close"
                               ButtonStyle="ButtonStyle.Warning"
                               Click="@(()=>CancelEdit(c))"
                               @onclick:stopPropagation="true"
-                              Size="Radzen.ButtonSize.ExtraSmall" />
+                              Size="ButtonSize.ExtraSmall" />
 
             </EditTemplate>
         </RadzenDataGridColumn>
@@ -93,12 +93,12 @@
                   Click="SaveChanged"
                   Icon="save"
                   ButtonStyle="ButtonStyle.Success"
-                  Size="Radzen.ButtonSize.Small" />
+                  Size="ButtonSize.Small" />
     <RadzenButton Text="Close"
                   Click="Close"
                   Icon="cancel"
                   ButtonStyle="ButtonStyle.Danger"
-                  Size="Radzen.ButtonSize.Small" />
+                  Size="ButtonSize.Small" />
 </RadzenStack>
 
 

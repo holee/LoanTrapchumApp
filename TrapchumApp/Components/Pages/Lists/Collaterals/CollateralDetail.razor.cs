@@ -1,35 +1,64 @@
 using Applications.Extensions;
-using Applications.Requests.Collaterals;
-using Applications.Responses.Collaterals;
+using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.ViewModels.Customers;
+using Applications.Services.LIsts;
 using Microsoft.AspNetCore.Components;
-using Radzen;
 
 namespace TrapchumApp.Components.Pages.Lists.Collaterals
 {
     public partial class CollateralDetail
     {
+        private readonly ICollateralsServiceImpl _collateralsService;
+
+        public CollateralDetail(ICollateralsServiceImpl collateralsService)
+        {
+            _collateralsService = collateralsService;
+        }
+
         [Parameter] public EventCallback Close { get; set; }
-        [Parameter] public EventCallback<Guid?> AddMoreCollateral { get; set; }
-        [Parameter] public CollateralResponse? Model { get; set; } = new();
+        [Parameter] public EventCallback<string?> AddMoreCollateral { get; set; }
+        [Parameter] public VCustomerCollaterals? Model { get; set; } = new();
         async Task CloseTab()
         {
             await Close.InvokeAsync();
         }
-        [Parameter] public long CustomerId { get; set; }
+        [Parameter] public string? CustomerId { get; set; }
         [Parameter] public LoanCustomerQuery? SelectedCustomer { get; set; }
-        [Parameter] public IQueryable<CollateralLineResponse>? CollateralLines { get; set; }
+        [Parameter] public List<VCollateralLines>? CollateralLines { get; set; } = [];
+        //private async Task AddCollateralByCustomer()
+        //{
+        //    if (Model!.CollateralId.IsNullOrEmpty())
+        //    {
+        //        NotificationService.Notify(Radzen.NotificationSeverity.Info, "Try getting data not found!");
+        //        return;
+        //    }
+        //    await AddMoreCollateral.InvokeAsync(Model.CollateralId);
 
-        private async Task AddCollateralByCustomer()
+        //    StateHasChanged();
+        //}
+
+        async Task GetCollateralById(string collateralId)
         {
-            if (Model!.CollateralId.IsNotNullOrEmpty())
+            var rsp = await _collateralsService.GetCustomerCollateralAsync(collateralId);
+
+            if (rsp.IsSuccess)
             {
-                NotificationService.Notify(Radzen.NotificationSeverity.Warning, "", "Try getting data not found!");
-                return;
+                Model = rsp.Data;
+
+                //CollateralLines = rsp.Data!.CollateralLines;
             }
-            await AddMoreCollateral.InvokeAsync(Model.CollateralId);
-            Console.WriteLine("Click...!");
-            StateHasChanged();
+            else
+            {
+                NotificationService.Notify(Radzen.NotificationSeverity.Error,rsp.ErrMessage);
+            }
+
+
+        }
+
+        protected override async Task OnParametersSetAsync()
+        {
+            await GetCollateralById(CustomerId!);
+            await base.OnParametersSetAsync();
         }
 
 

@@ -1,5 +1,4 @@
 using Applications.Extensions;
-using Applications.Interfaces.Customers;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Services.Customers;
 using Microsoft.AspNetCore.Components;
@@ -15,9 +14,10 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
             _incomeExpendServiceImpl = customerService;
         }
 
-        [Parameter] public Guid? CustomerId { get; set; }
+        [Parameter] public string? CustomerId { get; set; }
         [Parameter] public bool ShowAdd { get; set; } = true;
         [Parameter] public bool ShowReload { get; set; } = false;
+        [Parameter] public bool ShowCommand { get; set; } = false; 
         [Parameter] public IEnumerable<VCustomerIncomes> Items { get; set; } = [];
         bool isLoading = false;
         protected override async Task OnInitializedAsync()
@@ -27,12 +27,12 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
             await base.OnInitializedAsync();
         }
 
-        async Task GetCustomerIncomes(Guid? customerId)
+        async Task GetCustomerIncomes(string? customerId)
         {
 
             isLoading = true;
 
-            if (customerId.NotEmpty())
+            if (customerId.IsNotNullOrEmpty())
             {
                 var resp = await _incomeExpendServiceImpl.GetCustomerCustomerIncomes(customerId);
 
@@ -49,13 +49,13 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
             StateHasChanged();
         }
 
-        async void RefreshIncome()
+        async Task RefreshIncome()
         {
             await GetCustomerIncomes(CustomerId);
 
         }
 
-        protected async void AddInComeModal()
+        protected async Task AddInComeModal()
         {
 
             if (CustomerId.IsNullOrEmpty())
@@ -64,7 +64,7 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
                 return;
             }
 
-            var options = new Radzen.DialogOptions
+            var options = new DialogOptions
             {
                 Width = "50vw",
                 Resizable = false,

@@ -1,6 +1,4 @@
 ﻿@page "/Loan/CreditAgent/Changed"
-@using Applications.Responses.ViewModels.Customers
-@using Applications.Responses.ViewModels.Loans
 <PageTitle>Change Credit Agent</PageTitle>
 <div class="card">
     <div class="card-header">
@@ -20,12 +18,12 @@
                                                     Density="Density.Compact"
                                                     TextProperty="AltName"
                                                     ValueProperty="EmployeeRefId"
-                                                    @bind-Value="oldCreditAgentId"
+                                                    @bind-Value="_oldCreditAgentId"
                                                     @bind-Value:after="GetLoansByCreditAgents"
                                                     ShowSearch="false"
                                                     LoadData="GetOldCreditAgents"
                                                     Style="font-size:0.8rem;"
-                                                    Data="OldCreditAgents">
+                                                    Data="_oldCreditAgents">
                                 <Columns>
                                     <RadzenDropDownDataGridColumn Property="AltName" Title="Name" />
                                 </Columns>
@@ -46,11 +44,11 @@
                                                     Density="Density.Compact"
                                                     TextProperty="AltName"
                                                     ValueProperty="EmployeeRefId"
-                                                    @bind-Value="newCreditAgentId"
+                                                    @bind-Value="_newCreditAgentId"
                                                     ShowSearch="false"
                                                     LoadData="GetNewCreditAgents"
                                                     Style="font-size:0.8rem;"
-                                                    Data="NewCreditAgents">
+                                                    Data="_newCreditAgents">
                                 <Columns>
                                     <RadzenDropDownDataGridColumn Property="AltName" Title="Name" />
                                 </Columns>
@@ -64,20 +62,20 @@
             <RadzenDataGrid Density="Density.Compact"
                             AllowAlternatingRows="true"
                             GridLines="DataGridGridLines.Horizontal"
-                            IsLoading="isLoading"
+                            IsLoading="_isLoading"
                             AllowPaging="true"
-                            PageSize="@pageSize"
+                            PageSize="@_pageSize"
                             Style="--rz-grid-header-background-color:var(--rz-base-200);"
-                            Count="@counts"
+                            Count="@_counts"
                             ShowPagingSummary="true"
-                            Data="Items">
+                            Data="_items">
                 <Columns>
                     <RadzenDataGridColumn Context="p"
                                           Width="3rem"
                                           Title="#"
                                           Sortable="false">
                         <Template>
-                            @(Items.ToList().IndexOf(p) + 1)
+                            @(_items.ToList().IndexOf(p) + 1)
                         </Template>
                     </RadzenDataGridColumn>
                     <RadzenDataGridColumn Property="RegisterDate"
@@ -152,12 +150,12 @@
                      class="mt-2"
                      Gap="1rem"
                      AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
-            <RadzenButton Size="Radzen.ButtonSize.Small"
+            <RadzenButton Size="ButtonSize.Small"
                           ButtonStyle="ButtonStyle.Success"
                           Click="ChangedCreditAgent"
                           Icon="save"
                           Text="Save" />
-            <RadzenButton Size="Radzen.ButtonSize.Small"
+            <RadzenButton Size="ButtonSize.Small"
                           ButtonStyle="ButtonStyle.Danger"
                           Click="Back"
                           Icon="cancel"

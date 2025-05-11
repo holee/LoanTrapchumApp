@@ -1,89 +1,37 @@
-﻿@using Applications.Responses.Collaterals
-@using Applications.Requests.Collaterals
-<PageTitle>Collaterals Detail</PageTitle>
+﻿<PageTitle>Collaterals Detail</PageTitle>
 <Containers Fluid>
-    <Card>
-        <CardHeader>
-            <div class="d-flex justify-content-between">
-                <span>Collateral Information</span>
-                <strong @onclick="CloseTab" class="text-danger" style="cursor:pointer">X</strong>
-            </div>
-        </CardHeader>
-        <CardBody>
-            @if (Model is not null)
-            {
-                <table class="tbl table table-sm table-bordered">
-                    <tr>
-                        <th class="w-25">Customer</th>
-                        <td>
-                            <RadzenStack Orientation="Orientation.Horizontal"
-                                         AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                                <strong>
-                                    @Model?.CustomerName
-                                </strong>
-                                <RadzenButton Click="AddCollateralByCustomer"
-                                              Size="Radzen.ButtonSize.Small"
-                                              Icon="add"
-                                              Text="Add Collateral"
-                                              ButtonStyle="ButtonStyle.Success" />
+    <table class="tbl table table-sm table-bordered">
+        <tr>
+            <th class="w-25">Customer</th>
+            <td>
+                @Model?.CustomerName
+            </td>
+        </tr>
+        <tr>
+            <th class="w-25">Register Date</th>
+            <td>@Model?.RegisterDate.DayFirst()</td>
+        </tr>
+        <tr>
+            <th class="w-25">Document Site</th>
+            <td>@Model?.DocumentKeeping</td>
+        </tr>
+        <tr>
+            <th class="w-25">Remark</th>
+            <td>@Model?.Remark</td>
+        </tr>
 
-                            </RadzenStack>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th class="w-25">Register Date</th>
-                        <td>@Model?.RegisterDate</td>
-                    </tr>
-                    <tr>
-                        <th class="w-25">Document Site</th>
-                        <td>@Model?.DocumentKeeping</td>
-                    </tr>
-                    <tr>
-                        <th class="w-25">Remark</th>
-                        <td>@Model?.Remark</td>
-                    </tr>
+    </table>
+    <CollateralsCustomer CustomerId="@CustomerId" ShowAdd />
 
-                </table>
-                <RadzenDataGrid TItem="CollateralLineResponse"
-                                GridLines="DataGridGridLines.Both"
-                                Data="CollateralLines">
-                    <Columns>
-                        <RadzenDataGridColumn Title="#" Property="ReferenceNo" />
-                        <RadzenDataGridColumn Title="Collateral Number" Property="CollateralNo" Sortable="false" />
-                        <RadzenDataGridColumn Title="Category" Property="TypeName" Sortable="false" />
-                        <RadzenDataGridColumn Title="Sub Category" Property="SubTypeName" Sortable="false" />
-                        <RadzenDataGridColumn Title="Owner" Property="OwnerName" Sortable="false" />
-                        <RadzenDataGridColumn Title="Size" Property="Size" Sortable="false" />
-                        <RadzenDataGridColumn Title="Qty" Property="Quantity" Sortable="false" />
-                        <RadzenDataGridColumn TextAlign="TextAlign.End" Title="Market Price" Property="MarketPrice" Sortable="false" />
-                        <RadzenDataGridColumn TextAlign="TextAlign.End" Title="Pawn Price" Property="PawnPrice" Sortable="false" />
-                        <RadzenDataGridColumn TextAlign="TextAlign.End" Title="Hot Price" Property="HotPrice" Sortable="false" />
-                        <RadzenDataGridColumn TextAlign="TextAlign.Center" Title="Status" Sortable="false">
-                            <Template>
-                                <RadzenSwitch @bind-Value="context.IsAvailable"
-                                              Disabled></RadzenSwitch>
-                            </Template>
-                        </RadzenDataGridColumn>
-                    </Columns>
-                </RadzenDataGrid>
-            }
-            else
-            {
-                <div class="text-center align-content-center text-danger"><span>Data not found!</span></div>
-            }
-            }
-        </CardBody>
-        <CardFooter>
-            <RadzenStack Orientation="Orientation.Horizontal"
-                         JustifyContent="JustifyContent.End"
-                         AlignItems="AlignItems.Center">
-                <RadzenButton Text="Close"
-                              Icon="close"
-                              ButtonStyle="ButtonStyle.Danger"
-                              Size="Radzen.ButtonSize.Small"
-                              Click="CloseTab" />
-            </RadzenStack>
-        </CardFooter>
-    </Card>
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 JustifyContent="JustifyContent.End"
+                 class="rz-mt-2"
+                 AlignItems="AlignItems.Center">
+        <RadzenButton Text="Close"
+                      Icon="close"
+                      ButtonStyle="ButtonStyle.Danger"
+                      Size="ButtonSize.Small"
+                      Click="CloseTab" />
+    </RadzenStack>
 </Containers>
 

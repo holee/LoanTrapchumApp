@@ -1,4 +1,4 @@
-﻿@page "/Loan/CreditAgent/{LoanId:long}/Changed"
+﻿@page "/Loan/CreditAgent/{LoanId}/Changed"
 <PageTitle>Change Credit Agent</PageTitle>
 <RadzenCard class="rz-background-color-100">
     <RadzenRow AlignItems="AlignItems.Center">
@@ -68,7 +68,7 @@
                         ValueProperty="EmployeeRefId"
                         @bind-Value="newCreditAgentId"
                         ShowSearch="false"
-                        Data="CreditAgents">
+                        Data="_creditAgents">
                             <Columns>
                                 <RadzenDropDownDataGridColumn Property="AltName" Title="Name" />
                             </Columns>
@@ -81,12 +81,12 @@
     <RadzenStack Orientation="Orientation.Horizontal"
     Gap="1rem"
     AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
-        <RadzenButton Size="Radzen.ButtonSize.Small"
+        <RadzenButton Size="ButtonSize.Small"
         ButtonStyle="ButtonStyle.Success"
         Click="ChangedCreditAgent"
         Icon="save"
         Text="Save" />
-        <RadzenButton Size="Radzen.ButtonSize.Small"
+        <RadzenButton Size="ButtonSize.Small"
         ButtonStyle="ButtonStyle.Danger"
         Click="Back"
         Icon="cancel"

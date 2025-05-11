@@ -1,4 +1,4 @@
-﻿namespace Applications.Requests.Lists.Holidays;
+﻿namespace Applications.Responses.Lists.Holidays;
 
 public class HolidayDto
 {

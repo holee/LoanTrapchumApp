@@ -1,4 +1,3 @@
-using Applications.Interfaces.Customers;
 using Applications.Requests.Lists.Entities;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Services.Customers;
@@ -20,7 +19,7 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
 
         List<CustomerIncomeDtoCreate> CustomerIncomes = new List<CustomerIncomeDtoCreate>();
         List<VCustomerIncomes> Incomes = [];
-        [Parameter] public Guid? CustomerId { get; set; }
+        [Parameter] public string? CustomerId { get; set; }
         RadzenDataGrid<VCustomerIncomes> incomeGrid = default!;
         List<VCustomerIncomes> insertGrid = [];
         private void AddNewRow()
@@ -52,7 +51,7 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
             DialogService.Close(false);
         }
 
-        async Task GetCustomerIncome(Guid? customerId)
+        async Task GetCustomerIncome(string? customerId)
         {
             var resp = await _oiService.GetCustomerCustomerIncomes(customerId);
             if (resp.IsSuccess)

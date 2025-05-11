@@ -8,15 +8,15 @@ public abstract class LoanCaloulator : ICalculator
     {
         PayEvery = 1;
         EffectiveRate = 0;
-        FirstPayment = DateTime.UtcNow;
-        StartDate = DateTime.UtcNow;
+        FirstPayment = DateTimeOffset.UtcNow;
+        StartDate = DateTimeOffset.UtcNow;
         CollectionFeeMode = 1;
         Day = 30;
         CurrencyId = 1;
         InstallmentTypeId = 1;
     }
     public LoanCaloulator(int payEvery, decimal effectiveRate, int collectionFeeMode, int day,
-        int currencyId, int installmentTypeId, DateTime firstPayment, DateTime startDate)
+        int currencyId, int installmentTypeId, DateTimeOffset? firstPayment, DateTimeOffset? startDate)
     {
         PayEvery = payEvery;
         EffectiveRate = effectiveRate;
@@ -30,13 +30,13 @@ public abstract class LoanCaloulator : ICalculator
 
     public int PayEvery { get; set; }
     public decimal EffectiveRate { get; set; } = 0;
-    public DateTime FirstPayment { get; set; }
-    public DateTime StartDate { get; set; }
+    public DateTimeOffset? FirstPayment { get; set; }
+    public DateTimeOffset? StartDate { get; set; }
     public int CollectionFeeMode { get; set; } = 1;
     public int Day { get; set; } = 30;
     public int CurrencyId { get; set; } = 1;
     public int InstallmentTypeId { get; set; } = 1;
-    private List<DateTime> Holidays { get; set; } = [];
+    private List<DateTimeOffset> Holidays { get; set; } = [];
     protected decimal Pmt(int nper, decimal rate, decimal amount)
     {
         if (amount < 0 || rate < 0)
@@ -90,49 +90,51 @@ public abstract class LoanCaloulator : ICalculator
     {
         return holidaies.Where(x => x == holiday).Count();
     }
-    internal int TotalDays(DateTime start, DateTime end)
+    internal int TotalDays(DateTimeOffset? start, DateTimeOffset? end)
     {
-        TimeSpan dateDiff = end.Subtract(start);
+        TimeSpan dateDiff = end!.Value.Subtract(start!.Value);
+
         return dateDiff.Days;
+
     }
-    protected DateTime SetPaymentDate(DateTime date)
+    protected DateTimeOffset SetPaymentDate(DateTimeOffset? date)
     {
         return InstallmentTypeId switch
         {
-            1 => date.AddMonths(1),
-            2 => date.AddDays(14),
-            3 => date.AddDays(7),
-            4 => date.AddDays(1),
-            _ => DateTime.Now,
+            1 => date!.Value.AddMonths(1),
+            2 => date!.Value.AddDays(14),
+            3 => date!.Value.AddDays(7),
+            4 => date!.Value.AddDays(1),
+            _ => DateTimeOffset.UtcNow,
         };
     }
-    private bool IsSunday(DateTime date)
+    private bool IsSunday(DateTimeOffset? date)
     {
-        return date.DayOfWeek == DayOfWeek.Sunday;
+        return date!.Value.DayOfWeek == DayOfWeek.Sunday;
     }
-    private bool IsHoliday(DateTime holiday, DateTime paymentDate)
+    private bool IsHoliday(DateTimeOffset? holiday, DateTimeOffset? paymentDate)
     {
-        var days = (holiday - paymentDate).TotalDays;
+        var days = (holiday - paymentDate)!.Value.TotalDays;
+
         return days == 0;
+
     }
-    public void SetHoliday(ref DateTime paymentDate)
+    public void SetHoliday(ref DateTimeOffset? paymentDate)
     {
         foreach (var holiday in Holidays)
         {
             if (IsSunday(paymentDate) || IsHoliday(holiday, paymentDate))
             {
-
-                paymentDate = paymentDate.AddDays(1);
-
+                paymentDate = paymentDate!.Value.AddDays(1);
             }
         }
     }
-    public void SetHolidays(List<DateTime> Holidays)
+    public void SetHolidays(List<DateTimeOffset> Holidays)
     {
         this.Holidays = Holidays;
     }
     public abstract List<ScheduleLine> Calculate(int periodInMonth, decimal monthlyRate, decimal amount);
     public abstract List<ScheduleLine> Calculate(int? periodInMonth, decimal? monthlyRate, decimal? amount);
-    public abstract List<ScheduleLine> Calculate(int? periodInMonth, decimal? monthlyRate, decimal? amount, DateTime firstPayment);
+    public abstract List<ScheduleLine> Calculate(int? periodInMonth, decimal? monthlyRate, decimal? amount, DateTimeOffset? firstPayment=null);
 
 }

@@ -1,17 +1,5 @@
-﻿@page "/App/Currencies/Exchange"
+﻿@page "/App/Currencies/Exchange/{BranchId:int}/Branches"
 <Containers Fluid>
-@*     <RadzenRow AlignItems="AlignItems.Start">
-        <RadzenColumn Size="12" SizeSM="12" SizeMD="7">
-            <Card>
-                <CardBody>
-                    <MoneyExchanges BranchId="@BranchId" UserId="@UserId" />
-                </CardBody>
-            </Card>
-        </RadzenColumn>
-        <RadzenColumn Size="12" SizeSM="12" SizeMD="5">
-            <TableCurrenctRate Currency="@Currency" />
-        </RadzenColumn>
-    </RadzenRow> *@
    <Card>
        <CardHeader>
            <strong>Exchange History</strong>

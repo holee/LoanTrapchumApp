@@ -1,11 +1,12 @@
 ﻿using Applications.Interfaces.Transactions;
 using Applications.Responses.ViewModels.Ledgers;
-using Applications.Services.Transactions.Journals;
+using Microsoft.AspNetCore.Components;
 using Radzen;
 namespace TrapchumApp.Components.Pages.Transactions.Ledgers;
 
 public partial class LedgerIndex
 {
+    [Parameter] public int? BranchId { get; set; } = 0;
     private readonly ILedgerService _ledgerService;
 
     public LedgerIndex(ILedgerService ledgerService)
@@ -138,7 +139,7 @@ public partial class LedgerIndex
             Draggable = true,
             Resizable = false
         };
-        var confirm = await DialogService.OpenAsync<CreateLedgerModal>("Create", options: options);
+        var confirm = await DialogService.OpenAsync<CreateLedgerModal>("CreateNewUser", options: options);
 
         if ((bool)confirm == true)
         {

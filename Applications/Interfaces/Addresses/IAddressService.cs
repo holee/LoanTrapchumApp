@@ -12,7 +12,7 @@ namespace Applications.Interfaces.Addresses
         Task<IEnumerable<CommuneDto>> GetCommunesByDistrictId(int? districtId);
         Task<IEnumerable<VillageDto>> GetVillagesByCommuneId(int? communeId);
         Task<IEnumerable<Country>> GetCountries(string? filter = null);
-        Task<IEnumerable<Country>> GetCountries(int? countryId = 105);
+        Task<Result<IEnumerable<Country>>> GetCountries(int? countryId = 105);
         Task<IEnumerable<string>> GetCities(string? filter = null); 
         Task<Result> AddCity(City city);
         Task<Result> UpdateCity(City city);

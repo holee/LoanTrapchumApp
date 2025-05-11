@@ -1,4 +1,4 @@
-﻿namespace Applications.Requests.SysSettings
+﻿namespace Applications.Requests.Settings
 {
     public class UserLoanSizeDtoUpdate 
     {

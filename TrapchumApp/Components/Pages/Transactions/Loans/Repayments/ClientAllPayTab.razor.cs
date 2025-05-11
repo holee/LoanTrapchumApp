@@ -4,28 +4,27 @@ using Applications.Responses.ViewModels.Branches;
 using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Payments;
 using Applications.Responses.ViewModels.Loans.Schedules;
+using Applications.Services.Loans;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.JSInterop;
 using Radzen;
 
 namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
 {
     public partial class ClientAllPayTab
     {
-        readonly ISchedulesServiceImpl _scheduleService;
-        readonly ILoanService _dService;
-        readonly ILoanScheduleServiceImpl _loanScheduleService;
-        public ClientAllPayTab(ISchedulesServiceImpl schedulesService, ILoanService loanService, ILoanScheduleServiceImpl loanScheduleService)
+        private readonly ILoanServiceImpl _dService;
+        private readonly ILoanScheduleServiceImpl _loanScheduleService;
+        public ClientAllPayTab(ILoanServiceImpl loanService, 
+                              ILoanScheduleServiceImpl loanScheduleService)
         {
-            _scheduleService = schedulesService;
             _dService = loanService;
             _loanScheduleService = loanScheduleService;
         }
 
         [Parameter] public int BranchId { get; set; } = 0;
-        [Parameter] public long UserId { get; set; } = 0;
-        [Parameter] public EventCallback<int> GetCountChanged { get; set; }
+        [Parameter] public string? UserId { get; set; } = string.Empty;
+        [Parameter] public EventCallback<string> ShowCounts { get; set; }
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
         private List<VSchedule> ScheduleItems = [];
         private IList<VLoanDisbursments> SelectedLoans = [];
@@ -50,7 +49,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
 
         async Task GetCount()
         {
-            await GetCountChanged.InvokeAsync(counts);
+            await ShowCounts.InvokeAsync(counts.ToString());
         }
         async void TextLoanSearchChanged(string filter)
         {
@@ -62,22 +61,12 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
         {
             await GetLoansAsync();
         }
-        void GetLoanDetails(VSchedule p)
-        {
-            NavigationManager.NavigateTo($"/Loans/Details/{p.LoanId}?BranchId={p.BranchId}&CreditAgentId={p.CreditAgentId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
-            return;
-        }
         void GetPaymentSchedules(VSchedule p)
         {
             NavigationManager.NavigateTo($"/Loans/{p.LoanId}/Schedules?BranchId={p.BranchId}&CreditAgentId={p.CreditAgentId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
             return;
         }
 
-        void ChangeCreditAgent(VSchedule p)
-        {
-            NavigationManager.NavigateTo($"/Loan/CreditAgent/{p.LoanId}/Changed?CustomerId={p.CustomerId}&BranchId={p.BranchId}&CreditAgentId={p.CreditAgentId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
-            return;
-        }
         void CustomerPayOff(VSchedule p)
         {
             NavigationManager.NavigateTo($"/Loan/CreditAgent/{p.LoanId}/Changed?CustomerId={p.CustomerId}&BranchId={p.BranchId}&CreditAgentId={p.CreditAgentId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
@@ -112,7 +101,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
 
                 var param = new QueryParam(pageIndex, pageSize, sortField, sortDescending, filter);
 
-                var res = await _loanScheduleService.GetLoanSchedulesByPaymentDateAsync(paymentDate, BranchId, true, false, param);
+                var res = await _loanScheduleService.GetLoanSchedulesByPaymentDateAsync( BranchId, paymentDate, true, false, param);
 
                 ScheduleItems = res.Items;
 
@@ -138,6 +127,8 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
 
     }
 }
+
+
 //async Task DownLoadScheduleAsExcel(Guid loanRefId, int branchId)
 //{
 //    ContextMenuService.Close();

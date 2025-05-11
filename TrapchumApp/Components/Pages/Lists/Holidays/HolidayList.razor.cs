@@ -10,7 +10,7 @@ namespace TrapchumApp.Components.Pages.Lists.Holidays
 
         public HolidayList(IHolidayService holidayService)
         {
-            this._holidayService = holidayService;
+            _holidayService = holidayService;
         }
 
         protected string? searchField = string.Empty;

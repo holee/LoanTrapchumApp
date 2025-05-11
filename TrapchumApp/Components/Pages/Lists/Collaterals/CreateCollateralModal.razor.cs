@@ -1,8 +1,6 @@
 using Applications.Extensions.mappers;
-using Applications.Requests.Collaterals;
 using Applications.Requests.Lists.Collaterals;
-using Applications.Responses;
-using Applications.Responses.Collaterals;
+using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Services.LIsts;
 using Microsoft.AspNetCore.Components;
@@ -31,7 +29,7 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
         /// </summary>
         /// <returns></returns>
         private void Close() => DialogService.Close(false);
-        [Parameter] public Guid? CollateralId { get; set; } = Guid.Empty;
+        [Parameter] public string? CollateralId { get; set; } = string.Empty;
         //model varr
         //Onstartup
         protected async override Task OnInitializedAsync()
@@ -106,7 +104,7 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
             }
             else
             {
-                CollateralId = Guid.Empty;
+                CollateralId = string.Empty;
                 model.CustomerName = SelectedCustomer.Name;
                 model.CollateralId = SelectedCustomer.CustomerId;
                 model.Remark = "";

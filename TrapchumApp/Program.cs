@@ -1,19 +1,22 @@
 using Applications.DependencyInjections;
 using Applications.Extensions.Identity;
+using Applications.Schedules;
 using Applications.Validations;
 using Infrastructures.DependencyInjects;
 using Mapster;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Components.Server.Circuits;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection.Extensions;
+using QuestPDF.Infrastructure;
 using Radzen;
 using TrapchumApp;
 using TrapchumApp.Components;
 using TrapchumApp.Components.Account;
 var builder = WebApplication.CreateBuilder(args);
+
+
+
+
+QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -21,17 +24,19 @@ builder.Services.AddRazorComponents()
 builder.Services.AddRadzenComponents();
 builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
-builder.Services.AddInfrastructureServices(builder.Configuration);
+builder.Services.AddPolicyServices();
 builder.Services.AddApplicationServices();
 builder.Services.AddValidationServiceInjections();
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddMapster();
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 builder.Services.AddScoped<UserServiceImpl>();
-builder.Services.TryAddEnumerable(ServiceDescriptor.Scoped<CircuitHandler, UserCircuitHandler>());
+builder.Services.AddControllers();
+//builder.Services.AddScoped<IDocument, SchedulePdfService>();
 
 var app = builder.Build();
 
@@ -47,27 +52,22 @@ else
     app.UseHsts();
 }
 
+
+await app.SeedSystemData();
+
 app.UseHttpsRedirection();
 
 app.UseAntiforgery();
 
 app.MapStaticAssets();
 
-//app.UseAuthentication();
-//app.UseAuthorization();
+app.UseStaticFiles();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
 // Add additional endpoints required by the Identity /Account Razor components.
-app.MapAdditionalIdentityEndpoints();
+app.MapControllers();
+await app.MapAdditionalIdentityEndpoints();
 
 app.Run();
-
-
-//builder.Services.AddScoped<CookieEvent>();
-//builder.Services.ConfigureApplicationCookie(options =>
-//{
-//    options.EventsType=typeof(CookieEvent);
-//builder.Services.AddScoped<IClaimsTransformation, MinimalClaimsTransformation>();
-//});

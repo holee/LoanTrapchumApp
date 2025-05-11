@@ -5,7 +5,7 @@ namespace Domains.Models.Lists.Customers;
 
 public sealed class Customer
 {
-    public Guid? CustomerId { get; set; }
+    public string? CustomerId { get; set; }
     public int? Dependents { get; set; }
     public int? NoOfChildren { get; set; }
     public decimal? Income { get; set; }

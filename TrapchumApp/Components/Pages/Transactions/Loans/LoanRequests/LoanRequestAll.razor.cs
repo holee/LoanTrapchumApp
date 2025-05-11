@@ -23,7 +23,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
         [CascadingParameter]
         Task<AuthenticationState> AuthenticationState { get; set; } = default!;
         [Parameter] public int BranchId { get; set; }
-        [Parameter] public Guid? UserId { get; set; }
+        [Parameter] public string? UserId { get; set; }
         bool CanRequestLoan { get; set; } = false;
         bool CanDisburseLoan { get; set; } = false;
         bool CanAprovedLoan { get; set; } = false;
@@ -43,28 +43,16 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
         int statusId = 1;
         protected override async Task OnInitializedAsync()
         {
-
+            createRequestUrl = $"/App/Request/{BranchId}/Branches/{UserId}/CreateNew";
             var auth = await AuthenticationState;
-            CanRequestLoan = (await _authorizeService.AuthorizeAsync(auth.User, LoanRequestPolicies.CanCreate())).Succeeded;
-            CanDisburseLoan = (await _authorizeService.AuthorizeAsync(auth.User, LoanRequestPolicies.CanDisburseLoan())).Succeeded;
-            CanAprovedLoan = (await _authorizeService.AuthorizeAsync(auth.User, LoanRequestPolicies.CanAproveRequest())).Succeeded;
+            CanRequestLoan = (await _authorizeService.AuthorizeAsync(auth.User, RequestsPolicies.CanCreate())).Succeeded;
+            CanDisburseLoan = (await _authorizeService.AuthorizeAsync(auth.User, RequestsPolicies.CanDisburseLoan())).Succeeded;
+            CanAprovedLoan = (await _authorizeService.AuthorizeAsync(auth.User, RequestsPolicies.CanAproveRequest())).Succeeded;
 
-            await GetLoanRequestAsync();
+            await GetLoanRequestAsync(UserId);
 
             await base.OnInitializedAsync();
         }
-
-        protected override void OnParametersSet()
-        {
-            createRequestUrl = new Dictionary<string, object?>
-        {
-            {"BranchId",BranchId},
-            {"UserId",UserId},
-            { "ActionMode",ActionMode.Create}
-        }.AddQueryString($"/App/Loan/Customer/Request");
-            base.OnParametersSet();
-        }
-
 
         async Task LoadLoanData(LoadDataArgs args)
         {
@@ -83,7 +71,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
             await GetLoanRequestAsync();
         }
 
-        async Task GetLoanRequestAsync(Guid? userId)
+        async Task GetLoanRequestAsync(string? userId)
         {
             isLoading = true;
 
@@ -130,7 +118,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 
         async void PageChanged(int size)
         {
-            this.pageSize = size;
+            pageSize = size;
             await GetLoanRequestAsync();
 
         }

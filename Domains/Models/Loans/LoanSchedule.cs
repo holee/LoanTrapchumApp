@@ -3,14 +3,13 @@
     public sealed class LoanSchedule
     {
         public long LoanScheduleId { get; set; }
-        public Guid? LoanRefId { get; set; }
-        public Guid? LoanDisbursementRefId { get; set; }
-        public long? AgentRefId { get; set; }
+        public string? LoanRefId { get; set; }
+        public string? AgentRefId { get; set; }
         public int? BranchId { get; set; }
         public int? InstallmentNo { get; set; }
         public int? DaysAccrued { get; set; }
         public int? RepaymentModeRefId { get; set; }
-        public DateTime? PaymentDate { get; set; }
+        public DateTimeOffset? PaymentDate { get; set; }
         public int? TotalDay { get; set; } = 0;
         public decimal? Principal { get; set; }
         public decimal? Interest { get; set; }

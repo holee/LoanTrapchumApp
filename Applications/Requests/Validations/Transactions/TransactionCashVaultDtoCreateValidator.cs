@@ -7,8 +7,7 @@ namespace Applications.Requests.Validations.Transactions
     {
         public TransactionCashVaultDtoCreateValidator()
         {
-            RuleFor(x=>x.UserRefId).NotEmpty().WithMessage("Please Select User.")
-                                   .GreaterThan(0).WithMessage("There Is No User Selected");
+            RuleFor(x => x.UserRefId).NotEmpty().WithMessage("Please Select User.");
         }
     }
 }

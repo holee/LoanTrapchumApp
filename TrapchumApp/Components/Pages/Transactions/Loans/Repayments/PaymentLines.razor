@@ -1,4 +1,5 @@
-﻿@using Applications.Requests.Loans.Payments
+﻿@using Applications.Calculations
+@using Applications.Requests.Loans.Payments
 <RadzenStack AlignItems="AlignItems.Center" class="mt-2">
     <RadzenDataGrid @ref="gridLoanPaymentLines"
                     Density="Density.Compact"
@@ -86,7 +87,7 @@
                                   Context="c">
                 <Template>
                     <RadzenButton Icon="delete"
-                                  Size="Radzen.ButtonSize.ExtraSmall"
+                                  Size="ButtonSize.ExtraSmall"
                                   IconColor="@Colors.Danger"
                                   Variant="Variant.Outlined"
                                   ButtonStyle="ButtonStyle.Primary"

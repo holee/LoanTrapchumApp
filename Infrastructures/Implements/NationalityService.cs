@@ -18,6 +18,7 @@ namespace Infrastructures.Implements
         public async Task<IEnumerable<Nationality>> GetNationalities(string? searchText = null)
         {
             IQueryable<Nationality> queries = _context.Nationalities;
+
             if (!string.IsNullOrEmpty(searchText))
             {
                 queries = queries.Where(x => x.NationalityName != null && x.NationalityName.Contains(searchText, StringComparison.InvariantCultureIgnoreCase) ||

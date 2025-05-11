@@ -10,6 +10,7 @@ namespace Applications.Interfaces.Identity
         Task<Result> CreateAsync(RoleCreateDto role);
         Task<Result<RolePermissions>> GetPermissionsByRoleAsync(string roleId);
         Task<Result<RoleDto>> GetRoleByIdAsync(string id);
-        Task<Result<IEnumerable<RoleDto>>> GetRolesAsync(string? roleId = null, string? name = null);
+        Task<Result<IEnumerable<RoleDto>>> GetRolesAsync(string roleId, string? name = null);
+        Task<Result<IEnumerable<string>>> GetRolesAsync(string? name = null);
     }
 }

@@ -2,13 +2,12 @@
 using Applications.Responses.ViewModels.Customers;
 
 namespace Applications.Responses.ViewModels.Loans.Requests;
-
 public sealed class VLoanRequests
 {
-    public Guid? LoanRequestId { get; set; }
+    public string? LoanRequestId { get; set; }
     public DateTime? RequestDate { get; set; }
     public decimal? RequestAmount { get; set; }
-    public decimal? AprovedAmount { get; set; } 
+    public decimal? AprovedAmount { get; set; }
     public decimal? InterestRate { get; set; }
     public int? Installments { get; set; }
     public string? InstallmentType { get; set; }
@@ -22,13 +21,13 @@ public sealed class VLoanRequests
     public string? CurrencyName { get; set; }
     public int? StatusId { get; set; }
     public string? Status { get; set; }
-    public Guid? CreditAgentId { get; set; }
-    public Guid? UserRequestId { get; set; } 
+    public string? CreditAgentId { get; set; }
+    public string? UserRequestId { get; set; }
     public string? UserName { get; set; }
     public int? BankId { get; set; }
     public int? BranchId { get; set; }
     public string? BranchName { get; set; }
-    public Guid? CustomerId { get; set; }
+    public string   ? CustomerId { get; set; }
     public string? AltName { get; set; }
     public string? FullName { get; set; }
     public decimal? AdminFeeRate { get; set; }
@@ -46,7 +45,7 @@ public sealed class VLoanRequests
     public int? PayEvery { get; set; } = 1;
     public int? CollectionFeeModeId { get; set; } = 1;
     public string? CollectionFeeModeName { get; set; } = string.Empty;
-    public string? AprovedBy { get; set; }=string.Empty;
+    public string? AprovedBy { get; set; } = string.Empty;
     [NotMapped] public IEnumerable<VLoanRequestGuarantors> Guarantors { get; set; } = [];
     [NotMapped] public IEnumerable<VLoanRequestCollateralLines> Collaterals { get; set; } = [];
     [NotMapped] public IEnumerable<VLoanRequestsDocuments> Documents { get; set; } = [];

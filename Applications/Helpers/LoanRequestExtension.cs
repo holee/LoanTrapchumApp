@@ -10,7 +10,7 @@ namespace Applications.Helpers
         {
             return new LoanRequestDtoCreate
             {
-                Id = req.LoanRequestId,
+                LoanRequestId = req.LoanRequestId,
                 CustomerRefId = req.CustomerId,
                 LoanRequestStatusRefId = req.StatusId,
                 BranchRefId =req.BranchId,
@@ -52,7 +52,7 @@ namespace Applications.Helpers
                 LoanRequestId = req.LoanRequestId,
                 CustomerRefId = req.CustomerId,
                 CustomerName = req.FullName,
-                BranchRefId = req.BranchId,
+                BranchId = req.BranchId,
                 LoanCategoryRefId = req.LoanCategoryRefId,
                 LoanCategoryName=req.LoanCategoryName,
                 BankRefId = req.BankId,
@@ -75,7 +75,7 @@ namespace Applications.Helpers
                 RepaymentModeRefId = req.RepaymentModeRefId,
                 Principle = req.AprovedAmount,
                 InterestRate = req.InterestRate,
-                OtherChargeId = req.CollectionFeeModeId,
+                CollectionFeeModeId = req.CollectionFeeModeId,
                 OtherChargName = req.CollectionFeeModeName,
                 CollectionFeeRate = req.CollectionFeeRate,
                 Circle = req.Circle,

@@ -1,62 +1,63 @@
-﻿using Applications.Interfaces.Transactions;
+﻿using System.Data;
+using Applications.Extensions;
+using Applications.Interfaces.Transactions;
 using Applications.Responses;
 using Applications.Responses.Message;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Journals;
+using Applications.Responses.ViewModels.OtherNames;
+using Dapper;
 using Domains.Models.Journals;
 using Domains.Models.Transaction;
 using Infrastructures.DataAccess;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Infrastructures.Implements;
 
-public class JournalService : IJournalService
+public class JournalService(
+    ApplicationDbContext context,
+    ILogger<JournalService> logger,
+    IDbContextFactory<DataContext> dbContextFactory,
+    IDapperConnectionFactory dapperConnectionFactory)
+    : IJournalService
 {
-    private readonly ApplicationDbContext _context;
-    private ILogger<JournalService> _logger;
-    public JournalService(ApplicationDbContext context, ILogger<JournalService> logger)
+    private readonly IDapperConnectionFactory _dapperConnectionFactory = dapperConnectionFactory;
+
+    public async Task<Result<string>> CreateOrUpdateJournalAsync(string? journalId, JournalEntry journalEntry)
     {
-        this._context = context;
-        this._logger = logger;
-    }
-    public async Task<Result<string>> CreateOrUpdateJournalAsync(long? journalId, JournalEntry journalEntry)
-    {
-        _logger.LogInformation("Attempt to create Journal");
+        logger.LogInformation("Attempt to create Journal");
         //context.Database.BeginTransaction();
         try
         {
-
-            var existingJournal = _context.JournalEntries
-                                        .Include(x => x.LoanTransaction)
-                                        .Include(j => j.JournalEntryLines)
-                                        .FirstOrDefault(x => x.JournalId == journalEntry.JournalId);
-
-            JournalEntry? insertedEntity = null;
+            var existingJournal = context.JournalEntries
+                .Include(x => x.LoanTransaction)
+                .Include(j => j.JournalEntryLines)
+                .FirstOrDefault(x => x.JournalEntryId == journalEntry.JournalEntryId);
 
             if (existingJournal is null)
             {
-                insertedEntity = _context.Add(journalEntry).Entity;
+                _ = context.Add(journalEntry).Entity;
             }
             else
             {
-
-                _context.Entry(existingJournal)
-                        .CurrentValues
-                        .SetValues(journalEntry);
+                context.Entry(existingJournal)
+                    .CurrentValues
+                    .SetValues(journalEntry);
 
                 foreach (var line in journalEntry.JournalEntryLines!)
                 {
                     var existingJounralLine = existingJournal.JournalEntryLines!
-                                            .Where(x => x.JournalLineId == line.JournalLineId)
-                                            .FirstOrDefault();
+                        .Where(x => x.JournalLineId == line.JournalLineId)
+                        .FirstOrDefault();
                     if (existingJounralLine is null || existingJounralLine.JournalLineId == 0)
                     {
                         existingJournal.JournalEntryLines!.Add(line!);
                     }
                     else
                     {
-                        _context.Entry(existingJounralLine).CurrentValues.SetValues(line);
+                        context.Entry(existingJounralLine).CurrentValues.SetValues(line);
                     }
                 }
 
@@ -64,12 +65,12 @@ public class JournalService : IJournalService
                 {
                     if (!journalEntry.JournalEntryLines.Any(x => x.JournalLineId == item.JournalLineId))
                     {
-                        _context.Remove(item);
+                        context.Remove(item);
                     }
-
                 }
             }
-            await _context.SaveChangesAsync();
+
+            await context.SaveChangesAsync();
             //if(existingJournal is null)
             //{
             //    //insertedEntity!.JournalLineCount = journalEntry.JournalEntryLines!.Count;
@@ -91,7 +92,7 @@ public class JournalService : IJournalService
         catch (Exception ex)
         {
             //context.Database.RollbackTransaction();
-            _logger.LogError(ex, ex.Message);
+            logger.LogError(ex, ex.Message);
             return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}"));
         }
     }
@@ -99,37 +100,60 @@ public class JournalService : IJournalService
 
     public async Task<Result<LoanTransaction>> CreateJournalAsync(LoanTransaction model)
     {
-        _logger.LogInformation("Attempt to create Journal");
+        logger.LogInformation("Attempt to create Journal");
         try
         {
-            var insertedEntity = _context.Add(model).Entity;
-            await _context.SaveChangesAsync();
+            await using var dataContext = await dbContextFactory.CreateDbContextAsync();
+            var insertedEntity = dataContext.Add(model).Entity;
+            await dataContext.SaveChangesAsync();
             return Result.Success(insertedEntity);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, ex.Message);
+            logger.LogError(ex, ex.Message);
             return Result.Failure<LoanTransaction>(ErrorResponse.ServerError($"{ex.Message}"));
         }
     }
 
 
+    public async Task<Result<JournalEntry>> CreateJournalAsync(JournalEntry model)
+    {
+        logger.LogInformation("Attempt to create Journal");
 
-    public async Task<Result<string>> UpdateJournalAsync(long? id, LoanTransaction jTrx)
+        await using var dataContext = await dbContextFactory.CreateDbContextAsync();
+
+        try
+        {
+            dataContext.JournalEntries.Add(model);
+
+            await dataContext.SaveChangesAsync();
+
+            return Result.Success(model);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, ex.Message);
+
+            return Result.Failure<JournalEntry>(ErrorResponse.ServerError($"{ex.Message}"));
+        }
+    }
+
+    //
+    public async Task<Result<string>> UpdateJournalAsync(string? id, LoanTransaction jTrx)
     {
         try
         {
-            var trx = await _context.LoanTransaction.Include(x => x.JournalEntry)
-                                                    .ThenInclude(x => x!.JournalEntryLines)
-                                                        .Where(x => x.TranId == id)
-                                                        .FirstOrDefaultAsync();
+            var trx = await context.LoanTransaction.Include(x => x.JournalEntry)
+                .ThenInclude(x => x!.JournalEntryLines)
+                .Where(x => x.TransactionsId == id)
+                .FirstOrDefaultAsync();
             if (trx is null) return Result.Failure<string>(ErrorResponse.NotFound(Messages.DataNotFound));
 
-            _context.Database.BeginTransaction();
+            await context.Database.BeginTransactionAsync();
             trx.TransactionTypeName = jTrx.TransactionTypeName;
             var lines = trx.JournalEntry?.JournalEntryLines;
-            _context.JournalEntryLines.RemoveRange(lines!);
-            await _context.SaveChangesAsync();
+            context.JournalEntryLines.RemoveRange(lines!);
+            await context.SaveChangesAsync();
             int count = 1;
             jTrx.JournalEntry?.JournalEntryLines?.ForEach(x =>
             {
@@ -141,154 +165,203 @@ public class JournalService : IJournalService
             trx.JournalEntry!.JournalLineCount = count - 1;
             trx.JournalEntry.JournalEntryLines = jTrx.JournalEntry!.JournalEntryLines;
 
-            _context.Update(trx);
+            context.Update(trx);
 
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
 
-            _context.Database.CommitTransaction();
+            await context.Database.CommitTransactionAsync();
 
             return Result.Success(Messages.DataCreated);
-
         }
         catch (Exception ex)
         {
-            _context.Database.RollbackTransaction();
+            await context.Database.RollbackTransactionAsync();
 
             return Result.Failure<string>(ErrorResponse.ServerError(ex.Message));
         }
     }
 
-    public async Task<Result<string>> DeleteJournalAsync(long? id)
+    public async Task<Result<string>> DeleteJournalAsync(string? id)
     {
         try
         {
-            _context.Database.BeginTransaction();
+            await context.Database.BeginTransactionAsync();
 
-            var journalEntry = await _context.JournalEntries.FirstOrDefaultAsync(x => x.JournalId == id);
+            var journalEntry = await context.JournalEntries.FirstOrDefaultAsync(x => x.JournalEntryId == id);
 
             if (journalEntry is null)
             {
                 return Result.Failure<string>(ErrorResponse.NotFound(Messages.DataNotFound));
-
             }
 
-            _context.JournalEntries.Remove(journalEntry);
+            context.JournalEntries.Remove(journalEntry);
 
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
 
-            _context.Database.CommitTransaction();
+            await context.Database.CommitTransactionAsync();
 
             return Result.Success(Messages.DataDeleted);
-
         }
         catch (Exception ex)
         {
-            _context.Database.RollbackTransaction();
+            await context.Database.RollbackTransactionAsync();
 
             return Result.Failure<string>(ErrorResponse.ServerError(ex.Message));
         }
     }
 
-    public async Task<Pager<VJournal>> FindJournalsAsync(int pageIndex, int pageSize,
+    public async Task<Pager<JournalEntryVm>> GetJournalsAsync(int pageIndex, int pageSize,
         string sortColumn, bool sortDescending = false, string? q = null)
     {
-
-        IQueryable<VJournal> queries = _context.VJournals;
-
-        if (!string.IsNullOrEmpty(q))
-        {
-
-            var like = "%" + q + "%";
-
-            queries = queries.Where(x => EF.Functions.Like(x.ReferrenceNum!, like) ||
-                                         EF.Functions.Like(x.JournalType!, like) ||
-                                         EF.Functions.Like(x.TransactionTypeName!, like) ||
-                                         EF.Functions.Like(x.TransactionDate!.ToString(), like));
-        }
-
-        if (sortDescending)
-        {
-            queries = queries.OrderByDescending(x => EF.Property<object>(x, sortColumn));
-        }
-        else
-        {
-            queries = queries.OrderBy(x => EF.Property<object>(x, sortColumn));
-        }
-
+        await using var dataContext = await dbContextFactory.CreateDbContextAsync();
+        IQueryable<JournalEntryVm> queries = dataContext.VJournals
+            .WhereIf(!string.IsNullOrWhiteSpace(q), x => EF.Functions.Like(x.ReferrenceNum!, $"%{q}%") ||
+                                                         EF.Functions.Like(x.JournalType!, $"%{q}%") ||
+                                                         EF.Functions.Like(x.TransactionTypeName!, $"%{q}%") ||
+                                                         EF.Functions.Like(x.TransactionDate!.ToString(), $"%{q}%"))
+            .OrderByDescendingIf(sortDescending, x => EF.Property<object>(x, sortColumn));
         var pageCount = await queries.CountAsync();
         var pageItems = queries.Skip(pageIndex).Take(pageSize).ToList();
 
-        return new Pager<VJournal>
+        return new Pager<JournalEntryVm>
         {
             Count = pageCount,
             Items = pageItems
         };
-
-
     }
 
-    public async Task<IEnumerable<JournalEntry>> FindJournalsAsync(long? journalId = 0, string? q = null)
+    public async Task<Pager<JournalEntryVm>> GetJournalsAsync(int? branchId, QueryParam param)
     {
+        await using var dataContext = await dbContextFactory.CreateDbContextAsync();
+        IQueryable<JournalEntryVm> queries = dataContext.VJournals
+            .Where(x => x.BranchId == branchId)
+            .WhereIf(!string.IsNullOrWhiteSpace(param.Filter), x =>
+                EF.Functions.Like(x.ReferrenceNum!, $"%{param.Filter}%") ||
+                EF.Functions.Like(x.JournalType!, $"%{param.Filter}%") ||
+                EF.Functions.Like(x.TransactionTypeName!, $"%{param.Filter}%") ||
+                EF.Functions.Like(x.TransactionDate!.ToString(), $"%{param.Filter}%"))
+            .OrderByDescendingIf(param.SortDescending, x => EF.Property<object>(x, param.SortColumn));
+        var pageCount = await queries.CountAsync();
+        var pageItems = await queries.Skip(param.PageNumber).Take(param.PageSize)
+            .AsNoTracking()
+            .ToListAsync();
 
-        IQueryable<JournalEntry> queries = _context.JournalEntries
-                                                   .Include(x => x.LoanTransaction)
-                                                   .Include(x => x.JournalEntryLines);
-
-        if (journalId > 0)
+        return new Pager<JournalEntryVm>
         {
-            queries = queries.Where(x => x.JournalId == journalId);
+            Count = pageCount,
+            Items = pageItems
+        };
+    }
+
+    public async Task<IEnumerable<JournalEntry>> GetJournalsAsync(string? journalId, string? q = null)
+    {
+        IQueryable<JournalEntry> queries = context.JournalEntries
+            .Include(x => x.LoanTransaction)
+            .Include(x => x.JournalEntryLines);
+
+        if (journalId.IsNotNullOrEmpty())
+        {
+            queries = queries.Where(x => x.JournalEntryId == journalId);
         }
 
         if (!string.IsNullOrEmpty(q))
         {
-
             var like = "%" + q + "%";
 
             queries = queries.Where(x => EF.Functions.Like(x.ReferrenceNum!, like) ||
                                          EF.Functions.Like(x.JournalType!, like) ||
-                                         EF.Functions.Like(x.JournalId!.ToString(), like) ||
+                                         EF.Functions.Like(x.JournalEntryId, like) ||
                                          EF.Functions.Like(x.LoanTransaction!.TransactionDate!.ToString(), like));
         }
 
         return await queries.AsNoTracking().ToListAsync();
-
-
     }
 
-    public async Task<JournalEntry?> FindJournalByIdAsync(long? id)
+
+    public async Task<Result<JournalEntryVm>> GetJournalByIdAsync(string? journalId, bool include)
     {
-        var journal = _context.JournalEntries
-                                .Where(x => x.JournalId == id)
-                                .Include(x => x.LoanTransaction)
-                                .Include(a => a.JournalEntryLines);
+        //spGetJournalEntries
+        if (journalId.IsNotNullOrEmpty())
+        {
+            return Result.Failure<JournalEntryVm>(
+                ErrorResponse.NotFound($"There is no journal with this id:{journalId}."));
+        }
+
+        using var db = _dapperConnectionFactory.CreateConnection();
+
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        var parameters = new DynamicParameters();
+        parameters.Add("@JounrnalEntryId", journalId);
+        parameters.Add("@Include", include);
+        if (!include)
+        {
+            var existingJournal =
+                await db.QueryFirstOrDefaultAsync("spGetJournalEntries",
+                    param: parameters,
+                    commandType: CommandType.StoredProcedure);
+
+            return existingJournal is null
+                ? Result.Failure<JournalEntryVm>(ErrorResponse.NotFound("Data Not Found."))
+                : (Result<JournalEntryVm>)Result.Success(existingJournal);
+        }
+
+        var lookup = new Dictionary<string, JournalEntryVm>();
+        var items = await db.QueryAsync<JournalEntryVm, JournalEntryLineVm, JournalEntryVm>("spGetJournalEntries",
+            (journal, line) =>
+            {
+                if (lookup.TryGetValue(journal.JournalEntryId!, out var journalEntryVm))
+                {
+                    journal = journalEntryVm;
+                }
+                else
+                {
+                    lookup.Add(journal.JournalEntryId!, journalEntryVm!);
+                }
+
+                journal.JournalEntryLines?.Add(line);
+                return journal;
+            }, splitOn: "JournalLineId",
+            param: parameters,
+            commandType: CommandType.StoredProcedure);
+
+        var item2 = items.FirstOrDefault(x => x.JournalEntryId == journalId);
+
+        return item2 is null
+            ? Result.Failure<JournalEntryVm>(ErrorResponse.NotFound("Data Not Found."))
+            : Result.Success(item2);
+    }
+
+    public async Task<JournalEntry?> GetJournalByIdAsync(string? id)
+    {
+        var journal = context.JournalEntries
+            .Where(x => x.JournalEntryId == id)
+            .Include(x => x.LoanTransaction)
+            .Include(a => a.JournalEntryLines);
         return await journal.AsNoTracking().FirstOrDefaultAsync();
     }
 
 
-    public async Task<IEnumerable<JournalType>> FindJournalTypesAsync(string? expression = null)
+    public async Task<IEnumerable<JournalType>> GetJournalTypesAsync(string? expression = null)
     {
-        IQueryable<JournalType> journalTypes = _context.JournalTypes;
+        IQueryable<JournalType> journalTypes = context.JournalTypes;
         if (!string.IsNullOrEmpty(expression))
         {
             journalTypes = journalTypes.Where(x =>
-               x.Code != null && x.Code.ToLower().StartsWith(expression)
-               || x.Description != null && x.Description.ToLower().StartsWith(expression));
+                x.Code != null && x.Code.ToLower().StartsWith(expression)
+                || x.Description != null && x.Description.ToLower().StartsWith(expression));
         }
+
         return await journalTypes.AsNoTracking().ToListAsync() ?? Enumerable.Empty<JournalType>();
     }
 
-    public async Task<IEnumerable<VNameList>> FindNameLists(long? id = 0, int takeRows = 0, string? q = null)
+    public async Task<IEnumerable<VNameList>> GetNameLists(long? id = 0, int takeRows = 0, string? q = null)
     {
-        IQueryable<VNameList> queries = _context.NameLists;
+        await using var context1 = await dbContextFactory.CreateDbContextAsync();
 
-        if (id > 0)
-        {
-            queries = queries.Where(x => x.Id == id);
-        }
+        IQueryable<VNameList> queries = context.NameLists;
 
         if (!string.IsNullOrEmpty(q))
         {
-
             var filter = "%" + q + "%";
 
             queries = queries.Where(x => EF.Functions.Like(x.FullName, $"%{q}%") ||
@@ -304,6 +377,31 @@ public class JournalService : IJournalService
     }
 
 
+    public async Task<IEnumerable<T>> GetNameLists<T>(string? nameId, QueryParam param) where T : class, new()
+    {
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+        IQueryable<NameListVm> queries = context.Database
+            .SqlQuery<NameListVm>($@"SELECT * FROM {nameof(VNameList)}")
+            .WhereIf(!string.IsNullOrEmpty(param.Filter), x => EF.Functions.Like(x.FirstName!, $"%{param.Filter}%") ||
+                                                               EF.Functions.Like(x.LastName!, $"%{param.Filter}%") ||
+                                                               EF.Functions.Like(x.Name!, $"%{param.Filter}%") ||
+                                                               EF.Functions.Like(x.AltName!, $"%{param.Filter}%"))
+            .WhereIf(!string.IsNullOrEmpty(nameId), x => x.Id.Contains(nameId!))
+            .OrderByDescendingIf(param.SortDescending, x => EF.Property<object>(x, param.SortColumn));
+
+        if (param.PageSize > 0)
+        {
+            queries = queries.Take(param.PageSize).OrderByDescending(x => x.FullName);
+        }
+
+        var items = await queries
+            .ProjectToType<T>()
+            .AsNoTracking()
+            .ToListAsync();
+
+        return items;
+    }
 }
 
 //public async Task<JournalEntry?> FindJournal(Expression<Func<JournalEntry, bool>> expression, params string[] includes)

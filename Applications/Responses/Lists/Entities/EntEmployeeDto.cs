@@ -1,6 +1,7 @@
-﻿using Domains.Models.Loans;
+﻿using Applications.Requests.Lists.Entities;
+using Domains.Models.Loans;
 
-namespace Applications.Requests.Lists.Entities;
+namespace Applications.Responses.Lists.Entities;
 public class EntEmployeeDto
 {
     public long EmployeeId { get; set; }

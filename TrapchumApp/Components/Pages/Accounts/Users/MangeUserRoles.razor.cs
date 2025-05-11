@@ -32,6 +32,7 @@ namespace TrapchumApp.Components.Pages.Accounts.Users
             catch (Exception ex)
             {
                 IsLoading = true;
+                Console.WriteLine(ex.Message);
                 throw;
             }
             finally

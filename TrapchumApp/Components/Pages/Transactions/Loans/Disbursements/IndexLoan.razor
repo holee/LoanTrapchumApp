@@ -1,8 +1,8 @@
-﻿@page "/Loans"
+﻿@page "/App/Loan/{BranchId:int}/Branches"
 @using Applications.Responses.ViewModels.Loans
 <PageTitle>All</PageTitle>
 @attribute [Authorize]
-<RadzenTabs TabPosition="Radzen.TabPosition.Top" RenderMode="TabRenderMode.Server" SelectedIndex="0">
+<RadzenTabs TabPosition="TabPosition.Top" RenderMode="TabRenderMode.Server" SelectedIndex="0">
     <Tabs>
         <RadzenTabsItem Text="All Loans">
             <Template>
@@ -35,10 +35,10 @@
                         Click="@(()=>GetLoanDetails(p))"
                         Text="Loan Details"></RadzenMenuItem>
         <RadzenMenuItem Icon="file_download"
-                        Click="@(()=>DownLoadScheduleAsExcel(p.Id!.Value,p.BranchId!.Value))"
+                        Click="@(()=>DownLoadScheduleAsExcel(p.LoanId,p.BranchId!.Value))"
                         Text="Export Loan to Excel" />
         <RadzenMenuItem Icon="picture_as_pdf"
-                        Click="@(()=>DownLoadScheduleAsPdf(p.Id!.Value,p.BranchId!.Value))"
+                        Click="@(()=>DownLoadScheduleAsPdf(p.LoanId,p.BranchId!.Value))"
                         Text="Export Loan to Pdf" />
     </RadzenMenu>
     );

@@ -8,13 +8,17 @@ namespace Applications.Interfaces.Transactions;
 
 public interface IJournalService 
 {
-    Task<Result<string>> CreateOrUpdateJournalAsync(long? journalId, JournalEntry journalEntry);
+    Task<Result<string>> CreateOrUpdateJournalAsync(string? journalId, JournalEntry journalEntry);
     Task<Result<LoanTransaction>> CreateJournalAsync(LoanTransaction model);
-    Task<Result<string>> DeleteJournalAsync(long? id);
-    Task<JournalEntry?> FindJournalByIdAsync(long? id);
-    Task<IEnumerable<JournalType>> FindJournalTypesAsync(string? expression=null);
-    Task<Pager<VJournal>> FindJournalsAsync(int pageIndex, int pageSize, string sortColumn, bool sortDescending = false, string? q = null);
-    Task<IEnumerable<JournalEntry>> FindJournalsAsync(long? journalId = 0, string? q = null);
-    Task<IEnumerable<VNameList>> FindNameLists(long? id = 0, int takeRows = 0, string? q = null);
-    
+    Task<Result<JournalEntry>> CreateJournalAsync(JournalEntry model);
+    Task<Result<string>> DeleteJournalAsync(string? id);
+    Task<JournalEntry?> GetJournalByIdAsync(string? id);
+    Task<Result<JournalEntryVm>> GetJournalByIdAsync(string? journalId, bool include);
+    Task<IEnumerable<JournalType>> GetJournalTypesAsync(string? expression=null);
+    Task<Pager<JournalEntryVm>> GetJournalsAsync(int pageIndex, int pageSize, string sortColumn, bool sortDescending = false, string? q = null);
+    Task<IEnumerable<JournalEntry>> GetJournalsAsync(string? journalId, string? q = null);
+    Task<IEnumerable<VNameList>> GetNameLists(long? id = 0, int takeRows = 0, string? q = null);
+    Task<IEnumerable<T>> GetNameLists<T>(string? nameId, QueryParam param) where T : class, new();
+    Task<Pager<JournalEntryVm>> GetJournalsAsync(int? branchId,QueryParam param);
+
 }

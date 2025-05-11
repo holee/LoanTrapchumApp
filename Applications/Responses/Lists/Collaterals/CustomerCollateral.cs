@@ -1,7 +1,7 @@
-﻿namespace Applications.Requests.Collaterals;
+﻿namespace Applications.Responses.Lists.Collaterals;
 
 public class CustomerCollateral
 {
-    public Guid? CustomerId { get; set; }
+    public string? CustomerId { get; set; }
     public string? Name { get; set; }    
 }

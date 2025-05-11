@@ -1,73 +1,42 @@
-﻿@page "/Employees/CreditAgents"
+﻿@page "/App/Employee/CreditAgent"
 @using Applications.Responses.ViewModels.Employees;
+<PageTitle>Credit Agent</PageTitle>
 <RadzenCard>
     <RadzenTabs SelectedIndex="selectedTabIndex"
                 SelectedIndexChanged="SelectedTabChanged"
-                @ref="tabs"
                 RenderMode="TabRenderMode.Server">
         <Tabs>
             <RadzenTabsItem Text="All" Icon="people_alt">
-                <RadzenRow AlignItems="AlignItems.Center" RowGap="0.5rem" class="mb-2">
-                    <RadzenColumn Size="2">
-                        <RadzenStack AlignItems="AlignItems.Center"
-                                     JustifyContent="JustifyContent.Start"
-                                     Orientation="Orientation.Horizontal">
-                            <div class="dropdown-center">
-                                <RadzenButton class="rz-background-color-base-100"
-                                              ButtonType="Radzen.ButtonType.Button"
-                                              Size="Radzen.ButtonSize.Small"
-                                              ButtonStyle="ButtonStyle.Light"
-                                              data-bs-toggle="dropdown"
-                                              Shade="Shade.Darker"
-                                              aria-expanded="false">
-                                    Show @(pageSize) rows
-                                </RadzenButton>
-                                <ul class="dropdown-menu">
-                                    <li><button onclick="@(()=>ChangedPageSize(10))" class="btn-sm dropdown-item" type="button">10 Rows</button></li>
-                                    <li><button onclick="@(()=>ChangedPageSize(25))" class="btn-sm dropdown-item" type="button">25 Rows</button></li>
-                                    <li><button onclick="@(()=>ChangedPageSize(50))" class="btn-sm dropdown-item" type="button">50 Rows</button></li>
-                                    <li><button onclick="@(()=>ChangedPageSize(100))" class="btn-sm dropdown-item" type="button">100 Rows</button></li>
-                                </ul>
-                            </div>
+                <PageDropDown PageSizeChanged="ChangedPageSize"
+                              OnTextChanged="GetSearchChandged"
+                              ShowSearchBox="true">
+                    <LeftChildContent>
+                        <RadzenStack Orientation="Orientation.Horizontal"
+                                     AlignItems="AlignItems.Center"
+                                     JustifyContent="JustifyContent.SpaceBetween">
+                            <RadzenButton Text="Credit Officer"
+                                          Click="AddCreditAgentTab"
+                                          ButtonStyle="ButtonStyle.Primary"
+                                          Icon="add"
+                                          Size="ButtonSize.Small" />
                         </RadzenStack>
-                    </RadzenColumn>
-                    <RadzenColumn Size="4">
-                        <RadzenStack AlignItems="AlignItems.Center"
-                                     JustifyContent="JustifyContent.Center"
-                                     Orientation="Orientation.Horizontal">
-                            <div class="input-group input-group-sm">
-                                <span class="input-group-text">
-                                    Branch
-                                </span>
-                                <RadzenDropDown TValue="int"
-                                                TextProperty="BranchName"
-                                                ValueProperty="BranchId"
-                                                Data="Branches"
-                                                Style="width:75%"
-                                                @bind-Value:after="SelectedBranchChanged"
-                                                @bind-Value="BranchId">
-                                </RadzenDropDown>
-                            </div>
-                        </RadzenStack>
-                    </RadzenColumn>
-                    <RadzenColumn Size="6">
-                        <RadzenStack AlignItems="AlignItems.Center"
-                                     JustifyContent="JustifyContent.End"
-                                     Orientation="Orientation.Horizontal">
-                            <RadzenFormField AllowFloatingLabel="false" Variant="Variant.Outlined">
-                                <Start>
-                                    <RadzenIcon Icon="search" />
-                                </Start>
-                                <ChildContent>
-                                    <RadzenTextBox @bind-Value="searchText"
-                                                   @bind-Value:after="GetSearchChandged"
-                                                   Placeholder="Search Credit Agent Here.." />
-                                </ChildContent>
-                            </RadzenFormField>
-                        </RadzenStack>
-
-                    </RadzenColumn>
-                </RadzenRow>
+                    </LeftChildContent>
+                    <RightChildContent>
+                        <div class="input-group input-group-sm w-50">
+                            <span class="input-group-text">
+                                Branch
+                            </span>
+                            <RadzenDropDown TValue="int"
+                                            TextProperty="BranchName"
+                                            ValueProperty="BranchId"
+                                            Data="Branches"
+                                            class="w-auto"
+                                            @bind-Value:after="SelectedBranchChanged"
+                                            @bind-Value="BranchId">
+                            </RadzenDropDown>
+                        </div>
+                    </RightChildContent>
+                </PageDropDown>
                 <RadzenStack AlignItems="AlignItems.Center"
                              JustifyContent="JustifyContent.Center"
                              Orientation="Orientation.Horizontal">
@@ -80,18 +49,8 @@
                                     LoadData="LoadData"
                                     IsLoading="isLoading"
                                     Count="@counts"
+                                    AllowAlternatingRows="true"
                                     GridLines="DataGridGridLines.Both">
-                        <HeaderTemplate>
-                            <RadzenStack Orientation="Orientation.Horizontal"
-                                         AlignItems="AlignItems.Center"
-                                         JustifyContent="JustifyContent.SpaceBetween">
-                                <RadzenButton Text="Credit Officer"
-                                              Click="AddCreditAgentTab"
-                                              ButtonStyle="ButtonStyle.Primary"
-                                              Icon="add"
-                                              Size="Radzen.ButtonSize.Small" />
-                            </RadzenStack>
-                        </HeaderTemplate>
                         <Columns>
                             <RadzenDataGridColumn Property="LoanCreditAgentId"
                                                   Title="#"
@@ -110,17 +69,17 @@
                             <RadzenDataGridColumn Property="LastName" Title="Last Name" Sortable="true" />
                             <RadzenDataGridColumn Property="Phone" Title="Phone" Sortable="false" />
                             <RadzenDataGridColumn Property="BranchName" Title="Branch" Sortable="true" />
-                            <RadzenDataGridColumn Width="5rem" Context="c" Title="Remove" Sortable="false">
+                            <RadzenDataGridColumn TextAlign="TextAlign.Center" Width="5rem" Context="c" Title="Remove" Sortable="false">
                                 <Template>
                                     <CreditAgentSwitch Reload="Reload" CreditAgent="@c" />
                                 </Template>
                             </RadzenDataGridColumn>
                             <RadzenDataGridColumn Width="5rem"
                                                   TextAlign="TextAlign.Center"
-                                                  Context="c" Title="Remove" Sortable="false">
+                                                  Context="c" Title="Account" Sortable="false">
                                 <Template>
                                     <RadzenButton ButtonStyle="ButtonStyle.Primary"
-                                                  Size="Radzen.ButtonSize.ExtraSmall"
+                                                  Size="ButtonSize.ExtraSmall"
                                                   Click="@(()=>AddUserAccount(c))"
                                                   Icon="person_add" />
                                 </Template>
@@ -134,32 +93,41 @@
                              Orientation="Orientation.Horizontal"
                              class="mb-2"
                              JustifyContent="JustifyContent.End">
-                    <RadzenFormField>
-                        <Start>
-                            <RadzenIcon Icon="search" />
-                        </Start>
-                        <ChildContent>
-                            <RadzenTextBox Placeholder="Search Employee"
-                                           @bind-Value="searchText"
-                                           @bind-Value:after="SearchCreditAgent" />
-                        </ChildContent>
-                    </RadzenFormField>
+                    <SearchBox Placeholder="Search Employee"
+                               @bind-Value="_filter"
+                               SearchChanged="SearchCreditAgent" />
                 </RadzenStack>
                 <RadzenDataGrid TItem="VEmployeeCreateCreditAgent"
-                                PageSize="10"
+                                PageSize="15"
                                 ColumnWidth="10rem"
-                                style="--rz-grid-header-background-color:var(--rz-base-200);"
+                                ShowPagingSummary="true"
+                                AllowAlternatingRows="true"
+                                AllowPaging="true"
                                 Density="Density.Compact"
-                                Data="CreditAgentPageList">
+                                PagerPosition="PagerPosition.Bottom"
+                                PagerHorizontalAlign="HorizontalAlign.Right"
+                                Data="empCreditAgents">
                     <Columns>
+                        <RadzenDataGridColumn Width="5rem"
+                                              TextAlign="TextAlign.Center"
+                                              Property="@nameof(VEmployeeCreateCreditAgent.EmployeeId)" Title="#">
+                            <Template>
+                                <strong>
+                                    @{
+                                        var index = empCreditAgents.IndexOf(context) + 1;
+                                    }
+                                    @index
+                                </strong>
+                            </Template>
+                        </RadzenDataGridColumn>
                         <RadzenDataGridColumn Property="FirstName" Title="First Name" />
                         <RadzenDataGridColumn Property="LastName" Title="Last Name" />
                         <RadzenDataGridColumn Property="Gender" Title="Gender" />
                         <RadzenDataGridColumn Property="BranchName" Title="Branch Name" />
                         <RadzenDataGridColumn Width="6rem" Title="Action" Sortable="false">
                             <Template>
-                                <RadzenButton Size="Radzen.ButtonSize.ExtraSmall"
-                                              Click="@(()=>AddCreditAgent(context!.EmployeeId!.Value))"
+                                <RadzenButton Size="ButtonSize.ExtraSmall"
+                                              Click="@(()=>AddCreditAgent(context!.EmployeeId))"
                                               Variant="Variant.Text"
                                               Text="Make C.O"
                                               ButtonStyle="ButtonStyle.Primary"
@@ -178,7 +146,7 @@
                  Orientation="Orientation.Horizontal">
         <RadzenButton Text="Close"
                       Icon="cancel"
-                      Size="Radzen.ButtonSize.Small"
+                      Size="ButtonSize.Small"
                       Click="RemoveTab"
                       ButtonStyle="ButtonStyle.Danger" />
     </RadzenStack>

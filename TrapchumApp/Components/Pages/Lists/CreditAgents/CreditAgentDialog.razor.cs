@@ -1,5 +1,5 @@
-using Applications.Requests.Lists.Entities;
 using Applications.Requests.Loans.CreditAgents;
+using Applications.Responses.Lists.Entities;
 using Applications.Responses.ViewModels.Employees;
 using Applications.Services.Lists;
 using Microsoft.AspNetCore.Components;
@@ -10,7 +10,6 @@ namespace TrapchumApp.Components.Pages.Lists.CreditAgents
     {
         protected IEnumerable<EntEmployeeDto> Employees { get; set; } = [];
         private LoanCreditAgentDtoCreate model = new LoanCreditAgentDtoCreate();
-        private IEnumerable<VEmployeeCreateCreditAgent> CreditAgentPageList = [];
         private List<VEmployeeCreateCreditAgent> CreditAgents = [];
         [Parameter] public long Id { get; set; }
         [Inject] protected ICreditAgentServiceImpl CreditAgentService { get; set; } = default!;
@@ -21,6 +20,7 @@ namespace TrapchumApp.Components.Pages.Lists.CreditAgents
         protected override async Task OnInitializedAsync()
         {
             await LoadPageList();
+
             await base.OnInitializedAsync();
         }
         async Task SearchCreditAgent()
@@ -28,7 +28,7 @@ namespace TrapchumApp.Components.Pages.Lists.CreditAgents
             await LoadPageList(searchText);
         }
 
-        private async Task AddCreditAgent(Guid? id)
+        private async Task AddCreditAgent(string? id)
         {
             try
             {
@@ -56,7 +56,18 @@ namespace TrapchumApp.Components.Pages.Lists.CreditAgents
         {
             try
             {
-                CreditAgentPageList = await CreditAgentService.GetEmployeeCreateCreditAgents(filter);
+
+                var rsp = await CreditAgentService.GetEmployeeCreateCreditAgents(filter);
+
+                if (rsp.IsSuccess)
+                {
+                    CreditAgents = rsp.Data!.ToList();
+                }
+                else
+                {
+                    NotificationService.Notify(Radzen.NotificationSeverity.Error, rsp.ErrMessage);
+                    return;
+                }
             }
             catch (Exception ex)
             {

@@ -4,7 +4,7 @@ public class VLoanRepaymentLine
 {
     public long? Id { get; set; }
     public long? LoanScheduleRefId { get; set; }  
-    public long LoanRefId { get; set; }
+    public string? LoanRefId { get; set; }
     public int InstallmentNo { get; set; }
     public decimal PaidPrinciple { get; set; }
     public decimal PaidInterest { get; set; }

@@ -1,49 +1,75 @@
-﻿<table class="table table-sm">
-    <tbody>
-        <tr>
-            <td class="rz-background-color-base-100 w-2">Name</td>
-            <th>@LoanSchedule?.AltName</th>
-            <td class="rz-background-color-base-100">Address</td>
-            <th>@LoanSchedule?.Address</th>
-        </tr>
-        <tr>
-            <td class="rz-background-color-base-100">Contract</td>
-            <th>@LoanSchedule?.CurrencyName</th>
-            <td class="rz-background-color-base-100">Amount</td>
-            <th>
-                @(string.Format("{0:#,###.00}", LoanSchedule?.Amount))
-            </th>
-            <td class="rz-background-color-base-100">Phone</td>
-            <th>@LoanSchedule?.Phone</th>
-        </tr>
-        <tr>
-            <td class="rz-background-color-base-100">Account Number</td>
-            <th>@LoanSchedule?.PaidPrinciple</th>
-            <td class="rz-background-color-base-100">Expiry Date</td>
-            <th>
-                @(string.Format("{0:dd/MM/yyyy}", LoanSchedule?.LastPaymentDate))
-            </th>
-            <td class="rz-background-color-base-100">Interest Rate</td>
-            <th>@LoanSchedule?.InterestRate</th>
-        </tr>
-        <tr>
-            <td class="rz-background-color-base-100">Date</td>
-            <th>
-                @(string.Format("{0:dd/MM/yyyy}", LoanSchedule?.RegisterDate))
-            </th>
-            <td class="rz-background-color-base-100">Agent</td>
-            <th>@LoanSchedule?.AgentName</th>
-            <td class="rz-background-color-base-100">Phone</td>
-            <th>@LoanSchedule?.AgentPhone</th>
-        </tr>
-        <tr>
-            <td class="rz-background-color-base-100">Period</td>
-            <th>@LoanSchedule?.Period (Months)</th>
-            <td class="rz-background-color-base-100">Office</td>
-            <th>Trapchum</th>
-            <td class="rz-background-color-base-100">Circle</td>
-            <th>@LoanSchedule?.Circle</th>
-        </tr>
-    </tbody>
-</table>
+﻿<Containers Fluid CssClass="rz-mb-2">
+    <ChildContent>
+        <RadzenStack AlignItems="AlignItems.Center"
+                     Gap="1rem"
+                     class="rz-mb-2"
+                     Orientation="Orientation.Horizontal"
+                     JustifyContent="JustifyContent.End">
+            <RadzenButton Size="ButtonSize.ExtraSmall"
+                          Click="@DownLoadScheduleAsExcel"
+                          ButtonStyle="ButtonStyle.Success"
+                          Icon="file_download" Text="Export Excel" />
+            <RadzenButton Click="@DownLoadScheduleAsPdf"
+                          Size="ButtonSize.ExtraSmall"
+                          ButtonStyle="ButtonStyle.Light"
+                          Text="Export Pdf"
+                          Icon="picture_as_pdf" />
+        </RadzenStack>
+        <RadzenFieldset AllowCollapse="true" Collapsed="true">
+            <HeaderTemplate>
+                <RadzenIcon Icon="info" /><strong>Loan Information</strong>
+            </HeaderTemplate>
+            <ChildContent>
+                <table class="table table-sm table-bordered">
+                    <tbody>
+                        <tr>
+                            <th class="w-25">Name</th>
+                            <td>@LoanSchedule?.AltName</td>
+                            <th>Address</th>
+                            <td colspan="3">@LoanSchedule?.Address</td>
+                        </tr>
+                        <tr>
+                            <th>Contract</th>
+                            <td>@LoanSchedule?.CurrencyName</td>
+                            <th>Amount</th>
+                            <td>
+                                @(string.Format("{0:#,###.00}", LoanSchedule?.Amount))
+                            </td>
+                            <th>Phone</th>
+                            <td>@LoanSchedule?.Phone</td>
+                        </tr>
+                        <tr>
+                            <th>Account Number</th>
+                            <td>@LoanSchedule?.PaidPrinciple</td>
+                            <th>Expiry Date</th>
+                            <td>
+                                @(string.Format("{0:dd/MM/yyyy}", LoanSchedule?.LastPaymentDate))
+                            </td>
+                            <th>Interest Rate</th>
+                            <td>@LoanSchedule?.InterestRate</td>
+                        </tr>
+                        <tr>
+                            <th>Date</th>
+                            <td>
+                                @(string.Format("{0:dd/MM/yyyy}", LoanSchedule?.RegisterDate))
+                            </td>
+                            <th>Agent</th>
+                            <td>@LoanSchedule?.AgentName</td>
+                            <th>Phone</th>
+                            <td>@LoanSchedule?.AgentPhone</td>
+                        </tr>
+                        <tr>
+                            <th>Period</th>
+                            <td>@LoanSchedule?.Period (Months)</td>
+                            <th>Office</th>
+                            <td>Trapchum</td>
+                            <th>Circle</th>
+                            <td>@LoanSchedule?.Circle</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </ChildContent>
+        </RadzenFieldset>
+    </ChildContent>
+</Containers>
 

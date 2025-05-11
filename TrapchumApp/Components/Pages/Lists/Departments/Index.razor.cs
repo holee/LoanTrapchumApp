@@ -126,7 +126,7 @@ namespace TrapchumApp.Components.Pages.Lists.Departments
 
                 if (result.IsSuccess)
                 {
-                    NotificationService.Notify(NotificationSeverity.Success,"Create Success");
+                    NotificationService.Notify(NotificationSeverity.Success,"CreateNewUser Success");
                     await GetDepartments(searchText);
                 }
                 else

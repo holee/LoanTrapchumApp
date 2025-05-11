@@ -11,5 +11,6 @@ namespace Applications.Interfaces.Loans
         Task<IEnumerable<LoanSubTypeStatus>> GetSubSubTypeStatus(int? subTypeRefId = null, string? q = null);
         Task<IEnumerable<LoanTypeStatus>> GetSubTypeStatus(string? q = null);
         Task<IEnumerable<AprovePerson>> GetAprovedUserAsync(int? branchId, string? filter = null);
+        Task<IEnumerable<T>> GetAprovedUserAsync<T>(int? branchId, string? filter = null) where T : class;
     }
 }

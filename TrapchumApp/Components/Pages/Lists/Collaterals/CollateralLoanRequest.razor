@@ -1,4 +1,5 @@
-﻿@using Applications.Responses.ViewModels.Collaterals
+﻿@using Applications.Responses.Lists.Collaterals
+@using Applications.Responses.ViewModels.Collaterals
 <RadzenDataGrid GridLines="DataGridGridLines.Both"
                 Responsive
                 TItem="VCollateralLines"
@@ -11,7 +12,7 @@
                 Style="min-height:20rem;height:20rem;max-height:20rem;"
                 Data="CollateralLines">
     <HeaderTemplate>
-        <RadzenButton Size="Radzen.ButtonSize.Small"
+        <RadzenButton Size="ButtonSize.Small"
                       Click="Add"
                       Icon="add"
                       Text="Add New"
@@ -58,12 +59,12 @@
              Orientation="Orientation.Horizontal"
              class="my-2"
              JustifyContent="JustifyContent.End">
-    <RadzenButton Size="Radzen.ButtonSize.ExtraSmall"
+    <RadzenButton Size="ButtonSize.ExtraSmall"
                   ButtonStyle="ButtonStyle.Success"
                   Icon="check"
                   Click="@(()=>DialogService.Close(SelectedCollateralLines))"
                   Text="Accept" />
-    <RadzenButton Size="Radzen.ButtonSize.ExtraSmall"
+    <RadzenButton Size="ButtonSize.ExtraSmall"
                   ButtonStyle="ButtonStyle.Danger"
                   Icon="cancel"
                   Click="@(()=>DialogService.Close(SelectedCollateralLines))"

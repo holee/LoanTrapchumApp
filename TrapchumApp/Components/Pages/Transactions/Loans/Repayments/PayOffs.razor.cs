@@ -1,5 +1,5 @@
-using Applications.Extensions;
-using Applications.Extensions.NumberExtions;
+using Applications.Calculations;
+using Applications.Extensions.NumberExtensions;
 using Applications.Interfaces.Currencies;
 using Applications.Interfaces.Loans;
 using Applications.Requests.Loans.Payments;
@@ -309,7 +309,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
             }
             catch (Exception ex)
             {
-                NotificationService.Notify(Radzen.NotificationSeverity.Error, ex.Message);
+                NotificationService.Notify(NotificationSeverity.Error, ex.Message);
                 isLoading = false;
             }
             finally

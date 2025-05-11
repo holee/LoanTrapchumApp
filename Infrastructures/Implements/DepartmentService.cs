@@ -4,6 +4,7 @@ using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Departments;
 using Domains.Models.Lists;
 using Infrastructures.DataAccess;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructures.Implements;
@@ -38,7 +39,7 @@ public class DepartmentService : IDepartmentService
         }
 
     }
-    public async Task<Result<string>> DeleteAsync(int id)
+    public async Task<Result<string>> DeleteAsync(int? id)
     {
         try
         {
@@ -59,7 +60,7 @@ public class DepartmentService : IDepartmentService
         }
 
     }
-    public async Task<Result<Department>> GetDepartmentById(int departmentId)
+    public async Task<Result<Department>> GetDepartmentById(int? departmentId)
     {
         var department = await _context.Departments.Where(dept => dept.DepartmentId == departmentId).FirstOrDefaultAsync();
 
@@ -67,7 +68,7 @@ public class DepartmentService : IDepartmentService
 
         return Result.Success<Department>(department);
     }
-    public async Task<Result<VDepartment>> GetDepartmentDetails(int departmentId)
+    public async Task<Result<VDepartment>> GetDepartmentDetails(int? departmentId)
     {
         var department = _context.VDepartments.Where(dept => dept.DepartmentId == departmentId);
 
@@ -77,7 +78,9 @@ public class DepartmentService : IDepartmentService
 
         return Result.Success<VDepartment>(dept!);
     }
-    public async Task<Result<IEnumerable<Department>>> GetDepartments(int departmentId = 0, int take = 0, bool includeInactive = false, string? condition = null)
+
+
+    public async Task<Result<IEnumerable<Department>>> GetDepartments(int? departmentId = 0, int take = 0, bool includeInactive = false, string? condition = null)
     {
         IQueryable<Department> depsQuery = _context.Departments;
 
@@ -108,6 +111,39 @@ public class DepartmentService : IDepartmentService
         return Result.Success<IEnumerable<Department>>(depts);
 
     }
+
+
+    public async Task<Result<IEnumerable<T>>> GetDepartments<T>(int? departmentId, int take = 10,string? filter=null)
+        where T:class
+    {
+        IQueryable<Department> depsQuery = _context.Departments;
+
+
+        if (!string.IsNullOrEmpty(filter))
+        {
+            depsQuery=depsQuery.Where(x=>x.DepartmentName!.Contains(filter));
+        }
+
+        if (departmentId > 0)
+        {
+            depsQuery = depsQuery.Where(x => x.DepartmentId == departmentId);
+        }
+
+        if (take > 0)
+        {
+            depsQuery = depsQuery.Take(take).OrderByDescending(x => x.DepartmentName);
+        }
+
+        var depts = await depsQuery
+                                .ProjectToType<T>()
+                                .AsNoTracking()
+                                .ToListAsync();
+
+        return Result.Success<IEnumerable<T>>(depts);
+
+    }
+
+
     public async Task<Pager<VDepartment>> GetDepartments(QueryParam param)
     {
         IQueryable<VDepartment> query = _context.VDepartments;
@@ -129,7 +165,7 @@ public class DepartmentService : IDepartmentService
 
         var counts = await query.CountAsync();
 
-        var data = await query.Skip(param.PageIndex)
+        var data = await query.Skip(param.PageNumber)
                        .Take(param.PageSize)
                        .AsNoTracking()
                        .ToListAsync();
@@ -158,7 +194,7 @@ public class DepartmentService : IDepartmentService
         }
 
     }
-    public async Task<Result<string>> ActivateOrDeactivate(int id, Department req)
+    public async Task<Result<string>> ActivateOrDeactivate(int? id, Department req)
     {
         try
         {

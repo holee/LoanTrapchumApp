@@ -1,6 +1,6 @@
 ﻿@page "/App/Account/Users"
-@inject IdentityRedirectManager RedirectManager
-@attribute [Authorize(Roles = "SuperAdmin,Admin")]
+@using Applications.ApplicationPolicies
+<PageTitle>Users</PageTitle>
 <Containers Fluid>
     <RadzenTabs RenderMode="TabRenderMode.Server">
         <Tabs>
@@ -9,11 +9,15 @@
                               OnTextChanged="OnUserTextChanges"
                               ShowSearchBox="true">
                     <LeftChildContent>
-                        <RadzenButton Icon="person_add"
-                                      ButtonStyle="ButtonStyle.Primary"
-                                      Size="Radzen.ButtonSize.Small"
-                                      Click="AddUserAccount"
-                                      Text="Add New User" />
+                        <AuthorizeView Policy="@RolePolicies.AdminOnly">
+                            <Authorized>
+                                <RadzenButton Icon="person_add"
+                                              ButtonStyle="ButtonStyle.Primary"
+                                              Size="ButtonSize.Small"
+                                              Click="AddUserAccount"
+                                              Text="Add New User" />
+                            </Authorized>
+                        </AuthorizeView>
                     </LeftChildContent>
                     <RightChildContent>
 
@@ -54,9 +58,11 @@
                                 <RadzenCheckBox Value="@u.IsActive" />
                             </Template>
                         </RadzenDataGridColumn>
-                        <RadzenDataGridColumn Width="6rem" Sortable="false" Property="@(nameof(VUser.Id))" Title="Action" Context="u">
+                        <RadzenDataGridColumn Width="6rem" Sortable="false"
+                                              TextAlign="TextAlign.Center"
+                                              Property="@(nameof(VUser.Id))" Title="Action" Context="u">
                             <Template>
-                                <RadzenButton Size="Radzen.ButtonSize.ExtraSmall"
+                                <RadzenButton Size="ButtonSize.ExtraSmall"
                                               Icon="more_vert"
                                               Variant="Variant.Text"
                                               Click="@((args)=>ShowContextMenu(args,u.Id))" />
@@ -71,14 +77,16 @@
 
 @code {
 
-    void ShowContextMenu(MouseEventArgs args, string userId)
+    void ShowContextMenu(MouseEventArgs args, string? userId)
     {
         ContextMenuService.Open(args, ds =>@<RadzenMenu Style="font-size:0.8rem;">
         <RadzenMenuItem Icon="manage_accounts"
                         Click="@(()=>ManageAccount(userId))"
                         Text="Manage User"
+                        Visible="@AdminOnly"
                         Value="@userId" />
         <RadzenMenuItem Icon="manage_accounts"
+                        Visible="@AdminOnly"
                         Click="@(()=>ManageUserLoanSize(userId))"
                         Text="Set User Loan Size"
                         Value="@userId" />
@@ -95,7 +103,7 @@
         pageSize = size;
     }
 
-    void MangagePermissions(string userId)
+    void MangagePermissions(string? userId)
     {
         var redirectUrl = $"/Administrator/Users/{userId}/Permissions";
 
@@ -111,7 +119,7 @@
         }
     }
 
-    void ManageAccount(string userId)
+    void ManageAccount(string? userId)
     {
         ContextMenuService.Close();
 
@@ -124,13 +132,12 @@
         NavigationManager.NavigateTo($"/App/Account/{userId}/Users");
     }
 
-    async void ManageUserLoanSize(string userId)
+    async void ManageUserLoanSize(string? userId)
     {
         ContextMenuService.Close();
-        var options = new DialogOptions
-            {
-                WrapperCssClass = "rz-m-0 rz-p-2 rz-background-color-base-100"
-            };
+
+        var options = new DialogOptions{ };
+
         var param = new Dictionary<string, object?>
         {
             {"UserId",userId}

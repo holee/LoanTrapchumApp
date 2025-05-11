@@ -5,7 +5,7 @@ namespace Applications.Requests.Loans.Payments
     public sealed class LoanRepaymentLineDtoCreate 
     {
         public long? RepaymentRefId { get; set; }
-        public Guid? LoanRefId { get; set; }
+        public string? LoanRefId { get; set; }
         public int? BranchRefId { get; set; }
         public long? LoanScheduleRefId { get; set; }
         public string? OfficialReceiptNo { get; set; }

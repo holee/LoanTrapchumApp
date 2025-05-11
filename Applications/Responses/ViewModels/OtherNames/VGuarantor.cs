@@ -5,10 +5,10 @@ namespace Applications.Responses.ViewModels.OtherNames;
 
 public class VGuarantor
 {
-    public Guid Id { get; set; }
+    public string? Id { get; set; }
     public string? FullName { get; set; }
     public string? GuarantorName { get; set; }
-    public string? Sex { get; set; }
+    public string? Gender { get; set; }
     public string? Phone { get; set; }
     public string? ProInKhmer { get; set; }
     public string? DisInKhmer { get; set; }

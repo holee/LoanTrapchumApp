@@ -1,4 +1,4 @@
-﻿using Applications.Interfaces.Currencies;
+﻿using Applications.Calculations;
 using Applications.Interfaces.Loans;
 using Applications.Requests.Loans.Payments;
 using Applications.Requests.Transactions.ForiegnExchanges;
@@ -15,7 +15,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments;
 
 public partial class RepaymentMultiple
 {
-    [Parameter] public Guid LoanId { get; set; }
+    [Parameter] public string? LoanId { get; set; }
     [Parameter, SupplyParameterFromQuery] public int BranchId { get; set; }
     [Parameter, SupplyParameterFromQuery] public long CreditAgentId { get; set; }
     [Parameter, SupplyParameterFromQuery] public int CurrencyId { get; set; }
@@ -103,10 +103,10 @@ public partial class RepaymentMultiple
         var parameters = new Dictionary<string, object>{
                         { "LoanPayment",payment},
                         { "CurrencyId",payment.CurrencyId!.Value },
-                        { "LoanId",payment.LoanId!.Value },
+                        { "LoanId",payment.LoanId ! },
                         { "UserId",UserId },
                         { "BranchId",BranchId },
-                        { "CreditAgentId",payment.CreditAgentId!.Value
+                        { "CreditAgentId",payment.CreditAgentId!
                         }};
         var response = await DialogService.OpenAsync<ConfirmPaymentDialogue>("Recieve Payment", parameters, options);
 

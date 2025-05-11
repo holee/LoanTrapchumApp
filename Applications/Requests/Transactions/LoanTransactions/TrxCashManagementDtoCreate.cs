@@ -2,11 +2,13 @@
 
 public class TrxCashManagementDtoCreate
 {
+
+    public string? Id { get; set; } 
     public int? BankRefId { get; set; }
-    public long? StaffRefId { get; set; }
+    public string? StaffRefId { get; set; }
     public int? CurrencyRefId { get; set; }
     public int? BranchRefId { get; set; }
-    public long? TranRefId { get; set; }
+    public string? TranRefId { get; set; }
     public decimal? Amount { get; set; }
     public decimal? Balance { get; set; }
     public int? CashStatusRefId { get; set; }

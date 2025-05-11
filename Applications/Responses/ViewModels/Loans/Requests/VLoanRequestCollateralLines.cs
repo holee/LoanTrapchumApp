@@ -1,13 +1,15 @@
-﻿namespace Applications.Responses.ViewModels.Loans.Requests;
+﻿using Domains.Models.Lists;
+
+namespace Applications.Responses.ViewModels.Loans.Requests;
+
 
 public sealed class VLoanRequestCollateralLines
 {
     public long? Id { get; set; }
-    public Guid? LoanId { get; set; }
     public int? BranchId { get; set; }
-    public Guid? LoanRequestId { get; set; }
+    public string? LoanRequestId { get; set; }
     public long? CollateralLineId { get; set; }
-    public Guid? CollateralId { get; set; }
+    public string? CollateralId { get; set; }
     public string? CollateralNo { get; set; }
     public string? ReferenceNo { get; set; }
     public string? Location { get; set; }

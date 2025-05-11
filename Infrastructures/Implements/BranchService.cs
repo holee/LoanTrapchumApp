@@ -1,12 +1,11 @@
-﻿using Applications.Constants.Tables;
-using Applications.Extensions;
+﻿using Applications.Extensions;
 using Applications.Interfaces.Branches;
 using Applications.Requests.Lists.Entities;
 using Applications.Responses;
+using Applications.Responses.Auths;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Auths;
 using Applications.Responses.ViewModels.Branches;
-using Dapper;
 using Domains.Models.Lists;
 using Infrastructures.DataAccess;
 using Mapster;
@@ -14,14 +13,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructures.Implements;
 
-public class BranchService(ApplicationDbContext context, IDapperConnectionFactory dapperConnection) : IBranchService
+public class BranchService(IDbContextFactory<DataContext> contextFactory) : IBranchService
 {
     public async Task<Result> Create(Branch branch)
     {
         try
         {
-            context.Branches.Add(branch);
+            await using var context = await contextFactory.CreateDbContextAsync();
 
+            context.Branches.Add(branch);
             await context.SaveChangesAsync();
 
             return Result.Success("New branch was created.");
@@ -36,7 +36,21 @@ public class BranchService(ApplicationDbContext context, IDapperConnectionFactor
     {
         try
         {
-            var branch = await context.Branches.AsNoTracking().Where(x => x.BranchId == id).FirstOrDefaultAsync();
+            await using var context = await contextFactory.CreateDbContextAsync();
+
+            var inUsedBranch = await context
+                .Database
+                .SqlQuery<VBranchResponse>(
+                    $"SELECT TOP(1) * FROM VBranches WHERE BranchId={id} AND Used=CAST(1 AS BIT)")
+                .AsNoTracking()
+                .ToListAsync();
+
+            if (inUsedBranch.Any())
+            {
+                return Result.Failure<string>(ErrorResponse.Conflict("This branch is used in the system."));
+            }
+
+            var branch = await context.Branches.FindAsync(id);
 
             if (branch is null)
             {
@@ -55,23 +69,23 @@ public class BranchService(ApplicationDbContext context, IDapperConnectionFactor
         }
     }
 
-    public async Task<Result> Update(Branch branch)
+    public async Task<Result> UpdateAsync(Branch branch)
     {
         try
         {
-            var existingBranch = context.Branches.FirstOrDefault(x => x.BranchId == branch.BranchId);
+            await using var context = await contextFactory.CreateDbContextAsync();
 
+            var existingBranch = await context.Branches
+                .FirstOrDefaultAsync(x => x.BranchId == branch.BranchId &&
+                                          x.EditSeq == branch.EditSeq);
 
             if (existingBranch is null)
             {
-                return Result.Failure<string>(ErrorResponse.Failure("One branch was updated"));
+                return Result.Failure<string>(
+                    ErrorResponse.Failure("One branch was updated Or Branch was chnaged by someone"));
             }
 
-            if (existingBranch.EditSeq != branch.EditSeq)
-            {
-                return Result.Failure<string>(ErrorResponse.Failure("Branch was chnaged by someone"));
-            }
-
+            branch.EditSeq = existingBranch.EditSeq + 1;
 
             context.Entry(existingBranch).CurrentValues.SetValues(branch);
 
@@ -85,19 +99,22 @@ public class BranchService(ApplicationDbContext context, IDapperConnectionFactor
         }
     }
 
-
     public async Task<Result> UpdateStatusAsync(int? branchId)
     {
         try
         {
-            var existingBranch = await context.Branches.AsNoTracking().FirstOrDefaultAsync(x => x.BranchId == branchId);
+            await using var context = await contextFactory.CreateDbContextAsync();
+
+            var existingBranch = await context.Branches.FindAsync(branchId);
 
             if (existingBranch is null)
             {
                 return Result.Failure<string>(ErrorResponse.ServerError($"No any branch found."));
             }
 
-            existingBranch!.IsActive = existingBranch.IsActive ? false : true;
+            existingBranch.IsActive = !existingBranch.IsActive;
+
+            existingBranch.EditSeq = existingBranch.EditSeq + 1;
 
             context.Branches.Update(existingBranch);
 
@@ -113,9 +130,10 @@ public class BranchService(ApplicationDbContext context, IDapperConnectionFactor
 
     public async Task<Result<Branch>> GetBranchById(int? id)
     {
-        var branch = await context.Branches
-            .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.BranchId == id);
+        await using var context = await contextFactory.CreateDbContextAsync();
+
+        var branch = await context.Branches.FindAsync(id);
+
         if (branch is null)
         {
             return Result.Failure<Branch>(ErrorResponse.NotFound("There is no any branch found."));
@@ -125,150 +143,188 @@ public class BranchService(ApplicationDbContext context, IDapperConnectionFactor
     }
 
     public async Task<Result<T>> GetBranchById<T>(int? id)
+        where T : class
     {
-        var branch = await context.Branches
+        await using var context = await contextFactory.CreateDbContextAsync();
+
+        var branch = await context.Database
+            .SqlQuery<VBranchResponse>($"SELECT TOP(1) * FROM VBranches WHERE BranchId={id}")
             .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.BranchId == id);
+            .ProjectToType<T>()
+            .FirstOrDefaultAsync();
         if (branch is null)
         {
             return Result.Failure<T>(ErrorResponse.NotFound("There is no any branch found."));
         }
 
-        var item = branch.Adapt<T>();
-        
-        return Result.Success(item);
-    }
-    
-    
-    
-    public async Task<Result<IEnumerable<VBranchResponse>>> GetBranchesAsync(int branchId = 0,
-        int pageSize = 0,
-        bool includeInactive = false,
-        string? filter = null)
-    {
-        IQueryable<VBranchResponse> query = context.VBranchs.OrderByDescending(x => x.BranchName);
-
-        if (includeInactive)
-        {
-            query = query.IgnoreQueryFilters();
-        }
-
-        if (branchId > 0)
-        {
-            query = query.Where(x => x.BranchId == branchId);
-        }
-
-        if (!string.IsNullOrEmpty(filter))
-        {
-            query = query.Where(x => EF.Functions.Like(x.BranchName, $"%{filter}%"));
-        }
-
-        if (pageSize > 0)
-        {
-            query = query.Take(pageSize).OrderByDescending(x => x.BranchName);
-        }
-
-
-        return Result.Success<IEnumerable<VBranchResponse>>(await query.AsNoTracking().ToListAsync());
+        return Result.Success(branch);
     }
 
     public async Task<Pager<VBranchResponse>> GetBranchesAsync(QueryParam param)
     {
-        IQueryable<VBranchResponse> query = context.VBranchs;
+        await using var context = await contextFactory.CreateDbContextAsync();
 
-        if (param.IsIncludeInActive == true)
-            query = query.IgnoreQueryFilters();
+        var queries = context.VBranchs
+            .WhereIf(!string.IsNullOrEmpty(param.Filter),
+                x => EF.Functions.Like(x.BranchName, $"%{param.Filter}%"));
 
-        if (!string.IsNullOrEmpty(param.Filter))
+        if (param.IsIncludeInActive)
         {
-            query = query.Where(x => EF.Functions.Like(x.BranchName, $"%{param.Filter}%"));
+            queries = queries.IgnoreQueryFilters();
         }
 
         if (param.SortDescending)
         {
-            query = query.OrderByDescending(f => EF.Property<object>(f, param.SortColumn));
+            queries = queries.OrderByDescending(f => EF.Property<object>(f, param.SortColumn));
         }
 
-        int counts = await query.CountAsync();
+        int counts = queries.Count();
 
-        var items = query.Skip(param.PageIndex).Take(param.PageSize);
-
-        return new Pager<VBranchResponse>
+        if (param.PageSize > 0)
         {
-            Count = counts,
-            Items = await items.AsNoTracking().ToListAsync()
-        };
-    }
-
-    public async Task<Result<IEnumerable<VBranchResponse>>> GetBranchesAsync(int branchId = 0, int take = 0,
-        string? filter = null)
-    {
-        IQueryable<VBranchResponse> queries = context.VBranchs.OrderBy(x => x.BranchName);
-
-        if (!queries.Any())
-        {
-            return Result.Failure<IEnumerable<VBranchResponse>>(ErrorResponse.NotFound("no data found."));
-        }
-
-        if (!string.IsNullOrEmpty(filter))
-        {
-            queries = queries.Where(x => EF.Functions.Like(x.BranchName, $"%{filter}%"));
-        }
-
-        if (branchId > 0)
-        {
-            queries = queries.Where(x => x.BranchId == branchId);
-        }
-
-        if (take > 0)
-        {
-            queries = queries.Take(take).OrderBy(x => x.BranchName);
+            queries = queries.Skip(param.PageNumber).Take(param.PageSize);
         }
 
         var items = await queries.AsNoTracking().ToListAsync();
 
-        return Result.Success<IEnumerable<VBranchResponse>>(items);
+        return new Pager<VBranchResponse>
+        {
+            Count = counts,
+            Items = items
+        };
     }
 
-    public async Task<Result<IEnumerable<VBranchResponse>>> GetBranchesByUser(string userId, int? branchId = 0)
+    public async Task<Result<Pager<T>>> GetBranchesAsync<T>(int? branchId, QueryParam param)
+        where T : class
+    {
+        await using var context = await contextFactory.CreateDbContextAsync();
+
+        IQueryable<VBranchResponse> queries = context.VBranchs;
+
+        if (branchId is not null && branchId > 0)
+        {
+            queries = queries.Where(x => x.BranchId == branchId);
+        }
+
+        if (param.IsIncludeInActive) queries = queries.IgnoreQueryFilters();
+
+        if (!string.IsNullOrEmpty(param.Filter))
+        {
+            queries = queries.Where(x => EF.Functions.Like(x.BranchName, $"%{param.Filter}%"));
+        }
+
+        if (param.SortDescending)
+        {
+            queries = queries.OrderByDescending(f => EF.Property<object>(f, param.SortColumn));
+        }
+
+        int counts = await queries.CountAsync();
+
+        if (param.PageSize > 0)
+        {
+            queries = queries.Skip(param.PageNumber).Take(param.PageSize);
+        }
+
+        var items = await queries
+            .ProjectToType<T>()
+            .AsNoTracking()
+            .ToListAsync();
+        return Result.Success(new Pager<T>
+        {
+            Count = counts,
+            Items = items
+        });
+    }
+
+    public async Task<Result<IEnumerable<VBranchResponse>>> GetBranchesByUser(string? userId, int? branchId)
     {
         if (string.IsNullOrEmpty(userId))
         {
             return Result.Failure<IEnumerable<VBranchResponse>>(ErrorResponse.NotFound("No User found in the branch."));
         }
 
-        using var db = dapperConnection.CreateConnection();
+        await using var context = await contextFactory.CreateDbContextAsync();
 
-        var user = await db.QueryFirstAsync<VUser>($"SELECT * FROM {TableConstant.VUsers} WHERE id=@userId", new
+
+        var user = await context.Database.SqlQuery<VUser>($"SELECT * FROM VUsers WHERE id={userId}")
+            .AsNoTracking()
+            .FirstOrDefaultAsync();
+
+        if (user is null)
         {
-            UserId = userId
-        });
-
-        IQueryable<VBranchResponse> queries = context.VBranchs;
-
-        if (user.EmployeeRefId.IsNotNullOrEmpty())
-        {
-            queries = queries.Where(x => x.BranchId == user.BranchId);
+            return Result.Failure<IEnumerable<VBranchResponse>>(ErrorResponse.NotFound("No User found in the branch."));
         }
+
+
+        if (user.EmployeeRefId.IsNullOrEmpty())
+        {
+            return Result.Failure<IEnumerable<VBranchResponse>>(ErrorResponse.NotFound("No User found in the branch."));
+        }
+
+        var queries = context.VBranchs.Where(x => x.BranchId == user.BranchId);
 
         if (branchId > 0)
         {
             queries = queries.Where(x => x.BranchId == branchId);
         }
 
-
         return Result.Success<IEnumerable<VBranchResponse>>(await queries.AsNoTracking().ToListAsync());
     }
 
-    public async Task<Result<ResultStatus>> GetBrachStatus(int? branchRefId)
+    public async Task<Result<IEnumerable<T>>> GetBranchesByUser<T>(string? userId, int? branchId = 0)
+        where T : class
     {
-        var branch = await context.VBranchs.Where(x => x.BranchId == branchRefId).FirstOrDefaultAsync();
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Result.Failure<IEnumerable<T>>(ErrorResponse.NotFound("No User found in the branch."));
+        }
+
+        await using var context = await contextFactory.CreateDbContextAsync();
+
+        var user = await context.Database.SqlQuery<VUser>($"SELECT * FROM VUsers WHERE id={userId}")
+            .AsNoTracking()
+            .FirstOrDefaultAsync();
+
+        if (user is null)
+        {
+            return Result.Failure<IEnumerable<T>>(ErrorResponse.NotFound("No User found in the branch."));
+        }
+
+
+        if (user.EmployeeRefId.IsNullOrEmpty())
+        {
+            return Result.Failure<IEnumerable<T>>(ErrorResponse.NotFound("No User found in the branch."));
+        }
+
+        var queries = context.VBranchs.Where(x => x.BranchId == user.BranchId);
+
+        if (branchId > 0)
+        {
+            queries = queries.Where(x => x.BranchId == branchId);
+        }
+
+        var items = await queries
+            .AsNoTracking()
+            .ProjectToType<T>()
+            .ToListAsync();
+
+        return Result.Success<IEnumerable<T>>(items);
+    }
+
+    public async Task<Result<ResultStatus>> GetBrachStatus(int? branchId)
+    {
+        await using var context = await contextFactory.CreateDbContextAsync();
+
+        var branch = await context.VBranchs
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.BranchId == branchId && x.IsActive == true);
+
         if (branch is null)
         {
             return Result.Failure<ResultStatus>(ErrorResponse.NotFound("There is no any branch found."));
         }
 
-        return branch!.OpenStatus == "1"
+        return branch.OpenStatus == "1"
             ? Result.Success(new ResultStatus(true, "Open"))
             : Result.Success(new ResultStatus(false, "Closed"));
     }
@@ -278,6 +334,8 @@ public class BranchService(ApplicationDbContext context, IDapperConnectionFactor
     {
         try
         {
+            await using var context = await contextFactory.CreateDbContextAsync();
+
             var branch = await context.Branches.IgnoreAutoIncludes()
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.BranchId == id);
@@ -298,9 +356,10 @@ public class BranchService(ApplicationDbContext context, IDapperConnectionFactor
 
     public async Task<Result<BranchDtoUpdate>> GetUpdateBranchById(int? branchId)
     {
-        var existingBranch = await context.Branches
-            .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.BranchId == branchId);
+        await using var context = await contextFactory.CreateDbContextAsync();
+
+        var existingBranch = await context.Branches.FindAsync(branchId);
+
         if (existingBranch is null)
         {
             return Result.Failure<BranchDtoUpdate>(ErrorResponse.NotFound("There is no any branch found."));
@@ -311,80 +370,47 @@ public class BranchService(ApplicationDbContext context, IDapperConnectionFactor
         return Result.Success(item);
     }
 
-    public async Task<Result<IEnumerable<VBranchResponse>>> GetBranchesAsync(int? branchId = 0, int? pageSize = 0,
-        bool includeInactive = false, string? filter = null)
+    public async Task<Result<UserBranchesResponse>> GetBranchesByUser(string userId)
     {
-        // using var db = dapperConnection.CreateConnection();
-        //
-        // var branches =await db.QueryAsync<VBranchResponse>("spGetBranches", new
-        // {
-        //     branchId,
-        //     pageSize,
-        //     includeInactive,
-        //     filter
-        // },commandType:CommandType.StoredProcedure);
-        //
-        // return Result.Success(branches);
-
-        IQueryable<VBranchResponse> queries =
-            context.Database.SqlQuery<VBranchResponse>($"SELECT * FROM VBranches");
-
-        if (branchId is not null && branchId > 0)
+        if (string.IsNullOrEmpty(userId))
         {
-            queries = queries.Where(x => x.BranchId == branchId);
+            return Result.Failure<UserBranchesResponse>(ErrorResponse.NotFound("There is no user is selected"));
         }
 
-        if (pageSize > 0)
+        await using var context = await contextFactory.CreateDbContextAsync();
+
+        var user = await context.Database
+            .SqlQuery<VUser>($"SELECT * FROM VUsers WHERE id={userId}")
+            .ProjectToType<UserBranchesResponse>()
+            .AsNoTracking()
+            .FirstOrDefaultAsync();
+
+        if (user is null)
         {
-            queries = queries.Take(pageSize.Value);
+            return Result.Failure<UserBranchesResponse>(ErrorResponse.NotFound("There is no user in the system"));
         }
 
-        if (!includeInactive)
-        {
-            queries = queries.Where(b => b.IsActive == true);
-        }
-
-        if (!string.IsNullOrEmpty(filter))
-        {
-            queries = queries.Where(x => x.BranchName.Contains(filter));
-        }
-
-        var items = await queries.AsNoTracking().ToListAsync();
-
-        return Result.Success<IEnumerable<VBranchResponse>>(items);
+        return Result.Success(user);
     }
 
-    public async Task<Result<IEnumerable<T>>> GetBranchesAsync<T>(int? branchId, int? pageSize,
-        bool includeInactive = false, string? filter = null)
-        where T : class
+    public async Task<Result<IEnumerable<ApprovedUser>>> GetApprovedUser(int? branchId, string? filter)
     {
-        IQueryable<VBranchResponse> queries = context.Database.SqlQuery<VBranchResponse>($"SELECT * FROM VBranches");
+        await using var context = await contextFactory.CreateDbContextAsync();
 
-        if (branchId is not null && branchId > 0)
-        {
-            queries = queries.Where(x => x.BranchId == branchId);
-        }
-
-        if (pageSize > 0)
-        {
-            queries = queries.Take(pageSize.Value);
-        }
-
-        if (!includeInactive)
-        {
-            queries = queries.Where(b => b.IsActive == true);
-        }
-
-        if (!string.IsNullOrEmpty(filter))
-        {
-            queries = queries.Where(x => x.BranchName.Contains(filter));
-        }
-
-        var items = await queries
+        var user = await context.Database
+            .SqlQuery<VUser>($"SELECT * FROM VUsers WHERE BranchId={branchId} AND CanApproved=CAST(1 AS BIT)")
+            .WhereIf(!string.IsNullOrEmpty(filter), x => EF.Functions.Like(x.UserName!, $"%{filter}%") ||
+                                                         EF.Functions.Like(x.FirstName!, $"%{filter}%") ||
+                                                         EF.Functions.Like(x.LastName!, $"%{filter}%"))
+            .ProjectToType<ApprovedUser>()
             .AsNoTracking()
-            .ProjectToType<T>()
             .ToListAsync();
 
-        return Result.Success<IEnumerable<T>>(items);
+        if (!user.Any())
+        {
+            return Result.Failure<IEnumerable<ApprovedUser>>(ErrorResponse.NotFound("There is no user in the system"));
+        }
+
+        return Result.Success<IEnumerable<ApprovedUser>>(user);
     }
 }

@@ -1,31 +1,30 @@
-﻿@using Applications.Responses.ViewModels.Customers
-<RadzenDataGrid Data="Items"
-GridLines="DataGridGridLines.Both"
-Responsive
-IsLoading="isLoading"
-ColumnWidth="10rem"
-Style="height:20rem;max-height:30rem;"
-TItem="VCustomerActivities"
-Density="Density.Compact">
+﻿<RadzenStack Orientation="Orientation.Horizontal"
+             class="rz-mb-2"
+             Visible="ShowCommand"
+             AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+    <RadzenButton Text="Add Activity"
+                  Click="AddNewActivity"
+                  Icon="add"
+                  Visible="@(ShowAdd && ShowCommand)"
+                  ButtonStyle="ButtonStyle.Primary"
+                  Size="ButtonSize.Small" />
 
-    <HeaderTemplate>
-        @if (ShowAdd)
-        {
-            <RadzenButton Text="Expense"
-            Click="AddNewActivity"
-            Icon="add"
-            ButtonStyle="ButtonStyle.Primary"
-            Size="Radzen.ButtonSize.Small" />
-        }
-        @if (ShowReload)
-        {
-            <RadzenButton Click="RefreshActivity"
-            Icon="refresh"
-            ButtonStyle="ButtonStyle.Secondary"
-            class="ml-2"
-            Size="Radzen.ButtonSize.Small" />
-        }
-    </HeaderTemplate>
+    <RadzenButton Click="RefreshActivity"
+                  Icon="refresh"
+                  ButtonStyle="ButtonStyle.Secondary"
+                  class="ml-2"
+                  Visible="@(ShowReload && ShowCommand)"
+                  Size="ButtonSize.Small" />
+
+</RadzenStack>
+<RadzenDataGrid Data="Items"
+                GridLines="DataGridGridLines.Both"
+                Responsive
+                IsLoading="isLoading"
+                ColumnWidth="10rem"
+                Style="height:20rem;max-height:30rem;"
+                TItem="VCustomerActivities"
+                Density="Density.Compact">
     <Columns>
         <RadzenDataGridColumn Property="ActivityId" Context="c" Title="#" Width="3rem">
             <Template>
@@ -33,22 +32,22 @@ Density="Density.Compact">
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Context="c"
-        Width="10rem"
-        Property="@nameof(VCustomerActivities.Description)" Title="Expense">
+                              Width="10rem"
+                              Property="@nameof(VCustomerActivities.Description)" Title="Expense">
             <Template>
                 @c.Description
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Context="c"
-        Width="5rem"
-        TextAlign="TextAlign.Center"
+                              Width="5rem"
+                              TextAlign="TextAlign.Center"
                               Property="@nameof(VCustomerActivities.Status)" Title="Status">
             <Template>
                 <RadzenSwitch Value="@c.Status" />
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Context="c" Width="5rem"
-        Property="@nameof(VCustomerActivities.CreatedDT)" Title="Created">
+                              Property="@nameof(VCustomerActivities.CreatedDT)" Title="CreateNewUserd">
             <Template>
                 @c.CreatedDT.DayFirst()
             </Template>
@@ -62,9 +61,10 @@ Density="Density.Compact">
 
 
 @code {
-    [Parameter] public Guid? CustomerId { get; set; } = Guid.Empty;
+    [Parameter] public string? CustomerId { get; set; } = string.Empty;
     [Parameter] public bool ShowAdd { get; set; } = false;
     [Parameter] public bool ShowReload { get; set; } = false;
+    [Parameter] public bool ShowCommand { get; set; } = false;
     [Parameter] public IEnumerable<VCustomerActivities> Items { get; set; } = [];
 
     bool isLoading = false;
@@ -89,11 +89,11 @@ Density="Density.Compact">
         };
 
 
-        bool? addActivitieDialogue = await DialogService.OpenAsync<CustomerActivitiesAdd>("Activity",param);
+        bool? addActivitieDialogue = await DialogService.OpenAsync<CustomerActivitiesAdd>("Activity", param);
 
         if (addActivitieDialogue is not null && addActivitieDialogue == true)
         {
-          await  RefreshActivity();
+            await RefreshActivity();
         }
     }
     async Task RefreshActivity()

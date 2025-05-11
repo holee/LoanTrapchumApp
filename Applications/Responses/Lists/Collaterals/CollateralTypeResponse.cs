@@ -1,4 +1,4 @@
-﻿namespace Applications.Responses.Collaterals;
+﻿namespace Applications.Responses.Lists.Collaterals;
 
 public class CollateralTypeResponse
 {

@@ -101,7 +101,7 @@ public partial class UserManagement
     {
         var getRoles = await _roleService.GetRolesAsync();
 
-        roles = getRoles?.Data?.Where(x => !x.RoleName!.Contains(userModel.Role))!.Select(r => r.RoleName!) ?? [];
+        roles = getRoles?.Data?.Where(x => !x.Contains(userModel.Role))!.Select(r => r) ?? [];
 
     }
 

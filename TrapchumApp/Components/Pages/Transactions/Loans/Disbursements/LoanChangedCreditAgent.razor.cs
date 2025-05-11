@@ -21,7 +21,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Disbursements
         }
 
         [Parameter]
-        public Guid? LoanId { get; set; }
+        public string? LoanId { get; set; }
         [Parameter, SupplyParameterFromQuery]
         public long CustomerId { get; set; }
         [Parameter, SupplyParameterFromQuery]
@@ -29,13 +29,13 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Disbursements
         [Parameter, SupplyParameterFromQuery]
         public long CurrencyId { get; set; }
         [Parameter, SupplyParameterFromQuery]
-        public Guid? CreditAgentId { get; set; }
+        public string? CreditAgentId { get; set; }
         [Parameter, SupplyParameterFromQuery]
-        public Guid? UserId { get; set; }
+        public string? UserId { get; set; }
 
-        IEnumerable<VCreditAgent> CreditAgents = [];
-        Guid? newCreditAgentId = Guid.Empty;
-        VLoanDisbursments existingLoan = new();
+        private IEnumerable<VCreditAgent> _creditAgents = [];
+        private string? newCreditAgentId = string.Empty;
+        private VLoanDisbursments existingLoan = new();
         protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
@@ -60,11 +60,11 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Disbursements
 
         async Task GetCreditAgents(string? filterText = null)
         {
-            var creditAgentResult = await _creditAgentService.GetCreditAgents(false, filterText);
+            var rsp = await _creditAgentService.GetCreditAgents(false, filterText);
 
-            if (creditAgentResult.Any())
+            if (rsp.IsSuccess)
             {
-                CreditAgents = creditAgentResult.Where(x => x.EmployeeRefId != CreditAgentId);
+                _creditAgents = rsp.Data!.Where(x => x.EmployeeRefId != CreditAgentId);
             }
         }
 

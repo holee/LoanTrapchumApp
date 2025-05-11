@@ -1,132 +1,132 @@
-﻿@page "/App/Account/Ledgers"
-@using Applications.Constants
+﻿@page "/App/Account/Ledgers/{BranchId:int}/Branches"
 @using Applications.Responses.ViewModels.Ledgers
-@using Applications.Responses.ViewModels.Options
-@attribute [Authorize]
-<div class="card">
-    <div class="card-header">
-        <RadzenStack Orientation="Orientation.Horizontal"
-                     AlignItems="AlignItems.Center"
-                     JustifyContent="JustifyContent.End">
-           
-            <div class="rz-text-align-center">
-                <RadzenCheckBox TValue="bool"
-                                Name="IncludeInactive"
-                                @bind-Value:after="OnIncludeInActive"
-                                @bind-Value="includeInactive">
-                </RadzenCheckBox>
-                <RadzenLabel Text="Include Inactive" Component="IncludeInactive" class="rz-ms-2" />
-            </div>
-        </RadzenStack>
-    </div>
-    <div class="card-body py-0 my-0">
-        <PageDropDown ShowSearchBox="true"
-                      PageSizeChanged="ChangedPageSize"
-                      OnTextChanged="OnFilters">
-            <LeftChildContent>
-                <RadzenButton Click="DisplayModal"
-                              ButtonStyle="ButtonStyle.Primary"
-                              Icon="add"
-                              class="w-auto"
-                              Text="New Ledger"
-                              Size="Radzen.ButtonSize.Small" />
-                <div class="input-group input-group-sm w-50"> 
+<RadzenTabs>
+    <Tabs>
+        <RadzenTabsItem Text="Ledger List" Icon="data_table">
+            <PageDropDown ShowSearchBox="true"
+                          PageSizeChanged="ChangedPageSize"
+                          OnTextChanged="OnFilters">
+                <LeftChildContent>
+                    <RadzenButton Click="DisplayModal"
+                                  ButtonStyle="ButtonStyle.Primary"
+                                  Icon="add"
+                                  class="w-auto"
+                                  Text="New Ledger"
+                                  Size="ButtonSize.Small"/>
+                    <div class="input-group input-group-sm w-50"> 
                     <span class="input-group-text">
                         <RadzenLabel>Filter By Currency</RadzenLabel>
                     </span>
-                    <RadzenDropDown TValue="int"
-                                    Data="StorageConstant.Currencies"
-                                    TextProperty="@nameof(Items.Label)"
-                                    ValueProperty="@nameof(Items.Value)"
-                                    @bind-Value="currencyId" 
-                                    class="form-select"
-                                    @bind-Value:after="SelectedCurrencyChanged">
-                    </RadzenDropDown>
-                </div>
-            </LeftChildContent>
-        </PageDropDown>
-        <RadzenStack AlignItems="AlignItems.Center"
-                     JustifyContent="JustifyContent.Center"
-                     Gap="0"
-                     Orientation="Orientation.Horizontal">
-            <RadzenDataGrid Data="Ledgers"
-                            Density="Density.Compact"
-                            AllowAlternatingRows="true"
-                            AllowPaging="true"
-                            ShowPagingSummary="true"
-                            Count="@counts"
-                            PageSize="pageSize"
-                            LoadData="LoadData"
-                            AllowSorting="false"
-                            AllowMultiColumnSorting="false"
-                            ColumnWidth="13rem"
-                            IsLoading="isLoading"
-                            Style="--rz-grid-header-background-color:var(--rz-base-200);max-height:31.5rem;"
-                            PagerHorizontalAlign="HorizontalAlign.Right"
-                            GridLines="DataGridGridLines.Both">
-                <Columns>
-                    <RadzenDataGridColumn Property="LedgerCode"
-                                          Title="Code"
-                                          Width="8rem"
-                                          Sortable="true" />
-                    <RadzenDataGridColumn Property="LedgerName"
-                                          Title="Ledger Name"
-                                          Context="g"
-                                          Sortable="true">
-                        <Template>
-                            @if (g.ParentRefId > 0)
-                            {
-                                <text>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</text> @g.LedgerName
-                            }
-                            else
-                            {
-                                @g.LedgerName
-                            }
-                        </Template>
-                    </RadzenDataGridColumn>
-                    <RadzenDataGridColumn Property="LedgerTypeCode"
-                                          Title="Ledger Type" Sortable="true" />
-                    <RadzenDataGridColumn Property="CurrencyCode"
-                                          Width="6rem"
-                                          Title="Currency"
-                                          Sortable="true" />
-                    <RadzenDataGridColumn Title="Main"
-                                          Width="2rem"
-                                          TextAlign="TextAlign.Center"
-                                          Sortable="false"
-                                          Context="emp">
-                        <Template>
-                            <RadzenCheckBox TValue="bool?"
-                                            Disabled Value="@emp.IsMainGl" />
-                        </Template>
-                    </RadzenDataGridColumn>
-                    <RadzenDataGridColumn Context="c"
-                                          Title="Active"
-                                          Width="3.5rem"
-                                          TextAlign="TextAlign.Center"
-                                          Sortable="false">
-                        <Template>
-                            <RadzenCheckBox TValue="bool?"
-                                            @bind-Value="c.IsActive"
-                                            Change="@((arg)=>OnCheckChanged(arg,c.LedgerId))" />
-                        </Template>
-                    </RadzenDataGridColumn>
-                    <RadzenDataGridColumn Width="6rem"
-                                          Title="Actions"
-                                          Context="c"
-                                          Sortable="false">
-                        <Template>
-                            <RadzenButton Size="Radzen.ButtonSize.ExtraSmall"
-                                          Icon="more_vert"
-                                          Variant="Variant.Text"
-                                          Click="@((args)=>ShowContextMenu(args,c))" />
-                        </Template>
-                    </RadzenDataGridColumn>
-                </Columns>
-            </RadzenDataGrid>
-        </RadzenStack>
-    </div>
-</div>
+                        <RadzenDropDown TValue="int"
+                                        Data="StorageConstant.Currencies"
+                                        TextProperty="@nameof(Items.Label)"
+                                        ValueProperty="@nameof(Items.Value)"
+                                        @bind-Value="currencyId"
+                                        class="form-select"
+                                        @bind-Value:after="SelectedCurrencyChanged">
+                        </RadzenDropDown>
+                    </div>
+                </LeftChildContent>
+                <RightChildContent>
+                    <div class="rz-text-align-center">
+                        <RadzenCheckBox TValue="bool"
+                                        Name="IncludeInactive"
+                                        @bind-Value:after="OnIncludeInActive"
+                                        @bind-Value="includeInactive">
+                        </RadzenCheckBox>
+                        <RadzenLabel Text="Include Inactive" Component="IncludeInactive" class="rz-ms-2"/>
+                    </div>
+                </RightChildContent>
+            </PageDropDown>
+            <RadzenStack AlignItems="AlignItems.Center"
+                         JustifyContent="JustifyContent.Center"
+                         Gap="0"
+                         Orientation="Orientation.Horizontal">
+                <RadzenDataGrid Data="Ledgers"
+                                Density="Density.Compact"
+                                AllowAlternatingRows="true"
+                                AllowPaging="true"
+                                ShowPagingSummary="true"
+                                Count="@counts"
+                                PageSize="pageSize"
+                                LoadData="LoadData"
+                                AllowSorting="false"
+                                AllowMultiColumnSorting="false"
+                                ColumnWidth="13rem"
+                                IsLoading="isLoading"
+                                PagerHorizontalAlign="HorizontalAlign.Right"
+                                GridLines="DataGridGridLines.Both">
+                    <Columns>
+                        <RadzenDataGridColumn Property="LedgerCode"
+                                              Title="Code"
+                                              Width="8rem"
+                                              Sortable="true"/>
+                        <RadzenDataGridColumn Property="LedgerName"
+                                              Title="Ledger Name"
+                                              Context="g"
+                                              Sortable="true">
+                            <Template>
+                                @if (g.ParentRefId > 0)
+                                {
+                                    <text>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</text>
+                                    @g.LedgerName
+                                }
+                                else
+                                {
+                                    @g.LedgerName
+                                }
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Property="LedgerTypeCode"
+                                              Title="Ledger Type" Sortable="true"/>
+                        <RadzenDataGridColumn Property="CurrencyCode"
+                                              Width="6rem"
+                                              Title="Currency"
+                                              Sortable="true"/>
+                        <RadzenDataGridColumn Title="Main"
+                                              Width="2rem"
+                                              TextAlign="TextAlign.Center"
+                                              Sortable="false"
+                                              Context="emp">
+                            <Template>
+                                <RadzenCheckBox TValue="bool?"
+                                                Disabled Value="@emp.IsMainGl"/>
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Context="c"
+                                              Title="Active"
+                                              Width="3.5rem"
+                                              TextAlign="TextAlign.Center"
+                                              Sortable="false">
+                            <Template>
+                                <RadzenCheckBox TValue="bool?"
+                                                @bind-Value="c.IsActive"
+                                                Change="@((arg) => OnCheckChanged(arg, c.LedgerId))"/>
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Width="5rem"
+                                              Title="Actions"
+                                              TextAlign="TextAlign.Center"
+                                              Context="c"
+                                              Sortable="false">
+                            <Template>
+                                <RadzenButton Size="ButtonSize.ExtraSmall"
+                                              Icon="more_vert"
+                                              Variant="Variant.Text"
+                                              Click="@((args) => ShowContextMenu(args, c))"/>
+                            </Template>
+                        </RadzenDataGridColumn>
+                    </Columns>
+                </RadzenDataGrid>
+            </RadzenStack>
+        </RadzenTabsItem>
+    </Tabs>
+</RadzenTabs>
+<RadzenStack Orientation="Orientation.Horizontal"
+             AlignItems="AlignItems.Center"
+             JustifyContent="JustifyContent.End">
+</RadzenStack>
+
 @code {
 
     void ChangedPageSize(int page)
@@ -137,17 +137,18 @@
 
     void ShowContextMenu(MouseEventArgs args, VLedger p)
     {
-        ContextMenuService.Open(args, ds =>@<RadzenMenu Style="font-size:0.8rem;">
-        <RadzenMenuItem Icon="info"
-                        Click="@(()=>LedgerDetails(p.LedgerId))"
-                        Text="Details" />
-        <RadzenMenuItem Icon="edit"
-                        Click="@(()=>Edit(p.LedgerId))"
-                        Text="Edit" />
-        <RadzenMenuItem Icon="delete"
-                        Click="@(()=>OnDelete(p.LedgerId))"
-                        Text="Delete" />
-    </RadzenMenu>
-    );
+        ContextMenuService.Open(args, ds => @<RadzenMenu Style="font-size:0.8rem;">
+                                                <RadzenMenuItem Icon="info"
+                                                                Click="@(() => LedgerDetails(p.LedgerId))"
+                                                                Text="Details"/>
+                                                <RadzenMenuItem Icon="edit"
+                                                                Click="@(() => Edit(p.LedgerId))"
+                                                                Text="Edit"/>
+                                                <RadzenMenuItem Icon="delete"
+                                                                Click="@(() => OnDelete(p.LedgerId))"
+                                                                Text="Delete"/>
+                                            </RadzenMenu>
+        );
     }
+
 }

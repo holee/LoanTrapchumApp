@@ -1,10 +1,11 @@
-﻿@page "/Branches/OpenBranch"
+﻿@page "/Branches/{BranchId:int?}/OpenBranch"
+<PageTitle>Open Branch</PageTitle>
 @implements IDisposable
 @attribute [MustHasPermission(Modules.Transactions, Feature.OpenBranch)]
-<RadzenCard Class="rz-mx-auto" Style="width:100%;">
+<RadzenCard class="rz-mx-auto" Style="width:100%;">
     <RadzenAlert AlertStyle="AlertStyle.Warning"
                  ShowIcon="true"
-                 Visible="!bState.BranchState"
+                 Visible="!bState.State"
                  AllowClose="false"
                  Variant="Variant.Filled" Shade="Shade.Lighter">
         <RadzenText TagName="TagName.P" TextAlign="TextAlign.Center"
@@ -13,10 +14,10 @@
         </RadzenText>
     </RadzenAlert>
     <RadzenStack Gap="0.5rem" class="rz-my-2">
-        <RadzenCard Class="rz-mx-auto h-100" Style="width:100%;">
-            <RadzenRow JustifyContent="Radzen.JustifyContent.Center"
+        <RadzenCard class="rz-mx-auto h-100" Style="width:100%;">
+            <RadzenRow JustifyContent="JustifyContent.Center"
                        AlignItems="AlignItems.Start"
-                       Visible="bState.BranchState"
+                       Visible="bState.State"
                        Gap="1rem">
                 <RadzenColumn SizeMD="5" Size="12" SizeSM="12">
                     <RadzenDataGrid Responsive
@@ -42,7 +43,7 @@
                                                   Property="CurrencyId">
                                 <Template>
                                     <RadzenButton Click="@(()=>OpenSideDialog(c.CurrencyId!.Value))"
-                                                  Size="Radzen.ButtonSize.ExtraSmall"
+                                                  Size="ButtonSize.ExtraSmall"
                                                   Icon="attach_money"
                                                   class="rz-primary"
                                                   Text="Cash Note"
@@ -111,16 +112,16 @@
                                  class="mt-2"
                                  Orientation="Orientation.Horizontal"
                                  AlignItems="AlignItems.Center">
-                        @if (bState.BranchState)
+                        @if (bState.State)
                         {
                             @if (canVaultOut)
                             {
                                 <RadzenButton Click="OnCashVaultOut"
-                                              Size="Radzen.ButtonSize.Small"
+                                              Size="ButtonSize.Small"
                                               ButtonStyle="ButtonStyle.Success"
                                               Icon="lock_open"
                                               Text="Valut Out"
-                                              ButtonType="Radzen.ButtonType.Button" />
+                                              ButtonType="ButtonType.Button" />
 
                             }
                             @if (canOpenBranch)
@@ -128,8 +129,8 @@
                                 <RadzenButton Click="SubmitCloseBranch"
                                               Icon="lock_open"
                                               ButtonStyle="ButtonStyle.Secondary"
-                                              ButtonType="Radzen.ButtonType.Button"
-                                              Size="Radzen.ButtonSize.Small"
+                                              ButtonType="ButtonType.Button"
+                                              Size="ButtonSize.Small"
                                               Text="Close Branch" />
                             }
 
@@ -140,8 +141,8 @@
                             @if (canOpenBranch)
                             {
                                 <RadzenButton Click="SubmitOpenBranch"
-                                              ButtonType="Radzen.ButtonType.Button"
-                                              Size="Radzen.ButtonSize.Small"
+                                              ButtonType="ButtonType.Button"
+                                              Size="ButtonSize.Small"
                                               Icon="lock"
                                               Text="Open Branch"
                                               ButtonStyle="ButtonStyle.Success" />

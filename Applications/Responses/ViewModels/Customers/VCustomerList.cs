@@ -1,4 +1,5 @@
-﻿using Applications.Responses.ViewModels.Collaterals;
+﻿using Applications.Responses.Lists.Collaterals;
+using Applications.Responses.ViewModels.Collaterals;
 using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Requests;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -7,7 +8,7 @@ namespace Applications.Responses.ViewModels.Customers;
 
 public sealed class VCustomerList
 {
-    public Guid? CustomerId { get; set; }
+    public string? CustomerId { get; set; }
     public string? FirstName { get; set; }
     public string? MiddleName { get; set; }
     public string? LastName { get; set; }

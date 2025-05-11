@@ -1,7 +1,10 @@
 using Applications.Enumerations;
 using Applications.Requests.Lists.Addreses;
 using Applications.Requests.Lists.OtherNames;
+using Applications.Responses.Lists.Entities;
+using Applications.Services.Lists;
 using Applications.Services.LIsts;
+using Domains.Models.Addresses;
 using Domains.Models.Lists;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
@@ -12,37 +15,43 @@ namespace TrapchumApp.Components.Pages.Lists.Vendors
     public partial class VendorEdit
     {
         private readonly IVendorServiceImpl _vendorService;
-
-        public VendorEdit(IVendorServiceImpl vendorService)
+        private readonly INationalityServiceImpl _nationalityService;
+        private readonly IOccupationServiceImpl _occupationService;
+        private readonly ISalutationServiceImpl _salutationService;
+        public VendorEdit(IVendorServiceImpl vendorService, INationalityServiceImpl nationalityService, IOccupationServiceImpl occupationService, ISalutationServiceImpl salutationService)
         {
             _vendorService = vendorService;
+            _nationalityService = nationalityService;
+            _occupationService = occupationService;
+            _salutationService = salutationService;
         }
 
+        [Parameter] public EventCallback<bool> Closing { get; set; }
         [Parameter] public EventCallback<int> SelectIndex { get; set; }
-        [Parameter] public Guid? Id { get; set; }
+        [Parameter] public string? Id { get; set; }
         [Parameter] public IEnumerable<ProvinceDto> ProvinceList { get; set; } = [];
-        EntNameDtoUpdate model = new();
-        IEnumerable<CommuneDto>? CommuneList = [];
-        IEnumerable<DistrictDto>? DistrictList = [];
-        IEnumerable<VillageDto>? VillageList = [];
+        EntityNamesCreate model = new();
+        IEnumerable<Nationality> Nationalities = [];
         IEnumerable<string> Salutations = [];
-        ProvinceDto? SelectedProvince;
-        DistrictDto? SelectedDistrict;
-        CommuneDto? SelectedCommune;
-        VillageDto? SelectedVillage;
-        protected List<string> salutations = ["Mr.", "Mrs.", "Miss.", "Others"];
+        IEnumerable<Country> Countries = [];
+        IEnumerable<string> Cities = [];
+        IEnumerable<ProvinceDto> Provinces = [];
+        IEnumerable<DistrictDto> Districts = [];
+        IEnumerable<CommuneDto> Communes = [];
+        IEnumerable<VillageDto> Villages = [];
+        IEnumerable<string> Statuses = ["Single", "Married", "Divorced", "Widow"];
+        IEnumerable<OcupationResponse> Occupations = [];
+        List<string> salutations = ["Mr.", "Mrs.", "Miss.", "Others"];
+        string city = "";
+
+
         protected override async Task OnInitializedAsync()
         {
+            await GetAdditionalInformation();
             await GetSalutations();
             await ShowEditVendor(Id);
+            await base.OnInitializedAsync();
         }
-
-        protected override async Task OnParametersSetAsync()
-        {
-
-            await base.OnParametersSetAsync();
-        }
-
         protected async Task SelectedIndex()
         {
             await SelectIndex.InvokeAsync(0);
@@ -50,91 +59,85 @@ namespace TrapchumApp.Components.Pages.Lists.Vendors
 
         protected async Task HandleFormSubmit()
         {
-            model!.EntType = EntityTypes.Vendor.ToString();
-            model.ProvinceRefId = SelectedProvince?.ProvinceId;
-            model.ProDescription = SelectedProvince?.ProDescription;
-            model.ProInKhmer = SelectedProvince?.ProInKhmer;
-            model.DistrictRefId = SelectedDistrict?.DistrictId;
-            model.DisDescription = SelectedDistrict?.DisDescription;
-            model.DisInKhmer = SelectedDistrict?.DisInKhmer;
-            model.CommuneRefId = SelectedCommune?.CommuneId;
-            model.ComDescription = SelectedCommune?.ComDescription;
-            model.ComInKhmer = SelectedCommune?.ComInKhmer;
-            model.VillageRefId = SelectedVillage?.VillageId;
-            model.VillDescription = SelectedVillage?.VillDescription;
-            model.VilInKhmer = SelectedVillage?.VilInKhmer;
-
-            var rsp = await _vendorService!.UpdateAsync(model);
+            var rsp = await _vendorService.UpdateAsync(model);
 
             if (rsp.IsSuccess)
             {
-                NotificationService.Notify(Radzen.NotificationSeverity.Success, "Vendor", rsp.Data);
-
-                NavigationManager.NavigateTo($"/trapchum/vendors/");
-
+                NotificationService.Notify(NotificationSeverity.Success, "Vendor", rsp.Data);
+                await Close();
                 return;
             }
             else
             {
-                NotificationService.Notify(Radzen.NotificationSeverity.Error, "Vendor", rsp.ErrMessage);
+                NotificationService.Notify(NotificationSeverity.Error, "Vendor", rsp.ErrMessage);
             }
 
         }
-        async void SelectProvince(ProvinceDto e)
+
+        async Task GetAdditionalInformation()
         {
-            SelectedProvince = e;
-            if (SelectedProvince is not null)
+            Nationalities = await _nationalityService.GetNationalities();
+
+            Provinces = await _addressService.GetsProvinces();
+
+            Occupations = await _employeeService!.GetOccupationsAsync(string.Empty);
+
+            var rsp = await _addressService.GetCountries(105);
+
+            if (rsp.IsSuccess)
             {
-                DistrictList = await _addressService!.GetDistrictsByProvinceId(SelectedProvince.ProvinceId);
+                Countries = rsp.Data ?? [];
             }
-            else
+
+            Cities = await _addressService.GetCities();
+        }
+
+        async void SelectedProvinceChanged(object arg)
+        {
+            if (arg is not null)
             {
-                SelectedProvince = null;
-                DistrictList = null;
+                model.ProInKhmer = ((ProvinceDto)arg).ProInKhmer;
+
+                Districts = await _addressService!.GetDistrictsByProvinceId(((ProvinceDto)arg).ProvinceId);
+
+                StateHasChanged();
             }
-            StateHasChanged();
 
         }
-        async Task SelectDistrict(DistrictDto e)
+        async void SelectedDistrictChanged(object arg)
         {
-            if (e is not null)
+            if (arg is not null)
             {
-                SelectedDistrict = e;
-                CommuneList = await _addressService!.GetCommunesByDistrictId(SelectedDistrict.DistrictId);
+                model.DisInKhmer = ((DistrictDto)arg).DisInKhmer;
+
+                Communes = await _addressService!.GetCommunesByDistrictId(((DistrictDto)arg).DistrictId);
+
+                StateHasChanged();
             }
-            else
-            {
-                SelectedDistrict = null;
-                CommuneList = null;
-            }
-            StateHasChanged();
+
         }
-        async Task SelectCommune(CommuneDto e)
+        async void SelectedCommuneChanged(object arg)
         {
-            if (e is not null)
+            if (arg is not null)
             {
-                SelectedCommune = e;
-                VillageList = await _addressService!.GetVillagesByCommuneId(SelectedCommune.CommuneId);
+                model.ComInKhmer = ((CommuneDto)arg).ComInKhmer;
+
+                Villages = await _addressService!.GetVillagesByCommuneId(((CommuneDto)arg).CommuneId);
+
+                StateHasChanged();
             }
-            else
-            {
-                SelectedCommune = null;
-                VillageList = null;
-            }
-            StateHasChanged();
+
         }
-        void SelectVillage(VillageDto e)
+        void SelectedVillageChanged(object arg)
         {
-            if (e is not null)
+            if (arg is not null)
             {
-                SelectedVillage = e;
+                model.VilInKhmer = ((VillageDto)arg).VilInKhmer;
+                StateHasChanged();
             }
-            else
-            {
-                SelectedVillage = null;
-            }
-            StateHasChanged();
+
         }
+
 
 
         protected string? newSalution = "";
@@ -157,6 +160,7 @@ namespace TrapchumApp.Components.Pages.Lists.Vendors
         private async Task GetSalutations()
         {
             var salutations = await _salutationService.GetSalutions();
+
             if (salutations.IsSuccess)
             {
                 Salutations = salutations!.Data!.Select(x => x.Title!).ToList();
@@ -172,7 +176,20 @@ namespace TrapchumApp.Components.Pages.Lists.Vendors
         {
             model!.FirstName = model.Name;
         }
-        protected async Task ShowEditVendor(Guid? id)
+        async Task OnKeyPress(KeyboardEventArgs e)
+        {
+            if (e.Code == "Enter")
+            {
+                await _addressService.AddCity(new CityDtoCreate
+                {
+                    CityName = city
+                });
+
+                Cities = await _addressService.GetCities();
+            }
+
+        }
+        protected async Task ShowEditVendor(string? id)
         {
             try
             {
@@ -184,28 +201,19 @@ namespace TrapchumApp.Components.Pages.Lists.Vendors
                     return;
                 }
                 model = resp.Data!;
-
                 if (model is not null)
                 {
-                    if (model!.ProvinceRefId.HasValue)
-                    {
-                        SelectedProvince = ProvinceList!.FirstOrDefault(d => d.ProvinceId == model?.ProvinceRefId);
-                    }
                     if (model.DistrictRefId.HasValue)
                     {
-                        this.DistrictList = await _addressService!.GetDistrictsByProvinceId(model?.ProvinceRefId);
-                        SelectedDistrict = DistrictList.FirstOrDefault(d => d.DistrictId == model!.DistrictRefId);
-
+                        Districts = await _addressService!.GetDistrictsByProvinceId(model?.ProvinceRefId);
                     }
                     if (model!.CommuneRefId.HasValue)
                     {
-                        this.CommuneList = await _addressService!.GetCommunesByDistrictId(model?.DistrictRefId);
-                        SelectedCommune = this.CommuneList.FirstOrDefault(c => c.CommuneId == model!.CommuneRefId);
+                        Communes = await _addressService!.GetCommunesByDistrictId(model?.DistrictRefId);
                     }
                     if (model!.VillageRefId.HasValue)
                     {
-                        this.VillageList = await _addressService!.GetVillagesByCommuneId(model?.CommuneRefId);
-                        SelectedVillage = this.VillageList.FirstOrDefault(x => x.VillageId == model!.VillageRefId);
+                        Villages = await _addressService!.GetVillagesByCommuneId(model?.CommuneRefId);
                     }
 
                     StateHasChanged();
@@ -219,109 +227,9 @@ namespace TrapchumApp.Components.Pages.Lists.Vendors
 
         }
 
-
-
-
-        async void ShowEditVendor()
+        protected async Task Close()
         {
-
-            if (model is null)
-            {
-                return;
-            }
-            if (model!.ProvinceRefId.HasValue)
-            {
-                SelectedProvince = ProvinceList!.FirstOrDefault(d => d.ProvinceId == model?.ProvinceRefId);
-            }
-            else
-            {
-                SelectedProvince = new();
-            }
-            if (model.DistrictRefId.HasValue)
-            {
-                this.DistrictList = await _addressService!.GetDistrictsByProvinceId(model?.ProvinceRefId);
-                SelectedDistrict = DistrictList.FirstOrDefault(d => d.DistrictId == model!.DistrictRefId);
-            }
-            else
-            {
-                SelectedDistrict = new();
-            }
-            if (model!.CommuneRefId.HasValue)
-            {
-                this.CommuneList = await _addressService!.GetCommunesByDistrictId(model?.DistrictRefId);
-                SelectedCommune = this.CommuneList.FirstOrDefault(c => c.CommuneId == model!.CommuneRefId);
-            }
-            else
-            {
-                SelectedCommune = new();
-            }
-            if (model!.VillageRefId.HasValue)
-            {
-                this.VillageList = await _addressService!.GetVillagesByCommuneId(model?.CommuneRefId);
-                SelectedVillage = this.VillageList.FirstOrDefault(x => x.VillageId == model!.VillageRefId);
-            }
-            else
-            {
-                SelectedVillage = new();
-            }
-
-
+            await Closing.InvokeAsync(false);
         }
-
-
-
-        // async Task GetAddresses()
-        // {
-        //     try
-        //     {
-        //         if (clicked)
-        //         {
-        //             ProvinceList = await AddressService!.GetAllProvinceAsync();
-        //             Countries = await AddressService.GetCountries(105);
-        //             strCountries = Countries?.Select(x => x.DesInKhmer).ToList()!;
-        //             Cities = await AddressService.GetCities();
-        //             if (model is not null)
-        //             {
-
-        //                 if (model.ProvinceRefId.HasValue)
-        //                 {
-        //                     SelectedProvince = ProvinceList!.FirstOrDefault(d => d.ProvinceID == model?.ProvinceRefId);
-        //                 }
-        //                 if (model.DistrictRefId.HasValue)
-        //                 {
-        //                     this.DistrictList = await AddressService.GetDistrictByProvinceAsync(model?.ProvinceRefId);
-        //                     SelectedDistrict = DistrictList.FirstOrDefault(d => d.DistrictId == model?.DistrictRefId);
-
-        //                 }
-        //                 if (model!.DistrictRefId.HasValue)
-        //                 {
-        //                     this.CommuneList = await AddressService.GetCommuneByDistricteAsync(model?.DistrictRefId);
-        //                     SelectedCommune = this.CommuneList.FirstOrDefault(c => c.CommuneId == model?.CommuneRefId);
-        //                 }
-        //                 if (model!.DistrictRefId.HasValue)
-        //                 {
-        //                     this.VillageList = await AddressService.GetVillageByCommuneAsync(model?.CommuneRefId);
-
-        //                     SelectedVillage = this.VillageList.FirstOrDefault(x => x.VillageID == model?.VillageRefId);
-
-        //                 }
-
-        //             }
-        //             clicked = false;
-        //             StateHasChanged();
-
-        //         }
-
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         throw;
-        //     }
-
-
-        // }
-
-
-
     }
 }

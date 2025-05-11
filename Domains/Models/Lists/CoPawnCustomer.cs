@@ -1,10 +1,10 @@
 ﻿namespace Domains.Models.Lists;
 
-public class CoPawnCustomer
+public sealed class CoPawnCustomer
 {
     public int Id { get; set; }
-    public Guid? CustomerRefId { get; set; }
-    public Guid? LoanRefId { get; set; }
+    public string? CustomerRefId { get; set; }
+    public string? LoanRefId { get; set; }
     public bool? IsActive { get; set; }
 
 }

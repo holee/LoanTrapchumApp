@@ -2,7 +2,6 @@ using Applications.Interfaces.Lists;
 using Applications.Responses.ViewModels.OtherNames;
 using Applications.Responses.ViewModels.Vendors;
 using Microsoft.AspNetCore.Components;
-using Radzen;
 using TrapchumApp.Components.Pages.Lists.OtherNames;
 
 namespace TrapchumApp.Components.Pages.Lists.Customers
@@ -25,7 +24,7 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
 
         protected override async Task OnInitializedAsync()
         {
-            var gResponse = await _gService.GetGuarantorsAsync(Guid.Empty); //_customerService.GetGuarantorsAsync();
+            var gResponse = await _gService.GetGuarantorsAsync(string.Empty); //_customerService.GetGuarantorsAsync();
 
             if (gResponse.IsSuccess)
             {

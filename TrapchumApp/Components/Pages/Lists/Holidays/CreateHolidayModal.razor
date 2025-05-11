@@ -1,4 +1,5 @@
 ﻿@using Applications.Requests.Lists.Holidays
+@using Applications.Responses.Lists.Holidays
 <div>
     <RadzenProgressBar ProgressBarStyle="ProgressBarStyle.Primary" Visible="@visibled" Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
     <Card>
@@ -28,7 +29,7 @@
                     <RadzenTextArea Placeholder="Enter here..." @bind-Value="modelDTO.Description" Style="width: 100%;height:150px" aria-label="TextArea with placeholder" />
                     <div class="mt-2">
                         <div class="input-group mb-3">
-                            <span class="input-group-text" id="basic-addon1">Create Multi-Year <RadzenCheckBox class="ml-3" @bind-Value="IsMultiYear" @bind-Value:after="MultiYear" Name="IsActive" /></span>
+                            <span class="input-group-text" id="basic-addon1">CreateNewUser Multi-Year <RadzenCheckBox class="ml-3" @bind-Value="IsMultiYear" @bind-Value:after="MultiYear" Name="IsActive" /></span>
                             <RadzenNumeric @bind-Value="endYear" Disabled="IsDisible" class="form-control" Placeholder="Ex: 5 or 10 or 15 or 20" aria-label="Username" aria-describedby="basic-addon1" />
                             <span class="text-muted">Ex: 5 or 10 or 15 or 20</span>
                         </div>
@@ -68,7 +69,7 @@
                                     <RadzenButton Icon="delete" 
                                         Click="@(()=>DeleteHoliday(item.Id))" 
                                         ButtonStyle="ButtonStyle.Danger" 
-                                        Size="Radzen.ButtonSize.ExtraSmall"/>
+                                        Size="ButtonSize.ExtraSmall"/>
                                 </td>
                             </tr>
                         }
@@ -84,12 +85,12 @@
                                   
                                   ButtonStyle="ButtonStyle.Success"
                                   Click="FormValidSubmit"
-                                  Size="Radzen.ButtonSize.Small" />
+                                  Size="ButtonSize.Small" />
                     <RadzenButton Text="Close"
                                   Icon="close"
                                   ButtonStyle="ButtonStyle.Danger"
                                   Click="CloseTab"
-                                  Size="Radzen.ButtonSize.Small" />
+                                  Size="ButtonSize.Small" />
             </div>
         </div>
         @*  </RadzenTemplateForm> *@

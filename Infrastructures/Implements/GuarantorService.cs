@@ -5,38 +5,33 @@ using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.OtherNames;
-using Domains.Models.Lists;
+using Dapper;
 using FluentValidation;
 using Infrastructures.DataAccess;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace Infrastructures.Implements;
 public class GuarantorService : IGuarantorService
 {
     private readonly ApplicationDbContext _context;
+    private readonly IDbContextFactory<DataContext> _contextFactory;
     private readonly IValidator<EntityNameDtoCreate> _validator;
-    public GuarantorService(ApplicationDbContext context, IValidator<EntityNameDtoCreate> validator)
+    private readonly IDapperConnectionFactory dapperConnection;
+    public GuarantorService(ApplicationDbContext context, IValidator<EntityNameDtoCreate> validator, IDbContextFactory<DataContext> contextFactory, IDapperConnectionFactory dapperConnection)
     {
         _context = context;
         _validator = validator;
+        _contextFactory = contextFactory;
+        this.dapperConnection = dapperConnection;
     }
-    public async Task<Result<string>> CreateGaurantorAsync(EntityName othername)
+    public async Task<Result<string>> CreateGaurantorAsync(EntityNames othername)
     {
         try
         {
-            var req = othername.Adapt<EntityNameDtoCreate>();
 
-            var validatorResult = _validator.Validate(req);
-
-            if (!validatorResult.IsValid)
-            {
-                var errors = validatorResult.Errors.Select(er => er.ErrorMessage).ToList();
-                var errString = string.Join(Environment.NewLine, errors);
-                return Result.Failure<string>(ErrorResponse.ServerError(errString));
-            }
-
-            _context.OtherNames.Add(othername);
+            _context.EntityNames.Add(othername);
 
             await _context.SaveChangesAsync();
 
@@ -48,20 +43,22 @@ public class GuarantorService : IGuarantorService
             return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}"));
         }
     }
-    public async Task<Result<string>> UpdateGaurantorAsync(EntityName othername)
+    public async Task<Result<string>> UpdateGaurantorAsync(EntityNames othername)
     {
         try
         {
-            _context.OtherNames.Update(othername);
+            _context.EntityNames.Update(othername);
+
             await _context.SaveChangesAsync();
-            return Result.Success(new string("A new guarantor was created"));
+
+            return Result.Success(new string("A Gaurantor was changed"));
         }
         catch (Exception ex)
         {
             return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}"));
         }
     }
-    public async Task<Result<string>> DeleteGaurantorAsync(Guid? id)
+    public async Task<Result<string>> DeleteGaurantorAsync(string? id)
     {
         try
         {
@@ -74,18 +71,18 @@ public class GuarantorService : IGuarantorService
                 return Result.Failure<string>(ErrorResponse.ServerError("this guarantor is in used."));
             }
 
-            var result = _context.OtherNames.SingleOrDefault(er => er.EntId == id);
+            var result = await _context.EntityNames.FindAsync(id);
 
             if (result is null)
             {
                 return Result.Failure<string>(ErrorResponse.NotFound("no data found."));
             }
 
-            _context.OtherNames.Remove(result);
+            _context.EntityNames.Remove(result);
 
             await _context.SaveChangesAsync();
 
-            return Result.Success(new string("A new guarantor was created"));
+            return Result.Success(new string("A guarantor was removed"));
 
         }
         catch (Exception ex)
@@ -93,34 +90,27 @@ public class GuarantorService : IGuarantorService
             return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}"));
         }
     }
-    public async Task<Result<EntityName>> GetGuarantorByIdAsync(Guid? id)
+    public async Task<Result<EntityNames>> GetGuarantorByIdAsync(string? id)
     {
-        var guarantors = _context.OtherNames.Where(x => x.EntId == id);
+        var guarantors = await _context.EntityNames
+                                        .AsNoTracking()
+                                        .FirstOrDefaultAsync(x => x.Id == id);
 
-        if (!guarantors.Any())
+        if (guarantors is null)
         {
-            return Result.Failure<EntityName>(ErrorResponse.NotFound("No data found"));
+            return Result.Failure<EntityNames>(ErrorResponse.NotFound("No data found"));
         }
-
-        var item = await guarantors.AsNoTracking().FirstOrDefaultAsync();
-
-        return Result.Success(item!);
+        return Result.Success(guarantors);
 
     }
     public async Task<Result<Pager<VGuarantor>>> GetGuarantorsAsync(QueryParam param)
     {
-        var guarantors = _context.Database.SqlQuery<VGuarantor>($"SELECT * FROM VGuarantors");
+        await using var context = await _contextFactory.CreateDbContextAsync();
 
-        if (!string.IsNullOrEmpty(param.Filter))
-        {
-            guarantors = guarantors.Where(x => EF.Functions.Like(x.GuarantorName, $"%{param.Filter}%") ||
-                                                EF.Functions.Like(x.Phone!, $"%{param.Filter}%"));
-        }
-
-        if (!param.IsIncludeInActive)
-        {
-            guarantors = guarantors.Where(x => x.IsActive == false);
-        }
+        var guarantors = context.Database.SqlQuery<VGuarantor>($"SELECT * FROM VGuarantors")
+                                .WhereIf(!string.IsNullOrEmpty(param.Filter), x => EF.Functions.Like(x.GuarantorName, $"%{param.Filter}%") ||
+                                                EF.Functions.Like(x.Phone!, $"%{param.Filter}%"))
+                                .WhereIf(!param.IsIncludeInActive, x => x.IsActive == false);
 
         if (param.SortDescending)
         {
@@ -132,33 +122,30 @@ public class GuarantorService : IGuarantorService
             return Result.Failure<Pager<VGuarantor>>(ErrorResponse.NotFound("No data found"));
         }
 
-        var counts = await guarantors.CountAsync();
+        var counts = guarantors.Count();
 
-        var items = await guarantors.Skip(param.PageIndex)
-                                    .Take(param.PageSize)
+        if (param.PageSize > 0)
+        {
+            guarantors = guarantors.Skip(param.PageNumber).Take(param.PageSize);
+        }
+
+        var items = await guarantors.AsNoTracking()
                                     .ToListAsync();
 
         return Result.Success(new Pager<VGuarantor>(items, counts));
 
     }
-    public async Task<Result<IEnumerable<VGuarantor>>> GetGuarantorsAsync(Guid? id, bool allGuarantors = true, string? q = null)
+    public async Task<Result<IEnumerable<VGuarantor>>> GetGuarantorsAsync(string? id, bool allGuarantors = true, string? q = null)
     {
 
-        var guarantors = _context.Database.SqlQuery<VGuarantor>($"SELECT * FROM VGuarantors");
+        await using var context = await _contextFactory.CreateDbContextAsync();
 
-        if (!string.IsNullOrEmpty(q))
-        {
-            guarantors = guarantors.Where(x => EF.Functions.Like(x.GuarantorName!, $"%{q}%") ||
-                                                EF.Functions.Like(x.Phone!, $"%{q}%"));
-        }
-        if (!allGuarantors)
-        {
-            guarantors = guarantors.Where(x => x.IsActive == false);
-        }
-        if (id.IsNotNullOrEmpty())
-        {
-            guarantors = guarantors.Where(x => x.Id == id);
-        }
+        var guarantors = context.Database
+                                .SqlQuery<VGuarantor>($"SELECT * FROM VGuarantors")
+                                .WhereIf(!string.IsNullOrEmpty(q), x => EF.Functions.Like(x.GuarantorName!, $"%{q}%") ||
+                                                                       EF.Functions.Like(x.Phone!, $"%{q}%"))
+                                .WhereIf(!string.IsNullOrEmpty(id), x => x.Id == id)
+                                .WhereIf(!allGuarantors, x => x.IsActive == false);
         if (!guarantors.Any())
         {
             return Result.Failure<IEnumerable<VGuarantor>>(ErrorResponse.NotFound("There is no guarantor avalable."));
@@ -170,35 +157,105 @@ public class GuarantorService : IGuarantorService
 
     }
 
-    public async Task<Result<VGuarantor>> GetGuarantorByIdAsync(Guid? id, bool allGuarantors = false, bool include = true)
+    public async Task<Pager<VGuarantor>> GetGuarantorsAsync(string? id, QueryParam q)
     {
-        var guarantors = _context.Database.SqlQuery<VGuarantor>($"SELECT * FROM VGuarantors");
 
-        if (!allGuarantors)
-        {
-            guarantors = guarantors.Where(x => x.IsActive == false);
-        }
-        if (id.IsNotNullOrEmpty())
-        {
-            guarantors = guarantors.Where(x => x.Id == id);
-        }
+        await using var context = await _contextFactory.CreateDbContextAsync();
+
+        var guarantors = context.Database
+                                .SqlQuery<VGuarantor>($"SELECT * FROM VGuarantors")
+                                .WhereIf(!string.IsNullOrEmpty(q.Filter), x => EF.Functions.Like(x.GuarantorName!, $"%{q.Filter}%") ||
+                                                                       EF.Functions.Like(x.FullName!, $"%{q.Filter}%") ||
+                                                                       EF.Functions.Like(x.Gender!, $"%{q.Filter}%") ||
+                                                                       EF.Functions.Like(x.Phone!, $"%{q.Filter}%"))
+                                .WhereIf(!string.IsNullOrEmpty(id), x => x.Id == id)
+                                .WhereIf(!q.IsIncludeInActive, x => x.IsActive == false);
         if (!guarantors.Any())
+        {
+            return new Pager<VGuarantor>([], 0);
+        }
+
+        if (q.PageSize > 0)
+        {
+            guarantors = guarantors.Skip(q.PageNumber).Take(q.PageSize);
+        }
+
+        var counts = await guarantors.CountAsync();
+
+        var items = await guarantors.AsNoTracking().ToListAsync();
+
+        return new Pager<VGuarantor>(items, counts);
+
+    }
+
+
+    public async Task<Result<VGuarantor>> GetGuarantorByIdAsync(string? id, bool allGuarantors = false, bool includeRequest = true)
+    {
+
+        if (id.IsNullOrEmpty())
+        {
+            return Result.Failure<VGuarantor>(ErrorResponse.NotFound("There is no guarantor available."));
+        }
+
+        var parameters = new DynamicParameters();
+
+        parameters.Add("@Id", id);
+
+        parameters.Add("@AllGuarantors", allGuarantors);
+
+        parameters.Add("@IncludeRequest", includeRequest);
+
+        using var db = dapperConnection.CreateConnection();
+
+
+        if (!includeRequest)
+        {
+
+            var existingG = await db.QueryFirstOrDefaultAsync<VGuarantor>("spGetGaurantorWithLoans", parameters, commandType: CommandType.StoredProcedure);
+
+            if (existingG is null)
+            {
+                return Result.Failure<VGuarantor>(ErrorResponse.NotFound("There is no guarantor avalable."));
+            }
+
+            return Result.Success(existingG);
+        }
+
+        var lookup = new Dictionary<string, VGuarantor>();
+
+        var items = await db.QueryAsync<VGuarantor, VLoanGuarantors, VGuarantor>("spGetGaurantorWithLoans",
+            (g, gl) =>
+            {
+                if (lookup.TryGetValue(g.Id!, out var existingGaurantor))
+                {
+                    g = existingGaurantor;
+
+                    g.LoanGuarantors = [];
+                }
+                else
+                {
+                    lookup.Add(g.Id!, g);
+                }
+
+                if (gl is not null)
+                {
+                    g.LoanGuarantors.Add(gl);
+                }
+
+                return g;
+
+            }, commandType: CommandType.StoredProcedure,
+            param: parameters,
+            splitOn: "LoanId");
+
+        var guarantor = items.FirstOrDefault(x => x.Id == id);
+
+        if (guarantor is null)
         {
             return Result.Failure<VGuarantor>(ErrorResponse.NotFound("There is no guarantor avalable."));
         }
+        return Result.Success(guarantor);
 
-        var result = await guarantors.AsNoTracking().FirstAsync();
-
-        if (include)
-        {
-
-            var loans = await _context.Database
-                                .SqlQuery<VLoanGuarantors>($"SELECT * FROM VLoanGuarators WHERE GuarantorId={id}")
-                                .AsNoTracking()
-                                .ToListAsync();
-            result.LoanGuarantors = loans ?? [];
-        }
-        return Result.Success<VGuarantor>(result!);
     }
 
 

@@ -16,7 +16,7 @@
 @code {
     [CascadingParameter]
     Task<AuthenticationState> AuthenticationState { get; set; }=default!;
-    [Parameter] public Guid? CustomerId { get; set; }
+    [Parameter] public string? CustomerId { get; set; }
     CustomerActivityDtoCreate activity = new CustomerActivityDtoCreate();
 
 

@@ -1,0 +1,32 @@
+﻿@using Applications.Responses.Lists.Entities
+@using System.Linq.Expressions
+<RadzenDropDown Data="@FilterSalutations"
+                class="w-100"
+                id="@Id"
+                Name="@Name"
+                Value="@Value"
+                AllowClear="@AllowClear"
+                TValue="string"
+                ValueChanged="@ValueChanged"
+                ValueExpression="@ValueExpression"
+                Placeholder="Salutation">
+    <HeaderTemplate>
+        @if (ShowHeader)
+        {
+            <div class="rz-dropdown-filter-container">
+                <input aria-label="Search" id="search-@Guid.NewGuid().ToString("N")"
+                       tabindex="0"
+                       placeholder="type to search..."
+                       class="rz-dropdown-filter rz-inputtext"
+                       autocomplete="Off"
+                       aria-autocomplete="none"
+                       autofocus="true"
+                       @bind="@SearchText"
+                       @oninput="@OnSearchTextChanged"
+                       @onkeypress="@OnKeyPress"
+                       type="search">
+                <span class="notranslate rz-dropdown-filter-icon rzi rzi-search"></span>
+            </div>
+        }
+    </HeaderTemplate>
+</RadzenDropDown>

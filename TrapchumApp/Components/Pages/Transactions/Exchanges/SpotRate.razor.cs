@@ -1,6 +1,7 @@
 using Applications.Interfaces.Currencies;
 using Applications.Interfaces.Transactions;
 using Applications.Requests.Lists.Currency;
+using Applications.Responses.Lists.Currency;
 using Applications.Responses.Paginations;
 using Domains.Models.Currencies;
 using Mapster;
@@ -176,7 +177,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Exchanges
         {
             var qparam = new QueryParam
             {
-                PageIndex = pageIndex,
+                PageNumber = pageIndex,
                 PageSize = pageSize
             };
             CurrencyPaginatedList = await spotRateService.GetSpotRates(Id, qparam);

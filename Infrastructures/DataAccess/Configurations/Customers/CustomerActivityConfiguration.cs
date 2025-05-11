@@ -17,9 +17,7 @@ namespace Data.Configurations
 
             builder.Property(x => x.CustomerRefId)
                 .HasColumnName("CustomerRefId")
-                .HasMaxLength(36)
-                .HasConversion(TypeConversions.GuidConversion);
-
+                .HasMaxLength(250);
             builder.Property(x => x.Status)
                 .HasColumnName("Status")
                 .HasDefaultValue(false)

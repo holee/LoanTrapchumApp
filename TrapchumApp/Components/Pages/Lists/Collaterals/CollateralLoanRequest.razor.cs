@@ -1,4 +1,5 @@
 using Applications.Extensions;
+using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.ViewModels.Collaterals;
 using Microsoft.AspNetCore.Components;
 using Radzen;
@@ -8,14 +9,18 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
 {
     public partial class CollateralLoanRequest
     {
-        [Parameter] public Guid? CustomerId { get; set; } = Guid.Empty;
+        [Parameter] public string? CustomerId { get; set; } = string.Empty;
         [Parameter] public IList<VCollateralLines> SelectedCollateralLines { get; set; } = [];
+
         IEnumerable<VCollateralLines> CollateralLines = [];
-        bool allowRowSelectOnRowClick = true;
+
+        bool allowRowSelectOnRowClick = false;
+
         RadzenDataGrid<VCollateralLines> grid = default!;
         protected override async Task OnInitializedAsync()
         {
             await GetCustomerCollaterals();
+
             await base.OnInitializedAsync();
         }
 
@@ -59,5 +64,7 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
             }
             StateHasChanged();
         }
+
+
     }
 }

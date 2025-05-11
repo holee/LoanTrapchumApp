@@ -6,7 +6,16 @@ using Domains.Models.Lists;
 
 namespace Applications.Services.Lists
 {
-    public sealed class EntityNameService(IEntityNameService entService) : IEntityNameService
+
+    public interface IEntityNameServiceImpl
+    {
+        Task<string> AddMarriedStatus(MarritalStatus marrital);
+        Task<string> ChangeNameStatus(EntityNameDtoActivate req);
+        Task<Pager<VGuarantor>> FindGuarantorsAsync(int pageIndex, int pageSize, string sortColumn, bool sortDescending, bool includeInActive = false, string? filter = null);
+        Task<IEnumerable<VGuarantor>> FindGuarantorsAsync(long id, bool includeInActive = false, string? filter = null);
+        Task<IEnumerable<MarritalStatus>> GetMarriedStatuses(string? q = null);
+    }
+    public sealed class EntityNameService(IEntityNameService entService) : IEntityNameServiceImpl
     {
         public async Task<string> AddMarriedStatus(MarritalStatus marrital)
         {

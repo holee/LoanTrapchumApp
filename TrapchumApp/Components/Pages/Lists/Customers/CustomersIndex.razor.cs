@@ -8,11 +8,13 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
     {
         [CascadingParameter]
         Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+        [Parameter, SupplyParameterFromQuery] public string? UserId { get; set; }
+        [Parameter] public int? BranchId { get; set; }
         void SelectedTabChanged(int index)
         {
             selectedIndex = index;
         }
-        RadzenTabs tabs;
+        RadzenTabs tabs = default!;
         List<int> tabCounts = [0];
         protected int totalCstomers;
         int tabIndex = 1;
@@ -20,11 +22,11 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
         bool isNewTab = false;
         bool isDetailsTab = false;
         bool isEditTab = false;
-        Guid? customerId = Guid.Empty;
+        string? customerId = string.Empty;
         bool isVisble = false;
         bool isCollateralTab = false;
         bool IsLoading = true;
-        void Details(Guid? id)
+        void Details(string? id)
         {
             isVisble = true;
             if (!isDetailsTab)
@@ -38,7 +40,7 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
             isVisble = false;
         }
 
-        void AddCollateralTab(Guid? id)
+        void AddCollateralTab(string? id)
         {
             isVisble = true;
             if (!isCollateralTab)
@@ -52,7 +54,7 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
             isVisble = false;
         }
 
-        void AddEditTab(Guid? id)
+        void AddEditTab(string? id)
         {
             isVisble = true;
             if (!isEditTab)

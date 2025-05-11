@@ -11,8 +11,6 @@ namespace Infrastructures.DataAccess.Configurations.Transactions
         {
             builder.ToTable("tt_transactions");
             builder.HasKey(x => x.TransactionsId);
-            builder.Property(p => p.TransactionsId).ValueGeneratedOnAdd();
-            builder.Property(p => p.TranCode).ValueGeneratedOnAdd();
             builder.Property(p => p.TranTypeRefId);
             builder.Property(p => p.TransactionTypeName);
             builder.Property(p => p.TransactionDate).HasDefaultValueSql("GETDATE()");
@@ -22,7 +20,7 @@ namespace Infrastructures.DataAccess.Configurations.Transactions
 
             builder.HasOne(x => x.JournalEntry)
                         .WithOne(x=>x.LoanTransaction)
-                        .HasForeignKey<JournalEntry>(fk => fk.JournalEntryId);
+                        .HasForeignKey<JournalEntry>(fk => fk.TransactionsRefId);
 
             builder.HasMany(c => c.CashManagements)
                        .WithOne()

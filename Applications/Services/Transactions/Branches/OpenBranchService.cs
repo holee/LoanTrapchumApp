@@ -10,7 +10,7 @@ namespace Applications.Services.Transactions.Branches
 
     public sealed class OpenBranchService(IOpenBranchService obService) : IOpenBranchServiceImpl
     {
-        public async Task<Result<string>> CloseBranchAsync(CloseBranchDtoUpdate transaction)
+        public async Task<Result<string>> CloseBranchAsync(TransactionCloseBranchDto transaction)
         {
             var req = transaction.Adapt<LoanTransaction>();
 
@@ -22,7 +22,7 @@ namespace Applications.Services.Transactions.Branches
             return await obService.GetCashVaultBalance(branchRefId);
         }
 
-        public async Task<Result<string>> OpenBranchAsync(OpenBranchDtoCreate transaction)
+        public async Task<Result<string>> OpenBranchAsync(OpenBranchTransactionDto transaction) 
         {
             var req = transaction.Adapt<LoanTransaction>();
 

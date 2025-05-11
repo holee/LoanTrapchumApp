@@ -3,7 +3,6 @@ using Applications.Services.Loans;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
-using Radzen;
 
 namespace TrapchumApp.Components.Pages.Transactions.Loans.Disbursements
 {
@@ -17,15 +16,13 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Disbursements
         {
             _dService = dService;
         }
-
-        [Parameter, SupplyParameterFromQuery] public int BranchId { get; set; } = 0;
-        [Parameter, SupplyParameterFromQuery] public long UserId { get; set; } = 0;
+        [Parameter] public int BranchId { get; set; } = 0;
+        [Parameter, SupplyParameterFromQuery] public string? UserId { get; set; }
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
 
         bool branchStatus = false;
         int counts = 0;
         int loanCount = 0;
-
         int pageSize = 10;
         bool isLoading = false;
         bool isProgess = false;
@@ -47,7 +44,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Disbursements
 
         void AddNewLoanTab()
         {
-            NavigationManager.NavigateTo("/Loan/Disbursement/Create");
+            NavigationManager.NavigateTo("/Loan/Disbursement/CreateNewUser");
         }
         void CloseLoanTab()
         {
@@ -73,7 +70,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Disbursements
         }
 
 
-        async Task DownLoadScheduleAsExcel(Guid? loanRefId, int? branchId)
+        async Task DownLoadScheduleAsExcel(string? loanRefId, int? branchId)
         {
             ContextMenuService.Close();
             isProgess = true;
@@ -87,18 +84,19 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Disbursements
 
 
 
-        async Task DownLoadScheduleAsPdf(Guid? loanRefId, int? branchId)
+        async Task DownLoadScheduleAsPdf(string? loanRefId, int? branchId)
         {
 
             ContextMenuService.Close();
 
             isProgess = true;
+
             var stream = await _dService.DownLoadScheduleAsPdf(loanRefId, branchId);
 
-            using var streamRef = new DotNetStreamReference(stream: stream);
+            //using var streamRef = new DotNetStreamReference(stream: stream);
 
-            await js.InvokeVoidAsync("downloadFileFromStream", "Schedule.pdf", streamRef);
-            isProgess = false;
+            //await js.InvokeVoidAsync("downloadFileFromStream", "Schedule.pdf", streamRef);
+            //isProgess = false;
             StateHasChanged();
         }
 
@@ -110,23 +108,23 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Disbursements
 
         void GetLoanDetails(VLoanDisbursments p)
         {
-            NavigationManager.NavigateTo($"/Loans/Details/{p.Id}?BranchId={p.BranchId}&CreditAgentId={p.CreditAgentRefId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
+            NavigationManager.NavigateTo($"/Loans/Details/{p.LoanId}?BranchId={p.BranchId}&CreditAgentId={p.CreditAgentRefId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
             return;
         }
         void GetPaymentSchedules(VLoanDisbursments p)
         {
-            NavigationManager.NavigateTo($"/Loans/{p.Id}/Repayment?BranchId={p.BranchId}&CreditAgentId={p.CreditAgentRefId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
+            NavigationManager.NavigateTo($"/Loans/{p.LoanId}/Repayment?BranchId={p.BranchId}&CreditAgentId={p.CreditAgentRefId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
             return;
         }
 
         void ChangeCreditAgent(VLoanDisbursments p)
         {
-            NavigationManager.NavigateTo($"/Loan/CreditAgent/{p.Id}/Changed?CustomerId={p.CustomerId}&BranchId={p.BranchId}&CreditAgentId={p.CreditAgentRefId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
+            NavigationManager.NavigateTo($"/Loan/CreditAgent/{p.LoanId}/Changed?CustomerId={p.CustomerId}&BranchId={p.BranchId}&CreditAgentId={p.CreditAgentRefId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
             return;
         }
         void CustomerPayOff(VLoanDisbursments p)
         {
-            NavigationManager.NavigateTo($"/Loan/CreditAgent/{p.Id}/Changed?CustomerId={p.CustomerId}&BranchId={p.BranchId}&CreditAgentId={p.CreditAgentRefId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
+            NavigationManager.NavigateTo($"/Loan/CreditAgent/{p.LoanId}/Changed?CustomerId={p.CustomerId}&BranchId={p.BranchId}&CreditAgentId={p.CreditAgentRefId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
             return;
         }
 
@@ -173,7 +171,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Disbursements
 // }
 // void AddNewLoanTab()
 // {
-//     NavigationManager.NavigateTo("/Loan/Disbursement/Create");
+//     NavigationManager.NavigateTo("/Loan/Disbursement/CreateNewUser");
 // }
 // void CloseLoanTab()
 // {

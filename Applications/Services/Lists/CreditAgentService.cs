@@ -20,37 +20,40 @@ namespace Applications.Services.Lists
             return await crService.ActivateOrDeactivateCreditAgent(model);
         }
 
-        public async Task<Result> AddCreditAgent(long employeeRefId, LoanCreditAgent req)
+        public async Task<Result<string>> AddCreditAgent(string? employeeRefId, LoanCreditAgentDtoCreate req)
         {
-            return await crService.AddCreditAgent(employeeRefId, req);
+
+            var model = req.Adapt<LoanCreditAgent>();
+
+            return await crService.AddCreditAgent(employeeRefId, model);
         }
 
-        public Task<Result<string>> AddCreditAgent(Guid? employeeRefId, LoanCreditAgentDtoCreate req)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<IEnumerable<VCreditAgent>> GetCreditAgents(bool includeInactive = false, string? query = null)
+        public async Task<Result<IEnumerable<VCreditAgent>>> GetCreditAgents(bool includeInactive = false, string? query = null)
         {
             return await crService.GetCreditAgents(includeInactive, query);
         }
 
-        public async Task<Pager<VCreditAgent>> GetCreditAgents(int pageIndex, int pageSize, string sortColumn, bool includeIsRemove = false, bool sortDescending = false, string? query = null)
+        public async Task<Pager<VCreditAgent>> GetCreditAgents(QueryParam param)
         {
-            return await crService.GetCreditAgents(pageIndex, pageSize, sortColumn, includeIsRemove, sortDescending, query);
+            return await crService.GetCreditAgents(0,param);
         }
 
-        public async Task<IEnumerable<VEmployeeCreateCreditAgent>> GetEmployeeCreateCreditAgents(string? query = null)
+        public async Task<Pager<VCreditAgent>> GetCreditAgents(int? branchId,QueryParam param)
+        {
+            return await crService.GetCreditAgents(branchId, param);
+        }
+
+        public async Task<Result<IEnumerable<VEmployeeCreateCreditAgent>>> GetEmployeeCreateCreditAgents(string? query = null)
         {
             return await crService.GetEmployeeCreateCreditAgents(query);
         }
 
-        public async Task<Result> UpdateCreditAgent(int id, LoanCreditAgent req)
+        public async Task<Result> UpdateCreditAgent(string? id, LoanCreditAgent req)
         {
             return await crService.UpdateCreditAgent(id, req);
         }
 
-        public Task<Result<string>> UpdateCreditAgent(Guid id, LoanCreditAgentDtoUpdate req)
+        public Task<Result<string>> UpdateCreditAgent(string id, LoanCreditAgentDtoUpdate req)
         {
             throw new NotImplementedException();
         }

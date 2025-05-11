@@ -11,15 +11,10 @@ namespace Infrastructures.DataAccess.Configurations.Loans
         {
             builder.ToTable("lt_loanDescriptions");
             builder.HasKey(x => x.Id);
-            builder.Property(x => x.Id)
-                    .ValueGeneratedOnAdd();
-            builder.Property(x => x.Memo)
-                    .HasMaxLength(400);
-            builder.Property(x => x.CreatedDt)
-                    .HasColumnName("CreatedDT")
-                    .HasDefaultValueSql("GETDATE()");
-            builder.Property(x => x.LoanRequestRefId)
-                 .HasConversion(ConversionExts.GuidConversion);
+            builder.Property(x => x.Id).ValueGeneratedOnAdd();
+            builder.Property(x => x.Memo).HasMaxLength(400);
+            builder.Property(x => x.CreatedDt).HasColumnName("CreatedDT").HasDefaultValueSql("GETDATE()");
+            builder.Property(x => x.LoanRequestRefId).HasMaxLength(250);
         }
     }
 }

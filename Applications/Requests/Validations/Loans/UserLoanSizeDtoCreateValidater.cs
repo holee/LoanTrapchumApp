@@ -1,4 +1,4 @@
-﻿using Applications.Requests.SysSettings;
+﻿using Applications.Requests.Settings;
 using FluentValidation;
 
 namespace Applications.Requests.Validations.Loans

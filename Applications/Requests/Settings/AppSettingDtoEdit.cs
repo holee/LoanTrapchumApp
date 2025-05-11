@@ -1,6 +1,6 @@
-﻿namespace Applications.Requests.SysSettings;
+﻿namespace Applications.Requests.Settings;
 
-public class SysSettingDtoEdit:SysSettingDtoCreate
-{
-    public int Id { get; set; }
-}
+// public class AppSettingDtoEdit:AppSettingDtoCreate
+// {
+//     public int Id { get; set; }
+// }

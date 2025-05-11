@@ -1,7 +1,4 @@
 ﻿@page "/App/Account/{Id}/Users"
-@using Applications.Responses.ViewModels.Auths
-@using TrapchumApp.Components.Account.Shared
-@using TrapchumApp.Components.Pages.Shared
 @using TrapchumApp.Components.Shared
 <PageTitle>User Management</PageTitle>
 <div class="container-fluid">
@@ -66,9 +63,9 @@
                                                  Orientation="Orientation.Horizontal"
                                                  class="mt-2"
                                                  JustifyContent="JustifyContent.End">
-                                        <RadzenButton Size="Radzen.ButtonSize.Small"
+                                        <RadzenButton Size="ButtonSize.Small"
                                                       ButtonStyle="ButtonStyle.Success"
-                                                      ButtonType="Radzen.ButtonType.Submit"
+                                                      ButtonType="ButtonType.Submit"
                                                       Text="Changed"
                                                       Icon="save">
                                         </RadzenButton>
@@ -106,9 +103,9 @@
                                                  Orientation="Orientation.Horizontal"
                                                  class="mt-2"
                                                  JustifyContent="JustifyContent.End">
-                                        <RadzenButton Size="Radzen.ButtonSize.Small"
+                                        <RadzenButton Size="ButtonSize.Small"
                                                       ButtonStyle="ButtonStyle.Primary"
-                                                      ButtonType="Radzen.ButtonType.Submit"
+                                                      ButtonType="ButtonType.Submit"
                                                       Text="Update"
                                                       Icon="save">
                                         </RadzenButton>
@@ -152,7 +149,7 @@
                                      Orientation="Orientation.Horizontal">
                             <RadzenButton Icon="save"
                                           ButtonStyle="ButtonStyle.Primary"
-                                          Size="Radzen.ButtonSize.Small"
+                                          Size="ButtonSize.Small"
                                           Click="AddUserPermissions"
                                           IsBusy="isBusy"
                                           Text="Save"></RadzenButton>

@@ -1,6 +1,12 @@
 ﻿body {
     background: -webkit-linear-gradient(left, #3931af, #00c6ff);
 }
+
+table.table {
+    background-color: var(--rz-background-color-base-100);
+}
+
+
 .emp-profile {
     padding: 10px;
     margin-top: 10px;

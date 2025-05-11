@@ -1,140 +1,140 @@
 using Applications.Enumerations;
 using Applications.Extensions;
+using Applications.Extensions.DateTimes;
 using Applications.Extensions.LoanCalculators;
-using Applications.Requests.Lists.Collaterals;
-using Applications.Requests.Lists.Entities.Guarantors;
-using Applications.Requests.Loans.CreditAgents;
+using Applications.Extensions.mappers;
+using Applications.Extensions.Maths;
+using Applications.Interfaces.Lists;
+using Applications.Interfaces.Loans;
+using Applications.Interfaces.setting;
 using Applications.Requests.Loans.Disbursements;
 using Applications.Requests.Loans.LoanRequests;
+using Applications.Requests.Loans.Payments;
 using Applications.Responses;
-using Applications.Responses.ViewModels.Branches;
+using Applications.Responses.Auths;
+using Applications.Responses.Loans.Disbursements;
+using Applications.Responses.ViewModels.Auths;
 using Applications.Responses.ViewModels.Collaterals;
-using Applications.Responses.ViewModels.Customers;
 using Applications.Responses.ViewModels.Loans.Requests;
+using Applications.Responses.ViewModels.Options;
 using Applications.Responses.ViewModels.OtherNames;
-using Applications.Services.Loans;
 using Domains.Models.Files;
-using Domains.Models.Loans;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Forms;
 using Radzen;
-using Radzen.Blazor;
+using System.Web;
+using Applications.Responses.ViewModels.Customers;
 using TrapchumApp.Components.Pages.Lists.Collaterals;
 using TrapchumApp.Components.Pages.Lists.OtherNames;
+using Applications.Responses.Paginations;
+using Applications.Calculations;
+using Applications.Responses.Lists.Collaterals;
 
 namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 {
     public partial class LoanRequestEdit
     {
-        [Parameter, SupplyParameterFromQuery] public int BranchId { get; set; }
-        [Parameter, SupplyParameterFromQuery] public Guid? UserId { get; set; }
-        [Parameter] public Guid? CustomerId { get; set; }
-        [Parameter] public Guid? LoanRequestId { get; set; }
-        [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
-        LoanRequestDocument DocumentRef = default!;
-        LoanRequestCollaterals CollateralRef = default!;
-        LoanRequestGaurantor GuarantorRef = default!;
-        IEnumerable<LoanScheduleDtoCreate> previewSchedule = [];
-        IEnumerable<VCustomerList> Customers = [];
-        IEnumerable<VCustomerList>? CustomersList = [];
-        IEnumerable<SelectedCreditAgent>? CreditAgents = [];
-        IEnumerable<CollateralLineDtoCreate>? CollateralLines = [];
-        IEnumerable<CollateralLineDtoCreate>? SelectedCollateralLines = [];
-        IEnumerable<VBranchResponse> Branches = Enumerable.Empty<VBranchResponse>();
-        List<VLoanRequestGuarantors> Guarantors = [];
-        List<VLoanRequestCollateralLines> Collaterals = [];
-        List<VLoanRequestsDocuments> Documents = [];
-        RadzenDataGrid<VLoanRequestCollateralLines> gridColaterals = default!;
-        RadzenDataGrid<VLoanRequestGuarantors> gridGuarantors = default!;
-        RadzenDataGrid<VLoanRequestsDocuments> gridDocuments = default!;
-        string branchName = "";
-        string customerName = "";
-        bool isProgressing = false;
-        VLoanRequests data = new();
-        LoanRequestDtoCreate model = new();
-        bool IsAccepted = false;
-        bool isLoading = false;
-        // const long maxFileSize = 30_000_000;
-
-        string editUrl = "";
-        string backUrl = "";
-
-        void ShowLoanPreviews()
+        private readonly ILoanSettingService _loanSettingService;
+        private readonly IAppSettingService _settingsServiceImpl;
+        private readonly IHolidayService _holidayService;
+        private readonly ILogger<LoanRequestCreate> _logger;
+        public LoanRequestEdit(ILoanSettingService loanSettingService, IAppSettingService settingService, IHolidayService holidayService, ILogger<LoanRequestCreate> logger)
         {
-            if (model.RequestAmount == 0) return;
-            var calculator = SelectLoanType(3);
-            calculator.PayEvery = 1;
-            calculator.EffectiveRate = model.CollectionFeeRate!.Value;
-            calculator.StartDate = DateTime.Now;
-            calculator.FirstPayment = DateTime.Now.AddMonths(1);
-            calculator.CollectionFeeMode = 2;
-            calculator.InstallmentTypeId = 1;
-            calculator.CurrencyId = model.CurrencyRefId!.Value;
-            var schedule = calculator.Calculate(model.Installments, model.InterestRate, model.RequestAmount);
-            previewSchedule = schedule.Select(x => new LoanScheduleDtoCreate
-            {
-                InstallmentNo = x.InstallmentNo,
-                PaymentDate = x.PaymentDate,
-                Principal = x.Principal,
-                Interest = x.Interest,
-                CollectionFee = x.CollectionFeeAmount,
-                LoanOutstanding = x.OutStanding,
-                TotalDay = x.TotalDay,
-                TotalPay = x.TotalPay,
-                AgentRefId = Guid.NewGuid(),
-                ScheduleStatusRefId = 2
-            }).ToList();
+            _loanSettingService = loanSettingService;
+            _settingsServiceImpl = settingService;
+            _holidayService = holidayService;
+            _logger = logger;
         }
-        async Task CreateLoanRequest(VLoanRequests req)
+
+        [Parameter] public string? UserId { get; set; }
+        [Parameter] public int? BranchId { get; set; } = 0;
+        [Parameter] public string? CustomerId { get; set; }
+        [Parameter, SupplyParameterFromQuery] public string? LoanRequestId { get; set; }
+        [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+
+        IEnumerable<LoanScheduleDtoCreate> previewSchedule = [];
+
+        //IEnumerable<ApprovedUser> AprovedUsers = [];
+
+        IEnumerable<VCustomerList> Customers = [];
+
+        //IEnumerable<LoanRepaymentModeDto>? LoanRepaymentModes = [];
+
+        //IEnumerable<LoanScheduleStatusDto>? LoanScheduleStatus = [];
+
+        //IEnumerable<LoanStatusDto>? LoanStatuses = [];
+
+        //IEnumerable<LoanCategoryResponse>? loanCategories = [];
+
+        IEnumerable<VCustomerList>? CustomersList = [];
+
+        //IEnumerable<LoanInstallmentTypeDto>? LoanInstallments = [];
+
+        List<VLoanRequestGuarantors> Guarantors = [];
+
+        List<VLoanRequestCollateralLines> CollateralLines = [];
+
+        List<VLoanRequestsDocuments> Documents = [];
+
+        IEnumerable<LoanRequestDocumentsDtoCreate> _documents = [];
+
+        List<DateTime> Holidays = [];
+
+        LoanRequestDtoCreate model = new();
+
+        DateTime? RegisterDate = DateTime.Now;
+
+        EditForm editForm = default!;
+        //LoanInstallmentTypeDto? SelectedInstallment { get; set; }
+
+        VCustomerList? SelectedCustomer = new();
+
+        LoanRequestDocument DocumentRef = default!;
+
+        LoanRequestGaurantor GuarantorRef = default!;
+
+        LoanRequestCollaterals CollateralRef = default!;
+
+        List<VCollateralLines> _collateralLines = [];
+
+        VCustomerList? selectedCustomer = new();
+        DateTime firstPayment;
+        LoanCategoryResponse? SelectedLoanCategory;
+        VUser _user = new();
+        long? size = 0;
+        int counts = 0;
+        bool isVible = false;
+        bool isCustomerSelected = false;
+        bool isLoading = false;
+        bool isProgressing = false;
+        int SelectedCollectionFee = 1;
+        decimal? TotalAdminFee = 0;
+        int SelectedPeriodName = 1;
+        int installmentType = 1;
+        int selectedTabIndex = 0;
+        string? filterText = "";
+        public ActionMode ActionMode { get; set; }
+
+        IEnumerable<FileModel>? files = [];
+
+        IEnumerable<System.IO.FileInfo> UploadFiles = [];
+
+        decimal? LoanRequestAmount = 0;
+
+        void SelectTabIndexChanged(int tabIndex)
         {
-            var confirm = await DialogService.Confirm("Do you want to request this loan?.", "Loan Requesr");
-
-            if (confirm == false)
+            if (tabIndex == 1 && selectedCustomer?.CustomerId == string.Empty)
             {
-
-                NotificationService.Notify(NotificationSeverity.Info, "Loan request cancel.");
                 return;
             }
-
-            var request = new RequestDtoBaseCreate(BranchId, CustomerId, LoanRequestId, string.Empty);
-
-            var resp = await _loanRequestService.AppliedLoanRequestAsync(request);
-
-            if (resp.IsSuccess)
-            {
-                NavigationManager.NavigateTo($"/Loan/Request?BranchId={BranchId}&UserId={UserId}");
-            }
-
-        }
-        async void Remove(VLoanRequestsDocuments d)
-        {
-            var confirm = await DialogService.Confirm("Do you want to remove this document?", "Remove Document");
-
-            if (confirm == false) return;
-
-
-            var resp = await _loanRequestService.DeleteLoanRequestDocumentAsync(LoanRequestId, BranchId, d.Id);
-
-            if (resp.IsSuccess)
-            {
-                Documents.Remove(d);
-                DocumentRef.ReloadDocument();
-                NotificationService.Notify(NotificationSeverity.Warning, resp.Data);
-            }
-            else
-            {
-                NotificationService.Notify(NotificationSeverity.Warning, resp.ErrMessage);
-            }
-
-
         }
 
         async Task HandleFileDialogue()
         {
-
             var options = new DialogOptions
             {
-
+                
             };
 
             IEnumerable<FileModel> uploadedFiles = await DialogService.OpenAsync<FileUploadDialogue>("Upload", options: options);
@@ -148,205 +148,348 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
                         OriginalName = f.OriginalName,
                         NewFileName = f.FileName,
                         FileUrl = f.FileUrl,
+                        FileSize = f.FileSize,
                         AltText = f.OriginalName,
                         Description = f.OriginalName
                     });
                 }
+
+                DocumentRef.ReloadDocument();
             }
-            if (Documents.Any())
+
+            if (LoanRequestId.IsNotNullOrEmpty())
             {
-                await HandleFileSave(Documents);
+                if (!Documents.Any())
+                {
+                    NotificationService.Notify(NotificationSeverity.Error, "There is no any file to upload");
+                    return;
+                }
+
+                var documents = LoanDocumentsExtensions.ToLoanDocumentsCreate(CustomerId, LoanRequestId, BranchId, Documents);
+
+                var res = await _loanRequestService.AddLoanRequestDocumentAsync(documents);
+
+                if (!res.IsSuccess)
+                {
+                    NotificationService.Notify(NotificationSeverity.Error, res.ErrMessage);
+
+                    return;
+                }
+
+                await GetLoanRequestDocuments();
+
+                NotificationService.Notify(NotificationSeverity.Success, res.Data);
             }
         }
 
-        async void AddGuarantors()
+        async Task GetLoanRequestDocuments()
         {
-            var options = new DialogOptions
-            {
-                Width = "60vw"
-            };
+            var resp = await _loanRequestService.GetLoanRequestDocumentAsync(LoanRequestId, BranchId);
 
-            IList<VGuarantor> results = await DialogService.OpenAsync<GuarantorsList>("Select Guarantor", options: options);
-
-            if (!results.Any()) return;
-
-            var gs = results.Select(g => new VLoanRequestGuarantors
+            if (resp.IsSuccess)
             {
-                EntId = g.Id,
-                FullName = g.FullName,
-                AltName = g.GuarantorName,
-                Phone = g.Phone,
-                VilInKhmer = g.VilInKhmer,
-                ComInKhmer = g.ComInKhmer,
-                DisInKhmer = g.DisInKhmer,
-                ProInKhmer = g.ProInKhmer
-            });
-            foreach (var item in gs)
-            {
-                if (Guarantors.Any(x => x.EntId == item.EntId)) continue;
-                Guarantors.Add(item);
+                Documents = resp.Data!.ToList();
+
+                DocumentRef.ReloadDocument();
             }
-            var gaurantors = new LoanRequestGuarantors
-            {
-                CustomerRefId = CustomerId,
-                BranchRefId = BranchId,
-                LoanRequestId = LoanRequestId,
-                //GuarantorsLink = Guarantors.Select(g => new LoanGuarantorDtoCreate
-                //{
-                //    Id = g.Id,
-                //    BranchId = BranchId,
-                //    EntityNameRefId = g.EntId,
-                //    LoanRequestRefId = LoanRequestId,
-                //    IsActive = true
-                //}).ToList()
-            };
-
-            //var resp = await _loanRequestService.AddLoanRequestGuarantorAsync(gaurantors);
-
-            //if (resp.IsSuccess)
-            //{
-            //    // await gridGuarantors.Reload();
-            //    await GuarantorRef.GuarantorReload();
-            //}
-
-
         }
 
-        async void RemoveGuarantor(VLoanRequestGuarantors g)
-        {
 
-            var confirm = await DialogService.Confirm("Do you want to remove guarantor from link?", "Delete");
+        async void RemoveFile(VLoanRequestsDocuments doc)
+        {
+            var confirm = await DialogService.Confirm("Do you want to remove this document?", "Remove Document");
 
             if (confirm == false) return;
 
-            if (g is not null)
+            if (doc is not null && (LoanRequestId.IsNotNullOrEmpty() && doc.Id > 0))
             {
-                var resp = await _loanRequestService.DeleteLoanRequestGuarantorAsync(LoanRequestId, BranchId, g.Id);
+                var resp = await _loanRequestService.DeleteLoanRequestDocumentAsync(LoanRequestId, BranchId, doc.Id);
 
                 if (resp.IsSuccess)
                 {
+                    Documents.Remove(doc);
+
+                    DocumentRef.ReloadDocument();
+
+                    NotificationService.Notify(NotificationSeverity.Success, "Document was removed.");
+
+                    return;
+                }
+
+                NotificationService.Notify(NotificationSeverity.Error, resp.ErrMessage);
+            }
+
+            if (doc is not null && (LoanRequestId.IsNotNullOrEmpty() || doc.Id == 0))
+            {
+                Documents.Remove(doc);
+
+                DocumentRef.ReloadDocument();
+
+                NotificationService.Notify(NotificationSeverity.Success, "Document was removed.");
+
+                return;
+            }
+        }
+
+        async Task AddGuarantors()
+        {
+            var options = new DialogOptions
+            {
+
+            };
+
+            IList<VGuarantor> results = await DialogService.OpenAsync<GuarantorAddModal>("Select Guarantor", options: options);
+
+            if (results is not null && results.Any())
+            {
+                var gs = results.Select(g => new VLoanRequestGuarantors
+                {
+                    EmployeeRefId = g.Id,
+                    FullName = g.FullName,
+                    AltName = g.GuarantorName,
+                    Phone = g.Phone,
+                    VilInKhmer = g.VilInKhmer,
+                    ComInKhmer = g.ComInKhmer,
+                    DisInKhmer = g.DisInKhmer,
+                    ProInKhmer = g.ProInKhmer
+                });
+                foreach (var item in gs)
+                {
+                    if (Guarantors.Contains(item)) continue;
+
+                    Guarantors.Add(item);
+                }
+
+                await GuarantorRef.GuarantorReload();
+            }
+        }
+
+        async void RemoveGaurantor(VLoanRequestGuarantors g)
+        {
+            var confirm = await DialogService.Confirm("Do you want to remove this guarantor?", "Remove Guarantor");
+
+            if (confirm == false) return;
+
+            if (Guarantors.Any() && g.Id > 0)
+            {
+                var res = await _loanRequestService.DeleteLoanRequestGuarantorAsync(LoanRequestId, BranchId, g.Id);
+
+                if (res.IsSuccess)
+                {
                     Guarantors.Remove(g);
+
                     await GuarantorRef.GuarantorReload();
-                    NotificationService.Notify(NotificationSeverity.Success, resp.Data);
+
                 }
 
             }
 
-            return;
+            if (Guarantors.Any() && (g.Id is null || g.Id == 0))
+            {
+                Guarantors.Remove(g);
+
+                await GuarantorRef.GuarantorReload();
+            }
         }
 
         async void AddCollaterals()
         {
             var param = new Dictionary<string, object?>
-        {
-            {"CustomerId",CustomerId}
-        };
+            {
+                { "CustomerId", model.CustomerRefId }
+            };
             var options = new DialogOptions
             {
-                Width = "60vw"
+                Width = "85vw"
             };
 
-            IList<VCollateralLines> results = await DialogService.OpenAsync<CollateralLoanRequest>("Collateral", param, options);
-
-            if (!results.Any()) return;
-
-            var collateralLines = results.Select(c => new VLoanRequestCollateralLines
-            {
-                CollateralLineId = c.Id,
-                CollateralId = c.CollateralId!.ToGuid(),
-                TypeName = c.TypeName,
-                OwnerName = c.OwnerName,
-                ReferenceNo = c.ReferenceNo,
-                Quantity = c.Quantity
-            }).ToList();
-
-            foreach (var item in collateralLines)
-            {
-                if (Collaterals.Any(x => x.CollateralLineId == item.CollateralLineId && x.CollateralId == item.CollateralId))
-                {
-                    continue;
-                }
-                Collaterals.Add(item);
-            }
-
-            if (!Collaterals.Any()) return;
-
-            var collaterals = new LoanCollateralRequest
-            {
-                CustomerId = CustomerId,
-                LoanRequestId = LoanRequestId,
-                BranchId = BranchId,
-                //CollateralLinesLink = Collaterals.Select(c => new CollateralLinkDtoCreate
-                //{
-                //    Id = c.Id,
-                //    BranchId = BranchId,
-                //    LoanRequestRefId = c.LoanRequestId,
-                //    CollateralRefId = c.CollateralId,
-                //    CollateralLineRefId = c.CollateralLineId,
-                //    IsActive = true
-                //}).ToList()
-            };
-
-            //var resp = await _loanRequestService.AddCollateralsLoanRequestAsync(collaterals);
-
-            //if (resp.IsSuccess)
-            //{
-            //    //await gridColaterals.Reload();
-
-            //    CollateralRef.CollateralReload();
-
-            //}
-            //else
-            //{
-            //    var message = resp.Errors!.First();
-            //    NotificationService.Notify(NotificationSeverity.Error, message);
-            //}
+            await DialogService.OpenAsync<CollateralModalAdd>("Collateral", param, options);
+            
         }
 
-        async void RemoveCollateral(VLoanRequestCollateralLines c)
+        async void RemovedCollateral(VLoanRequestCollateralLines c)
         {
-            if (c is null) return;
-
-            bool? confirm = await DialogService.Confirm("Do you want to remove collaterals from Link?", "Confirm");
+            var confirm = await DialogService.Confirm("Do you want to remove this collateral?", "Remove Collateral");
 
             if (confirm == false) return;
 
-            var resp = await _loanRequestService.DeleteLoanRequestCollateralAsync(BranchId, LoanRequestId, c.Id);
-
-            if (resp.IsSuccess)
+            if (CollateralLines.Any() && c.Id > 0)
             {
-                Collaterals.Remove(c);
-                CollateralRef.CollateralReload();
-                NotificationService.Notify(NotificationSeverity.Success, resp.Data);
+                var res = await _loanRequestService.DeleteLoanRequestCollateralAsync(BranchId, LoanRequestId, c.Id);
+
+                if (res.IsSuccess)
+                {
+                    NotificationService.Notify(NotificationSeverity.Success, "Collateral was removed.");
+                    
+                    CollateralLines.Remove(c);
+                    
+                    await CollateralRef.CollateralReload();
+                }
+            }
+
+            if (CollateralLines.Any() && ( c.Id is null || c.Id == 0))
+            {
+
+                CollateralLines.Remove(c);
+
+                await CollateralRef.CollateralReload();
+            }
+        }
+
+ 
+        protected override async Task OnInitializedAsync()
+        {
+
+            //if (CustomerId.IsNotNullOrEmpty() || LoanRequestId.IsNotNullOrEmpty())
+            //{
+            //    isCustomerSelected = true;
+            //}
+
+            //var cat = await _loanSettingService.GetLoanCategories();
+
+            //if (cat!.Any())
+            //{
+            //    loanCategories = cat.Maps<LoanCategoryResponse>();
+
+            //    SelectedLoanCategory = loanCategories!.FirstOrDefault();
+            //}
+
+            //var aproveResp = await _loanSettingService.GetAprovedUserAsync<ApprovedUser>(BranchId);
+
+            //AprovedUsers = aproveResp ?? [];
+
+            await GetLoanRequestInfo();
+
+            await base.OnInitializedAsync();
+        }
+
+        async Task GetLoanRequestInfo()
+        {
+            try
+            {
+                isLoading = true;
+
+                await GetCustomers(CustomerId, 1);
+
+                var reqResp = await _loanRequestService.GetLoanRequestAsync(BranchId, CustomerId, LoanRequestId, true);
+
+                if (reqResp.IsSuccess)
+                {
+                    var data = reqResp.Data;
+                    model.CustomerRefId = CustomerId;
+                    FullName = reqResp.Data?.FullName;
+                    CollateralLines = data!.ToLoanRequestCollaterals();
+                    Guarantors = data!.ToLoanRequestGuarantors();
+                    Documents = data!.ToLoanRequestDocuments();
+                    model = data!.ToLoanRequestDtoCreate();
+                }
+
+                isLoading = false;
+
+            }
+            catch (Exception ex)
+            {
+                NotificationService.Notify(NotificationSeverity.Error, ex.Message);
+            }
+        }
+
+        private async Task GetCustomers(string? customerId, int take = 25, string? filter = null)
+        {
+
+            var queryParam = new QueryParam(0, take, string.Empty, filter: filter);
+
+
+            var customerResponse = await _customerService!.GetCustomersAsync<VCustomerList>(customerId, queryParam);
+
+            if (customerResponse.IsSuccess)
+            {
+                Customers = customerResponse.Data!.Items;
             }
             else
             {
-                NotificationService.Notify(NotificationSeverity.Success, resp.ErrMessage);
+                Customers = [];
+
+                NotificationService.Notify(NotificationSeverity.Error, customerResponse.ErrMessage);
             }
+        }
+
+
+        protected async Task HandleCreateNew()
+        {
+            if (editForm.EditContext?.Validate() == false)
+            {
+                return;
+            }
+
+            var confirm = await DialogService.Confirm("Do you want to save this loan request.", "Loan Request");
+
+            if (confirm == false)
+            {
+                NotificationService.Notify(NotificationSeverity.Info, "Loan request was cancel.");
+
+                return;
+            }
+
+            await HandleLoanRequest(RequestStatus.New);
         }
 
         protected async Task HandleCreateRequest()
         {
-            await HandleLoanRequest();
+            if (editForm.EditContext?.Validate() == false)
+            {
+                return;
+            }
+            var confirm = await DialogService.Confirm("Do you want to save this loan request.", "Loan Request");
+
+            if (confirm == false)
+            {
+                NotificationService.Notify(NotificationSeverity.Info, "Loan request was cancel.");
+
+                return;
+            }
+
+            await HandleLoanRequest(RequestStatus.Requested);
         }
 
-        protected async Task HandleLoanRequest()
+        protected async Task HandleLoanRequest(RequestStatus state)
         {
+
+            _logger.LogInformation("get start loan requesting...");
+
+            var oldGuarantors = Guarantors.ToGuarantorDtoCreate(BranchId);
+
+            model.GuarantorsLink.AddRange(oldGuarantors);
+
+            var oldCollaterals = CollateralLines.ToCollateralLinkDtoCreate(BranchId);
+
+            model.CollateralLinesLink.AddRange(oldCollaterals);
+
+            var documents = Documents.LoanDocumentDtoCreate(BranchId, LoanRequestId);
+
+            model.LoanDocuments.AddRange(documents);
+
+
+            editForm.EditContext!.Validate();
+
             try
             {
-                var req = new LoanChangeStatusDtoCreate
-                {
-                    LoanRequestId = LoanRequestId,
-                    StatusId = 2,
-                    BranchId = BranchId,
-                    AprovedUserId = UserId
-                };
+                model.BankRefId = 11;
+                model.LoanSubTypeRefId = 1;
+                model.BranchRefId = BranchId;
+                model.RequestUserRefId = UserId;
+                model.CreditAgentRefId = _user.EmployeeRefId;
+                model.RequestDate = DateTime.UtcNow;
+                model.LoanRequestStatusRefId = (int)state;
+                model.BranchRefId = BranchId;
+                model.AprovedAmount = model.RequestAmount;
+
                 var resp = await _loanRequestService.CreateLoanRequestAsync(model);
 
                 if (resp.IsSuccess)
                 {
-                    NotificationService.Notify(NotificationSeverity.Error, resp.Data);
-                    NavigationManager.NavigateTo("Loan/Request");
+                    NotificationService.Notify(NotificationSeverity.Success, resp.Data);
+
+                    NavigationManager.NavigateTo($"/App/Request/{BranchId}/Branches/?UserId={UserId}");
                 }
                 else
                 {
@@ -356,8 +499,9 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
             catch (Exception ex)
             {
                 NotificationService.Notify(NotificationSeverity.Error, ex.Message);
-            }
 
+                _logger.LogError(ex, ex.Message);
+            }
         }
 
         LoanCaloulator SelectLoanType(int? paymentMode)
@@ -372,59 +516,48 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
             };
         }
 
-        async Task HandleFileSave(IEnumerable<VLoanRequestsDocuments> doc)
+        void ShowLoanPreviews()
         {
-
-            if (!doc.Any())
+            if (model.RequestAmount == 0) return;
+            selectedTabIndex = 2;
+            var calculator = SelectLoanType(3);
+            calculator.PayEvery = 1;
+            calculator.EffectiveRate = model.CollectionFeeRate!.Value;
+            calculator.StartDate = DateTime.Now;
+            calculator.FirstPayment = DateTime.Now.AddMonths(1);
+            calculator.CollectionFeeMode = SelectedCollectionFee;
+            calculator.InstallmentTypeId = 1;
+            calculator.CurrencyId = model.CurrencyRefId!.Value;
+            var schedule = calculator.Calculate(model.Installments, model.InterestRate, model.RequestAmount);
+            previewSchedule = schedule.Select(x => new LoanScheduleDtoCreate
             {
-                NotificationService.Notify(NotificationSeverity.Error, "There is any file to upload");
-                return;
-            }
-            var document = LoanDocumentsExtensions.ToLoanRequestDocuments(CustomerId, LoanRequestId, BranchId, Documents);
-            var res = await _loanRequestService.AddLoanRequestDocumentAsync(document);
-            if (!res.IsSuccess)
-            {
-                NotificationService.Notify(NotificationSeverity.Error, res.Data);
-                return;
-            }
-            await GetLoanRequestDocuments();
-            NotificationService.Notify(NotificationSeverity.Error, res.ErrMessage);
-        }
-        async Task GetLoanRequestDocuments()
-        {
-            var resp = await _loanRequestService.GetLoanRequestDocumentAsync(LoanRequestId, BranchId);
-
-            if (resp.IsSuccess)
-            {
-                Documents = resp.Data!.ToList();
-                DocumentRef.ReloadDocument();
-            }
-        }
-        protected override async Task OnParametersSetAsync()
-        {
-            backUrl = $"/Loan/Request?BranchId={BranchId}&UserId={UserId}";
-            editUrl = $"/Loan/{CustomerId}/Customer/{LoanRequestId}/Request?BranchId={BranchId}&UserId={UserId}&ActionMode={ActionMode.Edit}";
-            isLoading = true;
-            if (CustomerId.NotEmpty() && LoanRequestId.NotEmpty())
-            {
-                //var reqResp = await _loanRequestService.GetLoanRequestsAsync(BranchId, CustomerId, LoanRequestId, true);
-
-                //if (reqResp.IsSuccess)
-                //{
-                //    data = reqResp.Data!;
-                //    Collaterals = reqResp.Data!.Collaterals.ToList();
-                //    Guarantors = reqResp.Data!.Guarantors.ToList();
-                //    Documents = reqResp.Data!.Documents.ToList();
-                //}
-                IsAccepted = data.StatusId == 2 ? true : false;
-            }
-
-            isLoading = false;
-
-            await base.OnParametersSetAsync();
-
+                InstallmentNo = x.InstallmentNo,
+                PaymentDate = x.PaymentDate,
+                Principal = x.Principal,
+                Interest = x.Interest,
+                CollectionFee = x.CollectionFeeAmount,
+                LoanOutstanding = x.OutStanding,
+                TotalDay = x.TotalDay,
+                TotalPay = x.TotalPay,
+                AgentRefId = UserId,
+                ScheduleStatusRefId = 2
+            }).ToList();
         }
 
 
+        
+
+
+
+  
     }
 }
+
+
+//var uri = new Uri(NavigationManager.Uri);
+//var queryParam = HttpUtility.ParseQueryString(uri.Query).Get(nameof(ActionMode));
+
+//if (Enum.TryParse(queryParam, true, out ActionMode result))
+//{
+//    ActionMode = result;
+//}

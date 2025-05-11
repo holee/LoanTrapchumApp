@@ -1,4 +1,4 @@
-﻿using Applications.Requests.Loans;
+﻿using Applications.Requests.Loans.Categories;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Categories;
@@ -8,16 +8,14 @@ namespace Applications.Interfaces.Loans
 {
     public interface ILoanCategoryService
     {
-        Task<Result<string>> Create(LoanCategory category);
-        Task<Result<string>> Delete(int id);
-        Task<IEnumerable<LoanCategory>> GetLoanCategories(string? q = null);
-        Task<IEnumerable<VlCategoryList>> GetListCategories(bool includeinactive=false,string? q = null);
-        Task<PaginatedList<VlCategoryList>> GetAllPaginAsync(QueryParam param, bool isActive = false, string? q = null);
-        Task<LoanCategory?> GetLoanCategory(int id);
-        Task<LoanCategoryDtoUpdate?> GetForEditAsync(int id);
-        Task<Result<string>> Update(LoanCategory cat);
-        Task<Result<string>> UpdateStatus(int id);
-        Task<bool> NameExist(string? name);
-        Task<bool> CodeExist(string? code);
+        Task<Result<string>> CreateAsync(LoanCategory category);
+        Task<Result<string>> DeleteAsync(int? id);
+        Task<Result<string>> UpdateAsync(LoanCategory cat);
+        Task<Result<string>> UpdateStatus(int? id);
+        Task<Pager<LoanCategory>> GetCategoriesAsync(string? q = null);
+        Task<Pager<VlCategoryList>> GetCategoriesAsync(QueryParam param);
+        Task<Result<LoanCategory>> GetLoanCategoryByIdAsync(int? id);
+        Task<Result<VlCategoryList>> GetCategoryAsync(int? id);
+        Task<Result<LoanCategoryDtoUpdate>> GetEditCategoryByIdAsync(int? id);
     }
 }

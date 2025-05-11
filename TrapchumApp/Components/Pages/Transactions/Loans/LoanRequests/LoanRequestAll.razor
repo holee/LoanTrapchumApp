@@ -3,9 +3,9 @@
               OnTextChanged="FilterTextChanged"
               ShowSearchBox="true">
     <LeftChildContent>
-        <AuthorizeView>
-            <Authorized>
-                <RadzenLink Path="@createRequestUrl" Text="Request" Icon="add" />
+        <AuthorizeView Policy="@RequestsPolicies.Request">
+            <Authorized>            
+                <RadzenLink class="rz-button rz-button-sm rz-primary" Path="@createRequestUrl" Text="Request" Icon="add" />
             </Authorized>
         </AuthorizeView>
     </LeftChildContent>
@@ -24,7 +24,7 @@
                 IsLoading="isLoading"
                 GridLines="DataGridGridLines.Both"
                 AllowPaging="true"
-                Style="height:30rem;min-height:30rem;max-height:45rem;--rz-grid-cell-line-height:1.4rem;"
+                Style="height:30rem;min-height:30rem;max-height:45rem;"
                 ShowPagingSummary="true">
     <Columns>
         <RadzenDataGridColumn Property="@(nameof(VLoanRequests.RequestDate))"
@@ -51,21 +51,21 @@
         <RadzenDataGridColumn Title="Status" Context="r"
                               Width="7rem" TextAlign="TextAlign.Center">
             <Template>
-                <AuthorizeView Policy="@LoanRequestsPolicies.Request">
+                <AuthorizeView Policy="@RequestsPolicies.Request">
                     <Authorized>
                         <LinkRequestLoan BranchId="@BranchId"
                                          LoanRequest="@r"
                                          CreditAgentId="@UserId" />
                     </Authorized>
                 </AuthorizeView>
-                <AuthorizeView Policy="@LoanRequestsPolicies.Disburse">
+                <AuthorizeView Policy="@RequestsPolicies.Disburse">
                     <Authorized>
                         <LinkRequestDisbursment LoanRequest="@r"
                                                 BranchId="@BranchId"
                                                 UserId="@UserId" />
                     </Authorized>
                 </AuthorizeView>
-                <AuthorizeView Policy="@LoanRequestsPolicies.Approve">
+                <AuthorizeView Policy="@RequestsPolicies.Approve">
                     <Authorized>
                         <LinkRequestApproved LoanRequest="@r" UserId="@UserId" BranchId="@BranchId" />
                     </Authorized>

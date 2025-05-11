@@ -5,6 +5,12 @@ namespace Applications.Extensions.Identity.Policies;
 
 public static class CustomersPolicies
 {
+    private const string prefix = "customers";
+    public const string Create = $"{prefix}.{nameof(Create)}";
+    public const string Read = $"{prefix}.{nameof(Read)}";
+    public const string Update = $"{prefix}.{nameof(Update)}";
+    public const string Delete = $"{prefix}.{nameof(Delete)}";
+
     private static string read = AppPermission.RuleFor(Modules.Customers, Feature.Read);
     private static string update = AppPermission.RuleFor(Modules.Customers, Feature.Update);
     private static string create = AppPermission.RuleFor(Modules.Customers, Feature.Create);

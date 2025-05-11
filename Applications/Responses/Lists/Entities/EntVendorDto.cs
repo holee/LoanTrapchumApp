@@ -1,4 +1,4 @@
-﻿namespace Applications.Requests.Lists.Entities
+﻿namespace Applications.Responses.Lists.Entities
 {
     public class EntVendorDto
     {

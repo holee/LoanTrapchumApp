@@ -25,6 +25,9 @@ namespace Applications.Services.Currencies
         Task<Result<Pager<VCurrencyNotes>>> GetCurrencyNotes(QueryParam param);
         Task<Currency> GetCurrencyWithSpotRates(int? id);
         Task<Result> SaveOrUpdate(Currency currency);
+
+        Task<Result<IEnumerable<T>>> GetCurrencies<T>(int? currencyId, string? q = null)
+            where T : class, new();
     }
 
     public sealed class CurrencyService(ICurrencyService currencyService) : ICurrencyServiceImpl
@@ -74,10 +77,15 @@ namespace Applications.Services.Currencies
             return await currencyService.GetCurrencies(currencyId, q);
         }
 
+        public async Task<Result<IEnumerable<T>>> GetCurrencies<T>(int? currencyId, string? q = null)
+            where T : class, new()
+        {
+            return await currencyService.GetCurrencies<T>(currencyId, q);
+        }
+
         public async Task<Result<VCurrenciesList>> GetCurrencyAsync(int? currencyId)
         {
             return await currencyService.GetCurrencyAsync(currencyId);
-
         }
 
         public async Task<Result<Currency>> GetCurrencyById(int? id)
@@ -104,8 +112,6 @@ namespace Applications.Services.Currencies
         {
             return await currencyService.SaveOrUpdate(currency);
         }
-
-
     }
 
     //public interface ICurrencyService
@@ -126,5 +132,4 @@ namespace Applications.Services.Currencies
     //    Task<IEnumerable<VCurrencyNotes>> GetCurrecyNotesss(int branchRefId);
     //    Task<Result<VCurrenciesList>> GetCurrencyAsync(int currencyId);
     //}
-
 }

@@ -7,22 +7,22 @@ public sealed class LoanChangeStatusDtoCreate
 
     }
 
-    public LoanChangeStatusDtoCreate(Guid? loanRequestId, int? branchId, int? statusId)
+    public LoanChangeStatusDtoCreate(string? loanRequestId, int? branchId, int? statusId)
     {
         LoanRequestId = loanRequestId;
         BranchId = branchId;
         StatusId = statusId;
     }
-    public LoanChangeStatusDtoCreate(Guid? loanRequestId, int? branchId, int? statusId, Guid? aprovedUserId)
+    public LoanChangeStatusDtoCreate(string? loanRequestId, int? branchId, int? statusId, string? aprovedUserId)
     {
         LoanRequestId = loanRequestId;
         BranchId = branchId;
         StatusId = statusId;
         AprovedUserId = aprovedUserId;
     }
-    public Guid? LoanRequestId { get; set; }
+    public string? LoanRequestId { get; set; }
     public int? BranchId { get; set; }
     public int? StatusId { get; set; } = 1;
-    public Guid? AprovedUserId { get; set; }
+    public string? AprovedUserId { get; set; }
 }
 

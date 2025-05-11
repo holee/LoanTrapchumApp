@@ -1,0 +1,233 @@
+﻿@using Domains.Models.Addresses
+<EditForm Model="@model" OnValidSubmit="@OnSubmit">
+    <FluentValidationValidator DisableAssemblyScanning="true" />
+    <RadzenFieldset AllowCollapse="false" Collapsed="false" Gap="0.25rem">
+        <HeaderTemplate>
+            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
+                <RadzenIcon Icon="info" /><b>Branch</b>
+            </RadzenStack>
+        </HeaderTemplate>
+        <ChildContent>
+            <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
+                <RadzenColumn Size="3">
+                    <RadzenLabel Text="Status" Component="IsActive" />
+                </RadzenColumn>
+                <RadzenColumn Size="9">
+                    <RadzenCheckBox @bind-Value=@model.IsActive Name="IsActive" />
+                    @(model.IsActive ? "Active" : "Inactive")
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
+                <RadzenColumn Size="3">
+                    <RadzenLabel Text="Branch Name*" />
+                </RadzenColumn>
+                <RadzenColumn Size="9">
+                    <RadzenTextBox Name="BranchName" @bind-Value="model.BranchName" Style="width:100%" />
+                    <ValidationMessage For="@(() => model.BranchName)" />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
+                <RadzenColumn Size="3">
+                    <RadzenLabel Text="Branch Code*" />
+                </RadzenColumn>
+                <RadzenColumn Size="9">
+                    <RadzenTextBox Name="Description" @bind-Value="model.Description" Style="width:100%" />
+                </RadzenColumn>
+            </RadzenRow>
+        </ChildContent>
+    </RadzenFieldset>
+    <RadzenFieldset AllowCollapse="false" Collapsed="false">
+        <HeaderTemplate>
+            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
+                <RadzenIcon Icon="location_on" /><b>Address</b>
+            </RadzenStack>
+        </HeaderTemplate>
+        <ChildContent>
+            <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
+                <RadzenColumn Size="3">
+                    <RadzenLabel>Country</RadzenLabel>
+                </RadzenColumn>
+                <RadzenColumn Size="9">
+                    <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                    FilterOperator="StringFilterOperator.Contains"
+                                    Data="@Countries"
+                                    TextProperty="@nameof(Country.DesInKhmer)"
+                                    ValueProperty="@nameof(Country.DesInKhmer)"
+                                    @bind-Value="@model.CountryName"
+                                    Style="width: 100%;"
+                                    Name="DropDownFiltering1" />
+                </RadzenColumn>
+            </RadzenRow>
+
+            <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
+                <RadzenColumn Size="3">
+                    <RadzenLabel>City</RadzenLabel>
+                </RadzenColumn>
+                <RadzenColumn Size="9">
+                    <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                    FilterOperator="StringFilterOperator.Contains"
+                                    AllowFiltering="false"
+                                    Data="@filteredItems"
+                                    AllowClear="false"
+                                    TValue="string"
+                                    @bind-Value="@model.City"
+                                    Style="width: 100%;"
+                                    Context="c"
+                                    Name="DropDownFiltering2">
+                        <HeaderTemplate>
+                            <div class="rz-dropdown-filter-container">
+                                <input aria-label="Search" id="@Guid.NewGuid().ToString("N")"
+                                       tabindex="0"
+                                       placeholder="type to search..."
+                                       class="rz-dropdown-filter rz-inputtext"
+                                       autocomplete="Off"
+                                       aria-autocomplete="none"
+                                       autofocus="true"
+                                       @bind="@searchText"
+                                       @oninput="@OnSearchTextChanged"
+                                       @onkeypress="@OnKeyPress"
+                                       type="search">
+                                <span class="notranslate rz-dropdown-filter-icon rzi rzi-search"></span>
+                            </div>
+                        </HeaderTemplate>
+                    </RadzenDropDown>
+                </RadzenColumn>
+            </RadzenRow>
+
+            <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
+                <RadzenColumn Size="3">
+                    <RadzenLabel>Province</RadzenLabel>
+                </RadzenColumn>
+                <RadzenColumn Size="9">
+                    <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                    FilterOperator="StringFilterOperator.Contains"
+                                    AllowFiltering="true"
+                                    Data="@provinceList"
+                                    AllowClear="false"
+                                    TextProperty="@nameof(ProvinceDto.ProInKhmer)"
+                                    ValueProperty="@nameof(ProvinceDto.ProvinceId)"
+                                    SelectedItemChanged="SelectProvince"
+                                    @bind-Value="model.ProvinceRefId"
+                                    Style="width: 100%;"
+                                    Name="DropDownFiltering3">
+                    </RadzenDropDown>
+                </RadzenColumn>
+            </RadzenRow>
+
+            <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
+                <RadzenColumn Size="3">
+                    <RadzenLabel>District</RadzenLabel>
+                </RadzenColumn>
+                <RadzenColumn Size="9">
+                    <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                    FilterOperator="StringFilterOperator.Contains"
+                                    AllowFiltering="true"
+                                    Data=@districtList AllowClear="false"
+                                    TextProperty="@nameof(DistrictDto.DisInKhmer)"
+                                    ValueProperty="@nameof(DistrictDto.DistrictId)"
+                                    SelectedItemChanged="SelectDistrict"
+                                    @bind-Value="model.DistrictRefId"
+                                    Style="width: 100%;"
+                                    Name="DropDownFiltering4">
+                    </RadzenDropDown>
+                </RadzenColumn>
+            </RadzenRow>
+
+            <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
+                <RadzenColumn Size="3">
+                    <RadzenLabel>Commune</RadzenLabel>
+                </RadzenColumn>
+                <RadzenColumn Size="9">
+                    <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                    FilterOperator="StringFilterOperator.Contains"
+                                    AllowFiltering="true"
+                                    Data="@communeList"
+                                    AllowClear="false"
+                                    TextProperty="@nameof(CommuneDto.ComInKhmer)"
+                                    ValueProperty="@nameof(CommuneDto.CommuneId)"
+                                    SelectedItemChanged="SelectCommune"
+                                    Style="width: 100%;"
+                                    @bind-Value="model.CommuneRefId"
+                                    Name="DropDownFiltering5">
+
+                    </RadzenDropDown>
+                </RadzenColumn>
+            </RadzenRow>
+
+            <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
+                <RadzenColumn Size="3">
+                    <RadzenLabel>Village</RadzenLabel>
+                </RadzenColumn>
+                <RadzenColumn Size="9">
+                    <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                    FilterOperator="StringFilterOperator.Contains"
+                                    AllowFiltering="true"
+                                    Data="@villageList"
+                                    AllowClear="false"
+                                    TextProperty="@nameof(VillageDto.VilInKhmer)"
+                                    ValueProperty="@nameof(VillageDto.VillageId)"
+                                    SelectedItemChanged="SelectVillage"
+                                    Style="width: 100%;"
+                                    @bind-value="model.VillageRefId"
+                                    Name="DropDownFiltering6">
+
+                    </RadzenDropDown>
+                </RadzenColumn>
+            </RadzenRow>
+        </ChildContent>
+    </RadzenFieldset>
+    <RadzenStack Gap="1rem" Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End">
+        <RadzenButton ButtonType="ButtonType.Submit"
+                      Text="Save"
+                      Size="ButtonSize.Small"
+                      ButtonStyle="ButtonStyle.Success"
+                      Icon="save"></RadzenButton>
+        <RadzenButton Click="@(() => DialogService!.Close(true))"
+                      Variant="Variant.Flat"
+                      Text="Close"
+                      Icon="cancel"
+                      Size="ButtonSize.Small"
+                      ButtonStyle="ButtonStyle.Danger" />
+    </RadzenStack>
+</EditForm>
+
+@code {
+    int selectedIndex = 0;
+
+    RadzenDropDown<string> radzenDropDown = default!;
+
+    string? searchText = string.Empty;
+
+    void OnSearchTextChanged(ChangeEventArgs e)
+    {
+        searchText = e.Value?.ToString() ?? string.Empty;
+
+        if (string.IsNullOrWhiteSpace(searchText))
+        {
+            filteredItems = Cities; // Show all items if search is empty
+        }
+        else
+        {
+            filteredItems = Cities
+                .Where(i => i.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+    }
+
+    async Task OnKeyPress(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter" && !string.IsNullOrWhiteSpace(searchText))
+        {
+            if (!Cities.Any(i => i.Equals(searchText, StringComparison.OrdinalIgnoreCase)))
+            {
+                await AddCity();
+
+                searchText = ""; //Clear the textbox
+            }
+        }
+    }
+
+}
+
+
+

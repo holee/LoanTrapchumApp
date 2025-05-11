@@ -1,7 +1,4 @@
-﻿@using Applications.Responses.ViewModels.Customers
-@using Microsoft.AspNetCore.WebUtilities
-@using Radzen.Blazor.Rendering
-@attribute [MustHasPermission(Modules.Customers, Feature.Read)]
+﻿@attribute [MustHasPermission(Modules.Customers, Feature.Read)]
 <Containers Fluid CssClass="rz-m-0 rz-p-0">
     <PageDropDown PageSizeChanged="ChangedPageSize"
                   ShowSearchBox="true"
@@ -78,7 +75,7 @@
                                   TextAlign="TextAlign.Start"
                                   Title="Actions">
                 <Template>
-                    <RadzenButton Size="Radzen.ButtonSize.ExtraSmall"
+                    <RadzenButton Size="ButtonSize.ExtraSmall"
                                   Icon="more_vert"
                                   Variant="Variant.Text"
                                   Click="@((args)=>ShowContextMenu(args,c))" />
@@ -93,9 +90,9 @@
     {
         ContextMenuService.Open(args, ds =>
     @<RadzenMenu Style="font-size:0.8rem;" Click="OnMenuItemClick">
-        <RadzenMenuItem Visible="@CanRequestLoan"
-                        Icon="add"
+        <RadzenMenuItem Icon="add"
                         Click="@(()=>AddLoanRequest(c.CustomerId))"
+                        Visible="@CanRequestLoan"
                         Text="Request Loan"
                         Value="@c.CustomerId"></RadzenMenuItem>
         <RadzenMenuItem Click="@(()=>AddCollateral(c.CustomerId))" Icon="add" Text="Add Collateral" Value="@c.CustomerId" />

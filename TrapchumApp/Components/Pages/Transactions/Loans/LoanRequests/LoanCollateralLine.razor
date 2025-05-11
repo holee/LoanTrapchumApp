@@ -1,14 +1,16 @@
 ﻿@using Applications.Responses.ViewModels.Loans.Requests
-<BCard>
-    <CardHeader>
-        <strong>Collaterals</strong>
-    </CardHeader>
-    <CardBody>
+<RadzenFieldset>
+    <HeaderTemplate>
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
+            <RadzenIcon Icon="collections_bookmark" /><b>Collaterals</b>
+        </RadzenStack>
+    </HeaderTemplate>
+    <ChildContent>
         <RadzenDataGrid GridLines="DataGridGridLines.Both"
                         Responsive
                         TItem="VLoanRequestCollateralLines"
                         Density="Density.Compact"
-                        Style="--rz-grid-header-background-color:var(--rz-base-200);min-height:20rem;height:20rem;max-height:20rem;"
+                        Style="min-height:20rem;height:20rem;max-height:20rem;"
                         Data="CollateralLines">
             <Columns>
                 <RadzenDataGridColumn Title="ReferenceNo" Property="@(nameof(VLoanRequestCollateralLines.ReferenceNo))" Context="c" />
@@ -32,8 +34,8 @@
                 </RadzenDataGridColumn>
             </Columns>
         </RadzenDataGrid>
-    </CardBody>
-</BCard>
+    </ChildContent>
+</RadzenFieldset>
 @code {
     [Parameter] public EventCallback<IEnumerable<VLoanRequestCollateralLines>> SendData { get; set; }
     [Parameter] public IEnumerable<VLoanRequestCollateralLines> CollateralLines { get; set; } = [];

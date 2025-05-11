@@ -4,14 +4,14 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructures.DataAccess.Configurations.Loans
 {
-    public class LoanRepaymentLineConfig : IEntityTypeConfiguration<LoanRepaymentLine>
+    public class LoanRepaymentLineConfig : IEntityTypeConfiguration<LoanPaymentLine>
     {
-        public void Configure(EntityTypeBuilder<LoanRepaymentLine> builder)
+        public void Configure(EntityTypeBuilder<LoanPaymentLine> builder)
         {
-            builder.ToTable("tt_loanRePaymentLines");
+            builder.ToTable("tt_loanPaymentLines");
             builder.HasKey(x => x.Id);
             builder.Property(p => p.Id).ValueGeneratedOnAdd();
-            builder.Property(p => p.LoanRefId);
+            builder.Property(p => p.LoanRefId).HasMaxLength(250);
             builder.Property(p => p.LoanScheduleRefId);
             builder.Property(p => p.InstallmentNo);
             builder.Property(p => p.PayDate).HasDefaultValueSql("GETDATE()");

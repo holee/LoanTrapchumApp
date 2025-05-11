@@ -2,19 +2,19 @@ using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Services.Loans;
 using Microsoft.AspNetCore.Components;
-using Radzen;
+
 namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
 {
     public partial class ClientLateSchedules
     {
-        private readonly ILoanScheduleService _scheduleService;
-        public ClientLateSchedules(ILoanScheduleService schedulesService)
+        private readonly ILoanScheduleServiceImpl _scheduleService;
+        public ClientLateSchedules(ILoanScheduleServiceImpl schedulesService)
         {
             _scheduleService = schedulesService;
         }
 
         [Parameter, EditorRequired] public int BranchId { get; set; } = 0;
-        [Parameter, EditorRequired] public long UserId { get; set; } = 0;
+        [Parameter, EditorRequired] public string? UserId { get; set; } = string.Empty;
         [Parameter] public EventCallback<int> GetCountChanged { get; set; }
         IList<VSchedule> LatePaymentSchedules = [];
         IList<VSchedule> SelectedPaymentSchedules = [];
@@ -29,12 +29,12 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
         void ShowCustomerPayment(VSchedule p)
         {
 
-            var parameters = new Dictionary<string, object>{
+            var parameters = new Dictionary<string, object?>{
                         { "LoanPayment",p},
                         { "CurrencyId",p.CurrencyId!.Value },
-                        { "LoanId",p.LoanId!.Value },
+                        { "LoanId",p.LoanId! },
                         { "UserId",UserId },
-                        { "CreditAgentId",p.CreditAgentId!.Value
+                        { "CreditAgentId",p.CreditAgentId!
                         }};
             NavigationManager.NavigateTo($"/Loans/Repayment/{p.LoanId}/Multiple?BranchId={p.BranchId}&CreditAgentId={p.CreditAgentId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
         }

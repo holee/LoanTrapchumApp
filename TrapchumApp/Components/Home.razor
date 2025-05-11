@@ -1,7 +1,10 @@
 ﻿@page "/Home"
-@attribute [Authorize(Roles = "Admin")]
+@inject IServiceProvider ServiceProvider
+@inject IWebHostEnvironment  Env
 <h3>Home</h3>
 
-@code {
 
-}
+<a href="/Reports/Schedules/120">Download</a>
+
+
+<RadzenButton Click="Print">Print</RadzenButton>

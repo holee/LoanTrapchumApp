@@ -1,7 +1,7 @@
 using Applications.Extensions.mappers;
 using Applications.Interfaces.Currencies;
-using Applications.Requests.Lists.Currency;
 using Applications.Requests.Loans.Products;
+using Applications.Responses.Lists.Currency;
 using Applications.Services.Loans;
 
 namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanProducts

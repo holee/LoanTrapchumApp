@@ -7,12 +7,14 @@ namespace Applications.Interfaces.Employees
 {
     public interface IEmployeeService
     {
-        Task<Result<string>> DeleteAsync(Guid? id);
-        Task<Result<Employee>> GetByIdAsync(Guid? id);
-        Task<Result<IReadOnlyList<VEmployees>>> GetEmployeesAsync(Guid? employeeId,int branchId=0, bool isActive = false, string? q = null);
-        Task<Pager<VEmployees>> GetEmployeesAsync(int pageIndex, int pageSize, string sortColumn, bool isDecending = false, bool includeInActive = false, string? q = null);
-        Task<Result<string>> UpdateIsActiveAsync(Guid? id);
+        Task<Result<string>> DeleteAsync(string? id);
+        Task<Result<EntityNames>> GetByIdAsync(string? id);
+        Task<Result<IReadOnlyList<VEmployeeList>>> GetEmployeesAsync(string? employeeId,int branchId=0, bool isActive = false, string? q = null);
+        Task<Pager<VEmployeeList>> GetEmployeesAsync(QueryParam q);
+        Task<Result<string>> UpdateIsActiveAsync(string? id);
         Task<Result<string>> CreateAsync(EntityNames employee);
         Task<Result<string>> UpdateAsync(EntityNames employee);
+        Task<Result<T>> GetByIdAsync<T>(string? id) where T : class;
+        Task<Result<VEmployeeList>> GetByIdAsync(string? id, int? branchId, bool include);
     }
 }

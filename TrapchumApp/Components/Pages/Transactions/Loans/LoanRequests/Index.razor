@@ -1,5 +1,6 @@
-﻿@page "/App/Loan/Request"
+﻿@page "/App/Request/{BranchId:int}/Branches"
 <PageTitle>Loan Request</PageTitle>
+@attribute [MustHasPermission(Modules.LoanRequest,Feature.Read)]
 <Containers Fluid>
     <RadzenTabs SelectedIndexChanged="SelectedIndexChanged"
                 RenderMode="TabRenderMode.Server">

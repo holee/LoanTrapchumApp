@@ -1,6 +1,5 @@
 ﻿@page "/App/Currencies/SpotRate/{Id:int}"
 <PageTitle>Spot Rate</PageTitle>
-@using Mapster
 <div class="card">
     <div class="card-header">
         <RadzenStack Orientation="Orientation.Horizontal"
@@ -44,11 +43,11 @@
                         <RadzenButton ButtonStyle="ButtonStyle.Success"
                                       Click="DisplayCurrencyDialogue"
                                       Icon="details"
-                                      Size="Radzen.ButtonSize.Small" Text="Currency Notes" />
+                                      Size="ButtonSize.Small" Text="Currency Notes" />
                         <RadzenButton ButtonStyle="ButtonStyle.Success"
                                       Click="DisplayCurrencyNoteDialogue"
                                       Icon="add"
-                                      Size="Radzen.ButtonSize.Small" Text="Add New Note" />
+                                      Size="ButtonSize.Small" Text="Add New Note" />
                     </RadzenStack>
                 </RadzenColumn>
             </RadzenRow>
@@ -130,9 +129,9 @@
                                              JustifyContent="JustifyContent.End">
                                     <RadzenButton ButtonStyle="ButtonStyle.Success"
                                                   Text="Set Spot Rate"
-                                                  Size="Radzen.ButtonSize.Small"
+                                                  Size="ButtonSize.Small"
                                                   Icon="save"
-                                                  ButtonType="Radzen.ButtonType.Submit">
+                                                  ButtonType="ButtonType.Submit">
 
                                     </RadzenButton>
                                 </RadzenStack>

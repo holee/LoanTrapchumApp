@@ -1,9 +1,12 @@
-﻿using Applications.Interfaces.Vendors;
+﻿using Applications.Extensions;
+using Applications.Interfaces.Vendors;
 using Applications.Requests.Lists.Entities;
 using Applications.Requests.Lists.OtherNames;
 using Applications.Responses;
+using Applications.Responses.Message;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Vendors;
+using Domains.Models.Bases;
 using Domains.Models.Lists;
 using System;
 using System.Collections.Generic;
@@ -15,49 +18,68 @@ namespace Applications.Services.LIsts
 {
     public sealed class VendorService(IVendorService vService) : IVendorServiceImpl
     {
-        public async Task<Result<string>> ChangeVendorStatus(EntVendorDtoChangeStatus req)
+        //public async Task<Result<string>> ChangeVendorStatus(EntVendorDtoChangeStatus req)
+        //{
+        //    return await vService.ChangeVendorStatus(req);
+        //}
+        public async Task<Result<string>> UpdateAsync(EntityNamesCreate vendor)
         {
-            return await vService.ChangeVendorStatus(req);
+            var model = vendor.ToEntityNames();
+
+            model.Vendor = vendor.ToVendor();
+
+            return await vService.UpdateAsync(model);
+        }
+        public async Task<Result<string>> CreateAsync(EntityNamesCreate vendor)
+        {
+
+            vendor.Id = $"{Guid.CreateVersion7()}";
+
+            vendor.EntType = EntType.Vendor.ToString();
+
+            var model = vendor.ToEntityNames();
+
+            model.Vendor = vendor.ToVendor();
+
+            return await vService.CreateAsync(model);
+
         }
 
-        public Task<Result<string>> UpdateAsync(EntNameDtoCreate vendor)
+        public async Task<Result<string>> DeleteAsync(string? vendorId)
         {
-            throw new NotImplementedException();
-        }
-        public Task<Result<string>> CreateAsync(EntNameDtoCreate vendor)
-        {
-            throw new NotImplementedException();
+            return await vService.DeleteAsync(vendorId);
         }
 
-        public Task<Result<string>> DeleteAsync(Guid? vendorId)
+        public async Task<Result<EntityNames>> GetVendorByIdAsync(string? vendorId, bool include)
         {
-            throw new NotImplementedException();
+            return await vService.GetVendorByIdAsync(vendorId, include);
         }
 
-        public Task<Result<EntityName>> GetVendorByIdAsync(Guid? vendorId, bool include)
+        public async Task<Result<EntityNamesCreate>> GetEditVendorAsync(string? vendorId)
         {
-            throw new NotImplementedException();
+            var rsp = await vService.GetVendorByIdAsync(vendorId, false);
+
+            if (rsp.IsSuccess)
+            {
+                var model = rsp.Data!.ToVendorCreate();
+
+                return Result.Success(model);
+            }
+
+            return Result.Failure<EntityNamesCreate>(ErrorResponse.NotFound(Messages.DataNotFound));
         }
 
-        public Task<Result<EntNameDtoUpdate>> GetEditVendorAsync(Guid? vendorId)
+
+        public async Task<Result<VendorVm>> GetVendorByIdAsync(string? vendorId)
         {
-            throw new NotImplementedException();
+            return await vService.GetVendorByIdAsync(vendorId);
+        }
+
+        public async Task<Pager<VendorVm>> GetVendorsAsync(QueryParam q)
+        {
+            return await vService.GetVendorsAsync(q);
         }
 
 
-        public Task<Result<VVendor>> GetVendorByIdAsync(Guid? vendorId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<Pager<VVendor>> GetVendorsAsync(QueryParam q)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<Result<string>> UpdateAsync(EntNameDtoUpdate vendor)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

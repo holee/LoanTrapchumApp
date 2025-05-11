@@ -1,8 +1,8 @@
+using Applications.Enumerations;
 using Applications.Interfaces.Currencies;
 using Applications.Responses.ViewModels.Currencies;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
-using Radzen;
 
 namespace TrapchumApp.Components.Pages.Transactions.Exchanges
 {
@@ -17,10 +17,9 @@ namespace TrapchumApp.Components.Pages.Transactions.Exchanges
 
         [CascadingParameter]
         Task<AuthenticationState> AuthenticationState { get; set; } = default!;
-        [Parameter, SupplyParameterFromQuery]
-        public int BranchId { get; set; } = 0;
-        [Parameter, SupplyParameterFromQuery]
-        public string? UserId { get; set; }
+        [Parameter] public int BranchId { get; set; } = 0;
+        [Parameter, SupplyParameterFromQuery] public string? UserId { get; set; }
+
         VCurrenciesList? Currency;
         protected override async Task OnInitializedAsync()
         {
@@ -32,7 +31,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Exchanges
 
             if (Currencies.Any())
             {
-                Currency = Currencies.FirstOrDefault(x => x.CurrencyId == 1);
+                Currency = Currencies.FirstOrDefault(x => x.CurrencyId == (int)CurrenciesType.Khr);
             }
             await base.OnInitializedAsync();
         }

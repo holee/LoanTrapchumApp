@@ -27,6 +27,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Exchanges
         protected override async Task OnInitializedAsync()
         {
             await GetExchangeHistories();
+
             await base.OnInitializedAsync();
         }
         async Task LoadData(LoadDataArgs args)

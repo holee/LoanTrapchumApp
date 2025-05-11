@@ -12,7 +12,7 @@ namespace Infrastructures.DataAccess.Configurations.LoanDisbursements
             builder.ToView("VLoanDisbursments");
             builder.HasNoKey();
             builder.Property(x => x.CustomerId);
-            builder.Property(x => x.CustomerName).HasMaxLength(50);
+            builder.Property(x => x.CustomerName).HasMaxLength(250);
             builder.Property(x => x.Salutation).HasMaxLength(20);
             builder.Property(x => x.Phone).HasMaxLength(20);
             builder.Property(x => x.Amount).HasPrecision(18, 3);

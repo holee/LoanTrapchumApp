@@ -10,15 +10,20 @@ namespace Infrastructures.DataAccess.Configurations.Loans
         {
             builder.ToTable("tt_loanRequests");
             builder.HasKey(x => x.LoanRequestId);
-            builder.Property(x => x.Id).ValueGeneratedOnAdd();
+            builder.Property(x => x.LoanRequestId).HasMaxLength(250);
+            builder.Property(x => x.CustomerRefId).HasMaxLength(250);
+            builder.Property(x => x.CreditAgentRefId).HasMaxLength(250);
+            builder.Property(x => x.RequestUserRefId).HasMaxLength(250);
+            builder.Property(x => x.AprovedUserId).HasMaxLength(250);
             builder.Property(x => x.RequestAmount).HasPrecision(18, 3);
             builder.Property(x => x.InterestRate).HasPrecision(18, 3);
             builder.Property(x => x.CollectionFeeRate).HasPrecision(18, 3);
-            builder.Property(x => x.RequestDate).HasColumnType("DATE")
-                                                .HasDefaultValueSql("GETDATE()");
+            builder.Property(x => x.RequestDate).HasColumnType("DATE").HasDefaultValueSql("GETDATE()");
             builder.Property(x => x.CreatedDt).HasDefaultValueSql("GETDATE()");
             builder.Property(x => x.ModifiedDt).HasDefaultValueSql("GETDATE()");
             builder.Property(x => x.Remark).HasMaxLength(400);
+
+
 
             builder.HasMany(x => x.LoanDocuments)
                     .WithOne(x => x.LoanRequest)
@@ -27,7 +32,6 @@ namespace Infrastructures.DataAccess.Configurations.Loans
             builder.HasMany(x => x.LoanDescriptions)
                 .WithOne()
                 .HasForeignKey(fk => fk.LoanRequestRefId);
-
         }
     }
 

@@ -28,12 +28,17 @@ public class LoanPaymentService : ILoanPaymentService
 
         try
         {
-
+            
             var tranXchange = req.ForeignExchangeTrx.Adapt<LoanTransaction>();
+
+            tranXchange.TransactionsId = $"trx-{Guid.CreateVersion7()}";
+
 
             var tranLoan = req.LoanTransaction.Adapt<LoanTransaction>();
 
-            var loanRepayment = req.Adapt<LoanRepayment>();
+            tranLoan.TransactionsId = $"trx-{Guid.CreateVersion7()}";
+
+            var loanRepayment = req.Adapt<LoanPayment>();
 
             var payment = _context.LoanRepayments.Add(loanRepayment).Entity;
 
@@ -60,6 +65,7 @@ public class LoanPaymentService : ILoanPaymentService
         catch (Exception ex)
         {
             tranx.Rollback();
+
             return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}"));
         }
     }
@@ -76,7 +82,7 @@ public class LoanPaymentService : ILoanPaymentService
 
             var tranLoan = req.LoanTransaction.Adapt<LoanTransaction>();
 
-            var loanRepayment = req.Adapt<LoanRepayment>();
+            var loanRepayment = req.Adapt<LoanPayment>();
 
             var payment = _context.LoanRepayments.Add(loanRepayment).Entity;
 
@@ -109,7 +115,7 @@ public class LoanPaymentService : ILoanPaymentService
         }
     }
 
-    public async Task<Result<IEnumerable<VLoanPaymentLines>>> GetPaymentLinesAsync(int? branchId, long? loanId, int? installmentNo)
+    public async Task<Result<IEnumerable<VLoanPaymentLines>>> GetPaymentLinesAsync(int? branchId, string? loanId, int? installmentNo)
     {
 
         using var db = _context.Database.GetDbConnection();
@@ -129,7 +135,7 @@ public class LoanPaymentService : ILoanPaymentService
         return Result.Success(repaymentLines);
     }
 
-    private void SetLoanScheduleComplete(int? branchId, Guid? loanId, long? scheduleId, int? installmentId)
+    private void SetLoanScheduleComplete(int? branchId, string? loanId, long? scheduleId, int? installmentId)
     {
         var leftAmount = _context.Database
                                 .SqlQuery<VSchedule?>($"""
@@ -149,22 +155,22 @@ public class LoanPaymentService : ILoanPaymentService
                 .ExecuteUpdate(x => x.SetProperty(p => p.ScheduleStatusRefId, statusId));
     }
 
-    async Task CloseLoanSchedule(int? branchId, Guid? loanId)
+    async Task CloseLoanSchedule(int? branchId, string? loanId)
     {
         var existingLoans = await _context.Database
                                     .SqlQuery<VLoanDisbursments>($"""
                                                                     SELECT * FROM VLoanDisbursments
-                                                                    WHERE Id={loanId} AND 
+                                                                    WHERE LoanId={loanId} AND 
                                                                     BranchId={branchId} AND 
                                                                     OutStanding=0
                                                                   """)
-                                    .Where(x => x.Id == loanId && x.BranchId == branchId && x.OutStanding == 0)
+                                    .Where(x => x.LoanId == loanId && x.BranchId == branchId && x.OutStanding == 0)
                                     .AsNoTracking()
                                     .ToListAsync();
         if (existingLoans.Any())
         {
             _context.LoanDisbursments
-                 .Where(x => x.LoanDisbursementsId == loanId & x.BranchRefId == branchId)
+                 .Where(x => x.LoanId == loanId & x.BranchRefId == branchId)
                  .ExecuteUpdate(p => p.SetProperty(x => x.LoanStatusRefId, (int)LoanStatuses.Close));
         }
     }

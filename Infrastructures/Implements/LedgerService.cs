@@ -1,4 +1,5 @@
-﻿using Applications.Interfaces.Transactions;
+﻿using Applications.Extensions;
+using Applications.Interfaces.Transactions;
 using Applications.Requests.Journals;
 using Applications.Responses;
 using Applications.Responses.Message;
@@ -15,11 +16,13 @@ public class LedgerService : ILedgerService
 {
     private readonly ApplicationDbContext _context;
     private readonly ILogger<LedgerService> _logger;
+
     public LedgerService(ApplicationDbContext context, ILogger<LedgerService> logger)
     {
         this._context = context;
         this._logger = logger;
     }
+
     public async Task<Result<string>> CreateOrUpdateLedger(Ledger entity)
     {
         _logger.LogInformation("try to create new or update ledger.");
@@ -27,19 +30,19 @@ public class LedgerService : ILedgerService
         {
             if (entity.LedgerId <= 0)
             {
-
                 var oldLedger = _context.Ledgers.Where(x => x.LedgerName!.Equals(entity.LedgerName!));
 
                 if (oldLedger.Any())
                 {
                     return Result.Failure<string>(ErrorResponse.Conflict(Messages.DataExist));
                 }
+
                 _context.Add(entity);
             }
             else
             {
                 var oldLedger = _context.Ledgers.Where(x => x.LedgerName!.Equals(entity.LedgerName!) &&
-                                                           x.LedgerId != entity.LedgerId);
+                                                            x.LedgerId != entity.LedgerId);
                 if (oldLedger.Any())
                 {
                     return Result.Failure<string>(ErrorResponse.Conflict(Messages.DataExist));
@@ -47,6 +50,7 @@ public class LedgerService : ILedgerService
 
                 _context.Update(entity);
             }
+
             await _context.SaveChangesAsync();
             return Result.Success<string>(new("new ledger was created or updated successfully."));
         }
@@ -59,17 +63,16 @@ public class LedgerService : ILedgerService
 
     public async Task<Result<string>> DeleteLedger(int? id)
     {
-
         _logger.LogInformation("try to delete ledger.....");
         try
         {
-
             var usedLedgers = _context.JournalEntryLines.Where(x => x.LedgerRefId.Equals(id));
 
             if (usedLedgers.Any())
             {
                 return Result.Failure<string>(ErrorResponse.Conflict(Messages.DataExist));
             }
+
             var parentLedger = _context.Ledgers.Where(x => x.ParentRefId.Equals(id));
 
             if (parentLedger.Any())
@@ -104,7 +107,7 @@ public class LedgerService : ILedgerService
         try
         {
             IQueryable<Ledger> ledgers = _context.Ledgers
-                                            .Where(x => x.LedgerId == ledgerId);
+                .Where(x => x.LedgerId == ledgerId);
 
             if (!ledgers.Any())
             {
@@ -120,8 +123,8 @@ public class LedgerService : ILedgerService
             _logger.LogError(ex, ex.Message);
             return Result.Failure<Ledger>(ErrorResponse.ServerError($"{ex.Message}"));
         }
-
     }
+
     public async Task<Result<IEnumerable<LedgerType>>> FindLedgerTypes(int? ledgerTypeId = 0, string? q = null)
     {
         IQueryable<LedgerType> queries = _context.LedgerTypes;
@@ -140,8 +143,8 @@ public class LedgerService : ILedgerService
         }
 
         var items = await queries.OrderBy(x => x.LedgerTypeCode)
-                          .AsNoTracking()
-                          .ToListAsync();
+            .AsNoTracking()
+            .ToListAsync();
 
         return Result.Success<IEnumerable<LedgerType>>(items);
     }
@@ -149,7 +152,6 @@ public class LedgerService : ILedgerService
 
     public async Task<Result<LedgerType>> FindLedgerTypeById(int? ledgerTypeId)
     {
-
         IQueryable<LedgerType> queries = _context.LedgerTypes.Where(x => x.LedgerTypeId == ledgerTypeId);
 
         if (!queries.Any())
@@ -169,22 +171,22 @@ public class LedgerService : ILedgerService
         bool includeInactive = false,
         string? q = null)
     {
-
-
         IQueryable<VLedger> queries = _context.VLedgers
-                                             .OrderBy(x => x.LedgerTypeId)
-                                             .ThenBy(x => x.LedgerTypeCode)
-                                             .ThenBy(x => x.CurrencyCode)
-                                             .ThenBy(x => x.LedgerName);
+            .OrderBy(x => x.LedgerTypeId)
+            .ThenBy(x => x.LedgerTypeCode)
+            .ThenBy(x => x.CurrencyCode)
+            .ThenBy(x => x.LedgerName);
 
         if (includeInactive)
         {
             queries = queries.IgnoreQueryFilters();
         }
+
         if (currencyId > 0)
         {
             queries = queries.Where(x => x.CurrencyId == currencyId);
         }
+
         if (sortDescending)
         {
             queries = queries.OrderByDescending(o => EF.Property<object>(o, sortColumn));
@@ -203,9 +205,9 @@ public class LedgerService : ILedgerService
 
         var counts = await queries.CountAsync();
         var items = await queries.Skip(pageIndex!.Value)
-                                .Take(pageSize!.Value)
-                                .AsNoTracking()
-                                .ToListAsync();
+            .Take(pageSize!.Value)
+            .AsNoTracking()
+            .ToListAsync();
         return new Pager<VLedger>
         {
             Count = counts,
@@ -213,17 +215,55 @@ public class LedgerService : ILedgerService
         };
     }
 
+    public async Task<Pager<VLedger>> GetLedgersAsync(int? currencyId, QueryParam q)
+    {
+        IQueryable<VLedger> queries = _context.VLedgers
+            .IgnoreFilterIf(q.IsIncludeInActive)
+            .WhereIf(currencyId > 0, x => x.CurrencyId == currencyId)
+            .OrderBy(x => x.LedgerTypeId)
+            .ThenBy(x => x.LedgerTypeCode)
+            .ThenBy(x => x.CurrencyCode)
+            .ThenBy(x => x.LedgerName);
+        
+        if (q.SortDescending)
+        {
+            queries = queries.OrderByDescending(o => EF.Property<object>(o, q.SortColumn));
+        }
+
+        if (!string.IsNullOrEmpty(q.Filter))
+        {
+            var filter = "%" + q.Filter + "%";
+
+            queries = queries.Where(x => EF.Functions.Like(x.LedgerCode, filter) ||
+                                         EF.Functions.Like(x.CurrencyCode, filter) ||
+                                         EF.Functions.Like(x.LedgerName, filter) ||
+                                         EF.Functions.Like(x.LedgerId.ToString(), filter));
+        }
+
+
+        var counts = await queries.CountAsync();
+        var items = await queries.Skip(q.PageNumber)
+            .Take(q.PageSize)
+            .AsNoTracking()
+            .ToListAsync();
+        return new Pager<VLedger>
+        {
+            Count = counts,
+            Items = items,
+        };
+    }
+
+
     public async Task<Result<IEnumerable<VLedger>>> GetLedgersAsync(int? ledgerId = 0, int? currencyId = 1,
         string? q = null)
     {
-
         try
         {
             IQueryable<VLedger> ledgers = _context.VLedgers
-                                             .OrderBy(x => x.LedgerTypeId)
-                                             .ThenBy(x => x.LedgerTypeCode)
-                                             .ThenBy(x => x.CurrencyCode)
-                                             .ThenBy(x => x.LedgerName);
+                .OrderBy(x => x.LedgerTypeId)
+                .ThenBy(x => x.LedgerTypeCode)
+                .ThenBy(x => x.CurrencyCode)
+                .ThenBy(x => x.LedgerName);
 
             if (ledgerId > 0)
             {
@@ -255,7 +295,6 @@ public class LedgerService : ILedgerService
         {
             return Result.Failure<IEnumerable<VLedger>>(ErrorResponse.ServerError($"{ex.Message}"));
         }
-
     }
 
     public async Task<Result<string>> ChangeLedgerStatus(LedgerChangeStatus req)
@@ -271,17 +310,15 @@ public class LedgerService : ILedgerService
             }
 
             await _context.Ledgers.Where(x => x.LedgerId == req.LedgerId)
-                              .ExecuteUpdateAsync(prop => prop.SetProperty(p => p.IsActive, req.Status));
+                .ExecuteUpdateAsync(prop => prop.SetProperty(p => p.IsActive, req.Status));
 
             return Result.Success(Messages.DataUpdated);
-
         }
         catch (DbUpdateConcurrencyException ex)
         {
             _logger.LogError(ex, ex.Message);
 
             return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}"));
-
         }
     }
 }

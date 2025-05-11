@@ -23,20 +23,20 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Disbursements
         }
 
         [Parameter, SupplyParameterFromQuery] public int BranchId { get; set; }
-        [Parameter, SupplyParameterFromQuery] public Guid? UserId { get; set; }
+        [Parameter, SupplyParameterFromQuery] public string? UserId { get; set; }
 
-        IEnumerable<VCreditAgent> OldCreditAgents = [];
-        IEnumerable<VCreditAgent> NewCreditAgents = [];
-        IEnumerable<VLoanDisbursments> Items = [];
-        Guid? newCreditAgentId = null;
-        Guid? oldCreditAgentId = null;
-        int pageIndex = 0;
-        int pageSize = 10;
-        string sortColumn = "RegisterDate";
-        bool sortDescending = true;
-        VLoanDisbursments existingLoan = new();
-        int counts = 0;
-        bool isLoading = false;
+        IEnumerable<VCreditAgent> _oldCreditAgents = [];
+        IEnumerable<VCreditAgent> _newCreditAgents = [];
+        IEnumerable<VLoanDisbursments> _items = [];
+        string? _newCreditAgentId = null;
+        string? _oldCreditAgentId = null;
+        int _pageIndex = 0;
+        int _pageSize = 10;
+        string _sortColumn = "RegisterDate";
+        bool _sortDescending = true;
+        VLoanDisbursments _existingLoan = new();
+        int _counts = 0;
+        bool _isLoading = false;
         protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
@@ -48,20 +48,20 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Disbursements
         async Task GetLoansByCreditAgents()
         {
 
-            isLoading = true;
+            _isLoading = true;
 
-            var param = new QueryParam(pageIndex, pageSize, sortColumn, true, false, string.Empty);
+            var param = new QueryParam(_pageIndex, _pageSize, _sortColumn, true, false, string.Empty);
 
-            var resp = await _loanService.GetLoansAsync(BranchId, oldCreditAgentId, LoanStatuses.Active, param);
+            var resp = await _loanService.GetLoansAsync(BranchId, _oldCreditAgentId, LoanStatuses.Active, param);
 
 
-            Items = resp.Items;
+            _items = resp.Items;
 
-            counts = resp.Count;
+            _counts = resp.Count;
 
             await GetNewCreditAgents();
 
-            isLoading = false;
+            _isLoading = false;
         }
 
 
@@ -86,31 +86,31 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Disbursements
 
         async Task GetOldCreditAgents(string? filterText = null)
         {
-            var creditAgentResult = await _creditAgentService.GetCreditAgents(false, filterText);
+            var rsp = await _creditAgentService.GetCreditAgents(false, filterText);
 
-            if (creditAgentResult.Any())
+            if (rsp.IsSuccess)
             {
-                OldCreditAgents = creditAgentResult;
+                _oldCreditAgents = rsp.Data!;
             }
         }
         async Task GetNewCreditAgents(string? filterText = null)
         {
-            var creditAgentResult = await _creditAgentService.GetCreditAgents(false, filterText);
+            var rsp = await _creditAgentService.GetCreditAgents(false, filterText);
 
-            if (creditAgentResult.Any() && oldCreditAgentId.NotEmpty())
+            if (rsp.IsSuccess && _oldCreditAgentId.IsNotNullOrEmpty())
             {
-                NewCreditAgents = creditAgentResult.Where(x => x.EmployeeRefId != oldCreditAgentId);
+                _newCreditAgents = rsp.Data!.Where(x => x.EmployeeRefId != _oldCreditAgentId);
             }
         }
 
         async Task ChangedCreditAgent()
         {
-            if (newCreditAgentId.IsNullOrEmpty() || oldCreditAgentId.IsNullOrEmpty() || !Items.Any())
+            if (_newCreditAgentId.IsNullOrEmpty() || _oldCreditAgentId.IsNullOrEmpty() || !_items.Any())
             {
                 NotificationService.Notify(NotificationSeverity.Error, "operation is failed.");
                 return;
             }
-            var models = Items.Select(x => new LoanChangedCaDtoCreate(x.Id, oldCreditAgentId, newCreditAgentId, UserId, UserId))
+            var models = _items.Select(x => new LoanChangedCaDtoCreate(x.LoanId, _oldCreditAgentId, _newCreditAgentId, UserId, UserId))
                                 .ToList();
             var resp = await _loanService.ChangedCreditAgent(BranchId, models);
             if (resp.IsSuccess)

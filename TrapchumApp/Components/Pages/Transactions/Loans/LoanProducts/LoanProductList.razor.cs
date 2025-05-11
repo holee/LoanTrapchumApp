@@ -1,6 +1,8 @@
 using Applications.Interfaces.Loans;
 using Applications.Responses.Loans.Disbursements;
+using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Products;
+using Applications.Services.Loans;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 using Radzen.Blazor;
@@ -10,31 +12,41 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanProducts
     public partial class LoanProductList
     {
 
+        private readonly ILoanProductServiceImpl _loanProductService;
+
+        public LoanProductList(ILoanProductServiceImpl loanProductService)
+        {
+            _loanProductService = loanProductService;
+        }
+
         int pageSize = 10;
+        int pageIndex = 0;
         bool sortDescending = false;
         string sortColumn = "Id";
         bool isLoading = false;
         int counts = 0;
         protected RadzenTabs? tabs;
-        [Parameter]
-        public int SelectIndex { get; set; }
+        [Parameter] public int SelectIndex { get; set; }
         private bool IsNew = false;
         private bool IsEdit = false;
         private bool IsDetails = false;
         protected LoanProductResponse? DetailModel = new();
-
-        async Task LPDetails(int Id)
+        bool IsIncludeInActive = false;
+        RadzenDataGrid<VlProductList> dataGridRef = default!;
+        protected string searchText = string.Empty;
+        protected bool InActive = false;
+        List<VlProductList> VLProducts = [];
+        int Id = 0;
+        void LPDetails(int id)
         {
             try
             {
-                //DetailModel = await service!.GetByIdAsync(Id);
-                StateHasChanged();
+                ContextMenuService.Close();
                 IsDetails = true;
                 SelectIndex = 1;
-                ContextMenuService.Close();
+                Id = id;
                 tabs!.Reload();
-
-                await Task.CompletedTask;
+                StateHasChanged();
             }
             catch (Exception ex)
             {
@@ -43,30 +55,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanProducts
 
             }
         }
-        // async void MenuClicked(RadzenSplitButtonItem args, VLProductList e)
-        // {
-        //     if (args is not null)
-        //     {
-        //         if (args.Value == "1")
-        //         {
-        //             await LPDetails(e.LoanProductId);
-        //             return;
-        //         }
-        //         if (args.Value == "2")
-        //         {
-        //             await OnEdit(e);
 
-        //             return;
-        //         }
-        //         if (args.Value == "3")
-        //         {
-        //             await OnDelete(e);
-        //             return;
-        //         }
-
-        //     }
-        //     return;
-        // }
         void CloseTabs(int e)
         {
             if (SelectIndex == 1)
@@ -84,80 +73,90 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanProducts
             SelectIndex = 0;
             StateHasChanged();
         }
-
-        [Inject] private ILoanProductService? service { get; set; }
-        protected string searchText { get; set; } = string.Empty;
-        protected bool InActive = false;
-        IQueryable<VlProductList>? VLProducts;
-        List<int> SelectedRow = [10, 20, 50, 100];
-
         protected async void Reload()
         {
-            await OnInitializedAsync();
+            await GetLoanProducts();
         }
 
-        protected async Task OnIsActive()
+        protected async Task OnIsActive(bool args)
         {
-            await OnInitializedAsync();
-            await InvokeAsync(StateHasChanged);
+            IsIncludeInActive = args;
+            await GetLoanProducts();
 
         }
         protected async Task DeactiveOrActive(bool arg, VlProductList para)
         {
-            //var message = await service!.IsActiveAsync(para.LoanProductId, arg);
-            //if (message)
-            //{
-            //    NotificationService.Notify(NotificationSeverity.Success, "", "Loan product was updated");
-            //    VLProducts!.ToList().Remove(para);
-            //    await OnInitializedAsync();
-            //    await InvokeAsync(StateHasChanged);
-            //    return;
-            //}
-            //else
-            //    NotificationService.Notify(NotificationSeverity.Success, "", "Loan product cannot update");
-            await Task.CompletedTask;
+            var rsp = await _loanProductService.UpdateAsync(para.LoanProductId, arg);
+
+            if (rsp.IsSuccess)
+            {
+                NotificationService.Notify(NotificationSeverity.Success, rsp.Data);
+                para.IsActive = arg;
+                await GetLoanProducts();
+
+            }
+            else
+                NotificationService.Notify(NotificationSeverity.Success, rsp.ErrMessage);
 
         }
-        async void LoadData(LoadDataArgs e)
+        async Task LoadData(LoadDataArgs e)
         {
-            //pageIndex = e.Skip!.Value;
-            //if (!string.IsNullOrEmpty(e.OrderBy))
-            //{
-            //    sortColumn = e.OrderBy.Split(" ")[0];
-            //    string dir = e.OrderBy.Split(" ")[1];
-            //    sortDescending = dir.Contains("asc") ? false : true;
-            //}
+
             searchText = e.Filter!.ToString()!;
 
-            VLProducts = VLProducts!.Where(x => x.LoanProductName!.ToLower().Contains(searchText, StringComparison.InvariantCultureIgnoreCase)
-            || x.LoanProductCode!.ToLower().Contains(searchText, StringComparison.InvariantCultureIgnoreCase));
-            await InvokeAsync(StateHasChanged);
-        }
-        protected async Task PerformSearch(ChangeEventArgs e)
-        {
-            searchText = e.Value!.ToString()!;
+            pageIndex = e.Skip!.Value;
 
-            VLProducts = VLProducts!.Where(x => x.LoanProductName!.ToLower().Contains(searchText, StringComparison.InvariantCultureIgnoreCase)
-            || x.LoanProductCode!.ToLower().Contains(searchText, StringComparison.InvariantCultureIgnoreCase));
-            await InvokeAsync(StateHasChanged);
+            if (!string.IsNullOrEmpty(e.OrderBy))
+            {
+                sortColumn = e.OrderBy.Split(" ")[0];
+                string dir = e.OrderBy.Split(" ")[1];
+                sortDescending = dir.Contains("asc") ? false : true;
+            }
+
+            await GetLoanProducts();
         }
         protected override async Task OnInitializedAsync()
         {
+            await GetLoanProducts();
+
+            await base.OnInitializedAsync();
+        }
+
+        async Task GetLoanProducts()
+        {
             try
             {
-                var results = await service!.GetAllListAsyc(InActive, null);
+                isLoading = true;
 
-                if (results.IsSuccess)
+
+                var param = new QueryParam
                 {
-                    VLProducts = results!.Data!.AsQueryable()!;
-                }
+                    PageSize = pageSize,
+                    PageNumber = pageIndex,
+                    IsIncludeInActive = IsIncludeInActive,
+                    SortColumn = sortColumn,
+                    SortDescending = sortDescending,
+                    Filter = searchText
+                };
+
+                var results = await _loanProductService!.GetLoanProductsAsync(param);
+
+                counts = results.Count;
+
+                VLProducts = results!.Items;
+                isLoading = false;
+                StateHasChanged();
+
             }
             catch (Exception ex)
             {
                 await DialogService.Alert(ex.InnerException!.Message);
+                isLoading = false;
             }
-            await base.OnInitializedAsync();
         }
+
+
+
         protected async Task OnEdit(VlProductList? loanProduct)
         {
             await Task.CompletedTask;
@@ -205,7 +204,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanProducts
                     }
                     else
                     {
-                        var isDe = await service!.DeleteAsync(productDTO!.LoanProductId);
+                        var isDe = await _loanProductService!.DeleteAsync(productDTO!.LoanProductId);
                         if (isDe.IsSuccess)
                         {
                             NotificationService.Notify(NotificationSeverity.Success, "Delete Loan Product", "Loan product was deleted successfully.");

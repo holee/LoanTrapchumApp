@@ -1,12 +1,16 @@
-﻿@using Applications.Interfaces.Branches
-@using TrapchumApp.Components.Account.Shared
+﻿@using TrapchumApp.Components.Shared
+<CascadingBranchState>
 <Router AppAssembly="typeof(Program).Assembly">
     <Found Context="routeData">
         <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">
             <NotAuthorized>
-                <RedirectToLogin />
+                @if (context.User.Identity?.IsAuthenticated ?? false)
+                {
+                    <RedirectToAccessDenied />
+                }
             </NotAuthorized>
         </AuthorizeRouteView>
         <FocusOnNavigate RouteData="routeData" Selector="h1" />
     </Found>
 </Router>
+</CascadingBranchState>

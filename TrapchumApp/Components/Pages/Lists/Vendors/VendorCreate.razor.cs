@@ -1,67 +1,174 @@
-using Applications.Enumerations;
-using Applications.Interfaces.Vendors;
-using Applications.Requests.Lists.Addreses;
+﻿using Applications.Requests.Lists.Addreses;
 using Applications.Requests.Lists.OtherNames;
-using Applications.Services.LIsts;
+using Applications.Responses.Lists.Entities;
+using Domains.Models.Addresses;
 using Domains.Models.Lists;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components.Web;
+using Radzen.Blazor;
 using Radzen;
+using Applications.Services.Lists;
+using Applications.Services.LIsts;
 
 namespace TrapchumApp.Components.Pages.Lists.Vendors
 {
     public partial class VendorCreate
     {
 
+        private readonly INationalityServiceImpl _nationalityService;
+        private readonly IOccupationServiceImpl _occupationService;
         private readonly IVendorServiceImpl _vendorService;
-
-        public VendorCreate(IVendorServiceImpl vendorService)
+        private readonly ISalutationServiceImpl _salutationService;
+        public VendorCreate(INationalityServiceImpl ationalityService, IOccupationServiceImpl occupationService, IVendorServiceImpl vendorService, ISalutationServiceImpl salutationService)
         {
+            _nationalityService = ationalityService;
+            _occupationService = occupationService;
             _vendorService = vendorService;
+            _salutationService = salutationService;
         }
 
-        [Parameter] public EventCallback<int> SelectIndex { get; set; }
-        [Parameter] public IEnumerable<ProvinceDto>? ProvinceList { get; set; }
-        EntNameDtoCreate model = new EntNameDtoCreate();
-        IEnumerable<CommuneDto>? CommuneList = [];
-        IEnumerable<DistrictDto>? DistrictList = [];
-        IEnumerable<VillageDto>? VillageList = [];
-        ProvinceDto? SelectedProvince { get; set; }
-        DistrictDto? SelectedDistrict { get; set; }
-        CommuneDto? SelectedCommune { get; set; }
-        VillageDto? SelectedVillage { get; set; }
+        [Parameter] public EventCallback<int> Closed { get; set; } = default!;
+        [Parameter] public int SelectIndex { get; set; } = 0;
+        [Parameter] public EventCallback<int?> SelectedValueChanged { get; set; }
         IEnumerable<string> Salutations = [];
-        private bool isValid = true;
-        //protected List<string> salutations = ["Mr.", "Mrs.", "Miss.", "Others"];
+        IEnumerable<ProvinceDto> Provinces = [];
+        IEnumerable<string> Cities = [];
+        IEnumerable<OcupationResponse> Occupations = [];
+        IEnumerable<Country> Countries = [];
+        protected EntityNamesCreate model = new();
+        protected IEnumerable<DistrictDto> Districts = [];
+        protected IEnumerable<CommuneDto> Communes = [];
+        protected IEnumerable<VillageDto> Villages = [];
+        protected EditForm? editForm;
+        private bool IsLoading = true;
 
+        protected string? newSalution = "";
         protected override async Task OnInitializedAsync()
         {
-            try
-            {
-                model.Sex = "Mr";
-            }
-            catch (Exception ex)
-            {
-                NotificationService.Notify(Radzen.NotificationSeverity.Error, "Exception", ex.Message);
 
+            await GetAdditionalInformation();
 
-            }
+            model.City = "Siem Reap";
+            model.CountryName = "ប្រទេសកម្ពុជា";
+            model.Salutation = "Mr";
+            model.MarritalStatus = "Single";
+            model.Nationality = "Khmer";
 
             await base.OnInitializedAsync();
         }
-        protected async void SelectedIndex()
+
+        IEnumerable<Nationality> Nationalities { get; set; } = [];
+        IEnumerable<string> Statuses = ["Single", "Married", "Divorced", "Widow"];
+        string selectedTab = "info";
+        string city = "";
+        async Task OnKeyPress(KeyboardEventArgs e)
         {
-            await SelectIndex.InvokeAsync(0);
+            if (e.Code == "Enter")
+            {
+                await _addressService.AddCity(new CityDtoCreate
+                {
+                    CityName = city
+                });
+                Cities = await _addressService.GetCities();
+            }
+
+        }
+        async Task GetAdditionalInformation()
+        {
+            Nationalities = await _nationalityService.GetNationalities();
+
+            Provinces = await _addressService.GetsProvinces();
+
+            Occupations = await _employeeService!.GetOccupationsAsync("Position");
+
+            var rsp = await _addressService.GetCountries(105);
+
+            if (rsp.IsSuccess)
+            {
+                Countries = rsp.Data ?? [];
+            }
+
+            Cities = await _addressService.GetCities();
+
+            var rsp1 = await _salutationService.GetSalutions();
+
+            if (rsp1.IsSuccess)
+            {
+                Salutations = rsp1.Data!.Select(x => x.Title!).ToList();
+            }
+        }
+        async void SelectedProvinceChanged(object arg)
+        {
+            if (arg is not null)
+            {
+                model.ProInKhmer = ((ProvinceDto)arg).ProInKhmer;
+
+                Districts = await _addressService!.GetDistrictsByProvinceId(((ProvinceDto)arg).ProvinceId);
+
+                StateHasChanged();
+            }
+
+        }
+        async void SelectedDistrictChanged(object arg)
+        {
+            if (arg is not null)
+            {
+                model.DisInKhmer = ((DistrictDto)arg).DisInKhmer;
+
+                Communes = await _addressService!.GetCommunesByDistrictId(((DistrictDto)arg).DistrictId);
+
+                StateHasChanged();
+            }
+
+        }
+        async void SelectedCommuneChanged(object arg)
+        {
+            if (arg is not null)
+            {
+                model.ComInKhmer = ((CommuneDto)arg).ComInKhmer;
+
+                Villages = await _addressService!.GetVillagesByCommuneId(((CommuneDto)arg).CommuneId);
+
+                StateHasChanged();
+            }
+
+        }
+        void SelectedVillageChanged(object arg)
+        {
+            if (arg is not null)
+            {
+                model.VilInKhmer = ((VillageDto)arg).VilInKhmer;
+                StateHasChanged();
+            }
+
         }
 
-        void SetFirstName()
+        private async Task GetCities()
         {
-            model.FirstName = model.Name;
+            Cities = await _addressService.GetCities();
         }
+        private async Task GetOccupation()
+        {
+            var pager = await _occupationService.GetOccupations<OcupationResponse>(0, string.Empty);
+            Occupations = pager.Items;
+        }
+        private async Task GetProvinces()
+        {
+            Provinces = await _addressService.GetsProvinces();
+        }
+        private async Task GetCountries()
+        {
+            var rsp = await _addressService.GetCountries(105);
 
+            if (rsp.IsSuccess)
+                Countries = rsp.Data ?? [];
+
+        }
         private async Task GetSalutations()
         {
             var salutations = await _salutationService.GetSalutions();
+
             if (salutations.IsSuccess)
             {
                 Salutations = salutations!.Data!.Select(x => x.Title!).ToList();
@@ -70,106 +177,33 @@ namespace TrapchumApp.Components.Pages.Lists.Vendors
             {
                 Salutations = [];
             }
-
         }
 
-        protected async Task HandleFormSubmit()
+        protected async void FormSubmit()
         {
             try
             {
-                model.EntType = EntityTypes.Vendor.ToString();
-                model.CountryName = "Cambodia";
-                model.City = SelectedProvince?.ProDescription;
-                model.ProvinceRefId = SelectedProvince?.ProvinceId;
-                model.ProDescription = SelectedProvince?.ProDescription;
-                model.ProInKhmer = SelectedProvince?.ProInKhmer;
-                model.DistrictRefId = SelectedDistrict?.DistrictId;
-                model.DisDescription = SelectedDistrict?.DisDescription;
-                model.DisInKhmer = SelectedDistrict?.DisInKhmer;
-                model.CommuneRefId = SelectedCommune?.CommuneId;
-                model.ComDescription = SelectedCommune?.ComDescription;
-                model.ComInKhmer = SelectedCommune?.ComInKhmer;
-                model.VillageRefId = SelectedVillage?.VillageId;
-                model.VillDescription = SelectedVillage?.VillDescription;
-                model.VilInKhmer = SelectedVillage?.VilInKhmer;
-                var message = await _vendorService!.CreateAsync(model);
-                if (message.IsSuccess)
+                var response = await _vendorService.CreateAsync(model);
+
+                if (response.IsSuccess)
                 {
-                    NotificationService.Notify(Radzen.NotificationSeverity.Success, "Other Name", "Other Name created successfully!");
-                    model = new();
-                    return;
+                    NotificationService.Notify(NotificationSeverity.Success, response.Data);
+
+                    Close();
+
                 }
                 else
                 {
-                    NotificationService.Notify(Radzen.NotificationSeverity.Error, "Other Name", "Other Name create failed");
 
+                    NotificationService.Notify(NotificationSeverity.Error, response.ErrMessage);
                 }
+
             }
             catch (Exception ex)
             {
-                NotificationService.Notify(Radzen.NotificationSeverity.Error, "Exception", ex.Message);
+                NotificationService.Notify(NotificationSeverity.Error, ex.Message);
             }
-
         }
-
-        async void SelectProvince(ProvinceDto e)
-        {
-            SelectedProvince = e;
-            if (SelectedProvince is not null)
-            {
-                DistrictList = await _addressService!.GetDistrictsByProvinceId(SelectedProvince.ProvinceId);
-            }
-            else
-            {
-                SelectedProvince = null;
-                DistrictList = null;
-            }
-            StateHasChanged();
-
-        }
-        async Task SelectDistrict(DistrictDto e)
-        {
-            if (e is not null)
-            {
-                SelectedDistrict = e;
-                CommuneList = await _addressService!.GetCommunesByDistrictId(SelectedDistrict.DistrictId);
-            }
-            else
-            {
-                SelectedDistrict = null;
-                CommuneList = null;
-            }
-            StateHasChanged();
-        }
-        async Task SelectCommune(CommuneDto e)
-        {
-            if (e is not null)
-            {
-                SelectedCommune = e;
-                VillageList = await _addressService!.GetVillagesByCommuneId(SelectedCommune.CommuneId);
-            }
-            else
-            {
-                SelectedCommune = null;
-                VillageList = null;
-            }
-            StateHasChanged();
-        }
-        void SelectVillage(VillageDto e)
-        {
-            if (e is not null)
-            {
-                SelectedVillage = e;
-
-            }
-            else
-            {
-                SelectedVillage = null;
-            }
-            StateHasChanged();
-        }
-
-        protected string? newSalution = "";
 
         protected async Task AddNewSalutation(KeyboardEventArgs e)
         {
@@ -186,7 +220,20 @@ namespace TrapchumApp.Components.Pages.Lists.Vendors
         {
             newSalution = e?.Value?.ToString();
         }
-
+        protected async Task<IEnumerable<string>?> SearchSalutaions(string searchText = "")
+        {
+            var salution = Salutations?.Where(x => x.StartsWith(searchText, StringComparison.InvariantCultureIgnoreCase))
+                                     .ToList();
+            return await Task.FromResult(salution);
+        }
+        protected async void Close()
+        {
+            await Closed.InvokeAsync(SelectIndex);
+        }
 
     }
+
+
 }
+
+

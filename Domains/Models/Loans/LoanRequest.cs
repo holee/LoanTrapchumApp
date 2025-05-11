@@ -6,18 +6,18 @@ namespace Domains.Models.Loans;
 
 public sealed class LoanRequest : BaseEntity
 {
-    public long Id { get; set; }
-    public Guid LoanRequestId { get; set; }
-    public Guid? CustomerRefId { get; set; }
+    public string LoanRequestId { get; set; } = null!;
+    public string? CustomerRefId { get; set; }
+    public string? RequestUserRefId { get; set; }
+    public string? CreditAgentRefId { get; set; }
+    public string? AprovedUserId { get; set; }
     public int? LoanRequestStatusRefId { get; set; }
     public int? BranchRefId { get; set; }
-    public long? RequestUserRefId { get; set; }
     public int? RepaymentModeRefId { get; set; }
     public int? LoanSubTypeRefId { get; set; }
     public int? LoanCategoryRefId { get; set; }
     public int? BankRefId { get; set; }
     public int? LoanProductRefId { get; set; }
-    public Guid? CreditAgentRefId { get; set; }
     public string? InstallmentName { get; set; }
     public int InstallmentTypeId { get; set; }
     public int PayEvery { get; set; } = 1;
@@ -33,7 +33,7 @@ public sealed class LoanRequest : BaseEntity
     public decimal? InterestRate { get; set; }
     public decimal? CollectionFeeRate { get; set; }
     public int? Circle { get; set; } = 1;
-    public long? AprovedUserId { get; set; }
+   
     public DateTime? AprovedDate { get; set; }
     public decimal? AdminFeeRate { get; set; }
     public decimal? AdminFeeAmount { get; set; }
@@ -42,10 +42,8 @@ public sealed class LoanRequest : BaseEntity
     public string? Memo { get; set; }
     public int? CollectionFeeModeId { get; set; } = 1;
     public string? CollectionFeeModeName { get; set; } = string.Empty;
-    public LoanCreditAgent? LoanCreditAgent { get; set; }
     public List<LoanDocuments> LoanDocuments { get; set; } = [];
-    public List<GuarantorLink> GuarantorsLink { get; set; } = [];
+    public List<LoanGuarantorLink> GuarantorsLink { get; set; } = [];
     public List<CollateralLink> CollateralLinesLink { get; set; } = [];
-    public ICollection<LoanDescriptions> LoanDescriptions { get; set; } = [];
-
+    public List<LoanDescriptions> LoanDescriptions { get; set; } = [];
 }

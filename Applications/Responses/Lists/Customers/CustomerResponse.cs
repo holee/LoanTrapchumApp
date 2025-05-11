@@ -1,5 +1,4 @@
-﻿using Applications.Responses.Collaterals;
-using Applications.Responses.Lists.Entities;
+﻿using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.Loans.Disbursements;
 namespace Applications.Responses.Lists.Customers;
 
@@ -40,6 +39,6 @@ public class CustomerResponse
     public ICollection<CustomerExpenseResponse>? CustomerExpenses { get; set; }
     public ICollection<CustomerIncomeResponse>? CustomerIncomes { get; set; }
     public ICollection<LoanDisbursmentResponse>? LoanDisbursements { get; set; }
-    public CollateralResponse? Collateral { get; set; } = new();
+    public VCustomerCollaterals? Collateral { get; set; } = new();
 
 }

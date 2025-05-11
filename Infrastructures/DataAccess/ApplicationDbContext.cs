@@ -20,6 +20,7 @@ using Domains.Models.Lists;
 using Domains.Models.Lists.CreditAgents;
 using Domains.Models.Lists.Customers;
 using Domains.Models.Lists.Employees;
+using Domains.Models.Lists.Vendors;
 using Domains.Models.Loans;
 using Domains.Models.Settings;
 using Domains.Models.Transaction;
@@ -31,9 +32,6 @@ namespace Infrastructures.DataAccess
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         { }
-
-        public IQueryable<VCurrencyNotes> GetCurrencyNotes(int branchId) => FromExpression(() => GetCurrencyNotes(branchId));
-
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -41,14 +39,13 @@ namespace Infrastructures.DataAccess
            .SelectMany(t => t.GetProperties())
            .Where(p => p.ClrType == typeof(decimal) || p.ClrType == typeof(decimal?)))
             {
-                property.SetColumnType("decimal(18,2)");
+                property.SetColumnType("decimal(18,3)");
             }
 
-            builder.HasDbFunction(typeof(ApplicationDbContext).GetMethod(nameof(GetCurrencyNotes), new[] { typeof(int) })!);
-
             builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-            
+
         }
+
 
         private void ProcessSaveChangedAsync()
         {
@@ -129,6 +126,7 @@ namespace Infrastructures.DataAccess
         public IDbTransaction StartTransaction()
         {
             var transaction = Database.BeginTransaction();
+
             return transaction.GetDbTransaction();
         }
 
@@ -136,7 +134,6 @@ namespace Infrastructures.DataAccess
         public DbSet<Currency> Currencies { get; set; }
         public DbSet<CurrencyCounter> CurrencyCounters { get; set; }
         public DbSet<Branch> Branches { get; set; }
-        //public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<Collateral> Collaterals { get; set; }
         public DbSet<CollateralLink> CollateralsLinks { get; set; }
         public DbSet<CollateralLine> CollateralLines { get; set; }
@@ -147,14 +144,15 @@ namespace Infrastructures.DataAccess
         public DbSet<Department> Departments { get; set; }
         public DbSet<UserLoanSize> UserLoanSizes { get; set; }
         public DbSet<Salutation> Salutations { get; set; }
-        public DbSet<Employee> Employees { get; set; }
+        public DbSet<Employee> Employees { get; set; } 
+        public DbSet<Vendor> Vendors { get; set; }
         public DbSet<LoanCreditAgent> LoanCreditAgents { get; set; }
         public DbSet<Customer> Customers { get; set; }
         public DbSet<CustomerExpense> CustomerExpenses { get; set; }
         public DbSet<CustomerIncome> CustomerIncomes { get; set; }
-        public DbSet<EntityName> Vendors { get; set; }
-        public DbSet<EntityName> OtherNames { get; set; }
+        public DbSet<EntityNames> EntityNames { get; set; }
         public DbSet<Occupation> Occupations { get; set; }
+        
         public DbSet<Address> Addresses { get; set; }
         public DbSet<City> Cities { get; set; }
         public DbSet<Country> Countries { get; set; }
@@ -162,7 +160,7 @@ namespace Infrastructures.DataAccess
         public DbSet<District> Districts { get; set; }
         public DbSet<Commune> Communes { get; set; }
         public DbSet<CustomerNote> CustomerNote { get; set; }
-        public DbSet<CustomerActivity> CustomerActivites { get; set; } 
+        public DbSet<CustomerActivity> CustomerActivites { get; set; }
         public DbSet<Village> Villages { get; set; }
         public DbSet<Nationality> Nationalities { get; set; }
         public DbSet<Ledger> Ledgers { get; set; }
@@ -170,46 +168,63 @@ namespace Infrastructures.DataAccess
         public DbSet<JournalEntry> JournalEntries { get; set; }
         public DbSet<JournalEntryLine> JournalEntryLines { get; set; }
         public DbSet<JournalType> JournalTypes { get; set; }
-        public DbSet<Loan> LoanDisbursments { get; set; }
-        public DbSet<LoanRepayment> LoanRepayments { get; set; }
-        public DbSet<LoanRepaymentLine> LoanRepaymentLine { get; set; }
+        public DbSet<LoanDisbursment> LoanDisbursments { get; set; }
+        public DbSet<LoanPayment> LoanRepayments { get; set; }
+        
+        public DbSet<LoanPaymentLine> LoanRepaymentLine { get; set; }
         public DbSet<LoanSchedule> LoanSchedules { get; set; }
         public DbSet<LoanStatus> LoanStatuses { get; set; }
         public DbSet<LoanCategory> LoanCategories { get; set; }
         public DbSet<LoanProduct> LoanProducts { get; set; }
+        
         public DbSet<LoanClarifyOfStaff> LoanClarifyOfStaff { get; set; }
         public DbSet<LoanRepaymentMode> LoanRepaymentModes { get; set; }
         public DbSet<LoanInstallmentType> LoanInstallmentTypes { get; set; }
         public DbSet<LoanTransaction> LoanTransaction { get; set; }
+        
         public DbSet<LoanTransactionType> TransactionTypes { get; set; }
         public DbSet<LoanScheduleStatus> LoanScheduleStatuses { get; set; }
         public DbSet<LoanPaymentLocation> LoanPaymentLocations { get; set; }
+        
         public DbSet<OpenBranch> OpenBranches { get; set; }
+        
         public DbSet<CashVault> CashVaults { get; set; }
+        
         public DbSet<CashManagement> CashManagements { get; set; }
+        
         public DbSet<CashManagementDetail> CashManagementDetails { get; set; }
         public DbSet<CashStatus> CashStatuses { get; set; }
+        
         public DbSet<ForeignExchange> ForeignExchanges { get; set; }
         public DbSet<LoanTermType> LoanTerms { get; set; }
         public DbSet<LoanTypeStatus> LoanSubTypeStatuses { get; set; }
         public DbSet<LoanSubTypeStatus> LoanSubTypeNoAcc { get; set; }
-        public DbSet<GuarantorLink> Guarantors { get; set; }
+        public DbSet<LoanGuarantorLink> Guarantors { get; set; }
+        
         public DbSet<CoPawnCustomer> CoPawnCustomers { get; set; }
+        
         public DbSet<AppStatus> AppStatuses { get; set; }
         public DbSet<CurrencySpotRate> SpotRates { get; set; }
+        
         public DbSet<ActivitiesStatus> ActivitiesStatuses { get; set; }
+        
         public DbSet<BankOther> BankOthers { get; set; }
+        
         public DbSet<DayName> DayNames { get; set; }
         public DbSet<Holiday> Holidays { get; set; }
+        
         public DbSet<MonthName> MonthNames { get; set; }
+        
         public DbSet<OtherType> OtherTypes { get; set; }
+        
         public DbSet<MarritalStatus> MarritalStatuses { get; set; }
-        public DbSet<Loan> LoanDisbursementRequests { get; set; }
+        
+        public DbSet<LoanDisbursment> LoanDisbursementRequests { get; set; }
         public DbSet<LoanRequest> LoanRequests { get; set; }
         public DbSet<LoanDocuments> LoanDocuments { get; set; }
         public DbSet<LoanChangedCa> LoanChangedCa { get; set; }
-        public DbSet<SysSettings> AppSettings { get; set; }
-        public DbSet<EntityNames> EntityNames { get; set; } 
+        public DbSet<AppSettings> AppSettings { get; set; }
+      
 
         /// <summary>
         /// Link to Views
@@ -222,10 +237,10 @@ namespace Infrastructures.DataAccess
         public DbSet<VLoanDisbursments> VLoanDisbursements { get; set; }
         public DbSet<VLoanRepaymentLine> VLoanRepaymentLines { get; set; }
         public DbSet<VCollateral> VCollaterals { get; set; }
-        public DbSet<VJournal> VJournals { get; set; }
+        public DbSet<JournalEntryVm> VJournals { get; set; }
         public DbSet<VLedger> VLedgers { get; set; }
         public DbSet<VNameList> NameLists { get; set; }
-        public DbSet<VEmployees> EmployeeLists { get; set; }
+        public DbSet<VEmployeeList> EmployeeLists { get; set; }
         public DbSet<VCustomerList> CustomerLists { get; set; }
         public DbSet<VCreditAgent> VCreditAgents { get; set; }
     }

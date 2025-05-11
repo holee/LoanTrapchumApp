@@ -91,7 +91,7 @@ public partial class ManageRolePermission
         {
             NotificationService.Notify(Radzen.NotificationSeverity.Success, "Permissions were assigned.");
 
-            NavigationManager.NavigateTo("/Administrator/Roles");
+            NavigationManager.NavigateTo("/App/Account/Roles");
         }
         else
         {

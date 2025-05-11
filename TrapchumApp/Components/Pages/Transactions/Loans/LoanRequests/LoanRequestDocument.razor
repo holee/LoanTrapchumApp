@@ -1,28 +1,30 @@
 ﻿@using Applications.Responses.ViewModels.Loans.Requests
-<Card>
-    <CardHeader>
-        <RadzenStack Orientation="Orientation.Horizontal"
-                     JustifyContent="JustifyContent.SpaceBetween"
-                     AlignItems="AlignItems.Center">
-            <strong>Documents</strong>
-            @if (ShowUpload)
-            {
-                <RadzenButton Text="Upload"
-                              Size="Radzen.ButtonSize.Small"
-                              Icon="upload"
-                              Click="@ClickUpload"
-                              class="rz-mt-0" />
-            }
+<RadzenFieldset>
+    <HeaderTemplate>
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
+            <RadzenIcon Icon="attachment" /><b>Documents</b>
         </RadzenStack>
-    </CardHeader>
-    <CardBody>
+    </HeaderTemplate>
+    <ChildContent>
+        <RadzenStack Orientation="Orientation.Horizontal"
+                     JustifyContent="JustifyContent.End"
+                     Visible="@ShowCommand"
+                     class="mb-2"
+                     AlignItems="AlignItems.Center">
+            <RadzenButton Text="Upload"
+                          Size="ButtonSize.Small"
+                          Icon="upload"
+                          Click="@ClickUpload"
+                          Visible="@(ShowUpload && ShowCommand)"
+                          class="rz-mt-0" />
+        </RadzenStack>
         <RadzenDataGrid Data="Documents"
                         GridLines="DataGridGridLines.Both"
                         TItem="VLoanRequestsDocuments"
                         Density="Density.Compact"
                         @ref="@gridDocuments"
                         PagerHorizontalAlign="HorizontalAlign.Right"
-                        Style="--rz-grid-header-background-color:var(--rz-base-200);min-height:15rem;height:15rem;max-height:15rem;">
+                        Style="min-height:15rem;height:15rem;max-height:15rem;">
             <Columns>
                 <RadzenDataGridColumn Context="g"
                                       Property="@(nameof(VLoanRequestsDocuments.Id))"
@@ -57,20 +59,20 @@
                             <RadzenButton Icon="delete"
                                           Shade="Shade.Lighter"
                                           Click="@(()=>DeleteDocument(g))"
-                                          Size="Radzen.ButtonSize.ExtraSmall"
+                                          Size="ButtonSize.ExtraSmall"
                                           Variant="Variant.Outlined" />
                         </Template>
                     </RadzenDataGridColumn>
                 }
             </Columns>
         </RadzenDataGrid>
-    </CardBody>
-</Card>
-
+    </ChildContent>
+</RadzenFieldset>
 @code {
 
     [Parameter, EditorRequired] public List<VLoanRequestsDocuments> Documents { get; set; } = [];
     [Parameter] public bool ShowUpload { get; set; } = true;
+    [Parameter] public bool ShowCommand { get; set; } = true;
     [Parameter] public EventCallback<VLoanRequestsDocuments> RemoveDocument { get; set; }
     [Parameter] public EventCallback UploadDocument { get; set; }
     [Parameter] public bool ShowDelete { get; set; } = false;
@@ -89,6 +91,6 @@
         await UploadDocument.InvokeAsync();
     }
     //await gridDocuments.Reload();
-    // public EventCallback DocumentStatusChanged => EventCallback.Factory.Create(this, (Action)NotifyLayoutChanged);
+    // public EventCallback DocumentStatusChanged => EventCallback.Factory.CreateNewUser(this, (Action)NotifyLayoutChanged);
 
 }

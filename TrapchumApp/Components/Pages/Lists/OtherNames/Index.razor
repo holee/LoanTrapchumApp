@@ -1,53 +1,35 @@
-﻿@page "/App/Othernames"
+﻿@page "/App/Names"
 @using Applications.Responses.ViewModels.OtherNames
 @using Applications.Responses.ViewModels.Vendors
 <PageTitle>Names</PageTitle>
-<RadzenTabs @bind-SelectedIndex=@selectedIndex @ref="tabs" RenderMode="TabRenderMode.Client">
+<RadzenTabs @bind-SelectedIndex="@selectedIndex" @ref="tabs" RenderMode="TabRenderMode.Server">
     <Tabs>
-        <RadzenTabsItem Text="Names" Icon="list">
+        <RadzenTabsItem Text="Names" Icon="patient_list">
             <Card>
-                <CardHeader>
-                    <RadzenStack AlignItems="AlignItems.Center"
-                                 Orientation="Orientation.Horizontal"
-                                 JustifyContent="JustifyContent.SpaceBetween">
-                        <RadzenButton Icon="add"
-                                      Size="Radzen.ButtonSize.Small"
-                                      Text="New Name"
-                                      Click="AddTabOtherName"
-                                      ButtonStyle="ButtonStyle.Primary" />
-                        <div>
-                            <RadzenCheckBox TValue="bool" @bind-Value=@includeInactive Change="ex=>IncludeInActiveChanged(ex)" Name="CheckBox1" />
-                            <RadzenLabel Text="Include InActive" Component="CheckBox1" Style="margin-left: 8px; vertical-align: middle;" />
-                        </div>
-                    </RadzenStack>
-                </CardHeader>
                 <CardBody>
-                    <RadzenStack Style="margin-bottom:10px"
-                                 JustifyContent="Radzen.JustifyContent.SpaceBetween"
-                                 Orientation="Radzen.Orientation.Horizontal"
-                                 Wrap="Radzen.FlexWrap.Wrap">
-                        <PageDropDown PageSizeChanged="PageSizeChanged"
-                                      Reload="Reload"
-                                      ShowReload="true" />
-                        <RadzenStack Style="width:25%" JustifyContent="Radzen.JustifyContent.End">
-                            <RadzenFormField AllowFloatingLabel="false">
-                                <Start>
-                                    <RadzenIcon Icon="search" />
-                                </Start>
-                                <ChildContent>
-                                    <RadzenTextBox Style="width:100%;height:33px;font-size:13px"
-                                                   Placeholder="Search here..."
-                                                   @bind-Value="q"
-                                                   @oninput="OnSearch" />
-                                </ChildContent>
-                            </RadzenFormField>
-                        </RadzenStack>
-                    </RadzenStack>
+                    <PageDropDown PageSizeChanged="PageSizeChanged"
+                                  Reload="Reload"
+                                  ShowSearchBox="true"
+                                  OnTextChanged="OnSearch"
+                                  ShowReload="true">
+                        <LeftChildContent>
+                            <RadzenButton Icon="add"
+                                          Size="ButtonSize.Small"
+                                          Text="New Name"
+                                          Click="AddTabOtherName"
+                                          ButtonStyle="ButtonStyle.Primary" />
+                        </LeftChildContent>
+                        <RightChildContent>
+                            <div>
+                                <RadzenCheckBox TValue="bool" @bind-Value=@includeInactive Change="ex=>IncludeInActiveChanged(ex)" Name="CheckBox1" />
+                                <RadzenLabel Text="Include InActive" Component="CheckBox1" Style="margin-left: 8px; vertical-align: middle;" />
+                            </div>
+                        </RightChildContent>
+                    </PageDropDown>
                     <RadzenDataGrid TItem="VOtherNames"
                                     Density="Density.Compact"
                                     Responsive
                                     Count="@counts"
-                                    Style="height:30rem;min-height:30rem;max-height:45rem;"
                                     PageSize="@pageSize"
                                     LoadData="@LoadData"
                                     ColumnWidth="15rem"
@@ -57,18 +39,18 @@
                                     AllowSorting="true"
                                     Data="Names">
                         <Columns>
-                            <RadzenDataGridColumn Title="Name" Property="@(nameof(VVendor.AltName))" />
-                            <RadzenDataGridColumn Width="6rem" Title="Gender" Property="@(nameof(VVendor.Sex))" />
-                            <RadzenDataGridColumn Sortable="false" Width="8rem" Title="Phone" Property="@(nameof(VVendor.Phone))" />
-                            <RadzenDataGridColumn Sortable="false" Title="Email" Property="@(nameof(VVendor.EmailAddress))" />
-                            <RadzenDataGridColumn Sortable="false" Title="Address" Property="@(nameof(VVendor.Description))" Context="v">
+                            <RadzenDataGridColumn Title="Name" Property="@(nameof(VOtherNames.AltName))" />
+                            <RadzenDataGridColumn Width="6rem" Title="Gender" Property="@(nameof(VendorVm.Gender))" />
+                            <RadzenDataGridColumn Sortable="false" Width="8rem" Title="Phone" Property="@(nameof(VOtherNames.Phone))" />
+                            <RadzenDataGridColumn Sortable="false" Title="Email" Property="@(nameof(VOtherNames.EmailAddress))" />
+                            <RadzenDataGridColumn Sortable="false" Title="Address" Property="@(nameof(VOtherNames.Description))" Context="v">
                                 <Template>
                                     @v.ToString()
                                 </Template>
                             </RadzenDataGridColumn>
-                            <RadzenDataGridColumn Width="8rem" Sortable="false" Title="Actions" Property="@(nameof(VVendor.EntId))" Context="v">
+                            <RadzenDataGridColumn Width="8rem" Sortable="false" Title="Actions" Property="@(nameof(VOtherNames.Id))" Context="v">
                                 <Template>
-                                    <RadzenButton Size="Radzen.ButtonSize.ExtraSmall"
+                                    <RadzenButton Size="ButtonSize.ExtraSmall"
                                                   Icon="more_vert"
                                                   Variant="Variant.Text"
                                                   Click="@((args)=>ShowContextMenuWithContent(args,v))" />
@@ -79,26 +61,16 @@
                 </CardBody>
             </Card>
         </RadzenTabsItem>
-        <RadzenTabsItem Visible="IsEnableNew" Text="New" Icon="add">
+        <RadzenTabsItem Visible="IsEnableNew" Text="New" Icon="person_add">
             <NameCreateModal Salutations="Salutations"
                              SelectIndex="CloseTabs"
                              ProvinceList="ProvinceList" />
         </RadzenTabsItem>
         <RadzenTabsItem Visible="IsEnableEdit" Text="Edit" Icon="edit">
-            <NameEditModal SelectIndex="CloseTabs"
-                           model="modelEdit"
-                           ProvinceList="ProvinceList"
-                           SelectedProvince="SelectedProvince"
-                           DistrictList="DistrictList"
-                           SelectedDistrict="SelectedDistrict"
-                           CommuneList="CommuneList"
-                           SelectedCommune="SelectedCommune"
-                           VillageList="VillageList"
-                           SelectedVillage="SelectedVillage"
-                           Salutations="Salutations" />
+            <NameEditModal OnClose="@OnEditClose" Id="@_nameId" Salutations="Salutations" />
         </RadzenTabsItem>
-        <RadzenTabsItem Visible="IsEnableDetail" Text="Details">
-            <NameDetailModal SelectIndex="CloseTabs" model="OtherNames" />
+        <RadzenTabsItem Visible="IsEnableDetail" Text="Details" Icon="person">
+            <NameDetailModal OnEdit="OnNameEdit" OnClose="OnDetailsClose" Id="@_nameId" />
         </RadzenTabsItem>
     </Tabs>
 </RadzenTabs>
@@ -108,12 +80,12 @@
     {
         ContextMenuService.Open(args, ds =>
     @<RadzenMenu Style="font-size:0.8rem;">
-        <RadzenMenuItem Click="@(()=>DisplayDetail(e.EntId))" Icon="info" Text="Details" Value="@e.EntId"></RadzenMenuItem>
-        <RadzenMenuItem Click="@(()=>ShowEdit(e.EntId))" Icon="edit" Text="Edit" Value="@e.EntId"></RadzenMenuItem>
-        <RadzenMenuItem Click="@(()=>OnDelete(e.EntId))" Icon="delete" Text="Delete" Value="@e.EntId"></RadzenMenuItem>
-        <RadzenMenuItem Click="@(()=>ConvertToEmployee(e.EntId))" Icon="subdirectory_arrow_right" Text="To Employee" Value="@e"></RadzenMenuItem>
-        <RadzenMenuItem Click="@(()=>ConvertToCustomer(e.EntId))" Icon="subdirectory_arrow_right" Text="To Customer" Value="@e"></RadzenMenuItem>
-        <RadzenMenuItem Click="@(()=>ConvertToVedor(e.EntId))" Icon="subdirectory_arrow_right" Text="To Vendor" Value="@e"></RadzenMenuItem>
+        <RadzenMenuItem Click="@(()=>DisplayDetail(e.Id))" Icon="info" Text="Details" Value="@e.Id"></RadzenMenuItem>
+        <RadzenMenuItem Click="@(()=>ShowEdit(e.Id))" Icon="edit" Text="Edit" Value="@e.Id"></RadzenMenuItem>
+        <RadzenMenuItem Click="@(()=>OnDelete(e.Id))" Icon="delete" Text="Delete" Value="@e.Id"></RadzenMenuItem>
+        <RadzenMenuItem Click="@(()=>ConvertToEmployee(e.Id))" Icon="subdirectory_arrow_right" Text="To Employee" Value="@e"></RadzenMenuItem>
+        <RadzenMenuItem Click="@(()=>ConvertToCustomer(e.Id))" Icon="subdirectory_arrow_right" Text="To Customer" Value="@e"></RadzenMenuItem>
+        <RadzenMenuItem Click="@(()=>ConvertToVedor(e.Id))" Icon="subdirectory_arrow_right" Text="To Vendor" Value="@e"></RadzenMenuItem>
     </RadzenMenu>
     );
     }

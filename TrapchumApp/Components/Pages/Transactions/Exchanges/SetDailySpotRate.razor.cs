@@ -1,12 +1,9 @@
-using Applications.Extensions.mappers;
 using Applications.Interfaces.Currencies;
 using Applications.Interfaces.Transactions;
 using Applications.Requests.Lists.Currency;
 using Applications.Responses.ViewModels.Currencies;
-using Applications.Services.Transactions.Currencies;
 using Domains.Models.Currencies;
 using Mapster;
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Radzen;
 

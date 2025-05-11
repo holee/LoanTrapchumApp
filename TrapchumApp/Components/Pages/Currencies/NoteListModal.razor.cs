@@ -2,7 +2,6 @@ using Applications.Interfaces.Currencies;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Currencies;
 using Microsoft.AspNetCore.Components;
-using Radzen;
 
 namespace TrapchumApp.Components.Pages.Currencies
 {

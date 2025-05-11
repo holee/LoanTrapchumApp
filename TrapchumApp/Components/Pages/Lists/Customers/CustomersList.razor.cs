@@ -6,7 +6,6 @@ using Applications.Responses.Lists.Customers;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Responses.ViewModels.Options;
-using Applications.Services.Customers;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Radzen;
@@ -15,26 +14,33 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
 {
     public partial class CustomersList
     {
-        [CascadingParameter]
-        Task<AuthenticationState> AuthenticationState { get; set; } = default!;
-        [Parameter] public EventCallback<Guid?> ClickedDetails { get; set; }
-        [Parameter] public EventCallback<Guid?> ClickedEdit { get; set; }
-        [Parameter] public EventCallback<Guid> ClickedDelete { get; set; }
-        [Parameter] public EventCallback<Guid?> ClickedAddCollateral { get; set; }
+        [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+        [Parameter] public EventCallback<string?> ClickedDetails { get; set; }
+        [Parameter] public EventCallback<string?> ClickedEdit { get; set; }
+        [Parameter] public EventCallback<string> ClickedDelete { get; set; }
+        [Parameter] public EventCallback<string?> ClickedAddCollateral { get; set; }
+        [Parameter, SupplyParameterFromQuery] public string? UserId { get; set; } = string.Empty;
+        [Parameter] public int? BranchId { get; set; } = 0;
         [Parameter] public EventCallback<VCustomerList> SelectedRowChanged { get; set; }
         [Parameter] public RenderFragment? ChildContent { get; set; } = default!;
+
         bool IsAccountOnly = false;
+
         bool IsAdminOnly = false;
 
         protected CustomerResponse? Customer;
-        protected List<VCustomerList>? VCustomers = [];
-        protected bool includeInactive = false;
-        protected string SearchTerm = string.Empty;
-        private int counts = 0;
-        private int pageSize = 10;
-        int branchId = 0;
-        long userId = 0;
 
+        protected List<VCustomerList>? VCustomers = [];
+
+        protected bool includeInactive = false;
+
+        protected string SearchTerm = string.Empty;
+
+        private int counts = 0;
+
+        private int pageSize = 10;
+
+        int branchId = 0;
 
         void OnMenuItemClick(MenuItemEventArgs args)
         {
@@ -42,89 +48,88 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
         }
 
         IList<VCustomerList> SelectedCustomers = [];
+
         bool isLoading = false;
+
         bool CanRequestLoan = false;
-        IList<Items> pages = new Items[]
-           {
-        new Items(10,"10"),
-        new Items(25,"25"),
-        new Items(50,"50"),
-        new Items(100,"100"),
-           };
 
         void ChangedPageSize(int page)
         {
             pageSize = page;
         }
 
-        protected async void AddInComeModal(Guid? customerId)
+        protected async void AddInComeModal(string? customerId)
         {
-            await DialogService.OpenAsync<CustomerModalIncome>("Income", options: new Radzen.DialogOptions
+            await DialogService.OpenAsync<CustomerModalIncome>("Income", options: new DialogOptions
             {
-                Width = "50rem",
-                Height = "25rem",
                 Resizable = false,
                 Draggable = true,
             }, parameters: new Dictionary<string, object?>
             {
-                { "CustomerId",customerId }
+                { "CustomerId", customerId }
             });
         }
-        protected async Task AddCollateral(Guid? customerId)
+
+        protected async Task AddCollateral(string? customerId)
         {
             ContextMenuService.Close();
             await ClickedAddCollateral.InvokeAsync(customerId);
-
         }
-        protected void AddLoanRequest(Guid? customerId)
+
+        protected void AddLoanRequest(string? customerId)
         {
             ContextMenuService.Close();
-            var uri = $"/Loan/{customerId}/Customer/Request?BranchId={branchId}&UserId={userId}&ActionMode={ActionMode.Create}";
+            var uri =$"/App/Request/{BranchId}/Branches/{UserId}/CreateNew?CustomerId={customerId}";
             NavigationManager.NavigateTo(uri);
-
         }
-        protected async void AddExpenseModal(Guid? customerId)
+
+        protected async void AddExpenseModal(string? customerId)
         {
-            await DialogService.OpenAsync<CustomerModalExpense>("Add Expense", options: new Radzen.DialogOptions
+            await DialogService.OpenAsync<CustomerModalExpense>("Add Expense", options: new DialogOptions
             {
-                Width = "60rem",
-                Height = "25rem",
                 Resizable = false,
                 Draggable = true,
             }, parameters: new Dictionary<string, object?>
             {
-                { "CustomerId",customerId }
+                { "CustomerId", customerId }
             });
         }
-        protected async void AddDetails(Guid? customerId)
+
+        protected void AddDetails(string? customerId)
         {
-            await ClickedDetails.InvokeAsync(customerId);
-
-            NavigationManager.NavigateTo($"/App/Customers/{customerId}/Details");
-
             ContextMenuService.Close();
+
+            //await ClickedDetails.InvokeAsync(customerId);
+
+            NavigationManager.NavigateTo($"/App/Customers/{customerId}/Details?branchId={BranchId}");
+
+            
         }
-        protected async void AddEdit(Guid? customerId)
+
+        protected async void AddEdit(string? customerId)
         {
             await ClickedEdit.InvokeAsync(customerId);
+
             ContextMenuService.Close();
         }
-        protected async void AddDelete(Guid? customerId)
+
+        protected async void AddDelete(string? customerId)
         {
-            var confirm = await DialogService.Confirm("do you want to delete this customer?", "Delete", options: new ConfirmOptions
-            {
-                OkButtonText = "Yes",
-                CancelButtonText = "No"
-            });
+            var confirm = await DialogService.Confirm("do you want to delete this customer?", "Delete",
+                options: new ConfirmOptions
+                {
+                    OkButtonText = "Yes",
+                    CancelButtonText = "No"
+                });
             if (confirm == true)
             {
-
             }
         }
 
         async void SearchCustomer(string? searchText = null)
         {
             SearchTerm = searchText ?? string.Empty;
+
             await LoadCustomerPageList();
         }
 
@@ -133,15 +138,19 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
             this.pageSize = pageSize;
             await LoadCustomerPageList();
         }
+
         protected override async Task OnInitializedAsync()
         {
             var auth = await AuthenticationState;
-            //branchId = auth.User.GetBranchId();
-            //userId = auth.User.GetId();
-            CanRequestLoan = await _authorizeService.MustHasPermissionAsync(auth.User, LoanRequestsPolicies.Request);
-            IsAccountOnly = await _authorizeService.MustHasPermissionAsync(auth.User, Policies.AccountOnly);
-            IsAdminOnly = await _authorizeService.MustHasPermissionAsync(auth.User, Policies.AdminOnly);
+
+            CanRequestLoan = await _authorizeService.MustHasPermissionAsync(auth.User, RequestsPolicies.Request);
+            
+            IsAccountOnly = await _authorizeService.MustHasPermissionAsync(auth.User, RolePolicies.AccountOnly);
+            
+            IsAdminOnly = await _authorizeService.MustHasPermissionAsync(auth.User, RolePolicies.AdminOnly);
+            
             await LoadCustomerPageList();
+           
             await base.OnInitializedAsync();
         }
 
@@ -159,6 +168,7 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
 
             await LoadCustomerPageList(pageIndex, sortField, sortDescending);
         }
+
         async Task LoadCustomerPageList(int pageIndex = 0, string sortField = "CustomerId", bool sortDescending = false)
         {
             try
@@ -178,7 +188,6 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
             {
                 isLoading = false;
             }
-
         }
 
         void OnRowRender(RowRenderEventArgs<VCustomerList> e)

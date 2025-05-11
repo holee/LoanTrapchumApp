@@ -1,73 +1,73 @@
 ﻿@using Applications.ApplicationPolicies
 @using Applications.Extensions.Identity.Authorizations.Extensions
-<RadzenPanelMenuItem Text="Loan Management" Icon="dataset" Visible="IsAdminOnly">
-    <RadzenPanelMenuItem Text="Guarantor" Icon="how_to_reg" Path="/App/Customers/Guarantors" />
-    <RadzenPanelMenuItem Text="Credit Officer" Icon="switch_account" Path="/App/Employees/CreditAgents" />
-    <RadzenPanelMenuItem Text="Loan Product" Icon="inventory_2" Path="/App/Loan/LoanProducts" />
-    <RadzenPanelMenuItem Text="Loan Category" Icon="lists" Path="/App/Loan/LoanCategories" />
-    <RadzenPanelMenuItem Text="Holidays" Icon="calendar_add_on" Path="/App/Holidays" />
-    <RadzenPanelMenuItem Text="Change Credit Agent" Icon="invert_colors" Path="@changeCreditUrl" />
-    <RadzenPanelMenuItem Text="Collaterals" Icon="invert_colors" Path="/App/Customer/Collaterals" />
-    <RadzenPanelMenuItem Text="Loan Request" Icon="request_quote" Path="@loanRequestUrl" />
-    <RadzenPanelMenuItem Text="Customers" Icon="group" Path="/App/Customers" />
+<RadzenPanelMenuItem Text="Loan Management" Icon="dataset">
+    @* 
+     for account only
+    *@
+    <RadzenPanelMenuItem Text="Loans" Icon="lists" Path="@($"/App/Loan/{BranchId}/Branches?UserId={UserId}")" Visible="@_canShowLoan" />
+    <RadzenPanelMenuItem Text="Client Due Pay" Icon="schedule" Path="@($"/App/Loan/{BranchId}/Branches/{UserId}/Users/Schedules")" Visible="@_canShowLoan"/>
+    <RadzenPanelMenuItem Text="Loan Write Off" Icon="person_off" Path="/App/Loan/WriteOff" Visible="@_isAccountOnly"/>
+    @* 
+        for admin only
+    *@
+    <RadzenPanelMenuItem Text="Guarantor" Icon="how_to_reg" Path="/App/Customer/Guarantor" Visible="@_isAdminOnly"/>
+    <RadzenPanelMenuItem Text="Credit Officer" Icon="switch_account" Path="/App/Employee/CreditAgent" Visible="@_isAdminOnly"/>
+    <RadzenPanelMenuItem Text="Loan Product" Icon="inventory_2" Path="/App/Loan/LoanProduct" Visible="@_isAdminOnly"/>
+    <RadzenPanelMenuItem Text="Loan Category" Icon="lists" Path="/App/Loan/Categories" Visible="@_isAdminOnly"/>
+    <RadzenPanelMenuItem Text="Holidays" Icon="calendar_add_on" Path="/App/Holiday" Visible="@_isAdminOnly"/>
+    @* 
+     for all roles
+    *@
+    
+    <RadzenPanelMenuItem Text="Customers" Icon="group" Path="@($"/App/Customer/{BranchId}/Branches?UserId={UserId}")" />
+    <RadzenPanelMenuItem Text="Collaterals" Icon="invert_colors" Path="/App/Customer/Collateral"/>
+    <RadzenPanelMenuItem Text="Loan Request" Icon="request_quote" Path="@($"/App/Request/{BranchId}/Branches/?UserId={UserId}")" Visible="_canShowLoanRequest" />
 </RadzenPanelMenuItem>
-<RadzenPanelMenuItem Text="Loan Management" Icon="dataset" Visible="@(IsAccountOnly && BranchState)">
-    <RadzenPanelMenuItem Text="Loans"
-                         Icon="lists" Path="@($"/App/Loans?BranchId={BranchId}&UserId={UserId}")" />
-    <RadzenPanelMenuItem Text="Schedules" Icon="schedule" Path="@clientDuePayUrl" />
-    <RadzenPanelMenuItem Text="Loan Write Off" Icon="person_off" Path="/App/Loans/WriteOff" />
-    <RadzenPanelMenuItem Text="Loan Request"
-                         Visible="canReadLoanRequest"
-                         Icon="request_quote" Path="@loanRequestUrl" />
-    <RadzenPanelMenuItem Text="Customers" Icon="group" Path="/App/Customers" />
-</RadzenPanelMenuItem>
-<RadzenPanelMenuItem Text="Loan Management" Icon="dataset" Visible="@IsCreditAgentOnly">
-    <RadzenPanelMenuItem Text="Loan Request"
-                         Visible="canReadLoanRequest"
-                         Icon="request_quote" Path="@loanRequestUrl" />
-    <RadzenPanelMenuItem Text="Customers" Icon="group" Path="/App/Customers" />
-</RadzenPanelMenuItem>
-<RadzenPanelMenuItem Text="Loan Management" Icon="dataset" Visible="@IsManagerOnly">
-    <RadzenPanelMenuItem Text="Loan Request"
-                         Visible="canReadLoanRequest"
-                         Icon="request_quote" Path="@loanRequestUrl" />
-</RadzenPanelMenuItem>
+
 @code {
     [Parameter] public int BranchId { get; set; } = 0;
     [Parameter] public string UserId { get; set; } = string.Empty;
     [Parameter] public bool BranchState { get; set; } = false;
     [CascadingParameter] private Task<AuthenticationState> AuthenticationState { get; set; } = default!;
-    string loanRequestUrl = "";
-    string changeCreditUrl = "";
-    string clientDuePayUrl = "";
-    bool IsAccountOnly = false;
-    bool IsAdminOnly = false;
-    bool IsCreditAgentOnly = false;
-    bool IsManagerOnly = false;
-    bool canReadLoanRequest = false;
-    protected override void OnParametersSet()
-    {
-        changeCreditUrl = $"/App/Loan/CreditAgent/Changed?BranchId={BranchId}&UserId={UserId}";
-        loanRequestUrl = $"/App/Loan/Request/?BranchId={BranchId}&UserId={UserId}";
-        clientDuePayUrl = $"/App/Loans/Schedules?BranchId={BranchId}&UserId={UserId}";
-        base.OnParametersSet();
-    }
+    string _loanRequestUrl = "";
+    string _changeCreditUrl = "";
+    string _clientDuePayUrl = "";
+    string _customerUrl = "";
+    string _loanUrl = "";
+    bool _canShowLoan = false;
+    bool _canShowLoanRequest = false;
+    bool _isAdminOnly = false;
+    bool _isCreditAgentOnly = false;
+    bool _isManagerOnly = false;
+    bool _canReadLoanRequest = false;
+    bool _isAccountOnly = false;
     protected override async Task OnInitializedAsync()
     {
         var state = await AuthenticationState;
 
         var user = state.User;
 
-        IsAccountOnly = await _authorizeService.MustHasPermissionAsync(user, Policies.AccountOnly);
+        _canShowLoan = await _authorizeService.MustHasPermissionAsync(user, LoanPolicies.Read);
 
-        IsAdminOnly = await _authorizeService.MustHasPermissionAsync(user, Policies.AdminOnly);
+        _canShowLoanRequest = await _authorizeService.MustHasPermissionAsync(user, RequestsPolicies.Read);
 
-        IsCreditAgentOnly = await _authorizeService.MustHasPermissionAsync(user, Policies.CreditOfficerOnly);
+        _isAdminOnly = await _authorizeService.MustHasPermissionAsync(user, RolePolicies.AdminOnly);
 
-        IsManagerOnly = await _authorizeService.MustHasPermissionAsync(user, Policies.ManagerOnly);
+        _isCreditAgentOnly = await _authorizeService.MustHasPermissionAsync(user, RolePolicies.CreditOfficerOnly);
 
-        canReadLoanRequest = await _authorizeService.MustHasPermissionAsync(user, AppPermission.RuleFor(Modules.LoanRequest, Feature.Read));
+        _isManagerOnly = await _authorizeService.MustHasPermissionAsync(user, RolePolicies.ManagerOnly);
 
+        _canReadLoanRequest = await _authorizeService.MustHasPermissionAsync(user, AppPermission.RuleFor(Modules.LoanRequest, Feature.Read));
+
+        _isAccountOnly = await _authorizeService.MustHasPermissionAsync(user, RolePolicies.AccountOnly);
+        
+        _changeCreditUrl = $"/App/Loan/CreditAgent/{BranchId}/Branches?UserId={UserId}";
+        _loanRequestUrl = $"/App/Request/{BranchId}/Branches/?UserId={UserId}";
+        _clientDuePayUrl = $"/App/Loan/{BranchId}/Branches/{UserId}/Users/Schedules";
+        _customerUrl = $"/App/Customer/{BranchId}/Branches?UserId={UserId}";
+        _loanUrl = $"/App/Loan/{BranchId}/Branches?UserId={UserId}";
+        
         await base.OnInitializedAsync();
     }
+
 }

@@ -6,11 +6,11 @@
     <RadzenPanelMenuItem Text="Open/Close Branch"
                          Icon="lock_open_right"
                          Visible="@IsAccountOnly"
-                         Path="@($"/Branches/OpenBranch?BranchId={BranchId}&UserId={UserId}")" />
+                         Path="@($"/Branches/{BranchId}/OpenBranch?UserId={UserId}")" />
     <RadzenPanelMenuItem Text="Cash Valutl In/Out"
                          Icon="check_in_out"
                          Visible="@IsAccountOnly"
-                         Path="@($"/Transaction/CashVault?BranchId={BranchId}&UserId={UserId}")" />
+                         Path="@($"/App/Branches/{BranchId}/CashVault?UserId={UserId}")" />
 
 </RadzenPanelMenuItem>
 

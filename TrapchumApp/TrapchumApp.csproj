@@ -8,19 +8,34 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="screenshot.pdf" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Blazored.FluentValidation" Version="2.2.0" />
     <PackageReference Include="FluentValidation" Version="11.11.0" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
+    <PackageReference Include="IronPdf" Version="2025.4.4" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="9.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.2" />
-    <PackageReference Include="Radzen.Blazor" Version="6.2.5" />
+    <PackageReference Include="Microsoft.Playwright" Version="1.51.0" />
+    <PackageReference Include="QuestPDF" Version="2025.4.0" />
+    <PackageReference Include="Radzen.Blazor" Version="6.6.4" />
+    <PackageReference Include="Razor.Templating.Core" Version="2.1.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Applications\Applications.csproj" />
     <ProjectReference Include="..\Infrastructures\Infrastructures.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Views\Reports\" />
+    <Folder Include="wwwroot\documents\files\" />
+    <Folder Include="wwwroot\schedules\" />
+    <Folder Include="wwwroot\uploads\" />
   </ItemGroup>
 
 </Project>

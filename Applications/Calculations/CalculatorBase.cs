@@ -1,0 +1,12 @@
+﻿namespace Applications.Calculations
+{
+    public abstract class CalculatorBase : ICalculatorBase
+    {
+        public int? Installments { get; set; } = 12;
+        public decimal? InterestRate { get; set; } = 0;
+        public decimal? Principle { get; set; }
+        public int? BranchId { get; set; }
+        public string? CreditAgentRefId { get; set; }
+        public int? RepaymentModeRefId { get; set; }
+    }
+}

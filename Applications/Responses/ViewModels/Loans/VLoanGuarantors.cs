@@ -2,12 +2,11 @@
 
 public sealed class VLoanGuarantors 
 {
-
     public long Id { get; set; }
     public long GuarantorId { get; set; }
     public string? GuarantorName { get; set; }
     public string? GuarantorKhmerName { get; set; }
-    public long? LoanId { get; set; }
+    public string? LoanId { get; set; }
     public string? CustomerName { get; set; }
     public string? CustomerKhmerName { get; set; }
     public int? Installments { get; set; }

@@ -1,6 +1,6 @@
 ﻿@page "/App/Account/Roles"
 <PageTitle>Roles</PageTitle>
-@attribute [MustHasPermission(Modules.Roles, Feature.Read)]
+@* @attribute [MustHasPermission(Modules.Roles, Feature.Read)] *@
 <RadzenTabs RenderMode="TabRenderMode.Server">
     <Tabs>
         <RadzenTabsItem Text="Roles" Icon="list">
@@ -12,7 +12,7 @@
                     <RadzenButton Icon="add"
                                   ButtonStyle="ButtonStyle.Primary"
                                   Text="Add Role"
-                                  Size="Radzen.ButtonSize.Small" />
+                                  Size="ButtonSize.Small" />
                 </LeftChildContent>
                 <RightChildContent>
                     <div class="rz-p-0 rz-text-align-center">
@@ -48,7 +48,7 @@
 
                     <RadzenDataGridColumn Width="6rem" Property="Id" Title="Action" Context="r" Sortable="false">
                         <Template>
-                            <RadzenButton Size="Radzen.ButtonSize.ExtraSmall"
+                            <RadzenButton Size="ButtonSize.ExtraSmall"
                                           Icon="more_vert"
                                           Variant="Variant.Text"
                                           Click="@((args)=>ShowContextMenu(args,r.Id))" />

@@ -4,26 +4,26 @@ using Applications.Responses.ViewModels.Branches;
 using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Payments;
 using Applications.Responses.ViewModels.Loans.Schedules;
+using Applications.Services.Loans;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.JSInterop;
 using Radzen;
 
 namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
 {
     public partial class ClientDuePayTab
     {
-        readonly ILoanScheduleServiceImpl _scheduleService;
-        private ILoanService _loanService;
-
-        public ClientDuePayTab(ILoanScheduleServiceImpl loanScheduleService, ILoanService loanService)
+        private readonly ILoanScheduleServiceImpl _scheduleService;
+        private readonly ILoanServiceImpl _loanService;
+        //private readonly ILoanPaymentServiceImpl _loanPaymentService;
+        public ClientDuePayTab(ILoanScheduleServiceImpl loanScheduleService, ILoanServiceImpl loanService)
         {
-            this._scheduleService = loanScheduleService;
+            _scheduleService = loanScheduleService;
             _loanService = loanService;
         }
 
         [Parameter] public int BranchId { get; set; } = 0;
-        [Parameter] public long UserId { get; set; } = 0;
+        [Parameter] public string? UserId { get; set; } = string.Empty;
         [Parameter] public EventCallback<int> GetCountChanged { get; set; }
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
         private List<VSchedule> ScheduleItems = [];
@@ -100,7 +100,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
 
                 var param = new QueryParam(pageIndex, pageSize, sortField, sortDescending, filterText);
 
-                var res = await _scheduleService.GetLoanSchedulesByPaymentDateAsync(paymentDate, BranchId, false, false, param);
+                var res = await _scheduleService.GetLoanSchedulesByPaymentDateAsync(BranchId, paymentDate, false, false, param);
 
                 ScheduleItems = res.Items;
 

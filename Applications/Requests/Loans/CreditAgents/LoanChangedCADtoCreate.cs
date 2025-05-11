@@ -1,11 +1,11 @@
 ﻿namespace Applications.Requests.Loans.CreditAgents;
 
-public sealed class LoanChangedCaDtoCreate(Guid? loanRefId, Guid? oldCreditAgentRefId,
-    Guid? newCreditAgentRefId, Guid? staffId, Guid? staffAuthId)
+public sealed class LoanChangedCaDtoCreate(string? loanRefId, string? oldCreditAgentRefId,
+    string? newCreditAgentRefId, string? staffId, string? staffAuthId)
 {
-    public Guid? LoanRefId { get; } = loanRefId;
-    public Guid? OldCreditAgentRefId { get; } = oldCreditAgentRefId;
-    public Guid? NewCreditAgentRefId { get; } = newCreditAgentRefId;
-    public Guid? StaffId { get; } = staffId;
-    public Guid? StaffAuthId { get; } = staffAuthId;
+    public string? LoanRefId { get; } = loanRefId;
+    public string? OldCreditAgentRefId { get; } = oldCreditAgentRefId;
+    public string? NewCreditAgentRefId { get; } = newCreditAgentRefId;
+    public string? StaffId { get; } = staffId;
+    public string? StaffAuthId { get; } = staffAuthId;
 }

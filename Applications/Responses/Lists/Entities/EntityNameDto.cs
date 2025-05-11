@@ -2,7 +2,7 @@
 using Applications.Responses.Lists.Addreses;
 using Domains.Models.Bases;
 
-namespace Applications.Requests.Lists.Entities;
+namespace Applications.Responses.Lists.Entities;
 
 public class EntityNameDto:BaseEntity
 {

@@ -1,10 +1,12 @@
 using Domains.Models.Bases;
+using Domains.Models.Lists;
 using Domains.Models.Lists.Customers;
 using Domains.Models.Lists.Employees;
+using Domains.Models.Lists.Vendors;
 
 public sealed class EntityNames : BaseEntity
 {
-    public Guid Id { get; set; }
+    public string Id { get; set; } = null!;
     public string? FirstName { get; set; }
     public string? MiddleName { get; set; }
     public string? LastName { get; set; }
@@ -26,25 +28,27 @@ public sealed class EntityNames : BaseEntity
     public bool? IsActive { get; set; }
     public string? CountryName { get; set; }
     public string? City { get; set; }
-    
+    public string? Occupation { get; set; }
     public int? ProvinceRefId { get; set; }
     public string? ProDescription { get; set; }
     public string? ProInKhmer { get; set; }
-    
+
     public int? DistrictRefId { get; set; }
     public string? DisDescription { get; set; }
     public string? DisInKhmer { get; set; }
-    
+
     public int? CommuneRefId { get; set; }
     public string? ComDescription { get; set; }
     public string? ComInKhmer { get; set; }
-    
+
     public int? VillageRefId { get; set; }
     public string? VillDescription { get; set; }
     public string? VilInKhmer { get; set; }
     public string? Description { get; set; }
-    
-    public bool Converted { get; set; } = false; 
+
+    public bool Converted { get; set; } = false;
     public Customer? Customer { get; set; }
     public Employee? Employee { get; set; }
+    public Vendor? Vendor { get; set; }
+    public List<LoanGuarantorLink> GuarantorsLink { get; set; } = [];
 }

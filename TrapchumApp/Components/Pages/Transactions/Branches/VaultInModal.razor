@@ -1,5 +1,4 @@
-﻿@using Applications.Extensions
-<RadzenFieldset Text="Please verify amount and balance then start cash vault.">
+﻿<RadzenFieldset Text="Please verify amount and balance then start cash vault.">
     <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
         <RadzenColumn SizeSM="12" Size="12" SizeMD="4">
             <InputGroup Size="InputSize.Small">
@@ -83,20 +82,20 @@
             </tfoot>
         </table>
     </div>
-    <RadzenStack JustifyContent="Radzen.JustifyContent.End"
-                 Orientation="Radzen.Orientation.Horizontal">
-        <RadzenButton Size="Radzen.ButtonSize.Small"
+    <RadzenStack JustifyContent="JustifyContent.End"
+                 Orientation="Orientation.Horizontal">
+        <RadzenButton Size="ButtonSize.Small"
                       ButtonStyle="ButtonStyle.Success"
                       Text="Save"
                       Icon="save"
                       Click="@OnSaveChanges" />
-        <RadzenButton Size="Radzen.ButtonSize.Small"
+        <RadzenButton Size="ButtonSize.Small"
                       ButtonStyle="ButtonStyle.Success"
                       Text="Save & Close"
                       Icon="save"
                       Click="@OnSaveChangesClose" />
 
-        <RadzenButton Size="Radzen.ButtonSize.Small"
+        <RadzenButton Size="ButtonSize.Small"
                       ButtonStyle="ButtonStyle.Danger"
                       Text="Cancel"
                       Icon="Close"

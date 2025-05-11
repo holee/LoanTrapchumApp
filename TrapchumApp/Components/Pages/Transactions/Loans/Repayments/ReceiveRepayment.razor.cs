@@ -1,6 +1,6 @@
-﻿using Applications.Enumerations;
-using Applications.Extensions.NumberExtions;
-using Applications.Interfaces.Loans;
+﻿using Applications.Calculations;
+using Applications.Enumerations;
+using Applications.Extensions.NumberExtensions;
 using Applications.Requests.Loans.Payments;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Branches;
@@ -8,11 +8,11 @@ using Applications.Responses.ViewModels.Currencies;
 using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Services.Loans;
+using Grpc.Core;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Radzen;
 using Radzen.Blazor;
-using TCLMS.Front.Pages.Transactions.Loans;
 
 namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments;
 
@@ -20,66 +20,105 @@ public partial class ReceiveRepayment
 {
 
     private readonly ILoanServiceImpl _loanService;
-    private readonly ILoanScheduleService _scheduleService;
-    private readonly ISchedulesServiceImpl _schedulesServiceImpl;
-    public ReceiveRepayment(ILoanServiceImpl loanService, ILoanScheduleService loanScheduleService, ISchedulesServiceImpl schedulesServiceImpl)
+
+    private readonly ILoanScheduleServiceImpl _scheduleService;
+    public ReceiveRepayment(ILoanServiceImpl loanService, ILoanScheduleServiceImpl loanScheduleService)
     {
         _loanService = loanService;
+
         _scheduleService = loanScheduleService;
-        _schedulesServiceImpl = schedulesServiceImpl;
     }
 
-    [Parameter] public Guid LoanId { get; set; }
-    [Parameter, SupplyParameterFromQuery] public int BranchId { get; set; }
-    [Parameter, SupplyParameterFromQuery] public long CreditAgentId { get; set; }
+    [Parameter] public string? LoanId { get; set; }
+    [Parameter] public int BranchId { get; set; }
+    [Parameter, SupplyParameterFromQuery] public string? CreditAgentId { get; set; }
     [Parameter, SupplyParameterFromQuery] public int CurrencyId { get; set; }
-    [Parameter, SupplyParameterFromQuery] public long UserId { get; set; }
+    [Parameter, SupplyParameterFromQuery] public string? UserId { get; set; }
     [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
 
     DateTime paymentDate = DateTime.UtcNow;
     List<VSchedule> schedules { get; set; } = [];
+
     List<LoanRepaymentDto> RepaymentLists = [];
+
     List<LoanRepaymentLineDtoCreate> LoanRepaymentLines = [];
+
     LoanRepaymentDtoCreate LoanRepayment = new();
+
     IEnumerable<VBranchResponse> Branches = [];
+
     VSchedule? SelectedSchedule = new();
+
     List<VSchedule>? selectedRepayments = [];
+
     VLoanDisbursments? LoanSchedule = new();
-    IEnumerable<VCurrenciesList> Currencies = Enumerable.Empty<VCurrenciesList>();
+
+    IEnumerable<VCurrenciesList> Currencies = [];
+
     VCurrenciesList? selectedCurrency = new();
+
     RadzenDataGrid<VSchedule> gridSchedule = default!;
+
     PaymentLines paymentLinesRef = default!;
+
     IEnumerable<VLoanRepaymentLine> VLoanRepaymentLines = [];
+
     IList<VSchedule>? SelectedSchedules = [];
+
     VLoanDisbursments? vLoan = new();
+
     DataGridSelectionMode gridSelectionMode = DataGridSelectionMode.Single;
+
     PaymentDtoCreate recievePayment = new();
+
     decimal? principleAmount = 0;
+
     decimal? interestAmount = 0;
+
     decimal? collectionfeeAmount = 0;
+
     decimal? totalPaidAmount = 0;
+
     decimal? penaltyAmount = 0;
+
     decimal? totalPaymentAmount = 0.00M;
+
     decimal? penaltyRate = 0;
+
     int selectedIndex = 0;
+
     bool isPaidNow = false;
+
     bool isLoading = false;
+
     bool includePaid = false;
+
     bool? canPaidNow = false;
+
     bool? isRestoreDefault = false;
+
     bool isAllowMultiplePayment = false;
+
     bool allowRowSelected = true;
+
     bool disableIsPaidNow = true;
+
     bool btnDisabled = false;
+
     string receiptNo = string.Empty;
+
     string recieptNumber = "";
+
     int pageIndex = 1;
+
     int pageSize = 25;
+
     string sortField = "LoanId";
+
     string filter = string.Empty;
     protected override async Task OnInitializedAsync()
     {
-        btnDisabled = true;
+        //btnDisabled = true;
 
         await GetLoanWithSchedules(BranchId, LoanId);
 
@@ -141,7 +180,11 @@ public partial class ReceiveRepayment
         {
             NotificationService.Notify(NotificationSeverity.Success, "Receive successfully.");
 
+            //await GetCustomerSchedulesAsync(ScheduleStatus.Unpaid);
+
+
             await GetCustomerSchedulesAsync(ScheduleStatus.Unpaid);
+
 
             LoanRepaymentLines.Clear();
 
@@ -161,7 +204,9 @@ public partial class ReceiveRepayment
             if (!previousSchedule.Selected && !previousSchedule.IsPaid)
             {
                 NotificationService.Notify(NotificationSeverity.Warning, "Cannot add new schedule due to previouse schedule not complete paid yet.");
+               
                 SetDefaultValue();
+               
                 return;
             }
         }
@@ -281,12 +326,12 @@ public partial class ReceiveRepayment
 
     }
 
-    async Task GetLoanWithSchedules(int? branchId, Guid loanId)
+    async Task GetLoanWithSchedules(int? branchId, string? loanId)
     {
 
         isLoading = true;
 
-        var responseSchedule = await _loanService.GetLoanByIdAsync(loanId, BranchId, ScheduleStatus.Unpaid);
+        var responseSchedule = await _loanService.GetLoanByIdAsync(loanId, BranchId, ScheduleStatus.Unpaid,true);
 
         if (!responseSchedule.IsSuccess && responseSchedule.Data is null)
         {
@@ -320,6 +365,7 @@ public partial class ReceiveRepayment
 
 
     }
+  
     async Task GetCustomerSchedulesAsync(ScheduleStatus status)
     {
         try

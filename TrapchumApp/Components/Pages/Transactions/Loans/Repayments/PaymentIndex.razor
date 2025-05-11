@@ -1,5 +1,5 @@
-﻿@page "/Loans/Schedules"
-@using Applications.Responses.ViewModels.Branches
+﻿@page "/App/Loan/{BranchId:int}/Branches/{UserId}/Users/Schedules"
+<PageTitle>Schedules</PageTitle>
 <RadzenTabs RenderMode="TabRenderMode.Server">
     <Tabs>
         <RadzenTabsItem Text="All">
@@ -10,7 +10,7 @@
                 </span>
             </Template>
             <ChildContent>
-                <ClientAllPayTab UserId="@UserId" BranchId="@BranchId" GetCountChanged="@GetCount" />
+                <ClientAllPayTab UserId="@UserId" BranchId="@BranchId" ShowCounts="@GetCount" />
             </ChildContent>
         </RadzenTabsItem>
         <RadzenTabsItem>

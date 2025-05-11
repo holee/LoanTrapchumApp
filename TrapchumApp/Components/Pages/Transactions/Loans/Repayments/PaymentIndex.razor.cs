@@ -11,23 +11,12 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
 {
     public partial class PaymentIndex
     {
-
-        private readonly ILoanServiceImpl _scheduleService;
-        //private readonly ILoanPaymentService _paymentService;
-        //private readonly ILoanScheduleService _loanScheduleService;
-        //private readonly ILoanPaymentService _loanPaymentService;
-        //private readonly ISchedulesService _schedulesService;
-        public PaymentIndex(ILoanServiceImpl scheduleService)
-        {
-            _scheduleService = scheduleService;
-        }
-
         [CascadingParameter] Task<AuthenticationState> authenticationState { get; set; } = default!;
-        [Parameter, SupplyParameterFromQuery] public int BranchId { get; set; } = 0;
-        [Parameter, SupplyParameterFromQuery] public long UserId { get; set; } = 0;
+        [Parameter] public int BranchId { get; set; } = 0;
+        [Parameter] public string? UserId { get; set; } = string.Empty;
         bool isLoading = false;
         bool isProgress = false;
-        int AllScheduleCounts = 0;
+        string AllScheduleCounts = "0";
         int AllLateScheduleCounts = 0;
         int DuePaymentCounts = 0;
         RadzenDataGrid<VSchedule> grid = default!;
@@ -47,11 +36,11 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
         int selectedTabIndex = 0;
         List<int> tabcounts = [0];
         int currencyId = 0;
-        Guid? loanId = Guid.Empty;
+        string? loanId = string.Empty;
         int installmentNo = 0;
 
 
-        void GetCount(int count)
+        void GetCount(string count)
         {
             AllScheduleCounts = count;
         }
@@ -91,16 +80,6 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
             Console.WriteLine(tabIndex);
         }
 
-        // protected override async Task OnParametersSetAsync()
-        // {
-        //     await base.OnParametersSetAsync();
-        //     await GetBranches(UserId);
-        // }
-        // protected override async Task OnInitializedAsync()
-        // {
-        //     selectedTabIndex = 0;
-        //     await base.OnInitializedAsync();
-        // }
 
         void GetLoanDetails(VSchedule p)
         {
@@ -118,7 +97,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
                 tabcounts.Add(1);
             }
             selectedTabIndex = 1;
-            loanId = p.LoanId!.Value;
+            loanId = p.LoanId!;
             StateHasChanged();
 
         }
@@ -134,7 +113,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
             }
 
             selectedTabIndex = 1;
-            loanId = p.LoanId!.Value;
+            loanId = p.LoanId!;
             StateHasChanged();
 
         }
@@ -152,9 +131,9 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
             var parameters = new Dictionary<string, object>{
                         { "LoanPayment",payment},
                         { "CurrencyId",payment.CurrencyId!.Value },
-                        { "LoanId",payment.LoanId!.Value },
+                        { "LoanId",payment.LoanId! },
                         { "UserId",UserId },
-                        { "CreditAgentId",payment.CreditAgentId!.Value
+                        { "CreditAgentId",payment.CreditAgentId!
                         }};
             var response = await DialogService.OpenAsync<ConfirmPaymentDialogue>("Recieve Payment", parameters, options);
 
@@ -175,9 +154,9 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
             var parameters = new Dictionary<string, object>{
                         { "LoanPayment",p},
                         { "CurrencyId",p.CurrencyId!.Value },
-                        { "LoanId",p.LoanId!.Value },
+                        { "LoanId",p.LoanId!},
                         { "UserId",UserId },
-                        { "CreditAgentId",p.CreditAgentId!.Value
+                        { "CreditAgentId",p.CreditAgentId!
                         }};
             NavigationManager.NavigateTo($"/Loans/Repayment/{p.LoanId}/Multiple?BranchId={p.BranchId}&CreditAgentId={p.CreditAgentId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
         }
@@ -230,7 +209,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
             if (v is not null)
             {
                 currencyId = v.CurrencyId!.Value;
-                loanId = v.LoanId!.Value;
+                loanId = v.LoanId;
                 installmentNo = v.InstallmentNo!.Value;
                 tabcounts.Add(2);
                 selectedTabIndex = 2;
@@ -271,7 +250,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
                 //    PaymentSchedulesOnDate = [];
                 //    //NotificationService.Notify(NotificationSeverity.Error, error);
                 //}
-              
+
                 await Task.CompletedTask;
 
                 isLoading = false;
@@ -304,9 +283,9 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
             var parameters = new Dictionary<string, object>{
                         {"LoanPayment",payment},
                         {"CurrencyId",payment.CurrencyId!.Value},
-                        {"LoanId",payment.LoanId!.Value},
+                        {"LoanId",payment.LoanId!},
                         {"UserId",UserId},
-                        {"CreditAgentId",payment.CreditAgentId!.Value}
+                        {"CreditAgentId",payment.CreditAgentId!}
                     };
 
             var options = new DialogOptions

@@ -1,5 +1,4 @@
 ﻿@page "/Administrator/Users/{Id:long}/Roles"
-@using Applications.Responses.ViewModels.Auths
 @attribute [Authorize(Roles = "SuperAdmin,Admin")]
 <div class="container-fluid">
     <div class="card">
@@ -32,7 +31,7 @@
         </div>
         <div class="card-footer">
             <RadzenButton ButtonStyle="ButtonStyle.Primary"
-                          Size="Radzen.ButtonSize.Small" Click="SubmitOnValid">Change</RadzenButton>
+                          Size="ButtonSize.Small" Click="SubmitOnValid">Change</RadzenButton>
             <RadzenLink Path="/Administrator/Users" Text="Back" Icon="back" />
         </div>
     </div>

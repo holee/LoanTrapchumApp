@@ -6,13 +6,12 @@ namespace Domains.Models.Transaction
     {
         public long Id { get; set; }
         public Guid ActivityMainGroupId { get; set; }
-        public long? StaffRefId { get; set; }
-        public long? TranRefId { get; set; }
-        public Guid? TransactionRefId { get; set; }
-        public long? NameRefId { get; set; }
+        public string? StaffRefId { get; set; }
+        public string? TransactionRefId { get; set; }
+        public string? NameRefId { get; set; }
         public int? BankRefId { get; set; }
         public int? BranchRefId { get; set; }   
-        public long? StaffAuthRefId { get; set; }
+        public string? StaffAuthRefId { get; set; }
         public int? BuyCurrencyRefId { get; set; }
         public decimal? BuyAmount { get; set; }
         public int? BuyLedgerRefId { get; set; }

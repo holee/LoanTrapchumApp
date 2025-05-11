@@ -8,7 +8,7 @@ public partial class ScheduleDetails
 
     [Parameter, EditorRequired] public int BranchId { get; set; } = 0;
     [Parameter, EditorRequired] public int CurrencyId { get; set; } = 1;
-    [Parameter, EditorRequired] public Guid? LoanId { get; set; } = Guid.Empty;
+    [Parameter, EditorRequired] public string? LoanId { get; set; } = string.Empty;
     [Parameter, EditorRequired] public long ScheduleId { get; set; } = 0;
 
     VSchedule schedule = new();

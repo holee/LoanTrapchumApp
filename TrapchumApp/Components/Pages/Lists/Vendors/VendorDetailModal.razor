@@ -1,12 +1,15 @@
-﻿<div class="card">
-    <div class="card-header bg-primary">
-        <div class="d-flex justify-content-between">
-            <span>Name Details: @model!.Salution @model?.Name <span class="ml-4"><RadzenCheckBox ReadOnly @bind-Value="model!.IsActive" /></span></span>
-            <strong @onclick="SelectedIndex" class="text-danger" style="cursor:pointer">X</strong>
-        </div>
-    </div>
-    <div class="card-body">
-        <div>
+﻿<Card>
+    <CardHeader>
+        <RadzenStack Orientation="Orientation.Horizontal"
+                     AlignItems="AlignItems.Center"
+                     JustifyContent="JustifyContent.SpaceBetween">
+            <span>Name Details:@model?.Name</span>
+            <span class="ml-4">
+                <RadzenCheckBox ReadOnly @bind-Value="model!.IsActive" />
+            </span>
+        </RadzenStack>
+    </CardHeader>
+    <CardBody>
             <div class="table-responsive">
                 <table class="table">
                     <tbody>
@@ -46,10 +49,16 @@
                                 @model.JobTitle
                             </td>
                         </tr>
+                    <tr>
+                        <th class="w-25 rz-background-color-base-100">Occupation</th>
+                        <td>
+                            @model.Occupation
+                        </td>
+                    </tr>
                         <tr>
                             <th class="w-25 rz-background-color-base-100">Phone</th>
                             <td>
-                                @model.Phone / @model.AltPhone (Alt Phone)
+                                @model.Phone / @model.AltPhone
                             </td>
                         </tr>
                         <tr>
@@ -61,13 +70,7 @@
                         <tr>
                             <th class="w-25 rz-background-color-base-100">Address In Khmer</th>
                             <td>
-                                @model?.ProInKhmer @model?.DisInKhmer @model?.ComInKhmer @model?.VilInKhmer
-                            </td>
-                        </tr>
-                        <tr>
-                            <th class="w-25 rz-background-color-base-100">Address In English</th>
-                            <td>
-                                @model?.ProDescription @model?.DisDescription @model?.ComDescription @model?.VillDescription
+                                @model?.ToString()
                             </td>
                         </tr>
                         <tr>
@@ -79,22 +82,21 @@
                     </tbody>
                 </table>
             </div>
-        </div>
-    </div>
-    <div class="card-footer ">
-        <div class="d-flex justify-content-between">
-            <div>
-                <label class="text-muted">Created: @string.Format("{0:dd MMM yyyy hh:mm tt}", model?.CreatedDt) Modified: @string.Format("{0:dd MMM yyyy hh:mm tt}", model?.ModifiedDt)</label>
-            </div>
-            <div>
-                <RadzenButton Text="Text" Size="ButtonSize.Small" Click="SelectedIndex"></RadzenButton>
-            </div>
-
-        </div>
-
-
-    </div>
-</div>
+    </CardBody>
+    <CardFooter>
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
+                     JustifyContent="JustifyContent.End">
+            <RadzenButton ButtonStyle="ButtonStyle.Success"
+                          Icon="edit" Text="Edit"
+                          Size="ButtonSize.Small"
+                          Click="ClickEdit" />
+            <RadzenButton ButtonStyle="ButtonStyle.Danger"
+                          Icon="cancel" Text="Close"
+                          Size="ButtonSize.Small"
+                          Click="SelectedIndex" />
+        </RadzenStack>
+    </CardFooter>
+</Card>
 
 
 

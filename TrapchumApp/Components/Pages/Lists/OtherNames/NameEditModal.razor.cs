@@ -1,144 +1,143 @@
-using Applications.Interfaces.Lists;
 using Applications.Requests.Lists.Addreses;
 using Applications.Requests.Lists.OtherNames;
-using Applications.Services.Addresses;
 using Applications.Services.Lists;
+using Domains.Models.Bases;
 using Domains.Models.Lists;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
-using Radzen;
 
 namespace TrapchumApp.Components.Pages.Lists.OtherNames
 {
     public partial class NameEditModal
     {
-        private readonly IAddressServiceImpl AddressService;
-        private readonly IOtherNameServiceImpl NameService;
-        private readonly ISalutationService SalutationService;
-        [Parameter] public IEnumerable<ProvinceDto>? ProvinceList { get; set; }
-        [Parameter] public IEnumerable<CommuneDto>? CommuneList { get; set; }
-        [Parameter] public IEnumerable<DistrictDto>? DistrictList { get; set; }
-        [Parameter] public IEnumerable<VillageDto>? VillageList { get; set; }
-        [Parameter] public ProvinceDto? SelectedProvince { get; set; }
-        [Parameter] public DistrictDto? SelectedDistrict { get; set; }
-        [Parameter] public CommuneDto? SelectedCommune { get; set; }
-        [Parameter] public VillageDto? SelectedVillage { get; set; }
-        [Parameter] public EntNameDtoUpdate model { get; set; } = new();
+        [Parameter] public string? Id { get; set; }
+        [Parameter] public EventCallback<int> SetSelectedIndexe { get; set; } 
+        [Parameter] public EventCallback<bool> OnClose { get; set; }
+        [Parameter] public IEnumerable<string> Salutations { get; set; } = [];
 
+        private readonly IOtherNameServiceImpl _otherNameService;
+        private readonly ISalutationServiceImpl _salutationService;
+        public NameEditModal(IOtherNameServiceImpl otherNameService, ISalutationServiceImpl salutationService)
+        {
+            _otherNameService = otherNameService;
+            _salutationService = salutationService;
+        }
+
+        EntityNamesCreate? model = new EntityNamesCreate();
+        IEnumerable<ProvinceDto>? ProvinceList = [];
+        IEnumerable<CommuneDto>? CommuneList = [];
+        IEnumerable<DistrictDto>? DistrictList = [];
+        IEnumerable<VillageDto>? VillageList = [];      
+        private bool isValid = true;
         protected List<string> salutations = ["Mr.", "Mrs.", "Miss.", "Others"];
+        protected override async Task OnInitializedAsync()
+        {
+            try
+            {
 
+                ProvinceList = await _addressService!.GetsProvinces();
+
+                await GetEditNameById(Id);
+            }
+            catch (Exception ex)
+            {
+                NotificationService.Notify(Radzen.NotificationSeverity.Error, "Exception", ex.Message);
+
+
+            }
+
+            await base.OnInitializedAsync();
+        }
         protected async Task OnSaveChanges()
         {
             try
             {
-                model!.EntType = "Other Name";
-                model.ProvinceRefId = SelectedProvince?.ProvinceId;
-                model.ProDescription = SelectedProvince?.ProDescription;
-                model.ProInKhmer = SelectedProvince?.ProInKhmer;
-                model.DistrictRefId = SelectedDistrict?.DistrictId;
-                model.DisDescription = SelectedDistrict?.DisDescription;
-                model.DisInKhmer = SelectedDistrict?.DisInKhmer;
-                model.CommuneRefId = SelectedCommune?.CommuneId;
-                model.ComDescription = SelectedCommune?.ComDescription;
-                model.ComInKhmer = SelectedCommune?.ComInKhmer;
-                model.VillageRefId = SelectedVillage?.VillageId;
-                model.VillDescription = SelectedVillage?.VillDescription;
-                model.VilInKhmer = SelectedVillage?.VilInKhmer;
+                var rsp = await _otherNameService!.UpdateAsync(model!);
 
-                var message = await NameService!.UpdateAsync(model);
-
-                if (message.IsSuccess)
+                if (rsp.IsSuccess)
                 {
-                    NotificationService.Notify(NotificationSeverity.Success, "Other Name", "Updated successfully!");
-
-                    await SelectedIndex();
-
+                    NotificationService.Notify(Radzen.NotificationSeverity.Success, rsp.Data);
+                    await Close();
                     return;
                 }
                 else
                 {
-
-                    NotificationService.Notify(NotificationSeverity.Error, "Other Name", "Try to update failed!");
+                    NotificationService.Notify(Radzen.NotificationSeverity.Error, rsp.ErrMessage);
                 }
             }
             catch (Exception ex)
             {
-                NotificationService.Notify(NotificationSeverity.Error, "Exception", ex.Message);
-
+                NotificationService.Notify(Radzen.NotificationSeverity.Error, "Exception", ex.Message);
             }
 
         }
-        async void SelectProvince(ProvinceDto e)
+
+        protected async void SetSelectedIndex()
         {
-            SelectedProvince = e;
-            if (SelectedProvince is not null)
+            await SetSelectedIndexe.InvokeAsync(0);
+        }
+
+        async Task Close()
+        {
+            await OnClose.InvokeAsync(false);
+            model = new();
+        }
+
+        async void SelectProvinceChanged(object e)
+        {
+
+            var province = e as ProvinceDto;
+
+            if (province is not null)
             {
-                DistrictList = await AddressService!.GetDistrictsByProvinceId(SelectedProvince.ProvinceId);
+                model!.ProInKhmer = province.ProInKhmer;
+                DistrictList = await _addressService!.GetDistrictsByProvinceId(province.ProvinceId);
             }
             else
             {
-                SelectedProvince = null;
-                DistrictList = null;
+                DistrictList = [];
             }
             StateHasChanged();
 
         }
-        async Task SelectDistrict(DistrictDto e)
+        async Task SelectDistrictChanged(object e)
         {
-            if (e is not null)
+            var district = e as DistrictDto;
+
+            if (district is not null)
             {
-                SelectedDistrict = e;
-                CommuneList = await AddressService!.GetCommunesByDistrictId(SelectedDistrict.DistrictId);
+                model!.DisInKhmer = district.DisInKhmer;
+                CommuneList = await _addressService!.GetCommunesByDistrictId(district.DistrictId);
             }
             else
             {
-                SelectedDistrict = null;
-                CommuneList = null;
+                CommuneList = [];
             }
             StateHasChanged();
         }
-        async Task SelectCommune(CommuneDto e)
+        async Task SelectCommuneChanged(object e)
         {
-            if (e is not null)
+
+            var commune = e as CommuneDto;
+
+            if (commune is not null)
             {
-                SelectedCommune = e;
-                VillageList = await AddressService!.GetVillagesByCommuneId(SelectedCommune.CommuneId);
+                model!.ComInKhmer = commune.ComInKhmer;
+                VillageList = await _addressService!.GetVillagesByCommuneId(commune.CommuneId);
             }
             else
             {
-                SelectedCommune = null;
-                VillageList = null;
-            }
-            StateHasChanged();
-        }
-        void SelectVillage(VillageDto e)
-        {
-            if (e is not null)
-            {
-                SelectedVillage = e;
-            }
-            else
-            {
-                SelectedVillage = null;
+                VillageList = [];
             }
             StateHasChanged();
         }
         //Salutation implements
-        [Parameter] public IEnumerable<string> Salutations { get; set; } = [];
         protected string? newSalution = "";
-
-        public NameEditModal(IAddressServiceImpl addressService, IOtherNameServiceImpl nameService, ISalutationService salutationService)
-        {
-            AddressService = addressService;
-            NameService = nameService;
-            SalutationService = salutationService;
-        }
-
         protected async Task AddNewSalutation(KeyboardEventArgs e)
         {
             if (e.Code == "Enter")
             {
-                await SalutationService.AddSalution(new Salutation
+                await _salutationService.AddSalution(new Salutation
                 {
                     Title = newSalution
                 });
@@ -151,8 +150,7 @@ namespace TrapchumApp.Components.Pages.Lists.OtherNames
         }
         private async Task GetSalutations()
         {
-            var salutations = await SalutationService.GetSalutions();
-
+            var salutations = await _salutationService.GetSalutions();
             if (salutations.IsSuccess)
             {
                 Salutations = salutations!.Data!.Select(x => x.Title!).ToList();
@@ -160,6 +158,35 @@ namespace TrapchumApp.Components.Pages.Lists.OtherNames
             else
             {
                 Salutations = [];
+            }
+
+        }
+
+
+        async Task GetEditNameById(string? id)
+        {
+            var rsp = await _otherNameService.GetEditNameByIdAsync(id);
+
+            if (rsp.IsSuccess && rsp.Data is not null)
+            {
+                model = rsp.Data;
+            }
+            if (model is not null)
+            {
+                if (model!.ProvinceRefId!.HasValue)
+                {
+                    DistrictList = await _addressService.GetDistrictsByProvinceId(model?.ProvinceRefId);
+                }
+
+                if (model!.DistrictRefId.HasValue)
+                {
+                    CommuneList = await _addressService.GetCommunesByDistrictId(model?.DistrictRefId);
+                }
+
+                if (model!.CommuneRefId.HasValue)
+                {
+                    VillageList = await _addressService.GetVillagesByCommuneId(model?.CommuneRefId);
+                }
             }
 
         }

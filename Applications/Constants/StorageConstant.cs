@@ -34,7 +34,7 @@ namespace Applications.Constants
                     new(1,"KHR"),
                     new(2,"USD"),
             ];
-        public static IReadOnlyList<Items> OtherChargedModes = [
+        public static IReadOnlyList<Items> CollectionFeeModes = [
                     new(1,"IRR"),
                     new(2,"Decline"),
             ];

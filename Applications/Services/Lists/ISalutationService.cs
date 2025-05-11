@@ -8,7 +8,7 @@ namespace Applications.Services.Lists
     {
         public async Task<Result<string>> AddSalution(Salutation salutation)
         {
-           return await sService.AddSalution(salutation);
+            return await sService.AddSalution(salutation);
         }
 
         public async Task<Result<string>> DeleteSalution(int id)
@@ -18,7 +18,12 @@ namespace Applications.Services.Lists
 
         public async Task<Result<IEnumerable<Salutation>>> GetSalutions(string? q = null)
         {
-            return await sService.GetSalutions(q);    
+            return await sService.GetSalutions(q);
+        }
+
+        public async Task<Result<IEnumerable<string>>> GetsSalutions(string? q = null)
+        {
+            return await sService.GetsSalutions(q);
         }
     }
 }

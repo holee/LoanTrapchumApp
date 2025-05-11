@@ -1,11 +1,6 @@
 ﻿@page "/Account/Login"
 <PageTitle>Login</PageTitle>
 @attribute [AllowAnonymous]
-@using System.ComponentModel.DataAnnotations
-@using Applications.Interfaces.Branches
-@using Applications.Interfaces.Identity
-@using Microsoft.AspNetCore.Authentication
-@using Microsoft.AspNetCore.Identity
 @layout EmptyLayout
 @inject ILogger<Login> Logger
 @inject IdentityRedirectManager RedirectManager

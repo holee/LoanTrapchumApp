@@ -1,3 +1,4 @@
+using Applications.Enumerations;
 using Applications.Requests.Lists.Addreses;
 using Applications.Requests.Lists.OtherNames;
 using Applications.Responses.Lists.Entities;
@@ -16,19 +17,22 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
     {
         private readonly IOccupationServiceImpl _occupationService;
         private readonly IFileUploadServiceImp _fileUploadService;
-
-        public CustomerEdit(IOccupationServiceImpl occupationService, IFileUploadServiceImp fileUploadService)
+        private readonly ISalutationServiceImpl _salutationService;
+        public CustomerEdit(IOccupationServiceImpl occupationService, IFileUploadServiceImp fileUploadService, ISalutationServiceImpl salutationService)
         {
             _occupationService = occupationService;
             _fileUploadService = fileUploadService;
+            _salutationService = salutationService;
         }
 
-        [Parameter] public Guid? CustomerId { get; set; }
+        [Parameter] public string? CustomerId { get; set; }
+        [Parameter] public bool ShowEditTab { get; set; } = false;
         [Parameter] public IEnumerable<ProvinceDto> Provinces { get; set; } = [];
         [Parameter] public IEnumerable<string> Salutations { get; set; } = [];
         [Parameter] public IEnumerable<string> Cities { get; set; } = [];
         [Parameter] public IEnumerable<string> Countries { get; set; } = [];
         [Parameter] public EventCallback<int?> SelectedValueChanged { get; set; }
+        [Parameter] public EventCallback<int> CloseTab { get; set; }
         protected EntityNamesCreate model = new();
         protected IEnumerable<ProvinceDto>? ProvinceList = [];
         protected IEnumerable<DistrictDto> DistrictList = [];
@@ -40,6 +44,13 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
         private bool IsLoading = true;
         protected string? newSalution = "";
         string city = "";
+
+
+        async Task ClickCloseTab()
+        {
+            await CloseTab.InvokeAsync(1);
+        }
+
 
         void OnChanged(ChangeEventArgs e)
         {
@@ -139,17 +150,17 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
                     {
                         if (model!.ProvinceRefId!.HasValue)
                         {
-                            this.DistrictList = await _addressService.GetDistrictsByProvinceId(model?.ProvinceRefId);
+                            DistrictList = await _addressService.GetDistrictsByProvinceId(model?.ProvinceRefId);
                         }
 
                         if (model!.DistrictRefId.HasValue)
                         {
-                            this.CommuneList = await _addressService.GetCommunesByDistrictId(model?.DistrictRefId);
+                            CommuneList = await _addressService.GetCommunesByDistrictId(model?.DistrictRefId);
                         }
 
                         if (model!.CommuneRefId.HasValue)
                         {
-                            this.VillageList = await _addressService.GetVillagesByCommuneId(model?.CommuneRefId);
+                            VillageList = await _addressService.GetVillagesByCommuneId(model?.CommuneRefId);
                         }
                     }
                 }
@@ -164,12 +175,12 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
 
         void Close() => DialogService.Close(false);
 
-        protected async Task FormSubmit()
+        protected async Task HandleFormUpdate()
         {
             editForm.EditContext?.Validate();
             try
             {
-                model!.EntType = "Customer";
+                model!.EntType = EntityTypes.Customer.ToString();
 
                 var response = await _customerService.UpdateAsync(model);
 
@@ -207,10 +218,10 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
 
         private async Task GetCountries()
         {
-            var countries = await _addressService.GetCountries(105);
-            Countries = countries.Where(x => x.CountryId == 105)
-                .Select(x => x.DesInKhmer!)
-                .ToList();
+            var rsp = await _addressService.GetCountries(105);
+            Countries = rsp.Data!.Where(x => x.CountryId == 105)
+                                .Select(x => x.DesInKhmer!)
+                                .ToList();
         }
 
         private async Task GetCities()

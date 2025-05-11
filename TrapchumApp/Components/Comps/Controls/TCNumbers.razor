@@ -1,5 +1,4 @@
 ﻿@using System.Linq.Expressions
-@using Applications.Interfaces.Branches
 @if (string.IsNullOrEmpty(Label))
 {
     <RadzenNumeric TValue="decimal?"
@@ -17,6 +16,7 @@
                    Disabled="@Disabled"
                    Min="@Min"
                    ValueChanged="@ValueChanged"
+                   Placeholder="@Placeholder"
                    Format="@Format" />
 }
 else
@@ -41,6 +41,7 @@ else
                                Disabled="@Disabled"
                                Min="@Min"
                                ValueChanged="@ValueChanged"
+                               Placeholder="@Placeholder"
                                Format="Format" />
                 <ValidationMessage For="@ValueExpression" />
             </div>
@@ -75,6 +76,7 @@ else
     [Parameter] public string? Name { get; set; } = Guid.NewGuid().ToString("N");
     [Parameter] public string Id { get; set; } = Guid.NewGuid().ToString("N");
     [Parameter] public string? Format { get; set; } = "#,##0.00";
+    [Parameter] public string? Placeholder { get; set; } = "";
     [Parameter] public decimal? Value { get; set; }
     [Parameter] public bool Disabled { get; set; }
     [Parameter] public TextAlign TextAlign { get; set; } = TextAlign.End;

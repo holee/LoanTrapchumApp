@@ -2,7 +2,6 @@ using Applications.Interfaces.Lists;
 using Applications.Requests.Lists.Entities;
 using Domains.Models.Lists;
 using Mapster;
-using Microsoft.AspNetCore.Components;
 using Radzen;
 
 namespace TrapchumApp.Components.Pages.Lists.Departments
@@ -26,7 +25,7 @@ namespace TrapchumApp.Components.Pages.Lists.Departments
 
             if (response!.IsSuccess)
             {
-                NotificationService.Notify(NotificationSeverity.Success, "Create Success");
+                NotificationService.Notify(NotificationSeverity.Success, "CreateNewUser Success");
                 DialogService.Close(true);
             }
             else

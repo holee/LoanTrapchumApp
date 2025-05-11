@@ -1,6 +1,7 @@
 using Applications.Extensions.mappers;
 using Applications.Interfaces.Currencies;
 using Applications.Requests.Lists.Currency;
+using Applications.Responses.Lists.Currency;
 using Domains.Models.Currencies;
 using Mapster;
 using Microsoft.AspNetCore.Components;

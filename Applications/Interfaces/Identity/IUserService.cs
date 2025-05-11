@@ -12,7 +12,7 @@ public interface IUserService
     Task<Result> EditUserAsync(string userId, EditUserDto model);
     Task<Result> ChangePassword(ChangePasswordDto req);
     Task<Result<UserDto>> GetUserDetailsById(string? userId);
-    Task<Pager<UserDto>> GetUsersAsync(int pageIndex, int pageSize, string sortColumn, bool includeInactive = false, string? filter = null);
+    //Task<Pager<UserDto>> GetUsersAsync(int pageIndex, int pageSize, string sortColumn, bool includeInactive = false, string? filter = null);
     Task<Result<UserPermissions>> GetUserPermissionsAsync(string? userId);
     Task<Result<string>> AddOrRemovedUserPermissionsAsync(string? userId, UserPermissionRequest permission);
     Task<Result<UserViewModel>> GetUserRolesAsync(string? userId);

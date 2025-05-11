@@ -2,7 +2,7 @@
 
 public sealed class EntityNamesCreate
 {
-    public Guid Id { get; set; }
+    public string? Id { get; set; }
     public string? FirstName { get; set; }
     public string? MiddleName { get; set; }
     public string? LastName { get; set; }
@@ -14,15 +14,19 @@ public sealed class EntityNamesCreate
     public DateTime? DateOfBirth { get; set; }
     public string? Salutation { get; set; }
     public string? Gender { get; set; }
+    
     public string? JobTitle { get; set; }
     public string? Phone { get; set; }
     public string? AltPhone { get; set; }
     public string? EmailAddress { get; set; }
+    
     public string? IdCard { get; set; }
+    
     public string? CompanyName { get; set; }
+    public string? CompanyAddress { get; set; }
     public string? Occupation { get; set; }
     public string? MarritalStatus { get; set; }
-    public bool? IsActive { get; set; }
+    public bool? IsActive { get; set; } = true;
     public string? CountryName { get; set; }
     public string? City { get; set; }
     public int? ProvinceRefId { get; set; }
@@ -44,7 +48,7 @@ public sealed class EntityNamesCreate
     /// For Customer
     /// </summary>
     ///
-    public Guid? CustomerId { get; set; } 
+    public string? CustomerId { get; set; } 
     public int? Dependents { get; set; }
     public int? NoOfChildren { get; set; }
     public decimal? Income { get; set; }
@@ -59,9 +63,11 @@ public sealed class EntityNamesCreate
     /// <summary>
     /// For Employees
     /// </summary>
-    public long? StaffId { get; set; }
+    /// 
 
-    public Guid? UserRefId { get; set; }
+    public string? EmployeeId { get; set; }
+    public string? StaffId { get; set; }
+    public string? UserRefId { get; set; }
     public DateTime? HireDate { get; set; }
     public DateTime? EndDate { get; set; }
     public int? DepartmentRefId { get; set; }
@@ -71,4 +77,9 @@ public sealed class EntityNamesCreate
     /// For Employees And Customer
     /// </summary>
     public string? Photo { get; set; }
+
+    /// <summary>
+    /// Vendors
+    /// </summary>
+    public string? VendorId { get; set; } = string.Empty; 
 }

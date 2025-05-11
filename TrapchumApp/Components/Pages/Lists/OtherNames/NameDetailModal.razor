@@ -1,92 +1,85 @@
 ﻿@using Applications.Requests.Lists.OtherNames
-<div class="card">
-    <div class="card-header bg-primary">
-        <div class="d-flex justify-content-between">
-            <span>Name Details: @model!.Sex @model?.Name <span><RadzenCheckBox @bind-Value="model!.IsActive" /></span></span>
-            <strong @onclick="SelectedIndex" class="text-danger" style="cursor:pointer">X</strong>
-        </div>
-    </div>
-    <div class="card-body">
+@using Applications.Responses.ViewModels.OtherNames
+<Card>
+    <CardHeader>
+        <RadzenStack Orientation="Orientation.Horizontal"
+        AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+            <span class="rz-p-0 rz-text-align-center">
+                Name Details:<strong>@model!.Gender @model?.Name</strong>
+            </span>
+            <span class="rz-p-0 rz-text-align-center">
+                <RadzenCheckBox Value="@model!.IsActive" ReadOnly />
+                <RadzenLabel Text="@(model.IsActive ? "Active" : "Inactive")" Component="IsActive" class="rz-ms-2" />
+            </span>
+        </RadzenStack>
+    </CardHeader>
+    <CardBody BodyCssClass="rz-background-color-base-100">
         <div>
             <div class="table-responsive">
                 <table class="table">
                     <tbody>
                         <tr>
-                            <th class="w-25 rz-background-color-base-100">Alternative Name</th>
+                            <th class="w-25">Alternative Name</th>
                             <td>
                                 @model!.AltName
                             </td>
                         </tr>
                         <tr>
-                            <th class="w-25 rz-background-color-base-100">First Name</th>
+                            <th class="w-25">First Name</th>
                             <td>
                                 @model.FirstName
                             </td>
                         </tr>
                         <tr>
-                            <th class="w-25 rz-background-color-base-100">Last Name</th>
+                            <th class="w-25">Last Name</th>
                             <td>
                                 @model.LastName
                             </td>
                         </tr>
                         <tr>
-                            <th class="w-25 rz-background-color-base-100">Phone</th>
+                            <th class="w-25">Phone</th>
                             <td>
                                 @model.Phone / @model.AltPhone (Alt Phone)
                             </td>
                         </tr>
                         <tr>
-                            <th class="w-25 rz-background-color-base-100">Email</th>
+                            <th class="w-25">Email</th>
                             <td>
                                 @model.EmailAddress
                             </td>
                         </tr>
                         <tr>
-                            <th class="w-25 rz-background-color-base-100">Note</th>
+                            <th class="w-25">Note</th>
                             <td>
                                 @model.Description
                             </td>
                         </tr>
 
                         <tr>
-                            <th class="w-25 rz-background-color-base-100">Address In Khmer</th>
+                            <th class="w-25">Address In Khmer</th>
                             <td>
-                                @model?.ProInKhmer @model?.DisInKhmer @model?.ComInKhmer @model?.VilInKhmer
+                                @model.ToString()
                             </td>
                         </tr>
-                        <tr>
-                            <th class="w-25 rz-background-color-base-100">Address In English</th>
-                            <td>
-                                @model?.ProDescription @model?.DisDescription @model?.ComDescription @model?.VillDescription
-                            </td>
-                        </tr>
-
                     </tbody>
                 </table>
             </div>
         </div>
-    </div>
-    <div class="card-footer ">
-        <div class="d-flex justify-content-between">
-            <div>
-                <label class="text-muted">Created: @string.Format("{0:dd MMM yyyy hh:mm tt}", model?.CreatedDt) Modified: @string.Format("{0:dd MMM yyyy hh:mm tt}", model?.ModifiedDt)</label>
-            </div>
-            <div>
-                <RadzenButton Click="SelectedIndex" Size="ButtonSize.Small" Text="Close" Icon="cancel" />
-            </div>
-        </div>
+    </CardBody>
+    <CardFooter>
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
+                     JustifyContent="JustifyContent.End">
+            <RadzenButton ButtonStyle="ButtonStyle.Success"
+                          Click="OnClickEdit"
+                          Size="ButtonSize.Small"
+                          Text="Edit" Icon="save" />
+            <RadzenButton ButtonStyle="ButtonStyle.Danger"
+                          Click="CloseTabs"
+                          Size="ButtonSize.Small"
+                          Text="Close" Icon="cancel" />
+        </RadzenStack>
+    </CardFooter>
+</Card>
 
 
-    </div>
-</div>
-
-@code {
-    [Parameter] public EntNameDto? model { get; set; }
-    [Parameter] public EventCallback<int> SelectIndex { get; set; }
-
-    protected async Task SelectedIndex()
-    {
-        await SelectIndex.InvokeAsync(0);
-    }
-}
 

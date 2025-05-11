@@ -1,4 +1,4 @@
-using Applications.Requests.Lists.Holidays;
+using Applications.Responses.Lists.Holidays;
 
 namespace TrapchumApp.Components.Pages.Lists.Holidays
 {

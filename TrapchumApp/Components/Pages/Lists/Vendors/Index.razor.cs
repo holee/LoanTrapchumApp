@@ -1,5 +1,4 @@
 using Applications.Extensions;
-using Applications.Interfaces.Addresses;
 using Applications.Interfaces.Lists;
 using Applications.Interfaces.Vendors;
 using Applications.Requests.Lists.Addreses;
@@ -11,6 +10,8 @@ using Mapster;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 using Radzen.Blazor;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 namespace TrapchumApp.Components.Pages.Lists.Vendors
 {
@@ -41,21 +42,20 @@ namespace TrapchumApp.Components.Pages.Lists.Vendors
         DistrictDto? SelectedDistrict;
         CommuneDto? SelectedCommune;
         VillageDto? SelectedVillage;
-        IEnumerable<VVendor> Vendors = [];
-        int pageIndex = 0;
+        IEnumerable<VendorVm> Vendors = [];
+        int pageIndex = 1;
         int pageSize = 10;
         int counts = 0;
         string sortField = "EntId";
         bool sortDescending = false;
         bool includeInactive = false;
         bool isLoading = false;
-        Guid? vendorId = Guid.Empty;
+        string? vendorId = string.Empty;
         protected override async Task OnInitializedAsync()
         {
             try
             {
                 await GetVendors();
-                ProvinceList = await _addressService!.GetsProvinces();
             }
             catch (Exception ex)
             {
@@ -66,15 +66,16 @@ namespace TrapchumApp.Components.Pages.Lists.Vendors
         }
 
 
-        protected async Task OnSearch(ChangeEventArgs e)
+        protected async Task OnSearch(string filter)
         {
-            q = e.Value!.ToString();
-            await GetVendors(q);
+            q = filter;
+            await GetVendors(filter);
         }
 
         async Task PageSizeChanged(int page)
         {
             pageSize = page;
+
             await GetVendors(q);
         }
 
@@ -109,47 +110,59 @@ namespace TrapchumApp.Components.Pages.Lists.Vendors
             await GetVendors(q);
 
         }
-        void ShowEdit(Guid? id)
+        async Task ShowEdit(string? vendorId) 
         {
-            NavigationManager.NavigateTo($"/App/Vendors/{id}/Edit");
+            //NavigationManager.NavigateTo($"/App/Vendors/{id}/Edit");
+
+            ContextMenuService.Close();
+
+            if (vendorId.IsNotNullOrEmpty())
+            {
+                try
+                {
+                    IsEnableEdit = true;
+                    selectedIndex = 2;
+                    this.vendorId = vendorId;
+                    await InvokeAsync(StateHasChanged);
+                }
+                catch (Exception ex)
+                {
+                    NotificationService.Notify(NotificationSeverity.Error, ex.Message);
+                }
+            }
+
+
         }
 
-        void SelectedId(Guid? id)
+        void SelectedId(string? id)
         {
             vendorId = id;
         }
 
-        protected async Task DisplayDetail(Guid? e)
+        protected async Task DisplayDetail(string? vendorId)
         {
-            if (e.IsNotNullOrEmpty())
+            ContextMenuService.Close();
+
+            if (vendorId.IsNotNullOrEmpty())
             {
                 try
                 {
-                    var name = await _otherNameService!.GetByIdAsync(e);
-
-                    OtherNames = name.Adapt<EntNameDto>();
-
                     IsEnableDetail = true;
-
                     selectedIndex = 3;
-
+                    this.vendorId = vendorId;
                     await InvokeAsync(StateHasChanged);
-
-                    ContextMenuService.Close();
-
                 }
                 catch (Exception ex)
                 {
                     NotificationService.Notify(NotificationSeverity.Error, "Exception", ex.Message);
                 }
-
             }
         }
-        async Task OnDelete(Guid? id)
+        async Task OnDelete(string? id)
         {
             ContextMenuService.Close();
             var confirm = (bool)await DialogService.Confirm("Other Name deleted will not be able to recover, would you like to continue?", "Delete Other Name",
-        new Radzen.ConfirmOptions { OkButtonText = "Yes", CancelButtonText = "No" });
+        new ConfirmOptions { OkButtonText = "Yes", CancelButtonText = "No" });
             if (!confirm)
             {
                 return;
@@ -157,7 +170,7 @@ namespace TrapchumApp.Components.Pages.Lists.Vendors
             var result = await _otherNameService!.DeleteAsync(id);
             if (result.IsSuccess)
             {
-                NotificationService.Notify(Radzen.NotificationSeverity.Success, "Delete Other Name", "Other Name was deleted successful!");
+                NotificationService.Notify(NotificationSeverity.Success, "Delete Other Name", "Other Name was deleted successful!");
                 await GetVendors(q);
             }
 
@@ -181,21 +194,37 @@ namespace TrapchumApp.Components.Pages.Lists.Vendors
             selectedIndex = 1;
             StateHasChanged();
         }
-        async void CloseTabs(int e)
+
+        async Task Closing(bool isEditTabl)
+        {
+            selectedIndex = 0;
+            IsEnableEdit = isEditTabl;
+            await GetVendors(q);
+            StateHasChanged();
+        }
+
+        void OnEdit(string vendor_id)
+        {
+            selectedIndex = 2;
+            IsEnableEdit = true;
+            vendorId = vendor_id;
+            StateHasChanged();
+        }
+
+
+        async Task CloseTabs(int e)
         {
             if (selectedIndex == 1)
             {
                 IsEnableNew = false;
                 selectedIndex = 0;
-
-                await OnInitializedAsync();
+                await GetVendors(q);
             }
             else if (selectedIndex == 2)
             {
                 IsEnableEdit = false;
                 selectedIndex = 0;
-
-                await OnInitializedAsync();
+                await GetVendors(q);
             }
             else if (selectedIndex == 3)
             {
@@ -206,25 +235,27 @@ namespace TrapchumApp.Components.Pages.Lists.Vendors
             StateHasChanged();
         }
 
-        protected async Task DeactiveOrActive(bool arg, VVendor e)
+        protected async Task DeactiveOrActive(bool arg, VendorVm e)
         {
-            var entVendor = new EntVendorDtoChangeStatus
-            {
-                VendorId = e.EntId,
-                EditSeq = e.EditSeq,
-                IsActive = arg
-            };
-            var response = await _vendorService.ChangeVendorStatus(entVendor);
-            if (response.IsSuccess)
-            {
-                NotificationService.Notify(NotificationSeverity.Success, "", response.Data);
-                await GetVendors(q);
-            }
-            else
-            {
-                await IncludeInActiveChanged(false);
-                NotificationService.Notify(NotificationSeverity.Warning, "", response.ErrMessage);
-            }
+            //var entVendor = new EntVendorDtoChangeStatus
+            //{
+            //    VendorId = e.VendorId,
+            //    EditSeq = e.EditSeq,
+            //    IsActive = arg
+            //};
+            //var response = await _vendorService.ChangeVendorStatus(entVendor);
+            //if (response.IsSuccess)
+            //{
+            //    NotificationService.Notify(NotificationSeverity.Success, "", response.Data);
+            //    await GetVendors(q);
+            //}
+            //else
+            //{
+            //    await IncludeInActiveChanged(false);
+            //    NotificationService.Notify(NotificationSeverity.Warning, "", response.ErrMessage);
+            //}
+
+            await Task.CompletedTask;
         }
     }
 }

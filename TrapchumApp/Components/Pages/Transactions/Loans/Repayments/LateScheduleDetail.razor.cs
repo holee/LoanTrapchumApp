@@ -1,6 +1,4 @@
-using Applications.Interfaces.Loans;
 using Applications.Responses.ViewModels.Loans.Schedules;
-using Applications.Services.Loans;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 using Radzen.Blazor;

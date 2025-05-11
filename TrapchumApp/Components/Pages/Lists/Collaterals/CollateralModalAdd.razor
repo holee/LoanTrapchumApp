@@ -1,4 +1,4 @@
-﻿@using Applications.Responses.Collaterals;
+﻿@using Applications.Responses.Lists.Collaterals
 <Containers Fluid>
     <EditForm Model="model" @ref="editForm">
         <DataAnnotationsValidator />
@@ -11,7 +11,7 @@
                             <RadzenLabel>Customer Name</RadzenLabel>
                         </RadzenColumn>
                         <RadzenColumn Size="7">
-                            <InputText @bind-Value="CustomerName" disabled class="form-control form-control-sm" />
+                            <InputText @bind-Value="model.CustomerName" disabled class="form-control form-control-sm" />
                         </RadzenColumn>
                     </RadzenRow>
                 </RadzenColumn>
@@ -57,14 +57,14 @@
             <Tabs>
                 <RadzenTabsItem Text="Property">
                     <RadzenDataGrid Density="Density.Compact"
-                                    TItem="CollateralLineResponse"
+                                    TItem="VCollateralLines"
                                     Responsive
                                     ColumnWidth="15rem"
                                     @ref="propertiesGrid"
                                     Style="--rz-grid-header-background-color:var(--rz-base-200)"
                                     Data="Properties">
                         <HeaderTemplate>
-                            <RadzenButton Size="Radzen.ButtonSize.Small"
+                            <RadzenButton Size="ButtonSize.Small"
                                           ButtonStyle="ButtonStyle.Primary"
                                           Click="@InsertPropertyRow"
                                           Icon="add_circle"
@@ -74,7 +74,8 @@
                             <RadzenDataGridColumn Property="Id" Title="#" Width="2rem">
                                 <Template Context="c">
                                     <input type="hidden" @bind="c.Id" />
-                                    <input type="hidden" @bind="c.CollateralRefId" />
+                                    <input type="hidden" @bind="c.CollateralId" />
+                                    <input type="hidden" @bind="c.CategoryRefId" />
                                 </Template>
                             </RadzenDataGridColumn>
                             <RadzenDataGridColumn Property="SubCategoryRefId" Title="Category" Context="c">
@@ -85,7 +86,7 @@
                                 <EditTemplate>
                                     <RadzenDropDown TValue="int?"
                                                     class="w-100"
-                                                    Data="CollateralProperties"
+                                                    Data="@CollateralProperties"
                                                     TextProperty="CollateralSubTypeName"
                                                     ValueProperty="Id"
                                                     Style="height:2rem;line-height:1rem;"
@@ -207,19 +208,19 @@
                                     <RadzenButton Click="@(()=>EditRow(c,1))"
                                                   Icon="edit"
                                                   ButtonStyle="ButtonStyle.Secondary"
-                                                  Size="Radzen.ButtonSize.ExtraSmall">
+                                                  Size="ButtonSize.ExtraSmall">
                                     </RadzenButton>
                                 </Template>
                                 <EditTemplate>
                                     <RadzenButton Click="@(()=>SavePropertyRow(c))"
                                                   Icon="check"
                                                   ButtonStyle="ButtonStyle.Success"
-                                                  Size="Radzen.ButtonSize.ExtraSmall">
+                                                  Size="ButtonSize.ExtraSmall">
                                     </RadzenButton>
                                     <RadzenButton Click="@(()=>CancelPropertyEdit(c))"
                                                   Icon="delete"
                                                   ButtonStyle="ButtonStyle.Danger"
-                                                  Size="Radzen.ButtonSize.ExtraSmall">
+                                                  Size="ButtonSize.ExtraSmall">
                                     </RadzenButton>
                                 </EditTemplate>
                             </RadzenDataGridColumn>
@@ -228,14 +229,14 @@
                 </RadzenTabsItem>
                 <RadzenTabsItem Text="Personal">
                     <RadzenDataGrid Density="Density.Compact"
-                                    TItem="CollateralLineResponse"
+                                    TItem="VCollateralLines"
                                     Responsive
                                     ColumnWidth="15rem"
                                     @ref="personalGrid"
                                     Style="--rz-grid-header-background-color:var(--rz-base-200)"
                                     Data="Personals">
                         <HeaderTemplate>
-                            <RadzenButton Size="Radzen.ButtonSize.Small"
+                            <RadzenButton Size="ButtonSize.Small"
                                           ButtonStyle="ButtonStyle.Primary"
                                           Click="InsertPersonRow"
                                           Icon="add_circle"
@@ -245,7 +246,7 @@
                             <RadzenDataGridColumn Property="Id" Title="#" Width="2rem">
                                 <Template Context="c">
                                     <input type="hidden" @bind="c.Id" />
-                                    <input type="hidden" @bind="c.CollateralRefId" />
+                                    <input type="hidden" @bind="c.CollateralId" />
                                     <input type="hidden" @bind="c.CategoryRefId" />
                                 </Template>
                             </RadzenDataGridColumn>
@@ -368,19 +369,19 @@
                                     <RadzenButton Click="@(()=>EditRow(c,2))"
                                                   Icon="edit"
                                                   ButtonStyle="ButtonStyle.Secondary"
-                                                  Size="Radzen.ButtonSize.ExtraSmall">
+                                                  Size="ButtonSize.ExtraSmall">
                                     </RadzenButton>
                                 </Template>
                                 <EditTemplate>
                                     <RadzenButton Click="@(()=>SavePersonRow(c))"
                                                   Icon="check"
                                                   ButtonStyle="ButtonStyle.Success"
-                                                  Size="Radzen.ButtonSize.ExtraSmall">
+                                                  Size="ButtonSize.ExtraSmall">
                                     </RadzenButton>
                                     <RadzenButton Click="@(()=>CancelPersonEdit(c))"
                                                   Icon="delete"
                                                   ButtonStyle="ButtonStyle.Danger"
-                                                  Size="Radzen.ButtonSize.ExtraSmall">
+                                                  Size="ButtonSize.ExtraSmall">
                                     </RadzenButton>
                                 </EditTemplate>
                             </RadzenDataGridColumn>
@@ -396,12 +397,12 @@
         <RadzenButton Text="Save"
                       Icon="save"
                       ButtonStyle="ButtonStyle.Success"
-                      Size="Radzen.ButtonSize.Small"
+                      Size="ButtonSize.Small"
                       Click="FormValidate" />
         <RadzenButton Text="Close"
                       Icon="close"
                       ButtonStyle="ButtonStyle.Danger"
-                      Size="Radzen.ButtonSize.Small"
+                      Size="ButtonSize.Small"
                       Click="CloseDialogue" />
     </RadzenStack>
 </Containers>

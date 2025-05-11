@@ -1,5 +1,4 @@
 ﻿@page "/Loan/Request/{LoanRequestId:long}/Review"
-@using TrapchumApp.Components.Pages.Lists.Customers
 <PageTitle>Reviews</PageTitle>
 <Containers Fluid CssClass="p-2">
     <Card>
@@ -94,10 +93,10 @@
                         <RadzenRow AlignItems="AlignItems.Center"
                                    Gap="1rem">
                             <RadzenColumn Size="6">
-                                <CustomerInc Items="@data!.Customer.CustomerIncomes" ShowAdd="false" />
+                               @*  <CustomerInc Items="@data!.Customer.CustomerIncomes" ShowAdd="false" /> *@
                             </RadzenColumn>
                             <RadzenColumn Size="6">
-                                <CustomerExp Items="@data!.Customer.CustomerExpenses" />
+                               @*  <CustomerExp Items="@data!.Customer.CustomerExpenses" /> *@
                             </RadzenColumn>
                         </RadzenRow>
                     </RadzenTabsItem>
@@ -114,20 +113,20 @@
                 {
                     <RadzenButton ButtonStyle="ButtonStyle.Success"
                                   Click="SaveLoanRequest"
-                                  Size="Radzen.ButtonSize.Small"
+                                  Size="ButtonSize.Small"
                                   Icon="save"
                                   Text="Save" />
                     <RadzenButton ButtonStyle="ButtonStyle.Secondary"
                                   Click="AprovedLoanRequest"
-                                  Size="Radzen.ButtonSize.Small"
+                                  Size="ButtonSize.Small"
                                   Icon="paid"
                                   Text="Aprove" />
                     <RadzenButton ButtonStyle="ButtonStyle.Danger"
-                                  Size="Radzen.ButtonSize.Small"
+                                  Size="ButtonSize.Small"
                                   Icon="do_not_disturb_on"
                                   Text="Denied" />
                     <RadzenButton ButtonStyle="ButtonStyle.Primary"
-                                  Size="Radzen.ButtonSize.Small"
+                                  Size="ButtonSize.Small"
                                   Icon="fact_check"
                                   Text="Rechecked" />
                 }

@@ -4,10 +4,10 @@ namespace Applications.Requests.Loans.Payments;
 
 public sealed class LoanRepaymentDtoCreate
 {
-    public Guid? TranxId { get; set; }
-    public Guid? LoanRefId { get; set; }
-    public Guid? CreditAgentRefId { get; set; }
-    public Guid? UserRefId { get; set; }
+    public string? TranxId { get; set; }
+    public string? LoanRefId { get; set; }
+    public string? CreditAgentRefId { get; set; }
+    public string? UserRefId { get; set; }
     public int? BranchRefId { get; set; }
     public int? CurrencyRefId { get; set; }
     public string? OfficialReceiptNo { get; set; }

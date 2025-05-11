@@ -1,5 +1,4 @@
 ﻿@page "/Loans/Customer/{LoanId:long}/PayOff"
-@using Applications.Requests.Loans.Payments
 <PageTitle>PayOff</PageTitle>
 <Containers Fluid>
     <RadzenRow AlignItems="AlignItems.Center">
@@ -82,13 +81,13 @@
                            Style="height:var(--input-text-sm)" />
         </RadzenColumn>
     </RadzenRow>
-    <RadzenStack Orientation="Radzen.Orientation.Horizontal"
-                 JustifyContent="Radzen.JustifyContent.End"
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 JustifyContent="JustifyContent.End"
                  class="mt-2"
                  Gap="1rem"
                  AlignItems="AlignItems.Center">
         <RadzenButton Icon="save"
-                      Size="Radzen.ButtonSize.Small"
+                      Size="ButtonSize.Small"
                       ButtonStyle="ButtonStyle.Success"
                       Click="ApplySchedulePayment"
                       Text="Applied Payment" />

@@ -3,7 +3,7 @@
 public class CustomerLoan
 {
     public long? Id { get; set; }
-    public Guid? LoanId { get; set; }
+    public string? LoanId { get; set; }
     public string? BranchName { get; set; }
     public DateTime RegisterDate { get; set; }
     public string? AgentName { get; set; }

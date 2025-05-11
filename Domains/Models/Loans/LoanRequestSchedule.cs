@@ -3,7 +3,7 @@
 public sealed class LoanRequestSchedule
 {
     public long LoanRequestScheduleId { get; set; }
-    public long? LoanRequestRefId { get; set; }
+    public string? LoanRequestRefId { get; set; }
     public int? InstallmentNo { get; set; }
     public decimal? Principal { get; set; }
     public decimal? InterestAmount { get; set; }

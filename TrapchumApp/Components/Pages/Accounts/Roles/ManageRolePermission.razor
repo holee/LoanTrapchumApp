@@ -14,7 +14,7 @@
     </RadzenStack>
     <RadzenStack>
         <RadzenTabs class="rz-background-color-base-100" Change="OnChange"
-                    TabPosition="Radzen.TabPosition.Top"
+                    TabPosition="TabPosition.Top"
                     RenderMode="TabRenderMode.Client">
             <Tabs>
                 @foreach (var group in RoleClaimsGrouped.Keys)
@@ -65,14 +65,14 @@
     </RadzenStack>
     <RadzenStack AlignItems="AlignItems.Center"
                  Gap="1rem"
-                 Orientation="Radzen.Orientation.Horizontal"
+                 Orientation="Orientation.Horizontal"
                  class="rz-mt-2"
-                 JustifyContent="Radzen.JustifyContent.End">
+                 JustifyContent="JustifyContent.End">
         <RadzenButton ButtonStyle="ButtonStyle.Success"
                       Click="SubmitHandler"
                       Icon="save"
                       Text="Save Changed"
-                      Size="Radzen.ButtonSize.Small" />
+                      Size="ButtonSize.Small" />
         <RadzenLink Icon="cancel"
                     IconColor="@Colors.White"
                     Text="Back"

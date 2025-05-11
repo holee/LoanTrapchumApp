@@ -2,7 +2,7 @@
 
 public class DeniedRequestDtoCreate : RequestDtoBaseCreate
 {
-    public DeniedRequestDtoCreate(int? branchId, Guid? customerId, Guid? loanRequestId, DateTime? deniedDate, string? memo)
+    public DeniedRequestDtoCreate(int? branchId, string? customerId, string? loanRequestId, DateTime? deniedDate, string? memo)
         : base(branchId, customerId, loanRequestId, memo)
     {
         LoanRequestId = loanRequestId;

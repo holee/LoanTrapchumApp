@@ -1,5 +1,4 @@
 ﻿using Applications.Requests.Lists.Employees;
-using Applications.Requests.Lists.Entities;
 using Applications.Requests.Lists.OtherNames;
 using Applications.Responses;
 using Applications.Responses.Lists.Entities;
@@ -13,16 +12,16 @@ namespace Applications.Services.Employees
     {
         Task<Result<string>> CreateAsync(EntityNamesCreate entityName);
         Task<Result<string>> UpdateAsync(EntityNamesCreate entityName);
-        Task<Result<string>> DeleteAsync(Guid? employeeId);
-        Task<Result<Employee>> GetByIdAsync(Guid? employeeId);
+        Task<Result<string>> DeleteAsync(string? employeeId);
+        Task<Result<EntityNames>> GetByIdAsync(string? employeeId);
 
-        Task<Result<IReadOnlyList<VEmployees>>> GetEmployeesAsync(Guid? employeeId, int branchId, bool isActive = false,
-            string? q = null);
+        Task<Result<IReadOnlyList<VEmployeeList>>> GetEmployeesAsync(string? employeeId, int branchId, bool isActive = false,string? q = null);
 
-        Task<Pager<VEmployees>> GetEmployeesAsync(QueryParam param);
-        Task<Result<string>> UpdateIsActiveAsync(Guid? employeeId);
+        Task<Pager<VEmployeeList>> GetEmployeesAsync(QueryParam param);
+        Task<Result<string>> UpdateIsActiveAsync(string? employeeId);
         Task<IEnumerable<OcupationResponse>> GetOccupationsAsync(string? filter);
-        Task<Result<EmployeeDtoUpdate>> GetEmployeeForUpdate(Guid? employeeId);
-        Task<Result<EmployeeDto>> GetEmployeeById(Guid? employeeId);
+        Task<Result<EntityNamesCreate>> GetEmployeeForUpdate(string? employeeId);
+        Task<Result<T>> GetEmployeeById<T>(string? employeeId) where T:class;
+        Task<Result<VEmployeeList>> GetEmployeeById(string? employeeId, int? branchId, bool include = false);
     }
 }

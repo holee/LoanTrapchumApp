@@ -6,6 +6,14 @@ namespace Applications.Extensions.Identity.Policies;
 
 public static class PaymentsPolicies
 {
+    private const string prefix = "repayments";
+    public const string Create = $"{prefix}.{nameof(Create)}";
+    public const string Update = $"{prefix}.{nameof(Update)}";
+    public const string Delete = $"{prefix}.{nameof(Delete)}";
+    public const string Read = $"{prefix}.{nameof(Read)}";
+    public const string MultiplePayment = $"{prefix}.{nameof(MultiplePayment)}";
+    public const string PayOff = $"{prefix}.{nameof(PayOff)}";
+
     private static string read = AppPermission.RuleFor(Modules.Repayments, Feature.Read);
     private static string update = AppPermission.RuleFor(Modules.Repayments, Feature.Update);
     private static string create = AppPermission.RuleFor(Modules.Repayments, Feature.Create);

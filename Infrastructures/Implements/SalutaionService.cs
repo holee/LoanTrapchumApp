@@ -1,4 +1,5 @@
-﻿using Applications.Interfaces.Lists;
+﻿using Applications.Extensions;
+using Applications.Interfaces.Lists;
 using Applications.Responses;
 using Domains.Models.Lists;
 using Infrastructures.DataAccess;
@@ -76,6 +77,23 @@ namespace Infrastructures.Implements
             return Result.Success<IEnumerable<Salutation>>(result);
 
         }
+
+        public async Task<Result<IEnumerable<string>>> GetsSalutions(string? q = null)
+        {
+            var salutations = await _context.Salutations
+                                                    .WhereIf(!string.IsNullOrEmpty(q), x => x.Title!.Contains(q!))
+                                                    .AsNoTracking()
+                                                    .Select(x => x.Title)
+                                                    .ToListAsync();
+            if (!salutations.Any())
+            {
+                return Result.Success<IEnumerable<string>>(Enumerable.Empty<string>());
+            }
+
+            return Result.Success<IEnumerable<string>>(salutations!);
+
+        }
+
 
     }
 }

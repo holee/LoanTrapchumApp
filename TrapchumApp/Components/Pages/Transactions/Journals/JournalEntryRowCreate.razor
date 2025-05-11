@@ -1,7 +1,6 @@
-﻿@using Radzen
-@using Radzen.Blazor
+﻿@using Applications.Responses.ViewModels.Journals
 <tr>
-    <td class="text-center">
+    <td class="text-center align-middle">
         <RadzenLabel>@RowIndex</RadzenLabel>
         @{
             JournalLine.LineSeq = JournalLineSeq;
@@ -19,15 +18,14 @@
                                 ShowSearch="false"
                                 AllowSelectAll="true"
                                 FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-                                AllowClear="true"
                                 Placeholder="Ledger..."
                                 ValueProperty="LedgerId"
                                 AllowColumnResize="true"
                                 AllowFilteringByAllStringColumns="true"
                                 Name="DropDownJournalLine">
             <Columns>
-                <RadzenDropDownDataGridColumn Title="Ledger" Property="LedgerName" Width="100px" />
-                <RadzenDropDownDataGridColumn Title="Type" Property="LedgerTypeCode" Width="100px" />
+                <RadzenDropDownDataGridColumn Title="Ledger" Property="LedgerName" Width="100px"/>
+                <RadzenDropDownDataGridColumn Title="Type" Property="LedgerTypeCode" Width="100px"/>
             </Columns>
         </RadzenDropDownDataGrid>
     </td>
@@ -39,6 +37,7 @@
                        TextAlign="TextAlign.End"
                        Style="height:32px;"
                        Disabled="JournalLine.IsCredit"
+                       Name="@($"Debit-{Guid.NewGuid().ToString("N")}")"
                        @bind-Value="JournalLine!.Debit"
                        @bind-Value:after="(()=>DebitValidate(JournalLine))">
 
@@ -53,53 +52,52 @@
                        TextAlign="TextAlign.End"
                        @onkeydown="e=>OnNedLine(e)"
                        @bind-Value="JournalLine.Credit"
+                       Name="@($"Credit-{Guid.NewGuid().ToString("N")}")"
                        @bind-Value:after="(()=>CreditValidate(JournalLine))">
         </RadzenNumeric>
     </td>
     <td>
         <RadzenTextBox Placeholder="Memo..."
                        @onkeydown="e=>OnNedLine(e)"
-                       Name="JournalLineDesc"
-                       @bind-Value="JournalLine.JournalLineDesc"
-                       Style="height:32px;font-size:14px;width:100%;" />
+                       Name="@($"JournalLineDesc-{Guid.NewGuid().ToString("N")}")"
+                       @bind-Value="JournalLine.JournalLineDesc"/>
     </td>
     <td>
         <RadzenDropDownDataGrid @bind-Value="JournalLine.EntityNameRefId"
-                                @bind-Value:after="GetName"
                                 Density="Density.Compact"
                                 Style="width:100%;cursor:pointer;height:32px;font-size:14px"
                                 @bind-SearchText="JournalLine.EntityName"
-                                Data="NameData"
-                                TextProperty="FullName"
-                                ValueProperty="Id"
+                                Data="NameLists"
+                                TextProperty="@nameof(VNameList.FullName)"
+                                ValueProperty="@nameof(VNameList.Id)"
                                 ShowSearch="false"
                                 PageSize="10"
                                 class="form-control"
                                 Placeholder="Name..."
-                                AllowClear="true"
-                                AllowColumnResize="true"
                                 AllowFilteringByAllStringColumns="true"
-                                Name="DropDownEntityNameRefId"
+                                Name="@($"EntityNameRefId-{Guid.NewGuid().ToString("N")}")"
+                                LoadData="LoanNameData"
+                                SelectedItemChanged="SelectedName"
                                 FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive">
             <Columns>
-                <RadzenDropDownDataGridColumn Property="FullName" Title="Name" Width="100px" />
-                <RadzenDropDownDataGridColumn Property="EntType" Title="Type" Width="100px" />
+                <RadzenDropDownDataGridColumn Property="FullName" Title="Name" Width="100px"/>
+                <RadzenDropDownDataGridColumn Property="EntType" Title="Type" Width="100px"/>
             </Columns>
         </RadzenDropDownDataGrid>
     </td>
-    <td>
-        <RadzenButton Click=@AddNewRow
+    <td class="text-center align-middle">
+        <RadzenButton Click="@AddNewRow"
                       Icon="add_circle_outline"
-                      Size="Radzen.ButtonSize.ExtraSmall"
+                      Size="ButtonSize.ExtraSmall"
                       Variant="Variant.Text"
-                      ButtonStyle="ButtonStyle.Primary" />
-        <RadzenButton Click=@RemoveRow
+                      Visible="RowIndex < 2"
+                      ButtonStyle="ButtonStyle.Primary"/>
+        <RadzenButton Click="@RemoveRow"
                       Icon="delete_forever"
-                      Size="Radzen.ButtonSize.ExtraSmall"
+                      Size="ButtonSize.ExtraSmall"
                       Variant="Variant.Text"
-                      ButtonStyle="ButtonStyle.Danger" />
-
-
+                      Visible="RowIndex > 1"
+                      ButtonStyle="ButtonStyle.Danger"/>
     </td>
 </tr>
 

@@ -1,5 +1,6 @@
 using Domains.Models.Lists.Customers;
 using Domains.Models.Lists.Employees;
+using Domains.Models.Lists.Vendors;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -9,7 +10,7 @@ public class EntityNamesConfiguration : IEntityTypeConfiguration<EntityNames>
     {
         builder.ToTable("lt_entityNames");
         builder.HasKey(x => x.Id);
-        builder.Property(x => x.Id).ValueGeneratedOnAdd();
+        builder.Property(x => x.Id).HasMaxLength(250);
         builder.Property(x => x.FirstName).HasMaxLength(128);
         builder.Property(x => x.MiddleName).HasMaxLength(50);
         builder.Property(x => x.LastName).HasMaxLength(128);
@@ -42,14 +43,19 @@ public class EntityNamesConfiguration : IEntityTypeConfiguration<EntityNames>
         builder.Property(e => e.CreatedDt).HasDefaultValueSql("GETDATE()");
         builder.Property(e => e.ModifiedDt).HasDefaultValueSql("GETDATE()");
 
-        // Nullable properties are configured by default in EF Core
-        // IsRequired() is not needed since all properties are nullable in the model
+        builder.HasOne(x => x.Customer).WithOne(x => x.EntityNames)
+                .HasForeignKey<Customer>(x => x.CustomerId)
+                .OnDelete(DeleteBehavior.Cascade);
 
-       builder.HasOne(x=>x.Customer).WithOne(x=>x.EntityNames)
-               .HasForeignKey<Customer>(x => x.CustomerId);
+        builder.HasOne(x => x.Employee).WithOne(x => x.EntityNames)
+                 .HasForeignKey<Employee>(x => x.EmployeeId)
+                 .OnDelete(DeleteBehavior.Cascade);
 
-      builder.HasOne(x=> x.Employee).WithOne(x => x.EntityNames)
-               .HasForeignKey<Employee>(x => x.EmployeeId);
+        builder.HasOne(x => x.Vendor)
+                .WithOne(x => x.EntityNames)
+                .HasForeignKey<Vendor>(x => x.VendorId)
+                .OnDelete(DeleteBehavior.Cascade);
 
     }
+
 }

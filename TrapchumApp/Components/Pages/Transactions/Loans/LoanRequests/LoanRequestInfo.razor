@@ -1,0 +1,319 @@
+@using Applications.Responses.Auths
+@using Applications.Responses.Lists.Collaterals
+@using Applications.Responses.Loans.Disbursements
+@using Applications.Responses.ViewModels.Loans.Requests
+@using Applications.Responses.ViewModels.OtherNames
+@using Radzen.Blazor.Rendering
+<style type="text/css">
+    .my-popup {
+    display: none;
+    position: absolute;
+    overflow: hidden;
+    height: 360px;
+    width: 600px;
+    border: var(--rz-panel-border);
+    background-color: var(--rz-panel-background-color);
+    box-shadow: var(--rz-panel-shadow);
+    border-radius: var(--rz-border-radius)
+    }
+</style>
+<RadzenFieldset>
+    <RadzenRow AlignItems="AlignItems.Center">
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenRow AlignItems="AlignItems.Center" class="my-1">
+                <RadzenColumn Size="4">
+                    <RadzenLabel>អតិថិជន</RadzenLabel>
+                </RadzenColumn>
+                <RadzenColumn Size="8">
+                    <RadzenTextBox @ref="@textBox" Value="@model.FullName"
+                    @oninput="@OnInput"
+                    @onclick="OpenPopup"
+                    class="w-100"
+                    ReadOnly="@isCustomerSelected"
+                    @onkeydown="@OnKeyDown" />
+                    <Popup @ref="popup" id="popup" AutoFocusFirstElement="false"
+                    class="my-popup">
+                        <RadzenDataGrid @ref="grid" id="grid"
+                        TItem="VCustomerList"
+                        Data="@Customers"
+                        RowSelect="@OnRowSelect"
+                        Responsive="true"
+                        Density="Density.Compact"
+                        AllowSorting="true"
+                        Style="height:360px">
+                            <Columns>
+                                <RadzenDataGridColumn Property="@nameof(VCustomerList.FullName)"
+                                Title="FullName" />
+                                <RadzenDataGridColumn Property="@nameof(VCustomerList.Salutation)"
+                                Title="Salutation" />
+                                <RadzenDataGridColumn Property="@nameof(VCustomerList.AltName)"
+                                Title="Name" />
+                                <RadzenDataGridColumn Property="@nameof(VCustomerList.Phone)"
+                                Title="Phone" />
+                            </Columns>
+                        </RadzenDataGrid>
+                    </Popup>
+                    <ValidationMessage For="@(() => model.CustomerRefId)" />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow AlignItems="AlignItems.Start" class="my-1">
+                <RadzenColumn Size="4">
+                    <RadzenLabel>ចំនួនទឹកប្រាក់ស្នើរសុំ</RadzenLabel>
+                </RadzenColumn>
+                <RadzenColumn Size="5">
+                    <TCNumbers OnValueChanged="PrincipleValueChanged"
+                    @bind-Value="model.RequestAmount" />
+                    <ValidationMessage For="@(() => model.RequestAmount)" />
+                </RadzenColumn>
+                <RadzenColumn Size="3">
+                    <RadzenDropDown Data="StorageConstant.CurrencyTpes"
+                    class="w-100"
+                    TValue="int?"
+                    TextProperty="@nameof(Items.Label)"
+                    ValueProperty="@nameof(Items.Value)"
+                    SelectedItemChanged="CurrencySelectedChanged"
+                    @bind-Value="model.CurrencyRefId">
+                    </RadzenDropDown>
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow AlignItems="AlignItems.Center" class="my-1">
+                <RadzenColumn Size="4">
+                    <RadzenLabel>អ្នកយល់ព្រម</RadzenLabel>
+                </RadzenColumn>
+                <RadzenColumn Size="8">
+                    <RadzenDropDown TextProperty="@nameof(ApprovedUser.FullName)"
+                    ValueProperty="@nameof(ApprovedUser.Id)"
+                    class="w-100"
+                    TValue="string"
+                    @bind-Value="model.AprovedUserId"
+                    Data="@AprovedUsers">
+                    </RadzenDropDown>
+                    <ValidationMessage For="@(() => model.AprovedUserId)" />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow AlignItems="AlignItems.Center" class="my-1">
+                <RadzenColumn Size="4">
+                    <RadzenLabel>ប្រាក់ប្រសិទ្ធិភាព</RadzenLabel>
+                </RadzenColumn>
+                <RadzenColumn Size="4" class="input-group">
+                    <TCNumbers @bind-Value="model.CollectionFeeRate" />
+                    <span class="input-group-text">%</span>
+                </RadzenColumn>
+                <RadzenColumn Size="4" class="input-group input-group-sm">
+                    <RadzenDropDown Data="StorageConstant.CollectionFeeModes"
+                    class="form-select"
+                    TextProperty="@nameof(Items.Label)"
+                    SelectedItemChanged="SelectedChargeModeChanged"
+                    ValueProperty="@nameof(Items.Value)"
+                    @bind-Value="model.CollectionFeeModeId">
+                    </RadzenDropDown>
+                    <span class="input-group-text">/Month</span>
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow AlignItems="AlignItems.Center" class="my-1">
+                <RadzenColumn Size="4">
+                    <RadzenLabel>អត្រាការប្រាក់</RadzenLabel>
+                </RadzenColumn>
+                <RadzenColumn Size="8" class="input-group input-group-sm">
+                    <TCNumbers @bind-Value="model.InterestRate" />
+                    <span class="input-group-text">%</span>
+                </RadzenColumn>
+                <ValidationMessage For="@(() => model.InterestRate)" />
+            </RadzenRow>
+            <RadzenRow AlignItems="AlignItems.Start" class="my-1">
+                <RadzenColumn Size="4">
+                    <RadzenLabel>សេវារដ្ឋបាល</RadzenLabel>
+                </RadzenColumn>
+                <RadzenColumn Size="4" class="input-group input-group-sm">
+                    <TCNumbers OnValueChanged="CalculateAdminFeeAmount"
+                    @bind-Value="model.AdminFeeRate" />
+                    <span class="input-group-text">%</span>
+                </RadzenColumn>
+                <RadzenColumn Size="4">
+                    <TCNumbers Disabled="true" @bind-Value="model.AdminFeeAmount" />
+                </RadzenColumn>
+                <ValidationMessage For="@(() => model.AdminFeeRate)" />
+                <ValidationMessage For="@(() => model.AdminFeeAmount)" />
+            </RadzenRow>
+            <RadzenRow AlignItems="AlignItems.Center" class="mt-1">
+                <RadzenColumn Size="4">
+                    <RadzenLabel>រយៈពេលខ្ចីប្រាក់</RadzenLabel>
+                </RadzenColumn>
+                <RadzenColumn Size="4">
+                    <IntInput @bind-Value:after="PeriodChanged"
+                    Disabled="false"
+                    @bind-Value="model.Installments" />
+                    <ValidationMessage For="@(() => model.Installments)" />
+                </RadzenColumn>
+                <RadzenColumn Size="4">
+                    <RadzenDropDown TextProperty="@nameof(Items.Label)"
+                    ValueProperty="@nameof(Items.Value)"
+                    @bind-Value="model.InstallmentTypeId"
+                    class="w-100"
+                    Multiple="false"
+                    SelectedItemChanged="SelectedInstallmentChanged"
+                    Data="StorageConstant.InstallmentTypes">
+                    </RadzenDropDown>
+                </RadzenColumn>
+            </RadzenRow>
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenRow AlignItems="AlignItems.Center" class="my-1">
+                <RadzenColumn Size="4">
+                    <RadzenLabel>ប្រភេទបង់រំលោះ</RadzenLabel>
+                </RadzenColumn>
+                <RadzenColumn Size="6">
+                    <RadzenDropDown TValue="int?"
+                    @bind-Value="model.RepaymentModeRefId"
+                    class="w-100"
+                    TextProperty="@nameof(Items.Label)"
+                    ValueProperty="@nameof(Items.Value)"
+                    SelectedItemChanged="RepaymentModeSelectedChanged"
+                    Data="StorageConstant.RepaymentModes">
+                    </RadzenDropDown>
+                </RadzenColumn>
+                <RadzenColumn Size="2">
+                    <RadzenNumeric Disabled="@(model.RepaymentModeRefId != 1)"
+                    @bind-Value="model.PayEvery"
+                    onclick="this.querySelector('.rz-numeric-input').select()"
+                    class="w-100"
+                    Min="1"
+                    TValue="int?" />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow AlignItems="AlignItems.Center" class="my-1">
+                <RadzenColumn Size="4">
+                    <RadzenLabel>ខ្ចីលើកទី</RadzenLabel>
+                </RadzenColumn>
+                <RadzenColumn Size="8">
+                    <RadzenNumeric class="w-100" ShowUpDown="false" @bind-Value="model.Circle" Min="1"
+                    Disabled />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow AlignItems="AlignItems.Center" class="my-1">
+                <RadzenColumn Size="4">
+                    <RadzenLabel>ប្រភេទកម្ចី</RadzenLabel>
+                </RadzenColumn>
+                <RadzenColumn Size="8">
+                    <RadzenDropDown @bind-Value="model.LoanCategoryRefId"
+                    TextProperty="@nameof(LoanCategoryResponse.LoanCategoryCode)"
+                    ValueProperty="@nameof(LoanCategoryResponse.LoanCategoryId)"
+                    AllowFiltering="true"
+                    class="w-100"
+                    Data="loanCategories">
+                    </RadzenDropDown>
+                    <ValidationMessage For="()=>model.LoanCategoryRefId" />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow AlignItems="AlignItems.Center" class="my-1">
+                <RadzenColumn Size="4">
+                    <RadzenLabel>ថ្ងៃខ្ចីប្រាក់</RadzenLabel>
+                </RadzenColumn>
+                <RadzenColumn Size="8">
+                    <TCDatePicker @bind-Value="model.RequestDate"
+                    Changed="@((args) => ChangedDate(args))" />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow AlignItems="AlignItems.Center" class="my-1">
+                <RadzenColumn Size="4">
+                    <RadzenLabel>ថ្ងៃបង់ប្រាក់លើកដំបូង</RadzenLabel>
+                </RadzenColumn>
+                <RadzenColumn Size="8">
+                    <TCDatePicker @bind-Value="model.FirstPaymentDate" />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+                <RadzenColumn Size="4">
+                    <RadzenLabel>កំណត់សម្គាល់</RadzenLabel>
+                </RadzenColumn>
+                <RadzenColumn Size="8">
+                    <RadzenTextArea class="w-100" @bind-Value="model.Remark" />
+                </RadzenColumn>
+            </RadzenRow>
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenFieldset>
+
+@code
+{
+    RadzenTextBox textBox = default!;
+    string? FullName = "";
+    Popup popup = default!;
+    RadzenDataGrid<VCustomerList> grid = default!;
+
+    async Task OnRowSelect(VCustomerList? customer)
+    {
+        if (customer is null) return;
+
+        model.CustomerRefId = customer.CustomerId;
+
+        model.FullName = customer.FullName;
+
+        await SetCustomerId(customer.CustomerId);
+
+        await popup.CloseAsync();
+    }
+
+
+    int selectedIndex = 0;
+
+    async Task OnInput(ChangeEventArgs args)
+    {
+        selectedIndex = 0;
+
+        filterText = args.Value!.ToString();
+
+        if (string.IsNullOrEmpty(filterText))
+        {
+            model.CustomerRefId = string.Empty;
+
+            model.FullName = string.Empty;
+        }
+
+        await GetCustomers(CustomerId, 25, filterText);
+
+        await grid.Reload();
+    }
+
+    async Task OnKeyDown(KeyboardEventArgs args)
+    {
+        var items = Customers;
+
+        var popupOpened = await js.InvokeAsync<bool>("Radzen.popupOpened", "popup");
+
+        var key = args.Code != null ? args.Code : args.Key;
+
+        if (!args.AltKey && (key == "ArrowDown" || key == "ArrowUp"))
+        {
+            var result = await js.InvokeAsync<int[]>("Radzen.focusTableRow", "grid", key, selectedIndex, null, false);
+
+            selectedIndex = result.First();
+        }
+        else if (args.AltKey && key == "ArrowDown" || key == "Enter" || key == "NumpadEnter")
+        {
+            if (popupOpened && (key == "Enter" || key == "NumpadEnter"))
+            {
+                CustomerId = items.ElementAtOrDefault(selectedIndex)?.CustomerId;
+            }
+
+            await popup.ToggleAsync(textBox.Element);
+        }
+        else if (key == "Escape" || key == "Tab")
+        {
+            await popup.CloseAsync();
+        }
+    }
+
+
+    async Task OpenPopup(MouseEventArgs arg)
+    {
+        if (isCustomerSelected) return;
+
+        await GetCustomers(string.Empty,10,filterText);
+
+        await popup.ToggleAsync(textBox.Element);
+    }
+
+
+
+}

@@ -2,7 +2,7 @@
 
 public class LoanCustomerQuery
 {
-    public Guid? CustomerId { get; set; }
+    public string? CustomerId { get; set; }
     public string? FullName { get; set; }
     public string? AltName { get; set; }
     public string? Phone { get; set; }

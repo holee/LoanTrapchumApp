@@ -11,7 +11,7 @@ namespace Applications.Services.Customers
 
     public class CustomerIncomeExpendService(ICustomerIncomeExpendService cusService) : IIncomeExpendServiceImpl
     {
-        public async Task<Result> AddExpensesAsync(Guid? customerRefId, List<CustomerExpenseDtoCreate> req)
+        public async Task<Result> AddExpensesAsync(string? customerRefId, List<CustomerExpenseDtoCreate> req)
         {
 
             var model = req.MapList<CustomerExpense>();
@@ -19,14 +19,14 @@ namespace Applications.Services.Customers
             return await cusService.AddExpensesAsync(customerRefId, model);
         }
 
-        public async Task<Result> AddIncomesAsync(Guid? customerRefId, List<CustomerIncomeDtoCreate> req)
+        public async Task<Result> AddIncomesAsync(string? customerRefId, List<CustomerIncomeDtoCreate> req)
         {
             var model = req.MapList<CustomerIncome>();
 
             return await cusService.AddIncomesAsync(customerRefId, model);
         }
 
-        public async Task<Result> AddOrUpdateExpensesAsync(Guid? customerId, List<CustomerExpenseDtoCreate> req)
+        public async Task<Result> AddOrUpdateExpensesAsync(string? customerId, List<CustomerExpenseDtoCreate> req)
         {
 
             var model=req.MapList<CustomerExpense>();
@@ -34,7 +34,7 @@ namespace Applications.Services.Customers
             return await cusService.AddOrUpdateExpensesAsync(customerId, model);
         }
 
-        public async Task<Result> AddOrUpdateIncomesAsync(Guid? customerId, List<CustomerIncomeDtoCreate> req)
+        public async Task<Result> AddOrUpdateIncomesAsync(string? customerId, List<CustomerIncomeDtoCreate> req)
         {
             var model = req.MapList<CustomerIncome>();
 
@@ -42,22 +42,22 @@ namespace Applications.Services.Customers
         }
 
 
-        public async Task<Result<IEnumerable<VCustomerExpenses>>> GetCustomerCustomerExpenses(Guid? customerId)
+        public async Task<Result<IEnumerable<VCustomerExpenses>>> GetCustomerCustomerExpenses(string? customerId)
         {
             return await cusService.GetCustomerCustomerExpenses(customerId);
         }
 
-        public async Task<Result<IEnumerable<T>>> GetCustomerCustomerExpenses<T>(Guid? customerId) where T : class
+        public async Task<Result<IEnumerable<T>>> GetCustomerCustomerExpenses<T>(string? customerId) where T : class
         {
             return await cusService.GetCustomerCustomerExpenses<T>(customerId);
         }
 
-        public async Task<Result<IEnumerable<VCustomerIncomes>>> GetCustomerCustomerIncomes(Guid? customerId)
+        public async Task<Result<IEnumerable<VCustomerIncomes>>> GetCustomerCustomerIncomes(string? customerId)
         {
             return await cusService.GetCustomerCustomerIncomes(customerId);
         }
 
-        public async Task<Result<IEnumerable<T>>> GetCustomerCustomerIncomes<T>(Guid? customerId) where T : class
+        public async Task<Result<IEnumerable<T>>> GetCustomerCustomerIncomes<T>(string? customerId) where T : class
         {
            return await cusService.GetCustomerCustomerIncomes<T>(customerId);
         }

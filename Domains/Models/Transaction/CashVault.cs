@@ -1,14 +1,14 @@
 ﻿namespace Domains.Models.Transaction;
 
-public class CashVault
+public sealed class CashVault
 {
-    public Guid CashVaultsId { get; set; } 
+    public string CashVaultsId { get; set; } =null!;
+    
     public int CvId { get; set; }
     public int? BranchRefId { get; set; }
     public int? BankRefId { get; set; }
-    public long? TranRefId { get; set; }
-    public Guid? TransactionRefId { get; set; }
-    public long? UserRefId { get; set; }
+    public string? TransactionRefId { get; set; }
+    public string? UserRefId { get; set; }
     public int? CvStatusRefId { get; set; }
     public DateTime? CvDate { get; set; }
 }

@@ -4,6 +4,7 @@ using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Branches;
 using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Payments;
+using Applications.Services.Loans;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
@@ -12,15 +13,15 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Disbursements
 {
     public partial class AllLoansTab
     {
-        readonly ILoanService _dService;
+       private readonly ILoanServiceImpl _dService;
 
-        public AllLoansTab(ILoanService dService)
+        public AllLoansTab(ILoanServiceImpl dService)
         {
             _dService = dService;
         }
 
         [Parameter] public int BranchId { get; set; } = 0;
-        [Parameter] public long UserId { get; set; } = 0;
+        [Parameter] public string? UserId { get; set; }
         [Parameter] public EventCallback<int> GetLoanChanged { get; set; }
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
         private List<VLoanDisbursments> LoanItems = [];
@@ -54,23 +55,23 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Disbursements
         }
         void GetLoanDetails(VLoanDisbursments p)
         {
-            NavigationManager.NavigateTo($"/Loans/Details/{p.Id}?BranchId={p.BranchId}&CreditAgentId={p.CreditAgentRefId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
+            NavigationManager.NavigateTo($"/App/Loan/{BranchId}/Branches/{p.LoanId}/Details?CreditAgentId={p.CreditAgentRefId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
             return;
         }
         void GetPaymentSchedules(VLoanDisbursments p)
         {
-            NavigationManager.NavigateTo($"/Loans/{p.Id}/Schedules?BranchId={p.BranchId}&CreditAgentId={p.CreditAgentRefId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
+            NavigationManager.NavigateTo($"/App/Loans/{p.BranchId}/Branches/{p.LoanId}/Schedules?CreditAgentId={p.CreditAgentRefId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
             return;
         }
 
         void ChangeCreditAgent(VLoanDisbursments p)
         {
-            NavigationManager.NavigateTo($"/Loan/CreditAgent/{p.Id}/Changed?CustomerId={p.CustomerId}&BranchId={p.BranchId}&CreditAgentId={p.CreditAgentRefId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
+            NavigationManager.NavigateTo($"/Loan/CreditAgent/{p.LoanId}/Changed?CustomerId={p.CustomerId}&BranchId={p.BranchId}&CreditAgentId={p.CreditAgentRefId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
             return;
         }
         void CustomerPayOff(VLoanDisbursments p)
         {
-            NavigationManager.NavigateTo($"/Loan/CreditAgent/{p.Id}/Changed?CustomerId={p.CustomerId}&BranchId={p.BranchId}&CreditAgentId={p.CreditAgentRefId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
+            NavigationManager.NavigateTo($"/Loan/CreditAgent/{p.LoanId}/Changed?CustomerId={p.CustomerId}&BranchId={p.BranchId}&CreditAgentId={p.CreditAgentRefId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
             return;
         }
         protected override async Task OnInitializedAsync()
@@ -127,7 +128,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Disbursements
         }
 
 
-        async Task DownLoadScheduleAsExcel(Guid loanRefId, int branchId)
+        async Task DownLoadScheduleAsExcel(string loanRefId, int branchId)
         {
             ContextMenuService.Close();
             isProgess = true;
@@ -152,18 +153,21 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Disbursements
 
 
 
-        async Task DownLoadScheduleAsPdf(Guid loanRefId, int branchId)
+        async Task DownLoadScheduleAsPdf(string? loanRefId, int? branchId)
         {
 
             ContextMenuService.Close();
 
             isProgess = true;
-            var stream = await _dService.DownLoadScheduleAsPdf(loanRefId, branchId);
 
-            using var streamRef = new DotNetStreamReference(stream: stream);
+            //var stream = await _dService.DownLoadScheduleAsPdf(loanRefId, branchId);
 
-            await js.InvokeVoidAsync("downloadFileFromStream", "Schedule.pdf", streamRef);
+            //using var streamRef = new DotNetStreamReference(stream: stream);
+
+            await js.InvokeVoidAsync("open", $"/Reports/Schedules/{loanRefId}/{branchId}", "_blank");
+           
             isProgess = false;
+            
             StateHasChanged();
         }
 

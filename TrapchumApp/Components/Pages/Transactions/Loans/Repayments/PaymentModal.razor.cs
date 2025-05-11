@@ -1,12 +1,13 @@
+using Applications.Calculations;
 using Applications.Extensions.mappers;
 using Applications.Extensions.Maths;
-using Applications.Extensions.NumberExtions;
+using Applications.Extensions.NumberExtensions;
 using Applications.Interfaces.Loans;
 using Applications.Requests.Loans.Payments;
-using Applications.Requests.SysSettings;
 using Applications.Requests.Transactions.ForiegnExchanges;
 using Applications.Requests.Transactions.LoanTransactions;
 using Applications.Responses.ViewModels.Currencies;
+using Applications.Responses.ViewModels.Settings;
 using Applications.Services.Settings;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -25,21 +26,27 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
         }
 
         [Parameter] public int CurrencyId { get; set; }
-        [Parameter] public Guid? CreditAgentId { get; set; }
-        [Parameter] public Guid? UserId { get; set; }
-        [Parameter] public Guid? LoanId { get; set; }
+        [Parameter] public string? CreditAgentId { get; set; }
+        [Parameter] public string? UserId { get; set; }
+        [Parameter] public string? LoanId { get; set; }
         [Parameter] public int BranchId { get; set; }
         [Parameter] public string CustomerName { get; set; } = string.Empty;
         [Parameter] public string ReceiptNo { get; set; } = string.Empty;
         [Parameter] public PaymentCreate PaymentCreate { get; set; } = new();
         [Parameter] public List<LoanRepaymentLineDtoCreate> LoanRepaymentLines { get; set; } = [];
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+
         VCurrenciesList? selectedCurrency;
+
         TrxForeignExchangeDtoCreate model = new TrxForeignExchangeDtoCreate();
+
         ForeignExchangeDtoCreate c = new ForeignExchangeDtoCreate();
         LoanRepaymentDtoCreate LoanRepayment { get; set; } = new();
+
         IEnumerable<VCurrenciesList> Currencies = [];
-        IEnumerable<SysSettings> settings = [];
+
+        IEnumerable<AppSettingVms> settings = [];
+
         decimal exchangeRate = 0;
         decimal? buyAmount = 0;
         decimal? sellAmount = 0;
@@ -71,7 +78,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
         bool disableButton = true;
         bool isPaymentExchanged = false;
         bool isExchangedChanged = false;
-        protected override async Task OnParametersSetAsync()
+        protected override async Task OnInitializedAsync()
         {
             var currencyResponse = await _curService.GetCurrencyAsync(1);
 
@@ -82,17 +89,25 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
                 sellingRate = currencyResponse.Data!.SellingRate;
                 spotRate = currencyResponse.Data!.SpotRate;
             }
-            var resultSetting = await _settingService.GetSysSettings();
+
+            var resultSetting = await _settingService.GetSysSettings<AppSettingVms>();
+
             if (resultSetting.IsSuccess)
             {
-                settings = resultSetting.Data!.Maps<SysSettings>();
-                gainLedgerRefId = settings.FirstOrDefault(p => p.Code == "FXGAIN-KHR")!.Value.ToNumer<int>();
-                lostLedgerRefId = settings.FirstOrDefault(p => p.Code == "FXLOSS-KHR")!.Value.ToNumer<int>();
-                buyLedgerRefId = settings.FirstOrDefault(p => p.Code == "FXEPA-USD")!.Value.ToNumer<int>();
-                sellLedgerRefId = settings.FirstOrDefault(p => p.Code == "FXPA-KHR")!.Value.ToNumer<int>();
+                settings = resultSetting.Data!;
+
+                gainLedgerRefId = settings!.FirstOrDefault(p => p.Code == "FXGAIN-KHR")!.Value!.ToNumer<int>();
+
+                lostLedgerRefId = settings!.FirstOrDefault(p => p.Code == "FXLOSS-KHR")!.Value!.ToNumer<int>();
+
+                buyLedgerRefId = settings!.FirstOrDefault(p => p.Code == "FXEPA-USD")!.Value!.ToNumer<int>();
+
+                sellLedgerRefId = settings!.FirstOrDefault(p => p.Code == "FXPA-KHR")!.Value!.ToNumer<int>();
             }
-            await base.OnParametersSetAsync();
+
+            await base.OnInitializedAsync();
         }
+
 
         void CloseModal()
         {
@@ -134,12 +149,12 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
                 {
                     var tranxCashManagement = new TrxCashManagementDtoCreate()
                     {
+                        Id = $"trx-{Guid.CreateVersion7()}",
                         CurrencyRefId = CurrencyId,
                         TransactionDate = DateTime.Now,
                         BusinessDate = DateTime.Now,
                         CashStatusRefId = 2,
                         BankRefId = 11,
-                        //StaffRefId = UserId,
                         Amount = PaymentCreate.TotalAmountWithPenalty,
                     };
                     LoanRepayment.LoanTransaction!.CashManagements!.Add(tranxCashManagement);
@@ -148,8 +163,6 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
                 {
                     var currencyExchanges = new ForeignExchangeDtoCreate
                     {
-                        //StaffRefId = UserId,
-                        //StaffAuthRefId = UserId,
                         BranchRefId = BranchId,
                         BankRefId = 11,
                         BuyAmount = buyAmount,
@@ -169,8 +182,6 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
                 {
                     var currencyExchanges = new ForeignExchangeDtoCreate
                     {
-                        //StaffRefId = UserId,
-                        //StaffAuthRefId = UserId,
                         BankRefId = 11,
                         BuyAmount = buyExchangeAmount,
                         BranchRefId = BranchId,
@@ -199,8 +210,11 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
                 if (confirmPayment == false) return;
 
                 model.UserRefId = UserId;
+
                 model.TranTypeRefId = 67;
+
                 model.TransactionTypeName = "Currency Foreign Exchange";
+
                 LoanRepayment.ForeignExchangeTrx = model;
 
                 var result = await _loanPaymentService.RecievePayment(LoanRepayment);

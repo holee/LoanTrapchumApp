@@ -1,7 +1,4 @@
-﻿@using Applications.Requests.Loans
-@using Applications.Requests.Transactions.ForiegnExchanges
-@using Applications.Responses.ViewModels.Currencies
-<div class="container-fluid rz-p-1 rz-m-0 rz-background-color-base-100">
+﻿<div class="container-fluid rz-p-1 rz-m-0 rz-background-color-base-100">
     <RadzenRow AlignItems="AlignItems.Center" class="rz-px-1 rz-py-2 rz-m-0">
         <RadzenColumn Size="6">
             <RadzenBadge BadgeStyle="BadgeStyle.Light" Shade="Shade.Dark">
@@ -36,7 +33,7 @@
                 <RadzenButton Click="RestoreDefault"
                               ButtonStyle="ButtonStyle.Primary"
                               Text="Set Default"
-                              Size="Radzen.ButtonSize.Small">
+                              Size="ButtonSize.Small">
                 </RadzenButton>
             </RadzenStack>
         </RadzenColumn>
@@ -187,20 +184,20 @@
         </RadzenColumn>
     </RadzenRow>
 </div>
-<RadzenStack Orientation="Radzen.Orientation.Horizontal"
+<RadzenStack Orientation="Orientation.Horizontal"
              AlignItems="AlignItems.Center"
              class="mt-3"
-             JustifyContent="Radzen.JustifyContent.End"
+             JustifyContent="JustifyContent.End"
              Gap="1rem">
     <RadzenButton ButtonStyle="ButtonStyle.Success"
-                  Size="Radzen.ButtonSize.Small"
+                  Size="ButtonSize.Small"
                   Icon="save"
                   Text="Recieve Payment"
                   IsBusy="isBusy"
                   Disabled="disableButton"
                   Click="OnSaveChanges">
     </RadzenButton>
-    <RadzenButton Size="Radzen.ButtonSize.Small"
+    <RadzenButton Size="ButtonSize.Small"
                   ButtonStyle="ButtonStyle.Danger"
                   Icon="cancel"
                   Text="Close"

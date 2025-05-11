@@ -1,9 +1,8 @@
 using Applications.Interfaces.Currencies;
 using Applications.Interfaces.Transactions;
 using Applications.Requests.Journals;
-using Applications.Requests.Lists.Currency;
+using Applications.Responses.Lists.Currency;
 using Applications.Responses.ViewModels.Ledgers;
-using Applications.Services.Transactions.Journals;
 using Domains.Models.Journals;
 using Mapster;
 using Microsoft.AspNetCore.Components.Forms;
@@ -145,7 +144,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Ledgers
                 else
                 {
                     counts = 0;
-                    NotificationService.Notify(Radzen.NotificationSeverity.Error, resp.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Error, resp.ErrMessage);
                 }
 
                 var currenciesRsponse = await _currencyService.GetCurrencies(0);
@@ -160,7 +159,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Ledgers
             }
             catch (Exception ex)
             {
-                NotificationService.Notify(Radzen.NotificationSeverity.Success, $"{ex.Message}");
+                NotificationService.Notify(NotificationSeverity.Success, $"{ex.Message}");
             }
 
             await base.OnInitializedAsync();
@@ -177,7 +176,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Ledgers
             else
             {
                 FilterLedgers = [];
-                NotificationService.Notify(Radzen.NotificationSeverity.Error, resp.ErrMessage);
+                NotificationService.Notify(NotificationSeverity.Error, resp.ErrMessage);
             }
         }
         void SelectedChangedLedgerType(object p)

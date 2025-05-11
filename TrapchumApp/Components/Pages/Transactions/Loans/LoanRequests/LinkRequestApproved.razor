@@ -13,14 +13,14 @@ else
     <NavLink href="@loanRequestDetailsUrl">
         <RadzenBadge Variant="Variant.Text"
                      Style="font-size:0.7rem;"
-                     Text="@LoanRequest?.Status" BadgeStyle="BadgeStyle.Secondary" />
+                     Text="Details" BadgeStyle="BadgeStyle.Secondary" />
     </NavLink>
 }
 
 
 @code {
     [Parameter] public VLoanRequests? LoanRequest { get; set; }
-    [Parameter] public Guid? UserId { get; set; }
+    [Parameter] public string? UserId { get; set; }
     [Parameter] public int? BranchId { get; set; }
     string loanRequestUrl = "";
     string loanRequestDetailsUrl = "";
@@ -28,8 +28,10 @@ else
     protected override void OnParametersSet()
     {
 
-        loanRequestUrl = $"/Loan/Request/{LoanRequest?.LoanRequestId}/Review?BranchId={BranchId}&CustomerId={LoanRequest?.CustomerId}&UserId={UserId}";
-        loanRequestDetailsUrl = $"/Loan/Request/{LoanRequest?.LoanRequestId}/Details?CustomerId={LoanRequest?.CustomerId}&BranchId={BranchId}&UserId={UserId}";
+        //"App/Loan/{BranchId}/Branches/Request/Details?UserId={UserId}&CustomerId={LoanRequest?.CustomerId}&LoanRequestId={LoanRequest?.LoanRequestId}")
+        loanRequestUrl = $"App/Loan/{BranchId}/Branches/Request/Details?UserId={UserId}&CustomerId={LoanRequest?.CustomerId}&LoanRequestId={LoanRequest?.LoanRequestId}";
+        //loanRequestDetailsUrl = $"/Loan/Request/{LoanRequest?.LoanRequestId}/Details?CustomerId={LoanRequest?.CustomerId}&BranchId={BranchId}&UserId={UserId}";
+        loanRequestDetailsUrl = $"App/Loan/{BranchId}/Branches/Request/Details?UserId={UserId}&CustomerId={LoanRequest?.CustomerId}&LoanRequestId={LoanRequest?.LoanRequestId}";
         base.OnParametersSet();
     }
 

@@ -1,4 +1,6 @@
-﻿namespace Applications.Requests.Lists.Currency;
+﻿using Applications.Requests.Lists.Currency;
+
+namespace Applications.Responses.Lists.Currency;
 
 public class CurrencyResponse
 {

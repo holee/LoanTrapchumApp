@@ -1,5 +1,4 @@
 using Applications.Enumerations;
-using Applications.Interfaces.Employees;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Branches;
 using Microsoft.AspNetCore.Components;
@@ -71,6 +70,7 @@ namespace TrapchumApp.Components.Pages.Lists.Branches
         protected override async Task OnInitializedAsync()
         {
             await GetBranches(searchText);
+
             await base.OnInitializedAsync();
 
         }
@@ -105,111 +105,79 @@ namespace TrapchumApp.Components.Pages.Lists.Branches
         }
         protected async Task OnDetail(VBranchResponse? branch)
         {
-            var resultModal = await DialogService!.OpenAsync<BranchDetailModal>("Branch Details",
-               new Dictionary<string, object> { { "Id", branch!.BranchId } },
-               new DialogOptions
-               {
-                   Draggable = true,
-                   Resizable = true,
-
-               });
-            if (resultModal != null)
-            {
-                await OnInitializedAsync();
-                Console.WriteLine("Updated...");
-            }
-            await InvokeAsync(StateHasChanged);
+            await DialogService!.OpenAsync<BranchDetailModal>("Branch Details",new Dictionary<string, object> { { "Id", branch!.BranchId } });
         }
         protected async Task OnEdit(VBranchResponse? branch)
         {
 
-            var resultModal = await DialogService!.OpenAsync<Update>("Edit Branch",
-               new Dictionary<string, object> { { "Id", branch!.BranchId } },
-               new DialogOptions
-               {
-                   Draggable = true,
-                   Resizable = true,
-
-               });
+            var resultModal = await DialogService!.OpenAsync<BranchUpdateModal>("Edit Branch",new Dictionary<string, object> { { "Id", branch!.BranchId } });
             if (resultModal != null)
             {
-                await OnInitializedAsync();
-                Console.WriteLine("Updated...");
+                await GetBranches(searchText);
             }
-            await InvokeAsync(StateHasChanged);
 
         }
         string BranchName = "Siem Reap";
         protected async void OnCreate()
         {
-            var resultModal = await DialogService!.OpenAsync<Create>("Add Branch",
-                new Dictionary<string, object> { },
-                new DialogOptions
-                {
-                    Draggable = true,
-                    Resizable = true,
+            bool? resultModal = await DialogService.OpenAsync<BranchCreateModal>("Add Branch");
 
-                });
-            if (resultModal != null)
+            if (resultModal != null && resultModal == true)
             {
-
-                Console.WriteLine("Created...");
+                await GetBranches(searchText);
             }
         }
 
         async Task OnDelete(VBranchResponse? branch)
         {
 
-            if ((bool)await DialogService!.Confirm("Branch deleted will not be able to recover, would you like to continue?", "Delete Branch",
-                new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" }
-                ))
+            var options = new ConfirmOptions()
             {
-                try
-                {
-                    var responseResult = await _employeeService!.GetEmployeesAsync(null, branch!.BranchId, true);
-
-                    if (!responseResult.IsSuccess) return;
-
-                    var employees = responseResult.Data;
-
-                    if (employees!.Any())
-                    {
-                        if ((bool)await DialogService!.Confirm("Branch you are trying to delete has started its operation, so you cannot delete it. Make inactive is strongly recommmended!", "Delete Branch",
-                            new ConfirmOptions() { OkButtonText = "Okay", CancelButtonText = "Cancel" }))
-                        {
-
-                            var message = await _branchService!.UpdateStatusAsync(branch!.BranchId);
-                            if (message!.IsSuccess)
-                            {
-                                await OnInitializedAsync();
-                            }
-
-                            return;
-                        }
-                    }
-                    else
-                    {
-                        var isDe = await _branchService!.DeleteAsync(branch!.BranchId);
-                        if (isDe!.IsSuccess == true)
-                        {
-                            await OnInitializedAsync();
-                            await InvokeAsync(StateHasChanged);
-
-                        }
-
-                        await OnInitializedAsync();
-                        await InvokeAsync(StateHasChanged);
-                    }
+                OkButtonText = "Yes",
+                CancelButtonText = "No"
+            };
 
 
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.Message);
+            bool? confirm = await DialogService.Confirm("Branch deleted will not be able to recover, would you like to continue?",options:options);
 
-                }
+            if (confirm == false) return;
 
+
+            var isDe = await _branchService!.DeleteAsync(branch!.BranchId);
+
+            if (isDe.IsSuccess)
+            {
+                await GetBranches(searchText);
             }
+
+            var message=isDe.ErrMessage;
+
+            if (!message.Contains("Used",StringComparison.InvariantCultureIgnoreCase))
+            {
+                return;
+            }
+
+            var options1 = new ConfirmOptions()
+            {
+                OkButtonText = "Yes",
+                CancelButtonText = "No"
+            };
+
+            var confirm1 = await DialogService.Confirm("Branch you are trying to delete has started its operation, so you cannot delete it. Make inactive is strongly recommmended!", options: options1);
+
+            if(confirm1==false) return;
+
+
+            var rsp = await _branchService!.UpdateStatusAsync(branch!.BranchId);
+
+            if (rsp!.IsSuccess)
+            {
+                NotificationService.Notify(NotificationSeverity.Success,"Changed");
+
+                await GetBranches(searchText);
+            }
+
+            NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
 
         }
     }

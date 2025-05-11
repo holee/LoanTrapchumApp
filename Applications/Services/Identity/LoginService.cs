@@ -5,17 +5,12 @@ using Applications.Responses;
 
 namespace Applications.Services.Identity;
 
-public sealed class LoginService : ILoginService
+
+
+public sealed class LoginService(ILoginService loginService) : ILoginServiceImpl
 {
-    private readonly ILoginService _loginService;
-
-    public LoginService(ILoginService loginService)
-    {
-        _loginService = loginService;
-    }
-
     public async Task<Result<string>> LoginUser(LoginRequest request)
     {
-        return await _loginService.LoginUser(request);
+        return await loginService.LoginUser(request);
     }
 }

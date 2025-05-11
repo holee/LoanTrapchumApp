@@ -1,5 +1,6 @@
+using Applications.Calculations;
 using Applications.Extensions.Maths;
-using Applications.Extensions.NumberExtions;
+using Applications.Extensions.NumberExtensions;
 using Applications.Interfaces.Loans;
 using Applications.Requests.Loans.Payments;
 using Applications.Requests.Transactions.ForiegnExchanges;
@@ -24,9 +25,9 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
         }
 
         [Parameter] public int CurrencyId { get; set; }
-        [Parameter] public Guid? CreditAgentId { get; set; }
-        [Parameter] public Guid? UserId { get; set; }
-        [Parameter] public Guid? LoanId { get; set; }
+        [Parameter] public string? CreditAgentId { get; set; }
+        [Parameter] public string? UserId { get; set; }
+        [Parameter] public string? LoanId { get; set; }
         [Parameter] public int BranchId { get; set; }
         [Parameter] public string CustomerName { get; set; } = string.Empty;
         [Parameter] public string ReceiptNo { get; set; } = string.Empty;
@@ -37,7 +38,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
         ForeignExchangeDtoCreate c = new ForeignExchangeDtoCreate();
         LoanRepaymentDtoCreate LoanRepayment { get; set; } = new();
         IEnumerable<VCurrenciesList> Currencies = [];
-        IEnumerable<SysSettings> settings = [];
+        IEnumerable<AppSettings> settings = [];
         decimal? receiveAmountUsd = 0;
         decimal? receiveAmountKhr = 0;
         decimal? changedAmountUSD = 0;

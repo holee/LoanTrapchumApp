@@ -1,4 +1,4 @@
-﻿@using Applications.Responses.Collaterals
+﻿@using Applications.Responses.Lists.Collaterals
 <PageTitle>Add Customer Collateral</PageTitle>
 <Containers CssClass="rz-background-color-base-200" Fluid>
     <EditForm Model="model" @ref="editForm">
@@ -14,7 +14,7 @@
                         <RadzenColumn Size="7">
                             <RadzenTextBox Disabled
                             class="w-100"
-                            @bind-Value="CustomerName" />
+                            @bind-Value="model.CustomerName" />
                             <ValidationMessage For="@(()=>model.CollateralId)" />
                         </RadzenColumn>
                     </RadzenRow>
@@ -62,14 +62,14 @@
             <Tabs>
                 <RadzenTabsItem Text="Property">
                     <RadzenDataGrid Density="Density.Compact"
-                    TItem="CollateralLineResponse"
+                    TItem="VCollateralLines"
                     Responsive
                     ColumnWidth="15rem"
                     @ref="propertiesGrid"
                     Style="--rz-grid-header-background-color:var(--rz-base-200);min-height:10rem;height:10rem;max-height:15rem"
                     Data="Properties">
                         <HeaderTemplate>
-                            <RadzenButton Size="Radzen.ButtonSize.Small"
+                            <RadzenButton Size="ButtonSize.Small"
                             ButtonStyle="ButtonStyle.Primary"
                             Click="@(()=>AddNewRow(1))"
                             Icon="add_circle"
@@ -79,7 +79,7 @@
                             <RadzenDataGridColumn Property="Id" Title="#" Width="2rem">
                                 <Template Context="c">
                                     <input type="hidden" @bind="c.Id" />
-                                    <input type="hidden" @bind="c.CollateralRefId" />
+                                    <input type="hidden" @bind="c.CollateralId" />
                                     @(Properties.IndexOf(c) + 1)
                                 </Template>
                             </RadzenDataGridColumn>
@@ -181,7 +181,7 @@
                                     <RadzenButton Click="@(()=>Remove(c,1))"
                                     Icon="remove"
                                     ButtonStyle="ButtonStyle.Danger"
-                                    Size="Radzen.ButtonSize.ExtraSmall">
+                                    Size="ButtonSize.ExtraSmall">
                                     </RadzenButton>
                                 </Template>
                             </RadzenDataGridColumn>
@@ -191,14 +191,14 @@
                 </RadzenTabsItem>
                 <RadzenTabsItem Text="Personal">
                     <RadzenDataGrid Density="Density.Compact"
-                    TItem="CollateralLineResponse"
+                    TItem="VCollateralLines"
                     Responsive
                     ColumnWidth="15rem"
                     @ref="personalGrid"
                     Style="--rz-grid-header-background-color:var(--rz-base-200);min-height:10rem;height:10rem;max-height:15rem"
                     Data="Personals">
                         <HeaderTemplate>
-                            <RadzenButton Size="Radzen.ButtonSize.Small"
+                            <RadzenButton Size="ButtonSize.Small"
                             ButtonStyle="ButtonStyle.Primary"
                             Click="@(()=>AddNewRow(3))"
                             Icon="add_circle"
@@ -208,7 +208,7 @@
                             <RadzenDataGridColumn Property="Id" Title="#" Width="2rem">
                                 <Template Context="c">
                                     <input type="hidden" @bind="c.Id" />
-                                    <input type="hidden" @bind="c.CollateralRefId" />
+                                    <input type="hidden" @bind="c.CollateralId" />
                                     @(Personals.IndexOf(c) + 1)
                                 </Template>
                             </RadzenDataGridColumn>
@@ -302,7 +302,7 @@
                                     <RadzenButton Click="@(()=>Remove(c,3))"
                                     Icon="remove"
                                     ButtonStyle="ButtonStyle.Danger"
-                                    Size="Radzen.ButtonSize.ExtraSmall">
+                                    Size="ButtonSize.ExtraSmall">
                                     </RadzenButton>
                                 </Template>
                             </RadzenDataGridColumn>
@@ -320,12 +320,12 @@
         <RadzenButton Text="Save"
         Icon="save"
         ButtonStyle="ButtonStyle.Success"
-        Size="Radzen.ButtonSize.Small"
+        Size="ButtonSize.Small"
         Click="FormValidate" />
         <RadzenButton Text="Cancel"
         Icon="cancel"
         ButtonStyle="ButtonStyle.Danger"
-        Size="Radzen.ButtonSize.Small"
+        Size="ButtonSize.Small"
         Click="CloseTab" />
     </RadzenStack>
 </Containers>

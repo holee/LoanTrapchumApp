@@ -4,39 +4,39 @@ public sealed class QueryParam
 {
     public QueryParam()
     {
-        PageIndex = 1;
+        PageNumber = 1;
         PageSize = 10;
         SortColumn = string.Empty;
         SortDescending = false;
         IsIncludeInActive = false;
         Filter = string.Empty;
     }
-    public QueryParam(int pageIndex, int pageSize, string sortField)
+    public QueryParam(int pageNumber, int pageSize, string sortField)
     {
-        PageIndex = pageIndex;
+        PageNumber = pageNumber;
         PageSize = pageSize;
         SortColumn = sortField;
     }
-    public QueryParam(int pageIndex, int pageSize, string sortField, string? filter = null)
-        : this(pageIndex, pageSize, sortField)
+    public QueryParam(int pageNumber, int pageSize, string sortField, string? filter = null)
+        : this(pageNumber, pageSize, sortField)
     {
         Filter = filter;
     }
-    public QueryParam(int pageIndex, int pageSize, string sortField, bool sortDescending = false, string? filter = null)
-        : this(pageIndex, pageSize, sortField)
+    public QueryParam(int pageNumber, int pageSize, string sortField, bool sortDescending = false, string? filter = null)
+        : this(pageNumber, pageSize, sortField)
     {
         SortDescending = sortDescending;
         Filter = filter;
     }
-    public QueryParam(int pageIndex, int pageSize, string sortField,
+    public QueryParam(int pageNumber, int pageSize, string sortField,
         bool sortDescending = false,
-        bool isIncludeInActive = false, string? filter = null) : this(pageIndex, pageSize, sortField)
+        bool isIncludeInActive = false, string? filter = null) : this(pageNumber, pageSize, sortField)
     {
         SortDescending = sortDescending;
         IsIncludeInActive = isIncludeInActive;
         Filter = filter;
     }
-    public int PageIndex { get; set; } = 1;
+    public int PageNumber { get; set; } = 1;
     public int PageSize { get; set; } = 10;
     public string SortColumn { get; set; } = "Id";
     public bool SortDescending { get; set; } = false;

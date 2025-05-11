@@ -1,10 +1,10 @@
+using Applications.Enumerations;
 using Applications.Extensions;
-using Applications.Requests.Collaterals;
 using Applications.Requests.Lists.Collaterals;
-using Applications.Responses;
-using Applications.Responses.Collaterals;
+using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Services.LIsts;
+using Domains.Models.Collaterals;
 using Mapster;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
@@ -20,7 +20,7 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
             _cService = collateralService;
         }
 
-        [Parameter] public Guid? CustomerId { get; set; }
+        [Parameter] public string? CustomerId { get; set; }
         [Parameter] public string? CustomerName { get; set; } = string.Empty;
         IEnumerable<VCustomerList> custlist = [];
         IEnumerable<CustomerCollateral> cusName = [];
@@ -28,19 +28,19 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
         IEnumerable<CollateralSubTypeResponse> CollateralProperties = [];
         IEnumerable<CollateralSubTypeResponse> CollateralPersonals = [];
         IEnumerable<CollateralSubTypeResponse> allSubTypes = [];
-        List<CollateralLineResponse> Properties = [];
-        List<CollateralLineResponse> Personals = [];
+        List<VCollateralLines> Properties = [];
+        List<VCollateralLines> Personals = [];
         EditForm editForm { get; set; } = default!;
         CollateralTypeResponse? SelectCollateralType;
         CollateralDtoCreate model { get; set; } = new();
 
-        Guid? CollateralId = Guid.Empty;
+        string? CollateralId = string.Empty;
         protected override async Task OnInitializedAsync()
         {
             CollateralTypes = await _cService.GetCollateralTypes(0);
             CollateralProperties = await _cService.GetCollateralSubTypes(1);
             CollateralPersonals = await _cService.GetCollateralSubTypes(3);
-            await GetCollateralLineByCustomer();
+            await GetCustomerCollateralAsync();
             allSubTypes = await _cService.GetCollateralSubTypes();
             await base.OnInitializedAsync();
         }
@@ -55,43 +55,39 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
 
         }
 
-        protected override async Task OnParametersSetAsync()
+        protected async Task GetCustomer()
         {
             var customerResponse = await _customerService.GetCustomerByIdAsync(CustomerId);
 
             if (customerResponse.IsSuccess)
             {
-                CustomerName = customerResponse!.Data!.EntityNames.AltName;
+                CustomerName = customerResponse!.Data!.AltName;
             }
 
             await base.OnParametersSetAsync();
         }
 
 
-        protected async Task GetCollateralLineByCustomer()
+
+        protected async Task GetCustomerCollateralAsync()
         {
-            var customerResult = await _cService.GetCollateralByCustomerAsync(CustomerId);
+            var customerResult = await _cService.GetCustomerCollateralsAsync(CustomerId, false);
 
             if (customerResult.IsSuccess)
             {
                 var collateral = customerResult.Data!;
                 CollateralId = CustomerId;
-                model!.CollateralId = CustomerId;
-                model.CustomerName = CustomerName;
-                model.Remark = collateral!.Remark;
-                model.DocumentKeeping = collateral!.DocumentKeeping;
-                model.RegisterDate = collateral!.RegisterDate;
-                //model.CollateralLines = collateral!.CollateralLines;
+                model = collateral.ToCollateralDtoCreate();
                 Personals = collateral.CollateralLines
-                              .Where(x => x.TypeName == "Personal")
+                              .Where(x => x.CategoryRefId == (int)CollateralTypeEnum.Personal)
                               .ToList();
                 Properties = collateral.CollateralLines
-                                .Where(x => x.TypeName == "Property")
+                                .Where(x => x.CategoryRefId == (int)CollateralTypeEnum.Property)
                                 .ToList();
             }
             else
             {
-                CollateralId = Guid.Empty;
+                CollateralId = string.Empty;
                 model!.CustomerName = CustomerName;
                 model.CollateralId = CustomerId;
                 model.Remark = "";
@@ -104,9 +100,9 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
         {
             if (collateralTypeId == 3)
             {
-                Personals.Add(new CollateralLineResponse
+                Personals.Add(new VCollateralLines
                 {
-                    CategoryRefId = collateralTypeId,
+                    SubCategoryRefId = collateralTypeId,
                     TypeName = "Personal"
                 });
 
@@ -114,16 +110,16 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
             }
             else
             {
-                Properties.Add(new CollateralLineResponse
+                Properties.Add(new VCollateralLines
                 {
-                    CategoryRefId = collateralTypeId,
+                    SubCategoryRefId = collateralTypeId,
                     TypeName = "Property"
                 });
                 propertiesGrid.Reload();
             }
 
         }
-        private void Remove(CollateralLineResponse row, int type = 3)
+        private void Remove(VCollateralLines row, int type = 3)
         {
             if (type == 3)
             {
@@ -144,22 +140,22 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
         {
             allSubTypes = await _cService.GetCollateralSubTypes();
 
-            List<CollateralLineResponse> lines = new List<CollateralLineResponse>
+            List<VCollateralLines> lines = new List<VCollateralLines>
             {
 
             }.Union(Properties.Where(x => x.SubCategoryRefId > 0))
             .Union(Personals.Where(x => x.SubCategoryRefId > 0))
             .ToList();
 
-            lines!.ForEach(x =>
+            lines!.ForEach((Action<VCollateralLines>)(x =>
             {
-                var subType = allSubTypes!.Where(a => a.Id == x.SubCategoryRefId).FirstOrDefault();
+                var subType = allSubTypes!.Where((Func<CollateralSubTypeResponse, bool>)(a => a.Id == x.SubCategoryRefId)).FirstOrDefault();
 
                 if (subType is not null)
                 {
-                    x.SubTypeName = subType.CollateralSubTypeName;
+                    x.CollateralSubTypeName = subType.CollateralSubTypeName;
                 }
-            });
+            }));
 
             model.CollateralLines = lines.Adapt<List<CollateralLineDtoCreate>>();
 
@@ -172,6 +168,7 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
             try
             {
                 var response = await _cService.CreateAsync(model);
+
                 if (response.IsSuccess)
                 {
 
@@ -189,6 +186,6 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
 
             }
         }
-  
+
     }
 }

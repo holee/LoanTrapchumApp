@@ -10,7 +10,7 @@
                         PageSize="10"
                         ColumnWidth="10rem"
                         Density="Density.Compact"
-                        Data="CreditAgentPageList">
+                        Data="CreditAgents">
             <Columns>
                 <RadzenDataGridColumn Property="FirstName" Title="First Name" />
                 <RadzenDataGridColumn Property="LastName" Title="Last Name" />
@@ -18,7 +18,7 @@
                 <RadzenDataGridColumn Property="BranchName" Title="Branch Name" />
                 <RadzenDataGridColumn Title="EmployeeId" Sortable="false">
                     <Template>
-                        <RadzenButton Size="Radzen.ButtonSize.ExtraSmall"
+                        <RadzenButton Size="ButtonSize.ExtraSmall"
                                       Click="@(()=>AddCreditAgent(context!.EmployeeId))"
                                       Variant="Variant.Text"
                                       Text="Make C.O"
@@ -35,7 +35,7 @@
              JustifyContent="JustifyContent.End">
     <RadzenButton Icon="cancel"
                   Click="CloseModal"
-                  Text="Close" Size="Radzen.ButtonSize.Small"
+                  Text="Close" Size="ButtonSize.Small"
                   Variant="Variant.Text"
                   ButtonStyle="ButtonStyle.Danger" />
 </RadzenStack>

@@ -2,7 +2,7 @@
 using Applications.Requests.Lists.Addreses;
 using Domains.Models.Lists;
 
-namespace Applications.Requests.Lists.Employees
+namespace Applications.Responses.Lists.Employees
 {
     public class EmployeeDto : AddressBaseDto
     {

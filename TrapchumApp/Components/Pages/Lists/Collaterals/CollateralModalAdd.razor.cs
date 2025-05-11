@@ -1,9 +1,10 @@
 using Applications.Extensions;
 using Applications.Requests.Lists.Collaterals;
-using Applications.Responses;
-using Applications.Responses.Collaterals;
+using Applications.Responses.Extensions;
+using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Services.LIsts;
+using Domains.Models.Collaterals;
 using Mapster;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
@@ -16,22 +17,33 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
     {
 
         private readonly ICollateralsServiceImpl _collateralService;
-        [Parameter] public Guid? CustomerId { get; set; } = Guid.Empty;
+        [Parameter] public string? CustomerId { get; set; } = string.Empty;
         [Parameter] public string? CustomerName { get; set; } = string.Empty;
-        IEnumerable<CollateralTypeResponse> CollateralTypes = [];
-        IEnumerable<CollateralSubTypeResponse> CollateralProperties = [];
-        IEnumerable<CollateralSubTypeResponse> CollateralPersonals = [];
-        IEnumerable<CollateralSubTypeResponse> allSubTypes = [];
-        List<CollateralLineResponse> Properties = [];
-        List<CollateralLineResponse> Personals = [];
-        EditForm editForm { get; set; } = default!;
-        CollateralTypeResponse? SelectCollateralType;
-        CollateralDtoCreate model { get; set; } = new();
-        VCustomerList Customer = new();
-        Guid? CollateralId = Guid.Empty;
-        RadzenDataGrid<CollateralLineResponse> personalGrid = default!;
-        RadzenDataGrid<CollateralLineResponse> propertiesGrid = default!;
 
+        IEnumerable<CollateralTypeResponse> CollateralTypes = [];
+
+        IEnumerable<CollateralSubTypeResponse> CollateralProperties = [];
+
+        IEnumerable<CollateralSubTypeResponse> CollateralPersonals = [];
+
+        IEnumerable<CollateralSubTypeResponse> allSubTypes = [];
+
+        List<VCollateralLines> Properties = [];
+
+        List<VCollateralLines> Personals = [];
+        EditForm editForm { get; set; } = default!;
+
+        CollateralTypeResponse? SelectCollateralType;
+
+        CollateralDtoCreate model { get; set; } = new();
+
+        VCustomerList Customer = new();
+
+        string? CollateralId = string.Empty;
+
+        RadzenDataGrid<VCollateralLines> personalGrid = default!;
+
+        RadzenDataGrid<VCollateralLines> propertiesGrid = default!;
         public CollateralModalAdd(ICollateralsServiceImpl collateralService)
         {
             _collateralService = collateralService;
@@ -45,64 +57,51 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
         protected override async Task OnInitializedAsync()
         {
 
-            var response = await _customerService.GetCustomerDetailsByIdAsync(CustomerId,false);
-
-            if (response.IsSuccess)
-            {
-                Customer = response.Data!;
-                CustomerName = response.Data!.AltName;
-            }
-            else
-            {
-
-                NotificationService.Notify(NotificationSeverity.Error, response.ErrMessage);
-
-            }
-
             CollateralTypes = await _collateralService.GetCollateralTypes(0);
 
             CollateralProperties = await _collateralService.GetCollateralSubTypes(1);
 
             CollateralPersonals = await _collateralService.GetCollateralSubTypes(3);
 
-            await GetCollateralLineByCustomer();
+            await GetCustomerCollaterals();
 
             allSubTypes = await _collateralService.GetCollateralSubTypes();
 
             await base.OnInitializedAsync();
         }
 
-        protected async Task GetCollateralLineByCustomer()
+        protected async Task GetCustomerCollaterals()
         {
             if (CustomerId.IsNullOrEmpty())
             {
                 return;
             }
-            var customerResult = await _collateralService.GetCollateralByCustomerAsync(CustomerId);
+            var customerResult = await _collateralService.GetCustomerCollateralsAsync(CustomerId, true);
 
             if (customerResult.IsSuccess)
             {
                 var collateral = customerResult.Data!;
-                CollateralId = CustomerId!.Value;
-                model!.CollateralId = CustomerId;
-                model.CustomerName = CustomerName;
-                model.Remark = collateral!.Remark;
-                model.DocumentKeeping = collateral!.DocumentKeeping;
-                model.RegisterDate = collateral!.RegisterDate;
-                Personals = collateral.CollateralLines
-                              .Where(x => x.CategoryRefId == 3)
-                              .ToList();
-                Properties = collateral.CollateralLines
-                                .Where(x => x.CategoryRefId == 1)
-                                .ToList();
+
+                CollateralId = CustomerId;
+
+                model = collateral.ToCollateralDtoCreate();
+
+                Personals = collateral.ToPersonals();
+
+                Properties = collateral.ToProperties();
             }
             else
             {
-                CollateralId = Guid.Empty;
+                CollateralId = string.Empty;
+
                 model!.CustomerName = CustomerName;
+
                 model.CollateralId = CustomerId;
+
                 model.Remark = "";
+
                 model.DocumentKeeping = "";
+
                 model.RegisterDate = DateTime.Now;
             }
         }
@@ -137,8 +136,7 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
                 }
             });
 
-            model.CollateralLines = lines;
-            model.CollateralId = CustomerId;
+            model.CollateralLines?.AddRange(lines);
 
             if (CustomerId.IsNullOrEmpty())
             {
@@ -154,7 +152,9 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
                 {
 
                     NotificationService.Notify(NotificationSeverity.Success, response.Data);
+                    
                     DialogService.Close(true);
+                    
                     model = new();
                 }
                 else
@@ -175,7 +175,7 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
             Personals.Clear();
         }
 
-        void ResetPerson(CollateralLineResponse e)
+        void ResetPerson(VCollateralLines e)
         {
             if (!Personals.Contains(e))
             {
@@ -185,26 +185,32 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
         }
         async Task InsertPersonRow()
         {
-            var e = new CollateralLineResponse();
+            var e = new VCollateralLines();
+
             e.CategoryRefId = 3;
-            e.TypeName = "Personal";
+
+            e.TypeName = CollateralTypeEnum.Personal.ToString();
+
             await personalGrid.InsertRow(e);
         }
-        void CancelPersonEdit(CollateralLineResponse e)
+        void CancelPersonEdit(VCollateralLines e)
         {
             ResetPerson(e);
+
             personalGrid.CancelEditRow(e);
         }
 
-        async Task DeletePersonRow(CollateralLineResponse e)
+        async Task DeletePersonRow(VCollateralLines e)
         {
             ResetPerson(e);
+
             personalGrid.CancelEditRow(e);
+
             await personalGrid.Reload();
 
         }
 
-        async Task SavePersonRow(CollateralLineResponse e)
+        async Task SavePersonRow(VCollateralLines e)
         {
             Personals.Add(e);
 
@@ -212,7 +218,7 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
         }
 
 
-        async Task EditRow(CollateralLineResponse e, int type = 1)
+        async Task EditRow(VCollateralLines e, int type = 1)
         {
             if (type == 1)
             {
@@ -229,7 +235,7 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
             Properties.Clear();
         }
 
-        void ResetProperty(CollateralLineResponse e)
+        void ResetProperty(VCollateralLines e)
         {
             if (!Properties.Contains(e))
             {
@@ -240,30 +246,36 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
 
         async Task InsertPropertyRow()
         {
-            var e = new CollateralLineResponse();
+            var e = new VCollateralLines();
+
             e.CategoryRefId = 1;
-            e.TypeName = "Propery";
+
+            e.TypeName = CollateralTypeEnum.Property.ToString();
+
             await propertiesGrid.InsertRow(e);
         }
 
-        void CancelPropertyEdit(CollateralLineResponse e)
+        void CancelPropertyEdit(VCollateralLines e)
         {
             ResetPerson(e);
 
             propertiesGrid.CancelEditRow(e);
         }
 
-        async Task DeletePropertyRow(CollateralLineResponse e)
+        async Task DeletePropertyRow(VCollateralLines e)
         {
             ResetProperty(e);
+
             propertiesGrid.CancelEditRow(e);
+
             await propertiesGrid.Reload();
 
         }
 
-        async Task SavePropertyRow(CollateralLineResponse e)
+        async Task SavePropertyRow(VCollateralLines e)
         {
             Properties.Add(e);
+
             await propertiesGrid.UpdateRow(e);
         }
 

@@ -1,9 +1,11 @@
-﻿using Applications.Interfaces.Addresses;
+﻿using Applications.Extensions;
+using Applications.Interfaces.Addresses;
 using Applications.Requests.Lists.Addreses;
 using Applications.Responses;
 using Domains.Models.Addresses;
 using Infrastructures.DataAccess;
 using Mapster;
+using Mapster.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructures.Implements;
@@ -11,27 +13,23 @@ namespace Infrastructures.Implements;
 public class AddressService : IAddressService
 {
     private readonly ApplicationDbContext _context;
-
-    public AddressService(ApplicationDbContext context)
+    private readonly IDbContextFactory<DataContext> _dbContextFactory;
+    public AddressService(ApplicationDbContext context, IDbContextFactory<DataContext> dbContextFactory)
     {
         _context = context;
+        _dbContextFactory = dbContextFactory;
     }
 
     public async Task<IEnumerable<ProvinceDto>> GetsProvinces(string? expression)
     {
-        IQueryable<Province> query = _context.Provinces;
+        await using var context = await _dbContextFactory.CreateDbContextAsync();
 
-        if (!string.IsNullOrEmpty(expression))
-        {
-            query = query.Where(x =>
-                x.ProInKhmer != null && x.ProInKhmer.Contains(expression) ||
-                x.ProDescription != null && x.ProDescription.Contains(expression));
-        }
-
-
-        var items = await query.ProjectToType<ProvinceDto>()
-            .AsNoTracking()
-            .ToListAsync();
+        var items = await context.Provinces
+                                        .WhereIf(expression.IsNotNullOrEmpty(), x => EF.Functions.Like(x.ProInKhmer!, $"%{expression}%") ||
+                                                                                   EF.Functions.Like(x.ProDescription!, $"%{expression}%"))
+                                        .ProjectToType<ProvinceDto>()
+                                        .AsNoTracking()
+                                        .ToListAsync();
 
         return items;
     }
@@ -39,7 +37,9 @@ public class AddressService : IAddressService
     public async Task<IEnumerable<T>> GetsProvinces<T>(string? expression)
         where T : class
     {
-        IQueryable<Province> query = _context.Provinces;
+        await using var context = await _dbContextFactory.CreateDbContextAsync();
+
+        IQueryable<Province> query = context.Provinces;
 
         if (!string.IsNullOrEmpty(expression))
         {
@@ -60,7 +60,8 @@ public class AddressService : IAddressService
     public async Task<IEnumerable<T>> GetDistrictsByProvinceId<T>(int? provinceId)
         where T : class
     {
-        var queries = await _context.Districts
+        await using var context = await _dbContextFactory.CreateDbContextAsync();
+        var queries = await context.Districts
             .Where(x => x.ProvinceRefId == provinceId)
             .ProjectToType<T>()
             .AsNoTracking()
@@ -71,7 +72,8 @@ public class AddressService : IAddressService
     public async Task<IEnumerable<T>> GetCommunesByDistrictId<T>(int? districtId)
         where T : class
     {
-        var queries = await _context.Communes
+        await using var context = await _dbContextFactory.CreateDbContextAsync();
+        var queries = await context.Communes
             .Where(x => x.DistrictRefId == districtId)
             .ProjectToType<T>()
             .AsNoTracking()
@@ -82,7 +84,9 @@ public class AddressService : IAddressService
     public async Task<IEnumerable<T>> GetVillagesByCommuneId<T>(int? communeId)
         where T : class
     {
-        var queries = await _context.Villages
+        await using var context = await _dbContextFactory.CreateDbContextAsync();
+
+        var queries = await context.Villages
             .Where(x => x.CommuneRefId == communeId)
             .ProjectToType<T>()
             .AsNoTracking()
@@ -93,20 +97,27 @@ public class AddressService : IAddressService
     public async Task<T?> GetsProvinceById<T>(int? id)
         where T : class
     {
-        var province = await _context.Provinces.AsNoTracking().FirstOrDefaultAsync(x => x.ProvinceId == id);
+        await using var context = await _dbContextFactory.CreateDbContextAsync();
+
+        var province = await context.Provinces.AsNoTracking().FirstOrDefaultAsync(x => x.ProvinceId == id);
         return province.Adapt<T?>();
     }
 
 
     public async Task<Province?> GetsProvinceById(int? id)
     {
-        IQueryable<Province> query = _context.Provinces;
+        await using var context = await _dbContextFactory.CreateDbContextAsync();
+
+        IQueryable<Province> query = context.Provinces;
+
         return await query.AsNoTracking().FirstOrDefaultAsync(x => x.ProvinceId == id);
     }
 
     public async Task<IEnumerable<DistrictDto>> GetDistrictsByProvinceId(int? provinceId)
     {
-        var queries = await _context.Districts
+        await using var context = await _dbContextFactory.CreateDbContextAsync();
+
+        var queries = await context.Districts
             .Where(x => x.ProvinceRefId == provinceId)
             .ProjectToType<DistrictDto>()
             .AsNoTracking()
@@ -116,7 +127,9 @@ public class AddressService : IAddressService
 
     public async Task<IEnumerable<CommuneDto>> GetCommunesByDistrictId(int? districtId)
     {
-        var queries = await _context.Communes
+        await using var context = await _dbContextFactory.CreateDbContextAsync();
+
+        var queries = await context.Communes
             .Where(x => x.DistrictRefId == districtId)
             .ProjectToType<CommuneDto>()
             .AsNoTracking()
@@ -126,7 +139,10 @@ public class AddressService : IAddressService
 
     public async Task<IEnumerable<VillageDto>> GetVillagesByCommuneId(int? communeId)
     {
-        var queries = await _context.Villages
+
+        await using var context = await _dbContextFactory.CreateDbContextAsync();
+
+        var queries = await context.Villages
             .Where(x => x.CommuneRefId == communeId)
             .ProjectToType<VillageDto>()
             .AsNoTracking()
@@ -136,7 +152,10 @@ public class AddressService : IAddressService
 
     public async Task<IEnumerable<Country>> GetCountries(string? searchText = null)
     {
-        IQueryable<Country> query = _context.Countries;
+
+        await using var context = await _dbContextFactory.CreateDbContextAsync();
+
+        IQueryable<Country> query = context.Countries;
 
         if (!string.IsNullOrEmpty(searchText))
         {
@@ -152,15 +171,23 @@ public class AddressService : IAddressService
 
     public async Task<IEnumerable<string>> GetCities(string? searchText = null)
     {
-        IQueryable<City> query = _context.Cities;
 
-        if (!string.IsNullOrEmpty(searchText))
+        await using var context = await _dbContextFactory.CreateDbContextAsync();
+
+
+        var cities = await context.Cities
+                                        .Where(x => !x.CityName.Equals(""))
+                                        .WhereIf(!string.IsNullOrEmpty(searchText), x =>
+                                                EF.Functions.Like(x.CityName, $"%{searchText}%"))
+                                        .AsNoTracking()
+                                        .ToListAsync();
+
+        if (cities.Any())
         {
-            query = query.Where(x =>
-                x.CityName != null && x.CityName.StartsWith(searchText, StringComparison.InvariantCultureIgnoreCase));
+            return cities.Select(x => x.CityName).ToList();
         }
 
-        return await query.AsNoTracking().Select(x => x.CityName).ToListAsync();
+        return Enumerable.Empty<string>();
     }
 
     public async Task<Result> AddCity(City city)
@@ -168,13 +195,16 @@ public class AddressService : IAddressService
         try
         {
             var c = _context.Cities.Where(x => x.CityName == city.CityName);
+
             if (c.Any())
             {
                 return Result.Failure(ErrorResponse.Conflict("City Already Exist."));
             }
 
             _context.Cities.Add(city);
+
             await _context.SaveChangesAsync();
+
             return Result.Success("New City was Added.");
         }
         catch (Exception ex)
@@ -188,13 +218,16 @@ public class AddressService : IAddressService
         try
         {
             var c = _context.Cities.Where(x => x.CityName == city.CityName && x.Id != city.Id);
+
             if (c.Any())
             {
                 return Result.Failure(ErrorResponse.Conflict("City Already Exist."));
             }
 
             _context.Cities.Update(city);
+
             await _context.SaveChangesAsync();
+
             return Result.Success("City was Updated.");
         }
         catch (Exception ex)
@@ -204,15 +237,15 @@ public class AddressService : IAddressService
     }
 
 
-    public async Task<IEnumerable<Country>> GetCountries(int? countryId)
+    public async Task<Result<IEnumerable<Country>>> GetCountries(int? countryId)
     {
-        IQueryable<Country> query = _context.Countries;
 
-        if (countryId > 0)
-        {
-            query = query.Where(x => x.CountryId == countryId);
-        }
+        await using var context = await _dbContextFactory.CreateDbContextAsync();
 
-        return await query.AsNoTracking().ToListAsync();
+        var countries = await context.Countries
+                                            .WhereIf(countryId > 0, x => x.CountryId == countryId)
+                                            .AsNoTracking()
+                                            .ToListAsync();
+        return Result.Success<IEnumerable<Country>>(countries);
     }
 }

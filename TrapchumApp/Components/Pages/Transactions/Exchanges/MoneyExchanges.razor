@@ -1,13 +1,7 @@
-﻿@using System.Security.Claims
-@using Applications.Constants
-@using Applications.Responses.ViewModels.Options
-<RadzenStack Gap="1rem" Orientation="Orientation.Vertical"
+﻿<RadzenStack Gap="1rem" Orientation="Orientation.Vertical"
              JustifyContent="JustifyContent.SpaceBetween"
              Style="width:100%;">
     <RadzenStack>
-        <RadzenAlert AlertStyle="AlertStyle.Warning" Variant="Variant.Flat" Shade="Shade.Lighter">
-           
-        </RadzenAlert>
         <EditForm Model="mx" @ref="form">
             <ValidationSummary />
             <FluentValidationValidator DisableAssemblyScanning="true" />
@@ -59,7 +53,6 @@
                         <RadzenColumn Size="8">
                             <TCNumbers @bind-Value="mx.Amount"
                                        OnValueChanged="AmountTextChanged" />
-                            <ValidationMessage For="()=>mx.Amount" />
                         </RadzenColumn>
                     </RadzenRow>
                 </RadzenColumn>
@@ -72,7 +65,6 @@
                             <TCNumbers OnValueChanged="ExchangedTextChanged"
                                        MouseLeave="MouseOut"
                                        @bind-Value="mx.ExchangeRate" />
-                            <ValidationMessage For="()=>mx.ExchangeRate" />
                         </RadzenColumn>
                     </RadzenRow>
                 </RadzenColumn>
@@ -84,7 +76,6 @@
                 <RadzenColumn Size="10">
                     <TCNumbers OnValueChanged="TextTotalChanged"
                                @bind-Value="mx.TotalAmount" />
-                    <ValidationMessage For="()=>mx.TotalAmount" />
                 </RadzenColumn>
             </RadzenRow>
             <RadzenRow class="mt-2" AlignItems="AlignItems.Center">
@@ -99,29 +90,29 @@
             </RadzenRow>
         </EditForm>
     </RadzenStack>
-    <RadzenStack Gap="1rem" Orientation="Radzen.Orientation.Horizontal"
+    <RadzenStack Gap="1rem" Orientation="Orientation.Horizontal"
                  AlignItems="AlignItems.Center"
                  class="mt-2"
-                 JustifyContent="Radzen.JustifyContent.End">
+                 JustifyContent="JustifyContent.End">
         <RadzenButton Icon="save"
-                      ButtonType="Radzen.ButtonType.Button"
+                      ButtonType="ButtonType.Button"
                       Text="Save & New"
                       Click="SaveAndNew"
                       BusyText="Please wait...."
                       IsBusy="isBusy"
                       ButtonStyle="ButtonStyle.Success"
-                      Size="Radzen.ButtonSize.Small" />
+                      Size="ButtonSize.Small" />
 
         @if (ShowCloseButton)
         {
             <RadzenButton Icon="close"
-                          ButtonType="Radzen.ButtonType.Button"
+                          ButtonType="ButtonType.Button"
                           Text="Close"
                           Click="Close"
                           BusyText="Please wait...."
                           IsBusy="isBusy"
                           ButtonStyle="ButtonStyle.Danger"
-                          Size="Radzen.ButtonSize.Small" />
+                          Size="ButtonSize.Small" />
         }
     </RadzenStack>
 </RadzenStack>

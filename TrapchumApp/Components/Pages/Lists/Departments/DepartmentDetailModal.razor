@@ -1,5 +1,5 @@
 ﻿<div class="container-fluid">
-    <RadzenStack Orientation="Radzen.Orientation.Horizontal"
+    <RadzenStack Orientation="Orientation.Horizontal"
                  AlignItems="AlignItems.Center">
         <table class="table table-sm">
             <tbody>
@@ -14,15 +14,15 @@
             </tbody>
         </table>
     </RadzenStack>
-    <RadzenStack Orientation="Radzen.Orientation.Horizontal"
+    <RadzenStack Orientation="Orientation.Horizontal"
                  AlignItems="AlignItems.Center"
-                 JustifyContent="Radzen.JustifyContent.End">
+                 JustifyContent="JustifyContent.End">
         <RadzenButton ButtonStyle="ButtonStyle.Danger"
                       Icon="cancel"
                       Text="Close"
                       Click="@(()=>DialogService.Close(false))"
                       Variant="Variant.Flat"
-                      Size="Radzen.ButtonSize.Small">
+                      Size="ButtonSize.Small">
         </RadzenButton>
     </RadzenStack>
 </div>

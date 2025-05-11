@@ -1,6 +1,6 @@
-﻿namespace Applications.Requests.SysSettings;
+﻿namespace Applications.Requests.Settings;
 
-public class SysSettingDtoCreate
+public class AppSettingDtoCreate
 {
     public string? Code { get; set; }
     public string? AppliedValue { get; set; }

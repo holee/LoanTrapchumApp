@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructures.DataAccess
 {
+
+
     public class UserDataContext : IdentityDbContext<ApplicationUser, ApplicationRole, string>
     {
         public UserDataContext(DbContextOptions<UserDataContext> options)
@@ -28,15 +30,12 @@ namespace Infrastructures.DataAccess
             builder.Entity<ApplicationUser>()
                     .HasOne<UserProfiles>()
                     .WithOne()
-                    .HasForeignKey<UserProfiles>(u=>u.UserRefId)    ;
-
-
-
-
+                    .HasForeignKey<UserProfiles>(u => u.UserRefId);
         }
         public DbSet<ApplicationRoleClaim> ApplicationRoleClaim { get; set; }
         public DbSet<ApplicationUserClaim> ApplicationUserClaim { get; set; }
         public DbSet<UserProfiles> UserProfiles { get; set; }
 
     }
+
 }

@@ -17,8 +17,7 @@ namespace Infrastructures.DataAccess.Configurations.Transactions
                                                 .HasMaxLength(1)
                                                 .HasDefaultValueSql("N");
             builder.Property(x => x.OpenDate).HasColumnType("DATETIME");
-            builder.Property(x => x.TransactionRefId)
-                .HasConversion(ConversionExts.GuidConversion);
+            //builder.Property(x => x.TransactionRefId).HasColumnType("NVARCHAR(50)");
         }
     }
 }

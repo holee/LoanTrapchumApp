@@ -5,14 +5,11 @@ namespace Domains.Models.Transaction;
 
 public class LoanTransaction : BaseEntity
 {
-    public long TranId { get; set; }
-
-    public Guid TransactionsId { get; set; }
-    public Guid? TranCode { get; set; }
+    public string TransactionsId { get; set; } =$"trx-{Guid.CreateVersion7()}";
     public int? TranTypeRefId { get; set; }
     public string TransactionTypeName { get; set; } = string.Empty;
-    public DateTime? TransactionDate { get; set; }=DateTime.Now;
-    public Guid? UserRefId { get; set; }
+    public DateTime? TransactionDate { get; set; } = DateTime.Now;
+    public string? UserRefId { get; set; }
     public bool? IsActive { get; set; } = true;
     public JournalEntry? JournalEntry { get; set; }
     public OpenBranch? OpenBranch { get; set; }

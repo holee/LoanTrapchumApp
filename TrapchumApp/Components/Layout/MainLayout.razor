@@ -1,8 +1,9 @@
-﻿@using Applications.Interfaces.Branches
-@using System.Security.Claims
+﻿@using Applications.ApplicationPolicies
+@using TrapchumApp.Components.Pages.Transactions.Exchanges
 @implements IDisposable
 @inherits LayoutComponentBase
-<RadzenComponents @rendermode="InteractiveServer" />
+@attribute [StreamRendering(false)]
+<RadzenComponents @rendermode="InteractiveServer"/>
 <RadzenLayout>
     <RadzenHeader>
         <RadzenStack Orientation="Orientation.Horizontal"
@@ -11,34 +12,37 @@
             <RadzenStack Orientation="Orientation.Horizontal"
                          JustifyContent="JustifyContent.SpaceBetween"
                          AlignItems="AlignItems.Center">
-                <RadzenSidebarToggle Click="@(() => sidebarExpanded = !sidebarExpanded)" />
+                <RadzenSidebarToggle Click="@(() => sidebarExpanded = !sidebarExpanded)"/>
             </RadzenStack>
             <RadzenStack Orientation="Orientation.Horizontal"
                          JustifyContent="JustifyContent.SpaceBetween"
                          AlignItems="AlignItems.Center">
                 <AuthorizeView>
                     <Authorized>
-
+                        <TopMenus IsBranchOpen="@bState.State" ShowDialogue="ShowCurrencyDialogue"/>
                     </Authorized>
                 </AuthorizeView>
-                <Profiles UserId="@userId" />
+                <Profiles UserId="@userId"/>
             </RadzenStack>
         </RadzenStack>
     </RadzenHeader>
     <RadzenSidebar Responsive="false" Style="width: max-content;">
-        <RadzenPanelMenu DisplayStyle="@(sidebarExpanded ? MenuItemDisplayStyle.IconAndText : MenuItemDisplayStyle.Icon)">
-            <RadzenPanelMenuItem Path="/" Text="សហគ្រាសបញ្ចាំទ្រព្យជុំ" Icon="dashboard" />
+        <RadzenPanelMenu
+            DisplayStyle="@(sidebarExpanded ? MenuItemDisplayStyle.IconAndText : MenuItemDisplayStyle.Icon)">
+            <RadzenPanelMenuItem Path="/" Text="សហគ្រាសបញ្ចាំទ្រព្យជុំ" Icon="dashboard"/>
         </RadzenPanelMenu>
-        <RadzenPanelMenu DisplayStyle="@(sidebarExpanded ? MenuItemDisplayStyle.IconAndText : MenuItemDisplayStyle.Icon)" ShowArrow="sidebarExpanded">
+        <RadzenPanelMenu
+            DisplayStyle="@(sidebarExpanded ? MenuItemDisplayStyle.IconAndText : MenuItemDisplayStyle.Icon)"
+            ShowArrow="sidebarExpanded">
             <AuthorizeView>
                 <Authorized>
 
                 </Authorized>
             </AuthorizeView>
-            <AuthorizeView>
+            <AuthorizeView Policy="@RolePolicies.AdminOnly">
                 <Authorized>
                     <RadzenPanelMenuItem Text="Departments" Icon="auto_awesome">
-                        <RadzenPanelMenuItem Text="Departments List" Path="/App/Departments" Icon="list" />
+                        <RadzenPanelMenuItem Text="Departments List" Path="/App/Department" Icon="list"/>
                     </RadzenPanelMenuItem>
                 </Authorized>
             </AuthorizeView>
@@ -56,62 +60,58 @@
             </AuthorizeView>
             <AuthorizeView>
                 <Authorized>
-                    <BranchItems BranchId="@brandId"
-                                 BranchState="true"
-                                 UserId="@userId" />
+                    <BranchItems BranchId="@branchId"
+                                 BranchState="@bState.State"
+                                 UserId="@userId"/>
+                </Authorized>
+            </AuthorizeView>
+            <AuthorizeView Policy="@RolePolicies.AccountOnly">
+                <Authorized>
+                    <AccountsItems BranchId="@branchId" IsBranchOpen="@bState.State"/>
                 </Authorized>
             </AuthorizeView>
             <AuthorizeView>
                 <Authorized>
-                    <AccountsItems IsBranchOpen="true" />
-                </Authorized>
-            </AuthorizeView>
-            <AuthorizeView>
-                <Authorized>
-                    <OperatedPerson Visible="true" />
+                    <OperatedPerson Visible="@IsAdminOnly" UserId="@userId" BranchId="@branchId"/>
                 </Authorized>
             </AuthorizeView>
             <AuthorizeView>
                 <Authorized>
                     <LoanManagementItems UserId="@userId"
-                                         BranchId="1" BranchState="true" />
+                                         BranchId="@branchId"
+                                         BranchState="@bState.State"/>
                 </Authorized>
             </AuthorizeView>
             <AuthorizeView>
                 <Authorized>
-                    <ReportsItems IsBranchOpen="true" />
+                    <ReportsItems IsBranchOpen="@bState.State"/>
                 </Authorized>
             </AuthorizeView>
             <AuthorizeView>
                 <Authorized>
-                    <CurrencyItems IsBranchOpen="true" />
+                    <CurrencyItems IsBranchOpen="@bState.State"/>
                 </Authorized>
             </AuthorizeView>
-            <AuthorizeView>
+            <AuthorizeView Policy="@RolePolicies.AdminOnly">
                 <Authorized>
-                    <AdminstrationsItems />
+                    <AdminstrationsItems/>
                 </Authorized>
             </AuthorizeView>
-            <NavMenu />
         </RadzenPanelMenu>
     </RadzenSidebar>
-    <RadzenBody>
-        <div class="container-fluid">
-            @Body
-        </div>
-        <div id="blazor-error-ui" data-nosnippet>
-            An unhandled error has occurred.
-            <a href="." class="reload">Reload</a>
-            <span class="dismiss">🗙</span>
-        </div>
+    <RadzenBody class="rz-background-color-base-200">
+        @Body
     </RadzenBody>
 </RadzenLayout>
+
 @code {
+
     private string? currentUrl;
 
     protected override void OnInitialized()
     {
         currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+
         NavigationManager.LocationChanged += OnLocationChanged;
     }
 
@@ -125,4 +125,19 @@
     {
         NavigationManager.LocationChanged -= OnLocationChanged;
     }
+
+    async Task ShowCurrencyDialogue()
+    {
+        var param = new Dictionary<string, object?> { { "BranchId", branchId }, { "UserId", userId }, { "ShowCloseButton", true } };
+
+        var options = new DialogOptions
+        {
+            Draggable = true,
+            Resizable = false,
+            Width = "50rem"
+        };
+
+        await DialogService.OpenAsync<MoneyExchanges>("Currency Exchange", param, options);
+    }
+
 }

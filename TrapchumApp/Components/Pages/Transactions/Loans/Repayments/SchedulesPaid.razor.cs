@@ -4,7 +4,6 @@ using Radzen.Blazor.Rendering;
 using Radzen.Blazor;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Responses.Paginations;
-using Applications.Enumerations;
 
 namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
 {
@@ -12,8 +11,8 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
     {
         [Parameter] public int BranchId { get; set; } = 0;
         [Parameter] public int CurrencyId { get; set; } = 1;
-        [Parameter] public Guid? UserId { get; set; } = Guid.Empty;
-        [Parameter] public Guid? LoanId { get; set; } = Guid.Empty;
+        [Parameter] public string? UserId { get; set; } = string.Empty;
+        [Parameter] public string? LoanId { get; set; } = string.Empty;
 
         IList<VSchedule> PaymentSchedules = [];
         bool isLoading = false;
@@ -36,9 +35,9 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
             var parameters = new Dictionary<string, object?>{
                         { "LoanPayment",p},
                         { "CurrencyId",p.CurrencyId!.Value },
-                        { "LoanId",p.LoanId!.Value },
+                        { "LoanId",p.LoanId ! },
                         { "UserId",UserId },
-                        { "CreditAgentId",p.CreditAgentId!.Value
+                        { "CreditAgentId",p.CreditAgentId !
                         }};
             NavigationManager.NavigateTo($"/Loans/{p.LoanId}/Schedules?BranchId={p.BranchId}&CreditAgentId={p.CreditAgentId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
         }

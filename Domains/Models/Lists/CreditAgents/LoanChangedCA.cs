@@ -3,11 +3,11 @@
     public class LoanChangedCa
     {
         public int Id { get; set; }
-        public long? LoanRefId { get; set; }
-        public long? OldCreditAgentRefId { get; set; }
-        public long? NewCreditAgentRefId { get; set; }
-        public long? StaffId { get; set; }
-        public long? StaffAuthId  { get; set; }
+        public string? LoanRefId { get; set; }
+        public string? OldCreditAgentRefId { get; set; }
+        public string? NewCreditAgentRefId { get; set; }
+        public string? StaffId { get; set; }
+        public string? StaffAuthId  { get; set; }
         public DateTime? MonetaDate { get; set; }
         public DateTime? WindowDate { get; set; }
     }

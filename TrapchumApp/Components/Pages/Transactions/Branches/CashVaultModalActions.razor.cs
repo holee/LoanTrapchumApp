@@ -1,8 +1,6 @@
-using Applications.Extensions;
-using Applications.Interfaces.Currencies;
 using Applications.Interfaces.Transactions;
-using Applications.Requests.Lists.Currency;
 using Applications.Requests.Lists.Entities;
+using Applications.Responses.Lists.Currency;
 using Applications.Responses.ViewModels.Branches;
 using Applications.Responses.ViewModels.Currencies;
 using Microsoft.AspNetCore.Components;
@@ -18,7 +16,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Branches
         [CascadingParameter]
         Task<AuthenticationState> AuthState { get; set; } = default!;
         [Parameter, SupplyParameterFromQuery] public string UserId { get; set; } = string.Empty;
-        [Parameter, SupplyParameterFromQuery] public int BranchId { get; set; }
+        [Parameter] public int BranchId { get; set; }
 
         protected IEnumerable<BankResponse>? bankList = [];
 

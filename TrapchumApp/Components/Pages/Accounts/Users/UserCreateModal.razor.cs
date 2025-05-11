@@ -1,9 +1,10 @@
-using Applications.Interfaces.Employees;
 using Applications.Interfaces.Identity;
 using Applications.Requests.Identity;
 using Applications.Requests.Lists.Entities;
+using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Employees;
 using Mapster;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Radzen;
 
@@ -11,71 +12,123 @@ namespace TrapchumApp.Components.Pages.Accounts.Users
 {
     public partial class UserCreateModal
     {
-        private readonly IRoleService _roleService;
+        [Parameter] public string? EmployeeId { get; set; } = string.Empty;
         
+        private readonly IRoleService _roleService;
+
         public UserCreateModal(IRoleService roleService)
         {
             _roleService = roleService;
         }
 
-        RegisterRequest model = new RegisterRequest();
-        EditForm form = default!;
-        IEnumerable<BranchDto> Branches = [];
-        IEnumerable<VEmployees> bEmployees = [];
-        IEnumerable<string?> roles = [];
-        IEnumerable<VEmployees> Employees = [];
+        RegisterRequest _model = new RegisterRequest();
+        
+        EditForm _form = default!;
+        
+        IEnumerable<BranchDto> _branches = [];
+        
+        IEnumerable<VEmployeeList> _bEmployees = [];
+
+        IEnumerable<string?> _roles = [];
+        
+        bool _showBranch = false;
+        
+        bool _showEmployee = false;
+
         protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
 
             var selectedRoles = await _roleService.GetRolesAsync();
 
-            roles = selectedRoles?.Data?.Select(r => r.RoleName) ?? [];
+            _roles = selectedRoles?.Data ?? [];
 
-            var employeeResponse = await _employeeService.GetEmployeesAsync(null, 0);
-
-            if (employeeResponse.IsSuccess)
+            if (!string.IsNullOrEmpty(EmployeeId))
             {
-                Employees = employeeResponse.Data!;
-            }
-            var branchResponse = await _branchService.GetBranchesAsync(0, 0, false);
+                _model.EmployeeId = EmployeeId;
 
-            if (branchResponse!.IsSuccess)
-            {
-                Branches = branchResponse.Data!.Adapt<IEnumerable<BranchDto>>();
+                await GetEmployees(EmployeeId);
+
+                var emp = _bEmployees.FirstOrDefault(x => x.EmployeeId == EmployeeId);
+
+                await GetBranches(emp?.BranchId);
+
+                _model.BranchRefId = emp?.BranchId ?? 0;
+
+                _showBranch = emp?.BranchId > 0;
+
+                _showEmployee = !string.IsNullOrEmpty(emp?.EmployeeId);
+                
+                SetDefaultUserNameAndEmail(emp);
+                
             }
             else
             {
-                Branches = Enumerable.Empty<BranchDto>();
+                await GetBranches();
             }
         }
 
 
-        protected async Task SelectBranchChanged()
+        async Task GetBranches(int? branchId = 0)
         {
-            if (model.BranchRefId > 0)
+            var branchResponse =
+                await _branchService.GetBranchesAsync<BranchDto>(branchId, new QueryParam(0, 25, string.Empty));
+
+            _branches = branchResponse!.IsSuccess ? branchResponse.Data!.Items : [];
+        }
+
+
+        void SetDefaultUserNameAndEmail(VEmployeeList? emp = null) 
+        {
+            if (emp is not null)
             {
-                var employeeResponse = await _employeeService.GetEmployeesAsync(null, model.BranchRefId);
-                if (employeeResponse.IsSuccess)
-                {
-                    bEmployees = employeeResponse.Data!;
-                }
+                var username = emp.FullName!.Split(" ");
+
+                _model.Username = $"{username[0]}{username[1]}".ToLower();
+
+                _model.Email = $"{username[0]}{username[1]}@gmail.com".ToLower();
+
+                _model.EmployeeId = emp.EmployeeId;
             }
             else
             {
-                model.BranchRefId = 0;
+                _model.Username = "";
+                _model.Email = "";
+                _model.EmployeeId = string.Empty;
             }
-            model.Username = "";
-            model.Email = "";
-            model.EmployeeId = Guid.Empty;
+        }
+        private async Task GetEmployees(string? employeeId, int branchId = 0)
+        {
+            var employeeResponse = await _employeeService.GetEmployeesAsync(employeeId, branchId);
+
+            if (employeeResponse.IsSuccess)
+            {
+                _bEmployees = employeeResponse.Data!;
+            }
+        }
+
+        private async Task SelectBranchChanged()
+        {
+            if (_model.BranchRefId > 0 && string.IsNullOrWhiteSpace(EmployeeId))
+            {
+                await GetEmployees(null, _model.BranchRefId);
+            }
+            else
+            {
+                _model.BranchRefId = 0;
+            }
+
+            _model.Username = "";
+            _model.Email = "";
+            _model.EmployeeId = string.Empty;
         }
 
         protected async void SubmitForm()
         {
             try
             {
-                form.EditContext?.Validate();
-                var result = await _userService.CreateUserAsync(model);
+                _form.EditContext?.Validate();
+                var result = await _userService.CreateUserAsync(_model);
                 if (result.IsSuccess)
                 {
                     NotificationService.Notify(NotificationSeverity.Success, result.Data);
@@ -85,39 +138,17 @@ namespace TrapchumApp.Components.Pages.Accounts.Users
                 {
                     NotificationService.Notify(NotificationSeverity.Error, result.ErrMessage);
                 }
-
             }
             catch (Exception ex)
             {
                 NotificationService.Notify(NotificationSeverity.Error, ex.Message);
             }
-
-
         }
 
-        protected void SelectedEmployeeChanged()
+        private void SelectedEmployeeChanged()
         {
-
-            var selectedEmployee = bEmployees.FirstOrDefault(x => x.EmployeeId == model.EmployeeId);
-            if (selectedEmployee is not null)
-            {
-                var username = selectedEmployee.FullName!.Split(" ");
-
-                model.Username = $"{username[0]}{username[1]}".ToLower();
-
-                model.Email = $"{username[0]}{username[1]}@gmail.com".ToLower();
-
-                model.EmployeeId = selectedEmployee.EmployeeId;
-            }
-            else
-            {
-                model.Username = "";
-                model.Email = "";
-                model.EmployeeId = Guid.Empty;
-            }
+            var selectedEmployee = _bEmployees.FirstOrDefault(x => x.EmployeeId == _model.EmployeeId);
+            SetDefaultUserNameAndEmail(selectedEmployee);
         }
-
-
-
     }
 }

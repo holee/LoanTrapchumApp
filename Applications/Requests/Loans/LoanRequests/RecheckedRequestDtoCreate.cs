@@ -3,7 +3,7 @@
 
 public sealed class RecheckedRequestDtoCreate : RequestDtoBaseCreate
 {
-    public RecheckedRequestDtoCreate(int? branchId, Guid? customerId, Guid? loanRequestId, DateTime? checkedDate, string? memo)
+    public RecheckedRequestDtoCreate(int? branchId, string? customerId, string? loanRequestId, DateTime? checkedDate, string? memo)
         : base(branchId, customerId, loanRequestId, memo)
     {
         CheckedDate = checkedDate;

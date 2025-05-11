@@ -1,7 +1,6 @@
 using Applications.Extensions;
-using Applications.Extensions.Identity;
 using Applications.Extensions.Maths;
-using Applications.Extensions.NumberExtions;
+using Applications.Extensions.NumberExtensions;
 using Applications.Interfaces.Currencies;
 using Applications.Interfaces.Loans;
 using Applications.Requests.Loans.Payments;
@@ -35,9 +34,9 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
     };
         [Parameter] public VSchedule LoanPayment { set; get; } = new();
         [Parameter] public int CurrencyId { set; get; } = 1;
-        [Parameter] public Guid? LoanId { set; get; }
-        [Parameter] public Guid? CreditAgentId { set; get; }
-        [Parameter] public Guid? UserId { set; get; }
+        [Parameter] public string? LoanId { set; get; }
+        [Parameter] public string? CreditAgentId { set; get; }
+        [Parameter] public string? UserId { set; get; }
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
         decimal? appliedAmountUSD = 0;
         decimal? appliedAmountKHR = 0;
@@ -217,7 +216,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
                 }
 
                 var confirmPayment = await DialogService.Confirm("Please make sure that money receive amount is correct",
-                "Confirm Payment", new Radzen.ConfirmOptions
+                "Confirm Payment", new ConfirmOptions
                 {
                     CancelButtonText = "Cancel",
                     OkButtonText = "Yes",

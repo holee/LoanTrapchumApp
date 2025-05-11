@@ -9,7 +9,7 @@
 
         public TransactionCashVaultDtoCreate(Guid? tranCode, int? tranTypeRefId,
                                              string transactionTypeName,
-                                             long? userRefId,
+                                             string? userRefId,
                                              DateTime? transactionDate)
         {
             TranCode = tranCode;
@@ -22,7 +22,7 @@
 
         public TransactionCashVaultDtoCreate(Guid? tranCode, int? tranTypeRefId,
                                              string transactionTypeName,
-                                             long? userRefId,
+                                             string? userRefId,
                                              DateTime? transactionDate,
                                              CashVaultDtoCreate cashVault,
                                              CashManagementDtoCreate cashManagements
@@ -38,7 +38,7 @@
         public Guid? TranCode { get; set; }
         public int? TranTypeRefId { get; set; }
         public string TransactionTypeName { get; set; } = string.Empty;
-        public long? UserRefId { get; set; }
+        public string? UserRefId { get; set; }
         public DateTime? TransactionDate { get; set; } = DateTime.Now;
         public CashVaultDtoCreate? CashVault { get; set; }
         public ICollection<CashManagementDtoCreate> CashManagements { get; set; } = [];

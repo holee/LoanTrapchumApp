@@ -3,19 +3,22 @@ using Domains.Models.Transaction;
 
 namespace Domains.Models.Journals;
 
-public class JournalEntry:BaseEntity
+public sealed class JournalEntry:BaseEntity
 {
-    public long JournalId { get; set; }
-    public Guid JournalEntryId { get; set; }
-    public Guid? TransactionsRefId { get; set; }
+    public string? JournalEntryId { get; set; }
+    public string? TransactionsRefId { get; set; }
+    
     public Guid? JournalCode { get; set; }=Guid.NewGuid();
+    
     public int? BranchRefId { get; set; }
+    
     public int? BankRefId { get; set; } 
     public string JournalType { get; set; } = string.Empty;
     public DateTime? JournalDate { get; set; }
     public bool IsAdjustment { get; set; } = false;
     public string? ReferrenceNum { get; set; } = string.Empty;
     public int? CurrencyRefId { get; set; }
+    
     public decimal? ExchangeRate { get; set; }
     public decimal? TotalDr { get; set; } = 0;
     public decimal? TotalCr { get; set; } = 0;

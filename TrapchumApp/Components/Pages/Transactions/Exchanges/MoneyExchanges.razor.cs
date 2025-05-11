@@ -1,6 +1,5 @@
-using Applications.Extensions;
 using Applications.Extensions.Maths;
-using Applications.Extensions.NumberExtions;
+using Applications.Extensions.NumberExtensions;
 using Applications.Interfaces.Currencies;
 using Applications.Interfaces.setting;
 using Applications.Interfaces.Transactions;
@@ -29,15 +28,15 @@ namespace TrapchumApp.Components.Pages.Transactions.Exchanges
         EditForm form = default!;
         IEnumerable<Items> buyCurrencies = [new Items(2, "US Dollar")];
         IEnumerable<Items> sellCurrencies = [new Items(1, "Khmer Riels")];
-        IEnumerable<SysSettings> settings = [];
+        IEnumerable<AppSettings> settings = [];
         VCurrenciesList Currency = new();
         bool isBuy = true;
         bool isBusy = false;
         private readonly ICurrencyService cuService;
-        private readonly ISettingService settingService;
+        private readonly IAppSettingService settingService;
         private readonly IForiegnCurrencyExchange _exchangeService;
 
-        public MoneyExchanges(ICurrencyService currencyService, ISettingService settingsServiceImpl, IForiegnCurrencyExchange exchangeServiceImpl)
+        public MoneyExchanges(ICurrencyService currencyService, IAppSettingService settingsServiceImpl, IForiegnCurrencyExchange exchangeServiceImpl)
         {
             cuService = currencyService;
             settingService = settingsServiceImpl;
@@ -248,7 +247,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Exchanges
                 isBusy = false;
                 return;
             }
-            model.UserRefId = UserId.ToGuid();
+            model.UserRefId = UserId;
             model.TranTypeRefId = 67;
             model.TransactionTypeName = "Currency Foreign Exchange";
             //c.StaffRefId = UserId;

@@ -11,7 +11,7 @@ namespace Infrastructures.DataAccess.Configurations.Loans
             builder.ToTable("lt_loanCategories");
             builder.HasKey(x => x.LoanCategoryId);
             builder.Property(prop => prop.LoanCategoryId).ValueGeneratedOnAdd();
-            builder.Property(prop => prop.LoancategoryCode).HasMaxLength(50);
+            builder.Property(prop => prop.LoanCategoryCode).HasMaxLength(50);
             builder.Property(prop => prop.DesInKhmer).HasMaxLength(50);
             builder.Property(prop => prop.Description).HasMaxLength(50);
             builder.Property(prop => prop.Code).HasMaxLength(50);

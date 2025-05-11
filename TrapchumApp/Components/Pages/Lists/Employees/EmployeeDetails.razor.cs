@@ -1,24 +1,48 @@
 using Applications.Requests.Lists.Employees;
+using Applications.Responses.ViewModels.Employees;
+using Applications.Responses.ViewModels.Loans;
+using Applications.Responses.ViewModels.Loans.Requests;
 using Microsoft.AspNetCore.Components;
+using Radzen;
 
 namespace TrapchumApp.Components.Pages.Lists.Employees
 {
     public partial class EmployeeDetails
     {
+
+
         string? imageFile = "";
-        [Parameter]
-        public EventCallback Close { get; set; }
-        [Parameter]
-        public EventCallback Edit { get; set; }
-        [Parameter]
-        public EmployeeDto? Model { get; set; } = new();
+        [Parameter] public string? EmployeeId { get; set; }
+        [Parameter] public int? BranchId { get; set; } = 0;
+        [Parameter] public EventCallback<bool> Close { get; set; }
+        [Parameter] public EventCallback<string> OnEdit { get; set; }
+        VEmployeeList? Model { get; set; } = new();
+        IEnumerable<VLoanRequests> LoanRequests = [];
+        IEnumerable<VLoanDisbursments> LoanDisbursments = [];
         async Task CloseTab()
         {
-            await Close.InvokeAsync();
+            await Close.InvokeAsync(false);
         }
         async Task EditTab()
         {
-            await Edit.InvokeAsync();
+            await OnEdit.InvokeAsync(EmployeeId);
+        }
+
+        protected override async Task OnInitializedAsync()
+        {
+            var rsp = await _employeeService.GetEmployeeById(EmployeeId,BranchId,true);
+
+            if (rsp.IsSuccess)
+            {
+                Model = rsp.Data!;
+                LoanRequests = rsp.Data?.LoanRequests ?? [];
+                LoanDisbursments = rsp.Data?.LoanDisbursments ?? [];
+            }
+            else
+            {
+                NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
+            }
+                await base.OnInitializedAsync();
         }
     }
 }

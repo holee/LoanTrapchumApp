@@ -1,46 +1,105 @@
-﻿@page "/Loan/Request/{LoanRequestId:long}/Details"
+﻿@page "/App/Loan/{BranchId:int}/Branches/Request/Details"
+@using Applications.Enumerations
 @using TrapchumApp.Components.Pages.Lists.Customers
-<PageTitle>Reviews</PageTitle>
-<Containers Fluid CssClass="p-2">
-    <Card>
-        <CardHeader>
-            <strong>Loan Request Review</strong>
-        </CardHeader>
-        <CardBody>
-            <Containers Fluid>
-                <LoanRequestDetails Data="@data" />
-            </Containers>
-            <RadzenTabs RenderMode="TabRenderMode.Server">
-                <Tabs>
-                    <RadzenTabsItem Text="ព័ត៌មានអតិថិជន">
-                        <LoanRequestCustomer Customer="@data?.Customer" />
-                    </RadzenTabsItem>
-                    <RadzenTabsItem Text="ទ្រព្យបញ្ចាំនិងអ្នកធានា">
-                        <LoanCollateralLine CollateralLines="@data?.Collaterals" />
-                        <LoanRequestGaurantor Guarantors="@data?.Guarantors" />
-                    </RadzenTabsItem>
-                    <RadzenTabsItem Text="ចំណូលនិងចំណាយ">
-                        <RadzenRow AlignItems="AlignItems.Center">
-                            <RadzenColumn Size="12" SizeMD="6" SizeSM="12">
-                                <CustomerInc Items="@data!.Customer.CustomerIncomes" ShowAdd="false" />
-                                <CustomerExp Items="@data!.Customer.CustomerExpenses" ShowAdd="false" />
-                            </RadzenColumn>
-                        </RadzenRow>
-                    </RadzenTabsItem>
-                    <RadzenTabsItem Text="ឯកសារផ្សេងៗ">
-                        <LoanRequestDocument Documents="@data?.Documents.ToList()" ShowUpload="false" />
-                    </RadzenTabsItem>
-                </Tabs>
-            </RadzenTabs>
-        </CardBody>
-        <CardFooter>
-            <RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal"
-                         JustifyContent="JustifyContent.End">
-                <RadzenLink Icon="arrow_back"
-                            Path="@($"/Loan/Request?BranchId={BranchId}&UserId={UserId}")">Back</RadzenLink>
-            </RadzenStack>
+<PageTitle>Details</PageTitle>
+<RadzenFieldset Text="Loan Request">
+    <LoanRequestDetails Data="@data" />
+    <RadzenTabs RenderMode="TabRenderMode.Server">
+        <Tabs>
+            <RadzenTabsItem Text="ព័ត៌មានអតិថិជន">
+                <LoanRequestCustomer Customer="@data?.Customer" @key="@(Guid.NewGuid().ToString("N"))" />
+            </RadzenTabsItem>
+            <RadzenTabsItem Text="ទ្រព្យបញ្ចាំនិងអ្នកធានា">
+                <LoanCollateralLine CollateralLines="@data?.Collaterals" @key="@(Guid.NewGuid().ToString("N"))" />
+                <LoanRequestGaurantor Guarantors="@data?.Guarantors" @key="@(Guid.NewGuid().ToString("N"))" />
+            </RadzenTabsItem>
+            <RadzenTabsItem Text="ចំណូលនិងចំណាយ">
+                <RadzenRow AlignItems="AlignItems.Center">
+                    <RadzenColumn Size="6" SizeMD="6" SizeSM="12">
+                        <CustomerInc Items="@data!.Customer.CustomerIncomes" ShowAdd="false" @key="@(Guid.NewGuid().ToString("N"))" />
+                    </RadzenColumn>
+                    <RadzenColumn Size="6" SizeMD="6" SizeSM="12">
+                        <CustomerExp Items="@data!.Customer.CustomerExpenses" ShowAdd="false" @key="@(Guid.NewGuid().ToString("N"))" />
+                    </RadzenColumn>
+                </RadzenRow>
+            </RadzenTabsItem>
+            <RadzenTabsItem Text="ឯកសារផ្សេងៗ">
+                <LoanRequestDocument Documents="@data?.Documents.ToList()" ShowUpload="false" @key="@(Guid.NewGuid().ToString("N"))" />
+            </RadzenTabsItem>
+        </Tabs>
+    </RadzenTabs>
+</RadzenFieldset>
+<AuthorizeView Policy="@RequestsPolicies.Request">
+    <Authorized>
+        <RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal"
+        JustifyContent="JustifyContent.End">
+            @if ((data?.StatusId == (int)RequestStatus.New || data?.StatusId == (int)RequestStatus.Rechecked))
+            {
+                <RadzenButton ButtonStyle="ButtonStyle.Primary"
+                Icon="request_quote" Size="ButtonSize.ExtraSmall"
+                Click="ApplyLoanRequest"
+                Text="Request Now"></RadzenButton>
+                <RadzenLink Icon="edit"
+                IconColor="@Colors.Success"
+                            Path="@($"App/Request/{BranchId}/Branches/{UserId}/{CustomerId}/Customer/Edit?LoanRequestId={LoanRequestId}")">Edit</RadzenLink>
+            }
+            <RadzenLink Icon="arrow_back"
+                        Path="@($"/App/Request/{BranchId}/Branches/?UserId={UserId}")">Back</RadzenLink>
+        </RadzenStack>
+    </Authorized>
+</AuthorizeView>
 
-        </CardFooter>
-    </Card>
-</Containers>
+<AuthorizeView Policy="@RequestsPolicies.Approve">
+    <Authorized>
+        <RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal"
+        Gap="1rem"
+        JustifyContent="JustifyContent.End">
+            @if ((data?.StatusId == (int)RequestStatus.Requested || 
+                  data?.StatusId == (int)RequestStatus.Verified) )
+            {
+                <RadzenButton ButtonStyle="ButtonStyle.Primary"
+                Icon="request_quote" Size="ButtonSize.ExtraSmall"
+                Click="SaveLoanRequest"
+                Text="Save"></RadzenButton>
+                <RadzenButton ButtonStyle="ButtonStyle.Success"
+                Icon="request_quote" Size="ButtonSize.ExtraSmall"
+                Click="AprovedLoanRequest"
+                Text="Approved"></RadzenButton>
+                <RadzenButton ButtonStyle="ButtonStyle.Secondary"
+                Icon="request_quote" Size="ButtonSize.ExtraSmall"
+                Click="DeniedLoanRequest"
+                Text="Denied"></RadzenButton>
+                <RadzenButton ButtonStyle="ButtonStyle.Primary"
+                Icon="request_quote" Size="ButtonSize.ExtraSmall"
+                          Click="RecheckedLoanRequest"
+                          Text="Rechecked"></RadzenButton>
 
+            }
+            <RadzenLink Icon="arrow_back"
+                        Path="@($"/App/Loan/Request?BranchId={BranchId}&UserId={UserId}")">Back</RadzenLink>
+        </RadzenStack>
+    </Authorized>
+</AuthorizeView>
+
+<AuthorizeView Policy="@RequestsPolicies.Disburse">
+    <Authorized>
+        <RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal"
+                     Gap="1rem"
+                     JustifyContent="JustifyContent.End">
+            @if ((data?.StatusId == (int)RequestStatus.Aprove))
+            {
+                <RadzenButton ButtonStyle="ButtonStyle.Primary"
+                              Icon="request_quote" Size="ButtonSize.ExtraSmall"
+                              Click="SaveLoanRequest"
+                              Text="Save"></RadzenButton>
+                <RadzenButton ButtonStyle="ButtonStyle.Success"
+                              Icon="request_quote" Size="ButtonSize.ExtraSmall"
+                              Click="AprovedLoanRequest"
+                              Text="Approved"></RadzenButton>
+
+            }
+            <RadzenLink Icon="arrow_back"
+                        Path="@($"/App/Loan/{BranchId}/Branches/Request?UserId={UserId}")">Back</RadzenLink>
+        </RadzenStack>
+    </Authorized>
+</AuthorizeView>

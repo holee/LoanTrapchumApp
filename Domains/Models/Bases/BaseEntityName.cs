@@ -7,7 +7,7 @@ namespace Domains.Models.Bases
         public Guid Id { get; set; }
         public string? Name { get; set; } = string.Empty;
         public string? AltName { get; set; } = string.Empty;
-        public EntityType? EntType { get; set; } = EntityType.Customer;
+        public EntType? EntType { get; set; } = Bases.EntType.Customer;
         public string? FirstName { get; set; } = string.Empty;
         public string? MiddleName { get; set; } = string.Empty;
         public string? LastName { get; set; } = string.Empty;

@@ -1,42 +1,117 @@
 ﻿using Applications.Interfaces.Loans;
-using Applications.Requests.Loans;
+using Applications.Requests.Loans.Categories;
 using Applications.Responses;
 using Applications.Responses.Message;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Categories;
+using Applications.Responses.ViewModels.Options;
 using Domains.Models.Loans;
 using Infrastructures.DataAccess;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructures.Implements
 {
     public class LoanCategoryService(ApplicationDbContext context) : ILoanCategoryService
     {
-        public async Task<IEnumerable<LoanCategory>> GetLoanCategories(string? q = null)
+
+
+        public async Task<Result<VlCategoryList>> GetCategoryAsync(int? id)
+        {
+            var item = await context.Database
+                            .SqlQuery<VlCategoryList>($@"SELECT * FROM VLCategoryList WHERE  LoanCategoryId={id}")
+                            .AsNoTracking()
+                            .FirstOrDefaultAsync();
+            if (item is null)
+            {
+                return Result.Failure<VlCategoryList>(ErrorResponse.NotFound(Messages.DataNotFound));
+            }
+
+            return Result.Success(item);
+        }
+
+
+        public async Task<Pager<VlCategoryList>> GetCategoriesAsync(QueryParam param)
+        {
+            IQueryable<VlCategoryList> query = context.Database.SqlQuery<VlCategoryList>($@"SELECT * FROM VLCategoryList");
+
+            if (param.IsIncludeInActive == false)
+            {
+                query = query.Where(x => x.IsActive == true);
+            }
+
+            if (!string.IsNullOrEmpty(param.Filter))
+            {
+                query = query.Where(x => EF.Functions.Like(x.LoancategoryCode!, $"%{param.Filter}%") ||
+                                         EF.Functions.Like(x.Code!, $"%{param.Filter}%") ||
+                                         EF.Functions.Like(x.DesInKhmer!, $"%{param.Filter}%") ||
+                                         EF.Functions.Like(x.Description!, $"%{param.Filter}%"));
+            }
+
+            if (param.PageSize > 0)
+            {
+                query = query.Skip((param.PageNumber) * param.PageSize).Take(param.PageSize);
+            }
+
+            if (param.SortDescending)
+            {
+                query = query.OrderByDescending(x => EF.Property<object>(x, param.SortColumn));
+            }
+
+            var counts = query.Count();
+
+            var items = await query.AsNoTracking().ToListAsync();
+
+            return new Pager<VlCategoryList>(items, counts);
+        }
+
+        public async Task<Pager<LoanCategory>> GetCategoriesAsync(string? q = null)
         {
             IQueryable<LoanCategory> query = context.LoanCategories;
 
             if (!string.IsNullOrEmpty(q))
             {
-                query = query.Where(x => x.LoancategoryCode != null && x.LoancategoryCode.Contains(q) ||
-                                  x.Code != null && x.Code.Contains(q));
+                query = query.Where(x => EF.Functions.Like(x.LoanCategoryCode!, $"%{q}%") ||
+                                        EF.Functions.Like(x.Code!, $"%{q}%"));
+            }
+            var counts = query.Count();
+            var items = await query.AsNoTracking().ToListAsync();
+            return new Pager<LoanCategory>(items, counts);
+        }
+
+        public async Task<Result<LoanCategory>> GetLoanCategoryByIdAsync(int? id)
+        {
+            var item = await context.LoanCategories.FindAsync(id);
+
+            if (item is null)
+            {
+                return Result.Failure<LoanCategory>(ErrorResponse.NotFound(Messages.DataNotFound));
             }
 
-            return await query.AsNoTracking().ToListAsync();
+            return Result.Success(item);
         }
 
-        public async Task<LoanCategory?> GetLoanCategory(int id)
+
+        public async Task<Result<LoanCategoryDtoUpdate>> GetEditCategoryByIdAsync(int? id) 
         {
-            IQueryable<LoanCategory> query = context.LoanCategories;
-            return await query.AsNoTracking().FirstOrDefaultAsync(c => c.LoanCategoryId == id);
+            var item = await context.LoanCategories.FindAsync(id);
+
+            if (item is null)
+            {
+                return Result.Failure<LoanCategoryDtoUpdate>(ErrorResponse.NotFound(Messages.DataNotFound));
+            }
+            
+            var mapper=item.Adapt<LoanCategoryDtoUpdate>();
+
+            return Result.Success(mapper);
         }
 
 
-        public async Task<Result<string>> Create(LoanCategory category)
+        public async Task<Result<string>> CreateAsync(LoanCategory category)
         {
             try
             {
-                if (await NameExist(category.LoancategoryCode))
+                if (await NameExist(category.LoanCategoryCode))
                 {
                     return Result.Failure<string>(ErrorResponse.Conflict(Messages.DataExist));
                 }
@@ -55,7 +130,7 @@ namespace Infrastructures.Implements
 
         }
 
-        public async Task<Result<string>> Update(LoanCategory cat)
+        public async Task<Result<string>> UpdateAsync(LoanCategory cat)
         {
             try
             {
@@ -80,23 +155,22 @@ namespace Infrastructures.Implements
 
 
         }
-
-        public async Task<Result<string>> Delete(int id)
+        public async Task<Result<string>> DeleteAsync(int? id)
         {
             try
             {
 
                 var category = await context.LoanCategories.AsNoTracking().Where(x => x.LoanCategoryId == id).FirstOrDefaultAsync();
-                
+
                 if (category is null)
                 {
                     return Result.Failure<string>(ErrorResponse.NotFound(Messages.DataNotFound));
                 }
-               
+
                 context.LoanCategories.Remove(category);
-              
+
                 await context.SaveChangesAsync();
-              
+
                 return Result.Success(Messages.DataDeleted);
             }
             catch (Exception ex)
@@ -106,23 +180,10 @@ namespace Infrastructures.Implements
             }
         }
 
-        public async Task<PaginatedList<VlCategoryList>> GetAllPaginAsync(QueryParam param, bool isActive = false, string? q = null)
-        {
-            IQueryable<VlCategoryList> query = context.Database.SqlQuery<VlCategoryList>($@"SELECT * FROM VLCategoryList");
-            if (isActive == false)
-                query = query.Where(x => x.IsActive == true);
-            if (!string.IsNullOrEmpty(q))
-            {
-                query = query.Where(x => x.LoancategoryCode != null && x.LoancategoryCode.Contains(q) ||
-                                  x.Code != null && x.Code.Contains(q));
-            }
-            //query=query.OrderByDynamic(param.SortField, param.SortDescending.ToUpper());
-            return await PaginatedList<VlCategoryList>.CreateAsync(query, param.PageIndex, param.PageSize);
-        }
 
         public async Task<bool> NameExist(string? name)
         {
-            if (await context.LoanCategories.AnyAsync(x => x.LoancategoryCode!.ToLower().Equals(name!.ToLower())))
+            if (await context.LoanCategories.AnyAsync(x => x.LoanCategoryCode!.ToLower().Equals(name!.ToLower())))
                 return true;
             return false;
         }
@@ -134,20 +195,7 @@ namespace Infrastructures.Implements
             return false;
         }
 
-        public async Task<IEnumerable<VlCategoryList>> GetListCategories(bool includeinactive = false, string? q = null)
-        {
-            IQueryable<VlCategoryList> query = context.Database.SqlQuery<VlCategoryList>($@"SELECT * FROM VLCategoryList");
-            if (includeinactive == false)
-                query = query.Where(x => x.IsActive == true);
-            if (!string.IsNullOrEmpty(q))
-            {
-                query = query.Where(x => x.LoancategoryCode != null && x.LoancategoryCode.StartsWith(q) ||
-                                  x.Code != null && x.Code.StartsWith(q));
-            }
-            return await query.AsNoTracking().ToListAsync();
-        }
-
-        public async Task<Result<string>> UpdateStatus(int id)
+        public async Task<Result<string>> UpdateStatus(int? id)
         {
             try
             {
@@ -178,9 +226,19 @@ namespace Infrastructures.Implements
             }
         }
 
-        public Task<LoanCategoryDtoUpdate?> GetForEditAsync(int id)
-        {
-            throw new NotImplementedException();
-        }
     }
 }
+
+
+//public async Task<IEnumerable<VlCategoryList>> GetListCategories(bool includeinactive = false, string? q = null)
+//{
+//    IQueryable<VlCategoryList> query = context.Database.SqlQuery<VlCategoryList>($@"SELECT * FROM VLCategoryList");
+//    if (includeinactive == false)
+//        query = query.Where(x => x.IsActive == true);
+//    if (!string.IsNullOrEmpty(q))
+//    {
+//        query = query.Where(x => x.LoancategoryCode != null && x.LoancategoryCode.StartsWith(q) ||
+//                          x.Code != null && x.Code.StartsWith(q));
+//    }
+//    return await query.AsNoTracking().ToListAsync();
+//}

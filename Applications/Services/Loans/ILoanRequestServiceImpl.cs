@@ -11,23 +11,26 @@ namespace Applications.Services.Loans
     public interface ILoanRequestServiceImpl
     {
         Task<Result<string>> AddLoanRequestCollateralAsync(LoanCollateralRequest req);
-        Task<Result<string>> AddLoanRequestDocumentAsync(LoanRequestDocuments request);
+        Task<Result<string>> AddLoanRequestDocumentAsync(LoanDocumentDtoCreate request);
+        Task<Result<string>> AddLoanRequestDocumentAsync(List<LoanDocumentDtoCreate> requests);
         Task<Result<string>> AddLoanRequestGuarantorAsync(LoanRequestGuarantorsDtoCreate request);
         Task<Result<string>> AppliedLoanRequestAsync(RequestDtoBaseCreate req);
         Task<Result<string>> AprovedLoanRequestAsync(AproveLoanDtoCreate req);
         Task<Result<string>> ChangedLoanRequestAsync(LoanChangeStatusDtoCreate req);
         Task<Result<string>> CreateLoanRequestAsync(LoanRequestDtoCreate request);
-        Task<Result<string>> DeleteLoanRequestCollateralAsync(int? branchId, Guid? loanRequestId, long? collateralLinkId);
-        Task<Result<string>> DeleteLoanRequestDocumentAsync(Guid? loanRequestId, int? branchId, long? documentId);
-        Task<Result<string>> DeleteLoanRequestGuarantorAsync(Guid? loanRequestId, int? branchId, long? guarantorLinkId);
+        Task<Result<bool>> CreateLoanRequestAsync(int? branchId, string? userId, string? loanRequestId);
+        Task<Result<string>> DeleteLoanRequestCollateralAsync(int? branchId, string? loanRequestId, long? collateralLinkId);
+        Task<Result<string>> DeleteLoanRequestDocumentAsync(string? loanRequestId, int? branchId, long? documentId);
+        Task<Result<string>> DeleteLoanRequestGuarantorAsync(string? loanRequestId, int? branchId, long? guarantorLinkId);
         Task<Result<string>> DeniedLoanRequestAsync(DeniedRequestDtoCreate req);
         Task<Result<string>> EditLoanRequestAsync(LoanRequest request);
-        Task<Result<VLoanRequests>> GetLoanRequestByCustomerAsync(int? branchId, Guid? customerId, Guid? loanRequestId, bool include);
-        Task<Result<IEnumerable<VLoanRequestCollateralLines>>> GetLoanRequestCollateralAsync(int? branchId, Guid? loanRequestId);
-        Task<Result<IEnumerable<VLoanRequestsDocuments>>> GetLoanRequestDocumentAsync(Guid? loanRequestId, int? branchId);
-        Task<Result<IEnumerable<VLoanRequestGuarantors>>> GetLoanRequestGuarantorAsync(int? branchId, Guid? loanRequestId, Guid? customerId);
-        Task<Pager<VLoanRequests>> GetLoanRequestsAsync(Guid? userId, int? branchId, RequestStatus requestStatus, QueryParam param);
-        Task<Result<VLoanRequests>> GetLoanRequestsAsync(int? branchId, Guid? customerId, Guid? loanRequestId, bool v);
+       
+        Task<Result<IEnumerable<VLoanRequestCollateralLines>>> GetLoanRequestCollateralAsync(int? branchId, string? loanRequestId);
+        Task<Result<IEnumerable<VLoanRequestsDocuments>>> GetLoanRequestDocumentAsync(string? loanRequestId, int? branchId);
+        Task<Result<IEnumerable<VLoanRequestGuarantors>>> GetLoanRequestGuarantorAsync(int? branchId, string? loanRequestId, string? customerId);
+        Task<Pager<VLoanRequests>> GetLoanRequestsAsync(string? userId, int? branchId, RequestStatus requestStatus, QueryParam param);
+        Task<Result<VLoanRequests>> GetLoanRequestAsync(int? branchId, string? customerId, string? loanRequestId, bool v);
+        Task<Result<T>> GetLoanRequestAsync<T>(int? branchId, string? customerId, string? loanRequestId) where T : class;
         Task<Result<string>> RecheckedLoanRequestAsync(RecheckedRequestDtoCreate req);
         Task<Result<string>> VerifiedLoanRequestAsync(RequestDtoBaseCreate req);
     }

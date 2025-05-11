@@ -2,7 +2,7 @@
 @using Applications.Responses.ViewModels.Loans
 <PageTitle>Guarantor</PageTitle>
 <Containers Fluid>
-    <table class="table">
+    <table class="table table-sm">
         <tbody>
             <tr>
                 <th class="rz-background-color-base-100 w-25">Name</th>
@@ -13,7 +13,7 @@
             <tr>
                 <th class="rz-background-color-base-100 w-25">Sex</th>
                 <td>
-                    @Guarantor?.Sex
+                    @Guarantor?.Gender
                 </td>
             </tr>
             <tr>
@@ -37,7 +37,7 @@
             <tr>
                 <th class="rz-background-color-base-100">Status</th>
                 <td>
-                    <RadzenCheckBox Value="@Guarantor?.IsActive" ReadOnly />
+                    <RadzenCheckBox TValue="bool?" Value="@Guarantor?.IsActive" ReadOnly />
                 </td>
             </tr>
         </tbody>
@@ -68,28 +68,27 @@
                             </Template>
                         </RadzenDataGridColumn>
                         <RadzenDataGridColumn TextAlign="TextAlign.Right"
-                                              Title="#" Property="@(nameof(VLoanGuarantors.InterestRate))" />
+                                              Title="Currency" Property="@(nameof(VLoanGuarantors.CurrencyId))" />
                         <RadzenDataGridColumn TextAlign="TextAlign.Right"
-                                              Title="#" Property="@(nameof(VLoanGuarantors.AdminFeeRate))" />
+                                              Title="Rate" Property="@(nameof(VLoanGuarantors.InterestRate))" />
                         <RadzenDataGridColumn TextAlign="TextAlign.Right"
-                                              Title="#" Property="@(nameof(VLoanGuarantors.CollectionFeeRate))" />
-                    </Columns>
+                                              Title="AdminFee" Property="@(nameof(VLoanGuarantors.AdminFeeRate))" />
+                        <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                              Title="CollectionFee" Property="@(nameof(VLoanGuarantors.CollectionFeeRate))" />
 
+                    </Columns>
                 </RadzenDataGrid>
             </RadzenTabsItem>
         </Tabs>
     </RadzenTabs>
-    @if (ChildContent is not null)
-    {
-        <RadzenStack Orientation="Orientation.Horizontal"
-                     JustifyContent="JustifyContent.End"
-                     class="mt-2"
-                     Gap="1rem"
-                     AlignItems="AlignItems.Center">
-            @ChildContent
-        </RadzenStack>
-    }
+    <RadzenStack AlignItems="AlignItems.Center"
+                 class="rz-mt-2"
+                 Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End">
+        <RadzenButton ButtonStyle="ButtonStyle.Danger"
+                      Icon="cancel"
+                      Text="Close"
+                      Click="CloseGuarantorTab"
+                      Size="ButtonSize.Small" />
+    </RadzenStack>
 </Containers>
-<div class="container-fluid">
-</div>
 

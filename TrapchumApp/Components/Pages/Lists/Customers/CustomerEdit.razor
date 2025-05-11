@@ -1,6 +1,5 @@
-﻿@page "/App/Customers/{CustomerId:guid}/Edit"
-@using Applications.Requests.Lists.Customers
-<PageTitle>Customer</PageTitle>
+﻿@page "/App/Customers/{CustomerId}/Edit"
+<PageTitle>Edit</PageTitle>
 <Card>
     <CardBody>
         <EditForm Model="model" @ref="editForm">
@@ -378,16 +377,27 @@
         </EditForm>
     </CardBody>
     <CardFooter>
-        <RadzenStack Orientation="Radzen.Orientation.Horizontal"
+        <RadzenStack Orientation="Orientation.Horizontal"
                      AlignItems="AlignItems.Center"
                      Gap="1rem"
-                     JustifyContent="Radzen.JustifyContent.End">
-            <RadzenButton Click="FormSubmit"
-                          Size="Radzen.ButtonSize.Small"
+                     JustifyContent="JustifyContent.End">
+            <RadzenButton Click="HandleFormUpdate"
+                          Size="ButtonSize.Small"
                           ButtonStyle="ButtonStyle.Success"
                           Text="Save"
                           Icon="save" />
-            <RadzenLink Path="/App/Customers" Icon="arrow_back" Text="Back" />
+            @if (!ShowEditTab)
+            {
+                <RadzenLink Path="/App/Customer" Icon="arrow_back" Text="Back" />
+            }
+            else
+            {
+                <RadzenButton Click="ClickCloseTab"
+                              Size="ButtonSize.Small"
+                              ButtonStyle="ButtonStyle.Danger"
+                              Text="Close"
+                              Icon="cancel" />
+            }
         </RadzenStack>
     </CardFooter>
 </Card>

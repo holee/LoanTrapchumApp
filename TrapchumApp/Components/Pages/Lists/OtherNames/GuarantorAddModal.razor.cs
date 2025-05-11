@@ -1,8 +1,7 @@
-using Applications.Interfaces.Addresses;
 using Applications.Interfaces.Lists;
 using Applications.Requests.Lists.Addreses;
 using Applications.Requests.Lists.Entities;
-using Domains.Models.Lists;
+using Applications.Requests.Lists.OtherNames;
 using Mapster;
 
 namespace TrapchumApp.Components.Pages.Lists.OtherNames;
@@ -18,14 +17,15 @@ public partial class GuarantorAddModal
     protected IEnumerable<CommuneDto>? communeList = [];
     protected IEnumerable<DistrictDto>? districtList = [];
     protected IEnumerable<VillageDto>? villageList = [];
-    private EntityNameDtoCreate model = new EntityNameDtoCreate();
+    private EntityNamesCreate model = new EntityNamesCreate();
     private bool isValid = true;
     protected override async Task OnInitializedAsync()
     {
         try
         {
             provinceList = await _addressService!.GetsProvinces();
-            model.Sex = "mr";
+
+            model.Gender = "mr";
         }
         catch (Exception ex)
         {
@@ -38,7 +38,7 @@ public partial class GuarantorAddModal
     {
         model.EntType = "Other Name";
 
-        var req = model.Adapt<EntityName>();
+        var req = model.Adapt<EntityNames>();
 
 
         var resultResponse = await _gService.CreateGaurantorAsync(req);

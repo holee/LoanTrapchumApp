@@ -1,7 +1,9 @@
 using Applications.Interfaces.Loans;
-using Applications.Requests.Loans;
+using Applications.Requests.Loans.Categories;
 using Applications.Responses.Loans.Disbursements;
+using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Categories;
+using Applications.Services.Loans;
 using Mapster;
 using Microsoft.AspNetCore.Components;
 using Radzen;
@@ -11,24 +13,26 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanCategoriess
 {
     public partial class LoanCategoryView
     {
-        private readonly ILoanCategoryService? _catService;
+        [Parameter] public int SelectIndex { get; set; } = 0;
 
-        public LoanCategoryView(ILoanCategoryService? service)
+        private readonly ILoanCategoryServiceImpl _catService;
+
+        public LoanCategoryView(ILoanCategoryServiceImpl service)
         {
-            this._catService = service;
+            _catService = service;
         }
 
         List<VlCategoryList?> loanCategories = [];
+
         protected string? searchText = string.Empty;
 
         protected bool InActive = false;
 
-        List<VlCategoryList>? vLCategories = [];
-
-        List<int> SelectedRow = [10, 20, 50, 100];
-
+        List<VlCategoryList> vLCategories = [];
 
         int pageSize = 10;
+        int pageIndex = 0;
+        int CategoryId = 0;
         bool sortDescending = false;
         string sortColumn = "Id";
         bool isLoading = false;
@@ -37,33 +41,9 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanCategoriess
         private bool IsNew = false;
         private bool IsEdit = false;
         private bool IsDetails = false;
-        [Parameter] public int SelectIndex { get; set; } = 0;
         protected LoanCategoryDtoUpdate? modelEdit = new();
         protected LoanCategoryResponse? detailsModel = new();
 
-        async void MenuClicked(RadzenSplitButtonItem args, VlCategoryList? loanCategory)
-        {
-            if (args is not null)
-            {
-                if (args.Value == "1")
-                {
-                    await Details(loanCategory!.LoanCategoryId);
-                    return;
-                }
-                if (args.Value == "2")
-                {
-                    EditCategory(loanCategory!.LoanCategoryId);
-                    return;
-                }
-                if (args.Value == "3")
-                {
-                    await OnDelete(loanCategory);
-                    return;
-                }
-
-            }
-            return;
-        }
         void TabChanged(int e)
         {
             SelectIndex = e;
@@ -76,40 +56,52 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanCategoriess
             SelectIndex = 1;
             tabs!.Reload();
         }
-        async void EditCategory(int id)
+         void EditCategory(int id)
         {
+            ContextMenuService.Close();
+
             try
             {
 
-                modelEdit = await _catService!.GetForEditAsync(id);
+                CategoryId = id;
+
+                //var rsp = await _catService!.GetForEditAsync(id);
+
+                //if (rsp.IsSuccess)
+                //{
+                //    modelEdit = rsp.Data!;
 
                 IsEdit = true;
-
                 SelectIndex = 2;
-
-                StateHasChanged();
+                //}
+                //else
+                //{
+                //    NotificationService.Notify(NotificationSeverity.Error, "Loan Category", rsp.ErrMessage);
+                //    return;
+                //}
 
                 tabs!.Reload();
 
-                ContextMenuService.Close();
+                StateHasChanged();
+
 
             }
             catch (Exception ex)
             {
-                NotificationService.Notify(Radzen.NotificationSeverity.Error, "Exception", ex.Message);
-                ContextMenuService.Close();
-
+                NotificationService.Notify(NotificationSeverity.Error, "Exception", ex.Message);
             }
         }
         async Task Details(int Id)
         {
+            ContextMenuService.Close();
+
             try
             {
                 var result = await _catService!.GetLoanCategory(Id);
 
                 if (result is not null)
                 {
-                    detailsModel = result.Adapt<LoanCategoryResponse>();
+                    detailsModel = result.Data.Adapt<LoanCategoryResponse>();
 
                     IsDetails = true;
 
@@ -124,9 +116,8 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanCategoriess
             }
             catch (Exception ex)
             {
-                NotificationService.Notify(Radzen.NotificationSeverity.Error, "Exception", ex.Message);
-                ContextMenuService.Close();
-
+                NotificationService.Notify(NotificationSeverity.Error, "Exception", ex.Message);
+              
             }
         }
         void CloseTabs(int e)
@@ -148,43 +139,34 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanCategoriess
         }
         protected async void Reload()
         {
-            await OnInitializedAsync();
+            await GetLoanCategories();
         }
         async void LoadData(LoadDataArgs e)
         {
-            //pageIndex = e.Skip!.Value;
-            //if (!string.IsNullOrEmpty(e.OrderBy))
-            //{
-            //    sortColumn = e.OrderBy.Split(" ")[0];
-            //    string dir = e.OrderBy.Split(" ")[1];
-            //    sortDescending = dir.Contains("asc") ? false : true;
-            //}
+            pageIndex = e.Skip!.Value;
+
             searchText = e.Filter!.ToString()!;
 
-            //vLCategories = vLCategories!.Where(x => x.LoancategoryCode!.ToLower().Contains(searchText.ToLower(), StringComparison.CurrentCultureIgnoreCase) ||
-            //x.DesInKhmer!.ToLower().Contains(searchText.ToLower(), StringComparison.CurrentCultureIgnoreCase) ||
-            //x.Code!.ToLower().Contains(searchText.ToLower(), StringComparison.CurrentCultureIgnoreCase) ||
-            //x.Description!.ToLower().Contains(searchText.ToLower(), StringComparison.CurrentCultureIgnoreCase));
-            await InvokeAsync(StateHasChanged);
+            if (!string.IsNullOrEmpty(e.OrderBy))
+            {
+                sortColumn = e.OrderBy.Split(" ")[0];
+                string dir = e.OrderBy.Split(" ")[1];
+                sortDescending = dir.Contains("asc") ? false : true;
+            }
+
+            await GetLoanCategories();
         }
-        protected async void PerformSearch(ChangeEventArgs e)
+        protected async void PerformSearch(string filter)
         {
-            searchText = e.Value!.ToString()!;
+            searchText = filter;
 
-            //vLCategories = vLCategories!.Where(x => x.LoancategoryCode!.ToLower().Contains(searchText.ToLower(), StringComparison.CurrentCultureIgnoreCase) ||
-            //                            x.DesInKhmer!.ToLower().Contains(searchText.ToLower(), StringComparison.CurrentCultureIgnoreCase) ||
-            //                            x.Code!.ToLower().Contains(searchText.ToLower(), StringComparison.CurrentCultureIgnoreCase) ||
-            //                            x.Description!.ToLower().Contains(searchText.ToLower(), StringComparison.CurrentCultureIgnoreCase));
-
-            await InvokeAsync(StateHasChanged);
-
+            await GetLoanCategories();
         }
 
 
         protected async Task OnIsActive()
         {
-            await OnInitializedAsync();
-            await InvokeAsync(StateHasChanged);
+            await GetLoanCategories();
         }
 
         protected async Task DeactiveOrActive(VlCategoryList category)
@@ -216,23 +198,45 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanCategoriess
         }
         protected override async Task OnInitializedAsync()
         {
+            await GetLoanCategories();
+            await base.OnInitializedAsync();
+        }
+
+
+        async Task PageChanged(int page)
+        {
+            pageSize = page;
+            await GetLoanCategories();
+        }
+
+
+
+        async Task GetLoanCategories()
+        {
             try
             {
-                var results = await _catService!.GetListCategories(InActive, null);
-
-                if (results.Any())
+                var param = new QueryParam
                 {
-                    vLCategories = results.ToList();
+                    PageNumber = pageIndex,
+                    PageSize = pageSize,
+                    Filter = searchText,
+                    SortColumn = sortColumn,
+                    IsIncludeInActive = InActive,
+                    SortDescending = sortDescending
+                };
 
-                    counts = vLCategories.Count();
-                }
+                var results = await _catService.GetCategoriesAsync(param);
+                vLCategories = results.Items;
+                counts = vLCategories.Count();
             }
             catch (Exception ex)
             {
                 NotificationService.Notify(NotificationSeverity.Error, "Exception", ex.InnerException!.Message);
             }
-            await base.OnInitializedAsync();
         }
+
+
+
         protected async Task OnDetail(VlCategoryList? loanCategory)
         {
 
@@ -289,7 +293,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanCategoriess
                     }
                     else
                     {
-                        var isDe = await _catService!.Delete(loanCategory.LoanCategoryId);
+                        var isDe = await _catService!.DeleteAsync(loanCategory.LoanCategoryId);
 
                         if (isDe.IsSuccess)
                         {

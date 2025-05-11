@@ -9,19 +9,19 @@ namespace Infrastructures.DataAccess.Configurations.LoanDisbursements
         public void Configure(EntityTypeBuilder<LoanCreditAgent> builder)
         {
             builder.ToTable("lt_loanCreditAgents");
-            builder.HasKey(x => new { x.EmployeeRefId });
-            builder.Property(x => x.Id).ValueGeneratedOnAdd();
+            builder.HasKey(x => x.EmployeeRefId);
+            builder.Property(x => x.EmployeeRefId).HasMaxLength(250);
             builder.Property(x => x.IsRemove).HasColumnType("BIT");
             builder.Property(x => x.CreatedDt).HasColumnType("DATETIME");
             builder.Property(x => x.ModifiedDt).HasColumnType("DATETIME");
-            
-            builder.HasOne(x => x.Employee)
-                   .WithOne(x => x.LoanCreditAgent)
-                   .HasForeignKey<LoanCreditAgent>(x => x.EmployeeRefId);
-            
-            builder.HasMany(x => x.LoanRequests)
-                .WithOne(x => x.LoanCreditAgent)
-                .HasForeignKey(x => x.CreditAgentRefId);
+
+            //builder.HasOne(x => x.Employee)
+            //       .WithOne()
+            //       .HasForeignKey<LoanCreditAgent>(x => x.EmployeeRefId);
+
+            //builder.HasMany(x => x.LoanRequests)
+            //    .WithOne(x => x.LoanCreditAgent)
+            //    .HasForeignKey(x => x.CreditAgentRefId);
         }
     }
 }

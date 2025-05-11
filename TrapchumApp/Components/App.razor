@@ -1,5 +1,4 @@
-﻿@using Applications.Interfaces.Branches
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -11,15 +10,25 @@
     <link rel="stylesheet" href="@Assets["TrapchumApp.styles.css"]" />
     <ImportMap />
     <link rel="icon" type="image/png" href="/assets/logo/tch_Logo.ico" />
-    <HeadOutlet @rendermode="PageRenderMode" />
-    <RadzenTheme Theme="material" @rendermode="PageRenderMode" />
+    <HeadOutlet @rendermode="@InteractiveServer" />
+    <RadzenTheme Theme="material" @rendermode="@InteractiveServer" />
 </head>
 
 <body>
-    <Routes @rendermode="PageRenderMode" />
+    <Routes @rendermode="@InteractiveServer" />
     <script src="_framework/blazor.web.js"></script>
     <script src="@Assets["lib/bootstrap/dist/js/bootstrap.bundle.min.js"]"></script>
     <script src="@Assets["_content/Radzen.Blazor/Radzen.Blazor.js?v=@(typeof(Radzen.Colors).Assembly.GetName().Version)"]"></script>
+    <script>
+        window.downloadFile = function (fileName, contentType, base64Data) {
+            const link = document.createElement('a');
+            link.download = fileName;
+            link.href = `data:${contentType};base64,${base64Data}`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        };
+    </script>
 </body>
 
 </html>

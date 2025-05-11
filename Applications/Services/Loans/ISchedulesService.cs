@@ -5,6 +5,6 @@ namespace Applications.Services.Loans
 {
     public interface ISchedulesService
     {
-        Task<Result<VCustomerSchedules>> GetCustomerSechedule(long loanId, long customerId, int branchId);
+        Task<Result<LoanScheduleVm>> GetCustomerSechedule(long loanId, long customerId, int branchId);
     }
 }

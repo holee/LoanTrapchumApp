@@ -17,49 +17,43 @@ namespace TrapchumApp.Components.Pages.Lists.OtherNames
         }
 
         [Parameter]
-        public IList<VGuarantor> SelectedGuarantors { get; set; } = [];
+        public List<VGuarantor> SelectedGuarantors { get; set; } = [];
         string? filterText = "";
         int pageSize = 10;
         string sortColumn = "Name";
         int counts = 0;
         bool isLoading = false;
         bool allowRowSelectOnRowClick = true;
+
         IEnumerable<VGuarantor> Guarantors = [];
+
         IEnumerable<VGuarantor> newGuarantors = [];
+
         RadzenDataGrid<VGuarantor> grid = default!;
 
-        void SearchTextChanged(ChangeEventArgs e)
-        {
-            filterText = e.Value!.ToString() ?? "";
-            newGuarantors = Guarantors.Where(x => x.GuarantorName!.Contains(filterText, StringComparison.InvariantCultureIgnoreCase) ||
-                                                  x.Phone!.Contains(filterText, StringComparison.InvariantCultureIgnoreCase)) ?? [];
-        }
         protected override async Task OnInitializedAsync()
         {
-            await base.OnInitializedAsync();
             await GetGuarantors();
+
+            await base.OnInitializedAsync();
+
         }
         async Task GetGuarantors()
         {
             isLoading = true;
+
             var guarantorResp = await _gService.GetGuarantorsAsync(null, true, filterText);
+
             if (guarantorResp.IsSuccess)
             {
                 Guarantors = guarantorResp.Data!;
-                counts = guarantorResp.Data!.Count();
-                newGuarantors = Guarantors;
             }
+
             isLoading = false;
 
             StateHasChanged();
         }
 
-
-        bool GuarantorsChecked(VGuarantor g)
-        {
-            return SelectedGuarantors.Any() && SelectedGuarantors.Contains(g);
-
-        }
 
         async void GuarantorCheckedChanged(bool args, VGuarantor g)
         {

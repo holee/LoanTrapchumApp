@@ -1,14 +1,57 @@
-﻿namespace Applications.Responses.ViewModels.Loans.Requests;
+﻿using Applications.Requests.Lists.Entities.Guarantors;
+
+namespace Applications.Responses.ViewModels.Loans.Requests;
+
+
+public static class VLoanRequestGuarantorsExtensions
+{
+    public static LoanGuarantorDtoCreate ToGuarantorDtoCreate(this VLoanRequestGuarantors guarantor)
+    {
+        return new LoanGuarantorDtoCreate
+        {
+            Id = guarantor.Id,
+            BranchId = guarantor.BranchRefId,
+            LoanRequestRefId = guarantor.LoanRequestRefId,
+            EntityNameRefId = guarantor.EmployeeRefId,
+            IsActive = true
+        };
+    }
+    public static LoanGuarantorDtoCreate ToGuarantorDtoCreate(this VLoanRequestGuarantors guarantor, int? branchId)
+    {
+        return new LoanGuarantorDtoCreate
+        {
+            Id = guarantor.Id,
+            BranchId = branchId,
+            LoanRequestRefId = guarantor.LoanRequestRefId,
+            EntityNameRefId = guarantor.EmployeeRefId,
+            IsActive = true
+        };
+    }
+
+    public static IEnumerable<LoanGuarantorDtoCreate> ToGuarantorDtoCreate(this List<VLoanRequestGuarantors> guarantors, int? branchId)
+    {
+        return guarantors.Select(g => new LoanGuarantorDtoCreate
+        {
+            Id = g.Id,
+            BranchId = branchId,
+            LoanRequestRefId = g.LoanRequestRefId,
+            EntityNameRefId = g.EmployeeRefId,
+            IsActive = true
+        }).ToList();
+    }
+
+
+}
+
 
 public sealed class VLoanRequestGuarantors
 {
 
     public long? Id { get; set; }
-    public int? BranchId { get; set; }
-    public Guid? LoanRequestId { get; set; }
-    public Guid? CustomerId { get; set; } 
-    public Guid? EntId { get; set; }
-    public string? CurrencyId { get; set; }
+    public int? BranchRefId { get; set; }
+    public string? LoanRequestRefId { get; set; }
+    public string? CustomerRefId { get; set; }
+    public string? EmployeeRefId { get; set; }
     public string? FullName { get; set; }
     public string? AltName { get; set; }
     public string? Phone { get; set; }

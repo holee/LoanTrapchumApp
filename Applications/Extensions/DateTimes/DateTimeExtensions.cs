@@ -6,6 +6,14 @@
         {
             return string.Format("{0:dd/MM/yyyy}", dt);
         }
+        public static string DayFirst(this DateTimeOffset dt)
+        {
+            return string.Format("{0:dd/MM/yyyy}", dt);
+        }
+        public static string DayFirst(this DateTimeOffset? dt)
+        {
+            return string.Format("{0:dd/MM/yyyy}", dt);
+        }
         public static string DayFirst(this DateTime? dt)
         {
             return string.Format("{0:dd/MM/yyyy}", dt);

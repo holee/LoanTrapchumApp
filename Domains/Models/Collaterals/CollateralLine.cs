@@ -5,10 +5,11 @@ namespace Domains.Models.Collaterals;
 public sealed class CollateralLine
 {
     public long Id { get; set; }
-    public Guid? CollateralRefId { get; set; }
+    public string? CollateralRefId { get; set; }
     public int? CategoryRefId { get; set; }
     public string? TypeName { get; set; }
     public int? SubCategoryRefId { get; set; }
+
     public string? SubTypeName { get; set; } 
     
     [NotMapped]
@@ -26,6 +27,7 @@ public sealed class CollateralLine
     public decimal? MarketPrice { get; set; }
     public decimal? HotPrice { get; set; }
     public decimal? PawnPrice { get; set; }
+    public bool IsUsed { get; set; } = false; 
     public DateTime? CreatedDt { get; set; } = DateTime.UtcNow;
     public DateTime? ModifiedDt { get; set; }= DateTime.UtcNow;
     public List<CollateralLink> CollateralLinesLink { get; set; } = [];

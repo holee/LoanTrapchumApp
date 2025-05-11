@@ -1,4 +1,4 @@
-using Applications.Responses.Collaterals;
+using Applications.Responses.Lists.Collaterals;
 using Applications.Services.LIsts;
 using Microsoft.AspNetCore.Components;
 using Radzen;
@@ -16,10 +16,10 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
             _collateralsService = collateralsService;
         }
 
-        [Parameter] public List<CollateralLineResponse> Personals { get; set; } = [];
-        [Parameter] public EventCallback<CollateralLineResponse> ClickedSave { get; set; }
+        [Parameter] public List<VCollateralLines> Personals { get; set; } = [];
+        [Parameter] public EventCallback<VCollateralLines> ClickedSave { get; set; }
 
-        RadzenDataGrid<CollateralLineResponse> personalGrid = default!;
+        RadzenDataGrid<VCollateralLines> personalGrid = default!;
         DataGridEditMode editMode = DataGridEditMode.Multiple;
         IEnumerable<CollateralSubTypeResponse> CollateralPersonals { get; set; } = [];
         protected override async Task OnInitializedAsync()
@@ -34,12 +34,12 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
             Personals.Clear();
         }
 
-        void Reset(CollateralLineResponse order)
+        void Reset(VCollateralLines order)
         {
             Personals.Remove(order);
         }
 
-        void OnCreateRow(CollateralLineResponse order)
+        void OnCreateRow(VCollateralLines order)
         {
             Personals.Remove(order);
         }
@@ -49,7 +49,7 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
             {
                 Reset();
             }
-            var order = new CollateralLineResponse();
+            var order = new VCollateralLines();
             Personals.Add(order);
             await personalGrid.InsertRow(order);
         }

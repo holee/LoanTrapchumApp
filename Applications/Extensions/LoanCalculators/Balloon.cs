@@ -32,17 +32,24 @@ public sealed class Balloon : LoanCaloulator, ICalculator
             var effAmount = 0.00M;
             var totalDays = 0;
             var principal = PaidPrincipal(amount, circles);
-            DateTime previusDate;
+
+            DateTimeOffset? previusDate;
+
             if (i == 1)
             {
                 previusDate = StartDate;
+
                 totalDays = TotalDays(previusDate, FirstPayment);
+
             }
             if (i > 1)
             {
                 previusDate = schedules[i - 2].PaymentDate!.Value;
+
                 paymentDate = SetPaymentDate(previusDate); //StartDate.AddMonths(i);
+
                 SetHoliday(ref paymentDate);
+
                 totalDays = TotalDays(previusDate, paymentDate);
             }
 
@@ -58,7 +65,9 @@ public sealed class Balloon : LoanCaloulator, ICalculator
                 }
 
                 interestAmount = CalcInterest(beginBalance, monthlyRate, totalDays);
+
                 totalPayAmount = TotalPay(principal, interestAmount, effAmount);
+
                 if (i < periodInMonth)
                 {
                     lastBalance = LastBalance(beginBalance, principal);
@@ -129,7 +138,7 @@ public sealed class Balloon : LoanCaloulator, ICalculator
             var effAmount = 0.00M;
             var totalDays = 0;
             var principal = PaidPrincipal(_amount, circles);
-            DateTime previusDate;
+            DateTimeOffset? previusDate;
             if (i == 1)
             {
                 previusDate = StartDate;
@@ -198,7 +207,7 @@ public sealed class Balloon : LoanCaloulator, ICalculator
         return schedules;
     }
    
-    public override List<ScheduleLine> Calculate(int? periodInMonth, decimal? monthlyRate, decimal? amount, DateTime firstPayment)
+    public override List<ScheduleLine> Calculate(int? periodInMonth, decimal? monthlyRate, decimal? amount, DateTimeOffset? firstPayment=null)
     {
         var schedules = new List<ScheduleLine>();
 
@@ -221,22 +230,33 @@ public sealed class Balloon : LoanCaloulator, ICalculator
         for (int i = 1; i <= periodInMonth; i++)
         {
             beginBalance = lastBalance;
+
             var interestAmount = 0.00M;
+
             var totalPayAmount = 0.00M;
+
             var effAmount = 0.00M;
+
             var totalDays = 0;
+
             var principal = PaidPrincipal(_amount, circles);
-            DateTime previusDate;
+
+            DateTimeOffset? previusDate;
+
             if (i == 1)
             {
                 previusDate = StartDate;
+
                 totalDays = TotalDays(previusDate, FirstPayment);
             }
             if (i > 1)
             {
                 previusDate = schedules[i - 2].PaymentDate!.Value;
+
                 paymentDate = SetPaymentDate(previusDate); //StartDate.AddMonths(i);
+
                 SetHoliday(ref paymentDate);
+
                 totalDays = TotalDays(previusDate, paymentDate);
             }
 
@@ -252,7 +272,9 @@ public sealed class Balloon : LoanCaloulator, ICalculator
                 }
 
                 interestAmount = CalcInterest(beginBalance, _monthlyRate, totalDays);
+
                 totalPayAmount = TotalPay(principal, interestAmount, effAmount);
+
                 if (i < periodInMonth)
                 {
                     lastBalance = LastBalance(beginBalance, principal);

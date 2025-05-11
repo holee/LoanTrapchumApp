@@ -10,7 +10,7 @@ public class CustomerIncomeDtoCreate
         Amount = amount;
         Description = description;
     }
-    public CustomerIncomeDtoCreate(long? id,Guid? customerId, string? incomeSource, decimal? amount, string? description)
+    public CustomerIncomeDtoCreate(long? id,string? customerId, string? incomeSource, decimal? amount, string? description)
     {
         Id = id;
         IncomeSource = incomeSource;
@@ -20,7 +20,7 @@ public class CustomerIncomeDtoCreate
     }
 
     public long? Id { get; set; } = 0;
-    public Guid? CustomerRefId { get; set; }
+    public string? CustomerRefId { get; set; }
     public string? IncomeSource { get; set; }
     public decimal? Amount { get; set; }
     public string? Description { get; set; }

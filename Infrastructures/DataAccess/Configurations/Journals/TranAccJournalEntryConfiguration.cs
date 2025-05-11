@@ -24,9 +24,7 @@ public class TranAccJournalEntryConfiguration : IEntityTypeConfiguration<Journal
         builder.Property(j => j.ModifiedDt).HasDefaultValueSql("GETDATE()");
         builder.Property(j => j.EditSeq).HasDefaultValue(0);
         builder.Property(j => j.IsAdjustment).HasDefaultValue(false);
-        builder.Property(j => j.TransactionsRefId).HasConversion(ConversionExts.GuidConversion);
-
-
+       
         builder.HasMany(x => x.JournalEntryLines)
                     .WithOne().HasForeignKey(fk => fk.JournalRefId);
 

@@ -1,5 +1,5 @@
 using Applications.Interfaces.Lists;
-using Applications.Requests.Lists.Entities;
+using Applications.Responses.Lists.Entities;
 using Mapster;
 using Microsoft.AspNetCore.Components;
 using Radzen;

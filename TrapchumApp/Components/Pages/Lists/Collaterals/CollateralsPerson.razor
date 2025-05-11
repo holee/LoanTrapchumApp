@@ -1,6 +1,6 @@
-﻿@using Applications.Responses.Collaterals
+﻿@using Applications.Responses.Lists.Collaterals
 <RadzenDataGrid Density="Density.Compact"
-                TItem="CollateralLineResponse"
+                TItem="VCollateralLines"
                 Responsive
                 ColumnWidth="15rem"
                 @ref="personalGrid"
@@ -17,7 +17,7 @@
         <RadzenDataGridColumn Property="Id" Title="#" Width="2rem">
             <Template Context="c">
                 <input type="hidden" @bind="c.Id" />
-                <input type="hidden" @bind="c.CollateralRefId" />
+                <input type="hidden" @bind="c.CollateralId" />
                 @(Personals.IndexOf(c) + 1)
             </Template>
         </RadzenDataGridColumn>
@@ -109,7 +109,7 @@
             <Template>
                 <RadzenButton Icon="remove"
                               ButtonStyle="ButtonStyle.Danger"
-                              Size="Radzen.ButtonSize.ExtraSmall">
+                              Size="ButtonSize.ExtraSmall">
                 </RadzenButton>
             </Template>
         </RadzenDataGridColumn>

@@ -1,20 +1,24 @@
-﻿@page "/App/Employees"
+﻿@page "/App/Employee"
 @using Applications.Requests.Lists.Employees
 @using Applications.Responses.Lists.Entities
 @using Applications.Responses.ViewModels.Employees
 @using Domains.Models.Addresses
 <PageTitle>Employees</PageTitle>
-<SectionContent SectionName="Progressbar">
-    <RadzenProgressBar Mode="ProgressBarMode.Indeterminate"
-                       ProgressBarStyle="ProgressBarStyle.Danger"
-                       Visible="isLoading" Value="100" ShowValue="false" />
-</SectionContent>
 <Containers Fluid>
-    <RadzenTabs @ref="tabs" RenderMode="TabRenderMode.Client" Change="TabChanged" @bind-SelectedIndex="selectedIndex">
+    <RadzenTabs @ref="tabs" RenderMode="TabRenderMode.Server" Change="TabChanged" @bind-SelectedIndex="selectedIndex">
         <Tabs>
             <RadzenTabsItem Text="Employees" Icon="group">
                 <Card>
                     <CardBody>
+                        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End">
+                            <div class="rz-p-1">
+                                <RadzenCheckBox @bind-Value="includeInActive"
+                                                @bind-Value:after="GetIncludeInactive"
+                                                Name="includeInActive" />
+                                <RadzenLabel Text="Include Inactive"
+                                             Component="includeInActive" Style="margin-left: 8px; vertical-align: middle;" />
+                            </div>
+                        </RadzenStack>
                         <PageDropDown PageSizeChanged="PageSizeChanged"
                                       ShowReload="true"
                                       ShowSearchBox="true"
@@ -27,13 +31,21 @@
                                               Text="Add Employee" />
                             </LeftChildContent>
                             <RightChildContent>
-                                <div class="rz-p-1">
-                                    <RadzenCheckBox @bind-Value="includeInActive"
-                                                    @bind-Value:after="GetIncludeInactive"
-                                                    Name="includeInActive" />
-                                    <RadzenLabel Text="Include Inactive"
-                                                 Component="includeInActive" Style="margin-left: 8px; vertical-align: middle;" />
-                                </div>
+                                <RadzenStack AlignItems="AlignItems.Center"
+                                             JustifyContent="JustifyContent.SpaceBetween"
+                                             Orientation="Orientation.Horizontal">
+                                    <div class="rz-p-1">
+                                        <RadzenDropDown Data="@Branches"
+                                                        AllowClear="false"
+                                                        TValue="int"
+                                                        TextProperty="@nameof(BranchDto.BranchName)"
+                                                        ValueProperty="@nameof(BranchDto.BranchId)"
+                                                        class="w-100"
+                                                        Name="Branch"
+                                                        Placeholder="Select branch">
+                                        </RadzenDropDown>
+                                    </div>
+                                </RadzenStack>
                             </RightChildContent>
                         </PageDropDown>
                         <RadzenDataGrid Data="Employees"
@@ -46,7 +58,6 @@
                                         AllowAlternatingRows="true"
                                         AllowRowSelectOnRowClick="true"
                                         LoadData="@LoadData"
-                                        @bind-Value="SelectedEmployees"
                                         Count="@counts"
                                         IsLoading="@isLoading"
                                         PagerPosition="PagerPosition.Bottom"
@@ -54,125 +65,71 @@
                                         ShowPagingSummary="true"
                                         Style="height:30rem;max-height:45rem;"
                                         PagerHorizontalAlign="HorizontalAlign.Right"
-                                        TItem="VEmployees">
+                                        TItem="VEmployeeList">
                             <Columns>
-                                <RadzenDataGridColumn Title="#" Property="@nameof(VEmployees.EmployeeId)" />
-                                <RadzenDataGridColumn Title="Name" Property="@nameof(VEmployees.AltName)" />
-                                <RadzenDataGridColumn Title="Phone" Property="@nameof(VEmployees.Phone)" />
-                                <RadzenDataGridColumn Title="Email" Property="@nameof(VEmployees.EmailAddress)" />
-                                <RadzenDataGridColumn Title="Department" Property="@nameof(VEmployees.DepartmentName)" />
-                                <RadzenDataGridColumn Title="Occupation" Property="@nameof(VEmployees.Occupation)" />
-                                <RadzenDataGridColumn Title="Branch" Property="@nameof(VEmployees.BranchName)" />
-                                <RadzenDataGridColumn Width="5rem" Sortable="false" Title="Status" Property="@nameof(VEmployees.EmployeeId)" Context="c">
+                                <RadzenDataGridColumn Context="c"
+                                                      Width="5rem"
+                                                      TextAlign="TextAlign.Center"
+                                                      Title="#" Property="@nameof(VEmployeeList.EmployeeId)">
+                                    <Template>
+                                        @(Employees.ToList().IndexOf(c) + 1)
+                                    </Template>
+                                </RadzenDataGridColumn>
+                                <RadzenDataGridColumn Title="Name" Property="@nameof(VEmployeeList.AltName)" />
+                                <RadzenDataGridColumn Title="Phone" Property="@nameof(VEmployeeList.Phone)" />
+                                <RadzenDataGridColumn Title="Email" Property="@nameof(VEmployeeList.EmailAddress)" />
+                                <RadzenDataGridColumn Title="Department" Property="@nameof(VEmployeeList.DepartmentName)" />
+                                <RadzenDataGridColumn Title="Occupation" Property="@nameof(VEmployeeList.Occupation)" />
+                                <RadzenDataGridColumn Title="Branch" Property="@nameof(VEmployeeList.BranchName)" />
+                                <RadzenDataGridColumn Width="5rem" Sortable="false"
+                                                      TextAlign="TextAlign.Center"
+                                                      Title="Status" Property="@nameof(VEmployeeList.EmployeeId)" Context="c">
                                     <Template>
                                         <RadzenCheckBox TValue="bool" @bind-Value="c.IsActive"
                                                         Name="chkStatus"
                                                         Change="@(()=> OnCheckChanged(c))" />
                                     </Template>
                                 </RadzenDataGridColumn>
-                                <RadzenDataGridColumn Width="8rem" Sortable="false" Title="Action" Property="@nameof(VEmployees.EmployeeId)" Context="c">
+                                <RadzenDataGridColumn Width="5rem" Sortable="false" Title="Action" Property="@nameof(VEmployeeList.EmployeeId)" Context="c">
                                     <Template>
-                                        <RadzenButton Size="Radzen.ButtonSize.ExtraSmall"
+                                        <RadzenButton Size="ButtonSize.ExtraSmall"
                                                       Icon="more_vert"
                                                       Variant="Variant.Text"
                                                       Click="@((args)=>ShowContextMenuWithContent(args,c.EmployeeId))" />
                                     </Template>
                                 </RadzenDataGridColumn>
                             </Columns>
+                            <LoadingTemplate>
+                                <RadzenProgressBar Value="100"
+                                                   ProgressBarStyle="ProgressBarStyle.Secondary"
+                                                   Mode="ProgressBarMode.Indeterminate"
+                                                   Visible="true"
+                                                   ShowValue="false">
+                                </RadzenProgressBar>
+                            </LoadingTemplate>
                         </RadzenDataGrid>
                     </CardBody>
                 </Card>
-
             </RadzenTabsItem>
-            <RadzenTabsItem Visible="IsEnableNew" Text="New Employee" Icon="person_add">
-                <CreateEmployee Departments="Departments"
-                                Branches="Branches"
-                                Cities="Cities"
-                                Countries="Countries"
-                                Nationalities="Nationalities"
-                                Occuptions="Occuptions"
-                                Close="RemoveTab"
-                                Reloaded="Reload"
-                                Salutations="Salutations"
-                                Provinces="Provinces" />
+            <RadzenTabsItem Visible="IsEnableNew" Text="New" Icon="person_add">
+                <CreateEmployee OnClose="OnClosing"
+                                Reloaded="Reload" />
             </RadzenTabsItem>
-            <RadzenTabsItem Visible="IsEnableEdit" Text="Edit Employee" Icon="edit">
-                @*<EmployeeEdit Nationalities="Nationalities"
-                      Close="RemoveTab"
-                      Reloaded="Reload"
-                      Salutations="Salutations"
-                      model="EmployeeEdit" />*@
+            <RadzenTabsItem Visible="IsEnableEdit" Text="Edit" Icon="edit">
+                <EmployeeEdit OnClose="OnIsEditClose"
+                              EmployeeId="@_empId"
+                              Reloaded="Reload" />
             </RadzenTabsItem>
-            <RadzenTabsItem Visible="IsEnableDetail" Text="Employee Details" Icon="info">
-                <EmployeeDetails Model="Employee" Close="RemoveTab" />
+            <RadzenTabsItem Visible="IsEnableDetail" Text="Details" Icon="info">
+                <EmployeeDetails OnEdit="OnEditTab" EmployeeId="@_empId" Close="OnIsDetailClose" />
             </RadzenTabsItem>
 
         </Tabs>
     </RadzenTabs>
 </Containers>
 @code {
-    RadzenTabs tabs;
-    List<TabItems> tabItems = [];
-    string? filter = string.Empty;
-    IList<VEmployees> SelectedEmployees = [];
-    void OnRowRender(RowRenderEventArgs<VEmployees> e)
-    {
-        if (e.Data.IsActive)
-        {
-            e.Attributes.Add("style", "font-weight:bold;color:red;background-color:yellow;");
-        }
-    }
-    bool IsEnableEdit = false;
-    bool IsEnableNew = false;
-    bool IsEnableDetail = false;
-    [Parameter] public int selectedIndex { get; set; } = 0;
-    EmployeeDto Employee = new();
-    IEnumerable<ProvinceDto> Provinces = [];
-    IEnumerable<string> Salutations = [];
-    IEnumerable<BranchDto> Branches = [];
-    IEnumerable<DepartmentDto> Departments = [];
-    IEnumerable<Country> Countries = [];
-    IEnumerable<Nationality> Nationalities = [];
-    IEnumerable<OcupationResponse>? Occuptions = [];
-    IEnumerable<string> Cities = [];
-    EmployeeDtoUpdate EmployeeEdit = new();
-    int pageSize = 10;
-    int counts = 0;
-    int pageIndex = 0;
-    string sortField = "EmployeeId";
-    bool sortDescending = false;
-    void PageSizeChanged(int page)
-    {
-        pageSize = page;
-    }
 
-
-    async Task OnCheckChanged(VEmployees param)
-    {
-        var responseResult = await _employeeService!.UpdateIsActiveAsync(param.EmployeeId);
-
-        if (!responseResult.IsSuccess)
-        {
-            NotificationService.Notify(NotificationSeverity.Error, responseResult.ErrMessage);
-            return;
-        }
-
-        NotificationService.Notify(NotificationSeverity.Success, responseResult.Data);
-
-        await GetEmployees(searchText);
-    }
-
-    async void AddNewTab()
-    {
-
-        IsEnableNew = true;
-        selectedIndex = 1;
-        StateHasChanged();
-        await GetSalutations();
-        tabs.Reload();
-    }
-
-    void ShowContextMenuWithContent(MouseEventArgs args, Guid? id)
+    void ShowContextMenuWithContent(MouseEventArgs args, string? id)
     {
         ContextMenuService.Open(args, ds =>
     @<RadzenMenu Style="font-size:0.8rem;">
@@ -182,110 +139,5 @@
     </RadzenMenu>
     );
     }
-
-
-    async void AddDetailsTab(Guid? employeeId)
-    {
-        try
-        {
-            var updatedResponse = await _employeeService!.GetEmployeeById(employeeId);
-
-            if (updatedResponse.IsSuccess)
-            {
-                Employee = updatedResponse.Data!;
-                IsEnableDetail = true;
-                selectedIndex = 3;
-                StateHasChanged();
-                ContextMenuService.Close();
-
-                tabs.Reload();
-            }
-            else
-            {
-                NotificationService.Notify(NotificationSeverity.Error, updatedResponse.ErrMessage);
-            }
-        }
-        catch (Exception ex)
-        {
-            NotificationService.Notify(NotificationSeverity.Error, ex.Message);
-        }
-    }
-
-    async Task AddEditTab(Guid? employeeId)
-    {
-        var updatedResponse = await _employeeService.GetEmployeeForUpdate(employeeId);
-
-        StateHasChanged();
-
-        IsEnableEdit = true;
-
-        selectedIndex = 2;
-
-        if (updatedResponse.IsSuccess)
-        {
-            EmployeeEdit = updatedResponse.Data!;
-        }
-        else
-        {
-            NotificationService.Notify(NotificationSeverity.Error, updatedResponse.ErrMessage);
-        }
-        ContextMenuService.Close();
-
-    }
-    void TabChanged(int e)
-    {
-        selectedIndex = e;
-        StateHasChanged();
-    }
-    void RemoveTab()
-    {
-        if (selectedIndex == 1)
-        {
-            IsEnableNew = false;
-            selectedIndex = 0;
-            tabs.Reload();
-            return;
-
-        }
-        else if (selectedIndex == 2)
-        {
-            IsEnableEdit = false;
-            selectedIndex = 0;
-
-            tabs.Reload();
-            return;
-
-        }
-        else if (selectedIndex == 3)
-        {
-            IsEnableDetail = false;
-            selectedIndex = 0;
-
-            tabs.Reload();
-            return;
-
-        }
-        StateHasChanged();
-    }
-
-    async void GetIncludeInactive()
-    {
-        await GetEmployees(searchText);
-    }
-    private async Task GetSalutations()
-    {
-        var salutations = await _salutationService.GetSalutions();
-
-        if (salutations.IsSuccess)
-        {
-            Salutations = salutations!.Data!.Select(x => x.Title!).ToList();
-        }
-        else
-        {
-            Salutations = [];
-        }
-
-    }
-
 }
 

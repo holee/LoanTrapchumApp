@@ -2,6 +2,7 @@
 using Applications.Interfaces.Identity;
 using Applications.Requests.Identity;
 using Applications.Responses;
+using Infrastructures.DataAccess;
 using Microsoft.AspNetCore.Identity;
 namespace Infrastructures.Implements;
 
@@ -11,9 +12,9 @@ public class LoginService(UserManager<ApplicationUser> userManager, SignInManage
     {
         try
         {
-            var user = await userManager.FindByEmailAsync(request.Email!);
+            var user = await userManager.FindByEmailAsync(request.Email);
 
-            var userByUserName = await userManager.FindByNameAsync(request.Email!);
+            var userByUserName = await userManager.FindByNameAsync(request.Email);
 
             user ??= userByUserName;
 
@@ -22,7 +23,7 @@ public class LoginService(UserManager<ApplicationUser> userManager, SignInManage
                 return Result.Failure<string>(ErrorResponse.NotFound("Invalid Email or UsreName."));
             }
 
-            if (user!.IsActive == false)
+            if (user.IsActive == false)
             {
                 return Result.Failure<string>(ErrorResponse.NotFound("Current User is not Active."));
             }

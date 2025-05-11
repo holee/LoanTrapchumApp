@@ -1,47 +1,54 @@
+using Applications.ApplicationPolicies;
 using Applications.Extensions.Identity;
-using Applications.Interfaces.Branches;
+using Applications.Extensions.Identity.Authorizations.Extensions;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
-using System.Threading.Tasks;
+using TrapchumApp.Components.Shared;
 
 namespace TrapchumApp.Components.Layout
 {
     public partial class MainLayout
     {
-        [CascadingParameter]
-        Task<AuthenticationState> AuthenticateState { get; set; } = default!;
+        [CascadingParameter] Task<AuthenticationState> AuthenticateState { get; set; } = default!;
+        [CascadingParameter] CascadingBranchState bState { get; set; } = default!;
 
         bool sidebarExpanded = true;
+
         string? userId = string.Empty;
-        int brandId = 0;
+
+        int branchId;
+
+        bool IsAdminOnly = false;
+
         protected override async Task OnInitializedAsync()
         {
             var auth = await AuthenticateState;
+
+            IsAdminOnly = await _authorizeService.MustHasPermissionAsync(auth.User, RolePolicies.AdminOnly);
 
             if (auth.User.Identity!.IsAuthenticated)
             {
                 userId = auth.User.GetId();
 
-                await getBranchId(userId!);
+                await GetBranchId(userId!);
             }
             await base.OnInitializedAsync();
         }
 
 
-        async Task getBranchId(string userId)
+        async Task GetBranchId(string userId)
         {
-            var branchResult = await _branchService.GetBranchesByUser(userId,0);
+            var rsp = await _branchService.GetBranchesByUser(userId);
 
-            if (branchResult.IsSuccess)
+            if (rsp.IsSuccess)
             {
-                var branch = branchResult.Data?.FirstOrDefault();
-
-                if (branch is not null)
-                {
-                    brandId = branch.BranchId;
-                }
+                branchId = rsp.Data!.BranchId;
             }
 
+            if (branchId > 0)
+            {
+               await bState.GetBranchState(branchId);
+            }
         }
     }
 }

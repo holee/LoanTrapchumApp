@@ -1,4 +1,4 @@
-﻿namespace Applications.Responses.Lists.Entities;
+﻿namespace Applications.Responses.Lists.Customers;
 
 public class CustomerIncomeResponse 
 {

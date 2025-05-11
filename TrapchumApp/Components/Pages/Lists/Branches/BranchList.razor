@@ -1,94 +1,87 @@
 ﻿@page "/App/Branches"
-@using Applications.Interfaces.Branches
 @using Applications.Responses.ViewModels.Branches
 <PageTitle>Branches</PageTitle>
-<Containers Fluid>
-    <Card>
-        <CardBody>
-            <RadzenTabs>
-                <Tabs>
-                    <RadzenTabsItem Text="Branches">
-                        <PageDropDown Reload="Reload"
-                                      ShowSearchBox="true"
-                                      OnTextChanged="PerformSearch"
-                                      ShowReload="true">
-                            <LeftChildContent>
-                                <AuthorizeView>
-                                    <Authorized>
-                                        <RadzenButton Click="OnCreate"
-                                                      Text="New Branch"
-                                                      Icon="add" Color="Kalor.Success" Size="ButtonSize.Small" />
-                                    </Authorized>
-                                </AuthorizeView>
-                            </LeftChildContent>
-                            <RightChildContent>
-                                <div class="ml-2">
-                                    <RadzenCheckBox TValue="bool" @bind-Value=@InActive Change="ex=>OnIncludeInactive(ex)" Name="InActive" />
-                                    <RadzenLabel Text="Include InActive" Component="CheckBox1" Style="margin-left: 8px; vertical-align: middle;" />
-                                </div>
-                            </RightChildContent>
-                        </PageDropDown>
-                        <RadzenDataGrid GridLines="DataGridGridLines.Horizontal"
-                                        Count="@counts"
-                                        PageSize="@pageSize"
-                                        AllowPaging="true"
-                                        ShowPagingSummary="true"
-                                        Density="Density.Compact"
-                                        PagerHorizontalAlign="HorizontalAlign.Right"
-                                        AllowSorting="true"
-                                        IsLoading="isLoading"
-                                        LoadData="LoadData"
-                                        Data="Branches">
-                            <Columns>
-                                <RadzenDataGridColumn Width="5rem" Title="#" Context="h">
-                                    <Template>
-                                        @(Branches!.ToList()!.IndexOf(h) + 1)
-                                    </Template>
-                                </RadzenDataGridColumn>
-                                <RadzenDataGridColumn Width="10rem" Title="Branch Name" Property="p=>p.BranchName" />
-                                <RadzenDataGridColumn Title="Description" Property="p=>p.Description" />
-                                <RadzenDataGridColumn Title="Address" Context="b">
-                                    <Template>
-                                        @b.ToString()
-                                    </Template>
-                                </RadzenDataGridColumn>
+<RadzenTabs RenderMode="TabRenderMode.Server">
+    <Tabs>
+        <RadzenTabsItem Text="Branches">
+            <PageDropDown Reload="Reload"
+            ShowSearchBox="true"
+            OnTextChanged="PerformSearch"
+            ShowReload="true">
+                <LeftChildContent>
+                    <AuthorizeView>
+                        <Authorized>
+                            <RadzenButton Click="OnCreate"
+                            Text="New Branch"
+                            Icon="add"
+                            ButtonStyle="ButtonStyle.Primary"
+                            Size="ButtonSize.Small" />
+                        </Authorized>
+                    </AuthorizeView>
+                </LeftChildContent>
+                <RightChildContent>
+                    <div class="ml-2">
+                        <RadzenCheckBox TValue="bool" @bind-Value=@InActive Change="ex=>OnIncludeInactive(ex)" Name="InActive" />
+                        <RadzenLabel Text="Include InActive" Component="CheckBox1" Style="margin-left: 8px; vertical-align: middle;" />
+                    </div>
+                </RightChildContent>
+            </PageDropDown>
+            <RadzenDataGrid GridLines="DataGridGridLines.Horizontal"
+            Count="@counts"
+            PageSize="@pageSize"
+            AllowPaging="true"
+            ShowPagingSummary="true"
+            Density="Density.Compact"
+            PagerHorizontalAlign="HorizontalAlign.Right"
+            AllowSorting="true"
+            IsLoading="isLoading"
+            LoadData="LoadData"
+            Data="Branches">
+                <Columns>
+                    <RadzenDataGridColumn Width="5rem" Title="#" Context="h">
+                        <Template>
+                            @(Branches!.ToList()!.IndexOf(h) + 1)
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Width="10rem" Title="Branch Name" Property="p=>p.BranchName" />
+                    <RadzenDataGridColumn Title="Description" Property="p=>p.Description" />
+                    <RadzenDataGridColumn Title="Address" Context="b">
+                        <Template>
+                            @b.ToString()
+                        </Template>
+                    </RadzenDataGridColumn>
 
-                                <RadzenDataGridColumn Width="5rem" Title="Status" Sortable="false" Context="c">
-                                    <Template>
-                                        <RadzenCheckBox TValue="bool?" @bind-Value=@c.IsActive Change="@(()=>OnCheckChanged(c))" />
-                                    </Template>
-                                </RadzenDataGridColumn>
-                                <AuthorizeView>
-                                    <Authorized>
-                                        <RadzenDataGridColumn Width="5rem" Title="Actions" Sortable="false" Context="c">
-                                            <Template>
-                                                <RadzenButton Size="Radzen.ButtonSize.ExtraSmall"
-                                                              Icon="more_vert"
-                                                              Variant="Variant.Text"
-                                                              Click="@((args)=>ShowContextMenuWithContent(args,c))" />
-                                            </Template>
-                                        </RadzenDataGridColumn>
-                                    </Authorized>
-                                </AuthorizeView>
-                            </Columns>
-                        </RadzenDataGrid>
-                    </RadzenTabsItem>
-                </Tabs>
-            </RadzenTabs>
-        </CardBody>
-    </Card>
-</Containers>
-
+                    <RadzenDataGridColumn Width="5rem" Title="Status" Sortable="false" Context="c">
+                        <Template>
+                            <RadzenCheckBox TValue="bool?" @bind-Value=@c.IsActive Change="@(()=>OnCheckChanged(c))" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <AuthorizeView>
+                        <Authorized>
+                            <RadzenDataGridColumn Width="5rem" Title="Actions" Sortable="false" Context="c">
+                                <Template>
+                                    <RadzenButton Size="ButtonSize.ExtraSmall"
+                                    Icon="more_vert"
+                                    Variant="Variant.Text"
+                                    Click="@((args)=>ShowContextMenuWithContent(args,c))" />
+                                </Template>
+                            </RadzenDataGridColumn>
+                        </Authorized>
+                    </AuthorizeView>
+                </Columns>
+            </RadzenDataGrid>
+        </RadzenTabsItem>
+    </Tabs>
+</RadzenTabs>
 @code {
-
     void ShowContextMenuWithContent(MouseEventArgs args, VBranchResponse e)
     {
-        // ContextMenuService.Open(args, ds =>
-        //     @<RadzenMenu Style="font-size:0.8rem;">
-        //         <RadzenMenuItem Click="@(()=>OnDetail(e))" Icon="info" Text="Details" Value="@e" />
-        //         <RadzenMenuItem Click="@(()=>OnEdit(e))" Disabled Icon="edit" Text="Edit" Value="@e" />
-        //         <RadzenMenuItem Click="@(()=>OnDelete(e))" Icon="delete" Text="Delete" Value="@e" />
-        //     </RadzenMenu>
-        // );
+        ContextMenuService.Open(args, ds =>
+    @<RadzenMenu Style="font-size:0.8rem;">
+        <RadzenMenuItem Click="@(()=>OnDetail(e))" Icon="info" Text="Details" Value="@e" />
+        <RadzenMenuItem Click="@(()=>OnEdit(e))" Icon="edit" Text="Edit" Value="@e" />
+        <RadzenMenuItem Click="@(()=>OnDelete(e))" Icon="delete" Text="Delete" Value="@e" />
+    </RadzenMenu>
+        );
     }
 }

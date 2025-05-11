@@ -1,7 +1,4 @@
 using Applications.Extensions;
-using Applications.Requests.Collaterals;
-using Applications.Responses.Collaterals;
-using Applications.Responses;
 using Applications.Responses.ViewModels.Collaterals;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Services.Customers;
@@ -9,6 +6,9 @@ using Applications.Services.LIsts;
 using Microsoft.AspNetCore.Components;
 using Radzen.Blazor;
 using Radzen;
+using System.Threading.Tasks;
+using Applications.Responses.Paginations;
+using Applications.Responses.Lists.Collaterals;
 namespace TrapchumApp.Components.Pages.Lists.Collaterals;
 
 public partial class CollateralList
@@ -30,11 +30,12 @@ public partial class CollateralList
     List<TabItems> tabItems = [];
     int tabIndex = 1;
     int selectedIndex = 0;
-    CollateralResponse? Collateral { get; set; } = new();
-    IEnumerable<CollateralLineResponse>? CollateralLines = [];
-    CollateralResponse? SelectedCollateral = new();
+    string CustomerId = string.Empty;
+    VCustomerCollaterals? Collateral { get; set; } = new();
+    IEnumerable<Applications.Responses.Lists.Collaterals.VCollateralLines>? CollateralLines = [];
+    VCustomerCollaterals? SelectedCollateral = new();
     LoanCustomerQuery? SelectedCustomers = new();
-    Guid? CollateralId = Guid.Empty;
+    string? CollateralId = string.Empty;
     IEnumerable<VCustomerList> custlist = [];
     IEnumerable<CustomerCollateral>? cusName = [];
     CustomerCollateral? SelectedCustomer = new();
@@ -48,13 +49,13 @@ public partial class CollateralList
         _cusService = customerService;
     }
 
-    void SearchCollateral()
+    async Task SearchCollateral()
     {
-        GetCollaterals(searchText);
+        await GetCollaterals();
         StateHasChanged();
     }
 
-    async Task AddedMoreCollateral(Guid? Id)
+    async Task AddedMoreCollateral(string? Id)
     {
         try
         {
@@ -76,7 +77,7 @@ public partial class CollateralList
             IsShowAdd = true;
             selectedIndex = 1;
             tabs!.Reload();
-            var rsp = await _colService.GetCollateralByIdAsync(Id!.Value);
+            var rsp = await _colService.GetCollateralByIdAsync(Id);
             if (rsp.IsSuccess)
             {
                 var collateral = rsp.Data!;
@@ -97,7 +98,7 @@ public partial class CollateralList
         }
         catch (Exception ex)
         {
-            NotificationService.Notify(Radzen.NotificationSeverity.Error, "Exception", ex!.Message);
+            NotificationService.Notify(NotificationSeverity.Error, "Exception", ex!.Message);
             Console.WriteLine(ex.Message);
             // IsProgress = false;
 
@@ -134,40 +135,25 @@ public partial class CollateralList
         }
         catch (Exception ex)
         {
-            NotificationService.Notify(Radzen.NotificationSeverity.Error, "Exception", ex!.Message);
+            NotificationService.Notify(NotificationSeverity.Error, "Exception", ex!.Message);
             Console.WriteLine(ex.Message);
             // IsProgress = false;
 
         }
 
     }
-    async void AddDetailsTab(Guid? customerId)
+    void Delete(string? customerId) { }
+    void AddDetailsTab(string? customerId)
     {
+        ContextMenuService.Close();
         try
         {
-            var rsp = await _colService.GetCollateralByIdAsync(customerId);
+            CustomerId = customerId!;
 
-            if ((rsp.IsSuccess))
-            {
-                SelectedCustomers!.CustomerId = rsp.Data!.CollateralId;
+            IsShowDetails = true;
 
-                SelectedCustomers.AltName = Collateral!.CustomerName;
+            selectedIndex = 1;
 
-                CollateralLines = rsp.Data.CollateralLines;
-
-                IsShowDetails = true;
-
-                selectedIndex = 2;
-
-                tabs!.Reload();
-
-                StateHasChanged();
-            }
-            else
-            {
-                NotificationService.Notify(NotificationSeverity.Warning, "", "Try getting data not found!");
-
-            }
         }
         catch (Exception ex)
         {
@@ -200,27 +186,30 @@ public partial class CollateralList
         //     selectedIndex = 0;
         // }
     }
-    protected void GetCollaterals(string? filter = null)
+
+    int pageIndex = 0;
+    int pageSize = 10;
+    bool sortDecending = false;
+    string sortColumn = "CollateralId";
+    int counts = 0;
+    protected async Task GetCollaterals(string? filter = null)
     {
         try
         {
-            //collateralGrid = async req =>
-            //{
-            //    var sortColumnName = req.SortByColumn!.Title ?? "#";
-            //    var sortByColumn = sortColumnName switch
-            //    {
-            //        "#" => "CustomerId",
-            //        "Date" => "RegisterDate",
-            //        "Customer" => "CustomerName",
-            //        _ => "Id"
-            //    };
-            //    var sortOder = req.SortByAscending;
-            //    var sortIndex = req.StartIndex == 0 ? 0 : req.StartIndex;
-            //    var sortCount = req.Count ?? 10;
-            //    var res = await CollateralNewService!.GetsCollateralAysnc(sortIndex, sortCount, sortByColumn, sortOder, filter);
-            //    Collaterals!.AddRange(res.Items);
-            //    return GridItemsProviderResult.From(res.Items!, res.Count!);
-            //};
+            var param = new QueryParam
+            {
+                PageNumber = pageIndex,
+                PageSize = pageSize,
+                SortColumn = sortColumn,
+                SortDescending = sortDecending,
+                Filter = filter
+            };
+
+            var rsp = await _colService.GetCollateralsAysnc(param);
+
+            Collaterals = rsp.Items ?? [];
+
+            counts = rsp.Count;
         }
         catch (Exception ex)
         {
@@ -229,23 +218,17 @@ public partial class CollateralList
     }
     protected async override Task OnInitializedAsync()
     {
-        GetCollaterals();
+        await GetCollaterals();
         await base.OnInitializedAsync();
     }
     async void Reload()
     {
-        await OnInitializedAsync();
-        StateHasChanged();
+        await GetCollaterals();
     }
-    void OnSearch(ChangeEventArgs e)
+    async Task OnSearch(string e)
     {
-        searchText = e.Value!.ToString()!;
-        GetCollaterals(searchText);
+        searchText = e;
+        await GetCollaterals(e);
 
-    }
-    private async void ShowModal()
-    {
-
-        await Task.CompletedTask;
     }
 }

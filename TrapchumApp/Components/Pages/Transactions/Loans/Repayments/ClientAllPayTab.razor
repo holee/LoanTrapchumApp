@@ -1,5 +1,4 @@
-﻿@using Applications.Responses.ViewModels.Loans.Schedules
-<PageDropDown PageSizeChanged="ChangedPageSize"
+﻿<PageDropDown PageSizeChanged="ChangedPageSize"
               OnTextChanged="TextLoanSearchChanged"
               ShowSearchBox="true">
     <RightChildContent>
@@ -120,7 +119,7 @@
                               Width="7rem"
                               TextAlign="TextAlign.Center">
             <Template>
-                <RadzenButton Size="Radzen.ButtonSize.ExtraSmall"
+                <RadzenButton Size="ButtonSize.ExtraSmall"
                               Icon="more_vert"
                               Variant="Variant.Text"
                               Click="@((args)=>ShowContextMenuWithContent(args,p))" />

@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Applications.Responses.ViewModels.Employees;
 
-public sealed class VEmployees
+public sealed class VEmployeeList
 {
     public string? EmployeeId { get; set; }
     public string? FirstName { get; set; } = string.Empty;

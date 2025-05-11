@@ -5,7 +5,7 @@ public sealed class VPaymentLines
     public long? Id { get; set; }
     public long? LoanScheduleRefId { get; set; }
     public long? BranchId { get; set; }
-    public long? LoanId { get; set; }
+    public string? LoanId { get; set; }
     public int? InstallmentNo { get; set; }
     public DateTime? PayDate { get; set; }
     public string? OfficialReceiptNo { get; set; }

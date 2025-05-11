@@ -1,11 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Applications.Extensions
+﻿namespace Applications.Extensions
 {
+    public static class StringExtensions
+    {
+        public static bool IsNotNullOrEmpty(this string? value)
+        {
+            return !string.IsNullOrEmpty(value) || !string.IsNullOrWhiteSpace(value);
+        }
+        public static bool IsNullOrEmpty(this string? value)
+        {
+            return string.IsNullOrEmpty(value);
+        }
+    }
     public static class GuidExtensions
     {
         public static bool NotEmpty(this Guid? value)

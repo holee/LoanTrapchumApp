@@ -1,0 +1,15 @@
+﻿<RadzenMenu>
+    <RadzenMenuItem Text="Currencies" Icon="payment" Visible="@IsBranchOpen">
+        <RadzenMenuItem  Text="Exchnage" Click="@ShowCurrencyDialogue" Icon="check_circle"></RadzenMenuItem>
+    </RadzenMenuItem>
+</RadzenMenu>
+@code {
+    [Parameter]
+    public EventCallback ShowDialogue { get; set; } = default!;
+    [Parameter,EditorRequired]
+    public bool IsBranchOpen { get; set; }
+    async Task ShowCurrencyDialogue()
+    {
+        await ShowDialogue.InvokeAsync();
+    }
+}

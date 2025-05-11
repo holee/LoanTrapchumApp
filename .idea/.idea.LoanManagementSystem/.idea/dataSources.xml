@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="trapchum" uuid="caeec553-2e75-48a7-840e-de8bbcc8cd82">
+    <data-source source="LOCAL" name="trapchum" uuid="591b36dd-2351-4a32-b839-282a08edc9c1">
       <driver-ref>sqlserver.localdb.jb</driver-ref>
       <synchronize>true</synchronize>
       <configured-by-url>true</configured-by-url>

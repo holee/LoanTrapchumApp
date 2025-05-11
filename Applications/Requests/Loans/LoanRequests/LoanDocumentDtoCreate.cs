@@ -4,7 +4,7 @@ public sealed class LoanDocumentDtoCreate
 {
     public long Id { get; set; }
     public int? BranchId { get; set; }
-    public long? LoanRequestId { get; set; }
+    public string? LoanRequestId { get; set; }
     public string? OriginalName { get; set; }
     public string? NewFileName { get; set; }
     public string? AltText { get; set; }

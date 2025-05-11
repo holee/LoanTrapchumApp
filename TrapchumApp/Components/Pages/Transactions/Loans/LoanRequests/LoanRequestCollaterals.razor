@@ -1,29 +1,35 @@
-﻿@using Applications.Responses.ViewModels.Collaterals
-@using Applications.Responses.ViewModels.Loans.Requests
-@using TrapchumApp.Components.Pages.Lists.Collaterals
-<Card>
-    <CardHeader>
-        <RadzenStack Orientation="Orientation.Horizontal"
-                     JustifyContent="JustifyContent.SpaceBetween"
-                     AlignItems="AlignItems.Center">
-            <strong>Collateral Information</strong>
-            @if (ShowAdd)
-            {
-                <RadzenButton Text="Add"
+﻿@using Applications.Responses.ViewModels.Loans.Requests
+<RadzenFieldset>
+    <HeaderTemplate>
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
+            <RadzenIcon Icon="house" /><b>Collateral Information</b>
+        </RadzenStack>
+    </HeaderTemplate>
+    <ChildContent>
+        <RadzenRow Visible="@ShowCommand" AlignItems="AlignItems.Center">
+            <RadzenColumn Size="8">
+                @if (SearchBoxTemplate is not null)
+                {
+                    @SearchBoxTemplate
+                }
+            </RadzenColumn>
+            <RadzenColumn Size="4">
+                <RadzenStack Orientation="Orientation.Horizontal"
+                            JustifyContent="JustifyContent.End">
+                 <RadzenButton Text="Add New"
                               ButtonStyle="ButtonStyle.Primary"
                               Icon="add"
                               Click="@ClickedAdd"
-                              Size="Radzen.ButtonSize.ExtraSmall"
-                              ButtonType="Radzen.ButtonType.Button"></RadzenButton>
-            }
+                              Size="ButtonSize.Small"
+                              Visible="@(ShowAdd && ShowCommand)"
+                              ButtonType="ButtonType.Button"></RadzenButton>
         </RadzenStack>
-    </CardHeader>
-    <CardBody>
+            </RadzenColumn>
+        </RadzenRow>
         <RadzenDataGrid GridLines="DataGridGridLines.Both"
                         Responsive
                         TItem="VLoanRequestCollateralLines"
                         Density="Density.Compact"
-
                         @ref="gridColaterals"
                         Style="min-height:15rem;height:15rem;max-height:15rem;"
                         Data="Collaterals">
@@ -49,7 +55,7 @@
                         <Template>
                             <RadzenButton Icon="delete"
                                           Shade="Shade.Lighter"
-                                          Size="Radzen.ButtonSize.ExtraSmall"
+                                          Size="ButtonSize.ExtraSmall"
                                           Click="()=>ClickedRemove(g)"
                                           Variant="Variant.Outlined" />
                         </Template>
@@ -57,66 +63,8 @@
                 }
             </Columns>
         </RadzenDataGrid>
-    </CardBody>
-</Card>
-
-@code {
-    [Parameter, EditorRequired] public List<VLoanRequestCollateralLines> Collaterals { get; set; } = [];
-    [Parameter, EditorRequired] public Guid? CustomerId { get; set; }
-    [Parameter] public bool ShowAdd { get; set; } = false;
-    [Parameter] public bool ShowRemove { get; set; } = false;
-    [Parameter] public EventCallback Add { get; set; }
-    [Parameter] public EventCallback<VLoanRequestCollateralLines> RemoveCollateral { get; set; }
-    RadzenDataGrid<VLoanRequestCollateralLines> gridColaterals = default!;
-    async void ClickedAdd()
-    {
-        await Add.InvokeAsync();
-        await gridColaterals.Reload();
-    }
-
-    async void ClickedRemove(VLoanRequestCollateralLines c)
-    {
-        // Collaterals.Remove(c);
-        // await gridColaterals.Reload();
-        await RemoveCollateral.InvokeAsync(c);
-    }
-
-
-    async void AddCollaterals()
-    {
-        var param = new Dictionary<string, object?>
-        {
-            {"CustomerId",CustomerId}
-        };
-        var options = new DialogOptions
-            {
-                Width = "60vw"
-            };
-
-        IList<VCollateralLines> results = await DialogService.OpenAsync<CollateralLoanRequest>("Collateral", param, options);
-        if (results.Any())
-        {
-            var collateralLines = results.Select(c => new VLoanRequestCollateralLines
-                {
-                    CollateralLineId = c.Id,
-                    CollateralId = c.CollateralId!.ToGuid(),
-                    OwnerName = c.OwnerName,
-                    ReferenceNo = c.ReferenceNo,
-                }).ToList();
-            foreach (var item in collateralLines)
-            {
-                // if (_collateralLines.Contains(item)) continue;
-                // _collateralLines.Add(item);
-            }
-            await gridColaterals.Reload();
-            StateHasChanged();
-        }
-    }
-
-
-    public async void CollateralReload()
-    {
-        await gridColaterals.Reload();
-        StateHasChanged();
-    }
+    </ChildContent>
+</RadzenFieldset>
+@code{
+    [Parameter] public RenderFragment? SearchBoxTemplate { get; set; } 
 }

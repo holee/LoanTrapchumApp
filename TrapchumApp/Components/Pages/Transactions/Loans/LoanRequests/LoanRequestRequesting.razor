@@ -1,10 +1,9 @@
-@using Applications.Extensions.Identity.Policies
 @using Applications.Responses.ViewModels.Loans.Requests
 <PageDropDown PageSizeChanged="PageChanged"
               OnTextChanged="FilterTextChanged"
               ShowSearchBox="true">
     <LeftChildContent>
-        <AuthorizeView Policy="@LoanRequestsPolicies.Create">
+        <AuthorizeView Policy="@RequestsPolicies.Create">
             <Authorized>
                 <RadzenLink Path="@createRequestUrl" Text="Request" Icon="add" />
             </Authorized>
@@ -50,14 +49,14 @@
         <RadzenDataGridColumn TextAlign="TextAlign.Right" Width="4rem" Property="@(nameof(VLoanRequests.InterestRate))" Title="Rate" />
         <RadzenDataGridColumn Title="Status" Context="r" Width="7rem" TextAlign="TextAlign.Center">
             <Template>
-                <AuthorizeView Policy="@LoanRequestsPolicies.Request">
+                <AuthorizeView Policy="@RequestsPolicies.Request">
                     <Authorized>
                         <LinkRequestLoan BranchId="@BranchId"
                                          LoanRequest="@r"
                                          CreditAgentId="@UserId" />
                     </Authorized>
                     <NotAuthorized>
-                        <NavLink href="@($"/Loan/Request/{r?.LoanRequestId}/Details?CustomerId={r?.CustomerId}&BranchId={BranchId}")">
+                        <NavLink href="@($"/App/Loan/{BranchId}/Branches/Request/Details?UserId={UserId}&LoanRequestId={r?.LoanRequestId}&CustomerId={r?.CustomerId}")">
                             <RadzenBadge Variant="Variant.Text"
                                          Style="font-size:0.7rem;"
                                          Text="@r?.Status" BadgeStyle="BadgeStyle.Secondary" />

@@ -1,8 +1,7 @@
-using Applications.Interfaces.Addresses;
-using Applications.Interfaces.Lists;
 using Applications.Requests.Lists.Addreses;
 using Applications.Requests.Lists.OtherNames;
 using Applications.Services.Lists;
+using Domains.Models.Bases;
 using Domains.Models.Lists;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
@@ -12,30 +11,27 @@ namespace TrapchumApp.Components.Pages.Lists.OtherNames
     public partial class NameCreateModal
     {
         private readonly IOtherNameServiceImpl _otherNameService;
-        public NameCreateModal(IOtherNameServiceImpl otherNameService)
+        private readonly ISalutationServiceImpl _salutationService;
+        public NameCreateModal(IOtherNameServiceImpl otherNameService, ISalutationServiceImpl salutationService)
         {
             _otherNameService = otherNameService;
+            _salutationService = salutationService;
         }
 
-        private EntNameDtoCreate model = new EntNameDtoCreate();
-
+        private EntityNamesCreate model = new EntityNamesCreate();
         [Parameter] public IEnumerable<ProvinceDto>? ProvinceList { get; set; }
         [Parameter] public IEnumerable<CommuneDto>? CommuneList { get; set; }
         [Parameter] public IEnumerable<DistrictDto>? DistrictList { get; set; }
         [Parameter] public IEnumerable<VillageDto>? VillageList { get; set; }
-        [Parameter] public ProvinceDto? SelectedProvince { get; set; }
-        [Parameter] public DistrictDto? SelectedDistrict { get; set; }
-        [Parameter] public CommuneDto? SelectedCommune { get; set; }
-        [Parameter] public VillageDto? SelectedVillage { get; set; }
         private bool isValid = true;
         protected List<string> salutations = ["Mr.", "Mrs.", "Miss.", "Others"];
-
         protected override async Task OnInitializedAsync()
         {
             try
             {
-                //ProvinceList = await AddressService!.GetAllProvinceAsync();
-                model.Sex = "Mr";
+                ProvinceList = await _addressService!.GetsProvinces();
+
+                model.Gender = "Mr";
             }
             catch (Exception ex)
             {
@@ -50,34 +46,19 @@ namespace TrapchumApp.Components.Pages.Lists.OtherNames
         {
             try
             {
-                model.EntType = "Other Name";
+                model.Id = $"{Guid.CreateVersion7()}";
+                model.EntType = EntType.OtherName.ToString();
                 model.CountryName = "Cambodia";
-                model.City = SelectedProvince?.ProDescription;
-                model.ProvinceRefId = SelectedProvince?.ProvinceId;
-                model.ProDescription = SelectedProvince?.ProDescription;
-                model.ProInKhmer = SelectedProvince?.ProInKhmer;
-                model.DistrictRefId = SelectedDistrict?.DistrictId;
-                model.DisDescription = SelectedDistrict?.DisDescription;
-                model.DisInKhmer = SelectedDistrict?.DisInKhmer;
-                model.CommuneRefId = SelectedCommune?.CommuneId;
-                model.ComDescription = SelectedCommune?.ComDescription;
-                model.ComInKhmer = SelectedCommune?.ComInKhmer;
-                model.VillageRefId = SelectedVillage?.VillageId;
-                model.VillDescription = SelectedVillage?.VillDescription;
-                model.VilInKhmer = SelectedVillage?.VilInKhmer;
-
-                var message = await _otherNameService!.CreateAsync(model);
-
-                if (message.IsSuccess)
+                var rsp = await _otherNameService!.CreateAsync(model);
+                if (rsp.IsSuccess)
                 {
-                    NotificationService.Notify(Radzen.NotificationSeverity.Success, "Other Name", "Other Name created successfully!");
+                    NotificationService.Notify(Radzen.NotificationSeverity.Success, rsp.Data);
                     model = new();
                     return;
                 }
                 else
                 {
-                    NotificationService.Notify(Radzen.NotificationSeverity.Error, "Other Name", "Other Name create failed");
-
+                    NotificationService.Notify(Radzen.NotificationSeverity.Error, rsp.ErrMessage);
                 }
             }
             catch (Exception ex)
@@ -87,60 +68,51 @@ namespace TrapchumApp.Components.Pages.Lists.OtherNames
 
         }
 
-        async void SelectProvince(ProvinceDto e)
+        async void SelectProvinceChanged(object e)
         {
-            SelectedProvince = e;
-            if (SelectedProvince is not null)
-            {
 
-                DistrictList = await _addressService!.GetDistrictsByProvinceId(SelectedProvince.ProvinceId);
+            var province = e as ProvinceDto;
+
+            if (province is not null)
+            {
+                model.ProInKhmer = province.ProInKhmer;
+                DistrictList = await _addressService!.GetDistrictsByProvinceId(province.ProvinceId);
             }
             else
             {
-                SelectedProvince = null;
-                DistrictList = null;
+                DistrictList = [];
             }
             StateHasChanged();
 
         }
-        async Task SelectDistrict(DistrictDto e)
+        async Task SelectDistrictChanged(object e)
         {
-            if (e is not null)
+            var district = e as DistrictDto;
+
+            if (district is not null)
             {
-                SelectedDistrict = e;
-                CommuneList = await _addressService!.GetCommunesByDistrictId(SelectedDistrict.DistrictId);
+                model.DisInKhmer = district.DisInKhmer;
+                CommuneList = await _addressService!.GetCommunesByDistrictId(district.DistrictId);
             }
             else
             {
-                SelectedDistrict = null;
-                CommuneList = null;
+                CommuneList = [];
             }
             StateHasChanged();
         }
-        async Task SelectCommune(CommuneDto e)
+        async Task SelectCommuneChanged(object e)
         {
-            if (e is not null)
+
+            var commune = e as CommuneDto;
+
+            if (commune is not null)
             {
-                SelectedCommune = e;
-                VillageList = await _addressService!.GetVillagesByCommuneId(SelectedCommune.CommuneId);
+                model.ComInKhmer = commune.ComInKhmer;
+                VillageList = await _addressService!.GetVillagesByCommuneId(commune.CommuneId);
             }
             else
             {
-                SelectedCommune = null;
-                VillageList = null;
-            }
-            StateHasChanged();
-        }
-        void SelectVillage(VillageDto e)
-        {
-            if (e is not null)
-            {
-                SelectedVillage = e;
-                
-            }
-            else
-            {
-                SelectedVillage = null;
+                VillageList = [];
             }
             StateHasChanged();
         }
@@ -165,6 +137,7 @@ namespace TrapchumApp.Components.Pages.Lists.OtherNames
         private async Task GetSalutations()
         {
             var salutations = await _salutationService.GetSalutions();
+
             if (salutations.IsSuccess)
             {
                 Salutations = salutations!.Data!.Select(x => x.Title!).ToList();

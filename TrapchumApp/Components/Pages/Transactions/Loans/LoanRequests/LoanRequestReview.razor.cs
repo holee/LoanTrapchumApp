@@ -1,11 +1,9 @@
 using Applications.Extensions;
 using Applications.Extensions.Identity;
 using Applications.Extensions.Maths;
-using Applications.Extensions.NumberExtions;
-using Applications.Interfaces.Identity;
+using Applications.Extensions.NumberExtensions;
 using Applications.Requests.Loans.LoanRequests;
 using Applications.Responses.ViewModels.Loans.Requests;
-using Applications.Services.Loans;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Radzen;
@@ -15,9 +13,9 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
     public partial class LoanRequestReview
     {
         [CascadingParameter] Task<AuthenticationState> State { get; set; } = default!;
-        [Parameter, EditorRequired] public Guid? LoanRequestId { get; set; }
-        [Parameter, SupplyParameterFromQuery] public Guid? CustomerId { get; set; }
-        [Parameter, SupplyParameterFromQuery] public Guid? UserId { get; set; }
+        [Parameter, EditorRequired] public string? LoanRequestId { get; set; }
+        [Parameter, SupplyParameterFromQuery] public string? CustomerId { get; set; }
+        [Parameter, SupplyParameterFromQuery] public string? UserId { get; set; }
         [Parameter, SupplyParameterFromQuery] public int BranchId { get; set; }
         VLoanRequests? data = new();
         string Memo = "";
@@ -68,7 +66,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 
         async Task GetLoanRequestDetails()
         {
-            var resp = await _loanRequestService.GetLoanRequestsAsync(BranchId, CustomerId, LoanRequestId, true);
+            var resp = await _loanRequestService.GetLoanRequestAsync(BranchId, CustomerId, LoanRequestId, true);
 
             if (resp.IsSuccess)
             {

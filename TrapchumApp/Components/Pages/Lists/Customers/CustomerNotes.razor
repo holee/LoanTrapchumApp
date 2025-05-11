@@ -1,4 +1,13 @@
-﻿<RadzenDataGrid Data="Notes"
+﻿<RadzenStack Orientation="Orientation.Horizontal"
+             class="rz-mb-2"
+             Visible="ShowCommand"
+             AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+    <RadzenButton ButtonStyle="ButtonStyle.Primary"
+                  Click="AddNewNote"
+                  Visible="@(ShowAdd && ShowCommand)"
+                  Size="ButtonSize.Small" Icon="add" Text="Add Note"></RadzenButton>
+</RadzenStack>
+<RadzenDataGrid Data="Notes"
                 Responsive
                 TItem="VCustomerNotes"
                 PagerHorizontalAlign="HorizontalAlign.Right"
@@ -8,31 +17,76 @@
                 GridLines="DataGridGridLines.Both"
                 ColumnWidth="15rem"
                 Density="Density.Compact">
-    <HeaderTemplate>
-        <RadzenButton ButtonStyle="ButtonStyle.Primary"
-                      Click="AddNewNote"
-                      Size="Radzen.ButtonSize.Small" Icon="add" Text="Add Note"></RadzenButton>
-    </HeaderTemplate>
     <Columns>
         <RadzenDataGridColumn Width="10rem"
-                              Title="Agent Name"
+                              Title="CreateNewUser By"
                               Property="CreditAgentName"></RadzenDataGridColumn>
         <RadzenDataGridColumn Title="Description" Property="Description"></RadzenDataGridColumn>
-        <RadzenDataGridColumn Width="6rem" Title="Created" Property="Created">
+        <RadzenDataGridColumn Width="6rem" Title="CreateNewUserd" Property="CreateNewUserd">
             <Template>
-                @context.Created!.Value.ToShortDateString()
+                @context.Created.DayFirst()
             </Template>
         </RadzenDataGridColumn>
     </Columns>
 </RadzenDataGrid>
 @code {
-    [Parameter]
-    public IEnumerable<VCustomerNotes> Notes { get; set; } = [];
-    [Parameter]
-    public EventCallback AddNote { get; set; }
+
+    [Parameter] public IEnumerable<VCustomerNotes> Notes { get; set; } = [];
+    [Parameter] public string? CustomerId { get; set; } = string.Empty;
+    [Parameter] public bool ShowAdd { get; set; } = false;
+    [Parameter] public bool ShowCommand { get; set; } = false;
+    [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        if (CustomerId.IsNotNullOrEmpty() && !Notes.Any())
+        {
+            await GetCustomerNotes(CustomerId);
+        }
+
+        await base.OnInitializedAsync();
+    }
 
     async Task AddNewNote()
     {
-        await AddNote.InvokeAsync();
+        var auth = await AuthenticationState;
+
+        if (auth.User.Identity!.IsAuthenticated == false)
+        {
+            return;
+        }
+
+        var userId = auth.User!.GetId();
+
+        bool? dialogueResult = await DialogService.OpenAsync<CustomerNoteAdd>("New Note", new Dictionary<string, object?>
+            {
+                { "CustomerId", CustomerId },
+                { "UserId", userId }
+            });
+
+        if (dialogueResult is not null && dialogueResult == true)
+        {
+            await GetCustomerNotes(CustomerId);
+        }
+
     }
+
+
+    async Task GetCustomerNotes(string? customerId)
+    {
+        var noteResponse = await _customerService.GetCusomerNotesAsync(customerId);
+
+        if (noteResponse.IsSuccess)
+        {
+            Notes = noteResponse.Data!;
+        }
+        else
+        {
+            Notes = [];
+
+            NotificationService.Notify(NotificationSeverity.Error, noteResponse.ErrMessage);
+        }
+    }
+
 }

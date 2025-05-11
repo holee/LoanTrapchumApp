@@ -11,6 +11,7 @@ namespace Infrastructures.DataAccess.Configurations.Loans
             builder.ToTable("tt_loanRequestSchedules");
             builder.HasKey(x => x.LoanRequestScheduleId);
             builder.Property(x => x.LoanRequestScheduleId).ValueGeneratedOnAdd();
+            builder.Property(x => x.LoanRequestRefId).HasMaxLength(250);
             builder.Property(x => x.Principal).HasPrecision(18, 2);
             builder.Property(x => x.InterestAmount).HasPrecision(18, 2);
             builder.Property(x => x.CollectionFeeAmount).HasPrecision(18, 2);

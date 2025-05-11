@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructures.DataAccess.Configurations.Vendors
 {
-    public class VVendorListConfig : IEntityTypeConfiguration<VVendor>
+    public class VVendorListConfig : IEntityTypeConfiguration<VendorVm>
     {
-        public void Configure(EntityTypeBuilder<VVendor> builder)
+        public void Configure(EntityTypeBuilder<VendorVm> builder)
         {
             builder.ToView("vVendorLists");
             builder.Property(c => c.CountryName).HasMaxLength(200).HasColumnName("Vendor_CountryName");

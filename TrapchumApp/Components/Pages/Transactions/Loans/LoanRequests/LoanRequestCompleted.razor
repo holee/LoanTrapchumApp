@@ -1,10 +1,9 @@
-@using Applications.Extensions.Identity.Policies
 @using Applications.Responses.ViewModels.Loans.Requests
 <PageDropDown PageSizeChanged="PageChanged"
               OnTextChanged="FilterTextChanged"
               ShowSearchBox="true">
     <LeftChildContent>
-        <AuthorizeView Policy="@LoanRequestsPolicies.Create">
+        <AuthorizeView Policy="@RequestsPolicies.Create">
             <Authorized>
                 <RadzenLink Path="@createRequestUrl" Text="Request" Icon="add" />
             </Authorized>

@@ -1,6 +1,4 @@
 ﻿@page "/App/Currencies"
-@using Applications.Responses.Paginations
-@using Applications.Responses.ViewModels.Currencies
 @using TrapchumApp.Components.Pages.Transactions.Exchanges
 <PageTitle>Currency List</PageTitle>
 <RadzenCard class="card rz-background-color-base-100">
@@ -66,7 +64,7 @@
                         </RadzenDataGridColumn>
                         <RadzenDataGridColumn Title="Actions" Context="item">
                             <Template>
-                                <RadzenButton Size="Radzen.ButtonSize.ExtraSmall"
+                                <RadzenButton Size="ButtonSize.ExtraSmall"
                                               Icon="more_vert"
                                               Variant="Variant.Text"
                                               Click="@((args)=>ShowContextMenuWithContent(args,item.CurrencyId))" />

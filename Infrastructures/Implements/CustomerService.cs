@@ -1,8 +1,10 @@
 ﻿using System.Data;
-using Applications.Constants.Tables;
+using System.Linq;
+using Applications.Enumerations;
+using Applications.Extensions;
 using Applications.Interfaces.Customers;
-using Applications.Requests.Lists.Customers;
 using Applications.Responses;
+using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.Message;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Collaterals;
@@ -19,9 +21,12 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructures.Implements;
 
-public class CustomerService(ApplicationDbContext context, IDapperConnectionFactory dapperService, ILogger<CustomerService> logger) : ICustomerService
+public class CustomerService(
+    ApplicationDbContext context,
+    IDapperConnectionFactory dapperService,
+    ILogger<CustomerService> logger) : ICustomerService
 {
-    public async Task<Result<IEnumerable<T>>> GetCustomersAsync<T>(Guid? customerId, int take = 0,
+    public async Task<Result<IEnumerable<T>>> GetCustomersAsync<T>(string? customerId, int take = 0,
         bool includeInactive = false,
         bool exceptActiveLoan = true,
         string? searchTerm = null) where T : class
@@ -48,7 +53,7 @@ public class CustomerService(ApplicationDbContext context, IDapperConnectionFact
                                                           EF.Functions.Like(x.Phone!, $"%{searchTerm}%")));
         }
 
-        if (customerId.HasValue)
+        if (customerId.IsNotNullOrEmpty())
         {
             customerQueries = customerQueries.Where(x => x.CustomerId == customerId);
         }
@@ -70,9 +75,11 @@ public class CustomerService(ApplicationDbContext context, IDapperConnectionFact
         return Result.Success<IEnumerable<T>>(results);
     }
 
-    public async Task<Pager<VCustomerList>> GetCustomers(QueryParam q)
+    public async Task<Pager<VCustomerList>> GetCustomersAsync(QueryParam q)
     {
         IQueryable<VCustomerList> queries = context.CustomerLists;
+
+        var counts = queries.Count();
 
         if (!q.IsIncludeInActive)
         {
@@ -83,7 +90,7 @@ public class CustomerService(ApplicationDbContext context, IDapperConnectionFact
         {
             queries = queries.Where(x => (EF.Functions.Like(x.FullName!, $"%{q.Filter}%") ||
                                           EF.Functions.Like(
-                                              EF.Functions.Collate(x.CustomerId.ToString(), "Khmer_100_CI_AI_SC_UTF8"),
+                                              EF.Functions.Collate(x.CustomerId, "Khmer_100_CI_AI_SC_UTF8"),
                                               $"%{q.Filter}%") ||
                                           EF.Functions.Like(x.AltName!, $"%{q.Filter}%") ||
                                           EF.Functions.Like(x.Phone!, $"%{q.Filter}%")));
@@ -99,7 +106,7 @@ public class CustomerService(ApplicationDbContext context, IDapperConnectionFact
         }
 
         var count = queries.Count();
-        var customers = queries.AsNoTracking().Skip(q.PageIndex).Take(q.PageSize);
+        var customers = queries.AsNoTracking().Skip(q.PageNumber).Take(q.PageSize);
         return new Pager<VCustomerList>
         {
             Items = await customers.ToListAsync(),
@@ -107,193 +114,48 @@ public class CustomerService(ApplicationDbContext context, IDapperConnectionFact
         };
     }
 
-    public async Task<Result<string>> AddCustomerNote(CustomerNote model)
-    {
-        try
-        {
-            logger.LogInformation("try adding new customer note");
-            context.CustomerNote.Add(model);
-            await context.SaveChangesAsync();
-            return Result.Success(Messages.DataCreated);
-        }
-        catch (Exception e)
-        {
-            logger.LogError(e.Message, e);
-            return Result.Failure<string>(ErrorResponse.ServerError(e.Message));
-        }
-    }
-
-
-    public async Task<Result<string>> AddCustomerActivity(CustomerActivity model) 
-    {
-        try
-        {
-            logger.LogInformation("try adding new customer note");
-            context.CustomerActivites.Add(model);
-            await context.SaveChangesAsync();
-            return Result.Success(Messages.DataCreated);
-        }
-        catch (Exception e)
-        {
-            logger.LogError(e.Message, e);
-            return Result.Failure<string>(ErrorResponse.ServerError(e.Message));
-        }
-    }
-
-    public async Task<Result<IEnumerable<T>>> GetCustomerNotes<T>(Guid? customerId)
+    public async Task<Result<Pager<T>>> GetCustomersAsync<T>(string? customerId, QueryParam param)
         where T : class
     {
         try
         {
-            logger.LogInformation("try adding new customer note");
+            var queries = context.Database.SqlQuery<VCustomerList>(
+                $"SELECT * FROM VCustomerList WHERE IsLoanActive=CAST(0 AS BIT) AND IsActive=CAST(1 AS BIT)");
 
-            var notes = await context.Database.SqlQuery<T>($"SELECT * FROM VCustomerNotes WHERE CustomerRefId={customerId.ToString()}")
-                .ProjectToType<T>()
-                .AsNoTracking()
-                .ToListAsync();
-
-            if (notes.Any())
+            if (!string.IsNullOrEmpty(param.Filter))
             {
-                return Result.Success<IEnumerable<T>>(notes);
+                queries = queries.Where(x => EF.Functions.Like(x.FullName!, $"%{param.Filter}%") ||
+                                             EF.Functions.Like(x.AltName!, $"%{param.Filter}%") ||
+                                             EF.Functions.Like(x.AltPhone!, $"%{param.Filter}%") ||
+                                             EF.Functions.Like(x.FirstName, $"%{param.Filter}%") ||
+                                             EF.Functions.Like(x.LastName, $"%{param.Filter}%"));
             }
 
-            return Result.Failure<IEnumerable<T>>(ErrorResponse.NotFound("There is no any notes."));
-        }
-        catch (Exception e)
-        {
-            logger.LogError(e.Message, e);
-            return Result.Failure<IEnumerable<T>>(ErrorResponse.ServerError(e.Message));
-        }
-    }
 
-    public async Task<Result<IEnumerable<T>>> GetCustomerActivies<T>(Guid? customerId) 
-        where T : class
-    {
-        try
-        {
-            logger.LogInformation("try adding new customer note");
-
-            var notes = await context.Database.SqlQuery<T>($"SELECT * FROM VCustomerActivities WHERE CustomerRefId={customerId.ToString()}")
-                .ProjectToType<T>()
-                .AsNoTracking()
-                .ToListAsync();
-
-            if (notes.Any())
+            if (customerId.IsNotNullOrEmpty())
             {
-                return Result.Success<IEnumerable<T>>(notes);
+                queries = queries.Where(x => x.CustomerId == customerId);
             }
 
-            return Result.Failure<IEnumerable<T>>(ErrorResponse.NotFound("Something went wrong with server."));
+            var counts = queries.Count();
+
+            var items = await queries
+                                    .OrderBy(x => x.FirstName)
+                                    .ThenBy(x => x.LastName)
+                                    .ProjectToType<T>()
+                                    .AsNoTracking()
+                                    .Skip(param.PageNumber)
+                                    .Take(param.PageSize)
+                                    .ToListAsync();
+            return Result.Success<Pager<T>>(new Pager<T>(items, counts));
         }
-        catch (Exception e)
+        catch (SqlException ex)
         {
-            logger.LogError(e.Message, e);
-            return Result.Failure<IEnumerable<T>>(ErrorResponse.ServerError(e.Message));
+            return Result.Failure<Pager<T>>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
         }
     }
 
-    public async Task<Result<VCustomerList>> GetCustomerDetailByIdAsync(string customerId, bool include = false)
-    {
-        using var connection =  dapperService.CreateConnection();
-        var parameters = new DynamicParameters();
-        parameters.Add("@customerId", customerId);
-        parameters.Add("@include", include);
-
-        if (!include)
-        {
-            // Simple case - just get customer details
-            var customer = await connection.QuerySingleOrDefaultAsync<VCustomerList>(
-                ProcedureConstant.GetCustomerDetailById, parameters, commandType: CommandType.StoredProcedure);
-            if (customer is not null)
-            {
-                return Result.Success(customer);
-            }
-
-            return Result.Failure<VCustomerList>(ErrorResponse.NotFound("No customer found."));
-        }
-
-        // Complex case - handle one-to-many relationships
-
-        var multiMap = await connection.QueryMultipleAsync(ProcedureConstant.GetCustomerDetailById, parameters,
-            commandType: CommandType.StoredProcedure);
-
-        var customerIncludes = await multiMap.ReadFirstOrDefaultAsync<VCustomerList>();
-
-        if (customerIncludes is not null)
-        {
-            var loans = await multiMap.ReadAsync<VLoanDisbursments>();
-            var expenses = await multiMap.ReadAsync<VCustomerExpenses>();
-            var incomes = await multiMap.ReadAsync<VCustomerIncomes>();
-            var notes = await multiMap.ReadAsync<VCustomerNotes>();
-            var requests = await multiMap.ReadAsync<VLoanRequests>();
-            var collaterallines = await multiMap.ReadAsync<VCollateralLines>();
-            var activities = await multiMap.ReadAsync<VCustomerActivities>();
-            customerIncludes.CustomerExpenses = expenses.ToArray() ?? [];
-            customerIncludes.CustomerIncomes = incomes.ToArray() ?? [];
-            customerIncludes.CustomerNotes = notes.ToArray() ?? [];
-            customerIncludes.LoanRequests = requests.ToArray() ?? [];
-            customerIncludes.CollateralLines = collaterallines.ToArray() ?? [];
-            customerIncludes.CustomerActivities = activities.ToArray() ?? [];
-            return Result.Success(customerIncludes);
-        }
-
-        return Result.Failure<VCustomerList>(ErrorResponse.NotFound("No customer found."));
-    }
-
-    public async Task<Result<EntityNames>> GetCustomerByIdAsync(Guid? customerId)
-    {
-        var customer = await context.EntityNames
-            .Include(e => e.Customer)
-            .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.Id == customerId);
-        if (customer is null)
-        {
-            return Result.Failure<EntityNames>(ErrorResponse.NotFound($"No Customer Found"));
-        }
-
-        return Result.Success(customer);
-    }
-
-    public async Task<Result<Customer>> GetCustomerByIdAsync(Guid? customerId, params string[] includes)
-    {
-        IQueryable<Customer> customersQuery = context.Customers.Where(x => x.CustomerId == customerId);
-        if (includes.Any())
-        {
-            foreach (var includeProp in includes)
-            {
-                customersQuery = customersQuery.Include(includeProp);
-            }
-        }
-
-        if (!customersQuery.Any())
-        {
-            return Result.Failure<Customer>(ErrorResponse.ServerError($"no customer found"));
-        }
-
-        var customer = await customersQuery
-            .AsNoTracking()
-            .FirstOrDefaultAsync();
-
-        return Result.Success(customer!);
-    }
-
-    public async Task<Result<VCustomerList>> GetCustomerForRequestLoanAsync(Guid? customerId)
-    {
-        IQueryable<VCustomerList> customersQuery = context.CustomerLists
-            .Where(x => x.CustomerId == customerId);
-        if (!customersQuery.Any())
-        {
-            return Result.Failure<VCustomerList>(ErrorResponse.ServerError($"no customer found"));
-        }
-
-        var customer = await customersQuery
-            .AsNoTracking()
-            .FirstOrDefaultAsync();
-
-        return Result.Success(customer!);
-    }
-
-    public async Task<Result<VCustomerList>> GetCustomerDetailByIdAsync(Guid? customerId, bool include = false)
+    public async Task<Result<VCustomerList>> GetCustomerDetailByIdAsync(string? customerId, bool include = false)
     {
         try
         {
@@ -317,20 +179,20 @@ public class CustomerService(ApplicationDbContext context, IDapperConnectionFact
                 return Result.Success(customer);
             }
 
-            var coustmerDictionary = new Dictionary<Guid, VCustomerList>();
+            var coustmerDictionary = new Dictionary<string, VCustomerList>();
 
             var customerInclude = await db.QueryAsync("spGetCustomerDetailsById",
                 (VCustomerList customer, VLoanDisbursments loan, VLoanRequests loanRequest,
                     VCollateralLines collateralLine, VCustomerIncomes customerIncome, VCustomerExpenses customerExpense,
                     VCustomerNotes customerNote) =>
                 {
-                    if (coustmerDictionary.TryGetValue(customer.CustomerId!.Value, out var existingCustomer))
+                    if (coustmerDictionary.TryGetValue(customer.CustomerId!, out var existingCustomer))
                     {
                         customer = existingCustomer;
                     }
                     else
                     {
-                        coustmerDictionary.Add(customer.CustomerId!.Value, customer);
+                        coustmerDictionary.Add(customer.CustomerId!, customer);
                     }
 
                     customer.Loans.Add(loan);
@@ -364,27 +226,203 @@ public class CustomerService(ApplicationDbContext context, IDapperConnectionFact
         }
     }
 
-    public async Task<Result<IEnumerable<VCollateralLines>>> GetCustomerCollateralLines(Guid? customerId, bool includeInUsed = false)
+    public async Task<Result<Pager<T>>> GetCustomerLoanRequestAsync<T>(int? branchId, string? customerId, bool includeComplete = false)
+        where T : class
     {
-        var queries =
-            context.Database.SqlQuery<VCollateralLines>($"SELECT * FROM VCustomerCollateralLines WHERE CollateralId={customerId.ToString()}");
-
-        if (!includeInUsed)
+        try
         {
-            queries = queries.Where(x => x.IsInUsed == false);
-        }
+            var customerLoanRequests = await context.Database
+                .SqlQuery<VLoanRequests>($"SELECT * FROM VLoanRequests WHERE CustomerId={customerId} AND BranchId={branchId}")
+                .WhereIf(includeComplete, c => c.StatusId == (int)RequestStatus.Completed)
+                .ProjectToType<T>()
+                .AsNoTracking()
+                .ToListAsync();
 
-        if (!queries.Any())
+            if (!customerLoanRequests.Any())
+            {
+                return Result.Failure<Pager<T>>(ErrorResponse.NotFound("No note found."));
+            }
+
+            var counts = customerLoanRequests.Count;
+
+            return Result.Success(new Pager<T>(customerLoanRequests, counts));
+        }
+        catch (SqlException ex)
         {
-            return Result.Failure<IEnumerable<VCollateralLines>>(ErrorResponse.NotFound("no data."));
+            return Result.Failure<Pager<T>>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
         }
-
-        var items = await queries.AsNoTracking().ToListAsync();
-
-        return Result.Success<IEnumerable<VCollateralLines>>(items);
     }
 
-    public async Task<Result<IEnumerable<VLoanDisbursments>>> GetCustomerLoanHistoryAsync(Guid? customerId)
+    public async Task<Result<string>> AddCustomerNote(CustomerNote model)
+    {
+        try
+        {
+            logger.LogInformation("try adding new customer note");
+            context.CustomerNote.Add(model);
+            await context.SaveChangesAsync();
+            return Result.Success(Messages.DataCreated);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e.Message, e);
+            return Result.Failure<string>(ErrorResponse.ServerError(e.Message));
+        }
+    }
+
+    public async Task<Result<string>> AddCustomerActivity(CustomerActivity model)
+    {
+        try
+        {
+            logger.LogInformation("try adding new customer note");
+            context.CustomerActivites.Add(model);
+            await context.SaveChangesAsync();
+            return Result.Success(Messages.DataCreated);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e.Message, e);
+            return Result.Failure<string>(ErrorResponse.ServerError(e.Message));
+        }
+    }
+
+    public async Task<Result<IEnumerable<T>>> GetCustomerNotes<T>(string? customerId)
+        where T : class
+    {
+        try
+        {
+            logger.LogInformation("try adding new customer note");
+
+            var notes = await context.Database
+                .SqlQuery<T>($"SELECT * FROM VCustomerNotes WHERE CustomerRefId={customerId}")
+                .ProjectToType<T>()
+                .AsNoTracking()
+                .ToListAsync();
+
+            if (notes.Any())
+            {
+                return Result.Success<IEnumerable<T>>(notes);
+            }
+
+            return Result.Failure<IEnumerable<T>>(ErrorResponse.NotFound("There is no any notes."));
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e.Message, e);
+            return Result.Failure<IEnumerable<T>>(ErrorResponse.ServerError(e.Message));
+        }
+    }
+
+    public async Task<Result<IEnumerable<T>>> GetCustomerActivies<T>(string? customerId)
+        where T : class
+    {
+        try
+        {
+            logger.LogInformation("try adding new customer note");
+
+            var notes = await context.Database
+                .SqlQuery<T>($"SELECT * FROM VCustomerActivities WHERE CustomerRefId={customerId}")
+                .ProjectToType<T>()
+                .AsNoTracking()
+                .ToListAsync();
+
+            if (notes.Any())
+            {
+                return Result.Success<IEnumerable<T>>(notes);
+            }
+
+            return Result.Failure<IEnumerable<T>>(ErrorResponse.NotFound("Something went wrong with server."));
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e.Message, e);
+            return Result.Failure<IEnumerable<T>>(ErrorResponse.ServerError(e.Message));
+        }
+    }
+
+    public async Task<Result<EntityNames>> GetCustomerByIdAsync(string? customerId)
+    {
+        var customer = await context.EntityNames
+            .Where(x => x.Id == customerId)
+            .Include(e => e.Customer)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == customerId);
+        if (customer is null)
+        {
+            return Result.Failure<EntityNames>(ErrorResponse.NotFound($"No Customer Found"));
+        }
+
+        return Result.Success(customer);
+    }
+
+    public async Task<Result<Customer>> GetCustomerByIdAsync(string? customerId, params string[] includes)
+    {
+        var customersQuery = context.Customers
+                                     .AsNoTracking()
+                                      .Where(x => x.CustomerId == customerId);
+        if (includes.Any())
+        {
+            foreach (var includeProp in includes)
+            {
+                customersQuery = customersQuery.Include(includeProp);
+            }
+        }
+
+        if (!customersQuery.Any())
+        {
+            return Result.Failure<Customer>(ErrorResponse.ServerError($"no customer found"));
+        }
+
+        var customer = await customersQuery
+                            .AsNoTracking()
+                            .FirstOrDefaultAsync();
+
+        if (customer is null)
+        {
+            return Result.Failure<Customer>(ErrorResponse.ServerError($"no customer found"));
+        }
+
+        return Result.Success(customer);
+    }
+
+    public async Task<Result<VCustomerList>> GetCustomerForRequestLoanAsync(string? customerId)
+    {
+        var customer = await context.CustomerLists.FirstOrDefaultAsync(x => x.CustomerId == customerId);
+
+        if (customer is null)
+        {
+            return Result.Failure<VCustomerList>(ErrorResponse.ServerError($"no customer found"));
+        }
+        return Result.Success(customer);
+    }
+
+
+    public async Task<Result<IEnumerable<VCollateralLines>>> GetCustomerCollateralLines(string? customerId, bool includeInUsed = false)
+    {
+        using var db = dapperService.CreateConnection();
+
+        var parameters = new DynamicParameters();
+
+        parameters.Add("@customerId", customerId);
+
+        parameters.Add("@includeInUsed", includeInUsed);
+
+        var sql = $@"SELECT * FROM VCustomerCollateralLines 
+                    WHERE CollateralId=@customerId AND 
+                    ((@includeInUsed='FALSE' AND IsInUsed=CAST(0 AS BIT)) OR 
+                      @includeInUsed=CAST(1 AS BIT));
+                    ";
+
+        var items = await db.QueryAsync<VCollateralLines>(sql, parameters);
+
+        if (!items.Any())
+        {
+            return Result.Failure<IEnumerable<VCollateralLines>>(ErrorResponse.NotFound("No data."));
+        }
+
+        return Result.Success(items);
+    }
+
+    public async Task<Result<IEnumerable<VLoanDisbursments>>> GetCustomerLoanHistoryAsync(string? customerId)
     {
         using var db = dapperService.CreateConnection();
 
@@ -395,7 +433,7 @@ public class CustomerService(ApplicationDbContext context, IDapperConnectionFact
         return Result.Success(loanHistories);
     }
 
-    public async Task<Result<string>> DeleteCustomerAsync(Guid? customerId)
+    public async Task<Result<string>> DeleteCustomerAsync(string? customerId)
     {
         try
         {
@@ -427,7 +465,8 @@ public class CustomerService(ApplicationDbContext context, IDapperConnectionFact
         }
     }
 
-    public async Task<Result<string>> MakeCustomerInActiveAsync(Guid? customerId, int editSeq = 0, bool isActive = true)
+    public async Task<Result<string>> MakeCustomerInActiveAsync(string? customerId, int editSeq = 0,
+        bool isActive = true)
     {
         try
         {
@@ -652,4 +691,50 @@ public class CustomerService(ApplicationDbContext context, IDapperConnectionFact
 //    {
 //        return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
 //    }
+//}    //public async Task<Result<VCustomerList>> GetCustomerDetailByIdAsync(string customerId, bool include = false)
+//{
+//    using var connection = dapperService.CreateConnection();
+//    var parameters = new DynamicParameters();
+//    parameters.Add("@customerId", customerId);
+//    parameters.Add("@include", include);
+
+//    if (!include)
+//    {
+//        // Simple case - just get customer details
+//        var customer = await connection.QuerySingleOrDefaultAsync<VCustomerList>(
+//            ProcedureConstant.GetCustomerDetailById, parameters, commandType: CommandType.StoredProcedure);
+//        if (customer is not null)
+//        {
+//            return Result.Success(customer);
+//        }
+
+//        return Result.Failure<VCustomerList>(ErrorResponse.NotFound("No customer found."));
+//    }
+
+//    // Complex case - handle one-to-many relationships
+
+//    var multiMap = await connection.QueryMultipleAsync(ProcedureConstant.GetCustomerDetailById, parameters,
+//        commandType: CommandType.StoredProcedure);
+
+//    var customerIncludes = await multiMap.ReadFirstOrDefaultAsync<VCustomerList>();
+
+//    if (customerIncludes is not null)
+//    {
+//        var loans = await multiMap.ReadAsync<VLoanDisbursments>();
+//        var expenses = await multiMap.ReadAsync<VCustomerExpenses>();
+//        var incomes = await multiMap.ReadAsync<VCustomerIncomes>();
+//        var notes = await multiMap.ReadAsync<VCustomerNotes>();
+//        var requests = await multiMap.ReadAsync<VLoanRequests>();
+//        var collaterallines = await multiMap.ReadAsync<VCollateralLines>();
+//        var activities = await multiMap.ReadAsync<VCustomerActivities>();
+//        customerIncludes.CustomerExpenses = expenses.ToArray() ?? [];
+//        customerIncludes.CustomerIncomes = incomes.ToArray() ?? [];
+//        customerIncludes.CustomerNotes = notes.ToArray() ?? [];
+//        customerIncludes.LoanRequests = requests.ToArray() ?? [];
+//        customerIncludes.CollateralLines = collaterallines.ToArray() ?? [];
+//        customerIncludes.CustomerActivities = activities.ToArray() ?? [];
+//        return Result.Success(customerIncludes);
+//    }
+
+//    return Result.Failure<VCustomerList>(ErrorResponse.NotFound("No customer found."));
 //}

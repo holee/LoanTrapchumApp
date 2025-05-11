@@ -1,4 +1,4 @@
-﻿@page "/App/Holidays"
+﻿@page "/App/Holiday"
 <PageTitle>Holiday</PageTitle>
 <RadzenTabs @bind-SelectedIndex="SelectedIndex" RenderMode="TabRenderMode.Client">
     <Tabs>
@@ -11,7 +11,7 @@
                                   Click="DisplayModal"
                                   Icon="add"
                                   ButtonStyle="ButtonStyle.Success"
-                                  Size="Radzen.ButtonSize.Small" />
+                                  Size="ButtonSize.Small" />
                     <div class="rz-text-center">
                         <RadzenCheckBox @bind-Value=@IsPreviousSelected
                                         @bind-Value:after="PreviousSelectedChanged"
@@ -20,18 +20,18 @@
                     </div>
                 </RadzenStack>
                 <RadzenStack Style="margin-bottom:7px"
-                             JustifyContent="Radzen.JustifyContent.SpaceBetween"
-                             Orientation="Radzen.Orientation.Horizontal"
+                             JustifyContent="JustifyContent.SpaceBetween"
+                             Orientation="Orientation.Horizontal"
                              AlignItems="AlignItems.Center"
-                             Wrap="Radzen.FlexWrap.Wrap">
-                    <RadzenStack JustifyContent="Radzen.JustifyContent.Start"
+                             Wrap="FlexWrap.Wrap">
+                    <RadzenStack JustifyContent="JustifyContent.Start"
                                  class="w-25"
                                  AlignItems="AlignItems.Center"
-                                 Orientation="Radzen.Orientation.Horizontal">
+                                 Orientation="Orientation.Horizontal">
                         <div class="dropdown-center">
                             <RadzenButton class="rz-background-color-base-100"
-                                          ButtonType="Radzen.ButtonType.Button"
-                                          Size="Radzen.ButtonSize.Small"
+                                          ButtonType="ButtonType.Button"
+                                          Size="ButtonSize.Small"
                                           ButtonStyle="ButtonStyle.Light"
                                           data-bs-toggle="dropdown"
                                           Shade="Shade.Darker"
@@ -46,13 +46,13 @@
                             </ul>
                         </div>
                         <div>
-                            <RadzenButton Size="Radzen.ButtonSize.Small"
+                            <RadzenButton Size="ButtonSize.Small"
                                           Icon="refresh"
                                           Click="Reload"
                                           ButtonStyle="ButtonStyle.Primary" />
                         </div>
                     </RadzenStack>
-                    <RadzenStack Style="width:30%" JustifyContent="Radzen.JustifyContent.End">
+                    <RadzenStack Style="width:30%" JustifyContent="JustifyContent.End">
                         <RadzenFormField AllowFloatingLabel="false"
                                          Variant="Variant.Outlined"
                                          class="mb-2 w-100">
@@ -102,7 +102,7 @@
                         </RadzenDataGridColumn>
                         <RadzenDataGridColumn Title="Actions" Sortable="false" Context="h">
                             <Template>
-                                <RadzenButton Size="Radzen.ButtonSize.ExtraSmall"
+                                <RadzenButton Size="ButtonSize.ExtraSmall"
                                               Icon="more_vert"
                                               Variant="Variant.Text"
                                               Click="@((args)=>ShowContextMenuWithContent(args,h.Id))" />

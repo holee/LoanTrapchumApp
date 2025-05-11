@@ -1,4 +1,4 @@
-﻿@page "/Loan/Disbursement/Create"
+﻿@page "/Loan/Disbursement/CreateNewUser"
 @using TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 <PageTitle>New Loan Disbursment</PageTitle>
 <SectionContent SectionName="Progressbar">
@@ -15,7 +15,7 @@
                         <div class="rz-m-0 rz-p-0">
                             <EditForm Model="model" @ref="editForm">
                                 <input type="hidden" @bind-value="penaltyRate" />
-                                <table class="table table-bordered">
+                                <table class="table table-bordered table-sm">
                                     <tbody>
                                         <tr>
                                             <th style="background-color:#F1F1F4" class="w-25">Customer</th>
@@ -81,7 +81,7 @@
                                             <th style="background-color:#F1F1F4" class="w-25">Effective Fee Rate</th>
                                             <td>
                                                 <input type="hidden" @bind="model!.CollectionFeeRate" />
-                                                <input type="hidden" @bind="model!.OtherChargeId" />
+                                                <input type="hidden" @bind="model!.CollectionFeeModeId" />
                                                 <span>
                                                     @model?.CollectionFeeRate
                                                     <i>%</i>
@@ -169,21 +169,21 @@
         </CardBody>
         <CardFooter>
             <RadzenStack Gap="1rem"
-                         Orientation="Radzen.Orientation.Horizontal"
-                         JustifyContent="Radzen.JustifyContent.End"
+                         Orientation="Orientation.Horizontal"
+                         JustifyContent="JustifyContent.End"
                          class="py-2"
                          AlignItems="AlignItems.Center">
                 <RadzenButton Click="ShowLoanPreviews"
-                              Size="Radzen.ButtonSize.Small"
+                              Size="ButtonSize.Small"
                               Icon="preview"
                               ButtonStyle="ButtonStyle.Primary" Text="Preview" />
-                <RadzenButton Size="Radzen.ButtonSize.Small"
+                <RadzenButton Size="ButtonSize.Small"
                               Click="HandleFormSubmit"
                               Text="Disburse Now"
                               Icon="save"
                               ButtonStyle="ButtonStyle.Success" />
                 <RadzenLink Icon="arrow_back"
-                            Path="@($"/Loan/Request/?BranchId={BranchId}&UserId={UserId}")"
+                            Path="@($"/App/Loan/{BranchId}/Branches/Request?UserId={UserId}")"
                             Text="Back" />
             </RadzenStack>
         </CardFooter>

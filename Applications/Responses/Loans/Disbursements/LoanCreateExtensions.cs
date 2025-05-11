@@ -1,4 +1,5 @@
-﻿using Applications.Requests.Loans.Disbursements;
+﻿using Applications.Calculations;
+using Applications.Requests.Loans.Disbursements;
 using Domains.Models.Loans;
 
 namespace Applications.Responses.Loans.Disbursements;
@@ -7,7 +8,7 @@ public static class LoanCreateExtensions
 {
     public static LoanInfo ToLoanInfo(this LoanDtoCreate arg)
     {
-        return new LoanInfo(arg.PayEvery!.Value, arg.CollectionFeeRate!.Value, arg.OtherChargeId!.Value, arg.InstallmentTypeId!.Value, arg.FirstPaymentDate!.Value, arg.StartDate!.Value);
+        return new LoanInfo(arg.PayEvery, arg.CollectionFeeRate, arg.CollectionFeeModeId, arg.InstallmentTypeId, arg.FirstPaymentDate, arg.StartDate);
     }
 }
 

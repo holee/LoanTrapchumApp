@@ -1,14 +1,12 @@
-﻿using Applications.Interfaces.Employees;
+﻿using Applications.Extensions;
+using Applications.Interfaces.Employees;
 using Applications.Interfaces.Lists;
 using Applications.Requests.Lists.Employees;
-using Applications.Requests.Lists.Entities;
 using Applications.Requests.Lists.OtherNames;
 using Applications.Responses;
 using Applications.Responses.Lists.Entities;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Employees;
-using Domains.Models.Lists.Employees;
-using Mapster;
 
 namespace Applications.Services.Employees
 {
@@ -17,8 +15,11 @@ namespace Applications.Services.Employees
         public async Task<Result<string>> CreateAsync(EntityNamesCreate entityName)
         {
             var emp = entityName.ToEmployee();
+
             var req = entityName.ToEntityNames();
+
             req.Employee = emp;
+
             return await empService.CreateAsync(req);
         }
         public async Task<Result<string>> UpdateAsync(EntityNamesCreate entityName)
@@ -29,55 +30,66 @@ namespace Applications.Services.Employees
             return await empService.UpdateAsync(req);
         }
 
-        public async Task<Result<string>> DeleteAsync(Guid? employeeId)
+        public async Task<Result<string>> DeleteAsync(string? employeeId)
         {
             return await empService.DeleteAsync(employeeId);
         }
 
-        public async Task<Result<Employee>> GetByIdAsync(Guid? employeeId)
+        public async Task<Result<EntityNames>> GetByIdAsync(string? employeeId)
         {
             return await empService.GetByIdAsync(employeeId);
         }
 
-        public async Task<Result<IReadOnlyList<VEmployees>>> GetEmployeesAsync(Guid? employeeId, int branchId = 0, bool isActive = false, string? q = null)
+        public async Task<Result<IReadOnlyList<VEmployeeList>>> GetEmployeesAsync(string? employeeId, int branchId = 0, bool isActive = false, string? q = null)
         {
             return await empService.GetEmployeesAsync(employeeId, branchId, isActive, q);
         }
 
-        public Task<Pager<VEmployees>> GetEmployeesAsync(QueryParam param)
+        public async Task<Pager<VEmployeeList>> GetEmployeesAsync(QueryParam param)
         {
-            throw new NotImplementedException();
+            return await empService.GetEmployeesAsync(param);
         }
-
-        public async Task<Pager<VEmployees>> GetEmployeesAsync(int pageIndex, int pageSize, string sortColumn, bool isDecending = false, bool includeInActive = false, string? q = null)
+        public async Task<Pager<VEmployeeList>> GetEmployeesAsync(int branchId,QueryParam param)
         {
-            return await empService.GetEmployeesAsync(pageIndex, pageSize, sortColumn, isDecending, includeInActive, q);
+            return await empService.GetEmployeesAsync(branchId,param);
         }
-
-        public async Task<Result<string>> UpdateIsActiveAsync(Guid? employeeId)
+        public async Task<Result<string>> UpdateIsActiveAsync(string? employeeId)
         {
             return await empService.UpdateIsActiveAsync(employeeId);
         }
 
-        public async Task<IEnumerable<OcupationResponse>> GetOccupationsAsync(string? filter) 
+        public async Task<IEnumerable<OcupationResponse>> GetOccupationsAsync(string? filter)
         {
-            var rsp= await ocService.GetOccupations<OcupationResponse>(null, filter);
+            var rsp = await ocService.GetOccupations<OcupationResponse>(null, filter);
             return rsp.Items;
         }
 
-        public Task<IEnumerable<EmployeeDtoUpdate>> GetEmployeeForUpdate(Guid? employeeId)
+        public async Task<Result<EntityNamesCreate>> GetEmployeeForUpdate(string? employeeId)
         {
-            throw new NotImplementedException();
+            var emp = await empService.GetByIdAsync(employeeId);
+
+            var employee = emp.Data!.ToEmployeeCreate();
+
+            if (employee is not null)
+            {
+                return Result.Success(employee);
+            }
+
+            return Result.Failure<EntityNamesCreate>(ErrorResponse.NotFound("There is no employee"));
         }
 
-        Task<Result<EmployeeDtoUpdate>> IEmployeeServiceImpl.GetEmployeeForUpdate(Guid? employeeId)
+        public async Task<Result<T>> GetEmployeeById<T>(string? employeeId)
+            where T:class
         {
-            throw new NotImplementedException();
+            return await empService.GetByIdAsync<T>(employeeId);
         }
 
-        public Task<Result<EmployeeDto>> GetEmployeeById(Guid? employeeId)
+
+        public async Task<Result<VEmployeeList>> GetEmployeeById(string? employeeId,int? branchId,bool include=false)
         {
-            throw new NotImplementedException();
+            return await empService.GetByIdAsync(employeeId,branchId,include);
         }
+
+
     }
 }

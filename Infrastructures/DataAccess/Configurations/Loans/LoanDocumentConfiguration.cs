@@ -16,6 +16,7 @@ namespace Infrastructures.DataAccess.Configurations.Loans
             builder.Property(x => x.FileUrl).HasMaxLength(400);
             builder.Property(x => x.AltText).HasMaxLength(100);
             builder.Property(x => x.Description).HasMaxLength(200);
+            builder.Property(x => x.LoanRequestId).HasMaxLength(250);
         }
     }
 

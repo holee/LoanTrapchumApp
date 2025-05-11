@@ -1,8 +1,8 @@
 using Applications.Interfaces.Currencies;
 using Applications.Interfaces.Transactions;
-using Applications.Requests.Lists.Currency;
 using Applications.Requests.Lists.Entities;
 using Applications.Requests.Transactions.CashManagements;
+using Applications.Responses.Lists.Currency;
 using Applications.Responses.ViewModels.Currencies;
 using Domains.Models.Transaction;
 using Mapster;
@@ -14,7 +14,8 @@ namespace TrapchumApp.Components.Pages.Transactions.Branches
     {
         [Inject] ICurrencyService curService { get; set; } = default!;
         [Inject] ICashVaultService caVaultService { get; set; } = default!;
-        [Parameter] public long UserId { get; set; }
+        
+        [Parameter] public string? UserId { get; set; }
         [Parameter] public int BranchId { get; set; }
         VCashVaults? vCashVault = new VCashVaults();
         List<CashManagementDetailDtoCreate> cashMDList = [];
@@ -137,7 +138,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Branches
             var cashMgs = new CashManagementDtoCreate
             {
                 BankRefId = branch?.BankRefId,
-                StaffRefId = UserId,
+                //StaffRefId = UserId,
                 CurrencyRefId = CurrencyId,
                 BranchRefId = branch?.BranchId,
                 Amount = totalAmount,
@@ -145,7 +146,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Branches
                 CashStatusRefId = 7,
                 TransactionDate = DateTime.Now,
                 BusinessDate = DateTime.Now,
-                DelegateToStaffRefId = (int)UserId,
+                //DelegateToStaffRefId = (int)UserId,
                 TmpAmount = 0,
                 Remark = "VaultIn",
                 CashManagementDetails = NewCashMDVIn,

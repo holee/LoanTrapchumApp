@@ -2,7 +2,7 @@ using Applications.Extensions.mappers;
 using Applications.Interfaces.Currencies;
 using Applications.Interfaces.Transactions;
 using Applications.Requests.Journals;
-using Applications.Requests.Lists.Currency;
+using Applications.Responses.Lists.Currency;
 using Applications.Responses.ViewModels.Ledgers;
 using Domains.Models.Journals;
 using Mapster;
@@ -51,7 +51,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Ledgers
             else
             {
                 LedgerTypes = [];
-                NotificationService.Notify(Radzen.NotificationSeverity.Error, resp.ErrMessage);
+                NotificationService.Notify(NotificationSeverity.Error, resp.ErrMessage);
             }
         }
 
@@ -65,7 +65,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Ledgers
             }
             else
             {
-                NotificationService.Notify(Radzen.NotificationSeverity.Error, resp.ErrMessage);
+                NotificationService.Notify(NotificationSeverity.Error, resp.ErrMessage);
             }
         }
 
@@ -93,13 +93,13 @@ namespace TrapchumApp.Components.Pages.Transactions.Ledgers
 
             if (result.IsSuccess)
             {
-                NotificationService.Notify(Radzen.NotificationSeverity.Success, result.Data);
+                NotificationService.Notify(NotificationSeverity.Success, result.Data);
                 model = new();
                 Close(true);
             }
             else
             {
-                NotificationService.Notify(Radzen.NotificationSeverity.Error, result.ErrMessage);
+                NotificationService.Notify(NotificationSeverity.Error, result.ErrMessage);
             }
         }
         protected override async Task OnParametersSetAsync()
@@ -112,7 +112,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Ledgers
             }
             else
             {
-                NotificationService.Notify(Radzen.NotificationSeverity.Error, resp.ErrMessage);
+                NotificationService.Notify(NotificationSeverity.Error, resp.ErrMessage);
             }
 
             var currenciesRsponse = await _currencyService.GetCurrencies(0);

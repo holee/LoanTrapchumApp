@@ -20,14 +20,14 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
         List<CustomerExpenseDtoCreate> CustomerExpenses = new List<CustomerExpenseDtoCreate>();
         RadzenDataGrid<VCustomerExpenses> incomeGrid = default!;
         List<VCustomerExpenses> Expenses = [];
-        [Parameter] public Guid? CustomerId { get; set; }
+        [Parameter] public string? CustomerId { get; set; }
         protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
             await GetCustomerIncome(CustomerId);
         }
 
-        async Task GetCustomerIncome(Guid? customerId)
+        async Task GetCustomerIncome(string? customerId)
         {
             var resp = await _cusExspenseAndIncome.GetCustomerCustomerExpenses(customerId);
             if (resp.IsSuccess)

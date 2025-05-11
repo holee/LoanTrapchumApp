@@ -1,3 +1,4 @@
+using Applications.Calculations;
 using Applications.Extensions;
 using Applications.Requests.Loans.Disbursements;
 using Applications.Responses.ViewModels.Branches;
@@ -38,19 +39,20 @@ public partial class LoanCreate
     protected int SelectedPeriodName = 1;
     protected IEnumerable<VBranchResponse> Branches = [];
     [Parameter, SupplyParameterFromQuery] public int BranchId { get; set; }
-    [Parameter, SupplyParameterFromQuery] public Guid? UserId { get; set; }
-    [Parameter, SupplyParameterFromQuery] public Guid? CustomerRequestId { get; set; } = Guid.Empty;
-    [Parameter, SupplyParameterFromQuery] public Guid LoanRequestId { get; set; } = Guid.Empty;
+    [Parameter, SupplyParameterFromQuery] public string? UserId { get; set; }
+    [Parameter, SupplyParameterFromQuery] public string? CustomerRequestId { get; set; } = string.Empty;
+    [Parameter, SupplyParameterFromQuery] public string? LoanRequestId { get; set; } = string.Empty;
+
     VLoanRequests req = new VLoanRequests();
     DateTime firstPayment;
     EditForm editForm = default!;
     decimal penaltyRate = 0.0M;
-    List<DateTime> Holidays = [];
+    List<DateTimeOffset> Holidays = [];
     async Task GetLoanRequest()
     {
         IsLoading = true;
 
-        var request = await _loanRequestService.GetLoanRequestByCustomerAsync(BranchId, CustomerRequestId, LoanRequestId, true);
+        var request = await _loanRequestService.GetLoanRequestAsync(BranchId, CustomerRequestId, LoanRequestId, true);
 
         if (request.IsSuccess)
         {
@@ -64,7 +66,7 @@ public partial class LoanCreate
     {
         try
         {
-            if (CustomerRequestId.NotEmpty() && LoanRequestId.NotEmpty())
+            if (CustomerRequestId.IsNotNullOrEmpty() && LoanRequestId.IsNotNullOrEmpty())
             {
                 await GetLoanRequest();
 
@@ -81,20 +83,28 @@ public partial class LoanCreate
     void ShowLoanPreviews()
     {
         if (model.Principle == 0) return;
+
         model.BankRefId = 11;
+
         model.TermTypeId = 11;
+
         model.LoanStatusRefId = 4;
+
         model.LoanSubTypeRefId = 1;
+
         model.UserRefId = UserId;
+
         model.PenaltyRate = penaltyRate;
+
         var param = model.ToLoanInfo();
 
-        var builder = Calculators.CreateBuilder(model.RepaymentModeRefId, model.CurrencyRefId);
+        var builder = Calculators.CreateBuilder(model);
         {
             var app = builder.Build(param);
+
             previewSchedule = app.SetHoliday(Holidays)
-                                 .Calculate(model.Installments, model.InterestRate, model.Principle)
-                                  .ToSchedules(BranchId, Guid.Empty, model.RepaymentModeRefId);
+                                 .CreateSchedules(model)
+                                 .MapTo(model);
             selectedTabIndex = 2;
         }
     }
@@ -107,30 +117,41 @@ public partial class LoanCreate
         if (confirm == false)
         {
             NotificationService.Notify(NotificationSeverity.Info, "loan disburse cancel.");
+
             return;
         }
+
         model.BankRefId = 11;
         model.TermTypeId = 11;
         model.LoanStatusRefId = 4;
         model.LoanSubTypeRefId = 1;
-        model.BranchRefId = BranchId;
+        model.BranchId = BranchId;
         model.UserRefId = UserId;
         model.PenaltyRate = penaltyRate;
+
         var param = model.ToLoanInfo();
-        var builder = Calculators.CreateBuilder(model.RepaymentModeRefId, model.CurrencyRefId);
-        var app = builder.Build(param);
+
+        var builder = Calculators.CreateBuilder(model);//.CreateBuilder(model.RepaymentModeRefId, model.CurrencyRefId);
+
+        var app = builder.Build(model);
+
         var scheduleDto = app.SetHoliday(Holidays)
-                             .Calculate(model.Installments, model.InterestRate, model.Principle)
-                             .ToSchedules(BranchId, model.CreditAgentRefId, model.RepaymentModeRefId);
+                             .CreateSchedules(model)
+                             .MapTo(model);
+
         var lastDate = scheduleDto!.LastOrDefault()!.PaymentDate;
+
         model.LastPaymentDate = lastDate;
+
         try
         {
             editForm.EditContext!.Validate();
 
+            model.LoanId = $"dis-{Guid.CreateVersion7()}";
+
             model.LoanSchedules = scheduleDto.ToList();
 
-            var rsp = await _loanService!.CreateLoanAsync(model);
+            var rsp = await _loanService.CreateLoanAsync(model);
 
             if (!rsp.IsSuccess)
             {

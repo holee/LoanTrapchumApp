@@ -1,6 +1,6 @@
 ﻿namespace Applications.Responses.ViewModels.Customers;
 
-public sealed class CustomerLoanRequest
+public sealed class CustomerLoanRequestVm
 {
     public string? LoanRequestId { get; set; }
     public DateTime? RequestDate { get; set; }
@@ -12,6 +12,7 @@ public sealed class CustomerLoanRequest
     public int Circle { get; set; } = 0;
     public string? InstallmentType { get; set; }
     public string? RepaymentMode { get; set; }
+    public int CurrencyId { get; set; } = 1;
     public string? CurrencyName { get; set; }
     public string? Status { get; set; }
     public string? BranchName { get; set; }

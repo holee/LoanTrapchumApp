@@ -2,7 +2,7 @@
 {
     public class VLoanRequestVm
     {
-        public long? CustomerId { get; set; }
+        public string? CustomerId { get; set; }
         public string? AltName { get; set; }
         public string? FullName { get; set; }
         public int NumberLoanRequest { get; set; } = 0;

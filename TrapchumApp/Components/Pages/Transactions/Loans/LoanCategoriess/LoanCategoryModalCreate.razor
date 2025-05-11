@@ -1,31 +1,27 @@
 ﻿<EditForm Model="model" OnValidSubmit="OnSaveNew">
     <div class="modal-body">
         <DataAnnotationsValidator />
-        <div class="card">
-            <div class="card-header bg-primary">
+        <Card>
+            <CardHeader>
                 <div class="d-flex justify-content-between">
                     <span>Loan Category Informations:</span>
-                    <strong class="text-danger" @onclick="ClosedTab" style="cursor:pointer">X</strong>
                 </div>
-            </div>
-            <div class="card-body">
+            </CardHeader>
+            <CardBody BodyCssClass="rz-background-color-base-100">
                 <div class="row">
                     <div class="col-md-3 text-md-end">
                         <RadzenLabel Component="Name">Loan Category Name <span class="text-danger">*</span></RadzenLabel>
                     </div>
                     <div class="col-md-9">
-                        @*   <RadzenFormField> *@
-                        <RadzenTextBox @bind-Value="model.LoancategoryCode"
+                        <RadzenTextBox @bind-Value="model.LoanCategoryCode"
                                        Style="width:100%;height:33px;font-size:14px"
                                        AutoComplete="true"
                                        Placeholder="Enter Category Name..."
                                        Name="Name" />
-                        <ValidationMessage For="@(()=>model.LoancategoryCode)"></ValidationMessage>
+                        <ValidationMessage For="@(()=>model.LoanCategoryCode)"></ValidationMessage>
                         <span>@messageName</span>
-                        @*  </RadzenFormField> *@
-
                     </div>
-                    <div class="col-md-3 text-md-end mt-3">
+                    <div class="col-md-3 text-md-end mt-3 rz-background-color-base-100">
                         <RadzenLabel>Record Status</RadzenLabel>
                     </div>
                     <div class="col-md-9 mt-3">
@@ -34,18 +30,8 @@
                             @(model.IsActive!.Value ? "Is Active" : "Is Inactive")
                         </RadzenLabel>
                     </div>
-                    <div class="col-md-3 text-md-end mt-3">
-                        <RadzenLabel>Description</RadzenLabel>
-                    </div>
-                    <div class="col-md-9 mt-3">
-                        <RadzenTextBox @bind-Value="model.Description"
-                                       Style="width:100%;height:33px;font-size:14px"
-                                       AutoComplete="true"
-                                       Placeholder="Enter Description..."
-                                       Name="Description" />
-                        <ValidationMessage For="@(()=>model.Description)"></ValidationMessage>
-                    </div>
-                    <div class="col-md-3 text-md-end mt-3">
+
+                    <div class="col-md-3 text-md-end mt-3 rz-background-color-base-100">
                         <RadzenLabel>Description-InKhmer</RadzenLabel>
                     </div>
                     <div class="col-md-9 mt-3">
@@ -56,7 +42,7 @@
                                        Name="DesInKhmer" />
                         <ValidationMessage For="@(()=>model.DesInKhmer)"></ValidationMessage>
                     </div>
-                    <div class="col-md-3 text-md-end mt-3">
+                    <div class="col-md-3 text-md-end mt-3 rz-background-color-base-100">
                         <RadzenLabel>Code</RadzenLabel>
                     </div>
                     <div class="col-md-9 mt-3">
@@ -69,23 +55,33 @@
                         <span>@messageCode</span>
 
                     </div>
+                    <div class="col-md-3 text-md-end mt-3 rz-background-color-base-100">
+                        <RadzenLabel>Description</RadzenLabel>
+                    </div>
+                    <div class="col-md-9 mt-3">
+                        <RadzenTextArea @bind-Value="model.Description"
+                                        Placeholder="Enter Description..."
+                                        class="form-control"
+                                        Name="Description"></RadzenTextArea>
+                        <ValidationMessage For="@(()=>model.Description)"></ValidationMessage>
+                    </div>
                 </div>
-            </div>
-            <div class="card-footer">
+            </CardBody>
+            <CardFooter>
                 <div class="d-flex justify-content-end gap-3">
                     <RadzenButton ButtonStyle="ButtonStyle.Success"
-                                  Icon="BtnIconType.Save"
+                                  Icon="save"
                                   Text="Save"
                                   Size="ButtonSize.Small"
                                   ButtonType="ButtonType.Submit" />
                     <RadzenButton ButtonStyle="ButtonStyle.Danger"
-                                  Icon="BtnIconType.Close"
+                                  Icon="cancel"
                                   Text="Cancel"
                                   Click="@ClosedTab"
                                   Size="ButtonSize.Small" />
                 </div>
-            </div>
-        </div>
+            </CardFooter>
+        </Card>
     </div>
 
 </EditForm>

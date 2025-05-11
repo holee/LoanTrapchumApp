@@ -5,7 +5,8 @@ namespace Domains.Models.Loans
     public class UserLoanSize:BaseEntity
     {
         public long Id { get; set; }
-        public long? UserRefId { get; set; }
+        public string? UserRefId { get; set; }
+        
         public decimal? MinLoanSize { get; set; }
         public decimal? MaxLoanSize { get; set; }
         public DateTime? StartDate { get; set; }

@@ -1,48 +1,61 @@
 using Applications.Interfaces.Lists;
 using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.OtherNames;
+using Applications.Services.Lists;
 using Microsoft.AspNetCore.Components;
 using Radzen;
+using System.Threading.Tasks;
 
 namespace TrapchumApp.Components.Pages.Lists.OtherNames
 {
     public partial class GuarantorDetails
     {
-        private readonly IGuarantorService _gService;
+        private readonly IGuarantorServiceImpl _gService;
 
-        public GuarantorDetails(IGuarantorService guarantorService)
+        public GuarantorDetails(IGuarantorServiceImpl guarantorService)
         {
             _gService = guarantorService;
         }
 
-        [Parameter] public Guid? Id { get; set; }
+        [Parameter] public string? Id { get; set; }
         [Parameter] public EventCallback Refresh { get; set; }
-        [Parameter] public RenderFragment? ChildContent { get; set; }
+        [Parameter] public EventCallback<int> Closing { get; set; } 
+
         VGuarantor? Guarantor = new VGuarantor();
+
         IEnumerable<VLoanGuarantors> LoanGuarantors = [];
         protected override async Task OnInitializedAsync()
         {
-            await base.OnInitializedAsync();
+            await GetGuarantorByIdAsync();
 
-            var resultResponse = await _gService.GetGuarantorByIdAsync(Id, false);
+            await base.OnInitializedAsync();
+        }
+
+        private async Task GetGuarantorByIdAsync() 
+        {
+
+            Console.WriteLine(Id);
+
+            var resultResponse = await _gService.GetGuarantorByIdAsync(Id, true,true);
 
             if (resultResponse.IsSuccess)
             {
                 Guarantor = resultResponse.Data!;
+
                 LoanGuarantors = resultResponse.Data!.LoanGuarantors;
-                return;
             }
-            
-            NotificationService.Notify(NotificationSeverity.Error, resultResponse.ErrMessage);
+            else
+            {
+
+                NotificationService.Notify(NotificationSeverity.Error, resultResponse.ErrMessage);
+            }
+
         }
 
-        private async void Reload()
+
+        async Task CloseGuarantorTab()
         {
-            await OnInitializedAsync();
-
-            await Refresh.InvokeAsync();
-
-            StateHasChanged();
+            await Closing.InvokeAsync(3);
         }
     }
 }

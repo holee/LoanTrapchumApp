@@ -1,9 +1,11 @@
-﻿using Applications.Interfaces.Loans;
+﻿using Applications.Extensions;
+using Applications.Interfaces.Loans;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Products;
 using Domains.Models.Loans;
 using Infrastructures.DataAccess;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructures.Implements
@@ -11,10 +13,11 @@ namespace Infrastructures.Implements
     public class LoanProductService : ILoanProductService
     {
         private readonly ApplicationDbContext _context;
-
-        public LoanProductService(ApplicationDbContext context)
+        private readonly IDbContextFactory<DataContext> contextFactory;
+        public LoanProductService(ApplicationDbContext context, IDbContextFactory<DataContext> contextFactory)
         {
             this._context = context;
+            this.contextFactory = contextFactory;
         }
 
         public async Task<Result<string>> CreateAsync(LoanProduct model)
@@ -32,7 +35,7 @@ namespace Infrastructures.Implements
             }
         }
 
-        public async Task<Result<string>> DeleteAsync(int id)
+        public async Task<Result<string>> DeleteAsync(int? id)
         {
             try
             {
@@ -58,15 +61,62 @@ namespace Infrastructures.Implements
             }
         }
 
+        public async Task<Result<string>> UpdateAsync(int? id, bool state)
+        {
+            try
+            {
+                var existing = await _context.LoanProducts.FindAsync(id);
+
+                if (existing is null)
+                {
+                    return Result.Failure<string>(ErrorResponse.NotFound("Loan Product is empty"));
+                }
+
+                int editSeq = existing.EditSeq + 1;
+                
+                _context.LoanProducts.Where(x => x.LoanProductId == id && x.EditSeq == existing.EditSeq)
+                    .ExecuteUpdate(props => props.SetProperty(x => x.IsActive, state)
+                                                 .SetProperty(x => x.EditSeq, editSeq)
+                                                 .SetProperty(x => x.ModifiedDt, DateTime.Now));
+
+                return Result.Success("Loan Product was updated");
+
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                return Result.Failure<string>(ErrorResponse.ServerError(ex.Message));
+
+            }
+        }
+
+        public async Task<Result<string>> UpdateAsync(LoanProduct model)
+        {
+            try
+            {
+                var result = await _context.LoanProducts
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(context => context.LoanProductId == model.LoanProductId && context.EditSeq == model.EditSeq);
+
+                if (result is null) return Result.Failure<string>(ErrorResponse.NotFound("Loan Product is empty"));
+                _context.LoanProducts.Update(model);
+                await SaveAsync();
+                return Result.Success("Loan product was modified");
+            }
+            catch (Exception ex)
+            {
+                return Result.Failure<string>(ErrorResponse.ServerError(ex.Message));
+
+            }
+        }
+
         public async Task<Result<IEnumerable<LoanProduct>>> GetAllAsyc(string? searches = null)
         {
             IQueryable<LoanProduct> results = _context.LoanProducts.AsNoTracking().Where(x => x.IsActive == true);
 
             if (searches != null)
             {
-                results = results.Where(context => EF.Functions.Like(context.LoanProductName, $"{searches}")
-                  ||
-                   EF.Functions.Like(context.LoanProductCode, $"{searches}"));
+                results = results.Where(context => EF.Functions.Like(context.LoanProductName, $"%{searches}%") ||
+                                                   EF.Functions.Like(context.LoanProductCode, $"%{searches}%"));
             }
 
             var data = await results.ToListAsync() ?? Enumerable.Empty<LoanProduct>();
@@ -74,36 +124,76 @@ namespace Infrastructures.Implements
             return Result.Success(data);
         }
 
-        public async Task<Result<IEnumerable<VlProductList>>> GetAllListAsyc(bool includeinactive = false, string? searches = null)
+        public async Task<Pager<T>> GetLoanProductsAsync<T>(QueryParam param) where T : class
         {
-            IQueryable<VlProductList> results = _context.Database.SqlQuery<VlProductList>($@"SELECT * FROM VLProductList");
 
-            if (includeinactive == false) results = results.Where(x => x.IsActive == true);
+            IQueryable<VlProductList> queries = _context.Database.SqlQuery<VlProductList>($@"SELECT * FROM VLProductList");
 
-            if (searches != null)
+            if (param.IsIncludeInActive == false)
             {
-                results = results.Where(context => EF.Functions.Like(context.LoanProductName, $"{searches}") ||
-                                                   EF.Functions.Like(context.LoanProductCode, $"{searches}"));
+                queries = queries.Where(x => x.IsActive == true);
             }
-            var data = await results.AsNoTracking().ToListAsync();
 
-            return Result.Success<IEnumerable<VlProductList>>(data);
+            if (string.IsNullOrEmpty(param.Filter))
+            {
+                queries = queries.Where(e => EF.Functions.Like(e.LoanProductName, $"%{param.Filter}%") ||
+                                             EF.Functions.Like(e.LoanProductCode, $"%{param.Filter}%"));
+            }
+
+            if (param.SortDescending)
+            {
+                queries = queries.OrderByDescending(p => EF.Property<object>(p, param.SortColumn));
+            }
+
+            var counts = queries.Count();
+
+            if (param.PageSize > 0)
+            {
+                queries = queries.Skip(param.PageNumber).Take(param.PageSize);
+            }
+
+            var items = await queries.Skip(param.PageNumber)
+                                        .Take(param.PageSize)
+                                        .ProjectToType<T>()
+                                        .AsNoTracking()
+                                        .ToListAsync();
+
+            return new Pager<T>(items, counts);
         }
 
-        public async Task<PaginatedList<VlProductList>> GetAllPagingAsyc(QueryParam param, bool isActive = false, string? searches = null)
+
+        public async Task<Pager<VlProductList>> GetLoanProductsAsync(QueryParam param)
         {
-            IQueryable<VlProductList> results = _context.Database.SqlQuery<VlProductList>($@"SELECT * FROM VLProductList");
-            if (isActive == false)
-                results = results.Where(x => x.IsActive == true);
-            if (searches != null)
+
+            await using var context = await contextFactory.CreateDbContextAsync();
+
+            IQueryable<VlProductList> queries = context.Database
+                                                        .SqlQuery<VlProductList>($@"SELECT * FROM VLProductList")
+                                                        .WhereIf(!param.IsIncludeInActive, x => x.IsActive == true)
+                                                        .WhereIf(!string.IsNullOrEmpty(param.Filter),e=> EF.Functions.Like(e.LoanProductName, $"%{param.Filter}%") ||
+                                                                                                         EF.Functions.Like(e.LoanProductCode, $"%{param.Filter}%"));
+            if (param.SortDescending)
             {
-                results = results.Where(context => EF.Functions.Like(context.LoanProductName, $"{searches}")
-               ||
-                EF.Functions.Like(context.LoanProductCode, $"{searches}"));
+                queries = queries.OrderByDescending(queries => EF.Property<object>(queries, param.SortColumn));
             }
-            //results = results.OrderByDynamic(param.SortField, param.SortDescending.ToUpper());
-            return await PaginatedList<VlProductList>.CreateAsync(results, param.PageIndex, param.PageSize);
+
+            var counts = queries.Count();
+
+            if (param.PageSize > 0)
+            {
+                queries = queries.Skip(param.PageNumber).Take(param.PageSize);
+            }
+
+            var items = await queries.AsNoTracking()
+                                     .ToListAsync();
+
+            return new Pager<VlProductList>(items, counts);
         }
+
+
+
+
+
 
         public async Task<Result<LoanProduct>> GetByFieldAsync(string? fields = null)
         {
@@ -128,11 +218,14 @@ namespace Infrastructures.Implements
             }
         }
 
-        public async Task<Result<LoanProduct>> GetByIdAsync(int id)
+        public async Task<Result<LoanProduct>> GetByIdAsync(int? id)
         {
             try
             {
-                var result = await _context.LoanProducts.Include(x => x.Currency).AsNoTracking().FirstOrDefaultAsync(context => context.LoanProductId == id);
+                var result = await _context.LoanProducts
+                                            .Include(x => x.Currency)
+                                            .AsNoTracking()
+                                            .FirstOrDefaultAsync(p => p.LoanProductId == id);
 
                 if (result is null)
                 {
@@ -149,22 +242,25 @@ namespace Infrastructures.Implements
             }
         }
 
-        public async Task<Result<string>> ModifyAsync(LoanProduct model)
+        public async Task<Result<T>> GetByIdAsync<T>(int? id) where T : class
         {
             try
             {
-                var result = await _context.LoanProducts
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(context => context.LoanProductId == model.LoanProductId && context.EditSeq == model.EditSeq);
+                var result = await _context.Database.SqlQuery<VlProductList>($"SELECT * FROM VLProductList WHERE LoanProductId={id}")
+                                            .ProjectToType<T>()
+                                            .AsNoTracking()
+                                            .FirstOrDefaultAsync();
+                if (result is null)
+                {
+                    return Result.Failure<T>(ErrorResponse.NotFound("No Data Found"));
+                }
 
-                if (result is null) return Result.Failure<string>(ErrorResponse.NotFound("Loan Product is empty"));
-                _context.LoanProducts.Update(model);
-                await SaveAsync();
-                return Result.Success("Loan product was modified");
+                return Result.Success(result);
+
             }
             catch (Exception ex)
             {
-                return Result.Failure<string>(ErrorResponse.ServerError(ex.Message));
+                return Result.Failure<T>(ErrorResponse.ServerError(ex.Message));
 
             }
         }

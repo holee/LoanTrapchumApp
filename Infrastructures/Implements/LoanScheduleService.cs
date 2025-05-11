@@ -5,14 +5,18 @@ using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Payments;
 using Applications.Responses.ViewModels.Loans.Schedules;
+using Applications.Responses.ViewModels.Options;
 using Dapper;
+using Domains.Models.Lists;
 using Infrastructures.DataAccess;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Infrastructures.Implements
 {
-    public class LoanScheduleService : ILoanScheduleServiceImpl
+    public class LoanScheduleService : ILoanScheduleService
     {
         private readonly ApplicationDbContext _context;
         private readonly ILogger<LoanService> _logger;
@@ -43,10 +47,7 @@ namespace Infrastructures.Implements
             return Result.Success(schedules);
         }
 
-
-
-
-        public async Task<Result<VSchedule>> GetSchedulesByIdAsync(long? loanId, int? branchId, long? scheduleId)
+        public async Task<Result<VSchedule>> GetSchedulesByIdAsync(string? loanId, int? branchId, long? scheduleId)
         {
             using var db = _context.Database.GetDbConnection();
 
@@ -61,7 +62,7 @@ namespace Infrastructures.Implements
 
             var schedule = await items.ReadFirstOrDefaultAsync<VSchedule>();
 
-            if(schedule is null)
+            if (schedule is null)
             {
                 return Result.Failure<VSchedule>(ErrorResponse.NotFound("No Schedule found."));
             }
@@ -72,48 +73,88 @@ namespace Infrastructures.Implements
             return Result.Success(schedule);
         }
 
-
-
-        public async Task<Pager<VSchedule>> GetLoanScheduleByIdAsync(long? loanId, int? branchId, ScheduleStatus status = ScheduleStatus.All, QueryParam? param = null)
+        public async Task<Result<LoanScheduleVm>> GetLoanSchedulesAsync(int? branchId, string? loanId, string? customerId)
         {
-            using var db = _context.Database.GetDbConnection();
+            var connection = _connectionFactory.CreateConnection();
 
-            var query = await db.QueryAsync<VSchedule>("spGetVSchedulesByLoanId", new
+            var lookupDictionary = new Dictionary<string, LoanScheduleVm>();
+
+            var items = await connection.QueryAsync<LoanScheduleVm, ScheduleViewModel, LoanScheduleVm>("getCustomerSchedules",
+                (customer, schedule) =>
+                {
+                    if (lookupDictionary.TryGetValue(customer.LoanId!, out var existingCustomer))
+                    {
+                        customer = existingCustomer!;
+                    }
+                    else
+                    {
+                        lookupDictionary.Add(customer.LoanId!, customer);
+                    }
+
+                    customer.LoanSchedules.Add(schedule);
+
+                    return customer;
+
+                }, new
+                {
+                    loanId,
+                    customerId,
+                    branchId
+                },
+                commandType: CommandType.StoredProcedure,
+                splitOn: "LoanScheduleId");
+
+            if (items.Any())
             {
-                branchId,
-                loanId,
-                @ScheduleStatusId = (int)status,
-                param?.PageIndex,
-                param?.PageSize,
-                param?.Filter
-            }, commandType: CommandType.StoredProcedure);
+                return Result.Failure<LoanScheduleVm>(ErrorResponse.NotFound("No Schedule to print."));
+            }
 
-            var counts = query.Count();
+            var item = lookupDictionary[loanId!];
 
-            var items = query.ToList();
+            return Result.Success(item);
+        }
+
+
+        public async Task<Pager<VSchedule>> GetLoanScheduleByIdAsync(string? loanId, int? branchId, ScheduleStatus status = ScheduleStatus.All, QueryParam? param = null)
+        {
+            var items = await _context.Database.SqlQuery<VSchedule>($"""
+                                                                        EXEC spGetVSchedulesByLoanId
+                                                                            {loanId},
+                                                                            {branchId},
+                                                                            {(int)status},
+                                                                            {param?.PageNumber},
+                                                                            {param?.PageSize},
+                                                                            {param?.Filter}
+                                                                      """)
+                                           .AsNoTracking()
+                                           .ToListAsync();
+
+            var counts = items.Count();
 
             return new Pager<VSchedule>(items, counts);
         }
 
 
+
+
+
+
         public async Task<Pager<VSchedule>> GetLoanSchedulesByPaymentDateAsync(DateTimeOffset? paymentDate, int? branchId, bool isIncludeLate = false, bool isLateOnly = false, QueryParam? param = null)
         {
-            using var db = _context.Database.GetDbConnection();
+            var items = await _context.Database.SqlQuery<VSchedule>($"""
+                                                                    EXEC spGetVSchedulesByPaymentDate
+                                                                    {branchId},
+                                                                    {paymentDate},
+                                                                    {isIncludeLate},
+                                                                    {isLateOnly},
+                                                                    {param?.PageNumber},
+                                                                    {param?.PageSize},
+                                                                    {param?.Filter}
+                                                                    """)
+                                            .AsNoTracking()
+                                            .ToListAsync();
 
-            var query = await db.QueryAsync<VSchedule>("spGetVSchedulesByPaymentDate", new
-            {
-                branchId,
-                paymentDate,
-                isIncludeLate,
-                isLateOnly,
-                param?.PageIndex,
-                param?.PageSize,
-                param?.Filter
-            }, commandType: CommandType.StoredProcedure);
-
-            var counts = query.Count();
-
-            var items = query.ToList();
+            var counts = items.Count();
 
             return new Pager<VSchedule>(items, counts);
         }
@@ -144,6 +185,8 @@ namespace Infrastructures.Implements
 
     }
 }
+
+
 //public async Task<Result<VSchedule>> GetLoanScheduleByIdAsync(long loanId, long loanScheduleId, int branchId, bool related)
 //{
 

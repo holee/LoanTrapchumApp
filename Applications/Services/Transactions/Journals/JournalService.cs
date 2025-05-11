@@ -1,51 +1,73 @@
 ﻿using Applications.Interfaces.Transactions;
+using Applications.Requests.Transactions.Journals;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Journals;
 using Domains.Models.Journals;
 using Domains.Models.Transaction;
+using Mapster;
 
-namespace Applications.Services.Transactions.Journals; 
+namespace Applications.Services.Transactions.Journals;
 
-public sealed class JournalService(IJournalService jService) : IJournalService
+public sealed class JournalService(IJournalService jService) : IJournalServiceImpl
 {
     public async Task<Result<LoanTransaction>> CreateJournalAsync(LoanTransaction model)
     {
         return await jService.CreateJournalAsync(model);
     }
 
-    public async Task<Result<string>> CreateOrUpdateJournalAsync(long? journalId, JournalEntry journalEntry)
+    public async Task<Result<JournalEntry>> CreateJournalAsync(JournalEntryDtoCreate req)
+    {
+        var model = req.Adapt<JournalEntry>();
+
+        return await jService.CreateJournalAsync(model);
+    }
+
+    //
+    public async Task<Result<string>> CreateOrUpdateJournalAsync(string? journalId, JournalEntry journalEntry)
     {
         return await jService.CreateOrUpdateJournalAsync(journalId, journalEntry);
     }
 
-    public async Task<Result<string>> DeleteJournalAsync(long? id)
+    public async Task<Result<string>> DeleteJournalAsync(string? id)
     {
         return await jService.DeleteJournalAsync(id);
     }
 
-    public async Task<JournalEntry?> FindJournalByIdAsync(long? id)
+    public async Task<JournalEntry?> GetJournalByIdAsync(string? id)
     {
-        return await jService.FindJournalByIdAsync(id);
+        return await jService.GetJournalByIdAsync(id);
     }
 
-    public async Task<Pager<VJournal>> FindJournalsAsync(int pageIndex, int pageSize, string sortColumn, bool sortDescending = false, string? q = null)
+    public async Task<Result<JournalEntryVm>> GetJournalByIdAsync(string? id, bool include)
     {
-        return await jService.FindJournalsAsync(pageIndex, pageSize, sortColumn, sortDescending, q);
+        return await jService.GetJournalByIdAsync(id, include);;
     }
 
-    public async Task<IEnumerable<JournalEntry>> FindJournalsAsync(long? journalId = 0, string? q = null)
+    public async Task<Pager<JournalEntryVm>> GetJournalsAsync(int pageIndex, int pageSize, string sortColumn,
+        bool sortDescending = false, string? q = null)
     {
-        return await jService.FindJournalsAsync(journalId, q);
+        return await jService.GetJournalsAsync(pageIndex, pageSize, sortColumn, sortDescending, q);
     }
 
-    public async Task<IEnumerable<JournalType>> FindJournalTypesAsync(string? expression = null)
+    public async Task<IEnumerable<JournalEntry>> GetJournalsAsync(string? journalId, string? q = null)
     {
-        return await jService.FindJournalTypesAsync(expression);
+        return await jService.GetJournalsAsync(journalId, q);
     }
 
-    public async Task<IEnumerable<VNameList>> FindNameLists(long? id = 0, int takeRows = 0, string? q = null)
+    public async Task<IEnumerable<JournalType>> GetJournalTypesAsync(string? expression = null)
     {
-        return await jService.FindNameLists(id, takeRows, q);
+        return await jService.GetJournalTypesAsync(expression);
     }
+
+    public async Task<Pager<JournalEntryVm>> GetJournalsAsync(int? branchId,QueryParam param)
+    {
+        return await jService.GetJournalsAsync(branchId,param);
+    }
+
+    public async Task<IEnumerable<VNameList>> GetNamesList(long? id = 0, int takeRows = 0, string? q = null)
+    {
+        return await jService.GetNameLists(id, takeRows, q);
+    }
+    
 }

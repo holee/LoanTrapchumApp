@@ -1,7 +1,5 @@
 using Applications.Interfaces.Identity;
 using Applications.Requests.Identity;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
 
 namespace TrapchumApp.Components.Pages.Accounts.Roles
 {
@@ -45,7 +43,7 @@ namespace TrapchumApp.Components.Pages.Accounts.Roles
 
         protected async Task GetRoles()
         {
-            var result = await _roleService.GetRolesAsync();
+            var result = await _roleService.GetRolesAsync(string.Empty,string.Empty);
 
             if (result.IsSuccess)
             {

@@ -1,6 +1,5 @@
-using Applications.Requests.Loans;
+using Applications.Requests.Loans.Categories;
 using Applications.Services.Loans;
-using Microsoft.AspNetCore.Components;
 using Radzen;
 
 namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanCategoriess

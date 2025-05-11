@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Components.Forms;
 using Radzen;
 using System.IdentityModel.Tokens.Jwt;
 using Applications.Extensions.Identity;
+using Applications.Extensions.Identity.Authorizations.Extensions;
+using Applications.ApplicationPolicies;
 namespace TrapchumApp.Components.Pages.Accounts.Users;
 
 public partial class Index
@@ -18,18 +20,17 @@ public partial class Index
     protected IEnumerable<VUser>? AllUsers = [];
     protected bool IsLoading = true;
     protected int index = 1;
-    //protected IEnumerable<RoleDto> roles = [];
     private bool cancelClose = false;
     private string? searchText = "";
     private readonly IUserService _authService;
     private readonly IEmployeeService _empService;
-    [CascadingParameter]
-    Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+    [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
     protected int selectedTabIndex = 0;
     IList<VUser>? Users = [];
     string? authenticatedUserId = string.Empty;
     bool isLoading = false;
     int counts = 0;
+    bool AdminOnly = false;
     public Index(IUserService authService, IEmployeeService empService)
     {
         _authService = authService;
@@ -37,16 +38,14 @@ public partial class Index
     }
 
     protected RegisterRequest model = new RegisterRequest();
-    private readonly JwtSecurityTokenHandler jwtSecurityTokenHandler = new();
-    private string? token = string.Empty;
     protected bool IsSuccess = false;
     protected bool IsVisible = false;
     protected string? message = "";
     protected EditForm form = default!;
-    protected IEnumerable<string?> roles = new List<string>();
-    protected IEnumerable<VEmployees> Employees = new List<VEmployees>();
-    protected IEnumerable<BranchDto> Branches = Enumerable.Empty<BranchDto>();
-    protected IEnumerable<VEmployees> bEmployees = Enumerable.Empty<VEmployees>();
+    protected IEnumerable<string?> roles = [];
+    protected IEnumerable<VEmployeeList> Employees = [];
+    protected IEnumerable<BranchDto> Branches = [];
+    protected IEnumerable<VEmployeeList> bEmployees = [];
     protected BranchDto SelectedBranch = default!;
     string? filterText = string.Empty;
     int pageIndex = 0;
@@ -62,31 +61,14 @@ public partial class Index
 
             var user = (await AuthenticationState).User;
 
+            AdminOnly = await _authorizeService.MustHasPermissionAsync(user, RolePolicies.AdminOnly);
+
             if (user is not null && user.Identity!.IsAuthenticated)
             {
                 authenticatedUserId = user.GetId();
             }
 
-            //var getRoles = await _roleService.GetRolesAsync(0);
 
-            //roles = getRoles?.Select(r => r.RoleName) ?? [];
-
-            //var employeeResponse = await _employeeService.GetEmployeesAsync(0, 0);
-
-            //if (employeeResponse.IsSuccess)
-            //{
-            //    Employees = employeeResponse.Data!;
-            //}
-            //var branchResponse = await _branchService.GetBranchesAsync(0, 0, false);
-
-            //if (branchResponse!.IsSuccess)
-            //{
-            //    Branches = branchResponse.Data!;
-            //}
-            //else
-            //{
-            //    Branches = Enumerable.Empty<BranchDto>();
-            //}
         }
         catch (Exception ex)
         {
@@ -106,7 +88,7 @@ public partial class Index
 
             var param = new QueryParam(pageIndex, pageSize, sortField, sortDescending, includeInactive, filterText);
 
-            var resp = await _authService!.GetUsersAsync(param);
+            var resp = await _authService.GetUsersAsync(param);
 
             if (resp.IsSuccess)
             {
@@ -182,7 +164,7 @@ public partial class Index
     {
         if (model.BranchRefId > 0)
         {
-            var employeeResponse = await _empService.GetEmployeesAsync(Guid.Empty, model.BranchRefId);
+            var employeeResponse = await _empService.GetEmployeesAsync(string.Empty, model.BranchRefId);
             if (employeeResponse.IsSuccess)
             {
                 bEmployees = employeeResponse.Data!;
@@ -194,7 +176,7 @@ public partial class Index
         }
         model.Username = "";
         model.Email = "";
-        model.EmployeeId = Guid.Empty;
+        model.EmployeeId = string.Empty;
     }
     protected void SelectedEmployeeChanged()
     {
@@ -214,7 +196,7 @@ public partial class Index
         {
             model.Username = "";
             model.Email = "";
-            model.EmployeeId = Guid.Empty;
+            model.EmployeeId = string.Empty;
         }
         Console.WriteLine(selectedEmployee!.EmployeeId);
     }

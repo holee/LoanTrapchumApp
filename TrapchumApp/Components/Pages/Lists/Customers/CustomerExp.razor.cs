@@ -1,9 +1,9 @@
 using Applications.Extensions;
-using Applications.Interfaces.Customers;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Services.Customers;
 using Microsoft.AspNetCore.Components;
 using Radzen;
+using Radzen.Blazor;
 
 namespace TrapchumApp.Components.Pages.Lists.Customers
 {
@@ -17,11 +17,13 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
             _incomeExpendServiceImpl = incomeExpendServiceImpl;
         }
 
-        [Parameter] public Guid? CustomerId { get; set; } = Guid.Empty;
+        [Parameter] public string? CustomerId { get; set; }
         [Parameter] public bool ShowAdd { get; set; } = false;
         [Parameter] public bool ShowReload { get; set; } = false;
+        [Parameter] public bool ShowCommand { get; set; } = false;
         [Parameter] public IEnumerable<VCustomerExpenses> Items { get; set; } = [];
         bool isLoading = false;
+        RadzenDataGrid<VCustomerExpenses>? grid = default!;
         protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
@@ -29,18 +31,19 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
             await GetCustomerExpense(CustomerId);
         }
 
-        async Task GetCustomerExpense(Guid? customerId)
+        async Task GetCustomerExpense(string? customerId)
         {
 
             isLoading = true;
 
-            if (CustomerId.NotEmpty())
+            if (CustomerId.IsNotNullOrEmpty())
             {
                 var resp = await _incomeExpendServiceImpl.GetCustomerCustomerExpenses(customerId);
 
                 if (resp.IsSuccess)
                 {
                     Items = resp.Data!;
+
                     isLoading = false;
                 }
             }
@@ -58,16 +61,16 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
 
         }
 
-        protected async void AddExpenseModal()
+        protected async Task AddExpenseModal()
         {
 
-            if (!CustomerId.NotEmpty())
+            if (!CustomerId.IsNotNullOrEmpty())
             {
-                NotificationService.Notify(NotificationSeverity.Info, "Please select cusotmer..");
+                NotificationService.Notify(NotificationSeverity.Info, "Please Select cusotmer..");
                 return;
             }
 
-            var options = new Radzen.DialogOptions
+            var options = new DialogOptions
             {
                 Width = "50vw",
                 Resizable = false,

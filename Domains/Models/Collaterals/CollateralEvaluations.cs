@@ -11,7 +11,7 @@ namespace Domains.Models.Collaterals
     {
 
         public long Id { get; set; }
-        public long? CollateralRefId { get; set; }
+        public string? CollateralRefId { get; set; }
         public int CurrencyRefId { get; set; }
         public DateTime? ValueDate { get; set; }
         public string? ValueBy { get; set; }

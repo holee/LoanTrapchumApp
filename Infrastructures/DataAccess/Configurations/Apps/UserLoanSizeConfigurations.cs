@@ -11,6 +11,7 @@ namespace Infrastructures.DataAccess.Configurations.Apps
             builder.ToTable("lt_userLoanSizes");
             builder.HasKey(x => x.Id);
             builder.Property(p => p.Id).ValueGeneratedOnAdd();
+            builder.Property(p => p.UserRefId).HasMaxLength(250);
             builder.Property(p => p.MaxLoanSize).HasPrecision(18,3);
             builder.Property(p => p.MaxLoanSize).HasPrecision(18,3);
             builder.Property(p => p.Description).HasMaxLength(200);

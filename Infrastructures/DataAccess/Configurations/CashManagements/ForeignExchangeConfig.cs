@@ -21,8 +21,7 @@ namespace Infrastructures.DataAccess.Configurations.CashManagements
             builder.Property(p => p.Narration).HasMaxLength(400);
             builder.Property(p => p.ExchangeRate).HasPrecision(18,2);
             builder.Property(p => p.Remark).HasColumnType("NVARCHAR(400)");
-            builder.Property(p => p.TransactionRefId)
-                    .HasConversion(ConversionExts.GuidConversion);
+            builder.Property(p => p.TransactionRefId).HasMaxLength(250);
         }
     }
 }

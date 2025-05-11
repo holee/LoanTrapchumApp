@@ -1,13 +1,12 @@
-﻿@using Applications.Responses.Collaterals
-@using Applications.Requests.Collaterals
+﻿@using Applications.Responses.Lists.Collaterals
 <RadzenDataGrid Density="Density.Compact"
-                TItem="CollateralLineResponse"
+                TItem="VCollateralLines"
                 Responsive
                 ColumnWidth="15rem"
                 @ref="propertiesGrid"
                 Data="Properties">
     <HeaderTemplate>
-        <RadzenButton Size="Radzen.ButtonSize.Small"
+        <RadzenButton Size="ButtonSize.Small"
                       ButtonStyle="ButtonStyle.Primary"
                       Icon="add_circle"
                       Text="Add" />
@@ -16,7 +15,7 @@
         <RadzenDataGridColumn Property="Id" Title="#" Width="2rem">
             <Template Context="c">
                 <input type="hidden" @bind="c.Id" />
-                <input type="hidden" @bind="c.CollateralRefId" />
+                <input type="hidden" @bind="c.CollateralId" />
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Property="SubCategoryRefId" Title="Category">
@@ -115,7 +114,7 @@
             <Template Context="c">
                 <RadzenButton Icon="remove"
                               ButtonStyle="ButtonStyle.Danger"
-                              Size="Radzen.ButtonSize.ExtraSmall">
+                              Size="ButtonSize.ExtraSmall">
                 </RadzenButton>
             </Template>
         </RadzenDataGridColumn>

@@ -1,5 +1,5 @@
-﻿using Applications.Requests.Lists.Currency;
-using Applications.Requests.Transactions.Journals;
+﻿using Applications.Requests.Transactions.Journals;
+using Applications.Responses.Lists.Currency;
 namespace Applications.Requests.Journals;
 
 public sealed class LedgerDto

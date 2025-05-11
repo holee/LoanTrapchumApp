@@ -1,17 +1,16 @@
-﻿@using Applications.Interfaces.Branches
-<div class="rz-p-2">
+﻿<div class="rz-p-2">
     <RadzenRow AlignItems="AlignItems.Center" Gap="1rem">
         <RadzenColumn Size="12" SizeSM="12" SizeMD="6">
             <RadzenStack AlignItems="AlignItems.Center"
-                         Orientation="Radzen.Orientation.Horizontal">
+                         Orientation="Orientation.Horizontal">
                 @if (LeftChildContent is not null)
                 {
                     @LeftChildContent
                 }
                 <div class="dropdown">
                     <RadzenButton class="btn rz-background-color-base-100"
-                                  ButtonType="Radzen.ButtonType.Button"
-                                  Size="Radzen.ButtonSize.Small"
+                                  ButtonType="ButtonType.Button"
+                                  Size="ButtonSize.Small"
                                   ButtonStyle="ButtonStyle.Light"
                                   data-bs-toggle="dropdown"
                                   Shade="Shade.Default"
@@ -27,7 +26,7 @@
                 </div>
                 @if (ShowReload)
                 {
-                    <RadzenButton Size="Radzen.ButtonSize.Small"
+                    <RadzenButton Size="ButtonSize.Small"
                                   Icon="refresh"
                                   class="w-auto"
                                   Click="Reload"
@@ -45,7 +44,7 @@
                 }
                 @if (ShowSearchBox)
                 {
-                    <RadzenFormField AllowFloatingLabel="false">
+                    <RadzenFormField AllowFloatingLabel="false" class="mb-2">
                         <Start>
                             <RadzenIcon Icon="search" />
                         </Start>
@@ -74,6 +73,7 @@
     async void ChangedPageSize(int pageSize)
     {
         this.pageSize = pageSize;
+
         await PageSizeChanged.InvokeAsync(pageSize);
     }
     async Task ReloadAction()
@@ -84,6 +84,7 @@
     async Task TextChangedHandler(ChangeEventArgs e)
     {
         filterText = e.Value?.ToString() ?? string.Empty;
+
         await OnTextChanged.InvokeAsync(filterText);
     }
 

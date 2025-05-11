@@ -1,4 +1,5 @@
-﻿using Applications.Interfaces.Lists;
+﻿using Applications.Extensions;
+using Applications.Interfaces.Lists;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Customers;
@@ -12,21 +13,26 @@ namespace Infrastructures.Implements
     public class CreditAgentService : ICreditAgentService
     {
         private readonly ApplicationDbContext _context;
-
-        public CreditAgentService(ApplicationDbContext context)
+        private readonly IDapperConnectionFactory _connectionFactory;
+        private readonly IDbContextFactory<DataContext> _dbContextFactory;
+        public CreditAgentService(ApplicationDbContext context, IDapperConnectionFactory connectionFactory, IDbContextFactory<DataContext> dbContextFactory)
         {
             _context = context;
+            _connectionFactory = connectionFactory;
+            _dbContextFactory = dbContextFactory;
         }
 
-        public async Task<Result> AddCreditAgent(Guid? employeeId, LoanCreditAgent req)
+        public async Task<Result<string>> AddCreditAgent(string? employeeRefId, LoanCreditAgent req)
         {
             try
             {
-                if (IsAlreadyCreditAgent(employeeId))
+                await using var context = await _dbContextFactory.CreateDbContextAsync();
+
+                if (IsAlreadyCreditAgent(employeeRefId))
                 {
-                    var existingCo = await _context.LoanCreditAgents
-                                                    .Where(x => x.EmployeeRefId == employeeId)
-                                                        .FirstOrDefaultAsync();
+                    var existingCo = await context.LoanCreditAgents
+                                                    .Where(x => x.EmployeeRefId == employeeRefId)
+                                                    .FirstOrDefaultAsync();
 
                     existingCo!.IsRemove = false;
 
@@ -35,11 +41,11 @@ namespace Infrastructures.Implements
                     return Result.Success("Credit Office was Added");
 
                 }
-                var emp = await _context.Employees
+                var emp = await context.Employees
                                         .Include(x => x.LoanCreditAgent)
-                                        .FirstOrDefaultAsync(x => x.EmployeeId == employeeId);
+                                        .FirstOrDefaultAsync(x => x.EmployeeId == employeeRefId);
                 if (emp is null)
-                    return Result.Failure(ErrorResponse.NotFound("There is no employee selected yet!."));
+                    return Result.Failure<string>(ErrorResponse.NotFound("There is no employee selected yet!."));
 
                 emp.LoanCreditAgent = req;
 
@@ -49,17 +55,24 @@ namespace Infrastructures.Implements
             }
             catch (Exception ex)
             {
-                return Result.Failure(ErrorResponse.ServerError(ex.Message));
+                return Result.Failure<string>(ErrorResponse.ServerError(ex.Message));
             }
         }
-        public async Task<Result> UpdateCreditAgent(int id, LoanCreditAgent req)
+        public async Task<Result> UpdateCreditAgent(string? id, LoanCreditAgent req)
         {
             try
             {
-                var emp = await _context.LoanCreditAgents.FirstOrDefaultAsync(x => x.Id == id);
+                await using var context = await _dbContextFactory.CreateDbContextAsync();
+
+
+                var emp = await context.LoanCreditAgents.FirstOrDefaultAsync(x => x.EmployeeRefId == id);
+
                 if (emp is null) return Result.Failure(ErrorResponse.NotFound("There is no employee yet!."));
-                _context.Update(req);
-                _context.SaveChanges();
+
+                context.Update(req);
+
+                context.SaveChanges();
+
                 return Result.Success("Credit Agent was Updated");
             }
             catch (Exception ex)
@@ -67,106 +80,135 @@ namespace Infrastructures.Implements
                 return Result.Failure(ErrorResponse.ServerError(ex.Message));
             }
         }
-        public async Task<Result> ActivateOrDeactivateCreditAgent(LoanCreditAgent req)
+        public async Task<Result<string>> ActivateOrDeactivateCreditAgent(LoanCreditAgent req)
         {
             try
             {
-                var emp = await _context.LoanCreditAgents.AsNoTracking().FirstOrDefaultAsync(x => x.EmployeeRefId == req.EmployeeRefId && x.EditSeq == req.EditSeq);
-                if (emp is null) return Result.Failure(ErrorResponse.NotFound("There is no employee yet Or Someone was changed this data!."));
-                _context.Entry(req).Property(x => x.IsRemove).IsModified = true;
-                _context.Entry(req).Property(x => x.EditSeq).IsModified = true;
+                await using var context = await _dbContextFactory.CreateDbContextAsync();
+
+                var emp = await context.LoanCreditAgents
+                                .AsNoTracking()
+                                .FirstOrDefaultAsync(x => x.EmployeeRefId == req.EmployeeRefId && x.EditSeq == req.EditSeq);
+                if (emp is null) return Result.Failure<string>(ErrorResponse.NotFound("There is no employee yet Or Someone was changed this data!."));
+               
+                context.Entry(req).Property(x => x.IsRemove).IsModified = true;
+
+                context.Entry(req).Property(x => x.EditSeq).IsModified = true;
+
                 await _context.SaveChangesAsync();
+
                 return Result.Success("Credit Agent was Updated");
             }
             catch (Exception ex)
             {
-                return Result.Failure(ErrorResponse.ServerError(ex.Message));
+                return Result.Failure<string>(ErrorResponse.ServerError(ex.Message));
             }
         }
-        public async Task<IEnumerable<VCreditAgent>> GetCreditAgents(bool includeIsRemove = false, string? query = null)
+        public async Task<Result<IEnumerable<VCreditAgent>>> GetCreditAgents(bool includeIsRemove = false, string? query = null)
         {
-            IQueryable<VCreditAgent> queries = _context.Database.SqlQuery<VCreditAgent>($@"SELECT * FROM VCreditAgents");
+            await using var context = await _dbContextFactory.CreateDbContextAsync();
 
-            if (!includeIsRemove)
-            {
-                queries = queries.Where(x => x.IsRemove == false);
-            }
+            var queries = await context.Database
+                                                      .SqlQuery<VCreditAgent>($@"SELECT * FROM VCreditAgents")
+                                                      .WhereIf(!includeIsRemove, x => x.IsRemove == false)
+                                                      .WhereIf(!string.IsNullOrEmpty(query), x => EF.Functions.Like(x.Name, $"%{query}%") ||
+                                                                                                  EF.Functions.Like(x.FirstName, $"%{query}%") ||
+                                                                                                  EF.Functions.Like(x.LastName, $"%{query}%") ||
+                                                                                                  EF.Functions.Like(x.AltName, $"%{query}%"))
+                                                      .OrderByDescending(x => x.FirstName)
+                                                            .ThenByDescending(x => x.LastName)
+                                                      .AsNoTracking()
+                                                      .ToArrayAsync();
 
-            if (!string.IsNullOrWhiteSpace(query))
-            {
-                queries = queries.Where(x => EF.Functions.Like(x.Name, $"%{query}%") ||
-                                             EF.Functions.Like(x.FirstName, $"%{query}%") ||
-                                             EF.Functions.Like(x.LastName, $"%{query}%") ||
-                                             EF.Functions.Like(x.AltName, $"%{query}%"));
-            }
-            return await queries.AsNoTracking().ToListAsync();
+
+            return Result.Success<IEnumerable<VCreditAgent>>(queries);
+
+
         }
-        public async Task<Pager<VCreditAgent>> GetCreditAgents(int pageIndex,
-            int pageSize,
-            string sortColumn,
-            bool includeIsRemove = false,
-            bool sortDescending = false,
-            string? query = null)
+
+        public async Task<Pager<VCreditAgent>> GetCreditAgents(int? branchId, QueryParam param)
         {
-            IQueryable<VCreditAgent> queries = _context.VCreditAgents
-                                                      .OrderBy(x => EF.Property<object>(x, sortColumn));
-            if (includeIsRemove)
+
+            await using var context = await _dbContextFactory.CreateDbContextAsync();
+
+            IQueryable<VCreditAgent> queries = context.VCreditAgents
+                                                        .WhereIf(branchId > 0, x => x.BranchId == branchId);
+
+            if (param.IsIncludeInActive)
             {
                 queries = queries.IgnoreQueryFilters();
             }
 
-            if (!string.IsNullOrWhiteSpace(query))
+            if (!string.IsNullOrWhiteSpace(param.Filter))
             {
-                queries = queries.Where(x => EF.Functions.Like(x.Name, $"%{query}%") ||
-                                             EF.Functions.Like(x.FirstName, $"%{query}%") ||
-                                             EF.Functions.Like(x.LastName, $"%{query}%") ||
-                                             EF.Functions.Like(x.BranchId.ToString(), $"%{query}%") ||
-                                             EF.Functions.Like(x.AltName, $"%{query}%"));
+                queries = queries.Where(x => EF.Functions.Like(x.Name!, $"%{param.Filter}%") ||
+                                             EF.Functions.Like(x.FirstName!, $"%{param.Filter}%") ||
+                                             EF.Functions.Like(x.LastName!, $"%{param.Filter}%") ||
+                                             EF.Functions.Like(x.BranchName!, $"%{param.Filter}%") ||
+                                             EF.Functions.Like(x.AltName!, $"%{param.Filter}%"));
             }
 
-            if (sortDescending)
+            if (param.SortDescending)
             {
-                queries = queries.OrderByDescending(x => EF.Property<object>(x, sortColumn));
+                queries = queries.OrderByDescending(x => EF.Property<object>(x, param.SortColumn));
             }
-            var counts = await queries.CountAsync();
-            queries = queries.Skip(pageIndex).Take(pageSize);
+            var counts = queries.Count();
+
+            if (param.PageSize > 0)
+            {
+                queries = queries.Skip(param.PageNumber).Take(param.PageSize);
+
+            }
+
+            var items = await queries.AsNoTracking().ToListAsync();
+
+
             return new Pager<VCreditAgent>
             {
                 Count = counts,
-                Items = await queries.AsNoTracking().ToListAsync()
+                Items = items
             };
         }
-        public async Task<IEnumerable<VEmployeeCreateCreditAgent>> GetEmployeeCreateCreditAgents(string? query = null)
+
+
+
+        public async Task<Result<IEnumerable<VEmployeeCreateCreditAgent>>> GetEmployeeCreateCreditAgents(string? filter = null)
         {
-            IQueryable<VEmployeeCreateCreditAgent> queries = _context.Database.SqlQuery<VEmployeeCreateCreditAgent>(@$"SELECT * FROM VEmployeeCreateCreditAgents")
-                                                                                                        .AsQueryable();
-            if (!string.IsNullOrWhiteSpace(query))
-            {
-                queries = queries.Where(x => EF.Functions.Like(x.FirstName, $"${query}%") ||
-                                             EF.Functions.Like(x.LastName, $"%{query}%") ||
-                                             EF.Functions.Like(x.AltName, $"%{query}%") ||
-                                             EF.Functions.Like(x.Name, $"%{query}%"))
-                                  .OrderByDescending(x => x.FirstName)
-                                  .ThenByDescending(x => x.FirstName);
-            }
-            return await queries.AsNoTracking().ToListAsync();
+            await using var context = await _dbContextFactory.CreateDbContextAsync();
+
+            var queries = await context.Database
+                                .SqlQuery<VEmployeeCreateCreditAgent>($"SELECT * FROM VEmployeeCreateCreditAgents")
+                                .WhereIf(!string.IsNullOrEmpty(filter),
+                                                                       x => EF.Functions.Like(x.FirstName!, $"%{filter}%") ||
+                                                                            EF.Functions.Like(x.LastName!, $"%{filter}%") ||
+                                                                            EF.Functions.Like(x.AltName!, $"%{filter}%") ||
+                                                                            EF.Functions.Like(x.Name!, $"%{filter}%"))
+                                .OrderByDescending(x => x.FirstName)
+                                    .ThenByDescending(x => x.LastName)
+                                .AsNoTracking()
+                                .ToListAsync();
+
+            return Result.Success<IEnumerable<VEmployeeCreateCreditAgent>>(queries);
         }
-        private bool IsAlreadyCreditAgent(Guid? empId)
+        private bool IsAlreadyCreditAgent(string? empId)
         {
             return _context.LoanCreditAgents
                             .Where(x => x.EmployeeRefId == empId)
                                 .Any();
         }
 
-        Task<Result<string>> ICreditAgentService.AddCreditAgent(long employeeRefId, LoanCreditAgent req)
-        {
-            throw new NotImplementedException();
-        }
-
-        Task<Result<string>> ICreditAgentService.ActivateOrDeactivateCreditAgent(LoanCreditAgent req)
-        {
-            throw new NotImplementedException();
-        }
     }
 }
 
+//var sql = @"
+//            SELECT * FROM VEmployeeCreateCreditAgents WHERE (FirstName LIKE N'%'+@filter+'%' OR 
+//            LastName LIKE N'%'+@filter+'%' OR 
+//            AltName LIKE N'%'+@filter+'%' OR 
+//            Name LIKE N'%'+@filter+'%') OR (@filter is NULL OR @filter=N'')
+//            ORDER BY FirstName DESC, LastName DESC
+//           ";
+//using var db = _connectionFactory.CreateConnection();
+
+//var items = await db.QueryAsync<VEmployeeCreateCreditAgent>(sql, new { filter });
+
+//return items;

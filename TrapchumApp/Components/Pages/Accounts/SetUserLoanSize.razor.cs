@@ -1,5 +1,5 @@
 using Applications.Interfaces.setting;
-using Applications.Requests.SysSettings;
+using Applications.Requests.Settings;
 using Domains.Models.Loans;
 using Mapster;
 using Microsoft.AspNetCore.Components;
@@ -9,9 +9,9 @@ namespace TrapchumApp.Components.Pages.Accounts
 {
     public partial class SetUserLoanSize
     {
-        private readonly ISettingService _settingService;
+        private readonly IAppSettingService _settingService;
 
-        public SetUserLoanSize(ISettingService settingService)
+        public SetUserLoanSize(IAppSettingService settingService)
         {
             _settingService = settingService;
         }

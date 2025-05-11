@@ -1,36 +1,54 @@
 using Applications.Interfaces.Vendors;
 using Applications.Responses.Lists.Vendors;
+using Applications.Responses.ViewModels.Vendors;
+using Applications.Services.LIsts;
 using Microsoft.AspNetCore.Components;
+using System.Threading.Tasks;
 
 namespace TrapchumApp.Components.Pages.Lists.Vendors
 {
     public partial class VendorDetailModal
     {
-        private readonly IVendorService VendorService;
+        private readonly IVendorServiceImpl VendorService;
 
-        public VendorDetailModal(IVendorService vendorService)
+        public VendorDetailModal(IVendorServiceImpl vendorService)
         {
             VendorService = vendorService;
         }
 
-        [Parameter] public VendorResponse? model { get; set; } = new();
-        [Parameter] public long Id { get; set; }
-        [Parameter]
-        public EventCallback<int> SelectIndex { get; set; }
-
+        VendorVm? model { get; set; } = new();
+        [Parameter] public string? Id { get; set; }
+        [Parameter] public EventCallback<int> Closing { get; set; }
+        [Parameter] public EventCallback<string> OnEdit { get; set; } 
         protected async void SelectedIndex()
         {
-            await SelectIndex.InvokeAsync(0);
+            await Closing.InvokeAsync(0);
         }
 
-        protected override async Task OnInitializedAsync()
+        async Task ClickEdit()
         {
-            await base.OnInitializedAsync();
+            await OnEdit.InvokeAsync(Id);
         }
 
-        void ShowList()
+
+        protected override async Task OnParametersSetAsync()
         {
-            // ModalService!.Hide();
+            await GetVendorById(Id);
+            await base.OnParametersSetAsync();
+        }
+
+        async Task GetVendorById(string? id)
+        {
+            var rsp =await VendorService.GetVendorByIdAsync(id);
+
+            if (rsp.IsSuccess)
+            {
+                model = rsp.Data;
+            }
+            else
+            {
+                model = new();
+            }
         }
     }
 }

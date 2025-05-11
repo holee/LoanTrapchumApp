@@ -11,10 +11,11 @@ public class CustomerConfiguration : IEntityTypeConfiguration<Customer>
 
         builder.ToTable("lt_entcustomers");
         builder.HasKey(x => x.CustomerId);
+        builder.Property(p => p.CustomerId).HasMaxLength(250);
         builder.Property(p => p.Dependents).HasMaxLength(100);
         builder.Property(p => p.NoOfChildren).HasDefaultValue(0);
-        builder.Property(p => p.Income).HasPrecision(18, 2);
-        builder.Property(p => p.Expenditure).HasPrecision(18, 2);
+        builder.Property(p => p.Income).HasPrecision(18, 3);
+        builder.Property(p => p.Expenditure).HasPrecision(18, 3);
         builder.Property(p => p.SpouseName).HasMaxLength(50);
         builder.Property(p => p.SpouseDateOfBirth).HasMaxLength(20);
         builder.Property(p => p.SpouseNationality).HasMaxLength(50);

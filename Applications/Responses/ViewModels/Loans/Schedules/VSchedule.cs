@@ -1,21 +1,25 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Payments;
 
 namespace Applications.Responses.ViewModels.Loans.Schedules;
 
-
+public sealed class ScheduleVms
+{
+    public int Count { get; set; } = 0;
+    public Pager<VSchedule> Schedules { get; set; }
+}
 
 public sealed class VSchedule
 {
     public long? LoanScheduleId { get; set; }
-    public long? CreditAgentId { get; set; }
+    public string? CreditAgentId { get; set; }
     public string? CreditAgentNameKh { get; set; }
     public string? CreditAgentNameEn { get; set; }
-    public long? CustomerId { get; set; }
-    public Guid? CustomerCode { get; set; }
+    public string? CustomerId { get; set; }
     public string? FullName { get; set; }
     public string? AltName { get; set; }
-    public Guid? LoanId { get; set; }
+    public string? LoanId { get; set; }
     public int BranchId { get; set; }
     public int? CurrencyId { get; set; }
     public int? InstallmentNo { get; set; }

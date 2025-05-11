@@ -4,7 +4,7 @@ namespace Applications.Responses.ViewModels.Employees
 {
     public class VEmployeesByBranch
     {
-        public long? EmployeeId { get; set; }
+        public string? EmployeeId { get; set; }
         public string? FullName { get; set; }
         public string? AltName { get; set; }
 

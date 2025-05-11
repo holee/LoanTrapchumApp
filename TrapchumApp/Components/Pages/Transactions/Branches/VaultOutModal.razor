@@ -1,16 +1,16 @@
 ﻿<RadzenStack>
     <RadzenFieldset Text="Please verify amount and balance then start cash vault.">
-        <RadzenStack Orientation="Radzen.Orientation.Horizontal"
-                     JustifyContent="Radzen.JustifyContent.SpaceBetween">
+        <RadzenStack Orientation="Orientation.Horizontal"
+                     JustifyContent="JustifyContent.SpaceBetween">
             <RadzenStack AlignItems="AlignItems.Center"
                          class="w-50"
                          Orientation="Orientation.Horizontal">
                 <RadzenLabel Text="CURRENCY" Component="DropDownBindValue" Style="margin-right: 8px" />
-                <RadzenDropDown Value=@CurrencyId
-                                ValueProperty="CurrencyId"
-                                Data=@CurrencyList
-                                TextProperty="CurrencyCode"
-                                ValueChanged="@((int? cid)=>OnSelectChanges(cid))"
+                <RadzenDropDown @bind-Value="@CurrencyId"
+                                ValueProperty="@nameof(Currency.CurrencyId)"
+                                TextProperty="@nameof(Currency.CurrencyCode)"
+                                Data="@CurrencyList"
+                                SelectedItemChanged="OnSelectChanges"
                                 Style="height:35px"
                                 Name="DropDownBindValue" />
             </RadzenStack>
@@ -55,9 +55,9 @@
         </table>
     </RadzenFieldset>
 </RadzenStack>
-<RadzenStack JustifyContent="Radzen.JustifyContent.End"
+<RadzenStack JustifyContent="JustifyContent.End"
              AlignItems="AlignItems.Center"
-             Orientation="Radzen.Orientation.Horizontal">
+             Orientation="Orientation.Horizontal">
     <RadzenButton ButtonStyle="ButtonStyle.Success"
                   Icon="save"
                   Text="Save"

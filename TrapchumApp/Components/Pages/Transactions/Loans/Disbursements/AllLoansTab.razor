@@ -115,7 +115,7 @@
                               TextAlign="TextAlign.Start"
                               Sortable="true">
             <Template>
-                <RadzenButton Size="Radzen.ButtonSize.ExtraSmall"
+                <RadzenButton Size="ButtonSize.ExtraSmall"
                               Icon="more_vert"
                               Variant="Variant.Text"
                               Click="@((args)=>ShowContextMenuWithContent(args,p))" />
@@ -145,12 +145,12 @@
                         Text="Change Credit Agent"></RadzenMenuItem>
         <RadzenMenuItem Icon="info"
                         Click="@(()=>GetLoanDetails(p))"
-                        Text="Loan Details"></RadzenMenuItem>
+                        Text="Details"></RadzenMenuItem>
         <RadzenMenuItem Icon="file_download"
-                        Click="@(()=>DownLoadScheduleAsExcel(p.Id!.Value,p.BranchId!.Value))"
+                        Click="@(()=>DownLoadScheduleAsExcel(p.LoanId,p.BranchId!.Value))"
                         Text="Export Loan to Excel" />
         <RadzenMenuItem Icon="picture_as_pdf"
-                        Click="@(()=>DownLoadScheduleAsPdf(p.Id!.Value,p.BranchId!.Value))"
+                        Click="@(()=>DownLoadScheduleAsPdf(p.LoanId,p.BranchId!.Value))"
                         Text="Export Loan to Pdf" />
     </RadzenMenu>
     );

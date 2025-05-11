@@ -1,5 +1,5 @@
-using Applications.Interfaces.Loans;
 using Applications.Requests.Loans.LoanRequests;
+using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.ViewModels.Collaterals;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Responses.ViewModels.Loans.Requests;
@@ -19,8 +19,8 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Disbursements
             _requestService = requestService;
         }
 
-        [Parameter] public Guid? LoanRequestId { get; set; }
-        [Parameter] public Guid? CustomerId { get; set; }
+        [Parameter] public string? LoanRequestId { get; set; }
+        [Parameter] public string? CustomerId { get; set; }
         [Parameter, SupplyParameterFromQuery] public int BranchId { get; set; }
         IEnumerable<VCollateralLines> CollateralLines = [];
         VLoanRequests? data = new();
@@ -36,7 +36,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Disbursements
 
         async Task GetLoanRequestDetails()
         {
-            var resp = await _requestService.GetLoanRequestsAsync(BranchId, CustomerId, LoanRequestId, true);
+            var resp = await _requestService.GetLoanRequestAsync(BranchId, CustomerId, LoanRequestId, true);
 
             if (resp.IsSuccess)
             {

@@ -1,9 +1,9 @@
-using Applications.Extensions.Identity;
 using Applications.Extensions.mappers;
 using Applications.Requests.Lists.Entities;
 using Applications.Requests.Loans.LoanRequests;
-using Applications.Responses;
+using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Auths;
+using Applications.Responses.ViewModels.Branches;
 using Applications.Responses.ViewModels.Customers;
 using Microsoft.AspNetCore.Components;
 using Radzen;
@@ -13,18 +13,18 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
     public partial class LoanRequestModal
     {
 
-        [Parameter] public Guid? CustomerId { get; set; }
-        [Parameter] public Guid? RequestUserId { get; set; }
+        [Parameter] public string? CustomerId { get; set; }
+        [Parameter] public string? RequestUserId { get; set; }
         [Parameter] public int BranchId { get; set; }
         [Parameter] public decimal? Amount { get; set; } = 0;
-        [Parameter] public Guid? LoanRequestId { get; set; } = Guid.Empty;
-        [Parameter] public Guid? AprovedUserId { get; set; } = Guid.Empty;
+        [Parameter] public string? LoanRequestId { get; set; } = string.Empty;
+        [Parameter] public string? AprovedUserId { get; set; } = string.Empty;
         IEnumerable<VUser> RequestUsers = [];
         IEnumerable<VCustomerList> Customers = [];
         IEnumerable<BranchDto> Branches = [];
         IEnumerable<VUser> AcceptUsers = [];
         string memo = "";
-        long UserId;
+        string? UserId;
 
         protected override void OnParametersSet()
         {
@@ -39,7 +39,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
         }
         async Task GetAllData()
         {
-            var empRsp = await _userService.GetUsersAsync(RequestUserId.ToString(), string.Empty);
+            var empRsp = await _userService.GetUsersAsync(RequestUserId, string.Empty);
 
             if (empRsp.IsSuccess)
             {
@@ -51,14 +51,14 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
             {
                 Customers = custResp.Data!;
             }
-            var branchResp = await _branchService.GetBranchesAsync(BranchId);
+            var branchResp = await _branchService.GetBranchesAsync<VBranchResponse>(BranchId, new QueryParam(0, 25, string.Empty));
 
             if (branchResp.IsSuccess)
             {
                 Branches = branchResp.Data!.Maps<BranchDto>();
             }
 
-            var userResp = await _userService.GetUsersAsync(UserId.ToString(), string.Empty);
+            var userResp = await _userService.GetUsersAsync(UserId, string.Empty);
 
             if (userResp.IsSuccess)
             {

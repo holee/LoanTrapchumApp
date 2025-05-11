@@ -4,11 +4,13 @@ using Applications.Requests.Lists;
 using Applications.Requests.Lists.Customers;
 using Applications.Requests.Lists.OtherNames;
 using Applications.Responses;
+using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.Lists.Customers;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Collaterals;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Responses.ViewModels.Loans;
+using Domains.Models.Bases;
 using Domains.Models.Lists.Customers;
 using Mapster;
 using System.Diagnostics;
@@ -19,24 +21,26 @@ namespace Applications.Services.Customers;
 public interface ICustomerServiceImpl
 {
     Task<Result<string>> AddCusomerNoteAsync(CustomerNoteDtoCreate model);
-    Task<Result<string>> DeleteCustomerAsync(Guid? customerId);
-    Task<Result<Customer>> GetCustomerByIdAsync(Guid? customerId);
-    Task<Result<Customer>> GetCustomerByIdAsync(Guid? customerId, params string[] includes);
-    Task<Result<IEnumerable<VCollateralLines>>> GetCustomerCollateralLines(Guid? customerId, bool includeInUsed = false);
-    Task<Result<VCustomerList>> GetCustomerDetailsByIdAsync(Guid? customerId, bool include = false);
-    Task<Result<VCustomerList>> GetCustomerForRequestLoanAsync(Guid? customerId);
-    Task<Result<IEnumerable<VLoanDisbursments>>> GetCustomerLoanHistoryAsync(Guid? customerId);
+    Task<Result<string>> DeleteCustomerAsync(string? customerId);
+    Task<Result<EntityNames>> GetCustomerByIdAsync(string? customerId);
+    Task<Result<Customer>> GetCustomerByIdAsync(string? customerId, params string[] includes);
+    Task<Result<IEnumerable<VCollateralLines>>> GetCustomerCollateralLines(string? customerId, bool includeInUsed = false);
+    Task<Result<VCustomerList>> GetCustomerDetailsByIdAsync(string? customerId, bool include = false);
+    Task<Result<VCustomerList>> GetCustomerForRequestLoanAsync(string? customerId);
+    Task<Result<IEnumerable<VLoanDisbursments>>> GetCustomerLoanHistoryAsync(string? customerId);
     Task<Pager<VCustomerList>> GetCustomers(QueryParam param);
 
-    Task<Result<IEnumerable<VCustomerList>>> GetCustomersAsync(Guid? customerId, int take = 0,
+    Task<Result<IEnumerable<VCustomerList>>> GetCustomersAsync(string? customerId, int take = 0,
         bool includeInactive = false, bool exceptActiveLoan = true, string? searchTerm = null);
-    Task<Result<EntityNamesCreate>> GetCustomerUpdateAsync(Guid? customerId);
-    Task<Result<string>> MakeCustomerInActiveAsync(Guid? customerId, int editSeq = 1, bool isActive = true);
+    Task<Result<EntityNamesCreate>> GetCustomerUpdateAsync(string? customerId);
+    Task<Result<string>> MakeCustomerInActiveAsync(string? customerId, int editSeq = 1, bool isActive = true);
     Task<Result<string>> UpdateAsync(EntityNamesCreate customer);
     Task<Result<string>> CreateAsync(EntityNamesCreate customer);
-    Task<Result<IEnumerable<VCustomerNotes>>> GetCusomerNotesAsync(Guid? customerId);
-    Task<Result<IEnumerable<T>>> GetCusomerActivies<T>(Guid? customerId) where T : class;
+    Task<Result<IEnumerable<VCustomerNotes>>> GetCusomerNotesAsync(string? customerId);
+    Task<Result<IEnumerable<T>>> GetCusomerActivies<T>(string? customerId) where T : class;
     Task<Result<string>> AddCusomerActivyAsync(CustomerActivityDtoCreate model);
+    Task<Result<Pager<T>>> GetCustomersAsync<T>(string? customerId, QueryParam param) where T : class;
+    Task<Pager<T>> GetCustomerLoanRequestAsync<T>(int? branchId, string? customerId) where T : class;
 }
 
 public sealed class CustomerService(ICustomerService cusService) : ICustomerServiceImpl
@@ -63,74 +67,95 @@ public sealed class CustomerService(ICustomerService cusService) : ICustomerServ
         return await cusService.UpdateAsync(req);
     }
 
-    public async Task<Result<string>> CreateAsync(EntityNamesCreate customer)
+    public async Task<Result<string>> CreateAsync(EntityNamesCreate entity)
     {
-        var cust = customer.ToCustomer();
-        var req = customer.ToEntityNames();
+        entity.Id = $"{Guid.CreateVersion7()}";
+        entity.EntType = EntType.Customer.ToString();
+        var cust = entity.ToCustomer();
+        var req = entity.ToEntityNames();
         req.Customer = cust;
         return await cusService.CreateAsync(req);
     }
 
-    public async Task<Result<string>> DeleteCustomerAsync(Guid? customerId)
+    public async Task<Result<string>> DeleteCustomerAsync(string? customerId)
     {
         return await cusService.DeleteCustomerAsync(customerId);
     }
 
-    public async Task<Result<IEnumerable<VCustomerNotes>>> GetCusomerNotesAsync(Guid? customerId)
+    public async Task<Result<IEnumerable<VCustomerNotes>>> GetCusomerNotesAsync(string? customerId)
     {
         return await cusService.GetCustomerNotes<VCustomerNotes>(customerId);
     }
 
-    public async Task<Result<IEnumerable<T>>> GetCusomerActivies<T>(Guid? customerId)
+    public async Task<Result<IEnumerable<T>>> GetCusomerActivies<T>(string? customerId)
         where T : class
     {
         return await cusService.GetCustomerActivies<T>(customerId);
     }
 
 
-    public async Task<Result<Customer>> GetCustomerByIdAsync(Guid? customerId, params string[] includes)
+    public async Task<Result<Customer>> GetCustomerByIdAsync(string? customerId, params string[] includes)
     {
         return await cusService.GetCustomerByIdAsync(customerId, includes);
     }
 
-    public Task<Result<Customer>> GetCustomerByIdAsync(Guid? customerId)
+    public async Task<Result<EntityNames>> GetCustomerByIdAsync(string? customerId)
     {
-        throw new NotImplementedException();
+        return await cusService.GetCustomerByIdAsync(customerId);
     }
 
-    public async Task<Result<IEnumerable<VCollateralLines>>> GetCustomerCollateralLines(Guid? customerId,
-        bool includeInUsed = false)
+    public async Task<Result<IEnumerable<VCollateralLines>>> GetCustomerCollateralLines(string? customerId, bool includeInUsed = false)
     {
         return await cusService.GetCustomerCollateralLines(customerId, includeInUsed);
     }
 
-    public async Task<Result<VCustomerList>> GetCustomerDetailsByIdAsync(Guid? customerId, bool include = false)
+    public async Task<Result<VCustomerList>> GetCustomerDetailsByIdAsync(string? customerId, bool include = false)
     {
         return await cusService.GetCustomerDetailByIdAsync(customerId, include);
     }
 
-    public Task<Result<VCustomerList>> GetCustomerForRequestLoanAsync(Guid? customerId)
+
+    public async Task<Pager<T>> GetCustomerLoanRequestAsync<T>(int? branchId, string? customerId)
+        where T : class
     {
-        throw new NotImplementedException();
+        var rsp = await cusService.GetCustomerLoanRequestAsync<T>(branchId, customerId);
+
+        if (rsp.IsSuccess)
+        {
+            return new Pager<T>(rsp.Data.Items, rsp.Data.Count);
+        }
+        return new Pager<T>();
     }
 
-    public async Task<Result<IEnumerable<VLoanDisbursments>>> GetCustomerLoanHistoryAsync(Guid? customerId)
+    public async Task<Result<VCustomerList>> GetCustomerForRequestLoanAsync(string? customerId)
+    {
+        return await cusService.GetCustomerForRequestLoanAsync(customerId);
+    }
+
+    public async Task<Result<IEnumerable<VLoanDisbursments>>> GetCustomerLoanHistoryAsync(string? customerId)
     {
         return await cusService.GetCustomerLoanHistoryAsync(customerId);
     }
 
     public async Task<Pager<VCustomerList>> GetCustomers(QueryParam param)
     {
-        return await cusService.GetCustomers(param);
+        return await cusService.GetCustomersAsync(param);
     }
 
-    public Task<Result<IEnumerable<VCustomerList>>> GetCustomersAsync(Guid? customerId, int take = 0,
+    public Task<Result<IEnumerable<VCustomerList>>> GetCustomersAsync(string? customerId, int take = 0,
         bool includeInactive = false, bool exceptActiveLoan = true, string? searchTerm = null)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<Result<EntityNamesCreate>> GetCustomerUpdateAsync(Guid? customerId)
+    public async Task<Result<Pager<T>>> GetCustomersAsync<T>(string? customerId, QueryParam param)
+        where T : class
+    {
+        return await cusService.GetCustomersAsync<T>(customerId, param);
+    }
+
+
+    public async Task<Result<EntityNamesCreate>> GetCustomerUpdateAsync(string? customerId)
     {
         var updateCustomer = await cusService.GetCustomerByIdAsync(customerId);
 
@@ -139,7 +164,7 @@ public sealed class CustomerService(ICustomerService cusService) : ICustomerServ
             return Result.Failure<EntityNamesCreate>(ErrorResponse.NotFound(updateCustomer.ErrMessage));
         }
 
-        var req = updateCustomer.Data?.ToEntityNamesCreate();
+        var req = updateCustomer.Data?.ToCustomerCreate();
 
         if (req is null)
         {
@@ -150,7 +175,7 @@ public sealed class CustomerService(ICustomerService cusService) : ICustomerServ
         return Result.Success(req!);
     }
 
-    public async Task<Result<string>> MakeCustomerInActiveAsync(Guid? customerId, int editSeq = 0, bool isActive = true)
+    public async Task<Result<string>> MakeCustomerInActiveAsync(string? customerId, int editSeq = 0, bool isActive = true)
     {
         return await cusService.MakeCustomerInActiveAsync(customerId, editSeq, isActive);
     }

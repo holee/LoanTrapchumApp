@@ -5,6 +5,8 @@ using Applications.Interfaces.Currencies;
 using Applications.Interfaces.Transactions;
 using Applications.Requests.Transactions.OpenBranches;
 using Applications.Responses.ViewModels.Currencies;
+using Applications.Services.Currencies;
+using Applications.Services.Transactions.Branches;
 using Domains.Models.Transaction;
 using Mapster;
 using Microsoft.AspNetCore.Components;
@@ -16,12 +18,17 @@ namespace TrapchumApp.Components.Pages.Transactions.Branches
 {
     public partial class OpenBranch
     {
-        [Inject] IOpenBranchService obService { get; set; } = default!;
-        [Inject] ICurrencyService curService { get; set; } = default!;
+        readonly IOpenBranchServiceImpl obService;
+        readonly ICurrencyServiceImpl curService;
+        public OpenBranch(IOpenBranchServiceImpl obService, ICurrencyServiceImpl curService)
+        {
+            this.obService = obService;
+            this.curService = curService;
+        }
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
-        [CascadingParameter] CascadingAppState bState { get; set; } = default!;
-        [Parameter, SupplyParameterFromQuery] public int BranchId { get; set; }
-        [Parameter, SupplyParameterFromQuery] public long UserId { get; set; }
+        [CascadingParameter] CascadingBranchState bState { get; set; } = default!;
+        [Parameter] public int? BranchId { get; set; } = 0;
+        [Parameter, SupplyParameterFromQuery] public string? UserId { get; set; }
         IEnumerable<VCurrencyNotes> CurrencyNotes = [];
         IEnumerable<VCashVaultBalance> CashVaultBalances = [];
         OpenBranchTransactionDto? transactionOpenBranch;
@@ -38,13 +45,14 @@ namespace TrapchumApp.Components.Pages.Transactions.Branches
         bool canVaultIn = false;
         private AlertStyle alertStyle;
         bool isBranchOpen = false;
+        
         protected override async Task OnInitializedAsync()
         {
             var auth = await AuthenticationState;
-            canOpenBranch = await _authorizeService.MustHasPermissionAsync(auth.User, TranxPolicies.OpenBranch);
-            canCloseBranch = await _authorizeService.MustHasPermissionAsync(auth.User, TranxPolicies.CloseBranch);
-            canVaultOut = await _authorizeService.MustHasPermissionAsync(auth.User, TranxPolicies.VaultOut);
-            canVaultIn = await _authorizeService.MustHasPermissionAsync(auth.User, TranxPolicies.VaultIn);
+            canOpenBranch = await _authorizeService.MustHasPermissionAsync(auth.User, TranxsPolicies.OpenBranch);
+            canCloseBranch = await _authorizeService.MustHasPermissionAsync(auth.User, TranxsPolicies.CloseBranch);
+            canVaultOut = await _authorizeService.MustHasPermissionAsync(auth.User, TranxsPolicies.VaultOut);
+            canVaultIn = await _authorizeService.MustHasPermissionAsync(auth.User, TranxsPolicies.VaultIn);
 
             var balanceResp = await obService.GetCashVaultBalance(BranchId);
 
@@ -88,28 +96,28 @@ namespace TrapchumApp.Components.Pages.Transactions.Branches
 
             transactionCloseBranch = new TransactionCloseBranchDto
             {
-                TransactionTypeName = "Open Branch",
+                TransactionsId = $"trx_{Guid.CreateVersion7()}",
+                TransactionTypeName = "Close Branch",
                 TranTypeRefId = 68,
                 UserRefId = UserId,
                 OpenBranch = new CloseBranchDtoUpdate
                 {
+                    OpenBranchId = $"trx-{Guid.CreateVersion7()}",
                     BranchRefId = BranchId,
                     OpenDate = DateTime.Now,
                     BankRefId = 11,
-                    OpenStatus = "0"
+                    OpenStatus = "0",
                 }
             };
 
-            var tranx = transactionCloseBranch.Adapt<LoanTransaction>();
-
-            var result = await obService.CloseBranchAsync(tranx);
+            var result = await obService.CloseBranchAsync(transactionCloseBranch);
 
             if (result!.IsSuccess)
             {
 
-                bState.BranchState = false;
+                bState.State = false;
 
-                NotificationService.Notify(NotificationSeverity.Success, result.ErrMessage);
+                NotificationService.Notify(NotificationSeverity.Success, result.Data);
 
             }
             else
@@ -144,30 +152,27 @@ namespace TrapchumApp.Components.Pages.Transactions.Branches
             {
                 return;
             }
-
-            transactionOpenBranch = new OpenBranchTransactionDto
+           var  openBranch = new OpenBranchTransactionDto()
             {
+                TransactionsId = $"trx-{Guid.CreateVersion7()}",
                 TranTypeRefId = 68,
                 TransactionTypeName = "Open Branch",
                 UserRefId = UserId,
-                OpenBranch = new OpenBranchDtoCreate
-                {
+                OpenBranch = new OpenBranchDtoCreate() {
+                    OpenBranchId = $"trx-{Guid.CreateVersion7()}",
                     BankRefId = 11,
                     BranchRefId = BranchId,
                     OpenStatus = "1",
-                    DelegateStaffId = UserId,
                     OpenDate = DateTime.Now
                 }
             };
 
-            var tranx = transactionOpenBranch.Adapt<LoanTransaction>();
-
-            var result = await obService.OpenBranchAsync(tranx);
+            var result = await obService.OpenBranchAsync(openBranch);
 
             if (result!.IsSuccess)
             {
-                bState.BranchState = true;
-                NotificationService.Notify(NotificationSeverity.Success, result.ErrMessage);
+                bState.State = true;
+                NotificationService.Notify(NotificationSeverity.Success, result.Data);
             }
             else
             {
@@ -199,7 +204,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Branches
         protected async void OnCashVaultOut()
         {
             var resultModal = await DialogService.OpenAsync<VaultOutModal>("Vault Out",
-                new Dictionary<string, object> {
+                new Dictionary<string, object?> {
                     { "UserId", UserId },
                     { "BranchId", BranchId },
                                                                                                                                                                                                                 },
@@ -209,7 +214,6 @@ namespace TrapchumApp.Components.Pages.Transactions.Branches
                 Resizable = true,
                 ShowTitle = false,
                 ShowClose = false,
-                Width = "70rem"
             });
             if (resultModal != null)
             {

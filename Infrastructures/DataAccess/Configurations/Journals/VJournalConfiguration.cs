@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructures.DataAccess.Configurations.Journals;
 
-public class VJournalConfiguration : IEntityTypeConfiguration<VJournal>
+public class VJournalConfiguration : IEntityTypeConfiguration<JournalEntryVm>
 {
-    void IEntityTypeConfiguration<VJournal>.Configure(EntityTypeBuilder<VJournal> builder)
+    void IEntityTypeConfiguration<JournalEntryVm>.Configure(EntityTypeBuilder<JournalEntryVm> builder)
     {
         builder.ToView("VJournals");
         builder.HasNoKey();

@@ -1,155 +1,129 @@
-﻿<PageTitle>Journal Entry</PageTitle>
-<div>
-    <RadzenProgressBar ProgressBarStyle="ProgressBarStyle.Primary" Visible="@visibled" Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
-    <div class="card">
-        <div class="card-header bg-primary">
-            <div class="d-flex justify-content-between">
-                <strong>Journal Entry</strong>
-                <strong @onclick="CloseSelectedTab" class="text-danger" style="cursor:pointer">X</strong>
+﻿@using Applications.Requests.Journals
+@using Applications.Responses.Lists.Currency
+<PageTitle>Journal Entry</PageTitle>
+<RadzenFieldset AllowCollapse="false" Collapsed="false">
+    <HeaderTemplate>
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25">
+            <RadzenIcon Icon="book_5"/>
+            <strong>Journal Entry</strong>
+        </RadzenStack>
+    </HeaderTemplate>
+    <ChildContent>
+        <RadzenAlert AlertStyle="AlertStyle.Warning" Visible="@_isMessage" ShowIcon="true"
+                     Variant="Variant.Flat" Shade="Shade.Lighter">
+            <span>@_titleMessage: </span> @_messageAlert
+        </RadzenAlert>
+        <EditForm Model="JLe" @ref="_editForm">
+            <DataAnnotationsValidator/>
+            <ValidationSummary/>
+            <RadzenRow AlignItems="AlignItems.Center" Gap="1rem">
+                <RadzenColumn Size="2">
+                    <RadzenLabel Text="Currency"/>
+                    <RadzenDropDown @bind-Value="@JLe.CurrencyRefId"
+                                    class="form-control"
+                                    Data="@_currencies"
+                                    TextProperty="@nameof(CurrencyResponse.CurrencyCode)"
+                                    ValueProperty="@nameof(CurrencyResponse.CurrencyId)"
+                                    SelectedItemChanged="SelectedCurrencyChanged"
+                                    Name="DropDownBindValue"/>
+                </RadzenColumn>
+                <RadzenColumn Size="3">
+                    <RadzenCheckBox @bind-Value=@JLe.IsAdjustment Name="CheckBox1"/>
+                    <RadzenLabel
+                        Component="CheckBox1">Adjustment Entry
+                    </RadzenLabel>
+                </RadzenColumn>
+                <RadzenColumn Size="3">
+                    <RadzenLabel Text="Journal Type"/>
+                    <RadzenDropDown @bind-Value="@JLe.JournalType"
+                                    TValue="string"
+                                    class="form-control"
+                                    Data="@_journalTypes"
+                                    Placeholder="Select Journal type"
+                                    TextProperty="@nameof(JournalTypeDto.Description)"
+                                    ValueProperty="@nameof(JournalTypeDto.Code)"
+                                    SelectedItemChanged="SelectedItemChanged"
+                                    Name="DropDownBindValue"/>
+                </RadzenColumn>
+                <RadzenColumn Size="2">
+                    <RadzenLabel Text="Date"/>
+                    <input id="startDate"
+                           class="date form-control "
+                           type="date"
+                           @bind-value="JLe.JournalDate"
+                           @bind-value:after="@OnValidateDate"/>
+                </RadzenColumn>
+                <RadzenColumn Size="2">
+                    <RadzenLabel Text="Ref #"/>
+                    <RadzenTextBox @bind-Value="JLe.ReferrenceNum"
+                                   Name="ReferrenceNum"
+                                   Placeholder="Ref No "
+                                   class="w-100"/>
+                </RadzenColumn>
+            </RadzenRow>
+            <div class="table-responsive rz-mt-2">
+                <table class="table table-sm table-bordered table-light">
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Account</th>
+                        <th>Debit</th>
+                        <th>Credit</th>
+                        <th>Description</th>
+                        <th>Name</th>
+                        <th style="width:3rem">Action</th>
+                    </tr>
+                    </thead>
+                    <tbody class="bg-info">
+                    @if (JournalLines?.Count > 0)
+                    {
+                        @for (var x = 0; x < JournalLines?.Count; x++)
+                        {
+                            var row = x;
+                            var currentRow = x + 1;
+                            <JournalEntryRowCreate JournalLine="JournalLines[row]"
+                                                   RowIndex="@currentRow"
+                                                   JournalLineSeq="@currentRow"
+                                                   AddRow="AddNewRow"
+                                                   RemovedRow="DeleteEvent"
+                                                   DebitValidated="DebitValidate"
+                                                   CreditValidated="CreditValidate"
+                                                   TotalValue="GetTotalValue"
+                                                   @key="@Guid.NewGuid().ToString("N")"
+                                                   ReCalculateTotal="OnNextPerform"/>
+                        }
+                    }
+                    </tbody>
+                    <tbody>
+                    <tr>
+                        <td class="text-end" colspan="2">Totals</td>
+                        <td class="text-end">
+                            @JLe?.TotalDr
+                        </td>
+                        <td class="text-end">
+                            @JLe?.TotalCr
+                        </td>
+                        <td colspan="3"></td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
-        </div>
-        <div class="card-body">
-            <RadzenAlert AlertStyle="AlertStyle.Warning" Visible="@IsMessage" ShowIcon="true" Variant="Variant.Flat" Shade="Shade.Lighter">
-                <span>@TitleMessage: </span> @MessageAlert
-            </RadzenAlert>
-
-            <EditForm Model="jLe" @ref="editForm">
-                <DataAnnotationsValidator />
-                <Microsoft.AspNetCore.Components.Forms.ValidationSummary />
-                <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="10px" Reverse="false" JustifyContent="Radzen.JustifyContent.SpaceBetween" Wrap="Radzen.FlexWrap.Wrap">
-                    <RadzenStack>
-                        <div class="input-group input-group-sm">
-                            <span class="input-group-text" id="basic-addon1">Currency</span>
-                            <RadzenDropDown @bind-Value="@selectedCurrencyId"
-                                            class="form-control"
-                                            @bind-Value:after="SelectedCurrencyChanged"
-                                            Data=@Currencies
-                                            TextProperty="CurrencyCode"
-                                            ValueProperty="CurrencyId"
-                                            Style="height:32px;font-size:14px;max-width:200px;width:100%"
-                                            Name="DropDownBindValue" />
-                        </div>
-                    </RadzenStack>
-                    <RadzenStack>
-                        <div class="input-group input-group-sm">
-                            <span class="input-group-text gap-3" id="basic-addon1">
-                                <RadzenCheckBox @bind-Value=@jLe.IsAdjustment Name="CheckBox1" /> <RadzenLabel Component="CheckBox1">Adjustment Entry</RadzenLabel>
-                            </span>
-                        </div>
-                    </RadzenStack>
-                    <RadzenStack>
-                        <div class="input-group input-group-sm">
-                            <span class="input-group-text" id="basic-addon1">
-                                Journal Type
-                            </span>
-                            <RadzenDropDown @bind-Value=@jLe.JournalType
-                                            TValue="string"
-                                            class="form-control"
-                                            Data=@JournalTypes
-                                            Placeholder="Select Journal type"
-                                            TextProperty="Description"
-                                            ValueProperty="Code"
-                                            AllowClear="true"
-                                            Style="height:32px;font-size:14px;max-width:200px;width:100%"
-                                            Name="DropDownBindValue" />
-                        </div>
-                    </RadzenStack>
-                    <RadzenStack>
-                        <div class="input-group input-group-sm">
-                            <span class="input-group-text" id="basic-addon1">
-                                Date
-                            </span>
-                            <input id="startDate"
-                                   class="date form-control "
-                                   type="date"
-                                   @bind-value="jLe.JournalDate"
-                                   @bind-value:after="@OnValidateDate" />
-                        </div>
-                    </RadzenStack>
-
-                    <RadzenStack>
-                        <div class="input-group input-group-sm">
-                            <span class="input-group-text" id="basic-addon1">
-                                <RadzenLabel Text="Ref #" Component="ReferrenceNum" />
-                            </span>
-                            <RadzenTextBox @bind-Value="jLe.ReferrenceNum"
-                                           Name="ReferrenceNum"
-                                           Placeholder="Ref No "
-                                           Style="height:32px;font-size:14px;width:auto" />
-                        </div>
-                    </RadzenStack>
-                </RadzenStack>
-                <div class="mt-3">
-                    <div>
-                        <table class="table table-sm">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Account</th>
-                                    <th>Debit</th>
-                                    <th>Credit</th>
-                                    <th>Description</th>
-                                    <th>Name</th>
-                                    <th style="width:70px">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @if (jLe.JournalEntryLines?.Count > 0)
-                                {
-                                    @for (int x = 0; x < jLe.JournalEntryLines?.Count; x++)
-                                    {
-                                        var row = x;
-                                        var currentRow = x + 1;
-                                        <JournalEntryRowCreate JournalLine="jLe.JournalEntryLines[row]"
-                                                               RowIndex="@currentRow"
-                                                               JournalLineSeq="@currentRow"
-                                                               JournalLineList="jLe.JournalEntryLines"
-                                                               LedgerData="Ledgers"
-                                                               AddRow="AddNewRow"
-                                                               RemovedRow="DeleteEvent"
-                                                               NameData="nameLists"
-                                                               DebitValidated="DebitValidate"
-                                                               CreditValidated="CreditValidate"
-                                                               TotalValue="GetTotalValue"
-                                                               ReCalculateTotal="OnNextPerform" />
-
-                                    }
-                                }
-                            </tbody>
-                            <tbody>
-                                <tr>
-                                    <td class="text-end" colspan="2">Totals</td>
-                                    <td class="text-end">
-                                        @jLe?.TotalDr
-                                    </td>
-                                    <td class="text-end">
-                                        @jLe?.TotalCr
-                                    </td>
-                                    <td colspan="2"></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </EditForm>
-        </div>
-        <div class="card-footer">
-            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
-                         JustifyContent="JustifyContent.End">
-                <RadzenButton Size="Radzen.ButtonSize.Small"
-                              Icon="save"
-                              ButtonStyle="ButtonStyle.Success"
-                              Click="OnSave"
-                              Text="Save" />
-                <RadzenButton Size="Radzen.ButtonSize.Small"
-                              Icon="cancel"
-                              ButtonStyle="ButtonStyle.Danger"
-                              Click="CloseSelectedTab"
-                              Text="Close" />
-            </RadzenStack>
-        </div>
-    </div>
-
-</div>
-
-
+        </EditForm>
+    </ChildContent>
+</RadzenFieldset>
+<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
+             class="rz-my-2"
+             JustifyContent="JustifyContent.End">
+    <RadzenButton Size="ButtonSize.ExtraSmall"
+                  Icon="save"
+                  ButtonStyle="ButtonStyle.Success"
+                  Click="OnSave"
+                  IsBusy="@_visibled"
+                  BusyText="Saving..."
+                  Text="Save"/>
+    <RadzenButton Size="ButtonSize.ExtraSmall"
+                  Icon="cancel"
+                  ButtonStyle="ButtonStyle.Danger"
+                  Click="CloseSelectedTab"
+                  Text="Close"/>
+</RadzenStack>

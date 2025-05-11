@@ -9,11 +9,11 @@ using Radzen;
 
 namespace TrapchumApp.Components.Pages.Accounts.Users;
 
-public partial class Create
+public partial class CreateNewUser
 {
     private readonly IRoleService _roleService;
 
-    public Create(IRoleService roleService)
+    public CreateNewUser(IRoleService roleService)
     {
         _roleService = roleService;
     }

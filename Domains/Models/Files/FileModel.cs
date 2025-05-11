@@ -9,8 +9,25 @@
             FileUrl = fileUrl;
         }
 
-        public string? OriginalName { get; set; }
+        public FileModel(string originalName, string? fileName, long fileSize, string? fileUrl)
+            : this(originalName, fileName, fileUrl)
+        {
+            FileSize = fileSize;
+        }
+
+
+        public FileModel(string originalName, string fileName, byte[]? fileContent)
+        {
+            OriginalName = originalName;
+            FileContent = fileContent;
+            FileName = fileName;
+        }
+
+        public long Id { get; set; } 
         public string? FileName { get; set; }
+        public long FileSize { get; set; } = 0;
+        public string? OriginalName { get; set; }
         public string? FileUrl { get; set; }
+        public byte[]? FileContent { get; set; } = null;
     }
 }

@@ -1,8 +1,8 @@
 using Applications.Extensions.Identity.Enumerations;
-using Applications.Interfaces.Employees;
 using Applications.Interfaces.Identity;
 using Applications.Requests.Identity;
 using Applications.Requests.Lists.Entities;
+using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Employees;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
@@ -12,14 +12,19 @@ namespace TrapchumApp.Components.Pages.Accounts.Users
 {
     public partial class CreditAgentUserCreate
     {
-        [Parameter] public Guid? EmployeeId { get; set; } = Guid.Empty;
+        [Parameter] public string? EmployeeId { get; set; } = string.Empty;
         [Parameter] public int BranchId { get; set; } = 0;
+
         RegisterRequest model = new RegisterRequest();
+
         EditForm form = default!;
+
         IEnumerable<BranchDto> Branches = [];
+
         IEnumerable<string?> roles = [];
-        IEnumerable<VEmployees> Employees = [];
-        
+
+        IEnumerable<VEmployeeList> Employees = [];
+
         private readonly IRoleService _roleService;
         public CreditAgentUserCreate(IRoleService roleService)
         {
@@ -29,30 +34,53 @@ namespace TrapchumApp.Components.Pages.Accounts.Users
         protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
+
             var employeeResponse = await _employeeService.GetEmployeesAsync(EmployeeId, BranchId);
-            var branchResponse = await _branchService.GetBranchesAsync(BranchId, 1, false);
-            var getRoles = await _roleService.GetRolesAsync();
+
+            var getRoles = await _roleService.GetRolesAsync(null);
 
 
-            roles = getRoles?.Data?.Where(x => x.RoleName!.Contains(AppRoles.Co)).Select(r => r.RoleName) ?? [];
+            roles = getRoles?.Data?.Where(x => x.Contains(AppRoles.Co)).ToList() ?? [];
 
-            model.RoleName = roles.First();
+            model.RoleName = roles.First()!;
 
             if (employeeResponse.IsSuccess)
             {
+
                 Employees = employeeResponse.Data!;
+
                 SelectedEmployeeChanged(Employees.First());
             }
+
+            await GetBranches();
+
+        }
+
+        private async Task GetBranches()
+        {
+
+            var branchResponse = await _branchService.GetBranchesAsync<BranchDto>(BranchId, new QueryParam(0, 25, string.Empty));
+
             if (branchResponse!.IsSuccess)
             {
-                // Branches = branchResponse.Data!;
-                model.BranchRefId = Branches.First().BranchId;
+
+                Branches = branchResponse.Data.Items ?? [];
+
+                model.BranchRefId = BranchId;
+
             }
             else
             {
                 Branches = [];
             }
+
+            await Task.CompletedTask;
+
         }
+
+
+
+
         protected async void SubmitForm()
         {
             try
@@ -64,11 +92,12 @@ namespace TrapchumApp.Components.Pages.Accounts.Users
                 if (result.IsSuccess)
                 {
                     NotificationService.Notify(NotificationSeverity.Success, "New user was created.");
+
                     DialogService.Close(true);
                 }
                 else
                 {
-                    NotificationService.Notify(NotificationSeverity.Error,result.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Error, result.ErrMessage);
                 }
 
             }
@@ -80,7 +109,7 @@ namespace TrapchumApp.Components.Pages.Accounts.Users
 
         }
 
-        void SelectedEmployeeChanged(VEmployees? emp)
+        void SelectedEmployeeChanged(VEmployeeList? emp)
         {
             if (emp is not null)
             {
@@ -96,7 +125,7 @@ namespace TrapchumApp.Components.Pages.Accounts.Users
             {
                 model.Username = "";
                 model.Email = "";
-                model.EmployeeId = Guid.Empty;
+                model.EmployeeId = string.Empty;
                 model.Password = "Pa$$w0rd";
                 model.ConfirmPassword = "Pa$$w0rd";
             }

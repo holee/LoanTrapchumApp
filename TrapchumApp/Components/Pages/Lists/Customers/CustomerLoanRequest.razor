@@ -1,5 +1,67 @@
-﻿<h3>CustomerLoanRequest</h3>
-
-@code {
-
-}
+﻿@using Applications.Enumerations
+@using TrapchumApp.Components.Pages.Lists.Collaterals
+<RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End"
+             class="rz-mb-2"
+             Orientation="Orientation.Horizontal">
+    <AuthorizeView Policy="@RequestsPolicies.Create">
+        <Authorized>
+            <RadzenButton Icon="add"
+                          Click="AddLoanRequest"
+                          ButtonStyle="ButtonStyle.Primary"
+                          Size="ButtonSize.Small"
+                          Text="Add Loan Request"></RadzenButton>
+        </Authorized>
+    </AuthorizeView>
+</RadzenStack>
+<RadzenDataGrid Data="_vLoanRequests"
+                Responsive
+                TItem="CustomerLoanRequestVm"
+                Density="Density.Compact">
+    <Columns>
+        <RadzenDataGridColumn Property="@nameof(CustomerLoanRequestVm.RequestDate)" Title="Date"
+                              Context="c"
+                              Sortable="false">
+            <Template>
+                @c.RequestDate.DayFirst()
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="@nameof(CustomerLoanRequestVm.CurrencyName)" Title="Currency"
+                              Sortable="false" />
+        <RadzenDataGridColumn Property="@nameof(CustomerLoanRequestVm.RequestAmount)" Title="Amount"
+                              Context="c"
+                              TextAlign="TextAlign.End"
+                              Sortable="false">
+            <Template>
+                @c.RequestAmount.Format(c.CurrencyId)
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="@nameof(CustomerLoanRequestVm.LoanCategoryName)"
+                              Title="Category"
+                              Sortable="false" />
+        <RadzenDataGridColumn Property="@nameof(CustomerLoanRequestVm.Remark)"
+                              Title="Remark"
+                              Sortable="false" />
+        <RadzenDataGridColumn TextAlign="TextAlign.Center" Width="6rem" 
+                              Property="@nameof(CustomerLoanRequestVm.Status)" 
+                              Title="Status"
+                              Context="c"
+                              Sortable="false">
+                 <Template>
+                    <AuthorizeView Policy="@RequestsPolicies.Request">
+                       <Authorized>
+                        <RadzenLink 
+                            Path="@($"App/Loan/{BranchId}/Branches/Request/Details?UserId={UserId}&CustomerId={CustomerId}&LoanRequestId={c?.LoanRequestId}")" Text="Detail" />
+                       </Authorized>
+                    </AuthorizeView>
+                <AuthorizeView Policy="@RequestsPolicies.Disburse">
+                    <Authorized>
+                        <RadzenLink Path="@($"App/Loan/{BranchId}/Branches/Request/Details?UserId={UserId}&CustomerId={CustomerId}&LoanRequestId={c?.LoanRequestId}")" Text="Detail" />
+                    </Authorized>
+                </AuthorizeView>
+                 </Template>       
+        </RadzenDataGridColumn>
+    </Columns>
+    <LoadingTemplate>
+        <RadzenProgressBarCircular ProgressBarStyle="ProgressBarStyle.Primary" Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+    </LoadingTemplate>
+</RadzenDataGrid>

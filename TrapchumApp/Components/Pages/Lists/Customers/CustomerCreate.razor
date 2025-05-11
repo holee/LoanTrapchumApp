@@ -1,12 +1,13 @@
-﻿@page "/App/Customers/Create"
+﻿@page "/App/Customers/CreateNewUser"
+@using Applications.Enumerations
 <Containers Fluid>
-    <EditForm Model="model" @ref="editForm">
+    <EditForm Model="model" @ref="editForm" OnValidSubmit="FormSubmit">
         <FluentValidationValidator DisableAssemblyScanning="true"></FluentValidationValidator>
-        <Card>
-            <CardHeader HeaderCssClass="rz-background-color-base-200">
-                <strong>Customer</strong>
-            </CardHeader>
-            <CardBody BodyCssClass="rz-background-color-base-100">
+        <RadzenFieldset AllowCollapse="true" Collapsed="false" class="rz-mb-2">
+            <HeaderTemplate>
+                <RadzenIcon Icon="person" /><strong>Customer</strong>
+            </HeaderTemplate>
+            <ChildContent>
                 <RadzenRow AlignItems="AlignItems.Center">
                     <RadzenColumn Size="3">
                         <RadzenRow AlignItems="AlignItems.Center">
@@ -14,8 +15,7 @@
                                 <RadzenLabel>Name</RadzenLabel>
                             </RadzenColumn>
                             <RadzenColumn Size="6">
-                                <RadzenDropDown 
-                                                Chips="true"
+                                <RadzenDropDown Chips="true"
                                                 AllowFiltering="true"
                                                 Name="DropDownSalutions"
                                                 Style="width: 100%;"
@@ -34,8 +34,8 @@
                             <RadzenColumn Size="12">
                                 <RadzenTextBox @bind-Value="model.FirstName"
                                                class="w-100"
-                                               Placeholder="First name..."/>
-                                <ValidationMessage For="@(() => model.FirstName)"/>
+                                               Placeholder="First name..." />
+                                <ValidationMessage For="@(() => model.FirstName)" />
                             </RadzenColumn>
                         </RadzenRow>
                     </RadzenColumn>
@@ -44,7 +44,7 @@
                             <RadzenColumn Size="12">
                                 <RadzenTextBox @bind-Value="model.MiddleName"
                                                class="w-100"
-                                               Placeholder="Middle Name..."/>
+                                               Placeholder="Middle Name..." />
                             </RadzenColumn>
                         </RadzenRow>
                     </RadzenColumn>
@@ -53,8 +53,8 @@
                             <RadzenColumn Size="12">
                                 <RadzenTextBox @bind-Value="model.LastName"
                                                class="w-100"
-                                               Placeholder="Last Name.."/>
-                                <ValidationMessage For="@(() => model.LastName)"/>
+                                               Placeholder="Last Name.." />
+                                <ValidationMessage For="@(() => model.LastName)" />
                             </RadzenColumn>
                         </RadzenRow>
                     </RadzenColumn>
@@ -68,7 +68,7 @@
                             <RadzenColumn Size="9">
                                 <RadzenTextBox @bind-Value="model.AltName"
                                                class="w-100"
-                                               Placeholder="ឈ្មោះខ្មែរ..."/>
+                                               Placeholder="ឈ្មោះខ្មែរ..." />
                             </RadzenColumn>
                         </RadzenRow>
                     </RadzenColumn>
@@ -123,7 +123,7 @@
                             <RadzenColumn Size="9">
                                 <RadzenTextBox class="w-100"
                                                @bind-Value="model.Phone"
-                                               Placeholder="Mobile phone..."/>
+                                               Placeholder="Mobile phone..." />
                             </RadzenColumn>
                         </RadzenRow>
                         <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
@@ -131,7 +131,7 @@
                             <RadzenColumn Size="9">
                                 <RadzenTextBox class="w-100"
                                                @bind-Value="model.EmailAddress"
-                                               Placeholder="Email Address"/>
+                                               Placeholder="Email Address" />
                             </RadzenColumn>
                         </RadzenRow>
                         <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
@@ -139,15 +139,20 @@
                             <RadzenColumn Size="9">
                                 <RadzenTextBox class="w-100"
                                                @bind-Value="model.PassportId"
-                                               Placeholder="Passport...."/>
+                                               Placeholder="Passport...." />
                             </RadzenColumn>
                         </RadzenRow>
                         <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
-                            <RadzenColumn Size="3">Nationality</RadzenColumn>
+                            <RadzenColumn Size="3">
+                                <RadzenLabel>Nationality</RadzenLabel>
+                            </RadzenColumn>
                             <RadzenColumn Size="9">
-                                <RadzenTextBox class="w-100"
-                                               @bind-Value="model.Nationality"
-                                               Placeholder="Nationality...."/>
+                                <RadzenDropDown Data="Nationalities"
+                                                class="w-100"
+                                                TextProperty="@nameof(Nationality.NationalityName)"
+                                                ValueProperty="@nameof(Nationality.NationalityName)"
+                                                @bind-Value="model.Nationality">
+                                </RadzenDropDown>
                             </RadzenColumn>
                         </RadzenRow>
                     </RadzenColumn>
@@ -157,7 +162,7 @@
                                 <RadzenColumn Size="3">
                                     <RadzenImage Path="@model.Photo"
                                                  class="rz-p-0 rz-m-0"
-                                                 Style="width:4.5rem;height:4.5rem;"/>
+                                                 Style="width:4.5rem;height:4.5rem;" />
                                 </RadzenColumn>
                                 <RadzenColumn Size="9">
                                     <RadzenUpload Change=@(args => HandleFileUpload(args, "Single file upload"))
@@ -171,9 +176,41 @@
                         </RadzenCard>
                     </RadzenColumn>
                 </RadzenRow>
-            </CardBody>
-        </Card>
-        <Card CssClass="rz-mt-2">
+
+            </ChildContent>
+        </RadzenFieldset>
+        <CustomerAddress Cities="@Cities"
+                         model="@model"
+                         Countries="@Countries" />
+        @if (model.MarritalStatus != MarritalStateEnum.Single.ToString())
+        {
+            <SpouseInfo model="@model"
+                        Nationalities="@Nationalities"
+                        Occupations="@Occupations" />
+        }
+        <RadzenStack Orientation="Orientation.Horizontal"
+                     AlignItems="AlignItems.Center"
+                     Gap="1rem"
+                     class="rz-mt-2"
+                     JustifyContent="JustifyContent.End">
+            <RadzenButton Size="ButtonSize.Small"
+                          ButtonStyle="ButtonStyle.Success"
+                          ButtonType="ButtonType.Submit"
+                          Text="Save"
+                          Icon="save" />
+            <RadzenButton Click="Close"
+                          Size="ButtonSize.Small"
+                          Text="Close"
+                          ButtonStyle="ButtonStyle.Danger"
+                          Icon="cancel" />
+        </RadzenStack>
+    </EditForm>
+</Containers>
+
+
+
+
+@*   <Card CssClass="rz-mt-2">
             <CardHeader HeaderCssClass="rz-background-color-base-200">
                 <strong>Address</strong>
             </CardHeader>
@@ -291,10 +328,9 @@
                     </RadzenColumn>
                 </RadzenRow>
             </CardBody>
-        </Card>
-        @if (model.MarritalStatus != "Single")
-        {
-            <Card CssClass="rz-mt-2">
+        </Card> *@
+
+@*             <Card CssClass="rz-mt-2">
                 <CardHeader HeaderCssClass="rz-background-color-base-200">
                     <strong>Spouse</strong>
                 </CardHeader>
@@ -401,28 +437,4 @@
                     </RadzenRow>
                 </CardBody>
             </Card>
-        }
-        <RadzenStack Orientation="Orientation.Horizontal"
-                     AlignItems="AlignItems.Center"
-                     Gap="1rem"
-                     class="rz-mt-2"
-                     JustifyContent="JustifyContent.End">
-            <RadzenButton Click="FormSubmit"
-                          Size="ButtonSize.Small"
-                          ButtonStyle="ButtonStyle.Success"
-                          Text="Save"
-                          Icon="save"/>
-            <RadzenButton Click="Close"
-                          Size="ButtonSize.Small"
-                          Text="Close"
-                          ButtonStyle="ButtonStyle.Danger"
-                          Icon="cancel"/>
-        </RadzenStack>
-    </EditForm>
-</Containers>
-
-
-
-
-
-
+         *@
