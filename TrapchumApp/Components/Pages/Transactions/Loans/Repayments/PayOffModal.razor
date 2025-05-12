@@ -104,7 +104,7 @@
                     Recieve Amount
                 </RadzenLabel>
             </RadzenColumn>
-            <RadzenColumn Size="4">
+            <RadzenColumn Size="8">
                 <RadzenNumeric TValue="decimal?"
                                ShowUpDown="false"
                                class="w-100"
@@ -116,7 +116,7 @@
                                @oninput="ReceivePaymentUSDChanged"
                                TextAlign="TextAlign.End" />
             </RadzenColumn>
-            <RadzenColumn Size="4">
+           @*  <RadzenColumn Size="4">
                 <RadzenNumeric TValue="decimal?"
                                ShowUpDown="false"
                                Format="#,##0.00"
@@ -128,13 +128,13 @@
                                onclick="this.querySelector('.rz-numeric-input').select()"
                                class="w-100"
                                TextAlign="TextAlign.End" />
-            </RadzenColumn>
+            </RadzenColumn> *@
         </RadzenRow>
         <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
             <RadzenColumn Size="4">
                 <RadzenLabel>Change</RadzenLabel>
             </RadzenColumn>
-            <RadzenColumn Size="4">
+            <RadzenColumn Size="8">
                 <RadzenNumeric TValue="decimal?"
                                @bind-Value="changedAmountUSD"
                                TextAlign="TextAlign.End"
@@ -148,7 +148,7 @@
                                ShowUpDown="false">
                 </RadzenNumeric>
             </RadzenColumn>
-            <RadzenColumn Size="4">
+           @*  <RadzenColumn Size="4">
                 <RadzenNumeric TValue="decimal?"
                                @bind-Value="changedAmountKHR"
                                TextAlign="TextAlign.End"
@@ -159,7 +159,7 @@
                                Format="#,##0.00"
                                ShowUpDown="false">
                 </RadzenNumeric>
-            </RadzenColumn>
+            </RadzenColumn> *@
         </RadzenRow>
         <input type="hidden" @bind="originalExchangeAmountUSD" />
         <input type="hidden" @bind="originalExchangeAmountKHR" />

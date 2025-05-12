@@ -3,18 +3,11 @@
 namespace Infrastructures.DataAccess.Factories
 {
 
-    public sealed class DataContextFactory : IDbContextFactory<DataContext>
+    public sealed class DataContextFactory(IDbContextFactory<DataContext> factory) : IDbContextFactory<DataContext>
     {
-        private readonly IDbContextFactory<DataContext> _factory;
-
-        public DataContextFactory(IDbContextFactory<DataContext> factory)
-        {
-            _factory = factory;
-        }
-
         public DataContext CreateDbContext()
         {
-            return _factory.CreateDbContext();
+            return factory.CreateDbContext();
         }
     }
 }

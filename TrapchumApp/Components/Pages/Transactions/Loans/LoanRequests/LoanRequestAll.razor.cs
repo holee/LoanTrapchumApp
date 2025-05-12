@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Radzen;
+using TrapchumApp.Components.Shared;
 
 namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 {
@@ -20,8 +21,8 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
             _requestService = loanRequestService;
         }
 
-        [CascadingParameter]
-        Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+        [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+        [CascadingParameter] private CascadingAppState bState { get; set; }
         [Parameter] public int BranchId { get; set; }
         [Parameter] public string? UserId { get; set; }
         bool CanRequestLoan { get; set; } = false;
@@ -41,14 +42,20 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
         bool isIncludeInactive = false;
         bool isLoading = false;
         int statusId = 1;
+
         protected override async Task OnInitializedAsync()
         {
             createRequestUrl = $"/App/Request/{BranchId}/Branches/{UserId}/CreateNew";
             var auth = await AuthenticationState;
-            CanRequestLoan = (await _authorizeService.AuthorizeAsync(auth.User, RequestsPolicies.CanCreate())).Succeeded;
-            CanDisburseLoan = (await _authorizeService.AuthorizeAsync(auth.User, RequestsPolicies.CanDisburseLoan())).Succeeded;
-            CanAprovedLoan = (await _authorizeService.AuthorizeAsync(auth.User, RequestsPolicies.CanAproveRequest())).Succeeded;
+            CanRequestLoan = (await _authorizeService.AuthorizeAsync(auth.User, RequestsPolicies.CanCreate()))
+                .Succeeded;
+            CanDisburseLoan = (await _authorizeService.AuthorizeAsync(auth.User, RequestsPolicies.CanDisburseLoan()))
+                .Succeeded;
+            CanAprovedLoan = (await _authorizeService.AuthorizeAsync(auth.User, RequestsPolicies.CanAproveRequest()))
+                .Succeeded;
 
+            await bState.CheckedCanDisbursemnt(auth.User);
+            
             await GetLoanRequestAsync(UserId);
 
             await base.OnInitializedAsync();
@@ -68,6 +75,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 
                 sortDescending = dir.Contains("asc") ? false : true;
             }
+
             await GetLoanRequestAsync();
         }
 
@@ -78,7 +86,10 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 
             var param = new QueryParam(pageIndex, pageSize, sortColumn, sortDescending, filtertext);
 
-
+            if (bState.CanDisbursed)
+            {
+                userId = string.Empty;
+            }
             var rsp = await _requestService.GetLoanRequestsAsync(userId, BranchId, RequestStatus.All, param);
 
             LoanRequests = rsp.Items;
@@ -95,7 +106,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
         {
             // if (CanDisburseLoan)
             // {
-                await GetLoanRequestAsync(null);
+            await GetLoanRequestAsync(null);
             // }
             // else
             // {
@@ -104,15 +115,13 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
         }
 
 
-
-
         void GotoLoanRequest()
         {
             createRequestUrl = new Dictionary<string, object?>
-        {
-            {"BranchId",BranchId},
-            {"UserId",UserId}
-        }.AddQueryString($"/Loan/0/Customer/0/Request");
+            {
+                { "BranchId", BranchId },
+                { "UserId", UserId }
+            }.AddQueryString($"/Loan/0/Customer/0/Request");
             NavigationManager.NavigateTo(createRequestUrl);
         }
 
@@ -120,7 +129,6 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
         {
             pageSize = size;
             await GetLoanRequestAsync();
-
         }
 
         async void FilterTextChanged(string? searchText = null)
@@ -130,18 +138,20 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
             await GetLoanRequestAsync();
         }
 
-        void RowSelectedChanged() { }
+        void RowSelectedChanged()
+        {
+        }
 
 
         void LoanRequestChecked(VLoanRequests param)
         {
             var baseURL = $"/Loan/Request/{param.LoanRequestId}/Review";
             var newUri = new Dictionary<string, object?>
-        {
-            {"BranchId",param.BranchId},
-            {"CustomerId",param.CustomerId},
-            {"UserId",UserId}
-        }.AddQueryString(baseURL);
+            {
+                { "BranchId", param.BranchId },
+                { "CustomerId", param.CustomerId },
+                { "UserId", UserId }
+            }.AddQueryString(baseURL);
 
             NavigationManager.NavigateTo(newUri);
         }
@@ -150,20 +160,17 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
         {
             var options = new DialogOptions
             {
-
             };
             var param = new Dictionary<string, object?>
-        {
-            {"CustomerId",req.CustomerId},
-            {"RequestUserId",req.CreditAgentId},
-            {"BranchId",req.BranchId},
-            {"Amount",req.RequestAmount},
-            {"LoanRequestId",req.LoanRequestId}
-        };
+            {
+                { "CustomerId", req.CustomerId },
+                { "RequestUserId", req.CreditAgentId },
+                { "BranchId", req.BranchId },
+                { "Amount", req.RequestAmount },
+                { "LoanRequestId", req.LoanRequestId }
+            };
 
             var result = await DialogService.OpenAsync<LoanRequestModal>("Loan Request", param, options: options);
         }
-
-
     }
 }

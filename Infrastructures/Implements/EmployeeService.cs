@@ -21,7 +21,9 @@ public class EmployeeService : IEmployeeService
     private readonly ApplicationDbContext _context;
     private readonly IDapperConnectionFactory connectionFactory;
     private readonly IDbContextFactory<DataContext> _dbContextFactory;
-    public EmployeeService(ApplicationDbContext app, IDapperConnectionFactory connectionFactory, IDbContextFactory<DataContext> dbContextFactory)
+
+    public EmployeeService(ApplicationDbContext app, IDapperConnectionFactory connectionFactory,
+        IDbContextFactory<DataContext> dbContextFactory)
     {
         this._context = app;
         this.connectionFactory = connectionFactory;
@@ -70,13 +72,14 @@ public class EmployeeService : IEmployeeService
         try
         {
             var employee = await _context.EntityNames
-                                    .Where(x => x.Id == id)
-                                    .Include(x => x.Employee)
-                                    .FirstOrDefaultAsync();
+                .Where(x => x.Id == id)
+                .Include(x => x.Employee)
+                .FirstOrDefaultAsync();
             if (employee is null)
             {
                 return Result.Failure<string>(ErrorResponse.NotFound("There is no Employee in then context."));
             }
+
             _context.EntityNames.Remove(employee);
 
             await _context.SaveChangesAsync();
@@ -161,8 +164,7 @@ public class EmployeeService : IEmployeeService
 
     public async Task<Pager<VEmployeeList>> GetEmployeesAsync(QueryParam q)
     {
-
-      await using var context=await _dbContextFactory.CreateDbContextAsync();
+        await using var context = await _dbContextFactory.CreateDbContextAsync();
 
         IQueryable<VEmployeeList> queries = context.EmployeeLists;
 
@@ -178,8 +180,8 @@ public class EmployeeService : IEmployeeService
                                          EF.Functions.Like(x.BranchName!, $"%{q.Filter}%") ||
                                          EF.Functions.Like(x.DepartmentName!, $"%{q.Filter}%") ||
                                          EF.Functions.Like(x.Phone!, $"%{q}%") ||
-                                         EF.Functions.Like(x.EmployeeId!, $"%{q}%") 
-                                         );
+                                         EF.Functions.Like(x.EmployeeId!, $"%{q}%")
+            );
         }
 
         if (q.SortDescending)
@@ -190,21 +192,20 @@ public class EmployeeService : IEmployeeService
         var counts = queries.Count();
 
         var items = await queries.Skip(q.PageNumber)
-                                    .Take(q.PageSize)
-                                    .AsNoTracking()
-                                    .ToListAsync();
+            .Take(q.PageSize)
+            .AsNoTracking()
+            .ToListAsync();
         return new Pager<VEmployeeList>(items, counts);
     }
 
 
-    public async Task<Pager<VEmployeeList>> GetEmployeesAsync(int branchId,QueryParam q)
+    public async Task<Pager<VEmployeeList>> GetEmployeesAsync(int? branchId, QueryParam q)
     {
-
         await using var context = await _dbContextFactory.CreateDbContextAsync();
 
         IQueryable<VEmployeeList> queries = context.EmployeeLists
-                                                    .WhereIf(branchId > 0, x=>x.BranchId==branchId)
-                                                    .IgnoreFilterIf(q.IsIncludeInActive);
+            .WhereIf(branchId > 0, x => x.BranchId == branchId)
+            .IgnoreFilterIf(q.IsIncludeInActive);
 
         if (!string.IsNullOrWhiteSpace(q.Filter))
         {
@@ -214,7 +215,7 @@ public class EmployeeService : IEmployeeService
                                          EF.Functions.Like(x.DepartmentName!, $"%{q.Filter}%") ||
                                          EF.Functions.Like(x.Phone!, $"%{q}%") ||
                                          EF.Functions.Like(x.EmployeeId!, $"%{q}%")
-                                         );
+            );
         }
 
         if (q.SortDescending)
@@ -225,25 +226,23 @@ public class EmployeeService : IEmployeeService
         var counts = queries.Count();
 
         var items = await queries.Skip(q.PageNumber)
-                                    .Take(q.PageSize)
-                                    .AsNoTracking()
-                                    .ToListAsync();
+            .Take(q.PageSize)
+            .AsNoTracking()
+            .ToListAsync();
         return new Pager<VEmployeeList>(items, counts);
     }
-
 
 
     public async Task<Result<EntityNames>> GetByIdAsync(string? id)
     {
         try
         {
-
             await using var context = await _dbContextFactory.CreateDbContextAsync();
 
             var employees = await context.EntityNames
-                                            .Include(e => e.Employee)
-                                            .AsNoTracking()
-                                            .FirstOrDefaultAsync(e => e.Id == id);
+                .Include(e => e.Employee)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(e => e.Id == id);
 
             if (employees is not null)
             {
@@ -259,7 +258,6 @@ public class EmployeeService : IEmployeeService
     }
 
 
-
     public async Task<Result<T>> GetByIdAsync<T>(string? id)
         where T : class
     {
@@ -268,10 +266,10 @@ public class EmployeeService : IEmployeeService
             await using var context = await _dbContextFactory.CreateDbContextAsync();
 
             var employees = await context.EmployeeLists
-                                    .Where(x => x.EmployeeId == id && x.IsActive == true)
-                                    .ProjectToType<T>()
-                                    .AsNoTracking()
-                                    .FirstOrDefaultAsync();
+                .Where(x => x.EmployeeId == id && x.IsActive == true)
+                .ProjectToType<T>()
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
             if (employees is not null)
             {
                 return Result.Success(employees);
@@ -307,19 +305,20 @@ public class EmployeeService : IEmployeeService
             if (!include)
             {
                 var employee = await db.QueryFirstOrDefaultAsync<VEmployeeList>("spGetEmployeeByIdWithLoans",
-                                                                parameters,
-                                                                commandType: CommandType.StoredProcedure);
+                    parameters,
+                    commandType: CommandType.StoredProcedure);
 
                 if (employee is not null)
                 {
                     return Result.Success(employee);
                 }
+
                 return Result.Failure<VEmployeeList>(ErrorResponse.NotFound("No Employee Found."));
             }
 
-            using (var multiMap = await db.QueryMultipleAsync("spGetEmployeeByIdWithLoans", parameters, commandType: CommandType.StoredProcedure))
+            using (var multiMap = await db.QueryMultipleAsync("spGetEmployeeByIdWithLoans", parameters,
+                       commandType: CommandType.StoredProcedure))
             {
-
                 var existingItem = await multiMap.ReadSingleOrDefaultAsync<VEmployeeList>();
 
                 var loanRequests = (await multiMap.ReadAsync<VLoanRequests>()).ToList();
@@ -337,14 +336,10 @@ public class EmployeeService : IEmployeeService
 
                 return Result.Success(existingItem);
             }
-
         }
         catch (Exception ex)
         {
             return Result.Failure<VEmployeeList>(ErrorResponse.NotFound($"{ex.Message}."));
         }
     }
-
-
-
 }

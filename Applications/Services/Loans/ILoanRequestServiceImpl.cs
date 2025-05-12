@@ -33,5 +33,8 @@ namespace Applications.Services.Loans
         Task<Result<T>> GetLoanRequestAsync<T>(int? branchId, string? customerId, string? loanRequestId) where T : class;
         Task<Result<string>> RecheckedLoanRequestAsync(RecheckedRequestDtoCreate req);
         Task<Result<string>> VerifiedLoanRequestAsync(RequestDtoBaseCreate req);
+
+        Task<Result<VLoanRequests>> GetLoanRequestAsync(int? branchId, string? userId, string? customerId,
+            string? loanRequestId, bool v);
     }
 }

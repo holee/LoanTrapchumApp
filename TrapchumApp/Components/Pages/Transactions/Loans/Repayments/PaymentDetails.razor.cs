@@ -103,9 +103,9 @@ public partial class PaymentDetails
         }
         else
         {
-            create.RecieveUsdAmount = loanRepaymentLines.Total();
+            create.RecieveAmount = loanRepaymentLines.Total();
         }
-        create.ChangeUsdAmount = 0;
+        create.ChangeAmount = 0;
         create.ChangeKhrAmount = 0;
         var data = new Dictionary<string, object?>
         {
@@ -132,8 +132,7 @@ public partial class PaymentDetails
     {
         ContextMenuService.Close();
 
-        NavigationManager.NavigateTo($"/Loans/{LoanId}/Schedules?BranchId={BranchId}&CreditAgentId={CreditAgentId}&CurrencyId={CurrencyId}&UserId={UserId}");
-        
+        NavigationManager.NavigateTo($"/App/Loans/{BranchId}/Branches/{LoanId}/Schedules?CreditAgentId={CreditAgentId}&CurrencyId={CurrencyId}&UserId={UserId}");
         return;
     }
 

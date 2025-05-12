@@ -23,5 +23,6 @@ namespace Applications.Services.Employees
         Task<Result<EntityNamesCreate>> GetEmployeeForUpdate(string? employeeId);
         Task<Result<T>> GetEmployeeById<T>(string? employeeId) where T:class;
         Task<Result<VEmployeeList>> GetEmployeeById(string? employeeId, int? branchId, bool include = false);
+        Task<Pager<VEmployeeList>> GetEmployeesAsync(int? branchId,QueryParam param);
     }
 }

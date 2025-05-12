@@ -609,6 +609,59 @@ public class LoanRequestService(
     }
 
 
+   
+    
+    
+    
+    public async Task<Result<VLoanRequests>> GetLoanRequestAsync(int? branchId,string? userId, string? customerId, string? loanRequestId, bool include)
+    {
+        try
+        {
+
+            using var db = await dapperFactory.CreateConnectionAsync();
+
+            const string sql = @"SELECT * FROM VLoanRequests WHERE BranchId=@branchId AND 
+                                  CustomerId=@customerId AND  
+                                  UserRequestId=@userId AND  
+                                  LoanRequestId=@loanRequestId";
+
+            var resultQueries = await db.QueryFirstOrDefaultAsync<VLoanRequests>(sql, new
+            {
+                branchId,
+                customerId,
+                loanRequestId,
+                userId
+            });
+
+            if (resultQueries is null)
+            {
+                return Result.Failure<VLoanRequests>(ErrorResponse.NotFound("No Data not found."));
+            }
+
+            if (!include)
+            {
+                return Result.Success(resultQueries);
+            }
+
+            resultQueries.Guarantors = await GetLoanGuarantors(loanRequestId, branchId);
+
+            resultQueries.Collaterals = await GetLoanCollateralLines(loanRequestId, branchId);
+
+            resultQueries.Documents = await GetLoanDocuments(loanRequestId, branchId);
+
+            resultQueries.Customer = await GetLoanCustomer(customerId);
+
+            return Result.Success(resultQueries!);
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<VLoanRequests>(ErrorResponse.ServerError($"{ex.Message}"));
+        }
+    }
+
+
+    
+    
     public async Task<Result<T>> GetLoanRequestAsync<T>(int? branchId, string? customerId, string? loanRequestId)
         where T : class
     {
@@ -617,7 +670,7 @@ public class LoanRequestService(
 
             var item = await context
                             .Database
-                            .SqlQuery<VLoanRequests>(@$"SELECT * FROM VLoanReuests 
+                            .SqlQuery<VLoanRequests>(@$"SELECT * FROM VLoanRequests 
                                                         WHERE BranchId={branchId} AND 
                                                         CustomerId={customerId} AND  
                                                         LoanRequestId={loanRequestId}")

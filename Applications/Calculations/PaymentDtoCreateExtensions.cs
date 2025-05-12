@@ -14,9 +14,9 @@ public static class PaymentDtoCreateExtensions
             TotalAmountWithPenalty = create.TotalPaymentWithPenalty,
             PenaltyAmount = create.PenaltyAmountAmount,
             RecieveKhrAmount = 0,
-            RecieveUsdAmount = 0,
+            RecieveAmount = 0,
             ChangeKhrAmount = 0,
-            ChangeUsdAmount = 0,
+            ChangeAmount = 0,
         };
     }
 
@@ -30,9 +30,9 @@ public static class PaymentDtoCreateExtensions
             TotalAmountWithPenalty = create.TotalPaymentWithPenalty,
             PenaltyAmount = create.PenaltyAmountAmount,
             RecieveKhrAmount = currencyId == 1 ? create.TotalPaymentWithPenalty : 0.00M,
-            RecieveUsdAmount = currencyId == 2 ? create.TotalPaymentWithPenalty : 0.00M,
+            RecieveAmount = currencyId == 2 ? create.TotalPaymentWithPenalty : 0.00M,
             ChangeKhrAmount = 0,
-            ChangeUsdAmount = 0,
+            ChangeAmount = 0,
             LoanRepaymentLines = []
         };
     }
@@ -47,9 +47,9 @@ public static class PaymentDtoCreateExtensions
             TotalAmountWithPenalty = lines.TotalAmountWithPenalty(),
             PenaltyAmount = lines.TotalPaidPenaltyAmount(),
             RecieveKhrAmount = currencyId == 1 ? lines.TotalAmountWithPenalty() : 0.00M,
-            RecieveUsdAmount = currencyId == 2 ? lines.TotalAmountWithPenalty() : 0.00M,
+            RecieveAmount = currencyId == 2 ? lines.TotalAmountWithPenalty() : 0.00M,
             ChangeKhrAmount = 0,
-            ChangeUsdAmount = 0,
+            ChangeAmount = 0,
             LoanRepaymentLines = lines
         };
 

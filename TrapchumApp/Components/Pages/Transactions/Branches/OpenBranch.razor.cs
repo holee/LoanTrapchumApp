@@ -26,7 +26,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Branches
             this.curService = curService;
         }
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
-        [CascadingParameter] CascadingBranchState bState { get; set; } = default!;
+        [CascadingParameter] CascadingAppState bState { get; set; } = default!;
         [Parameter] public int? BranchId { get; set; } = 0;
         [Parameter, SupplyParameterFromQuery] public string? UserId { get; set; }
         IEnumerable<VCurrencyNotes> CurrencyNotes = [];

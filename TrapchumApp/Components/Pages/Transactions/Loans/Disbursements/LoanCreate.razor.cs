@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Forms;
 using Radzen;
 using Radzen.Blazor;
+
 namespace TrapchumApp.Components.Pages.Transactions.Loans.Disbursements;
 
 public partial class LoanCreate
@@ -48,6 +49,7 @@ public partial class LoanCreate
     EditForm editForm = default!;
     decimal penaltyRate = 0.0M;
     List<DateTimeOffset> Holidays = [];
+
     async Task GetLoanRequest()
     {
         IsLoading = true;
@@ -80,6 +82,7 @@ public partial class LoanCreate
 
         await base.OnInitializedAsync();
     }
+
     void ShowLoanPreviews()
     {
         if (model.Principle == 0) return;
@@ -103,15 +106,14 @@ public partial class LoanCreate
             var app = builder.Build(param);
 
             previewSchedule = app.SetHoliday(Holidays)
-                                 .CreateSchedules(model)
-                                 .MapTo(model);
+                .CreateSchedules(model)
+                .MapTo(model);
             selectedTabIndex = 2;
         }
     }
 
     protected async Task HandleFormSubmit()
     {
-
         var confirm = await DialogService.Confirm("Do you want to disburse this loan request?", "Confirm");
 
         if (confirm == false)
@@ -131,13 +133,13 @@ public partial class LoanCreate
 
         var param = model.ToLoanInfo();
 
-        var builder = Calculators.CreateBuilder(model);//.CreateBuilder(model.RepaymentModeRefId, model.CurrencyRefId);
+        var builder = Calculators.CreateBuilder(model); //.CreateBuilder(model.RepaymentModeRefId, model.CurrencyRefId);
 
         var app = builder.Build(model);
 
         var scheduleDto = app.SetHoliday(Holidays)
-                             .CreateSchedules(model)
-                             .MapTo(model);
+            .CreateSchedules(model)
+            .MapTo(model);
 
         var lastDate = scheduleDto!.LastOrDefault()!.PaymentDate;
 
@@ -156,20 +158,19 @@ public partial class LoanCreate
             if (!rsp.IsSuccess)
             {
                 NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
-
                 return;
             }
-            else
-            {
-                NotificationService.Notify(NotificationSeverity.Success, rsp.Data);
-            }
+
+            NotificationService.Notify(NotificationSeverity.Success, rsp.Data);
+            
+            
+            
+            
+            
         }
         catch (Exception ex)
         {
             NotificationService.Notify(NotificationSeverity.Error, ex.Message);
         }
-
     }
-
 }
-

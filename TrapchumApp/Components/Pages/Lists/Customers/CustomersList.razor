@@ -8,8 +8,8 @@
             @ChildContent
         </LeftChildContent>
     </PageDropDown>
-    <RadzenDataGrid Count="@counts"
-                    AllowPaging="true"
+    <RadzenDataGrid 
+                    Count="@counts"
                     Responsive
                     IsLoading="isLoading"
                     GridLines="DataGridGridLines.Both"
@@ -20,13 +20,12 @@
                     ColumnWidth="200px"
                     PageSize="@pageSize"
                     PagerPosition="PagerPosition.Bottom"
-                    RowRender="OnRowRender"
                     ShowPagingSummary="true"
+                    AllowPaging="true"
                     PagerHorizontalAlign="HorizontalAlign.Right"
-                    @bind-Value="SelectedCustomers"
                     LoadData="LoadData"
-                    Style="min-height:30rem;height:30rem;max-height:45rem;"
                     TItem="VCustomerList"
+                    RowRender="OnRowRender"
                     Data="VCustomers">
         <Columns>
             <RadzenDataGridColumn Title="#"

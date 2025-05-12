@@ -1,4 +1,4 @@
-﻿@page "/Loan/Disbursement/CreateNewUser"
+﻿@page "/Loan/Disbursement/CreateNew"
 @using TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 <PageTitle>New Loan Disbursment</PageTitle>
 <SectionContent SectionName="Progressbar">
@@ -177,13 +177,17 @@
                               Size="ButtonSize.Small"
                               Icon="preview"
                               ButtonStyle="ButtonStyle.Primary" Text="Preview" />
+                <RadzenButton Click="HandleFormSubmit"
+                              Size="ButtonSize.Small"
+                              Icon="save"
+                              ButtonStyle="ButtonStyle.Primary" Text="Save" />
                 <RadzenButton Size="ButtonSize.Small"
                               Click="HandleFormSubmit"
                               Text="Disburse Now"
                               Icon="save"
                               ButtonStyle="ButtonStyle.Success" />
                 <RadzenLink Icon="arrow_back"
-                            Path="@($"/App/Loan/{BranchId}/Branches/Request?UserId={UserId}")"
+                            Path="@($"/App/Request/{BranchId}/Branches?UserId={UserId}")"
                             Text="Back" />
             </RadzenStack>
         </CardFooter>

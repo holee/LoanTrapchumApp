@@ -1,5 +1,6 @@
 ﻿@page "/App/Account/Users"
 @using Applications.ApplicationPolicies
+@attribute [MustHasPermission(Modules.Users,Feature.Read)]
 <PageTitle>Users</PageTitle>
 <Containers Fluid>
     <RadzenTabs RenderMode="TabRenderMode.Server">

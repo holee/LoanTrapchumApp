@@ -1,9 +1,12 @@
 using Applications.DependencyInjections;
 using Applications.Extensions.Identity;
+using Applications.Extensions.Identity.Authorizations.AuthorizeHandlers;
 using Applications.Schedules;
 using Applications.Validations;
+using Infrastructures.Authorizations;
 using Infrastructures.DependencyInjects;
 using Mapster;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using QuestPDF.Infrastructure;
@@ -37,6 +40,7 @@ builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSe
 builder.Services.AddScoped<UserServiceImpl>();
 builder.Services.AddControllers();
 //builder.Services.AddScoped<IDocument, SchedulePdfService>();
+builder.Services.AddScoped<IAuthorizationHandler, SameUserRequestAuthorizationHandler>();
 
 var app = builder.Build();
 
@@ -62,6 +66,7 @@ app.UseAntiforgery();
 app.MapStaticAssets();
 
 app.UseStaticFiles();
+
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();

@@ -10,7 +10,7 @@ namespace TrapchumApp.Components.Layout
     public partial class MainLayout
     {
         [CascadingParameter] Task<AuthenticationState> AuthenticateState { get; set; } = default!;
-        [CascadingParameter] CascadingBranchState bState { get; set; } = default!;
+        [CascadingParameter] CascadingAppState bState { get; set; } = default!;
 
         bool sidebarExpanded = true;
 

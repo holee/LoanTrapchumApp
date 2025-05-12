@@ -61,13 +61,10 @@ public sealed class UserService(IUserService userService) : IUserServiceImpl
         return await userService.GetUsersAsync(userId, filter);
     }
 
-    public async Task<Result<UserDto>> GetUserDetailsById(string? userId)
-    {
-        return await userService.GetUserDetailsById(userId);
-    }
+    public async Task<Result<UserDto>> GetUserDetailsById(string? userId) => await userService.GetUserDetailsById(userId);
 
-    public async Task<Result> UpdateUserRoleAsync(UserRoleDtoUpdate req)
-    {
-        return await userService.UpdateUserRoleAsync(req);
-    }
+    public async Task<Result> UpdateUserRoleAsync(UserRoleDtoUpdate req) => await userService.UpdateUserRoleAsync(req);
+
+    public async Task<Pager<PermissionsVm>> GetPermissionsAsync(QueryParam req) => await userService.GetPermissionsAsync(req);
+
 }

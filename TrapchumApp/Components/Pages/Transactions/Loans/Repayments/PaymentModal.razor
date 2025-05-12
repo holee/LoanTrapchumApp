@@ -106,11 +106,10 @@
         <RadzenColumn Size="8">
             <RadzenNumeric TValue="decimal?"
                            @bind-Value="PaymentCreate.TotalAmountWithPenalty"
-                           onclick="this.querySelector('.rz-numeric-input').select()"
                            ShowUpDown="false"
                            TextAlign="TextAlign.End"
                            class="w-100"
-                           Disabled
+                           ReadOnly
                            Min="0"
                            Style="height:var(--input-text-sm)"
                            Format="#,##0.00" />
@@ -122,29 +121,17 @@
                 Recieve Amount
             </RadzenLabel>
         </RadzenColumn>
-        <RadzenColumn Size="4">
+        <RadzenColumn Size="8">
             <RadzenNumeric TValue="decimal?"
                            ShowUpDown="false"
                            class="w-100"
                            onclick="this.querySelector('.rz-numeric-input').select()"
-                           @bind-Value="PaymentCreate.RecieveUsdAmount"
+                           @bind-Value="PaymentCreate.RecieveAmount"
                            Format="#,##0.00"
                            Style="height:var(--input-text-sm)"
                            Min="0"
                            @oninput="ReceivePaymentUSDChanged"
-                           TextAlign="TextAlign.End" />
-        </RadzenColumn>
-        <RadzenColumn Size="4">
-            <RadzenNumeric TValue="decimal?"
-                           ShowUpDown="false"
-                           Format="#,##0.00"
-                           @bind-Value="PaymentCreate.RecieveKhrAmount"
-                           @oninput="ReceivePaymentKHRChanged"
-                           Disabled="@(CurrencyId==2)"
-                           Min="0"
-                           Style="height:var(--input-text-sm)"
-                           onclick="this.querySelector('.rz-numeric-input').select()"
-                           class="w-100"
+                           @onfocusout="ReceivePaymentFocus"
                            TextAlign="TextAlign.End" />
         </RadzenColumn>
     </RadzenRow>
@@ -152,29 +139,16 @@
         <RadzenColumn Size="4">
             <RadzenLabel>Change</RadzenLabel>
         </RadzenColumn>
-        <RadzenColumn Size="4">
+        <RadzenColumn Size="8">
             <RadzenNumeric TValue="decimal?"
-                           @bind-Value="PaymentCreate.ChangeUsdAmount"
+                           @bind-Value="PaymentCreate.ChangeAmount"
                            TextAlign="TextAlign.End"
                            class="w-100"
                            Format="#,##0.00"
-                           onclick="this.querySelector('.rz-numeric-input').select()"
+                           ReadOnly
                            Min="0"
-                           Disabled="@(PaymentCreate.RecieveKhrAmount > 0 && PaymentCreate.RecieveUsdAmount > 0)"
+                           Disabled="@(PaymentCreate.RecieveKhrAmount > 0 && PaymentCreate.RecieveAmount > 0)"
                            Style="cursor:not-allowed;height:var(--input-text-sm)"
-                           @oninput="TextUsdAmountChanged"
-                           ShowUpDown="false">
-            </RadzenNumeric>
-        </RadzenColumn>
-        <RadzenColumn Size="4">
-            <RadzenNumeric TValue="decimal?"
-                           @bind-Value="PaymentCreate.ChangeKhrAmount"
-                           TextAlign="TextAlign.End"
-                           Disabled
-                           Style="cursor:not-allowed;height:var(--input-text-sm)"
-                           class="w-100"
-                           Min="0"
-                           Format="#,##0.00"
                            ShowUpDown="false">
             </RadzenNumeric>
         </RadzenColumn>
@@ -200,3 +174,28 @@
     </RadzenButton>
 </RadzenStack>
 
+@* <RadzenColumn Size="4">
+            <RadzenNumeric TValue="decimal?"
+                           @bind-Value="PaymentCreate.ChangeKhrAmount"
+                           TextAlign="TextAlign.End"
+                           Disabled
+                           Style="cursor:not-allowed;height:var(--input-text-sm)"
+                           class="w-100"
+                           Min="0"
+                           Format="#,##0.00"
+                           ShowUpDown="false">
+            </RadzenNumeric>
+        </RadzenColumn> *@
+@*  <RadzenColumn Size="4">
+            <RadzenNumeric TValue="decimal?"
+                           ShowUpDown="false"
+                           Format="#,##0.00"
+                           @bind-Value="PaymentCreate.RecieveKhrAmount"
+                           @oninput="ReceivePaymentKHRChanged"
+                           Disabled="@(CurrencyId==2)"
+                           Min="0"
+                           Style="height:var(--input-text-sm)"
+                           onclick="this.querySelector('.rz-numeric-input').select()"
+                           class="w-100"
+                           TextAlign="TextAlign.End" />
+        </RadzenColumn> *@

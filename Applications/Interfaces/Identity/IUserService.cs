@@ -12,7 +12,6 @@ public interface IUserService
     Task<Result> EditUserAsync(string userId, EditUserDto model);
     Task<Result> ChangePassword(ChangePasswordDto req);
     Task<Result<UserDto>> GetUserDetailsById(string? userId);
-    //Task<Pager<UserDto>> GetUsersAsync(int pageIndex, int pageSize, string sortColumn, bool includeInactive = false, string? filter = null);
     Task<Result<UserPermissions>> GetUserPermissionsAsync(string? userId);
     Task<Result<string>> AddOrRemovedUserPermissionsAsync(string? userId, UserPermissionRequest permission);
     Task<Result<UserViewModel>> GetUserRolesAsync(string? userId);
@@ -20,5 +19,6 @@ public interface IUserService
     Task<Result<Pager<VUser>>> GetUsersAsync(QueryParam param, string? userId = null);
     Task<Result<IEnumerable<VUser>>> GetUsersAsync(string? userId, string? filter = null);
     Task<Result> UpdateUserRoleAsync(UserRoleDtoUpdate req);
+    Task<Pager<PermissionsVm>> GetPermissionsAsync(QueryParam q);
 
 }

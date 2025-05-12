@@ -13,6 +13,7 @@ public interface IUserServiceImpl
     Task<Result> ChangePassword(ChangePasswordDto req);
     Task<Result<string>> CreateUserAsync(RegisterRequest model);
     Task<Result> EditUserAsync(string userId, EditUserDto model);
+    Task<Pager<PermissionsVm>> GetPermissionsAsync(QueryParam req);
     Task<Result<UserDto>> GetUserDetailsById(string? userId);
     Task<Result<UserPermissions>> GetUserPermissionsAsync(string? userId);
     Task<Result<UserViewModel>> GetUserRolesAsync(string? userId);

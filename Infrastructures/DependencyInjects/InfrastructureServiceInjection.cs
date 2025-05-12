@@ -54,7 +54,7 @@ namespace Infrastructures.DependencyInjects
                 .AddSignInManager()
                 .AddDefaultTokenProviders();
            
-            services.AddScoped<IAppSettingService, AppSettingService>();
+            services.TryAddTransient<IAppSettingService, AppSettingService>();
             services.TryAddTransient<ILoanSettingService, LoanSettingService>();
             services.TryAddTransient<IForiegnCurrencyExchange, ForiegnCurrencyExchange>();
             services.TryAddTransient<IJournalService, JournalService>();
@@ -92,7 +92,7 @@ namespace Infrastructures.DependencyInjects
             services.TryAddTransient<INationalityService, NationalityService>();
             services.TryAddTransient<IFileUploadService, FileUploadService>();
             services.AddScoped<IDapperConnectionFactory, DapperConnectionFactory>();
-            services.AddScoped<IVendorService, VendorService>();
+            services.TryAddTransient<IVendorService, VendorService>();
             return services;
 
         }

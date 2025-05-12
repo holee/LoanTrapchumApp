@@ -3,12 +3,13 @@ using Applications.Constants.Authorizations;
 using Applications.Extensions.Identity;
 using Applications.Extensions.Identity.Enumerations;
 using Applications.Helpers;
+using Domains.Models.Identity;
 using Infrastructures.DataAccess;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructures.Seeds
-{ 
+{
     public sealed class DatabaseSeeder
     {
         private readonly RoleManager<ApplicationRole> _roleManager;
@@ -23,12 +24,14 @@ namespace Infrastructures.Seeds
             _userManager = userManager;
             _roleManager = roleManager;
         }
+
         public async Task DatabaseSeederAsync()
         {
             await CheckDatabaseMigrationAsync();
             await SeedDefaultRolesWithPermissions();
             await SeedSystemUser();
             await SeedAdminUser();
+            await SeedPermission();
         }
 
         private async Task CheckDatabaseMigrationAsync()
@@ -43,7 +46,8 @@ namespace Infrastructures.Seeds
         {
             var defaultRoles = Enum.GetValues<AppRole>().Select(x => x.ToString());
 
-            var dict = Enum.GetValues(typeof(AppRole)).Cast<AppRole>().ToDictionary(t => t.ToString(), t => t.GetDisplayName());
+            var dict = Enum.GetValues(typeof(AppRole)).Cast<AppRole>()
+                .ToDictionary(t => t.ToString(), t => t.GetDisplayName());
 
             foreach (var roleName in defaultRoles)
             {
@@ -67,7 +71,6 @@ namespace Infrastructures.Seeds
 
                 await AssignPermissionsToRoleAsync(superAdminRole, ApplicationPermissions.DashboardPermission);
             }
-
 
 
             var roles = _roleManager.Roles.Select(x => x.Name).ToArray();
@@ -121,7 +124,6 @@ namespace Infrastructures.Seeds
                     await AssignPermissionsToRoleAsync(approle, ApplicationPermissions.AccountDashboard);
                 }
             }
-
         }
 
         private async Task SeedSystemUser()
@@ -149,8 +151,6 @@ namespace Infrastructures.Seeds
                     await _userManager.AddToRoleAsync(adminUser, SystemRole.SuperAdmin);
                 }
             }
-
-
         }
 
         private async Task SeedAdminUser()
@@ -175,8 +175,39 @@ namespace Infrastructures.Seeds
                     await _userManager.AddToRoleAsync(adminUser, SystemRole.Admin);
                 }
             }
+        }
 
 
+        private async Task SeedPermission()
+        {
+            var permissions = ApplicationPermissions.AllPermissions;
+
+            var exsitingPersmissions = await _context.Permissions.ToListAsync();
+
+            List<Permissions> ps = new();
+            
+            foreach (var per in permissions)
+            {
+                if (exsitingPersmissions.Any(x =>
+                        x.Module == per.Module && 
+                        x.Action == per.Action && 
+                        x.Group == per.Group))
+                {
+                    continue;
+                }
+                
+                ps.Add(new Permissions
+                {
+                    Description = per.Description,
+                    Group = per.Group,
+                    IsBasic = per.IsBasic,
+                    Action = per.Action,
+                    Module = per.Module,
+                });
+                
+            }
+            _context.Permissions.AddRange(ps);
+            await _context.SaveChangesAsync();
         }
 
         private async Task AssignPermissionsToRoleAsync(ApplicationRole role, IReadOnlyList<AppPermission> permissions)
@@ -190,7 +221,7 @@ namespace Infrastructures.Seeds
                     await _context.RoleClaims.AddAsync(new ApplicationRoleClaim
                     {
                         RoleId = role.Id,
-                        Module=permission.Module,
+                        Module = permission.Module,
                         ClaimType = AppClaim.Permission,
                         ClaimValue = permission.For,
                         Description = permission.Description,
@@ -201,11 +232,8 @@ namespace Infrastructures.Seeds
                 }
             }
         }
-
     }
 }
-
-
 
 
 //if (roleName.Contains(SystemRole.SuperAdmin))

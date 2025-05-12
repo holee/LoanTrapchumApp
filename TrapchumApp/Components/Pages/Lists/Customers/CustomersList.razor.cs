@@ -58,10 +58,10 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
             pageSize = page;
         }
 
-        protected async void AddInComeModal(string? customerId)
+        private async Task AddInComeModal(string? customerId)
         {
             await DialogService.OpenAsync<CustomerModalIncome>("Income", options: new DialogOptions
-            {
+            { 
                 Resizable = false,
                 Draggable = true,
             }, parameters: new Dictionary<string, object?>
@@ -76,14 +76,14 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
             await ClickedAddCollateral.InvokeAsync(customerId);
         }
 
-        protected void AddLoanRequest(string? customerId)
+        private void AddLoanRequest(string? customerId)
         {
             ContextMenuService.Close();
             var uri =$"/App/Request/{BranchId}/Branches/{UserId}/CreateNew?CustomerId={customerId}";
             NavigationManager.NavigateTo(uri);
         }
 
-        protected async void AddExpenseModal(string? customerId)
+        private async void AddExpenseModal(string? customerId)
         {
             await DialogService.OpenAsync<CustomerModalExpense>("Add Expense", options: new DialogOptions
             {
@@ -95,7 +95,7 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
             });
         }
 
-        protected void AddDetails(string? customerId)
+        private void AddDetails(string? customerId)
         {
             ContextMenuService.Close();
 
@@ -106,14 +106,14 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
             
         }
 
-        protected async void AddEdit(string? customerId)
+        private async void AddEdit(string? customerId)
         {
             await ClickedEdit.InvokeAsync(customerId);
 
             ContextMenuService.Close();
         }
 
-        protected async void AddDelete(string? customerId)
+        private async void AddDelete(string? customerId)
         {
             var confirm = await DialogService.Confirm("do you want to delete this customer?", "Delete",
                 options: new ConfirmOptions
@@ -126,11 +126,11 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
             }
         }
 
-        async void SearchCustomer(string? searchText = null)
+        async Task SearchCustomer(string? searchText = null)
         {
             SearchTerm = searchText ?? string.Empty;
 
-            await LoadCustomerPageList();
+            await LoadCustomerPageList(); 
         }
 
         async Task SelectedPageChanged(int pageSize)

@@ -1,6 +1,4 @@
-
 using Applications.Extensions;
-using Applications.Extensions.mappers;
 using Applications.Interfaces.Lists;
 using Applications.Requests.Lists.Addreses;
 using Applications.Requests.Lists.Employees;
@@ -22,6 +20,7 @@ namespace TrapchumApp.Components.Pages.Lists.Employees
         private readonly INationalityService _nationalityService;
         private readonly IDepartmentService _departmentService;
         private readonly ILogger<EmployeesIndex> _logger;
+
         public EmployeesIndex(INationalityService nationalityService,
             IDepartmentService departmentService,
             ILogger<EmployeesIndex> logger)
@@ -30,17 +29,20 @@ namespace TrapchumApp.Components.Pages.Lists.Employees
             _departmentService = departmentService;
             _logger = logger;
         }
+
         RadzenTabs tabs = default!;
         List<TabItems> tabItems = [];
         string? filter = string.Empty;
         IList<VEmployeeList> SelectedEmployees = [];
+
         void OnRowRender(RowRenderEventArgs<VEmployeeList> e)
         {
             if (e.Data.IsActive)
             {
-                e.Attributes.Add("style", "color:red;background-color:yellow;");
+                //e.Attributes.Add("style", "color:red;background-color:yellow;");
             }
         }
+
         bool IsEnableEdit = false;
         bool IsEnableNew = false;
         bool IsEnableDetail = false;
@@ -48,7 +50,7 @@ namespace TrapchumApp.Components.Pages.Lists.Employees
         EmployeeDto Employee = new();
         IEnumerable<ProvinceDto> Provinces = [];
         IEnumerable<string> Salutations = [];
-        IEnumerable<BranchDto> Branches = [];
+        List<BranchDto> Branches = [];
         IEnumerable<DepartmentDto> Departments = [];
         IEnumerable<Country> Countries = [];
         IEnumerable<Nationality> Nationalities = [];
@@ -61,6 +63,8 @@ namespace TrapchumApp.Components.Pages.Lists.Employees
         string sortField = "EmployeeId";
         bool sortDescending = false;
         string? _empId = string.Empty;
+        int branchId = 1;
+
         void PageSizeChanged(int page)
         {
             pageSize = page;
@@ -79,7 +83,7 @@ namespace TrapchumApp.Components.Pages.Lists.Employees
 
             NotificationService.Notify(NotificationSeverity.Success, responseResult.Data);
 
-            await GetEmployees(searchText);
+            await GetEmployees(branchId, searchText);
         }
 
         async Task GetBranches()
@@ -89,21 +93,23 @@ namespace TrapchumApp.Components.Pages.Lists.Employees
             if (results.IsSuccess)
             {
                 Branches = results!.Data!.Items;
+                Branches.Add(new BranchDto
+                {
+                    BranchId = 0,
+                    BranchName = "All"
+                });
+                Branches = Branches.OrderBy(x => x.BranchId).ToList();
             }
-
         }
 
 
         void AddNewTab()
         {
-
             IsEnableNew = true;
             selectedIndex = 1;
             tabs.Reload();
             StateHasChanged();
         }
-
-
 
 
         void AddDetailsTab(string? employeeId)
@@ -134,8 +140,6 @@ namespace TrapchumApp.Components.Pages.Lists.Employees
             selectedIndex = 2;
 
             StateHasChanged();
-
-
         }
 
         void OnEditTab(string? employeeId)
@@ -168,7 +172,7 @@ namespace TrapchumApp.Components.Pages.Lists.Employees
 
         async void GetIncludeInactive()
         {
-            await GetEmployees(searchText);
+            await GetEmployees(branchId, searchText);
         }
 
         public EmployeeDto? employee;
@@ -176,10 +180,12 @@ namespace TrapchumApp.Components.Pages.Lists.Employees
         IEnumerable<VEmployeeList> Employees = [];
         protected bool includeInActive = false;
         bool isLoading = false;
-        protected async void PerformSearch(string? searchtext = null)
+
+        protected async Task PerformSearch(string? searchtext = null)
         {
             searchText = searchtext ?? string.Empty;
-            await GetEmployees(searchText);
+
+            await GetEmployees(branchId, searchText);
         }
 
         void OnClosing(bool isNewClosed)
@@ -190,21 +196,22 @@ namespace TrapchumApp.Components.Pages.Lists.Employees
         }
 
 
-        protected async void Reload()
+        protected async Task Reload()
         {
-            await GetEmployees(searchText);
+            await GetEmployees(branchId, searchText);
         }
-        protected async override Task OnInitializedAsync()
+
+        protected override async Task OnInitializedAsync()
         {
             try
             {
                 await GetBranches();
-                await GetEmployees();
+
+                await GetEmployees(branchId);
             }
             catch (Exception ex)
             {
                 NotificationService.Notify(NotificationSeverity.Error, ex.Message);
-
             }
         }
 
@@ -212,7 +219,8 @@ namespace TrapchumApp.Components.Pages.Lists.Employees
         {
             ContextMenuService.Close();
 
-            var confitm = await DialogService!.Confirm("Employee deleted will not be able to recover, would you like to continue?",
+            var confitm = await DialogService!.Confirm(
+                "Employee deleted will not be able to recover, would you like to continue?",
                 "Delete Employee",
                 new ConfirmOptions
                 {
@@ -227,7 +235,7 @@ namespace TrapchumApp.Components.Pages.Lists.Employees
 
                     if (deleteResponse.IsSuccess)
                     {
-                        await GetEmployees(searchText);
+                        await GetEmployees(branchId, searchText);
                     }
                     else
                     {
@@ -238,14 +246,11 @@ namespace TrapchumApp.Components.Pages.Lists.Employees
                 {
                     NotificationService.Notify(NotificationSeverity.Error, ex.InnerException!.Message);
                 }
-
             }
-
-
         }
 
 
-        async Task GetEmployees(string? q = null)
+        async Task GetEmployees(int? branchId, string? q = null)
         {
             isLoading = true;
 
@@ -254,15 +259,10 @@ namespace TrapchumApp.Components.Pages.Lists.Employees
             try
             {
                 var param = new QueryParam(pageIndex, pageSize, sortField, sortDescending, includeInActive, q);
-
-                var pageDate = await _employeeService.GetEmployeesAsync(param);
-
-                var counts = pageDate.Count;
-
+                var pageDate = await _employeeService.GetEmployeesAsync(branchId, param);
+                counts = pageDate.Count;
                 Employees = pageDate.Items;
-
                 isLoading = false;
-
             }
             catch (Exception ex)
             {
@@ -274,6 +274,7 @@ namespace TrapchumApp.Components.Pages.Lists.Employees
             {
                 isLoading = false;
             }
+
             StateHasChanged();
         }
 
@@ -291,11 +292,21 @@ namespace TrapchumApp.Components.Pages.Lists.Employees
 
                 sortDescending = dir.Contains("asc") ? false : true;
             }
-            await GetEmployees(searchText);
+
+            await GetEmployees(branchId, searchText);
         }
 
 
+        private async Task SelectedItemChanged(object? arg)
+        {
+            if (arg is not null)
+            {
+                var branchId = ((BranchDto)arg).BranchId;
+
+                this.branchId = branchId;
+
+                await GetEmployees(branchId, searchText);
+            }
+        }
     }
-
-
 }

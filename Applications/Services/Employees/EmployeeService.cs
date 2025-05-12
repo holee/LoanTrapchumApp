@@ -49,7 +49,7 @@ namespace Applications.Services.Employees
         {
             return await empService.GetEmployeesAsync(param);
         }
-        public async Task<Pager<VEmployeeList>> GetEmployeesAsync(int branchId,QueryParam param)
+        public async Task<Pager<VEmployeeList>> GetEmployeesAsync(int? branchId,QueryParam param) 
         {
             return await empService.GetEmployeesAsync(branchId,param);
         }

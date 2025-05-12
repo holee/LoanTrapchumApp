@@ -27,7 +27,7 @@ else
     protected override void OnParametersSet()
     {
         loanRequestDetailsUrl = $"App/Loan/{BranchId}/Branches/Request/Details?UserId={UserId}&CustomerId={LoanRequest?.CustomerId}&LoanRequestId={LoanRequest?.LoanRequestId}";
-        requestLoanUrl = $"/Loan/Disbursement/CreateNewUser?BranchId={BranchId}&UserId={UserId}&CustomerRequestId={LoanRequest?.CustomerId}&LoanRequestId={LoanRequest?.LoanRequestId}";
+        requestLoanUrl = $"/Loan/Disbursement/CreateNew?BranchId={BranchId}&UserId={UserId}&CustomerRequestId={LoanRequest?.CustomerId}&LoanRequestId={LoanRequest?.LoanRequestId}";
 
         base.OnParametersSet();
     }

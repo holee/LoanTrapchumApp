@@ -158,8 +158,6 @@ public sealed class UserService : IUserService
 
         return Result.Success<Pager<VUser>>(new(users, counts));
     }
-
-
     public async Task<Result> ChangePassword(ChangePasswordDto req)
     {
 
@@ -587,7 +585,31 @@ public sealed class UserService : IUserService
 
         return Result.Success(userResponse);
     }
-    
-    
-    
+
+    public async Task<Pager<PermissionsVm>> GetPermissionsAsync(QueryParam q)
+    {
+
+        await using var context = await _dbContextFactory.CreateDbContextAsync();
+
+        var queries = context.Database
+                            .SqlQuery<PermissionsVm>($"SELECT * FROM [Security].[VPermessions]")
+                            .WhereIf(!string.IsNullOrEmpty(q.Filter),
+                                     x=>EF.Functions.Like(x.Module,$"%{q.Filter}%") ||
+                                        EF.Functions.Like(x.Action, $"%{q.Filter}%") ||
+                                        EF.Functions.Like(x.Group, $"%{q.Filter}%"))
+                            ;
+        var counts = await queries.CountAsync();
+
+        if (q.PageSize > 0)
+        {
+            queries = queries
+                    .Skip(q.PageNumber)
+                    .Take(q.PageSize)
+                    .OrderBy(x => x.Module);
+        }
+        var permissions = await queries
+                            .AsNoTracking()
+                            .ToListAsync();
+        return new Pager<PermissionsVm>(permissions,counts);
+    }
 }

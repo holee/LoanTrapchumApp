@@ -11,6 +11,7 @@ namespace Applications.Interfaces.Employees
         Task<Result<EntityNames>> GetByIdAsync(string? id);
         Task<Result<IReadOnlyList<VEmployeeList>>> GetEmployeesAsync(string? employeeId,int branchId=0, bool isActive = false, string? q = null);
         Task<Pager<VEmployeeList>> GetEmployeesAsync(QueryParam q);
+        Task<Pager<VEmployeeList>> GetEmployeesAsync(int? branchId,QueryParam q); 
         Task<Result<string>> UpdateIsActiveAsync(string? id);
         Task<Result<string>> CreateAsync(EntityNames employee);
         Task<Result<string>> UpdateAsync(EntityNames employee);
