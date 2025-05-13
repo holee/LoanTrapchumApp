@@ -17,22 +17,23 @@ namespace Infrastructures.Implements;
 public class LoanPaymentService : ILoanPaymentService
 {
     private readonly ApplicationDbContext _context;
-    public LoanPaymentService(ApplicationDbContext context)
+    private readonly IDbContextFactory<DataContext> dbContextFactory;
+    public LoanPaymentService(ApplicationDbContext context, IDbContextFactory<DataContext> dbContextFactory)
     {
         _context = context;
+        this.dbContextFactory = dbContextFactory;
     }
 
     public async Task<Result<string>> RecievePayment(LoanRepaymentDtoCreate req)
     {
-        using var tranx = _context.StartTransaction();
+
+        await using var db = await dbContextFactory.CreateDbContextAsync();
+
+
+        using var tranx = db.StartTransaction();
 
         try
         {
-            
-            var tranXchange = req.ForeignExchangeTrx.Adapt<LoanTransaction>();
-
-            tranXchange.TransactionsId = $"trx-{Guid.CreateVersion7()}";
-
 
             var tranLoan = req.LoanTransaction.Adapt<LoanTransaction>();
 
@@ -40,19 +41,17 @@ public class LoanPaymentService : ILoanPaymentService
 
             var loanRepayment = req.Adapt<LoanPayment>();
 
-            var payment = _context.LoanRepayments.Add(loanRepayment).Entity;
+            var payment = db.LoanRepayments.Add(loanRepayment).Entity;
 
-            _context.LoanTransaction.Add(tranLoan);
+            db.LoanTransaction.Add(tranLoan);
 
-            _context.LoanTransaction.Add(tranXchange);
-
-            await _context.SaveChangesAsync();
+            await db.SaveChangesAsync();
 
             var schedules = payment.LoanRepaymentLines?.ToList();
 
-            schedules?.ForEach(item =>
+            schedules?.ForEach(async item =>
             {
-                SetLoanScheduleComplete(req.BranchRefId, req.LoanRefId, item.LoanScheduleRefId, item.InstallmentNo);
+               await SetLoanScheduleComplete(req.BranchRefId, req.LoanRefId, item.LoanScheduleRefId, item.InstallmentNo);
             });
 
             await CloseLoanSchedule(req.BranchRefId, req.LoanRefId);
@@ -69,6 +68,45 @@ public class LoanPaymentService : ILoanPaymentService
             return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}"));
         }
     }
+
+
+    public async Task<Result<string>> RecievePayment(LoanTransaction req)
+    {
+
+        await using var db = await dbContextFactory.CreateDbContextAsync();
+
+
+        using var tranx = db.StartTransaction();
+
+        try
+        {
+
+            var payment = db.LoanTransaction.Add(req).Entity;
+
+            await db.SaveChangesAsync();
+
+            var schedules = payment.LoanPayment?.LoanRepaymentLines?.ToList();
+
+            schedules?.ForEach(async item =>
+            {
+                await SetLoanScheduleComplete(req.LoanPayment?.BranchRefId, req.LoanPayment?.LoanRefId, item.LoanScheduleRefId, item.InstallmentNo);
+            });
+
+            await CloseLoanSchedule(req.LoanPayment?.BranchRefId, req.LoanPayment?.LoanRefId);
+
+            tranx.Commit();
+
+            return Result.Success<string>(new("Payment successfully."));
+
+        }
+        catch (Exception ex)
+        {
+            tranx.Rollback();
+
+            return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}"));
+        }
+    }
+
 
     public async Task<Result<string>> PayOff(LoanRepaymentDtoCreate req)
     {
@@ -94,9 +132,9 @@ public class LoanPaymentService : ILoanPaymentService
 
             var schedules = payment.LoanRepaymentLines?.ToList();
 
-            schedules?.ForEach(item =>
+            schedules?.ForEach(async item =>
             {
-                SetLoanScheduleComplete(req.BranchRefId, req.LoanRefId, item.LoanScheduleRefId, item.InstallmentNo);
+               await SetLoanScheduleComplete(req.BranchRefId, req.LoanRefId, item.LoanScheduleRefId, item.InstallmentNo);
             });
 
 
@@ -135,9 +173,12 @@ public class LoanPaymentService : ILoanPaymentService
         return Result.Success(repaymentLines);
     }
 
-    private void SetLoanScheduleComplete(int? branchId, string? loanId, long? scheduleId, int? installmentId)
+    private async Task SetLoanScheduleComplete(int? branchId, string? loanId, long? scheduleId, int? installmentId)
     {
-        var leftAmount = _context.Database
+        await using var db = await dbContextFactory.CreateDbContextAsync();
+
+
+        var leftAmount = db.Database
                                 .SqlQuery<VSchedule?>($"""
                                        SELECT * FROM VSchedules
                                        WHERE LoanScheduleId={scheduleId}
@@ -149,7 +190,7 @@ public class LoanPaymentService : ILoanPaymentService
 
         var statusId = leftAmount == 0 ? (int)ScheduleStatus.Paid : (int)ScheduleStatus.Partial;
 
-        _context.LoanSchedules
+        db.LoanSchedules
                 .Where(x => x.LoanScheduleId == scheduleId &&
                          x.LoanRefId == loanId && x.InstallmentNo == installmentId)
                 .ExecuteUpdate(x => x.SetProperty(p => p.ScheduleStatusRefId, statusId));
@@ -157,7 +198,11 @@ public class LoanPaymentService : ILoanPaymentService
 
     async Task CloseLoanSchedule(int? branchId, string? loanId)
     {
-        var existingLoans = await _context.Database
+
+        await using var db = await dbContextFactory.CreateDbContextAsync();
+
+
+        var existingLoans = await db.Database
                                     .SqlQuery<VLoanDisbursments>($"""
                                                                     SELECT * FROM VLoanDisbursments
                                                                     WHERE LoanId={loanId} AND 
@@ -169,7 +214,7 @@ public class LoanPaymentService : ILoanPaymentService
                                     .ToListAsync();
         if (existingLoans.Any())
         {
-            _context.LoanDisbursments
+            db.LoanDisbursments
                  .Where(x => x.LoanId == loanId & x.BranchRefId == branchId)
                  .ExecuteUpdate(p => p.SetProperty(x => x.LoanStatusRefId, (int)LoanStatuses.Close));
         }

@@ -16,6 +16,7 @@
         public decimal? PaidInterest { get; set; }
         public decimal? PaidCollectionFee { get; set; }
         public decimal? PenaltyAmount { get; set; }
-        public decimal? SubTotal { get; set; } 
+        public decimal? SubTotal { get; set; }
+        public DateTime? Created { get; set; }= DateTime.Now;
     }
 }

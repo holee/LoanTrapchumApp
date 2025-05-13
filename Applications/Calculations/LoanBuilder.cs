@@ -1,12 +1,16 @@
 ﻿using Applications.Enumerations;
 using Applications.Requests.Loans.Disbursements;
+using Domains.Enumerations;
 using Domains.Models.Loans;
 
 namespace Applications.Calculations
 {
-    public sealed class CalculatorBuilder
+
+    public record struct LoanBuilderBase(int? Period, decimal? RateInMonth, decimal? Amount);
+
+    public sealed class LoanBuilder
     {
-        int? _currencyId;
+        int? _currencyId = (int)CurrenciesType.Khr;
 
         int? _payEvery = 1;
 
@@ -16,15 +20,17 @@ namespace Applications.Calculations
 
         int? _installmentTypeId = (int)InstallmentTypes.Monthly;
 
+        PayementSechuleMode _sechuleMode = PayementSechuleMode.Before;
+
         decimal? _collectionFeeRate = 0;
 
         DateTimeOffset? _firstPayment = DateTimeOffset.UtcNow;
 
         DateTimeOffset? _startDate = DateTimeOffset.UtcNow;
 
-        List<DateTimeOffset> Holidays { get; set; } = [];
+        List<DateTimeOffset> _holidays { get; set; } = [];
 
-        public CalculatorBuilder(int? currencyId, int? payEvery, int? repaymentModeId, int? collectionFeeModeId, int? installmentTypeId, decimal? effectiveRate, DateTimeOffset? firstPayment = null, DateTimeOffset? startDate = null)
+        public LoanBuilder(int? currencyId, int? payEvery, int? repaymentModeId, int? collectionFeeModeId, int? installmentTypeId, decimal? effectiveRate, DateTimeOffset? firstPayment = null, DateTimeOffset? startDate = null)
         {
             _currencyId = currencyId;
 
@@ -38,12 +44,12 @@ namespace Applications.Calculations
 
             _collectionFeeRate = effectiveRate;
 
-            _firstPayment = firstPayment ?? DateTimeOffset.UtcNow;
+            _firstPayment = firstPayment ?? DateTimeOffset.Now;
 
-            _startDate = startDate ?? DateTimeOffset.UtcNow;
+            _startDate = startDate ?? DateTimeOffset.Now;
         }
 
-        public CalculatorBuilder(LoanDtoCreate req)
+        public LoanBuilder(LoanDtoCreate req)
         {
             _currencyId = req.CurrencyRefId;
 
@@ -57,23 +63,72 @@ namespace Applications.Calculations
 
             _collectionFeeRate = req.CollectionFeeRate;// .effectiveRate;
 
-            _firstPayment = req.FirstPaymentDate ?? DateTimeOffset.UtcNow;
+            _firstPayment = req.FirstPaymentDate ?? DateTimeOffset.Now;
 
-            _startDate = req.StartDate ?? DateTimeOffset.UtcNow;
+            _startDate = req.StartDate ?? DateTimeOffset.Now;
+
+            _holidays = req.Holidays ?? [];
+
+            _sechuleMode = req.SechuleMode;
         }
 
-        public void SetHolidays(List<DateTimeOffset> holidays)
+        public IEnumerable<ScheduleLine> CreateSchedules(LoanDtoCreate req)
         {
-            this.Holidays = holidays;
+
+            SetHolidays(req.Holidays ?? []);
+
+            return req.RepaymentModeRefId switch
+            {
+                1 => Balloon(req),
+
+                2 => Decline(req),
+
+                3 => Flat(req),
+
+                4 => Annurity(req),
+
+                _ => Flat(req)
+            };
         }
 
-        public CalculatorBuilder SetHoliday(List<DateTimeOffset> holidays)
+        public IEnumerable<ScheduleLine> CreateSchedules(LoanDtoCreate req, List<DateTimeOffset> holidays)
         {
-            this.Holidays = holidays;
 
-            return this;
+            SetHolidays(holidays);
+
+            return req.RepaymentModeRefId switch
+            {
+                1 => Balloon(req),
+
+                2 => Decline(req),
+
+                3 => Flat(req),
+
+                4 => Annurity(req),
+
+                _ => Flat(req)
+            };
         }
-        public IEnumerable<ScheduleLine> CreateSchedules(int? periodInMonth, decimal? rateInMonth, decimal? amount)
+
+        public IEnumerable<ScheduleLine> CreateSchedules(LoanDtoCreate req, RepaymentModes mode, List<DateTimeOffset> holidays)
+        {
+            SetHolidays(holidays);
+
+            return mode switch
+            {
+                RepaymentModes.Balloon => Balloon(req),
+
+                RepaymentModes.Declined => Decline(req),
+
+                RepaymentModes.IRR => Flat(req),
+
+                RepaymentModes.Annurity => Annurity(req),
+
+                _ => Flat(req)
+            };
+        }
+
+        private IEnumerable<ScheduleLine> CreateSchedules(int? periodInMonth, decimal? rateInMonth, decimal? amount)
         {
 
             return _repaymentModeId switch
@@ -90,44 +145,26 @@ namespace Applications.Calculations
             };
         }
 
-        public IEnumerable<ScheduleLine> CreateSchedules(LoanDtoCreate req)
+        private IEnumerable<ScheduleLine> CreateSchedules(LoanBuilderBase param)
         {
 
-            return req.RepaymentModeRefId switch
+            return _repaymentModeId switch
             {
-                1 => Balloon(req),
+                1 => Balloon(param.Period, param.RateInMonth, param.Amount),
 
-                2 => Decline(req),
+                2 => Decline(param.Period, param.RateInMonth, param.Amount),
 
-                3 => Flat(req),
+                3 => Flat(param.Period, param.RateInMonth, param.Amount),
 
-                4 => Annurity(req),
+                4 => Annurity(param.Period, param.RateInMonth, param.Amount),
 
-                _ => Flat(req)
-            };
-        }
-
-
-        public IEnumerable<ScheduleLine> CreateSchedules(LoanDtoCreate req, RepaymentModes mode)
-        {
-
-            return mode switch
-            {
-                RepaymentModes.Balloon => Balloon(req),
-
-                RepaymentModes.Declined => Decline(req),
-
-                RepaymentModes.IRR => Flat(req),
-
-                RepaymentModes.Annurity => Annurity(req),
-
-                _ => Flat(req)
+                _ => Flat(param.Period, param.RateInMonth, param.Amount)
             };
         }
 
         private void SetHoliday(ref DateTimeOffset? paymentDate)
         {
-            foreach (var holiday in Holidays)
+            foreach (var holiday in _holidays)
             {
                 if (IsSunday(paymentDate) || IsHoliday(holiday, paymentDate))
                 {
@@ -193,11 +230,11 @@ namespace Applications.Calculations
                 {
                     if (_collectionFeeModeId == 1)
                     {
-                        effAmount = CalculatorExtensions.CalcEffective(_currencyId, _amount, _collectionFeeRate, totalDays);
+                        effAmount = CalculatorExtensions.CalcCollectionFee(_currencyId, _amount, _collectionFeeRate, totalDays);
                     }
                     else
                     {
-                        effAmount = CalculatorExtensions.CalcEffective(_currencyId, beginBalance, _collectionFeeRate, totalDays);
+                        effAmount = CalculatorExtensions.CalcCollectionFee(_currencyId, beginBalance, _collectionFeeRate, totalDays);
                     }
 
                     interestAmount = CalculatorExtensions.CalcInterest(_currencyId, beginBalance, _monthlyRate, totalDays);
@@ -206,11 +243,12 @@ namespace Applications.Calculations
 
                     if (i < periodInMonth)
                     {
-                        lastBalance = CalculatorExtensions.LastBalance(beginBalance, principal);
+                        lastBalance = CalculatorExtensions.CalcLastBalance(beginBalance, principal);
                     }
                     else
                     {
                         principal = beginBalance;
+
                         lastBalance = 0;
                     }
 
@@ -218,13 +256,14 @@ namespace Applications.Calculations
                 if (i % _payEvery != 0)
                 {
                     principal = 0;
+
                     if (_collectionFeeModeId == 1)
                     {
-                        effAmount = CalculatorExtensions.CalcEffective(_currencyId, _amount, _collectionFeeRate, totalDays);
+                        effAmount = CalculatorExtensions.CalcCollectionFee(_currencyId, _amount, _collectionFeeRate, totalDays);
                     }
                     else
                     {
-                        effAmount = CalculatorExtensions.CalcEffective(_currencyId, beginBalance, _collectionFeeRate, totalDays);
+                        effAmount = CalculatorExtensions.CalcCollectionFee(_currencyId, beginBalance, _collectionFeeRate, totalDays);
                     }
 
                     interestAmount = CalculatorExtensions.CalcInterest(_currencyId, beginBalance, _monthlyRate, totalDays);
@@ -266,7 +305,7 @@ namespace Applications.Calculations
                 var interest = 0.00M;
                 if (i < periodInMonth)
                 {
-                    lastBalance = CalculatorExtensions.LastBalance(beginBalance, principalPaid);
+                    lastBalance = CalculatorExtensions.CalcLastBalance(beginBalance, principalPaid);
                 }
                 if (i >= periodInMonth)
                 {
@@ -287,11 +326,11 @@ namespace Applications.Calculations
                 }
                 if (_collectionFeeModeId == 1)
                 {
-                    effAmount = CalculatorExtensions.CalcEffective(_currencyId, amount, _collectionFeeRate, totalDays);
+                    effAmount = CalculatorExtensions.CalcCollectionFee(_currencyId, amount, _collectionFeeRate, totalDays);
                 }
                 if (_collectionFeeModeId == 2)
                 {
-                    effAmount = CalculatorExtensions.CalcEffective(_currencyId, beginBalance, _collectionFeeRate, totalDays);
+                    effAmount = CalculatorExtensions.CalcCollectionFee(_currencyId, beginBalance, _collectionFeeRate, totalDays);
                 }
 
                 interest = CalculatorExtensions.CalcInterest(_currencyId, amount.Value, monthlyRate!.Value, totalDays);
@@ -361,11 +400,11 @@ namespace Applications.Calculations
                 }
                 if (_collectionFeeModeId == 1)
                 {
-                    effAmount = CalculatorExtensions.CalcEffective(_currencyId, amount, _collectionFeeRate, totalDays);
+                    effAmount = CalculatorExtensions.CalcCollectionFee(_currencyId, amount, _collectionFeeRate, totalDays);
                 }
                 if (_collectionFeeModeId == 2)
                 {
-                    effAmount = CalculatorExtensions.CalcEffective(_currencyId, beginBalance, _collectionFeeRate, totalDays);
+                    effAmount = CalculatorExtensions.CalcCollectionFee(_currencyId, beginBalance, _collectionFeeRate, totalDays);
                 }
                 interest = CalculatorExtensions.CalcInterest(_currencyId, beginBalance, monthlyRate!.Value, totalDays);
 
@@ -375,7 +414,7 @@ namespace Applications.Calculations
                 {
                     principal = principleAndInterestAmount - interest;
 
-                    lastBalance = CalculatorExtensions.LastBalance(beginBalance, principal);
+                    lastBalance = CalculatorExtensions.CalcLastBalance(beginBalance, principal);
                 }
                 if (i >= periodInMonth)
                 {
@@ -447,11 +486,11 @@ namespace Applications.Calculations
 
                 if (_collectionFeeModeId == 1)
                 {
-                    effAmount = CalculatorExtensions.CalcEffective(_currencyId, _amount, _collectionFeeRate, totalDays);
+                    effAmount = CalculatorExtensions.CalcCollectionFee(_currencyId, _amount, _collectionFeeRate, totalDays);
                 }
                 if (_collectionFeeModeId == 2)
                 {
-                    effAmount = CalculatorExtensions.CalcEffective(_currencyId, beginBalance, _collectionFeeRate, totalDays);
+                    effAmount = CalculatorExtensions.CalcCollectionFee(_currencyId, beginBalance, _collectionFeeRate, totalDays);
                 }
 
                 interest = CalculatorExtensions.CalcInterest(_currencyId, beginBalance, rate, totalDays);
@@ -460,7 +499,7 @@ namespace Applications.Calculations
 
                 if (i < period)
                 {
-                    lastBalance = CalculatorExtensions.LastBalance(beginBalance, principalPaid);
+                    lastBalance = CalculatorExtensions.CalcLastBalance(beginBalance, principalPaid);
                 }
                 if (i >= period)
                 {
@@ -493,6 +532,10 @@ namespace Applications.Calculations
         /// <param name="date"></param>
         /// <returns></returns>
 
+        private void SetHolidays(List<DateTimeOffset> holidays)
+        {
+            this._holidays = holidays;
+        }
 
         private IEnumerable<ScheduleLine> Balloon(CalculatorBase req)
         {
@@ -538,7 +581,7 @@ namespace Applications.Calculations
                 }
                 if (i > 1)
                 {
-                    previusDate = schedules[i - 2].PaymentDate!.Value;
+                    previusDate = schedules[i - 2].PaymentDate;
 
                     paymentDate = SetPaymentDate(previusDate); //StartDate.AddMonths(i);
 
@@ -551,11 +594,11 @@ namespace Applications.Calculations
                 {
                     if (_collectionFeeModeId == 1)
                     {
-                        effAmount = CalculatorExtensions.CalcEffective(_currencyId, _amount, _collectionFeeRate, totalDays);
+                        effAmount = CalculatorExtensions.CalcCollectionFee(_currencyId, _amount, _collectionFeeRate, totalDays);
                     }
                     else
                     {
-                        effAmount = CalculatorExtensions.CalcEffective(_currencyId, beginBalance, _collectionFeeRate, totalDays);
+                        effAmount = CalculatorExtensions.CalcCollectionFee(_currencyId, beginBalance, _collectionFeeRate, totalDays);
                     }
 
                     interestAmount = CalculatorExtensions.CalcInterest(_currencyId, beginBalance, _monthlyRate, totalDays);
@@ -564,7 +607,7 @@ namespace Applications.Calculations
 
                     if (i < _periodInMonth)
                     {
-                        lastBalance = CalculatorExtensions.LastBalance(beginBalance, principal);
+                        lastBalance = CalculatorExtensions.CalcLastBalance(beginBalance, principal);
                     }
                     else
                     {
@@ -579,11 +622,11 @@ namespace Applications.Calculations
 
                     if (_collectionFeeModeId == 1)
                     {
-                        effAmount = CalculatorExtensions.CalcEffective(_currencyId, _amount, _collectionFeeRate, totalDays);
+                        effAmount = CalculatorExtensions.CalcCollectionFee(_currencyId, _amount, _collectionFeeRate, totalDays);
                     }
                     else
                     {
-                        effAmount = CalculatorExtensions.CalcEffective(_currencyId, beginBalance, _collectionFeeRate, totalDays);
+                        effAmount = CalculatorExtensions.CalcCollectionFee(_currencyId, beginBalance, _collectionFeeRate, totalDays);
                     }
 
                     interestAmount = CalculatorExtensions.CalcInterest(_currencyId, beginBalance, _monthlyRate, totalDays);
@@ -645,7 +688,7 @@ namespace Applications.Calculations
 
                 if (i < periodInMonth)
                 {
-                    lastBalance = CalculatorExtensions.LastBalance(beginBalance, principalPaid);
+                    lastBalance = CalculatorExtensions.CalcLastBalance(beginBalance, principalPaid);
                 }
                 if (i >= periodInMonth)
                 {
@@ -670,11 +713,11 @@ namespace Applications.Calculations
                 }
                 if (_collectionFeeModeId == 1)
                 {
-                    effAmount = CalculatorExtensions.CalcEffective(_currencyId, amount, _collectionFeeRate, totalDays);
+                    effAmount = CalculatorExtensions.CalcCollectionFee(_currencyId, amount, _collectionFeeRate, totalDays);
                 }
                 if (_collectionFeeModeId == 2)
                 {
-                    effAmount = CalculatorExtensions.CalcEffective(_currencyId, beginBalance, _collectionFeeRate, totalDays);
+                    effAmount = CalculatorExtensions.CalcCollectionFee(_currencyId, beginBalance, _collectionFeeRate, totalDays);
                 }
 
                 interest = CalculatorExtensions.CalcInterest(_currencyId, amount, monthlyRate, totalDays);
@@ -712,7 +755,7 @@ namespace Applications.Calculations
 
             beginBalance = lastBalance = req.Principle!.Value;
 
-            var effAmount = 0M;
+            var _collectionFeeAmount = 0M;
 
             for (int i = 1; i <= req.Installments; i++)
             {
@@ -748,21 +791,21 @@ namespace Applications.Calculations
                 }
                 if (_collectionFeeModeId == 1)
                 {
-                    effAmount = CalculatorExtensions.CalcEffective(_currencyId, req.Principle, _collectionFeeRate, totalDays);
+                    _collectionFeeAmount = CalculatorExtensions.CalcCollectionFee(_currencyId, req.Principle, _collectionFeeRate, totalDays);
                 }
                 if (_collectionFeeModeId == 2)
                 {
-                    effAmount = CalculatorExtensions.CalcEffective(_currencyId, beginBalance, _collectionFeeRate, totalDays);
+                    _collectionFeeAmount = CalculatorExtensions.CalcCollectionFee(_currencyId, beginBalance, _collectionFeeRate, totalDays);
                 }
                 interest = CalculatorExtensions.CalcInterest(_currencyId, beginBalance, req.InterestRate, totalDays);
 
-                totalPay = CalculatorExtensions.TotalPay(principleAndInterestAmount, effAmount);
+                totalPay = CalculatorExtensions.TotalPay(principleAndInterestAmount, _collectionFeeAmount);
 
                 if (i < req.Installments)
                 {
                     principal = principleAndInterestAmount - interest;
 
-                    lastBalance = CalculatorExtensions.LastBalance(beginBalance, principal);
+                    lastBalance = CalculatorExtensions.CalcLastBalance(beginBalance, principal);
                 }
                 if (i >= req.Installments)
                 {
@@ -779,7 +822,7 @@ namespace Applications.Calculations
                     Interest = interest,
                     TotalPay = totalPay,
                     OutStanding = lastBalance,
-                    CollectionFeeAmount = effAmount,
+                    CollectionFeeAmount = _collectionFeeAmount,
                     BranchId = req.BranchId,
                     CreditAgentRefId = req.CreditAgentRefId,
                     RepaymentModeRefId = req.RepaymentModeRefId,
@@ -803,7 +846,7 @@ namespace Applications.Calculations
 
             var principalPaid = CalculatorExtensions.PaidPrincipal(_currencyId, _amount, period);
 
-            var effAmount = 0M;
+            var _collectionFeeAmount = 0M;
 
             decimal beginBalance = 0, lastBalance = 0;
 
@@ -842,20 +885,20 @@ namespace Applications.Calculations
 
                 if (_collectionFeeModeId == 1)
                 {
-                    effAmount = CalculatorExtensions.CalcEffective(_currencyId, _amount, _collectionFeeRate, totalDays);
+                    _collectionFeeAmount = CalculatorExtensions.CalcCollectionFee(_currencyId, _amount, _collectionFeeRate, totalDays);
                 }
                 if (_collectionFeeModeId == 2)
                 {
-                    effAmount = CalculatorExtensions.CalcEffective(_currencyId, beginBalance, _collectionFeeRate, totalDays);
+                    _collectionFeeAmount = CalculatorExtensions.CalcCollectionFee(_currencyId, beginBalance, _collectionFeeRate, totalDays);
                 }
 
                 interest = CalculatorExtensions.CalcInterest(_currencyId, beginBalance, rate, totalDays);
 
-                totalPay = CalculatorExtensions.TotalPay(principalPaid, interest, effAmount);
+                totalPay = CalculatorExtensions.TotalPay(principalPaid, interest, _collectionFeeAmount);
 
                 if (i < period)
                 {
-                    lastBalance = CalculatorExtensions.LastBalance(beginBalance, principalPaid);
+                    lastBalance = CalculatorExtensions.CalcLastBalance(beginBalance, principalPaid);
                 }
                 if (i >= period)
                 {
@@ -871,7 +914,7 @@ namespace Applications.Calculations
                     TotalDay = totalDays,
                     TotalPay = totalPay,
                     OutStanding = lastBalance,
-                    CollectionFeeAmount = effAmount,
+                    CollectionFeeAmount = _collectionFeeAmount,
                     BranchId = req.BranchId,
                     CreditAgentRefId = req.CreditAgentRefId,
                     RepaymentModeRefId = req.RepaymentModeRefId,
@@ -915,5 +958,18 @@ namespace Applications.Calculations
                 _ => DateTimeOffset.Now,
             };
         }
+
+        private DateTimeOffset? SetPaymentDate(DateTimeOffset? date, InstallmentTypes type)
+        {
+            return type switch
+            {
+                InstallmentTypes.Monthly => date!.Value.AddMonths(1),
+                InstallmentTypes.BiWeekly => date!.Value.AddDays(14),
+                InstallmentTypes.Weekly => date!.Value.AddDays(7),
+                InstallmentTypes.Daily => date!.Value.AddDays(1),
+                _ => DateTimeOffset.Now,
+            };
+        }
+
     }
 }

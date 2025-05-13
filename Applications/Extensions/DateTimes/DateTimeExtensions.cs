@@ -26,5 +26,17 @@
             return value.DayOfWeek.ToString();
         }
 
+
+        public static int DayNum(this DateTime dt)
+        {
+            return int.Parse(dt.ToString("yyyyMMdd"));    
+        }
+
+        public static int DayNum(this DateTime? dt)
+        {
+            var value = dt ?? DateTime.Now;
+
+            return int.Parse(value.ToString("yyyyMMdd"));
+        }
     }
 }

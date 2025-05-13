@@ -14,10 +14,10 @@ public static class LoanDtoCreateExtensions
             LoanSubTypeRefId = dto.LoanSubTypeRefId,
             LoanCategoryRefId = dto.LoanCategoryRefId,
             BankRefId = dto.BankRefId,
-            BranchRefId=dto.BranchId,
+            BranchRefId = dto.BranchId,
             Installments = dto.Installments,
             UserRefId = dto.UserRefId,
-            Principle=dto.Principle,
+            Principle = dto.Principle,
             CreditAgentRefId = dto.CreditAgentRefId,
             LoanProductRefId = dto.LoanProductRefId,
             LoanAccountCode = dto.LoanAccountCode,
@@ -42,21 +42,51 @@ public static class LoanDtoCreateExtensions
             Circle = dto.Circle,
             RepaymentModeRefId = dto.RepaymentModeRefId,
             InterestRate = dto.InterestRate,
-            LoanSchedules = dto.LoanSchedules?.Select(s => new LoanSchedule
-            {
-                InstallmentNo = s.InstallmentNo,
-                AgentRefId = s.AgentRefId,
-                Interest=s.Interest, 
-                BranchId = s.BranchId,
-                Principal=s.Principal,
-                PaymentDate=s.PaymentDate,
-                ScheduleStatusRefId = s.ScheduleStatusRefId,
-                TotalDay = s.TotalDay,
-                TotalPay = s.TotalPay,
-                LoanOutstanding = s.LoanOutstanding
-            }).ToList()
+            LoanSchedules = dto.LoanSchedules?.MapScedules()
         };
     }
+
+
+
+
+    public static LoanSchedule MapScedule(this LoanScheduleDtoCreate s)
+    {
+        return new LoanSchedule
+        {
+            InstallmentNo = s.InstallmentNo,
+            AgentRefId = s.AgentRefId,
+            Interest = s.Interest,
+            BranchId = s.BranchId,
+            Principal = s.Principal,
+            CollectionFee = s.CollectionFee,
+            PaymentDate = s.PaymentDate,
+            ScheduleStatusRefId = s.ScheduleStatusRefId,
+            TotalDay = s.TotalDay,
+            TotalPay = s.TotalPay,
+            LoanOutstanding = s.LoanOutstanding
+        };
+    }
+
+
+    public static List<LoanSchedule> MapScedules(this IEnumerable<LoanScheduleDtoCreate> dto)
+    {
+        return dto.Select(s => new LoanSchedule
+        {
+            InstallmentNo = s.InstallmentNo,
+            AgentRefId = s.AgentRefId,
+            Interest = s.Interest,
+            BranchId = s.BranchId,
+            Principal = s.Principal,
+            CollectionFee = s.CollectionFee,
+            PaymentDate = s.PaymentDate,
+            ScheduleStatusRefId = s.ScheduleStatusRefId,
+            TotalDay = s.TotalDay,
+            TotalPay = s.TotalPay,
+            LoanOutstanding = s.LoanOutstanding
+        }).ToList();
+    }
+
+
 }
 
 

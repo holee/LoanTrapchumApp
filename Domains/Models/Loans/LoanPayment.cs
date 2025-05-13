@@ -1,4 +1,6 @@
-﻿namespace Domains.Models.Loans
+﻿using Domains.Models.Transaction;
+
+namespace Domains.Models.Loans
 {
     public sealed class LoanPayment
     {
@@ -17,6 +19,9 @@
         public decimal? SubTotal { get; set; }
         public bool? IsReturn { get; set; }
         public int? CurrencyRefId { get; set; }
+        public DateTime? Created { get; set; } = DateTime.Now;
+
+        public LoanTransaction? LoanTransaction { get; set; }
         public ICollection<LoanPaymentLine>? LoanRepaymentLines { get; set; } = [];
     }
 }

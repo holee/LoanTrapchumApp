@@ -180,11 +180,9 @@ public partial class ReceiveRepayment
         {
             NotificationService.Notify(NotificationSeverity.Success, "Receive successfully.");
 
-            //await GetCustomerSchedulesAsync(ScheduleStatus.Unpaid);
-
-
             await GetCustomerSchedulesAsync(ScheduleStatus.Unpaid);
 
+            //await GetLoanWithSchedules(BranchId, LoanId);
 
             LoanRepaymentLines.Clear();
 
@@ -304,20 +302,28 @@ public partial class ReceiveRepayment
         if (!allowRowSelected && !s.Selected && arg)
         {
             s.Selected = arg;
+
             gridSchedule.SelectRow(s);
+
             SetSelectedSchedule(s);
+
             StateHasChanged();
+
             return;
         }
         if (!allowRowSelected && s.Selected && !arg)
         {
             s.Selected = arg;
+
             gridSchedule.SelectRow(s, false);
+
             var removeSchedule = LoanRepaymentLines.Where(x => x.InstallmentNo == s.InstallmentNo).FirstOrDefault();
+
             if (removeSchedule is not null)
             {
                 OnRemoveAdded(removeSchedule);
             }
+
             StateHasChanged();
             return;
         }
@@ -376,14 +382,16 @@ public partial class ReceiveRepayment
 
             SelectedSchedules = [];
 
-            var param = new QueryParam(pageIndex, pageSize, sortField, filter);
 
-            var responseSchedule = await _scheduleService.GetLoanScheduleByIdAsync(LoanId, BranchId, status, param);
+            var responseSchedule = await _scheduleService.GetLoanScheduleByIdAsync(LoanId, BranchId, status);
 
+            if (responseSchedule.IsSuccess)
+            {
+                schedules = responseSchedule.Data!.ToList();
 
-            schedules = responseSchedule.Items;
+                SelectedSchedules = schedules.Take(1).ToList();
+            }
 
-            SelectedSchedules = schedules.Take(1).ToList();
 
             if (SelectedSchedules.Any() && !isAllowMultiplePayment)
             {
@@ -396,6 +404,7 @@ public partial class ReceiveRepayment
         catch (Exception ex)
         {
             NotificationService.Notify(NotificationSeverity.Error, ex.Message);
+
             isLoading = false;
         }
         finally
@@ -458,7 +467,9 @@ public partial class ReceiveRepayment
     {
         if (s is not null)
         {
+
             SelectedSchedule = s;
+            SelectedSchedule.LoanId = LoanId;
             SelectedSchedule.Selected = true;
             disableIsPaidNow = false;
         }

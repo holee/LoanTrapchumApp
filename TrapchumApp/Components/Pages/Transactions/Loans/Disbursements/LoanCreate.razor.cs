@@ -1,4 +1,5 @@
 using Applications.Calculations;
+using Applications.Enumerations;
 using Applications.Extensions;
 using Applications.Requests.Loans.Disbursements;
 using Applications.Responses.ViewModels.Branches;
@@ -99,15 +100,12 @@ public partial class LoanCreate
 
         model.PenaltyRate = penaltyRate;
 
-        var param = model.ToLoanInfo();
-
         var builder = Calculators.CreateBuilder(model);
         {
-            var app = builder.Build(param);
+            var app = builder.Build();
 
-            previewSchedule = app.SetHoliday(Holidays)
-                .CreateSchedules(model)
-                .MapTo(model);
+            previewSchedule = app.CreateSchedules(model).MapToLoanSchedule(model);
+
             selectedTabIndex = 2;
         }
     }
@@ -131,15 +129,13 @@ public partial class LoanCreate
         model.UserRefId = UserId;
         model.PenaltyRate = penaltyRate;
 
-        var param = model.ToLoanInfo();
+        //var builder = Calculators.CreateBuilder(model);
 
-        var builder = Calculators.CreateBuilder(model); //.CreateBuilder(model.RepaymentModeRefId, model.CurrencyRefId);
+        //var app = builder.Build(model);
 
-        var app = builder.Build(model);
+        //var scheduleDto = app.CreateSchedules(model, Holidays).MapToLoanSchedule(model);
 
-        var scheduleDto = app.SetHoliday(Holidays)
-            .CreateSchedules(model)
-            .MapTo(model);
+        var scheduleDto = model.CreateSchedules(Holidays).MapToLoanSchedule(model);
 
         var lastDate = scheduleDto!.LastOrDefault()!.PaymentDate;
 
@@ -158,15 +154,12 @@ public partial class LoanCreate
             if (!rsp.IsSuccess)
             {
                 NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
+
                 return;
             }
 
             NotificationService.Notify(NotificationSeverity.Success, rsp.Data);
-            
-            
-            
-            
-            
+
         }
         catch (Exception ex)
         {

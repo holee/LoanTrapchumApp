@@ -6,7 +6,7 @@ namespace Applications.Calculations
 {
     public static class ScheduleLineExtensions
     {
-        public static IEnumerable<LoanScheduleDtoCreate> MapTo(this IEnumerable<ScheduleLine> source, int? BranchId, string? creditAgentId, int? repaymentModeId = 2, ScheduleStatus status = ScheduleStatus.Unpaid)
+        public static IEnumerable<LoanScheduleDtoCreate> MapToLoanSchedule(this IEnumerable<ScheduleLine> source, int? BranchId, string? creditAgentId, int? repaymentModeId = 2, ScheduleStatus status = ScheduleStatus.Unpaid)
         {
 
             ArgumentNullException.ThrowIfNull(source, nameof(source));
@@ -30,7 +30,7 @@ namespace Applications.Calculations
         }
 
 
-        public static IEnumerable<LoanScheduleDtoCreate> MapTo(this IEnumerable<ScheduleLine> source, LoanDtoCreate req)
+        public static IEnumerable<LoanScheduleDtoCreate> MapToLoanSchedule(this IEnumerable<ScheduleLine> source, LoanDtoCreate req)
         {
 
             ArgumentNullException.ThrowIfNull(source, nameof(source));
@@ -52,11 +52,34 @@ namespace Applications.Calculations
             });
         }
 
-
-        public static IEnumerable<LoanScheduleDtoCreate> MapTo(this IEnumerable<ScheduleLine> source)
+        public static IEnumerable<LoanScheduleDtoCreate> MapToLoanSchedule(this IEnumerable<ScheduleLine> source, string? creditAgentId, int repaymentModeId = 1)
         {
 
             ArgumentNullException.ThrowIfNull(source, nameof(source));
+
+            return source.Select(x => new LoanScheduleDtoCreate
+            {
+                BranchId = x.BranchId,
+                InstallmentNo = x.InstallmentNo,
+                PaymentDate = x.PaymentDate,
+                Principal = x.Principal,
+                Interest = x.Interest,
+                CollectionFee = x.CollectionFeeAmount,
+                LoanOutstanding = x.OutStanding,
+                TotalDay = x.TotalDay,
+                TotalPay = x.TotalPay,
+                AgentRefId = creditAgentId ?? string.Empty,
+                RepaymentModeRefId = repaymentModeId,
+                ScheduleStatusRefId = (int)ScheduleStatus.Unpaid,
+            });
+        }
+
+
+        public static IEnumerable<LoanScheduleDtoCreate> MapToLoanSchedule(this IEnumerable<ScheduleLine> source)
+        {
+
+            ArgumentNullException.ThrowIfNull(source, nameof(source));
+
             return source.Select(x => new LoanScheduleDtoCreate
             {
                 BranchId = x.BranchId,

@@ -7,6 +7,9 @@ using Applications.Requests.Transactions.LoanTransactions;
 using Applications.Responses.ViewModels.Currencies;
 using Applications.Responses.ViewModels.Settings;
 using Applications.Services.Settings;
+using Domains.Models.Loans;
+using Domains.Models.Transaction;
+using Mapster;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
@@ -60,20 +63,20 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
         decimal? buyingRate = 0;
         decimal? sellingRate = 0;
         decimal? spotRate = 0;
-        bool isBusy = false; 
+        bool isBusy = false;
         protected override async Task OnInitializedAsync()
         {
-            var currencyResponse = await _curService.GetCurrencyAsync(1);
+            //var currencyResponse = await _curService.GetCurrencyAsync(1);
 
-            if (currencyResponse.IsSuccess)
-            {
-                selectedCurrency = currencyResponse.Data!;
-                //buyingRate = currencyResponse.Data!.BuyingRate;
-                //sellingRate = currencyResponse.Data!.SellingRate;
-                //spotRate = currencyResponse.Data!.SpotRate;
-            }
+            //if (currencyResponse.IsSuccess)
+            //{
+            //    selectedCurrency = currencyResponse.Data!;
+            //    //buyingRate = currencyResponse.Data!.BuyingRate;
+            //    //sellingRate = currencyResponse.Data!.SellingRate;
+            //    //spotRate = currencyResponse.Data!.SpotRate;
+            //}
 
-            
+
             await base.OnInitializedAsync();
         }
 
@@ -98,10 +101,12 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
                 if (PaymentCreate.RecieveKhrAmount <= 0 && PaymentCreate.RecieveAmount <= 0)
                 {
                     NotificationService.Notify(NotificationSeverity.Error, "Please provide payment amount.");
+
                     return;
                 }
                 var tran = new LoanTransactionDtoCreate
                 {
+                    TransactionsId = $"trx-{Guid.CreateVersion7()}",
                     TransactionDate = DateTime.Now,
                     TransactionTypeName = "Loan Principal Repayment",
                     TranTypeRefId = 20,
@@ -121,20 +126,22 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
                 LoanRepayment.BranchRefId = BranchId;
                 LoanRepayment.UserRefId = UserId;
                 LoanRepayment.CurrencyRefId = CurrencyId;
-                if (PaymentCreate.TotalAmountWithPenalty > 0)
+
+                var tranxCashManagement = new TrxCashManagementDtoCreate()
                 {
-                    var tranxCashManagement = new TrxCashManagementDtoCreate()
-                    {
-                        Id = $"trx-{Guid.CreateVersion7()}",
-                        CurrencyRefId = CurrencyId,
-                        TransactionDate = DateTime.Now,
-                        BusinessDate = DateTime.Now,
-                        CashStatusRefId = 2,
-                        BankRefId = 11,
-                        Amount = PaymentCreate.TotalAmountWithPenalty,
-                    };
-                    LoanRepayment.LoanTransaction!.CashManagements!.Add(tranxCashManagement);
-                }
+                    Id = $"trx-{Guid.CreateVersion7()}",
+                    CurrencyRefId = CurrencyId,
+                    TransactionDate = DateTime.Now,
+                    BusinessDate = DateTime.Now,
+                    CashStatusRefId = 2,
+                    BranchRefId = BranchId,
+                    BankRefId = 11,
+                    Amount = PaymentCreate.TotalAmountWithPenalty,
+                };
+
+                tran.CashManagements?.Add(tranxCashManagement);
+
+                tran.LoanPayment = LoanRepayment;
 
                 string message = $"Receive money from {CustomerName} with amount {PaymentCreate.TotalAmountWithPenalty}";
 
@@ -142,15 +149,9 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
 
                 if (confirmPayment == false) return;
 
-                //model.UserRefId = UserId;
+                var trx = tran.ToLoanTransction();
 
-                //model.TranTypeRefId = 67;
-
-                //model.TransactionTypeName = "Currency Foreign Exchange";
-
-                //LoanRepayment.ForeignExchangeTrx = model;
-
-                var result = await _loanPaymentService.RecievePayment(LoanRepayment);
+                var result = await _loanPaymentService.RecievePayment(trx);
 
                 if (result.IsSuccess)
                 {
@@ -160,11 +161,13 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
                 {
                     NotificationService.Notify(NotificationSeverity.Error, result.ErrMessage);
                 }
+
                 isBusy = false;
             }
             catch (Exception ex)
             {
                 isBusy = false;
+
                 NotificationService.Notify(NotificationSeverity.Error, ex.Message);
             }
         }
@@ -176,7 +179,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
                 PaymentCreate.RecieveAmount = 0;
 
                 NotificationService.Notify(NotificationSeverity.Error, "please input apply amount.");
-                
+
                 return;
             }
         }
@@ -198,7 +201,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
 
             if (amount >= PaymentCreate.TotalAmountWithPenalty)
             {
-                PaymentCreate.ChangeAmount= amount - PaymentCreate.TotalAmountWithPenalty;
+                PaymentCreate.ChangeAmount = amount - PaymentCreate.TotalAmountWithPenalty;
 
                 return;
             }
@@ -228,7 +231,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
             }
 
         }
-       
+
         void SetDefualt()
         {
             PaymentCreate.ChangeKhrAmount = 0.00M;

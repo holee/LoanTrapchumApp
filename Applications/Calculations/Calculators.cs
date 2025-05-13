@@ -2,35 +2,60 @@
 
 namespace Applications.Calculations
 {
+
+    public sealed class LoanCreateConfiguration
+    {
+        public LoanDtoCreate? LoanCreate { get; set; }
+    }
+
+
     public sealed class Calculators
     {
-        int? repaymentModeId;
+        int? _repaymentModeId;
 
-        int? currencyId;
+        int? _currencyId;
 
-        public static Calculators CreateBuilder(int? repaymentModeId, int? currencyId)
+        static LoanDtoCreate? _parameter;
+
+        private Calculators(LoanDtoCreate? parameter)
         {
-            return new Calculators(repaymentModeId, currencyId);
-        }
-        public static Calculators CreateBuilder(LoanDtoCreate req)
-        {
-            return new Calculators(req.RepaymentModeRefId, req.CurrencyRefId);
+            _parameter = parameter;
         }
 
-        private Calculators(int? repaymentModeId, int? currencyId)
+        public static Calculators CreateBuilder(LoanDtoCreate parameter)
         {
-            this.repaymentModeId = repaymentModeId;
+            _parameter = parameter;
 
-            this.currencyId = currencyId;
-        }
-        public CalculatorBuilder Build(LoanInfo e)
-        {
-            return new(currencyId, e.PayEvery, repaymentModeId, e.CollectionFeeModeId, e.InstallmentTypeId, e.CollectionFeeRate, e.FirstPayment, e.StartDate);
+            return new Calculators(parameter);
         }
 
-        public CalculatorBuilder Build(LoanDtoCreate e)
+        public static Calculators CreateBuilder(Action<LoanCreateConfiguration> config)
         {
-            return new(e.CurrencyRefId, e.PayEvery, e.RepaymentModeRefId, e.CollectionFeeModeId, e.InstallmentTypeId, e.CollectionFeeRate, e.FirstPaymentDate, e.StartDate);
+            var parameter = new LoanCreateConfiguration();
+
+            config.Invoke(parameter);
+
+            _parameter = parameter.LoanCreate;
+
+            return new Calculators(_parameter);
+        }
+
+        public LoanBuilder Build()
+        {
+            if (_parameter is null) throw new ArgumentNullException(nameof(_parameter), "Parameter cannot be null");
+
+            return Build(_parameter);
+
+        }
+
+        public LoanBuilder Build(LoanInfo e)
+        {
+            return new(_currencyId, e.PayEvery, _repaymentModeId, e.CollectionFeeModeId, e.InstallmentTypeId, e.CollectionFeeRate, e.FirstPayment, e.StartDate);
+        }
+
+        private LoanBuilder Build(LoanDtoCreate e)
+        {
+            return new(e);
         }
     }
 }

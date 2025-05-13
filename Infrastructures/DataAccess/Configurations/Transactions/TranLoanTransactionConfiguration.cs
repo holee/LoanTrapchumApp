@@ -1,11 +1,12 @@
 ﻿using Domains.Models.Journals;
+using Domains.Models.Loans;
 using Domains.Models.Transaction;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructures.DataAccess.Configurations.Transactions
 {
-    public class TranLoanTransactionConfiguration : IEntityTypeConfiguration<LoanTransaction>
+    public class TranLoanTransactionConfiguration : IBaseEntityTypeConfigurations<LoanTransaction>
     {
         public void Configure(EntityTypeBuilder<LoanTransaction> builder)
         {
@@ -19,7 +20,7 @@ namespace Infrastructures.DataAccess.Configurations.Transactions
             builder.Property(p => p.ModifiedDt).HasDefaultValueSql("GETDATE()");
 
             builder.HasOne(x => x.JournalEntry)
-                        .WithOne(x=>x.LoanTransaction)
+                        .WithOne(x => x.LoanTransaction)
                         .HasForeignKey<JournalEntry>(fk => fk.TransactionsRefId);
 
             builder.HasMany(c => c.CashManagements)
@@ -38,6 +39,13 @@ namespace Infrastructures.DataAccess.Configurations.Transactions
             builder.HasOne(x => x.CashVault)
                        .WithOne()
                        .HasForeignKey<CashVault>(fk => fk.TransactionRefId);
+
+
+
+            builder.HasOne(x => x.LoanPayment)
+                .WithOne(x => x.LoanTransaction)
+                .HasForeignKey<LoanPayment>(fk => fk.TransactionRefId)
+                .IsRequired(false);
         }
 
     }

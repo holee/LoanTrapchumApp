@@ -12,6 +12,7 @@ namespace Applications.Services.Loans
         Task<Pager<VSchedule>> GetLoanScheduleByIdAsync(string? loanId, int? branchId, ScheduleStatus status = ScheduleStatus.All, QueryParam? param = null);
         Task<Pager<VSchedule>> GetLoanSchedulesByPaymentDateAsync(int? branchId, DateTimeOffset? paymentDate, bool isIncludeLate = false, bool isLateOnly = false, QueryParam? param = null);
         Task<Result<LoanScheduleVm>> GetLoanSchedulesAsync(int? branchId, string? loanId, string? customerId);
+        Task<Result<IEnumerable<VSchedule>>> GetLoanScheduleByIdAsync(string? loanId, int? branchId, ScheduleStatus status = ScheduleStatus.All);
     }
 
     public sealed class LoanScheduleService(ILoanScheduleService loanSchedule) : ILoanScheduleServiceImpl
@@ -19,6 +20,11 @@ namespace Applications.Services.Loans
         public async Task<Pager<VSchedule>> GetLoanScheduleByIdAsync(string? loanId, int? branchId, ScheduleStatus status = ScheduleStatus.All, QueryParam? param = null)
         {
             return await loanSchedule.GetLoanScheduleByIdAsync(loanId, branchId, status,param);
+        }
+
+        public async Task<Result<IEnumerable<VSchedule>>> GetLoanScheduleByIdAsync(string? loanId, int? branchId, ScheduleStatus status = ScheduleStatus.All)
+        {
+            return await loanSchedule.GetLoanScheduleByIdAsync(loanId, branchId, status);
         }
 
         public async Task<Pager<VSchedule>> GetLoanSchedulesByPaymentDateAsync(int? branchId, DateTimeOffset? paymentDate, bool isIncludeLate = false, bool isLateOnly = false, QueryParam? param = null)

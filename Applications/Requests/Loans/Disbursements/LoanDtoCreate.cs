@@ -1,8 +1,10 @@
 ﻿using Applications.Calculations;
+using Applications.Enumerations;
+using Domains.Enumerations;
 
 namespace Applications.Requests.Loans.Disbursements;
 
-public sealed class LoanDtoCreate : CalculatorBase,ICalculatorBase
+public sealed class LoanDtoCreate : CalculatorBase, ICalculatorBase
 {
     public string? LoanId { get; set; }
     public string? LoanRequestId { get; set; }
@@ -43,6 +45,8 @@ public sealed class LoanDtoCreate : CalculatorBase,ICalculatorBase
     public string? InstallmentName { get; set; } = string.Empty;
     public string? ApprovedBy { get; set; } = string.Empty;
     public decimal? PaidAmount => Principle - AdminFeeAmount;
+    public PayementSechuleMode SechuleMode { get; set; } = PayementSechuleMode.Before;
+    public List<DateTimeOffset>? Holidays { get; set; } = [];
     public List<LoanScheduleDtoCreate>? LoanSchedules { get; set; } = [];
 }
 

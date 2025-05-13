@@ -17,5 +17,7 @@ namespace Applications.Interfaces.Lists
         Task<Pager<Holiday>> GetHolidays(int pageNumber, int pageSize, string sortColumn= "HolidayName",bool isSelectedPrevious = false,bool sortDescending=false, string? q = null);
         Task<IEnumerable<Holiday>> GetHolidays(bool isSelectedPrevious=false, DateTime? startFrom=null,DateTime? end=null);
         Task<IEnumerable<Holiday>> GetHolidays(DateTime selectedDate);
+        Task<Pager<Holiday>> GetHolidays(QueryParam q);
+        Task<Pager<Holiday>> GetHolidays(QueryParam q);
     }
 }

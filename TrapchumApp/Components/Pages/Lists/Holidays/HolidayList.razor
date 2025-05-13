@@ -91,7 +91,7 @@
                         <RadzenDataGridColumn Title="Holiday Date" Sortable="true"
                                               Context="h">
                             <Template>
-                                @(h?.HolidayName.ToShortDateString())-<small>@(h?.HolidayName.DayOfWeek)</small>
+                                @(h?.HolidayDt.ToShortDateString())-<small>@(h?.HolidayDt.DayOfWeek)</small>
                             </Template>
                         </RadzenDataGridColumn>
                         <RadzenDataGridColumn Title="Description" Property="p=>p.Description" />

@@ -1,4 +1,5 @@
-﻿using Applications.Interfaces.Lists;
+﻿using Applications.Extensions;
+using Applications.Interfaces.Lists;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Domains.Models.Lists;
@@ -10,11 +11,16 @@ namespace Infrastructures.Implements
     public class HolidayService : IHolidayService
     {
         private readonly ApplicationDbContext _context;
+
         private IEnumerable<DateTime> _xistingHolidays = [];
 
-        public HolidayService(ApplicationDbContext context)
+        private readonly IDbContextFactory<DataContext> _contextFactory;
+
+        public HolidayService(ApplicationDbContext context, IDbContextFactory<DataContext> contextFactory)
         {
-            this._context = context;
+            _context = context;
+
+            _contextFactory = contextFactory;
         }
 
         public async Task<Result<string>> CreateHoliday(Holiday entities)
@@ -25,13 +31,15 @@ namespace Infrastructures.Implements
                 if (entities.Id <= 0)
                 {
                     _context.Holidays.Add(entities);
+
                     await _context.SaveChangesAsync();
+
                     return Result.Success<string>(new("New holiday was added successfully!"));
                 }
                 else
                 {
                     var emp = _context.Holidays.AsNoTracking()
-                    .Where(x => x.Id == entities.Id && x.HolidayName.Month == entities.HolidayName.Month)
+                    .Where(x => x.Id == entities.Id && x.HolidayDt.Month == entities.HolidayDt.Month)
                     .FirstOrDefault();
 
                     if (emp is null)
@@ -55,6 +63,7 @@ namespace Infrastructures.Implements
         {
 
             var result = await _context.Holidays.Where(x => x.Id == id).FirstOrDefaultAsync();
+
             return result ?? default;
         }
 
@@ -62,25 +71,24 @@ namespace Infrastructures.Implements
         public async Task<IEnumerable<Holiday>> GetHolidays(DateTime selectedDate)
         {
             IQueryable<Holiday> queries = _context.Holidays
-                                                 .Where(x => x.HolidayName.Month == selectedDate.Month &&
-                                                        x.HolidayName.Year == selectedDate.Year);
+                                                 .Where(x => x.HolidayDt.Month == selectedDate.Month &&
+                                                        x.HolidayDt.Year == selectedDate.Year);
             return await queries.AsNoTracking().ToListAsync();
         }
-        public async Task<IEnumerable<Holiday>> GetHolidays(bool isSelectedPrevious,
-            DateTime? startFrom = null, DateTime? end = null)
+        public async Task<IEnumerable<Holiday>> GetHolidays(bool isSelectedPrevious,DateTime? startFrom = null, DateTime? end = null)
         {
             IQueryable<Holiday> queries = _context.Holidays;
             if (isSelectedPrevious && startFrom is not null)
             {
-                queries = queries.Where(d => d.HolidayName >= startFrom);
+                queries = queries.Where(d => d.HolidayDt >= startFrom);
             }
             if (!isSelectedPrevious && startFrom is not null)
             {
-                queries = queries.Where(d => d.HolidayName >= startFrom && d.HolidayName <= end);
+                queries = queries.Where(d => d.HolidayDt >= startFrom && d.HolidayDt <= end);
             }
             if (!isSelectedPrevious && startFrom is null)
             {
-                queries = queries.Where(d => d.HolidayName >= DateTime.Now && d.HolidayName <= end);
+                queries = queries.Where(d => d.HolidayDt >= DateTime.Now && d.HolidayDt <= end);
             }
             return await queries.AsNoTracking().ToListAsync();
         }
@@ -93,13 +101,13 @@ namespace Infrastructures.Implements
             IQueryable<Holiday> queries = _context.Holidays;
             if (!isSelectedPrevious)
             {
-                queries = queries.Where(d => d.HolidayName >= DateTime.Now);
+                queries = queries.Where(d => d.HolidayDt >= DateTime.Now);
             }
 
             if (q != null)
             {
                 queries = queries.Where(x => EF.Functions.Like(x.Description, $"%{q}%") ||
-                                             EF.Functions.Like(x.HolidayName.ToString(), $"%{q}%"));
+                                             EF.Functions.Like(x.HolidayDt.ToString(), $"%{q}%"));
             }
 
             if (sortDescending)
@@ -115,9 +123,60 @@ namespace Infrastructures.Implements
                 Items = await queries.AsNoTracking().ToListAsync()
             };
         }
+
+        public async Task<Pager<Holiday>> GetHolidays(QueryParam q)
+        {
+
+            await using var context = await _contextFactory.CreateDbContextAsync(); 
+
+
+            var queries = context.Holidays
+                                  .WhereIf(!q.IsIncludeInActive, d => d.HolidayDt >= DateTime.Now)
+                                  .WhereIf(!string.IsNullOrEmpty(q.Filter),
+                                            x=> EF.Functions.Like(x.Description, $"%{q}%") ||
+                                                EF.Functions.Like(x.HolidayNum.ToString(), $"%{q}%") ||
+                                                EF.Functions.Like(x.HolidayDt.ToString(), $"%{q}%"));
+
+            if (q.SortDescending)
+            {
+                queries = queries.OrderByDescending(x => EF.Property<object>(x, q.SortColumn));
+            }
+
+            var counts =await queries.CountAsync();
+
+            if(q.PageSize > 0)
+            {
+                queries = queries.Skip(q.PageNumber).Take(q.PageSize);
+
+            }
+
+            return new Pager<Holiday>
+            {
+                Count = counts,
+
+                Items = await queries.AsNoTracking().ToListAsync()
+            };
+        }
+
+
+        public async Task<IEnumerable<Holiday>> GetActiveHolidays(DateTime? selectedDate) 
+        {
+
+            await using var context = await _contextFactory.CreateDbContextAsync();
+
+            var queries =await context.Holidays
+                                  .Where(d => d.HolidayDt >= selectedDate)
+                                  .AsNoTracking()
+                                  .ToListAsync();
+
+            return  queries ?? [];
+        }
+
+
+
         public async Task<bool> Existdate(DateTime setdate)
         {
-            var query = await _context.Holidays.Where(x => x.HolidayName == setdate)
+            var query = await _context.Holidays.Where(x => x.HolidayDt == setdate)
                                 .ToListAsync();
             return query.Count() > 0;
         }
@@ -146,15 +205,15 @@ namespace Infrastructures.Implements
         public async Task<IEnumerable<Holiday>> GetDate(DateTime q)
         {
             IQueryable<Holiday> respone = _context.Holidays
-                                                .Where(x => x.HolidayName.Month == q.Month &&
-                                                        x.HolidayName.Year == q.Year);
+                                                .Where(x => x.HolidayDt.Month == q.Month &&
+                                                        x.HolidayDt.Year == q.Year);
             return await respone.AsNoTracking().ToListAsync() ?? Enumerable.Empty<Holiday>();
         }
         public async Task<Result<Holiday>> GetByDate(DateTime? dt)
         {
             try
             {
-                var data = await _context.Holidays.Where(x => x.HolidayName == dt).FirstOrDefaultAsync();
+                var data = await _context.Holidays.Where(x => x.HolidayDt == dt).FirstOrDefaultAsync();
 
                 if (data is null)
                     return Result.Failure<Holiday>(ErrorResponse.NotFound("No data found"));

@@ -10,9 +10,9 @@ namespace Infrastructures.DataAccess.Configurations.Holidays
         {
             builder.ToTable("lt_holidays");
             builder.HasKey(x => x.Id);
-            builder.HasIndex(x => x.HolidayName).IsUnique();
+            builder.HasIndex(x => x.HolidayDt).IsUnique();
             builder.Property(x => x.Id).ValueGeneratedOnAdd();
-            builder.Property(x => x.HolidayName).HasColumnType("DATE");
+            builder.Property(x => x.HolidayDt).HasColumnType("DATE");
             builder.Property(x => x.Status).HasDefaultValue(true);
             builder.Property(x => x.Description).HasDefaultValue(null);
             builder.HasQueryFilter(x => x.Status == true);

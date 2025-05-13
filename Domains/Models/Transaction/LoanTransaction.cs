@@ -1,5 +1,6 @@
 ﻿using Domains.Models.Bases;
 using Domains.Models.Journals;
+using Domains.Models.Loans;
 
 namespace Domains.Models.Transaction;
 
@@ -14,6 +15,7 @@ public class LoanTransaction : BaseEntity
     public JournalEntry? JournalEntry { get; set; }
     public OpenBranch? OpenBranch { get; set; }
     public CashVault? CashVault { get; set; }
+    public LoanPayment? LoanPayment { get; set; }
     public List<CashManagement> CashManagements { get; set; } = [];
     public List<ForeignExchange> ForeignExchanges { get; set; } = [];
 }

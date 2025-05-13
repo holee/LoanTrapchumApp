@@ -7,9 +7,12 @@ internal class CalculatorExtensions
     internal static decimal TotalPay(decimal? principal, decimal? interestRate, decimal? collectionFee = 0)
     {
         var p = principal ?? 0;
+
         var i = interestRate ?? 0;
+
         var c = collectionFee ?? 0;
-        return Math.Round(p+ i+ c, 3);
+
+        return Math.Round(p + i + c, 3);
     }
     internal static decimal PaidPrincipal(int? currencyId, decimal? amount, int? nper)
     {
@@ -19,19 +22,27 @@ internal class CalculatorExtensions
         return (amount / nper).RoundDown(3);
 
     }
-    internal static decimal LastBalance(decimal? beginBalance, decimal? principalPaid)
+    internal static decimal CalcLastBalance(decimal? beginBalance, decimal? principalPaid)
     {
-        return Math.Round(beginBalance!.Value - principalPaid!.Value, 3);
+
+        var begin = beginBalance ?? 0;
+
+        var principal = principalPaid ?? 0;
+
+        return Math.Round(begin - principal, 3);
     }
-    internal static decimal CalcEffective(int? currencyId, decimal? amount, decimal? effectiveRate, int? days = 30)
+    internal static decimal CalcCollectionFee(int? currencyId, decimal? amount, decimal? effectiveRate, int? days = 30)
     {
-        var ratePerday = Math.Round(effectiveRate!.Value / 28 / 100, 3);
 
-        var effective = amount * ratePerday * days;
+        var rate = effectiveRate ?? 0;
 
-        if (currencyId == 1) return effective.RoundUp(-2);
+        var ratePerday = Math.Round(rate / 28 / 100, 3);
 
-        return effective.RoundUp(2);
+        var collectionAmount = amount * ratePerday * days;
+
+        if (currencyId == 1) return collectionAmount.RoundUp(-2);
+
+        return collectionAmount.RoundUp(2);
     }
 
 
@@ -52,15 +63,19 @@ internal class CalculatorExtensions
         return Math.Round(pmt!.Value, 2);
     }
 
-    internal static decimal CalcInterest(int? currencyId, decimal? amount, decimal? rate, int? numOfDay, int? calPeriod = 28)
+    internal static decimal CalcInterest(int? currencyId, decimal? amount, decimal? rate, int? numOfDay, int? period = 28)
     {
-        decimal ratePerDay = rate!.Value / calPeriod!.Value;
+        var r = rate ?? 0;
 
-        var totalPay = amount * (ratePerDay / 100) * numOfDay;
+        var p = period ?? 0;
+
+        decimal ratePerDay = r / p;
+
+        var totalPay = amount * (ratePerDay / 100) * numOfDay ?? 0;
 
         if (currencyId == 1) return totalPay.RoundUp(-2);
 
-        return Math.Round(totalPay!.Value, 2);
+        return Math.Round(totalPay, 2);
     }
 
     internal static decimal CalcPmt(int? currencyId, int? period, decimal? rate, decimal? amount)

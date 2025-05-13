@@ -20,6 +20,6 @@
         public string? Remark { get; set; }
         public decimal? TmpAmount { get; set; }
         public long? DelegateToStaffRefId { get; set; }
-        public List<CashManagementDetail>? CashManagementDetails { get; set; }
+        public List<CashManagementDetail>? CashManagementDetails { get; set; } = [];
     }
 }

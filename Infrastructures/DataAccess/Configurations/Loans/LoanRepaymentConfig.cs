@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructures.DataAccess.Configurations.Loans
 {
-    public class LoanRepaymentConfig : IEntityTypeConfiguration<LoanPayment>
+    public class LoanRepaymentConfig : IBaseEntityTypeConfigurations<LoanPayment>
     {
         public void Configure(EntityTypeBuilder<LoanPayment> builder)
         {
@@ -22,9 +22,15 @@ namespace Infrastructures.DataAccess.Configurations.Loans
             builder.Property(p => p.PenaltyAmount).HasPrecision(18, 2);
             builder.Property(p => p.SubTotal).HasPrecision(18, 2);
             builder.Property(p => p.OfficialReceiptNo).HasMaxLength(30);
+
             builder.HasMany(fk => fk.LoanRepaymentLines)
                     .WithOne()
                     .HasForeignKey(x => x.LoanPaymentRefId);
+
+            builder.HasOne(fk => fk.LoanTransaction)
+                    .WithOne(x => x.LoanPayment)
+                    .HasForeignKey<LoanPayment>(x => x.TransactionRefId)
+                    .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

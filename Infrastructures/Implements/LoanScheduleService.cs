@@ -135,9 +135,27 @@ namespace Infrastructures.Implements
         }
 
 
+        public async Task<Result<IEnumerable<VSchedule>>> GetLoanScheduleByIdAsync(string? loanId, int? branchId, ScheduleStatus status = ScheduleStatus.All)
+        {
+
+            var db = _connectionFactory.CreateConnection();
+
+            var parameters = new DynamicParameters();
+
+            parameters.Add("@LoanId", loanId);
+
+            parameters.Add("@BranchId", branchId);
+
+            parameters.Add("@ScheduleStatusId", (int)status);
+
+            var items =await db.QueryAsync<VSchedule>("spGetSchedulesByLoanId", parameters, commandType: CommandType.StoredProcedure);
+
+            return Result.Success(items);
+        }
 
 
 
+        //
 
         public async Task<Pager<VSchedule>> GetLoanSchedulesByPaymentDateAsync(DateTimeOffset? paymentDate, int? branchId, bool isIncludeLate = false, bool isLateOnly = false, QueryParam? param = null)
         {

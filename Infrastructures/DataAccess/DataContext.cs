@@ -23,6 +23,8 @@ using Domains.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using Domains.Models.Bases;
+using Microsoft.EntityFrameworkCore.Storage;
+using System.Data;
 
 namespace Infrastructures.DataAccess
 {
@@ -44,6 +46,12 @@ namespace Infrastructures.DataAccess
 
         }
 
+        public IDbTransaction StartTransaction()
+        {
+            var transaction = Database.BeginTransaction();
+
+            return transaction.GetDbTransaction();
+        }
         private void ProcessSaveChangedAsync()
         {
             foreach (var item in ChangeTracker.Entries()
