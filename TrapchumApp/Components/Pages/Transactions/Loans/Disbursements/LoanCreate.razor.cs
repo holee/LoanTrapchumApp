@@ -5,6 +5,7 @@ using Applications.Requests.Loans.Disbursements;
 using Applications.Responses.ViewModels.Branches;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Applications.Services.Loans;
+using Domains.Enumerations;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Forms;
@@ -74,6 +75,10 @@ public partial class LoanCreate
                 await GetLoanRequest();
 
                 model = req.ToLoanDtoCreate();
+
+                model.PayementSechuleModeId = 2;
+
+                model.ScheduleMode = PaymentSechuleMode.After;
             }
         }
         catch (Exception ex)
@@ -92,7 +97,7 @@ public partial class LoanCreate
 
         model.TermTypeId = 11;
 
-        model.LoanStatusRefId = 4;
+        model.LoanStatusRefId = (int)LoanStatuses.Active;
 
         model.LoanSubTypeRefId = 1;
 

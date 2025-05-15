@@ -1,6 +1,9 @@
 using Applications.Interfaces.Lists;
+using Applications.Responses.Paginations;
+using Applications.Responses.ViewModels.Holidays;
 using Domains.Models.Lists;
 using Microsoft.AspNetCore.Components;
+using Radzen;
 
 namespace TrapchumApp.Components.Pages.Lists.Holidays
 {
@@ -14,17 +17,26 @@ namespace TrapchumApp.Components.Pages.Lists.Holidays
         }
 
         protected string? searchField = string.Empty;
+
         protected int holiid;
+
         protected bool isActive = false;
+
         public bool IsPreviousSelected = false;
-        protected List<Holiday>? HolidaysList = [];
+
+        protected List<HolidayVm>? HolidaysList = [];
+
         int pageIndex = 0;
+
         int pageSize = 10;
+
         bool sortDescending = false;
-        string sortColumn = "Id";
+
+        string sortColumn = "HolidayDt";
+
         int counts = 0;
+
         public Holiday holidayvm { get; set; } = default!;
-        List<int> SelectedRow = [10, 20, 50, 100];
 
         protected async void PreviousSelectedChanged()
         {
@@ -40,16 +52,24 @@ namespace TrapchumApp.Components.Pages.Lists.Holidays
         protected async Task GetsHolidays(string? q = null)
         {
             isLoading = true;
+
             try
             {
-                var gridItems = await _holidayService.GetHolidays(pageIndex, pageSize, sortColumn, IsPreviousSelected, sortDescending, q);
+
+                var param = new QueryParam(pageIndex, pageSize, sortColumn, IsPreviousSelected, sortDescending, q);
+
+                var gridItems = await _holidayService.GetHolidays(param);
+
                 HolidaysList = gridItems.Items;
+
                 counts = gridItems.Count;
+
                 isLoading = false;
             }
             catch (Exception ex)
             {
                 HolidaysList = [];
+
                 NotificationService.Notify(Radzen.NotificationSeverity.Success, $"{ex.InnerException!.Message}");
 
             }
@@ -65,9 +85,10 @@ namespace TrapchumApp.Components.Pages.Lists.Holidays
         {
             await GetsHolidays(searchField);
         }
-        protected async void SearchEvent(ChangeEventArgs e)
+        protected async void SearchEvent(string e)
         {
-            searchField = e.Value!.ToString();
+            searchField = e ?? string.Empty;
+
             await GetsHolidays(searchField);
         }
 
@@ -79,7 +100,22 @@ namespace TrapchumApp.Components.Pages.Lists.Holidays
 
         protected async Task ShowEdit(long id)
         {
-            await DialogService.OpenAsync<UpdateHolidayModal>("New Holiday");
+            var param = new Dictionary<string, object?>
+            {
+                {"id", id}
+            };
+
+            var options=new DialogOptions()
+            {
+                ShowClose = true,
+                Width = "75rem",
+                Height = "35rempx",
+                Resizable = true,
+                Draggable = true,
+            };
+            await DialogService.OpenAsync<UpdateHolidayModal>("Holiday", parameters: param,options);
+
+            await GetsHolidays(searchField);
 
         }
         protected async Task Delete(long id)
@@ -112,26 +148,9 @@ namespace TrapchumApp.Components.Pages.Lists.Holidays
             else
             {
                 ContextMenuService.Close();
-                
+
                 NotificationService.Notify(Radzen.NotificationSeverity.Warning, "Delete was cancel");
             }
-        }
-        protected Task<bool> ValidateSuccess(bool success) => Task.FromResult(success);
-        protected async Task CreateSuccess(bool param)
-        {
-            if (param)
-            {
-                await OnInitializedAsync();
-            }
-            await InvokeAsync(StateHasChanged);
-        }
-        protected async Task UpdateSuccess(bool param)
-        {
-            if (param)
-            {
-                await OnInitializedAsync();
-            }
-            await InvokeAsync(StateHasChanged);
         }
         protected async Task OnCheckChanged(long id)
         {
@@ -144,9 +163,11 @@ namespace TrapchumApp.Components.Pages.Lists.Holidays
             //}
             //else
             //    NotificationService.Notify(Radzen.NotificationSeverity.Error, message.Message);
-            
-            
+
+
             await Task.CompletedTask;
         }
+
+
     }
 }

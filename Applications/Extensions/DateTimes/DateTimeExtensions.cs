@@ -26,10 +26,14 @@
             return value.DayOfWeek.ToString();
         }
 
+        public static string DayName(this DateTime dt)
+        {
+            return dt.DayOfWeek.ToString();
+        }
 
         public static int DayNum(this DateTime dt)
         {
-            return int.Parse(dt.ToString("yyyyMMdd"));    
+            return int.Parse(dt.ToString("yyyyMMdd"));
         }
 
         public static int DayNum(this DateTime? dt)
@@ -37,6 +41,21 @@
             var value = dt ?? DateTime.Now;
 
             return int.Parse(value.ToString("yyyyMMdd"));
+        }
+
+        public static int DayNum(this DateTimeOffset? dt)
+        {
+            var value = dt ?? DateTime.Now;
+
+            return int.Parse(value.ToString("yyyyMMdd"));
+        }
+        public static bool IsEqual(this DateTime? first, DateTime? second)
+        {
+            var _first = DateOnly.FromDateTime(first ?? DateTime.Now);
+
+            var _second = DateOnly.FromDateTime(second ?? DateTime.Now);
+
+            return _first.CompareTo(_second)==0;
         }
     }
 }

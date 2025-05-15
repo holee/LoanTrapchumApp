@@ -11,9 +11,6 @@ namespace Applications.Calculations
 
     public sealed class Calculators
     {
-        int? _repaymentModeId;
-
-        int? _currencyId;
 
         static LoanDtoCreate? _parameter;
 
@@ -48,14 +45,18 @@ namespace Applications.Calculations
 
         }
 
-        public LoanBuilder Build(LoanInfo e)
-        {
-            return new(_currencyId, e.PayEvery, _repaymentModeId, e.CollectionFeeModeId, e.InstallmentTypeId, e.CollectionFeeRate, e.FirstPayment, e.StartDate);
-        }
-
         private LoanBuilder Build(LoanDtoCreate e)
         {
             return new(e);
         }
     }
 }
+
+
+//public LoanBuilder Build(LoanInfo e)
+//{
+//    return new(_currencyId, e.PayEvery, _repaymentModeId, e.CollectionFeeModeId, e.InstallmentTypeId, e.CollectionFeeRate, e.FirstPayment, e.StartDate);
+//}
+//int? _repaymentModeId;
+
+//int? _currencyId;

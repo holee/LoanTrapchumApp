@@ -1,10 +1,11 @@
 ﻿@using Applications.Responses.ViewModels.Loans.Requests
+@using TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests.Links
 <PageDropDown PageSizeChanged="PageChanged"
               OnTextChanged="FilterTextChanged"
               ShowSearchBox="true">
     <LeftChildContent>
         <AuthorizeView Policy="@RequestsPolicies.Request">
-            <Authorized>            
+            <Authorized>
                 <RadzenLink class="rz-button rz-button-sm rz-primary" Path="@createRequestUrl" Text="Request" Icon="add" />
             </Authorized>
         </AuthorizeView>

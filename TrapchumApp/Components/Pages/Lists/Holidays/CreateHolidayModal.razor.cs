@@ -1,8 +1,15 @@
+using Applications.Extensions.DateTimes;
 using Applications.Extensions.mappers;
 using Applications.Requests.Lists.Holidays;
 using Applications.Responses.Lists.Holidays;
+using Applications.Responses.ViewModels.Holidays;
 using Applications.Services.Lists;
+using Domains.Models.Lists;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
+using Radzen;
+using System.Security.Cryptography;
+using System.Threading.Tasks;
 namespace TrapchumApp.Components.Pages.Lists.Holidays
 {
     public partial class CreateHolidayModal
@@ -16,8 +23,10 @@ namespace TrapchumApp.Components.Pages.Lists.Holidays
         }
 
         private List<HolidayCreateDto> model = new List<HolidayCreateDto>();
+
         private HolidayCreateDto modelDTO = new();
-        private IEnumerable<HolidayDto> listvm = new List<HolidayDto>();
+
+        private IEnumerable<HolidayVm> listvm = [];
 
         DateTime currentdt = DateTime.Now;
         bool IsMultiYear = false;
@@ -38,55 +47,10 @@ namespace TrapchumApp.Components.Pages.Lists.Holidays
             StateHasChanged();
             await base.OnInitializedAsync();
         }
-        protected override async Task OnParametersSetAsync()
+
+        private void SelectedDateChanged(DateTime? arg)
         {
-
-            await base.OnParametersSetAsync();
-        }
-        void MultiYear()
-        {
-
-            if (IsMultiYear == true)
-            {
-                IsDisible = false;
-            }
-            else
-            {
-                IsDisible = true;
-                return;
-            }
-
-        }
-        private void SelectedDateChanged()
-        {
-            modelDTO.Status = true;
-
-            if (listvm.Any())
-            {
-
-                var hol = listvm!.Select(x => new HolidayCreateDto
-                {
-                    HolidayName = x.HolidayName,
-                    Status = x.Status,
-                    Description = x.Description,
-                    Id = x.Id
-                }).FirstOrDefault(x => x.HolidayName!.Value.Date == SelectedDate!.Value.Date);
-
-                if (hol == null)
-                {
-                    modelDTO = new();
-                }
-                else
-                {
-                    modelDTO = hol;
-                }
-                StateHasChanged();
-            }
-            else
-            {
-                listvm = [];
-                modelDTO.Description = "";
-            }
+            
 
         }
         protected async Task FormValidSubmit()
@@ -94,41 +58,31 @@ namespace TrapchumApp.Components.Pages.Lists.Holidays
             try
             {
                 visibled = true;
-                if (IsMultiYear == true)
-                {
-                    if (endYear > 20)
-                    {
-                        NotificationService.Notify(Radzen.NotificationSeverity.Warning, "Over Year", "CreateNewUser Multi-Year support between 1 to 20 years");
-                        return;
-                    }
-                    Year = SelectedDate!.Value;
-                    for (int i = 1; i <= endYear; i++)
-                    {
-                        Year = Year.AddYears(1);
-                        Years!.Add(Year);
-                        modelDTO!.HolidayName = Year;
-                        var ex = await _holidayService.CreateHoliday(modelDTO);
 
-                    }
-                    IsMultiYear = false;
-                    endYear = null;
-                    IsDisible = true;
+                modelDTO!.HolidayDt = SelectedDate;
 
-                }
-                modelDTO!.HolidayName = SelectedDate;
-                var rsp = await _holidayService.CreateHoliday(modelDTO);
-                if (rsp.IsSuccess == true)
+                modelDTO.HolidayName = SelectedDate.DayName();
+
+                modelDTO.HolidayNum = SelectedDate.DayNum();
+
+                var rsp = await _holidayService.CreateOrUpdateHoliday(modelDTO);
+
+                if (rsp.IsSuccess)
                 {
 
-                    await GetHolidays(modelDTO.HolidayName);
-                    NotificationService.Notify(Radzen.NotificationSeverity.Success, rsp.Data);
+                    await GetHolidays(modelDTO.HolidayDt);
+
+                    NotificationService.Notify(Radzen.NotificationSeverity.Success, "Holiday were added.");
+
                     modelDTO = new();
-                    visibled = false;
+
                 }
                 else
                 {
                     NotificationService.Notify(Radzen.NotificationSeverity.Error, rsp.ErrMessage);
+
                     modelDTO = new();
+
                     visibled = false;
 
                 }
@@ -147,15 +101,21 @@ namespace TrapchumApp.Components.Pages.Lists.Holidays
             try
             {
                 var rsp = await _holidayService.GetHolidays(dt);
+
                 if (rsp.Any())
                 {
-                    listvm = rsp.Maps<HolidayDto>();
+                    listvm = rsp;
                 }
+                else
+                {
+                    listvm = [];
+                }
+
+                //StateHasChanged();
 
             }
             catch (Exception e)
             {
-                listvm = new List<HolidayDto>();
                 Console.WriteLine(e.Message);
             }
         }
@@ -163,7 +123,7 @@ namespace TrapchumApp.Components.Pages.Lists.Holidays
         {
             var confitm = await DialogService!.Confirm("Holiday deleted will not be able to recover, would you like to continue?",
                 "Delete Holiday",
-                new Radzen.ConfirmOptions
+                options: new Radzen.ConfirmOptions
                 {
                     CancelButtonText = "Cancel",
                     OkButtonText = "OK"
@@ -177,11 +137,11 @@ namespace TrapchumApp.Components.Pages.Lists.Holidays
                     if (deleteResponse.IsSuccess)
                     {
                         await GetHolidays(SelectedDate);
-                        NotificationService.Notify(Radzen.NotificationSeverity.Success, deleteResponse.Data);
+                        NotificationService.Notify(NotificationSeverity.Success, deleteResponse.Data);
                     }
                     else
                     {
-                        NotificationService.Notify(Radzen.NotificationSeverity.Error, "Can not delete");
+                        NotificationService.Notify(NotificationSeverity.Error, "Can not delete");
                     }
                     StateHasChanged();
 
@@ -196,37 +156,41 @@ namespace TrapchumApp.Components.Pages.Lists.Holidays
 
 
         [Parameter] public EventCallback Closed { get; set; }
-        void DateChangedEvt(DateTime? d)
-        {
-            Console.WriteLine(d!.Value);
-        }
+
         private async Task CloseTab()
         {
             await Closed.InvokeAsync();
         }
 
-        void OnSelectRow(HolidayDto holiday)
-        {
-            if (holiday != null)
-            {
-                SelectedDate = holiday.HolidayName;
-                modelDTO.Id = holiday.Id;
-                modelDTO.HolidayName = holiday.HolidayName;
-                modelDTO.Description = holiday.Description;
-                modelDTO.Status = holiday.Status;
-            }
-        }
         async void ChangedDate(DateTime dt)
         {
-            Console.WriteLine("Change date...:" + dt.ToLongDateString());
-            if (dt.Month != currentdt.Month)
-            {
-                await GetHolidays(dt);
-                modelDTO = new();
-                currentdt = dt;
-            }
+            await GetHolidays(dt);
             StateHasChanged();
+        }
+        private void RowSelectedChanged(HolidayVm arg)
+        {
+            if (arg != null)
+            {
+                modelDTO.Id = arg.Id;
+                SelectedDate = arg!.HolidayDt;
+                modelDTO.HolidayName = arg!.HolidayName;
+                modelDTO.Description = arg!.Description;
+                modelDTO.Status = arg.Status;
+            }
+        }
+        private async Task ShowMultipleModal(MouseEventArgs args)
+        {
+            var options = new DialogOptions()
+            {
+                Draggable = true
+            };
 
+            bool? result = await DialogService.OpenAsync<CreateMultipleModal>("Create Multiple Holidays", options: options);
+
+            if (result is not null && result == true)
+            {
+                await GetHolidays(SelectedDate);
+            }
         }
     }
 }

@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 
 namespace Domains.Enumerations
 {
-    public enum PayementSechuleMode
+    public enum PaymentSechuleMode
     {
         [Description("Pay Before payment schedule")]
-        Before,
+        Before = 1,
         [Description("Pay After payment schedule")]
-        After,
+        After = 2,
         [Description("Skip payment schedule")]
-        Skip    
+        Skip = 3
     }
 }

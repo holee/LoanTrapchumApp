@@ -46,6 +46,7 @@ public sealed class VLoanRequests
     public int? CollectionFeeModeId { get; set; } = 1;
     public string? CollectionFeeModeName { get; set; } = string.Empty;
     public string? AprovedBy { get; set; } = string.Empty;
+    //public int PayementSechuleModeId { get; set; } = 2;
     [NotMapped] public IEnumerable<VLoanRequestGuarantors> Guarantors { get; set; } = [];
     [NotMapped] public IEnumerable<VLoanRequestCollateralLines> Collaterals { get; set; } = [];
     [NotMapped] public IEnumerable<VLoanRequestsDocuments> Documents { get; set; } = [];

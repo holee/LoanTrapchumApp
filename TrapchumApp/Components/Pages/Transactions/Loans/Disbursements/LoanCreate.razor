@@ -1,4 +1,5 @@
 ﻿@page "/Loan/Disbursement/CreateNew"
+@using Domains.Enumerations
 @using TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 <PageTitle>New Loan Disbursment</PageTitle>
 <SectionContent SectionName="Progressbar">
@@ -129,10 +130,25 @@
                                             </td>
                                         </tr>
                                         <tr>
+                                            <th style="background-color:#F1F1F4" class="w-25">Changed Payment Scedule to</th>
+                                            <td>
+                                                <RadzenRadioButtonList @bind-Value="model!.PayementSechuleModeId"
+                                                                       TValue="int"
+                                                                       Change="OnScheduleChanged">
+                                                    <Items>
+                                                        <RadzenRadioButtonListItem Text="Before" Value="1" />
+                                                        <RadzenRadioButtonListItem Text="After" Value="2" />
+                                                        <RadzenRadioButtonListItem Text="Skip" Value="3" />
+                                                    </Items>
+                                                </RadzenRadioButtonList>
+                                            </td>
+                                        </tr>
+                                        <tr>
                                             <th style="background-color:#F1F1F4" class="w-25">First Payment</th>
                                             <td>
-                                                <input type="hidden" @bind="model!.FirstPaymentDate" />
-                                                @model?.FirstPaymentDate
+                                                <RadzenDatePicker DateFormat="dd/MM/yyyy"
+                                                                  @bind-Value:format="yyyy/MM/dd"
+                                                                  @bind-Value="model!.FirstPaymentDate" />
                                             </td>
                                         </tr>
                                         <tr>
@@ -194,4 +210,17 @@
     </Card>
 </Containers>
 
+@code {
 
+    void OnScheduleChanged(int arg)
+    {
+        model.ScheduleMode = arg switch
+        {
+            1 => PaymentSechuleMode.Before,
+            2 => PaymentSechuleMode.After,
+            _ => PaymentSechuleMode.Skip
+        };
+        Console.WriteLine(arg);
+    }
+
+}

@@ -160,8 +160,8 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 
             if (confirm == false) return;
 
-           
-            if (doc is not null &&  doc.Id == 0)
+
+            if (doc is not null && doc.Id == 0)
             {
                 Documents.Remove(doc);
 
@@ -171,8 +171,8 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 
                 return;
             }
-       
-        
+
+
         }
 
         async Task AddGuarantors()
@@ -263,7 +263,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 
 
 
-            if (CollateralLines.Any() &&(c.Id is not null || c.Id == 0))
+            if (CollateralLines.Any() && (c.Id is not null || c.Id == 0))
             {
                 CollateralLines.Remove(c);
 
@@ -323,13 +323,13 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 
         async Task SetCustomer(string? customerId)
         {
-            if(string.IsNullOrEmpty(customerId))
+            if (string.IsNullOrEmpty(customerId))
             {
                 isCustomerSelected = false;
 
                 return;
 
-            }   
+            }
             CustomerId = customerId;
             model.CustomerRefId = customerId;
             await GetCustomers(CustomerId, 1);
@@ -425,7 +425,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
             if (confirm == false)
             {
                 NotificationService.Notify(NotificationSeverity.Info, "Loan request was cancel.");
-                
+
                 return;
             }
 
@@ -434,7 +434,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 
         protected async Task HandleCreateRequest()
         {
-            if (editForm.EditContext?.Validate()==false)
+            if (editForm.EditContext?.Validate() == false)
             {
                 return;
             }
@@ -516,7 +516,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
             }
         }
 
-        
+
 
         void PrincipleValueChanged(decimal? principle)
         {
@@ -552,7 +552,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
             period += 2;
             var fut = cur.AddMonths(period);
             var hols = await _holidayService.GetHolidays(false, cur, fut);
-            Holidays = hols.Select(x => x.HolidayDt).ToList();
+            Holidays = hols.Select(x => x.HolidayDt!.Value).ToList();
         }
 
         void ChangedDate()

@@ -84,7 +84,7 @@ namespace Applications.Calculations
                 AdminFeeAmount = req.AdminFeeAmount,
                 Remark = req.Remark,
                 BranchName = req.BranchName,
-                ApprovedBy = req.AprovedBy
+                ApprovedBy = req.AprovedBy,
             };
         }
 

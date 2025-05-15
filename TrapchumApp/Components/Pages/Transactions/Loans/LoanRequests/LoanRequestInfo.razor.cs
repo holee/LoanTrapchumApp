@@ -171,7 +171,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
             period += 2;
             var fut = cur.AddMonths(period);
             var hols = await _holidayService.GetHolidays(false, cur, fut);
-            Holidays = hols.Select(x => x.HolidayDt).ToList();
+            Holidays = hols.Select(x => x.HolidayDt!.Value).ToList();
         }
 
         void ChangedDate()

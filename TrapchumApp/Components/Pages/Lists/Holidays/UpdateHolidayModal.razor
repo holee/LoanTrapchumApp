@@ -1,64 +1,92 @@
-﻿<RadzenStack Orientation="Orientation.Horizontal"
-             AlignItems="AlignItems.Center">
-    <RadzenStack Orientation="Orientation.Horizontal" class="w-100">
-        <RadzenDatePicker Inline
-                          DateFormat="dd/MM/yyyy"
-                          Placeholder="select holiday date"
-                          @bind-Value="selectedDates"
-                          @bind-Value:format="yyyy/MM/dd"
-                          @bind-Value:after="SelectedDateChanged">
-        </RadzenDatePicker>
-    </RadzenStack>
-    <RadzenStack Orientation="Orientation.Horizontal" class="w-100">
-        <RadzenRow AlignItems="AlignItems.Center">
-            <RadzenColumn Size="2">
-                <RadzenLabel>Description</RadzenLabel>
+﻿@using Applications.Responses.ViewModels.Holidays
+<RadzenFieldset>
+    <HeaderTemplate>
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25">
+            <RadzenIcon Icon="event" /> <span>New Holiday</span>
+        </RadzenStack>
+    </HeaderTemplate>
+    <ChildContent>
+        <RadzenRow>
+            <RadzenColumn Size="6" SizeSM="12" SizeMD="6">
+                <RadzenStack Orientation="Orientation.Horizontal" class="w-100">
+                    <RadzenDatePicker Inline
+                                      TValue="DateTime?"
+                                      AllowInput="true"
+                                      CurrentDateChanged="ChangedDate"
+                                      DateFormat="dd/MM/yyyy"
+                                      Placeholder="select holiday date"
+                                      @bind-Value="model.HolidayDt"
+                                      Change="SelectedDateChanged"
+                                      @bind-Value:format="yyyy/MM/dd">
+                        <FooterTemplate>
+                            <RadzenButton Icon="today" Click=@(args => model.HolidayDt = DateTime.Now) Text="Today" Style="width: 100%;" class="rz-my-1" />
+                        </FooterTemplate>
+                    </RadzenDatePicker>
+                </RadzenStack>
             </RadzenColumn>
-            <RadzenColumn Size="9">
-                <RadzenTextArea Rows="10"
-                                Placeholder="Descriptions"
-                                @bind-Value="model.Description" />
-            </RadzenColumn>
-            <RadzenColumn Size="1">
-                <div class="rz-p-12 rz-text-align-center">
-                    <RadzenCheckBox @bind-Value="model.Status" Name="IsActive" />
-                    <RadzenLabel Text="IsActive" Component="IsActive" Style="margin-left: 8px; vertical-align: middle;" />
-                </div>
+            <RadzenColumn Size="6" SizeMD="6" SizeSM="12">
+                <RadzenRow class="rz-mb-2" AlignItems="AlignItems.Center">
+                    <RadzenColumn Size="2">
+                        Description
+                    </RadzenColumn>
+                    <RadzenColumn Size="10">
+                        <RadzenTextArea Placeholder="Enter event or holiday title..."
+                                        @bind-Value="model.Description"
+                                        class="h-100 w-100 form-control"
+                                        aria-label="TextArea with placeholder" />
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
+                    <RadzenColumn Size="2">
+                        <RadzenLabel Text="Is Active" Component="IsActive"
+                                     Style="margin-right: 12px; vertical-align: middle;" />
+                    </RadzenColumn>
+                    <RadzenColumn Size="10">
+                        <RadzenCheckBox @bind-Value="model.Status" Name="IsActive" />
+                    </RadzenColumn>
+                </RadzenRow>
             </RadzenColumn>
         </RadzenRow>
-    </RadzenStack>
-</RadzenStack>
-<RadzenStack Orientation="Orientation.Horizontal"
-             AlignItems="AlignItems.Center">
-    <table class="table table-sm">
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Date</th>
-                <th>Descriptions</th>
-                <th>IsActive</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in listvm.OrderBy(e => e.HolidayName))
-            {
-                var index = listvm.OrderBy(e => e.HolidayName).ToList().IndexOf(item) + 1;
-                <tr>
-                    <td>@index</td>
-                    <td>@item.HolidayName!.Value.ToString("dd/MM/yyyy")</td>
-                    <td>@item.Description</td>
-                    <td>
+        <RadzenDataGrid Data="listvm"
+                        Responsive="true"
+                        TItem="HolidayVm"
+                        RowSelect="RowSelectedChanged"
+                        Density="Density.Compact">
+            <Columns>
+                <RadzenDataGridColumn Property="Id"
+                                      Context="h"
+                                      Title="#"
+                                      Width="50px">
+                    <Template>
+                        @(listvm?.ToList().IndexOf(h) + 1)
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Property="@nameof(HolidayVm.HolidayDt)"
+                                      Title="Date"
+                                      Context="h"
+                                      Width="100px">
+                    <Template>
+                        @h.HolidayDt.DayFirst()
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Property="@nameof(HolidayVm.HolidayName)"
+                                      Title="Holiday" />
+                <RadzenDataGridColumn Property="@nameof(HolidayVm.Description)"
+                                      Title="Description" />
+                <RadzenDataGridColumn Property="@nameof(HolidayVm.Status)"
+                                      Context="h"
+                                      Title="Status">
+                    <Template>
                         <RadzenCheckBox TValue="bool?"
-                                        @bind-Value="item.Status" Disabled>
-                        </RadzenCheckBox>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-</RadzenStack>
-
+                                        @bind-Value="h.Status" Disabled />
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
+    </ChildContent>
+</RadzenFieldset>
 <RadzenStack AlignItems="AlignItems.Center"
+             Orientation="Orientation.Horizontal"
              JustifyContent="JustifyContent.End">
     <RadzenButton Text="Set"
                   Icon="add"
@@ -66,7 +94,7 @@
                   Click="FormValidSubmit"
                   Size="ButtonSize.Small" />
     <RadzenButton Text="Close"
-                  Icon="BtnIconType.None"
+                  Icon="close"
                   ButtonStyle="ButtonStyle.Danger"
                   Click="Close"
                   Size="ButtonSize.Small" />

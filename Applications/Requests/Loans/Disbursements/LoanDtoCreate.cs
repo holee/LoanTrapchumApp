@@ -1,5 +1,6 @@
 ﻿using Applications.Calculations;
 using Applications.Enumerations;
+using Applications.Responses.ViewModels.Holidays;
 using Domains.Enumerations;
 
 namespace Applications.Requests.Loans.Disbursements;
@@ -45,8 +46,9 @@ public sealed class LoanDtoCreate : CalculatorBase, ICalculatorBase
     public string? InstallmentName { get; set; } = string.Empty;
     public string? ApprovedBy { get; set; } = string.Empty;
     public decimal? PaidAmount => Principle - AdminFeeAmount;
-    public PayementSechuleMode SechuleMode { get; set; } = PayementSechuleMode.Before;
-    public List<DateTimeOffset>? Holidays { get; set; } = [];
+    public int PayementSechuleModeId { get; set; } = 2;
+    public PaymentSechuleMode ScheduleMode { get; set; } = PaymentSechuleMode.After;
+    public List<HolidayVm> Holidays { get; set; } = [];
     public List<LoanScheduleDtoCreate>? LoanSchedules { get; set; } = [];
 }
 
