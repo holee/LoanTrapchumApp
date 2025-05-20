@@ -56,7 +56,7 @@ namespace Applications.Services.Loans
 
         public async Task<Result<string>> CreateLoanRequestAsync(LoanRequestDtoCreate request)
         {
-            var req = request.Adapt<LoanRequest>();
+            var req = request.MapToLoanRequest(); 
 
             return await reqService.CreateLoanRequestAsync(req);
         }
@@ -106,6 +106,11 @@ namespace Applications.Services.Loans
             return await reqService.GetLoanRequestDocumentAsync(loanRequestId, branchId);
         }
 
+
+       
+
+
+
         public async Task<Result<IEnumerable<VLoanRequestGuarantors>>> GetLoanRequestGuarantorAsync(int? branchId,
             string? loanRequestId, string? customerId)
         {
@@ -118,8 +123,13 @@ namespace Applications.Services.Loans
             return await reqService.GetLoanRequestsAsync(userId, branchId, requestStatus, param);
         }
 
-        public async Task<Result<VLoanRequests>> GetLoanRequestAsync(int? branchId, string? customerId,
-            string? loanRequestId, bool v)
+        public async Task<Pager<VLoanRequests>> GetLoanRequestsAsync(string? userId,bool candisburse, int? branchId,RequestStatus requestStatus, QueryParam param)
+        {
+            return await reqService.GetLoanRequestsAsync(userId,candisburse, branchId, requestStatus, param);
+        }
+
+
+        public async Task<Result<VLoanRequests>> GetLoanRequestAsync(int? branchId, string? customerId,string? loanRequestId, bool v)
         {
             return await reqService.GetLoanRequestAsync(branchId, customerId, loanRequestId, v);
         }

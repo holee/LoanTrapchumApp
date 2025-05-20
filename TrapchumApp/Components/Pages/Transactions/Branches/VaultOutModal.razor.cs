@@ -17,19 +17,31 @@ namespace TrapchumApp.Components.Pages.Transactions.Branches
 {
     public partial class VaultOutModal(ICurrencyServiceImpl curService, ICashVaultServiceImpl caVaultService)
     {
-        [Parameter, EditorRequired] public int BranchId { get; set; }
-        [Parameter, EditorRequired] public string? UserId { get; set; }
+        [Parameter] public int BranchId { get; set; }
+        [Parameter] public string? UserId { get; set; }
+
         private IEnumerable<VCashVaults>? vCashVaults;
+
         private IEnumerable<ViewModelCurrencyNotes>? CurrencyNotes;
+
         private VCashVaults? vCashVault;
+
         private TransactionCashVaultDtoCreate transaction = new TransactionCashVaultDtoCreate();
+
         private List<CashManagementDetailDtoCreate> cashMDList = [];
+
         private List<CashManagementDetailDtoCreate> NewCashMDVOut = [];
+
         private BranchDto? branch = new BranchDto();
+
         private int? CurrencyId;
+
         private decimal? totalAmount = 0;
+
         private decimal? total = 0;
+
         private string? messageAlert;
+
         private bool visible = false;
         private IEnumerable<CurrencyResponse>? CurrencyList { get; set; }
         private CurrencyResponse? Currency { get; set; } = new CurrencyResponse();
@@ -41,6 +53,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Branches
             if (rsp.IsSuccess)
             {
                 CurrencyList = rsp.Data;
+
                 Currency = rsp.Data?.FirstOrDefault();
             }
 
@@ -52,7 +65,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Branches
             {
                 CurrencyNotes = resultResp ?? [];
 
-                OnGetCurrencyNote();
+                OnGetCurrencyNote(CurrencyId);
             }
 
             await base.OnInitializedAsync();
@@ -67,29 +80,39 @@ namespace TrapchumApp.Components.Pages.Transactions.Branches
                 if (arg is not null)
                 {
                     var id = ((CurrencyResponse)arg)?.CurrencyId;
-                    Currency = ((CurrencyResponse)arg);
-                    OnGetCurrencyNote();
+
+                    CurrencyId= id;
+
+                    Currency = ((CurrencyResponse)arg!);
+
+                    OnGetCurrencyNote(id);
+
                     totalAmount = 0;
+
                     total = 0;
+
                     var currency = await curService.GetCurrencyById(id);
+
                     sp = Currency?.CurrencyCode == "KHR" ? "#,#0" : "#,#0.00";
                 }
 
                 NewCashMDVOut = new();
+
                 StateHasChanged();
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
+
                 NotificationService.Notify(NotificationSeverity.Error, e.Message);
             }
         }
 
-        private void OnGetCurrencyNote()
+        private void OnGetCurrencyNote(int? currencyId)
         {
             if (CurrencyId.HasValue)
             {
-                cashMDList = CurrencyNotes!.Where(x => x.CurrencyRefId == CurrencyId).Select(x =>
+                cashMDList = CurrencyNotes!.Where(x => x.CurrencyRefId == currencyId).Select(x =>
                     new CashManagementDetailDtoCreate
                     {
                         BranchRefId = BranchId,
@@ -100,9 +123,10 @@ namespace TrapchumApp.Components.Pages.Transactions.Branches
                         CurrencyNoteValue = (int?)x.CurrencyValue,
                         QOnHand = x.Quantity == null ? 0 : x.Quantity,
                         TotalValue = 0
-                    }).Where(x => x.QOnHand > 0).ToList();
+                    }).ToList();
+                    //.Where(x => x.QOnHand > 0).ToList();
             }
-            //await InvokeAsync(StateHasChanged);
+            StateHasChanged();
         }
 
 
@@ -146,7 +170,6 @@ namespace TrapchumApp.Components.Pages.Transactions.Branches
                         if (confirm)
                         {
                             //Transaction 
-                            transaction.TranCode = Guid.NewGuid();
                             transaction.TranTypeRefId = 78;
                             transaction.TransactionTypeName = "CashVault";
                             transaction.UserRefId = UserId;
@@ -162,7 +185,6 @@ namespace TrapchumApp.Components.Pages.Transactions.Branches
                             transaction.CashManagements.Add(new CashManagementDtoCreate
                             {
                                 BankRefId = branch?.BankRefId,
-                                //StaffRefId = UserId,
                                 CurrencyRefId = CurrencyId,
                                 BranchRefId = branch?.BranchId,
                                 Amount = totalAmount,
@@ -250,16 +272,21 @@ namespace TrapchumApp.Components.Pages.Transactions.Branches
                         if (confirm == true)
                         {
                             //Transaction 
-                            transaction.TranCode = Guid.NewGuid();
                             transaction.TranTypeRefId = 78;
+
                             transaction.TransactionTypeName = "CashVault";
+
                             transaction.UserRefId = UserId!;
 
                             //Cash vault
                             transaction.CashVault.BranchRefId = branch?.BranchId;
+
                             transaction.CashVault.BankRefId = branch?.BankRefId;
+
                             transaction.CashVault.UserRefId = UserId;
+
                             transaction.CashVault.CvStatusRefId = 8;
+
                             transaction.CashVault.CvDate = DateTime.Now;
 
                             //CashManagement 

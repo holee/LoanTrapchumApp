@@ -7,7 +7,7 @@ namespace Applications.Interfaces.Files
     {
         Task<Result<string>> RemovedFile(string? removedFile = null);
         Task<Result<string>> RemovedFile(long fileId, string filePath);
-        Task<Result<FileModel>> UploadFile(MultipartFormDataContent content);
+        //Task<Result<FileModel>> UploadFile(MultipartFormDataContent content);
         Task<Result<FileModel>> UploadFile(FileUploadModel model);
         Task<Result<FileModel>> UploadFile(StreamContent content);
         Task<Result<IEnumerable<FileModel>>> UploadFile(IEnumerable<FileUploadModel> model);

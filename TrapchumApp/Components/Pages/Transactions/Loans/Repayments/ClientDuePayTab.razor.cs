@@ -29,7 +29,6 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
         private List<VSchedule> ScheduleItems = [];
         private IList<VLoanDisbursments> SelectedLoans = [];
         protected IEnumerable<VBranchResponse> Branches = [];
-        protected IEnumerable<VSchedulePaid> PaidSchedules = [];
         protected string filterText = string.Empty;
         int counts = 0;
         int pageSize = 10;

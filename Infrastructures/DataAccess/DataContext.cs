@@ -25,6 +25,7 @@ using System.Reflection;
 using Domains.Models.Bases;
 using Microsoft.EntityFrameworkCore.Storage;
 using System.Data;
+using Applications.Responses.ViewModels.Loans.Requests;
 
 namespace Infrastructures.DataAccess
 {
@@ -219,5 +220,6 @@ namespace Infrastructures.DataAccess
         public DbSet<VEmployeeList> EmployeeLists => Set<VEmployeeList>();
         public DbSet<VCustomerList> CustomerLists => Set<VCustomerList>();
         public DbSet<VCreditAgent> VCreditAgents => Set<VCreditAgent>();
+        public DbSet<VLoanRequests> VLoanRequests => Set<VLoanRequests>();
     }
 }

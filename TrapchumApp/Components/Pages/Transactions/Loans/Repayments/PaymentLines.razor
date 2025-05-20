@@ -5,7 +5,6 @@
                     Density="Density.Compact"
                     GridLines="DataGridGridLines.Both"
                     AllowAlternatingRows="true"
-                    Style="--rz-grid-header-background-color:var(--rz-base-200);cursor:pointer;"
                     Data="LoanRepaymentLines">
         <Columns>
             <RadzenDataGridColumn Width="2rem"
@@ -99,10 +98,10 @@
     </RadzenDataGrid>
 </RadzenStack>
 @code {
-    [Parameter] public List<LoanRepaymentLineDtoCreate> LoanRepaymentLines { get; set; } = [];
-    [Parameter] public EventCallback<LoanRepaymentLineDtoCreate> Remove { get; set; }
-    RadzenDataGrid<LoanRepaymentLineDtoCreate> gridLoanPaymentLines = default!;
-    async Task OnRemoveAdded(LoanRepaymentLineDtoCreate c)
+    [Parameter] public List<LoanPaymentLineDtoCreate> LoanRepaymentLines { get; set; } = [];
+    [Parameter] public EventCallback<LoanPaymentLineDtoCreate> Remove { get; set; }
+    RadzenDataGrid<LoanPaymentLineDtoCreate> gridLoanPaymentLines = default!;
+    async Task OnRemoveAdded(LoanPaymentLineDtoCreate c)
     {
         await Remove.InvokeAsync(c);
         await gridLoanPaymentLines.Reload();

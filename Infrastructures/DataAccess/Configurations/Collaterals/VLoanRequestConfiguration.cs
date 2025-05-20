@@ -8,7 +8,7 @@ public class VLoanRequestConfiguration : IEntityTypeConfiguration<VLoanRequests>
 { 
     public void Configure(EntityTypeBuilder<VLoanRequests> builder)
     {
-        builder.ToView("VLoanReuests");
+        builder.ToView("VLoanRequests");
         builder.HasNoKey();
         builder.Property(x => x.AdminFeeAmount).HasPrecision(18, 3);
         builder.Property(x => x.RequestAmount).HasPrecision(18, 3);

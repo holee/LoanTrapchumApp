@@ -1,15 +1,13 @@
 using Applications.Calculations;
 using Applications.Extensions.NumberExtensions;
-using Applications.Interfaces.Loans;
 using Applications.Requests.Loans.Payments;
 using Applications.Requests.Transactions.ForiegnExchanges;
 using Applications.Requests.Transactions.LoanTransactions;
 using Applications.Responses.ViewModels.Currencies;
 using Applications.Responses.ViewModels.Settings;
+using Applications.Services.Loans;
 using Applications.Services.Settings;
 using Domains.Models.Loans;
-using Domains.Models.Transaction;
-using Mapster;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
@@ -20,8 +18,8 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
     {
         private readonly ISettingServiceImpl _settingService;
 
-        private readonly ILoanPaymentService _loanPaymentService;
-        public PaymentModal(ISettingServiceImpl settingService, ILoanPaymentService loanPaymentService)
+        private readonly ILoanPaymentServiceImpl _loanPaymentService;
+        public PaymentModal(ISettingServiceImpl settingService, ILoanPaymentServiceImpl loanPaymentService)
         {
             _settingService = settingService;
             _loanPaymentService = loanPaymentService;
@@ -35,19 +33,9 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
         [Parameter] public string CustomerName { get; set; } = string.Empty;
         [Parameter] public string ReceiptNo { get; set; } = string.Empty;
         [Parameter] public PaymentCreate PaymentCreate { get; set; } = new();
-        [Parameter] public List<LoanRepaymentLineDtoCreate> LoanRepaymentLines { get; set; } = [];
+        [Parameter] public List<LoanPaymentLineDtoCreate> LoanRepaymentLines { get; set; } = [];
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
-
-        VCurrenciesList? selectedCurrency;
-
-        TrxForeignExchangeDtoCreate model = new TrxForeignExchangeDtoCreate();
-
-        ForeignExchangeDtoCreate c = new ForeignExchangeDtoCreate();
-        LoanRepaymentDtoCreate LoanRepayment { get; set; } = new();
-
-        IEnumerable<VCurrenciesList> Currencies = [];
-
-        IEnumerable<AppSettingVms> settings = [];
+        LoanPaymentDtoCreate LoanRepayment { get; set; } = new();
 
         decimal exchangeRate = 0;
         decimal? buyAmount = 0;
@@ -64,34 +52,18 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
         decimal? sellingRate = 0;
         decimal? spotRate = 0;
         bool isBusy = false;
-        protected override async Task OnInitializedAsync()
-        {
-            //var currencyResponse = await _curService.GetCurrencyAsync(1);
-
-            //if (currencyResponse.IsSuccess)
-            //{
-            //    selectedCurrency = currencyResponse.Data!;
-            //    //buyingRate = currencyResponse.Data!.BuyingRate;
-            //    //sellingRate = currencyResponse.Data!.SellingRate;
-            //    //spotRate = currencyResponse.Data!.SpotRate;
-            //}
-
-
-            await base.OnInitializedAsync();
-        }
-
 
         void CloseModal()
         {
             DialogService.Close(false);
         }
 
-
         async Task OnSaveChanges()
         {
             var confirmOption = new ConfirmOptions
             {
                 CancelButtonText = "Cancel",
+
                 OkButtonText = "Yes",
             };
             try
@@ -104,7 +76,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
 
                     return;
                 }
-                var tran = new LoanTransactionDtoCreate
+                var tran = new LoanPaymentTransactionDtoCreate
                 {
                     TransactionsId = $"trx-{Guid.CreateVersion7()}",
                     TransactionDate = DateTime.Now,
@@ -122,7 +94,6 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
                 LoanRepayment.SubTotal = LoanRepaymentLines.Total();
                 LoanRepayment.OfficialReceiptNo = ReceiptNo;
                 LoanRepayment.LoanRepaymentLines = LoanRepaymentLines;
-                LoanRepayment.LoanTransaction = tran;
                 LoanRepayment.BranchRefId = BranchId;
                 LoanRepayment.UserRefId = UserId;
                 LoanRepayment.CurrencyRefId = CurrencyId;
@@ -149,9 +120,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
 
                 if (confirmPayment == false) return;
 
-                var trx = tran.ToLoanTransction();
-
-                var result = await _loanPaymentService.RecievePayment(trx);
+                var result = await _loanPaymentService.RecievePayment(tran,BranchId);
 
                 if (result.IsSuccess)
                 {

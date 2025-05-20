@@ -22,6 +22,7 @@ namespace Domains.Models.Loans
         public DateTime? Created { get; set; } = DateTime.Now;
 
         public LoanTransaction? LoanTransaction { get; set; }
+
         public ICollection<LoanPaymentLine>? LoanRepaymentLines { get; set; } = [];
     }
 }

@@ -1,17 +1,22 @@
 ﻿using System.Data;
+using Applications.Constants.Tables;
 using Applications.Enumerations;
 using Applications.Interfaces.Loans;
 using Applications.Requests.Loans.CreditAgents;
 using Applications.Requests.Loans.Disbursements;
 using Applications.Responses;
 using Applications.Responses.Paginations;
+using Applications.Responses.ViewModels.Customers;
 using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Payments;
+using Applications.Responses.ViewModels.Loans.Requests;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Dapper;
 using Domains.Models.Lists.CreditAgents;
+using Domains.Models.Lists.Customers;
 using Domains.Models.Loans;
 using Domains.Models.Transaction;
+using Infrastructures.Constants.Procedures;
 using Infrastructures.DataAccess;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
@@ -19,27 +24,21 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructures.Implements
 {
-    public class LoanService : ILoanService
+    public class LoanService(
+        DataContext context,
+        ILogger<LoanService> logger,
+        IDapperConnectionFactory connectionFactory)
+        : ILoanService
     {
-        private readonly ApplicationDbContext _context;
-        private readonly ILogger<LoanService> _logger;
-        private readonly IDapperConnectionFactory _connectionFactory;
-        public LoanService(ApplicationDbContext context, ILogger<LoanService> logger, IDapperConnectionFactory connectionFactory)
-        {
-            _context = context;
-            _logger = logger;
-            _connectionFactory = connectionFactory;
-        }
         public async Task<Result<string>> CreateLoanAsync(LoanDtoCreate req)
         {
-
-            using var trans = _context.Database.BeginTransaction();
+            await using var trans = await context.Database.BeginTransactionAsync();
 
             try
             {
-                var customerInActiveLoan = await _context.Customers
-                                                .AsNoTracking()
-                                                .FirstOrDefaultAsync(c => c.CustomerId == req.CustomerRefId && c.IsLoanActive == true);
+                var customerInActiveLoan = await context.Customers
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(c => c.CustomerId == req.CustomerRefId && c.IsLoanActive == true);
 
                 if (customerInActiveLoan is not null)
                 {
@@ -50,7 +49,7 @@ namespace Infrastructures.Implements
                 {
                     TransactionsId = $"trx-{Guid.CreateVersion7()}",
                     UserRefId = req.UserRefId,
-                    TransactionTypeName = "Loan Disbursment",
+                    TransactionTypeName = "Loan Disbursement",
                     TranTypeRefId = 19,
                     IsActive = true
                 };
@@ -78,7 +77,6 @@ namespace Infrastructures.Implements
                     Balance = 0,
 
                     EmployeeRefId = req.UserRefId
-
                 };
 
                 tranx.CashManagements.Add(cashMgt);
@@ -87,133 +85,219 @@ namespace Infrastructures.Implements
 
                 model.LoanTransaction = tranx;
 
-                _context.LoanDisbursments.Add(model);
+                context.LoanDisbursments.Add(model);
 
-                await _context.SaveChangesAsync();
+                await context.SaveChangesAsync();
 
-                await _context.Customers.Where(x => x.CustomerId == req.CustomerRefId)
-                                        .ExecuteUpdateAsync(p => p.SetProperty(x => x.IsLoanActive, true));
+                await context.Customers.Where(x => x.CustomerId == req.CustomerRefId)
+                    .ExecuteUpdateAsync(p => p.SetProperty(x => x.IsLoanActive, true));
 
-                await _context.LoanRequests.Where(x => x.LoanRequestId == req.LoanRequestId &&
-                                                       x.CustomerRefId == req.CustomerRefId)
-                                           .ExecuteUpdateAsync(prop => prop.SetProperty(p => p.LoanRequestStatusRefId, (int)RequestStatus.Completed)
-                                                                           .SetProperty(p => p.ModifiedDt, DateTime.UtcNow));
+                await context.LoanRequests.Where(x => x.LoanRequestId == req.LoanRequestId &&
+                                                      x.CustomerRefId == req.CustomerRefId)
+                    .ExecuteUpdateAsync(prop => prop
+                        .SetProperty(p => p.LoanRequestStatusRefId, (int)RequestStatus.Completed)
+                        .SetProperty(p => p.ModifiedDt, DateTime.UtcNow));
 
-                trans.Commit();
+                await trans.CommitAsync();
 
                 return Result.Success(new string("New Loan Disbursement was added."));
             }
             catch (DbUpdateException ex)
             {
-                trans.Rollback();
+                await trans.RollbackAsync();
 
                 return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}"));
-
             }
         }
+
+
+        public async Task<Result<bool>> CreateLoanAsync(LoanDisbursment req)
+        {
+            await using var trans = await context.Database.BeginTransactionAsync();
+
+            try
+            {
+                if (await CustomerAlreadyRequest(req.CustomerRefId))
+                {
+                    return Result.Failure<bool>(ErrorResponse.Conflict("This Customer Is Already Requested"));
+                }
+
+                if (await CustomerInActiveLoan(req.CustomerRefId))
+                {
+                    return Result.Failure<bool>(ErrorResponse.Conflict("This Customer Is Already disburse"));
+                }
+
+                context.LoanDisbursments.Add(req);
+
+                await context.SaveChangesAsync();
+
+                await context.Customers.Where(x => x.CustomerId == req.CustomerRefId)
+                    .ExecuteUpdateAsync(p => p.SetProperty(x => x.IsLoanActive, true));
+
+                await context.LoanRequests.Where(x => x.LoanRequestId == req.LoanRequestId &&
+                                                      x.CustomerRefId == req.CustomerRefId)
+                    .ExecuteUpdateAsync(prop => prop
+                        .SetProperty(p => p.LoanRequestStatusRefId, (int)RequestStatus.Completed)
+                        .SetProperty(p => p.ModifiedDt, DateTime.UtcNow));
+
+                await trans.CommitAsync();
+
+                return Result.Success<bool>(true);
+            }
+            catch (DbUpdateException ex)
+            {
+                await trans.RollbackAsync();
+
+                return Result.Failure<bool>(ErrorResponse.ServerError($"{ex.Message}"));
+            }
+        }
+
+        private async Task<bool> CustomerAlreadyRequest(string? customerId)
+        {
+            if (string.IsNullOrEmpty(customerId)) return false;
+
+            using var db = await connectionFactory.CreateConnectionAsync();
+
+            var parameter = new DynamicParameters();
+
+            parameter.Add("@CustomerId", customerId);
+
+            var sql =
+                $@"SELECT LoanRequestId,RequestAmount,CustomerId FROM VLoanRequests WHERE CustomerId=@CustomerId AND StatusId NOT IN (2,3,4)";
+
+            var existingLoanRequest = await db.QueryAsync<VLoanRequests>(sql, parameter);
+
+            return existingLoanRequest.Any();
+        }
+
+        private async Task<bool> CustomerInActiveLoan(string? customerId)
+        {
+            if (string.IsNullOrEmpty(customerId)) return false;
+
+            using var db = await connectionFactory.CreateConnectionAsync();
+
+            var parameter = new DynamicParameters();
+
+            parameter.Add("@CustomerId", customerId);
+
+            parameter.Add("@IsLoanActive", true);
+            var sql =@"SELECT 
+                            CustomerId,
+                            FirstName,
+                            LastName,
+                            IsLoanActive 
+                     FROM VCustomerList 
+                     WHERE CustomerId=@CustomerId AND IsLoanActive=@IsLoanActive";
+            var customerInActiveLoan = await db.QueryAsync<VCustomerList>(sql, parameter);
+            return customerInActiveLoan.Any();
+        }
+
+
         public async Task<Result<string>> DeleteAsync(string? loanId, int? branchId)
         {
-            var loan = _context.LoanDisbursments.Where(x => x.LoanId == loanId && x.BranchRefId == branchId).FirstOrDefault();
+            var loan = context.LoanDisbursments.Where(x => x.LoanId == loanId && x.BranchRefId == branchId)
+                .FirstOrDefault();
 
             if (loan is null)
             {
                 return Result.Failure<string>(ErrorResponse.NotFound("No Loan Data."));
             }
 
-            _context.LoanDisbursments.Remove(loan);
+            context.LoanDisbursments.Remove(loan);
 
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
 
             return Result.Success(new string("data wad delete."));
         }
+
         public async Task<Result<string>> UpdateAsync(LoanDisbursment disbursement)
         {
-            _context.LoanDisbursments.Update(disbursement);
+            context.LoanDisbursments.Update(disbursement);
 
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
 
             return Result.Success(new string("New Loan Disbursement was added."));
         }
+
         public async Task<Result<string>> ChangedCreditAgent(int? branchId, LoanChangedCaDtoCreate req)
         {
-
-            var exstingLoan = _context.LoanDisbursments.Where(x => x.LoanId == req.LoanRefId && x.BranchRefId == branchId && x.CreditAgentRefId == req.OldCreditAgentRefId);
+            var exstingLoan = context.LoanDisbursments.Where(x =>
+                x.LoanId == req.LoanRefId && x.BranchRefId == branchId &&
+                x.CreditAgentRefId == req.OldCreditAgentRefId);
 
             if (!exstingLoan.Any())
             {
                 return Result.Failure<string>(ErrorResponse.NotFound("No Loan Data found"));
             }
 
-            var trx = _context.Database.BeginTransaction();
+            var trx = context.Database.BeginTransaction();
 
             try
             {
                 var model = req.Adapt<LoanChangedCa>();
 
-                _context.LoanChangedCa.Add(model);
+                context.LoanChangedCa.Add(model);
 
-                await _context.SaveChangesAsync();
+                await context.SaveChangesAsync();
                 var editSeq = exstingLoan.First().EditSeq + 1;
-                _context.LoanDisbursments
-                        .Where(x => x.LoanId == req.LoanRefId &&
-                                    x.BranchRefId == branchId &&
-                                    x.CreditAgentRefId == req.OldCreditAgentRefId)
-                        .ExecuteUpdate(prop => prop.SetProperty(p => p.CreditAgentRefId, req.NewCreditAgentRefId)
-                                                   .SetProperty(p => p.ModifiedDt, DateTime.UtcNow)
-                                                   .SetProperty(p => p.EditSeq, editSeq));
+                context.LoanDisbursments
+                    .Where(x => x.LoanId == req.LoanRefId &&
+                                x.BranchRefId == branchId &&
+                                x.CreditAgentRefId == req.OldCreditAgentRefId)
+                    .ExecuteUpdate(prop => prop.SetProperty(p => p.CreditAgentRefId, req.NewCreditAgentRefId)
+                        .SetProperty(p => p.ModifiedDt, DateTime.UtcNow)
+                        .SetProperty(p => p.EditSeq, editSeq));
 
                 trx.Commit();
 
                 return Result.Success<string>(new("Loan has changed new credit agent."));
-
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, ex.InnerException!.Message);
+                logger.LogError(ex, ex.InnerException!.Message);
 
                 trx.Rollback();
 
                 return Result.Failure<string>(ErrorResponse.NotFound($"{ex.InnerException!.Message}"));
             }
         }
+
         public async Task<Result<string>> ChangedCreditAgents(int? branchId, List<LoanChangedCaDtoCreate> req)
         {
-            var trx = _context.Database.BeginTransaction();
+            var trx = context.Database.BeginTransaction();
             try
             {
                 var model = req.Adapt<IEnumerable<LoanChangedCa>>();
 
-                _context.LoanChangedCa.AddRange(model);
+                context.LoanChangedCa.AddRange(model);
 
-                await _context.SaveChangesAsync();
+                await context.SaveChangesAsync();
 
                 var oldCreditAgentId = req.First().OldCreditAgentRefId;
 
                 var newCreditAgentRefId = req.First().NewCreditAgentRefId;
 
-                _context.LoanDisbursments
-                        .Where(x => x.BranchRefId == branchId && x.CreditAgentRefId == oldCreditAgentId)
-                        .ExecuteUpdate(prop => prop.SetProperty(p => p.CreditAgentRefId, newCreditAgentRefId)
-                                                   .SetProperty(p => p.ModifiedDt, DateTime.UtcNow));
+                context.LoanDisbursments
+                    .Where(x => x.BranchRefId == branchId && x.CreditAgentRefId == oldCreditAgentId)
+                    .ExecuteUpdate(prop => prop.SetProperty(p => p.CreditAgentRefId, newCreditAgentRefId)
+                        .SetProperty(p => p.ModifiedDt, DateTime.UtcNow));
 
                 trx.Commit();
 
                 return Result.Success<string>(new("Loan has changed new credit agent."));
-
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, ex.InnerException!.Message);
+                logger.LogError(ex, ex.InnerException!.Message);
                 trx.Rollback();
                 return Result.Failure<string>(ErrorResponse.NotFound($"{ex.InnerException!.Message}"));
             }
-
-
         }
-        public async Task<Pager<VLoanDisbursments>> GetLoansAsync(int? branchId, string? creditAgentId, LoanStatuses status = LoanStatuses.Active, QueryParam? param = null)
-        {
 
-            using var db = _connectionFactory.CreateConnection();
+        public async Task<Pager<VLoanDisbursments>> GetLoansAsync(int? branchId, string? creditAgentId,
+            LoanStatuses status = LoanStatuses.Active, QueryParam? param = null)
+        {
+            using var db = connectionFactory.CreateConnection();
 
             var queries = await db.QueryAsync<VLoanDisbursments>("spGetLoansByBranchId", new
             {
@@ -232,48 +316,44 @@ namespace Infrastructures.Implements
             var items = queries.ToList();
 
             return new Pager<VLoanDisbursments>(items, counts);
-
-
         }
-        public async Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus status,bool include=false)
-        {
 
-            using var db = _connectionFactory.CreateConnection();
+        public async Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId,
+            ScheduleStatus status, bool include = false)
+        {
+            using var db = connectionFactory.CreateConnection();
 
             if (include)
             {
-
                 var jointDictionary = new Dictionary<string, VLoanDisbursments>();
 
-                var queries = await db.QueryAsync<VLoanDisbursments, VSchedule, VLoanDisbursments>("spGetLoanById",
-
-                         (disbursment, schedule) =>
-                         {
-                             if (jointDictionary.TryGetValue(disbursment.LoanId!, out var existingDis))
-                             {
-                                 disbursment = existingDis!;
-                             }
-                             else
-                             {
-                                 jointDictionary.Add(disbursment.LoanId!, disbursment);
-                             }
-
-                             disbursment.Schedules?.Add(schedule);
-
-                             return disbursment;
-                         },
-                        param: new
+                var queries = await db.QueryAsync<VLoanDisbursments, VSchedule, VLoanDisbursments>(ProcedureConstant.GetLoanById,
+                    (disbursment, schedule) =>
+                    {
+                        if (jointDictionary.TryGetValue(disbursment.LoanId!, out var existingDis))
                         {
-                            @LoanId = loanId,
+                            disbursment = existingDis!;
+                        }
+                        else
+                        {
+                            jointDictionary.Add(disbursment.LoanId!, disbursment);
+                        }
 
-                            @BranchId = branchId,
+                        disbursment.Schedules?.Add(schedule);
 
-                            @ScheduleStatusId = (int)status,
+                        return disbursment;
+                    },
+                    param: new
+                    {
+                        @LoanId = loanId,
 
-                            @Include = include
+                        @BranchId = branchId,
 
-                        }, splitOn: "LoanScheduleId"
-                        , commandType: CommandType.StoredProcedure);
+                        @ScheduleStatusId = (int)status,
+
+                        @Include = include
+                    }, splitOn: "LoanScheduleId"
+                    , commandType: CommandType.StoredProcedure);
 
                 var item = queries.FirstOrDefault();
 
@@ -285,26 +365,89 @@ namespace Infrastructures.Implements
                 return Result.Success(item);
             }
 
-                var result = await db.QueryFirstOrDefaultAsync<VLoanDisbursments>("spGetLoanById",
-                        param: new
-                        {
-                            @LoanId = loanId,
-
-                            @BranchId = branchId,
-
-                            @ScheduleStatusId = (int)status,
-
-                            @Include= include
-
-                        }, commandType: CommandType.StoredProcedure); 
-
-
-                if (result is null)
+            var result = await db.QueryFirstOrDefaultAsync<VLoanDisbursments>("spGetLoanById",
+                param: new
                 {
-                    return Result.Failure<VLoanDisbursments>(ErrorResponse.NotFound("No Data was found."));
+                    @LoanId = loanId,
+
+                    @BranchId = branchId,
+
+                    @ScheduleStatusId = (int)status,
+
+                    @Include = include
+                }, commandType: CommandType.StoredProcedure);
+
+
+            if (result is null)
+            {
+                return Result.Failure<VLoanDisbursments>(ErrorResponse.NotFound("No Data was found."));
+            }
+
+            return Result.Success(result);
+        }
+
+     public async Task<Result<VLoanDisbursments>> GetLoanWithSchedulesByIdAsync(string? loanId,int? branchId,ScheduleStatus status,bool include = false)
+        {
+            using var db = connectionFactory.CreateConnection(); 
+
+            var parameters = new
+            {
+                LoanId = loanId,
+                BranchId = branchId,
+                ScheduleStatusId = (int)status,
+                Include = include
+            };
+
+            if (include)
+            {
+                var loanMap = new Dictionary<string, VLoanDisbursments>();
+
+                var queries = await db.QueryAsync<VLoanDisbursments, VSchedule, VLoanDisbursments>("spGetLoanById" ,
+                    (disbursment, schedule) =>
+                    {
+                        if (!loanMap.TryGetValue(disbursment.LoanId!, out var existing))
+                        {
+                            disbursment.Schedules = new List<VSchedule>();
+
+                            loanMap[disbursment.LoanId!] = disbursment;
+
+                            existing = disbursment;
+                        }
+
+                        if (schedule != null)
+                        {
+                            existing.Schedules?.Add(schedule);
+                        }
+
+                        return existing;
+                    },
+                    param: parameters,
+                    splitOn: "LoanScheduleId",
+                    commandType: CommandType.StoredProcedure
+                );
+
+                var resultItem = loanMap.Values.FirstOrDefault();
+
+                if (resultItem is null)
+                {
+                    return Result.Failure<VLoanDisbursments>(ErrorResponse.NotFound("No data was found."));
                 }
 
-                return Result.Success(result);
+                return Result.Success(resultItem);
+            }
+
+            var result = await db.QueryFirstOrDefaultAsync<VLoanDisbursments>(
+                "spGetLoanById",
+                param: parameters,
+                commandType: CommandType.StoredProcedure);
+
+            if (result is null)
+            {
+                return Result.Failure<VLoanDisbursments>(
+                    ErrorResponse.NotFound("No data was found."));
+            }
+
+            return Result.Success(result);
         }
 
 
@@ -455,4 +598,3 @@ namespace Infrastructures.Implements
 ////{
 
 ////}
-

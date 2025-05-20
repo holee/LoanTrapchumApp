@@ -1,6 +1,9 @@
 ﻿@using Applications.Enumerations
 @using Applications.Responses.ViewModels.Loans.Requests
-@if (LoanRequest?.StatusId == (int)RequestStatus.Requested || LoanRequest?.StatusId == (int)RequestStatus.Verified)
+@using System.Security.Claims
+@using Infrastructures.Authorizations
+@if (canApproved && (LoanRequest?.StatusId == (int)RequestStatus.Requested ||
+                     LoanRequest?.StatusId == (int)RequestStatus.Verified))
 {
     <NavLink href="@loanRequestUrl">
         <RadzenBadge Variant="Variant.Filled"
@@ -22,17 +25,23 @@ else
     [Parameter] public VLoanRequests? LoanRequest { get; set; }
     [Parameter] public string? UserId { get; set; }
     [Parameter] public int? BranchId { get; set; }
+    [Parameter] public ClaimsPrincipal? User { get; set; } = default!;
     string loanRequestUrl = "";
     string loanRequestDetailsUrl = "";
+    bool canApproved = false;
 
-    protected override void OnParametersSet()
+    protected override async Task OnInitializedAsync()
     {
+        if (User is not null)
+        {
+            canApproved = (await _authorizeService.AuthorizeAsync(User, LoanRequest, new SameUserApprovedRequirement())).Succeeded;
+        }
 
-        //"App/Loan/{BranchId}/Branches/Request/Details?UserId={UserId}&CustomerId={LoanRequest?.CustomerId}&LoanRequestId={LoanRequest?.LoanRequestId}")
         loanRequestUrl = $"App/Loan/{BranchId}/Branches/Request/Details?UserId={UserId}&CustomerId={LoanRequest?.CustomerId}&LoanRequestId={LoanRequest?.LoanRequestId}";
-        //loanRequestDetailsUrl = $"/Loan/Request/{LoanRequest?.LoanRequestId}/Details?CustomerId={LoanRequest?.CustomerId}&BranchId={BranchId}&UserId={UserId}";
+
         loanRequestDetailsUrl = $"App/Loan/{BranchId}/Branches/Request/Details?UserId={UserId}&CustomerId={LoanRequest?.CustomerId}&LoanRequestId={LoanRequest?.LoanRequestId}";
-        base.OnParametersSet();
+
+        await base.OnInitializedAsync();
     }
 
 }

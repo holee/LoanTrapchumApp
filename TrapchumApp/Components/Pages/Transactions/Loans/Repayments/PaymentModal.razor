@@ -174,29 +174,3 @@
                   Click="@CloseModal">
     </RadzenButton>
 </RadzenStack>
-
-@* <RadzenColumn Size="4">
-            <RadzenNumeric TValue="decimal?"
-                           @bind-Value="PaymentCreate.ChangeKhrAmount"
-                           TextAlign="TextAlign.End"
-                           Disabled
-                           Style="cursor:not-allowed;height:var(--input-text-sm)"
-                           class="w-100"
-                           Min="0"
-                           Format="#,##0.00"
-                           ShowUpDown="false">
-            </RadzenNumeric>
-        </RadzenColumn> *@
-@*  <RadzenColumn Size="4">
-            <RadzenNumeric TValue="decimal?"
-                           ShowUpDown="false"
-                           Format="#,##0.00"
-                           @bind-Value="PaymentCreate.RecieveKhrAmount"
-                           @oninput="ReceivePaymentKHRChanged"
-                           Disabled="@(CurrencyId==2)"
-                           Min="0"
-                           Style="height:var(--input-text-sm)"
-                           onclick="this.querySelector('.rz-numeric-input').select()"
-                           class="w-100"
-                           TextAlign="TextAlign.End" />
-        </RadzenColumn> *@

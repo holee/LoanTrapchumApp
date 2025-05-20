@@ -1,4 +1,5 @@
 using Applications.Responses.ViewModels.Loans.Payments;
+using Applications.Responses.ViewModels.Loans.Schedules;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 
@@ -6,11 +7,12 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Disbursements
 {
     public partial class PaidSchedules
     {
-        [Parameter] public IEnumerable<VSchedulePaid>? Repayments { get; set; } = [];
         [Parameter] public int? CurrencyId { get; set; } = 1;
         [Parameter] public bool ShowCloseButton { get; set; } = false;
         [Parameter] public EventCallback CloseButton { get; set; }
-        async void RowSelectedChanged(VSchedulePaid s)
+
+        private IEnumerable<VSchedule> _schedules = [];
+        async void RowSelectedChanged(VSchedule s)
         {
             var para = new Dictionary<string, object?>
         {

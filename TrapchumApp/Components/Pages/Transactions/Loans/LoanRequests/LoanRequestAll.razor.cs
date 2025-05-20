@@ -8,26 +8,23 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Radzen;
+using System.Security.Claims;
 using TrapchumApp.Components.Shared;
 
 namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 {
-    public partial class LoanRequestAll
+    public partial class LoanRequestAll(ILoanRequestServiceImpl loanRequestService)
     {
-        private readonly ILoanRequestServiceImpl _requestService;
-
-        public LoanRequestAll(ILoanRequestServiceImpl loanRequestService)
-        {
-            _requestService = loanRequestService;
-        }
+        private readonly ILoanRequestServiceImpl _requestService = loanRequestService;
 
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
-        [CascadingParameter] private CascadingAppState bState { get; set; }
+        [CascadingParameter] private CascadingAppState bState { get; set; } = default!;
         [Parameter] public int BranchId { get; set; }
         [Parameter] public string? UserId { get; set; }
         bool CanRequestLoan { get; set; } = false;
         bool CanDisburseLoan { get; set; } = false;
         bool CanAprovedLoan { get; set; } = false;
+        ClaimsPrincipal? _user;
 
         IEnumerable<VLoanRequests> LoanRequests = [];
 
@@ -47,15 +44,16 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
         {
             createRequestUrl = $"/App/Request/{BranchId}/Branches/{UserId}/CreateNew";
             var auth = await AuthenticationState;
-            CanRequestLoan = (await _authorizeService.AuthorizeAsync(auth.User, RequestsPolicies.CanCreate()))
+            _user = auth.User;
+            CanRequestLoan = (await _authorizeService.AuthorizeAsync(_user, RequestsPolicies.CanCreate()))
                 .Succeeded;
-            CanDisburseLoan = (await _authorizeService.AuthorizeAsync(auth.User, RequestsPolicies.CanDisburseLoan()))
+            CanDisburseLoan = (await _authorizeService.AuthorizeAsync(_user, RequestsPolicies.CanDisburseLoan()))
                 .Succeeded;
-            CanAprovedLoan = (await _authorizeService.AuthorizeAsync(auth.User, RequestsPolicies.CanAproveRequest()))
+            CanAprovedLoan = (await _authorizeService.AuthorizeAsync(_user, RequestsPolicies.CanAproveRequest()))
                 .Succeeded;
 
-            await bState.CheckedCanDisbursemnt(auth.User);
-            
+            await bState.CheckedCanDisbursemnt(_user);
+
             await GetLoanRequestAsync(UserId);
 
             await base.OnInitializedAsync();
@@ -90,7 +88,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
             {
                 userId = string.Empty;
             }
-            var rsp = await _requestService.GetLoanRequestsAsync(userId, BranchId, RequestStatus.All, param);
+            var rsp = await _requestService.GetLoanRequestsAsync(userId, CanDisburseLoan, BranchId, RequestStatus.All, param);
 
             LoanRequests = rsp.Items;
 

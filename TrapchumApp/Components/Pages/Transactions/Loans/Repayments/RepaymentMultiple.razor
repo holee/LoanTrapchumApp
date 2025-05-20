@@ -2,9 +2,6 @@
 @* @attribute [Authorize(Policy=@Policies.AllowMultiplePayment) ]*@
 <PageTitle>Repayment</PageTitle>
 <div class="container-fluid">
-    <SectionContent SectionName="BranchName">
-        @_selectedBranchResponse.BranchName
-    </SectionContent>
     <CustomerLoanInformation LoanSchedule="LoanSchedule" />
     <Card>
         <CardHeader>
@@ -65,7 +62,7 @@
                                           Sortable="false">
                         <Template>
                             <small>
-                                <strong>@c.PaymentDate!.Value!.ToString("dd/MM/yyyy")</strong>
+                                <strong>@c.PaymentDate.DayFirst()</strong>
                                 <br />
                                 <em>@c.PaymentDate!.Value!.DayOfWeek</em>
                             </small>

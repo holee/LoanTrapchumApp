@@ -7,8 +7,8 @@ namespace Applications.Services.Transactions.Branches
 {
     public interface ICashVaultServiceImpl
     {
-        Task<Result> CreateCashManagementAsync(LoanTransactionDtoCreate cashTrsansaction);
-        Task<Result> CreateCashVaultAsync(LoanTransactionDtoCreate transaction);
+        Task<Result> CreateCashManagementAsync(LoanPaymentTransactionDtoCreate cashTrsansaction);
+        Task<Result> CreateCashVaultAsync(LoanPaymentTransactionDtoCreate transaction);
         
         //TransactionCashVaultDtoCreate
         Task<Result<string>> CreateCashVaultAsync(TransactionCashVaultDtoCreate transaction);

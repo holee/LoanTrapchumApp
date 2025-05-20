@@ -2,89 +2,96 @@
 @using Applications.Responses.ViewModels.Currencies
 <PageTitle>Cash vault</PageTitle>
 <Containers Fluid>
-    <RadzenFieldset Text="Cash Balance In Vault On Hand">
-        <RadzenStack Orientation="Orientation.Horizontal"
-                     AlignItems="AlignItems.Center"
-                     class="rz-mb-1"
-                     JustifyContent="JustifyContent.End">
-            @if (canVaultOut)
-            {
-                <RadzenButton Icon="lock_open"
-                              Click="OnCashVaultOut"
-                              Size="ButtonSize.Small"
-                              Text="Vault Out" ButtonStyle="ButtonStyle.Success" />
-            }
-            @if (canVaultIn)
-            {
-                <RadzenButton ButtonStyle="ButtonStyle.Danger"
-                              Disabled="IsDisabled"
-                              Size="ButtonSize.Small"
-                              Icon="lock"
-                              Text="Vault In"
-                              Click="OnCashVaultIn" />
-            }
-        </RadzenStack>
-        <RadzenDataGrid TItem="VCashVaults"
-                        Responsive="true"
-                        Density="Density.Compact"
-                        AllowAlternatingRows
-                        Style="--rz-grid-cell-line-height:1.3rem;"
-                        Data="vCashVaults">
-            <Columns>
-                <RadzenDataGridColumn Title="Currency Code"
-                                      Property="@nameof(VCashVaults.CurrencyCode)"
-                                      Width="6rem"
-                                      Context="c">
-                    <Template>
-                        @c.CurrencyCode
-                    </Template>
-                </RadzenDataGridColumn>
-                <RadzenDataGridColumn Title="Start Cash"
-                                      Property="@nameof(VCashVaults.CurrencyCode)"
-                                      Width="6rem"
-                                      TextAlign="TextAlign.Right"
-                                      Context="c">
-                    <Template>
-                        @c.StartCash.Format(CurrencyId)
-                    </Template>
-                </RadzenDataGridColumn>
-                <RadzenDataGridColumn Title="Vault Out"
-                                      Property="@nameof(VCashVaults.CurrencyCode)"
-                                      Width="6rem"
-                                      TextAlign="TextAlign.Right"
-                                      Context="c">
-                    <Template>
-                        @c.VaultIn.Format(CurrencyId)
-                    </Template>
-                </RadzenDataGridColumn>
-                <RadzenDataGridColumn Title="Vault In"
-                                      Property="@nameof(VCashVaults.CurrencyCode)"
-                                      Width="6rem"
-                                      TextAlign="TextAlign.Right"
-                                      Context="c">
-                    <Template>
-                        @c.VaultOut.Format(CurrencyId)
-                    </Template>
-                </RadzenDataGridColumn>
-                <RadzenDataGridColumn Title="Vault Balance"
-                                      Property="@nameof(VCashVaults.CurrencyCode)"
-                                      Width="6rem"
-                                      TextAlign="TextAlign.Right"
-                                      Context="c">
-                    <Template>
-                        @c.VaultBalance.Format(c.CurrencyRefId)
-                    </Template>
-                </RadzenDataGridColumn>
-                <RadzenDataGridColumn Title="User Balance"
-                                      Property="@nameof(VCashVaults.CurrencyCode)"
-                                      Width="6rem"
-                                      TextAlign="TextAlign.Right"
-                                      Context="c">
-                    <Template>
-                        @c.UserBalance.Format(c.CurrencyRefId)
-                    </Template>
-                </RadzenDataGridColumn>
-            </Columns>
-        </RadzenDataGrid>
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 AlignItems="AlignItems.Center"
+                 class="rz-mb-1"
+                 JustifyContent="JustifyContent.End">
+        @if (bState.VaultOut)
+        {
+            <RadzenButton Icon="lock_open"
+                          Click="OnCashVaultOut"
+                          Size="ButtonSize.Small"
+                          Text="Vault Out" ButtonStyle="ButtonStyle.Success" />
+        }
+        @if (bState.VaultIn)
+        {
+            <RadzenButton ButtonStyle="ButtonStyle.Danger"
+                          Disabled="IsDisabled"
+                          Size="ButtonSize.Small"
+                          Icon="lock"
+                          Text="Vault In"
+                          Click="OnCashVaultIn" />
+        }
+    </RadzenStack>
+    <RadzenFieldset>
+        <HeaderTemplate>
+            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
+                <RadzenIcon Icon="money_bag" /><b>Cash Balance In Vault On Hand</b>
+            </RadzenStack>
+        </HeaderTemplate>
+        <ChildContent>       
+            <RadzenDataGrid TItem="VCashVaults"
+                            Responsive="true"
+                            Density="Density.Compact"
+                            AllowAlternatingRows
+                            Style="--rz-grid-cell-line-height:1.3rem;"
+                            Data="vCashVaults">
+                <Columns>
+                    <RadzenDataGridColumn Title="Currency Code"
+                                          Property="@nameof(VCashVaults.CurrencyCode)"
+                                          Width="6rem"
+                                          Context="c">
+                        <Template>
+                            @c.CurrencyCode
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Title="Start Cash"
+                                          Property="@nameof(VCashVaults.CurrencyCode)"
+                                          Width="6rem"
+                                          TextAlign="TextAlign.Right"
+                                          Context="c">
+                        <Template>
+                            @c.StartCash.Format(CurrencyId)
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Title="Vault Out"
+                                          Property="@nameof(VCashVaults.CurrencyCode)"
+                                          Width="6rem"
+                                          TextAlign="TextAlign.Right"
+                                          Context="c">
+                        <Template>
+                            @c.VaultIn.Format(CurrencyId)
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Title="Vault In"
+                                          Property="@nameof(VCashVaults.CurrencyCode)"
+                                          Width="6rem"
+                                          TextAlign="TextAlign.Right"
+                                          Context="c">
+                        <Template>
+                            @c.VaultOut.Format(CurrencyId)
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Title="Vault Balance"
+                                          Property="@nameof(VCashVaults.CurrencyCode)"
+                                          Width="6rem"
+                                          TextAlign="TextAlign.Right"
+                                          Context="c">
+                        <Template>
+                            @c.VaultBalance.Format(c.CurrencyRefId)
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Title="User Balance"
+                                          Property="@nameof(VCashVaults.CurrencyCode)"
+                                          Width="6rem"
+                                          TextAlign="TextAlign.Right"
+                                          Context="c">
+                        <Template>
+                            @c.UserBalance.Format(c.CurrencyRefId)
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </RadzenDataGrid>
+        </ChildContent>
     </RadzenFieldset>
 </Containers>

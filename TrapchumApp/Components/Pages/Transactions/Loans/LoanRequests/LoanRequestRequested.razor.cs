@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Radzen;
+using System.Security.Claims;
 
 namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 {
@@ -33,13 +34,20 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
         bool isIncludeInactive = false;
         bool isLoading = false;
         int statusId = 1;
+        ClaimsPrincipal? _user;
+        bool isAllowApproved = false;
         protected override async Task OnInitializedAsync()
         {
 
             var auth = await AuthenticationState;
-            CanRequestLoan = (await _authorizeService.AuthorizeAsync(auth.User, RequestsPolicies.CanCreate())).Succeeded;
-            CanDisburseLoan = (await _authorizeService.AuthorizeAsync(auth.User, RequestsPolicies.CanDisburseLoan())).Succeeded;
-            CanAprovedLoan = (await _authorizeService.AuthorizeAsync(auth.User, RequestsPolicies.CanAproveRequest())).Succeeded;
+
+            _user=auth.User;
+           
+            CanRequestLoan = (await _authorizeService.AuthorizeAsync(_user, RequestsPolicies.CanCreate())).Succeeded;
+            
+            CanDisburseLoan = (await _authorizeService.AuthorizeAsync(_user, RequestsPolicies.CanDisburseLoan())).Succeeded;
+            
+            CanAprovedLoan = (await _authorizeService.AuthorizeAsync(_user, RequestsPolicies.CanAproveRequest())).Succeeded;
 
             await GetLoanRequestAsync(UserId);
 
@@ -89,7 +97,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 
             var param = new QueryParam(pageIndex, pageSize, sortColumn, sortDescending, isIncludeInactive, filtertext);
 
-            var rsp = await _loanRequestService.GetLoanRequestsAsync(userId, BranchId, RequestStatus.Requested, param);
+            var rsp = await _loanRequestService.GetLoanRequestsAsync(userId,false, BranchId, RequestStatus.Requested, param);
 
             LoanRequests = rsp.Items;
 
@@ -101,97 +109,9 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
         }
 
 
-        async Task GetRequestedLoansAsync(string? userId)
-        {
-            isLoading = true;
-
-            var param = new QueryParam(pageIndex, pageSize, sortColumn, sortDescending, isIncludeInactive, filtertext);
-
-            var rsp = await _loanRequestService.GetLoanRequestsAsync(userId, BranchId, RequestStatus.Requested, param);
-
-
-            LoanRequests = rsp.Items;
-
-            counts = rsp.Count;
-
-            isLoading = false;
-
-            StateHasChanged();
-        }
-
-
-        async Task GetCompletedLoanRequestAsync(string? userId)
-        {
-            isLoading = true;
-
-            var param = new QueryParam(pageIndex, pageSize, sortColumn, sortDescending, isIncludeInactive, filtertext);
-
-            var rsp = await _loanRequestService.GetLoanRequestsAsync(userId, BranchId, RequestStatus.Completed, param);
-
-
-            LoanRequests = rsp.Items;
-
-            counts = rsp.Count;
-
-
-            isLoading = false;
-
-            StateHasChanged();
-        }
-
-
-        async Task GetApproveLoanRequestAsync(string? userId)
-        {
-            isLoading = true;
-
-            var param = new QueryParam(pageIndex, pageSize, sortColumn, sortDescending, isIncludeInactive, filtertext);
-
-            var rsp = await _loanRequestService.GetLoanRequestsAsync(userId, BranchId, RequestStatus.Aprove, param);
-
-
-            LoanRequests = rsp.Items;
-
-            counts = rsp.Count;
-
-
-            isLoading = false;
-
-            StateHasChanged();
-        }
-
-
-        async Task GetVerrfiedLoanRequestAsync(string? userId)
-        {
-            isLoading = true;
-
-            var param = new QueryParam(pageIndex, pageSize, sortColumn, sortDescending, isIncludeInactive, filtertext);
-
-            var rsp = await _loanRequestService.GetLoanRequestsAsync(userId, BranchId, RequestStatus.Verified, param);
-
-
-            LoanRequests = rsp.Items;
-
-            counts = rsp.Count;
-
-
-            isLoading = false;
-
-            StateHasChanged();
-        }
 
 
 
-
-
-        void GotoLoanRequest()
-        {
-            createRequestUrl = new Dictionary<string, object?>
-        {
-            {"BranchId",BranchId},
-            {"UserId",UserId}
-        }.AddQueryString($"/Loan/0/Customer/0/Request");
-            NavigationManager.NavigateTo(createRequestUrl);
-        }
 
         async void PageChanged(int size)
         {
@@ -242,3 +162,93 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 
     }
 }
+
+
+
+
+//async Task GetVerrfiedLoanRequestAsync(string? userId)
+//{
+//    isLoading = true;
+
+//    var param = new QueryParam(pageIndex, pageSize, sortColumn, sortDescending, isIncludeInactive, filtertext);
+
+//    var rsp = await _loanRequestService.GetLoanRequestsAsync(userId, BranchId, RequestStatus.Verified, param);
+
+
+//    LoanRequests = rsp.Items;
+
+//    counts = rsp.Count;
+
+
+//    isLoading = false;
+
+//    StateHasChanged();
+//}
+
+
+//void GotoLoanRequest()
+//{
+//    createRequestUrl = new Dictionary<string, object?>
+//{
+//    {"BranchId",BranchId},
+//    {"UserId",UserId}
+//}.AddQueryString($"/Loan/0/Customer/0/Request");
+//    NavigationManager.NavigateTo(createRequestUrl);
+//}
+//async Task GetRequestedLoansAsync(string? userId)
+//{
+//    isLoading = true;
+
+//    var param = new QueryParam(pageIndex, pageSize, sortColumn, sortDescending, isIncludeInactive, filtertext);
+
+//    var rsp = await _loanRequestService.GetLoanRequestsAsync(userId, BranchId, RequestStatus.Requested, param);
+
+
+//    LoanRequests = rsp.Items;
+
+//    counts = rsp.Count;
+
+//    isLoading = false;
+
+//    StateHasChanged();
+//}
+
+
+//async Task GetCompletedLoanRequestAsync(string? userId)
+//{
+//    isLoading = true;
+
+//    var param = new QueryParam(pageIndex, pageSize, sortColumn, sortDescending, isIncludeInactive, filtertext);
+
+//    var rsp = await _loanRequestService.GetLoanRequestsAsync(userId, BranchId, RequestStatus.Completed, param);
+
+
+//    LoanRequests = rsp.Items;
+
+//    counts = rsp.Count;
+
+
+//    isLoading = false;
+
+//    StateHasChanged();
+//}
+
+
+//async Task GetApproveLoanRequestAsync(string? userId)
+//{
+//    isLoading = true;
+
+//    var param = new QueryParam(pageIndex, pageSize, sortColumn, sortDescending, isIncludeInactive, filtertext);
+
+//    var rsp = await _loanRequestService.GetLoanRequestsAsync(userId, BranchId, RequestStatus.Aprove, param);
+
+
+//    LoanRequests = rsp.Items;
+
+//    counts = rsp.Count;
+
+
+//    isLoading = false;
+
+//    StateHasChanged();
+//}

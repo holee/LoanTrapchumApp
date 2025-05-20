@@ -2,27 +2,23 @@
 using Applications.Responses;
 using Applications.Responses.Message;
 using Applications.Responses.ViewModels.Currencies;
+using Dapper;
 using Domains.Models.Transaction;
+using Infrastructures.Constants.Procedures;
 using Infrastructures.DataAccess;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace Infrastructures.Implements
 {
-    public class CashVaultService : ICashVaultService
+    public class CashVaultService(ApplicationDbContext context, IDapperConnectionFactory connectionFactory) : ICashVaultService
     {
-        private readonly ApplicationDbContext _context;
-
-        public CashVaultService(ApplicationDbContext context)
-        {
-            this._context = context;
-        }
-
         public async Task<Result> CreateCashManagementAsync(LoanTransaction cashTransaction)
         {
             try
             {
-                _context.LoanTransaction.Add(cashTransaction);
-                await _context.SaveChangesAsync();
+                context.LoanTransaction.Add(cashTransaction);
+                await context.SaveChangesAsync();
                 return Result.Success("Cash vault transaction succeed");
             }
             catch (Exception ex)
@@ -36,39 +32,39 @@ namespace Infrastructures.Implements
         {
             try
             {
-                await _context.Database.BeginTransactionAsync();
-                _context.LoanTransaction.Add(transaction);
-                await _context.SaveChangesAsync();
+                await context.Database.BeginTransactionAsync();
+                context.LoanTransaction.Add(transaction);
+                await context.SaveChangesAsync();
                 var cash = transaction?.CashManagements?.FirstOrDefault();
                 cash?.CashManagementDetails?.ForEach(x =>
                 {
                     x.TransactionRefId = transaction!.TransactionsId;
                 });
-                _context.Update(transaction!);
-                await _context.SaveChangesAsync();
-                await _context.Database.CommitTransactionAsync();
+                context.Update(transaction!);
+                await context.SaveChangesAsync();
+                await context.Database.CommitTransactionAsync();
                 return Result.Success("Cash vault transaction succeed");
             }
             catch (Exception ex)
             {
-                _context.Database.RollbackTransaction();
+                context.Database.RollbackTransaction();
                 return Result.Failure(ErrorResponse.ServerError($"{ex.Message}"));
             }
         }
 
         public async Task<IEnumerable<ViewModelCurrencyNotes>> GetCurrencyNotesAsync(int? branchId)
         {
-            IQueryable<ViewModelCurrencyNotes> results = _context.Database.SqlQuery<ViewModelCurrencyNotes>($@"SELECT * FROM fGetCurrencyNotesByBranch({branchId})");
-            var notes = await results.Where(x => x.IsActive == true)
-                                        .AsNoTracking()
-                                        .OrderBy(x => x.CurrencyValue)
-                                        .ToListAsync();
-            return notes;
+
+            using var db= await connectionFactory.CreateConnectionAsync();
+
+            var queries = await db.QueryAsync<ViewModelCurrencyNotes>(ProcedureConstant.GetCurrencyNotesByBranchId, new { branchId }, commandType: CommandType.StoredProcedure);
+
+            return queries;
         }
 
         public async Task<IEnumerable<VCashVaults>> GetViewCashVaultAsync()
         {
-            IQueryable<VCashVaults> results = _context.Database.SqlQuery<VCashVaults>($@"SELECT * FROM VCashVaults");
+            IQueryable<VCashVaults> results = context.Database.SqlQuery<VCashVaults>($@"SELECT * FROM VCashVaults");
 
             var vaults = await results.AsNoTracking()
                                         .ToListAsync();
@@ -79,7 +75,7 @@ namespace Infrastructures.Implements
 
         public async Task<VCashVaults?> GetCashVaultAsync(int? currencyId, int? branchId)
         {
-            var vaults = await _context.Database.SqlQuery<VCashVaults>($@"SELECT * FROM VCashVaults WHERE CurrencyRefId={currencyId} AND BranchRefId={branchId}")
+            var vaults = await context.Database.SqlQuery<VCashVaults>($@"SELECT * FROM VCashVaults WHERE CurrencyRefId={currencyId} AND BranchRefId={branchId}")
                                         .AsNoTracking().FirstOrDefaultAsync();
             return vaults;
 
@@ -87,7 +83,7 @@ namespace Infrastructures.Implements
 
         public async Task<Result<IEnumerable<VCashVaults>>> GetCashVaultsAsync(int? branchId)
         {
-            var results = await _context.Database
+            var results = await context.Database
                                                  .SqlQuery<VCashVaults>($@"SELECT * FROM VCashVaults")
                                                  .Where(x => x.BankRefId == branchId)
                                                  .AsNoTracking()

@@ -12,6 +12,6 @@
         public decimal? RecieveKhrAmount { get; set; } = 0;
         public decimal? ChangeAmount { get; set; } = 0;
         public decimal? ChangeKhrAmount { get; set; } = 0;
-        public List<LoanRepaymentLineDtoCreate> LoanRepaymentLines { get; set; } = [];
+        public List<LoanPaymentLineDtoCreate> LoanRepaymentLines { get; set; } = [];
     }
 }

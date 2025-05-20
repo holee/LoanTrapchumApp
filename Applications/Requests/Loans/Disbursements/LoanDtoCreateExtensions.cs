@@ -46,10 +46,8 @@ public static class LoanDtoCreateExtensions
         };
     }
 
-
-
-
-    public static LoanSchedule MapScedule(this LoanScheduleDtoCreate s)
+    
+    public static LoanSchedule MapSchedule(this LoanScheduleDtoCreate s)
     {
         return new LoanSchedule
         {

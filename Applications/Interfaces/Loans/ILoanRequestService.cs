@@ -34,6 +34,7 @@ namespace Applications.Interfaces.Loans
         Task<Result<bool>> CreateLoanRequestAsync(int? branchId, string? userId, string? loanRequestId);
 
         Task<Result<VLoanRequests>> GetLoanRequestAsync(int? branchId,string? userId, string? customerId, string? loanRequestId, bool include);
+        Task<Pager<VLoanRequests>> GetLoanRequestsAsync(string? userId, bool canDisburse, int? branchId, RequestStatus requestStatus, QueryParam param);
     }
 }
 //Task<Pager<VLoanRequests>> GetLoanRequestsAsync(long userId, int statusId, int branchId, QueryParam param);

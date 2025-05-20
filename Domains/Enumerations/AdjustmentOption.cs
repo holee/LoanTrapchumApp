@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Domains.Enumerations
 {
-    public enum PaymentSechuleMode
+    public enum AdjustmentOption
     {
         [Description("Pay Before payment schedule")]
         Before = 1,

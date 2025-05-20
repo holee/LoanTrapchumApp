@@ -36,5 +36,6 @@ namespace Applications.Services.Loans
 
         Task<Result<VLoanRequests>> GetLoanRequestAsync(int? branchId, string? userId, string? customerId,
             string? loanRequestId, bool v);
+        Task<Pager<VLoanRequests>> GetLoanRequestsAsync(string? userId, bool candisburse, int? branchId, RequestStatus requestStatus, QueryParam param);
     }
 }

@@ -12,12 +12,14 @@ namespace Applications.Interfaces.Loans
     public interface ILoanService
     {
         Task<Result<string>> CreateLoanAsync(LoanDtoCreate disbursement);
+        Task<Result<bool>> CreateLoanAsync(LoanDisbursment req);
         Task<Result<string>> DeleteAsync(string? loanId,int? branchId);
         Task<Result<string>> UpdateAsync(LoanDisbursment disbursement);
         Task<Result<string>> ChangedCreditAgent(int? branchId, LoanChangedCaDtoCreate req);
         Task<Result<string>> ChangedCreditAgents(int? branchId, List<LoanChangedCaDtoCreate> req);
         Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus status, bool include = false);
         Task<Pager<VLoanDisbursments>> GetLoansAsync(int? branchId, string? userId, LoanStatuses status = LoanStatuses.Active, QueryParam? param = null);
+ 
     }
 
 }

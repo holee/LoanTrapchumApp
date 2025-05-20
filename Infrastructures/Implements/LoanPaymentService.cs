@@ -1,30 +1,25 @@
-﻿using System.Data;
-using Applications.Enumerations;
+﻿using Applications.Enumerations;
 using Applications.Interfaces.Loans;
 using Applications.Requests.Loans.Payments;
 using Applications.Responses;
+using Applications.Responses.Message;
 using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Payments;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Dapper;
+using Domains.Models.Lists;
 using Domains.Models.Loans;
 using Domains.Models.Transaction;
 using Infrastructures.DataAccess;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
+using System.Data.Common;
 
 namespace Infrastructures.Implements;
-public class LoanPaymentService : ILoanPaymentService
+public class LoanPaymentService(DataContext context, IDbContextFactory<DataContext> dbContextFactory, IDapperConnectionFactory connectionFactory) : ILoanPaymentService
 {
-    private readonly ApplicationDbContext _context;
-    private readonly IDbContextFactory<DataContext> dbContextFactory;
-    public LoanPaymentService(ApplicationDbContext context, IDbContextFactory<DataContext> dbContextFactory)
-    {
-        _context = context;
-        this.dbContextFactory = dbContextFactory;
-    }
-
-    public async Task<Result<string>> RecievePayment(LoanRepaymentDtoCreate req)
+    public async Task<Result<string>> RecievePayment(LoanPaymentDtoCreate req)
     {
 
         await using var db = await dbContextFactory.CreateDbContextAsync();
@@ -35,15 +30,15 @@ public class LoanPaymentService : ILoanPaymentService
         try
         {
 
-            var tranLoan = req.LoanTransaction.Adapt<LoanTransaction>();
+            // var tranLoan = req.LoanTransaction.Adapt<LoanTransaction>();
 
-            tranLoan.TransactionsId = $"trx-{Guid.CreateVersion7()}";
+            //tranLoan.TransactionsId = $"trx-{Guid.CreateVersion7()}";
 
             var loanRepayment = req.Adapt<LoanPayment>();
 
             var payment = db.LoanRepayments.Add(loanRepayment).Entity;
 
-            db.LoanTransaction.Add(tranLoan);
+            // db.LoanTransaction.Add(tranLoan);
 
             await db.SaveChangesAsync();
 
@@ -51,7 +46,7 @@ public class LoanPaymentService : ILoanPaymentService
 
             schedules?.ForEach(async item =>
             {
-               await SetLoanScheduleComplete(req.BranchRefId, req.LoanRefId, item.LoanScheduleRefId, item.InstallmentNo);
+                await SetLoanScheduleComplete(req.BranchRefId, req.LoanRefId, item.LoanScheduleRefId, item.InstallmentNo);
             });
 
             await CloseLoanSchedule(req.BranchRefId, req.LoanRefId);
@@ -76,7 +71,7 @@ public class LoanPaymentService : ILoanPaymentService
         await using var db = await dbContextFactory.CreateDbContextAsync();
 
 
-        using var tranx = db.StartTransaction();
+        using var tranx = await db.Database.BeginTransactionAsync();
 
         try
         {
@@ -87,54 +82,59 @@ public class LoanPaymentService : ILoanPaymentService
 
             var schedules = payment.LoanPayment?.LoanRepaymentLines?.ToList();
 
-            schedules?.ForEach(async item =>
+            if (schedules is not null && schedules.Any())
             {
-                await SetLoanScheduleComplete(req.LoanPayment?.BranchRefId, req.LoanPayment?.LoanRefId, item.LoanScheduleRefId, item.InstallmentNo);
-            });
+                foreach (var item in schedules)
+                {
+                    await SetLoanScheduleComplete(db, req.LoanPayment?.BranchRefId, req.LoanPayment?.LoanRefId, item.LoanScheduleRefId, item.InstallmentNo);
+                }
 
-            await CloseLoanSchedule(req.LoanPayment?.BranchRefId, req.LoanPayment?.LoanRefId);
+            }
 
-            tranx.Commit();
+
+            await CloseLoanSchedule(db, req.LoanPayment?.BranchRefId, req.LoanPayment?.LoanRefId);
+
+            await tranx.CommitAsync();
 
             return Result.Success<string>(new("Payment successfully."));
 
         }
         catch (Exception ex)
         {
-            tranx.Rollback();
+            await tranx.RollbackAsync();
 
             return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}"));
         }
     }
 
 
-    public async Task<Result<string>> PayOff(LoanRepaymentDtoCreate req)
+    public async Task<Result<string>> PayOff(LoanPaymentDtoCreate req)
     {
 
-        using var tranx = _context.StartTransaction();
+        using var tranx = context.StartTransaction();
 
         try
         {
 
-            var tranXchange = req.ForeignExchangeTrx.Adapt<LoanTransaction>();
+            // var tranXchange = req.ForeignExchangeTrx.Adapt<LoanTransaction>();
 
-            var tranLoan = req.LoanTransaction.Adapt<LoanTransaction>();
+            // var tranLoan = req.LoanTransaction.Adapt<LoanTransaction>();
 
             var loanRepayment = req.Adapt<LoanPayment>();
 
-            var payment = _context.LoanRepayments.Add(loanRepayment).Entity;
+            var payment = context.LoanRepayments.Add(loanRepayment).Entity;
 
-            _context.LoanTransaction.Add(tranLoan);
+            // _context.LoanTransaction.Add(tranLoan);
 
-            _context.LoanTransaction.Add(tranXchange);
+            // _context.LoanTransaction.Add(tranXchange);
 
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
 
             var schedules = payment.LoanRepaymentLines?.ToList();
 
             schedules?.ForEach(async item =>
             {
-               await SetLoanScheduleComplete(req.BranchRefId, req.LoanRefId, item.LoanScheduleRefId, item.InstallmentNo);
+                await SetLoanScheduleComplete(req.BranchRefId, req.LoanRefId, item.LoanScheduleRefId, item.InstallmentNo);
             });
 
 
@@ -153,12 +153,12 @@ public class LoanPaymentService : ILoanPaymentService
         }
     }
 
-    public async Task<Result<IEnumerable<VLoanPaymentLines>>> GetPaymentLinesAsync(int? branchId, string? loanId, int? installmentNo)
+    public async Task<Result<IEnumerable<LoanPaymentLineVm>>> GetPaymentLinesAsync(int? branchId, string? loanId, int? installmentNo)
     {
 
-        using var db = _context.Database.GetDbConnection();
+        using var db = context.Database.GetDbConnection();
 
-        var repaymentLines = await db.QueryAsync<VLoanPaymentLines>("spGetPayementScheduleLines", new
+        var repaymentLines = await db.QueryAsync<LoanPaymentLineVm>("spGetPayementScheduleLines", new
         {
             branchId,
             loanId,
@@ -167,7 +167,7 @@ public class LoanPaymentService : ILoanPaymentService
 
         if (!repaymentLines.Any())
         {
-            return Result.Failure<IEnumerable<VLoanPaymentLines>>(ErrorResponse.NotFound("No Schedule Lines found"));
+            return Result.Failure<IEnumerable<LoanPaymentLineVm>>(ErrorResponse.NotFound("No Schedule Lines found"));
         }
 
         return Result.Success(repaymentLines);
@@ -192,8 +192,61 @@ public class LoanPaymentService : ILoanPaymentService
 
         db.LoanSchedules
                 .Where(x => x.LoanScheduleId == scheduleId &&
-                         x.LoanRefId == loanId && x.InstallmentNo == installmentId)
+                            x.LoanRefId == loanId &&
+                            x.BranchId == branchId &&
+                            x.InstallmentNo == installmentId)
                 .ExecuteUpdate(x => x.SetProperty(p => p.ScheduleStatusRefId, statusId));
+    }
+
+    private async Task SetLoanScheduleComplete(DataContext db, int? branchId, string? loanId, long? scheduleId, int? installmentId)
+    {
+        if (branchId == null || loanId == null || scheduleId == null || installmentId == null)
+        {
+            throw new ArgumentException("Invalid schedule parameters.");
+        }
+
+        // Use parameterized query to get LeftAmount
+        var leftAmount = await db.Database
+            .SqlQuery<VSchedule>($"SELECT * FROM VSchedules WHERE LoanScheduleId = {scheduleId} AND LoanId = {loanId} AND BranchId = {branchId}")
+            .Select(x => x.LeftAmount)
+            .FirstOrDefaultAsync();
+
+        var statusId = leftAmount == 0 ? ScheduleStatus.Paid : ScheduleStatus.Partial;
+
+        // Update schedule status
+        await db.LoanSchedules
+            .Where(x => x.LoanScheduleId == scheduleId && x.LoanRefId == loanId && x.BranchId == branchId && x.InstallmentNo == installmentId)
+            .ExecuteUpdateAsync(x => x.SetProperty(p => p.ScheduleStatusRefId, (int)statusId));
+    }
+
+
+    private async Task CloseLoanSchedule(DataContext db, int? branchId, string? loanId)
+    {
+        if (!branchId.HasValue && !string.IsNullOrEmpty(loanId))
+        {
+            return; // Skip if parameters are invalid
+        }
+
+        await IsLoanFullyPaidAsync(branchId, loanId);
+
+        var existingLoans = await db.Database
+                                      .SqlQuery<VLoanDisbursments>($"""
+                                                                    SELECT * FROM VLoanDisbursments
+                                                                    WHERE LoanId={loanId} AND 
+                                                                    BranchId={branchId} AND 
+                                                                    OutStanding=0
+                                                                  """)
+                                      .Where(x => x.LoanId == loanId &&
+                                                  x.BranchId == branchId &&
+                                                  x.OutStanding == 0)
+                                      .AsNoTracking()
+                                      .ToListAsync();
+        if (existingLoans.Any())
+        {
+            db.LoanDisbursments
+                 .Where(x => x.LoanId == loanId & x.BranchRefId == branchId)
+                 .ExecuteUpdate(p => p.SetProperty(x => x.LoanStatusRefId, (int)LoanStatuses.Close));
+        }
     }
 
     async Task CloseLoanSchedule(int? branchId, string? loanId)
@@ -209,7 +262,9 @@ public class LoanPaymentService : ILoanPaymentService
                                                                     BranchId={branchId} AND 
                                                                     OutStanding=0
                                                                   """)
-                                    .Where(x => x.LoanId == loanId && x.BranchId == branchId && x.OutStanding == 0)
+                                    .Where(x => x.LoanId == loanId &&
+                                                x.BranchId == branchId &&
+                                                x.OutStanding == 0)
                                     .AsNoTracking()
                                     .ToListAsync();
         if (existingLoans.Any())
@@ -219,6 +274,125 @@ public class LoanPaymentService : ILoanPaymentService
                  .ExecuteUpdate(p => p.SetProperty(x => x.LoanStatusRefId, (int)LoanStatuses.Close));
         }
     }
+
+
+    private async Task<bool> IsLoanFullyPaidAsync(int? branchId, string? loanId)
+    {
+        await using var db = await dbContextFactory.CreateDbContextAsync();
+
+        var totalCounts = await db.LoanSchedules
+            .CountAsync(x => x.BranchId == branchId && x.LoanRefId == loanId);
+
+        var InstallmentNo = await db.LoanSchedules
+            .Where(x => x.BranchId == branchId &&
+                        x.LoanRefId == loanId &&
+                        x.ScheduleStatusRefId == (int)ScheduleStatus.Paid)
+            .OrderByDescending(x => x.InstallmentNo)
+            .AsNoTracking()
+            .Select(x => x.InstallmentNo)
+            .FirstOrDefaultAsync();
+
+        return InstallmentNo != null && totalCounts == InstallmentNo;
+    }
+
+    public async Task<Result<IEnumerable<VSchedule>>> GetPaidScheduleAsync(int? branchId, string? loanRefId)
+    {
+        await using var db = await dbContextFactory.CreateDbContextAsync();
+
+        var queries = await db.Database
+                            .SqlQuery<VSchedule>($"SELECT * FROM VSchedules WHERE BranchId={branchId} AND LoanId={loanRefId} AND ScheduleStatusId=1")
+                            .AsNoTracking()
+                            .Select(x => new VSchedule
+                            {
+                                LoanScheduleId=x.LoanScheduleId,
+                                InstallmentNo = x.InstallmentNo,
+                                PaymentDate = x.PaymentDate,
+                                Principle = x.Principle,
+                                Interest = x.Interest,
+                                CollectionFee = x.CollectionFee,
+                                TotalPay = x.TotalPay,
+                            }).ToListAsync();
+
+        return Result.Success<IEnumerable<VSchedule>>(queries);
+
+
+    }
+
+    public async Task<Result<ScheduleVm>> GetScheduleByIdAsync(long? loanScheduleId, int? branchId, string? loanId)
+    {
+
+        using var db = await connectionFactory.CreateConnectionAsync();
+
+        string sql = @"
+                SELECT 
+                s.LoanScheduleId,
+                s.Principle,
+                s.Interest,
+                s.CollectionFee,
+                s.PaymentDate,
+                (
+                    SELECT 
+                        SUM(s.SubTotal) FROM VLoanPaymentLines s
+                    WHERE  s.LoanRefId = @LoanId AND 
+                           s.BranchRefId = @BranchId AND
+                           s.LoanScheduleRefId=@LoanScheduleId
+                ) AS Total,
+                    s1.Id,
+                    s1.PaidPrinciple,
+                    s1.PaidInterest,
+                    s1.PaidCollectionFee,
+                    s1.PenaltyAmount,
+                    s1.SubTotal,
+                    CONVERT(DATE, s1.Created) AS Created
+            FROM VSchedules s 
+            LEFT JOIN VLoanPaymentLines s1 
+                ON s.LoanId = s1.LoanRefId 
+                AND s.LoanScheduleId = s1.LoanScheduleRefId 
+                AND s.InstallmentNo = s1.InstallmentNo
+            WHERE 
+                s.LoanScheduleId = @LoanScheduleId 
+                AND s.LoanId = @LoanId 
+                AND s.BranchId = @BranchId 
+                AND s.ScheduleStatusId IN (1);";
+
+        var lookup = new Dictionary<long, ScheduleVm>();
+
+        await db.QueryAsync<ScheduleVm, LoanPaymentLineVm, ScheduleVm>(sql,
+            (schedule, paymentLine) =>
+            {
+                if (!lookup.TryGetValue(schedule.LoanScheduleId, out var existing))
+                {
+                    existing = schedule;
+
+                    lookup.Add(schedule.LoanScheduleId, existing);
+                }
+
+                if (paymentLine != null && paymentLine.Id > 0)
+                {
+                    existing.PaymentLines.Add(paymentLine);
+                }
+
+                return existing;
+            },
+            new
+            {
+                LoanScheduleId = loanScheduleId,
+                LoanId = loanId,
+                BranchId = branchId
+            },
+            splitOn: "Id");
+
+
+        var schedule = lookup.Values.FirstOrDefault();
+
+        if (schedule is not null)
+        {
+            return Result.Success(schedule);
+        }
+
+        return Result.Failure<ScheduleVm>(ErrorResponse.NotFound(Messages.DataNotFound));
+    }
+
 
 }
 

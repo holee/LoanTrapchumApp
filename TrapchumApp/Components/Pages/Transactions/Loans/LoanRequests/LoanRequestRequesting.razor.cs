@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Radzen;
+using System.Security.Claims;
 
 namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 {
@@ -33,30 +34,28 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
         bool isIncludeInactive = false;
         bool isLoading = false;
         int statusId = 1;
+        ClaimsPrincipal? _user;
         protected override async Task OnInitializedAsync()
         {
 
             var auth = await AuthenticationState;
-            CanRequestLoan = (await _authorizeService.AuthorizeAsync(auth.User, RequestsPolicies.CanCreate())).Succeeded;
-            CanDisburseLoan = (await _authorizeService.AuthorizeAsync(auth.User, RequestsPolicies.CanDisburseLoan())).Succeeded;
-            CanAprovedLoan = (await _authorizeService.AuthorizeAsync(auth.User, RequestsPolicies.CanAproveRequest())).Succeeded;
+            _user = auth.User;
+            CanRequestLoan = (await _authorizeService.AuthorizeAsync(_user, RequestsPolicies.CanCreate())).Succeeded;
+            CanDisburseLoan = (await _authorizeService.AuthorizeAsync(_user, RequestsPolicies.CanDisburseLoan())).Succeeded;
+            CanAprovedLoan = (await _authorizeService.AuthorizeAsync(_user, RequestsPolicies.CanAproveRequest())).Succeeded;
 
             await GetLoanRequestAsync(UserId);
 
+
+            createRequestUrl = new Dictionary<string, object?>{
+                {"BranchId",BranchId},
+                {"UserId",UserId},
+                { "ActionMode",ActionMode.Create}
+             }.AddQueryString($"/Loan/Customer/Request");
+
+
             await base.OnInitializedAsync();
         }
-
-        protected override void OnParametersSet()
-        {
-            createRequestUrl = new Dictionary<string, object?>
-        {
-            {"BranchId",BranchId},
-            {"UserId",UserId},
-            { "ActionMode",ActionMode.Create}
-        }.AddQueryString($"/Loan/Customer/Request");
-            base.OnParametersSet();
-        }
-
 
         async Task LoadLoanData(LoadDataArgs args)
         {

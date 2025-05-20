@@ -29,19 +29,14 @@ using System.Threading.Tasks;
 
 namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 {
-    public partial class LoanRequestCreate
+    public partial class LoanRequestCreate(
+        ILoanSettingService loanSettingService,
+        IAppSettingService settingService,
+        IHolidayService holidayService,
+        ILogger<LoanRequestCreate> logger)
     {
-        private readonly ILoanSettingService _loanSettingService;
-        private readonly IAppSettingService _settingsServiceImpl;
-        private readonly IHolidayService _holidayService;
-        private readonly ILogger<LoanRequestCreate> _logger;
-        public LoanRequestCreate(ILoanSettingService loanSettingService, IAppSettingService settingService, IHolidayService holidayService, ILogger<LoanRequestCreate> logger)
-        {
-            _loanSettingService = loanSettingService;
-            _settingsServiceImpl = settingService;
-            _holidayService = holidayService;
-            _logger = logger;
-        }
+        private readonly ILoanSettingService _loanSettingService = loanSettingService;
+        private readonly IAppSettingService _settingsServiceImpl = settingService;
 
         [Parameter] public string? UserId { get; set; }
         [Parameter] public int? BranchId { get; set; } = 0;
@@ -130,7 +125,8 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
                 Width = "45vw"
             };
 
-            IEnumerable<FileModel> uploadedFiles = await DialogService.OpenAsync<FileUploadDialogue>("Upload", options: options);
+            IEnumerable<FileModel> uploadedFiles =
+                await DialogService.OpenAsync<FileUploadDialogue>("Upload", options: options);
 
             if (uploadedFiles.Any())
             {
@@ -149,9 +145,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 
                 DocumentRef.ReloadDocument();
             }
-
         }
-
 
 
         async void RemoveFile(VLoanRequestsDocuments doc)
@@ -171,8 +165,6 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 
                 return;
             }
-
-
         }
 
         async Task AddGuarantors()
@@ -182,7 +174,8 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
                 Width = "60vw"
             };
 
-            IList<VGuarantor> results = await DialogService.OpenAsync<GuarantorsList>("Select Guarantor", options: options);
+            IList<VGuarantor> results =
+                await DialogService.OpenAsync<GuarantorsList>("Select Guarantor", options: options);
 
             if (results is not null && results.Any())
             {
@@ -262,7 +255,6 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
             if (confirm == false) return;
 
 
-
             if (CollateralLines.Any() && (c.Id is not null || c.Id == 0))
             {
                 CollateralLines.Remove(c);
@@ -301,26 +293,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
                 model.PayEvery = 1;
             }
         }
-
-        protected override async Task OnParametersSetAsync()
-        {
-            //var cat = await _loanSettingService.GetLoanCategories();
-
-
-            //if (cat!.Any())
-            //{
-            //    loanCategories = cat.Maps<LoanCategoryResponse>();
-
-            //    SelectedLoanCategory = loanCategories!.FirstOrDefault();
-            //}
-
-            //var aproveResp = await _loanSettingService.GetAprovedUserAsync<ApprovedUser>(BranchId);
-
-            //AprovedUsers = aproveResp ?? [];
-
-            await base.OnParametersSetAsync();
-        }
-
+        
         async Task SetCustomer(string? customerId)
         {
             if (string.IsNullOrEmpty(customerId))
@@ -328,28 +301,32 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
                 isCustomerSelected = false;
 
                 return;
-
             }
+
             CustomerId = customerId;
+            
             model.CustomerRefId = customerId;
+            
             await GetCustomers(CustomerId, 1);
         }
 
         protected override async Task OnInitializedAsync()
         {
+            await GetLoanRequestInfo();
+            
+            var rsp1 = await _userService.GetUsersAsync(UserId, string.Empty);
 
-            await GetLoanRequestInfo(ActionMode);
-
-            if (CustomerId.IsNotNullOrEmpty())
+            if (rsp1 is { IsSuccess: true, Data: not null })
             {
-                //isCustomerSelected = true;
-            }
+                _user = rsp1.Data!.First();
 
+                model.CreditAgentRefId = _user.EmployeeRefId;
+            }
 
             await base.OnInitializedAsync();
         }
 
-        async Task GetLoanRequestInfo(ActionMode action)
+        async Task GetLoanRequestInfo()
         {
             try
             {
@@ -394,7 +371,6 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 
         private async Task GetCustomers(string? customerId, int take = 25, string? filter = null)
         {
-
             var queryParam = new QueryParam(0, take, string.Empty, filter: filter);
 
 
@@ -438,6 +414,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
             {
                 return;
             }
+
             var confirm = await DialogService.Confirm("Do you want to save this loan request.", "Loan Request");
 
             if (confirm == false)
@@ -450,10 +427,9 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
             await HandleLoanRequest(RequestStatus.Requested);
         }
 
-        protected async Task HandleLoanRequest(RequestStatus state)
+        private async Task HandleLoanRequest(RequestStatus state)
         {
-
-            _logger.LogInformation("get start loan requesting...");
+            logger.LogInformation("get start loan requesting...");
 
             var oldGuarantors = Guarantors.ToGuarantorDtoCreate(BranchId);
 
@@ -466,7 +442,6 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
             var documents = Documents.LoanDocumentDtoCreate();
 
             model.LoanDocuments.AddRange(documents);
-
 
             editForm.EditContext!.Validate();
 
@@ -499,13 +474,12 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
             {
                 NotificationService.Notify(NotificationSeverity.Error, ex.Message);
 
-                _logger.LogError(ex, ex.Message);
+                logger.LogError(ex, ex.Message);
             }
         }
 
 
-
-        void SelectedInstallmentChanged(object arg)
+        void SelectedInstallmentChanged(object? arg)
         {
             if (arg is not null)
             {
@@ -515,7 +489,6 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
                 ChangedDate();
             }
         }
-
 
 
         void PrincipleValueChanged(decimal? principle)
@@ -551,7 +524,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
             var cur = DateTime.Now;
             period += 2;
             var fut = cur.AddMonths(period);
-            var hols = await _holidayService.GetHolidays(false, cur, fut);
+            var hols = await holidayService.GetHolidays(false, cur, fut);
             Holidays = hols.Select(x => x.HolidayDt!.Value).ToList();
         }
 
@@ -721,7 +694,6 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 
 //    NotificationService.Notify(NotificationSeverity.Error, resp.ErrMessage);
 //}
-
 
 
 //if (LoanRequestId.IsNotNullOrEmpty())

@@ -47,7 +47,7 @@ public sealed class LoanDtoCreate : CalculatorBase, ICalculatorBase
     public string? ApprovedBy { get; set; } = string.Empty;
     public decimal? PaidAmount => Principle - AdminFeeAmount;
     public int PayementSechuleModeId { get; set; } = 2;
-    public PaymentSechuleMode ScheduleMode { get; set; } = PaymentSechuleMode.After;
+    public AdjustmentOption ScheduleMode { get; set; } = AdjustmentOption.After;
     public List<HolidayVm> Holidays { get; set; } = [];
     public List<LoanScheduleDtoCreate>? LoanSchedules { get; set; } = [];
 }

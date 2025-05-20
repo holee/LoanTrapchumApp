@@ -3,6 +3,7 @@ using Applications.Extensions.Identity;
 using Applications.Extensions.Identity.Authorizations.Extensions;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using System.Security.Claims;
 using TrapchumApp.Components.Shared;
 
 namespace TrapchumApp.Components.Layout
@@ -20,17 +21,35 @@ namespace TrapchumApp.Components.Layout
 
         bool IsAdminOnly = false;
 
+        bool IsAccountOnly = false;
+
+        bool IsCreditAgentOnly = false;
+
+        bool IsManagerOnly = false;
+
+        ClaimsPrincipal? _user;
         protected override async Task OnInitializedAsync()
         {
             var auth = await AuthenticateState;
 
-            IsAdminOnly = await _authorizeService.MustHasPermissionAsync(auth.User, RolePolicies.AdminOnly);
+            _user = auth.User;
 
-            if (auth.User.Identity!.IsAuthenticated)
+            IsAdminOnly = await _authorizeService.MustHasPermissionAsync(_user, RolePolicies.AdminOnly);
+
+            IsAccountOnly = await _authorizeService.MustHasPermissionAsync(_user, RolePolicies.AccountOnly);
+
+            IsCreditAgentOnly = await _authorizeService.MustHasPermissionAsync(_user, RolePolicies.CreditOfficerOnly);
+
+            IsManagerOnly = await _authorizeService.MustHasPermissionAsync(_user, RolePolicies.ManagerOnly);
+
+
+            if (_user.Identity!.IsAuthenticated)
             {
-                userId = auth.User.GetId();
+                userId = _user.GetId();
 
                 await GetBranchId(userId!);
+
+                await bState.GetAuthenticatedUser(_user);
             }
             await base.OnInitializedAsync();
         }
@@ -47,7 +66,7 @@ namespace TrapchumApp.Components.Layout
 
             if (branchId > 0)
             {
-               await bState.GetBranchState(branchId);
+                await bState.GetBranchState(branchId);
             }
         }
     }

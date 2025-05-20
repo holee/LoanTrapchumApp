@@ -3,7 +3,9 @@ using Applications.Enumerations;
 using Applications.Extensions;
 using Applications.Requests.Loans.Disbursements;
 using Applications.Responses.ViewModels.Branches;
+using Applications.Responses.ViewModels.Holidays;
 using Applications.Responses.ViewModels.Loans.Requests;
+using Applications.Services.Lists;
 using Applications.Services.Loans;
 using Domains.Enumerations;
 using Microsoft.AspNetCore.Components;
@@ -14,15 +16,8 @@ using Radzen.Blazor;
 
 namespace TrapchumApp.Components.Pages.Transactions.Loans.Disbursements;
 
-public partial class LoanCreate
+public partial class LoanCreate(ILoanServiceImpl loanService, IHolidayServiceImpl holidayService)
 {
-    private readonly ILoanServiceImpl _loanService;
-
-    public LoanCreate(ILoanServiceImpl loanService)
-    {
-        _loanService = loanService;
-    }
-
     [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
     bool collapse = false;
     string collapseIcon = "expand_more";
@@ -47,11 +42,16 @@ public partial class LoanCreate
     [Parameter, SupplyParameterFromQuery] public string? LoanRequestId { get; set; } = string.Empty;
 
     VLoanRequests req = new VLoanRequests();
-    DateTime firstPayment;
-    EditForm editForm = default!;
-    decimal penaltyRate = 0.0M;
-    List<DateTimeOffset> Holidays = [];
 
+    DateTime firstPayment;
+
+    EditForm editForm = default!;
+
+    decimal penaltyRate = 0.0M;
+
+    IEnumerable<HolidayVm> holidays = [];
+
+    bool disburseStatus = false;
     async Task GetLoanRequest()
     {
         IsLoading = true;
@@ -65,11 +65,20 @@ public partial class LoanCreate
 
         IsLoading = false;
     }
+    private async Task GetHolidayes(DateTimeOffset? date,int? installment=12)
+    {
+        var yearAdded = (installment / 12) + 1;
 
+        var selectedYear = date!.Value.DateTime;
+
+        holidays = await holidayService.GetActiveHolidays(selectedYear, yearAdded);
+
+    }
     protected override async Task OnInitializedAsync()
     {
         try
         {
+
             if (CustomerRequestId.IsNotNullOrEmpty() && LoanRequestId.IsNotNullOrEmpty())
             {
                 await GetLoanRequest();
@@ -78,8 +87,14 @@ public partial class LoanCreate
 
                 model.PayementSechuleModeId = 2;
 
-                model.ScheduleMode = PaymentSechuleMode.After;
+                model.ScheduleMode = AdjustmentOption.After;
+
+                await GetHolidayes(model.FirstPaymentDate,model.Installments);
+
+                model.Holidays = holidays.ToList();
             }
+
+
         }
         catch (Exception ex)
         {
@@ -105,14 +120,10 @@ public partial class LoanCreate
 
         model.PenaltyRate = penaltyRate;
 
-        var builder = Calculators.CreateBuilder(model);
-        {
-            var app = builder.Build();
+        previewSchedule = model.CreateSchedules().MapToLoanSchedules();
 
-            previewSchedule = app.CreateSchedules(model).MapToLoanSchedule(model);
+        selectedTabIndex = 2;
 
-            selectedTabIndex = 2;
-        }
     }
 
     protected async Task HandleFormSubmit()
@@ -128,19 +139,13 @@ public partial class LoanCreate
 
         model.BankRefId = 11;
         model.TermTypeId = 11;
-        model.LoanStatusRefId = 4;
+        model.LoanStatusRefId = (int)LoanStatuses.Active;
         model.LoanSubTypeRefId = 1;
         model.BranchId = BranchId;
         model.UserRefId = UserId;
         model.PenaltyRate = penaltyRate;
 
-        //var builder = Calculators.CreateBuilder(model);
-
-        //var app = builder.Build(model);
-
-        //var scheduleDto = app.CreateSchedules(model, Holidays).MapToLoanSchedule(model);
-
-        var scheduleDto = model.CreateSchedules(Holidays).MapToLoanSchedule(model);
+        var scheduleDto = model.CreateSchedules().MapToLoanSchedules();
 
         var lastDate = scheduleDto!.LastOrDefault()!.PaymentDate;
 
@@ -154,7 +159,7 @@ public partial class LoanCreate
 
             model.LoanSchedules = scheduleDto.ToList();
 
-            var rsp = await _loanService.CreateLoanAsync(model);
+            var rsp = await loanService.CreateLoanAsync(model);
 
             if (!rsp.IsSuccess)
             {
@@ -163,7 +168,9 @@ public partial class LoanCreate
                 return;
             }
 
-            NotificationService.Notify(NotificationSeverity.Success, rsp.Data);
+            disburseStatus = rsp.Data;
+
+            StateHasChanged();
 
         }
         catch (Exception ex)

@@ -16,7 +16,7 @@ namespace Applications.Services.Transactions.Branches
 
     public sealed class CashVaultService(ICashVaultService cService) : ICashVaultServiceImpl
     {
-        public async Task<Result> CreateCashManagementAsync(LoanTransactionDtoCreate cashTrsansaction)
+        public async Task<Result> CreateCashManagementAsync(LoanPaymentTransactionDtoCreate cashTrsansaction)
         {
 
             var req = cashTrsansaction.Adapt<LoanTransaction>();
@@ -24,7 +24,7 @@ namespace Applications.Services.Transactions.Branches
             return await cService.CreateCashManagementAsync(req);
         }
 
-        public async Task<Result> CreateCashVaultAsync(LoanTransactionDtoCreate transaction)
+        public async Task<Result> CreateCashVaultAsync(LoanPaymentTransactionDtoCreate transaction)
         {
             var req = transaction.Adapt<LoanTransaction>();
 

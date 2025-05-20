@@ -49,9 +49,13 @@ namespace TrapchumApp.Components.Pages.Transactions.Branches
         protected override async Task OnInitializedAsync()
         {
             var auth = await AuthenticationState;
+           
             canOpenBranch = await _authorizeService.MustHasPermissionAsync(auth.User, TranxsPolicies.OpenBranch);
+           
             canCloseBranch = await _authorizeService.MustHasPermissionAsync(auth.User, TranxsPolicies.CloseBranch);
+           
             canVaultOut = await _authorizeService.MustHasPermissionAsync(auth.User, TranxsPolicies.VaultOut);
+           
             canVaultIn = await _authorizeService.MustHasPermissionAsync(auth.User, TranxsPolicies.VaultIn);
 
             var balanceResp = await obService.GetCashVaultBalance(BranchId);
@@ -61,19 +65,14 @@ namespace TrapchumApp.Components.Pages.Transactions.Branches
                 CashVaultBalances = balanceResp.Data ?? [];
             }
 
-
-            currencyId = CashVaultBalances!.FirstOrDefault(x => x.CurrencyId == (int)CurrenciesType.Khr)!.CurrencyId!.Value;
-
-            var currencyResponse = await curService.GetCurrencyNotes(currencyId, BranchId);
-
-            if (currencyResponse.IsSuccess)
+            if (CashVaultBalances.Any())
             {
-                CurrencyNotes = currencyResponse.Data!;
+                currencyId = CashVaultBalances!.FirstOrDefault(x => x.CurrencyId == (int)CurrenciesType.Khr)!.CurrencyId!.Value;
+               
+                await GetCurrencyNotes(currencyId, BranchId);
             }
-            else
-            {
-                CurrencyNotes = [];
-            }
+
+           
 
             await bState.GetBranchState(BranchId);
 
@@ -86,7 +85,9 @@ namespace TrapchumApp.Components.Pages.Transactions.Branches
             var confirm = await DialogService.Confirm("Are you sure you want to close branch?", "Confirm", new ConfirmOptions
             {
                 OkButtonText = "Yes",
+
                 CancelButtonText = "No",
+
                 CloseDialogOnEsc = false,
             });
             if (confirm == false)
@@ -126,18 +127,9 @@ namespace TrapchumApp.Components.Pages.Transactions.Branches
             }
         }
 
-        async Task OpenSideDialog(int currencyId)
+        async Task OpenSideDialog(int? currencyId)
         {
-            var currencyResponse = await curService.GetCurrencyNotes(currencyId, BranchId);
-
-            if (currencyResponse.IsSuccess)
-            {
-                CurrencyNotes = currencyResponse.Data!;
-            }
-            else
-            {
-                CurrencyNotes = [];
-            }
+           await GetCurrencyNotes(currencyId!.Value,BranchId);
         }
 
         async Task SubmitOpenBranch()
@@ -181,7 +173,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Branches
 
         }
 
-        async Task GetCurrencyNotes(int currencyId, int branchRefId)
+        async Task GetCurrencyNotes(int currencyId, int? branchRefId)
         {
             isClicked = !isClicked;
 
@@ -210,10 +202,8 @@ namespace TrapchumApp.Components.Pages.Transactions.Branches
                                                                                                                                                                                                                 },
             new DialogOptions
             {
-                Draggable = true,
-                Resizable = true,
                 ShowTitle = false,
-                ShowClose = false,
+                Style = "min-width:75rem"
             });
             if (resultModal != null)
             {

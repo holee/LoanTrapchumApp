@@ -36,8 +36,8 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
         DateTime paymentDate = DateTime.UtcNow;
         List<VSchedule> schedules { get; set; } = [];
         List<LoanRepaymentDto> RepaymentLists = [];
-        List<LoanRepaymentLineDtoCreate> loanRepaymentLines = [];
-        LoanRepaymentDtoCreate LoanRepayment = new();
+        List<LoanPaymentLineDtoCreate> loanRepaymentLines = [];
+        LoanPaymentDtoCreate LoanRepayment = new();
         IEnumerable<VBranchResponse> Branches = [];
         VSchedule? SelectedSchedule = new();
         List<VSchedule>? selectedRepayments = [];
@@ -47,7 +47,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
         IEnumerable<VCurrenciesList> Currencies = [];
         VCurrenciesList? selectedCurrency = new();
         RadzenDataGrid<VSchedule> gridSchedule = default!;
-        RadzenDataGrid<LoanRepaymentLineDtoCreate> gridLoanPaymentLines = default!;
+        RadzenDataGrid<LoanPaymentLineDtoCreate> gridLoanPaymentLines = default!;
         IEnumerable<VLoanRepaymentLine> VLoanRepaymentLines = [];
         IList<VSchedule>? SelectedSchedules = [];
         DataGridSelectionMode gridSelectionMode = DataGridSelectionMode.Single;
@@ -436,7 +436,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
             SelectedSchedule = new();
             disableIsPaidNow = true;
         }
-        void OnRemoveAdded(LoanRepaymentLineDtoCreate value)
+        void OnRemoveAdded(LoanPaymentLineDtoCreate value)
         {
             var removeIndex = loanRepaymentLines.IndexOf(value);
 

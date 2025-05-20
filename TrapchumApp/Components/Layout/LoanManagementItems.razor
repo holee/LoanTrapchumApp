@@ -1,27 +1,10 @@
 ﻿@using Applications.ApplicationPolicies
 @using Applications.Extensions.Identity.Authorizations.Extensions
 <RadzenPanelMenuItem Text="Loan Management" Icon="dataset">
-    @* 
-     for account only
-    *@
-    <RadzenPanelMenuItem Text="Loans" Icon="lists" Path="@($"/App/Loan/{BranchId}/Branches?UserId={UserId}")" Visible="@_canShowLoan" />
-    <RadzenPanelMenuItem Text="Client Due Pay" Icon="schedule" Path="@($"/App/Loan/{BranchId}/Branches/{UserId}/Users/Schedules")" Visible="@_canShowLoan"/>
-    <RadzenPanelMenuItem Text="Loan Write Off" Icon="person_off" Path="/App/Loan/WriteOff" Visible="@_isAccountOnly"/>
-    @* 
-        for admin only
-    *@
-    <RadzenPanelMenuItem Text="Guarantor" Icon="how_to_reg" Path="/App/Customer/Guarantor" Visible="@_isAdminOnly"/>
-    <RadzenPanelMenuItem Text="Credit Officer" Icon="switch_account" Path="/App/Employee/CreditAgent" Visible="@_isAdminOnly"/>
-    <RadzenPanelMenuItem Text="Loan Product" Icon="inventory_2" Path="/App/Loan/LoanProduct" Visible="@_isAdminOnly"/>
-    <RadzenPanelMenuItem Text="Loan Category" Icon="lists" Path="/App/Loan/Categories" Visible="@_isAdminOnly"/>
-    <RadzenPanelMenuItem Text="Holidays" Icon="calendar_add_on" Path="/App/Holiday" Visible="@_isAdminOnly"/>
-    @* 
-     for all roles
-    *@
-    
-    <RadzenPanelMenuItem Text="Customers" Icon="group" Path="@($"/App/Customer/{BranchId}/Branches?UserId={UserId}")" />
-    <RadzenPanelMenuItem Text="Collaterals" Icon="invert_colors" Path="/App/Customer/Collateral"/>
-    <RadzenPanelMenuItem Text="Loan Request" Icon="request_quote" Path="@($"/App/Request/{BranchId}/Branches/?UserId={UserId}")" Visible="_canShowLoanRequest" />
+        <RadzenPanelMenuItem Text="Loans" Icon="lists" Path="@($"/App/Loan/{BranchId}/Branches?UserId={UserId}")" Visible="@_canShowLoan" />
+        <RadzenPanelMenuItem Text="Client Due Pay" Icon="schedule" Path="@($"/App/Loan/{BranchId}/Branches/{UserId}/Users/Schedules")" Visible="@_canShowLoan"/>
+        <RadzenPanelMenuItem Text="Loan Write Off" Icon="person_off" Path="/App/Loan/WriteOff" Visible="@_isAccountOnly"/>
+        <RadzenPanelMenuItem Text="Loan Request" Icon="request_quote" Path="@($"/App/Request/{BranchId}/Branches/?UserId={UserId}")" Visible="@_isAccountOnly" />
 </RadzenPanelMenuItem>
 
 @code {
@@ -62,9 +45,13 @@
         _isAccountOnly = await _authorizeService.MustHasPermissionAsync(user, RolePolicies.AccountOnly);
         
         _changeCreditUrl = $"/App/Loan/CreditAgent/{BranchId}/Branches?UserId={UserId}";
+
         _loanRequestUrl = $"/App/Request/{BranchId}/Branches/?UserId={UserId}";
+
         _clientDuePayUrl = $"/App/Loan/{BranchId}/Branches/{UserId}/Users/Schedules";
+
         _customerUrl = $"/App/Customer/{BranchId}/Branches?UserId={UserId}";
+
         _loanUrl = $"/App/Loan/{BranchId}/Branches?UserId={UserId}";
         
         await base.OnInitializedAsync();

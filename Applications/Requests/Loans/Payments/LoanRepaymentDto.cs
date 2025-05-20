@@ -12,6 +12,9 @@
         public decimal? Interest { get; set; }
         public decimal? OtherInterest { get; set; }
         public decimal? OtherCharged { get; set; }
+        public decimal? AmountWithoutPenalty { get; set; } = 0;
+        public decimal? AmountWithPenalty { get; set; } = 0;
+        public decimal? OriginalAmount { get; set; }
         public decimal? SubTotal { get; set; }
         public bool? IsReturn { get; set; }
         public ICollection<LoanRepaymentLineDto>? LoanRepaymentLines { get; set; }

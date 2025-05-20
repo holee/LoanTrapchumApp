@@ -1,37 +1,25 @@
 using Applications.Responses.ViewModels.Loans.Payments;
-using Applications.Responses.ViewModels.Loans.Schedules;
 using Microsoft.AspNetCore.Components;
 
 namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments;
 public partial class ScheduleDetails
 {
 
-    [Parameter, EditorRequired] public int BranchId { get; set; } = 0;
-    [Parameter, EditorRequired] public int CurrencyId { get; set; } = 1;
-    [Parameter, EditorRequired] public string? LoanId { get; set; } = string.Empty;
-    [Parameter, EditorRequired] public long ScheduleId { get; set; } = 0;
-
-    VSchedule schedule = new();
-
-    IEnumerable<VPaymentLines> PaymentLines = [];
+    [Parameter] public int BranchId { get; set; } = 0;
+    [Parameter] public int CurrencyId { get; set; } = 1;
+    [Parameter] public string? LoanId { get; set; } = string.Empty;
+    [Parameter] public long ScheduleId { get; set; } = 0;
+    [Parameter] public ScheduleVm Schedule { get; set; } = new();
 
     protected override async Task OnInitializedAsync()
     {
-        //var resp = await _scheduleService.GetScheduleByIdAsync(LoanId, BranchId, ScheduleId, (int)ScheduleStatus.All);
 
-        //if (resp.IsSuccess)
-        //{
-        //    schedule = resp.Data!;
+        if (Schedule is { LoanScheduleId: 0 })
+        {
 
-        //    PaymentLines = schedule?.PaymentLines != null ? schedule!.PaymentLines : [];
-        //}
+        }
 
         await base.OnInitializedAsync();
     }
-
-
-
-
-
 
 }

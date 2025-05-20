@@ -21,8 +21,10 @@ namespace Infrastructures.DataAccess.Configurations.LoanDisbursements
             builder.Property(x => x.AdminFeeRate).HasPrecision(18, 3);
             builder.Property(x => x.Amount).HasPrecision(18, 3);
             builder.Property(x => x.PaidPrinciple).HasPrecision(18, 3);
-            builder.Property(x => x.TotalCollectionFee).HasPrecision(18, 3);
-            builder.Property(x => x.TotalInterest).HasPrecision(18, 3);
+            builder.Property(x => x.PaidCollectionFee)
+                .HasColumnName("PaidCollectionFee").HasPrecision(18, 3);
+            builder.Property(x => x.PaidInterest)
+                .HasColumnName("PaidInterest").HasPrecision(18, 3);
             builder.Property(x => x.AdminFeeAmount).HasPrecision(18, 3);
             builder.Property(x => x.TotalOtherCharge).HasPrecision(18, 3);
             builder.Property(x => x.OutStanding).HasPrecision(18, 3);

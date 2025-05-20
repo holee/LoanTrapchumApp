@@ -30,7 +30,6 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
         private IList<VLoanDisbursments> SelectedLoans = [];
         private string? filter = string.Empty;
         protected IEnumerable<VBranchResponse> Branches = [];
-        protected IEnumerable<VSchedulePaid> PaidSchedules = [];
         protected string filterText = string.Empty;
         int counts = 0;
         int pageSize = 10;

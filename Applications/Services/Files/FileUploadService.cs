@@ -9,8 +9,6 @@ namespace Applications.Services.Files
     {
         private readonly string[] permittedExtensions = { ".pdf", ".docx", ".jpg", ".png" };
 
-
-
         private string FormatFileSize(long bytes)
         {
             string[] sizes = { "B", "KB", "MB", "GB" };
@@ -58,10 +56,10 @@ namespace Applications.Services.Files
             return await fileUpload.RemovedFile(fileId, removedFile);
         }
 
-        public async Task<Result<FileModel>> UploadFile(MultipartFormDataContent content)
-        {
-            return await fileUpload.UploadFile(content);
-        }
+        //public async Task<Result<FileModel>> UploadFile(MultipartFormDataContent content)
+        //{
+        //    return await fileUpload.UploadFile(content);
+        //}
 
         public async Task<Result<FileModel>> UploadFile(FileUploadModel model)
         {

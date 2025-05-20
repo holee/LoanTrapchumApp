@@ -20,7 +20,7 @@ namespace Applications.Interfaces.Lists
         Task<IEnumerable<Holiday>> GetHolidays(bool isSelectedPrevious=false, DateTime? startFrom=null,DateTime? end=null);
         Task<IEnumerable<HolidayVm>> GetHolidays(DateTime? selectedDate);
         Task<Pager<HolidayVm>> GetHolidays(QueryParam q);
-        Task<IEnumerable<Holiday>> GetActiveHolidays(DateTime? selectedDate);
+        Task<IEnumerable<HolidayVm>> GetActiveHolidays(DateTime? selectedDate,int? selectedYear= 0);
         Task<Result<IEnumerable<HolidayVm>>> CreateHolidays(IEnumerable<Holiday> entities);
         Task<Result<string>> ActivateOrDeactivate(int id, Holiday req);
     }

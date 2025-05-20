@@ -12,7 +12,7 @@ namespace Applications.Services.Loans
     {
         Task<Result<string>> ChangedCreditAgent(int? branchId, LoanChangedCaDtoCreate req);
         Task<Result<string>> ChangedCreditAgent(int? branchId, List<LoanChangedCaDtoCreate> req);
-        Task<Result<string>> CreateLoanAsync(LoanDtoCreate disbursement);
+        Task<Result<bool>> CreateLoanAsync(LoanDtoCreate req);
         Task<Result<string>> DeleteAsync(string? loanId, int? branchId);
         Task<Result<string>> UpdateAsync(LoanDisbursment disbursement);
         Task<Stream> DownLoadScheduleAsExcel(string? loanId, int? branchId);

@@ -8,34 +8,28 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructures.Implements
 {
-    public class OpenBranchService(ApplicationDbContext context, IDbContextFactory<DataContext> contextFactory) : IOpenBranchService
+    public class OpenBranchService(IDbContextFactory<DataContext> contextFactory, IDapperConnectionFactory connectionFactory) : IOpenBranchService
     {
-
         public async Task<Result<IEnumerable<VCashVaultBalance>>> GetCashVaultBalance(int? branchRefId)
         {
 
             using var context = await contextFactory.CreateDbContextAsync();
 
-            var queries = await context.Database
-                            .SqlQuery<VCashVaultBalance>($"SELECT * FROM VCashVaultBalances WHERE BranchRefId={branchRefId}")
-                            .AsNoTracking()
-                            .ToListAsync();
-
-            if (!queries.Any())
-            {
-                queries = await context.Database
-                               .SqlQuery<VCashVaultBalance>($@"SELECT DISTINCT
+            var    queries = await context.Database
+                               .SqlQuery<VCashVaultBalance>($@"
+                               SELECT
 			                        c.CurrencyId,
                                     c.BranchRefId,
 			                        c.CurrencyName,
 			                        c.CurrencyCode,
-			                        CAST(0 AS DECIMAL) AS VaultBalance FROM VCashVaultBalances c")
+			                        COALESCE(c.VaultBalance,0) AS VaultBalance 
+                                FROM VCashVaultBalances c 
+                                WHERE BranchRefId={branchRefId}
+                                ")
                                .AsNoTracking()
                                .ToListAsync();
                 return Result.Success<IEnumerable<VCashVaultBalance>>(queries);
-            }
 
-            return Result.Success<IEnumerable<VCashVaultBalance>>(queries);
         }
 
         public async Task<Result<string>> OpenBranchAsync(LoanTransaction tranx)
@@ -44,10 +38,15 @@ namespace Infrastructures.Implements
             try
             {
                 await using var context = await contextFactory.CreateDbContextAsync();
+
                 var transaction = tranx.Adapt<LoanTransaction>();
+
                 transaction.TransactionDate = DateTime.UtcNow;
+
                 context.LoanTransaction.Add(transaction);
+
                 await context.SaveChangesAsync();
+
                 return Result.Success(new string("Branch Open Successfully."));
 
             }
@@ -64,15 +63,22 @@ namespace Infrastructures.Implements
             try
             {
                 await using var context = await contextFactory.CreateDbContextAsync();
+
                 var branchId = transaction.OpenBranch!.BranchRefId!.Value;
+
                 var closeDate = transaction.TransactionDate!.Value;
+
                 if (!(await IsAllreadyVaultIn(branchId, closeDate)))
                 {
                     return Result.Failure<string>(ErrorResponse.NotFound("Cannot Close Branch Now, Please VaultIn First."));
                 }
+
                 transaction.TransactionDate = DateTime.UtcNow;
+
                 context.LoanTransaction.Add(transaction);
+
                 await context.SaveChangesAsync();
+
                 return Result.Success(new string("Branch Close Successfully"));
             }
             catch (DbUpdateException ex)

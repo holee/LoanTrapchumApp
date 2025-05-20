@@ -23,7 +23,7 @@ public static class AppPolicies
                     .Build();
     }
 
-    public static AuthorizationPolicy IsCreditOfficerOnly()
+    public static AuthorizationPolicy CreditOfficerOnly()
     { 
         return new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()

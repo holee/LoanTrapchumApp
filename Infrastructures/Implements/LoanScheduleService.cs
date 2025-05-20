@@ -1,18 +1,15 @@
-﻿using System.Data;
-using Applications.Enumerations;
+﻿using Applications.Enumerations;
 using Applications.Interfaces.Loans;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Payments;
 using Applications.Responses.ViewModels.Loans.Schedules;
-using Applications.Responses.ViewModels.Options;
 using Dapper;
-using Domains.Models.Lists;
+using Infrastructures.Constants.Procedures;
 using Infrastructures.DataAccess;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Data;
 
 namespace Infrastructures.Implements
 {
@@ -51,7 +48,8 @@ namespace Infrastructures.Implements
         {
             using var db = _context.Database.GetDbConnection();
 
-            var items = await db.QueryMultipleAsync("spGetScheduleById",
+            
+            var items = await db.QueryMultipleAsync(ProcedureConstant.GetLoanById,
                new
                {
                    @LoanId = loanId,
@@ -66,7 +64,7 @@ namespace Infrastructures.Implements
             {
                 return Result.Failure<VSchedule>(ErrorResponse.NotFound("No Schedule found."));
             }
-            var lines = await items.ReadAsync<VPaymentLines>();
+            var lines = await items.ReadAsync<LoanPaymentLineVm>();
 
             schedule.PaymentLines = lines.ToList() ?? [];
 
@@ -148,7 +146,7 @@ namespace Infrastructures.Implements
 
             parameters.Add("@ScheduleStatusId", (int)status);
 
-            var items =await db.QueryAsync<VSchedule>("spGetSchedulesByLoanId", parameters, commandType: CommandType.StoredProcedure);
+            var items = await db.QueryAsync<VSchedule>("spGetSchedulesByLoanId", parameters, commandType: CommandType.StoredProcedure);
 
             return Result.Success(items);
         }
@@ -178,15 +176,15 @@ namespace Infrastructures.Implements
         }
 
 
-        public async Task<Result<IEnumerable<VPaymentLines>>> GetPayementScheduleLines(int branchId, long loanId, int installmentNo)
+        public async Task<Result<IEnumerable<LoanPaymentLineVm>>> GetPayementScheduleLines(int branchId, long loanId, int installmentNo)
         {
 
             var db = _connectionFactory.CreateConnection();
 
-            var sql = @"SELECT * FROM VLoanRepaymentLines WHERE 
+            var sql = @"SELECT * FROM VLoanPaymentLines WHERE 
                                  BranchRefId=@branchId AND LoanRefId=@loanId AND 
                                  InstallmentNo=@installmentNo";
-            var paymentLines = await db.QueryAsync<VPaymentLines>(sql, new
+            var paymentLines = await db.QueryAsync<LoanPaymentLineVm>(sql, new
             {
                 branchId,
                 loanId,
@@ -195,7 +193,7 @@ namespace Infrastructures.Implements
 
             if (!paymentLines.Any())
             {
-                return Result.Failure<IEnumerable<VPaymentLines>>(ErrorResponse.NotFound("No Payment schedule found."));
+                return Result.Failure<IEnumerable<LoanPaymentLineVm>>(ErrorResponse.NotFound("No Payment schedule found."));
             }
             return Result.Success(paymentLines);
         }

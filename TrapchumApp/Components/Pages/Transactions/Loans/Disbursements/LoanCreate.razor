@@ -126,7 +126,7 @@
                                             <th style="background-color:#F1F1F4" class="w-25">Start Date</th>
                                             <td>
                                                 <input type="hidden" @bind="model!.StartDate" />
-                                                @model?.StartDate
+                                                @model?.StartDate.DayFirst()
                                             </td>
                                         </tr>
                                         <tr>
@@ -155,7 +155,7 @@
                                             <th style="background-color:#F1F1F4" class="w-25">Last Payment</th>
                                             <td>
                                                 <input type="hidden" @bind="model!.LastPaymentDate" />
-                                                @model?.LastPaymentDate
+                                                @model?.LastPaymentDate.DayFirst()
                                             </td>
                                         </tr>
                                         <tr>
@@ -189,19 +189,23 @@
                          JustifyContent="JustifyContent.End"
                          class="py-2"
                          AlignItems="AlignItems.Center">
-                <RadzenButton Click="ShowLoanPreviews"
-                              Size="ButtonSize.Small"
-                              Icon="preview"
-                              ButtonStyle="ButtonStyle.Primary" Text="Preview" />
-                <RadzenButton Click="HandleFormSubmit"
-                              Size="ButtonSize.Small"
-                              Icon="save"
-                              ButtonStyle="ButtonStyle.Primary" Text="Save" />
-                <RadzenButton Size="ButtonSize.Small"
-                              Click="HandleFormSubmit"
-                              Text="Disburse Now"
-                              Icon="save"
-                              ButtonStyle="ButtonStyle.Success" />
+
+                @if (!disburseStatus)
+                {
+                    <RadzenButton Click="ShowLoanPreviews"
+                                  Size="ButtonSize.Small"
+                                  Icon="preview"
+                                  ButtonStyle="ButtonStyle.Primary" Text="Preview" />
+                    <RadzenButton Click="HandleFormSubmit"
+                                  Size="ButtonSize.Small"
+                                  Icon="save"
+                                  ButtonStyle="ButtonStyle.Primary" Text="Save" />
+                    <RadzenButton Size="ButtonSize.Small"
+                                  Click="HandleFormSubmit"
+                                  Text="Disburse Now"
+                                  Icon="save"
+                                  ButtonStyle="ButtonStyle.Success" />
+                }
                 <RadzenLink Icon="arrow_back"
                             Path="@($"/App/Request/{BranchId}/Branches?UserId={UserId}")"
                             Text="Back" />
@@ -216,11 +220,10 @@
     {
         model.ScheduleMode = arg switch
         {
-            1 => PaymentSechuleMode.Before,
-            2 => PaymentSechuleMode.After,
-            _ => PaymentSechuleMode.Skip
+            1 => AdjustmentOption.Before,
+            2 => AdjustmentOption.After,
+            _ => AdjustmentOption.Skip
         };
-        Console.WriteLine(arg);
     }
 
 }

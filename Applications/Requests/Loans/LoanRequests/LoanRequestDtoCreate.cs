@@ -42,12 +42,12 @@ public sealed class LoanRequestDtoCreate
     public string? Summiter { get; set; }
     public decimal? AdminFeeRate { get; set; }
     public decimal? AdminFeeAmount { get; set; }
+
     public decimal? PenaltyRate { get; set; }
     public string? Remark { get; set; }
     public string? Memo { get; set; }
-
     public List<LoanGuarantorDtoCreate> GuarantorsLink { get; set; } = [];
     public List<CollateralLinkDtoCreate> CollateralLinesLink { get; set; } = [];
     public List<LoanDocumentDtoCreate> LoanDocuments { get; set; } = [];
-    public List<LoanDecriptionDtoCreate> LoanDescriptions { get; set; } = [];
-}
+    public List<LoanDescriptionsDtoCreate> LoanDescriptions { get; set; } = [];
+} 

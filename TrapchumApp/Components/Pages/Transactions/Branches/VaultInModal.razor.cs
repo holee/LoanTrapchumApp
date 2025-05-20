@@ -4,17 +4,16 @@ using Applications.Requests.Lists.Entities;
 using Applications.Requests.Transactions.CashManagements;
 using Applications.Responses.Lists.Currency;
 using Applications.Responses.ViewModels.Currencies;
+using Applications.Services.Currencies;
+using Applications.Services.Transactions.Branches;
 using Domains.Models.Transaction;
 using Mapster;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 namespace TrapchumApp.Components.Pages.Transactions.Branches
 {
-    public partial class VaultInModal
+    public partial class VaultInModal(ICurrencyServiceImpl curService, ICashVaultServiceImpl caVaultService)
     {
-        [Inject] ICurrencyService curService { get; set; } = default!;
-        [Inject] ICashVaultService caVaultService { get; set; } = default!;
-        
         [Parameter] public string? UserId { get; set; }
         [Parameter] public int BranchId { get; set; }
         VCashVaults? vCashVault = new VCashVaults();
@@ -59,7 +58,9 @@ namespace TrapchumApp.Components.Pages.Transactions.Branches
                 if (cashVaultResp.Any())
                 {
                     vCashVaults = cashVaultResp ?? [];
+
                     userBalance = vCashVaults?.Where(x => x.CurrencyRefId == CurrencyId).Sum(x => x.UserBalance);
+                
                 }
                 var cashNotes = await caVaultService.GetCurrencyNotesAsync(BranchId);
 
@@ -75,6 +76,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Branches
 
         }
         string sp = "#,#0";
+
         private void SelectValueChange(int? cid)
         {
             if (cid.HasValue) CurrencyId = cid;
@@ -177,7 +179,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Branches
 
             var request = tranx.Adapt<LoanTransaction>();
 
-            var result = await caVaultService.CreateCashVaultAsync(request);
+            var result = await caVaultService.CreateCashVaultAsync(tranx);
 
             if (!result.IsSuccess)
             {

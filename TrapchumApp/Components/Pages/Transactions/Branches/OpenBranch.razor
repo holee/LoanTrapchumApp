@@ -42,7 +42,7 @@
                                                   Context="c"
                                                   Property="CurrencyId">
                                 <Template>
-                                    <RadzenButton Click="@(()=>OpenSideDialog(c.CurrencyId!.Value))"
+                                    <RadzenButton Click="@(()=>OpenSideDialog(c.CurrencyId))"
                                                   Size="ButtonSize.ExtraSmall"
                                                   Icon="attach_money"
                                                   class="rz-primary"
@@ -114,7 +114,7 @@
                                  AlignItems="AlignItems.Center">
                         @if (bState.State)
                         {
-                            @if (canVaultOut)
+                            @if (bState.VaultOut)
                             {
                                 <RadzenButton Click="OnCashVaultOut"
                                               Size="ButtonSize.Small"

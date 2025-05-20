@@ -54,7 +54,7 @@ namespace Applications.Services.Currencies
 
         public async Task<Result<IEnumerable<VCurrencyNotes>>> GetCurrencyNotes(int? currencyId, int? branchId)
         {
-            return await currencyService.GetCurrencyNotes(branchId, currencyId);
+            return await currencyService.GetCurrencyNotes(currencyId, branchId);
         }
 
         public async Task<IEnumerable<VCurrencyNotes>> GetCurrecyNotesss(int? branchRefId)

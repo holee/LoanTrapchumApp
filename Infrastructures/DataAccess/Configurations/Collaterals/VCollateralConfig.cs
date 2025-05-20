@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructures.DataAccess.Configurations.Collaterals
 {
-    public class VCollateralConfig : IEntityTypeConfiguration<VCollateral>
+    public class VCollateralConfig : IBaseEntityTypeConfigurations<VCollateral>
     {
         public void Configure(EntityTypeBuilder<VCollateral> builder)
         {
@@ -18,12 +18,17 @@ namespace Infrastructures.DataAccess.Configurations.Collaterals
     }
 
 
-    public class VLoanCollateralLineConfig : IEntityTypeConfiguration<VLoanRequestCollateralLines> 
+    public class VLoanCollateralLineConfig : IBaseEntityTypeConfigurations<VLoanRequestCollateralLines> 
     {
         public void Configure(EntityTypeBuilder<VLoanRequestCollateralLines> builder)
         {
             builder.ToView("VLoanCollaterals");
             builder.HasNoKey();
+            builder.Property(x => x.HotPrice).HasPrecision(18, 3);
+            builder.Property(x => x.MarketPrice).HasPrecision(18, 3);
+            builder.Property(x => x.PawnPrice).HasPrecision(18, 3);
+            //builder.Property(x => x.).HasPrecision(18, 3);
+            //builder.Property(x => x.HotPrice).HasPrecision(18, 3);
         }
     }
 }

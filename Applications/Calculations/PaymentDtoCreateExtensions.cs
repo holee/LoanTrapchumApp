@@ -37,7 +37,7 @@ public static class PaymentDtoCreateExtensions
         };
     }
 
-    public static PaymentCreate ToPaymentCreate(this List<LoanRepaymentLineDtoCreate> lines, int currencyId)
+    public static PaymentCreate ToPaymentCreate(this List<LoanPaymentLineDtoCreate> lines, int currencyId)
     {
         return new PaymentCreate
         {

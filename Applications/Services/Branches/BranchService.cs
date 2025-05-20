@@ -71,7 +71,6 @@ namespace Applications.Services.Branches
         public async Task<Result<UserBranchesResponse>> GetBranchesByUser(string userId) => await branchService.GetBranchesByUser(userId);
 
 
-
         public async Task<Result<Branch>> GetBranchForVault(int? id)
         {
             return await branchService.GetBranchForVault(id);

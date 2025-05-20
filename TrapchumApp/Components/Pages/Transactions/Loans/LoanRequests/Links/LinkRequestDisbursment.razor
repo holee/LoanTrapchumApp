@@ -24,11 +24,10 @@ else
     [Parameter, EditorRequired] public string? UserId { get; set; }  
     string? requestLoanUrl = "";
     string? loanRequestDetailsUrl = "";
-    protected override void OnParametersSet()
+    protected override void OnInitialized()
     {
         loanRequestDetailsUrl = $"App/Loan/{BranchId}/Branches/Request/Details?UserId={UserId}&CustomerId={LoanRequest?.CustomerId}&LoanRequestId={LoanRequest?.LoanRequestId}";
         requestLoanUrl = $"/Loan/Disbursement/CreateNew?BranchId={BranchId}&UserId={UserId}&CustomerRequestId={LoanRequest?.CustomerId}&LoanRequestId={LoanRequest?.LoanRequestId}";
 
-        base.OnParametersSet();
     }
 }

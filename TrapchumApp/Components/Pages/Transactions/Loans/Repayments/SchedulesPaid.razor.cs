@@ -4,110 +4,90 @@ using Radzen.Blazor.Rendering;
 using Radzen.Blazor;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Responses.Paginations;
+using Applications.Services.Loans;
+using Applications.Responses.ViewModels.Loans.Payments;
 
 namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
 {
     public partial class SchedulesPaid
     {
+
+        private readonly ILoanPaymentServiceImpl _loanPaymentService;
+        public SchedulesPaid(ILoanPaymentServiceImpl loanPaymentService)
+        {
+            _loanPaymentService = loanPaymentService;
+        }
+        [Parameter] public int? CurrencyId { get; set; } = 1;
         [Parameter] public int BranchId { get; set; } = 0;
-        [Parameter] public int CurrencyId { get; set; } = 1;
-        [Parameter] public string? UserId { get; set; } = string.Empty;
         [Parameter] public string? LoanId { get; set; } = string.Empty;
-
-        IList<VSchedule> PaymentSchedules = [];
+        int counts = 0;
+        IEnumerable<VSchedule> _schedules = [];
+        ScheduleVm? _schedule = null;
         bool isLoading = false;
-        int count = 0;
-        int pageSize = 25;
-        string? filterText = "";
-        Popup popup = default!;
-        RadzenMenuItem buttonItem = default!;
+        int pageSize = 15;
         long ScheduleId = 0;
-
         protected override async Task OnInitializedAsync()
         {
             await GetCustomerSchedules();
+
             await base.OnInitializedAsync();
         }
 
-        void ShowCustomerPayment(VSchedule p)
-        {
-
-            var parameters = new Dictionary<string, object?>{
-                        { "LoanPayment",p},
-                        { "CurrencyId",p.CurrencyId!.Value },
-                        { "LoanId",p.LoanId ! },
-                        { "UserId",UserId },
-                        { "CreditAgentId",p.CreditAgentId !
-                        }};
-            NavigationManager.NavigateTo($"/Loans/{p.LoanId}/Schedules?BranchId={p.BranchId}&CreditAgentId={p.CreditAgentId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
-        }
-
         void RowSelecting(VSchedule s) { }
-
-
-
         async Task ShowScheduleDetails(VSchedule p)
         {
-            //await popup.ToggleAsync(buttonItem.Element);
+
             ContextMenuService.Close();
+
+            var rsp = await _loanPaymentService.GetScheduleByIdAsync(p.LoanScheduleId, BranchId, LoanId);
+
+            if (rsp is { IsSuccess: false, Data: null }) return;
+
+            _schedule = rsp.Data;
+
             var param = new Dictionary<string, object?>
             {
                 {"LoanId",LoanId },
                 {"CurrencyId",CurrencyId },
                 {"BranchId",BranchId },
                 {"ScheduleId",p.LoanScheduleId },
+                {"Schedule",_schedule  }
             };
+
+
             var options = new SideDialogOptions
             {
                 Position = DialogPosition.Right,
                 ShowMask = true,
                 CloseDialogOnOverlayClick = true,
-                Width = "70vw"
+                Width = "55vw"
             };
+
             await DialogService.OpenSideAsync<ScheduleDetails>($"Schedule-{p.LoanScheduleId}", parameters: param, options);
 
 
         }
-
-        void ChangedPageSize(int page)
-        {
-            pageSize = page;
-        }
-
         async Task GetCustomerSchedules()
         {
             try
             {
                 isLoading = true;
 
-                PaymentSchedules = [];
+                var rsp = await _loanPaymentService.GetPaidedScheduleAsync(BranchId, LoanId);
 
-                var param = new QueryParam(1, pageSize, "LoanId");
+                if (rsp is { IsSuccess: true, Data: not null })
+                {
+                    _schedules = rsp.Data;
 
-                //var responseData = await _scheduleService.GetLoanScheduleByIdAsync(LoanId, BranchId, ScheduleStatus.Paid, param);
-
-                //if (responseData.IsSuccess)
-                //{
-
-                //    PaymentSchedules = responseData.Data!.Items;
-
-                //    count = responseData.Data!.Count;
-                //}
-                //else
-                //{
-                //    count = 0;
-                //    PaymentSchedules = [];
-                //    var error = responseData.Errors!.FirstOrDefault();
-                //    NotificationService.Notify(NotificationSeverity.Error, error);
-                //}
-
-                await Task.CompletedTask;
+                    counts = rsp.Data.Count();
+                }
 
                 isLoading = false;
             }
             catch (Exception ex)
             {
                 isLoading = false;
+
                 NotificationService.Notify(NotificationSeverity.Error, ex.Message);
             }
             finally

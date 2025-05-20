@@ -5,9 +5,11 @@ using Applications.Requests.Loans.Disbursements;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans;
+using Applications.Responses.ViewModels.Loans.Payments;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Schedules;
 using Domains.Models.Loans;
+using Domains.Models.Transaction;
 using Mapster;
 using QuestPDF.Fluent;
 
@@ -25,10 +27,53 @@ namespace Applications.Services.Loans
             throw new NotImplementedException();
         }
 
-        public async Task<Result<string>> CreateLoanAsync(LoanDtoCreate disbursement)
+        public async Task<Result<bool>> CreateLoanAsync(LoanDtoCreate req)
         {
-            return await loanService.CreateLoanAsync(disbursement);
+            
+            var tranx = new LoanTransaction
+            {
+                TransactionsId = $"trx-{Guid.CreateVersion7()}",
+                UserRefId = req.UserRefId,
+                TransactionTypeName = "Loan Disbursement",
+                TranTypeRefId = 19,
+                IsActive = true
+            };
+            
+            var cashMgt = new CashManagement
+            {
+                Id = $"cash-{Guid.CreateVersion7()}",
+
+                BankRefId = req.BankRefId,
+
+                BranchRefId = req.BranchId,
+
+                Amount = req.PaidAmount,
+
+                CurrencyRefId = req.CurrencyRefId,
+
+                CashStatusRefId = 2,
+
+                Remark = "Cash goes through transaction",
+
+                TransactionDate = req.RegisterDate,
+
+                BusinessDate = req.RegisterDate,
+
+                Balance = 0,
+
+                EmployeeRefId = req.UserRefId
+            };
+
+            tranx.CashManagements.Add(cashMgt);
+            
+            var model = req.MapLoan();
+            
+            model.LoanTransaction = tranx;
+            
+            return await loanService.CreateLoanAsync(model);
         }
+
+        
 
         public Task<Result<string>> UpdateAsync(LoanDisbursment disbursement)
         {
@@ -65,9 +110,9 @@ namespace Applications.Services.Loans
             return Result.Failure<Stream>(ErrorResponse.NotFound(""));
         }
 
-        public async Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus status,bool include=false)
+        public async Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus status,bool includeSchedule=false)
         {
-            return await loanService.GetLoanByIdAsync(loanId, branchId, status,include);
+            return await loanService.GetLoanByIdAsync(loanId, branchId, status,includeSchedule);
         }
 
         public async Task<Pager<VLoanDisbursments>> GetLoansAsync(int? branchId, string? userId, LoanStatuses status = LoanStatuses.Active, QueryParam? param = null)

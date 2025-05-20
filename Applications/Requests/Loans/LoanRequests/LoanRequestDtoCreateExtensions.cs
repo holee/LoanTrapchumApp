@@ -19,7 +19,16 @@ public static class LoanRequestDtoCreateExtensions
             NewFileName = req.NewFileName
         };
     }
-
+    
+    private static LoanDescriptions MapToLoanDescription(this LoanDescriptionsDtoCreate req)
+    {
+        return new LoanDescriptions
+        {
+            Id = req.Id,
+            Memo = req.Memo,
+            LoanRequestRefId = req.LoanRequestRefId
+        };
+    }
 
     private static LoanGuarantorLink MapToLoanGuarantorLink(this LoanGuarantorDtoCreate req)
     {
@@ -85,13 +94,10 @@ public static class LoanRequestDtoCreateExtensions
             Memo = req.Memo,
             CollectionFeeModeId = req.CollectionFeeModeId ?? 1,
             CollectionFeeModeName = req.CollectionFeeModeName ?? string.Empty,
-            LoanDocuments = req.LoanDocuments?.Select(d => d.MapToLoanDocument()).ToList() ?? [],
-            GuarantorsLink = req.GuarantorsLink?.Select(g => g.MapToLoanGuarantorLink()).ToList() ?? [],
-            CollateralLinesLink = req.CollateralLinesLink?.Select(c => c.MapToCollateralLinesLink()).ToList() ?? [],
-            LoanDescriptions = req.LoanDescriptions?.Select(ld => new LoanDescriptions
-            {
-                Memo = ld.Memo
-            }).ToList() ?? []
+            LoanDocuments = req.LoanDocuments.Select(d => d.MapToLoanDocument()).ToList() ?? [],
+            GuarantorsLink = req.GuarantorsLink.Select(g => g.MapToLoanGuarantorLink()).ToList() ?? [],
+            CollateralLinesLink = req.CollateralLinesLink.Select(c => c.MapToCollateralLinesLink()).ToList() ?? [],
+            LoanDescriptions = req.LoanDescriptions.Select(ld => ld.MapToLoanDescription()).ToList() ?? []
         };
     }
 }

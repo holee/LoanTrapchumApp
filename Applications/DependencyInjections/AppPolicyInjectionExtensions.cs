@@ -69,7 +69,7 @@ namespace Applications.DependencyInjections
             options.AddPolicy(DashboardPolicies.ShowAdminDashboard, DashboardPolicies.CanShowAdminDashboard());
             options.AddPolicy(RolePolicies.AdminOnly, AppPolicies.IsAdminOnly());
             options.AddPolicy(RolePolicies.AccountOnly, AppPolicies.IsAccountOnly());
-            options.AddPolicy(RolePolicies.CreditOfficerOnly, AppPolicies.IsCreditOfficerOnly());
+            options.AddPolicy(RolePolicies.CreditOfficerOnly, AppPolicies.CreditOfficerOnly());
             options.AddPolicy(RolePolicies.ManagerOnly, AppPolicies.IsManagerOnly());
             options.AddPolicy(CustomersPolicies.Read, CustomersPolicies.CanRead());
             options.AddPolicy(CustomersPolicies.Create, CustomersPolicies.CanCreate());

@@ -6,6 +6,7 @@ using Applications.Responses.ViewModels.Currencies;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Radzen;
+using TrapchumApp.Components.Shared;
 
 namespace TrapchumApp.Components.Pages.Transactions.Branches
 {
@@ -15,6 +16,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Branches
 
         [CascadingParameter]
         Task<AuthenticationState> AuthState { get; set; } = default!;
+        [CascadingParameter] CascadingAppState bState { get; set; } = default!;
         [Parameter, SupplyParameterFromQuery] public string UserId { get; set; } = string.Empty;
         [Parameter] public int BranchId { get; set; }
 
@@ -37,7 +39,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Branches
         DialogOptions options = new DialogOptions
         {
             ShowTitle = false,
-            Style="min-width:75rem"
+            Style = "min-width:75rem"
         };
         protected override async Task OnInitializedAsync()
         {
@@ -50,7 +52,10 @@ namespace TrapchumApp.Components.Pages.Transactions.Branches
 
                 //canVaultIn = await _authorizeService.MustHasPermissionAsync(user, TranxPolicies.VaultIn);
 
-                var branchResponse = await _branchService.GetBranchesByUser(UserId,0);
+                await bState.GetAuthenticatedUser(user);
+
+
+                var branchResponse = await _branchService.GetBranchesByUser(UserId, 0);
 
                 if (branchResponse.IsSuccess)
                 {
@@ -94,7 +99,6 @@ namespace TrapchumApp.Components.Pages.Transactions.Branches
             if (resultModal != null)
             {
                 await OnInitializedAsync();
-                Console.WriteLine("Vault In...");
             }
         }
     }

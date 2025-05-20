@@ -11,6 +11,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
         [Parameter] public string? CustomerId { get; set; }
         [Parameter] public int BranchId { get; set; } = 0;
         [Parameter] public string? LoanRequestId { get; set; }
+
         ApprovedRequest? Data = new();
 
         AproveLoanDtoCreate? model=new();

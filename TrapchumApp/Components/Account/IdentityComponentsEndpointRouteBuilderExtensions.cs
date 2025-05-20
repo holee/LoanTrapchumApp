@@ -119,7 +119,9 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
 
 
         reportGroup.MapGet("/Schedules/{loanId}/{branchId:int}/Exel", async ([FromServices] IPrintPdfServiceImpl printer,
-            [FromServices] IWebHostEnvironment env, [FromServices] IPrintExelServiceImpl exel, string loanId, int branchId) =>
+            [FromServices] IWebHostEnvironment env, 
+            [FromServices] IPrintExelServiceImpl exel, 
+            string loanId, int branchId) =>
         {
 
             var rsp = await exel.DownLoadScheduleAsExcel(loanId, branchId);

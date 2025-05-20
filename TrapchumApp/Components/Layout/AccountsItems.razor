@@ -1,23 +1,32 @@
-﻿<RadzenPanelMenuItem Text="Accounts" Icon="deployed_code_account" Visible="IsBranchOpen">
-    <RadzenPanelMenuItem Text="Ledger" Icon="finance" Path="@($"/App/Account/Ledgers/{BranchId}/Branches")"/>
-    <RadzenPanelMenuItem Text="G. Journal Entry" Path="@($"/App/Account/Journals/{BranchId}/Branches")" Icon="data_table"/>
-    <RadzenPanelMenuItem Text="Bank Reconcile" Icon="source_environment"/>
+﻿<RadzenPanelMenuItem Text="Branches" Icon="auto_awesome">
+    <RadzenPanelMenuItem Text="Open/Close Branch"
+                         Icon="lock_open_right"
+                         Path="@($"/Branches/{BranchId}/OpenBranch?UserId={UserId}")" />
+    <RadzenPanelMenuItem Text="Cash Valutl In/Out"
+                         Icon="check_in_out"
+                         Visible="@IsBranchOpen"
+                         Path="@($"/App/Branches/{BranchId}/CashVault?UserId={UserId}")" />
+</RadzenPanelMenuItem>
+<RadzenPanelMenuItem Text="Accounts" Icon="deployed_code_account" Visible="IsBranchOpen">
+    <RadzenPanelMenuItem Text="Ledger" Icon="finance" Path="@($"/App/Account/Ledgers/{BranchId}/Branches")" />
+    <RadzenPanelMenuItem Text="G. Journal Entry" Path="@($"/App/Account/Journals/{BranchId}/Branches")" Icon="data_table" />
+    <RadzenPanelMenuItem Text="Bank Reconcile" Icon="source_environment" />
 </RadzenPanelMenuItem>
 <RadzenPanelMenuItem Text="Budget" Icon="deployed_code_account" Visible="IsBranchOpen">
-    <RadzenPanelMenuItem Text="Vendor" Icon="finance"/>
-    <RadzenPanelMenuItem Text="Expense" Icon="data_table"/>
-    <RadzenPanelMenuItem Text="Payment Voucher" Icon="source_environment"/>
+    <RadzenPanelMenuItem Text="Vendor" Icon="finance" />
+    <RadzenPanelMenuItem Text="Expense" Icon="data_table" />
+    <RadzenPanelMenuItem Text="Payment Voucher" Icon="source_environment" />
 </RadzenPanelMenuItem>
 <RadzenPanelMenuItem Text="Payroll" Icon="deployed_code_account" Visible="IsBranchOpen">
-    <RadzenPanelMenuItem Text="Employee" Icon="finance"/>
-    <RadzenPanelMenuItem Text="Taxation" Icon="data_table"/>
-    <RadzenPanelMenuItem Text="E-Filing" Icon="source_environment"/>
+    <RadzenPanelMenuItem Text="Employee" Icon="finance" />
+    <RadzenPanelMenuItem Text="Taxation" Icon="data_table" />
+    <RadzenPanelMenuItem Text="E-Filing" Icon="source_environment" />
 </RadzenPanelMenuItem>
 
 @code {
-    [Parameter, EditorRequired] public bool IsBranchOpen { get; set; } = false;
-    [Parameter]public int? BranchId { get; set; } = 0;
-
+    [Parameter] public bool IsBranchOpen { get; set; } = false;
+    [Parameter] public int? BranchId { get; set; } = 0;
+    [Parameter] public string? UserId { get; set; } = "";
     void GoAccount()
     {
         //RedirectManager.RedirectTo("/App/Account/Journals");

@@ -6,7 +6,7 @@
         if (firstRender)
         {
             var returnUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
-            NavigationManager.NavigateTo($"/Account/AccessDenied?returnUrl={Uri.EscapeDataString(returnUrl)}", forceLoad: false);
+            NavigationManager.NavigateTo($"/Account/AccessDenied?returnUrl={Uri.EscapeDataString(returnUrl)}", forceLoad: true);
         }
     }
 }

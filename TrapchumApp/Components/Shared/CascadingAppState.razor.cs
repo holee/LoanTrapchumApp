@@ -4,7 +4,6 @@ using System.Text.Json;
 using Applications.ApplicationPolicies;
 using Applications.Extensions.Identity.Authorizations.Extensions;
 using Applications.Extensions.Identity.Policies;
-using Microsoft.AspNetCore.Authorization;
 
 namespace TrapchumApp.Components.Shared
 {
@@ -15,10 +14,36 @@ namespace TrapchumApp.Components.Shared
         private bool _state;
         private bool _isAdmin;
         private bool _isAccount;
+        private bool _isManager;
         private bool _isCreditAgent;
         private bool _canDisbursed;
         private bool _canApproved;
         private bool _canRequest;
+
+        private bool _vaultIn;
+
+        public bool VaultIn
+        {
+            get { return _vaultIn; }
+            set
+            {
+                _vaultIn = value;
+                StateHasChanged();
+            }
+        }
+
+        private bool _vaultOut;
+
+        public bool VaultOut
+        {
+            get { return _vaultOut; }
+            set
+            {
+                _vaultOut = value;
+                StateHasChanged();
+            }
+        }
+
 
         public bool State
         {
@@ -39,19 +64,19 @@ namespace TrapchumApp.Components.Shared
             {
                 _isAdmin = value;
                 StateHasChanged();
-            } 
+            }
         }
 
         public bool IsAccount
         {
             get => _isAccount;
-            
+
             set
             {
                 _isAccount = value;
-                
+
                 StateHasChanged();
-            } 
+            }
         }
 
         public bool IsCreditAgent
@@ -59,9 +84,9 @@ namespace TrapchumApp.Components.Shared
             get => _isCreditAgent;
             set
             {
-                 _isCreditAgent = value;
-                 
-                 StateHasChanged();
+                _isCreditAgent = value;
+
+                StateHasChanged();
             }
         }
 
@@ -91,42 +116,143 @@ namespace TrapchumApp.Components.Shared
             set
             {
                 _canRequest = value;
-                
+
                 StateHasChanged();
             }
         }
 
+        public bool IsManager
+        {
+            get => _isManager;
+            set
+            {
+                _isManager = value;
 
-        public async Task CheckedIsAdmin(ClaimsPrincipal user)
-        {
-            _isAdmin = await _authorizeService.MustHasPermissionAsync(user, RolePolicies.AdminOnly);
+                StateHasChanged();
+            }
         }
-        
-        public async Task CheckedIsAccount(ClaimsPrincipal user)
+        internal async Task CheckedIsAdmin(ClaimsPrincipal user)
         {
-            _isAccount = await _authorizeService.MustHasPermissionAsync(user, RolePolicies.AccountOnly);
+            if (user is null && user?.Identity?.IsAuthenticated == false)
+            {
+                _isAdmin = false;
+
+                return;
+            }
+
+            _isAdmin = await _authorizeService.MustHasPermissionAsync(user!, RolePolicies.AdminOnly);
         }
-        
-        public async Task CheckedIsCreditAgent(ClaimsPrincipal user)
+
+        internal async Task CheckedIsManager(ClaimsPrincipal user)
         {
-            _isCreditAgent = await _authorizeService.MustHasPermissionAsync(user, RolePolicies.CreditOfficerOnly);
+            if (user is null && user?.Identity?.IsAuthenticated == false)
+            {
+                _isManager = false;
+                return;
+            }
+            _isManager = await _authorizeService.MustHasPermissionAsync(user!, RolePolicies.ManagerOnly);
         }
-        
-        public async Task CheckedCanDisbursemnt(ClaimsPrincipal user) 
+
+        internal async Task CheckedIsAccount(ClaimsPrincipal user)
         {
-            _canDisbursed = await _authorizeService.MustHasPermissionAsync(user, RequestsPolicies.Disburse);
+            if (user is null && user?.Identity?.IsAuthenticated == false)
+            {
+                _isAccount = false;
+                return;
+            }
+
+            _isAccount = await _authorizeService.MustHasPermissionAsync(user!, RolePolicies.AccountOnly);
         }
-        
-        public async Task CheckedCanApprved(ClaimsPrincipal user)  
+
+        internal async Task CheckedIsCreditAgent(ClaimsPrincipal user)
         {
-            _canApproved = await _authorizeService.MustHasPermissionAsync(user, RequestsPolicies.Approve);
+            if (user is null && user?.Identity?.IsAuthenticated == false)
+            {
+                _isCreditAgent = false;
+                return;
+            }
+
+            _isCreditAgent = await _authorizeService.MustHasPermissionAsync(user!, RolePolicies.CreditOfficerOnly);
         }
-        
-        public async Task CheckedCanRequest(ClaimsPrincipal user)   
+
+        internal async Task CheckedCanDisbursemnt(ClaimsPrincipal user)
         {
-            _canRequest = await _authorizeService.MustHasPermissionAsync(user, RequestsPolicies.Request);
+            if (user is null && user?.Identity?.IsAuthenticated == false)
+            {
+                _canDisbursed = false;
+
+                return;
+            }
+
+            _canDisbursed = await _authorizeService.MustHasPermissionAsync(user!, RequestsPolicies.Disburse);
         }
-        
+
+        internal async Task CheckedCanVaultIn(ClaimsPrincipal user)
+        {
+            if (user is null && user?.Identity?.IsAuthenticated == false)
+            {
+                _vaultIn = false;
+
+                return;
+            }
+
+            _vaultIn = await _authorizeService.MustHasPermissionAsync(user!, TranxsPolicies.VaultIn);
+        }
+
+        internal async Task CheckedCanVaultOut(ClaimsPrincipal user)
+        {
+            if (user is null && user?.Identity?.IsAuthenticated == false)
+            {
+                _vaultOut = false;
+
+                return;
+            }
+
+            _vaultOut = await _authorizeService.MustHasPermissionAsync(user!, TranxsPolicies.VaultOut);
+        }
+
+
+        internal async Task CheckedCanApprved(ClaimsPrincipal user)
+        {
+
+            if (user is null && user?.Identity?.IsAuthenticated == false)
+            {
+                _canApproved = false;
+
+                return;
+            }
+
+            _canApproved = await _authorizeService.MustHasPermissionAsync(user!, RequestsPolicies.Approve);
+        }
+
+        internal async Task CheckedCanRequest(ClaimsPrincipal user)
+        {
+            if (user is null && user?.Identity?.IsAuthenticated == false)
+            {
+                _canRequest = false;
+
+                return;
+            }
+
+            _canRequest = await _authorizeService.MustHasPermissionAsync(user!, RequestsPolicies.Request);
+        }
+
+
+        public async Task GetAuthenticatedUser(ClaimsPrincipal user)
+        {
+            await CheckedCanApprved(user);
+            await CheckedCanDisbursemnt(user);
+            await CheckedCanRequest(user);
+            await CheckedIsAccount(user);
+            await CheckedIsAdmin(user);
+            await CheckedIsCreditAgent(user);
+            await CheckedIsManager(user);
+            await CheckedIsCreditAgent(user);
+            await CheckedCanVaultIn(user);
+            await CheckedCanVaultOut(user);
+        }
+
+
         public async Task GetBranchState(int? branchId)
         {
             var branchStateResponse = await _branchService.GetBrachStatus(branchId);

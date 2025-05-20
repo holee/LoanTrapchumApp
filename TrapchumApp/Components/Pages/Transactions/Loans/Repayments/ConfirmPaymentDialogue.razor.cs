@@ -56,26 +56,16 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
         private VCurrenciesList? selectedCurrency;
         private decimal? totalPaidAmount = 0;
         bool isBuy = true;
+
         TrxForeignExchangeDtoCreate model = new TrxForeignExchangeDtoCreate();
 
         ForeignExchangeDtoCreate c = new ForeignExchangeDtoCreate();
-        private LoanRepaymentDtoCreate LoanRepayment { get; set; } = new();
-        public ICollection<LoanRepaymentLineDtoCreate> LoanRepaymentLines { get; set; }
-                                               = new List<LoanRepaymentLineDtoCreate>();
+        private LoanPaymentDtoCreate LoanRepayment { get; set; } = new();
+        public ICollection<LoanPaymentLineDtoCreate> LoanRepaymentLines { get; set; } = [];
+
         bool isBusy = false;
+
         bool disableButton = true;
-
-        protected override async Task OnParametersSetAsync()
-        {
-            var currencyResponse = await _currencyService.GetCurrencyAsync(1);
-
-            if (currencyResponse.IsSuccess)
-            {
-                selectedCurrency = currencyResponse.Data!;
-            }
-
-            await base.OnParametersSetAsync();
-        }
 
         protected override async Task OnInitializedAsync()
         {
@@ -83,27 +73,40 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
 
             var user = auth.User;
 
+            await GetCurrencies();
+
             GetTotalPaidAmount();
 
             await base.OnInitializedAsync();
         }
 
+        private async Task GetCurrencies()
+        {
+            var currencyResponse = await _currencyService.GetCurrencyAsync(1);
+
+            if (currencyResponse.IsSuccess)
+            {
+                selectedCurrency = currencyResponse.Data!;
+            }
+        }
 
         void GetTotalPaidAmount()
         {
             if (LoanPayment.LoanId.IsNullOrEmpty()) return;
+
             paidAmount = LoanPayment.TotalPay;
+
             penaltyAmount = LoanPayment.PenaltyAmount.RoundUp(2, CurrencyId);
+
             totalPenaltyAmount = penaltyAmount;
+
             if (CurrencyId == 1)
             {
                 appliedAmountKHR = paidAmount + penaltyAmount;
-                // totalPaidAmount = paidAmount;
             }
             if (CurrencyId == 2)
             {
                 appliedAmountUSD = paidAmount + penaltyAmount;
-                //totalPaidAmount = paidAmount;
             }
         }
 
@@ -115,7 +118,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
         {
             try
             {
-                var line = new LoanRepaymentLineDtoCreate
+                var line = new LoanPaymentLineDtoCreate
                 {
                     LoanRefId = LoanPayment.LoanId,
                     LoanScheduleRefId = LoanPayment.LoanScheduleId,
@@ -142,13 +145,13 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
                 LoanRepayment.BranchRefId = LoanPayment.BranchId;
                 LoanRepayment.UserRefId = UserId;
                 LoanRepayment.LoanRepaymentLines.Add(line);
-                LoanRepayment.LoanTransaction = new LoanTransactionDtoCreate
-                {
-                    TransactionDate = DateTime.Now,
-                    TransactionTypeName = "Loan Principal Repayment",
-                    TranTypeRefId = 20,
-                    UserRefId = UserId
-                };
+                //LoanRepayment.LoanTransaction = new LoanPaymentTransactionDtoCreate
+                //{
+                //    TransactionDate = DateTime.Now,
+                //    TransactionTypeName = "Loan Principal Repayment",
+                //    TranTypeRefId = 20,
+                //    UserRefId = UserId
+                //};
                 if (appliedAmountKHR > 0)
                 {
                     var tranxCashManagement = new TrxCashManagementDtoCreate()
@@ -160,7 +163,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
                         BankRefId = 11,
                         Amount = appliedAmountKHR,
                     };
-                    LoanRepayment.LoanTransaction!.CashManagements!.Add(tranxCashManagement);
+                    //LoanRepayment.LoanTransaction!.CashManagements!.Add(tranxCashManagement);
                 }
 
                 if (appliedAmountUSD > 0)
@@ -174,7 +177,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
                         BankRefId = 11,
                         Amount = appliedAmountUSD,
                     };
-                    LoanRepayment.LoanTransaction!.CashManagements!.Add(tranxCashManagement);
+                    //LoanRepayment.LoanTransaction!.CashManagements!.Add(tranxCashManagement);
                 }
 
                 model.UserRefId = UserId;

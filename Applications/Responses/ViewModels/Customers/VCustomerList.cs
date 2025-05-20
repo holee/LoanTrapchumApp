@@ -55,11 +55,11 @@ public sealed class VCustomerList
     }
 
 
-    [NotMapped] public ICollection<VCustomerExpenses> CustomerExpenses { get; set; } = [];
-    [NotMapped] public ICollection<VCustomerIncomes> CustomerIncomes { get; set; } = [];
-    [NotMapped] public ICollection<VCollateralLines> CollateralLines { get; set; } = [];
-    [NotMapped] public ICollection<VLoanRequests> LoanRequests { get; set; } = [];
-    [NotMapped] public ICollection<VLoanDisbursments> Loans { get; set; } = [];
-    [NotMapped] public ICollection<VCustomerNotes> CustomerNotes { get; set; } = [];
-    [NotMapped] public ICollection<VCustomerActivities> CustomerActivities { get; set; } = [];
+    [NotMapped] public List<VCustomerExpenses> CustomerExpenses { get; set; } = [];
+    [NotMapped] public List<VCustomerIncomes> CustomerIncomes { get; set; } = [];
+    [NotMapped] public List<VCollateralLines> CollateralLines { get; set; } = [];
+    [NotMapped] public List<VLoanRequests> LoanRequests { get; set; } = [];
+    [NotMapped] public List<VLoanDisbursments> Loans { get; set; } = [];
+    [NotMapped] public List<VCustomerNotes> CustomerNotes { get; set; } = [];
+    [NotMapped] public List<VCustomerActivities> CustomerActivities { get; set; } = [];
 }

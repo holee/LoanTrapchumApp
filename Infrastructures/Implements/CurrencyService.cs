@@ -6,10 +6,13 @@ using Applications.Responses.Message;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Currencies;
 using Applications.Services.Currencies;
+using Dapper;
 using Domains.Models.Currencies;
+using Infrastructures.Constants.Procedures;
 using Infrastructures.DataAccess;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace Infrastructures.Implements;
 
@@ -17,11 +20,12 @@ public class CurrencyService : ICurrencyService
 {
     private readonly ApplicationDbContext _context;
     private readonly IDbContextFactory<DataContext> _contextFactory;
-
-    public CurrencyService(ApplicationDbContext context, IDbContextFactory<DataContext> contextFactory)
+    private readonly IDapperConnectionFactory _connectionFactory;
+    public CurrencyService(ApplicationDbContext context, IDbContextFactory<DataContext> contextFactory, IDapperConnectionFactory connectionFactory)
     {
         _context = context;
         _contextFactory = contextFactory;
+        _connectionFactory = connectionFactory;
     }
 
     public async Task<Currency> GetCurrencyWithSpotRates(int? currencyId)
@@ -370,19 +374,18 @@ public class CurrencyService : ICurrencyService
 
     public async Task<Result<IEnumerable<VCurrencyNotes>>> GetCurrencyNotes(int? currencyId, int? branchId)
     {
-        using var context = await _contextFactory.CreateDbContextAsync();
+        using var db=await _connectionFactory.CreateConnectionAsync();
 
-        var currencyQueries =
-            context.Database.SqlQuery<VCurrencyNotes>($"SELECT * FROM fGetCurrencyNotes({currencyId},{branchId})");
 
-        if (!currencyQueries.Any())
+        var queries =await db.QueryAsync<VCurrencyNotes>(ProcedureConstant.GetCurrencyNotes, 
+                                        new { currencyId, branchId },
+                                        commandType:CommandType.StoredProcedure);
+        if (!queries.Any())
         {
             return Result.Failure<IEnumerable<VCurrencyNotes>>(ErrorResponse.NotFound("No Data was found"));
         }
 
-        var currencyData = await currencyQueries.AsNoTracking().ToListAsync();
-
-        return Result.Success<IEnumerable<VCurrencyNotes>>(currencyData);
+        return Result.Success<IEnumerable<VCurrencyNotes>>(queries);
     }
 
 

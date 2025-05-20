@@ -83,27 +83,27 @@
     <RadzenTabs RenderMode="TabRenderMode.Server">
         <Tabs>
             <RadzenTabsItem Text="ព័ត៌មានអតិថិជន">
-                <LoanRequestCustomer Customer="@data?.Customer" @key="@(Guid.NewGuid().ToString("N"))"/>
+                <LoanRequestCustomer Customer="@data?.Customer" @key="@(Guid.NewGuid().ToString("N"))" />
             </RadzenTabsItem>
             <RadzenTabsItem Text="ទ្រព្យបញ្ចាំនិងអ្នកធានា">
-                <LoanCollateralLine CollateralLines="@data?.Collaterals" @key="@(Guid.NewGuid().ToString("N"))"/>
-                <LoanRequestGaurantor Guarantors="@data?.Guarantors" @key="@(Guid.NewGuid().ToString("N"))"/>
+                <LoanCollateralLine CollateralLines="@data?.Collaterals" @key="@(Guid.NewGuid().ToString("N"))" />
+                <LoanRequestGaurantor Guarantors="@data?.Guarantors" @key="@(Guid.NewGuid().ToString("N"))" />
             </RadzenTabsItem>
             <RadzenTabsItem Text="ចំណូលនិងចំណាយ">
                 <RadzenRow AlignItems="AlignItems.Center">
                     <RadzenColumn Size="6" SizeMD="6" SizeSM="12">
                         <CustomerInc Items="@data!.Customer.CustomerIncomes" ShowAdd="false"
-                                     @key="@(Guid.NewGuid().ToString("N"))"/>
+                                     @key="@(Guid.NewGuid().ToString("N"))" />
                     </RadzenColumn>
                     <RadzenColumn Size="6" SizeMD="6" SizeSM="12">
                         <CustomerExp Items="@data!.Customer.CustomerExpenses" ShowAdd="false"
-                                     @key="@(Guid.NewGuid().ToString("N"))"/>
+                                     @key="@(Guid.NewGuid().ToString("N"))" />
                     </RadzenColumn>
                 </RadzenRow>
             </RadzenTabsItem>
             <RadzenTabsItem Text="ឯកសារផ្សេងៗ">
                 <LoanRequestDocument Documents="@data?.Documents.ToList()" ShowUpload="false"
-                                     @key="@(Guid.NewGuid().ToString("N"))"/>
+                                     @key="@(Guid.NewGuid().ToString("N"))" />
             </RadzenTabsItem>
         </Tabs>
     </RadzenTabs>
@@ -113,7 +113,8 @@
              JustifyContent="JustifyContent.End">
     <AuthorizeView Policy="@RequestsPolicies.Request">
         <Authorized>
-            @if ((data?.StatusId == (int)RequestStatus.New || data?.StatusId == (int)RequestStatus.Rechecked))
+            @if (canAllow && (data?.StatusId == (int)RequestStatus.New ||
+                        data?.StatusId == (int)RequestStatus.Rechecked))
             {
                 <RadzenButton ButtonStyle="ButtonStyle.Primary"
                               Icon="request_quote" Size="ButtonSize.ExtraSmall"
@@ -130,8 +131,8 @@
 
     <AuthorizeView Policy="@RequestsPolicies.Approve">
         <Authorized>
-            @if ((data?.StatusId == (int)RequestStatus.Requested ||
-                  data?.StatusId == (int)RequestStatus.Verified))
+            @if (canApprove && (data?.StatusId == (int)RequestStatus.Requested ||
+                        data?.StatusId == (int)RequestStatus.Verified))
             {
                 <RadzenButton ButtonStyle="ButtonStyle.Primary"
                               Icon="request_quote" Size="ButtonSize.ExtraSmall"
@@ -164,11 +165,12 @@
                 <RadzenButton ButtonStyle="ButtonStyle.Success"
                               Icon="request_quote" Size="ButtonSize.ExtraSmall"
                               Click="AprovedLoanRequest"
-                              Text="Approved"></RadzenButton>
+                              Text="Disburse Now"></RadzenButton>
             }
         </Authorized>
     </AuthorizeView>
-    <RadzenLink Icon="arrow_back"
-                Path="@($"/App/Request/{BranchId}/Branches?UserId={UserId}")">Back
-    </RadzenLink>
+    <RadzenLink Icon="arrow_back" Text="Back"
+                Match="NavLinkMatch.All"
+                Path="@($"/App/Request/{BranchId}/Branches?UserId={UserId}")"/>
+
 </RadzenStack>

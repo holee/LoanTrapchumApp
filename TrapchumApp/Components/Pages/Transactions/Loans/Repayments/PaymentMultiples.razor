@@ -1,0 +1,290 @@
+﻿<style>
+    .table-cell-edited {
+        position: relative;
+    }
+
+        .table-cell-edited::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 0;
+            height: 0;
+            border-top: 10px solid red;
+            border-left: 10px solid transparent;
+        }
+</style>
+<RadzenDataGrid TItem="VSchedule"
+                Data="@Schedules"
+                Responsive
+                Density="Density.Compact"
+                AllowFiltering="false"
+                AllowPaging="false"
+                AllowSorting="false"
+                @ref="@grid"
+                CellClick="@OnCellClick"
+                RowUpdate="@OnUpdateRow"
+                GridLines="DataGridGridLines.Both">
+    <Columns>
+        <RadzenDataGridColumn Context="c"
+                              Width="3rem"
+                              Title="#"
+                              OrderIndex="1"
+                              TextAlign="TextAlign.Center"
+                              Sortable="false">
+            <Template>
+                <input type="hidden" @bind="c.LoanId" />
+                @c.InstallmentNo
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Width="6rem"
+                              Context="c"
+                              Title="ថ្ងៃត្រូវបង់ប្រាក់"
+                              Sortable="false">
+            <Template>
+                <small>
+                    <strong>@c.PaymentDate.DayFirst()</strong>
+                    <br />
+                    <em><small>@c.PaymentDate.DayName()</small></em>
+                </small>
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                              Title="ប្រាក់ដើមត្រូវបង់" Sortable="false">
+            <Template Context="c">
+                @c.LeftPrinciple.Format(c.CurrencyId)
+            </Template>
+            <EditTemplate Context="c">
+                <RadzenNumeric @ref="editor" 
+                            Change="@((decimal? args) => Update())" 
+                            @bind-Value="c.LeftPrinciple" 
+                            Style="width:100%" 
+                            ShowUpDown="false"
+                               InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "Select Left Principle" } })" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TextAlign="TextAlign.End"
+                              Context="c"
+                              Title="ការប្រាក់ត្រូវបង់" Sortable="false">
+            <Template>
+                @c.LeftInterestAmount.Format(c.CurrencyId)
+            </Template>
+            <EditTemplate>
+                <RadzenNumeric @ref="editor"
+                               Change="@((decimal? args) => Update())"
+                               @bind-Value="c.LeftInterestAmount"
+                               Style="width:100%"
+                               ShowUpDown="false"
+                               InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "Select Left Interest Amount" } })" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                              Title="ប្រាក់ប្រសិទ្ធិភាពត្រូវបង់"
+                              Context="c"
+                              Sortable="false">
+            <Template>
+                @c.LeftCollectionFeeAmount.Format(c.CurrencyId)
+            </Template>
+            <EditTemplate>
+                <RadzenNumeric @ref="editor"
+                               Change="@((decimal? args) => Update())"
+                               @bind-Value="c.LeftCollectionFeeAmount"
+                               Style="width:100%"
+                               ShowUpDown="false"
+                               InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "Select Left Fee Amount" } })" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                              Title="ប្រាក់ពីន័យ"
+                              Context="c"
+                              Sortable="false">
+            <Template>
+                @c.PenaltyAmount.Format(c.CurrencyId)
+            </Template>
+            <EditTemplate>
+                <RadzenNumeric @ref="editor"
+                               Change="@((decimal? args) => Update())"
+                               @bind-Value="c.PenaltyAmount"
+                               Style="width:100%"
+                               ShowUpDown="false"
+                               InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "Select Penalty Amount" } })" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                              Property="TotalPay"
+                              Title="សរុបប្រាក់ត្រូវបង់"
+                              Context="c"
+                              Sortable="false">
+            <Template>
+                @c.LeftAmount.Format(c.CurrencyId)
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+
+</RadzenDataGrid>
+<RadzenStack Orientation="Orientation.Horizontal"
+             JustifyContent="JustifyContent.End"
+             class="mt-2"
+             Gap="1rem"
+             AlignItems="AlignItems.Center">
+
+    <AuthorizeView>
+        <Authorized>
+            <RadzenButton Icon="paid"
+                          Size="ButtonSize.Small"
+                          ButtonStyle="ButtonStyle.Secondary"
+                          Text="PayOff" />
+        </Authorized>
+    </AuthorizeView>
+
+    <RadzenLink Path="@($"/App/Loan/mm/Branches?UserId=")"
+                Text="Cancel" />
+</RadzenStack>
+@code {
+    RadzenDataGrid<VSchedule> grid = default!;
+    string columnEditing=string.Empty;
+    List<KeyValuePair<long, string>> editedFields = new List<KeyValuePair<long, string>>();
+    List<VSchedule> scheduleToUpdate = [];
+    IRadzenFormComponent editor=default!;
+    bool editorFocused;
+
+    async Task OnCellClick(DataGridCellMouseEventArgs<VSchedule> args)
+    {
+        if (!grid.IsValid || (scheduleToUpdate.Contains(args.Data) && 
+            columnEditing == args.Column.Property))
+            {
+                return;
+            }
+
+        // Record the previous edited field, if you're not using IRevertibleChangeTracking to track object changes
+       
+        if (scheduleToUpdate.Any())
+        {
+
+            editedFields.Add(new(scheduleToUpdate.First().LoanScheduleId!.Value, columnEditing));
+
+            await Update();
+        }
+
+        // This sets which column is currently being edited.
+        columnEditing = args.Column.Property;
+
+        // This sets the Item to be edited.
+        await EditRow(args.Data);
+    }
+
+    async Task Update()
+    {
+        editorFocused = false;
+
+        if (scheduleToUpdate.Any())
+        {
+            await grid.UpdateRow(scheduleToUpdate.First());
+        }
+    }
+
+    async Task EditRow(VSchedule schedule)
+    {
+        Reset();
+
+        scheduleToUpdate.Add(schedule);
+
+        await grid.EditRow(schedule);
+    }
+
+
+    void Reset(VSchedule? schedule = null)
+    {
+        editorFocused = false;
+
+        if (schedule != null)
+        {
+            scheduleToUpdate.Remove(schedule);
+        }
+        else
+        {
+            scheduleToUpdate.Clear();
+        }
+    }
+
+    bool IsEditing(string columnName, VSchedule schedule)
+    {
+        // Comparing strings is quicker than checking the contents of a List, so let the property check fail first.
+        return columnEditing == columnName && scheduleToUpdate.Contains(schedule);
+    }
+
+    string IsEdited(RadzenDataGridColumn<VSchedule> column, VSchedule schedule)
+    {
+        // In a real scenario, you might use IRevertibleChangeTracking to check the current column
+        //  against a list of the object's edited fields.
+        return editedFields.Where(c => c.Key == schedule.LoanScheduleId && 
+                                       c.Value == column.Property).Any() ?
+                                       "table-cell-edited" :string.Empty;
+    }
+
+
+    void OnUpdateRow(VSchedule schedule)
+    {
+        Reset(schedule);
+
+        //dbContext.Update(order);
+
+        //dbContext.SaveChanges();
+    }
+
+
+    void OnPrincipleChange(decimal? value, VSchedule schedule)
+    {
+        if (value.HasValue)
+        {
+            schedule.LeftPrinciple = value.Value;
+            UpdateLeftAmount(schedule);
+            AddToEditedFields(schedule, nameof(schedule.LeftPrinciple));
+        }
+    }
+
+    void OnOtherFieldChange(decimal? value, VSchedule schedule)
+    {
+        if (value.HasValue)
+        {
+            // Update the specific field based on the column being edited
+            switch (columnEditing)
+            {
+                case nameof(VSchedule.LeftInterestAmount):
+                    schedule.LeftInterestAmount = value.Value;
+                    break;
+                case nameof(VSchedule.LeftCollectionFeeAmount):
+                    schedule.LeftCollectionFeeAmount = value.Value;
+                    break;
+                case nameof(VSchedule.PenaltyAmount):
+                    schedule.PenaltyAmount = value.Value;
+                    break;
+            }
+            UpdateLeftAmount(schedule);
+            AddToEditedFields(schedule, columnEditing);
+        }
+    }
+
+    void UpdateLeftAmount(VSchedule schedule)
+    {
+        // Calculate LeftAmount as the sum of LeftPrinciple, LeftInterestAmount, LeftCollectionFeeAmount, and PenaltyAmount
+        schedule.LeftAmount = (schedule.LeftPrinciple ?? 0) +
+                             (schedule.LeftInterestAmount ?? 0) +
+                             (schedule.LeftCollectionFeeAmount ?? 0) +
+                             (schedule.PenaltyAmount ?? 0);
+    }
+
+    void AddToEditedFields(VSchedule schedule, string propertyName)
+    {
+        if (!editedFields.Any(f => f.Key == schedule.LoanScheduleId && f.Value == propertyName))
+        {
+            editedFields.Add(new KeyValuePair<long, string>(schedule.LoanScheduleId!.Value, propertyName));
+        }
+
+        if (!scheduleToUpdate.Contains(schedule))
+        {
+            scheduleToUpdate.Add(schedule);
+        }
+    }
+
+}

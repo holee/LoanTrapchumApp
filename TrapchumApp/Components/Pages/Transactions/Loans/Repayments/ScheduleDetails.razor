@@ -4,82 +4,110 @@
         <tr>
             <th class="w-25 rz-background-color-base-100">Principle</th>
             <td>
-                @schedule.Principle.Format(CurrencyId)
+                @Schedule.Principle.Format(CurrencyId)
             </td>
         </tr>
         <tr>
             <th class="w-25 rz-background-color-base-100">Interest</th>
             <td>
-                @schedule.Interest.Format(CurrencyId)
+                @Schedule.Interest.Format(CurrencyId)
             </td>
         </tr>
         <tr>
             <th class="w-25 rz-background-color-base-100">Collection Fee</th>
             <td>
-                @schedule.CollectionFee.Format(CurrencyId)
+                @Schedule.CollectionFee.Format(CurrencyId)
             </td>
         </tr>
         <tr>
             <th class="w-25 rz-background-color-base-100">Payment Date</th>
             <td>
-                @schedule.PaymentDate.DayFirst()
+                @Schedule.PaymentDate.DayFirst()
             </td>
         </tr>
     </thead>
 </table>
-<RadzenDataGrid Data="PaymentLines"
+<RadzenDataGrid Data="@Schedule.PaymentLines"
                 Responsive="true"
                 Density="Density.Compact"
-                TItem="VPaymentLines">
+                GridLines="DataGridGridLines.Both"
+                AllowAlternatingRows="true"
+                TItem="LoanPaymentLineVm">
     <Columns>
-        <RadzenDataGridColumn Title="#" Property="@nameof(VPaymentLines.Id)" Width="3rem" />
-        <RadzenDataGridColumn Title="PaidPrinciple" Property="@nameof(VPaymentLines.PaidPrinciple)"
-                              Context="c"
-                              Width="10rem">
+        <RadzenDataGridColumn Title="#" Context="c" Property="@nameof(LoanPaymentLineVm.Id)" Width="3rem">
             <Template>
-                @c?.PaidPrinciple?.Format(CurrencyId)
+                @{
+                    var index = Schedule.PaymentLines.IndexOf(c) + 1;
+                }
+                @index
             </Template>
         </RadzenDataGridColumn>
-        <RadzenDataGridColumn Title="PaidInterest"
+        <RadzenDataGridColumn Title="Principle"
+                              Property="@nameof(LoanPaymentLineVm.PaidPrinciple)"
                               Context="c"
-                              Property="@nameof(VPaymentLines.PaidInterest)" Width="10rem">
+                              Width="8rem">
             <Template>
-                @c?.PaidInterest?.Format(CurrencyId)
+                @c?.PaidPrinciple
             </Template>
+            <FooterTemplate>
+                @Schedule.PaymentLines?.Sum(x => x.PaidPrinciple).Format(CurrencyId)
+            </FooterTemplate>
         </RadzenDataGridColumn>
-        <RadzenDataGridColumn Title="PaidCollectionFee"
+        <RadzenDataGridColumn Title="Interest"
                               Context="c"
-                              Property="@nameof(VPaymentLines.PaidCollectionFee)" Width="8rem">
+                              Property="@nameof(LoanPaymentLineVm.PaidInterest)"
+                              TextAlign="TextAlign.Right"
+                              Width="8rem">
             <Template>
-                @c?.PaidCollectionFee?.Format(CurrencyId)
+                @c?.PaidInterest
             </Template>
+            <FooterTemplate>
+                @Schedule.PaymentLines?.Sum(x => x.PaidInterest).Format(CurrencyId)
+            </FooterTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="CollectionFee"
+                              Context="c"
+                              TextAlign="TextAlign.Right"
+                              Property="@nameof(LoanPaymentLineVm.PaidCollectionFee)"
+                              Width="8rem">
+            <Template>
+                @c?.PaidCollectionFee
+            </Template>
+            <FooterTemplate>
+                @Schedule.PaymentLines?.Sum(x => x.PaidCollectionFee).Format(CurrencyId)
+            </FooterTemplate>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Title="PenaltyAmount"
                               Context="c"
-                              Property="@nameof(VPaymentLines.PenaltyAmount)" Width="8rem">
+                              TextAlign="TextAlign.Right"
+                              Property="@nameof(LoanPaymentLineVm.PenaltyAmount)"
+                              Width="8rem">
             <Template>
-                @c?.PenaltyAmount?.Format(CurrencyId)
+                @c?.PenaltyAmount
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Title="SubTotal"
                               Context="c"
-                              Property="@nameof(VPaymentLines.SubTotal)" Width="8rem">
+                              TextAlign="TextAlign.Right"
+                              Property="@nameof(LoanPaymentLineVm.SubTotal)"
+                              Width="8rem">
             <Template>
-                @c?.SubTotal?.Format(CurrencyId)
-            </Template>
-        </RadzenDataGridColumn>
-        <RadzenDataGridColumn Title="Total"
-                              Context="c"
-                              Property="@nameof(VPaymentLines.Total)" Width="8rem">
-            <Template>
-                @c?.Total?.Format(CurrencyId)
+                @c?.SubTotal
             </Template>
             <FooterTemplate>
-                @PaymentLines.Sum(x=>x.Total).Format(CurrencyId)
+                <strong>
+                    @Schedule?.Total.Format(CurrencyId)
+                </strong>
             </FooterTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="Recieve Date"
+                              Context="c"
+                              TextAlign="TextAlign.Right"
+                              Property="@nameof(LoanPaymentLineVm.Created)"
+                              Width="8rem">
+            <Template>
+                @c?.Created.DayFirst()
+            </Template>
         </RadzenDataGridColumn>
     </Columns>
 </RadzenDataGrid>
-@code {
-
-}

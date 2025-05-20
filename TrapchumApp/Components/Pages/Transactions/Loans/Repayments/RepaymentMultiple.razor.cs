@@ -6,6 +6,7 @@ using Applications.Responses.ViewModels.Branches;
 using Applications.Responses.ViewModels.Currencies;
 using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Schedules;
+using Applications.Services.Loans;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Radzen;
@@ -19,13 +20,13 @@ public partial class RepaymentMultiple
     [Parameter, SupplyParameterFromQuery] public int BranchId { get; set; }
     [Parameter, SupplyParameterFromQuery] public long CreditAgentId { get; set; }
     [Parameter, SupplyParameterFromQuery] public int CurrencyId { get; set; }
-    [Parameter, SupplyParameterFromQuery] public Guid UserId { get; set; }
+    [Parameter, SupplyParameterFromQuery] public string UserId { get; set; }
     [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
     List<VSchedule> schedules { get; set; } = [];
     List<LoanRepaymentDto> RepaymentLists = [];
-    List<LoanRepaymentLineDtoCreate> loanRepaymentLines = [];
-    LoanRepaymentLineDtoCreate? LineStore = new();
-    LoanRepaymentDtoCreate LoanRepayment = new();
+    List<LoanPaymentLineDtoCreate> loanRepaymentLines = [];
+    LoanPaymentLineDtoCreate? LineStore = new();
+    LoanPaymentDtoCreate LoanRepayment = new();
     IEnumerable<VBranchResponse> Branches = [];
     VBranchResponse _selectedBranchResponse = new();
     VSchedule? selectedRepayment = new();
@@ -45,7 +46,7 @@ public partial class RepaymentMultiple
     private IEnumerable<VCurrenciesList> Currencies = Enumerable.Empty<VCurrenciesList>();
     protected VCurrenciesList? selectedCurrency;
     RadzenDataGrid<VSchedule> grid = default!;
-    private RadzenDataGrid<LoanRepaymentLineDtoCreate> gridLoanPaymentLines = default!;
+    private RadzenDataGrid<LoanPaymentLineDtoCreate> gridLoanPaymentLines = default!;
     private IEnumerable<VLoanRepaymentLine> VLoanRepaymentLines = [];
     private IList<VSchedule?>? SelectedSchedules = [];
     private bool isLoading = false;
@@ -56,8 +57,8 @@ public partial class RepaymentMultiple
     int nextIndex = 1;
 
     private readonly ILoanService _loanService;
-    private readonly ILoanPaymentService _paymentService;
-    public RepaymentMultiple(ILoanService scheduleService, ILoanPaymentService paymentService)
+    private readonly ILoanPaymentServiceImpl _paymentService;
+    public RepaymentMultiple(ILoanService scheduleService, ILoanPaymentServiceImpl paymentService)
     {
         _loanService = scheduleService;
         _paymentService = paymentService;
@@ -74,7 +75,7 @@ public partial class RepaymentMultiple
     async Task OpenSideDialog(VSchedule SelectedRepayment)
     {
         ContextMenuService.Close();
-        var parameters = new Dictionary<string, object>{
+        var parameters = new Dictionary<string, object?>{
                     {"LoanId",LoanId},
                     {"CurrencyId",CurrencyId},
                     {"IntallmentNo",SelectedRepayment!.InstallmentNo!},
@@ -125,7 +126,7 @@ public partial class RepaymentMultiple
             NotificationService.Notify(NotificationSeverity.Warning, "Please select schedule to apply payment.");
             return;
         }
-        loanRepaymentLines = SelectedSchedules.Select(x => new LoanRepaymentLineDtoCreate
+        loanRepaymentLines = SelectedSchedules.Select(x => new LoanPaymentLineDtoCreate
         {
             LoanRefId = LoanId,
             LoanScheduleRefId = x!.LoanScheduleId,
@@ -154,7 +155,7 @@ public partial class RepaymentMultiple
             Draggable = true,
             WrapperCssClass = "rz-p-1 rz-m-0 rz-background-color-base-100"
         };
-        var parameters = new Dictionary<string, object>{
+        var parameters = new Dictionary<string, object?>{
                 {"LoanRepaymentLines" , loanRepaymentLines},
                 {"CurrencyId" , CurrencyId},
                 {"LoanId" , LoanId},

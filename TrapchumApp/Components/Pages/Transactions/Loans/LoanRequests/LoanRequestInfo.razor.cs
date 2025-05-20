@@ -24,22 +24,23 @@ using Radzen;
 
 namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 {
-    public partial class LoanRequestInfo
+    public partial class LoanRequestInfo(
+        ILoanSettingService loanSettingService,
+        IAppSettingService settingsServiceImpl,
+        IHolidayService holidayService,
+        ILogger<LoanRequestCreate> logger)
     {
+        private readonly IAppSettingService _settingsServiceImpl = settingsServiceImpl;
+        
+        private readonly ILogger<LoanRequestCreate> _logger = logger;
 
-        private readonly ILoanSettingService _loanSettingService;
-        private readonly IAppSettingService _settingsServiceImpl;
-        private readonly IHolidayService _holidayService;
-        private readonly ILogger<LoanRequestCreate> _logger;
-
-        [Parameter] public LoanRequestDtoCreate model { get; set; } = new();
-
+        [Parameter] public LoanRequestDtoCreate Model { get; set; } = new();
         [Parameter] public string? UserId { get; set; }
         [Parameter] public int? BranchId { get; set; } = 0;
         [Parameter] public string? CustomerId { get; set; }
-
-        [Parameter] public EventCallback<string?> SelectCustomer { get; set; } 
+        [Parameter] public EventCallback<string?> SelectCustomer { get; set; }
         [Parameter] public string? LoanRequestId { get; set; }
+
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
 
         IEnumerable<LoanScheduleDtoCreate> previewSchedule = [];
@@ -75,8 +76,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
         DateTime firstPayment;
 
         LoanCategoryResponse? SelectedLoanCategory;
-
-        VUser _user = new();
+        
         long? size = 0;
         int counts = 0;
         bool isVible = false;
@@ -91,19 +91,9 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
         string? filterText = "";
 
 
-        protected override void OnParametersSet()
-        {
-            if (model.CustomerRefId.IsNotNullOrEmpty() || model.LoanRequestId.IsNotNullOrEmpty())
-            {
-                isCustomerSelected = true;
-            }
-
-            base.OnParametersSet();
-        }
         protected override async Task OnInitializedAsync()
         {
-
-            var cat = await _loanSettingService.GetLoanCategories();
+            var cat = await loanSettingService.GetLoanCategories();
 
             if (cat!.Any())
             {
@@ -112,39 +102,16 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
                 SelectedLoanCategory = loanCategories!.FirstOrDefault();
             }
 
-            var aproveResp = await _loanSettingService.GetAprovedUserAsync<ApprovedUser>(BranchId);
+            var aproveResp = await loanSettingService.GetAprovedUserAsync<ApprovedUser>(BranchId);
 
             AprovedUsers = aproveResp ?? [];
-
+            
             await base.OnInitializedAsync();
         }
 
 
-
-        public LoanRequestInfo(ILoanSettingService loanSettingService, IAppSettingService settingsServiceImpl, IHolidayService holidayService, ILogger<LoanRequestCreate> logger)
-        {
-            _loanSettingService = loanSettingService;
-            _settingsServiceImpl = settingsServiceImpl;
-            _holidayService = holidayService;
-            _logger = logger;
-        }
-
-        async Task GetCustomerRequest(string? customerId)
-        {
-            if (customerId.IsNotNullOrEmpty())
-            {
-                var customerResponse = await _customerService.GetCustomerForRequestLoanAsync(customerId);
-
-                if (customerResponse.IsSuccess)
-                {
-                    //SelectedCustomer = customerResponse.Data!;
-                }
-            }
-        }
-
         private async Task GetCustomers(string? customerId, int take = 25, string? filter = null)
         {
-
             var queryParam = new QueryParam(0, take, string.Empty, filter: filter);
 
             var customerResponse = await _customerService!.GetCustomersAsync<VCustomerList>(customerId, queryParam);
@@ -157,12 +124,10 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 
         async Task SetCustomerId(string? customerId)
         {
-            if (customerId.IsNotNullOrEmpty()) {
-
+            if (customerId.IsNotNullOrEmpty())
+            {
                 await SelectCustomer.InvokeAsync(customerId);
-
             }
-
         }
 
         private async Task GetHolidays(int period)
@@ -170,7 +135,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
             var cur = DateTime.Now;
             period += 2;
             var fut = cur.AddMonths(period);
-            var hols = await _holidayService.GetHolidays(false, cur, fut);
+            var hols = await holidayService.GetHolidays(false, cur, fut);
             Holidays = hols.Select(x => x.HolidayDt!.Value).ToList();
         }
 
@@ -198,7 +163,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 
             HolidayHelper.SetHoliday(Holidays, ref firstPayment);
 
-            model.FirstPaymentDate = firstPayment;
+            Model.FirstPaymentDate = firstPayment;
         }
 
         void ChangedDate(DateTime? date)
@@ -225,37 +190,37 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 
             HolidayHelper.SetHoliday(Holidays, ref firstPayment);
 
-            model.FirstPaymentDate = firstPayment;
+            Model.FirstPaymentDate = firstPayment;
         }
 
         void CalculateAdminFeeAmount(decimal? value)
         {
-            if (model.CurrencyRefId == 1)
+            if (Model.CurrencyRefId == 1)
             {
-                model.AdminFeeAmount = (model.RequestAmount * (value / 100)).RoundUpKhr(2);
+                Model.AdminFeeAmount = (Model.RequestAmount * (value / 100)).RoundUpKhr(2);
             }
             else
             {
-                model.AdminFeeAmount = (model.RequestAmount * (value / 100)).RoundUp(2);
+                Model.AdminFeeAmount = (Model.RequestAmount * (value / 100)).RoundUp(2);
             }
         }
 
         void SetDefault()
         {
-            model.CurrencyRefId = 1;
-            model.InterestRate = 1.10M;
-            model.CollectionFeeRate = 2.90M;
-            model.AdminFeeRate = 3.00M;
-            model.Installments = 12;
-            model.InstallmentType = "Monthly";
-            model.InstallmentTypeId = 1;
-            model.RepaymentModeRefId = 2;
-            model.RequestDate = DateTime.Now;
-            model.RequestAmount = 0.00M;
-            model.AdminFeeAmount = 0.00M;
-            model.PayEvery = 1;
+            Model.CurrencyRefId = 1;
+            Model.InterestRate = 1.10M;
+            Model.CollectionFeeRate = 2.90M;
+            Model.AdminFeeRate = 3.00M;
+            Model.Installments = 12;
+            Model.InstallmentType = "Monthly";
+            Model.InstallmentTypeId = 1;
+            Model.RepaymentModeRefId = 2;
+            Model.RequestDate = DateTime.Now;
+            Model.RequestAmount = 0.00M;
+            Model.AdminFeeAmount = 0.00M;
+            Model.PayEvery = 1;
             //previewSchedule = [];
-            model.FirstPaymentDate = DateTime.UtcNow.AddMonths(1);
+            Model.FirstPaymentDate = DateTime.UtcNow.AddMonths(1);
             //installmentType = 1;
         }
 
@@ -264,36 +229,36 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
             if (!principle.HasValue || principle < 0)
             {
                 NotificationService.Notify(NotificationSeverity.Warning, "Invalid principle input");
-                model.RequestAmount = 0.00M;
+                Model.RequestAmount = 0.00M;
                 return;
             }
 
             if (principle <= 50000)
             {
-                model.CurrencyRefId = 2;
-                model.AdminFeeAmount = (principle * (model.AdminFeeRate / 100)).RoundUp(2);
+                Model.CurrencyRefId = 2;
+                Model.AdminFeeAmount = (principle * (Model.AdminFeeRate / 100)).RoundUp(2);
                 return;
             }
             else
             {
-                model.CurrencyRefId = 1;
-                model.AdminFeeAmount = (principle * (model.AdminFeeRate / 100)).RoundUp(-2);
+                Model.CurrencyRefId = 1;
+                Model.AdminFeeAmount = (principle * (Model.AdminFeeRate / 100)).RoundUp(-2);
                 return;
             }
         }
 
         async Task PeriodChanged()
         {
-            await GetHolidays(model.Installments!.Value);
+            await GetHolidays(Model.Installments!.Value);
         }
 
-        void SelectedInstallmentChanged(object arg)
+        void SelectedInstallmentChanged(object? arg)
         {
             if (arg is not null)
             {
                 var installType = (Items)arg;
                 installmentType = installType.Value;
-                model.InstallmentType = installType.Label;
+                Model.InstallmentType = installType.Label;
                 ChangedDate();
             }
         }
@@ -305,35 +270,47 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
             StateHasChanged();
         }
 
-        void SelectedChargeModeChanged(object e)
+        void SelectedChargeModeChanged(object? e)
         {
             if (e is not null)
             {
                 var selectedValue = (Items)e;
 
-                model.CollectionFeeModeName = selectedValue.Label;
+                Model.CollectionFeeModeName = selectedValue.Label;
             }
             else
             {
-                model.CollectionFeeModeId = 1;
+                Model.CollectionFeeModeId = 1;
 
-                model.CollectionFeeModeName = "Flat";
+                Model.CollectionFeeModeName = "Flat";
             }
         }
 
         void RepaymentModeSelectedChanged(object e)
         {
             var selectedValue = (Items)e;
-            model.RepaymentMode = selectedValue.Label;
+            Model.RepaymentMode = selectedValue.Label;
             if (selectedValue.Value == 1)
             {
-                model.PayEvery = 4;
+                Model.PayEvery = 4;
             }
             else
             {
-                model.PayEvery = 1;
+                Model.PayEvery = 1;
             }
         }
-
     }
 }
+
+// async Task GetCustomerRequest(string? customerId)
+// {
+//     if (customerId.IsNotNullOrEmpty())
+//     {
+//         var customerResponse = await _customerService.GetCustomerForRequestLoanAsync(customerId);
+//
+//         if (customerResponse.IsSuccess)
+//         {
+//             //SelectedCustomer = customerResponse.Data!;
+//         }
+//     }
+// }

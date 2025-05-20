@@ -1,9 +1,12 @@
 using Applications.Extensions.Identity;
 using Applications.Requests.Loans.LoanRequests;
 using Applications.Responses.ViewModels.Loans.Requests;
+using Infrastructures.Authorizations;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Radzen;
+using System.Security.Claims;
 using TrapchumApp.Components.Shared;
 
 namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
@@ -28,19 +31,24 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 
         bool canApprove = false;
 
+        bool canAllow = false;
+
+        ClaimsPrincipal? user;
 
         protected override async Task OnInitializedAsync()
         {
-            await GetLoanRequestDetails();
 
-            var auth = await State;
+            user = (await State).User;
 
-            aprovedUserId = auth.User.GetId();
+            aprovedUserId = user.GetId();
 
+            await AppState.CheckedCanApprved(user);
 
-            await AppState.CheckedCanApprved(auth.User);
-            await AppState.CheckedCanDisbursemnt(auth.User);
-            await AppState.CheckedCanRequest(auth.User);
+            await AppState.CheckedCanDisbursemnt(user);
+
+            await AppState.CheckedCanRequest(user);
+
+            await GetLoanRequestDetails(user);
 
             await base.OnInitializedAsync();
         }
@@ -73,7 +81,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
         }
 
 
-        async Task GetLoanRequestDetails(bool include = true)
+        async Task GetLoanRequestDetails(ClaimsPrincipal user, bool include = true)
         {
             var resp = await _loanRequestService.GetLoanRequestAsync(BranchId, CustomerId, LoanRequestId, include);
 
@@ -81,6 +89,8 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
             {
                 data = resp.Data;
 
+                canAllow = (await _authorizeService.AuthorizeAsync(user, data, new SameUserRequestRequirement())).Succeeded;
+                canApprove = (await _authorizeService.AuthorizeAsync(user, data, new SameUserApprovedRequirement())).Succeeded;
                 success = data?.StatusId == 2 ? false : true;
             }
         }
@@ -99,9 +109,9 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 
             bool dialogueResult = await DialogService.OpenAsync<ConfirmModal>("Confirm", param, options);
 
-            if (dialogueResult)
+            if (dialogueResult && user is not null)
             {
-                await GetLoanRequestDetails(true);
+                await GetLoanRequestDetails(user, true);
 
                 StateHasChanged();
             }

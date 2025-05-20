@@ -1,8 +1,7 @@
 ﻿@page "/App/Loan/{BranchId:int}/Branches/{LoanId}/Details"
 @using TrapchumApp.Components.Pages.Transactions.Loans.Disbursements
 <PageTitle>Loan Details</PageTitle>
-<RadzenProgressBar Value="100" Visible="isVible" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
-<LoanInfos LoanSchedule="loanSchedule" />
+<LoanInfos LoanSchedule="@loanSchedule" Currency="@CurrencyId" LoanId="@LoanId" BranchId="@BranchId" />
 <Containers Fluid>
     <ChildContent>
         <RadzenTabs Change="SelectedTabChanged" RenderMode="TabRenderMode.Server" @bind-SelectedIndex="selectedTabIndex">
@@ -155,7 +154,7 @@
 
                 </RadzenTabsItem>
                 <RadzenTabsItem Text="Paid Schedule" Icon="paid">
-                    <SchedulesPaid BranchId="@BranchId" LoanId="@LoanId" UserId="@UserId" CurrencyId="@CurrencyId" />
+                    <SchedulesPaid BranchId="@BranchId" LoanId="@LoanId" CurrencyId="@CurrencyId"/>
                 </RadzenTabsItem>
                 <RadzenButton Icon="add" Variant="Variant.Text" Size="ButtonSize.ExtraSmall" />
             </Tabs>

@@ -1,8 +1,4 @@
 @using Radzen.Blazor.Rendering
-<PageDropDown PageSizeChanged="ChangedPageSize"
-              ShowSearchBox="false"
-              ShowReload="false">
-</PageDropDown>
 <RadzenDataGrid AllowPaging="true"
                 AllowAlternatingRows="true"
                 AllowRowSelectOnRowClick="true"
@@ -15,8 +11,8 @@
                 ShowPagingSummary="true"
                 RowSelect="RowSelecting"
                 TItem="VSchedule"
-                Style="min-height:30rem;height:30rem;max-height:40rem;"
-                Data="PaymentSchedules">
+                Count="@counts"
+                Data="@_schedules">
     <Columns>
         <RadzenDataGridColumn Title="#"
                               Width="2rem"
@@ -30,7 +26,7 @@
                               Property="PaymentDate"
                               Context="p">
             <Template>
-                @(string.Format("{0:dd/MM/yyyy}", p.PaymentDate))
+                @p.PaymentDate.DayFirst()
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Title="Principle"
@@ -38,7 +34,7 @@
                               Property="Principal"
                               Context="p">
             <Template>
-                @p.Principle.FormatUp(2, p.CurrencyId!.Value)
+                @p.Principle.Format(CurrencyId)
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Title="Interest"
@@ -46,7 +42,7 @@
                               Property="Interest"
                               Context="p">
             <Template>
-                @p.Interest.FormatUp(2, p.CurrencyId!.Value)
+                @p.Interest.Format(CurrencyId)
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Title="Collection Fee"
@@ -54,7 +50,7 @@
                               Property="CollectionFee"
                               Context="p">
             <Template>
-                @p.CollectionFee.Format(p.CurrencyId)
+                @p.CollectionFee.Format(CurrencyId)
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Title="Penalty"
@@ -65,12 +61,12 @@
                 @if (p.PenaltyAmount > 0)
                 {
                     <strong class="text-danger">
-                        @p.PenaltyAmount.FormatUp(2, p.CurrencyId!.Value)
+                        @p.PenaltyAmount.Format(CurrencyId)
                     </strong>
                 }
                 else
                 {
-                    @p.PenaltyAmount.FormatUp(2, p.CurrencyId!.Value)
+                    @p.PenaltyAmount.Format(CurrencyId)
                 }
             </Template>
         </RadzenDataGridColumn>
@@ -79,7 +75,7 @@
                               Property="TotalPay"
                               Context="p">
             <Template>
-                @p.TotalPay.Format(p.CurrencyId)
+                @p.TotalPay
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Title="Actions"
@@ -95,17 +91,14 @@
         </RadzenDataGridColumn>
     </Columns>
 </RadzenDataGrid>
-<Popup @ref="@popup" Lazy="true" class="my-popup">
-   <ScheduleDetails CurrencyId="1" BranchId="@BranchId" LoanId="@LoanId" ScheduleId="@ScheduleId" />
-</Popup>
 @code {
     void ShowContextMenu(MouseEventArgs args, VSchedule p)
     {
         ContextMenuService.Open(args, ds =>@<RadzenMenu Style="font-size:0.8rem;">
-        <RadzenMenuItem Icon="info_i"
-                        Click="@((args)=>ShowScheduleDetails(p))"
-                        Text="Show Details" />
-    </RadzenMenu>
+    <RadzenMenuItem Icon="info_i"
+                    Click="@((args)=>ShowScheduleDetails(p))"
+                    Text="Show Details" />
+</RadzenMenu>
     );
     }
 }

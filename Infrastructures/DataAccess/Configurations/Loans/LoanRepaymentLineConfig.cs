@@ -22,6 +22,7 @@ namespace Infrastructures.DataAccess.Configurations.Loans
             builder.Property(p => p.PenaltyAmount).HasPrecision(18, 2);
             builder.Property(p => p.SubTotal).HasPrecision(18, 2);
             builder.Property(p => p.OfficialReceiptNo).HasMaxLength(20);
+            builder.Property(p => p.Created).HasDefaultValueSql("GETDATE()");
         }
     }
 }

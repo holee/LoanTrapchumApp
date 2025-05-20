@@ -1,3 +1,4 @@
+using Applications.Calculations;
 using Applications.Enumerations;
 using Applications.Extensions;
 using Applications.Extensions.LoanCalculators;
@@ -7,23 +8,24 @@ using Applications.Interfaces.setting;
 using Applications.Requests.Loans.Disbursements;
 using Applications.Requests.Loans.LoanRequests;
 using Applications.Responses;
+using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.Loans.Disbursements;
+using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Auths;
+using Applications.Responses.ViewModels.Customers;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Applications.Responses.ViewModels.OtherNames;
 using Domains.Models.Files;
+using Domains.Models.Loans;
+using Infrastructures.Authorizations;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Forms;
 using Radzen;
-using Applications.Responses.ViewModels.Customers;
+using System.Security.Claims;
 using TrapchumApp.Components.Pages.Lists.Collaterals;
 using TrapchumApp.Components.Pages.Lists.OtherNames;
-using Applications.Responses.Paginations;
-using Applications.Calculations;
-using Applications.Responses.Lists.Collaterals;
-using Infrastructures.Authorizations;
-using Microsoft.AspNetCore.Authorization;
 
 namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 {
@@ -54,19 +56,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
         //IEnumerable<ApprovedUser> AprovedUsers = [];
 
         IEnumerable<VCustomerList> Customers = [];
-
-        //IEnumerable<LoanRepaymentModeDto>? LoanRepaymentModes = [];
-
-        //IEnumerable<LoanScheduleStatusDto>? LoanScheduleStatus = [];
-
-        //IEnumerable<LoanStatusDto>? LoanStatuses = [];
-
-        //IEnumerable<LoanCategoryResponse>? loanCategories = [];
-
         IEnumerable<VCustomerList>? CustomersList = [];
-
-        //IEnumerable<LoanInstallmentTypeDto>? LoanInstallments = [];
-
         List<VLoanRequestGuarantors> Guarantors = [];
 
         List<VLoanRequestCollateralLines> CollateralLines = [];
@@ -110,7 +100,8 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
         int installmentType = 1;
         int selectedTabIndex = 0;
         string? filterText = "";
-        public ActionMode ActionMode { get; set; }
+
+        bool isAllow = false;
 
         IEnumerable<FileModel>? files = [];
 
@@ -329,33 +320,19 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
             }
         }
 
-
         protected override async Task OnInitializedAsync()
         {
-            //if (CustomerId.IsNotNullOrEmpty() || LoanRequestId.IsNotNullOrEmpty())
-            //{
-            //    isCustomerSelected = true;
-            //}
 
-            //var cat = await _loanSettingService.GetLoanCategories();
+            var auth = await AuthenticationState;
 
-            //if (cat!.Any())
-            //{
-            //    loanCategories = cat.Maps<LoanCategoryResponse>();
+            var user = auth.User;
 
-            //    SelectedLoanCategory = loanCategories!.FirstOrDefault();
-            //}
-
-            //var aproveResp = await _loanSettingService.GetAprovedUserAsync<ApprovedUser>(BranchId);
-
-            //AprovedUsers = aproveResp ?? [];
-
-            await GetLoanRequestInfo();
+            await GetLoanRequestInfo(user);
 
             await base.OnInitializedAsync();
         }
 
-        async Task GetLoanRequestInfo()
+        async Task GetLoanRequestInfo(ClaimsPrincipal user)
         {
             try
             {
@@ -371,24 +348,20 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
                     NavigationManager.NavigateTo($"/App/Request/{BranchId}/Branches/?UserId={UserId}");
                     return;
                 }
-
                 var data = reqResp.Data;
 
-                var auth = await AuthenticationState;
-
-                var isAuthenticated =
-                    await _authorizeService.AuthorizeAsync(auth.User, data, new SameUserRequestRequirement());
-                if (!isAuthenticated.Succeeded)
-                {
-                    NavigationManager.NavigateTo("/Account/AccessDenied");
-                }
-
+                isAllow = (await _authorizeService.AuthorizeAsync(user, data, new SameUserRequestRequirement())).Succeeded;
 
                 model.CustomerRefId = CustomerId;
+
                 FullName = reqResp.Data?.FullName;
+
                 CollateralLines = data!.ToLoanRequestCollaterals();
+
                 Guarantors = data!.ToLoanRequestGuarantors();
+
                 Documents = data!.ToLoanRequestDocuments();
+
                 model = data!.ToLoanRequestDtoCreate();
 
                 isLoading = false;
@@ -559,3 +532,29 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 //{
 //    ActionMode = result;
 //}
+
+//IEnumerable<LoanRepaymentModeDto>? LoanRepaymentModes = [];
+
+//IEnumerable<LoanScheduleStatusDto>? LoanScheduleStatus = [];
+
+//IEnumerable<LoanStatusDto>? LoanStatuses = [];
+
+//IEnumerable<LoanCategoryResponse>? loanCategories = [];
+//IEnumerable<LoanInstallmentTypeDto>? LoanInstallments = [];
+//if (CustomerId.IsNotNullOrEmpty() || LoanRequestId.IsNotNullOrEmpty())
+//{
+//    isCustomerSelected = true;
+//}
+
+//var cat = await _loanSettingService.GetLoanCategories();
+
+//if (cat!.Any())
+//{
+//    loanCategories = cat.Maps<LoanCategoryResponse>();
+
+//    SelectedLoanCategory = loanCategories!.FirstOrDefault();
+//}
+
+//var aproveResp = await _loanSettingService.GetAprovedUserAsync<ApprovedUser>(BranchId);
+
+//AprovedUsers = aproveResp ?? [];

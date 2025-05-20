@@ -3,15 +3,18 @@
 @using static Applications.ApplicationPolicies.Policies
 @using TrapchumApp.Components.Pages.Transactions.Loans.Disbursements
 <PageTitle>Repayment</PageTitle>
-<LoanInfos LoanSchedule="LoanSchedule" @key="@(Guid.NewGuid().ToString())" />
+<LoanInfos BranchId="@BranchId"
+           LoanId="@LoanId"
+           Currency="@CurrencyId"
+           LoanSchedule="LoanSchedule" @key="@(Guid.NewGuid().ToString())" />
 <RadzenFieldset class="rz-my-2">
     <HeaderTemplate>
         <RadzenStack Orientation="Orientation.Horizontal"
                      Gap="0.25rem">
-            <RadzenIcon Icon="paid"/><strong>Payment Schedules</strong>
+            <RadzenIcon Icon="paid" /><strong>Payment Schedules</strong>
         </RadzenStack>
     </HeaderTemplate>
-   <ChildContent>
+    <ChildContent>
         <div class="m-0 p-0 rz-background-color-base-200">
             <RadzenStack Orientation="Orientation.Horizontal"
                          JustifyContent="JustifyContent.End"
@@ -39,10 +42,10 @@
                             Density="Density.Compact"
                             SelectionMode="@gridSelectionMode"
                             GridLines="DataGridGridLines.Both"
-                            @bind-Value="SelectedSchedules"
+                            @bind-Value="@SelectedSchedules"
                             RowSelect="SelectedRowEvt"
                             RowDeselect="DeSelectedRowEvt"
-                            AllowRowSelectOnRowClick="allowRowSelected"
+                            AllowRowSelectOnRowClick="@allowRowSelected"
                             IsLoading="isLoading"
                             @ref="gridSchedule">
                 <Columns>
@@ -56,7 +59,7 @@
                         <Template>
                             <RadzenCheckBox TabIndex="-1"
                                             TriState="false"
-                                            Value="@s.Selected"
+                                            Value="@(SelectedSchedules!.Any() && SelectedSchedules!.Contains(s))"
                                             Change="@(arg=>CheckedChanged(arg,s))"
                                             InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Select item" }})"
                                             TValue="bool" />
@@ -70,7 +73,7 @@
                                           Sortable="false">
                         <Template>
                             <input type="hidden" @bind="c.LoanId" />
-                            @c.InstallmentNo
+                            @c.InstallmentNo                       
                         </Template>
                     </RadzenDataGridColumn>
                     <RadzenDataGridColumn Width="6rem"
@@ -100,7 +103,7 @@
                                           Context="c"
                                           Title="ប្រាក់ដើមត្រូវបង់" Sortable="false">
                         <Template>
-                            @c.LeftPrinciple!.Value.Format(CurrencyId)
+                            @c.LeftPrinciple.Format(CurrencyId)
                         </Template>
                     </RadzenDataGridColumn>
                     <RadzenDataGridColumn TextAlign="TextAlign.End"
@@ -309,7 +312,7 @@
                 <RadzenFieldset Text="ព័ត‌៌មានទូទាត់ប្រាក់" class="mt-2">
                     <PaymentLines @ref="@paymentLinesRef"
                                   Remove="@OnRemoveAdded"
-                                  LoanRepaymentLines="LoanRepaymentLines" />
+                                  LoanRepaymentLines="LoanPaymentLines" />
                 </RadzenFieldset>
 
             }
@@ -319,6 +322,17 @@
                      class="mt-2"
                      Gap="1rem"
                      AlignItems="AlignItems.Center">
+
+            <AuthorizeView Policy="@RepaymentPolicies.MultiplePayment">
+                <Authorized>
+                    <RadzenButton Icon="paid"
+                                  Size="ButtonSize.Small"
+                                  ButtonStyle="ButtonStyle.Primary"
+                                  Click="ApplyMultipleSchedulePayment"
+                                  Visible="isAllowMultiplePayment"
+                                  Text="ApplySchedulePayment" />
+                </Authorized>
+            </AuthorizeView>
             <AuthorizeView Policy="@RepaymentPolicies.PayOff">
                 <Authorized>
                     <RadzenButton Icon="paid"
@@ -332,6 +346,7 @@
                           Size="ButtonSize.Small"
                           ButtonStyle="ButtonStyle.Success"
                           Click="ApplySchedulePayment"
+                          Visible="!isAllowMultiplePayment"
                           Text="Applied Payment" />
             <RadzenLink Path="@($"/App/Loan/{BranchId}/Branches?UserId={UserId}")"
                         Text="Cancel" />

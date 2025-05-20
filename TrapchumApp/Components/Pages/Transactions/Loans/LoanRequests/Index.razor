@@ -2,8 +2,7 @@
 <PageTitle>Loan Request</PageTitle>
 @attribute [MustHasPermission(Modules.LoanRequest,Feature.Read)]
 <Containers Fluid>
-    <RadzenTabs SelectedIndexChanged="SelectedIndexChanged"
-                RenderMode="TabRenderMode.Server">
+    <RadzenTabs SelectedIndexChanged="SelectedIndexChanged" RenderMode="TabRenderMode.Server">
         <Tabs>
             <RadzenTabsItem Icon="list" Text="All">
                 <LoanRequestAll BranchId="@BranchId" UserId="@UserId"/>

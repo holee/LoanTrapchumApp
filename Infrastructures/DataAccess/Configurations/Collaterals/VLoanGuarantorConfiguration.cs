@@ -10,5 +10,9 @@ public class VLoanGuarantorConfiguration : IEntityTypeConfiguration<VLoanGuarant
     {
         builder.ToTable("VLoanGuarators");
         builder.HasNoKey();
+        builder.Property(x => x.Principle).HasPrecision(18, 3);
+        builder.Property(x => x.AdminFeeRate).HasPrecision(18, 3);
+        builder.Property(x => x.CollectionFeeRate).HasPrecision(18, 3);
+        builder.Property(x => x.InterestRate).HasPrecision(18, 3);
     }
 }

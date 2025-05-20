@@ -23,6 +23,7 @@ namespace Applications.Services.Lists
         Task<IEnumerable<Holiday>> GetHolidays(bool isSelectedPrevious, DateTime? startFrom = null, DateTime? end = null);
         Task<IEnumerable<HolidayVm>> GetHolidays(DateTime? selectedDate);
         Task<Pager<Holiday>> GetHolidays(int pageNumber, int pageSize, string sortColumn = "HolidayName", bool isSelectedPrevious = false, bool sortDescending = false, string? q = null);
+        Task<IEnumerable<HolidayVm>> GetActiveHolidays(DateTime? startFrom, int? selectedYear);
         //Task<Result<string>> ModifyHolidate(long id, HolidayCreateDto model);
     }
 
@@ -90,7 +91,17 @@ namespace Applications.Services.Lists
 
         public async Task<IEnumerable<Holiday>> GetHolidays(bool isSelectedPrevious = false, DateTime? startFrom = null, DateTime? end = null)
         {
+
+
             return await hService.GetHolidays(isSelectedPrevious, startFrom, end);
+        }
+
+
+        public async Task<IEnumerable<HolidayVm>> GetActiveHolidays(DateTime? startFrom, int? selectedYear)
+        {
+            var startDate = startFrom < DateTime.Now ? DateTime.Now : startFrom;
+
+            return await hService.GetActiveHolidays(startDate, selectedYear);
         }
 
         public async Task<IEnumerable<HolidayVm>> GetHolidays(DateTime? selectedDate)

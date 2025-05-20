@@ -61,7 +61,7 @@ public partial class PaymentDetails
     {
         ContextMenuService.Close();
 
-        List<LoanRepaymentLineDtoCreate> loanRepaymentLines = [];
+        List<LoanPaymentLineDtoCreate> loanRepaymentLines = [];
 
         if (p.IsPaid)
         {

@@ -4,6 +4,7 @@ using Applications.Interfaces.Lists;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Holidays;
+using Dapper;
 using Domains.Models.Lists;
 using Infrastructures.DataAccess;
 using Microsoft.EntityFrameworkCore;
@@ -17,12 +18,13 @@ namespace Infrastructures.Implements
         private IEnumerable<DateTime> _xistingHolidays = [];
 
         private readonly IDbContextFactory<DataContext> _contextFactory;
-
-        public HolidayService(ApplicationDbContext context, IDbContextFactory<DataContext> contextFactory)
+        private readonly IDapperConnectionFactory _connectionFactory;
+        public HolidayService(ApplicationDbContext context, IDbContextFactory<DataContext> contextFactory, IDapperConnectionFactory connectionFactory)
         {
             _context = context;
 
             _contextFactory = contextFactory;
+            _connectionFactory = connectionFactory;
         }
 
         public async Task<Result<string>> CreateOrUpdateHoliday(Holiday entities)
@@ -34,7 +36,6 @@ namespace Infrastructures.Implements
                 {
                     _context.Holidays.Add(entities);
 
-                    return Result.Success<string>(new("New holiday was added successfully!"));
                 }
                 else
                 {
@@ -227,6 +228,8 @@ namespace Infrastructures.Implements
 
             }
 
+            //var builder = new SqlBuilder();
+
             var items = await queries.AsNoTracking().ToListAsync();
 
             return new Pager<HolidayVm>
@@ -238,15 +241,25 @@ namespace Infrastructures.Implements
         }
 
 
-        public async Task<IEnumerable<Holiday>> GetActiveHolidays(DateTime? selectedDate)
+        public async Task<IEnumerable<HolidayVm>> GetActiveHolidays(DateTime? selectedDate,int? selectedYear=0)
         {
 
-            await using var context = await _contextFactory.CreateDbContextAsync();
+            using var db = _connectionFactory.CreateConnection();
 
-            var queries = await context.Holidays
-                                  .Where(d => d.HolidayDt >= selectedDate)
-                                  .AsNoTracking()
-                                  .ToListAsync();
+            var lastSelectedDate = selectedYear > 0 ? selectedDate!.Value.AddYears(selectedYear!.Value) : selectedDate;
+
+            var parameters = new DynamicParameters();
+
+            parameters.Add("@selectedDate", selectedDate);
+
+            parameters.Add("@lastSelectedDate", lastSelectedDate);
+
+            var sql = @"SELECT Id, HolidayDt, HolidayName, HolidayName, HolidayNum, Status, Description
+                        FROM VHolidaysVm WHERE Status = CAST(1 AS BIT) AND 
+                        CAST(HolidayDt AS DATE) BETWEEN CAST(@selectedDate AS DATE) AND 
+                        CAST(@lastSelectedDate AS DATE);
+                       ";
+            var queries=await db.QueryAsync<HolidayVm>(sql, parameters);
 
             return queries ?? [];
         }

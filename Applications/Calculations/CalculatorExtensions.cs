@@ -22,7 +22,7 @@ internal class CalculatorExtensions
         return (amount / nper).RoundDown(3);
 
     }
-    internal static decimal CalcLastBalance(decimal? beginBalance, decimal? principalPaid)
+    internal static decimal LastBalance(decimal? beginBalance, decimal? principalPaid)
     {
 
         var begin = beginBalance ?? 0;
@@ -31,7 +31,7 @@ internal class CalculatorExtensions
 
         return Math.Round(begin - principal, 3);
     }
-    internal static decimal CalcCollectionFee(int? currencyId, decimal? amount, decimal? effectiveRate, int? days = 30)
+    internal static decimal CollectionFee(int? currencyId, decimal? amount, decimal? effectiveRate, int? days = 30)
     {
 
         var rate = effectiveRate ?? 0;
@@ -63,7 +63,7 @@ internal class CalculatorExtensions
         return Math.Round(pmt!.Value, 2);
     }
 
-    internal static decimal CalcInterest(int? currencyId, decimal? amount, decimal? rate, int? numOfDay, int? period = 28)
+    internal static decimal Interest(int? currencyId, decimal? amount, decimal? rate, int? numOfDay, int? period = 28)
     {
         var r = rate ?? 0;
 
@@ -97,7 +97,22 @@ internal class CalculatorExtensions
 
     internal static int TotalDays(DateTimeOffset? start, DateTimeOffset? end)
     {
-        TimeSpan dateDiff = end!.Value.Subtract(start!.Value);
+        var start1 = start ?? DateTime.Now;
+
+        var end1 = end ?? DateTime.Now;
+
+        TimeSpan dateDiff = end1.Subtract(start1);
+
+        return dateDiff.Days;
+    }
+
+    internal static int TotalDays(DateTime? start, DateTime? end)
+    {
+        var start1 = start ?? DateTime.Now;
+
+        var end1 = end ?? DateTime.Now; 
+
+        TimeSpan dateDiff = end1.Subtract(start1);
 
         return dateDiff.Days;
     }

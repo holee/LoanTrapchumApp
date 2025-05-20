@@ -45,12 +45,8 @@ public sealed class VSchedule
     public string? ScheduleStatus { get; set; }
     public bool IsLate { get; set; } = false;
 
-    [NotMapped]
-    public bool Selected { get; set; } = false;
-    [NotMapped]
-    public bool IsPaid => ScheduleStatusId == 1;
-    [NotMapped]
-    public bool IsPartialPaid => ScheduleStatusId == 4;
-    [NotMapped]
-    public List<VPaymentLines> PaymentLines { get; set; } = [];
+    [NotMapped] public bool Selected { get; set; } = false;
+    [NotMapped] public bool IsPaid => ScheduleStatusId == 1;
+    [NotMapped] public bool IsPartialPaid => ScheduleStatusId == 4;
+    [NotMapped] public List<LoanPaymentLineVm> PaymentLines { get; set; } = [];
 }

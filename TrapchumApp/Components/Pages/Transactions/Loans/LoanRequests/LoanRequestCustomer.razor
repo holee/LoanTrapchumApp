@@ -67,12 +67,12 @@
             </tr>
             <tr>
                 <th style="background-color:#F1F1F4" class="w-25">Income</th>
-                <td>@Customer?.CustomerIncomes.Sum(x => x.IncomeAmount)</td>
+                <td>@Customer?.CustomerIncomes?.Sum(x => x?.IncomeAmount)</td>
             </tr>
             <tr>
                 <th style="background-color:#F1F1F4" class="w-25">Expend</th>
                 <td>
-                    @Customer?.CustomerExpenses.Sum(x => x.ExpendAmount)
+                    @Customer?.CustomerExpenses?.Sum(x => x?.ExpendAmount)
                 </td>
             </tr>
         </tbody>
