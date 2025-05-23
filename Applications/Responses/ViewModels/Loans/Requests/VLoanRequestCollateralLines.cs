@@ -5,7 +5,7 @@ namespace Applications.Responses.ViewModels.Loans.Requests;
 
 public sealed class VLoanRequestCollateralLines
 {
-    public long? Id { get; set; }
+    public long Id { get; set; }
     public int? BranchId { get; set; }
     public string? LoanRequestId { get; set; }
     public long? CollateralLineId { get; set; }
@@ -22,7 +22,17 @@ public sealed class VLoanRequestCollateralLines
     public string? SubTypeName { get; set; }
     public bool? InUsed { get; set; } = true;
 
-
+    //public int? CategoryRefId { get; set; }
+    //public int? SubCategoryRefId { get; set; }
+    //public string? CollateralSubTypeName { get; set; }
+    //public bool IsAvailable { get; set; } = true;
+    //public bool? IsReturn { get; set; } = false;
+    //public DateTime? ReturnDate { get; set; }
+    //public DateTime? RegisterDate { get; set; }
+    //public string? WareHouse { get; set; }
+    //public string? Size { get; set; }
+    //public string? Description { get; set; }
+    //public bool IsUsed { get; set; } = false;
 
 }
 

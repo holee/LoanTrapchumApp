@@ -17,7 +17,6 @@
 <RadzenStack AlignItems="AlignItems.Center"
              Orientation="Orientation.Horizontal" class="rz-my-1">
     <RadzenTextBox @onclick="@OpenPopup"
-                   class="form-control"
                    @ref="@_guarantorSearchText"
                    @bind-Value="@FullName"
                    @onkeydown="@OnKeyDown"
@@ -49,6 +48,7 @@
                                       TextAlign="TextAlign.Center"
                                       Context="g"
                                       Width="3rem"
+                                      Sortable="false"
                                       Property="@(nameof(VGuarantor.Id))">
                     <Template>
                         <RadzenCheckBox InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Select item" }})"
@@ -60,9 +60,8 @@
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn Property="@nameof(VGuarantor.FullName)" Title="FullName" />
                 <RadzenDataGridColumn Width="8rem" Property="@nameof(VGuarantor.Gender)" Title="Salutation" />
-                <RadzenDataGridColumn Width="10rem" Property="@nameof(VGuarantor.GuarantorName)" Title="Name" />
                 <RadzenDataGridColumn Width="8rem" Property="@nameof(VGuarantor.Phone)" Title="Phone" />
-                <RadzenDataGridColumn Width="4rem"
+                <RadzenDataGridColumn Width="8rem"
                                       TextAlign="TextAlign.Center"
                                       Property="@nameof(VGuarantor.NumberOfLoan)" Title="Loans" />
                 <RadzenDataGridColumn Width="5rem"

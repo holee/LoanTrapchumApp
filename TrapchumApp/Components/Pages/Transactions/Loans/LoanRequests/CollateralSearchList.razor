@@ -17,8 +17,10 @@
 </style>
 <RadzenStack AlignItems="AlignItems.Center"
              Orientation="Orientation.Horizontal" class="rz-my-1">
+
+    @SelectedItems.Count()
+
     <RadzenTextBox @onclick="@OpenPopup"
-                   class="form-control"
                    @ref="@_collateralSearchText"
                    @onkeydown="@OnKeyDown"
                    Placeholder="Search Collateral...."
@@ -48,12 +50,22 @@
                                       TextAlign="TextAlign.Center"
                                       Context="g"
                                       Width="3rem"
+                                      Sortable="false"
                                       Property="@(nameof(VGuarantor.Id))">
+                    <HeaderTemplate>
+                        <RadzenCheckBox TabIndex="-1"
+                                        TriState="false" 
+                                        TValue="bool"
+                                        InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "Select many items" } })"
+                                        Change="CheckedChanged"
+                                        Value="@SelectedMultiple" />
+                    </HeaderTemplate>
                     <Template>
-                        <RadzenCheckBox InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Select item" }})"
+                        <RadzenCheckBox InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "Select item" } })"
                                         TriState="false"
+                                        Disabled="!SelectedMultiple"
                                         Value="@(_selectedCollateralLines.Any() && _selectedCollateralLines.Contains(g))"
-                                        Change=@(args => { if(!allowRowSelectOnRowClick) { _gridCollaterals.SelectRow(g); }})
+                                        Change="@(args => ToggleRowSelection(g))"
                                         TValue="bool" />
                     </Template>
                 </RadzenDataGridColumn>
@@ -62,7 +74,8 @@
                 <RadzenDataGridColumn Width="10rem" Property="@nameof(VCollateralLines.TypeName)" Title="Type Name" />
                 <RadzenDataGridColumn Width="8rem"
                                       Context="g"
-                                      Property="@nameof(VCollateralLines.RegisterDate)" Title="RegisterDate">
+                                      Property="@nameof(VCollateralLines.RegisterDate)" 
+                                      Title="RegisterDate">
                     <Template>
                         @g.RegisterDate.DayFirst()
                     </Template>
@@ -96,3 +109,6 @@
     </Popup>
 </RadzenStack>
 
+@code {
+    bool SelectedMultiple = false;
+}

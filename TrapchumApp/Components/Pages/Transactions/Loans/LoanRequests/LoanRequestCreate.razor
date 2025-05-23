@@ -1,5 +1,6 @@
 ﻿@page "/App/Request/{BranchId:int}/Branches/{UserId}/CreateNew"
 @using Applications.Responses.Auths
+@using Applications.Responses.Lists.Collaterals
 @using Applications.Responses.Loans.Disbursements
 @using Radzen.Blazor.Rendering
 @attribute [MustHasPermission(Modules.LoanRequest, Feature.Read)]
@@ -20,9 +21,12 @@
                                                 @ref="CollateralRef"
                                                 Add="AddCollaterals"
                                                 RemoveCollateral="RemovedCollateral"
-                                                Collaterals="CollateralLines">
+                                                Collaterals="@requestCollateralLines">
                             <SearchBoxTemplate>
-                                <CollateralSearchList CustomerId="@CustomerId"/>
+                                <CollateralSearchList CustomerId="@CustomerId"
+                                                      SelectedItems="requestCollateralLines.MapToVCollateralLines()"
+                                                      MultipleSelected="MultipleSelected"
+                                                      SingleSelected="SingleSelected" />
                             </SearchBoxTemplate>
                         </LoanRequestCollaterals>
 
@@ -34,7 +38,8 @@
                                               Remove="RemoveGaurantor"
                                               @ref="GuarantorRef">
                             <SearchBoxTemplate>
-                                <GuarantorSearchList/>
+                                <GuarantorSearchList OnSelected="SelectedGuarantors" 
+                                                SelectMany="SelectMany" />
 
                             </SearchBoxTemplate>
                         </LoanRequestGaurantor>

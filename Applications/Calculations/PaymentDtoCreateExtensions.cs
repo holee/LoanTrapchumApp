@@ -42,10 +42,10 @@ public static class PaymentDtoCreateExtensions
         return new PaymentCreate
         {
             OriginalPaidAmount = lines.TotalAmountNoPenalty(),
-            OriginalPenaltyAmount = lines.TotalPaidPenaltyAmount(),
+            OriginalPenaltyAmount = lines.PaidPenaltyAmount(),
             TotalAmountNoPenalty = lines.TotalAmountNoPenalty(),
             TotalAmountWithPenalty = lines.TotalAmountWithPenalty(),
-            PenaltyAmount = lines.TotalPaidPenaltyAmount(),
+            PenaltyAmount = lines.PaidPenaltyAmount(),
             RecieveKhrAmount = currencyId == 1 ? lines.TotalAmountWithPenalty() : 0.00M,
             RecieveAmount = currencyId == 2 ? lines.TotalAmountWithPenalty() : 0.00M,
             ChangeKhrAmount = 0,

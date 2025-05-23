@@ -8,5 +8,6 @@
         public const string GetScheduleById = "spGetScheduleById";
         public const string GetCurrencyNotes = "getCurrencyNotes";
         public const string GetCurrencyNotesByBranchId = "GetCurrencyNotesByBranchId";
+        public const string GetSchedulesByLoanId = "spGetSchedulesByLoanId";
     }
 }

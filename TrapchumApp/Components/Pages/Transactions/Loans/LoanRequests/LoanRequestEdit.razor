@@ -26,8 +26,8 @@
                                                     Collaterals="CollateralLines">
                                 <SearchBoxTemplate>
                                     <CollateralSearchList CustomerId="@CustomerId"
-                                                          SelectMany="SelectManyCollaterals"
-                                                          OnSelected="SelectedCollateral" />
+                                                          MultipleSelected="SelectManyCollaterals"
+                                                          SingleSelected="SelectedCollateral" />
                                 </SearchBoxTemplate>
                             </LoanRequestCollaterals>
                             <LoanRequestGaurantor Guarantors="Guarantors"
@@ -162,8 +162,6 @@
         await GuarantorRef.GuarantorReload();
 
     }
-
-
 
     async Task SelectedGuarantors(VGuarantor? g)
     {

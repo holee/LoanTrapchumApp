@@ -163,7 +163,7 @@ namespace Infrastructures.Implements
             parameter.Add("@CustomerId", customerId);
 
             var sql =
-                $@"SELECT LoanRequestId,RequestAmount,CustomerId FROM VLoanRequests WHERE CustomerId=@CustomerId AND StatusId NOT IN (2,3,4)";
+                $@"SELECT LoanRequestId,RequestAmount,CustomerId FROM VLoanRequests WHERE CustomerId=@CustomerId AND StatusId NOT IN (4)";
 
             var existingLoanRequest = await db.QueryAsync<VLoanRequests>(sql, parameter);
 

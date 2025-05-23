@@ -1,7 +1,6 @@
 using Applications.Enumerations;
 using Applications.Extensions;
 using Applications.Extensions.DateTimes;
-using Applications.Extensions.mappers;
 using Applications.Extensions.Maths;
 using Applications.Interfaces.Lists;
 using Applications.Interfaces.Loans;
@@ -10,8 +9,11 @@ using Applications.Requests.Loans.Disbursements;
 using Applications.Requests.Loans.LoanRequests;
 using Applications.Requests.Loans.Payments;
 using Applications.Responses.Auths;
+using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.Loans.Disbursements;
+using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Auths;
+using Applications.Responses.ViewModels.Customers;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Applications.Responses.ViewModels.Options;
 using Applications.Responses.ViewModels.OtherNames;
@@ -20,12 +22,8 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Forms;
 using Radzen;
-using Applications.Responses.ViewModels.Customers;
 using TrapchumApp.Components.Pages.Lists.Collaterals;
 using TrapchumApp.Components.Pages.Lists.OtherNames;
-using Applications.Responses.Paginations;
-using Applications.Responses.Lists.Collaterals;
-using System.Threading.Tasks;
 
 namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 {
@@ -63,7 +61,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 
         List<VLoanRequestGuarantors> Guarantors = [];
 
-        List<VLoanRequestCollateralLines> CollateralLines = [];
+        List<VLoanRequestCollateralLines> requestCollateralLines = [];
 
         List<VLoanRequestsDocuments> Documents = [];
 
@@ -116,13 +114,14 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
             {
                 return;
             }
+
         }
+
 
         async Task HandleFileDialogue()
         {
             var options = new DialogOptions
             {
-                Width = "45vw"
             };
 
             IEnumerable<FileModel> uploadedFiles =
@@ -145,6 +144,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 
                 DocumentRef.ReloadDocument();
             }
+
         }
 
 
@@ -165,6 +165,62 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 
                 return;
             }
+        }
+
+        async Task SelectMany(IEnumerable<VGuarantor> gs)
+        {
+            if (!gs.Any()) return;
+
+            foreach (var g in gs)
+            {
+                if (Guarantors.Any(x => x.EmployeeRefId == g.Id)) continue;
+
+                var item = new VLoanRequestGuarantors
+                {
+                    EmployeeRefId = g.Id,
+                    FullName = g.FullName,
+                    AltName = g.GuarantorName,
+                    Phone = g.Phone,
+                    VilInKhmer = g.VilInKhmer,
+                    ComInKhmer = g.ComInKhmer,
+                    DisInKhmer = g.DisInKhmer,
+                    ProInKhmer = g.ProInKhmer
+                };
+
+
+                Guarantors.Add(item);
+            }
+
+            await GuarantorRef.GuarantorReload();
+
+        }
+
+        async Task SelectedGuarantors(VGuarantor? g)
+        {
+            if (g is null || string.IsNullOrEmpty(g.Id)) return;
+
+            var gs = new VLoanRequestGuarantors
+            {
+                EmployeeRefId = g.Id,
+                FullName = g.FullName,
+                AltName = g.GuarantorName,
+                Phone = g.Phone,
+                VilInKhmer = g.VilInKhmer,
+                ComInKhmer = g.ComInKhmer,
+                DisInKhmer = g.DisInKhmer,
+                ProInKhmer = g.ProInKhmer
+            };
+
+            if (Guarantors.Any(x => x.EmployeeRefId == g.Id))
+            {
+                NotificationService.Notify(NotificationSeverity.Info, "Guarantor already exists");
+
+                return;
+            }
+
+            Guarantors.Add(gs);
+
+            await GuarantorRef.GuarantorReload();
         }
 
         async Task AddGuarantors()
@@ -207,8 +263,17 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 
             if (confirm == false) return;
 
+            if (Guarantors.Any() == false) return;
 
-            if (Guarantors.Any() && (g.Id is null || g.Id == 0))
+            var lastItem = Guarantors.Last();
+
+            if (lastItem != g)
+            {
+                NotificationService.Notify(NotificationSeverity.Info, "Please select the last item to remove.");
+                return;
+            }
+
+            if (Guarantors.Contains(g))
             {
                 Guarantors.Remove(g);
 
@@ -216,84 +281,99 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
             }
         }
 
+        async Task SingleSelected(VCollateralLines? c)
+        {
+            if (c is null || c.Id <= 0) return;
+
+            var item = new VLoanRequestCollateralLines
+            {
+                Id = c.Id,
+                CollateralLineId = c.Id,
+                CollateralId = c.CollateralId,
+                OwnerName = c.OwnerName,
+                ReferenceNo = c.ReferenceNo,
+                TypeName = c.TypeName,
+                Quantity = c.Quantity,
+            };
+
+
+            if (requestCollateralLines.Any(x => x.Id == item.Id))
+            {
+                NotificationService.Notify(NotificationSeverity.Info, "Collateral already exists");
+                return;
+            }
+            requestCollateralLines.Add(item);
+
+            await CollateralRef.CollateralReload();
+        }
+
+        async Task MultipleSelected(IEnumerable<VCollateralLines> cs)
+        {
+            if (!cs.Any()) return;
+
+            foreach (var g in cs)
+            {
+
+                if (requestCollateralLines.Any(x => x.CollateralLineId == g.Id)) continue;
+
+                var item = new VLoanRequestCollateralLines
+                {
+                    CollateralLineId = g.Id,
+                    CollateralId = g.CollateralId,
+                    OwnerName = g.OwnerName,
+                    ReferenceNo = g.ReferenceNo,
+                    TypeName = g.TypeName,
+                    Quantity = g.Quantity,
+                };
+
+                requestCollateralLines.Add(item);
+            }
+
+            await CollateralRef.CollateralReload();
+
+        }
         async void AddCollaterals()
         {
+
             var param = new Dictionary<string, object?>
             {
                 { "CustomerId", model.CustomerRefId }
             };
             var options = new DialogOptions
             {
-                Width = "60vw"
+                Width = "85vw"
             };
 
-            IList<VCollateralLines> results =
-                await DialogService.OpenAsync<CollateralLoanRequest>("Collateral", param, options);
-            if (results.Any())
-            {
-                var collateralLines = results.Select(c => new VLoanRequestCollateralLines
-                {
-                    CollateralLineId = c.Id,
-                    CollateralId = c.CollateralId,
-                    OwnerName = c.OwnerName,
-                    ReferenceNo = c.ReferenceNo,
-                }).ToList();
-                foreach (var item in collateralLines)
-                {
-                    if (CollateralLines.Contains(item)) continue;
-                    CollateralLines.Add(item);
-                }
+            await DialogService.OpenAsync<CollateralModalAdd>("Collateral", param, options);
 
-                await CollateralRef.CollateralReload();
-            }
+
         }
-
         async void RemovedCollateral(VLoanRequestCollateralLines c)
         {
             var confirm = await DialogService.Confirm("Do you want to remove this collateral?", "Remove Collateral");
 
             if (confirm == false) return;
 
+            if (requestCollateralLines.Any() == false) return;
 
-            if (CollateralLines.Any() && (c.Id is not null || c.Id == 0))
+            var lastItem = requestCollateralLines.Last();
+
+            if (lastItem != c)
             {
-                CollateralLines.Remove(c);
 
-                await CollateralRef.CollateralReload();
+                NotificationService.Notify(NotificationSeverity.Info, "Please select last item to remove.");
+                
+                return;
+
             }
+
+            if (requestCollateralLines.Contains(c))
+            {
+                requestCollateralLines.Remove(c);
+            }
+            await CollateralRef.CollateralReload();
         }
 
-        void SelectedChargeModeChanged(object e)
-        {
-            if (e is not null)
-            {
-                var selectedValue = (Items)e;
-
-                model.CollectionFeeModeName = selectedValue.Label;
-            }
-            else
-            {
-                model.CollectionFeeModeId = 1;
-                model.CollectionFeeModeName = "Flat";
-            }
-        }
-
-        void RepaymentModeSelectedChanged(object e)
-        {
-            var selectedValue = (Items)e;
-
-            model.RepaymentMode = selectedValue.Label;
-
-            if (selectedValue.Value == 1)
-            {
-                model.PayEvery = 4;
-            }
-            else
-            {
-                model.PayEvery = 1;
-            }
-        }
-        
         async Task SetCustomer(string? customerId)
         {
             if (string.IsNullOrEmpty(customerId))
@@ -304,16 +384,16 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
             }
 
             CustomerId = customerId;
-            
+
             model.CustomerRefId = customerId;
-            
+
             await GetCustomers(CustomerId, 1);
         }
 
         protected override async Task OnInitializedAsync()
         {
             await GetLoanRequestInfo();
-            
+
             var rsp1 = await _userService.GetUsersAsync(UserId, string.Empty);
 
             if (rsp1 is { IsSuccess: true, Data: not null })
@@ -435,7 +515,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 
             model.GuarantorsLink.AddRange(oldGuarantors);
 
-            var oldCollaterals = CollateralLines.ToCollateralLinkDtoCreate(BranchId);
+            var oldCollaterals = requestCollateralLines.ToCollateralLinkDtoCreate(BranchId);
 
             model.CollateralLinesLink.AddRange(oldCollaterals);
 
@@ -614,6 +694,38 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
         }
     }
 }
+
+
+//void SelectedChargeModeChanged(object e)
+//{
+//    if (e is not null)
+//    {
+//        var selectedValue = (Items)e;
+
+//        model.CollectionFeeModeName = selectedValue.Label;
+//    }
+//    else
+//    {
+//        model.CollectionFeeModeId = 1;
+//        model.CollectionFeeModeName = "Flat";
+//    }
+//}
+
+//void RepaymentModeSelectedChanged(object e)
+//{
+//    var selectedValue = (Items)e;
+
+//    model.RepaymentMode = selectedValue.Label;
+
+//    if (selectedValue.Value == 1)
+//    {
+//        model.PayEvery = 4;
+//    }
+//    else
+//    {
+//        model.PayEvery = 1;
+//    }
+//}
 
 //LoanCaloulator SelectLoanType(int? paymentMode)
 //{

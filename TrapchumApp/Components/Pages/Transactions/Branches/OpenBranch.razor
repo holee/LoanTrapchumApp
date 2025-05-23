@@ -22,6 +22,7 @@
                 <RadzenColumn SizeMD="5" Size="12" SizeSM="12">
                     <RadzenDataGrid Responsive
                                     Density="Density.Compact"
+                                    GridLines="DataGridGridLines.Both"
                                     Data="CashVaultBalances">
                         <Columns>
                             <RadzenDataGridColumn Title="Currency Name"
@@ -56,6 +57,7 @@
                 <RadzenColumn SizeMD="7" Size="12" SizeSM="12">
                     <RadzenDataGrid Density="Density.Compact"
                                     Responsive
+                                    GridLines="DataGridGridLines.Both"
                                     Data="CurrencyNotes">
                         <Columns>
                             <RadzenDataGridColumn Title="Currency Name"
@@ -74,6 +76,7 @@
                             </RadzenDataGridColumn>
                             <RadzenDataGridColumn Title="Value"
                                                   Context="c"
+                                                  TextAlign="TextAlign.Right"
                                                   Property="CurrencyValue">
                                 <Template>
                                     @c.CurrencyValue
@@ -81,6 +84,7 @@
                             </RadzenDataGridColumn>
                             <RadzenDataGridColumn Title="Quantity"
                                                   Context="c"
+                                                  TextAlign="TextAlign.Right"
                                                   Property="Quantity">
                                 <Template>
                                     @(c.Quantity ?? 0)
@@ -91,6 +95,7 @@
                             </RadzenDataGridColumn>
                             <RadzenDataGridColumn Title="Sub Total"
                                                   Context="c"
+                                                  TextAlign="TextAlign.Right"
                                                   Property="Quantity">
                                 <Template>
                                     @((c.Quantity * c.CurrencyValue) ?? 0)

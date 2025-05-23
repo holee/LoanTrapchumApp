@@ -1,10 +1,7 @@
 using Applications.Calculations;
 using Applications.Extensions.NumberExtensions;
 using Applications.Requests.Loans.Payments;
-using Applications.Requests.Transactions.ForiegnExchanges;
 using Applications.Requests.Transactions.LoanTransactions;
-using Applications.Responses.ViewModels.Currencies;
-using Applications.Responses.ViewModels.Settings;
 using Applications.Services.Loans;
 using Applications.Services.Settings;
 using Domains.Models.Loans;
@@ -87,10 +84,10 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
                 LoanRepayment.LoanRefId = LoanId;
                 LoanRepayment.CreditAgentRefId = CreditAgentId;
                 LoanRepayment.PayDate = DateTime.Now;
-                LoanRepayment.Principle = LoanRepaymentLines.TotalPaidPrincipleAmount();
-                LoanRepayment.Interest = LoanRepaymentLines.TotalPaidInterestAmount();
-                LoanRepayment.CollectionFeeAmount = LoanRepaymentLines.TotalPaidCollectionFeeAmount();
-                LoanRepayment.PenaltyAmount = LoanRepaymentLines.TotalPaidPenaltyAmount();
+                LoanRepayment.Principle = LoanRepaymentLines.PaidPrincipleAmount();
+                LoanRepayment.Interest = LoanRepaymentLines.PaidInterestAmount();
+                LoanRepayment.CollectionFeeAmount = LoanRepaymentLines.PaidCollectionFeeAmount();
+                LoanRepayment.PenaltyAmount = LoanRepaymentLines.PaidPenaltyAmount();
                 LoanRepayment.SubTotal = LoanRepaymentLines.Total();
                 LoanRepayment.OfficialReceiptNo = ReceiptNo;
                 LoanRepayment.LoanRepaymentLines = LoanRepaymentLines;

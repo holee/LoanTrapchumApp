@@ -12,6 +12,17 @@ public static class LoanRequestDtoCreateExtensions
     {
         return new LoanDocuments
         {
+            BranchId = req.BranchId,
+            LoanRequestId = req.LoanRequestId,
+            OriginalName = req.OriginalName,
+            NewFileName = req.NewFileName
+        };
+    }
+
+    private static LoanDocuments MapToLoanDocument(this LoanDocumentDtoUpdate req)
+    {
+        return new LoanDocuments
+        {
             Id = req.Id,
             BranchId = req.BranchId,
             LoanRequestId = req.LoanRequestId,
@@ -19,12 +30,21 @@ public static class LoanRequestDtoCreateExtensions
             NewFileName = req.NewFileName
         };
     }
-    
+
     private static LoanDescriptions MapToLoanDescription(this LoanDescriptionsDtoCreate req)
     {
         return new LoanDescriptions
         {
-            Id = req.Id,
+            Memo = req.Memo,
+            LoanRequestRefId = req.LoanRequestRefId
+        };
+    }
+
+    private static LoanDescriptions MapToLoanDescription(this LoanDescriptionsDtoUpdate req)
+    {
+        return new LoanDescriptions
+        {
+            Id= req.Id,
             Memo = req.Memo,
             LoanRequestRefId = req.LoanRequestRefId
         };
@@ -45,7 +65,6 @@ public static class LoanRequestDtoCreateExtensions
     {
         return new CollateralLink
         {
-            Id = req.Id ?? 0,
             BranchId = req.BranchId,
             CollateralLineRefId = req.CollateralLineRefId,
             LoanRequestRefId = req.LoanRequestRefId,
@@ -76,7 +95,7 @@ public static class LoanRequestDtoCreateExtensions
             PayEvery = req.PayEvery ?? 1,
             CurrencyRefId = req.CurrencyRefId,
             RequestDate = req.RequestDate,
-            FirstPaymentDate = req.FirstPaymentDate ?? DateTime.UtcNow.AddMonths(1),
+            FirstPaymentDate = req.FirstPaymentDate ?? DateTime.Now.AddMonths(1),
             LastPaymentDate = req.LastPaymentDate,
             Installments = req.Installments ?? 12,
             InstallmentType = req.InstallmentType,

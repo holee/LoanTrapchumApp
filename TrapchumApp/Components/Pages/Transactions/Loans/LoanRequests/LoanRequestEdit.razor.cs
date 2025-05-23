@@ -223,32 +223,32 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
         {
             var options = new DialogOptions
             {
+                Width="65rem"
             };
 
-            IList<VGuarantor> results =
-                await DialogService.OpenAsync<GuarantorAddModal>("Select Guarantor", options: options);
+            bool? results = await DialogService.OpenAsync<GuarantorAddModal>("Select Guarantor", options: options);
 
-            if (results is not null && results.Any())
+            if (results is not null && results == true)
             {
-                var gs = results.Select(g => new VLoanRequestGuarantors
-                {
-                    EmployeeRefId = g.Id,
-                    FullName = g.FullName,
-                    AltName = g.GuarantorName,
-                    Phone = g.Phone,
-                    VilInKhmer = g.VilInKhmer,
-                    ComInKhmer = g.ComInKhmer,
-                    DisInKhmer = g.DisInKhmer,
-                    ProInKhmer = g.ProInKhmer
-                });
-                foreach (var item in gs)
-                {
-                    if (Guarantors.Contains(item)) continue;
+                //var gs = results.Select(g => new VLoanRequestGuarantors
+                //{
+                //    EmployeeRefId = g.Id,
+                //    FullName = g.FullName,
+                //    AltName = g.GuarantorName,
+                //    Phone = g.Phone,
+                //    VilInKhmer = g.VilInKhmer,
+                //    ComInKhmer = g.ComInKhmer,
+                //    DisInKhmer = g.DisInKhmer,
+                //    ProInKhmer = g.ProInKhmer
+                //});
+                //foreach (var item in gs)
+                //{
+                //    if (Guarantors.Contains(item)) continue;
 
-                    Guarantors.Add(item);
-                }
+                //    Guarantors.Add(item);
+                //}
 
-                await GuarantorRef.GuarantorReload();
+                //await GuarantorRef.GuarantorReload();
             }
         }
 
@@ -312,7 +312,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
                 }
             }
 
-            if (CollateralLines.Any() && (c.Id is null || c.Id == 0))
+            if (CollateralLines.Any() && c.Id == 0)
             {
                 CollateralLines.Remove(c);
 

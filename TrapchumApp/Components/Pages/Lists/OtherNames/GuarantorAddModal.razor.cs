@@ -2,13 +2,15 @@ using Applications.Interfaces.Lists;
 using Applications.Requests.Lists.Addreses;
 using Applications.Requests.Lists.Entities;
 using Applications.Requests.Lists.OtherNames;
+using Applications.Services.Lists;
+using Domains.Models.Bases;
 using Mapster;
 
 namespace TrapchumApp.Components.Pages.Lists.OtherNames;
 public partial class GuarantorAddModal
 {
-    private readonly IGuarantorService _gService;
-    public GuarantorAddModal(IGuarantorService guarantorService)
+    private readonly IGuarantorServiceImpl _gService;
+    public GuarantorAddModal(IGuarantorServiceImpl guarantorService)
     {
         _gService = guarantorService;
     }
@@ -36,16 +38,14 @@ public partial class GuarantorAddModal
     }
     protected async Task OnSaveChanges()
     {
-        model.EntType = "Other Name";
+        model.EntType = EntType.OtherName.ToString();
 
-        var req = model.Adapt<EntityNames>();
-
-
-        var resultResponse = await _gService.CreateGaurantorAsync(req);
+        var resultResponse = await _gService.CreateAsync(model);
 
         if (resultResponse.IsSuccess)
         {
             NotificationService.Notify(Radzen.NotificationSeverity.Success, resultResponse.Data);
+
             DialogService.Close(true);
         }
         else

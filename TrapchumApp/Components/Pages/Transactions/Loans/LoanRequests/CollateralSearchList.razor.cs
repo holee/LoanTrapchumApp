@@ -10,38 +10,65 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 {
     public partial class CollateralSearchList
     {
-        [Parameter] public EventCallback<VCollateralLines> OnSelected { get; set; }
-        [Parameter] public EventCallback<IEnumerable<VCollateralLines>> SelectMany { get; set; }
+        [Parameter] public EventCallback<VCollateralLines> SingleSelected { get; set; }
+        [Parameter] public EventCallback<IEnumerable<VCollateralLines>> MultipleSelected { get; set; }
+        [Parameter] public IEnumerable<VCollateralLines> SelectedItems { get; set; } = [];
         [Parameter] public string? CustomerId { get; set; } = string.Empty;
 
-        IEnumerable<VCollateralLines> _collateralLines = [];
+        private IEnumerable<VCollateralLines> _collateralLines = [];
 
-        IList<VCollateralLines> _selectedCollateralLines = [];
+        private IList<VCollateralLines> _selectedCollateralLines = [];
 
-        RadzenTextBox _collateralSearchText = default!;
+        private RadzenTextBox _collateralSearchText = default!;
 
-        Popup _collateralPopup = default!;
+        private Popup _collateralPopup = default!;
+
+        private bool allowRowSelectOnRowClick = false;
+
+        private RadzenDataGrid<VCollateralLines> _gridCollaterals = default!;
+
+        private VCollateralLines? _selectedCollateral = new();
+
+        private string? filterText = "";
+
+        private int pageSize = 10;
+
+        private string sortColumn = "Name";
+
+        private int counts = 0;
+
+        private bool isLoading = false;
+
+        private int selectedIndex = 0;
+
+        private long collateralLineId = 0;
 
 
-        RadzenDataGrid<VCollateralLines> _gridCollaterals = default!;
+        private IEnumerable<VCollateralLines> FilteredCollateralLines =>
+        string.IsNullOrEmpty(filterText)
+            ? _collateralLines
+            : _collateralLines.Where(c =>
+                (c.CollateralNo?.Contains(filterText, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (c.OwnerName?.Contains(filterText, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (c.TypeName?.Contains(filterText, StringComparison.OrdinalIgnoreCase) ?? false));
+        protected override void OnInitialized()
+        {
+            base.OnInitialized();
+        }
 
-        VCollateralLines? _selectedCollateral = new();
-
-        string? filterText = "";
-        int pageSize = 10;
-        string sortColumn = "Name";
-        int counts = 0;
-        bool isLoading = false;
-        int selectedIndex = 0;
-        long collateralLineId = 0;
-        bool allowRowSelectOnRowClick = false;
         async Task OnRowCollateralSelect(VCollateralLines g)
         {
             if (_collateralLines.Any(x => x.Id == g.Id))
             {
-                await OnSelected.InvokeAsync(g);
+                await SingleSelected.InvokeAsync(g);
+
+                await _collateralPopup.CloseAsync();
             }
-            await _collateralPopup.CloseAsync();
+            else
+            {
+                await _collateralPopup.CloseAsync();
+            }
+
 
         }
 
@@ -53,7 +80,12 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 
             if (!string.IsNullOrEmpty(args.Value!.ToString()))
             {
+                await GetCustomerCollaterals();
                 await _collateralPopup.ToggleAsync(_collateralSearchText.Element);
+            }
+            else
+            {
+                await _collateralPopup.CloseAsync();
             }
             await _gridCollaterals.Reload();
         }
@@ -96,7 +128,14 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 
         async Task OpenPopup(MouseEventArgs arg)
         {
+            //if (SelectedItems.Any())
+            //{
+            //    _selectedCollateralLines = SelectedItems.Select(x => x.Map()).ToList();
+            //}
+
             await GetCustomerCollaterals();
+
+            _selectedCollateralLines = SelectedItems.Take(1).ToList();
 
             await _collateralPopup.ToggleAsync(_collateralSearchText.Element);
         }
@@ -104,21 +143,31 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 
         async Task GetSelectedGuarantors(IEnumerable<VCollateralLines> args)
         {
+            if (!SelectedMultiple)
+            {
+                await _collateralPopup.CloseAsync();
 
-            if (!args.Any()) return;
+                return;
+            }
+            if (!args.Any())
+            {
+                await _collateralPopup.CloseAsync();
+            }
+            else
+            {
+                await MultipleSelected.InvokeAsync(args);
 
-            await SelectMany.InvokeAsync(args);
+                await _collateralPopup.CloseAsync();
+            }
 
-            await _collateralPopup.CloseAsync();
+
         }
         async Task GetSelectedCollater(VCollateralLines g)
         {
 
             if (_collateralLines.Any(x => x.Id == g.Id))
             {
-                // FullName = _selectedGuarantor.FullName;
-
-                await OnSelected.InvokeAsync(g);
+                await SingleSelected.InvokeAsync(g);
             }
             await _collateralPopup.CloseAsync();
         }
@@ -132,6 +181,23 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
                 _collateralLines = resp.Data!;
             }
             StateHasChanged();
+        }
+
+        private async Task ToggleRowSelection(VCollateralLines item)
+        {
+            if (_selectedCollateralLines.Contains(item))
+            {
+                _selectedCollateralLines.Remove(item);
+            }
+            else
+            {
+                _selectedCollateralLines.Add(item);
+            }
+            await _gridCollaterals.Reload();
+        }
+        private void CheckedChanged(bool args)
+        {
+            SelectedMultiple = args;
         }
     }
 }

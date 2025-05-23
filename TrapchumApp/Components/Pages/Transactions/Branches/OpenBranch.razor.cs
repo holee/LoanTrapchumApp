@@ -35,17 +35,13 @@ namespace TrapchumApp.Components.Pages.Transactions.Branches
         TransactionCloseBranchDto? transactionCloseBranch;
         bool isClicked = false;
         long userRefId = 0;
-        int selectedBranchRefId = 0;
-        int selectedCurrencyRefId = 0;
-        string branchName = "Siem Reap";
         int currencyId = 1;
         bool canOpenBranch = false;
         bool canCloseBranch = false;
         bool canVaultOut = false;
         bool canVaultIn = false;
         private AlertStyle alertStyle;
-        bool isBranchOpen = false;
-        
+
         protected override async Task OnInitializedAsync()
         {
             var auth = await AuthenticationState;
@@ -67,8 +63,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Branches
 
             if (CashVaultBalances.Any())
             {
-                currencyId = CashVaultBalances!.FirstOrDefault(x => x.CurrencyId == (int)CurrenciesType.Khr)!.CurrencyId!.Value;
-               
+                await  GetCurrencies((int)CurrenciesType.Khr);
                 await GetCurrencyNotes(currencyId, BranchId);
             }
 
@@ -78,6 +73,19 @@ namespace TrapchumApp.Components.Pages.Transactions.Branches
 
             await base.OnInitializedAsync();
         }
+
+        async Task GetCurrencies(int id=0)
+        {
+            var rsp = await curService.GetCurrencies<VCurrencyList>(id);
+
+            if (rsp.IsSuccess) { 
+
+                currencyId=rsp.Data!.First().CurrencyId;
+
+            } 
+
+        }
+
 
         async Task SubmitCloseBranch()
         {

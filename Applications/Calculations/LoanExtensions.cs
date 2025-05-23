@@ -8,6 +8,7 @@ namespace Applications.Calculations
     {
 
         public static PaymentDtoCreate ToPaymentDtoCreate(this VSchedule s) => new PaymentDtoCreate(s.LeftPrinciple, s.LeftInterestAmount, s.LeftCollectionFeeAmount, s.PenaltyAmount);
+      
         public static LoanPaymentLineDtoCreate ToPaymentLine(this VSchedule s, PaymentDtoCreate p) => new LoanPaymentLineDtoCreate
         {
             LoanRefId = s.LoanId,
@@ -23,6 +24,12 @@ namespace Applications.Calculations
             BranchRefId = s.BranchId,
             SubTotal = p.SubTotal()
         };
+
+        public static List<LoanPaymentLineDtoCreate> ToPaymentLines(this IEnumerable<VSchedule> source, PaymentDtoCreate p)
+        {
+            return source.Select(x => x.ToPaymentLine(p)).ToList();
+        }
+        
         public static decimal? SubTotal(decimal? principle = 0, decimal? interest = 0, decimal? collectionfee = 0, decimal? penalty = 0)
         {
             var value = principle + interest + collectionfee + penalty;
@@ -115,22 +122,22 @@ namespace Applications.Calculations
             principle = principle + interest + collectionfee + penalty;
             return principle ?? 0;
         }
-        public static decimal? TotalPaidPrincipleAmount(this IEnumerable<LoanPaymentLineDtoCreate> s)
+        public static decimal? PaidPrincipleAmount(this IEnumerable<LoanPaymentLineDtoCreate> s)
         {
             var total1 = s.Sum(x => x.PaidPrinciple);
             return total1 ?? 0;
         }
-        public static decimal? TotalPaidInterestAmount(this IEnumerable<LoanPaymentLineDtoCreate> s)
+        public static decimal? PaidInterestAmount(this IEnumerable<LoanPaymentLineDtoCreate> s)
         {
             var total1 = s.Sum(x => x.PaidInterest);
             return total1 ?? 0;
         }
-        public static decimal? TotalPaidCollectionFeeAmount(this IEnumerable<LoanPaymentLineDtoCreate> s)
+        public static decimal? PaidCollectionFeeAmount(this IEnumerable<LoanPaymentLineDtoCreate> s)
         {
             var total1 = s.Sum(x => x.PaidCollectionFee);
             return total1 ?? 0;
         }
-        public static decimal? TotalPaidPenaltyAmount(this IEnumerable<LoanPaymentLineDtoCreate> s)
+        public static decimal? PaidPenaltyAmount(this IEnumerable<LoanPaymentLineDtoCreate> s)
         {
             var total1 = s.Sum(x => x.PenaltyAmount);
             return total1 ?? 0;

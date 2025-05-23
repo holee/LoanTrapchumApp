@@ -73,7 +73,7 @@
                                           Sortable="false">
                         <Template>
                             <input type="hidden" @bind="c.LoanId" />
-                            @c.InstallmentNo                       
+                            @c.InstallmentNo
                         </Template>
                     </RadzenDataGridColumn>
                     <RadzenDataGridColumn Width="6rem"
@@ -159,167 +159,170 @@
                 </Columns>
             </RadzenDataGrid>
         </div>
-        <div class="rz-m-0 rz-py-2 rz-background-color-base-200">
-            <RadzenFieldset Text="តារាងសងប្រាក់">
-                <PaymentScedule SelectedSchedule="@SelectedSchedule" />
-            </RadzenFieldset>
-            <RadzenFieldset Text="Customer's Payment" class="mt-2">
-                <RadzenRow AlignItems="AlignItems.Center">
-                    <RadzenColumn Size="3">
-                        <RadzenRow AlignItems="AlignItems.Center">
-                            <RadzenColumn Size="5">
-                                <RadzenStack AlignItems="AlignItems.Center"
-                                             Orientation="Orientation.Horizontal"
-                                             JustifyContent="JustifyContent.SpaceAround">
-                                    <RadzenCheckBox TValue="bool"
-                                                    Name="PaidNow"
-                                                    Disabled="disableIsPaidNow"
-                                                    Change="CheckPaymentChanged"
-                                                    @bind-Value="isPaidNow">
-                                    </RadzenCheckBox>
-                                    <RadzenLabel>ប្រាក់ដើម</RadzenLabel>
-                                </RadzenStack>
-                            </RadzenColumn>
-                            <RadzenColumn Size="7">
-                                <RadzenNumeric TextAlign="TextAlign.End"
-                                               TValue="decimal?"
-                                               ShowUpDown="false"
-                                               class="w-auto"
-                                               Format="#,##0.00"
-                                               Style="height:var(--input-text-sm)"
-                                               onclick="this.querySelector('.rz-numeric-input').select()"
-                                               Disabled="!isPaidNow"
-                                               Min="0"
-                                               Max="@SelectedSchedule?.LeftPrinciple"
-                                               @oninput="PrincipleAmountValueChanged"
-                                               @bind-Value="recievePayment!.RecievePrincipleAmount">
-                                </RadzenNumeric>
-                            </RadzenColumn>
-                        </RadzenRow>
-                    </RadzenColumn>
-                    <RadzenColumn Size="3">
-                        <RadzenRow AlignItems="AlignItems.Center">
-                            <RadzenColumn Size="4">
-                                <RadzenLabel>ការប្រាក់</RadzenLabel>
-                            </RadzenColumn>
-                            <RadzenColumn Size="8">
-                                <RadzenNumeric TextAlign="TextAlign.End"
-                                               TValue="decimal?"
-                                               Disabled="!isPaidNow"
-                                               Format="#,##0.00"
-                                               class="w-auto"
-                                               Min="0"
-                                               Max="@SelectedSchedule?.LeftInterestAmount"
-                                               Style="height:var(--input-text-sm)"
-                                               onclick="this.querySelector('.rz-numeric-input').select()"
-                                               ShowUpDown="false"
-                                               @oninput="InterestAmountValueChanged"
-                                               @bind-Value="recievePayment!.RecieveInterestAmount">
-                                </RadzenNumeric>
-                            </RadzenColumn>
-                        </RadzenRow>
-                    </RadzenColumn>
-                    <RadzenColumn Size="3">
-                        <RadzenRow AlignItems="AlignItems.Center">
-                            <RadzenColumn Size="5">
-                                <RadzenLabel>ប្រាក់ប្រសិទ្ធិភាព</RadzenLabel>
-                            </RadzenColumn>
-                            <RadzenColumn Size="7">
-                                <RadzenNumeric TextAlign="TextAlign.End"
-                                               TValue="decimal?"
-                                               Disabled="!isPaidNow"
-                                               Style="height:var(--input-text-sm)"
-                                               class="w-auto"
-                                               Format="#,##0.00"
-                                               Min="0"
-                                               onclick="this.querySelector('.rz-numeric-input').select()"
-                                               @bind-Value="recievePayment!.RecieveCollectionFeeAmount"
-                                               @oninput="CollectionFeeAmountValueChanged"
-                                               Max="@SelectedSchedule?.LeftCollectionFeeAmount"
-                                               ShowUpDown="false">
-                                </RadzenNumeric>
-                            </RadzenColumn>
-                        </RadzenRow>
-                    </RadzenColumn>
-                    <RadzenColumn Size="3">
-                        <RadzenRow AlignItems="AlignItems.Center">
-                            <RadzenColumn Size="5">
-                                <RadzenLabel>ប្រាក់ពិន័យ</RadzenLabel>
-                            </RadzenColumn>
-                            <RadzenColumn Size="7">
-                                <RadzenNumeric TextAlign="TextAlign.End"
-                                               TValue="decimal?"
-                                               Format="#,##0.00"
-                                               class="w-auto"
-                                               Min="0"
-                                               Style="height:var(--input-text-sm)"
-                                               onclick="this.querySelector('.rz-numeric-input').select()"
-                                               @bind-Value="recievePayment!.PenaltyAmountAmount"
-                                               Disabled="!isPaidNow"
-                                               Max="@SelectedSchedule?.PenaltyAmount"
-                                               ShowUpDown="false" />
-                            </RadzenColumn>
-                        </RadzenRow>
-                    </RadzenColumn>
-                </RadzenRow>
-                <RadzenRow class="mt-2" AlignItems="AlignItems.Center">
-                    <RadzenColumn Size="3" Offset="6">
-                        <RadzenRow AlignItems="AlignItems.Center">
-                            <RadzenColumn Size="5">
-                                <RadzenLabel>Reciept No</RadzenLabel>
-                            </RadzenColumn>
-                            <RadzenColumn Size="7">
-                                <RadzenTextBox @bind-Value="receiptNo"
-                                               class="w-100"
-                                               Style="height:var(--input-text-sm)" />
-                            </RadzenColumn>
-                        </RadzenRow>
-                    </RadzenColumn>
-                    <RadzenColumn Size="3">
-                        <RadzenRow AlignItems="AlignItems.Center">
-                            <RadzenColumn Size="5">
-                                <RadzenLabel>Total</RadzenLabel>
-                            </RadzenColumn>
-                            <RadzenColumn Size="7">
-                                <RadzenStack Orientation="Orientation.Horizontal"
-                                             Gap="0"
-                                             AlignItems="AlignItems.Center">
-                                    <RadzenNumeric Value="@recievePayment?.TotalPaymentWithPenalty"
-                                                   ShowUpDown="false"
-                                                   Format="#,##0.00"
-                                                   class="rz-m-0 rz-p-0"
-                                                   Style="height:var(--input-text-sm)"
-                                                   Disabled />
-                                    @if (isAllowMultiplePayment)
-                                    {
-
-                                        <RadzenButton Disabled="!isPaidNow" Click="OnPaid"
-                                                      Size="ButtonSize.Small"
-                                                      Icon="add"
-                                                      ButtonStyle="ButtonStyle.Primary"
-                                                      class="w-auto">
-                                        </RadzenButton>
-
-                                    }
-                                </RadzenStack>
-                            </RadzenColumn>
-                        </RadzenRow>
-                    </RadzenColumn>
-                </RadzenRow>
-            </RadzenFieldset>
-            @if (isAllowMultiplePayment)
-            {
-                <RadzenFieldset Text="ព័ត‌៌មានទូទាត់ប្រាក់" class="mt-2">
-                    <PaymentLines @ref="@paymentLinesRef"
-                                  Remove="@OnRemoveAdded"
-                                  LoanRepaymentLines="LoanPaymentLines" />
+        @if (!isAllowMultiplePayment)
+        {
+            <div class="rz-m-0 rz-py-2 rz-background-color-base-200">
+                <RadzenFieldset Text="តារាងសងប្រាក់">
+                    <PaymentScedule SelectedSchedule="@SelectedSchedule" />
                 </RadzenFieldset>
+                <RadzenFieldset Text="Customer's Payment" class="mt-2">
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="3">
+                            <RadzenRow AlignItems="AlignItems.Center">
+                                <RadzenColumn Size="5">
+                                    <RadzenStack AlignItems="AlignItems.Center"
+                                                 Orientation="Orientation.Horizontal"
+                                                 JustifyContent="JustifyContent.SpaceAround">
+                                        <RadzenCheckBox TValue="bool"
+                                                        Name="PaidNow"
+                                                        Disabled="disableIsPaidNow"
+                                                        Change="CheckPaymentChanged"
+                                                        Value="@isPaidNow">
+                                        </RadzenCheckBox>
+                                        <RadzenLabel>ប្រាក់ដើម</RadzenLabel>
+                                    </RadzenStack>
+                                </RadzenColumn>
+                                <RadzenColumn Size="7">
+                                    <RadzenNumeric TextAlign="TextAlign.End"
+                                                   TValue="decimal?"
+                                                   ShowUpDown="false"
+                                                   class="w-auto"
+                                                   Format="#,##0.00"
+                                                   Style="height:var(--input-text-sm)"
+                                                   onclick="this.querySelector('.rz-numeric-input').select()"
+                                                   Disabled="!isPaidNow"
+                                                   Min="0"
+                                                   Max="@SelectedSchedule?.LeftPrinciple"
+                                                   @oninput="PrincipleAmountValueChanged"
+                                                   @bind-Value="recievePayment!.RecievePrincipleAmount">
+                                    </RadzenNumeric>
+                                </RadzenColumn>
+                            </RadzenRow>
+                        </RadzenColumn>
+                        <RadzenColumn Size="3">
+                            <RadzenRow AlignItems="AlignItems.Center">
+                                <RadzenColumn Size="4">
+                                    <RadzenLabel>ការប្រាក់</RadzenLabel>
+                                </RadzenColumn>
+                                <RadzenColumn Size="8">
+                                    <RadzenNumeric TextAlign="TextAlign.End"
+                                                   TValue="decimal?"
+                                                   Disabled="!isPaidNow"
+                                                   Format="#,##0.00"
+                                                   class="w-auto"
+                                                   Min="0"
+                                                   Max="@SelectedSchedule?.LeftInterestAmount"
+                                                   Style="height:var(--input-text-sm)"
+                                                   onclick="this.querySelector('.rz-numeric-input').select()"
+                                                   ShowUpDown="false"
+                                                   @oninput="InterestAmountValueChanged"
+                                                   @bind-Value="recievePayment!.RecieveInterestAmount">
+                                    </RadzenNumeric>
+                                </RadzenColumn>
+                            </RadzenRow>
+                        </RadzenColumn>
+                        <RadzenColumn Size="3">
+                            <RadzenRow AlignItems="AlignItems.Center">
+                                <RadzenColumn Size="5">
+                                    <RadzenLabel>ប្រាក់ប្រសិទ្ធិភាព</RadzenLabel>
+                                </RadzenColumn>
+                                <RadzenColumn Size="7">
+                                    <RadzenNumeric TextAlign="TextAlign.End"
+                                                   TValue="decimal?"
+                                                   Disabled="!isPaidNow"
+                                                   Style="height:var(--input-text-sm)"
+                                                   class="w-auto"
+                                                   Format="#,##0.00"
+                                                   Min="0"
+                                                   onclick="this.querySelector('.rz-numeric-input').select()"
+                                                   @bind-Value="recievePayment!.RecieveCollectionFeeAmount"
+                                                   @oninput="CollectionFeeAmountValueChanged"
+                                                   Max="@SelectedSchedule?.LeftCollectionFeeAmount"
+                                                   ShowUpDown="false">
+                                    </RadzenNumeric>
+                                </RadzenColumn>
+                            </RadzenRow>
+                        </RadzenColumn>
+                        <RadzenColumn Size="3">
+                            <RadzenRow AlignItems="AlignItems.Center">
+                                <RadzenColumn Size="5">
+                                    <RadzenLabel>ប្រាក់ពិន័យ</RadzenLabel>
+                                </RadzenColumn>
+                                <RadzenColumn Size="7">
+                                    <RadzenNumeric TextAlign="TextAlign.End"
+                                                   TValue="decimal?"
+                                                   Format="#,##0.00"
+                                                   class="w-auto"
+                                                   Min="0"
+                                                   Style="height:var(--input-text-sm)"
+                                                   onclick="this.querySelector('.rz-numeric-input').select()"
+                                                   @bind-Value="recievePayment!.PenaltyAmountAmount"
+                                                   Disabled="!isPaidNow"
+                                                   Max="@SelectedSchedule?.PenaltyAmount"
+                                                   ShowUpDown="false" />
+                                </RadzenColumn>
+                            </RadzenRow>
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenRow class="mt-2" AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="3" Offset="6">
+                            <RadzenRow AlignItems="AlignItems.Center">
+                                <RadzenColumn Size="5">
+                                    <RadzenLabel>Reciept No</RadzenLabel>
+                                </RadzenColumn>
+                                <RadzenColumn Size="7">
+                                    <RadzenTextBox @bind-Value="receiptNo"
+                                                   class="w-100"
+                                                   Style="height:var(--input-text-sm)" />
+                                </RadzenColumn>
+                            </RadzenRow>
+                        </RadzenColumn>
+                        <RadzenColumn Size="3">
+                            <RadzenRow AlignItems="AlignItems.Center">
+                                <RadzenColumn Size="5">
+                                    <RadzenLabel>Total</RadzenLabel>
+                                </RadzenColumn>
+                                <RadzenColumn Size="7">
+                                    <RadzenStack Orientation="Orientation.Horizontal"
+                                                 Gap="0"
+                                                 AlignItems="AlignItems.Center">
+                                        <RadzenNumeric Value="@recievePayment?.TotalPaymentWithPenalty"
+                                                       ShowUpDown="false"
+                                                       Format="#,##0.00"
+                                                       class="rz-m-0 rz-p-0"
+                                                       Style="height:var(--input-text-sm)"
+                                                       Disabled />
+                                        @if (isAllowMultiplePayment)
+                                        {
 
-            }
-        </div>
+                                            <RadzenButton Disabled="!isPaidNow" Click="OnPaid"
+                                                          Size="ButtonSize.Small"
+                                                          Icon="add"
+                                                          ButtonStyle="ButtonStyle.Primary"
+                                                          class="w-auto">
+                                            </RadzenButton>
+
+                                        }
+                                    </RadzenStack>
+                                </RadzenColumn>
+                            </RadzenRow>
+                        </RadzenColumn>
+                    </RadzenRow>
+                </RadzenFieldset>
+                @if (isAllowMultiplePayment)
+                {
+                    <RadzenFieldset Text="ព័ត‌៌មានទូទាត់ប្រាក់" class="mt-2">
+                        <PaymentLines @ref="@paymentLinesRef"
+                                      Remove="@OnRemoveAdded"
+                                      LoanRepaymentLines="LoanPaymentLines" />
+                    </RadzenFieldset>
+
+                }
+            </div>
+        }
         <RadzenStack Orientation="Orientation.Horizontal"
                      JustifyContent="JustifyContent.End"
-                     class="mt-2"
+                     class="rz-mt-3"
                      Gap="1rem"
                      AlignItems="AlignItems.Center">
 

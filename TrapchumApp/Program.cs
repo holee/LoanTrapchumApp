@@ -1,7 +1,5 @@
 using Applications.DependencyInjections;
 using Applications.Extensions.Identity;
-using Applications.Extensions.Identity.Authorizations.AuthorizeHandlers;
-using Applications.Schedules;
 using Applications.Validations;
 using Infrastructures.Authorizations;
 using Infrastructures.DependencyInjects;
@@ -19,7 +17,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 
-QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+QuestPDF.Settings.License = LicenseType.Community;
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -52,9 +50,6 @@ if (app.Environment.IsDevelopment())
 else
 {
 
-
-
-
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
 
     app.UseHsts();
@@ -70,7 +65,6 @@ app.UseAntiforgery();
 app.MapStaticAssets();
 
 app.UseStaticFiles();
-
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
