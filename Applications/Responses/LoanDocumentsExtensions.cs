@@ -38,9 +38,20 @@ public static class LoanDocumentsExtensions
             Description = x.Description
 
         }).ToList();
+    }
 
-
-
+    public static List<LoanDocumentDtoCreate> ToLoanDocumentsEdit(this IEnumerable<VLoanRequestsDocuments> doc)
+    {
+        return doc.Select(x => new LoanDocumentDtoCreate 
+        {
+            Id = x.Id,
+            BranchId =x.BranchRefId,
+            LoanRequestId = x.LoanRequestId,
+            OriginalName = x.OriginalName,
+            NewFileName = x.NewFileName,
+            FileUrl = x.FileUrl,
+            Description = x.Description,
+        }).ToList();
     }
 
 }

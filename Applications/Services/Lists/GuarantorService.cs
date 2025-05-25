@@ -12,7 +12,7 @@ public sealed class GuarantorService(IGuarantorService gService) : IGuarantorSer
     public async Task<Result<string>> CreateAsync(EntityNamesCreate othername)
     {
 
-        var req = othername.Adapt<EntityNames>();
+        var req = othername.ToGuarantorCreate();
 
         return await gService.CreateGaurantorAsync(req);
     }
@@ -20,7 +20,7 @@ public sealed class GuarantorService(IGuarantorService gService) : IGuarantorSer
     public async Task<Result<string>> UpdateAsync(EntityNamesCreate othername)
     {
 
-        var req = othername.Adapt<EntityNames>();
+        var req = othername.ToGuarantorEdit();
 
         return await gService.UpdateGaurantorAsync(req);
     }
@@ -61,7 +61,7 @@ public sealed class GuarantorService(IGuarantorService gService) : IGuarantorSer
         if (rsp.IsSuccess)
         {
 
-            var result = rsp.Data!.Adapt<EntityNamesCreate>();
+            var result = rsp.Data!.ToGuarantorEdit();
 
             return Result.Success(result);
 

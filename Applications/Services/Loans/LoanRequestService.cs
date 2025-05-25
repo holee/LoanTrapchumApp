@@ -1,5 +1,5 @@
 ﻿using Applications.Enumerations;
-using Applications.Extensions.mappers;
+using Applications.Helpers.Mappers;
 using Applications.Interfaces.Loans;
 using Applications.Requests.Loans.CreditAgents;
 using Applications.Requests.Loans.LoanRequests;
@@ -27,7 +27,7 @@ namespace Applications.Services.Loans
 
         public async Task<Result<string>> AddLoanRequestDocumentAsync(List<LoanDocumentDtoCreate> request)
         {
-            var model = request.MapList<LoanDocuments>();
+            var model = request.DocumentsDtoCreate();
 
             return await reqService.AddLoanRequestDocumentAsync(model);
         }
@@ -56,7 +56,8 @@ namespace Applications.Services.Loans
 
         public async Task<Result<string>> CreateLoanRequestAsync(LoanRequestDtoCreate request)
         {
-            var req = request.MapToLoanRequest(); 
+            
+            var req = request.MapToLoanRequest();
 
             return await reqService.CreateLoanRequestAsync(req);
         }
@@ -107,7 +108,7 @@ namespace Applications.Services.Loans
         }
 
 
-       
+
 
 
 
@@ -123,19 +124,18 @@ namespace Applications.Services.Loans
             return await reqService.GetLoanRequestsAsync(userId, branchId, requestStatus, param);
         }
 
-        public async Task<Pager<VLoanRequests>> GetLoanRequestsAsync(string? userId,bool candisburse, int? branchId,RequestStatus requestStatus, QueryParam param)
+        public async Task<Pager<VLoanRequests>> GetLoanRequestsAsync(string? userId, bool candisburse, int? branchId, RequestStatus requestStatus, QueryParam param)
         {
-            return await reqService.GetLoanRequestsAsync(userId,candisburse, branchId, requestStatus, param);
+            return await reqService.GetLoanRequestsAsync(userId, candisburse, branchId, requestStatus, param);
         }
 
 
-        public async Task<Result<VLoanRequests>> GetLoanRequestAsync(int? branchId, string? customerId,string? loanRequestId, bool v)
+        public async Task<Result<VLoanRequests>> GetLoanRequestAsync(int? branchId, string? customerId, string? loanRequestId, bool include)
         {
-            return await reqService.GetLoanRequestAsync(branchId, customerId, loanRequestId, v);
+            return await reqService.GetLoanRequestAsync(branchId, customerId, loanRequestId, include);
         }
 
-        public async Task<Result<VLoanRequests>> GetLoanRequestAsync(int? branchId, string? userId, string? customerId,
-            string? loanRequestId, bool v)
+        public async Task<Result<VLoanRequests>> GetLoanRequestAsync(int? branchId, string? userId, string? customerId,string? loanRequestId, bool v)
         {
             return await reqService.GetLoanRequestAsync(branchId, userId, customerId, loanRequestId, v);
         }

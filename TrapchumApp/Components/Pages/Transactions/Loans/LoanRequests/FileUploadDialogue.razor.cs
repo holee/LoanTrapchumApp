@@ -18,8 +18,11 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
         }
 
         IEnumerable<Radzen.FileInfo> UploadFiles = [];
+
         const long maxFileSize = 2L * 1024 * 1024 * 1024;
+
         RadzenUpload radzenUpload = default!;
+
         void OnProgress(UploadProgressArgs args, string name)
         {
             if (args.Progress == 100)
@@ -30,42 +33,34 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
                 }
             }
         }
-        void SelectedsFilesChanged(UploadChangeEventArgs args)
-        {
-            UploadFiles = [];
 
-            if (args.Files.Any())
-            {
-                UploadFiles = args.Files.Select(x => x).ToList();
-            }
-            StateHasChanged();
-        }
         async Task HandleUploadFiles()
         {
 
-            if (files.Any())
+            if (!files.Any())
             {
+                NotificationService.Notify(NotificationSeverity.Error, "There is no any file to upload");
 
-                var resp = await _fileUploadService.UploadFiles(files);
+                DialogService.Close(Enumerable.Empty<FileModel>());
 
-                if (!resp.IsSuccess)
-                {
-
-                    NotificationService.Notify(NotificationSeverity.Info, resp.ErrMessage);
-
-                    return;
-                }
-
-                files = [];
-
-                DialogService.Close(resp.Data);
-
-            }
-            else
-            {
-                NotificationService.Notify(NotificationSeverity.Info, "No file selected");
+                return;
             }
 
+            var resp = await _fileUploadService.UploadFiles(files);
+
+            if (!resp.IsSuccess)
+            {
+
+                NotificationService.Notify(NotificationSeverity.Info, resp.ErrMessage);
+
+                DialogService.Close(Enumerable.Empty<FileModel>());
+
+                return;
+            }
+
+            files = [];
+
+            DialogService.Close(resp.Data);
         }
 
         private async Task OnFileUpload(UploadChangeEventArgs args)
@@ -88,7 +83,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
                     {
                         await fileStream.CopyToAsync(stream); // ✅ Read the file content
 
-                        files.Add(new FileModel(file.Name, originalName, stream.ToArray()));
+                        files.Add(new FileModel(file.Name, originalName,file.Size, stream.ToArray()));
                     }
 
                 }

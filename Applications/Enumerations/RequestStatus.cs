@@ -11,6 +11,6 @@
         Aprove,
         Denied,
         Rechecked,
-        Completed
+        Completed,
     }
 }

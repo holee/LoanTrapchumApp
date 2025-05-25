@@ -49,6 +49,9 @@
                         <RadzenLink Target="_blank" Path="@d.FileUrl">@d.NewFileName</RadzenLink>
                     </Template>
                 </RadzenDataGridColumn>
+                <RadzenDataGridColumn Context="g" Title="Size" 
+                    TextAlign="TextAlign.Right"
+                        Property="@(nameof(VLoanRequestsDocuments.FileSize))" />
                 <RadzenDataGridColumn Context="g" Title="Description" Property="@(nameof(VLoanRequestsDocuments.Description))" />
                 @if (ShowDelete)
                 {

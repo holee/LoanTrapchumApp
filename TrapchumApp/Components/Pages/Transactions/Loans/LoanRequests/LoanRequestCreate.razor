@@ -9,7 +9,7 @@
     <FluentValidationValidator DisableAssemblyScanning="true"/>
     <input type="hidden" @bind="model.CreditAgentRefId"/>
     <CardBody BodyCssClass="rz-background-color-base-200">
-        <RadzenTabs SelectedIndexChanged="SelectTabIndexChanged" RenderMode="TabRenderMode.Server">
+        <RadzenTabs SelectedIndexChanged="SelectTabIndexChanged" RenderMode="TabRenderMode.Client">
             <Tabs>
                 <RadzenTabsItem Text="សំណើរ">
                     <LoanRequestInfo SelectCustomer="@SetCustomer" BranchId="@BranchId" Model="@model"/>
@@ -53,6 +53,17 @@
                 <RadzenTabsItem Text="អតិថិជន">
                     <RadzenFieldset>
                         <CustomerRequest CustomerId="@CustomerId"/>
+                    </RadzenFieldset>
+                </RadzenTabsItem>
+                <RadzenTabsItem Text="Notes">
+                    <RadzenFieldset>
+                        <RadzenRow AlignItems="AlignItems.Center">
+                            <RadzenColumn Size="12">
+                                <RadzenTextArea Rows="30" @bind-Value="model.Memo" class="form-control">
+
+                                </RadzenTextArea>
+                            </RadzenColumn>
+                        </RadzenRow>
                     </RadzenFieldset>
                 </RadzenTabsItem>
             </Tabs>

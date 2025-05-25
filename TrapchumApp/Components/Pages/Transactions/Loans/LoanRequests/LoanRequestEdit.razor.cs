@@ -13,6 +13,7 @@ using Applications.Responses.Loans.Disbursements;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Auths;
 using Applications.Responses.ViewModels.Customers;
+using Applications.Responses.ViewModels.Loans.LoanRequests;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Applications.Responses.ViewModels.OtherNames;
 using Domains.Models.Files;
@@ -63,6 +64,8 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 
         List<VLoanRequestsDocuments> Documents = [];
 
+        List<VLoanRequestDescription> _loanDescriptions = []; 
+
         IEnumerable<LoanRequestDocumentsDtoCreate> _documents = [];
 
         List<DateTime> Holidays = [];
@@ -100,9 +103,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
         int installmentType = 1;
         int selectedTabIndex = 0;
         string? filterText = "";
-
         bool isAllow = false;
-
         IEnumerable<FileModel>? files = [];
 
         IEnumerable<System.IO.FileInfo> UploadFiles = [];
@@ -123,15 +124,22 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
             {
             };
 
-            IEnumerable<FileModel> uploadedFiles =
-                await DialogService.OpenAsync<FileUploadDialogue>("Upload", options: options);
+            IEnumerable<FileModel>? uploadedFiles = await DialogService.OpenAsync<FileUploadDialogue>("Upload", options: options);
 
-            if (uploadedFiles.Any())
+
+            if (uploadedFiles is null || !uploadedFiles.Any())
+            {
+                return;
+            }
+
+            if (uploadedFiles is not null)
             {
                 foreach (var f in uploadedFiles)
                 {
                     Documents.Add(new VLoanRequestsDocuments
                     {
+                        BranchRefId = BranchId,
+                        LoanRequestId = LoanRequestId,
                         OriginalName = f.OriginalName,
                         NewFileName = f.FileName,
                         FileUrl = f.FileUrl,
@@ -149,11 +157,11 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
                 if (!Documents.Any())
                 {
                     NotificationService.Notify(NotificationSeverity.Error, "There is no any file to upload");
+
                     return;
                 }
 
-                var documents =
-                    LoanDocumentsExtensions.ToLoanDocumentsCreate(CustomerId, LoanRequestId, BranchId, Documents);
+                var documents = Documents.ToLoanDocumentsEdit();
 
                 var res = await _loanRequestService.AddLoanRequestDocumentAsync(documents);
 
@@ -189,7 +197,17 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 
             if (confirm == false) return;
 
-            if (doc is not null && (LoanRequestId.IsNotNullOrEmpty() && doc.Id > 0))
+            if (!Documents.Any()) return;
+
+            var lastItem = Documents.Last();
+
+            if (lastItem != doc)
+            {
+                NotificationService.Notify(NotificationSeverity.Error, "Please selected last document to delete.");
+                return;
+            }
+
+            if (LoanRequestId.IsNotNullOrEmpty() && doc.Id > 0)
             {
                 var resp = await _loanRequestService.DeleteLoanRequestDocumentAsync(LoanRequestId, BranchId, doc.Id);
 
@@ -206,8 +224,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 
                 NotificationService.Notify(NotificationSeverity.Error, resp.ErrMessage);
             }
-
-            if (doc is not null && (LoanRequestId.IsNotNullOrEmpty() || doc.Id == 0))
+            if (doc.LoanRequestId.IsNotNullOrEmpty() || doc.Id == 0)
             {
                 Documents.Remove(doc);
 
@@ -223,7 +240,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
         {
             var options = new DialogOptions
             {
-                Width="65rem"
+                Width = "65rem"
             };
 
             bool? results = await DialogService.OpenAsync<GuarantorAddModal>("Select Guarantor", options: options);
@@ -327,8 +344,11 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 
             var user = auth.User;
 
-            await GetLoanRequestInfo(user);
+            if (user is not null) {
 
+                await GetLoanRequestInfo(user);
+            }
+           
             await base.OnInitializedAsync();
         }
 
@@ -361,6 +381,8 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
                 Guarantors = data!.ToLoanRequestGuarantors();
 
                 Documents = data!.ToLoanRequestDocuments();
+
+                _loanDescriptions=data!.ToLoanRequestDecriptions();
 
                 model = data!.ToLoanRequestDtoCreate();
 
@@ -436,6 +458,8 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 
             var oldGuarantors = Guarantors.ToGuarantorDtoCreate(BranchId);
 
+            var descriptions = new LoanDescriptionsDtoCreate(model.Memo,UserId);
+
             model.GuarantorsLink.AddRange(oldGuarantors);
 
             var oldCollaterals = CollateralLines.ToCollateralLinkDtoCreate(BranchId);
@@ -446,6 +470,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 
             model.LoanDocuments.AddRange(documents);
 
+            model.LoanDescriptions.Add(descriptions);
 
             editForm.EditContext!.Validate();
 

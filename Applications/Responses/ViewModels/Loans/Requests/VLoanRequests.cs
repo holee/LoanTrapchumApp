@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using Applications.Responses.ViewModels.Customers;
+using Applications.Responses.ViewModels.Loans.LoanRequests;
 
 namespace Applications.Responses.ViewModels.Loans.Requests;
 public sealed class VLoanRequests
@@ -46,9 +47,11 @@ public sealed class VLoanRequests
     public int? CollectionFeeModeId { get; set; } = 1;
     public string? CollectionFeeModeName { get; set; } = string.Empty;
     public string? AprovedBy { get; set; } = string.Empty;
+
     //public int PayementSechuleModeId { get; set; } = 2;
     [NotMapped] public IEnumerable<VLoanRequestGuarantors> Guarantors { get; set; } = [];
     [NotMapped] public IEnumerable<VLoanRequestCollateralLines> Collaterals { get; set; } = [];
     [NotMapped] public IEnumerable<VLoanRequestsDocuments> Documents { get; set; } = [];
+    [NotMapped] public IEnumerable<VLoanRequestDescription> Descriptions { get; set; } = []; 
     [NotMapped] public VCustomerList Customer { get; set; } = new();
 }

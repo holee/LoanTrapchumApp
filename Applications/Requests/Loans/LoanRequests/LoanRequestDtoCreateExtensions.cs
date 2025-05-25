@@ -36,6 +36,7 @@ public static class LoanRequestDtoCreateExtensions
         return new LoanDescriptions
         {
             Memo = req.Memo,
+            UserRefId = req.UserRefId,
             LoanRequestRefId = req.LoanRequestRefId
         };
     }

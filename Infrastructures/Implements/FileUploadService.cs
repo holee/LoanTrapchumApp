@@ -201,7 +201,7 @@ namespace Infrastructures.Implements
 
                     using var stream = new MemoryStream(item.FileContent);
 
-                    var uploadFile = await UploadImageFile(item.FileName, stream);
+                    var uploadFile = await UploadImageFile(item.FileName!, stream);
 
                     fileModels.Add(uploadFile.Data!);
                 }
@@ -355,11 +355,11 @@ namespace Infrastructures.Implements
 
                 var filePath = Path.Combine(uploadDestination, fileName);
 
+                var fileSize = content.Length;
+
                 using var fileStream = new FileStream(filePath, FileMode.Create);
 
                 await content.CopyToAsync(fileStream);
-
-                var fileSize = content.Length;
 
                 var fileUrl = $"/{fileUploadPath}/{fileName}";
 

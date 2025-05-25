@@ -1,4 +1,6 @@
-﻿namespace Applications.Responses.ViewModels.Loans.Requests;
+﻿using Applications.Responses.ViewModels.Loans.LoanRequests;
+
+namespace Applications.Responses.ViewModels.Loans.Requests;
 
 public static class VLoanRequestsExtensions
 {
@@ -16,5 +18,10 @@ public static class VLoanRequestsExtensions
     {
         return req.Documents.ToList() ?? [];
     }
+
+    public static List<VLoanRequestDescription> ToLoanRequestDecriptions(this VLoanRequests req)
+    {
+        return req.Descriptions.ToList() ?? [];
+    } 
 
 }

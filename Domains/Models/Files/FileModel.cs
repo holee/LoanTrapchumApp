@@ -23,6 +23,12 @@
             FileName = fileName;
         }
 
+        public FileModel(string originalName, string fileName,long fileSize, byte[]? fileContent)
+            :this(originalName, fileName,fileContent)
+        {
+            FileSize = fileSize;
+        }
+
         public long Id { get; set; } 
         public string? FileName { get; set; }
         public long FileSize { get; set; } = 0;

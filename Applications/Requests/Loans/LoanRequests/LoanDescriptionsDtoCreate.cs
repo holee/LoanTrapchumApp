@@ -2,11 +2,23 @@ namespace Applications.Requests.Loans.LoanRequests;
 
 public sealed class LoanDescriptionsDtoCreate
 {
+    public LoanDescriptionsDtoCreate()
+    {
+        Memo = string.Empty;
+        LoanRequestRefId = string.Empty;
+    }
+    public LoanDescriptionsDtoCreate(string? memo,string? userRefId)
+    {
+        Memo = memo;
+        UserRefId = userRefId;
+    }
+
     public string? LoanRequestRefId { get; set; }
     public string? Memo { get; set; } = string.Empty;
+    public string? UserRefId { get; set; }=string.Empty;
 }
 
-public sealed class LoanDescriptionsDtoUpdate 
+public sealed class LoanDescriptionsDtoUpdate
 {
     public long Id { get; set; }
     public string? LoanRequestRefId { get; set; }

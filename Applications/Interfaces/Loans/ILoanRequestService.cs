@@ -11,7 +11,7 @@ namespace Applications.Interfaces.Loans
     public interface ILoanRequestService
     {
         Task<Result<string>> ChangedLoanRequestAsync(LoanChangeStatusDtoCreate req);
-        Task<Result<string>> CreateLoanRequestAsync(LoanRequest request);
+        Task<Result<string>> CreateLoanRequestAsync(LoanRequest request,CancellationToken cancellationToken = default);
         Task<Result<string>> AprovedLoanRequestAsync(AproveLoanDtoCreate req);
         Task<Result<string>> RecheckedLoanRequestAsync(RecheckedRequestDtoCreate req);
         Task<Result<string>> DeniedLoanRequestAsync(DeniedRequestDtoCreate req);
@@ -35,6 +35,7 @@ namespace Applications.Interfaces.Loans
 
         Task<Result<VLoanRequests>> GetLoanRequestAsync(int? branchId,string? userId, string? customerId, string? loanRequestId, bool include);
         Task<Pager<VLoanRequests>> GetLoanRequestsAsync(string? userId, bool canDisburse, int? branchId, RequestStatus requestStatus, QueryParam param);
+        Task<Result<string>> AddLoanRequestDocumentAsync(int? branchId, string? loanRequestId, List<LoanDocuments> documents);
     }
 }
 //Task<Pager<VLoanRequests>> GetLoanRequestsAsync(long userId, int statusId, int branchId, QueryParam param);

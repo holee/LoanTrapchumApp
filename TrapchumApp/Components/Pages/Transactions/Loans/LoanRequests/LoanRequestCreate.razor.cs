@@ -14,6 +14,7 @@ using Applications.Responses.Loans.Disbursements;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Auths;
 using Applications.Responses.ViewModels.Customers;
+using Applications.Responses.ViewModels.Loans.LoanRequests;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Applications.Responses.ViewModels.Options;
 using Applications.Responses.ViewModels.OtherNames;
@@ -513,6 +514,8 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 
             var oldGuarantors = Guarantors.ToGuarantorDtoCreate(BranchId);
 
+            var descriptions = new LoanDescriptionsDtoCreate(model.Memo, UserId);
+
             model.GuarantorsLink.AddRange(oldGuarantors);
 
             var oldCollaterals = requestCollateralLines.ToCollateralLinkDtoCreate(BranchId);
@@ -522,6 +525,8 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
             var documents = Documents.LoanDocumentDtoCreate();
 
             model.LoanDocuments.AddRange(documents);
+
+            model.LoanDescriptions.Add(descriptions);
 
             editForm.EditContext!.Validate();
 
