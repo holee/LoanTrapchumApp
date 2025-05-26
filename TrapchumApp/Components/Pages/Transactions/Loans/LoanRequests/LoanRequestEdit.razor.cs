@@ -456,24 +456,13 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
         {
             _logger.LogInformation("get start loan requesting...");
 
-            var oldGuarantors = Guarantors.ToGuarantorDtoCreate(BranchId);
+            if (!string.IsNullOrEmpty(model.Memo))
+            {
+                var descriptions = new LoanDescriptionsDtoCreate(model.Memo, UserId,LoanRequestId);
 
-            var descriptions = new LoanDescriptionsDtoCreate(model.Memo,UserId);
-
-            model.GuarantorsLink.AddRange(oldGuarantors);
-
-            var oldCollaterals = CollateralLines.ToCollateralLinkDtoCreate(BranchId);
-
-            model.CollateralLinesLink.AddRange(oldCollaterals);
-
-            var documents = Documents.LoanDocumentDtoCreate(BranchId, LoanRequestId);
-
-            model.LoanDocuments.AddRange(documents);
-
-            model.LoanDescriptions.Add(descriptions);
-
+                model.LoanDescriptions.Add(descriptions);
+            }
             editForm.EditContext!.Validate();
-
             try
             {
                 model.BankRefId = 11;

@@ -1,18 +1,15 @@
 ﻿@page "/Loan/Disbursement/CreateNew"
+@using Applications.Enumerations
 @using Domains.Enumerations
 @using TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
+@using TrapchumApp.Helpers.Constants
 <PageTitle>New Loan Disbursment</PageTitle>
-<SectionContent SectionName="Progressbar">
-    <RadzenProgressBar Visible="IsLoading" Value="100"
-                       ProgressBarStyle="ProgressBarStyle.Danger"
-                       ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
-</SectionContent>
 <Containers CssClass="rz-m-0 rz-p-0 rz-background-color-base-200" Fluid>
     <Card CssClass="rz-background-color-base-200">
         <CardBody>
             <RadzenTabs @bind-SelectedIndex="selectedTabIndex" RenderMode="TabRenderMode.Client">
                 <Tabs>
-                    <RadzenTabsItem Text="ព័ត៌មានប្រាក់កម្ចី" Icon="add">
+                    <RadzenTabsItem Text="ព័ត៌មានប្រាក់កម្ចី" Icon="@IconNames.AddNew">
                         <div class="rz-m-0 rz-p-0">
                             <EditForm Model="model" @ref="editForm">
                                 <input type="hidden" @bind-value="penaltyRate" />
@@ -116,10 +113,17 @@
                                             </td>
                                         </tr>
                                         <tr>
-                                            <th style="background-color:#F1F1F4" class="w-25">Agent Name</th>
+                                            <th style="background-color:#F1F1F4" class="w-25">Request By</th>
                                             <td>
                                                 <input type="hidden" @bind="model!.CreditAgentRefId" />
                                                 @model?.CreditAgentName
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th style="background-color:#F1F1F4" class="w-25">Approved By</th>
+                                            <td>
+                                                <input type="hidden" @bind="model!.AprovedUserId" />
+                                                @model?.ApprovedBy
                                             </td>
                                         </tr>
                                         <tr>
@@ -169,14 +173,24 @@
                             </EditForm>
                         </div>
                     </RadzenTabsItem>
-                    <RadzenTabsItem Text="អ្នកធានានិងទ្រព្យបញ្ចាំ" Icon="inventory">
+                    <RadzenTabsItem Text="អ្នកធានានិងទ្រព្យបញ្ចាំ" Icon="@IconNames.Inventory">
                         <LoanRequestCollaterals CustomerId="CustomerRequestId"
                                                 Collaterals="@req.Collaterals?.ToList()"
                                                 ShowAdd="false" />
                         <LoanRequestGaurantor Guarantors="@req.Guarantors" ShowAdd="false" />
                         <LoanRequestDocument Documents="@req.Documents.ToList()" ShowUpload="false" />
                     </RadzenTabsItem>
-                    <RadzenTabsItem Text="Preview" Icon="preview">
+                    <RadzenTabsItem Text="Notes" Icon="@IconNames.Comment">
+                        <RadzenRow AlignItems="AlignItems.Center">
+                            <RadzenColumn Size="12">
+                                <RadzenTextArea Rows="10" class="form-control" @bind-Value="@memo">
+
+                                </RadzenTextArea>
+                            </RadzenColumn>
+                        </RadzenRow>
+                        <LoanRequestNotes Data="@req.Descriptions" />
+                    </RadzenTabsItem>
+                    <RadzenTabsItem Text="Preview" Icon="@IconNames.Preview">
                         <LoanSchedules Schedules="previewSchedule"
                                        CurrencyId="model.CurrencyRefId" />
                     </RadzenTabsItem>
@@ -190,12 +204,8 @@
                          class="py-2"
                          AlignItems="AlignItems.Center">
 
-                @if (!disburseStatus)
+                @if (!disburseStatus && RequestStatusId ==(int)RequestStatus.Aprove)
                 {
-                    <RadzenButton Click="ShowLoanPreviews"
-                                  Size="ButtonSize.Small"
-                                  Icon="preview"
-                                  ButtonStyle="ButtonStyle.Primary" Text="Preview" />
                     <RadzenButton Click="HandleFormSubmit"
                                   Size="ButtonSize.Small"
                                   Icon="save"
@@ -203,8 +213,16 @@
                     <RadzenButton Size="ButtonSize.Small"
                                   Click="HandleFormSubmit"
                                   Text="Disburse Now"
-                                  Icon="save"
+                                  Icon="@IconNames.Save"
                                   ButtonStyle="ButtonStyle.Success" />
+                    <RadzenButton Click="SendRechecked"
+                                  Size="ButtonSize.Small"
+                                  Icon="@IconNames.Undo"
+                                  ButtonStyle="ButtonStyle.Secondary" Text="Rechecked" />
+                    <RadzenButton Click="ShowLoanPreviews"
+                                  Size="ButtonSize.Small"
+                                  Icon="@IconNames.Preview"
+                                  ButtonStyle="ButtonStyle.Primary" Text="Preview" />
                 }
                 <RadzenLink Icon="arrow_back"
                             Path="@($"/App/Request/{BranchId}/Branches?UserId={UserId}")"

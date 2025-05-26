@@ -22,11 +22,11 @@ namespace Infrastructures.Implements
 {
     public class OtherNameService : IOtherNameService
     {
-        private readonly ApplicationDbContext _context;
+        private readonly DataContext _context;
         private readonly IDbContextFactory<DataContext> _dbContextFactory;
         private IValidator<EntityNameDtoCreate> _validator;
 
-        public OtherNameService(ApplicationDbContext context, IValidator<EntityNameDtoCreate> validator, IDbContextFactory<DataContext> dbContextFactory)
+        public OtherNameService(DataContext context, IValidator<EntityNameDtoCreate> validator, IDbContextFactory<DataContext> dbContextFactory)
         {
             _context = context;
             _validator = validator;

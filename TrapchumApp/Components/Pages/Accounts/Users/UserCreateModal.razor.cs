@@ -13,7 +13,9 @@ namespace TrapchumApp.Components.Pages.Accounts.Users
     public partial class UserCreateModal
     {
         [Parameter] public string? EmployeeId { get; set; } = string.Empty;
-        
+
+        [Parameter] public int BranchId { get; set; } = 0;
+
         private readonly IRoleService _roleService;
 
         public UserCreateModal(IRoleService roleService)
@@ -22,28 +24,26 @@ namespace TrapchumApp.Components.Pages.Accounts.Users
         }
 
         RegisterRequest _model = new RegisterRequest();
-        
+
         EditForm _form = default!;
-        
+
         IEnumerable<BranchDto> _branches = [];
-        
+
         IEnumerable<VEmployeeList> _bEmployees = [];
 
         IEnumerable<string?> _roles = [];
-        
+
         bool _showBranch = false;
-        
+
         bool _showEmployee = false;
 
         protected override async Task OnInitializedAsync()
         {
-            await base.OnInitializedAsync();
-
             var selectedRoles = await _roleService.GetRolesAsync();
 
             _roles = selectedRoles?.Data ?? [];
 
-            if (!string.IsNullOrEmpty(EmployeeId))
+            if (!string.IsNullOrEmpty(EmployeeId) && BranchId <= 0)
             {
                 _model.EmployeeId = EmployeeId;
 
@@ -51,34 +51,43 @@ namespace TrapchumApp.Components.Pages.Accounts.Users
 
                 var emp = _bEmployees.FirstOrDefault(x => x.EmployeeId == EmployeeId);
 
-                await GetBranches(emp?.BranchId);
+                await GetBranches(emp!.BranchId);
 
-                _model.BranchRefId = emp?.BranchId ?? 0;
+                _model.BranchRefId = emp.BranchId!.Value;
 
-                _showBranch = emp?.BranchId > 0;
+                _showBranch = emp!.BranchId > 0;
 
                 _showEmployee = !string.IsNullOrEmpty(emp?.EmployeeId);
-                
+
                 SetDefaultUserNameAndEmail(emp);
-                
+
             }
-            else
+
+            if (BranchId > 0 && string.IsNullOrEmpty(EmployeeId))
             {
-                await GetBranches();
+                await GetBranches(BranchId);
+
+                await GetEmployees(EmployeeId, BranchId);
+
+                _model.BranchRefId = BranchId;
+
+                _showBranch = BranchId > 0;
             }
+
+            await base.OnInitializedAsync();
+
         }
 
 
         async Task GetBranches(int? branchId = 0)
         {
-            var branchResponse =
-                await _branchService.GetBranchesAsync<BranchDto>(branchId, new QueryParam(0, 25, string.Empty));
+            var rsp = await _branchService.GetBranchesAsync<BranchDto>(branchId, new QueryParam(0, 0, string.Empty));
 
-            _branches = branchResponse!.IsSuccess ? branchResponse.Data!.Items : [];
+            _branches = rsp!.IsSuccess ? rsp.Data!.Items : [];
         }
 
 
-        void SetDefaultUserNameAndEmail(VEmployeeList? emp = null) 
+        void SetDefaultUserNameAndEmail(VEmployeeList? emp = null)
         {
             if (emp is not null)
             {
@@ -99,12 +108,10 @@ namespace TrapchumApp.Components.Pages.Accounts.Users
         }
         private async Task GetEmployees(string? employeeId, int branchId = 0)
         {
-            var employeeResponse = await _employeeService.GetEmployeesAsync(employeeId, branchId);
+            var rsp = await _employeeService.GetEmployeesAsync(branchId, employeeId, new QueryParam(0, 0));
+            
+            _bEmployees = rsp.Items ?? [];
 
-            if (employeeResponse.IsSuccess)
-            {
-                _bEmployees = employeeResponse.Data!;
-            }
         }
 
         private async Task SelectBranchChanged()
@@ -119,7 +126,9 @@ namespace TrapchumApp.Components.Pages.Accounts.Users
             }
 
             _model.Username = "";
+
             _model.Email = "";
+
             _model.EmployeeId = string.Empty;
         }
 
@@ -128,10 +137,13 @@ namespace TrapchumApp.Components.Pages.Accounts.Users
             try
             {
                 _form.EditContext?.Validate();
+
                 var result = await _userService.CreateUserAsync(_model);
+
                 if (result.IsSuccess)
                 {
                     NotificationService.Notify(NotificationSeverity.Success, result.Data);
+
                     DialogService.Close(true);
                 }
                 else
@@ -148,6 +160,7 @@ namespace TrapchumApp.Components.Pages.Accounts.Users
         private void SelectedEmployeeChanged()
         {
             var selectedEmployee = _bEmployees.FirstOrDefault(x => x.EmployeeId == _model.EmployeeId);
+
             SetDefaultUserNameAndEmail(selectedEmployee);
         }
     }

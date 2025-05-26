@@ -17,7 +17,7 @@ using Microsoft.Extensions.Logging;
 namespace Infrastructures.Implements;
 
 public class JournalService(
-    ApplicationDbContext context,
+    DataContext context,
     ILogger<JournalService> logger,
     IDbContextFactory<DataContext> dbContextFactory,
     IDapperConnectionFactory dapperConnectionFactory)

@@ -1,33 +1,64 @@
 ﻿@page "/Account/Users/{UserId:long}/Loan"
+@using TrapchumApp.Helpers.Constants
 <Containers Fluid CssClass="rz-background-color-base-200 p-2">
     <EditForm Model="model" OnValidSubmit="HandleFormSubmit">
         <FluentValidationValidator DisableAssemblyScanning="true"></FluentValidationValidator>
+        
         <RadzenRow AlignItems="AlignItems.Center" class="my-1">
             <RadzenColumn Size="3" SizeMD="3">
-                <RadzenLabel Component="MinLoanSize">Min Laon Size</RadzenLabel>
+                <RadzenLabel Component="MinLoanSize">Min Usd Size</RadzenLabel>
             </RadzenColumn>
             <RadzenColumn Size="9" SizeMD="9">
-                <RadzenNumeric @bind-Value="model.MinLoanSize"
+                <RadzenNumeric @bind-Value="model.MinUsdLoanSize"
                                class="w-100" Min="0"
                                Format="#,##0.00"
                                Name="MinLoanSize"
                                TextAlign="TextAlign.End"
                                ShowUpDown="false" />
-                <ValidationMessage For="@(()=>model.MinLoanSize)"></ValidationMessage>
+                <ValidationMessage For="@(()=>model.MinUsdLoanSize)"></ValidationMessage>
             </RadzenColumn>
         </RadzenRow>
         <RadzenRow AlignItems="AlignItems.Center" class="my-1">
             <RadzenColumn Size="3" SizeMD="3">
-                <RadzenLabel Component="MaxLoanSize">Min Laon Size</RadzenLabel>
+                <RadzenLabel Component="MaxLoanSize">Max Usd Size</RadzenLabel>
             </RadzenColumn>
             <RadzenColumn Size="9" SizeMD="9">
-                <RadzenNumeric @bind-Value="model.MaxLoanSize"
+                <RadzenNumeric @bind-Value="model.MaxUsdLoanSize"
                                class="w-100" Min="0"
                                Name="MaxLoanSize"
                                TextAlign="TextAlign.End"
                                ShowUpDown="false"
                                Format="#,##0.00" />
-                <ValidationMessage For="@(()=>model.MaxLoanSize)"></ValidationMessage>
+                <ValidationMessage For="@(()=>model.MaxUsdLoanSize)"></ValidationMessage>
+            </RadzenColumn>
+        </RadzenRow>
+
+        <RadzenRow AlignItems="AlignItems.Center" class="my-1">
+            <RadzenColumn Size="3" SizeMD="3">
+                <RadzenLabel Component="MinLoanSize">Min Khr Size</RadzenLabel>
+            </RadzenColumn>
+            <RadzenColumn Size="9" SizeMD="9">
+                <RadzenNumeric @bind-Value="model.MinKhrLoanSize"
+                               class="w-100" Min="0"
+                               Format="#,##0.00"
+                               Name="MinLoanSize"
+                               TextAlign="TextAlign.End"
+                               ShowUpDown="false" />
+                <ValidationMessage For="@(() => model.MinKhrLoanSize)"></ValidationMessage>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow AlignItems="AlignItems.Center" class="my-1">
+            <RadzenColumn Size="3" SizeMD="3">
+                <RadzenLabel Component="MaxLoanSize">Max Khr Size</RadzenLabel>
+            </RadzenColumn>
+            <RadzenColumn Size="9" SizeMD="9">
+                <RadzenNumeric @bind-Value="model.MaxKhrLoanSize"
+                               class="w-100" Min="0"
+                               Name="MaxLoanSize"
+                               TextAlign="TextAlign.End"
+                               ShowUpDown="false"
+                               Format="#,##0.00" />
+                <ValidationMessage For="@(() => model.MaxKhrLoanSize)"></ValidationMessage>
             </RadzenColumn>
         </RadzenRow>
         <RadzenRow AlignItems="AlignItems.Center" class="my-1">
@@ -55,12 +86,12 @@
         <RadzenStack Gap="1rem" AlignItems="AlignItems.Center"
                      JustifyContent="JustifyContent.End"
                      Orientation="Orientation.Horizontal">
-            <RadzenButton Icon="save"
+            <RadzenButton Icon="@IconNames.Save"
                          ButtonType="ButtonType.Submit"
                           Size="ButtonSize.ExtraSmall"
                           Text="Save"
                           ButtonStyle="ButtonStyle.Success"></RadzenButton>
-            <RadzenButton Icon="cancel"
+            <RadzenButton Icon="@IconNames.Cancel"
                           Size="ButtonSize.ExtraSmall"
                           Text="Cancel"
                           Click="@(()=>DialogService.Close(false))"

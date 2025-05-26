@@ -13,6 +13,12 @@ public sealed class LoanDescriptionsDtoCreate
         UserRefId = userRefId;
     }
 
+    public LoanDescriptionsDtoCreate(string? memo, string? userRefId,string? loanRequestId)
+        :this(memo,userRefId)
+    {
+        LoanRequestRefId = loanRequestId;
+    }
+
     public string? LoanRequestRefId { get; set; }
     public string? Memo { get; set; } = string.Empty;
     public string? UserRefId { get; set; }=string.Empty;
@@ -23,4 +29,5 @@ public sealed class LoanDescriptionsDtoUpdate
     public long Id { get; set; }
     public string? LoanRequestRefId { get; set; }
     public string? Memo { get; set; } = string.Empty;
+    public string? UserRefId { get; set; } = string.Empty;
 }

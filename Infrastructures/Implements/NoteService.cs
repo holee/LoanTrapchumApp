@@ -11,9 +11,9 @@ namespace Infrastructures.Implements
 {
     public class NoteService : INoteService
     {
-        private readonly ApplicationDbContext _context;
+        private readonly DataContext _context;
         private readonly ILogger<NoteService> _logger;
-        public NoteService(ApplicationDbContext context, ILogger<NoteService> logger)
+        public NoteService(DataContext context, ILogger<NoteService> logger)
         {
             _context = context;
             _logger = logger;

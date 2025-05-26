@@ -18,11 +18,11 @@ namespace Infrastructures.Implements;
 
 public class EmployeeService : IEmployeeService
 {
-    private readonly ApplicationDbContext _context;
+    private readonly DataContext _context;
     private readonly IDapperConnectionFactory connectionFactory;
     private readonly IDbContextFactory<DataContext> _dbContextFactory;
 
-    public EmployeeService(ApplicationDbContext app, IDapperConnectionFactory connectionFactory,
+    public EmployeeService(DataContext app, IDapperConnectionFactory connectionFactory,
         IDbContextFactory<DataContext> dbContextFactory)
     {
         this._context = app;
@@ -162,17 +162,14 @@ public class EmployeeService : IEmployeeService
         return Result.Success<IReadOnlyList<VEmployeeList>>(await queries.AsNoTracking().ToListAsync());
     }
 
-    public async Task<Pager<VEmployeeList>> GetEmployeesAsync(QueryParam q)
+    public async Task<Pager<VEmployeeList>> GetEmployeesAsync(int? branchId, string? employeeId, QueryParam q)
     {
         await using var context = await _dbContextFactory.CreateDbContextAsync();
 
-        IQueryable<VEmployeeList> queries = context.EmployeeLists;
-
-        if (q.IsIncludeInActive)
-        {
-            queries = queries.IgnoreQueryFilters();
-        }
-
+        var queries = context.EmployeeLists
+                              .WhereIf(branchId > 0, x => x.BranchId == branchId)
+                              .WhereIf(employeeId.IsNotNullOrEmpty(), x => x.EmployeeId == employeeId)
+                              .IgnoreFilterIf(q.IsIncludeInActive);
         if (!string.IsNullOrWhiteSpace(q.Filter))
         {
             queries = queries.Where(x => EF.Functions.Like(x.LastName!, $"%{q.Filter}%") ||
@@ -191,44 +188,13 @@ public class EmployeeService : IEmployeeService
 
         var counts = queries.Count();
 
-        var items = await queries.Skip(q.PageNumber)
-            .Take(q.PageSize)
-            .AsNoTracking()
-            .ToListAsync();
-        return new Pager<VEmployeeList>(items, counts);
-    }
-
-
-    public async Task<Pager<VEmployeeList>> GetEmployeesAsync(int? branchId, QueryParam q)
-    {
-        await using var context = await _dbContextFactory.CreateDbContextAsync();
-
-        IQueryable<VEmployeeList> queries = context.EmployeeLists
-            .WhereIf(branchId > 0, x => x.BranchId == branchId)
-            .IgnoreFilterIf(q.IsIncludeInActive);
-
-        if (!string.IsNullOrWhiteSpace(q.Filter))
+        if (q.PageNumber > 0)
         {
-            queries = queries.Where(x => EF.Functions.Like(x.LastName!, $"%{q.Filter}%") ||
-                                         EF.Functions.Like(x.FirstName!, $"%{q.Filter}%") ||
-                                         EF.Functions.Like(x.BranchName!, $"%{q.Filter}%") ||
-                                         EF.Functions.Like(x.DepartmentName!, $"%{q.Filter}%") ||
-                                         EF.Functions.Like(x.Phone!, $"%{q}%") ||
-                                         EF.Functions.Like(x.EmployeeId!, $"%{q}%")
-            );
+            queries = queries.Skip(q.PageNumber).Take(q.PageSize);
         }
 
-        if (q.SortDescending)
-        {
-            queries = queries.OrderByDescending(x => EF.Property<object>(x, q.SortColumn));
-        }
-
-        var counts = queries.Count();
-
-        var items = await queries.Skip(q.PageNumber)
-            .Take(q.PageSize)
-            .AsNoTracking()
-            .ToListAsync();
+        var items = await queries.AsNoTracking()
+                                 .ToListAsync();
         return new Pager<VEmployeeList>(items, counts);
     }
 

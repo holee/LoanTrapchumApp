@@ -102,13 +102,18 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
                 SelectedLoanCategory = loanCategories!.FirstOrDefault();
             }
 
-            var aproveResp = await loanSettingService.GetAprovedUserAsync<ApprovedUser>(BranchId);
-
-            AprovedUsers = aproveResp ?? [];
+            await GetApprovedUser(BranchId);
             
             await base.OnInitializedAsync();
         }
 
+
+        private async Task GetApprovedUser(int? branchId)
+        {
+            var aproveResp = await loanSettingService.GetAprovedUserAsync<ApprovedUser>(branchId);
+
+            AprovedUsers = aproveResp ?? [];
+        }
 
         private async Task GetCustomers(string? customerId, int take = 25, string? filter = null)
         {

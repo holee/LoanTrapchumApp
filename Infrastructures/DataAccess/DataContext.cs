@@ -204,6 +204,7 @@ namespace Infrastructures.DataAccess
         public DbSet<LoanDisbursment> LoanDisbursementRequests => Set<LoanDisbursment>();
         public DbSet<LoanRequest> LoanRequests => Set<LoanRequest>();
         public DbSet<LoanDocuments> LoanDocuments => Set<LoanDocuments>();
+        public DbSet<LoanDescriptions> LoanDescriptions => Set<LoanDescriptions>();
         public DbSet<LoanChangedCa> LoanChangedCa => Set<LoanChangedCa>();
         public DbSet<AppSettings> AppSettings => Set<AppSettings>();
         public DbSet<VCurrenciesList> VCurrenciesList => Set<VCurrenciesList>();

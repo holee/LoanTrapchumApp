@@ -34,7 +34,7 @@ namespace Applications.Services.Loans
 
         public async Task<Result<string>> AddLoanRequestGuarantorAsync(LoanRequestGuarantorsDtoCreate request)
         {
-            var req = request.Adapt<LoanRequestGuarantors>();
+            var req = request.MapTo();
 
             return await reqService.AddLoanRequestGuarantorAsync(req);
         }
@@ -54,12 +54,19 @@ namespace Applications.Services.Loans
             return await reqService.ChangedLoanRequestAsync(req);
         }
 
-        public async Task<Result<string>> CreateLoanRequestAsync(LoanRequestDtoCreate request)
+        public async Task<Result<string>> CreateNewLoanRequestAsync(LoanRequestDtoCreate request)
         {
             
             var req = request.MapToLoanRequest();
 
-            return await reqService.CreateLoanRequestAsync(req);
+            return await reqService.CreateNewLoanRequestAsync(req);
+        }
+
+        public async Task<Result<string>> CreateLoanRequestAsync(LoanRequestDtoCreate request,CancellationToken cancellation=default)
+        {
+            var req = request.MapToLoanRequestCreate(); 
+
+            return await reqService.CreateLoanRequestAsync(req,cancellation);
         }
 
         public async Task<Result<bool>> CreateLoanRequestAsync(int? branchId, string? userId, string? loanRequestId)
@@ -107,11 +114,6 @@ namespace Applications.Services.Loans
             return await reqService.GetLoanRequestDocumentAsync(loanRequestId, branchId);
         }
 
-
-
-
-
-
         public async Task<Result<IEnumerable<VLoanRequestGuarantors>>> GetLoanRequestGuarantorAsync(int? branchId,
             string? loanRequestId, string? customerId)
         {
@@ -135,6 +137,11 @@ namespace Applications.Services.Loans
             return await reqService.GetLoanRequestAsync(branchId, customerId, loanRequestId, include);
         }
 
+        public async Task<Result<VLoanRequests>> GetApprovedLoanRequestAsync(int? branchId, string? customerId, string? loanRequestId, bool include)
+        {
+            return await reqService.GetApprovedLoanRequestAsync(branchId, customerId, loanRequestId, include); 
+        }
+
         public async Task<Result<VLoanRequests>> GetLoanRequestAsync(int? branchId, string? userId, string? customerId,string? loanRequestId, bool v)
         {
             return await reqService.GetLoanRequestAsync(branchId, userId, customerId, loanRequestId, v);
@@ -146,15 +153,31 @@ namespace Applications.Services.Loans
             return await reqService.GetLoanRequestAsync<T>(branchId, customerId, loanRequestId);
         }
 
-        public async Task<Result<string>> RecheckedLoanRequestAsync(RecheckedRequestDtoCreate req)
+        public async Task<Result<VLoanRequests>> RecheckedLoanRequestAsync(RecheckedRequestDtoCreate req)
         {
             return await reqService.RecheckedLoanRequestAsync(req);
         }
 
+        public async Task<Result<string>> AddDescriptionAsync(LoanDescriptionsDtoCreate req,CancellationToken cancellation=default)
+        {
+            var model=req.MapToDescriptionCreate();
+            return await reqService.AddDescription(model,cancellation);
+        }
 
         public async Task<Result<string>> VerifiedLoanRequestAsync(RequestDtoBaseCreate req)
         {
             return await reqService.VerifiedLoanRequestAsync(req);
         }
+
+
+        public async Task<bool> IsCustomerBusy(string? customerId,CancellationToken cancellation=default)
+        {
+
+            ArgumentNullException.ThrowIfNullOrWhiteSpace(nameof(customerId));
+
+            return await reqService.IsCustomerBusy(customerId, cancellation);
+
+        }
+
     }
 }

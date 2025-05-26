@@ -5,11 +5,11 @@
             <RadzenColumn Size="3">Branch</RadzenColumn>
             <RadzenColumn Size="9">
                 <RadzenDropDown @bind-Value="_model.BranchRefId"
-                                Data="_branches"
+                                Data="@_branches"
                                 Style="width: 100%;"
-                                TextProperty="BranchName"
+                                TextProperty="@(nameof(BranchDto.BranchName))"
                                 @bind-Value:after="SelectBranchChanged"
-                                ValueProperty="BranchId"
+                                ValueProperty="@(nameof(BranchDto.BranchId))"
                                 Disabled="@_showBranch"
                                 Name="DropDownBindValue" />
                 <ValidationMessage For="@(()=>_model.BranchRefId)" />

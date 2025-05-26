@@ -1,4 +1,6 @@
-﻿using Applications.Interfaces.setting;
+﻿using Applications.Helpers.Mappers;
+using Applications.Interfaces.setting;
+using Applications.Requests.Settings;
 using Applications.Responses;
 using Domains.Models.Loans;
 using Domains.Models.Settings;
@@ -14,10 +16,16 @@ namespace Applications.Services.Settings
             return await sSeting.ApplyUserLoanSizeAsync(model);
         }
 
-
-        public async Task<Result<string>> DeActivateUserLoanSizeAsync(Guid? id)
+        public async Task<Result<string>> ApplyUserLoanSizeAsync(UserLoanSizeDtoCreate req)
         {
-            return await sSeting.DeActivateUserLoanSizeAsync(id);
+
+            var model=req.MapToCreate();
+
+            return await sSeting.ApplyUserLoanSizeAsync(model); 
+        }
+        public async Task<Result<string>> DeActivateUserLoanSizeAsync(long? id,string userRefId,CancellationToken cancellation=default)
+        {
+            return await sSeting.DeActivateUserLoanSizeAsync(id,userRefId,cancellation);
         }
 
 

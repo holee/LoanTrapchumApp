@@ -1,6 +1,5 @@
-﻿using Applications.Extensions.Identity;
+﻿using Applications.Requests.Settings;
 using Applications.Responses;
-using Domains.Models.Identity;
 using Domains.Models.Loans;
 using Domains.Models.Settings;
 
@@ -14,8 +13,7 @@ public interface IAppSettingService
     Task<Result<AppSettings>> GetSysSettingByCode(string code);
     Task<Result<AppSettings>> GetSysSettingByCode(int? id);
     Task<Result<IEnumerable<AppSettings>>> GetSysSettings(string? filterValue=null);
-    Task<Result<string>> ApplyUserLoanSizeAsync(UserLoanSize model);
-    Task<Result<string>> DeActivateUserLoanSizeAsync(Guid? id);
-    Task<Result<IEnumerable<T>>> GetSysSettings<T>(string? filterValue = null)
-        where T : class;
+    Task<Result<string>> DeActivateUserLoanSizeAsync(long? id,string? userRefId,CancellationToken cancellation = default);
+    Task<Result<IEnumerable<T>>> GetSysSettings<T>(string? filterValue = null) where T : class;
+    Task<Result<string>> ApplyUserLoanSizeAsync(UserLoanSize model, CancellationToken cancellation = default);
 }

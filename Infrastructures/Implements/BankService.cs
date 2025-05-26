@@ -7,9 +7,9 @@ namespace Infrastructures.Implements
 {
     public class BankService : IBankService
     {
-        private readonly ApplicationDbContext _context;
+        private readonly DataContext _context;
 
-        public BankService(ApplicationDbContext context)
+        public BankService(DataContext context)
         {
             _context = context;
         }

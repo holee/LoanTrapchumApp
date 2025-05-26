@@ -4,6 +4,19 @@ namespace Domains.Models.Loans;
 
 public sealed class LoanCollateralRequest 
 {
+    public LoanCollateralRequest()
+    {
+        BranchId = 0;
+        CustomerId=string.Empty;
+        LoanRequestId=string.Empty;
+        CollateralLinesLink = [];
+    }
+    public LoanCollateralRequest(int? branchId, string? loanRequestId, string? customerId)
+    {
+        BranchId = branchId;
+        LoanRequestId = loanRequestId;
+        CustomerId = customerId;
+    }
 
     public int? BranchId { get; set; } 
     

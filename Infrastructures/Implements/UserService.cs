@@ -158,6 +158,37 @@ public sealed class UserService : IUserService
 
         return Result.Success<Pager<VUser>>(new(users, counts));
     }
+
+    public async Task<Result<Pager<VUser>>> GetUsersAsync(int? branchId, string? userId, QueryParam param)
+    {
+
+        await using var context = await _dbContextFactory.CreateDbContextAsync();
+
+        var queries = context.Database
+                            .SqlQuery<VUser>($"SELECT * FROM vUsers")
+                            .WhereIf(branchId > 0,x=>x.BranchId == branchId)
+                            .WhereIf(!param.IsIncludeInActive, x => x.IsActive == true)
+                            .WhereIf(!string.IsNullOrWhiteSpace(param.Filter), e => EF.Functions.Like(e.UserName!, $"%{param.Filter}%") ||
+                                                                                    EF.Functions.Like(e.Email!, $"%{param.Filter}%"))
+                            .WhereIf(userId.IsNotNullOrEmpty(), u => u.Id == userId)
+                            .OrderByDescendingIf(param.SortDescending, p => EF.Property<object>(p, param.SortColumn));
+
+
+        var counts = await queries.CountAsync();
+
+        if (param.PageSize > 0)
+        {
+            queries = queries.Skip(param.PageNumber).Take(param.PageSize);
+        }
+
+        var users = await queries
+                            .AsNoTracking()
+                            .ToListAsync();
+
+        return Result.Success<Pager<VUser>>(new(users, counts));
+    }
+
+
     public async Task<Result> ChangePassword(ChangePasswordDto req)
     {
 

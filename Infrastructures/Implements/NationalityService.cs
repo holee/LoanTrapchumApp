@@ -8,9 +8,9 @@ namespace Infrastructures.Implements
 {
     public class NationalityService : INationalityService
     {
-        private readonly ApplicationDbContext _context;
+        private readonly DataContext _context;
 
-        public NationalityService(ApplicationDbContext context)
+        public NationalityService(DataContext context)
         {
             this._context = context;
         }

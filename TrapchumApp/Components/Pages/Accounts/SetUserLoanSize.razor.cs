@@ -1,5 +1,6 @@
 using Applications.Interfaces.setting;
 using Applications.Requests.Settings;
+using Applications.Services.Settings;
 using Domains.Models.Loans;
 using Mapster;
 using Microsoft.AspNetCore.Components;
@@ -9,9 +10,9 @@ namespace TrapchumApp.Components.Pages.Accounts
 {
     public partial class SetUserLoanSize
     {
-        private readonly IAppSettingService _settingService;
+        private readonly ISettingServiceImpl _settingService;
 
-        public SetUserLoanSize(IAppSettingService settingService)
+        public SetUserLoanSize(ISettingServiceImpl settingService)
         {
             _settingService = settingService;
         }
@@ -28,14 +29,12 @@ namespace TrapchumApp.Components.Pages.Accounts
         async void HandleFormSubmit()
         {
 
-
-            var loanSize = model.Adapt<UserLoanSize>();
-
-            var resp = await _settingService.ApplyUserLoanSizeAsync(loanSize);
+            var resp = await _settingService.ApplyUserLoanSizeAsync(model);
 
             if (!resp.IsSuccess)
             {
                 NotificationService.Notify(NotificationSeverity.Error, resp.ErrMessage);
+
                 DialogService.Close(true);
             }
             else

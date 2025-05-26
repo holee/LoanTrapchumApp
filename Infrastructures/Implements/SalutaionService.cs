@@ -9,8 +9,8 @@ namespace Infrastructures.Implements
 {
     public class SalutaionService : ISalutationService
     {
-        private readonly ApplicationDbContext _context;
-        public SalutaionService(ApplicationDbContext context)
+        private readonly DataContext _context;
+        public SalutaionService(DataContext context)
         {
             _context = context;
         }

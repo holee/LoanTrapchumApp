@@ -1,3 +1,4 @@
+using Applications.Enumerations;
 using Applications.Requests.Loans.LoanRequests;
 using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.ViewModels.Collaterals;
@@ -81,13 +82,13 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Disbursements
         }
         async Task RecheckedLoanRequest()
         {
-            var req = new RecheckedRequestDtoCreate(BranchId, CustomerId, LoanRequestId, DateTime.UtcNow, string.Empty);
+            var req = new RecheckedRequestDtoCreate(BranchId, CustomerId, LoanRequestId, DateTime.UtcNow,RequestStatus.Rechecked, string.Empty);
 
             var rsp = await _requestService.RecheckedLoanRequestAsync(req);
 
             if (rsp.IsSuccess)
             {
-                NotificationService.Notify(NotificationSeverity.Success, rsp.Data);
+                NotificationService.Notify(NotificationSeverity.Success,"");
             }
             else
             {

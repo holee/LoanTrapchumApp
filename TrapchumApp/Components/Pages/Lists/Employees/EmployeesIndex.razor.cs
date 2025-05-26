@@ -63,7 +63,7 @@ namespace TrapchumApp.Components.Pages.Lists.Employees
         string sortField = "EmployeeId";
         bool sortDescending = false;
         string? _empId = string.Empty;
-        int branchId = 1;
+        int branchId = 0;
 
         void PageSizeChanged(int page)
         {
@@ -90,15 +90,20 @@ namespace TrapchumApp.Components.Pages.Lists.Employees
         {
             var results = await _branchService.GetBranchesAsync<BranchDto>(0, new QueryParam(0, 0, string.Empty));
 
-            if (results.IsSuccess)
+            var unionBranches = new List<BranchDto>
             {
-                Branches = results!.Data!.Items;
-                Branches.Add(new BranchDto
+                new BranchDto
                 {
                     BranchId = 0,
                     BranchName = "All"
-                });
-                Branches = Branches.OrderBy(x => x.BranchId).ToList();
+                }
+            };
+
+            if (results.IsSuccess)
+            {
+                var branches = results!.Data!.Items.Union(unionBranches);
+
+                Branches = branches.OrderBy(x => x.BranchId).ToList();
             }
         }
 
@@ -259,9 +264,13 @@ namespace TrapchumApp.Components.Pages.Lists.Employees
             try
             {
                 var param = new QueryParam(pageIndex, pageSize, sortField, sortDescending, includeInActive, q);
-                var pageDate = await _employeeService.GetEmployeesAsync(branchId, param);
+
+                var pageDate = await _employeeService.GetEmployeesAsync(branchId, null, param);
+
                 counts = pageDate.Count;
+
                 Employees = pageDate.Items;
+
                 isLoading = false;
             }
             catch (Exception ex)

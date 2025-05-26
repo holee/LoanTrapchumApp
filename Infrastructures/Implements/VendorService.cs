@@ -11,8 +11,8 @@ namespace Infrastructures.Implements
 {
     public class VendorService : IVendorService
     {
-        private readonly ApplicationDbContext _context;
-        public VendorService(ApplicationDbContext context)
+        private readonly DataContext _context;
+        public VendorService(DataContext context)
         {
             this._context = context;
         }

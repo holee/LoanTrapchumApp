@@ -197,7 +197,8 @@
 
         var parameters = new Dictionary<string, object?>
         {
-            { "EmployeeId", EmployeeId }
+            { "EmployeeId", EmployeeId },
+             { "BranchId", 0 }
         };
 
         var dialogue = DialogService.OpenAsync<UserCreateModal>("New User", parameters: parameters, options: options);

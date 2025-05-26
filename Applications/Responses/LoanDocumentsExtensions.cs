@@ -7,7 +7,7 @@ namespace Applications.Responses;
 
 public static class LoanDocumentsExtensions
 {
-    public static LoanRequestDocuments ToLoanRequestDocuments(Guid? customerId, Guid? loanRequestId, int? branchId, IEnumerable<VLoanRequestsDocuments> doc)
+    public static LoanRequestDocuments ToLoanRequestDocuments(string? customerId, string? loanRequestId, int? branchId, IEnumerable<VLoanRequestsDocuments> doc)
     {
         return new LoanRequestDocuments
         {
@@ -50,6 +50,7 @@ public static class LoanDocumentsExtensions
             OriginalName = x.OriginalName,
             NewFileName = x.NewFileName,
             FileUrl = x.FileUrl,
+            FileSize=x.FileSize,
             Description = x.Description,
         }).ToList();
     }

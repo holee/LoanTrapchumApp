@@ -9,6 +9,7 @@ using Applications.Responses.ViewModels.Options;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Radzen;
+using System.Threading.Tasks;
 
 namespace TrapchumApp.Components.Pages.Lists.Customers
 {
@@ -76,10 +77,18 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
             await ClickedAddCollateral.InvokeAsync(customerId);
         }
 
-        private void AddLoanRequest(string? customerId)
+        private async Task AddLoanRequest(string? customerId)
         {
             ContextMenuService.Close();
+
+            if (await _loanRequestService.IsCustomerBusy(customerId))
+            {
+                NotificationService.Notify(NotificationSeverity.Error, "This customer cannot request loan again.");
+                return;
+            }
+
             var uri =$"/App/Request/{BranchId}/Branches/{UserId}/CreateNew?CustomerId={customerId}";
+
             NavigationManager.NavigateTo(uri);
         }
 

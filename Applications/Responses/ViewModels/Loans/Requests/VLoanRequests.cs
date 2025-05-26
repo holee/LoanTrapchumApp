@@ -17,7 +17,6 @@ public sealed class VLoanRequests
     public DateTime? AprovedDate { get; set; }
     public string? Summiter { get; set; }
     public string? Remark { get; set; }
-    public string? Memo { get; set; }
     public int? CurrencyId { get; set; }
     public string? CurrencyName { get; set; }
     public int? StatusId { get; set; }
@@ -28,7 +27,7 @@ public sealed class VLoanRequests
     public int? BankId { get; set; }
     public int? BranchId { get; set; }
     public string? BranchName { get; set; }
-    public string   ? CustomerId { get; set; }
+    public string? CustomerId { get; set; }
     public string? AltName { get; set; }
     public string? FullName { get; set; }
     public decimal? AdminFeeRate { get; set; }
@@ -48,7 +47,7 @@ public sealed class VLoanRequests
     public string? CollectionFeeModeName { get; set; } = string.Empty;
     public string? AprovedBy { get; set; } = string.Empty;
 
-    //public int PayementSechuleModeId { get; set; } = 2;
+    [NotMapped] public string? Memo { get; set; }
     [NotMapped] public IEnumerable<VLoanRequestGuarantors> Guarantors { get; set; } = [];
     [NotMapped] public IEnumerable<VLoanRequestCollateralLines> Collaterals { get; set; } = [];
     [NotMapped] public IEnumerable<VLoanRequestsDocuments> Documents { get; set; } = [];

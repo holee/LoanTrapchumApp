@@ -14,10 +14,10 @@ namespace Infrastructures.Implements;
 
 public class LedgerService : ILedgerService
 {
-    private readonly ApplicationDbContext _context;
+    private readonly DataContext _context;
     private readonly ILogger<LedgerService> _logger;
 
-    public LedgerService(ApplicationDbContext context, ILogger<LedgerService> logger)
+    public LedgerService(DataContext context, ILogger<LedgerService> logger)
     {
         this._context = context;
         this._logger = logger;

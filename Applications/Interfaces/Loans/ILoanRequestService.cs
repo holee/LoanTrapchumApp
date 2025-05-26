@@ -11,9 +11,9 @@ namespace Applications.Interfaces.Loans
     public interface ILoanRequestService
     {
         Task<Result<string>> ChangedLoanRequestAsync(LoanChangeStatusDtoCreate req);
-        Task<Result<string>> CreateLoanRequestAsync(LoanRequest request,CancellationToken cancellationToken = default);
+        Task<Result<string>> CreateNewLoanRequestAsync(LoanRequest request,CancellationToken cancellationToken = default);
         Task<Result<string>> AprovedLoanRequestAsync(AproveLoanDtoCreate req);
-        Task<Result<string>> RecheckedLoanRequestAsync(RecheckedRequestDtoCreate req);
+        Task<Result<VLoanRequests>> RecheckedLoanRequestAsync(RecheckedRequestDtoCreate req);
         Task<Result<string>> DeniedLoanRequestAsync(DeniedRequestDtoCreate req);
         Task<Result<string>> VerifiedLoanRequestAsync(RequestDtoBaseCreate req);
         Task<Result<string>> AppliedLoanRequestAsync(RequestDtoBaseCreate req);
@@ -36,6 +36,10 @@ namespace Applications.Interfaces.Loans
         Task<Result<VLoanRequests>> GetLoanRequestAsync(int? branchId,string? userId, string? customerId, string? loanRequestId, bool include);
         Task<Pager<VLoanRequests>> GetLoanRequestsAsync(string? userId, bool canDisburse, int? branchId, RequestStatus requestStatus, QueryParam param);
         Task<Result<string>> AddLoanRequestDocumentAsync(int? branchId, string? loanRequestId, List<LoanDocuments> documents);
+        Task<bool> IsCustomerBusy(string? customerId, CancellationToken cancellation = default);
+        Task<Result<string>> AddDescription(LoanDescriptions descriptions, CancellationToken cancellation = default);
+        Task<Result<VLoanRequests>> GetApprovedLoanRequestAsync(int? branchId, string? customerId, string? loanRequestId, bool include);
+        Task<Result<string>> CreateLoanRequestAsync(LoanRequest req, CancellationToken cancellationToken = default);
     }
 }
 //Task<Pager<VLoanRequests>> GetLoanRequestsAsync(long userId, int statusId, int branchId, QueryParam param);

@@ -9,9 +9,9 @@ namespace Infrastructures.Implements
 {
     public class CashService:ICashServiceImpl
     {
-        private readonly ApplicationDbContext _context;
+        private readonly DataContext _context;
 
-        public CashService(ApplicationDbContext context)
+        public CashService(DataContext context)
         {
             this._context = context;
         }

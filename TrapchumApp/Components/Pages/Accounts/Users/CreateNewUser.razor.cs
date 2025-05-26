@@ -28,7 +28,6 @@ public partial class CreateNewUser
     IEnumerable<BranchDto> Branches = [];
     IEnumerable<VEmployeeList> bEmployees = [];
     BranchDto SelectedBranch = default!;
-
     protected override async Task OnInitializedAsync()
     {
         try
@@ -40,18 +39,18 @@ public partial class CreateNewUser
                 roles = roleResult?.Data ?? [];
             }
 
-            var employeeResponse = await _employeeService.GetEmployeesAsync(string.Empty, 0);
+            var rsp = await _employeeService.GetEmployeesAsync(0, null, new(0, 0));
 
-            if (employeeResponse.IsSuccess)
+            if (rsp.Items.Any())
             {
-                Employees = employeeResponse.Data!;
+                Employees = rsp.Items;
             }
 
-            var branchResponse = await _branchService.GetBranchesAsync<BranchDto>(0, new QueryParam(0, 25, string.Empty));
+            var bRsp = await _branchService.GetBranchesAsync<BranchDto>(0, new QueryParam(0, 25));
 
-            if (branchResponse!.IsSuccess)
+            if (bRsp!.IsSuccess)
             {
-                Branches = branchResponse.Data.Items;
+                Branches = bRsp.Data.Items;
             }
             else
             {
@@ -70,12 +69,9 @@ public partial class CreateNewUser
     {
         if (model.BranchRefId > 0)
         {
-            var employeeResponse = await _employeeService.GetEmployeesAsync(string.Empty, model.BranchRefId);
+            var rsp = await _employeeService.GetEmployeesAsync(model.BranchRefId, string.Empty, new(0, 0));
 
-            if (employeeResponse.IsSuccess)
-            {
-                bEmployees = employeeResponse.Data!;
-            }
+            bEmployees = rsp.Items ?? [];
         }
         else
         {

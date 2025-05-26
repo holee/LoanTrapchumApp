@@ -1,7 +1,7 @@
 using Applications.Requests.Lists.OtherNames;
 using Mapster;
 
-namespace Applications.Extensions;
+namespace Applications.Helpers.Mappers;
 
 public static class EntityNameExtensions 
 {

@@ -15,11 +15,11 @@ using System.Data;
 namespace Infrastructures.Implements;
 public class GuarantorService : IGuarantorService
 {
-    private readonly ApplicationDbContext _context;
+    private readonly DataContext _context;
     private readonly IDbContextFactory<DataContext> _contextFactory;
     private readonly IValidator<EntityNameDtoCreate> _validator;
     private readonly IDapperConnectionFactory dapperConnection;
-    public GuarantorService(ApplicationDbContext context, IValidator<EntityNameDtoCreate> validator, IDbContextFactory<DataContext> contextFactory, IDapperConnectionFactory dapperConnection)
+    public GuarantorService(DataContext context, IValidator<EntityNameDtoCreate> validator, IDbContextFactory<DataContext> contextFactory, IDapperConnectionFactory dapperConnection)
     {
         _context = context;
         _validator = validator;

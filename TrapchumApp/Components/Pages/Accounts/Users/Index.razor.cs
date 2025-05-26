@@ -13,6 +13,8 @@ using System.IdentityModel.Tokens.Jwt;
 using Applications.Extensions.Identity;
 using Applications.Extensions.Identity.Authorizations.Extensions;
 using Applications.ApplicationPolicies;
+using Applications.Services.Identity;
+using System.Threading.Tasks;
 namespace TrapchumApp.Components.Pages.Accounts.Users;
 
 public partial class Index
@@ -22,7 +24,7 @@ public partial class Index
     protected int index = 1;
     private bool cancelClose = false;
     private string? searchText = "";
-    private readonly IUserService _authService;
+    private readonly IUserServiceImpl _authService;
     private readonly IEmployeeService _empService;
     [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
     protected int selectedTabIndex = 0;
@@ -31,7 +33,7 @@ public partial class Index
     bool isLoading = false;
     int counts = 0;
     bool AdminOnly = false;
-    public Index(IUserService authService, IEmployeeService empService)
+    public Index(IUserServiceImpl authService, IEmployeeService empService)
     {
         _authService = authService;
         _empService = empService;
@@ -44,7 +46,7 @@ public partial class Index
     protected EditForm form = default!;
     protected IEnumerable<string?> roles = [];
     protected IEnumerable<VEmployeeList> Employees = [];
-    protected IEnumerable<BranchDto> Branches = [];
+    protected List<BranchDto> Branches = [];
     protected IEnumerable<VEmployeeList> bEmployees = [];
     protected BranchDto SelectedBranch = default!;
     string? filterText = string.Empty;
@@ -53,10 +55,12 @@ public partial class Index
     string sortField = nameof(VUser.BranchName);
     bool includeInactive = false;
     bool sortDescending = false;
+    int selectedBranchId = 0;
     protected override async Task OnInitializedAsync()
     {
         try
         {
+            await GetBranches();
             await LoadAllUsers();
 
             var user = (await AuthenticationState).User;
@@ -67,7 +71,6 @@ public partial class Index
             {
                 authenticatedUserId = user.GetId();
             }
-
 
         }
         catch (Exception ex)
@@ -80,7 +83,29 @@ public partial class Index
         await base.OnInitializedAsync();
     }
 
-    async Task LoadAllUsers(long userId = 0, string? filterText = null)
+
+    private async Task GetBranches()
+    {
+        var rsp =await _branchService.GetBranchesAsync<BranchDto>(0,new QueryParam(1,0,""));
+
+        var unionBranches = new List<BranchDto>()
+        {
+            new BranchDto
+            {
+                BranchId=0,
+                BranchName="All"
+            }
+        };
+
+        if (rsp.IsSuccess)
+        {
+            var branches = rsp.Data.Items.Union(unionBranches);
+
+            Branches=branches.OrderBy(x=>x.BranchId).ToList();
+        }
+    }
+
+    async Task LoadAllUsers(string? userId=null, string? filterText = null)
     {
         try
         {
@@ -88,11 +113,12 @@ public partial class Index
 
             var param = new QueryParam(pageIndex, pageSize, sortField, sortDescending, includeInactive, filterText);
 
-            var resp = await _authService.GetUsersAsync(param);
+            var resp = await _authService.GetUsersAsync(selectedBranchId, userId, param);
 
             if (resp.IsSuccess)
             {
                 counts = resp.Data.Count;
+
                 AllUsers = resp.Data.Items;
             }
             else
@@ -124,7 +150,8 @@ public partial class Index
 
             sortDescending = dir.Contains("asc") ? false : true;
         }
-        await LoadAllUsers(0, filterText);
+
+        await LoadAllUsers(string.Empty, filterText);
 
     }
 
@@ -199,5 +226,14 @@ public partial class Index
             model.EmployeeId = string.Empty;
         }
         Console.WriteLine(selectedEmployee!.EmployeeId);
+    }
+    private async Task SelectedBranchChanged(object? args)
+    {
+        if(args is not null)
+        {
+           selectedBranchId=((BranchDto?)args)!.BranchId;
+
+           await LoadAllUsers(string.Empty);
+        }
     }
 }

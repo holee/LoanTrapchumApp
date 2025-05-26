@@ -55,11 +55,11 @@
                         <CustomerRequest CustomerId="@CustomerId"/>
                     </RadzenFieldset>
                 </RadzenTabsItem>
-                <RadzenTabsItem Text="Notes">
+                <RadzenTabsItem Text="Notes" Icon="comment">
                     <RadzenFieldset>
                         <RadzenRow AlignItems="AlignItems.Center">
                             <RadzenColumn Size="12">
-                                <RadzenTextArea Rows="30" @bind-Value="model.Memo" class="form-control">
+                                <RadzenTextArea Rows="15" @bind-Value="model.Memo" class="form-control">
 
                                 </RadzenTextArea>
                             </RadzenColumn>

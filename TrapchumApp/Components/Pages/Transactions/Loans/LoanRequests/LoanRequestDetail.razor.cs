@@ -1,3 +1,4 @@
+using Applications.Enumerations;
 using Applications.Extensions.Identity;
 using Applications.Requests.Loans.LoanRequests;
 using Applications.Responses.ViewModels.Loans.Requests;
@@ -5,6 +6,7 @@ using Infrastructures.Authorizations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Radzen;
 using System.Security.Claims;
 using TrapchumApp.Components.Shared;
@@ -23,7 +25,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 
         VLoanRequests? data = new();
 
-        string Memo = "";
+        string memo = "";
 
         string? aprovedUserId = string.Empty;
 
@@ -104,7 +106,8 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
             {
                 { "LoanRequestId", LoanRequestId },
                 { "BranchId", BranchId },
-                { "CustomerId", CustomerId }
+                { "CustomerId", CustomerId },
+                 { "UserId", UserId }
             };
 
             bool dialogueResult = await DialogService.OpenAsync<ConfirmModal>("Confirm", param, options);
@@ -127,12 +130,17 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
                 return;
             }
 
-            var req = new DeniedRequestDtoCreate(BranchId, CustomerId, LoanRequestId, DateTime.UtcNow, Memo);
+            var req = new DeniedRequestDtoCreate(BranchId, CustomerId, LoanRequestId, DateTime.UtcNow, memo);
 
             var rsp = await _loanRequestService.DeniedLoanRequestAsync(req);
 
             if (rsp.IsSuccess)
             {
+
+                var description = new LoanDescriptionsDtoCreate(memo,UserId,LoanRequestId);
+
+                await _loanRequestService.AddDescriptionAsync(description);
+
                 NotificationService.Notify(NotificationSeverity.Success, rsp.Data);
             }
             else
@@ -152,13 +160,13 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
                 return;
             }
 
-            var req = new RecheckedRequestDtoCreate(BranchId, CustomerId, LoanRequestId, DateTime.UtcNow, Memo);
+            var req = new RecheckedRequestDtoCreate(BranchId, CustomerId, LoanRequestId, DateTime.UtcNow,RequestStatus.Rechecked, memo);
 
             var rsp = await _loanRequestService.RecheckedLoanRequestAsync(req);
 
             if (rsp.IsSuccess)
             {
-                NotificationService.Notify(NotificationSeverity.Success, rsp.Data);
+                NotificationService.Notify(NotificationSeverity.Success, "");
             }
             else
             {
@@ -177,7 +185,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
                 return;
             }
 
-            var req = new RecheckedRequestDtoCreate(BranchId, CustomerId, LoanRequestId, DateTime.UtcNow, Memo);
+            var req = new RecheckedRequestDtoCreate(BranchId, CustomerId, LoanRequestId, DateTime.UtcNow,RequestStatus.Rechecked, memo);
 
             var rsp = await _loanRequestService.VerifiedLoanRequestAsync(req);
 

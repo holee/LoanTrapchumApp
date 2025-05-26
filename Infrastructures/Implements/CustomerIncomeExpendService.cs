@@ -12,12 +12,12 @@ namespace Infrastructures.Implements
 {
     public class CustomerIncomeExpendService : ICustomerIncomeExpendService
     {
-        private readonly ApplicationDbContext _context;
+        private readonly DataContext _context;
 
         private readonly ILogger<CustomerIncomeExpendService> _logger;
 
         private readonly IDapperConnectionFactory connectionFactory;
-        public CustomerIncomeExpendService(ApplicationDbContext context, ILogger<CustomerIncomeExpendService> logger, IDapperConnectionFactory connectionFactory)
+        public CustomerIncomeExpendService(DataContext context, ILogger<CustomerIncomeExpendService> logger, IDapperConnectionFactory connectionFactory)
         {
             _context = context;
             _logger = logger;

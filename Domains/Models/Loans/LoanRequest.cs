@@ -39,7 +39,6 @@ public sealed class LoanRequest : BaseEntity
     public decimal? AdminFeeAmount { get; set; }
     public decimal? PenaltyRate { get; set; }
     public string? Remark { get; set; }
-    public string? Memo { get; set; }
     public int? CollectionFeeModeId { get; set; } = 1;
     public string? CollectionFeeModeName { get; set; } = string.Empty;
     public List<LoanDocuments> LoanDocuments { get; set; } = [];

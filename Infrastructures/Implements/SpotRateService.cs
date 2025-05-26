@@ -12,9 +12,9 @@ namespace Infrastructures.Implements;
 public class SpotRateService : ISpotRateService
 {
 
-    private readonly ApplicationDbContext _context;
+    private readonly DataContext _context;
 
-    public SpotRateService(ApplicationDbContext context)
+    public SpotRateService(DataContext context)
     {
         this._context = context;
     }

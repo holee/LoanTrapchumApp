@@ -17,9 +17,6 @@
 </style>
 <RadzenStack AlignItems="AlignItems.Center"
              Orientation="Orientation.Horizontal" class="rz-my-1">
-
-    @SelectedItems.Count()
-
     <RadzenTextBox @onclick="@OpenPopup"
                    @ref="@_collateralSearchText"
                    @onkeydown="@OnKeyDown"

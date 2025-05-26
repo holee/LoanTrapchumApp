@@ -1,4 +1,4 @@
-﻿using Applications.Extensions;
+﻿using Applications.Helpers.Mappers;
 using Applications.Interfaces.Employees;
 using Applications.Interfaces.Lists;
 using Applications.Requests.Lists.Employees;
@@ -25,8 +25,11 @@ namespace Applications.Services.Employees
         public async Task<Result<string>> UpdateAsync(EntityNamesCreate entityName)
         {
             var emp = entityName.ToEmployee();
+
             var req = entityName.ToEntityNames();
+
             req.Employee = emp;
+
             return await empService.UpdateAsync(req);
         }
 
@@ -40,18 +43,14 @@ namespace Applications.Services.Employees
             return await empService.GetByIdAsync(employeeId);
         }
 
-        public async Task<Result<IReadOnlyList<VEmployeeList>>> GetEmployeesAsync(string? employeeId, int branchId = 0, bool isActive = false, string? q = null)
+        public async Task<Result<IReadOnlyList<VEmployeeList>>> GetEmployeesByBranchIdAsync(string? employeeId, int branchId = 0, bool isActive = false, string? q = null)
         {
             return await empService.GetEmployeesAsync(employeeId, branchId, isActive, q);
         }
 
-        public async Task<Pager<VEmployeeList>> GetEmployeesAsync(QueryParam param)
+        public async Task<Pager<VEmployeeList>> GetEmployeesAsync(int? branchId, string? employeeId, QueryParam param) 
         {
-            return await empService.GetEmployeesAsync(param);
-        }
-        public async Task<Pager<VEmployeeList>> GetEmployeesAsync(int? branchId,QueryParam param) 
-        {
-            return await empService.GetEmployeesAsync(branchId,param);
+            return await empService.GetEmployeesAsync(branchId,employeeId, param);
         }
         public async Task<Result<string>> UpdateIsActiveAsync(string? employeeId)
         {

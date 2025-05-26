@@ -12,9 +12,9 @@ namespace Infrastructures.Implements
 {
     public class LoanProductService : ILoanProductService
     {
-        private readonly ApplicationDbContext _context;
+        private readonly DataContext _context;
         private readonly IDbContextFactory<DataContext> contextFactory;
-        public LoanProductService(ApplicationDbContext context, IDbContextFactory<DataContext> contextFactory)
+        public LoanProductService(DataContext context, IDbContextFactory<DataContext> contextFactory)
         {
             this._context = context;
             this.contextFactory = contextFactory;

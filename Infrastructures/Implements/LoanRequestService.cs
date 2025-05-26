@@ -1,9 +1,11 @@
 ﻿using Applications.Enumerations;
 using Applications.Extensions;
+using Applications.Helpers.Mappers;
 using Applications.Interfaces.Loans;
 using Applications.Requests.Loans.CreditAgents;
 using Applications.Requests.Loans.LoanRequests;
 using Applications.Responses;
+using Applications.Responses.Message;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Responses.ViewModels.Loans.LoanRequests;
@@ -17,19 +19,19 @@ using Infrastructures.DataAccess;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System.Linq;
 
 namespace Infrastructures.Implements;
 
 public sealed class LoanRequestService(
-    ApplicationDbContext context,
+    DataContext context,
     ILogger<LoanRequestService> logger,
     IDapperConnectionFactory dapperFactory,
     IDbContextFactory<DataContext> contextFactory) : ILoanRequestService
 {
-    public async Task<Result<string>> CreateLoanRequestAsync(LoanRequest req, CancellationToken cancellationToken = default)
+    public async Task<Result<string>> CreateNewLoanRequestAsync(LoanRequest req, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(req, nameof(req));
+
         logger.LogInformation("Creating loan request for CustomerRefId: {CustomerRefId}", req.CustomerRefId);
         try
         {
@@ -69,10 +71,12 @@ public sealed class LoanRequestService(
                 {
                     cxt.Entry(existingRequest).CurrentValues.SetValues(req);
 
-
-                    foreach (var item in req.LoanDescriptions)
+                    if (req.LoanDescriptions.Any())
                     {
-                        existingRequest.LoanDescriptions.Add(item);
+                        foreach (var item in req.LoanDescriptions)
+                        {
+                            existingRequest.LoanDescriptions.Add(item);
+                        }
                     }
 
                     foreach (var item in req.GuarantorsLink)
@@ -104,11 +108,6 @@ public sealed class LoanRequestService(
                         }
                     }
 
-
-
-
-
-
                     foreach (var item in existingRequest.CollateralLinesLink)
                     {
                         if (!(req.CollateralLinesLink.Any(x => x.Id == item.Id)))
@@ -124,9 +123,6 @@ public sealed class LoanRequestService(
                             cxt.Remove(item);
                         }
                     }
-
-
-
 
 
                 }
@@ -151,6 +147,90 @@ public sealed class LoanRequestService(
             return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}"));
         }
     }
+
+
+    public async Task<Result<string>> CreateLoanRequestAsync(LoanRequest req, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(req, nameof(req));
+
+        logger.LogInformation("Creating loan request for CustomerRefId: {CustomerRefId}", req.CustomerRefId);
+        try
+        {
+            await using var cxt = await contextFactory.CreateDbContextAsync();
+
+            if (await CheckExistingLoanRequest(req.CustomerRefId))
+            {
+                return Result.Failure<string>(ErrorResponse.Conflict("Loan Request already exists."));
+            }
+
+            if (await CheckExistingHasLoan(req.CustomerRefId))
+            {
+                return Result.Failure<string>(ErrorResponse.Conflict("Customer has active loan."));
+            }
+
+            using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
+
+            try
+            {
+                var existingRequest = await cxt.LoanRequests
+                                .Include(x => x.LoanDescriptions)
+                                .FirstOrDefaultAsync(x => x.LoanRequestId == req.LoanRequestId &&
+                                                          x.CustomerRefId == req.CustomerRefId &&
+                                                          x.LoanRequestStatusRefId == (int)RequestStatus.New, cancellationToken);
+
+
+                if (existingRequest is null)
+                {
+                    return Result.Failure<string>(ErrorResponse.Conflict("Customer has active loan."));
+                }
+
+                cxt.Entry(existingRequest).CurrentValues.SetValues(req);
+
+                if (req.LoanDescriptions.Any())
+                {
+                    foreach (var item in req.LoanDescriptions)
+                    {
+                        existingRequest.LoanDescriptions.Add(item);
+                    }
+                }
+
+                await cxt.SaveChangesAsync(cancellationToken);
+
+                await transaction.CommitAsync(cancellationToken);
+
+                return Result.Success(new string("New Loan Request was created."));
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync(cancellationToken);
+                throw;
+            }
+
+        }
+
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to create loan request for CustomerRefId: {CustomerRefId}", req.CustomerRefId);
+            return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}"));
+        }
+    }
+
+    public async Task<bool> IsCustomerBusy(string? customerId, CancellationToken cancellation = default)
+    {
+        if (string.IsNullOrEmpty(customerId)) return false;
+
+        using var db = await dapperFactory.CreateConnectionAsync(cancellation);
+        var parameters = new DynamicParameters();
+        parameters.Add("@CustomerId", customerId);
+        parameters.Add("@IsLoanActive", true);
+        var sql = @"SELECT LoanRequestId,CustomerId FROM VLoanRequests WHERE CustomerId=@CustomerId AND StatusId IN (1,2,3,6)";
+        var sql1 = "SELECT CustomerId,IsLoanActive FROM VCustomerList WHERE CustomerId=@CustomerId AND IsLoanActive=@IsLoanActive";
+        var existingLoanRequest = await db.QueryAsync<VLoanRequests>(sql, parameters);
+        var customerInActiveLoan = await db.QueryAsync<Customer>(sql1, parameters);
+        return existingLoanRequest.Any() || customerInActiveLoan.Any();
+
+    }
+
 
     public async Task<Result<bool>> CreateLoanRequestAsync(int? branchId, string? userId, string? loanRequestId)
     {
@@ -217,24 +297,23 @@ public sealed class LoanRequestService(
         try
         {
             var existingRequest = await context.LoanRequests
-                .Where(x => x.LoanRequestId == req.LoanRequestId && x.CustomerRefId == req.CustomerId &&
-                            x.BranchRefId == req.BranchId)
                 .Include(c => c.CollateralLinesLink)
                 .ThenInclude(x => x.CollateralLine)
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(x => x.LoanRequestId == req.LoanRequestId &&
+                            x.CustomerRefId == req.CustomerId &&
+                            x.BranchRefId == req.BranchId);
 
             if (existingRequest is null)
             {
                 return Result.Failure<string>(ErrorResponse.Conflict("Loan Request does not exist."));
             }
 
-            var collerals = req.CollateralLinesLink.Adapt<IEnumerable<CollateralLink>>();
+            var collerals = req.MapToCollateralLinkCreate();
 
             foreach (var item in collerals)
             {
                 var existingCollateralLine = existingRequest.CollateralLinesLink
-                    .Where(x => x.Id == item.Id)
-                    .FirstOrDefault();
+                                                .FirstOrDefault(x => x.Id == item.Id);
                 if (existingCollateralLine is null || existingCollateralLine.Id == 0)
                 {
                     existingRequest.CollateralLinesLink.Add(item);
@@ -245,13 +324,13 @@ public sealed class LoanRequestService(
                 }
             }
 
-            foreach (var item in existingRequest.CollateralLinesLink)
-            {
-                if (!collerals.Any(x => x.Id == item.Id))
-                {
-                    context.Remove(item);
-                }
-            }
+            //foreach (var item in existingRequest.CollateralLinesLink)
+            //{
+            //    if (!collerals.Any(x => x.Id == item.Id))
+            //    {
+            //        context.Remove(item);
+            //    }
+            //}
 
             await context.SaveChangesAsync();
 
@@ -347,12 +426,11 @@ public sealed class LoanRequestService(
         try
         {
             var existingRequest = await context.LoanRequests
-                .Where(x => x.LoanRequestId == request.LoanRequestId &&
-                            x.CustomerRefId == request.CustomerRefId &&
-                            x.BranchRefId == request.BranchRefId)
                 .Include(g => g.GuarantorsLink)
                 .ThenInclude(x => x.Guarantor)
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(x => x.LoanRequestId == request.LoanRequestId &&
+                            x.CustomerRefId == request.CustomerRefId &&
+                            x.BranchRefId == request.BranchRefId);
 
             if (existingRequest is null)
             {
@@ -360,10 +438,9 @@ public sealed class LoanRequestService(
             }
 
 
-            var collateralLinks = request.GuarantorsLink.Adapt<IEnumerable<LoanGuarantorLink>>();
+            var gLinks = request.GuarantorsLink;
 
-
-            foreach (var item in collateralLinks)
+            foreach (var item in gLinks)
             {
                 var existingGuarantor = existingRequest.GuarantorsLink
                     .Where(x => x.Id == item.Id).FirstOrDefault();
@@ -378,13 +455,13 @@ public sealed class LoanRequestService(
                 }
             }
 
-            foreach (var item in existingRequest.GuarantorsLink)
-            {
-                if (!(collateralLinks.Any(x => x.Id == item.Id)))
-                {
-                    context.Remove(item);
-                }
-            }
+            //foreach (var item in existingRequest.GuarantorsLink)
+            //{
+            //    if (!(collateralLinks.Any(x => x.Id == item.Id)))
+            //    {
+            //        context.Remove(item);
+            //    }
+            //}
 
 
             await context.SaveChangesAsync();
@@ -530,17 +607,17 @@ public sealed class LoanRequestService(
         try
         {
 
-            await using var ctx=await contextFactory.CreateDbContextAsync();
+            await using var ctx = await contextFactory.CreateDbContextAsync();
 
             if (!documents.Any())
             {
                 return Result.Failure<string>(ErrorResponse.NotFound("There is no any document to add."));
             }
 
-            var ids=documents.Where(x => x.Id > 0).Select(x => x.Id).ToList();
+            var ids = documents.Where(x => x.Id > 0).Select(x => x.Id).ToList();
 
-            var existingDocs=await ctx.LoanDocuments
-                                    .Where(x=>ids.Contains(x.Id))
+            var existingDocs = await ctx.LoanDocuments
+                                    .Where(x => ids.Contains(x.Id))
                                     .AsNoTracking()
                                     .ToListAsync();
 
@@ -581,7 +658,7 @@ public sealed class LoanRequestService(
     }
 
 
-    public async Task<Result<string>> AddLoanRequestDocumentAsync(int? branchId,string? loanRequestId,List<LoanDocuments> documents)
+    public async Task<Result<string>> AddLoanRequestDocumentAsync(int? branchId, string? loanRequestId, List<LoanDocuments> documents)
     {
         logger.LogInformation("try to create new loan request");
         try
@@ -592,16 +669,16 @@ public sealed class LoanRequestService(
                 return Result.Failure<string>(ErrorResponse.NotFound("There is no any document to add."));
             }
 
-            var existingDocument=await context.LoanRequests
-                                         .Include(x=>x.LoanDocuments)
+            var existingDocument = await context.LoanRequests
+                                         .Include(x => x.LoanDocuments)
                                          .FirstOrDefaultAsync(x => x.LoanRequestId == loanRequestId &&
                                                                    x.BranchRefId == branchId);
-            if(existingDocument is null)
+            if (existingDocument is null)
             {
                 return Result.Failure<string>(ErrorResponse.NotFound("There is no any document to add."));
             }
 
-            existingDocument.LoanDocuments=documents;
+            existingDocument.LoanDocuments = documents;
 
             //context.Entry(existingDocument).CurrentValues.SetValues(documents);
 
@@ -739,7 +816,73 @@ public sealed class LoanRequestService(
     }
 
 
-    public async Task<Result<VLoanRequests>> GetLoanRequestAsync(int? branchId, string? userId, string? customerId,string? loanRequestId, bool include)
+
+    public async Task<Result<VLoanRequests>> GetApprovedLoanRequestAsync(int? branchId, string? customerId, string? loanRequestId, bool include)
+    {
+        try
+        {
+            using var db = await dapperFactory.CreateConnectionAsync();
+
+            var sql = @"SELECT * FROM VLoanRequests 
+                                    WHERE BranchId=@branchId AND 
+                                    CustomerId=@customerId AND  
+                                    LoanRequestId=@loanRequestId AND
+                                    StatusId IN (4)";
+
+            var resultQueries = await db.QueryFirstOrDefaultAsync<VLoanRequests>(sql, new
+            {
+                branchId,
+                customerId,
+                loanRequestId
+            });
+
+            if (resultQueries is null)
+            {
+                return Result.Failure<VLoanRequests>(ErrorResponse.NotFound("No Data not found."));
+            }
+
+            if (!include)
+            {
+                return Result.Success(resultQueries);
+            }
+
+            // Fetch related data concurrently
+            var guarantorsTask = GetLoanGuarantors(loanRequestId, branchId);
+
+            var collateralsTask = GetLoanCollateralLines(loanRequestId, branchId);
+
+            var documentsTask = GetLoanDocuments(loanRequestId, branchId);
+
+            var customerTask = GetLoanCustomer(customerId);
+
+            var descriptionsTask = GetLoanRequestDescriptions(loanRequestId);
+
+            await Task.WhenAll(guarantorsTask, collateralsTask, documentsTask, customerTask, descriptionsTask);
+
+            resultQueries.Guarantors = guarantorsTask.Result.ToList();
+
+            resultQueries.Collaterals = collateralsTask.Result.ToList();
+
+            resultQueries.Documents = documentsTask.Result.ToList();
+
+            resultQueries.Descriptions = descriptionsTask.Result.ToList();
+
+            if (customerTask.Result is { IsSuccess: true, Data: not null })
+            {
+                resultQueries.Customer = customerTask.Result.Data;
+            }
+
+            return Result.Success(resultQueries);
+
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<VLoanRequests>(ErrorResponse.ServerError($"{ex.Message}"));
+        }
+    }
+
+
+    public async Task<Result<VLoanRequests>> GetLoanRequestAsync(int? branchId, string? userId, string? customerId, string? loanRequestId, bool include)
     {
         try
         {
@@ -867,7 +1010,6 @@ public sealed class LoanRequestService(
                     .SetProperty(p => p.AprovedDate, req.AprovedDate)
                     .SetProperty(p => p.AprovedAmount, req.AprovedAmount)
                     .SetProperty(p => p.AdminFeeAmount, req.AdminFeeAmount)
-                    .SetProperty(p => p.Memo, req.Memo)
                     .SetProperty(p => p.EditSeq, lastEditSequent));
 
             return updateResult > 0
@@ -902,7 +1044,7 @@ public sealed class LoanRequestService(
                 .ExecuteUpdateAsync(prop => prop.SetProperty(p => p.LoanRequestStatusRefId, (int)RequestStatus.Denied)
                     .SetProperty(p => p.ModifiedDt, DateTime.UtcNow)
                     .SetProperty(p => p.AprovedDate, req.DeniedDate)
-                    .SetProperty(p => p.Memo, req.Memo)
+                    .SetProperty(p => p.Remark, req.Remark)
                     .SetProperty(p => p.EditSeq, lastEditSequent));
 
             return updateResult > 0
@@ -915,7 +1057,7 @@ public sealed class LoanRequestService(
         }
     }
 
-    public async Task<Result<string>> RecheckedLoanRequestAsync(RecheckedRequestDtoCreate req)
+    public async Task<Result<VLoanRequests>> RecheckedLoanRequestAsync(RecheckedRequestDtoCreate req)
     {
         await using var cxt = await contextFactory.CreateDbContextAsync();
 
@@ -929,7 +1071,7 @@ public sealed class LoanRequestService(
 
             if (existingLoanRequest is null)
             {
-                return Result.Failure<string>(ErrorResponse.NotFound($"No data founds"));
+                return Result.Failure<VLoanRequests>(ErrorResponse.NotFound(Messages.DataNotFound));
             }
 
             var lastEditSequent = existingLoanRequest.EditSeq + 1;
@@ -940,19 +1082,42 @@ public sealed class LoanRequestService(
                             x.EditSeq == existingLoanRequest.EditSeq &&
                             x.CustomerRefId == req.CustomerId)
                 .ExecuteUpdateAsync(prop => prop
-                    .SetProperty(p => p.LoanRequestStatusRefId, (int)RequestStatus.Rechecked)
+                    .SetProperty(p => p.LoanRequestStatusRefId, req.RequestStatusId)
                     .SetProperty(p => p.ModifiedDt, DateTime.UtcNow)
                     .SetProperty(p => p.AprovedDate, req.CheckedDate)
-                    .SetProperty(p => p.Memo, req.Memo)
+                    .SetProperty(p => p.Remark, req.Remark)
                     .SetProperty(p => p.EditSeq, lastEditSequent));
 
-            return updateResult > 0
-                ? Result.Success<string>(new("Loan Request was Aproved"))
-                : Result.Failure<string>(ErrorResponse.ServerError($"cannot be aproved the loan Request."));
+
+            if (updateResult > 0)
+            {
+                var result = await cxt.Database
+                       .SqlQuery<VLoanRequests>($@"
+                                    SELECT * FROM VLoanRequests WHERE LoanRequestId={req.LoanRequestId}
+                                        AND BranchId={req.BranchId}
+                                        AND CustomerId={req.CustomerId}")
+                       .Select(x => new VLoanRequests
+                       {
+                           LoanRequestId = x.LoanRequestId,
+                           CustomerId = x.CustomerId,
+                           BranchId = x.BranchId,
+                           StatusId = x.StatusId
+                       })
+                       .AsNoTracking()
+                       .FirstOrDefaultAsync();
+
+                if (result is not null)
+                {
+                    return Result.Success(result);
+                }
+
+            }
+
+            return Result.Failure<VLoanRequests>(ErrorResponse.ServerError($"cannot be aproved the loan Request."));
         }
         catch (Exception ex)
         {
-            return Result.Failure<string>(ErrorResponse.ServerError($"Error due to : {ex.Message}"));
+            return Result.Failure<VLoanRequests>(ErrorResponse.ServerError($"Error due to : {ex.Message}"));
         }
     }
 
@@ -980,7 +1145,7 @@ public sealed class LoanRequestService(
                         x.EditSeq == existingLoanRequest.EditSeq)
             .ExecuteUpdateAsync(prop => prop.SetProperty(p => p.LoanRequestStatusRefId, (int)RequestStatus.Verified)
                 .SetProperty(p => p.ModifiedDt, DateTime.UtcNow)
-                .SetProperty(p => p.Memo, req.Memo)
+                .SetProperty(p => p.Remark, req.Remark)
                 .SetProperty(p => p.EditSeq, lastEditSequent));
 
         return updateResult > 0
@@ -1008,7 +1173,7 @@ public sealed class LoanRequestService(
             .Where(x => x.LoanRequestId == req.LoanRequestId && x.BranchRefId == req.BranchId)
             .ExecuteUpdateAsync(prop => prop.SetProperty(p => p.LoanRequestStatusRefId, (int)RequestStatus.Requested)
                 .SetProperty(p => p.ModifiedDt, DateTime.UtcNow)
-                .SetProperty(p => p.Memo, req.Memo)
+                .SetProperty(p => p.Remark, req.Remark)
                 .SetProperty(p => p.EditSeq, lastEditSequent));
 
         return updateResult > 0
@@ -1156,6 +1321,25 @@ public sealed class LoanRequestService(
 
 
 
+    public async Task<Result<string>> AddDescription(LoanDescriptions descriptions, CancellationToken cancellation = default)
+    {
+        try
+        {
+            await using var ctx = await contextFactory.CreateDbContextAsync(cancellation);
+
+            ctx.LoanDescriptions.Add(descriptions);
+
+            await ctx.SaveChangesAsync(cancellation);
+
+            return Result.Success(Messages.DataCreated);
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<string>(ErrorResponse.ServerError(ex.Message));
+        }
+
+    }
+
 
     private async Task<Result<VCustomerList>> GetLoanCustomer(string? customerId)
     {
@@ -1262,7 +1446,7 @@ public sealed class LoanRequestService(
 
         parameters.Add("@CustomerId", customerId);
 
-        var sql = @"SELECT LoanRequestId,RequestAmount,CustomerId FROM VLoanRequests WHERE CustomerId=@CustomerId AND StatusId IN (2,3,6)";
+        var sql = @"SELECT LoanRequestId,CustomerId FROM VLoanRequests WHERE CustomerId=@CustomerId AND StatusId IN (2,3,6)";
 
         var existingLoanRequest = await db.QueryAsync<VLoanRequests>(sql, parameters);
 
@@ -1303,11 +1487,12 @@ public sealed class LoanRequestService(
         const string sql = @"
                             SELECT * 
                             FROM VLoanRequestDescriptions 
-                            WHERE LoanRequestRefId=@LoanRequestId;";
+                            WHERE LoanRequestRefId=@LoanRequestId
+                            ORDER BY CreatedDT DESC;";
 
         return await db.QueryAsync<VLoanRequestDescription>(
             sql,
-            new { LoanRequestId = loanRequestId}
+            new { LoanRequestId = loanRequestId }
         );
     }
 

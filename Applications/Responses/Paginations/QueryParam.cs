@@ -11,10 +11,14 @@ public sealed class QueryParam
         IsIncludeInActive = false;
         Filter = string.Empty;
     }
-    public QueryParam(int pageNumber, int pageSize, string sortField)
+    public QueryParam(int pageNumber, int pageSize)
     {
         PageNumber = pageNumber;
         PageSize = pageSize;
+    }
+    public QueryParam(int pageNumber, int pageSize, string sortField)
+        : this(pageNumber, pageSize)
+    {
         SortColumn = sortField;
     }
     public QueryParam(int pageNumber, int pageSize, string sortField, string? filter = null)
@@ -23,18 +27,15 @@ public sealed class QueryParam
         Filter = filter;
     }
     public QueryParam(int pageNumber, int pageSize, string sortField, bool sortDescending = false, string? filter = null)
-        : this(pageNumber, pageSize, sortField)
+        : this(pageNumber, pageSize, sortField,filter)
     {
         SortDescending = sortDescending;
-        Filter = filter;
     }
     public QueryParam(int pageNumber, int pageSize, string sortField,
-        bool sortDescending = false,
-        bool isIncludeInActive = false, string? filter = null) : this(pageNumber, pageSize, sortField)
+        bool sortDescending = false, bool isIncludeInActive = false, string? filter = null)
+        : this(pageNumber, pageSize, sortField, sortDescending, filter)
     {
-        SortDescending = sortDescending;
         IsIncludeInActive = isIncludeInActive;
-        Filter = filter;
     }
     public int PageNumber { get; set; } = 1;
     public int PageSize { get; set; } = 10;

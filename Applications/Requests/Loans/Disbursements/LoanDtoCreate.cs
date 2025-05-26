@@ -1,5 +1,4 @@
 ﻿using Applications.Calculations;
-using Applications.Enumerations;
 using Applications.Responses.ViewModels.Holidays;
 using Domains.Enumerations;
 
@@ -44,6 +43,7 @@ public sealed class LoanDtoCreate : CalculatorBase, ICalculatorBase
     public string? LoanCategoryName { get; set; } = string.Empty;
     public string? CurrencyName { get; set; } = string.Empty;
     public string? InstallmentName { get; set; } = string.Empty;
+    public string? AprovedUserId { get; set; } 
     public string? ApprovedBy { get; set; } = string.Empty;
     public decimal? PaidAmount => Principle - AdminFeeAmount;
     public int PayementSechuleModeId { get; set; } = 2;

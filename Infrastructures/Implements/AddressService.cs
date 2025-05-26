@@ -12,9 +12,9 @@ namespace Infrastructures.Implements;
 
 public class AddressService : IAddressService
 {
-    private readonly ApplicationDbContext _context;
+    private readonly DataContext _context;
     private readonly IDbContextFactory<DataContext> _dbContextFactory;
-    public AddressService(ApplicationDbContext context, IDbContextFactory<DataContext> dbContextFactory)
+    public AddressService(DataContext context, IDbContextFactory<DataContext> dbContextFactory)
     {
         _context = context;
         _dbContextFactory = dbContextFactory;

@@ -22,7 +22,7 @@ using Microsoft.Extensions.Logging;
 namespace Infrastructures.Implements;
 
 public class CustomerService(
-    ApplicationDbContext context,
+    DataContext context,
     IDapperConnectionFactory dapperService,
     ILogger<CustomerService> logger) : ICustomerService
 {

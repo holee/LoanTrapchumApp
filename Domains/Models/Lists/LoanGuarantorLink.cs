@@ -4,9 +4,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domains.Models.Lists
 {
-    public class LoanGuarantorLink:BaseEntity 
+    public sealed class LoanGuarantorLink:BaseEntity 
     {
         public long Id { get; set; }
+
         [ForeignKey("EntityNames")] 
         public string? EntityNameRefId { get; set; }
         public int? BranchId { get; set; }

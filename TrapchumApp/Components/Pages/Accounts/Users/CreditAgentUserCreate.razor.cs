@@ -35,7 +35,7 @@ namespace TrapchumApp.Components.Pages.Accounts.Users
         {
             await base.OnInitializedAsync();
 
-            var employeeResponse = await _employeeService.GetEmployeesAsync(EmployeeId, BranchId);
+            var empRsp = await _employeeService.GetEmployeesAsync(BranchId, EmployeeId,new(0,0));
 
             var getRoles = await _roleService.GetRolesAsync(null);
 
@@ -44,10 +44,9 @@ namespace TrapchumApp.Components.Pages.Accounts.Users
 
             model.RoleName = roles.First()!;
 
-            if (employeeResponse.IsSuccess)
+            if (empRsp.Items.Any())
             {
-
-                Employees = employeeResponse.Data!;
+                Employees = empRsp.Items ?? [];
 
                 SelectedEmployeeChanged(Employees.First());
             }

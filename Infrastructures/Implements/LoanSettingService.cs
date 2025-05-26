@@ -11,10 +11,10 @@ namespace Infrastructures.Implements
 {
     public sealed class LoanSettingService : ILoanSettingService
     {
-        private readonly ApplicationDbContext _context;
+        private readonly DataContext _context;
         private readonly IDapperConnectionFactory _db;
         private readonly IDbContextFactory<DataContext> _contextFactory;
-        public LoanSettingService(ApplicationDbContext context, IDapperConnectionFactory db, IDbContextFactory<DataContext> contextFactory)
+        public LoanSettingService(DataContext context, IDapperConnectionFactory db, IDbContextFactory<DataContext> contextFactory)
         {
             _context = context;
             _db = db;

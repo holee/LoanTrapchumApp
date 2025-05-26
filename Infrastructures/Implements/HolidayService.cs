@@ -13,13 +13,13 @@ namespace Infrastructures.Implements
 {
     public class HolidayService : IHolidayService
     {
-        private readonly ApplicationDbContext _context;
+        private readonly DataContext _context;
 
         private IEnumerable<DateTime> _xistingHolidays = [];
 
         private readonly IDbContextFactory<DataContext> _contextFactory;
         private readonly IDapperConnectionFactory _connectionFactory;
-        public HolidayService(ApplicationDbContext context, IDbContextFactory<DataContext> contextFactory, IDapperConnectionFactory connectionFactory)
+        public HolidayService(DataContext context, IDbContextFactory<DataContext> contextFactory, IDapperConnectionFactory connectionFactory)
         {
             _context = context;
 

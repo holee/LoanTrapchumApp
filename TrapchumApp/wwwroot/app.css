@@ -178,3 +178,14 @@ h1:focus {
     font-size: 0.875rem;
     color: #6c757d;
 }
+
+@font-face {
+    font-family: 'Font Awesome';
+    font-style: normal;
+    font-weight: 900;
+    src: url('font-awesome/webfonts/fa-solid-900.woff2') format('woff2');
+}
+
+.fa {
+    --rz-icon-font-family: 'Font Awesome'
+}

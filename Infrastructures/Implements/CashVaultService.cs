@@ -11,7 +11,7 @@ using System.Data;
 
 namespace Infrastructures.Implements
 {
-    public class CashVaultService(ApplicationDbContext context, IDapperConnectionFactory connectionFactory) : ICashVaultService
+    public class CashVaultService(DataContext context, IDapperConnectionFactory connectionFactory) : ICashVaultService
     {
         public async Task<Result> CreateCashManagementAsync(LoanTransaction cashTransaction)
         {

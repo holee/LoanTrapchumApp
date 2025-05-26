@@ -18,10 +18,10 @@ namespace Infrastructures.Implements;
 
 public class CurrencyService : ICurrencyService
 {
-    private readonly ApplicationDbContext _context;
+    private readonly DataContext _context;
     private readonly IDbContextFactory<DataContext> _contextFactory;
     private readonly IDapperConnectionFactory _connectionFactory;
-    public CurrencyService(ApplicationDbContext context, IDbContextFactory<DataContext> contextFactory, IDapperConnectionFactory connectionFactory)
+    public CurrencyService(DataContext context, IDbContextFactory<DataContext> contextFactory, IDapperConnectionFactory connectionFactory)
     {
         _context = context;
         _contextFactory = contextFactory;

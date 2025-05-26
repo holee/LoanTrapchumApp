@@ -1,9 +1,12 @@
 ﻿@page "/App/Request/{BranchId:int}/Branches/{UserId}/Customer/{CustomerId}/Edit"
+@using Applications.Requests.Loans.LoanRequests
 @using Applications.Responses.Auths
 @using Applications.Responses.Lists.Collaterals
 @using Applications.Responses.Loans.Disbursements
 @using Applications.Responses.ViewModels.Loans.Requests
 @using Applications.Responses.ViewModels.OtherNames
+@using Domains.Models.Collaterals
+@using Domains.Models.Loans
 @using Radzen.Blazor.Rendering
 <PageTitle>Loan Request</PageTitle>
 <Card>
@@ -14,7 +17,7 @@
             <RadzenTabs SelectedIndexChanged="SelectTabIndexChanged" RenderMode="TabRenderMode.Client">
                 <Tabs>
                     <RadzenTabsItem Text="សំណើរ">
-                        <LoanRequestInfo Model="@model" CustomerId="@CustomerId" LoanRequestId="@LoanRequestId" />
+                        <LoanRequestInfo Model="@model" CustomerId="@CustomerId" LoanRequestId="@LoanRequestId" BranchId="@BranchId" />
                         <RadzenFieldset>
                             <LoanRequestCollaterals CustomerId="@CustomerId"
                                                     ShowCommand="true"
@@ -109,38 +112,36 @@
 
 @code
 {
-    async Task SelectedCollateral(VCollateralLines? c)
-    {
-        if (c is null || c.Id <= 0) return;
-
-        var item = new VLoanRequestCollateralLines
-            {
-                CollateralLineId = c.Id,
-                CollateralId = c.CollateralId,
-                OwnerName = c.OwnerName,
-                ReferenceNo = c.ReferenceNo,
-                TypeName = c.TypeName,
-                Quantity = c.Quantity,
-            };
-
-
-        if (CollateralLines.Any(x => x.Id == item.Id))
-        {
-            NotificationService.Notify(NotificationSeverity.Info, "Collateral already exists");
-            return;
-        }
-        CollateralLines.Add(item);
-
-        await CollateralRef.CollateralReload();
-    }
+    RadzenTextBox textBox = default!;
+    string? FullName = "";
+    Popup popup = default!;
+    RadzenDataGrid<VCustomerList> grid = default!;
 
     async Task SelectMany(IEnumerable<VGuarantor> gs)
     {
         if (!gs.Any()) return;
 
+        var gLinks = new LoanRequestGuarantorsDtoCreate
+        {
+             BranchRefId=BranchId,
+             CustomerRefId=CustomerId,
+             LoanRequestId=LoanRequestId,
+             GuarantorsLink=[]
+        };
+
         foreach (var g in gs)
         {
             if (Guarantors.Any(x => x.EmployeeRefId == g.Id)) continue;
+
+            var guarantor = new LoanGuarantorLink
+            {
+                 EntityNameRefId=g.Id,
+                 IsActive=true,
+                 BranchId=BranchId,
+                 LoanRequestRefId=LoanRequestId
+            };
+
+            gLinks.GuarantorsLink.Add(guarantor);
 
             var item = new VLoanRequestGuarantors
                 {
@@ -154,22 +155,145 @@
                     ProInKhmer = g.ProInKhmer
                 };
 
-
             Guarantors.Add(item);
         }
 
-        await GuarantorRef.GuarantorReload();
+        var rsp = await _loanRequestService.AddLoanRequestGuarantorAsync(gLinks);
 
+        if (rsp.IsSuccess)
+        {
+            NotificationService.Notify(NotificationSeverity.Success, rsp.Data);
+            await GuarantorRef.GuarantorReload();
+        }
+        else
+        {
+            NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
+        }
+
+    }
+
+    async Task SelectedGuarantors(VGuarantor? g)
+    {
+        if (g is null || string.IsNullOrEmpty(g.Id)) return;
+
+        if (Guarantors.Any(x => x.EmployeeRefId == g.Id))
+        {
+            NotificationService.Notify(NotificationSeverity.Info, "Guarantor already exists");
+            
+            return;
+        }
+
+        var gLinks = new LoanRequestGuarantorsDtoCreate
+        {
+            BranchRefId = BranchId,
+            CustomerRefId = CustomerId,
+            LoanRequestId = LoanRequestId,
+            GuarantorsLink = []
+        };
+
+        var guarantor = new LoanGuarantorLink
+        {
+            EntityNameRefId = g.Id,
+            IsActive = true,
+            BranchId = BranchId,
+            LoanRequestRefId = LoanRequestId
+        };
+
+        gLinks.GuarantorsLink.Add(guarantor);
+
+        var rsp = await _loanRequestService.AddLoanRequestGuarantorAsync(gLinks);
+
+        if (rsp.IsSuccess)
+        {
+            NotificationService.Notify(NotificationSeverity.Success, rsp.Data);
+
+            var gs = new VLoanRequestGuarantors
+            {
+                EmployeeRefId = g.Id,
+                FullName = g.FullName,
+                AltName = g.GuarantorName,
+                Phone = g.Phone,
+                VilInKhmer = g.VilInKhmer,
+                ComInKhmer = g.ComInKhmer,
+                DisInKhmer = g.DisInKhmer,
+                ProInKhmer = g.ProInKhmer
+            };
+
+            Guarantors.Add(gs);
+
+            await GuarantorRef.GuarantorReload();
+        }
+        else
+        {
+            NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
+        }
+
+        
+    }
+
+
+
+    async Task SelectedCollateral(VCollateralLines? c)
+    {
+        if (c is null || c.Id <= 0) return;
+
+        if (CollateralLines.Any(x => x.Id == c.Id))
+        {
+            NotificationService.Notify(NotificationSeverity.Info, "Collateral already exists");
+            return;
+        }
+
+
+        var collaterals = new LoanCollateralRequest(BranchId, LoanRequestId, CustomerId);
+
+        var collateralLink = new CollateralLink
+        {
+            CollateralLineRefId = c.Id,
+            CollateralRefId = c.CollateralId,
+            ModifiedDt = DateTime.Now
+        };
+
+        collaterals.CollateralLinesLink.Add(collateralLink);
+
+        var rsp = await _loanRequestService.AddLoanRequestCollateralAsync(collaterals);
+
+        if (rsp.IsSuccess)
+        {
+            var item = new VLoanRequestCollateralLines
+            {
+                CollateralLineId = c.Id,
+                CollateralId = c.CollateralId,
+                OwnerName = c.OwnerName,
+                ReferenceNo = c.ReferenceNo,
+                TypeName = c.TypeName,
+                Quantity = c.Quantity,
+            };
+
+            CollateralLines.Add(item);
+
+            await CollateralRef.CollateralReload();
+        }
     }
 
     async Task SelectManyCollaterals(IEnumerable<VCollateralLines> cs)
     {
         if (!cs.Any()) return;
 
+        var collaterals = new LoanCollateralRequest(BranchId,LoanRequestId,CustomerId);
+
         foreach (var g in cs)
         {
 
             if (CollateralLines.Any(x => x.CollateralId == g.CollateralId)) continue;
+
+            var collateralLink = new CollateralLink
+            {
+                 CollateralLineRefId=g.Id,
+                 CollateralRefId=g.CollateralId,
+                 ModifiedDt=DateTime.Now
+            };
+
+            collaterals.CollateralLinesLink.Add(collateralLink);
 
             var item = new VLoanRequestCollateralLines
                 {
@@ -184,43 +308,19 @@
             CollateralLines.Add(item);
         }
 
-        await GuarantorRef.GuarantorReload();
+        var rsp= await _loanRequestService.AddLoanRequestCollateralAsync(collaterals);
 
-    }
-
-    async Task SelectedGuarantors(VGuarantor? g)
-    {
-        if (g is null || string.IsNullOrEmpty(g.Id)) return;
-
-        var gs = new VLoanRequestGuarantors
-            {
-                EmployeeRefId = g.Id,
-                FullName = g.FullName,
-                AltName = g.GuarantorName,
-                Phone = g.Phone,
-                VilInKhmer = g.VilInKhmer,
-                ComInKhmer = g.ComInKhmer,
-                DisInKhmer = g.DisInKhmer,
-                ProInKhmer = g.ProInKhmer
-            };
-
-        if (Guarantors.Any(x => x.EmployeeRefId == g.Id))
+        if (rsp.IsSuccess)
         {
-            NotificationService.Notify(NotificationSeverity.Info, "Guarantor already exists");
-
-            return;
+            NotificationService.Notify(NotificationSeverity.Success, rsp.Data);
+            await GuarantorRef.GuarantorReload();
+        }
+        else
+        {
+            NotificationService.Notify(NotificationSeverity.Success, rsp.ErrMessage);
         }
 
-        Guarantors.Add(gs);
-
-        await GuarantorRef.GuarantorReload();
     }
-
-
-    RadzenTextBox textBox = default!;
-    string? FullName = "";
-    Popup popup = default!;
-    RadzenDataGrid<VCustomerList> grid = default!;
 
     // async Task OnRowSelect(VCustomerList customer)
     // {

@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructures.DataAccess.Configurations.Collaterals
 {
-    public class CollateralLinkConfig : IEntityTypeConfiguration<CollateralLink>
+    public sealed class CollateralLinkConfig : IBaseEntityTypeConfigurations<CollateralLink>
     {
         public void Configure(EntityTypeBuilder<CollateralLink> builder)
         {

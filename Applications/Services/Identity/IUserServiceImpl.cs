@@ -20,5 +20,6 @@ public interface IUserServiceImpl
     Task<Pager<UserDto>> GetUsersAsync(int pageIndex, int pageSize, string sortColumn, bool includeInactive = false, string? filter = null);
     Task<Result<Pager<VUser>>> GetUsersAsync(QueryParam param, string? userId = null);
     Task<Result<IEnumerable<VUser>>> GetUsersAsync(string? userId, string? filter = null);
+    Task<Result<Pager<VUser>>> GetUsersAsync(int? branchId, string? userId, QueryParam param);
     Task<Result> UpdateUserRoleAsync(UserRoleDtoUpdate req);
 }

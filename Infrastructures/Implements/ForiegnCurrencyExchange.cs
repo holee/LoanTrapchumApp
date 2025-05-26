@@ -10,9 +10,9 @@ namespace Infrastructures.Implements
 {
     public sealed class ForiegnCurrencyExchange : IForiegnCurrencyExchange
     {
-        private readonly ApplicationDbContext _context;
+        private readonly DataContext _context;
 
-        public ForiegnCurrencyExchange(ApplicationDbContext context)
+        public ForiegnCurrencyExchange(DataContext context)
         {
             this._context = context;
         }

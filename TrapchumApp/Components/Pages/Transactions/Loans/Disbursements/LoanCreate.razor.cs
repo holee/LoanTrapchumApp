@@ -2,6 +2,7 @@ using Applications.Calculations;
 using Applications.Enumerations;
 using Applications.Extensions;
 using Applications.Requests.Loans.Disbursements;
+using Applications.Requests.Loans.LoanRequests;
 using Applications.Responses.ViewModels.Branches;
 using Applications.Responses.ViewModels.Holidays;
 using Applications.Responses.ViewModels.Loans.Requests;
@@ -36,12 +37,6 @@ public partial class LoanCreate(ILoanServiceImpl loanService, IHolidayServiceImp
     protected decimal? TotalAdminFee = 0;
     protected int SelectedPeriodName = 1;
     protected IEnumerable<VBranchResponse> Branches = [];
-    [Parameter, SupplyParameterFromQuery] public int BranchId { get; set; }
-    [Parameter, SupplyParameterFromQuery] public string? UserId { get; set; }
-    [Parameter, SupplyParameterFromQuery] public string? CustomerRequestId { get; set; } = string.Empty;
-    [Parameter, SupplyParameterFromQuery] public string? LoanRequestId { get; set; } = string.Empty;
-
-    VLoanRequests req = new VLoanRequests();
 
     DateTime firstPayment;
 
@@ -52,15 +47,29 @@ public partial class LoanCreate(ILoanServiceImpl loanService, IHolidayServiceImp
     IEnumerable<HolidayVm> holidays = [];
 
     bool disburseStatus = false;
+
+    private string memo=string.Empty;
+
+    int RequestStatusId = 0;
+
+    [Parameter, SupplyParameterFromQuery] public int BranchId { get; set; }
+    [Parameter, SupplyParameterFromQuery] public string? UserId { get; set; }
+    [Parameter, SupplyParameterFromQuery] public string? CustomerRequestId { get; set; } = string.Empty;
+    [Parameter, SupplyParameterFromQuery] public string? LoanRequestId { get; set; } = string.Empty;
+
+    VLoanRequests req = new VLoanRequests();
+
+   
     async Task GetLoanRequest()
     {
         IsLoading = true;
 
-        var request = await _loanRequestService.GetLoanRequestAsync(BranchId, CustomerRequestId, LoanRequestId, true);
+        var request = await _loanRequestService.GetApprovedLoanRequestAsync(BranchId, CustomerRequestId, LoanRequestId, true);
 
         if (request.IsSuccess)
         {
             req = request.Data!;
+            RequestStatusId = request.Data!.StatusId!.Value;
         }
 
         IsLoading = false;
@@ -125,6 +134,33 @@ public partial class LoanCreate(ILoanServiceImpl loanService, IHolidayServiceImp
         selectedTabIndex = 2;
 
     }
+
+    async Task SendRechecked()
+    {
+
+        var req = new RecheckedRequestDtoCreate(BranchId, CustomerRequestId, LoanRequestId,DateTime.Now,RequestStatus.Rechecked,memo);
+
+        var rsp= await _loanRequestService.RecheckedLoanRequestAsync(req);
+
+        if (rsp.IsSuccess) 
+        {
+            RequestStatusId = rsp.Data!.StatusId!.Value;
+
+            var description = new LoanDescriptionsDtoCreate(memo, UserId, LoanRequestId);
+
+            await _loanRequestService.AddDescriptionAsync(description);
+
+            NotificationService.Notify(NotificationSeverity.Success,"Request was sent successfully.");
+
+            StateHasChanged();
+        }
+        else
+        {
+            NotificationService.Notify(NotificationSeverity.Error,rsp.ErrMessage);
+        }
+
+    }
+
 
     protected async Task HandleFormSubmit()
     {

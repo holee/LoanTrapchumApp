@@ -56,6 +56,11 @@ public sealed class UserService(IUserService userService) : IUserServiceImpl
         return await userService.GetUsersAsync(param, userId);
     }
 
+    public async Task<Result<Pager<VUser>>> GetUsersAsync(int? branchId,string? userId,QueryParam param)
+    {
+        return await userService.GetUsersAsync(branchId,userId,param);
+    }
+
     public async Task<Result<IEnumerable<VUser>>> GetUsersAsync(string? userId, string? filter = null)
     {
         return await userService.GetUsersAsync(userId, filter);

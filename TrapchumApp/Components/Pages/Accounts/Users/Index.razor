@@ -1,5 +1,6 @@
 ﻿@page "/App/Account/Users"
 @using Applications.ApplicationPolicies
+@using TrapchumApp.Helpers.Constants
 @attribute [MustHasPermission(Modules.Users,Feature.Read)]
 <PageTitle>Users</PageTitle>
 <Containers Fluid>
@@ -12,7 +13,7 @@
                     <LeftChildContent>
                         <AuthorizeView Policy="@RolePolicies.AdminOnly">
                             <Authorized>
-                                <RadzenButton Icon="person_add"
+                                <RadzenButton Icon="@IconNames.PersonAdd"
                                               ButtonStyle="ButtonStyle.Primary"
                                               Size="ButtonSize.Small"
                                               Click="AddUserAccount"
@@ -21,7 +22,15 @@
                         </AuthorizeView>
                     </LeftChildContent>
                     <RightChildContent>
+                        <RadzenDropDown 
+                           TValue="int"
+                           TextProperty="@nameof(BranchDto.BranchName)"
+                           ValueProperty="@nameof(BranchDto.BranchId)"
+                           @bind-Value="@selectedBranchId"
+                           SelectedItemChanged="SelectedBranchChanged"
+                           Data="@Branches">
 
+                        </RadzenDropDown>
                     </RightChildContent>
                 </PageDropDown>
                 <RadzenDataGrid GridLines="DataGridGridLines.Both"
@@ -64,7 +73,7 @@
                                               Property="@(nameof(VUser.Id))" Title="Action" Context="u">
                             <Template>
                                 <RadzenButton Size="ButtonSize.ExtraSmall"
-                                              Icon="more_vert"
+                                              Icon="@IconNames.MoreVert"
                                               Variant="Variant.Text"
                                               Click="@((args)=>ShowContextMenu(args,u.Id))" />
                             </Template>
@@ -97,7 +106,7 @@
     async void OnUserTextChanges(string e)
     {
         filterText = e ?? string.Empty;
-        await LoadAllUsers(0, filterText);
+        await LoadAllUsers(string.Empty, filterText);
     }
     void PageSizeChanged(int size)
     {
@@ -114,6 +123,7 @@
     async void SelectedTabChanged(int index)
     {
         selectedTabIndex = index;
+
         if (index == 0)
         {
             await LoadAllUsers();
@@ -153,6 +163,7 @@
     void Cancel()
     {
         selectedTabIndex = 0;
+
         model = new();
     }
 
@@ -165,11 +176,15 @@
                 ContentCssClass = "rz-mt-3 rz-background-color-base-100"
             };
 
-        bool result = await DialogService.OpenAsync<UserCreateModal>("New User", options: options);
-
-        if (true)
+        var parameters = new Dictionary<string, object?>
         {
-            await LoadAllUsers(0, filterText);
+            {"BranchId",selectedBranchId}
+        };
+        bool? result = await DialogService.OpenAsync<UserCreateModal>("New User",parameters, options: options);
+
+        if (result is not null && result==true)
+        {
+            await LoadAllUsers(string.Empty, filterText);
         }
     }
 

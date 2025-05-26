@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructures.Implements
 {
-    public class LoanCategoryService(ApplicationDbContext context) : ILoanCategoryService
+    public class LoanCategoryService(DataContext context) : ILoanCategoryService
     {
 
 

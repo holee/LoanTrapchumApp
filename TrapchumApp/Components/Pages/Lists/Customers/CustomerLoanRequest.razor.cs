@@ -1,7 +1,10 @@
 using Applications.Enumerations;
 using Applications.Extensions;
 using Applications.Responses.ViewModels.Customers;
+using Domains.Models.Lists.Customers;
 using Microsoft.AspNetCore.Components;
+using Radzen;
+using System.Threading.Tasks;
 
 namespace TrapchumApp.Components.Pages.Lists.Customers
 {
@@ -39,10 +42,20 @@ namespace TrapchumApp.Components.Pages.Lists.Customers
             await base.OnInitializedAsync();
         }
 
-        protected void AddLoanRequest()
+        protected async Task AddLoanRequest()
         {
-            var uri = $"/App/Request/{BranchId}/Branches/{UserId}/CreateNewUser?CustomerId={CustomerId}&ActionMode={ActionMode.Create}";
+
+            if (await _loanRequestService.IsCustomerBusy(CustomerId))
+            {
+                NotificationService.Notify(NotificationSeverity.Error, "This customer cannot request loan again.");
+               
+                return;
+            }
+
+            var uri = $"/App/Request/{BranchId}/Branches/{UserId}/CreateNew?CustomerId={CustomerId}";
+
             NavigationManager.NavigateTo(uri);
+
         }
 
     }

@@ -11,9 +11,9 @@ namespace Infrastructures.Implements
     public class OccupationService : IOccupationService
     {
 
-        private readonly ApplicationDbContext _context;
+        private readonly DataContext _context;
 
-        public OccupationService(ApplicationDbContext context)
+        public OccupationService(DataContext context)
         {
             this._context = context;
         }

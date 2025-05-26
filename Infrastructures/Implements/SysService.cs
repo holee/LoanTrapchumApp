@@ -10,9 +10,9 @@ namespace Infrastructures.Implements
 {
     public class SysService:ISysService
     {
-        private readonly ApplicationDbContext _context;
+        private readonly DataContext _context;
 
-        public SysService(ApplicationDbContext context)
+        public SysService(DataContext context)
         {
             this._context = context;
         }

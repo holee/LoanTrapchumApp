@@ -514,7 +514,11 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 
             var oldGuarantors = Guarantors.ToGuarantorDtoCreate(BranchId);
 
-            var descriptions = new LoanDescriptionsDtoCreate(model.Memo, UserId);
+            if (!string.IsNullOrEmpty(model.Memo))
+            {
+                var descriptions = new LoanDescriptionsDtoCreate(model.Memo, UserId);
+                model.LoanDescriptions.Add(descriptions);
+            }
 
             model.GuarantorsLink.AddRange(oldGuarantors);
 
@@ -526,7 +530,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 
             model.LoanDocuments.AddRange(documents);
 
-            model.LoanDescriptions.Add(descriptions);
+         
 
             editForm.EditContext!.Validate();
 
@@ -542,7 +546,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
                 model.BranchRefId = BranchId;
                 model.AprovedAmount = model.RequestAmount;
 
-                var resp = await _loanRequestService.CreateLoanRequestAsync(model);
+                var resp = await _loanRequestService.CreateNewLoanRequestAsync(model);
 
                 if (resp.IsSuccess)
                 {

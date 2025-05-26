@@ -127,14 +127,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
         {
             if (arg == null) return;
 
-            if (SelectedGuarantors.Any(x => x.Id == arg.Id))
-            {
-                FullName = arg.FullName;
-
-                await OnSelected.InvokeAsync(arg);
-
-            }
-            FullName = "";
+            await OnSelected.InvokeAsync(arg);
 
             await _guarantorPopup.CloseAsync();
         }

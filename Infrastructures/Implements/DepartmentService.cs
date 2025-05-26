@@ -11,9 +11,9 @@ namespace Infrastructures.Implements;
 
 public class DepartmentService : IDepartmentService
 {
-    private readonly ApplicationDbContext _context;
+    private readonly DataContext _context;
     private readonly IDapperConnectionFactory dapperFactory;
-    public DepartmentService(ApplicationDbContext app, IDapperConnectionFactory dapperConnectionFactory)
+    public DepartmentService(DataContext app, IDapperConnectionFactory dapperConnectionFactory)
     {
         this._context = app;
         this.dapperFactory = dapperConnectionFactory;

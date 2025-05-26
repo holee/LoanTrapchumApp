@@ -12,10 +12,10 @@ namespace Infrastructures.Implements
 {
     public class CreditAgentService : ICreditAgentService
     {
-        private readonly ApplicationDbContext _context;
+        private readonly DataContext _context;
         private readonly IDapperConnectionFactory _connectionFactory;
         private readonly IDbContextFactory<DataContext> _dbContextFactory;
-        public CreditAgentService(ApplicationDbContext context, IDapperConnectionFactory connectionFactory, IDbContextFactory<DataContext> dbContextFactory)
+        public CreditAgentService(DataContext context, IDapperConnectionFactory connectionFactory, IDbContextFactory<DataContext> dbContextFactory)
         {
             _context = context;
             _connectionFactory = connectionFactory;

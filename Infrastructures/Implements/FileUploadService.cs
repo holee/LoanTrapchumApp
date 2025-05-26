@@ -11,11 +11,11 @@ namespace Infrastructures.Implements
     public class FileUploadService : IFileUploadService
     {
         private readonly IWebHostEnvironment _env;
-        private readonly ApplicationDbContext _context;
+        private readonly DataContext _context;
         private string fileUploadPath = "";
         private readonly ILogger<FileUploadService> _logger;
         private readonly IDbContextFactory<DataContext> _dbContextFactory;
-        public FileUploadService(IWebHostEnvironment env, ApplicationDbContext context, ILogger<FileUploadService> logger, IDbContextFactory<DataContext> dbContextFactory)
+        public FileUploadService(IWebHostEnvironment env, DataContext context, ILogger<FileUploadService> logger, IDbContextFactory<DataContext> dbContextFactory)
         {
             _env = env;
             _context = context;
@@ -199,11 +199,17 @@ namespace Infrastructures.Implements
                         continue;
                     }
 
-                    using var stream = new MemoryStream(item.FileContent);
+                    //using var stream = new MemoryStream(item.FileContent);
 
-                    var uploadFile = await UploadImageFile(item.FileName!, stream);
+                    var rsp = await UploadImageFile(item);
 
-                    fileModels.Add(uploadFile.Data!);
+                    if (rsp.IsSuccess && rsp.Data is not null)
+                    {
+                        fileModels.Add(rsp.Data);
+                    }
+                    else continue;
+
+                    
                 }
 
                 return Result.Success<IEnumerable<FileModel>>(fileModels);
@@ -372,6 +378,62 @@ namespace Infrastructures.Implements
                 return await Result.FailureAsync<FileModel>(ErrorResponse.ServerError(ex.Message));
             }
         }
+
+
+        private async Task<Result<FileModel>> UploadImageFile(FileModel model)
+        {
+            try
+            {
+                var uploadDestination = "";
+
+                string extension = Path.GetExtension(model.FileName!);
+
+                if (AllowFileImage.Contains(extension.ToLower()))
+                {
+                    fileUploadPath = Path.Combine("document", "images");
+
+                    uploadDestination = Path.Combine(_env.WebRootPath, fileUploadPath);
+                }
+
+                if (AllowFileFiles.Contains(extension.ToLower()))
+                {
+                    fileUploadPath = Path.Combine("document", "files");
+
+                    uploadDestination = Path.Combine(_env.WebRootPath, fileUploadPath);
+                }
+
+                if (!Path.Exists(uploadDestination))
+                {
+                    Directory.CreateDirectory(uploadDestination);
+                }
+
+                var newFileName = $"{Guid.NewGuid()}{extension}";
+
+                var filePath = Path.Combine(uploadDestination, newFileName);
+
+                var fileSize = model.FileSize;
+
+                using var fileStream = new FileStream(filePath, FileMode.Create);
+
+                using var stream=new MemoryStream(model.FileContent!);
+
+                await stream.CopyToAsync(fileStream);
+
+                var fileUrl = $"/{fileUploadPath}/{newFileName}";
+
+                var fileModel = new FileModel(model.FileName!, newFileName, model.FileSize, fileUrl);
+
+                return await Result.SuccessAsync(fileModel);
+            }
+            catch (Exception ex)
+            {
+                return await Result.FailureAsync<FileModel>(ErrorResponse.ServerError(ex.Message));
+            }
+        }
+
+
+
+
 
         private IList<string> AllowFileImage => ["jpeg", ".jpg", ".png"];
         private IList<string> AllowFileFiles => [".xlsx", ".pdf", ".docx"];

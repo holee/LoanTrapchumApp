@@ -111,7 +111,6 @@ public static class LoanRequestDtoCreateExtensions
             AdminFeeAmount = req.AdminFeeAmount,
             PenaltyRate = req.PenaltyRate,
             Remark = req.Remark,
-            Memo = req.Memo,
             CollectionFeeModeId = req.CollectionFeeModeId ?? 1,
             CollectionFeeModeName = req.CollectionFeeModeName ?? string.Empty,
             LoanDocuments = req.LoanDocuments.Select(d => d.MapToLoanDocument()).ToList() ?? [],
@@ -120,4 +119,49 @@ public static class LoanRequestDtoCreateExtensions
             LoanDescriptions = req.LoanDescriptions.Select(ld => ld.MapToLoanDescription()).ToList() ?? []
         };
     }
+
+
+
+    public static LoanRequest MapToLoanRequestCreate(this LoanRequestDtoCreate req)
+    {
+        return new LoanRequest
+        {
+            LoanRequestId = req.LoanRequestId ?? $"req-{Guid.CreateVersion7()}",
+            CustomerRefId = req.CustomerRefId,
+            RequestUserRefId = req.RequestUserRefId,
+            CreditAgentRefId = req.CreditAgentRefId,
+            AprovedUserId = req.AprovedUserId,
+            LoanRequestStatusRefId = req.LoanRequestStatusRefId,
+            BranchRefId = req.BranchRefId,
+            RepaymentModeRefId = req.RepaymentModeRefId,
+            LoanSubTypeRefId = req.LoanSubTypeRefId,
+            LoanCategoryRefId = req.LoanCategoryRefId,
+            BankRefId = req.BankRefId,
+            LoanProductRefId = req.LoanProductRefId,
+            InstallmentName = req.InstallmentName,
+            InstallmentTypeId = req.InstallmentTypeId ?? 0,
+            PayEvery = req.PayEvery ?? 1,
+            CurrencyRefId = req.CurrencyRefId,
+            RequestDate = req.RequestDate,
+            FirstPaymentDate = req.FirstPaymentDate ?? DateTime.Now.AddMonths(1),
+            LastPaymentDate = req.LastPaymentDate,
+            Installments = req.Installments ?? 12,
+            InstallmentType = req.InstallmentType,
+            RepaymentMode = req.RepaymentMode,
+            RequestAmount = req.RequestAmount,
+            AprovedAmount = req.AprovedAmount,
+            InterestRate = req.InterestRate,
+            CollectionFeeRate = req.CollectionFeeRate,
+            Circle = req.Circle ?? 1,
+            AprovedDate = req.AprovedDate,
+            AdminFeeRate = req.AdminFeeRate,
+            AdminFeeAmount = req.AdminFeeAmount,
+            PenaltyRate = req.PenaltyRate,
+            Remark = req.Remark,
+            CollectionFeeModeId = req.CollectionFeeModeId ?? 1,
+            CollectionFeeModeName = req.CollectionFeeModeName ?? string.Empty,
+            LoanDescriptions = req.LoanDescriptions.Select(ld => ld.MapToLoanDescription()).ToList() ?? []
+        };
+    }
+
 }

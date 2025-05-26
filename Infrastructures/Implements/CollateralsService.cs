@@ -15,7 +15,7 @@ using System.Runtime.CompilerServices;
 
 namespace Infrastructures.Implements;
 
-public class CollateralsService(ApplicationDbContext context, IDapperConnectionFactory connectionFactory) : ICollateralsService
+public class CollateralsService(DataContext context, IDapperConnectionFactory connectionFactory) : ICollateralsService
 {
     public async Task<IEnumerable<CollateralSubTypeResponse>> GetCollateralSubTypes(int? id, string? searchText = null)
     {

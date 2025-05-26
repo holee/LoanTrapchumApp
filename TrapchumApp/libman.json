@@ -8,6 +8,16 @@
       "files": [
         "js/bootstrap.bundle.js"
       ]
+    },
+    {
+      "library": "font-awesome@6.7.2",
+      "destination": "wwwroot/font-awesome/",
+      "files": [
+        "webfonts/fa-regular-400.woff2",
+        "webfonts/fa-solid-900.woff2",
+        "webfonts/fa-v4compatibility.woff2",
+        "webfonts/fa-brands-400.woff2"
+      ]
     }
   ]
 }
