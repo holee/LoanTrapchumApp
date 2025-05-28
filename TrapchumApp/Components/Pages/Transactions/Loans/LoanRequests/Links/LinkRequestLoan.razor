@@ -5,7 +5,7 @@
 @if (isAllow && LoanRequest?.StatusId == (int)RequestStatus.New)
 {
     <NavLink href="@loanRequestUrl">
-        <RadzenBadge Variant="Variant.Text"
+        <RadzenBadge Variant="Variant.Filled"
                      Style="font-size:0.7rem;"
                      Text="Request" BadgeStyle="BadgeStyle.Secondary" />
     </NavLink>
@@ -13,7 +13,7 @@
 else
 {
     <NavLink href="@loanRequestDetailsUrl">
-        <RadzenBadge Variant="Variant.Text"
+        <RadzenBadge Variant="Variant.Filled"
                      Style="font-size:0.7rem;"
                      Text="Details" BadgeStyle="BadgeStyle.Secondary" />
     </NavLink>

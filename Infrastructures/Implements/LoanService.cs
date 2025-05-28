@@ -306,7 +306,7 @@ namespace Infrastructures.Implements
                 @LoanStatusId = (int)status,
                 @SortColumn = param?.SortColumn,
                 @SortDescending = param?.SortDescending,
-                @PageIndex = param?.PageNumber ?? 1,
+                @PageIndex = param?.Skip ?? 1,
                 @PageSize = param?.PageSize ?? 25,
                 @Filter = param?.Filter ?? string.Empty
             }, commandType: CommandType.StoredProcedure);

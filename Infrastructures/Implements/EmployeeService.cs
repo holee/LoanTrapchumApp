@@ -188,9 +188,9 @@ public class EmployeeService : IEmployeeService
 
         var counts = queries.Count();
 
-        if (q.PageNumber > 0)
+        if (q.Skip > 0)
         {
-            queries = queries.Skip(q.PageNumber).Take(q.PageSize);
+            queries = queries.Skip(q.Skip).Take(q.PageSize);
         }
 
         var items = await queries.AsNoTracking()

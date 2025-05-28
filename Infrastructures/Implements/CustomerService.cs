@@ -23,6 +23,7 @@ namespace Infrastructures.Implements;
 
 public class CustomerService(
     DataContext context,
+    IDbContextFactory<DataContext> contextFactory,
     IDapperConnectionFactory dapperService,
     ILogger<CustomerService> logger) : ICustomerService
 {
@@ -75,9 +76,12 @@ public class CustomerService(
         return Result.Success<IEnumerable<T>>(results);
     }
 
-    public async Task<Pager<VCustomerList>> GetCustomersAsync(QueryParam q)
+    public async Task<Pager<VCustomerList>> GetCustomersAsync(QueryParam q,CancellationToken cancellation=default)
     {
-        IQueryable<VCustomerList> queries = context.CustomerLists;
+
+        await using var cxt = await contextFactory.CreateDbContextAsync(cancellation);
+
+        IQueryable<VCustomerList> queries = cxt.CustomerLists;
 
         var counts = queries.Count();
 
@@ -106,7 +110,9 @@ public class CustomerService(
         }
 
         var count = queries.Count();
-        var customers = queries.AsNoTracking().Skip(q.PageNumber).Take(q.PageSize);
+
+        var customers = queries.AsNoTracking().Skip(q.Skip).Take(q.PageSize);
+
         return new Pager<VCustomerList>
         {
             Items = await customers.ToListAsync(),
@@ -119,7 +125,10 @@ public class CustomerService(
     {
         try
         {
-            var queries = context.Database.SqlQuery<VCustomerList>(
+
+            await using var cxt = await contextFactory.CreateDbContextAsync();
+
+            var queries = cxt.Database.SqlQuery<VCustomerList>(
                 $"SELECT * FROM VCustomerList WHERE IsLoanActive=CAST(0 AS BIT) AND IsActive=CAST(1 AS BIT)");
 
             if (!string.IsNullOrEmpty(param.Filter))
@@ -144,7 +153,7 @@ public class CustomerService(
                                     .ThenBy(x => x.LastName)
                                     .ProjectToType<T>()
                                     .AsNoTracking()
-                                    .Skip(param.PageNumber)
+                                    .Skip(param.Skip)
                                     .Take(param.PageSize)
                                     .ToListAsync();
             return Result.Success<Pager<T>>(new Pager<T>(items, counts));

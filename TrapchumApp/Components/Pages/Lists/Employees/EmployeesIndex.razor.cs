@@ -31,8 +31,11 @@ namespace TrapchumApp.Components.Pages.Lists.Employees
         }
 
         RadzenTabs tabs = default!;
+
         List<TabItems> tabItems = [];
+
         string? filter = string.Empty;
+
         IList<VEmployeeList> SelectedEmployees = [];
 
         void OnRowRender(RowRenderEventArgs<VEmployeeList> e)
@@ -59,7 +62,7 @@ namespace TrapchumApp.Components.Pages.Lists.Employees
         EmployeeDtoUpdate EmployeeEdit = new();
         int pageSize = 10;
         int counts = 0;
-        int pageIndex = 0;
+        int pageIndex = 1;
         string sortField = "EmployeeId";
         bool sortDescending = false;
         string? _empId = string.Empty;
@@ -88,7 +91,7 @@ namespace TrapchumApp.Components.Pages.Lists.Employees
 
         async Task GetBranches()
         {
-            var results = await _branchService.GetBranchesAsync<BranchDto>(0, new QueryParam(0, 0, string.Empty));
+            var results = await _branchService.GetBranchesAsync<BranchDto>(0, new QueryParam(0, 0));
 
             var unionBranches = new List<BranchDto>
             {
@@ -181,9 +184,13 @@ namespace TrapchumApp.Components.Pages.Lists.Employees
         }
 
         public EmployeeDto? employee;
+
         string searchText = string.Empty;
+
         IEnumerable<VEmployeeList> Employees = [];
+
         protected bool includeInActive = false;
+
         bool isLoading = false;
 
         protected async Task PerformSearch(string? searchtext = null)
@@ -196,7 +203,9 @@ namespace TrapchumApp.Components.Pages.Lists.Employees
         void OnClosing(bool isNewClosed)
         {
             IsEnableNew = isNewClosed;
+
             selectedIndex = 0;
+
             StateHasChanged();
         }
 

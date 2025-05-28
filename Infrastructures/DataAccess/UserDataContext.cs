@@ -1,6 +1,7 @@
 ﻿using Applications.Constants.Schemas;
 using Applications.Extensions.Identity;
 using Domains.Models.Identity;
+using Domains.Models.Loans;
 using Infrastructures.DataAccess.Configurations.Auths;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -34,6 +35,12 @@ namespace Infrastructures.DataAccess
                 .HasOne<UserProfiles>()
                 .WithOne()
                 .HasForeignKey<UserProfiles>(u => u.UserRefId);
+
+            //builder.Entity<ApplicationUser>()
+            //    .HasOne<UserLoanSize>()
+            //    .WithOne()
+            //    .HasForeignKey<UserLoanSize>(uc => uc.UserRefId)
+            //    .IsRequired(false);
         }
 
         public DbSet<ApplicationRoleClaim> ApplicationRoleClaim { get; set; }

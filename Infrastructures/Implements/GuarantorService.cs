@@ -126,7 +126,7 @@ public class GuarantorService : IGuarantorService
 
         if (param.PageSize > 0)
         {
-            guarantors = guarantors.Skip(param.PageNumber).Take(param.PageSize);
+            guarantors = guarantors.Skip(param.Skip).Take(param.PageSize);
         }
 
         var items = await guarantors.AsNoTracking()
@@ -177,7 +177,7 @@ public class GuarantorService : IGuarantorService
 
         if (q.PageSize > 0)
         {
-            guarantors = guarantors.Skip(q.PageNumber).Take(q.PageSize);
+            guarantors = guarantors.Skip(q.Skip).Take(q.PageSize);
         }
 
         var counts = await guarantors.CountAsync();

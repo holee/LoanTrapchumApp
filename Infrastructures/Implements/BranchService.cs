@@ -182,7 +182,7 @@ public class BranchService(IDbContextFactory<DataContext> contextFactory) : IBra
 
         if (param.PageSize > 0)
         {
-            queries = queries.Skip(param.PageNumber).Take(param.PageSize);
+            queries = queries.Skip(param.Skip).Take(param.PageSize);
         }
 
         var items = await queries.AsNoTracking().ToListAsync();
@@ -222,7 +222,7 @@ public class BranchService(IDbContextFactory<DataContext> contextFactory) : IBra
 
         if (param.PageSize > 0)
         {
-            queries = queries.Skip(param.PageNumber).Take(param.PageSize);
+            queries = queries.Skip(param.Skip).Take(param.PageSize);
         }
 
         var items = await queries

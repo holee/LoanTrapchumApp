@@ -1,9 +1,9 @@
 using Applications.Requests.Lists.OtherNames;
 using Mapster;
 
-namespace Applications.Helpers.Mappers;
+namespace Applications.Commons.Mappers;
 
-public static class EntityNameExtensions 
+public static class EntityNameMapper 
 {
     public static EntityNamesCreate ToCustomerCreate(this EntityNames c)
     {

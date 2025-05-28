@@ -120,7 +120,7 @@ namespace Infrastructures.Implements
                                                                             {loanId},
                                                                             {branchId},
                                                                             {(int)status},
-                                                                            {param?.PageNumber},
+                                                                            {param?.Skip},
                                                                             {param?.PageSize},
                                                                             {param?.Filter}
                                                                       """)
@@ -163,7 +163,7 @@ namespace Infrastructures.Implements
                                                                     {paymentDate},
                                                                     {isIncludeLate},
                                                                     {isLateOnly},
-                                                                    {param?.PageNumber},
+                                                                    {param?.Skip},
                                                                     {param?.PageSize},
                                                                     {param?.Filter}
                                                                     """)

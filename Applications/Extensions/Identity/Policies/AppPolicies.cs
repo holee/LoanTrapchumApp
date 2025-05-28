@@ -35,7 +35,7 @@ public static class AppPolicies
     {
         return new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
-                    .RequireRole(AppRoles.Manager, AppRoles.Dbm, AppRoles.Rbm, AppRoles.Bm)
+                    .RequireRole(AppRoles.Manager,AppRoles.ChiefBm, AppRoles.Dbm, AppRoles.Rbm, AppRoles.Bm)
                     .Build();
     }
 

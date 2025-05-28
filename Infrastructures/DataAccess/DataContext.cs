@@ -53,6 +53,21 @@ namespace Infrastructures.DataAccess
 
             return transaction.GetDbTransaction();
         }
+
+        public override int SaveChanges()
+        {
+            ProcessSaveChangedAsync();
+
+            return base.SaveChanges();
+        }
+
+
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            ProcessSaveChangedAsync();
+
+            return base.SaveChangesAsync(cancellationToken);
+        }
         private void ProcessSaveChangedAsync()
         {
             foreach (var item in ChangeTracker.Entries()
@@ -91,6 +106,9 @@ namespace Infrastructures.DataAccess
                 item.Property(nameof(BaseEntity.CreatedDt)).IsModified = false;
 
             }
+
+
+
         }
         private void ProcessSaveChanged(bool acceptAllChangesOnSuccess)
         {

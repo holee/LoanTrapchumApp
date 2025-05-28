@@ -43,17 +43,17 @@ builder.Services.AddScoped<IAuthorizationHandler, SameUserApprovedAuthorizationH
 var app = builder.Build();
 
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseMigrationsEndPoint();
-}
-else
-{
+//if (app.Environment.IsDevelopment())
+//{
+//    app.UseMigrationsEndPoint();
+//}
+//else
+//{
 
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
+//    app.UseExceptionHandler("/Error", createScopeForErrors: true);
 
-    app.UseHsts();
-}
+//    app.UseHsts();
+//}
 
 
 await app.SeedSystemData();

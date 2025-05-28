@@ -97,7 +97,7 @@ public class CollateralsService(DataContext context, IDapperConnectionFactory co
 
         if (param.PageSize > 0)
         {
-            queries = queries.Skip(param.PageNumber).Take(param.PageSize);
+            queries = queries.Skip(param.Skip).Take(param.PageSize);
         }
 
         var collaterals = await queries.ToListAsync();

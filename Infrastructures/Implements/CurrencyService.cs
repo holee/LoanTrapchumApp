@@ -66,7 +66,7 @@ public class CurrencyService : ICurrencyService
 
         var counts = queries.Count();
 
-        var items = await queries.Skip(param.PageNumber)
+        var items = await queries.Skip(param.Skip)
             .Take(param.PageSize)
             .AsNoTracking()
             .ToListAsync();
@@ -174,7 +174,7 @@ public class CurrencyService : ICurrencyService
             return Result.Failure<Pager<VCurrencyNotes>>(ErrorResponse.NotFound("No Data Found"));
         }
 
-        queries = queries.Skip(param.PageNumber).Take(param.PageSize);
+        queries = queries.Skip(param.Skip).Take(param.PageSize);
 
         var counts = await queries.CountAsync();
 
@@ -207,7 +207,7 @@ public class CurrencyService : ICurrencyService
             queries = queries.OrderByDescending(x => EF.Property<object>(x, param.SortColumn));
         }
 
-        queries = queries.Skip(param.PageNumber).Take(param.PageSize);
+        queries = queries.Skip(param.Skip).Take(param.PageSize);
 
         var counts = queries.Count();
 

@@ -165,7 +165,7 @@ public class DepartmentService : IDepartmentService
 
         var counts = await query.CountAsync();
 
-        var data = await query.Skip(param.PageNumber)
+        var data = await query.Skip(param.Skip)
                        .Take(param.PageSize)
                        .AsNoTracking()
                        .ToListAsync();

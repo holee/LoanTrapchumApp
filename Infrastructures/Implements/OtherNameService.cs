@@ -162,7 +162,7 @@ namespace Infrastructures.Implements
             }
 
             var counts = await queries.CountAsync();
-            var items = await queries.Skip(q.PageNumber).Take(q.PageSize).ToListAsync();
+            var items = await queries.Skip(q.Skip).Take(q.PageSize).ToListAsync();
             return new Pager<VOtherNames>(items, counts);
         }
 
@@ -186,7 +186,7 @@ namespace Infrastructures.Implements
             }
 
             var counts = await queries.CountAsync();
-            var items = await queries.Skip(q.PageNumber).Take(q.PageSize).ToListAsync();
+            var items = await queries.Skip(q.Skip).Take(q.PageSize).ToListAsync();
             return new Pager<VOtherNames>(items, counts);
         }
 

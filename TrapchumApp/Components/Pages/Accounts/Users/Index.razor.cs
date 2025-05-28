@@ -26,6 +26,7 @@ public partial class Index
     private string? searchText = "";
     private readonly IUserServiceImpl _authService;
     private readonly IEmployeeService _empService;
+    private LoadDataArgs? dataGridArgs;
     [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
     protected int selectedTabIndex = 0;
     IList<VUser>? Users = [];
@@ -61,6 +62,7 @@ public partial class Index
         try
         {
             await GetBranches();
+
             await LoadAllUsers();
 
             var user = (await AuthenticationState).User;
@@ -105,13 +107,13 @@ public partial class Index
         }
     }
 
-    async Task LoadAllUsers(string? userId=null, string? filterText = null)
+    async Task LoadAllUsers(string? userId=null, string? filter = null)
     {
         try
         {
             isLoading = true;
 
-            var param = new QueryParam(pageIndex, pageSize, sortField, sortDescending, includeInactive, filterText);
+            var param = new QueryParam(pageIndex, pageSize, sortField, sortDescending, includeInactive, filter);
 
             var resp = await _authService.GetUsersAsync(selectedBranchId, userId, param);
 
@@ -140,22 +142,21 @@ public partial class Index
 
     async Task LoadAllUsers(LoadDataArgs args)
     {
-        pageIndex = args.Skip!.Value;
 
-        if (!string.IsNullOrEmpty(args.OrderBy))
+        pageIndex = args.Skip ?? 0;
+
+        if (args?.Sorts?.Any() == true)
         {
-            sortField = args.OrderBy.Split(" ")[0];
+            var sort = args.Sorts.First();
 
-            string dir = args.OrderBy.Split(" ")[1];
+            sortField = sort.Property ?? "Id";
 
-            sortDescending = dir.Contains("asc") ? false : true;
+            sortDescending = sort.SortOrder == SortOrder.Descending;
         }
 
         await LoadAllUsers(string.Empty, filterText);
 
     }
-
-
 
     protected async void SubmitForm()
     {
@@ -229,11 +230,14 @@ public partial class Index
     }
     private async Task SelectedBranchChanged(object? args)
     {
-        if(args is not null)
+        pageIndex = 0;
+
+        if (args is not null)
         {
            selectedBranchId=((BranchDto?)args)!.BranchId;
 
            await LoadAllUsers(string.Empty);
         }
     }
+
 }

@@ -1,4 +1,5 @@
 ﻿using Applications.Responses.Auths;
+using Applications.Responses.ViewModels.Settings;
 using Domains.Models.Loans;
 
 namespace Applications.Interfaces.Loans
@@ -12,5 +13,6 @@ namespace Applications.Interfaces.Loans
         Task<IEnumerable<LoanTypeStatus>> GetSubTypeStatus(string? q = null);
         Task<IEnumerable<AprovePerson>> GetAprovedUserAsync(int? branchId, string? filter = null);
         Task<IEnumerable<T>> GetAprovedUserAsync<T>(int? branchId, string? filter = null) where T : class;
+        Task<IEnumerable<VUserLoanSizes>> GetAprovedUserAsync(int? branchId, int? currencyId = 1, decimal? amount = 0, string? filter = null);
     }
 }

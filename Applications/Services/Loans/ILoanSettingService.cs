@@ -1,5 +1,6 @@
 ﻿using Applications.Interfaces.Loans;
 using Applications.Responses.Auths;
+using Applications.Responses.ViewModels.Settings;
 using Domains.Models.Loans;
 
 namespace Applications.Services.Loans
@@ -9,6 +10,11 @@ namespace Applications.Services.Loans
         public async Task<IEnumerable<AprovePerson>> GetAprovedUserAsync(int? branchId, string? filter = null)
         {
             return await service.GetAprovedUserAsync(branchId, filter);
+        }
+
+        public async Task<IEnumerable<VUserLoanSizes>> GetAprovedUserAsync(int? branchId, int? currencyId, decimal? amount, string? filter = null)
+        {
+            return await service.GetAprovedUserAsync(branchId,currencyId,amount,filter);
         }
 
         public async Task<IEnumerable<LoanInstallmentType>> GetInstallmentTypes(string? q = null)

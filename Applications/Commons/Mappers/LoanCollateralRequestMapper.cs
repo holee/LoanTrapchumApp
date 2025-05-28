@@ -7,9 +7,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Applications.Helpers.Mappers
+namespace Applications.Commons.Mappers
 {
-    public static class LoanCollateralRequestExtensions
+    public static class LoanCollateralRequestMapper
     {
         public static List<CollateralLink> MapToCollateralLinkCreate(this LoanCollateralRequest req)
         {

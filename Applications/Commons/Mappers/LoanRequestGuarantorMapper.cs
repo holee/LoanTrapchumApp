@@ -7,9 +7,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Applications.Helpers.Mappers
+namespace Applications.Commons.Mappers
 {
-    public static class LoanRequestGuarantorExtensions
+    public static class LoanRequestGuarantorMapper
     {
         public static LoanRequestGuarantors MapTo(this LoanRequestGuarantorsDtoCreate source)
         {

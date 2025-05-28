@@ -100,7 +100,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Journals
 
         private async Task GetJournals(string? filter = null)
         {
-            var param = new QueryParam(pageIndex, pageSize, sortColumn, sortDescending, filter);
+            var param = new QueryParam(pageIndex, pageSize, sortColumn,false, sortDescending, filter);
 
             isDataLoading = true;
 

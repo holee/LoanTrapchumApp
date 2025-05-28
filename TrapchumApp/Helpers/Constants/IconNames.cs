@@ -27,5 +27,54 @@
         public const string RequestQuote = "request_quote";
         public const string PersonAdd = "person_add";
         public const string MoreVert  = "more_vert";
-    }
+        public const string HMoreVert = "more_horiz";
+        public const string ManageAccount = "manage_accounts";
+        public const string PersonEdit = "person_edit";
+        public const string GroupAdd = "person_add";
+        public const string Group = "group";
+        public const string LockPerson = "lock_person";
+        public const string GroupRemoved = "group_remove"; 
+        public const string EmailContact = "contact_mail"; 
+        public const string PersonBook = "person_book";
+        public const string Contact = "contact_mail";
+        public const string PersonSearch = "person_search";
+        public const string VerifiedUser = "verified_user";
+        public const string Edit = "edit_square";
+        public const string PersonRemove = "person_remove";
+        public const string CreditCard = "credit_card";
+        public const string PriceCheck = "price_check";
+        public const string CardMembership = "card_membership";
+        public const string PriceChange = "price_change";
+        public const string MoneyBag = "money_bag";
+        public const string Details = "details"; 
+        public const string Settings = "settings";  
+        public const string ReceiptLong = "receipt_long"; 
+        public const string AddCard = "add_card"; 
+        public const string Delete = "delete";
+        public const string DeleteForever = "delete_forever";
+        public const string AddCircle = "add_circle";
+        public const string Sync = "sync";
+        public const string Add = "add"; 
+        public const string Download = "download"; 
+        public const string Remove = "remove";
+        public const string DoneAll = "done_all"; 
+        public const string Reply = "reply"; 
+        public const string AddTask = "add_task";
+        public const string TrendingUp = "trending_up";
+        public const string Database = "database";
+        public const string AccountBalanceWallet = "account_balance_wallet"; 
+        public const string QrcodeScanner = "qr_code_scanner"; 
+        public const string Receipt = "receipt";
+        public const string Analytics = "analytics";
+        public const string ShowChart = "show_chart";
+        public const string RequestApprove = "order_approve";
+        public const string SendMoney = "send_money";
+        public const string InactiveRequest = "inactive_order";
+        public const string Refresh = "refresh";
+        public const string SyncDisabled = "inactive_order";
+        public const string AttachFile = "attach_file"; 
+        public const string Collaterals = "source_environment";
+        public const string Customers = "patient_list"; 
+
+    } 
 }

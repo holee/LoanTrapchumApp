@@ -122,24 +122,36 @@ namespace Applications.Calculations
             principle = principle + interest + collectionfee + penalty;
             return principle ?? 0;
         }
-        public static decimal? PaidPrincipleAmount(this IEnumerable<LoanPaymentLineDtoCreate> s)
+        public static decimal? TotalPaidPrinciple(this IEnumerable<LoanPaymentLineDtoCreate> source)
         {
-            var total1 = s.Sum(x => x.PaidPrinciple);
+            if (!source.Any()) return 0.00M;
+
+            var total1 = source.Sum(x => x.PaidPrinciple);
+
+            return total1 ?? 0.00M;
+        }
+        public static decimal? TotalPaidInterest(this IEnumerable<LoanPaymentLineDtoCreate> source)
+        {
+            if (!source.Any()) return 0.00M;
+
+            var total1 = source.Sum(x => x.PaidInterest);
+
+            return total1 ?? 0.00M;
+        }
+        public static decimal? TotalPaidCollectionFee(this IEnumerable<LoanPaymentLineDtoCreate> source)
+        {
+            if (!source.Any()) return 0.00M;
+
+            var total1 = source.Sum(x => x.PaidCollectionFee);
+
             return total1 ?? 0;
         }
-        public static decimal? PaidInterestAmount(this IEnumerable<LoanPaymentLineDtoCreate> s)
+        public static decimal? TotalPaidPenalty(this IEnumerable<LoanPaymentLineDtoCreate> source)
         {
-            var total1 = s.Sum(x => x.PaidInterest);
-            return total1 ?? 0;
-        }
-        public static decimal? PaidCollectionFeeAmount(this IEnumerable<LoanPaymentLineDtoCreate> s)
-        {
-            var total1 = s.Sum(x => x.PaidCollectionFee);
-            return total1 ?? 0;
-        }
-        public static decimal? PaidPenaltyAmount(this IEnumerable<LoanPaymentLineDtoCreate> s)
-        {
-            var total1 = s.Sum(x => x.PenaltyAmount);
+            if (!source.Any()) return 0.00M;
+
+            var total1 = source.Sum(x => x.PenaltyAmount);
+
             return total1 ?? 0;
         }
         public static decimal? CalculatePenalty(int CurrencyId = 1, decimal? totalPayment = 0, decimal? rate = 0, int? totalDay = 0)

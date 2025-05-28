@@ -172,7 +172,7 @@ namespace Infrastructures.Implements
 
             if (q.PageSize > 0)
             {
-                queries = queries.Skip(q.PageSize * (q.PageNumber - 1)).Take(q.PageSize);
+                queries = queries.Skip(q.PageSize * (q.Skip - 1)).Take(q.PageSize);
             }
             var items = await queries.AsNoTracking().ToListAsync();
 

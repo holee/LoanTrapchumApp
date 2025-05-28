@@ -1,4 +1,6 @@
-﻿namespace Applications.Requests.Loans.Payments;
+﻿using Applications.Calculations;
+
+namespace Applications.Requests.Loans.Payments;
 
 public sealed class LoanPaymentDtoCreate
 {
@@ -16,9 +18,14 @@ public sealed class LoanPaymentDtoCreate
     public decimal? CollectionFeeAmount { get; set; }
     public decimal? PenaltyAmount { get; set; }
     public decimal? SubTotal { get; set; }
-    public decimal? AmountWithoutPenalty => LoanRepaymentLines.GetTotal();
-    public decimal? AmountWithPenalty => LoanRepaymentLines.GetTotal(true);
+    public decimal? AmountWithoutPenalty => LoanRepaymentLines.GetTotal(includePenalty: false);
+    public decimal? AmountWithPenalty => LoanRepaymentLines.GetTotal(includePenalty: true);
     public decimal? Amount { get; set; }
+    public decimal? PaidPrinciple => LoanRepaymentLines.TotalPaidPrinciple();
+    public decimal? PaidInterest => LoanRepaymentLines.TotalPaidInterest();
+    public decimal? PaidFeeAmount => LoanRepaymentLines.TotalPaidCollectionFee();
+    public decimal? PaidPenaltyAmount => LoanRepaymentLines.TotalPaidPenalty();
+    public decimal? SubTotalAmount => (PaidPrinciple + PaidInterest + PaidFeeAmount + PaidPenaltyAmount) ?? 0.00M;
     public ICollection<LoanPaymentLineDtoCreate> LoanRepaymentLines { get; set; } = [];
 }
 
@@ -27,25 +34,9 @@ internal static class LoanPaymentDtoCreateExtension
 {
     public static decimal? GetTotal(this IEnumerable<LoanPaymentLineDtoCreate> lines, bool includePenalty = false)
     {
-        if (!includePenalty)
-        {
-            var totalPrinciples = lines.Sum(x => x.PaidPrinciple) ?? 0;
-            var totalInterest = lines.Sum(x => x.PaidInterest) ?? 0;
-            var totalFee = lines.Sum(x => x.PaidCollectionFee) ?? 0;
-            return totalPrinciples + totalInterest + totalFee;
-        }
-        else
-        {
-            var totalPrinciples = lines.Sum(x => x.PaidPrinciple) ?? 0;
-            var totalInterest = lines.Sum(x => x.PaidInterest) ?? 0;
-            var totalFee = lines.Sum(x => x.PaidCollectionFee) ?? 0;
-            var totalPenalty = lines.Sum(x => x.PenaltyAmount) ?? 0;
-            return totalPrinciples + totalInterest + totalFee + totalPenalty;
-        }
-
+        return !includePenalty ? lines.GetTotalNoPenalty() : lines.GetTotalWithPenalty();
     }
-
-    public static decimal? GetTotalWithPenalty(this IEnumerable<LoanPaymentLineDtoCreate> lines)
+    private static decimal? GetTotalWithPenalty(this IEnumerable<LoanPaymentLineDtoCreate> lines)
     {
         var totalPrinciples = lines.Sum(x => x.PaidPrinciple) ?? 0;
         var totalInterest = lines.Sum(x => x.PaidInterest) ?? 0;
@@ -53,7 +44,12 @@ internal static class LoanPaymentDtoCreateExtension
         var totalPenalty = lines.Sum(x => x.PenaltyAmount) ?? 0;
         return totalPrinciples + totalInterest + totalFee + totalPenalty;
     }
-}
 
-//public LoanPaymentTransactionDtoCreate? LoanTransaction { get; set; } = new();
-//public TrxForeignExchangeDtoCreate? ForeignExchangeTrx { get; set; } = new();
+    private static decimal? GetTotalNoPenalty(this IEnumerable<LoanPaymentLineDtoCreate> lines)
+    {
+        var totalPrinciples = lines.Sum(x => x.PaidPrinciple) ?? 0;
+        var totalInterest = lines.Sum(x => x.PaidInterest) ?? 0;
+        var totalFee = lines.Sum(x => x.PaidCollectionFee) ?? 0;
+        return totalPrinciples + totalInterest + totalFee;
+    }
+}

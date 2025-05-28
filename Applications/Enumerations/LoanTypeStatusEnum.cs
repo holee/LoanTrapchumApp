@@ -2,7 +2,7 @@
 
 namespace Applications.Enumerations
 {
-    public enum LoanTypeStatus
+    public enum LoanTypeStatusEnum
     {
         [Description("Normal")]
         Standard =1,

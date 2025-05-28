@@ -58,6 +58,15 @@
                 <RadzenCheckBox @bind-Value="g.IsActive" ReadOnly />
             </Template>
         </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn TextAlign="TextAlign.Right" Context="g" 
+                            Width="5rem"
+                            Property="ProInKhmer" Title="No.Loans">
+            <Template>
+                @g.NumberOfLoan
+            </Template>
+        </RadzenDataGridColumn>
+
         <RadzenDataGridColumn Width="5rem" Context="g" Title="Actions">
             <Template>
                 <RadzenButton Size="ButtonSize.ExtraSmall"

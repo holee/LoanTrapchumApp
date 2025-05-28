@@ -82,7 +82,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
             isLoading = true;
 
 
-            var param = new QueryParam(pageIndex, pageSize, sortColumn, sortDescending, filtertext);
+            var param = new QueryParam(pageIndex, pageSize, sortColumn,false, sortDescending, filtertext);
 
             if (bState.CanDisbursed)
             {

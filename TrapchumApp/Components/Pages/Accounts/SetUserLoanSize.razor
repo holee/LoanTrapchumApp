@@ -2,8 +2,9 @@
 @using TrapchumApp.Helpers.Constants
 <Containers Fluid CssClass="rz-background-color-base-200 p-2">
     <EditForm Model="model" OnValidSubmit="HandleFormSubmit">
-        <FluentValidationValidator DisableAssemblyScanning="true"></FluentValidationValidator>
-        
+        <FluentValidationValidator DisableAssemblyScanning="true"></FluentValidationValidator>  
+        <ValidationSummary />
+        <input type="hidden" @bind="@model.UserRefId" />
         <RadzenRow AlignItems="AlignItems.Center" class="my-1">
             <RadzenColumn Size="3" SizeMD="3">
                 <RadzenLabel Component="MinLoanSize">Min Usd Size</RadzenLabel>
@@ -69,8 +70,21 @@
                 <RadzenDatePicker @bind-Value="model.StartDate"
                                class="w-100"
                                Name="StartDate"
+                                  Change="StartDateChanged"
                                DateFormat="dd/MM/yyyy" />
                 <ValidationMessage For="@(()=>model.StartDate)"></ValidationMessage>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow AlignItems="AlignItems.Center" class="my-1">
+            <RadzenColumn Size="3" SizeMD="3">
+                <RadzenLabel Component="EndDate">Until</RadzenLabel>
+            </RadzenColumn>
+            <RadzenColumn Size="9" SizeMD="9">
+                <RadzenDatePicker @bind-Value="model.EndDate"
+                                  class="w-100"
+                                  Name="EndDate"
+                                  DateFormat="dd/MM/yyyy" />
+                <ValidationMessage For="@(() => model.EndDate)"></ValidationMessage>
             </RadzenColumn>
         </RadzenRow>
         <RadzenRow AlignItems="AlignItems.Center" class="my-1">

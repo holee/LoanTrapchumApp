@@ -38,18 +38,17 @@
                                 AllowSorting="true"
                                 AllowPaging="true"
                                 AllowRowSelectOnRowClick="true"
-                                @bind-Value="Users"
                                 SelectionMode="DataGridSelectionMode.Single"
                                 Density="Density.Compact"
                                 ColumnWidth="10rem"
-                                PageSize="pageSize"
                                 Count="@counts"
+                                PageSize="@pageSize"
                                 IsLoading="isLoading"
-                                LoadData="LoadAllUsers"
-                                Style="height:30rem;min-height:30rem;max-height:40rem"
+                                LoadData="@LoadAllUsers"
                                 ShowPagingSummary="true"
                                 PagerHorizontalAlign="HorizontalAlign.Right"
-                                Data="AllUsers">
+                                TItem="VUser"
+                                Data="@AllUsers">
                     <Columns>
                         <RadzenDataGridColumn Width="4rem"
                                               Property="@(nameof(VUser.Id))" Title="#" Context="u">
@@ -65,15 +64,15 @@
                                               TextAlign="TextAlign.Center"
                                               Property="@(nameof(VUser.Id))" Title="Status" Context="u">
                             <Template>
-                                <RadzenCheckBox Value="@u.IsActive" />
+                                <RadzenCheckBox Value="@u.IsActive" ReadOnly />
                             </Template>
                         </RadzenDataGridColumn>
-                        <RadzenDataGridColumn Width="6rem" Sortable="false"
+                        <RadzenDataGridColumn Width="5rem" Sortable="false"
                                               TextAlign="TextAlign.Center"
                                               Property="@(nameof(VUser.Id))" Title="Action" Context="u">
                             <Template>
                                 <RadzenButton Size="ButtonSize.ExtraSmall"
-                                              Icon="@IconNames.MoreVert"
+                                              Icon="@IconNames.HMoreVert"
                                               Variant="Variant.Text"
                                               Click="@((args)=>ShowContextMenu(args,u.Id))" />
                             </Template>
@@ -106,11 +105,14 @@
     async void OnUserTextChanges(string e)
     {
         filterText = e ?? string.Empty;
+
         await LoadAllUsers(string.Empty, filterText);
     }
-    void PageSizeChanged(int size)
+    async Task PageSizeChanged(int size)
     {
         pageSize = size;
+        pageIndex = 0;
+        await LoadAllUsers();
     }
 
     void MangagePermissions(string? userId)
@@ -184,18 +186,9 @@
 
         if (result is not null && result==true)
         {
-            await LoadAllUsers(string.Empty, filterText);
+            await LoadAllUsers(filter:filterText);
         }
     }
-
-
-
-
-
-
-
-
-
 }
 
 

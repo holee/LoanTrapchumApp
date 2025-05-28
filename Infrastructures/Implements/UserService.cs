@@ -148,7 +148,7 @@ public sealed class UserService : IUserService
 
         if (param.PageSize > 0)
         {
-            queries = queries.Skip(param.PageNumber).Take(param.PageSize);
+            queries = queries.Skip(param.Skip).Take(param.PageSize);
         }
 
 
@@ -176,9 +176,10 @@ public sealed class UserService : IUserService
 
         var counts = await queries.CountAsync();
 
+
         if (param.PageSize > 0)
         {
-            queries = queries.Skip(param.PageNumber).Take(param.PageSize);
+            queries = queries.Skip(param.Skip).Take(param.PageSize);
         }
 
         var users = await queries
@@ -634,7 +635,7 @@ public sealed class UserService : IUserService
         if (q.PageSize > 0)
         {
             queries = queries
-                    .Skip(q.PageNumber)
+                    .Skip(q.Skip)
                     .Take(q.PageSize)
                     .OrderBy(x => x.Module);
         }

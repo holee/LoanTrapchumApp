@@ -132,7 +132,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanProducts
                 var param = new QueryParam
                 {
                     PageSize = pageSize,
-                    PageNumber = pageIndex,
+                    Skip = pageIndex,
                     IsIncludeInActive = IsIncludeInActive,
                     SortColumn = sortColumn,
                     SortDescending = sortDescending,

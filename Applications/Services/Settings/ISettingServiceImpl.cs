@@ -1,5 +1,7 @@
 ﻿using Applications.Requests.Settings;
 using Applications.Responses;
+using Applications.Responses.Paginations;
+using Applications.Responses.ViewModels.Settings;
 using Domains.Models.Loans;
 using Domains.Models.Settings;
 
@@ -7,9 +9,9 @@ namespace Applications.Services.Settings
 {
     public interface ISettingServiceImpl
     {
-        Task<Result<string>> ApplyUserLoanSizeAsync(UserLoanSizeDtoCreate model);
+        Task<Result<string>> CreateUserLoanSizeAsync(UserLoanSizeDtoCreate model);
         Task<Result<string>> DeActivateUserLoanSizeAsync(long? id, string userRefId, CancellationToken cancellation = default);
-        Task<Result<string>> Delete(Guid? id);
+        Task<Result<string>> Delete(long? id);
         Task<Result<AppSettings>> GetSysSettingByCode(int? id);
         Task<Result<AppSettings>> GetSysSettingByCode(string code);
         Task<Result<IEnumerable<AppSettings>>> GetSysSettings(string? filterValue = null);
@@ -18,5 +20,9 @@ namespace Applications.Services.Settings
 
         Task<Result<IEnumerable<T>>> GetSysSettings<T>(string? filterValue = null)
             where T:class;
+        Task<Result<VUserLoanSizes>> GetLoanSizeByUserId(string? userRefId, CancellationToken cancellation = default);
+        Task<Pager<VUserLoanSizes>> GetUserLoanSizes(string? userRefId, QueryParam q, CancellationToken cancellation = default);
+        Task<Result<UserLoanSizeDtoCreate>> GetEditLoanSizeByUserId(long? id,string? userId, CancellationToken cancellation = default);
+        Task<Result<string>> EditUserLoanSizeAsync(UserLoanSizeDtoCreate req, CancellationToken cancellation = default);
     }
 }

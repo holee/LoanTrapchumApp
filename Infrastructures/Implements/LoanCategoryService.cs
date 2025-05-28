@@ -50,7 +50,7 @@ namespace Infrastructures.Implements
 
             if (param.PageSize > 0)
             {
-                query = query.Skip((param.PageNumber) * param.PageSize).Take(param.PageSize);
+                query = query.Skip((param.Skip) * param.PageSize).Take(param.PageSize);
             }
 
             if (param.SortDescending)

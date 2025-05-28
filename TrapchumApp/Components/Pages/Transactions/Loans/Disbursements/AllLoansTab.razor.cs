@@ -99,7 +99,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Disbursements
         {
             try
             {
-                var param = new QueryParam(pageIndex, pageSize, sortField, sortDescending, filter);
+                var param = new QueryParam(pageIndex, pageSize, sortField,false, sortDescending, filter);
 
                 isLoading = true;
 

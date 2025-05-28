@@ -1,6 +1,6 @@
-﻿using Applications.Enumerations;
+﻿using Applications.Commons.Mappers;
+using Applications.Enumerations;
 using Applications.Extensions;
-using Applications.Helpers.Mappers;
 using Applications.Interfaces.Loans;
 using Applications.Requests.Loans.CreditAgents;
 using Applications.Requests.Loans.LoanRequests;
@@ -19,6 +19,8 @@ using Infrastructures.DataAccess;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Threading;
+using static QuestPDF.Helpers.Colors;
 
 namespace Infrastructures.Implements;
 
@@ -59,7 +61,6 @@ public sealed class LoanRequestService(
                             x.LoanRequestStatusRefId == (int)RequestStatus.New, cancellationToken);
 
             using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
-
 
             try
             {
@@ -148,8 +149,7 @@ public sealed class LoanRequestService(
         }
     }
 
-
-    public async Task<Result<string>> CreateLoanRequestAsync(LoanRequest req, CancellationToken cancellationToken = default)
+    public async Task<Result<string>> SaveLoanRequestAsync(LoanRequest req, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(req, nameof(req));
 
@@ -215,6 +215,64 @@ public sealed class LoanRequestService(
         }
     }
 
+    public async Task<Result<string>> CreateLoanRequestAsync(LoanRequest req, CancellationToken cancellation = default)
+    {
+        logger.LogInformation("Creating loan request for CustomerRefId: {CustomerRefId}", req.CustomerRefId);
+
+        await using var cxt = await contextFactory.CreateDbContextAsync(cancellation);
+
+        if (await CheckExistingLoanRequest(req.CustomerRefId))
+        {
+            return Result.Failure<string>(ErrorResponse.Conflict("Loan Request already exists."));
+        }
+
+        if (await CheckExistingHasLoan(req.CustomerRefId))
+        {
+            return Result.Failure<string>(ErrorResponse.Conflict("Customer has active loan."));
+        }
+
+        var existingRequest = await context.LoanRequests
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.LoanRequestId == req.LoanRequestId &&
+                                      x.BranchRefId == req.BranchRefId &&
+                                      x.RequestUserRefId == req.RequestUserRefId &&
+                                      x.LoanRequestStatusRefId == (int)RequestStatus.New);
+
+        if (existingRequest is null)
+        {
+            return Result.Failure<string>(ErrorResponse.Conflict("Loan Request does not exist."));
+        }
+
+        try
+        {
+
+            using var transaction = await context.Database.BeginTransactionAsync(cancellation);
+
+            try
+            {
+                cxt.LoanRequests.Update(req);
+
+                await cxt.SaveChangesAsync(cancellation);
+
+                await transaction.CommitAsync(cancellation);
+
+                return Result.Success(new string("New Loan Request was created."));
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync(cancellation);
+                throw;
+            }
+
+        }
+
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to create loan request for CustomerRefId: {CustomerRefId}", req.CustomerRefId);
+            return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}"));
+        }
+    }
+
     public async Task<bool> IsCustomerBusy(string? customerId, CancellationToken cancellation = default)
     {
         if (string.IsNullOrEmpty(customerId)) return false;
@@ -229,48 +287,6 @@ public sealed class LoanRequestService(
         var customerInActiveLoan = await db.QueryAsync<Customer>(sql1, parameters);
         return existingLoanRequest.Any() || customerInActiveLoan.Any();
 
-    }
-
-
-    public async Task<Result<bool>> CreateLoanRequestAsync(int? branchId, string? userId, string? loanRequestId)
-    {
-        logger.LogInformation("try to create new loan request");
-        try
-        {
-            var existingRequest = await context.LoanRequests
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.LoanRequestId == loanRequestId &&
-                                          x.BranchRefId == branchId &&
-                                          x.RequestUserRefId == userId &&
-                                          x.LoanRequestStatusRefId == (int)RequestStatus.New);
-
-            if (existingRequest is null)
-            {
-                return Result.Failure<bool>(ErrorResponse.Conflict("Loan Request does not exist."));
-            }
-
-            var updated = await context.LoanRequests
-                .Where(x => x.LoanRequestId == loanRequestId &&
-                            x.BranchRefId == branchId &&
-                            x.RequestUserRefId == userId &&
-                            x.LoanRequestStatusRefId == (int)RequestStatus.New)
-                .ExecuteUpdateAsync(props => props
-                    .SetProperty(p => p.LoanRequestStatusRefId, (int)RequestStatus.Requested)
-                    .SetProperty(p => p.ModifiedDt, DateTime.Now));
-            if (updated > 0)
-            {
-                return Result.Success(true);
-            }
-
-            return Result.Failure<bool>(ErrorResponse.ServerError("Loan Request was not created."));
-        }
-
-        catch (Exception ex)
-        {
-            logger.LogError(ex, ex.Message);
-
-            return Result.Failure<bool>(ErrorResponse.ServerError($"{ex.Message}"));
-        }
     }
 
 
@@ -1261,9 +1277,9 @@ public sealed class LoanRequestService(
         // Paging
         var totalCount = await baseQuery.CountAsync();
 
-        var skip = (param.PageNumber - 1) * param.PageSize;
+        var skip = (param.Skip - 1) * param.PageSize;
 
-        var items = await baseQuery.Skip(param.PageNumber).Take(param.PageSize).AsNoTracking().ToListAsync();
+        var items = await baseQuery.Skip(param.Skip).Take(param.PageSize).AsNoTracking().ToListAsync();
 
         return new Pager<VLoanRequests>(items, totalCount);
     }
@@ -1314,7 +1330,7 @@ public sealed class LoanRequestService(
 
         var counts = resultQueries.Count();
 
-        var items = await resultQueries.Skip(param.PageNumber).Take(param.PageSize).AsNoTracking().ToListAsync();
+        var items = await resultQueries.Skip(param.Skip).Take(param.PageSize).AsNoTracking().ToListAsync();
 
         return new Pager<VLoanRequests>(items, counts);
     }
@@ -1506,10 +1522,10 @@ public sealed class LoanRequestService(
         using var db = await dapperFactory.CreateConnectionAsync();
 
         const string sql = @"
-        SELECT * 
-        FROM VLoanRequestCollaterals 
-        WHERE LoanRequestId = @LoanRequestId 
-          AND BranchId = @BranchId;";
+                            SELECT * 
+                                FROM VLoanRequestCollaterals 
+                            WHERE LoanRequestId = @LoanRequestId 
+                              AND BranchId = @BranchId;";
 
         return await db.QueryAsync<VLoanRequestCollateralLines>(
             sql,
@@ -1527,10 +1543,9 @@ public sealed class LoanRequestService(
         using var db = await dapperFactory.CreateConnectionAsync();
 
         const string sql = @"
-        SELECT * 
-        FROM VLoanRequestDocuments 
-        WHERE LoanRequestId = @LoanRequestId 
-          AND BranchRefId = @BranchId;";
+                            SELECT * 
+                                FROM VLoanRequestDocuments 
+                            WHERE LoanRequestId = @LoanRequestId AND BranchRefId = @BranchId;";
 
         return await db.QueryAsync<VLoanRequestsDocuments>(
             sql,

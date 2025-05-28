@@ -117,8 +117,8 @@ namespace Applications.Extensions
             }
 
             return sortDescending
-                ? queries.OrderByDescending(o => EF.Property<object>(o, sortColumn))
-                : queries.OrderBy(o => EF.Property<object>(o, sortColumn));
+                ? queries.OrderByDescending(o => EF.Property<object>(o!, sortColumn))
+                : queries.OrderBy(o => EF.Property<object>(o!, sortColumn));
         }
 
         public static IQueryable<T> ApplySafeSorting<T>(this IQueryable<T> queries, string sortColumn,

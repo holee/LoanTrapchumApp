@@ -223,7 +223,7 @@ namespace Infrastructures.Implements
             if (q.PageSize > 0)
             {
                 queries = queries
-                                .Skip(q.PageNumber)
+                                .Skip(q.Skip)
                                 .Take(q.PageSize);
 
             }

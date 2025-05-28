@@ -1,4 +1,5 @@
-﻿<div class="container-fluid rz-background-color-base-100">
+﻿@using TrapchumApp.Components.Pages.Transactions.Exchanges
+<div class="container-fluid rz-background-color-base-100">
     <input type="hidden" @bind="buyingRate" />
     <input type="hidden" @bind="sellingRate" />
     <input type="hidden" @bind="spotRate" />
@@ -8,6 +9,7 @@
     <input type="hidden" @bind="gainOrLostAmount" />
     <input type="hidden" @bind="originalExchangeAmountUSD" />
     <input type="hidden" @bind="originalExchangeAmountKHR" />
+    <RadzenButton Size="ButtonSize.ExtraSmall" Click="OpenSide">Show Exchange</RadzenButton>
     <RadzenRow AlignItems="AlignItems.Center" class="rz-px-1 rz-py-2 rz-m-0">
         <RadzenColumn Size="5">
             <RadzenBadge BadgeStyle="BadgeStyle.Light" Shade="Shade.Dark">
@@ -174,3 +176,17 @@
                   Click="@CloseModal">
     </RadzenButton>
 </RadzenStack>
+
+@code {
+
+    SideDialogOptions options = new SideDialogOptions
+    {
+        Width = "30rem",
+        CloseDialogOnOverlayClick = true,
+    };
+
+    void OpenSide()
+    {
+        DialogService.OpenSide<ExchangesSidebar>("Money Exchanged", options: options);
+    }
+}

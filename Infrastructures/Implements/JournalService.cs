@@ -242,7 +242,7 @@ public class JournalService(
                 EF.Functions.Like(x.TransactionDate!.ToString(), $"%{param.Filter}%"))
             .OrderByDescendingIf(param.SortDescending, x => EF.Property<object>(x, param.SortColumn));
         var pageCount = await queries.CountAsync();
-        var pageItems = await queries.Skip(param.PageNumber).Take(param.PageSize)
+        var pageItems = await queries.Skip(param.Skip).Take(param.PageSize)
             .AsNoTracking()
             .ToListAsync();
 

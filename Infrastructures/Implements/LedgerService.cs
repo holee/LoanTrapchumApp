@@ -242,7 +242,7 @@ public class LedgerService : ILedgerService
 
 
         var counts = await queries.CountAsync();
-        var items = await queries.Skip(q.PageNumber)
+        var items = await queries.Skip(q.Skip)
             .Take(q.PageSize)
             .AsNoTracking()
             .ToListAsync();

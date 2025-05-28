@@ -1,4 +1,5 @@
-﻿using Applications.Interfaces.Loans;
+﻿using Applications.Commons.Mappers;
+using Applications.Interfaces.Loans;
 using Applications.Requests.Loans.Payments;
 using Applications.Requests.Transactions.LoanTransactions;
 using Applications.Responses;

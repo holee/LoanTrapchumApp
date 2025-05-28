@@ -6,9 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Applications.Helpers.Mappers
+namespace Applications.Commons.Mappers
 {
-    public static class LoanDocumentExtensions
+    public static class LoanDocumentMapper
     {
         public static LoanDocuments DocumentDtoCreate(this LoanDocumentDtoCreate dto)
         {

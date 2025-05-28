@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Domains.Models.Loans;
+using Microsoft.AspNetCore.Identity;
 
 namespace Applications.Extensions.Identity;
 
@@ -14,5 +15,6 @@ public class ApplicationUser:IdentityUser
     public DateTime? CreatedDT { get; set; } = DateTime.UtcNow;
     public DateTime? ModifiedDT { get; set; } = DateTime.UtcNow;
     public ICollection<UserProfiles> UserProfiles { get; set; } = [];
+    //public UserLoanSize? UserLoanSize { get; set; }
 
 }

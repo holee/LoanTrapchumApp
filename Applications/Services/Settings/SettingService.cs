@@ -1,7 +1,11 @@
-﻿using Applications.Helpers.Mappers;
+﻿using Applications.Commons.Mappers;
+using Applications.Extensions;
 using Applications.Interfaces.setting;
 using Applications.Requests.Settings;
 using Applications.Responses;
+using Applications.Responses.Message;
+using Applications.Responses.Paginations;
+using Applications.Responses.ViewModels.Settings;
 using Domains.Models.Loans;
 using Domains.Models.Settings;
 
@@ -11,18 +15,61 @@ namespace Applications.Services.Settings
 
     public sealed class SettingService(IAppSettingService sSeting) : ISettingServiceImpl
     {
-        public async Task<Result<string>> ApplyUserLoanSizeAsync(UserLoanSize model)
-        {
-            return await sSeting.ApplyUserLoanSizeAsync(model);
-        }
-
-        public async Task<Result<string>> ApplyUserLoanSizeAsync(UserLoanSizeDtoCreate req)
+        public async Task<Result<string>> CreateUserLoanSizeAsync(UserLoanSizeDtoCreate req)
         {
 
             var model=req.MapToCreate();
 
-            return await sSeting.ApplyUserLoanSizeAsync(model); 
+            return await sSeting.CreateUserLoanSizeAsync(model); 
         }
+
+
+        public async Task<Result<string>> EditUserLoanSizeAsync(UserLoanSizeDtoCreate req,CancellationToken cancellation=default)
+        {
+
+            var model = req.MapToEdit(); 
+
+            return await sSeting.EditUserLoanSizeAsync(model,cancellation);
+        }
+
+        public async Task<Result<VUserLoanSizes>> GetLoanSizeByUserId(string? userRefId,CancellationToken cancellation=default)
+        {
+            if (userRefId.IsNotNullOrEmpty())
+            {
+                return Result.Failure<VUserLoanSizes>(ErrorResponse.Validation("Please input user id.."));
+            }
+
+            return await sSeting.GetLoanSizeByUserId(userRefId,cancellation);
+        }
+
+
+        public async Task<Result<UserLoanSizeDtoCreate>> GetEditLoanSizeByUserId(long? id,string? userId, CancellationToken cancellation = default)
+        {
+            if (id<=0) 
+            {
+                return Result.Failure<UserLoanSizeDtoCreate>(ErrorResponse.Validation("Invalid Id....."));
+            }
+
+            var rsp= await sSeting.GetLoanSizeById(id,userId, cancellation);
+
+
+            if(rsp.IsSuccess && rsp.Data is not null)
+            {
+                var editModel = rsp.Data.MapToEdit();
+
+                return Result.Success(editModel);
+            }
+
+            return Result.Failure<UserLoanSizeDtoCreate>(ErrorResponse.NotFound(rsp.ErrMessage));
+        }
+
+
+
+        public async Task<Pager<VUserLoanSizes>> GetUserLoanSizes(string? userRefId,QueryParam q, CancellationToken cancellation = default)
+        {
+            return await sSeting.GetUserLoanSizes(userRefId,q, cancellation);
+        }
+
         public async Task<Result<string>> DeActivateUserLoanSizeAsync(long? id,string userRefId,CancellationToken cancellation=default)
         {
             return await sSeting.DeActivateUserLoanSizeAsync(id,userRefId,cancellation);
@@ -30,7 +77,7 @@ namespace Applications.Services.Settings
 
 
 
-        public async Task<Result<string>> Delete(Guid? id)
+        public async Task<Result<string>> Delete(long? id)
         {
             return await sSeting.Delete(id);
         }

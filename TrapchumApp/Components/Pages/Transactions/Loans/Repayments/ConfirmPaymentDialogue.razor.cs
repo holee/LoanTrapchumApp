@@ -145,13 +145,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
                 LoanRepayment.BranchRefId = LoanPayment.BranchId;
                 LoanRepayment.UserRefId = UserId;
                 LoanRepayment.LoanRepaymentLines.Add(line);
-                //LoanRepayment.LoanTransaction = new LoanPaymentTransactionDtoCreate
-                //{
-                //    TransactionDate = DateTime.Now,
-                //    TransactionTypeName = "Loan Principal Repayment",
-                //    TranTypeRefId = 20,
-                //    UserRefId = UserId
-                //};
+
                 if (appliedAmountKHR > 0)
                 {
                     var tranxCashManagement = new TrxCashManagementDtoCreate()

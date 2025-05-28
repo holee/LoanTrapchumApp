@@ -22,7 +22,7 @@ namespace TrapchumApp.Components.Pages.Lists.OtherNames
         string? filterText = "";
         int pageIndex = 0;
         int pageSize = 10;
-        string sortColumn = "Name";
+        string sortColumn = "FullName";
         bool sortDescending = false;
         int counts = 0;
         bool isLoading = false;
@@ -85,7 +85,7 @@ namespace TrapchumApp.Components.Pages.Lists.OtherNames
         async Task GetGuarantors()
         {
             isLoading = true;
-            var param = new QueryParam(pageIndex, pageSize, sortColumn, sortDescending, includeInactive, filterText);
+            var param = new QueryParam(pageIndex, pageSize, sortColumn, includeInactive, sortDescending,filterText);
             var guarantorResp = await _gService.GetGuarantorsAsync(param);
             if (guarantorResp.IsSuccess)
             {

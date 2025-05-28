@@ -1,4 +1,24 @@
 ﻿@page "/"
 @using Applications.Services.Files
 @using Domains.Models.Files
+@using TrapchumApp.Components.Pages.Transactions.Exchanges
 <PageTitle>Home</PageTitle>
+
+<button @onclick="OpenSide">Open</button>
+
+@code {
+
+    SideDialogOptions options = new SideDialogOptions
+    {
+        Width = "30rem",
+        CloseDialogOnOverlayClick = true,
+        ShowMask = true
+    };
+
+
+
+    void OpenSide()
+    {
+        DialogService.OpenSide<ExchangesSidebar>("Money Exchanged", options: options);
+    }
+}

@@ -4,40 +4,46 @@ public sealed class QueryParam
 {
     public QueryParam()
     {
-        PageNumber = 1;
+        Skip = 1;
         PageSize = 10;
         SortColumn = string.Empty;
         SortDescending = false;
         IsIncludeInActive = false;
         Filter = string.Empty;
     }
-    public QueryParam(int pageNumber, int pageSize)
+    public QueryParam(int skip, int pageSize)
     {
-        PageNumber = pageNumber;
+        Skip = skip;
         PageSize = pageSize;
     }
-    public QueryParam(int pageNumber, int pageSize, string sortField)
-        : this(pageNumber, pageSize)
+    public QueryParam(int skip, int pageSize, string sortField)
+        : this(skip, pageSize)
     {
         SortColumn = sortField;
     }
-    public QueryParam(int pageNumber, int pageSize, string sortField, string? filter = null)
-        : this(pageNumber, pageSize, sortField)
+    public QueryParam(int skip, int pageSize, string sortField, string? filter = null)
+        : this(skip, pageSize, sortField)
     {
         Filter = filter;
     }
-    public QueryParam(int pageNumber, int pageSize, string sortField, bool sortDescending = false, string? filter = null)
-        : this(pageNumber, pageSize, sortField,filter)
-    {
-        SortDescending = sortDescending;
-    }
-    public QueryParam(int pageNumber, int pageSize, string sortField,
-        bool sortDescending = false, bool isIncludeInActive = false, string? filter = null)
-        : this(pageNumber, pageSize, sortField, sortDescending, filter)
+
+    public QueryParam(int skip, int pageSize, string sortField,bool isIncludeInActive = false)
+        : this(skip, pageSize, sortField)
     {
         IsIncludeInActive = isIncludeInActive;
     }
-    public int PageNumber { get; set; } = 1;
+    public QueryParam(int skip, int pageSize, string sortField,bool isIncludeInActive = false,bool sortDescending = false)
+        : this(skip, pageSize, sortField, isIncludeInActive)
+    {
+        SortDescending = sortDescending;
+    }
+    public QueryParam(int skip, int pageSize, string sortField, bool isIncludeInActive = false, bool sortDescending = false, string? filter = null)
+        : this(skip, pageSize, sortField, isIncludeInActive, sortDescending)
+    {
+        Filter = filter;
+    }
+    
+    public int Skip { get; set; } = 0;
     public int PageSize { get; set; } = 10;
     public string SortColumn { get; set; } = "Id";
     public bool SortDescending { get; set; } = false;

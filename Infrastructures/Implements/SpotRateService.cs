@@ -140,7 +140,7 @@ public class SpotRateService : ISpotRateService
                                                            TransactionDate = x.TransactionDate,
                                                            EditSeq = x.EditSeq
                                                        });
-        return await PaginatedList<CurrencyDtoSpotRate>.CreateAsync(queries, param.PageNumber, param.PageSize);
+        return await PaginatedList<CurrencyDtoSpotRate>.CreateAsync(queries, param.Skip, param.PageSize);
     }
     public async Task<IEnumerable<VCurrenciesList>> GetCurrenciesForSetSpotRate(bool includeBaseCurrency = false)
     {

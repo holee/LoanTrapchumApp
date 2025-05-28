@@ -1,23 +1,21 @@
+using Applications.Commons.Mappers;
 using Applications.Enumerations;
 using Applications.Extensions;
-using Applications.Extensions.DateTimes;
 using Applications.Extensions.mappers;
 using Applications.Extensions.Maths;
 using Applications.Interfaces.Lists;
-using Applications.Interfaces.Loans;
 using Applications.Interfaces.setting;
 using Applications.Requests.Loans.Disbursements;
 using Applications.Requests.Loans.LoanRequests;
 using Applications.Requests.Loans.Payments;
-using Applications.Responses.Auths;
 using Applications.Responses.Loans.Disbursements;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Auths;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Applications.Responses.ViewModels.Options;
-using Domains.Models.Files;
-using Domains.Models.Lists;
+using Applications.Responses.ViewModels.Settings;
+using Applications.Services.Loans;
+using Applications.Services.Settings;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Radzen;
@@ -25,13 +23,11 @@ using Radzen;
 namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 {
     public partial class LoanRequestInfo(
-        ILoanSettingService loanSettingService,
-        IAppSettingService settingsServiceImpl,
+        ILoanSettingServiceImpl loanSettingService,
+        ISettingServiceImpl settingsServiceImpl,
         IHolidayService holidayService,
         ILogger<LoanRequestCreate> logger)
     {
-        private readonly IAppSettingService _settingsServiceImpl = settingsServiceImpl;
-        
         private readonly ILogger<LoanRequestCreate> _logger = logger;
 
         [Parameter] public LoanRequestDtoCreate Model { get; set; } = new();
@@ -45,7 +41,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 
         IEnumerable<LoanScheduleDtoCreate> previewSchedule = [];
 
-        IEnumerable<ApprovedUser> AprovedUsers = [];
+        IEnumerable<VUserLoanSizes> AprovedUsers = [];
 
         IEnumerable<VCustomerList> Customers = [];
 
@@ -69,14 +65,12 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 
         IEnumerable<LoanRequestDocumentsDtoCreate> _documents = [];
 
-        List<DateTime> Holidays = [];
-
         VCustomerList? selectedCustomer = new();
 
         DateTime firstPayment;
 
         LoanCategoryResponse? SelectedLoanCategory;
-        
+
         long? size = 0;
         int counts = 0;
         bool isVible = false;
@@ -89,28 +83,35 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
         int installmentType = 1;
         int selectedTabIndex = 0;
         string? filterText = "";
-
-
         protected override async Task OnInitializedAsync()
         {
             var cat = await loanSettingService.GetLoanCategories();
 
             if (cat!.Any())
             {
-                loanCategories = cat.Maps<LoanCategoryResponse>();
+                loanCategories = cat.Maps();
 
                 SelectedLoanCategory = loanCategories!.FirstOrDefault();
             }
 
-            await GetApprovedUser(BranchId);
-            
+
             await base.OnInitializedAsync();
         }
 
 
-        private async Task GetApprovedUser(int? branchId)
+        protected override async Task OnParametersSetAsync()
         {
-            var aproveResp = await loanSettingService.GetAprovedUserAsync<ApprovedUser>(branchId);
+            if (LoanRequestId.IsNotNullOrEmpty())
+            {
+                await GetApprovedUser(BranchId, Model.CurrencyRefId, Model.RequestAmount);
+            }
+            await base.OnParametersSetAsync();
+        }
+
+
+        private async Task GetApprovedUser(int? branchId, int? currencyId, decimal? amount)
+        {
+            var aproveResp = await loanSettingService.GetAprovedUserAsync(branchId, currencyId, amount);
 
             AprovedUsers = aproveResp ?? [];
         }
@@ -119,11 +120,11 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
         {
             var queryParam = new QueryParam(0, take, string.Empty, filter: filter);
 
-            var customerResponse = await _customerService!.GetCustomersAsync<VCustomerList>(customerId, queryParam);
+            var rsp = await _customerService!.GetCustomersAsync<VCustomerList>(customerId, queryParam);
 
-            if (customerResponse.IsSuccess)
+            if (rsp.IsSuccess)
             {
-                Customers = customerResponse.Data!.Items;
+                Customers = rsp.Data!.Items;
             }
         }
 
@@ -141,7 +142,6 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
             period += 2;
             var fut = cur.AddMonths(period);
             var hols = await holidayService.GetHolidays(false, cur, fut);
-            Holidays = hols.Select(x => x.HolidayDt!.Value).ToList();
         }
 
         void ChangedDate()
@@ -166,9 +166,9 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
                 firstPayment = DateTime.UtcNow.AddDays(1);
             }
 
-            HolidayHelper.SetHoliday(Holidays, ref firstPayment);
+            //HolidayHelper.SetHoliday(Holidays, ref firstPayment);
 
-            Model.FirstPaymentDate = firstPayment;
+            //Model.FirstPaymentDate = firstPayment;
         }
 
         void ChangedDate(DateTime? date)
@@ -192,10 +192,6 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
             {
                 firstPayment = date!.Value.AddDays(1);
             }
-
-            HolidayHelper.SetHoliday(Holidays, ref firstPayment);
-
-            Model.FirstPaymentDate = firstPayment;
         }
 
         void CalculateAdminFeeAmount(decimal? value)
@@ -229,7 +225,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
             //installmentType = 1;
         }
 
-        void PrincipleValueChanged(decimal? principle)
+        async Task PrincipleValueChanged(decimal? principle)
         {
             if (!principle.HasValue || principle < 0)
             {
@@ -241,15 +237,23 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
             if (principle <= 50000)
             {
                 Model.CurrencyRefId = 2;
+
                 Model.AdminFeeAmount = (principle * (Model.AdminFeeRate / 100)).RoundUp(2);
-                return;
+
+                await GetApprovedUser(BranchId, (int)CurrenciesType.Usd, principle);
+
             }
             else
             {
                 Model.CurrencyRefId = 1;
+
                 Model.AdminFeeAmount = (principle * (Model.AdminFeeRate / 100)).RoundUp(-2);
-                return;
+
+                await GetApprovedUser(BranchId, (int)CurrenciesType.Khr, principle);
+
             }
+
+            StateHasChanged();
         }
 
         async Task PeriodChanged()

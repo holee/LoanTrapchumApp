@@ -109,6 +109,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Branches
                 TransactionTypeName = "Close Branch",
                 TranTypeRefId = 68,
                 UserRefId = UserId,
+                BranchRefId= BranchId,
                 OpenBranch = new CloseBranchDtoUpdate
                 {
                     OpenBranchId = $"trx-{Guid.CreateVersion7()}",
@@ -158,6 +159,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Branches
                 TranTypeRefId = 68,
                 TransactionTypeName = "Open Branch",
                 UserRefId = UserId,
+                BranchRefId=BranchId,
                 OpenBranch = new OpenBranchDtoCreate() {
                     OpenBranchId = $"trx-{Guid.CreateVersion7()}",
                     BankRefId = 11,

@@ -217,7 +217,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanCategoriess
             {
                 var param = new QueryParam
                 {
-                    PageNumber = pageIndex,
+                    Skip = pageIndex,
                     PageSize = pageSize,
                     Filter = searchText,
                     SortColumn = sortColumn,

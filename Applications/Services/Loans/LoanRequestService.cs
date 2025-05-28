@@ -1,5 +1,5 @@
-﻿using Applications.Enumerations;
-using Applications.Helpers.Mappers;
+﻿using Applications.Commons.Mappers;
+using Applications.Enumerations;
 using Applications.Interfaces.Loans;
 using Applications.Requests.Loans.CreditAgents;
 using Applications.Requests.Loans.LoanRequests;
@@ -54,24 +54,26 @@ namespace Applications.Services.Loans
             return await reqService.ChangedLoanRequestAsync(req);
         }
 
-        public async Task<Result<string>> CreateNewLoanRequestAsync(LoanRequestDtoCreate request)
+        public async Task<Result<string>> CreateNewLoanRequestAsync(LoanRequestDtoCreate request, CancellationToken cancellation = default)
         {
             
-            var req = request.MapToLoanRequest();
+            var req = request.MapToLoanCreateNew();
 
-            return await reqService.CreateNewLoanRequestAsync(req);
+            return await reqService.CreateNewLoanRequestAsync(req,cancellation);
         }
 
-        public async Task<Result<string>> CreateLoanRequestAsync(LoanRequestDtoCreate request,CancellationToken cancellation=default)
+        public async Task<Result<string>> SaveLoanRequestAsync(LoanRequestDtoCreate request,CancellationToken cancellation=default)
         {
             var req = request.MapToLoanRequestCreate(); 
 
-            return await reqService.CreateLoanRequestAsync(req,cancellation);
+            return await reqService.SaveLoanRequestAsync(req,cancellation);
         }
 
-        public async Task<Result<bool>> CreateLoanRequestAsync(int? branchId, string? userId, string? loanRequestId)
+        public async Task<Result<string>> CreateLoanRequestAsync(LoanRequestDtoCreate request, CancellationToken cancellation = default)
         {
-            return await reqService.CreateLoanRequestAsync(branchId, userId, loanRequestId);
+            var model = request.MapToLoanRequestCreate();
+
+            return await reqService.CreateLoanRequestAsync(model, cancellation);
         }
 
         public async Task<Result<string>> DeleteLoanRequestCollateralAsync(int? branchId, string? loanRequestId,

@@ -1,4 +1,4 @@
-﻿using Applications.Helpers.Mappers;
+﻿using Applications.Commons.Mappers;
 using Applications.Interfaces.Vendors;
 using Applications.Requests.Lists.Entities;
 using Applications.Requests.Lists.OtherNames;

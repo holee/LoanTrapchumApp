@@ -75,7 +75,7 @@ public static class LoanRequestDtoCreateExtensions
     }
 
 
-    public static LoanRequest MapToLoanRequest(this LoanRequestDtoCreate req)
+    public static LoanRequest MapToLoanCreateNew(this LoanRequestDtoCreate req)
     {
         return new LoanRequest
         {

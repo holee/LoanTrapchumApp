@@ -182,10 +182,21 @@ h1:focus {
 @font-face {
     font-family: 'Font Awesome';
     font-style: normal;
-    font-weight: 900;
+    font-weight: 200;
     src: url('font-awesome/webfonts/fa-solid-900.woff2') format('woff2');
 }
 
+
+@font-face {
+    font-family: 'line awesome';
+    font-style: normal;
+    font-weight: 900;
+    src: url('line-awesome/fonts/la-solid-900.woff2') format('woff2');
+}
 .fa {
     --rz-icon-font-family: 'Font Awesome'
+}
+
+.la {
+    --rz-icon-font-family: 'line awesome'
 }

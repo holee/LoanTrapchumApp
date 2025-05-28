@@ -8,6 +8,7 @@
 @using Domains.Models.Collaterals
 @using Domains.Models.Loans
 @using Radzen.Blazor.Rendering
+@using TrapchumApp.Helpers.Constants
 <PageTitle>Loan Request</PageTitle>
 <Card>
     <EditForm Model="model" @ref="editForm">
@@ -16,47 +17,57 @@
         <CardBody BodyCssClass="rz-background-color-base-200">
             <RadzenTabs SelectedIndexChanged="SelectTabIndexChanged" RenderMode="TabRenderMode.Client">
                 <Tabs>
-                    <RadzenTabsItem Text="សំណើរ">
+                    <RadzenTabsItem Text="សំណើរ" Icon="@IconNames.RequestQuote">
                         <LoanRequestInfo Model="@model" CustomerId="@CustomerId" LoanRequestId="@LoanRequestId" BranchId="@BranchId" />
-                        <RadzenFieldset>
-                            <LoanRequestCollaterals CustomerId="@CustomerId"
-                                                    ShowCommand="true"
-                                                    ShowAdd="true"
-                                                    ShowRemove="true"
-                                                    @ref="CollateralRef"
-                                                    Add="AddCollaterals"
-                                                    RemoveCollateral="RemovedCollateral"
-                                                    Collaterals="CollateralLines">
-                                <SearchBoxTemplate>
-                                    <CollateralSearchList CustomerId="@CustomerId"
-                                                          MultipleSelected="SelectManyCollaterals"
-                                                          SingleSelected="SelectedCollateral" />
-                                </SearchBoxTemplate>
-                            </LoanRequestCollaterals>
-                            <LoanRequestGaurantor Guarantors="Guarantors"
-                                                  ShowAdd="true"
-                                                  Add="AddGuarantors"
-                                                  ShowRemove="true"
-                                                  ShowCommand="true"
-                                                  Remove="RemoveGaurantor"
-                                                  @ref="GuarantorRef">
-                                <SearchBoxTemplate>
-                                    <GuarantorSearchList OnSelected="SelectedGuarantors" SelectMany="SelectMany" />
-                                </SearchBoxTemplate>
-                            </LoanRequestGaurantor>
-                            <LoanRequestDocument Documents="@Documents"
-                                                 UploadDocument="@HandleFileDialogue"
-                                                 RemoveDocument="RemoveFile"
-                                                 @ref="DocumentRef"
-                                                 ShowDelete="true" />
-                        </RadzenFieldset>
+                        <RadzenTabs>
+                            <Tabs>
+                                <RadzenTabsItem Icon="@IconNames.Collaterals" Text="Collaterals">
+                                    <LoanRequestCollaterals CustomerId="@CustomerId"
+                                                            ShowCommand="true"
+                                                            ShowAdd="true"
+                                                            ShowRemove="true"
+                                                            @ref="CollateralRef"
+                                                            Add="AddCollaterals"
+                                                            RemoveCollateral="RemovedCollateral"
+                                                            Collaterals="CollateralLines">
+                                        <SearchBoxTemplate>
+                                            <CollateralSearchList CustomerId="@CustomerId"
+                                                                  MultipleSelected="SelectManyCollaterals"
+                                                                  SingleSelected="SelectedCollateral" />
+                                        </SearchBoxTemplate>
+                                    </LoanRequestCollaterals>
+
+                                </RadzenTabsItem>
+                                <RadzenTabsItem Icon="@IconNames.Group" Text="Guarantors">
+                                    <LoanRequestGaurantor Guarantors="Guarantors"
+                                                          ShowAdd="true"
+                                                          Add="AddGuarantors"
+                                                          ShowRemove="true"
+                                                          ShowCommand="true"
+                                                          Remove="RemoveGaurantor"
+                                                          @ref="GuarantorRef">
+                                        <SearchBoxTemplate>
+                                            <GuarantorSearchList OnSelected="SelectedGuarantors" SelectMany="SelectMany" />
+                                        </SearchBoxTemplate>
+                                    </LoanRequestGaurantor>
+
+                                </RadzenTabsItem>
+                                <RadzenTabsItem Icon="@IconNames.AttachFile" Text="Attarchment">
+                                    <LoanRequestDocument Documents="@Documents"
+                                                         UploadDocument="@HandleFileDialogue"
+                                                         RemoveDocument="RemoveFile"
+                                                         @ref="DocumentRef"
+                                                         ShowDelete="true" />
+                                </RadzenTabsItem>
+                            </Tabs>
+                        </RadzenTabs>
                     </RadzenTabsItem>
-                    <RadzenTabsItem Text="អតិថិជន">
+                    <RadzenTabsItem Text="អតិថិជន" Icon="@IconNames.Customers">
                         <RadzenFieldset>
                             <CustomerRequest CustomerId="@CustomerId" />
                         </RadzenFieldset>
                     </RadzenTabsItem>
-                    <RadzenTabsItem Text="Notes">
+                    <RadzenTabsItem Text="Notes" Icon="@IconNames.Comment">
                         <RadzenFieldset>
                           <RadzenRow AlignItems="AlignItems.Center">
                               <RadzenColumn Size="12">
@@ -65,20 +76,7 @@
                                   </RadzenTextArea>
                               </RadzenColumn>
                           </RadzenRow>
-                            <div class="comments-list">
-                                @foreach (var item in _loanDescriptions ?? [])
-                                {
-                                    <div class="comment">
-                                        <div class="comment-header">
-                                            <span class="comment-author">@item.FullName</span>
-                                            <span class="comment-date">@item.PretierDate</span>
-                                        </div>
-                                        <p>
-                                            @item.Memo
-                                        </p>
-                                    </div>
-                                }
-                            </div>
+                            <LoanRequestNotes Data="@_loanDescriptions" />
                         </RadzenFieldset>
                     </RadzenTabsItem>
                 </Tabs>

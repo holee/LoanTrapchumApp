@@ -141,10 +141,10 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
                 LoanRepayment.LoanRefId = LoanId;
                 LoanRepayment.CreditAgentRefId = CreditAgentId;
                 LoanRepayment.PayDate = DateTime.Now;
-                LoanRepayment.Principle = LoanRepaymentLines.PaidPrincipleAmount();
-                LoanRepayment.Interest = LoanRepaymentLines.PaidInterestAmount();
-                LoanRepayment.CollectionFeeAmount = LoanRepaymentLines.PaidCollectionFeeAmount();
-                LoanRepayment.PenaltyAmount = LoanRepaymentLines.PaidPenaltyAmount();
+                LoanRepayment.Principle = LoanRepaymentLines.TotalPaidPrinciple();
+                LoanRepayment.Interest = LoanRepaymentLines.TotalPaidInterest();
+                LoanRepayment.CollectionFeeAmount = LoanRepaymentLines.TotalPaidCollectionFee();
+                LoanRepayment.PenaltyAmount = LoanRepaymentLines.TotalPaidPenalty();
                 LoanRepayment.SubTotal = LoanRepaymentLines.Total();
                 LoanRepayment.OfficialReceiptNo = ReceiptNo;
                 LoanRepayment.LoanRepaymentLines = LoanRepaymentLines;

@@ -1,4 +1,5 @@
-﻿<style>
+﻿@using TrapchumApp.Helpers.Constants
+<style>
     .table-cell-edited {
         position: relative;
     }
@@ -71,7 +72,7 @@
                 @c.LeftPrinciple.Format(c.CurrencyId)
             </Template>
             <FooterTemplate>
-                @Schedules.Sum(x => x.LeftPrinciple)
+                @Schedules.Sum(x => x.LeftPrinciple).Format(CurrencyId)
             </FooterTemplate>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn TextAlign="TextAlign.End"
@@ -83,7 +84,7 @@
                 @c.LeftInterestAmount.Format(c.CurrencyId)
             </Template>
             <FooterTemplate>
-                @Schedules.Sum(x => x.LeftInterestAmount)
+                @Schedules.Sum(x => x.LeftInterestAmount).Format(CurrencyId)
             </FooterTemplate>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn TextAlign="TextAlign.Right"
@@ -96,7 +97,7 @@
                 @c.LeftCollectionFeeAmount.Format(c.CurrencyId)
             </Template>
             <FooterTemplate>
-                @Schedules.Sum(x => x.LeftCollectionFeeAmount)
+                @Schedules.Sum(x => x.LeftCollectionFeeAmount).Format(CurrencyId)
             </FooterTemplate>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn TextAlign="TextAlign.Right"
@@ -121,6 +122,9 @@
                                Format="#,##0.00"
                                InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "Select Penalty Amount" } })" />
             </EditTemplate>
+            <FooterTemplate>
+                @Schedules.Sum(x => x.PenaltyAmount).Format(CurrencyId)
+            </FooterTemplate>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn TextAlign="TextAlign.Right"
                               Title="សរុបប្រាក់ត្រូវបង់"
@@ -132,7 +136,7 @@
                 @c.LeftAmount.Format(c.CurrencyId)
             </Template>
             <FooterTemplate>
-                @Schedules.Sum(x => x.LeftAmount)
+                @Schedules.Sum(x => x.LeftAmount).Format(CurrencyId)
             </FooterTemplate>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn TextAlign="TextAlign.Center"
@@ -143,11 +147,10 @@
                               Property="@nameof(VSchedule.LoanScheduleId)"
                               Sortable="false">
             <Template>
-                <RadzenButton Icon="undo"
+                <RadzenButton Icon="@IconNames.Undo"
                               Variant="Variant.Text"
                               Click="@(()=>ResetIndividualSchedule(c))"
                               Size="ButtonSize.ExtraSmall" />
-                IndividualSchedule
             </Template>
         </RadzenDataGridColumn>
     </Columns>
@@ -161,7 +164,7 @@
 
     <AuthorizeView>
         <Authorized>
-            <RadzenButton Icon="paid"
+            <RadzenButton Icon="@IconNames.Paid"
                           Size="ButtonSize.Small"
                           ButtonStyle="ButtonStyle.Secondary"
                           Click="@(()=>DialogService.Close(true))"
@@ -169,7 +172,7 @@
         </Authorized>
     </AuthorizeView>
 
-    <RadzenButton Icon="cancel"
+    <RadzenButton Icon="@IconNames.Cancel"
                   Size="ButtonSize.Small"
                   Variant="Variant.Text"
                   ButtonStyle="ButtonStyle.Secondary"

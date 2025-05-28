@@ -177,7 +177,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Exchanges
         {
             var qparam = new QueryParam
             {
-                PageNumber = pageIndex,
+                Skip = pageIndex,
                 PageSize = pageSize
             };
             CurrencyPaginatedList = await spotRateService.GetSpotRates(Id, qparam);

@@ -1,11 +1,15 @@
-﻿using Applications.Extensions;
+﻿using Applications.Enumerations;
+using Applications.Extensions;
 using Applications.Interfaces.Loans;
 using Applications.Responses.Auths;
 using Applications.Responses.ViewModels.Auths;
+using Applications.Responses.ViewModels.Settings;
+using Dapper;
 using Domains.Models.Loans;
 using Infrastructures.DataAccess;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Infrastructures.Implements
 {
@@ -14,11 +18,13 @@ namespace Infrastructures.Implements
         private readonly DataContext _context;
         private readonly IDapperConnectionFactory _db;
         private readonly IDbContextFactory<DataContext> _contextFactory;
-        public LoanSettingService(DataContext context, IDapperConnectionFactory db, IDbContextFactory<DataContext> contextFactory)
+        private readonly ILogger<LoanSettingService> _logger;
+        public LoanSettingService(DataContext context, IDapperConnectionFactory db, IDbContextFactory<DataContext> contextFactory, ILogger<LoanSettingService> logger)
         {
             _context = context;
             _db = db;
             _contextFactory = contextFactory;
+            _logger = logger;
         }
         public async Task<IEnumerable<LoanSubTypeStatus>> GetSubSubTypeStatus(int? subTypeRefId = null, string? q = null)
         {
@@ -48,6 +54,7 @@ namespace Infrastructures.Implements
                                                         .ToListAsync();
             return queries;
         }
+
         public async Task<IEnumerable<LoanRepaymentMode>> GetRepaymentModes(string? q = null)
         {
 
@@ -127,12 +134,82 @@ namespace Infrastructures.Implements
                                                                                          EF.Functions.Like(x.LastName!, $"%{filter}%"))
                                                .ProjectToType<T>()
                                                .AsNoTracking()
-                                               .ToListAsync() ;
+                                               .ToListAsync();
 
             return aprovedPersons;
 
         }
 
+        public async Task<IEnumerable<VUserLoanSizes>> GetAprovedUserAsync(int? branchId, int? currencyId, decimal? amount, string? filter = null)
+        {
+            ArgumentException.ThrowIfNullOrEmpty(nameof(branchId));
+
+            _logger.LogInformation(@"GetAprovedUserAsync called with branchId: {BranchId}, currencyId: {CurrencyId}, amount: {Amount}", 
+                branchId, currencyId, amount);
+
+            using var db = _db.CreateConnection();
+
+            var sql = @"SELECT 
+                        UserRefId,
+                        FullName
+                    FROM 
+                        VUserLoanSizes
+                    WHERE 
+                        IsActive =CAST(1 AS BIT)
+                        AND ((@branchId > 0 AND BranchId = @branchId) OR @branchId IS NULL)
+                        AND (
+                            (@currencyId = 1 AND @amount BETWEEN MinKhrLoanSize AND MaxKhrLoanSize)
+                            OR 
+                            (@currencyId = 2 AND @amount BETWEEN MinUsdLoanSize AND MaxUsdLoanSize)
+                        )
+                        AND (
+                            @filter IS NULL OR @filter = N'' 
+                            OR FullName LIKE N'%' + @filter + '%' 
+                            OR BranchName LIKE N'%' + @filter + '%'
+                        )
+                    ";
+
+            var parameters = new DynamicParameters();
+
+            parameters.Add("@branchId", branchId);
+
+            parameters.Add("@currencyId", currencyId);
+
+            parameters.Add("@amount", amount);
+
+            parameters.Add("@filter", filter);
+
+            var results = await db.QueryAsync<VUserLoanSizes>(sql, parameters);
+
+            return results;
+
+        }
+
+
     }
 
 }
+
+//var queries = context.Database
+//                     .SqlQuery<VUserLoanSizes>($"SELECT * FROM VUserLoanSizes WHERE IsActive=CAST(1 AS BIT)")
+//                     .WhereIf(branchId > 0, x => x.BranchId == branchId)
+//                     .WhereIf(filter.IsNotNullOrEmpty(), x => EF.Functions.Like(x.FullName, $"%{filter}%") ||
+//                                                           EF.Functions.Like(x.BranchName, $"%{filter}%"));
+
+//if (currencyId == (int)CurrenciesType.Khr)
+//{
+//    queries = queries.Where(x => amount >= x.MinKhrLoanSize && amount <= x.MaxKhrLoanSize);
+//}
+//else if (currencyId == (int)CurrenciesType.Usd)
+//{
+//    queries = queries.Where(x => amount >= x.MinUsdLoanSize && amount <= x.MaxUsdLoanSize);
+//}
+
+//var results = await queries
+//            .Select(x => new VUserLoanSizes
+//            {
+//                UserRefId = x.UserRefId,
+//                FullName = x.FullName,
+//            })
+//            .AsNoTracking()
+//            .ToListAsync();

@@ -1,8 +1,5 @@
-using Applications.Interfaces.setting;
 using Applications.Requests.Settings;
 using Applications.Services.Settings;
-using Domains.Models.Loans;
-using Mapster;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 
@@ -17,30 +14,42 @@ namespace TrapchumApp.Components.Pages.Accounts
             _settingService = settingService;
         }
 
+        protected override void OnInitialized()
+        {
+            model.UserRefId = UserId;
+            model.StartDate = DateTime.Now;
+            base.OnInitialized();
+        }
         [Parameter, EditorRequired] public string UserId { get; set; } = string.Empty;
 
         UserLoanSizeDtoCreate model = new UserLoanSizeDtoCreate();
 
-        protected override async Task OnInitializedAsync()
-        {
-            await base.OnInitializedAsync();
-        }
-
-        async void HandleFormSubmit()
+        async Task HandleFormSubmit()
         {
 
-            var resp = await _settingService.ApplyUserLoanSizeAsync(model);
+            var resp = await _settingService.CreateUserLoanSizeAsync(model);
 
             if (!resp.IsSuccess)
             {
                 NotificationService.Notify(NotificationSeverity.Error, resp.ErrMessage);
-
-                DialogService.Close(true);
+                return;
             }
             else
             {
                 NotificationService.Notify(NotificationSeverity.Success, "Loan Size was seeting");
+                DialogService.Close(true);
             }
         }
+        private void StartDateChanged(DateTime? args)
+        {
+            if (args is not null && args.HasValue)
+            {
+
+                var newDate = model.EndDate ?? DateTime.Now;
+
+                model.EndDate = newDate.AddYears(1);
+            }
+        }
+
     }
 }

@@ -3,6 +3,8 @@
 @using Applications.Responses.Loans.Disbursements
 @using Applications.Responses.ViewModels.Loans.Requests
 @using Applications.Responses.ViewModels.OtherNames
+@using Applications.Responses.ViewModels.Settings
+@using Domains.Models.Loans
 @using Radzen.Blazor.Rendering
 <style type="text/css">
     .my-popup {
@@ -25,11 +27,12 @@
                     <RadzenLabel>អតិថិជន</RadzenLabel>
                 </RadzenColumn>
                 <RadzenColumn Size="8">
+                    <input type="hidden" @bind="@Model.CustomerRefId" />
                     <RadzenTextBox @ref="@textBox" Value="@Model.FullName"
                                    @oninput="@OnInput"
                                    @onclick="OpenPopup"
                                    class="w-100"
-                                   ReadOnly="@isCustomerSelected"
+                                   ReadOnly="@(LoanRequestId.IsNotNullOrEmpty() || CustomerId.IsNotNullOrEmpty())"
                                    @onkeydown="@OnKeyDown"/>
                     <Popup @ref="popup" id="popup" AutoFocusFirstElement="false"
                            class="my-popup">
@@ -81,8 +84,8 @@
                     <RadzenLabel>អ្នកយល់ព្រម</RadzenLabel>
                 </RadzenColumn>
                 <RadzenColumn Size="8">
-                    <RadzenDropDown TextProperty="@nameof(ApprovedUser.FullName)"
-                                    ValueProperty="@nameof(ApprovedUser.Id)"
+                    <RadzenDropDown TextProperty="@nameof(VUserLoanSizes.FullName)"
+                                    ValueProperty="@nameof(VUserLoanSizes.UserRefId)"
                                     class="w-100"
                                     TValue="string"
                                     @bind-Value="Model.AprovedUserId"
@@ -245,12 +248,14 @@
     {
         if (customer is null) return;
 
-        Model.CustomerRefId = customer.CustomerId;
+        if (CustomerId.IsNullOrEmpty())
+        {
+            Model.CustomerRefId = customer.CustomerId;
 
-        Model.FullName = customer.FullName;
+            Model.FullName = customer.FullName;
 
-        await SetCustomerId(customer.CustomerId);
-
+            //await SetCustomerId(customer.CustomerId);
+        }
         await popup.CloseAsync();
     }
 
@@ -307,7 +312,12 @@
 
     async Task OpenPopup(MouseEventArgs arg)
     {
-        if (isCustomerSelected) return;
+        if (LoanRequestId.IsNotNullOrEmpty() || CustomerId.IsNotNullOrEmpty())
+        {
+            await popup.CloseAsync();
+
+            return;
+        }
 
         await GetCustomers(string.Empty, 10, filterText);
 

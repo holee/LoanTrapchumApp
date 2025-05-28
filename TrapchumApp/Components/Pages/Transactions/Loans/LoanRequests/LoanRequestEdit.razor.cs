@@ -1,4 +1,5 @@
 using Applications.Calculations;
+using Applications.Commons.Mappers;
 using Applications.Enumerations;
 using Applications.Extensions;
 using Applications.Extensions.LoanCalculators;
@@ -8,6 +9,7 @@ using Applications.Interfaces.setting;
 using Applications.Requests.Loans.Disbursements;
 using Applications.Requests.Loans.LoanRequests;
 using Applications.Responses;
+using Applications.Responses.Auths;
 using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.Loans.Disbursements;
 using Applications.Responses.Paginations;
@@ -456,23 +458,38 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
         {
             _logger.LogInformation("get start loan requesting...");
 
-            if (!string.IsNullOrEmpty(model.Memo))
+            if (editForm.EditContext!.Validate()==false)
             {
+                NotificationService.Notify(NotificationSeverity.Error, "Please fill all required fields.");
+                return;
+            }
+
+            if (model.Memo.IsNotNullOrEmpty())
+            {
+
                 var descriptions = new LoanDescriptionsDtoCreate(model.Memo, UserId,LoanRequestId);
 
                 model.LoanDescriptions.Add(descriptions);
             }
-            editForm.EditContext!.Validate();
+           
             try
             {
                 model.BankRefId = 11;
+
                 model.LoanSubTypeRefId = 1;
+
                 model.BranchRefId = BranchId;
+
                 model.RequestUserRefId = UserId;
+
                 model.CreditAgentRefId = _user.EmployeeRefId;
-                model.RequestDate = DateTime.UtcNow;
+
+                model.RequestDate = DateTime.Now;
+
                 model.LoanRequestStatusRefId = (int)state;
+
                 model.BranchRefId = BranchId;
+
                 model.AprovedAmount = model.RequestAmount;
 
                 var resp = await _loanRequestService.CreateLoanRequestAsync(model);
@@ -496,79 +513,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
             }
         }
 
-        LoanCaloulator SelectLoanType(int? paymentMode)
-        {
-            return paymentMode switch
-            {
-                1 => new Balloon(),
-                2 => new Decline(),
-                3 => new Flat(),
-                4 => new Annuarity(),
-                _ => new Flat(),
-            };
-        }
+       
 
-        void ShowLoanPreviews()
-        {
-            if (model.RequestAmount == 0) return;
-            selectedTabIndex = 2;
-            var calculator = SelectLoanType(3);
-            calculator.PayEvery = 1;
-            calculator.EffectiveRate = model.CollectionFeeRate!.Value;
-            calculator.StartDate = DateTime.Now;
-            calculator.FirstPayment = DateTime.Now.AddMonths(1);
-            calculator.CollectionFeeMode = SelectedCollectionFee;
-            calculator.InstallmentTypeId = 1;
-            calculator.CurrencyId = model.CurrencyRefId!.Value;
-            var schedule = calculator.Calculate(model.Installments, model.InterestRate, model.RequestAmount);
-            previewSchedule = schedule.Select(x => new LoanScheduleDtoCreate
-            {
-                InstallmentNo = x.InstallmentNo,
-                PaymentDate = x.PaymentDate,
-                Principal = x.Principal,
-                Interest = x.Interest,
-                CollectionFee = x.CollectionFeeAmount,
-                LoanOutstanding = x.OutStanding,
-                TotalDay = x.TotalDay,
-                TotalPay = x.TotalPay,
-                AgentRefId = UserId,
-                ScheduleStatusRefId = 2
-            }).ToList();
-        }
     }
 }
-
-
-//var uri = new Uri(NavigationManager.Uri);
-//var queryParam = HttpUtility.ParseQueryString(uri.Query).Get(nameof(ActionMode));
-
-//if (Enum.TryParse(queryParam, true, out ActionMode result))
-//{
-//    ActionMode = result;
-//}
-
-//IEnumerable<LoanRepaymentModeDto>? LoanRepaymentModes = [];
-
-//IEnumerable<LoanScheduleStatusDto>? LoanScheduleStatus = [];
-
-//IEnumerable<LoanStatusDto>? LoanStatuses = [];
-
-//IEnumerable<LoanCategoryResponse>? loanCategories = [];
-//IEnumerable<LoanInstallmentTypeDto>? LoanInstallments = [];
-//if (CustomerId.IsNotNullOrEmpty() || LoanRequestId.IsNotNullOrEmpty())
-//{
-//    isCustomerSelected = true;
-//}
-
-//var cat = await _loanSettingService.GetLoanCategories();
-
-//if (cat!.Any())
-//{
-//    loanCategories = cat.Maps<LoanCategoryResponse>();
-
-//    SelectedLoanCategory = loanCategories!.FirstOrDefault();
-//}
-
-//var aproveResp = await _loanSettingService.GetAprovedUserAsync<ApprovedUser>(BranchId);
-
-//AprovedUsers = aproveResp ?? [];

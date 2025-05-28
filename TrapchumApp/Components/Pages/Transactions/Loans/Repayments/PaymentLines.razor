@@ -37,7 +37,7 @@
                     @c.PaidPrinciple
                 </Template>
                 <FooterTemplate>
-                    @LoanRepaymentLines.PaidPrincipleAmount()
+                    @LoanRepaymentLines.TotalPaidPrinciple()
                 </FooterTemplate>
             </RadzenDataGridColumn>
             <RadzenDataGridColumn TextAlign="TextAlign.Right"
@@ -47,7 +47,7 @@
                     @c.PaidInterest
                 </Template>
                 <FooterTemplate>
-                    @LoanRepaymentLines.PaidInterestAmount()
+                    @LoanRepaymentLines.TotalPaidInterest()
                 </FooterTemplate>
             </RadzenDataGridColumn>
             <RadzenDataGridColumn TextAlign="TextAlign.Right"
@@ -57,7 +57,7 @@
                     @c.PaidCollectionFee
                 </Template>
                 <FooterTemplate>
-                    @LoanRepaymentLines.PaidCollectionFeeAmount()
+                    @LoanRepaymentLines.TotalPaidCollectionFee()
                 </FooterTemplate>
             </RadzenDataGridColumn>
             <RadzenDataGridColumn Title="ប្រាក់ពិន័យ"
@@ -67,7 +67,7 @@
                     @c.PenaltyAmount
                 </Template>
                 <FooterTemplate>
-                    @LoanRepaymentLines.PaidPenaltyAmount()
+                    @LoanRepaymentLines.TotalPaidPenalty()
                 </FooterTemplate>
             </RadzenDataGridColumn>
             <RadzenDataGridColumn TextAlign="TextAlign.Right"

@@ -98,7 +98,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
             {
                 isLoading = true;
 
-                var param = new QueryParam(pageIndex, pageSize, sortField, sortDescending, filter);
+                var param = new QueryParam(pageIndex, pageSize, sortField,false, sortDescending, filter);
 
                 var res = await _loanScheduleService.GetLoanSchedulesByPaymentDateAsync( BranchId, paymentDate, true, false, param);
 

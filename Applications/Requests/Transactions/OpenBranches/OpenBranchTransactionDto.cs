@@ -6,6 +6,7 @@ public class OpenBranchTransactionDto
     public int TranTypeRefId { get; set; }
     public string? TransactionTypeName { get; set; } 
     public string? UserRefId { get; set; }
+    public int? BranchRefId { get; set; }
     public OpenBranchDtoCreate OpenBranch { get; set; } = new();
 
 }
