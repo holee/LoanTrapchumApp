@@ -1,0 +1,100 @@
+﻿@page "/App/Vendor"
+@using Applications.Responses.ViewModels.Vendors
+@using TrapchumApp.Components.Pages.Lists.OtherNames
+@using TrapchumApp.Services
+<PageTitle>Vendors</PageTitle>
+<RadzenTabs SelectedIndex="@selectedIndex" RenderMode="TabRenderMode.Server">
+    <Tabs>
+        <RadzenTabsItem Text="Vendors" Icon="list">
+            <Card>
+                <CardBody>
+                    <PageDropDown PageSizeChanged="PageSizeChanged"
+                                  Reload="Reload"
+                                  ShowSearchBox="true"
+                                  OnTextChanged="OnSearch"
+                                  ShowReload="true">
+                        <LeftChildContent>
+                            <RadzenButton Icon="add"
+                                          Size="ButtonSize.Small"
+                                          Text="Vendor"
+                                          Click="AddTabOtherName"
+                                          ButtonStyle="ButtonStyle.Primary" />
+                        </LeftChildContent>
+                        <RightChildContent>
+                            <div>
+                                <RadzenCheckBox TValue="bool" @bind-Value=@includeInactive Change="ex=>IncludeInActiveChanged(ex)" Name="CheckBox1" />
+                                <RadzenLabel Text="Include InActive" Component="CheckBox1" Style="margin-left: 8px; vertical-align: middle;" />
+                            </div>
+                        </RightChildContent>
+                    </PageDropDown>
+                    <RadzenDataGrid TItem="VendorVm"
+                                    Density="Density.Compact"
+                                    Responsive
+                                    Count="@counts"
+                                    Style="height:30rem;min-height:30rem;max-height:45rem;"
+                                    PageSize="@pageSize"
+                                    LoadData="@LoadData"
+                                    ColumnWidth="15rem"
+                                    AllowPaging="true"
+                                    PagerHorizontalAlign="HorizontalAlign.Right"
+                                    ShowPagingSummary="true"
+                                    AllowSorting="true"
+                                    IsLoading="@isLoading"
+                                    Data="Vendors">
+                        <Columns>
+                            <RadzenDataGridColumn Width="10rem" Title="Name" Property="@(nameof(VendorVm.AltName))" />
+                            <RadzenDataGridColumn Width="6rem" Title="Title" Property="@(nameof(VendorVm.Salutation))" />
+                            <RadzenDataGridColumn Sortable="false" Width="8rem" Title="Phone" Property="@(nameof(VendorVm.Phone))" />
+                            <RadzenDataGridColumn Sortable="false" Width="15rem" Title="Email" Property="@(nameof(VendorVm.EmailAddress))" />
+                            <RadzenDataGridColumn Sortable="false" Title="Address" Property="@(nameof(VendorVm.Description))" Context="v">
+                                <Template>
+                                    @v.ToString()
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn Sortable="false"
+                                                  Width="6rem"
+                                                  Title="Status" Property="@(nameof(VendorVm.VendorId))" Context="v">
+                                <Template>
+                                    <RadzenCheckBox TValue="bool"
+                                                    Change="@(arg=>DeactiveOrActive(arg,v))"
+                                                    @bind-Value="v.IsActive" />
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn Width="5rem" Sortable="false" Title="Actions" Property="@(nameof(VendorVm.VendorId))" Context="v">
+                                <Template>
+                                    <RadzenButton Size="ButtonSize.ExtraSmall"
+                                                  Icon="more_vert"
+                                                  Variant="Variant.Text"
+                                                  Click="@(args=>ShowContextMenuWithContent(args,v))" />
+                                </Template>
+                            </RadzenDataGridColumn>
+                        </Columns>
+                    </RadzenDataGrid>
+                </CardBody>
+            </Card>
+        </RadzenTabsItem>
+        <RadzenTabsItem Visible="IsEnableNew" Text="New" Icon="person_add">
+            <VendorCreate Closed="CloseTabs" />
+        </RadzenTabsItem>
+        <RadzenTabsItem Visible="IsEnableEdit" Text="Edit" Icon="edit">
+            <VendorEdit Id="@vendorId" Closing="Closing" />
+        </RadzenTabsItem>
+        <RadzenTabsItem Visible="IsEnableDetail" Text="Details" Icon="person">
+            <VendorDetailModal OnEdit="OnEdit" Closing="CloseTabs" Id="@vendorId" />
+        </RadzenTabsItem>
+    </Tabs>
+</RadzenTabs>
+
+@code {
+
+    void ShowContextMenuWithContent(MouseEventArgs args, VendorVm e)
+    {
+        ContextMenuService.Open(args, ds =>
+    @<RadzenMenu Style="font-size:0.8rem;">
+        <RadzenMenuItem Click="@(()=>DisplayDetail(e.VendorId))" Icon="info" Text="Details" Value="@e.VendorId"></RadzenMenuItem>
+        <RadzenMenuItem Click="@(()=>ShowEdit(e.VendorId))" Icon="edit" Text="Edit" Value="@e.VendorId"></RadzenMenuItem>
+        <RadzenMenuItem Click="@(()=>OnDelete(e.VendorId))" Icon="delete" Text="Delete" Value="@e.VendorId"></RadzenMenuItem>
+    </RadzenMenu>
+    );
+    }
+}

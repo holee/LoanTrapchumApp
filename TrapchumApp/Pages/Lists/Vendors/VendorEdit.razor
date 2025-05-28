@@ -1,0 +1,27 @@
+﻿@page "/App/Vendors/{Id}/Edit"
+@using TrapchumApp.Services
+<PageTitle>Vendor</PageTitle>
+<EditForm Model="model" OnValidSubmit="HandleFormSubmit">
+    <FluentValidationValidator DisableAssemblyScanning="true"></FluentValidationValidator>
+    <input type="hidden" @bind="model.Id" />
+    <CreateComp model="model" @key="@(Guid.NewGuid().ToString("N"))" />
+    <AddressBaseCreate model="model" @key="@(Guid.NewGuid().ToString("N"))" />
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 AlignItems="AlignItems.Center"
+                 Gap="1rem"
+                 class="rz-mt-2"
+                 JustifyContent="JustifyContent.End">
+        <RadzenButton Size="ButtonSize.Small"
+                      ButtonStyle="ButtonStyle.Success"
+                      ButtonType="ButtonType.Submit"
+                      Text="Save"
+                      Icon="save" />
+        <RadzenButton Click="Close"
+                      Size="ButtonSize.Small"
+                      Text="Close"
+                      ButtonStyle="ButtonStyle.Danger"
+                      Icon="cancel" />
+    </RadzenStack>
+</EditForm>
+
+

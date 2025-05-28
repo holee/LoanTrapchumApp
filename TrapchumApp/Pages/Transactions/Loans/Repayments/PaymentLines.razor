@@ -1,0 +1,116 @@
+﻿@using Applications.Calculations
+@using Applications.Requests.Loans.Payments
+@using TrapchumApp.Services
+<RadzenStack AlignItems="AlignItems.Center" class="mt-2">
+    <RadzenDataGrid @ref="gridLoanPaymentLines"
+                    Density="Density.Compact"
+                    GridLines="DataGridGridLines.Both"
+                    AllowAlternatingRows="true"
+                    Data="LoanRepaymentLines">
+        <Columns>
+            <RadzenDataGridColumn Width="2rem"
+                                  Title="#"
+                                  Context="c">
+                <Template>
+                    @(LoanRepaymentLines.IndexOf(c) + 1)
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Width="6rem"
+                                  Title="ថ្ងៃបង់ប្រាក់"
+                                  Context="c">
+                <Template>
+                    <em>@c.PayDate.DayFirst()</em>
+                    <br />
+                    <small>@c.PayDate.DayName()</small>
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Width="4rem"
+                                  Title="រយៈពេល"
+                                  Context="c">
+                <Template>
+                    @c.InstallmentNo
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                  Title="ប្រាក់ដើម"
+                                  Context="c">
+                <Template>
+                    @c.PaidPrinciple
+                </Template>
+                <FooterTemplate>
+                    @LoanRepaymentLines.TotalPaidPrinciple()
+                </FooterTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                  Title="ការប្រាក់"
+                                  Context="c">
+                <Template>
+                    @c.PaidInterest
+                </Template>
+                <FooterTemplate>
+                    @LoanRepaymentLines.TotalPaidInterest()
+                </FooterTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                  Title="ប្រាក់ប្រសិទ្ធិភាព"
+                                  Context="c">
+                <Template>
+                    @c.PaidCollectionFee
+                </Template>
+                <FooterTemplate>
+                    @LoanRepaymentLines.TotalPaidCollectionFee()
+                </FooterTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Title="ប្រាក់ពិន័យ"
+                                  TextAlign="TextAlign.Right"
+                                  Context="c">
+                <Template>
+                    @c.PenaltyAmount
+                </Template>
+                <FooterTemplate>
+                    @LoanRepaymentLines.TotalPaidPenalty()
+                </FooterTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                  Title="សរុបប្រាក់"
+                                  Context="c">
+                <Template>
+                    @c.SubTotal
+                </Template>
+                <FooterTemplate>
+                    @LoanRepaymentLines.Sum(x => (x.SubTotal))
+                </FooterTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TextAlign="TextAlign.Center"
+                                  Width="3.5rem"
+                                  Title="Actions"
+                                  Context="c">
+                <Template>
+                    <RadzenButton Icon="delete"
+                                  Size="ButtonSize.ExtraSmall"
+                                  IconColor="@Colors.Danger"
+                                  Variant="Variant.Outlined"
+                                  ButtonStyle="ButtonStyle.Primary"
+                                  Click="(()=>OnRemoveAdded(c))">
+                    </RadzenButton>
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+</RadzenStack>
+@code {
+    [Parameter] public List<LoanPaymentLineDtoCreate> LoanRepaymentLines { get; set; } = [];
+    [Parameter] public EventCallback<LoanPaymentLineDtoCreate> Remove { get; set; }
+    RadzenDataGrid<LoanPaymentLineDtoCreate> gridLoanPaymentLines = default!;
+    async Task OnRemoveAdded(LoanPaymentLineDtoCreate c)
+    {
+        await Remove.InvokeAsync(c);
+        await gridLoanPaymentLines.Reload();
+    }
+    internal async Task ReLoad()
+    {
+        await gridLoanPaymentLines.Reload();
+    }
+
+
+}

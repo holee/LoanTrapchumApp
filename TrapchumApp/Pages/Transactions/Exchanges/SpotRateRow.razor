@@ -1,0 +1,27 @@
+﻿@using TrapchumApp.Services
+<tr 
+    @onclick="@(()=>SelectingRow(SpotRate))" 
+    class="@SelectedColor"
+    style="cursor:pointer;" id="@rowId">
+    <td>@(RowNumber + 1)</td>
+    <td>@SpotRate.TransactionDate?.ToString("dd/MM/yyyy")</td>
+    <td class="text-end">@SpotRate.SpotRate</td>
+    <td class="text-end">@SpotRate.BuyingRate</td>
+    <td class="text-end">@SpotRate.SellingRate</td>
+</tr>
+@code {
+    [Parameter] public int? RowNumber { get; set; } = 0;
+    [Parameter] public CurrencyDtoSpotRate SpotRate { get; set; } = default!;
+    [Parameter] public EventCallback<CurrencyDtoSpotRate> SelectedRow { get; set; }
+    private string SelectedColor => (SpotRate == selectedSpotRate ? "highlight" : "");
+    private bool IsSelected { get; set; } = false;
+    private string rowId => Guid.NewGuid().ToString("N");
+    private CurrencyDtoSpotRate selectedSpotRate = new CurrencyDtoSpotRate();
+    private async Task SelectingRow(CurrencyDtoSpotRate spotRate)
+    {
+        selectedSpotRate = spotRate;
+        await SelectedRow.InvokeAsync(spotRate);
+        StateHasChanged();
+        await Task.CompletedTask;
+    }
+}

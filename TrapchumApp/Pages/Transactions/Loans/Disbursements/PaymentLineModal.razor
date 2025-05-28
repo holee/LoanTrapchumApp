@@ -1,0 +1,92 @@
+﻿@using Applications.Responses.ViewModels.Loans.Payments
+@using TrapchumApp.Services
+<RadzenDataGrid Data="paymentLines"
+                Responsive
+                GridLines="DataGridGridLines.Horizontal"
+                AllowAlternatingRows="true"
+                Density="Density.Compact"
+                TItem="LoanPaymentLineVm">
+    <Columns>
+        <RadzenDataGridColumn Property="@(nameof(LoanPaymentLineVm.InstallmentNo))"
+                              Title="#"
+                              Width="4rem"
+                              TextAlign="TextAlign.Center"
+                              Sortable="false" />
+        <RadzenDataGridColumn Property="@(nameof(LoanPaymentLineVm.PaidPrinciple))"
+                              Title="Principle"
+                              TextAlign="TextAlign.Right"
+                              Sortable="false">
+            <Template>
+                @context?.PaidPrinciple
+            </Template>
+            <FooterTemplate>
+                @paymentLines.Sum(x => x.PaidPrinciple)
+            </FooterTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="@(nameof(LoanPaymentLineVm.PaidInterest))"
+                              Title="Interest"
+                              TextAlign="TextAlign.Right"
+                              Sortable="false">
+            <Template>
+                @context?.PaidInterest
+            </Template>
+            <FooterTemplate>
+                @paymentLines.Sum(x => x.PaidInterest)
+            </FooterTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="@(nameof(LoanPaymentLineVm.PaidCollectionFee))"
+                              Title="Coll. Fee"
+                              TextAlign="TextAlign.Right"
+                              Sortable="false">
+            <Template>
+                @context?.PaidCollectionFee
+            </Template>
+            <FooterTemplate>
+                @paymentLines.Sum(x => x.PaidCollectionFee)
+            </FooterTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="@(nameof(LoanPaymentLineVm.PenaltyAmount))"
+                              Title="Penalty"
+                              TextAlign="TextAlign.Right"
+                              Sortable="false">
+            <Template>
+                @context?.PenaltyAmount
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="@(nameof(LoanPaymentLineVm.SubTotal))"
+                              Title="SubTotal"
+                              Context="c"
+                              TextAlign="TextAlign.Center"
+                              Sortable="false">
+            <Template>
+                @c?.SubTotal
+            </Template>
+            <FooterTemplate>
+                @paymentLines.Sum(x => x.SubTotal)
+            </FooterTemplate>
+        </RadzenDataGridColumn>
+    </Columns>
+    <EmptyTemplate>
+        <RadzenStack AlignItems="AlignItems.Center"
+                     Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End">
+            <strong>There is no any payemnt yet.....!</strong>
+        </RadzenStack>
+    </EmptyTemplate>
+</RadzenDataGrid>
+@code {
+    [Parameter] public long? LoanId { get; set; }
+    [Parameter] public int? BranchId { get; set; }
+    [Parameter] public int? InstallmentNo { get; set; }
+    IEnumerable<LoanPaymentLineVm> paymentLines = [];
+    // protected override async Task OnParametersSetAsync()
+    // {
+    //     await base.OnParametersSetAsync();
+
+    //     // var resp = await _repaymentService.GetLoanRepaymentLinesAsync(LoanId, InstallmentNo, BranchId);
+
+    //     // if (resp.IsSuccess)
+    //     // {
+    //     //     paymentLines = resp.Data!;
+    //     // }
+    // }
+}

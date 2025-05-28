@@ -1,0 +1,323 @@
+﻿@using Applications.Responses.Lists.Collaterals
+@using TrapchumApp.Services
+<RadzenCard>
+    <EditForm Model="model" @ref="editForm">
+        <DataAnnotationsValidator />
+        <input type="hidden" @bind="model.CollateralId" />
+        <RadzenFieldset Text="Summary Information">
+            <RadzenRow AlignItems="AlignItems.Center">
+                <RadzenColumn Size="6">
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="3">
+                            <RadzenLabel>Customer Name</RadzenLabel>
+                        </RadzenColumn>
+                        <RadzenColumn Size="7">
+                            <RadzenTextBox Disabled
+                                           class="w-100"
+                                           @bind-Value="model.CustomerName" />
+                            <ValidationMessage For="@(()=>model.CollateralId)" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                </RadzenColumn>
+                <RadzenColumn Size="6">
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="3">
+                            <RadzenLabel>Registered Date</RadzenLabel>
+                        </RadzenColumn>
+                        <RadzenColumn Size="7">
+                            <RadzenDatePicker TValue="DateTime?"
+                                              DateFormat="dd/MM/yyyy"
+                                              class="w-100"
+                                              @bind-Value="model.RegisterDate" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                </RadzenColumn>
+                <RadzenColumn Size="6">
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="3">
+                            <RadzenLabel>Remarks</RadzenLabel>
+                        </RadzenColumn>
+                        <RadzenColumn Size="7">
+                            <RadzenTextBox Placeholder="Remark..."
+                                           class="w-100"
+                                           @bind-Value="model.Remark" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                </RadzenColumn>
+                <RadzenColumn Size="6">
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="3">
+                            <RadzenLabel>Document Keeping</RadzenLabel>
+                        </RadzenColumn>
+                        <RadzenColumn Size="7">
+                            <RadzenTextBox Placeholder="Document keeping..."
+                                           class="w-100"
+                                           @bind-Value="model.DocumentKeeping" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                </RadzenColumn>
+            </RadzenRow>
+        </RadzenFieldset>
+        <RadzenTabs>
+            <Tabs>
+                <RadzenTabsItem Text="Property">
+                    <RadzenDataGrid Density="Density.Compact"
+                                    TItem="VCollateralLines"
+                                    Responsive
+                                    ColumnWidth="15rem"
+                                    @ref="propertiesGrid"
+                                    Data="Properties">
+                        <HeaderTemplate>
+                            <RadzenButton Size="ButtonSize.Small"
+                                          ButtonStyle="ButtonStyle.Primary"
+                                          Click="@(()=>AddNewRow(1))"
+                                          Icon="add_circle"
+                                          Text="Add" />
+                        </HeaderTemplate>
+                        <Columns>
+                            <RadzenDataGridColumn Property="Id" Title="#" Width="2rem">
+                                <Template Context="c">
+                                    <input type="hidden" @bind="c.Id" />
+                                    <input type="hidden" @bind="c.CollateralId" />
+                                    <input type="hidden" @bind="c.CategoryRefId" />
+                                    @(Personals.IndexOf(c) + 1)
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn Property="SubCategoryRefId" Title="Category">
+                                <Template Context="c">
+                                    <RadzenDropDown TValue="int?"
+                                                    class="w-100"
+                                                    Data="CollateralProperties"
+                                                    TextProperty="CollateralSubTypeName"
+                                                    ValueProperty="Id"
+                                                    @bind-Value:after="SelectedPeopleChanged"
+                                                    @bind-Value="c.SubCategoryRefId">
+                                    </RadzenDropDown>
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn Width="8rem"
+                                                  Property="CollateralNo"
+                                                  Title="Collateral No">
+                                <Template Context="c">
+                                    <RadzenTextBox class="w-100"
+                                                   @bind-Value="c.CollateralNo"></RadzenTextBox>
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn Property="OwnerName" Title="Owner Name">
+                                <Template Context="c">
+                                    <RadzenTextBox class="w-100"
+                                                   @bind-Value="c.OwnerName"></RadzenTextBox>
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn Width="5rem"
+                                                  Property="Size"
+                                                  Title="Size">
+                                <Template Context="c">
+                                    <RadzenTextBox class="w-100"
+                                                   @bind-Value="c.Size"></RadzenTextBox>
+                                </Template>
+                            </RadzenDataGridColumn>
+
+                            <RadzenDataGridColumn Width="6rem"
+                                                  Property="Quantity" Title="Quantity">
+                                <Template Context="c">
+                                    <RadzenNumeric ShowUpDown="false"
+                                                   Min="0"
+                                                   Placeholder="Qty"
+                                                   class="w-100"
+                                                   @bind-Value="c.Quantity" />
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn Width="6rem"
+                                                  Property="MarketPrice"
+                                                  Title="Market Price">
+                                <Template Context="c">
+                                    <RadzenNumeric ShowUpDown="false"
+                                                   Min="0"
+                                                   Placeholder="Market Price"
+                                                   class="w-100"
+                                                   @bind-Value="c.MarketPrice" />
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn Width="6rem"
+                                                  Property="HotPrice"
+                                                  Title="Hot Price">
+                                <Template Context="c">
+                                    <RadzenNumeric @bind-Value="c.HotPrice"
+                                                   Min="0"
+                                                   class="w-100"
+                                                   ShowUpDown="false"
+                                                   Placeholder="Hot Price"
+                                                   TextAlign="TextAlign.End" />
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn Width="6rem"
+                                                  Property="PawnPrice"
+                                                  Title="Hot Price">
+                                <Template Context="c">
+                                    <RadzenNumeric ShowUpDown="false"
+                                                   Min="0"
+                                                   class="w-100"
+                                                   Placeholder="Pawn Price"
+                                                   @bind-Value="c.PawnPrice"
+                                                   TextAlign="TextAlign.End" />
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn Width="4rem"
+                                                  Frozen="true"
+                                                  TextAlign="TextAlign.Center"
+                                                  Property="Id" Title="Actions">
+                                <Template Context="c">
+                                    <RadzenButton Click="@(()=>Remove(c,1))"
+                                                  Icon="remove"
+                                                  ButtonStyle="ButtonStyle.Danger"
+                                                  Size="ButtonSize.ExtraSmall">
+                                    </RadzenButton>
+                                </Template>
+                            </RadzenDataGridColumn>
+                        </Columns>
+                    </RadzenDataGrid>
+
+                </RadzenTabsItem>
+                <RadzenTabsItem Text="Personal">
+                    <RadzenDataGrid Density="Density.Compact"
+                                    TItem="VCollateralLines"
+                                    Responsive
+                                    ColumnWidth="15rem"
+                                    @ref="personalGrid"
+                                    Data="Personals">
+                        <HeaderTemplate>
+                            <RadzenButton Size="ButtonSize.Small"
+                                          ButtonStyle="ButtonStyle.Primary"
+                                          Click="@(()=>AddNewRow(3))"
+                                          Icon="add_circle"
+                                          Text="Add" />
+                        </HeaderTemplate>
+                        <Columns>
+                            <RadzenDataGridColumn Property="Id" Title="#" Width="2rem">
+                                <Template Context="c">
+                                    <input type="hidden" @bind="c.Id" />
+                                    <input type="hidden" @bind="c.CollateralId" />
+                                    <input type="hidden" @bind="c.CategoryRefId" />
+                                    @(Personals.IndexOf(c) + 1)
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn Property="SubCategoryRefId" Title="Category">
+                                <Template Context="c">
+                                    <RadzenDropDown TValue="int?"
+                                                    class="w-100"
+                                                    Data="CollateralPersonals"
+                                                    TextProperty="CollateralSubTypeName"
+                                                    ValueProperty="Id"
+                                                    @bind-Value:after="SelectedPeopleChanged"
+                                                    @bind-Value="c.SubCategoryRefId">
+                                    </RadzenDropDown>
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn Width="8rem"
+                                                  Property="CollateralNo" Title="Collateral No">
+                                <Template Context="c">
+                                    <RadzenTextBox class="w-100"
+                                                   @bind-Value="c.CollateralNo"></RadzenTextBox>
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn Property="OwnerName" Title="Owner Name">
+                                <Template Context="c">
+                                    <RadzenTextBox class="w-100"
+                                                   @bind-Value="c.OwnerName"></RadzenTextBox>
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn Width="5rem" Property="Size" Title="Size">
+                                <Template Context="c">
+                                    <RadzenTextBox class="w-100"
+                                                   @bind-Value="c.Size"></RadzenTextBox>
+                                </Template>
+                            </RadzenDataGridColumn>
+
+                            <RadzenDataGridColumn Width="6rem"
+                                                  Property="Quantity" Title="Quantity">
+                                <Template Context="c">
+                                    <RadzenNumeric ShowUpDown="false"
+                                                   Min="0"
+                                                   Placeholder="Qty"
+                                                   class="w-100"
+                                                   @bind-Value="c.Quantity" />
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn Width="6rem"
+                                                  Property="MarketPrice" Title="Market Price">
+                                <Template Context="c">
+                                    <RadzenNumeric ShowUpDown="false"
+                                                   Min="0"
+                                                   Placeholder="Market Price"
+                                                   class="w-100"
+                                                   @bind-Value="c.MarketPrice" />
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn Width="6rem" Property="HotPrice" Title="Hot Price">
+                                <Template Context="c">
+                                    <RadzenNumeric @bind-Value="c.HotPrice"
+                                                   Min="0"
+                                                   class="w-100"
+                                                   ShowUpDown="false"
+                                                   Placeholder="Hot Price"
+                                                   TextAlign="TextAlign.End" />
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn Width="6rem" Property="PawnPrice" Title="Hot Price">
+                                <Template Context="c">
+                                    <RadzenNumeric ShowUpDown="false"
+                                                   Min="0"
+                                                   class="w-100"
+                                                   Placeholder="Pawn Price"
+                                                   @bind-Value="c.PawnPrice"
+                                                   TextAlign="TextAlign.End" />
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn Width="4rem"
+                                                  Frozen="true"
+                                                  TextAlign="TextAlign.Center"
+                                                  Property="Id" Title="Actions">
+                                <Template Context="c">
+                                    <RadzenButton Click="@(()=>Remove(c,3))"
+                                                  Icon="remove"
+                                                  ButtonStyle="ButtonStyle.Danger"
+                                                  Size="ButtonSize.ExtraSmall">
+                                    </RadzenButton>
+                                </Template>
+                            </RadzenDataGridColumn>
+                        </Columns>
+                    </RadzenDataGrid>
+                </RadzenTabsItem>
+            </Tabs>
+        </RadzenTabs>
+    </EditForm>
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
+                 Gap="1rem"
+                 class="mt-2 mb-2"
+                 JustifyContent="JustifyContent.End">
+        <RadzenButton Text="Save"
+                      Icon="save"
+                      ButtonStyle="ButtonStyle.Success"
+                      Size="ButtonSize.Small"
+                      Click="FormValidate" />
+        <RadzenButton Text="Close"
+                      Icon="close"
+                      ButtonStyle="ButtonStyle.Danger"
+                      Size="ButtonSize.Small"
+                      Click="CloseTab" />
+    </RadzenStack>
+</RadzenCard>
+
+@code {
+    RadzenDataGrid<VCollateralLines> personalGrid = default!;
+    RadzenDataGrid<VCollateralLines> propertiesGrid = default!;
+
+    [Parameter]
+    public EventCallback Close { get; set; }
+
+    async void CloseTab()
+    {
+        await Close.InvokeAsync();
+    }
+}

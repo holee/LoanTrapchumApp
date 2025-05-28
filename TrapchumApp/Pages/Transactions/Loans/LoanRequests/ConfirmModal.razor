@@ -1,0 +1,64 @@
+﻿@using TrapchumApp.Services
+<div class="table-responsive rz-background-color-base-200 rz-p-2 rz-m-0">
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <input type="hidden" @bind="model!.CustomerId" />
+                <input type="hidden" @bind="model!.LoanRequestId" />
+                <input type="hidden" @bind="model!.BranchId" />
+                <input type="hidden" @bind="model!.AdminFeeAmount" />
+                <th>Request Amount</th>
+                <td class="text-end">
+                    @Data?.RequestAmount
+                </td>
+            </tr>
+            <tr>
+                <th>Approve Amount</th>
+                <td>
+                    <TCNumbers @bind-Value="model!.AprovedAmount" Min="0" />
+                </td>
+            </tr>
+            <tr>
+                <th>Admin Fee</th>
+                <td class="text-end">@Data?.AdminFeeAmount</td>
+            </tr>
+            <tr>
+                <th>Customer</th>
+                <td>@Data?.AltName</td>
+            </tr>
+            <tr>
+                <th>Request By</th>
+                <td>@Data?.Summiter</td>
+            </tr>
+            <tr>
+                <th>Branch</th>
+                <td>@Data?.BranchName</td>
+            </tr>
+            <tr>
+                <th>Accept By</th>
+                <td>@Data?.AprovedBy</td>
+            </tr>
+            <tr>
+                <th> Note</th>
+                <td>
+                    <RadzenTextArea class="w-100" @bind-Value="model.Memo" />
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End"
+                 Orientation="Orientation.Horizontal">
+        <RadzenButton Text="Save"
+                      ButtonStyle="ButtonStyle.Success"
+                      Click="HandleFormRequest"
+                      Size="ButtonSize.ExtraSmall"
+                      Icon="Save"></RadzenButton>
+        <RadzenButton Text="Close"
+                      ButtonStyle="ButtonStyle.Danger"
+                      Size="ButtonSize.ExtraSmall"
+                      Variant="Variant.Filled"
+                      Click="@(()=>DialogService.Close(false))"
+                      Icon="cancel"></RadzenButton>
+    </RadzenStack>
+</div>
+

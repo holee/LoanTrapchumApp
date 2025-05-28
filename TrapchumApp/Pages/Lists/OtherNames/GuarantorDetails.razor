@@ -1,0 +1,130 @@
+﻿@page "/App/Customers/Guarantors/{Id:long}/Details"
+@using Applications.Responses.ViewModels.Loans
+@using TrapchumApp.Services
+<PageTitle>Guarantor</PageTitle>
+<Containers Fluid>
+    <table class="table table-sm">
+        <tbody>
+            <tr>
+                <th class="rz-background-color-base-100 w-25">Name</th>
+                <td>
+                    @Guarantor?.GuarantorName
+                </td>
+            </tr>
+            <tr>
+                <th class="rz-background-color-base-100 w-25">Sex</th>
+                <td>
+                    @Guarantor?.Gender
+                </td>
+            </tr>
+            <tr>
+                <th class="rz-background-color-base-100 w-25">Phone</th>
+                <td>
+                    @Guarantor?.Phone
+                </td>
+            </tr>
+            <tr>
+                <th class="rz-background-color-base-100 w-25">NumberOfLoan</th>
+                <td>
+                    @Guarantor?.NumberOfLoan
+                </td>
+            </tr>
+            <tr>
+                <th class="rz-background-color-base-100 w-25 w-25">Address</th>
+                <td>
+                    @Guarantor?.ToString()
+                </td>
+            </tr>
+            <tr>
+                <th class="rz-background-color-base-100">Status</th>
+                <td>
+                    <RadzenCheckBox TValue="bool?" Value="@Guarantor?.IsActive" ReadOnly />
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <RadzenTabs>
+        <Tabs>
+            <RadzenTabsItem Text="Loans">
+                <RadzenDataGrid Responsive
+                                AllowAlternatingRows
+                                GridLines="DataGridGridLines.Both"
+                                TItem="VLoanGuarantors"
+                                Density="Density.Compact"
+                                Data="LoanGuarantors">
+                    <Columns>
+                        <RadzenDataGridColumn Title="#" Property="@(nameof(VLoanGuarantors.Id))" Context="g">
+                            <Template>
+                                @(LoanGuarantors.ToList().IndexOf(g) + 1)
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Title="CreditAgent" Property="@(nameof(VLoanGuarantors.CreditAgentKhmerName))" />
+                        <RadzenDataGridColumn Title="Customer" Property="@(nameof(VLoanGuarantors.CustomerKhmerName))" />
+                        <RadzenDataGridColumn Title="Installment" Property="@(nameof(VLoanGuarantors.InstallmentName))" />
+                        <RadzenDataGridColumn Title="Principle"
+                                              TextAlign="TextAlign.Right"
+                                              Property="@(nameof(VLoanGuarantors.Principle))" Context="g">
+                            <Template>
+                                @g.Principle.Format(g.CurrencyId)
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                              Title="Currency" Property="@(nameof(VLoanGuarantors.CurrencyId))" />
+                        <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                              Title="Rate" Property="@(nameof(VLoanGuarantors.InterestRate))" />
+                        <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                              Title="AdminFee" Property="@(nameof(VLoanGuarantors.AdminFeeRate))" />
+                        <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                              Title="CollectionFee" Property="@(nameof(VLoanGuarantors.CollectionFeeRate))" />
+
+                    </Columns>
+                </RadzenDataGrid>
+            </RadzenTabsItem>
+            <RadzenTabsItem Text="Loans Request">
+                <RadzenDataGrid Responsive
+                                AllowAlternatingRows
+                                GridLines="DataGridGridLines.Both"
+                                TItem="VLoanGuarantors"
+                                Density="Density.Compact"
+                                Data="LoanGuarantors">
+                    <Columns>
+                        <RadzenDataGridColumn Title="#" Property="@(nameof(VLoanGuarantors.Id))" Context="g">
+                            <Template>
+                                @(LoanGuarantors.ToList().IndexOf(g) + 1)
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Title="CreditAgent" Property="@(nameof(VLoanGuarantors.CreditAgentKhmerName))" />
+                        <RadzenDataGridColumn Title="Customer" Property="@(nameof(VLoanGuarantors.CustomerKhmerName))" />
+                        <RadzenDataGridColumn Title="Installment" Property="@(nameof(VLoanGuarantors.InstallmentName))" />
+                        <RadzenDataGridColumn Title="Principle"
+                                              TextAlign="TextAlign.Right"
+                                              Property="@(nameof(VLoanGuarantors.Principle))" Context="g">
+                            <Template>
+                                @g.Principle.Format(g.CurrencyId)
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                              Title="Currency" Property="@(nameof(VLoanGuarantors.CurrencyId))" />
+                        <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                              Title="Rate" Property="@(nameof(VLoanGuarantors.InterestRate))" />
+                        <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                              Title="AdminFee" Property="@(nameof(VLoanGuarantors.AdminFeeRate))" />
+                        <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                              Title="CollectionFee" Property="@(nameof(VLoanGuarantors.CollectionFeeRate))" />
+
+                    </Columns>
+                </RadzenDataGrid>
+            </RadzenTabsItem>
+        </Tabs>
+    </RadzenTabs>
+    <RadzenStack AlignItems="AlignItems.Center"
+                 class="rz-mt-2"
+                 Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End">
+        <RadzenButton ButtonStyle="ButtonStyle.Danger"
+                      Icon="cancel"
+                      Text="Close"
+                      Click="CloseGuarantorTab"
+                      Size="ButtonSize.Small" />
+    </RadzenStack>
+</Containers>
+

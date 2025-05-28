@@ -1,0 +1,211 @@
+﻿@page "/App/Currencies/SpotRate/{Id:int}"
+@using TrapchumApp.Services
+<PageTitle>Spot Rate</PageTitle>
+<div class="card">
+    <div class="card-header">
+        <RadzenStack Orientation="Orientation.Horizontal"
+                     AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+            <b>CURRENCY INFORMATION</b>
+            <input type="hidden" @bind="Currency!.CurrencyId" />
+        </RadzenStack>
+    </div>
+    <div class="card-body">
+        <div class="card card-body rx-background-color-base-100">
+            <RadzenRow AlignItems="AlignItems.Center">
+                <RadzenColumn Size="6">
+                    <RadzenText TagName="TagName.H4" Text="Currency Name"></RadzenText>
+                    <RadzenTextBox @bind-Value="Currency!.Description"
+                                   Disabled />
+                </RadzenColumn>
+                <RadzenColumn Size="6">
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
+                                 JustifyContent="JustifyContent.Start">
+                        <div class="rz-text-align-center">
+                            <RadzenCheckBox TValue="bool" @bind-Value="Currency!.IsActive" Disabled Name="CurrencyStatus" />
+                            <RadzenLabel Text="@(Currency.IsActive ? "Currency Is Active" : "Currency Is Inactive")" Component="CurrencyStatus" class="rz-ms-2" />
+                        </div>
+                        <div class="rz-text-align-center">
+                            <RadzenCheckBox Name="IsBaseCurrency" TValue="bool" @bind-Value="Currency.IsBaseCurrency" Disabled />
+                            <RadzenLabel Text="Is Base Currency" Component="IsBaseCurrency" class="rz-ms-2" />
+                        </div>
+                    </RadzenStack>
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow AlignItems="AlignItems.Center">
+                <RadzenColumn Size="6">
+                    <RadzenText TagName="TagName.H4" Text="Currency Code"></RadzenText>
+                    <RadzenTextBox @bind-Value="Currency!.CurrencyCode"
+                                   Disabled />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+                <RadzenColumn Size="12">
+                    <RadzenStack Orientation="Orientation.Horizontal">
+                        <RadzenButton ButtonStyle="ButtonStyle.Success"
+                                      Click="DisplayCurrencyDialogue"
+                                      Icon="details"
+                                      Size="ButtonSize.Small" Text="Currency Notes" />
+                        <RadzenButton ButtonStyle="ButtonStyle.Success"
+                                      Click="DisplayCurrencyNoteDialogue"
+                                      Icon="add"
+                                      Size="ButtonSize.Small" Text="Add New Note" />
+                    </RadzenStack>
+                </RadzenColumn>
+            </RadzenRow>
+        </div>
+        @if (!Currency!.IsBaseCurrency)
+        {
+            <div class="card">
+                <div class="card-body">
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="4">
+                            <EditForm Model="SpotRateDtoCreate" OnValidSubmit="FormSubmit">
+                                <DataAnnotationsValidator />
+                                <input type="hidden" @bind="SpotRateDtoCreate.EditSeq" />
+                                <RadzenRow AlignItems="AlignItems.Center">
+                                    <RadzenColumn SizeMD="12" Size="6">
+                                        <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Select A Date to See Exchange Rate</RadzenText>
+                                        <div>
+                                            <RadzenDatePicker TValue="DateTime?"
+                                                              Max="DateTime.Now"
+                                                              @bind-Value="reqDate"
+                                                              DateFormat="dd/MM/yyyy"
+                                                              @bind-Value:format="dd/MMM/yyyy"
+                                                              @bind-Value:after="SelectedValueChanged" />
+                                            <ValidationMessage For="@(()=>SpotRateDtoCreate.TransactionDate)" />
+                                        </div>
+                                    </RadzenColumn>
+                                </RadzenRow>
+                                <RadzenRow AlignItems="AlignItems.Center">
+                                    <RadzenColumn SizeSM="12" Size="6">
+                                        <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Spot Rate</RadzenText>
+                                        <div class="input-group">
+                                            <span class="input-group-text">1USD&equals;</span>
+                                            <RadzenNumeric TValue="decimal?"
+                                                           ShowUpDown="false"
+                                                           class="form-control"
+                                                           TextAlign="TextAlign.End"
+                                                           @bind-Value="SpotRateDtoCreate.SpotRate"
+                                                           Placeholder="0.00" />
+                                            <span class="input-group-text">KHR</span>
+                                        </div>
+                                        <ValidationMessage For="@(()=>SpotRateDtoCreate.SpotRate)" />
+                                    </RadzenColumn>
+                                </RadzenRow>
+                                <RadzenRow AlignItems="AlignItems.Center">
+                                    <RadzenColumn SizeSM="12" Size="6">
+                                        <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Buying Rate</RadzenText>
+                                        <div class="input-group">
+                                            <span class="input-group-text">1USD&equals;</span>
+                                            <RadzenNumeric @bind-Value="SpotRateDtoCreate.BuyingRate"
+                                                           TextAlign="TextAlign.End"
+                                                           ShowUpDown="false"
+                                                           class="form-control"
+                                                           TValue="decimal?"
+                                                           Placeholder="0.00" />
+                                            <span class="input-group-text">KHR</span>
+                                        </div>
+                                        <ValidationMessage For="@(()=>SpotRateDtoCreate.BuyingRate)" />
+                                    </RadzenColumn>
+                                </RadzenRow>
+                                <RadzenRow AlignItems="AlignItems.Center">
+                                    <RadzenColumn SizeSM="12" Size="6">
+                                        <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Selling Rate</RadzenText>
+                                        <div class="input-group">
+                                            <span class="input-group-text">1USD&equals;</span>
+                                            <RadzenNumeric TValue="decimal?"
+                                                           TextAlign="TextAlign.End"
+                                                           ShowUpDown="false"
+                                                           class="form-control"
+                                                           @bind-Value="SpotRateDtoCreate.SellingRate"
+                                                           Placeholder="0.00" />
+                                            <span class="input-group-text">KHR</span>
+                                        </div>
+                                        <ValidationMessage For="@(()=>SpotRateDtoCreate.SellingRate)" />
+                                    </RadzenColumn>
+                                </RadzenRow>
+                                <RadzenStack Orientation="Orientation.Horizontal"
+                                             AlignItems="AlignItems.Center"
+                                             class="mt-2"
+                                             JustifyContent="JustifyContent.End">
+                                    <RadzenButton ButtonStyle="ButtonStyle.Success"
+                                                  Text="Set Spot Rate"
+                                                  Size="ButtonSize.Small"
+                                                  Icon="save"
+                                                  ButtonType="ButtonType.Submit">
+
+                                    </RadzenButton>
+                                </RadzenStack>
+                            </EditForm>
+                        </RadzenColumn>
+                        <RadzenColumn Size="8">
+                            <RadzenDataGrid Density="Density.Compact"
+                                            AllowAlternatingRows="true"
+                                            @ref="gridRef"
+                                            @bind-Value="SelectedCurrencySpotRates"
+                                            AllowRowSelectOnRowClick="true"
+                                            GridLines="DataGridGridLines.Both"
+                                            RowSelect="SelectedRowChanged"
+                                            SelectionMode="DataGridSelectionMode.Single"
+                                            TItem="CurrencyDtoSpotRate"
+                                            Data="currencySpotRates">
+                                <Columns>
+                                    <RadzenDataGridColumn Title="#" Context="s" Width="5rem">
+                                        <Template>
+                                            @(currencySpotRates.IndexOf(s) + 1)
+                                        </Template>
+                                    </RadzenDataGridColumn>
+                                    <RadzenDataGridColumn Property="TransactionDate" Title="As Of Date" Context="s" />
+                                    <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                                          Property="SpotRate"
+                                                          Title="Spot Rate" Context="s" />
+                                    <RadzenDataGridColumn Property="BuyingRate"
+                                                          TextAlign="TextAlign.Right"
+                                                          Title="Buying Rate" Context="s" />
+                                    <RadzenDataGridColumn Property="SellingRate"
+                                                          TextAlign="TextAlign.Right"
+                                                          Title="Selling Rate" Context="s" />
+                                </Columns>
+                            </RadzenDataGrid>
+                        </RadzenColumn>
+                    </RadzenRow>
+                </div>
+            </div>
+        }
+    </div>
+    <div class="card-footer">
+        <RadzenStack AlignItems="AlignItems.Center"
+                     JustifyContent="JustifyContent.End"
+                     Orientation="Orientation.Horizontal">
+            <RadzenButton ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.ExtraSmall" Icon="west" Click="Close"></RadzenButton>
+        </RadzenStack>
+    </div>
+</div>
+
+
+@*  <table class="table table-sm">
+                <thead>
+                <tr>
+                <th>#</th>
+                <th>As Of Date</th>
+                <th class="text-end">Spot Rate</th>
+                <th class="text-end">Buying Rate</th>
+                <th class="text-end">Selling Rate</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var item in currencySpotRates ?? Enumerable.Empty<CurrencyDtoSpotRate>())
+                {
+                var rowNumber = currencySpotRates?.IndexOf(item);
+                var colorClass = (item == selectedSpotRate) ? "table-success" : "";
+                <tr class="@(colorClass)"
+                style="cursor:pointer;" @onclick="@(()=>SelectedRow(item))">
+                <td>@(rowNumber + 1)</td>
+                <td>@item.TransactionDate?.ToString("dd/MM/yyyy")</td>
+                <td class="text-end">@item.SpotRate</td>
+                <td class="text-end">@item.BuyingRate</td>
+                <td class="text-end">@item.SellingRate</td>
+                </tr>
+                }
+                </tbody>
+                </table> *@

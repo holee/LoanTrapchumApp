@@ -1,0 +1,149 @@
+﻿@page "/App/Employee"
+@using Applications.Requests.Lists.Employees
+@using Applications.Responses.Lists.Entities
+@using Applications.Responses.ViewModels.Employees
+@using Domains.Models.Addresses
+@using TrapchumApp.Services
+<PageTitle>Employees</PageTitle>
+<Containers Fluid>
+    <RadzenTabs @ref="tabs" RenderMode="TabRenderMode.Server" Change="TabChanged" @bind-SelectedIndex="selectedIndex">
+        <Tabs>
+            <RadzenTabsItem Text="Employees" Icon="group">
+                <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End">
+                    <div class="rz-p-1">
+                        <RadzenCheckBox @bind-Value="includeInActive"
+                                        @bind-Value:after="GetIncludeInactive"
+                                        Name="includeInActive"/>
+                        <RadzenLabel Text="Include Inactive"
+                                     Component="includeInActive"
+                                     Style="margin-left: 8px; vertical-align: middle;"/>
+                    </div>
+                </RadzenStack>
+                <PageDropDown PageSizeChanged="PageSizeChanged"
+                              ShowReload="true"
+                              ShowSearchBox="true"
+                              OnTextChanged="PerformSearch"
+                              Reload="Reload">
+                    <LeftChildContent>
+                        <RadzenButton Size="ButtonSize.Small"
+                                      ButtonStyle="ButtonStyle.Primary"
+                                      Click="AddNewTab"
+                                      Text="Add Employee"/>
+                    </LeftChildContent>
+                    <RightChildContent>
+                        <RadzenStack AlignItems="AlignItems.Center"
+                                     JustifyContent="JustifyContent.SpaceBetween"
+                                     Orientation="Orientation.Horizontal">
+                            <div class="rz-p-1">
+                                <RadzenDropDown Data="@Branches"
+                                                AllowClear="false"
+                                                TValue="int"
+                                                @bind-Value="@branchId"
+                                                TextProperty="@nameof(BranchDto.BranchName)"
+                                                ValueProperty="@nameof(BranchDto.BranchId)"
+                                                class="w-100"
+                                                Name="Branch"
+                                                SelectedItemChanged="SelectedItemChanged"
+                                                Placeholder="Select branch">
+                                </RadzenDropDown>
+                            </div>
+                        </RadzenStack>
+                    </RightChildContent>
+                </PageDropDown>
+                <RadzenDataGrid
+                    Data="Employees"
+                    GridLines="DataGridGridLines.Both"
+                    AllowAlternatingRows="true"
+                    AllowRowSelectOnRowClick="true"
+                    ColumnWidth="10rem"
+                    RowRender="OnRowRender"
+                    LoadData="LoadData"
+                    Responsive
+                    Density="Density.Compact"
+                    Count="@counts"
+                    PagerPosition="PagerPosition.Bottom"
+                    PagerHorizontalAlign="HorizontalAlign.Right"
+                    PageSize="@pageSize"
+                    ShowPagingSummary="true"
+                    AllowPaging="true"
+                    TItem="VEmployeeList">
+                    <Columns>
+                        <RadzenDataGridColumn Context="c"
+                                              Width="5rem"
+                                              TextAlign="TextAlign.Center"
+                                              Title="#" Property="@nameof(VEmployeeList.EmployeeId)">
+                            <Template>
+                                @(Employees.ToList().IndexOf(c) + 1)
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Title="Name" Property="@nameof(VEmployeeList.AltName)"/>
+                        <RadzenDataGridColumn Title="Phone" Property="@nameof(VEmployeeList.Phone)"/>
+                        <RadzenDataGridColumn Title="Email" Property="@nameof(VEmployeeList.EmailAddress)"/>
+                        <RadzenDataGridColumn Title="Department"
+                                              Property="@nameof(VEmployeeList.DepartmentName)"/>
+                        <RadzenDataGridColumn Title="Occupation" Property="@nameof(VEmployeeList.Occupation)"/>
+                        <RadzenDataGridColumn Title="Branch" Property="@nameof(VEmployeeList.BranchName)"/>
+                        <RadzenDataGridColumn Width="5rem" Sortable="false"
+                                              TextAlign="TextAlign.Center"
+                                              Title="Status" Property="@nameof(VEmployeeList.EmployeeId)"
+                                              Context="c">
+                            <Template>
+                                <RadzenCheckBox TValue="bool" @bind-Value="c.IsActive"
+                                                Name="chkStatus"
+                                                Change="@(() => OnCheckChanged(c))"/>
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Width="5rem" Sortable="false" Title="Action"
+                                              TextAlign="TextAlign.Center"
+                                              Property="@nameof(VEmployeeList.EmployeeId)" Context="c">
+                            <Template>
+                                <RadzenButton Size="ButtonSize.ExtraSmall"
+                                              Icon="more_vert"
+                                              Variant="Variant.Text"
+                                              Click="@((args) => ShowContextMenuWithContent(args, c.EmployeeId))"/>
+                            </Template>
+                        </RadzenDataGridColumn>
+                    </Columns>
+                    <LoadingTemplate>
+                        <RadzenProgressBar Value="100"
+                                           ProgressBarStyle="ProgressBarStyle.Secondary"
+                                           Mode="ProgressBarMode.Indeterminate"
+                                           Visible="@isLoading"
+                                           ShowValue="false">
+                        </RadzenProgressBar>
+                    </LoadingTemplate>
+                </RadzenDataGrid>
+            </RadzenTabsItem>
+            <RadzenTabsItem Visible="IsEnableNew" Text="New" Icon="person_add">
+                <CreateEmployee OnClose="OnClosing"
+                                Reloaded="Reload"/>
+            </RadzenTabsItem>
+            <RadzenTabsItem Visible="IsEnableEdit" Text="Edit" Icon="edit">
+                <EmployeeEdit OnClose="OnIsEditClose"
+                              EmployeeId="@_empId"
+                              Reloaded="Reload"/>
+            </RadzenTabsItem>
+            <RadzenTabsItem Visible="IsEnableDetail" Text="Details" Icon="info">
+                <EmployeeDetails OnEdit="OnEditTab" EmployeeId="@_empId" Close="OnIsDetailClose"/>
+            </RadzenTabsItem>
+
+        </Tabs>
+    </RadzenTabs>
+</Containers>
+
+@code {
+
+    void ShowContextMenuWithContent(MouseEventArgs args, string? id)
+    {
+        ContextMenuService.Open(args, ds =>
+            @<RadzenMenu Style="font-size:0.8rem;">
+                <RadzenMenuItem Click="@(() => AddDetailsTab(id))" Icon="info" Text="Details"
+                                Value="@id"></RadzenMenuItem>
+                <RadzenMenuItem Click="@(() => AddEditTab(id))" Icon="edit" Text="Edit" Value="@id"></RadzenMenuItem>
+                <RadzenMenuItem Click="@(() => Delete(id))" Icon="delete" Text="Delete" Value="@id"></RadzenMenuItem>
+            </RadzenMenu>
+        );
+    }
+
+}
+

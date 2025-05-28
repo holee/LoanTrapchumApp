@@ -1,0 +1,50 @@
+﻿@using Applications.Requests.Lists.Customers
+@using TrapchumApp.Services
+
+<EditForm Model="activity"  OnValidSubmit="@HandleFormSubmit">
+        <FluentValidationValidator DisableAssemblyScanning="true" />
+         <RadzenSwitch @bind-Value="@activity.Status" />
+         <RadzenTextArea @bind-Value="@activity.Description" class="form-control" />
+         <RadzenStack class="rz-mt-2" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+        <RadzenButton Size="ButtonSize.ExtraSmall" class="rz-mt-2" 
+                    ButtonType="ButtonType.Submit" 
+                    Text="Save" 
+                    ButtonStyle="ButtonStyle.Success" />
+
+    </RadzenStack>
+
+    </EditForm>
+@code {
+    [CascadingParameter]
+    Task<AuthenticationState> AuthenticationState { get; set; }=default!;
+    [Parameter] public string? CustomerId { get; set; }
+    CustomerActivityDtoCreate activity = new CustomerActivityDtoCreate();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        var auth = await AuthenticationState;
+
+        if (auth.User.Identity!.IsAuthenticated)
+        {
+            activity.CustomerRefId = CustomerId;
+        }
+        await base.OnInitializedAsync();
+    }
+
+    async Task HandleFormSubmit()
+    {
+        var rsp = await _customerService.AddCusomerActivyAsync(activity);
+
+        if (!rsp.IsSuccess)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Error", rsp.ErrMessage);   
+            return;
+        }
+
+        DialogService.Close(true);  
+
+    }
+
+
+}

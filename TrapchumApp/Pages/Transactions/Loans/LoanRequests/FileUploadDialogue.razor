@@ -1,0 +1,19 @@
+﻿@using TrapchumApp.Services
+<RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Drag and drop files to upload</RadzenText>
+<RadzenUpload ChooseText="Drag and drop here or click to choose files"
+              Multiple="true"
+              Auto="false"
+              @ref="@radzenUpload"
+              Accept=".jpg,.jpeg,.png,.doc,.docx,.pdf,.xls,.xlsx"
+              Change="OnFileUpload"
+              InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "select file" }})"
+              Progress=@(args => OnProgress(args, "Drag and drop files to upload"))
+              Style="width: 100%" />
+<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End">
+    <RadzenButton Size="ButtonSize.Small"
+                  Icon="upload"
+                  Text="Upload"
+                  Click="@HandleUploadFiles"
+                  class="rz-mt-8" />
+</RadzenStack>
+

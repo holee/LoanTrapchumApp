@@ -1,0 +1,34 @@
+﻿@using System.Linq.Expressions
+@using TrapchumApp.Services
+<RadzenDropDown Value="@Value"
+                Data="Nationalities"
+                TextProperty="@nameof(Nationality.NationalityName)"
+                ValueProperty="@nameof(Nationality.NationalityName)"
+                Style="width: 100%;"
+                AllowClear="@AllowClear"
+                TValue="string"
+                ValueChanged="@ValueChanged"
+                ValueExpression="@ValueExpression"
+                Placeholder="@Placeholder"
+                Name="@Name">
+    <HeaderTemplate>
+        @if (ShowHeader)
+        {
+            <div class="rz-dropdown-filter-container">
+                <input aria-label="Search" id="search-@Guid.NewGuid().ToString("N")"
+                       tabindex="0"
+                       placeholder="type to search..."
+                       class="rz-dropdown-filter rz-inputtext"
+                       autocomplete="Off"
+                       aria-autocomplete="none"
+                       autofocus="true"
+                       @bind="@SearchText"
+                       @oninput="@OnSearchTextChanged"
+                       @onkeypress="@OnKeyPress"
+                       type="search">
+                <span class="notranslate rz-dropdown-filter-icon rzi rzi-search"></span>
+            </div>
+        }
+    </HeaderTemplate>
+</RadzenDropDown>
+

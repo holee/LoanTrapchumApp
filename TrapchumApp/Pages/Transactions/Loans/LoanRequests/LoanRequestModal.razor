@@ -1,0 +1,95 @@
+﻿@using TrapchumApp.Services
+<Containers Fluid CssClass="rz-background-color-base-100 rz-p-2">
+    <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
+        <RadzenColumn Size="3">
+            Customer
+        </RadzenColumn>
+        <RadzenColumn Size="9">
+            <RadzenDropDownDataGrid TValue="long"
+                                    Data="@Customers"
+                                    TextProperty="AltName"
+                                    class="w-100"
+                                    Value="@CustomerId"
+                                    Disabled="true"
+                                    ValueProperty="CustomerId">
+            </RadzenDropDownDataGrid>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
+        <RadzenColumn Size="3">
+            Request By
+        </RadzenColumn>
+        <RadzenColumn Size="9">
+            <RadzenDropDownDataGrid TValue="long"
+                                    Data="@RequestUsers"
+                                    TextProperty="FullName"
+                                    Value="RequestUserId"
+                                    Disabled="true"
+                                    class="w-100"
+                                    ValueProperty="Id">
+            </RadzenDropDownDataGrid>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
+        <RadzenColumn Size="3">
+            Branch
+        </RadzenColumn>
+        <RadzenColumn Size="9">
+            <RadzenDropDownDataGrid TValue="int"
+                                    Data="@Branches"
+                                    TextProperty="@(nameof(BranchDto.BranchName))"
+                                    Value="@BranchId"
+                                    class="w-100"
+                                    Disabled="true"
+                                    ValueProperty="@(nameof(BranchDto.BranchId))">
+            </RadzenDropDownDataGrid>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
+        <RadzenColumn Size="3">
+            Amount
+        </RadzenColumn>
+        <RadzenColumn Size="9">
+            <RadzenNumeric Disabled class="w-100" Value="@Amount" ShowUpDown="false" />
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
+        <RadzenColumn Size="3">
+            Accept By
+        </RadzenColumn>
+        <RadzenColumn Size="9">
+            <RadzenDropDownDataGrid TValue="long"
+                                    Data="@AcceptUsers"
+                                    TextProperty="FullName"
+                                    Value="UserId"
+                                    class="w-100"
+                                    Disabled="true"
+                                    ValueProperty="Id">
+            </RadzenDropDownDataGrid>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
+        <RadzenColumn Size="3">
+            Note
+        </RadzenColumn>
+        <RadzenColumn Size="9">
+            <RadzenTextArea class="w-100" @bind-Value="memo" />
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End"
+                 Orientation="Orientation.Horizontal">
+        <RadzenButton Text="Save"
+                      ButtonStyle="ButtonStyle.Success"
+                      Click="LoanRequestVerified"
+                      Size="ButtonSize.Small"
+                      Icon="save"></RadzenButton>
+        <RadzenButton Text="Close"
+                      ButtonStyle="ButtonStyle.Danger"
+                      Size="ButtonSize.Small"
+                      Variant="Variant.Text"
+                      Click="@(()=>DialogService.Close(false))"
+                      Icon="cancel"></RadzenButton>
+    </RadzenStack>
+</Containers>
+
+

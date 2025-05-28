@@ -1,0 +1,41 @@
+﻿@using Applications.Responses.ViewModels.Loans.Requests
+@using TrapchumApp.Services
+<RadzenDataGrid Data="LoanRequests"
+                TItem="VLoanRequests"
+                Responsive="true"
+                Density="Density.Compact"
+                AllowAlternatingRows="true"
+                PagerHorizontalAlign="HorizontalAlign.Right"
+                ColumnWidth="10rem"
+                RowSelect="RowSelectedChanged"
+                LoadData="LoadLoanData"
+                Count="@counts"
+                PageSize="@pageSize"
+                IsLoading="isLoading"
+                GridLines="DataGridGridLines.Both"
+                AllowPaging="true"
+                Style="height:30rem;min-height:30rem;max-height:45rem;"
+                ShowPagingSummary="true">
+    <Columns>
+        <RadzenDataGridColumn Property="@(nameof(VLoanRequests.RequestDate))"
+                              Context="r"
+                              Title="RequestDate">
+            <Template>
+                @r.RequestDate.DayFirst()
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="@(nameof(VLoanRequests.AltName))" Title="Name" />
+        <RadzenDataGridColumn Property="@(nameof(VLoanRequests.BranchName))" Title="Branch Name" />
+        <RadzenDataGridColumn Property="@(nameof(VLoanRequests.Summiter))" Title="Summiter" />
+        <RadzenDataGridColumn Property="@(nameof(VLoanRequests.CurrencyName))" Title="Currency" />
+        <RadzenDataGridColumn Property="@(nameof(VLoanRequests.AprovedAmount))"
+                              Context="r"
+                              TextAlign="TextAlign.Right"
+                              Title="Amount">
+            <Template>
+                @r.AprovedAmount.Format(r.CurrencyId)
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+

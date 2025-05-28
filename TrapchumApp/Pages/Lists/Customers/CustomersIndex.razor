@@ -1,0 +1,49 @@
+﻿@page "/App/Customer"
+@page "/App/Customer/{BranchId:int}/Branches"
+@using TrapchumApp.Components.Pages.Lists.Collaterals
+@using TrapchumApp.Services
+<PageTitle>Customers</PageTitle>
+<RadzenProgressBar Mode="ProgressBarMode.Indeterminate" Value="100" Visible="isVisble"
+                   ShowValue="false"></RadzenProgressBar>
+<Containers Fluid CssClass="rz-background-color-base-100">
+    <RadzenTabs RenderMode="TabRenderMode.Server"
+                Change="SelectedTabChanged"
+                @bind-SelectedIndex="selectedIndex"
+                @ref="@tabs">
+        <Tabs>
+            <RadzenTabsItem Text="Customer" Icon="group" Selected="true">
+                <CustomersList ClickedEdit="AddEditTab"
+                               ClickedAddCollateral="AddCollateralTab"
+                               BranchId="@BranchId"
+                               ClickedDetails="Details">
+                    <ChildContent>
+                        <RadzenButton Icon="person_add"
+                                      Text="Add Customer"
+                                      ButtonStyle="ButtonStyle.Primary"
+                                      Click="AddCustomerTab"
+                                      Size="ButtonSize.Small">
+                        </RadzenButton>
+                    </ChildContent>
+                </CustomersList>
+            </RadzenTabsItem>
+            <RadzenTabsItem Text="New Customer" Icon="person_add" Visible="isNewTab">
+                <CustomerCreate Closed="CloseTabe" />
+            </RadzenTabsItem>
+            <RadzenTabsItem Text="Customer" Icon="info" Visible="isDetailsTab">
+                <CustomerDetails Close="CloseTabe" CustomerId="@customerId" />
+            </RadzenTabsItem>
+            <RadzenTabsItem Text="Edit"
+                            Icon="edit_square"
+                            Visible="isEditTab">
+                <CustomerUpdateTab CustomerId="@customerId"
+                                   Closed="CloseTabe"></CustomerUpdateTab>
+            </RadzenTabsItem>
+            <RadzenTabsItem Text="Customer Colleral"
+                            Icon="inventory"
+                            Visible="isCollateralTab">
+                <CollateralCreate Close="CloseTabe" CustomerId="@customerId"></CollateralCreate>
+            </RadzenTabsItem>
+        </Tabs>
+    </RadzenTabs>
+</Containers>
+

@@ -1,0 +1,21 @@
+﻿@using Applications.Responses.ViewModels.Loans.LoanRequests
+@using TrapchumApp.Services
+@foreach (var item in Data ?? [])
+{
+    <div class="comment">
+        <div class="comment-header">
+            <span class="comment-author">@item.FullName</span>
+            <span class="comment-date">
+                <i>@item.CreatedDT</i><br/>
+                <em>@item.PretierDate</em>
+            </span>
+        </div>
+        <p>
+            @item.Memo
+        </p>
+    </div>
+}
+@code {
+    [Parameter]
+    public IEnumerable<VLoanRequestDescription> Data { get; set; } = [];
+}

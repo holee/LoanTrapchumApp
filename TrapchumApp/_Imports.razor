@@ -1,0 +1,63 @@
+﻿@using System.Net.Http
+@using System.Net.Http.Json
+@using Applications.Constants
+@using Applications.Constants.Authorizations
+@using Applications.Extensions
+@using Applications.Extensions.DateTimes
+@using Applications.Extensions.Identity
+@using Applications.Extensions.Identity.Authorizations.Attributes
+@using Applications.Extensions.Identity.Enumerations
+@using Applications.Extensions.Identity.Policies
+@using Applications.Extensions.Maths
+@using Applications.Requests.Identity
+@using Applications.Requests.Lists.Addreses;
+@using Applications.Requests.Lists.Currency;
+@using Applications.Requests.Lists.Entities;
+@using Applications.Responses.ViewModels.Auths
+@using Applications.Responses.ViewModels.Customers
+@using Applications.Responses.ViewModels.Departments
+@using Applications.Responses.ViewModels.Loans.Schedules
+@using Applications.Responses.ViewModels.Options
+@using Applications.Services.Addresses
+@using Applications.Services.Branches
+@using Applications.Services.Currencies
+@using Applications.Services.Customers
+@using Applications.Services.Employees
+@using Applications.Services.Identity
+@using Applications.Services.Lists
+@using Applications.Services.Loans
+@using Blazored.FluentValidation
+@using Domains.Models.Lists
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Sections
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Web.Virtualization
+@using Microsoft.JSInterop
+@using Radzen
+@using Radzen.Blazor
+@using TrapchumApp
+@using TrapchumApp.Components
+@using TrapchumApp.Components.Comps
+@using TrapchumApp.Components.Comps.Cards
+@using TrapchumApp.Components.Comps.Controls
+@using TrapchumApp.Services
+@using static Microsoft.AspNetCore.Components.Web.RenderMode
+@attribute [Authorize]
+@inject IJSRuntime js
+@inject IAuthorizationService _authorizeService;
+@inject NotificationService NotificationService
+@inject DialogService DialogService
+@inject NavigationManager NavigationManager
+@inject ContextMenuService ContextMenuService
+@inject TooltipService tooltipService
+@inject IdentityRedirectManager RedirectManager
+@inject IAddressServiceImpl _addressService;
+@inject IEmployeeServiceImpl _employeeService;
+@inject IBranchServiceImpl _branchService
+@inject IUserServiceImpl _userService
+@inject ICustomerServiceImpl _customerService
+@inject ICurrencyServiceImpl _curService
+@inject ILoanRequestServiceImpl _loanRequestService

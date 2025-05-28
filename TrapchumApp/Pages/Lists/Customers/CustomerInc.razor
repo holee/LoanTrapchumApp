@@ -1,0 +1,73 @@
+﻿@using TrapchumApp.Services
+<RadzenFieldset>
+    <HeaderTemplate>
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem" >
+            <RadzenIcon Icon="money_bag" /><b>Income</b>
+        </RadzenStack>
+    </HeaderTemplate>
+    <ChildContent>
+        <RadzenStack AlignItems="AlignItems.Center" Gap="1rem"
+                     JustifyContent="JustifyContent.End"
+        Orientation="Orientation.Horizontal" class="rz-mb-2" Visible="@ShowCommand">
+            <RadzenButton Text="Income"
+                          Click="AddInComeModal"
+                          Icon="add"
+                          ButtonStyle="ButtonStyle.Primary"
+                          Visible="@(ShowAdd && ShowCommand)"
+                          Size="ButtonSize.ExtraSmall" />
+            <RadzenButton Click="RefreshIncome"
+                          Icon="refresh"
+                          class="ml-2"
+                          Visible="@(ShowReload && ShowCommand)"
+                          ButtonStyle="ButtonStyle.Secondary"
+                          Size="ButtonSize.ExtraSmall" />
+
+        </RadzenStack>
+        <RadzenDataGrid Data="Items"
+                        GridLines="DataGridGridLines.Both"
+                        Responsive
+                        IsLoading="isLoading"
+                        ColumnWidth="10rem"
+                        Style="min-height:20rem;height:20rem;max-height:30rem;"
+                        Density="Density.Compact">
+            <Columns>
+                <RadzenDataGridColumn OrderIndex="0" Property="IncomeId" Context="c" Title="#" Width="3rem">
+                    <Template>
+                        @c.IncomeId
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Context="c"
+                                      Property="IncomeSource"
+                                      Title="Income Source">
+                    <Template>
+                        @c.IncomeSource
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Context="c"
+                                      Width="10rem"
+                                      Property="IncomeAmount"
+                                      TextAlign="TextAlign.Right"
+                                      Title="Amount">
+                    <Template>
+                        @c?.IncomeAmount
+                    </Template>
+                    <FooterTemplate>
+                        <strong>
+                            @Items.Sum(x => x.IncomeAmount)
+                        </strong>
+                    </FooterTemplate>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Context="c"
+                                      Property="InDescription"
+                                      Title="Description">
+                    <Template>
+                        @c.InDescription
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+            <LoadingTemplate>
+                <RadzenProgressBarCircular ProgressBarStyle="ProgressBarStyle.Primary" Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+            </LoadingTemplate>
+        </RadzenDataGrid>
+    </ChildContent>
+</RadzenFieldset>

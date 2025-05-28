@@ -1,0 +1,109 @@
+﻿@page "/App/Account/Journals/{BranchId:int}/Branches"
+@attribute [Authorize(Policy = "AccountOnly")]
+@using Applications.Responses.ViewModels.Journals
+@using TrapchumApp.Services
+<PageTitle>Journal list</PageTitle>
+<RadzenTabs RenderMode="TabRenderMode.Server" @bind-SelectedIndex="@selectedIndex" Change="e=>TabChanged(e)" @ref="tb">
+    <Tabs>
+        <RadzenTabsItem Text="Journals">
+            <PageDropDown ShowSearchBox="true"
+                          OnTextChanged="PerformSearch"
+                          PageSizeChanged="ChangedPageSize">
+                <LeftChildContent>
+                    <RadzenButton ButtonStyle="ButtonStyle.Primary"
+                                  Size="ButtonSize.Small"
+                                  Click="ShowCreatedTab"
+                                  Icon="add"
+                                  ButtonType="ButtonType.Button" Text="New Journal"/>
+                </LeftChildContent>
+            </PageDropDown>
+            <RadzenDataGrid GridLines="DataGridGridLines.Horizontal"
+                            AllowAlternatingRows="true"
+                            Density="Density.Compact"
+                            AllowPaging="true"
+                            AllowSorting="true"
+                            LoadData="LoadData"
+                            PagerHorizontalAlign="HorizontalAlign.Left"
+                            Count="@counts"
+                            IsLoading="isDataLoading"
+                            TItem="JournalEntryVm"
+                            RowSelect="RowSelecting"
+                            Data="@JournalItems">
+                <Columns>
+                    <RadzenDataGridColumn Property="TransactionDate" Title="Transaction Date" Context="j">
+                        <Template>
+                            <span>@j.TransactionDate.DayFirst()</span>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Property="TransactionTypeName" Title="Name"/>
+                    <RadzenDataGridColumn Property="JournalType" Title="Journal Type"/>
+                    <RadzenDataGridColumn Property="TotalDr" Title="Debit" TextAlign="TextAlign.Right"/>
+                    <RadzenDataGridColumn Property="TotalCr" Title="Credit" TextAlign="TextAlign.Right"/>
+                    <RadzenDataGridColumn Property="IsAdjustment" TextAlign="TextAlign.Center"
+                                          Context="c"
+                                          Sortable="false" Title="Adjustment">
+                        <Template>
+                            <RadzenCheckBox Disabled @bind-Value="c.IsAdjustment"/>
+                        </Template>
+                    </RadzenDataGridColumn>
+
+                    <RadzenDataGridColumn Property="IsAdjustment" TextAlign="TextAlign.Center"
+                                          Context="c"
+                                          Sortable="false" Title="Actions">
+                        <Template>
+                            <RadzenButton Size="ButtonSize.ExtraSmall"
+                                          Icon="more_vert"
+                                          Variant="Variant.Text"
+                                          Click="@((args) => ShowContextMenuWithContent(args, c.JournalEntryId))"/>
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </RadzenDataGrid>
+        </RadzenTabsItem>
+        <RadzenTabsItem Visible="showCreateTab">
+            <Template>
+                    <span style="display: flex; gap: 6px">
+                        <RadzenButton Icon="close"
+                                      @onclick:stopPropagation Click="CloseCreateTab"
+                                      Size="ButtonSize.ExtraSmall"
+                                      ButtonStyle="ButtonStyle.Danger"
+                                      Variant="Variant.Text"/>
+                        New Journal
+                    </span>
+            </Template>
+            <ChildContent>
+                <JournalEntryCreate Close="CloseCreateTab"/>
+            </ChildContent>
+        </RadzenTabsItem>
+        <RadzenTabsItem Visible="showDetailTab">
+            <Template>
+                    <span style="display: flex; gap: 6px">
+                        <RadzenButton Icon="close" @onclick:stopPropagation Click="CloseDetailTab"
+                                      Size="ButtonSize.ExtraSmall"
+                                      ButtonStyle="ButtonStyle.Danger" Variant="Variant.Text"/>
+                        Journal Details
+                    </span>
+            </Template>
+            <ChildContent>
+                <JournalDetails SelectIndex="CloseDetailJournal" JournalId="@_selectedJournalId"/>
+            </ChildContent>
+        </RadzenTabsItem>
+    </Tabs>
+</RadzenTabs>
+
+@code {
+
+    void ShowContextMenuWithContent(MouseEventArgs args, string? id)
+    {
+        ContextMenuService.Open(args, ds =>
+            @<RadzenMenu Style="font-size:0.8rem;">
+
+                <RadzenMenuItem Click="@(() => GetDetailJournal(id))" Icon="info" Text="Details"
+                                Value="@id"></RadzenMenuItem>
+
+            </RadzenMenu>
+        );
+    }
+
+
+}

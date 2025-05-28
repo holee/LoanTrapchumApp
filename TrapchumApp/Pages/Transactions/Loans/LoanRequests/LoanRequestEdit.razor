@@ -1,0 +1,393 @@
+﻿@page "/App/Request/{BranchId:int}/Branches/{UserId}/Customer/{CustomerId}/Edit"
+@using Applications.Requests.Loans.LoanRequests
+@using Applications.Responses.Auths
+@using Applications.Responses.Lists.Collaterals
+@using Applications.Responses.Loans.Disbursements
+@using Applications.Responses.ViewModels.Loans.Requests
+@using Applications.Responses.ViewModels.OtherNames
+@using Domains.Models.Collaterals
+@using Domains.Models.Loans
+@using Radzen.Blazor.Rendering
+@using TrapchumApp.Helpers.Constants
+@using TrapchumApp.Services
+<PageTitle>Loan Request</PageTitle>
+<Card>
+    <EditForm Model="model" @ref="editForm">
+        <input type="hidden" @bind="model.LoanRequestId" />
+        <FluentValidationValidator DisableAssemblyScanning="true" />
+        <CardBody BodyCssClass="rz-background-color-base-200">
+            <RadzenTabs SelectedIndexChanged="SelectTabIndexChanged" RenderMode="TabRenderMode.Client">
+                <Tabs>
+                    <RadzenTabsItem Text="សំណើរ" Icon="@IconNames.RequestQuote">
+                        <LoanRequestInfo Model="@model" CustomerId="@CustomerId" LoanRequestId="@LoanRequestId" BranchId="@BranchId" />
+                        <RadzenTabs>
+                            <Tabs>
+                                <RadzenTabsItem Icon="@IconNames.Collaterals" Text="Collaterals">
+                                    <LoanRequestCollaterals CustomerId="@CustomerId"
+                                                            ShowCommand="true"
+                                                            ShowAdd="true"
+                                                            ShowRemove="true"
+                                                            @ref="CollateralRef"
+                                                            Add="AddCollaterals"
+                                                            RemoveCollateral="RemovedCollateral"
+                                                            Collaterals="CollateralLines">
+                                        <SearchBoxTemplate>
+                                            <CollateralSearchList CustomerId="@CustomerId"
+                                                                  MultipleSelected="SelectManyCollaterals"
+                                                                  SingleSelected="SelectedCollateral" />
+                                        </SearchBoxTemplate>
+                                    </LoanRequestCollaterals>
+
+                                </RadzenTabsItem>
+                                <RadzenTabsItem Icon="@IconNames.Group" Text="Guarantors">
+                                    <LoanRequestGaurantor Guarantors="Guarantors"
+                                                          ShowAdd="true"
+                                                          Add="AddGuarantors"
+                                                          ShowRemove="true"
+                                                          ShowCommand="true"
+                                                          Remove="RemoveGaurantor"
+                                                          @ref="GuarantorRef">
+                                        <SearchBoxTemplate>
+                                            <GuarantorSearchList OnSelected="SelectedGuarantors" SelectMany="SelectMany" />
+                                        </SearchBoxTemplate>
+                                    </LoanRequestGaurantor>
+
+                                </RadzenTabsItem>
+                                <RadzenTabsItem Icon="@IconNames.AttachFile" Text="Attarchment">
+                                    <LoanRequestDocument Documents="@Documents"
+                                                         UploadDocument="@HandleFileDialogue"
+                                                         RemoveDocument="RemoveFile"
+                                                         @ref="DocumentRef"
+                                                         ShowDelete="true" />
+                                </RadzenTabsItem>
+                            </Tabs>
+                        </RadzenTabs>
+                    </RadzenTabsItem>
+                    <RadzenTabsItem Text="អតិថិជន" Icon="@IconNames.Customers">
+                        <RadzenFieldset>
+                            <CustomerRequest CustomerId="@CustomerId" />
+                        </RadzenFieldset>
+                    </RadzenTabsItem>
+                    <RadzenTabsItem Text="Notes" Icon="@IconNames.Comment">
+                        <RadzenFieldset>
+                          <RadzenRow AlignItems="AlignItems.Center">
+                              <RadzenColumn Size="12">
+                                  <RadzenTextArea Rows="10" @bind-Value="model.Memo" class="form-control">
+
+                                  </RadzenTextArea>
+                              </RadzenColumn>
+                          </RadzenRow>
+                            <LoanRequestNotes Data="@_loanDescriptions" />
+                        </RadzenFieldset>
+                    </RadzenTabsItem>
+                </Tabs>
+            </RadzenTabs>
+        </CardBody>
+        <CardFooter>
+            <RadzenStack class="mt-2"
+                         Orientation="Orientation.Horizontal"
+                         JustifyContent="JustifyContent.End"
+                         Gap="0.5rem"
+                         AlignItems="AlignItems.Center">
+
+                <RadzenButton Disabled="model.RequestAmount <=0"
+                              Size="ButtonSize.Small"
+                              Click="HandleCreateNew"
+                              Text="Save"
+                              Icon="save"
+                              ButtonStyle="ButtonStyle.Primary" />
+                <RadzenButton Disabled="model.RequestAmount <=0"
+                              Size="ButtonSize.Small"
+                              Click="HandleCreateRequest"
+                              Text="Request"
+                              Icon="save"
+                              ButtonStyle="ButtonStyle.Success" />
+                <RadzenLink Path="@($"/App/Request/{BranchId}/Branches?UserId={UserId}")"
+                            Text="Back" />
+            </RadzenStack>
+        </CardFooter>
+    </EditForm>
+</Card>
+
+@code
+{
+    RadzenTextBox textBox = default!;
+    string? FullName = "";
+    Popup popup = default!;
+    RadzenDataGrid<VCustomerList> grid = default!;
+
+    async Task SelectMany(IEnumerable<VGuarantor> gs)
+    {
+        if (!gs.Any()) return;
+
+        var gLinks = new LoanRequestGuarantorsDtoCreate
+        {
+             BranchRefId=BranchId,
+             CustomerRefId=CustomerId,
+             LoanRequestId=LoanRequestId,
+             GuarantorsLink=[]
+        };
+
+        foreach (var g in gs)
+        {
+            if (Guarantors.Any(x => x.EmployeeRefId == g.Id)) continue;
+
+            var guarantor = new LoanGuarantorLink
+            {
+                 EntityNameRefId=g.Id,
+                 IsActive=true,
+                 BranchId=BranchId,
+                 LoanRequestRefId=LoanRequestId
+            };
+
+            gLinks.GuarantorsLink.Add(guarantor);
+
+            var item = new VLoanRequestGuarantors
+                {
+                    EmployeeRefId = g.Id,
+                    FullName = g.FullName,
+                    AltName = g.GuarantorName,
+                    Phone = g.Phone,
+                    VilInKhmer = g.VilInKhmer,
+                    ComInKhmer = g.ComInKhmer,
+                    DisInKhmer = g.DisInKhmer,
+                    ProInKhmer = g.ProInKhmer
+                };
+
+            Guarantors.Add(item);
+        }
+
+        var rsp = await _loanRequestService.AddLoanRequestGuarantorAsync(gLinks);
+
+        if (rsp.IsSuccess)
+        {
+            NotificationService.Notify(NotificationSeverity.Success, rsp.Data);
+            await GuarantorRef.GuarantorReload();
+        }
+        else
+        {
+            NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
+        }
+
+    }
+
+    async Task SelectedGuarantors(VGuarantor? g)
+    {
+        if (g is null || string.IsNullOrEmpty(g.Id)) return;
+
+        if (Guarantors.Any(x => x.EmployeeRefId == g.Id))
+        {
+            NotificationService.Notify(NotificationSeverity.Info, "Guarantor already exists");
+            
+            return;
+        }
+
+        var gLinks = new LoanRequestGuarantorsDtoCreate
+        {
+            BranchRefId = BranchId,
+            CustomerRefId = CustomerId,
+            LoanRequestId = LoanRequestId,
+            GuarantorsLink = []
+        };
+
+        var guarantor = new LoanGuarantorLink
+        {
+            EntityNameRefId = g.Id,
+            IsActive = true,
+            BranchId = BranchId,
+            LoanRequestRefId = LoanRequestId
+        };
+
+        gLinks.GuarantorsLink.Add(guarantor);
+
+        var rsp = await _loanRequestService.AddLoanRequestGuarantorAsync(gLinks);
+
+        if (rsp.IsSuccess)
+        {
+            NotificationService.Notify(NotificationSeverity.Success, rsp.Data);
+
+            var gs = new VLoanRequestGuarantors
+            {
+                EmployeeRefId = g.Id,
+                FullName = g.FullName,
+                AltName = g.GuarantorName,
+                Phone = g.Phone,
+                VilInKhmer = g.VilInKhmer,
+                ComInKhmer = g.ComInKhmer,
+                DisInKhmer = g.DisInKhmer,
+                ProInKhmer = g.ProInKhmer
+            };
+
+            Guarantors.Add(gs);
+
+            await GuarantorRef.GuarantorReload();
+        }
+        else
+        {
+            NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
+        }
+
+        
+    }
+
+
+
+    async Task SelectedCollateral(VCollateralLines? c)
+    {
+        if (c is null || c.Id <= 0) return;
+
+        if (CollateralLines.Any(x => x.Id == c.Id))
+        {
+            NotificationService.Notify(NotificationSeverity.Info, "Collateral already exists");
+            return;
+        }
+
+
+        var collaterals = new LoanCollateralRequest(BranchId, LoanRequestId, CustomerId);
+
+        var collateralLink = new CollateralLink
+        {
+            CollateralLineRefId = c.Id,
+            CollateralRefId = c.CollateralId,
+            ModifiedDt = DateTime.Now
+        };
+
+        collaterals.CollateralLinesLink.Add(collateralLink);
+
+        var rsp = await _loanRequestService.AddLoanRequestCollateralAsync(collaterals);
+
+        if (rsp.IsSuccess)
+        {
+            var item = new VLoanRequestCollateralLines
+            {
+                CollateralLineId = c.Id,
+                CollateralId = c.CollateralId,
+                OwnerName = c.OwnerName,
+                ReferenceNo = c.ReferenceNo,
+                TypeName = c.TypeName,
+                Quantity = c.Quantity,
+            };
+
+            CollateralLines.Add(item);
+
+            await CollateralRef.CollateralReload();
+        }
+    }
+
+    async Task SelectManyCollaterals(IEnumerable<VCollateralLines> cs)
+    {
+        if (!cs.Any()) return;
+
+        var collaterals = new LoanCollateralRequest(BranchId,LoanRequestId,CustomerId);
+
+        foreach (var g in cs)
+        {
+
+            if (CollateralLines.Any(x => x.CollateralId == g.CollateralId)) continue;
+
+            var collateralLink = new CollateralLink
+            {
+                 CollateralLineRefId=g.Id,
+                 CollateralRefId=g.CollateralId,
+                 ModifiedDt=DateTime.Now
+            };
+
+            collaterals.CollateralLinesLink.Add(collateralLink);
+
+            var item = new VLoanRequestCollateralLines
+                {
+                    CollateralLineId = g.Id,
+                    CollateralId = g.CollateralId,
+                    OwnerName = g.OwnerName,
+                    ReferenceNo = g.ReferenceNo,
+                    TypeName = g.TypeName,
+                    Quantity = g.Quantity,
+                };
+
+            CollateralLines.Add(item);
+        }
+
+        var rsp= await _loanRequestService.AddLoanRequestCollateralAsync(collaterals);
+
+        if (rsp.IsSuccess)
+        {
+            NotificationService.Notify(NotificationSeverity.Success, rsp.Data);
+            await GuarantorRef.GuarantorReload();
+        }
+        else
+        {
+            NotificationService.Notify(NotificationSeverity.Success, rsp.ErrMessage);
+        }
+
+    }
+
+    // async Task OnRowSelect(VCustomerList customer)
+    // {
+    //     FullName = "";
+    //     model.CustomerRefId = customer.CustomerId;
+    //     CustomerId = customer.CustomerId;
+    //     FullName = customer.FullName;
+    //     await popup.CloseAsync();
+    // }
+
+
+    // int selectedIndex = 0;
+
+    // async Task OnInput(ChangeEventArgs args)
+    // {
+    //     selectedIndex = 0;
+
+    //     filterText = args.Value!.ToString();
+
+    //     if (string.IsNullOrEmpty(filterText))
+    //     {
+    //         model.CustomerRefId = string.Empty;
+    //         CustomerId = string.Empty;
+    //         FullName = string.Empty;
+    //     }
+
+    //     await GetCustomers(CustomerId, 25, filterText);
+
+    //     await grid.Reload();
+    // }
+
+    // async Task OnKeyDown(KeyboardEventArgs args)
+    // {
+    //     var items = Customers;
+
+    //     var popupOpened = await js.InvokeAsync<bool>("Radzen.popupOpened", "popup");
+
+    //     var key = args.Code != null ? args.Code : args.Key;
+
+    //     if (!args.AltKey && (key == "ArrowDown" || key == "ArrowUp"))
+    //     {
+    //         var result = await js.InvokeAsync<int[]>("Radzen.focusTableRow", "grid", key, selectedIndex, null, false);
+
+    //         selectedIndex = result.First();
+    //     }
+    //     else if (args.AltKey && key == "ArrowDown" || key == "Enter" || key == "NumpadEnter")
+    //     {
+    //         if (popupOpened && (key == "Enter" || key == "NumpadEnter"))
+    //         {
+    //             CustomerId = items.ElementAtOrDefault(selectedIndex)?.CustomerId;
+    //         }
+
+    //         await popup.ToggleAsync(textBox.Element);
+    //     }
+    //     else if (key == "Escape" || key == "Tab")
+    //     {
+    //         await popup.CloseAsync();
+    //     }
+    // }
+
+
+    // async Task OpenPopup(MouseEventArgs arg)
+    // {
+    //     if (isCustomerSelected) return;
+
+    //     await popup.ToggleAsync(textBox.Element);
+    // }
+
+
+
+}

@@ -1,0 +1,87 @@
+﻿@page "/App/Loan/LoanProduct"
+@using Applications.Responses.ViewModels.Loans.Products
+@using TrapchumApp.Services
+<PageTitle>Loan Products</PageTitle>
+<RadzenTabs @ref="tabs" RenderMode="TabRenderMode.Server" @bind-SelectedIndex="SelectIndex">
+    <Tabs>
+        <RadzenTabsItem Text="Products" Icon="list">
+            <Card>
+                <CardBody>
+                    <PageDropDown ShowSearchBox="true"
+                                  Reload="Reload"
+                                  ShowReload="true">
+                        <LeftChildContent>
+                            <RadzenButton Click="OnCreate" Disabled
+                                          Icon="add"
+                                          Text="New LoanProduct"
+                                          ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small">
+                            </RadzenButton>
+                        </LeftChildContent>
+                        <RightChildContent>
+                            <span>
+                                <RadzenCheckBox TValue="bool"
+                                                Value="@IsIncludeInActive"
+                                                Change="OnIsActive" />
+                                Include inactive
+                            </span>
+                        </RightChildContent>
+                    </PageDropDown>
+                    <RadzenDataGrid GridLines="DataGridGridLines.Horizontal"
+                                    Count="@counts"
+                                    PageSize="@pageSize"
+                                    AllowPaging="true"
+                                    ShowPagingSummary="true"
+                                    Density="Density.Compact"
+                                    PagerHorizontalAlign="HorizontalAlign.Right"
+                                    AllowSorting="true"
+                                    IsLoading="isLoading"
+                                    LoadData="LoadData"
+                                    Data="VLProducts">
+                        <Columns>
+                            <RadzenDataGridColumn Title="#" Context="h" Sortable="false">
+                                <Template>
+                                    @(VLProducts.IndexOf(h) + 1)
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn Title="Product Code" Property="p=>p.LoanProductCode" />
+                            <RadzenDataGridColumn Title="Product Name" Property="p=>p.LoanProductName" />
+                            <RadzenDataGridColumn Title="Loan Size" Property="p=>p.LoanSize" />
+                            <RadzenDataGridColumn Title="Currency" Property="p=>p.CurrencyCode" />
+                            <RadzenDataGridColumn Title="Installment" Property="p=>p.Installments" />
+                            <RadzenDataGridColumn Title="Status" Sortable="false" Context="c">
+                                <Template>
+                                    <RadzenCheckBox TValue="bool" @bind-Value="c.IsActive"
+                                                    Change="@((arg)=>DeactiveOrActive(arg,c))" />
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn Width="5rem" Title="Actions" Sortable="false" Context="c">
+                                <Template>
+                                    <RadzenButton Size="ButtonSize.ExtraSmall"
+                                                  Icon="more_vert"
+                                                  Variant="Variant.Text"
+                                                  Click="@((args)=>ShowContextMenuWithContent(args,c))" />
+                                </Template>
+                            </RadzenDataGridColumn>
+                        </Columns>
+                    </RadzenDataGrid>
+                </CardBody>
+            </Card>
+        </RadzenTabsItem>
+        <RadzenTabsItem Text="Loan Product Details" Visible="IsDetails">
+           <LPModalDetail Id="@Id" CloseTab="@CloseTabs" />
+        </RadzenTabsItem>
+    </Tabs>
+</RadzenTabs>
+
+@code {
+    void ShowContextMenuWithContent(MouseEventArgs args, VlProductList e)
+    {
+        ContextMenuService.Open(args, ds =>
+    @<RadzenMenu Style="font-size:0.8rem;">
+        <RadzenMenuItem Click="@(()=>LPDetails(e.LoanProductId))" Icon="info" Text="Details" Value="@e"></RadzenMenuItem>
+        <RadzenMenuItem Click="@(()=>OnEdit(e))" Disabled Icon="edit" Text="Edit" Value="@e"></RadzenMenuItem>
+        <RadzenMenuItem Click="@(()=>OnDelete(e))" Icon="delete" Text="Delete" Value="@e"></RadzenMenuItem>
+    </RadzenMenu>
+    );
+    }
+}

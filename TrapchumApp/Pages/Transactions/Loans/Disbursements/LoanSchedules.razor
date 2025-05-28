@@ -1,0 +1,90 @@
+﻿@using Applications.Requests.Loans.Disbursements
+@using TrapchumApp.Services
+<Containers Fluid>
+    @if(Customer is not null)
+    {
+        <table class="table">
+            <tbody>
+                <tr>
+                </tr>
+            </tbody>
+        </table>
+    }
+    <RadzenDataGrid Responsive
+                    Density="Density.Compact"
+                    GridLines="DataGridGridLines.Both"
+                    AllowSorting="false"
+                    ColumnWidth="15rem"
+                    Style="min-height:30rem;height:30rem;max-height:40rem;"
+                    Data="Schedules">
+        <Columns>
+            <RadzenDataGridColumn Width="2.5rem" TextAlign="TextAlign.Center" Property="InstallmentNo" Title="No" Context="c">
+                <Template>
+                    @c.InstallmentNo
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Width="7rem" Property="PaymentDate" Title="Payment Date" Context="c">
+                <Template>
+                    <small>@c.PaymentDate.DayFirst()</small>
+                    <br />
+                    <small>@c.PaymentDate!.Value.DayOfWeek</small>
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Width="6rem" TextAlign="TextAlign.Center" Property="TotalDay" Title="Total Day" Context="c">
+                <Template>
+                    @c.TotalDay
+                </Template>
+                <FooterTemplate>
+                    <strong>
+                        @Schedules.Sum(p => p.TotalDay)
+                    </strong>
+                </FooterTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Width="10rem" TextAlign="TextAlign.Right" Property="Principal" Title="Principal" Context="c">
+                <Template>
+                    @c.Principal.Format(CurrencyId)
+                </Template>
+                <FooterTemplate>
+                    <strong>
+                        @Schedules.Sum(p => p.Principal).Format(CurrencyId)
+                    </strong>
+                </FooterTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Width="10rem" TextAlign="TextAlign.Right" Property="Interest" Title="Interest" Context="c">
+                <Template>
+                    @c.Interest.Format(CurrencyId)
+                </Template>
+                <FooterTemplate>
+                    <strong>
+                        @Schedules.Sum(p => p.Interest).Format(CurrencyId)
+                    </strong>
+                </FooterTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Width="10rem" TextAlign="TextAlign.Right" Property="CollectionFee" Title="Collection Fee" Context="c">
+                <Template>
+                    @c.CollectionFee.Format(CurrencyId)
+                </Template>
+                <FooterTemplate>
+                    <strong>
+                        @Schedules.Sum(p => p.CollectionFee).Format(CurrencyId)
+                    </strong>
+                </FooterTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Width="10rem" TextAlign="TextAlign.Right" Property="TotalPay" Title="Total Pay" Context="c">
+                <Template>
+                    @c.TotalPay.Format(CurrencyId)
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Width="10rem" TextAlign="TextAlign.Right" Property="LoanOutstanding" Title="Outstanding" Context="c">
+                <Template>
+                    @c.LoanOutstanding.Format(CurrencyId)
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+</Containers>
+@code {
+    [Parameter] public int? CurrencyId { get; set; } = 1;
+    [Parameter] public VCustomerList? Customer { get; set; }
+    [Parameter] public IEnumerable<LoanScheduleDtoCreate> Schedules { get; set; } = [];
+}

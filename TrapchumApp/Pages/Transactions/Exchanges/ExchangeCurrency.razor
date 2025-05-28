@@ -1,0 +1,13 @@
+﻿@page "/App/Currencies/Exchange/{BranchId:int}/Branches"
+@using TrapchumApp.Services
+<Containers Fluid>
+   <Card>
+       <CardHeader>
+           <strong>Exchange History</strong>
+       </CardHeader>
+       <CardBody>
+           <ExchangeHistory BranchId="@BranchId" UserId="@UserId" />
+       </CardBody>
+   </Card>
+</Containers>
+

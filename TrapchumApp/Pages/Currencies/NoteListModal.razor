@@ -1,0 +1,27 @@
+﻿@using TrapchumApp.Services
+<Containers Fluid>
+    <RadzenDataGrid Density="Density.Compact"
+                    Responsive="true"
+                    Data="CurrencyCounters">
+        <Columns>
+            <RadzenDataGridColumn Property="CurrencyName"
+                                  Title="Currency Name">
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Title="Currency Code"
+                                  Property="CurrencyCode"></RadzenDataGridColumn>
+            <RadzenDataGridColumn Title="Currency Value"
+                                  Property="CurrencyValue"></RadzenDataGridColumn>
+            <RadzenDataGridColumn Title="Quantity"
+                                  Property="Quantity"></RadzenDataGridColumn>
+            <RadzenDataGridColumn Title="Description"
+                                  Property="Description"></RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+    <RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal">
+        <RadzenButton ButtonStyle="ButtonStyle.Danger"
+                      Click="Close"
+                      Icon="cancel"
+                      Size="ButtonSize.Small" Text="Close" />
+    </RadzenStack>
+</Containers>
+

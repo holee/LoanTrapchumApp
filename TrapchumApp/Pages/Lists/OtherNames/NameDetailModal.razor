@@ -1,0 +1,86 @@
+﻿@using Applications.Requests.Lists.OtherNames
+@using Applications.Responses.ViewModels.OtherNames
+@using TrapchumApp.Services
+<Card>
+    <CardHeader>
+        <RadzenStack Orientation="Orientation.Horizontal"
+        AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+            <span class="rz-p-0 rz-text-align-center">
+                Name Details:<strong>@model!.Gender @model?.Name</strong>
+            </span>
+            <span class="rz-p-0 rz-text-align-center">
+                <RadzenCheckBox Value="@model!.IsActive" ReadOnly />
+                <RadzenLabel Text="@(model.IsActive ? "Active" : "Inactive")" Component="IsActive" class="rz-ms-2" />
+            </span>
+        </RadzenStack>
+    </CardHeader>
+    <CardBody BodyCssClass="rz-background-color-base-100">
+        <div>
+            <div class="table-responsive">
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <th class="w-25">Alternative Name</th>
+                            <td>
+                                @model!.AltName
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="w-25">First Name</th>
+                            <td>
+                                @model.FirstName
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="w-25">Last Name</th>
+                            <td>
+                                @model.LastName
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="w-25">Phone</th>
+                            <td>
+                                @model.Phone / @model.AltPhone (Alt Phone)
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="w-25">Email</th>
+                            <td>
+                                @model.EmailAddress
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="w-25">Note</th>
+                            <td>
+                                @model.Description
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th class="w-25">Address In Khmer</th>
+                            <td>
+                                @model.ToString()
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </CardBody>
+    <CardFooter>
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
+                     JustifyContent="JustifyContent.End">
+            <RadzenButton ButtonStyle="ButtonStyle.Success"
+                          Click="OnClickEdit"
+                          Size="ButtonSize.Small"
+                          Text="Edit" Icon="save" />
+            <RadzenButton ButtonStyle="ButtonStyle.Danger"
+                          Click="CloseTabs"
+                          Size="ButtonSize.Small"
+                          Text="Close" Icon="cancel" />
+        </RadzenStack>
+    </CardFooter>
+</Card>
+
+
+

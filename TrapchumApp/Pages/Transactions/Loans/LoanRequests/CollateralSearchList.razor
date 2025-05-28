@@ -1,0 +1,112 @@
+﻿@using Applications.Responses.Lists.Collaterals
+@using Applications.Responses.ViewModels.Loans.Requests
+@using Applications.Responses.ViewModels.OtherNames
+@using Radzen.Blazor.Rendering
+@using TrapchumApp.Services
+<style type="text/css">
+    .my-popup-collateral {
+        display: none;
+        position: absolute;
+        overflow: hidden;
+        height: 200px;
+        width: 60%;
+        border: var(--rz-panel-border);
+        background-color: var(--rz-panel-background-color);
+        box-shadow: var(--rz-panel-shadow);
+        border-radius: var(--rz-border-radius)
+    }
+</style>
+<RadzenStack AlignItems="AlignItems.Center"
+             Orientation="Orientation.Horizontal" class="rz-my-1">
+    <RadzenTextBox @onclick="@OpenPopup"
+                   @ref="@_collateralSearchText"
+                   @onkeydown="@OnKeyDown"
+                   Placeholder="Search Collateral...."
+                   @oninput="@OnCollateralSearchText" />
+    <Popup @ref="@_collateralPopup" id="collateralPopup"
+           autoFocusFirstElement="false"
+           class="my-popup-collateral">
+        <RadzenDataGrid @ref="@_gridCollaterals"
+                        id="_gridCollaterals"
+                        TItem="VCollateralLines"
+                        Data="@_collateralLines"
+                        Density="Density.Compact"
+                        AllowAlternatingRows="true"
+                        RowSelect="@OnRowCollateralSelect"
+                        GridLines="DataGridGridLines.Both"
+                        Responsive="true"
+                        AllowSorting="true"
+                        ColumnWidth="10rem"
+                        AllowPaging="true"
+                        @bind-Value="@_selectedCollateralLines"
+                        AllowRowSelectOnRowClick="@allowRowSelectOnRowClick"
+                        SelectionMode="DataGridSelectionMode.Multiple"
+                        ShowPagingSummary="true"
+                        Style="height:200px;width:100%;">
+            <Columns>
+                <RadzenDataGridColumn Title="#"
+                                      TextAlign="TextAlign.Center"
+                                      Context="g"
+                                      Width="3rem"
+                                      Sortable="false"
+                                      Property="@(nameof(VGuarantor.Id))">
+                    <HeaderTemplate>
+                        <RadzenCheckBox TabIndex="-1"
+                                        TriState="false" 
+                                        TValue="bool"
+                                        InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "Select many items" } })"
+                                        Change="CheckedChanged"
+                                        Value="@SelectedMultiple" />
+                    </HeaderTemplate>
+                    <Template>
+                        <RadzenCheckBox InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "Select item" } })"
+                                        TriState="false"
+                                        Disabled="!SelectedMultiple"
+                                        Value="@(_selectedCollateralLines.Any() && _selectedCollateralLines.Contains(g))"
+                                        Change="@(args => ToggleRowSelection(g))"
+                                        TValue="bool" />
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Property="@nameof(VCollateralLines.CollateralNo)" Title="CollateralNo" />
+                <RadzenDataGridColumn Width="8rem" Property="@nameof(VCollateralLines.OwnerName)" Title="OwnerName" />
+                <RadzenDataGridColumn Width="10rem" Property="@nameof(VCollateralLines.TypeName)" Title="Type Name" />
+                <RadzenDataGridColumn Width="8rem"
+                                      Context="g"
+                                      Property="@nameof(VCollateralLines.RegisterDate)" 
+                                      Title="RegisterDate">
+                    <Template>
+                        @g.RegisterDate.DayFirst()
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Width="8rem"
+                                      TextAlign="TextAlign.Center"
+                                      Property="@nameof(VCollateralLines.Quantity)" Title="Quantity" />
+                <RadzenDataGridColumn Width="5rem"
+                                      TextAlign="TextAlign.Center"
+                                      Context="g" Property="@nameof(VCollateralLines.Id)" Title="Action">
+                    <Template>
+                        <RadzenButton Icon="add_task"
+                                      Click="@(()=>GetSelectedCollater(g))"
+                                      Size="ButtonSize.ExtraSmall"
+                                      Variant="Variant.Outlined" />
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+            <FooterTemplate>
+                <RadzenStack AlignItems="AlignItems.Center"
+                             Orientation="Orientation.Horizontal"
+                             class="rz-m-2"
+                             JustifyContent="JustifyContent.End">
+                    <RadzenButton Icon="done_all"
+                                  Text="Accept"
+                                  Click="@(()=>GetSelectedGuarantors(_selectedCollateralLines))"
+                                  Size="ButtonSize.ExtraSmall" />
+                </RadzenStack>
+            </FooterTemplate>
+        </RadzenDataGrid>
+    </Popup>
+</RadzenStack>
+
+@code {
+    bool SelectedMultiple = false;
+}

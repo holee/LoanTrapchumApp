@@ -1,0 +1,89 @@
+﻿@page "/App/Names/{Id}/Employee"
+@using TrapchumApp.Services
+<EditForm Model="model" OnValidSubmit="HandleFormSubmit">
+    <input type="hidden" @bind="@Id" />
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <th>Khmer Name</th>
+                <td>@name?.AltName</td>
+                <th>Name</th>
+                <td>@name?.Name</td>
+            </tr>
+            <tr>
+                <th>First Name</th>
+                <td>@name?.FirstName</td>
+                <th>Last Name</th>
+                <td>@name?.LastName</td>
+            </tr>
+            <tr>
+                <th>Phone</th>
+                <td>@name?.Phone</td>
+                <th>EmailAddress</th>
+                <td>@name?.EmailAddress</td>
+            </tr>
+            <tr>
+                <th>Address</th>
+                <td colspan="4">@name?.ToString()</td>
+            </tr>
+            <tr>
+                <th>Description</th>
+                <td colspan="4">@name?.Description</td>
+            </tr>
+        </tbody>
+    </table>
+    <RadzenRow class="rz-mb-2" AlignItems="AlignItems.Center">
+        <RadzenColumn Size="2">
+            <RadzenLabel Text="HireDate" />
+        </RadzenColumn>
+        <RadzenColumn Size="4">
+            <TCDatePicker @bind-Value="model.HireDate"/>
+        </RadzenColumn>
+        <RadzenColumn Size="2">
+            <RadzenLabel Text="EndDate" />
+        </RadzenColumn>
+        <RadzenColumn Size="4">
+            <TCDatePicker @bind-Value="model.EndDate"/>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
+        <RadzenColumn Size="2">
+            <RadzenLabel Text="Department" />
+        </RadzenColumn>
+        <RadzenColumn Size="10">
+            <RadzenDropDown Data="@depts"
+                            class="form-select"
+                            @bind-Value="model.DepartmentRefId"
+                            TextProperty="@nameof(Department.DepartmentName)"
+                            ValueProperty="@nameof(Department.DepartmentId)">
+            </RadzenDropDown>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
+        <RadzenColumn Size="2">
+            <RadzenLabel Text="Branch" />
+        </RadzenColumn>
+        <RadzenColumn Size="10">
+            <RadzenDropDown Data="@branches"
+                            @bind-Value="model.BranchRefId"
+                            class="form-select"
+                            TextProperty="@nameof(Branch.BranchName)"
+                            ValueProperty="@nameof(Branch.BranchId)">
+            </RadzenDropDown>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenStack AlignItems="AlignItems.Center"
+                 Orientation="Orientation.Horizontal"
+                 class="rz-mt-2"
+                 Gap="1rem"
+                 JustifyContent="JustifyContent.End">
+        <RadzenButton Size="ButtonSize.ExtraSmall"
+                      ButtonStyle="ButtonStyle.Success"
+                      Icon="save" Text="Save"
+                      ButtonType="ButtonType.Submit" />
+        <RadzenButton Size="ButtonSize.ExtraSmall"
+                      ButtonStyle="ButtonStyle.Danger"
+                      Click="@(()=> DialogService.Close(false))"
+                      Icon="cancel" Text="Close" />
+    </RadzenStack>
+</EditForm>

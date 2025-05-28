@@ -1,0 +1,30 @@
+﻿@using Applications.Responses.ViewModels.Currencies
+@using TrapchumApp.Services
+<Card CssClass="rz-background-color-base-100">
+    <CardBody>
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead class="table-primary">
+                    <tr>
+                        <th>Currency Name</th>
+                        <th>Spot Rate</th>
+                        <th>Buying Rate</th>
+                        <th>Selling Rate</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>@Currency?.CurrencyName</td>
+                        <td>@Currency?.SpotRate</td>
+                        <td>@Currency?.BuyingRate</td>
+                        <td>@Currency?.SellingRate</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </CardBody>
+</Card>
+@code {
+    [Parameter]
+    public VCurrenciesList Currency { get; set; } = new();
+}

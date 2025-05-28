@@ -1,0 +1,95 @@
+﻿@page "/App/Loan/Categories"
+@using Applications.Responses.ViewModels.Loans.Categories
+@using TrapchumApp.Services
+<PageTitle>Loan Categories</PageTitle>
+<div>
+    <RadzenTabs @ref="tabs" 
+        @bind-SelectedIndex="SelectIndex" 
+        RenderMode="TabRenderMode.Server">
+        <Tabs>
+            <RadzenTabsItem Text="Categories">
+                <PageDropDown ShowReload="true"
+                              Reload="Reload" ShowSearchBox="true"
+                              PageSizeChanged="PageChanged"
+                              OnTextChanged="PerformSearch">
+                    <LeftChildContent>
+                        <RadzenButton Size="ButtonSize.Small" Click="AddNewCategory" ButtonStyle="ButtonStyle.Success">Add Category</RadzenButton>
+                    </LeftChildContent>
+                    <RightChildContent>
+                        <div>
+                            <RadzenCheckBox TValue="bool" @bind-Value=@InActive @bind-Value:after="OnIsActive" Name="CheckBox1" />
+                            <RadzenLabel Text="Include InActive" Component="CheckBox1" Style="margin-left: 8px; vertical-align: middle;" />
+                        </div>
+                    </RightChildContent>
+                </PageDropDown>
+                <Card>
+                    <CardBody>
+                        <RadzenDataGrid GridLines="DataGridGridLines.Horizontal"
+                                        Count="@counts"
+                                        PageSize="@pageSize"
+                                        AllowPaging="true"
+                                        ShowPagingSummary="true"
+                                        Density="Density.Compact"
+                                        PagerHorizontalAlign="HorizontalAlign.Right"
+                                        AllowSorting="true"
+                                        LoadData="LoadData"
+                                        IsLoading="isLoading"
+                                        Data="vLCategories">
+                            <Columns>
+                                <RadzenDataGridColumn Width="5rem" Title="#" Context="h">
+                                    <Template>
+                                        @(vLCategories.IndexOf(h) + 1)
+                                    </Template>
+                                </RadzenDataGridColumn>
+                                <RadzenDataGridColumn Title="Category" Property="p=>p.LoancategoryCode" />
+                                <RadzenDataGridColumn Title="Description" Property="p=>p.Description" />
+                                <RadzenDataGridColumn Title="Description-Khmer" Property="p=>p.DesInKhmer" />
+                                <RadzenDataGridColumn Width="5rem" Title="Code" Property="p=>p.Code" />
+                                <RadzenDataGridColumn Width="5rem" Title="Status" Sortable="false" Context="h">
+                                    <Template>
+                                        <RadzenCheckBox TValue="bool?"
+                                                        Value="h.IsActive"
+                                                        Change="@(()=>DeactiveOrActive(h))" />
+                                    </Template>
+                                </RadzenDataGridColumn>
+                                <RadzenDataGridColumn Width="5rem" Title="Actions" Sortable="false" Context="c">
+                                    <Template>
+                                        <RadzenButton Size="ButtonSize.ExtraSmall"
+                                                      Icon="more_vert"
+                                                      Variant="Variant.Text"
+                                                      Click="@(args=>ShowContextMenuWithContent(args,c))" />
+                                    </Template>
+                                </RadzenDataGridColumn>
+                            </Columns>
+                        </RadzenDataGrid>
+                    </CardBody>
+                </Card>
+            </RadzenTabsItem>
+            <RadzenTabsItem Visible="IsNew" Text="New Category" Icon="add">
+                <LoanCategoryModalCreate CloseTab="CloseTabs" />
+            </RadzenTabsItem>
+            <RadzenTabsItem Visible="IsEdit" Text="Edit Category">
+                 <LoanCategoryModalEdit Id="@CategoryId" CloseTab="CloseTabs" />
+            </RadzenTabsItem>
+            <RadzenTabsItem Visible="IsDetails" Text="Details LoanCategory">
+                  <LCDetailModal category="detailsModel" CloseTab="CloseTabs" />
+            </RadzenTabsItem>
+        </Tabs>
+    </RadzenTabs>
+
+</div>
+@code {
+    void ShowContextMenuWithContent(MouseEventArgs args, VlCategoryList? loanCategory)
+    {
+        ContextMenuService.Open(args, ds =>
+    @<RadzenMenu Style="font-size:0.8rem;">
+
+        <RadzenMenuItem Click="@(()=>Details(loanCategory!.LoanCategoryId))" Icon="info" Text="Details" Value="@loanCategory"></RadzenMenuItem>
+        <RadzenMenuItem Click="@(()=>EditCategory(loanCategory!.LoanCategoryId))" Icon="edit" Text="Edit" Value="@loanCategory"></RadzenMenuItem>
+        <RadzenMenuItem Click="@(()=>OnDelete(loanCategory))" Icon="delete" Text="Delete" Value="@loanCategory"></RadzenMenuItem>
+    </RadzenMenu>
+    );
+    }
+}
+
+

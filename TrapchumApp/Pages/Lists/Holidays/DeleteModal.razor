@@ -1,0 +1,59 @@
+﻿@using TrapchumApp.Services
+<div class="container-fluid">
+    <RadzenText TagName="TagName.P" TextStyle="TextStyle.DisplayH5">
+        Delete single will remove only current selected holiday.
+    </RadzenText>
+    <RadzenText TagName="TagName.P" TextStyle="TextStyle.DisplayH6">
+        Delete all will remove all the same holiday start from current select holiday year.
+    </RadzenText>
+</div>
+<RadzenStack Orientation="Orientation.Horizontal"
+             Gap="1rem"
+             AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+    <RadzenButton Text="Delete" ButtonStyle="ButtonStyle.Warning" Click="DeleteSingle" />
+    <RadzenButton Text="Delete All" ButtonStyle="ButtonStyle.Danger" Click="DeleteAll" />
+</RadzenStack>
+
+@code {
+    [Parameter] public long id { get; set; }
+    private void Close() => DialogService.Close(false);
+    private async void DeleteSingle()
+    {
+        // try
+        // {
+
+        //     if (await _holidayService.DeleteHoliday(id))
+        //     {
+        //         NotificationService.Notify(NotificationSeverity.Success, "Delete");
+        //         Close();
+        //     }
+        //     else
+        //     {
+        //         NotificationService.Notify(NotificationSeverity.Success, "Cannot Delete");
+        //     }
+        // }
+        // catch (Exception ex)
+        // {
+        //     throw ex;
+        // }
+    }
+    private async void DeleteAll()
+    {
+        // try
+        // {
+        //     if (await _holidayService.DeleteMultiyearHoliday(id))
+        //     {
+        //         NotificationService.Notify(NotificationSeverity.Success, "Delete");
+        //         Close();
+        //     }
+        //     else
+        //     {
+        //         NotificationService.Notify(NotificationSeverity.Success, "Cannot Delete");
+        //     }
+        // }
+        // catch (Exception ex)
+        // {
+        //     throw ex;
+        // }
+    }
+}

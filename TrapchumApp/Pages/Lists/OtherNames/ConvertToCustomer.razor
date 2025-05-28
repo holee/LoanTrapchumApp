@@ -1,0 +1,172 @@
+﻿@page "/App/Names/{Id}/Customer"
+@using TrapchumApp.Services
+<EditForm Model="model" OnValidSubmit="HandleFormSubmit">
+    <RadzenFieldset Text="Customer">
+        <input type="hidden" value="@Id" />
+        <table class="table table-sm table-bordered">
+            <tbody>
+                <tr>
+                    <th>Khmer Name</th>
+                    <td>@name?.AltName</td>
+                    <th>Name</th>
+                    <td>@name?.Name</td>
+                </tr>
+                <tr>
+                    <th>First Name</th>
+                    <td>@name?.FirstName</td>
+                    <th>Last Name</th>
+                    <td>@name?.LastName</td>
+                </tr>
+                <tr>
+                    <th>Phone</th>
+                    <td>@name?.Phone</td>
+                    <th>EmailAddress</th>
+                    <td>@name?.EmailAddress</td>
+                </tr>
+                <tr>
+                    <th>Address</th>
+                    <td colspan="4">@name?.ToString()</td>
+                </tr>
+                <tr>
+                    <th>Description</th>
+                    <td colspan="4">@name?.Description</td>
+                </tr>
+            </tbody>
+        </table>
+        <RadzenRow AlignItems="AlignItems.Center">
+            <RadzenColumn Size="6">
+                <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+                    <RadzenColumn Size="4">
+                        <RadzenLabel>Income</RadzenLabel>
+                    </RadzenColumn>
+                    <RadzenColumn Size="8">
+                        <TCNumbers @bind-Value="model.Income" />
+                    </RadzenColumn>
+                </RadzenRow>
+            </RadzenColumn>
+            <RadzenColumn Size="6">
+                <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+                    <RadzenColumn Size="4">
+                        <RadzenLabel>Expenditure</RadzenLabel>
+                    </RadzenColumn>
+                    <RadzenColumn Size="8">
+                        <TCNumbers @bind-Value="model.Expenditure" />
+                    </RadzenColumn>
+                </RadzenRow>
+            </RadzenColumn>
+        </RadzenRow>
+    </RadzenFieldset>
+    <RadzenFieldset Text="Spouse">
+        <div class="rz-background-color-base-100">
+            <RadzenRow AlignItems="AlignItems.Center">
+                <RadzenColumn Size="6">
+                    <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+                        <RadzenColumn Size="4">
+                            <RadzenLabel>Spouse Name</RadzenLabel>
+                        </RadzenColumn>
+                        <RadzenColumn Size="8">
+                            <RadzenTextBox @bind-Value="model.SpouseName"
+                                           class="w-100"
+                                           Placeholder="Spouse name" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+                        <RadzenColumn Size="4">
+                            <RadzenLabel>Nationality</RadzenLabel>
+                        </RadzenColumn>
+                        <RadzenColumn Size="8">
+                            <RadzenTextBox @bind-Value="model.SpouseNationality"
+                                           class="w-100"
+                                           Placeholder="Spouse Nationality" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+                        <RadzenColumn Size="4">
+                            <RadzenLabel>Passport No</RadzenLabel>
+                        </RadzenColumn>
+                        <RadzenColumn Size="8">
+                            <RadzenTextBox @bind-Value="model.SpousePassport"
+                                           class="w-100"
+                                           Placeholder="Spouse Passport" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+                        <RadzenColumn Size="4">
+                            <RadzenLabel>Spouse Phone</RadzenLabel>
+                        </RadzenColumn>
+                        <RadzenColumn Size="8">
+                            <RadzenTextBox @bind-Value="model.SpousePhoneNo"
+                                           class="w-100"
+                                           Placeholder="Spouse Phone" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                </RadzenColumn>
+                <RadzenColumn Size="6">
+                    <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+                        <RadzenColumn Size="4">
+                            <RadzenLabel>Birth Date</RadzenLabel>
+                        </RadzenColumn>
+                        <RadzenColumn Size="8">
+                            <RadzenDatePicker TValue="DateTime?"
+                                              class="w-100"
+                                              Placeholder="Spouse Date Of Birth"
+                                              @bind-Value:format="yyyy-MMM-dd"
+                                              @bind-Value="model.SpouseDateOfBirth">
+                            </RadzenDatePicker>
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+                        <RadzenColumn Size="4">
+                            <RadzenLabel>Dependents</RadzenLabel>
+                        </RadzenColumn>
+                        <RadzenColumn Size="8">
+                            <RadzenNumeric TValue="int?"
+                                           class="w-100"
+                                           Min="0"
+                                           ShowUpDown="false"
+                                           Max="12"
+                                           @bind-Value="model.Dependents" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+                        <RadzenColumn Size="4">
+                            <RadzenLabel>Children</RadzenLabel>
+                        </RadzenColumn>
+                        <RadzenColumn Size="8">
+                            <RadzenNumeric TValue="int?"
+                                           Min="0"
+                                           Max="12"
+                                           ShowUpDown="false"
+                                           class="w-100"
+                                           @bind-Value="model.NoOfChildren" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+                        <RadzenColumn Size="4">
+                            <RadzenLabel>Occupation</RadzenLabel>
+                        </RadzenColumn>
+                        <RadzenColumn Size="8">
+                            <RadzenTextBox @bind-Value="model.SpouseOccupation"
+                                           class="w-100"
+                                           Placeholder="Spouse Phone" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                </RadzenColumn>
+            </RadzenRow>
+        </div>
+    </RadzenFieldset>
+    <RadzenStack AlignItems="AlignItems.Center"
+                 Orientation="Orientation.Horizontal"
+                 class="rz-mt-2"
+                 Gap="1rem"
+                 JustifyContent="JustifyContent.End">
+        <RadzenButton Size="ButtonSize.ExtraSmall"
+                      ButtonStyle="ButtonStyle.Success"
+                      Icon="save" Text="Save"
+                      ButtonType="ButtonType.Submit" />
+        <RadzenButton Size="ButtonSize.ExtraSmall"
+                      ButtonStyle="ButtonStyle.Danger"
+                      Click="@(()=> DialogService.Close())"
+                      Icon="cancel" Text="Close" />
+    </RadzenStack>
+</EditForm>

@@ -1,0 +1,166 @@
+﻿@page "/Loan/CreditAgent/Changed"
+@using TrapchumApp.Services
+<PageTitle>Change Credit Agent</PageTitle>
+<div class="card">
+    <div class="card-header">
+        <h6>Change Loan Credit Agent</h6>
+    </div>
+    <div class="card-body">
+        <RadzenRow AlignItems="AlignItems.Center">
+            <RadzenColumn Size="6">
+                <RadzenFieldset Text="Old Credit Agent">
+                    <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+                        <RadzenColumn Size="4">
+                            <RadzenLabel Text="Old Credit Agent" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="8">
+                            <RadzenDropDownDataGrid class="w-100"
+                                                    PageSize="10"
+                                                    Density="Density.Compact"
+                                                    TextProperty="AltName"
+                                                    ValueProperty="EmployeeRefId"
+                                                    @bind-Value="_oldCreditAgentId"
+                                                    @bind-Value:after="GetLoansByCreditAgents"
+                                                    ShowSearch="false"
+                                                    LoadData="GetOldCreditAgents"
+                                                    Style="font-size:0.8rem;"
+                                                    Data="_oldCreditAgents">
+                                <Columns>
+                                    <RadzenDropDownDataGridColumn Property="AltName" Title="Name" />
+                                </Columns>
+                            </RadzenDropDownDataGrid>
+                        </RadzenColumn>
+                    </RadzenRow>
+                </RadzenFieldset>
+            </RadzenColumn>
+            <RadzenColumn Size="6">
+                <RadzenFieldset Text="New Credit Agent">
+                    <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+                        <RadzenColumn Size="4">
+                            <RadzenLabel Text="New Credit Agent" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="8">
+                            <RadzenDropDownDataGrid class="w-100"
+                                                    PageSize="10"
+                                                    Density="Density.Compact"
+                                                    TextProperty="AltName"
+                                                    ValueProperty="EmployeeRefId"
+                                                    @bind-Value="_newCreditAgentId"
+                                                    ShowSearch="false"
+                                                    LoadData="GetNewCreditAgents"
+                                                    Style="font-size:0.8rem;"
+                                                    Data="_newCreditAgents">
+                                <Columns>
+                                    <RadzenDropDownDataGridColumn Property="AltName" Title="Name" />
+                                </Columns>
+                            </RadzenDropDownDataGrid>
+                        </RadzenColumn>
+                    </RadzenRow>
+                </RadzenFieldset>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow AlignItems="AlignItems.Center" RowGap="0.5rem">
+            <RadzenDataGrid Density="Density.Compact"
+                            AllowAlternatingRows="true"
+                            GridLines="DataGridGridLines.Horizontal"
+                            IsLoading="_isLoading"
+                            AllowPaging="true"
+                            PageSize="@_pageSize"
+                            Count="@_counts"
+                            ShowPagingSummary="true"
+                            Data="_items">
+                <Columns>
+                    <RadzenDataGridColumn Context="p"
+                                          Width="3rem"
+                                          Title="#"
+                                          Sortable="false">
+                        <Template>
+                            @(_items.ToList().IndexOf(p) + 1)
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Property="RegisterDate"
+                                          Context="p"
+                                          Title="Date"
+                                          Sortable="true">
+                        <Template>
+                            @p.RegisterDate!.Value.ToShortDateString()
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Context="p"
+                                          Property="AltName"
+                                          Title="Name"
+                                          Sortable="true">
+                        <Template>
+                            @p.AltName
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Context="p"
+                                          Title="Principle"
+                                          Property="Principle"
+                                          TextAlign="TextAlign.Right"
+                                          Sortable="true">
+                        <Template>
+                            @p.Amount.Format(p.CurrencyId)
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Context="p"
+                                          Title="Interest"
+                                          Property="InterestRate"
+                                          TextAlign="TextAlign.Right"
+                                          Sortable="true">
+                        <Template>
+                            @p.InterestRate (%) / @p.PeriodName
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Context="p"
+                                          Title="Paid Principle"
+                                          Property="PaidPrinciple"
+                                          TextAlign="TextAlign.Right"
+                                          Sortable="true">
+                        <Template>
+                            @p.PaidPrinciple.Format(p.CurrencyId)
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Context="p"
+                                          Title="OutStanding"
+                                          Property="OutStanding"
+                                          TextAlign="TextAlign.Right"
+                                          Sortable="true">
+                        <Template>
+                            @p.OutStanding.Format(p.CurrencyId)
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Context="p"
+                                          Title="Status"
+                                          Property="LoanStatus"
+                                          Width="6rem"
+                                          TextAlign="TextAlign.Center"
+                                          Sortable="true">
+                        <Template>
+                            @p.LoanStatus
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+
+            </RadzenDataGrid>
+        </RadzenRow>
+    </div>
+    <div class="card-footer">
+        <RadzenStack Orientation="Orientation.Horizontal"
+                     class="mt-2"
+                     Gap="1rem"
+                     AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+            <RadzenButton Size="ButtonSize.Small"
+                          ButtonStyle="ButtonStyle.Success"
+                          Click="ChangedCreditAgent"
+                          Icon="save"
+                          Text="Save" />
+            <RadzenButton Size="ButtonSize.Small"
+                          ButtonStyle="ButtonStyle.Danger"
+                          Click="Back"
+                          Icon="cancel"
+                          Text="Cancel" />
+        </RadzenStack>
+    </div>
+</div>
+

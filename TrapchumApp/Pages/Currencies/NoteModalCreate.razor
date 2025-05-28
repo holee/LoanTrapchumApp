@@ -1,0 +1,70 @@
+﻿@using TrapchumApp.Services
+<div class="container-fluid">
+    <EditForm Model="model" @ref="editForm">
+        <DataAnnotationsValidator />
+        <RadzenRow AlignItems="AlignItems.Center">
+            <RadzenColumn Size="3">
+                <RadzenLabel>Currency Code</RadzenLabel>
+            </RadzenColumn>
+            <RadzenColumn Size="9">
+                <RadzenDropDown Data="Currencies"
+                                TValue="int?"
+                                Disabled="@(Id==0?false:true)"
+                                class="w-100"
+                                TextProperty="Description"
+                                ValueProperty="CurrencyId"
+                                @bind-Value="model.CurrencyRefId">
+                </RadzenDropDown>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+            <RadzenColumn Size="3">
+                <RadzenLabel>Currency Value</RadzenLabel>
+            </RadzenColumn>
+            <RadzenColumn Size="9">
+                <RadzenNumeric TValue="int?"
+                               @bind-Value="model.CurrencyValue"
+                               class="w-100"
+                               Placeholder="Currency Value" />
+                <ValidationMessage For="@(()=>model.CurrencyValue)" />
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+            <RadzenColumn Size="3">
+                <RadzenLabel>Description</RadzenLabel>
+            </RadzenColumn>
+            <RadzenColumn Size="9">
+                <InputTextArea @bind-Value="model.Description" class="form-control"></InputTextArea>
+                <ValidationMessage For="@(()=>model.Description)" />
+            </RadzenColumn>
+        </RadzenRow>
+    </EditForm>
+    <RadzenStack Orientation="Orientation.Horizontal" class="mt-2"
+                 Gap="1rem"
+                 AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+        <RadzenButton Icon="save"
+                      Text="Save"
+                      Click="FormSubmit"
+                      Size="ButtonSize.Small"
+                      ButtonStyle="ButtonStyle.Success" />
+        <RadzenButton Icon="cancel"
+                      Click="Close"
+                      Text="Close"
+                      Size="ButtonSize.Small"
+                      ButtonStyle="ButtonStyle.Danger" />
+    </RadzenStack>
+</div>
+
+
+
+
+
+        @*  <Field Horizontal ColumnSize="ColumnSize.Is12.OnDesktop">
+                 <FieldLabel ColumnSize="ColumnSize.Is4.OnDesktop">Qauntity</FieldLabel>
+                 <FieldBody ColumnSize="ColumnSize.Is8.OnDesktop">
+                     <NumericEdit TValue="int?"
+                                  @bind-Value="model.Quantity"
+                                  Placeholder="Qauntity"
+                                  Size="Blazorise.Size.Small" />
+                 </FieldBody>
+             </Field> *@

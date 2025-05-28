@@ -1,0 +1,80 @@
+﻿@using Applications.Responses.ViewModels.Loans.Requests
+@using Applications.Responses.ViewModels.OtherNames
+@using Radzen.Blazor.Rendering
+@using TrapchumApp.Services
+<RadzenFieldset>
+    <HeaderTemplate>
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
+            <RadzenIcon Icon="group" /><b>Guarantors Information</b>
+        </RadzenStack>
+    </HeaderTemplate>
+    <ChildContent>
+        <RadzenRow AlignItems="AlignItems.Center">
+            <RadzenColumn Size="8">
+                @if (SearchBoxTemplate is not null)
+                {
+                    @SearchBoxTemplate
+                }
+            </RadzenColumn>
+            <RadzenColumn Size="4">
+                <RadzenStack Orientation="Orientation.Horizontal"
+                             Visible="@ShowCommand"
+                             JustifyContent="JustifyContent.End"
+                             class="mb-2"
+                             AlignItems="AlignItems.Center">
+                    <RadzenButton Text="Add New"
+                                  ButtonStyle="ButtonStyle.Primary"
+                                  Icon="person_add"
+                                  Click="@ClickedAdd"
+                                  Visible="@(ShowAdd && ShowCommand)"
+                                  Size="ButtonSize.Small"
+                                  ButtonType="ButtonType.Button"></RadzenButton>
+                </RadzenStack>
+            </RadzenColumn>
+        </RadzenRow>
+       
+        <RadzenDataGrid Data="Guarantors"
+                        GridLines="DataGridGridLines.Both"
+                        TItem="VLoanRequestGuarantors"
+                        Density="Density.Compact"
+                        @ref="gridGuarantors"
+                        PagerHorizontalAlign="HorizontalAlign.Right"
+                        Style="min-height:15rem;height:15rem;max-height:15rem;">
+            <Columns>
+                <RadzenDataGridColumn Context="g"
+                                      Property="@(nameof(VLoanRequestGuarantors.EmployeeRefId))"
+                                      Width="3rem"
+                                      Title="#"
+                                      Sortable="false">
+                    <Template>
+                        @(Guarantors.ToList().IndexOf(g) + 1)
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Width="15rem" Property="@(nameof(VLoanRequestGuarantors.FullName))" Title="Name" Sortable="false" />
+                <RadzenDataGridColumn Width="10rem" Property="@(nameof(VLoanRequestGuarantors.Phone))" Title="Phone" Sortable="false" />
+                <RadzenDataGridColumn Context="g" Title="Address">
+                    <Template>
+                        @g.ToString()
+                    </Template>
+                </RadzenDataGridColumn>
+                @if (ShowRemove)
+                {
+                    <RadzenDataGridColumn Context="g" TextAlign="TextAlign.Center"
+                                          Width="4rem" Property="ProInKhmer"
+                                          Title="Action">
+                        <Template>
+                            <RadzenButton Icon="delete"
+                                          Shade="Shade.Lighter"
+                                          Click="@(()=>ClickedRevmove(g))"
+                                          Size="ButtonSize.ExtraSmall"
+                                          Variant="Variant.Outlined" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                }
+            </Columns>
+        </RadzenDataGrid>
+    </ChildContent>
+</RadzenFieldset>
+@code {
+    [Parameter] public RenderFragment? SearchBoxTemplate { get; set; }
+}

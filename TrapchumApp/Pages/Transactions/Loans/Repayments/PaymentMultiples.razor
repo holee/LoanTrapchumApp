@@ -1,0 +1,182 @@
+﻿@using TrapchumApp.Helpers.Constants
+@using TrapchumApp.Services
+<style>
+    .table-cell-edited {
+        position: relative;
+    }
+
+        .table-cell-edited::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 0;
+            height: 0;
+            border-top: 10px solid red;
+            border-left: 10px solid transparent;
+        }
+</style>
+<RadzenStack Orientation="Orientation.Horizontal"
+             class="rz-mb-2"
+             AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+    <RadzenButton Text="Refresh" Size="ButtonSize.ExtraSmall"
+                  Click="Resets"
+                  Icon="refresh"
+                  ButtonStyle="ButtonStyle.Secondary" />
+</RadzenStack>
+<RadzenDataGrid TItem="VSchedule"
+                Data="@Schedules"
+                Responsive
+                Density="Density.Compact"
+                AllowFiltering="false"
+                AllowPaging="false"
+                AllowSorting="false"
+                @ref="@gridPopup"
+                CellClick="@OnCellClick"
+                RowUpdate="@OnUpdateRow"
+                GridLines="DataGridGridLines.Both">
+    <Columns>
+        <RadzenDataGridColumn Context="c"
+                              Width="3rem"
+                              Title="#"
+                              OrderIndex="1"
+                              TItem="VSchedule"
+                              Property="@nameof(VSchedule.InstallmentNo)"
+                              TextAlign="TextAlign.Center"
+                              Sortable="false">
+            <Template>
+                <input type="hidden" @bind="c.LoanId" />
+                @c.InstallmentNo
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Width="6rem"
+                              Context="c"
+                              Title="ថ្ងៃត្រូវបង់ប្រាក់"
+                              Property="@nameof(VSchedule.PaymentDate)"
+                              TItem="VSchedule"
+                              Sortable="false">
+            <Template>
+                <small>
+                    <strong>@c.PaymentDate.DayFirst()</strong>
+                    <br />
+                    <em><small>@c.PaymentDate.DayName()</small></em>
+                </small>
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                              Property="@nameof(VSchedule.LeftPrinciple)"
+                              TItem="VSchedule"
+                              Title="ប្រាក់ដើមត្រូវបង់"
+                              Context="c"
+                              Sortable="false">
+            <Template Context="c">
+                @c.LeftPrinciple.Format(c.CurrencyId)
+            </Template>
+            <FooterTemplate>
+                @Schedules.Sum(x => x.LeftPrinciple).Format(CurrencyId)
+            </FooterTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TextAlign="TextAlign.End"
+                              Context="c"
+                              TItem="VSchedule"
+                              Property="@nameof(VSchedule.LeftInterestAmount)"
+                              Title="ការប្រាក់ត្រូវបង់" Sortable="false">
+            <Template>
+                @c.LeftInterestAmount.Format(c.CurrencyId)
+            </Template>
+            <FooterTemplate>
+                @Schedules.Sum(x => x.LeftInterestAmount).Format(CurrencyId)
+            </FooterTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                              Title="ប្រាក់ប្រសិទ្ធិភាពត្រូវបង់"
+                              Context="c"
+                              TItem="VSchedule"
+                              Property="@nameof(VSchedule.LeftCollectionFeeAmount)"
+                              Sortable="false">
+            <Template>
+                @c.LeftCollectionFeeAmount.Format(c.CurrencyId)
+            </Template>
+            <FooterTemplate>
+                @Schedules.Sum(x => x.LeftCollectionFeeAmount).Format(CurrencyId)
+            </FooterTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                              Title="ប្រាក់ពីន័យ"
+                              Context="c"
+                              TItem="VSchedule"
+                              Property="@nameof(VSchedule.PenaltyAmount)"
+                              IsInEditMode="@IsEditing"
+                              Sortable="false">
+            <Template>
+                @c.PenaltyAmount.Format(c.CurrencyId)
+            </Template>
+            <EditTemplate>
+                <RadzenNumeric @ref="editor"
+                               TValue="decimal?"
+                               Change="@(args => OnPenaltyChange(args,c))"
+                               @bind-Value="c.PenaltyAmount"
+                               Style="width:100%;height:2.3rem;"
+                               onclick="this.querySelector('.rz-numeric-input').select()"
+                               ShowUpDown="false"
+                               Min="0"
+                               Format="#,##0.00"
+                               InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "Select Penalty Amount" } })" />
+            </EditTemplate>
+            <FooterTemplate>
+                @Schedules.Sum(x => x.PenaltyAmount).Format(CurrencyId)
+            </FooterTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                              Title="សរុបប្រាក់ត្រូវបង់"
+                              Context="c"
+                              TItem="VSchedule"
+                              Property="@nameof(VSchedule.TotalPay)"
+                              Sortable="false">
+            <Template>
+                @c.LeftAmount.Format(c.CurrencyId)
+            </Template>
+            <FooterTemplate>
+                @Schedules.Sum(x => x.LeftAmount).Format(CurrencyId)
+            </FooterTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TextAlign="TextAlign.Center"
+                              Title="Action"
+                              Context="c"
+                              Width="5rem"
+                              TItem="VSchedule"
+                              Property="@nameof(VSchedule.LoanScheduleId)"
+                              Sortable="false">
+            <Template>
+                <RadzenButton Icon="@IconNames.Undo"
+                              Variant="Variant.Text"
+                              Click="@(()=>ResetIndividualSchedule(c))"
+                              Size="ButtonSize.ExtraSmall" />
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+
+</RadzenDataGrid>
+<RadzenStack Orientation="Orientation.Horizontal"
+             JustifyContent="JustifyContent.End"
+             class="mt-2"
+             Gap="1rem"
+             AlignItems="AlignItems.Center">
+
+    <AuthorizeView>
+        <Authorized>
+            <RadzenButton Icon="@IconNames.Paid"
+                          Size="ButtonSize.Small"
+                          ButtonStyle="ButtonStyle.Secondary"
+                          Click="@(()=>DialogService.Close(true))"
+                          Text="Recieve" />
+        </Authorized>
+    </AuthorizeView>
+
+    <RadzenButton Icon="@IconNames.Cancel"
+                  Size="ButtonSize.Small"
+                  Variant="Variant.Text"
+                  ButtonStyle="ButtonStyle.Secondary"
+                  Click="Close"
+                  Text="cancel" />
+</RadzenStack>

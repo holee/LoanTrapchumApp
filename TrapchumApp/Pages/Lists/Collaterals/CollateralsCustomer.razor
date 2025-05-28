@@ -1,0 +1,70 @@
+﻿@using Applications.Responses.Lists.Collaterals
+@using Applications.Responses.ViewModels.Collaterals
+@using TrapchumApp.Services
+<RadzenFieldset>
+    <HeaderTemplate>
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
+            <RadzenIcon Icon="house" /><b>Collateral Information</b>
+        </RadzenStack>
+    </HeaderTemplate>
+    <ChildContent>
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
+                     class="rz-mb-2"
+                     Visible="@ShowCommand"
+                     JustifyContent="JustifyContent.End">
+            <RadzenButton Size="ButtonSize.Small"
+                          Click="Add"
+                          Icon="add"
+                          Text="Add New"
+                          Visible="@(ShowAdd && ShowCommand)"
+                          ButtonStyle="ButtonStyle.Primary"></RadzenButton>
+        </RadzenStack>
+        <RadzenDataGrid GridLines="DataGridGridLines.Both"
+                        Responsive
+                        @ref="refGrid"
+                        TItem="VCollateralLines"
+                        Density="Density.Compact"
+                        Style="min-height:20rem;height:20rem;max-height:20rem;"
+                        Data="CollateralLines">
+            <Columns>
+                <RadzenDataGridColumn Title="ReferenceNo" Property="ReferenceNo" Context="c" />
+                <RadzenDataGridColumn Title="Type Name" Property="TypeName" Context="c" />
+                <RadzenDataGridColumn Title="Owner Name" Property="OwnerName" Context="c" />
+                <RadzenDataGridColumn Title="Location" Property="Location" Context="c" />
+                <RadzenDataGridColumn Title="Hot Price" Context="c" TextAlign="TextAlign.Right">
+                    <Template>
+                        @c.HotPrice
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Title="Hot Price" Context="c" TextAlign="TextAlign.Right">
+                    <Template>
+                        @c.MarketPrice
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Title="Hot Price" Context="c" TextAlign="TextAlign.Right">
+                    <Template>
+                        @c.PawnPrice
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Title="Size" Property="Size" Sortable="false" />
+                <RadzenDataGridColumn Width="3rem" Title="Qty" Property="Quantity" Sortable="false" />
+                <RadzenDataGridColumn Width="3.5rem" Context="c" TextAlign="TextAlign.Center" Title="Status" Sortable="false">
+                    <Template>
+                        <RadzenSwitch @bind-Value="c.IsAvailable"
+                                      Disabled></RadzenSwitch>
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Visible="@ShowAcction" Width="3.5rem" Context="c" TextAlign="TextAlign.Center" Title="Action" Sortable="false">
+                    <Template>
+                        <RadzenButton Size="ButtonSize.ExtraSmall"
+                                      ButtonStyle="ButtonStyle.Primary"
+                                      Shade="Shade.Lighter"
+                                      Icon="delete" />
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
+
+    </ChildContent>
+</RadzenFieldset>
+

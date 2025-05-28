@@ -1,0 +1,22 @@
+﻿@using TrapchumApp.Services
+<EditForm Model="model" OnValidSubmit="FormSubmit">
+    <RadzenRow AlignItems="AlignItems.Center">
+        <RadzenColumn Size="12">
+            <RadzenLabel>Note</RadzenLabel>
+            <RadzenTextArea @bind-Value="model.Description" class="w-100"></RadzenTextArea>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenStack AlignItems="AlignItems.Center"
+    Orientation="Orientation.Horizontal"
+    JustifyContent="JustifyContent.End">
+        <RadzenButton ButtonType="ButtonType.Submit"
+                      IsBusy="isBusy"
+                      Icon="save"
+                      Size="ButtonSize.Small"
+                      ButtonStyle="ButtonStyle.Success"
+                      Text="Save">
+        </RadzenButton>
+    </RadzenStack> 
+</EditForm>
+
+

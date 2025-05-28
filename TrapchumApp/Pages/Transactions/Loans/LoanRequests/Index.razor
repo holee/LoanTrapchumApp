@@ -1,0 +1,30 @@
+﻿@page "/App/Request/{BranchId:int}/Branches"
+@using TrapchumApp.Services
+<PageTitle>Loan Request</PageTitle>
+@attribute [MustHasPermission(Modules.LoanRequest,Feature.Read)]
+<Containers Fluid>
+    <RadzenTabs SelectedIndexChanged="SelectedIndexChanged" RenderMode="TabRenderMode.Server">
+        <Tabs>
+            <RadzenTabsItem Icon="list" Text="All">
+                <LoanRequestAll BranchId="@BranchId" UserId="@UserId"/>
+            </RadzenTabsItem>
+            <RadzenTabsItem Text="Requesting" Icon="pending_actions">
+                <LoanRequestRequesting BranchId="@BranchId"
+                                       UserId="@UserId"/>
+            </RadzenTabsItem>
+            <RadzenTabsItem Text="Requested" Icon="request_quote">
+                <LoanRequestRequested BranchId="@BranchId"
+                                      UserId="@UserId"/>
+            </RadzenTabsItem>
+            <RadzenTabsItem Text="Approved" Icon="fact_check">
+                <LoanRequestApprove BranchId="@BranchId" UserId="@UserId"/>
+            </RadzenTabsItem>
+            <RadzenTabsItem Text="Completed" Icon="done_outline">
+                <LoanRequestCompleted BranchId="@BranchId" CreditAgentId="@UserId"/>
+            </RadzenTabsItem>
+        </Tabs>
+    </RadzenTabs>
+
+</Containers>
+
+

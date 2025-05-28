@@ -1,0 +1,99 @@
+﻿@page "/App/Department"
+@using TrapchumApp.Services
+<RadzenCard>
+    <PageDropDown ShowSearchBox="true"
+                  OnTextChanged="TextChanged"
+                  PageSizeChanged="SelectedPageChanged">
+        <LeftChildContent>
+            <RadzenButton Text="New Department"
+                          Click="ShowCreate"
+                          ButtonStyle="ButtonStyle.Primary"
+                          Size="ButtonSize.Small"
+                          Icon="add" />
+        </LeftChildContent>
+        <RightChildContent>
+            <RadzenStack Orientation="Orientation.Horizontal">
+                <RadzenCheckBox TValue="bool" @bind-Value=@includeInactive Change="ex=>ShowInactiveAndActive(ex)" Name="CheckBox1" />
+                <RadzenLabel Text="Include InActive" Component="CheckBox1" Style="margin-left: 8px; vertical-align: middle;" />
+            </RadzenStack>
+        </RightChildContent>
+    </PageDropDown>
+    <RadzenDataGrid Responsive="true"
+                    TItem="VDepartment"
+                    Density="Density.Compact"
+                    Data="Departments">
+        <Columns>
+            <RadzenDataGridColumn Width="4rem" Title="#" Property="@nameof(VDepartment.DepartmentId)" />
+            <RadzenDataGridColumn Property="@nameof(VDepartment.DepartmentName)"
+                                  Title="Department"
+                                  Width="14rem"
+                                  Sortable="true" />
+            <RadzenDataGridColumn Property="@nameof(VDepartment.Description)"
+                                  Title="Description"
+                                  Sortable="false" />
+            <RadzenDataGridColumn Context="c"
+                                  Title="Active"
+                                  Width="4rem"
+                                  Sortable="false">
+                <Template>
+                    <RadzenCheckBox TValue="bool"
+                                    Value="@c.IsActive"
+                                    Change="@(()=>OnCheckChanged(c))" />
+                </Template>
+
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Title="Actions" Context="c" Width="4rem">
+                <Template>
+                    <RadzenButton Size="ButtonSize.ExtraSmall"
+                                  Icon="more_vert"
+                                  Variant="Variant.Text"
+                                  Click="@((args)=>ShowContextMenuWithContent(args,c.DepartmentId))" />
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+
+    </RadzenDataGrid>
+</RadzenCard>
+@code {
+
+    void ShowContextMenuWithContent(MouseEventArgs args, int id)
+    {
+        ContextMenuService.Open(args, ds =>
+    @<RadzenMenu>
+        <RadzenMenuItem Click="@(()=>Details(id))" Icon="info" Text="Details" Value="@id"></RadzenMenuItem>
+        <RadzenMenuItem Click="@(()=>Edit(id))" Icon="edit" Text="Edit" Value="@id"></RadzenMenuItem>
+        <RadzenMenuItem Click="@(()=>Delete(id))" Icon="delete" Text="Delete" Value="@id"></RadzenMenuItem>
+    </RadzenMenu>
+    );
+    }
+
+    async void SelectedPageChanged()
+    {
+        await GetDepartments();
+    }
+    protected async Task OnCheckChanged(VDepartment department)
+    {
+        var active = department.IsActive ? true : false;
+        var dep = new Department
+            {
+                DepartmentId = department.DepartmentId,
+                DepartmentName = department.DepartmentName,
+                Description = department.Description,
+                IsActive = active
+            };
+        var resultResponse = await _depService.ActivateOrDeactivate(department.DepartmentId, dep);
+        if (resultResponse!.IsSuccess)
+        {
+
+            NotificationService.Notify(NotificationSeverity.Success, "Success");
+            await GetDepartments(searchText);
+        }
+        else
+        {
+            NotificationService.Notify(NotificationSeverity.Success, resultResponse.ErrMessage);
+        }
+
+        await Task.CompletedTask;
+    }
+
+}

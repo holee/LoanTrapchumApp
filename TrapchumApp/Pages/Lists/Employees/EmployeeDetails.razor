@@ -1,0 +1,208 @@
+﻿@using Applications.ApplicationPolicies
+@using Applications.Responses.ViewModels.Loans
+@using Applications.Responses.ViewModels.Loans.Requests
+@using TrapchumApp.Components.Pages.Identity.Users
+@using TrapchumApp.Services
+<RadzenCard Style="padding:0;box-sizing:border-box;margin:0">
+    <RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal" class="rz-p-2">
+        <AuthorizeView Policy="@RolePolicies.AdminOnly">
+            <Authorized>
+                <RadzenButton Text="Create New User"
+                              ButtonStyle="ButtonStyle.Secondary"
+                              ButtonType="ButtonType.Button"
+                              Click="CreateNewUser"
+                              Size="ButtonSize.ExtraSmall"/>
+            </Authorized>
+        </AuthorizeView>
+
+    </RadzenStack>
+    <table class="table table-sm table-bordered">
+        <tbody>
+        <tr>
+            <th class="w-25">Name</th>
+            <td>
+                @Model?.FullName
+            </td>
+            <td rowspan="5">
+                <RadzenStack AlignItems="AlignItems.Center" class="rz-mx-auto rz-my-auto">
+                    <RadzenImage
+                        Path="https://www.radzen.com/assets/radzen-logo-top-b2d6e9dcacf7d344bbab515b8748c5f4d702c6c5bfc349bd9ff9003016a3a6ee.svg"
+                        AlternateText="Employee Image"/>
+                </RadzenStack>
+            </td>
+        </tr>
+        <tr>
+            <th class="w-25">Date Of Birth</th>
+            <td colspan="2">
+                @string.Format("{0:dd-MMM-yyyy}", Model?.DateOfBirth)
+            </td>
+        </tr>
+        <tr>
+            <th class="w-25">Gender</th>
+            <td colspan="2">
+                @Model?.Gender
+            </td>
+        </tr>
+        <tr>
+            <th class="w-25">Marrital Status</th>
+            <td colspan="2">
+                @Model?.MarritalStatus
+            </td>
+        </tr>
+        <tr>
+            <th class="w-25">Nationality</th>
+            <td colspan="2">
+                @Model?.Nationality
+            </td>
+        </tr>
+        <tr>
+            <th class="w-25">Phone</th>
+            <td colspan="2">
+                @Model?.Phone / @Model?.AltPhone
+            </td>
+        </tr>
+        <tr>
+            <th class="w-25"> Email</th>
+            <td colspan="2">
+                @Model?.EmailAddress
+            </td>
+        </tr>
+        <tr>
+            <th class="w-25">Address</th>
+            <td colspan="2">
+                @Model?.ToString()
+            </td>
+        </tr>
+        <tr>
+            <th class="w-25">Hire Date</th>
+            <td colspan="2">
+                @string.Format("{0:dd MMM yyyy}", Model?.HireDate)
+            </td>
+        </tr>
+        <tr>
+            <th class="w-25">End Date</th>
+            <td colspan="2">
+                @string.Format("{0:dd MMM yyyy}", Model?.EndDate)
+            </td>
+        </tr>
+        <tr>
+            <th class="w-25">Job Title</th>
+            <td colspan="2">
+                @Model?.Occupation
+            </td>
+        </tr>
+        <tr>
+            <th class="w-25">Department</th>
+            <td colspan="2">
+                @Model?.DepartmentName
+            </td>
+        </tr>
+        <tr>
+            <th class="w-25">Branch</th>
+            <td colspan="2">
+                @Model?.BranchName
+            </td>
+        </tr>
+        <tr>
+            <th class="w-25">Description</th>
+            <td colspan="2">
+                @Model?.Description
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <RadzenTabs>
+        <Tabs>
+            <RadzenTabsItem Text="Loan Request">
+                <RadzenDataGrid Density="Density.Compact"
+                                AllowAlternatingRows="true"
+                                TItem="VLoanRequests"
+                                Data="@LoanRequests">
+                    <Columns>
+                        <RadzenDataGridColumn Property="@nameof(VLoanRequests.AltName)"
+                                              Title="Name"/>
+                        <RadzenDataGridColumn Property="@nameof(VLoanRequests.RequestDate)"
+                                              Title="Request Date"/>
+                        <RadzenDataGridColumn Property="@nameof(VLoanRequests.RequestAmount)"
+                                              Title="Request Amount"/>
+                        <RadzenDataGridColumn Property="@nameof(VLoanRequests.AprovedAmount)"
+                                              Title="Aproved Amount"/>
+                        <RadzenDataGridColumn Property="@nameof(VLoanRequests.AprovedBy)"
+                                              Title="Aproved By"/>
+                        <RadzenDataGridColumn Property="@nameof(VLoanRequests.AprovedDate)"
+                                              Title="Aproved Date"/>
+                        <RadzenDataGridColumn Property="@nameof(VLoanRequests.AprovedDate)"
+                                              Title="AprovedDate"/>
+                    </Columns>
+                </RadzenDataGrid>
+            </RadzenTabsItem>
+            <RadzenTabsItem Text="Loan">
+                <RadzenDataGrid Density="Density.Compact"
+                                AllowAlternatingRows="true"
+                                TItem="VLoanDisbursments"
+                                Data="@LoanDisbursments">
+                    <Columns>
+                        <RadzenDataGridColumn Property="@nameof(VLoanDisbursments.CustomerName)"
+                                              Title="Name"/>
+                        <RadzenDataGridColumn Property="@nameof(VLoanDisbursments.Principle)"
+                                              Title="Amount"/>
+                        <RadzenDataGridColumn Property="@nameof(VLoanDisbursments.InterestRate)"
+                                              Title="InterestRate"/>
+                        <RadzenDataGridColumn Property="@nameof(VLoanDisbursments.InstallmentType)"
+                                              Title="Installment"/>
+                        <RadzenDataGridColumn Property="@nameof(VLoanDisbursments.FirstPaymentDate)"
+                                              Title="FirstPaymentDate"/>
+                        <RadzenDataGridColumn Property="@nameof(VLoanDisbursments.LastPaymentDate)"
+                                              Title="LastPaymentDate"/>
+                        <RadzenDataGridColumn Property="@nameof(VLoanDisbursments.PaidPrinciple)"
+                                              Title="PaidPrinciple"/>
+                        <RadzenDataGridColumn Property="@nameof(VLoanDisbursments.LoanStatus)"
+                                              Title="Status"/>
+                        <RadzenDataGridColumn Property="@nameof(VLoanDisbursments.OutStanding)"
+                                              Title="OutStanding"/>
+                    </Columns>
+                </RadzenDataGrid>
+            </RadzenTabsItem>
+        </Tabs>
+    </RadzenTabs>
+
+    <RadzenStack AlignItems="AlignItems.Center"
+                 Orientation="Orientation.Horizontal"
+                 class="rz-p-2"
+                 JustifyContent="JustifyContent.End">
+        <RadzenButton Text="Edit"
+                      Icon="edit"
+                      Click="EditTab"
+                      Size="ButtonSize.ExtraSmall"
+                      ButtonStyle="ButtonStyle.Success"
+                      ButtonType="ButtonType.Button"/>
+        <RadzenButton Text="Cancel"
+                      Icon="close"
+                      Click="CloseTab"
+                      Size="ButtonSize.ExtraSmall"
+                      ButtonStyle="ButtonStyle.Danger"
+                      ButtonType="ButtonType.Button"/>
+    </RadzenStack>
+</RadzenCard>
+
+@code
+{
+    async Task CreateNewUser()
+    {
+        var emp = await _employeeService.GetEmployeeById(EmployeeId, 0, false);
+
+        var options = new DialogOptions
+        {
+            ContentCssClass = "rz-mt-3 rz-background-color-base-100"
+        };
+
+        var parameters = new Dictionary<string, object?>
+        {
+            { "EmployeeId", EmployeeId },
+             { "BranchId", 0 }
+        };
+
+        var dialogue = DialogService.OpenAsync<UserCreateModal>("New User", parameters: parameters, options: options);
+    }
+
+}

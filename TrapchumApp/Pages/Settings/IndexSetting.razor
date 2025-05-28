@@ -1,0 +1,83 @@
+﻿@page "/App/Loans/Settings"
+@using Applications.Responses.ViewModels.Settings
+@using TrapchumApp.Services
+<PageTitle>Settings</PageTitle>
+<RadzenFieldset>
+    <HeaderTemplate>
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
+            <RadzenIcon Icon="settings" /><b>Application Settings</b>
+        </RadzenStack>
+    </HeaderTemplate>
+    <ChildContent>
+        <RadzenDataGrid AllowAlternatingRows="true"
+                        AllowFiltering="false"
+                        ColumnWidth="200px"
+                        Density="Density.Compact"
+                        SelectionMode="DataGridSelectionMode.Single"
+                        EditMode="editMode"
+                        @ref="settingsGrid"
+                        Responsive
+                        Data="Settings">
+            <HeaderTemplate>
+                <RadzenButton ButtonStyle="ButtonStyle.Primary"
+                              Size="ButtonSize.Small"
+                              Text="Add" Icon="add" />
+            </HeaderTemplate>
+            <Columns>
+                <RadzenDataGridColumn Property="@nameof(AppSettingVms.Id)"
+                                      Filterable="false"
+                                      Title="ID" Frozen="true"
+                                      Width="3rem"
+                                      TextAlign="TextAlign.Center" />
+                <RadzenDataGridColumn Property="@nameof(AppSettingVms.Code)" Title="Code" Frozen="true" Width="8rem" />
+                <RadzenDataGridColumn Property="@nameof(AppSettingVms.Value)"
+                                      Context="s"
+                                      Title="Value"
+                                      Width="5rem">
+                    <Template>
+                        @s.Value
+                    </Template>
+                    <EditTemplate>
+                        <RadzenTextBox @bind-Value="s.Value"
+                                       class="w-100"
+                                       Style="height:2rem;line-height:1rem;" />
+                    </EditTemplate>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Property="@nameof(AppSettingVms.Description)" Title="Description" Width="12rem" />
+                <RadzenDataGridColumn TextAlign="TextAlign.Center" Title="Status" Width="4rem" Context="s">
+                    <Template>
+                        <RadzenCheckBox @bind-Value="s.IsActive" />
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Title="Action" Width="5rem" TextAlign="TextAlign.Center" Context="s">
+                    <Template>
+                        <RadzenButton Size="ButtonSize.ExtraSmall"
+                                      Icon="edit"
+                                      Click="@(()=>EditRow(s))"
+                                      Variant="Variant.Flat"
+                                      @onclick:stopPropagation="true"
+                                      ButtonStyle="ButtonStyle.Secondary">
+                        </RadzenButton>
+                    </Template>
+                    <EditTemplate>
+                        <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success"
+                                      Variant="Variant.Flat"
+                                      Size="ButtonSize.ExtraSmall"
+                                      aria-label="Save">
+                        </RadzenButton>
+                        <RadzenButton Icon="close"
+                                      ButtonStyle="ButtonStyle.Primary"
+                                      Variant="Variant.Flat"
+                                      Click="@(()=>CancelEdit(s))"
+                                      Size="ButtonSize.ExtraSmall"
+                                      class="rz-my-1 rz-ms-1"
+                                      aria-label="Cancel">
+                        </RadzenButton>
+                    </EditTemplate>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
+    </ChildContent>
+</RadzenFieldset>
+
+

@@ -1,0 +1,31 @@
+﻿@using System.Linq.Expressions
+@using TrapchumApp.Services
+<RadzenDropDown Value="@Value"
+                Data="@Items"
+                Style="width: 100%;"
+                AllowClear="@AllowClear"
+                TValue="string"
+                ValueChanged="@ValueChanged"
+                ValueExpression="@ValueExpression"
+                Placeholder="@Placeholder"
+                Name="MarritalStatus">
+</RadzenDropDown>
+@code {
+    [Parameter] public IEnumerable<string> Items { get; set; } = [];
+    [Parameter] public string Value { get; set; } = string.Empty;
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+    [Parameter] public string Placeholder { get; set; } = "Marrital Status";
+    [Parameter] public Expression<Func<string>> ValueExpression { get; set; } = default!;
+    [Parameter] public bool AllowClear { get; set; } = false;
+
+    protected override void OnInitialized()
+    {
+        if (!Items.Any())
+        {
+            Items = ["Single", "Married", "Divorced", "Widowed"];
+        }
+
+        base.OnInitialized();
+    }
+
+}

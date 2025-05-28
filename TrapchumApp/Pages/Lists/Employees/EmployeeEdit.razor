@@ -1,0 +1,29 @@
+﻿@using Applications.Requests.Lists.OtherNames
+@using TrapchumApp.Services
+@page "/App/Employees/{EmployeeId}/Edit"
+<PageTitle>Employee</PageTitle>
+<EditForm Model="@model" OnValidSubmit="@FormValidSubmit">
+    <ValidationSummary />
+    <input type="hidden" @bind="model.Id" />
+    <EmployeeComp model="model" />
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 JustifyContent="JustifyContent.End"
+                 class="rz-mt-2"
+                 Gap="1rem">
+        <RadzenButton ButtonType="ButtonType.Submit"
+                      ButtonStyle="ButtonStyle.Success"
+                      Size="ButtonSize.Small"
+                      Icon="save"
+                      Text="Save" />
+        <RadzenButton ButtonStyle="ButtonStyle.Danger"
+                      Variant="Variant.Flat"
+                      Size="ButtonSize.Small"
+                      Icon="cancel"
+                      Text="Cancel"
+                      Click="CloseTab" />
+    </RadzenStack>
+</EditForm>
+@code {
+
+
+}

@@ -1,0 +1,67 @@
+@using Applications.Responses.ViewModels.Loans
+@using TrapchumApp.Components.Pages.Lists.Collaterals
+@using TrapchumApp.Services
+<RadzenDataGrid GridLines="DataGridGridLines.Both"
+                Responsive
+                Density="Density.Compact"
+                PagerHorizontalAlign="HorizontalAlign.Right"
+                AllowPaging="true"
+                PageSize="10"
+                AllowSorting="false"
+                Data="VLoanDisbursements">
+    <Columns>
+        <RadzenDataGridColumn Property="LoanDate"
+                              Title="#"
+                              Sortable="false">
+            <Template>
+
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="LoanDate"
+                              Context="c"
+                              Sortable="false">
+            <Template>
+                @c.RegisterDate!.Value.ToShortDateString()
+            </Template>
+
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="Priciple"
+                              Context="c"
+                              Sortable="false">
+            <Template>
+                @c.Amount.Format(c.CurrencyId)
+            </Template>
+
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="Interest"
+                              Sortable="false">
+            <Template>
+                @context.InterestRate
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="Fee"
+                              Context="c"
+                              Sortable="false">
+            <Template>
+                @c.CollectionFeeRate
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="Last Payment"
+                              Context="c"
+                              Sortable="false">
+            <Template>
+                @c.LastPaymentDate!.Value.ToShortDateString()
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="Statust"
+                              Context="c"
+                              Sortable="false">
+            <Template>
+                @c.LoanStatus
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="Action">
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+

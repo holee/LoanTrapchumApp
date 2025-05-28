@@ -1,0 +1,155 @@
+﻿@page "/App/Employee/CreditAgent"
+@using Applications.Responses.ViewModels.Employees;
+@using TrapchumApp.Services
+<PageTitle>Credit Agent</PageTitle>
+<RadzenCard>
+    <RadzenTabs SelectedIndex="selectedTabIndex"
+                SelectedIndexChanged="SelectedTabChanged"
+                RenderMode="TabRenderMode.Server">
+        <Tabs>
+            <RadzenTabsItem Text="All" Icon="people_alt">
+                <PageDropDown PageSizeChanged="ChangedPageSize"
+                              OnTextChanged="GetSearchChandged"
+                              ShowSearchBox="true">
+                    <LeftChildContent>
+                        <RadzenStack Orientation="Orientation.Horizontal"
+                                     AlignItems="AlignItems.Center"
+                                     JustifyContent="JustifyContent.SpaceBetween">
+                            <RadzenButton Text="Credit Officer"
+                                          Click="AddCreditAgentTab"
+                                          ButtonStyle="ButtonStyle.Primary"
+                                          Icon="add"
+                                          Size="ButtonSize.Small" />
+                        </RadzenStack>
+                    </LeftChildContent>
+                    <RightChildContent>
+                        <div class="input-group input-group-sm w-50">
+                            <span class="input-group-text">
+                                Branch
+                            </span>
+                            <RadzenDropDown TValue="int"
+                                            TextProperty="BranchName"
+                                            ValueProperty="BranchId"
+                                            Data="Branches"
+                                            class="w-auto"
+                                            @bind-Value:after="SelectedBranchChanged"
+                                            @bind-Value="BranchId">
+                            </RadzenDropDown>
+                        </div>
+                    </RightChildContent>
+                </PageDropDown>
+                <RadzenStack AlignItems="AlignItems.Center"
+                             JustifyContent="JustifyContent.Center"
+                             Orientation="Orientation.Horizontal">
+                    <RadzenDataGrid Data="CreditAgents"
+                                    Density="Density.Compact"
+                                    AllowPaging="true"
+                                    ShowPagingSummary="true"
+                                    PageSize="pageSize"
+                                    PagerHorizontalAlign="HorizontalAlign.Right"
+                                    LoadData="LoadData"
+                                    IsLoading="isLoading"
+                                    Count="@counts"
+                                    AllowAlternatingRows="true"
+                                    GridLines="DataGridGridLines.Both">
+                        <Columns>
+                            <RadzenDataGridColumn Property="LoanCreditAgentId"
+                                                  Title="#"
+                                                  Width="3rem"
+                                                  Context="em">
+                                <Template>
+                                    <strong>
+                                        @{
+                                            var rowNumber = CreditAgents!.IndexOf(em) + 1;
+                                        }
+                                        @rowNumber
+                                    </strong>
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn Property="FirstName" Title="First Name" Sortable="true" />
+                            <RadzenDataGridColumn Property="LastName" Title="Last Name" Sortable="true" />
+                            <RadzenDataGridColumn Property="Phone" Title="Phone" Sortable="false" />
+                            <RadzenDataGridColumn Property="BranchName" Title="Branch" Sortable="true" />
+                            <RadzenDataGridColumn TextAlign="TextAlign.Center" Width="5rem" Context="c" Title="Remove" Sortable="false">
+                                <Template>
+                                    <CreditAgentSwitch Reload="Reload" CreditAgent="@c" />
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn Width="5rem"
+                                                  TextAlign="TextAlign.Center"
+                                                  Context="c" Title="Account" Sortable="false">
+                                <Template>
+                                    <RadzenButton ButtonStyle="ButtonStyle.Primary"
+                                                  Size="ButtonSize.ExtraSmall"
+                                                  Click="@(()=>AddUserAccount(c))"
+                                                  Icon="person_add" />
+                                </Template>
+                            </RadzenDataGridColumn>
+                        </Columns>
+                    </RadzenDataGrid>
+                </RadzenStack>
+            </RadzenTabsItem>
+            <RadzenTabsItem Text="New C.O" Visible="ShowAddedTab" Icon="person_add">
+                <RadzenStack AlignItems="AlignItems.Center"
+                             Orientation="Orientation.Horizontal"
+                             class="mb-2"
+                             JustifyContent="JustifyContent.End">
+                    <SearchBox Placeholder="Search Employee"
+                               @bind-Value="_filter"
+                               SearchChanged="SearchCreditAgent" />
+                </RadzenStack>
+                <RadzenDataGrid TItem="VEmployeeCreateCreditAgent"
+                                PageSize="15"
+                                ColumnWidth="10rem"
+                                ShowPagingSummary="true"
+                                AllowAlternatingRows="true"
+                                AllowPaging="true"
+                                Density="Density.Compact"
+                                PagerPosition="PagerPosition.Bottom"
+                                PagerHorizontalAlign="HorizontalAlign.Right"
+                                Data="empCreditAgents">
+                    <Columns>
+                        <RadzenDataGridColumn Width="5rem"
+                                              TextAlign="TextAlign.Center"
+                                              Property="@nameof(VEmployeeCreateCreditAgent.EmployeeId)" Title="#">
+                            <Template>
+                                <strong>
+                                    @{
+                                        var index = empCreditAgents.IndexOf(context) + 1;
+                                    }
+                                    @index
+                                </strong>
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Property="FirstName" Title="First Name" />
+                        <RadzenDataGridColumn Property="LastName" Title="Last Name" />
+                        <RadzenDataGridColumn Property="Gender" Title="Gender" />
+                        <RadzenDataGridColumn Property="BranchName" Title="Branch Name" />
+                        <RadzenDataGridColumn Width="6rem" Title="Action" Sortable="false">
+                            <Template>
+                                <RadzenButton Size="ButtonSize.ExtraSmall"
+                                              Click="@(()=>AddCreditAgent(context!.EmployeeId))"
+                                              Variant="Variant.Text"
+                                              Text="Make C.O"
+                                              ButtonStyle="ButtonStyle.Primary"
+                                              Icon="person_add" />
+                            </Template>
+                        </RadzenDataGridColumn>
+                    </Columns>
+                </RadzenDataGrid>
+            </RadzenTabsItem>
+        </Tabs>
+    </RadzenTabs>
+    <RadzenStack AlignItems="AlignItems.Center"
+                 JustifyContent="JustifyContent.End"
+                 Gap="1rem"
+                 class="mt-2"
+                 Orientation="Orientation.Horizontal">
+        <RadzenButton Text="Close"
+                      Icon="cancel"
+                      Size="ButtonSize.Small"
+                      Click="RemoveTab"
+                      ButtonStyle="ButtonStyle.Danger" />
+    </RadzenStack>
+</RadzenCard>
+
