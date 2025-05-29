@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Radzen;
 
-namespace TrapchumApp.Components.Pages.Currencies
+namespace TrapchumApp.Pages.Currencies
 {
     public partial class NoteModalCreate
     {

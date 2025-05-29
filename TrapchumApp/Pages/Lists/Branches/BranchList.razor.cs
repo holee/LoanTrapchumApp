@@ -3,7 +3,8 @@ using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Branches;
 using Microsoft.AspNetCore.Components;
 using Radzen;
-namespace TrapchumApp.Components.Pages.Lists.Branches
+
+namespace TrapchumApp.Pages.Lists.Branches
 {
     public partial class BranchList
     {

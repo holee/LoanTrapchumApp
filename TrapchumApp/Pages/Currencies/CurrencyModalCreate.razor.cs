@@ -2,7 +2,7 @@ using Applications.Interfaces.Currencies;
 using Applications.Requests.Lists.Currency;
 using Microsoft.AspNetCore.Components.Forms;
 
-namespace TrapchumApp.Components.Pages.Currencies
+namespace TrapchumApp.Pages.Currencies
 {
     public partial class CurrencyModalCreate
     {

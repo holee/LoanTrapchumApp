@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Applications.Commons.Mappers;
 using Applications.Enumerations;
 using Applications.Extensions;
@@ -8,12 +9,10 @@ using Infrastructures.Authorizations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Radzen;
-using System.Security.Claims;
-using TrapchumApp.Components.Shared;
+using TrapchumApp.Shared;
 
-namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
+namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 {
     public partial class LoanRequestDetail
     {

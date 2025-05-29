@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components.Web;
 using Radzen;
 
-namespace TrapchumApp.Components.Pages.Lists.Customers
+namespace TrapchumApp.Pages.Lists.Customers
 {
     public partial class CustomerEdit
     {

@@ -8,7 +8,7 @@ namespace Applications.Calculations
     {
 
         public static PaymentDtoCreate ToPaymentDtoCreate(this VSchedule s) => new PaymentDtoCreate(s.LeftPrinciple, s.LeftInterestAmount, s.LeftCollectionFeeAmount, s.PenaltyAmount);
-      
+
         public static LoanPaymentLineDtoCreate ToPaymentLine(this VSchedule s, PaymentDtoCreate p) => new LoanPaymentLineDtoCreate
         {
             LoanRefId = s.LoanId,
@@ -25,10 +25,14 @@ namespace Applications.Calculations
             SubTotal = p.SubTotal()
         };
 
+ 
+
         public static List<LoanPaymentLineDtoCreate> ToPaymentLines(this IEnumerable<VSchedule> source, PaymentDtoCreate p)
         {
             return source.Select(x => x.ToPaymentLine(p)).ToList();
         }
+
+  
         
         public static decimal? SubTotal(decimal? principle = 0, decimal? interest = 0, decimal? collectionfee = 0, decimal? penalty = 0)
         {

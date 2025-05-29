@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Radzen;
 
-namespace TrapchumApp.Components.Pages.Transactions.Ledgers
+namespace TrapchumApp.Pages.Transactions.Ledgers
 {
     public partial class EditLedgerModal
     {

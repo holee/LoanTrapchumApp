@@ -1,11 +1,11 @@
 ﻿using System.Security.Claims;
-using Microsoft.AspNetCore.Components;
 using System.Text.Json;
 using Applications.ApplicationPolicies;
 using Applications.Extensions.Identity.Authorizations.Extensions;
 using Applications.Extensions.Identity.Policies;
+using Microsoft.AspNetCore.Components;
 
-namespace TrapchumApp.Components.Shared
+namespace TrapchumApp.Shared
 {
     public partial class CascadingAppState : ComponentBase, IAppStateService
     {

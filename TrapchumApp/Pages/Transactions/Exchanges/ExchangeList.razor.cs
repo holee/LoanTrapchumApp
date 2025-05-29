@@ -1,4 +1,4 @@
-﻿namespace TCLMS.Front.Pages.Transactions.Exchanges
+﻿namespace TrapchumApp.Pages.Transactions.Exchanges
 {
     public partial class ExchangeList
     {

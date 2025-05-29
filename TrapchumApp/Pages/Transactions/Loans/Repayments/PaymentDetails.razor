@@ -1,5 +1,6 @@
 ﻿@page "/App/Loan/{BranchId:int}/Branches/{LoanId}/Details"
-@using TrapchumApp.Components.Pages.Transactions.Loans.Disbursements
+@using Microsoft.AspNetCore.Components.Web
+@using TrapchumApp.Pages.Transactions.Loans.Disbursements
 @using TrapchumApp.Services
 <PageTitle>Loan Details</PageTitle>
 <LoanInfos LoanSchedule="@loanSchedule" Currency="@CurrencyId" LoanId="@LoanId" BranchId="@BranchId" />

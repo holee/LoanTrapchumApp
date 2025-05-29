@@ -1,9 +1,9 @@
+using System.Linq.Expressions;
 using Applications.Responses.Lists.Entities;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
-using System.Linq.Expressions;
 
-namespace TrapchumApp.Components.Pages.Lists
+namespace TrapchumApp.Pages.Lists
 {
     public partial class OccupationDropDown
     {

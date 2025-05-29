@@ -16,6 +16,7 @@ using System.Security.Claims;
 using Infrastructures.DataAccess;
 using Applications.Responses.Message;
 using Applications.Extensions;
+using Dapper;
 namespace Infrastructures.Implements;
 
 public sealed class UserService : IUserService
@@ -26,12 +27,14 @@ public sealed class UserService : IUserService
     private readonly RoleManager<ApplicationRole> _roleManager;
     private readonly IWebHostEnvironment _env;
     private readonly IDbContextFactory<UserDataContext> _dbContextFactory;
+    private readonly IDapperConnectionFactory connectionFactory;
     public UserService(UserManager<ApplicationUser> userManager,
          RoleManager<ApplicationRole> roleManager,
          UserDataContext userContext,
          IWebHostEnvironment env,
          SignInManager<ApplicationUser> signinManager,
-         IDbContextFactory<UserDataContext> dbContextFactory)
+         IDbContextFactory<UserDataContext> dbContextFactory,
+         IDapperConnectionFactory connectionFactory)
     {
         _userManager = userManager;
         _roleManager = roleManager;
@@ -39,6 +42,7 @@ public sealed class UserService : IUserService
         _env = env;
         _signinManager = signinManager;
         _dbContextFactory = dbContextFactory;
+        this.connectionFactory = connectionFactory;
     }
     public async Task<Result<string>> CreateUserAsync(RegisterRequest model)
     {
@@ -130,6 +134,65 @@ public sealed class UserService : IUserService
         return Result.Success<IEnumerable<VUser>>(queries);
 
     }
+
+    public async Task<Result<VUser>> GetUserByIdAsync(string? userId,CancellationToken cancellation=default)
+    {
+
+        if (userId.IsNullOrEmpty())
+        {
+            return Result.Failure<VUser>(ErrorResponse.NotFound("There is no user selected"));
+        }
+
+        using var db = await connectionFactory.CreateConnectionAsync(cancellation);
+
+        var parameters = new DynamicParameters();
+
+        parameters.Add("@UserId", userId);
+
+        var sql = "SELECT * FROM vUsers WHERE Id=@UserId";
+
+        var item = await db.QueryFirstOrDefaultAsync<VUser>(sql, parameters);
+
+        if(item is null)
+        {
+            return Result.Failure<VUser>(ErrorResponse.NotFound(Messages.DataNotFound));
+        }
+
+        return Result.Success<VUser>(item);
+
+    }
+
+    public async Task<Result<VUser>> GetUserByIdAsync(string? userId, CancellationToken cancellation = default,params IEnumerable<string> columns)
+    {
+
+        if (userId.IsNullOrEmpty())
+        {
+            return Result.Failure<VUser>(ErrorResponse.NotFound("There is no user selected"));
+        }
+
+        var strColumns =columns.Any() ? string.Join(",",columns) : "*";
+
+        using var db = await connectionFactory.CreateConnectionAsync(cancellation);
+
+        var parameters = new DynamicParameters();
+
+        parameters.Add("@UserId", userId);
+
+        var sql = $"SELECT {strColumns} FROM vUsers WHERE Id=@UserId";
+
+        var item = await db.QueryFirstOrDefaultAsync<VUser>(sql, parameters);
+
+        if (item is null)
+        {
+            return Result.Failure<VUser>(ErrorResponse.NotFound(Messages.DataNotFound));
+        }
+
+        return Result.Success<VUser>(item);
+
+    }
+
+
+
     public async Task<Result<Pager<VUser>>> GetUsersAsync(QueryParam param, string? userId)
     {
 

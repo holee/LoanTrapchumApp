@@ -1,18 +1,17 @@
 ﻿using Applications.Extensions;
-using Applications.Responses.ViewModels.Customers;
-using Applications.Services.LIsts;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
-using Radzen.Blazor;
-using Radzen;
-using TrapchumApp.Components.Pages.Lists.Collaterals;
-using TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests;
 using Applications.Extensions.Identity;
 using Applications.Extensions.Web;
-using Applications.Services.Customers;
 using Applications.Responses.Lists.Collaterals;
+using Applications.Responses.ViewModels.Customers;
+using Applications.Services.Customers;
+using Applications.Services.LIsts;
+using Microsoft.AspNetCore.Components;
+using Radzen;
+using Microsoft.AspNetCore.Components.Authorization;
+using Radzen.Blazor;
+using TrapchumApp.Pages.Lists.Collaterals;
 
-namespace TrapchumApp.Components.Pages.Lists.Customers
+namespace TrapchumApp.Pages.Lists.Customers
 {
     public partial class CustomerDetails
     {

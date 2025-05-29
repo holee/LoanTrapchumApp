@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Radzen.Blazor;
 
-namespace TrapchumApp.Components.Pages.Lists.Customers
+namespace TrapchumApp.Pages.Lists.Customers
 {
     public partial class CustomersIndex
     {

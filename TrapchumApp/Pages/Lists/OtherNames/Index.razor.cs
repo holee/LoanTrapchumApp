@@ -1,9 +1,6 @@
 using Applications.Extensions;
 using Applications.Requests.Lists.Addreses;
-using Applications.Requests.Lists.Customers;
-using Applications.Requests.Lists.Employees;
 using Applications.Requests.Lists.OtherNames;
-using Applications.Requests.Lists.Vendors;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.OtherNames;
 using Applications.Services.Lists;
@@ -11,10 +8,8 @@ using Domains.Models.Bases;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 using Radzen.Blazor;
-using System.Threading.Tasks;
 
-
-namespace TrapchumApp.Components.Pages.Lists.OtherNames;
+namespace TrapchumApp.Pages.Lists.OtherNames;
 
 public partial class Index
 {

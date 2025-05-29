@@ -1,16 +1,13 @@
+using Applications.Interfaces.Banks;
+using Applications.Requests.Lists.Addreses;
+using Applications.Requests.Lists.Entities;
+using Applications.Responses.Lists.Currency;
+using Domains.Models.Addresses;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Radzen;
-using Applications.Requests.Lists.Entities;
-using Applications.Interfaces.Addresses;
-using Applications.Interfaces.Banks;
-using Applications.Requests.Lists.Addreses;
-using Domains.Models.Addresses;
-using Mapster;
-using Domains.Models.Lists;
-using Applications.Responses.Lists.Currency;
 
-namespace TrapchumApp.Components.Pages.Lists.Branches
+namespace TrapchumApp.Pages.Lists.Branches
 {
     public partial class BranchUpdateModal
     {

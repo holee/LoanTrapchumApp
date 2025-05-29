@@ -10,12 +10,12 @@ using Applications.Services.Lists;
 using Applications.Services.Loans;
 using Domains.Enumerations;
 using Microsoft.AspNetCore.Components;
+using Radzen;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Forms;
-using Radzen;
 using Radzen.Blazor;
 
-namespace TrapchumApp.Components.Pages.Transactions.Loans.Disbursements;
+namespace TrapchumApp.Pages.Transactions.Loans.Disbursements;
 
 public partial class LoanCreate(ILoanServiceImpl loanService, IHolidayServiceImpl holidayService)
 {

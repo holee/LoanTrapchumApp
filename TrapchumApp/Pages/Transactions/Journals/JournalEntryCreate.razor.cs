@@ -1,22 +1,19 @@
-﻿using Applications.Constants.Authorizations;
-using Applications.Enumerations;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Forms;
-using Radzen;
-using Applications.Requests.Transactions.Journals;
-using Applications.Requests.Journals;
-using Applications.Responses.ViewModels.Ledgers;
-using Applications.Responses.ViewModels.Journals;
-using Mapster;
-using Domains.Models.Transaction;
+﻿using Applications.Enumerations;
 using Applications.Extensions.mappers;
+using Applications.Requests.Journals;
+using Applications.Requests.Transactions.Journals;
 using Applications.Responses.Lists.Currency;
 using Applications.Responses.Paginations;
+using Applications.Responses.ViewModels.Journals;
+using Applications.Responses.ViewModels.Ledgers;
 using Applications.Services.Currencies;
 using Applications.Services.Lists;
 using Applications.Services.Transactions.Journals;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
+using Radzen;
 
-namespace TrapchumApp.Components.Pages.Transactions.Journals;
+namespace TrapchumApp.Pages.Transactions.Journals;
 
 public partial class JournalEntryCreate(
     ICurrencyServiceImpl currencyService,

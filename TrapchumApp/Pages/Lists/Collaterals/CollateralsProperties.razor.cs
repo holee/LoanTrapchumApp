@@ -1,7 +1,7 @@
 using Applications.Responses.Lists.Collaterals;
 using Radzen.Blazor;
 
-namespace TrapchumApp.Components.Pages.Lists.Collaterals
+namespace TrapchumApp.Pages.Lists.Collaterals
 {
     public partial class CollateralsProperties
     {

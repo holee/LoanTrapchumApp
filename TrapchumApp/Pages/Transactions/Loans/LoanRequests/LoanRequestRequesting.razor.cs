@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Applications.Enumerations;
 using Applications.Extensions.Identity.Policies;
 using Applications.Extensions.Web;
@@ -7,9 +8,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Radzen;
-using System.Security.Claims;
 
-namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
+namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 {
     public partial class LoanRequestRequesting
     {

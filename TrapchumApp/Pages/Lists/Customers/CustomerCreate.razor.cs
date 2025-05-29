@@ -1,18 +1,18 @@
 ﻿using Applications.Requests.Lists.Addreses;
 using Applications.Requests.Lists.OtherNames;
 using Applications.Responses.Lists.Entities;
+using Applications.Services.Files;
+using Applications.Services.Lists;
 using Domains.Models.Addresses;
 using Domains.Models.Files;
 using Domains.Models.Lists;
 using Microsoft.AspNetCore.Components;
+using Radzen;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components.Web;
 using Radzen.Blazor;
-using Radzen;
-using Applications.Services.Files;
-using Applications.Services.Lists;
 
-namespace TrapchumApp.Components.Pages.Lists.Customers
+namespace TrapchumApp.Pages.Lists.Customers
 {
     public partial class CustomerCreate
     {

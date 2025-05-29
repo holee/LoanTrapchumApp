@@ -2,7 +2,7 @@
 using Applications.Requests.Transactions.CashManagements;
 using Microsoft.AspNetCore.Components;
 
-namespace TrapchumApp.Components.Pages.Transactions.Branches
+namespace TrapchumApp.Pages.Transactions.Branches
 {
     public partial class VaultInRow
     {

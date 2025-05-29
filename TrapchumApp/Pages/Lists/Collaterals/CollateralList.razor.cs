@@ -1,15 +1,14 @@
 using Applications.Extensions;
+using Applications.Responses.Lists.Collaterals;
+using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Collaterals;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Services.Customers;
 using Applications.Services.LIsts;
-using Microsoft.AspNetCore.Components;
-using Radzen.Blazor;
 using Radzen;
-using System.Threading.Tasks;
-using Applications.Responses.Paginations;
-using Applications.Responses.Lists.Collaterals;
-namespace TrapchumApp.Components.Pages.Lists.Collaterals;
+using Radzen.Blazor;
+
+namespace TrapchumApp.Pages.Lists.Collaterals;
 
 public partial class CollateralList
 {
@@ -145,7 +144,9 @@ public partial class CollateralList
     void Delete(string? customerId) { }
     void AddDetailsTab(string? customerId)
     {
+
         ContextMenuService.Close();
+
         try
         {
             CustomerId = customerId!;

@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MiniExcelLibs;
-using System.Threading.Tasks;
 
 namespace TrapchumApp.Controllers
 {

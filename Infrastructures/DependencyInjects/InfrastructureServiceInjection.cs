@@ -27,10 +27,6 @@ namespace Infrastructures.DependencyInjects
     {
         public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
         {
-            //services.AddDbContext<DataContext>(options =>
-            //{
-            //    options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
-            //},ServiceLifetime.Transient);
 
             services.AddDbContextFactory<UserDataContext>(options =>
             {
@@ -42,18 +38,34 @@ namespace Infrastructures.DependencyInjects
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
             });
             services.AddScoped<Seeds.DatabaseSeeder>();
-            services.AddAuthentication(options =>
-            {
-                options.DefaultScheme = IdentityConstants.ApplicationScheme;
-                options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
-            }).AddIdentityCookies();
+
             services.AddIdentityCore<ApplicationUser>()
                 .AddRoles<ApplicationRole>()
                 .AddEntityFrameworkStores<UserDataContext>()
                 .AddRoleManager<RoleManager<ApplicationRole>>()
                 .AddSignInManager()
                 .AddDefaultTokenProviders();
-           
+
+            services.AddAuthentication(options =>
+            {
+                options.DefaultScheme = IdentityConstants.ApplicationScheme;
+                options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+                options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
+                options.DefaultChallengeScheme = IdentityConstants.ApplicationScheme;
+            }).AddIdentityCookies(options =>
+            {
+                
+            });
+
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.ExpireTimeSpan = TimeSpan.FromDays(15);
+                options.SlidingExpiration = true;
+                //options.SessionStore = new MemoryCacheTicketStore();
+                //options.LoginPath = LOGIN_PATH;
+            });
+
+
             services.TryAddTransient<IAppSettingService, AppSettingService>();
             services.TryAddTransient<ILoanSettingService, LoanSettingService>();
             services.TryAddTransient<IForiegnCurrencyExchange, ForiegnCurrencyExchange>();

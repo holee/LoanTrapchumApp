@@ -4,7 +4,7 @@ using Mapster;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 
-namespace TrapchumApp.Components.Pages.Lists.Departments
+namespace TrapchumApp.Pages.Lists.Departments
 {
     public partial class DepartmentDetailModal
     {

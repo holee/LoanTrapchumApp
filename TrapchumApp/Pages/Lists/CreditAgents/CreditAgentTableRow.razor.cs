@@ -3,7 +3,7 @@ using Applications.Responses.ViewModels.Customers;
 using Applications.Services.Lists;
 using Microsoft.AspNetCore.Components;
 
-namespace TrapchumApp.Components.Pages.Lists.CreditAgents
+namespace TrapchumApp.Pages.Lists.CreditAgents
 {
     public partial class CreditAgentTableRow
     {

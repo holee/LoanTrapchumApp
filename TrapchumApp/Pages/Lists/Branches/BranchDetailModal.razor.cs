@@ -1,7 +1,7 @@
 using Applications.Responses.ViewModels.Branches;
 using Microsoft.AspNetCore.Components;
 
-namespace TrapchumApp.Components.Pages.Lists.Branches
+namespace TrapchumApp.Pages.Lists.Branches
 {
     public partial class BranchDetailModal
     {

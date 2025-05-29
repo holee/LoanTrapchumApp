@@ -146,7 +146,7 @@ namespace Infrastructures.Implements
 
             parameters.Add("@ScheduleStatusId", (int)status);
 
-            var items = await db.QueryAsync<VSchedule>(ProcedureConstant.GetSchedulesByLoanId, parameters, commandType: CommandType.StoredProcedure);
+            var items = await db.QueryAsync<VSchedule>(ProcedureConstant.SpGetSchedulesByLoanId, parameters, commandType: CommandType.StoredProcedure);
 
             return Result.Success(items);
         }

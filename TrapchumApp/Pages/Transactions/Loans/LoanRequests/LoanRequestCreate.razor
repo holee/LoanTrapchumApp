@@ -2,6 +2,8 @@
 @using Applications.Responses.Auths
 @using Applications.Responses.Lists.Collaterals
 @using Applications.Responses.Loans.Disbursements
+@using Microsoft.AspNetCore.Components.Web
+@using Radzen.Blazor
 @using Radzen.Blazor.Rendering
 @using TrapchumApp.Helpers.Constants
 @using TrapchumApp.Services
@@ -145,13 +147,13 @@
     {
         var items = Customers;
 
-        var popupOpened = await js.InvokeAsync<bool>("Radzen.popupOpened", "popup");
+        var popupOpened = await js.InvokeAsync<bool>("popupOpened", "popup");
 
         var key = args.Code != null ? args.Code : args.Key;
 
         if (!args.AltKey && (key == "ArrowDown" || key == "ArrowUp"))
         {
-            var result = await js.InvokeAsync<int[]>("Radzen.focusTableRow", "grid", key, selectedIndex, null, false);
+            var result = await js.InvokeAsync<int[]>("focusTableRow", "grid", key, selectedIndex, null, false);
 
             selectedIndex = result.First();
         }

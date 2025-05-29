@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
 
-namespace TrapchumApp.Components.Pages.Transactions.Loans.Disbursements
+namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 {
     public partial class IndexLoan
     {

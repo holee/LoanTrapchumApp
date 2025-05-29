@@ -1,8 +1,9 @@
 ﻿using Applications.Extensions.DateTimes;
 using Applications.Requests.Lists.Holidays;
 using Applications.Services.Lists;
+using Radzen;
 
-namespace TrapchumApp.Components.Pages.Lists.Holidays
+namespace TrapchumApp.Pages.Lists.Holidays
 {
     public partial class CreateMultipleModal
     {
@@ -51,7 +52,7 @@ namespace TrapchumApp.Components.Pages.Lists.Holidays
                 if (rsp.IsSuccess)
                 {
 
-                    NotificationService.Notify(Radzen.NotificationSeverity.Success, "Holiday were added.");
+                    NotificationService.Notify(NotificationSeverity.Success, "Holiday were added.");
 
                     visibled = false;
 
@@ -59,7 +60,7 @@ namespace TrapchumApp.Components.Pages.Lists.Holidays
                 }
                 else
                 {
-                    NotificationService.Notify(Radzen.NotificationSeverity.Error, rsp.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
 
                     visibled = false;
 
@@ -68,7 +69,7 @@ namespace TrapchumApp.Components.Pages.Lists.Holidays
             }
             catch (Exception ex)
             {
-                NotificationService.Notify(Radzen.NotificationSeverity.Error, ex.Message);
+                NotificationService.Notify(NotificationSeverity.Error, ex.Message);
 
                 visibled = false;
 

@@ -3,7 +3,7 @@ using Applications.Responses.ViewModels.Currencies;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 
-namespace TrapchumApp.Components.Pages.Transactions.Exchanges
+namespace TrapchumApp.Pages.Transactions.Exchanges
 {
     public partial class ExchangeHistory
     {

@@ -7,7 +7,7 @@ using Mapster;
 using Microsoft.AspNetCore.Components.Web;
 using Radzen;
 
-namespace TrapchumApp.Components.Pages.Transactions.Exchanges
+namespace TrapchumApp.Pages.Transactions.Exchanges
 {
     public partial class SetDailySpotRate
     {

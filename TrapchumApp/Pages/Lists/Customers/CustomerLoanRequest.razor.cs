@@ -1,12 +1,9 @@
-using Applications.Enumerations;
 using Applications.Extensions;
 using Applications.Responses.ViewModels.Customers;
-using Domains.Models.Lists.Customers;
 using Microsoft.AspNetCore.Components;
 using Radzen;
-using System.Threading.Tasks;
 
-namespace TrapchumApp.Components.Pages.Lists.Customers
+namespace TrapchumApp.Pages.Lists.Customers
 {
     public partial class CustomerLoanRequest
     {

@@ -2,7 +2,7 @@
 @using Domains.Models.Bases
 @using TrapchumApp.Services
 <EditForm Model="@model" OnValidSubmit="OnSaveChanges">
-        <Microsoft.AspNetCore.Components.Forms.ValidationSummary />
+        <Forms.ValidationSummary />
         <FluentValidationValidator DisableAssemblyScanning="false"></FluentValidationValidator>
         <RadzenFieldset>
             <HeaderTemplate>

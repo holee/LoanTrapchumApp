@@ -14,6 +14,8 @@ public interface IUserServiceImpl
     Task<Result<string>> CreateUserAsync(RegisterRequest model);
     Task<Result> EditUserAsync(string userId, EditUserDto model);
     Task<Pager<PermissionsVm>> GetPermissionsAsync(QueryParam req);
+    Task<Result<VUser>> GetUserByIdAsync(string? userId, CancellationToken cancellation = default);
+    Task<Result<VUser>> GetUserByIdAsync(string? userId, CancellationToken cancellation = default, params IEnumerable<string> columns);
     Task<Result<UserDto>> GetUserDetailsById(string? userId);
     Task<Result<UserPermissions>> GetUserPermissionsAsync(string? userId);
     Task<Result<UserViewModel>> GetUserRolesAsync(string? userId);

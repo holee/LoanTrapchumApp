@@ -1,7 +1,7 @@
 using Applications.Responses.ViewModels.Loans.Payments;
 using Microsoft.AspNetCore.Components;
 
-namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments;
+namespace TrapchumApp.Pages.Transactions.Loans.Repayments;
 public partial class ScheduleDetails
 {
 

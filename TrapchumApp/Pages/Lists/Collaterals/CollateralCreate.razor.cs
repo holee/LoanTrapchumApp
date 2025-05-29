@@ -1,4 +1,3 @@
-using Applications.Enumerations;
 using Applications.Extensions;
 using Applications.Requests.Lists.Collaterals;
 using Applications.Responses.Lists.Collaterals;
@@ -8,8 +7,9 @@ using Domains.Models.Collaterals;
 using Mapster;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
+using Radzen;
 
-namespace TrapchumApp.Components.Pages.Lists.Collaterals
+namespace TrapchumApp.Pages.Lists.Collaterals
 {
     public partial class CollateralCreate
     {
@@ -161,7 +161,7 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
 
             if (CustomerId.IsNullOrEmpty())
             {
-                NotificationService.Notify(Radzen.NotificationSeverity.Warning, "Empty Selected", "Please select customer first");
+                NotificationService.Notify(NotificationSeverity.Warning, "Empty Selected", "Please select customer first");
                 return;
             }
             editForm.EditContext?.Validate();
@@ -172,17 +172,17 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
                 if (response.IsSuccess)
                 {
 
-                    NotificationService.Notify(Radzen.NotificationSeverity.Success, response.Data);
+                    NotificationService.Notify(NotificationSeverity.Success, response.Data);
                     model = new();
                 }
                 else
                 {
-                    NotificationService.Notify(Radzen.NotificationSeverity.Error, response.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Error, response.ErrMessage);
                 }
             }
             catch (Exception ex)
             {
-                NotificationService.Notify(Radzen.NotificationSeverity.Error, ex.Message);
+                NotificationService.Notify(NotificationSeverity.Error, ex.Message);
 
             }
         }

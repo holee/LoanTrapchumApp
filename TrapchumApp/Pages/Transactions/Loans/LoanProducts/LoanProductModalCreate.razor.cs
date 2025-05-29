@@ -3,8 +3,9 @@ using Applications.Interfaces.Currencies;
 using Applications.Requests.Loans.Products;
 using Applications.Responses.Lists.Currency;
 using Applications.Services.Loans;
+using Radzen;
 
-namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanProducts
+namespace TrapchumApp.Pages.Transactions.Loans.LoanProducts
 {
     public partial class LoanProductModalCreate
     {
@@ -56,7 +57,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanProducts
             }
             catch (Exception ex)
             {
-                NotificationService.Notify(Radzen.NotificationSeverity.Error, ex.Message);
+                NotificationService.Notify(NotificationSeverity.Error, ex.Message);
             }
         }
     }

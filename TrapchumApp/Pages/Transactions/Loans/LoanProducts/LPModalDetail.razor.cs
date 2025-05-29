@@ -1,12 +1,8 @@
-using Applications.Interfaces.Loans;
-using Applications.Responses.Loans.Disbursements;
-using Applications.Responses.ViewModels.Loans.Payments;
 using Applications.Responses.ViewModels.Loans.Products;
 using Applications.Services.Loans;
-using Mapster;
 using Microsoft.AspNetCore.Components;
 
-namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanProducts
+namespace TrapchumApp.Pages.Transactions.Loans.LoanProducts
 {
     public partial class LPModalDetail
     {

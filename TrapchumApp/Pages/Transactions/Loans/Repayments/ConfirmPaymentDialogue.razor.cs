@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Radzen;
 
-namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
+namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 {
 
     public partial class ConfirmPaymentDialogue

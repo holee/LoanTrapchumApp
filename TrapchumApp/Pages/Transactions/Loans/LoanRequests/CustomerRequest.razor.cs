@@ -2,7 +2,7 @@ using Applications.Extensions;
 using Applications.Responses.ViewModels.Customers;
 using Microsoft.AspNetCore.Components;
 
-namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
+namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 {
     public partial class CustomerRequest
     {

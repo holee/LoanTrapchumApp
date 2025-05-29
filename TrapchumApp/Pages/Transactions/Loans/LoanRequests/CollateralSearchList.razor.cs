@@ -1,12 +1,11 @@
-using Microsoft.AspNetCore.Components.Web;
+using Applications.Responses.Lists.Collaterals;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
-using Radzen.Blazor.Rendering;
+using Microsoft.AspNetCore.Components.Web;
 using Radzen.Blazor;
-using Applications.Responses.Lists.Collaterals;
-using Applications.Responses.ViewModels.OtherNames;
+using Radzen.Blazor.Rendering;
 
-namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
+namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 {
     public partial class CollateralSearchList
     {
@@ -93,6 +92,17 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
         async Task OnKeyDown(KeyboardEventArgs args)
         {
 
+            if (!_collateralLines.Any()) return;
+
+            var isShiftKey = args.ShiftKey;
+            
+            var arrowDownKey = args.Code == "ArrowDown" || args.Key == "ArrowDown";
+
+            var arrowUpKey = args.Code == "ArrowUp" || args.Key == "ArrowUp";
+
+
+
+
             var items = _collateralLines;
 
             var popupOpened = await js.InvokeAsync<bool>("Radzen.popupOpened", "_collateralPopup");
@@ -128,10 +138,6 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 
         async Task OpenPopup(MouseEventArgs arg)
         {
-            //if (SelectedItems.Any())
-            //{
-            //    _selectedCollateralLines = SelectedItems.Select(x => x.Map()).ToList();
-            //}
 
             await GetCustomerCollaterals();
 

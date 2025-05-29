@@ -4,12 +4,12 @@ using Applications.Requests.Loans.Payments;
 using Applications.Requests.Transactions.LoanTransactions;
 using Applications.Services.Loans;
 using Applications.Services.Settings;
-using Domains.Models.Loans;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Radzen;
-namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
+
+namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 {
     public partial class PaymentModal
     {
@@ -30,6 +30,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
         [Parameter] public string CustomerName { get; set; } = string.Empty;
         [Parameter] public string ReceiptNo { get; set; } = string.Empty;
         [Parameter] public PaymentCreate PaymentCreate { get; set; } = new();
+        [Parameter] public LoanPaymentDtoCreate LoanPaymentCreate { get; set; } = new(); 
         [Parameter] public List<LoanPaymentLineDtoCreate> LoanRepaymentLines { get; set; } = [];
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
         LoanPaymentDtoCreate LoanRepayment { get; set; } = new();

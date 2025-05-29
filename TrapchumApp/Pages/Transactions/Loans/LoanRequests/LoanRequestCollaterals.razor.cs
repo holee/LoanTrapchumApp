@@ -3,9 +3,9 @@ using Applications.Responses.ViewModels.Loans.Requests;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 using Radzen.Blazor;
-using TrapchumApp.Components.Pages.Lists.Collaterals;
+using TrapchumApp.Pages.Lists.Collaterals;
 
-namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
+namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 {
     public partial class LoanRequestCollaterals
     {

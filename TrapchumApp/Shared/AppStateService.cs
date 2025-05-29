@@ -1,4 +1,4 @@
-﻿namespace TrapchumApp.Components.Shared
+﻿namespace TrapchumApp.Shared
 {
     public sealed class AppStateService : IAppStateService
     {

@@ -8,7 +8,7 @@ using Mapster;
 using Microsoft.AspNetCore.Components.Forms;
 using Radzen;
 
-namespace TrapchumApp.Components.Pages.Transactions.Ledgers
+namespace TrapchumApp.Pages.Transactions.Ledgers
 {
     public partial class CreateLedgerModal
     {
@@ -64,7 +64,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Ledgers
         //    //{
         //    //    LedgerTypes = [];
         //    //    counts = 0;
-        //    //    NotificationService.Notify(Radzen.NotificationSeverity.Error, resp.ErrMessage);
+        //    //    NotificationService.Notify(NotificationSeverity.Error, resp.ErrMessage);
         //    //}
         //}
        

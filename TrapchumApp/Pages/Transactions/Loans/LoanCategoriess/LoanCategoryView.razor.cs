@@ -1,4 +1,3 @@
-using Applications.Interfaces.Loans;
 using Applications.Requests.Loans.Categories;
 using Applications.Responses.Loans.Disbursements;
 using Applications.Responses.Paginations;
@@ -9,7 +8,7 @@ using Microsoft.AspNetCore.Components;
 using Radzen;
 using Radzen.Blazor;
 
-namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanCategoriess
+namespace TrapchumApp.Pages.Transactions.Loans.LoanCategoriess
 {
     public partial class LoanCategoryView
     {

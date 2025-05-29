@@ -1,6 +1,5 @@
 ﻿using Applications.Enumerations;
 using Applications.Interfaces.Lists;
-using Applications.Requests.Lists.Addreses;
 using Applications.Requests.Lists.OtherNames;
 using Applications.Responses.Lists.Entities;
 using Applications.Services.Files;
@@ -13,7 +12,7 @@ using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components.Web;
 using Radzen;
 
-namespace TrapchumApp.Components.Pages.Lists.Customers
+namespace TrapchumApp.Pages.Lists.Customers
 {
     public partial class CustomerUpdateTab
     {

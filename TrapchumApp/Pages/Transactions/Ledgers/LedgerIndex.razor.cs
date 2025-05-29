@@ -2,7 +2,8 @@
 using Applications.Responses.ViewModels.Ledgers;
 using Microsoft.AspNetCore.Components;
 using Radzen;
-namespace TrapchumApp.Components.Pages.Transactions.Ledgers;
+
+namespace TrapchumApp.Pages.Transactions.Ledgers;
 
 public partial class LedgerIndex
 {

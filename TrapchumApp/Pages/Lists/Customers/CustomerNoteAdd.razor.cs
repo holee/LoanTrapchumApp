@@ -1,7 +1,7 @@
 using Applications.Requests.Lists.Customers;
 using Microsoft.AspNetCore.Components;
 
-namespace TrapchumApp.Components.Pages.Lists.Customers
+namespace TrapchumApp.Pages.Lists.Customers
 {
     public partial class CustomerNoteAdd
     {

@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Radzen;
 
-namespace TrapchumApp.Components.Pages.Transactions.Loans.WriteOffs
+namespace TrapchumApp.Pages.Transactions.Loans.WriteOffs
 {
     public partial class Index
     {

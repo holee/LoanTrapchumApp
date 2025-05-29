@@ -1,0 +1,37 @@
+﻿@page "/Account/Login"
+@using TrapchumApp.Pages.Identity.Shared
+@using TrapchumApp.Services
+<PageTitle>Login</PageTitle>
+@attribute [AllowAnonymous]
+@layout EmptyLayout
+@inject NavigationManager NavigationManager
+<RadzenCard Style="background-color: #eeeeee94;">
+    <RadzenStack Style="text-align:center;width:100%;">
+        <RadzenImage Path="/assets/logo/tch_Logo.png" Text="Company Logo" />
+    </RadzenStack>
+    <RadzenStack class="mt-2">
+       <StatusMessage Message="@errorMessage" />
+        <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
+            <DataAnnotationsValidator />
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.Email" id="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                <label for="Input.Email" class="form-label">Email</label>
+                <ValidationMessage For="() => Input.Email" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputText type="password" @bind-Value="Input.Password" id="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password" />
+                <label for="Input.Password" class="form-label">Password</label>
+                <ValidationMessage For="() => Input.Password" class="text-danger" />
+            </div>
+            <div class="checkbox mb-3">
+                <label class="form-label">
+                    <InputCheckbox @bind-Value="Input.RememberMe" class="darker-border-checkbox form-check-input" />
+                    Remember me
+                </label>
+            </div>
+            <div>
+                <button type="submit" class="w-100 btn btn-sm btn-primary">Log in</button>
+            </div>
+        </EditForm>
+    </RadzenStack>
+</RadzenCard>

@@ -21,4 +21,6 @@ public interface IUserService
     Task<Result> UpdateUserRoleAsync(UserRoleDtoUpdate req);
     Task<Pager<PermissionsVm>> GetPermissionsAsync(QueryParam q);
     Task<Result<Pager<VUser>>> GetUsersAsync(int? branchId, string? userId, QueryParam param);
+    Task<Result<VUser>> GetUserByIdAsync(string? userId, CancellationToken cancellation = default, params IEnumerable<string> columns);
+    Task<Result<VUser>> GetUserByIdAsync(string? userId, CancellationToken cancellation = default);
 }

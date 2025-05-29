@@ -9,11 +9,11 @@ using Applications.Responses.ViewModels.Currencies;
 using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
 using Radzen;
+using Microsoft.AspNetCore.Components.Authorization;
 using Radzen.Blazor;
 
-namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
+namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 {
     public partial class PayOffs
     {

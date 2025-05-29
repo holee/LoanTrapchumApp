@@ -1,10 +1,9 @@
-using Microsoft.AspNetCore.Components;
 using Applications.Requests.Lists.OtherNames;
-using Applications.Services.Lists;
-using Radzen;
 using Domains.Models.Bases;
+using Microsoft.AspNetCore.Components;
+using Radzen;
 
-namespace TrapchumApp.Components.Pages.Lists.Employees
+namespace TrapchumApp.Pages.Lists.Employees
 {
     public partial class CreateEmployee
     {

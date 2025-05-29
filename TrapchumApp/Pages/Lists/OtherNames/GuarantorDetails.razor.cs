@@ -1,12 +1,10 @@
-using Applications.Interfaces.Lists;
 using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.OtherNames;
 using Applications.Services.Lists;
 using Microsoft.AspNetCore.Components;
 using Radzen;
-using System.Threading.Tasks;
 
-namespace TrapchumApp.Components.Pages.Lists.OtherNames
+namespace TrapchumApp.Pages.Lists.OtherNames
 {
     public partial class GuarantorDetails
     {

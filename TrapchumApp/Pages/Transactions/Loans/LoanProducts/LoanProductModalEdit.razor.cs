@@ -2,7 +2,7 @@ using Applications.Interfaces.Loans;
 using Applications.Requests.Loans.Products;
 using Microsoft.AspNetCore.Components;
 
-namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanProducts
+namespace TrapchumApp.Pages.Transactions.Loans.LoanProducts
 {
     public partial class LoanProductModalEdit
     {

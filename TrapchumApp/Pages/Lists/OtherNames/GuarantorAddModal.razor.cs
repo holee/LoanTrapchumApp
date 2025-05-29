@@ -1,12 +1,10 @@
-using Applications.Interfaces.Lists;
 using Applications.Requests.Lists.Addreses;
-using Applications.Requests.Lists.Entities;
 using Applications.Requests.Lists.OtherNames;
 using Applications.Services.Lists;
 using Domains.Models.Bases;
-using Mapster;
+using Radzen;
 
-namespace TrapchumApp.Components.Pages.Lists.OtherNames;
+namespace TrapchumApp.Pages.Lists.OtherNames;
 public partial class GuarantorAddModal
 {
     private readonly IGuarantorServiceImpl _gService;
@@ -31,7 +29,7 @@ public partial class GuarantorAddModal
         }
         catch (Exception ex)
         {
-            NotificationService.Notify(Radzen.NotificationSeverity.Error, ex.Message);
+            NotificationService.Notify(NotificationSeverity.Error, ex.Message);
         }
 
         await base.OnInitializedAsync();
@@ -44,13 +42,13 @@ public partial class GuarantorAddModal
 
         if (resultResponse.IsSuccess)
         {
-            NotificationService.Notify(Radzen.NotificationSeverity.Success, resultResponse.Data);
+            NotificationService.Notify(NotificationSeverity.Success, resultResponse.Data);
 
             DialogService.Close(true);
         }
         else
         {
-            NotificationService.Notify(Radzen.NotificationSeverity.Error, resultResponse.ErrMessage);
+            NotificationService.Notify(NotificationSeverity.Error, resultResponse.ErrMessage);
         }
     }
 

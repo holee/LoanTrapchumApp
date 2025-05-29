@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Components;
 using Radzen;
 using Radzen.Blazor;
 
-namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
+namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 {
     public partial class LateScheduleDetail
     {

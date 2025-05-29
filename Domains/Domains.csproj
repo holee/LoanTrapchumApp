@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="14.0.0" />
+    <PackageReference Include="MediatR" Version="12.5.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.DataAnnotations.Validation" Version="3.2.0-rc1.20223.4" />
     <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="9.0.2" />
     <PackageReference Include="MiniExcel" Version="1.38.0" />

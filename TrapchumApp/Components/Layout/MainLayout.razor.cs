@@ -2,9 +2,9 @@ using Applications.ApplicationPolicies;
 using Applications.Extensions.Identity;
 using Applications.Extensions.Identity.Authorizations.Extensions;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
 using System.Security.Claims;
-using TrapchumApp.Components.Shared;
+using Microsoft.AspNetCore.Components.Authorization;
+using TrapchumApp.Shared;
 
 namespace TrapchumApp.Components.Layout
 {

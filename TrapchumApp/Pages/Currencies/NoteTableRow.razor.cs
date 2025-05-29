@@ -3,7 +3,7 @@ using Applications.Requests.Lists.Currency;
 using Applications.Responses.ViewModels.Currencies;
 using Microsoft.AspNetCore.Components;
 
-namespace TrapchumApp.Components.Pages.Currencies
+namespace TrapchumApp.Pages.Currencies
 {
     public partial class NoteTableRow
     {

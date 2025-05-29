@@ -4,7 +4,7 @@ using Domains.Models.Lists;
 using Mapster;
 using Radzen;
 
-namespace TrapchumApp.Components.Pages.Lists.Departments
+namespace TrapchumApp.Pages.Lists.Departments
 {
     public partial class DepartmentModalCreate
     {

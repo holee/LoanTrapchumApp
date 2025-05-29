@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Radzen;
 
-namespace TrapchumApp.Components.Pages.Lists.Collaterals
+namespace TrapchumApp.Pages.Lists.Collaterals
 {
     public partial class CreateCollateralModal
     {

@@ -1,7 +1,6 @@
 using Applications.Services.Currencies;
-using Microsoft.AspNetCore.Components;
 
-namespace TrapchumApp.Components.Pages.Transactions.Branches;
+namespace TrapchumApp.Pages.Transactions.Branches;
 
 public partial class CashVaultSummary(ICurrencyServiceImpl currencyService)
 {

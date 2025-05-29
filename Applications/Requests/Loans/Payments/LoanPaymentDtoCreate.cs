@@ -4,6 +4,8 @@ namespace Applications.Requests.Loans.Payments;
 
 public sealed class LoanPaymentDtoCreate
 {
+
+    public string? CustomerName { get; set; }
     public string? TransactionRefId { get; set; }
     public string? LoanRefId { get; set; }
     public string? CreditAgentRefId { get; set; }
@@ -25,7 +27,7 @@ public sealed class LoanPaymentDtoCreate
     public decimal? PaidInterest => LoanRepaymentLines.TotalPaidInterest();
     public decimal? PaidFeeAmount => LoanRepaymentLines.TotalPaidCollectionFee();
     public decimal? PaidPenaltyAmount => LoanRepaymentLines.TotalPaidPenalty();
-    public decimal? SubTotalAmount => (PaidPrinciple + PaidInterest + PaidFeeAmount + PaidPenaltyAmount) ?? 0.00M;
+    public decimal? SubTotalAmount => AmountWithPenalty;
     public ICollection<LoanPaymentLineDtoCreate> LoanRepaymentLines { get; set; } = [];
 }
 

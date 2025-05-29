@@ -66,6 +66,15 @@ public sealed class UserService(IUserService userService) : IUserServiceImpl
         return await userService.GetUsersAsync(userId, filter);
     }
 
+    public async Task<Result<VUser>> GetUserByIdAsync(string? userId,CancellationToken cancellation=default) 
+    {
+        return await userService.GetUserByIdAsync(userId, cancellation);
+    }
+    public async Task<Result<VUser>> GetUserByIdAsync(string? userId, CancellationToken cancellation = default,params IEnumerable<string> columns)
+    {
+        return await userService.GetUserByIdAsync(userId, cancellation,columns);
+    }
+
     public async Task<Result<UserDto>> GetUserDetailsById(string? userId) => await userService.GetUserDetailsById(userId);
 
     public async Task<Result> UpdateUserRoleAsync(UserRoleDtoUpdate req) => await userService.UpdateUserRoleAsync(req);

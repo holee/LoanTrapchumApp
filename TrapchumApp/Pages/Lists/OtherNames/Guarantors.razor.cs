@@ -1,12 +1,10 @@
-using Applications.Extensions;
 using Applications.Requests.Lists.OtherNames;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.OtherNames;
 using Applications.Services.Lists;
-using Radzen;
 using Radzen.Blazor;
 
-namespace TrapchumApp.Components.Pages.Lists.OtherNames
+namespace TrapchumApp.Pages.Lists.OtherNames
 {
     public partial class Guarantors
     {

@@ -2,7 +2,7 @@ using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Radzen;
 
-namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
+namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 {
     public partial class ScheduleNotPaid
     {

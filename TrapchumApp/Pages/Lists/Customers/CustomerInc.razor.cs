@@ -4,7 +4,7 @@ using Applications.Services.Customers;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 
-namespace TrapchumApp.Components.Pages.Lists.Customers
+namespace TrapchumApp.Pages.Lists.Customers
 {
     public partial class CustomerInc
     {

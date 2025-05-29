@@ -4,7 +4,7 @@ using Applications.Responses.ViewModels.Currencies;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 
-namespace TrapchumApp.Components.Pages.Currencies
+namespace TrapchumApp.Pages.Currencies
 {
     public partial class NoteList
     {

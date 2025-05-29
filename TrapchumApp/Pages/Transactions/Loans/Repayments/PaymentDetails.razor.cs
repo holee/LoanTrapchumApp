@@ -1,16 +1,15 @@
+using Applications.Calculations;
+using Applications.Enumerations;
+using Applications.Requests.Loans.Payments;
+using Applications.Responses.ViewModels.Loans;
+using Applications.Responses.ViewModels.Loans.Schedules;
+using Applications.Services.Loans;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
-using Radzen.Blazor;
 using Radzen;
-using Applications.Responses.ViewModels.Loans;
-using Applications.Responses.ViewModels.Loans.Schedules;
-using Applications.Requests.Loans.Payments;
-using Applications.Enumerations;
-using Applications.Services.Loans;
-using Applications.Calculations;
 
-namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments;
+namespace TrapchumApp.Pages.Transactions.Loans.Repayments;
 public partial class PaymentDetails
 {
     readonly ILoanServiceImpl _dService;

@@ -1,10 +1,8 @@
 using Applications.Commons.Mappers;
 using Applications.Enumerations;
 using Applications.Extensions;
-using Applications.Extensions.mappers;
 using Applications.Extensions.Maths;
 using Applications.Interfaces.Lists;
-using Applications.Interfaces.setting;
 using Applications.Requests.Loans.Disbursements;
 using Applications.Requests.Loans.LoanRequests;
 using Applications.Requests.Loans.Payments;
@@ -20,7 +18,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Radzen;
 
-namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
+namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 {
     public partial class LoanRequestInfo(
         ILoanSettingServiceImpl loanSettingService,

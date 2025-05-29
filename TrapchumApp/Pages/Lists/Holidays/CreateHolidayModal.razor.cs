@@ -1,16 +1,12 @@
 using Applications.Extensions.DateTimes;
-using Applications.Extensions.mappers;
 using Applications.Requests.Lists.Holidays;
-using Applications.Responses.Lists.Holidays;
 using Applications.Responses.ViewModels.Holidays;
 using Applications.Services.Lists;
-using Domains.Models.Lists;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Radzen;
-using System.Security.Cryptography;
-using System.Threading.Tasks;
-namespace TrapchumApp.Components.Pages.Lists.Holidays
+
+namespace TrapchumApp.Pages.Lists.Holidays
 {
     public partial class CreateHolidayModal
     {
@@ -72,14 +68,14 @@ namespace TrapchumApp.Components.Pages.Lists.Holidays
 
                     await GetHolidays(modelDTO.HolidayDt);
 
-                    NotificationService.Notify(Radzen.NotificationSeverity.Success, "Holiday were added.");
+                    NotificationService.Notify(NotificationSeverity.Success, "Holiday were added.");
 
                     modelDTO = new();
 
                 }
                 else
                 {
-                    NotificationService.Notify(Radzen.NotificationSeverity.Error, rsp.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
 
                     modelDTO = new();
 
@@ -90,7 +86,7 @@ namespace TrapchumApp.Components.Pages.Lists.Holidays
             }
             catch (Exception ex)
             {
-                NotificationService.Notify(Radzen.NotificationSeverity.Error, ex.Message);
+                NotificationService.Notify(NotificationSeverity.Error, ex.Message);
                 visibled = false;
 
             }
@@ -123,7 +119,7 @@ namespace TrapchumApp.Components.Pages.Lists.Holidays
         {
             var confitm = await DialogService!.Confirm("Holiday deleted will not be able to recover, would you like to continue?",
                 "Delete Holiday",
-                options: new Radzen.ConfirmOptions
+                options: new ConfirmOptions
                 {
                     CancelButtonText = "Cancel",
                     OkButtonText = "OK"
@@ -148,7 +144,7 @@ namespace TrapchumApp.Components.Pages.Lists.Holidays
                 }
                 catch (Exception ex)
                 {
-                    NotificationService.Notify(Radzen.NotificationSeverity.Error, ex.InnerException!.Message);
+                    NotificationService.Notify(NotificationSeverity.Error, ex.InnerException!.Message);
                 }
 
             }

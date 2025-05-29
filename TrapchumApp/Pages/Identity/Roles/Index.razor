@@ -1,0 +1,91 @@
+﻿@page "/App/Account/Roles"
+@using Microsoft.AspNetCore.Components.Web
+@using TrapchumApp.Services
+<PageTitle>Roles</PageTitle>
+@* @attribute [MustHasPermission(Modules.Roles, Feature.Read)] *@
+<RadzenTabs RenderMode="TabRenderMode.Server">
+    <Tabs>
+        <RadzenTabsItem Text="Roles" Icon="list">
+            <PageDropDown PageSizeChanged="PageSizeChanged"
+                          Reload="RoleRefresh"
+                          ShowSearchBox="true"
+                          ShowReload="true">
+                <LeftChildContent>
+                    <RadzenButton Icon="add"
+                                  ButtonStyle="ButtonStyle.Primary"
+                                  Text="Add Role"
+                                  Size="ButtonSize.Small" />
+                </LeftChildContent>
+                <RightChildContent>
+                    <div class="rz-p-0 rz-text-align-center">
+                        <RadzenCheckBox Name="InlcudeInActive" Value="true" />
+                        <RadzenLabel Text="Inlcude InActive" Component="InlcudeInActive" class="rz-ms-0" />
+                    </div>
+                </RightChildContent>
+            </PageDropDown>
+            <RadzenDataGrid Density="Density.Compact"
+                            GridLines="DataGridGridLines.Both"
+                            Responsive
+                            TItem="RoleDto"
+                            AllowPaging="true"
+                            ColumnWidth="12.5rem"
+                            PageSize="pageSize"
+                            PagerHorizontalAlign="HorizontalAlign.Right"
+                            Data="Roles">
+                <Columns>
+                    <RadzenDataGridColumn Property="Id" Title="#"
+                                          Width="3rem"
+                                          Sortable="false" TextAlign="TextAlign.Center" Context="r">
+                        <Template>
+                            @(Roles?.ToList().IndexOf(r) + 1)
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Width="8rem" Property="RoleName" Title="Name" />
+                    <RadzenDataGridColumn Property="Description" Title="Description" Sortable="false" />
+                    <RadzenDataGridColumn TextAlign="TextAlign.Center" Width="3rem" Property="IsActive" Title="Status" Context="r" Sortable="false">
+                        <Template>
+                            <RadzenCheckBox TValue="bool" Value="@r.IsActive" />
+                        </Template>
+                    </RadzenDataGridColumn>
+
+                    <RadzenDataGridColumn Width="6rem" Property="Id" Title="Action" Context="r" Sortable="false">
+                        <Template>
+                            <RadzenButton Size="ButtonSize.ExtraSmall"
+                                          Icon="more_vert"
+                                          Variant="Variant.Text"
+                                          Click="@((args)=>ShowContextMenu(args,r.Id))" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </RadzenDataGrid>
+        </RadzenTabsItem>
+    </Tabs>
+</RadzenTabs>
+
+@*    //string returnUrl ="";
+
+        //returnUrl = _navigationManager.ToBaseRelativePath(_navigationManager.Uri);
+        //Console.WriteLine(returnUrl);
+        //Console.WriteLine(index);
+
+    // Popup popup;
+    // string selectedTab = "home";
+    // async Task OnOpen()
+    // {
+    //     //await _js.InvokeVoidAsync("eval", "setTimeout(function(){ document.getElementById('search').focus(); }, 200)");
+    // } *@
+
+@code {
+    void ShowContextMenu(MouseEventArgs args, string userId)
+    {
+        ContextMenuService.Open(args, ds =>
+    @<RadzenMenu Style="font-size:0.8rem;">
+        <RadzenMenuItem Icon="manage_accounts"
+                        Click="@(()=>ManageRolePermissions(userId))"
+                        Text="Manage Role"
+                        Value="@userId" />
+    </RadzenMenu>
+
+       );
+    }
+}

@@ -4,7 +4,7 @@ using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Departments;
 using Radzen;
 
-namespace TrapchumApp.Components.Pages.Lists.Departments
+namespace TrapchumApp.Pages.Lists.Departments
 {
     public partial class Index
     {

@@ -1,4 +1,3 @@
-using Applications.Interfaces.Loans;
 using Applications.Responses.Loans.Disbursements;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Products;
@@ -7,7 +6,7 @@ using Microsoft.AspNetCore.Components;
 using Radzen;
 using Radzen.Blazor;
 
-namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanProducts
+namespace TrapchumApp.Pages.Transactions.Loans.LoanProducts
 {
     public partial class LoanProductList
     {

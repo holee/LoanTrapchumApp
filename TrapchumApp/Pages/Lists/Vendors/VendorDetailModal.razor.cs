@@ -1,11 +1,8 @@
-using Applications.Interfaces.Vendors;
-using Applications.Responses.Lists.Vendors;
 using Applications.Responses.ViewModels.Vendors;
 using Applications.Services.LIsts;
 using Microsoft.AspNetCore.Components;
-using System.Threading.Tasks;
 
-namespace TrapchumApp.Components.Pages.Lists.Vendors
+namespace TrapchumApp.Pages.Lists.Vendors
 {
     public partial class VendorDetailModal
     {

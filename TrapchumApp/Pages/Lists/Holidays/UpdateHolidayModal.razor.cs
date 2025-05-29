@@ -1,11 +1,10 @@
 using Applications.Requests.Lists.Holidays;
-using Applications.Responses.Lists.Holidays;
 using Applications.Responses.ViewModels.Holidays;
 using Applications.Services.Lists;
-using Mapster;
 using Microsoft.AspNetCore.Components;
+using Radzen;
 
-namespace TrapchumApp.Components.Pages.Lists.Holidays
+namespace TrapchumApp.Pages.Lists.Holidays
 {
     public partial class UpdateHolidayModal
     {
@@ -69,18 +68,18 @@ namespace TrapchumApp.Components.Pages.Lists.Holidays
                 {
                     model = new();
 
-                    NotificationService.Notify(Radzen.NotificationSeverity.Success, response.Data);
+                    NotificationService.Notify(NotificationSeverity.Success, response.Data);
 
                     Close();
                 }
                 else
                 {
-                    NotificationService.Notify(Radzen.NotificationSeverity.Error, response.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Error, response.ErrMessage);
                 }
             }
             catch (Exception ex)
             {
-                NotificationService.Notify(Radzen.NotificationSeverity.Error, $"{ex.Message}");
+                NotificationService.Notify(NotificationSeverity.Error, $"{ex.Message}");
             }
         }
 

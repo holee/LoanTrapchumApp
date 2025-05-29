@@ -1,5 +1,4 @@
 using Applications.Requests.Lists.OtherNames;
-using Applications.Responses.Lists.Entities;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Branches;
 using Applications.Responses.ViewModels.OtherNames;
@@ -8,7 +7,7 @@ using Domains.Models.Lists;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 
-namespace TrapchumApp.Components.Pages.Lists.OtherNames
+namespace TrapchumApp.Pages.Lists.OtherNames
 {
     public partial class ConvertToEmployee
     {

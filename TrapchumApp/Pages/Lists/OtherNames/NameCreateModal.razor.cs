@@ -5,8 +5,9 @@ using Domains.Models.Bases;
 using Domains.Models.Lists;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using Radzen;
 
-namespace TrapchumApp.Components.Pages.Lists.OtherNames
+namespace TrapchumApp.Pages.Lists.OtherNames
 {
     public partial class NameCreateModal
     {
@@ -35,7 +36,7 @@ namespace TrapchumApp.Components.Pages.Lists.OtherNames
             }
             catch (Exception ex)
             {
-                NotificationService.Notify(Radzen.NotificationSeverity.Error, "Exception", ex.Message);
+                NotificationService.Notify(NotificationSeverity.Error, "Exception", ex.Message);
 
 
             }
@@ -52,18 +53,18 @@ namespace TrapchumApp.Components.Pages.Lists.OtherNames
                 var rsp = await _otherNameService!.CreateAsync(model);
                 if (rsp.IsSuccess)
                 {
-                    NotificationService.Notify(Radzen.NotificationSeverity.Success, rsp.Data);
+                    NotificationService.Notify(NotificationSeverity.Success, rsp.Data);
                     model = new();
                     return;
                 }
                 else
                 {
-                    NotificationService.Notify(Radzen.NotificationSeverity.Error, rsp.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
                 }
             }
             catch (Exception ex)
             {
-                NotificationService.Notify(Radzen.NotificationSeverity.Error, "Exception", ex.Message);
+                NotificationService.Notify(NotificationSeverity.Error, "Exception", ex.Message);
             }
 
         }

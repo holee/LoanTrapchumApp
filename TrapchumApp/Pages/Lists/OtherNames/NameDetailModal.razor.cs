@@ -1,8 +1,9 @@
 using Applications.Responses.ViewModels.OtherNames;
 using Applications.Services.Lists;
 using Microsoft.AspNetCore.Components;
+using Radzen;
 
-namespace TrapchumApp.Components.Pages.Lists.OtherNames
+namespace TrapchumApp.Pages.Lists.OtherNames
 {
     public partial class NameDetailModal
     {
@@ -45,7 +46,7 @@ namespace TrapchumApp.Components.Pages.Lists.OtherNames
             }
             else
             {
-                NotificationService.Notify(Radzen.NotificationSeverity.Error, rsp.ErrMessage);
+                NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
             }
         }
 

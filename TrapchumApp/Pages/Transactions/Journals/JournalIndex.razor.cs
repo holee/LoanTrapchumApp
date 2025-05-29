@@ -1,17 +1,14 @@
 ﻿using Applications.Extensions.mappers;
-using Applications.Interfaces.Transactions;
 using Applications.Requests.Journals;
-using Applications.Requests.Transactions.Journals;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Journals;
 using Applications.Services.Transactions.Journals;
-using Mapster;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
 using Radzen;
+using Microsoft.AspNetCore.Components.Authorization;
 using Radzen.Blazor;
 
-namespace TrapchumApp.Components.Pages.Transactions.Journals
+namespace TrapchumApp.Pages.Transactions.Journals
 {
     public partial class JournalIndex
     {

@@ -1,0 +1,49 @@
+﻿@using TrapchumApp.Services
+@* @page "/Administrator/Users/{Id:long}/Permissions"
+@attribute [Authorize]
+<Blazorise.Container Fluid>
+    <Card>
+        <CardHeader>
+            <Strong>Manage User Permissions</Strong>
+        </CardHeader>
+        <CardBody>
+            <SpinLoader IsLoading="IsLoading">
+                <LoadingTemplate>
+                    <Chase Color="red" Size="2rem" Center></Chase>
+                </LoadingTemplate>
+                <ContentTemplate>
+                     <EditForm Model="UserClaimsVM" @ref="formEdit">
+                         <input type="hidden" @bind="UserClaimsVM!.UserId" />
+                         <table class="table table-sm">
+                             <thead>
+                                 <tr>
+                                     <th>Permission</th>
+                                     <th>Status</th>
+                                 </tr>
+                             </thead>
+                             <tbody>
+                                 @foreach (var x in UserClaimsVM.Claims!)
+                                {
+                                    <tr>
+                                        <td>
+                                            @x.ClaimType
+                                            <input type="hidden" @bind="x.ClaimType" />
+                                            <input type="hidden" @bind="x.ClaimType" />
+                                        </td>
+                                        <td>
+                                            <RadzenCheckBox @bind-Checked="x.IsSelected" TValue="bool?" />
+                                        </td>
+                                    </tr>
+                                }
+                             </tbody>
+                         </table>
+                    </EditForm>
+                </ContentTemplate>
+            </SpinLoader>
+        </CardBody>
+        <CardFooter>
+            <Button Color="Color.Success" @onclick="SubmitOnVaid" Size="Blazorise.Size.Small">Save Changed</Button>
+            <a href="/Administrator/Users" class="btn btn-sm btn-success">Back</a>
+        </CardFooter>
+    </Card>
+</Blazorise.Container> *@

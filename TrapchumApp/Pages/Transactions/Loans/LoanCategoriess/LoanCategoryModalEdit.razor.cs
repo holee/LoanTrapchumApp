@@ -1,8 +1,9 @@
 using Applications.Requests.Loans.Categories;
 using Applications.Services.Loans;
 using Microsoft.AspNetCore.Components;
+using Radzen;
 
-namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanCategoriess
+namespace TrapchumApp.Pages.Transactions.Loans.LoanCategoriess
 {
     public partial class LoanCategoryModalEdit
     {
@@ -37,7 +38,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanCategoriess
             }
             catch (Exception ex)
             {
-                NotificationService.Notify(Radzen.NotificationSeverity.Error, "Exception", ex.Message);
+                NotificationService.Notify(NotificationSeverity.Error, "Exception", ex.Message);
             }
         }
 
@@ -52,7 +53,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanCategoriess
             }
             else
             {
-                NotificationService.Notify(Radzen.NotificationSeverity.Error, "Error", result.ErrMessage);
+                NotificationService.Notify(NotificationSeverity.Error, "Error", result.ErrMessage);
             }
         }
     }

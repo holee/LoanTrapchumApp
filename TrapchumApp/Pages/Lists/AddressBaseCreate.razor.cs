@@ -3,8 +3,7 @@ using Applications.Requests.Lists.OtherNames;
 using Domains.Models.Addresses;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
-
-namespace TrapchumApp.Components.Pages.Lists
+namespace TrapchumApp.Pages.Lists
 {
     public partial class AddressBaseCreate
     {

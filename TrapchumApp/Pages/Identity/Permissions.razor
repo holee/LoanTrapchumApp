@@ -1,0 +1,42 @@
+@page "/App/Account/Permissions"
+@using TrapchumApp.Services
+<PageTitle>Permissions</PageTitle>
+<RadzenCard>
+    <PageDropDown ShowSearchBox="true"
+                  OnTextChanged="OnTextChanged"
+        PageSizeChanged="PageSizeChanged">
+        <RightChildContent>
+
+        </RightChildContent>
+    </PageDropDown>
+    <RadzenDataGrid 
+        Count="@counts"
+        PageSize="@pageSize"
+        ColumnWidth="10rem"
+        LoadData="LoadData"
+        Responsive="true"
+        Density="Density.Compact"
+        ShowPagingSummary="true"
+                    AllowPaging="true"
+                    PagerPosition="PagerPosition.Bottom"
+                    PagerHorizontalAlign="HorizontalAlign.Right"
+        Data="@permissions">
+        <Columns>
+            <RadzenDataGridColumn Property="@nameof(PermissionsVm.Module)" Title="Module" />
+            <RadzenDataGridColumn Property="@nameof(PermissionsVm.Action)" Title="Action" />
+            <RadzenDataGridColumn Context="p" Property="@nameof(PermissionsVm.Action)" Title="Feature">
+                <Template>
+                    @(p.Module).@(p.Action)
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Property="@nameof(PermissionsVm.Description)" Title="Description" />
+            <RadzenDataGridColumn Width="6rem" 
+                TextAlign="TextAlign.Center"
+                Context="p" Property="@nameof(PermissionsVm.IsBasic)" Title="Is Basic">
+                <Template>
+                       <RadzenCheckBox TValue="bool?" Value="@p.IsBasic" />
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+</RadzenCard>

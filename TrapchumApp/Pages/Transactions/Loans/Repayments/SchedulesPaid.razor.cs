@@ -1,13 +1,10 @@
+using Applications.Responses.ViewModels.Loans.Payments;
+using Applications.Responses.ViewModels.Loans.Schedules;
+using Applications.Services.Loans;
 using Microsoft.AspNetCore.Components;
 using Radzen;
-using Radzen.Blazor.Rendering;
-using Radzen.Blazor;
-using Applications.Responses.ViewModels.Loans.Schedules;
-using Applications.Responses.Paginations;
-using Applications.Services.Loans;
-using Applications.Responses.ViewModels.Loans.Payments;
 
-namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
+namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 {
     public partial class SchedulesPaid
     {

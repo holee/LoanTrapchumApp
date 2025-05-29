@@ -1,5 +1,7 @@
 ﻿@using Applications.ApplicationPolicies
 @using Applications.Extensions.Identity.Authorizations.Extensions
+@using Microsoft.AspNetCore.Components.Authorization
+@using TrapchumApp.Services
 <RadzenPanelMenuItem Text="Loan Management" Icon="dataset">
         <RadzenPanelMenuItem Text="Loans" Icon="lists" Path="@($"/App/Loan/{BranchId}/Branches?UserId={UserId}")" Visible="@_canShowLoan" />
         <RadzenPanelMenuItem Text="Client Due Pay" Icon="schedule" Path="@($"/App/Loan/{BranchId}/Branches/{UserId}/Users/Schedules")" Visible="@_canShowLoan"/>

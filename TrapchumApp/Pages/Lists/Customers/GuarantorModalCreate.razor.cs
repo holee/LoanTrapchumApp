@@ -2,9 +2,9 @@ using Applications.Interfaces.Lists;
 using Applications.Responses.ViewModels.OtherNames;
 using Applications.Responses.ViewModels.Vendors;
 using Microsoft.AspNetCore.Components;
-using TrapchumApp.Components.Pages.Lists.OtherNames;
+using TrapchumApp.Pages.Lists.OtherNames;
 
-namespace TrapchumApp.Components.Pages.Lists.Customers
+namespace TrapchumApp.Pages.Lists.Customers
 {
     public partial class GuarantorModalCreate
     {

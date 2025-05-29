@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Components;
 using Radzen;
 using Radzen.Blazor;
 
-namespace TrapchumApp.Components.Pages.Lists.OtherNames
+namespace TrapchumApp.Pages.Lists.OtherNames
 {
     public partial class GuarantorsList
     {
@@ -123,7 +123,7 @@ namespace TrapchumApp.Components.Pages.Lists.OtherNames
 
         //     if (resultResponse.IsSuccess)
         //     {
-        //         NotificationService.Notify(Radzen.NotificationSeverity.Success, resultResponse.Data!.message);
+        //         NotificationService.Notify(NotificationSeverity.Success, resultResponse.Data!.message);
         //         ShowAddTab = false;
         //         selectedTabIndex = 0;
         //         //tabs.Reload();
@@ -131,7 +131,7 @@ namespace TrapchumApp.Components.Pages.Lists.OtherNames
         //     else
         //     {
         //         var error = resultResponse.Errors!.FirstOrDefault();
-        //         NotificationService.Notify(Radzen.NotificationSeverity.Error, error);
+        //         NotificationService.Notify(NotificationSeverity.Error, error);
         //     }
         // }
 
@@ -158,7 +158,7 @@ namespace TrapchumApp.Components.Pages.Lists.OtherNames
 
         //     if (resultResponse.IsSuccess)
         //     {
-        //         NotificationService.Notify(Radzen.NotificationSeverity.Success, resultResponse.Data!.message);
+        //         NotificationService.Notify(NotificationSeverity.Success, resultResponse.Data!.message);
         //         ShowAddTab = false;
         //         selectedTabIndex = 0;
         //         await GetGuarantors();
@@ -167,7 +167,7 @@ namespace TrapchumApp.Components.Pages.Lists.OtherNames
         //     else
         //     {
         //         var error = resultResponse.Errors!.FirstOrDefault();
-        //         NotificationService.Notify(Radzen.NotificationSeverity.Error, error);
+        //         NotificationService.Notify(NotificationSeverity.Error, error);
         //     }
         // }
 

@@ -1,8 +1,7 @@
-﻿using Microsoft.AspNetCore.Components;
-using System.Text.Json;
-using TrapchumApp.Components.Shared;
+﻿using System.Text.Json;
+using Microsoft.AspNetCore.Components;
 
-namespace TrapchumApp.Components.Pages.Shared
+namespace TrapchumApp.Shared
 {
     public partial class CascadingAuthState : ComponentBase, IAuthStateService
     {

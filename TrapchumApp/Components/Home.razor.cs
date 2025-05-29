@@ -1,12 +1,4 @@
-
-using Applications.Schedules;
-using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
-using Microsoft.Playwright;
-using QuestPDF.Fluent;
-using QuestPDF.Infrastructure;
-using System.Buffers.Text;
-using System.Security.Cryptography.Xml;
 
 namespace TrapchumApp.Components
 {

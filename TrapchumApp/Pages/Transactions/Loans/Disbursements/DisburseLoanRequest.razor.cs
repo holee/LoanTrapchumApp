@@ -1,14 +1,13 @@
 using Applications.Enumerations;
 using Applications.Requests.Loans.LoanRequests;
 using Applications.Responses.Lists.Collaterals;
-using Applications.Responses.ViewModels.Collaterals;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Applications.Services.Loans;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 
-namespace TrapchumApp.Components.Pages.Transactions.Loans.Disbursements
+namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 {
     public partial class DisburseLoanRequest
     {

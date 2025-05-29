@@ -2,10 +2,9 @@ using Applications.Interfaces.Lists;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Holidays;
 using Domains.Models.Lists;
-using Microsoft.AspNetCore.Components;
 using Radzen;
 
-namespace TrapchumApp.Components.Pages.Lists.Holidays
+namespace TrapchumApp.Pages.Lists.Holidays
 {
     public partial class HolidayList
     {
@@ -70,7 +69,7 @@ namespace TrapchumApp.Components.Pages.Lists.Holidays
             {
                 HolidaysList = [];
 
-                NotificationService.Notify(Radzen.NotificationSeverity.Success, $"{ex.InnerException!.Message}");
+                NotificationService.Notify(NotificationSeverity.Success, $"{ex.InnerException!.Message}");
 
             }
 
@@ -120,9 +119,11 @@ namespace TrapchumApp.Components.Pages.Lists.Holidays
         }
         protected async Task Delete(long id)
         {
+            ContextMenuService.Close();
+
             var comfirm = await DialogService.Confirm("Holiday deleted will not be able to recover, would you like to continue?",
                 "Delete Holiday",
-                     new Radzen.ConfirmOptions
+                     new ConfirmOptions
                      {
                          OkButtonText = "OK",
                          CancelButtonText = "Cancel",
@@ -136,20 +137,19 @@ namespace TrapchumApp.Components.Pages.Lists.Holidays
                 if (deleteResponse.IsSuccess)
                 {
                     await OnInitializedAsync();
-                    NotificationService.Notify(Radzen.NotificationSeverity.Success, deleteResponse.Data);
+                    NotificationService.Notify(NotificationSeverity.Success, deleteResponse.Data);
                 }
                 else
                 {
-                    NotificationService.Notify(Radzen.NotificationSeverity.Error, deleteResponse.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Error, deleteResponse.ErrMessage);
                 }
                 StateHasChanged();
-                ContextMenuService.Close();
+                
             }
             else
             {
-                ContextMenuService.Close();
 
-                NotificationService.Notify(Radzen.NotificationSeverity.Warning, "Delete was cancel");
+                NotificationService.Notify(NotificationSeverity.Warning, "Delete was cancel");
             }
         }
         protected async Task OnCheckChanged(long id)
@@ -159,10 +159,10 @@ namespace TrapchumApp.Components.Pages.Lists.Holidays
             //var message = await _holidayService.ActivateOrDeactivat(id, holidayvm);
             //if (message!.IsSuccess)
             //{
-            //    NotificationService.Notify(Radzen.NotificationSeverity.Success, message.Message);
+            //    NotificationService.Notify(NotificationSeverity.Success, message.Message);
             //}
             //else
-            //    NotificationService.Notify(Radzen.NotificationSeverity.Error, message.Message);
+            //    NotificationService.Notify(NotificationSeverity.Error, message.Message);
 
 
             await Task.CompletedTask;

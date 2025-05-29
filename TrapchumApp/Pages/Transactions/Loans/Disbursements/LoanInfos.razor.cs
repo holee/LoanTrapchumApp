@@ -1,12 +1,11 @@
 using Applications.Extensions;
 using Applications.Responses.ViewModels.Loans;
-using Applications.Services.Loans;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using Radzen;
-using TrapchumApp.Components.Pages.Transactions.Loans.Repayments;
+using TrapchumApp.Pages.Transactions.Loans.Repayments;
 
-namespace TrapchumApp.Components.Pages.Transactions.Loans.Disbursements
+namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 {
     public partial class LoanInfos
     {

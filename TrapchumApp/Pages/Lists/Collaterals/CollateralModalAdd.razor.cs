@@ -7,11 +7,11 @@ using Applications.Services.LIsts;
 using Domains.Models.Collaterals;
 using Mapster;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Forms;
 using Radzen;
+using Microsoft.AspNetCore.Components.Forms;
 using Radzen.Blazor;
 
-namespace TrapchumApp.Components.Pages.Lists.Collaterals
+namespace TrapchumApp.Pages.Lists.Collaterals
 {
     public partial class CollateralModalAdd
     {

@@ -1,5 +1,5 @@
 ﻿@page "/App/Currencies"
-@using TrapchumApp.Components.Pages.Transactions.Exchanges
+@using Microsoft.AspNetCore.Components.Web
 @using TrapchumApp.Services
 <PageTitle>Currency List</PageTitle>
 <RadzenCard class="card rz-background-color-base-100">
@@ -9,7 +9,6 @@
                 <RadzenDataGrid Responsive
                                 GridLines="DataGridGridLines.Horizontal"
                                 AllowAlternatingRows="true"
-                                Style="height:30rem;min-height:30rem;max-height:auto;"
                                 Density="Density.Compact"
                                 AllowSorting="false"
                                 Data="Currencies">

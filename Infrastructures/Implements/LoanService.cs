@@ -294,12 +294,12 @@ namespace Infrastructures.Implements
             }
         }
 
-        public async Task<Pager<VLoanDisbursments>> GetLoansAsync(int? branchId, string? creditAgentId,
+        public async Task<Pager<VLoanDisbursments>> GetLoansByBranchId(int? branchId, string? creditAgentId,
             LoanStatuses status = LoanStatuses.Active, QueryParam? param = null)
         {
             using var db = connectionFactory.CreateConnection();
 
-            var queries = await db.QueryAsync<VLoanDisbursments>("spGetLoansByBranchId", new
+            var queries = await db.QueryAsync<VLoanDisbursments>(ProcedureConstant.SpGetLoansByBranchId, new
             {
                 @BranchId = branchId,
                 @CreditAgentId = creditAgentId,

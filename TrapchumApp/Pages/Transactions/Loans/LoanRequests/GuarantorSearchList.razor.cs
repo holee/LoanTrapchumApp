@@ -2,12 +2,12 @@ using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.OtherNames;
 using Applications.Services.Lists;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
+using Microsoft.AspNetCore.Components.Web;
 using Radzen.Blazor;
 using Radzen.Blazor.Rendering;
 
-namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
+namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 {
     public partial class GuarantorSearchList
     {
@@ -81,6 +81,9 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 
         async Task OnKeyDown(KeyboardEventArgs args)
         {
+
+            if (!_guarantors.Any()) return;
+
 
             var items = _guarantors;
 

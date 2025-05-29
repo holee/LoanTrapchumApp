@@ -4,7 +4,7 @@ using Applications.Responses.ViewModels.Currencies;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 
-namespace TrapchumApp.Components.Pages.Transactions.Exchanges
+namespace TrapchumApp.Pages.Transactions.Exchanges
 {
     public partial class ExchangeCurrency
     {

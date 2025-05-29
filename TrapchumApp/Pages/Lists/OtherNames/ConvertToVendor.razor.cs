@@ -1,13 +1,10 @@
 using Applications.Requests.Lists.OtherNames;
-using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Branches;
 using Applications.Responses.ViewModels.OtherNames;
 using Applications.Services.Lists;
-using Domains.Models.Lists;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 
-namespace TrapchumApp.Components.Pages.Lists.OtherNames
+namespace TrapchumApp.Pages.Lists.OtherNames
 {
     public partial class ConvertToVendor
     {

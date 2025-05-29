@@ -2,7 +2,7 @@ using Applications.Requests.Loans.Categories;
 using Applications.Services.Loans;
 using Radzen;
 
-namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanCategoriess
+namespace TrapchumApp.Pages.Transactions.Loans.LoanCategoriess
 {
     public partial class LoanCategoryModalCreate
     {

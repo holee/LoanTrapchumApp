@@ -5,7 +5,7 @@ using Domains.Models.Addresses;
 using Domains.Models.Lists;
 using Microsoft.AspNetCore.Components;
 
-namespace TrapchumApp.Components.Pages.Lists.Vendors
+namespace TrapchumApp.Pages.Lists.Vendors
 {
     public partial class CreateComp
     {

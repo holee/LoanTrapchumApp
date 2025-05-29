@@ -8,7 +8,7 @@ using Mapster;
 using Microsoft.AspNetCore.Components;
 using Radzen.Blazor;
 
-namespace TrapchumApp.Components.Pages.Transactions.Exchanges
+namespace TrapchumApp.Pages.Transactions.Exchanges
 {
     public partial class SpotRate
     {

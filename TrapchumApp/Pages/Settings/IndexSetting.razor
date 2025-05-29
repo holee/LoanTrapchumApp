@@ -1,6 +1,5 @@
 ﻿@page "/App/Loans/Settings"
 @using Applications.Responses.ViewModels.Settings
-@using TrapchumApp.Services
 <PageTitle>Settings</PageTitle>
 <RadzenFieldset>
     <HeaderTemplate>
@@ -15,7 +14,7 @@
                         Density="Density.Compact"
                         SelectionMode="DataGridSelectionMode.Single"
                         EditMode="editMode"
-                        @ref="settingsGrid"
+                        @ref="@settingsGrid"
                         Responsive
                         Data="Settings">
             <HeaderTemplate>

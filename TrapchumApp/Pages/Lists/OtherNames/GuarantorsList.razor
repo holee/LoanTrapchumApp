@@ -1,5 +1,6 @@
 ﻿@using Applications.Responses.ViewModels.OtherNames
 @using Radzen.Blazor.Rendering
+@using Microsoft.AspNetCore.Components.Web
 @using TrapchumApp.Services
 <style type="text/css">
     .my-popup1 {
@@ -134,14 +135,14 @@
 
         var items = Guarantors;
 
-        var popupOpened = await js.InvokeAsync<bool>("Radzen.popupOpened", "popup1");
+        var popupOpened = await js.InvokeAsync<bool>("popupOpened", "popup1");
 
         var key = args.Code != null ? args.Code : args.Key;
 
         if (!args.AltKey && (key == "ArrowDown" || key == "ArrowUp"))
         {
 
-            var result = await js.InvokeAsync<int[]>("Radzen.focusTableRow", "grid1", key, selectedIndex, null, false);
+            var result = await js.InvokeAsync<int[]>("focusTableRow", "grid1", key, selectedIndex, null, false);
 
             selectedIndex = result.First();
 

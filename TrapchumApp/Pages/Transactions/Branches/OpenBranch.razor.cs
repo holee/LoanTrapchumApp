@@ -1,20 +1,16 @@
 using Applications.Enumerations;
 using Applications.Extensions.Identity.Authorizations.Extensions;
 using Applications.Extensions.Identity.Policies;
-using Applications.Interfaces.Currencies;
-using Applications.Interfaces.Transactions;
 using Applications.Requests.Transactions.OpenBranches;
 using Applications.Responses.ViewModels.Currencies;
 using Applications.Services.Currencies;
 using Applications.Services.Transactions.Branches;
-using Domains.Models.Transaction;
-using Mapster;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Radzen;
-using TrapchumApp.Components.Shared;
+using TrapchumApp.Shared;
 
-namespace TrapchumApp.Components.Pages.Transactions.Branches
+namespace TrapchumApp.Pages.Transactions.Branches
 {
     public partial class OpenBranch
     {

@@ -4,7 +4,6 @@ using Applications.Requests.Lists.OtherNames;
 using Applications.Responses.Lists.Entities;
 using Applications.Responses.Paginations;
 using Applications.Services.Lists;
-using Domains.Models.Addresses;
 using Domains.Models.Files;
 using Domains.Models.Lists;
 using Microsoft.AspNetCore.Components;
@@ -12,7 +11,7 @@ using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components.Web;
 using Radzen;
 
-namespace TrapchumApp.Components.Pages.Lists.Employees
+namespace TrapchumApp.Pages.Lists.Employees
 {
     public partial class EmployeeComp
     {

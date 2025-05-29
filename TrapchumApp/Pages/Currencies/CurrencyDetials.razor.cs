@@ -7,7 +7,7 @@ using Domains.Models.Currencies;
 using Mapster;
 using Microsoft.AspNetCore.Components;
 
-namespace TrapchumApp.Components.Pages.Currencies
+namespace TrapchumApp.Pages.Currencies
 {
     public partial class CurrencyDetials
     {

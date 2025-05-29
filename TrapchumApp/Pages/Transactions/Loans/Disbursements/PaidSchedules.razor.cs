@@ -1,9 +1,8 @@
-using Applications.Responses.ViewModels.Loans.Payments;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 
-namespace TrapchumApp.Components.Pages.Transactions.Loans.Disbursements
+namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 {
     public partial class PaidSchedules
     {

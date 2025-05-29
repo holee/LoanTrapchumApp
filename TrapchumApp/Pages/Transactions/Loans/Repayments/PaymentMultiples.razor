@@ -16,6 +16,41 @@
             border-left: 10px solid transparent;
         }
 </style>
+<table class="table table-sm table-bordered">
+    <tr>
+        <th class="w-25">Customer Name</th>
+        <td>
+            <ul>
+                <li>Name: @LoanPayment?.CustomerName</li>
+                <li>CreditA Agent: @LoanPayment?.CreditAgentRefId</li>
+                <li>User :@LoanPayment?.UserRefId</li>
+                <li>Loan Ref: @LoanPayment?.LoanRefId</li>
+                <li>Currency: @LoanPayment?.CurrencyRefId</li>
+                <li>Branch: @LoanPayment?.BranchRefId</li>
+            </ul>
+        </td>
+    </tr>
+    <tr>
+        <th class="w-25">PaidPrinciple</th>
+        <td>@LoanPayment?.PaidPrinciple</td>
+    </tr>
+    <tr>
+        <th class="w-25">PaidInterest</th>
+        <td>@LoanPayment?.PaidInterest</td>
+    </tr>
+    <tr>
+        <th class="w-25">PaidFeeAmount</th>
+        <td>@LoanPayment?.PaidFeeAmount</td>
+    </tr>
+    <tr>
+        <th class="w-25">Penalty Amount</th>
+        <td>@LoanPayment?.PaidPenaltyAmount</td>
+    </tr>
+    <tr>
+        <th class="w-25">Total</th>
+        <td>@LoanPayment?.AmountWithPenalty</td>
+    </tr>
+</table>
 <RadzenStack Orientation="Orientation.Horizontal"
              class="rz-mb-2"
              AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
@@ -25,7 +60,7 @@
                   ButtonStyle="ButtonStyle.Secondary" />
 </RadzenStack>
 <RadzenDataGrid TItem="VSchedule"
-                Data="@Schedules"
+                Data="@_schedules"
                 Responsive
                 Density="Density.Compact"
                 AllowFiltering="false"
@@ -73,7 +108,7 @@
                 @c.LeftPrinciple.Format(c.CurrencyId)
             </Template>
             <FooterTemplate>
-                @Schedules.Sum(x => x.LeftPrinciple).Format(CurrencyId)
+                @_schedules.Sum(x => x.LeftPrinciple).Format(CurrencyId)
             </FooterTemplate>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn TextAlign="TextAlign.End"
@@ -85,7 +120,7 @@
                 @c.LeftInterestAmount.Format(c.CurrencyId)
             </Template>
             <FooterTemplate>
-                @Schedules.Sum(x => x.LeftInterestAmount).Format(CurrencyId)
+                @_schedules.Sum(x => x.LeftInterestAmount).Format(CurrencyId)
             </FooterTemplate>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn TextAlign="TextAlign.Right"
@@ -98,7 +133,7 @@
                 @c.LeftCollectionFeeAmount.Format(c.CurrencyId)
             </Template>
             <FooterTemplate>
-                @Schedules.Sum(x => x.LeftCollectionFeeAmount).Format(CurrencyId)
+                @_schedules.Sum(x => x.LeftCollectionFeeAmount).Format(CurrencyId)
             </FooterTemplate>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn TextAlign="TextAlign.Right"
@@ -124,7 +159,7 @@
                                InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "Select Penalty Amount" } })" />
             </EditTemplate>
             <FooterTemplate>
-                @Schedules.Sum(x => x.PenaltyAmount).Format(CurrencyId)
+                @_schedules.Sum(x => x.PenaltyAmount).Format(CurrencyId)
             </FooterTemplate>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn TextAlign="TextAlign.Right"
@@ -137,7 +172,7 @@
                 @c.LeftAmount.Format(c.CurrencyId)
             </Template>
             <FooterTemplate>
-                @Schedules.Sum(x => x.LeftAmount).Format(CurrencyId)
+                @_schedules.Sum(x => x.LeftAmount).Format(CurrencyId)
             </FooterTemplate>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn TextAlign="TextAlign.Center"
@@ -168,7 +203,7 @@
             <RadzenButton Icon="@IconNames.Paid"
                           Size="ButtonSize.Small"
                           ButtonStyle="ButtonStyle.Secondary"
-                          Click="@(()=>DialogService.Close(true))"
+                          Click="ApplySchedulePayment"
                           Text="Recieve" />
         </Authorized>
     </AuthorizeView>
@@ -177,6 +212,6 @@
                   Size="ButtonSize.Small"
                   Variant="Variant.Text"
                   ButtonStyle="ButtonStyle.Secondary"
-                  Click="Close"
+                  Click="@(()=>Close(false))"
                   Text="cancel" />
 </RadzenStack>

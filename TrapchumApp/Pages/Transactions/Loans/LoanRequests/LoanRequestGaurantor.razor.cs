@@ -3,7 +3,7 @@ using Applications.Services.Lists;
 using Microsoft.AspNetCore.Components;
 using Radzen.Blazor;
 
-namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
+namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 {
     public partial class LoanRequestGaurantor
     {

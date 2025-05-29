@@ -2,7 +2,7 @@ using Applications.Responses.Lists.Holidays;
 using Applications.Responses.Loans.Disbursements;
 using Microsoft.AspNetCore.Components;
 
-namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanCategoriess
+namespace TrapchumApp.Pages.Transactions.Loans.LoanCategoriess
 {
     public partial class LCDetailModal
     {

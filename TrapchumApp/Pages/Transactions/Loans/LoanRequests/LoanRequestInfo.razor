@@ -5,6 +5,8 @@
 @using Applications.Responses.ViewModels.OtherNames
 @using Applications.Responses.ViewModels.Settings
 @using Domains.Models.Loans
+@using Microsoft.AspNetCore.Components.Web
+@using Radzen.Blazor
 @using Radzen.Blazor.Rendering
 @using TrapchumApp.Services
 <style type="text/css">
@@ -299,7 +301,12 @@
         {
             if (popupOpened && (key == "Enter" || key == "NumpadEnter"))
             {
-                CustomerId = items.ElementAtOrDefault(selectedIndex)?.CustomerId;
+                //CustomerId = items.ElementAtOrDefault(selectedIndex)?.CustomerId;
+                if(CustomerId.IsNullOrEmpty())
+                {
+                    Model.FullName = items.ElementAtOrDefault(selectedIndex)?.FullName;
+                    Model.CustomerRefId = items.ElementAtOrDefault(selectedIndex)?.CustomerId;
+                }
             }
 
             await popup.ToggleAsync(textBox.Element);

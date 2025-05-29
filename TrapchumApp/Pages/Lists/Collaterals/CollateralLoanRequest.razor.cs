@@ -1,11 +1,10 @@
 using Applications.Extensions;
 using Applications.Responses.Lists.Collaterals;
-using Applications.Responses.ViewModels.Collaterals;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 using Radzen.Blazor;
 
-namespace TrapchumApp.Components.Pages.Lists.Collaterals
+namespace TrapchumApp.Pages.Lists.Collaterals
 {
     public partial class CollateralLoanRequest
     {

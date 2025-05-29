@@ -4,7 +4,7 @@ using Applications.Responses.ViewModels.Currencies;
 using Domains.Models.Currencies;
 using Mapster;
 
-namespace TrapchumApp.Components.Pages.Transactions.Exchanges
+namespace TrapchumApp.Pages.Transactions.Exchanges
 {
     public partial class SetDailySpotRateModal
     {

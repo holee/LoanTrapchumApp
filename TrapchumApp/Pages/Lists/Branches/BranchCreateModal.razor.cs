@@ -1,4 +1,3 @@
-using Applications.Interfaces.Addresses;
 using Applications.Interfaces.Banks;
 using Applications.Requests.Lists.Addreses;
 using Applications.Requests.Lists.Entities;
@@ -7,9 +6,9 @@ using Domains.Models.Addresses;
 using Domains.Models.Lists;
 using Mapster;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
+using Radzen;
 
-namespace TrapchumApp.Components.Pages.Lists.Branches
+namespace TrapchumApp.Pages.Lists.Branches
 {
     public partial class BranchCreateModal
     {
@@ -68,13 +67,13 @@ namespace TrapchumApp.Components.Pages.Lists.Branches
 
                 if (response!.IsSuccess)
                 {
-                    NotificationService.Notify(Radzen.NotificationSeverity.Success, "New Branch", "Branch created successfully!");
+                    NotificationService.Notify(NotificationSeverity.Success, "New Branch", "Branch created successfully!");
                     DialogService.Close(true);
                 }
             }
             catch (Exception ex)
             {
-                NotificationService.Notify(Radzen.NotificationSeverity.Error, "Exception", ex.Message);
+                NotificationService.Notify(NotificationSeverity.Error, "Exception", ex.Message);
             }
         }
         protected async Task AddCity()

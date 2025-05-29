@@ -1,15 +1,14 @@
+using System.Security.Claims;
 using Applications.Calculations;
 using Applications.Commons.Mappers;
 using Applications.Enumerations;
 using Applications.Extensions;
-using Applications.Extensions.LoanCalculators;
 using Applications.Interfaces.Lists;
 using Applications.Interfaces.Loans;
 using Applications.Interfaces.setting;
 using Applications.Requests.Loans.Disbursements;
 using Applications.Requests.Loans.LoanRequests;
 using Applications.Responses;
-using Applications.Responses.Auths;
 using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.Loans.Disbursements;
 using Applications.Responses.Paginations;
@@ -17,20 +16,17 @@ using Applications.Responses.ViewModels.Auths;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Responses.ViewModels.Loans.LoanRequests;
 using Applications.Responses.ViewModels.Loans.Requests;
-using Applications.Responses.ViewModels.OtherNames;
 using Domains.Models.Files;
-using Domains.Models.Loans;
 using Infrastructures.Authorizations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Forms;
 using Radzen;
-using System.Security.Claims;
-using TrapchumApp.Components.Pages.Lists.Collaterals;
-using TrapchumApp.Components.Pages.Lists.OtherNames;
+using TrapchumApp.Pages.Lists.Collaterals;
+using TrapchumApp.Pages.Lists.OtherNames;
 
-namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
+namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 {
     public partial class LoanRequestEdit
     {

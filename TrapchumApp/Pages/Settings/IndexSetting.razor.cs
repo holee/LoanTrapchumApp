@@ -5,7 +5,7 @@ using Mapster;
 using Radzen;
 using Radzen.Blazor;
 
-namespace TrapchumApp.Components.Pages.Settings
+namespace TrapchumApp.Pages.Settings
 {
     public partial class IndexSetting
     {

@@ -9,7 +9,7 @@ using Applications.Services.Loans;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 
-namespace TrapchumApp.Components.Pages.Transactions.Loans.Disbursements
+namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 {
     public partial class LoanChangedCreditAgents
     {

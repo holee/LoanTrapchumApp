@@ -18,7 +18,26 @@ public static class LoanTransactionMapper
             TransactionTypeName = req.TransactionTypeName,
             TransactionDate = req.TransactionDate,
             UserRefId = req.UserRefId,
+            BranchRefId= branchId,
             LoanPayment = req.LoanPayment?.ToLoanPayment(branchId),
+            CashManagements = req.CashManagements!.ToCashManagements()
+        };
+    }
+
+
+    public static LoanTransaction ToLoanTransction(this LoanPaymentTransactionDtoCreate req)
+    {
+        if (req == null) return new();
+
+        return new LoanTransaction
+        {
+            TransactionsId = req.TransactionsId,
+            TranTypeRefId = req.TranTypeRefId,
+            TransactionTypeName = req.TransactionTypeName,
+            TransactionDate = req.TransactionDate,
+            UserRefId = req.UserRefId,
+            BranchRefId = req.BranchRefId,
+            LoanPayment = req.LoanPayment?.ToLoanPayment(req.BranchRefId),
             CashManagements = req.CashManagements!.ToCashManagements()
         };
     }

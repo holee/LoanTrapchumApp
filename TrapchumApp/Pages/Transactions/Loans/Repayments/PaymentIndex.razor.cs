@@ -1,13 +1,11 @@
-using Applications.Interfaces.Loans;
 using Applications.Responses.ViewModels.Branches;
 using Applications.Responses.ViewModels.Loans.Schedules;
-using Applications.Services.Loans;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
 using Radzen;
+using Microsoft.AspNetCore.Components.Authorization;
 using Radzen.Blazor;
 
-namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments
+namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 {
     public partial class PaymentIndex
     {

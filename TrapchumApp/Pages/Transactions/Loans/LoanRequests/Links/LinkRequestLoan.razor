@@ -2,6 +2,7 @@
 @using Applications.Enumerations
 @using Applications.Responses.ViewModels.Loans.Requests
 @using Infrastructures.Authorizations
+@using Microsoft.AspNetCore.Components.Authorization
 @using TrapchumApp.Services
 @if (isAllow && LoanRequest?.StatusId == (int)RequestStatus.New)
 {

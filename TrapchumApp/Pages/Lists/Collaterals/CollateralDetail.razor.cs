@@ -1,10 +1,10 @@
-using Applications.Extensions;
 using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Services.LIsts;
 using Microsoft.AspNetCore.Components;
+using Radzen;
 
-namespace TrapchumApp.Components.Pages.Lists.Collaterals
+namespace TrapchumApp.Pages.Lists.Collaterals
 {
     public partial class CollateralDetail
     {
@@ -29,7 +29,7 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
         //{
         //    if (Model!.CollateralId.IsNullOrEmpty())
         //    {
-        //        NotificationService.Notify(Radzen.NotificationSeverity.Info, "Try getting data not found!");
+        //        NotificationService.Notify(NotificationSeverity.Info, "Try getting data not found!");
         //        return;
         //    }
         //    await AddMoreCollateral.InvokeAsync(Model.CollateralId);
@@ -49,7 +49,7 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
             }
             else
             {
-                NotificationService.Notify(Radzen.NotificationSeverity.Error,rsp.ErrMessage);
+                NotificationService.Notify(NotificationSeverity.Error,rsp.ErrMessage);
             }
 
 

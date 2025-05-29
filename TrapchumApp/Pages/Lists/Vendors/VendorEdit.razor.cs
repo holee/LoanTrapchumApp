@@ -1,4 +1,3 @@
-using Applications.Enumerations;
 using Applications.Requests.Lists.Addreses;
 using Applications.Requests.Lists.OtherNames;
 using Applications.Responses.Lists.Entities;
@@ -10,7 +9,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Radzen;
 
-namespace TrapchumApp.Components.Pages.Lists.Vendors
+namespace TrapchumApp.Pages.Lists.Vendors
 {
     public partial class VendorEdit
     {

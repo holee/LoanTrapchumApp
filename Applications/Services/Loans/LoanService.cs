@@ -117,7 +117,7 @@ namespace Applications.Services.Loans
 
         public async Task<Pager<VLoanDisbursments>> GetLoansAsync(int? branchId, string? userId, LoanStatuses status = LoanStatuses.Active, QueryParam? param = null)
         {
-            return await loanService.GetLoansAsync(branchId, userId, status, param);
+            return await loanService.GetLoansByBranchId(branchId, userId, status, param);
         }
 
         public async Task<Result<byte[]>> ExportScheduleAsPdf(string? loanId, int? branchId)

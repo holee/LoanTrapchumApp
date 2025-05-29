@@ -1,15 +1,14 @@
 ﻿using Applications.Enumerations;
-using Applications.Interfaces.Loans;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Branches;
 using Applications.Responses.ViewModels.Loans;
-using Applications.Responses.ViewModels.Loans.Payments;
 using Applications.Services.Loans;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
 using Radzen;
-namespace TrapchumApp.Components.Pages.Transactions.Loans.Disbursements
+
+namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 {
     public partial class AllLoansTab
     {
@@ -41,16 +40,16 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Disbursements
         async Task ChangedPageSize(int page)
         {
             pageSize = page;
-            await GetLoans();
+            await GetLoanDisbursements();
         }
         async void TextLoanSearchChanged(string filterText)
         {
             filter = filterText;
-            await GetLoans();
+            await GetLoanDisbursements();
         }
         async void CheckedIncludeChanged()
         {
-            await GetLoans();
+            await GetLoanDisbursements();
         }
         void GetLoanDetails(VLoanDisbursments p)
         {
@@ -75,7 +74,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Disbursements
         }
         protected override async Task OnInitializedAsync()
         {
-            await GetLoans();
+            await GetLoanDisbursements();
             await GetLoanCount();
             await base.OnInitializedAsync();
         }
@@ -92,10 +91,10 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Disbursements
 
                 sortDescending = dir.Contains("asc") ? false : true;
             }
-            await GetLoans();
+            await GetLoanDisbursements();
         }
 
-        private async Task GetLoans()
+        private async Task GetLoanDisbursements()
         {
             try
             {
@@ -127,9 +126,10 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.Disbursements
         }
 
 
-        async Task DownLoadScheduleAsExcel(string loanRefId, int branchId)
+        async Task DownLoadScheduleAsExcel(string? loanRefId, int? branchId)
         {
             ContextMenuService.Close();
+
             isProgess = true;
 
             var stream = await _dService.DownLoadScheduleAsExcel(loanRefId, branchId);

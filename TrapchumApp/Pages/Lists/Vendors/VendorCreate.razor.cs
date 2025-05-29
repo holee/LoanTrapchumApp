@@ -1,17 +1,16 @@
 ﻿using Applications.Requests.Lists.Addreses;
 using Applications.Requests.Lists.OtherNames;
 using Applications.Responses.Lists.Entities;
+using Applications.Services.Lists;
+using Applications.Services.LIsts;
 using Domains.Models.Addresses;
 using Domains.Models.Lists;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components.Web;
-using Radzen.Blazor;
 using Radzen;
-using Applications.Services.Lists;
-using Applications.Services.LIsts;
 
-namespace TrapchumApp.Components.Pages.Lists.Vendors
+namespace TrapchumApp.Pages.Lists.Vendors
 {
     public partial class VendorCreate
     {

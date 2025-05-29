@@ -6,11 +6,12 @@ using Applications.Responses.ViewModels.Customers;
 using Applications.Responses.ViewModels.Employees;
 using Applications.Services.Lists;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
 using Radzen;
+using Microsoft.AspNetCore.Components.Authorization;
 using Radzen.Blazor;
-using TrapchumApp.Components.Pages.Identity.Users;
-namespace TrapchumApp.Components.Pages.Lists.CreditAgents;
+using TrapchumApp.Pages.Identity.Users;
+
+namespace TrapchumApp.Pages.Lists.CreditAgents;
 
 public partial class CreditAgent
 {

@@ -1,19 +1,25 @@
+using Applications.Commons.Mappers;
+using Applications.Requests.Loans.Payments;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Microsoft.AspNetCore.Components;
-using Microsoft.CodeAnalysis.Differencing;
+using Microsoft.AspNetCore.Components.Web;
 using Radzen;
 using Radzen.Blazor;
 using System.Threading.Tasks;
 
-namespace TrapchumApp.Components.Pages.Transactions.Loans.Repayments;
+namespace TrapchumApp.Pages.Transactions.Loans.Repayments;
 public partial class PaymentMultiples
 {
     [Parameter] public IEnumerable<VSchedule> Schedules { get; set; } = [];
+    [Parameter] public LoanPaymentDtoCreate? LoanPayment { set; get; } = new();
     [Parameter] public int? CurrencyId { get; set; } = 1;
 
     RadzenDataGrid<VSchedule> gridPopup = default!;
+
     private List<VSchedule> _schedules = [];
+
     private IList<VSchedule> originalSchedules = [];
+
     string columnEditing = string.Empty;
 
     List<KeyValuePair<long, string>> editedFields = new List<KeyValuePair<long, string>>();
@@ -23,8 +29,6 @@ public partial class PaymentMultiples
     IRadzenFormComponent editor = default!;
 
     bool editorFocused;
-
-
 
     protected override void OnInitialized()
     {
@@ -218,15 +222,15 @@ public partial class PaymentMultiples
                                        "table-cell-edited" : string.Empty;
     }
 
-    void OnUpdateRow(VSchedule schedule)
+    async Task OnUpdateRow(VSchedule schedule)
     {
-        Reset(schedule);
+       await  Reset(schedule);
     }
-    private void Close()
+    private async Task Close(bool isclosed=false)
     {
-        Reset();
+       await Reset();
 
-        DialogService.Close(false);
+        DialogService.CloseSide(isclosed);
     }
 
     async Task OnPenaltyChange(decimal? value, VSchedule schedule)
@@ -242,6 +246,9 @@ public partial class PaymentMultiples
 
             AddToEditedFields(schedule, nameof(schedule.LeftPrinciple));
         }
+
+
+        LoanPayment!.LoanRepaymentLines = _schedules.MapsTo();
     }
 
     void UpdateLeftAmount(VSchedule schedule)
@@ -270,7 +277,7 @@ public partial class PaymentMultiples
 
     private async Task Resets()
     {
-        Schedules = originalSchedules;
+        _schedules = originalSchedules.ToList();
 
         await gridPopup.Reload();
 
@@ -278,58 +285,33 @@ public partial class PaymentMultiples
 
         StateHasChanged();
     }
+    private void ApplySchedulePayment(MouseEventArgs args)
+    {
+        if (!_schedules.Any())
+        {
+
+            NotificationService.Notify(NotificationSeverity.Error, "There is np any schedule to pay.");
+
+            return;
+        }
+
+        LoanPayment!.LoanRepaymentLines= _schedules.MapsTo();
+        var create= _schedules.MapsTo();
+        var options = new DialogOptions
+        {
+            CloseDialogOnOverlayClick = true,
+            Style="z-index:2000"
+        };
+
+        var parameters = new Dictionary<string, object?>
+        {
+            {"LoanPaymentCreate", LoanPayment},
+            {"LoanRepaymentLines",create}
+
+        };
+
+        DialogService.OpenAsync<PaymentModal>($"{LoanPayment.CustomerName}",parameters,options);
+
+    }
 }
 
-//void OnPrincipleChange(decimal? value, VSchedule schedule)
-//{
-//    if (value.HasValue)
-//    {
-//        schedule.LeftPrinciple = value.Value;
-//        UpdateLeftAmount(schedule);
-//        AddToEditedFields(schedule, nameof(schedule.LeftPrinciple));
-//    }
-//}
-
-//void OnOtherFieldChange(decimal? value, VSchedule schedule)
-//{
-//    if (value.HasValue)
-//    {
-//        // Update the specific field based on the column being edited
-//        switch (columnEditing)
-//        {
-//            case nameof(VSchedule.LeftInterestAmount):
-//                schedule.LeftInterestAmount = value.Value;
-//                break;
-//            case nameof(VSchedule.LeftCollectionFeeAmount):
-//                schedule.LeftCollectionFeeAmount = value.Value;
-//                break;
-//            case nameof(VSchedule.PenaltyAmount):
-//                schedule.PenaltyAmount = value.Value;
-//                break;
-//        }
-//        UpdateLeftAmount(schedule);
-//        AddToEditedFields(schedule, columnEditing);
-//    }
-//}
-
-//void UpdateLeftAmount(VSchedule schedule)
-//{
-//    // Calculate LeftAmount as the sum of LeftPrinciple, LeftInterestAmount, LeftCollectionFeeAmount, and PenaltyAmount
-//    schedule.LeftAmount = (schedule.LeftPrinciple ?? 0) +
-//                         (schedule.LeftInterestAmount ?? 0) +
-//                         (schedule.LeftCollectionFeeAmount ?? 0) +
-//                         (schedule.PenaltyAmount ?? 0);
-//}
-
-//void AddToEditedFields(VSchedule schedule, string propertyName)
-//{
-//    if (!editedFields.Any(f => f.Key == schedule.LoanScheduleId && f.Value == propertyName))
-//    {
-//        editedFields.Add(new KeyValuePair<long, string>(schedule.LoanScheduleId!.Value, propertyName));
-//    }
-
-//    if (!scheduleToUpdate.Contains(schedule))
-//    {
-//        scheduleToUpdate.Add(schedule);
-//    }
-//}

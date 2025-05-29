@@ -1,5 +1,4 @@
-﻿using Applications.Interfaces.Transactions;
-using Applications.Requests.Transactions.Journals;
+﻿using Applications.Requests.Transactions.Journals;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Journals;
 using Applications.Responses.ViewModels.Ledgers;
@@ -10,7 +9,7 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
 using Radzen;
 
-namespace TrapchumApp.Components.Pages.Transactions.Journals;
+namespace TrapchumApp.Pages.Transactions.Journals;
 
 public partial class JournalEntryRowCreate(
     ILedgerServiceImpl ledgerService,

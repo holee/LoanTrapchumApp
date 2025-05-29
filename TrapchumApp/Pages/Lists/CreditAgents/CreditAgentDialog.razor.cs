@@ -3,8 +3,9 @@ using Applications.Responses.Lists.Entities;
 using Applications.Responses.ViewModels.Employees;
 using Applications.Services.Lists;
 using Microsoft.AspNetCore.Components;
+using Radzen;
 
-namespace TrapchumApp.Components.Pages.Lists.CreditAgents
+namespace TrapchumApp.Pages.Lists.CreditAgents
 {
     public partial class CreditAgentDialog
     {
@@ -40,7 +41,7 @@ namespace TrapchumApp.Components.Pages.Lists.CreditAgents
                 }
                 else
                 {
-                    NotificationService.Notify(Radzen.NotificationSeverity.Error, response.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Error, response.ErrMessage);
                     return;
                 }
             }
@@ -65,7 +66,7 @@ namespace TrapchumApp.Components.Pages.Lists.CreditAgents
                 }
                 else
                 {
-                    NotificationService.Notify(Radzen.NotificationSeverity.Error, rsp.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
                     return;
                 }
             }

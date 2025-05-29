@@ -2,18 +2,14 @@ using Applications.Extensions;
 using Applications.Interfaces.Lists;
 using Applications.Interfaces.Vendors;
 using Applications.Requests.Lists.Addreses;
-using Applications.Requests.Lists.Entities;
 using Applications.Requests.Lists.OtherNames;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Vendors;
-using Mapster;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 using Radzen.Blazor;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 
-namespace TrapchumApp.Components.Pages.Lists.Vendors
+namespace TrapchumApp.Pages.Lists.Vendors
 {
     public partial class Index
     {

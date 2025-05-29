@@ -6,9 +6,10 @@ using Applications.Services.LIsts;
 using Mapster;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
+using Radzen;
 using Radzen.Blazor;
 
-namespace TrapchumApp.Components.Pages.Lists.Collaterals
+namespace TrapchumApp.Pages.Lists.Collaterals
 {
     public partial class CollateralCreateTab
     {
@@ -178,7 +179,7 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
 
             if (!CustomerId.IsNotNullOrEmpty())
             {
-                NotificationService.Notify(Radzen.NotificationSeverity.Warning, "Empty Selected",
+                NotificationService.Notify(NotificationSeverity.Warning, "Empty Selected",
                     "Please select customer first");
                 return;
             }
@@ -190,18 +191,18 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
 
                 if (response.IsSuccess)
                 {
-                    NotificationService.Notify(Radzen.NotificationSeverity.Success, response.Data);
+                    NotificationService.Notify(NotificationSeverity.Success, response.Data);
                     model = new();
                     await SaveChanged.InvokeAsync();
                 }
                 else
                 {
-                    NotificationService.Notify(Radzen.NotificationSeverity.Error, response.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Error, response.ErrMessage);
                 }
             }
             catch (Exception ex)
             {
-                NotificationService.Notify(Radzen.NotificationSeverity.Error, ex.Message);
+                NotificationService.Notify(NotificationSeverity.Error, ex.Message);
             }
         }
 
@@ -373,17 +374,17 @@ namespace TrapchumApp.Components.Pages.Lists.Collaterals
         //        var data = await _service.CreateCollateral(CollateralId, model);
         //        if (data.IsSuccess)
         //        {
-        //            NotificationService.Notify(Radzen.NotificationSeverity.Success, data.Message);
+        //            NotificationService.Notify(NotificationSeverity.Success, data.Message);
         //            DialogService.Close(true);
         //        }
         //        else
         //        {
-        //            NotificationService.Notify(Radzen.NotificationSeverity.Error, data.Message);
+        //            NotificationService.Notify(NotificationSeverity.Error, data.Message);
         //        }
         //    }
         //    catch (Exception ex)
         //    {
-        //        NotificationService.Notify(Radzen.NotificationSeverity.Error, ex.Message);
+        //        NotificationService.Notify(NotificationSeverity.Error, ex.Message);
         //    }
         //}
 

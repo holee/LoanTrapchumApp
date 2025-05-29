@@ -14,7 +14,6 @@ using Applications.Responses.Loans.Disbursements;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Auths;
 using Applications.Responses.ViewModels.Customers;
-using Applications.Responses.ViewModels.Loans.LoanRequests;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Applications.Responses.ViewModels.Options;
 using Applications.Responses.ViewModels.OtherNames;
@@ -23,10 +22,10 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Forms;
 using Radzen;
-using TrapchumApp.Components.Pages.Lists.Collaterals;
-using TrapchumApp.Components.Pages.Lists.OtherNames;
+using TrapchumApp.Pages.Lists.Collaterals;
+using TrapchumApp.Pages.Lists.OtherNames;
 
-namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
+namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 {
     public partial class LoanRequestCreate(
         ILoanSettingService loanSettingService,
@@ -128,7 +127,7 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
             IEnumerable<FileModel> uploadedFiles =
                 await DialogService.OpenAsync<FileUploadDialogue>("Upload", options: options);
 
-            if (uploadedFiles.Any())
+            if (uploadedFiles.Any()) 
             {
                 foreach (var f in uploadedFiles)
                 {
@@ -393,14 +392,11 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
 
         protected override async Task OnInitializedAsync()
         {
-            await GetLoanRequestInfo();
 
-            var rsp1 = await _userService.GetUsersAsync(UserId, string.Empty);
+            var rsp1 = await _userService.GetUserByIdAsync(UserId,default, "EmployeeRefId");
 
             if (rsp1 is { IsSuccess: true, Data: not null })
             {
-                _user = rsp1.Data!.First();
-
                 model.CreditAgentRefId = _user.EmployeeRefId;
             }
 
@@ -453,7 +449,6 @@ namespace TrapchumApp.Components.Pages.Transactions.Loans.LoanRequests
         private async Task GetCustomers(string? customerId, int take = 25, string? filter = null)
         {
             var queryParam = new QueryParam(0, take, string.Empty, filter: filter);
-
 
             var customerResponse = await _customerService!.GetCustomersAsync<VCustomerList>(customerId, queryParam);
 

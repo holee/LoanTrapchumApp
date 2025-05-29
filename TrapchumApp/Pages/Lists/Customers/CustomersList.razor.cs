@@ -1,17 +1,14 @@
 using Applications.ApplicationPolicies;
-using Applications.Enumerations;
 using Applications.Extensions.Identity.Authorizations.Extensions;
 using Applications.Extensions.Identity.Policies;
 using Applications.Responses.Lists.Customers;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Customers;
-using Applications.Responses.ViewModels.Options;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Radzen;
-using System.Threading.Tasks;
 
-namespace TrapchumApp.Components.Pages.Lists.Customers
+namespace TrapchumApp.Pages.Lists.Customers
 {
     public partial class CustomersList
     {

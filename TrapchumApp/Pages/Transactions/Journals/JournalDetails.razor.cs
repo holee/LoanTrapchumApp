@@ -1,11 +1,10 @@
-using Applications.Interfaces.Transactions;
 using Applications.Requests.Transactions.Journals;
 using Applications.Responses.ViewModels.Journals;
 using Applications.Services.Transactions.Journals;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 
-namespace TrapchumApp.Components.Pages.Transactions.Journals
+namespace TrapchumApp.Pages.Transactions.Journals
 {
     public partial class JournalDetails(IJournalServiceImpl journalService)
     {

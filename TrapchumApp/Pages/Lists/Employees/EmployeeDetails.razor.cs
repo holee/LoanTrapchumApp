@@ -1,11 +1,10 @@
-using Applications.Requests.Lists.Employees;
 using Applications.Responses.ViewModels.Employees;
 using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 
-namespace TrapchumApp.Components.Pages.Lists.Employees
+namespace TrapchumApp.Pages.Lists.Employees
 {
     public partial class EmployeeDetails
     {

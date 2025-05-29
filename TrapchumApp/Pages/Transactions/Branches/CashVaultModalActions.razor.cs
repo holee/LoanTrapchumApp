@@ -6,9 +6,9 @@ using Applications.Responses.ViewModels.Currencies;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Radzen;
-using TrapchumApp.Components.Shared;
+using TrapchumApp.Shared;
 
-namespace TrapchumApp.Components.Pages.Transactions.Branches
+namespace TrapchumApp.Pages.Transactions.Branches
 {
     public partial class CashVaultModalActions
     {

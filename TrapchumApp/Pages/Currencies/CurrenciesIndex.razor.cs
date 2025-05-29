@@ -3,7 +3,7 @@ using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Currencies;
 using Radzen;
 
-namespace TrapchumApp.Components.Pages.Currencies
+namespace TrapchumApp.Pages.Currencies
 {
     public partial class CurrenciesIndex
     {

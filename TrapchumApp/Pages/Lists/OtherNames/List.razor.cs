@@ -5,7 +5,7 @@ using Applications.Services.Lists;
 using Radzen;
 using Radzen.Blazor;
 
-namespace TrapchumApp.Components.Pages.Lists.OtherNames;
+namespace TrapchumApp.Pages.Lists.OtherNames;
 public partial class List
 {
     private readonly IGuarantorServiceImpl _gService;

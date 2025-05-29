@@ -1,7 +1,4 @@
 using Applications.Enumerations;
-using Applications.Extensions.mappers;
-using Applications.Interfaces.Currencies;
-using Applications.Interfaces.Transactions;
 using Applications.Requests.Lists.Entities;
 using Applications.Requests.Transactions.CashManagements;
 using Applications.Responses.Lists.Currency;
@@ -13,7 +10,7 @@ using Mapster;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 
-namespace TrapchumApp.Components.Pages.Transactions.Branches
+namespace TrapchumApp.Pages.Transactions.Branches
 {
     public partial class VaultOutModal(ICurrencyServiceImpl curService, ICashVaultServiceImpl caVaultService)
     {

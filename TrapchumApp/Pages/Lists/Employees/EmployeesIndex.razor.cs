@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Components;
 using Radzen;
 using Radzen.Blazor;
 
-namespace TrapchumApp.Components.Pages.Lists.Employees
+namespace TrapchumApp.Pages.Lists.Employees
 {
     public partial class EmployeesIndex
     {
