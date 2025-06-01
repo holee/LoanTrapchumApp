@@ -12,5 +12,6 @@
         public const string SpGetLoansByBranchId = nameof(SpGetLoansByBranchId);
         public const string SpGetVSchedulesByPaymentDate = nameof(SpGetVSchedulesByPaymentDate);
         public const string SpGetLateVSchedules = nameof(SpGetLateVSchedules);
+        public const string SpGetGaurantorWithLoans = nameof(SpGetGaurantorWithLoans);
     }
 }

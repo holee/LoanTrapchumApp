@@ -1,4 +1,6 @@
-﻿using Applications.Enumerations;
+﻿using Applications.Commons.Mappers;
+using Applications.Enumerations;
+using Applications.Extensions.DateTimes;
 using Applications.Interfaces.Loans;
 using Applications.Responses;
 using Applications.Responses.ViewModels.Reports;
@@ -14,22 +16,24 @@ namespace Applications.Services.Loans
         {
 
 
-            var rsp = await loanService.GetLoanByIdAsync(loanId, branchId, ScheduleStatus.All);
+            var rsp = await loanService.GetLoanByIdAsync(loanId, branchId, ScheduleStatus.All, true);
 
 
-            if (!rsp.IsSuccess) {
+            if (!rsp.IsSuccess)
+            {
 
-                return Result.Failure<Stream>(ErrorResponse.NotFound("No data to print."));            
-            
+                return Result.Failure<Stream>(ErrorResponse.NotFound("No data to print."));
+
             }
 
             MemoryStream ms = new MemoryStream();
 
-            var item = rsp!.Data!.Schedules;
 
             var loanInfo = rsp.Data!;
 
-            var data = item.Adapt<IEnumerable<ScheduleRpt>>();
+            var item = rsp!.Data!.Schedules;
+
+            var data = loanInfo.MapsToScheduleRpt();
 
             var templatePath = Path.Combine(env.WebRootPath, "Reports/Schedule.xlsx");
 
@@ -51,7 +55,7 @@ namespace Applications.Services.Loans
 
                 phone = loanInfo.Phone,
 
-                date = loanInfo.RegisterDate!.Value.ToString("dd/MM/yyyy"),
+                date = loanInfo.RegisterDate.DayFirst(),
 
                 l = data,
 

@@ -24,6 +24,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructures.Implements
 {
+
     public class LoanService(
         DataContext context,
         ILogger<LoanService> logger,

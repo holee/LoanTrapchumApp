@@ -12,6 +12,7 @@ public sealed class ScheduleRpt
     public decimal? Principal { get; set; }
     public decimal? Interest { get; set; }
     public decimal? CollectionFee { get; set; }
+    public decimal? TotalInterest => Interest + CollectionFee;
     public decimal? TotalPay { get; set; }
     public decimal? LoanOutstanding { get; set; }
 }

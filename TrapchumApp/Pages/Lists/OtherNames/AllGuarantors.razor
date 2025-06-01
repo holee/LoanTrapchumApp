@@ -61,9 +61,9 @@
             </Template>
         </RadzenDataGridColumn>
 
-        <RadzenDataGridColumn TextAlign="TextAlign.Right" Context="g" 
-                            Width="5rem"
-                            Property="ProInKhmer" Title="No.Loans">
+        <RadzenDataGridColumn TextAlign="TextAlign.Center" Context="g"
+                              Width="5rem"
+                              Property="ProInKhmer" Title="Loans">
             <Template>
                 @g.NumberOfLoan
             </Template>
@@ -81,21 +81,21 @@
 </RadzenDataGrid>
 
 
-@code{
+@code {
     void ShowContextMenuWithContent(MouseEventArgs args, string? id)
     {
         ContextMenuService.Open(args, ds =>
     @<RadzenMenu Style="font-size:0.8rem;">
-        <RadzenMenuItem Icon="info"
-                        Click="@(()=>GetGuarantorDetails(id))"
-                        Text="Guarantor Details" Value="@id"></RadzenMenuItem>
-        <RadzenMenuItem Icon="edit"
-                        Click="@(()=>GetEditGuarantor(id))"
-                        Text="Edit" Value="@id"></RadzenMenuItem>
-        <RadzenMenuItem Icon="delete"
-                        Click="@(()=>DeleteGuarantorAsync(id))"
-                        Text="Delete" Value="@id"></RadzenMenuItem>
-    </RadzenMenu>
+    <RadzenMenuItem Icon="info"
+                    Click="@(()=>GetGuarantorDetails(id))"
+                    Text="Guarantor Details" Value="@id"></RadzenMenuItem>
+    <RadzenMenuItem Icon="edit"
+                    Click="@(()=>GetEditGuarantor(id))"
+                    Text="Edit" Value="@id"></RadzenMenuItem>
+    <RadzenMenuItem Icon="delete"
+                    Click="@(()=>DeleteGuarantorAsync(id))"
+                    Text="Delete" Value="@id"></RadzenMenuItem>
+</RadzenMenu>
         );
     }
 }

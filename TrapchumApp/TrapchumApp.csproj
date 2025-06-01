@@ -180,7 +180,6 @@
     <AdditionalFiles Include="Pages\Transactions\Ledgers\EditLedgerModal.razor" />
     <AdditionalFiles Include="Pages\Transactions\Ledgers\LedgerIndex.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\AllLoansTab.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\DisburseLoanRequest.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\IndexLoan.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\LoanChangedCreditAgent.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\LoanChangedCreditAgents.razor" />

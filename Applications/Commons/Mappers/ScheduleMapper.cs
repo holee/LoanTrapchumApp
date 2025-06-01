@@ -1,6 +1,8 @@
 ﻿using Applications.Calculations;
 using Applications.Requests.Loans.Payments;
+using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Schedules;
+using Applications.Responses.ViewModels.Reports;
 
 namespace Applications.Commons.Mappers
 {
@@ -27,6 +29,33 @@ namespace Applications.Commons.Mappers
         {
             return source.Select(x => x.MapTo()).ToList();
         }
+
+
+        public static ScheduleRpt MapToScheduleRpt(this VSchedule s) => new ScheduleRpt
+        {
+            InstallmentNo = s!.InstallmentNo,
+            TotalDay = s!.TotalDay,
+            PaymentDate = s!.PaymentDate,
+            Principal = s.Principle,
+            Interest = s.Interest,
+            CollectionFee = s.CollectionFee,
+            TotalPay = s.TotalPay,
+            LoanOutstanding = s.LoanOutstanding
+        };
+
+        public static List<ScheduleRpt> MapsToScheduleRpt(this IEnumerable<VSchedule> source)
+        {
+            return source.Select(x => x.MapToScheduleRpt()).ToList();
+        }
+
+        public static List<ScheduleRpt> MapsToScheduleRpt(this VLoanDisbursments? source)
+        {
+            if (source == null || (source.Schedules is null)) return new List<ScheduleRpt>();
+
+            return source.Schedules.Select(x => x.MapToScheduleRpt()).ToList();
+
+        }
+
 
     }
 }

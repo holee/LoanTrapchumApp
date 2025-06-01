@@ -9,6 +9,8 @@ using Domains.Models.Loans;
 
 namespace Applications.Interfaces.Loans
 {
+
+
     public interface ILoanService
     {
         Task<Result<string>> CreateLoanAsync(LoanDtoCreate disbursement);

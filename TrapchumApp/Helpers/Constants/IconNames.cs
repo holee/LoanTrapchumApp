@@ -74,7 +74,11 @@
         public const string SyncDisabled = "inactive_order";
         public const string AttachFile = "attach_file"; 
         public const string Collaterals = "source_environment";
-        public const string Customers = "patient_list"; 
-
+        public const string Customers = "patient_list";
+        public const string LocationHome = "location_home";
+        public const string LocationParking = "local_parking";
+        public const string LocationOn = "location_on";
+        public const string LocationDrop = "pin_drop";
+        public const string LocationCity = "location_city";
     } 
 }

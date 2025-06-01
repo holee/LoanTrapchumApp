@@ -1,5 +1,6 @@
-﻿@using TrapchumApp.Services
-<RadzenPanelMenuItem Text="Operated Person" Icon="list_alt">
+﻿@using TrapchumApp.Helpers.Constants
+@using TrapchumApp.Services
+<RadzenPanelMenuItem Text="Operated Person" Icon="@IconNames.PersonBook">
     <RadzenPanelMenuItem Text="Customers" Icon="group" Path="@($"/App/Customer/{BranchId}/Branches?UserId={@UserId}")" />
     <RadzenPanelMenuItem Text="Employees" Icon="person" Path="@($"/App/Employee?UserId={@UserId}")" />
     <RadzenPanelMenuItem Text="Vendors" Icon="supervisor_account" Path="@($"/App/Vendor?UserId={@UserId}")" />

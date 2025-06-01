@@ -7,6 +7,7 @@ using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.OtherNames;
 using Dapper;
 using FluentValidation;
+using Infrastructures.Constants.Procedures;
 using Infrastructures.DataAccess;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
@@ -223,7 +224,7 @@ public class GuarantorService : IGuarantorService
 
         var lookup = new Dictionary<string, VGuarantor>();
 
-        var items = await db.QueryAsync<VGuarantor, VLoanGuarantors, VGuarantor>("spGetGaurantorWithLoans",
+        var items = await db.QueryAsync<VGuarantor, VLoanGuarantors, VGuarantor>(ProcedureConstant.SpGetGaurantorWithLoans,
             (g, gl) =>
             {
                 if (lookup.TryGetValue(g.Id!, out var existingGaurantor))

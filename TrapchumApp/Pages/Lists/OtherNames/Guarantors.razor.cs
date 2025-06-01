@@ -18,7 +18,7 @@ namespace TrapchumApp.Pages.Lists.OtherNames
         string? filterText = "";
         int pageIndex = 0;
         int pageSize = 10;
-        string sortColumn = "Name";
+        string sortColumn = "FullName";
         bool sortDescending = false;
         int counts = 0;
         bool isLoading = false;
@@ -97,32 +97,6 @@ namespace TrapchumApp.Pages.Lists.OtherNames
         {
             SelectedGuarantorId = guarantorId;
         }
-
-
-
-        //async Task GetEditGuarantor(string? id)
-        //{
-        //    ContextMenuService.Close();
-
-        //    if (!ShowEditTab)
-        //    {
-        //        ShowEditTab = true;
-
-        //        var rsp = await _gService.GetGuarantorEditAsync(id);
-
-        //        modelEdit = rsp.Data!;
-
-        //        StateHasChanged();
-        //    }
-
-        //    SelectedGuarantorId = id;
-
-        //    selectedTabIndex = 2;
-
-        //    //tabs.Reload();
-
-        //}
-
 
         async Task GetGuarantors()
         {
