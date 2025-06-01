@@ -103,7 +103,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
         {
             if (LoanRepaymentLines.Any())
             {
-                penaltyAmount = LoanRepaymentLines.Sum(x => x.PenaltyAmount);
+                penaltyAmount = LoanRepaymentLines.Sum(x => x.PaidPenaltyAmount);
                 originalPenaltyAmount = penaltyAmount;
                 TotalPaidAmount = LoanRepaymentLines.Total();
                 originalPaidAmount = LoanRepaymentLines.TotalAmountWithPenalty();
@@ -147,7 +147,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
                 LoanRepayment.PenaltyAmount = LoanRepaymentLines.TotalPaidPenalty();
                 LoanRepayment.SubTotal = LoanRepaymentLines.Total();
                 LoanRepayment.OfficialReceiptNo = ReceiptNo;
-                LoanRepayment.LoanRepaymentLines = LoanRepaymentLines;
+                LoanRepayment.LoanPaymentLines = LoanRepaymentLines;
                 //LoanRepayment.LoanTransaction = tran;
                 LoanRepayment.BranchRefId = BranchId;
                 LoanRepayment.UserRefId = UserId;

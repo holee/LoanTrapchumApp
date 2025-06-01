@@ -400,6 +400,8 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
                 model.CreditAgentRefId = _user.EmployeeRefId;
             }
 
+            SetDefault();
+
             await base.OnInitializedAsync();
         }
 

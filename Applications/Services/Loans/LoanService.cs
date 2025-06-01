@@ -115,6 +115,11 @@ namespace Applications.Services.Loans
             return await loanService.GetLoanByIdAsync(loanId, branchId, status,includeSchedule);
         }
 
+        public async Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId)
+        {
+            return await loanService.GetLoanByIdAsync(loanId, branchId);
+        }
+
         public async Task<Pager<VLoanDisbursments>> GetLoansAsync(int? branchId, string? userId, LoanStatuses status = LoanStatuses.Active, QueryParam? param = null)
         {
             return await loanService.GetLoansByBranchId(branchId, userId, status, param);

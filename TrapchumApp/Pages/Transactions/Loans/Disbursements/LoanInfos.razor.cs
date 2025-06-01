@@ -1,5 +1,7 @@
+using Applications.Enumerations;
 using Applications.Extensions;
 using Applications.Responses.ViewModels.Loans;
+using Applications.Services.Loans;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using Radzen;
@@ -9,7 +11,14 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 {
     public partial class LoanInfos
     {
-        [Parameter] public VLoanDisbursments LoanSchedule { get; set; } = new();
+        private readonly ILoanServiceImpl _loanService;
+
+        public LoanInfos(ILoanServiceImpl loanService)
+        {
+            _loanService = loanService;
+        }
+
+        [Parameter] public VLoanDisbursments? LoanSchedule { get; set; } = new();
         [Parameter] public string? LoanId { get; set; }=string.Empty;
         [Parameter] public int BranchId { get; set; } = 1;
         [Parameter] public int? Currency { get; set; } = 1; 
@@ -17,17 +26,51 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
         {
             if (LoanId.IsNotNullOrEmpty() && BranchId > 0)
             {
-                await js.InvokeVoidAsync("open", $"/Reports/Schedules/{LoanSchedule.LoanId}/{LoanSchedule.BranchId}/Exel", "_blank");
+                await js.InvokeVoidAsync("open", $"/Reports/Schedules/{LoanId}/{BranchId}/Exel", "_blank");
             }
             return;
         }
 
+        protected override async Task OnInitializedAsync()
+        {
+            if (LoanId.IsNotNullOrEmpty() && BranchId > 0 
+                && LoanSchedule!.LoanId.IsNullOrEmpty())
+            {
+                await GetLoanWithSchedules(BranchId, LoanId);
+            }
+            await base.OnInitializedAsync();
+        }
+
+
+
+        async Task GetLoanWithSchedules(int? branchId, string? loanId)
+        {
+
+            var rsp = await _loanService.GetLoanByIdAsync(loanId, BranchId, ScheduleStatus.All, false);
+
+            if (rsp.IsSuccess == false)
+            {
+                NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = rsp.ErrMessage,
+                    Duration = 3000
+                });
+            }
+            else
+            {
+                LoanSchedule = rsp.Data;
+            }
+        }
+
+
         private async Task DownLoadScheduleAsPdf()
         {
 
-            if (LoanSchedule.LoanId.IsNotNullOrEmpty() && LoanSchedule.BranchId > 0)
+            if (LoanId.IsNotNullOrEmpty() && BranchId > 0)
             {
-                await js.InvokeVoidAsync("open", $"/Reports/Schedules/{LoanSchedule.LoanId}/{LoanSchedule.BranchId}", "_blank");
+                await js.InvokeVoidAsync("open", $"/Reports/Schedules/{LoanId}/{BranchId}", "_blank");
             }
             return;
         }

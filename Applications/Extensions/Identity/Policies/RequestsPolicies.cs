@@ -78,7 +78,7 @@ public static class RequestsPolicies
     {
         return new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
-                    .RequireRole(AppRoles.Manager, AppRoles.Bm, AppRoles.Rbm, AppRoles.Dbm)
+                    .RequireRole(AppRoles.Manager,AppRoles.ChiefBm, AppRoles.Bm, AppRoles.Rbm, AppRoles.Dbm)
                     .RequireClaim(AppClaim.Permission, aprove)
                     .Build();
     }

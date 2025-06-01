@@ -1,5 +1,6 @@
 ﻿@using Applications.ApplicationPolicies
 @using Microsoft.AspNetCore.Components.Routing
+@using TrapchumApp.Helpers.Constants
 @using TrapchumApp.Pages.Transactions.Exchanges
 @using TrapchumApp.Services
 @implements IDisposable
@@ -71,6 +72,11 @@
             <AuthorizeView Policy="@RolePolicies.AccountOnly">
                 <Authorized>
                     <AccountsItems UserId="@userId" BranchId="@branchId" IsBranchOpen="@bState.State" />
+                </Authorized>
+            </AuthorizeView>
+            <AuthorizeView Policy="@RolePolicies.AdminOnly">
+                <Authorized>
+                    <OperationArea />
                 </Authorized>
             </AuthorizeView>
             <AuthorizeView Policy="@RolePolicies.AdminOnly">

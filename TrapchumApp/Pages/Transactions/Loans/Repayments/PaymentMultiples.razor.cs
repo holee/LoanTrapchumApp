@@ -1,3 +1,4 @@
+using Applications.Calculations;
 using Applications.Commons.Mappers;
 using Applications.Requests.Loans.Payments;
 using Applications.Responses.ViewModels.Loans.Schedules;
@@ -55,6 +56,8 @@ public partial class PaymentMultiples
             LoanScheduleId = s.LoanScheduleId,
             CurrencyId = s.CurrencyId
         }).ToList();
+
+        LoanPayment!.LoanPaymentLines = _schedules.MapsTo();
     }
 
     private void CopyToTempSchedules()
@@ -248,16 +251,16 @@ public partial class PaymentMultiples
         }
 
 
-        LoanPayment!.LoanRepaymentLines = _schedules.MapsTo();
+        LoanPayment!.LoanPaymentLines = _schedules.MapsTo();
     }
 
     void UpdateLeftAmount(VSchedule schedule)
     {
         // Calculate LeftAmount as the sum of LeftPrinciple, LeftInterestAmount, LeftCollectionFeeAmount, and PenaltyAmount
-        schedule.LeftAmount = (schedule.LeftPrinciple ?? 0) +
-                             (schedule.LeftInterestAmount ?? 0) +
-                             (schedule.LeftCollectionFeeAmount ?? 0) +
-                             (schedule.PenaltyAmount ?? 0);
+        //schedule.LeftAmount = (schedule.LeftPrinciple ?? 0) +
+        //                     (schedule.LeftInterestAmount ?? 0) +
+        //                     (schedule.LeftCollectionFeeAmount ?? 0) +
+        //                     (schedule.PenaltyAmount ?? 0);
 
     }
 
@@ -279,6 +282,8 @@ public partial class PaymentMultiples
     {
         _schedules = originalSchedules.ToList();
 
+        DeepCopySchedules();
+
         await gridPopup.Reload();
 
         scheduleToUpdate.Clear();
@@ -290,24 +295,25 @@ public partial class PaymentMultiples
         if (!_schedules.Any())
         {
 
-            NotificationService.Notify(NotificationSeverity.Error, "There is np any schedule to pay.");
+            NotificationService.Notify(NotificationSeverity.Error, "There is no any schedule to pay.");
 
             return;
         }
 
-        LoanPayment!.LoanRepaymentLines= _schedules.MapsTo();
+        LoanPayment!.LoanPaymentLines= _schedules.MapsTo();
+
         var create= _schedules.MapsTo();
+     
         var options = new DialogOptions
         {
-            CloseDialogOnOverlayClick = true,
-            Style="z-index:2000"
+            CloseDialogOnOverlayClick = false,
+            Left = "10%",
         };
 
         var parameters = new Dictionary<string, object?>
         {
             {"LoanPaymentCreate", LoanPayment},
-            {"LoanRepaymentLines",create}
-
+            {"CurrencyId",CurrencyId }
         };
 
         DialogService.OpenAsync<PaymentModal>($"{LoanPayment.CustomerName}",parameters,options);

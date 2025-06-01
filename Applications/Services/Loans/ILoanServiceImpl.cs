@@ -20,6 +20,7 @@ namespace Applications.Services.Loans
         Task<Result<byte[]>> ExportScheduleAsPdf(string? loanId, int? branchId);
         Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus status,bool include=false);
         Task<Pager<VLoanDisbursments>> GetLoansAsync(int? branchId, string? userId, LoanStatuses status = LoanStatuses.Active, QueryParam? param = null);
+        Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId);
     }
 
 }

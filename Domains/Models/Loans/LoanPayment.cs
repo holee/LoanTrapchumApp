@@ -1,4 +1,5 @@
 ﻿using Domains.Models.Transaction;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domains.Models.Loans
 {
@@ -19,6 +20,8 @@ namespace Domains.Models.Loans
         public decimal? PenaltyAmount { get; set; }
         public decimal? SubTotal { get; set; }
         public bool? IsReturn { get; set; }
+        public decimal? RecieveAmount { get; set; } = 0;
+        public decimal? ChangeAmount { get; set; } = 0;
         public DateTime? Created { get; set; } = DateTime.Now;
         public LoanTransaction? LoanTransaction { get; set; }
         public ICollection<LoanPaymentLine>? LoanRepaymentLines { get; set; } = [];

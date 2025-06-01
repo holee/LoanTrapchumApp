@@ -1,8 +1,9 @@
 using Applications.Responses.Paginations;
+using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Services.Loans;
 using Microsoft.AspNetCore.Components;
-
+using System.Threading.Tasks;
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 {
     public partial class ClientLateSchedules
@@ -26,18 +27,14 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
         DateTime paymentDate = DateTime.Now;
         string? filterText = "";
         bool sortDescending = false;
-        void ShowCustomerPayment(VSchedule p)
-        {
 
-            var parameters = new Dictionary<string, object?>{
-                        { "LoanPayment",p},
-                        { "CurrencyId",p.CurrencyId!.Value },
-                        { "LoanId",p.LoanId! },
-                        { "UserId",UserId },
-                        { "CreditAgentId",p.CreditAgentId!
-                        }};
-            NavigationManager.NavigateTo($"/Loans/Repayment/{p.LoanId}/Multiple?BranchId={p.BranchId}&CreditAgentId={p.CreditAgentId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
+
+        void GetPaymentSchedules(VSchedule p)
+        {
+            ContextMenuService.Close();
+            NavigationManager.NavigateTo($"/App/Loans/{BranchId}/Branches/{p.LoanId}/Schedules?CreditAgentId={p.CreditAgentId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
         }
+
 
         void CustomerPayOff(VSchedule p)
         {
@@ -45,10 +42,19 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 
         }
 
-        void GetCustomerLateSchedules(VSchedule p)
+        async Task GetCustomerLateSchedules(VSchedule p)
         {
             ContextMenuService.Close();
-            StateHasChanged();
+
+            var parameters = new Dictionary<string, object?>{
+                        { "LoanId",p.LoanId },
+                        { "BranchId",BranchId },
+                        { "PaymentDate",paymentDate}
+                    };
+            var sideOptions = new SideDialogOptions() { Width = "50rem",CloseDialogOnOverlayClick=true };
+
+            await DialogService.OpenSideAsync<LateScheduleDetail>("Late Schedule Detail", parameters, sideOptions);
+
 
         }
 
@@ -79,6 +85,8 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 
                 counts = responseData.Count;
 
+                await GetCount();
+
                 isLoading = false;
             }
             catch
@@ -108,5 +116,38 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
             await base.OnInitializedAsync();
         }
 
+        private void RowRenderChanged(DataGridCellRenderEventArgs<VSchedule> args)
+        {
+
+            if (args.Data.DayArrea >= 1 && args.Data.DayArrea <= 7)
+            {
+                args.Attributes.Add("style", "background-color: orange; color: #721c24;"); // Light red background for late schedules
+            }
+            else if (args.Data.DayArrea > 7 && args.Data.DayArrea <= 14)
+            {
+                args.Attributes.Add("style", "background-color: orange; color: #856404;"); // Light orange background for schedules with more than 7 days late
+            }
+            else if (args.Data.DayArrea > 14)
+            {
+                args.Attributes.Add("style", "background-color: yellow; color: #856404;"); // Light yellow background for schedules with more than 14 days late
+            }
+            else
+            {
+                args.Attributes.Add("style", "background-color: white; color: black;"); // Default style for non-late schedules
+            }
+        }
     }
 }
+
+//void ShowCustomerPayment(VSchedule p)
+//{
+
+//    var parameters = new Dictionary<string, object?>{
+//                { "LoanPayment",p},
+//                { "CurrencyId",p.CurrencyId!.Value },
+//                { "LoanId",p.LoanId! },
+//                { "UserId",UserId },
+//                { "CreditAgentId",p.CreditAgentId!
+//                }};
+//    NavigationManager.NavigateTo($"/Loans/Repayment/{p.LoanId}/Multiple?BranchId={p.BranchId}&CreditAgentId={p.CreditAgentId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
+//}

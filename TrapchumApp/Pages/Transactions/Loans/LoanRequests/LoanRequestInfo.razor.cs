@@ -256,7 +256,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
         async Task PeriodChanged()
         {
-            await GetHolidays(Model.Installments!.Value);
+            //await GetHolidays(Model.Installments!.Value);
         }
 
         void SelectedInstallmentChanged(object? arg)

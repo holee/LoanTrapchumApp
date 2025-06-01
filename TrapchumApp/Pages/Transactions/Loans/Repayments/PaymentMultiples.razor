@@ -19,15 +19,7 @@
 <table class="table table-sm table-bordered">
     <tr>
         <th class="w-25">Customer Name</th>
-        <td>
-            <ul>
-                <li>Name: @LoanPayment?.CustomerName</li>
-                <li>CreditA Agent: @LoanPayment?.CreditAgentRefId</li>
-                <li>User :@LoanPayment?.UserRefId</li>
-                <li>Loan Ref: @LoanPayment?.LoanRefId</li>
-                <li>Currency: @LoanPayment?.CurrencyRefId</li>
-                <li>Branch: @LoanPayment?.BranchRefId</li>
-            </ul>
+        <td>@LoanPayment?.CustomerName
         </td>
     </tr>
     <tr>
@@ -155,7 +147,7 @@
                                onclick="this.querySelector('.rz-numeric-input').select()"
                                ShowUpDown="false"
                                Min="0"
-                               Format="#,##0.00"
+                               Format="#,#00.00"
                                InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "Select Penalty Amount" } })" />
             </EditTemplate>
             <FooterTemplate>
@@ -202,7 +194,7 @@
         <Authorized>
             <RadzenButton Icon="@IconNames.Paid"
                           Size="ButtonSize.Small"
-                          ButtonStyle="ButtonStyle.Secondary"
+                          ButtonStyle="ButtonStyle.Success"
                           Click="ApplySchedulePayment"
                           Text="Recieve" />
         </Authorized>

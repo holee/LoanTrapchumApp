@@ -18,9 +18,9 @@ namespace Applications.Commons.Mappers
             PaidPrinciple = s.LeftPrinciple,
             PaidInterest = s.LeftInterestAmount,
             PaidCollectionFee = s.LeftCollectionFeeAmount,
-            PenaltyAmount = s.PenaltyAmount,
+            PaidPenaltyAmount = s.PenaltyAmount,
             BranchRefId = s.BranchId,
-            SubTotal = s.SubTotal(includePenalty: true) 
+            SubTotal = s.LeftAmount
         };
 
         public static List<LoanPaymentLineDtoCreate> MapsTo(this IEnumerable<VSchedule> source)

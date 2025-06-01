@@ -45,7 +45,17 @@
                               Width="6rem"
                               Sortable="true">
             <Template>
-                @p.PaymentDate!.Value.ToShortDateString()
+                @p.PaymentDate.DayFirst()    
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="DayArrea"
+                              Context="p"
+                              Title="Day Arrea"
+                              Width="6rem"
+                              TextAlign="TextAlign.Center"
+                              Sortable="true">
+            <Template>
+                @p.DayArrea
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Context="p"

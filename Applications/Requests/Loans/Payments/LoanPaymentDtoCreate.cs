@@ -4,7 +4,6 @@ namespace Applications.Requests.Loans.Payments;
 
 public sealed class LoanPaymentDtoCreate
 {
-
     public string? CustomerName { get; set; }
     public string? TransactionRefId { get; set; }
     public string? LoanRefId { get; set; }
@@ -20,15 +19,17 @@ public sealed class LoanPaymentDtoCreate
     public decimal? CollectionFeeAmount { get; set; }
     public decimal? PenaltyAmount { get; set; }
     public decimal? SubTotal { get; set; }
-    public decimal? AmountWithoutPenalty => LoanRepaymentLines.GetTotal(includePenalty: false);
-    public decimal? AmountWithPenalty => LoanRepaymentLines.GetTotal(includePenalty: true);
+    public decimal? AmountWithoutPenalty => LoanPaymentLines.GetTotal(includePenalty: false);
+    public decimal? AmountWithPenalty => LoanPaymentLines.GetTotal(includePenalty: true);
     public decimal? Amount { get; set; }
-    public decimal? PaidPrinciple => LoanRepaymentLines.TotalPaidPrinciple();
-    public decimal? PaidInterest => LoanRepaymentLines.TotalPaidInterest();
-    public decimal? PaidFeeAmount => LoanRepaymentLines.TotalPaidCollectionFee();
-    public decimal? PaidPenaltyAmount => LoanRepaymentLines.TotalPaidPenalty();
-    public decimal? SubTotalAmount => AmountWithPenalty;
-    public ICollection<LoanPaymentLineDtoCreate> LoanRepaymentLines { get; set; } = [];
+    public decimal? PaidPrinciple => LoanPaymentLines.TotalPaidPrinciple();
+    public decimal? PaidInterest => LoanPaymentLines.TotalPaidInterest();
+    public decimal? PaidFeeAmount => LoanPaymentLines.TotalPaidCollectionFee();
+    public decimal? PaidPenaltyAmount => LoanPaymentLines.TotalPaidPenalty();
+    public decimal? TotalAmount => AmountWithPenalty;
+    public decimal? RecieveAmount { get; set; } = 0;
+    public decimal? ChangeAmount { get; set; } = 0;
+    public ICollection<LoanPaymentLineDtoCreate> LoanPaymentLines { get; set; } = [];
 }
 
 
@@ -43,7 +44,7 @@ internal static class LoanPaymentDtoCreateExtension
         var totalPrinciples = lines.Sum(x => x.PaidPrinciple) ?? 0;
         var totalInterest = lines.Sum(x => x.PaidInterest) ?? 0;
         var totalFee = lines.Sum(x => x.PaidCollectionFee) ?? 0;
-        var totalPenalty = lines.Sum(x => x.PenaltyAmount) ?? 0;
+        var totalPenalty = lines.Sum(x => x.PaidPenaltyAmount) ?? 0;
         return totalPrinciples + totalInterest + totalFee + totalPenalty;
     }
 

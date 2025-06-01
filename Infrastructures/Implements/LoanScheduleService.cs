@@ -48,7 +48,7 @@ namespace Infrastructures.Implements
         {
             using var db = _context.Database.GetDbConnection();
 
-            
+
             var items = await db.QueryMultipleAsync(ProcedureConstant.GetLoanById,
                new
                {
@@ -169,8 +169,29 @@ namespace Infrastructures.Implements
                                                                     """)
                                             .AsNoTracking()
                                             .ToListAsync();
-
             var counts = items.Count();
+
+            return new Pager<VSchedule>(items, counts);
+        }
+
+
+
+        public async Task<Pager<VSchedule>> GetLateSchedulesAsync(int? branchId, string? loanId, DateTimeOffset? paymentDate, CancellationToken cancellation = default)
+        {
+            using var db = await _connectionFactory.CreateConnectionAsync(cancellation);
+
+            var queries = await db.QueryAsync<VSchedule>(ProcedureConstant.SpGetLateVSchedules,
+                new
+                {
+                    branchId,
+                    loanId,
+                    paymentDate
+                },
+                commandType: CommandType.StoredProcedure);
+
+            var counts = queries.Count();
+
+            var items= queries.ToList();
 
             return new Pager<VSchedule>(items, counts);
         }

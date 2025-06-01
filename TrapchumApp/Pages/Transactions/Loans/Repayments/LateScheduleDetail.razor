@@ -1,80 +1,80 @@
-﻿@using TrapchumApp.Services
+﻿@using TrapchumApp.Helpers.Constants
+@using TrapchumApp.Pages.Transactions.Loans.Disbursements
+@using TrapchumApp.Services
+<LoanInfos BranchId="@BranchId" LoanId="@LoanId" />
 <RadzenDataGrid AllowAlternatingRows="true"
                 AllowRowSelectOnRowClick="allowRowSelectOnRowClick"
                 AllowSorting="false"
                 PagerHorizontalAlign="HorizontalAlign.Right"
                 Density="Density.Compact"
                 GridLines="DataGridGridLines.Both"
-                @bind-Value="SelectedSchedules"
-                SelectionMode="DataGridSelectionMode.Multiple"
+                @bind-Value="@SelectedSchedules"
+                SelectionMode="DataGridSelectionMode.Single"
                 KeyProperty="PaymentDate"
-                Style="--rz-grid-header-background-color:var(--rz-base-200);"
                 @ref="grid"
                 TItem="VSchedule"
-                RowSelect="RowSelectedChanged"
-                RowDeselect="RowDeSelectedChanged"
+                Responsive="true"
                 Data="LateSchedules">
     <Columns>
-        <RadzenDataGridColumn Width="60px" Sortable="false" Filterable="false">
-            <HeaderTemplate>
-                <RadzenCheckBox TabIndex="-1" TriState="false" TValue="bool?"
-                                InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Select all items" }})"
-                                @bind-Value="isHeaderChecked"
-                                Change="SelectionChanged" />
-            </HeaderTemplate>
-            <Template Context="data">
-                <RadzenCheckBox TabIndex="-1" TriState="false"
-                                @bind-Value="data.Selected"
-                                InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Select item" }})"
-                                TValue="bool"
-                                Change="@((arg)=>SelectionCheckChanged(arg,data))" />
-                <input type="hidden" @bind-value="data.BranchId" />
-                <input type="hidden" @bind-value="data.LoanId" />
-                <input type="hidden" @bind-value="data.LoanScheduleId" />
-                <input type="hidden" @bind-value="data.InstallmentNo" />
-            </Template>
-        </RadzenDataGridColumn>
         <RadzenDataGridColumn Title="#"
                               Width="2rem"
                               Context="p">
             <Template>
-                @(LateSchedules.ToList().IndexOf(p) + 1)
+                <input type="hidden" @bind-value="p.BranchId" />
+                <input type="hidden" @bind-value="p.LoanId" />
+                <input type="hidden" @bind-value="p.LoanScheduleId" />
+                <input type="hidden" @bind-value="p.InstallmentNo" />
+                @p.InstallmentNo
             </Template>
         </RadzenDataGridColumn>
-        <RadzenDataGridColumn Title="Name"
-                              Property="AltName"
-                              Width="10rem"
-                              Context="p">
-            <Template>
-                @p.AltName
-            </Template>
-        </RadzenDataGridColumn>
-        <RadzenDataGridColumn Title="Payment Date"
-                              Width="8rem"
+        <RadzenDataGridColumn Title="Date"
+                              Width="6rem"
                               Property="PaymentDate"
                               Context="p">
             <Template>
-                @(string.Format("{0:dd/MM/yyyy}", p.PaymentDate))
+                @p.PaymentDate.DayFirst()
                 <br />
                 <small>
                     @p.PaymentDate!.Value.DayOfWeek
                 </small>
             </Template>
         </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="Late"
+                              Width="5rem"
+                              TextAlign="TextAlign.Right"
+                              Property="DayArrea"
+                              Context="p">
+            <Template>
+                <strong class="text-danger">
+                    @p.DayArrea
+                </strong>
+            </Template>
+        </RadzenDataGridColumn>
         <RadzenDataGridColumn Title="Days"
                               Width="4rem"
                               Property="TotalDay"
+                              TextAlign="TextAlign.Right"
                               Context="p">
             <Template>
                 @p.TotalDay
             </Template>
         </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="Rate"
+                              Width="4rem"
+                              Property="InterestRate"
+                              TextAlign="TextAlign.Right"
+                              Context="p">
+            <Template>
+                @p.InterestRate
+            </Template>
+        </RadzenDataGridColumn>
         <RadzenDataGridColumn Title="Principle"
                               Width="8rem"
                               Property="Principal"
+                              TextAlign="TextAlign.Right"
                               Context="p">
             <Template>
-                @p.Principle.FormatUp(2, p.CurrencyId!.Value)
+                @p.Principle.Format(p.CurrencyId)
             </Template>
             <FooterTemplate>
                 @LateSchedules.Sum(p => p.Principle)
@@ -83,9 +83,11 @@
         <RadzenDataGridColumn Title="Interest"
                               Width="8rem"
                               Property="Interest"
+                              TextAlign="TextAlign.Right"
+                              TItem="VSchedule"
                               Context="p">
             <Template>
-                @p.Interest.FormatUp(2, p.CurrencyId!.Value)
+                @p.Interest.Format(p.CurrencyId)
             </Template>
             <FooterTemplate>
                 @LateSchedules.Sum(p => p.Interest)
@@ -93,6 +95,7 @@
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Title="Collection Fee"
                               Width="8rem"
+                              TextAlign="TextAlign.Right"
                               Property="CollectionFee"
                               Context="p">
             <Template>
@@ -102,22 +105,22 @@
                 @LateSchedules.Sum(p => p.CollectionFee)
             </FooterTemplate>
         </RadzenDataGridColumn>
-        <RadzenDataGridColumn Title="Late"
-                              Width="4rem"
-                              Property="DayArrea"
+        <RadzenDataGridColumn Title="Penalty"
+                              Width="8rem"
+                              Property="PenaltyAmount"
+                              TextAlign="TextAlign.Right"
                               Context="p">
             <Template>
-                <strong class="text-danger">
-                    @p.DayArrea
-                </strong>
+                @p.PenaltyAmount.Format(p.CurrencyId)
             </Template>
             <FooterTemplate>
-                @LateSchedules.Sum(p => p.DayArrea)
+                @LateSchedules.Sum(p => p.PenaltyAmount)
             </FooterTemplate>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Title="Total"
                               Width="8rem"
                               Property="TotalPay"
+                              TextAlign="TextAlign.Right"
                               Context="p">
             <Template>
                 @p.TotalPay.Format(p.CurrencyId)
@@ -129,6 +132,7 @@
         <RadzenDataGridColumn Title="Outstanding"
                               Width="8rem"
                               Property="LoanOutstanding"
+                              TextAlign="TextAlign.Right"
                               Context="p">
             <Template>
                 @(p.LoanOutstanding.Format(p.CurrencyId))
@@ -138,13 +142,23 @@
 </RadzenDataGrid>
 <RadzenStack AlignItems="AlignItems.Center" class="mt-2"
              Gap="1rem"
+             Style="position:absolute;right:1rem;bottom:1rem;"
              Orientation="Orientation.Horizontal"
              JustifyContent="JustifyContent.End">
-    <RadzenButton Size="ButtonSize.Small"
-                  ButtonStyle="ButtonStyle.Primary"
+    <RadzenButton Size="ButtonSize.ExtraSmall"
+                  ButtonStyle="ButtonStyle.Success"
                   Click="RecievePayments"
                   Text="Receive Payment" Icon="paid">
 
     </RadzenButton>
+    <RadzenButton Size="ButtonSize.ExtraSmall"
+                  ButtonStyle="ButtonStyle.Danger"
+                  Click="@(()=>DialogService.CloseSide(false))"
+                  Text="Close"
+                  Variant="Variant.Text"
+                  Icon="@IconNames.Cancel">
+
+    </RadzenButton>
 </RadzenStack>
 
+    

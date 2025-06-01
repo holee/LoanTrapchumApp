@@ -19,7 +19,7 @@ namespace Applications.Interfaces.Loans
         Task<Result<string>> ChangedCreditAgents(int? branchId, List<LoanChangedCaDtoCreate> req);
         Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus status, bool include = false);
         Task<Pager<VLoanDisbursments>> GetLoansByBranchId(int? branchId, string? userId, LoanStatuses status = LoanStatuses.Active, QueryParam? param = null);
- 
+        Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId);
     }
 
 }

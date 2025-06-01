@@ -1,8 +1,9 @@
 using Applications.Responses.ViewModels.Branches;
+using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Microsoft.AspNetCore.Components;
-using Radzen;
 using Microsoft.AspNetCore.Components.Authorization;
+using Radzen;
 using Radzen.Blazor;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments
@@ -149,7 +150,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
         void ShowCustomerPayment(VSchedule p)
         {
 
-            var parameters = new Dictionary<string, object>{
+            var parameters = new Dictionary<string, object?>{
                         { "LoanPayment",p},
                         { "CurrencyId",p.CurrencyId!.Value },
                         { "LoanId",p.LoanId!},
@@ -157,6 +158,9 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
                         { "CreditAgentId",p.CreditAgentId!
                         }};
             NavigationManager.NavigateTo($"/Loans/Repayment/{p.LoanId}/Multiple?BranchId={p.BranchId}&CreditAgentId={p.CreditAgentId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
+
+            
+
         }
 
 

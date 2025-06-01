@@ -93,8 +93,8 @@ public partial class PaymentDetails
         create.TotalAmountWithPenalty = loanRepaymentLines.Total();
         create.OriginalPaidAmount = loanRepaymentLines.TotalAmountWithPenalty();
         create.TotalAmountNoPenalty = loanRepaymentLines.TotalAmountWithPenalty();
-        create.PenaltyAmount = loanRepaymentLines.Sum(x => x.PenaltyAmount);
-        create.OriginalPenaltyAmount = loanRepaymentLines.Sum(x => x.PenaltyAmount);
+        create.PenaltyAmount = loanRepaymentLines.Sum(x => x.PaidPenaltyAmount);
+        create.OriginalPenaltyAmount = loanRepaymentLines.Sum(x => x.PaidPenaltyAmount);
         create.RecieptNumber = "";
         if (CurrencyId == 1)
         {

@@ -8,7 +8,7 @@
 <LoanInfos BranchId="@BranchId"
            LoanId="@LoanId"
            Currency="@CurrencyId"
-           LoanSchedule="LoanSchedule" @key="@(Guid.NewGuid().ToString())" />
+           LoanSchedule="@LoanSchedule" @key="@(Guid.NewGuid().ToString())" />
 <RadzenFieldset class="rz-my-2">
     <HeaderTemplate>
         <RadzenStack Orientation="Orientation.Horizontal"
@@ -196,7 +196,7 @@
                                                    Min="0"
                                                    Max="@SelectedSchedule?.LeftPrinciple"
                                                    @oninput="PrincipleAmountValueChanged"
-                                                   @bind-Value="recievePayment!.RecievePrincipleAmount">
+                                                   @bind-Value="loanPaymentLine!.PaidPrinciple">
                                     </RadzenNumeric>
                                 </RadzenColumn>
                             </RadzenRow>
@@ -218,7 +218,7 @@
                                                    onclick="this.querySelector('.rz-numeric-input').select()"
                                                    ShowUpDown="false"
                                                    @oninput="InterestAmountValueChanged"
-                                                   @bind-Value="recievePayment!.RecieveInterestAmount">
+                                                   @bind-Value="loanPaymentLine!.PaidInterest">
                                     </RadzenNumeric>
                                 </RadzenColumn>
                             </RadzenRow>
@@ -237,7 +237,7 @@
                                                    Format="#,##0.00"
                                                    Min="0"
                                                    onclick="this.querySelector('.rz-numeric-input').select()"
-                                                   @bind-Value="recievePayment!.RecieveCollectionFeeAmount"
+                                                   @bind-Value="loanPaymentLine!.PaidCollectionFee"
                                                    @oninput="CollectionFeeAmountValueChanged"
                                                    Max="@SelectedSchedule?.LeftCollectionFeeAmount"
                                                    ShowUpDown="false">
@@ -258,7 +258,7 @@
                                                    Min="0"
                                                    Style="height:var(--input-text-sm)"
                                                    onclick="this.querySelector('.rz-numeric-input').select()"
-                                                   @bind-Value="recievePayment!.PenaltyAmountAmount"
+                                                   @bind-Value="loanPaymentLine!.PaidPenaltyAmount"
                                                    Disabled="!isPaidNow"
                                                    Max="@SelectedSchedule?.PenaltyAmount"
                                                    ShowUpDown="false" />
@@ -273,7 +273,7 @@
                                     <RadzenLabel>Reciept No</RadzenLabel>
                                 </RadzenColumn>
                                 <RadzenColumn Size="7">
-                                    <RadzenTextBox @bind-Value="receiptNo"
+                                    <RadzenTextBox @bind-Value="loanPaymentLine.OfficialReceiptNo"
                                                    class="w-100"
                                                    Style="height:var(--input-text-sm)" />
                                 </RadzenColumn>
@@ -288,23 +288,12 @@
                                     <RadzenStack Orientation="Orientation.Horizontal"
                                                  Gap="0"
                                                  AlignItems="AlignItems.Center">
-                                        <RadzenNumeric Value="@recievePayment?.TotalPaymentWithPenalty"
+                                        <RadzenNumeric Value="@loanPaymentLine?.TotalWithPenalty"
                                                        ShowUpDown="false"
                                                        Format="#,##0.00"
                                                        class="rz-m-0 rz-p-0"
                                                        Style="height:var(--input-text-sm)"
                                                        Disabled />
-                                        @if (isAllowMultiplePayment)
-                                        {
-
-                                            <RadzenButton Disabled="!isPaidNow" Click="OnPaid"
-                                                          Size="ButtonSize.Small"
-                                                          Icon="add"
-                                                          ButtonStyle="ButtonStyle.Primary"
-                                                          class="w-auto">
-                                            </RadzenButton>
-
-                                        }
                                     </RadzenStack>
                                 </RadzenColumn>
                             </RadzenRow>

@@ -1,76 +1,156 @@
+using Applications.Commons.Mappers;
+using Applications.Enumerations;
+using Applications.Extensions.Identity;
+using Applications.Requests.Loans.Payments;
+using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Schedules;
+using Applications.Services.Loans;
+using Domains.Models.Currencies;
+using Domains.Models.Loans;
 using Microsoft.AspNetCore.Components;
-using Radzen;
 using Radzen.Blazor;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 {
     public partial class LateScheduleDetail
     {
-        //private readonly ILoanPaymentService _loanPaymentService;
-        //private readonly ISchedulesService _schedulesService;
-        [Parameter] public long LoanId { get; set; }
+
+        private readonly ILoanScheduleServiceImpl _scheduleService;
+        private readonly ILoanServiceImpl _loanService;
+        public LateScheduleDetail(ILoanScheduleServiceImpl scheduleService, ILoanServiceImpl loanService)
+        {
+            _scheduleService = scheduleService;
+            _loanService = loanService;
+        }
+
+        [Parameter] public string? LoanId { get; set; }
         [Parameter] public int BranchId { get; set; }
-        [Parameter] public DateTime PaymentDate { get; set; } = DateTime.UtcNow;
+        [Parameter] public DateTime? PaymentDate { get; set; } = DateTime.Now;
+        [CascadingParameter]
+        Task<AuthenticationState> AuthenticationState { get; set; } = default!;
         IEnumerable<VSchedule> LateSchedules { get; set; } = [];
         bool allowRowSelectOnRowClick = true;
         RadzenDataGrid<VSchedule> grid = default!;
         IList<VSchedule>? SelectedSchedules;
         bool? isHeaderChecked = false;
         bool isRowChecked = false;
-
-        //public LateScheduleDetail(ILoanPaymentService loanPaymentService, ISchedulesService schedulesService)
-        //{
-        //    _loanPaymentService = loanPaymentService;
-        //    _schedulesService = schedulesService;
-        //}
-
+        VLoanDisbursments? LoanSchedule = new();
+        private int counts = 0;
+        string? UserId = string.Empty;
         protected override async Task OnInitializedAsync()
         {
+
+            await GetLoanWithSchedules(BranchId, LoanId);
+
+            await GetLateSchedule();
+
+            var authState = await AuthenticationState;
+
+            UserId = authState.User.GetId() ?? string.Empty;
+
             await base.OnInitializedAsync();
-
-            //var response = await _schedulesService.GetLateScheduleLineDetai(LoanId, BranchId, PaymentDate);
-
-            //if (response.IsSuccess)
-            //{
-            //    LateSchedules = response.Data!;
-            //}
-            //else
-            //{
-            //    LateSchedules = [];
-            //}
-
-
         }
+
+        async Task GetLateSchedule()
+        {
+            var rsp = await _scheduleService.GetLateScedulesAsync(BranchId, LoanId, PaymentDate);
+
+            LateSchedules = rsp.Items;
+
+            counts = rsp.Count;
+        }
+        async Task GetLoanWithSchedules(int? branchId, string? loanId)
+        {
+
+            var rsp = await _loanService.GetLoanByIdAsync(loanId, BranchId, ScheduleStatus.All, false);
+
+            if (rsp.IsSuccess == false)
+            {
+                NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = rsp.ErrMessage,
+                    Duration = 3000
+                });
+            }
+            else
+            {
+                LoanSchedule = rsp.Data;
+            }
+        }
+
 
         void RowSelectedChanged(VSchedule schedule)
         {
-            var selectedIndex = LateSchedules.ToList().IndexOf(schedule);
+            //if (SelectedSchedules == null)
+            //{
+            //    SelectedSchedules = new List<VSchedule>();
+            //}
+            //var scheduleList = LateSchedules.ToList();
 
-            Console.WriteLine(selectedIndex);
+            //var firstSchedule = scheduleList.FirstOrDefault();
 
-            if (selectedIndex > 0 && !IsPreviousRowSelected(selectedIndex - 1))
-            {
-                schedule.Selected = false;
-                grid.SelectRow(schedule, false);
-                NotificationService.Notify(NotificationSeverity.Error, "Previous schedule is not selected yet.");
-                return;
-            }
+            //if (!SelectedSchedules!.Any())
+            //{
+            //    if (schedule != firstSchedule)
+            //    {
+            //        NotificationService.Notify(new NotificationMessage
+            //        {
+            //            Severity = NotificationSeverity.Error,
+            //            Summary = "First Row Selected",
+            //            Detail = "Only The first schedule is allow selected.",
+            //            Duration = 3000
+            //        });
 
-            schedule.Selected = true;
-            //grid.SelectRow(schedule);
+            //        SelectedSchedules = [];
+
+            //        return;
+            //    }
+            //    else
+            //    {
+            //        SelectedSchedules!.Add(schedule);
+            //    }
+
+            //}
+
+            //int newIndex = scheduleList.IndexOf(schedule!);
+
+            //var selectedIndices = SelectedSchedules!.Select(e => scheduleList.IndexOf(e)).ToList();
+
+            //// Check if the new selection is contiguous
+            //int minIndex = selectedIndices.Min();
+
+            //int maxIndex = selectedIndices.Max();
+
+            //bool isContiguous = newIndex == minIndex - 1 || newIndex == maxIndex + 1 || selectedIndices.Contains(newIndex);
+
+            //if (isContiguous)
+            //{
+            //    if (!SelectedSchedules!.Contains(schedule!))
+            //    {
+            //        SelectedSchedules.Add(schedule!);
+            //        //await gridSchedule.SelectRow(schedule!);
+            //    }
+            //}
+
+
+            //await grid.Reload();
+
+            //StateHasChanged();
+
         }
 
         void RowDeSelectedChanged(VSchedule schedule)
         {
-            var deSelectedIndex = SelectedSchedules!.IndexOf(schedule);
+            //var deSelectedIndex = SelectedSchedules!.IndexOf(schedule);
 
-            if (deSelectedIndex < SelectedSchedules.Count - 1)
-            {
-                grid.SelectRow(schedule);
-                return;
-            }
-            schedule.Selected = false;
+            //if (deSelectedIndex < SelectedSchedules.Count - 1)
+            //{
+            //    grid.SelectRow(schedule);
+            //    return;
+            //}
+            //schedule.Selected = false;
             //grid.SelectRow(schedule, false);
         }
 
@@ -162,7 +242,36 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 
         void RecievePayments()
         {
-            Console.WriteLine(SelectedSchedules!.Count);
+            var options = new DialogOptions
+            {
+                Draggable = true,
+                Left="5rem",
+            };
+            var loanPayment = new LoanPaymentDtoCreate
+            {
+                LoanRefId = LoanId,
+                CreditAgentRefId = LoanSchedule?.CreditAgentRefId,
+                PayDate = DateTime.Now,
+                OfficialReceiptNo = "",
+                BranchRefId = BranchId,
+                UserRefId = UserId,
+                CurrencyRefId = LoanSchedule?.CurrencyId,
+                CustomerName = LoanSchedule!.AltName
+            };
+
+            var loanPaymentLines = LateSchedules.MapsTo();
+
+            loanPayment.LoanPaymentLines = loanPaymentLines.ToList();
+
+
+            var parameters = new Dictionary<string, object?>{
+                {"LoanPaymentCreate", loanPayment},
+                {"CurrencyId",LoanSchedule.CurrencyId }
+            };
+
+            DialogService.OpenAsync<PaymentModal>($"{loanPayment.CustomerName}", parameters, options);
+
+
         }
 
         bool IsPreviousRowSelected(int index)

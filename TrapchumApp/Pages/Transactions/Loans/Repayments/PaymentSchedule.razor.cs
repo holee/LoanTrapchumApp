@@ -1,4 +1,5 @@
 ﻿using Applications.Calculations;
+using Applications.Commons.Mappers;
 using Applications.Enumerations;
 using Applications.Extensions.mappers;
 using Applications.Extensions.NumberExtensions;
@@ -114,6 +115,9 @@ public partial class PaymentSchedule
     int counts = 0;
 
     bool isSelectionLocked = false;
+
+
+    LoanPaymentLineDtoCreate loanPaymentLine = new();
     protected override async Task OnInitializedAsync()
     {
         //btnDisabled = true;
@@ -167,16 +171,25 @@ public partial class PaymentSchedule
             CssClass = "rz-p-1 rz-m-0 rz-background-color-base-200"
         };
 
+       
+
+        var loanPayment = new LoanPaymentDtoCreate
+        {
+            LoanRefId= LoanId,
+            CreditAgentRefId = CreditAgentId,
+            BranchRefId=BranchId,
+            CurrencyRefId= CurrencyId,
+            UserRefId= UserId,
+            PayDate = DateTime.Now,
+            CustomerName= LoanSchedule!.AltName,
+            OfficialReceiptNo= loanPaymentLine.OfficialReceiptNo
+        };
+
+        loanPayment.LoanPaymentLines.Add(loanPaymentLine);
+
         var parameters = new Dictionary<string, object?>{
-                {"LoanRepaymentLines" , LoanPaymentLines},
                 {"CurrencyId" , CurrencyId},
-                {"PaymentCreate" ,create},
-                {"LoanId" , LoanId},
-                {"CreditAgentId" , CreditAgentId},
-                {"BranchId",BranchId },
-                {"ReceiptNo",receiptNo },
-                {"CustomerName",LoanSchedule!.AltName},
-                {"UserId",UserId}
+                {"LoanPaymentCreate",loanPayment },
             };
 
         var message = $"Recieve Payment from {LoanSchedule!.AltName}";
@@ -245,8 +258,9 @@ public partial class PaymentSchedule
 
         var options = new SideDialogOptions
         {
-            Width = "60vw",
+            Width = "50vw",
             CloseDialogOnOverlayClick = true,
+            Position=DialogPosition.Right
         };
 
 
@@ -269,6 +283,16 @@ public partial class PaymentSchedule
 
     void CheckPaymentChanged(bool arg)
     {
+
+        if (!arg)
+        {
+
+            loanPaymentLine = new();
+
+            isPaidNow = false;
+
+            return;
+        }
 
         if (SelectedSchedule is null)
         {
@@ -296,10 +320,11 @@ public partial class PaymentSchedule
 
         decimal? total = SelectedSchedule.SubTotal();
 
-
-        if (arg && total > 0)
+        if (total > 0)
         {
-            recievePayment = SelectedSchedule!.ToPaymentDtoCreate();
+            //recievePayment = SelectedSchedule!.ToPaymentDtoCreate();
+
+            loanPaymentLine = SelectedSchedule.MapTo();
 
             btnDisabled = false;
         }

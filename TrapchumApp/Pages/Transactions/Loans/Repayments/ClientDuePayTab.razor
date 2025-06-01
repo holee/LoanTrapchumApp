@@ -48,6 +48,15 @@
                 @p.PaymentDate.DayFirst()
             </Template>
         </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="Day Arrea"
+                              Context="p"
+                              Title="Day Arrea"
+                              TextAlign="TextAlign.Center"
+                              Sortable="true">
+            <Template>
+                @p.DayArrea
+            </Template>
+        </RadzenDataGridColumn>
         <RadzenDataGridColumn Context="p"
                               Property="AltName"
                               Title="Name"

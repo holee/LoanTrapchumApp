@@ -20,7 +20,7 @@ namespace Infrastructures.DataAccess.Configurations.Loans
             builder.Property(p => p.Interest).HasPrecision(18, 2);
             builder.Property(p => p.CollectionFeeAmount).HasPrecision(18, 2);
             builder.Property(p => p.PenaltyAmount).HasPrecision(18, 2);
-            builder.Property(p => p.SubTotal).HasPrecision(18, 2);
+            builder.Property(p => p.SubTotal).HasComputedColumnSql("(((coalesce([Principle],(0))+coalesce([Interest],(0)))+coalesce([CollectionFeeAmount],(0)))+coalesce([PenaltyAmount],(0)))", stored: true);
             builder.Property(p => p.OfficialReceiptNo).HasMaxLength(30);
 
             builder.HasMany(fk => fk.LoanRepaymentLines)

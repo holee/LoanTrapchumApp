@@ -7,25 +7,28 @@ using Applications.Responses.ViewModels.Employees;
 using Applications.Responses.ViewModels.Journals;
 using Applications.Responses.ViewModels.Ledgers;
 using Applications.Responses.ViewModels.Loans;
+using Applications.Responses.ViewModels.Loans.Requests;
+using Domains.Models;
 using Domains.Models.Addresses;
+using Domains.Models.Audits;
+using Domains.Models.Bases;
 using Domains.Models.Collaterals;
 using Domains.Models.Currencies;
 using Domains.Models.Journals;
+using Domains.Models.Lists;
 using Domains.Models.Lists.CreditAgents;
 using Domains.Models.Lists.Customers;
 using Domains.Models.Lists.Employees;
 using Domains.Models.Lists.Vendors;
-using Domains.Models.Lists;
 using Domains.Models.Loans;
 using Domains.Models.Settings;
 using Domains.Models.Transaction;
-using Domains.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection;
-using Domains.Models.Bases;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage;
 using System.Data;
-using Applications.Responses.ViewModels.Loans.Requests;
+using System.Reflection;
+using System.Text.Json;
 
 namespace Infrastructures.DataAccess
 {
@@ -62,11 +65,18 @@ namespace Infrastructures.DataAccess
         }
 
 
-        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
+
+            var auditEntries = OnBeforeSaveChanges();
+
             ProcessSaveChangedAsync();
 
-            return base.SaveChangesAsync(cancellationToken);
+            var result = await base.SaveChangesAsync(cancellationToken);
+
+            await OnAfterSaveChanges(auditEntries);
+
+            return result;
         }
         private void ProcessSaveChangedAsync()
         {
@@ -147,7 +157,76 @@ namespace Infrastructures.DataAccess
             }
         }
 
+        private List<AuditLog> OnBeforeSaveChanges()
+        {
+            ChangeTracker.DetectChanges();
 
+            var auditEntries = new List<AuditLog>();
+
+            foreach (var entry in ChangeTracker.Entries())
+            {
+                if (entry.Entity is AuditLog || entry.State == EntityState.Detached || entry.State == EntityState.Unchanged)
+                    continue;
+
+                var auditLog = new AuditLog
+                {
+                    EntityName = entry.Entity.GetType().Name,
+                    AuditAction = entry.State.ToString(),
+                    PrimaryKey = GetPrimaryKey(entry),
+                    //UserId = _currentUserId,
+                    Timestamp = DateTime.UtcNow,
+                    //TransactionType = GetTransactionType(entry), // Custom logic to determine TransactionType
+                    //Description = GetTransactionType(entry).GetDescription() // From your enum extension
+                };
+
+                if (entry.State == EntityState.Added)
+                {
+                    auditLog.NewValues = JsonSerializer.Serialize(entry.CurrentValues.ToObject());
+                }
+                else if (entry.State == EntityState.Modified)
+                {
+                    auditLog.OldValues = JsonSerializer.Serialize(entry.OriginalValues.ToObject());
+                    auditLog.NewValues = JsonSerializer.Serialize(entry.CurrentValues.ToObject());
+                }
+                else if (entry.State == EntityState.Deleted)
+                {
+                    auditLog.OldValues = JsonSerializer.Serialize(entry.OriginalValues.ToObject());
+                }
+
+                auditEntries.Add(auditLog);
+            }
+
+            // Temporarily add audit logs to ChangeTracker without triggering more audits
+            foreach (var auditLog in auditEntries)
+            {
+                AuditLogs.Add(auditLog);
+            }
+
+            return auditEntries;
+        }
+
+        private async Task OnAfterSaveChanges(List<AuditLog> auditEntries)
+        {
+            if (auditEntries == null || auditEntries.Count == 0)
+                return;
+
+            // Save audit logs to the database
+            await base.SaveChangesAsync();
+        }
+
+        private string GetPrimaryKey(EntityEntry entry)
+        {
+            var key = entry.Metadata.FindPrimaryKey();
+
+            if (key == null) return string.Empty;
+
+            var keyValues = key.Properties.Select(p => entry.Property(p.Name).CurrentValue);
+
+            return string.Join(",", keyValues);
+        }
+
+
+        public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
         public DbSet<Bank> Banks => Set<Bank>();
         public DbSet<Currency> Currencies => Set<Currency>();
         public DbSet<CurrencyCounter> CurrencyCounters => Set<CurrencyCounter>();
@@ -200,7 +279,7 @@ namespace Infrastructures.DataAccess
         public DbSet<LoanScheduleStatus> LoanScheduleStatuses => Set<LoanScheduleStatus>();
         public DbSet<LoanPaymentLocation> LoanPaymentLocations => Set<LoanPaymentLocation>();
         public DbSet<OpenBranch> OpenBranches => Set<OpenBranch>();
-        public DbSet<CashVault> CashVaults =>Set<CashVault>();  
+        public DbSet<CashVault> CashVaults => Set<CashVault>();
         public DbSet<CashManagement> CashManagements => Set<CashManagement>();
         public DbSet<CashManagementDetail> CashManagementDetails => Set<CashManagementDetail>();
         public DbSet<CashStatus> CashStatuses => Set<CashStatus>();

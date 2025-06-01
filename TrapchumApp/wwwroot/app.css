@@ -1,9 +1,9 @@
 :root {
     --input-text-sm: calc(1.5em + 0.5rem + calc(var(--bs-border-width) * 2));
     --input-text-lg: calc(1.5em + 1rem + calc(var(--bs-border-width) * 2));
-    --rz-grid-header-background-color: #94d1b8 !important;
+/*    --rz-grid-header-background-color: #94d1b8 !important;
     --rz-grid-header-color: white;
-    --rz-grid-header-background-color: red;
+    --rz-grid-header-background-color: red;*/
     --rz-lookup-search: 2rem !important;
     --rz-panel-menu-item-background-color: #25476a !important;
     --rz-panel-menu-item-hover-background-color: #94d1b8 !important;
@@ -18,7 +18,7 @@
     --rz-sidebar-background-color: #25476a !important;
     --rz-header-background-color: #25476a;
     --rz-menu-top-item-background-color: #25476a;
-    /*    --rz-profile-menu-top-item-background-color: #25476a;
+    /*--rz-profile-menu-top-item-background-color: #25476a;
     --rz-profile-menu-background-color: rgb(200,200, 200) !important;*/
     --rz-profile-menu-item-hover-background-color: #94d1b8 !important;
     --rz-input-height: 2.125rem !important;
@@ -28,7 +28,8 @@
     --rz-dropdown-item-hover-background-color: #94d1b8 !important;
     --rz-menu-item-hover-color: #030303 !important;
     --rz-menu-item-hover-background-color: #94d1b8 !important;
-    --rz-grid-header-background-color: #66cc8f !important;
+    /*--rz-grid-header-background-color: #66cc8f !important;*/
+    /* --rz-grid-cell-line-height: 1.3rem !important;*/
     --rz-badge-font-size: 0.75rem !important;
     --rz-badge-padding: 0.125rem 0.25rem;
     --rz-badge-line-height: 0.8rem !important;
@@ -37,7 +38,6 @@
     --rz-progressbar-height: 0.15rem !important;
     --rz-dialog-title-background-color: var(--rz-base-200) !important;
     --rz-dialog-background-color: var(--rz-base-200) !important;
-    --rz-grid-cell-line-height: 1.3rem !important;
 }
 
 table.table th {

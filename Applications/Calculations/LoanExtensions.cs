@@ -20,7 +20,7 @@ namespace Applications.Calculations
             PaidPrinciple = p.RecievePrincipleAmount,
             PaidInterest = p.RecieveInterestAmount,
             PaidCollectionFee = p.RecieveCollectionFeeAmount,
-            PenaltyAmount = p.PenaltyAmountAmount,
+            PaidPenaltyAmount = p.PenaltyAmountAmount,
             BranchRefId = s.BranchId,
             SubTotal = p.SubTotal()
         };
@@ -71,7 +71,7 @@ namespace Applications.Calculations
 
             if (includePenalty)
             {
-                total = s.PaidPrinciple + s.PaidInterest + s.PaidCollectionFee + s.PenaltyAmount;
+                total = s.PaidPrinciple + s.PaidInterest + s.PaidCollectionFee + s.PaidPenaltyAmount;
                 return total ?? 0;
             }
             total = s.PaidPrinciple + s.PaidInterest + s.PaidCollectionFee;
@@ -154,7 +154,7 @@ namespace Applications.Calculations
         {
             if (!source.Any()) return 0.00M;
 
-            var total1 = source.Sum(x => x.PenaltyAmount);
+            var total1 = source.Sum(x => x.PaidPenaltyAmount);
 
             return total1 ?? 0;
         }

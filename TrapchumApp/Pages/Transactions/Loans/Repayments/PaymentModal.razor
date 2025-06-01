@@ -1,16 +1,11 @@
-﻿@using TrapchumApp.Pages.Transactions.Exchanges
+﻿@using TrapchumApp.Helpers.Constants
+@using TrapchumApp.Pages.Transactions.Exchanges
 @using TrapchumApp.Services
 <div class="container-fluid rz-background-color-base-100">
-    <input type="hidden" @bind="buyingRate" />
-    <input type="hidden" @bind="sellingRate" />
-    <input type="hidden" @bind="spotRate" />
-    <input type="hidden" @bind="buyAmount" />
-    <input type="hidden" @bind="sellAmount" />
-    <input type="hidden" @bind="spotRateAmount" />
-    <input type="hidden" @bind="gainOrLostAmount" />
-    <input type="hidden" @bind="originalExchangeAmountUSD" />
-    <input type="hidden" @bind="originalExchangeAmountKHR" />
-    <RadzenButton Size="ButtonSize.ExtraSmall" Click="OpenSide">Show Exchange</RadzenButton>
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
+    JustifyContent="JustifyContent.End">
+        <RadzenButton Size="ButtonSize.ExtraSmall" Click="OpenSide">Show Exchange</RadzenButton>
+    </RadzenStack>
     <RadzenRow AlignItems="AlignItems.Center" class="rz-px-1 rz-py-2 rz-m-0">
         <RadzenColumn Size="5">
             <RadzenBadge BadgeStyle="BadgeStyle.Light" Shade="Shade.Dark">
@@ -20,7 +15,7 @@
                              Style="padding: 0.4rem 0.25rem 0.4rem 0; text-transform: none;">
                     Paid Amount
                     <strong style="font-size:1rem;color:black;">
-                        @(PaymentCreate.OriginalPaidAmount.Format(CurrencyId))
+                        @(LoanRepayment.AmountWithoutPenalty.Format(CurrencyId))
                     </strong>
                 </RadzenStack>
             </RadzenBadge>
@@ -33,7 +28,7 @@
                              Style="padding: 0.4rem 0.25rem 0.4rem 0; text-transform: none;">
                     Penalty Amount
                     <strong style="font-size:1rem;color:black;">
-                        @(PaymentCreate.OriginalPenaltyAmount.Format(CurrencyId))
+                        @(LoanRepayment.PaidPenaltyAmount.Format(CurrencyId))
                     </strong>
                 </RadzenStack>
             </RadzenBadge>
@@ -80,7 +75,7 @@
             <RadzenLabel>Reciept No</RadzenLabel>
         </RadzenColumn>
         <RadzenColumn Size="8">
-            <RadzenTextBox @bind-Value="PaymentCreate.RecieptNumber"
+            <RadzenTextBox @bind-Value="LoanRepayment.OfficialReceiptNo"
                            class="w-100"
                            Style="height:var(--input-text-sm)" />
         </RadzenColumn>
@@ -91,7 +86,7 @@
         </RadzenColumn>
         <RadzenColumn Size="8">
             <RadzenNumeric TValue="decimal?"
-                           @bind-Value="PaymentCreate.PenaltyAmount"
+                           Value="LoanRepayment.PenaltyAmount"
                            onclick="this.querySelector('.rz-numeric-input').select()"
                            TextAlign="TextAlign.End"
                            class="w-100"
@@ -108,7 +103,7 @@
         </RadzenColumn>
         <RadzenColumn Size="8">
             <RadzenNumeric TValue="decimal?"
-                           @bind-Value="PaymentCreate.TotalAmountWithPenalty"
+                           Value="LoanRepayment.SubTotal"
                            ShowUpDown="false"
                            TextAlign="TextAlign.End"
                            class="w-100"
@@ -129,11 +124,11 @@
                            ShowUpDown="false"
                            class="w-100"
                            onclick="this.querySelector('.rz-numeric-input').select()"
-                           @bind-Value="PaymentCreate.RecieveAmount"
+                           @bind-Value="LoanRepayment.RecieveAmount"
                            Format="#,##0.00"
                            Style="height:var(--input-text-sm)"
                            Min="0"
-                           @oninput="ReceivePaymentUSDChanged"
+                           @oninput="@ReceivePaymentChanged"
                            @onfocusout="ReceivePaymentFocus"
                            TextAlign="TextAlign.End" />
         </RadzenColumn>
@@ -144,13 +139,13 @@
         </RadzenColumn>
         <RadzenColumn Size="8">
             <RadzenNumeric TValue="decimal?"
-                           @bind-Value="PaymentCreate.ChangeAmount"
+                           @bind-Value="LoanRepayment.ChangeAmount"
                            TextAlign="TextAlign.End"
                            class="w-100"
                            Format="#,##0.00"
                            ReadOnly
+                           @ondblclick="CalculateExhanged"
                            Min="0"
-                           Disabled="@(PaymentCreate.RecieveKhrAmount > 0 && PaymentCreate.RecieveAmount > 0)"
                            Style="cursor:not-allowed;height:var(--input-text-sm)"
                            ShowUpDown="false">
             </RadzenNumeric>
@@ -164,7 +159,7 @@
              Gap="1rem">
     <RadzenButton ButtonStyle="ButtonStyle.Success"
                   Size="ButtonSize.Small"
-                  Icon="save"
+                  Icon="@IconNames.Save"
                   Text="Recieve Payment"
                   IsBusy="isBusy"
                   BusyText="Recieving..."

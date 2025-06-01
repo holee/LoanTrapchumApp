@@ -23,6 +23,7 @@ public sealed class VSchedule
     public int BranchId { get; set; }
     public int? CurrencyId { get; set; }
     public int? InstallmentNo { get; set; }
+    public decimal? InterestRate { get; set; } 
     public DateTime? PaymentDate { get; set; }
     public int? TotalDay { get; set; }
     public decimal? Principle { get; set; }

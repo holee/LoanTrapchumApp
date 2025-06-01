@@ -137,7 +137,7 @@ public partial class RepaymentMultiple
             PaidPrinciple = x!.Principle,
             PaidInterest = x.Interest,
             PaidCollectionFee = x.CollectionFee,
-            PenaltyAmount = x.PenaltyAmount,
+            PaidPenaltyAmount = x.PenaltyAmount,
             SubTotal = LoanExtensions.SubTotal(x.TotalPay, x.PenaltyAmount, 0, 0)
         }).ToList();
 

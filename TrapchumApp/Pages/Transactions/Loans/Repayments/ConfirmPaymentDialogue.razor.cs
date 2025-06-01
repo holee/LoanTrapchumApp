@@ -129,7 +129,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
                     PaidPrinciple = LoanPayment.Principle,
                     PaidInterest = LoanPayment.Interest,
                     PaidCollectionFee = LoanPayment.CollectionFee,
-                    PenaltyAmount = penaltyAmount,
+                    PaidPenaltyAmount = penaltyAmount,
                     SubTotal = LoanPayment.TotalPay + penaltyAmount
                 };
                 LoanRepayment.LoanRefId = LoanId;
@@ -144,7 +144,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
                 LoanRepayment.OfficialReceiptNo = "";
                 LoanRepayment.BranchRefId = LoanPayment.BranchId;
                 LoanRepayment.UserRefId = UserId;
-                LoanRepayment.LoanRepaymentLines.Add(line);
+                LoanRepayment.LoanPaymentLines.Add(line);
 
                 if (appliedAmountKHR > 0)
                 {

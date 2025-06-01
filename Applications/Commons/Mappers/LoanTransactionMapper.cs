@@ -56,12 +56,14 @@ public static class LoanTransactionMapper
             CurrencyRefId = req.CurrencyRefId,
             OfficialReceiptNo = req.OfficialReceiptNo,
             PayDate = req.PayDate,
+            RecieveAmount= req.RecieveAmount,
+            ChangeAmount = req.ChangeAmount,
             Principle = req.PaidPrinciple, //req.Principle
             Interest = req.PaidInterest,// req.Interest
             CollectionFeeAmount = req.PaidFeeAmount,// req.CollectionFeeAmount
             PenaltyAmount = req.PaidPenaltyAmount,// req.PenaltyAmount
-            SubTotal = req.SubTotalAmount,// req.SubTotal
-            LoanRepaymentLines = req.LoanRepaymentLines.Select(x => x.ToLoanPaymentLines(branchId)).ToList(),
+            //SubTotal = req.TotalAmount,// req.SubTotal
+            LoanRepaymentLines = req.LoanPaymentLines.Select(x => x.ToLoanPaymentLines(branchId)).ToList(),
         };
     }
 
@@ -78,13 +80,15 @@ public static class LoanTransactionMapper
             BranchRefId = req.BranchRefId,
             CurrencyRefId = req.CurrencyRefId,
             OfficialReceiptNo = req.OfficialReceiptNo,
+            RecieveAmount = req.RecieveAmount,
+            ChangeAmount = req.ChangeAmount,
             PayDate = req.PayDate,
             Principle = req.PaidPrinciple, //req.Principle
             Interest = req.PaidInterest,// req.Interest
             CollectionFeeAmount = req.PaidFeeAmount,// req.CollectionFeeAmount
             PenaltyAmount = req.PaidPenaltyAmount,// req.PenaltyAmount
-            SubTotal = req.SubTotalAmount,// req.SubTotal
-            LoanRepaymentLines = req.LoanRepaymentLines.Select(x => x.ToLoanPaymentLines(req.BranchRefId)).ToList(),
+            //SubTotal = req.TotalAmount,// req.SubTotal
+            LoanRepaymentLines = req.LoanPaymentLines.Select(x => x.ToLoanPaymentLines(req.BranchRefId)).ToList(),
         };
     }
 
@@ -101,8 +105,9 @@ public static class LoanTransactionMapper
             PaidInterest = x.PaidInterest,
             BranchRefId = branchId,
             PaidCollectionFee = x.PaidCollectionFee,
-            PenaltyAmount = x.PenaltyAmount,
-            SubTotal = x.SubTotal
+            PenaltyAmount = x.PaidPenaltyAmount,
+            OfficialReceiptNo = x.OfficialReceiptNo,
+            //SubTotal = x.SubTotal
         };
     }
 

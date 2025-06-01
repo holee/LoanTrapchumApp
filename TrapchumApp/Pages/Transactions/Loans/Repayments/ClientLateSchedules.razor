@@ -1,4 +1,5 @@
 @using Microsoft.AspNetCore.Components.Web
+@using TrapchumApp.Helpers.Constants
 @using TrapchumApp.Services
 <PageDropDown PageSizeChanged="ChangedPageSize"
               ShowSearchBox="true"
@@ -21,10 +22,11 @@
                 Density="Density.Compact"
                 IsLoading="isLoading"
                 GridLines="DataGridGridLines.Both"
-                PageSize="pageSize"
+                PageSize="@pageSize"
                 ShowPagingSummary="true"
+                PageSizeOptions="new int[] { 10, 20, 50, 100 }"
                 Count="counts"
-                Style="min-height:30rem;height:30rem;max-height:40rem;"
+                CellRender="RowRenderChanged"
                 @bind-Value="SelectedPaymentSchedules"
                 Data="LatePaymentSchedules">
     <Columns>
@@ -43,6 +45,14 @@
                 @p.PaymentDate.DayFirst()
             </Template>
         </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="Day Arrea"
+                              Property="DayArrea"
+                              Width="7rem"
+                              Context="p">
+            <Template>
+                <span>@p.DayArrea <b>(ថ្ងៃ)</b></span>
+            </Template>
+        </RadzenDataGridColumn>
         <RadzenDataGridColumn Title="Name"
                               Property="AltName"
                               Width="10rem"
@@ -54,6 +64,7 @@
         <RadzenDataGridColumn Title="Principle"
                               Width="8rem"
                               Property="Principal"
+                              TextAlign="TextAlign.Right"
                               Context="p">
             <Template>
                 @p.Principle.FormatUp(2, p.CurrencyId!.Value)
@@ -62,6 +73,7 @@
         <RadzenDataGridColumn Title="Interest"
                               Width="8rem"
                               Property="Interest"
+                              TextAlign="TextAlign.Right"
                               Context="p">
             <Template>
                 @p.Interest.FormatUp(2, p.CurrencyId!.Value)
@@ -70,6 +82,7 @@
         <RadzenDataGridColumn Title="Collection Fee"
                               Width="8rem"
                               Property="CollectionFee"
+                              TextAlign="TextAlign.Right"
                               Context="p">
             <Template>
                 @p.CollectionFee.Format(p.CurrencyId)
@@ -78,6 +91,7 @@
         <RadzenDataGridColumn Title="Penalty"
                               Width="8rem"
                               Property="PenaltyAmount"
+                              TextAlign="TextAlign.Right"
                               Context="p">
             <Template>
                 @if (p.PenaltyAmount > 0)
@@ -95,6 +109,7 @@
         <RadzenDataGridColumn Title="Total"
                               Width="8rem"
                               Property="TotalPay"
+                              TextAlign="TextAlign.Right"
                               Context="p">
             <Template>
                 @p.TotalPay.Format(p.CurrencyId)
@@ -103,6 +118,7 @@
         <RadzenDataGridColumn Title="Outstanding"
                               Width="8rem"
                               Property="LoanOutstanding"
+                              TextAlign="TextAlign.Right"
                               Context="p">
             <Template>
                 @(p.LoanOutstanding.Format(p.CurrencyId))
@@ -113,9 +129,9 @@
                               Context="p">
             <Template>
                 <RadzenButton Size="ButtonSize.ExtraSmall"
-                              Icon="more_vert"
+                              Icon="@IconNames.Edit"
                               Variant="Variant.Text"
-                              Click="@((args)=>ShowContextMenu(args,p))" />
+                              Click="@(()=>GetCustomerLateSchedules(p))" />
             </Template>
         </RadzenDataGridColumn>
     </Columns>
@@ -125,17 +141,17 @@
     void ShowContextMenu(MouseEventArgs args, VSchedule p)
     {
         ContextMenuService.Open(args, ds =>@<RadzenMenu Style="font-size:0.8rem;">
-        <RadzenMenuItem Icon="money"
-                        Visible="!p.IsPaid"
-                        Click="@(()=>ShowCustomerPayment(p))"
-                        Text="Recieve Payment" />
-        <RadzenMenuItem Icon="paid"
-                        Click="@(()=>CustomerPayOff(p))"
-                        Text="PayOff" />
-        <RadzenMenuItem Icon="info"
-                        Click="@(()=>GetCustomerLateSchedules(p))"
-                        Text="Show Late Schedule" />
-    </RadzenMenu>
+    <RadzenMenuItem Icon="money"
+                    Visible="!p.IsPaid"
+                    Click="@(()=>GetPaymentSchedules(p))"
+                    Text="Recieve Payment" />
+    <RadzenMenuItem Icon="paid"
+                    Click="@(()=>CustomerPayOff(p))"
+                    Text="PayOff" />
+    <RadzenMenuItem Icon="info"
+                    Click="@(()=>GetCustomerLateSchedules(p))"
+                    Text="Show Late Schedule" />
+</RadzenMenu>
     );
     }
 }

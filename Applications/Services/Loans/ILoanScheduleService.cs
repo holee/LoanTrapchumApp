@@ -11,6 +11,7 @@ namespace Applications.Services.Loans
         Task<Result<VSchedule>> GetSchedulesByIdAsync(string? loanId, int? branchId, long? scheduleId);
         Task<Pager<VSchedule>> GetLoanScheduleByIdAsync(string? loanId, int? branchId, ScheduleStatus status = ScheduleStatus.All, QueryParam? param = null);
         Task<Pager<VSchedule>> GetLoanSchedulesByPaymentDateAsync(int? branchId, DateTimeOffset? paymentDate, bool isIncludeLate = false, bool isLateOnly = false, QueryParam? param = null);
+        Task<Pager<VSchedule>> GetLateScedulesAsync(int? branchId, string? loanId, DateTimeOffset? paymentDate, CancellationToken cancellation = default);
         Task<Result<LoanScheduleVm>> GetLoanSchedulesAsync(int? branchId, string? loanId, string? customerId);
         Task<Result<IEnumerable<VSchedule>>> GetLoanScheduleByIdAsync(string? loanId, int? branchId, ScheduleStatus status = ScheduleStatus.All);
     }
@@ -19,7 +20,7 @@ namespace Applications.Services.Loans
     {
         public async Task<Pager<VSchedule>> GetLoanScheduleByIdAsync(string? loanId, int? branchId, ScheduleStatus status = ScheduleStatus.All, QueryParam? param = null)
         {
-            return await loanSchedule.GetLoanScheduleByIdAsync(loanId, branchId, status,param);
+            return await loanSchedule.GetLoanScheduleByIdAsync(loanId, branchId, status, param);
         }
 
         public async Task<Result<IEnumerable<VSchedule>>> GetLoanScheduleByIdAsync(string? loanId, int? branchId, ScheduleStatus status = ScheduleStatus.All)
@@ -29,7 +30,7 @@ namespace Applications.Services.Loans
 
         public async Task<Pager<VSchedule>> GetLoanSchedulesByPaymentDateAsync(int? branchId, DateTimeOffset? paymentDate, bool isIncludeLate = false, bool isLateOnly = false, QueryParam? param = null)
         {
-            return await loanSchedule.GetLoanSchedulesByPaymentDateAsync(paymentDate,branchId,isIncludeLate,isLateOnly,param);
+            return await loanSchedule.GetLoanSchedulesByPaymentDateAsync(paymentDate, branchId, isIncludeLate, isLateOnly, param);
         }
 
         public async Task<Result<VSchedule>> GetSchedulesByIdAsync(string? loanId, int? branchId, long? scheduleId)
@@ -37,12 +38,22 @@ namespace Applications.Services.Loans
             return await loanSchedule.GetSchedulesByIdAsync(loanId, branchId, scheduleId);
         }
 
-        public async Task<Result<LoanScheduleVm>> GetLoanSchedulesAsync(int? branchId,string? loanId,string? customerId)
+        public async Task<Result<LoanScheduleVm>> GetLoanSchedulesAsync(int? branchId, string? loanId, string? customerId)
         {
-            return await loanSchedule.GetLoanSchedulesAsync(branchId,loanId, customerId);
+            return await loanSchedule.GetLoanSchedulesAsync(branchId, loanId, customerId);
         }
 
+        public async Task<Pager<VSchedule>> GetLateScedulesAsync(int? branchId, string? loanId, DateTimeOffset? paymentDate, CancellationToken cancellation = default)
+        {
 
+            ArgumentNullException.ThrowIfNull(branchId, nameof(branchId));
+
+            ArgumentNullException.ThrowIfNull(loanId, nameof(loanId));
+
+            ArgumentNullException.ThrowIfNull(paymentDate, nameof(paymentDate));
+
+            return await loanSchedule.GetLateSchedulesAsync(branchId, loanId, paymentDate, cancellation);
+        }
     }
 
 }

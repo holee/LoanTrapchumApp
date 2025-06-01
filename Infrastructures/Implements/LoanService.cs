@@ -386,7 +386,36 @@ namespace Infrastructures.Implements
             return Result.Success(result);
         }
 
-     public async Task<Result<VLoanDisbursments>> GetLoanWithSchedulesByIdAsync(string? loanId,int? branchId,ScheduleStatus status,bool include = false)
+
+
+
+
+        public async Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId)
+        {
+            using var db = connectionFactory.CreateConnection();
+
+            var result = await db.QueryFirstOrDefaultAsync<VLoanDisbursments>(ProcedureConstant.GetLoanById,
+                param: new
+                {
+                    @LoanId = loanId,
+                    @BranchId = branchId,
+                    @ScheduleStatusId =0,
+                    @Include = false
+                }, commandType: CommandType.StoredProcedure);
+
+
+            if (result is null)
+            {
+                return Result.Failure<VLoanDisbursments>(ErrorResponse.NotFound("No Data was found."));
+            }
+
+            return Result.Success(result);
+        }
+
+
+
+
+        public async Task<Result<VLoanDisbursments>> GetLoanWithSchedulesByIdAsync(string? loanId,int? branchId,ScheduleStatus status,bool include = false)
         {
             using var db = connectionFactory.CreateConnection(); 
 
