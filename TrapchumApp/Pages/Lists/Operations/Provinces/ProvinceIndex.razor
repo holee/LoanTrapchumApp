@@ -29,8 +29,9 @@
                     AllowPaging="true"
                     TItem="ProvinceViewModel"
                     Density="Density.Compact"
-                    LoadData="LoadData"
-                    Data="ProvincesList">
+                    LoadData="@LoadData"
+                    PagerHorizontalAlign="HorizontalAlign.Right"
+                    Data="@ProvincesList">
         <Columns>
             <RadzenDataGridColumn Width="4rem" Title="#" Property="@nameof(ProvinceViewModel.ProvinceId)" />
             <RadzenDataGridColumn Property="@nameof(ProvinceViewModel.ProvinceCode)"
