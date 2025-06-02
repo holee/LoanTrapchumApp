@@ -1,5 +1,7 @@
 ﻿@using Applications.Responses.ViewModels.Addresses
+@using TrapchumApp.Helpers.Constants
 @page "/App/Operation-Area/Provinces"
+<PageTitle>Provinces</PageTitle>
 <RadzenCard>
     <PageDropDown ShowSearchBox="true"
                   PlaceHolder="Search province"
@@ -9,7 +11,7 @@
             <RadzenButton Text="New Province"
                           ButtonStyle="ButtonStyle.Primary"
                           Size="ButtonSize.Small"
-                          Icon="add"
+                          Icon="@IconNames.Add"
                           Click="ShowCreate" />
         </LeftChildContent>
         <RightChildContent>
