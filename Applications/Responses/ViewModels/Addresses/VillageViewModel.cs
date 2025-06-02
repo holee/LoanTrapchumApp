@@ -4,6 +4,7 @@
     {
         public int? VillageId { get; set; }
         public int? CommuneRefId { get; set; }
+        public string? VilDescription { get; set; }
         public string? VilInKhmer { get; set; }
     }
 }
