@@ -18,11 +18,19 @@ namespace TrapchumApp.Pages.Lists.Operations.Provinces
             _proService = proService;
         }
         protected string? searchText = string.Empty;
+
         protected bool includeInactive = false;
+
         int pageIndex = 0;
+
         int pageSize = 10;
+
+        int counts= 0;
+
         bool sortDescending = false;
+
         string sortField = "";
+
         protected List<ProvinceViewModel> ProvincesList= [];
         protected override async Task OnInitializedAsync()
         {
@@ -81,7 +89,9 @@ namespace TrapchumApp.Pages.Lists.Operations.Provinces
                 var res = await _proService.GetAllPager(param);
 
                 ProvincesList = res.Items;
-                pageIndex = res.Count;
+
+                counts = res.Count;
+
                 StateHasChanged();
             }
             catch
