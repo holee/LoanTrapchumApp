@@ -1,4 +1,5 @@
-﻿using Applications.Services.Addresses;
+﻿using Applications.Interfaces.Addresses;
+using Applications.Services.Addresses;
 using Applications.Services.Banks;
 using Applications.Services.Branches;
 using Applications.Services.Currencies;

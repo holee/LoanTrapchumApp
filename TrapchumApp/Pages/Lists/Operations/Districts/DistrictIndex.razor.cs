@@ -1,0 +1,143 @@
+
+using Applications.Interfaces.Addresses;
+using Applications.Responses.Paginations;
+using Applications.Responses.ViewModels.Addresses;
+using TrapchumApp.Pages.Lists.Operations.Provinces;
+
+namespace TrapchumApp.Pages.Lists.Operations.Districts
+{
+    public partial class DistrictIndex
+    {
+        private readonly IDistrictService districtService;
+
+        public DistrictIndex(IDistrictService districtService) {
+            this.districtService = districtService;
+        }
+        protected string? searchText = string.Empty;
+        protected bool includeInactive = false;
+        int pageIndex = 0;
+        int pageSize = 10;
+        bool sortDescending = false;
+        string sortField = "";
+        protected List<VDistricts> VDistrictList = [];
+        protected override async Task OnInitializedAsync()
+        {
+            await GetDistricts();
+            await base.OnInitializedAsync();
+        }
+         protected async Task GetDistricts(string? text = null)
+        {
+            try
+            {
+                var param = new QueryParam(pageIndex, pageSize, sortField, sortDescending, includeInactive, text);
+                var results = await districtService.GetAllPagerAsync(param);
+                if (results.Count > 0)
+                {
+                    VDistrictList = results.Items;
+                }
+
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+        async Task LoadData(LoadDataArgs args)
+        {
+            string sortField = "DistrictId";
+            bool sortDescending = false;
+            int pageIndex = args.Skip!.Value;
+            if (!string.IsNullOrEmpty(args.OrderBy))
+            {
+                sortField = args.OrderBy.Split(" ")[0];
+                string dir = args.OrderBy.Split(" ")[1];
+                sortDescending = dir.Contains("asc") ? false : true;
+            }
+
+            await LoadDistrictPageList(pageIndex, sortField, sortDescending);
+        }
+
+        async Task LoadDistrictPageList(int pageIndex = 0, string sortField = "DistrictId", bool sortDescending = false)
+        {
+            try
+            {
+
+                var param = new QueryParam(pageIndex, pageSize, sortField, sortDescending,includeInactive, searchText);
+
+                var res = await districtService.GetAllPagerAsync(param);
+
+                VDistrictList = res.Items;
+                pageIndex = res.Count;
+                StateHasChanged();
+            }
+            catch
+            {
+
+            }
+        }
+        protected async Task TextChanged(string? searchtext = null)
+        {
+            searchText = searchtext ?? string.Empty;
+            await GetDistricts(searchText);
+        }
+
+        protected async Task ShowCreate()
+        {
+            var resultModal = await DialogService!.OpenAsync<ProvinceCreatePage>("Province Create",
+               options: new DialogOptions
+               {
+                   Draggable = true,
+                   Resizable = true,
+               });
+            if (resultModal != null)
+            {
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        protected async Task Edit(int Id)
+        {
+            var resultModal = await DialogService!.OpenAsync<ProvinceUpdatePage>("Edit Province",
+               new Dictionary<string, object> { { "Id", Id } },
+               new DialogOptions
+               {
+                   Draggable = true,
+                   Resizable = true,
+
+               });
+            if (resultModal != null)
+            {
+                await OnInitializedAsync();
+                Console.WriteLine("Updated...");
+            }
+            await InvokeAsync(StateHasChanged);
+
+        }
+        protected async Task Details(int Id)
+        {
+
+        }
+        protected async Task Delete(int proId)
+        {
+            //var confirm = await DialogService.Confirm("Do you want to delete?", "Delete", new ConfirmOptions
+            //{
+            //    CancelButtonText = "Cancel",
+            //    OkButtonText = "OK",
+            //});
+            //if (confirm == true)
+            //{
+            //    var result = await _proService.DeleteAsync(proId);
+
+            //    if (result.IsSuccess)
+            //    {
+            //        NotificationService.Notify(NotificationSeverity.Success, "Province one record deleted successful.");
+            //        await GetProvinces(searchText);
+            //    }
+            //    else
+            //    {
+            //        NotificationService.Notify(NotificationSeverity.Success, result.ErrMessage);
+            //    }
+            //}
+
+        }
+    }
+}

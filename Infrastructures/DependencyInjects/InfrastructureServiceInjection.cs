@@ -106,6 +106,7 @@ namespace Infrastructures.DependencyInjects
             services.AddScoped<IDapperConnectionFactory, DapperConnectionFactory>();
             services.TryAddTransient<IVendorService, VendorService>();
             services.TryAddTransient<IProvinceService, ProvinceService>();
+            services.TryAddTransient<IDistrictService, DistrictService>();
             return services;
 
         }

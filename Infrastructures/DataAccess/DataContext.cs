@@ -1,4 +1,5 @@
-﻿using Applications.Responses.ViewModels.Branches;
+﻿using Applications.Responses.ViewModels.Addresses;
+using Applications.Responses.ViewModels.Branches;
 using Applications.Responses.ViewModels.Collaterals;
 using Applications.Responses.ViewModels.Currencies;
 using Applications.Responses.ViewModels.Customers;
@@ -319,5 +320,6 @@ namespace Infrastructures.DataAccess
         public DbSet<VCustomerList> CustomerLists => Set<VCustomerList>();
         public DbSet<VCreditAgent> VCreditAgents => Set<VCreditAgent>();
         public DbSet<VLoanRequests> VLoanRequests => Set<VLoanRequests>();
+        public DbSet<VDistricts> VDistricts => Set<VDistricts>();
     }
 }

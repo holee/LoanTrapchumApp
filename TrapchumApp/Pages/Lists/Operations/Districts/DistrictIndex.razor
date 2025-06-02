@@ -1,0 +1,80 @@
+﻿@page "/App/Operation-Area/Districts"
+@using Applications.Responses.ViewModels.Addresses;
+<PageTitle>Districts</PageTitle>
+<RadzenCard>
+    <PageDropDown ShowSearchBox="true"
+                  PlaceHolder="Search province"
+                  OnTextChanged="TextChanged"
+                  PageSizeChanged="PageSizeChanged">
+        <LeftChildContent>
+            <RadzenButton Text="New Province"
+                          ButtonStyle="ButtonStyle.Primary"
+                          Size="ButtonSize.Small"
+                          Icon="add"
+                          Click="ShowCreate" />
+        </LeftChildContent>
+        <RightChildContent>
+            <RadzenStack Orientation="Orientation.Horizontal">
+
+            </RadzenStack>
+        </RightChildContent>
+    </PageDropDown>
+    <RadzenDataGrid Responsive="true"
+                    AllowSorting="true"
+                    Count="@pageIndex"
+                    PageSize="@pageSize"
+                    PagerPosition="PagerPosition.Bottom"
+                    ShowPagingSummary="true"
+                    AllowPaging="true"
+                    TItem="VDistricts"
+                    Density="Density.Compact"
+                    LoadData="LoadData"
+                    Data="VDistrictList">
+        <Columns>
+            <RadzenDataGridColumn Width="4rem" Title="#" Property="@nameof(VDistricts.DistrictId)" />
+            <RadzenDataGridColumn Property="@nameof(VDistricts.DisDescription)"
+                                  Title="District-English"
+                                  Width="14rem"
+                                  Sortable="true"
+                                  SortProperty="DisDescription" />
+            <RadzenDataGridColumn Property="@nameof(VDistricts.DisInKhmer)"
+                                  Title="District-Khmer"
+                                  Width="14rem"
+                                  Sortable="true"
+                                  SortProperty="DisInKhmer" />
+            <RadzenDataGridColumn Property="@nameof(VDistricts.ProDescription)"
+                                  Title="Province-Engish"
+                                  Sortable="false" />
+            <RadzenDataGridColumn Property="@nameof(VDistricts.ProInKhmer)"
+                                  Title="Province-Khmer"
+                                  Sortable="false" />
+
+            <RadzenDataGridColumn Title="Actions" Context="c" Width="7rem">
+                <Template>
+                    <RadzenButton Size="ButtonSize.ExtraSmall"
+                                  Icon="more_vert"
+                                  Variant="Variant.Text"
+                                  Click="@((args)=>ShowContextMenuWithContent(args,c.DistrictId))" />
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+
+    </RadzenDataGrid>
+</RadzenCard>
+
+@code {
+    void PageSizeChanged(int page)
+    {
+        pageSize = page;
+    }
+    void ShowContextMenuWithContent(MouseEventArgs args, int? id)
+    {
+        ContextMenuService.Open(args, ds =>
+    @<RadzenMenu>
+    <RadzenMenuItem Icon="edit"  Text="Edit" Value="@id"></RadzenMenuItem>
+    <RadzenMenuItem Icon="delete" Text="Delete" Value="@id"></RadzenMenuItem>
+</RadzenMenu>
+    );
+    }
+}
+
