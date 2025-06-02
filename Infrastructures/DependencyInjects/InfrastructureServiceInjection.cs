@@ -106,6 +106,7 @@ namespace Infrastructures.DependencyInjects
             services.TryAddTransient<IFileUploadService, FileUploadService>();
             services.AddScoped<IDapperConnectionFactory, DapperConnectionFactory>();
             services.TryAddTransient<IVendorService, VendorService>();
+            services.TryAddTransient<IProvinceService, ProvinceService>();
             return services;
 
         }
