@@ -1,4 +1,4 @@
-﻿namespace Applications.Constants.Schemas
+﻿namespace Infrastructures.Constants.Schemas
 {
     public static class Tables
     {

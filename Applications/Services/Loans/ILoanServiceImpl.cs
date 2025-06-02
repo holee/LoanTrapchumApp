@@ -15,9 +15,6 @@ namespace Applications.Services.Loans
         Task<Result<bool>> CreateLoanAsync(LoanDtoCreate req);
         Task<Result<string>> DeleteAsync(string? loanId, int? branchId);
         Task<Result<string>> UpdateAsync(LoanDisbursment disbursement);
-        Task<Stream> DownLoadScheduleAsExcel(string? loanId, int? branchId);
-        Task<Result<Stream>> DownLoadScheduleAsPdf(string? loanId, int? branchId);
-        Task<Result<byte[]>> ExportScheduleAsPdf(string? loanId, int? branchId);
         Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus status,bool include=false);
         Task<Pager<VLoanDisbursments>> GetLoansAsync(int? branchId, string? userId, LoanStatuses status = LoanStatuses.Active, QueryParam? param = null);
         Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId);
@@ -25,7 +22,9 @@ namespace Applications.Services.Loans
 
 }
 
-
+//Task<Stream> DownLoadScheduleAsExcel(string? loanId, int? branchId);
+//Task<Result<Stream>> DownLoadScheduleAsPdf(string? loanId, int? branchId);
+//Task<Result<byte[]>> ExportScheduleAsPdf(string? loanId, int? branchId);
 //Task<Result<string>> CreateLoanAsync(LoanDtoCreate disbursement);
 //Task<Result<string>> DeleteAsync(long loanId,int branchId);
 //Task<Result<string>> UpdateAsync(Loan disbursement);

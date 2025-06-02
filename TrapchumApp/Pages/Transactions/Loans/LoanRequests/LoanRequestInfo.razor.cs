@@ -15,8 +15,6 @@ using Applications.Responses.ViewModels.Settings;
 using Applications.Services.Loans;
 using Applications.Services.Settings;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
-using Radzen;
 
 namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 {
@@ -92,6 +90,12 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
                 SelectedLoanCategory = loanCategories!.FirstOrDefault();
             }
 
+            if (CustomerId.IsNotNullOrEmpty() && Model.CustomerRefId.IsNullOrEmpty())
+            {
+                Model.CustomerRefId = CustomerId;
+                await GetCustomers(CustomerId);
+                Model.FullName = Customers.First().FullName;
+            }
 
             await base.OnInitializedAsync();
         }
@@ -254,11 +258,6 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             StateHasChanged();
         }
 
-        async Task PeriodChanged()
-        {
-            //await GetHolidays(Model.Installments!.Value);
-        }
-
         void SelectedInstallmentChanged(object? arg)
         {
             if (arg is not null)
@@ -266,14 +265,12 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
                 var installType = (Items)arg;
                 installmentType = installType.Value;
                 Model.InstallmentType = installType.Label;
-                ChangedDate();
             }
         }
 
         void CurrencySelectedChanged(object e)
         {
             var selectedValue = (Items)e;
-
             StateHasChanged();
         }
 
@@ -296,7 +293,9 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         void RepaymentModeSelectedChanged(object e)
         {
             var selectedValue = (Items)e;
+
             Model.RepaymentMode = selectedValue.Label;
+
             if (selectedValue.Value == 1)
             {
                 Model.PayEvery = 4;

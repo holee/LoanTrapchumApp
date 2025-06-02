@@ -9,7 +9,7 @@ public sealed class ScheduleRpt
     [ExcelFormat("dd/MMM/yyyy")]
     public DateTime? PaymentDate { get; set; }
     public int? TotalDay { get; set; }
-    public decimal? Principal { get; set; }
+    public decimal? Principle { get; set; }
     public decimal? Interest { get; set; }
     public decimal? CollectionFee { get; set; }
     public decimal? TotalInterest => Interest + CollectionFee;

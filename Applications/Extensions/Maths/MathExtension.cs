@@ -228,6 +228,15 @@ namespace Applications.Extensions.Maths
                 _ => string.Format(UserCulture(CurrenciesType.Khr), "{0:C}", d),
             };
         }
+        public static string SetFormat(this decimal? d, int? currencyId) 
+        {
+            return currencyId switch
+            {
+                1 => string.Format(UserCulture(CurrenciesType.Khr), "{0:C}", d),
+                2 => string.Format(UserCulture(CurrenciesType.Usd), "{0:C}", d),
+                _ => string.Format(UserCulture(CurrenciesType.Khr), "{0:C}", d),
+            };
+        }
         private static CultureInfo UserCulture(CurrenciesType type)
         {
             return type switch

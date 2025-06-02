@@ -68,5 +68,7 @@ namespace Applications.Constants
             new (2, "Sell Currency")
             ];
 
+        public static int[] InstallemntOptions = [12,18,24,36,42,48,60,72];
+
     }
 }

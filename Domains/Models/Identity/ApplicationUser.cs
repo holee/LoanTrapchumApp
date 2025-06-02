@@ -1,7 +1,6 @@
-﻿using Domains.Models.Loans;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 
-namespace Applications.Extensions.Identity;
+namespace Domains.Models.Identity;
 
 public class ApplicationUser:IdentityUser
 {
@@ -12,9 +11,7 @@ public class ApplicationUser:IdentityUser
     public string?  RefreshToken { get; set; }
     public int? AprovedLevelId { get; set; } 
     public DateTime? RefreshTokenExpiryDate { get; set; } 
-    public DateTime? CreatedDT { get; set; } = DateTime.UtcNow;
-    public DateTime? ModifiedDT { get; set; } = DateTime.UtcNow;
+    public DateTime? CreatedDT { get; set; } = DateTime.Now;
+    public DateTime? ModifiedDT { get; set; } = DateTime.Now;
     public ICollection<UserProfiles> UserProfiles { get; set; } = [];
-    //public UserLoanSize? UserLoanSize { get; set; }
-
 }

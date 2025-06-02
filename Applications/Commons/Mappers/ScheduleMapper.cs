@@ -31,30 +31,30 @@ namespace Applications.Commons.Mappers
         }
 
 
-        public static ScheduleRpt MapToScheduleRpt(this VSchedule s) => new ScheduleRpt
-        {
-            InstallmentNo = s!.InstallmentNo,
-            TotalDay = s!.TotalDay,
-            PaymentDate = s!.PaymentDate,
-            Principal = s.Principle,
-            Interest = s.Interest,
-            CollectionFee = s.CollectionFee,
-            TotalPay = s.TotalPay,
-            LoanOutstanding = s.LoanOutstanding
-        };
+        //public static ScheduleRpt MapToScheduleRpt(this VSchedule s) => new ScheduleRpt
+        //{
+        //    InstallmentNo = s!.InstallmentNo,
+        //    TotalDay = s!.TotalDay,
+        //    PaymentDate = s!.PaymentDate,
+        //    Principal = s.Principle,
+        //    Interest = s.Interest,
+        //    CollectionFee = s.CollectionFee,
+        //    TotalPay = s.TotalPay,
+        //    LoanOutstanding = s.LoanOutstanding
+        //};
 
-        public static List<ScheduleRpt> MapsToScheduleRpt(this IEnumerable<VSchedule> source)
-        {
-            return source.Select(x => x.MapToScheduleRpt()).ToList();
-        }
+        //public static List<ScheduleRpt> MapsToScheduleRpt(this IEnumerable<VSchedule> source)
+        //{
+        //    return source.Select(x => x.MapToScheduleRpt()).ToList();
+        //}
 
-        public static List<ScheduleRpt> MapsToScheduleRpt(this VLoanDisbursments? source)
-        {
-            if (source == null || (source.Schedules is null)) return new List<ScheduleRpt>();
+        //public static List<ScheduleRpt> MapsToScheduleRpt(this VLoanDisbursments? source)
+        //{
+        //    if (source == null || (source.Schedules is null)) return new List<ScheduleRpt>();
 
-            return source.Schedules.Select(x => x.MapToScheduleRpt()).ToList();
+        //    return source.Schedules.Select(x => x.MapToScheduleRpt()).ToList();
 
-        }
+        //}
 
 
     }

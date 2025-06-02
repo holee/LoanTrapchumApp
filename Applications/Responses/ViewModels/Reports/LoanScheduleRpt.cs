@@ -23,5 +23,5 @@ public sealed class LoanScheduleRpt
     public DateTime? LastPaymentDate { get; set; }
     public string? Address { get; set; }
     public int? Circle { get; set; }
-    public int? Period { get; set; }
+    public string? Period { get; set; }
 }

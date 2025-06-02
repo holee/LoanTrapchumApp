@@ -1,6 +1,6 @@
 using Applications.DependencyInjections;
-using Applications.Extensions.Identity;
 using Applications.Validations;
+using Domains.Models.Identity;
 using Infrastructures.Authorizations;
 using Infrastructures.DependencyInjects;
 using Mapster;
@@ -52,17 +52,20 @@ else
 }
 
 
-await app.SeedSystemData();
+//await app.SeedSystemData();
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseAntiforgery();
 app.UseHttpsRedirection();
 app.MapStaticAssets();
 app.UseStaticFiles();
-app.MapRazorComponents<App>() .AddInteractiveServerRenderMode();
+app.MapRazorComponents<App>()
+    .AddInteractiveServerRenderMode();
 
 // Add additional endpoints required by the Identity /Account Razor components.
 app.MapControllers();
+
 await app.MapAdditionalIdentityEndpoints();
 
 app.Run();

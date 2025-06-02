@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Applications.Constants.Tables
+namespace Infrastructures.Constants.Tables
 {
     public static class TableNames
     {

@@ -1,4 +1,6 @@
-﻿namespace Domains.Models.Identity;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Domains.Models.Identity;
 
 public sealed class UserProfiles
 {
@@ -9,5 +11,5 @@ public sealed class UserProfiles
     public string? FileUrl { get; set; }=string.Empty;
     public DateTime? Created { get; set; } = DateTime.Now;
     public bool IsActive { get; set; } = true;
-    //public ApplicationUser? AppUser { get; set; }  
+    public ApplicationUser? AppUser { get; set; }  
 }

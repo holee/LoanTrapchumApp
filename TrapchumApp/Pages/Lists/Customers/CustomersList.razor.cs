@@ -1,4 +1,3 @@
-using Applications.ApplicationPolicies;
 using Applications.Extensions.Identity.Authorizations.Extensions;
 using Applications.Extensions.Identity.Policies;
 using Applications.Responses.Lists.Customers;

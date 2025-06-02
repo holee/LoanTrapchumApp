@@ -230,31 +230,38 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
                 Width = "60vw"
             };
 
-            IList<VGuarantor> results =
-                await DialogService.OpenAsync<GuarantorsList>("Select Guarantor", options: options);
+            bool? results = await DialogService.OpenAsync<GuarantorAddModal>("Add New Guarantor", options: options);
 
-            if (results is not null && results.Any())
-            {
-                var gs = results.Select(g => new VLoanRequestGuarantors
-                {
-                    EmployeeRefId = g.Id,
-                    FullName = g.FullName,
-                    AltName = g.GuarantorName,
-                    Phone = g.Phone,
-                    VilInKhmer = g.VilInKhmer,
-                    ComInKhmer = g.ComInKhmer,
-                    DisInKhmer = g.DisInKhmer,
-                    ProInKhmer = g.ProInKhmer
-                });
-                foreach (var item in gs)
-                {
-                    if (Guarantors.Contains(item)) continue;
 
-                    Guarantors.Add(item);
-                }
 
-                await GuarantorRef.GuarantorReload();
-            }
+
+            //IList<VGuarantor> results =
+            //    await DialogService.OpenAsync<GuarantorsList>("Select Guarantor", options: options);
+
+            //if (results is not null && results.Any())
+            //{
+            //    var gs = results.Select(g => new VLoanRequestGuarantors
+            //    {
+            //        EmployeeRefId = g.Id,
+            //        FullName = g.FullName,
+            //        AltName = g.GuarantorName,
+            //        Phone = g.Phone,
+            //        VilInKhmer = g.VilInKhmer,
+            //        ComInKhmer = g.ComInKhmer,
+            //        DisInKhmer = g.DisInKhmer,
+            //        ProInKhmer = g.ProInKhmer
+            //    });
+            //    foreach (var item in gs)
+            //    {
+            //        if (Guarantors.Contains(item)) continue;
+
+            //        Guarantors.Add(item);
+            //    }
+
+            //    await GuarantorRef.GuarantorReload();
+            //}
+       
+        
         }
 
         async void RemoveGaurantor(VLoanRequestGuarantors g)

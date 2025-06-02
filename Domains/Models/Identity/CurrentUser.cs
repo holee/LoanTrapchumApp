@@ -1,4 +1,4 @@
-﻿namespace Applications.Extensions.Identity;
+﻿namespace Domains.Models.Identity;
 
 public class CurrentUser
 {

@@ -4,8 +4,7 @@ namespace Applications.Services.Loans
 {
     public interface IPrintPdfServiceImpl
     {
-        Task<Result<Stream>> DownLoadScheduleAsPdf(string? loanId, int? branchId);
-        Task<Result<byte[]>> ExportScheduleAsPdf(string? loanId, int? branchId);
+        Task<Result<Stream>> DownLoadScheduleAsPdf(int? branchId, string? loanId);
     }
 
 }

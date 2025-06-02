@@ -1,8 +1,8 @@
 ﻿using System.Security.Claims;
 using System.Text.Json;
-using Applications.ApplicationPolicies;
 using Applications.Extensions.Identity.Authorizations.Extensions;
 using Applications.Extensions.Identity.Policies;
+using Domains.Models.Identity;
 using Microsoft.AspNetCore.Components;
 
 namespace TrapchumApp.Shared
@@ -10,6 +10,7 @@ namespace TrapchumApp.Shared
     public partial class CascadingAppState : ComponentBase, IAppStateService
     {
         [Parameter] public RenderFragment ChildContent { get; set; } = default!;
+        [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
 
         private bool _state;
         private bool _isAdmin;
@@ -19,8 +20,10 @@ namespace TrapchumApp.Shared
         private bool _canDisbursed;
         private bool _canApproved;
         private bool _canRequest;
-
         private bool _vaultIn;
+
+        private int _branchId;
+        private string? _userId;
 
         public bool VaultIn
         {
@@ -131,6 +134,10 @@ namespace TrapchumApp.Shared
                 StateHasChanged();
             }
         }
+
+        public int BranchId { get => _branchId; set => _branchId = value; }
+        public string? UserId { get => _userId; set => _userId = value; }
+
         internal async Task CheckedIsAdmin(ClaimsPrincipal user)
         {
             if (user is null && user?.Identity?.IsAuthenticated == false)
@@ -266,6 +273,52 @@ namespace TrapchumApp.Shared
                 _state = false;
             }
         }
+
+        internal async Task GetUserId()
+        {
+            var authState = await AuthenticationState;  
+
+            var user = authState.User;
+
+            if(user.Identity?.IsAuthenticated == true)
+            {
+                _userId = user.GetId();
+            }
+            else
+            {
+                _userId = string.Empty;
+            }
+        }
+
+        internal async Task GetBranchIdByUser()  
+        {
+            var authState = await AuthenticationState;
+
+            var user = authState.User;
+
+            if (user.Identity?.IsAuthenticated == true)
+            {
+                _userId = user.GetId();
+
+               var rsp= await _branchService.GetBranchesByUser(_userId!);
+
+               if(rsp.IsSuccess && rsp.Data is not null)
+               {
+                       _branchId = rsp.Data.BranchId;
+               }
+               else
+               {
+                   _branchId = 0;
+                }
+            }
+            else
+            {
+                _branchId = 0;
+            }
+        }
+
+
+
 
         public IAppStateService CopyState()
         {

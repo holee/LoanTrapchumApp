@@ -1,13 +1,9 @@
-﻿using Applications.Constants.Schemas;
-using Applications.Extensions.Identity;
-using Domains.Models.Identity;
-using Domains.Models.Loans;
+﻿using Domains.Models.Identity;
+using Infrastructures.Constants.Schemas;
 using Infrastructures.DataAccess.Configurations.Auths;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using UserProfiles = Applications.Extensions.Identity.UserProfiles;
-
 namespace Infrastructures.DataAccess
 {
     public class UserDataContext : IdentityDbContext<ApplicationUser, ApplicationRole, string>
@@ -44,7 +40,6 @@ namespace Infrastructures.DataAccess
         }
 
         public DbSet<ApplicationRoleClaim> ApplicationRoleClaim { get; set; }
-
         public DbSet<ApplicationUserClaim> ApplicationUserClaim { get; set; }
         public DbSet<UserProfiles> UserProfiles { get; set; }
         public DbSet<Permissions> Permissions => Set<Permissions>();

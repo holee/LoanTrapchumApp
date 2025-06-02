@@ -1,15 +1,10 @@
-﻿using Applications.Enumerations;
-using Applications.Responses;
-using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Loans;
+﻿using Applications.Responses.ViewModels.Reports;
 
 namespace Applications.Interfaces.Loans
 {
-    public interface ILoanReportService 
+    public interface ILoanReportService
     {
-        Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus status, bool include = false);
-        Task<Pager<VLoanDisbursments>> GetLoansByBranchId(int? branchId, string? userId, LoanStatuses status = LoanStatuses.Active, QueryParam? param = null);
-        Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId);
+        Task<DisbursmentsRpt?> GetLoanScheduleAsync(int? branchId, string? loanId);
     }
 
 }

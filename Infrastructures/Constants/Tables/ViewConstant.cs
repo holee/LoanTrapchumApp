@@ -1,4 +1,4 @@
-namespace Applications.Constants.Tables;
+namespace Infrastructures.Constants.Tables;
 
 public static class ViewConstant
 {

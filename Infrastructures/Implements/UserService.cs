@@ -1,5 +1,4 @@
 ﻿using Applications.Constants.Authorizations;
-using Applications.Extensions.Identity;
 using Applications.Interfaces.Identity;
 using Applications.Requests.Identity;
 using Applications.Responses;
@@ -17,6 +16,7 @@ using Infrastructures.DataAccess;
 using Applications.Responses.Message;
 using Applications.Extensions;
 using Dapper;
+using Domains.Models.Identity;
 namespace Infrastructures.Implements;
 
 public sealed class UserService : IUserService

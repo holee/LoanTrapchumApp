@@ -5,13 +5,8 @@ using Applications.Requests.Loans.Disbursements;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans;
-using Applications.Responses.ViewModels.Loans.Payments;
-using Applications.Responses.ViewModels.Loans.Schedules;
-using Applications.Schedules;
 using Domains.Models.Loans;
 using Domains.Models.Transaction;
-using Mapster;
-using QuestPDF.Fluent;
 
 namespace Applications.Services.Loans
 {
@@ -89,27 +84,7 @@ namespace Applications.Services.Loans
             throw new NotImplementedException();
         }
 
-        public async Task<Result<Stream>> DownLoadScheduleAsPdf(string? loanId, int? branchId)
-        {
-
-            var rsp = await loanService.GetLoanByIdAsync(loanId, branchId, ScheduleStatus.All);
-
-            if (rsp.IsSuccess)
-            {
-
-                var item = rsp.Data.Adapt<LoanScheduleVm>();
-
-                var pdf = new SchedulePdfService(item);
-
-                var stream = new MemoryStream(pdf.GeneratePdf());
-
-                return Result.Success<Stream>(stream);
-
-            }
-
-            return Result.Failure<Stream>(ErrorResponse.NotFound(""));
-        }
-
+   
         public async Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus status,bool includeSchedule=false)
         {
             return await loanService.GetLoanByIdAsync(loanId, branchId, status,includeSchedule);
@@ -125,20 +100,7 @@ namespace Applications.Services.Loans
             return await loanService.GetLoansByBranchId(branchId, userId, status, param);
         }
 
-        public async Task<Result<byte[]>> ExportScheduleAsPdf(string? loanId, int? branchId)
-        {
-            var rsp = await loanService.GetLoanByIdAsync(loanId, branchId, ScheduleStatus.All);
-
-            if (!rsp.IsSuccess)
-            {
-                return Result.Failure<byte[]>(ErrorResponse.NotFound("No Schedule to print"));
-            }
-            var item = rsp.Data.Adapt<LoanScheduleVm>();
-
-            var pdf = new SchedulePdfService(item);
-
-            return Result.Success(pdf.GeneratePdf());
-        }
+        
     }
 
 }

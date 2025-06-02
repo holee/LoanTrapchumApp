@@ -241,7 +241,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
                 Width = "65rem"
             };
 
-            bool? results = await DialogService.OpenAsync<GuarantorAddModal>("Select Guarantor", options: options);
+            bool? results = await DialogService.OpenAsync<GuarantorAddModal>("Add New Guarantor", options: options);
 
             if (results is not null && results == true)
             {

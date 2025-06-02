@@ -1,10 +1,10 @@
-using Applications.ApplicationPolicies;
-using Applications.Extensions.Identity;
 using Applications.Extensions.Identity.Authorizations.Extensions;
 using Microsoft.AspNetCore.Components;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Components.Authorization;
 using TrapchumApp.Shared;
+using Applications.Extensions.Identity.Policies;
+using Domains.Models.Identity;
 
 namespace TrapchumApp.Components.Layout
 {
