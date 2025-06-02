@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Domains.Models.Lists.Customers;
 using Infrastructures.DataAccess.Configurations;
 
-namespace Data.Configurations
+namespace Infrastructures.DataAccess.Configurations.Customers
 {
     public class CustomerActivityConfiguration : IBaseEntityTypeConfigurations<CustomerActivity>
     {

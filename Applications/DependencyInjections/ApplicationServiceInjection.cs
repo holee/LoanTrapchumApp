@@ -10,6 +10,7 @@ using Applications.Services.Identity;
 using Applications.Services.Lists;
 using Applications.Services.LIsts;
 using Applications.Services.Loans;
+using Applications.Services.Reports;
 using Applications.Services.Settings;
 using Applications.Services.Transactions.Branches;
 using Applications.Services.Transactions.Currencies;
@@ -48,6 +49,7 @@ namespace Applications.DependencyInjections
             services.AddTransient<ILoanCategoryServiceImpl, LoanCategoryService>();
             services.AddTransient<ILoanProductServiceImpl, LoanProductService>();
             services.AddTransient<ILoanPaymentServiceImpl, LoanPaymentService>();
+            services.AddTransient<ILoanReportServiceImpl, LoanReportServiceImpl>();
             services.AddTransient<ILoanSettingServiceImpl, LoanSettingService>();
             services.AddTransient<INationalityServiceImpl, NationalityService>();
             services.AddTransient<IOccupationServiceImpl, OccupationService>();

@@ -1,5 +1,4 @@
 ﻿using Applications.Extensions;
-using Applications.Extensions.Identity;
 using Applications.Extensions.Web;
 using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.ViewModels.Customers;
@@ -10,6 +9,7 @@ using Radzen;
 using Microsoft.AspNetCore.Components.Authorization;
 using Radzen.Blazor;
 using TrapchumApp.Pages.Lists.Collaterals;
+using Domains.Models.Identity;
 
 namespace TrapchumApp.Pages.Lists.Customers
 {

@@ -1,10 +1,10 @@
 ﻿using Applications.Constants.Authorizations;
-using Applications.Extensions.Identity;
 using Applications.Interfaces.Identity;
 using Applications.Requests.Identity;
 using Applications.Responses;
 using Applications.Responses.Auths;
 using Applications.Responses.ViewModels.Auths;
+using Domains.Models.Identity;
 using FluentValidation;
 using Infrastructures.DataAccess;
 using Mapster;

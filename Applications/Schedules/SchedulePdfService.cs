@@ -1,5 +1,6 @@
 ﻿using Applications.Extensions.Maths;
 using Applications.Responses.ViewModels.Loans.Schedules;
+using Applications.Responses.ViewModels.Reports;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
@@ -8,12 +9,12 @@ namespace Applications.Schedules
 {
     public sealed class SchedulePdfService : IDocument
     {
-        public LoanScheduleVm Item { get; }
+        public DisbursmentsRpt Item { get; }
 
         public string? ImageUrl { get; set; } = string.Empty;
 
 
-        public SchedulePdfService(LoanScheduleVm loan)
+        public SchedulePdfService(DisbursmentsRpt loan)
         {
             Item = loan;
         }
@@ -84,13 +85,13 @@ namespace Applications.Schedules
                     //header.Cell().ColumnSpan(6).PaddingTop(5).BorderBottom(1).BorderColor(Colors.Black);
                 });
 
-                //step 3 defining data
+            //step 3 defining data
 
-                foreach (var item in Item.LoanSchedules)
+            foreach (var item in Item.Schedules ?? [])
                 {
                     table.Cell().Element(CellStyle).Text($"{item.InstallmentNo}").AlignCenter();
                     table.Cell().Element(CellStyle).Text($"{item.TotalDay}").AlignCenter();
-                    table.Cell().Element(CellStyle).Text($"{item.Principal.Formats(Item.CurrencyId)}").AlignRight();
+                    table.Cell().Element(CellStyle).Text($"{item.Principle.Formats(Item.CurrencyId)}").AlignRight();
                     table.Cell().Element(CellStyle).Text($"{item.Interest.Formats(Item.CurrencyId)}").AlignRight();
                     table.Cell().Element(CellStyle).Text($"{item.TotalPay.Formats(Item.CurrencyId)}").AlignRight();
                     table.Cell().Element(CellStyle).Text($"{item.LoanOutstanding.Formats(Item.CurrencyId)}").AlignRight();
@@ -110,13 +111,11 @@ namespace Applications.Schedules
                 {
                     var scale = 0.9f;
                     col.Item().Scale(scale).Text($"Name      :{Item.FullName}");
-                    col.Item().Scale(scale).Text($"Period    : {Item.PeriodName}");
-                    col.Item().Scale(scale).Text($"Rate      :{Item.InterestRate}");
-                    col.Item().Scale(scale).Text($"Principle :{Item.Principle.Formats(Item.CurrencyId)}");
+                    col.Item().Scale(scale).Text($"Period    :{Item.PeriodName}");
+                    col.Item().Scale(scale).Text($"Rate      :{Item.TotalInterest}");
+                    col.Item().Scale(scale).Text($"Principle :{Item.Principle}");
                     col.Item().Scale(scale).Text($"Branch    :{Item.BranchName}");
                 });
-
-
             });
 
         }

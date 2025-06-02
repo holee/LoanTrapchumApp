@@ -2,10 +2,10 @@
 
 public sealed class ForeignExchangeDtoCreate 
 {
-    public long? StaffRefId { get; set; }
-    public long? TranRefId { get; set; }
-    public long? NameRefId { get; set; }
-    public long? StaffAuthRefId { get; set; }
+    public string? StaffRefId { get; set; }
+    public string? TranRefId { get; set; }
+    public string? NameRefId { get; set; }
+    public string? StaffAuthRefId { get; set; }
     public int? BankRefId { get; set; }
     public int? BranchRefId { get; set; }
     public int? BuyCurrencyRefId { get; set; }
@@ -18,9 +18,9 @@ public sealed class ForeignExchangeDtoCreate
     public decimal? SpotRate { get; set; }
     public int? GainAndLostLedgerRefId { get; set; }
     public decimal? GainAndLostAmount { get; set; }
-    public int? FXEPA_LedgerRefId { get; set; }
+    public int? FxepaLedgerRefId { get; set; }
     public decimal? FXEPA_Amount { get; set; }
-    public int? FXPA_LedgerRefId { get; set; }
+    public int? FxpaLedgerRefId { get; set; }
     public decimal? FXPA_Amount { get; set; }
     public string? Remark { get; set; }
 

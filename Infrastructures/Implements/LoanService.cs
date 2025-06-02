@@ -1,5 +1,4 @@
 ﻿using System.Data;
-using Applications.Constants.Tables;
 using Applications.Enumerations;
 using Applications.Interfaces.Loans;
 using Applications.Requests.Loans.CreditAgents;
@@ -8,12 +7,10 @@ using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Responses.ViewModels.Loans;
-using Applications.Responses.ViewModels.Loans.Payments;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Dapper;
 using Domains.Models.Lists.CreditAgents;
-using Domains.Models.Lists.Customers;
 using Domains.Models.Loans;
 using Domains.Models.Transaction;
 using Infrastructures.Constants.Procedures;

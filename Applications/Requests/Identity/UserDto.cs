@@ -1,4 +1,4 @@
-﻿using Applications.Extensions.Identity;
+﻿using Domains.Models.Identity;
 
 namespace Applications.Requests.Identity;
 

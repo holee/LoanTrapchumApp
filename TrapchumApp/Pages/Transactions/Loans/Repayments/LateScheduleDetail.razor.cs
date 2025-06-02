@@ -1,11 +1,11 @@
 using Applications.Commons.Mappers;
 using Applications.Enumerations;
-using Applications.Extensions.Identity;
 using Applications.Requests.Loans.Payments;
 using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Services.Loans;
 using Domains.Models.Currencies;
+using Domains.Models.Identity;
 using Domains.Models.Loans;
 using Microsoft.AspNetCore.Components;
 using Radzen.Blazor;

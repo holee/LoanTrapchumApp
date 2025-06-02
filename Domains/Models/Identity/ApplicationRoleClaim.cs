@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace Applications.Extensions.Identity
+namespace Domains.Models.Identity
 {
     public class ApplicationRoleClaim : IdentityRoleClaim<string>
     {

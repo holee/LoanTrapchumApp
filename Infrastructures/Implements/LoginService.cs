@@ -1,7 +1,7 @@
-﻿using Applications.Extensions.Identity;
-using Applications.Interfaces.Identity;
+﻿using Applications.Interfaces.Identity;
 using Applications.Requests.Identity;
 using Applications.Responses;
+using Domains.Models.Identity;
 using Infrastructures.DataAccess;
 using Microsoft.AspNetCore.Identity;
 namespace Infrastructures.Implements;

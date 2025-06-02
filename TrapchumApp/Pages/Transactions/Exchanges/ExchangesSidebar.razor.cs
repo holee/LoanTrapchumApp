@@ -1,3 +1,5 @@
+using Applications.Commons.Extensions;
+using Applications.Enumerations;
 using Applications.Extensions.Maths;
 using Applications.Extensions.NumberExtensions;
 using Applications.Interfaces.Currencies;
@@ -14,11 +16,13 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components.Web;
 using Radzen;
+using TrapchumApp.Shared;
 
 namespace TrapchumApp.Pages.Transactions.Exchanges
 {
     public partial class ExchangesSidebar
     {
+        [CascadingParameter] CascadingAppState bState { get; set; } = default!;
         [Parameter] public int BranchId { get; set; } = 0;
         [Parameter] public string? UserId { get; set; }
 
@@ -234,6 +238,10 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
         {
             form.EditContext!.Validate();
 
+            await bState.GetBranchIdByUser();
+
+            await bState.GetUserId();
+
             isBusy = true;
 
             var FXGAIN_KHR_ID = settings.FirstOrDefault(p => p.Code == "FXGAIN-KHR")!.Value.ToNumer<int>();
@@ -263,15 +271,17 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
                 isBusy = false;
                 return;
             }
-            model.UserRefId = UserId;
+            model.UserRefId = UserId ?? bState.UserId;
             model.TranTypeRefId = 67;
-            model.TransactionTypeName = "Currency Foreign Exchange";
-            //c.StaffRefId = UserId;
-            //c.StaffAuthRefId = UserId;
-            c.BranchRefId = BranchId;
+            model.BranchRefId = BranchId > 0 ? BranchId : bState.BranchId;
+            model.TransactionTypeName =TransactionTypes.CFX.GetDescription() ;//"Currency Foreign Exchange";
+            c.StaffRefId = UserId ?? bState.UserId;
+            c.StaffAuthRefId =UserId ?? bState.UserId;
+            c.BranchRefId = BranchId > 0 ? BranchId : bState.BranchId;
             c.BankRefId = 11;
             c.SpotRate = mx.SpotRate;
             c.Remark = mx.Description;
+            c.NameRefId= bState.UserId;
             if (isBuy)
             {
                 c.BuyAmount = mx.Amount;
@@ -284,8 +294,8 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
                 c.GainAndLostAmount = (mx.Amount * mx.SpotRate) - mx.TotalAmount;
                 c.FXEPA_Amount = mx.Amount;//FXEPA_Amount
                 c.FXPA_Amount = mx.Amount * mx.SpotRate;//FXPA_Amount
-                c.FXEPA_LedgerRefId = FXEPA_USD_ID;//FXEPA_LedgerRefId
-                c.FXPA_LedgerRefId = FXPA_KHR_ID;//FXPA_LedgerRefId
+                c.FxepaLedgerRefId = FXEPA_USD_ID;//FXEPA_LedgerRefId
+                c.FxpaLedgerRefId = FXPA_KHR_ID;//FXPA_LedgerRefId
                 c.SpotRate = mx.SpotRate;
                 if (c.GainAndLostAmount > 0)
                 {
@@ -309,8 +319,8 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
                 c.FXEPA_Amount = mx.Amount;
                 c.FXPA_Amount = mx.Amount * mx.SpotRate;
                 c.SpotRate = mx.SpotRate;
-                c.FXEPA_LedgerRefId = FXEPA_USD_ID;
-                c.FXPA_LedgerRefId = FXPA_KHR_ID;
+                c.FxepaLedgerRefId = FXEPA_USD_ID;
+                c.FxpaLedgerRefId = FXPA_KHR_ID;
                 if (c.GainAndLostAmount > 0)
                 {
                     c.GainAndLostLedgerRefId = FXGAIN_KHR_ID;

@@ -1,11 +1,6 @@
 using Applications.Interfaces.Addresses;
-using Applications.Interfaces.Lists;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Addresses;
-using BitMiracle.LibTiff.Classic;
-using Domains.Models.Lists;
-using Domains.Models.Lists.Customers;
-using TrapchumApp.Pages.Lists.Departments;
 
 namespace TrapchumApp.Pages.Lists.Operations.Provinces
 {
@@ -18,11 +13,19 @@ namespace TrapchumApp.Pages.Lists.Operations.Provinces
             _proService = proService;
         }
         protected string? searchText = string.Empty;
+
         protected bool includeInactive = false;
+
         int pageIndex = 0;
+
         int pageSize = 10;
+
+        int counts= 0;
+
         bool sortDescending = false;
+
         string sortField = "";
+
         protected List<ProvinceViewModel> ProvincesList= [];
         protected override async Task OnInitializedAsync()
         {
@@ -41,30 +44,26 @@ namespace TrapchumApp.Pages.Lists.Operations.Provinces
             pageSize = page;
         }
         private async Task GetProvinces(string? filter = null)
-        {
-            try
-            {
-                
+        {   
                 var param = new QueryParam(pageIndex, pageSize, sortField, sortDescending, includeInactive, filter);
                 var resultResponse = await _proService.GetAllPager(param);
-                var counts = resultResponse.Count;
+                counts = resultResponse.Count;
                 ProvincesList = resultResponse.Items ?? [];
-
-            }
-            catch
-            {
-
-            }
         }
         async Task LoadData(LoadDataArgs args)
         {
             string sortField = "ProvinceId";
+
             bool sortDescending = false;
+
             int pageIndex = args.Skip!.Value;
+
             if (!string.IsNullOrEmpty(args.OrderBy))
             {
                 sortField = args.OrderBy.Split(" ")[0];
+
                 string dir = args.OrderBy.Split(" ")[1];
+
                 sortDescending = dir.Contains("asc") ? false : true;
             }
 
@@ -73,21 +72,15 @@ namespace TrapchumApp.Pages.Lists.Operations.Provinces
 
         async Task LoadProvincePageList(int pageIndex = 0, string sortField = "ProvinceId", bool sortDescending = false)
         {
-            try
-            {
-
-                var param = new QueryParam(pageIndex, pageSize, sortField, sortDescending, includeInactive, searchText);
+                var param = new QueryParam(pageIndex, pageSize, sortField, includeInactive, sortDescending, searchText);
 
                 var res = await _proService.GetAllPager(param);
 
                 ProvincesList = res.Items;
-                pageIndex = res.Count;
-                StateHasChanged();
-            }
-            catch
-            {
 
-            }
+                counts = res.Count;
+
+                StateHasChanged();
         }
         protected async Task TextChanged(string? searchtext = null)
         {

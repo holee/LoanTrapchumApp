@@ -1,17 +1,15 @@
-﻿using Applications.Enumerations;
-using Applications.Interfaces.Loans;
-using Applications.Responses;
-using Applications.Responses.ViewModels.Loans;
+﻿using Applications.Responses;
 using Applications.Schedules;
+using Applications.Services.Reports;
 using Microsoft.Extensions.Logging;
 using QuestPDF.Fluent;
 
 namespace Applications.Services.Loans
 {
-    public sealed class PrintPdfServiceImpl(ILoanService loanService, ILogger<PrintPdfServiceImpl> logger) : IPrintPdfServiceImpl
+    public sealed class PrintPdfServiceImpl(ILoanReportServiceImpl loanService, ILogger<PrintPdfServiceImpl> logger) : IPrintPdfServiceImpl
     {
 
-        public async Task<Result<Stream>> DownLoadScheduleAsExcel(string? loanId, int? branchId)
+        public async Task<Result<Stream>> DownLoadScheduleAsExcel(int? branchId,string? loanId)
         {
 
             logger.LogInformation($"getting data from Loan:{loanId} and branch: {branchId}");
@@ -19,22 +17,14 @@ namespace Applications.Services.Loans
             try
             {
 
-                var rsp = await loanService.GetLoanByIdAsync(loanId, branchId, ScheduleStatus.All);
+                var data = await loanService.GetLoanScheduleAsync(branchId,loanId);
 
-                if (!rsp.IsSuccess)
+                if (data is null)
                 {
                     return Result.Failure<Stream>(ErrorResponse.NotFound("There is no any schedule to print"));
                 }
 
-                var loanwithSchedules = rsp.Data?.ToLoanScheduleVm();
-
-                if (loanwithSchedules is null)
-                {
-                    return Result.Failure<Stream>(ErrorResponse.NotFound("There is no any schedule to print"));
-                }
-
-                var pdf = new SchedulePdfService(loanwithSchedules);
-
+                var pdf = new SchedulePdfService(data);
 
                 var stream =new MemoryStream(pdf.GeneratePdf());
 
@@ -53,7 +43,7 @@ namespace Applications.Services.Loans
             }
         }
 
-        public async Task<Result<Stream>> DownLoadScheduleAsPdf(string? loanId, int? branchId)
+        public async Task<Result<Stream>> DownLoadScheduleAsPdf(int? branchId,string? loanId)
         {
 
             logger.LogInformation($"getting data from Loan:{loanId} and branch: {branchId}");
@@ -61,21 +51,15 @@ namespace Applications.Services.Loans
             try
             {
 
-                var rsp = await loanService.GetLoanByIdAsync(loanId, branchId, ScheduleStatus.All);
+                var data = await loanService.GetLoanScheduleAsync(branchId, loanId);
 
-                if (!rsp.IsSuccess)
+                if (data is null)
                 {
                     return Result.Failure<Stream>(ErrorResponse.NotFound("There is no any schedule to print"));
                 }
 
-                var loanwithSchedules = rsp.Data?.ToLoanScheduleVm();
 
-                if (loanwithSchedules is null)
-                {
-                    return Result.Failure<Stream>(ErrorResponse.NotFound("There is no any schedule to print"));
-                }
-
-                var pdf = new SchedulePdfService(loanwithSchedules);
+                var pdf = new SchedulePdfService(data);
 
 
                 var stream = new MemoryStream(pdf.GeneratePdf());
@@ -95,55 +79,52 @@ namespace Applications.Services.Loans
             }
         }
 
-        public Task<Result<byte[]>> ExportScheduleAsExcel(string? loanId, int? branchId)
-        {
-            throw new NotImplementedException();
-        }
 
-        public async Task<Result<byte[]>> ExportScheduleAsPdf(string? loanId, int? branchId)
-        {
-            logger.LogInformation($"getting data from Loan:{loanId} and branch: {branchId}");
-
-            try
-            {
-
-                var rsp = await loanService.GetLoanByIdAsync(loanId, branchId, ScheduleStatus.All);
-
-                if (!rsp.IsSuccess)
-                {
-                    return Result.Failure<byte[]>(ErrorResponse.NotFound("There is no any schedule to print"));
-                }
-
-                var loanwithSchedules = rsp.Data?.ToLoanScheduleVm();
-
-                if (loanwithSchedules is null)
-                {
-                    return Result.Failure<byte[]>(ErrorResponse.NotFound("There is no any schedule to print"));
-                }
-
-                var pdf = new SchedulePdfService(loanwithSchedules);
-
-
-                var stream = pdf.GeneratePdf();
-
-
-                logger.LogInformation("gettign loan schedule successfull");
-
-                return Result.Success<byte[]>(stream);
-
-
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex.Message, ex);
-
-                return Result.Failure<byte[]>(ErrorResponse.NotFound($"Error due to: {ex.Message}"));
-            }
-        }
+       
     }
 
 }
 
+//public async Task<Result<byte[]>> ExportScheduleAsPdf(string? loanId, int? branchId)
+//{
+//    logger.LogInformation($"getting data from Loan:{loanId} and branch: {branchId}");
+
+//    try
+//    {
+
+//        var rsp = await loanService.GetLoanByIdAsync(loanId, branchId, ScheduleStatus.All);
+
+//        if (!rsp.IsSuccess)
+//        {
+//            return Result.Failure<byte[]>(ErrorResponse.NotFound("There is no any schedule to print"));
+//        }
+
+//        var loanwithSchedules = rsp.Data?.ToLoanScheduleVm();
+
+//        if (loanwithSchedules is null)
+//        {
+//            return Result.Failure<byte[]>(ErrorResponse.NotFound("There is no any schedule to print"));
+//        }
+
+//        var pdf = new SchedulePdfService(loanwithSchedules);
+
+
+//        var stream = pdf.GeneratePdf();
+
+
+//        logger.LogInformation("gettign loan schedule successfull");
+
+//        return Result.Success<byte[]>(stream);
+
+
+//    }
+//    catch (Exception ex)
+//    {
+//        logger.LogError(ex.Message, ex);
+
+//        return Result.Failure<byte[]>(ErrorResponse.NotFound($"Error due to: {ex.Message}"));
+//    }
+//}
 
 //Task<Result<string>> CreateLoanAsync(LoanDtoCreate disbursement);
 //Task<Result<string>> DeleteAsync(long loanId,int branchId);

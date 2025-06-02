@@ -22,6 +22,9 @@ namespace Infrastructures.DataAccess.Configurations.CashManagements
             builder.Property(p => p.ExchangeRate).HasPrecision(18,2);
             builder.Property(p => p.Remark).HasColumnType("NVARCHAR(400)");
             builder.Property(p => p.TransactionRefId).HasMaxLength(250);
+            builder.Property(p => p.FxepaLedgerRefId).HasColumnName("FXEPA_LedgerRefId");
+            builder.Property(p => p.FxpaLedgerRefId).HasColumnName("FXPA_LedgerRefId");
+            //
         }
     }
 }

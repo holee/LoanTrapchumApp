@@ -1,5 +1,4 @@
-﻿using Applications.Extensions.Identity;
-using Applications.Interfaces.Addresses;
+﻿using Applications.Interfaces.Addresses;
 using Applications.Interfaces.Banks;
 using Applications.Interfaces.Branches;
 using Applications.Interfaces.Currencies;
@@ -12,6 +11,7 @@ using Applications.Interfaces.Loans;
 using Applications.Interfaces.setting;
 using Applications.Interfaces.Transactions;
 using Applications.Interfaces.Vendors;
+using Domains.Models.Identity;
 using Infrastructures.DataAccess;
 using Infrastructures.DataAccess.Factories;
 using Infrastructures.Implements;
@@ -100,6 +100,7 @@ namespace Infrastructures.DependencyInjects
             services.TryAddTransient<ILoanService, LoanService>();
             services.TryAddTransient<ILoanCategoryService, LoanCategoryService>();
             services.TryAddTransient<ILoanRequestService, LoanRequestService>();
+            services.TryAddTransient<ILoanReportService, LoanReportService>();
             services.TryAddTransient<ISalutationService, SalutaionService>();
             services.TryAddTransient<INationalityService, NationalityService>();
             services.TryAddTransient<IFileUploadService, FileUploadService>();

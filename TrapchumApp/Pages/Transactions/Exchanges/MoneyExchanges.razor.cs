@@ -268,8 +268,8 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
                 c.GainAndLostAmount = (mx.Amount * mx.SpotRate) - mx.TotalAmount;
                 c.FXEPA_Amount = mx.Amount;//FXEPA_Amount
                 c.FXPA_Amount = mx.Amount * mx.SpotRate;//FXPA_Amount
-                c.FXEPA_LedgerRefId = FXEPA_USD_ID;//FXEPA_LedgerRefId
-                c.FXPA_LedgerRefId = FXPA_KHR_ID;//FXPA_LedgerRefId
+                c.FxepaLedgerRefId = FXEPA_USD_ID;//FXEPA_LedgerRefId
+                c.FxpaLedgerRefId = FXPA_KHR_ID;//FXPA_LedgerRefId
                 c.SpotRate = mx.SpotRate;
                 if (c.GainAndLostAmount > 0)
                 {
@@ -293,8 +293,8 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
                 c.FXEPA_Amount = mx.Amount;
                 c.FXPA_Amount = mx.Amount * mx.SpotRate;
                 c.SpotRate = mx.SpotRate;
-                c.FXEPA_LedgerRefId = FXEPA_USD_ID;
-                c.FXPA_LedgerRefId = FXPA_KHR_ID;
+                c.FxepaLedgerRefId = FXEPA_USD_ID;
+                c.FxpaLedgerRefId = FXPA_KHR_ID;
                 if (c.GainAndLostAmount > 0)
                 {
                     c.GainAndLostLedgerRefId = FXGAIN_KHR_ID;

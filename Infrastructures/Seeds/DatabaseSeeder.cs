@@ -1,6 +1,5 @@
 ﻿using Applications.Constants.Authentications;
 using Applications.Constants.Authorizations;
-using Applications.Extensions.Identity;
 using Applications.Extensions.Identity.Enumerations;
 using Applications.Helpers;
 using Domains.Models.Identity;

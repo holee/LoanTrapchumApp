@@ -1,4 +1,4 @@
-using Applications.Extensions.Identity;
+using Domains.Models.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 namespace TrapchumApp.Services;

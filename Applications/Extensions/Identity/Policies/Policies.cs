@@ -1,4 +1,4 @@
-﻿namespace Applications.ApplicationPolicies;
+﻿namespace Applications.Extensions.Identity.Policies;
 
 public static class RolePolicies  
 {

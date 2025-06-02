@@ -1,6 +1,5 @@
-﻿using Applications.ApplicationPolicies;
-using Applications.Extensions.Identity;
-using Applications.Extensions.Identity.Authorizations.Extensions;
+﻿using Applications.Extensions.Identity.Authorizations.Extensions;
+using Applications.Extensions.Identity.Policies;
 using Applications.Interfaces.Employees;
 using Applications.Requests.Identity;
 using Applications.Requests.Lists.Entities;
@@ -8,6 +7,7 @@ using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Auths;
 using Applications.Responses.ViewModels.Employees;
 using Applications.Services.Identity;
+using Domains.Models.Identity;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Forms;

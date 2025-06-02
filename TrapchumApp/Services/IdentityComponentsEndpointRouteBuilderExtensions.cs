@@ -1,9 +1,9 @@
 using System.Security.Claims;
 using System.Text.Json;
-using Applications.Extensions.Identity;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Schedules;
 using Applications.Services.Loans;
+using Domains.Models.Identity;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -87,31 +87,12 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
         var reportGroup = endpoints.MapGroup("/Reports");
 
 
-        reportGroup.MapGet("/Schedules/{loanId}/{customerId}/{branchId:int}", async ([FromServices] ILoanScheduleServiceImpl _schedulesService,
-                                                string? loanId, string? customerId, int? branchId) =>
-        {
 
-            var rsp = await _schedulesService.GetLoanSchedulesAsync(branchId, loanId, customerId);
-
-            var loanWithScedules = new LoanScheduleVm();
-
-            if (rsp.IsSuccess)
-            {
-                loanWithScedules = rsp.Data;
-            }
-
-            var doc = new SchedulePdfService(loanWithScedules!);
-
-            var stream = doc.GeneratePdf();
-
-            return TypedResults.File(stream, contentType: "application/pdf");
-
-        });
 
 
         reportGroup.MapGet("/Schedules/{loanId}/{branchId:int}", async ([FromServices] IPrintPdfServiceImpl printer, string loanId, int branchId) =>
         {
-            var rsp = await printer.DownLoadScheduleAsPdf(loanId, branchId);
+            var rsp = await printer.DownLoadScheduleAsPdf(branchId, loanId);
 
             return TypedResults.File(rsp.Data!, contentType: "application/pdf");
 
@@ -148,6 +129,28 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
 }
 
 
+
+
+//reportGroup.MapGet("/Schedules/{loanId}/{customerId}/{branchId:int}", async ([FromServices] ILoanScheduleServiceImpl _schedulesService,
+//                                        string? loanId, string? customerId, int? branchId) =>
+//{
+
+//    var rsp = await _schedulesService.GetLoanSchedulesAsync(branchId, loanId, customerId);
+
+//    var loanWithScedules = new LoanScheduleVm();
+
+//    if (rsp.IsSuccess)
+//    {
+//        loanWithScedules = rsp.Data;
+//    }
+
+//    var doc = new SchedulePdfService(loanWithScedules!);
+
+//    var stream = doc.GeneratePdf();
+
+//    return TypedResults.File(stream, contentType: "application/pdf");
+
+//});
 //reportGroup.MapGet("/Schedules/Pdf/{loanId}/{customerId}/{branchId:int}", async ([FromServices] IWebHostEnvironment env,
 //                                            [FromServices] ILoanScheduleServiceImpl _schedulesService,
 //                                            string ? loanId, string? customerId, int? branchId) =>

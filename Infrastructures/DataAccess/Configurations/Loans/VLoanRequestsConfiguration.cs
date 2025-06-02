@@ -3,7 +3,7 @@ using Infrastructures.DataAccess.Configurations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Data.Configurations
+namespace Infrastructures.DataAccess.Configurations.Loans
 {
     public class VLoanRequestsConfiguration : IBaseEntityTypeConfigurations<VLoanRequests>
     {

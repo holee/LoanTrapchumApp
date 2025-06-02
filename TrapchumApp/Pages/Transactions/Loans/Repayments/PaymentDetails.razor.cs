@@ -212,16 +212,16 @@ public partial class PaymentDetails
         await base.OnInitializedAsync();
     }
 
-    private async Task DownLoadScheduleAsExcel(string loanRefId)
+    private void DownLoadScheduleAsExcel(string loanRefId)
     {
-        var stream = await _dService.DownLoadScheduleAsExcel(loanRefId, BranchId);
-        using var streamRef = new DotNetStreamReference(stream: stream);
-        await js.InvokeVoidAsync("downloadFileFromStream", "Schedule.xlsx", streamRef);
+        //var stream = await _dService.DownLoadScheduleAsExcel(loanRefId, BranchId);
+        //using var streamRef = new DotNetStreamReference(stream: stream);
+        //await js.InvokeVoidAsync("downloadFileFromStream", "Schedule.xlsx", streamRef);
     }
 
-    private async Task DownLoadScheduleAsPdf(string loanRefId)
+    private void DownLoadScheduleAsPdf(string loanRefId)
     {
-        var stream = await _dService.DownLoadScheduleAsPdf(loanRefId, BranchId);
+        //var stream = await _dService.DownLoadScheduleAsPdf(loanRefId, BranchId);
 
         //using var streamRef = new DotNetStreamReference(stream: stream);
 

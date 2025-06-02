@@ -1,6 +1,6 @@
 ﻿using System.Security.Claims;
 
-namespace Applications.Extensions.Identity;
+namespace Domains.Models.Identity;
 
 public static class ClaimPrincipleExtension
 {

@@ -1,6 +1,6 @@
-using Applications.Constants.Schemas;
 using Applications.Extensions.Identity.Enumerations;
 using Domains.Models.Identity;
+using Infrastructures.Constants.Schemas;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

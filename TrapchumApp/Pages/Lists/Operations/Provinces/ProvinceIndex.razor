@@ -1,5 +1,7 @@
 ﻿@using Applications.Responses.ViewModels.Addresses
+@using TrapchumApp.Helpers.Constants
 @page "/App/Operation-Area/Provinces"
+<PageTitle>Provinces</PageTitle>
 <RadzenCard>
     <PageDropDown ShowSearchBox="true"
                   PlaceHolder="Search province"
@@ -9,7 +11,7 @@
             <RadzenButton Text="New Province"
                           ButtonStyle="ButtonStyle.Primary"
                           Size="ButtonSize.Small"
-                          Icon="add"
+                          Icon="@IconNames.Add"
                           Click="ShowCreate" />
         </LeftChildContent>
         <RightChildContent>
@@ -20,15 +22,16 @@
     </PageDropDown>
     <RadzenDataGrid Responsive="true"
         AllowSorting="true"
-                    Count="@pageIndex"
+                    Count="@counts"
                     PageSize="@pageSize"
                     PagerPosition="PagerPosition.Bottom"
                     ShowPagingSummary="true"
                     AllowPaging="true"
                     TItem="ProvinceViewModel"
                     Density="Density.Compact"
-                    LoadData="LoadData"
-                    Data="ProvincesList">
+                    LoadData="@LoadData"
+                    PagerHorizontalAlign="HorizontalAlign.Right"
+                    Data="@ProvincesList">
         <Columns>
             <RadzenDataGridColumn Width="4rem" Title="#" Property="@nameof(ProvinceViewModel.ProvinceId)" />
             <RadzenDataGridColumn Property="@nameof(ProvinceViewModel.ProvinceCode)"

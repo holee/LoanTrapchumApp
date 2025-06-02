@@ -126,17 +126,17 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
         }
 
 
-        async Task DownLoadScheduleAsExcel(string? loanRefId, int? branchId)
+        void DownLoadScheduleAsExcel(string? loanRefId, int? branchId)
         {
             ContextMenuService.Close();
 
-            isProgess = true;
+            //isProgess = true;
 
-            var stream = await _dService.DownLoadScheduleAsExcel(loanRefId, branchId);
+            //var stream = await _dService.DownLoadScheduleAsExcel(loanRefId, branchId);
 
-            using var streamRef = new DotNetStreamReference(stream: stream);
+            //using var streamRef = new DotNetStreamReference(stream: stream);
 
-            await js.InvokeVoidAsync("downloadFileFromStream", "Schedule.xlsx", streamRef);
+            //await js.InvokeVoidAsync("downloadFileFromStream", "Schedule.xlsx", streamRef);
 
             isProgess = false;
 
