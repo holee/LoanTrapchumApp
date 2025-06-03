@@ -14,7 +14,7 @@ namespace Infrastructures.DataAccess.Configurations.Addresses
     {
         public void Configure(EntityTypeBuilder<VDistricts> builder)
         {
-            builder.ToView("VDistricts");
+            builder.ToView("VAddrDistricts");
             builder.HasNoKey();
         }
     }

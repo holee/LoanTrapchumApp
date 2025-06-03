@@ -6,6 +6,16 @@
             <RadzenRow>
                 <RadzenColumn Size="12">
                     <RadzenColumn Size="12" SizeMD="6" SizeLG="3">
+                        <RadzenFormField Text="Province ID *" Variant="Variant.Flat" Style="width:100%">
+                            <RadzenNumeric Name="ProvinceId"  @bind-Value="Req.ProvinceId" Style="width:100%" />
+                            <RadzenRequiredValidator Component="ProvinceId" Text="Province ID is required" />
+                        </RadzenFormField>
+                    </RadzenColumn>
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow>
+                <RadzenColumn Size="12">
+                    <RadzenColumn Size="12" SizeMD="6" SizeLG="3">
                         <RadzenFormField Text="Country" Variant="Variant.Flat" Style="width:100%">
                             <RadzenDropDown Chips="true"
                                             AllowFiltering="true"
@@ -30,7 +40,7 @@
                     <RadzenColumn Size="12" SizeMD="6" SizeLG="3">
                         <RadzenFormField Text="Province Code *" Variant="Variant.Flat" Style="width:100%">
                             <RadzenTextBox Name="ProvinceCode" @bind-Value="Req.ProvinceCode" Style="width:100%" />
-                            <RadzenRequiredValidator Component="ProvinceCode" Text="Province code name is required" />
+                            <RadzenRequiredValidator Component="ProvinceCode" Text="Province code is required" />
                         </RadzenFormField>
                     </RadzenColumn>
                 </RadzenColumn>
@@ -38,7 +48,7 @@
             <RadzenRow>
                 <RadzenColumn Size="12">
                     <RadzenColumn Size="12" SizeMD="6" SizeLG="3">
-                        <RadzenFormField Text="Pro. In English" Variant="Variant.Flat" Style="width:100%;margin-top:10px">
+                        <RadzenFormField Text="Province In English" Variant="Variant.Flat" Style="width:100%;margin-top:10px">
                             <RadzenTextBox Name="ProDescription" @bind-Value="Req.ProDescription" Style="width:100%" />
                         </RadzenFormField>
                     </RadzenColumn>
@@ -48,7 +58,7 @@
             <RadzenRow>
                 <RadzenColumn Size="12">
                     <RadzenColumn Size="12" SizeMD="6" SizeLG="3">
-                        <RadzenFormField Text="Pro. In Khmer" Variant="Variant.Flat" Style="width:100%;margin-top:10px">
+                        <RadzenFormField Text="Province In Khmer" Variant="Variant.Flat" Style="width:100%;margin-top:10px">
                             <RadzenTextBox Name="ProInKhmer" @bind-Value="Req.ProInKhmer" Style="width:100%" />
                         </RadzenFormField>
                     </RadzenColumn>

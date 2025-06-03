@@ -304,6 +304,7 @@ namespace Infrastructures.DataAccess
         public DbSet<VCreditAgent> VCreditAgents => Set<VCreditAgent>();
         public DbSet<VLoanRequests> VLoanRequests => Set<VLoanRequests>();
         public DbSet<VDistricts> VDistricts => Set<VDistricts>();
+        public DbSet<VCommunes> VCommunes => Set<VCommunes>();
     }
 }
 

@@ -1,5 +1,76 @@
-﻿<h3>DistrictCreatePage</h3>
+﻿@using TrapchumApp.Services
+@using Domains.Models.Addresses
+<RadzenStack Gap="1rem" Orientation="Orientation.Vertical" JustifyContent="JustifyContent.SpaceBetween" Style="height: 100%;">
+    <RadzenTemplateForm TItem="DistrictDtoCreate" Data=@model Submit=@Create>
+        <RadzenStack>
+            <RadzenRow>
+                <RadzenColumn Size="12">
+                    <RadzenColumn Size="12" SizeMD="6" SizeLG="3">
+                        <RadzenFormField Text="District ID *" Variant="Variant.Flat" Style="width:100%">
+                            <RadzenNumeric Name="DistrictId" @bind-Value="@model.DistrictId" Style="width:100%" />
+                            <RadzenRequiredValidator Component="DistrictId" Text="District ID is required" />
+                        </RadzenFormField>
+                    </RadzenColumn>
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow>
+                <RadzenColumn Size="12">
+                    <RadzenColumn Size="12" SizeMD="6" SizeLG="3">
+                        <RadzenFormField Text="Province" Variant="Variant.Flat" Style="width:100%">
+                            <RadzenDropDown Chips="true"
+                                            AllowFiltering="true"
+                                            Name="DropDownSalutions"
+                                            Style="width: 100%;"
+                                            Data="provinces"
+                                            @bind-Value="model.ProvinceId"
+                                            TextProperty="@nameof(Province.ProInKhmer​​)"
+                                            ValueProperty="@nameof(Province.ProvinceId)"
+                                            FilterOperator="StringFilterOperator.Contains"
+                                            Placeholder="Province">
 
-@code {
+                            </RadzenDropDown>
+                        </RadzenFormField>
+                    </RadzenColumn>
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow>
+                <RadzenColumn Size="12">
+                    <RadzenColumn Size="12" SizeMD="6" SizeLG="3">
+                        <RadzenFormField Text="District In English" Variant="Variant.Flat" Style="width:100%">
+                            <RadzenTextBox Name="DisDescription" @bind-Value="model.DisDescription" Style="width:100%" />
+                            
+                        </RadzenFormField>
+                    </RadzenColumn>
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow>
+                <RadzenColumn Size="12">
+                    <RadzenColumn Size="12" SizeMD="6" SizeLG="3">
+                        <RadzenFormField Text="District In Khmer" Variant="Variant.Flat" Style="width:100%">
+                            <RadzenTextBox Name="DisInKhmer" @bind-Value="model.DisInKhmer" Style="width:100%" />
+                           
+                        </RadzenFormField>
+                    </RadzenColumn>
+                </RadzenColumn>
+            </RadzenRow>
+        </RadzenStack>
+        <RadzenStack Orientation="Orientation.Horizontal" class="mt-2"
+                     JustifyContent="JustifyContent.End" Gap="0.5rem">
+            <RadzenButton ButtonType="ButtonType.Submit"
+                          Text="Save"
+                          Size="ButtonSize.Small"
+                          ButtonStyle="ButtonStyle.Primary"
+                          Icon="save"></RadzenButton>
+            <RadzenButton Click="@((args) => DialogService!.Close(true))"
+                          Variant="Variant.Flat"
+                          Size="ButtonSize.Small"
+                          Text="Close"
+                          Icon="cancel"
+                          ButtonStyle="ButtonStyle.Secondary" />
+        </RadzenStack>
+    </RadzenTemplateForm>
+</RadzenStack>
 
-}
+
+
+

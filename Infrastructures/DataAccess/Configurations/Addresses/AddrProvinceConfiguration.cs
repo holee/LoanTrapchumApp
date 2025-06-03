@@ -10,7 +10,7 @@ public class AddrProvinceConfiguration : IEntityTypeConfiguration<Province>
     {
         builder.ToTable("lt_addrProvinces");
         builder.HasKey(x => x.ProvinceId);
-        builder.Property(x => x.ProvinceId).ValueGeneratedOnAdd();
+        builder.Property(x => x.ProvinceId).ValueGeneratedNever();
         builder.Property(x => x.CountryId);
         builder.Property(x => x.ProvinceCode).HasMaxLength(20);
         builder.Property(x => x.ProInKhmer).HasMaxLength(100);

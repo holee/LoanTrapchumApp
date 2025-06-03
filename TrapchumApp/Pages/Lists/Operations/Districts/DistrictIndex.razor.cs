@@ -2,6 +2,7 @@
 using Applications.Interfaces.Addresses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Addresses;
+using Radzen;
 using TrapchumApp.Pages.Lists.Operations.Provinces;
 
 namespace TrapchumApp.Pages.Lists.Operations.Districts
@@ -17,6 +18,7 @@ namespace TrapchumApp.Pages.Lists.Operations.Districts
         protected bool includeInactive = false;
         int pageIndex = 0;
         int pageSize = 10;
+        int counts = 0;
         bool sortDescending = false;
         string sortField = "";
         protected List<VDistricts> VDistrictList = [];
@@ -33,6 +35,7 @@ namespace TrapchumApp.Pages.Lists.Operations.Districts
                 var results = await districtService.GetAllPagerAsync(param);
                 if (results.Count > 0)
                 {
+                    counts=results.Count;
                     VDistrictList = results.Items;
                 }
 
@@ -67,7 +70,7 @@ namespace TrapchumApp.Pages.Lists.Operations.Districts
                 var res = await districtService.GetAllPagerAsync(param);
 
                 VDistrictList = res.Items;
-                pageIndex = res.Count;
+                counts = res.Count;
                 StateHasChanged();
             }
             catch
@@ -83,7 +86,7 @@ namespace TrapchumApp.Pages.Lists.Operations.Districts
 
         protected async Task ShowCreate()
         {
-            var resultModal = await DialogService!.OpenAsync<ProvinceCreatePage>("Province Create",
+            var resultModal = await DialogService!.OpenAsync<DistrictCreatePage>("District Create",
                options: new DialogOptions
                {
                    Draggable = true,
@@ -96,7 +99,7 @@ namespace TrapchumApp.Pages.Lists.Operations.Districts
         }
         protected async Task Edit(int Id)
         {
-            var resultModal = await DialogService!.OpenAsync<ProvinceUpdatePage>("Edit Province",
+            var resultModal = await DialogService!.OpenAsync<DistrictUpdatePage>("Edit District",
                new Dictionary<string, object> { { "Id", Id } },
                new DialogOptions
                {
@@ -118,25 +121,31 @@ namespace TrapchumApp.Pages.Lists.Operations.Districts
         }
         protected async Task Delete(int proId)
         {
-            //var confirm = await DialogService.Confirm("Do you want to delete?", "Delete", new ConfirmOptions
-            //{
-            //    CancelButtonText = "Cancel",
-            //    OkButtonText = "OK",
-            //});
-            //if (confirm == true)
-            //{
-            //    var result = await _proService.DeleteAsync(proId);
+            var confirm = await DialogService.Confirm("Do you want to delete district record?", "Delete", new ConfirmOptions
+            {
+                CancelButtonText = "Cancel",
+                OkButtonText = "OK",
+            });
+            if (confirm == true)
+            {
+                var used= VDistrictList.Where(x=>x.DistrictId == proId).FirstOrDefault();
+                if (used.Used == true)
+                {
+                    NotificationService.Notify(NotificationSeverity.Warning, "This district's record in used with other tables, cannot delete it.");
+                    return;
+                }
+                var result = await districtService.DeleteAsync(proId);
 
-            //    if (result.IsSuccess)
-            //    {
-            //        NotificationService.Notify(NotificationSeverity.Success, "Province one record deleted successful.");
-            //        await GetProvinces(searchText);
-            //    }
-            //    else
-            //    {
-            //        NotificationService.Notify(NotificationSeverity.Success, result.ErrMessage);
-            //    }
-            //}
+                if (result.IsSuccess)
+                {
+                    NotificationService.Notify(NotificationSeverity.Success, "District one record deleted successful.");
+                    await GetDistricts(searchText);
+                }
+                else
+                {
+                    NotificationService.Notify(NotificationSeverity.Success, result.ErrMessage);
+                }
+            }
 
         }
     }

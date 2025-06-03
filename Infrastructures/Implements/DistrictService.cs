@@ -5,6 +5,7 @@ using Applications.Responses.ViewModels.Addresses;
 using Domains.Models.Addresses;
 using Infrastructures.DataAccess;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,24 +16,33 @@ namespace Infrastructures.Implements
 {
     public class DistrictService : IDistrictService
     {
-        private readonly DataContext _context;
+        private readonly IDbContextFactory<DataContext> contextFactory;
+        private readonly ILogger<DistrictService> logger;
+        private readonly DataContext dataContext;
 
-        public DistrictService(DataContext context) {
-            _context = context;
+        public DistrictService( IDbContextFactory<DataContext> context,
+            ILogger<DistrictService> logger,
+            DataContext dataContext) {
+            contextFactory = context;
+            this.logger = logger;
+            this.dataContext = dataContext;
         }
         public async Task<Result<string>> CreateAsync(District model)
         {
             try
             {
-                
-                await _context.Districts.AddAsync(model);
+                logger.LogInformation("Creating district record.");
+                await using var cxt = await contextFactory.CreateDbContextAsync();
 
-                await _context.SaveChangesAsync();
+                await cxt.Districts.AddAsync(model);
+
+                await cxt.SaveChangesAsync();
 
                 return Result.Success<string>(new("New District added."));
             }
             catch (DbUpdateException ex)
             {
+                logger.LogError("District",ex.Message);
                 return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
             }
         }
@@ -41,19 +51,22 @@ namespace Infrastructures.Implements
         {
             try
             {
-                var result = await _context.Districts.FirstOrDefaultAsync(dp => dp.DistrictId == Id);
+                logger.LogInformation("Deleting district record.");
+                await using var cxt = await contextFactory.CreateDbContextAsync();
+                var result = await cxt.Districts.FirstOrDefaultAsync(dp => dp.DistrictId == Id);
 
                 if (result is null) return Result.Failure<string>(ErrorResponse.NotFound("No District Found."));
 
-                _context.Districts.Remove(result);
+                cxt.Districts.Remove(result);
 
-                await _context.SaveChangesAsync();
+                await cxt.SaveChangesAsync();
 
                 return Result.Success<string>(new("District was deleted."));
 
             }
             catch (Exception ex)
             {
+                logger.LogError($"{ex.Message}", ex);
                 return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
             }
         }
@@ -65,7 +78,9 @@ namespace Infrastructures.Implements
 
         public async Task<Pager<VDistricts>> GetAllPagerAsync(QueryParam param)
         {
-            IQueryable<VDistricts> query = _context.VDistricts;
+            logger.LogInformation("Retrieving district record.");
+            await using var cxt = await contextFactory.CreateDbContextAsync();
+            IQueryable<VDistricts> query = cxt.VDistricts;
 
             if (!string.IsNullOrEmpty(param.Filter))
             {
@@ -95,7 +110,9 @@ namespace Infrastructures.Implements
         {
             try
             {
-                var result = await _context.Districts.AsNoTracking().FirstOrDefaultAsync(dp => dp.DistrictId == Id);
+                logger.LogInformation("Retrieving district record.");
+                await using var cxt = await contextFactory.CreateDbContextAsync();
+                var result = await cxt.Districts.AsNoTracking().FirstOrDefaultAsync(dp => dp.DistrictId == Id);
 
                 if (result is null) return Result.Failure<District>(ErrorResponse.NotFound("No District found."));
 
@@ -104,6 +121,7 @@ namespace Infrastructures.Implements
             }
             catch (Exception ex)
             {
+                logger.LogError($"{ex.Message}",ex);
                 return Result.Failure<District>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
             }
         }
@@ -112,19 +130,22 @@ namespace Infrastructures.Implements
         {
             try
             {
-                var result = await _context.Districts
+                logger.LogInformation("Updating district record.");
+                await using var cxt = await contextFactory.CreateDbContextAsync();
+                var result = await cxt.Districts
                     .Where(x => x.DistrictId == model.DistrictId).AsNoTracking().FirstOrDefaultAsync();
 
                 if (result is null) return Result.Failure<string>(ErrorResponse.Conflict("District doesn't exist!"));
 
-                _context.Districts.Update(model);
+                cxt.Districts.Update(model);
 
-                await _context.SaveChangesAsync();
+                await cxt.SaveChangesAsync();
 
                 return Result.Success(new string("District was updated"));
             }
             catch (DbUpdateException ex)
             {
+                logger.LogError(ex.Message, ex);
                 return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
             }
         }

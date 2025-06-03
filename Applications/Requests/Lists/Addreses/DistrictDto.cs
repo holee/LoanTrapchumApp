@@ -8,4 +8,18 @@
         public int? ProvinceId { get; set; }
         public ICollection<CommuneDto>? Communes { get; set; } 
     }
+    public class DistrictDtoCreate
+    {
+        public int? DistrictId { get; set; }
+        public string? DisDescription { get; set; }
+        public string? DisInKhmer { get; set; }
+        public int? ProvinceId { get; set; }
+    }
+    public class DistrictDtoUpdate
+    {
+        public int? DistrictId { get; set; }
+        public string? DisDescription { get; set; }
+        public string? DisInKhmer { get; set; }
+        public int? ProvinceId { get; set; }
+    }
 }

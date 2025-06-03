@@ -13,6 +13,7 @@
         public string? DisInKhmer { get; set; }
         public string? ProDescription{ get; set; }
         public string? ProInKhmer{ get; set; }
+        public bool Used { get; set; }
     }
 }
 

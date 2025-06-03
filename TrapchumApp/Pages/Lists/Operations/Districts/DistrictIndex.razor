@@ -21,7 +21,7 @@
     </PageDropDown>
     <RadzenDataGrid Responsive="true"
                     AllowSorting="true"
-                    Count="@pageIndex"
+                    Count="@counts"
                     PageSize="@pageSize"
                     PagerPosition="PagerPosition.Bottom"
                     ShowPagingSummary="true"
@@ -72,8 +72,8 @@
     {
         ContextMenuService.Open(args, ds =>
     @<RadzenMenu>
-    <RadzenMenuItem Icon="edit"  Text="Edit" Value="@id"></RadzenMenuItem>
-    <RadzenMenuItem Icon="delete" Text="Delete" Value="@id"></RadzenMenuItem>
+    <RadzenMenuItem Icon="edit" Click="@(() => Edit(id ?? default))" Text="Edit" Value="@id"></RadzenMenuItem>
+    <RadzenMenuItem Icon="delete" Click="@(() => Delete (id ?? default))" Text="Delete" Value="@id"></RadzenMenuItem>
 </RadzenMenu>
     );
     }
