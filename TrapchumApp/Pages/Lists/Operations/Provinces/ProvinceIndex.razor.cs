@@ -1,16 +1,19 @@
 using Applications.Interfaces.Addresses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Addresses;
+using Domains.Models.Addresses;
 
 namespace TrapchumApp.Pages.Lists.Operations.Provinces
 {
     public partial class ProvinceIndex
     {
         private readonly IProvinceService _proService;
+        private readonly IDistrictService districtService;
 
-        public ProvinceIndex(IProvinceService proService)
+        public ProvinceIndex(IProvinceService proService,IDistrictService districtService)
         {
             _proService = proService;
+            this.districtService = districtService;
         }
         protected string? searchText = string.Empty;
 
@@ -27,6 +30,7 @@ namespace TrapchumApp.Pages.Lists.Operations.Provinces
         string sortField = "";
 
         protected List<ProvinceViewModel> ProvincesList= [];
+        protected List<District> districtList= [];
         protected override async Task OnInitializedAsync()
         {
             try
@@ -132,6 +136,13 @@ namespace TrapchumApp.Pages.Lists.Operations.Provinces
             });
             if (confirm == true)
             {
+                var datas=await districtService.GetAllAsync();
+                districtList = datas.Data.Where(x=>x.ProvinceRefId==proId).ToList();
+                if (districtList.Count() > 0)
+                {
+                    NotificationService.Notify(NotificationSeverity.Warning, "This province's record in used with other tables, cannot delete it.");
+                    return;
+                }
                 var result = await _proService.DeleteAsync(proId);
 
                 if (result.IsSuccess)

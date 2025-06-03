@@ -9,22 +9,22 @@ namespace TrapchumApp.Pages.Lists.Operations.Districts
     public partial class DistrictCreatePage
     {
         private readonly IDistrictService districtService;
-        private readonly IProvinceService provinceService;
+        private readonly IAddressService addressService;
 
-        public DistrictCreatePage(IDistrictService districtService,IProvinceService provinceService)
+        public DistrictCreatePage(IDistrictService districtService,IAddressService addressService)
         {
             this.districtService = districtService;
-            this.provinceService = provinceService;
+            this.addressService = addressService;
         }
-        protected List<Province> provinces = [];
+        protected List<ProvinceDto> provinces = [];
         protected DistrictDtoCreate model= new DistrictDtoCreate();
         protected override async Task OnInitializedAsync()
         {
-            var results= await provinceService.GetAllAsync(0,0,null);
-            if (results.IsSuccess)
+            var results = await addressService.GetsProvinces(null);
+            if (results.Count()>0)
             {
 
-                provinces = results.Data.ToList();
+                provinces = results.ToList();
             }
             await base.OnInitializedAsync();
         }

@@ -10,6 +10,16 @@
             <RadzenRow>
                 <RadzenColumn Size="12">
                     <RadzenColumn Size="12" SizeMD="6" SizeLG="3">
+                        <RadzenFormField Text="Province ID *" Variant="Variant.Flat" Style="width:100%">
+                            <RadzenNumeric Name="ProvinceId" Disabled @bind-Value="Req.ProvinceId" Style="width:100%" />
+                            <RadzenRequiredValidator Component="ProvinceId" Text="Province ID is required" />
+                        </RadzenFormField>
+                    </RadzenColumn>
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow>
+                <RadzenColumn Size="12">
+                    <RadzenColumn Size="12" SizeMD="6" SizeLG="3">
                         <RadzenFormField Text="Country" Variant="Variant.Flat" Style="width:100%">
                             <RadzenDropDown Chips="true"
                                             AllowFiltering="true"

@@ -3,6 +3,7 @@ using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Addresses;
 using Domains.Models.Addresses;
+using Domains.Models.Lists;
 using Infrastructures.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -71,9 +72,21 @@ namespace Infrastructures.Implements
             }
         }
 
-        public Task<Result<IEnumerable<VDistricts>>> GetAllAsync(int? proId = 0, int take = 0, string? condition = null)
+        public async Task<Result<IEnumerable<District>>> GetAllAsync(int? proId = 0, int take = 0, string? condition = null)
         {
-            throw new NotImplementedException();
+            logger.LogInformation("Retrieving district record.");
+            await using var cxt = await contextFactory.CreateDbContextAsync();
+            IQueryable<District> query = cxt.Districts;
+
+            if (!string.IsNullOrEmpty(condition))
+            {
+                query = query.Where(x => EF.Functions.Like(x.DisInKhmer!, $"%{condition}%")
+                || EF.Functions.Like(x.DisDescription!, $"%{condition}%")
+               );
+            }
+            var dis = await query.AsNoTracking().ToListAsync();
+
+            return Result.Success<IEnumerable<District>>(dis);
         }
 
         public async Task<Pager<VDistricts>> GetAllPagerAsync(QueryParam param)

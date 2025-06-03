@@ -46,7 +46,7 @@ namespace Infrastructures.Implements
             {
                 await using var context = await contextFactory.CreateDbContextAsync(cancellation);
 
-                var pro = await context.Provinces.FirstOrDefaultAsync(dp => dp.ProvinceId == proId, cancellation);
+                var pro = await context.Provinces.AsNoTracking().FirstOrDefaultAsync(dp => dp.ProvinceId == proId, cancellation);
 
                 if (pro is null) return Result.Failure<string>(ErrorResponse.NotFound("No Province Found."));
 
@@ -131,8 +131,8 @@ namespace Infrastructures.Implements
             {
                 await using var context = await contextFactory.CreateDbContextAsync(cancellation);
 
-                var result = await context.Provinces
-                                            .FindAsync(province.ProvinceId);
+                var result = await context.Provinces.AsNoTracking()
+                                            .FirstOrDefaultAsync(x=>x.ProvinceId==province.ProvinceId);
 
                 if (result is null) return Result.Failure<string>(ErrorResponse.Conflict("Province doesn't exist!"));
 

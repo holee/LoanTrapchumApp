@@ -16,19 +16,21 @@
             <RadzenRow>
                 <RadzenColumn Size="12">
                     <RadzenColumn Size="12" SizeMD="6" SizeLG="3">
-                        <RadzenFormField Text="Province" Variant="Variant.Flat" Style="width:100%">
+                        <RadzenFormField Text="Province *" Variant="Variant.Flat" Style="width:100%">
                             <RadzenDropDown Chips="true"
+                                            
                                             AllowFiltering="true"
                                             Name="DropDownSalutions"
                                             Style="width: 100%;"
                                             Data="provinces"
-                                            @bind-Value="model.ProvinceId"
+                                            @bind-Value="model.ProvinceRefId"
                                             TextProperty="@nameof(Province.ProInKhmer​​)"
                                             ValueProperty="@nameof(Province.ProvinceId)"
                                             FilterOperator="StringFilterOperator.Contains"
-                                            Placeholder="Province">
+                                            Placeholder="Please select province">
 
                             </RadzenDropDown>
+                            
                         </RadzenFormField>
                     </RadzenColumn>
                 </RadzenColumn>
