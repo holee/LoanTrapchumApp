@@ -52,7 +52,7 @@ namespace TrapchumApp.Pages.Identity.Users
 
                 await GetBranches(emp!.BranchId);
 
-                _model.BranchRefId = emp.BranchId!.Value;
+                _model.BranchRefId = emp.BranchId ?? 0;
 
                 _showBranch = emp!.BranchId > 0;
 
@@ -72,6 +72,19 @@ namespace TrapchumApp.Pages.Identity.Users
 
                 _showBranch = BranchId > 0;
             }
+
+
+            if (BranchId <= 0 && string.IsNullOrEmpty(EmployeeId))
+            {
+                await GetBranches(BranchId);
+
+                await GetEmployees(EmployeeId, BranchId);
+
+                _model.BranchRefId = BranchId;
+
+                _showBranch = BranchId > 0;
+            }
+
 
             await base.OnInitializedAsync();
 
@@ -108,7 +121,7 @@ namespace TrapchumApp.Pages.Identity.Users
         private async Task GetEmployees(string? employeeId, int branchId = 0)
         {
             var rsp = await _employeeService.GetEmployeesAsync(branchId, employeeId, new QueryParam(0, 0));
-            
+
             _bEmployees = rsp.Items ?? [];
 
         }

@@ -201,7 +201,7 @@ public class BranchService(IDbContextFactory<DataContext> contextFactory) : IBra
 
         IQueryable<VBranchResponse> queries = context.VBranchs;
 
-        if (branchId is not null && branchId > 0)
+        if (branchId > 0)
         {
             queries = queries.Where(x => x.BranchId == branchId);
         }

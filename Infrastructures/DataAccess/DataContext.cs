@@ -140,6 +140,7 @@ namespace Infrastructures.DataAccess
                     EntityName = entry.Entity.GetType().Name,
                     AuditAction = entry.State.ToString(),
                     Timestamp = DateTime.UtcNow,
+                    PrimaryKey = GetPrimaryKey(entry)
                 };
 
                 if (entry.State == EntityState.Added)
@@ -151,12 +152,11 @@ namespace Infrastructures.DataAccess
                     auditLog.OldValues = JsonSerializer.Serialize(entry.OriginalValues.ToObject());
 
                     auditLog.NewValues = JsonSerializer.Serialize(entry.CurrentValues.ToObject());
-                    auditLog.PrimaryKey = GetPrimaryKey(entry);
+                    
                 }
                 else if (entry.State == EntityState.Deleted)
                 {
                     auditLog.OldValues = JsonSerializer.Serialize(entry.OriginalValues.ToObject());
-                    auditLog.PrimaryKey = GetPrimaryKey(entry);
                 }
 
                 auditEntries.Add(auditLog);

@@ -45,7 +45,7 @@ public partial class CreateNewUser
                 Employees = rsp.Items;
             }
 
-            var bRsp = await _branchService.GetBranchesAsync<BranchDto>(0, new QueryParam(0, 25));
+            var bRsp = await _branchService.GetBranchesAsync<BranchDto>(0, new QueryParam(0, 0));
 
             if (bRsp!.IsSuccess)
             {
