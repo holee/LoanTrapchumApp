@@ -2,6 +2,7 @@ using Applications.Interfaces.Addresses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Addresses;
 using Domains.Models.Addresses;
+using TrapchumApp.Pages.Lists.Operations.Districts;
 
 namespace TrapchumApp.Pages.Lists.Operations.Provinces
 {
@@ -123,6 +124,22 @@ namespace TrapchumApp.Pages.Lists.Operations.Provinces
             await InvokeAsync(StateHasChanged);
 
         }
+
+
+        protected async Task AddDistrict(int? Id)
+        {
+            await DialogService!.OpenAsync<DistrictCreatePage>("Edit Province",
+               new Dictionary<string, object?> { { "ProvinceCode", Id } },
+               new DialogOptions
+               {
+                   Draggable = true,
+                   Resizable = false,
+
+               });
+
+        }
+
+
         protected async Task Details(int Id)
         {
 

@@ -17,12 +17,12 @@
                 <RadzenColumn Size="12">
                     <RadzenColumn Size="12" SizeMD="6" SizeLG="3">
                         <RadzenFormField Text="Province *" Variant="Variant.Flat" Style="width:100%">
-                            <RadzenDropDown Chips="true"
-                                            
+                            <RadzenDropDown Chips="true"                                          
                                             AllowFiltering="true"
                                             Name="DropDownSalutions"
                                             Style="width: 100%;"
                                             Data="provinces"
+                                            ReadOnly="ProvinceCode > 0"
                                             @bind-Value="model.ProvinceRefId"
                                             TextProperty="@nameof(Province.ProInKhmer​​)"
                                             ValueProperty="@nameof(Province.ProvinceId)"
