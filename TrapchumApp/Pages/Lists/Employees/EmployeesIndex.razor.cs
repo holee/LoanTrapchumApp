@@ -272,7 +272,7 @@ namespace TrapchumApp.Pages.Lists.Employees
 
             try
             {
-                var param = new QueryParam(pageIndex, pageSize, sortField, sortDescending, includeInActive, q);
+                var param = new QueryParam(pageIndex, pageSize, sortField, includeInActive, sortDescending, q);
 
                 var pageDate = await _employeeService.GetEmployeesAsync(branchId, null, param);
 
