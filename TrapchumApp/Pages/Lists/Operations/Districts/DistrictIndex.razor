@@ -3,11 +3,11 @@
 <PageTitle>Districts</PageTitle>
 <RadzenCard>
     <PageDropDown ShowSearchBox="true"
-                  PlaceHolder="Search province"
+                  PlaceHolder="Search district"
                   OnTextChanged="TextChanged"
                   PageSizeChanged="PageSizeChanged">
         <LeftChildContent>
-            <RadzenButton Text="New Province"
+            <RadzenButton Text="New District"
                           ButtonStyle="ButtonStyle.Primary"
                           Size="ButtonSize.Small"
                           Icon="add"
@@ -29,6 +29,7 @@
                     TItem="VDistricts"
                     Density="Density.Compact"
                     LoadData="LoadData"
+                    PagerHorizontalAlign="HorizontalAlign.Right"
                     Data="VDistrictList">
         <Columns>
             <RadzenDataGridColumn Width="4rem" Title="#" Property="@nameof(VDistricts.DistrictId)" />
