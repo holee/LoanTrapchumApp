@@ -31,6 +31,7 @@ namespace TrapchumApp.Pages.Lists.Employees
                 {
                     NotificationService.Notify(NotificationSeverity.Success, createResponse.Data);
                     model = new();
+                    await CloseTab();
                     Reload();
                 }
                 else
@@ -44,6 +45,6 @@ namespace TrapchumApp.Pages.Lists.Employees
             }
 
         }
-    
+
     }
 }

@@ -4,6 +4,7 @@ using Domains.Models.Lists;
 using Infrastructures.DataAccess;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
 
 namespace Infrastructures.Implements
@@ -11,21 +12,30 @@ namespace Infrastructures.Implements
     public class OccupationService : IOccupationService
     {
 
-        private readonly DataContext _context;
-
-        public OccupationService(DataContext context)
+        private readonly IDbContextFactory<DataContext> _contextFactory;
+        private readonly ILogger<OccupationService> _logger;
+        public OccupationService(IDbContextFactory<DataContext> contextFactory, ILogger<OccupationService> logger)
         {
-            this._context = context;
+            _contextFactory = contextFactory;
+            _logger = logger;
         }
 
         public async Task<Occupation?> GetOccupationByIdAsync(int? id)
         {
+            _logger.LogInformation("Fetching occupation with ID: {Id}", id);
+
+            await using var _context = await _contextFactory.CreateDbContextAsync();
+
             var occ = await _context.Occupations.FirstOrDefaultAsync(x => x.OccupationId == id);
             return occ;
         }
 
         public async Task<Pager<T>> GetOccupations<T>(int? id, string? term = null)
         {
+            _logger.LogInformation("Fetching occupations with ID: {Id} and term: {Term}", id, term);
+
+            await using var _context = await _contextFactory.CreateDbContextAsync();
+
             IQueryable<Occupation> queries = _context.Occupations;
 
             if (id.HasValue && id > 0)
@@ -52,6 +62,10 @@ namespace Infrastructures.Implements
 
         public async Task<IEnumerable<Occupation>> GetOccupationsAsync(string? expression = null)
         {
+            _logger.LogInformation("Fetching occupations with expression: {Expression}", expression);
+
+            await using var _context = await _contextFactory.CreateDbContextAsync();
+
             IQueryable<Occupation> occupations = _context.Occupations;
 
             if (expression is not null)

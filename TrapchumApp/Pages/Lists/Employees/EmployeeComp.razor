@@ -28,11 +28,12 @@
             <RadzenColumn Size="12" SizeMD="10">
                 <RadzenRow AlignItems="AlignItems.Center" class="rz-m-0">
                     <RadzenColumn Size="12" SizeMD="2">
-                        <SalutationDropDown @bind-Value="model.Salutation"
-                                            Name="DropDownSalutions"
-                                            Placeholder="Salutation"
-                                            Items="@Salutations">
-                        </SalutationDropDown>
+                        <RadzenDropDown Name="DropDownSalutions"
+                                        Data="@Salutations"
+                                        TValue="string"
+                                        Placeholder="Salutation"
+                                        @bind-Value="model.Salutation">
+                        </RadzenDropDown>
                     </RadzenColumn>
                     <RadzenColumn Size="10" SizeMD="10">
                         <RadzenTextBox Name="LastName"

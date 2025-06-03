@@ -4,41 +4,59 @@ using Applications.Responses;
 using Domains.Models.Lists;
 using Infrastructures.DataAccess;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Infrastructures.Implements
 {
     public class SalutaionService : ISalutationService
     {
         private readonly DataContext _context;
-        public SalutaionService(DataContext context)
+        private readonly IDbContextFactory<DataContext> _contextFactory;
+        private readonly ILogger<SalutaionService> _logger;
+        public SalutaionService(DataContext context, IDbContextFactory<DataContext> contextFactory, ILogger<SalutaionService> logger)
         {
             _context = context;
+            _contextFactory = contextFactory;
+            _logger = logger;
         }
         public async Task<Result<string>> AddSalution(Salutation salutation)
         {
             try
             {
+                _logger.LogInformation("Adding or updating salutation with title: {Title}", salutation.Title);
+
+                await using var context = await _contextFactory.CreateDbContextAsync();
+
                 if (string.IsNullOrWhiteSpace(salutation.Title))
                 {
                     return Result.Failure<string>(ErrorResponse.Validation("Title field is required."));
                 }
-                var sal = await _context.Salutations.AnyAsync(x => x.Title == salutation.Title);
+
+                var sal = await context.Salutations.AnyAsync(x => x.Title == salutation.Title);
+
                 if (sal)
                 {
                     return Result.Failure<string>(ErrorResponse.Conflict("Title already existing."));
                 }
                 if (salutation.Id > 0)
                 {
-                    _context.Salutations.Update(salutation);
-                    await _context.SaveChangesAsync();
+                    context.Salutations.Update(salutation);
+
+                    await context.SaveChangesAsync();
+
                     return Result.Success(new string("Title was updated."));
                 }
-                _context.Salutations.Add(salutation);
-                await _context.SaveChangesAsync();
+
+                context.Salutations.Add(salutation);
+
+                await context.SaveChangesAsync();
+
                 return Result.Success(new string("Title was added."));
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error occurred while adding or updating salutation with title: {Title}", salutation.Title);
+
                 return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
             }
         }
@@ -47,25 +65,38 @@ namespace Infrastructures.Implements
         {
             try
             {
+                _logger.LogInformation("Deleting salutation with ID: {Id}", id);
+
+                await using var context = await _contextFactory.CreateDbContextAsync();
 
                 if (id > 0)
                 {
-                    var result = await _context.Salutations.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
-                    _context.Salutations.Remove(result!);
-                    await _context.SaveChangesAsync();
+                    var result = await context.Salutations.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+
+                    context.Salutations.Remove(result!);
+
+                    await context.SaveChangesAsync();
+
                     return Result.Success(new string("Title was deleted."));
                 }
                 return Result.Success(new string("Title not found."));
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error occurred while deleting salutation with ID: {Id}", id);
+
                 return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
             }
         }
 
         public async Task<Result<IEnumerable<Salutation>>> GetSalutions(string? q = null)
         {
-            IQueryable<Salutation> queries = _context.Salutations;
+
+            _logger.LogInformation("Retrieving salutations with query: {Query}", q);
+
+            await using var context = await _contextFactory.CreateDbContextAsync();
+
+            IQueryable<Salutation> queries = context.Salutations;
 
             if (!string.IsNullOrEmpty(q))
             {
@@ -80,7 +111,13 @@ namespace Infrastructures.Implements
 
         public async Task<Result<IEnumerable<string>>> GetsSalutions(string? q = null)
         {
-            var salutations = await _context.Salutations
+
+
+            _logger.LogInformation("Retrieving salutations with query: {Query}", q);
+
+            await using var context = await _contextFactory.CreateDbContextAsync();
+
+            var salutations = await context.Salutations
                                                     .WhereIf(!string.IsNullOrEmpty(q), x => x.Title!.Contains(q!))
                                                     .AsNoTracking()
                                                     .Select(x => x.Title)
