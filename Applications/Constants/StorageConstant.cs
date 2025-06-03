@@ -70,5 +70,7 @@ namespace Applications.Constants
 
         public static int[] InstallemntOptions = [12,18,24,36,42,48,60,72];
 
+        public static int[] PageSizeOptions = [10, 25, 50, 100];
+         
     }
 }

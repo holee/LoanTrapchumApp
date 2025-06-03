@@ -6,10 +6,10 @@ namespace Infrastructures.DataAccess.Factories;
 
 public class DapperConnectionFactory(IConfiguration config) : IDapperConnectionFactory
 {
-    public IDbConnection CreateConnection() => new SqlConnection(config.GetConnectionString("DefaultConnection"));
+    public IDbConnection CreateConnection() => new SqlConnection(config.GetConnectionString("MyConnection"));
     public async Task<IDbConnection> CreateConnectionAsync(CancellationToken token = default)
     {
-        var connection = new SqlConnection(config.GetConnectionString("DefaultConnection"));
+        var connection = new SqlConnection(config.GetConnectionString("MyConnection"));
         await connection.OpenAsync(token);
         return connection;
     }

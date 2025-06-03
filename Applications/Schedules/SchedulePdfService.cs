@@ -1,6 +1,7 @@
 ﻿using Applications.Extensions.Maths;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Responses.ViewModels.Reports;
+using Applications.Services.LIsts;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
@@ -115,6 +116,17 @@ namespace Applications.Schedules
                     col.Item().Scale(scale).Text($"Rate      :{Item.TotalInterest}");
                     col.Item().Scale(scale).Text($"Principle :{Item.Principle}");
                     col.Item().Scale(scale).Text($"Branch    :{Item.BranchName}");
+                });
+
+                row.RelativeItem().Column(col =>
+                {
+                    var font = "Khmer Os Siemreap";
+                    var scale = 0.9f;
+                    col.Item().Scale(scale).Text($"Name      :{Item.LastPaymentDate}");
+                    col.Item().Scale(scale).Text($"Period    :{Item.Address}").FontFamily(font);
+                    col.Item().Scale(scale).Text($"Rate      :{Item.AgentName}").FontFamily(font);
+                    col.Item().Scale(scale).Text($"Principle :{Item.AgentPhone}");
+                    col.Item().Scale(scale).Text($"Branch    :{Item.BranchName}").FontFamily(font);
                 });
             });
 

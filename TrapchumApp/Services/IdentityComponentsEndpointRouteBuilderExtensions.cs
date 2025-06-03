@@ -94,7 +94,7 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
         {
             var rsp = await printer.DownLoadScheduleAsPdf(branchId, loanId);
 
-            return TypedResults.File(rsp.Data!, contentType: "application/pdf");
+            return TypedResults.File(rsp.Data!, contentType: "application/pdf",$"{Guid.CreateVersion7()}.pdf");
 
         });
 

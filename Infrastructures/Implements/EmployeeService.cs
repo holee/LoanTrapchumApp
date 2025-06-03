@@ -188,7 +188,7 @@ public class EmployeeService : IEmployeeService
 
         var counts = queries.Count();
 
-        if (q.Skip > 0)
+        if (q.PageSize > 0)
         {
             queries = queries.Skip(q.Skip).Take(q.PageSize);
         }
