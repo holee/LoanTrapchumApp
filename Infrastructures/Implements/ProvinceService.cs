@@ -1,106 +1,76 @@
 ﻿using Applications.Interfaces.Addresses;
-using Applications.Requests.Lists.Addreses;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Addresses;
-using Applications.Responses.ViewModels.Departments;
 using Domains.Models.Addresses;
-using Domains.Models.Lists;
 using Infrastructures.DataAccess;
 using Microsoft.EntityFrameworkCore;
-using System;
+using Microsoft.Extensions.Logging;
 
 
 namespace Infrastructures.Implements
 {
-    public class ProvinceService : IProvinceService
+    public sealed class ProvinceService(IDapperConnectionFactory dapper,
+            IDbContextFactory<DataContext> contextFactory,
+            ILogger<ProvinceService> logger) : IProvinceService
     {
-        private readonly DataContext _context;
-        private readonly IDapperConnectionFactory _dapper;
-        public ProvinceService(DataContext context,IDapperConnectionFactory dapper) 
+        public async Task<Result<string>> CreateAsync(Province province, CancellationToken cancellation = default)
         {
-            _context = context;
-            _dapper = dapper;
-        }
-
-        public async Task<Result<string>> CreateAsync(Province province)
-        {
+            logger.LogInformation("Creating new province with code: {ProvinceCode}", province.ProvinceCode);
             try
             {
-                var pro = await _context.Provinces.Where(x => x.ProvinceCode != null & x.ProvinceCode == province.ProvinceCode)
-                                       .FirstOrDefaultAsync();
+                await using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+                var pro = await context.Provinces.Where(x => x.ProvinceCode != null & x.ProvinceCode == province.ProvinceCode)
+                                       .FirstOrDefaultAsync(cancellation);
                 if (pro is not null) return Result.Failure<string>(ErrorResponse.Conflict("Province code already exist."));
 
-                await _context.Provinces.AddAsync(province);
+                await context.Provinces.AddAsync(province, cancellation);
 
-                await _context.SaveChangesAsync();
+                await context.SaveChangesAsync(cancellation);
 
                 return Result.Success<string>(new("New province added."));
             }
             catch (DbUpdateException ex)
             {
+                logger.LogError(ex, "Error occurred while creating province with code: {ProvinceCode}", province.ProvinceCode);
                 return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
             }
         }
 
-        public async Task<Result<string>> DeleteAsync(int? proId)
+        public async Task<Result<string>> DeleteAsync(int? proId, CancellationToken cancellation = default)
         {
+            logger.LogInformation("Deleting province with ID: {ProvinceId}", proId);
+
             try
             {
-                var pro = await _context.Provinces.FirstOrDefaultAsync(dp => dp.ProvinceId == proId);
+                await using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+                var pro = await context.Provinces.FirstOrDefaultAsync(dp => dp.ProvinceId == proId, cancellation);
 
                 if (pro is null) return Result.Failure<string>(ErrorResponse.NotFound("No Province Found."));
 
-                _context.Provinces.Remove(pro);
+                context.Provinces.Remove(pro);
 
-                await _context.SaveChangesAsync();
+                await context.SaveChangesAsync();
 
                 return Result.Success<string>(new("Province was deleted."));
 
             }
             catch (Exception ex)
             {
+                logger.LogError(ex, "Error occurred while deleting province with ID: {ProvinceId}", proId);
                 return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
             }
         }
 
-        public async Task<Result<IEnumerable<Province>>> GetAllAsync(int? proId = 0, int take = 0, string? condition = null)
+
+        public async Task<Pager<ProvinceViewModel>> GetAllAsync(QueryParam param, CancellationToken cancellation = default)
         {
-            try
-            {
-                IQueryable<Province> provinces = _context.Provinces;
 
-                if (condition is not null)
-                {
-                    provinces = provinces.Where(x => x.ProvinceCode != null
-                                                && x.ProvinceCode.Contains(condition));
-                }
+            await using var context = await contextFactory.CreateDbContextAsync(cancellation);
 
-                if (proId > 0)
-                {
-
-                    provinces = provinces.Where(x => x.ProvinceId == proId);
-                }
-
-                if (take > 0)
-                {
-                    provinces = provinces.Take(take).OrderByDescending(x => x.ProvinceCode);
-                }
-
-                var pros = await provinces.AsNoTracking().ToListAsync();
-
-                return Result.Success < IEnumerable <Province>>(pros);
-
-            }
-            catch (Exception ex)
-            {
-                return null;
-            }
-        }
-
-        public async Task<Pager<ProvinceViewModel>> GetAllPager(QueryParam param)
-        {
-            IQueryable<Province> query = _context.Provinces;
+            IQueryable<Province> query = context.Provinces;
 
             if (param.IsIncludeInActive == true)
             {
@@ -109,8 +79,8 @@ namespace Infrastructures.Implements
 
             if (!string.IsNullOrEmpty(param.Filter))
             {
-                query = query.Where(x => EF.Functions.Like(x.ProDescription!, $"%{param.Filter}%")
-                || EF.Functions.Like(x.ProInKhmer!, $"%{param.Filter}%"));
+                query = query.Where(x => EF.Functions.Like(x.ProDescription!, $"%{param.Filter}%") ||
+                                         EF.Functions.Like(x.ProInKhmer!, $"%{param.Filter}%"));
             }
 
             if (param.SortDescending)
@@ -122,26 +92,27 @@ namespace Infrastructures.Implements
 
             var data = await query.Skip(param.Skip)
                            .Take(param.PageSize)
-                           .AsNoTracking()
-                           .ToListAsync();
-            var result = data.Select(x => new ProvinceViewModel
-            {
-                ProvinceId = x.ProvinceId,
-                ProvinceCode = x.ProvinceCode,
-                ProDescription = x.ProDescription,
-                ProInKhmer = x.ProInKhmer,
-                // Add more properties as needed
-            }).ToList();
+                           .Select(x => new ProvinceViewModel
+                           {
+                               ProvinceId = x.ProvinceId,
+                               ProvinceCode = x.ProvinceCode,
+                               ProDescription = x.ProDescription,
+                               ProInKhmer = x.ProInKhmer,
+                               // Add more properties as needed
+                           })
+                          .AsNoTracking()
+                     .ToListAsync(cancellation);
 
-
-            return new Pager<ProvinceViewModel>(result, counts);
+            return new Pager<ProvinceViewModel>(data, counts);
         }
 
-        public async Task<Result<Province>> GetById(int? proId)
+        public async Task<Result<Province>> GetById(int? proId, CancellationToken cancellation = default)
         {
             try
             {
-                var pro = await _context.Provinces.AsNoTracking().FirstOrDefaultAsync(dp => dp.ProvinceId == proId);
+                await using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+                var pro = await context.Provinces.AsNoTracking().FirstOrDefaultAsync(dp => dp.ProvinceId == proId);
 
                 if (pro is null) return Result.Failure<Province>(ErrorResponse.NotFound("No Deapartment found."));
 
@@ -154,18 +125,20 @@ namespace Infrastructures.Implements
             }
         }
 
-        public async Task<Result<string>> UpdateAsync(Province province)
+        public async Task<Result<string>> UpdateAsync(Province province, CancellationToken cancellation = default)
         {
             try
             {
-                var result = await _context.Provinces
-                    .Where(x => x.ProvinceId==province.ProvinceId).AsNoTracking().FirstOrDefaultAsync();
+                await using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+                var result = await context.Provinces
+                                            .FindAsync(province.ProvinceId);
 
                 if (result is null) return Result.Failure<string>(ErrorResponse.Conflict("Province doesn't exist!"));
 
-                _context.Provinces.Update(province);
+                context.Provinces.Update(province);
 
-                await _context.SaveChangesAsync();
+                await context.SaveChangesAsync();
 
                 return Result.Success(new string("Province was updated"));
             }

@@ -46,7 +46,7 @@ namespace TrapchumApp.Pages.Lists.Operations.Provinces
         private async Task GetProvinces(string? filter = null)
         {   
                 var param = new QueryParam(pageIndex, pageSize, sortField, sortDescending, includeInactive, filter);
-                var resultResponse = await _proService.GetAllPager(param);
+                var resultResponse = await _proService.GetAllAsync(param);
                 counts = resultResponse.Count;
                 ProvincesList = resultResponse.Items ?? [];
         }
@@ -74,7 +74,7 @@ namespace TrapchumApp.Pages.Lists.Operations.Provinces
         {
                 var param = new QueryParam(pageIndex, pageSize, sortField, includeInactive, sortDescending, searchText);
 
-                var res = await _proService.GetAllPager(param);
+                var res = await _proService.GetAllAsync(param);
 
                 ProvincesList = res.Items;
 

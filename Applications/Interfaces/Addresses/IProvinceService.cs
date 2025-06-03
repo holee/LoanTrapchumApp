@@ -15,12 +15,11 @@ namespace Applications.Interfaces.Addresses
 {
     public interface IProvinceService
     {
-        Task<Result<Province>> GetById(int? proId);
-        Task<Result<IEnumerable<Province>>> GetAllAsync(int? proId = 0, int take = 0, string? condition = null);
-        Task<Pager<ProvinceViewModel>> GetAllPager(QueryParam param);
-        Task<Result<string>> CreateAsync(Province province);
-        Task<Result<string>> UpdateAsync(Province province);
-        Task<Result<string>> DeleteAsync(int? proId);
+        Task<Result<Province>> GetById(int? proId,CancellationToken cancellation = default);
+        Task<Pager<ProvinceViewModel>> GetAllAsync(QueryParam param,CancellationToken cancellation = default);
+        Task<Result<string>> CreateAsync(Province province,CancellationToken cancellation = default);
+        Task<Result<string>> UpdateAsync(Province province, CancellationToken cancellation = default);
+        Task<Result<string>> DeleteAsync(int? proId, CancellationToken cancellation = default);
        
     }
 }
