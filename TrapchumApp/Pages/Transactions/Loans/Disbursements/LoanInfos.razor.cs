@@ -72,8 +72,14 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
             {
                 await js.InvokeVoidAsync("open", $"/Reports/Schedules/{LoanId}/{BranchId}", "_blank");
             }
-            return;
         }
+
+
+        private  async Task Priner()
+        {
+            await js.InvokeVoidAsync("printPdfFromUrl", $"/Reports/Schedules/{LoanId}/{BranchId}");
+        }
+
 
 
         private void ShowPaidSchedule()

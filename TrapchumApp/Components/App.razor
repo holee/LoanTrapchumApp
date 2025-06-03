@@ -19,16 +19,7 @@
     <script src="_framework/blazor.web.js"></script>
     <script src="@Assets["lib/bootstrap/dist/js/bootstrap.bundle.min.js"]"></script>
     <script src="@Assets["_content/Radzen.Blazor/Radzen.Blazor.js?v=@(typeof(Radzen.Colors).Assembly.GetName().Version)"]"></script>
-    <script>
-        window.downloadFile = function (fileName, contentType, base64Data) {
-            const link = document.createElement('a');
-            link.download = fileName;
-            link.href = `data:${contentType};base64,${base64Data}`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        };
-    </script>
+    <script src="@Assets["assets/js/printer.js"]"></script>
 </body>
 
 </html>
