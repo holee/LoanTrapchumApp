@@ -65,6 +65,7 @@
     {
         ContextMenuService.Open(args, ds =>
     @<RadzenMenu>
+    <RadzenMenuItem Icon="@IconNames.Add" Click="@(() => AddDistrict(id))" Text="AddDistrict" Value="@id"></RadzenMenuItem>
         <RadzenMenuItem Icon="edit" Click="@(() => Edit(id ?? default))" Text="Edit" Value="@id"></RadzenMenuItem>
         <RadzenMenuItem Icon="delete" Click="@(() => Delete(id ?? default))" Text="Delete" Value="@id"></RadzenMenuItem>
     </RadzenMenu>

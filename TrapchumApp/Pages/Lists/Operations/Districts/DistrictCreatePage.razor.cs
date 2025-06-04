@@ -1,38 +1,62 @@
+using Applications.Commons.Mappers;
 using Applications.Interfaces.Addresses;
 using Applications.Requests.Lists.Addreses;
 using BitMiracle.LibTiff.Classic;
 using Domains.Models.Addresses;
 using Mapster;
+using Microsoft.AspNetCore.Components;
 
 namespace TrapchumApp.Pages.Lists.Operations.Districts
 {
     public partial class DistrictCreatePage
     {
         private readonly IDistrictService districtService;
+
         private readonly IAddressService addressService;
 
-        public DistrictCreatePage(IDistrictService districtService,IAddressService addressService)
+        [Parameter] public int? ProvinceCode { get; set; } = 0;
+
+        public DistrictCreatePage(IDistrictService districtService, IAddressService addressService)
         {
             this.districtService = districtService;
+
             this.addressService = addressService;
         }
         protected List<ProvinceDto> provinces = [];
-        protected DistrictDtoCreate model= new DistrictDtoCreate();
+
+        protected DistrictDtoCreate model = new DistrictDtoCreate();
         protected override async Task OnInitializedAsync()
         {
-            var results = await addressService.GetsProvinces(null);
-            if (results.Count()>0)
+            if (ProvinceCode > 0)
             {
+                await GetProvinces(ProvinceCode, string.Empty);
 
-                provinces = results.ToList();
+                model.ProvinceRefId = ProvinceCode;
             }
+            else
+            {
+                await GetProvinces(0, string.Empty);
+            }
+
+
             await base.OnInitializedAsync();
         }
+
+        private async Task GetProvinces(int? provinceCode, string? filter = null)
+        {
+            var results = await addressService.GetsProvinces(provinceCode,filter);
+
+            if (results.Count() > 0)
+            {
+                provinces = results.ToList();
+            }
+        }
+
         protected async Task Create()
         {
             try
             {
-                var data = model.Adapt<District>();
+                var data = model.MapCreate();
 
                 var response = await districtService.CreateAsync(data);
 

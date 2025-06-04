@@ -13,7 +13,7 @@ public class AddrDistrctConfiguration : IEntityTypeConfiguration<District>
         builder.Property(p => p.DistrictId).ValueGeneratedNever();
         builder.Property(p => p.DisDescription).HasMaxLength(100);
         builder.Property(p => p.DisInKhmer).HasMaxLength(100);
-        builder.Property(p => p.ProvinceRefId);
+        builder.Property(p => p.ProvinceRefId).HasConversion<int>();
 
     }
 }

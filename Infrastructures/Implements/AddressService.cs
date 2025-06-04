@@ -34,6 +34,22 @@ public class AddressService : IAddressService
         return items;
     }
 
+
+    public async Task<IEnumerable<ProvinceDto>> GetsProvinces(int? provinceId,string? expression)
+    {
+        await using var context = await _dbContextFactory.CreateDbContextAsync();
+
+        var items = await context.Provinces
+                                        .WhereIf(expression.IsNotNullOrEmpty(), x => EF.Functions.Like(x.ProInKhmer!, $"%{expression}%") ||
+                                                                                   EF.Functions.Like(x.ProDescription!, $"%{expression}%"))
+                                        .WhereIf(provinceId > 0, x => x.ProvinceId == provinceId)
+                                        .ProjectToType<ProvinceDto>()
+                                        .AsNoTracking()
+                                        .ToListAsync();
+
+        return items;
+    }
+
     public async Task<IEnumerable<T>> GetsProvinces<T>(string? expression)
         where T : class
     {

@@ -29,7 +29,7 @@ namespace Applications.Interfaces.Addresses
         Task<IEnumerable<T>> GetVillagesByCommuneId<T>(int? communeId)
             where T : class;
 
-        Task<T?> GetsProvinceById<T>(int? id)
-            where T : class;
+        Task<T?> GetsProvinceById<T>(int? id) where T : class;
+        Task<IEnumerable<ProvinceDto>> GetsProvinces(int? provinceId, string? expression);
     }
 }
