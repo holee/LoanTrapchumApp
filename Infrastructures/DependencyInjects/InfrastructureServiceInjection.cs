@@ -108,6 +108,7 @@ namespace Infrastructures.DependencyInjects
             services.TryAddTransient<IVendorService, VendorService>();
             services.TryAddTransient<IProvinceService, ProvinceService>();
             services.TryAddTransient<IDistrictService, DistrictService>();
+            services.TryAddTransient<ICommuneService, CommuneService>();
             return services;
 
         }
