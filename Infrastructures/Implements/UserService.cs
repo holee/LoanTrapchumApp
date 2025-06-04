@@ -1,22 +1,23 @@
 ﻿using Applications.Constants.Authorizations;
+using Applications.Extensions;
 using Applications.Interfaces.Identity;
 using Applications.Requests.Identity;
 using Applications.Responses;
 using Applications.Responses.Auths;
+using Applications.Responses.Message;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Auths;
+using Dapper;
 using Domains.Models.Files;
+using Domains.Models.Identity;
+using Infrastructures.DataAccess;
 using Mapster;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using Infrastructures.DataAccess;
-using Applications.Responses.Message;
-using Applications.Extensions;
-using Dapper;
-using Domains.Models.Identity;
 namespace Infrastructures.Implements;
 
 public sealed class UserService : IUserService
@@ -707,4 +708,7 @@ public sealed class UserService : IUserService
                             .ToListAsync();
         return new Pager<PermissionsVm>(permissions,counts);
     }
+
+
+   
 }

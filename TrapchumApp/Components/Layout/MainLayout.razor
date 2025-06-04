@@ -140,6 +140,9 @@
             <AuthorizeView Policy="@RolePolicies.AdminOnly">
                 <Authorized>
                     <AdminstrationsItems />
+                    <RadzenPanelMenuItem Text="Audit Trail" Icon="@IconNames.DataProtection">
+                        <RadzenPanelMenuItem Text="Audit" Icon="@IconNames.PolicyAlert" Path="/App/Audit" />
+                    </RadzenPanelMenuItem>
                 </Authorized>
             </AuthorizeView>
         </RadzenPanelMenu>

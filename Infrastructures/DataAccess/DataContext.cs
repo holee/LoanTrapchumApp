@@ -9,7 +9,6 @@ using Applications.Responses.ViewModels.Journals;
 using Applications.Responses.ViewModels.Ledgers;
 using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Requests;
-using Domains.Commons.Entities;
 using Domains.Models;
 using Domains.Models.Addresses;
 using Domains.Models.Audits;
@@ -25,6 +24,7 @@ using Domains.Models.Lists.Vendors;
 using Domains.Models.Loans;
 using Domains.Models.Settings;
 using Domains.Models.Transaction;
+using Infrastructures.Persistence.Interceptors;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -36,7 +36,11 @@ namespace Infrastructures.DataAccess
 {
     public sealed class DataContext : DbContext
     {
-        public DataContext(DbContextOptions<DataContext> options) : base(options) { }
+        private readonly AuditingSaveChangesInterceptor _auditInterceptor;
+        public DataContext(DbContextOptions<DataContext> options, AuditingSaveChangesInterceptor auditInterceptor) : base(options)
+        {
+            _auditInterceptor = auditInterceptor;
+        }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -50,6 +54,11 @@ namespace Infrastructures.DataAccess
 
             builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.AddInterceptors(_auditInterceptor);
         }
 
         public IDbTransaction StartTransaction()
@@ -67,19 +76,19 @@ namespace Infrastructures.DataAccess
         }
 
 
-        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-        {
+        //public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        //{
 
-            var auditEntries = OnBeforeSaveChanges();
+        //    //var auditEntries = OnBeforeSaveChanges();
 
-            ProcessSaveChangedAsync();
+        //    //ProcessSaveChangedAsync();
 
-            var result = await base.SaveChangesAsync(cancellationToken);
+        //    var result = await base.SaveChangesAsync(cancellationToken);
 
-            await OnAfterSaveChanges(auditEntries);
+        //   // await OnAfterSaveChanges(auditEntries);
 
-            return result;
-        }
+        //    return result;
+        //}
         private void ProcessSaveChangedAsync()
         {
             foreach (var item in ChangeTracker.Entries()
@@ -118,8 +127,6 @@ namespace Infrastructures.DataAccess
                 item.Property(nameof(BaseEntity.CreatedDt)).IsModified = false;
 
             }
-
-
 
         }
 
@@ -173,24 +180,6 @@ namespace Infrastructures.DataAccess
         {
             if (auditEntries == null || auditEntries.Count == 0)
                 return;
-
-            //var addedEntries = ChangeTracker.Entries()
-            //                                .Where(e => e.State == EntityState.Unchanged && 
-            //                                            e.Entity != null);
-
-            //foreach (var entry in addedEntries)
-            //{
-            //    var key = entry.Metadata.FindPrimaryKey();
-            //    if (key == null) continue;
-
-            //    var pk = string.Join(",", key.Properties.Select(p => entry.Property(p.Name).CurrentValue));
-            //    var auditLog = auditEntries.FirstOrDefault(a => a.EntityName == entry.Entity.GetType().Name && string.IsNullOrEmpty(a.PrimaryKey));
-            //    if (auditLog != null)
-            //    {
-            //        auditLog.PrimaryKey = pk;
-            //    }
-            //}
-            // Save audit logs to the database
             await base.SaveChangesAsync();
         }
 
@@ -210,6 +199,7 @@ namespace Infrastructures.DataAccess
         /// </summary>
 
 
+        public DbSet<AuditEntry> AuditEntries => Set<AuditEntry>();
         public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
         public DbSet<Bank> Banks => Set<Bank>();
         public DbSet<Currency> Currencies => Set<Currency>();

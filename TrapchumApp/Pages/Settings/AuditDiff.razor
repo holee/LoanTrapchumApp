@@ -1,0 +1,38 @@
+﻿@using System.Text.Json
+@using Applications.Responses.Audits
+@using Microsoft.AspNetCore.Components.Web
+
+<div class="p-4">
+    <h5>@Audit.TableName (@Audit.ActionType)</h5>
+    <p><small>@Audit.CreatedAt.ToLocalTime()</small></p>
+
+    @if (Old is not null || New is not null)
+    {
+        <div class="row">
+            <div class="col">
+                <h6>Old</h6>
+                <pre>@Old</pre>
+            </div>
+            <div class="col">
+                <h6>New</h6>
+                <pre>@New</pre>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public required AuditVm Audit { get; set; }
+
+    private string? Old => Audit.OldValues is null
+        ? null
+        : JsonSerializer.Serialize(
+              JsonSerializer.Deserialize<JsonElement>(Audit.OldValues),
+              new JsonSerializerOptions { WriteIndented = true });
+
+    private string? New => Audit.NewValues is null
+        ? null
+        : JsonSerializer.Serialize(
+              JsonSerializer.Deserialize<JsonElement>(Audit.NewValues),
+              new JsonSerializerOptions { WriteIndented = true });
+}

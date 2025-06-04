@@ -138,7 +138,7 @@ namespace Infrastructures.Implements
 
                 context.Provinces.Update(province);
 
-                await context.SaveChangesAsync();
+                await context.SaveChangesAsync(cancellation);
 
                 return Result.Success(new string("Province was updated"));
             }

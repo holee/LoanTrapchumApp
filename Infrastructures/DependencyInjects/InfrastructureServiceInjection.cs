@@ -1,4 +1,5 @@
 ﻿using Applications.Interfaces.Addresses;
+using Applications.Interfaces.Audits;
 using Applications.Interfaces.Banks;
 using Applications.Interfaces.Branches;
 using Applications.Interfaces.Currencies;
@@ -15,6 +16,9 @@ using Domains.Models.Identity;
 using Infrastructures.DataAccess;
 using Infrastructures.DataAccess.Factories;
 using Infrastructures.Implements;
+using Infrastructures.Implements.Audits;
+using Infrastructures.Implements.Identity;
+using Infrastructures.Persistence.Interceptors;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -38,6 +42,8 @@ namespace Infrastructures.DependencyInjects
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
             });
             services.AddScoped<Seeds.DatabaseSeeder>();
+
+            services.AddHttpContextAccessor();
 
             services.AddIdentityCore<ApplicationUser>()
                 .AddRoles<ApplicationRole>()
@@ -64,8 +70,9 @@ namespace Infrastructures.DependencyInjects
                 //options.SessionStore = new MemoryCacheTicketStore();
                 //options.LoginPath = LOGIN_PATH;
             });
-
-
+            services.AddSingleton<AuditingSaveChangesInterceptor>();
+            services.AddSingleton<ICurrentUserService, CurrentUserService>();
+            services.AddScoped<IAuditReadService, AuditReadService>();
             services.TryAddTransient<IAppSettingService, AppSettingService>();
             services.TryAddTransient<ILoanSettingService, LoanSettingService>();
             services.TryAddTransient<IForiegnCurrencyExchange, ForiegnCurrencyExchange>();

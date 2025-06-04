@@ -1,0 +1,104 @@
+﻿@page "/App/Audit"
+@using Applications.Interfaces.Audits
+@using Applications.Responses.Audits
+@using Applications.Responses.Paginations
+@using TrapchumApp.Helpers.Constants
+@using TrapchumApp.Shared
+@inject IAuditReadService AuditService
+@inject NavigationManager Nav
+<h3>AuditTrails</h3>
+<RadzenDataGrid TItem="AuditVm"
+                Data="@_items"
+                Count="@_count"
+                LoadData="@LoadAuditAsync"
+                AllowFiltering="true"
+                AllowPaging="true"
+                PageSize="@pageSize"
+                Responsive="true"
+                Density="Density.Compact"
+                GridLines="DataGridGridLines.Both"
+                ShowPagingSummary="true"
+                PagerPosition="PagerPosition.Bottom"
+                PagerHorizontalAlign="HorizontalAlign.Right"
+                PageSizeOptions="@StorageConstant.PageSizeOptions"
+                PageSizeChanged="PageSizeChanged"
+                AllowSorting="true">
+
+    <Columns>
+        <RadzenDataGridColumn TItem="AuditVm" Property="@nameof(AuditVm.CreatedAt)" Title="When" Width="10rem" />
+        <RadzenDataGridColumn TItem="AuditVm" Property="@nameof(AuditVm.FullName)" Title="User" Width="200px" />
+        <RadzenDataGridColumn TItem="AuditVm" Property="@nameof(AuditVm.TableName)" Title="Table" />
+        <RadzenDataGridColumn TItem="AuditVm" Property="@nameof(AuditVm.ActionType)" Title="Action" Width="8rem" />
+        <RadzenDataGridColumn Width="5rem" 
+            TextAlign="TextAlign.Center"
+            TItem="AuditVm" Title="Diff" Sortable="false">
+            <Template Context="row">
+                <RadzenButton 
+                    Size="ButtonSize.ExtraSmall"
+                    Variant="Variant.Text"
+                    Icon="@IconNames.View"
+                    ButtonStyle="ButtonStyle.Primary"
+                    Click="@(() => ShowDiff(row))" />
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+    private IEnumerable<AuditVm> _items = [];
+    private int _count=0;
+    private int pageSkip = 0;
+    private int pageSize = 10;
+    private bool isLoading = false;
+    protected override async Task OnInitializedAsync()
+    {
+        await GetAuditTrail();
+
+        await base.OnInitializedAsync();
+    }
+
+    private async Task GetAuditTrail(string? userId = null)
+    {
+
+        isLoading = true;
+
+        var param = new QueryParam(pageSkip, pageSize);
+
+        var page = await AuditService.GetAllAsync(userId, null, null, param);
+
+        _items = page.Items;
+
+        _count = page.Count;
+
+        isLoading = false;
+
+        StateHasChanged();
+    }
+
+
+
+    private async Task LoadAuditAsync(LoadDataArgs args)
+    {
+        pageSkip = args.Skip ?? 0;
+        pageSize = args.Top ?? pageSize;
+        await GetAuditTrail(null);
+
+
+    }
+
+    void ShowDiff(AuditVm row)
+        => DialogService.Open(
+            $"Change set #{row.Id}",
+            ds => builder =>
+            {
+                builder.OpenComponent<AuditDiff>(0);
+                builder.AddAttribute(1, "Audit", row);
+                builder.CloseComponent();
+            });
+    private async Task PageSizeChanged(int args)
+    {
+        pageSize = args;
+        pageSkip = 0;
+        await GetAuditTrail();
+    }
+}

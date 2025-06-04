@@ -1,3 +1,4 @@
+using Applications.Commons.Mappers;
 using Applications.Interfaces.Addresses;
 using Applications.Interfaces.Lists;
 using Applications.Requests.Lists.Addreses;
@@ -12,11 +13,12 @@ namespace TrapchumApp.Pages.Lists.Operations.Provinces
     {
         private readonly IProvinceService proService;
         private readonly IAddressService addressService;
-
-        public ProvinceCreatePage(IProvinceService ser,IAddressService addressService)
+        private readonly ILogger<ProvinceCreatePage> logger;
+        public ProvinceCreatePage(IProvinceService ser, IAddressService addressService, ILogger<ProvinceCreatePage> logger)
         {
             proService = ser;
             this.addressService = addressService;
+            this.logger = logger;
         }
         protected IEnumerable<Country> Countries = [];
         private ProvinceDtoCreate Req = new ProvinceDtoCreate();
@@ -30,13 +32,14 @@ namespace TrapchumApp.Pages.Lists.Operations.Provinces
         {
             try
             {
-                var model = Req.Adapt<Province>();
+                var model = Req.MapTo();
 
                 var response = await proService.CreateAsync(model);
 
                 if (response!.IsSuccess)
                 {
                     NotificationService.Notify(NotificationSeverity.Success, "Province new record was created successful.");
+                  
                     DialogService.Close(true);
                 }
                 else
@@ -46,7 +49,7 @@ namespace TrapchumApp.Pages.Lists.Operations.Provinces
             }
             catch (Exception ex)
             {
-                throw new Exception();
+                logger.LogError(ex, $"Error creating province : {ex.InnerException!.Message}");
             } 
            
         }

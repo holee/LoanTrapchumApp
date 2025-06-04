@@ -80,5 +80,9 @@
         public const string LocationOn = "location_on";
         public const string LocationDrop = "pin_drop";
         public const string LocationCity = "location_city";
-    } 
+        public const string DataProtection= "data_loss_prevention";
+        public const string PolicyAlert = "policy_alert";
+        public const string Policy = "policy";
+        public const string View = "visibility";
+    }  
 }

@@ -3,7 +3,7 @@
 <RadzenStack Gap="1rem" Orientation="Orientation.Vertical" JustifyContent="JustifyContent.SpaceBetween" Style="height: 100%;">
     <RadzenTemplateForm TItem="ProvinceDtoCreate" Data=@Req Submit=@Create>
         <RadzenStack>
-            <RadzenRow>
+           @*  <RadzenRow>
                 <RadzenColumn Size="12">
                     <RadzenColumn Size="12" SizeMD="6" SizeLG="3">
                         <RadzenFormField Text="Province ID *" Variant="Variant.Flat" Style="width:100%">
@@ -12,7 +12,7 @@
                         </RadzenFormField>
                     </RadzenColumn>
                 </RadzenColumn>
-            </RadzenRow>
+            </RadzenRow> *@
             <RadzenRow>
                 <RadzenColumn Size="12">
                     <RadzenColumn Size="12" SizeMD="6" SizeLG="3">
@@ -25,11 +25,7 @@
                                             @bind-Value="Req.CountryId"
                                             TextProperty="@nameof(Country.CountryName)"
                                             ValueProperty="@nameof(Country.CountryId)"
-                                            FilterOperator="StringFilterOperator.Contains"
-                                            Placeholder="Country"
-                                            
-                                            >
-                               
+                                            FilterOperator="StringFilterOperator.Contains">
                             </RadzenDropDown>
                         </RadzenFormField>
                     </RadzenColumn>
