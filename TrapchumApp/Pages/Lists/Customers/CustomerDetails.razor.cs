@@ -16,12 +16,14 @@ namespace TrapchumApp.Pages.Lists.Customers
     public partial class CustomerDetails
     {
         private readonly IIncomeExpendServiceImpl _customerIncomeService;
+
         private readonly ICollateralsServiceImpl _collateralService;
 
         public CustomerDetails(IIncomeExpendServiceImpl customerIncomeService,
             ICollateralsServiceImpl collateralService)
         {
             _customerIncomeService = customerIncomeService;
+
             _collateralService = collateralService;
         }
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;

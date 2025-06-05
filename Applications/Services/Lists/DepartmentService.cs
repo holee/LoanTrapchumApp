@@ -10,7 +10,7 @@ namespace Applications.Services.Lists;
 public sealed class DepartmentService(IDepartmentService deService) : IDepartmentServiceImpl
 {
 
-    public async Task<Result<string>> ActivateOrDeactivate(int? id, Department req)
+    public async Task<Result<string>> ActivateOrDeactivate(int? id, bool req)
     {
         return await deService.ActivateOrDeactivate(id, req);
     }

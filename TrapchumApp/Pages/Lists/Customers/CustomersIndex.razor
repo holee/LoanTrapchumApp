@@ -1,5 +1,6 @@
 ﻿@page "/App/Customer"
 @page "/App/Customer/{BranchId:int}/Branches"
+@using TrapchumApp.Pages.Lists.Collaterals
 @using TrapchumApp.Services
 <PageTitle>Customers</PageTitle>
 <RadzenProgressBar Mode="ProgressBarMode.Indeterminate" Value="100" Visible="isVisble"
@@ -34,8 +35,7 @@
             <RadzenTabsItem Text="Edit"
                             Icon="edit_square"
                             Visible="isEditTab">
-                <CustomerUpdateTab CustomerId="@customerId"
-                                   Closed="CloseTabe"></CustomerUpdateTab>
+                <CustomerUpdateTab CustomerId="@customerId"></CustomerUpdateTab>
             </RadzenTabsItem>
             <RadzenTabsItem Text="Customer Colleral"
                             Icon="inventory"

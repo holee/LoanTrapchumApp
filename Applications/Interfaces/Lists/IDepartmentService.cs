@@ -13,7 +13,7 @@ public interface IDepartmentService
     Task<Result<string>> CreateAsync(Department department);
     Task<Result<string>> UpdateAsync(Department department);
     Task<Result<string>> DeleteAsync(int? departmentId);
-    Task<Result<string>> ActivateOrDeactivate(int? id, Department req);
+    Task<Result<string>> ActivateOrDeactivate(int? id, bool state);
     Task<Result<VDepartment>> GetDepartmentDetails(int? departmentId);
     Task<Result<IEnumerable<T>>> GetDepartments<T>(int? departmentId, int take = 10, string? condition = null) where T : class;
 }

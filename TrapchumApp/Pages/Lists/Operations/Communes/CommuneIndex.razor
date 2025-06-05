@@ -1,5 +1,6 @@
 ﻿@page "/App/Operation-Area/Communes"
 @using Applications.Responses.ViewModels.Addresses
+@using TrapchumApp.Helpers.Constants
 <PageTitle>Communes</PageTitle>
 <RadzenCard>
     <PageDropDown ShowSearchBox="true"
@@ -68,14 +69,16 @@
     void PageSizeChanged(int page)
     {
         pageSize = page;
+        pageIndex = 0;
     }
     void ShowContextMenuWithContent(MouseEventArgs args, int? id)
     {
         ContextMenuService.Open(args, ds =>
-    @<RadzenMenu>
-    <RadzenMenuItem Icon="edit" Click="@(() => Edit(id ?? default))" Text="Edit" Value="@id"></RadzenMenuItem>
-    <RadzenMenuItem Icon="delete" Click="@(() => Delete(id ?? default))" Text="Delete" Value="@id"></RadzenMenuItem>
-</RadzenMenu>
+        @<RadzenMenu>
+            <RadzenMenuItem Icon="@IconNames.Add" Click="@(() =>AddCommune(id))" Text="Add Commune" Value="@id"></RadzenMenuItem>
+            <RadzenMenuItem Icon="edit" Click="@(() => Edit(id ?? default))" Text="Edit" Value="@id"></RadzenMenuItem>
+            <RadzenMenuItem Icon="delete" Click="@(() => Delete(id ?? default))" Text="Delete" Value="@id"></RadzenMenuItem>
+        </RadzenMenu>
     );
     }
 }

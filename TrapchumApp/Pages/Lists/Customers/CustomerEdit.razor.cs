@@ -180,7 +180,7 @@ namespace TrapchumApp.Pages.Lists.Customers
             editForm.EditContext?.Validate();
             try
             {
-                model!.EntType = EntityTypes.Customer.ToString();
+                model.EntType = EntityTypes.Customer.ToString();
 
                 var response = await _customerService.UpdateAsync(model);
 

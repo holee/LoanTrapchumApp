@@ -3,26 +3,40 @@ using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Branches;
 using Microsoft.AspNetCore.Components;
 using Radzen;
+using System.Threading.Tasks;
 
 namespace TrapchumApp.Pages.Lists.Branches
 {
     public partial class BranchList
     {
         protected string searchText { get; set; } = string.Empty;
+
         int pageIndex = 0;
+
         int counts = 0;
+
         string sortField = "BranchId";
+
         bool includeInactive = false;
+
         protected bool InActive = false;
+
         int pageSize = 10;
+
         bool sortDescending = false;
+
         string sortColumn = "Id";
+
         bool isLoading = false;
+
         IEnumerable<VBranchResponse>? Branches;
+
         IEnumerable<RowNumber>? rowNumbers;
+
         protected async Task PerformSearch(ChangeEventArgs e)
         {
             searchText = e.Value?.ToString() ?? string.Empty;
+
             await GetBranches(searchText);
         }
 
@@ -39,34 +53,24 @@ namespace TrapchumApp.Pages.Lists.Branches
 
         protected async Task OnIncludeInactive(bool e)
         {
+            includeInactive = e;
             await GetBranches(searchText);
         }
-        async Task OnCheckChanged(VBranchResponse branchResponse)
+        async Task OnCheckChanged(int? branchId, bool state)
         {
-            try
+            var rsp = await _branchService!.UpdateStatusAsync(branchId, state);
+
+            if (rsp!.IsSuccess)
             {
+                NotificationService.Notify(NotificationSeverity.Success, rsp.Data);
 
-                var resultResponse = await _branchService!.UpdateStatusAsync(branchResponse.BranchId);
+                await GetBranches(searchText);
 
-                if (resultResponse!.IsSuccess)
-                {
-                    NotificationService.Notify(NotificationSeverity.Success, "Update Branch");
-
-                    await GetBranches(searchText);
-
-                }
-                else
-                {
-                    NotificationService.Notify(NotificationSeverity.Error, resultResponse.ErrMessage);
-                }
-
-                await Task.CompletedTask;
             }
-            catch (Exception ex)
+            else
             {
-                NotificationService.Notify(NotificationSeverity.Error, ex.InnerException!.Message);
+                NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
             }
-
         }
         protected override async Task OnInitializedAsync()
         {
@@ -79,11 +83,11 @@ namespace TrapchumApp.Pages.Lists.Branches
         {
             isLoading = true;
 
-            var param = new QueryParam(pageIndex, pageSize, sortField, sortDescending, includeInactive, filterText);
+            var param = new QueryParam(pageIndex, pageSize, sortField, includeInactive, sortDescending, filterText);
 
             var resultResponse = await _branchService.GetBranchesAsync(param);
 
-            var counts = resultResponse.Count;
+            counts = resultResponse.Count;
 
             Branches = resultResponse.Items;
 
@@ -94,24 +98,40 @@ namespace TrapchumApp.Pages.Lists.Branches
         async void LoadData(LoadDataArgs e)
         {
             searchText = e.Filter!.ToString() ?? string.Empty;
+
             pageIndex = e.Skip!.Value;
+
             if (!string.IsNullOrEmpty(e.OrderBy))
             {
                 sortField = e.OrderBy.Split(" ")[0];
+
                 string dir = e.OrderBy.Split(" ")[1];
+
                 sortDescending = dir.Contains("asc") ? false : true;
             }
+
+            var columnFilter = e.Filters?.FirstOrDefault(f => f.Property == "BranchName" || f.Property == "BranchId")?.FilterValue?.ToString();
+            
+            searchText = columnFilter ?? string.Empty;
+
+
+            Console.WriteLine(e.Filters?.Select(x=>x.Property));
+
+            await GetBranches(searchText);
+
+
+
             await GetBranches(searchText);
 
         }
         protected async Task OnDetail(VBranchResponse? branch)
         {
-            await DialogService!.OpenAsync<BranchDetailModal>("Branch Details",new Dictionary<string, object> { { "Id", branch!.BranchId } });
+            await DialogService!.OpenAsync<BranchDetailModal>("Branch Details", new Dictionary<string, object> { { "Id", branch!.BranchId } });
         }
         protected async Task OnEdit(VBranchResponse? branch)
         {
 
-            var resultModal = await DialogService!.OpenAsync<BranchUpdateModal>("Edit Branch",new Dictionary<string, object> { { "Id", branch!.BranchId } });
+            var resultModal = await DialogService!.OpenAsync<BranchUpdateModal>("Edit Branch", new Dictionary<string, object> { { "Id", branch!.BranchId } });
             if (resultModal != null)
             {
                 await GetBranches(searchText);
@@ -139,7 +159,7 @@ namespace TrapchumApp.Pages.Lists.Branches
             };
 
 
-            bool? confirm = await DialogService.Confirm("Branch deleted will not be able to recover, would you like to continue?",options:options);
+            bool? confirm = await DialogService.Confirm("Branch deleted will not be able to recover, would you like to continue?", options: options);
 
             if (confirm == false) return;
 
@@ -151,9 +171,9 @@ namespace TrapchumApp.Pages.Lists.Branches
                 await GetBranches(searchText);
             }
 
-            var message=isDe.ErrMessage;
+            var message = isDe.ErrMessage;
 
-            if (!message.Contains("Used",StringComparison.InvariantCultureIgnoreCase))
+            if (!message.Contains("Used", StringComparison.InvariantCultureIgnoreCase))
             {
                 return;
             }
@@ -166,20 +186,28 @@ namespace TrapchumApp.Pages.Lists.Branches
 
             var confirm1 = await DialogService.Confirm("Branch you are trying to delete has started its operation, so you cannot delete it. Make inactive is strongly recommmended!", options: options1);
 
-            if(confirm1==false) return;
+            if (confirm1 == false) return;
 
 
             var rsp = await _branchService!.UpdateStatusAsync(branch!.BranchId);
 
             if (rsp!.IsSuccess)
             {
-                NotificationService.Notify(NotificationSeverity.Success,"Changed");
+                NotificationService.Notify(NotificationSeverity.Success, "Changed");
 
                 await GetBranches(searchText);
             }
 
             NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
 
+        }
+        private async Task PageSizeChanged(int args)
+        {
+            pageSize= args;
+
+            pageIndex = 0; // Reset to first page when page size changes
+
+            await GetBranches(searchText);
         }
     }
 }

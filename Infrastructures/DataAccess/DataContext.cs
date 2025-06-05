@@ -30,7 +30,6 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage;
 using System.Data;
 using System.Reflection;
-using System.Text.Json;
 
 namespace Infrastructures.DataAccess
 {
@@ -75,20 +74,6 @@ namespace Infrastructures.DataAccess
             return base.SaveChanges();
         }
 
-
-        //public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-        //{
-
-        //    //var auditEntries = OnBeforeSaveChanges();
-
-        //    //ProcessSaveChangedAsync();
-
-        //    var result = await base.SaveChangesAsync(cancellationToken);
-
-        //   // await OnAfterSaveChanges(auditEntries);
-
-        //    return result;
-        //}
         private void ProcessSaveChangedAsync()
         {
             foreach (var item in ChangeTracker.Entries()
@@ -131,76 +116,28 @@ namespace Infrastructures.DataAccess
         }
 
 
-        private List<AuditLog> OnBeforeSaveChanges()
-        {
-            ChangeTracker.DetectChanges();
-
-            var auditEntries = new List<AuditLog>();
-
-            foreach (var entry in ChangeTracker.Entries())
-            {
-                if (entry.Entity is AuditLog || entry.State == EntityState.Detached || entry.State == EntityState.Unchanged)
-                    continue;
-
-                var auditLog = new AuditLog
-                {
-                    EntityName = entry.Entity.GetType().Name,
-                    AuditAction = entry.State.ToString(),
-                    Timestamp = DateTime.UtcNow,
-                    PrimaryKey = GetPrimaryKey(entry)
-                };
-
-                if (entry.State == EntityState.Added)
-                {
-                    auditLog.NewValues = JsonSerializer.Serialize(entry.CurrentValues.ToObject());
-                }
-                else if (entry.State == EntityState.Modified)
-                {
-                    auditLog.OldValues = JsonSerializer.Serialize(entry.OriginalValues.ToObject());
-
-                    auditLog.NewValues = JsonSerializer.Serialize(entry.CurrentValues.ToObject());
-                    
-                }
-                else if (entry.State == EntityState.Deleted)
-                {
-                    auditLog.OldValues = JsonSerializer.Serialize(entry.OriginalValues.ToObject());
-                }
-
-                auditEntries.Add(auditLog);
-            }
-
-            // Temporarily add audit logs to ChangeTracker without triggering more audits
-
-            AuditLogs.AddRange(auditEntries);
-
-            return auditEntries;
-        }
-
-        private async Task OnAfterSaveChanges(List<AuditLog> auditEntries)
-        {
-            if (auditEntries == null || auditEntries.Count == 0)
-                return;
-            await base.SaveChangesAsync();
-        }
-
-        private string GetPrimaryKey(EntityEntry entry)
-        {
-            var key = entry.Metadata.FindPrimaryKey();
-
-            if (key == null) return string.Empty;
-
-            var keyValues = key.Properties.Select(p => entry.Property(p.Name).CurrentValue);
-
-            return string.Join(",", keyValues);
-        }
+        
 
         /// <summary>
         /// Handles the DbSet properties for the DataContext.
         /// </summary>
 
+        //public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        //{
+
+        //    //var auditEntries = OnBeforeSaveChanges();
+
+        //    //ProcessSaveChangedAsync();
+
+        //    var result = await base.SaveChangesAsync(cancellationToken);
+
+        //   // await OnAfterSaveChanges(auditEntries);
+
+        //    return result;
+        //}
+
 
         public DbSet<AuditEntry> AuditEntries => Set<AuditEntry>();
-        public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
         public DbSet<Bank> Banks => Set<Bank>();
         public DbSet<Currency> Currencies => Set<Currency>();
         public DbSet<CurrencyCounter> CurrencyCounters => Set<CurrencyCounter>();
@@ -416,6 +353,67 @@ namespace Infrastructures.DataAccess
 //    }
 //}
 
+//private List<AuditLog> OnBeforeSaveChanges()
+//{
+//    ChangeTracker.DetectChanges();
 
+//    var auditEntries = new List<AuditLog>();
+
+//    foreach (var entry in ChangeTracker.Entries())
+//    {
+//        if (entry.Entity is AuditLog || entry.State == EntityState.Detached || entry.State == EntityState.Unchanged)
+//            continue;
+
+//        var auditLog = new AuditLog
+//        {
+//            EntityName = entry.Entity.GetType().Name,
+//            AuditAction = entry.State.ToString(),
+//            Timestamp = DateTime.UtcNow,
+//            PrimaryKey = GetPrimaryKey(entry)
+//        };
+
+//        if (entry.State == EntityState.Added)
+//        {
+//            auditLog.NewValues = JsonSerializer.Serialize(entry.CurrentValues.ToObject());
+//        }
+//        else if (entry.State == EntityState.Modified)
+//        {
+//            auditLog.OldValues = JsonSerializer.Serialize(entry.OriginalValues.ToObject());
+
+//            auditLog.NewValues = JsonSerializer.Serialize(entry.CurrentValues.ToObject());
+
+//        }
+//        else if (entry.State == EntityState.Deleted)
+//        {
+//            auditLog.OldValues = JsonSerializer.Serialize(entry.OriginalValues.ToObject());
+//        }
+
+//        auditEntries.Add(auditLog);
+//    }
+
+//    // Temporarily add audit logs to ChangeTracker without triggering more audits
+
+//    AuditLogs.AddRange(auditEntries);
+
+//    return auditEntries;
+//}
+
+//private async Task OnAfterSaveChanges(List<AuditLog> auditEntries)
+//{
+//    if (auditEntries == null || auditEntries.Count == 0)
+//        return;
+//    await base.SaveChangesAsync();
+//}
+
+//private string GetPrimaryKey(EntityEntry entry)
+//{
+//    var key = entry.Metadata.FindPrimaryKey();
+
+//    if (key == null) return string.Empty;
+
+//    var keyValues = key.Properties.Select(p => entry.Property(p.Name).CurrentValue);
+
+//    return string.Join(",", keyValues);
+//}
 
 

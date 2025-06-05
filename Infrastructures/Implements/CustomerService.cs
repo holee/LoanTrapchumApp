@@ -498,12 +498,12 @@ public class CustomerService(
         }
     }
 
-    public async Task<Result<string>> CreateAsync(EntityNames model)
+    public async Task<Result<string>> CreateAsync(EntityNames model, CancellationToken cancellation = default)
     {
         try
         {
             context.EntityNames.Add(model);
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(cancellation);
             return Result.Failure<string>(ErrorResponse.ServerError($"New Customer was added."));
         }
         catch (DbUpdateConcurrencyException ex)
@@ -512,13 +512,16 @@ public class CustomerService(
         }
     }
 
-    public async Task<Result<string>> UpdateAsync(EntityNames model)
+    public async Task<Result<string>> UpdateAsync(EntityNames model,CancellationToken cancellation=default)
     {
         try
         {
-            context.EntityNames.Update(model);
+            await using var cxt = await contextFactory.CreateDbContextAsync(cancellation);
 
-            await context.SaveChangesAsync();
+
+            cxt.EntityNames.Update(model);
+
+            await cxt.SaveChangesAsync(cancellation);
 
             return Result.Success<string>("Customer update customer.");
         }
@@ -529,221 +532,3 @@ public class CustomerService(
     }
 }
 
-
-//var customerDictionary = new Dictionary<Guid, VCustomerList>();
-//    await connection.QueryAsync<VCustomerList, VLoanDisbursments, VLoanRequests, VCollateralLines, VCustomerIncomes, VCustomerExpenses, VCustomerNotes, VCustomerList>
-//        (ProcedureConstant.GetCustomerDetailsById,
-//            (
-//                 customer,
-//                 loan,
-//                 request,
-//                 collateral,
-//                 income,
-//                 expense,
-//                 note
-//            ) =>
-//                {
-//        if (!customerDictionary.TryGetValue(customer.CustomerId!.Value, out VCustomerList customerEntry))
-//        {
-//            customerEntry = customer;
-//            customerEntry.Loans = [];
-//            customerEntry.LoanRequests = [];
-//            customerEntry.CollateralLines = [];
-//            customerEntry.CustomerIncomes = [];
-//            customerEntry.CustomerExpenses = [];
-//            customerEntry.CustomerNotes = [];
-//            //customerEntry.Activities = [];
-//            customerDictionary.Add(customer.CustomerId.Value, customerEntry);
-//        }
-//        if (loan != null) customerEntry.Loans.Add(loan);
-//        if (request != null) customerEntry.LoanRequests.Add(request);
-//        if (collateral != null) customerEntry.CollateralLines.Add(collateral);
-//        if (income != null) customerEntry.CustomerIncomes.Add(income);
-//        if (expense != null) customerEntry.CustomerExpenses.Add(expense);
-//        if (note != null) customerEntry.CustomerNotes.Add(note);
-//        //if (activity != null) customerEntry.CustomerActivities.Add(activity);
-//        return customerEntry;
-//    },
-//                param: parameters,
-//                commandType: CommandType.StoredProcedure,
-//                splitOn: "LoanId,LoanRequestId,CollateralId,IncomeId,ExpendId,NoteId,ActivityId");
-
-//        return customerDictionary.Values.FirstOrDefault();
-
-
-//var customerIncludes = multiMap.Read<VCustomerList, VLoanDisbursments, VLoanRequests, VCollateralLines, VCustomerIncomes, VCustomerExpenses, VCustomerNotes, VCustomerActivities, VCustomerList>(
-//            (customer, loan, request, collateral, income, expense, note, ac) =>
-//            {
-//                customer.Loans.Add(loan);
-//                customer.LoanRequests.Add(request);
-//                customer.CollateralLines.Add(collateral);
-//                customer.CustomerIncomes.Add(income);
-//                customer.CustomerExpenses.Add(expense);
-//                customer.CustomerNotes.Add(note);
-//                return customer;
-//            }, splitOn: "LoanId,LoanRequestId,CollateralId,IncomeId,ExpendId,NoteId");
-//public async Task<VCustomerList?> GetByIdAsync(Guid customerId)
-//{
-//    using var connection = await dapperService.CreateConnectionAsync();
-
-//    const string sql = """
-//        SELECT c.*, ce.*, ci.*, cn.*, cl.*
-//        FROM Customers c
-//        LEFT JOIN CustomerExpenses ce ON c.CustomerId = ce.CustomerRefId
-//        LEFT JOIN CustomerIncomes ci ON c.CustomerId = ci.CustomerRefId
-//        LEFT JOIN CustomerNotes cn ON c.CustomerId = cn.CustomerRefId
-//        LEFT JOIN CollateralLines cl ON c.CustomerId = cl.CustomerId
-//        WHERE c.CustomerId = @CustomerId AND c.IsActive = 1
-//        """;
-
-//    var customerDictionary = new Dictionary<Guid, VCustomerList>();
-//    await connection.QueryAsync<VCustomerList, VCustomerExpenses, VCustomerIncomes,VCustomerNotes, VCollateralLines, VCustomerList>(
-//        sql, (customer, expenses, incomes, notes, collaterals) =>
-//        {
-//            if (!customerDictionary.TryGetValue(customer.CustomerId!.Value, out var customerEntry))
-//            {
-//                customerEntry = customer;
-//                customerEntry.CustomerExpenses = [];
-//                customerEntry.CustomerIncomes = [];
-//                customerEntry.CustomerNotes = [];
-//                customerEntry.CollateralLines = [];
-//                customerDictionary.Add(customer.CustomerId.Value, customerEntry);
-//            }
-
-//            if (expenses != null) customerEntry.CustomerExpenses.Add(expenses);
-//            if (incomes != null) customerEntry.CustomerIncomes.Add(incomes);
-//            if (notes != null) customerEntry.CustomerNotes.Add(notes);
-//            if (collaterals != null) customerEntry.CollateralLines.Add(collaterals);
-//            return customerEntry;
-//        },
-//        new { CustomerId = customerId }, 
-//        splitOn: "ExpendId,IncomeId,NoteId,Id");
-
-//    return customerDictionary.Values.FirstOrDefault();
-//}
-//public async Task<Result<VCustomerList>> GetCustomerDetailsByIdAsync(Guid? customerId)
-//{
-//    var db = await dapperService.CreateConnectionAsync();
-
-//    var results = await db.QueryMultipleAsync("spGetCustomerDetails", new
-//    {
-//        @customerId = customerId
-//    }, commandType: CommandType.StoredProcedure);
-
-//    var customer = await results.ReadFirstOrDefaultAsync<VCustomerList>();
-
-//    if (customer is null)
-//    {
-//        return Result.Failure<VCustomerList>(ErrorResponse.NotFound("No Customer found."));
-//    }
-
-//    var expenses = results.Read<VCustomerExpenses>().ToList();
-//    var incomes = results.Read<VCustomerIncomes>().ToList();
-//    var notes = results.Read<VCustomerNotes>().ToList();
-//    var requests = results.Read<VLoanRequests>().ToList();
-//    var collaterallines = results.Read<VCollateralLines>().ToList();
-//    customer.CustomerExpenses = expenses ?? [];
-//    customer.CustomerIncomes = incomes ?? [];
-//    customer.LoanRequests = requests ?? [];
-//    customer.CustomerNotes = notes ?? [];
-//    customer.CollateralLines = collaterallines ?? [];
-//    return Result.Success<VCustomerList>(customer);
-//}
-//public async Task<Result<string>> AddOrUpdateCustomerAsync(Customer customer)
-//{
-//    try
-//    {
-//        var existingCustomer =
-//            await context.Customers.FirstOrDefaultAsync(x => x.CustomerId == customer.CustomerId);
-
-//        if (existingCustomer is null && customer.CustomerId.IsNullOrEmpty())
-//        {
-//            context.Customers.Add(customer);
-//        }
-//        else
-//        {
-//            context.Entry(existingCustomer!).CurrentValues.SetValues(customer);
-//        }
-
-//        await context.SaveChangesAsync();
-
-//        return Result.Success(new string("New Customer was crated"));
-//    }
-//    catch (Exception ex)
-//    {
-//        return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
-//    }
-//}
-
-//public async Task<Result<string>> UpdateCustomerAsync(Customer customer)
-//{
-//    try
-//    {
-//        var existedCustomer = context.Customers
-//            .AsNoTracking()
-//            .Where(x => x.CustomerId == customer.CustomerId &&
-//                        customer.EntityNames!.EditSeq == customer.EntityNames!.EditSeq)
-//            .FirstOrDefault();
-
-//        if (existedCustomer is null)
-//        {
-//            return Result.Failure<string>(ErrorResponse.NotFound("There is no any customer in the system."));
-//        }
-
-//        context.Customers.Update(customer);
-
-//        await context.SaveChangesAsync();
-
-//        return Result.Success<string>(new string("customer was updated"));
-//    }
-//    catch (Exception ex)
-//    {
-//        return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
-//    }
-//}    //public async Task<Result<VCustomerList>> GetCustomerDetailByIdAsync(string customerId, bool include = false)
-//{
-//    using var connection = dapperService.CreateConnection();
-//    var parameters = new DynamicParameters();
-//    parameters.Add("@customerId", customerId);
-//    parameters.Add("@include", include);
-
-//    if (!include)
-//    {
-//        // Simple case - just get customer details
-//        var customer = await connection.QuerySingleOrDefaultAsync<VCustomerList>(
-//            ProcedureConstant.GetCustomerDetailById, parameters, commandType: CommandType.StoredProcedure);
-//        if (customer is not null)
-//        {
-//            return Result.Success(customer);
-//        }
-
-//        return Result.Failure<VCustomerList>(ErrorResponse.NotFound("No customer found."));
-//    }
-
-//    // Complex case - handle one-to-many relationships
-
-//    var multiMap = await connection.QueryMultipleAsync(ProcedureConstant.GetCustomerDetailById, parameters,
-//        commandType: CommandType.StoredProcedure);
-
-//    var customerIncludes = await multiMap.ReadFirstOrDefaultAsync<VCustomerList>();
-
-//    if (customerIncludes is not null)
-//    {
-//        var loans = await multiMap.ReadAsync<VLoanDisbursments>();
-//        var expenses = await multiMap.ReadAsync<VCustomerExpenses>();
-//        var incomes = await multiMap.ReadAsync<VCustomerIncomes>();
-//        var notes = await multiMap.ReadAsync<VCustomerNotes>();
-//        var requests = await multiMap.ReadAsync<VLoanRequests>();
-//        var collaterallines = await multiMap.ReadAsync<VCollateralLines>();
-//        var activities = await multiMap.ReadAsync<VCustomerActivities>();
-//        customerIncludes.CustomerExpenses = expenses.ToArray() ?? [];
-//        customerIncludes.CustomerIncomes = incomes.ToArray() ?? [];
-//        customerIncludes.CustomerNotes = notes.ToArray() ?? [];
-//        customerIncludes.LoanRequests = requests.ToArray() ?? [];
-//        customerIncludes.CollateralLines = collaterallines.ToArray() ?? [];
-//        customerIncludes.CustomerActivities = activities.ToArray() ?? [];
-//        return Result.Success(customerIncludes);
-//    }
-
-//    return Result.Failure<VCustomerList>(ErrorResponse.NotFound("No customer found."));
-//}

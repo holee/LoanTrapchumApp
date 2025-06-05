@@ -62,8 +62,11 @@ public sealed class CustomerService(ICustomerService cusService) : ICustomerServ
     public async Task<Result<string>> UpdateAsync(EntityNamesCreate customer)
     {
         var req = customer.Adapt<EntityNames>();
+
         var cust = customer.ToCustomer();
+
         req.Customer = cust;
+
         return await cusService.UpdateAsync(req);
     }
 

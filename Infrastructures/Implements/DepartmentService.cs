@@ -1,5 +1,6 @@
 ﻿using Applications.Interfaces.Lists;
 using Applications.Responses;
+using Applications.Responses.Message;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Departments;
 using Domains.Models.Lists;
@@ -7,6 +8,7 @@ using Infrastructures.DataAccess;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Infrastructures.Implements;
 
@@ -95,9 +97,9 @@ public class DepartmentService : IDepartmentService
 
         if (department is null) return Result.Failure<VDepartment>(ErrorResponse.NotFound("Deapartment found."));
 
-        var dept = await department.AsNoTracking().FirstOrDefaultAsync();
+        var dept = await department.AsNoTracking().FirstAsync();
 
-        return Result.Success<VDepartment>(dept!);
+        return Result.Success<VDepartment>(dept);
     }
 
 
@@ -139,8 +141,8 @@ public class DepartmentService : IDepartmentService
     }
 
 
-    public async Task<Result<IEnumerable<T>>> GetDepartments<T>(int? departmentId, int take = 10,string? filter=null)
-        where T:class
+    public async Task<Result<IEnumerable<T>>> GetDepartments<T>(int? departmentId, int take = 10, string? filter = null)
+        where T : class
     {
 
         _logger.LogInformation("Fetching departments of type {Type} with parameters - DepartmentId: {DepartmentId}, Take: {Take}, Filter: {Filter}", typeof(T).Name, departmentId, take, filter);
@@ -153,7 +155,7 @@ public class DepartmentService : IDepartmentService
 
         if (!string.IsNullOrEmpty(filter))
         {
-            depsQuery=depsQuery.Where(x=>x.DepartmentName!.Contains(filter));
+            depsQuery = depsQuery.Where(x => x.DepartmentName!.Contains(filter));
         }
 
         if (departmentId > 0)
@@ -193,7 +195,12 @@ public class DepartmentService : IDepartmentService
 
         if (!string.IsNullOrEmpty(param.Filter))
         {
-            query = query.Where(x => EF.Functions.Like(x.DepartmentName!, $"%{param.Filter}%"));
+
+            query = query.Where(x =>
+                EF.Functions.Like(x.DepartmentId.ToString()!, $"%{param.Filter}%") ||
+                EF.Functions.Like(x.DepartmentName!, $"%{param.Filter}%") ||
+                EF.Functions.Like(x.Description!, $"%{param.Filter}%")
+            );
         }
 
         if (param.SortDescending)
@@ -236,7 +243,7 @@ public class DepartmentService : IDepartmentService
         }
 
     }
-    public async Task<Result<string>> ActivateOrDeactivate(int? id, Department req)
+    public async Task<Result<string>> ActivateOrDeactivate(int? id, bool state)
     {
         _logger.LogInformation("Activating or deactivating department with ID: {DepartmentId}", id);
 
@@ -246,19 +253,22 @@ public class DepartmentService : IDepartmentService
             await using var context = await _contextFactory.CreateDbContextAsync();
 
             var dep = await context.Departments
-                                   .Where(x => x.DepartmentId != id && x.EditSeq == req.EditSeq)
-                                       .FirstOrDefaultAsync();
+                                   .IgnoreQueryFilters()
+                                   .FirstOrDefaultAsync(x => x.DepartmentId == id);
 
-            if (dep is not null)
+            if (dep is null)
             {
-                return Result.Failure<string>(ErrorResponse.Conflict("Department Name already exist."));
+                return Result.Failure<string>(ErrorResponse.NotFound(Messages.DataNotFound));
             }
 
-            context.Departments.Update(req);
+            dep.IsActive = state;
+
+            dep.ModifiedDt = DateTime.Now;
 
             await context.SaveChangesAsync();
 
             return Result.Success<string>(new("department was updated."));
+
         }
         catch (Exception ex)
         {

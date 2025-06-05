@@ -23,6 +23,7 @@ namespace Applications.Services.Branches
         Task<Result<BranchDtoUpdate>> GetUpdateBranchById(int? branchId);
         Task<Result> UpdateStatusAsync(int? branchId);
         Task<Result<T>> GetBranchById<T>(int? id) where T : class;
+        Task<Result<string>> UpdateStatusAsync(int? branchId, bool state);
     }
 
     public sealed class BranchService(IBranchService branchService) : IBranchServiceImpl
@@ -92,6 +93,10 @@ namespace Applications.Services.Branches
         public async Task<Result> UpdateStatusAsync(int? branchId)
         {
             return await branchService.UpdateStatusAsync(branchId);
+        }
+        public async Task<Result<string>> UpdateStatusAsync(int? branchId,bool state)
+        {
+            return await branchService.UpdateStatusAsync(branchId,state);
         }
     }
 }

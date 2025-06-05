@@ -3,6 +3,7 @@ using Applications.Interfaces.Branches;
 using Applications.Requests.Lists.Entities;
 using Applications.Responses;
 using Applications.Responses.Auths;
+using Applications.Responses.Message;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Auths;
 using Applications.Responses.ViewModels.Branches;
@@ -128,6 +129,35 @@ public class BranchService(IDbContextFactory<DataContext> contextFactory) : IBra
         }
     }
 
+
+    public async Task<Result<string>> UpdateStatusAsync(int? branchId,bool state)
+    {
+        try
+        {
+            await using var context = await contextFactory.CreateDbContextAsync();
+
+            var existingBranch = await context.Branches.FindAsync(branchId);
+
+            if (existingBranch is null)
+            {
+                return Result.Failure<string>(ErrorResponse.ServerError(Messages.DataNotFound));
+            }
+
+            existingBranch.IsActive = state;
+
+            existingBranch.ModifiedDt = DateTime.Now;
+
+            await context.SaveChangesAsync();
+
+            return Result.Success("Branch was updated successfully!");
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
+        }
+    }
+
+
     public async Task<Result<Branch>> GetBranchById(int? id)
     {
         await using var context = await contextFactory.CreateDbContextAsync();
@@ -166,7 +196,8 @@ public class BranchService(IDbContextFactory<DataContext> contextFactory) : IBra
 
         var queries = context.VBranchs
             .WhereIf(!string.IsNullOrEmpty(param.Filter),
-                x => EF.Functions.Like(x.BranchName, $"%{param.Filter}%"));
+                x => EF.Functions.Like(x.BranchName, $"%{param.Filter}%") ||
+                     EF.Functions.Like(x.BranchId.ToString(), $"%{param.Filter}%"));
 
         if (param.IsIncludeInActive)
         {
