@@ -21,7 +21,7 @@ public class VCommuneConfiguration : IEntityTypeConfiguration<VCommunes>
 {
     public void Configure(EntityTypeBuilder<VCommunes> builder)
     {
-        builder.ToView("VAddrCommune");
+        builder.ToView("VAddrCommunes");
         builder.HasNoKey();
     }
 }

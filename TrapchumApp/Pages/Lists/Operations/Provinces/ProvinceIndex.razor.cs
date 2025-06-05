@@ -61,7 +61,7 @@ namespace TrapchumApp.Pages.Lists.Operations.Provinces
 
             bool sortDescending = false;
 
-            int pageIndex = args.Skip!.Value;
+            pageIndex = args.Skip!.Value;
 
             if (!string.IsNullOrEmpty(args.OrderBy))
             {
@@ -118,7 +118,7 @@ namespace TrapchumApp.Pages.Lists.Operations.Provinces
                });
             if (resultModal != null)
             {
-                await OnInitializedAsync();
+                await GetProvinces();
                 Console.WriteLine("Updated...");
             }
             await InvokeAsync(StateHasChanged);

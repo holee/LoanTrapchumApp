@@ -10,9 +10,9 @@
     public class VVillages
     {
         public int? VillageId { get; set; }
-        public string? VilDescription { get; set; }
+        public string? VillDescription { get; set; }
         public string? VilInKhmer { get; set; }
-        public string? ComDesctiption { get; set; }
+        public string? ComDescription { get; set; }
         public string? ComInKhmer { get; set; }
     }
     public class VVillageDetails

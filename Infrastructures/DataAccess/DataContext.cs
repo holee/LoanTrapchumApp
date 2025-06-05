@@ -295,6 +295,7 @@ namespace Infrastructures.DataAccess
         public DbSet<VLoanRequests> VLoanRequests => Set<VLoanRequests>();
         public DbSet<VDistricts> VDistricts => Set<VDistricts>();
         public DbSet<VCommunes> VCommunes => Set<VCommunes>();
+        public DbSet<VVillages> VVillages => Set<VVillages>();
     }
 }
 

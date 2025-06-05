@@ -116,6 +116,7 @@ namespace Infrastructures.DependencyInjects
             services.TryAddTransient<IProvinceService, ProvinceService>();
             services.TryAddTransient<IDistrictService, DistrictService>();
             services.TryAddTransient<ICommuneService, CommuneService>();
+            services.TryAddTransient<IVillageServer, VillageService>();
             return services;
 
         }
