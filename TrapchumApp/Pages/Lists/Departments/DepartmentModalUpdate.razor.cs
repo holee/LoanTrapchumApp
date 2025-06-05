@@ -12,6 +12,7 @@ namespace TrapchumApp.Pages.Lists.Departments
     {
 
         private DepartmentDtoUpdate model = new DepartmentDtoUpdate();
+
         private readonly IDepartmentService _depService;
 
         public DepartmentModalUpdate(IDepartmentService departmentService)
@@ -24,9 +25,23 @@ namespace TrapchumApp.Pages.Lists.Departments
         {
             try
             {
+
+                var confirm = await DialogService.Confirm($"Do you want to update with ID#{Id}?",options:new ConfirmOptions
+                {
+                    CancelButtonText = "Cancel",
+
+                    OkButtonText = "OK",
+                });
+
+                if(confirm != true)
+                {
+                    return;
+                }
+
                 var req = model.Adapt<Department>();
 
                 var response = await _depService.UpdateAsync(req);
+
                 if (response!.IsSuccess)
                 {
                     NotificationService.Notify(NotificationSeverity.Success, Messages.DataCreated);

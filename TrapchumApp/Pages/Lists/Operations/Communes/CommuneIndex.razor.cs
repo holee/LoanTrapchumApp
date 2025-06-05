@@ -9,7 +9,8 @@ namespace TrapchumApp.Pages.Lists.Operations.Communes
     public partial class CommuneIndex
     {
         private readonly ICommuneService communeService;
-        public CommuneIndex(ICommuneService communeService) {
+        public CommuneIndex(ICommuneService communeService)
+        {
             this.communeService = communeService;
         }
         protected string? searchText = string.Empty;
@@ -29,21 +30,10 @@ namespace TrapchumApp.Pages.Lists.Operations.Communes
         }
         protected async Task GetCommunes(string? text = null)
         {
-            try
-            {
-                var param = new QueryParam(pageIndex, pageSize, sortField, sortDescending, includeInactive, text);
-                var results = await communeService.GetAllPagerAsync(param);
-                if (results.Count > 0)
-                {
-                    counts = results.Count;
-                    vCommunelistt = results.Items;
-                }
-
-            }
-            catch (Exception ex)
-            {
-
-            }
+            var param = new QueryParam(pageIndex, pageSize, sortField, includeInactive, sortDescending, text);
+            var results = await communeService.GetAllPagerAsync(param);
+            counts = results.Count;
+            vCommunelistt = results.Items;
         }
         async Task LoadData(LoadDataArgs args)
         {
@@ -62,21 +52,11 @@ namespace TrapchumApp.Pages.Lists.Operations.Communes
 
         async Task LoadDistrictPageList(int pageIndex = 0, string sortField = "CommuneId", bool sortDescending = false)
         {
-            try
-            {
-
-                var param = new QueryParam(pageIndex, pageSize, sortField, sortDescending, includeInactive, searchText);
-
-                var res = await communeService.GetAllPagerAsync(param);
-
-                vCommunelistt = res.Items;
-                counts = res.Count;
-                StateHasChanged();
-            }
-            catch
-            {
-
-            }
+            var param = new QueryParam(pageIndex, pageSize, sortField, sortDescending, includeInactive, searchText);
+            var res = await communeService.GetAllPagerAsync(param);
+            vCommunelistt = res.Items;
+            counts = res.Count;
+            StateHasChanged();
         }
         protected async Task TextChanged(string? searchtext = null)
         {
@@ -115,10 +95,26 @@ namespace TrapchumApp.Pages.Lists.Operations.Communes
             await InvokeAsync(StateHasChanged);
 
         }
-        protected async Task Details(int Id)
+
+        protected async Task AddCommune(int? Id) 
         {
+            var resultModal = await DialogService!.OpenAsync<CommuneUpdatePage>("Edit Commune",
+               new Dictionary<string, object?> { { "Id", Id } },
+               new DialogOptions
+               {
+                   Draggable = true,
+                   Resizable = true,
+
+               });
+            if (resultModal != null)
+            {
+                await OnInitializedAsync();
+                Console.WriteLine("Updated...");
+            }
+            await InvokeAsync(StateHasChanged);
 
         }
+
         protected async Task Delete(int id)
         {
             var confirm = await DialogService.Confirm("Do you want to delete commune record?", "Delete", new ConfirmOptions

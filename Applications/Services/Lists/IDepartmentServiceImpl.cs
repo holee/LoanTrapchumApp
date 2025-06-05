@@ -8,7 +8,7 @@ namespace Applications.Services.Lists;
 
 public interface IDepartmentServiceImpl
 {
-    Task<Result<string>> ActivateOrDeactivate(int? id, Department req);
+    Task<Result<string>> ActivateOrDeactivate(int? id, bool req);
     Task<Result<string>> CreateAsync(DepartmentDtoCreate department);
     Task<Result<string>> DeleteAsync(int? departmentId);
     Task<Result<string>> UpdateAsync(DepartmentDtoUpdate department);

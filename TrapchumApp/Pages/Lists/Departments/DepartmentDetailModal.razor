@@ -1,4 +1,5 @@
 ﻿@using TrapchumApp.Services
+<PageTitle>Department Details</PageTitle>
 <div class="container-fluid">
     <RadzenStack Orientation="Orientation.Horizontal"
                  AlignItems="AlignItems.Center">
@@ -6,11 +7,23 @@
             <tbody>
                 <tr>
                     <th class="table-light">Name</th>
-                    <td>@department!.DepartmentName</td>
+                    <td>@department?.DepartmentName</td>
                 </tr>
                 <tr>
                     <th class="table-light">Description</th>
-                    <td>@department!.Description</td>
+                    <td>@department?.Description</td>
+                </tr>
+                <tr>
+                    <th class="table-light">Is Active</th>
+                    <td>
+                        <RadzenCheckBox TValue="bool" Value="@department!.IsActive" />
+                    </td>
+                </tr>
+                <tr>
+                    <th class="table-light">Is InUseed</th>
+                    <td>
+                        <RadzenCheckBox TValue="bool" Value="@department!.Used" />
+                    </td>
                 </tr>
             </tbody>
         </table>

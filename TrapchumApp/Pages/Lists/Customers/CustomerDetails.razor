@@ -1,4 +1,5 @@
 ﻿@page "/App/Customers/{CustomerId}/Details"
+@using TrapchumApp.Pages.Lists.Collaterals
 @using TrapchumApp.Services
 <PageTitle>Customer</PageTitle>
 <RadzenTabs RenderMode="TabRenderMode.Server" SelectedIndex="@selectedIndex">
@@ -132,5 +133,5 @@
              Gap="1rem"
              class="rz-p-1"
              JustifyContent="JustifyContent.End">
-    <RadzenLink Path="@($"/App/Customer/{BranchId}/Branches?UserId={UserId}")" Text="Back" Icon="arrow_back" />
+    <RadzenLink Path="@($"/App/Customer/?UserId={UserId}")" Text="Back" Icon="arrow_back" />
 </RadzenStack>

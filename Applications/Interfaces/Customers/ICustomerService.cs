@@ -9,8 +9,8 @@ namespace Applications.Interfaces.Customers;
 public interface ICustomerService
 {
     Task<Result<string>> DeleteCustomerAsync(string? customerId);
-    Task<Result<string>> CreateAsync(EntityNames model);
-    Task<Result<string>> UpdateAsync(EntityNames model);
+    Task<Result<string>> CreateAsync(EntityNames model, CancellationToken cancellation = default);
+    Task<Result<string>> UpdateAsync(EntityNames model,CancellationToken cancellation = default);
     Task<Result<string>> AddCustomerNote(CustomerNote model);
     Task<Result<string>> MakeCustomerInActiveAsync(string? customerId, int editSeq = 1, bool isActive = true);
     Task<Result<string>> AddCustomerActivity(CustomerActivity model);

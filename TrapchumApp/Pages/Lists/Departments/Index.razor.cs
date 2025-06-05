@@ -3,6 +3,7 @@ using Applications.Requests.Lists.Entities;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Departments;
 using Radzen;
+using System.Threading.Tasks;
 
 namespace TrapchumApp.Pages.Lists.Departments
 {
@@ -26,6 +27,7 @@ namespace TrapchumApp.Pages.Lists.Departments
         bool sortDescending = false;
         string sortField = "DepartmentId";
         bool isLoading = false;
+        int counts = 0;
         protected override async Task OnInitializedAsync()
         {
             try
@@ -55,13 +57,18 @@ namespace TrapchumApp.Pages.Lists.Departments
         protected async Task ShowInactiveAndActive(bool e)
         {
             includeInactive = e;
-            await OnInitializedAsync();
-            await InvokeAsync(StateHasChanged);
+
+            await GetDepartments(searchText);
         }
 
-        protected async Task TextChanged()
+
+
+
+        protected async Task TextChanged(string filter)
         {
-            await GetDepartments(searchText);
+            searchText = filter;
+
+            await GetDepartments(filter);
         }
 
 
@@ -70,9 +77,9 @@ namespace TrapchumApp.Pages.Lists.Departments
             try
             {
                 isLoading = true;
-                var param = new QueryParam(pageIndex, pageSize, sortField, sortDescending, includeInactive, filter);
+                var param = new QueryParam(pageIndex, pageSize, sortField, includeInactive, sortDescending, filter);
                 var resultResponse = await _depService.GetDepartments(param);
-                var counts = resultResponse.Count;
+                counts = resultResponse.Count;
                 Departments = resultResponse.Items ?? [];
                 isLoading = false;
             }
@@ -85,7 +92,7 @@ namespace TrapchumApp.Pages.Lists.Departments
         }
         protected async Task Edit(int departmentId)
         {
-            var resultModal = await DialogService!.OpenAsync<DepartmentModalUpdate>("Edit Branch",
+            bool? resultModal = await DialogService.OpenAsync<DepartmentModalUpdate>("Edit",
                new Dictionary<string, object> { { "Id", departmentId } },
                new DialogOptions
                {
@@ -93,12 +100,10 @@ namespace TrapchumApp.Pages.Lists.Departments
                    Resizable = true,
 
                });
-            if (resultModal != null)
+            if (resultModal is bool reslt && reslt==true)
             {
-                await OnInitializedAsync();
-                Console.WriteLine("Updated...");
+                await GetDepartments(searchText);
             }
-            await InvokeAsync(StateHasChanged);
 
         }
         protected async Task Details(int departmentId)
@@ -113,6 +118,53 @@ namespace TrapchumApp.Pages.Lists.Departments
                 Resizable = false
             });
         }
+
+        private async Task LoadDepartmentData(LoadDataArgs args)
+        {
+
+            pageIndex = args.Skip ?? 0;
+
+            pageSize = args.Top ?? 10;
+
+            if (!string.IsNullOrEmpty(args.OrderBy))
+            {
+                sortField = args.OrderBy.Split(" ")[0];
+
+                string dir = args.OrderBy.Split(" ")[1];
+
+                sortDescending = dir.Contains("asc") ? false : true;
+            }
+
+
+            var filters = new List<string>();
+
+            if (args.Filters != null && args.Filters.Any())
+            {
+                foreach (var filter in args.Filters)
+                {
+                    if (filter.Property == nameof(VDepartment.DepartmentName) ||
+                        filter.Property == nameof(VDepartment.Description) ||
+                        filter.Property == nameof(VDepartment.DepartmentId))
+                    {
+                        filters.Add(filter.FilterValue?.ToString() ?? string.Empty);
+                    }
+                }
+            }
+
+            // Include search text from PageDropDown
+            if (!string.IsNullOrEmpty(searchText))
+            {
+                filters.Add(searchText);
+            }
+
+            // Combine filters into a single string (space-separated)
+            var filterString = filters.Any() ? string.Join(" ", filters.Where(f => !string.IsNullOrEmpty(f))) : null;
+
+
+            await GetDepartments(filterString);
+
+        }
+
         protected async Task Delete(int departmentId)
         {
             var confirm = await DialogService.Confirm("Do you want to delete?", "Delete", new ConfirmOptions
@@ -126,7 +178,7 @@ namespace TrapchumApp.Pages.Lists.Departments
 
                 if (result.IsSuccess)
                 {
-                    NotificationService.Notify(NotificationSeverity.Success,"CreateNewUser Success");
+                    NotificationService.Notify(NotificationSeverity.Success, "CreateNewUser Success");
                     await GetDepartments(searchText);
                 }
                 else
