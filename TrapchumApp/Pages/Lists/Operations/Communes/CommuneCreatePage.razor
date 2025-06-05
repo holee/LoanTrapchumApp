@@ -7,8 +7,8 @@
                 <RadzenColumn Size="12">
                     <RadzenColumn Size="12" SizeMD="6" SizeLG="3">
                         <RadzenFormField Text="Commune ID *" Variant="Variant.Flat" Style="width:100%">
-                            <RadzenNumeric Name="DistrictId" @bind-Value="@model.CommuneId" Style="width:100%" />
-                            <RadzenRequiredValidator Component="DistrictId" Text="District ID is required" />
+                            <RadzenNumeric Name="CommuneId" @bind-Value="@model.CommuneId" Style="width:100%" />
+                            <RadzenRequiredValidator Component="CommuneId" Text="Commune ID is required" />
                         </RadzenFormField>
                     </RadzenColumn>
                 </RadzenColumn>
@@ -19,7 +19,7 @@
                         <RadzenFormField Text="District *" Variant="Variant.Flat" Style="width:100%">
                             <RadzenDropDown Chips="true"
                                             AllowFiltering="true"
-                                            Name="DropDownSalutions"
+                                            Name="DistrictRefId"
                                             Style="width: 100%;"
                                             Data="districts"
                                             @bind-Value="model.DistrictRefId"
@@ -29,7 +29,7 @@
                                             Placeholder="Please select district">
 
                             </RadzenDropDown>
-
+                            <RadzenRequiredValidator Component="DistrictRefId" Text="District is required" />
                         </RadzenFormField>
                     </RadzenColumn>
                 </RadzenColumn>
