@@ -1,6 +1,7 @@
 using Applications.Interfaces.Addresses;
 using Applications.Requests.Lists.Addreses;
 using Domains.Models.Addresses;
+using Microsoft.AspNetCore.Components;
 
 namespace TrapchumApp.Pages.Lists.Operations.Villages
 {
@@ -15,16 +16,26 @@ namespace TrapchumApp.Pages.Lists.Operations.Villages
             this.communeService = communeService;
             this.villageServer = villageServer;
         }
+        [Parameter] public int? Id { get; set; }
         protected List<Commune> communelist = [];
         protected VillageDtoCreate model = new VillageDtoCreate();
         protected override async Task OnInitializedAsync()
         {
-            var results = await communeService.GetAllAsync(null);
-            if (results.IsSuccess)
+            try
             {
+                var results = await communeService.GetAllAsync(null);
+                if (results.IsSuccess)
+                {
 
-                communelist = results.Data!.ToList();
+                    communelist = results.Data!.ToList();
+                    model.CommuneRefId = Id ?? 0;
+                }
             }
+            catch(Exception ex)
+            {
+                NotificationService.Notify(NotificationSeverity.Error, ex.Message);
+            }
+            
             await base.OnInitializedAsync();
         }
         protected async Task Create()
@@ -50,7 +61,7 @@ namespace TrapchumApp.Pages.Lists.Operations.Villages
             }
             catch (Exception ex)
             {
-                throw new Exception();
+                NotificationService.Notify(NotificationSeverity.Error, ex.Message);
             }
         }
     }

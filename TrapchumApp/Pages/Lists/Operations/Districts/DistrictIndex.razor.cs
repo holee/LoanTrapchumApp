@@ -3,6 +3,7 @@ using Applications.Interfaces.Addresses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Addresses;
 using Radzen;
+using TrapchumApp.Pages.Lists.Operations.Communes;
 using TrapchumApp.Pages.Lists.Operations.Provinces;
 
 namespace TrapchumApp.Pages.Lists.Operations.Districts
@@ -50,22 +51,30 @@ namespace TrapchumApp.Pages.Lists.Operations.Districts
             string sortField = "DistrictId";
             bool sortDescending = false;
             pageIndex = args.Skip!.Value;
-            if (!string.IsNullOrEmpty(args.OrderBy))
+            if (args.OrderBy.Any())
             {
-                sortField = args.OrderBy.Split(" ")[0];
-                string dir = args.OrderBy.Split(" ")[1];
-                sortDescending = dir.Contains("asc") ? false : true;
+                sortField = args.Sorts.First().Property;
+
+                sortDescending = args.Sorts.First().SortOrder == SortOrder.Descending;
             }
 
-            await LoadDistrictPageList(pageIndex, sortField, sortDescending);
+            var filterColumns = args.Filters?.FirstOrDefault(f => 
+                                                                f.Property == nameof(VDistricts.DisDescription) ||
+                                                                f.Property == nameof(VDistricts.DisInKhmer) ||
+                                                                f.Property == nameof(VDistricts.ProInKhmer)||
+                                                                f.Property == nameof(VDistricts.ProDescription))?.FilterValue?.ToString();
+
+            var filterString = filterColumns ?? string.Empty;
+
+            await LoadDistrictPageList(pageIndex, sortField, sortDescending,filterString);
         }
 
-        async Task LoadDistrictPageList(int pageIndex = 0, string sortField = "DistrictId", bool sortDescending = false)
+        async Task LoadDistrictPageList(int pageIndex = 0, string sortField = "DistrictId", bool sortDescending = false,string? filter=null)
         {
             try
             {
 
-                var param = new QueryParam(pageIndex, pageSize, sortField, sortDescending,includeInactive, searchText);
+                var param = new QueryParam(pageIndex, pageSize, sortField, includeInactive, sortDescending, filter);
 
                 var res = await districtService.GetAllPagerAsync(param);
 
@@ -100,6 +109,24 @@ namespace TrapchumApp.Pages.Lists.Operations.Districts
         protected async Task Edit(int Id)
         {
             var resultModal = await DialogService!.OpenAsync<DistrictUpdatePage>("Edit District",
+               new Dictionary<string, object> { { "Id", Id } },
+               new DialogOptions
+               {
+                   Draggable = true,
+                   Resizable = true,
+
+               });
+            if (resultModal != null)
+            {
+                await GetDistricts();
+                Console.WriteLine("Updated...");
+            }
+            await InvokeAsync(StateHasChanged);
+
+        }
+        protected async Task AddCommune(int Id)
+        {
+            var resultModal = await DialogService!.OpenAsync<CommuneCreatePage>("Commune Create",
                new Dictionary<string, object> { { "Id", Id } },
                new DialogOptions
                {

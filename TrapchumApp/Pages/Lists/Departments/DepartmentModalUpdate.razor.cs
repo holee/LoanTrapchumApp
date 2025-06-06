@@ -44,7 +44,7 @@ namespace TrapchumApp.Pages.Lists.Departments
 
                 if (response!.IsSuccess)
                 {
-                    NotificationService.Notify(NotificationSeverity.Success, Messages.DataCreated);
+                    NotificationService.Notify(NotificationSeverity.Success, "Department was updated successful!");
 
                     DialogService.Close(true);
                 }

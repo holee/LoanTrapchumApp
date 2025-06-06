@@ -63,7 +63,7 @@ namespace TrapchumApp.Pages.Lists.Operations.Villages
             }
             catch (Exception ex)
             {
-                throw new Exception();
+                throw new Exception(ex.Message, ex.InnerException);
             }
         }
     }

@@ -25,6 +25,7 @@ namespace Applications.Commons.Mappers
         {
             return new District
             {
+                DistrictId = source.DistrictId,
                 DisDescription = source.DisDescription,
                 ProvinceRefId = source.ProvinceRefId,
                 DisInKhmer = source.DisDescription,

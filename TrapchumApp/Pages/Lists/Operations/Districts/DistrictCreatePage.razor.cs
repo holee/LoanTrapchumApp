@@ -1,6 +1,7 @@
 using Applications.Commons.Mappers;
 using Applications.Interfaces.Addresses;
 using Applications.Requests.Lists.Addreses;
+using Azure;
 using BitMiracle.LibTiff.Classic;
 using Domains.Models.Addresses;
 using Mapster;
@@ -72,7 +73,7 @@ namespace TrapchumApp.Pages.Lists.Operations.Districts
             }
             catch (Exception ex)
             {
-                throw new Exception();
+                NotificationService.Notify(NotificationSeverity.Error, ex.Message);
             }
         }
     }

@@ -1,6 +1,8 @@
 using Applications.Interfaces.Addresses;
 using Applications.Requests.Lists.Addreses;
+using Azure;
 using Domains.Models.Addresses;
+using Microsoft.AspNetCore.Components;
 
 namespace TrapchumApp.Pages.Lists.Operations.Communes
 {
@@ -15,16 +17,26 @@ namespace TrapchumApp.Pages.Lists.Operations.Communes
             this.districtService = districtService;
             this.communeService = communeService;
         }
+        [Parameter] public int? Id { get; set; } 
         protected List<District> districts = [];
         protected CommuneDtoCreate model = new CommuneDtoCreate();
         protected override async Task OnInitializedAsync()
         {
-            var results = await districtService.GetAllAsync(null);
-            if (results.IsSuccess)
+            try
             {
+                var results = await districtService.GetAllAsync(null);
+                if (results.IsSuccess)
+                {
 
-                districts = results.Data!.ToList();
+                    districts = results.Data!.ToList();
+                    model.DistrictRefId = Id ?? 0;
+                }
             }
+            catch (Exception ex)
+            {
+                NotificationService.Notify(NotificationSeverity.Error, ex.Message);
+            }
+            
             await base.OnInitializedAsync();
         }
         protected async Task Create()
@@ -36,7 +48,7 @@ namespace TrapchumApp.Pages.Lists.Operations.Communes
 
                 if (response!.IsSuccess)
                 {
-                    NotificationService.Notify(NotificationSeverity.Success, "District new record was created successful.");
+                    NotificationService.Notify(NotificationSeverity.Success, "Commune new record was created successful.");
                     DialogService.Close(true);
                 }
                 else
@@ -46,7 +58,7 @@ namespace TrapchumApp.Pages.Lists.Operations.Communes
             }
             catch (Exception ex)
             {
-                throw new Exception();
+                NotificationService.Notify(NotificationSeverity.Error,ex.Message);
             }
         }
     }
