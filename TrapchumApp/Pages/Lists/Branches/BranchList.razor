@@ -12,23 +12,25 @@
 <RadzenTabs RenderMode="TabRenderMode.Server">
     <Tabs>
         <RadzenTabsItem Text="Branches">
-            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
-                         class="rz-my-2"
-                         JustifyContent="JustifyContent.SpaceBetween">
-                <AuthorizeView>
-                    <Authorized>
-                        <RadzenButton Click="OnCreate"
-                                      Text="New Branch"
-                                      Icon="add"
-                                      ButtonStyle="ButtonStyle.Primary"
-                                      Size="ButtonSize.Small" />
-                    </Authorized>
-                </AuthorizeView>
-                <div class="ml-2">
-                    <RadzenCheckBox TValue="bool" @bind-Value=@InActive Change="ex => OnIncludeInactive(ex)" Name="InActive" />
-                    <RadzenLabel Text="Include InActive" Component="CheckBox1" Style="margin-left: 8px; vertical-align: middle;" />
-                </div>
-            </RadzenStack>
+            <GridToolbar SearchChanged="SearchChanged">
+                <LeftChildren>
+                    <AuthorizeView>
+                        <Authorized>
+                            <RadzenButton Click="OnCreate"
+                                          Text="New Branch"
+                                          Icon="add"
+                                          ButtonStyle="ButtonStyle.Primary"
+                                          Size="ButtonSize.Small" />
+                        </Authorized>
+                    </AuthorizeView>
+                </LeftChildren>
+                <RightChildren>
+                    <div class="ml-2">
+                        <RadzenCheckBox TValue="bool" @bind-Value=@InActive Change="ex => OnIncludeInactive(ex)" Name="InActive" />
+                        <RadzenLabel Text="Include InActive" Component="CheckBox1" Style="margin-left:3px; vertical-align: middle;" />
+                    </div>
+                </RightChildren>
+            </GridToolbar>
             <RadzenDataGrid GridLines="DataGridGridLines.Horizontal"
                             Count="@counts"
                             PageSize="@pageSize"

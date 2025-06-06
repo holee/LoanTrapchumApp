@@ -64,7 +64,7 @@ namespace TrapchumApp.Pages.Lists.Departments
 
 
 
-        protected async Task TextChanged(string filter)
+        protected async Task SearchChanged(string filter)
         {
             searchText = filter;
 
@@ -126,40 +126,18 @@ namespace TrapchumApp.Pages.Lists.Departments
 
             pageSize = args.Top ?? 10;
 
-            if (!string.IsNullOrEmpty(args.OrderBy))
+            if (args.OrderBy.Any())
             {
-                sortField = args.OrderBy.Split(" ")[0];
+                sortField = args.Sorts.First().Property;
 
-                string dir = args.OrderBy.Split(" ")[1];
-
-                sortDescending = dir.Contains("asc") ? false : true;
+                sortDescending = args.Sorts.First().SortOrder == SortOrder.Descending;
             }
 
+            var filterColumns= args.Filters?.FirstOrDefault(f => f.Property == nameof(VDepartment.DepartmentName) ||
+                                                                f.Property == nameof(VDepartment.Description) ||
+                                                                f.Property == nameof(VDepartment.DepartmentId))?.FilterValue?.ToString();   
 
-            var filters = new List<string>();
-
-            if (args.Filters != null && args.Filters.Any())
-            {
-                foreach (var filter in args.Filters)
-                {
-                    if (filter.Property == nameof(VDepartment.DepartmentName) ||
-                        filter.Property == nameof(VDepartment.Description) ||
-                        filter.Property == nameof(VDepartment.DepartmentId))
-                    {
-                        filters.Add(filter.FilterValue?.ToString() ?? string.Empty);
-                    }
-                }
-            }
-
-            // Include search text from PageDropDown
-            if (!string.IsNullOrEmpty(searchText))
-            {
-                filters.Add(searchText);
-            }
-
-            // Combine filters into a single string (space-separated)
-            var filterString = filters.Any() ? string.Join(" ", filters.Where(f => !string.IsNullOrEmpty(f))) : null;
-
+            var filterString = filterColumns ?? string.Empty;
 
             await GetDepartments(filterString);
 

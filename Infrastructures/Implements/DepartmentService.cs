@@ -207,8 +207,12 @@ public class DepartmentService : IDepartmentService
         {
             query = query.OrderByDescending(x => EF.Property<object>(x, param.SortColumn));
         }
+        else
+        {
+            query = query.OrderBy(x => EF.Property<object>(x, param.SortColumn));
+        }
 
-        var counts = await query.CountAsync();
+            var counts = await query.CountAsync();
 
         var data = await query.Skip(param.Skip)
                        .Take(param.PageSize)

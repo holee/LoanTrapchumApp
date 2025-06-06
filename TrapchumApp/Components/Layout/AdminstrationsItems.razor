@@ -1,4 +1,5 @@
 ﻿@using TrapchumApp.Services
+@using TrapchumApp.Helpers.Constants
 <RadzenPanelMenuItem Text="Adminstrations" Icon="manage_accounts">
     <RadzenPanelMenuItem Text="Manage Users" Icon="account_circle" Path="/App/Account/Users" />
     <RadzenPanelMenuItem Text="Manage Roles" Icon="admin_panel_settings" Path="/App/Account/Roles" />
@@ -8,10 +9,11 @@
 <RadzenPanelMenuItem Text="Backup/Recovery" Icon="manage_accounts">
    
 </RadzenPanelMenuItem>
-<RadzenPanelMenuItem Text="Application Setting" Icon="settings">
-    <RadzenPanelMenuItem Text="Generals" Icon="tv_options_input_settings" Path="/Settings" />
-    <RadzenPanelMenuItem Text="Loan Setting" Icon="color_lens" Path="/App/Loans/Settings" />
-    <RadzenPanelMenuItem Text="Manage Permissions" Icon="color_lens" Path="/Administrator/Permissions" />
+<RadzenPanelMenuItem Text="Setting" Icon="@IconNames.Settings">
+    <RadzenPanelMenuItem Text="Provinces" Icon="@IconNames.LocationParking" Path="@($"/App/Operation-Area/Provinces")" />
+    <RadzenPanelMenuItem Text="Districts" Icon="@IconNames.LocationCity" Path="/App/Operation-Area/Districts" />
+    <RadzenPanelMenuItem Text="Communes" Icon="@IconNames.LocationHome" Path="/App/Operation-Area/Communes" />
+    <RadzenPanelMenuItem Text="Villages" Icon="@IconNames.LocationOn" Path="/App/Operation-Area/Villages" />
 </RadzenPanelMenuItem>
 @code {
 

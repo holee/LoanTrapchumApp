@@ -76,11 +76,6 @@
             </AuthorizeView>
             <AuthorizeView Policy="@RolePolicies.AdminOnly">
                 <Authorized>
-                    <OperationArea />
-                </Authorized>
-            </AuthorizeView>
-            <AuthorizeView Policy="@RolePolicies.AdminOnly">
-                <Authorized>
                     <OperatedPerson UserId="@userId" BranchId="@branchId" />
                 </Authorized>
             </AuthorizeView>

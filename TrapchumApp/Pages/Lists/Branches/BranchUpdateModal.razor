@@ -35,6 +35,7 @@
                 </RadzenColumn>
                 <RadzenColumn Size="9">
                     <RadzenTextBox Name="Description" @bind-Value="model.Description" Style="width:100%" />
+                     <ValidationMessage For="@(() => model.Description)" />
                 </RadzenColumn>
             </RadzenRow>
         </ChildContent>

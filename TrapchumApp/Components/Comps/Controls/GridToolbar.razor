@@ -1,0 +1,64 @@
+﻿@using System.Linq.Expressions
+@using TrapchumApp.Services
+@inherits ComponentBase
+<RadzenRow AlignItems="AlignItems.Center">
+    <RadzenColumn Size="12" SizeMD="6" SizeSM="12">
+        @if(LeftChildren is not null)
+        {
+            <RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween" Orientation="Orientation.Horizontal">
+                @LeftChildren
+            </RadzenStack>
+        }
+    </RadzenColumn>
+    <RadzenColumn Size="12" SizeMD="6" SizeSM="12">
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+            @if(RightChildren is not null)
+            {
+                @RightChildren
+            }
+            <RadzenFormField Style="margin-bottom:0.8rem;">
+                <Start>
+                    <RadzenIcon Icon="search" />
+                </Start>
+                <ChildContent>
+                    <RadzenTextBox Value="@Value"
+                                   ValueExpression="@ValueExpression"
+                                   Change="Changed"
+                                   @oninput="OnTextChanged"
+                                   class="w-100"
+                                   id="@Id"
+                                   @key="@Id"
+                                   Name="@Name"
+                                   Placeholder="@Placeholder"
+                                   ValueChanged="ValueChanged" />
+                </ChildContent>
+            </RadzenFormField>
+        </RadzenStack>
+    </RadzenColumn>
+</RadzenRow>
+
+
+@code {
+    [Parameter] public string Id { get; set; } = Guid.NewGuid().ToString("N");
+    [Parameter] public string Name { get; set; } = Guid.NewGuid().ToString("N");
+    [Parameter] public string? Value { get; set; }
+    [Parameter] public string Placeholder { get; set; } = "Search...";
+    [Parameter] public TextAlign TextAlign { get; set; } = TextAlign.Left;
+    [Parameter] public EventCallback<string?> ValueChanged { get; set; }
+    [Parameter] public Expression<Func<string>>? ValueExpression { get; set; }
+    [Parameter] public EventCallback<string> Changed { get; set; }
+    [Parameter] public EventCallback<string> SearchChanged { get; set; }
+    [Parameter] public bool ShowIcon { get; set; } = true;
+    [Parameter] public RenderFragment? RightChildren { get; set; } = default!;
+    [Parameter] public RenderFragment? LeftChildren { get; set; } = default!;
+
+    async Task OnTextChanged(ChangeEventArgs e)
+    {
+        Value = e.Value?.ToString() ?? string.Empty;
+
+        await SearchChanged.InvokeAsync(Value);
+
+    }
+
+
+}

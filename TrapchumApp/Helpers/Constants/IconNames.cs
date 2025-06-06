@@ -63,6 +63,7 @@
         public const string TrendingUp = "trending_up";
         public const string Database = "database";
         public const string AccountBalanceWallet = "account_balance_wallet"; 
+        public const string ManageAccounts = "manage_accounts"; 
         public const string QrcodeScanner = "qr_code_scanner"; 
         public const string Receipt = "receipt";
         public const string Analytics = "analytics";

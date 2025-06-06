@@ -24,6 +24,7 @@ namespace Applications.Validations
         public static IServiceCollection AddValidationServiceInjections(this IServiceCollection services)
         {
             services.AddTransient<IValidator<BranchDtoCreate>, BranchDtoCreateValidator>();
+            services.AddTransient<IValidator<BranchDtoUpdate>, BranchDtoUpdateValidator>();
             services.AddTransient<IValidator<RoleCreateDto>, RoleCreateDtoValidator>();
             services.AddTransient<IValidator<RegisterRequest>, RegisterRequestValidator>();
             services.AddTransient<IValidator<TokenRequest>, TokenRequestValidator>();

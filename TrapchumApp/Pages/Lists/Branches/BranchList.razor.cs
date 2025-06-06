@@ -33,11 +33,11 @@ namespace TrapchumApp.Pages.Lists.Branches
 
         IEnumerable<RowNumber>? rowNumbers;
 
-        protected async Task PerformSearch(ChangeEventArgs e)
+        protected async Task SearchChanged(string arg)
         {
-            searchText = e.Value?.ToString() ?? string.Empty;
+            searchText = arg ?? string.Empty;
 
-            await GetBranches(searchText);
+            await GetBranches(arg);
         }
 
         protected async Task PerformSearch(string? searchText = null)

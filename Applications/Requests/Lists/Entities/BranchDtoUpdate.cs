@@ -1,6 +1,6 @@
 ﻿namespace Applications.Requests.Lists.Entities;
 
-public class BranchDtoUpdate
+public sealed class BranchDtoUpdate
 {
     public int BranchId { get; set; }
     public int? BankRefId { get; set; }

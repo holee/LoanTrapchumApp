@@ -8,9 +8,8 @@ namespace Applications.Validations.Branches
         {
             RuleFor(x => x.BranchName)
                            .NotEmpty().WithMessage("Branch Name is required.");
-            RuleFor(x => x.BankRefId)
-                           .NotNull().WithMessage("Please fill the bank value.")
-                           .GreaterThan(0).WithMessage("Please fill the bank value.");
+            RuleFor(x => x.Description)
+                          .NotEmpty().WithMessage("Please fill the branch code.");
         }
     }
 }
