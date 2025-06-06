@@ -37,9 +37,9 @@ namespace TrapchumApp.Pages.Lists.Operations.Communes
         }
         async Task LoadData(LoadDataArgs args)
         {
-            string sortField = "DistrictId";
+            string sortField = "CommuneId";
             bool sortDescending = false;
-            int pageIndex = args.Skip!.Value;
+            pageIndex = args.Skip!.Value;
             if (!string.IsNullOrEmpty(args.OrderBy))
             {
                 sortField = args.OrderBy.Split(" ")[0];
@@ -50,7 +50,7 @@ namespace TrapchumApp.Pages.Lists.Operations.Communes
             await LoadDistrictPageList(pageIndex, sortField, sortDescending);
         }
 
-        async Task LoadDistrictPageList(int pageIndex = 0, string sortField = "DistrictId", bool sortDescending = false)
+        async Task LoadDistrictPageList(int pageIndex = 0, string sortField = "CommuneId", bool sortDescending = false)
         {
             var param = new QueryParam(pageIndex, pageSize, sortField, sortDescending, includeInactive, searchText);
             var res = await communeService.GetAllPagerAsync(param);
@@ -89,7 +89,7 @@ namespace TrapchumApp.Pages.Lists.Operations.Communes
                });
             if (resultModal != null)
             {
-                await OnInitializedAsync();
+                await GetCommunes();
                 Console.WriteLine("Updated...");
             }
             await InvokeAsync(StateHasChanged);

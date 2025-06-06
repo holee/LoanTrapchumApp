@@ -1,3 +1,85 @@
-﻿<h3>VillageUpdatePage</h3>
+﻿@using TrapchumApp.Services
+@using Domains.Models.Addresses
+<RadzenStack Gap="1rem" Orientation="Orientation.Vertical" JustifyContent="JustifyContent.SpaceBetween" Style="height: 100%;">
+    <RadzenTemplateForm TItem="VillageDtoUpdate" Data=@model Submit=@Update>
+        <RadzenStack>
+            <RadzenRow>
+                <RadzenColumn Size="12">
+                    <RadzenColumn Size="12" SizeMD="6" SizeLG="3">
+                        <RadzenFormField Text="Village ID *" Variant="Variant.Flat" Style="width:100%">
+                            <RadzenNumeric Disabled Name="VillageId" @bind-Value="@model.VillageId" Style="width:100%" />
+                            <RadzenRequiredValidator Component="VillageId" Text="Village ID is required" />
+                        </RadzenFormField>
+                    </RadzenColumn>
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow>
+                <RadzenColumn Size="12">
+                    <RadzenColumn Size="12" SizeMD="6" SizeLG="3">
+                        <RadzenFormField Text="Commune *" Variant="Variant.Flat" Style="width:100%">
+                            <RadzenDropDown Disabled Chips="true"
+                                            AllowFiltering="true"
+                                            Name="CommuneRefId"
+                                            Style="width: 100%;"
+                                            Data="communelist"
+                                            @bind-Value="model.CommuneRefId"
+                                            TextProperty="@nameof(Commune.ComInKhmer)"
+                                            ValueProperty="@nameof(Commune.CommuneId)"
+                                            FilterOperator="StringFilterOperator.Contains"
+                                            Placeholder="Please select commune">
+
+                            </RadzenDropDown>
+
+                        </RadzenFormField>
+                    </RadzenColumn>
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow>
+                <RadzenColumn Size="12">
+                    <RadzenColumn Size="12" SizeMD="6" SizeLG="3">
+                        <RadzenFormField Text="Village In English" Variant="Variant.Flat" Style="width:100%">
+                            <RadzenTextBox Name="VillDescription" @bind-Value="model.VillDescription" Style="width:100%" />
+
+                        </RadzenFormField>
+                    </RadzenColumn>
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow>
+                <RadzenColumn Size="12">
+                    <RadzenColumn Size="12" SizeMD="6" SizeLG="3">
+                        <RadzenFormField Text="Village In Khmer" Variant="Variant.Flat" Style="width:100%">
+                            <RadzenTextBox Name="VilInKhmer" @bind-Value="model.VilInKhmer" Style="width:100%" />
+
+                        </RadzenFormField>
+                    </RadzenColumn>
+                </RadzenColumn>
+            </RadzenRow>
+        </RadzenStack>
+        <RadzenStack Orientation="Orientation.Horizontal" class="mt-2"
+                     JustifyContent="JustifyContent.End" Gap="0.5rem">
+            <RadzenButton ButtonType="ButtonType.Submit"
+                          Text="Save"
+                          Size="ButtonSize.Small"
+                          ButtonStyle="ButtonStyle.Primary"
+                          Icon="save"></RadzenButton>
+            <RadzenButton Click="@((args) => DialogService!.Close(true))"
+                          Variant="Variant.Flat"
+                          Size="ButtonSize.Small"
+                          Text="Close"
+                          Icon="cancel"
+                          ButtonStyle="ButtonStyle.Secondary" />
+        </RadzenStack>
+    </RadzenTemplateForm>
+</RadzenStack>
+
+
+
+
+
+
+
+
+
+
 
 

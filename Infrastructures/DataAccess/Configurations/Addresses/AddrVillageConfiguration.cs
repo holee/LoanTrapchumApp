@@ -11,7 +11,7 @@ public class AddrVillageConfiguration : IEntityTypeConfiguration<Village>
     {
         builder.ToTable("lt_addrVillages");
         builder.HasKey(x => x.VillageId);
-        builder.Property(x => x.VillageId).ValueGeneratedOnAdd();
+        builder.Property(x => x.VillageId).ValueGeneratedNever();
         builder.Property(p => p.CommuneRefId);
         builder.Property(p => p.VilInKhmer).HasMaxLength(200);
         builder.Property(p => p.VillDescription).HasMaxLength(200);

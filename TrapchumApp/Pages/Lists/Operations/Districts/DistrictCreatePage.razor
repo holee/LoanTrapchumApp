@@ -19,7 +19,7 @@
                         <RadzenFormField Text="Province *" Variant="Variant.Flat" Style="width:100%">
                             <RadzenDropDown Chips="true"                                          
                                             AllowFiltering="true"
-                                            Name="DropDownSalutions"
+                                            Name="ProvinceRefId"
                                             Style="width: 100%;"
                                             Data="provinces"
                                             ReadOnly="ProvinceCode > 0"
@@ -30,7 +30,7 @@
                                             Placeholder="Please select province">
 
                             </RadzenDropDown>
-                            
+                            <RadzenRequiredValidator Component="ProvinceRefId" Text="Province is required" />
                         </RadzenFormField>
                     </RadzenColumn>
                 </RadzenColumn>

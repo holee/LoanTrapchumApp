@@ -49,7 +49,7 @@ namespace TrapchumApp.Pages.Lists.Operations.Districts
         {
             string sortField = "DistrictId";
             bool sortDescending = false;
-            int pageIndex = args.Skip!.Value;
+            pageIndex = args.Skip!.Value;
             if (!string.IsNullOrEmpty(args.OrderBy))
             {
                 sortField = args.OrderBy.Split(" ")[0];
@@ -109,7 +109,7 @@ namespace TrapchumApp.Pages.Lists.Operations.Districts
                });
             if (resultModal != null)
             {
-                await OnInitializedAsync();
+                await GetDistricts();
                 Console.WriteLine("Updated...");
             }
             await InvokeAsync(StateHasChanged);
