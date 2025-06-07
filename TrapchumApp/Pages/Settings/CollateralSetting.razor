@@ -1,0 +1,155 @@
+﻿@using Applications.Responses.Lists.Collaterals
+@using Applications.Services.Settings
+@using Domains.Models.Collaterals
+<style>
+    .rz-grid-table td .rz-cell-data {
+        line-height: 1.5rem;
+        font-size: 0.8rem;
+    }
+</style>
+<RadzenDataGrid Count="@_counts"
+                PageSize="@pageSize"
+                LoadData="@LoadData"
+                Density="Density.Compact"
+                GridLines="DataGridGridLines.Both"
+                TItem="CollateralSubType"
+                EditMode="DataGridEditMode.Single"
+                RowUpdate="@OnUpdateRow"
+                RowCreate="@OnCreateRow"
+                ShowPagingSummary="true"
+                AllowPaging="true"
+                Sort="@Reset"
+                Page="@Reset"
+                Filter="@Reset"
+                @ref="@refGrid"
+                Data="@_collateralSubTypes">
+    <Columns>
+        <RadzenDataGridColumn Property="@nameof(CollateralSubType.Id)"
+                              Title="Id"
+                              Width="4rem"
+                              TextAlign="TextAlign.Center"
+                              Context="c">
+            <Template>
+                @(_collateralSubTypes.IndexOf(c) + 1)
+                <input type="hidden" @bind="c.Id" />
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="@nameof(CollateralTypeResponse.CollateralTypeCode)"
+                              Title="Category"
+                              Width="10rem"
+                              Context="c"
+                              TextAlign="TextAlign.Left">
+            <Template>
+                @_colleralTypes.FirstOrDefault(x=>x.CollateralTypeId==c.CollateralTypeRefId)?.CollateralTypeCode
+            </Template>
+            <EditTemplate Context="c">
+                <RadzenDropDown @bind-Value="c.CollateralTypeRefId"
+                                Data="@_colleralTypes"
+                                TextProperty="@nameof(CollateralTypeResponse.CollateralTypeCode)"
+                                ValueProperty="@nameof(CollateralTypeResponse.CollateralTypeId)" 
+                                Style="width:100%; display: block;"
+                                InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "Select customer" } })" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="@nameof(CollateralSubType.CollateralSubTypeName)"
+                              Title="Type Name"
+                              Width="10rem"
+                              TextAlign="TextAlign.Left"
+                              Context="c">
+            <Template>
+                @c.CollateralSubTypeName
+            </Template>
+            <EditTemplate Context="c">
+                <RadzenTextBox @bind-Value="c.CollateralSubTypeName" Style="width: 100%;" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="@nameof(CollateralSubType.CollateralSubTypeNameInKhmer)"
+                              Title="Khmer Name"
+                              Width="10rem"
+                              TextAlign="TextAlign.Left"
+                              Context="c">
+            <Template>
+                @c.CollateralSubTypeNameInKhmer
+            </Template>
+            <EditTemplate Context="c">
+                <RadzenTextBox @bind-Value="c.CollateralSubTypeNameInKhmer" Style="width: 100%;" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="@nameof(CollateralSubType.ValueRate)"
+                              Title="Type Name"
+                              Width="10rem"
+                              TextAlign="TextAlign.Left"
+                              Context="c">
+            <Template>
+                @c?.ValueRate
+            </Template>
+            <EditTemplate Context="c">
+                <RadzenNumeric ShowUpDown="false" TValue="decimal?" @bind-Value="c.ValueRate" Style="width: 100%;" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="@nameof(CollateralSubType.LoanSizeAmuntMin)"
+                              Title="Min Amount"
+                              Width="10rem"
+                              TextAlign="TextAlign.Left"
+                              Context="c">
+            <Template>
+                @c?.LoanSizeAmuntMin
+            </Template>
+            <EditTemplate Context="c">
+                <RadzenNumeric ShowUpDown="false" TValue="decimal?" @bind-Value="c.LoanSizeAmuntMin" Style="width: 100%;" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="@nameof(CollateralSubType.LoanSizeAmuntMax)"
+                              Title="Max Amount"
+                              Width="10rem"
+                              TextAlign="TextAlign.Left"
+                              Context="c">
+            <Template>
+                @c?.LoanSizeAmuntMax
+            </Template>
+            <EditTemplate Context="c">
+                <RadzenNumeric ShowUpDown="false" TValue="decimal?" @bind-Value="c.LoanSizeAmuntMax" Style="width: 100%;" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="@nameof(CollateralSubType.IsActive)"
+                              Title="IsActive"
+                              Width="6rem"
+                              TextAlign="TextAlign.Center"
+                              Context="c">
+            <Template>
+                <RadzenCheckBox TValue="bool?" Value="@c.IsActive" ReadOnly />
+            </Template>
+            <EditTemplate>
+                <RadzenCheckBox TValue="bool?" @bind-Value="@c.IsActive" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="@nameof(CollateralSubType.Id)"
+                              Title="Action"
+                              Width="6rem"
+                              TextAlign="TextAlign.Center"
+                              Context="c">
+            <Template>
+                <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light"
+                              Variant="Variant.Flat" Size="ButtonSize.ExtraSmall"
+                              class="rz-my-1 rz-ms-1" Click="@(args => EditRow(c))"
+                              @onclick:stopPropagation="true" />
+@*                 <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger"
+                              Variant="Variant.Flat" Size="ButtonSize.ExtraSmall"
+                              Shade="Shade.Lighter" class="rz-my-1 rz-ms-1"
+                              Click="@(args => DeleteRow(c))" @onclick:stopPropagation="true" /> *@
+            </Template>
+            <EditTemplate Context="order">
+                <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Danger"
+                              Variant="Variant.Flat"
+                              Size="ButtonSize.ExtraSmall" Click="@((args) => SaveRow(order))" aria-label="Save" />
+                <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Primary"
+                              Variant="Variant.Flat" Size="ButtonSize.ExtraSmall"
+                              class="rz-my-1 rz-ms-1" Click="@((args) => CancelEdit(order))" aria-label="Cancel" />
+@*                 <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger"
+                              Variant="Variant.Flat" Size="ButtonSize.ExtraSmall"
+                              Shade="Shade.Lighter" class="rz-my-1 rz-ms-1"
+                              Click="@(args => DeleteRow(order))" aria-label="Delete" /> *@
+            </EditTemplate>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>

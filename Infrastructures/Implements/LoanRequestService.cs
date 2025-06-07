@@ -1159,7 +1159,7 @@ public sealed class LoanRequestService(
                         x.BranchRefId == req.BranchId &&
                         x.CustomerRefId == req.CustomerId &&
                         x.EditSeq == existingLoanRequest.EditSeq)
-            .ExecuteUpdateAsync(prop => prop.SetProperty(p => p.LoanRequestStatusRefId, (int)RequestStatus.Verified)
+            .ExecuteUpdateAsync(prop => prop.SetProperty(p => p.LoanRequestStatusRefId, (int)RequestStatus.Checking)
                 .SetProperty(p => p.ModifiedDt, DateTime.UtcNow)
                 .SetProperty(p => p.Remark, req.Remark)
                 .SetProperty(p => p.EditSeq, lastEditSequent));
@@ -1235,9 +1235,9 @@ public sealed class LoanRequestService(
                                           x.StatusId == (int)RequestStatus.Denied)
                                          && x.UserRequestId == userId),
 
-                RequestStatus.Requested or RequestStatus.Verified =>
+                RequestStatus.Requested or RequestStatus.Checking =>
                     baseQuery.Where(x => (x.StatusId == (int)RequestStatus.Requested ||
-                                          x.StatusId == (int)RequestStatus.Verified)
+                                          x.StatusId == (int)RequestStatus.Checking)
                                          && x.AprovedUserId == userId),
 
                 RequestStatus.Aprove =>
@@ -1308,10 +1308,10 @@ public sealed class LoanRequestService(
                                                          x.UserRequestId == userId);
                 break;
             case RequestStatus.Requested:
-            case RequestStatus.Verified:
+            case RequestStatus.Checking:
                 resultQueries = resultQueries.Where(x =>
                     (x.StatusId == (int)RequestStatus.Requested ||
-                     x.StatusId == (int)RequestStatus.Verified) &&
+                     x.StatusId == (int)RequestStatus.Checking) &&
                     x.AprovedUserId == userId);
                 break;
             case RequestStatus.Aprove:

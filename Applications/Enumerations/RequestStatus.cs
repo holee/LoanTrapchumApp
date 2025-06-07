@@ -7,10 +7,12 @@
         All,
         New = 1,
         Requested,
-        Verified,
+        Checking,
         Aprove,
         Denied,
         Rechecked,
         Completed,
+        ReApproved,
+
     }
 }

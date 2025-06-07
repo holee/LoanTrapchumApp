@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Radzen.Blazor;
 using TrapchumApp.Pages.Lists.Collaterals;
 using Domains.Models.Identity;
+using System.Threading.Tasks;
 
 namespace TrapchumApp.Pages.Lists.Customers
 {
@@ -30,15 +31,25 @@ namespace TrapchumApp.Pages.Lists.Customers
         [Parameter, SupplyParameterFromQuery] public int? BranchId { get; set; } = 0;
         [Parameter, SupplyParameterFromQuery] public string? UserId { get; set; }
         [Parameter, EditorRequired] public string? CustomerId { get; set; }
-        [Parameter] public EventCallback Close { get; set; }
+        [Parameter] public EventCallback<int> Close { get; set; }
+        [Parameter] public EventCallback<int> EditClick { get; set; } 
+
         protected VCustomerList Customer = new();
+
         protected IEnumerable<VCollateralLines> CollateralLines = [];
+
         bool isCollateralTab = false;
+
         RadzenTabs tabs = default!;
+
         int selectedIndex = 0;
+
         bool collapse = false;
+
         bool IsLoading = false;
+
         string collapseIcon = "expand_less";
+
         bool ShowEditTab = false;
         async void SelectedTabIndexChanged()
         {
@@ -86,22 +97,10 @@ namespace TrapchumApp.Pages.Lists.Customers
             NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
         }
 
-        void ShowEditCustomer()
+        async Task ShowEditCustomer()
         {
-            if (ShowEditTab == false)
-            {
-                ShowEditTab = true;
-                selectedIndex = 1;
-            }
-        }
-
-        void CloseEditTab(int index)
-        {
-            if (index > 0)
-            {
-                selectedIndex = index - 1;
-                ShowEditTab = false;
-            }
+           await EditClick.InvokeAsync(2);
+           
         }
         protected async Task AddCollateral()
         {
@@ -241,9 +240,9 @@ namespace TrapchumApp.Pages.Lists.Customers
             }
         }
 
-        async void CloseTab()
+        async Task CloseTab()
         {
-            await Close.InvokeAsync();
+            await Close.InvokeAsync(3);
         }
     }
 }

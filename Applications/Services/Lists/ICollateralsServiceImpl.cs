@@ -3,6 +3,7 @@ using Applications.Responses;
 using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Collaterals;
+using Domains.Models.Collaterals;
 
 namespace Applications.Services.LIsts;
 
@@ -19,4 +20,5 @@ public interface ICollateralsServiceImpl
     Task<Result<VCustomerCollaterals>> GetCustomerCollateralAsync(string? customerId);
     Task<Result<VCustomerCollaterals>> GetCustomerCollateralsAsync(string? customerId);
     Task<Result<VCustomerCollaterals>> GetCustomerCollateralsAsync(string? customerId, bool includeInUsed);
+    Task<Result<string>> UpdateAsync(CollateralSubType entity);
 }

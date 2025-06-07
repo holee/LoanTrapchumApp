@@ -4,7 +4,7 @@
 @using Infrastructures.Authorizations
 @using TrapchumApp.Services
 @if (canApproved && (LoanRequest?.StatusId == (int)RequestStatus.Requested ||
-                     LoanRequest?.StatusId == (int)RequestStatus.Verified))
+                     LoanRequest?.StatusId == (int)RequestStatus.Checking))
 {
     <NavLink href="@loanRequestUrl">
         <RadzenBadge Variant="Variant.Filled"
