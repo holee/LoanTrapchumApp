@@ -1,8 +1,10 @@
-﻿using Applications.Interfaces.Addresses;
+﻿
+using Applications.Interfaces.Addresses;
 using Applications.Requests.Lists.Addreses;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Addresses;
+using Applications.Responses.ViewModels.Currencies;
 using Domains.Models.Addresses;
 using Infrastructures.DataAccess;
 using Mapster;
@@ -137,6 +139,28 @@ namespace Infrastructures.Implements
                 logger.LogError($"{ex.Message}", ex);
                 return Result.Failure<Village>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
             }
+        }
+
+        public async Task<Result<VVillageDetails>> GetDettailsAsync(int? Id)
+        {
+            try
+            {
+                using var context = await contextFactory.CreateDbContextAsync();
+
+                var result = context.Database
+                    .SqlQuery<VVillageDetails>($"SELECT * FROM fGetVillageDetails({Id})");
+                if (result is null) return Result.Failure<VVillageDetails>(ErrorResponse.NotFound("No village found."));
+
+                var data = await result.AsNoTracking().FirstOrDefaultAsync();
+                return Result.Success<VVillageDetails>(data);
+
+            }
+            catch(Exception ex)
+            {
+                logger.LogError($"{ex.Message}", ex);
+                return Result.Failure<VVillageDetails>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
+            }
+           
         }
 
         public async Task<Result<string>> UpdateAsync(VillageDtoUpdate model)

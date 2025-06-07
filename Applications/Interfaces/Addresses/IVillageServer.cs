@@ -14,6 +14,7 @@ namespace Applications.Interfaces.Addresses
     public interface IVillageServer
     {
         Task<Result<Village>> GetByIdAsync(int? Id);
+        Task<Result<VVillageDetails>> GetDettailsAsync(int? Id);
         Task<Result<IEnumerable<Village>>> GetAllAsync(int? proId = 0, int take = 0, string? condition = null);
         Task<Pager<VVillages>> GetAllPagerAsync(QueryParam param);
         Task<Result<string>> CreateAsync(VillageDtoCreate model);

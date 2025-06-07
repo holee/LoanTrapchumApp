@@ -133,7 +133,19 @@ namespace TrapchumApp.Pages.Lists.Operations.Villages
         }
         protected async Task Details(int Id)
         {
+            var resultModal = await DialogService!.OpenAsync<VillageDetailsPage>("Details Village",
+               new Dictionary<string, object> { { "Id", Id } },
+               new DialogOptions
+               {
+                   Draggable = true,
+                   Resizable = true,
 
+               });
+            if (resultModal != null)
+            {
+
+            }
+            await InvokeAsync(StateHasChanged);
         }
         protected async Task Delete(int id)
         {

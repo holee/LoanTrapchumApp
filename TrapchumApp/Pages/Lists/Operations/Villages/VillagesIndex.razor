@@ -1,5 +1,6 @@
 ﻿@page "/App/Operation-Area/Villages"
 @using Applications.Responses.ViewModels.Addresses
+@using TrapchumApp.Helpers.Constants
 <PageTitle>Villages</PageTitle>
 
 <RadzenCard>
@@ -79,9 +80,10 @@
     {
         ContextMenuService.Open(args, ds =>
     @<RadzenMenu>
-    <RadzenMenuItem Icon="edit" Click="@(() => Edit(id ?? default))" Text="Edit" Value="@id"></RadzenMenuItem>
-    <RadzenMenuItem Icon="delete" Click="@(() => Delete(id ?? default))" Text="Delete" Value="@id"></RadzenMenuItem>
-</RadzenMenu>
+    <RadzenMenuItem Icon="@IconNames.Info" Click="@(() => Details(id ?? default))" Text="Details" Value="@id"></RadzenMenuItem>
+        <RadzenMenuItem Icon="edit" Click="@(() => Edit(id ?? default))" Text="Edit" Value="@id"></RadzenMenuItem>
+        <RadzenMenuItem Icon="delete" Click="@(() => Delete(id ?? default))" Text="Delete" Value="@id"></RadzenMenuItem>
+    </RadzenMenu>
     );
     }
 }
