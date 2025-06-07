@@ -18,16 +18,28 @@
                 RowCreate="@OnCreateRow"
                 ShowPagingSummary="true"
                 AllowPaging="true"
+                AllowSorting="true"
+                AllowFiltering="true"
                 Sort="@Reset"
                 Page="@Reset"
                 Filter="@Reset"
                 @ref="@refGrid"
+                PagerPosition="PagerPosition.Bottom"
+                PagerHorizontalAlign="HorizontalAlign.Right"
+                PageSizeOptions="@StorageConstant.PageSizeOptions"
                 Data="@_collateralSubTypes">
+    <HeaderTemplate>
+        <RadzenButton ButtonStyle="ButtonStyle.Primary"
+                      Size="ButtonSize.Small"
+                      Text="Add" Icon="add" />
+    </HeaderTemplate>
     <Columns>
         <RadzenDataGridColumn Property="@nameof(CollateralSubType.Id)"
-                              Title="Id"
+                              Title="#"
                               Width="4rem"
                               TextAlign="TextAlign.Center"
+                              Filterable="false"
+                              Sortable="false"
                               Context="c">
             <Template>
                 @(_collateralSubTypes.IndexOf(c) + 1)
@@ -40,13 +52,13 @@
                               Context="c"
                               TextAlign="TextAlign.Left">
             <Template>
-                @_colleralTypes.FirstOrDefault(x=>x.CollateralTypeId==c.CollateralTypeRefId)?.CollateralTypeCode
+                @_colleralTypes.FirstOrDefault(x => x.CollateralTypeId == c.CollateralTypeRefId)?.CollateralTypeCode
             </Template>
             <EditTemplate Context="c">
                 <RadzenDropDown @bind-Value="c.CollateralTypeRefId"
                                 Data="@_colleralTypes"
                                 TextProperty="@nameof(CollateralTypeResponse.CollateralTypeCode)"
-                                ValueProperty="@nameof(CollateralTypeResponse.CollateralTypeId)" 
+                                ValueProperty="@nameof(CollateralTypeResponse.CollateralTypeId)"
                                 Style="width:100%; display: block;"
                                 InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "Select customer" } })" />
             </EditTemplate>
@@ -114,6 +126,8 @@
         <RadzenDataGridColumn Property="@nameof(CollateralSubType.IsActive)"
                               Title="IsActive"
                               Width="6rem"
+                              Filterable="false"
+                              Sortable="false"
                               TextAlign="TextAlign.Center"
                               Context="c">
             <Template>
@@ -127,13 +141,15 @@
                               Title="Action"
                               Width="6rem"
                               TextAlign="TextAlign.Center"
+                              Filterable="false"
+                              Sortable="false"
                               Context="c">
             <Template>
                 <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light"
                               Variant="Variant.Flat" Size="ButtonSize.ExtraSmall"
                               class="rz-my-1 rz-ms-1" Click="@(args => EditRow(c))"
                               @onclick:stopPropagation="true" />
-@*                 <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger"
+                @*                 <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger"
                               Variant="Variant.Flat" Size="ButtonSize.ExtraSmall"
                               Shade="Shade.Lighter" class="rz-my-1 rz-ms-1"
                               Click="@(args => DeleteRow(c))" @onclick:stopPropagation="true" /> *@
@@ -145,7 +161,7 @@
                 <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Primary"
                               Variant="Variant.Flat" Size="ButtonSize.ExtraSmall"
                               class="rz-my-1 rz-ms-1" Click="@((args) => CancelEdit(order))" aria-label="Cancel" />
-@*                 <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger"
+                @*                 <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger"
                               Variant="Variant.Flat" Size="ButtonSize.ExtraSmall"
                               Shade="Shade.Lighter" class="rz-my-1 rz-ms-1"
                               Click="@(args => DeleteRow(order))" aria-label="Delete" /> *@
