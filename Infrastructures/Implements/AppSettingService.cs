@@ -5,6 +5,7 @@ using Applications.Responses.Auths;
 using Applications.Responses.Message;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Settings;
+using Domains.Models.Collaterals;
 using Domains.Models.Loans;
 using Domains.Models.Settings;
 using Infrastructures.DataAccess;
@@ -108,9 +109,9 @@ public sealed class AppSettingService(IDbContextFactory<DataContext> dbContextFa
 
             var existings = await cxt.UserLoanSizes.AnyAsync(x => x.UserRefId == model.UserRefId);
 
-            if (existings) 
+            if (existings)
             {
-                Result.Failure(ErrorResponse.Conflict(Messages.DataExist));            
+                Result.Failure(ErrorResponse.Conflict(Messages.DataExist));
             }
 
             cxt.UserLoanSizes.Add(model);
@@ -137,13 +138,13 @@ public sealed class AppSettingService(IDbContextFactory<DataContext> dbContextFa
 
             await using var cxt = await dbContextFactory.CreateDbContextAsync(cancellation);
 
-            var existings = await cxt.UserLoanSizes.AnyAsync(x => x.Id==model.Id &&  
+            var existings = await cxt.UserLoanSizes.AnyAsync(x => x.Id == model.Id &&
                                                                   x.UserRefId == model.UserRefId &&
-                                                                  x.EditSeq==model.EditSeq);
+                                                                  x.EditSeq == model.EditSeq);
 
             if (!existings)
             {
-               return Result.Failure<string>(ErrorResponse.Conflict(Messages.DataNotFound)); 
+                return Result.Failure<string>(ErrorResponse.Conflict(Messages.DataNotFound));
             }
 
             cxt.UserLoanSizes.Update(model);
@@ -191,14 +192,14 @@ public sealed class AppSettingService(IDbContextFactory<DataContext> dbContextFa
 
     }
 
-    public async Task<Result<UserLoanSize>> GetLoanSizeById(long? id,string? userId, CancellationToken cancellation = default)
+    public async Task<Result<UserLoanSize>> GetLoanSizeById(long? id, string? userId, CancellationToken cancellation = default)
     {
-        try 
+        try
         {
             await using var cxt = await dbContextFactory.CreateDbContextAsync(cancellation);
 
             var item = await cxt.UserLoanSizes
-                                .FirstOrDefaultAsync(x=>x.Id==id && x.UserRefId==userId);
+                                .FirstOrDefaultAsync(x => x.Id == id && x.UserRefId == userId);
 
             if (item is null)
             {
@@ -302,4 +303,48 @@ public sealed class AppSettingService(IDbContextFactory<DataContext> dbContextFa
                Result.Success<string>(new("Data was changed")) :
                Result.Failure<string>(new(Messages.DataNotFound));
     }
+
+
+    public async Task<Pager<CollateralSubType>> GetCollateralSubTypes(QueryParam param, CancellationToken cancellation = default)
+    {
+        await using var cxt = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+        var queries = cxt.CollateralSubTypes.AsNoTracking();
+
+
+        if (!param.IsIncludeInActive)
+        {
+            queries = queries.Where(x => x.IsActive == true);
+        }
+
+        if (param.Filter.IsNotNullOrEmpty())
+        {
+            queries = queries.Where(x => EF.Functions.Like(x.CollateralSubTypeName!, $"%{param.Filter}%") ||
+                                         EF.Functions.Like(x.CollateralSubTypeNameInKhmer!, $"%{param.Filter}%"));
+        }
+
+
+        if (param.SortDescending)
+        {
+            queries = queries.OrderByDescending(x => EF.Property<object>(x, param.SortColumn));
+        }
+
+        var counts = await queries.CountAsync(cancellation);
+
+        var items = await queries.Skip(param.Skip)
+                                    .Take(param.PageSize)
+                                    .AsNoTracking()
+                                    .ToListAsync(cancellation);
+
+
+
+
+        return new Pager<CollateralSubType>(items, counts);
+
+
+    }
+
+
+
+
 }

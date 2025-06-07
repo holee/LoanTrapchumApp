@@ -6,6 +6,7 @@ using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Collaterals;
 using Domains.Models.Collaterals;
 using Mapster;
+using Microsoft.EntityFrameworkCore;
 
 namespace Applications.Services.LIsts;
 
@@ -13,7 +14,7 @@ public class CollateralsService(ICollateralsService collateralsService) : IColla
 {
     public async Task<Result<VCustomerCollaterals>> GetCustomerCollateralAsync(string? customerId)
     {
-      
+
         var resp = await collateralsService.GetCustomerCollateralAsync(customerId);
 
         return resp;
@@ -23,16 +24,16 @@ public class CollateralsService(ICollateralsService collateralsService) : IColla
     public async Task<Result<VCustomerCollaterals>> GetCustomerCollateralsAsync(string? customerId)
     {
 
-        var resp = await collateralsService.GetCustomerCollateralsAsync(customerId); 
+        var resp = await collateralsService.GetCustomerCollateralsAsync(customerId);
 
         return resp;
 
     }
 
-    public async Task<Result<VCustomerCollaterals>> GetCustomerCollateralsAsync(string? customerId,bool includeInUsed)
+    public async Task<Result<VCustomerCollaterals>> GetCustomerCollateralsAsync(string? customerId, bool includeInUsed)
     {
 
-        var resp = await collateralsService.GetCustomerCollateralsAsync(customerId,includeInUsed);
+        var resp = await collateralsService.GetCustomerCollateralsAsync(customerId, includeInUsed);
 
         return resp;
 
@@ -81,4 +82,10 @@ public class CollateralsService(ICollateralsService collateralsService) : IColla
     {
         throw new NotImplementedException();
     }
+
+    public Task<Result<string>> UpdateAsync(CollateralSubType entity)
+    {
+        return collateralsService.InsertOrUpdateAsync(entity);
+    }
+
 }

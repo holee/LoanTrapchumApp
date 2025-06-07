@@ -205,18 +205,11 @@
                       ButtonStyle="ButtonStyle.Success"
                       Text="Save"
                       Icon="save" />
-        @if (!ShowEditTab)
-        {
-            <RadzenLink Path="/App/Customer" Icon="arrow_back" Text="Back" />
-        }
-        else
-        {
-            <RadzenButton Click="ClickCloseTab"
-                          Size="ButtonSize.Small"
-                          Text="Close"
-                          ButtonStyle="ButtonStyle.Danger"
-                          Icon="cancel" />
-        }
+        <RadzenButton Click="ClickCloseTab"
+                      Size="ButtonSize.Small"
+                      Text="Close"
+                      ButtonStyle="ButtonStyle.Danger"
+                      Icon="cancel" />
 
     </RadzenStack>
 </EditForm>
@@ -257,7 +250,7 @@
 
             var fileModel = new FileModel(originalName, file.Name, file.Size, stream.ToArray());
 
-            var rsp= await _fileUploadService.UploadFile(fileModel);
+            var rsp = await _fileUploadService.UploadFile(fileModel);
 
             if (rsp.IsSuccess)
             {

@@ -29,14 +29,15 @@ namespace TrapchumApp.Pages.Lists.Customers
         void Details(string? id)
         {
             isVisble = true;
+
             if (!isDetailsTab)
             {
                 isDetailsTab = true;
-                tabCounts.Add(2);
             }
             customerId = id;
-            tabs.Reload();
-            selectedIndex = 2;
+
+            selectedIndex = 3;
+
             isVisble = false;
         }
 
@@ -77,32 +78,25 @@ namespace TrapchumApp.Pages.Lists.Customers
             tabs.Reload();
             selectedIndex = 1;
         }
-        void CloseTabe()
+        void CloseTabe(int closeTabIndex)
         {
-            if (selectedIndex == 1)
+            if (closeTabIndex == 1)
             {
                 isNewTab = false;
-                tabCounts.Remove(1);
-                selectedIndex = tabCounts.Count - 1;
             }
-            if (selectedIndex == 2)
-            {
-                isDetailsTab = false;
-                tabCounts.Remove(2);
-                selectedIndex = tabCounts.Count - 1;
-            }
-            if (selectedIndex == 3)
+          
+            if (closeTabIndex == 2)
             {
                 isEditTab = false;
-                tabCounts.Remove(3);
-                selectedIndex = tabCounts.Count - 1;
             }
-            if (selectedIndex == 4)
+
+            if (closeTabIndex == 3)
             {
-                isCollateralTab = false;
-                tabCounts.Remove(4);
-                selectedIndex = tabCounts.Count - 1;
+                isDetailsTab = false;
             }
+
+            selectedIndex = 0;
+
         }
 
     }

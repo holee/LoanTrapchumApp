@@ -29,7 +29,7 @@ namespace TrapchumApp.Pages.Lists.Customers
             _salutationService = salutationService;
         }
 
-        [Parameter] public EventCallback Closed { get; set; } = default!;
+        [Parameter] public EventCallback<int> Closed { get; set; } = default!;
         [Parameter] public EventCallback<int?> SelectedValueChanged { get; set; }
         IEnumerable<string> Salutations = [];
         IEnumerable<ProvinceDto> Provinces = [];
@@ -269,6 +269,11 @@ namespace TrapchumApp.Pages.Lists.Customers
                 if (response.IsSuccess)
                 {
 
+                    await Close();
+
+
+                    model = new();
+
                     NotificationService.Notify(NotificationSeverity.Success, "Customer was created successfully!");
                 }
                 else
@@ -307,9 +312,9 @@ namespace TrapchumApp.Pages.Lists.Customers
                                      .ToList();
             return await Task.FromResult(salution);
         }
-        protected async void Close()
+        protected async Task Close()
         {
-            await Closed.InvokeAsync();
+            await Closed.InvokeAsync(1);
         }
 
     }

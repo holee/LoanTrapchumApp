@@ -163,7 +163,7 @@
     <AuthorizeView Policy="@RequestsPolicies.Approve">
         <Authorized>
             @if (canApprove && (data?.StatusId == (int)RequestStatus.Requested ||
-                        data?.StatusId == (int)RequestStatus.Verified) ||
+                        data?.StatusId == (int)RequestStatus.Checking) ||
                         data?.StatusId == (int)RequestStatus.Rechecked)
             {
                 <RadzenButton ButtonStyle="ButtonStyle.Primary"

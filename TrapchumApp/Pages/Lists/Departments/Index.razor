@@ -2,83 +2,84 @@
 @using Microsoft.AspNetCore.Components.Web
 @using TrapchumApp.Services
 <PageTitle>Departments</PageTitle>
-<RadzenCard>
-    <RadzenStack class="rz-my-2" Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween">
+<RadzenTabs>
+    <Tabs>
+        <RadzenTabsItem  Text="Departments">
+            <GridToolbar SearchChanged="SearchChanged">
+                <LeftChildren>
+                    <RadzenButton Text="New Department"
+                                  Click="ShowCreate"
+                                  ButtonStyle="ButtonStyle.Primary"
+                                  Size="ButtonSize.Small"
+                                  Icon="add" />
+                </LeftChildren>
+                <RightChildren>
+                    <RadzenStack Orientation="Orientation.Horizontal">
+                        <RadzenCheckBox TValue="bool" @bind-Value=@includeInactive Change="ex => ShowInactiveAndActive(ex)" Name="CheckBox1" />
+                        <RadzenLabel Text="Include InActive" Component="CheckBox1" Style="margin-left:2px; vertical-align: middle;" />
+                    </RadzenStack>
+                </RightChildren>
+            </GridToolbar>
+            <RadzenDataGrid Responsive="true"
+                            TItem="VDepartment"
+                            Density="Density.Compact"
+                            LoadData="LoadDepartmentData"
+                            PageSize="@pageSize"
+                            Count="@counts"
+                            AllowPaging="true"
+                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                            ShowPagingSummary="true"
+                            PagerPosition="PagerPosition.Bottom"
+                            PagerHorizontalAlign="HorizontalAlign.Right"
+                            AllowFiltering="true"
+                            AllowSorting="true"
+                            PageSizeOptions="@StorageConstant.PageSizeOptions"
+                            Data="@Departments">
+                <Columns>
+                    <RadzenDataGridColumn Width="5rem" Title="#"
+                                          Context="c"
+                                          Sortable="false"
+                                          Property="@nameof(VDepartment.DepartmentId)">
+                        <Template>
+                            @(Departments.IndexOf(c) + 1)
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Property="@nameof(VDepartment.DepartmentName)"
+                                          Title="Department"
+                                          Width="14rem"
+                                          Sortable="true" />
+                    <RadzenDataGridColumn Property="@nameof(VDepartment.Description)"
+                                          Title="Description"
+                                          Sortable="false" />
+                    <RadzenDataGridColumn Context="c"
+                                          Title="Active"
+                                          Width="4rem"
+                                          Filterable="false"
+                                          Sortable="false">
+                        <Template>
+                            <RadzenCheckBox TValue="bool"
+                                            @bind-Value="@c.IsActive"
+                                            Change="@((arg)=>OnCheckChanged(c.DepartmentId,arg))" />
+                        </Template>
 
-        
-    </RadzenStack>
-    <GridToolbar SearchChanged="SearchChanged">
-        <LeftChildren>
-            <RadzenButton Text="New Department"
-                          Click="ShowCreate"
-                          ButtonStyle="ButtonStyle.Primary"
-                          Size="ButtonSize.Small"
-                          Icon="add" />
-        </LeftChildren>
-        <RightChildren>
-            <RadzenStack Orientation="Orientation.Horizontal">
-                <RadzenCheckBox TValue="bool" @bind-Value=@includeInactive Change="ex => ShowInactiveAndActive(ex)" Name="CheckBox1" />
-                <RadzenLabel Text="Include InActive" Component="CheckBox1" Style="margin-left:2px; vertical-align: middle;" />
-            </RadzenStack>
-        </RightChildren>
-    </GridToolbar>
-    <RadzenDataGrid Responsive="true"
-                    TItem="VDepartment"
-                    Density="Density.Compact"
-                    LoadData="LoadDepartmentData"
-                    PageSize="@pageSize"
-                    Count="@counts"
-                    AllowPaging="true"
-                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-                    ShowPagingSummary="true"
-                    PagerPosition="PagerPosition.Bottom"
-                    PagerHorizontalAlign="HorizontalAlign.Right"
-                    AllowFiltering="true"
-                    AllowSorting="true"
-                    PageSizeOptions="@StorageConstant.PageSizeOptions"
-                    Data="@Departments">
-        <Columns>
-            <RadzenDataGridColumn Width="5rem" Title="#"
-                                  Context="c"
-                                  Sortable="false"
-                                  Property="@nameof(VDepartment.DepartmentId)">
-                <Template>
-                    @(Departments.IndexOf(c) + 1)
-                </Template>
-            </RadzenDataGridColumn>
-            <RadzenDataGridColumn Property="@nameof(VDepartment.DepartmentName)"
-                                  Title="Department"
-                                  Width="14rem"
-                                  Sortable="true" />
-            <RadzenDataGridColumn Property="@nameof(VDepartment.Description)"
-                                  Title="Description"
-                                  Sortable="false" />
-            <RadzenDataGridColumn Context="c"
-                                  Title="Active"
-                                  Width="4rem"
-                                  Filterable="false"
-                                  Sortable="false">
-                <Template>
-                    <RadzenCheckBox TValue="bool"
-                                    @bind-Value="@c.IsActive"
-                                    Change="@((arg)=>OnCheckChanged(c.DepartmentId,arg))" />
-                </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Filterable="false"
+                                          Sortable="false"
+                                          Title="Actions" Context="c" Width="4rem">
+                        <Template>
+                            <RadzenButton Size="ButtonSize.ExtraSmall"
+                                          Icon="more_vert"
+                                          Variant="Variant.Text"
+                                          Click="@((args)=>ShowContextMenuWithContent(args,c.DepartmentId))" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
 
-            </RadzenDataGridColumn>
-            <RadzenDataGridColumn Filterable="false"
-                                  Sortable="false"
-                                  Title="Actions" Context="c" Width="4rem">
-                <Template>
-                    <RadzenButton Size="ButtonSize.ExtraSmall"
-                                  Icon="more_vert"
-                                  Variant="Variant.Text"
-                                  Click="@((args)=>ShowContextMenuWithContent(args,c.DepartmentId))" />
-                </Template>
-            </RadzenDataGridColumn>
-        </Columns>
-
-    </RadzenDataGrid>
-</RadzenCard>
+            </RadzenDataGrid>
+        </RadzenTabsItem>
+    </Tabs>
+</RadzenTabs>
+    
 @code {
 
     void ShowContextMenuWithContent(MouseEventArgs args, int id)

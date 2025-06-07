@@ -11,11 +11,10 @@ using Infrastructures.DataAccess;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
-using System.Runtime.CompilerServices;
 
 namespace Infrastructures.Implements;
 
-public class CollateralsService(DataContext context, IDapperConnectionFactory connectionFactory) : ICollateralsService
+public class CollateralsService(DataContext context, IDapperConnectionFactory connectionFactory, IDbContextFactory<DataContext> dbContextFactory) : ICollateralsService
 {
     public async Task<IEnumerable<CollateralSubTypeResponse>> GetCollateralSubTypes(int? id, string? searchText = null)
     {
@@ -23,7 +22,7 @@ public class CollateralsService(DataContext context, IDapperConnectionFactory co
 
         if (id > 0)
         {
-            queries = queries.Where(x => x.CollateralTypeRefid == id);
+            queries = queries.Where(x => x.CollateralTypeRefId == id);
         }
 
         if (!string.IsNullOrEmpty(searchText))
@@ -212,7 +211,7 @@ public class CollateralsService(DataContext context, IDapperConnectionFactory co
             {
                 lookup.Add(collateral.CollateralId!, collateral!);
             }
-            if(collateralLine is not null)
+            if (collateralLine is not null)
             {
                 collateral.CollateralLines.Add(collateralLine);
             }
@@ -290,6 +289,36 @@ public class CollateralsService(DataContext context, IDapperConnectionFactory co
             }
 
             await context.SaveChangesAsync();
+
+            return Result.Success("Collateral was changed.");
+
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}"));
+        }
+
+
+
+    }
+
+
+    public async Task<Result<string>> InsertOrUpdateAsync(CollateralSubType req, CancellationToken cancellation = default)
+    {
+        try
+        {
+            await using var _context = await dbContextFactory.CreateDbContextAsync();
+
+            if (req.Id == 0)
+            {
+                _context.CollateralSubTypes.Add(req);
+            }
+            else
+            {
+                _context.CollateralSubTypes.Update(req);
+            }
+
+            await _context.SaveChangesAsync(cancellation);
 
             return Result.Success("Collateral was changed.");
 

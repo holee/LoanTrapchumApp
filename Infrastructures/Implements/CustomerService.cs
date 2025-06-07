@@ -93,18 +93,13 @@ public class CustomerService(
         if (!string.IsNullOrEmpty(q.Filter))
         {
             queries = queries.Where(x => (EF.Functions.Like(x.FullName!, $"%{q.Filter}%") ||
-                                          EF.Functions.Like(
-                                              EF.Functions.Collate(x.CustomerId, "Khmer_100_CI_AI_SC_UTF8"),
+                                          EF.Functions.Like(EF.Functions.Collate(x.CustomerId, "Khmer_100_CI_AI_SC_UTF8"),
                                               $"%{q.Filter}%") ||
                                           EF.Functions.Like(x.AltName!, $"%{q.Filter}%") ||
                                           EF.Functions.Like(x.Phone!, $"%{q.Filter}%")));
         }
 
         if (q.SortDescending)
-        {
-            queries = queries.OrderBy(x => EF.Property<object>(x, q.SortColumn));
-        }
-        else
         {
             queries = queries.OrderByDescending(x => EF.Property<object>(x, q.SortColumn));
         }
@@ -503,8 +498,10 @@ public class CustomerService(
         try
         {
             context.EntityNames.Add(model);
+
             await context.SaveChangesAsync(cancellation);
-            return Result.Failure<string>(ErrorResponse.ServerError($"New Customer was added."));
+
+            return Result.Success<string>($"New Customer was added.");
         }
         catch (DbUpdateConcurrencyException ex)
         {

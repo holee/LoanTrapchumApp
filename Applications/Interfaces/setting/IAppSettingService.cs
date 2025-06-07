@@ -2,6 +2,7 @@
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Settings;
+using Domains.Models.Collaterals;
 using Domains.Models.Loans;
 using Domains.Models.Settings;
 
@@ -22,4 +23,5 @@ public interface IAppSettingService
     Task<Result<VUserLoanSizes>> GetLoanSizeByUserId(string? userRefId, CancellationToken cancellation = default);
     Task<Result<UserLoanSize>> GetLoanSizeById(long? id,string? userId, CancellationToken cancellation = default);
     Task<Result<string>> EditUserLoanSizeAsync(UserLoanSize model, CancellationToken cancellation = default);
+    Task<Pager<CollateralSubType>> GetCollateralSubTypes(QueryParam param, CancellationToken cancellation = default);
 }

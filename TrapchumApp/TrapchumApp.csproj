@@ -99,7 +99,6 @@
     <AdditionalFiles Include="Pages\Lists\Customers\CustomerAddress.razor" />
     <AdditionalFiles Include="Pages\Lists\Customers\CustomerCreate.razor" />
     <AdditionalFiles Include="Pages\Lists\Customers\CustomerDetails.razor" />
-    <AdditionalFiles Include="Pages\Lists\Customers\CustomerEdit.razor" />
     <AdditionalFiles Include="Pages\Lists\Customers\CustomerExp.razor" />
     <AdditionalFiles Include="Pages\Lists\Customers\CustomerInc.razor" />
     <AdditionalFiles Include="Pages\Lists\Customers\CustomerLoanRequest.razor" />
@@ -154,7 +153,6 @@
     <AdditionalFiles Include="Pages\Lists\Vendors\VendorCreate.razor" />
     <AdditionalFiles Include="Pages\Lists\Vendors\VendorDetailModal.razor" />
     <AdditionalFiles Include="Pages\Lists\Vendors\VendorEdit.razor" />
-    <AdditionalFiles Include="Pages\Settings\GeneralSetting.razor" />
     <AdditionalFiles Include="Pages\Settings\IndexSetting.razor" />
     <AdditionalFiles Include="Pages\Transactions\Branches\CashVaultModalActions.razor" />
     <AdditionalFiles Include="Pages\Transactions\Branches\CashVaultSummary.razor" />

@@ -178,7 +178,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
             var param = new QueryParam(pageIndex, pageSize, sortColumn, sortDescending, isIncludeInactive, filtertext);
 
-            var rsp = await _loanRequestService.GetLoanRequestsAsync(userId, BranchId, RequestStatus.Verified, param);
+            var rsp = await _loanRequestService.GetLoanRequestsAsync(userId, BranchId, RequestStatus.Checking, param);
 
 
             LoanRequests = rsp.Items;

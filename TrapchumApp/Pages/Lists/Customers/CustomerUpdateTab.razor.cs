@@ -7,11 +7,6 @@ using Applications.Services.Lists;
 using Domains.Models.Addresses;
 using Domains.Models.Files;
 using Domains.Models.Lists;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Forms;
-using Microsoft.AspNetCore.Components.Web;
-using Radzen;
-
 namespace TrapchumApp.Pages.Lists.Customers
 {
     public partial class CustomerUpdateTab
@@ -29,14 +24,15 @@ namespace TrapchumApp.Pages.Lists.Customers
             _salutationService = salutationService;
         }
 
-        [Parameter] public EventCallback<int> CloseTab { get; set; }
+        [Parameter] public EventCallback<int> Closed { get; set; }
         [Parameter] public bool ShowEditTab { get; set; } = false;
+
         string selectedTab = "info";
 
         string city = "";
         async Task ClickCloseTab()
         {
-            await CloseTab.InvokeAsync(1);
+            await Closed.InvokeAsync(2);
         }
         private Task OnSelectedTabChanged(string name)
         {
@@ -82,8 +78,6 @@ namespace TrapchumApp.Pages.Lists.Customers
             model.Photo = resp.Data?.FileUrl;
             StateHasChanged();
         }
-
-
         async Task GetAdditionalInformation()
         {
             Nationalities = await _nationalityService!.GetNationalities();
@@ -106,7 +100,6 @@ namespace TrapchumApp.Pages.Lists.Customers
                 Salutations = rsp1.Data!.Select(x => x.Title!).ToList();
             }
         }
-        [Parameter] public EventCallback Closed { get; set; } = default!;
         [Parameter] public EventCallback<int?> SelectedValueChanged { get; set; }
         [Parameter] public string? CustomerId { get; set; }
         IEnumerable<string> Salutations = [];
@@ -157,8 +150,9 @@ namespace TrapchumApp.Pages.Lists.Customers
 
                 if (rsp.IsSuccess)
                 {
+                    await CloseTab(2);
 
-                    NotificationService.Notify(NotificationSeverity.Success, "Customer was created successfully!");
+                    NotificationService.Notify(NotificationSeverity.Success, "Customer was edited successfully!");
                 }
                 else
                 {
@@ -193,9 +187,9 @@ namespace TrapchumApp.Pages.Lists.Customers
                                      .ToList();
             return await Task.FromResult(salution);
         }
-        protected async void Close()
+        protected async Task CloseTab(int selectedIndex)
         {
-            await Closed.InvokeAsync();
+            await Closed.InvokeAsync(selectedIndex);
         }
         private async Task GetSalutations()
         {

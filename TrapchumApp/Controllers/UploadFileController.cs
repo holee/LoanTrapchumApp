@@ -5,7 +5,7 @@ namespace TrapchumApp.Controllers
 {
 
     [ApiController]
-    [Route("App/[controller]")]
+    [Microsoft.AspNetCore.Mvc.Route("App/[controller]")]
     public sealed class UploadFileController : ControllerBase
     {
         private readonly IWebHostEnvironment _environment;
@@ -21,7 +21,7 @@ namespace TrapchumApp.Controllers
         }
 
         [HttpPost]
-        [Route("Upload")]
+        [Microsoft.AspNetCore.Mvc.Route("Upload")]
         public async Task<IActionResult> Upload(ICollection<IFormFile> files)
         {
             var uploadFolder = Path.Combine(_environment.WebRootPath, "uploads");

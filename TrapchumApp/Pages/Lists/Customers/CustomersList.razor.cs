@@ -3,9 +3,6 @@ using Applications.Extensions.Identity.Policies;
 using Applications.Responses.Lists.Customers;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Customers;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
-using Radzen;
 
 namespace TrapchumApp.Pages.Lists.Customers
 {
@@ -13,7 +10,9 @@ namespace TrapchumApp.Pages.Lists.Customers
     {
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
         [Parameter] public EventCallback<string?> ClickedDetails { get; set; }
+        [Parameter] public EventCallback<int?> ClickedAdd { get; set; }
         [Parameter] public EventCallback<string?> ClickedEdit { get; set; }
+        [Parameter] public EventCallback<int> EditIndex { get; set; }
         [Parameter] public EventCallback<string> ClickedDelete { get; set; }
         [Parameter] public EventCallback<string?> ClickedAddCollateral { get; set; }
         [Parameter, SupplyParameterFromQuery] public string? UserId { get; set; } = string.Empty;
@@ -31,11 +30,17 @@ namespace TrapchumApp.Pages.Lists.Customers
 
         protected bool includeInactive = false;
 
-        protected string SearchTerm = string.Empty;
+        protected string filterText = string.Empty;
 
         private int counts = 0;
 
-        private int pageSize = 10;
+        private int pageSize = 15;
+
+        private int pageIndex = 0;
+
+        private string sortField = "CustomerId";
+
+        private bool sortDescending = false;
 
         int branchId = 0;
 
@@ -50,15 +55,20 @@ namespace TrapchumApp.Pages.Lists.Customers
 
         bool CanRequestLoan = false;
 
-        void ChangedPageSize(int page)
+        async Task PageSizeChanged(int page)
         {
             pageSize = page;
+
+            pageIndex = 0; // Reset to first page when page size changes
+
+            await LoadCustomerPageList(filterText);
+
         }
 
         private async Task AddInComeModal(string? customerId)
         {
             await DialogService.OpenAsync<CustomerModalIncome>("Income", options: new DialogOptions
-            { 
+            {
                 Resizable = false,
                 Draggable = true,
             }, parameters: new Dictionary<string, object?>
@@ -83,7 +93,7 @@ namespace TrapchumApp.Pages.Lists.Customers
                 return;
             }
 
-            var uri =$"/App/Request/{BranchId}/Branches/{UserId}/CreateNew?CustomerId={customerId}";
+            var uri = $"/App/Request/{BranchId}/Branches/{UserId}/CreateNew?CustomerId={customerId}";
 
             NavigationManager.NavigateTo(uri);
         }
@@ -100,22 +110,20 @@ namespace TrapchumApp.Pages.Lists.Customers
             });
         }
 
-        private void AddDetails(string? customerId)
+        private async Task AddDetails(string? customerId)
         {
             ContextMenuService.Close();
 
-            //await ClickedDetails.InvokeAsync(customerId);
+            await ClickedDetails.InvokeAsync(customerId);
 
-            NavigationManager.NavigateTo($"/App/Customers/{customerId}/Details?branchId={BranchId}");
-
-            
         }
 
-        private async void AddEdit(string? customerId)
+        private async Task AddEdit(string? customerId)
         {
-            await ClickedEdit.InvokeAsync(customerId);
-
             ContextMenuService.Close();
+            await ClickedEdit.InvokeAsync(customerId);
+            await EditIndex.InvokeAsync(2);
+
         }
 
         private async void AddDelete(string? customerId)
@@ -133,15 +141,9 @@ namespace TrapchumApp.Pages.Lists.Customers
 
         async Task SearchCustomer(string? searchText = null)
         {
-            SearchTerm = searchText ?? string.Empty;
+            filterText = searchText ?? string.Empty;
 
-            await LoadCustomerPageList(); 
-        }
-
-        async Task SelectedPageChanged(int pageSize)
-        {
-            this.pageSize = pageSize;
-            await LoadCustomerPageList();
+            await LoadCustomerPageList(searchText);
         }
 
         protected override async Task OnInitializedAsync()
@@ -149,44 +151,65 @@ namespace TrapchumApp.Pages.Lists.Customers
             var auth = await AuthenticationState;
 
             CanRequestLoan = await _authorizeService.MustHasPermissionAsync(auth.User, RequestsPolicies.Request);
-            
+
             IsAccountOnly = await _authorizeService.MustHasPermissionAsync(auth.User, RolePolicies.AccountOnly);
-            
+
             IsAdminOnly = await _authorizeService.MustHasPermissionAsync(auth.User, RolePolicies.AdminOnly);
-            
-            await LoadCustomerPageList();
-           
+
+            await LoadCustomerPageList(filterText);
+
             await base.OnInitializedAsync();
         }
 
         async Task LoadData(LoadDataArgs args)
         {
-            string sortField = "CustomerId";
-            bool sortDescending = false;
-            int pageIndex = args.Skip!.Value;
-            if (!string.IsNullOrEmpty(args.OrderBy))
+            sortField = "CustomerId";
+
+            sortDescending = false;
+
+            pageIndex = args.Skip!.Value;
+
+            if (args.Sorts.Any())
             {
-                sortField = args.OrderBy.Split(" ")[0];
-                string dir = args.OrderBy.Split(" ")[1];
-                sortDescending = dir.Contains("asc") ? false : true;
+                sortField = args.Sorts.First().Property;
+
+                sortDescending = args.Sorts.First().SortOrder == SortOrder.Descending;
             }
 
-            await LoadCustomerPageList(pageIndex, sortField, sortDescending);
+            var filterColumn = args.Filters?.FirstOrDefault(f => f.Property == nameof(VCustomerList.FullName) ||
+                                                            f.Property == nameof(VCustomerList.AltName) ||
+                                                           f.Property == nameof(VCustomerList.CustomerId) ||
+                                                           f.Property == nameof(VCustomerList.Phone))?.FilterValue?.ToString();
+
+            filterText = filterColumn ?? string.Empty;
+
+            await LoadCustomerPageList(filterText);
         }
 
-        async Task LoadCustomerPageList(int pageIndex = 0, string sortField = "CustomerId", bool sortDescending = false)
+
+        async Task AddCustomerTab(int selectedIndex)
+        {
+            ContextMenuService.Close();
+
+            await ClickedAdd.InvokeAsync(selectedIndex);
+        }
+
+        async Task LoadCustomerPageList(string? filter = null)
         {
             try
             {
                 isLoading = true;
 
-                var param = new QueryParam(pageIndex, pageSize, sortField, sortDescending, includeInactive, SearchTerm);
+                var param = new QueryParam(pageIndex, pageSize, sortField, includeInactive, sortDescending, filter);
 
                 var res = await _customerService.GetCustomers(param);
 
                 VCustomers = res.Items;
+
                 counts = res.Count;
+
                 isLoading = false;
+
                 StateHasChanged();
             }
             catch

@@ -1,4 +1,4 @@
-﻿@page "/App/Loans/Settings"
+﻿@page "/App/Settings"
 @using Applications.Responses.ViewModels.Settings
 <PageTitle>Settings</PageTitle>
 <RadzenFieldset>
@@ -79,4 +79,13 @@
     </ChildContent>
 </RadzenFieldset>
 
-
+<RadzenFieldset>
+    <HeaderTemplate>
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
+            <RadzenIcon Icon="settings" /><b>Colleral Settings</b>
+        </RadzenStack>
+    </HeaderTemplate>
+    <ChildContent>
+        <CollateralSetting />
+    </ChildContent>
+</RadzenFieldset>

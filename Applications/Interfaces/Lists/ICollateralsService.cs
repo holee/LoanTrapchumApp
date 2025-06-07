@@ -18,4 +18,5 @@ public interface ICollateralsService
     Task<Result<string>> InsertOrUpdate(Collateral entity);
     Task<Result<VCustomerCollaterals>> GetCustomerCollateralsAsync(string? customerId);
     Task<Result<VCustomerCollaterals>> GetCustomerCollateralsAsync(string? customerId, bool includeInUsed);
+    Task<Result<string>> InsertOrUpdateAsync(CollateralSubType req, CancellationToken cancellation = default);
 }
