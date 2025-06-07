@@ -28,6 +28,8 @@
                     ShowPagingSummary="true"
                     AllowPaging="true"
                     TItem="VCommunes"
+                    AllowFiltering="true"
+                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
                     Density="Density.Compact"
                     LoadData="LoadData"
                     PagerHorizontalAlign="HorizontalAlign.Right"
@@ -44,15 +46,15 @@
                                   Title="District-English"
                                   Width="14rem"
                                   Sortable="true"
-                                  SortProperty="DisDescription" />
+                                  />
             <RadzenDataGridColumn Property="@nameof(VCommunes.DisInKhmer)"
                                   Title="District-Khmer"
                                   Width="14rem"
                                   Sortable="true"
-                                  SortProperty="DisInKhmer" />
+                                  />
             
 
-            <RadzenDataGridColumn Title="Actions" Context="c" Width="7rem">
+            <RadzenDataGridColumn Title="Actions" Sortable="false" Filterable="false" Context="c" Width="7rem">
                 <Template>
                     <RadzenButton Size="ButtonSize.ExtraSmall"
                                   Icon="more_vert"
@@ -75,7 +77,7 @@
     {
         ContextMenuService.Open(args, ds =>
         @<RadzenMenu>
-            <RadzenMenuItem Icon="@IconNames.Add" Click="@(() =>AddCommune(id))" Text="Add Commune" Value="@id"></RadzenMenuItem>
+    <RadzenMenuItem Icon="@IconNames.Add" Click="@(() => AddVillage(id))" Text="Add Village" Value="@id"></RadzenMenuItem>
             <RadzenMenuItem Icon="edit" Click="@(() => Edit(id ?? default))" Text="Edit" Value="@id"></RadzenMenuItem>
             <RadzenMenuItem Icon="delete" Click="@(() => Delete(id ?? default))" Text="Delete" Value="@id"></RadzenMenuItem>
         </RadzenMenu>

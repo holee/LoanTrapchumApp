@@ -54,24 +54,32 @@ namespace TrapchumApp.Pages.Lists.Operations.Villages
             string sortField = "VillageId";
             bool sortDescending = false;
             pageIndex = args.Skip!.Value;
-            
-           
-            if (!string.IsNullOrEmpty(args.OrderBy))
+
+
+            if (args.OrderBy.Any())
             {
-                sortField = args.OrderBy.Split(" ")[0];
-                string dir = args.OrderBy.Split(" ")[1];
-                sortDescending = dir.Contains("asc") ? false : true;
+                sortField = args.Sorts.First().Property;
+
+                sortDescending = args.Sorts.First().SortOrder == SortOrder.Descending;
             }
 
-            await LoadVillagePageList(pageIndex, sortField, sortDescending);
+            var filterColumns = args.Filters?.FirstOrDefault(f =>
+                                                                f.Property == nameof(VVillages.VilInKhmer) ||
+                                                                f.Property == nameof(VVillages.VillDescription) ||
+                                                                f.Property == nameof(VVillages.ComInKhmer) ||
+                                                                f.Property == nameof(VVillages.ComDescription))?.FilterValue?.ToString();
+
+            var filterString = filterColumns ?? string.Empty;
+
+            await LoadVillagePageList(pageIndex, sortField, sortDescending,filterString);
         }
 
-        async Task LoadVillagePageList(int pageIndex = 0, string sortField = "VillageId", bool sortDescending = false)
+        async Task LoadVillagePageList(int pageIndex = 0, string sortField = "VillageId", bool sortDescending = false,string? filter=null)
         {
             try
             {
 
-                var param = new QueryParam(pageIndex, pageSize, sortField, sortDescending, includeInactive, searchText);
+                var param = new QueryParam(pageIndex, pageSize, sortField, includeInactive, sortDescending,  filter);
 
                 var res = await villageServer.GetAllPagerAsync(param);
 
@@ -81,7 +89,7 @@ namespace TrapchumApp.Pages.Lists.Operations.Villages
             }
             catch
             {
-
+                throw new Exception("Error loading villages. Please try again later.");
             }
         }
         protected async Task TextChanged(string? searchtext = null)
@@ -129,26 +137,34 @@ namespace TrapchumApp.Pages.Lists.Operations.Villages
         }
         protected async Task Delete(int id)
         {
-            var confirm = await DialogService.Confirm("Do you want to delete village record?", "Delete", new ConfirmOptions
+            try
             {
-                CancelButtonText = "Cancel",
-                OkButtonText = "OK",
-            });
-            if (confirm == true)
-            {
-               
-                var result = await villageServer.DeleteAsync(id);
+                var confirm = await DialogService.Confirm("Do you want to delete village record?", "Delete", new ConfirmOptions
+                {
+                    CancelButtonText = "Cancel",
+                    OkButtonText = "OK",
+                });
+                if (confirm == true)
+                {
 
-                if (result.IsSuccess)
-                {
-                    NotificationService.Notify(NotificationSeverity.Success, "Village one record deleted successful.");
-                    await GetVillages(searchText);
-                }
-                else
-                {
-                    NotificationService.Notify(NotificationSeverity.Success, result.ErrMessage);
+                    var result = await villageServer.DeleteAsync(id);
+
+                    if (result.IsSuccess)
+                    {
+                        NotificationService.Notify(NotificationSeverity.Success, "Village one record deleted successful.");
+                        await GetVillages(searchText);
+                    }
+                    else
+                    {
+                        NotificationService.Notify(NotificationSeverity.Success, result.ErrMessage);
+                    }
                 }
             }
+            catch(Exception ex)
+            {
+                throw new Exception($"Error deleting village: {ex.Message}");
+            }
+           
 
         }
     }

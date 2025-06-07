@@ -1,6 +1,7 @@
 using Applications.Interfaces.Addresses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Addresses;
+using Applications.Responses.ViewModels.Departments;
 using Domains.Models.Addresses;
 using TrapchumApp.Pages.Lists.Operations.Districts;
 
@@ -34,14 +35,8 @@ namespace TrapchumApp.Pages.Lists.Operations.Provinces
         protected List<District> districtList= [];
         protected override async Task OnInitializedAsync()
         {
-            try
-            {
                 await GetProvinces();
-            }
-            catch (Exception ex)
-            {
-                NotificationService.Notify(NotificationSeverity.Error, ex.Message);
-            }
+   
             await base.OnInitializedAsync();
         }
         void PageSizeChanged(int page)
@@ -49,11 +44,19 @@ namespace TrapchumApp.Pages.Lists.Operations.Provinces
             pageSize = page;
         }
         private async Task GetProvinces(string? filter = null)
-        {   
+        {
+            try
+            {
                 var param = new QueryParam(pageIndex, pageSize, sortField, sortDescending, includeInactive, filter);
                 var resultResponse = await _proService.GetAllAsync(param);
                 counts = resultResponse.Count;
                 ProvincesList = resultResponse.Items ?? [];
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error loading provinces: {ex.Message}");
+            }
+                
         }
         async Task LoadData(LoadDataArgs args)
         {
@@ -63,21 +66,27 @@ namespace TrapchumApp.Pages.Lists.Operations.Provinces
 
             pageIndex = args.Skip!.Value;
 
-            if (!string.IsNullOrEmpty(args.OrderBy))
+            if (args.OrderBy.Any())
             {
-                sortField = args.OrderBy.Split(" ")[0];
+                sortField = args.Sorts.First().Property;
 
-                string dir = args.OrderBy.Split(" ")[1];
-
-                sortDescending = dir.Contains("asc") ? false : true;
+                sortDescending = args.Sorts.First().SortOrder == SortOrder.Descending;
             }
 
-            await LoadProvincePageList(pageIndex, sortField, sortDescending);
+            var filterColumns = args.Filters?.FirstOrDefault(f => f.Property == nameof(ProvinceViewModel.ProvinceCode) ||
+                                                                f.Property == nameof(ProvinceViewModel.ProDescription) ||
+                                                                f.Property == nameof(ProvinceViewModel.ProInKhmer))?.FilterValue?.ToString();
+
+            var filterString = filterColumns ?? string.Empty;
+
+            await LoadProvincePageList(pageIndex, sortField, sortDescending,filterString);
         }
 
-        async Task LoadProvincePageList(int pageIndex = 0, string sortField = "ProvinceId", bool sortDescending = false)
+        async Task LoadProvincePageList(int pageIndex = 0, string sortField = "ProvinceId", bool sortDescending = false, string? filter=null)
         {
-                var param = new QueryParam(pageIndex, pageSize, sortField, includeInactive, sortDescending, searchText);
+            try
+            {
+                var param = new QueryParam(pageIndex, pageSize, sortField, includeInactive, sortDescending, filter);
 
                 var res = await _proService.GetAllAsync(param);
 
@@ -86,6 +95,12 @@ namespace TrapchumApp.Pages.Lists.Operations.Provinces
                 counts = res.Count;
 
                 StateHasChanged();
+            }
+            catch(Exception ex)
+            {
+                throw new Exception($"Error loading provinces: {ex.Message}");
+            }
+                
         }
         protected async Task TextChanged(string? searchtext = null)
         {
@@ -128,7 +143,7 @@ namespace TrapchumApp.Pages.Lists.Operations.Provinces
 
         protected async Task AddDistrict(int? Id)
         {
-            await DialogService!.OpenAsync<DistrictCreatePage>("Edit Province",
+            await DialogService!.OpenAsync<DistrictCreatePage>("District Create",
                new Dictionary<string, object?> { { "ProvinceCode", Id } },
                new DialogOptions
                {
@@ -146,32 +161,41 @@ namespace TrapchumApp.Pages.Lists.Operations.Provinces
         }
         protected async Task Delete(int proId)
         {
-            var confirm = await DialogService.Confirm("Do you want to delete?", "Delete", new ConfirmOptions
+            try
             {
-                CancelButtonText = "Cancel",
-                OkButtonText = "OK",
-            });
-            if (confirm == true)
-            {
-                var datas=await districtService.GetAllAsync();
-                districtList = datas.Data.Where(x=>x.ProvinceRefId==proId).ToList();
-                if (districtList.Count() > 0)
+                var confirm = await DialogService.Confirm("Do you want to delete?", "Delete", new ConfirmOptions
                 {
-                    NotificationService.Notify(NotificationSeverity.Warning, "This province's record in used with other tables, cannot delete it.");
-                    return;
-                }
-                var result = await _proService.DeleteAsync(proId);
+                    CancelButtonText = "Cancel",
+                    OkButtonText = "OK",
+                });
+                if (confirm == true)
+                {
+                    var datas = await districtService.GetAllAsync();
+                    districtList = datas.Data.Where(x => x.ProvinceRefId == proId).ToList();
+                    if (districtList.Count() > 0)
+                    {
+                        NotificationService.Notify(NotificationSeverity.Warning, "This province's record in used with other tables, cannot delete it.");
+                        return;
+                    }
+                    var result = await _proService.DeleteAsync(proId);
 
-                if (result.IsSuccess)
-                {
-                    NotificationService.Notify(NotificationSeverity.Success, "Province one record deleted successful.");
-                    await GetProvinces(searchText);
-                }
-                else
-                {
-                    NotificationService.Notify(NotificationSeverity.Success, result.ErrMessage);
+                    if (result.IsSuccess)
+                    {
+                        NotificationService.Notify(NotificationSeverity.Success, "Province one record deleted successful.");
+                        await GetProvinces(searchText);
+                    }
+                    else
+                    {
+                        NotificationService.Notify(NotificationSeverity.Warning, result.ErrMessage);
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                NotificationService.Notify(NotificationSeverity.Error, ex.Message);
+                return;
+            }
+            
 
         }
     }

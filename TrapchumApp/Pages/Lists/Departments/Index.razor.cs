@@ -43,7 +43,7 @@ namespace TrapchumApp.Pages.Lists.Departments
 
         protected async Task ShowCreate()
         {
-            var resultModal = await DialogService!.OpenAsync<DepartmentModalCreate>("Department",
+            var resultModal = await DialogService!.OpenAsync<DepartmentModalCreate>("Department Create",
                options: new DialogOptions
                {
                    Draggable = true,
@@ -145,25 +145,34 @@ namespace TrapchumApp.Pages.Lists.Departments
 
         protected async Task Delete(int departmentId)
         {
-            var confirm = await DialogService.Confirm("Do you want to delete?", "Delete", new ConfirmOptions
+            try
             {
-                CancelButtonText = "Cancel",
-                OkButtonText = "OK",
-            });
-            if (confirm == true)
-            {
-                var result = await _depService.DeleteAsync(departmentId);
+                var confirm = await DialogService.Confirm("Do you want to delete?", "Delete", new ConfirmOptions
+                {
+                    CancelButtonText = "Cancel",
+                    OkButtonText = "OK",
+                });
+                if (confirm == true)
+                {
+                    var result = await _depService.DeleteAsync(departmentId);
 
-                if (result.IsSuccess)
-                {
-                    NotificationService.Notify(NotificationSeverity.Success, "CreateNewUser Success");
-                    await GetDepartments(searchText);
-                }
-                else
-                {
-                    NotificationService.Notify(NotificationSeverity.Success, result.ErrMessage);
+                    if (result.IsSuccess)
+                    {
+                        NotificationService.Notify(NotificationSeverity.Success, "Department record was deleted successful!");
+                        await GetDepartments(searchText);
+                    }
+                    else
+                    {
+                        NotificationService.Notify(NotificationSeverity.Error, result.ErrMessage);
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                NotificationService.Notify(NotificationSeverity.Error, ex.Message);
+                return;
+            }
+           
 
         }
 

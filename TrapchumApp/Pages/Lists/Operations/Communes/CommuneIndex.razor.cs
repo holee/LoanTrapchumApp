@@ -3,6 +3,7 @@ using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Addresses;
 using Infrastructures.Implements;
 using TrapchumApp.Pages.Lists.Operations.Districts;
+using TrapchumApp.Pages.Lists.Operations.Villages;
 
 namespace TrapchumApp.Pages.Lists.Operations.Communes
 {
@@ -40,19 +41,27 @@ namespace TrapchumApp.Pages.Lists.Operations.Communes
             string sortField = "CommuneId";
             bool sortDescending = false;
             pageIndex = args.Skip!.Value;
-            if (!string.IsNullOrEmpty(args.OrderBy))
+            if (args.OrderBy.Any())
             {
-                sortField = args.OrderBy.Split(" ")[0];
-                string dir = args.OrderBy.Split(" ")[1];
-                sortDescending = dir.Contains("asc") ? false : true;
+                sortField = args.Sorts.First().Property;
+
+                sortDescending = args.Sorts.First().SortOrder == SortOrder.Descending;
             }
 
-            await LoadDistrictPageList(pageIndex, sortField, sortDescending);
+            var filterColumns = args.Filters?.FirstOrDefault(f => 
+                                                                f.Property == nameof(VCommunes.DisDescription) ||
+                                                                f.Property == nameof(VCommunes.DisInKhmer) ||
+                                                                f.Property == nameof(VCommunes.ComInKhmer) ||
+                                                                f.Property == nameof(VCommunes.ComDescription))?.FilterValue?.ToString();
+
+            var filterString = filterColumns ?? string.Empty;
+
+            await LoadDistrictPageList(pageIndex, sortField, sortDescending,filterString);
         }
 
-        async Task LoadDistrictPageList(int pageIndex = 0, string sortField = "CommuneId", bool sortDescending = false)
+        async Task LoadDistrictPageList(int pageIndex = 0, string sortField = "CommuneId", bool sortDescending = false,string? filter=null)
         {
-            var param = new QueryParam(pageIndex, pageSize, sortField, sortDescending, includeInactive, searchText);
+            var param = new QueryParam(pageIndex, pageSize, sortField, includeInactive, sortDescending, filter);
             var res = await communeService.GetAllPagerAsync(param);
             vCommunelistt = res.Items;
             counts = res.Count;
@@ -96,9 +105,9 @@ namespace TrapchumApp.Pages.Lists.Operations.Communes
 
         }
 
-        protected async Task AddCommune(int? Id) 
+        protected async Task AddVillage(int? Id) 
         {
-            var resultModal = await DialogService!.OpenAsync<CommuneUpdatePage>("Edit Commune",
+            var resultModal = await DialogService!.OpenAsync<VillageCreatePage>("Village Create",
                new Dictionary<string, object?> { { "Id", Id } },
                new DialogOptions
                {
@@ -108,7 +117,7 @@ namespace TrapchumApp.Pages.Lists.Operations.Communes
                });
             if (resultModal != null)
             {
-                await OnInitializedAsync();
+                await GetCommunes();
                 Console.WriteLine("Updated...");
             }
             await InvokeAsync(StateHasChanged);
@@ -117,31 +126,40 @@ namespace TrapchumApp.Pages.Lists.Operations.Communes
 
         protected async Task Delete(int id)
         {
-            var confirm = await DialogService.Confirm("Do you want to delete commune record?", "Delete", new ConfirmOptions
+            try
             {
-                CancelButtonText = "Cancel",
-                OkButtonText = "OK",
-            });
-            if (confirm == true)
-            {
-                var used = vCommunelistt.Where(x => x.CommuneId == id).FirstOrDefault();
-                if (used!.Used == true)
+                var confirm = await DialogService.Confirm("Do you want to delete commune record?", "Delete", new ConfirmOptions
                 {
-                    NotificationService.Notify(NotificationSeverity.Warning, "This commune's record in used with other tables, cannot delete it.");
-                    return;
-                }
-                var result = await communeService.DeleteAsync(id);
+                    CancelButtonText = "Cancel",
+                    OkButtonText = "OK",
+                });
+                if (confirm == true)
+                {
+                    var used = vCommunelistt.Where(x => x.CommuneId == id).FirstOrDefault();
+                    if (used!.Used == true)
+                    {
+                        NotificationService.Notify(NotificationSeverity.Warning, "This commune's record in used with other tables, cannot delete it.");
+                        return;
+                    }
+                    var result = await communeService.DeleteAsync(id);
 
-                if (result.IsSuccess)
-                {
-                    NotificationService.Notify(NotificationSeverity.Success, "Commune one record deleted successful.");
-                    await GetCommunes(searchText);
-                }
-                else
-                {
-                    NotificationService.Notify(NotificationSeverity.Success, result.ErrMessage);
+                    if (result.IsSuccess)
+                    {
+                        NotificationService.Notify(NotificationSeverity.Success, "Commune one record deleted successful.");
+                        await GetCommunes(searchText);
+                    }
+                    else
+                    {
+                        NotificationService.Notify(NotificationSeverity.Error, result.ErrMessage);
+                    }
                 }
             }
+            catch(Exception ex)
+            {
+                NotificationService.Notify(NotificationSeverity.Error, "Error", ex.Message);
+                return;
+            }
+            
 
         }
     }

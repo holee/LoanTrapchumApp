@@ -22,16 +22,24 @@ namespace TrapchumApp.Pages.Lists.Departments
 
         protected override async Task OnInitializedAsync()
         {
-            var resultResponse = await _departmentService.GetDepartmentDetails(Id);
+            try
+            {
+                var resultResponse = await _departmentService.GetDepartmentDetails(Id);
 
-            if (resultResponse.IsSuccess)
-            {
-                department = resultResponse.Data;
+                if (resultResponse.IsSuccess)
+                {
+                    department = resultResponse.Data;
+                }
+                else
+                {
+                    NotificationService.Notify(NotificationSeverity.Error, resultResponse.ErrMessage);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                NotificationService.Notify(NotificationSeverity.Error, resultResponse.ErrMessage);
+                NotificationService.Notify(NotificationSeverity.Error, "Error", ex.Message);
             }
+            
 
             await base.OnInitializedAsync();
         }

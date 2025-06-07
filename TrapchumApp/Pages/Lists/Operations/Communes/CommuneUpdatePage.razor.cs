@@ -1,6 +1,7 @@
 using Applications.Interfaces.Addresses;
 using Applications.Requests.Lists.Addreses;
 using Applications.Responses.Message;
+using Azure;
 using Domains.Models.Addresses;
 using Mapster;
 using Microsoft.AspNetCore.Components;
@@ -43,7 +44,7 @@ namespace TrapchumApp.Pages.Lists.Operations.Communes
             }
             catch (Exception ex)
             {
-                throw new Exception();
+                NotificationService.Notify(NotificationSeverity.Error, ex.Message);
             }
             
             await base.OnInitializedAsync();
