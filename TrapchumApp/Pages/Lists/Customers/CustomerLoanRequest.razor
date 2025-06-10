@@ -1,4 +1,5 @@
 ﻿@using Applications.Enumerations
+@using Applications.Responses.ViewModels.Loans.Requests
 @using TrapchumApp.Services
 <RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End"
              class="rz-mb-2"
@@ -15,50 +16,64 @@
 </RadzenStack>
 <RadzenDataGrid Data="_vLoanRequests"
                 Responsive
-                TItem="CustomerLoanRequestVm"
+                TItem="VLoanRequests"
                 Density="Density.Compact">
     <Columns>
-        <RadzenDataGridColumn Property="@nameof(CustomerLoanRequestVm.RequestDate)" Title="Date"
+        <RadzenDataGridColumn Property="@nameof(VLoanRequests.RequestDate)"
+                              Title="Date"
                               Context="c"
                               Sortable="false">
             <Template>
                 @c.RequestDate.DayFirst()
             </Template>
         </RadzenDataGridColumn>
-        <RadzenDataGridColumn Property="@nameof(CustomerLoanRequestVm.CurrencyName)" Title="Currency"
+        <RadzenDataGridColumn Property="@nameof(VLoanRequests.CurrencyName)"
+                              Title="Currency"
                               Sortable="false" />
-        <RadzenDataGridColumn Property="@nameof(CustomerLoanRequestVm.RequestAmount)" Title="Amount"
+        <RadzenDataGridColumn Property="@nameof(VLoanRequests.RequestAmount)"
+                              Title="Amount"
                               Context="c"
-                              TextAlign="TextAlign.End"
+                              TextAlign="TextAlign.Right"
                               Sortable="false">
             <Template>
                 @c.RequestAmount.Format(c.CurrencyId)
             </Template>
         </RadzenDataGridColumn>
-        <RadzenDataGridColumn Property="@nameof(CustomerLoanRequestVm.LoanCategoryName)"
-                              Title="Category"
+        <RadzenDataGridColumn Property="@nameof(VLoanRequests.AprovedAmount)"
+                              Title="Amount"
+                              Context="c"
+                              TextAlign="TextAlign.Right"
+                              Sortable="false">
+            <Template>
+                @c.AprovedAmount.Format(c.CurrencyId)
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="@nameof(VLoanRequests.Summiter)"
+                              Title="Summiter"
                               Sortable="false" />
-        <RadzenDataGridColumn Property="@nameof(CustomerLoanRequestVm.Remark)"
-                              Title="Remark"
+        <RadzenDataGridColumn Property="@nameof(VLoanRequests.AprovedBy)"
+                              Title="AprovedBy"
                               Sortable="false" />
-        <RadzenDataGridColumn TextAlign="TextAlign.Center" Width="6rem" 
-                              Property="@nameof(CustomerLoanRequestVm.Status)" 
+        <RadzenDataGridColumn Property="@nameof(VLoanRequests.Status)"
                               Title="Status"
+                              Sortable="false" />
+        <RadzenDataGridColumn TextAlign="TextAlign.Center" Width="6rem"
+                              Property="@nameof(VLoanRequests.LoanRequestId)"
+                              Title="Actions"
                               Context="c"
                               Sortable="false">
-                 <Template>
-                    <AuthorizeView Policy="@RequestsPolicies.Request">
-                       <Authorized>
-                        <RadzenLink 
-                            Path="@($"App/Loan/{BranchId}/Branches/Request/Details?UserId={UserId}&CustomerId={CustomerId}&LoanRequestId={c?.LoanRequestId}")" Text="Detail" />
-                       </Authorized>
-                    </AuthorizeView>
+            <Template>
+                <AuthorizeView Policy="@RequestsPolicies.Request">
+                    <Authorized>
+                        <RadzenLink Path="@($"App/Loan/{BranchId}/Branches/Request/Details?UserId={UserId}&CustomerId={CustomerId}&LoanRequestId={c?.LoanRequestId}")" Text="Detail" />
+                    </Authorized>
+                </AuthorizeView>
                 <AuthorizeView Policy="@RequestsPolicies.Disburse">
                     <Authorized>
                         <RadzenLink Path="@($"App/Loan/{BranchId}/Branches/Request/Details?UserId={UserId}&CustomerId={CustomerId}&LoanRequestId={c?.LoanRequestId}")" Text="Detail" />
                     </Authorized>
                 </AuthorizeView>
-                 </Template>       
+            </Template>
         </RadzenDataGridColumn>
     </Columns>
     <LoadingTemplate>

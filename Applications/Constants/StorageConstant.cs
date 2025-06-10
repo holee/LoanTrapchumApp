@@ -71,6 +71,18 @@ namespace Applications.Constants
         public static int[] InstallemntOptions = [12,18,24,36,42,48,60,72];
 
         public static int[] PageSizeOptions = [15, 25, 50, 100];
-         
+        
+        public static string[]  MarritalOptions = ["Single", "Married", "Divorced", "Widow"];
+
+        public static IReadOnlyList<Items> RepaymentModeOptions = [ 
+                new (1,"Balloon"), 
+                new (2,"Decline"),
+                new (3,"Flat"),
+                new (4,"Annuarity"),
+             ];
+        public static IReadOnlyList<Items> CurrencyTypeOptions = [
+                    new(1,"KHR"),
+                    new(2,"USD"), 
+            ];
     }
 }

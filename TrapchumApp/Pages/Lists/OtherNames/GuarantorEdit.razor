@@ -1,7 +1,6 @@
 ﻿@using TrapchumApp.Services
 <EditForm Model="model" OnValidSubmit="OnSaveChanges">
     <input type="hidden" @bind="model.Id" />
-    <Forms.ValidationSummary />
     <FluentValidationValidator DisableAssemblyScanning="false"></FluentValidationValidator>
     <RadzenFieldset>
         <HeaderTemplate>

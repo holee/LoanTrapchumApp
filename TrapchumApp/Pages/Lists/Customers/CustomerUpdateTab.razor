@@ -2,7 +2,7 @@
 @using Applications.Enumerations
 @using Domains.Models.Files
 @using TrapchumApp.Services
-<PageTitle>Customer</PageTitle>
+<PageTitle>Edit Customer</PageTitle>
 <RadzenProgressBar Value="100" ShowValue="false"
                    Mode="ProgressBarMode.Indeterminate"
                    Visible="IsLoading"
@@ -15,7 +15,85 @@
         </HeaderTemplate>
         <ChildContent>
             <input type="hidden" @bind="model.CustomerId" />
-            <RadzenRow AlignItems="AlignItems.Center">
+            <CreateCustomerInfo Model="@model" />
+        </ChildContent>
+    </RadzenFieldset>
+    <CustomerAddress model="@model" Cities="@Cities" Countries="@Countries" />
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 AlignItems="AlignItems.Center"
+                 Gap="1rem"
+                 class="rz-mt-2"
+                 JustifyContent="JustifyContent.End">
+        <RadzenButton Click="FormSubmit"
+                      Size="ButtonSize.Small"
+                      ButtonStyle="ButtonStyle.Success"
+                      Text="Save"
+                      Icon="save" />
+        <RadzenButton Click="ClickCloseTab"
+                      Size="ButtonSize.Small"
+                      Text="Close"
+                      ButtonStyle="ButtonStyle.Danger"
+                      Icon="cancel" />
+
+    </RadzenStack>
+</EditForm>
+@code {
+    // const long maxFileSize = 2L * 1024 * 1024 * 1024;
+    // private async Task OnFileUpload(UploadChangeEventArgs args)
+    // {
+    //     try
+    //     {
+    //         if (!args.Files.Any())
+    //         {
+    //             model.Photo = string.Empty;
+
+    //             return;
+    //         }
+
+    //         var file = args.Files.FirstOrDefault();
+
+    //         if (file is null || (file is not null && file.Size > maxFileSize))
+    //         {
+    //             NotificationService.Notify(new NotificationMessage
+    //             {
+    //                 Severity = NotificationSeverity.Error,
+    //                 Summary = "File upload error",
+    //                 Detail = "File is too large or not selected."
+    //             });
+    //             return;
+    //         }
+    //         var ext = Path.GetExtension(file!.Name);
+
+    //         var originalName = file.Name;
+
+    //         using var stream = new MemoryStream();
+
+    //         using var fileStream = file.OpenReadStream(maxFileSize);// 30 MB limit
+
+    //         await fileStream.CopyToAsync(stream); // ✅ Read the file content
+
+    //         var fileModel = new FileModel(originalName, file.Name, file.Size, stream.ToArray());
+
+    //         var rsp = await _fileUploadService.UploadFile(fileModel);
+
+    //         if (rsp.IsSuccess)
+    //         {
+    //             model.Photo = rsp.Data?.FileUrl ?? string.Empty;
+    //         }
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         Console.WriteLine($"Error uploading files: {ex.Message}");
+    //         // Handle error (e.g., show notification)
+    //     }
+    // }
+
+
+}
+
+
+
+@*   <RadzenRow AlignItems="AlignItems.Center">
                 <RadzenColumn Size="3">
                     <RadzenRow AlignItems="AlignItems.Center">
                         <RadzenColumn Size="6">
@@ -28,13 +106,6 @@
                                             TValue="string"
                                             Placeholder="Salutation"
                                             Data="Salutations">
-                                <ValueTemplate Context="s">
-                                    <RadzenTextBox @bind-Value="model.Salutation"
-                                                   @onkeydown="AddNewSalutation"
-                                                   @oninput="OnTextChangedSalution"
-                                                   Style="width:120%;height:120%;margin:-15px"
-                                                   aria-labelledby="DropDownEditLabel" />
-                                </ValueTemplate>
                             </RadzenDropDown>
                         </RadzenColumn>
                     </RadzenRow>
@@ -187,88 +258,6 @@
                         </RadzenRow>
                     </RadzenCard>
                 </RadzenColumn>
-            </RadzenRow>
-        </ChildContent>
-    </RadzenFieldset>
-    <CustomerAddress model="@model" Cities="@Cities" Countries="@Countries" />
-    @if (model.MarritalStatus != MarritalStateEnum.Single.ToString())
-    {
-        <SpouseInfo model="@model" Nationalities="@Nationalities" Occupations="@Occupations" />
-    }
-    <RadzenStack Orientation="Orientation.Horizontal"
-                 AlignItems="AlignItems.Center"
-                 Gap="1rem"
-                 class="rz-mt-2"
-                 JustifyContent="JustifyContent.End">
-        <RadzenButton Click="FormSubmit"
-                      Size="ButtonSize.Small"
-                      ButtonStyle="ButtonStyle.Success"
-                      Text="Save"
-                      Icon="save" />
-        <RadzenButton Click="ClickCloseTab"
-                      Size="ButtonSize.Small"
-                      Text="Close"
-                      ButtonStyle="ButtonStyle.Danger"
-                      Icon="cancel" />
-
-    </RadzenStack>
-</EditForm>
-@code {
-    const long maxFileSize = 2L * 1024 * 1024 * 1024;
-    private async Task OnFileUpload(UploadChangeEventArgs args)
-    {
-        try
-        {
-            if (!args.Files.Any())
-            {
-                model.Photo = string.Empty;
-
-                return;
-            }
-
-            var file = args.Files.FirstOrDefault();
-
-            if (file is null || (file is not null && file.Size > maxFileSize))
-            {
-                NotificationService.Notify(new NotificationMessage
-                {
-                    Severity = NotificationSeverity.Error,
-                    Summary = "File upload error",
-                    Detail = "File is too large or not selected."
-                });
-                return;
-            }
-            var ext = Path.GetExtension(file!.Name);
-
-            var originalName = file.Name;
-
-            using var stream = new MemoryStream();
-
-            using var fileStream = file.OpenReadStream(maxFileSize);// 30 MB limit
-
-            await fileStream.CopyToAsync(stream); // ✅ Read the file content
-
-            var fileModel = new FileModel(originalName, file.Name, file.Size, stream.ToArray());
-
-            var rsp = await _fileUploadService.UploadFile(fileModel);
-
-            if (rsp.IsSuccess)
-            {
-                model.Photo = rsp.Data?.FileUrl ?? string.Empty;
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error uploading files: {ex.Message}");
-            // Handle error (e.g., show notification)
-        }
-    }
-
-
-}
-
-
-
-
+            </RadzenRow> *@
 
 

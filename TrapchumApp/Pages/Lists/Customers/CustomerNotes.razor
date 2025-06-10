@@ -18,14 +18,16 @@
                 PageSize="10"
                 AllowSorting="false"
                 GridLines="DataGridGridLines.Both"
-                ColumnWidth="15rem"
                 Density="Density.Compact">
     <Columns>
         <RadzenDataGridColumn Width="10rem"
                               Title="Create By"
                               Property="CreditAgentName"></RadzenDataGridColumn>
         <RadzenDataGridColumn Title="Description" Property="Description"></RadzenDataGridColumn>
-        <RadzenDataGridColumn Width="6rem" Title="CreateNewUserd" Property="CreateNewUserd">
+        <RadzenDataGridColumn 
+                        Width="6rem" 
+                        Title="Created"
+                        Property="Created">
             <Template>
                 @context.Created.DayFirst()
             </Template>

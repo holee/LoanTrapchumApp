@@ -9,7 +9,7 @@ public sealed class VLoanDisbursments
     public string? LoanId { get; set; }
     public string? ContractNumber { get; set; }
     public int? BranchId { get; set; }
-    public string? BranchName { get; set; }
+    public string? LoanBranchName { get; set; }
     public string? CustomerId { get; set; }
     public string? AltName { get; set; }
     public string? CustomerName { get; set; }

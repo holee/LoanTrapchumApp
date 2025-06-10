@@ -1,16 +1,14 @@
 ﻿@using Applications.Responses.ViewModels.Loans.Requests
 @using TrapchumApp.Services
-<PageDropDown PageSizeChanged="PageChanged"
-              OnTextChanged="FilterTextChanged"
-              ShowSearchBox="true">
-    <LeftChildContent>
+<GridToolbar SearchChanged="@FilterTextChanged" Placeholder="Type something to search........">
+      <LeftChildren>
         <AuthorizeView Policy="@RequestsPolicies.Request">
             <Authorized>
                 <RadzenLink class="rz-button rz-button-sm rz-primary" Path="@createRequestUrl" Text="Request" Icon="add" />
             </Authorized>
         </AuthorizeView>
-    </LeftChildContent>
-</PageDropDown>
+    </LeftChildren>
+</GridToolbar>
 <RadzenDataGrid Data="LoanRequests"
                 TItem="VLoanRequests"
                 Responsive="true"
@@ -24,6 +22,8 @@
                 IsLoading="isLoading"
                 GridLines="DataGridGridLines.Both"
                 AllowPaging="true"
+                PageSizeOptions="StorageConstant.PageSizeOptions"
+                PageSizeChanged="@PageChanged"
                 ShowPagingSummary="true">
     <Columns>
         <RadzenDataGridColumn Property="@(nameof(VLoanRequests.RequestDate))"

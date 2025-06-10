@@ -6,6 +6,7 @@ using Applications.Services.Lists;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 using Radzen.Blazor;
+using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Lists.OtherNames
 {
@@ -19,19 +20,33 @@ namespace TrapchumApp.Pages.Lists.OtherNames
         }
 
         bool includeInactive = true;
+
         string? filterText = "";
+
         int pageIndex = 0;
-        int pageSize = 10;
-        string sortColumn = "FullName";
+
+        int pageSize = 15;
+
+        string sortColumn = "GuarantorName";
+
         bool sortDescending = false;
+
         int counts = 0;
+
         bool isLoading = false;
+
         bool ShowAddTab = false;
+
         RadzenTabs tabs = default!;
+
         int selectedTabIndex = 0;
+
         string? SelectedGuarantorId = string.Empty;
-        IEnumerable<VGuarantor> guarantors = [];
+
+        List<VGuarantor> guarantors = [];
+
         EntityNamesCreate modelCreate = new EntityNamesCreate();
+
         EntityNamesCreate modelEdit = new EntityNamesCreate();
         [Parameter] public EventCallback<int> OpenAddTab { get; set; }
         [Parameter] public EventCallback<int> OpenDetailTab { get; set; }
@@ -40,13 +55,22 @@ namespace TrapchumApp.Pages.Lists.OtherNames
         async Task LoadGuarantors(LoadDataArgs e)
         {
             pageIndex = e.Skip!.Value;
-            if (!string.IsNullOrEmpty(e.OrderBy))
-            {
-                sortColumn = e.OrderBy.Split(" ")[0];
-                string dir = e.OrderBy.Split(" ")[1];
-                sortDescending = dir.Contains("asc") ? false : true;
-            }
-            await GetGuarantors();
+
+            pageSize = e.Top ?? 15;
+
+            (sortColumn, sortDescending) = e.PageInfo();
+
+            var filterColumn = e.Filters?.FirstOrDefault(p =>
+                                                         p.Property == nameof(VGuarantor.Gender) ||
+                                                         p.Property == nameof(VGuarantor.GuarantorName) ||
+                                                          p.Property == nameof(VGuarantor.Phone) ||
+                                                         p.Property == nameof(VGuarantor.NumberOfLoan)
+                                                      )?.FilterValue.ToString() ?? string.Empty;
+
+
+            filterText = filterColumn ?? string.Empty;
+
+            await GetGuarantors(filterText);
 
         }
 
@@ -57,20 +81,26 @@ namespace TrapchumApp.Pages.Lists.OtherNames
             await base.OnInitializedAsync();
         }
 
-        async Task IncludeInactiveCheckedChanged()
+        async Task IncludeInactiveCheckedChanged(bool arg)
         {
-            await GetGuarantors();
+            includeInactive = arg;
+
+            await GetGuarantors(filterText);
         }
 
         async Task ChangedPageSize(int page)
         {
             pageSize = page;
+            pageIndex = 0;
             await GetGuarantors();
         }
 
-        async void SearchTextChanged()
+        async void SearchTextChanged(string filter)
         {
-            await GetGuarantors();
+
+            filterText = filter;
+
+            await GetGuarantors(filter);
         }
 
         async Task AddAddTab()
@@ -82,17 +112,18 @@ namespace TrapchumApp.Pages.Lists.OtherNames
             await GetGuarantors();
         }
 
-        async Task GetGuarantors()
+        async Task GetGuarantors(string? filter = null)
         {
             isLoading = true;
-            var param = new QueryParam(pageIndex, pageSize, sortColumn, includeInactive, sortDescending,filterText);
-            var guarantorResp = await _gService.GetGuarantorsAsync(param);
-            if (guarantorResp.IsSuccess)
-            {
-                guarantors = guarantorResp.Data.Items;
 
-                counts = guarantorResp.Data.Count;
-            }
+            var param = new QueryParam(pageIndex, pageSize, sortColumn, includeInactive, sortDescending, filter);
+
+            var rsp = await _gService.GetGuarantorsAsync(param);
+
+            guarantors = rsp.Items;
+
+            counts = rsp.Count;
+
             isLoading = false;
 
             StateHasChanged();
@@ -101,7 +132,9 @@ namespace TrapchumApp.Pages.Lists.OtherNames
         async Task GetGuarantorDetails(string? id)
         {
             ContextMenuService.Close();
+
             await SetGuarantorId.InvokeAsync(id);
+
             await OpenDetailTab.InvokeAsync(3);
         }
 

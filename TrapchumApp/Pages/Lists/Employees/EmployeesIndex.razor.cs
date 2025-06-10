@@ -6,12 +6,15 @@ using Applications.Requests.Lists.Entities;
 using Applications.Responses.Lists.Employees;
 using Applications.Responses.Lists.Entities;
 using Applications.Responses.Paginations;
+using Applications.Responses.ViewModels.Currencies;
+using Applications.Responses.ViewModels.Customers;
 using Applications.Responses.ViewModels.Employees;
 using Domains.Models.Addresses;
 using Domains.Models.Lists;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 using Radzen.Blazor;
+using System.Threading.Tasks;
 
 namespace TrapchumApp.Pages.Lists.Employees
 {
@@ -60,7 +63,7 @@ namespace TrapchumApp.Pages.Lists.Employees
         IEnumerable<OcupationResponse>? Occuptions = [];
         IEnumerable<string> Cities = [];
         EmployeeDtoUpdate EmployeeEdit = new();
-        int pageSize = 10;
+        int pageSize = 15;
         int counts = 0;
         int pageIndex = 1;
         string sortField = "EmployeeId";
@@ -68,19 +71,33 @@ namespace TrapchumApp.Pages.Lists.Employees
         string? _empId = string.Empty;
         int branchId = 0;
 
-        void PageSizeChanged(int page)
+        async Task PageSizeChanged(int page)
         {
             pageSize = page;
+            pageIndex = 0;
+            await GetEmployees(branchId, filter);
         }
 
 
-        async Task OnCheckChanged(VEmployeeList param)
+        async Task OnCheckChanged(string? employeeId,bool state)
         {
-            var responseResult = await _employeeService!.UpdateIsActiveAsync(param.EmployeeId);
+
+            var confirm = await DialogService.Confirm($"Do you want to Deactivate/Activate Employee with ID#{branchId}?", options: new ConfirmOptions
+            {
+                CancelButtonText = "Cancel",
+
+                OkButtonText = "OK",
+            });
+
+            if (confirm == false) return;
+
+
+            var responseResult = await _employeeService!.UpdateIsActiveAsync(employeeId, state);
 
             if (!responseResult.IsSuccess)
             {
                 NotificationService.Notify(NotificationSeverity.Error, responseResult.ErrMessage);
+
                 return;
             }
 
@@ -187,7 +204,7 @@ namespace TrapchumApp.Pages.Lists.Employees
 
         string searchText = string.Empty;
 
-        IEnumerable<VEmployeeList> Employees = [];
+        List<VEmployeeList> Employees = [];
 
         protected bool includeInActive = false;
 
@@ -298,18 +315,27 @@ namespace TrapchumApp.Pages.Lists.Employees
 
         async Task LoadData(LoadDataArgs e)
         {
-            searchText = e.Filter ?? string.Empty;
 
-            pageIndex = e.Skip!.Value;
+            pageIndex = e.Skip ?? 0;
 
-            if (!string.IsNullOrEmpty(e.OrderBy))
+            pageSize = e.Top ?? 15;
+
+            if (e.Sorts.Any())
             {
-                sortField = e.OrderBy.Split(" ")[0];
+                sortField = e.Sorts.FirstOrDefault()!.Property;
 
-                string dir = e.OrderBy.Split(" ")[1];
-
-                sortDescending = dir.Contains("asc") ? false : true;
+                sortDescending = e.Sorts.FirstOrDefault()?.SortOrder == SortOrder.Descending;
             }
+
+            var filterColumn = e.Filters?.FirstOrDefault(p => p.Property == nameof(VEmployeeList.AltName) ||
+                                                            p.Property == nameof(VEmployeeList.Phone) ||
+                                                            p.Property == nameof(VEmployeeList.EmailAddress) ||
+                                                            p.Property == nameof(VEmployeeList.DepartmentName) ||
+                                                            p.Property == nameof(VEmployeeList.Occupation) ||
+                                                            p.Property == nameof(VEmployeeList.BranchName))?.FilterValue?.ToString() ?? string.Empty;
+
+
+            searchText = filterColumn ?? string.Empty;
 
             await GetEmployees(branchId, searchText);
         }

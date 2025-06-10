@@ -104,13 +104,18 @@ public class GuarantorService : IGuarantorService
         return Result.Success(guarantors);
 
     }
-    public async Task<Result<Pager<VGuarantor>>> GetGuarantorsAsync(QueryParam param)
-    {
-        await using var context = await _contextFactory.CreateDbContextAsync();
 
-        var guarantors = context.Database.SqlQuery<VGuarantor>($"SELECT * FROM VGuarantors")
-                                .WhereIf(!string.IsNullOrEmpty(param.Filter), x => EF.Functions.Like(x.GuarantorName, $"%{param.Filter}%") ||
-                                                EF.Functions.Like(x.Phone!, $"%{param.Filter}%"))
+    public async Task<Pager<VGuarantor>> GetGuarantorsAsync(QueryParam param, CancellationToken cancellation = default)
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync(cancellation);
+
+        var guarantors = context.VGuarantors
+                                .WhereIf(!string.IsNullOrEmpty(param.Filter), x =>
+                                                                 EF.Functions.Like(x.GuarantorName!, $"%{param.Filter}%") ||
+                                                                 EF.Functions.Like(x.FullName!, $"%{param.Filter}%") ||
+                                                                 EF.Functions.Like(x.NumberOfLoan!.ToString(), $"%{param.Filter}%") ||
+                                                                 EF.Functions.Like(x.Gender!, $"%{param.Filter}%") ||
+                                                                 EF.Functions.Like(x.Phone!, $"%{param.Filter}%"))
                                 .WhereIf(!param.IsIncludeInActive, x => x.IsActive == false);
 
         if (param.SortDescending)
@@ -118,12 +123,7 @@ public class GuarantorService : IGuarantorService
             guarantors = guarantors.OrderByDescending(x => EF.Property<object>(x, param.SortColumn));
         }
 
-        if (!guarantors.Any())
-        {
-            return Result.Failure<Pager<VGuarantor>>(ErrorResponse.NotFound("No data found"));
-        }
-
-        var counts = guarantors.Count();
+        var counts = await guarantors.CountAsync(cancellation);
 
         if (param.PageSize > 0)
         {
@@ -131,11 +131,13 @@ public class GuarantorService : IGuarantorService
         }
 
         var items = await guarantors.AsNoTracking()
-                                    .ToListAsync();
+                                    .ToListAsync(cancellation);
 
-        return Result.Success(new Pager<VGuarantor>(items, counts));
+        return new Pager<VGuarantor>(items, counts);
 
     }
+
+
     public async Task<Result<IEnumerable<VGuarantor>>> GetGuarantorsAsync(string? id, bool allGuarantors = true, string? q = null)
     {
 

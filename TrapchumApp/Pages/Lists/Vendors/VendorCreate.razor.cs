@@ -35,7 +35,7 @@ namespace TrapchumApp.Pages.Lists.Vendors
         IEnumerable<string> Cities = [];
         IEnumerable<OcupationResponse> Occupations = [];
         IEnumerable<Country> Countries = [];
-        protected EntityNamesCreate model = new();
+        protected EntityVendorCreate model = new();
         protected IEnumerable<DistrictDto> Districts = [];
         protected IEnumerable<CommuneDto> Communes = [];
         protected IEnumerable<VillageDto> Villages = [];
@@ -188,7 +188,7 @@ namespace TrapchumApp.Pages.Lists.Vendors
                 {
                     NotificationService.Notify(NotificationSeverity.Success, response.Data);
 
-                    Close();
+                   await Close();
 
                 }
                 else
@@ -225,7 +225,7 @@ namespace TrapchumApp.Pages.Lists.Vendors
                                      .ToList();
             return await Task.FromResult(salution);
         }
-        protected async void Close()
+        protected async Task Close()
         {
             await Closed.InvokeAsync(SelectIndex);
         }

@@ -3,6 +3,7 @@ using Applications.Responses.ViewModels.Customers;
 using Applications.Responses.ViewModels.Loans.LoanRequests;
 
 namespace Applications.Responses.ViewModels.Loans.Requests;
+
 public sealed class VLoanRequests
 {
     public string? LoanRequestId { get; set; }

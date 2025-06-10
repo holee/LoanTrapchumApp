@@ -11,11 +11,11 @@
                       Size="ButtonSize.ExtraSmall"
                       Icon="save"
                       ButtonType="ButtonType.Submit"
-                      Text="Save" />
+                      Text="Save & Close" />
         <RadzenButton ButtonStyle="ButtonStyle.Danger"
                       Size="ButtonSize.ExtraSmall"
                       Icon="cancel"
-                      Click="SelectedIndex"
+                      Click="@CloseTab"
                       Text="Close" />
     </RadzenStack>
 </EditForm>
@@ -24,7 +24,7 @@
     [Parameter]
     public EventCallback<int> SelectIndex { get; set; }
 
-    protected async void SelectedIndex()
+    protected async Task CloseTab()
     {
         await SelectIndex.InvokeAsync(0);
     }

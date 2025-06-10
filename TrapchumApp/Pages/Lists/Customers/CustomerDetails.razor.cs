@@ -20,8 +20,7 @@ namespace TrapchumApp.Pages.Lists.Customers
 
         private readonly ICollateralsServiceImpl _collateralService;
 
-        public CustomerDetails(IIncomeExpendServiceImpl customerIncomeService,
-            ICollateralsServiceImpl collateralService)
+        public CustomerDetails(IIncomeExpendServiceImpl customerIncomeService,ICollateralsServiceImpl collateralService)
         {
             _customerIncomeService = customerIncomeService;
 
@@ -169,7 +168,7 @@ namespace TrapchumApp.Pages.Lists.Customers
                     UserId ??= auth.User.GetId();
                 }
 
-                var response = await _customerService.GetCustomerDetailsByIdAsync(CustomerId, false);
+                var response = await _customerService.GetCustomerDetailsByIdAsync(CustomerId, true);
 
                 if (response.IsSuccess)
                 {

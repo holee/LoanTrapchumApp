@@ -3,7 +3,7 @@
 @page "/App/Employees/CreateNewUser"
 <PageTitle>New Employee</PageTitle>
 <EditForm Model="@model" OnValidSubmit="@FormValidSubmit">
-    <ValidationSummary />
+    <FluentValidationValidator DisableAssemblyScanning="false" />
     <EmployeeComp model="model" />
     <RadzenStack Orientation="Orientation.Horizontal"
                  JustifyContent="JustifyContent.End"

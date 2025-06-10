@@ -2,6 +2,12 @@
 @using TrapchumApp.Services
 <PageTitle>Loan Request</PageTitle>
 @attribute [MustHasPermission(Modules.LoanRequest,Feature.Read)]
+<style>
+    .rz-grid-table td .rz-cell-data {
+        line-height: 1.5rem;
+        font-size: 0.8rem;
+    }
+</style>
 <Containers Fluid>
     <RadzenTabs SelectedIndexChanged="SelectedIndexChanged" RenderMode="TabRenderMode.Server">
         <Tabs>

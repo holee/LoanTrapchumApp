@@ -52,13 +52,15 @@ namespace Infrastructures.Implements
         {
             try
             {
-                _context.EntityNames.Update(othername);
+                await using var context = await _dbContextFactory.CreateDbContextAsync();
 
-                await _context.SaveChangesAsync();
+                context.EntityNames.Update(othername);
+
+                await context.SaveChangesAsync();
 
                 return Result.Success(new string("A new Name was created"));
             }
-            catch (Exception ex)
+            catch (DbUpdateException ex)
             {
                 return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}"));
             }
@@ -167,17 +169,25 @@ namespace Infrastructures.Implements
         }
 
 
-        public async Task<Pager<VOtherNames>> GetNamesAsync(QueryParam q, EntType type = EntType.OtherName)
+        public async Task<Pager<VOtherNames>> GetNamesAsync(QueryParam q, CancellationToken cancellation = default)
         {
-            var queries =
-                _context.Database.SqlQuery<VOtherNames>($"SELECT * FROM VNames WHERE EntType={type.ToString()}");
+            await using var context = await _dbContextFactory.CreateDbContextAsync(cancellation);
+
+            var queries = context.VOtherNames.AsNoTracking();
 
             if (!string.IsNullOrEmpty(q.Filter))
             {
                 queries = queries.Where(e => EF.Functions.Like(e.FirstName, $"{q.Filter}") ||
                                              EF.Functions.Like(e.LastName, $"{q.Filter}") ||
+                                             EF.Functions.Like(e.EmailAddress, $"{q.Filter}") ||
+                                             EF.Functions.Like(e.Gender, $"{q.Filter}") ||
                                              EF.Functions.Like(e.Phone, $"{q.Filter}") ||
                                              EF.Functions.Like(e.AltName, $"{q.Filter}"));
+            }
+
+            if (!q.IsIncludeInActive)
+            {
+                queries = queries.Where(x => x.IsActive == true);
             }
 
             if (q.SortDescending)
@@ -185,10 +195,20 @@ namespace Infrastructures.Implements
                 queries = queries.OrderByDescending(e => EF.Property<object>(e, q.SortColumn));
             }
 
-            var counts = await queries.CountAsync();
-            var items = await queries.Skip(q.Skip).Take(q.PageSize).ToListAsync();
+            var counts = await queries.CountAsync(cancellation);
+
+            if (q.PageSize > 0)
+            {
+                queries = queries.Skip(q.Skip).Take(q.PageSize);
+            }
+
+
+            var items = await queries.AsNoTracking().ToListAsync(cancellation);
+
             return new Pager<VOtherNames>(items, counts);
         }
+
+
 
 
         public async Task<Result<EntityNames>> GetByIdAsync(string? id)
@@ -230,87 +250,67 @@ namespace Infrastructures.Implements
             }
         }
 
-        public async Task<Result<string>> ConvertToCustomerAsync(string? id, Customer customer)
+        public async Task<Result<string>> ConvertToCustomerAsync(string? id, Customer customer, CancellationToken cancellation = default)
         {
-            var transaction = _context.Database.BeginTransaction();
+
+            await using var context = await _dbContextFactory.CreateDbContextAsync(cancellation);
             try
             {
-                var otherName = await _context.EntityNames
-                    .FirstOrDefaultAsync(x => x.Id == id &&
+                var otherName = await context.EntityNames
+                                              .FirstOrDefaultAsync(x => x.Id == id &&
                                               x.Converted == false &&
-                                              x.EntType == EntType.OtherName.ToString());
+                                              x.EntType == EntType.OtherName.ToString(), cancellation);
 
                 if (otherName is null)
                 {
                     return Result.Failure<string>(ErrorResponse.NotFound(Messages.DataNotFound));
                 }
 
-
-                await _context.EntityNames.Where(x => x.Id == id &&
-                                                      x.Converted == false &&
-                                                      x.EntType == EntType.OtherName.ToString())
-                    .ExecuteUpdateAsync(x => x.SetProperty(p => p.EntType, EntityTypes.Customer.ToString()));
-
-
+                otherName.EntType = EntityTypes.Customer.ToString();
+                otherName.Converted = true;
                 otherName.Customer = customer;
-
-                await _context.SaveChangesAsync();
-
-                transaction.Commit();
-
-                return Result.Success(new string("Name was converted to vendor"));
+                await context.SaveChangesAsync(cancellation);
+                return Result.Success(new string("Name was converted to customer"));
             }
             catch (Exception ex)
             {
-                transaction.Rollback();
                 return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}."));
             }
         }
 
-        public async Task<Result<string>> ConvertToVendorAsync(string? id, Vendor vendor)
+        public async Task<Result<string>> ConvertToVendorAsync(string? id, Vendor vendor, CancellationToken cancellation = default)
         {
-            var transaction = _context.Database.BeginTransaction();
+            await using var context = await _dbContextFactory.CreateDbContextAsync(cancellation);
             try
             {
-                var otherName = await _context.EntityNames
-                    .FirstOrDefaultAsync(x => x.Id == id &&
+                var otherName = await context.EntityNames
+                                        .FirstOrDefaultAsync(x => x.Id == id &&
                                               x.Converted == false &&
-                                              x.EntType == EntType.OtherName.ToString());
+                                              x.EntType == EntType.OtherName.ToString(), cancellation);
 
                 if (otherName is null)
                 {
                     return Result.Failure<string>(ErrorResponse.NotFound(Messages.DataNotFound));
                 }
-
-
-                await _context.EntityNames.Where(x => x.Id == id &&
-                                                      x.Converted == false &&
-                                                      x.EntType == EntType.OtherName.ToString())
-                    .ExecuteUpdateAsync(x => x.SetProperty(p => p.EntType, EntityTypes.Vendor.ToString()));
-
-
+                otherName.EntType = EntityTypes.Vendor.ToString();
+                otherName.Converted = true;
                 otherName.Vendor = vendor;
-
-                await _context.SaveChangesAsync();
-
-                transaction.Commit();
-
+                await context.SaveChangesAsync(cancellation);
                 return Result.Success(new string("Name was converted to vendor"));
             }
             catch (Exception ex)
             {
-                transaction.Rollback();
                 return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}."));
             }
         }
 
-        public async Task<Result<string>> ConvertToEmployeeAsync(string? id, Employee employee)
+        public async Task<Result<string>> ConvertToEmployeeAsync(string? id, Employee employee, CancellationToken cancellation = default)
         {
-            var transaction = _context.Database.BeginTransaction();
+            await using var context = await _dbContextFactory.CreateDbContextAsync(cancellation);
             try
             {
-                var otherName = await _context.EntityNames
-                    .FirstOrDefaultAsync(x => x.Id == id &&
+                var otherName = await context.EntityNames
+                                            .FirstOrDefaultAsync(x => x.Id == id &&
                                               x.Converted == false &&
                                               x.EntType == EntType.OtherName.ToString());
 
@@ -319,24 +319,14 @@ namespace Infrastructures.Implements
                     return Result.Failure<string>(ErrorResponse.NotFound(Messages.DataNotFound));
                 }
 
-
-                await _context.EntityNames.Where(x => x.Id == id &&
-                                                      x.Converted == false &&
-                                                      x.EntType == EntType.OtherName.ToString())
-                    .ExecuteUpdateAsync(x => x.SetProperty(p => p.EntType, EntityTypes.Employee.ToString()));
-
-
+                otherName.EntType = EntityTypes.Employee.ToString();
+                otherName.Converted = true;
                 otherName.Employee = employee;
-
-                await _context.SaveChangesAsync();
-
-                transaction.Commit();
-
+                await context.SaveChangesAsync();
                 return Result.Success(new string("Name was converted to vendor"));
             }
             catch (Exception ex)
             {
-                transaction.Rollback();
                 return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}."));
             }
         }
@@ -353,11 +343,11 @@ namespace Infrastructures.Implements
                     // EF.Functions.Like(x.Name!, $"%{param.Filter}%") ||
                     EF.Functions.Like(x.AltName!, $"%{param.Filter}%"))
                 .WhereIf(!string.IsNullOrEmpty(nameId), x => x.Id.Contains(nameId));
-            
+
             if (param.PageSize > 0)
             {
                 queries = queries.Take(param.PageSize).OrderByDescending(x => x.FirstName)
-                                                        .ThenByDescending(x=>x.LastName);
+                                                        .ThenByDescending(x => x.LastName);
             }
 
             var items = await queries
@@ -372,19 +362,58 @@ namespace Infrastructures.Implements
         {
             try
             {
-                var result = await _context.EntityNames.AsNoTracking().FirstOrDefaultAsync(x => x.Id == othernameId);
+
+                await using var context = await _dbContextFactory.CreateDbContextAsync();
+
+                var result = await context.EntityNames.AsNoTracking().FirstOrDefaultAsync(x => x.Id == othernameId);
 
                 result!.IsActive = result.IsActive == true ? false : true;
 
-                _context.EntityNames.Update(result);
+                context.EntityNames.Update(result);
 
-                await _context.SaveChangesAsync();
+                await context.SaveChangesAsync();
 
                 return Result.Success("Other Name was updated successfully!");
             }
             catch (Exception ex)
             {
                 return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}"));
+            }
+        }
+
+
+        public async Task<Result<VOtherNames>> UpdateStatusAsync(string? othernameId, bool state, CancellationToken cancellation = default)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(othernameId))
+                {
+
+                    return Result.Failure<VOtherNames>(ErrorResponse.Validation($"Invalid Guarantor ID#{othernameId}"));
+                }
+
+                await using var context = await _dbContextFactory.CreateDbContextAsync(cancellation);
+
+                var existing = await context.EntityNames.FindAsync(othernameId, cancellation);
+
+                if (existing is null)
+                {
+                    return Result.Failure<VOtherNames>(ErrorResponse.NotFound(Messages.DataNotFound));
+                }
+
+                existing.IsActive = state;
+
+                await context.SaveChangesAsync();
+
+                var updateGuarant = await context.VOtherNames
+                                            .AsNoTracking()
+                                            .FirstOrDefaultAsync(x => x.Id == othernameId, cancellation);
+
+                return Result.Success<VOtherNames>(updateGuarant!);
+            }
+            catch (Exception ex)
+            {
+                return Result.Failure<VOtherNames>(ErrorResponse.ServerError($"{ex.Message}"));
             }
         }
     }

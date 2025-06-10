@@ -3,7 +3,7 @@ using Applications.Responses.ViewModels.Loans;
 
 namespace Applications.Responses.ViewModels.OtherNames;
 
-public class VGuarantor
+public sealed class VGuarantor
 {
     public string? Id { get; set; }
     public string? FullName { get; set; }

@@ -1,0 +1,206 @@
+@using Applications.Enumerations
+@using Applications.Requests.Lists.OtherNames
+@using Domains.Models.Files
+@using TrapchumApp.Services
+
+<RadzenFieldset AllowCollapse="true" Collapsed="false" class="rz-mb-2">
+    <HeaderTemplate>
+        <RadzenIcon Icon="person" /><strong>Customer</strong>
+    </HeaderTemplate>
+    <ChildContent>
+
+        <RadzenRow class="rz-my-2">
+            <RadzenColumn Size="6">
+                <RadzenRow>
+                    <RadzenColumn Size="3">
+                        <RadzenLabel>Khmer Name</RadzenLabel>
+                    </RadzenColumn>
+                    <RadzenColumn Size="3">
+                        <RadzenDropDown Chips="true"
+                                        AllowFiltering="true"
+                                        Name="DropDownSalutions"
+                                        Style="width: 100%;"
+                                        TValue="string"
+                                        FilterOperator="StringFilterOperator.Contains"
+                                        Placeholder="Salutation"
+                                        @bind-Value="Model.Salutation"
+                                        Data="Salutations">
+                        </RadzenDropDown>
+                    </RadzenColumn>
+                    <RadzenColumn Size="6">
+                        <RadzenTextBox @bind-Value="Model.AltName"
+                                       class="w-100"
+                                       Placeholder="ឈ្មោះខ្មែរ..." />
+                        <ValidationMessage For="@(() => Model.AltName)" />
+                    </RadzenColumn>
+                </RadzenRow>
+            </RadzenColumn>
+            <RadzenColumn Size="6">
+                <RadzenCheckBox TValue="bool?" @bind-Value="Model.IsActive" />
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow class="rz-my-2">
+            <RadzenColumn Size="6">
+                <RadzenRow>
+                    <RadzenColumn Size="3">
+                        <RadzenLabel>Name</RadzenLabel>
+                    </RadzenColumn>
+                    <RadzenColumn Size="9">
+                        <RadzenTextBox @bind-Value="Model.FirstName"
+                                       class="w-100"
+                                       Placeholder="First name..." />
+                        <ValidationMessage For="@(() => Model.FirstName)" />
+                    </RadzenColumn>
+                </RadzenRow>
+            </RadzenColumn>
+            <RadzenColumn Size="6">
+                <RadzenRow>
+                    <RadzenColumn Size="6">
+                        <RadzenTextBox @bind-Value="Model.MiddleName"
+                                       class="w-100"
+                                       Placeholder="Middle Name..." />
+                    </RadzenColumn>
+                    <RadzenColumn Size="6">
+                        <RadzenTextBox @bind-Value="Model.LastName"
+                                       class="w-100"
+                                       Placeholder="Last Name.." />
+                        <ValidationMessage For="@(() => Model.LastName)" />
+                    </RadzenColumn>
+                </RadzenRow>
+            </RadzenColumn>
+        </RadzenRow>
+
+        <RadzenRow class="rz-my-2">
+            <RadzenColumn Size="6">
+                <RadzenRow AlignItems="AlignItems.Center">
+                    <RadzenColumn Size="3">Passport</RadzenColumn>
+                    <RadzenColumn Size="9">
+                        <RadzenTextBox class="w-100"
+                                       @bind-Value="Model.PassportId"
+                                       Placeholder="Passport...." />
+                    </RadzenColumn>
+                </RadzenRow>
+            </RadzenColumn>
+            <RadzenColumn Size="3">
+                <RadzenRow AlignItems="AlignItems.Center">
+                    <RadzenColumn Size="3">
+                        <RadzenLabel>Married?</RadzenLabel>
+                    </RadzenColumn>
+                    <RadzenColumn Size="9">
+                        <RadzenDropDown @bind-Value="Model.MarritalStatus"
+                                        class="w-100"
+                                        Data="@StorageConstant.MarritalOptions">
+                        </RadzenDropDown>
+                    </RadzenColumn>
+                </RadzenRow>
+            </RadzenColumn>
+            
+            <RadzenColumn Size="3">
+                <RadzenRow AlignItems="AlignItems.Center">
+                    <RadzenColumn Size="4">
+                       <RadzenLabel>Birth Date</RadzenLabel>
+                    </RadzenColumn>
+                    <RadzenColumn Size="8">
+                        <RadzenDatePicker TValue="DateTime?"
+                                          @bind-Value="Model.DateOfBirth"
+                                          @bind-Value:format="yyyy-MMM-dd"
+                                          DateFormat="dd/MM/yyyy"
+                                          class="w-100"
+                                          Placeholder="Date Of Birth">
+                        </RadzenDatePicker>
+                    </RadzenColumn>
+                </RadzenRow>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow>
+            <RadzenColumn Size="6">
+                <RadzenRow class="rz-my-2">
+                    <RadzenColumn Size="3">
+                        <RadzenLabel>Nationality</RadzenLabel>
+                    </RadzenColumn>
+                    <RadzenColumn Size="9">
+                        <RadzenDropDown Data="Nationalities"
+                                        class="w-100"
+                                        TextProperty="@nameof(Nationality.NationalityName)"
+                                        ValueProperty="@nameof(Nationality.NationalityName)"
+                                        @bind-Value="Model.Nationality">
+                        </RadzenDropDown>
+                    </RadzenColumn>
+                </RadzenRow>
+            </RadzenColumn>
+            <RadzenColumn Size="6">
+                <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+                    <RadzenColumn Size="3">
+                        <RadzenLabel>ID Card</RadzenLabel>
+                    </RadzenColumn>
+                    <RadzenColumn Size="9">
+                        <RadzenTextBox @bind-Value="Model.IdCard" Placeholder="ID Card" class="w-100" />
+                    </RadzenColumn>
+                </RadzenRow>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+            <RadzenColumn Size="6">
+                <RadzenRow AlignItems="AlignItems.Center">
+                    <RadzenColumn Size="3">Occupation</RadzenColumn>
+                    <RadzenColumn Size="9">
+                        <RadzenDropDown class="w-100"
+                                        Data="@Occupations"
+                                        AllowFiltering="true"
+                                        FilterOperator="StringFilterOperator.Contains"
+                                        TextProperty="OccupationTitle"
+                                        FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                        ValueProperty="OccupationTitle"
+                                        @bind-Value="Model.Occupation">
+                        </RadzenDropDown>
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+                    <RadzenColumn Size="3">Phone</RadzenColumn>
+                    <RadzenColumn Size="9">
+                        <RadzenTextBox class="w-100"
+                                       @bind-Value="Model.Phone"
+                                       Placeholder="Mobile phone..." />
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+                    <RadzenColumn Size="3">Email</RadzenColumn>
+                    <RadzenColumn Size="9">
+                        <RadzenTextBox class="w-100"
+                                       @bind-Value="Model.EmailAddress"
+                                       Placeholder="Email Address" />
+                    </RadzenColumn>
+                </RadzenRow>
+            </RadzenColumn>
+            <RadzenColumn Size="6">
+                <RadzenCard class="rz-m-0 rz-m-md-0 w-100 rz-py-4">
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <input type="hidden" value="@tempUrl" />
+                        <RadzenColumn Size="3">
+                            <RadzenImage Path="@Model.Photo"
+                                         class="rz-p-0 rz-m-0"
+                                         Style="width:4.5rem;height:4.5rem;" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="9">
+                            <RadzenUpload Change="@OnFileUpload"
+                                          Auto="false"
+                                          Multiple="false"
+                                          Accept=".jpg,.jpeg,.png"
+                                          Progress=@(args => OnProgress(args, "Single file upload"))
+                                          Style="width: 100%"
+                                          InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "select file" }})">
+                            </RadzenUpload>
+                        </RadzenColumn>
+                    </RadzenRow>
+                </RadzenCard>
+            </RadzenColumn>
+        </RadzenRow>
+    </ChildContent>
+</RadzenFieldset>
+
+@if (Model.MarritalStatus != MarritalStateEnum.Single.ToString())
+{
+    <SpouseInfo model="@Model"
+                Nationalities="@Nationalities"
+                Occupations="@Occupations" />
+}

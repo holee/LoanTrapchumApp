@@ -11,9 +11,12 @@
     <Columns>
         <RadzenDataGridColumn Property="LoanDate"
                               Title="#"
+                              Context="l"
+                              Width="5rem"
+                              TextAlign="TextAlign.Center"
                               Sortable="false">
             <Template>
-
+                @(VLoanDisbursements.ToList().IndexOf(l) + 1)
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Title="LoanDate"

@@ -27,9 +27,13 @@ namespace TrapchumApp.Pages.Lists.OtherNames
         bool ShowEditTab = false;
         RadzenTabs tabs = default!;
         int selectedTabIndex = 0;
+
         string? SelectedGuarantorId = string.Empty;
+
         IEnumerable<VGuarantor> guarantors = [];
-        EntityNamesCreate modelCreate = new EntityNamesCreate();
+
+        EntityGuarantorCreate modelCreate = new EntityGuarantorCreate(); 
+
         EntityNamesCreate modelEdit = new EntityNamesCreate();
 
         void AddGuarantorTab(int index)
@@ -101,14 +105,15 @@ namespace TrapchumApp.Pages.Lists.OtherNames
         async Task GetGuarantors()
         {
             isLoading = true;
-            var param = new QueryParam(pageIndex, pageSize, sortColumn, sortDescending, includeInactive, filterText);
-            var guarantorResp = await _gService.GetGuarantorsAsync(param);
-            if (guarantorResp.IsSuccess)
-            {
-                guarantors = guarantorResp.Data.Items;
+            
+            var param = new QueryParam(pageIndex, pageSize, sortColumn, includeInactive, sortDescending, filterText);
+            
+            var rsp = await _gService.GetGuarantorsAsync(param);
 
-                counts = guarantorResp.Data.Count;
-            }
+            guarantors = rsp.Items;
+
+            counts = rsp.Count;
+
             isLoading = false;
 
             StateHasChanged();

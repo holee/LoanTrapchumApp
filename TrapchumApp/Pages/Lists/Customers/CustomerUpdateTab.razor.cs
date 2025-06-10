@@ -106,7 +106,7 @@ namespace TrapchumApp.Pages.Lists.Customers
         IEnumerable<string> Cities = [];
         IEnumerable<OcupationResponse> Occupations = [];
         IEnumerable<Country> Countries = [];
-        EntityNamesCreate model = new();
+        EntityCustomerCreate model = new();
         EditForm? editForm;
         bool IsLoading = true;
         string? newSalution = "";

@@ -11,90 +11,90 @@
         </RadzenStack>
     </CardHeader>
     <CardBody>
-            <div class="table-responsive">
-                <table class="table">
-                    <tbody>
-                        <tr>
-                            <th class="w-25 rz-background-color-base-100">Vendor Name</th>
-                            <td>
-                                @model!.Name
-                            </td>
-                        </tr>
-                        <tr>
-                            <th class="w-25 rz-background-color-base-100">Alternative Name</th>
-                            <td>
-                                @model!.AltName
-                            </td>
-                        </tr>
-                        <tr>
-                            <th class="w-25 rz-background-color-base-100">First Name</th>
-                            <td>
-                                @model.FirstName
-                            </td>
-                        </tr>
-                        <tr>
-                            <th class="w-25 rz-background-color-base-100">Last Name</th>
-                            <td>
-                                @model.LastName
-                            </td>
-                        </tr>
-                        <tr>
-                            <th class="w-25 rz-background-color-base-100">Company Name</th>
-                            <td>
-                                @model.CompanyName
-                            </td>
-                        </tr>
-                        <tr>
-                            <th class="w-25 rz-background-color-base-100">Job Title</th>
-                            <td>
-                                @model.JobTitle
-                            </td>
-                        </tr>
+        <div class="table-responsive">
+            <table class="table">
+                <tbody>
+                    <tr>
+                        <th class="w-25 rz-background-color-base-100">Khmer Name</th>
+                        <td>
+                            @model!.AltName
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="w-25 rz-background-color-base-100">First Name</th>
+                        <td>
+                            @model.FirstName
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="w-25 rz-background-color-base-100">Last Name</th>
+                        <td>
+                            @model.LastName
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="w-25 rz-background-color-base-100">Company Name</th>
+                        <td>
+                            @model.CompanyName
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="w-25 rz-background-color-base-100">Company Address</th>
+                        <td>
+                            @model!.CompanyAddress
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="w-25 rz-background-color-base-100">Job Title</th>
+                        <td>
+                            @model.JobTitle
+                        </td>
+                    </tr>
                     <tr>
                         <th class="w-25 rz-background-color-base-100">Occupation</th>
                         <td>
                             @model.Occupation
                         </td>
                     </tr>
-                        <tr>
-                            <th class="w-25 rz-background-color-base-100">Phone</th>
-                            <td>
-                                @model.Phone / @model.AltPhone
-                            </td>
-                        </tr>
-                        <tr>
-                            <th class="w-25 rz-background-color-base-100">Email</th>
-                            <td>
-                                @model.EmailAddress
-                            </td>
-                        </tr>
-                        <tr>
-                            <th class="w-25 rz-background-color-base-100">Address In Khmer</th>
-                            <td>
-                                @model?.ToString()
-                            </td>
-                        </tr>
-                        <tr>
-                            <th class="w-25 rz-background-color-base-100">Description</th>
-                            <td>
-                                @model!.Description
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+                    <tr>
+                        <th class="w-25 rz-background-color-base-100">Phone</th>
+                        <td>
+                            @model.Phone / @model.AltPhone
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="w-25 rz-background-color-base-100">Email</th>
+                        <td>
+                            @model.EmailAddress
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="w-25 rz-background-color-base-100">Address In Khmer</th>
+                        <td>
+                            @model?.ToString()
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="w-25 rz-background-color-base-100">Description</th>
+                        <td>
+                            @model!.Description
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </CardBody>
     <CardFooter>
         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
                      JustifyContent="JustifyContent.End">
             <RadzenButton ButtonStyle="ButtonStyle.Success"
                           Icon="edit" Text="Edit"
-                          Size="ButtonSize.Small"
-                          Click="ClickEdit" />
+                          Size="ButtonSize.ExtraSmall"
+                          Click="@ClickEdit" />
             <RadzenButton ButtonStyle="ButtonStyle.Danger"
                           Icon="cancel" Text="Close"
-                          Size="ButtonSize.Small"
-                          Click="SelectedIndex" />
+                          Size="ButtonSize.ExtraSmall"
+                          Click="@CloseTab" />
         </RadzenStack>
     </CardFooter>
 </Card>

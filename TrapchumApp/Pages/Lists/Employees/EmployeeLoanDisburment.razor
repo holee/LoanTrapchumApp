@@ -1,0 +1,50 @@
+@using Applications.ApplicationPolicies
+@using Applications.Responses.ViewModels.Loans
+@using Applications.Responses.ViewModels.Loans.Requests
+@using TrapchumApp.Pages.Identity.Users
+@using TrapchumApp.Services
+
+<RadzenDataGrid Density="Density.Compact"
+                AllowAlternatingRows="true"
+                TItem="VLoanDisbursments"
+                AllowPaging="true"
+                AllowSorting="true"
+                PageSize="10"
+                Data="@LoanDisbursments">
+    <Columns>
+        <RadzenDataGridColumn Property="@nameof(VLoanDisbursments.CustomerId)"
+                                Context="c"
+                              Title="Name">
+                              <Template>
+                                  @(LoanDisbursments.IndexOf(c) + 1)
+                              </Template>
+                          </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="@nameof(VLoanDisbursments.CustomerName)"
+                              Title="Name" />
+        <RadzenDataGridColumn Property="@nameof(VLoanDisbursments.Principle)"
+                              Title="Amount" TextAlign="TextAlign.Right" />
+        <RadzenDataGridColumn Property="@nameof(VLoanDisbursments.InterestRate)"
+                              Title="InterestRate" TextAlign="TextAlign.Right" />
+        <RadzenDataGridColumn Property="@nameof(VLoanDisbursments.InstallmentType)"
+                              Title="Installment" />
+        <RadzenDataGridColumn Property="@nameof(VLoanDisbursments.FirstPaymentDate)"
+                              Title="FirstPaymentDate" FormatString="{0:dd/MM/yyyy}" />
+        <RadzenDataGridColumn Property="@nameof(VLoanDisbursments.LastPaymentDate)"
+                              Title="LastPaymentDate" FormatString="{0:dd/MM/yyyy}" />
+        <RadzenDataGridColumn Property="@nameof(VLoanDisbursments.PaidPrinciple)"
+                              Title="Paid Principle" TextAlign="TextAlign.Right" />
+        <RadzenDataGridColumn Property="@nameof(VLoanDisbursments.PaidInterest)"
+                              Title="Paid Interest" TextAlign="TextAlign.Right" />
+        <RadzenDataGridColumn Property="@nameof(VLoanDisbursments.PaidCollectionFee)"
+                              Title="Paid Collection Fee" TextAlign="TextAlign.Right" />
+        <RadzenDataGridColumn Property="@nameof(VLoanDisbursments.OutStanding)"
+                              Title="OutStanding" TextAlign="TextAlign.Right" />
+        <RadzenDataGridColumn Property="@nameof(VLoanDisbursments.LoanStatus)"
+                              Title="Status" />
+    </Columns>
+</RadzenDataGrid>
+@code{
+    [Parameter] public List<VLoanDisbursments> LoanDisbursments { get; set; } = [];
+    [Parameter] public string? EmployeeId { get; set; } = string.Empty;
+
+}

@@ -41,7 +41,10 @@ namespace TrapchumApp.Pages.Lists.Employees
         IEnumerable<Nationality> Nationalities = [];
         IEnumerable<OcupationResponse> Occuptions = [];
         IEnumerable<string> Cities = [];
-        protected EntityNamesCreate model = new EntityNamesCreate();
+        protected EntityEmployeeCreate model = new EntityEmployeeCreate
+        {
+            Id=$"emp-{Guid.CreateVersion7()}"
+        };
         protected FileModel? fileModelDTO;
         protected EditForm? editForm;
         protected string? strText = "";
@@ -225,11 +228,11 @@ namespace TrapchumApp.Pages.Lists.Employees
             try
             {
 
-                var createResponse = await _employeeService.UpdateAsync(model);
+                var rsp = await _employeeService.UpdateAsync(model);
 
-                if (createResponse.IsSuccess)
+                if (rsp.IsSuccess)
                 {
-                    NotificationService.Notify(NotificationSeverity.Success, createResponse.Data);
+                    NotificationService.Notify(NotificationSeverity.Success, rsp.Data);
 
                     await CloseTab();
 
@@ -237,7 +240,7 @@ namespace TrapchumApp.Pages.Lists.Employees
                 }
                 else
                 {
-                    NotificationService.Notify(NotificationSeverity.Error, createResponse.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
                 }
             }
             catch (Exception ex)

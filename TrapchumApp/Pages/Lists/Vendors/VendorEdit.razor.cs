@@ -25,11 +25,11 @@ namespace TrapchumApp.Pages.Lists.Vendors
             _salutationService = salutationService;
         }
 
-        [Parameter] public EventCallback<bool> Closing { get; set; }
+        [Parameter] public EventCallback<bool> Closed { get; set; }
         [Parameter] public EventCallback<int> SelectIndex { get; set; }
         [Parameter] public string? Id { get; set; }
         [Parameter] public IEnumerable<ProvinceDto> ProvinceList { get; set; } = [];
-        EntityNamesCreate model = new();
+        EntityVendorCreate model = new();
         IEnumerable<Nationality> Nationalities = [];
         IEnumerable<string> Salutations = [];
         IEnumerable<Country> Countries = [];
@@ -228,7 +228,7 @@ namespace TrapchumApp.Pages.Lists.Vendors
 
         protected async Task Close()
         {
-            await Closing.InvokeAsync(false);
+            await Closed.InvokeAsync(false);
         }
     }
 }

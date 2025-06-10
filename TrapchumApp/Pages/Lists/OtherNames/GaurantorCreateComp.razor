@@ -2,121 +2,120 @@
 @using Domains.Models.Bases
 @using TrapchumApp.Services
 <EditForm Model="@model" OnValidSubmit="OnSaveChanges">
-        <Forms.ValidationSummary />
-        <FluentValidationValidator DisableAssemblyScanning="false"></FluentValidationValidator>
-        <RadzenFieldset>
-            <HeaderTemplate>
-                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
-                    <RadzenIcon Icon="contacts" /><strong>Contact</strong>
-                </RadzenStack>
-            </HeaderTemplate>
-            <ChildContent>
-                <RadzenRow AlignItems="AlignItems.Center" class="mb-2">
-                    <RadzenColumn Size="2">
-                        <RadzenLabel>Contact Name</RadzenLabel>
-                    </RadzenColumn>
-                    <RadzenColumn Size="10">
-                        <RadzenRow AlignItems="AlignItems.Center">
-                            <RadzenColumn Size="5">
-                                <RadzenTextBox @bind-Value="model.Name"
-                                class="w-100"
-                                Change="SetFirstName"
-                                Placeholder="Your Name" />
-                                <ValidationMessage For="@(()=>model.Name)"></ValidationMessage>
-                            </RadzenColumn>
-                            <RadzenColumn Size="5">
-                                <RadzenTextBox @bind-Value="model.AltName"
-                                class="w-100"
-                                Placeholder="Alternative Name" />
-                                <ValidationMessage For="@(()=>model.AltName)"></ValidationMessage>
-                            </RadzenColumn>
-                            <RadzenColumn Size="2">
-                                <RadzenCheckBox TValue="bool?" @bind-Value="model.IsActive">
-                                    @if (model.IsActive == true)
-                                    {
-                                        @("Is Active")
-                                    }
-                                    else
-                                    {
-                                        @("Is InActive")
-                                    }
+    <FluentValidationValidator DisableAssemblyScanning="false" />
+    <RadzenFieldset>
+        <HeaderTemplate>
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+                <RadzenIcon Icon="contacts" /><strong>Contact</strong>
+            </RadzenStack>
+        </HeaderTemplate>
+        <ChildContent>
+            <RadzenRow class="rz-my-2">
+                <RadzenColumn Size="2">
+                    <RadzenLabel>Contact Name</RadzenLabel>
+                </RadzenColumn>
+                <RadzenColumn Size="10">
+                    <RadzenRow>
+                        <RadzenColumn Size="5">
+                            <RadzenTextBox @bind-Value="model.Name"
+                                           class="w-100"
+                                           Change="SetFirstName"
+                                           Placeholder="Your Name" />
+                            <ValidationMessage For="@(() => model.Name)"></ValidationMessage>
+                        </RadzenColumn>
+                        <RadzenColumn Size="5">
+                            <RadzenTextBox @bind-Value="model.AltName"
+                                           class="w-100"
+                                           Placeholder="Alternative Name" />
+                            <ValidationMessage For="@(() => model.AltName)"></ValidationMessage>
+                        </RadzenColumn>
+                        <RadzenColumn Size="2">
+                            <RadzenCheckBox TValue="bool?" @bind-Value="model.IsActive">
+                                @if (model.IsActive == true)
+                                {
+                                    @("Is Active")
+                                }
+                                else
+                                {
+                                    @("Is InActive")
+                                }
 
-                                </RadzenCheckBox>
-                            </RadzenColumn>
-                        </RadzenRow>
-                    </RadzenColumn>
-                </RadzenRow>
-                <RadzenRow AlignItems="AlignItems.Center" class="mb-2">
-                    <RadzenColumn Size="2">
-                        <RadzenLabel>Contact Name</RadzenLabel>
-                    </RadzenColumn>
-                    <RadzenColumn Size="10">
-                        <RadzenRow AlignItems="AlignItems.Center">
-                            <RadzenColumn Size="2">
-                                <RadzenDropDown TValue="string"
-                                Data="StorageConstant.Salutations"
-                                TextProperty="label"
-                                ValueProperty="value"
-                                class="w-100"
-                                @bind-Value="model.Gender">
-                                </RadzenDropDown>
-                                <ValidationMessage For="@(()=>model.Gender)" />
-                            </RadzenColumn>
-                            <RadzenColumn Size="4">
-                                <RadzenTextBox Placeholder="Firstname..."
-                                class="w-100"
-                                @bind-Value="model.FirstName" />
-                                <ValidationMessage For="@(()=>model.FirstName)" />
-                            </RadzenColumn>
-                            <RadzenColumn Size="2">
-                                <RadzenTextBox class="w-100"
-                                Placeholder="Middle Name..."
-                                @bind-Value="model.MiddleName" />
-                            </RadzenColumn>
-                            <RadzenColumn Size="4">
-                                <RadzenTextBox class="w-100"
-                                Placeholder="Last Name"
-                                @bind-Value="model.LastName" />
-                            </RadzenColumn>
-                        </RadzenRow>
-                    </RadzenColumn>
-                </RadzenRow>
-                <RadzenRow AlignItems="AlignItems.Center" class="mb-2">
-                    <RadzenColumn Size="2">
-                        <RadzenLabel>Contact Number</RadzenLabel>
-                    </RadzenColumn>
-                    <RadzenColumn Size="10">
-                        <RadzenRow AlignItems="AlignItems.Center">
-                            <RadzenColumn Size="4">
-                                <RadzenTextBox Placeholder="Phone Number"
-                                class="w-100"
-                                @bind-Value="model.Phone" />
-                            </RadzenColumn>
-                            <RadzenColumn Size="4">
-                                <RadzenTextBox Placeholder="Alternate Phone"
-                                class="w-100"
-                                @bind-Value="model.AltPhone" />
-                            </RadzenColumn>
-                            <RadzenColumn Size="4">
-                                <RadzenTextBox Placeholder="Email..."
-                                class="w-100"
-                                @bind-Value="model.EmailAddress" />
-                            </RadzenColumn>
-                        </RadzenRow>
-                    </RadzenColumn>
-                </RadzenRow>
-                <RadzenRow AlignItems="AlignItems.Center" class="mb-2">
-                    <RadzenColumn Size="2">
-                        <RadzenLabel>Note</RadzenLabel>
-                    </RadzenColumn>
-                    <RadzenColumn Size="10">
-                        <RadzenTextArea class="w-100"
-                        @bind-Value="model.Description"></RadzenTextArea>
-                    </RadzenColumn>
-                </RadzenRow>
-            </ChildContent>
-        </RadzenFieldset>
-        <AddressBaseCreate model="model" />
+                            </RadzenCheckBox>
+                        </RadzenColumn>
+                    </RadzenRow>
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow class="rz-my-2">
+                <RadzenColumn Size="2">
+                    <RadzenLabel>Contact Name</RadzenLabel>
+                </RadzenColumn>
+                <RadzenColumn Size="10">
+                    <RadzenRow>
+                        <RadzenColumn Size="2">
+                            <RadzenDropDown TValue="string"
+                                            Data="StorageConstant.Salutations"
+                                            TextProperty="label"
+                                            ValueProperty="value"
+                                            class="w-100"
+                                            @bind-Value="model.Gender">
+                            </RadzenDropDown>
+                            <ValidationMessage For="@(() => model.Gender)" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="4">
+                            <RadzenTextBox Placeholder="Firstname..."
+                                           class="w-100"
+                                           @bind-Value="model.FirstName" />
+                            <ValidationMessage For="@(() => model.FirstName)" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="2">
+                            <RadzenTextBox class="w-100"
+                                           Placeholder="Middle Name..."
+                                           @bind-Value="model.MiddleName" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="4">
+                            <RadzenTextBox class="w-100"
+                                           Placeholder="Last Name"
+                                           @bind-Value="model.LastName" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow AlignItems="AlignItems.Center" class="mb-2">
+                <RadzenColumn Size="2">
+                    <RadzenLabel>Contact Number</RadzenLabel>
+                </RadzenColumn>
+                <RadzenColumn Size="10">
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="4">
+                            <RadzenTextBox Placeholder="Phone Number"
+                                           class="w-100"
+                                           @bind-Value="model.Phone" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="4">
+                            <RadzenTextBox Placeholder="Alternate Phone"
+                                           class="w-100"
+                                           @bind-Value="model.AltPhone" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="4">
+                            <RadzenTextBox Placeholder="Email..."
+                                           class="w-100"
+                                           @bind-Value="model.EmailAddress" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow AlignItems="AlignItems.Center" class="mb-2">
+                <RadzenColumn Size="2">
+                    <RadzenLabel>Note</RadzenLabel>
+                </RadzenColumn>
+                <RadzenColumn Size="10">
+                    <RadzenTextArea class="w-100"
+                                    @bind-Value="model.Description"></RadzenTextArea>
+                </RadzenColumn>
+            </RadzenRow>
+        </ChildContent>
+    </RadzenFieldset>
+    <AddressBaseCreate model="model" />
     <RadzenStack Orientation="Orientation.Horizontal"
                  AlignItems="AlignItems.Center"
                  Gap="1rem"
@@ -132,5 +131,5 @@
                       Click="TabClosing"
                       Size="ButtonSize.Small" />
     </RadzenStack>
-    </EditForm>
+</EditForm>
 

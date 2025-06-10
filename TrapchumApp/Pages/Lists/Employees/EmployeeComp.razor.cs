@@ -1,31 +1,30 @@
+using Applications.Extensions;
 using Applications.Requests.Lists.Addreses;
 using Applications.Requests.Lists.Entities;
 using Applications.Requests.Lists.OtherNames;
 using Applications.Responses.Lists.Entities;
 using Applications.Responses.Paginations;
+using Applications.Services.Files;
 using Applications.Services.Lists;
 using Domains.Models.Files;
 using Domains.Models.Lists;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Forms;
-using Microsoft.AspNetCore.Components.Web;
-using Radzen;
 
 namespace TrapchumApp.Pages.Lists.Employees
 {
     public partial class EmployeeComp
     {
-        [Parameter, EditorRequired] public EntityNamesCreate model { get; set; } = new();
+        [Parameter, EditorRequired] public EntityEmployeeCreate model { get; set; } = new(); 
         [Parameter] public EventCallback<bool> OnClose { get; set; }
 
         private readonly ISalutationServiceImpl _salutationService;
         private readonly INationalityServiceImpl _nationalityService;
         private readonly IDepartmentServiceImpl _departmentService;
-        public EmployeeComp(ISalutationServiceImpl salutationService, INationalityServiceImpl nationalityService, IDepartmentServiceImpl departmentService)
+        public EmployeeComp(ISalutationServiceImpl salutationService, INationalityServiceImpl nationalityService, IDepartmentServiceImpl departmentService, IFileUploadServiceImp fileUploadService)
         {
             _salutationService = salutationService;
             _nationalityService = nationalityService;
             _departmentService = departmentService;
+            _fileUploadService = fileUploadService;
         }
         long? fileSize;
         IEnumerable<int> relations = new List<int> { 1, 2, 3, 4 };
@@ -43,10 +42,15 @@ namespace TrapchumApp.Pages.Lists.Employees
         protected EditForm? editForm;
         protected string? strText = "";
         protected bool IsActive = false;
-
+        private string tempPath = string.Empty;
         protected override async Task OnInitializedAsync()
         {
             await GetAdditionalInformation();
+
+            if (model.Photo.IsNotNullOrEmpty())
+            {
+                tempPath = model.Photo!;
+            }
 
             await base.OnInitializedAsync();
         }
@@ -116,6 +120,65 @@ namespace TrapchumApp.Pages.Lists.Employees
                 }
             }
         }
+
+        private readonly IFileUploadServiceImp _fileUploadService;
+        const long maxFileSize = 2L * 1024 * 1024 * 1024;
+        private async Task OnFileUpload(UploadChangeEventArgs args)
+        {
+            try
+            {
+                if (!args.Files.Any())
+                {
+                    if (tempPath.IsNotNullOrEmpty())
+                    {
+                        model.Photo = tempPath;
+                    }
+                    else
+                    {
+                        model.Photo = string.Empty;
+                    }
+
+                    return;
+                }
+
+                var file = args.Files.FirstOrDefault();
+
+                if (file is null || (file is not null && file.Size > maxFileSize))
+                {
+                    NotificationService.Notify(new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Error,
+                        Summary = "File upload error",
+                        Detail = "File is too large or not selected."
+                    });
+                    return;
+                }
+                var ext = Path.GetExtension(file!.Name);
+
+                var originalName = file.Name;
+
+                using var stream = new MemoryStream();
+
+                using var fileStream = file.OpenReadStream(maxFileSize);// 30 MB limit
+
+                await fileStream.CopyToAsync(stream); // ✅ Read the file content
+
+                var fileModel = new FileModel(originalName, file.Name, file.Size, stream.ToArray());
+
+                var rsp = await _fileUploadService.UploadFile(fileModel);
+
+                if (rsp.IsSuccess)
+                {
+                    model.Photo = rsp.Data?.FileUrl ?? string.Empty;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error uploading files: {ex.Message}");
+                // Handle error (e.g., show notification)
+            }
+        }
+
         void SetFirstNameToName()
         {
             model.Name = model.FirstName;

@@ -5,19 +5,23 @@ using Applications.Requests.Lists.Addreses;
 using Applications.Requests.Lists.OtherNames;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Vendors;
+using Applications.Services.LIsts;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 using Radzen.Blazor;
+using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Lists.Vendors
 {
     public partial class Index
     {
-        readonly IVendorService _vendorService;
+        readonly IVendorServiceImpl _vendorService;
+
         readonly IOtherNameService _otherNameService;
-        public Index(IVendorService vendorService, IOtherNameService otherNameService)
+        public Index(IVendorServiceImpl vendorService, IOtherNameService otherNameService)
         {
             _vendorService = vendorService;
+
             _otherNameService = otherNameService;
         }
 
@@ -26,23 +30,16 @@ namespace TrapchumApp.Pages.Lists.Vendors
         bool IsEnableEdit = false;
         bool IsEnableNew = false;
         bool IsEnableDetail = false;
-        string? q;
+        string? filter;
         long NameId { get; set; }
         IEnumerable<ProvinceDto>? ProvinceList = [];
         EntNameDtoUpdate? model = new();
-        IEnumerable<CommuneDto>? CommuneList = [];
-        IEnumerable<DistrictDto>? DistrictList = [];
-        IEnumerable<VillageDto>? VillageList = [];
         EntNameDto? OtherNames = new();
-        ProvinceDto? SelectedProvince;
-        DistrictDto? SelectedDistrict;
-        CommuneDto? SelectedCommune;
-        VillageDto? SelectedVillage;
-        IEnumerable<VendorVm> Vendors = [];
-        int pageIndex = 1;
-        int pageSize = 10;
+        List<VendorVm> Vendors = [];
+        int pageIndex = 0;
+        int pageSize = 15;
         int counts = 0;
-        string sortField = "EntId";
+        string sortField = "VendorId";
         bool sortDescending = false;
         bool includeInactive = false;
         bool isLoading = false;
@@ -62,17 +59,17 @@ namespace TrapchumApp.Pages.Lists.Vendors
         }
 
 
-        protected async Task OnSearch(string filter)
+        protected async Task SearchChanged(string filter)
         {
-            q = filter;
+            this.filter = filter;
             await GetVendors(filter);
         }
 
         async Task PageSizeChanged(int page)
         {
             pageSize = page;
-
-            await GetVendors(q);
+            pageIndex = 0;
+            await GetVendors(filter);
         }
 
         async Task GetVendors(string? filterText = "")
@@ -80,7 +77,7 @@ namespace TrapchumApp.Pages.Lists.Vendors
 
             isLoading = true;
 
-            var param = new QueryParam(pageIndex, pageSize, sortField, sortDescending, includeInactive, filterText);
+            var param = new QueryParam(pageIndex, pageSize, sortField, includeInactive, sortDescending, filterText);
 
             var resp = await _vendorService.GetVendorsAsync(param);
 
@@ -95,20 +92,27 @@ namespace TrapchumApp.Pages.Lists.Vendors
 
         async Task LoadData(LoadDataArgs e)
         {
-            q = e.Filter ?? string.Empty;
+
             pageIndex = e.Skip!.Value;
-            if (!string.IsNullOrEmpty(e.OrderBy))
-            {
-                sortField = e.OrderBy.Split(" ")[0];
-                string dir = e.OrderBy.Split(" ")[1];
-                sortDescending = dir.Contains("asc") ? false : true;
-            }
-            await GetVendors(q);
+
+            pageSize = e.Top ?? 15;
+
+            (sortField, sortDescending) = e.PageInfo();
+
+            var filterColumn = e.Filters?.FirstOrDefault(pr => pr.Property == nameof(VendorVm.AltName) ||
+                                                           pr.Property == nameof(VendorVm.VendorId) ||
+                                                           pr.Property == nameof(VendorVm.FirstName) ||
+                                                           pr.Property == nameof(VendorVm.Salutation) ||
+                                                           pr.Property == nameof(VendorVm.LastName) ||
+                                                           pr.Property == nameof(VendorVm.Phone) ||
+                                                           pr.Property == nameof(VendorVm.EmailAddress))?.FilterValue.ToString() ?? string.Empty;
+            filter = filterColumn ?? string.Empty;
+
+            await GetVendors(filter);
 
         }
-        async Task ShowEdit(string? vendorId) 
+        async Task ShowEdit(string? vendorId)
         {
-            //NavigationManager.NavigateTo($"/App/Vendors/{id}/Edit");
 
             ContextMenuService.Close();
 
@@ -167,23 +171,15 @@ namespace TrapchumApp.Pages.Lists.Vendors
             if (result.IsSuccess)
             {
                 NotificationService.Notify(NotificationSeverity.Success, "Delete Other Name", "Other Name was deleted successful!");
-                await GetVendors(q);
+                await GetVendors(filter);
             }
 
         }
         protected async Task IncludeInActiveChanged(bool e)
         {
             includeInactive = e;
-            await GetVendors(q);
+            await GetVendors(filter);
         }
-        protected async Task Reload()
-        {
-            await GetVendors(q);
-        }
-
-
-
-
         void AddTabOtherName()
         {
             IsEnableNew = true;
@@ -195,7 +191,7 @@ namespace TrapchumApp.Pages.Lists.Vendors
         {
             selectedIndex = 0;
             IsEnableEdit = isEditTabl;
-            await GetVendors(q);
+            await GetVendors(filter);
             StateHasChanged();
         }
 
@@ -207,51 +203,53 @@ namespace TrapchumApp.Pages.Lists.Vendors
             StateHasChanged();
         }
 
-
-        async Task CloseTabs(int e)
+        async Task CloseTabs(int index)
         {
-            if (selectedIndex == 1)
+            if (index == 1)
             {
                 IsEnableNew = false;
-                selectedIndex = 0;
-                await GetVendors(q);
             }
-            else if (selectedIndex == 2)
+            if (index == 2)
             {
                 IsEnableEdit = false;
-                selectedIndex = 0;
-                await GetVendors(q);
             }
-            else if (selectedIndex == 3)
+            if (index == 3)
             {
                 IsEnableDetail = false;
-                selectedIndex = 0;
-
             }
+
+            selectedIndex = 0;
+
+            await GetVendors(filter);
+
             StateHasChanged();
         }
 
-        protected async Task DeactiveOrActive(bool arg, VendorVm e)
+        protected async Task DeactiveOrActive(bool arg, string vendorId)
         {
-            //var entVendor = new EntVendorDtoChangeStatus
-            //{
-            //    VendorId = e.VendorId,
-            //    EditSeq = e.EditSeq,
-            //    IsActive = arg
-            //};
-            //var response = await _vendorService.ChangeVendorStatus(entVendor);
-            //if (response.IsSuccess)
-            //{
-            //    NotificationService.Notify(NotificationSeverity.Success, "", response.Data);
-            //    await GetVendors(q);
-            //}
-            //else
-            //{
-            //    await IncludeInActiveChanged(false);
-            //    NotificationService.Notify(NotificationSeverity.Warning, "", response.ErrMessage);
-            //}
 
-            await Task.CompletedTask;
+            var confirm = await DialogService.Confirm($"Do you want to change vendor ID #{vendorId} status?", "Confirm",
+                options: new ConfirmOptions
+                {
+                    CancelButtonText = "Cancel",
+                    OkButtonText = "Yes",
+                });
+
+            if (confirm == false) return;
+
+            var rsp = await _vendorService.ChangeVendorStatus(vendorId, arg);
+
+            if (rsp.IsSuccess)
+            {
+                NotificationService.Notify(NotificationSeverity.Success, rsp.Data);
+
+                await GetVendors(filter);
+            }
+            else
+            {
+                NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
+            }
+
         }
     }
 }

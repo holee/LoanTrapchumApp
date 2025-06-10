@@ -16,7 +16,9 @@ namespace TrapchumApp.Pages.Lists.Employees
         [Parameter] public EventCallback<bool> Close { get; set; }
         [Parameter] public EventCallback<string> OnEdit { get; set; }
         VEmployeeList? Model { get; set; } = new();
+
         IEnumerable<VLoanRequests> LoanRequests = [];
+
         IEnumerable<VLoanDisbursments> LoanDisbursments = [];
         async Task CloseTab()
         {
@@ -29,7 +31,7 @@ namespace TrapchumApp.Pages.Lists.Employees
 
         protected override async Task OnInitializedAsync()
         {
-            var rsp = await _employeeService.GetEmployeeById(EmployeeId,BranchId,true);
+            var rsp = await _employeeService.GetEmployeeById(EmployeeId);
 
             if (rsp.IsSuccess)
             {

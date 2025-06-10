@@ -21,7 +21,7 @@ namespace TrapchumApp.Pages.Lists.Branches
 
         protected bool InActive = false;
 
-        int pageSize = 10;
+        int pageSize = 15;
 
         bool sortDescending = false;
 
@@ -58,6 +58,17 @@ namespace TrapchumApp.Pages.Lists.Branches
         }
         async Task OnCheckChanged(int? branchId, bool state)
         {
+
+
+            var confirm = await DialogService.Confirm($"Do you want to deactivate Branch with ID#{branchId}?", options: new ConfirmOptions
+            {
+                CancelButtonText = "Cancel",
+
+                OkButtonText = "OK",
+            });
+
+            if (confirm == false) return;
+
             var rsp = await _branchService!.UpdateStatusAsync(branchId, state);
 
             if (rsp!.IsSuccess)

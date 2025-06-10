@@ -1,7 +1,6 @@
 ﻿using Applications.Commons.Mappers;
 using Applications.Interfaces.Employees;
 using Applications.Interfaces.Lists;
-using Applications.Requests.Lists.Employees;
 using Applications.Requests.Lists.OtherNames;
 using Applications.Responses;
 using Applications.Responses.Lists.Entities;
@@ -12,25 +11,16 @@ namespace Applications.Services.Employees
 {
     public class EmployeeService(IEmployeeService empService, IOccupationService ocService) : IEmployeeServiceImpl
     {
-        public async Task<Result<string>> CreateAsync(EntityNamesCreate entityName)
+        public async Task<Result<string>> CreateAsync(EntityEmployeeCreate entityName)
         {
-            var emp = entityName.ToEmployee();
-
-            var req = entityName.ToEntityNames();
-
-            req.Employee = emp;
-
-            return await empService.CreateAsync(req);
+            var emp = entityName.ToEmployeeCreate();
+            return await empService.CreateAsync(emp);
         }
-        public async Task<Result<string>> UpdateAsync(EntityNamesCreate entityName)
+        public async Task<Result<string>> UpdateAsync(EntityEmployeeCreate entityName)
         {
-            var emp = entityName.ToEmployee();
+            var emp = entityName.ToEmployeeEdit();
 
-            var req = entityName.ToEntityNames();
-
-            req.Employee = emp;
-
-            return await empService.UpdateAsync(req);
+            return await empService.UpdateAsync(emp);
         }
 
         public async Task<Result<string>> DeleteAsync(string? employeeId)
@@ -52,9 +42,9 @@ namespace Applications.Services.Employees
         {
             return await empService.GetEmployeesAsync(branchId,employeeId, param);
         }
-        public async Task<Result<string>> UpdateIsActiveAsync(string? employeeId)
+        public async Task<Result<string>> UpdateIsActiveAsync(string? employeeId,bool state)
         {
-            return await empService.UpdateIsActiveAsync(employeeId);
+            return await empService.UpdateIsActiveAsync(employeeId,state);
         }
 
         public async Task<IEnumerable<OcupationResponse>> GetOccupationsAsync(string? filter)
@@ -63,7 +53,7 @@ namespace Applications.Services.Employees
             return rsp.Items;
         }
 
-        public async Task<Result<EntityNamesCreate>> GetEmployeeForUpdate(string? employeeId)
+        public async Task<Result<EntityEmployeeCreate>> GetEmployeeForUpdate(string? employeeId)
         {
             var emp = await empService.GetByIdAsync(employeeId);
 
@@ -74,7 +64,7 @@ namespace Applications.Services.Employees
                 return Result.Success(employee);
             }
 
-            return Result.Failure<EntityNamesCreate>(ErrorResponse.NotFound("There is no employee"));
+            return Result.Failure<EntityEmployeeCreate>(ErrorResponse.NotFound("There is no employee"));
         }
 
         public async Task<Result<T>> GetEmployeeById<T>(string? employeeId)
@@ -89,6 +79,9 @@ namespace Applications.Services.Employees
             return await empService.GetByIdAsync(employeeId,branchId,include);
         }
 
-
+        public async Task<Result<VEmployeeList>> GetEmployeeById(string? employeeId,CancellationToken cancellation=default)
+        {
+            return await empService.GetByIdAsync(employeeId,cancellation);
+        }
     }
 }

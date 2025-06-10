@@ -3,9 +3,6 @@ using Applications.Requests.Lists.OtherNames;
 using Applications.Services.Lists;
 using Domains.Models.Bases;
 using Domains.Models.Lists;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
-using Radzen;
 
 namespace TrapchumApp.Pages.Lists.OtherNames
 {
@@ -45,79 +42,23 @@ namespace TrapchumApp.Pages.Lists.OtherNames
         }
         protected async Task OnSaveChanges()
         {
-            try
+            model.Id = $"{Guid.CreateVersion7()}";
+            model.EntType = EntType.OtherName.ToString();
+            model.CountryName = "Cambodia";
+            var rsp = await _otherNameService!.CreateAsync(model);
+            if (rsp.IsSuccess)
             {
-                model.Id = $"{Guid.CreateVersion7()}";
-                model.EntType = EntType.OtherName.ToString();
-                model.CountryName = "Cambodia";
-                var rsp = await _otherNameService!.CreateAsync(model);
-                if (rsp.IsSuccess)
-                {
-                    NotificationService.Notify(NotificationSeverity.Success, rsp.Data);
-                    model = new();
-                    return;
-                }
-                else
-                {
-                    NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
-                }
-            }
-            catch (Exception ex)
-            {
-                NotificationService.Notify(NotificationSeverity.Error, "Exception", ex.Message);
-            }
-
-        }
-
-        async void SelectProvinceChanged(object e)
-        {
-
-            var province = e as ProvinceDto;
-
-            if (province is not null)
-            {
-                model.ProInKhmer = province.ProInKhmer;
-                DistrictList = await _addressService!.GetDistrictsByProvinceId(province.ProvinceId);
+                NotificationService.Notify(NotificationSeverity.Success, rsp.Data);
+                model = new();
+                await CloseTab();
+                return;
             }
             else
             {
-                DistrictList = [];
+                NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
             }
-            StateHasChanged();
 
         }
-        async Task SelectDistrictChanged(object e)
-        {
-            var district = e as DistrictDto;
-
-            if (district is not null)
-            {
-                model.DisInKhmer = district.DisInKhmer;
-                CommuneList = await _addressService!.GetCommunesByDistrictId(district.DistrictId);
-            }
-            else
-            {
-                CommuneList = [];
-            }
-            StateHasChanged();
-        }
-        async Task SelectCommuneChanged(object e)
-        {
-
-            var commune = e as CommuneDto;
-
-            if (commune is not null)
-            {
-                model.ComInKhmer = commune.ComInKhmer;
-                VillageList = await _addressService!.GetVillagesByCommuneId(commune.CommuneId);
-            }
-            else
-            {
-                VillageList = [];
-            }
-            StateHasChanged();
-        }
-        //Salutation implements
         [Parameter] public IEnumerable<string> Salutations { get; set; } = [];
         protected string? newSalution = "";
         protected async Task AddNewSalutation(KeyboardEventArgs e)

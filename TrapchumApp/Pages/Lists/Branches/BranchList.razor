@@ -71,7 +71,7 @@
                                           Sortable="false" Context="c">
                         <Template>
                             <RadzenCheckBox TValue="bool?"
-                                            @bind-Value="@c.IsActive"
+                                            Value="@c.IsActive"
                                             Change="@((arg) => OnCheckChanged(c.BranchId,arg!.Value))" />
                         </Template>
                     </RadzenDataGridColumn>

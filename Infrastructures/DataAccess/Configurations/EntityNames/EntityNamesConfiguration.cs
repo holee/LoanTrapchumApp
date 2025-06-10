@@ -1,10 +1,13 @@
+using Applications.Responses.ViewModels.OtherNames;
+using Domains.Models.Bases;
 using Domains.Models.Lists.Customers;
 using Domains.Models.Lists.Employees;
 using Domains.Models.Lists.Vendors;
+using Infrastructures.DataAccess.Configurations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-public class EntityNamesConfiguration : IEntityTypeConfiguration<EntityNames>
+public class EntityNamesConfiguration : IBaseEntityTypeConfigurations<EntityNames>
 {
     public void Configure(EntityTypeBuilder<EntityNames> builder)
     {
@@ -59,3 +62,16 @@ public class EntityNamesConfiguration : IEntityTypeConfiguration<EntityNames>
     }
 
 }
+
+
+public class EntityVOThernameConfiguration : IBaseEntityTypeConfigurations<VOtherNames>
+{
+    public void Configure(EntityTypeBuilder<VOtherNames> builder)
+    {
+        builder.ToView("VNames");
+        builder.HasNoKey();
+        builder.HasQueryFilter(x => x.EntType == EntType.OtherName.ToString());
+    }
+
+}
+

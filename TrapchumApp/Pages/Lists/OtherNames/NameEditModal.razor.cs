@@ -23,11 +23,11 @@ namespace TrapchumApp.Pages.Lists.OtherNames
             _salutationService = salutationService;
         }
 
-        EntityNamesCreate? model = new EntityNamesCreate();
+        EntityNamesCreate model = new EntityNamesCreate();
         IEnumerable<ProvinceDto>? ProvinceList = [];
         IEnumerable<CommuneDto>? CommuneList = [];
         IEnumerable<DistrictDto>? DistrictList = [];
-        IEnumerable<VillageDto>? VillageList = [];      
+        IEnumerable<VillageDto>? VillageList = [];
         private bool isValid = true;
         protected List<string> salutations = ["Mr.", "Mrs.", "Miss.", "Others"];
         protected override async Task OnInitializedAsync()
@@ -52,12 +52,14 @@ namespace TrapchumApp.Pages.Lists.OtherNames
         {
             try
             {
-                var rsp = await _otherNameService!.UpdateAsync(model!);
+                var rsp = await _otherNameService.UpdateAsync(model);
 
                 if (rsp.IsSuccess)
                 {
                     NotificationService.Notify(NotificationSeverity.Success, rsp.Data);
+
                     await Close();
+
                     return;
                 }
                 else
@@ -83,54 +85,6 @@ namespace TrapchumApp.Pages.Lists.OtherNames
             model = new();
         }
 
-        async void SelectProvinceChanged(object e)
-        {
-
-            var province = e as ProvinceDto;
-
-            if (province is not null)
-            {
-                model!.ProInKhmer = province.ProInKhmer;
-                DistrictList = await _addressService!.GetDistrictsByProvinceId(province.ProvinceId);
-            }
-            else
-            {
-                DistrictList = [];
-            }
-            StateHasChanged();
-
-        }
-        async Task SelectDistrictChanged(object e)
-        {
-            var district = e as DistrictDto;
-
-            if (district is not null)
-            {
-                model!.DisInKhmer = district.DisInKhmer;
-                CommuneList = await _addressService!.GetCommunesByDistrictId(district.DistrictId);
-            }
-            else
-            {
-                CommuneList = [];
-            }
-            StateHasChanged();
-        }
-        async Task SelectCommuneChanged(object e)
-        {
-
-            var commune = e as CommuneDto;
-
-            if (commune is not null)
-            {
-                model!.ComInKhmer = commune.ComInKhmer;
-                VillageList = await _addressService!.GetVillagesByCommuneId(commune.CommuneId);
-            }
-            else
-            {
-                VillageList = [];
-            }
-            StateHasChanged();
-        }
         //Salutation implements
         protected string? newSalution = "";
         protected async Task AddNewSalutation(KeyboardEventArgs e)
