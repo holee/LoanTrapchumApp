@@ -146,13 +146,15 @@ public partial class List
     async Task GetGuarantors()
     {
         isLoading = true;
+        
         var param = new QueryParam(pageIndex, pageSize, sortColumn, sortDescending, includeInactive, filterText);
+        
         var guarantorResp = await _gService.GetGuarantorsAsync(param);
-        if (guarantorResp.IsSuccess)
-        {
-            guarantors = guarantorResp.Data.Items;
-            counts = guarantorResp.Data.Count;
-        }
+
+        guarantors = guarantorResp.Items;
+       
+        counts = guarantorResp.Count;
+
         isLoading = false;
 
         StateHasChanged();

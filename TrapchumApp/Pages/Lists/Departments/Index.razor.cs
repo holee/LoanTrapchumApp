@@ -23,7 +23,7 @@ namespace TrapchumApp.Pages.Lists.Departments
         protected string? searchText = string.Empty;
         protected bool includeInactive = false;
         int pageIndex = 0;
-        int pageSize = 10;
+        int pageSize = 15;
         bool sortDescending = false;
         string sortField = "DepartmentId";
         bool isLoading = false;

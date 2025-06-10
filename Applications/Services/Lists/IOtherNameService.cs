@@ -19,42 +19,39 @@ namespace Applications.Services.Lists
 {
     public interface IOtherNameServiceImpl
     {
-        Task<Result<string>> ConvertToCustomerAsync(string? id, CustomerConvertCreate customer);
-        Task<Result<string>> ConvertToEmployeeAsync(string? id, EmployeeConvertCreate employee);
-        Task<Result<string>> ConvertToVendorAsync(string? id, VenderConvertCreate vendor);
+        Task<Result<string>> ConvertToCustomerAsync(string? id, ConvertCreateCustomer customer);
+        Task<Result<string>> ConvertToEmployeeAsync(string? id, ConvertCreateEmployee employee);
+        Task<Result<string>> ConvertToVendorAsync(string? id, ConvertCreateVendor vendor);
         Task<Result<string>> CreateAsync(EntityNamesCreate othername);
         Task<Result<string>> UpdateAsync(EntityNamesCreate othername);
         Task<Result<string>> CreateGaurantorAsync(EntityNamesCreate othername);
         Task<Result<string>> DeleteAsync(string? othernameId);
         Task<Result<EntityNames>> GetByIdAsync(string? id);
         Task<Result<T>> GetDetailAsync<T>(string? id) where T : class;
-        Task<Pager<VOtherNames>> GetNamesAsync(QueryParam q, string type);
-        Task<Result<string>> UpdateStatusAsync(string? othernameId);
-        Task<Pager<VOtherNames>> GetNamesAsync(QueryParam q, EntType type);
         Task<Result<EntityNamesCreate>> GetEditNameByIdAsync(string? id);
-
-        Task<IEnumerable<T>> GetNameLists<T>(string? nameId, QueryParam q) 
-            where T : class, new();
+        Task<IEnumerable<T>> GetNameLists<T>(string? nameId, QueryParam q)  where T : class, new();
+        Task<Pager<VOtherNames>> GetNamesAsync(QueryParam q, CancellationToken cancellation = default);
+        Task<Result<VOtherNames>> UpdateStatusAsync(string? id, bool state);
     }
 
 
     public sealed class OtherNameService(IOtherNameService oName) : IOtherNameServiceImpl
     {
-        public async Task<Result<string>> ConvertToCustomerAsync(string? id, CustomerConvertCreate customer)
+        public async Task<Result<string>> ConvertToCustomerAsync(string? id, ConvertCreateCustomer customer)
         {
             var req = customer.Adapt<Customer>();
 
             return await oName.ConvertToCustomerAsync(id, req);
         }
 
-        public async Task<Result<string>> ConvertToEmployeeAsync(string? id, EmployeeConvertCreate employee)
+        public async Task<Result<string>> ConvertToEmployeeAsync(string? id, ConvertCreateEmployee employee)
         {
             var req = employee.Adapt<Employee>();
 
             return await oName.ConvertToEmployeeAsync(id, req);
         }
 
-        public async Task<Result<string>> ConvertToVendorAsync(string? id, VenderConvertCreate vendor)
+        public async Task<Result<string>> ConvertToVendorAsync(string? id, ConvertCreateVendor vendor)
         {
             var req = vendor.Adapt<Vendor>();
 
@@ -106,9 +103,9 @@ namespace Applications.Services.Lists
             return await oName.GetDetailAsync<T>(id);
         }
 
-        public async Task<Pager<VOtherNames>> GetNamesAsync(QueryParam q, string type)
+        public async Task<Pager<VOtherNames>> GetNamesAsync(QueryParam q, CancellationToken cancellation=default)
         {
-            return await oName.GetNamesAsync(q, type);
+            return await oName.GetNamesAsync(q, cancellation);
         }
 
         public async Task<IEnumerable<T>> GetNameLists<T>(string? nameId, QueryParam q) 
@@ -117,14 +114,9 @@ namespace Applications.Services.Lists
             return await oName.GetNameLists<T>(nameId, q);
         }
 
-        public async Task<Pager<VOtherNames>> GetNamesAsync(QueryParam q, EntType type)
-        {
-            return await oName.GetNamesAsync(q, type);
-        }
-
         public async Task<Result<string>> UpdateAsync(EntityNamesCreate othername)
         {
-            var model = othername.Adapt<EntityNames>();
+            var model = othername.MapNamesEdit();
 
             return await oName.UpdateAsync(model);
         }
@@ -132,6 +124,11 @@ namespace Applications.Services.Lists
         public async Task<Result<string>> UpdateStatusAsync(string? id)
         {
             return await oName.UpdateStatusAsync(id);
+        }
+
+        public async Task<Result<VOtherNames>> UpdateStatusAsync(string? id,bool state)
+        {
+            return await oName.UpdateStatusAsync(id,state);
         }
     }
 }

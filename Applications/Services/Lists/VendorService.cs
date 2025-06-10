@@ -1,45 +1,31 @@
 ﻿using Applications.Commons.Mappers;
 using Applications.Interfaces.Vendors;
-using Applications.Requests.Lists.Entities;
 using Applications.Requests.Lists.OtherNames;
 using Applications.Responses;
 using Applications.Responses.Message;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Vendors;
 using Domains.Models.Bases;
-using Domains.Models.Lists;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Applications.Services.LIsts
 {
     public sealed class VendorService(IVendorService vService) : IVendorServiceImpl
     {
-        //public async Task<Result<string>> ChangeVendorStatus(EntVendorDtoChangeStatus req)
-        //{
-        //    return await vService.ChangeVendorStatus(req);
-        //}
-        public async Task<Result<string>> UpdateAsync(EntityNamesCreate vendor)
-        {
-            var model = vendor.ToEntityNames();
 
-            model.Vendor = vendor.ToVendor();
+        public async Task<Result<string>> UpdateAsync(EntityVendorCreate vendor)
+        {
+            var model = vendor.ToVendorEdit();
 
             return await vService.UpdateAsync(model);
         }
-        public async Task<Result<string>> CreateAsync(EntityNamesCreate vendor)
+        public async Task<Result<string>> CreateAsync(EntityVendorCreate vendor)
         {
 
             vendor.Id = $"{Guid.CreateVersion7()}";
 
             vendor.EntType = EntType.Vendor.ToString();
 
-            var model = vendor.ToEntityNames();
-
-            model.Vendor = vendor.ToVendor();
+            var model = vendor.ToVendorCreate();
 
             return await vService.CreateAsync(model);
 
@@ -55,18 +41,18 @@ namespace Applications.Services.LIsts
             return await vService.GetVendorByIdAsync(vendorId, include);
         }
 
-        public async Task<Result<EntityNamesCreate>> GetEditVendorAsync(string? vendorId)
+        public async Task<Result<EntityVendorCreate>> GetEditVendorAsync(string? vendorId)
         {
             var rsp = await vService.GetVendorByIdAsync(vendorId, false);
 
             if (rsp.IsSuccess)
             {
-                var model = rsp.Data!.ToVendorCreate();
+                var model = rsp.Data!.ToVendor();
 
                 return Result.Success(model);
             }
 
-            return Result.Failure<EntityNamesCreate>(ErrorResponse.NotFound(Messages.DataNotFound));
+            return Result.Failure<EntityVendorCreate>(ErrorResponse.NotFound(Messages.DataNotFound));
         }
 
 
@@ -80,6 +66,9 @@ namespace Applications.Services.LIsts
             return await vService.GetVendorsAsync(q);
         }
 
-
+        public async Task<Result<string>> ChangeVendorStatus(string? vendorId, bool state, CancellationToken cancellation = default)
+        {
+            return await vService.ChangeVendorStatus(vendorId, state, cancellation);
+        }
     }
 }

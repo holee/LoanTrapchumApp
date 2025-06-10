@@ -11,7 +11,7 @@ public static class VLoanDisbursmentExtensions
         {
             LoanId = s.LoanId ?? string.Empty,
             ContractNumber = s.ContractNumber,
-            BranchName = s.BranchName,
+            BranchName = s.LoanBranchName,
             FullName = s.CustomerName,
             CustomerKhmerName = s.AltName,
             CustomerPhone = s.Phone,

@@ -9,8 +9,7 @@ public sealed class Employee
     public string? UserRefId { get; set; }
     public DateTime? HireDate { get; set; }
     public DateTime? EndDate { get; set; }
-    public int? DepartmentRefId { get; set; } 
-    
+    public int? DepartmentRefId { get; set; }   
     public int? BranchRefId { get; set; }
     public string? Photo { get; set; }
     public LoanCreditAgent? LoanCreditAgent { get; set; }

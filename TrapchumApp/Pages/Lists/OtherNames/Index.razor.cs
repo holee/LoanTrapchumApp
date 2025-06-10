@@ -8,6 +8,8 @@ using Domains.Models.Bases;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 using Radzen.Blazor;
+using System.Threading.Tasks;
+using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Lists.OtherNames;
 
@@ -21,9 +23,9 @@ public partial class Index
         _salutationService = salutationService;
     }
 
-    IEnumerable<VOtherNames> Names = [];
+    List<VOtherNames> Names = [];
     int pageIndex = 0;
-    int pageSize = 10;
+    int pageSize = 15;
     int counts = 0;
     string sortField = "EntId";
     string? _nameId = string.Empty;
@@ -61,7 +63,7 @@ public partial class Index
         await base.OnInitializedAsync();
 
     }
-    protected async Task OnSearch(string filter)
+    protected async Task SearchChanged(string filter)
     {
         q = filter;
         await GetOtherNames(filter);
@@ -76,23 +78,33 @@ public partial class Index
     async Task GetOtherNames(string? filterText = "")
     {
 
-        var param = new QueryParam(pageIndex, pageSize, sortField, sortDescending, includeInactive, filterText);
-        var resp = await _otherNameService.GetNamesAsync(param, EntType.OtherName);
+        var param = new QueryParam(pageIndex, pageSize, sortField, includeInactive, sortDescending, filterText);
+       
+        var resp = await _otherNameService.GetNamesAsync(param);
+        
         counts = resp.Count;
+       
         Names = resp.Items;
 
     }
 
     async Task LoadData(LoadDataArgs e)
     {
-        q = e.Filter ?? string.Empty;
         pageIndex = e.Skip!.Value;
-        if (!string.IsNullOrEmpty(e.OrderBy))
-        {
-            sortField = e.OrderBy.Split(" ")[0];
-            string dir = e.OrderBy.Split(" ")[1];
-            sortDescending = dir.Contains("asc") ? false : true;
-        }
+
+        (sortField, sortDescending) = e.PageInfo();
+
+        var filterColunm = e.Filters?.FirstOrDefault(p =>
+                                p.Property == nameof(VOtherNames.Name) ||
+                                p.Property == nameof(VOtherNames.Phone) ||
+                                p.Property == nameof(VOtherNames.EmailAddress) ||
+                                p.Property == nameof(VOtherNames.FirstName) ||
+                                p.Property == nameof(VOtherNames.Gender) ||
+                                p.Property == nameof(VOtherNames.LastName)
+                            )?.FilterValue.ToString() ?? string.Empty;
+
+        q = filterColunm ?? string.Empty;
+
         await GetOtherNames(q);
 
     }
@@ -100,16 +112,13 @@ public partial class Index
     protected async Task IncludeInActiveChanged(bool e)
     {
         includeInactive = e;
-        await OnInitializedAsync();
-    }
-    protected async Task Reload()
-    {
-        await OnInitializedAsync();
+        await GetOtherNames(q);
     }
 
     private async Task GetSalutations()
     {
         var salutations = await _salutationService.GetSalutions();
+
         if (salutations.IsSuccess)
         {
             Salutations = salutations!.Data!.Select(x => x.Title!).ToList();
@@ -169,44 +178,28 @@ public partial class Index
         if (selectedIndex == 1)
         {
             IsEnableNew = false;
-            selectedIndex = 0;
 
-            await OnInitializedAsync();
+            selectedIndex = 0;
         }
         else if (selectedIndex == 2)
         {
             IsEnableEdit = false;
-            selectedIndex = 0;
 
-            await OnInitializedAsync();
+            selectedIndex = 0;
         }
         else if (selectedIndex == 3)
         {
             IsEnableDetail = false;
+
             selectedIndex = 0;
 
         }
+
+       await GetOtherNames(q);
+
         StateHasChanged();
     }
-    protected async Task DeactiveOrActive(EntNameDto e)
-    {
-
-        var response = await _otherNameService!.UpdateStatusAsync(e.Id);
-
-        if (response.IsSuccess)
-        {
-            //names!.ToList().Remove(e);
-            NotificationService.Notify(NotificationSeverity.Success, response.ErrMessage);
-            // await IncludeInActiveChanged(false);
-            await InvokeAsync(StateHasChanged);
-
-        }
-        else
-        {
-            // await IncludeInActiveChanged(false);
-            NotificationService.Notify(NotificationSeverity.Warning, "Changing status failded!");
-        }
-    }
+    
     protected async Task ShowEdit(string? id)
     {
         ContextMenuService.Close();
@@ -244,7 +237,7 @@ public partial class Index
 
         if (dialogueResult is not null && dialogueResult == true)
         {
-
+            await GetOtherNames(q);
         }
     }
     protected async Task ConvertToVedor(string? id)
@@ -261,7 +254,7 @@ public partial class Index
 
         if (dialogueResult is not null && dialogueResult == true)
         {
-
+            await GetOtherNames(q);
         }
     }
     protected async Task ConvertToEmployee(string? id)
@@ -274,11 +267,11 @@ public partial class Index
             Draggable = true
         };
 
-        bool? dialogueResult = await DialogService.OpenAsync<ConvertToEmployee>("Convert to Employee", new Dictionary<string, object?>() { { "Id", id } }, options);
+        bool? rsp = await DialogService.OpenAsync<ConvertToEmployee>("Convert to Employee", new Dictionary<string, object?>() { { "Id", id } }, options);
 
-        if (dialogueResult is not null && dialogueResult == true)
+        if (rsp is bool result && result == true)
         {
-
+            await GetOtherNames(q);
         }
     }
     protected EntNameDto? OtherNames = new();
@@ -323,6 +316,27 @@ public partial class Index
 
 
 
+    private async Task OnChanged(bool args,string? id)
+    {
+        var confirm = await DialogService.Confirm("Do you want enable or disable?", "Confirm", new ConfirmOptions
+        {
+            OkButtonText="Yes",
+            CancelButtonText="Cancel"
+        });
+
+        if (confirm == false) return;
+
+        var rsp=  await _otherNameService.UpdateStatusAsync(id, args);
+
+        if (rsp.IsSuccess) { 
+        
+            await GetOtherNames(q);
+            return;
+        }
+
+        NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
+
+    }
 }
 
 

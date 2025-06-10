@@ -1,8 +1,7 @@
 ﻿namespace Applications.Requests.Lists.OtherNames;
 
-public sealed class CustomerConvertCreate 
+public sealed class ConvertCreateCustomer
 {
-    
     public string? CustomerId { get; set; }
     public int? Dependents { get; set; }
     public int? NoOfChildren { get; set; }

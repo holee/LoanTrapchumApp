@@ -15,24 +15,24 @@ namespace TrapchumApp.Pages.Lists.Vendors
 
         VendorVm? model { get; set; } = new();
         [Parameter] public string? Id { get; set; }
-        [Parameter] public EventCallback<int> Closing { get; set; }
+        [Parameter] public EventCallback<int> Closed { get; set; }
         [Parameter] public EventCallback<string> OnEdit { get; set; } 
-        protected async void SelectedIndex()
+        protected async Task CloseTab()
         {
-            await Closing.InvokeAsync(0);
+            await Closed.InvokeAsync(3);
         }
-
         async Task ClickEdit()
         {
             await OnEdit.InvokeAsync(Id);
         }
 
-
-        protected override async Task OnParametersSetAsync()
+        protected override async Task OnInitializedAsync()
         {
             await GetVendorById(Id);
-            await base.OnParametersSetAsync();
+
+            await base.OnInitializedAsync();
         }
+
 
         async Task GetVendorById(string? id)
         {

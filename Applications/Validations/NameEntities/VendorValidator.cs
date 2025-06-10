@@ -1,10 +1,16 @@
-﻿using Applications.Requests.Lists.Employees;
+﻿using Applications.Requests.Lists.OtherNames;
 using FluentValidation;
-namespace Applications.Validations.Employees
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Applications.Validations.NameEntities
 {
-    public class EmployeeDtoUpdateValidator : AbstractValidator<EmployeeDtoUpdate> 
+    public sealed class VendorValidator : AbstractValidator<EntityVendorCreate>
     {
-        public EmployeeDtoUpdateValidator() 
+        public VendorValidator()
         {
             RuleFor(x => x.FirstName)
                     .NotEmpty().WithMessage("Please input First Name Field")

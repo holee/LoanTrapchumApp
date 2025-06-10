@@ -15,11 +15,11 @@ namespace TrapchumApp.Pages.Lists.OtherNames
             _gService = gService;
         }
 
-        [Parameter] public EntityNamesCreate model { get; set; } = new();
-        [Parameter] public EventCallback<int> Closing { get; set; }
+        [Parameter] public EntityGuarantorCreate model { get; set; } = new();
+        [Parameter] public EventCallback<int> Closed { get; set; } 
         async Task TabClosing()
         {
-            await Closing.InvokeAsync(1);
+            await Closed.InvokeAsync(1);
         }
 
         void SetFirstName(string e)
@@ -50,13 +50,18 @@ namespace TrapchumApp.Pages.Lists.OtherNames
         protected async Task OnSaveChanges()
         {
             model.EntType = EntType.OtherName.ToString();
+
             model.Id = Guid.CreateVersion7().ToString();
+
             var rsp = await _gService.CreateAsync(model);
 
             if (rsp.IsSuccess)
             {
                 NotificationService.Notify(NotificationSeverity.Success, rsp.Data);
+
                 model = new();
+
+                await TabClosing();
             }
 
             else

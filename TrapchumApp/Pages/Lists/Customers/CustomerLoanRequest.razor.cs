@@ -1,5 +1,6 @@
 using Applications.Extensions;
 using Applications.Responses.ViewModels.Customers;
+using Applications.Responses.ViewModels.Loans.Requests;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 
@@ -11,22 +12,14 @@ namespace TrapchumApp.Pages.Lists.Customers
         [Parameter] public string? UserId { get; set; }
         [Parameter, EditorRequired] public string? CustomerId { get; set; }
 
-        protected IEnumerable<CustomerLoanRequestVm> _vLoanRequests = [];
+        protected IEnumerable<VLoanRequests> _vLoanRequests = [];
 
         async Task GetCustomerLoanReuquests()
         {
-            var rsp = await _customerService.GetCustomerLoanRequestAsync<CustomerLoanRequestVm>(BranchId, CustomerId);
-            _vLoanRequests = rsp.Items ?? [];
-        }
+            var rsp = await _customerService.GetCustomerLoanRequestAsync(BranchId, CustomerId,false);
 
-        // string loanRequestDetailsUrl = "";
-        // string loanRequestUrl = "";
-        // protected override void OnParametersSet()
-        // {
-        //     loanRequestDetailsUrl = $"";
-        //     loanRequestUrl = $"/App/Loan/{BranchId}/Branches/Request/?UserId={UserId}&CustomerId={LoanRequest?.CustomerId}&LoanRequestId={LoanRequest?.LoanRequestId}";
-        //     base.OnParametersSet();
-        // }
+            _vLoanRequests = rsp.Data ?? [];
+        }
 
 
         protected override async Task OnInitializedAsync()

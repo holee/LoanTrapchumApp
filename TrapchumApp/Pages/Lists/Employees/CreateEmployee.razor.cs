@@ -17,12 +17,22 @@ namespace TrapchumApp.Pages.Lists.Employees
         {
             await OnClose.InvokeAsync(false);
         }
-        protected EntityNamesCreate model = new EntityNamesCreate();
+        protected EntityEmployeeCreate model = new EntityEmployeeCreate();
+
+
+        protected override void OnInitialized()
+        {
+
+            model.Photo = "/Profiles/Profile.png";
+
+            base.OnInitialized();
+        }
         protected async Task FormValidSubmit()
         {
             try
             {
                 model.Id = $"{Guid.CreateVersion7()}";
+
                 model.EntType = EntType.Employee.ToString();
 
                 var createResponse = await _employeeService.CreateAsync(model);

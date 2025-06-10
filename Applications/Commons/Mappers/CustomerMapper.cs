@@ -1,35 +1,74 @@
-﻿using Domains.Models.Lists.Customers;
-using Domains.Models.Lists.Employees;
-using Domains.Models.Lists.Vendors;
-using Mapster;
+﻿using Applications.Requests.Lists.OtherNames;
+using Domains.Models.Lists.Customers;
 
-namespace Applications.Requests.Lists.OtherNames;
+namespace Applications.Commons.Mappers;
 
-public static class EntityNamesCreateExtensions
+public static class CustomerMapper
 {
-    public static Employee ToEmployee(this EntityNamesCreate entityNameCreate)
-    {
-        return entityNameCreate.Adapt<Employee>();
-    }
-
-    public static Customer ToCustomer(this EntityNamesCreate entityNameCreate)
-    {
-        return entityNameCreate.Adapt<Customer>();
-    }
-
-    public static Vendor ToVendor(this EntityNamesCreate entityNameCreate)
-    {
-        return entityNameCreate.Adapt<Vendor>();
-    }
-    public static EntityNames ToEntityNames(this EntityNamesCreate entityNameCreate)
-    {
-        return entityNameCreate.Adapt<EntityNames>();
-    }
 
 
-    public static EntityNames ToGuarantorCreate(this EntityNamesCreate dto)
+    public static EntityCustomerCreate ToCustomer(this EntityNames dto)
     {
-        var entity = new EntityNames
+
+        return new EntityCustomerCreate
+        {
+            Id =dto.Id,
+            FirstName = dto.FirstName,
+            MiddleName = dto.MiddleName,
+            LastName = dto.LastName,
+            AltName = dto.AltName,
+            Name = dto.Name,
+            EntType = dto.EntType,
+            PassportId = dto.PassportId,
+            Nationality = dto.Nationality,
+            DateOfBirth = dto.DateOfBirth,
+            Salutation = dto.Salutation,
+            Gender = dto.Gender,
+            JobTitle = dto.JobTitle,
+            Phone = dto.Phone,
+            AltPhone = dto.AltPhone,
+            EmailAddress = dto.EmailAddress,
+            IdCard = dto.IdCard,
+            CompanyName = dto.CompanyName,
+            MarritalStatus = dto.MarritalStatus,
+            IsActive = dto.IsActive,
+            CountryName = dto.CountryName,
+            City = dto.City,
+            Occupation = dto.Occupation,
+            ProvinceRefId = dto.ProvinceRefId,
+            ProDescription = dto.ProDescription,
+            ProInKhmer = dto.ProInKhmer,
+            DistrictRefId = dto.DistrictRefId,
+            DisDescription = dto.DisDescription,
+            DisInKhmer = dto.DisInKhmer,
+            CommuneRefId = dto.CommuneRefId,
+            ComDescription = dto.ComDescription,
+            ComInKhmer = dto.ComInKhmer,
+            VillageRefId = dto.VillageRefId,
+            VillDescription = dto.VillDescription,
+            VilInKhmer = dto.VilInKhmer,
+            Description = dto.Description,
+            CustomerId=dto.Id,
+            Photo = dto.Customer?.Photo,
+            Dependents = dto.Customer?.Dependents,
+            Expenditure = dto.Customer?.Expenditure,
+            Income = dto.Customer?.Income,
+            NoOfChildren = dto.Customer?.NoOfChildren,
+            SpouseDateOfBirth = dto.Customer?.SpouseDateOfBirth,
+            SpouseName = dto.Customer?.SpouseName,
+            SpouseNationality = dto.Customer?.SpouseNationality,
+            SpouseOccupation = dto.Customer?.SpouseOccupation,
+            SpousePassport = dto.Customer?.SpousePassport,
+            SpousePhoneNo = dto.Customer?.SpousePhoneNo,
+
+        };
+
+    }
+
+    public static EntityNames ToCustomerCreate(this EntityCustomerCreate dto)
+    {
+
+        return new EntityNames
         {
             Id = $"ent-{Guid.CreateVersion7()}",
             FirstName = dto.FirstName,
@@ -67,59 +106,29 @@ public static class EntityNamesCreateExtensions
             VillDescription = dto.VillDescription,
             VilInKhmer = dto.VilInKhmer,
             Description = dto.Description,
-            Converted = dto.Converted,
+            Customer = new Customer
+            {
+                Photo = dto.Photo,
+                Dependents = dto.Dependents,
+                Expenditure = dto.Expenditure,
+                Income = dto.Income,
+                NoOfChildren = dto.NoOfChildren,
+                Occupation = dto.Occupation,
+                SpouseDateOfBirth = dto.SpouseDateOfBirth,
+                SpouseName = dto.SpouseName,
+                SpouseNationality = dto.SpouseNationality,
+                SpouseOccupation = dto.SpouseOccupation,
+                SpousePassport = dto.SpousePassport,
+                SpousePhoneNo = dto.SpousePhoneNo,
+            }
         };
 
-        return entity;
     }
 
-    public static EntityNames ToGuarantorEdit(this EntityNamesCreate dto)
+    public static EntityNames ToCustomerEdit(this EntityCustomerCreate dto)
     {
-        var entity = new EntityNames
-        {
-            Id = dto.Id!,
-            FirstName = dto.FirstName,
-            MiddleName = dto.MiddleName,
-            LastName = dto.LastName,
-            AltName = dto.AltName,
-            Name = dto.Name,
-            EntType = dto.EntType,
-            PassportId = dto.PassportId,
-            Nationality = dto.Nationality,
-            DateOfBirth = dto.DateOfBirth,
-            Salutation = dto.Salutation,
-            Gender = dto.Gender,
-            JobTitle = dto.JobTitle,
-            Phone = dto.Phone,
-            AltPhone = dto.AltPhone,
-            EmailAddress = dto.EmailAddress,
-            IdCard = dto.IdCard,
-            CompanyName = dto.CompanyName,
-            MarritalStatus = dto.MarritalStatus,
-            IsActive = dto.IsActive,
-            CountryName = dto.CountryName,
-            City = dto.City,
-            Occupation = dto.Occupation,
-            ProvinceRefId = dto.ProvinceRefId,
-            ProDescription = dto.ProDescription,
-            ProInKhmer = dto.ProInKhmer,
-            DistrictRefId = dto.DistrictRefId,
-            DisDescription = dto.DisDescription,
-            DisInKhmer = dto.DisInKhmer,
-            CommuneRefId = dto.CommuneRefId,
-            ComDescription = dto.ComDescription,
-            ComInKhmer = dto.ComInKhmer,
-            VillageRefId = dto.VillageRefId,
-            VillDescription = dto.VillDescription,
-            VilInKhmer = dto.VilInKhmer,
-            Description = dto.Description,
-        };
-        return entity;
-    }
 
-    public static EntityNamesCreate ToGuarantorEdit(this EntityNames dto)
-    {
-        var entity = new EntityNamesCreate
+        return new EntityNames
         {
             Id = dto.Id,
             FirstName = dto.FirstName,
@@ -157,13 +166,308 @@ public static class EntityNamesCreateExtensions
             VillDescription = dto.VillDescription,
             VilInKhmer = dto.VilInKhmer,
             Description = dto.Description,
+            Customer = new Customer
+            {
+                CustomerId=dto.Id,
+                Photo = dto.Photo,
+                Dependents = dto.Dependents,
+                Expenditure = dto.Expenditure,
+                Income = dto.Income,
+                NoOfChildren = dto.NoOfChildren,
+                Occupation = dto.Occupation,
+                SpouseDateOfBirth = dto.SpouseDateOfBirth,
+                SpouseName = dto.SpouseName,
+                SpouseNationality = dto.SpouseNationality,
+                SpouseOccupation = dto.SpouseOccupation,
+                SpousePassport = dto.SpousePassport,
+                SpousePhoneNo = dto.SpousePhoneNo,
+            }
         };
-        return entity;
+
     }
 
 
 
+
+
 }
+
+
+//public static Customer ToCustomerCreate(this EntityNamesCreate dto)
+//{
+//    return new Customer()
+//    {
+//        Dependents = dto.Dependents,
+//        Expenditure = dto.Expenditure,
+//        Income = dto.Income,
+//        NoOfChildren = dto.NoOfChildren,
+//        Occupation = dto.Occupation,
+//        Photo = dto.Photo,
+//        SpouseDateOfBirth = dto.SpouseDateOfBirth,
+//        SpouseName = dto.SpouseName,
+//        SpouseNationality = dto.SpouseNationality,
+//        SpouseOccupation = dto.SpouseOccupation,
+//        SpousePassport = dto.SpousePassport,
+//        SpousePhoneNo = dto.SpousePhoneNo,
+//    };
+//}
+//public static Customer ToCustomerEdit(this EntityNamesCreate dto)
+//{
+//    return new Customer()
+//    {
+//        CustomerId = dto.CustomerId,
+//        Dependents = dto.Dependents,
+//        Expenditure = dto.Expenditure,
+//        Income = dto.Income,
+//        NoOfChildren = dto.NoOfChildren,
+//        Occupation = dto.Occupation,
+//        Photo = dto.Photo,
+//        SpouseDateOfBirth = dto.SpouseDateOfBirth,
+//        SpouseName = dto.SpouseName,
+//        SpouseNationality = dto.SpouseNationality,
+//        SpouseOccupation = dto.SpouseOccupation,
+//        SpousePassport = dto.SpousePassport,
+//        SpousePhoneNo = dto.SpousePhoneNo,
+//    };
+//}
+
+//public static Vendor ToVendorCreate(this EntityNamesCreate dto)
+//{
+//    return new Vendor
+//    {
+//        CompanyAddress = dto.CompanyAddress,
+//        CompanyName = dto.CompanyName,
+//    };
+//}
+
+
+//public static EntityNames ToEntityNamesCreate(this EntityNamesCreate dto)
+//{
+
+//    return new EntityNames
+//    {
+//        Id = $"ent-{Guid.CreateVersion7()}",
+//        FirstName = dto.FirstName,
+//        MiddleName = dto.MiddleName,
+//        LastName = dto.LastName,
+//        AltName = dto.AltName,
+//        Name = dto.Name,
+//        EntType = dto.EntType,
+//        PassportId = dto.PassportId,
+//        Nationality = dto.Nationality,
+//        DateOfBirth = dto.DateOfBirth,
+//        Salutation = dto.Salutation,
+//        Gender = dto.Gender,
+//        JobTitle = dto.JobTitle,
+//        Phone = dto.Phone,
+//        AltPhone = dto.AltPhone,
+//        EmailAddress = dto.EmailAddress,
+//        IdCard = dto.IdCard,
+//        CompanyName = dto.CompanyName,
+//        MarritalStatus = dto.MarritalStatus,
+//        IsActive = dto.IsActive,
+//        CountryName = dto.CountryName,
+//        City = dto.City,
+//        Occupation = dto.Occupation,
+//        ProvinceRefId = dto.ProvinceRefId,
+//        ProDescription = dto.ProDescription,
+//        ProInKhmer = dto.ProInKhmer,
+//        DistrictRefId = dto.DistrictRefId,
+//        DisDescription = dto.DisDescription,
+//        DisInKhmer = dto.DisInKhmer,
+//        CommuneRefId = dto.CommuneRefId,
+//        ComDescription = dto.ComDescription,
+//        ComInKhmer = dto.ComInKhmer,
+//        VillageRefId = dto.VillageRefId,
+//        VillDescription = dto.VillDescription,
+//        VilInKhmer = dto.VilInKhmer,
+//        Description = dto.Description,
+//        Converted = dto.Converted,
+//    };
+//}
+
+//public static EntityNames ToEntityNamesEdit(this EntityNamesCreate dto)
+//{
+
+//    return new EntityNames
+//    {
+//        Id = dto.Id!,
+//        FirstName = dto.FirstName,
+//        MiddleName = dto.MiddleName,
+//        LastName = dto.LastName,
+//        AltName = dto.AltName,
+//        Name = dto.Name,
+//        EntType = dto.EntType,
+//        PassportId = dto.PassportId,
+//        Nationality = dto.Nationality,
+//        DateOfBirth = dto.DateOfBirth,
+//        Salutation = dto.Salutation,
+//        Gender = dto.Gender,
+//        JobTitle = dto.JobTitle,
+//        Phone = dto.Phone,
+//        AltPhone = dto.AltPhone,
+//        EmailAddress = dto.EmailAddress,
+//        IdCard = dto.IdCard,
+//        CompanyName = dto.CompanyName,
+//        MarritalStatus = dto.MarritalStatus,
+//        IsActive = dto.IsActive,
+//        CountryName = dto.CountryName,
+//        City = dto.City,
+//        Occupation = dto.Occupation,
+//        ProvinceRefId = dto.ProvinceRefId,
+//        ProDescription = dto.ProDescription,
+//        ProInKhmer = dto.ProInKhmer,
+//        DistrictRefId = dto.DistrictRefId,
+//        DisDescription = dto.DisDescription,
+//        DisInKhmer = dto.DisInKhmer,
+//        CommuneRefId = dto.CommuneRefId,
+//        ComDescription = dto.ComDescription,
+//        ComInKhmer = dto.ComInKhmer,
+//        VillageRefId = dto.VillageRefId,
+//        VillDescription = dto.VillDescription,
+//        VilInKhmer = dto.VilInKhmer,
+//        Description = dto.Description,
+//        Converted = dto.Converted
+//    };
+//}
+
+
+
+//public static EntityNames ToGuarantorCreate(this EntityNamesCreate dto)
+//{
+//    var entity = new EntityNames
+//    {
+//        Id = $"ent-{Guid.CreateVersion7()}",
+//        FirstName = dto.FirstName,
+//        MiddleName = dto.MiddleName,
+//        LastName = dto.LastName,
+//        AltName = dto.AltName,
+//        Name = dto.Name,
+//        EntType = dto.EntType,
+//        PassportId = dto.PassportId,
+//        Nationality = dto.Nationality,
+//        DateOfBirth = dto.DateOfBirth,
+//        Salutation = dto.Salutation,
+//        Gender = dto.Gender,
+//        JobTitle = dto.JobTitle,
+//        Phone = dto.Phone,
+//        AltPhone = dto.AltPhone,
+//        EmailAddress = dto.EmailAddress,
+//        IdCard = dto.IdCard,
+//        CompanyName = dto.CompanyName,
+//        MarritalStatus = dto.MarritalStatus,
+//        IsActive = dto.IsActive,
+//        CountryName = dto.CountryName,
+//        City = dto.City,
+//        Occupation = dto.Occupation,
+//        ProvinceRefId = dto.ProvinceRefId,
+//        ProDescription = dto.ProDescription,
+//        ProInKhmer = dto.ProInKhmer,
+//        DistrictRefId = dto.DistrictRefId,
+//        DisDescription = dto.DisDescription,
+//        DisInKhmer = dto.DisInKhmer,
+//        CommuneRefId = dto.CommuneRefId,
+//        ComDescription = dto.ComDescription,
+//        ComInKhmer = dto.ComInKhmer,
+//        VillageRefId = dto.VillageRefId,
+//        VillDescription = dto.VillDescription,
+//        VilInKhmer = dto.VilInKhmer,
+//        Description = dto.Description,
+//        Converted = dto.Converted,
+//    };
+
+//    return entity;
+//}
+
+//public static EntityNames ToGuarantorEdit(this EntityNamesCreate dto)
+//{
+//    var entity = new EntityNames
+//    {
+//        Id = dto.Id!,
+//        FirstName = dto.FirstName,
+//        MiddleName = dto.MiddleName,
+//        LastName = dto.LastName,
+//        AltName = dto.AltName,
+//        Name = dto.Name,
+//        EntType = dto.EntType,
+//        PassportId = dto.PassportId,
+//        Nationality = dto.Nationality,
+//        DateOfBirth = dto.DateOfBirth,
+//        Salutation = dto.Salutation,
+//        Gender = dto.Gender,
+//        JobTitle = dto.JobTitle,
+//        Phone = dto.Phone,
+//        AltPhone = dto.AltPhone,
+//        EmailAddress = dto.EmailAddress,
+//        IdCard = dto.IdCard,
+//        CompanyName = dto.CompanyName,
+//        MarritalStatus = dto.MarritalStatus,
+//        IsActive = dto.IsActive,
+//        CountryName = dto.CountryName,
+//        City = dto.City,
+//        Occupation = dto.Occupation,
+//        ProvinceRefId = dto.ProvinceRefId,
+//        ProDescription = dto.ProDescription,
+//        ProInKhmer = dto.ProInKhmer,
+//        DistrictRefId = dto.DistrictRefId,
+//        DisDescription = dto.DisDescription,
+//        DisInKhmer = dto.DisInKhmer,
+//        CommuneRefId = dto.CommuneRefId,
+//        ComDescription = dto.ComDescription,
+//        ComInKhmer = dto.ComInKhmer,
+//        VillageRefId = dto.VillageRefId,
+//        VillDescription = dto.VillDescription,
+//        VilInKhmer = dto.VilInKhmer,
+//        Description = dto.Description,
+//    };
+//    return entity;
+//}
+
+//public static EntityNamesCreate ToGuarantorEdit(this EntityNames dto)
+//{
+//    var entity = new EntityNamesCreate
+//    {
+//        Id = dto.Id,
+//        FirstName = dto.FirstName,
+//        MiddleName = dto.MiddleName,
+//        LastName = dto.LastName,
+//        AltName = dto.AltName,
+//        Name = dto.Name,
+//        EntType = dto.EntType,
+//        PassportId = dto.PassportId,
+//        Nationality = dto.Nationality,
+//        DateOfBirth = dto.DateOfBirth,
+//        Salutation = dto.Salutation,
+//        Gender = dto.Gender,
+//        JobTitle = dto.JobTitle,
+//        Phone = dto.Phone,
+//        AltPhone = dto.AltPhone,
+//        EmailAddress = dto.EmailAddress,
+//        IdCard = dto.IdCard,
+//        CompanyName = dto.CompanyName,
+//        MarritalStatus = dto.MarritalStatus,
+//        IsActive = dto.IsActive,
+//        CountryName = dto.CountryName,
+//        City = dto.City,
+//        Occupation = dto.Occupation,
+//        ProvinceRefId = dto.ProvinceRefId,
+//        ProDescription = dto.ProDescription,
+//        ProInKhmer = dto.ProInKhmer,
+//        DistrictRefId = dto.DistrictRefId,
+//        DisDescription = dto.DisDescription,
+//        DisInKhmer = dto.DisInKhmer,
+//        CommuneRefId = dto.CommuneRefId,
+//        ComDescription = dto.ComDescription,
+//        ComInKhmer = dto.ComInKhmer,
+//        VillageRefId = dto.VillageRefId,
+//        VillDescription = dto.VillDescription,
+//        VilInKhmer = dto.VilInKhmer,
+//        Description = dto.Description,
+//    };
+//    return entity;
+//}
+
+
 
 //// Application/Mappers/EntityNamesMapper.cs
 //using Domain.Entities; // Assuming EntityNames is in the Domain layer

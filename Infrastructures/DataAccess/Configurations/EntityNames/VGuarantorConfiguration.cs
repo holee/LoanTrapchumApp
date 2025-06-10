@@ -16,7 +16,7 @@ namespace Infrastructures.DataAccess.Configurations.EntityNames
             builder.Property(x => x.DisInKhmer).HasMaxLength(100);
             builder.Property(x => x.ComInKhmer).HasMaxLength(100);
             builder.Property(x => x.VilInKhmer).HasMaxLength(100);
-            builder.HasQueryFilter(x=>x.IsActive==true);
+            //builder.HasQueryFilter(x=>x.IsActive==true);
         }
     }
 }

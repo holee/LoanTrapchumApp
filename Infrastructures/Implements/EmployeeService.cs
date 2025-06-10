@@ -1,17 +1,17 @@
 ﻿using Applications.Extensions;
 using Applications.Interfaces.Employees;
-using Applications.Requests.Lists;
-using Applications.Requests.Lists.OtherNames;
 using Applications.Responses;
+using Applications.Responses.Message;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Employees;
 using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Dapper;
-using Domains.Models.Lists.Employees;
+using Infrastructures.Constants.Procedures;
 using Infrastructures.DataAccess;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System.Data;
 
 namespace Infrastructures.Implements;
@@ -21,16 +21,17 @@ public class EmployeeService : IEmployeeService
     private readonly DataContext _context;
     private readonly IDapperConnectionFactory connectionFactory;
     private readonly IDbContextFactory<DataContext> _dbContextFactory;
-
+    private readonly ILogger<EmployeeService> _logger;
     public EmployeeService(DataContext app, IDapperConnectionFactory connectionFactory,
-        IDbContextFactory<DataContext> dbContextFactory)
+        IDbContextFactory<DataContext> dbContextFactory, ILogger<EmployeeService> logger)
     {
         this._context = app;
         this.connectionFactory = connectionFactory;
         _dbContextFactory = dbContextFactory;
+        _logger = logger;
     }
 
-    public async Task<Result<string>> CreateAsync(EntityNames employee)
+    public async Task<Result<string>> CreateAsync(EntityNames employee, CancellationToken cancellation = default)
     {
         try
         {
@@ -46,17 +47,21 @@ public class EmployeeService : IEmployeeService
         }
     }
 
-    public async Task<Result<string>> UpdateAsync(EntityNames employee)
+    public async Task<Result<string>> UpdateAsync(EntityNames employee, CancellationToken cancellation = default)
     {
         try
         {
-            //_context.EntityNames.Update(employee);
 
-            _context.Entry(employee).State = EntityState.Modified;
+            await using var context = await _dbContextFactory.CreateDbContextAsync(cancellation);
 
-            _context.Entry(employee.Employee!).State = EntityState.Modified;
 
-            await _context.SaveChangesAsync();
+            context.EntityNames.Update(employee);
+
+            //_context.Entry(employee).State = EntityState.Modified;
+
+            //_context.Entry(employee.Employee!).State = EntityState.Modified;
+
+            await context.SaveChangesAsync(cancellation);
 
             return Result.Success<string>(new("New Employee was Updated."));
         }
@@ -67,14 +72,14 @@ public class EmployeeService : IEmployeeService
     }
 
 
-    public async Task<Result<string>> DeleteAsync(string? id)
+    public async Task<Result<string>> DeleteAsync(string? id, CancellationToken cancellation = default)
     {
         try
         {
             var employee = await _context.EntityNames
-                .Where(x => x.Id == id)
-                .Include(x => x.Employee)
-                .FirstOrDefaultAsync();
+                                            .Where(x => x.Id == id)
+                                            .Include(x => x.Employee)
+                                            .FirstOrDefaultAsync();
             if (employee is null)
             {
                 return Result.Failure<string>(ErrorResponse.NotFound("There is no Employee in then context."));
@@ -93,7 +98,7 @@ public class EmployeeService : IEmployeeService
         }
     }
 
-    public async Task<Result<string>> UpdateIsActiveAsync(string? id)
+    public async Task<Result<string>> UpdateIsActiveAsync(string? id, bool state, CancellationToken cancellation = default)
     {
         try
         {
@@ -177,6 +182,8 @@ public class EmployeeService : IEmployeeService
                                          EF.Functions.Like(x.BranchName!, $"%{q.Filter}%") ||
                                          EF.Functions.Like(x.DepartmentName!, $"%{q.Filter}%") ||
                                          EF.Functions.Like(x.Phone!, $"%{q}%") ||
+                                         EF.Functions.Like(x.AltName!, $"%{q.Filter}%") ||
+                                         EF.Functions.Like(x.EmailAddress!, $"%{q.Filter}%") ||
                                          EF.Functions.Like(x.EmployeeId!, $"%{q}%")
             );
         }
@@ -249,6 +256,9 @@ public class EmployeeService : IEmployeeService
         }
     }
 
+
+    //spGetLoansByEmployeeId
+
     public async Task<Result<VEmployeeList>> GetByIdAsync(string? id, int? branchId, bool include)
     {
         try
@@ -270,7 +280,7 @@ public class EmployeeService : IEmployeeService
 
             if (!include)
             {
-                var employee = await db.QueryFirstOrDefaultAsync<VEmployeeList>("spGetEmployeeByIdWithLoans",
+                var employee = await db.QueryFirstOrDefaultAsync<VEmployeeList>(ProcedureConstant.SpGetEmployeeByIdWithLoans,
                     parameters,
                     commandType: CommandType.StoredProcedure);
 
@@ -308,4 +318,58 @@ public class EmployeeService : IEmployeeService
             return Result.Failure<VEmployeeList>(ErrorResponse.NotFound($"{ex.Message}."));
         }
     }
+
+
+
+    public async Task<Result<VEmployeeList>> GetByIdAsync(string? employeeId,CancellationToken cancellation=default)
+    {
+
+        _logger.LogInformation("getting employee with ID #{0}",employeeId); 
+       
+        if (string.IsNullOrEmpty(employeeId))
+        {
+            return Result.Failure<VEmployeeList>(ErrorResponse.NotFound(""));
+        }
+
+        using var db=await connectionFactory.CreateConnectionAsync(cancellation);
+
+        var employeeDict = new Dictionary<string, VEmployeeList>();
+
+        var result = await db.QueryAsync<VEmployeeList, VLoanDisbursments, VLoanRequests, VEmployeeList>(ProcedureConstant.SpGetEmployeeByIdWithLoans,
+            (employee, loan, request) =>
+            {
+                if (!employeeDict.TryGetValue(employee.EmployeeId!, out var emp))
+                {
+                    emp = employee;
+                    emp.LoanDisbursments = new List<VLoanDisbursments>();
+                    emp.LoanRequests = new List<VLoanRequests>();
+                    employeeDict.Add(emp.EmployeeId!, emp);
+                }
+
+                if (loan?.LoanId != null && !emp.LoanDisbursments.Any(x => x.LoanId == loan.LoanId))
+                {
+                    emp.LoanDisbursments.Add(loan);
+                }
+
+                if (request?.LoanRequestId != null && !emp.LoanRequests.Any(x => x.LoanRequestId == request.LoanRequestId))
+                {
+                    emp.LoanRequests.Add(request);
+                }
+
+                return emp;
+            },
+            new { EmployeeId = employeeId,BranchId=1},
+            commandType: CommandType.StoredProcedure,
+            splitOn: "LoanId,LoanRequestId");
+
+        var item= employeeDict.Values.FirstOrDefault(x=>x.EmployeeId==employeeId);
+
+        if(item is null)
+        {
+            return Result.Failure<VEmployeeList>(ErrorResponse.NotFound(Messages.DataNotFound));
+        }
+
+        return Result.Success(item);
+    }
+
 }

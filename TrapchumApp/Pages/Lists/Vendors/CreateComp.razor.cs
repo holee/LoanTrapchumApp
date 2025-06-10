@@ -3,7 +3,6 @@ using Applications.Responses.Lists.Entities;
 using Applications.Services.Lists;
 using Domains.Models.Addresses;
 using Domains.Models.Lists;
-using Microsoft.AspNetCore.Components;
 
 namespace TrapchumApp.Pages.Lists.Vendors
 {
@@ -13,7 +12,7 @@ namespace TrapchumApp.Pages.Lists.Vendors
         private readonly INationalityServiceImpl _nationalityService;
         private readonly IOccupationServiceImpl _occupationService;
         private readonly ISalutationServiceImpl _salutationService;
-        [Parameter] public EntityNamesCreate model { get; set; } = new();
+        [Parameter] public EntityVendorCreate model { get; set; } = new();
 
         IEnumerable<OcupationResponse> Occupations = [];
         IEnumerable<Nationality> Nationalities { get; set; } = [];

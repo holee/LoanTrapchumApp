@@ -1,30 +1,29 @@
-﻿using System.Data;
-using System.Linq;
-using Applications.Enumerations;
+﻿using Applications.Enumerations;
 using Applications.Extensions;
 using Applications.Interfaces.Customers;
 using Applications.Responses;
 using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.Message;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Collaterals;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Dapper;
 using Domains.Models.Lists.Customers;
+using Infrastructures.Constants.Procedures;
 using Infrastructures.DataAccess;
 using Mapster;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Data;
 
 namespace Infrastructures.Implements;
 
 public class CustomerService(
     DataContext context,
     IDbContextFactory<DataContext> contextFactory,
-    IDapperConnectionFactory dapperService,
+    IDapperConnectionFactory dapperFactory,
     ILogger<CustomerService> logger) : ICustomerService
 {
     public async Task<Result<IEnumerable<T>>> GetCustomersAsync<T>(string? customerId, int take = 0,
@@ -76,7 +75,7 @@ public class CustomerService(
         return Result.Success<IEnumerable<T>>(results);
     }
 
-    public async Task<Pager<VCustomerList>> GetCustomersAsync(QueryParam q,CancellationToken cancellation=default)
+    public async Task<Pager<VCustomerList>> GetCustomersAsync(QueryParam q, CancellationToken cancellation = default)
     {
 
         await using var cxt = await contextFactory.CreateDbContextAsync(cancellation);
@@ -163,7 +162,7 @@ public class CustomerService(
     {
         try
         {
-            using var db = await dapperService.CreateConnectionAsync();
+            using var db = await dapperFactory.CreateConnectionAsync();
 
             if (!include)
             {
@@ -184,8 +183,8 @@ public class CustomerService(
             }
 
             var coustmerDictionary = new Dictionary<string, VCustomerList>();
-
-            var customerInclude = await db.QueryAsync("spGetCustomerDetailsById",
+            //"spGetCustomerDetailsById"
+            var customerInclude = await db.QueryAsync(ProcedureConstant.SpGetCustomerDetailsById,
                 (VCustomerList customer, VLoanDisbursments loan, VLoanRequests loanRequest,
                     VCollateralLines collateralLine, VCustomerIncomes customerIncome, VCustomerExpenses customerExpense,
                     VCustomerNotes customerNote) =>
@@ -229,6 +228,89 @@ public class CustomerService(
                 ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
         }
     }
+
+
+    public async Task<Result<VCustomerList>> GetCustomerDetailByIdAsync(string? customerId, bool include = false, CancellationToken cancellationToken = default)
+    {
+        logger.LogInformation("Fetching customer details for ID {CustomerId} (Include Related: {Include})", customerId, include);
+
+        using var db = await dapperFactory.CreateConnectionAsync(cancellationToken);
+
+        var parameters = new
+        {
+            customerId = customerId,
+            include = include
+        };
+
+        using var multi = await db.QueryMultipleAsync(ProcedureConstant.SpGetCustomerDetailsById, parameters, commandType: CommandType.StoredProcedure);
+
+        var customer = await multi.ReadSingleOrDefaultAsync<VCustomerList>();
+
+        if (customer == null)
+        {
+            return Result.Failure<VCustomerList>(ErrorResponse.NotFound("Customer not found."));
+        }
+
+        if (!include)
+        {
+            return Result.Success(customer);
+        }
+
+        customer.Loans = (await multi.ReadAsync<VLoanDisbursments>()).ToList();
+        customer.LoanRequests = (await multi.ReadAsync<VLoanRequests>()).ToList();
+        customer.CollateralLines = (await multi.ReadAsync<VCollateralLines>()).ToList();
+        customer.CustomerIncomes = (await multi.ReadAsync<VCustomerIncomes>()).ToList();
+        customer.CustomerExpenses = (await multi.ReadAsync<VCustomerExpenses>()).ToList();
+        customer.CustomerNotes = (await multi.ReadAsync<VCustomerNotes>()).ToList();
+        customer.CustomerActivities = (await multi.ReadAsync<VCustomerActivities>()).ToList();
+
+        return Result.Success(customer);
+
+    }
+
+
+    public async Task<Result<IEnumerable<VLoanRequests>>> GetCustomerLoanRequestAsync(int? branchId, string? customerId, bool onlyComplete = false, CancellationToken cancellation = default)
+    {
+        try
+        {
+
+            using var db = await dapperFactory.CreateConnectionAsync(cancellation);
+
+            var sql = @"SELECT
+                            r.LoanRequestId,
+				            r.RequestDate,
+				            r.CreditAgentId,
+				            r.RequestAmount,
+				            r.AprovedAmount,
+				            r.AprovedBy,
+				            r.AprovedDate,
+				            r.CurrencyId,
+				            r.CurrencyName,
+				            r.AltName,
+				            r.BranchId,
+				            r.BranchName,
+				            r.[Status]
+                        FROM VLoanRequests r WHERE r.CustomerId=@customerId AND ((@onlyComplete='TRUE' AND r.StatusId=7) OR @onlyComplete='FALSE')";
+
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@customerId", customerId);
+            parameters.Add("@onlyComplete", onlyComplete);
+            var rsp = await db.QueryAsync<VLoanRequests>(sql, parameters);
+            if (!rsp.Any())
+            {
+                return Result.Failure<IEnumerable<VLoanRequests>>(ErrorResponse.NotFound("No note found."));
+            }
+            return Result.Success(rsp);
+        }
+        catch (SqlException ex)
+        {
+            return Result.Failure<IEnumerable<VLoanRequests>>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
+        }
+    }
+    
+   
+
 
     public async Task<Result<Pager<T>>> GetCustomerLoanRequestAsync<T>(int? branchId, string? customerId, bool includeComplete = false)
         where T : class
@@ -297,7 +379,16 @@ public class CustomerService(
             logger.LogInformation("try adding new customer note");
 
             var notes = await context.Database
-                .SqlQuery<T>($"SELECT * FROM VCustomerNotes WHERE CustomerRefId={customerId}")
+                .SqlQuery<T>($@"SELECT 
+	                 c.NoteId,
+	                 c.CustomerRefId,
+	                 CASE
+		                WHEN c.CreditAgentName IS NULL THEN 'Administrator'
+		                ELSE c.CreditAgentName
+	                END AS CreditAgentName,
+	                c.Description,
+	                c.Created
+                FROM VCustomerNotes c WHERE c.CustomerRefId={customerId}")
                 .ProjectToType<T>()
                 .AsNoTracking()
                 .ToListAsync();
@@ -402,7 +493,7 @@ public class CustomerService(
 
     public async Task<Result<IEnumerable<VCollateralLines>>> GetCustomerCollateralLines(string? customerId, bool includeInUsed = false)
     {
-        using var db = dapperService.CreateConnection();
+        using var db = dapperFactory.CreateConnection();
 
         var parameters = new DynamicParameters();
 
@@ -428,7 +519,7 @@ public class CustomerService(
 
     public async Task<Result<IEnumerable<VLoanDisbursments>>> GetCustomerLoanHistoryAsync(string? customerId)
     {
-        using var db = dapperService.CreateConnection();
+        using var db = dapperFactory.CreateConnection();
 
         var sql = @"SELECT * FROM VLoanDisbursments WHERE CustomerId=@customerId";
 
@@ -437,24 +528,27 @@ public class CustomerService(
         return Result.Success(loanHistories);
     }
 
-    public async Task<Result<string>> DeleteCustomerAsync(string? customerId)
+    public async Task<Result<string>> DeleteCustomerAsync(string? customerId, CancellationToken cancellation = default)
     {
         try
         {
-            var customer = await context.Customers
-                .FirstOrDefaultAsync(x => x.CustomerId == customerId);
+            await using var _context = await contextFactory.CreateDbContextAsync(cancellation);
+
+            var customer = await context.Customers.FindAsync(customerId, cancellation);
+
             if (customer is null)
             {
                 return Result.Failure<string>(ErrorResponse.NotFound("There is no Customer in the List."));
             }
 
-            var customerInUse = context.LoanDisbursments.AsNoTracking().Where(x => x.CustomerRefId == customerId)
-                .ToList();
-
-            if (customerInUse.Any())
+            if (await IsCustomerInUsed(customerId, cancellation))
             {
-                return Result.Failure<string>(
-                    ErrorResponse.Conflict("This Customer information is in use, so cannot delete"));
+                var rsp = await MakeCustomerInActiveAsync(customerId, false, cancellation);
+
+                if (rsp.IsSuccess)
+                {
+                    return Result.Success("This customer was disable,because of is being used by someone.");
+                }
             }
 
             context.Customers.Remove(customer);
@@ -469,8 +563,8 @@ public class CustomerService(
         }
     }
 
-    public async Task<Result<string>> MakeCustomerInActiveAsync(string? customerId, int editSeq = 0,
-        bool isActive = true)
+
+    public async Task<Result<string>> MakeCustomerInActiveAsync(string? customerId, int editSeq = 0, bool isActive = true)
     {
         try
         {
@@ -486,6 +580,34 @@ public class CustomerService(
             }
 
             return Result.Failure<string>(ErrorResponse.ServerError($"cannot update customer."));
+        }
+        catch (SqlException ex)
+        {
+            return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
+        }
+    }
+
+    public async Task<Result<string>> MakeCustomerInActiveAsync(string? customerId, bool state, CancellationToken cancellation = default)
+    {
+        try
+        {
+
+            await using var _context = await contextFactory.CreateDbContextAsync(cancellation);
+
+            var existingCustomer = await _context.EntityNames
+                                                .Where(x => x.Id == customerId)
+                                                .Include(x => x.Customer)
+                                                .FirstOrDefaultAsync(cancellation);
+            if (existingCustomer is null)
+            {
+                return Result.Failure<string>(ErrorResponse.NotFound(Messages.DataNotFound));
+            }
+
+            existingCustomer.IsActive = state;
+
+            await _context.SaveChangesAsync(cancellation);
+
+            return Result.Success<string>("customer state was changed.");
         }
         catch (SqlException ex)
         {
@@ -509,12 +631,11 @@ public class CustomerService(
         }
     }
 
-    public async Task<Result<string>> UpdateAsync(EntityNames model,CancellationToken cancellation=default)
+    public async Task<Result<string>> UpdateAsync(EntityNames model, CancellationToken cancellation = default)
     {
         try
         {
             await using var cxt = await contextFactory.CreateDbContextAsync(cancellation);
-
 
             cxt.EntityNames.Update(model);
 
@@ -527,5 +648,20 @@ public class CustomerService(
             return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
         }
     }
+
+
+    private async Task<bool> IsCustomerInUsed(string? customerId, CancellationToken cancellation = default)
+    {
+        await using var _context = await contextFactory.CreateDbContextAsync(cancellation);
+
+        var customerInUse = await _context.LoanDisbursments
+                                   .AsNoTracking()
+                                   .Where(x => x.CustomerRefId == customerId)
+                                   .ToListAsync(cancellation);
+        return customerInUse.Any();
+    }
+
+
+
 }
 

@@ -29,21 +29,21 @@
             {
                 @RightChildren
             }
-            <RadzenFormField Style="margin-bottom:0.8rem;">
+            <RadzenFormField Style="margin-bottom:0.75rem;" AllowFloatingLabel="false">
                 <Start>
                     <RadzenIcon Icon="search" />
                 </Start>
                 <ChildContent>
                     <RadzenTextBox Value="@Value"
                                    ValueExpression="@ValueExpression"
-                                   Change="Changed"
-                                   @oninput="OnTextChanged"
+                                   Change="@Changed"
+                                   @oninput="@OnTextChanged"
                                    class="w-100"
                                    id="@Id"
                                    @key="@Id"
                                    Name="@Name"
                                    Placeholder="@Placeholder"
-                                   ValueChanged="ValueChanged" />
+                                   ValueChanged="@ValueChanged" />
                 </ChildContent>
             </RadzenFormField>
         </RadzenStack>

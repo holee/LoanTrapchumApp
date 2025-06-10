@@ -10,9 +10,9 @@
         </RadzenStack>
     </HeaderTemplate>
     <ChildContent>
-        <RadzenRow AlignItems="AlignItems.Center">
+        <RadzenRow class="rz-my-2">
             <RadzenColumn Size="3">
-                <RadzenRow AlignItems="AlignItems.Center">
+                <RadzenRow>
                     <RadzenColumn Size="6">
                         <RadzenLabel>Name</RadzenLabel>
                     </RadzenColumn>
@@ -31,7 +31,7 @@
                 </RadzenRow>
             </RadzenColumn>
             <RadzenColumn Size="3">
-                <RadzenRow AlignItems="AlignItems.Center">
+                <RadzenRow>
                     <RadzenColumn Size="12">
                         <RadzenTextBox @bind-Value="model.FirstName"
                                        class="w-100"
@@ -41,7 +41,7 @@
                 </RadzenRow>
             </RadzenColumn>
             <RadzenColumn Size="3">
-                <RadzenRow AlignItems="AlignItems.Center">
+                <RadzenRow>
                     <RadzenColumn Size="12">
                         <RadzenTextBox @bind-Value="model.MiddleName"
                                        class="w-100"
@@ -50,7 +50,7 @@
                 </RadzenRow>
             </RadzenColumn>
             <RadzenColumn Size="3">
-                <RadzenRow AlignItems="AlignItems.Center">
+                <RadzenRow>
                     <RadzenColumn Size="12">
                         <RadzenTextBox @bind-Value="model.LastName"
                                        class="w-100"
@@ -158,21 +158,42 @@
         <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
             <RadzenColumn Size="6" SizeMD="6" SizeSM="12">
                 <RadzenRow AlignItems="AlignItems.Center">
-                    <RadzenColumn Size="3">Phone</RadzenColumn>
-                    <RadzenColumn Size="9">
+                    <RadzenColumn Size="3" SizeMD="3" SizeSM="12">
+                        <RadzenLabel Component="model.Phone">Phone</RadzenLabel>
+                    </RadzenColumn>
+                    <RadzenColumn Size="9" SizeMD="9" SizeSM="12">
                         <RadzenTextBox class="w-100"
+                                       Name="model.Phone"
                                        @bind-Value="model.Phone"
                                        Placeholder="Mobile phone..." />
                     </RadzenColumn>
                 </RadzenRow>
             </RadzenColumn>
+        </RadzenRow> 
+        <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
             <RadzenColumn Size="6" SizeMD="6" SizeSM="12">
                 <RadzenRow AlignItems="AlignItems.Center">
-                    <RadzenColumn Size="3">Alt Phone</RadzenColumn>
-                    <RadzenColumn Size="9">
+                    <RadzenColumn Size="3" SizeMD="3" SizeSM="12">
+                        <RadzenLabel Component="model.Phone">Alt. Phone</RadzenLabel>
+                    </RadzenColumn>
+                    <RadzenColumn Size="9" SizeMD="9" SizeSM="12">
                         <RadzenTextBox class="w-100"
+                                       Name="model.Phone"
                                        @bind-Value="model.AltPhone"
-                                       Placeholder="Alt. phone..." />
+                                       Placeholder="Alternate Phone..." />
+                    </RadzenColumn>
+                </RadzenRow>
+            </RadzenColumn>
+            <RadzenColumn Size="6" SizeMD="6" SizeSM="12">
+                <RadzenRow AlignItems="AlignItems.Center">
+                    <RadzenColumn Size="3" SizeMD="3" SizeSM="12">
+                        <RadzenLabel Component="model.EmailAddress">Email</RadzenLabel>
+                    </RadzenColumn>
+                    <RadzenColumn Size="9" SizeMD="9" SizeSM="12">
+                        <RadzenTextBox class="rz-w-100"
+                                       Name="model.EmailAddress"
+                                       @bind-Value="model.EmailAddress"
+                                       Placeholder="Email Address" />
                     </RadzenColumn>
                 </RadzenRow>
             </RadzenColumn>
@@ -180,11 +201,11 @@
         <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
             <RadzenColumn Size="6" SizeMD="6" SizeSM="12">
                 <RadzenRow AlignItems="AlignItems.Center">
-                    <RadzenColumn Size="3">Email</RadzenColumn>
+                    <RadzenColumn Size="3">Company Name</RadzenColumn>
                     <RadzenColumn Size="9">
                         <RadzenTextBox class="w-100"
-                                       @bind-Value="model.EmailAddress"
-                                       Placeholder="Email Address" />
+                                       @bind-Value="model.CompanyName"
+                                       Placeholder="Company Name...." />
                     </RadzenColumn>
                 </RadzenRow>
             </RadzenColumn>

@@ -9,6 +9,8 @@ using Applications.Responses.ViewModels.Journals;
 using Applications.Responses.ViewModels.Ledgers;
 using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Requests;
+using Applications.Responses.ViewModels.OtherNames;
+using Applications.Responses.ViewModels.Vendors;
 using Domains.Models;
 using Domains.Models.Addresses;
 using Domains.Models.Audits;
@@ -226,6 +228,10 @@ namespace Infrastructures.DataAccess
         public DbSet<JournalEntryVm> VJournals => Set<JournalEntryVm>();
         public DbSet<VLedger> VLedgers => Set<VLedger>();
         public DbSet<VNameList> NameLists => Set<VNameList>();
+        public DbSet<VendorVm> VVendor => Set<VendorVm>();
+        public DbSet<VGuarantor> VGuarantors => Set<VGuarantor>();
+
+        public DbSet<VOtherNames> VOtherNames => Set<VOtherNames>();
         public DbSet<VEmployeeList> EmployeeLists => Set<VEmployeeList>();
         public DbSet<VCustomerList> CustomerLists => Set<VCustomerList>();
         public DbSet<VCreditAgent> VCreditAgents => Set<VCreditAgent>();

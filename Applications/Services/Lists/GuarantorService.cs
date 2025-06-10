@@ -1,3 +1,4 @@
+using Applications.Commons.Mappers;
 using Applications.Interfaces.Lists;
 using Applications.Requests.Lists.OtherNames;
 using Applications.Responses;
@@ -17,10 +18,26 @@ public sealed class GuarantorService(IGuarantorService gService) : IGuarantorSer
         return await gService.CreateGaurantorAsync(req);
     }
 
+    public async Task<Result<string>> CreateAsync(EntityGuarantorCreate othername)
+    {
+
+        var req = othername.MapGuarantorCreate();
+
+        return await gService.CreateGaurantorAsync(req);
+    }
+
     public async Task<Result<string>> UpdateAsync(EntityNamesCreate othername)
     {
 
         var req = othername.ToGuarantorEdit();
+
+        return await gService.UpdateGaurantorAsync(req);
+    }
+
+    public async Task<Result<string>> UpdateAsync(EntityGuarantorCreate othername)
+    {
+
+        var req = othername.MapGuarantorEdit();
 
         return await gService.UpdateGaurantorAsync(req);
     }
@@ -40,11 +57,10 @@ public sealed class GuarantorService(IGuarantorService gService) : IGuarantorSer
         return await gService.GetGuarantorByIdAsync(id, allGuarantors, include);
     }
 
-    public async Task<Result<Pager<VGuarantor>>> GetGuarantorsAsync(QueryParam param)
+    public async Task<Pager<VGuarantor>> GetGuarantorsAsync(QueryParam param,CancellationToken cancellation=default)
     {
-        return await gService.GetGuarantorsAsync(param);
+        return await gService.GetGuarantorsAsync(param,cancellation);
     }
-
     public async Task<Result<IEnumerable<VGuarantor>>> GetGuarantorsAsync(string? id, bool allGuarantors = true, string? q = null)
     {
         return await gService.GetGuarantorsAsync(id, allGuarantors, q);
@@ -61,7 +77,7 @@ public sealed class GuarantorService(IGuarantorService gService) : IGuarantorSer
         if (rsp.IsSuccess)
         {
 
-            var result = rsp.Data!.ToGuarantorEdit();
+            var result = rsp.Data!.ToGuarantor();
 
             return Result.Success(result);
 

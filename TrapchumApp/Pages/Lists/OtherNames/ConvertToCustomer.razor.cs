@@ -19,7 +19,7 @@ namespace TrapchumApp.Pages.Lists.OtherNames
             _departmentService = departmentService;
         }
         VOtherNames? name = new VOtherNames();
-        CustomerConvertCreate model = new CustomerConvertCreate();
+        ConvertCreateCustomer model = new ConvertCreateCustomer();
         protected override async Task OnParametersSetAsync()
         {
             await GetName(Id);

@@ -3,31 +3,33 @@ using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Vendors;
-using Domains.Models.Bases;
 using Infrastructures.DataAccess;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Infrastructures.Implements
 {
     public class VendorService : IVendorService
     {
         private readonly DataContext _context;
-        public VendorService(DataContext context)
+        private readonly IDbContextFactory<DataContext> _dbContextFactory;
+        public readonly ILogger<VendorService> logger;
+        public VendorService(DataContext context, IDbContextFactory<DataContext> dbContextFactory, ILogger<VendorService> logger)
         {
             this._context = context;
+            _dbContextFactory = dbContextFactory;
+            this.logger = logger;
         }
 
-        public async Task<Result<string>> CreateAsync(EntityNames vendor)
+        public async Task<Result<string>> CreateAsync(EntityNames vendor, CancellationToken cancellation = default)
         {
             try
             {
-                vendor.Id = $"{Guid.CreateVersion7()}";
+                await using var context = await _dbContextFactory.CreateDbContextAsync(cancellation);
 
-                vendor.EntType = EntType.Vendor.ToString();
+                context.EntityNames.Add(vendor);
 
-                _context.EntityNames.Add(vendor);
-
-                await _context.SaveChangesAsync();
+                await context.SaveChangesAsync();
 
                 return Result.Success(new string("Name was created or updated."));
 
@@ -39,15 +41,16 @@ namespace Infrastructures.Implements
         }
 
 
-        public async Task<Result<string>> UpdateAsync(EntityNames vendor)
+        public async Task<Result<string>> UpdateAsync(EntityNames vendor, CancellationToken cancellation = default)
         {
             try
             {
-                _context.Entry(vendor).State = EntityState.Modified;
 
-                _context.Entry(vendor.Vendor!).State = EntityState.Modified;
+                await using var context = await _dbContextFactory.CreateDbContextAsync(cancellation);
 
-                await _context.SaveChangesAsync();
+                context.EntityNames.Update(vendor);
+
+                await context.SaveChangesAsync(cancellation);
 
                 return Result.Success(new string("Name was created or updated."));
 
@@ -60,57 +63,61 @@ namespace Infrastructures.Implements
         }
 
 
-        //public async Task<Result<string>> ChangeVendorStatus(EntVendorDtoChangeStatus req)
-        //{
-        //    try
-        //    {
-
-        //        var vendor = await _context.EntityNames.FirstOrDefaultAsync(x => x.Id == req.VendorId && x.EditSeq == req.EditSeq);
-
-        //        if (vendor is null)
-        //        {
-        //            return Result.Failure<string>(ErrorResponse.NotFound("Vendor not found."));
-        //        }
-
-        //        vendor.IsActive = req.IsActive;
-
-        //        vendor.EditSeq = req.EditSeq + 1;
-
-        //        await _context.SaveChangesAsync();
-
-        //        return Result.Success(new string("Vendor was changed."));
-        //    }
-        //    catch (DbUpdateException ex)
-        //    {
-        //        return Result.Failure<string>(ErrorResponse.NotFound($"{ex.Message}"));
-        //    }
-
-        //}
-
-
-        public async Task<Result<string>> DeleteAsync(string? id)
+        public async Task<Result<string>> ChangeVendorStatus(string? vendorId, bool state, CancellationToken cancellation = default)
         {
             try
             {
 
-                var vendor = await _context.EntityNames.FindAsync(id);
+                await using var context = await _dbContextFactory.CreateDbContextAsync(cancellation);
+
+                var vendor = await context.EntityNames
+                                           .Where(x => x.Id == vendorId)
+                                           .Include(x => x.Vendor)
+                                           .FirstOrDefaultAsync(cancellation);
+
+                if (vendor is null)
+                {
+                    return Result.Failure<string>(ErrorResponse.NotFound("Vendor not found."));
+                }
+
+                vendor.IsActive = state;
+
+                await context.SaveChangesAsync(cancellation);
+
+                return Result.Success(new string("Vendor was changed."));
+            }
+            catch (DbUpdateException ex)
+            {
+                return Result.Failure<string>(ErrorResponse.NotFound($"{ex.Message}"));
+            }
+
+        }
+
+
+        public async Task<Result<string>> DeleteAsync(string? id, CancellationToken cancellation = default)
+        {
+            try
+            {
+                await using var context = await _dbContextFactory.CreateDbContextAsync(cancellation);
+
+                var vendor = await context.EntityNames.FindAsync(id, cancellation);
 
                 if (vendor is null)
                 {
                     return Result.Failure<string>(ErrorResponse.NotFound("There is no any vendor to delete."));
                 }
 
-                var usedVendor = await _context.Database
+                var usedVendor = await context.Database
                                                 .SqlQuery<VLoanGuarantors>($"SELECT * FROM VLoanGuarators WHERE GuarantorId={id}")
-                                                .AnyAsync();
+                                                .AnyAsync(cancellation);
                 if (usedVendor)
                 {
                     return Result.Failure<string>(ErrorResponse.NotFound("Vendor already in used."));
                 }
 
-                _context.EntityNames.Remove(vendor);
+                context.EntityNames.Remove(vendor);
 
-                await _context.SaveChangesAsync();
+                await context.SaveChangesAsync(cancellation);
 
                 return Result.Success(new string("Name was created was deleted."));
             }
@@ -123,7 +130,11 @@ namespace Infrastructures.Implements
 
         public async Task<Result<EntityNames>> GetVendorByIdAsync(string? vendorId, bool include)
         {
-            var vendor = await _context.EntityNames
+
+            await using var context = await _dbContextFactory.CreateDbContextAsync();
+
+
+            var vendor = await context.EntityNames
                                     .Where(x => x.Id == vendorId)
                                     .Include(x => x.Vendor)
                                     .AsNoTracking()
@@ -138,7 +149,11 @@ namespace Infrastructures.Implements
 
         public async Task<Result<VendorVm>> GetVendorByIdAsync(string? vendorId)
         {
-            var vendor = await _context.Database.SqlQuery<VendorVm>($"SELECT * FROM VVendors WHERE VendorId={vendorId}")
+
+            await using var context = await _dbContextFactory.CreateDbContextAsync();
+
+
+            var vendor = await context.Database.SqlQuery<VendorVm>($"SELECT * FROM VVendors WHERE VendorId={vendorId}")
                                         .AsNoTracking()
                                         .FirstOrDefaultAsync();
 
@@ -150,17 +165,26 @@ namespace Infrastructures.Implements
         }
 
 
-        public async Task<Pager<VendorVm>> GetVendorsAsync(QueryParam q)
+        public async Task<Pager<VendorVm>> GetVendorsAsync(QueryParam q, CancellationToken cancellation = default)
         {
 
-            var queries = _context.Database.SqlQuery<VendorVm>($"SELECT * FROM VVendors");
+            await using var context = await _dbContextFactory.CreateDbContextAsync(cancellation);
+
+            var queries = context.VVendor.AsNoTracking();
 
             if (!string.IsNullOrEmpty(q.Filter))
             {
                 queries = queries.Where(e => EF.Functions.Like(e.FirstName!, $"%{q.Filter}%") ||
                                          EF.Functions.Like(e.LastName!, $"%{q.Filter}%") ||
                                          EF.Functions.Like(e.Phone!, $"%{q.Filter}%") ||
+                                         EF.Functions.Like(e.Salutation!, $"%{q.Filter}%") ||
+                                         EF.Functions.Like(e.EmailAddress!, $"%{q.Filter}%") ||
                                          EF.Functions.Like(e.AltName!, $"%{q.Filter}%"));
+            }
+
+            if (!q.IsIncludeInActive)
+            {
+                queries = queries.Where(x => x.IsActive == true);
             }
 
             if (q.SortDescending)
@@ -172,7 +196,7 @@ namespace Infrastructures.Implements
 
             if (q.PageSize > 0)
             {
-                queries = queries.Skip(q.PageSize * (q.Skip - 1)).Take(q.PageSize);
+                queries = queries.Skip(q.Skip).Take(q.PageSize);
             }
             var items = await queries.AsNoTracking().ToListAsync();
 

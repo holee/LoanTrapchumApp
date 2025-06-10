@@ -24,7 +24,7 @@ namespace TrapchumApp.Pages.Lists.OtherNames
         IEnumerable<VBranchResponse> branches = [];
         IEnumerable<Department> depts = [];
         VOtherNames? name = new VOtherNames();
-        EmployeeConvertCreate model = new EmployeeConvertCreate();
+        ConvertCreateEmployee model = new ConvertCreateEmployee();
         IEnumerable<string> Statuses = ["Single", "Married", "Divorced", "Widow"];
         protected override async Task OnParametersSetAsync()
         {

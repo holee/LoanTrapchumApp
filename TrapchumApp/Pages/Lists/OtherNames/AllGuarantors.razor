@@ -3,51 +3,67 @@
 @using Applications.Responses.ViewModels.OtherNames
 @using Microsoft.AspNetCore.Components.Web
 @using TrapchumApp.Services
-
-<PageDropDown ShowSearchBox="true"
-              PageSizeChanged="ChangedPageSize"
-              ShowReload="true"
-              Reload="Reload"
-              OnTextChanged="SearchTextChanged">
-    <LeftChildContent>
-        <RadzenButton Text="New"
+<style>
+    .rz-grid-table td .rz-cell-data {
+        line-height: 1.5rem;
+        font-size: 0.8rem;
+    }
+</style>
+<GridToolbar SearchChanged="SearchTextChanged">
+    <LeftChildren>
+        <RadzenButton Text="Add New"
                       Icon="add"
                       Size="ButtonSize.Small"
                       Click="AddAddTab"
-                      ButtonStyle="ButtonStyle.Primary">
-        </RadzenButton>
-    </LeftChildContent>
-    <RightChildContent>
+                      ButtonStyle="ButtonStyle.Primary" />
+    </LeftChildren>
+    <RightChildren>
         <div class="rz-text-align-center">
             <RadzenCheckBox TValue="bool"
                             Name="IncludeInActive"
-                            @bind-Value:after="IncludeInactiveCheckedChanged"
-                            @bind-Value="includeInactive" />
+                            Change="@IncludeInactiveCheckedChanged"
+                            Value="@includeInactive" />
             <RadzenLabel Text="Include Active Loan" Component="IncludeInActive" />
         </div>
-    </RightChildContent>
-</PageDropDown>
+    </RightChildren>
+</GridToolbar>
 <RadzenDataGrid Data="guarantors"
                 GridLines="DataGridGridLines.Both"
+                Responsive="true"
                 Density="Density.Compact"
                 ShowPagingSummary="true"
                 AllowAlternatingRows="true"
                 IsLoading="isLoading"
                 AllowPaging="true"
+                AllowFiltering="true"
+                AllowSorting="true"
                 PagerHorizontalAlign="HorizontalAlign.Right"
                 Count="@counts"
                 PageSize="pageSize"
+                PageSizeOptions="@StorageConstant.PageSizeOptions"
+                PageSizeChanged="@ChangedPageSize"
+                PagerPosition="PagerPosition.Bottom"
                 LoadData="LoadGuarantors">
     <Columns>
         <RadzenDataGridColumn Width="4rem"
-                              Property="id" Title="#" Context="g">
+                              Filterable="false"
+                              Sortable="false"
+                              Property="id"
+                              Title="#" Context="g">
             <Template>
-                @(guarantors.ToList().IndexOf(g) + 1)
+                @(guarantors.IndexOf(g) + 1)
             </Template>
         </RadzenDataGridColumn>
-        <RadzenDataGridColumn Property="GuarantorName" Title="Name" Sortable="true" />
-        <RadzenDataGridColumn Property="Phone" Title="Phone" />
-        <RadzenDataGridColumn Context="g" Property="ProInKhmer" Title="Address">
+        <RadzenDataGridColumn Property="@nameof(VGuarantor.GuarantorName)"
+                              Title="Name"
+                              Sortable="true" />
+        <RadzenDataGridColumn Property="@nameof(VGuarantor.Phone)"
+                              Title="Phone" />
+        <RadzenDataGridColumn Context="g"
+                              Property="@nameof(VGuarantor.ProInKhmer)"
+                              Filterable="false"
+                              Sortable="false"
+                              Title="Address">
             <Template>
                 @g.ToString()
             </Template>
@@ -55,21 +71,29 @@
         <RadzenDataGridColumn TextAlign="TextAlign.Center"
                               Width="5rem"
                               Context="g"
+                              Filterable="false"
+                              Sortable="false"
                               Title="Loan Active">
             <Template>
                 <RadzenCheckBox @bind-Value="g.IsActive" ReadOnly />
             </Template>
         </RadzenDataGridColumn>
 
-        <RadzenDataGridColumn TextAlign="TextAlign.Center" Context="g"
-                              Width="5rem"
-                              Property="ProInKhmer" Title="Loans">
+        <RadzenDataGridColumn TextAlign="TextAlign.Center"
+                              Context="g"
+                              Width="8rem"
+                              Property="@nameof(VGuarantor.NumberOfLoan)"
+                              Title="Loans">
             <Template>
                 @g.NumberOfLoan
             </Template>
         </RadzenDataGridColumn>
 
-        <RadzenDataGridColumn Width="5rem" Context="g" Title="Actions">
+        <RadzenDataGridColumn Width="5rem"
+                              Filterable="false"
+                              Sortable="false"
+                              TextAlign="TextAlign.Center"
+                              Context="g" Title="Actions">
             <Template>
                 <RadzenButton Size="ButtonSize.ExtraSmall"
                               Icon="more_vert"
@@ -86,16 +110,16 @@
     {
         ContextMenuService.Open(args, ds =>
     @<RadzenMenu Style="font-size:0.8rem;">
-    <RadzenMenuItem Icon="info"
-                    Click="@(()=>GetGuarantorDetails(id))"
-                    Text="Guarantor Details" Value="@id"></RadzenMenuItem>
-    <RadzenMenuItem Icon="edit"
-                    Click="@(()=>GetEditGuarantor(id))"
-                    Text="Edit" Value="@id"></RadzenMenuItem>
-    <RadzenMenuItem Icon="delete"
-                    Click="@(()=>DeleteGuarantorAsync(id))"
-                    Text="Delete" Value="@id"></RadzenMenuItem>
-</RadzenMenu>
+            <RadzenMenuItem Icon="info"
+                            Click="@(()=>GetGuarantorDetails(id))"
+                            Text="Guarantor Details" Value="@id"></RadzenMenuItem>
+            <RadzenMenuItem Icon="edit"
+                            Click="@(()=>GetEditGuarantor(id))"
+                            Text="Edit" Value="@id"></RadzenMenuItem>
+            <RadzenMenuItem Icon="delete"
+                            Click="@(()=>DeleteGuarantorAsync(id))"
+                            Text="Delete" Value="@id"></RadzenMenuItem>
+    </RadzenMenu>
         );
     }
 }

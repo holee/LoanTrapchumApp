@@ -134,9 +134,21 @@ namespace TrapchumApp.Pages.Lists.Customers
                     OkButtonText = "Yes",
                     CancelButtonText = "No"
                 });
-            if (confirm == true)
+            if (confirm == false) return;
+
+            var rsp = await _customerService.DeleteCustomerAsync(customerId);
+
+            if (rsp.IsSuccess)
             {
+                NotificationService.Notify(NotificationSeverity.Success, rsp.Data);
+
+                await LoadCustomerPageList(filterText);
             }
+            else
+            {
+                NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
+            }
+
         }
 
         async Task SearchCustomer(string? searchText = null)
@@ -224,6 +236,10 @@ namespace TrapchumApp.Pages.Lists.Customers
             {
                 e.Attributes.Add("style", "font-weight:bold;color:red;background-color:yellow;");
             }
+        }
+        private void OnRowSelected(VCustomerList args)
+        {
+            
         }
     }
 }

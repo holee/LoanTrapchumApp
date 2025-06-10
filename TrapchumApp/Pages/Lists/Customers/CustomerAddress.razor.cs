@@ -1,14 +1,12 @@
 using Applications.Requests.Lists.Addreses;
 using Applications.Requests.Lists.OtherNames;
 using Domains.Models.Addresses;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
 
 namespace TrapchumApp.Pages.Lists.Customers
 {
     public partial class CustomerAddress
     {
-        [Parameter] public EntityNamesCreate model { get; set; } = new();
+        [Parameter] public BaseEntityNamesCreate model { get; set; }
         [Parameter] public IEnumerable<string> Cities { get; set; } = [];
         [Parameter] public IEnumerable<Country> Countries { get; set; } = [];
         string city = "";

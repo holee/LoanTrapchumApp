@@ -19,7 +19,7 @@ namespace TrapchumApp.Pages.Lists.OtherNames
 
         VOtherNames? name = new VOtherNames();
 
-        VenderConvertCreate model = new VenderConvertCreate();
+        ConvertCreateVendor model = new ConvertCreateVendor();
 
         protected override async Task OnParametersSetAsync()
         {
