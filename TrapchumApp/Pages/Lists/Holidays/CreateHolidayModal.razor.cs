@@ -46,8 +46,20 @@ namespace TrapchumApp.Pages.Lists.Holidays
 
         private void SelectedDateChanged(DateTime? arg)
         {
+            try
+            {
+                var result = listvm.FirstOrDefault(x => x.HolidayDt == arg);
+                Console.WriteLine($"Selected Date: {result?.HolidayDt}");
+                if (result == null || result.Id <= 0)
+                {
+                    modelDTO.Id = 0;
+                }
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
             
-
         }
         protected async Task FormValidSubmit()
         {

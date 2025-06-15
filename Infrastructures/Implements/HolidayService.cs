@@ -8,6 +8,7 @@ using Dapper;
 using Domains.Models.Lists;
 using Infrastructures.DataAccess;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Infrastructures.Implements
 {
@@ -19,12 +20,18 @@ namespace Infrastructures.Implements
 
         private readonly IDbContextFactory<DataContext> _contextFactory;
         private readonly IDapperConnectionFactory _connectionFactory;
-        public HolidayService(DataContext context, IDbContextFactory<DataContext> contextFactory, IDapperConnectionFactory connectionFactory)
+        private readonly ILogger<HolidayService> logger;
+
+        public HolidayService(DataContext context, 
+            IDbContextFactory<DataContext> contextFactory, 
+            IDapperConnectionFactory connectionFactory,
+            ILogger<HolidayService> logger)
         {
             _context = context;
 
             _contextFactory = contextFactory;
             _connectionFactory = connectionFactory;
+            this.logger = logger;
         }
 
         public async Task<Result<string>> CreateOrUpdateHoliday(Holiday entities)
@@ -32,16 +39,17 @@ namespace Infrastructures.Implements
             try
             {
 
+                await using var ctx = await _contextFactory.CreateDbContextAsync();
                 if (entities.Id <= 0)
                 {
-                    _context.Holidays.Add(entities);
+                    ctx.Holidays.Add(entities);
 
                 }
                 else
                 {
-                    var emp = await _context.Holidays
+                    var emp = await ctx.Holidays
                                         .Where(x => x.Id == entities.Id &&
-                                                    x.HolidayNum == x.HolidayNum)
+                                                    x.HolidayNum == entities.HolidayNum)
                                         .FirstOrDefaultAsync();
 
                     if (emp is null)
@@ -55,9 +63,11 @@ namespace Infrastructures.Implements
                     emp.HolidayDt = entities.HolidayDt;
                     emp.Status = entities.Status;
                     emp.Description = entities.Description;
+
+                    ctx.Holidays.Update(emp);
                 }
 
-                await _context.SaveChangesAsync();
+                await ctx.SaveChangesAsync();
 
                 return Result.Success<string>(new("Holiday was updated successfully!"));
 
@@ -92,9 +102,9 @@ namespace Infrastructures.Implements
                 }
 
 
-                _context.Holidays.AddRange(addedEntitities);
+                context.Holidays.AddRange(addedEntitities);
 
-                await _context.SaveChangesAsync();
+                await context.SaveChangesAsync();
 
                 var mapper = addedEntitities.ToHolidays();
 
@@ -111,35 +121,55 @@ namespace Infrastructures.Implements
 
         public async Task<Result<Holiday>> GetHoliday(long id)
         {
-
-            var result = await _context.Holidays.FindAsync(id);
-
-            if (result is null)
+            try
             {
-                return Result.Failure<Holiday>(ErrorResponse.NotFound("No data found"));
+                await using var ctx = await _contextFactory.CreateDbContextAsync();
+
+                var result = await ctx.Holidays.FindAsync(id);
+
+                if (result is null)
+                {
+                    return Result.Failure<Holiday>(ErrorResponse.NotFound("No data found"));
+                }
+                return Result.Success(result);
             }
-            return Result.Success(result);
+            catch(Exception ex)
+            {
+                return Result.Failure<Holiday>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
+            }
+           
         }
 
 
         public async Task<IEnumerable<HolidayVm>> GetHolidays(DateTime? selectedDate)
         {
+            try
+            {
+                logger.LogInformation("Fetching holidays for the selected date.");
+                await using var ctx = await _contextFactory.CreateDbContextAsync();
 
-            var value = selectedDate ?? DateTime.Now;
+                var value = selectedDate ?? DateTime.Now;
 
-            var month = value.Month;
+                var month = value.Month;
 
-            var year = value.Year;
+                var year = value.Year;
 
-            var queries = await _context.Database
-                                        .SqlQuery<HolidayVm>(@$"SELECT h.* FROM lt_holidays  h 
+                var queries = await ctx.Database
+                                            .SqlQuery<HolidayVm>(@$"SELECT h.* FROM lt_holidays  h 
                                                         WHERE (h.HolidayDt IS NOT NULL) AND
                                                         DATEPART(YEAR,h.HolidayDt) = {year} AND 
                                                         DATEPART(MONTH,h.HolidayDt) = {month}")
-                                        .OrderByDescending(x => x.HolidayDt)
-                                        .AsNoTracking()
-                                        .ToListAsync();
-            return queries;
+                                            .OrderByDescending(x => x.HolidayDt)
+                                            .AsNoTracking()
+                                            .ToListAsync();
+                return queries;
+            }
+            catch(Exception ex)
+            {
+                logger.LogError($"Error in GetHolidays: {ex.Message}", ex);
+                throw new Exception($"Error in GetHolidays: {ex.Message}");
+            }
+            
         }
 
 
@@ -147,21 +177,33 @@ namespace Infrastructures.Implements
 
         public async Task<IEnumerable<Holiday>> GetHolidays(bool isSelectedPrevious, DateTime? startFrom = null, DateTime? end = null)
         {
-            IQueryable<Holiday> queries = _context.Holidays;
+            try
+            {
+                logger.LogInformation("Fetching holidays based on the selected criteria.");
+                await using var ctx = await _contextFactory.CreateDbContextAsync();
 
-            if (isSelectedPrevious && startFrom is not null)
-            {
-                queries = queries.Where(d => d.HolidayDt >= startFrom);
+                IQueryable<Holiday> queries = ctx.Holidays;
+
+                if (isSelectedPrevious && startFrom is not null)
+                {
+                    queries = queries.Where(d => d.HolidayDt >= startFrom);
+                }
+                if (!isSelectedPrevious && startFrom is not null)
+                {
+                    queries = queries.Where(d => d.HolidayDt >= startFrom && d.HolidayDt <= end);
+                }
+                if (!isSelectedPrevious && startFrom is null)
+                {
+                    queries = queries.Where(d => d.HolidayDt >= DateTime.Now && d.HolidayDt <= end);
+                }
+                return await queries.AsNoTracking().ToListAsync();
             }
-            if (!isSelectedPrevious && startFrom is not null)
+            catch (Exception ex)
             {
-                queries = queries.Where(d => d.HolidayDt >= startFrom && d.HolidayDt <= end);
+                logger.LogError($"Error in GetHolidays: {ex.Message}", ex);
+                throw new Exception($"Error in GetHolidays: {ex.Message}");
             }
-            if (!isSelectedPrevious && startFrom is null)
-            {
-                queries = queries.Where(d => d.HolidayDt >= DateTime.Now && d.HolidayDt <= end);
-            }
-            return await queries.AsNoTracking().ToListAsync();
+            
         }
 
         public async Task<Pager<Holiday>> GetHolidays(int pageNumber, int pageSize, string sortColumn = "HolidayName",
@@ -169,123 +211,164 @@ namespace Infrastructures.Implements
             bool sortDescending = false,
             string? q = null)
         {
-            IQueryable<Holiday> queries = _context.Holidays;
-            if (!isSelectedPrevious)
+            try
             {
-                queries = queries.Where(d => d.HolidayDt >= DateTime.Now);
-            }
+                logger.LogInformation("Fetching paginated holidays with sorting and filtering.");
+                await using var ctx = await _contextFactory.CreateDbContextAsync();
+                IQueryable<Holiday> queries = ctx.Holidays;
+                if (!isSelectedPrevious)
+                {
+                    queries = queries.Where(d => d.HolidayDt >= DateTime.Now);
+                }
 
-            if (q != null)
-            {
-                queries = queries.Where(x => EF.Functions.Like(x.Description, $"%{q}%") ||
-                                             EF.Functions.Like(x.HolidayDt.ToString(), $"%{q}%"));
-            }
+                if (q != null)
+                {
+                    queries = queries.Where(x => EF.Functions.Like(x.Description, $"%{q}%") ||
+                                                 EF.Functions.Like(x.HolidayDt.ToString(), $"%{q}%"));
+                }
 
-            if (sortDescending)
-            {
-                queries = queries.OrderByDescending(x => EF.Property<object>(x, sortColumn));
-            }
+                if (sortDescending)
+                {
+                    queries = queries.OrderByDescending(x => EF.Property<object>(x, sortColumn));
+                }
 
-            var counts = queries.Count();
-            queries = queries.Skip(pageNumber).Take(pageSize);
-            return new Pager<Holiday>
+                var counts = queries.Count();
+                queries = queries.Skip(pageNumber).Take(pageSize);
+                return new Pager<Holiday>
+                {
+                    Count = counts,
+                    Items = await queries.AsNoTracking().ToListAsync()
+                };
+            }
+            catch(Exception ex)
             {
-                Count = counts,
-                Items = await queries.AsNoTracking().ToListAsync()
-            };
+                logger.LogError($"Error in GetHolidays: {ex.Message}", ex);
+                throw new Exception($"Error in GetHolidays: {ex.Message}");
+            }
+           
         }
 
         public async Task<Pager<HolidayVm>> GetHolidays(QueryParam q)
         {
-
-            await using var context = await _contextFactory.CreateDbContextAsync();
-
-
-            var queries = context.Database
-                                  .SqlQuery<HolidayVm>($"SELECT * FROM VHolidaysVm")
-                                  .WhereIf(!q.IsIncludeInActive, d => d.HolidayDt >= DateTime.Now)
-                                  .WhereIf(!string.IsNullOrEmpty(q.Filter),
-                                            x => EF.Functions.Like(x.Description, $"%{q}%") ||
-                                                EF.Functions.Like(x.HolidayNum.ToString(), $"%{q}%") ||
-                                                EF.Functions.Like(x.HolidayDt.ToString(), $"%{q}%"));
-
-            if (q.SortDescending)
+            try
             {
-                queries = queries.OrderByDescending(x => EF.Property<object>(x, q.SortColumn));
+                logger.LogInformation("Fetching paginated holidays with query parameters.");
+                await using var context = await _contextFactory.CreateDbContextAsync();
+
+
+                var queries = context.Database
+                                      .SqlQuery<HolidayVm>($"SELECT * FROM VHolidaysVm")
+                                      .WhereIf(!q.IsIncludeInActive, d => d.HolidayDt >= DateTime.Now)
+                                      .WhereIf(!string.IsNullOrEmpty(q.Filter),
+                                                x => EF.Functions.Like(x.Description, $"%{q.Filter}%") ||
+                                                    EF.Functions.Like(x.HolidayNum.ToString(), $"%{q.Filter}%") ||
+                                                    EF.Functions.Like(x.HolidayName.ToString(), $"%{q.Filter}%") ||
+                                                    EF.Functions.Like(x.HolidayDt.ToString(), $"%{q.Filter}%"));
+
+                if (q.SortDescending)
+                {
+                    queries = queries.OrderByDescending(x => EF.Property<object>(x, q.SortColumn));
+                }
+                else
+                {
+                    queries = queries.OrderBy(x => x.HolidayDt);
+                }
+
+                var counts = await queries.CountAsync();
+
+                if (q.PageSize > 0)
+                {
+                    queries = queries
+                                    .Skip(q.Skip)
+                                    .Take(q.PageSize);
+
+                }
+
+                //var builder = new SqlBuilder();
+
+                var items = await queries.AsNoTracking().ToListAsync();
+
+                return new Pager<HolidayVm>
+                {
+                    Count = counts,
+
+                    Items = items
+                };
             }
-            else
+            catch(Exception ex)
             {
-                queries = queries.OrderBy(x => x.HolidayDt);
+                logger.LogError($"Error in GetHolidays: {ex.Message}", ex);
+                throw new Exception($"Error in GetHolidays: {ex.Message}");
             }
-
-            var counts = await queries.CountAsync();
-
-            if (q.PageSize > 0)
-            {
-                queries = queries
-                                .Skip(q.Skip)
-                                .Take(q.PageSize);
-
-            }
-
-            //var builder = new SqlBuilder();
-
-            var items = await queries.AsNoTracking().ToListAsync();
-
-            return new Pager<HolidayVm>
-            {
-                Count = counts,
-
-                Items = items
-            };
+           
         }
 
 
         public async Task<IEnumerable<HolidayVm>> GetActiveHolidays(DateTime? selectedDate,int? selectedYear=0)
         {
+            try
+            {
+                using var db = _connectionFactory.CreateConnection();
 
-            using var db = _connectionFactory.CreateConnection();
+                var lastSelectedDate = selectedYear > 0 ? selectedDate!.Value.AddYears(selectedYear!.Value) : selectedDate;
 
-            var lastSelectedDate = selectedYear > 0 ? selectedDate!.Value.AddYears(selectedYear!.Value) : selectedDate;
+                var parameters = new DynamicParameters();
 
-            var parameters = new DynamicParameters();
+                parameters.Add("@selectedDate", selectedDate);
 
-            parameters.Add("@selectedDate", selectedDate);
+                parameters.Add("@lastSelectedDate", lastSelectedDate);
 
-            parameters.Add("@lastSelectedDate", lastSelectedDate);
-
-            var sql = @"SELECT Id, HolidayDt, HolidayName, HolidayName, HolidayNum, Status, Description
+                var sql = @"SELECT Id, HolidayDt, HolidayName, HolidayName, HolidayNum, Status, Description
                         FROM VHolidaysVm WHERE Status = CAST(1 AS BIT) AND 
                         CAST(HolidayDt AS DATE) BETWEEN CAST(@selectedDate AS DATE) AND 
                         CAST(@lastSelectedDate AS DATE);
                        ";
-            var queries=await db.QueryAsync<HolidayVm>(sql, parameters);
+                var queries = await db.QueryAsync<HolidayVm>(sql, parameters);
 
-            return queries ?? [];
+                return queries ?? [];
+            }
+            catch(Exception ex)
+            {
+                logger.LogError($"Error in GetActiveHolidays: {ex.Message}", ex);
+                throw new Exception($"Error in GetActiveHolidays: {ex.Message}");
+            }
+
+            
         }
 
 
 
         public async Task<bool> ExistHolidays(DateTime? setdate)
         {
-            var query = await _context
+            try
+            {
+                logger.LogInformation("Checking if holidays exist for the given date.");
+                var query = await _context
                                 .Holidays.Where(x => x.HolidayNum == setdate.DayNum())
                                 .AsNoTracking()
                                 .ToListAsync();
-            return query.Any();
+                return query.Any();
+            }
+            catch(Exception ex)
+            {
+                logger.LogError($"Error in ExistHolidays: {ex.Message}", ex);
+                throw new Exception($"Error in ExistHolidays: {ex.Message}");
+            }
+            
         }
         public async Task<Result<string>> ActivateOrDeactivate(int id, Holiday req)
         {
             try
             {
-                var data = await _context.Holidays.Where(x => x.Id != id && x.Status == req.Status).FirstOrDefaultAsync();
+                await using var ctx = await _contextFactory.CreateDbContextAsync();
+                var data = await ctx.Holidays.Where(x => x.Id != id && x.Status == req.Status).FirstOrDefaultAsync();
 
                 if (data is not null)
                     return Result.Failure<string>(ErrorResponse.Conflict("Holiday status already exist!"));
 
-                _context.Holidays.Update(req);
+                ctx.Holidays.Update(req);
 
-                await _context.SaveChangesAsync();
+                await ctx.SaveChangesAsync();
 
                 return Result.Success<string>(new("Holiday status was updated successfully!"));
 
@@ -323,8 +406,9 @@ namespace Infrastructures.Implements
         {
             try
             {
-                _context.Holidays.AddRange(enity);
-                await _context.SaveChangesAsync();
+                await using var ctx = await _contextFactory.CreateDbContextAsync();
+                ctx.Holidays.AddRange(enity);
+                await ctx.SaveChangesAsync();
                 return Result.Success<string>(new("New holiday was added successfully!"));
 
             }
@@ -339,14 +423,15 @@ namespace Infrastructures.Implements
         {
             try
             {
+                await using var ctx = await _contextFactory.CreateDbContextAsync();
                 foreach (var i in id)
                 {
-                    var result = await _context.Holidays.AsNoTracking().FirstOrDefaultAsync(x => x.Id == i);
+                    var result = await ctx.Holidays.AsNoTracking().FirstOrDefaultAsync(x => x.Id == i);
 
-                    _context.Holidays.Remove(result!);
+                    ctx.Holidays.Remove(result!);
 
                 }
-                await _context.SaveChangesAsync();
+                await ctx.SaveChangesAsync();
                 return Result.Success<string>(new("Holiday was deleted successfully!"));
             }
             catch (Exception ex)
@@ -359,11 +444,11 @@ namespace Infrastructures.Implements
         {
             try
             {
+                await using var ctx = await _contextFactory.CreateDbContextAsync();
+                var result = await ctx.Holidays.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
 
-                var result = await _context.Holidays.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
-
-                _context.Holidays.Remove(result!);
-                await _context.SaveChangesAsync();
+                ctx.Holidays.Remove(result!);
+                await ctx.SaveChangesAsync();
                 return Result.Success<string>(new("Holiday was deleted successfully!"));
             }
             catch (Exception ex)
