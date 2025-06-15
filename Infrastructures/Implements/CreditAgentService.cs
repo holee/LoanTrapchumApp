@@ -36,7 +36,7 @@ namespace Infrastructures.Implements
 
                     existingCo!.IsRemove = false;
 
-                    await _context.SaveChangesAsync();
+                    await context.SaveChangesAsync();
 
                     return Result.Success("Credit Office was Added");
 
@@ -49,7 +49,7 @@ namespace Infrastructures.Implements
 
                 emp.LoanCreditAgent = req;
 
-                await _context.SaveChangesAsync();
+                await context.SaveChangesAsync();
 
                 return Result.Success("Credit Office was Added");
             }
@@ -80,7 +80,7 @@ namespace Infrastructures.Implements
                 return Result.Failure(ErrorResponse.ServerError(ex.Message));
             }
         }
-        public async Task<Result<string>> ActivateOrDeactivateCreditAgent(LoanCreditAgent req)
+        public async Task<Result<string>> ChangeCreditAgentState(LoanCreditAgent req)
         {
             try
             {
@@ -88,22 +88,28 @@ namespace Infrastructures.Implements
 
                 var emp = await context.LoanCreditAgents
                                 .AsNoTracking()
-                                .FirstOrDefaultAsync(x => x.EmployeeRefId == req.EmployeeRefId && x.EditSeq == req.EditSeq);
+                                .FirstOrDefaultAsync(x => x.EmployeeRefId == req.EmployeeRefId && 
+                                                          x.EditSeq == req.EditSeq);
+              
                 if (emp is null) return Result.Failure<string>(ErrorResponse.NotFound("There is no employee yet Or Someone was changed this data!."));
-               
+
                 context.Entry(req).Property(x => x.IsRemove).IsModified = true;
 
                 context.Entry(req).Property(x => x.EditSeq).IsModified = true;
 
-                await _context.SaveChangesAsync();
+                await context.SaveChangesAsync();
 
                 return Result.Success("Credit Agent was Updated");
             }
-            catch (Exception ex)
+            catch (DbUpdateException ex)
             {
                 return Result.Failure<string>(ErrorResponse.ServerError(ex.Message));
             }
         }
+
+
+
+
         public async Task<Result<IEnumerable<VCreditAgent>>> GetCreditAgents(bool includeIsRemove = false, string? query = null)
         {
             await using var context = await _dbContextFactory.CreateDbContextAsync();
@@ -126,10 +132,10 @@ namespace Infrastructures.Implements
 
         }
 
-        public async Task<Pager<VCreditAgent>> GetCreditAgents(int? branchId, QueryParam param)
+        public async Task<Pager<VCreditAgent>> GetCreditAgents(int? branchId, QueryParam param, CancellationToken cancellation = default)
         {
 
-            await using var context = await _dbContextFactory.CreateDbContextAsync();
+            await using var context = await _dbContextFactory.CreateDbContextAsync(cancellation);
 
             IQueryable<VCreditAgent> queries = context.VCreditAgents
                                                         .WhereIf(branchId > 0, x => x.BranchId == branchId);
@@ -152,7 +158,7 @@ namespace Infrastructures.Implements
             {
                 queries = queries.OrderByDescending(x => EF.Property<object>(x, param.SortColumn));
             }
-            var counts = queries.Count();
+            var counts = await queries.CountAsync(cancellation);
 
             if (param.PageSize > 0)
             {
@@ -160,7 +166,7 @@ namespace Infrastructures.Implements
 
             }
 
-            var items = await queries.AsNoTracking().ToListAsync();
+            var items = await queries.AsNoTracking().ToListAsync(cancellation);
 
 
             return new Pager<VCreditAgent>
@@ -169,7 +175,6 @@ namespace Infrastructures.Implements
                 Items = items
             };
         }
-
 
 
         public async Task<Result<IEnumerable<VEmployeeCreateCreditAgent>>> GetEmployeeCreateCreditAgents(string? filter = null)
@@ -190,6 +195,10 @@ namespace Infrastructures.Implements
 
             return Result.Success<IEnumerable<VEmployeeCreateCreditAgent>>(queries);
         }
+
+
+
+
         private bool IsAlreadyCreditAgent(string? empId)
         {
             return _context.LoanCreditAgents

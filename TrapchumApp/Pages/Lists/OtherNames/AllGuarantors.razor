@@ -28,6 +28,7 @@
     </RightChildren>
 </GridToolbar>
 <RadzenDataGrid Data="guarantors"
+                TItem="VGuarantor"
                 GridLines="DataGridGridLines.Both"
                 Responsive="true"
                 Density="Density.Compact"
@@ -43,6 +44,7 @@
                 PageSizeOptions="@StorageConstant.PageSizeOptions"
                 PageSizeChanged="@ChangedPageSize"
                 PagerPosition="PagerPosition.Bottom"
+                RowSelect="@OnRowSelected"
                 LoadData="LoadGuarantors">
     <Columns>
         <RadzenDataGridColumn Width="4rem"
@@ -56,7 +58,15 @@
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Property="@nameof(VGuarantor.GuarantorName)"
                               Title="Name"
-                              Sortable="true" />
+                              Context="g"
+                              Sortable="true">
+                              <Template>
+                                 <RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal">
+                                     <span class="rz-ml-1">@g.GuarantorName</span>
+                                     <i class="text-danger">(@(g?.FullName))</i>
+                                 </RadzenStack>
+                              </Template>
+                          </RadzenDataGridColumn>
         <RadzenDataGridColumn Property="@nameof(VGuarantor.Phone)"
                               Title="Phone" />
         <RadzenDataGridColumn Context="g"
@@ -120,6 +130,8 @@
                             Click="@(()=>DeleteGuarantorAsync(id))"
                             Text="Delete" Value="@id"></RadzenMenuItem>
     </RadzenMenu>
-        );
+    );
     }
+
+    void OnRowSelected(VGuarantor arg) { }
 }

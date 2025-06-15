@@ -190,7 +190,6 @@ public class AddressService : IAddressService
 
         await using var context = await _dbContextFactory.CreateDbContextAsync();
 
-
         var cities = await context.Cities
                                         .Where(x => !x.CityName.Equals(""))
                                         .WhereIf(!string.IsNullOrEmpty(searchText), x =>
@@ -210,16 +209,18 @@ public class AddressService : IAddressService
     {
         try
         {
-            var c = _context.Cities.Where(x => x.CityName == city.CityName);
+            await using var context = await _dbContextFactory.CreateDbContextAsync();
+
+            var c = context.Cities.Where(x => x.CityName == city.CityName);
 
             if (c.Any())
             {
                 return Result.Failure(ErrorResponse.Conflict("City Already Exist."));
             }
 
-            _context.Cities.Add(city);
+            context.Cities.Add(city);
 
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
 
             return Result.Success("New City was Added.");
         }
@@ -233,16 +234,18 @@ public class AddressService : IAddressService
     {
         try
         {
-            var c = _context.Cities.Where(x => x.CityName == city.CityName && x.Id != city.Id);
+            await using var context = await _dbContextFactory.CreateDbContextAsync();
+
+            var c = context.Cities.Where(x => x.CityName == city.CityName && x.Id != city.Id);
 
             if (c.Any())
             {
                 return Result.Failure(ErrorResponse.Conflict("City Already Exist."));
             }
 
-            _context.Cities.Update(city);
+            context.Cities.Update(city);
 
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
 
             return Result.Success("City was Updated.");
         }

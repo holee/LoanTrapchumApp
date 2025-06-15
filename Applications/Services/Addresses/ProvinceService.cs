@@ -16,10 +16,10 @@ namespace Applications.Services.Addresses
 {
     //public class ProvinceService(IProvinceService proService) : IProvinceService
     //{
-    //    public async Task<Result<string>> CreateAsync(ProvinceDtoCreate province)
+    //    public async Task<Result<string>> UpsertAsync(ProvinceDtoCreate province)
     //    {
     //        var pro = province.Adapt<ProvinceDtoCreate>();
-    //        return await proService.CreateAsync(pro);
+    //        return await proService.UpsertAsync(pro);
     //    }
 
     //    public async Task<Result<string>> DeleteAsync(int? proId)

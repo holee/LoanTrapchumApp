@@ -123,11 +123,13 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             var options = new DialogOptions
             {
             };
-
-            IEnumerable<FileModel> uploadedFiles =
-                await DialogService.OpenAsync<FileUploadDialogue>("Upload", options: options);
-
-            if (uploadedFiles.Any()) 
+            IEnumerable<FileModel> uploadedFiles = await DialogService.OpenAsync<FileUploadDialogue>("Upload", options: options);
+           
+            if (uploadedFiles is null || !uploadedFiles.Any())
+            {
+                return;
+            }
+            if (uploadedFiles.Any())
             {
                 foreach (var f in uploadedFiles)
                 {
@@ -260,8 +262,8 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
             //    await GuarantorRef.GuarantorReload();
             //}
-       
-        
+
+
         }
 
         async void RemoveGaurantor(VLoanRequestGuarantors g)
@@ -348,7 +350,9 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             };
             var options = new DialogOptions
             {
-                Width = "85vw"
+                Width = "100vw",
+                Height = "100vh",
+                AutoFocusFirstElement = false
             };
 
             await DialogService.OpenAsync<CollateralModalAdd>("Collateral", param, options);
@@ -369,7 +373,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             {
 
                 NotificationService.Notify(NotificationSeverity.Info, "Please select last item to remove.");
-                
+
                 return;
 
             }
@@ -400,7 +404,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         protected override async Task OnInitializedAsync()
         {
 
-            var rsp1 = await _userService.GetUserByIdAsync(UserId,default, "EmployeeRefId");
+            var rsp1 = await _userService.GetUserByIdAsync(UserId, default, "EmployeeRefId");
 
             if (rsp1 is { IsSuccess: true, Data: not null })
             {
@@ -534,7 +538,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
             model.LoanDocuments.AddRange(documents);
 
-         
+
 
             editForm.EditContext!.Validate();
 
@@ -715,12 +719,12 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 //    {
 //        var selectedValue = (Items)e;
 
-//        model.CollectionFeeModeName = selectedValue.Label;
+//        Model.CollectionFeeModeName = selectedValue.Label;
 //    }
 //    else
 //    {
-//        model.CollectionFeeModeId = 1;
-//        model.CollectionFeeModeName = "Flat";
+//        Model.CollectionFeeModeId = 1;
+//        Model.CollectionFeeModeName = "Flat";
 //    }
 //}
 
@@ -728,15 +732,15 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 //{
 //    var selectedValue = (Items)e;
 
-//    model.RepaymentMode = selectedValue.Label;
+//    Model.RepaymentMode = selectedValue.Label;
 
 //    if (selectedValue.Value == 1)
 //    {
-//        model.PayEvery = 4;
+//        Model.PayEvery = 4;
 //    }
 //    else
 //    {
-//        model.PayEvery = 1;
+//        Model.PayEvery = 1;
 //    }
 //}
 
@@ -777,17 +781,17 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 //}
 //void ShowLoanPreviews()
 //{
-//    if (model.RequestAmount == 0) return;
+//    if (Model.RequestAmount == 0) return;
 //    selectedTabIndex = 2;
 //    var calculator = SelectLoanType(3);
 //    calculator.PayEvery = 1;
-//    calculator.EffectiveRate = model.CollectionFeeRate!.Value;
+//    calculator.EffectiveRate = Model.CollectionFeeRate!.Value;
 //    calculator.StartDate = DateTime.Now;
 //    calculator.FirstPayment = DateTime.Now.AddMonths(1);
 //    calculator.CollectionFeeMode = SelectedCollectionFee;
 //    calculator.InstallmentTypeId = 1;
-//    calculator.CurrencyId = model.CurrencyRefId!.Value;
-//    var schedule = calculator.Calculate(model.Installments, model.InterestRate, model.RequestAmount);
+//    calculator.CurrencyId = Model.CurrencyRefId!.Value;
+//    var schedule = calculator.Calculate(Model.Installments, Model.InterestRate, Model.RequestAmount);
 //    previewSchedule = schedule.Select(x => new LoanScheduleDtoCreate
 //    {
 //        InstallmentNo = x.InstallmentNo,

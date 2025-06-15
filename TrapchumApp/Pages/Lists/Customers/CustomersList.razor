@@ -1,4 +1,5 @@
-﻿@using Microsoft.AspNetCore.Components.Web
+﻿@using CommunityToolkit.HighPerformance
+@using Microsoft.AspNetCore.Components.Web
 @using TrapchumApp.Helpers.Constants
 @using TrapchumApp.Services
 @attribute [MustHasPermission(Modules.Customers, Feature.Read)]
@@ -12,8 +13,15 @@
              CommandText="Add Customer"
              ShowCommandIcon="@IconNames.PersonAdd"
              ShowAddCommand="true"
-             AddClick="@(()=>AddCustomerTab(1))"
+             AddClick="@(() => AddCustomerTab(1))"
              Placeholder="Search Customer....">
+    <RightChildren>
+        <div class="text-start">
+            <RadzenCheckBox TValue="bool" Value="@includeInactive" Change="@OnChanged"/>
+            <RadzenLabel Text="Include InActive" />
+        </div>
+       
+    </RightChildren>
 </GridToolbar>
 <RadzenDataGrid Count="@counts"
                 Responsive
@@ -35,6 +43,7 @@
                 PageSizeChanged="PageSizeChanged"
                 RowRender="OnRowRender"
                 RowSelect="OnRowSelected"
+                CellRender="@OnCellRender"
                 Data="@VCustomers">
     <Columns>
         <RadzenDataGridColumn Title="#"
@@ -45,6 +54,7 @@
                               Sortable="true">
             <Template>
                 @(VCustomers?.IndexOf(c) + 1)
+               
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Property="@nameof(VCustomerList.AltName)"

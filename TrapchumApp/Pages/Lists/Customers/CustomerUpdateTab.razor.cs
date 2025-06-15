@@ -32,52 +32,9 @@ namespace TrapchumApp.Pages.Lists.Customers
         string city = "";
         async Task ClickCloseTab()
         {
-            await Closed.InvokeAsync(2);
+            await Closed.InvokeAsync(3);
         }
-        private Task OnSelectedTabChanged(string name)
-        {
-            selectedTab = name;
-            return Task.CompletedTask;
-        }
-        void OnChanged(ChangeEventArgs e)
-        {
-            city = e!.Value!.ToString()!;
-        }
-        void OnProgress(UploadProgressArgs args, string name)
-        {
-            if (args.Progress == 100)
-            {
-                foreach (var file in args.Files)
-                {
-
-                }
-            }
-        }
-        async Task OnImageChange(UploadChangeEventArgs args, string name)
-        {
-            if (args.Files.Count() == 0) return;
-
-            var file = args.Files.FirstOrDefault();
-
-            if (file is null) return;
-
-            using var ms = new MemoryStream();
-
-            await file.OpenReadStream().CopyToAsync(ms);
-            var fileName = file.Name;
-            var fileExtension = Path.GetExtension(file.Name);
-            var fileSize = file.Size;
-            var fileUpload = new FileUploadModel(fileName, fileExtension, fileSize, ms.ToArray());
-            var resp = await _fileUploadService.UploadFile(fileUpload);
-            if (!resp.IsSuccess)
-            {
-                NotificationService.Notify(NotificationSeverity.Info, resp.ErrMessage);
-                return;
-            }
-
-            model.Photo = resp.Data?.FileUrl;
-            StateHasChanged();
-        }
+       
         async Task GetAdditionalInformation()
         {
             Nationalities = await _nationalityService!.GetNationalities();
@@ -141,16 +98,15 @@ namespace TrapchumApp.Pages.Lists.Customers
         }
         protected async void FormSubmit()
         {
-            editForm?.EditContext?.Validate();
+            if(editForm?.EditContext?.Validate()==false) return;
             try
             {
                 model.EntType = EntityTypes.Customer.ToString();
-
                 var rsp = await _customerService.UpdateAsync(model);
 
                 if (rsp.IsSuccess)
                 {
-                    await CloseTab(2);
+                    await CloseTab(3);
 
                     NotificationService.Notify(NotificationSeverity.Success, "Customer was edited successfully!");
                 }

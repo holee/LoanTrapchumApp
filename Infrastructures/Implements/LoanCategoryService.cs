@@ -5,6 +5,7 @@ using Applications.Responses.Message;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Categories;
 using Applications.Responses.ViewModels.Options;
+using Domains.Models.Bases;
 using Domains.Models.Loans;
 using Infrastructures.DataAccess;
 using Mapster;
@@ -12,12 +13,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructures.Implements
 {
-    public class LoanCategoryService(DataContext context) : ILoanCategoryService
+    public class LoanCategoryService(DataContext context, IDbContextFactory<DataContext> dbContextFactory) : ILoanCategoryService
     {
-
-
         public async Task<Result<VlCategoryList>> GetCategoryAsync(int? id)
         {
+            await using var context = await dbContextFactory.CreateDbContextAsync();
+
             var item = await context.Database
                             .SqlQuery<VlCategoryList>($@"SELECT * FROM VLCategoryList WHERE  LoanCategoryId={id}")
                             .AsNoTracking()
@@ -33,6 +34,10 @@ namespace Infrastructures.Implements
 
         public async Task<Pager<VlCategoryList>> GetCategoriesAsync(QueryParam param)
         {
+
+            await using var context=await dbContextFactory.CreateDbContextAsync();
+
+
             IQueryable<VlCategoryList> query = context.Database.SqlQuery<VlCategoryList>($@"SELECT * FROM VLCategoryList");
 
             if (param.IsIncludeInActive == false)
@@ -48,39 +53,28 @@ namespace Infrastructures.Implements
                                          EF.Functions.Like(x.Description!, $"%{param.Filter}%"));
             }
 
-            if (param.PageSize > 0)
-            {
-                query = query.Skip((param.Skip) * param.PageSize).Take(param.PageSize);
-            }
+            var counts = query.Count();
 
             if (param.SortDescending)
             {
                 query = query.OrderByDescending(x => EF.Property<object>(x, param.SortColumn));
             }
 
-            var counts = query.Count();
+
+            if (param.PageSize > 0)
+            {
+                query = query.Skip(param.Skip).Take(param.PageSize);
+            }
 
             var items = await query.AsNoTracking().ToListAsync();
 
             return new Pager<VlCategoryList>(items, counts);
         }
 
-        public async Task<Pager<LoanCategory>> GetCategoriesAsync(string? q = null)
-        {
-            IQueryable<LoanCategory> query = context.LoanCategories;
-
-            if (!string.IsNullOrEmpty(q))
-            {
-                query = query.Where(x => EF.Functions.Like(x.LoanCategoryCode!, $"%{q}%") ||
-                                        EF.Functions.Like(x.Code!, $"%{q}%"));
-            }
-            var counts = query.Count();
-            var items = await query.AsNoTracking().ToListAsync();
-            return new Pager<LoanCategory>(items, counts);
-        }
-
         public async Task<Result<LoanCategory>> GetLoanCategoryByIdAsync(int? id)
         {
+            await using var context = await dbContextFactory.CreateDbContextAsync();
+
             var item = await context.LoanCategories.FindAsync(id);
 
             if (item is null)
@@ -92,16 +86,18 @@ namespace Infrastructures.Implements
         }
 
 
-        public async Task<Result<LoanCategoryDtoUpdate>> GetEditCategoryByIdAsync(int? id) 
+        public async Task<Result<LoanCategoryDtoUpdate>> GetEditCategoryByIdAsync(int? id)
         {
+            await using var context = await dbContextFactory.CreateDbContextAsync();
+
             var item = await context.LoanCategories.FindAsync(id);
 
             if (item is null)
             {
                 return Result.Failure<LoanCategoryDtoUpdate>(ErrorResponse.NotFound(Messages.DataNotFound));
             }
-            
-            var mapper=item.Adapt<LoanCategoryDtoUpdate>();
+
+            var mapper = item.Adapt<LoanCategoryDtoUpdate>();
 
             return Result.Success(mapper);
         }
@@ -111,6 +107,8 @@ namespace Infrastructures.Implements
         {
             try
             {
+                await using var context = await dbContextFactory.CreateDbContextAsync();
+
                 if (await NameExist(category.LoanCategoryCode))
                 {
                     return Result.Failure<string>(ErrorResponse.Conflict(Messages.DataExist));
@@ -119,8 +117,11 @@ namespace Infrastructures.Implements
                 {
                     return Result.Failure<string>(ErrorResponse.Conflict("Loan code is already exist!"));
                 }
+
                 context.LoanCategories.Add(category);
+
                 await context.SaveChangesAsync();
+
                 return Result.Success(Messages.DataCreated);
             }
             catch (Exception ex)
@@ -134,7 +135,8 @@ namespace Infrastructures.Implements
         {
             try
             {
-
+                await using var context = await dbContextFactory.CreateDbContextAsync();
+               
                 var category = await context.LoanCategories.AsNoTracking()
                                         .Where(x => x.LoanCategoryId == cat.LoanCategoryId
                                                 && x.EditSeq == cat.EditSeq).FirstOrDefaultAsync();
@@ -145,7 +147,9 @@ namespace Infrastructures.Implements
                 }
 
                 context.LoanCategories.Update(cat);
+
                 await context.SaveChangesAsync();
+
                 return Result.Success(Messages.DataUpdated);
             }
             catch (DbUpdateConcurrencyException ex)
@@ -159,6 +163,7 @@ namespace Infrastructures.Implements
         {
             try
             {
+                await using var context = await dbContextFactory.CreateDbContextAsync();
 
                 var category = await context.LoanCategories.AsNoTracking().Where(x => x.LoanCategoryId == id).FirstOrDefaultAsync();
 
@@ -183,6 +188,8 @@ namespace Infrastructures.Implements
 
         public async Task<bool> NameExist(string? name)
         {
+            await using var context = await dbContextFactory.CreateDbContextAsync();
+
             if (await context.LoanCategories.AnyAsync(x => x.LoanCategoryCode!.ToLower().Equals(name!.ToLower())))
                 return true;
             return false;
@@ -190,6 +197,8 @@ namespace Infrastructures.Implements
 
         public async Task<bool> CodeExist(string? code)
         {
+            await using var context = await dbContextFactory.CreateDbContextAsync();
+
             if (await context.LoanCategories.AnyAsync(x => x.Code!.ToLower().Equals(code!.ToLower())))
                 return true;
             return false;
@@ -218,6 +227,37 @@ namespace Infrastructures.Implements
                 }
 
                 return Result.Failure<string>(ErrorResponse.ServerError("Cannot update category"));
+
+            }
+            catch (DbUpdateException ex)
+            {
+                return Result.Failure<string>(ErrorResponse.NotFound($"{ex.InnerException!.Message}"));
+            }
+        }
+
+
+
+        public async Task<Result<string>> UpdateStatusAsync(int? id, ChangeState state, CancellationToken cancellation = default)
+        {
+            try
+            {
+                await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+                var result = await context.LoanCategories
+                                          .IgnoreQueryFilters()
+                                          .FirstOrDefaultAsync(emp =>
+                                                               emp.LoanCategoryId == id &&
+                                                               emp.EditSeq == state.EditSeq, cancellation);
+                if (result is null)
+                {
+                    return Result.Failure<string>(ErrorResponse.NotFound("No Loan category found."));
+                }
+
+                result.IsActive = state.State;
+
+                await context.SaveChangesAsync(cancellation);
+
+                return Result.Success<string>(Messages.DataUpdated);
 
             }
             catch (DbUpdateException ex)

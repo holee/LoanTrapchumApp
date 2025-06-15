@@ -1,5 +1,6 @@
 ﻿using Applications.Requests.Identity;
 using Applications.Requests.Journals;
+using Applications.Requests.Lists.Collaterals;
 using Applications.Requests.Lists.Currency;
 using Applications.Requests.Lists.Customers;
 using Applications.Requests.Lists.Employees;
@@ -45,6 +46,7 @@ namespace Applications.Validations
             services.AddTransient<IValidator<LoanRequestDtoCreate>, LoanRequestValidator>();
             services.AddTransient<IValidator<ExchangeDtoCreate>, CurrencyExchangeValidator>();
             services.AddTransient<IValidator<CustomerActivityDtoCreate>, CustomerActivityDtoCreateValidator>();
+            services.AddTransient<IValidator<CollateralSubTypeDtoCreate>, CollateralSubTypeValidator>();
             return services;
         }
     }

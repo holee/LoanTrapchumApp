@@ -1,4 +1,5 @@
-﻿using Applications.Interfaces.Lists;
+﻿using Applications.Commons.Mappers;
+using Applications.Interfaces.Lists;
 using Applications.Requests.Lists.Collaterals;
 using Applications.Responses;
 using Applications.Responses.Lists.Collaterals;
@@ -72,11 +73,38 @@ public class CollateralsService(ICollateralsService collateralsService) : IColla
     public async Task<Result<string>> CreateAsync(CollateralDtoCreate entity)
     {
 
-        var insertModel = entity.Adapt<Collateral>();
+        var insertModel = entity.MapCollateral();
 
         return await collateralsService.InsertOrUpdate(insertModel);
 
     }
+
+    
+    public async Task<Result<string>> UpsertAsync(CollateralSubTypeDtoCreate entity)
+    {
+
+        var insertModel = entity.MapCollateralSubTypeCreate();
+
+        return await collateralsService.Upsert(insertModel);
+
+    }
+    public async Task<Result<string>> CreateAsync(CollateralLineDtoCreate entity, CancellationToken cancellation = default)
+    {
+
+        var insertModel = entity.MapCollateralLine();
+
+        return await collateralsService.UpSertAsync(insertModel,cancellation);
+
+    }
+
+    public async Task<Result<string>> UpdateAsync(CollateralLineDtoUpdate entity,CancellationToken cancellation=default)
+    {
+
+        var model= entity.MapCollateralLine();
+
+        return await collateralsService.UpSertAsync(model,cancellation);
+    }
+
 
     public Task<Result<string>> UpdateAsync(CollateralDtoUpdate entity)
     {

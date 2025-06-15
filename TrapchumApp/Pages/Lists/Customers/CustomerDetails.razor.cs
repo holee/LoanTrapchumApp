@@ -241,7 +241,7 @@ namespace TrapchumApp.Pages.Lists.Customers
 
         async Task CloseTab()
         {
-            await Close.InvokeAsync(3);
+            await Close.InvokeAsync(2);
         }
     }
 }

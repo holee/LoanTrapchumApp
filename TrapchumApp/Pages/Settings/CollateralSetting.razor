@@ -1,6 +1,7 @@
 ﻿@using Applications.Responses.Lists.Collaterals
 @using Applications.Services.Settings
 @using Domains.Models.Collaterals
+@using TrapchumApp.Pages.Lists.Collaterals
 <style>
     .rz-grid-table td .rz-cell-data {
         line-height: 1.5rem;
@@ -27,11 +28,14 @@
                 PagerPosition="PagerPosition.Bottom"
                 PagerHorizontalAlign="HorizontalAlign.Right"
                 PageSizeOptions="@StorageConstant.PageSizeOptions"
+                IsLoading="@_isLoading"
                 Data="@_collateralSubTypes">
     <HeaderTemplate>
         <RadzenButton ButtonStyle="ButtonStyle.Primary"
                       Size="ButtonSize.Small"
-                      Text="Add" Icon="add" />
+                      Text="Add New Collateral"
+                      Click="@ClickAdd"
+                      Icon="@IconNames.Add" />
     </HeaderTemplate>
     <Columns>
         <RadzenDataGridColumn Property="@nameof(CollateralSubType.Id)"
@@ -88,8 +92,8 @@
             </EditTemplate>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Property="@nameof(CollateralSubType.ValueRate)"
-                              Title="Type Name"
-                              Width="10rem"
+                              Title="Value Rate"
+                              Width="8rem"
                               TextAlign="TextAlign.Left"
                               Context="c">
             <Template>
@@ -145,9 +149,11 @@
                               Sortable="false"
                               Context="c">
             <Template>
-                <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light"
-                              Variant="Variant.Flat" Size="ButtonSize.ExtraSmall"
-                              class="rz-my-1 rz-ms-1" Click="@(args => EditRow(c))"
+                <RadzenButton Icon="@IconNames.EditPen"
+                              Variant="Variant.Text"
+                              Size="ButtonSize.ExtraSmall"
+                              class="rz-my-1 rz-ms-1"
+                              Click="@(args => EditRow(c))"
                               @onclick:stopPropagation="true" />
                 @*                 <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger"
                               Variant="Variant.Flat" Size="ButtonSize.ExtraSmall"
@@ -155,11 +161,14 @@
                               Click="@(args => DeleteRow(c))" @onclick:stopPropagation="true" /> *@
             </Template>
             <EditTemplate Context="order">
-                <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Danger"
-                              Variant="Variant.Flat"
-                              Size="ButtonSize.ExtraSmall" Click="@((args) => SaveRow(order))" aria-label="Save" />
-                <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Primary"
-                              Variant="Variant.Flat" Size="ButtonSize.ExtraSmall"
+                <RadzenButton Icon="@IconNames.Checked" ButtonStyle="ButtonStyle.Success"
+                              Variant="Variant.Text"
+                              Size="ButtonSize.ExtraSmall"
+                              Click="@((args) => SaveRow(order))"
+                              aria-label="Save" />
+                <RadzenButton Icon="@IconNames.Undo" ButtonStyle="ButtonStyle.Danger"
+                              Variant="Variant.Text"
+                              Size="ButtonSize.ExtraSmall"
                               class="rz-my-1 rz-ms-1" Click="@((args) => CancelEdit(order))" aria-label="Cancel" />
                 @*                 <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger"
                               Variant="Variant.Flat" Size="ButtonSize.ExtraSmall"
@@ -168,4 +177,25 @@
             </EditTemplate>
         </RadzenDataGridColumn>
     </Columns>
+    <LoadingTemplate>
+        <RadzenProgressBarCircular Value="100" ShowValue="false"
+                                   Mode="ProgressBarMode.Indeterminate"
+                                   ProgressBarStyle="ProgressBarStyle.Danger"></RadzenProgressBarCircular>
+    </LoadingTemplate>
 </RadzenDataGrid>
+@code {
+    private bool _isLoading = false;
+    async Task ClickAdd()
+    {
+        var options = new DialogOptions
+        {
+            Width = "65vw",
+        };
+        var dia= await DialogService.OpenAsync<SubTypeCollateralCreate>("Add", options: options);
+
+        if (dia is bool result && result == true)
+        {
+            await GetCollateralSubTypes();
+        } 
+    }
+}

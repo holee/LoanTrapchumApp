@@ -13,7 +13,7 @@
                            OpenAddTab="AddGuarantorTab" />
         </RadzenTabsItem>
         <RadzenTabsItem Text="Add" Visible="ShowAddTab" Icon="@IconNames.PersonAdd">
-            <GaurantorCreateComp model="modelCreate" Closed="CloseGuarantorTab" @key="@Guid.NewGuid().ToString("N")" />
+            <GuarantorCreate  Closed="CloseGuarantorTab" @key="@Guid.NewGuid().ToString("N")" />
         </RadzenTabsItem>
 
         <RadzenTabsItem Text="Edit" Visible="ShowEditTab" Icon="@IconNames.PersonEdit">

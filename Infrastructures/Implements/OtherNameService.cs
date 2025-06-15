@@ -177,12 +177,12 @@ namespace Infrastructures.Implements
 
             if (!string.IsNullOrEmpty(q.Filter))
             {
-                queries = queries.Where(e => EF.Functions.Like(e.FirstName, $"{q.Filter}") ||
-                                             EF.Functions.Like(e.LastName, $"{q.Filter}") ||
-                                             EF.Functions.Like(e.EmailAddress, $"{q.Filter}") ||
-                                             EF.Functions.Like(e.Gender, $"{q.Filter}") ||
-                                             EF.Functions.Like(e.Phone, $"{q.Filter}") ||
-                                             EF.Functions.Like(e.AltName, $"{q.Filter}"));
+                queries = queries.Where(e => EF.Functions.Like(e.FirstName, $"%{q.Filter}%") ||
+                                             EF.Functions.Like(e.LastName, $"%{q.Filter}%") ||
+                                             EF.Functions.Like(e.EmailAddress, $"%{q.Filter}%") ||
+                                             EF.Functions.Like(e.Gender, $"%{q.Filter}%") ||
+                                             EF.Functions.Like(e.Phone, $"%{q.Filter}%") ||
+                                             EF.Functions.Like(e.AltName, $"%{q.Filter}%"));
             }
 
             if (!q.IsIncludeInActive)

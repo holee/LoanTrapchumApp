@@ -47,6 +47,7 @@ public partial class Index
     protected DistrictDto? SelectedDistrict;
     protected CommuneDto? SelectedCommune;
     protected VillageDto? SelectedVillage;
+    bool isLoading = false;
     protected override async Task OnInitializedAsync()
     {
         try
@@ -77,6 +78,7 @@ public partial class Index
 
     async Task GetOtherNames(string? filterText = "")
     {
+        isLoading = true;
 
         var param = new QueryParam(pageIndex, pageSize, sortField, includeInactive, sortDescending, filterText);
        
@@ -85,6 +87,10 @@ public partial class Index
         counts = resp.Count;
        
         Names = resp.Items;
+
+        isLoading = false;
+
+        StateHasChanged();
 
     }
 
@@ -95,7 +101,7 @@ public partial class Index
         (sortField, sortDescending) = e.PageInfo();
 
         var filterColunm = e.Filters?.FirstOrDefault(p =>
-                                p.Property == nameof(VOtherNames.Name) ||
+                                p.Property == nameof(VOtherNames.AltName) ||
                                 p.Property == nameof(VOtherNames.Phone) ||
                                 p.Property == nameof(VOtherNames.EmailAddress) ||
                                 p.Property == nameof(VOtherNames.FirstName) ||

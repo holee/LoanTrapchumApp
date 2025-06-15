@@ -171,13 +171,13 @@ namespace TrapchumApp.Pages.Transactions.Ledgers
             Console.WriteLine(tempCurrencyId);
 
 
-            // if (model.IsSubTypeOf && model.ParentRefId != 0)
+            // if (Model.IsSubTypeOf && Model.ParentRefId != 0)
             // {
-            //     model.ParentRefId = null;
+            //     Model.ParentRefId = null;
             // }
             // if (tempCurrencyId != 0 && tempCurrencyId == currencyId)
             // {
-            //     model.ParentRefId = tempParentRefIdId;
+            //     Model.ParentRefId = tempParentRefIdId;
             // }
 
 
@@ -186,7 +186,7 @@ namespace TrapchumApp.Pages.Transactions.Ledgers
 
         protected void SelectedChangedLedgerType(object p)
         {
-            //model.LedgerTypeRefId = SelectedLedgerType!.LedgerTypeId;
+            //Model.LedgerTypeRefId = SelectedLedgerType!.LedgerTypeId;
         }
         private void SelectCheckedChanged(bool isMain)
         {

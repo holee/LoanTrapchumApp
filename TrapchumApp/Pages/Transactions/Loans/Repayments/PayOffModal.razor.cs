@@ -222,7 +222,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
                 model.UserRefId = UserId;
                 model.TranTypeRefId = 67;
                 model.TransactionTypeName = "Currency Foreign Exchange";
-                //LoanRepayment.ForeignExchangeTrx = model;
+                //LoanRepayment.ForeignExchangeTrx = Model;
                 var result = await _repaymentService.RecievePayment(LoanRepayment);
 
                 if (result.IsSuccess)

@@ -3,7 +3,7 @@
     public static class LoadDataArgsExtensions
     {
 
-        public static (string, bool) PageInfo(this LoadDataArgs args)
+        public static (string, bool) PageInfo(this LoadDataArgs args, string? sortColumns = null)
         {
             if (args.Sorts.Any())
             {
@@ -15,7 +15,7 @@
 
             }
 
-            return ("Id", false);
+            return (sortColumns ?? "", false);
         }
 
     }

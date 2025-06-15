@@ -15,8 +15,12 @@ public interface ICollateralsService
     Task<IEnumerable<Responses.Lists.Collaterals.VCollateralLines>> GetCollateralLinesAsync(string? collateralId);
     Task<Result<VCustomerCollaterals>> GetCustomerCollateralAsync(string? customerId);
     Task<Pager<VCollateral>> GetCollateralsAysnc(QueryParam param);
-    Task<Result<string>> InsertOrUpdate(Collateral entity);
+    Task<Result<string>> InsertOrUpdate(Collateral entity, CancellationToken cancellation = default);
     Task<Result<VCustomerCollaterals>> GetCustomerCollateralsAsync(string? customerId);
     Task<Result<VCustomerCollaterals>> GetCustomerCollateralsAsync(string? customerId, bool includeInUsed);
     Task<Result<string>> InsertOrUpdateAsync(CollateralSubType req, CancellationToken cancellation = default);
+    Task<Result<string>> CreateAsync(CollateralLine req, CancellationToken cancellation = default);
+    Task<Result<string>> UpdateAsync(CollateralLine req, CancellationToken cancellation = default);
+    Task<Result<string>> UpSertAsync(CollateralLine req, CancellationToken cancellation = default);
+    Task<Result<string>> Upsert(CollateralSubType req,CancellationToken cancellation=default);
 }

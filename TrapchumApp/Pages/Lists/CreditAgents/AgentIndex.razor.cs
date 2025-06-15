@@ -10,33 +10,29 @@ using Radzen;
 using Microsoft.AspNetCore.Components.Authorization;
 using Radzen.Blazor;
 using TrapchumApp.Pages.Identity.Users;
+using TrapchumApp.Helpers.Extensions;
+using System.Threading.Tasks;
 
 namespace TrapchumApp.Pages.Lists.CreditAgents;
 
-public partial class CreditAgent
+public partial class AgentIndex
 {
     [CascadingParameter] Task<AuthenticationState> AuthState { get; set; } = default!;
 
 
     private readonly ICreditAgentServiceImpl _creditAgentService;
 
-    public CreditAgent(ICreditAgentServiceImpl creditAgentService)
+    public AgentIndex(ICreditAgentServiceImpl creditAgentService)
     {
         _creditAgentService = creditAgentService;
     }
-
     int BranchId;
-
     string? BranchName;
-
     [Parameter] public int Index { get; set; } = 1;
-
+    int selectedBranchId = 0;
     bool isLoading = false;
-
     bool ShowAddedTab = false;
-
     RadzenTabs tabs = default!;
-
     protected bool includeInactive = false;
     protected IEnumerable<EntEmployeeDto> Employees { get; set; } = [];
     protected List<VCreditAgent>? CreditAgents { get; set; }
@@ -48,7 +44,7 @@ public partial class CreditAgent
 
     int pageIndex = 0;
 
-    int pageSize = 10;
+    int pageSize = 15;
 
     string sortColumn = "FirstName";
 
@@ -62,43 +58,14 @@ public partial class CreditAgent
 
     int selectedTabIndex = 0;
 
-    private async Task AddCreditAgent(string? id)
-    {
-
-        bool? confirm = await DialogService.Confirm($"do you want make Employee #{id} as C.O?",
-                                "Confirm",
-                                 new ConfirmOptions
-                                 {
-                                     OkButtonText = "Ok",
-                                     CancelButtonText = "Cancel"
-                                 });
-        if (confirm == false) return;
-
-        var response = await _creditAgentService.AddCreditAgent(id, model);
-
-        if (response!.IsSuccess)
-        {
-            NotificationService.Notify(NotificationSeverity.Success, response.Data);
-
-            ShowAddedTab = false;
-
-            selectedTabIndex = 0;
-
-            await GetCreditAgents(BranchId, _filter);
-
-            //tabs.Reload();
-        }
-        else
-        {
-            NotificationService.Notify(NotificationSeverity.Error, response.ErrMessage);
-        }
-    }
 
     async Task ChangedPageSize(int page)
     {
         pageSize = page;
 
-        await GetCreditAgents(BranchId, _filter);
+        pageIndex = 0;
+
+        await GetCreditAgents(selectedBranchId, _filter);
     }
 
 
@@ -134,11 +101,7 @@ public partial class CreditAgent
         selectedTabIndex = 0;
     }
 
-    async Task SearchCreditAgent(string filter)
-    {
-        _filter = filter;
-        await LoadPageList(filter);
-    }
+
 
     async Task LoadPageList(string? filter = null)
     {
@@ -237,12 +200,19 @@ public partial class CreditAgent
     private async Task LoadData(LoadDataArgs e)
     {
         int pageIndex = e.Skip!.Value;
-        if (!string.IsNullOrEmpty(e.OrderBy))
-        {
-            sortColumn = e.OrderBy.Split(" ")[0];
-            string dir = e.OrderBy.Split(" ")[1];
-            sortDescending = dir.Contains("asc") ? false : true;
-        }
+
+        (sortColumn, sortDescending) = e.PageInfo("FirstName");
+
+        var filterColumn = e.Filters?.FirstOrDefault(p =>
+                                p.Property == nameof(VCreditAgent.FirstName) ||
+                                p.Property == nameof(VCreditAgent.LastName) ||
+                                p.Property == nameof(VCreditAgent.Phone) ||
+                                p.Property == nameof(VCreditAgent.BranchName) ||
+                                p.Property == nameof(VCreditAgent.EmailAddress)
+                            )?.FilterValue.ToString() ?? string.Empty;
+
+        _filter = filterColumn ?? string.Empty;
+
         await GetCreditAgents(BranchId, _filter);
     }
 
@@ -256,7 +226,28 @@ public partial class CreditAgent
     async Task SelectedBranchChanged()
     {
         await GetCreditAgents(BranchId, _filter);
+
         await InvokeAsync(StateHasChanged);
     }
 
+    private void CloseTab(int closeTabIndex)
+    {
+        if (closeTabIndex == 1)
+        {
+
+            ShowAddedTab = false;
+
+        }
+
+        selectedTabIndex = 0;
+    }
+    private async Task SelectedItemChanged(object? args)
+    {
+        if (args is not null)
+        {
+            selectedBranchId = ((BranchDto)args).BranchId;
+
+            await GetCreditAgents(selectedBranchId, _filter);
+        }
+    }
 }

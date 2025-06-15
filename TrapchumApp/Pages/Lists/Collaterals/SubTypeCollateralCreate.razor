@@ -1,0 +1,101 @@
+﻿@using Applications.Responses.Lists.Collaterals
+@inject IJSRuntime JsRuntime
+@inject NavigationManager NavigationManager
+
+<EditForm Model="model"  OnValidSubmit="SaveForm">
+    <DataAnnotationsValidator />
+    <FluentValidationValidator DisableAssemblyScanning="true" />
+    <RadzenFieldset Text="Collateral Sub-Type Details">
+        <RadzenRow Gap="1rem" class="rz-my-4">
+            <RadzenColumn Size="12" SizeMD="6">
+                <RadzenLabel Text="Collateral Sub-Type Name" />
+                <RadzenTextBox @bind-Value="model.SubTypeName"
+                               Class="w-100"
+                               Placeholder="Enter sub-type name..."
+                               MaxLength="100" />
+                <ValidationMessage For="@(() => model.SubTypeName)" />
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="6">
+                <RadzenLabel Text="Collateral Sub-Type Name (Khmer)" />
+                <RadzenTextBox @bind-Value="model.SubTypeNameInKhmer"
+                               Class="w-100"
+                               Placeholder="Enter sub-type name in Khmer..."
+                               MaxLength="100" />
+                <ValidationMessage For="@(() => model.SubTypeNameInKhmer)" />
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow Gap="1rem" class="rz-my-4">
+            <RadzenColumn Size="12" SizeMD="6">
+                <RadzenLabel Text="Collateral Type" />
+                <RadzenDropDown @bind-Value="model.CollateralTypeRefId"
+                                Data="@_collateralTypes"
+                                TextProperty="@nameof(CollateralTypeResponse.CollateralTypeCode)"
+                                ValueProperty="@nameof(CollateralTypeResponse.CollateralTypeId)"
+                                Class="w-100"
+                                Placeholder="Select collateral type..."
+                                AllowClear="true"
+                                TValue="int?" />
+                <ValidationMessage For="@(() => model.CollateralTypeRefId)" />
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="6">
+                <RadzenLabel Text="Value Rate (%)" />
+                <RadzenNumeric @bind-Value="model.ValueRate"
+                               Class="w-100"
+                               Min="0"
+                               Max="100"
+                               Step="0.01"
+                               Format="N2"
+                               Placeholder="Enter value rate..."
+                               TValue="decimal?" />
+                <ValidationMessage For="@(() => model.ValueRate)" />
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow Gap="1rem" class="rz-my-4">
+            <RadzenColumn Size="12" SizeMD="6">
+                <RadzenLabel Text="Min Loan Size Amount" />
+                <RadzenNumeric @bind-Value="model.LoanSizeAmuntMin"
+                               Class="w-100"
+                               Min="0"
+                               Step="100"
+                               Format="C2"
+                               Placeholder="Enter minimum loan amount..."
+                               TValue="decimal?" />
+                <ValidationMessage For="@(() => model.LoanSizeAmuntMin)" />
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="6">
+                <RadzenLabel Text="Max Loan Size Amount" />
+                <RadzenNumeric @bind-Value="model.LoanSizeAmuntMax"
+                               Class="w-100"
+                               Min="0"
+                               Step="100"
+                               Format="C2"
+                               Placeholder="Enter maximum loan amount..."
+                               TValue="decimal?" />
+                <ValidationMessage For="@(() => model.LoanSizeAmuntMax)" />
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow Gap="1rem" class="rz-my-4">
+            <RadzenColumn Size="12" SizeMD="6">
+                <RadzenLabel Text="Is Active" />
+                <RadzenCheckBox @bind-Value="model.IsActive"
+                                TriState="false"
+                                TValue="bool?" />
+            </RadzenColumn>
+        </RadzenRow>
+    </RadzenFieldset>
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 JustifyContent="JustifyContent.End"
+                 Gap="1rem"
+                 Class="rz-mt-4">
+        <RadzenButton ButtonType="ButtonType.Submit"
+                      Text="Save"
+                      Icon="save"
+                      ButtonStyle="ButtonStyle.Success"
+                      Size="ButtonSize.ExtraSmall" />
+        <RadzenButton Text="Cancel"
+                      Icon="cancel"
+                      ButtonStyle="ButtonStyle.Secondary"
+                      Size="ButtonSize.ExtraSmall"
+                      Click="CancelForm" />
+    </RadzenStack>
+</EditForm>

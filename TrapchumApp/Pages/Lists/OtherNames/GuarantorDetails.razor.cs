@@ -1,4 +1,6 @@
 using Applications.Responses.ViewModels.Loans;
+using Applications.Responses.ViewModels.Loans.Disbursements;
+using Applications.Responses.ViewModels.Loans.Requests;
 using Applications.Responses.ViewModels.OtherNames;
 using Applications.Services.Lists;
 using Microsoft.AspNetCore.Components;
@@ -21,7 +23,11 @@ namespace TrapchumApp.Pages.Lists.OtherNames
 
         VGuarantor? Guarantor = new VGuarantor();
 
-        IEnumerable<VLoanGuarantors> LoanGuarantors = [];
+        List<VLoanGuarantors> LoanGuarantors = [];
+
+        List<VGuarantorLoanRequest> LoanRequest = [];
+
+        List<VGuarantorLoan> Loans = []; 
         protected override async Task OnInitializedAsync()
         {
             await GetGuarantorByIdAsync();
@@ -34,18 +40,20 @@ namespace TrapchumApp.Pages.Lists.OtherNames
 
             Console.WriteLine(Id);
 
-            var resultResponse = await _gService.GetGuarantorByIdAsync(Id, true,true);
+            var rsp = await _gService.GetGuarantorWithByIdAsync(Id);
 
-            if (resultResponse.IsSuccess)
+            if (rsp.IsSuccess)
             {
-                Guarantor = resultResponse.Data!;
+                Guarantor = rsp.Data!;
 
-                LoanGuarantors = resultResponse.Data!.LoanGuarantors;
+                LoanRequest = rsp.Data!.LoanRequests.ToList();
+
+                Loans = rsp.Data.Loans.ToList();
             }
             else
             {
 
-                NotificationService.Notify(NotificationSeverity.Error, resultResponse.ErrMessage);
+                NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
             }
 
         }

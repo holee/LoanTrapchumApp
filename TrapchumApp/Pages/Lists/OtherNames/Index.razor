@@ -41,6 +41,7 @@
                             AllowPaging="true"
                             AllowFiltering="true"
                             AllowAlternatingRows="true"
+                            IsLoading="@isLoading"
                             PagerHorizontalAlign="HorizontalAlign.Right"
                             ShowPagingSummary="true"
                             GridLines="DataGridGridLines.Both"
@@ -63,7 +64,7 @@
                     <RadzenDataGridColumn Width="8rem" Title="Gender" Property="@(nameof(VendorVm.Gender))" />
                     <RadzenDataGridColumn Sortable="false" Width="8rem" Title="Phone" Property="@(nameof(VOtherNames.Phone))" />
                     <RadzenDataGridColumn Sortable="false" Title="Email" Property="@(nameof(VOtherNames.EmailAddress))" />
-                    <RadzenDataGridColumn Sortable="false" Title="Address" Property="@(nameof(VOtherNames.Description))" Context="v">
+                    <RadzenDataGridColumn Sortable="false" Filterable="false" Title="Address" Property="@(nameof(VOtherNames.Description))" Context="v">
                         <Template>
                             @v.ToString()
                         </Template>

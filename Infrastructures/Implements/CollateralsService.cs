@@ -99,7 +99,7 @@ public class CollateralsService(DataContext context, IDapperConnectionFactory co
             queries = queries.Skip(param.Skip).Take(param.PageSize);
         }
 
-        var collaterals = await queries.ToListAsync();
+        var collaterals = await queries.AsNoTracking().ToListAsync();
 
         return new Pager<VCollateral>
         {
@@ -248,10 +248,12 @@ public class CollateralsService(DataContext context, IDapperConnectionFactory co
         return lines;
     }
 
-    public async Task<Result<string>> InsertOrUpdate(Collateral req)
+    public async Task<Result<string>> InsertOrUpdate(Collateral req,CancellationToken cancellation=default)
     {
         try
         {
+            await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);
+
             var existingCollateral = await context.Collaterals
                                .Include(c => c.CollateralLines)
                                .FirstOrDefaultAsync(x => x.CollateralId == req.CollateralId);
@@ -301,6 +303,103 @@ public class CollateralsService(DataContext context, IDapperConnectionFactory co
 
 
     }
+
+
+
+
+    public async Task<Result<string>> Upsert(CollateralSubType req,CancellationToken cancellation=default)
+    {
+        try
+        {
+            await using var dataContext = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+            if (req.Id == 0)
+            {
+                dataContext.Add(req);
+            }
+            else
+            {
+                dataContext.Update(req);
+            }
+            await dataContext.SaveChangesAsync(cancellation);
+
+            return Result.Success("Collateral was changed.");
+
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}"));
+        }
+
+
+
+    }
+
+
+
+    public async Task<Result<string>> CreateAsync(CollateralLine req, CancellationToken cancellation = default)
+    {
+        try
+        {
+            await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);
+            context.Add(req);
+            await context.SaveChangesAsync(cancellation);
+            return Result.Success("New collateral was added.");
+
+        }
+        catch (DbUpdateException ex)
+        {
+            return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}"));
+        }
+    }
+
+
+    public async Task<Result<string>> UpdateAsync(CollateralLine req, CancellationToken cancellation = default)
+    {
+        try
+        {
+            await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);
+            context.Update(req);
+            await context.SaveChangesAsync(cancellation);
+            return Result.Success("Collateraline was changed.");
+
+        }
+        catch (DbUpdateException ex)
+        {
+            return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}"));
+        }
+    }
+
+    public async Task<Result<string>> UpSertAsync(CollateralLine req, CancellationToken cancellation = default)
+    {
+        try
+        {
+            await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+            if (req.Id == 0)
+            {
+                context.Add(req);
+            }
+            else
+            {
+                context.Update(req);
+            }
+
+            await context.SaveChangesAsync(cancellation);
+
+            return Result.Success("Collateraline was changed.");
+
+        }
+        catch (DbUpdateException ex)
+        {
+            return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}"));
+        }
+
+
+
+    }
+
+
 
 
     public async Task<Result<string>> InsertOrUpdateAsync(CollateralSubType req, CancellationToken cancellation = default)

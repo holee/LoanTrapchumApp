@@ -573,6 +573,6 @@ public class JournalService(
 //    //}
 
 //    //journalEntries = journalEntries.OrderByDynamic(sortField, sortOrder.ToUpper());
-//    //return await PaginatedList<JournalEntryVM>.CreateAsync(journalEntries, pageNumber, pageSize);
+//    //return await PaginatedList<JournalEntryVM>.UpsertAsync(journalEntries, pageNumber, pageSize);
 
 //}

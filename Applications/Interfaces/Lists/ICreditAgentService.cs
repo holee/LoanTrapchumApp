@@ -9,10 +9,10 @@ namespace Applications.Interfaces.Lists
     public interface ICreditAgentService
     {
         Task<Result<string>> AddCreditAgent(string? employeeRefId, LoanCreditAgent req);
-        Task<Result<string>> ActivateOrDeactivateCreditAgent(LoanCreditAgent req);
+        Task<Result<string>> ChangeCreditAgentState(LoanCreditAgent req);
         Task<Result<IEnumerable<VCreditAgent>>> GetCreditAgents(bool includeInactive=false, string? query = null);
         Task<Result> UpdateCreditAgent(string? id, LoanCreditAgent req);
         Task<Result<IEnumerable<VEmployeeCreateCreditAgent>>> GetEmployeeCreateCreditAgents(string? query = null);
-        Task<Pager<VCreditAgent>> GetCreditAgents(int? branchId, QueryParam param);
+        Task<Pager<VCreditAgent>> GetCreditAgents(int? branchId, QueryParam param, CancellationToken cancellation = default);
     }
 }

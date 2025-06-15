@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using Applications.Responses.ViewModels.Loans;
+using Applications.Responses.ViewModels.Loans.Disbursements;
+using Applications.Responses.ViewModels.Loans.Requests;
 
 namespace Applications.Responses.ViewModels.OtherNames;
 
@@ -20,6 +22,11 @@ public sealed class VGuarantor
     public bool Selected { get;set; } = false;
     [NotMapped]
     public ICollection<VLoanGuarantors> LoanGuarantors { get; set; } = [];
+
+    [NotMapped]
+    public ICollection<VGuarantorLoanRequest> LoanRequests { get; set; } = [];
+    [NotMapped]
+    public ICollection<VGuarantorLoan> Loans { get; set; } = []; 
     public override string ToString()
     {
         return $"{ProInKhmer} {DisInKhmer} {ComInKhmer} {VilInKhmer}";

@@ -11,7 +11,7 @@
             @ref="@tabs">
     <Tabs>
         <RadzenTabsItem Text="Customer" Icon="group" Selected="true">
-            <CustomersList ClickedEdit="AddEditTab"
+            <CustomersList ClickedEdit="@AddEditTab"
                            ClickedAddCollateral="AddCollateralTab"
                            BranchId="@BranchId"
                            EditIndex="@EditIndex"
@@ -30,14 +30,15 @@
         <RadzenTabsItem Text="New Customer" Icon="person_add" Visible="isNewTab">
             <CustomerCreate Closed="CloseTabe" />
         </RadzenTabsItem>
+        <RadzenTabsItem Text="Customer" Icon="info" Visible="@isDetailsTab">
+            <CustomerDetails Close="CloseTabe" CustomerId="@customerId" EditClick="@EditIndex" />
+        </RadzenTabsItem>
         <RadzenTabsItem Text="Edit"
                         Icon="@IconNames.PersonEdit"
                         Visible="@isEditTab">
             <CustomerUpdateTab CustomerId="@customerId" Closed="CloseTabe" />
         </RadzenTabsItem>
-        <RadzenTabsItem Text="Customer" Icon="info" Visible="@isDetailsTab">
-            <CustomerDetails Close="CloseTabe" CustomerId="@customerId" EditClick="@EditIndex" />
-        </RadzenTabsItem>
+       
 
     </Tabs>
 </RadzenTabs>
@@ -45,6 +46,7 @@
     void EditIndex(int selectedTabIndex)
     {
         selectedIndex = selectedTabIndex;
+
         isEditTab = true;
     }
 }

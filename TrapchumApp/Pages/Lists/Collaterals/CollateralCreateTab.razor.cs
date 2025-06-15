@@ -208,14 +208,14 @@ namespace TrapchumApp.Pages.Lists.Collaterals
 
         #region codes
 
-        //model!.CollateralLines!.Add(new CollateralLineDTO
+        //Model!.CollateralLines!.Add(new CollateralLineDTO
         //{
         //    CategoryRefId = collateralTypeId,
         //    TypeName = collateralTypeId == 3 ? "Personal" : "Property"
         //});
 
 
-        //model!.CollateralLines!.ForEach(x =>
+        //Model!.CollateralLines!.ForEach(x =>
         //{
         //    var subType = allSubTypes!.Where(a => a.Id == x.SubCategoryRefId).FirstOrDefault();
         //    if (subType is not null)
@@ -229,22 +229,22 @@ namespace TrapchumApp.Pages.Lists.Collaterals
         //    if (collateral is not null)
         //    {
         //        CollateralId = CustomerId;
-        //        model!.CustomerRefId = CustomerId;
-        //        model.CustomerName = CustomerName;
-        //        model.CollateralLines = collateral!.CollateralLines;
-        //        model.Remark = collateral!.Remark;
-        //        model.DocumentKeeping = collateral!.DocumentKeeping;
-        //        model.RegisterDate = collateral!.RegisterDate;
+        //        Model!.CustomerRefId = CustomerId;
+        //        Model.CustomerName = CustomerName;
+        //        Model.CollateralLines = collateral!.CollateralLines;
+        //        Model.Remark = collateral!.Remark;
+        //        Model.DocumentKeeping = collateral!.DocumentKeeping;
+        //        Model.RegisterDate = collateral!.RegisterDate;
         //    }
         //    else
         //    {
         //        CollateralId = 0;
-        //        model!.CustomerName = CustomerName;
-        //        model.CustomerRefId = CustomerId;
-        //        model.Remark = "";
-        //        model.DocumentKeeping = "";
-        //        model.RegisterDate = DateTime.Now;
-        //        model.CollateralLines!.Clear();
+        //        Model!.CustomerName = CustomerName;
+        //        Model.CustomerRefId = CustomerId;
+        //        Model.Remark = "";
+        //        Model.DocumentKeeping = "";
+        //        Model.RegisterDate = DateTime.Now;
+        //        Model.CollateralLines!.Clear();
         //    }
         //    await InvokeAsync(StateHasChanged);
         //}
@@ -270,7 +270,7 @@ namespace TrapchumApp.Pages.Lists.Collaterals
         //protected IEnumerable<LoanCustomerQuery>? cusName = Enumerable.Empty<LoanCustomerQuery>();
         //protected EditForm editForm { get; set; } = default!;
 
-        //protected CollateralDto model = new CollateralDto();
+        //protected CollateralDto Model = new CollateralDto();
 
         //private IEnumerable<CollateralTypeDto> CollateralTypeDtos = [];
         //private IEnumerable<CollateralSubTypeDto> collateralProperties = [];
@@ -290,7 +290,7 @@ namespace TrapchumApp.Pages.Lists.Collaterals
         //        collateralPersonals = await _service.GetCollateralSubTypes(3);
         //        await GetCollateralLineByCustomer(SelectedCustomer!.CustomerId);
         //        allSubTypes = await _service.GetCollateralSubTypes();
-        //        model.RegisterDate = DateTime.UtcNow;
+        //        Model.RegisterDate = DateTime.UtcNow;
 
         //    }
         //    catch (Exception ex)
@@ -320,7 +320,7 @@ namespace TrapchumApp.Pages.Lists.Collaterals
         //}
         //private void AddNewRow(int collateralTypeId)
         //{
-        //    model.CollateralLines!.Add(new CollateralLineDTO
+        //    Model.CollateralLines!.Add(new CollateralLineDTO
         //    {
         //        CategoryRefId = collateralTypeId,
         //        TypeName = collateralTypeId == 3 ? "Personal" : "Property"
@@ -332,34 +332,34 @@ namespace TrapchumApp.Pages.Lists.Collaterals
         //    if (customerResult is not null)
         //    {
         //        CollateralId = customerResult!.CustomerRefId!.Value;
-        //        model.CustomerRefId = customerResult!.CustomerRefId;
-        //        model.CustomerName = SelectedCustomer!.AltName;
-        //        model.CustomerRefId = SelectedCustomer.CustomerId;
-        //        model.Remark = customerResult!.Remark;
-        //        model.DocumentKeeping = customerResult!.DocumentKeeping;
-        //        model.RegisterDate = customerResult!.RegisterDate;
-        //        model.CollateralLines = customerResult!.CollateralLines;
+        //        Model.CustomerRefId = customerResult!.CustomerRefId;
+        //        Model.CustomerName = SelectedCustomer!.AltName;
+        //        Model.CustomerRefId = SelectedCustomer.CustomerId;
+        //        Model.Remark = customerResult!.Remark;
+        //        Model.DocumentKeeping = customerResult!.DocumentKeeping;
+        //        Model.RegisterDate = customerResult!.RegisterDate;
+        //        Model.CollateralLines = customerResult!.CollateralLines;
         //    }
         //    else
         //    {
         //        CollateralId = 0;
-        //        model.CustomerName = SelectedCustomer!.AltName;
-        //        model.CustomerRefId = SelectedCustomer.CustomerId;
-        //        model.Remark = "";
-        //        model.DocumentKeeping = "";
-        //        model.RegisterDate = DateTime.Now;
+        //        Model.CustomerName = SelectedCustomer!.AltName;
+        //        Model.CustomerRefId = SelectedCustomer.CustomerId;
+        //        Model.Remark = "";
+        //        Model.DocumentKeeping = "";
+        //        Model.RegisterDate = DateTime.Now;
         //    }
         //}
         //private void Remove(CollateralLineDTO row)
         //{
-        //    model?.CollateralLines!.Remove(row);
+        //    Model?.CollateralLines!.Remove(row);
         //}
 
         //////
         /////create method
         //protected async Task FormValidate()
         //{
-        //    model.CollateralLines!.ForEach(x =>
+        //    Model.CollateralLines!.ForEach(x =>
         //    {
         //        var subType = allSubTypes!.Where(a => a.Id == x.SubCategoryRefId).FirstOrDefault();
         //        if (subType is not null)
@@ -371,7 +371,7 @@ namespace TrapchumApp.Pages.Lists.Collaterals
         //    editForm.EditContext?.Validate();
         //    try
         //    {
-        //        var data = await _service.CreateCollateral(CollateralId, model);
+        //        var data = await _service.CreateCollateral(CollateralId, Model);
         //        if (data.IsSuccess)
         //        {
         //            NotificationService.Notify(NotificationSeverity.Success, data.Message);

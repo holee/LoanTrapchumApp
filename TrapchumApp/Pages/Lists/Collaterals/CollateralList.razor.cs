@@ -51,7 +51,15 @@ public partial class CollateralList
     async Task SearchCollateral()
     {
         await GetCollaterals();
-        StateHasChanged();
+
+        
+    }
+
+    void PageSizeChanged(int page)
+    {
+        pageSize = page;
+
+        pageIndex = 0;
     }
 
     async Task AddedMoreCollateral(string? Id)
@@ -178,18 +186,10 @@ public partial class CollateralList
         IsShowAdd = false;
         selectedIndex = 0;
         StateHasChanged();
-        // if (tabItems.Count > 0 && selectedIndex > 0)
-        // {
-        //     tabItems.RemoveAt(selectedIndex);
-        // }
-        // if (tabItems.Count == 0)
-        // {
-        //     selectedIndex = 0;
-        // }
     }
 
     int pageIndex = 0;
-    int pageSize = 10;
+    int pageSize = 15;
     bool sortDecending = false;
     string sortColumn = "CollateralId";
     int counts = 0;
@@ -211,6 +211,8 @@ public partial class CollateralList
             Collaterals = rsp.Items ?? [];
 
             counts = rsp.Count;
+
+            StateHasChanged();
         }
         catch (Exception ex)
         {
@@ -220,12 +222,10 @@ public partial class CollateralList
     protected async override Task OnInitializedAsync()
     {
         await GetCollaterals();
+
         await base.OnInitializedAsync();
     }
-    async void Reload()
-    {
-        await GetCollaterals();
-    }
+
     async Task OnSearch(string e)
     {
         searchText = e;

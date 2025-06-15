@@ -67,6 +67,11 @@ namespace TrapchumApp.Pages.Lists
             {
                 model.ProInKhmer = ((ProvinceDto)arg).ProInKhmer;
                 Districts = await _addressService!.GetDistrictsByProvinceId(((ProvinceDto)arg).ProvinceId);
+                model.DistrictRefId = null;
+                model.CommuneRefId = null;
+                model.VillageRefId = null;
+                Communes = [];
+                Villages = [];
                 StateHasChanged();
             }
 
@@ -77,6 +82,9 @@ namespace TrapchumApp.Pages.Lists
             {
                 model.DisInKhmer = ((DistrictDto)arg).DisInKhmer;
                 Communes = await _addressService!.GetCommunesByDistrictId(((DistrictDto)arg).DistrictId);
+                Villages = [];
+                model.CommuneRefId = null;
+                model.VillageRefId = null;
                 StateHasChanged();
             }
         }
@@ -86,6 +94,7 @@ namespace TrapchumApp.Pages.Lists
             {
                 model.ComInKhmer = ((CommuneDto)arg).ComInKhmer;
                 Villages = await _addressService!.GetVillagesByCommuneId(((CommuneDto)arg).CommuneId);
+                model.VillageRefId = null;
                 StateHasChanged();
             }
 

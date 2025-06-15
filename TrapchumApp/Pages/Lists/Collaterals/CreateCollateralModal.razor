@@ -90,9 +90,9 @@
                                     </tr>
                                 </thead>
                                @*  <tbody>
-                                    @if (model?.CollateralLines!.Count > 0)
+                                    @if (Model?.CollateralLines!.Count > 0)
                                     {
-                                        var properties = model?.CollateralLines!
+                                        var properties = Model?.CollateralLines!
                                         .Where(x => x.TypeName == "Property")
                                         .ToList();
 
@@ -176,9 +176,9 @@
                                     </tr>
                                 </thead>
                               @*   <tbody>
-                                    @if (model.CollateralLines?.Count > 0)
+                                    @if (Model.CollateralLines?.Count > 0)
                                     {
-                                        var people = model.CollateralLines
+                                        var people = Model.CollateralLines
                                         .Where(x => x.TypeName == "Personal")
                                         .ToList();
                                         @for (int x = 0; x < people?.Count; x++)

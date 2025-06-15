@@ -1,8 +1,10 @@
+using Applications.Extensions.DateTimes;
 using Applications.Extensions.Identity.Authorizations.Extensions;
 using Applications.Extensions.Identity.Policies;
 using Applications.Responses.Lists.Customers;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Customers;
+using TrapchumApp.Pages.Lists.Collaterals;
 
 namespace TrapchumApp.Pages.Lists.Customers
 {
@@ -43,7 +45,7 @@ namespace TrapchumApp.Pages.Lists.Customers
         private bool sortDescending = false;
 
         int branchId = 0;
-
+        
         void OnMenuItemClick(MenuItemEventArgs args)
         {
             ContextMenuService.Close();
@@ -80,7 +82,18 @@ namespace TrapchumApp.Pages.Lists.Customers
         protected async Task AddCollateral(string? customerId)
         {
             ContextMenuService.Close();
-            await ClickedAddCollateral.InvokeAsync(customerId);
+            var param = new Dictionary<string, object?>
+            {
+                { "CustomerId", customerId}
+            };
+            var options = new DialogOptions
+            {
+                Width = "100vw",
+                Height = "100vh",
+                AutoFocusFirstElement=false
+            };
+
+            await DialogService.OpenAsync<CollateralModalAdd>("Collateral", param, options);
         }
 
         private async Task AddLoanRequest(string? customerId)
@@ -121,8 +134,10 @@ namespace TrapchumApp.Pages.Lists.Customers
         private async Task AddEdit(string? customerId)
         {
             ContextMenuService.Close();
+
             await ClickedEdit.InvokeAsync(customerId);
-            await EditIndex.InvokeAsync(2);
+
+            await EditIndex.InvokeAsync(3);
 
         }
 
@@ -230,16 +245,37 @@ namespace TrapchumApp.Pages.Lists.Customers
             }
         }
 
-        void OnRowRender(RowRenderEventArgs<VCustomerList> e)
+        void OnRowRender(RowRenderEventArgs<VCustomerList> args)
         {
-            if (e.Data.IsLoanActive)
+            if (args.Data.IsLoanActive)
             {
-                e.Attributes.Add("style", "font-weight:bold;color:red;background-color:yellow;");
+                args.Attributes.Add("style", "font-weight:bold;color:red;background-color:yellow;");
+            }
+
+            if (args.Data.ModifiedDT.IsRecently())
+            {
+
+                args.Attributes.Add("class", "rz-state-highlight rz-data-row recently-edited");
+                
             }
         }
+
+        void OnCellRender(RowRenderEventArgs<VCustomerList> e)
+        {
+            
+        }
+
+        
         private void OnRowSelected(VCustomerList args)
         {
             
+        }
+
+        private async Task OnChanged(bool arg)
+        {
+            includeInactive=arg;
+            
+            await LoadCustomerPageList(filterText);
         }
     }
 }

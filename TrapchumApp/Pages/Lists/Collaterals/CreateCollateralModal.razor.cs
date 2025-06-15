@@ -25,12 +25,12 @@ namespace TrapchumApp.Pages.Lists.Collaterals
         protected CustomerCollateral? SelectedCustomer = new();
         protected CollateralDtoCreate model = new();
         /// <summary>
-        /// end model include
+        /// end Model include
         /// </summary>
         /// <returns></returns>
         private void Close() => DialogService.Close(false);
         [Parameter] public string? CollateralId { get; set; } = string.Empty;
-        //model varr
+        //Model varr
         //Onstartup
         protected async override Task OnInitializedAsync()
         {
@@ -151,7 +151,7 @@ namespace TrapchumApp.Pages.Lists.Collaterals
                 var subType = allSubTypes!.Where(a => a.Id == x.SubCategoryRefId).FirstOrDefault();
                 if (subType is not null)
                 {
-                    x.SubTypeName = subType.CollateralSubTypeName;
+                    x.CollateralSubTypeName = subType.CollateralSubTypeName;
                 }
             });
 

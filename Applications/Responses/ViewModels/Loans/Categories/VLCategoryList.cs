@@ -1,6 +1,6 @@
 ﻿namespace Applications.Responses.ViewModels.Loans.Categories
 {
-    public class VlCategoryList
+    public sealed class VlCategoryList
     {
         public int LoanCategoryId { get; set; }
         public string? LoancategoryCode { get; set; }

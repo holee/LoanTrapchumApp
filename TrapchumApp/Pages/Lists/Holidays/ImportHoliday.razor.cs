@@ -17,7 +17,7 @@ namespace TrapchumApp.Pages.Lists.Holidays
             //if (existdate == true)
             //{
             //    bool checkDT = checkdt(modelDTO.HolidayName);
-            //    var a = model.Find(x => x.HolidayName == modelDTO.HolidayName);
+            //    var a = Model.Find(x => x.HolidayName == modelDTO.HolidayName);
             //    if (checkDT == true && a == null)
             //    {
 
@@ -52,7 +52,7 @@ namespace TrapchumApp.Pages.Lists.Holidays
         {
             model?.Remove(modelV);
         }
-        //private void readexcel() => model = MiniExcel.Query<HolidayCreateDtos>("readexcel.xlsx").ToList();
+        //private void readexcel() => Model = MiniExcel.Query<HolidayCreateDtos>("readexcel.xlsx").ToList();
 
     }
 }

@@ -1,4 +1,15 @@
 ﻿@using TrapchumApp.Services
+
+<RadzenStack class="rz-my-2" AlignItems="AlignItems.Center"
+             Orientation="Orientation.Horizontal"
+             JustifyContent="JustifyContent.SpaceBetween">
+    <RadzenButton Variant="Variant.Flat"
+                  Click="InsertedRow"
+                  Text="Add"
+                  ButtonStyle="ButtonStyle.Primary"
+                  Icon="add_circle"
+                  Size="ButtonSize.ExtraSmall" />
+</RadzenStack>
 <RadzenStack AlignItems="AlignItems.Center"
              Wrap="FlexWrap.Wrap"
              Orientation="Orientation.Horizontal">
@@ -10,13 +21,6 @@
                     GridLines="DataGridGridLines.Both"
                     ColumnWidth="8rem"
                     Density="Density.Compact">
-        <HeaderTemplate>
-            <RadzenButton Variant="Variant.Flat"
-                          Click="InsertedRow"
-                          ButtonStyle="ButtonStyle.Success"
-                          Icon="add_circle"
-                          Size="ButtonSize.ExtraSmall" />
-        </HeaderTemplate>
         <Columns>
             <RadzenDataGridColumn Context="c" Title="#" Width="2rem" TextAlign="TextAlign.Center">
                 <Template>

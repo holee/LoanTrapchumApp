@@ -118,8 +118,8 @@ namespace TrapchumApp.Pages.Lists.OtherNames
 
         // protected async Task OnSaveChanges()
         // {
-        //     model.EntType = "Other Name";
-        //     var resultResponse = await _gService.CreateGaurantorAsync(model);
+        //     Model.EntType = "Other Name";
+        //     var resultResponse = await _gService.CreateGaurantorAsync(Model);
 
         //     if (resultResponse.IsSuccess)
         //     {
@@ -175,7 +175,7 @@ namespace TrapchumApp.Pages.Lists.OtherNames
         // {
         //     if (e is not null)
         //     {
-        //         model.ProInKhmer = ((ProvinceDto)e).ProInKhmer;
+        //         Model.ProInKhmer = ((ProvinceDto)e).ProInKhmer;
         //         var id = ((ProvinceDto)e).ProvinceID;
         //         districtList = await _addressService!.GetDistrictByProvinceAsync(id);
         //     }
@@ -185,7 +185,7 @@ namespace TrapchumApp.Pages.Lists.OtherNames
         // {
         //     if (e is not null)
         //     {
-        //         model.DisInKhmer = ((DistrictDto)e).DisInKhmer;
+        //         Model.DisInKhmer = ((DistrictDto)e).DisInKhmer;
         //         var id = ((DistrictDto)e).DistrictId;
         //         communeList = await _addressService!.GetCommuneByDistricteAsync(id);
         //     }
@@ -198,7 +198,7 @@ namespace TrapchumApp.Pages.Lists.OtherNames
         // {
         //     if (e is not null)
         //     {
-        //         model.ComInKhmer = ((CommuneDto)e).ComInKhmer;
+        //         Model.ComInKhmer = ((CommuneDto)e).ComInKhmer;
         //         var id = ((CommuneDto)e).CommuneId;
         //         villageList = await _addressService!.GetVillageByCommuneAsync(id);
         //     }
@@ -208,13 +208,13 @@ namespace TrapchumApp.Pages.Lists.OtherNames
         // {
         //     if (e is not null)
         //     {
-        //         model.VilInKhmer = ((VillageDto)e).VilInKhmer;
+        //         Model.VilInKhmer = ((VillageDto)e).VilInKhmer;
         //     }
         //     StateHasChanged();
         // }
         // void SetFirstName()
         // {
-        //     model.FirstName = model.Name;
+        //     Model.FirstName = Model.Name;
         // }
 
     }

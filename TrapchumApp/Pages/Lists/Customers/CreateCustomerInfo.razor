@@ -36,7 +36,10 @@
                 </RadzenRow>
             </RadzenColumn>
             <RadzenColumn Size="6">
-                <RadzenCheckBox TValue="bool?" @bind-Value="Model.IsActive" />
+                <div class="text-start">
+                    <RadzenCheckBox TValue="bool?" @bind-Value="Model.IsActive"/>
+                    <RadzenLabel Text="@(Model.IsActive==true ? "Active" : "In Active")" />
+                </div>
             </RadzenColumn>
         </RadzenRow>
         <RadzenRow class="rz-my-2">

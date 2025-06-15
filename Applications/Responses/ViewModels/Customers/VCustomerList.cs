@@ -1,10 +1,11 @@
 ﻿using Applications.Responses.Lists.Collaterals;
-using Applications.Responses.ViewModels.Collaterals;
 using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Requests;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Applications.Responses.ViewModels.Customers;
+
+
 
 public sealed class VCustomerList
 {
@@ -49,6 +50,8 @@ public sealed class VCustomerList
     public bool IsLoanActive { get; set; } = false;
     public int? Circle { get; set; }
     public string? Photo { get; set; }=string.Empty;
+
+    public DateTime? ModifiedDT { get; set; }
     public override string ToString()
     {
         return $"{ProInKhmer} {DisInKhmer} {ComInKhmer} {VilInKhmer}";

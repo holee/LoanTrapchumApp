@@ -15,10 +15,14 @@ public interface ICollateralsServiceImpl
     Task<IEnumerable<CollateralSubTypeResponse>> GetCollateralSubTypes(int? id = 0, string? searchText = null);
     Task<IEnumerable<CollateralTypeResponse>> GetCollateralTypes(int? collateralId = 0, string? q = null);
     Task<IEnumerable<VCollateral>> GetsCollateralAysnc(string? q = null);
-    Task<Result<string>> CreateAsync(CollateralDtoCreate entity);
-    Task<Result<string>> UpdateAsync(CollateralDtoUpdate entity);
     Task<Result<VCustomerCollaterals>> GetCustomerCollateralAsync(string? customerId);
     Task<Result<VCustomerCollaterals>> GetCustomerCollateralsAsync(string? customerId);
     Task<Result<VCustomerCollaterals>> GetCustomerCollateralsAsync(string? customerId, bool includeInUsed);
     Task<Result<string>> UpdateAsync(CollateralSubType entity);
+
+    Task<Result<string>> CreateAsync(CollateralDtoCreate entity);
+    Task<Result<string>> UpdateAsync(CollateralDtoUpdate entity);
+    Task<Result<string>> CreateAsync(CollateralLineDtoCreate entity, CancellationToken cancellation = default);
+    Task<Result<string>> UpdateAsync(CollateralLineDtoUpdate entity, CancellationToken cancellation = default);
+    Task<Result<string>> UpsertAsync(CollateralSubTypeDtoCreate entity);
 }

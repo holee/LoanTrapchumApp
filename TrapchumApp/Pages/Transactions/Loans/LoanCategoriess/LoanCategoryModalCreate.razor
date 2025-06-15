@@ -1,97 +1,83 @@
 ﻿@using TrapchumApp.Services
 <EditForm Model="model" OnValidSubmit="OnSaveNew">
-    <div class="modal-body">
-        <DataAnnotationsValidator />
-        <Card>
-            <CardHeader>
-                <div class="d-flex justify-content-between">
-                    <span>Loan Category Informations:</span>
-                </div>
-            </CardHeader>
-            <CardBody BodyCssClass="rz-background-color-base-100">
-                <div class="row">
-                    <div class="col-md-3 text-md-end">
-                        <RadzenLabel Component="Name">Loan Category Name <span class="text-danger">*</span></RadzenLabel>
-                    </div>
-                    <div class="col-md-9">
-                        <RadzenTextBox @bind-Value="model.LoanCategoryCode"
-                                       Style="width:100%;height:33px;font-size:14px"
-                                       AutoComplete="true"
-                                       Placeholder="Enter Category Name..."
-                                       Name="Name" />
-                        <ValidationMessage For="@(()=>model.LoanCategoryCode)"></ValidationMessage>
-                        <span>@messageName</span>
-                    </div>
-                    <div class="col-md-3 text-md-end mt-3 rz-background-color-base-100">
-                        <RadzenLabel>Record Status</RadzenLabel>
-                    </div>
-                    <div class="col-md-9 mt-3">
-                        <RadzenCheckBox @bind-Value=@model.IsActive Name="CheckBox1" />
-                        <RadzenLabel Component="CheckBox1" Style="margin-left: 8px; vertical-align: middle;">
-                            @(model.IsActive!.Value ? "Is Active" : "Is Inactive")
-                        </RadzenLabel>
-                    </div>
+    <DataAnnotationsValidator />
+    <div class="row">
+        <div class="col-md-3 text-md-end">
+            <RadzenLabel Component="Name">Loan Category<span class="text-danger">*</span></RadzenLabel>
+        </div>
+        <div class="col-md-9">
+            <RadzenTextBox @bind-Value="model.LoanCategoryCode"
+                           Style="width:100%;height:33px;font-size:14px"
+                           AutoComplete="true"
+                           Placeholder="Enter Category Name..."
+                           Name="Name" />
+            <ValidationMessage For="@(() => model.LoanCategoryCode)"></ValidationMessage>
+            <span>@messageName</span>
+        </div>
+        <div class="col-md-3 text-md-end mt-3 rz-background-color-base-100">
+            <RadzenLabel>Status</RadzenLabel>
+        </div>
+        <div class="col-md-9 mt-3">
+            <RadzenCheckBox @bind-Value=@model.IsActive Name="CheckBox1" />
+            <RadzenLabel Component="CheckBox1" Style="margin-left: 8px; vertical-align: middle;">
+                @(model.IsActive!.Value ? "Is Active" : "Is Inactive")
+            </RadzenLabel>
+        </div>
 
-                    <div class="col-md-3 text-md-end mt-3 rz-background-color-base-100">
-                        <RadzenLabel>Description-InKhmer</RadzenLabel>
-                    </div>
-                    <div class="col-md-9 mt-3">
-                        <RadzenTextBox @bind-Value="model.DesInKhmer"
-                                       Style="width:100%;height:33px;font-size:14px"
-                                       AutoComplete="true"
-                                       Placeholder="Enter Description in Khmer..."
-                                       Name="DesInKhmer" />
-                        <ValidationMessage For="@(()=>model.DesInKhmer)"></ValidationMessage>
-                    </div>
-                    <div class="col-md-3 text-md-end mt-3 rz-background-color-base-100">
-                        <RadzenLabel>Code</RadzenLabel>
-                    </div>
-                    <div class="col-md-9 mt-3">
-                        <RadzenTextBox @bind-Value="model.Code"
-                                       Style="width:100%;height:33px;font-size:14px"
-                                       AutoComplete="true"
-                                       Placeholder="Enter Code..."
-                                       Name="Code" />
-                        <ValidationMessage For="@(()=>model.Code)"></ValidationMessage>
-                        <span>@messageCode</span>
+        <div class="col-md-3 text-md-end mt-3 rz-background-color-base-100">
+            <RadzenLabel>Description-InKhmer</RadzenLabel>
+        </div>
+        <div class="col-md-9 mt-3">
+            <RadzenTextBox @bind-Value="model.DesInKhmer"
+                           Style="width:100%;height:33px;font-size:14px"
+                           AutoComplete="true"
+                           Placeholder="Enter Description in Khmer..."
+                           Name="DesInKhmer" />
+            <ValidationMessage For="@(() => model.DesInKhmer)"></ValidationMessage>
+        </div>
+        <div class="col-md-3 text-md-end mt-3 rz-background-color-base-100">
+            <RadzenLabel>Code</RadzenLabel>
+        </div>
+        <div class="col-md-9 mt-3">
+            <RadzenTextBox @bind-Value="model.Code"
+                           Style="width:100%;height:33px;font-size:14px"
+                           AutoComplete="true"
+                           Placeholder="Enter Code..."
+                           Name="Code" />
+            <ValidationMessage For="@(() => model.Code)"></ValidationMessage>
+            <span>@messageCode</span>
 
-                    </div>
-                    <div class="col-md-3 text-md-end mt-3 rz-background-color-base-100">
-                        <RadzenLabel>Description</RadzenLabel>
-                    </div>
-                    <div class="col-md-9 mt-3">
-                        <RadzenTextArea @bind-Value="model.Description"
-                                        Placeholder="Enter Description..."
-                                        class="form-control"
-                                        Name="Description"></RadzenTextArea>
-                        <ValidationMessage For="@(()=>model.Description)"></ValidationMessage>
-                    </div>
-                </div>
-            </CardBody>
-            <CardFooter>
-                <div class="d-flex justify-content-end gap-3">
-                    <RadzenButton ButtonStyle="ButtonStyle.Success"
-                                  Icon="save"
-                                  Text="Save"
-                                  Size="ButtonSize.Small"
-                                  ButtonType="ButtonType.Submit" />
-                    <RadzenButton ButtonStyle="ButtonStyle.Danger"
-                                  Icon="cancel"
-                                  Text="Cancel"
-                                  Click="@ClosedTab"
-                                  Size="ButtonSize.Small" />
-                </div>
-            </CardFooter>
-        </Card>
+        </div>
+        <div class="col-md-3 text-md-end mt-3 rz-background-color-base-100">
+            <RadzenLabel>Description</RadzenLabel>
+        </div>
+        <div class="col-md-9 mt-3">
+            <RadzenTextArea @bind-Value="model.Description"
+                            Placeholder="Enter Description..."
+                            class="form-control"
+                            Name="Description"></RadzenTextArea>
+            <ValidationMessage For="@(() => model.Description)"></ValidationMessage>
+        </div>
     </div>
-
+    <div class="d-flex justify-content-end gap-3 mt-2">
+        <RadzenButton ButtonStyle="ButtonStyle.Success"
+                      Icon="save"
+                      Text="Save"
+                      Size="ButtonSize.Small"
+                      ButtonType="ButtonType.Submit" />
+        <RadzenButton ButtonStyle="ButtonStyle.Danger"
+                      Icon="cancel"
+                      Text="Cancel"
+                      Click="@ClosedTab"
+                      Size="ButtonSize.Small" />
+    </div>
 </EditForm>
 @code {
     [Parameter] public EventCallback<int> CloseTab { get; set; }
-    async void ClosedTab()
+    
+    void ClosedTab()
     {
-        await CloseTab.InvokeAsync(0);
-        StateHasChanged();
+        DialogService.Close(false);
     }
 }
 

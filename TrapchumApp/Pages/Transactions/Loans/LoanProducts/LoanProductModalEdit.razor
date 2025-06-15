@@ -8,18 +8,18 @@
              <FieldBody ColumnSize="ColumnSize.Is10">
                  <Blazorise.Row>
                      <Blazorise.Column ColumnSize="ColumnSize.Is9.OnDesktop.IsFull.OnTablet">
-                         <TextEdit Placeholder="Code..." MaxLength="100" @bind-Text="model.LoanProductCode" />
+                         <TextEdit Placeholder="Code..." MaxLength="100" @bind-Text="Model.LoanProductCode" />
                      </Blazorise.Column>
                      <Blazorise.Column TextAlignment="TextAlignment.End" ColumnSize="ColumnSize.Is3.OnDesktop.IsFull.OnTablet">
-                         @if (model.IsActive == true)
+                         @if (Model.IsActive == true)
                         {
-                            <Check TValue="bool?" @bind-Checked="model.IsActive">
+                            <Check TValue="bool?" @bind-Checked="Model.IsActive">
                                 Is Active
                             </Check>
                         }
                         else
                         {
-                            <Check TValue="bool?" @bind-Checked="model.IsActive">
+                            <Check TValue="bool?" @bind-Checked="Model.IsActive">
                                 Is Inactive
                             </Check>
                         }
@@ -27,7 +27,7 @@
                 </Blazorise.Row>
 
                 <FieldHelp>
-                    <ValidationMessage For="@(()=>model.LoanProductCode)" />
+                    <ValidationMessage For="@(()=>Model.LoanProductCode)" />
                 </FieldHelp>
             </FieldBody>
 

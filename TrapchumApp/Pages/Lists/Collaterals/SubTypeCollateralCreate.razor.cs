@@ -1,0 +1,44 @@
+using Applications.Requests.Lists.Collaterals;
+using Applications.Responses.Lists.Collaterals;
+using Applications.Services.LIsts;
+
+namespace TrapchumApp.Pages.Lists.Collaterals;
+
+public partial class SubTypeCollateralCreate
+{
+    private readonly ICollateralsServiceImpl _collateralService;
+    private CollateralSubTypeDtoCreate model = new();
+    private List<CollateralTypeResponse> _collateralTypes = [];
+
+    public SubTypeCollateralCreate(ICollateralsServiceImpl collateralService)
+    {
+        _collateralService = collateralService;
+    }
+
+    async Task GetCollateralTypes()
+    {
+        var rsp=await _collateralService.GetCollateralTypes();
+        _collateralTypes = rsp.ToList();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetCollateralTypes();
+        await base.OnInitializedAsync();
+    }
+
+    private async Task SaveForm()
+    {
+       var rsp=  await _collateralService.UpsertAsync(model);
+       
+       if (rsp.IsSuccess)
+       {
+           DialogService.Close(true);
+       }
+    }
+
+    private void CancelForm()
+    {
+        DialogService.Close(false); 
+    }
+}

@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="Pages\Lists\OtherNames\GaurantorCreate.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="screenshot.pdf" />
   </ItemGroup>
 
@@ -90,7 +94,7 @@
     <AdditionalFiles Include="Pages\Lists\Collaterals\CollateralsPerson.razor" />
     <AdditionalFiles Include="Pages\Lists\Collaterals\CollateralsProperties.razor" />
     <AdditionalFiles Include="Pages\Lists\Collaterals\CreateCollateralModal.razor" />
-    <AdditionalFiles Include="Pages\Lists\CreditAgents\CreditAgent.razor" />
+    <AdditionalFiles Include="Pages\Lists\CreditAgents\AgentIndex.razor" />
     <AdditionalFiles Include="Pages\Lists\CreditAgents\CreditAgentDialog.razor" />
     <AdditionalFiles Include="Pages\Lists\CreditAgents\CreditAgentSwitch.razor" />
     <AdditionalFiles Include="Pages\Lists\CreditAgents\CreditAgentTableRow.razor" />
@@ -189,7 +193,7 @@
     <AdditionalFiles Include="Pages\Transactions\Loans\LoanCategoriess\LCDetailModal.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\LoanCategoriess\LoanCategoryModalCreate.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\LoanCategoriess\LoanCategoryModalEdit.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\LoanCategoriess\LoanCategoryView.razor" />
+    <AdditionalFiles Include="Pages\Transactions\Loans\LoanCategoriess\LoanCategoryIndex.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\LoanProducts\LoanProductList.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\LoanProducts\LoanProductModalCreate.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\LoanProducts\LoanProductModalEdit.razor" />

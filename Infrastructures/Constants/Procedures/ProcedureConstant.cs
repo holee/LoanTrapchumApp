@@ -2,6 +2,17 @@
 {
     public static class ProcedureConstant
     {
+
+        /// <summary>
+        /// Guarantor
+        /// </summary>
+        public const string SpGetGaurantorWithLoans = nameof(SpGetGaurantorWithLoans);
+        public const string SpGetGaurantorWithLoanRequests = nameof(SpGetGaurantorWithLoanRequests);
+
+
+        /// <summary>
+        /// 
+        /// </summary>
         public const string SpGetCustomerDetailsById = nameof(SpGetCustomerDetailsById);
         public const string GetCustomerDetailById = "spGetCustomerDetailById";
         public const string GetLoanById = "spGetLoanById";//spGetLoanById
@@ -12,7 +23,6 @@
         public const string SpGetLoansByBranchId = nameof(SpGetLoansByBranchId);
         public const string SpGetVSchedulesByPaymentDate = nameof(SpGetVSchedulesByPaymentDate);
         public const string SpGetLateVSchedules = nameof(SpGetLateVSchedules);
-        public const string SpGetGaurantorWithLoans = nameof(SpGetGaurantorWithLoans);
         /// <summary>
         /// Employee Store Procedures
         /// </summary>

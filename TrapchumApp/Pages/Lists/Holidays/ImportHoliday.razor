@@ -12,7 +12,7 @@
              </TableRow>
          </TableHeader>
          <TableBody>
-             @for (int x = 0; x < model?.Count; x++)
+             @for (int x = 0; x < Model?.Count; x++)
             {
                 var row = x;
                 var currentrow = x + 1;
@@ -23,15 +23,15 @@
                                             Mode="LoreSoft.Blazor.Controls.DateTimePickerMode.Date"
                                             DateFormat="dd/MMM/yyyy"
                                             @bind-Value:format="yyyy/MMM/dd"
-                                            @bind-Value="model[row].HolidayName" />
+                                            @bind-Value="Model[row].HolidayName" />
 
                         </TableRowCell>
                         <TableRowCell>
-                            <TextEdit Placeholder="Descriptions" @bind-Text="model[row].Description" />
+                            <TextEdit Placeholder="Descriptions" @bind-Text="Model[row].Description" />
                         </TableRowCell>
                         <TableRowCell>
                             <TButton Icon="BtnIconType.Delete"
-                                     Click="(()=>DeleteEvent(model[row]))" />
+                                     Click="(()=>DeleteEvent(Model[row]))" />
                         </TableRowCell>
                     </TableRow>
             }

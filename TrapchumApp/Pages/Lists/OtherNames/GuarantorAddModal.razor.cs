@@ -38,17 +38,17 @@ public partial class GuarantorAddModal
     {
         model.EntType = EntType.OtherName.ToString();
 
-        var resultResponse = await _gService.CreateAsync(model);
+        var rsp = await _gService.CreateAsync(model);
 
-        if (resultResponse.IsSuccess)
+        if (rsp.IsSuccess)
         {
-            NotificationService.Notify(NotificationSeverity.Success, resultResponse.Data);
-
+            NotificationService.Notify(NotificationSeverity.Success, rsp.Data);
+            model = new();
             DialogService.Close(true);
         }
         else
         {
-            NotificationService.Notify(NotificationSeverity.Error, resultResponse.ErrMessage);
+            NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
         }
     }
 

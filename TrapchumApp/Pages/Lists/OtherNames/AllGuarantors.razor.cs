@@ -169,10 +169,12 @@ namespace TrapchumApp.Pages.Lists.OtherNames
             if (rsp.IsSuccess)
             {
                 NotificationService.Notify(NotificationSeverity.Success, rsp.Data);
+
                 ShowAddTab = false;
+
                 selectedTabIndex = 0;
+
                 await GetGuarantors();
-                tabs.Reload();
             }
             else
             {

@@ -43,7 +43,7 @@ namespace TrapchumApp.Pages.Settings
 
         private async Task GetCollateralSubTypes()
         {
-
+            _isLoading = true;
             var param = new QueryParam(pageIndex, pageSize, sortField, includeInactive, sortDescending, filterText);
 
             var rsp = await _settingService.GetColleralSubTypes(param);
@@ -51,6 +51,10 @@ namespace TrapchumApp.Pages.Settings
             _collateralSubTypes = rsp.Items.ToList() ?? [];
 
             _counts = rsp.Count;
+
+            _isLoading = false;
+            
+            StateHasChanged();
 
         }
 

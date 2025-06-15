@@ -1,38 +1,36 @@
 ﻿@using TrapchumApp.Services
 <PageTitle>Collaterals Detail</PageTitle>
-<Containers Fluid>
-    <table class="tbl table table-sm table-bordered">
-        <tr>
-            <th class="w-25">Customer</th>
-            <td>
-                @Model?.CustomerName
-            </td>
-        </tr>
-        <tr>
-            <th class="w-25">Register Date</th>
-            <td>@Model?.RegisterDate.DayFirst()</td>
-        </tr>
-        <tr>
-            <th class="w-25">Document Site</th>
-            <td>@Model?.DocumentKeeping</td>
-        </tr>
-        <tr>
-            <th class="w-25">Remark</th>
-            <td>@Model?.Remark</td>
-        </tr>
+<table class="tbl table table-sm table-bordered">
+    <tr>
+        <th class="w-25">Customer</th>
+        <td>
+            @Model?.CustomerName
+        </td>
+    </tr>
+    <tr>
+        <th class="w-25">Register Date</th>
+        <td>@Model?.RegisterDate.DayFirst()</td>
+    </tr>
+    <tr>
+        <th class="w-25">Document Site</th>
+        <td>@Model?.DocumentKeeping</td>
+    </tr>
+    <tr>
+        <th class="w-25">Remark</th>
+        <td>@Model?.Remark</td>
+    </tr>
 
-    </table>
-    <CollateralsCustomer CustomerId="@CustomerId" ShowAdd />
-
-    <RadzenStack Orientation="Orientation.Horizontal"
-                 JustifyContent="JustifyContent.End"
-                 class="rz-mt-2"
-                 AlignItems="AlignItems.Center">
-        <RadzenButton Text="Close"
-                      Icon="close"
-                      ButtonStyle="ButtonStyle.Danger"
-                      Size="ButtonSize.Small"
-                      Click="CloseTab" />
-    </RadzenStack>
-</Containers>
-
+</table>
+<CollateralsCustomer CustomerId="@CustomerId"
+                     ShowCommand="true"
+                     ShowAdd="true" />
+<RadzenStack Orientation="Orientation.Horizontal"
+             JustifyContent="JustifyContent.End"
+             class="rz-mt-2"
+             AlignItems="AlignItems.Center">
+    <RadzenButton Text="Close"
+                  Icon="close"
+                  ButtonStyle="ButtonStyle.Danger"
+                  Size="ButtonSize.Small"
+                  Click="CloseTab" />
+</RadzenStack>

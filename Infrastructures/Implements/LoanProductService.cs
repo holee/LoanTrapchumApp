@@ -61,23 +61,23 @@ namespace Infrastructures.Implements
             }
         }
 
-        public async Task<Result<string>> UpdateAsync(int? id, bool state)
+
+        public async Task<Result<string>> UpdateAsync(int? id, bool state, CancellationToken cancellation = default)
         {
             try
             {
-                var existing = await _context.LoanProducts.FindAsync(id);
+                await using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+                var existing = await context.LoanProducts.FindAsync(id, cancellation);
 
                 if (existing is null)
                 {
                     return Result.Failure<string>(ErrorResponse.NotFound("Loan Product is empty"));
                 }
 
-                int editSeq = existing.EditSeq + 1;
-                
-                _context.LoanProducts.Where(x => x.LoanProductId == id && x.EditSeq == existing.EditSeq)
-                    .ExecuteUpdate(props => props.SetProperty(x => x.IsActive, state)
-                                                 .SetProperty(x => x.EditSeq, editSeq)
-                                                 .SetProperty(x => x.ModifiedDt, DateTime.Now));
+                existing.IsActive = state;
+
+                await context.SaveChangesAsync();
 
                 return Result.Success("Loan Product was updated");
 
@@ -88,6 +88,8 @@ namespace Infrastructures.Implements
 
             }
         }
+
+
 
         public async Task<Result<string>> UpdateAsync(LoanProduct model)
         {
@@ -167,11 +169,13 @@ namespace Infrastructures.Implements
 
             await using var context = await contextFactory.CreateDbContextAsync();
 
-            IQueryable<VlProductList> queries = context.Database
-                                                        .SqlQuery<VlProductList>($@"SELECT * FROM VLProductList")
-                                                        .WhereIf(!param.IsIncludeInActive, x => x.IsActive == true)
-                                                        .WhereIf(!string.IsNullOrEmpty(param.Filter),e=> EF.Functions.Like(e.LoanProductName, $"%{param.Filter}%") ||
-                                                                                                         EF.Functions.Like(e.LoanProductCode, $"%{param.Filter}%"));
+            var queries = context.Database
+                                 .SqlQuery<VlProductList>($"SELECT * FROM VLProductList")
+                                 .WhereIf(!param.IsIncludeInActive, x => x.IsActive == true)
+                                 .WhereIf(!string.IsNullOrEmpty(param.Filter),
+                                           e => EF.Functions.Like(e.LoanProductName!, $"%{param.Filter}%") ||
+                                                EF.Functions.Like(e.LoanSize!, $"%{param.Filter}%") ||
+                                                EF.Functions.Like(e.LoanProductCode!, $"%{param.Filter}%"));
             if (param.SortDescending)
             {
                 queries = queries.OrderByDescending(queries => EF.Property<object>(queries, param.SortColumn));

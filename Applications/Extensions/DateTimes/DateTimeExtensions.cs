@@ -57,5 +57,25 @@
 
             return _first.CompareTo(_second)==0;
         }
+        
+        
+        public static double Days(this DateTime? first, DateTime? second)
+        {
+            var _first = first ?? DateTime.Now;
+
+            var _second = second ?? DateTime.Now;
+
+            var timestampse = _second - _first;
+            
+            return timestampse.TotalDays;
+        }
+
+        public static bool IsRecently(this DateTime? current)
+        {
+            if (!current.HasValue)
+                return false;
+            var timeSince = DateTime.UtcNow - current.Value.ToUniversalTime();
+            return timeSince.Minutes < 2;
+        }
     }
 }

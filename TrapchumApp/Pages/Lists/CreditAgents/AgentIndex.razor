@@ -1,0 +1,106 @@
+﻿@page "/App/Employee/CreditAgent"
+@using Applications.Responses.ViewModels.Employees;
+@using TrapchumApp.Services
+<PageTitle>Credit Agent</PageTitle>
+<RadzenTabs SelectedIndex="selectedTabIndex"
+            SelectedIndexChanged="SelectedTabChanged"
+            RenderMode="TabRenderMode.Server">
+    <Tabs>
+        <RadzenTabsItem Text="All" Icon="people_alt">
+            <GridToolbar SearchChanged="GetSearchChandged" @bind-Value="@_filter">
+                <LeftChildren>
+                    <RadzenButton Text="Credit Officer"
+                                  Click="AddCreditAgentTab"
+                                  ButtonStyle="ButtonStyle.Primary"
+                                  Icon="@IconNames.Add"
+                                  Size="ButtonSize.Small" />
+                </LeftChildren>
+                <RightChildren>
+                    <div class="input-group input-group-sm w-50">
+                        <span class="input-group-text">
+                            Branch
+                        </span>
+                        <RadzenDropDown TValue="int"
+                                        TextProperty="BranchName"
+                                        ValueProperty="BranchId"
+                                        Data="Branches"
+                                        class="w-auto"
+                                        SelectedItemChanged="@SelectedItemChanged"
+                                        @bind-Value="@selectedBranchId">
+                        </RadzenDropDown>
+                    </div>
+                </RightChildren>
+            </GridToolbar>
+            <RadzenStack AlignItems="AlignItems.Center"
+                         JustifyContent="JustifyContent.Center"
+                         Orientation="Orientation.Horizontal">
+                <RadzenDataGrid Data="CreditAgents"
+                                Density="Density.Compact"
+                                Responsive
+                                ShowPagingSummary="true"
+                                PageSize="pageSize"
+                                PagerHorizontalAlign="HorizontalAlign.Right"
+                                LoadData="@LoadData"
+                                IsLoading="isLoading"
+                                Count="@counts"
+                                AllowAlternatingRows="true"
+                                AllowFiltering="true"
+                                AllowPaging="true"
+                                PageSizeChanged="ChangedPageSize"
+                                PageSizeOptions="StorageConstant.PageSizeOptions"
+                                GridLines="DataGridGridLines.Both">
+                    <Columns>
+                        <RadzenDataGridColumn Property="LoanCreditAgentId"
+                                              Title="#"
+                                              Width="3rem"
+                                              Filterable="false"
+                                              Sortable="false"
+                                              Context="em">
+                            <Template>
+                                @{
+                                    var rowNumber = CreditAgents!.IndexOf(em) + 1;
+                                }
+                                @rowNumber
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Property="FirstName" Title="First Name" Sortable="true" />
+                        <RadzenDataGridColumn Property="LastName" Title="Last Name" Sortable="true" />
+                        <RadzenDataGridColumn Property="Phone" Title="Phone" Sortable="false" />
+                        <RadzenDataGridColumn Property="BranchName" Title="Branch" Sortable="true" />
+                        <RadzenDataGridColumn TextAlign="TextAlign.Center"
+                                              Width="7rem" Context="c"
+                                              Title="Remove"
+                                              Filterable="false"
+                                              Sortable="false">
+                            <Template>
+                                <CreditAgentSwitch Reload="Reload" CreditAgent="@c" />
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Width="5rem"
+                                              TextAlign="TextAlign.Center"
+                                              Filterable="false"
+                                              Context="c"
+                                              Title="Account"
+                                              Sortable="false">
+                            <Template>
+                                <RadzenButton ButtonStyle="ButtonStyle.Primary"
+                                              Size="ButtonSize.ExtraSmall"
+                                              Click="@(()=>AddUserAccount(c))"
+                                              Icon="person_add" />
+                            </Template>
+                        </RadzenDataGridColumn>
+                    </Columns>
+                    <LoadingTemplate>
+                        <RadzenProgressBarCircular Mode="ProgressBarMode.Indeterminate"
+                                                   ProgressBarStyle="ProgressBarStyle.Danger"
+                                                   Value="100" ShowValue="false" />
+                    </LoadingTemplate>
+                </RadzenDataGrid>
+            </RadzenStack>
+        </RadzenTabsItem>
+        <RadzenTabsItem Text="New C.O" Visible="@ShowAddedTab" Icon="@IconNames.PersonAdd">
+            <AddCreditAgentTab Closed="@CloseTab" BranchId="@selectedBranchId"/>
+        </RadzenTabsItem>
+    </Tabs>
+</RadzenTabs>
+

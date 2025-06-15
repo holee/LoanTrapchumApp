@@ -34,6 +34,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanCategoriess
                     model = new();
                     messageName = "";
                     messageCode = "";
+                    DialogService.Close(true);
                 }
                 else
                 {

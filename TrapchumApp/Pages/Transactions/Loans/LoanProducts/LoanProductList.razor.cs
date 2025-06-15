@@ -5,6 +5,8 @@ using Applications.Services.Loans;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 using Radzen.Blazor;
+using System.Threading.Tasks;
+using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Transactions.Loans.LoanProducts
 {
@@ -18,7 +20,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanProducts
             _loanProductService = loanProductService;
         }
 
-        int pageSize = 10;
+        int pageSize = 15;
         int pageIndex = 0;
         bool sortDescending = false;
         string sortColumn = "Id";
@@ -61,15 +63,9 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanProducts
             {
                 IsDetails = false;
             }
-            // else if (SelectIndex == 2)
-            // {
-            //     IsEdit = false;
-            // }
-            // else if (SelectIndex == 3)
-            // {
-            //     IsDetails = false;
-            //}
+
             SelectIndex = 0;
+
             StateHasChanged();
         }
         protected async void Reload()
@@ -80,19 +76,31 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanProducts
         protected async Task OnIsActive(bool args)
         {
             IsIncludeInActive = args;
-            await GetLoanProducts();
+
+            await GetLoanProducts(searchText);
 
         }
-        protected async Task DeactiveOrActive(bool arg, VlProductList para)
+
+        async Task PageSizeChanged(int page)
         {
-            var rsp = await _loanProductService.UpdateAsync(para.LoanProductId, arg);
+            pageSize = page;
+
+            pageIndex = 0;
+
+            await GetLoanProducts(searchText);
+        }
+
+        protected async Task ChangeStatus(bool arg, int id)
+        {
+            var confirm = await DialogService.Confirm("Do you disable or enable this Product?");
+
+            if (confirm == false) return;
+
+            var rsp = await _loanProductService.UpdateAsync(id, arg);
 
             if (rsp.IsSuccess)
             {
-                NotificationService.Notify(NotificationSeverity.Success, rsp.Data);
-                para.IsActive = arg;
                 await GetLoanProducts();
-
             }
             else
                 NotificationService.Notify(NotificationSeverity.Success, rsp.ErrMessage);
@@ -105,14 +113,17 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanProducts
 
             pageIndex = e.Skip!.Value;
 
-            if (!string.IsNullOrEmpty(e.OrderBy))
-            {
-                sortColumn = e.OrderBy.Split(" ")[0];
-                string dir = e.OrderBy.Split(" ")[1];
-                sortDescending = dir.Contains("asc") ? false : true;
-            }
+            (sortColumn, sortDescending) = e.PageInfo();
 
-            await GetLoanProducts();
+            var filterColumn = e.Filters?.FirstOrDefault(p =>
+                                p.Property == nameof(VlProductList.LoanSize) ||
+                                p.Property == nameof(VlProductList.LoanProductCode) ||
+                                p.Property == nameof(VlProductList.LoanProductName)
+                                )?.FilterValue.ToString() ?? string.Empty;
+
+            searchText = filterColumn ?? string.Empty;
+
+            await GetLoanProducts(searchText);
         }
         protected override async Task OnInitializedAsync()
         {
@@ -121,29 +132,22 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanProducts
             await base.OnInitializedAsync();
         }
 
-        async Task GetLoanProducts()
+        async Task GetLoanProducts(string? filter = null)
         {
             try
             {
                 isLoading = true;
 
+                var param = new QueryParam(pageIndex, pageSize, sortColumn, IsIncludeInActive, sortDescending, filter);
 
-                var param = new QueryParam
-                {
-                    PageSize = pageSize,
-                    Skip = pageIndex,
-                    IsIncludeInActive = IsIncludeInActive,
-                    SortColumn = sortColumn,
-                    SortDescending = sortDescending,
-                    Filter = searchText
-                };
-
-                var results = await _loanProductService!.GetLoanProductsAsync(param);
+                var results = await _loanProductService.GetLoanProductsAsync(param);
 
                 counts = results.Count;
 
-                VLProducts = results!.Items;
+                VLProducts = results.Items;
+
                 isLoading = false;
+
                 StateHasChanged();
 
             }
@@ -169,6 +173,9 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanProducts
 
         async Task OnDelete(VlProductList? productDTO)
         {
+
+            ContextMenuService.Close();
+
             var confirm = (bool)await DialogService!.Confirm("Loan Product deleted will not be able to recover, would you like to continue?", "Delete Loan Product",
                 new ConfirmOptions
                 {
@@ -198,7 +205,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanProducts
                             //}
                             return;
                         }
-                        ContextMenuService.Close();
+                       
 
                     }
                     else
@@ -209,15 +216,11 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanProducts
                             NotificationService.Notify(NotificationSeverity.Success, "Delete Loan Product", "Loan product was deleted successfully.");
                             await OnInitializedAsync();
                         }
-                        ContextMenuService.Close();
-
                     }
                 }
                 catch (Exception ex)
                 {
                     NotificationService.Notify(NotificationSeverity.Success, "Exception", ex.InnerException!.Message);
-                    ContextMenuService.Close();
-
                 }
 
             }

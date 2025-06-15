@@ -13,5 +13,9 @@ public class CustomerDtoCreateValidator : AbstractValidator<EntityCustomerCreate
                 .Matches(@"^[\p{L}]+$").WithMessage("Name Field Alphabet only allow");
         RuleFor(x => x.AltName)
               .NotEmpty().WithMessage("Please Input Khmer Field");
+        RuleFor(x => x.IdCard)
+            .NotEmpty().WithMessage("Please Input ID Card Field");
+        RuleFor(x => x.Phone)
+            .NotEmpty().WithMessage("Please Input Phone Field");
     }
 }

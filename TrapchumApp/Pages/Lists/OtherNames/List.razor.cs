@@ -56,7 +56,7 @@ public partial class List
         {
             ShowAddTab = true;
             //provinceList = await _addressService!.GetsProvinces();
-            //model.Gender = "mr";
+            //Model.Gender = "mr";
         }
         selectedTabIndex = 1;
         tabs.Reload();

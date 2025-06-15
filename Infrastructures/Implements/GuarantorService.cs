@@ -4,6 +4,8 @@ using Applications.Requests.Lists.Entities;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans;
+using Applications.Responses.ViewModels.Loans.Disbursements;
+using Applications.Responses.ViewModels.Loans.Requests;
 using Applications.Responses.ViewModels.OtherNames;
 using Dapper;
 using FluentValidation;
@@ -27,14 +29,15 @@ public class GuarantorService : IGuarantorService
         _contextFactory = contextFactory;
         this.dapperConnection = dapperConnection;
     }
-    public async Task<Result<string>> CreateGaurantorAsync(EntityNames othername)
+    public async Task<Result<string>> CreateAsync(EntityNames othername, CancellationToken cancellation = default)
     {
         try
         {
+            await using var context = await _contextFactory.CreateDbContextAsync(cancellation);
 
-            _context.EntityNames.Add(othername);
+            context.EntityNames.Add(othername);
 
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
 
             return Result.Success(new string("A new guarantor was created"));
 
@@ -44,13 +47,16 @@ public class GuarantorService : IGuarantorService
             return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}"));
         }
     }
-    public async Task<Result<string>> UpdateGaurantorAsync(EntityNames othername)
+    public async Task<Result<string>> UpdateAsync(EntityNames othername,CancellationToken cancellation=default)
     {
         try
         {
-            _context.EntityNames.Update(othername);
 
-            await _context.SaveChangesAsync();
+            await using var context = await _contextFactory.CreateDbContextAsync(cancellation);
+
+            context.EntityNames.Update(othername);
+
+            await context.SaveChangesAsync();
 
             return Result.Success(new string("A Gaurantor was changed"));
         }
@@ -59,12 +65,13 @@ public class GuarantorService : IGuarantorService
             return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}"));
         }
     }
-    public async Task<Result<string>> DeleteGaurantorAsync(string? id)
+    public async Task<Result<string>> DeleteAsync(string? id, CancellationToken cancellation = default)
     {
         try
         {
+            await using var context = await _contextFactory.CreateDbContextAsync(cancellation);
 
-            var existingLoan = _context.LoanRequests
+            var existingLoan = context.LoanRequests
                                     .Where(x => x.GuarantorsLink!.Any(x => x.EntityNameRefId == id))
                                     .AsNoTracking();
             if (existingLoan.Any())
@@ -72,16 +79,16 @@ public class GuarantorService : IGuarantorService
                 return Result.Failure<string>(ErrorResponse.ServerError("this guarantor is in used."));
             }
 
-            var result = await _context.EntityNames.FindAsync(id);
+            var result = await context.EntityNames.FindAsync(id);
 
             if (result is null)
             {
                 return Result.Failure<string>(ErrorResponse.NotFound("no data found."));
             }
 
-            _context.EntityNames.Remove(result);
+            context.EntityNames.Remove(result);
 
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
 
             return Result.Success(new string("A guarantor was removed"));
 
@@ -93,7 +100,10 @@ public class GuarantorService : IGuarantorService
     }
     public async Task<Result<EntityNames>> GetGuarantorByIdAsync(string? id)
     {
-        var guarantors = await _context.EntityNames
+
+        await using var context = await _contextFactory.CreateDbContextAsync();
+
+        var guarantors = await context.EntityNames
                                         .AsNoTracking()
                                         .FirstOrDefaultAsync(x => x.Id == id);
 
@@ -143,8 +153,7 @@ public class GuarantorService : IGuarantorService
 
         await using var context = await _contextFactory.CreateDbContextAsync();
 
-        var guarantors = context.Database
-                                .SqlQuery<VGuarantor>($"SELECT * FROM VGuarantors")
+        var guarantors = context.VGuarantors
                                 .WhereIf(!string.IsNullOrEmpty(q), x => EF.Functions.Like(x.GuarantorName!, $"%{q}%") ||
                                                                        EF.Functions.Like(x.Phone!, $"%{q}%"))
                                 .WhereIf(!string.IsNullOrEmpty(id), x => x.Id == id)
@@ -165,8 +174,7 @@ public class GuarantorService : IGuarantorService
 
         await using var context = await _contextFactory.CreateDbContextAsync();
 
-        var guarantors = context.Database
-                                .SqlQuery<VGuarantor>($"SELECT * FROM VGuarantors")
+        var guarantors = context.VGuarantors
                                 .WhereIf(!string.IsNullOrEmpty(q.Filter), x => EF.Functions.Like(x.GuarantorName!, $"%{q.Filter}%") ||
                                                                        EF.Functions.Like(x.FullName!, $"%{q.Filter}%") ||
                                                                        EF.Functions.Like(x.Gender!, $"%{q.Filter}%") ||
@@ -250,6 +258,60 @@ public class GuarantorService : IGuarantorService
             }, commandType: CommandType.StoredProcedure,
             param: parameters,
             splitOn: "LoanId");
+
+        var guarantor = items.FirstOrDefault(x => x.Id == id);
+
+        if (guarantor is null)
+        {
+            return Result.Failure<VGuarantor>(ErrorResponse.NotFound("There is no guarantor avalable."));
+        }
+        return Result.Success(guarantor);
+
+    }
+
+
+
+
+    public async Task<Result<VGuarantor>> GetGuarantorWithByIdAsync(string? id) 
+    {
+
+        if (id.IsNullOrEmpty())
+        {
+            return Result.Failure<VGuarantor>(ErrorResponse.NotFound("There is no guarantor available."));
+        }
+
+        var parameters = new DynamicParameters();
+
+        parameters.Add("@Id", id);
+
+        using var db = dapperConnection.CreateConnection();
+
+        var lookup = new Dictionary<string, VGuarantor>();
+
+        var items = await db.QueryAsync<VGuarantor, VGuarantorLoanRequest,VGuarantorLoan, VGuarantor>(ProcedureConstant.SpGetGaurantorWithLoanRequests,
+            (g, gl,d) =>
+            {
+                if (!lookup.TryGetValue(g.Id!, out var existingGaurantor))
+                {
+                    existingGaurantor = g;
+
+                    existingGaurantor.LoanGuarantors = [];
+
+                    lookup.Add(g.Id!, existingGaurantor);    
+                }
+                if (gl is not null && gl.LoanRequestId.IsNotNullOrEmpty())
+                {
+                    g.LoanRequests.Add(gl);
+                }
+                if(d is not null && d.LoanId.IsNotNullOrEmpty())
+                {
+                    g.Loans.Add(d);
+                }
+                return g;
+
+            }, commandType: CommandType.StoredProcedure,
+            param: parameters,
+            splitOn: "LoanRequestId,LoanId");
 
         var guarantor = items.FirstOrDefault(x => x.Id == id);
 

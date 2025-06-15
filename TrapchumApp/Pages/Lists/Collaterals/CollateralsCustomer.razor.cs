@@ -47,14 +47,13 @@ namespace TrapchumApp.Pages.Lists.Collaterals
 
             var options = new DialogOptions
             {
-                Width = "90vw",
-                Draggable = true,
-                Resizable = false
+                Width = "100vw",
+                Height ="100vh"
             };
 
-            bool result = await DialogService.OpenAsync<CollateralModalAdd>("Add Collateral", parameters, options);
+            var dia = await DialogService.OpenAsync<CollateralModalAdd>("Add Collateral", parameters, options);
 
-            if (result == true)
+            if (dia is bool result && result==true)
             {
                 await GetCustomerCollaterals();
             }

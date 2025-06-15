@@ -39,7 +39,7 @@
                                         AllowFiltering="true"
                                         TextProperty="@nameof(ProvinceDto.ProInKhmer)"
                                         ValueProperty="@nameof(ProvinceDto.ProvinceId)"
-                                        SelectedItemChanged="SelectedProvinceChanged"
+                                        SelectedItemChanged="@SelectedProvinceChanged"
                                         FilterOperator="StringFilterOperator.Contains"
                                         FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
                                         @bind-Value="model.ProvinceRefId">

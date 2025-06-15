@@ -164,7 +164,7 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
 
 //        var html = await RazorTemplateEngine.RenderAsync("Views/Schedule.cshtml", loanWithSchedules);
 
-//        var playwright = await Playwright.CreateAsync();
+//        var playwright = await Playwright.UpsertAsync();
 
 //        var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
 //        {

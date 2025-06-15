@@ -3,6 +3,7 @@
     public static class IconNames
     {
         public const string Comment = "comment";
+        public const string Checked = "check";
         public const string ArrowCircleUp = "arrow_circle_up"; 
         public const string ArrowCircleLeft = "arrow_circle_left";
         public const string ArrowCircleDown = "arrow_circle_left";
@@ -40,6 +41,7 @@
         public const string PersonSearch = "person_search";
         public const string VerifiedUser = "verified_user";
         public const string Edit = "edit_square";
+        public const string EditPen = "edit"; 
         public const string PersonRemove = "person_remove";
         public const string CreditCard = "credit_card";
         public const string PriceCheck = "price_check";

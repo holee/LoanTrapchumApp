@@ -155,11 +155,6 @@ public sealed class CustomerService(ICustomerService cusService) : ICustomerServ
         return Result.Success(req!);
     }
 
-    public async Task<Result<string>> MakeCustomerInActiveAsync(string? customerId, int editSeq = 0, bool isActive = true)
-    {
-        return await cusService.MakeCustomerInActiveAsync(customerId, editSeq, isActive);
-    }
-
     public async Task<Result<IEnumerable<VLoanRequests>>> GetCustomerLoanRequestAsync(int? branchId, string? customerId, bool include = false, CancellationToken cancellation = default)
     {
         return await cusService.GetCustomerLoanRequestAsync(branchId, customerId, include, cancellation);

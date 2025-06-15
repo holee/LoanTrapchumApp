@@ -18,11 +18,12 @@ namespace TrapchumApp.Pages.Lists.OtherNames
         public GuarantorEdit(IGuarantorServiceImpl gService, ISalutationServiceImpl salutationService)
         {
             _gService = gService;
+
             _salutationService = salutationService;
         }
 
         [Parameter] public string? NameId { get; set; }
-        [Parameter] public EntityNamesCreate model { get; set; } = new();
+        [Parameter] public EntityGuarantorCreate model { get; set; } = new();
         [Parameter] public IEnumerable<string> Salutations { get; set; } = [];
         [Parameter] public EventCallback<int> Closing { get; set; }
 
@@ -118,7 +119,7 @@ namespace TrapchumApp.Pages.Lists.OtherNames
 //{
 //    if (e is not null)
 //    {
-//        model.ProInKhmer = ((ProvinceDto)e).ProInKhmer;
+//        Model.ProInKhmer = ((ProvinceDto)e).ProInKhmer;
 //        var id = ((ProvinceDto)e).ProvinceId;
 //        DistrictList = await _addressService!.GetDistrictsByProvinceId(id);
 //    }
@@ -128,7 +129,7 @@ namespace TrapchumApp.Pages.Lists.OtherNames
 //{
 //    if (e is not null)
 //    {
-//        model.DisInKhmer = ((DistrictDto)e).DisInKhmer;
+//        Model.DisInKhmer = ((DistrictDto)e).DisInKhmer;
 //        var id = ((DistrictDto)e).DistrictId;
 //        CommuneList = await _addressService!.GetCommunesByDistrictId(id);
 //    }
@@ -139,7 +140,7 @@ namespace TrapchumApp.Pages.Lists.OtherNames
 //{
 //    if (e is not null)
 //    {
-//        model.ComInKhmer = ((CommuneDto)e).ComInKhmer;
+//        Model.ComInKhmer = ((CommuneDto)e).ComInKhmer;
 //        var id = ((CommuneDto)e).CommuneId;
 //        VillageList = await _addressService!.GetVillagesByCommuneId(id);
 //    }
@@ -149,7 +150,7 @@ namespace TrapchumApp.Pages.Lists.OtherNames
 //{
 //    if (e is not null)
 //    {
-//        model.VilInKhmer = ((VillageDto)e).VilInKhmer;
+//        Model.VilInKhmer = ((VillageDto)e).VilInKhmer;
 //    }
 //    StateHasChanged();
 //}

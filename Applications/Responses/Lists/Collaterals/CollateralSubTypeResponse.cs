@@ -1,9 +1,9 @@
 ﻿namespace Applications.Responses.Lists.Collaterals
 {
-    public class CollateralSubTypeResponse
+    public sealed class CollateralSubTypeResponse
     {
         public int Id { get; set; }
-        public string? CollateralSubTypeName { get; set; }
+        public string? CollateralSubTypeName { get; set; } 
         public string? CollateralSubTypeNameInKhmer { get; set; }
         public int? CollateralTypeRefId { get; set; }
         public decimal? ValueRate { get; set; }

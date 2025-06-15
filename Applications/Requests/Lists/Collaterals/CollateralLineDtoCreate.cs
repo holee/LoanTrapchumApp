@@ -4,12 +4,12 @@ namespace Applications.Requests.Lists.Collaterals;
 
 public sealed class CollateralLineDtoCreate
 {
-    public long? Id { get; set; }
-    public Guid? CollateralRefId { get; set; }
+    public long Id { get; set; }
+    public string? CollateralRefId { get; set; }
     public int? CategoryRefId { get; set; }
     public string? TypeName { get; set; }
     public int SubCategoryRefId { get; set; }
-    public string? SubTypeName { get; set; }
+    public string? CollateralSubTypeName { get; set; } 
     public string? ReferenceNo { get; set; }
     public string? CollateralNo { get; set; }
     public string? OwnerName { get; set; }

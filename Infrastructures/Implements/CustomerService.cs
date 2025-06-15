@@ -80,7 +80,7 @@ public class CustomerService(
 
         await using var cxt = await contextFactory.CreateDbContextAsync(cancellation);
 
-        IQueryable<VCustomerList> queries = cxt.CustomerLists;
+        IQueryable<VCustomerList> queries = cxt.CustomerLists.OrderByDescending(x => x.ModifiedDT);
 
         var counts = queries.Count();
 
@@ -312,33 +312,7 @@ public class CustomerService(
    
 
 
-    public async Task<Result<Pager<T>>> GetCustomerLoanRequestAsync<T>(int? branchId, string? customerId, bool includeComplete = false)
-        where T : class
-    {
-        try
-        {
-            var customerLoanRequests = await context.Database
-                .SqlQuery<VLoanRequests>($"SELECT * FROM VLoanRequests WHERE CustomerId={customerId} AND BranchId={branchId}")
-                .WhereIf(includeComplete, c => c.StatusId == (int)RequestStatus.Completed)
-                .ProjectToType<T>()
-                .AsNoTracking()
-                .ToListAsync();
-
-            if (!customerLoanRequests.Any())
-            {
-                return Result.Failure<Pager<T>>(ErrorResponse.NotFound("No note found."));
-            }
-
-            var counts = customerLoanRequests.Count;
-
-            return Result.Success(new Pager<T>(customerLoanRequests, counts));
-        }
-        catch (SqlException ex)
-        {
-            return Result.Failure<Pager<T>>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
-        }
-    }
-
+ 
     public async Task<Result<string>> AddCustomerNote(CustomerNote model)
     {
         try
@@ -436,7 +410,10 @@ public class CustomerService(
 
     public async Task<Result<EntityNames>> GetCustomerByIdAsync(string? customerId)
     {
-        var customer = await context.EntityNames
+
+        await using var cxt = await contextFactory.CreateDbContextAsync();
+
+        var customer = await cxt.EntityNames
             .Where(x => x.Id == customerId)
             .Include(e => e.Customer)
             .AsNoTracking()
@@ -451,7 +428,10 @@ public class CustomerService(
 
     public async Task<Result<Customer>> GetCustomerByIdAsync(string? customerId, params string[] includes)
     {
-        var customersQuery = context.Customers
+
+        await using var cxt = await contextFactory.CreateDbContextAsync();
+
+        var customersQuery = cxt.Customers
                                      .AsNoTracking()
                                       .Where(x => x.CustomerId == customerId);
         if (includes.Any())
@@ -481,7 +461,10 @@ public class CustomerService(
 
     public async Task<Result<VCustomerList>> GetCustomerForRequestLoanAsync(string? customerId)
     {
-        var customer = await context.CustomerLists.FirstOrDefaultAsync(x => x.CustomerId == customerId);
+
+        await using var cxt = await contextFactory.CreateDbContextAsync();
+
+        var customer = await cxt.CustomerLists.FirstOrDefaultAsync(x => x.CustomerId == customerId);
 
         if (customer is null)
         {
@@ -532,7 +515,7 @@ public class CustomerService(
     {
         try
         {
-            await using var _context = await contextFactory.CreateDbContextAsync(cancellation);
+            await using var context = await contextFactory.CreateDbContextAsync(cancellation);
 
             var customer = await context.Customers.FindAsync(customerId, cancellation);
 
@@ -563,29 +546,6 @@ public class CustomerService(
         }
     }
 
-
-    public async Task<Result<string>> MakeCustomerInActiveAsync(string? customerId, int editSeq = 0, bool isActive = true)
-    {
-        try
-        {
-            var increaseEdit = editSeq + 1;
-            var updatedRows = await context.Customers
-                .Where(x => x.CustomerId == customerId && x.EntityNames!.EditSeq == editSeq)
-                .ExecuteUpdateAsync(prop => prop
-                    .SetProperty(x => x.EntityNames!.IsActive, isActive)
-                    .SetProperty(x => x.EntityNames!.EditSeq, increaseEdit));
-            if (updatedRows > 0)
-            {
-                return Result.Success(new string("customer was updated"));
-            }
-
-            return Result.Failure<string>(ErrorResponse.ServerError($"cannot update customer."));
-        }
-        catch (SqlException ex)
-        {
-            return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
-        }
-    }
 
     public async Task<Result<string>> MakeCustomerInActiveAsync(string? customerId, bool state, CancellationToken cancellation = default)
     {
@@ -619,6 +579,8 @@ public class CustomerService(
     {
         try
         {
+            await using var context = await contextFactory.CreateDbContextAsync(cancellation); 
+
             context.EntityNames.Add(model);
 
             await context.SaveChangesAsync(cancellation);
@@ -665,3 +627,30 @@ public class CustomerService(
 
 }
 
+
+//public async Task<Result<Pager<T>>> GetCustomerLoanRequestAsync<T>(int? branchId, string? customerId, bool includeComplete = false)
+//    where T : class
+//{
+//    try
+//    {
+//        var customerLoanRequests = await context.Database
+//            .SqlQuery<VLoanRequests>($"SELECT * FROM VLoanRequests WHERE CustomerId={customerId} AND BranchId={branchId}")
+//            .WhereIf(includeComplete, c => c.StatusId == (int)RequestStatus.Completed)
+//            .ProjectToType<T>()
+//            .AsNoTracking()
+//            .ToListAsync();
+
+//        if (!customerLoanRequests.Any())
+//        {
+//            return Result.Failure<Pager<T>>(ErrorResponse.NotFound("No note found."));
+//        }
+
+//        var counts = customerLoanRequests.Count;
+
+//        return Result.Success(new Pager<T>(customerLoanRequests, counts));
+//    }
+//    catch (SqlException ex)
+//    {
+//        return Result.Failure<Pager<T>>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
+//    }
+//}

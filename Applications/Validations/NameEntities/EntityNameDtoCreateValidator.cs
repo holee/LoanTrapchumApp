@@ -32,7 +32,7 @@ namespace Applications.Validations.NameEntities
             RuleFor(x => x.LastName)
                     .NotEmpty()
                      .WithMessage("Please enter last name field");
-            RuleFor(x => x.Name)
+            RuleFor(x => x.AltName)
                 .NotEmpty()
                 .WithMessage("Please enter name field.");
 

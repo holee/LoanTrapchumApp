@@ -14,7 +14,6 @@ public interface ICustomerService
     Task<Result<string>> CreateAsync(EntityNames model, CancellationToken cancellation = default);
     Task<Result<string>> UpdateAsync(EntityNames model,CancellationToken cancellation = default);
     Task<Result<string>> AddCustomerNote(CustomerNote model);
-    Task<Result<string>> MakeCustomerInActiveAsync(string? customerId, int editSeq = 1, bool isActive = true);
     Task<Result<string>> AddCustomerActivity(CustomerActivity model);
     Task<Result<IEnumerable<VCollateralLines>>> GetCustomerCollateralLines(string? customerId,bool includeInUsed = false);
     Task<Result<IEnumerable<VLoanDisbursments>>> GetCustomerLoanHistoryAsync(string? customerId);

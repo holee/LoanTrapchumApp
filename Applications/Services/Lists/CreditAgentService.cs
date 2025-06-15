@@ -17,7 +17,7 @@ namespace Applications.Services.Lists
 
             var model = req.Adapt<LoanCreditAgent>();
 
-            return await crService.ActivateOrDeactivateCreditAgent(model);
+            return await crService.ChangeCreditAgentState(model);
         }
 
         public async Task<Result<string>> AddCreditAgent(string? employeeRefId, LoanCreditAgentDtoCreate req)

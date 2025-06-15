@@ -3,20 +3,23 @@ using Applications.Responses.Loans.Disbursements;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Categories;
 using Applications.Services.Loans;
+using Domains.Models.Bases;
 using Mapster;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 using Radzen.Blazor;
+using System.Threading.Tasks;
+using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Transactions.Loans.LoanCategoriess
 {
-    public partial class LoanCategoryView
+    public partial class LoanCategoryIndex
     {
         [Parameter] public int SelectIndex { get; set; } = 0;
 
         private readonly ILoanCategoryServiceImpl _catService;
 
-        public LoanCategoryView(ILoanCategoryServiceImpl service)
+        public LoanCategoryIndex(ILoanCategoryServiceImpl service)
         {
             _catService = service;
         }
@@ -29,11 +32,11 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanCategoriess
 
         List<VlCategoryList> vLCategories = [];
 
-        int pageSize = 10;
+        int pageSize = 15;
         int pageIndex = 0;
         int CategoryId = 0;
         bool sortDescending = false;
-        string sortColumn = "Id";
+        string sortColumn = "LoanCategoryId";
         bool isLoading = false;
         int counts = 0;
         RadzenTabs? tabs;
@@ -55,31 +58,29 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanCategoriess
             SelectIndex = 1;
             tabs!.Reload();
         }
-         void EditCategory(int id)
+        async Task EditCategory(int? id)
         {
             ContextMenuService.Close();
 
             try
             {
+                var options = new DialogOptions
+                {
+                    Draggable = true,
+                };
 
-                CategoryId = id;
+                var parameters = new Dictionary<string, object?>()
+                {
+                    { "Id",id }
+                };
 
-                //var rsp = await _catService!.GetForEditAsync(id);
 
-                //if (rsp.IsSuccess)
-                //{
-                //    modelEdit = rsp.Data!;
+                var dia = await DialogService.OpenAsync<LoanCategoryModalEdit>("Edit", parameters, options);
 
-                IsEdit = true;
-                SelectIndex = 2;
-                //}
-                //else
-                //{
-                //    NotificationService.Notify(NotificationSeverity.Error, "Loan Category", rsp.ErrMessage);
-                //    return;
-                //}
-
-                tabs!.Reload();
+                if (dia is bool result && result)
+                {
+                    await GetLoanCategories(searchText);
+                }
 
                 StateHasChanged();
 
@@ -116,7 +117,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanCategoriess
             catch (Exception ex)
             {
                 NotificationService.Notify(NotificationSeverity.Error, "Exception", ex.Message);
-              
+
             }
         }
         void CloseTabs(int e)
@@ -144,22 +145,28 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanCategoriess
         {
             pageIndex = e.Skip!.Value;
 
-            searchText = e.Filter!.ToString()!;
+            (sortColumn, sortDescending) = e.PageInfo();
 
-            if (!string.IsNullOrEmpty(e.OrderBy))
-            {
-                sortColumn = e.OrderBy.Split(" ")[0];
-                string dir = e.OrderBy.Split(" ")[1];
-                sortDescending = dir.Contains("asc") ? false : true;
-            }
+            var filterField = e.Filters?.FirstOrDefault()?.Property;
+            var filterValue = e.Filters?.FirstOrDefault()?.FilterValue.ToString();
 
-            await GetLoanCategories();
+
+            var filterColumn = e.Filters?.FirstOrDefault(p =>
+                                        p.Property == nameof(VlCategoryList.Description) ||
+                                        p.Property == nameof(VlCategoryList.DesInKhmer) ||
+                                        p.Property == nameof(VlCategoryList.Code) ||
+                                        p.Property == nameof(VlCategoryList.LoancategoryCode))
+                                       ?.FilterValue.ToString() ?? string.Empty;
+
+            searchText = filterColumn ?? string.Empty;
+
+            await GetLoanCategories(searchText);
         }
         protected async void PerformSearch(string filter)
         {
             searchText = filter;
 
-            await GetLoanCategories();
+            await GetLoanCategories(filter);
         }
 
 
@@ -168,36 +175,33 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanCategoriess
             await GetLoanCategories();
         }
 
-        protected async Task DeactiveOrActive(VlCategoryList category)
+        protected async Task DeactiveOrActive(bool? arg, VlCategoryList cat)
         {
-            try
-            {
-                var rsp = await _catService!.UpdateStatus(category.LoanCategoryId);
 
-                if (rsp.IsSuccess)
-                {
-                    NotificationService.Notify(NotificationSeverity.Success, "Loan Category", rsp.Data);
-                    vLCategories!.ToList().Remove(category);
-                    await OnInitializedAsync();
-                    await InvokeAsync(StateHasChanged);
-                }
-                else
-                {
-                    NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
-                    return;
-                }
+            var confirm = await DialogService.Confirm("Do you want to disable or enable Category?.");
 
-            }
-            catch (Exception ex)
+            if (confirm == false) return;
+
+            var state = new ChangeState(arg, cat.EditSeq);
+
+            var rsp = await _catService.UpdateStatusAsync(cat.LoanCategoryId, state);
+
+            if (rsp.IsSuccess)
             {
-                NotificationService.Notify(NotificationSeverity.Error, "Exception", ex.InnerException!.Message);
-                await OnInitializedAsync();
+                NotificationService.Notify(NotificationSeverity.Success, "Loan Category", rsp.Data);
+
+                await GetLoanCategories(searchText);
             }
-            await Task.CompletedTask;
+            else
+            {
+                NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
+            }
+
         }
         protected override async Task OnInitializedAsync()
         {
-            await GetLoanCategories();
+            await GetLoanCategories(searchText);
+
             await base.OnInitializedAsync();
         }
 
@@ -205,12 +209,15 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanCategoriess
         async Task PageChanged(int page)
         {
             pageSize = page;
-            await GetLoanCategories();
+
+            pageIndex = 0;
+
+            await GetLoanCategories(searchText);
         }
 
 
 
-        async Task GetLoanCategories()
+        async Task GetLoanCategories(string? filter = null)
         {
             try
             {
@@ -218,15 +225,19 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanCategoriess
                 {
                     Skip = pageIndex,
                     PageSize = pageSize,
-                    Filter = searchText,
+                    Filter = filter,
                     SortColumn = sortColumn,
                     IsIncludeInActive = InActive,
                     SortDescending = sortDescending
                 };
 
                 var results = await _catService.GetCategoriesAsync(param);
+
                 vLCategories = results.Items;
-                counts = vLCategories.Count();
+
+                counts = results.Count;
+
+                StateHasChanged();
             }
             catch (Exception ex)
             {
@@ -249,7 +260,19 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanCategoriess
         protected async void OnCreate()
         {
 
-            await Task.CompletedTask;
+
+            var options = new DialogOptions
+            {
+                Draggable = true,
+            };
+
+            var dia = await DialogService.OpenAsync<LoanCategoryModalCreate>("Categogry", options: options);
+
+
+            if (dia is bool result && result == true)
+            {
+                await GetLoanCategories(searchText);
+            }
 
         }
 

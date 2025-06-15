@@ -8,7 +8,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanCategoriess
     public partial class LoanCategoryModalEdit
     {
         [Parameter] public int Id { get; set; }
-        LoanCategoryDtoUpdate? model { get; set; } = new();
+        LoanCategoryDtoUpdate model { get; set; } = new();
 
         private readonly ILoanCategoryServiceImpl service;
         public LoanCategoryModalEdit(ILoanCategoryServiceImpl service)

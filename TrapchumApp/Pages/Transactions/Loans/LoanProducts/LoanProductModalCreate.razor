@@ -13,18 +13,18 @@
                      <FieldBody>
                          <Blazorise.Row>
                              <Blazorise.Column ColumnSize="ColumnSize.Is9.OnDesktop">
-                                 <TextEdit Placeholder="Code..." MaxLength="50" @bind-Text="model.LoanProductCode" />
+                                 <TextEdit Placeholder="Code..." MaxLength="50" @bind-Text="Model.LoanProductCode" />
                              </Blazorise.Column>
                              <Blazorise.Column TextAlignment="TextAlignment.End" ColumnSize="ColumnSize.Is3.OnDesktop">
-                                    <Check TValue="bool?" @bind-Checked="model.IsActive">
-                                     @(model.IsActive.Value ? "Is Active" : "Is Inactive")
+                                    <Check TValue="bool?" @bind-Checked="Model.IsActive">
+                                     @(Model.IsActive.Value ? "Is Active" : "Is Inactive")
                                     </Check>
 
 
                             </Blazorise.Column>
                         </Blazorise.Row>
                         <FieldHelp>
-                            <ValidationMessage For="@(()=>model.LoanProductCode)" />
+                            <ValidationMessage For="@(()=>Model.LoanProductCode)" />
                         </FieldHelp>
                     </FieldBody>
 
@@ -38,9 +38,9 @@
              <Blazorise.Column ColumnSize="ColumnSize.Is9.OnDesktop">
                  <Field Horizontal ColumnSize="ColumnSize.Is12.OnDesktop">
                      <FieldBody ColumnSize="ColumnSize.Is9.OnDesktop">
-                        <TextEdit Placeholder="Loan Product Name" MaxLength="250" @bind-Text="model.LoanProductName"/>             
+                        <TextEdit Placeholder="Loan Product Name" MaxLength="250" @bind-Text="Model.LoanProductName"/>             
                      <FieldHelp>
-                         <ValidationMessage For="@(()=>model.LoanProductName)" />
+                         <ValidationMessage For="@(()=>Model.LoanProductName)" />
                      </FieldHelp>
                      </FieldBody>
                  </Field>
@@ -54,10 +54,10 @@
                  <Field Horizontal>
                      
                      <FieldBody ColumnSize="ColumnSize.Is12.OnDesktop">
-                         <TextEdit Placeholder="Loan Size" MaxLength="20" @bind-Text="model.LoanSize" />
+                         <TextEdit Placeholder="Loan Size" MaxLength="20" @bind-Text="Model.LoanSize" />
                      </FieldBody>
                      <FieldHelp>
-                         <ValidationMessage For="@(()=>model.LoanSize)" />
+                         <ValidationMessage For="@(()=>Model.LoanSize)" />
                      </FieldHelp>
                  </Field>
              </Blazorise.Column>
@@ -66,10 +66,10 @@
 
                     <FieldLabel ColumnSize="ColumnSize.Is3.OnDesktop">Currency</FieldLabel>
                     <FieldBody ColumnSize="ColumnSize.Is8.OnDesktop">
-                        <NumericEdit TValue="int?" @bind-Value="model.CurrencyRefId"/>
+                        <NumericEdit TValue="int?" @bind-Value="Model.CurrencyRefId"/>
                          
                         <FieldHelp>
-                            <ValidationMessage For="@(()=>model.CurrencyRefId)" />
+                            <ValidationMessage For="@(()=>Model.CurrencyRefId)" />
                         </FieldHelp>
                      </FieldBody>
                     
@@ -84,20 +84,20 @@
                 <Field Horizontal>
 
                     <FieldBody ColumnSize="ColumnSize.Is12.OnDesktop">
-                        <TextEdit Placeholder="Installment" MaxLength="15" @bind-Text="model.Installments" />
+                        <TextEdit Placeholder="Installment" MaxLength="15" @bind-Text="Model.Installments" />
                     </FieldBody>
                     <FieldHelp>
-                        <ValidationMessage For="@(()=>model.Installments)" />
+                        <ValidationMessage For="@(()=>Model.Installments)" />
                     </FieldHelp>
                 </Field>
             </Blazorise.Column>
             <Blazorise.Column ColumnSize="ColumnSize.Is5.OnDesktop">
                 <Field Horizontal>
                     <FieldBody >
-                        <TextEdit Placeholder="Installment type" MaxLength="50" @bind-Text="model.InstallmentType"/>
+                        <TextEdit Placeholder="Installment type" MaxLength="50" @bind-Text="Model.InstallmentType"/>
                     </FieldBody>
                     <FieldHelp>
-                        <ValidationMessage For="@(()=>model.InstallmentType)" />
+                        <ValidationMessage For="@(()=>Model.InstallmentType)" />
                     </FieldHelp>
                 </Field>
             </Blazorise.Column>
@@ -109,10 +109,10 @@
             <Blazorise.Column ColumnSize="ColumnSize.Is9.OnDesktop">
                 <Field Horizontal>
                     <FieldBody ColumnSize="ColumnSize.Is12.OnDesktop">
-                        <TextEdit Placeholder="Interest rate" MaxLength="15" @bind-Text="model.InterestRate" />
+                        <TextEdit Placeholder="Interest rate" MaxLength="15" @bind-Text="Model.InterestRate" />
                     </FieldBody>
                     <FieldHelp>
-                        <ValidationMessage For="@(()=>model.InterestRate)" />
+                        <ValidationMessage For="@(()=>Model.InterestRate)" />
                     </FieldHelp>
                 </Field>
             </Blazorise.Column>
@@ -125,10 +125,10 @@
             <Blazorise.Column ColumnSize="ColumnSize.Is9.OnDesktop">
                 <Field Horizontal>
                     <FieldBody ColumnSize="ColumnSize.Is12.OnDesktop">
-                        <TextEdit Placeholder="Repayment mode" MaxLength="15" @bind-Text="model.RepaymentMode" />
+                        <TextEdit Placeholder="Repayment mode" MaxLength="15" @bind-Text="Model.RepaymentMode" />
                     </FieldBody>
                     <FieldHelp>
-                        <ValidationMessage For="@(()=>model.RepaymentMode)" />
+                        <ValidationMessage For="@(()=>Model.RepaymentMode)" />
                     </FieldHelp>
                 </Field>
             </Blazorise.Column>
@@ -141,10 +141,10 @@
             <Blazorise.Column ColumnSize="ColumnSize.Is9.OnDesktop">
                 <Field Horizontal>
                     <FieldBody ColumnSize="ColumnSize.Is12.OnDesktop">
-                        <TextEdit Placeholder="Origination fee" MaxLength="20" @bind-Text="model.OriginationFees" />
+                        <TextEdit Placeholder="Origination fee" MaxLength="20" @bind-Text="Model.OriginationFees" />
                     </FieldBody>
                     <FieldHelp>
-                        <ValidationMessage For="@(()=>model.OriginationFees)" />
+                        <ValidationMessage For="@(()=>Model.OriginationFees)" />
                     </FieldHelp>
                 </Field>
             </Blazorise.Column>
@@ -157,10 +157,10 @@
             <Blazorise.Column ColumnSize="ColumnSize.Is9.OnDesktop">
                 <Field Horizontal>
                     <FieldBody ColumnSize="ColumnSize.Is12.OnDesktop">
-                        <TextEdit Placeholder="Arrear rate" MaxLength="15" @bind-Text="model.ArrearRate" />
+                        <TextEdit Placeholder="Arrear rate" MaxLength="15" @bind-Text="Model.ArrearRate" />
                     </FieldBody>
                     <FieldHelp>
-                        <ValidationMessage For="@(()=>model.ArrearRate)" />
+                        <ValidationMessage For="@(()=>Model.ArrearRate)" />
                     </FieldHelp>
                 </Field>
             </Blazorise.Column>
@@ -173,25 +173,25 @@
             <Blazorise.Column ColumnSize="ColumnSize.Is5.OnDesktop">
                 <Field Horizontal>
                     <FieldBody ColumnSize="ColumnSize.Is12.OnDesktop">
-                        <Select TValue="int?" @bind-SelectedValue="model.LoanBFLFOLId">
+                        <Select TValue="int?" @bind-SelectedValue="Model.LoanBFLFOLId">
                             <SelectItem Value="1">Loan BFLFOL</SelectItem>
                             
                         </Select>
                     </FieldBody>
                     <FieldHelp>
-                        <ValidationMessage For="@(()=>model.LoanBFLFOLId)" />
+                        <ValidationMessage For="@(()=>Model.LoanBFLFOLId)" />
                     </FieldHelp>
                 </Field>
             </Blazorise.Column>
             <Blazorise.Column ColumnSize="ColumnSize.Is4.OnDesktop">
                 <Field Horizontal>
                     <FieldBody ColumnSize="ColumnSize.Is12.OnDesktop">
-                        <Select TValue="int?" @bind-SelectedValue="model.LoanAPTId">
+                        <Select TValue="int?" @bind-SelectedValue="Model.LoanAPTId">
                             <SelectItem Value="1">Loan APT</SelectItem>
                         </Select>
                     </FieldBody>
                     <FieldHelp>
-                        <ValidationMessage For="@(()=>model.LoanAPTId)" />
+                        <ValidationMessage For="@(()=>Model.LoanAPTId)" />
                     </FieldHelp>
                 </Field>
             </Blazorise.Column>

@@ -70,6 +70,26 @@ a, .btn-link {
     box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
+.recently-edited {
+    animation: fadeBackground 3s ease-in-out forwards;
+    font-style:italic;
+    font-weight:700;
+    color: darkred;
+}
+
+@Keyframes fadeBackground {
+    0% {
+        background-color: #ffe6e6;
+    }
+
+    100% {
+        background-color: transparent;
+    }
+}
+
+
+
+
 .content {
     padding-top: 1.1rem;
 }
