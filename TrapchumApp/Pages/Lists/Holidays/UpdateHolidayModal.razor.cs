@@ -1,6 +1,8 @@
+using Applications.Interfaces.Lists;
 using Applications.Requests.Lists.Holidays;
 using Applications.Responses.ViewModels.Holidays;
 using Applications.Services.Lists;
+using Domains.Models.Lists;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 
@@ -10,7 +12,7 @@ namespace TrapchumApp.Pages.Lists.Holidays
     {
         [Parameter] public long id { get; set; }
 
-        private readonly IHolidayServiceImpl _holidayService;
+        private readonly IHolidayService _holidayService;
 
         IReadOnlyList<DateTime?> selectedDates = [];
 
@@ -49,7 +51,7 @@ namespace TrapchumApp.Pages.Lists.Holidays
             await Task.CompletedTask;
 
         }
-        public UpdateHolidayModal(IHolidayServiceImpl holidayService)
+        public UpdateHolidayModal(IHolidayService holidayService)
         {
             _holidayService = holidayService;
         }
@@ -62,7 +64,16 @@ namespace TrapchumApp.Pages.Lists.Holidays
         {
             try
             {
-                var response = await _holidayService.CreateOrUpdateHoliday(model);
+                var data=new Holiday
+                {
+                    Id = model.Id,
+                    HolidayDt = model.HolidayDt,
+                    HolidayNum = (int)model.HolidayNum,
+                    HolidayName = model.HolidayName,
+                    Description = model.Description,
+                    Status = model.Status
+                };
+                var response = await _holidayService.CreateOrUpdateHoliday(data);
 
                 if (response.IsSuccess)
                 {
@@ -87,11 +98,12 @@ namespace TrapchumApp.Pages.Lists.Holidays
         {
             if (arg != null)
             {
-                modelDTO.Id = arg.Id;
+                model.Id = arg.Id;
                 model.HolidayDt = arg!.HolidayDt;
-                modelDTO.HolidayName = arg!.HolidayName;
-                modelDTO.Description = arg!.Description;
-                modelDTO.Status = arg.Status;
+                model.HolidayNum = arg!.HolidayNum;
+                model.HolidayName = arg!.HolidayName;
+                model.Description = arg!.Description;
+                model.Status = arg.Status;
             }
         }
         protected override async Task OnInitializedAsync()
