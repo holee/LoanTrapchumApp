@@ -3,7 +3,7 @@
 @using Domains.Models.Files
 @using TrapchumApp.Services
 <Containers Fluid>
-    <EditForm Model="model" @ref="editForm" OnValidSubmit="FormSubmit">
+    <EditForm Model="model" @ref="editForm" OnValidSubmit="@FormSubmit">
         <FluentValidationValidator DisableAssemblyScanning="true"></FluentValidationValidator>
         <CreateCustomerInfo Model="@model" />
         <CustomerAddress Cities="@Cities"

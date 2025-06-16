@@ -74,21 +74,13 @@ namespace TrapchumApp.Pages.Lists.Departments
 
         private async Task GetDepartments(string? filter = null)
         {
-            try
-            {
-                isLoading = true;
-                var param = new QueryParam(pageIndex, pageSize, sortField, includeInactive, sortDescending, filter);
-                var resultResponse = await _depService.GetDepartments(param);
-                counts = resultResponse.Count;
-                Departments = resultResponse.Items ?? [];
-                isLoading = false;
-            }
-            catch
-            {
-                isLoading = false;
-            }
-
-
+            isLoading = true;
+            var param = new QueryParam(pageIndex, pageSize, sortField, includeInactive, sortDescending, filter);
+            var resultResponse = await _depService.GetDepartments(param);
+            counts = resultResponse.Count;
+            Departments = resultResponse.Items ?? [];
+            isLoading = false;
+            StateHasChanged();
         }
         protected async Task Edit(int departmentId)
         {
@@ -97,10 +89,8 @@ namespace TrapchumApp.Pages.Lists.Departments
                new DialogOptions
                {
                    Draggable = true,
-                   Resizable = true,
-
                });
-            if (resultModal is bool reslt && reslt==true)
+            if (resultModal is bool reslt && reslt == true)
             {
                 await GetDepartments(searchText);
             }
@@ -133,9 +123,9 @@ namespace TrapchumApp.Pages.Lists.Departments
                 sortDescending = args.Sorts.First().SortOrder == SortOrder.Descending;
             }
 
-            var filterColumns= args.Filters?.FirstOrDefault(f => f.Property == nameof(VDepartment.DepartmentName) ||
+            var filterColumns = args.Filters?.FirstOrDefault(f => f.Property == nameof(VDepartment.DepartmentName) ||
                                                                 f.Property == nameof(VDepartment.Description) ||
-                                                                f.Property == nameof(VDepartment.DepartmentId))?.FilterValue?.ToString();   
+                                                                f.Property == nameof(VDepartment.DepartmentId))?.FilterValue?.ToString();
 
             var filterString = filterColumns ?? string.Empty;
 
@@ -172,7 +162,7 @@ namespace TrapchumApp.Pages.Lists.Departments
                 NotificationService.Notify(NotificationSeverity.Error, ex.Message);
                 return;
             }
-           
+
 
         }
 

@@ -8,36 +8,37 @@ using Infrastructures.DataAccess;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System.Security.Cryptography.X509Certificates;
 
 namespace Infrastructures.Implements;
 
 public class DepartmentService : IDepartmentService
 {
     private readonly DataContext _context;
-    private readonly IDapperConnectionFactory dapperFactory;
+    private readonly IDapperConnectionFactory _dapperFactory;
     private readonly IDbContextFactory<DataContext> _contextFactory;
     private readonly ILogger<DepartmentService> _logger;
     public DepartmentService(DataContext app, IDapperConnectionFactory dapperConnectionFactory, IDbContextFactory<DataContext> contextFactory, ILogger<DepartmentService> logger)
     {
-        this._context = app;
-        this.dapperFactory = dapperConnectionFactory;
+        _context = app;
+        _dapperFactory = dapperConnectionFactory;
         _contextFactory = contextFactory;
         _logger = logger;
     }
 
-    public async Task<Result<string>> CreateAsync(Department req)
+    public async Task<Result<string>> CreateAsync(Department req, CancellationToken cancellation = default)
     {
 
         _logger.LogInformation("Creating new department with name: {DepartmentName}", req.DepartmentName);
 
         try
         {
-            await using var context = await _contextFactory.CreateDbContextAsync();
 
-            var dep = await context.Departments.Where(x => x.DepartmentName != null & x.DepartmentName == req.DepartmentName)
-                                   .FirstOrDefaultAsync();
-            if (dep is not null) return Result.Failure<string>(ErrorResponse.Conflict("Department already exist."));
+            if (await IsDepartmentExist(null, req.DepartmentName))
+            {
+                return Result.Failure<string>(ErrorResponse.Conflict("Department already exists."));
+            }
+
+            await using var context = await _contextFactory.CreateDbContextAsync();
 
             await context.Departments.AddAsync(req);
 
@@ -51,16 +52,87 @@ public class DepartmentService : IDepartmentService
         }
 
     }
-    public async Task<Result<string>> DeleteAsync(int? id)
+
+    public async Task<Result<string>> UpdateAsync(Department req, CancellationToken cancellation = default)
+    {
+        _logger.LogInformation("Updating department with ID: {DepartmentId}", req.DepartmentId);
+
+        try
+        {
+
+            if (await IsDepartmentExist(req.DepartmentId, req.DepartmentName, cancellation))
+            {
+                return Result.Failure<string>(ErrorResponse.Conflict("Department Name already exist or invalid sequence.!"));
+            }
+
+            await using var context = await _contextFactory.CreateDbContextAsync(cancellation);
+
+            context.Departments.Update(req);
+
+            await context.SaveChangesAsync(cancellation);
+
+            return Result.Success(new string("department was updated"));
+        }
+        catch (DbUpdateException ex)
+        {
+            return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
+        }
+
+    }
+
+    public async Task<Result<string>> ActivateOrDeactivate(int? id, bool state)
+    {
+        _logger.LogInformation("Activating or deactivating department with ID: {DepartmentId}", id);
+
+        try
+        {
+
+            await using var context = await _contextFactory.CreateDbContextAsync();
+
+            var dep = await context.Departments
+                                   .IgnoreQueryFilters()
+                                   .FirstOrDefaultAsync(x => x.DepartmentId == id);
+
+            if (dep is null)
+            {
+                return Result.Failure<string>(ErrorResponse.NotFound(Messages.DataNotFound));
+            }
+
+            dep.IsActive = state;
+
+            dep.ModifiedDt = DateTime.Now;
+
+            await context.SaveChangesAsync();
+
+            return Result.Success<string>(new("department was updated."));
+
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
+        }
+
+    }
+
+
+
+    public async Task<Result<string>> DeleteAsync(int? id, CancellationToken cancellation = default)
     {
         _logger.LogInformation("Deleting department with ID: {DepartmentId}", id);
         try
         {
             await using var context = await _contextFactory.CreateDbContextAsync();
 
-            var dept = await context.Departments.FirstOrDefaultAsync(dp => dp.DepartmentId == id);
+            var dept = await context.Departments
+                                    .IgnoreQueryFilters()
+                                    .FirstOrDefaultAsync(x => x.DepartmentId == id, cancellation);
 
             if (dept is null) return Result.Failure<string>(ErrorResponse.NotFound("No Department Found."));
+
+            if (await IsDepartmentInUsed(id))
+            {
+                return Result.Failure<string>(ErrorResponse.Validation("Can not delete department because is already used."));
+            }
 
             context.Departments.Remove(dept);
 
@@ -93,16 +165,16 @@ public class DepartmentService : IDepartmentService
 
         await using var context = await _contextFactory.CreateDbContextAsync();
 
-        var department = context.VDepartments.Where(dept => dept.DepartmentId == departmentId);
+        var department = context.VDepartments
+                                .IgnoreQueryFilters()
+                                .Where(dept => dept.DepartmentId == departmentId)
+                                .AsNoTracking()
+                                .FirstOrDefault();
 
         if (department is null) return Result.Failure<VDepartment>(ErrorResponse.NotFound("Deapartment found."));
 
-        var dept = await department.AsNoTracking().FirstAsync();
-
-        return Result.Success<VDepartment>(dept);
+        return Result.Success<VDepartment>(department);
     }
-
-
     public async Task<Result<IEnumerable<Department>>> GetDepartments(int? departmentId = 0, int take = 0, bool includeInactive = false, string? condition = null)
     {
 
@@ -139,8 +211,6 @@ public class DepartmentService : IDepartmentService
         return Result.Success<IEnumerable<Department>>(depts);
 
     }
-
-
     public async Task<Result<IEnumerable<T>>> GetDepartments<T>(int? departmentId, int take = 10, string? filter = null)
         where T : class
     {
@@ -176,8 +246,6 @@ public class DepartmentService : IDepartmentService
         return Result.Success<IEnumerable<T>>(depts);
 
     }
-
-
     public async Task<Pager<VDepartment>> GetDepartments(QueryParam param)
     {
 
@@ -212,7 +280,7 @@ public class DepartmentService : IDepartmentService
             query = query.OrderBy(x => EF.Property<object>(x, param.SortColumn));
         }
 
-            var counts = await query.CountAsync();
+        var counts = await query.CountAsync();
 
         var data = await query.Skip(param.Skip)
                        .Take(param.PageSize)
@@ -221,63 +289,34 @@ public class DepartmentService : IDepartmentService
         return new Pager<VDepartment>(data, counts);
 
     }
-    public async Task<Result<string>> UpdateAsync(Department req)
+
+    private async Task<bool> IsDepartmentInUsed(int? departmentId, CancellationToken cancellation = default)
     {
-        _logger.LogInformation("Updating department with ID: {DepartmentId}", req.DepartmentId);
+        await using var context = await _contextFactory.CreateDbContextAsync(cancellation);
 
-        try
-        {
-            await using var context = await _contextFactory.CreateDbContextAsync();
+        var existing = await context.VDepartments
+                            .IgnoreQueryFilters()
+                            .Where(x => x.DepartmentId == departmentId &&
+                                        x.Used == true)
+                            .AsNoTracking()
+                            .ToListAsync();
 
-            var dep = await context.Departments.Where(x => ((x.DepartmentName != null & x.DepartmentName == req.DepartmentName) &&
-                                               x.DepartmentId != req.DepartmentId) &&
-                                               x.EditSeq == req.EditSeq).FirstOrDefaultAsync();
+        return existing.Any();
 
-            if (dep is not null) return Result.Failure<string>(ErrorResponse.Conflict("Department Name already exist or invalid sequence.!"));
-
-            context.Departments.Update(req);
-
-            await context.SaveChangesAsync();
-
-            return Result.Success(new string("department was updated"));
-        }
-        catch (DbUpdateException ex)
-        {
-            return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
-        }
 
     }
-    public async Task<Result<string>> ActivateOrDeactivate(int? id, bool state)
+
+    private async Task<bool> IsDepartmentExist(int? id, string departmentName, CancellationToken cancellation = default)
     {
-        _logger.LogInformation("Activating or deactivating department with ID: {DepartmentId}", id);
 
-        try
-        {
+        await using var context = await _contextFactory.CreateDbContextAsync();
 
-            await using var context = await _contextFactory.CreateDbContextAsync();
-
-            var dep = await context.Departments
-                                   .IgnoreQueryFilters()
-                                   .FirstOrDefaultAsync(x => x.DepartmentId == id);
-
-            if (dep is null)
-            {
-                return Result.Failure<string>(ErrorResponse.NotFound(Messages.DataNotFound));
-            }
-
-            dep.IsActive = state;
-
-            dep.ModifiedDt = DateTime.Now;
-
-            await context.SaveChangesAsync();
-
-            return Result.Success<string>(new("department was updated."));
-
-        }
-        catch (Exception ex)
-        {
-            return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
-        }
+        var dep = await context.Departments
+                               .Where(x => (x.DepartmentName == departmentName) &&
+                                           (!id.HasValue || x.DepartmentId != id))
+                               .AsNoTracking()
+                               .ToListAsync();
+        return dep.Any();
 
     }
 }

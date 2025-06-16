@@ -48,6 +48,7 @@
 @using TrapchumApp.Helpers.Constants
 @attribute [Authorize]
 @inject IJSRuntime js
+@inject LoadingTrackerService Tracker
 @inject IAuthorizationService _authorizeService;
 @inject NotificationService NotificationService
 @inject DialogService DialogService

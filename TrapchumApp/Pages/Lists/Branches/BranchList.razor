@@ -6,7 +6,7 @@
 <style>
     .rz-grid-table td .rz-cell-data {
         line-height: 1.5rem;
-        font-size:0.8rem;
+        font-size: 0.8rem;
     }
 </style>
 <RadzenTabs RenderMode="TabRenderMode.Server">
@@ -42,7 +42,7 @@
                             FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
                             LogicalFilterOperator="LogicalFilterOperator.Or"
                             AllowFiltering="true"
-                            IsLoading="@isLoading"
+                            IsLoading="@Tracker.IsLoading"
                             LoadData="@LoadData"
                             PageSizeOptions="@StorageConstant.PageSizeOptions"
                             PageSizeChanged="PageSizeChanged"
@@ -90,6 +90,11 @@
                         </Authorized>
                     </AuthorizeView>
                 </Columns>
+                <LoadingTemplate>
+                    <RadzenProgressBarCircular Mode="ProgressBarMode.Indeterminate"
+                                               ProgressBarStyle="ProgressBarStyle.Danger"
+                                               Value="100" ShowValue="false" />
+                </LoadingTemplate>
             </RadzenDataGrid>
         </RadzenTabsItem>
     </Tabs>

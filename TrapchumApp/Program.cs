@@ -28,6 +28,7 @@ builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuth
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddPolicyServices();
 builder.Services.AddApplicationServices();
+builder.Services.AddOtherServices();
 builder.Services.AddValidationServiceInjections();
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddMapster();

@@ -9,7 +9,7 @@ namespace Applications.Interfaces.Branches
 {
     public interface IBranchService
     {
-        Task<Result> Create(Branch branch);
+        Task<Result<VBranchResponse>> CreateAsync(Branch branch, CancellationToken cancellation = default);
         Task<Result> UpdateAsync(Branch branch);
         Task<Result<BranchDtoUpdate>> GetUpdateBranchById(int? branchId);
         Task<Result> UpdateStatusAsync(int? branchId);

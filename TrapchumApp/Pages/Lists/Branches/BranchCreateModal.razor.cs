@@ -5,8 +5,7 @@ using Applications.Responses.Lists.Currency;
 using Domains.Models.Addresses;
 using Domains.Models.Lists;
 using Mapster;
-using Microsoft.AspNetCore.Components;
-using Radzen;
+using TrapchumApp.Helpers.Validations;
 
 namespace TrapchumApp.Pages.Lists.Branches
 {
@@ -23,9 +22,16 @@ namespace TrapchumApp.Pages.Lists.Branches
         protected IEnumerable<string> strCountries = [];
 
         protected IEnumerable<string> Cities = [];
+
         protected IEnumerable<string> filteredItems = [];
+
+        EditContext editContext=default!;
+
         protected override async Task OnInitializedAsync()
         {
+
+            editContext = new EditContext(model);
+
             var rsp = await _addressService!.GetCountries(105);
 
             if (rsp.IsSuccess)
@@ -65,10 +71,14 @@ namespace TrapchumApp.Pages.Lists.Branches
 
                 var response = await _branchService.CreateAsync(createModel);
 
-                if (response!.IsSuccess)
+                if (response.IsSuccess)
                 {
                     NotificationService.Notify(NotificationSeverity.Success, "New Branch", "Branch created successfully!");
                     DialogService.Close(true);
+                }
+                else
+                {
+                    editContext.ApplyValidationSummary<BranchDtoCreate>(response.ErrMessage);
                 }
             }
             catch (Exception ex)
@@ -138,6 +148,7 @@ namespace TrapchumApp.Pages.Lists.Branches
             if (e is not null)
             {
                 model.ComDescription = ((VillageDto)e)?.VillDescription;
+
                 model.ComInKhmer = ((VillageDto)e!)?.VilInKhmer;
             }
             StateHasChanged();

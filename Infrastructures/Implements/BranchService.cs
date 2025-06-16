@@ -16,40 +16,50 @@ namespace Infrastructures.Implements;
 
 public class BranchService(IDbContextFactory<DataContext> contextFactory) : IBranchService
 {
-    public async Task<Result> Create(Branch branch)
+
+    public async Task<Result<VBranchResponse>> CreateAsync(Branch branch, CancellationToken cancellation = default)
     {
         try
         {
+            if (await IsBranchExist(null, branch.BranchName)) 
+            {
+                return Result.Failure<VBranchResponse>(ErrorResponse.Conflict("Branch Name is already exist."));
+            }
+
             await using var context = await contextFactory.CreateDbContextAsync();
 
             context.Branches.Add(branch);
+
             await context.SaveChangesAsync();
 
-            return Result.Success("New branch was created.");
+           var created=await context.VBranchs
+                            .AsNoTracking()
+                            .FirstOrDefaultAsync(x => x.BranchId == branch.BranchId);
+
+            if(created is null)
+            {
+                return Result.Failure<VBranchResponse>(ErrorResponse.Validation("Could not created branch...!"));
+            }
+
+            return Result.Success(created);
         }
-        catch (Exception ex)
+        catch (DbUpdateException ex)
         {
-            return Result.Failure(ErrorResponse.ServerError($"{ex.Message}"));
+            return Result.Failure<VBranchResponse>(ErrorResponse.ServerError($"{ex.Message}"));
         }
     }
-
+     
     public async Task<Result> DeleteAsync(int? id)
     {
         try
         {
-            await using var context = await contextFactory.CreateDbContextAsync();
 
-            var inUsedBranch = await context
-                .Database
-                .SqlQuery<VBranchResponse>(
-                    $"SELECT TOP(1) * FROM VBranches WHERE BranchId={id} AND Used=CAST(1 AS BIT)")
-                .AsNoTracking()
-                .ToListAsync();
-
-            if (inUsedBranch.Any())
+            if(await IsBranchUsed(id))
             {
                 return Result.Failure<string>(ErrorResponse.Conflict("This branch is used in the system."));
             }
+
+            await using var context = await contextFactory.CreateDbContextAsync();
 
             var branch = await context.Branches.FindAsync(id);
 
@@ -129,8 +139,7 @@ public class BranchService(IDbContextFactory<DataContext> contextFactory) : IBra
         }
     }
 
-
-    public async Task<Result<string>> UpdateStatusAsync(int? branchId,bool state)
+    public async Task<Result<string>> UpdateStatusAsync(int? branchId, bool state)
     {
         try
         {
@@ -444,4 +453,32 @@ public class BranchService(IDbContextFactory<DataContext> contextFactory) : IBra
 
         return Result.Success<IEnumerable<ApprovedUser>>(user);
     }
+
+
+
+    private async Task<bool> IsBranchExist(int? branchId,string branchName,CancellationToken cancellation=default)
+    {
+        await using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+        var existings=await context.VBranchs
+                                    .Where(x=>x.BranchName == branchName && 
+                                            (!branchId.HasValue || x.BranchId !=branchId))
+                                    .AsNoTracking()
+                                    .ToListAsync(cancellation);
+
+        return existings.Any();
+    }
+
+    private async Task<bool> IsBranchUsed(int? branchId, CancellationToken cancellation = default)
+    {
+        await using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+        var existings = await context.VBranchs
+                                    .Where(x =>x.BranchId==branchId && x.Used==true)
+                                    .AsNoTracking()
+                                    .ToListAsync(cancellation);
+
+        return existings.Any();
+    }
+
 }

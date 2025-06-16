@@ -6,7 +6,14 @@
 @implements IDisposable
 @inherits LayoutComponentBase
 @attribute [StreamRendering(false)]
+@inject LoadingTrackerService Tracker
 <RadzenComponents @rendermode="InteractiveServer" />
+<RadzenProgressBar Visible="@isLoading"
+                   Mode="ProgressBarMode.Indeterminate"
+                   Value="100"
+                   ShowValue="false"
+                   ProgressBarStyle="ProgressBarStyle.Danger"
+                   Style="height: 4px; position: fixed; top: 0; left: 0; width: 100%; z-index: 9999;" />
 <RadzenLayout>
     <RadzenHeader>
         <RadzenStack Orientation="Orientation.Horizontal"
@@ -150,23 +157,44 @@
 @code {
 
     private string? currentUrl;
+    private bool isLoading;
 
     protected override void OnInitialized()
     {
         currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
 
         NavigationManager.LocationChanged += OnLocationChanged;
+
+        Tracker.OnLoadingChanged += state =>
+        {
+            isLoading = state;
+
+            InvokeAsync(StateHasChanged);
+        };
     }
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
+
         currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+
         StateHasChanged();
     }
+
+
+
+
 
     public void Dispose()
     {
         NavigationManager.LocationChanged -= OnLocationChanged;
+
+        Tracker.OnLoadingChanged -= state =>
+        {
+            isLoading = state;
+
+            InvokeAsync(StateHasChanged);
+        };
     }
 
     async Task ShowCurrencyDialogue()

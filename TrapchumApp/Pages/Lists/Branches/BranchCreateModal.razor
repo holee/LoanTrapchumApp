@@ -2,8 +2,9 @@
 @using Microsoft.AspNetCore.Components.Web
 @using Radzen.Blazor
 @using TrapchumApp.Services
-<EditForm Model="@model" OnValidSubmit="@OnSubmit">
+<EditForm OnValidSubmit="@OnSubmit" EditContext="@editContext">
     <FluentValidationValidator DisableAssemblyScanning="true" />
+    <ValidationSummary />
     <RadzenFieldset AllowCollapse="false" Collapsed="false" Gap="0.25rem">
         <HeaderTemplate>
             <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
@@ -11,7 +12,7 @@
             </RadzenStack>
         </HeaderTemplate>
         <ChildContent>
-            <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
+            <RadzenRow  class="rz-mb-2">
                 <RadzenColumn Size="3">
                     <RadzenLabel Text="Status" Component="IsActive" />
                 </RadzenColumn>
@@ -20,7 +21,7 @@
                     @(model.IsActive ? "Active" : "Inactive")
                 </RadzenColumn>
             </RadzenRow>
-            <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
+            <RadzenRow  class="rz-mb-2">
                 <RadzenColumn Size="3">
                     <RadzenLabel Text="Branch Name*" />
                 </RadzenColumn>

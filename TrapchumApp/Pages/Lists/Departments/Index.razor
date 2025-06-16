@@ -4,7 +4,7 @@
 <PageTitle>Departments</PageTitle>
 <RadzenTabs>
     <Tabs>
-        <RadzenTabsItem  Text="Departments">
+        <RadzenTabsItem Text="Departments">
             <GridToolbar SearchChanged="SearchChanged">
                 <LeftChildren>
                     <RadzenButton Text="New Department"
@@ -33,6 +33,7 @@
                             PagerHorizontalAlign="HorizontalAlign.Right"
                             AllowFiltering="true"
                             AllowSorting="true"
+                            IsLoading="@isLoading"
                             PageSizeOptions="@StorageConstant.PageSizeOptions"
                             Data="@Departments">
                 <Columns>
@@ -74,12 +75,17 @@
                         </Template>
                     </RadzenDataGridColumn>
                 </Columns>
+                <LoadingTemplate>
+                    <RadzenProgressBarCircular Mode="ProgressBarMode.Indeterminate"
+                                               ShowValue="false" Value="100"
+                                               ProgressBarStyle="ProgressBarStyle.Danger" />
+                </LoadingTemplate>
 
             </RadzenDataGrid>
         </RadzenTabsItem>
     </Tabs>
 </RadzenTabs>
-    
+
 @code {
 
     void ShowContextMenuWithContent(MouseEventArgs args, int id)

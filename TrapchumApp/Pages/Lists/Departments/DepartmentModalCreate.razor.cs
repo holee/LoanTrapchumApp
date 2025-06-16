@@ -2,7 +2,6 @@ using Applications.Interfaces.Lists;
 using Applications.Requests.Lists.Entities;
 using Domains.Models.Lists;
 using Mapster;
-using Radzen;
 
 namespace TrapchumApp.Pages.Lists.Departments
 {
@@ -18,28 +17,21 @@ namespace TrapchumApp.Pages.Lists.Departments
         private DepartmentDtoCreate Req = new DepartmentDtoCreate();
         protected async Task Create()
         {
-            try
+
+            var model = Req.Adapt<Department>();
+
+            var response = await depService.CreateAsync(model);
+
+            if (response!.IsSuccess)
             {
-                var model = Req.Adapt<Department>();
-
-                var response = await depService.CreateAsync(model);
-
-                if (response!.IsSuccess)
-                {
-                    NotificationService.Notify(NotificationSeverity.Success, "Department record was created successful!");
-                    DialogService.Close(true);
-                }
-                else
-                {
-                    NotificationService.Notify(NotificationSeverity.Success, response.ErrMessage);
-                }
+                NotificationService.Notify(NotificationSeverity.Success, "Department record was created successful!");
+                DialogService.Close(true);
             }
-            catch (Exception ex)
+            else
             {
-                NotificationService.Notify(NotificationSeverity.Error, ex.Message);
+                NotificationService.Notify(NotificationSeverity.Error, response.ErrMessage);
             }
 
-            
         }
 
 

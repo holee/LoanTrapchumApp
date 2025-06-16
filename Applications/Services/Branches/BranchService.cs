@@ -30,7 +30,7 @@ namespace Applications.Services.Branches
     {
         public async Task<Result> CreateAsync(Branch branch)
         {
-            return await branchService.Create(branch);
+            return await branchService.CreateAsync(branch);
         }
 
         public async Task<Result> DeleteAsync(int? id)

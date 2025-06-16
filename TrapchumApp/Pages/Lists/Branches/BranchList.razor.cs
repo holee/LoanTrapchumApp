@@ -92,7 +92,7 @@ namespace TrapchumApp.Pages.Lists.Branches
         }
         async Task GetBranches(string? filterText = "")
         {
-            isLoading = true;
+            Tracker.Show();
 
             var param = new QueryParam(pageIndex, pageSize, sortField, includeInactive, sortDescending, filterText);
 
@@ -102,7 +102,7 @@ namespace TrapchumApp.Pages.Lists.Branches
 
             Branches = resultResponse.Items;
 
-            isLoading = false;
+            Tracker.Hide();
 
             StateHasChanged();
         }

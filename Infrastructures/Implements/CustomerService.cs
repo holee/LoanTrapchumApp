@@ -17,6 +17,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Data;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Infrastructures.Implements;
 
@@ -579,6 +580,11 @@ public class CustomerService(
     {
         try
         {
+            if (await IsCustomerRegister(null,model.Phone, model.IdCard,cancellation)) 
+            {
+                return Result.Failure<string>(ErrorResponse.Conflict($"Customer With Name:{model.AltName} is already register."));
+            }
+
             await using var context = await contextFactory.CreateDbContextAsync(cancellation); 
 
             context.EntityNames.Add(model);
@@ -597,6 +603,12 @@ public class CustomerService(
     {
         try
         {
+
+            if (await IsCustomerRegister(model.Id, model.Phone, model.IdCard, cancellation))
+            {
+                return Result.Failure<string>(ErrorResponse.Conflict($"Customer With Name:{model.AltName} is already register."));
+            }
+
             await using var cxt = await contextFactory.CreateDbContextAsync(cancellation);
 
             cxt.EntityNames.Update(model);
@@ -618,39 +630,28 @@ public class CustomerService(
 
         var customerInUse = await _context.LoanDisbursments
                                    .AsNoTracking()
-                                   .Where(x => x.CustomerRefId == customerId)
-                                   .ToListAsync(cancellation);
-        return customerInUse.Any();
+                                   .AnyAsync(x => x.CustomerRefId == customerId,cancellation);
+        return customerInUse;
     }
 
+    private async Task<bool> IsCustomerRegister(string? customerId, string? phoneNumber,string? idCard,CancellationToken cancellation=default)
+    {
+        if (string.IsNullOrWhiteSpace(phoneNumber))
+            throw new ArgumentException("Phone number is required", nameof(phoneNumber));
 
+        if (string.IsNullOrWhiteSpace(idCard))
+            throw new ArgumentException("ID Card is required", nameof(idCard));
+
+        await using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+        return await context.CustomerLists
+                            .AsNoTracking()
+                            .AnyAsync(x =>(x.Phone == phoneNumber || x.IdCard == idCard) && 
+                                        (string.IsNullOrEmpty(x.CustomerId) || x.CustomerId != customerId),
+                                cancellation);
+
+    }
 
 }
 
 
-//public async Task<Result<Pager<T>>> GetCustomerLoanRequestAsync<T>(int? branchId, string? customerId, bool includeComplete = false)
-//    where T : class
-//{
-//    try
-//    {
-//        var customerLoanRequests = await context.Database
-//            .SqlQuery<VLoanRequests>($"SELECT * FROM VLoanRequests WHERE CustomerId={customerId} AND BranchId={branchId}")
-//            .WhereIf(includeComplete, c => c.StatusId == (int)RequestStatus.Completed)
-//            .ProjectToType<T>()
-//            .AsNoTracking()
-//            .ToListAsync();
-
-//        if (!customerLoanRequests.Any())
-//        {
-//            return Result.Failure<Pager<T>>(ErrorResponse.NotFound("No note found."));
-//        }
-
-//        var counts = customerLoanRequests.Count;
-
-//        return Result.Success(new Pager<T>(customerLoanRequests, counts));
-//    }
-//    catch (SqlException ex)
-//    {
-//        return Result.Failure<Pager<T>>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
-//    }
-//}
