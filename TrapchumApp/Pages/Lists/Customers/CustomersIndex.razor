@@ -3,8 +3,6 @@
 @using TrapchumApp.Pages.Lists.Collaterals
 @using TrapchumApp.Services
 <PageTitle>Customers</PageTitle>
-<RadzenProgressBar Mode="ProgressBarMode.Indeterminate" Value="100" Visible="@isVisble"
-                   ShowValue="false"></RadzenProgressBar>
 <RadzenTabs RenderMode="TabRenderMode.Server"
             Change="SelectedTabChanged"
             @bind-SelectedIndex="selectedIndex"
@@ -48,5 +46,18 @@
         selectedIndex = selectedTabIndex;
 
         isEditTab = true;
+    }
+
+    async Task CreateCustomerQuick()
+    {
+
+        var options = new DialogOptions
+            {
+                Width = "45vw",
+                Draggable = true,
+                Resizable = false
+            };
+
+        await DialogService.OpenAsync<CustomerCreateQuick>("Quick Add",options:options);
     }
 }
