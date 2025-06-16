@@ -75,27 +75,43 @@ public partial class JournalEntryCreate(
 
     private async Task GetLedgerByCurrency(int? currencyId, string? searchText = null)
     {
-        var res = await ledgerService.GetLedgersAsync(0, currencyId, searchText);
-
-        if (res.IsSuccess)
+        try
         {
-            Ledgers = res.Data;
-        }
-        else
-        {
-            NotificationService.Notify(NotificationSeverity.Error, res.ErrMessage);
-        }
+            var res = await ledgerService.GetLedgersAsync(0, currencyId, searchText);
 
-        StateHasChanged();
+            if (res.IsSuccess)
+            {
+                Ledgers = res.Data;
+            }
+            else
+            {
+                NotificationService.Notify(NotificationSeverity.Error, res.ErrMessage);
+            }
+
+            StateHasChanged();
+        }
+        catch(Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Exception", ex.Message);
+        }
+        
     }
 
     private async Task GetNameLists(string? id = null, string? searchText = null)
     {
-        var param = new QueryParam(1, 10, string.Empty, true, false, searchText);
+        try
+        {
+            var param = new QueryParam(1, 10, string.Empty, true, false, searchText);
 
-        NameLists = await nameService.GetNameLists<VNameList>(id, param);
+            NameLists = await nameService.GetNameLists<VNameList>(id, param);
 
-        StateHasChanged();
+            StateHasChanged();
+        }
+        catch(Exception ex)
+        {
+            NotificationService!.Notify(NotificationSeverity.Error, "Exception", ex.Message);
+        }
+       
     }
 
     protected void AddNewRow()
@@ -136,7 +152,7 @@ public partial class JournalEntryCreate(
                 TransactionsId = $"trx-{Guid.CreateVersion7()}",
                 TranTypeRefId = 33,
                 TransactionTypeName = "Journal Entries",
-                CurrencyRefId = 1,
+                CurrencyRefId = JLe.CurrencyRefId,
                 UserRefId = UserId
             };
             JLe.LoanTransaction = trx;
@@ -194,7 +210,7 @@ public partial class JournalEntryCreate(
 
             if (resp.IsSuccess)
             {
-                NotificationService.Notify(NotificationSeverity.Success, "Journal", "Success");
+                NotificationService.Notify(NotificationSeverity.Success, "Journal", "Journal Entry created successful!");
                 JLe.JournalEntryLines = [];
                 JournalLines = [];
                 AddNewRow();
@@ -235,7 +251,7 @@ public partial class JournalEntryCreate(
             journalLine.Credit = null;
         }
 
-        if (journalLine.LedgerRefId == null || journalLine.LedgerRefId == 0)
+        if (journalLine.LedgerRefId == null || journalLine.LedgerRefId <= 0)
         {
             _isMessage = true;
 

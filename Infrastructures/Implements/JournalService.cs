@@ -118,7 +118,9 @@ public class JournalService(
 
     public async Task<Result<JournalEntry>> CreateJournalAsync(JournalEntry model)
     {
-        logger.LogInformation("Attempt to create Journal");
+        logger.LogInformation("\n =======================\n" +
+            "Attempt to create Journal " +
+            "\n =========================\n");
 
         await using var dataContext = await dbContextFactory.CreateDbContextAsync();
 
@@ -132,9 +134,9 @@ public class JournalService(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, ex.Message);
+            logger.LogError("Error Server: "+ ex, ex.Message);
 
-            return Result.Failure<JournalEntry>(ErrorResponse.ServerError($"{ex.Message}"));
+            return Result.Failure<JournalEntry>(ErrorResponse.ServerError($"Error Server: {ex.Message}"));
         }
     }
 
