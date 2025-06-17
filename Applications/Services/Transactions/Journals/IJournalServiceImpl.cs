@@ -10,8 +10,6 @@ namespace Applications.Services.Transactions.Journals;
 public interface IJournalServiceImpl 
 {
     Task<Result<string>> CreateOrUpdateJournalAsync(string? journalId, JournalEntry journalEntry);
-    Task<Result<LoanTransaction>> CreateJournalAsync(LoanTransaction model);
-    Task<Result<JournalEntry>> CreateJournalAsync(JournalEntryDtoCreate req);
     Task<Result<string>> DeleteJournalAsync(string? id);
     Task<JournalEntry?> GetJournalByIdAsync(string? id);
     Task<IEnumerable<JournalType>> GetJournalTypesAsync(string? expression = null);
@@ -21,4 +19,5 @@ public interface IJournalServiceImpl
     
     Task<Pager<JournalEntryVm>> GetJournalsAsync(int? branchId,QueryParam param);
     Task<Result<JournalEntryVm>> GetJournalByIdAsync(string? id, bool include);
+    Task<Result<string>> CreateJournalAsync(JournalTransactionDtoCreate req, CancellationToken cancellation = default);
 }

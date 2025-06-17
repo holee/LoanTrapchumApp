@@ -1,5 +1,6 @@
 ﻿using Applications.Enumerations;
 using Applications.Extensions.mappers;
+using Applications.Helpers;
 using Applications.Requests.Journals;
 using Applications.Requests.Transactions.Journals;
 using Applications.Responses.Lists.Currency;
@@ -36,7 +37,6 @@ public partial class JournalEntryCreate(
     private EditForm? _editForm;
     [Parameter] public string? UserId { get; set; }
     [Parameter] public int BranchId { get; set; }
-
     protected override async Task OnInitializedAsync()
     {
         try
@@ -149,16 +149,18 @@ public partial class JournalEntryCreate(
         {
             var trx = new JournalTransactionDtoCreate
             {
-                TransactionsId = $"trx-{Guid.CreateVersion7()}",
                 TranTypeRefId = 33,
-                TransactionTypeName = "Journal Entries",
+                TransactionTypeName = TransactionTypes.JORNL.GetDescription(),
                 CurrencyRefId = JLe.CurrencyRefId,
-                UserRefId = UserId
+                UserRefId = UserId,
+                BranchRefId=BranchId
+               
             };
-            JLe.LoanTransaction = trx;
-            JLe.JournalEntryId = $"jrn-{Guid.CreateVersion7()}";
+
             JLe.BranchRefId = BranchId;
+
             JLe.BankRefId = 11;
+
             if (JournalLines.Count() <= 1)
             {
                 _isMessage = true;
@@ -198,15 +200,21 @@ public partial class JournalEntryCreate(
             }
 
             JLe.TotalCr = JournalLines!.Sum(x => x.Credit);
+
             JLe.TotalDr = JournalLines!.Sum(x => x.Debit);
+
             JLe.JournalLineCount = JournalLines!.Count();
-            JLe.JournalEntryLines = JournalLines;
+
+            JLe.JournalEntryLines!.AddRange(JournalLines);
+
+            trx.JournalEntry = JLe;
+
             if (_editForm?.EditContext?.Validate() == false)
             {
                 return;
             }
 
-            var resp = await journalService.CreateJournalAsync(JLe);
+            var resp = await journalService.CreateJournalAsync(trx);
 
             if (resp.IsSuccess)
             {
@@ -231,7 +239,7 @@ public partial class JournalEntryCreate(
 
             _isMessage = false;
 
-            NotificationService.Notify(NotificationSeverity.Error, "Exception", ex!.Message);
+            NotificationService.Notify(NotificationSeverity.Error, "Exception", ex.InnerException?.Message);
         }
     }
 

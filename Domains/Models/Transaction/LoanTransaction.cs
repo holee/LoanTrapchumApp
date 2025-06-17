@@ -4,7 +4,7 @@ using Domains.Models.Loans;
 
 namespace Domains.Models.Transaction;
 
-public class LoanTransaction : BaseEntity
+public sealed class LoanTransaction : BaseEntity
 {
     public string TransactionsId { get; set; } =$"trx-{Guid.CreateVersion7()}";
     public string? UserRefId { get; set; }

@@ -7,5 +7,7 @@ public class JournalTransactionDtoCreate
     public string TransactionTypeName { get; set; } = string.Empty;
     public string? UserRefId { get; set; }
     public int? CurrencyRefId { get; set; }
+    public int? BranchRefId { get; set; } 
+    public JournalEntryDtoCreate JournalEntry { get; set; } = new();
 
 }

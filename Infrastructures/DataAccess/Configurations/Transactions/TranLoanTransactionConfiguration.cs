@@ -20,7 +20,7 @@ namespace Infrastructures.DataAccess.Configurations.Transactions
             builder.Property(p => p.ModifiedDt).HasDefaultValueSql("GETDATE()");
 
             builder.HasOne(x => x.JournalEntry)
-                        .WithOne(x => x.LoanTransaction)
+                        .WithOne()
                         .HasForeignKey<JournalEntry>(fk => fk.TransactionsRefId);
 
             builder.HasMany(c => c.CashManagements)

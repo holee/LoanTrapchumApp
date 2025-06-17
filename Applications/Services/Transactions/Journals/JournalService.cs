@@ -1,4 +1,5 @@
-﻿using Applications.Interfaces.Transactions;
+﻿using Applications.Commons.Mappers;
+using Applications.Interfaces.Transactions;
 using Applications.Requests.Transactions.Journals;
 using Applications.Responses;
 using Applications.Responses.Paginations;
@@ -11,22 +12,18 @@ namespace Applications.Services.Transactions.Journals;
 
 public sealed class JournalService(IJournalService jService) : IJournalServiceImpl
 {
-    public async Task<Result<LoanTransaction>> CreateJournalAsync(LoanTransaction model)
-    {
-        return await jService.CreateJournalAsync(model);
-    }
 
-    public async Task<Result<JournalEntry>> CreateJournalAsync(JournalEntryDtoCreate req)
+    public async Task<Result<string>> CreateJournalAsync(JournalTransactionDtoCreate req,CancellationToken cancellation=default)
     {
-        var model = req.Adapt<JournalEntry>();
+        var model = req.MapTransactionCreate();
 
-        return await jService.CreateJournalAsync(model);
+        return await jService.CreateJournalAsync(model,cancellation);
     }
 
     //
     public async Task<Result<string>> CreateOrUpdateJournalAsync(string? journalId, JournalEntry journalEntry)
     {
-        return await jService.CreateOrUpdateJournalAsync(journalId, journalEntry);
+        return await jService.UpdateJournalAsync(journalId, journalEntry);
     }
 
     public async Task<Result<string>> DeleteJournalAsync(string? id)

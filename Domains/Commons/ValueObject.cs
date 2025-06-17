@@ -6,7 +6,7 @@ public abstract class ValueObject
     {
         if (left is null ^ right is null) return false;
 
-        return left?.Equals(right) != false;
+        return left?.Equals(right!) != false;
     }
 
     protected static bool NotEqualOperator(ValueObject left, ValueObject right)

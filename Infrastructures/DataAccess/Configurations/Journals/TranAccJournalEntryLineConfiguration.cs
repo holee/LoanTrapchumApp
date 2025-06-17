@@ -19,7 +19,7 @@ namespace Infrastructures.DataAccess.Configurations.Journals
             builder.Property(p => p.Debit).HasPrecision(18, 2);
             builder.Property(p => p.Credit).HasPrecision(18, 2);
             builder.Property(p => p.Amount).HasPrecision(18, 2)
-                   .HasComputedColumnSql("[Debit] + [Credit]", true);
+                   .HasComputedColumnSql("((ISNULL([Debit],0)) - (ISNULL([Credit],0)))", true);
             builder.Property(p => p.ExchangeRate).HasColumnType("DECIMAL(18,2)");
             builder.Property(p => p.BaseAmount).HasColumnType("DECIMAL(18,2)");
             builder.Property(p => p.JournalLineDesc);

@@ -25,14 +25,14 @@ public class JournalService(
 {
     private readonly IDapperConnectionFactory _dapperConnectionFactory = dapperConnectionFactory;
 
-    public async Task<Result<string>> CreateOrUpdateJournalAsync(string? journalId, JournalEntry journalEntry)
+    public async Task<Result<string>> UpdateJournalAsync(string? journalId, JournalEntry journalEntry)
     {
         logger.LogInformation("Attempt to create Journal");
         //context.Database.BeginTransaction();
         try
         {
             var existingJournal = context.JournalEntries
-                .Include(x => x.LoanTransaction)
+                //.Include(x => x.LoanTransaction)
                 .Include(j => j.JournalEntryLines)
                 .FirstOrDefault(x => x.JournalEntryId == journalEntry.JournalEntryId);
 
@@ -97,6 +97,71 @@ public class JournalService(
         }
     }
 
+    public async Task<Result<string>> UpdateJournalAsync(LoanTransaction tranx,CancellationToken cancellation=default)
+    {
+        logger.LogInformation("Attempt to create Journal");
+        try
+        {
+            await using var dataContext = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+            var existingJournal =await dataContext.LoanTransaction
+                                        .Include(x => x.JournalEntry)
+                                        .ThenInclude(j => j.JournalEntryLines)
+                                        .FirstOrDefaultAsync(x => x.TransactionsId == tranx.TransactionsId,cancellation);
+
+            if (existingJournal is null) 
+            { 
+                    return Result.Failure<string>(ErrorResponse.NotFound(Messages.DataFound));
+            }
+            
+            dataContext.Entry(existingJournal).CurrentValues.SetValues(tranx);
+
+            // Update JournalEntry
+            if (tranx.JournalEntry is not null && existingJournal.JournalEntry is not null)
+            {
+                dataContext.Entry(existingJournal.JournalEntry).CurrentValues.SetValues(tranx.JournalEntry);
+
+                // Update JournalEntryLines
+                foreach (var line in tranx.JournalEntry.JournalEntryLines ?? Enumerable.Empty<JournalEntryLine>())
+                {
+                    var existingLine = existingJournal?.JournalEntry?.JournalEntryLines?
+                        .FirstOrDefault(x => x.JournalLineId == line.JournalLineId);
+
+                    if (existingLine is null || line.JournalLineId == 0)
+                    {
+                        existingJournal?.JournalEntry.JournalEntryLines!.Add(line);
+                    }
+                    else
+                    {
+                        dataContext.Entry(existingLine).CurrentValues.SetValues(line);
+                    }
+                }
+
+                // Remove lines not present in updated model
+                var linesToRemove = existingJournal?.JournalEntry?.JournalEntryLines?
+                    .Where(existing => !tranx.JournalEntry.JournalEntryLines!
+                        .Any(updated => updated.JournalLineId == existing.JournalLineId))
+                    .ToList();
+
+                foreach (var removeLine in linesToRemove ?? [])
+                {
+                    dataContext.Remove(removeLine);
+                }
+            }
+
+            await dataContext.SaveChangesAsync(cancellation);
+
+            return Result.Success("Journal entry successfully updated.");
+
+        }
+        catch (Exception ex)
+        {
+            //context.Database.RollbackTransaction();
+            logger.LogError(ex, ex.Message);
+            return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}"));
+        }
+    }
+
 
     public async Task<Result<LoanTransaction>> CreateJournalAsync(LoanTransaction model)
     {
@@ -118,15 +183,13 @@ public class JournalService(
 
     public async Task<Result<JournalEntry>> CreateJournalAsync(JournalEntry model)
     {
-        logger.LogInformation("\n =======================\n" +
-            "Attempt to create Journal " +
-            "\n =========================\n");
+        logger.LogInformation(@"=======================Attempt to create Journal=========================");
 
         await using var dataContext = await dbContextFactory.CreateDbContextAsync();
 
         try
         {
-            dataContext.JournalEntries.Add(model);
+            var addedEntity = dataContext.JournalEntries.Add(model).Entity;
 
             await dataContext.SaveChangesAsync();
 
@@ -134,11 +197,38 @@ public class JournalService(
         }
         catch (Exception ex)
         {
-            logger.LogError("Error Server: "+ ex, ex.Message);
+            logger.LogError("Error Server: " + ex, ex.Message);
 
             return Result.Failure<JournalEntry>(ErrorResponse.ServerError($"Error Server: {ex.Message}"));
         }
     }
+
+
+    public async Task<Result<string>> CreateJournalAsync(LoanTransaction model, CancellationToken cancellation = default)
+    {
+        logger.LogInformation(@"=======================Attempt to create Journal=========================");
+
+        await using var dataContext = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+        try
+        {
+
+            dataContext.LoanTransaction.Add(model);
+
+            await dataContext.SaveChangesAsync(cancellation);
+
+            return Result.Success(Messages.DataCreated);
+        }
+        catch (DbUpdateException ex)
+        {
+            logger.LogError("Error Server: " + ex, ex.Message);
+
+            return Result.Failure<string>(ErrorResponse.ServerError($"Error Server: {ex.InnerException?.Message}"));
+        }
+    }
+
+
+
 
     //
     public async Task<Result<string>> UpdateJournalAsync(string? id, LoanTransaction jTrx)
@@ -258,7 +348,7 @@ public class JournalService(
     public async Task<IEnumerable<JournalEntry>> GetJournalsAsync(string? journalId, string? q = null)
     {
         IQueryable<JournalEntry> queries = context.JournalEntries
-            .Include(x => x.LoanTransaction)
+            //.Include(x => x.LoanTransaction)
             .Include(x => x.JournalEntryLines);
 
         if (journalId.IsNotNullOrEmpty())
@@ -272,8 +362,7 @@ public class JournalService(
 
             queries = queries.Where(x => EF.Functions.Like(x.ReferrenceNum!, like) ||
                                          EF.Functions.Like(x.JournalType!, like) ||
-                                         EF.Functions.Like(x.JournalEntryId, like) ||
-                                         EF.Functions.Like(x.LoanTransaction!.TransactionDate!.ToString(), like));
+                                         EF.Functions.Like(x.JournalEntryId, like));
         }
 
         return await queries.AsNoTracking().ToListAsync();
@@ -337,7 +426,6 @@ public class JournalService(
     {
         var journal = context.JournalEntries
             .Where(x => x.JournalEntryId == id)
-            .Include(x => x.LoanTransaction)
             .Include(a => a.JournalEntryLines);
         return await journal.AsNoTracking().FirstOrDefaultAsync();
     }

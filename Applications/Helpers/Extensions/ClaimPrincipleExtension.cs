@@ -8,17 +8,17 @@ public static class ClaimPrincipleExtension
                        => claimsPrincipal.FindFirstValue(ClaimTypes.Email);
     public static string? GetUserName(this ClaimsPrincipal claimsPrincipal)
                        => claimsPrincipal.FindFirstValue(ClaimTypes.Name);
-    public static long GetId(this ClaimsPrincipal claimsPrincipal)
-    {
-        var value = claimsPrincipal.FindFirstValue(ClaimTypes.NameIdentifier);
+    //public static long GetId(this ClaimsPrincipal claimsPrincipal)
+    //{
+    //    var value = claimsPrincipal.FindFirstValue(ClaimTypes.NameIdentifier);
 
-        if (long.TryParse(value, out var id))
-        {
-            return id;
-        }
+    //    if (long.TryParse(value, out var id))
+    //    {
+    //        return id;
+    //    }
 
-        return default;
-    }
+    //    return default;
+    //}
 
     public static string? GetRole(this ClaimsPrincipal claimsPrincipal)
     {

@@ -7,12 +7,14 @@ using Microsoft.AspNetCore.Components;
 using Radzen;
 using Microsoft.AspNetCore.Components.Authorization;
 using Radzen.Blazor;
+using Applications.Helpers.Extensions;
+using Domains.Models.Identity;
 
 namespace TrapchumApp.Pages.Transactions.Journals
 {
     public partial class JournalIndex
     {
-        [Parameter] public int? BranchId { get; set; } = 0;
+        [Parameter] public int BranchId { get; set; } = 0;
         private readonly IJournalServiceImpl _journalService;
         [Parameter] public int selectedIndex { get; set; } = 0;
         [CascadingParameter] private Task<AuthenticationState> AuthState { get; set; } = default!;
@@ -43,7 +45,7 @@ namespace TrapchumApp.Pages.Transactions.Journals
         IEnumerable<JournalEntryVm> JournalItems = [];
         JournalEntryVm? modelDetails = new();
         private string? _selectedJournalId;
-
+        string? UserId=string.Empty;
         void ShowCreatedTab()
         {
             if (!showCreateTab)
@@ -83,6 +85,12 @@ namespace TrapchumApp.Pages.Transactions.Journals
 
         protected override async Task OnInitializedAsync()
         {
+
+            var authState = await AuthState;
+
+            UserId = authState.User.GetId();
+
+
             await GetJournals();
 
             var resp = await _journalService.GetJournalTypesAsync(null);

@@ -14,7 +14,7 @@
                      Variant="Variant.Flat" Shade="Shade.Lighter">
             <span>@_titleMessage: </span> @_messageAlert
         </RadzenAlert>
-        <EditForm Model="JLe" @ref="_editForm">
+        <EditForm Model="JLe" @ref="@_editForm">
             <DataAnnotationsValidator/>
             <ValidationSummary/>
             <RadzenRow AlignItems="AlignItems.Center" Gap="1rem">
@@ -120,7 +120,7 @@
     <RadzenButton Size="ButtonSize.ExtraSmall"
                   Icon="save"
                   ButtonStyle="ButtonStyle.Success"
-                  Click="OnSave"
+                  Click="@OnSave"
                   IsBusy="@_visibled"
                   BusyText="Saving..."
                   Text="Save"/>

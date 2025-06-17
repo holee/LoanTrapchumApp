@@ -8,7 +8,7 @@ namespace Applications.Interfaces.Transactions;
 
 public interface IJournalService 
 {
-    Task<Result<string>> CreateOrUpdateJournalAsync(string? journalId, JournalEntry journalEntry);
+    Task<Result<string>> UpdateJournalAsync(string? journalId, JournalEntry journalEntry);
     Task<Result<LoanTransaction>> CreateJournalAsync(LoanTransaction model);
     Task<Result<JournalEntry>> CreateJournalAsync(JournalEntry model);
     Task<Result<string>> DeleteJournalAsync(string? id);
@@ -20,5 +20,6 @@ public interface IJournalService
     Task<IEnumerable<VNameList>> GetNameLists(long? id = 0, int takeRows = 0, string? q = null);
     Task<IEnumerable<T>> GetNameLists<T>(string? nameId, QueryParam param) where T : class, new();
     Task<Pager<JournalEntryVm>> GetJournalsAsync(int? branchId,QueryParam param);
-
+    Task<Result<string>> CreateJournalAsync(LoanTransaction model, CancellationToken cancellation = default);
+    Task<Result<string>> UpdateJournalAsync(LoanTransaction tranx, CancellationToken cancellation = default);
 }

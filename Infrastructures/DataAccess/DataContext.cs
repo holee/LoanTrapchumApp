@@ -32,6 +32,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage;
 using System.Data;
 using System.Reflection;
+using System.Reflection.Emit;
 
 namespace Infrastructures.DataAccess
 {
@@ -52,6 +53,21 @@ namespace Infrastructures.DataAccess
             {
                 property.SetColumnType("decimal(18,3)");
             }
+
+
+            foreach (var entityType in builder.Model.GetEntityTypes())
+            {
+                var prop = entityType.ClrType.GetProperties()
+                    .Where(p => p.Name == "EditSeq" && p.PropertyType == typeof(int))
+                    .FirstOrDefault();
+                if (prop != null)
+                {
+                    builder.Entity(entityType.ClrType)
+                       .Property(prop.Name)
+                       .HasDefaultValue(1);
+                }
+            }
+
 
             builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
@@ -118,7 +134,7 @@ namespace Infrastructures.DataAccess
         }
 
 
-        
+
 
         /// <summary>
         /// Handles the DbSet properties for the DataContext.
@@ -241,186 +257,3 @@ namespace Infrastructures.DataAccess
         public DbSet<VVillages> VVillages => Set<VVillages>();
     }
 }
-
-//private void ProcessSaveChanged(bool acceptAllChangesOnSuccess)
-//{
-//    foreach (var item in ChangeTracker.Entries()
-//                        .Where(e => e.Entity is BaseAddress && e.State == EntityState.Added))
-//    {
-//        BaseAddress baseEntry = (BaseAddress)item.Entity;
-//        baseEntry.CreatedDt = DateTime.Now;
-//        baseEntry.ModifiedDt = DateTime.Now;
-//    }
-//    foreach (var item in ChangeTracker.Entries()
-//                       .Where(e => e.Entity is BaseAddress && e.State == EntityState.Modified))
-//    {
-//        var baseEntries = (BaseAddress)item.Entity;
-//        baseEntries.ModifiedDt = DateTime.Now;
-//        baseEntries.EditSeq += 1;
-//        item.Property(nameof(BaseAddress.CreatedDt)).IsModified = false;
-
-//    }
-//    ////for Entity inherit from BaseEntity
-//    foreach (var item in ChangeTracker.Entries()
-//                        .Where(e => e.Entity is BaseEntity && e.State == EntityState.Added))
-//    {
-//        BaseEntity baseEntry = (BaseEntity)item.Entity;
-//        baseEntry.CreatedDt = DateTime.Now;
-//        baseEntry.ModifiedDt = DateTime.Now;
-//    }
-//    foreach (var item in ChangeTracker.Entries()
-//                       .Where(e => e.Entity is BaseEntity && e.State == EntityState.Modified))
-//    {
-//        var baseEntries = (BaseEntity)item.Entity;
-//        baseEntries.ModifiedDt = DateTime.Now;
-//        baseEntries.EditSeq += 1;
-//        item.Property(nameof(BaseEntity.CreatedDt)).IsModified = false;
-
-//    }
-//}        //private List<AuditTrail> HandleAuditingBeforeSaveChanges(Guid? userId)
-//{
-//    var auditableEntries = ChangeTracker.Entries<IAuditableEntity>()
-//        .Where(x => x.State is EntityState.Added or EntityState.Deleted or EntityState.Modified)
-//        .Select(x => CreateTrailEntry(userId, x))
-//        .ToList();
-
-//    return auditableEntries;
-//}
-
-//private static AuditTrail CreateTrailEntry(Guid? userId, EntityEntry<IAuditableEntity> entry)
-//{
-//    var trailEntry = new AuditTrail
-//    {
-//        Id = Guid.NewGuid(),
-//        EntityName = entry.Entity.GetType().Name,
-//        //UserId = userId,
-//        DateUtc = DateTime.UtcNow
-//    };
-
-//    SetAuditTrailPropertyValues(entry, trailEntry);
-//    SetAuditTrailNavigationValues(entry, trailEntry);
-//    SetAuditTrailReferenceValues(entry, trailEntry);
-
-//    return trailEntry;
-//}
-
-
-//private static void SetAuditTrailPropertyValues(EntityEntry entry, AuditTrail trailEntry)
-//{
-//    // Skip temp fields (that will be assigned automatically by ef core engine, for example: when inserting an entity
-//    foreach (var property in entry.Properties.Where(x => !x.IsTemporary))
-//    {
-//        if (property.Metadata.IsPrimaryKey())
-//        {
-//            trailEntry.PrimaryKey = property.CurrentValue?.ToString();
-//            continue;
-//        }
-
-//        // Filter properties that should not appear in the audit list
-//        if (property.Metadata.Name.Equals("PasswordHash"))
-//        {
-//            continue;
-//        }
-
-//        SetAuditTrailPropertyValue(entry, trailEntry, property);
-//    }
-//}
-
-//private static void SetAuditTrailPropertyValue(EntityEntry entry, AuditTrail trailEntry, PropertyEntry property)
-//{
-//    var propertyName = property.Metadata.Name;
-
-//    switch (entry.State)
-//    {
-//        case EntityState.Added:
-//            trailEntry.TrailType = TrailType.Create;
-//            trailEntry.NewValues =JsonSerializer. property.CurrentValue;
-//            break;
-
-//        case EntityState.Deleted:
-//            trailEntry.TrailType = TrailType.Delete;
-//            trailEntry.OldValues = property.OriginalValue;
-//            break;
-
-//        case EntityState.Modified:
-//            if (property.IsModified && (property.OriginalValue is null || !property.OriginalValue.Equals(property.CurrentValue)))
-//            {
-//                trailEntry.ChangedColumns.Add(propertyName);
-//                trailEntry.TrailType = TrailType.Update;
-//                trailEntry.OldValues[propertyName] = property.OriginalValue;
-//                trailEntry.NewValues[propertyName] = property.CurrentValue;
-//            }
-
-//            break;
-//    }
-
-//    if (trailEntry.ChangedColumns.Count > 0)
-//    {
-//        trailEntry.TrailType = TrailType.Update;
-//    }
-//}
-
-//private List<AuditLog> OnBeforeSaveChanges()
-//{
-//    ChangeTracker.DetectChanges();
-
-//    var auditEntries = new List<AuditLog>();
-
-//    foreach (var entry in ChangeTracker.Entries())
-//    {
-//        if (entry.Entity is AuditLog || entry.State == EntityState.Detached || entry.State == EntityState.Unchanged)
-//            continue;
-
-//        var auditLog = new AuditLog
-//        {
-//            EntityName = entry.Entity.GetType().Name,
-//            AuditAction = entry.State.ToString(),
-//            Timestamp = DateTime.UtcNow,
-//            PrimaryKey = GetPrimaryKey(entry)
-//        };
-
-//        if (entry.State == EntityState.Added)
-//        {
-//            auditLog.NewValues = JsonSerializer.Serialize(entry.CurrentValues.ToObject());
-//        }
-//        else if (entry.State == EntityState.Modified)
-//        {
-//            auditLog.OldValues = JsonSerializer.Serialize(entry.OriginalValues.ToObject());
-
-//            auditLog.NewValues = JsonSerializer.Serialize(entry.CurrentValues.ToObject());
-
-//        }
-//        else if (entry.State == EntityState.Deleted)
-//        {
-//            auditLog.OldValues = JsonSerializer.Serialize(entry.OriginalValues.ToObject());
-//        }
-
-//        auditEntries.Add(auditLog);
-//    }
-
-//    // Temporarily add audit logs to ChangeTracker without triggering more audits
-
-//    AuditLogs.AddRange(auditEntries);
-
-//    return auditEntries;
-//}
-
-//private async Task OnAfterSaveChanges(List<AuditLog> auditEntries)
-//{
-//    if (auditEntries == null || auditEntries.Count == 0)
-//        return;
-//    await base.SaveChangesAsync();
-//}
-
-//private string GetPrimaryKey(EntityEntry entry)
-//{
-//    var key = entry.Metadata.FindPrimaryKey();
-
-//    if (key == null) return string.Empty;
-
-//    var keyValues = key.Properties.Select(p => entry.Property(p.Name).CurrentValue);
-
-//    return string.Join(",", keyValues);
-//}
-
-

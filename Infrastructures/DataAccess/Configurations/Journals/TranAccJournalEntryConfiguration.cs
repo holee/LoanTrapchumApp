@@ -27,10 +27,5 @@ public class TranAccJournalEntryConfiguration : IEntityTypeConfiguration<Journal
        
         builder.HasMany(x => x.JournalEntryLines)
                     .WithOne().HasForeignKey(fk => fk.JournalRefId);
-
-
-        builder.HasOne(x => x.LoanTransaction)
-                .WithOne(x => x.JournalEntry)
-                .HasForeignKey<JournalEntry>(x => x.TransactionsRefId);
     }
 }
