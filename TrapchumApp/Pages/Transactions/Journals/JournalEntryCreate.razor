@@ -22,7 +22,7 @@
         }
 </style>
 <RadzenFieldset AllowCollapse="false" Collapsed="false" Text="Journal Entry">
-    <RadzenAlert AlertStyle="AlertStyle.Warning" Visible="@_isMessage" ShowIcon="true"
+    <RadzenAlert AlertStyle="AlertStyle.Danger" Visible="@_isMessage" ShowIcon="true"
                  Variant="Variant.Flat" Shade="Shade.Lighter">
         <span>@_titleMessage: </span> @_messageAlert
     </RadzenAlert>
@@ -305,9 +305,13 @@
             if (JournalLines[selectedIndex - 1].LedgerRefId == null ||
                 JournalLines[selectedIndex - 1].LedgerRefId == 0)
             {
-                NotificationService.Notify(NotificationSeverity.Error, "Please select previous select first.");
+                _isMessage = true;
+                _messageAlert = "Please select previous row first.";
                 return;
             }
+
+            _isMessage =false;
+            _messageAlert = string.Empty;
         }
 
 
