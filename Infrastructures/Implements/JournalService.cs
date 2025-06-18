@@ -97,23 +97,23 @@ public class JournalService(
         }
     }
 
-    public async Task<Result<string>> UpdateJournalAsync(LoanTransaction tranx,CancellationToken cancellation=default)
+    public async Task<Result<string>> UpdateJournalAsync(LoanTransaction tranx, CancellationToken cancellation = default)
     {
         logger.LogInformation("Attempt to create Journal");
         try
         {
             await using var dataContext = await dbContextFactory.CreateDbContextAsync(cancellation);
 
-            var existingJournal =await dataContext.LoanTransaction
+            var existingJournal = await dataContext.LoanTransaction
                                         .Include(x => x.JournalEntry)
                                         .ThenInclude(j => j.JournalEntryLines)
-                                        .FirstOrDefaultAsync(x => x.TransactionsId == tranx.TransactionsId,cancellation);
+                                        .FirstOrDefaultAsync(x => x.TransactionsId == tranx.TransactionsId, cancellation);
 
-            if (existingJournal is null) 
-            { 
-                    return Result.Failure<string>(ErrorResponse.NotFound(Messages.DataFound));
+            if (existingJournal is null)
+            {
+                return Result.Failure<string>(ErrorResponse.NotFound(Messages.DataFound));
             }
-            
+
             dataContext.Entry(existingJournal).CurrentValues.SetValues(tranx);
 
             // Update JournalEntry
@@ -332,8 +332,14 @@ public class JournalService(
                 EF.Functions.Like(x.JournalType!, $"%{param.Filter}%") ||
                 EF.Functions.Like(x.TransactionTypeName!, $"%{param.Filter}%") ||
                 EF.Functions.Like(x.TransactionDate!.ToString(), $"%{param.Filter}%"))
-            .OrderByDescendingIf(param.SortDescending, x => EF.Property<object>(x, param.SortColumn));
+            .OrderByDescending(x => x.Updated);
+        if (param.SortDescending)
+        {
+            queries = queries.OrderByDescending(x => EF.Property<object>(x, param.SortColumn));
+        }
+
         var pageCount = await queries.CountAsync();
+
         var pageItems = await queries.Skip(param.Skip).Take(param.PageSize)
             .AsNoTracking()
             .ToListAsync();
@@ -446,9 +452,9 @@ public class JournalService(
 
     public async Task<IEnumerable<VNameList>> GetNameLists(long? id = 0, int takeRows = 0, string? q = null)
     {
-        await using var context1 = await dbContextFactory.CreateDbContextAsync();
+        await using var context = await dbContextFactory.CreateDbContextAsync(); 
 
-        IQueryable<VNameList> queries = context.NameLists;
+        var queries = context.VNameLists.AsNoTracking();
 
         if (!string.IsNullOrEmpty(q))
         {
@@ -463,7 +469,9 @@ public class JournalService(
             queries = queries.Take(takeRows).OrderByDescending(x => x.FullName);
         }
 
-        return await queries.AsNoTracking().ToListAsync();
+        return await queries.AsNoTracking()
+                            .ProjectToType<VNameList>()
+                            .ToListAsync();
     }
 
 

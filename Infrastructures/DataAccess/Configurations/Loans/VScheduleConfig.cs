@@ -12,6 +12,7 @@ namespace Infrastructures.DataAccess.Configurations.Loans
             builder.HasNoKey();
             builder.Property(x => x.Principle).HasPrecision(18, 3);
             builder.Property(x => x.Interest).HasPrecision(18, 3);
+            builder.Property(x => x.InterestRate).HasPrecision(18, 3);
             builder.Property(x => x.LoanOutstanding).HasPrecision(18, 3);
             builder.Property(x => x.CollectionFee).HasPrecision(18, 3);
             builder.Property(x => x.TotalPay).HasPrecision(18, 3);

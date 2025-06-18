@@ -16,11 +16,12 @@ public class LedgerService : ILedgerService
 {
     private readonly DataContext _context;
     private readonly ILogger<LedgerService> _logger;
-
-    public LedgerService(DataContext context, ILogger<LedgerService> logger)
+    private readonly IDbContextFactory<DataContext> _dbContextFactory;
+    public LedgerService(DataContext context, ILogger<LedgerService> logger, IDbContextFactory<DataContext> dbContextFactory)
     {
         this._context = context;
         this._logger = logger;
+        _dbContextFactory = dbContextFactory;
     }
 
     public async Task<Result<string>> CreateOrUpdateLedger(Ledger entity)
@@ -215,16 +216,20 @@ public class LedgerService : ILedgerService
         };
     }
 
-    public async Task<Pager<VLedger>> GetLedgersAsync(int? currencyId, QueryParam q)
+    public async Task<Pager<VLedger>> GetLedgersAsync(int? currencyId, QueryParam q, CancellationToken cancellation = default)
     {
-        IQueryable<VLedger> queries = _context.VLedgers
-            .IgnoreFilterIf(q.IsIncludeInActive)
-            .WhereIf(currencyId > 0, x => x.CurrencyId == currencyId)
-            .OrderBy(x => x.LedgerTypeId)
-            .ThenBy(x => x.LedgerTypeCode)
-            .ThenBy(x => x.CurrencyCode)
-            .ThenBy(x => x.LedgerName);
-        
+
+        await using var context = await _dbContextFactory.CreateDbContextAsync(cancellation);
+
+        var queries = context.VLedgers
+                            .IgnoreFilterIf(q.IsIncludeInActive)
+                            .WhereIf(currencyId > 0, x => x.CurrencyId == currencyId)
+                            .OrderBy(x => x.LedgerTypeId)
+                            .ThenBy(x => x.LedgerTypeCode)
+                            .ThenBy(x => x.CurrencyCode)
+                            .ThenBy(x => x.LedgerName)
+                            .AsNoTracking();
+
         if (q.SortDescending)
         {
             queries = queries.OrderByDescending(o => EF.Property<object>(o, q.SortColumn));
@@ -243,9 +248,9 @@ public class LedgerService : ILedgerService
 
         var counts = await queries.CountAsync();
         var items = await queries.Skip(q.Skip)
-            .Take(q.PageSize)
-            .AsNoTracking()
-            .ToListAsync();
+                                    .Take(q.PageSize)
+                                    .AsNoTracking()
+                                    .ToListAsync();
         return new Pager<VLedger>
         {
             Count = counts,
@@ -254,11 +259,13 @@ public class LedgerService : ILedgerService
     }
 
 
-    public async Task<Result<IEnumerable<VLedger>>> GetLedgersAsync(int? ledgerId = 0, int? currencyId = 1,
-        string? q = null)
+    public async Task<Result<IEnumerable<VLedger>>> GetLedgersAsync(int? ledgerId = 0, int? currencyId = 1, string? q = null)
     {
         try
         {
+
+            await using var context = await _dbContextFactory.CreateDbContextAsync();
+
             IQueryable<VLedger> ledgers = _context.VLedgers
                 .OrderBy(x => x.LedgerTypeId)
                 .ThenBy(x => x.LedgerTypeCode)

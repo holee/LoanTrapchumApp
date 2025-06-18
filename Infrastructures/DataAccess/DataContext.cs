@@ -243,11 +243,12 @@ namespace Infrastructures.DataAccess
         public DbSet<VCollateral> VCollaterals => Set<VCollateral>();
         public DbSet<JournalEntryVm> VJournals => Set<JournalEntryVm>();
         public DbSet<VLedger> VLedgers => Set<VLedger>();
-        public DbSet<VNameList> NameLists => Set<VNameList>();
         public DbSet<VendorVm> VVendor => Set<VendorVm>();
         public DbSet<VGuarantor> VGuarantors => Set<VGuarantor>();
 
         public DbSet<VOtherNames> VOtherNames => Set<VOtherNames>();
+
+        public DbSet<NameListVm> VNameLists => Set<NameListVm>(); 
         public DbSet<VEmployeeList> EmployeeLists => Set<VEmployeeList>();
         public DbSet<VCustomerList> CustomerLists => Set<VCustomerList>();
         public DbSet<VCreditAgent> VCreditAgents => Set<VCreditAgent>();

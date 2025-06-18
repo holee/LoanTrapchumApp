@@ -1,4 +1,5 @@
 ﻿@using Applications.Responses.ViewModels.Journals
+@using Applications.Responses.ViewModels.Ledgers
 @using TrapchumApp.Services
 <tr>
     <td class="text-center align-middle">
@@ -12,21 +13,20 @@
                                 Density="Density.Compact"
                                 @bind-Value:after="SelectedItemChange"
                                 Style="width:100%;cursor:pointer;height:32px;font-size:14px"
-                                Data="LedgerData"
-                                TextProperty="LedgerName"
-                                PageSize="10"
+                                Data="@LedgerData"
                                 class="form-control"
                                 ShowSearch="false"
                                 AllowSelectAll="true"
                                 FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
                                 Placeholder="Ledger..."
-                                ValueProperty="LedgerId"
+                                ValueProperty="@nameof(VLedger.LedgerId)"
+                                TextProperty="@nameof(VLedger.LedgerName)"
                                 AllowColumnResize="true"
                                 AllowFilteringByAllStringColumns="true"
-                                Name="DropDownJournalLine">
+                                Name="@Guid.NewGuid().ToString("N")">
             <Columns>
-                <RadzenDropDownDataGridColumn Title="Ledger" Property="LedgerName" Width="100px"/>
-                <RadzenDropDownDataGridColumn Title="Type" Property="LedgerTypeCode" Width="100px"/>
+                <RadzenDropDownDataGridColumn Title="Ledger" Property="LedgerName" Width="100px" />
+                <RadzenDropDownDataGridColumn Title="Type" Property="LedgerTypeCode" Width="100px" />
             </Columns>
         </RadzenDropDownDataGrid>
     </td>
@@ -34,13 +34,13 @@
         <RadzenNumeric TValue="decimal?"
                        ShowUpDown="false"
                        Min="0"
-                       @onkeydown="e=>OnNedLine(e)"
                        TextAlign="TextAlign.End"
                        Style="height:32px;"
                        Disabled="JournalLine.IsCredit"
                        Name="@($"Debit-{Guid.NewGuid().ToString("N")}")"
+                       @key="@($"Debit-{Guid.NewGuid().ToString("N")}")"
                        @bind-Value="JournalLine!.Debit"
-                       @bind-Value:after="(()=>DebitValidate(JournalLine))">
+                       @bind-Value:after="(() => DebitValidate(JournalLine))">
 
         </RadzenNumeric>
     </td>
@@ -51,38 +51,39 @@
                        Style="width:100%;height:32px;"
                        Disabled="JournalLine.IsDebit"
                        TextAlign="TextAlign.End"
-                       @onkeydown="e=>OnNedLine(e)"
                        @bind-Value="JournalLine.Credit"
                        Name="@($"Credit-{Guid.NewGuid().ToString("N")}")"
-                       @bind-Value:after="(()=>CreditValidate(JournalLine))">
+                       @key="@($"Credit-{Guid.NewGuid().ToString("N")}")"
+                       @bind-Value:after="(() => CreditValidate(JournalLine))">
         </RadzenNumeric>
     </td>
     <td>
         <RadzenTextBox Placeholder="Memo..."
-                       @onkeydown="e=>OnNedLine(e)"
                        Name="@($"JournalLineDesc-{Guid.NewGuid().ToString("N")}")"
-                       @bind-Value="JournalLine.JournalLineDesc"/>
+                       @bind-Value="JournalLine.JournalLineDesc" />
     </td>
     <td>
         <RadzenDropDownDataGrid @bind-Value="JournalLine.EntityNameRefId"
                                 Density="Density.Compact"
                                 Style="width:100%;cursor:pointer;height:32px;font-size:14px"
+                                Data="@NameLists"
                                 @bind-SearchText="JournalLine.EntityName"
-                                Data="NameLists"
-                                TextProperty="@nameof(VNameList.FullName)"
+                                TextProperty="@nameof(VNameList.AltName)"
                                 ValueProperty="@nameof(VNameList.Id)"
                                 ShowSearch="false"
-                                PageSize="10"
+                                PageSize="@pageSize"
+                                Count="@counts"
                                 class="form-control"
                                 Placeholder="Name..."
                                 AllowFilteringByAllStringColumns="true"
+                                ShowPagingSummary="true"
                                 Name="@($"EntityNameRefId-{Guid.NewGuid().ToString("N")}")"
-                                LoadData="LoanNameData"
-                                SelectedItemChanged="SelectedName"
+                                LoadData="@LoanNameList"
+                                SelectedItemChanged="@SelectedName"
                                 FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive">
             <Columns>
-                <RadzenDropDownDataGridColumn Property="FullName" Title="Name" Width="100px"/>
-                <RadzenDropDownDataGridColumn Property="EntType" Title="Type" Width="100px"/>
+                <RadzenDropDownDataGridColumn Property="@nameof(VNameList.AltName)" Title="Name" Width="100px" />
+                <RadzenDropDownDataGridColumn Property="@nameof(VNameList.EntType)" Title="Type" Width="100px" />
             </Columns>
         </RadzenDropDownDataGrid>
     </td>
@@ -92,13 +93,13 @@
                       Size="ButtonSize.ExtraSmall"
                       Variant="Variant.Text"
                       Visible="RowIndex < 2"
-                      ButtonStyle="ButtonStyle.Primary"/>
+                      ButtonStyle="ButtonStyle.Primary" />
         <RadzenButton Click="@RemoveRow"
                       Icon="delete_forever"
                       Size="ButtonSize.ExtraSmall"
                       Variant="Variant.Text"
                       Visible="RowIndex > 1"
-                      ButtonStyle="ButtonStyle.Danger"/>
+                      ButtonStyle="ButtonStyle.Danger" />
     </td>
 </tr>
 

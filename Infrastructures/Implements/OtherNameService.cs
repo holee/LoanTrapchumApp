@@ -5,11 +5,9 @@ using Applications.Requests.Lists.Entities;
 using Applications.Responses;
 using Applications.Responses.Message;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Journals;
 using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.OtherNames;
 using Domains.Models.Bases;
-using Domains.Models.Lists;
 using Domains.Models.Lists.Customers;
 using Domains.Models.Lists.Employees;
 using Domains.Models.Lists.Vendors;
@@ -24,21 +22,22 @@ namespace Infrastructures.Implements
     {
         private readonly DataContext _context;
         private readonly IDbContextFactory<DataContext> _dbContextFactory;
-        private IValidator<EntityNameDtoCreate> _validator;
-
-        public OtherNameService(DataContext context, IValidator<EntityNameDtoCreate> validator, IDbContextFactory<DataContext> dbContextFactory)
+        public OtherNameService(DataContext context, IDbContextFactory<DataContext> dbContextFactory)
         {
             _context = context;
-            _validator = validator;
             _dbContextFactory = dbContextFactory;
         }
 
-        public async Task<Result<string>> CreateAsync(EntityNames othername)
+        public async Task<Result<string>> CreateAsync(EntityNames othername, CancellationToken cancellation = default)
         {
             try
             {
-                _context.Add(othername);
-                await _context.SaveChangesAsync();
+                await using var _context = await _dbContextFactory.CreateDbContextAsync(cancellation);
+
+                _context.EntityNames.Add(othername);
+
+                await _context.SaveChangesAsync(cancellation);
+
                 return Result.Success(new string("A new Name was created"));
             }
             catch (Exception ex)
@@ -66,25 +65,14 @@ namespace Infrastructures.Implements
             }
         }
 
-
-        public async Task<Result<string>> CreateGaurantorAsync(EntityNames othername)
+        public async Task<Result<string>> CreateGaurantorAsync(EntityNames othername, CancellationToken cancellation = default)
         {
             try
             {
-                var req = othername.Adapt<EntityNameDtoCreate>();
 
-                var validatorResult = _validator.Validate(req);
+                await using var context = await _dbContextFactory.CreateDbContextAsync();
 
-                if (!validatorResult.IsValid)
-                {
-                    var errors = validatorResult.Errors.Select(er => er.ErrorMessage).ToList();
-
-                    var errString = string.Join(Environment.NewLine, errors);
-
-                    return Result.Failure<string>(ErrorResponse.Validation(errString));
-                }
-
-                _context.Add(othername);
+                _context.EntityNames.Add(othername);
 
                 await _context.SaveChangesAsync();
 
@@ -340,9 +328,8 @@ namespace Infrastructures.Implements
                 .WhereIf(!string.IsNullOrEmpty(param.Filter), x =>
                     EF.Functions.Like(x.FirstName!, $"%{param.Filter}%") ||
                     EF.Functions.Like(x.LastName!, $"%{param.Filter}%") ||
-                    // EF.Functions.Like(x.Name!, $"%{param.Filter}%") ||
                     EF.Functions.Like(x.AltName!, $"%{param.Filter}%"))
-                .WhereIf(!string.IsNullOrEmpty(nameId), x => x.Id.Contains(nameId));
+                .WhereIf(!string.IsNullOrEmpty(nameId), x => x.Id.Contains(nameId!));
 
             if (param.PageSize > 0)
             {
@@ -357,6 +344,41 @@ namespace Infrastructures.Implements
 
             return items;
         }
+
+
+
+        public async Task<Pager<T>> GetNameAsync<T>(string? nameId, QueryParam param, CancellationToken cancellation = default) where T : class, new()
+        {
+            await using var context = await _dbContextFactory.CreateDbContextAsync(cancellation);
+
+            var queries = context.VNameLists
+                .WhereIf(!string.IsNullOrEmpty(param.Filter), x =>
+                    EF.Functions.Like(x.FullName!, $"%{param.Filter}%") ||
+                    EF.Functions.Like(x.AltName!, $"%{param.Filter}%") ||
+                    EF.Functions.Like(x.LastName!, $"%{param.Filter}%") ||
+                    EF.Functions.Like(x.Phone!, $"%{param.Filter}%") ||
+                    EF.Functions.Like(x.FirstName!, $"%{param.Filter}%"))
+                .WhereIf(!string.IsNullOrEmpty(nameId), x => x.Id.Contains(nameId!));
+
+            var counts = await queries.CountAsync(cancellation);
+
+            if (param.PageSize > 0)
+            {
+                queries = queries.Take(param.PageSize).OrderByDescending(x => x.FirstName)
+                                                        .ThenByDescending(x => x.LastName);
+            }
+
+            var items = await queries
+                .ProjectToType<T>()
+                .AsNoTracking()
+                .ToListAsync(cancellation);
+
+            return new Pager<T>(items, counts);
+        }
+
+
+
+
 
         public async Task<Result<string>> UpdateStatusAsync(string? othernameId)
         {
@@ -403,7 +425,7 @@ namespace Infrastructures.Implements
 
                 existing.IsActive = state;
 
-                await context.SaveChangesAsync();
+                await context.SaveChangesAsync(cancellation);
 
                 var updateGuarant = await context.VOtherNames
                                             .AsNoTracking()

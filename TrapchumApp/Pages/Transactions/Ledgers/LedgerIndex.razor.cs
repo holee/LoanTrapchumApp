@@ -1,13 +1,16 @@
 ﻿using Applications.Interfaces.Transactions;
+using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Ledgers;
 using Microsoft.AspNetCore.Components;
 using Radzen;
+using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Transactions.Ledgers;
 
 public partial class LedgerIndex
 {
     [Parameter] public int? BranchId { get; set; } = 0;
+
     private readonly ILedgerService _ledgerService;
 
     public LedgerIndex(ILedgerService ledgerService)
@@ -16,27 +19,35 @@ public partial class LedgerIndex
     }
 
     protected string searchField { get; set; } = string.Empty;
+
     private int currentPage = 1;
-    private int pageSize = 10;
+
+    private int pageSize = 15;
+
     int pageIndex = 0;
+
     string sortColumn = "LedgerId";
+
     bool sortDescending = false;
+
     int counts = 0;
+
     protected bool isLoading = false;
+
     protected int ledgerId;
+
     protected List<VLedger>? Ledgers { get; set; } = [];
+
     protected int currencyId = 0;
+
     bool includeInactive = false;
     async Task LoadData(LoadDataArgs e)
     {
         pageIndex = e.Skip ?? 0;
+
         searchField = e.Filter;
-        if (!string.IsNullOrEmpty(e.OrderBy))
-        {
-            sortColumn = e.OrderBy.Split(" ")[0];
-            string dir = e.OrderBy.Split(" ")[1];
-            sortDescending = dir.Contains("asc") ? false : true;
-        }
+
+        (sortColumn, sortDescending) = e.PageInfo();
 
         await LoadLedgerPageList(searchField);
     }
@@ -57,11 +68,20 @@ public partial class LedgerIndex
     {
         try
         {
+
+            var param = new QueryParam(pageIndex, pageSize, sortColumn, includeInactive, sortDescending, filter);
+
+
             isLoading = true;
-            var res = await _ledgerService.GetLedgersAsync(pageIndex, pageSize, sortColumn, sortDescending, currencyId, includeInactive, filter);
+
+            var res = await _ledgerService.GetLedgersAsync(currencyId, param);
+
             Ledgers = res.Items;
+
             counts = res.Count;
+
             isLoading = false;
+
             StateHasChanged();
         }
         catch (Exception ex)
@@ -123,12 +143,14 @@ public partial class LedgerIndex
     protected async Task OnIncludeInActive()
     {
         await LoadLedgerPageList(searchField);
+
         await InvokeAsync(StateHasChanged);
     }
 
     public async void Reload()
     {
         await OnInitializedAsync();
+
         StateHasChanged();
     }
 

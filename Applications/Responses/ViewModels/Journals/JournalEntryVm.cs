@@ -33,7 +33,7 @@ namespace Applications.Responses.ViewModels.Journals
         public int? CurrencyId { get; set; }
         
         public string? CurrencyCode { get; set; }
-        
+        public DateTime? Updated { get; set; }
         [NotMapped]
         public ICollection<JournalEntryLineVm> JournalEntryLines { get; set; } = [];
     }

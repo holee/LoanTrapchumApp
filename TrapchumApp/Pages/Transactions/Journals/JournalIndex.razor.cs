@@ -3,11 +3,7 @@ using Applications.Requests.Journals;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Journals;
 using Applications.Services.Transactions.Journals;
-using Microsoft.AspNetCore.Components;
-using Radzen;
-using Microsoft.AspNetCore.Components.Authorization;
 using Radzen.Blazor;
-using Applications.Helpers.Extensions;
 using Domains.Models.Identity;
 
 namespace TrapchumApp.Pages.Transactions.Journals
@@ -27,7 +23,7 @@ namespace TrapchumApp.Pages.Transactions.Journals
         string SearchText = string.Empty;
         string types = string.Empty;
         int pageIndex = 0;
-        int pageSize = 10;
+        int pageSize = 15;
         string sortColumn = "TransactionDate";
         bool sortDescending = false;
         int counts = 0;
@@ -45,17 +41,37 @@ namespace TrapchumApp.Pages.Transactions.Journals
         IEnumerable<JournalEntryVm> JournalItems = [];
         JournalEntryVm? modelDetails = new();
         private string? _selectedJournalId;
-        string? UserId=string.Empty;
-        void ShowCreatedTab()
+        string? UserId = string.Empty;
+        async Task ShowCreatedTab()
         {
-            if (!showCreateTab)
+            //if (!showCreateTab)
+            //{
+            //    showCreateTab = true;
+            //    selectedIndex = 1;
+            //    return;
+            //}
+
+            //selectedIndex = 0;
+
+            var options = new DialogOptions
             {
-                showCreateTab = true;
-                selectedIndex = 1;
-                return;
+                Width = "100vw",
+                Height = "100vh"
+            };
+
+            var parameters = new Dictionary<string, object?>
+            {
+                {"BranchId",BranchId },
+                {"UserId",UserId }
+            };
+
+            var dia = await DialogService.OpenAsync<JournalEntryCreate>("Jorunal Entry", parameters, options);
+
+            if (dia is bool succes && succes)
+            {
+                await GetJournals(SearchText);
             }
 
-            selectedIndex = 0;
         }
 
         void CloseCreateTab()
@@ -105,29 +121,29 @@ namespace TrapchumApp.Pages.Transactions.Journals
 
         private async Task GetJournals(string? filter = null)
         {
-            var param = new QueryParam(pageIndex, pageSize, sortColumn,false, sortDescending, filter);
-
-            isDataLoading = true;
-
             try
             {
-                var journalItems = await _journalService.GetJournalsAsync(BranchId,param);
+                Tracker.Show();
+
+                var param = new QueryParam(pageIndex, pageSize, sortColumn, false, sortDescending, filter);
+
+                var journalItems = await _journalService.GetJournalsAsync(BranchId, param);
 
                 counts = journalItems.Count;
 
                 JournalItems = journalItems.Items;
 
-                isDataLoading = false;
+                Tracker.Hide();
             }
             catch (Exception ex)
             {
                 NotificationService.Notify(NotificationSeverity.Error, "Exception", ex.Message);
 
-                isDataLoading = false;
+                Tracker.Hide();
             }
             finally
             {
-                isDataLoading = false;
+                Tracker.Hide();
             }
 
             StateHasChanged();

@@ -10,9 +10,7 @@ using Applications.Responses.ViewModels.Ledgers;
 using Applications.Services.Currencies;
 using Applications.Services.Lists;
 using Applications.Services.Transactions.Journals;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Forms;
-using Radzen;
+using System.Threading.Tasks;
 
 namespace TrapchumApp.Pages.Transactions.Journals;
 
@@ -42,12 +40,21 @@ public partial class JournalEntryCreate(
         try
         {
             JLe.JournalType = JournalTypes.PV.ToString();
+
             JLe.JournalDate = DateTime.Now;
+
             JLe.CurrencyRefId = (int)CurrenciesType.Khr;
+
             AddNewRow();
+
             await LoadRelatedData();
+
             await GetLedgerByCurrency((int)CurrenciesType.Khr);
+
+            _selectedCurrencyId = (int)CurrenciesType.Khr;
+
             await GetNameLists(null);
+
             await base.OnInitializedAsync();
         }
         catch (Exception ex)
@@ -73,28 +80,11 @@ public partial class JournalEntryCreate(
         }
     }
 
-    private async Task GetLedgerByCurrency(int? currencyId, string? searchText = null)
+
+
+    async Task LoadNamesList(LoadDataArgs arg)
     {
-        try
-        {
-            var res = await ledgerService.GetLedgersAsync(0, currencyId, searchText);
-
-            if (res.IsSuccess)
-            {
-                Ledgers = res.Data;
-            }
-            else
-            {
-                NotificationService.Notify(NotificationSeverity.Error, res.ErrMessage);
-            }
-
-            StateHasChanged();
-        }
-        catch(Exception ex)
-        {
-            NotificationService.Notify(NotificationSeverity.Error, "Exception", ex.Message);
-        }
-        
+        await GetNameLists(arg.Filter ?? string.Empty);
     }
 
     private async Task GetNameLists(string? id = null, string? searchText = null)
@@ -107,16 +97,65 @@ public partial class JournalEntryCreate(
 
             StateHasChanged();
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             NotificationService!.Notify(NotificationSeverity.Error, "Exception", ex.Message);
         }
-       
+
     }
 
     protected void AddNewRow()
     {
-        JournalLines!.Add(new JournalLineDtoCreate());
+        if (JournalLines.Any(x => x.Debit == null && x.Credit == null))
+            return;
+
+        for (int i = 1; i <= 8; i++)
+        {
+            JournalLines!.Add(new JournalLineDtoCreate
+            {
+                LineSeq = i
+            });
+
+        }
+
+    }
+
+    protected async Task AddLastRows()
+    {
+
+        if (!gridJournalLines.IsValid) return;
+
+        if (JournalLines.Any(x => x.Debit == null && x.Credit == null))
+            return;
+
+        var lastRow = JournalLines.Last();
+
+        var seq = JournalLines.Count() + 1;
+
+        var line = new JournalLineDtoCreate
+        {
+            LineSeq = seq
+        };
+
+        JournalLines.Add(line);
+
+        await gridJournalLines.InsertAfterRow(line, lastRow);
+
+
+        var lastRow2 = JournalLines.Last();
+
+        var seq2 = JournalLines.Count() + 1;
+
+        var line2 = new JournalLineDtoCreate
+        {
+            LineSeq = seq2
+        };
+
+        JournalLines.Add(line2);
+
+        await gridJournalLines.InsertAfterRow(line2, lastRow2);
+
+
     }
 
     protected void DeleteEvent(JournalLineDtoCreate journalEntryLine)
@@ -145,6 +184,10 @@ public partial class JournalEntryCreate(
     {
         _visibled = true;
 
+
+        if (!JournalLines.Any()) return;
+
+
         try
         {
             var trx = new JournalTransactionDtoCreate
@@ -153,8 +196,8 @@ public partial class JournalEntryCreate(
                 TransactionTypeName = TransactionTypes.JORNL.GetDescription(),
                 CurrencyRefId = JLe.CurrencyRefId,
                 UserRefId = UserId,
-                BranchRefId=BranchId
-               
+                BranchRefId = BranchId
+
             };
 
             JLe.BranchRefId = BranchId;
@@ -174,7 +217,7 @@ public partial class JournalEntryCreate(
                 return;
             }
 
-            foreach (var value in JournalLines!)
+            foreach (var value in JournalLines!.Where(x => x.LedgerRefId != null && x.LedgerRefId > 0) ?? [])
             {
                 var isTrue = await ValidateNameType(value);
 
@@ -186,7 +229,7 @@ public partial class JournalEntryCreate(
                 }
             }
 
-            if (JLe.TotalCr != JLe.TotalDr)
+            if (!IsSameDebitAndCredit())
             {
                 _isMessage = true;
 
@@ -205,7 +248,10 @@ public partial class JournalEntryCreate(
 
             JLe.JournalLineCount = JournalLines!.Count();
 
-            JLe.JournalEntryLines!.AddRange(JournalLines);
+            JLe.JournalEntryLines = JournalLines.Where(x => x.LedgerRefId != null &&
+                                                          x.LedgerRefId > 0 &&
+                                                          (x.Credit > 0 || x.Debit > 0))
+                                                .ToList();
 
             trx.JournalEntry = JLe;
 
@@ -219,11 +265,19 @@ public partial class JournalEntryCreate(
             if (resp.IsSuccess)
             {
                 NotificationService.Notify(NotificationSeverity.Success, "Journal", "Journal Entry created successful!");
-                JLe.JournalEntryLines = [];
+
+                JLe = new();
+
                 JournalLines = [];
-                AddNewRow();
+
+                //AddNewRow();
+
                 _isMessage = false;
+
                 _visibled = false;
+
+                DialogService.Close(true);
+
                 StateHasChanged();
             }
             else
@@ -279,7 +333,7 @@ public partial class JournalEntryCreate(
         }
 
         GetTotalValue();
-        
+
         StateHasChanged();
     }
 
@@ -375,8 +429,8 @@ public partial class JournalEntryCreate(
     {
         var index = JournalLines!.IndexOf(journalLine);
 
-        if (journalLine.LedgerRefId == 0 || journalLine.LedgerRefId == null)
-            return;
+        if (journalLine.LedgerRefId == 0 || journalLine.LedgerRefId == null) return;
+
         if (index >= 1)
         {
             journalLine.Credit = null;
@@ -489,28 +543,35 @@ public partial class JournalEntryCreate(
     bool _visibled = false;
     [Parameter] public EventCallback<int> Close { get; set; }
 
-    protected async void CloseSelectedTab()
+    protected void CloseSelectedTab()
     {
-        await Close.InvokeAsync(0);
-
-        StateHasChanged();
+        //await Close.InvokeAsync(0);
+        DialogService.Close(false);
+        //StateHasChanged();
     }
 
     private async Task SelectedCurrencyChanged(object? obj)
     {
-            if (obj is not null)
-            {
-                
-                var item = (CurrencyResponse)obj;
+        if (obj is not null)
+        {
 
-                await GetLedgerByCurrency(item.CurrencyId, null);
-                
-                JournalLines!.Clear();
+            var item = (CurrencyResponse)obj;
 
-            }
-            AddNewRow();
-            
-            StateHasChanged();
+            await GetLedgerByCurrency(item.CurrencyId, filter);
+
+            _selectedCurrencyId = item.CurrencyId;
+
+            JournalLines!.Clear();
+
+        }
+
+        AddNewRow();
+
+
+        await gridJournalLines.Reload();
+
+
+        StateHasChanged();
     }
 
     private void OnValidateDate()
@@ -551,7 +612,65 @@ public partial class JournalEntryCreate(
         if (obj is not null)
         {
             var item = (JournalTypeDto)obj;
-            JLe.JournalType = item?.Code;
+            JLe.JournalType = item?.Code!;
         }
+    }
+
+
+    private async Task GetLedgerByCurrency(int? currencyId, string? searchText = null)
+    {
+        try
+        {
+            var res = await ledgerService.GetLedgersAsync(0, currencyId, searchText);
+
+            if (res.IsSuccess)
+            {
+                Ledgers = res.Data;
+            }
+            else
+            {
+                NotificationService.Notify(NotificationSeverity.Error, res.ErrMessage);
+            }
+
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Exception", ex.Message);
+        }
+
+    }
+
+    string filter = "";
+
+    async Task LoadDataLedger(LoadDataArgs arg)
+    {
+        if (arg is not null && !string.IsNullOrEmpty(arg.Filter))
+        {
+            filter = arg.Filter;
+        }
+
+        await GetLedgerByCurrency(_selectedCurrencyId, filter);
+    }
+
+    private void SelectedItemChanged(object? obj, JournalLineDtoCreate row)
+    {
+        if (obj is not null)
+        {
+            var item = (VLedger)obj;
+
+            row.LedgerName = item?.LedgerName!;
+
+            row.LedgerRefId = item?.LedgerId;
+        }
+
+        var rowIndex = JournalLines.IndexOf(row);
+
+        if (rowIndex >= 1)
+        {
+            OnNextPerform(row);
+        }
+
+
     }
 }

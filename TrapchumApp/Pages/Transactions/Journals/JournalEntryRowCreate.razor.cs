@@ -4,17 +4,11 @@ using Applications.Responses.ViewModels.Journals;
 using Applications.Responses.ViewModels.Ledgers;
 using Applications.Services.Lists;
 using Applications.Services.Transactions.Journals;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
-using Radzen;
 
 namespace TrapchumApp.Pages.Transactions.Journals;
 
-public partial class JournalEntryRowCreate(
-    ILedgerServiceImpl ledgerService,
-    IJournalServiceImpl journalService,
-    IOtherNameServiceImpl nameService)
+public partial class JournalEntryRowCreate(ILedgerServiceImpl ledgerService, IJournalServiceImpl journalService, IOtherNameServiceImpl nameService)
 {
     [Parameter] public JournalLineDtoCreate JournalLine { get; set; } = new();
     [Parameter] public IEnumerable<VNameList> NameData { get; set; } = [];
@@ -28,7 +22,7 @@ public partial class JournalEntryRowCreate(
     [Parameter] public int JournalLineSeq { get; set; } = 1;
     [Parameter] public EventCallback TotalValue { get; set; }
     [Parameter] public int RowIndex { get; set; } = 0;
-
+    [Parameter] public string? Id { get; set; } = Guid.NewGuid().ToString("N");
     protected async void AddNewRow()
     {
         await AddRow.InvokeAsync();
@@ -55,11 +49,10 @@ public partial class JournalEntryRowCreate(
         if (journalLine.Credit > 0)
         {
             var credit = JournalLineList.LastOrDefault();
-            
+
             if (credit!.Credit > 0)
             {
                 AddNewRow();
-                
                 StateHasChanged();
             }
         }
@@ -70,6 +63,7 @@ public partial class JournalEntryRowCreate(
         if (journalLine.Debit > 0)
         {
             var debit = JournalLineList.LastOrDefault();
+
             if (debit!.Debit > 0)
             {
                 AddNewRow();
@@ -80,17 +74,24 @@ public partial class JournalEntryRowCreate(
 
     decimal? _savedValue = 0;
 
+    protected override async Task OnInitializedAsync()
+    {
+        await GetNameLists(null);
+        await base.OnInitializedAsync();
+    }
+
+
     protected async void DebitValidate(JournalLineDtoCreate journalLine)
     {
         GetDebitAmount(journalLine);
-        
+
         await DebitValidated.InvokeAsync(journalLine);
     }
 
     protected async void CreditValidate(JournalLineDtoCreate journalLine)
     {
         GetCreditAmount(journalLine);
-        
+
         await CreditValidated.InvokeAsync(journalLine);
     }
 
@@ -114,11 +115,14 @@ public partial class JournalEntryRowCreate(
         }
     }
 
-    void ShowAdd(ElementReference elementReference, TooltipOptions? options = null) =>
-        tooltipService!.Open(elementReference, "Adding new row", options);
+    void OnNedLine()
+    {
+        if (JournalLine!.LedgerRefId > 0)
+        {
+            AddNewRow();
+        }
+    }
 
-    void ShowDelete(ElementReference elementReference, TooltipOptions? options = null) =>
-        tooltipService!.Open(elementReference, "Romove row", options);
 
     private void SelectedName(object? arg)
     {
@@ -136,7 +140,7 @@ public partial class JournalEntryRowCreate(
 
         if (ledger != null)
         {
-            JournalLine.LedgerName = ledger.LedgerName;
+            JournalLine.LedgerName = ledger.LedgerName!;
         }
 
         if (RowIndex == 1)
@@ -165,25 +169,42 @@ public partial class JournalEntryRowCreate(
     }
 
     VNameList? _nameList;
+    bool isDataLoaded = false;
+    int pageIndex = 0;
+    int pageSize = 10;
+    int counts = 0;
+    string sortColumn = "FullName";
+
+    async Task LoanNameList(LoadDataArgs args)
+    {
+
+        pageIndex = args.Skip ?? 0;
+
+        pageSize = args.Top ?? 10;
+
+        var filter = args.Filter;
+
+        await GetNameLists(null, filter);
+    }
 
     private async Task GetNameLists(string? id, string? searchText = null)
     {
-        var param = new QueryParam(1, 10, string.Empty, true, false, searchText);
+        Tracker.Show();
 
-        NameLists = await nameService.GetNameLists<VNameList>(id, param);
+        var param = new QueryParam(pageIndex, pageSize, sortColumn, true, false, searchText);
+
+        var pager = await nameService.GetNameAsync<VNameList>(id, param);
+
+        NameLists = pager.Items;
+
+        counts = pager.Count;
+
+        Tracker.Hide();
 
         StateHasChanged();
     }
 
     IEnumerable<VNameList> NameLists = [];
-
-
-    protected override async Task OnInitializedAsync()
-    {
-        await GetNameLists(null);
-        await base.OnInitializedAsync();
-    }
-
     protected async Task<bool> ValidateNameType(JournalLineDtoCreate journalLine)
     {
         try

@@ -29,9 +29,10 @@ namespace Applications.Services.Lists
         Task<Result<EntityNames>> GetByIdAsync(string? id);
         Task<Result<T>> GetDetailAsync<T>(string? id) where T : class;
         Task<Result<EntityNamesCreate>> GetEditNameByIdAsync(string? id);
-        Task<IEnumerable<T>> GetNameLists<T>(string? nameId, QueryParam q)  where T : class, new();
+        Task<IEnumerable<T>> GetNameLists<T>(string? nameId, QueryParam q) where T : class, new();
         Task<Pager<VOtherNames>> GetNamesAsync(QueryParam q, CancellationToken cancellation = default);
         Task<Result<VOtherNames>> UpdateStatusAsync(string? id, bool state);
+        Task<Pager<T>> GetNameAsync<T>(string? nameId, QueryParam q, CancellationToken cancellation = default) where T : class, new();
     }
 
 
@@ -103,15 +104,21 @@ namespace Applications.Services.Lists
             return await oName.GetDetailAsync<T>(id);
         }
 
-        public async Task<Pager<VOtherNames>> GetNamesAsync(QueryParam q, CancellationToken cancellation=default)
+        public async Task<Pager<VOtherNames>> GetNamesAsync(QueryParam q, CancellationToken cancellation = default)
         {
             return await oName.GetNamesAsync(q, cancellation);
         }
 
-        public async Task<IEnumerable<T>> GetNameLists<T>(string? nameId, QueryParam q) 
+        public async Task<IEnumerable<T>> GetNameLists<T>(string? nameId, QueryParam q)
             where T : class, new()
         {
             return await oName.GetNameLists<T>(nameId, q);
+        }
+
+        public async Task<Pager<T>> GetNameAsync<T>(string? nameId, QueryParam q, CancellationToken cancellation = default)
+           where T : class, new()
+        {
+            return await oName.GetNameAsync<T>(nameId, q, cancellation); 
         }
 
         public async Task<Result<string>> UpdateAsync(EntityNamesCreate othername)
@@ -126,9 +133,9 @@ namespace Applications.Services.Lists
             return await oName.UpdateStatusAsync(id);
         }
 
-        public async Task<Result<VOtherNames>> UpdateStatusAsync(string? id,bool state)
+        public async Task<Result<VOtherNames>> UpdateStatusAsync(string? id, bool state)
         {
-            return await oName.UpdateStatusAsync(id,state);
+            return await oName.UpdateStatusAsync(id, state);
         }
     }
 }

@@ -18,4 +18,5 @@ public interface ILedgerService
     Task<Pager<VLedger>> GetLedgersAsync(int? pageIndex, int? pageSize, string sortColumn
                                          , bool sortDescending = false, int currencyId = 1,
                                           bool includeInactive = false, string? q = null);
+    Task<Pager<VLedger>> GetLedgersAsync(int? currencyId, QueryParam q, CancellationToken cancellation = default);
 }
