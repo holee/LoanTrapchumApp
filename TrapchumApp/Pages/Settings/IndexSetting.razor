@@ -53,20 +53,20 @@
                         <RadzenButton Size="ButtonSize.ExtraSmall"
                                       Icon="edit"
                                       Click="@(()=>EditRow(s))"
-                                      Variant="Variant.Flat"
+                                      Variant="Variant.Text"
                                       @onclick:stopPropagation="true"
                                       ButtonStyle="ButtonStyle.Secondary">
                         </RadzenButton>
                     </Template>
                     <EditTemplate>
                         <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success"
-                                      Variant="Variant.Flat"
+                                      Variant="Variant.Text"
                                       Size="ButtonSize.ExtraSmall"
                                       aria-label="Save">
                         </RadzenButton>
                         <RadzenButton Icon="close"
                                       ButtonStyle="ButtonStyle.Primary"
-                                      Variant="Variant.Flat"
+                                      Variant="Variant.Text"
                                       Click="@(()=>CancelEdit(s))"
                                       Size="ButtonSize.ExtraSmall"
                                       class="rz-my-1 rz-ms-1"

@@ -16,7 +16,6 @@ public sealed class Customer
     public string? SpousePassport { get; set; }
     public string? SpousePhoneNo { get; set; }
     public string? SpouseOccupation { get; set; }
-
     public string? Occupation { get; set; } 
     public string? Photo { get; set; }
     public bool? IsLoanActive { get; set; } = false;
@@ -24,5 +23,5 @@ public sealed class Customer
     public ICollection<CustomerExpense> CustomerExpenses { get; set; } = [];
     public ICollection<CustomerIncome> CustomerIncomes { get; set; } = [];
     public ICollection<LoanRequest> LoanRequests { get; set; } = [];
-    public EntityNames? EntityNames { get; set; } 
+    //public EntityNames? EntityNames { get; set; } 
 }

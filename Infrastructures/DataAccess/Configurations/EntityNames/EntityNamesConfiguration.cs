@@ -44,7 +44,7 @@ public class EntityNamesConfiguration : IBaseEntityTypeConfigurations<EntityName
         builder.Property(e => e.CreatedDt).HasDefaultValueSql("GETDATE()");
         builder.Property(e => e.ModifiedDt).HasDefaultValueSql("GETDATE()");
 
-        builder.HasOne(x => x.Customer).WithOne(x => x.EntityNames)
+        builder.HasOne(x => x.Customer).WithOne()
                 .HasForeignKey<Customer>(x => x.CustomerId)
                 .OnDelete(DeleteBehavior.Cascade);
 

@@ -19,8 +19,8 @@ public sealed class LoanRequest : BaseEntity
     public int? BankRefId { get; set; }
     public int? LoanProductRefId { get; set; }
     public string? InstallmentName { get; set; }
-    public int InstallmentTypeId { get; set; }
-    public int PayEvery { get; set; } = 1;
+    public int? InstallmentTypeId { get; set; }
+    public int? PayEvery { get; set; } = 1;
     public int? CurrencyRefId { get; set; }
     public DateTime? RequestDate { get; set; }
     public DateTime? FirstPaymentDate { get; set; } = DateTime.UtcNow.AddMonths(1);

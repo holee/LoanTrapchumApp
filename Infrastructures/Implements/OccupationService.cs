@@ -1,9 +1,15 @@
-﻿using Applications.Interfaces.Lists;
+﻿using Applications.Commons.Mappers;
+using Applications.Extensions;
+using Applications.Extensions.mappers;
+using Applications.Interfaces.Lists;
+using Applications.Responses;
 using Applications.Responses.Paginations;
+using Applications.Responses.ViewModels;
 using Domains.Models.Lists;
 using Infrastructures.DataAccess;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
 
@@ -19,6 +25,20 @@ namespace Infrastructures.Implements
             _contextFactory = contextFactory;
             _logger = logger;
         }
+
+        public async Task<Result<OccupationVm>> CreateAsync(Occupation occupation, CancellationToken cancellation = default)
+        {
+            await using var context = await _contextFactory.CreateDbContextAsync();
+
+            context.Occupations.Add(occupation);
+
+            await context.SaveChangesAsync();
+
+            var created = occupation.Map();
+
+            return Result.Success(created);
+        }
+
 
         public async Task<Occupation?> GetOccupationByIdAsync(int? id)
         {
@@ -78,5 +98,47 @@ namespace Infrastructures.Implements
             return await occupations.AsNoTracking().ToListAsync() ?? Enumerable.Empty<Occupation>();
 
         }
+
+
+        public async Task<Pager<OccupationVm>> GetOccupationsAsync(int? id, QueryParam param, CancellationToken cancellation = default)
+        {
+            _logger.LogInformation("Fetching occupations with expression");
+
+            await using var _context = await _contextFactory.CreateDbContextAsync(cancellation);
+
+            var queries = _context.Occupations
+                                  .WhereIf(!string.IsNullOrEmpty(param.Filter),
+                                           x => EF.Functions.Like(x.OccupationTitle, $"%{param.Filter}%") ||
+                                                EF.Functions.Like(x.Khmer, $"%{param.Filter}%") ||
+                                                EF.Functions.Like(x.TypeOf!, $"%{param.Filter}%"));
+            if (id.HasValue && id > 0)
+            {
+                queries = queries.Where(x => x.OccupationId == id);
+            }
+
+            if (param.SortDescending)
+            {
+                queries = queries.OrderByDescending(x => EF.Property<object>(x, param.SortColumn));
+            }
+
+
+            var counts = await queries.CountAsync(cancellation);
+
+            if (param.PageSize > 0)
+            {
+
+                queries = queries.Skip(param.Skip).Take(param.PageSize);
+            }
+
+            var items = await queries.AsNoTracking()
+                                    .ProjectToType<OccupationVm>()
+                                    .ToListAsync();
+
+            return new Pager<OccupationVm>(items, counts);
+
+        }
+
+
+
     }
 }

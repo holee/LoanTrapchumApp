@@ -55,18 +55,18 @@ namespace Infrastructures.DataAccess
             }
 
 
-            foreach (var entityType in builder.Model.GetEntityTypes())
-            {
-                var prop = entityType.ClrType.GetProperties()
-                    .Where(p => p.Name == "EditSeq" && p.PropertyType == typeof(int))
-                    .FirstOrDefault();
-                if (prop != null)
-                {
-                    builder.Entity(entityType.ClrType)
-                       .Property(prop.Name)
-                       .HasDefaultValue(1);
-                }
-            }
+            //foreach (var entityType in builder.Model.GetEntityTypes())
+            //{
+            //    var prop = entityType.ClrType.GetProperties()
+            //        .Where(p => p.Name == "EditSeq" && p.PropertyType == typeof(int))
+            //        .FirstOrDefault();
+            //    if (prop != null)
+            //    {
+            //        builder.Entity(entityType.ClrType)
+            //           .Property(prop.Name)
+            //           .HasDefaultValue(1);
+            //    }
+            //}
 
 
             builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());

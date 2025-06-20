@@ -106,6 +106,7 @@ public static class CustomerMapper
             VillDescription = dto.VillDescription,
             VilInKhmer = dto.VilInKhmer,
             Description = dto.Description,
+            Converted=false,
             Customer = new Customer
             {
                 Photo = dto.Photo,
@@ -120,6 +121,7 @@ public static class CustomerMapper
                 SpouseOccupation = dto.SpouseOccupation,
                 SpousePassport = dto.SpousePassport,
                 SpousePhoneNo = dto.SpousePhoneNo,
+               
             }
         };
 

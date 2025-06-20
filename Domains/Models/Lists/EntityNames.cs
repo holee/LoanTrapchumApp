@@ -45,8 +45,7 @@ public sealed class EntityNames : BaseEntity
     public string? VillDescription { get; set; }
     public string? VilInKhmer { get; set; }
     public string? Description { get; set; }
-
-    public bool Converted { get; set; } = false;
+    public bool? Converted { get; set; } = false;
     public Customer? Customer { get; set; }
     public Employee? Employee { get; set; }
     public Vendor? Vendor { get; set; }

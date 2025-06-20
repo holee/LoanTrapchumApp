@@ -1,6 +1,6 @@
 ﻿namespace Domains.Models.Lists
 {
-    public class Occupation
+    public sealed class Occupation
     {
         public int OccupationId { get; set; }
         public string OccupationTitle { get; set; } = string.Empty;

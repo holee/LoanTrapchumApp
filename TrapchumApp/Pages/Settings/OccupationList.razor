@@ -1,0 +1,144 @@
+﻿@page "/App/Setting/Occupations"
+@using Applications.Responses.Paginations
+@using Applications.Responses.ViewModels
+@using TrapchumApp.Helpers.Extensions
+<PageTitle>Occupations</PageTitle>
+<GridToolbar>
+    <LeftChildren>
+        <RadzenButton Size="ButtonSize.ExtraSmall"
+                      ButtonStyle="ButtonStyle.Primary"
+                      Text="Add New"
+                      Click="@AddOccupations"
+                      Icon="@IconNames.Add" />
+    </LeftChildren>
+</GridToolbar>
+<RadzenDataGrid Responsive="true"
+                GridLines="DataGridGridLines.Both"
+                Density="Density.Compact"
+                AllowPaging="true"
+                AllowFiltering="true"
+                AllowAlternatingRows="true"
+                AllowSorting="true"
+                @ref="@gridRef"
+                TItem="OccupationVm"
+                LoadData="@LoadOccupation"
+                IsLoading="@Tracker.IsLoading"
+                Count="@_counts"
+                PageSize="@pageSize"
+                PageSizeOptions="@StorageConstant.PageSizeOptions"
+                PagerPosition="PagerPosition.Bottom"
+                PageSizeChanged="@PageSizeChanged"
+                PagerHorizontalAlign="HorizontalAlign.Right"
+                Data="@_occupations">
+    <Columns>
+        <RadzenDataGridColumn Title="#"
+                              Property="@nameof(OccupationVm.OccupationId)"
+                              Sortable="false"
+                              Filterable="false"
+                              Width="5rem"
+                              Context="c"
+                              TextAlign="TextAlign.Center">
+            <Template>
+                <span>@(_occupations.IndexOf(c) + 1)</span>
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="Title"
+                              Property="@nameof(OccupationVm.OccupationTitle)"
+                              TextAlign="TextAlign.Left">
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="Khmer"
+                              Property="@nameof(OccupationVm.Khmer)"
+                              TextAlign="TextAlign.Left">
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="TypeOf"
+                              Property="@nameof(OccupationVm.TypeOf)"
+                              TextAlign="TextAlign.Left">
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+@code {
+    private List<OccupationVm> _occupations = [];
+    RadzenDataGrid<OccupationVm> gridRef = default!;
+    private int pageIndex = 0;
+    private int pageSize = 15;
+    private int _counts = 0;
+    private string? _filter = string.Empty;
+    private string sortField = nameof(OccupationVm.OccupationId);
+    private bool sortDescending = false;
+    private bool isIncludeInActive = false;
+    private readonly IOccupationServiceImpl _occService;
+    public OccupationList(IOccupationServiceImpl occService)
+    {
+        _occService = occService;
+    }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        await GetOccupations();
+
+        await base.OnInitializedAsync();
+    }
+
+
+    private async Task GetOccupations(string? filter = null)
+    {
+        Tracker.Show();
+
+        var param = new QueryParam(pageIndex, pageSize, sortField, isIncludeInActive, sortDescending, filter);
+
+        var rsp = await _occService.GetOccupationsAsync(0, param);
+
+        _occupations = rsp.Items ?? [];
+
+        _counts = rsp.Count;
+
+        Tracker.Hide();
+
+        StateHasChanged();
+    }
+
+    private async Task LoadOccupation(LoadDataArgs args)
+    {
+        pageIndex = args.Skip ?? 0;
+
+        (sortField, sortDescending) = args.PageInfo();
+
+        var filterColumn = args.Filters?
+                                .FirstOrDefault(prop => prop.Property == nameof(OccupationVm.OccupationTitle) ||
+                                                        prop.Property == nameof(OccupationVm.Khmer) ||
+                                                        prop.Property == nameof(OccupationVm.TypeOf)
+                                    )?.FilterValue.ToString() ?? string.Empty;
+
+        _filter = filterColumn ?? string.Empty;
+
+        await GetOccupations(_filter);
+    }
+
+    async Task PageSizeChanged(int page)
+    {
+        pageSize = page;
+
+        pageIndex = 0;
+
+        await GetOccupations(_filter);
+    }
+
+    async Task AddOccupations()
+    {
+        var dia = await DialogService.OpenAsync<OccupationCreate>("Occupations");
+
+        if (dia is OccupationVm result && result is not null)
+        {
+            //await GetOccupations(_filter);
+
+            await gridRef.InsertRow(result);
+
+            await gridRef.Reload();
+
+        }
+    }
+
+
+}
