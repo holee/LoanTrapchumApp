@@ -5,6 +5,8 @@ using Applications.Requests.Loans.Disbursements;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans;
+using Applications.Services.Identity;
+using Applications.Services.Loans;
 using Domains.Models.Loans;
 using Domains.Models.Transaction;
 
@@ -79,32 +81,45 @@ namespace Applications.Services.Loans
             throw new NotImplementedException();
         }
 
-        public Task<Stream> DownLoadScheduleAsExcel(string? loanId, int? branchId)
+        public async Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus status, bool include = false,CancellationToken cancellation=default)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(loanId) || !branchId.HasValue)
+            {
+                return Result.Failure<VLoanDisbursments>(ErrorResponse.Validation("LoanId and BranchId must be provided."));
+            }
+
+            return await loanService.GetLoanByIdAsync(loanId, branchId, status, include,cancellation);
         }
 
-   
-        public async Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus status,bool includeSchedule=false)
+        public async Task<Pager<VLoanDisbursments>> GetLoansByBranchIdAsync(int? branchId, string? userId, LoanStatuses status = LoanStatuses.Active, QueryParam? param = null,CancellationToken cancellation=default)
         {
-            return await loanService.GetLoanByIdAsync(loanId, branchId, status,includeSchedule);
+            return await loanService.GetLoansByBranchId(branchId, userId, status, param,cancellation);
         }
 
-        public async Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId)
-        {
-            return await loanService.GetLoanByIdAsync(loanId, branchId);
-        }
-
-        public async Task<Pager<VLoanDisbursments>> GetLoansAsync(int? branchId, string? userId, LoanStatuses status = LoanStatuses.Active, QueryParam? param = null)
-        {
-            return await loanService.GetLoansByBranchId(branchId, userId, status, param);
-        }
-
-        
     }
 
 }
 
+//public async Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus status,bool include=false)
+//{
+
+//    if (string.IsNullOrEmpty(loanId) || !branchId.HasValue)
+//    {
+//        return Result.Failure<VLoanDisbursments>(ErrorResponse.Validation("LoanId and BranchId must be provided."));
+//    }
+
+//    return await loanService.GetLoanByIdAsync(loanId, branchId, status,include);
+//}
+
+//public async Task<Pager<VLoanDisbursments>> GetLoansByBranchIdAsync(int? branchId, string? userId, LoanStatuses status = LoanStatuses.Active, QueryParam? param = null)
+//{
+//    return await loanService.GetLoansByBranchId(branchId, userId, status, param);
+//}
+
+//public async Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId)
+//{
+//    return await loanService.GetLoanByIdAsync(loanId, branchId);
+//}
 
 //Task<Result<string>> CreateLoanAsync(LoanDtoCreate disbursement);
 //Task<Result<string>> DeleteAsync(long loanId,int branchId);

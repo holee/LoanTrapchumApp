@@ -43,11 +43,15 @@ namespace Applications.Services.Lists
             return await crService.GetCreditAgents(branchId, param);
         }
 
-        public async Task<Result<IEnumerable<VEmployeeCreateCreditAgent>>> GetEmployeeCreateCreditAgents(string? query = null)
+        public async Task<Result<IEnumerable<VEmployeeCreditAgent>>> GetEmployeeCreateCreditAgents(string? query = null)
         {
             return await crService.GetEmployeeCreateCreditAgents(query);
         }
 
+        public async Task<Pager<VEmployeeCreditAgent>> GetEmployeeCreditAgents(int? branchId,string? employeeId,QueryParam param)
+        {
+            return await crService.GetEmployeeCreditAgents(branchId,employeeId,param);
+        }
         public async Task<Result> UpdateCreditAgent(string? id, LoanCreditAgent req)
         {
             return await crService.UpdateCreditAgent(id, req);

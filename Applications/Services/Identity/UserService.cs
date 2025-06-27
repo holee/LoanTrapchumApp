@@ -5,12 +5,15 @@ using Applications.Responses;
 using Applications.Responses.Auths;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Auths;
+using Domains.Models.Files;
+using FluentValidation;
 
 namespace Applications.Services.Identity;
 
 
-public sealed class UserService(IUserService userService) : IUserServiceImpl 
+public sealed class UserService(IUserService userService, IValidator<ChangePasswordDto> validator) : IUserServiceImpl
 {
+
     public async Task<Result<string>> AddOrRemovedUserPermissionsAsync(string? userId, UserPermissionRequest permission)
     {
         return await userService.AddOrRemovedUserPermissionsAsync(userId, permission);
@@ -21,9 +24,30 @@ public sealed class UserService(IUserService userService) : IUserServiceImpl
         return await userService.AddOrRemovedUserRolesAsync(useroles, userId);
     }
 
-    public async Task<Result> ChangePassword(ChangePasswordDto req)
+    public async Task<Result<string>> ChangePassword(ChangePasswordDto req, CancellationToken cancellation = default)
     {
-        return await userService.ChangePassword(req);
+
+        var valid = validator.Validate(req);
+
+        if (!valid.IsValid)
+        {
+
+            var errors = valid.ToDictionary();
+
+            return Result.Failure<string>(ErrorResponse.Validation(errors));
+        }
+
+        return await userService.ChangePassword(req, cancellation);
+    }
+
+
+    public async Task<Result<FileModel>> ChangeProfile(string? userId, ProfileDtoCreate req)
+    {
+
+        var model = new FileModel(req.FileName, req.FileName, req.FileSize, req.FileContent);
+
+        return await userService.ChangeProfile(userId, model);
+
     }
 
     public async Task<Result<string>> CreateUserAsync(RegisterRequest model)
@@ -56,9 +80,9 @@ public sealed class UserService(IUserService userService) : IUserServiceImpl
         return await userService.GetUsersAsync(param, userId);
     }
 
-    public async Task<Result<Pager<VUser>>> GetUsersAsync(int? branchId,string? userId,QueryParam param)
+    public async Task<Result<Pager<VUser>>> GetUsersAsync(int? branchId, string? userId, QueryParam param)
     {
-        return await userService.GetUsersAsync(branchId,userId,param);
+        return await userService.GetUsersAsync(branchId, userId, param);
     }
 
     public async Task<Result<IEnumerable<VUser>>> GetUsersAsync(string? userId, string? filter = null)
@@ -66,13 +90,13 @@ public sealed class UserService(IUserService userService) : IUserServiceImpl
         return await userService.GetUsersAsync(userId, filter);
     }
 
-    public async Task<Result<VUser>> GetUserByIdAsync(string? userId,CancellationToken cancellation=default) 
+    public async Task<Result<VUser>> GetUserByIdAsync(string? userId, CancellationToken cancellation = default)
     {
         return await userService.GetUserByIdAsync(userId, cancellation);
     }
-    public async Task<Result<VUser>> GetUserByIdAsync(string? userId, CancellationToken cancellation = default,params IEnumerable<string> columns)
+    public async Task<Result<VUser>> GetUserByIdAsync(string? userId, CancellationToken cancellation = default, params IEnumerable<string> columns)
     {
-        return await userService.GetUserByIdAsync(userId, cancellation,columns);
+        return await userService.GetUserByIdAsync(userId, cancellation, columns);
     }
 
     public async Task<Result<UserDto>> GetUserDetailsById(string? userId) => await userService.GetUserDetailsById(userId);
@@ -81,4 +105,15 @@ public sealed class UserService(IUserService userService) : IUserServiceImpl
 
     public async Task<Pager<PermissionsVm>> GetPermissionsAsync(QueryParam req) => await userService.GetPermissionsAsync(req);
 
+
+    public async Task<Result<UserProfileResponse>> GetUserProfile(string? userId, CancellationToken cancellation = default)
+    {
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Result.Failure<UserProfileResponse>(ErrorResponse.Validation("No UserId"));
+        }
+
+        return await userService.GetUserProfile(userId);
+
+    }
 }

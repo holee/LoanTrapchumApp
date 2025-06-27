@@ -2,8 +2,6 @@
 using Applications.Requests.Identity;
 using Applications.Responses.Auths;
 using Applications.Responses.ViewModels.Auths;
-using Microsoft.AspNetCore.Components;
-using Radzen;
 
 namespace TrapchumApp.Pages.Identity.Users;
 
@@ -59,6 +57,7 @@ public partial class UserManagement
             if (!response.IsSuccess)
             {
                 NotificationService.Notify(NotificationSeverity.Error, response.ErrMessage);
+
                 return;
             }
             else

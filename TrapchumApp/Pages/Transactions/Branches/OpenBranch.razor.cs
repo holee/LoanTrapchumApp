@@ -60,6 +60,7 @@ namespace TrapchumApp.Pages.Transactions.Branches
             if (CashVaultBalances.Any())
             {
                 await  GetCurrencies((int)CurrenciesType.Khr);
+
                 await GetCurrencyNotes(currencyId, BranchId);
             }
 

@@ -80,6 +80,11 @@ namespace Applications.Services.Files
             return await fileUpload.UploadFiles(content);
         }
 
+        public async Task<Result<IEnumerable<FileModel>>> ChangeProfile(IEnumerable<FileModel> content)
+        {
+            return await fileUpload.UploadFiles(content); 
+        }
+
         public async Task<Result<FileModel>> UploadFile(FileModel content)
         {
             return await fileUpload.UploadFile(content);

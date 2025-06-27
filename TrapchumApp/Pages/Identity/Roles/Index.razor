@@ -6,31 +6,31 @@
 <RadzenTabs RenderMode="TabRenderMode.Server">
     <Tabs>
         <RadzenTabsItem Text="Roles" Icon="list">
-            <PageDropDown PageSizeChanged="PageSizeChanged"
-                          Reload="RoleRefresh"
-                          ShowSearchBox="true"
-                          ShowReload="true">
-                <LeftChildContent>
-                    <RadzenButton Icon="add"
+            <GridToolbar>
+                <LeftChildren>
+                    <RadzenButton Icon="@IconNames.Add"
                                   ButtonStyle="ButtonStyle.Primary"
                                   Text="Add Role"
-                                  Size="ButtonSize.Small" />
-                </LeftChildContent>
-                <RightChildContent>
+                                  Click="@AddUserRole"
+                                  Size="ButtonSize.ExtraSmall" />
+                </LeftChildren>
+                <RightChildren>
                     <div class="rz-p-0 rz-text-align-center">
                         <RadzenCheckBox Name="InlcudeInActive" Value="true" />
                         <RadzenLabel Text="Inlcude InActive" Component="InlcudeInActive" class="rz-ms-0" />
                     </div>
-                </RightChildContent>
-            </PageDropDown>
+                </RightChildren>
+            </GridToolbar>
             <RadzenDataGrid Density="Density.Compact"
                             GridLines="DataGridGridLines.Both"
                             Responsive
                             TItem="RoleDto"
                             AllowPaging="true"
                             ColumnWidth="12.5rem"
-                            PageSize="pageSize"
+                            PageSize="@pageSize"
                             PagerHorizontalAlign="HorizontalAlign.Right"
+                            PageSizeOptions="@StorageConstant.PageSizeOptions"
+                            PageSizeChanged="@PageSizeChanged"
                             Data="Roles">
                 <Columns>
                     <RadzenDataGridColumn Property="Id" Title="#"
@@ -42,13 +42,18 @@
                     </RadzenDataGridColumn>
                     <RadzenDataGridColumn Width="8rem" Property="RoleName" Title="Name" />
                     <RadzenDataGridColumn Property="Description" Title="Description" Sortable="false" />
-                    <RadzenDataGridColumn TextAlign="TextAlign.Center" Width="3rem" Property="IsActive" Title="Status" Context="r" Sortable="false">
+                    <RadzenDataGridColumn TextAlign="TextAlign.Center"
+                                          Width="3rem"
+                                          Property="IsActive"
+                                          Title="Status" Context="r" Sortable="false">
                         <Template>
                             <RadzenCheckBox TValue="bool" Value="@r.IsActive" />
                         </Template>
                     </RadzenDataGridColumn>
 
-                    <RadzenDataGridColumn Width="6rem" Property="Id" Title="Action" Context="r" Sortable="false">
+                    <RadzenDataGridColumn Width="3rem"
+                                          TextAlign="TextAlign.Center"
+                                          Property="Id" Title="Action" Context="r" Sortable="false">
                         <Template>
                             <RadzenButton Size="ButtonSize.ExtraSmall"
                                           Icon="more_vert"
@@ -80,12 +85,18 @@
     {
         ContextMenuService.Open(args, ds =>
     @<RadzenMenu Style="font-size:0.8rem;">
-        <RadzenMenuItem Icon="manage_accounts"
-                        Click="@(()=>ManageRolePermissions(userId))"
-                        Text="Manage Role"
-                        Value="@userId" />
-    </RadzenMenu>
+    <RadzenMenuItem Icon="manage_accounts"
+                    Click="@(()=>ManageRolePermissions(userId))"
+                    Text="Manage Role"
+                    Value="@userId" />
+</RadzenMenu>
 
-       );
+    );
+    }
+
+
+    async Task AddUserRole()
+    {
+        await DialogService.OpenAsync<RoleCreate>("Add Role");
     }
 }

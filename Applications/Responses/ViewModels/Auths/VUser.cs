@@ -4,11 +4,10 @@ namespace Applications.Responses.ViewModels.Auths;
 
 public sealed class VUser
 {
-    public string? Id { get; set; } = string.Empty;
+    public string Id { get; set; } = null!;
     public string? Email { get; set; }
     public string? UserName { get; set; }
-    public string? RoleName { get; set; }
-    
+    public string? RoleName { get; set; } 
     public bool CanApproved { get; set; } = false;
     public string? EmployeeRefId { get; set; }
     public string? FirstName { get; set; }

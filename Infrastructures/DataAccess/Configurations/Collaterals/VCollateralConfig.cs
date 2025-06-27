@@ -10,15 +10,15 @@ namespace Infrastructures.DataAccess.Configurations.Collaterals
         public void Configure(EntityTypeBuilder<VCollateral> builder)
         {
             builder.ToView("VCollateralList");
-            builder.HasNoKey();
-            builder.Property(x => x.RegisterDate).HasColumnType("DATE");
-            builder.Property(x => x.Remark).HasMaxLength(200);
+            builder.HasKey(x => x.CustomerId);
             builder.Property(x => x.CustomerName).HasMaxLength(100);
+            builder.Property(x => x.RegisterDate).HasColumnType("DATE");
+            builder.Property(x => x.Remark).HasMaxLength(400);
         }
     }
 
 
-    public class VLoanCollateralLineConfig : IBaseEntityTypeConfigurations<VLoanRequestCollateralLines> 
+    public class VLoanCollateralLineConfig : IBaseEntityTypeConfigurations<VLoanRequestCollateralLines>
     {
         public void Configure(EntityTypeBuilder<VLoanRequestCollateralLines> builder)
         {

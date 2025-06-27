@@ -1,4 +1,5 @@
 ﻿using Applications.Responses.ViewModels.Addresses;
+using Applications.Responses.ViewModels.Auths;
 using Applications.Responses.ViewModels.Branches;
 using Applications.Responses.ViewModels.Collaterals;
 using Applications.Responses.ViewModels.Currencies;
@@ -47,27 +48,13 @@ namespace Infrastructures.DataAccess
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
             foreach (var property in builder.Model.GetEntityTypes()
-           .SelectMany(t => t.GetProperties())
-           .Where(p => p.ClrType == typeof(decimal) || p.ClrType == typeof(decimal?)))
-            {
-                property.SetColumnType("decimal(18,3)");
-            }
-
-
-            //foreach (var entityType in builder.Model.GetEntityTypes())
-            //{
-            //    var prop = entityType.ClrType.GetProperties()
-            //        .Where(p => p.Name == "EditSeq" && p.PropertyType == typeof(int))
-            //        .FirstOrDefault();
-            //    if (prop != null)
-            //    {
-            //        builder.Entity(entityType.ClrType)
-            //           .Property(prop.Name)
-            //           .HasDefaultValue(1);
-            //    }
-            //}
-
+               .SelectMany(t => t.GetProperties())
+               .Where(p => p.ClrType == typeof(decimal) || p.ClrType == typeof(decimal?)))
+                {
+                    property.SetColumnType("decimal(18,3)");
+                }
 
             builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
@@ -233,6 +220,8 @@ namespace Infrastructures.DataAccess
         public DbSet<LoanDescriptions> LoanDescriptions => Set<LoanDescriptions>();
         public DbSet<LoanChangedCa> LoanChangedCa => Set<LoanChangedCa>();
         public DbSet<AppSettings> AppSettings => Set<AppSettings>();
+
+        public DbSet<VUser> VUsers => Set<VUser>();
         public DbSet<VCurrenciesList> VCurrenciesList => Set<VCurrenciesList>();
         public DbSet<VCurrencyNotes> VCurrencyNotes => Set<VCurrencyNotes>();
         public DbSet<VBranchResponse> VBranchs => Set<VBranchResponse>();
@@ -245,9 +234,8 @@ namespace Infrastructures.DataAccess
         public DbSet<VLedger> VLedgers => Set<VLedger>();
         public DbSet<VendorVm> VVendor => Set<VendorVm>();
         public DbSet<VGuarantor> VGuarantors => Set<VGuarantor>();
-
+        public DbSet<VEmployeeCreditAgent> EmployeeCreditAgent => Set<VEmployeeCreditAgent>(); 
         public DbSet<VOtherNames> VOtherNames => Set<VOtherNames>();
-
         public DbSet<NameListVm> VNameLists => Set<NameListVm>(); 
         public DbSet<VEmployeeList> EmployeeLists => Set<VEmployeeList>();
         public DbSet<VCustomerList> CustomerLists => Set<VCustomerList>();

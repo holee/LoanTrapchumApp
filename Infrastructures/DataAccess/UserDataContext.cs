@@ -27,6 +27,10 @@ namespace Infrastructures.DataAccess
             builder.ApplyConfiguration(new PermissionsConfigurations());
 
 
+
+            builder.Entity<UserProfiles>()
+                .HasKey(x => new { x.UserRefId });
+
             builder.Entity<ApplicationUser>()
                 .HasOne<UserProfiles>()
                 .WithOne()

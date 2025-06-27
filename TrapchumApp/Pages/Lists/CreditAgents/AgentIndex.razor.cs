@@ -54,7 +54,7 @@ public partial class AgentIndex
 
     LoanCreditAgentDtoCreate model = new LoanCreditAgentDtoCreate();
 
-    List<VEmployeeCreateCreditAgent> empCreditAgents = [];
+    List<VEmployeeCreditAgent> empCreditAgents = [];
 
     int selectedTabIndex = 0;
 
@@ -230,16 +230,17 @@ public partial class AgentIndex
         await InvokeAsync(StateHasChanged);
     }
 
-    private void CloseTab(int closeTabIndex)
+    private async Task CloseTab(int closeTabIndex)
     {
         if (closeTabIndex == 1)
         {
-
             ShowAddedTab = false;
 
+            await GetCreditAgents(BranchId,_filter);
         }
 
         selectedTabIndex = 0;
+
     }
     private async Task SelectedItemChanged(object? args)
     {

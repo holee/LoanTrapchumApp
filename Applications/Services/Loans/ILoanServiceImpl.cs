@@ -14,14 +14,17 @@ namespace Applications.Services.Loans
         Task<Result<string>> ChangedCreditAgent(int? branchId, List<LoanChangedCaDtoCreate> req);
         Task<Result<bool>> CreateLoanAsync(LoanDtoCreate req);
         Task<Result<string>> DeleteAsync(string? loanId, int? branchId);
-        Task<Result<string>> UpdateAsync(LoanDisbursment disbursement);
-        Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus status,bool include=false);
-        Task<Pager<VLoanDisbursments>> GetLoansAsync(int? branchId, string? userId, LoanStatuses status = LoanStatuses.Active, QueryParam? param = null);
-        Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId);
+        Task<Result<string>> UpdateAsync(LoanDisbursment disbursement);  
+        Task<Pager<VLoanDisbursments>> GetLoansByBranchIdAsync(int? branchId, string? userId, LoanStatuses status = LoanStatuses.Active, QueryParam? param = null, CancellationToken cancellation = default);
+        Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus status, bool include = false, CancellationToken cancellation = default);
     }
 
 }
 
+//Task<Pager<VLoanDisbursments>> GetLoansByBranchIdAsync(int? branchId, string? userId, LoanStatuses status = LoanStatuses.Active, QueryParam? param = null);  
+
+//Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus status,bool include=false);
+//Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId);
 //Task<Stream> DownLoadScheduleAsExcel(string? loanId, int? branchId);
 //Task<Result<Stream>> DownLoadScheduleAsPdf(string? loanId, int? branchId);
 //Task<Result<byte[]>> ExportScheduleAsPdf(string? loanId, int? branchId);

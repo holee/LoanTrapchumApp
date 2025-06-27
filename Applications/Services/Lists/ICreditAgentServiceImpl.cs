@@ -14,7 +14,8 @@ namespace Applications.Services.Lists
         Task<Result<string>> UpdateCreditAgent(string id, LoanCreditAgentDtoUpdate req);
         Task<Result<IEnumerable<VCreditAgent>>> GetCreditAgents(bool includeInactive = false, string? query = null);
         Task<Pager<VCreditAgent>> GetCreditAgents(QueryParam param);
-        Task<Result<IEnumerable<VEmployeeCreateCreditAgent>>> GetEmployeeCreateCreditAgents(string? query = null);
+        Task<Result<IEnumerable<VEmployeeCreditAgent>>> GetEmployeeCreateCreditAgents(string? query = null);
         Task<Pager<VCreditAgent>> GetCreditAgents(int? branchId, QueryParam param);
+        Task<Pager<VEmployeeCreditAgent>> GetEmployeeCreditAgents(int? branchId, string? employeeId, QueryParam param);
     }
 }

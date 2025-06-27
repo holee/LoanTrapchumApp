@@ -1,15 +1,13 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-
-using Applications.Responses.ViewModels.Loans.Schedules;
+﻿using Applications.Responses.ViewModels.Loans.Schedules;
 
 namespace Applications.Responses.ViewModels.Loans;
 
 public sealed class VLoanDisbursments
 {
     public string? LoanId { get; set; }
-    public string? ContractNumber { get; set; }
     public int? BranchId { get; set; }
-    public string? LoanBranchName { get; set; }
+    public string? ContractNumber { get; set; }
+    public string? BranchName { get; set; }
     public string? CustomerId { get; set; }
     public string? AltName { get; set; }
     public string? CustomerName { get; set; }
@@ -41,6 +39,5 @@ public sealed class VLoanDisbursments
     public int? Period { get; set; }
     public string? PeriodName { get; set; }
     public string? InstallmentType { get; set; }
-    [NotMapped]
     public ICollection<VSchedule>? Schedules { get; set; } = [];
 }

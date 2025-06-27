@@ -1,6 +1,6 @@
 ﻿namespace Applications.Responses;
 
-public class ResultStatus
+public sealed class ResultStatus
 {
     public ResultStatus()
     {

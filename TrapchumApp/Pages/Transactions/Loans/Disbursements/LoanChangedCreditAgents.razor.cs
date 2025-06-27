@@ -52,7 +52,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 
             var param = new QueryParam(_pageIndex, _pageSize, _sortColumn, true, false, string.Empty);
 
-            var resp = await _loanService.GetLoansAsync(BranchId, _oldCreditAgentId, LoanStatuses.Active, param);
+            var resp = await _loanService.GetLoansByBranchIdAsync(BranchId, _oldCreditAgentId, LoanStatuses.Active, param);
 
 
             _items = resp.Items;

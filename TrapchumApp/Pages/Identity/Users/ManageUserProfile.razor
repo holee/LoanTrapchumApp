@@ -1,7 +1,170 @@
 ﻿@page "/App/Account/Profile/{UserId}/User"
+@page "/profile"
+@using Domains.Models.Files
 @using TrapchumApp.Services
+@using Radzen
+@using Radzen.Blazor
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Web
+@inject NavigationManager Navigation
+@inject NavigationManager Navigation
+@inject IWebHostEnvironment Env
+
+<PageTitle>User Profile</PageTitle>
+<style>
+    .sidebar-nav {
+        background-color: red;
+    }
+</style>
+<RadzenCard Style="margin: auto; margin-top:0; box-shadow: 0 4px 20px rgba(0,0,0,0.1); border-radius: 12px;;background-color:rgba(200,250,250,0.1);">
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="20px">
+        <RadzenStack class="rz-w-25">
+            <!-- Profile Picture -->
+            <RadzenImage Path="@(user.FileUrl)" alt="User Avatar"
+                         style="border-radius: 50%; width: 120px; height: 120px; object-fit: cover;" />
+            <!-- Profile Info -->
+            <div style="flex:1;">
+                <EditForm Model="@UploadModel" OnValidSubmit="@ChangeProfile">
+                    <FluentValidationValidator />
+                    <ValidationSummary />
+                    <InputFile OnChange="HandleFileSelected" />
+                    <RadzenStack Orientation="Orientation.Horizontal" Gap="10px" class="rz-my-2">
+                        <RadzenButton Text="Change Profile"
+                                      Icon="@IconNames.SwitchAccount"
+                                      ButtonStyle="ButtonStyle.Primary"
+                                      ButtonType="ButtonType.Submit"
+                                      IsBusy="@Tracker.IsLoading"
+                                      BusyText="Changing Profile..."
+                                      Size="ButtonSize.ExtraSmall" />
+                        <RadzenButton Text="Change Password"
+                                      Click="@ChangAccountPassword"
+                                      Icon="@IconNames.Lock"
+                                      ButtonStyle="ButtonStyle.Secondary"
+                                      Size="ButtonSize.ExtraSmall" />
+                    </RadzenStack>
+                </EditForm>
+            </div>
+        </RadzenStack>
+        <RadzenStack class="rz-w-75">
+            <RadzenRow>
+                <RadzenColumn Size="3">
+                    <RadzenLabel>Name</RadzenLabel>
+                </RadzenColumn>
+                <RadzenColumn Size="9">
+                    <RadzenLabel>@user.FullName</RadzenLabel>
+                </RadzenColumn>
+                <RadzenColumn Size="3">
+                    <RadzenLabel>Branch</RadzenLabel>
+                </RadzenColumn>
+                <RadzenColumn Size="9">
+                    <RadzenLabel>@user.BranchName</RadzenLabel>
+                </RadzenColumn>
+                <RadzenColumn Size="3">
+                    <RadzenLabel>Email</RadzenLabel>
+                </RadzenColumn>
+                <RadzenColumn Size="9">
+                    <RadzenLabel>@user.Email</RadzenLabel>
+                </RadzenColumn>
+                <RadzenColumn Size="3">
+                    <RadzenLabel>Role</RadzenLabel>
+                </RadzenColumn>
+                <RadzenColumn Size="9">
+                    <RadzenLabel>@user.RoleName</RadzenLabel>
+                </RadzenColumn>
+            </RadzenRow>
+        </RadzenStack>
+    </RadzenStack>
+</RadzenCard>
 
 @code {
+    private readonly IUserServiceImpl userService;
+
+    public ManageUserProfile(IUserServiceImpl userService)
+    {
+        this.userService = userService;
+    }
+
     [Parameter]
     public string UserId { get; set; } = string.Empty;
+
+    UserProfileResponse user = new();
+
+    ProfileDtoCreate UploadModel = new();
+
+    string? fileImage = "";
+
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        var rsp = await _userService.GetUserProfile(UserId);
+
+        if (rsp.IsSuccess)
+        {
+            user = rsp.Data!;
+        }
+
+        await base.OnInitializedAsync();
+    }
+
+
+    async void ChangAccountPassword()
+    {
+
+        var options = new DialogOptions { };
+
+        var param = new Dictionary<string, object?>
+        {
+            {"UserId",UserId}
+        };
+
+        await DialogService.OpenAsync<UserChangePassword>("Change Password", param, options);
+    }
+
+
+    private string? StatusMessage;
+
+    const long maxFileSize = 10 * 1024 * 1024;
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+
+        if (e.FileCount > 0)
+        {
+            using var stream = new MemoryStream();
+
+            using var fileStream = e.File.OpenReadStream(maxFileSize); // 30 MB limit
+
+            await fileStream.CopyToAsync(stream); // ✅ Read the file content
+
+            UploadModel.FileName = e.File.Name;
+
+            UploadModel.FileSize = e.File.Size;
+
+            UploadModel.FileContent = stream.ToArray();
+        }
+    }
+
+    async Task ChangeProfile()
+    {
+        if (UploadModel is null) return;
+
+        Tracker.Show();
+
+        var rsp = await userService.ChangeProfile(UserId, UploadModel);
+
+        if (rsp.IsSuccess)
+        {
+            user.FileUrl = rsp.Data?.FileUrl;
+
+            UploadModel = new();
+
+            StateHasChanged();
+        }
+
+        Tracker.Hide();
+
+    }
+
+
 }

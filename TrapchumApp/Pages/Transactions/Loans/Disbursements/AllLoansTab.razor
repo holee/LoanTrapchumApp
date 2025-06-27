@@ -1,10 +1,8 @@
 ﻿@using Applications.Responses.ViewModels.Loans
 @using Microsoft.AspNetCore.Components.Web
 @using TrapchumApp.Services
-<PageDropDown PageSizeChanged="ChangedPageSize"
-              OnTextChanged="TextLoanSearchChanged"
-              ShowSearchBox="true">
-    <RightChildContent>
+<GridToolbar SearchChanged="@TextLoanSearchChanged">
+    <RightChildren>
         <RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal">
             <RadzenCheckBox TValue="bool"
                             @bind-Value="includeInactive"
@@ -13,8 +11,8 @@
             <RadzenLabel Text="Include Inactive"
                          Component="IncludeInactive" class="rz-ms-2" />
         </RadzenStack>
-    </RightChildContent>
-</PageDropDown>
+    </RightChildren>
+</GridToolbar>
 <RadzenDataGrid Data="LoanItems"
                 Count="@counts"
                 PageSize="pageSize"
@@ -26,10 +24,10 @@
                 PagerPosition="PagerPosition.Bottom"
                 ShowPagingSummary="true"
                 PagerHorizontalAlign="HorizontalAlign.Right"
-                IsLoading="isLoading"
-                class="h-100"
-                Style="min-height:30rem;height:30rem;max-height:35rem;"
+                IsLoading="@isLoading"
                 AllowRowSelectOnRowClick="true"
+                PageSizeChanged="@ChangedPageSize"
+                PageSizeOptions="@StorageConstant.PageSizeOptions"
                 AllowPaging="true">
     <Columns>
         <RadzenDataGridColumn Context="p"
@@ -114,7 +112,7 @@
         <RadzenDataGridColumn Context="p"
                               Title="Actions"
                               Width="6rem"
-                              TextAlign="TextAlign.Start"
+                              TextAlign="TextAlign.Center"
                               Sortable="true">
             <Template>
                 <RadzenButton Size="ButtonSize.ExtraSmall"
@@ -136,25 +134,25 @@
     void ShowContextMenuWithContent(MouseEventArgs args, VLoanDisbursments p)
     {
         ContextMenuService.Open(args, ds =>@<RadzenMenu Style="font-size:0.8rem;">
-        <RadzenMenuItem Icon="money"
-                        Click="@(()=>GetPaymentSchedules(p))"
-                        Text="Recieve Payment"></RadzenMenuItem>
-        <RadzenMenuItem Icon="paid"
-                        Click="@(()=>CustomerPayOff(p))"
-                        Text="PayOff"></RadzenMenuItem>
-        <RadzenMenuItem Icon="change_circle"
-                        Click="@(()=>ChangeCreditAgent(p))"
-                        Text="Change Credit Agent"></RadzenMenuItem>
-        <RadzenMenuItem Icon="info"
-                        Click="@(()=>GetLoanDetails(p))"
-                        Text="Details"></RadzenMenuItem>
-        <RadzenMenuItem Icon="file_download"
-                        Click="@(()=>DownLoadScheduleAsExcel(p.LoanId,p.BranchId!.Value))"
-                        Text="Export Loan to Excel" />
-        <RadzenMenuItem Icon="picture_as_pdf"
-                        Click="@(()=>DownLoadScheduleAsPdf(p.LoanId,p.BranchId!.Value))"
-                        Text="Export Loan to Pdf" />
-    </RadzenMenu>
+    <RadzenMenuItem Icon="money"
+                    Click="@(()=>GetPaymentSchedules(p))"
+                    Text="Recieve Payment"></RadzenMenuItem>
+    <RadzenMenuItem Icon="paid"
+                    Click="@(()=>CustomerPayOff(p))"
+                    Text="PayOff"></RadzenMenuItem>
+    <RadzenMenuItem Icon="change_circle"
+                    Click="@(()=>ChangeCreditAgent(p))"
+                    Text="Change Credit Agent"></RadzenMenuItem>
+    <RadzenMenuItem Icon="info"
+                    Click="@(()=>GetLoanDetails(p))"
+                    Text="Details"></RadzenMenuItem>
+    <RadzenMenuItem Icon="file_download"
+                    Click="@(()=>DownLoadScheduleAsExcel(p.LoanId,p.BranchId!.Value))"
+                    Text="Export Loan to Excel" />
+    <RadzenMenuItem Icon="picture_as_pdf"
+                    Click="@(()=>DownLoadScheduleAsPdf(p.LoanId,p.BranchId!.Value))"
+                    Text="Export Loan to Pdf" />
+</RadzenMenu>
     );
     }
 }

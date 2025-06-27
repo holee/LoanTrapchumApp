@@ -6,7 +6,8 @@ namespace Applications.Responses.ViewModels.Loans.Requests;
 
 public sealed class VLoanRequests
 {
-    public string? LoanRequestId { get; set; }
+    public string LoanRequestId { get; set; } = null!;
+    public int? BranchId { get; set; }
     public DateTime? RequestDate { get; set; }
     public decimal? RequestAmount { get; set; }
     public decimal? AprovedAmount { get; set; }
@@ -26,7 +27,6 @@ public sealed class VLoanRequests
     public string? UserRequestId { get; set; }
     public string? UserName { get; set; }
     public int? BankId { get; set; }
-    public int? BranchId { get; set; }
     public string? BranchName { get; set; }
     public string? CustomerId { get; set; }
     public string? AltName { get; set; }

@@ -1,6 +1,6 @@
 ﻿namespace Applications.Responses.ViewModels.Employees
 {
-    public class VEmployeeCreateCreditAgent
+    public class VEmployeeCreditAgent
     {
         public string? EmployeeId { get; set; }
         public string? Name { get; set; }
@@ -13,6 +13,7 @@
         public string? JobTitle { get; set; }
         public string? Gender { get; set; }
         public bool IsActive { get; set; } = true;
+        public int? BranchId { get; set; }
         public string? BranchName { get; set; }=string.Empty;   
 
     }

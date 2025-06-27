@@ -22,7 +22,7 @@ namespace Infrastructures.Migrations.Identity
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Applications.Extensions.Identity.ApplicationRole", b =>
+            modelBuilder.Entity("Domains.Models.Identity.ApplicationRole", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -55,7 +55,7 @@ namespace Infrastructures.Migrations.Identity
                     b.ToTable("Roles", "Security");
                 });
 
-            modelBuilder.Entity("Applications.Extensions.Identity.ApplicationUser", b =>
+            modelBuilder.Entity("Domains.Models.Identity.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -134,6 +134,9 @@ namespace Infrastructures.Migrations.Identity
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
+                    b.Property<string>("UserProfilesUserRefId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedEmail")
@@ -144,10 +147,12 @@ namespace Infrastructures.Migrations.Identity
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
+                    b.HasIndex("UserProfilesUserRefId");
+
                     b.ToTable("Users", "Security");
                 });
 
-            modelBuilder.Entity("Applications.Extensions.Identity.UserProfiles", b =>
+            modelBuilder.Entity("Domains.Models.Identity.Permissions", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -155,7 +160,34 @@ namespace Infrastructures.Migrations.Identity
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<string>("AppUserId")
+                    b.Property<string>("Action")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<string>("Group")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<bool?>("IsBasic")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("Module")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Permisions", "Security");
+                });
+
+            modelBuilder.Entity("Domains.Models.Identity.UserProfiles", b =>
+                {
+                    b.Property<string>("UserRefId")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime?>("Created")
@@ -164,25 +196,13 @@ namespace Infrastructures.Migrations.Identity
                     b.Property<string>("FileName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("FileTitle")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("FileUrl")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<string>("UserRefId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AppUserId");
-
-                    b.HasIndex("UserRefId")
-                        .IsUnique();
+                    b.HasKey("UserRefId");
 
                     b.ToTable("UserProfiles", "Security");
                 });
@@ -297,7 +317,7 @@ namespace Infrastructures.Migrations.Identity
                     b.ToTable("UserTokens", "Security");
                 });
 
-            modelBuilder.Entity("Applications.Extensions.Identity.ApplicationRoleClaim", b =>
+            modelBuilder.Entity("Domains.Models.Identity.ApplicationRoleClaim", b =>
                 {
                     b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>");
 
@@ -313,7 +333,7 @@ namespace Infrastructures.Migrations.Identity
                     b.ToTable("RoleClaims", "Security");
                 });
 
-            modelBuilder.Entity("Applications.Extensions.Identity.ApplicationUserClaim", b =>
+            modelBuilder.Entity("Domains.Models.Identity.ApplicationUserClaim", b =>
                 {
                     b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>");
 
@@ -323,24 +343,27 @@ namespace Infrastructures.Migrations.Identity
                     b.ToTable("UserClaims", "Security");
                 });
 
-            modelBuilder.Entity("Applications.Extensions.Identity.UserProfiles", b =>
+            modelBuilder.Entity("Domains.Models.Identity.ApplicationUser", b =>
                 {
-                    b.HasOne("Applications.Extensions.Identity.ApplicationUser", "AppUser")
-                        .WithMany("UserProfiles")
-                        .HasForeignKey("AppUserId");
+                    b.HasOne("Domains.Models.Identity.UserProfiles", "UserProfiles")
+                        .WithMany()
+                        .HasForeignKey("UserProfilesUserRefId");
 
-                    b.HasOne("Applications.Extensions.Identity.ApplicationUser", null)
+                    b.Navigation("UserProfiles");
+                });
+
+            modelBuilder.Entity("Domains.Models.Identity.UserProfiles", b =>
+                {
+                    b.HasOne("Domains.Models.Identity.ApplicationUser", null)
                         .WithOne()
-                        .HasForeignKey("Applications.Extensions.Identity.UserProfiles", "UserRefId")
+                        .HasForeignKey("Domains.Models.Identity.UserProfiles", "UserRefId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("AppUser");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
-                    b.HasOne("Applications.Extensions.Identity.ApplicationRole", null)
+                    b.HasOne("Domains.Models.Identity.ApplicationRole", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -349,7 +372,7 @@ namespace Infrastructures.Migrations.Identity
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("Applications.Extensions.Identity.ApplicationUser", null)
+                    b.HasOne("Domains.Models.Identity.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -358,7 +381,7 @@ namespace Infrastructures.Migrations.Identity
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("Applications.Extensions.Identity.ApplicationUser", null)
+                    b.HasOne("Domains.Models.Identity.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -367,13 +390,13 @@ namespace Infrastructures.Migrations.Identity
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
                 {
-                    b.HasOne("Applications.Extensions.Identity.ApplicationRole", null)
+                    b.HasOne("Domains.Models.Identity.ApplicationRole", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Applications.Extensions.Identity.ApplicationUser", null)
+                    b.HasOne("Domains.Models.Identity.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -382,34 +405,29 @@ namespace Infrastructures.Migrations.Identity
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("Applications.Extensions.Identity.ApplicationUser", null)
+                    b.HasOne("Domains.Models.Identity.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Applications.Extensions.Identity.ApplicationRoleClaim", b =>
+            modelBuilder.Entity("Domains.Models.Identity.ApplicationRoleClaim", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", null)
                         .WithOne()
-                        .HasForeignKey("Applications.Extensions.Identity.ApplicationRoleClaim", "Id")
+                        .HasForeignKey("Domains.Models.Identity.ApplicationRoleClaim", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Applications.Extensions.Identity.ApplicationUserClaim", b =>
+            modelBuilder.Entity("Domains.Models.Identity.ApplicationUserClaim", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", null)
                         .WithOne()
-                        .HasForeignKey("Applications.Extensions.Identity.ApplicationUserClaim", "Id")
+                        .HasForeignKey("Domains.Models.Identity.ApplicationUserClaim", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Applications.Extensions.Identity.ApplicationUser", b =>
-                {
-                    b.Navigation("UserProfiles");
                 });
 #pragma warning restore 612, 618
         }

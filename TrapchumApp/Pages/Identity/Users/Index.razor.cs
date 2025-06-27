@@ -50,7 +50,7 @@ public partial class Index
     protected BranchDto SelectedBranch = default!;
     string? filterText = string.Empty;
     int pageIndex = 0;
-    int pageSize = 10;
+    int pageSize = 15;
     string sortField = nameof(VUser.BranchName);
     bool includeInactive = false;
     bool sortDescending = false;

@@ -7,25 +7,32 @@ public class RegisterRequestValidator : AbstractValidator<RegisterRequest>
 {
     public RegisterRequestValidator()
     {
-        RuleFor(x => x.Username).NotEmpty().WithMessage("Please enter your username")
-                                .Length(5,50).WithMessage("{PropertyName} Length must be bewteen 5 and 50");
-        RuleFor(x => x.Email).NotEmpty().WithMessage("Please enter your username");
-        RuleFor(x => x.Password).NotEmpty().WithMessage("Please enter your Password")
+        RuleFor(x => x.Username)
+            .Cascade(CascadeMode.Stop)
+            .NotEmpty().WithMessage("Please enter your Username")
+                                .Matches(@"^[a-zA-Z]+[0-9]*$").WithMessage("Username must start with letters.")
                                 .Length(5, 50).WithMessage("{PropertyName} Length must be bewteen 5 and 50");
-        RuleFor(x => x.ConfirmPassword).NotEmpty().WithMessage("Please enter your Confirm Password")
+        RuleFor(x => x.Email).Cascade(CascadeMode.Stop)
+                    .NotEmpty()
+                    .WithMessage("Please enter your username")
+                    .EmailAddress()
+                    .WithMessage("Please enter a valid email address.");
+        RuleFor(x => x.Password).Cascade(CascadeMode.Stop).NotEmpty().WithMessage("Please enter your Password")
+                                .Length(5, 50).WithMessage("{PropertyName} Length must be bewteen 5 and 50");
+        RuleFor(x => x.ConfirmPassword).Cascade(CascadeMode.Stop)
+                                .NotEmpty().WithMessage("Please enter your Confirm Password")
                                 .Length(5, 50).WithMessage("User Name Length must be bewteen 5 and 50")
-                                .Equal(x=>x.Password).WithMessage("Confirm Password and Passwrod must be match.");
+                                .Equal(x => x.Password).WithMessage("Confirm Password and Passwrod must be match.");
         RuleFor(x => x.RoleName).NotEmpty()
-                                .WithMessage("{Please enter User Role.");
-        RuleFor(x => x.BranchRefId).GreaterThan(0)
-                                .WithMessage("Please Select Employee Branch.")
-                                .NotNull()
-                                .WithMessage("Please Select Employee Branch.");
+                                .WithMessage("Please enter User Role.");
+        RuleFor(x => x.BranchRefId)
+                        .Cascade(CascadeMode.Stop)
+                        .NotNull().WithMessage("Please Select Employee Branch.")
+                        .GreaterThan(0).WithMessage("Please Select Employee Branch.");
         RuleFor(x => x.EmployeeId)
-                            .NotNull()
-                            .WithMessage("Please select employee.")
-                            .NotNull()
-                            .WithMessage("Please Select Employee.");
+                            .Cascade(CascadeMode.Stop)
+                            .NotEmpty().WithMessage("Employee must not blank.")
+                            .NotNull().WithMessage("Please select employee.");
     }
 
 }

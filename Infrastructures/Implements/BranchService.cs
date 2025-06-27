@@ -419,11 +419,11 @@ public class BranchService(IDbContextFactory<DataContext> contextFactory) : IBra
 
         await using var context = await contextFactory.CreateDbContextAsync();
 
-        var user = await context.Database
-            .SqlQuery<VUser>($"SELECT * FROM VUsers WHERE id={userId}")
-            .ProjectToType<UserBranchesResponse>()
-            .AsNoTracking()
-            .FirstOrDefaultAsync();
+        var user = await context.VUsers
+                                .Where(x=>x.Id==userId)
+                                .ProjectToType<UserBranchesResponse>()
+                                .AsNoTracking()
+                                .FirstOrDefaultAsync();
 
         if (user is null)
         {
@@ -437,8 +437,8 @@ public class BranchService(IDbContextFactory<DataContext> contextFactory) : IBra
     {
         await using var context = await contextFactory.CreateDbContextAsync();
 
-        var user = await context.Database
-            .SqlQuery<VUser>($"SELECT * FROM VUsers WHERE BranchId={branchId} AND CanApproved=CAST(1 AS BIT)")
+        var user = await context.VUsers
+            .Where(x=>x.BranchId==branchId && x.CanApproved==true)
             .WhereIf(!string.IsNullOrEmpty(filter), x => EF.Functions.Like(x.UserName!, $"%{filter}%") ||
                                                          EF.Functions.Like(x.FirstName!, $"%{filter}%") ||
                                                          EF.Functions.Like(x.LastName!, $"%{filter}%"))

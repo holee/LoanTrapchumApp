@@ -11,7 +11,7 @@ namespace TrapchumApp.Pages.Lists.CreditAgents
     {
         protected IEnumerable<EntEmployeeDto> Employees { get; set; } = [];
         private LoanCreditAgentDtoCreate model = new LoanCreditAgentDtoCreate();
-        private List<VEmployeeCreateCreditAgent> CreditAgents = [];
+        private List<VEmployeeCreditAgent> CreditAgents = [];
         [Parameter] public long Id { get; set; }
         [Inject] protected ICreditAgentServiceImpl CreditAgentService { get; set; } = default!;
 

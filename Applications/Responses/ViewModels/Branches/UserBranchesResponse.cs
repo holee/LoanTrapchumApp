@@ -5,11 +5,9 @@ namespace Applications.Responses.ViewModels.Branches
 {
     public sealed class UserBranchesResponse
     {
-        public string? Id { get; set; }
-        
+        public string? Id { get; set; }     
         public string? UserName { get; set; } = string.Empty;
-        public int BranchId { get; set; } = 0;
-        
+        public int BranchId { get; set; } = 0;   
         public string? BranchName { get; set; } = string.Empty;
 
     }

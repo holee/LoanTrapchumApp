@@ -1,5 +1,5 @@
-﻿using System.Data;
-using Applications.Enumerations;
+﻿using Applications.Enumerations;
+using Applications.Extensions;
 using Applications.Interfaces.Loans;
 using Applications.Requests.Loans.CreditAgents;
 using Applications.Requests.Loans.Disbursements;
@@ -18,6 +18,8 @@ using Infrastructures.DataAccess;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Data;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Infrastructures.Implements
 {
@@ -25,7 +27,8 @@ namespace Infrastructures.Implements
     public class LoanService(
         DataContext context,
         ILogger<LoanService> logger,
-        IDapperConnectionFactory connectionFactory)
+        IDapperConnectionFactory connectionFactory,
+        IDbContextFactory<DataContext> dbContextFactory)
         : ILoanService
     {
         public async Task<Result<string>> CreateLoanAsync(LoanDtoCreate req)
@@ -129,8 +132,9 @@ namespace Infrastructures.Implements
 
                 await context.SaveChangesAsync();
 
-                await context.Customers.Where(x => x.CustomerId == req.CustomerRefId)
-                    .ExecuteUpdateAsync(p => p.SetProperty(x => x.IsLoanActive, true));
+                await context.Customers
+                             .Where(x => x.CustomerId == req.CustomerRefId)
+                             .ExecuteUpdateAsync(p => p.SetProperty(x => x.IsLoanActive, true));
 
                 await context.LoanRequests.Where(x => x.LoanRequestId == req.LoanRequestId &&
                                                       x.CustomerRefId == req.CustomerRefId)
@@ -160,9 +164,10 @@ namespace Infrastructures.Implements
 
             parameter.Add("@CustomerId", customerId);
 
-            var sql =
-                $@"SELECT LoanRequestId,RequestAmount,CustomerId FROM VLoanRequests WHERE CustomerId=@CustomerId AND StatusId NOT IN (4)";
-
+            var sql =$@"SELECT LoanRequestId,RequestAmount,CustomerId 
+                        FROM VLoanRequests 
+                        WHERE CustomerId=@CustomerId AND 
+                              StatusId NOT IN (4)";
             var existingLoanRequest = await db.QueryAsync<VLoanRequests>(sql, parameter);
 
             return existingLoanRequest.Any();
@@ -179,7 +184,7 @@ namespace Infrastructures.Implements
             parameter.Add("@CustomerId", customerId);
 
             parameter.Add("@IsLoanActive", true);
-            var sql =@"SELECT 
+            var sql = @"SELECT 
                             CustomerId,
                             FirstName,
                             LastName,
@@ -292,8 +297,7 @@ namespace Infrastructures.Implements
             }
         }
 
-        public async Task<Pager<VLoanDisbursments>> GetLoansByBranchId(int? branchId, string? creditAgentId,
-            LoanStatuses status = LoanStatuses.Active, QueryParam? param = null)
+        public async Task<Pager<VLoanDisbursments>> GetLoansByBranchId(int? branchId, string? creditAgentId, LoanStatuses status = LoanStatuses.Active, QueryParam? param = null)
         {
             using var db = connectionFactory.CreateConnection();
 
@@ -316,8 +320,44 @@ namespace Infrastructures.Implements
             return new Pager<VLoanDisbursments>(items, counts);
         }
 
-        public async Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId,
-            ScheduleStatus status, bool include = false)
+
+        public async Task<Pager<VLoanDisbursments>> GetLoansByBranchId(int? branchId, string? creditAgentId, LoanStatuses status = LoanStatuses.Active, QueryParam? param = null, CancellationToken cancellation = default)
+        {
+
+            await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+            var queries = context.VLoanDisbursements
+                                 .Where(x=>x.BranchId==branchId)
+                                 .WhereIf((int)status > 0, x => x.LoanstatusId == (int)status)
+                                 .WhereIf(!string.IsNullOrEmpty(creditAgentId), x => x.CreditAgentRefId == creditAgentId);
+
+            if (!string.IsNullOrEmpty(param?.Filter))
+            {
+                queries = queries.Where(x => EF.Functions.Like(x.CustomerName!, $"%{param!.Filter}%") ||
+                                             EF.Functions.Like(x.AgentName!, $"%{param!.Filter}%") ||
+                                             EF.Functions.Like(x.Phone!, $"%{param!.Filter}%") ||
+                                             EF.Functions.Like(x.AltName!, $"%{param!.Filter}%"));
+            }
+
+
+            if (param!.SortDescending)
+            {
+                queries=queries.OrderByDescending(x=>EF.Property<object>(x,param!.SortColumn));
+            }
+
+            var counts =await queries.CountAsync(cancellation);
+
+            var items =await queries.Skip(param!.Skip).Take(param!.PageSize)
+                            .AsNoTracking()
+                            .ToListAsync(cancellation);
+
+            return new Pager<VLoanDisbursments>(items, counts);
+        }
+
+
+
+
+        public async Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus status, bool include = false)
         {
             using var db = connectionFactory.CreateConnection();
 
@@ -388,6 +428,49 @@ namespace Infrastructures.Implements
 
 
 
+        public async Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus status, bool include = false,CancellationToken cancellation=default)
+        {
+
+            await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+            var queries = context.VLoanDisbursements
+                                     .Where(x => x.LoanId == loanId && x.BranchId == branchId)
+                                     .AsNoTracking();
+            
+
+            if (!include && queries.Any())
+            {
+
+                var loanDisbursement = await queries.FirstOrDefaultAsync(cancellation);
+
+                return loanDisbursement is not null
+                    ? Result.Success(loanDisbursement)
+                    : Result.Failure<VLoanDisbursments>(ErrorResponse.Validation("No loan disbursement found."));
+
+            }
+
+            int?[] filter = status switch
+            {
+                ScheduleStatus.Paid => [1],
+                ScheduleStatus.Unpaid => [2,4],
+                ScheduleStatus.All => [1,2,4],
+                _ => [1,2,4]
+            };
+
+            var item1 =await queries
+                                .Include(x => x.Schedules!.Where(x =>x.LoanId==loanId && filter.Contains(x.ScheduleStatusId)))
+                                .AsNoTracking()
+                                .AsSplitQuery()
+                                .FirstOrDefaultAsync(cancellation);
+
+            return item1 is not null
+                                ? Result.Success(item1)
+                                : Result.Failure<VLoanDisbursments>(ErrorResponse.NotFound("No loan disbursement found.")); ;
+        }
+
+
+
+
         public async Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId)
         {
             using var db = connectionFactory.CreateConnection();
@@ -397,7 +480,7 @@ namespace Infrastructures.Implements
                 {
                     @LoanId = loanId,
                     @BranchId = branchId,
-                    @ScheduleStatusId =0,
+                    @ScheduleStatusId = 0,
                     @Include = false
                 }, commandType: CommandType.StoredProcedure);
 
@@ -413,9 +496,9 @@ namespace Infrastructures.Implements
 
 
 
-        public async Task<Result<VLoanDisbursments>> GetLoanWithSchedulesByIdAsync(string? loanId,int? branchId,ScheduleStatus status,bool include = false)
+        public async Task<Result<VLoanDisbursments>> GetLoanWithSchedulesByIdAsync(string? loanId, int? branchId, ScheduleStatus status, bool include = false)
         {
-            using var db = connectionFactory.CreateConnection(); 
+            using var db = connectionFactory.CreateConnection();
 
             var parameters = new
             {
@@ -429,7 +512,7 @@ namespace Infrastructures.Implements
             {
                 var loanMap = new Dictionary<string, VLoanDisbursments>();
 
-                var queries = await db.QueryAsync<VLoanDisbursments, VSchedule, VLoanDisbursments>("spGetLoanById" ,
+                var queries = await db.QueryAsync<VLoanDisbursments, VSchedule, VLoanDisbursments>("spGetLoanById",
                     (disbursment, schedule) =>
                     {
                         if (!loanMap.TryGetValue(disbursment.LoanId!, out var existing))

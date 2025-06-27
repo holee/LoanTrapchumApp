@@ -25,9 +25,9 @@
                         </table>
                     </RadzenTabsItem>
                     <RadzenTabsItem Text="Change Password" Icon="password">
-                        <EditForm Model="model" OnValidSubmit="SubmitOnValid">
+                        <EditForm Model="model" OnValidSubmit="@SubmitOnValid">
                             <FluentValidationValidator DisableAssemblyScanning="true"></FluentValidationValidator>
-                            <Forms.ValidationSummary />
+                            <ValidationSummary />
                             <input type="hidden" @bind="model.UserId" />
                             <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
                                 <RadzenColumn SizeMD="2">Current Password</RadzenColumn>
@@ -77,7 +77,7 @@
                     <RadzenTabsItem Text="Change Role" Icon="person">
                         <EditForm Model="formRequest" OnValidSubmit="HandleSubmitOnValid">
                             <FluentValidationValidator DisableAssemblyScanning="true"></FluentValidationValidator>
-                            <Forms.ValidationSummary />
+                            <ValidationSummary />
                             <input type="hidden" @bind="model.UserId" />
                             <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
                                 <RadzenColumn SizeMD="2">Current Role</RadzenColumn>

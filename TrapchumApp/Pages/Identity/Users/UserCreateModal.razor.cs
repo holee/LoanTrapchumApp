@@ -3,9 +3,6 @@ using Applications.Requests.Identity;
 using Applications.Requests.Lists.Entities;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Employees;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Forms;
-using Radzen;
 
 namespace TrapchumApp.Pages.Identity.Users
 {

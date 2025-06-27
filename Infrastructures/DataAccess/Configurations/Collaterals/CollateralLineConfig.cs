@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructures.DataAccess.Configurations.Collaterals;
 
-public class CollateralLineConfig : IEntityTypeConfiguration<CollateralLine>
+public class CollateralLineConfig : IBaseEntityTypeConfigurations<CollateralLine>
 {
     public void Configure(EntityTypeBuilder<CollateralLine> builder)
     {

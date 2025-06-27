@@ -2,14 +2,14 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Infrastructures.DataAccess.Configurations.Collaterals;
+namespace Infrastructures.DataAccess.Configurations.Loans;
 
 public class VLoanRequestConfiguration : IEntityTypeConfiguration<VLoanRequests>
 { 
     public void Configure(EntityTypeBuilder<VLoanRequests> builder)
     {
         builder.ToView("VLoanRequests");
-        builder.HasNoKey();
+        builder.HasKey(x=>new { x.LoanRequestId, x.BranchId });
         builder.Property(x => x.AdminFeeAmount).HasPrecision(18, 3);
         builder.Property(x => x.RequestAmount).HasPrecision(18, 3);
         builder.Property(x => x.InterestRate).HasPrecision(18, 3);

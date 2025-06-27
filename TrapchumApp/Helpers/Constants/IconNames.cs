@@ -34,6 +34,7 @@
         public const string GroupAdd = "person_add";
         public const string Group = "group";
         public const string LockPerson = "lock_person";
+        public const string Lock = "lock";
         public const string GroupRemoved = "group_remove"; 
         public const string EmailContact = "contact_mail"; 
         public const string PersonBook = "person_book";
@@ -87,5 +88,6 @@
         public const string PolicyAlert = "policy_alert";
         public const string Policy = "policy";
         public const string View = "visibility";
+        public const string SwitchAccount = "switch_account";
     }  
 }

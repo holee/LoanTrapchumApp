@@ -16,7 +16,7 @@ public sealed record ErrorResponse
 {
     public static readonly ErrorResponse None = new();
 
-    public static readonly ErrorResponse NullValue = new(ErrorCode.NullValue,"Null Value");
+    public static readonly ErrorResponse NullValue = new(ErrorCode.NullValue, "Null Value");
     public static ErrorResponse Failure(string errorMessages) => new(errorMessages);
     public ErrorResponse()
     {
@@ -28,7 +28,7 @@ public sealed record ErrorResponse
         Code = code;
         ErrMessage = errorMessages;
     }
-    public ErrorResponse(ErrorCode code, Dictionary<string, string> fieldErrors)
+    public ErrorResponse(ErrorCode code, IDictionary<string, string[]>? fieldErrors)
     {
         Code = code;
         FieldErrors = fieldErrors;
@@ -36,9 +36,11 @@ public sealed record ErrorResponse
     public ErrorResponse(string errMessages) => ErrMessage = errMessages;
     public ErrorCode Code { get; } = ErrorCode.Ok;
     public string ErrMessage { get; } = string.Empty;
-    public Dictionary<string, string>? FieldErrors { get; set; }
+    public IDictionary<string, string[]>? FieldErrors { get; set; }
+
+    public bool HasErrors => FieldErrors!.Any();
     public static ErrorResponse Validation(string errorMessages) => new(ErrorCode.Validation, errorMessages);
-    public static ErrorResponse Validation(Dictionary<string, string> fieldErrors) => new(ErrorCode.Validation, fieldErrors);
+    public static ErrorResponse Validation(IDictionary<string, string[]>? fieldErrors) => new(ErrorCode.Validation, fieldErrors);
     public static ErrorResponse NotFound(string errorMessages) => new(ErrorCode.NotFound, errorMessages);
     public static ErrorResponse Forbiden(string errorMessages) => new(ErrorCode.Forbiden, errorMessages);
     public static ErrorResponse Unauthorized(string errorMessages) => new(ErrorCode.Unauthorized, errorMessages);

@@ -7,12 +7,13 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
 using Radzen;
+using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 {
     public partial class AllLoansTab
     {
-       private readonly ILoanServiceImpl _dService;
+        private readonly ILoanServiceImpl _dService;
 
         public AllLoansTab(ILoanServiceImpl dService)
         {
@@ -30,16 +31,17 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
         private int selectedBranchId;
         bool branchStatus = false;
         int counts = 0;
-        int pageSize = 10;
+        int pageSize = 15;
         bool isLoading = false;
         bool isProgess = false;
         bool includeInactive = false;
-        string sortField = "Id";
+        string sortField = "RegisterDate";
         bool sortDescending = true;
-        int pageIndex = 1;
+        int pageIndex = 0;
         async Task ChangedPageSize(int page)
         {
             pageSize = page;
+            pageIndex = 0;
             await GetLoanDisbursements();
         }
         async void TextLoanSearchChanged(string filterText)
@@ -83,14 +85,10 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
         {
             pageIndex = args.Skip!.Value == 0 ? 1 : args.Skip!.Value;
 
-            if (!string.IsNullOrEmpty(args.OrderBy))
-            {
-                sortField = args.OrderBy.Split(" ")[0];
+            pageIndex = args.Skip ?? 0;
 
-                string dir = args.OrderBy.Split(" ")[1];
+            (sortField, sortDescending) = args.PageInfo();
 
-                sortDescending = dir.Contains("asc") ? false : true;
-            }
             await GetLoanDisbursements();
         }
 
@@ -98,11 +96,11 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
         {
             try
             {
-                var param = new QueryParam(pageIndex, pageSize, sortField,false, sortDescending, filter);
+                var param = new QueryParam(pageIndex, pageSize, sortField, false, sortDescending, filter);
 
                 isLoading = true;
 
-                var res = await _dService.GetLoansAsync(BranchId, null, LoanStatuses.Active, param);
+                var res = await _dService.GetLoansByBranchIdAsync(BranchId, null, LoanStatuses.Active, param);
 
                 LoanItems = res.Items;
 
@@ -164,9 +162,9 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
             //using var streamRef = new DotNetStreamReference(stream: stream);
 
             await js.InvokeVoidAsync("open", $"/Reports/Schedules/{loanRefId}/{branchId}", "_blank");
-           
+
             isProgess = false;
-            
+
             StateHasChanged();
         }
 

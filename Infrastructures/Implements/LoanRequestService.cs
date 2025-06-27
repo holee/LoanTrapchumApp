@@ -1221,10 +1221,13 @@ public sealed class LoanRequestService(
 
         if (branchId is null) return new Pager<VLoanRequests>([], 0); // Handle edge case
 
-        var baseQuery = cxt.Database
-                            .SqlQuery<VLoanRequests>($"SELECT r.* FROM VLoanRequests r WHERE r.BranchId={branchId}");
+        var baseQuery = cxt.VLoanRequests
+                            .Where(x => x.BranchId == branchId)
+                            .AsNoTracking();
+                            //.SqlQuery<VLoanRequests>($"SELECT r.* FROM VLoanRequests r WHERE r.BranchId={branchId}");
 
         // Apply filtering for non-account users
+
         if (!canDisburse)
         {
             baseQuery = requestStatus switch
@@ -1290,11 +1293,12 @@ public sealed class LoanRequestService(
     {
         await using var cxt = await contextFactory.CreateDbContextAsync();
 
-        IQueryable<VLoanRequests> resultQueries = cxt.Database
-            .SqlQuery<VLoanRequests>($"SELECT r.* FROM VLoanRequests r WHERE r.BranchId={branchId}")
-            .WhereIf(!string.IsNullOrEmpty(param.Filter), x => EF.Functions.Like(x.BranchName!, $"%{param.Filter}%") ||
-                                                               EF.Functions.Like(x.AltName!, $"%{param.Filter}%") ||
-                                                               EF.Functions.Like(x.FullName!, $"%{param.Filter}%"));
+        IQueryable<VLoanRequests> resultQueries = cxt.VLoanRequests
+                .Where(x=>x.BranchId==branchId)
+                .WhereIf(!string.IsNullOrEmpty(param.Filter), 
+                         x => EF.Functions.Like(x.BranchName!, $"%{param.Filter}%") ||
+                              EF.Functions.Like(x.AltName!, $"%{param.Filter}%") ||
+                              EF.Functions.Like(x.FullName!, $"%{param.Filter}%"));
         switch (requestStatus)
         {
             case RequestStatus.All:

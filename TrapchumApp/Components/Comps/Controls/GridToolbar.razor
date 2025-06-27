@@ -68,6 +68,7 @@
     [Parameter] public string CommandText { get; set; } = "Add";
     [Parameter] public string ShowCommandIcon { get; set; } = IconNames.Add;
     [Parameter] public EventCallback AddClick { get; set; } = default!;
+   
     async Task OnTextChanged(ChangeEventArgs e)
     {
         Value = e.Value?.ToString() ?? string.Empty;

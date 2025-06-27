@@ -20,7 +20,7 @@ public sealed class VSchedule
     public string? FullName { get; set; }
     public string? AltName { get; set; }
     public string? LoanId { get; set; }
-    public int BranchId { get; set; }
+    public int? BranchId { get; set; }
     public int? CurrencyId { get; set; }
     public int? InstallmentNo { get; set; }
     public decimal? InterestRate { get; set; } 

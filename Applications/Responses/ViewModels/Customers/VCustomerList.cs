@@ -58,11 +58,11 @@ public sealed class VCustomerList
     }
 
 
-    [NotMapped] public List<VCustomerExpenses> CustomerExpenses { get; set; } = [];
-    [NotMapped] public List<VCustomerIncomes> CustomerIncomes { get; set; } = [];
+    public List<VCustomerExpenses> CustomerExpenses { get; set; } = [];
+    public List<VCustomerIncomes> CustomerIncomes { get; set; } = [];
     [NotMapped] public List<VCollateralLines> CollateralLines { get; set; } = [];
-    [NotMapped] public List<VLoanRequests> LoanRequests { get; set; } = [];
+    public List<VLoanRequests> LoanRequests { get; set; } = [];
     [NotMapped] public List<VLoanDisbursments> Loans { get; set; } = [];
-    [NotMapped] public List<VCustomerNotes> CustomerNotes { get; set; } = [];
-    [NotMapped] public List<VCustomerActivities> CustomerActivities { get; set; } = [];
+    public List<VCustomerNotes> CustomerNotes { get; set; } = [];
+    public List<VCustomerActivities> CustomerActivities { get; set; } = [];
 }

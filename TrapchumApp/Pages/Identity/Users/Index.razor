@@ -9,10 +9,8 @@
     <RadzenTabs RenderMode="TabRenderMode.Server">
         <Tabs>
             <RadzenTabsItem Text="Users" Icon="group">
-                <PageDropDown PageSizeChanged="PageSizeChanged"
-                              OnTextChanged="OnUserTextChanges"
-                              ShowSearchBox="true">
-                    <LeftChildContent>
+                <GridToolbar SearchChanged="@OnUserTextChanges">
+                    <LeftChildren>
                         <AuthorizeView Policy="@RolePolicies.AdminOnly">
                             <Authorized>
                                 <RadzenButton Icon="@IconNames.PersonAdd"
@@ -22,24 +20,23 @@
                                               Text="Add New User" />
                             </Authorized>
                         </AuthorizeView>
-                    </LeftChildContent>
-                    <RightChildContent>
-                        <RadzenDropDown 
-                           TValue="int"
-                           TextProperty="@nameof(BranchDto.BranchName)"
-                           ValueProperty="@nameof(BranchDto.BranchId)"
-                           @bind-Value="@selectedBranchId"
-                           SelectedItemChanged="SelectedBranchChanged"
-                           Data="@Branches">
+                    </LeftChildren>
+                    <RightChildren>
+                        <RadzenDropDown TValue="int"
+                                        TextProperty="@nameof(BranchDto.BranchName)"
+                                        ValueProperty="@nameof(BranchDto.BranchId)"
+                                        @bind-Value="@selectedBranchId"
+                                        SelectedItemChanged="SelectedBranchChanged"
+                                        Data="@Branches">
 
                         </RadzenDropDown>
-                    </RightChildContent>
-                </PageDropDown>
+                    </RightChildren>
+                </GridToolbar>
                 <RadzenDataGrid GridLines="DataGridGridLines.Both"
                                 AllowAlternatingRows
+                                Responsive="true"
                                 AllowSorting="true"
                                 AllowPaging="true"
-                                AllowRowSelectOnRowClick="true"
                                 SelectionMode="DataGridSelectionMode.Single"
                                 Density="Density.Compact"
                                 ColumnWidth="10rem"
@@ -49,6 +46,8 @@
                                 LoadData="@LoadAllUsers"
                                 ShowPagingSummary="true"
                                 PagerHorizontalAlign="HorizontalAlign.Right"
+                                PageSizeOptions="@StorageConstant.PageSizeOptions"
+                                PageSizeChanged="PageSizeChanged"
                                 TItem="VUser"
                                 Data="@AllUsers">
                     <Columns>
@@ -101,6 +100,11 @@
                         Click="@(()=>ManageUserLoanSize(userId))"
                         Text="Set User Loan Size"
                         Value="@userId" />
+    <RadzenMenuItem Icon="manage_accounts"
+                    Click="@(()=>ChangAccountPassword(userId))"
+                    Text="Change Password"
+                    Visible="@AdminOnly"
+                    Value="@userId" />
     </RadzenMenu>
     );
     }
@@ -163,6 +167,22 @@
     }
 
 
+    async void ChangAccountPassword(string? userId)
+    {
+        ContextMenuService.Close();
+
+        var options = new DialogOptions { };
+
+        var param = new Dictionary<string, object?>
+        {
+            {"UserId",userId}
+        };
+
+        bool dialogueResult = await DialogService.OpenAsync<UserChangePassword>("Change Password", param, options);
+
+    }
+
+    
 
     void Cancel()
     {

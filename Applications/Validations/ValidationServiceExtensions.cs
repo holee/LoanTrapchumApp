@@ -18,6 +18,7 @@ using Applications.Validations.Branches;
 using Applications.Validations.Customers;
 using Applications.Validations.Employees;
 using Applications.Validations.NameEntities;
+using Domains.Models.Identity;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 namespace Applications.Validations
@@ -26,6 +27,7 @@ namespace Applications.Validations
     {
         public static IServiceCollection AddValidationServiceInjections(this IServiceCollection services)
         {
+
             services.AddTransient<IValidator<BranchDtoCreate>, BranchDtoCreateValidator>();
             services.AddTransient<IValidator<BranchDtoUpdate>, BranchDtoUpdateValidator>();
             services.AddTransient<IValidator<RoleCreateDto>, RoleCreateDtoValidator>();
@@ -47,6 +49,7 @@ namespace Applications.Validations
             services.AddTransient<IValidator<ExchangeDtoCreate>, CurrencyExchangeValidator>();
             services.AddTransient<IValidator<CustomerActivityDtoCreate>, CustomerActivityDtoCreateValidator>();
             services.AddTransient<IValidator<CollateralSubTypeDtoCreate>, CollateralSubTypeValidator>();
+            services.AddTransient<IValidator<ProfileDtoCreate>, ProfileValidator>();
             return services;
         }
     }

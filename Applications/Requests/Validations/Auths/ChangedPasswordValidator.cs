@@ -8,13 +8,20 @@ namespace Applications.Requests.Validations.Auths
         public ChangedPasswordValidator()
         {
             RuleFor(x => x.UserId).NotEmpty().WithMessage("User Id is required");
-            RuleFor(x => x.CurrentPassword).NotEmpty().WithMessage("Please enter new password")
-                                           .MinimumLength(4).WithMessage("Password length is not meet requirement.");
-            RuleFor(x => x.NewPassword).NotEmpty().WithMessage("Please enter new password")
-                                           .MinimumLength(4).WithMessage("Password length is not meet requirement.");
-            RuleFor(x => x.ConfirmPassword).NotEmpty().WithMessage("Please enter new password")
-                                           .MinimumLength(4).WithMessage("Password length is not meet requirement.")
-                                           .Equal("NewPassword").WithMessage("New Password and Confirm Password not same.");
+
+            RuleFor(x => x.CurrentPassword).Cascade(CascadeMode.Stop)
+                                           .NotEmpty().WithMessage("Please enter current password")
+                                           .MinimumLength(4).WithMessage("Password must be at least 4 characters long.");
+
+            RuleFor(x => x.NewPassword)
+                                    .Cascade(CascadeMode.Stop)
+                                    .NotEmpty().WithMessage("Please enter new password")
+                                       .MinimumLength(4).WithMessage("Password must be at least 4 characters long.");
+
+            RuleFor(x => x.ConfirmPassword).Cascade(CascadeMode.Stop)
+                .NotEmpty().WithMessage("Please confirm new password")
+                                           .MinimumLength(4).WithMessage("Password must be at least 4 characters long")
+                                           .Equal(x => x.NewPassword).WithMessage("New Password and Confirm Password must match.");
         }
     }
 }

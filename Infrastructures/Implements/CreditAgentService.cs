@@ -1,4 +1,5 @@
-﻿using Applications.Extensions;
+﻿
+using Applications.Extensions;
 using Applications.Interfaces.Lists;
 using Applications.Responses;
 using Applications.Responses.Paginations;
@@ -176,13 +177,56 @@ namespace Infrastructures.Implements
             };
         }
 
+        public async Task<Pager<VEmployeeCreditAgent>> GetEmployeeCreditAgents(int? branchId,string? employeeId,QueryParam param,CancellationToken cancellation=default)
+        {
+            await using var context = await _dbContextFactory.CreateDbContextAsync();
 
-        public async Task<Result<IEnumerable<VEmployeeCreateCreditAgent>>> GetEmployeeCreateCreditAgents(string? filter = null)
+            var queries = context.EmployeeCreditAgent
+                               .WhereIf(branchId.HasValue && branchId > 0, x => x.BranchId == branchId)
+                               .WhereIf(employeeId.IsNotNullOrEmpty(),x => x.EmployeeId == employeeId);
+
+            if (param.FilterColumn.IsNotNullOrEmpty())
+            {
+                queries = param.FilterColumn switch
+                {
+                    nameof(VEmployeeCreditAgent.AltName) => queries.Where(x => EF.Functions.Like(x.AltName!, $"%{param.Filter}%")),
+                    nameof(VEmployeeCreditAgent.BranchName) => queries.Where(x => EF.Functions.Like(x.BranchName!, $"%{param.Filter}%")),
+                    nameof(VEmployeeCreditAgent.Phone) => queries.Where(x => EF.Functions.Like(x.Phone!, $"%{param.Filter}%")),
+                    nameof(VEmployeeCreditAgent.FirstName) => queries.Where(x => EF.Functions.Like(x.FirstName!, $"%{param.Filter}%")),
+                    nameof(VEmployeeCreditAgent.LastName) => queries.Where(x => EF.Functions.Like(x.LastName!, $"%{param.Filter}%")),
+                    _ => queries // No filter applied if column is unrecognized
+                };
+            }
+            if (param.Filter.IsNotNullOrEmpty() && param.FilterColumn.IsNullOrEmpty()) { 
+            
+                queries=queries.Where(x => EF.Functions.Like(x.FirstName!, $"%{param.Filter}%") ||
+                                           EF.Functions.Like(x.LastName!, $"%{param.Filter}%") ||
+                                           EF.Functions.Like(x.AltName!, $"%{param.Filter}%") ||
+                                           EF.Functions.Like(x.AltName!, $"%{param.Filter}%"));
+            
+            }
+            if (param.SortDescending)
+            {
+                queries=queries.OrderByDescending(x=>EF.Property<string>(x,param.SortColumn));
+            }
+
+
+            var counts = await queries.CountAsync(cancellation);
+
+            var items=await queries
+                            .Skip(param.Skip)
+                            .Take(param.PageSize)
+                            .AsNoTracking().ToListAsync(cancellation);
+
+            return new Pager<VEmployeeCreditAgent>(items,counts);
+        }
+
+        public async Task<Result<IEnumerable<VEmployeeCreditAgent>>> GetEmployeeCreateCreditAgents(string? filter = null)
         {
             await using var context = await _dbContextFactory.CreateDbContextAsync();
 
             var queries = await context.Database
-                                .SqlQuery<VEmployeeCreateCreditAgent>($"SELECT * FROM VEmployeeCreateCreditAgents")
+                                .SqlQuery<VEmployeeCreditAgent>($"SELECT * FROM VEmployeeCreateCreditAgents")
                                 .WhereIf(!string.IsNullOrEmpty(filter),
                                                                        x => EF.Functions.Like(x.FirstName!, $"%{filter}%") ||
                                                                             EF.Functions.Like(x.LastName!, $"%{filter}%") ||
@@ -193,17 +237,15 @@ namespace Infrastructures.Implements
                                 .AsNoTracking()
                                 .ToListAsync();
 
-            return Result.Success<IEnumerable<VEmployeeCreateCreditAgent>>(queries);
+            return Result.Success<IEnumerable<VEmployeeCreditAgent>>(queries);
         }
-
-
 
 
         private bool IsAlreadyCreditAgent(string? empId)
         {
             return _context.LoanCreditAgents
-                            .Where(x => x.EmployeeRefId == empId)
-                                .Any();
+                                .IgnoreQueryFilters()
+                                .Any(x => x.EmployeeRefId == empId);
         }
 
     }

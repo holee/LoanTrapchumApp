@@ -152,7 +152,7 @@ public partial class PaymentDetails
     {
         isVible = true;
 
-        var resultResponse = await _dService.GetLoanByIdAsync(LoanId, BranchId, status,true);
+        var resultResponse = await _dService.GetLoanByIdAsync(LoanId, BranchId, status,true,default);
 
         if (resultResponse.IsSuccess)
         {

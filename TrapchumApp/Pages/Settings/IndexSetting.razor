@@ -13,6 +13,7 @@
                         ColumnWidth="200px"
                         Density="Density.Compact"
                         SelectionMode="DataGridSelectionMode.Single"
+                        GridLines="DataGridGridLines.Both"
                         EditMode="editMode"
                         @ref="@settingsGrid"
                         Responsive
@@ -43,19 +44,18 @@
                     </EditTemplate>
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn Property="@nameof(AppSettingVms.Description)" Title="Description" Width="12rem" />
-                <RadzenDataGridColumn TextAlign="TextAlign.Center" Title="Status" Width="4rem" Context="s">
+                <RadzenDataGridColumn TextAlign="TextAlign.Center" Title="Status" Width="6rem" Context="s">
                     <Template>
                         <RadzenCheckBox @bind-Value="s.IsActive" />
                     </Template>
                 </RadzenDataGridColumn>
-                <RadzenDataGridColumn Title="Action" Width="5rem" TextAlign="TextAlign.Center" Context="s">
+                <RadzenDataGridColumn Title="Action" Width="6rem" TextAlign="TextAlign.Center" Context="s">
                     <Template>
                         <RadzenButton Size="ButtonSize.ExtraSmall"
-                                      Icon="edit"
+                                      Icon="@IconNames.EditPen"
                                       Click="@(()=>EditRow(s))"
                                       Variant="Variant.Text"
-                                      @onclick:stopPropagation="true"
-                                      ButtonStyle="ButtonStyle.Secondary">
+                                      @onclick:stopPropagation="true">
                         </RadzenButton>
                     </Template>
                     <EditTemplate>

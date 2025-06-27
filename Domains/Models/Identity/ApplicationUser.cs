@@ -13,5 +13,5 @@ public class ApplicationUser:IdentityUser
     public DateTime? RefreshTokenExpiryDate { get; set; } 
     public DateTime? CreatedDT { get; set; } = DateTime.Now;
     public DateTime? ModifiedDT { get; set; } = DateTime.Now;
-    public ICollection<UserProfiles> UserProfiles { get; set; } = [];
+    public UserProfiles? UserProfiles { get; set; }
 }

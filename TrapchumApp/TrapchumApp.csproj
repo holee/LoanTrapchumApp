@@ -242,7 +242,6 @@
     <AdditionalFiles Include="Pages\Transactions\Loans\Repayments\PayOffs.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\Repayments\PaymentSchedule.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\Repayments\RepaymentMultiple.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\Repayments\ScheduleDetails.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\Repayments\ScheduleNotPaid.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\Repayments\SchedulesPaid.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\WriteOffs\Index.razor" />
