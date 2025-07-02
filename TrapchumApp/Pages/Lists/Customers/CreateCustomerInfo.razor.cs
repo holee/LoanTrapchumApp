@@ -1,12 +1,15 @@
 using Applications.Extensions;
 using Applications.Requests.Lists.Addreses;
 using Applications.Requests.Lists.OtherNames;
+using Applications.Requests.Settings;
 using Applications.Responses.Lists.Entities;
 using Applications.Services.Files;
 using Applications.Services.Lists;
 using Domains.Models.Addresses;
 using Domains.Models.Files;
 using Domains.Models.Lists;
+using Domains.Shared.Enums;
+using System.Threading.Tasks;
 
 namespace TrapchumApp.Pages.Lists.Customers
 {
@@ -40,17 +43,6 @@ namespace TrapchumApp.Pages.Lists.Customers
 
             await base.OnInitializedAsync();
         }
-
-
-
-
-
-
-
-
-
-
-
 
         void OnProgress(UploadProgressArgs args, string name)
         {
@@ -125,33 +117,105 @@ namespace TrapchumApp.Pages.Lists.Customers
 
 
         IEnumerable<OcupationResponse> Occupations = [];
+        IEnumerable<OcupationResponse> OriginalOccupations = [];
         IEnumerable<Nationality> Nationalities { get; set; } = [];
 
         IEnumerable<string> Salutations = [];
-
+        IEnumerable<string> OriginalSalutations = [];
         async Task GetAdditionalInformation()
         {
             Nationalities = await _nationalityService.GetNationalities();
-
-            Occupations = await _employeeService!.GetOccupationsAsync("Position");
-
             await GetSalutations();
+            await GetOccupations();
         }
 
-        private async Task GetSalutations()
+        private async Task GetSalutations(string? filter = null)
         {
-            var salutations = await _salutationService.GetSalutions();
+            var rsp = await _salutationService.GetSalutions(filter);
 
-            if (salutations.IsSuccess)
+            Salutations = rsp!.Data!.Select(x => x.Title!) ?? [];
+
+            OriginalSalutations = Salutations.Select(x => x) ?? [];
+
+        }
+
+        async Task AddOccupation()
+        {
+            if (!string.IsNullOrEmpty(Model.Occupation))
             {
-                Salutations = salutations!.Data!.Select(x => x.Title!).ToList();
+                var occupation = new OccupationDtoCreate
+                {
+                    OccupationTitle = Model.Occupation,
+                    Khmer = string.Empty,
+                    TypeOf = TypeOfEnum.Position.ToString()
+                };
+
+                var rsp = await _occupationService.CreateAsync(occupation);
+
+                if (!rsp.IsSuccess)
+                {
+                    Model.Occupation = string.Empty;
+                }
+                else
+                {
+                    await GetOccupations();
+                }
+            }
+        }
+
+        private async Task GetOccupations(string? filter = "Job")
+        {
+            Occupations = await _employeeService.GetOccupationsAsync(filter);
+        }
+
+        string occupationFilter = string.Empty;
+
+        string _salFilter = string.Empty;
+        private void OnSalutaionSearched(string value)
+        {
+            _salFilter = value;
+
+            if (!string.IsNullOrEmpty(value))
+            {
+                Salutations = Salutations.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
             }
             else
             {
-                Salutations = [];
+                Salutations = OriginalSalutations;
             }
+
+            StateHasChanged();
         }
+
+        private void OnOccupationSearched(string value)
+        {
+            //occupationFilter = value;
+
+            if (!string.IsNullOrEmpty(value))
+            {
+                Occupations = OriginalOccupations.Where(x => x.OccupationTitle!.Contains(value, StringComparison.InvariantCultureIgnoreCase))
+                                                 .ToList();
+            }
+            else
+            {
+                Occupations = OriginalOccupations.ToList();
+            }
+
+            StateHasChanged();
+
+        }
+
+        async Task LoadOccupations(LoadDataArgs args)
+        {
+
+            occupationFilter = args.Filter?.ToString() ?? string.Empty;
+
+            await GetOccupations(occupationFilter);
+        }
+
+
     }
 }
+
 
 

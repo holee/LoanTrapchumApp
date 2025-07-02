@@ -38,13 +38,13 @@ namespace Applications.Services.Employees
             return await empService.GetEmployeesAsync(employeeId, branchId, isActive, q);
         }
 
-        public async Task<Pager<VEmployeeList>> GetEmployeesAsync(int? branchId, string? employeeId, QueryParam param) 
+        public async Task<Pager<VEmployeeList>> GetEmployeesAsync(int? branchId, string? employeeId, QueryParam param)
         {
-            return await empService.GetEmployeesAsync(branchId,employeeId, param);
+            return await empService.GetEmployeesAsync(branchId, employeeId, param);
         }
-        public async Task<Result<string>> UpdateIsActiveAsync(string? employeeId,bool state)
+        public async Task<Result<string>> UpdateIsActiveAsync(string? employeeId, bool state)
         {
-            return await empService.UpdateIsActiveAsync(employeeId,state);
+            return await empService.UpdateIsActiveAsync(employeeId, state);
         }
 
         public async Task<IEnumerable<OcupationResponse>> GetOccupationsAsync(string? filter)
@@ -68,20 +68,30 @@ namespace Applications.Services.Employees
         }
 
         public async Task<Result<T>> GetEmployeeById<T>(string? employeeId)
-            where T:class
+            where T : class
         {
             return await empService.GetByIdAsync<T>(employeeId);
         }
 
 
-        public async Task<Result<VEmployeeList>> GetEmployeeById(string? employeeId,int? branchId,bool include=false)
+        public async Task<Result<VEmployeeList>> GetEmployeeById(string? employeeId, int? branchId, bool include = false)
         {
-            return await empService.GetByIdAsync(employeeId,branchId,include);
+            return await empService.GetByIdAsync(employeeId, branchId, include);
         }
 
-        public async Task<Result<VEmployeeList>> GetEmployeeById(string? employeeId,CancellationToken cancellation=default)
+        //public async Task<Result<VEmployeeList>> GetEmployeeById(string? employeeId,CancellationToken cancellation=default)
+        //{
+        //    return await empService.GetByIdAsync(employeeId,cancellation);
+        //}
+
+        public async Task<Result<VEmployeeList>> GetEmployeeById(string? employeeId, CancellationToken cancellation = default)
         {
-            return await empService.GetByIdAsync(employeeId,cancellation);
+            if (string.IsNullOrEmpty(employeeId))
+            {
+                return Result.Failure<VEmployeeList>(ErrorResponse.NotFound("Employee ID cannot be null or empty"));
+            }
+
+            return await empService.GetEmployeeByIdAsync(employeeId, cancellation);
         }
     }
 }

@@ -32,7 +32,7 @@ public class CustomerService(
         bool exceptActiveLoan = true,
         string? searchTerm = null) where T : class
     {
-        IQueryable<VCustomerList> customerQueries = context.CustomerLists;
+        IQueryable<VCustomerList> customerQueries = context.VCustomerLists;
 
         if (includeInactive)
         {
@@ -81,7 +81,7 @@ public class CustomerService(
 
         await using var cxt = await contextFactory.CreateDbContextAsync(cancellation);
 
-        IQueryable<VCustomerList> queries = cxt.CustomerLists.OrderByDescending(x => x.ModifiedDT);
+        IQueryable<VCustomerList> queries = cxt.VCustomerLists.OrderByDescending(x => x.ModifiedDT);
 
         var counts = queries.Count();
 
@@ -123,8 +123,9 @@ public class CustomerService(
 
             await using var cxt = await contextFactory.CreateDbContextAsync();
 
-            var queries = cxt.Database.SqlQuery<VCustomerList>(
-                $"SELECT * FROM VCustomerList WHERE IsLoanActive=CAST(0 AS BIT) AND IsActive=CAST(1 AS BIT)");
+            var queries = cxt.VCustomerLists
+                            .Where(x => x.IsLoanActive == false && x.IsActive == true)
+                            .AsNoTracking();
 
             if (!string.IsNullOrEmpty(param.Filter))
             {
@@ -269,6 +270,30 @@ public class CustomerService(
 
     }
 
+    public async Task<Result<VCustomerList>> GetCustomerDetailByIdAsync(string? customerId, CancellationToken cancellationToken = default)
+    {
+        logger.LogInformation("Fetching customer details for ID {CustomerId}", customerId);
+
+        await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+
+        var customer = await context.VCustomerLists
+                            .Include(x => x.CustomerActivities)
+                            .Include(x => x.CustomerExpenses)
+                            .Include(x => x.CustomerIncomes)
+                            .Include(x => x.CustomerNotes)
+                            .Include(x => x.CollateralLines)
+                            .Include(x => x.LoanRequests)
+                            .Include(x => x.Loans)
+                            .AsSplitQuery()
+                            .AsNoTracking()
+                            .FirstOrDefaultAsync(x => x.CustomerId == customerId, cancellationToken);
+
+        if (customer is null)
+            return Result.Failure<VCustomerList>(ErrorResponse.NotFound("Customer Not Found."));
+
+        return Result.Success(customer);
+
+    }
 
     public async Task<Result<IEnumerable<VLoanRequests>>> GetCustomerLoanRequestAsync(int? branchId, string? customerId, bool onlyComplete = false, CancellationToken cancellation = default)
     {
@@ -309,11 +334,11 @@ public class CustomerService(
             return Result.Failure<IEnumerable<VLoanRequests>>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
         }
     }
-    
-   
 
 
- 
+
+
+
     public async Task<Result<string>> AddCustomerNote(CustomerNote model)
     {
         try
@@ -332,11 +357,15 @@ public class CustomerService(
 
     public async Task<Result<string>> AddCustomerActivity(CustomerActivity model)
     {
+        logger.LogInformation("try adding new customer note");
         try
         {
-            logger.LogInformation("try adding new customer note");
+            await using var context = await contextFactory.CreateDbContextAsync();
+
             context.CustomerActivites.Add(model);
+
             await context.SaveChangesAsync();
+
             return Result.Success(Messages.DataCreated);
         }
         catch (Exception e)
@@ -346,15 +375,17 @@ public class CustomerService(
         }
     }
 
-    public async Task<Result<IEnumerable<T>>> GetCustomerNotes<T>(string? customerId)
+    public async Task<Result<IEnumerable<T>>> GetCustomerNotes<T>(string? customerId, CancellationToken cancellation = default)
         where T : class
     {
+        logger.LogInformation("try adding new customer note");
         try
         {
-            logger.LogInformation("try adding new customer note");
+            await using var context = await contextFactory.CreateDbContextAsync();
 
             var notes = await context.Database
-                .SqlQuery<T>($@"SELECT 
+                .SqlQuery<T>($@"
+                     SELECT 
 	                 c.NoteId,
 	                 c.CustomerRefId,
 	                 CASE
@@ -363,7 +394,7 @@ public class CustomerService(
 	                END AS CreditAgentName,
 	                c.Description,
 	                c.Created
-                FROM VCustomerNotes c WHERE c.CustomerRefId={customerId}")
+                    FROM VCustomerNotes c WHERE c.CustomerRefId={customerId}")
                 .ProjectToType<T>()
                 .AsNoTracking()
                 .ToListAsync();
@@ -382,13 +413,12 @@ public class CustomerService(
         }
     }
 
-    public async Task<Result<IEnumerable<T>>> GetCustomerActivies<T>(string? customerId)
-        where T : class
+    public async Task<Result<IEnumerable<T>>> GetCustomerActivies<T>(string? customerId, CancellationToken cancellation = default) where T : class
     {
+        logger.LogInformation("try adding new customer note");
         try
         {
-            logger.LogInformation("try adding new customer note");
-
+            await using var context = await contextFactory.CreateDbContextAsync(cancellation);
             var notes = await context.Database
                 .SqlQuery<T>($"SELECT * FROM VCustomerActivities WHERE CustomerRefId={customerId}")
                 .ProjectToType<T>()
@@ -405,6 +435,7 @@ public class CustomerService(
         catch (Exception e)
         {
             logger.LogError(e.Message, e);
+
             return Result.Failure<IEnumerable<T>>(ErrorResponse.ServerError(e.Message));
         }
     }
@@ -460,12 +491,12 @@ public class CustomerService(
         return Result.Success(customer);
     }
 
-    public async Task<Result<VCustomerList>> GetCustomerForRequestLoanAsync(string? customerId)
+    public async Task<Result<VCustomerList>> GetCustomerForRequestLoanAsync(string? customerId, CancellationToken cancellation = default)
     {
 
-        await using var cxt = await contextFactory.CreateDbContextAsync();
+        await using var cxt = await contextFactory.CreateDbContextAsync(cancellation);
 
-        var customer = await cxt.CustomerLists.FirstOrDefaultAsync(x => x.CustomerId == customerId);
+        var customer = await cxt.VCustomerLists.FirstOrDefaultAsync(x => x.CustomerId == customerId);
 
         if (customer is null)
         {
@@ -580,12 +611,12 @@ public class CustomerService(
     {
         try
         {
-            if (await IsCustomerRegister(null,model.Phone, model.IdCard,cancellation)) 
+            if (await IsCustomerRegister(null, model.Phone, model.IdCard, cancellation))
             {
                 return Result.Failure<string>(ErrorResponse.Conflict($"Customer With Name:{model.AltName} is already register."));
             }
 
-            await using var context = await contextFactory.CreateDbContextAsync(cancellation); 
+            await using var context = await contextFactory.CreateDbContextAsync(cancellation);
 
             context.EntityNames.Add(model);
 
@@ -630,11 +661,11 @@ public class CustomerService(
 
         var customerInUse = await _context.LoanDisbursments
                                    .AsNoTracking()
-                                   .AnyAsync(x => x.CustomerRefId == customerId,cancellation);
+                                   .AnyAsync(x => x.CustomerRefId == customerId, cancellation);
         return customerInUse;
     }
 
-    private async Task<bool> IsCustomerRegister(string? customerId, string? phoneNumber,string? idCard,CancellationToken cancellation=default)
+    private async Task<bool> IsCustomerRegister(string? customerId, string? phoneNumber, string? idCard, CancellationToken cancellation = default)
     {
         if (string.IsNullOrWhiteSpace(phoneNumber))
             throw new ArgumentException("Phone number is required", nameof(phoneNumber));
@@ -644,9 +675,9 @@ public class CustomerService(
 
         await using var context = await contextFactory.CreateDbContextAsync(cancellation);
 
-        return await context.CustomerLists
+        return await context.VCustomerLists
                             .AsNoTracking()
-                            .AnyAsync(x =>(x.Phone == phoneNumber || x.IdCard == idCard) && 
+                            .AnyAsync(x => (x.Phone == phoneNumber || x.IdCard == idCard) &&
                                         (string.IsNullOrEmpty(x.CustomerId) || x.CustomerId != customerId),
                                 cancellation);
 

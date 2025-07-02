@@ -60,9 +60,9 @@ public sealed class VCustomerList
 
     public List<VCustomerExpenses> CustomerExpenses { get; set; } = [];
     public List<VCustomerIncomes> CustomerIncomes { get; set; } = [];
-    [NotMapped] public List<VCollateralLines> CollateralLines { get; set; } = [];
+    public List<VCollateralLines> CollateralLines { get; set; } = [];
     public List<VLoanRequests> LoanRequests { get; set; } = [];
-    [NotMapped] public List<VLoanDisbursments> Loans { get; set; } = [];
+    public List<VLoanDisbursments> Loans { get; set; } = [];
     public List<VCustomerNotes> CustomerNotes { get; set; } = [];
     public List<VCustomerActivities> CustomerActivities { get; set; } = [];
 }

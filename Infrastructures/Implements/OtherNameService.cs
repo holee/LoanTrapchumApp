@@ -99,6 +99,8 @@ namespace Infrastructures.Implements
                 var usedVendor = await _context.Database
                     .SqlQuery<VLoanGuarantors>($"SELECT * FROM VLoanGuarators WHERE GuarantorId={id}")
                     .AnyAsync();
+
+
                 if (usedVendor)
                 {
                     return Result.Failure<string>(ErrorResponse.NotFound("Vendor already in used."));

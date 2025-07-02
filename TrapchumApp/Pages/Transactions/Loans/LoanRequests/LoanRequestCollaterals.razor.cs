@@ -18,7 +18,6 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         [Parameter] public EventCallback<VLoanRequestCollateralLines> RemoveCollateral { get; set; }
 
         RadzenDataGrid<VLoanRequestCollateralLines> gridColaterals = default!;
-
         async void ClickedAdd()
         {
             await Add.InvokeAsync();
@@ -32,42 +31,41 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         }
 
 
-        async void AddCollaterals()
-        {
-            var param = new Dictionary<string, object?>
-        {
-            {"CustomerId",CustomerId}
-        };
-            var options = new DialogOptions
-            {
-                Width = "60vw"
-            };
-
-            IList<VCollateralLines> results = await DialogService.OpenAsync<CollateralLoanRequest>("Collateral", param, options);
-            if (results.Any())
-            {
-                var collateralLines = results.Select(c => new VLoanRequestCollateralLines
-                {
-                    CollateralLineId = c.Id,
-                    CollateralId = c.CollateralId,
-                    OwnerName = c.OwnerName,
-                    ReferenceNo = c.ReferenceNo,
-                }).ToList();
-                foreach (var item in collateralLines)
-                {
-                    if (Collaterals.Contains(item)) continue;
-                    Collaterals.Add(item);
-                }
-                await gridColaterals.Reload();
-
-                StateHasChanged();
-            }
-        }
-
-
         public async Task CollateralReload()
         {
             await gridColaterals.Reload();
         }
     }
 }
+
+//async void AddCollaterals()
+//{
+//    var param = new Dictionary<string, object?>
+//{
+//    {"CustomerId",CustomerId}
+//};
+//    var options = new DialogOptions
+//    {
+//        Width = "60vw"
+//    };
+
+//    IList<VCollateralLines> results = await DialogService.OpenAsync<CollateralLoanRequest>("Collateral", param, options);
+//    if (results.Any())
+//    {
+//        var collateralLines = results.Select(c => new VLoanRequestCollateralLines
+//        {
+//            CollateralLineId = c.Id,
+//            CollateralId = c.CollateralId,
+//            OwnerName = c.OwnerName,
+//            ReferenceNo = c.ReferenceNo,
+//        }).ToList();
+//        foreach (var item in collateralLines)
+//        {
+//            if (Collaterals.Contains(item)) continue;
+//            Collaterals.Add(item);
+//        }
+//        await gridColaterals.Reload();
+
+//        StateHasChanged();
+//    }
+//}

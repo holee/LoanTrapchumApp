@@ -9,7 +9,7 @@ namespace Infrastructures.DataAccess.Configurations.LoanDisbursements
         public void Configure(EntityTypeBuilder<VLoanDisbursments> builder)
         {
             
-            builder.ToView("VLoanDisbursments");
+            builder.ToView("VLoansDisbursments");
             builder.HasKey(x=>new { x.LoanId,x.BranchId });
             builder.Property(x => x.CustomerId);
             builder.Property(x => x.CustomerName).HasMaxLength(250);

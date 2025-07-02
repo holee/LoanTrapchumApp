@@ -7,15 +7,15 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 {
     public partial class LoanRequestGaurantor
     {
-        [Parameter] public IEnumerable<VLoanRequestGuarantors> Guarantors { get; set; } = [];
+        [Parameter] public IEnumerable<VLoanRequestGuarantor> Guarantors { get; set; } = [];
         [Parameter] public bool ShowAdd { get; set; } = false;
         [Parameter] public bool ShowCommand { get; set; } = false; 
         [Parameter] public bool ShowRemove { get; set; } = false;
         [Parameter] public EventCallback Add { get; set; }
         [Parameter] public EventCallback Reload { get; set; }
-        [Parameter] public EventCallback<VLoanRequestGuarantors> Remove { get; set; }
+        [Parameter] public EventCallback<VLoanRequestGuarantor> Remove { get; set; }
 
-        RadzenDataGrid<VLoanRequestGuarantors> gridGuarantors = default!;
+        RadzenDataGrid<VLoanRequestGuarantor> gridGuarantors = default!;
 
         private readonly IGuarantorServiceImpl _gService;
 
@@ -30,7 +30,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             //await Reload.InvokeAsync();
             //await gridGuarantors.Reload();
         }
-        async void ClickedRevmove(VLoanRequestGuarantors g)
+        async void ClickedRevmove(VLoanRequestGuarantor g)
         {
             await Remove.InvokeAsync(g);
         }

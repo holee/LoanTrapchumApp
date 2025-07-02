@@ -49,7 +49,7 @@ public sealed class VLoanRequests
     public string? AprovedBy { get; set; } = string.Empty;
 
     [NotMapped] public string? Memo { get; set; }
-    [NotMapped] public IEnumerable<VLoanRequestGuarantors> Guarantors { get; set; } = [];
+    [NotMapped] public IEnumerable<VLoanRequestGuarantor> Guarantors { get; set; } = [];
     [NotMapped] public IEnumerable<VLoanRequestCollateralLines> Collaterals { get; set; } = [];
     [NotMapped] public IEnumerable<VLoanRequestsDocuments> Documents { get; set; } = [];
     [NotMapped] public IEnumerable<VLoanRequestDescription> Descriptions { get; set; } = []; 

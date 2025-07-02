@@ -4,19 +4,12 @@
 @using Microsoft.AspNetCore.Components.Web
 @using TrapchumApp.Services
 <style>
-    .rz-grid-table td .rz-cell-data {
+    /* .rz-grid-table td .rz-cell-data {
         line-height: 1.5rem;
         font-size: 0.8rem;
-    }
+    } */
 </style>
 <GridToolbar SearchChanged="SearchTextChanged">
-    <LeftChildren>
-        <RadzenButton Text="Add New"
-                      Icon="add"
-                      Size="ButtonSize.Small"
-                      Click="AddAddTab"
-                      ButtonStyle="ButtonStyle.Primary" />
-    </LeftChildren>
     <RightChildren>
         <div class="rz-text-align-center">
             <RadzenCheckBox TValue="bool"
@@ -38,6 +31,7 @@
                 AllowPaging="true"
                 AllowFiltering="true"
                 AllowSorting="true"
+                AllowColumnPicking="true"
                 PagerHorizontalAlign="HorizontalAlign.Right"
                 Count="@counts"
                 PageSize="pageSize"
@@ -45,12 +39,21 @@
                 PageSizeChanged="@ChangedPageSize"
                 PagerPosition="PagerPosition.Bottom"
                 RowSelect="@OnRowSelected"
-                LoadData="LoadGuarantors">
+                LoadData="@LoadGuarantors">
+    <HeaderTemplate>
+        <RadzenButton Text="Add New"
+                      Icon="add"
+                      Size="ButtonSize.Small"
+                      Click="AddAddTab"
+                      ButtonStyle="ButtonStyle.Primary" />
+    </HeaderTemplate>
     <Columns>
         <RadzenDataGridColumn Width="4rem"
                               Filterable="false"
                               Sortable="false"
                               Property="id"
+                              TextAlign="TextAlign.Center"
+                              Pickable="false"
                               Title="#" Context="g">
             <Template>
                 @(guarantors.IndexOf(g) + 1)
@@ -59,15 +62,16 @@
         <RadzenDataGridColumn Property="@nameof(VGuarantor.GuarantorName)"
                               Title="Name"
                               Context="g"
+                              Width="10rem"
+                              Sortable="true" />
+        <RadzenDataGridColumn Property="@nameof(VGuarantor.FullName)"
+                              Title="Full Name"
+                              Context="g"
+                              Visible="false"
                               Sortable="true">
-                              <Template>
-                                 <RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal">
-                                     <span class="rz-ml-1">@g.GuarantorName</span>
-                                     <i class="text-danger">(@(g?.FullName))</i>
-                                 </RadzenStack>
-                              </Template>
-                          </RadzenDataGridColumn>
+        </RadzenDataGridColumn>
         <RadzenDataGridColumn Property="@nameof(VGuarantor.Phone)"
+                              Width="8rem"
                               Title="Phone" />
         <RadzenDataGridColumn Context="g"
                               Property="@nameof(VGuarantor.ProInKhmer)"
@@ -89,7 +93,7 @@
             </Template>
         </RadzenDataGridColumn>
 
-        <RadzenDataGridColumn TextAlign="TextAlign.Center"
+        <RadzenDataGridColumn TextAlign="TextAlign.Right"
                               Context="g"
                               Width="8rem"
                               Property="@nameof(VGuarantor.NumberOfLoan)"
@@ -98,7 +102,15 @@
                 @g.NumberOfLoan
             </Template>
         </RadzenDataGridColumn>
-
+        <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                              Context="g"
+                              Width="10rem"
+                              Property="@nameof(VGuarantor.Requests)"
+                              Title="Requests">
+            <Template>
+                @g.Requests
+            </Template>
+        </RadzenDataGridColumn>
         <RadzenDataGridColumn Width="5rem"
                               Filterable="false"
                               Sortable="false"
@@ -120,16 +132,16 @@
     {
         ContextMenuService.Open(args, ds =>
     @<RadzenMenu Style="font-size:0.8rem;">
-            <RadzenMenuItem Icon="info"
-                            Click="@(()=>GetGuarantorDetails(id))"
-                            Text="Guarantor Details" Value="@id"></RadzenMenuItem>
-            <RadzenMenuItem Icon="edit"
-                            Click="@(()=>GetEditGuarantor(id))"
-                            Text="Edit" Value="@id"></RadzenMenuItem>
-            <RadzenMenuItem Icon="delete"
-                            Click="@(()=>DeleteGuarantorAsync(id))"
-                            Text="Delete" Value="@id"></RadzenMenuItem>
-    </RadzenMenu>
+    <RadzenMenuItem Icon="info"
+                    Click="@(()=>GetGuarantorDetails(id))"
+                    Text="Guarantor Details" Value="@id"></RadzenMenuItem>
+    <RadzenMenuItem Icon="edit"
+                    Click="@(()=>GetEditGuarantor(id))"
+                    Text="Edit" Value="@id"></RadzenMenuItem>
+    <RadzenMenuItem Icon="delete"
+                    Click="@(()=>DeleteGuarantorAsync(id))"
+                    Text="Delete" Value="@id"></RadzenMenuItem>
+</RadzenMenu>
     );
     }
 

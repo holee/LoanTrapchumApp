@@ -4,12 +4,7 @@ using Applications.Responses.Lists.Entities;
 using Applications.Services.Files;
 using Applications.Services.Lists;
 using Domains.Models.Addresses;
-using Domains.Models.Files;
 using Domains.Models.Lists;
-using Microsoft.AspNetCore.Components;
-using Radzen;
-using Microsoft.AspNetCore.Components.Forms;
-using Microsoft.AspNetCore.Components.Web;
 using Radzen.Blazor;
 using Applications.Enumerations;
 
@@ -127,6 +122,44 @@ namespace TrapchumApp.Pages.Lists.Customers
                 {
 
                     NotificationService.Notify(NotificationSeverity.Error, response.ErrMessage);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                NotificationService.Notify(NotificationSeverity.Error, ex.Message);
+            }
+        }
+
+
+
+        protected async Task CreateAsync(bool saveClosed=false)
+        {
+            try
+            {
+                model.EntType = EntityTypes.Customer.ToString();
+
+                model.Photo ??= "/Profiles/profile.png";
+
+                var rsp = await _customerService.CreateAsync(model);
+
+                if (rsp.IsSuccess)
+                {
+                    NotificationService.Notify(NotificationSeverity.Success, "Customer was created successfully!");
+
+                    if (saveClosed)
+                    {
+                        await Close();
+                    }
+                    else
+                    {
+                        model = new();
+                    }
+                }
+                else
+                {
+
+                    NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
                 }
 
             }

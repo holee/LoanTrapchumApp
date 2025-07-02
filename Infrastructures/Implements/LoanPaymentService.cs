@@ -29,16 +29,9 @@ public class LoanPaymentService(DataContext context, IDbContextFactory<DataConte
 
         try
         {
-
-            // var tranLoan = req.LoanTransaction.Adapt<LoanTransaction>();
-
-            //tranLoan.TransactionsId = $"trx-{Guid.CreateVersion7()}";
-
             var loanRepayment = req.Adapt<LoanPayment>();
 
             var payment = db.LoanRepayments.Add(loanRepayment).Entity;
-
-            // db.LoanTransaction.Add(tranLoan);
 
             await db.SaveChangesAsync();
 
@@ -176,17 +169,12 @@ public class LoanPaymentService(DataContext context, IDbContextFactory<DataConte
     private async Task SetLoanScheduleComplete(int? branchId, string? loanId, long? scheduleId, int? installmentId)
     {
         await using var db = await dbContextFactory.CreateDbContextAsync();
-
-
-        var leftAmount = db.Database
-                                .SqlQuery<VSchedule?>($"""
-                                       SELECT * FROM VSchedules
-                                       WHERE LoanScheduleId={scheduleId}
-                                       AND LoanId={loanId}                                                    
-                                       AND BranchId={branchId}
-                                      """)
-                            .Select(x => x!.LeftAmount)
-                            .FirstOrDefault();
+        var leftAmount = await db.VSchedules
+                         .Where(x => x.LoanScheduleId == scheduleId &&
+                                   x.LoanId == loanId &&
+                                   x.BranchId == branchId)
+                         .Select(x => x.LeftAmount)
+                         .FirstOrDefaultAsync();
 
         var statusId = leftAmount == 0 ? (int)ScheduleStatus.Paid : (int)ScheduleStatus.Partial;
 
@@ -204,12 +192,13 @@ public class LoanPaymentService(DataContext context, IDbContextFactory<DataConte
         {
             throw new ArgumentException("Invalid schedule parameters.");
         }
-
         // Use parameterized query to get LeftAmount
-        var leftAmount = await db.Database
-            .SqlQuery<VSchedule>($"SELECT * FROM VSchedules WHERE LoanScheduleId = {scheduleId} AND LoanId = {loanId} AND BranchId = {branchId}")
-            .Select(x => x.LeftAmount)
-            .FirstOrDefaultAsync();
+        var leftAmount = await db.VSchedules
+                                 .Where(x=>x.LoanScheduleId==scheduleId &&
+                                           x.LoanId==loanId &&
+                                           x.BranchId==branchId)
+                                 .Select(x => x.LeftAmount)
+                                 .FirstOrDefaultAsync();
 
         var statusId = leftAmount == 0 ? ScheduleStatus.Paid : ScheduleStatus.Partial;
 
@@ -229,19 +218,11 @@ public class LoanPaymentService(DataContext context, IDbContextFactory<DataConte
 
         await IsLoanFullyPaidAsync(branchId, loanId);
 
-        var existingLoans = await db.Database
-                                      .SqlQuery<VLoanDisbursments>($"""
-                                                                    SELECT * FROM VLoanDisbursments
-                                                                    WHERE LoanId={loanId} AND 
-                                                                    BranchId={branchId} AND 
-                                                                    OutStanding=0
-                                                                  """)
-                                      .Where(x => x.LoanId == loanId &&
+        var existingLoans = await db.VLoanDisbursements
+                                      .AnyAsync(x => x.LoanId == loanId &&
                                                   x.BranchId == branchId &&
-                                                  x.OutStanding == 0)
-                                      .AsNoTracking()
-                                      .ToListAsync();
-        if (existingLoans.Any())
+                                                  x.OutStanding == 0);
+        if (existingLoans)
         {
             db.LoanDisbursments
                  .Where(x => x.LoanId == loanId & x.BranchRefId == branchId)
@@ -254,20 +235,11 @@ public class LoanPaymentService(DataContext context, IDbContextFactory<DataConte
 
         await using var db = await dbContextFactory.CreateDbContextAsync();
 
-
-        var existingLoans = await db.Database
-                                    .SqlQuery<VLoanDisbursments>($"""
-                                                                    SELECT * FROM VLoanDisbursments
-                                                                    WHERE LoanId={loanId} AND 
-                                                                    BranchId={branchId} AND 
-                                                                    OutStanding=0
-                                                                  """)
-                                    .Where(x => x.LoanId == loanId &&
+        var existingLoans = await db.VLoanDisbursements
+                                    .AnyAsync(x => x.LoanId == loanId &&
                                                 x.BranchId == branchId &&
-                                                x.OutStanding == 0)
-                                    .AsNoTracking()
-                                    .ToListAsync();
-        if (existingLoans.Any())
+                                                x.OutStanding == 0);
+        if (existingLoans)
         {
             db.LoanDisbursments
                  .Where(x => x.LoanId == loanId & x.BranchRefId == branchId)

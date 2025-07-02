@@ -60,6 +60,15 @@ a, .btn-link {
     color: #006bb7;
 }
 
+
+.rz-grid-table td .rz-cell-data {
+
+    line-height: normal !important;
+
+/*    font-size: 0.8rem;*/
+}
+
+
 .btn-primary {
     color: #fff;
     background-color: #1b6ec2;

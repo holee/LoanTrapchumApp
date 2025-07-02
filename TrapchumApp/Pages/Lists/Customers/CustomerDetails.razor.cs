@@ -20,7 +20,7 @@ namespace TrapchumApp.Pages.Lists.Customers
 
         private readonly ICollateralsServiceImpl _collateralService;
 
-        public CustomerDetails(IIncomeExpendServiceImpl customerIncomeService,ICollateralsServiceImpl collateralService)
+        public CustomerDetails(IIncomeExpendServiceImpl customerIncomeService, ICollateralsServiceImpl collateralService)
         {
             _customerIncomeService = customerIncomeService;
 
@@ -31,7 +31,7 @@ namespace TrapchumApp.Pages.Lists.Customers
         [Parameter, SupplyParameterFromQuery] public string? UserId { get; set; }
         [Parameter, EditorRequired] public string? CustomerId { get; set; }
         [Parameter] public EventCallback<int> Close { get; set; }
-        [Parameter] public EventCallback<int> EditClick { get; set; } 
+        [Parameter] public EventCallback<int> EditClick { get; set; }
 
         protected VCustomerList Customer = new();
 
@@ -98,8 +98,8 @@ namespace TrapchumApp.Pages.Lists.Customers
 
         async Task ShowEditCustomer()
         {
-           await EditClick.InvokeAsync(2);
-           
+            await EditClick.InvokeAsync(2);
+
         }
         protected async Task AddCollateral()
         {
@@ -160,7 +160,6 @@ namespace TrapchumApp.Pages.Lists.Customers
 
                 IsLoading = true;
 
-
                 var auth = await AuthenticationState;
 
                 if (auth.User.Identity!.IsAuthenticated)
@@ -168,7 +167,7 @@ namespace TrapchumApp.Pages.Lists.Customers
                     UserId ??= auth.User.GetId();
                 }
 
-                var response = await _customerService.GetCustomerDetailsByIdAsync(CustomerId, true);
+                var response = await _customerService.GetCustomerDetailsByIdAsync(CustomerId, default);
 
                 if (response.IsSuccess)
                 {

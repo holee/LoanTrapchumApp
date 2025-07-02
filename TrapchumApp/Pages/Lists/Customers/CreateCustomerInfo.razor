@@ -1,33 +1,36 @@
 @using Applications.Enumerations
 @using Applications.Requests.Lists.OtherNames
+@using Applications.Responses.Lists.Entities
 @using Domains.Models.Files
 @using TrapchumApp.Services
-
+<style>
+    .rz-dropdown-items-wrapper {
+        margin-top: var(--rz-mt-3);
+    }
+</style>
 <RadzenFieldset AllowCollapse="true" Collapsed="false" class="rz-mb-2">
     <HeaderTemplate>
         <RadzenIcon Icon="person" /><strong>Customer</strong>
     </HeaderTemplate>
     <ChildContent>
-
         <RadzenRow class="rz-my-2">
             <RadzenColumn Size="6">
                 <RadzenRow>
                     <RadzenColumn Size="3">
                         <RadzenLabel>Khmer Name</RadzenLabel>
                     </RadzenColumn>
-                    <RadzenColumn Size="3">
-                        <RadzenDropDown Chips="true"
-                                        AllowFiltering="true"
+                    <RadzenColumn Size="4">
+                        <RadzenDropDown AllowFiltering="true"
                                         Name="DropDownSalutions"
                                         Style="width: 100%;"
                                         TValue="string"
                                         FilterOperator="StringFilterOperator.Contains"
                                         Placeholder="Salutation"
                                         @bind-Value="Model.Salutation"
-                                        Data="Salutations">
+                                        Data="@Salutations">
                         </RadzenDropDown>
                     </RadzenColumn>
-                    <RadzenColumn Size="6">
+                    <RadzenColumn Size="5">
                         <RadzenTextBox @bind-Value="Model.AltName"
                                        class="w-100"
                                        Placeholder="ឈ្មោះខ្មែរ..." />
@@ -37,8 +40,8 @@
             </RadzenColumn>
             <RadzenColumn Size="6">
                 <div class="text-start">
-                    <RadzenCheckBox TValue="bool?" @bind-Value="Model.IsActive"/>
-                    <RadzenLabel Text="@(Model.IsActive==true ? "Active" : "In Active")" />
+                    <RadzenCheckBox TValue="bool?" @bind-Value="Model.IsActive" />
+                    <RadzenLabel Text="@(Model.IsActive == true ? "Active" : "In Active")" />
                 </div>
             </RadzenColumn>
         </RadzenRow>
@@ -73,16 +76,16 @@
             </RadzenColumn>
         </RadzenRow>
         <RadzenRow>
-             <RadzenColumn Size="6">
-                 <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+            <RadzenColumn Size="6">
+                <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
                     <RadzenColumn Size="3">Phone</RadzenColumn>
                     <RadzenColumn Size="9">
                         <RadzenTextBox class="w-100"
                                        @bind-Value="Model.Phone"
                                        Placeholder="Mobile phone..." />
                     </RadzenColumn>
-                 </RadzenRow>
-             </RadzenColumn>
+                </RadzenRow>
+            </RadzenColumn>
             <RadzenColumn Size="6">
                 <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
                     <RadzenColumn Size="3">
@@ -118,11 +121,11 @@
                     </RadzenColumn>
                 </RadzenRow>
             </RadzenColumn>
-            
+
             <RadzenColumn Size="3">
                 <RadzenRow AlignItems="AlignItems.Center">
                     <RadzenColumn Size="4">
-                       <RadzenLabel>Birth Date</RadzenLabel>
+                        <RadzenLabel>Birth Date</RadzenLabel>
                     </RadzenColumn>
                     <RadzenColumn Size="8">
                         <RadzenDatePicker TValue="DateTime?"
@@ -144,29 +147,24 @@
                 <RadzenRow AlignItems="AlignItems.Center">
                     <RadzenColumn Size="3">Occupation</RadzenColumn>
                     <RadzenColumn Size="9">
-                        <RadzenDropDown class="w-100"
-                                        Data="@Occupations"
-                                        AllowFiltering="true"
-                                        FilterOperator="StringFilterOperator.Contains"
-                                        TextProperty="OccupationTitle"
-                                        FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-                                        ValueProperty="OccupationTitle"
-                                        @bind-Value="Model.Occupation">
-                        </RadzenDropDown>
+                        <OccupationDropDown 
+                                TypeOf="@Domains.Shared.Enums.TypeOfEnum.Job"
+                                ShowAdd="true" 
+                                @bind-Value="Model.Occupation" />
                     </RadzenColumn>
                 </RadzenRow>
                 <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
-                            <RadzenColumn Size="3">
-                                <RadzenLabel>Nationality</RadzenLabel>
-                            </RadzenColumn>
-                            <RadzenColumn Size="9">
-                                <RadzenDropDown Data="Nationalities"
-                                                class="w-100"
-                                                TextProperty="@nameof(Nationality.NationalityName)"
-                                                ValueProperty="@nameof(Nationality.NationalityName)"
-                                                @bind-Value="Model.Nationality">
-                                </RadzenDropDown>
-                            </RadzenColumn>
+                    <RadzenColumn Size="3">
+                        <RadzenLabel>Nationality</RadzenLabel>
+                    </RadzenColumn>
+                    <RadzenColumn Size="9">
+                        <RadzenDropDown Data="Nationalities"
+                                        class="w-100"
+                                        TextProperty="@nameof(Nationality.NationalityName)"
+                                        ValueProperty="@nameof(Nationality.NationalityName)"
+                                        @bind-Value="Model.Nationality">
+                        </RadzenDropDown>
+                    </RadzenColumn>
                 </RadzenRow>
                 <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
                     <RadzenColumn Size="3">Email</RadzenColumn>

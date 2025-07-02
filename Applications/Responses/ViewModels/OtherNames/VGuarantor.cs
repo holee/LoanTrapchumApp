@@ -18,15 +18,13 @@ public sealed class VGuarantor
     public string? VilInKhmer { get; set; }
     public bool IsActive { get; set; } = false;
     public int NumberOfLoan { get; set; }
-    [NotMapped]
-    public bool Selected { get;set; } = false;
-    [NotMapped]
-    public ICollection<VLoanGuarantors> LoanGuarantors { get; set; } = [];
+    public int Requests { get; set; }  
 
     [NotMapped]
-    public ICollection<VGuarantorLoanRequest> LoanRequests { get; set; } = [];
-    [NotMapped]
-    public ICollection<VGuarantorLoan> Loans { get; set; } = []; 
+    public bool Selected { get; set; } = false;
+    [NotMapped] public ICollection<VLoanGuarantors> LoanGuarantors { get; set; } = [];
+    public ICollection<VGuarantorsLoanRequest> LoanRequests { get; set; } = [];
+    public ICollection<VGuarantorLoan> GuarantorLoans { get; set; } = [];
     public override string ToString()
     {
         return $"{ProInKhmer} {DisInKhmer} {ComInKhmer} {VilInKhmer}";

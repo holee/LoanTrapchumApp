@@ -6,7 +6,7 @@ namespace Applications.Commons.Mappers;
 
 public static class VLoanRequestsMapper
 {
-    public static List<VLoanRequestGuarantors> ToLoanRequestGuarantors(this VLoanRequests req)
+    public static List<VLoanRequestGuarantor> ToLoanRequestGuarantors(this VLoanRequests req)
     {
         return req.Guarantors.ToList() ?? [];
     }

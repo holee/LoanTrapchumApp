@@ -18,5 +18,6 @@ namespace Applications.Interfaces.Employees
         Task<Result<T>> GetByIdAsync<T>(string? id) where T : class;
         Task<Result<VEmployeeList>> GetByIdAsync(string? id, int? branchId, bool include);
         Task<Result<VEmployeeList>> GetByIdAsync(string? employeeId, CancellationToken cancellation = default);
+        Task<Result<VEmployeeList>> GetEmployeeByIdAsync(string? employeeId, CancellationToken cancellation = default);
     }
 }

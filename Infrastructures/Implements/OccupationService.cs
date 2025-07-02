@@ -6,6 +6,7 @@ using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels;
 using Domains.Models.Lists;
+using Domains.Shared.Enums;
 using Infrastructures.DataAccess;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
@@ -28,7 +29,17 @@ namespace Infrastructures.Implements
 
         public async Task<Result<OccupationVm>> CreateAsync(Occupation occupation, CancellationToken cancellation = default)
         {
-            await using var context = await _contextFactory.CreateDbContextAsync();
+
+            _logger.LogInformation("Creating a new occupation: {OccupationTitle}", occupation.OccupationTitle);
+
+            if (await IsOccupationExist(occupation.OccupationTitle, cancellation))
+            {
+                _logger.LogWarning("Occupation with title {OccupationTitle} already exists.", occupation.OccupationTitle);
+
+                return Result.Failure<OccupationVm>(ErrorResponse.Conflict("Occupation with title already exists"));
+            }
+
+            await using var context = await _contextFactory.CreateDbContextAsync(cancellation);
 
             context.Occupations.Add(occupation);
 
@@ -38,6 +49,7 @@ namespace Infrastructures.Implements
 
             return Result.Success(created);
         }
+
 
 
         public async Task<Occupation?> GetOccupationByIdAsync(int? id)
@@ -65,9 +77,9 @@ namespace Infrastructures.Implements
 
             if (!string.IsNullOrEmpty(term))
             {
-                queries = queries.Where(x => x.OccupationTitle != null && x.OccupationTitle.ToLower().StartsWith(term)
-                                            || x.Khmer != null && x.Khmer.ToLower().StartsWith(term)
-                                            || x.TypeOf!.ToLower().Contains(term));
+                queries = queries.Where(x => EF.Functions.Like(x.OccupationTitle!, $"%{term}%") ||
+                                             EF.Functions.Like(x.Khmer, $"%{term}%") ||
+                                             EF.Functions.Like(x.TypeOf, $"%{term}%"));
             }
 
             int counts = queries.Count();
@@ -79,6 +91,45 @@ namespace Infrastructures.Implements
 
             return new Pager<T>(items, counts);
         }
+
+
+        public async Task<Pager<T>> GetOccupations<T>(int? id, TypeOfEnum ofOption, string? term = null, CancellationToken cancellation = default)
+        {
+            _logger.LogInformation("Fetching occupations with ID: {Id} and term: {Term}", id, term);
+
+            await using var _context = await _contextFactory.CreateDbContextAsync(cancellation);
+
+            var queries = ofOption switch
+            {
+                TypeOfEnum.Position => _context.Occupations.Where(o => o.TypeOf == TypeOfEnum.Position.ToString()),
+                TypeOfEnum.Job => _context.Occupations.Where(o => o.TypeOf == TypeOfEnum.Job.ToString()),
+                _ => _context.Occupations.AsNoTracking()
+            };
+
+
+            if (id.HasValue && id > 0)
+            {
+                queries = queries.Where(o => o.OccupationId != id);
+            }
+
+            if (!string.IsNullOrEmpty(term))
+            {
+                queries = queries.Where(x => EF.Functions.Like(x.OccupationTitle!, $"%{term}%") ||
+                                             EF.Functions.Like(x.Khmer, $"%{term}%") ||
+                                             EF.Functions.Like(x.TypeOf, $"%{term}%"));
+            }
+
+            int counts = queries.Count();
+
+            var items = await queries
+                                   .AsNoTracking()
+                                   .ProjectToType<T>()
+                                   .ToListAsync();
+
+            return new Pager<T>(items, counts);
+        }
+
+
 
         public async Task<IEnumerable<Occupation>> GetOccupationsAsync(string? expression = null)
         {
@@ -139,6 +190,19 @@ namespace Infrastructures.Implements
         }
 
 
+
+
+
+        private async Task<bool> IsOccupationExist(string occupationTitle, CancellationToken cancellation)
+        {
+            _logger.LogInformation("Checking if occupation with title {OccupationTitle} exists", occupationTitle);
+
+            await using var _context = await _contextFactory.CreateDbContextAsync(cancellation);
+
+            return await _context.Occupations
+                                 .AsNoTracking()
+                                 .AnyAsync(x => x.OccupationTitle!.ToLower() == occupationTitle.ToLower(), cancellation);
+        }
 
     }
 }

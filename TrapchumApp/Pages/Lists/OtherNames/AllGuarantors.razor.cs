@@ -54,21 +54,19 @@ namespace TrapchumApp.Pages.Lists.OtherNames
         [Parameter] public EventCallback<string> SetGuarantorId { get; set; }
         async Task LoadGuarantors(LoadDataArgs e)
         {
-            pageIndex = e.Skip!.Value;
+            pageIndex = e.Skip ?? 0;
 
             pageSize = e.Top ?? 15;
 
             (sortColumn, sortDescending) = e.PageInfo();
 
-            var filterColumn = e.Filters?.FirstOrDefault(p =>
-                                                         p.Property == nameof(VGuarantor.Gender) ||
-                                                         p.Property == nameof(VGuarantor.GuarantorName) ||
-                                                          p.Property == nameof(VGuarantor.Phone) ||
-                                                         p.Property == nameof(VGuarantor.NumberOfLoan)
-                                                      )?.FilterValue.ToString() ?? string.Empty;
+            var filterDescriptor = e.Filters?.FirstOrDefault();
 
+            var filterProperty = filterDescriptor?.Property;
 
-            filterText = filterColumn ?? string.Empty;
+            var filterValue = filterDescriptor?.FilterValue?.ToString();
+
+            filterText = filterValue ?? string.Empty;
 
             await GetGuarantors(filterText);
 

@@ -53,6 +53,6 @@ public sealed class VEmployeeList
     }
 
 
-    [NotMapped] public ICollection<VLoanDisbursments> LoanDisbursments { get; set; } = [];
-    [NotMapped] public ICollection<VLoanRequests> LoanRequests { get; set; } = [];
+   public ICollection<VLoanDisbursments> LoanDisbursments { get; set; } = [];
+   public ICollection<VLoanRequests> LoanRequests { get; set; } = [];
 }

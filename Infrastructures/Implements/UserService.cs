@@ -323,7 +323,9 @@ public sealed class UserService : IUserService
         await using var context = await _dbContextFactory.CreateDbContextAsync(cancellation);
 
 
-        var existingProfile = await context.UserProfiles.FindAsync(userId);
+        var existingProfile = await context.UserProfiles
+                                            .AsNoTracking()
+                                            .FirstOrDefaultAsync(x => x.UserRefId == userId);
 
 
         var uploadResult = await UploadFile(model);
@@ -345,19 +347,42 @@ public sealed class UserService : IUserService
 
         if (existingProfile is null)
         {
-            _userContext.UserProfiles.Add(userProfile);
+            context.UserProfiles.Add(userProfile);
         }
         else
         {
-            _userContext.UserProfiles.Update(userProfile);
+            context.UserProfiles.Update(userProfile);
         }
 
 
         DeleteOldProfileFile(existingProfile?.FileName);
 
-        await _userContext.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
         return Result.Success<FileModel>(fileResult);
+
+    }
+
+    public async Task<Result<string>> ChangeProfile(UserProfiles profile, CancellationToken cancellation = default)
+    {
+
+        await using var context = await _dbContextFactory.CreateDbContextAsync(cancellation);
+
+        if (string.IsNullOrEmpty(profile.UserRefId))
+        {
+            _userContext.UserProfiles.Add(profile);
+        }
+        else
+        {
+            _userContext.UserProfiles.Update(profile);
+        }
+
+
+        //DeleteOldProfileFile(existingProfile?.FileName);
+
+        await _userContext.SaveChangesAsync();
+
+        return Result.Success<string>("Profile was changed.");
 
     }
 

@@ -51,12 +51,9 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
 
         IEnumerable<LoanScheduleDtoCreate> previewSchedule = [];
-
-        //IEnumerable<ApprovedUser> AprovedUsers = [];
-
         IEnumerable<VCustomerList> Customers = [];
         IEnumerable<VCustomerList>? CustomersList = [];
-        List<VLoanRequestGuarantors> Guarantors = [];
+        List<VLoanRequestGuarantor> Guarantors = [];
 
         List<VLoanRequestCollateralLines> CollateralLines = [];
 
@@ -73,7 +70,6 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         DateTime? RegisterDate = DateTime.Now;
 
         EditForm editForm = default!;
-        //LoanInstallmentTypeDto? SelectedInstallment { get; set; }
 
         VCustomerList? SelectedCustomer = new();
 
@@ -178,6 +174,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
         async Task GetLoanRequestDocuments()
         {
+
             var resp = await _loanRequestService.GetLoanRequestDocumentAsync(LoanRequestId, BranchId);
 
             if (resp.IsSuccess)
@@ -267,7 +264,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             }
         }
 
-        async void RemoveGaurantor(VLoanRequestGuarantors g)
+        async void RemoveGaurantor(VLoanRequestGuarantor g)
         {
             var confirm = await DialogService.Confirm("Do you want to remove this guarantor?", "Remove Guarantor");
 
@@ -285,7 +282,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
                 }
             }
 
-            if (Guarantors.Any() && (g.Id is null || g.Id == 0))
+            if (Guarantors.Any() && g.Id == 0)
             {
                 Guarantors.Remove(g);
 
@@ -363,7 +360,9 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
                 if (!reqResp.IsSuccess)
                 {
                     NotificationService.Notify(NotificationSeverity.Error, reqResp.ErrMessage);
+                  
                     NavigationManager.NavigateTo($"/App/Request/{BranchId}/Branches/?UserId={UserId}");
+                  
                     return;
                 }
                 var data = reqResp.Data;

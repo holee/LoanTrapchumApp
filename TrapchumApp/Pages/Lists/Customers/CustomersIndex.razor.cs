@@ -36,7 +36,7 @@ namespace TrapchumApp.Pages.Lists.Customers
             }
             customerId = id;
 
-            selectedIndex = 3;
+            selectedIndex = 2;
 
             isVisble = false;
         }

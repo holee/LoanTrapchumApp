@@ -21,12 +21,12 @@ namespace Infrastructures.DataAccess.Configurations.Customers
             builder.ToView("VCustomerIncomes");
             builder.HasKey(x => new { x.IncomeId, x.CustomerRefId });
             builder.Property(x => x.IncomeAmount).HasPrecision(18, 3);
-        } 
+        }
     }
 
     public sealed class VCustomerNoteConfig : IBaseEntityTypeConfigurations<VCustomerNotes>
     {
-        public void Configure(EntityTypeBuilder<VCustomerNotes> builder) 
+        public void Configure(EntityTypeBuilder<VCustomerNotes> builder)
         {
             builder.ToView("VCustomerNotes");
             builder.HasKey(x => new { x.NoteId, x.CustomerRefId });
@@ -43,7 +43,7 @@ namespace Infrastructures.DataAccess.Configurations.Customers
     }
 
 
-    
+
 
 
     public sealed class VCustomerListConfig : IBaseEntityTypeConfigurations<VCustomerList>
@@ -51,7 +51,7 @@ namespace Infrastructures.DataAccess.Configurations.Customers
         public void Configure(EntityTypeBuilder<VCustomerList> builder)
         {
             builder.ToView("VCustomerList");
-            builder.HasKey(x=>x.CustomerId);
+            builder.HasKey(x => x.CustomerId);
             builder.Property(x => x.CustomerId).HasMaxLength(250);
             builder.Property(x => x.FirstName).HasMaxLength(50);
             builder.Property(x => x.MiddleName).HasMaxLength(50);
@@ -86,27 +86,35 @@ namespace Infrastructures.DataAccess.Configurations.Customers
             builder.Property(x => x.IsActive).HasDefaultValue(true);
             builder.Property(x => x.IsLoanActive).HasDefaultValue(false);
             builder.HasQueryFilter(x => x.IsActive == true);
-
-
+           
             builder.HasMany(x => x.CustomerActivities)
                     .WithOne()
                     .HasForeignKey(x => x.CustomerRefId);
 
             builder.HasMany(x => x.CustomerIncomes)
                    .WithOne()
-                   .HasForeignKey(x => x.CustomerRefId );
+                   .HasForeignKey(x => x.CustomerRefId);
 
             builder.HasMany(x => x.CustomerExpenses)
                   .WithOne()
-                  .HasForeignKey(x => x.CustomerRefId );
+                  .HasForeignKey(x => x.CustomerRefId);
 
             builder.HasMany(x => x.CustomerNotes)
                  .WithOne()
-                 .HasForeignKey(x => x.CustomerRefId );
+                 .HasForeignKey(x => x.CustomerRefId);
 
             builder.HasMany(x => x.LoanRequests)
                 .WithOne()
                 .HasForeignKey(x => x.CustomerId);
+
+            builder.HasMany(x => x.Loans)
+                    .WithOne()
+                    .HasForeignKey(x => x.CustomerId);
+
+            builder.HasMany(x => x.CollateralLines)
+                   .WithOne()
+                   .HasForeignKey(x => x.CollateralId);
+
         }
     }
 }

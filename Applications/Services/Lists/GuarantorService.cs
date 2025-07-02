@@ -62,6 +62,11 @@ public sealed class GuarantorService(IGuarantorService gService) : IGuarantorSer
         return await gService.GetGuarantorWithByIdAsync(id);
     }
 
+    public async Task<Result<VGuarantor>> GetGuarantorByIdAsync(string? id,CancellationToken cancellation=default)
+    {
+        return await gService.GetGuarantorByIdAsync(id,cancellation); 
+    }
+
 
     public async Task<Pager<VGuarantor>> GetGuarantorsAsync(QueryParam param,CancellationToken cancellation=default)
     {

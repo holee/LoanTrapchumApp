@@ -85,10 +85,10 @@
     </ChildContent>
 </RadzenFieldset>
 <RadzenCard class="rz-mt-2">
-    <RadzenTabs RenderMode="TabRenderMode.Client">
+    <RadzenTabs RenderMode="TabRenderMode.Server">
         <Tabs>
             <RadzenTabsItem Text="Loan Request">
-                <CustomerLoanRequest CustomerId="@CustomerId"
+                <CustomerLoanRequest CustomerId="@CustomerId" 
                                      BranchId="@BranchId"
                                      UserId="@UserId" />
             </RadzenTabsItem>

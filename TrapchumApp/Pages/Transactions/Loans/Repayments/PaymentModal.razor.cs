@@ -7,6 +7,8 @@ using Applications.Requests.Loans.Payments;
 using Applications.Requests.Transactions.LoanTransactions;
 using Applications.Services.Loans;
 using Applications.Services.Settings;
+using Domains.Models.Identity;
+using Domains.Models.Loans;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
@@ -39,10 +41,19 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
         {
             DialogService.Close(false);
         }
+        string? UserId = string.Empty;
+
+        protected override async Task OnInitializedAsync()
+        {
+            var auth = await AuthenticationState;
+
+            UserId = auth.User.GetId();
+
+            await base.OnInitializedAsync();
+        }
 
         protected override void OnInitialized()
         {
-
             OriginalLoanPayment = new LoanPaymentDtoCreate
             {
                 RecieveAmount = LoanPaymentCreate.RecieveAmount,
@@ -163,6 +174,8 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 
                 tran.CashManagements?.Add(tranxCashManagement);
 
+                LoanRepayment.UserRefId = UserId;
+
                 tran.LoanPayment = LoanRepayment;
 
                 string message = $"Receive money from {LoanRepayment.CustomerName} with amount {LoanRepayment.AmountWithPenalty}";
@@ -259,7 +272,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
         }
         private async Task CalculateExhanged(MouseEventArgs args)
         {
-           await js.InvokeVoidAsync("alert");
+            await js.InvokeVoidAsync("alert");
             Console.WriteLine("dsdsdsdsdsd");
         }
     }

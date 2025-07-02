@@ -1,4 +1,5 @@
 ﻿using Applications.Requests.Loans.LoanRequests;
+using Applications.Responses.ViewModels.Loans.Requests;
 using Domains.Models.Lists;
 using Domains.Models.Loans;
 using System;
@@ -38,5 +39,27 @@ namespace Applications.Commons.Mappers
             return [];
            
         }
+
+        public static List<LoanGuarantorLink> MapToGuarantorCreate(this LoanRequestGuarantorsDtoCreate source) 
+        {
+            if (source is not null && source.GuarantorsLink.Any())
+            {
+
+                return source.GuarantorsLink.Select(x => new LoanGuarantorLink
+                {
+                    BranchId = source.BranchRefId,
+                    LoanRequestRefId = source.LoanRequestId,
+                    EntityNameRefId = x.EntityNameRefId,
+                    IsActive = true,
+                }).ToList();
+            }
+
+            return [];
+
+        }
+
+
+
+        //ToGuarantorDtoCreate
     }
 }

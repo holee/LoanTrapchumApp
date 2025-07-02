@@ -34,12 +34,12 @@ namespace Infrastructures.DependencyInjects
 
             services.AddDbContextFactory<UserDataContext>(options =>
             {
-                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
+                options.UseSqlServer(configuration.GetConnectionString("MyConnection"));
             });
 
             services.AddDbContextFactory<DataContext>(options =>
             {
-                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
+                options.UseSqlServer(configuration.GetConnectionString("MyConnection"));
             });
             services.AddScoped<Seeds.DatabaseSeeder>();
 

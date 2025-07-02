@@ -321,17 +321,17 @@ public class EmployeeService : IEmployeeService
 
 
 
-    public async Task<Result<VEmployeeList>> GetByIdAsync(string? employeeId,CancellationToken cancellation=default)
+    public async Task<Result<VEmployeeList>> GetByIdAsync(string? employeeId, CancellationToken cancellation = default)
     {
 
-        _logger.LogInformation("getting employee with ID #{0}",employeeId); 
-       
+        _logger.LogInformation("getting employee with ID #{0}", employeeId);
+
         if (string.IsNullOrEmpty(employeeId))
         {
             return Result.Failure<VEmployeeList>(ErrorResponse.NotFound(""));
         }
 
-        using var db=await connectionFactory.CreateConnectionAsync(cancellation);
+        using var db = await connectionFactory.CreateConnectionAsync(cancellation);
 
         var employeeDict = new Dictionary<string, VEmployeeList>();
 
@@ -358,18 +358,43 @@ public class EmployeeService : IEmployeeService
 
                 return emp;
             },
-            new { EmployeeId = employeeId,BranchId=1},
+            new { EmployeeId = employeeId, BranchId = 1 },
             commandType: CommandType.StoredProcedure,
             splitOn: "LoanId,LoanRequestId");
 
-        var item= employeeDict.Values.FirstOrDefault(x=>x.EmployeeId==employeeId);
+        var item = employeeDict.Values.FirstOrDefault(x => x.EmployeeId == employeeId);
 
-        if(item is null)
+        if (item is null)
         {
             return Result.Failure<VEmployeeList>(ErrorResponse.NotFound(Messages.DataNotFound));
         }
 
         return Result.Success(item);
     }
+
+
+
+    public async Task<Result<VEmployeeList>> GetEmployeeByIdAsync(string? employeeId, CancellationToken cancellation = default)
+    {
+
+        _logger.LogInformation("getting employee with ID #{0}", employeeId);
+
+        await using var context = await _dbContextFactory.CreateDbContextAsync(cancellation);
+
+        var item = await context.EmployeeLists
+                                .Include(x => x.LoanDisbursments)
+                                .Include(x => x.LoanRequests)
+                                .IgnoreQueryFilters()
+                                .AsNoTracking()
+                                .FirstOrDefaultAsync(x => x.EmployeeId == employeeId, cancellation);
+        if (item is null)
+        {
+            return Result.Failure<VEmployeeList>(ErrorResponse.NotFound(Messages.DataNotFound));
+        }
+
+        return Result.Success(item);
+    }
+
+
 
 }

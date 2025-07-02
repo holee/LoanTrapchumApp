@@ -10,6 +10,7 @@ using Applications.Responses.ViewModels.Journals;
 using Applications.Responses.ViewModels.Ledgers;
 using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Requests;
+using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Responses.ViewModels.OtherNames;
 using Applications.Responses.ViewModels.Vendors;
 using Domains.Models;
@@ -228,6 +229,7 @@ namespace Infrastructures.DataAccess
         public DbSet<VDepartment> VDepartments => Set<VDepartment>();
         public DbSet<VSpotRate> VSpotRates => Set<VSpotRate>();
         public DbSet<VLoanDisbursments> VLoanDisbursements => Set<VLoanDisbursments>();
+        public DbSet<VSchedule> VSchedules => Set<VSchedule>(); 
         public DbSet<VLoanRepaymentLine> VLoanRepaymentLines => Set<VLoanRepaymentLine>();
         public DbSet<VCollateral> VCollaterals => Set<VCollateral>();
         public DbSet<JournalEntryVm> VJournals => Set<JournalEntryVm>();
@@ -238,7 +240,7 @@ namespace Infrastructures.DataAccess
         public DbSet<VOtherNames> VOtherNames => Set<VOtherNames>();
         public DbSet<NameListVm> VNameLists => Set<NameListVm>(); 
         public DbSet<VEmployeeList> EmployeeLists => Set<VEmployeeList>();
-        public DbSet<VCustomerList> CustomerLists => Set<VCustomerList>();
+        public DbSet<VCustomerList> VCustomerLists => Set<VCustomerList>();
         public DbSet<VCreditAgent> VCreditAgents => Set<VCreditAgent>();
         public DbSet<VLoanRequests> VLoanRequests => Set<VLoanRequests>();
         public DbSet<VDistricts> VDistricts => Set<VDistricts>();

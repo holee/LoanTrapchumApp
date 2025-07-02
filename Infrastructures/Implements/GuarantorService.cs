@@ -47,7 +47,7 @@ public class GuarantorService : IGuarantorService
             return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}"));
         }
     }
-    public async Task<Result<string>> UpdateAsync(EntityNames othername,CancellationToken cancellation=default)
+    public async Task<Result<string>> UpdateAsync(EntityNames othername, CancellationToken cancellation = default)
     {
         try
         {
@@ -126,7 +126,9 @@ public class GuarantorService : IGuarantorService
                                                                  EF.Functions.Like(x.NumberOfLoan!.ToString(), $"%{param.Filter}%") ||
                                                                  EF.Functions.Like(x.Gender!, $"%{param.Filter}%") ||
                                                                  EF.Functions.Like(x.Phone!, $"%{param.Filter}%"))
-                                .WhereIf(!param.IsIncludeInActive, x => x.IsActive == false);
+                                .WhereIf(!param.IsIncludeInActive, x => x.IsActive == false)
+                                .OrderBy(x=>x.FullName)
+                                .AsNoTracking();
 
         if (param.SortDescending)
         {
@@ -272,7 +274,7 @@ public class GuarantorService : IGuarantorService
 
 
 
-    public async Task<Result<VGuarantor>> GetGuarantorWithByIdAsync(string? id) 
+    public async Task<Result<VGuarantor>> GetGuarantorWithByIdAsync(string? id)
     {
 
         if (id.IsNullOrEmpty())
@@ -288,8 +290,8 @@ public class GuarantorService : IGuarantorService
 
         var lookup = new Dictionary<string, VGuarantor>();
 
-        var items = await db.QueryAsync<VGuarantor, VGuarantorLoanRequest,VGuarantorLoan, VGuarantor>(ProcedureConstant.SpGetGaurantorWithLoanRequests,
-            (g, gl,d) =>
+        var items = await db.QueryAsync<VGuarantor, VGuarantorsLoanRequest, VGuarantorLoan, VGuarantor>(ProcedureConstant.SpGetGaurantorWithLoanRequests,
+            (g, gl, d) =>
             {
                 if (!lookup.TryGetValue(g.Id!, out var existingGaurantor))
                 {
@@ -297,15 +299,15 @@ public class GuarantorService : IGuarantorService
 
                     existingGaurantor.LoanGuarantors = [];
 
-                    lookup.Add(g.Id!, existingGaurantor);    
+                    lookup.Add(g.Id!, existingGaurantor);
                 }
                 if (gl is not null && gl.LoanRequestId.IsNotNullOrEmpty())
                 {
                     g.LoanRequests.Add(gl);
                 }
-                if(d is not null && d.LoanId.IsNotNullOrEmpty())
+                if (d is not null && d.LoanId.IsNotNullOrEmpty())
                 {
-                    g.Loans.Add(d);
+                    g.GuarantorLoans.Add(d);
                 }
                 return g;
 
@@ -314,6 +316,28 @@ public class GuarantorService : IGuarantorService
             splitOn: "LoanRequestId,LoanId");
 
         var guarantor = items.FirstOrDefault(x => x.Id == id);
+
+        if (guarantor is null)
+        {
+            return Result.Failure<VGuarantor>(ErrorResponse.NotFound("There is no guarantor avalable."));
+        }
+        return Result.Success(guarantor);
+
+    }
+
+
+
+    public async Task<Result<VGuarantor>> GetGuarantorByIdAsync(string? id, CancellationToken cancellation = default)
+    {
+
+        await using var context = await _contextFactory.CreateDbContextAsync(cancellation); 
+
+        var guarantor = await context.VGuarantors
+                                .Include(x => x.GuarantorLoans)
+                                .Include(x => x.LoanRequests)
+                                .AsSplitQuery()
+                                .AsNoTracking()
+                                .FirstOrDefaultAsync(x => x.Id == id, cancellation);
 
         if (guarantor is null)
         {

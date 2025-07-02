@@ -38,7 +38,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         {
             isLoading = true;
 
-            var param = new QueryParam(1, 10, string.Empty, false, true, filterText);
+            var param = new QueryParam(1, 10, string.Empty, true, true, filterText);
 
             var guarantorResp = await _gService.GetGuarantorsAsync(null, param);
 

@@ -26,13 +26,14 @@ public interface ICustomerServiceImpl
     Task<Result<VCustomerList>> GetCustomerForRequestLoanAsync(string? customerId);
     Task<Result<IEnumerable<VLoanDisbursments>>> GetCustomerLoanHistoryAsync(string? customerId);
     Task<Pager<VCustomerList>> GetCustomers(QueryParam param);
-    Task<Result<IEnumerable<VCustomerList>>> GetCustomersAsync(string? customerId, int take = 0,bool includeInactive = false, bool exceptActiveLoan = true, string? searchTerm = null);
+    Task<Result<IEnumerable<VCustomerList>>> GetCustomersAsync(string? customerId, int take = 0, bool includeInactive = false, bool exceptActiveLoan = true, string? searchTerm = null);
     Task<Result<EntityCustomerCreate>> GetCustomerUpdateAsync(string? customerId);
     Task<Result<IEnumerable<VCustomerNotes>>> GetCusomerNotesAsync(string? customerId);
     Task<Result<IEnumerable<T>>> GetCusomerActivies<T>(string? customerId) where T : class;
     Task<Result<Pager<T>>> GetCustomersAsync<T>(string? customerId, QueryParam param) where T : class;
-    Task<Result<IEnumerable<VLoanRequests>>> GetCustomerLoanRequestAsync(int? branchId, string? customerId, bool include = false, CancellationToken cancellation=default);
+    Task<Result<IEnumerable<VLoanRequests>>> GetCustomerLoanRequestAsync(int? branchId, string? customerId, bool include = false, CancellationToken cancellation = default);
     Task<Result<VCustomerList>> GetCustomerDetailsByIdAsync(string? customerId, bool include = false, CancellationToken cancellation = default);
+    Task<Result<VCustomerList>> GetCustomerDetailsByIdAsync(string? customerId, CancellationToken cancellation = default);
 }
 
 public sealed class CustomerService(ICustomerService cusService) : ICustomerServiceImpl
@@ -51,19 +52,19 @@ public sealed class CustomerService(ICustomerService cusService) : ICustomerServ
     }
 
 
-    public async Task<Result<string>> UpdateAsync(EntityCustomerCreate customer,CancellationToken cancellation = default)
+    public async Task<Result<string>> UpdateAsync(EntityCustomerCreate customer, CancellationToken cancellation = default)
     {
 
         var cust = customer.ToCustomerEdit();
 
-        return await cusService.UpdateAsync(cust,cancellation);
+        return await cusService.UpdateAsync(cust, cancellation);
     }
 
-    public async Task<Result<string>> CreateAsync(EntityCustomerCreate entity,CancellationToken cancellation=default)
+    public async Task<Result<string>> CreateAsync(EntityCustomerCreate entity, CancellationToken cancellation = default)
     {
         var cust = entity.ToCustomerCreate();
 
-        return await cusService.CreateAsync(cust,cancellation);
+        return await cusService.CreateAsync(cust, cancellation);
     }
 
     public async Task<Result<string>> DeleteCustomerAsync(string? customerId)
@@ -103,11 +104,20 @@ public sealed class CustomerService(ICustomerService cusService) : ICustomerServ
         return await cusService.GetCustomerDetailByIdAsync(customerId, include);
     }
 
-    public async Task<Result<VCustomerList>> GetCustomerDetailsByIdAsync(string? customerId, bool include = false,CancellationToken cancellation=default)
+    public async Task<Result<VCustomerList>> GetCustomerDetailsByIdAsync(string? customerId, bool include = false, CancellationToken cancellation = default)
     {
-        return await cusService.GetCustomerDetailByIdAsync(customerId, include,cancellation);
+        return await cusService.GetCustomerDetailByIdAsync(customerId, include, cancellation);
     }
 
+    public async Task<Result<VCustomerList>> GetCustomerDetailsByIdAsync(string? customerId, CancellationToken cancellation = default)
+    {
+        if (string.IsNullOrEmpty(customerId))
+        {
+            return Result.Failure<VCustomerList>(ErrorResponse.Validation("Customer ID Is Required."));
+        }
+
+        return await cusService.GetCustomerDetailByIdAsync(customerId, cancellation);
+    }
     public async Task<Result<VCustomerList>> GetCustomerForRequestLoanAsync(string? customerId)
     {
         return await cusService.GetCustomerForRequestLoanAsync(customerId);

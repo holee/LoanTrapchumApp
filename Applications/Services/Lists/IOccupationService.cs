@@ -6,6 +6,7 @@ using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels;
 using Domains.Models.Lists;
+using Domains.Shared.Enums;
 
 namespace Applications.Services.Lists
 {
@@ -38,6 +39,11 @@ namespace Applications.Services.Lists
         public async Task<Pager<T>> GetOccupations<T>(int? id, string? term = null)
         {
             return await oService.GetOccupations<T>(id, term);
+        }
+
+        public async Task<Pager<T>> GetOccupations<T>(int? id, TypeOfEnum typeOf, string? term = null)
+        {
+            return await oService.GetOccupations<T>(id, typeOf, term);
         }
 
 

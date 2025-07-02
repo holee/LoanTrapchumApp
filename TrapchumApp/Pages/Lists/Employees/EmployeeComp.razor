@@ -4,7 +4,7 @@
 @using Domains.Models.Addresses
 @using Domains.Models.Files
 @using TrapchumApp.Services
-
+@using Domains.Shared.Enums
 <RadzenFieldset>
     <HeaderTemplate>
         <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
@@ -158,7 +158,6 @@
         </RadzenRow>
     </ChildContent>
 </RadzenFieldset>
-<AddressBaseCreate model="model" />
 <RadzenFieldset AllowCollapse="false" Collapsed="false" class="rz-my-2">
     <HeaderTemplate>
         <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
@@ -166,6 +165,87 @@
         </RadzenStack>
     </HeaderTemplate>
     <ChildContent>
+        <RadzenFieldset Text="Job Details">
+            <RadzenStack Gap="1rem">
+                <RadzenRow AlignItems="AlignItems.Start">
+                    <RadzenColumn Size="12" SizeMD="6">
+                        <RadzenRow AlignItems="AlignItems.Center">
+                            <RadzenColumn Size="12" SizeMD="2">
+                                <RadzenLabel Text="Job Title" Component="JobTitle" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="10">
+                                <OccupationDropDown @bind-Value="model.Occupation" TypeOf="TypeOfEnum.Position" ShowAdd="true" />
+                            </RadzenColumn>
+                        </RadzenRow>
+                        <RadzenRow AlignItems="AlignItems.Center" Style="margin-top:15px">
+                            <RadzenColumn Size="12" SizeMD="2">
+                                <RadzenLabel Text="Department" Component="Department" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="10">
+                                <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                                FilterOperator="StringFilterOperator.Contains"
+                                                AllowFiltering="true"
+                                                Data="@Departments"
+                                                AllowClear="false"
+                                                TextProperty="@nameof(DepartmentDto.DepartmentName)"
+                                                ValueProperty="@nameof(DepartmentDto.DepartmentId)"
+                                                Style="width: 100%;"
+                                                Name="Department"
+                                                @bind-Value="model.DepartmentRefId"
+                                                Placeholder="Select department">
+                                </RadzenDropDown>
+                            </RadzenColumn>
+                        </RadzenRow>
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeMD="6">
+                        <RadzenRow AlignItems="AlignItems.Center">
+                            <RadzenColumn Size="12" SizeMD="2">
+                                <RadzenLabel Text="Branch" Component="Branch" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="10">
+                                <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                                FilterOperator="StringFilterOperator.Contains"
+                                                AllowFiltering="true"
+                                                Data="@Branches"
+                                                AllowClear="false"
+                                                TextProperty="@nameof(BranchDto.BranchName)"
+                                                ValueProperty="@nameof(BranchDto.BranchId)"
+                                                class="w-100"
+                                                @bind-Value="model.BranchRefId"
+                                                Name="Branch"
+                                                Placeholder="Select branch">
+                                </RadzenDropDown>
+                            </RadzenColumn>
+                        </RadzenRow>
+                        <RadzenRow AlignItems="AlignItems.Center" Style="margin-top:15px">
+                            <RadzenColumn Size="12" SizeMD="2">
+                                <RadzenLabel Text="Supervisor" Component="Supervisor" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="10">
+                                <RadzenDropDown Disabled @bind-Value="model.EntType"
+                                                Placeholder="Choose"
+                                                Data="@supervisors"
+                                                Style="width: 100%;"
+                                                Name="Supervisor">
+                                </RadzenDropDown>
+                            </RadzenColumn>
+                        </RadzenRow>
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow AlignItems="AlignItems.Center">
+                    <RadzenColumn Size="12" SizeMD="1">
+                        <RadzenLabel Text="Note" Component="Note" />
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeMD="11">
+                        <RadzenTextArea @bind-Value="model.Description"
+                                        Placeholder="Say something here..."
+                                        class="w-100"
+                                        Name="Note">
+                        </RadzenTextArea>
+                    </RadzenColumn>
+                </RadzenRow>
+            </RadzenStack>
+        </RadzenFieldset>
         <RadzenStack Gap="1rem">
             <RadzenRow>
                 <RadzenColumn Size="12" SizeMD="6">
@@ -204,7 +284,6 @@
                             </RadzenRow>
                         </RadzenStack>
                     </RadzenFieldset>
-
                 </RadzenColumn>
                 <RadzenColumn Size="12" SizeMD="6">
                     <RadzenCard class="rz-m-0 rz-m-md-0 w-100">
@@ -229,90 +308,10 @@
                     </RadzenCard>
                 </RadzenColumn>
             </RadzenRow>
-            <RadzenFieldset Text="Job Details">
-                <RadzenStack Gap="1rem">
-                    <RadzenRow AlignItems="AlignItems.Start">
-                        <RadzenColumn Size="12" SizeMD="6">
-                            <RadzenRow AlignItems="AlignItems.Center">
-                                <RadzenColumn Size="12" SizeMD="2">
-                                    <RadzenLabel Text="Job Title" Component="JobTitle" />
-                                </RadzenColumn>
-                                <RadzenColumn Size="12" SizeMD="10">
-                                    <OccupationDropDown @bind-Value="model.Occupation" />
-                                </RadzenColumn>
-                            </RadzenRow>
-                            <RadzenRow AlignItems="AlignItems.Center" Style="margin-top:15px">
-                                <RadzenColumn Size="12" SizeMD="2">
-                                    <RadzenLabel Text="Department" Component="Department" />
-                                </RadzenColumn>
-                                <RadzenColumn Size="12" SizeMD="10">
-                                    <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-                                                    FilterOperator="StringFilterOperator.Contains"
-                                                    AllowFiltering="true"
-                                                    Data="@Departments"
-                                                    AllowClear="false"
-                                                    TextProperty="@nameof(DepartmentDto.DepartmentName)"
-                                                    ValueProperty="@nameof(DepartmentDto.DepartmentId)"
-                                                    Style="width: 100%;"
-                                                    Name="Department"
-                                                    @bind-Value="model.DepartmentRefId"
-                                                    Placeholder="Select department">
-                                    </RadzenDropDown>
-                                </RadzenColumn>
-                            </RadzenRow>
-                        </RadzenColumn>
-                        <RadzenColumn Size="12" SizeMD="6">
-                            <RadzenRow AlignItems="AlignItems.Center">
-                                <RadzenColumn Size="12" SizeMD="2">
-                                    <RadzenLabel Text="Branch" Component="Branch" />
-                                </RadzenColumn>
-                                <RadzenColumn Size="12" SizeMD="10">
-                                    <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-                                                    FilterOperator="StringFilterOperator.Contains"
-                                                    AllowFiltering="true"
-                                                    Data="@Branches"
-                                                    AllowClear="false"
-                                                    TextProperty="@nameof(BranchDto.BranchName)"
-                                                    ValueProperty="@nameof(BranchDto.BranchId)"
-                                                    class="w-100"
-                                                    @bind-Value="model.BranchRefId"
-                                                    Name="Branch"
-                                                    Placeholder="Select branch">
-                                    </RadzenDropDown>
-                                </RadzenColumn>
-                            </RadzenRow>
-                            <RadzenRow AlignItems="AlignItems.Center" Style="margin-top:15px">
-                                <RadzenColumn Size="12" SizeMD="2">
-                                    <RadzenLabel Text="Supervisor" Component="Supervisor" />
-                                </RadzenColumn>
-                                <RadzenColumn Size="12" SizeMD="10">
-                                    <RadzenDropDown Disabled @bind-Value="model.EntType"
-                                                    Placeholder="Choose"
-                                                    Data="@supervisors"
-                                                    Style="width: 100%;"
-                                                    Name="Supervisor">
-                                    </RadzenDropDown>
-                                </RadzenColumn>
-                            </RadzenRow>
-                        </RadzenColumn>
-                    </RadzenRow>
-                    <RadzenRow AlignItems="AlignItems.Center">
-                        <RadzenColumn Size="12" SizeMD="1">
-                            <RadzenLabel Text="Note" Component="Note" />
-                        </RadzenColumn>
-                        <RadzenColumn Size="12" SizeMD="11">
-                            <RadzenTextArea @bind-Value="model.Description"
-                                            Placeholder="Say something here..."
-                                            class="w-100"
-                                            Name="Note">
-                            </RadzenTextArea>
-                        </RadzenColumn>
-                    </RadzenRow>
-                </RadzenStack>
-            </RadzenFieldset>
         </RadzenStack>
     </ChildContent>
 </RadzenFieldset>
+<AddressBaseCreate model="model" />
 <RadzenFieldset AllowCollapse="true" Collapsed="true" class="rz-my-2">
     <HeaderTemplate>
         <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">

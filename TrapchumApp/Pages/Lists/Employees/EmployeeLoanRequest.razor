@@ -6,12 +6,18 @@
 <RadzenDataGrid Density="Density.Compact"
                 AllowAlternatingRows="true"
                 TItem="VLoanRequests"
+                Responsive="true"
+                AllowColumnPicking="true"
                 Data="@LoanRequests">
+    <HeaderTemplate>
+
+    </HeaderTemplate>
     <Columns>
         <RadzenDataGridColumn Property="@nameof(VLoanRequests.AltName)"
                               Context="c"
                               Width="5rem"
                               TextAlign="TextAlign.Center"
+                              Pickable="false"
                               Title="#">
             <Template>
                 @(LoanRequests.IndexOf(c) + 1)
@@ -29,6 +35,8 @@
                               Title="Aproved By" />
         <RadzenDataGridColumn Property="@nameof(VLoanRequests.AprovedDate)"
                               Title="Aproved Date" FormatString="{0:dd/MM/yyyy}" />
+        <RadzenDataGridColumn Property="@nameof(VLoanRequests.Status)"
+                              Title="Status" />
     </Columns>
 </RadzenDataGrid>
 @code {

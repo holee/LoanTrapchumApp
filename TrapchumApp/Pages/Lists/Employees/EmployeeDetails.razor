@@ -3,148 +3,144 @@
 @using Applications.Responses.ViewModels.Loans.Requests
 @using TrapchumApp.Pages.Identity.Users
 @using TrapchumApp.Services
-<RadzenCard Style="padding:0;box-sizing:border-box;margin:0">
-    <RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal" class="rz-p-2">
-        <AuthorizeView Policy="@RolePolicies.AdminOnly">
-            <Authorized>
-                <RadzenButton Text="Create New User"
-                              ButtonStyle="ButtonStyle.Secondary"
-                              ButtonType="ButtonType.Button"
-                              Click="CreateNewUser"
-                              Size="ButtonSize.ExtraSmall" />
-            </Authorized>
-        </AuthorizeView>
+<RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal" class="rz-p-2">
+    <AuthorizeView Policy="@RolePolicies.AdminOnly">
+        <Authorized>
+            <RadzenButton Text="Create New User"
+                          ButtonStyle="ButtonStyle.Secondary"
+                          ButtonType="ButtonType.Button"
+                          Click="CreateNewUser"
+                          Size="ButtonSize.ExtraSmall" />
+        </Authorized>
+    </AuthorizeView>
 
-    </RadzenStack>
-    <table class="table table-sm table-bordered">
-        <tbody>
-            <tr>
-                <th class="w-25">Name</th>
-                <td>
-                    @Model?.FullName
-                </td>
-                <td rowspan="5">
-                    <RadzenStack Orientation="Orientation.Horizontal"
-                                 AlignItems="AlignItems.Center"
-                                 JustifyContent="JustifyContent.End"
-                                 class="rz-mx-auto rz-my-auto">
-                        <RadzenImage Path="@Model!.Photo"
-                                     Style="width:10rem;height:10rem;"
-                                     AlternateText="Employee Image" />
-                    </RadzenStack>
-                </td>
-            </tr>
-            <tr>
-                <th class="w-25">Date Of Birth</th>
-                <td colspan="2">
-                    @string.Format("{0:dd-MMM-yyyy}", Model?.DateOfBirth)
-                </td>
-            </tr>
-            <tr>
-                <th class="w-25">Gender</th>
-                <td colspan="2">
-                    @Model?.Gender
-                </td>
-            </tr>
-            <tr>
-                <th class="w-25">Marrital Status</th>
-                <td colspan="2">
-                    @Model?.MarritalStatus
-                </td>
-            </tr>
-            <tr>
-                <th class="w-25">Nationality</th>
-                <td colspan="2">
-                    @Model?.Nationality
-                </td>
-            </tr>
-            <tr>
-                <th class="w-25">Phone</th>
-                <td colspan="2">
-                    @Model?.Phone / @Model?.AltPhone
-                </td>
-            </tr>
-            <tr>
-                <th class="w-25"> Email</th>
-                <td colspan="2">
-                    @Model?.EmailAddress
-                </td>
-            </tr>
-            <tr>
-                <th class="w-25">Address</th>
-                <td colspan="2">
-                    @Model?.ToString()
-                </td>
-            </tr>
-            <tr>
-                <th class="w-25">Hire Date</th>
-                <td colspan="2">
-                    @string.Format("{0:dd MMM yyyy}", Model?.HireDate)
-                </td>
-            </tr>
-            <tr>
-                <th class="w-25">End Date</th>
-                <td colspan="2">
-                    @string.Format("{0:dd MMM yyyy}", Model?.EndDate)
-                </td>
-            </tr>
-            <tr>
-                <th class="w-25">Job Title</th>
-                <td colspan="2">
-                    @Model?.Occupation
-                </td>
-            </tr>
-            <tr>
-                <th class="w-25">Department</th>
-                <td colspan="2">
-                    @Model?.DepartmentName
-                </td>
-            </tr>
-            <tr>
-                <th class="w-25">Branch</th>
-                <td colspan="2">
-                    @Model?.BranchName
-                </td>
-            </tr>
-            <tr>
-                <th class="w-25">Description</th>
-                <td colspan="2">
-                    @Model?.Description
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    <RadzenTabs>
-        <Tabs>
-            <RadzenTabsItem Text="Loan Request">
-                <EmployeeLoanRequest LoanRequests="@LoanRequests.ToList()" EmployeeId="@EmployeeId" />
-            </RadzenTabsItem>
-            <RadzenTabsItem Text="Loans">
-                <EmployeeLoanDisburment LoanDisbursments="@LoanDisbursments.ToList()" EmployeeId="@EmployeeId" />
-            </RadzenTabsItem>
-        
-        </Tabs>
-    </RadzenTabs>
+</RadzenStack>
+<table class="table table-sm table-bordered">
+    <tbody>
+        <tr>
+            <th class="w-25">Name</th>
+            <td>
+                @Model?.FullName
+            </td>
+            <td rowspan="5">
+                <RadzenStack Orientation="Orientation.Horizontal"
+                             AlignItems="AlignItems.Center"
+                             JustifyContent="JustifyContent.End"
+                             class="rz-mx-auto rz-my-auto">
+                    <RadzenImage Path="@Model!.Photo"
+                                 Style="width:10rem;height:10rem;"
+                                 AlternateText="Employee Image" />
+                </RadzenStack>
+            </td>
+        </tr>
+        <tr>
+            <th class="w-25">Date Of Birth</th>
+            <td colspan="2">
+                @string.Format("{0:dd-MMM-yyyy}", Model?.DateOfBirth)
+            </td>
+        </tr>
+        <tr>
+            <th class="w-25">Gender</th>
+            <td colspan="2">
+                @Model?.Gender
+            </td>
+        </tr>
+        <tr>
+            <th class="w-25">Marrital Status</th>
+            <td colspan="2">
+                @Model?.MarritalStatus
+            </td>
+        </tr>
+        <tr>
+            <th class="w-25">Nationality</th>
+            <td colspan="2">
+                @Model?.Nationality
+            </td>
+        </tr>
+        <tr>
+            <th class="w-25">Phone</th>
+            <td colspan="2">
+                @Model?.Phone / @Model?.AltPhone
+            </td>
+        </tr>
+        <tr>
+            <th class="w-25"> Email</th>
+            <td colspan="2">
+                @Model?.EmailAddress
+            </td>
+        </tr>
+        <tr>
+            <th class="w-25">Address</th>
+            <td colspan="2">
+                @Model?.ToString()
+            </td>
+        </tr>
+        <tr>
+            <th class="w-25">Hire Date</th>
+            <td colspan="2">
+                @string.Format("{0:dd MMM yyyy}", Model?.HireDate)
+            </td>
+        </tr>
+        <tr>
+            <th class="w-25">End Date</th>
+            <td colspan="2">
+                @string.Format("{0:dd MMM yyyy}", Model?.EndDate)
+            </td>
+        </tr>
+        <tr>
+            <th class="w-25">Job Title</th>
+            <td colspan="2">
+                @Model?.Occupation
+            </td>
+        </tr>
+        <tr>
+            <th class="w-25">Department</th>
+            <td colspan="2">
+                @Model?.DepartmentName
+            </td>
+        </tr>
+        <tr>
+            <th class="w-25">Branch</th>
+            <td colspan="2">
+                @Model?.BranchName
+            </td>
+        </tr>
+        <tr>
+            <th class="w-25">Description</th>
+            <td colspan="2">
+                @Model?.Description
+            </td>
+        </tr>
+    </tbody>
+</table>
+<RadzenTabs>
+    <Tabs>
+        <RadzenTabsItem Text="Loan Request">
+            <EmployeeLoanRequest LoanRequests="@LoanRequests.ToList()" EmployeeId="@EmployeeId" />
+        </RadzenTabsItem>
+        <RadzenTabsItem Text="Loans">
+            <EmployeeLoanDisburment LoanDisbursments="@LoanDisbursments.ToList()" EmployeeId="@EmployeeId" />
+        </RadzenTabsItem>
 
-    <RadzenStack AlignItems="AlignItems.Center"
-                 Orientation="Orientation.Horizontal"
-                 class="rz-p-2"
-                 JustifyContent="JustifyContent.End">
-        <RadzenButton Text="Edit"
-                      Icon="edit"
-                      Click="EditTab"
-                      Size="ButtonSize.ExtraSmall"
-                      ButtonStyle="ButtonStyle.Success"
-                      ButtonType="ButtonType.Button" />
-        <RadzenButton Text="Cancel"
-                      Icon="close"
-                      Click="CloseTab"
-                      Size="ButtonSize.ExtraSmall"
-                      ButtonStyle="ButtonStyle.Danger"
-                      ButtonType="ButtonType.Button" />
-    </RadzenStack>
-</RadzenCard>
-
+    </Tabs>
+</RadzenTabs>
+<RadzenStack AlignItems="AlignItems.Center"
+             Orientation="Orientation.Horizontal"
+             class="rz-p-2"
+             JustifyContent="JustifyContent.End">
+    <RadzenButton Text="Edit"
+                  Icon="edit"
+                  Click="EditTab"
+                  Size="ButtonSize.ExtraSmall"
+                  ButtonStyle="ButtonStyle.Success"
+                  ButtonType="ButtonType.Button" />
+    <RadzenButton Text="Cancel"
+                  Icon="close"
+                  Click="CloseTab"
+                  Size="ButtonSize.ExtraSmall"
+                  ButtonStyle="ButtonStyle.Danger"
+                  ButtonType="ButtonType.Button" />
+</RadzenStack>
 @code
 {
     async Task CreateNewUser()

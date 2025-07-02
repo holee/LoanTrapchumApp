@@ -25,7 +25,7 @@ namespace TrapchumApp.Pages.Lists.OtherNames
 
         List<VLoanGuarantors> LoanGuarantors = [];
 
-        List<VGuarantorLoanRequest> LoanRequest = [];
+        List<VGuarantorsLoanRequest> LoanRequest = [];
 
         List<VGuarantorLoan> Loans = []; 
         protected override async Task OnInitializedAsync()
@@ -38,21 +38,18 @@ namespace TrapchumApp.Pages.Lists.OtherNames
         private async Task GetGuarantorByIdAsync() 
         {
 
-            Console.WriteLine(Id);
+            var rsp = await _gService.GetGuarantorByIdAsync(Id,default);
 
-            var rsp = await _gService.GetGuarantorWithByIdAsync(Id);
-
-            if (rsp.IsSuccess)
+            if (rsp.IsSuccess && rsp.Data is not null)
             {
-                Guarantor = rsp.Data!;
+                Guarantor = rsp.Data;
 
-                LoanRequest = rsp.Data!.LoanRequests.ToList();
+                LoanRequest = Guarantor.LoanRequests.ToList();
 
-                Loans = rsp.Data.Loans.ToList();
+                Loans = Guarantor.GuarantorLoans.ToList();
             }
             else
             {
-
                 NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
             }
 

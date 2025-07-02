@@ -101,8 +101,6 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             var arrowUpKey = args.Code == "ArrowUp" || args.Key == "ArrowUp";
 
 
-
-
             var items = _collateralLines;
 
             var popupOpened = await js.InvokeAsync<bool>("Radzen.popupOpened", "_collateralPopup");

@@ -10,16 +10,20 @@
                 AllowPaging="true"
                 AllowSorting="true"
                 PageSize="10"
+                Responsive="true"
+                AllowColumnPicking="true"
                 Data="@LoanDisbursments">
+    <HeaderTemplate></HeaderTemplate>
     <Columns>
         <RadzenDataGridColumn Property="@nameof(VLoanDisbursments.CustomerId)"
-                                Context="c"
-                              Title="Name">
-                              <Template>
-                                  @(LoanDisbursments.IndexOf(c) + 1)
-                              </Template>
-                          </RadzenDataGridColumn>
-        <RadzenDataGridColumn Property="@nameof(VLoanDisbursments.CustomerName)"
+                              Context="c"
+                              Pickable="false"
+                              Title="#">
+            <Template>
+                @(LoanDisbursments.IndexOf(c) + 1)
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="@nameof(VLoanDisbursments.AltName)"
                               Title="Name" />
         <RadzenDataGridColumn Property="@nameof(VLoanDisbursments.Principle)"
                               Title="Amount" TextAlign="TextAlign.Right" />
@@ -40,10 +44,11 @@
         <RadzenDataGridColumn Property="@nameof(VLoanDisbursments.OutStanding)"
                               Title="OutStanding" TextAlign="TextAlign.Right" />
         <RadzenDataGridColumn Property="@nameof(VLoanDisbursments.LoanStatus)"
+                              TextAlign="TextAlign.Center"
                               Title="Status" />
     </Columns>
 </RadzenDataGrid>
-@code{
+@code {
     [Parameter] public List<VLoanDisbursments> LoanDisbursments { get; set; } = [];
     [Parameter] public string? EmployeeId { get; set; } = string.Empty;
 

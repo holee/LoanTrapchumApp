@@ -1,65 +1,77 @@
-using System.Linq.Expressions;
+using Applications.Requests.Settings;
 using Applications.Responses.Lists.Entities;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
+using Applications.Services.Lists;
+using Domains.Shared.Enums;
+using System.Linq.Expressions;
 
 namespace TrapchumApp.Pages.Lists
 {
     public partial class OccupationDropDown
     {
+        [Parameter] public TypeOfEnum TypeOf { get; set; } = TypeOfEnum.Job;
         [Parameter] public string Id { get; set; } = $"{Guid.NewGuid().ToString("N")}";
         [Parameter] public string Name { get; set; } = $"{Guid.NewGuid().ToString("N")}";
-        [Parameter] public IEnumerable<OcupationResponse> Occuptions { get; set; } = [];
         [Parameter] public string Value { get; set; } = string.Empty;
-        [Parameter] public bool ShowHeader { get; set; } = false;
+        [Parameter] public bool ShowAdd { get; set; } = false;
         [Parameter] public bool AllowClear { get; set; } = false;
-        [Parameter] public string SearchText { get; set; } = string.Empty;
-        [Parameter] public EventCallback<KeyboardEventArgs> AddOnEnter { get; set; }
-        [Parameter] public EventCallback<string> SearchTextChanged { get; set; }
         [Parameter] public EventCallback<string> ValueChanged { get; set; }
         [Parameter] public Expression<Func<string>> ValueExpression { get; set; } = default!;
-        IEnumerable<OcupationResponse> FilterOccuptions { get; set; } = [];
 
-
-        private async Task OnValueChanged(object? newValue)
+        private readonly IOccupationServiceImpl _occupationService;
+        IEnumerable<OcupationResponse> Occuptions { get; set; } = [];
+        public OccupationDropDown(IOccupationServiceImpl occupationService)
         {
-            Value = newValue?.ToString() ?? string.Empty;
-
-            await ValueChanged.InvokeAsync(Value);
+            _occupationService = occupationService;
         }
-        private void OnSearchTextChanged(ChangeEventArgs e)
+
+        protected override async Task OnInitializedAsync()
         {
-            SearchText = e.Value?.ToString() ?? string.Empty;
 
-            SearchTextChanged.InvokeAsync(SearchText);
+            await GetOccupations();
 
-            if (!string.IsNullOrEmpty(SearchText))
+            await base.OnInitializedAsync();
+        }
+
+
+        async Task AddOccupation()
+        {
+            if (string.IsNullOrEmpty(Value)) return;
+
+            var confirm = await DialogService.Confirm("Are you sure you want to add this occupation?", "Confirm", new ConfirmOptions
             {
-                FilterOccuptions = Occuptions.Where(x => x.OccupationTitle!.Contains(SearchText, StringComparison.InvariantCultureIgnoreCase));
+                OkButtonText = "Yes",
+                CancelButtonText = "No"
+            });
+
+            if (confirm == false) return;
+
+            var occupation = new OccupationDtoCreate
+            {
+                OccupationTitle = Value,
+
+                Khmer = string.Empty,
+
+                TypeOf = TypeOfEnum.Position.ToString()
+            };
+
+            var rsp = await _occupationService.CreateAsync(occupation);
+
+            if (!rsp.IsSuccess)
+            {
+                Value = string.Empty;
             }
             else
             {
-                FilterOccuptions = Occuptions;
+                await GetOccupations();
             }
+
         }
 
-        private void OnKeyPress(KeyboardEventArgs e)
+        private async Task GetOccupations(string? filter = null)
         {
-            if (e.Key == "Enter")
-            {
-                AddOnEnter.InvokeAsync(e);
-            }
-        }
-        protected override async Task OnInitializedAsync()
-        {
-            if (!Occuptions.Any())
-            {
-                Occuptions = await _employeeService!.GetOccupationsAsync("Position");
-            }
+            var rsp = await _occupationService.GetOccupations<OcupationResponse>(0, TypeOf, filter);
 
-            FilterOccuptions = Occuptions;
-
-            await base.OnInitializedAsync();
+            Occuptions = rsp.Items ?? [];
         }
 
     }

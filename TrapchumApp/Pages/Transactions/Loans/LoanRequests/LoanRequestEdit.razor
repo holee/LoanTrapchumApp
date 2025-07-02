@@ -131,7 +131,7 @@
 
         foreach (var g in gs)
         {
-            if (Guarantors.Any(x => x.EmployeeRefId == g.Id)) continue;
+            if (Guarantors.Any(x => x.GuarantorId == g.Id)) continue;
 
             var guarantor = new LoanGuarantorLink
             {
@@ -143,16 +143,13 @@
 
             gLinks.GuarantorsLink.Add(guarantor);
 
-            var item = new VLoanRequestGuarantors
+            var item = new VLoanRequestGuarantor
                 {
-                    EmployeeRefId = g.Id,
+                    GuarantorId = g.Id,
                     FullName = g.FullName,
-                    AltName = g.GuarantorName,
+                    GuarantorName = g.GuarantorName,
                     Phone = g.Phone,
-                    VilInKhmer = g.VilInKhmer,
-                    ComInKhmer = g.ComInKhmer,
-                    DisInKhmer = g.DisInKhmer,
-                    ProInKhmer = g.ProInKhmer
+                    Address=g.ToString()
                 };
 
             Guarantors.Add(item);
@@ -176,7 +173,7 @@
     {
         if (g is null || string.IsNullOrEmpty(g.Id)) return;
 
-        if (Guarantors.Any(x => x.EmployeeRefId == g.Id))
+        if (Guarantors.Any(x => x.GuarantorId == g.Id))
         {
             NotificationService.Notify(NotificationSeverity.Info, "Guarantor already exists");
             
@@ -207,16 +204,13 @@
         {
             NotificationService.Notify(NotificationSeverity.Success, rsp.Data);
 
-            var gs = new VLoanRequestGuarantors
+            var gs = new VLoanRequestGuarantor
             {
-                EmployeeRefId = g.Id,
+                GuarantorId = g.Id,
                 FullName = g.FullName,
-                AltName = g.GuarantorName,
+                GuarantorName = g.GuarantorName,
                 Phone = g.Phone,
-                VilInKhmer = g.VilInKhmer,
-                ComInKhmer = g.ComInKhmer,
-                DisInKhmer = g.DisInKhmer,
-                ProInKhmer = g.ProInKhmer
+                Address=g.ToString()
             };
 
             Guarantors.Add(gs);

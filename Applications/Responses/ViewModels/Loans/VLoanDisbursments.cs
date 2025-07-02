@@ -5,6 +5,7 @@ namespace Applications.Responses.ViewModels.Loans;
 public sealed class VLoanDisbursments
 {
     public string? LoanId { get; set; }
+    public string? LoanRequestId { get; set; }
     public int? BranchId { get; set; }
     public string? ContractNumber { get; set; }
     public string? BranchName { get; set; }
@@ -16,6 +17,7 @@ public sealed class VLoanDisbursments
     public DateTime? RegisterDate { get; set; }
     public string? CreditAgentRefId { get; set; }
     public string? AgentName { get; set; }
+    public string? CreditAgentKhmer { get; set; }
     public string? AgentPhone { get; set; }
     public DateTime? FirstPaymentDate { get; set; }
     public int? CurrencyId { get; set; }

@@ -59,7 +59,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
         IEnumerable<LoanInstallmentTypeDto>? LoanInstallments = [];
 
-        List<VLoanRequestGuarantors> Guarantors = [];
+        List<VLoanRequestGuarantor> Guarantors = [];
 
         List<VLoanRequestCollateralLines> requestCollateralLines = [];
 
@@ -175,18 +175,15 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
             foreach (var g in gs)
             {
-                if (Guarantors.Any(x => x.EmployeeRefId == g.Id)) continue;
+                if (Guarantors.Any(x => x.GuarantorId == g.Id)) continue;
 
-                var item = new VLoanRequestGuarantors
+                var item = new VLoanRequestGuarantor
                 {
-                    EmployeeRefId = g.Id,
+                    GuarantorId = g.Id,
                     FullName = g.FullName,
-                    AltName = g.GuarantorName,
+                    GuarantorName = g.GuarantorName,
                     Phone = g.Phone,
-                    VilInKhmer = g.VilInKhmer,
-                    ComInKhmer = g.ComInKhmer,
-                    DisInKhmer = g.DisInKhmer,
-                    ProInKhmer = g.ProInKhmer
+                    Address=g.ToString(),
                 };
 
 
@@ -201,19 +198,16 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         {
             if (g is null || string.IsNullOrEmpty(g.Id)) return;
 
-            var gs = new VLoanRequestGuarantors
+            var gs = new VLoanRequestGuarantor
             {
-                EmployeeRefId = g.Id,
+                GuarantorId = g.Id,
                 FullName = g.FullName,
-                AltName = g.GuarantorName,
+                GuarantorName = g.GuarantorName,
                 Phone = g.Phone,
-                VilInKhmer = g.VilInKhmer,
-                ComInKhmer = g.ComInKhmer,
-                DisInKhmer = g.DisInKhmer,
-                ProInKhmer = g.ProInKhmer
+               Address= g.ToString(),
             };
 
-            if (Guarantors.Any(x => x.EmployeeRefId == g.Id))
+            if (Guarantors.Any(x => x.GuarantorId == g.Id))
             {
                 NotificationService.Notify(NotificationSeverity.Info, "Guarantor already exists");
 
@@ -234,39 +228,9 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
             bool? results = await DialogService.OpenAsync<GuarantorAddModal>("Add New Guarantor", options: options);
 
-
-
-
-            //IList<VGuarantor> results =
-            //    await DialogService.OpenAsync<GuarantorsList>("Select Guarantor", options: options);
-
-            //if (results is not null && results.Any())
-            //{
-            //    var gs = results.Select(g => new VLoanRequestGuarantors
-            //    {
-            //        EmployeeRefId = g.Id,
-            //        FullName = g.FullName,
-            //        AltName = g.GuarantorName,
-            //        Phone = g.Phone,
-            //        VilInKhmer = g.VilInKhmer,
-            //        ComInKhmer = g.ComInKhmer,
-            //        DisInKhmer = g.DisInKhmer,
-            //        ProInKhmer = g.ProInKhmer
-            //    });
-            //    foreach (var item in gs)
-            //    {
-            //        if (Guarantors.Contains(item)) continue;
-
-            //        Guarantors.Add(item);
-            //    }
-
-            //    await GuarantorRef.GuarantorReload();
-            //}
-
-
         }
 
-        async void RemoveGaurantor(VLoanRequestGuarantors g)
+        async void RemoveGaurantor(VLoanRequestGuarantor g)
         {
             var confirm = await DialogService.Confirm("Do you want to remove this guarantor?", "Remove Guarantor");
 
@@ -416,48 +380,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             await base.OnInitializedAsync();
         }
 
-        async Task GetLoanRequestInfo()
-        {
-            try
-            {
-                isLoading = true;
 
-
-                if (CustomerId.IsNullOrEmpty())
-                {
-                    await GetCustomers(CustomerId, 10);
-
-                    SetDefault();
-
-                    isLoading = false;
-
-                    return;
-                }
-
-                if (CustomerId.IsNotNullOrEmpty())
-                {
-                    await GetCustomers(CustomerId, 1);
-
-                    model.CustomerRefId = CustomerId;
-
-                    FullName = Customers.FirstOrDefault()?.FullName;
-
-                    model.FullName = Customers.FirstOrDefault()?.FullName;
-
-                    model.CustomerRefId = CustomerId;
-
-                    SetDefault();
-
-                    isLoading = false;
-
-                    return;
-                }
-            }
-            catch (Exception ex)
-            {
-                NotificationService.Notify(NotificationSeverity.Error, ex.Message);
-            }
-        }
 
         private async Task GetCustomers(string? customerId, int take = 25, string? filter = null)
         {
@@ -525,7 +448,9 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             if (!string.IsNullOrEmpty(model.Memo))
             {
                 var descriptions = new LoanDescriptionsDtoCreate(model.Memo, UserId);
+
                 model.LoanDescriptions.Add(descriptions);
+
             }
 
             model.GuarantorsLink.AddRange(oldGuarantors);
@@ -537,8 +462,6 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             var documents = Documents.LoanDocumentDtoCreate();
 
             model.LoanDocuments.AddRange(documents);
-
-
 
             editForm.EditContext!.Validate();
 
@@ -588,33 +511,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         }
 
 
-        void PrincipleValueChanged(decimal? principle)
-        {
-            if (!principle.HasValue || principle < 0)
-            {
-                NotificationService.Notify(NotificationSeverity.Warning, "Invalid principle input");
-                model.RequestAmount = 0.00M;
-                return;
-            }
 
-            if (principle <= 50000)
-            {
-                model.CurrencyRefId = 2;
-                model.AdminFeeAmount = (principle * (model.AdminFeeRate / 100)).RoundUp(2);
-                return;
-            }
-            else
-            {
-                model.CurrencyRefId = 1;
-                model.AdminFeeAmount = (principle * (model.AdminFeeRate / 100)).RoundUp(-2);
-                return;
-            }
-        }
-
-        async Task PeriodChanged()
-        {
-            await GetHolidays(model.Installments!.Value);
-        }
 
         private async Task GetHolidays(int period)
         {
@@ -652,44 +549,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             model.FirstPaymentDate = firstPayment;
         }
 
-        void ChangedDate(DateTime? date)
-        {
-            if (installmentType == 1)
-            {
-                firstPayment = date!.Value.AddMonths(1);
-            }
 
-            if (installmentType == 2)
-            {
-                firstPayment = date!.Value.AddDays(14);
-            }
-
-            if (installmentType == 3)
-            {
-                firstPayment = date!.Value.AddDays(7);
-            }
-
-            if (installmentType == 4)
-            {
-                firstPayment = date!.Value.AddDays(1);
-            }
-
-            HolidayHelper.SetHoliday(Holidays, ref firstPayment);
-
-            model.FirstPaymentDate = firstPayment;
-        }
-
-        void CalculateAdminFeeAmount(decimal? value)
-        {
-            if (model.CurrencyRefId == 1)
-            {
-                model.AdminFeeAmount = (model.RequestAmount * (value / 100)).RoundUpKhr(2);
-            }
-            else
-            {
-                model.AdminFeeAmount = (model.RequestAmount * (value / 100)).RoundUp(2);
-            }
-        }
 
         void SetDefault()
         {
@@ -712,6 +572,117 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
     }
 }
 
+
+//void PrincipleValueChanged(decimal? principle)
+//{
+//    if (!principle.HasValue || principle < 0)
+//    {
+//        NotificationService.Notify(NotificationSeverity.Warning, "Invalid principle input");
+//        model.RequestAmount = 0.00M;
+//        return;
+//    }
+
+//    if (principle <= 50000)
+//    {
+//        model.CurrencyRefId = 2;
+//        model.AdminFeeAmount = (principle * (model.AdminFeeRate / 100)).RoundUp(2);
+//        return;
+//    }
+//    else
+//    {
+//        model.CurrencyRefId = 1;
+//        model.AdminFeeAmount = (principle * (model.AdminFeeRate / 100)).RoundUp(-2);
+//        return;
+//    }
+//}
+
+//async Task PeriodChanged()
+//{
+//    await GetHolidays(model.Installments!.Value);
+//}
+
+
+//void ChangedDate(DateTime? date)
+//{
+//    if (installmentType == 1)
+//    {
+//        firstPayment = date!.Value.AddMonths(1);
+//    }
+
+//    if (installmentType == 2)
+//    {
+//        firstPayment = date!.Value.AddDays(14);
+//    }
+
+//    if (installmentType == 3)
+//    {
+//        firstPayment = date!.Value.AddDays(7);
+//    }
+
+//    if (installmentType == 4)
+//    {
+//        firstPayment = date!.Value.AddDays(1);
+//    }
+
+//    HolidayHelper.SetHoliday(Holidays, ref firstPayment);
+
+//    model.FirstPaymentDate = firstPayment;
+//}
+
+//void CalculateAdminFeeAmount(decimal? value)
+//{
+//    if (model.CurrencyRefId == 1)
+//    {
+//        model.AdminFeeAmount = (model.RequestAmount * (value / 100)).RoundUpKhr(2);
+//    }
+//    else
+//    {
+//        model.AdminFeeAmount = (model.RequestAmount * (value / 100)).RoundUp(2);
+//    }
+//}
+
+//async Task GetLoanRequestInfo()
+//{
+//    try
+//    {
+//        isLoading = true;
+
+
+//        if (CustomerId.IsNullOrEmpty())
+//        {
+//            await GetCustomers(CustomerId, 10);
+
+//            SetDefault();
+
+//            isLoading = false;
+
+//            return;
+//        }
+
+//        if (CustomerId.IsNotNullOrEmpty())
+//        {
+//            await GetCustomers(CustomerId, 1);
+
+//            model.CustomerRefId = CustomerId;
+
+//            FullName = Customers.FirstOrDefault()?.FullName;
+
+//            model.FullName = Customers.FirstOrDefault()?.FullName;
+
+//            model.CustomerRefId = CustomerId;
+
+//            SetDefault();
+
+//            isLoading = false;
+
+//            return;
+//        }
+//    }
+//    catch (Exception ex)
+//    {
+//        NotificationService.Notify(NotificationSeverity.Error, ex.Message);
+//    }
+//}
 
 //void SelectedChargeModeChanged(object e)
 //{

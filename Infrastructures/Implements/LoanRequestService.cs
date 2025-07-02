@@ -1437,23 +1437,6 @@ public sealed class LoanRequestService(
     }
 
 
-    //private async Task<bool> CheckExistingLoanRequestAsync(string customerRefId, CancellationToken cancellationToken)
-    //{
-    //    await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
-    //    return await context.LoanRequests
-    //        .AnyAsync(x => x.CustomerRefId == customerRefId &&
-    //                      x.LoanRequestStatusRefId == (int)RequestStatus.New,
-    //                      cancellationToken);
-    //}
-
-    //private async Task<bool> CheckExistingHasLoanAsync(string customerRefId, CancellationToken cancellationToken)
-    //{
-    //    await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
-    //    return await context.LoanDisbursments
-    //        .AnyAsync(x => x.CustomerRefId == customerRefId &&
-    //                      x.LoanStatusRefId == (int)LoanStatus.,
-    //                      cancellationToken);
-    //}
 
 
     private async Task<bool> CheckExistingLoanRequest(string? customerId)
@@ -1474,22 +1457,22 @@ public sealed class LoanRequestService(
     }
 
 
-    private async Task<IEnumerable<VLoanRequestGuarantors>> GetLoanGuarantors(string? loanRequestId, int? branchId)
+    private async Task<IEnumerable<VLoanRequestGuarantor>> GetLoanGuarantors(string? loanRequestId, int? branchId)
     {
         if (!branchId.HasValue || string.IsNullOrEmpty(loanRequestId))
         {
-            return Enumerable.Empty<VLoanRequestGuarantors>();
+            return Enumerable.Empty<VLoanRequestGuarantor>();
         }
 
         using var db = await dapperFactory.CreateConnectionAsync();
 
         const string sql = @"
-        SELECT * 
-        FROM VLoanRequestGuarators 
-        WHERE LoanRequestRefId = @LoanRequestId 
-          AND BranchRefId = @BranchId;";
+                            SELECT * 
+                            FROM VLoanRequestGuarantors 
+                            WHERE LoanRequestRefId = @LoanRequestId 
+                            AND BranchId = @BranchId;";
 
-        return await db.QueryAsync<VLoanRequestGuarantors>(
+        return await db.QueryAsync<VLoanRequestGuarantor>(
             sql,
             new { LoanRequestId = loanRequestId, BranchId = branchId }
         );
@@ -1610,6 +1593,26 @@ public sealed class LoanRequestService(
     }
 
 }
+
+
+//private async Task<bool> CheckExistingLoanRequestAsync(string customerRefId, CancellationToken cancellationToken)
+//{
+//    await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+//    return await context.LoanRequests
+//        .AnyAsync(x => x.CustomerRefId == customerRefId &&
+//                      x.LoanRequestStatusRefId == (int)RequestStatus.New,
+//                      cancellationToken);
+//}
+
+//private async Task<bool> CheckExistingHasLoanAsync(string customerRefId, CancellationToken cancellationToken)
+//{
+//    await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+//    return await context.LoanDisbursments
+//        .AnyAsync(x => x.CustomerRefId == customerRefId &&
+//                      x.LoanStatusRefId == (int)LoanStatus.,
+//                      cancellationToken);
+//}
+
 //resultQueries.Guarantors = await GetLoanGuarantors(loanRequestId, branchId);
 
 //resultQueries.Collaterals = await GetLoanCollateralLines(loanRequestId, branchId);

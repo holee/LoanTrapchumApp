@@ -9,9 +9,6 @@ using Applications.Requests.Transactions.LoanTransactions;
 using Applications.Responses.ViewModels.Currencies;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Services.Transactions.Currencies;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
-using Radzen;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 {
@@ -202,15 +199,15 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
                     c.SellLedgerRefId = 1;
                     c.SpotRate = selectedCurrency!.SpotRate;
                 }
-                model.ForeignExchanges!.Add(c);
+                //model.ForeignExchanges!.Add(c);
 
-                var resultExchanged = await _exchangeServiceImpl.Exchange(model);
+                //var resultExchanged = await _exchangeServiceImpl.Exchange(model);
 
-                if (!resultExchanged.IsSuccess)
-                {
-                    NotificationService.Notify(NotificationSeverity.Error, resultExchanged.ErrMessage);
-                    return;
-                }
+                //if (!resultExchanged.IsSuccess)
+                //{
+                //    NotificationService.Notify(NotificationSeverity.Error, resultExchanged.ErrMessage);
+                //    return;
+                //}
 
                 var confirmPayment = await DialogService.Confirm("Please make sure that money receive amount is correct",
                 "Confirm Payment", new ConfirmOptions
@@ -229,6 +226,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
                 if (resultResponse.IsSuccess)
                 {
                     NotificationService.Notify(NotificationSeverity.Success, resultResponse.Data);
+                   
                     DialogService.Close(true);
                 }
                 else

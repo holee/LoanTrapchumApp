@@ -2,29 +2,34 @@ using Applications.Extensions;
 using Applications.Requests.Lists.Addreses;
 using Applications.Requests.Lists.Entities;
 using Applications.Requests.Lists.OtherNames;
+using Applications.Requests.Settings;
 using Applications.Responses.Lists.Entities;
 using Applications.Responses.Paginations;
+using Applications.Responses.ViewModels;
 using Applications.Services.Files;
 using Applications.Services.Lists;
 using Domains.Models.Files;
 using Domains.Models.Lists;
+using Domains.Shared.Enums;
 
 namespace TrapchumApp.Pages.Lists.Employees
 {
     public partial class EmployeeComp
     {
-        [Parameter, EditorRequired] public EntityEmployeeCreate model { get; set; } = new(); 
+        [Parameter, EditorRequired] public EntityEmployeeCreate model { get; set; } = new();
         [Parameter] public EventCallback<bool> OnClose { get; set; }
 
         private readonly ISalutationServiceImpl _salutationService;
         private readonly INationalityServiceImpl _nationalityService;
         private readonly IDepartmentServiceImpl _departmentService;
-        public EmployeeComp(ISalutationServiceImpl salutationService, INationalityServiceImpl nationalityService, IDepartmentServiceImpl departmentService, IFileUploadServiceImp fileUploadService)
+        private readonly IOccupationServiceImpl _occupationService;
+        public EmployeeComp(ISalutationServiceImpl salutationService, INationalityServiceImpl nationalityService, IDepartmentServiceImpl departmentService, IFileUploadServiceImp fileUploadService, IOccupationServiceImpl occupationService)
         {
             _salutationService = salutationService;
             _nationalityService = nationalityService;
             _departmentService = departmentService;
             _fileUploadService = fileUploadService;
+            _occupationService = occupationService;
         }
         long? fileSize;
         IEnumerable<int> relations = new List<int> { 1, 2, 3, 4 };
@@ -36,7 +41,7 @@ namespace TrapchumApp.Pages.Lists.Employees
         IEnumerable<BranchDto> Branches = [];
         IEnumerable<DepartmentDto> Departments = [];
         IEnumerable<Nationality> Nationalities = [];
-        IEnumerable<OcupationResponse> Occuptions = [];
+        IEnumerable<OcupationResponse> Occupations = [];
         IEnumerable<string> Cities = [];
         protected FileModel? fileModelDTO;
         protected EditForm? editForm;
@@ -73,11 +78,44 @@ namespace TrapchumApp.Pages.Lists.Employees
 
             Nationalities = await _nationalityService!.GetNationalities();
 
-            Occuptions = await _employeeService!.GetOccupationsAsync("Position");
+            var rsp = await _occupationService.GetOccupations<OcupationResponse>(0, TypeOfEnum.Position.ToString());
+
+            Occupations = rsp.Items ?? [];
 
             await GetSalutations();
 
             StateHasChanged();
+        }
+        async Task AddOccupation()
+        {
+            if (!string.IsNullOrEmpty(model.Occupation))
+            {
+                var occupation = new OccupationDtoCreate
+                {
+                    OccupationTitle = model.Occupation,
+
+                    Khmer = string.Empty,
+
+                    TypeOf = TypeOfEnum.Position.ToString()
+                };
+
+                var rsp = await _occupationService.CreateAsync(occupation);
+
+                if (!rsp.IsSuccess)
+                {
+                    model.Occupation = string.Empty;
+                }
+                else
+                {
+                    await GetOccupations();
+                }
+            }
+        }
+
+
+        private async Task GetOccupations(string? filter = "Job")
+        {
+            Occupations = await _employeeService.GetOccupationsAsync(filter);
         }
 
         IEnumerable<string> Salutations { get; set; } = [];
