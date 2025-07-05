@@ -6,20 +6,22 @@ using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans;
 using Domains.Models.Loans;
 
-namespace Applications.Services.Loans
-{
-    public interface ILoanServiceImpl
-    {
-        Task<Result<string>> ChangedCreditAgent(int? branchId, LoanChangedCaDtoCreate req);
-        Task<Result<string>> ChangedCreditAgent(int? branchId, List<LoanChangedCaDtoCreate> req);
-        Task<Result<bool>> CreateLoanAsync(LoanDtoCreate req);
-        Task<Result<string>> DeleteAsync(string? loanId, int? branchId);
-        Task<Result<string>> UpdateAsync(LoanDisbursment disbursement);  
-        Task<Pager<VLoanDisbursments>> GetLoansByBranchIdAsync(int? branchId, string? userId, LoanStatuses status = LoanStatuses.Active, QueryParam? param = null, CancellationToken cancellation = default);
-        Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus status, bool include = false, CancellationToken cancellation = default);
-    }
+namespace Applications.Services.Loans;
 
+public interface ILoanServiceImpl
+{
+    Task<Result<string>> ChangedCreditAgent(int? branchId, List<LoanChangedCaDtoCreate> req);
+    Task<Result<bool>> CreateLoanAsync(LoanDtoCreate req);
+    Task<Result<string>> DeleteAsync(string? loanId, int? branchId);
+    Task<Result<string>> UpdateAsync(LoanDisbursment disbursement);  
+    Task<Pager<VLoanDisbursments>> GetLoansByBranchIdAsync(int? branchId, string? userId, LoanStatuses status = LoanStatuses.Active, QueryParam? param = null, CancellationToken cancellation = default);
+    Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus status, bool include = false, CancellationToken cancellation = default);
+    Task<Result<VLoanDisbursments>> GetLoanByCreditAgentIdAsync(string? creditAgentId,string? loanId, int? branchId, CancellationToken cancellation = default);
+    Task<Pager<VLoanDisbursments>> GetLoanByCreditAgentsAsync(string? creditAgentId, int? branchId, CancellationToken cancellation = default);
+     
 }
+
+
 
 //Task<Pager<VLoanDisbursments>> GetLoansByBranchIdAsync(int? branchId, string? userId, LoanStatuses status = LoanStatuses.Active, QueryParam? param = null);  
 

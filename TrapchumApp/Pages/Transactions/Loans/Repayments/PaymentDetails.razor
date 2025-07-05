@@ -28,7 +28,7 @@
                                     @bind-Value="SelectedSchedules"
                                     ColumnWidth="15rem"
                                     CellRender="CellRender"
-                                    Style="min-height:30rem;height:30rem;max-height:35rem;"
+                                    RowDoubleClick="@OnRowDoubleClick"
                                     TItem="VSchedule">
                         <Columns>
                             <RadzenDataGridColumn Property="@(nameof(VSchedule.InstallmentNo))"

@@ -4,6 +4,7 @@
 @using Applications.Responses.ViewModels.Employees
 @using Domains.Models.Addresses
 @using Microsoft.AspNetCore.Components.Web
+@using TrapchumApp.Helpers.Extensions
 @using TrapchumApp.Services
 <PageTitle>Employees</PageTitle>
 <style>
@@ -78,7 +79,18 @@
                             @(Employees.IndexOf(c) + 1)
                         </Template>
                     </RadzenDataGridColumn>
-                    <RadzenDataGridColumn Title="Name" Property="@nameof(VEmployeeList.AltName)" />
+                    <RadzenDataGridColumn Title="Name" Property="@nameof(VEmployeeList.AltName)" Context="e">
+                        <Template>
+                            <div class="wellNameFormat">
+                                <span class="first">
+                                    @e.AltName?.WellFormName().First
+                                </span>
+                                <span class="second">
+                                    @e.AltName?.WellFormName().Last
+                                </span>
+                            </div>
+                        </Template>
+                    </RadzenDataGridColumn>
                     <RadzenDataGridColumn Title="Phone" Property="@nameof(VEmployeeList.Phone)" />
                     <RadzenDataGridColumn Title="Email"
                                           Sortable="false"

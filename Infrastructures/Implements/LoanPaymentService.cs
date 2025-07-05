@@ -58,22 +58,86 @@ public class LoanPaymentService(DataContext context, IDbContextFactory<DataConte
     }
 
 
-    public async Task<Result<string>> RecievePayment(LoanTransaction req)
+
+    public async Task<Result<string>> CreatePayment(LoanTransaction req, CancellationToken cancellation = default)
+    {
+        await using var db = await dbContextFactory.CreateDbContextAsync(cancellation);
+      
+        await using var tranx = await db.Database.BeginTransactionAsync(cancellation);
+
+        try
+        {
+            var payment = db.LoanTransaction.Add(req).Entity;
+
+            await db.SaveChangesAsync(cancellation);
+
+            var schedules = payment.LoanPayment?.LoanRepaymentLines ?? [];
+
+            if (schedules.Any())
+            {
+                var scheduleIds = schedules.Select(x => x.LoanScheduleRefId).ToList();
+                var installmentNos = schedules.Select(x => x.InstallmentNo).ToList();
+
+                // Fetch related VSchedules in one go
+                var scheduleStatusMap = await db.VSchedules
+                    .Where(x =>
+                        x.BranchId == req.LoanPayment!.BranchRefId &&
+                        x.LoanId == req.LoanPayment.LoanRefId &&
+                        scheduleIds.Contains(x.LoanScheduleId ?? 0))
+                    .Select(x => new
+                    {
+                        x.LoanScheduleId,
+                        x.InstallmentNo,
+                        Status = x.LeftAmount == 0 ? ScheduleStatus.Paid : ScheduleStatus.Partial
+                    })
+                    .ToListAsync(cancellation);
+
+                // Bulk update LoanSchedules
+                foreach (var group in scheduleStatusMap.GroupBy(x => x.Status))
+                {
+                    var scheduleIdList = group.Select(x => x.LoanScheduleId).ToList();
+                    var installmentList = group.Select(x => x.InstallmentNo).ToList();
+
+                    await db.LoanSchedules
+                        .Where(x =>
+                            x.LoanRefId == req.LoanPayment!.LoanRefId &&
+                            x.BranchId == req.LoanPayment.BranchRefId &&
+                            scheduleIdList.Contains(x.LoanScheduleId) &&
+                            installmentList.Contains(x.InstallmentNo))
+                        .ExecuteUpdateAsync(x => x.SetProperty(p => p.ScheduleStatusRefId, (int)group.Key));
+                }
+            }
+
+            await CloseLoanSchedule(db, req.LoanPayment?.BranchRefId, req.LoanPayment?.LoanRefId);
+
+            await tranx.CommitAsync(cancellation);
+
+            return Result.Success<string>("Payment successfully.");
+        }
+        catch (Exception ex)
+        {
+            await tranx.RollbackAsync(cancellation);
+            return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}"));
+        }
+    }
+
+
+
+    public async Task<Result<string>> RecievePayment(LoanTransaction req, CancellationToken cancellation = default)
     {
 
-        await using var db = await dbContextFactory.CreateDbContextAsync();
+        await using var db = await dbContextFactory.CreateDbContextAsync(cancellation);
 
-
-        using var tranx = await db.Database.BeginTransactionAsync();
+        using var tranx = await db.Database.BeginTransactionAsync(cancellation);
 
         try
         {
 
             var payment = db.LoanTransaction.Add(req).Entity;
 
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(cancellation);
 
-            var schedules = payment.LoanPayment?.LoanRepaymentLines?.ToList();
+            var schedules = payment.LoanPayment?.LoanRepaymentLines ?? [];
 
             if (schedules is not null && schedules.Any())
             {
@@ -87,14 +151,14 @@ public class LoanPaymentService(DataContext context, IDbContextFactory<DataConte
 
             await CloseLoanSchedule(db, req.LoanPayment?.BranchRefId, req.LoanPayment?.LoanRefId);
 
-            await tranx.CommitAsync();
+            await tranx.CommitAsync(cancellation);
 
             return Result.Success<string>(new("Payment successfully."));
 
         }
         catch (Exception ex)
         {
-            await tranx.RollbackAsync();
+            await tranx.RollbackAsync(cancellation);
 
             return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}"));
         }
@@ -194,9 +258,9 @@ public class LoanPaymentService(DataContext context, IDbContextFactory<DataConte
         }
         // Use parameterized query to get LeftAmount
         var leftAmount = await db.VSchedules
-                                 .Where(x=>x.LoanScheduleId==scheduleId &&
-                                           x.LoanId==loanId &&
-                                           x.BranchId==branchId)
+                                 .Where(x => x.LoanScheduleId == scheduleId &&
+                                           x.LoanId == loanId &&
+                                           x.BranchId == branchId)
                                  .Select(x => x.LeftAmount)
                                  .FirstOrDefaultAsync();
 
@@ -204,13 +268,16 @@ public class LoanPaymentService(DataContext context, IDbContextFactory<DataConte
 
         // Update schedule status
         await db.LoanSchedules
-            .Where(x => x.LoanScheduleId == scheduleId && x.LoanRefId == loanId && x.BranchId == branchId && x.InstallmentNo == installmentId)
-            .ExecuteUpdateAsync(x => x.SetProperty(p => p.ScheduleStatusRefId, (int)statusId));
+                .Where(x => x.LoanScheduleId == scheduleId &&
+                            x.LoanRefId == loanId &&
+                            x.BranchId == branchId &&
+                            x.InstallmentNo == installmentId)
+                .ExecuteUpdateAsync(x => x.SetProperty(p => p.ScheduleStatusRefId, (int)statusId));
     }
-
 
     private async Task CloseLoanSchedule(DataContext db, int? branchId, string? loanId)
     {
+
         if (!branchId.HasValue && !string.IsNullOrEmpty(loanId))
         {
             return; // Skip if parameters are invalid
@@ -224,9 +291,10 @@ public class LoanPaymentService(DataContext context, IDbContextFactory<DataConte
                                                   x.OutStanding == 0);
         if (existingLoans)
         {
-            db.LoanDisbursments
-                 .Where(x => x.LoanId == loanId & x.BranchRefId == branchId)
-                 .ExecuteUpdate(p => p.SetProperty(x => x.LoanStatusRefId, (int)LoanStatuses.Close));
+            await db.LoanDisbursments
+                  .Where(x => x.LoanId == loanId & x.BranchRefId == branchId)
+                  .ExecuteUpdateAsync(p => p.SetProperty(x => x.LoanStatusRefId, (int)LoanStatuses.Close)
+                                       .SetProperty(x => x.ModifiedDt, DateTime.Now));
         }
     }
 
@@ -271,12 +339,12 @@ public class LoanPaymentService(DataContext context, IDbContextFactory<DataConte
     {
         await using var db = await dbContextFactory.CreateDbContextAsync();
 
-        var queries = await db.Database
-                            .SqlQuery<VSchedule>($"SELECT * FROM VSchedules WHERE BranchId={branchId} AND LoanId={loanRefId} AND ScheduleStatusId=1")
+        var queries = await db.VSchedules
+                            .Where(x => x.BranchId == branchId && x.LoanId == loanRefId && x.ScheduleStatusId == (int)ScheduleStatus.Paid)
                             .AsNoTracking()
                             .Select(x => new VSchedule
                             {
-                                LoanScheduleId=x.LoanScheduleId,
+                                LoanScheduleId = x.LoanScheduleId,
                                 InstallmentNo = x.InstallmentNo,
                                 PaymentDate = x.PaymentDate,
                                 Principle = x.Principle,

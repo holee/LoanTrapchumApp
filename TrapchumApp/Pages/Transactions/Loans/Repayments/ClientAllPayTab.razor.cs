@@ -3,9 +3,6 @@ using Applications.Responses.ViewModels.Branches;
 using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Services.Loans;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
-using Radzen;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 {
@@ -30,7 +27,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
         protected IEnumerable<VBranchResponse> Branches = [];
         protected string filterText = string.Empty;
         int counts = 0;
-        int pageSize = 10;
+        int pageSize = 15;
         int pageIndex = 1;
         bool isLoading = false;
         bool isProgess = false;
@@ -39,9 +36,11 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
         bool sortDescending = true;
 
         DateTime paymentDate = DateTime.Now;
-        void ChangedPageSize(int page)
+        async Task ChangedPageSize(int page)
         {
             pageSize = page;
+            pageIndex = 0;
+            await GetLoansAsync();
         }
 
         async Task GetCount()
@@ -58,11 +57,13 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
         {
             await GetLoansAsync();
         }
+
         void GetPaymentSchedules(VSchedule p)
         {
-            NavigationManager.NavigateTo($"/Loans/{p.LoanId}/Schedules?BranchId={p.BranchId}&CreditAgentId={p.CreditAgentId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
+            NavigationManager.NavigateTo($"/App/Loans/{p.BranchId}/Branches/{p.LoanId}/Schedules?CreditAgentId={p.CreditAgentId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
             return;
         }
+
 
         void CustomerPayOff(VSchedule p)
         {

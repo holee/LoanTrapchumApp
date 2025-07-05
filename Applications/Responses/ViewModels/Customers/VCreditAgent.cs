@@ -3,7 +3,6 @@
 public sealed class VCreditAgent
 {
     public string? EmployeeRefId { get; set; }
-    public string? Name { get; set; }
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
     public string? AltName { get; set; }

@@ -6,14 +6,6 @@ namespace Applications.Calculations
 {
     public static class LoanBuilderExtension
     {
-        //public static IEnumerable<ScheduleLine> CreateSchedules(this LoanDtoCreate req, List<DateTimeOffset> holidays)
-        //{
-        //    var app = Calculators.CreateBuilder(req).Build();
-
-        //    return app.CreateSchedules(req, holidays);
-
-        //}
-
         public static IEnumerable<ScheduleLine> CreateSchedules(this LoanDtoCreate req)
         {
             var app = Calculators.CreateBuilder(req).Build();

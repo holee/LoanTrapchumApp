@@ -4,6 +4,7 @@ using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Responses.ViewModels.Employees;
+using Domains.Models.Lists.CreditAgents;
 using Domains.Models.Loans;
 using Mapster;
 
@@ -28,17 +29,21 @@ namespace Applications.Services.Lists
             return await crService.AddCreditAgent(employeeRefId, model);
         }
 
+        public async Task<Result<string>> ChangeCreditAgents(int? branchId, List<LoanChangedCaDtoCreate> req)
+        {
+
+            var model = req.Adapt<List<LoanChangedCa>>();
+
+            return await crService.ChangedCreditAgents(branchId, model);
+        }
+
+
         public async Task<Result<IEnumerable<VCreditAgent>>> GetCreditAgents(bool includeInactive = false, string? query = null)
         {
             return await crService.GetCreditAgents(includeInactive, query);
         }
 
-        public async Task<Pager<VCreditAgent>> GetCreditAgents(QueryParam param)
-        {
-            return await crService.GetCreditAgents(0,param);
-        }
-
-        public async Task<Pager<VCreditAgent>> GetCreditAgents(int? branchId,QueryParam param)
+        public async Task<Pager<VCreditAgent>> GetCreditAgents(int? branchId, QueryParam param)
         {
             return await crService.GetCreditAgents(branchId, param);
         }
@@ -48,13 +53,9 @@ namespace Applications.Services.Lists
             return await crService.GetEmployeeCreateCreditAgents(query);
         }
 
-        public async Task<Pager<VEmployeeCreditAgent>> GetEmployeeCreditAgents(int? branchId,string? employeeId,QueryParam param)
+        public async Task<Pager<VEmployeeCreditAgent>> GetEmployeeCreditAgents(int? branchId, string? employeeId, QueryParam param)
         {
-            return await crService.GetEmployeeCreditAgents(branchId,employeeId,param);
-        }
-        public async Task<Result> UpdateCreditAgent(string? id, LoanCreditAgent req)
-        {
-            return await crService.UpdateCreditAgent(id, req);
+            return await crService.GetEmployeeCreditAgents(branchId, employeeId, param);
         }
 
         public Task<Result<string>> UpdateCreditAgent(string id, LoanCreditAgentDtoUpdate req)

@@ -1,6 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using Applications.Requests.Loans.Payments;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Payments;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Applications.Responses.ViewModels.Loans.Schedules;
 
@@ -50,4 +51,8 @@ public sealed class VSchedule
     [NotMapped] public bool IsPaid => ScheduleStatusId == 1;
     [NotMapped] public bool IsPartialPaid => ScheduleStatusId == 4;
     [NotMapped] public List<LoanPaymentLineVm> PaymentLines { get; set; } = [];
+
+
+
+    
 }

@@ -1,4 +1,5 @@
-﻿using Applications.Responses.ViewModels.Loans;
+﻿using Applications.Enumerations;
+using Applications.Responses.ViewModels.Loans;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -28,7 +29,7 @@ namespace Infrastructures.DataAccess.Configurations.LoanDisbursements
             builder.Property(x => x.OutStanding).HasPrecision(18, 3);
             builder.Property(x => x.CurrencyName).HasMaxLength(30);
             builder.Property(x => x.AgentName).HasMaxLength(100);
-            builder.HasQueryFilter(x => x.LoanStatus == "Active");
+            builder.HasQueryFilter(x => x.LoanStatus == LoanStatuses.Active.ToString());
             builder.HasMany(x => x.Schedules)
                 .WithOne()
                 .HasForeignKey(x => new {x.LoanId,x.BranchId });

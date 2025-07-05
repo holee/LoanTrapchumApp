@@ -31,6 +31,12 @@ namespace Infrastructures.Implements
         IDbContextFactory<DataContext> dbContextFactory)
         : ILoanService
     {
+
+
+
+
+
+
         public async Task<Result<string>> CreateLoanAsync(LoanDtoCreate req)
         {
             await using var trans = await context.Database.BeginTransactionAsync();
@@ -164,7 +170,7 @@ namespace Infrastructures.Implements
 
             parameter.Add("@CustomerId", customerId);
 
-            var sql =$@"SELECT LoanRequestId,RequestAmount,CustomerId 
+            var sql = $@"SELECT LoanRequestId,RequestAmount,CustomerId 
                         FROM VLoanRequests 
                         WHERE CustomerId=@CustomerId AND 
                               StatusId NOT IN (4)";
@@ -265,7 +271,7 @@ namespace Infrastructures.Implements
             }
         }
 
-        public async Task<Result<string>> ChangedCreditAgents(int? branchId, List<LoanChangedCaDtoCreate> req)
+        public async Task<Result<string>> ChangedCreditAgents(int? branchId, List<LoanChangedCa> req)
         {
             var trx = context.Database.BeginTransaction();
             try
@@ -327,7 +333,7 @@ namespace Infrastructures.Implements
             await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);
 
             var queries = context.VLoanDisbursements
-                                 .Where(x=>x.BranchId==branchId)
+                                 .Where(x => x.BranchId == branchId)
                                  .WhereIf((int)status > 0, x => x.LoanstatusId == (int)status)
                                  .WhereIf(!string.IsNullOrEmpty(creditAgentId), x => x.CreditAgentRefId == creditAgentId);
 
@@ -342,12 +348,12 @@ namespace Infrastructures.Implements
 
             if (param!.SortDescending)
             {
-                queries=queries.OrderByDescending(x=>EF.Property<object>(x,param!.SortColumn));
+                queries = queries.OrderByDescending(x => EF.Property<object>(x, param!.SortColumn));
             }
 
-            var counts =await queries.CountAsync(cancellation);
+            var counts = await queries.CountAsync(cancellation);
 
-            var items =await queries.Skip(param!.Skip).Take(param!.PageSize)
+            var items = await queries.Skip(param!.Skip).Take(param!.PageSize)
                             .AsNoTracking()
                             .ToListAsync(cancellation);
 
@@ -428,7 +434,7 @@ namespace Infrastructures.Implements
 
 
 
-        public async Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus status, bool include = false,CancellationToken cancellation=default)
+        public async Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus status, bool include = false, CancellationToken cancellation = default)
         {
 
             await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);
@@ -436,7 +442,7 @@ namespace Infrastructures.Implements
             var queries = context.VLoanDisbursements
                                      .Where(x => x.LoanId == loanId && x.BranchId == branchId)
                                      .AsNoTracking();
-            
+
 
             if (!include && queries.Any())
             {
@@ -452,13 +458,13 @@ namespace Infrastructures.Implements
             int?[] filter = status switch
             {
                 ScheduleStatus.Paid => [1],
-                ScheduleStatus.Unpaid => [2,4],
-                ScheduleStatus.All => [1,2,4],
-                _ => [1,2,4]
+                ScheduleStatus.Unpaid => [2, 4],
+                ScheduleStatus.All => [1, 2, 4],
+                _ => [1, 2, 4]
             };
 
-            var item1 =await queries
-                                .Include(x => x.Schedules!.Where(x =>x.LoanId==loanId && filter.Contains(x.ScheduleStatusId)))
+            var item1 = await queries
+                                .Include(x => x.Schedules!.Where(x => x.LoanId == loanId && filter.Contains(x.ScheduleStatusId)))
                                 .AsNoTracking()
                                 .AsSplitQuery()
                                 .FirstOrDefaultAsync(cancellation);
@@ -560,6 +566,36 @@ namespace Infrastructures.Implements
             return Result.Success(result);
         }
 
+
+
+        public async Task<VLoanDisbursments?> GetLoanByCreditAgentIdAsync(string? creditAgentId, string? loanId, int? branchId, CancellationToken cancellation = default)
+        {
+            await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+            var query = await context.VLoanDisbursements
+                                    .FirstOrDefaultAsync(x => x.CreditAgentRefId == creditAgentId &&
+                                              x.LoanId == loanId &&
+                                              x.BranchId == branchId);
+            return query;
+        }
+
+        public async Task<Pager<VLoanDisbursments>> GetLoanByCreditAgentAsync(string? creditAgentId, int? branchId, CancellationToken cancellation = default)
+        {
+            await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+            var query = context.VLoanDisbursements
+                                      .Where(x => x.CreditAgentRefId == creditAgentId &&
+                                                                x.BranchId == branchId 
+                                                                )
+                                      .OrderByDescending(x => x.RegisterDate)
+                                      .AsNoTracking();
+
+            var counts = await query.CountAsync(cancellation);
+
+            var items = await query.AsNoTracking().ToListAsync(cancellation);
+
+            return new Pager<VLoanDisbursments>(items, counts);
+        }
 
     }
 }

@@ -2,7 +2,7 @@
 using Microsoft.VisualBasic;
 namespace Applications.Calculations;
 
-internal class CalculatorExtensions
+internal static class CalculatorExtensions
 {
     internal static decimal TotalPay(decimal? principal, decimal? interestRate, decimal? collectionFee = 0)
     {
@@ -17,7 +17,7 @@ internal class CalculatorExtensions
     internal static decimal PaidPrincipal(int? currencyId, decimal? amount, int? nper)
     {
 
-        if (currencyId == 1) return (amount / nper).RoundDown(-2);
+        if (currencyId == 1) return (amount / nper).RoundDown(-3);
 
         return (amount / nper).RoundDown(3);
 

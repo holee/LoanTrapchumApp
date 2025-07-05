@@ -10,6 +10,7 @@ using Infrastructures.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Data;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Infrastructures.Implements
 {
@@ -157,21 +158,41 @@ namespace Infrastructures.Implements
 
         public async Task<Pager<VSchedule>> GetLoanSchedulesByPaymentDateAsync(DateTimeOffset? paymentDate, int? branchId, bool isIncludeLate = false, bool isLateOnly = false, QueryParam? param = null)
         {
-            var items = await _context.Database.SqlQuery<VSchedule>($"""
-                                                                    EXEC spGetVSchedulesByPaymentDate
-                                                                    {branchId},
-                                                                    {paymentDate},
-                                                                    {isIncludeLate},
-                                                                    {isLateOnly},
-                                                                    {param?.Skip},
-                                                                    {param?.PageSize},
-                                                                    {param?.Filter}
-                                                                    """)
-                                            .AsNoTracking()
-                                            .ToListAsync();
-            var counts = items.Count();
+            
+            using var db = _connectionFactory.CreateConnection();
 
-            return new Pager<VSchedule>(items, counts);
+            param ??= new QueryParam();
+
+            var pageNumber = (int)Math.Floor((param.Skip) / (double)(param.PageSize)) + 1;
+
+            var parameters = new DynamicParameters();
+
+            parameters.Add("@BranchId", branchId ?? 0, DbType.Int32);
+
+            parameters.Add("@PaymentDate", paymentDate?.DateTime ?? DateTime.Now, DbType.DateTime);
+
+            parameters.Add("@IsIncludeLate", isIncludeLate, DbType.Boolean);
+
+            parameters.Add("@IsLateOnly", isLateOnly, DbType.Boolean);
+
+            parameters.Add("@PageNumber", pageNumber, DbType.Int32);
+
+            parameters.Add("@PageSize", param.PageSize, DbType.Int32);
+
+            parameters.Add("@Filter", param.Filter ?? string.Empty, DbType.String);
+
+
+            var result = await db.QueryAsync<VSchedule>(ProcedureConstant.SpGetVSchedulesByPaymentDate,
+                                    parameters,
+                                    commandType: CommandType.StoredProcedure
+                                );
+
+            var items=result.ToList();
+
+            return new Pager<VSchedule>(items, items.Count);
+
+
+
         }
 
 

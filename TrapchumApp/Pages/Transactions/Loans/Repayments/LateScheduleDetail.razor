@@ -14,7 +14,7 @@
                 @ref="grid"
                 TItem="VSchedule"
                 Responsive="true"
-                Data="LateSchedules">
+                Data="@LateSchedules">
     <Columns>
         <RadzenDataGridColumn Title="#"
                               Width="2rem"
@@ -28,15 +28,19 @@
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Title="Date"
-                              Width="6rem"
+                              Width="10rem"
                               Property="PaymentDate"
                               Context="p">
             <Template>
-                @p.PaymentDate.DayFirst()
-                <br />
                 <small>
-                    @p.PaymentDate!.Value.DayOfWeek
+                    <span>
+                        @p.PaymentDate.DayFirst() &ndash;
+                        <small>
+                            @p.PaymentDate!.DayName()
+                        </small>
+                    </span>
                 </small>
+              
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Title="Late"
@@ -59,15 +63,6 @@
                 @p.TotalDay
             </Template>
         </RadzenDataGridColumn>
-        <RadzenDataGridColumn Title="Rate"
-                              Width="4rem"
-                              Property="InterestRate"
-                              TextAlign="TextAlign.Right"
-                              Context="p">
-            <Template>
-                @p.InterestRate
-            </Template>
-        </RadzenDataGridColumn>
         <RadzenDataGridColumn Title="Principle"
                               Width="8rem"
                               Property="Principal"
@@ -77,7 +72,7 @@
                 @p.Principle.Format(p.CurrencyId)
             </Template>
             <FooterTemplate>
-                @LateSchedules.Sum(p => p.Principle)
+                @LateSchedules.Sum(p => p.Principle).Format(currencyId)
             </FooterTemplate>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Title="Interest"
@@ -90,7 +85,7 @@
                 @p.Interest.Format(p.CurrencyId)
             </Template>
             <FooterTemplate>
-                @LateSchedules.Sum(p => p.Interest)
+                @LateSchedules.Sum(p => p.Interest).Format(currencyId)
             </FooterTemplate>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Title="Collection Fee"
@@ -102,7 +97,7 @@
                 @p.CollectionFee.Format(p.CurrencyId)
             </Template>
             <FooterTemplate>
-                @LateSchedules.Sum(p => p.CollectionFee)
+                @LateSchedules.Sum(p => p.CollectionFee).Format(currencyId)
             </FooterTemplate>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Title="Penalty"
@@ -114,7 +109,7 @@
                 @p.PenaltyAmount.Format(p.CurrencyId)
             </Template>
             <FooterTemplate>
-                @LateSchedules.Sum(p => p.PenaltyAmount)
+                @LateSchedules.Sum(p => p.PenaltyAmount).Format(currencyId)
             </FooterTemplate>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Title="Total"
@@ -126,7 +121,7 @@
                 @p.TotalPay.Format(p.CurrencyId)
             </Template>
             <FooterTemplate>
-                @LateSchedules.Sum(p => p.TotalPay)
+                @LateSchedules.Sum(p => p.TotalPay).Format(currencyId)
             </FooterTemplate>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Title="Outstanding"
@@ -147,7 +142,7 @@
              JustifyContent="JustifyContent.End">
     <RadzenButton Size="ButtonSize.ExtraSmall"
                   ButtonStyle="ButtonStyle.Success"
-                  Click="RecievePayments"
+                  Click="@RecievePayments"
                   Text="Receive Payment" Icon="paid">
 
     </RadzenButton>

@@ -1,0 +1,40 @@
+﻿@typeparam TItem
+<RadzenCheckBox TabIndex="-1"
+                TriState="true"
+                TValue="bool?"
+                InputAttributes="@(new Dictionary<string, object> { { "aria-label", "Select all items" } })"
+                Value="@GetSelectAllCheckboxState"
+                Change="OnHeaderCheckboxChanged" />
+
+@code {
+    [Parameter]
+    public IEnumerable<TItem> AllItems { get; set; } = [];
+
+    [Parameter]
+    public IList<TItem>? SelectedItems { get; set; }
+
+    [Parameter]
+    public EventCallback<IList<TItem>> SelectedItemsChanged { get; set; }
+
+    private bool? GetSelectAllCheckboxState // => SelectedItems == null || SelectedItems?.Any() != true ? false : !AllItems.All(i => SelectedItems.Contains(i)) ? null : AllItems.Any(i => SelectedItems.Contains(i));
+    {
+        get
+        {
+            if (SelectedItems == null || !SelectedItems.Any())
+                return false;
+
+            if (!AllItems!.All(item => SelectedItems.Contains(item)))
+                return null;
+
+            return true;
+        }
+
+    }
+
+    private async Task OnHeaderCheckboxChanged(bool? isChecked)
+    {
+        SelectedItems = isChecked == true ? AllItems?.ToList() : null;
+
+        await SelectedItemsChanged.InvokeAsync(SelectedItems);
+    }
+}

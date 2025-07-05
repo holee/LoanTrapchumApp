@@ -1,13 +1,11 @@
 using Applications.Calculations;
+using Applications.Commons.Mappers;
 using Applications.Enumerations;
 using Applications.Requests.Loans.Payments;
 using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Services.Loans;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.JSInterop;
-using Radzen;
+using Domains.Models.Loans;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments;
 public partial class PaymentDetails
@@ -25,10 +23,12 @@ public partial class PaymentDetails
     [Parameter, SupplyParameterFromQuery] public int CurrencyId { get; set; }
     [Parameter, SupplyParameterFromQuery] public string? CreditAgentId { get; set; }
     [Parameter, SupplyParameterFromQuery] public string? UserId { get; set; }
-   
+
     private VLoanDisbursments? loanSchedule = new();
 
     IList<VSchedule> SelectedSchedules = [];
+
+    IEnumerable<VSchedule> Schedules = [];
 
     bool collapse = false;
     string collapseIcon = "expand_more";
@@ -50,88 +50,109 @@ public partial class PaymentDetails
 
     }
 
+    void OnRowDoubleClick()
+    {
+
+    }
+
+
     void ShowPaidSchedules()
     {
         ContextMenuService.Close();
+
         selectedTabIndex = 1;
     }
 
-    async void PayBySchedules(VSchedule p)
+    async Task PayBySchedules(VSchedule p)
     {
         ContextMenuService.Close();
 
-        List<LoanPaymentLineDtoCreate> loanRepaymentLines = [];
+        var schedulesList = loanSchedule?.Schedules?.ToList();
 
-        if (p.IsPaid)
+        var firstSchedule = schedulesList?.First();
+
+        if (p != firstSchedule)
         {
+            NotificationService.Notify(NotificationSeverity.Warning, "Cannot add new schedule due to previouse schedule not complete paid yet.");
             return;
         }
 
-        var schedules = loanSchedule!.Schedules!.ToList();
-
-        int selectedIndex = schedules.IndexOf(p);
-
-        if (selectedIndex > 0)
+        if (p.IsPaid)
         {
-            var preSchedule = schedules[selectedIndex - 1];
+            NotificationService.Notify(NotificationSeverity.Warning, "This schedule is already paid.");
 
-            if (!preSchedule.IsPaid)
-            {
-                NotificationService.Notify(NotificationSeverity.Info, "Previous schedule not pay yet.");
-
-                return;
-            }
+            return;
         }
-        var options = new DialogOptions { };
 
-        var paymentCreate = p.ToPaymentDtoCreate();
+        decimal? total = p.SubTotal();
 
-        var line = p.ToPaymentLine(paymentCreate);
+        List<LoanPaymentLineDtoCreate> loanRepaymentLines = [];
 
-        loanRepaymentLines.Add(line);
-        PaymentCreate create = new PaymentCreate();
-        create.TotalAmountWithPenalty = loanRepaymentLines.Total();
-        create.OriginalPaidAmount = loanRepaymentLines.TotalAmountWithPenalty();
-        create.TotalAmountNoPenalty = loanRepaymentLines.TotalAmountWithPenalty();
-        create.PenaltyAmount = loanRepaymentLines.Sum(x => x.PaidPenaltyAmount);
-        create.OriginalPenaltyAmount = loanRepaymentLines.Sum(x => x.PaidPenaltyAmount);
-        create.RecieptNumber = "";
-        if (CurrencyId == 1)
+        PaymentDtoCreate recievePayment = new();
+
+        var line = p?.ToPaymentLine(recievePayment);
+
+        if (line is not null)
         {
-            create.RecieveKhrAmount = loanRepaymentLines.Total();
+            loanRepaymentLines.Add(line);
         }
-        else
+
+        if (!loanRepaymentLines.Any())
         {
-            create.RecieveAmount = loanRepaymentLines.Total();
+            NotificationService.Notify(NotificationSeverity.Error, "There is any schedule selected yet!");
+
+            return;
         }
-        create.ChangeAmount = 0;
-        create.ChangeKhrAmount = 0;
-        var data = new Dictionary<string, object?>
-        {
-                {"LoanRepaymentLines" , loanRepaymentLines},
-                {"PaymentCreate" ,create},
-                {"CurrencyId" , CurrencyId},
-                {"LoanId" , LoanId},
-                {"CreditAgentId" , CreditAgentId},
-                { "BranchId",BranchId },
-                { "ReceiptNo",receiptNo },
-                { "CustomerName",p.AltName},
-                {"UserId",UserId}
+
+        var loanPaymentLine = p!.MapToLoanPaymentLine();
+
+        var create = loanRepaymentLines.ToPaymentCreate(CurrencyId); 
+
+        var options = new DialogOptions 
+        { 
+            Resizable = false,
+             
+            Draggable = true,
+
+            CssClass = "rz-p-1 rz-m-0 rz-background-color-base-200"
         };
 
 
-        bool confirm = await DialogService.OpenAsync<PaymentModal>("Confirm", data, options);
+        var loanPayment = loanSchedule?.Create(UserId, "");
 
-        if (confirm)
+        if (loanPayment is null)
         {
-            await GetLoanSchedulesById(ScheduleStatus.Unpaid);
+            NotificationService.Notify(NotificationSeverity.Error, "There is any problem with payment");
+
+            return;
         }
+
+        loanPayment.LoanPaymentLines.Add(loanPaymentLine);
+        {
+            var parameters = new Dictionary<string, object?>();
+
+            parameters.Add("CurrencyId", CurrencyId);
+
+            parameters.Add("LoanPaymentCreate", loanPayment);
+
+            var message = $"Recieve Payment from {loanSchedule!.AltName}";
+
+            bool? confirm = await DialogService.OpenAsync<PaymentModal>(message, parameters, options);
+
+            if (confirm is not null && confirm == true)
+            {
+                NotificationService.Notify(NotificationSeverity.Success, "Receive successfully.");
+            }
+
+        }
+
     }
     void GetPaymentSchedules()
     {
         ContextMenuService.Close();
 
         NavigationManager.NavigateTo($"/App/Loans/{BranchId}/Branches/{LoanId}/Schedules?CreditAgentId={CreditAgentId}&CurrencyId={CurrencyId}&UserId={UserId}");
+       
         return;
     }
 
@@ -152,26 +173,23 @@ public partial class PaymentDetails
     {
         isVible = true;
 
-        var resultResponse = await _dService.GetLoanByIdAsync(LoanId, BranchId, status,true,default);
+        var rsp = await _dService.GetLoanByIdAsync(LoanId, BranchId, status, true, default);
 
-        if (resultResponse.IsSuccess)
+        if (rsp.IsSuccess)
         {
-            loanSchedule = resultResponse.Data!;
+            loanSchedule = rsp.Data!;
         }
         else
         {
             loanSchedule = new();
 
-            NotificationService.Notify(NotificationSeverity.Info, resultResponse.ErrMessage);
+            NotificationService.Notify(NotificationSeverity.Info, rsp.ErrMessage);
         }
 
         isVible = false;
 
         StateHasChanged();
     }
-
-
-
 
     async Task ShowScheduleDetails(VSchedule p)
     {
@@ -228,3 +246,84 @@ public partial class PaymentDetails
         //await js.InvokeVoidAsync("downloadFileFromStream", "Schedule.pdf", streamRef);
     }
 }
+
+
+
+//var schedules = loanSchedule!.Schedules!.ToList();
+
+//int selectedIndex = schedules.IndexOf(p);
+
+//if (selectedIndex > 0)
+//{
+//    var preSchedule = schedules[selectedIndex - 1];
+
+//    if (!preSchedule.IsPaid)
+//    {
+//        NotificationService.Notify(NotificationSeverity.Info, "Previous schedule not pay yet.");
+
+//        return;
+//    }
+//}
+//var options = new DialogOptions { };
+
+//var paymentCreate = p.ToPaymentDtoCreate();
+
+//var line = p.ToPaymentLine(paymentCreate);
+
+//loanRepaymentLines.Add(line);
+//PaymentCreate create = new PaymentCreate();
+//create.TotalAmountWithPenalty = loanRepaymentLines.Total();
+//create.OriginalPaidAmount = loanRepaymentLines.TotalAmountWithPenalty();
+//create.TotalAmountNoPenalty = loanRepaymentLines.TotalAmountWithPenalty();
+//create.PenaltyAmount = loanRepaymentLines.Sum(x => x.PaidPenaltyAmount);
+//create.OriginalPenaltyAmount = loanRepaymentLines.Sum(x => x.PaidPenaltyAmount);
+//create.RecieptNumber = "";
+//if (CurrencyId == 1)
+//{
+//    create.RecieveKhrAmount = loanRepaymentLines.Total();
+//}
+//else
+//{
+//    create.RecieveAmount = loanRepaymentLines.Total();
+//}
+//create.ChangeAmount = 0;
+//create.ChangeKhrAmount = 0;
+//var data = new Dictionary<string, object?>
+//{
+//        {"LoanRepaymentLines" , loanRepaymentLines},
+//        {"PaymentCreate" ,create},
+//        {"CurrencyId" , CurrencyId},
+//        {"LoanId" , LoanId},
+//        {"CreditAgentId" , CreditAgentId},
+//        { "BranchId",BranchId },
+//        { "ReceiptNo",receiptNo },
+//        { "CustomerName",p.AltName},
+//        {"UserId",UserId}
+//};
+
+
+//bool confirm = await DialogService.OpenAsync<PaymentModal>("Confirm", data, options);
+
+//if (confirm)
+//{
+//    await GetLoanSchedulesById(ScheduleStatus.Unpaid);
+//}
+
+//var loanPayment = new LoanPaymentDtoCreate
+//{
+//    LoanRefId = LoanId,
+
+//    CreditAgentRefId = CreditAgentId,
+
+//    BranchRefId = BranchId,
+
+//    CurrencyRefId = CurrencyId,
+
+//    UserRefId = UserId,
+
+//    PayDate = DateTime.Now,
+
+//    CustomerName = loanSchedule!.AltName,
+
+//    OfficialReceiptNo = loanPaymentLine.OfficialReceiptNo
+//};

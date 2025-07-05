@@ -42,7 +42,7 @@
                     <td>@LoanSchedule?.CurrencyName</td>
                     <th>Amount</th>
                     <td>
-                        @(string.Format("{0:#,###.00}", LoanSchedule?.Amount))
+                        @(string.Format("{0:#,###.00}", LoanSchedule?.Principle))
                     </td>
                     <th>Phone</th>
                     <td>@LoanSchedule?.Phone</td>
@@ -82,6 +82,10 @@
                     <td>@LoanSchedule?.PaidInterest.Format(LoanSchedule.CurrencyId)</td>
                     <th>Total Paid Collection Fee</th>
                     <td>@LoanSchedule?.PaidCollectionFee.Format(LoanSchedule.CurrencyId)</td>
+                </tr>
+                <tr>
+                    <th>OutStanding</th>
+                    <td colspan="5">@LoanSchedule?.OutStanding.Format(LoanSchedule.CurrencyId)</td>
                 </tr>
             </tbody>
         </table>

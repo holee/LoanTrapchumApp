@@ -9,7 +9,7 @@ namespace Applications.Commons.Mappers
     public static class ScheduleMapper
     {
 
-        public static LoanPaymentLineDtoCreate MapTo(this VSchedule s) => new LoanPaymentLineDtoCreate
+        public static LoanPaymentLineDtoCreate MapToLoanPaymentLine(this VSchedule s) => new LoanPaymentLineDtoCreate
         {
             LoanRefId = s.LoanId,
             LoanScheduleRefId = s!.LoanScheduleId,
@@ -27,7 +27,7 @@ namespace Applications.Commons.Mappers
 
         public static List<LoanPaymentLineDtoCreate> MapsTo(this IEnumerable<VSchedule> source)
         {
-            return source.Select(x => x.MapTo()).ToList();
+            return source.Select(x => x.MapToLoanPaymentLine()).ToList();
         }
 
 

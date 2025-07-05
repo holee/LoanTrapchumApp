@@ -44,10 +44,12 @@ table.table th {
     background-color: var(--rz-base-200);
 }
 
-/*table td{
-    line-height:normal !important;
+.rz-data-row {
+    background-color: yellowgreen;
+    color: red;
+    cursor: pointer;
 }
-*/
+
 .rz-grid-table thead th {
     background-color: #d4d5d6 !important;
 }
@@ -60,12 +62,61 @@ a, .btn-link {
     color: #006bb7;
 }
 
+.wellNameFormat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+    .wellNameFormat .first {
+        flex: 2;
+        display: block;
+        color:red;
+    }
+
+    .wellNameFormat .second {
+        flex: 3;
+        display: block;
+        text-align: left;
+        color:hotpink;
+    }
+
+.address {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+    .address .province {
+        flex: 3;
+        display: block;
+        color: red;
+    }
+
+    .address .district {
+        flex: 3;
+        display: block;
+        text-align: left;
+        color: rebeccapurple;
+    }
+
+    .address .commune {
+        flex: 3;
+        display: block;
+        text-align: left;
+        color: blueviolet;
+    }
+
+    .address .village {
+        flex: 3;
+        display: block;
+        text-align: left;
+        color: deeppink
+    }
 
 .rz-grid-table td .rz-cell-data {
-
     line-height: normal !important;
-
-/*    font-size: 0.8rem;*/
+    /*    font-size: 0.8rem;*/
 }
 
 
@@ -81,14 +132,14 @@ a, .btn-link {
 
 .recently-edited {
     animation: fadeBackground 3s ease-in-out forwards;
-    font-style:italic;
-    font-weight:700;
-    color: darkred;
+    font-style: italic;
+    font-weight: 500;
+    color: palevioletred;
 }
 
 @Keyframes fadeBackground {
     0% {
-        background-color: #ffe6e6;
+        background-color: aliceblue;
     }
 
     100% {
@@ -224,6 +275,7 @@ h1:focus {
     font-weight: 900;
     src: url('line-awesome/fonts/la-solid-900.woff2') format('woff2');
 }
+
 .fa {
     --rz-icon-font-family: 'Font Awesome'
 }

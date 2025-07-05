@@ -66,25 +66,26 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 
         void ChangeCreditAgent(VLoanDisbursments p)
         {
-            NavigationManager.NavigateTo($"/Loan/CreditAgent/{p.LoanId}/Changed?CustomerId={p.CustomerId}&BranchId={p.BranchId}&CreditAgentId={p.CreditAgentRefId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
+            NavigationManager.NavigateTo($"/App/Loan/{p.LoanId}/CreditAgent/{p.CreditAgentRefId}?CustomerId={p.CustomerId}&BranchId={p.BranchId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
+           
             return;
         }
         void CustomerPayOff(VLoanDisbursments p)
         {
-            NavigationManager.NavigateTo($"/Loan/CreditAgent/{p.LoanId}/Changed?CustomerId={p.CustomerId}&BranchId={p.BranchId}&CreditAgentId={p.CreditAgentRefId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
+            NavigationManager.NavigateTo($"/Loan/CreditAgent/{p.LoanId}/{p.CreditAgentRefId}?CustomerId={p.CustomerId}&BranchId={p.BranchId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
             return;
         }
         protected override async Task OnInitializedAsync()
         {
             await GetLoanDisbursements();
+
             await GetLoanCount();
+
             await base.OnInitializedAsync();
         }
 
         private async Task LoadData(LoadDataArgs args)
         {
-            pageIndex = args.Skip!.Value == 0 ? 1 : args.Skip!.Value;
-
             pageIndex = args.Skip ?? 0;
 
             (sortField, sortDescending) = args.PageInfo();

@@ -21,7 +21,7 @@
         public const string GetCurrencyNotesByBranchId = "GetCurrencyNotesByBranchId";
         public const string SpGetSchedulesByLoanId = nameof(SpGetSchedulesByLoanId);
         public const string SpGetLoansByBranchId = nameof(SpGetLoansByBranchId);
-        public const string SpGetVSchedulesByPaymentDate = nameof(SpGetVSchedulesByPaymentDate);
+        public const string SpGetVSchedulesByPaymentDate = nameof(SpGetVSchedulesByPaymentDate);//spGetVSchedulesByPaymentDate
         public const string SpGetLateVSchedules = nameof(SpGetLateVSchedules);
         /// <summary>
         /// Employee Store Procedures

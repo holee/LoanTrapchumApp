@@ -51,7 +51,11 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
                         { "BranchId",BranchId },
                         { "PaymentDate",paymentDate}
                     };
-            var sideOptions = new SideDialogOptions() { Width = "50rem",CloseDialogOnOverlayClick=true };
+            var sideOptions = new SideDialogOptions() { 
+                Width = "70vw",
+                CloseDialogOnOverlayClick=true,
+                ShowMask = true,
+            };
 
             await DialogService.OpenSideAsync<LateScheduleDetail>("Late Schedule Detail", parameters, sideOptions);
 
@@ -103,6 +107,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
         async void GetLoanDataFilter(string filter)
         {
             filterText = filter;
+
             await GetCustomerLateSchedules();
         }
 

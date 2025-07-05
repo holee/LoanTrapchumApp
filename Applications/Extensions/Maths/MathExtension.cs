@@ -202,9 +202,9 @@ namespace Applications.Extensions.Maths
         {
             return currencyId switch
             {
-                1 => (MarkupString)string.Format("{0:#,00.00} {1}", d, "&#6107;"),
-                2 => (MarkupString)string.Format("{0:#,00.00} {1}", d, "&dollar;"),
-                _ => (MarkupString)string.Format("{0:#,00.00} {1}", d, "&#6107;"),
+                1 => (MarkupString)string.Format("{0:##,0.00} {1}", d, "&#6107;"),
+                2 => (MarkupString)string.Format("{0:##,0.00} {1}", d, "&dollar;"),
+                _ => (MarkupString)string.Format("{0:##,0.00} {1}", d, "&#6107;"),
             };
         }
 

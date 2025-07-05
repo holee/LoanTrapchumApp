@@ -7,8 +7,8 @@
         public string? OldCreditAgentRefId { get; set; }
         public string? NewCreditAgentRefId { get; set; }
         public string? StaffId { get; set; }
-        public string? StaffAuthId  { get; set; }
-        public DateTime? MonetaDate { get; set; }
-        public DateTime? WindowDate { get; set; }
+        public string? StaffAuthId { get; set; }
+        public DateTime? MonetaDate { get; set; } = DateTime.Now;
+        public DateTime? WindowDate { get; set; } = DateTime.Now;
     }
 }

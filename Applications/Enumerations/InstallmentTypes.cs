@@ -5,7 +5,7 @@ namespace Applications.Enumerations
     public enum CollectionFeeModes
     {  
         [Description("Flat")]
-        Flat = 1,
+        IRR = 1,
         [Description("Declined")]
         Declined = 2,
     }

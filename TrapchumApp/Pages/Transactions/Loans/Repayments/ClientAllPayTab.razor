@@ -1,9 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Components.Web
 @using TrapchumApp.Services
-<PageDropDown PageSizeChanged="ChangedPageSize"
-              OnTextChanged="TextLoanSearchChanged"
-              ShowSearchBox="true">
-    <RightChildContent>
+<GridToolbar SearchChanged="@TextLoanSearchChanged">
+    <RightChildren>
         <RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal">
             <RadzenCheckBox TValue="bool"
                             @bind-Value="includeInactive"
@@ -12,23 +10,25 @@
             <RadzenLabel Text="Include Inactive"
                          Component="IncludeInactive" class="rz-ms-2" />
         </RadzenStack>
-    </RightChildContent>
-</PageDropDown>
-<RadzenDataGrid Data="ScheduleItems"
+    </RightChildren>
+</GridToolbar>
+<RadzenDataGrid Data="@ScheduleItems"
                 TItem="VSchedule"
                 Count="@counts"
-                PageSize="pageSize"
+                PageSize="@pageSize"
                 Density="Density.Compact"
                 GridLines="DataGridGridLines.Both"
                 LoadData="LoadData"
-                AllowSorting="true"
+                AllowSorting="false"
                 RowSelect="RowSelected"
                 Responsive="true"
                 PagerPosition="PagerPosition.Bottom"
                 ShowPagingSummary="true"
                 PagerHorizontalAlign="HorizontalAlign.Right"
-                IsLoading="isLoading"
+                IsLoading="@isLoading"
                 AllowRowSelectOnRowClick="true"
+                PageSizeOptions="@StorageConstant.PageSizeOptions"
+                PageSizeChanged="@ChangedPageSize"
                 AllowPaging="true">
     <Columns>
         <RadzenDataGridColumn Context="p"
@@ -152,6 +152,9 @@
         <RadzenMenuItem Icon="money"
                         Click="@(()=>GetPaymentSchedules(p))"
                         Text="Recieve Payment"></RadzenMenuItem>
+        <RadzenMenuItem Icon="money"
+                    Click="@(()=>GetPaymentSchedules(p))"
+                    Text="Schedule Details"></RadzenMenuItem>
         <RadzenMenuItem Icon="paid"
                         Click="@(()=>CustomerPayOff(p))"
                         Text="PayOff"></RadzenMenuItem>

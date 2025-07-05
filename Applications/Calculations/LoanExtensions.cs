@@ -25,15 +25,34 @@ namespace Applications.Calculations
             SubTotal = p.SubTotal()
         };
 
- 
+
+        public static LoanPaymentLineDtoCreate ToPaymentLine(this VSchedule s,
+            decimal? RecievePrincipleAmount,
+            decimal RecieveInterestAmount,
+            decimal? RecieveCollectionFeeAmount,
+            decimal? PenaltyAmountAmount) => new LoanPaymentLineDtoCreate
+            {
+                LoanRefId = s.LoanId,
+                LoanScheduleRefId = s!.LoanScheduleId,
+                InstallmentNo = s!.InstallmentNo,
+                NumberOfDay = s!.TotalDay,
+                DayArrea = s.DayArrea,
+                PayDate = s!.PaymentDate,
+                BranchRefId = s.BranchId,
+                SubTotal = (RecievePrincipleAmount + RecieveInterestAmount + RecieveInterestAmount + PenaltyAmountAmount),
+                PaidPrinciple = RecievePrincipleAmount,
+                PaidInterest = RecieveInterestAmount,
+                PaidCollectionFee = RecieveInterestAmount,
+                PaidPenaltyAmount = PenaltyAmountAmount,
+            };
 
         public static List<LoanPaymentLineDtoCreate> ToPaymentLines(this IEnumerable<VSchedule> source, PaymentDtoCreate p)
         {
             return source.Select(x => x.ToPaymentLine(p)).ToList();
         }
 
-  
-        
+
+
         public static decimal? SubTotal(decimal? principle = 0, decimal? interest = 0, decimal? collectionfee = 0, decimal? penalty = 0)
         {
             var value = principle + interest + collectionfee + penalty;

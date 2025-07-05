@@ -1,32 +1,37 @@
 ﻿using Applications.Enumerations;
+using Applications.Interfaces.Lists;
 using Applications.Interfaces.Loans;
 using Applications.Requests.Loans.CreditAgents;
 using Applications.Requests.Loans.Disbursements;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans;
-using Applications.Services.Identity;
-using Applications.Services.Loans;
+using Domains.Models.Lists.CreditAgents;
 using Domains.Models.Loans;
 using Domains.Models.Transaction;
+using Mapster;
 
 namespace Applications.Services.Loans
 {
-    public sealed class LoanService(ILoanService loanService) : ILoanServiceImpl
+    public sealed class LoanService(ILoanService loanService, ICreditAgentService creditAgentService) : ILoanServiceImpl
     {
-        public Task<Result<string>> ChangedCreditAgent(int? branchId, LoanChangedCaDtoCreate req)
+        public async Task<Result<string>> ChangedCreditAgent(int? branchId, List<LoanChangedCaDtoCreate> req)
         {
-            throw new NotImplementedException();
-        }
+            if (!branchId.HasValue)
+            {
+                return Result.Failure<string>(ErrorResponse.Validation("BranchId and Credit Agent details are required."));
+            }
 
-        public Task<Result<string>> ChangedCreditAgent(int? branchId, List<LoanChangedCaDtoCreate> req)
-        {
-            throw new NotImplementedException();
+            var model = req.Adapt<List<LoanChangedCa>>();
+
+            return await creditAgentService.ChangedCreditAgents(branchId, model);
         }
+        
+
 
         public async Task<Result<bool>> CreateLoanAsync(LoanDtoCreate req)
         {
-            
+
             var tranx = new LoanTransaction
             {
                 TransactionsId = $"trx-{Guid.CreateVersion7()}",
@@ -35,7 +40,7 @@ namespace Applications.Services.Loans
                 TranTypeRefId = 19,
                 IsActive = true
             };
-            
+
             var cashMgt = new CashManagement
             {
                 Id = $"cash-{Guid.CreateVersion7()}",
@@ -62,15 +67,15 @@ namespace Applications.Services.Loans
             };
 
             tranx.CashManagements.Add(cashMgt);
-            
+
             var model = req.MapLoan();
-            
+
             model.LoanTransaction = tranx;
-            
+
             return await loanService.CreateLoanAsync(model);
         }
 
-        
+
 
         public Task<Result<string>> UpdateAsync(LoanDisbursment disbursement)
         {
@@ -81,20 +86,48 @@ namespace Applications.Services.Loans
             throw new NotImplementedException();
         }
 
-        public async Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus status, bool include = false,CancellationToken cancellation=default)
+        public async Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus status, bool include = false, CancellationToken cancellation = default)
         {
             if (string.IsNullOrEmpty(loanId) || !branchId.HasValue)
             {
                 return Result.Failure<VLoanDisbursments>(ErrorResponse.Validation("LoanId and BranchId must be provided."));
             }
 
-            return await loanService.GetLoanByIdAsync(loanId, branchId, status, include,cancellation);
+            return await loanService.GetLoanByIdAsync(loanId, branchId, status, include, cancellation);
         }
 
-        public async Task<Pager<VLoanDisbursments>> GetLoansByBranchIdAsync(int? branchId, string? userId, LoanStatuses status = LoanStatuses.Active, QueryParam? param = null,CancellationToken cancellation=default)
+        public async Task<Pager<VLoanDisbursments>> GetLoansByBranchIdAsync(int? branchId, string? userId, LoanStatuses status = LoanStatuses.Active, QueryParam? param = null, CancellationToken cancellation = default)
         {
-            return await loanService.GetLoansByBranchId(branchId, userId, status, param,cancellation);
+            return await loanService.GetLoansByBranchId(branchId, userId, status, param, cancellation);
         }
+
+        public async Task<Result<VLoanDisbursments>> GetLoanByCreditAgentIdAsync(string? creditAgentId, string? loanId, int? branchId, CancellationToken cancellation = default)
+        {
+            if (string.IsNullOrEmpty(creditAgentId) || string.IsNullOrEmpty(loanId) || !branchId.HasValue)
+            {
+                return Result.Failure<VLoanDisbursments>(ErrorResponse.Validation($"{creditAgentId} OR {loanId} OR {branchId} is required,"));
+            }
+
+
+            var item = await loanService.GetLoanByCreditAgentIdAsync(creditAgentId, loanId, branchId, cancellation);
+
+            if (item == null)
+            {
+                return Result.Failure<VLoanDisbursments>(ErrorResponse.NotFound("Loan Not Found."));
+            }
+
+            return Result.Success(item);
+
+        }
+
+        public async Task<Pager<VLoanDisbursments>> GetLoanByCreditAgentsAsync(string? creditAgentId, int? branchId, CancellationToken cancellation = default)
+        {
+            if (!branchId.HasValue)
+                throw new ArgumentNullException(nameof(branchId), "Branch ID must not be null.");
+
+            return await loanService.GetLoanByCreditAgentAsync(creditAgentId, branchId, cancellation);
+        }
+
 
     }
 

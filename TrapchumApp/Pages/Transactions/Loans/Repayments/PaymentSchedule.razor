@@ -78,15 +78,13 @@
                             @c.InstallmentNo
                         </Template>
                     </RadzenDataGridColumn>
-                    <RadzenDataGridColumn Width="6rem"
+                    <RadzenDataGridColumn Width="12rem"
                                           Context="c"
                                           Title="ថ្ងៃត្រូវបង់ប្រាក់"
                                           Sortable="false">
                         <Template>
                             <small>
-                                <strong>@c.PaymentDate!.Value!.ToString("dd/MM/yyyy")</strong>
-                                <br />
-                                <em>@c.PaymentDate!.Value!.DayOfWeek</em>
+                                <strong>@c.PaymentDate.DayFirst()</strong>-<small>@c.PaymentDate.DayName()</small>
                             </small>
                         </Template>
                     </RadzenDataGridColumn>
@@ -178,7 +176,7 @@
                                         <RadzenCheckBox TValue="bool"
                                                         Name="PaidNow"
                                                         Disabled="disableIsPaidNow"
-                                                        Change="CheckPaymentChanged"
+                                                        Change="@CheckPaymentChanged"
                                                         Value="@isPaidNow">
                                         </RadzenCheckBox>
                                         <RadzenLabel>ប្រាក់ដើម</RadzenLabel>
@@ -327,19 +325,10 @@
                                   Text="ApplySchedulePayment" />
                 </Authorized>
             </AuthorizeView>
-            <AuthorizeView Policy="@RepaymentPolicies.PayOff">
-                <Authorized>
-                    <RadzenButton Icon="@IconNames.Paid"
-                                  Size="ButtonSize.Small"
-                                  ButtonStyle="ButtonStyle.Secondary"
-                                  Click="ApplySchedulePayment"
-                                  Text="PayOff" />
-                </Authorized>
-            </AuthorizeView>
             <RadzenButton Icon="save"
                           Size="ButtonSize.Small"
                           ButtonStyle="ButtonStyle.Success"
-                          Click="ApplySchedulePayment"
+                          Click="@ApplySchedulePayment"
                           Visible="!isAllowMultiplePayment"
                           Text="Applied Payment" />
             <RadzenLink Path="@($"/App/Loan/{BranchId}/Branches?UserId={UserId}")"
@@ -348,3 +337,12 @@
     </ChildContent>
 
 </RadzenFieldset>
+@*  <AuthorizeView Policy="@RepaymentPolicies.PayOff">
+                <Authorized>
+                    <RadzenButton Icon="@IconNames.Paid"
+                                  Size="ButtonSize.Small"
+                                  ButtonStyle="ButtonStyle.Secondary"
+                                  Click="ApplySchedulePayment"
+                                  Text="PayOff" />
+                </Authorized>
+            </AuthorizeView> *@

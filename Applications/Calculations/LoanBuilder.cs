@@ -18,7 +18,7 @@ namespace Applications.Calculations
 
         int? _repaymentModeId = (int)RepaymentModes.Declined;
 
-        int? _collectionFeeModeId = (int)CollectionFeeModes.Flat;
+        int? _collectionFeeModeId = (int)CollectionFeeModes.IRR;
 
         int? _installmentTypeId = (int)InstallmentTypes.Monthly;
 
@@ -32,6 +32,7 @@ namespace Applications.Calculations
 
         IEnumerable<HolidayVm> holidays = []; 
 
+        decimal? _effectiveBalance = 0;
         public LoanBuilder(LoanDtoCreate req)
         {
             _currencyId = req.CurrencyRefId;
@@ -160,7 +161,9 @@ namespace Applications.Calculations
             DateTimeOffset? newDate = _sechuleMode switch
             {
                 AdjustmentOption.Before => date!.Value.AddDays(-1),
+
                 AdjustmentOption.After => date!.Value.AddDays(1),
+
                 _ => throw new InvalidOperationException("Invalid schedule mode")
             };
 
@@ -188,8 +191,7 @@ namespace Applications.Calculations
             return false;
         }
        
-       
-
+      
         private IEnumerable<ScheduleLine> Balloon(CalculatorBase req)
         {
             var schedules = new List<ScheduleLine>();
@@ -209,6 +211,8 @@ namespace Applications.Calculations
             var paymentDate = _firstPayment;
 
             beginBalance = lastBalance = _amount;
+
+            _effectiveBalance = req.Principle ?? 0.00M;
 
             for (int i = 1; i <= _periodInMonth; i++)
             {
@@ -245,7 +249,7 @@ namespace Applications.Calculations
 
                 if (i % _payEvery == 0)
                 {
-                    if (_collectionFeeModeId == 1)
+                    if (_collectionFeeModeId == (int)EffectiveEnum.IRR)
                     {
                         effAmount = CalculatorExtensions.CollectionFee(_currencyId, _amount, _collectionFeeRate, totalDays);
                     }
@@ -273,9 +277,14 @@ namespace Applications.Calculations
                 {
                     principal = 0;
 
-                    if (_collectionFeeModeId == 1)
+                    if (_collectionFeeModeId == (int)EffectiveEnum.IRR)
                     {
-                        effAmount = CalculatorExtensions.CollectionFee(_currencyId, _amount, _collectionFeeRate, totalDays);
+                        if (i % 5 == 0)
+                        {
+                            _effectiveBalance = lastBalance;
+                        }
+
+                        effAmount = CalculatorExtensions.CollectionFee(_currencyId, _effectiveBalance, _collectionFeeRate, totalDays);
                     }
                     else
                     {
@@ -329,6 +338,8 @@ namespace Applications.Calculations
 
             DateTimeOffset? previusDate;
 
+            _effectiveBalance = req.Principle ?? 0.00M;
+
             for (int i = 1; i <= periodInMonth; i++)
             {
                 beginBalance = lastBalance;
@@ -365,11 +376,17 @@ namespace Applications.Calculations
 
                     totalDays = CalculatorExtensions.TotalDays(previusDate, paymentDate);
                 }
-                if (_collectionFeeModeId == 1)
+                if (_collectionFeeModeId == (int)EffectiveEnum.IRR)
                 {
-                    effAmount = CalculatorExtensions.CollectionFee(_currencyId, amount, _collectionFeeRate, totalDays);
+
+                    if (i % 5 == 0)
+                    {
+                        _effectiveBalance = lastBalance;
+                    }
+
+                    effAmount = CalculatorExtensions.CollectionFee(_currencyId, _effectiveBalance, _collectionFeeRate, totalDays);
                 }
-                if (_collectionFeeModeId == 2)
+                if (_collectionFeeModeId == (int)EffectiveEnum.Declined)
                 {
                     effAmount = CalculatorExtensions.CollectionFee(_currencyId, beginBalance, _collectionFeeRate, totalDays);
                 }
@@ -409,6 +426,8 @@ namespace Applications.Calculations
 
             beginBalance = lastBalance = req.Principle!.Value;
 
+            _effectiveBalance = req.Principle ?? 0.00M;
+
             var _collectionFeeAmount = 0M;
 
             for (int i = 1; i <= req.Installments; i++)
@@ -443,11 +462,18 @@ namespace Applications.Calculations
                     totalDays = CalculatorExtensions.TotalDays(previusDate, paymentDate);
 
                 }
-                if (_collectionFeeModeId == 1)
+                if (_collectionFeeModeId == (int)EffectiveEnum.IRR)
                 {
-                    _collectionFeeAmount = CalculatorExtensions.CollectionFee(_currencyId, req.Principle, _collectionFeeRate, totalDays);
+
+                    if (i % 5 == 0)
+                    {
+                        _effectiveBalance = lastBalance;
+                    }
+
+                    _collectionFeeAmount = CalculatorExtensions.CollectionFee(_currencyId, _effectiveBalance, _collectionFeeRate, totalDays);
+
                 }
-                if (_collectionFeeModeId == 2)
+                if (_collectionFeeModeId == (int)EffectiveEnum.Declined)
                 {
                     _collectionFeeAmount = CalculatorExtensions.CollectionFee(_currencyId, beginBalance, _collectionFeeRate, totalDays);
                 }
@@ -488,6 +514,8 @@ namespace Applications.Calculations
 
             return loanScheduleLines;
         }
+
+
         private IEnumerable<ScheduleLine> Decline(CalculatorBase req)
         {
             List<ScheduleLine> loanScheduleLines = [];
@@ -507,6 +535,8 @@ namespace Applications.Calculations
             DateTimeOffset? paymentDate = _firstPayment;
 
             beginBalance = lastBalance = _amount;
+
+            _effectiveBalance = req.Principle ?? 0.00M;
 
             for (int i = 1; i <= period; i++)
             {
@@ -537,11 +567,18 @@ namespace Applications.Calculations
                     totalDays = CalculatorExtensions.TotalDays(previusDate, paymentDate);
                 }
 
-                if (_collectionFeeModeId == 1)
+                if (_collectionFeeModeId == (int)EffectiveEnum.IRR)
                 {
-                    _collectionFeeAmount = CalculatorExtensions.CollectionFee(_currencyId, _amount, _collectionFeeRate, totalDays);
+
+                    if (i % 5 == 0)
+                    {
+                        _effectiveBalance = lastBalance;
+                    }
+
+                    _collectionFeeAmount = CalculatorExtensions.CollectionFee(_currencyId, _effectiveBalance, _collectionFeeRate, totalDays);
                 }
-                if (_collectionFeeModeId == 2)
+
+                if (_collectionFeeModeId == (int)EffectiveEnum.Declined)
                 {
                     _collectionFeeAmount = CalculatorExtensions.CollectionFee(_currencyId, beginBalance, _collectionFeeRate, totalDays);
                 }
@@ -557,8 +594,10 @@ namespace Applications.Calculations
                 if (i >= period)
                 {
                     principalPaid = beginBalance;
+
                     lastBalance = 0;
                 }
+
                 ScheduleLine line = new ScheduleLine()
                 {
                     InstallmentNo = i,
@@ -573,6 +612,7 @@ namespace Applications.Calculations
                     CreditAgentRefId = req.CreditAgentRefId,
                     RepaymentModeRefId = req.RepaymentModeRefId,
                 };
+
                 loanScheduleLines.Add(line);
             }
 

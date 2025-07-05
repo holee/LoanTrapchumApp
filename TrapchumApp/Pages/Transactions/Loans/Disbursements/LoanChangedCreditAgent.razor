@@ -1,8 +1,10 @@
-﻿@page "/Loan/CreditAgent/{LoanId}/Changed"
+﻿@page "/App/Loan/{LoanId}/CreditAgent/{CreditAgentId}"
 @using TrapchumApp.Services
 <PageTitle>Change Credit Agent</PageTitle>
-<RadzenCard class="rz-background-color-100">
-    <RadzenRow AlignItems="AlignItems.Center">
+
+<RadzenFieldset Text="Change Credit Agent">
+    <RadzenLink Path="@($"/Loan/CreditAgent/{BranchId}/Branches?CreditAgentId={CreditAgentId}")">Change Credit Agents</RadzenLink>
+    <RadzenRow>
         <RadzenColumn Size="6">
             <RadzenFieldset Text="Loan Information">
                 <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
@@ -29,8 +31,8 @@
                     </RadzenColumn>
                     <RadzenColumn Size="8">
                         <RadzenNumeric class="w-100"
-                        Disabled
-                        Value="@existingLoan.OutStanding" />
+                                       Disabled
+                                       Value="@existingLoan.OutStanding" />
                     </RadzenColumn>
                 </RadzenRow>
                 <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
@@ -40,8 +42,8 @@
                     </RadzenColumn>
                     <RadzenColumn Size="8">
                         <RadzenTextBox class="w-100"
-                        Disabled
-                        Value="@existingLoan.CurrencyName" />
+                                       Disabled
+                                       Value="@existingLoan.CurrencyName" />
                     </RadzenColumn>
                 </RadzenRow>
             </RadzenFieldset>
@@ -62,36 +64,31 @@
                         <RadzenLabel Text="New Credit Agent" />
                     </RadzenColumn>
                     <RadzenColumn Size="8">
-                        <RadzenDropDownDataGrid class="w-100"
-                        PageSize="10"
-                        Density="Density.Compact"
-                        TextProperty="AltName"
-                        ValueProperty="EmployeeRefId"
-                        @bind-Value="newCreditAgentId"
-                        ShowSearch="false"
-                        Data="_creditAgents">
-                            <Columns>
-                                <RadzenDropDownDataGridColumn Property="AltName" Title="Name" />
-                            </Columns>
-                        </RadzenDropDownDataGrid>
+                        <RadzenDropDown TextProperty="@nameof(VCreditAgent.AltName)"
+                                        ValueProperty="@nameof(VCreditAgent.EmployeeRefId)"
+                                        @bind-Value="@newCreditAgentId"
+                                        AllowFiltering="true"
+                                        PageSize="10"
+                                        class="rz-w-100"
+                                        Data="@_creditAgents">
+                        </RadzenDropDown>
                     </RadzenColumn>
                 </RadzenRow>
             </RadzenFieldset>
         </RadzenColumn>
     </RadzenRow>
     <RadzenStack Orientation="Orientation.Horizontal"
-    Gap="1rem"
-    AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                 Gap="1rem"
+                 AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
         <RadzenButton Size="ButtonSize.Small"
-        ButtonStyle="ButtonStyle.Success"
-        Click="ChangedCreditAgent"
-        Icon="save"
-        Text="Save" />
+                      ButtonStyle="ButtonStyle.Success"
+                      Click="ChangedCreditAgent"
+                      Icon="@IconNames.Save"
+                      Text="Save" />
         <RadzenButton Size="ButtonSize.Small"
-        ButtonStyle="ButtonStyle.Danger"
-        Click="Back"
-        Icon="cancel"
-        Text="Cancel" />
+                      ButtonStyle="ButtonStyle.Danger"
+                      Click="Back"
+                      Icon="@IconNames.Cancel"
+                      Text="Cancel" />
     </RadzenStack>
-</RadzenCard>
-
+</RadzenFieldset>

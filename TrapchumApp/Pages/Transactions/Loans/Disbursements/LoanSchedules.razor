@@ -1,33 +1,32 @@
 ﻿@using Applications.Requests.Loans.Disbursements
 @using TrapchumApp.Services
 <Containers Fluid>
-    @if(Customer is not null)
-    {
-        <table class="table">
-            <tbody>
-                <tr>
-                </tr>
-            </tbody>
-        </table>
-    }
-    <RadzenDataGrid Responsive
+
+
+    <RadzenDataGrid Responsive="true"
                     Density="Density.Compact"
                     GridLines="DataGridGridLines.Both"
                     AllowSorting="false"
                     ColumnWidth="15rem"
-                    Style="min-height:30rem;height:30rem;max-height:40rem;"
-                    Data="Schedules">
+                    RowSelect="@OnRowSelect"
+                    RowRender="@OnRowRender"
+                    TItem="LoanScheduleDtoCreate"
+                    Data="@Schedules">
         <Columns>
             <RadzenDataGridColumn Width="2.5rem" TextAlign="TextAlign.Center" Property="InstallmentNo" Title="No" Context="c">
                 <Template>
                     @c.InstallmentNo
                 </Template>
             </RadzenDataGridColumn>
-            <RadzenDataGridColumn Width="7rem" Property="PaymentDate" Title="Payment Date" Context="c">
+            <RadzenDataGridColumn Width="12rem"
+                                  Property="PaymentDate"
+                                  Title="Payment Date"
+                                  Context="c">
                 <Template>
-                    <small>@c.PaymentDate.DayFirst()</small>
-                    <br />
-                    <small>@c.PaymentDate!.Value.DayOfWeek</small>
+                    <small>
+                        @c.PaymentDate.DayFirst()-
+                        <small>@c.PaymentDate!.Value.DayOfWeek</small>
+                    </small>
                 </Template>
             </RadzenDataGridColumn>
             <RadzenDataGridColumn Width="6rem" TextAlign="TextAlign.Center" Property="TotalDay" Title="Total Day" Context="c">
@@ -87,4 +86,19 @@
     [Parameter] public int? CurrencyId { get; set; } = 1;
     [Parameter] public VCustomerList? Customer { get; set; }
     [Parameter] public IEnumerable<LoanScheduleDtoCreate> Schedules { get; set; } = [];
+
+
+
+    void OnRowRender(RowRenderEventArgs<LoanScheduleDtoCreate> arg)
+    {
+        if (arg.Data.InstallmentNo % 5 == 0)
+        {
+            arg.Attributes.Add("class", "rz-state-highlight rz-data-row recently-edited");
+        }
+    }
+
+    void OnRowSelect(LoanScheduleDtoCreate arg)
+    {
+        // Handle row selection if needed
+    }
 }

@@ -131,7 +131,7 @@ public partial class LoanCreate(ILoanServiceImpl loanService, IHolidayServiceImp
 
         previewSchedule = model.CreateSchedules().MapToLoanSchedules();
 
-        selectedTabIndex = 2;
+        selectedTabIndex = 3;
 
     }
 

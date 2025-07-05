@@ -6,6 +6,7 @@ using Applications.Responses.ViewModels.Customers;
 using Applications.Responses.ViewModels.Loans;
 using Applications.Services.Lists;
 using Applications.Services.Loans;
+using Domains.Models.Identity;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 
@@ -22,38 +23,72 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
             _creditAgentService = creditAgentService;
         }
 
-        [Parameter, SupplyParameterFromQuery] public int BranchId { get; set; }
-        [Parameter, SupplyParameterFromQuery] public string? UserId { get; set; }
+        [Parameter] public int BranchId { get; set; }
+        [Parameter, SupplyParameterFromQuery] public string? CreditAgentId { get; set; }
+        [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
 
         IEnumerable<VCreditAgent> _oldCreditAgents = [];
+
         IEnumerable<VCreditAgent> _newCreditAgents = [];
+
         IEnumerable<VLoanDisbursments> _items = [];
+
+        IList<VLoanDisbursments>? _selectedSchedules;
+
         string? _newCreditAgentId = null;
-        string? _oldCreditAgentId = null;
-        int _pageIndex = 0;
-        int _pageSize = 10;
-        string _sortColumn = "RegisterDate";
-        bool _sortDescending = true;
+        string? UserId = null;
+        int _pageSize = 15;
+
         VLoanDisbursments _existingLoan = new();
+
         int _counts = 0;
+
         bool _isLoading = false;
+        bool disabledOldCreditAgent => !string.IsNullOrWhiteSpace(CreditAgentId);
         protected override async Task OnInitializedAsync()
         {
-            await base.OnInitializedAsync();
+
+            var auth = await AuthenticationState;
+
+            UserId = auth.User.GetId();
 
             await GetOldCreditAgents();
 
+
+            if (!string.IsNullOrWhiteSpace(CreditAgentId))
+            {
+                await GetLoanByCreditAgents(CreditAgentId);
+            }
+
+
+            await base.OnInitializedAsync();
+
         }
 
-        async Task GetLoansByCreditAgents()
+        async Task GetLoansByCreditAgents(object? arg)
+        {
+
+            if (arg is null)
+            {
+                _isLoading = false;
+
+                return;
+            }
+
+            var creditAgentId = ((VCreditAgent)arg).EmployeeRefId;
+
+            await GetLoanByCreditAgents(creditAgentId);
+
+        }
+
+
+
+        async Task GetLoanByCreditAgents(string? creditAgentId = null)
         {
 
             _isLoading = true;
 
-            var param = new QueryParam(_pageIndex, _pageSize, _sortColumn, true, false, string.Empty);
-
-            var resp = await _loanService.GetLoansByBranchIdAsync(BranchId, _oldCreditAgentId, LoanStatuses.Active, param);
-
+            var resp = await _loanService.GetLoanByCreditAgentsAsync(creditAgentId, BranchId);
 
             _items = resp.Items;
 
@@ -65,62 +100,61 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
         }
 
 
-
-
-        async Task GetOldCreditAgents(LoadDataArgs e)
-        {
-
-            var filterText = e.Filter.Trim() ?? "";
-
-            await GetOldCreditAgents(filterText);
-        }
-
-        async Task GetNewCreditAgents(LoadDataArgs e)
-        {
-
-            var filterText = e.Filter.Trim() ?? "";
-
-            await GetNewCreditAgents(filterText);
-        }
-
-
         async Task GetOldCreditAgents(string? filterText = null)
         {
-            var rsp = await _creditAgentService.GetCreditAgents(false, filterText);
 
-            if (rsp.IsSuccess)
-            {
-                _oldCreditAgents = rsp.Data!;
-            }
+            var param = new QueryParam(0, 0, nameof(VCreditAgent.AltName), false, false, filterText);
+
+            var rsp = await _creditAgentService.GetCreditAgents(BranchId, param);
+
+            _oldCreditAgents = rsp.Items ?? [];
+
         }
         async Task GetNewCreditAgents(string? filterText = null)
         {
-            var rsp = await _creditAgentService.GetCreditAgents(false, filterText);
 
-            if (rsp.IsSuccess && _oldCreditAgentId.IsNotNullOrEmpty())
+            var param = new QueryParam(0, 0, nameof(VCreditAgent.AltName), false, false, filterText);
+
+            var rsp = await _creditAgentService.GetCreditAgents(BranchId, param);
+
+            if (rsp.Items.Any() && CreditAgentId.IsNotNullOrEmpty())
             {
-                _newCreditAgents = rsp.Data!.Where(x => x.EmployeeRefId != _oldCreditAgentId);
+                _newCreditAgents = rsp.Items.Where(x => x.EmployeeRefId != CreditAgentId);
             }
         }
 
         async Task ChangedCreditAgent()
         {
-            if (_newCreditAgentId.IsNullOrEmpty() || _oldCreditAgentId.IsNullOrEmpty() || !_items.Any())
+            if (_newCreditAgentId.IsNullOrEmpty() || CreditAgentId.IsNullOrEmpty() || !_selectedSchedules!.Any())
             {
                 NotificationService.Notify(NotificationSeverity.Error, "operation is failed.");
                 return;
             }
-            var models = _items.Select(x => new LoanChangedCaDtoCreate(x.LoanId, _oldCreditAgentId, _newCreditAgentId, UserId, UserId))
+
+            var models = _selectedSchedules?
+                                .Where(x => x.LoanId != null)
+                                .Select(x => new LoanChangedCaDtoCreate(x.LoanId, CreditAgentId, _newCreditAgentId, UserId, UserId))
                                 .ToList();
-            var resp = await _loanService.ChangedCreditAgent(BranchId, models);
+
+            if (models is null || !models.Any())
+            {
+                NotificationService.Notify(NotificationSeverity.Error, "operation is failed.");
+
+                return;
+            }
+
+            var resp = await _creditAgentService.ChangeCreditAgents(BranchId, models);
+
             if (resp.IsSuccess)
             {
                 NotificationService.Notify(NotificationSeverity.Success, resp.Data);
 
-                NavigationManager.NavigateTo($"/Loans?BranchId={BranchId}&UserId={UserId}");
+                await GetLoanByCreditAgents(CreditAgentId);
 
                 return;
             }
+
+            _isLoading = false;
 
             NotificationService.Notify(NotificationSeverity.Error, resp.ErrMessage);
 

@@ -1,4 +1,6 @@
 ﻿using Applications.Calculations;
+using Domains.Models.Currencies;
+using Domains.Models.Loans;
 
 namespace Applications.Requests.Loans.Payments;
 
@@ -30,6 +32,8 @@ public sealed class LoanPaymentDtoCreate
     public decimal? RecieveAmount { get; set; } = 0;
     public decimal? ChangeAmount { get; set; } = 0;
     public ICollection<LoanPaymentLineDtoCreate> LoanPaymentLines { get; set; } = [];
+
+    
 }
 
 

@@ -5,9 +5,11 @@ using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Responses.ViewModels.Employees;
+using Domains.Models.Lists.CreditAgents;
 using Domains.Models.Loans;
 using Infrastructures.DataAccess;
 using Microsoft.EntityFrameworkCore;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Infrastructures.Implements
 {
@@ -89,9 +91,9 @@ namespace Infrastructures.Implements
 
                 var emp = await context.LoanCreditAgents
                                 .AsNoTracking()
-                                .FirstOrDefaultAsync(x => x.EmployeeRefId == req.EmployeeRefId && 
+                                .FirstOrDefaultAsync(x => x.EmployeeRefId == req.EmployeeRefId &&
                                                           x.EditSeq == req.EditSeq);
-              
+
                 if (emp is null) return Result.Failure<string>(ErrorResponse.NotFound("There is no employee yet Or Someone was changed this data!."));
 
                 context.Entry(req).Property(x => x.IsRemove).IsModified = true;
@@ -118,7 +120,7 @@ namespace Infrastructures.Implements
             var queries = await context.Database
                                                       .SqlQuery<VCreditAgent>($@"SELECT * FROM VCreditAgents")
                                                       .WhereIf(!includeIsRemove, x => x.IsRemove == false)
-                                                      .WhereIf(!string.IsNullOrEmpty(query), x => EF.Functions.Like(x.Name, $"%{query}%") ||
+                                                      .WhereIf(!string.IsNullOrEmpty(query), x =>
                                                                                                   EF.Functions.Like(x.FirstName, $"%{query}%") ||
                                                                                                   EF.Functions.Like(x.LastName, $"%{query}%") ||
                                                                                                   EF.Functions.Like(x.AltName, $"%{query}%"))
@@ -138,8 +140,11 @@ namespace Infrastructures.Implements
 
             await using var context = await _dbContextFactory.CreateDbContextAsync(cancellation);
 
-            IQueryable<VCreditAgent> queries = context.VCreditAgents
-                                                        .WhereIf(branchId > 0, x => x.BranchId == branchId);
+            var queries = context.VCreditAgents
+                                                        .WhereIf(branchId > 0, x => x.BranchId == branchId)
+                                                        .OrderByDescending(x => x.FirstName)
+                                                        .ThenByDescending(x => x.LastName)
+                                                        .AsNoTracking();
 
             if (param.IsIncludeInActive)
             {
@@ -148,17 +153,17 @@ namespace Infrastructures.Implements
 
             if (!string.IsNullOrWhiteSpace(param.Filter))
             {
-                queries = queries.Where(x => EF.Functions.Like(x.Name!, $"%{param.Filter}%") ||
-                                             EF.Functions.Like(x.FirstName!, $"%{param.Filter}%") ||
-                                             EF.Functions.Like(x.LastName!, $"%{param.Filter}%") ||
-                                             EF.Functions.Like(x.BranchName!, $"%{param.Filter}%") ||
-                                             EF.Functions.Like(x.AltName!, $"%{param.Filter}%"));
+                queries = queries.Where(x => EF.Functions.Like(x.FirstName!, $"%{param.Filter}%"))
+                                 .OrWhere(x => EF.Functions.Like(x.BranchName!, $"%{param.Filter}%"))
+                                 .OrWhere(x => EF.Functions.Like(x.AltName!, $"%{param.Filter}%"))
+                                 .OrWhere(x => EF.Functions.Like(x.LastName!, $"%{param.Filter}%"));
             }
 
             if (param.SortDescending)
             {
                 queries = queries.OrderByDescending(x => EF.Property<object>(x, param.SortColumn));
             }
+
             var counts = await queries.CountAsync(cancellation);
 
             if (param.PageSize > 0)
@@ -177,13 +182,13 @@ namespace Infrastructures.Implements
             };
         }
 
-        public async Task<Pager<VEmployeeCreditAgent>> GetEmployeeCreditAgents(int? branchId,string? employeeId,QueryParam param,CancellationToken cancellation=default)
+        public async Task<Pager<VEmployeeCreditAgent>> GetEmployeeCreditAgents(int? branchId, string? employeeId, QueryParam param, CancellationToken cancellation = default)
         {
             await using var context = await _dbContextFactory.CreateDbContextAsync();
 
             var queries = context.EmployeeCreditAgent
                                .WhereIf(branchId.HasValue && branchId > 0, x => x.BranchId == branchId)
-                               .WhereIf(employeeId.IsNotNullOrEmpty(),x => x.EmployeeId == employeeId);
+                               .WhereIf(employeeId.IsNotNullOrEmpty(), x => x.EmployeeId == employeeId);
 
             if (param.FilterColumn.IsNotNullOrEmpty())
             {
@@ -197,28 +202,29 @@ namespace Infrastructures.Implements
                     _ => queries // No filter applied if column is unrecognized
                 };
             }
-            if (param.Filter.IsNotNullOrEmpty() && param.FilterColumn.IsNullOrEmpty()) { 
-            
-                queries=queries.Where(x => EF.Functions.Like(x.FirstName!, $"%{param.Filter}%") ||
+            if (param.Filter.IsNotNullOrEmpty() && param.FilterColumn.IsNullOrEmpty())
+            {
+
+                queries = queries.Where(x => EF.Functions.Like(x.FirstName!, $"%{param.Filter}%") ||
                                            EF.Functions.Like(x.LastName!, $"%{param.Filter}%") ||
                                            EF.Functions.Like(x.AltName!, $"%{param.Filter}%") ||
                                            EF.Functions.Like(x.AltName!, $"%{param.Filter}%"));
-            
+
             }
             if (param.SortDescending)
             {
-                queries=queries.OrderByDescending(x=>EF.Property<string>(x,param.SortColumn));
+                queries = queries.OrderByDescending(x => EF.Property<string>(x, param.SortColumn));
             }
 
 
             var counts = await queries.CountAsync(cancellation);
 
-            var items=await queries
+            var items = await queries
                             .Skip(param.Skip)
                             .Take(param.PageSize)
                             .AsNoTracking().ToListAsync(cancellation);
 
-            return new Pager<VEmployeeCreditAgent>(items,counts);
+            return new Pager<VEmployeeCreditAgent>(items, counts);
         }
 
         public async Task<Result<IEnumerable<VEmployeeCreditAgent>>> GetEmployeeCreateCreditAgents(string? filter = null)
@@ -239,6 +245,65 @@ namespace Infrastructures.Implements
 
             return Result.Success<IEnumerable<VEmployeeCreditAgent>>(queries);
         }
+
+
+
+        public async Task<Result<string>> ChangedCreditAgents(int? branchId, List<LoanChangedCa> req, CancellationToken cancellation = default)
+        {
+            await using var context = await _dbContextFactory.CreateDbContextAsync(cancellation);
+
+            var trx = await context.Database.BeginTransactionAsync(cancellation);
+
+            try
+            {
+
+                context.LoanChangedCa.AddRange(req);
+
+                await context.SaveChangesAsync(cancellation);
+
+                var firstRequest = req[0];
+
+                var oldCreditAgentId = firstRequest.OldCreditAgentRefId;
+
+                var newCreditAgentRefId = firstRequest.NewCreditAgentRefId;
+
+                var currentDateTime = DateTime.Now;
+
+                // Build query based on count
+                var disbursmentsQuery = context.LoanDisbursments
+                                                .Where(x => x.BranchRefId == branchId &&
+                                                            x.CreditAgentRefId == oldCreditAgentId);
+
+                // Get relevant LoanIds from request
+                var loanIds = req.Select(r => r.LoanRefId).Distinct().ToList();
+
+                // Build query for affected disbursements
+                var disbursementsQuery = context.LoanDisbursments
+                                                .Where(x => x.BranchRefId == branchId &&
+                                                            x.CreditAgentRefId == oldCreditAgentId &&
+                                                            loanIds.Contains(x.LoanId));
+                // Batch update
+                await disbursementsQuery.ExecuteUpdateAsync(prop => prop
+                    .SetProperty(p => p.CreditAgentRefId, newCreditAgentRefId)
+                    .SetProperty(p => p.ModifiedDt, currentDateTime), cancellation);
+
+                await trx.CommitAsync(cancellation);
+
+                return Result.Success<string>(new("Loan has changed new credit agent."));
+
+            }
+            catch (DbUpdateException ex)
+            {
+                await trx.RollbackAsync(cancellation);
+
+                return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
+            }
+
+
+        }
+
+
+
 
 
         private bool IsAlreadyCreditAgent(string? empId)

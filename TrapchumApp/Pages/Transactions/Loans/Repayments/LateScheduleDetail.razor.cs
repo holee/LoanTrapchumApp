@@ -37,6 +37,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
         VLoanDisbursments? LoanSchedule = new();
         private int counts = 0;
         string? UserId = string.Empty;
+        int? currencyId = 0;
         protected override async Task OnInitializedAsync()
         {
 
@@ -77,6 +78,8 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
             else
             {
                 LoanSchedule = rsp.Data;
+
+                currencyId = LoanSchedule?.CurrencyId;
             }
         }
 
@@ -246,6 +249,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
             {
                 Draggable = true,
                 Left="5rem",
+                CloseDialogOnEsc = true
             };
             var loanPayment = new LoanPaymentDtoCreate
             {

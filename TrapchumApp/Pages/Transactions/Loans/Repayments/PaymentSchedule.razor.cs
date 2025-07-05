@@ -141,6 +141,7 @@ public partial class PaymentSchedule
         if (!isAllowMultiplePayment && !isPaidNow)
         {
             NotificationService.Notify(NotificationSeverity.Error, "Please select schedule to apply payment.");
+
             return;
         }
         if (!isAllowMultiplePayment && isPaidNow)
@@ -167,7 +168,9 @@ public partial class PaymentSchedule
         var options = new DialogOptions
         {
             Resizable = false,
+
             Draggable = true,
+
             CssClass = "rz-p-1 rz-m-0 rz-background-color-base-200"
         };
 
@@ -208,6 +211,9 @@ public partial class PaymentSchedule
 
             Reset();
         }
+
+
+
     }
 
 
@@ -324,7 +330,7 @@ public partial class PaymentSchedule
         {
             //recievePayment = SelectedSchedule!.ToPaymentDtoCreate();
 
-            loanPaymentLine = SelectedSchedule.MapTo();
+            loanPaymentLine = SelectedSchedule.MapToLoanPaymentLine();
 
             btnDisabled = false;
         }
