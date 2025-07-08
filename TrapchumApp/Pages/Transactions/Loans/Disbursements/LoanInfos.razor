@@ -6,21 +6,12 @@
              Orientation="Orientation.Horizontal"
              JustifyContent="JustifyContent.End">
     <RadzenButton Size="ButtonSize.ExtraSmall"
-                  Click="@ShowPaidSchedule"
-                  ButtonStyle="ButtonStyle.Success"
-                  Icon="file_download" Text="View Paid Schedule" />
-    <RadzenButton Size="ButtonSize.ExtraSmall"
                   Click="@DownLoadScheduleAsExcel"
                   ButtonStyle="ButtonStyle.Success"
                   Icon="file_download" Text="Export Excel" />
     <RadzenButton Click="@DownLoadScheduleAsPdf"
                   Size="ButtonSize.ExtraSmall"
                   ButtonStyle="ButtonStyle.Light"
-                  Text="Export Pdf"
-                  Icon="picture_as_pdf" />
-    <RadzenButton Click="@Priner"
-                  Size="ButtonSize.ExtraSmall"
-                  ButtonStyle="ButtonStyle.Dark"
                   Text="Export Pdf"
                   Icon="picture_as_pdf" />
 </RadzenStack>

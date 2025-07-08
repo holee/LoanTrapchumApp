@@ -99,9 +99,33 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
         });
 
 
+
+
+
+
         reportGroup.MapGet("/Schedules/{loanId}/{branchId:int}/Exel", async ([FromServices] IPrintPdfServiceImpl printer,
             [FromServices] IWebHostEnvironment env, 
             [FromServices] IPrintExelServiceImpl exel, 
+            string loanId, int branchId) =>
+        {
+
+            var rsp = await exel.DownLoadScheduleAsExcel(loanId, branchId);
+
+            if (!rsp.IsSuccess)
+            {
+                return Results.NoContent();
+            }
+
+            var ms = rsp.Data ?? Stream.Null;
+
+            return Results.File(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"{loanId}.xlsx");
+
+        });
+
+
+
+        reportGroup.MapGet("/Schedules/{loanId}/{branchId:int}/Excel", async ([FromServices] IWebHostEnvironment env,
+            [FromServices] IPrintExelServiceImpl exel,
             string loanId, int branchId) =>
         {
 

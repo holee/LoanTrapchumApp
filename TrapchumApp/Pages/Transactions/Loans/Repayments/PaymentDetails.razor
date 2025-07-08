@@ -18,8 +18,7 @@
                             <RadzenLabel Text="Show All" Component="ShowUnPaindOnly" class="rz-ms-2" />
                         </div>
                     </RadzenStack>
-                    <RadzenDataGrid Data="@loanSchedule!.Schedules"
-                                    PageSize="@loanSchedule!.Schedules!.Count"
+                    <RadzenDataGrid Data="@Schedules"
                                     Density="Density.Compact"
                                     Responsive
                                     AllowAlternatingRows="true"

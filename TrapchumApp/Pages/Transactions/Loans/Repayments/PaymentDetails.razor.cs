@@ -6,6 +6,7 @@ using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Services.Loans;
 using Domains.Models.Loans;
+using System.Threading.Tasks;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments;
 public partial class PaymentDetails
@@ -36,6 +37,7 @@ public partial class PaymentDetails
     int selectedTabIndex = 0;
     string receiptNo = "";
     bool ShowAll = false;
+    int? selectedItem = 0;
     void SelectedTabChanged(int index)
     {
         selectedTabIndex = index;
@@ -50,9 +52,9 @@ public partial class PaymentDetails
 
     }
 
-    void OnRowDoubleClick()
+    async Task OnRowDoubleClick(DataGridRowMouseEventArgs<VSchedule> arg)
     {
-
+       await PayBySchedules(arg.Data);
     }
 
 
@@ -69,7 +71,7 @@ public partial class PaymentDetails
 
         var schedulesList = loanSchedule?.Schedules?.ToList();
 
-        var firstSchedule = schedulesList?.First();
+        var firstSchedule = schedulesList?.First(x=>x.IsPaid==false);
 
         if (p != firstSchedule)
         {
@@ -178,6 +180,9 @@ public partial class PaymentDetails
         if (rsp.IsSuccess)
         {
             loanSchedule = rsp.Data!;
+
+            Schedules = rsp.Data!.Schedules ?? [];
+
         }
         else
         {

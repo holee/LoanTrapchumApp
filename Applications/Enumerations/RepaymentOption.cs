@@ -9,7 +9,7 @@ namespace Applications.Enumerations
 {
 
 
-    public enum RepaymentModes
+    public enum RepaymentOption
     {
         [Description("Balloon")]
         Balloon =1,

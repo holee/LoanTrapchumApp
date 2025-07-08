@@ -1,6 +1,7 @@
 ﻿using Applications.Enumerations;
 using Applications.Interfaces.Loans;
 using Applications.Responses;
+using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Responses.ViewModels.Reports;
 using Applications.Schedules;
@@ -13,6 +14,8 @@ namespace Applications.Services.Reports
     public interface ILoanReportServiceImpl
     {
         Task<DisbursmentsRpt?> GetLoanScheduleAsync(int? branchId, string? loanId);
+        Task<VLoanDisbursments?> GetLoanWithTopSchedulesAsync(int? branchId, string? loanId);
+        Task<VLoanDisbursments?> PrintLoanScheduleAsync(int? branchId, string? loanId);
     }
 
     public sealed class LoanReportServiceImpl(ILoanReportService loanReportService) : ILoanReportServiceImpl
@@ -22,7 +25,16 @@ namespace Applications.Services.Reports
             return await loanReportService.GetLoanScheduleAsync(branchId, loanId);
         }
 
-      
+        public async Task<VLoanDisbursments?> PrintLoanScheduleAsync(int? branchId, string? loanId)
+        {
+            return await loanReportService.PrintLoanScheduleAsync(branchId, loanId);
+        }
+
+        public async Task<VLoanDisbursments?> GetLoanWithTopSchedulesAsync(int? branchId, string? loanId)
+        {
+            return await loanReportService.GetLoanWithTopSchedulesAsync(loanId,branchId);
+        }
+
     }
 }
 

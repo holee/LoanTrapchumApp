@@ -1,4 +1,5 @@
 ﻿using Applications.Enumerations;
+using Applications.Extensions;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Branches;
 using Applications.Responses.ViewModels.Loans;
@@ -125,21 +126,14 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
         }
 
 
-        void DownLoadScheduleAsExcel(string? loanRefId, int? branchId)
+        async Task DownLoadScheduleAsExcel(string? loanRefId, int? branchId)
         {
             ContextMenuService.Close();
 
-            //isProgess = true;
-
-            //var stream = await _dService.DownLoadScheduleAsExcel(loanRefId, branchId);
-
-            //using var streamRef = new DotNetStreamReference(stream: stream);
-
-            //await js.InvokeVoidAsync("downloadFileFromStream", "Schedule.xlsx", streamRef);
-
-            isProgess = false;
-
-            StateHasChanged();
+            if (loanRefId.IsNotNullOrEmpty() && branchId > 0)
+            {
+                await js.InvokeVoidAsync("open", $"/Reports/Schedules/{loanRefId}/{branchId}/Exel", "_blank");
+            }
         }
 
         async Task GetLoanCount()
@@ -156,17 +150,10 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 
             ContextMenuService.Close();
 
-            isProgess = true;
-
-            //var stream = await _dService.DownLoadScheduleAsPdf(loanRefId, branchId);
-
-            //using var streamRef = new DotNetStreamReference(stream: stream);
-
-            await js.InvokeVoidAsync("open", $"/Reports/Schedules/{loanRefId}/{branchId}", "_blank");
-
-            isProgess = false;
-
-            StateHasChanged();
+            if (loanRefId.IsNotNullOrEmpty() && BranchId > 0)
+            {
+                await js.InvokeVoidAsync("open", $"/Reports/Schedules/{loanRefId}/{branchId}", "_blank");
+            }
         }
 
 

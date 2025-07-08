@@ -33,5 +33,6 @@
         public string? BatchName { get; set; }
         public int? ScheduleStatusRefId { get; set; }
         public string? ScheduleStatusName { get; set; }
+        public int? ScheduleNum { get; set; } = 1;
     }
 }

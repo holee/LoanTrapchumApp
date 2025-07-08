@@ -5,7 +5,6 @@ namespace Applications.Services.Loans
     public interface IPrintExelServiceImpl 
     {
         Task<Result<Stream>> DownLoadScheduleAsExcel(string? loanId, int? branchId);
-        Task<Result<byte[]>> ExportScheduleAsExcel(string? loanId, int? branchId);
     }
 
 }

@@ -13,7 +13,7 @@ namespace Applications.Services.Loans
         {
 
 
-            var rsp = await loanService.GetLoanScheduleAsync(branchId, loanId);
+            var rsp = await loanService.PrintLoanScheduleAsync(branchId, loanId);
 
             MemoryStream ms = new MemoryStream();
 
@@ -23,7 +23,7 @@ namespace Applications.Services.Loans
 
             var dataTemplate = new
             {
-                name = rsp.FullName,
+                name = rsp.AltName,
 
                 period = rsp.PeriodName,
 
@@ -43,11 +43,11 @@ namespace Applications.Services.Loans
 
                 l = rsp.Schedules,
 
-                totalDay = rsp.TotalDay,
+                totalDay = rsp.Circle,
 
-                principle = rsp.TotalPrinciple.SetFormat(rsp.CurrencyId),
+                principle = rsp.OutStanding.SetFormat(rsp.CurrencyId),
 
-                interest = rsp.TotalInterest.SetFormat(rsp.CurrencyId)
+                interest = rsp.PaidInterest.SetFormat(rsp.CurrencyId)
             };
 
             await ms.SaveAsByTemplateAsync(templatePath, dataTemplate);
@@ -57,10 +57,6 @@ namespace Applications.Services.Loans
             return Result.Success<Stream>(ms);
         }
 
-        public Task<Result<byte[]>> ExportScheduleAsExcel(string? loanId, int? branchId)
-        {
-            throw new NotImplementedException();
-        }
     }
 
 }

@@ -477,6 +477,42 @@ namespace Infrastructures.Implements
 
 
 
+        public async Task<IEnumerable<VSchedule>> GetLoanSchedulesAsync(string? loanId, int? branchId, 
+                        ScheduleStatus status, bool include = false, 
+                        QueryParam? param=null,
+                        CancellationToken cancellation = default)
+        { 
+
+            await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+            int?[] filter = status switch
+            {
+                ScheduleStatus.Paid => [1],
+                ScheduleStatus.Unpaid => [2, 4],
+                ScheduleStatus.All => [1, 2, 4],
+                _ => [1, 2, 4]
+            };
+
+
+            var queries = context.VSchedules
+                                     .Where(x => x.LoanId == loanId && 
+                                                 x.BranchId == branchId &&
+                                                 filter.Contains(x.ScheduleStatusId))
+                                     .OrderBy(x=>x.InstallmentNo)
+                                     .AsNoTracking();
+           if(param?.PageSize > 0)
+            {
+                queries = queries.Take(param.PageSize);
+            }
+
+            var item1= await queries.AsNoTracking().ToListAsync(cancellation);
+
+            return item1;
+
+        }
+
+
+
         public async Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId)
         {
             using var db = connectionFactory.CreateConnection();

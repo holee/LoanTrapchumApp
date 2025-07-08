@@ -51,7 +51,10 @@ namespace Applications.Services.Loans
             try
             {
 
-                var data = await loanService.GetLoanScheduleAsync(branchId, loanId);
+                //var data = await loanService.GetLoanScheduleAsync(branchId, loanId);
+
+                var data = await loanService.PrintLoanScheduleAsync(branchId, loanId);
+
 
                 if (data is null)
                 {

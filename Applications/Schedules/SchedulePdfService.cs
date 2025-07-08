@@ -1,16 +1,26 @@
-﻿using Applications.Extensions.Maths;
+﻿using Applications.Extensions.DateTimes;
+using Applications.Extensions.Maths;
+using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Responses.ViewModels.Reports;
 using Applications.Services.LIsts;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Applications.Schedules
 {
     public sealed class SchedulePdfService : IDocument
     {
         public DisbursmentsRpt Item { get; }
+        public VLoanDisbursments Value { get; }
+
+        public SchedulePdfService(VLoanDisbursments value)
+        {
+            Item = new();
+            Value = value;
+        }
 
         public string? ImageUrl { get; set; } = string.Empty;
 
@@ -18,6 +28,7 @@ namespace Applications.Schedules
         public SchedulePdfService(DisbursmentsRpt loan)
         {
             Item = loan;
+            Value = new();
         }
 
         public DocumentMetadata GetMetadata() => DocumentMetadata.Default;
@@ -27,7 +38,7 @@ namespace Applications.Schedules
             {
                 page.Size(PageSizes.A4);
 
-                page.Margin(1F,Unit.Centimetre);
+                page.Margin(1F, Unit.Centimetre);
 
                 page.Header().Element(ComposeHeader);
 
@@ -83,19 +94,18 @@ namespace Applications.Schedules
                     header.Cell().Element(HeaderCellStyle).AlignRight().Text("Interest").SemiBold();
                     header.Cell().Element(HeaderCellStyle).AlignRight().Text("Total").SemiBold();
                     header.Cell().Element(HeaderCellStyle).AlignRight().Text("Outstanding").SemiBold();
-                    //header.Cell().ColumnSpan(6).PaddingTop(5).BorderBottom(1).BorderColor(Colors.Black);
                 });
 
-            //step 3 defining data
+                //step 3 defining data
 
-            foreach (var item in Item.Schedules ?? [])
+                foreach (var item in Value.Schedules ?? [])
                 {
                     table.Cell().Element(CellStyle).Text($"{item.InstallmentNo}").AlignCenter();
                     table.Cell().Element(CellStyle).Text($"{item.TotalDay}").AlignCenter();
-                    table.Cell().Element(CellStyle).Text($"{item.Principle.Formats(Item.CurrencyId)}").AlignRight();
-                    table.Cell().Element(CellStyle).Text($"{item.Interest.Formats(Item.CurrencyId)}").AlignRight();
-                    table.Cell().Element(CellStyle).Text($"{item.TotalPay.Formats(Item.CurrencyId)}").AlignRight();
-                    table.Cell().Element(CellStyle).Text($"{item.LoanOutstanding.Formats(Item.CurrencyId)}").AlignRight();
+                    table.Cell().Element(CellStyle).Text($"{item.Principle.Formats(Value.CurrencyId)}").AlignRight();
+                    table.Cell().Element(CellStyle).Text($"{item.Interest.Formats(Value.CurrencyId)}").AlignRight();
+                    table.Cell().Element(CellStyle).Text($"{item.TotalPay.Formats(Value.CurrencyId)}").AlignRight();
+                    table.Cell().Element(CellStyle).Text($"{item.LoanOutstanding.Formats(Value.CurrencyId)}").AlignRight();
                 }
 
 
@@ -110,23 +120,52 @@ namespace Applications.Schedules
             {
                 row.RelativeItem().Column(col =>
                 {
+                    var font = "Khmer Os Siemreap";
                     var scale = 0.9f;
-                    col.Item().Scale(scale).Text($"Name      :{Item.FullName}");
-                    col.Item().Scale(scale).Text($"Period    :{Item.PeriodName}");
-                    col.Item().Scale(scale).Text($"Rate      :{Item.TotalInterest}");
-                    col.Item().Scale(scale).Text($"Principle :{Item.Principle}");
-                    col.Item().Scale(scale).Text($"Branch    :{Item.BranchName}");
+                    col.Item().Row(r1 =>
+                    {
+                        r1.RelativeItem().Column(c1 =>
+                        {
+                            c1.Item().Scale(scale).Text($"Name").FontFamily(font);
+                            c1.Item().Scale(scale).Text($"Period").FontFamily(font);
+                            c1.Item().Scale(scale).Text($"Rate").FontFamily(font);
+                            c1.Item().Scale(scale).Text($"Principle").FontFamily(font);
+                            c1.Item().Scale(scale).Text($"Branch").FontFamily(font);
+                        });
+                        r1.RelativeItem().Column(c1 =>
+                        {
+                            c1.Item().Scale(scale).Text($"{Value.AltName}").FontFamily(font);
+                            c1.Item().Scale(scale).Text($"{Value.PeriodName}").FontFamily(font);
+                            c1.Item().Scale(scale).Text($"{Value.PaidInterest.Formats(Value.CurrencyId)}");
+                            c1.Item().Scale(scale).Text($"{Value.Principle.Formats(Value.CurrencyId)}");
+                            c1.Item().Scale(scale).Text($"{Value.BranchName}").FontFamily(font);
+                        });
+
+                    });                
+
                 });
 
                 row.RelativeItem().Column(col =>
                 {
                     var font = "Khmer Os Siemreap";
                     var scale = 0.9f;
-                    col.Item().Scale(scale).Text($"Name      :{Item.LastPaymentDate}");
-                    col.Item().Scale(scale).Text($"Period    :{Item.Address}").FontFamily(font);
-                    col.Item().Scale(scale).Text($"Rate      :{Item.AgentName}").FontFamily(font);
-                    col.Item().Scale(scale).Text($"Principle :{Item.AgentPhone}");
-                    col.Item().Scale(scale).Text($"Branch    :{Item.BranchName}").FontFamily(font);
+                    col.Item().Row(r1 =>
+                    {
+                        r1.ConstantItem(2.8F,Unit.Centimetre).Column(c1 =>
+                        {
+                            c1.Item().Scale(scale).Text($"ថ្ងៃបង់ចុងក្រោយ").FontFamily(font);
+                            c1.Item().Scale(scale).Text($"អស៍យដ្ឋាន").FontFamily(font);
+                            c1.Item().Scale(scale).Text($"ភ្ងាក់ងារ").FontFamily(font);
+                            c1.Item().Scale(scale).Text($"ទូរស័ព្ទ").FontFamily(font);
+                        });
+                        r1.RelativeItem().Column(c1 =>
+                        {
+                            c1.Item().Scale(scale).Text($"{Value.LastPaymentDate.DayFirst()}");
+                            c1.Item().Scale(scale).Text($"{Value.Address}").FontFamily(font);
+                            c1.Item().Scale(scale).Text($"{Value.AgentName}").FontFamily(font);
+                            c1.Item().Scale(scale).Text($"{Value.AgentPhone}");
+                        });
+                    });
                 });
             });
 
@@ -145,11 +184,21 @@ namespace Applications.Schedules
         {
             return container
                 .Border(0.5F)
+                .BorderColor(Colors.Black)
                 .Background(Colors.Grey.Medium)
                 .BorderColor(Colors.Black)
                 .PaddingHorizontal(3)
                 .PaddingVertical(5);
         }
+
+        //private static IContainer LabelRow(string label, string value, string font, float scale = 0.9f)
+        //{
+        //    return IContainer().Scale(scale).Row(row =>
+        //    {
+        //        row.ConstantItem(100).Text($"{label} :").FontFamily(font);
+        //        row.RelativeItem().Text(value).FontFamily(font);
+        //    });
+        //}
 
     }
 }

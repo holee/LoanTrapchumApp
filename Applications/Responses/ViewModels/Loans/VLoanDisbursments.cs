@@ -41,5 +41,5 @@ public sealed class VLoanDisbursments
     public int? Period { get; set; }
     public string? PeriodName { get; set; }
     public string? InstallmentType { get; set; }
-    public ICollection<VSchedule>? Schedules { get; set; } = [];
+    public ICollection<VSchedule> Schedules { get; set; } = [];
 }

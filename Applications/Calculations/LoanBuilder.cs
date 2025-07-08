@@ -16,11 +16,11 @@ namespace Applications.Calculations
 
         int? _payEvery = 1;
 
-        int? _repaymentModeId = (int)RepaymentModes.Declined;
+        int? _repaymentModeId = (int)RepaymentOption.Declined;
 
-        int? _collectionFeeModeId = (int)CollectionFeeModes.IRR;
+        int? _collectionFeeModeId = (int)CollectionFeeOption.IRR;
 
-        int? _installmentTypeId = (int)InstallmentTypes.Monthly;
+        int? _installmentTypeId = (int)InstallmentOption.Monthly;
 
         AdjustmentOption _sechuleMode = AdjustmentOption.After;
 

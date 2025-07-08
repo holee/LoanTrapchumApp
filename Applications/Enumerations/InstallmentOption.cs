@@ -2,7 +2,7 @@
 
 namespace Applications.Enumerations
 {
-    public enum CollectionFeeModes
+    public enum CollectionFeeOption
     {  
         [Description("Flat")]
         IRR = 1,
@@ -10,7 +10,7 @@ namespace Applications.Enumerations
         Declined = 2,
     }
 
-    public enum InstallmentTypes 
+    public enum InstallmentOption 
     {
         [Description("every month")]
         Monthly = 1, 

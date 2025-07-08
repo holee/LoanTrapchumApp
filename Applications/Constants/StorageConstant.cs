@@ -71,6 +71,11 @@ namespace Applications.Constants
         public static int[] InstallemntOptions = [12, 18, 24, 36, 42, 48, 60, 72];
 
         public static int[] PageSizeOptions = [15, 25, 50, 100];
+        public static Items[] ScheduleOptions = new Items[]
+        {
+            new(4, "First 4 Items"),
+            new(0, "All"),
+        };
 
         public static string[] MarritalOptions = ["Single", "Married", "Divorced", "Widow"];
 
