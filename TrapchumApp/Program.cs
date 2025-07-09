@@ -54,11 +54,10 @@ else
 
 
 //await app.SeedSystemData();
-
+app.UseHttpsRedirection();
+app.UseAntiforgery();
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseAntiforgery();
-app.UseHttpsRedirection();
 app.MapStaticAssets();
 app.UseStaticFiles();
 app.MapRazorComponents<App>()
