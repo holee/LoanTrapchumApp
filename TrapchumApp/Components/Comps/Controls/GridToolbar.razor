@@ -1,10 +1,10 @@
 ﻿@using System.Linq.Expressions
+@using Applications.Features.LoanRequests.Services
 @using TrapchumApp.Helpers.Constants
 @using TrapchumApp.Services
 @inherits ComponentBase
-<RadzenRow AlignItems="AlignItems.Center">
+<RadzenRow AlignItems="AlignItems.Center" class="rz-p-0">
     <RadzenColumn Size="12" SizeMD="6" SizeSM="12">
-
         <RadzenStack Orientation="Orientation.Horizontal"
                      Gap="1rem"
                      AlignItems="AlignItems.Center">
@@ -21,7 +21,6 @@
                 @LeftChildren
             }
         </RadzenStack>
-
     </RadzenColumn>
     <RadzenColumn Size="12" SizeMD="6" SizeSM="12">
         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">

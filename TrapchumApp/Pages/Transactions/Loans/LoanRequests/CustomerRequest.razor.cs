@@ -1,6 +1,5 @@
 using Applications.Extensions;
 using Applications.Responses.ViewModels.Customers;
-using Microsoft.AspNetCore.Components;
 
 namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 {
@@ -8,6 +7,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
     {
         [Parameter] public string? CustomerId { get; set; }
         [Parameter] public VCustomerList? Customer { get; set; } = new();
+        [Parameter] public bool ShowAdditionalInfo { get; set; } = false;
         protected override async Task OnInitializedAsync()
         {
             if (CustomerId.IsNotNullOrEmpty())

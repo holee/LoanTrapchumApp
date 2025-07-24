@@ -1,5 +1,5 @@
-﻿using Applications.Responses;
-using Applications.Schedules;
+﻿using Applications.Features.Schedules;
+using Applications.Responses;
 using Applications.Services.Reports;
 using Microsoft.Extensions.Logging;
 using QuestPDF.Fluent;

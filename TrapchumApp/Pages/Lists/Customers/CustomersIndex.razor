@@ -1,5 +1,6 @@
 ﻿@page "/App/Customer"
 @page "/App/Customer/{BranchId:int}/Branches"
+@using Applications.Features.LoanRequests.Services
 @using TrapchumApp.Pages.Lists.Collaterals
 @using TrapchumApp.Services
 <PageTitle>Customers</PageTitle>
@@ -29,7 +30,7 @@
             <CustomerCreate Closed="CloseTabe" />
         </RadzenTabsItem>
         <RadzenTabsItem Text="Customer" Icon="info" Visible="@isDetailsTab">
-            <CustomerDetails Close="CloseTabe" CustomerId="@customerId" EditClick="@EditIndex" />
+            <CustomerDetails BranchId="@BranchId" Close="CloseTabe" CustomerId="@customerId" EditClick="@EditIndex" />
         </RadzenTabsItem>
         <RadzenTabsItem Text="Edit"
                         Icon="@IconNames.PersonEdit"

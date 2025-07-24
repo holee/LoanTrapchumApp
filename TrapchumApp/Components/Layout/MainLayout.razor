@@ -1,4 +1,5 @@
 ﻿@using Applications.ApplicationPolicies
+@using Applications.Features.LoanRequests.Services
 @using Microsoft.AspNetCore.Components.Routing
 @using TrapchumApp.Helpers.Constants
 @using TrapchumApp.Pages.Transactions.Exchanges
@@ -97,6 +98,7 @@
                             <RadzenPanelMenuItem Text="Loan Category" Icon="lists" Path="/App/Loan/Categories" />
                             <RadzenPanelMenuItem Text="Collaterals" Icon="invert_colors" Path="/App/Customer/Collateral" />
                             <RadzenPanelMenuItem Text="Holidays" Icon="calendar_add_on" Path="/App/Holiday" />
+                            <RadzenPanelMenuItem Text="Change Credit Agent" Icon="@IconNames.SwitchAccount" Path="@($"/App/Loan/CreditAgent/{branchId}/Branches")" />
                         </RadzenPanelMenuItem>
                     }
                     @if (bState.IsAccount && bState.State)
@@ -111,7 +113,8 @@
                         <RadzenPanelMenuItem Text="Loan Management" Icon="dataset">
                             <RadzenPanelMenuItem Text="Customers" Icon="group" Path="@($"/App/Customer/{branchId}/Branches?UserId={userId}")" />
                             <RadzenPanelMenuItem Text="Collaterals" Icon="invert_colors" Path="/App/Customer/Collateral" />
-                            <RadzenPanelMenuItem Text="Loan Request" Icon="request_quote" Path="@($"/App/Request/{branchId}/Branches/?UserId={userId}")" />
+                            <RadzenPanelMenuItem Text="Request" Icon="request_quote" Path="@($"/App/Request/{branchId}/Branches/?UserId={userId}")" />
+                            <RadzenPanelMenuItem Text="Loans" Icon="@IconNames.MoneyBag" Path="@($"/App/Loan/{branchId}/Branches?UserId={userId}")" />
                         </RadzenPanelMenuItem>
 
                     }

@@ -5,6 +5,7 @@ public static class Modules
     /// <summary>
     /// Dashboard
     /// </summary>
+    public const string Dashboard = nameof(Dashboard);
     public const string AccountsDashboard = nameof(AccountsDashboard);
     public const string AdministratorsDashboard = nameof(AdministratorsDashboard);
     public const string CreditOfficersDashboard = nameof(CreditOfficersDashboard);

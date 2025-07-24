@@ -107,7 +107,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
         async void GetLoanDataFilter(string filter)
         {
             filterText = filter;
-
+            pageIndex = 0;
             await GetCustomerLateSchedules();
         }
 

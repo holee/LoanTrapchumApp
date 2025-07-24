@@ -17,9 +17,9 @@ namespace Infrastructures.Implements
     public class LoanScheduleService : ILoanScheduleService
     {
         private readonly DataContext _context;
-        private readonly ILogger<LoanService> _logger;
+        private readonly ILogger<LoanDisbursementRepository> _logger;
         private readonly IDapperConnectionFactory _connectionFactory;
-        public LoanScheduleService(DataContext context, ILogger<LoanService> logger, IDapperConnectionFactory connectionFactory)
+        public LoanScheduleService(DataContext context, ILogger<LoanDisbursementRepository> logger, IDapperConnectionFactory connectionFactory)
         {
             _context = context;
             _logger = logger;

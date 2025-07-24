@@ -1,0 +1,8 @@
+@using TrapchumApp.Helpers.Extensions
+<div class="wellNameFormat">
+    <span class="first">@AltName?.WellFormName().First</span>
+    <span class="second">@AltName?.WellFormName().Last</span>
+</div>
+@code{
+    [Parameter] public string? AltName { get; set; } = string.Empty;
+}

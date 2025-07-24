@@ -1,8 +1,9 @@
-﻿@using TrapchumApp.Services
+﻿@using Applications.Features.LoanRequests.Services
+@using TrapchumApp.Services
 @if (!string.IsNullOrEmpty(DisplayMessage))
 {
     var statusMessageClass = DisplayMessage.StartsWith("Error") ? "danger" : "success";
-    <div class="alert alert-@statusMessageClass" role="alert">
+    <div class="@statusMessageClass" role="alert">
         @DisplayMessage
     </div>
 }

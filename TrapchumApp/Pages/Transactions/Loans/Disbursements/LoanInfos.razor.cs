@@ -1,7 +1,7 @@
 using Applications.Enumerations;
 using Applications.Extensions;
+using Applications.Features.Loans.Services;
 using Applications.Responses.ViewModels.Loans;
-using Applications.Services.Loans;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using Radzen;

@@ -1,26 +1,26 @@
-﻿<!DOCTYPE html>
+﻿@using Applications.Features.LoanRequests.Services
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <base href="/" />
-    <link rel="stylesheet" href="@Assets["lib/bootstrap/dist/css/bootstrap.min.css"]" />
+@*     <link rel="stylesheet" href="@Assets["lib/bootstrap/dist/css/bootstrap.min.css"]" /> *@
     <link rel="stylesheet" href="@Assets["app.css"]" />
     <link rel="stylesheet" href="@Assets["TrapchumApp.styles.css"]" />
-    <ImportMap />
+    <ImportMap  />
     <link rel="icon" type="image/png" href="/assets/logo/tch_Logo.ico" />
-    <HeadOutlet @rendermode="@RenderModeForPage" />
+    <HeadOutlet @rendermode="@PageRenderMode" />
     <RadzenTheme Theme="material" @rendermode="@InteractiveServer" />
 </head>
 
 <body>
-    <Routes @rendermode="@RenderModeForPage" />
+    <Routes @rendermode="@PageRenderMode" />
     <script src="_framework/blazor.web.js"></script>
-    <script src="@Assets["lib/bootstrap/dist/js/bootstrap.bundle.min.js"]"></script>
+@*     <script src="@Assets["lib/bootstrap/dist/js/bootstrap.bundle.min.js"]"></script> *@
     <script src="@Assets["_content/Radzen.Blazor/Radzen.Blazor.js?v=@(typeof(Radzen.Colors).Assembly.GetName().Version)"]"></script>
     <script src="@Assets["assets/js/printer.js"]"></script>
-    <script src="@Assets["assets/js/KeyboardLayout.js"]"></script>
 </body>
 
 </html>
@@ -33,5 +33,5 @@
        ? null
        : new InteractiveServerRenderMode(false);
 
-    //private IComponentRenderMode? PageRenderMode => HttpContext.AcceptsInteractiveRouting() ? InteractiveServer : null;
+    private IComponentRenderMode? PageRenderMode => HttpContext.AcceptsInteractiveRouting() ? InteractiveServer : null;
 }

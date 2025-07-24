@@ -1,18 +1,16 @@
 using Applications.Calculations;
 using Applications.Enumerations;
 using Applications.Extensions;
+using Applications.Features.Loans.Mappers;
+using Applications.Features.Loans.Services;
 using Applications.Requests.Loans.Disbursements;
 using Applications.Requests.Loans.LoanRequests;
 using Applications.Responses.ViewModels.Branches;
+using Applications.Responses.ViewModels.Customers;
 using Applications.Responses.ViewModels.Holidays;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Applications.Services.Lists;
-using Applications.Services.Loans;
 using Domains.Enumerations;
-using Microsoft.AspNetCore.Components;
-using Radzen;
-using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Components.Forms;
 using Radzen.Blazor;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Disbursements;
@@ -59,6 +57,7 @@ public partial class LoanCreate(ILoanServiceImpl loanService, IHolidayServiceImp
 
     VLoanRequests req = new VLoanRequests();
 
+    VCustomerList _customer=new VCustomerList();
    
     async Task GetLoanRequest()
     {
@@ -69,7 +68,10 @@ public partial class LoanCreate(ILoanServiceImpl loanService, IHolidayServiceImp
         if (request.IsSuccess)
         {
             req = request.Data!;
+
             RequestStatusId = request.Data!.StatusId!.Value;
+
+            _customer = request.Data.Customer;
         }
 
         IsLoading = false;
@@ -181,7 +183,7 @@ public partial class LoanCreate(ILoanServiceImpl loanService, IHolidayServiceImp
         model.UserRefId = UserId;
         model.PenaltyRate = penaltyRate;
 
-        var scheduleDto = model.CreateSchedules().MapToLoanSchedules();
+        var scheduleDto = model.GenerateSchedules();  //.CreateSchedules().MapToLoanSchedules();
 
         var lastDate = scheduleDto!.LastOrDefault()!.PaymentDate;
 

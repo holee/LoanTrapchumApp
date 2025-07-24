@@ -114,10 +114,13 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
                
                 canApprove = (await _authorizeService.AuthorizeAsync(user, data, new SameUserApprovedRequirement())).Succeeded;
                
-                success = data?.StatusId == 2 ? false : true;
+                success = data?.StatusId == (int)RequestStatus.Requested ? false : true;
+
+                disableTextbox = data?.StatusId == (int)RequestStatus.Aprove ? true : false ;
             }
         }
 
+        private bool disableTextbox = false;
         async Task AprovedLoanRequest()
         {
             var options = new DialogOptions
@@ -136,6 +139,8 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             if (dialogueResult && user is not null)
             {
                 await GetLoanRequestDetails(user, true);
+
+                disableTextbox = true;
 
                 StateHasChanged();
             }

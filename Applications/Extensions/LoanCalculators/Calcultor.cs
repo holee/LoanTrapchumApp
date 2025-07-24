@@ -1,4 +1,5 @@
-﻿using Domains.Models.Loans;
+﻿using Applications.Responses.ViewModels.Loans.Payments;
+using Domains.Models.Loans;
 using Microsoft.VisualBasic;
 namespace Applications.Extensions.LoanCalculators;
 public interface ILoanCalculatorInterface
@@ -160,6 +161,7 @@ public sealed class Calcultor : ILoanCalculatorInterface
         decimal? lastBalance = 0.00M;
         DateTimeOffset? paymentDate = FirstPayment;
         beginBalance = lastBalance = amount;
+        int scheduleNum = 1;
         for (int i = 1; i <= periodInMonth; i++)
         {
             beginBalance = lastBalance;
@@ -235,6 +237,12 @@ public sealed class Calcultor : ILoanCalculatorInterface
 
                 totalPayAmount = TotalPay(principal, interestAmount, effAmount);
             }
+
+            if(i % 5 == 0)
+            {
+                scheduleNum++;
+            }
+
             ScheduleLine line = new ScheduleLine()
             {
                 InstallmentNo = i,
@@ -244,7 +252,8 @@ public sealed class Calcultor : ILoanCalculatorInterface
                 Interest = interestAmount,
                 CollectionFeeAmount = effAmount,
                 TotalPay = totalPayAmount,
-                OutStanding = lastBalance
+                OutStanding = lastBalance,
+                ScheduleNum = scheduleNum,
             };
             schedules.Add(line);
         }
@@ -260,7 +269,7 @@ public sealed class Calcultor : ILoanCalculatorInterface
         decimal beginBalance = 0, lastBalance = 0;
         DateTimeOffset? paymentDate = FirstPayment;
         beginBalance = lastBalance = amount!.Value;
-
+        int scheduleNum = 1;
         for (int i = 1; i <= period; i++)
         {
             var totalPay = 0.00M;
@@ -308,6 +317,12 @@ public sealed class Calcultor : ILoanCalculatorInterface
                 principalPaid = beginBalance;
                 lastBalance = 0;
             }
+
+            if(i % 5== 0)
+            {
+                scheduleNum++;
+            }
+
             ScheduleLine line = new ScheduleLine()
             {
                 InstallmentNo = i,
@@ -317,7 +332,8 @@ public sealed class Calcultor : ILoanCalculatorInterface
                 TotalDay = totalDays,
                 TotalPay = totalPay,
                 OutStanding = lastBalance,
-                CollectionFeeAmount = effAmount
+                CollectionFeeAmount = effAmount,
+                ScheduleNum = scheduleNum,
             };
             loanScheduleLines.Add(line);
         }
@@ -333,6 +349,7 @@ public sealed class Calcultor : ILoanCalculatorInterface
         beginBalance = lastBalance = amount!.Value;
         var effAmount = 0M;
         DateTimeOffset? previusDate;
+        int scheduleNum = 1;
         for (int i = 1; i <= periodInMonth; i++)
         {
             beginBalance = lastBalance;
@@ -379,6 +396,13 @@ public sealed class Calcultor : ILoanCalculatorInterface
             }
             interest = CalcInterest(amount!.Value, monthlyRate!.Value, totalDays);
             totalPay = TotalPay(principalPaid, interest, effAmount);
+
+
+            if (i % 5 == 0)
+            {
+                scheduleNum++;
+            }
+
             ScheduleLine line = new ScheduleLine()
             {
                 InstallmentNo = i,
@@ -403,6 +427,7 @@ public sealed class Calcultor : ILoanCalculatorInterface
         DateTimeOffset? paymentDate = FirstPayment;
         beginBalance = lastBalance = amount.Value;
         var effAmount = 0M;
+        int scheduleNum = 1;
         for (int i = 1; i <= period; i++)
         {
             var totalPay = 0.00M;
@@ -454,6 +479,11 @@ public sealed class Calcultor : ILoanCalculatorInterface
                 lastBalance = 0;
             }
 
+            if (i % 5 == 0)
+            {
+                scheduleNum++;
+            }
+
             ScheduleLine line = new ScheduleLine()
             {
                 InstallmentNo = i,
@@ -463,7 +493,8 @@ public sealed class Calcultor : ILoanCalculatorInterface
                 Interest = interest,
                 TotalPay = totalPay,
                 OutStanding = lastBalance,
-                CollectionFeeAmount = effAmount
+                CollectionFeeAmount = effAmount,
+                ScheduleNum= scheduleNum
 
             };
             loanScheduleLines.Add(line);

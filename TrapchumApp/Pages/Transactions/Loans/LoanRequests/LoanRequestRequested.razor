@@ -1,16 +1,6 @@
+@using Applications.Features.LoanRequests.Services
 @using Applications.Responses.ViewModels.Loans.Requests
 @using TrapchumApp.Services
-<PageDropDown PageSizeChanged="PageChanged"
-              OnTextChanged="FilterTextChanged"
-              ShowSearchBox="true">
-    <LeftChildContent>
-        <AuthorizeView Policy="@RequestsPolicies.Create">
-            <Authorized>
-                <RadzenLink Path="@createRequestUrl" Text="Request" Icon="add" />
-            </Authorized>
-        </AuthorizeView>
-    </LeftChildContent>
-</PageDropDown>
 <GridToolbar SearchChanged="@FilterTextChanged" Placeholder="Type something to search........">
     <LeftChildren>
         <AuthorizeView Policy="@RequestsPolicies.Request">
@@ -34,7 +24,8 @@
                 IsLoading="isLoading"
                 GridLines="DataGridGridLines.Both"
                 AllowPaging="true"
-                Style="height:30rem;min-height:30rem;max-height:45rem;--rz-grid-cell-line-height:1.4rem;"
+                PageSizeChanged="PageChanged"
+                PageSizeOptions="@StorageConstant.PageSizeOptions"
                 ShowPagingSummary="true">
     <Columns>
         <RadzenDataGridColumn Property="@(nameof(VLoanRequests.RequestDate))"
@@ -44,7 +35,11 @@
                 @r.RequestDate.DayFirst()
             </Template>
         </RadzenDataGridColumn>
-        <RadzenDataGridColumn Property="@(nameof(VLoanRequests.AltName))" Title="Name" />
+        <RadzenDataGridColumn Property="@(nameof(VLoanRequests.AltName))" Title="Name" Context="x">
+            <Template>
+                <TrapchumApp.Pages.Lists.KhmerName AltName="@x.AltName" />
+            </Template>
+        </RadzenDataGridColumn>
         <RadzenDataGridColumn Width="8rem" 
                     Property="@(nameof(VLoanRequests.BranchName))" 
                     Title="Branch Name" />

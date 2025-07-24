@@ -1,89 +1,87 @@
 ﻿@page "/App/Currencies/SetDailySpotRate"
+@using Applications.Features.LoanRequests.Services
 @using TrapchumApp.Services
 <PageTitle>Daily Set Spot Rate</PageTitle>
-<RadzenStack AlignItems="AlignItems.Center" class="my-2" JustifyContent="JustifyContent.SpaceBetween"
-             Wrap="FlexWrap.NoWrap" Orientation="Orientation.Horizontal">
-    <RadzenStack AlignItems="AlignItems.Center"
-                 JustifyContent="JustifyContent.SpaceBetween"
-                 Orientation="Orientation.Horizontal">
-        <div>
-            <div class="input-group">
-                <span class="input-group-text">Plese Select Date To Set Spot Rate</span>
-                <RadzenDatePicker @bind-Value:format="yyyy-MMM-dd"
-                                  TValue="DateTime"
-                                  DateFormat="dd/MM/yyyy"
-                                  Max="@(DateTime.Now)"
-                                  @bind-Value="reqDate" />
-            </div>
-        </div>
-        <div>
-            <RadzenLink Target="_blank" Path="https://www.nbc.gov.kh/english/economic_research/exchange_rate.php">NBC Exchange Rate</RadzenLink>
+<RadzenStack AlignItems="AlignItems.Center"
+             JustifyContent="JustifyContent.SpaceBetween"
+             class="rz-my-2"
+             Orientation="Orientation.Horizontal">
+    <RadzenStack class="rz-w-50" Orientation="Orientation.Horizontal">
+        <div class="input-group">
+            <span class="input-group-text">Plese Select Date To Set Spot Rate</span>
+            <RadzenDatePicker @bind-Value:format="yyyy-MMM-dd"
+                              TValue="DateTime"
+                              DateFormat="dd/MM/yyyy"
+                              Max="@(DateTime.Now)"
+                              @bind-Value="reqDate" />
         </div>
     </RadzenStack>
+    <RadzenStack class="rz-w-50" AlignItems="AlignItems.Center"
+                 Orientation="Orientation.Horizontal"
+                 JustifyContent="JustifyContent.End">
+        <RadzenLink Target="_blank" Path="https://www.nbc.gov.kh/english/economic_research/exchange_rate.php">NBC Exchange Rate</RadzenLink>
+    </RadzenStack>
 </RadzenStack>
-<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" class="w-100">
-    <EditForm Model="model" class="w-100">
-        <div class="table-responsive rz-background-color-base-100">
-            <table class="table table-sm">
-                <thead>
-                    <tr>
-                        <th class="w-auto">#</th>
-                        <th class="w-25">Currency Name</th>
-                        <th class="w-25">Currency Code</th>
-                        <th class="w-auto text-end">Spot Rate</th>
-                        <th class="w-auto text-end">Buying Rate</th>
-                        <th class="w-auto text-end">Selling Rate</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Currencies ?? [])
-                    {
-                        var index = Currencies?.ToList().IndexOf(item);
-                        <tr class="rz-background-color-base-100">
-                            <th class="text-center align-middle">@(index + 1)</th>
-                            <td class="align-middle">
-                                <input type="hidden" @bind="item.CurrencyId" />
-                                @item.CurrencyName
-                            </td>
-                            <td class="align-middle">@item.CurrencyCode</td>
-                            <td class="align-middle">
-                                <RadzenNumeric ShowUpDown="false"
-                                               Disabled="@(item.IsBaseCurrency?true:false)"
-                                               TextAlign="TextAlign.End"
-                                               @bind-Value="item.SpotRate"
-                                               Style="height:32px;"
-                                               class="w-100 form-control form-control-sm"
-                                               TValue="decimal?" />
-                            </td>
-                            <td class="align-middle">
-                                <RadzenNumeric Disabled="@(item.IsBaseCurrency?true:false)"
-                                               ShowUpDown="false"
-                                               @bind-Value="item.BuyingRate"
-                                               TextAlign="TextAlign.End"
-                                               TValue="decimal?"
-                                               Style="height:32px;"
-                                               class="w-100" />
-                            </td>
-                            <td class="align-middle">
-                                <RadzenNumeric ShowStepButtons="false"
-                                               Disabled="@(item.IsBaseCurrency?true:false)"
-                                               @bind-Value="item.SellingRate"
-                                               TextAlign="TextAlign.End"
-                                               ShowUpDown="false"
-                                               Style="height:32px;"
-                                               class="w-100"
-                                               TValue="decimal?"
-                                               @onfocusout="CheckSellingRate" />
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
+    <EditForm Model="model" class="rz-w-100">
+        <RadzenTable GridLines="DataGridGridLines.Both"
+                     AllowAlternatingRows="false">
+            <RadzenTableHeader>
+                <RadzenTableHeaderRow>
+                    <RadzenTableHeaderCell Style="width:2rem;">#</RadzenTableHeaderCell>
+                    <RadzenTableHeaderCell>Currency Name</RadzenTableHeaderCell>
+                    <RadzenTableHeaderCell>Currency Code</RadzenTableHeaderCell>
+                    <RadzenTableHeaderCell>Spot Rate</RadzenTableHeaderCell>
+                    <RadzenTableHeaderCell>Buying Rate</RadzenTableHeaderCell>
+                    <RadzenTableHeaderCell>Selling Rate</RadzenTableHeaderCell>
+                </RadzenTableHeaderRow>
+            </RadzenTableHeader>
+            <RadzenTableBody>
+                @foreach (var item in Currencies ?? [])
+                {
+                    var index = Currencies?.ToList().IndexOf(item);
+                    <RadzenTableRow>
+                        <RadzenTableCell>@(index + 1)</RadzenTableCell>
+                        <RadzenTableCell>
+                            <input type="hidden" @bind="item.CurrencyId" />
+                            @item.CurrencyName
+                        </RadzenTableCell>
+                        <RadzenTableCell>@item.CurrencyCode</RadzenTableCell>
+                        <RadzenTableCell>
+                            <RadzenNumeric ShowUpDown="false"
+                                           Disabled="@(item.IsBaseCurrency?true:false)"
+                                           TextAlign="TextAlign.End"
+                                           @bind-Value="item.SpotRate"
+                                           class="rz-w-100"
+                                           TValue="decimal?" />
+                        </RadzenTableCell>
+                        <RadzenTableCell>
+                            <RadzenNumeric Disabled="@(item.IsBaseCurrency ? true : false)"
+                                           ShowUpDown="false"
+                                           @bind-Value="item.BuyingRate"
+                                           TextAlign="TextAlign.End"
+                                           TValue="decimal?"
+                                           class="rz-w-100" />
+                        </RadzenTableCell>
+                        <RadzenTableCell class="align-middle">
+                            <RadzenNumeric ShowStepButtons="false"
+                                           Disabled="@(item.IsBaseCurrency?true:false)"
+                                           @bind-Value="item.SellingRate"
+                                           TextAlign="TextAlign.End"
+                                           ShowUpDown="false"
+                                           Style="height:32px;"
+                                           class="rz-w-100"
+                                           TValue="decimal?"
+                                           @onfocusout="CheckSellingRate" />
+                        </RadzenTableCell>
+                    </RadzenTableRow>
+                }
+            </RadzenTableBody>
+        </RadzenTable>
     </EditForm>
 </RadzenStack>
-<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" AlignItems="AlignItems.Center">
-    <RadzenButton Icon="save"
+<RadzenStack Orientation="Orientation.Horizontal" class="rz-mt-2" JustifyContent="JustifyContent.End" AlignItems="AlignItems.Center">
+    <RadzenButton Icon="@IconNames.Save"
                   Text="Set"
                   ButtonStyle="ButtonStyle.Primary"
                   Click="SetSpotRate"

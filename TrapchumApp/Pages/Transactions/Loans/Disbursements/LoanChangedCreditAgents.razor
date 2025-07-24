@@ -1,11 +1,32 @@
-﻿@page "/Loan/CreditAgent/{BranchId:int}/Branches"
+﻿@page "/App/Loan/CreditAgent/{BranchId:int}/Branches"
+@using Applications.Features.LoanRequests.Services
+@using Applications.Responses.ViewModels.Branches
 @using Applications.Responses.ViewModels.Loans
 @using TrapchumApp.Services
 <PageTitle>Change Credit Agent</PageTitle>
 <RadzenRow>
-    <RadzenColumn Size="6">
+    <RadzenColumn Size="4">
         <RadzenFieldset Text="Old Credit Agent">
-            <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+            <RadzenRow AlignItems="AlignItems.Center" class="rz-mt-2">
+                <RadzenColumn Size="4">
+                    <RadzenLabel Text="Old Credit Agent" />
+                </RadzenColumn>
+                <RadzenColumn Size="8">
+                    <RadzenDropDown class="rz-w-100"
+                                    PageSize="10"
+                                    TextProperty="@nameof(VBranchResponse.BranchName)"
+                                    ValueProperty="@nameof(VBranchResponse.BranchId)"
+                                    @bind-Value="@BranchId"
+                                    Style="font-size:0.8rem;"
+                                    Data="@_newBranches">
+                    </RadzenDropDown>
+                </RadzenColumn>
+            </RadzenRow>
+        </RadzenFieldset>
+    </RadzenColumn>
+    <RadzenColumn Size="4">
+        <RadzenFieldset Text="Old Credit Agent">
+            <RadzenRow AlignItems="AlignItems.Center" class="rz-mt-2">
                 <RadzenColumn Size="4">
                     <RadzenLabel Text="Old Credit Agent" />
                 </RadzenColumn>
@@ -25,14 +46,14 @@
             </RadzenRow>
         </RadzenFieldset>
     </RadzenColumn>
-    <RadzenColumn Size="6">
+    <RadzenColumn Size="4">
         <RadzenFieldset Text="New Credit Agent">
-            <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+            <RadzenRow AlignItems="AlignItems.Center" class="rz-mt-2">
                 <RadzenColumn Size="4">
                     <RadzenLabel Text="New Credit Agent" />
                 </RadzenColumn>
                 <RadzenColumn Size="8">
-                    <RadzenDropDown class="w-100"
+                    <RadzenDropDown class="rz-w-100"
                                     PageSize="10"
                                     TextProperty="@nameof(VCreditAgent.AltName)"
                                     ValueProperty="@nameof(VCreditAgent.EmployeeRefId)"
@@ -171,7 +192,7 @@
 @code {
 
 
-    VLoanDisbursments vLoan;
+    VLoanDisbursments? vLoan;
 
     private bool? GetSelectAllCheckboxState => _selectedSchedules == null || _selectedSchedules?.Any() != true ? false : !_items.All(i => _selectedSchedules.Contains(i)) ? null : _items.Any(i => _selectedSchedules.Contains(i));
 

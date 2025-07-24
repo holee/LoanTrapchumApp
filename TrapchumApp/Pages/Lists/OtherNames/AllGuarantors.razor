@@ -1,14 +1,9 @@
+@using Applications.Features.LoanRequests.Services
 @using Applications.Requests.Lists.OtherNames
 @using Applications.Responses.Paginations
 @using Applications.Responses.ViewModels.OtherNames
 @using Microsoft.AspNetCore.Components.Web
 @using TrapchumApp.Services
-<style>
-    /* .rz-grid-table td .rz-cell-data {
-        line-height: 1.5rem;
-        font-size: 0.8rem;
-    } */
-</style>
 <GridToolbar SearchChanged="SearchTextChanged">
     <RightChildren>
         <div class="rz-text-align-center">
@@ -63,7 +58,11 @@
                               Title="Name"
                               Context="g"
                               Width="10rem"
-                              Sortable="true" />
+                              Sortable="true">
+            <Template>
+                <KhmerName AltName="@g.GuarantorName" />
+            </Template>
+        </RadzenDataGridColumn>
         <RadzenDataGridColumn Property="@nameof(VGuarantor.FullName)"
                               Title="Full Name"
                               Context="g"
@@ -73,15 +72,7 @@
         <RadzenDataGridColumn Property="@nameof(VGuarantor.Phone)"
                               Width="8rem"
                               Title="Phone" />
-        <RadzenDataGridColumn Context="g"
-                              Property="@nameof(VGuarantor.ProInKhmer)"
-                              Filterable="false"
-                              Sortable="false"
-                              Title="Address">
-            <Template>
-                @g.ToString()
-            </Template>
-        </RadzenDataGridColumn>
+        
         <RadzenDataGridColumn TextAlign="TextAlign.Center"
                               Width="5rem"
                               Context="g"
@@ -89,7 +80,20 @@
                               Sortable="false"
                               Title="Loan Active">
             <Template>
-                <RadzenCheckBox @bind-Value="g.IsActive" ReadOnly />
+                @if (g.IsActive)
+                {
+                    <RadzenIcon IconStyle="@IconStyle.Dark"
+                                Style="font-size:0.9rem;"
+                                Icon="check_box" IconColor="@Colors.Success" />
+                }
+                else
+                {
+                    <RadzenIcon IconStyle="@IconStyle.Primary"
+                                Style="font-size:0.9rem;"
+                                Icon="check_box_outline_blank" IconColor="@Colors.Danger" />
+                }
+
+                @* <RadzenCheckBox @bind-Value="g.IsActive" ReadOnly /> *@
             </Template>
         </RadzenDataGridColumn>
 
@@ -109,6 +113,18 @@
                               Title="Requests">
             <Template>
                 @g.Requests
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Context="g"
+                              Property="@nameof(VGuarantor.ProInKhmer)"
+                              Filterable="false"
+                              Sortable="false"
+                              Title="Address">
+            <Template>
+                <AddressInfo VilInKhmer="@g?.VilInKhmer"
+                             ComInKhmer="@g?.ComInKhmer"
+                             ProInKhmer="@g?.ProInKhmer"
+                             DisInKhmer="@g?.DisInKhmer" />
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Width="5rem"

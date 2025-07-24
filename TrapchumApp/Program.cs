@@ -15,7 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 QuestPDF.Settings.License = LicenseType.Community;
-builder.WebHost.UseStaticWebAssets();
+//builder.WebHost.UseStaticWebAssets();
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
@@ -30,6 +30,7 @@ builder.Services.AddPolicyServices();
 builder.Services.AddApplicationServices();
 builder.Services.AddOtherServices();
 builder.Services.AddValidationServiceInjections();
+builder.Services.AddValidationServices();
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddMapster();
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
@@ -56,10 +57,10 @@ else
 //await app.SeedSystemData();
 app.UseHttpsRedirection();
 app.UseAntiforgery();
-app.UseAuthentication();
-app.UseAuthorization();
+//app.UseAuthentication();
+//app.UseAuthorization();
 app.MapStaticAssets();
-app.UseStaticFiles();
+//app.UseStaticFiles();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 

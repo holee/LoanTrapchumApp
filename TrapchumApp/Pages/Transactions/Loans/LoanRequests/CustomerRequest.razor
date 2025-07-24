@@ -1,86 +1,87 @@
-﻿@using TrapchumApp.Services
-<div class="table table-responsive">
-    <table class="table table-bordered table-sm">
-        <tbody>
-            <tr>
-                <th class="w-25">
-                    Customer Name
-                </th>
-                <td>
-                    @Customer?.AltName (@Customer?.FullName )
-                </td>
-            </tr>
-            <tr>
-                <th class="w-25">
-                    Phone
-                </th>
-                <td>
-                    @Customer?.Phone
-                </td>
-            </tr>
-            <tr>
-                <th class="w-25">DateOfBirth</th>
-                <td>
-                    <span>
-                        @Customer?.DateOfBirth
-                    </span>
+﻿@using Applications.Features.LoanRequests.Services
+@using TrapchumApp.Pages.Lists.Collaterals
+@using TrapchumApp.Pages.Lists.Customers
+@using TrapchumApp.Services
+<table class="table-sm rz-mb-2">
+    <tbody>
+        <tr>
+            <th class="rz-w-25" Style="height:0.85rem;">
+                Customer Name
+            </th>
+            <td>
+                @Customer?.AltName (@Customer?.FullName )
+            </td>
+        </tr>
+        <tr>
+            <th class="rz-w-25">
+                Phone
+            </th>
+            <td>
+                @Customer?.Phone
+            </td>
+        </tr>
+        <tr>
+            <th class="rz-w-25">DateOfBirth</th>
+            <td>
+                <span>
+                    @Customer?.DateOfBirth
+                </span>
+            </td>
+        </tr>
+        <tr>
+            <th class="rz-w-25">
+                Occupation
+            </th>
+            <td>
+                <span>
+                    @Customer?.Occupation
+                </span>
+            </td>
+        </tr>
+        <tr>
+            <th class="rz-w-25">ID Card</th>
+            <td>
+                @Customer?.IdCard
+            </td>
+        </tr>
+        <tr>
+            <th class="rz-w-25">
+                Circle
+            </th>
+            <td>
+                @Customer?.Circle
+            </td>
+        </tr>
+        <tr>
+            <th class="rz-w-25">
+                Salutation
+            </th>
+            <td>
+                @Customer?.Salutation
+            </td>
+        </tr>
+        <tr>
+            <th class="rz-w-25">
+                Address
+            </th>
+            <td>
+                @Customer?.ToString()
+            </td>
+        </tr>
+        <tr>
+            <th class="rz-w-25">Income</th>
+            <td>@Customer?.CustomerIncomes.Sum(x => x.IncomeAmount)</td>
+        </tr>
+        <tr>
+            <th class="rz-w-25">Expend</th>
+            <td>
+                @Customer?.CustomerExpenses.Sum(x => x.ExpendAmount)
+            </td>
+        </tr>
+    </tbody>
+</table>
 
-                </td>
-            </tr>
-            <tr>
-                <th class="w-25">
-                    Occupation
-                </th>
-                <td>
-                    <span>
-                        @Customer?.Occupation
-                    </span>
-                </td>
-            </tr>
-            <tr>
-                <th class="w-25">ID Card</th>
-                <td>
-                    @Customer?.IdCard
-                </td>
-            </tr>
-            <tr>
-                <th class="w-25">
-                    Circle
-                </th>
-                <td>
-                    @Customer?.Circle
-                </td>
-            </tr>
-            <tr>
-                <th class="w-25">
-                    Salutation
-                </th>
-                <td>
-                    @Customer?.Salutation
-                </td>
-            </tr>
-            <tr>
-                <th class="w-25">
-                    Address
-                </th>
-                <td>
-                    @Customer?.ToString()
-                </td>
-            </tr>
-            <tr>
-                <th class="w-25">Income</th>
-                <td>@Customer?.CustomerIncomes.Sum(x => x.IncomeAmount)</td>
-            </tr>
-            <tr>
-                <th class="w-25">Expend</th>
-                <td>
-                    @Customer?.CustomerExpenses.Sum(x => x.ExpendAmount)
-                </td>
-            </tr>
-        </tbody>
-    </table>
-</div>
-<RadzenRow AlignItems="AlignItems.Center">
+<RadzenRow AlignItems="AlignItems.Center" Visible="@ShowAdditionalInfo">
     <RadzenColumn Size="12" SizeMD="6">
         <CustomerInc CustomerId="@CustomerId" ShowAdd="true" ShowReload="false" ShowCommand="true" />
     </RadzenColumn>
@@ -88,9 +89,8 @@
         <CustomerExp CustomerId="@CustomerId" ShowAdd="true" ShowReload="false" ShowCommand="true" />
     </RadzenColumn>
 </RadzenRow>
-<RadzenRow AlignItems="AlignItems.Center">
+<RadzenRow AlignItems="AlignItems.Center" Visible="@ShowAdditionalInfo">
     <RadzenColumn Size="12">
         <CollateralsCustomer CustomerId="@CustomerId" ShowAdd="true" ShowCommand="true" />
     </RadzenColumn>
 </RadzenRow>
-

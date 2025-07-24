@@ -18,5 +18,20 @@
         public const string ExchangeMoney = nameof(ExchangeMoney);
         public const string RejectRequest = nameof(RejectRequest);
         public const string Grant = nameof(Grant);
+
+
+        public const string ReadAccountDashboard = nameof(ReadAccountDashboard);
+        public const string ReadCoDashboard = nameof(ReadCoDashboard);
+        public const string ReadAdminDashboard = nameof(ReadAdminDashboard);
+        public const string ReadCeoDashboard = nameof(ReadCeoDashboard); 
+        public const string ReadBbDashboard = nameof(ReadBbDashboard);
+        public const string ReadRbmDashboard = nameof(ReadRbmDashboard);
+        public const string ReadCurrencyDashboard = nameof(ReadCurrencyDashboard);
+        public const string ReadReportDashboard = nameof(ReadReportDashboard);
+        public const string ReadLoanDashboard = nameof(ReadLoanDashboard);
+        public const string ReadLoanRequestDashboard = nameof(ReadLoanRequestDashboard);
+        public const string ReadSettingDashboard = nameof(ReadSettingDashboard);
+        public const string ReadDepartmentDashboard = nameof(ReadDepartmentDashboard);
+        public const string ReadOperatedtDashboard = nameof(ReadOperatedtDashboard);
     }
 }

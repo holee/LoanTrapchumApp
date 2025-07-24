@@ -1,4 +1,5 @@
 ﻿@page "/App/Names"
+@using Applications.Features.LoanRequests.Services
 @using Applications.Responses.ViewModels.OtherNames
 @using Applications.Responses.ViewModels.Vendors
 @using Microsoft.AspNetCore.Components.Web
@@ -60,13 +61,20 @@
                             @(Names.IndexOf(name) + 1)
                         </Template>
                     </RadzenDataGridColumn>
-                    <RadzenDataGridColumn Width="10rem" Title="Name" Property="@(nameof(VOtherNames.AltName))" />
+                    <RadzenDataGridColumn Width="10rem" Title="Name" Context="x" Property="@(nameof(VOtherNames.AltName))">
+                        <Template>
+                            <KhmerName AltName="@x.AltName" />
+                        </Template>
+                    </RadzenDataGridColumn>
                     <RadzenDataGridColumn Width="8rem" Title="Gender" Property="@(nameof(VendorVm.Gender))" />
                     <RadzenDataGridColumn Sortable="false" Width="8rem" Title="Phone" Property="@(nameof(VOtherNames.Phone))" />
                     <RadzenDataGridColumn Sortable="false" Title="Email" Property="@(nameof(VOtherNames.EmailAddress))" />
                     <RadzenDataGridColumn Sortable="false" Filterable="false" Title="Address" Property="@(nameof(VOtherNames.Description))" Context="v">
                         <Template>
-                            @v.ToString()
+                            <AddressInfo VilInKhmer="@v.VilInKhmer"
+                                         ComInKhmer="@v.ComInKhmer"
+                                         DisInKhmer="@v.DisInKhmer"
+                                         ProInKhmer="@v.ProInKhmer" />
                         </Template>
                     </RadzenDataGridColumn>
                     <RadzenDataGridColumn Sortable="false"

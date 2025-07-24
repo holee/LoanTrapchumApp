@@ -2,6 +2,7 @@
 using Applications.Requests.Identity;
 using Applications.Responses;
 using Applications.Responses.Auths;
+using Applications.Responses.ViewModels.Auths;
 
 namespace Applications.Services.Identity
 {
@@ -9,6 +10,8 @@ namespace Applications.Services.Identity
     {
         Task<Result> AddRolePermissions(RolePermissionRequest permission);
         Task<Result> CreateAsync(RoleCreateDto role);
+        List<PermissionsDtoCreate> GetAllPermissions();
+        List<RolePermissionsViewModel> GetPermissions();
         Task<Result<RolePermissions>> GetPermissionsByRoleAsync(string roleId);
         Task<Result<RoleDto>> GetRoleByIdAsync(string id);
         Task<Result<IEnumerable<RoleDto>>> GetRolesAsync(string? roleId, string? roleName = null);
@@ -31,6 +34,18 @@ namespace Applications.Services.Identity
         {
             return await roleService.GetPermissionsByRoleAsync(roleId);
         }
+
+        public List<RolePermissionsViewModel> GetPermissions()
+        {
+            return roleService.GetAllPermisses();
+        }
+
+
+        public List<PermissionsDtoCreate> GetAllPermissions()
+        {
+            return roleService.GetAllPermissions(); 
+        }
+
 
         public async Task<Result<RoleDto>> GetRoleByIdAsync(string id)
         {

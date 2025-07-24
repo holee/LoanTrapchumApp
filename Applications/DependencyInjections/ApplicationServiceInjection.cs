@@ -1,4 +1,10 @@
-﻿using Applications.Interfaces.Addresses;
+﻿using Applications.Features.Identity.Roles.Validation;
+using Applications.Features.LoanRequests.Services;
+using Applications.Features.LoanRequests.Validations;
+using Applications.Features.Loans.Services;
+using Applications.Interfaces.Addresses;
+using Applications.Requests.Identity;
+using Applications.Requests.Loans.LoanRequests;
 using Applications.Services.Addresses;
 using Applications.Services.Banks;
 using Applications.Services.Branches;
@@ -15,6 +21,7 @@ using Applications.Services.Settings;
 using Applications.Services.Transactions.Branches;
 using Applications.Services.Transactions.Currencies;
 using Applications.Services.Transactions.Journals;
+using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 namespace Applications.DependencyInjections
 {
@@ -22,47 +29,58 @@ namespace Applications.DependencyInjections
     {
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
-            services.AddTransient<IAddressServiceImpl, AddressService>();
-            services.AddTransient<IBranchServiceImpl, BranchService>();
-            services.AddTransient<IBankServiceImpl, BankService>();
-            services.AddTransient<IOpenBranchServiceImpl, OpenBranchService>();
-            services.AddTransient<ICurrencyServiceImpl, CurrencyService>();
-            services.AddTransient<ICashVaultServiceImpl, CashVaultService>();
-            services.AddTransient<ICustomerServiceImpl, CustomerService>();
-            services.AddTransient<IIncomeExpendServiceImpl, CustomerIncomeExpendService>();
-            services.AddTransient<IHolidayServiceImpl, HolidayService>();
-            services.AddTransient<ICreditAgentServiceImpl, CreditAgentService>();
-            services.AddTransient<ICollateralsServiceImpl, CollateralsService>();
-            services.AddTransient<IEmployeeServiceImpl, EmployeeService>();
-            services.AddTransient<IFileUploadServiceImp, FileUploadService>();
-            services.AddTransient<IDepartmentServiceImpl, DepartmentService>();
-            services.AddTransient<IEntityNameServiceImpl, EntityNameService>();
-            services.AddTransient<ICreditAgentServiceImpl, CreditAgentService>();
-            services.AddTransient<ILoginServiceImpl, LoginService>();
-            services.AddTransient<IUserServiceImpl, UserService>();
-            services.AddTransient<IForiegnCurrencyExchangeImpl, ForiegnCurrencyExchange>();
-            services.AddTransient<IJournalServiceImpl, JournalService>();
-            services.AddTransient<ILedgerServiceImpl, LedgerService>();
-            services.AddTransient<ILoanRequestServiceImpl, LoanRequestService>();
-            services.AddTransient<ILoanServiceImpl, LoanService>();
-            services.AddTransient<ILoanScheduleServiceImpl, LoanScheduleService>();
-            services.AddTransient<ILoanCategoryServiceImpl, LoanCategoryService>();
-            services.AddTransient<ILoanProductServiceImpl, LoanProductService>();
-            services.AddTransient<ILoanPaymentServiceImpl, LoanPaymentService>();
-            services.AddTransient<ILoanReportServiceImpl, LoanReportServiceImpl>();
-            services.AddTransient<ILoanSettingServiceImpl, LoanSettingService>();
-            services.AddTransient<INationalityServiceImpl, NationalityService>();
-            services.AddTransient<IOccupationServiceImpl, OccupationService>();
-            services.AddTransient<IOtherNameServiceImpl, OtherNameService>();
-            services.AddTransient<IPrintPdfServiceImpl, PrintPdfServiceImpl>();
-            services.AddTransient<IGuarantorServiceImpl, GuarantorService>();
-            services.AddTransient<IRoleServiceImpl, RoleService>();
-            services.AddTransient<ISpotRateServiceImpl, SpotRateService>();
-            services.AddTransient<ISettingServiceImpl, SettingService>();
-            services.AddTransient<ISalutationServiceImpl, SalutationService>();
-            services.AddTransient<IVendorServiceImpl, VendorService>();
-            services.AddTransient<IFileUploadServiceImp, FileUploadService>();
-            services.AddTransient<IPrintExelServiceImpl, PrintExelServiceImpl>();
+            services.AddScoped<ScheduleService>();
+            services.AddScoped<SchedulePrintService>();
+            services.AddScoped<IAddressServiceImpl, AddressService>();
+            services.AddScoped<IBranchServiceImpl, BranchService>();
+            services.AddScoped<IBankServiceImpl, BankService>();
+            services.AddScoped<IOpenBranchServiceImpl, OpenBranchService>();
+            services.AddScoped<ICurrencyServiceImpl, CurrencyService>();
+            services.AddScoped<ICashVaultServiceImpl, CashVaultService>();
+            services.AddScoped<ICustomerServiceImpl, CustomerService>();
+            services.AddScoped<IIncomeExpendServiceImpl, CustomerIncomeExpendService>();
+            services.AddScoped<IHolidayServiceImpl, HolidayService>();
+            services.AddScoped<ICreditAgentServiceImpl, CreditAgentService>();
+            services.AddScoped<ICollateralsServiceImpl, CollateralsService>();
+            services.AddScoped<IEmployeeServiceImpl, EmployeeService>();
+            services.AddScoped<IFileUploadServiceImp, FileUploadService>();
+            services.AddScoped<IDepartmentServiceImpl, DepartmentService>();
+            services.AddScoped<IEntityNameServiceImpl, EntityNameService>();
+            services.AddScoped<ICreditAgentServiceImpl, CreditAgentService>();
+            services.AddScoped<ILoginServiceImpl, LoginService>();
+            services.AddScoped<IUserServiceImpl, UserService>();
+            services.AddScoped<IForiegnCurrencyExchangeImpl, ForiegnCurrencyExchange>();
+            services.AddScoped<IJournalServiceImpl, JournalService>();
+            services.AddScoped<ILedgerServiceImpl, LedgerService>();
+            services.AddScoped<ILoanRequestServiceImpl, LoanRequestService>();
+            services.AddScoped<ILoanServiceImpl, LoanService>();
+            services.AddScoped<ILoanScheduleServiceImpl, LoanScheduleService>();
+            services.AddScoped<ILoanCategoryServiceImpl, LoanCategoryService>();
+            services.AddScoped<ILoanProductServiceImpl, LoanProductService>();
+            services.AddScoped<ILoanPaymentServiceImpl, LoanPaymentService>();
+            services.AddScoped<ILoanReportServiceImpl, LoanReportServiceImpl>();
+            services.AddScoped<ILoanSettingServiceImpl, LoanSettingService>();
+            services.AddScoped<INationalityServiceImpl, NationalityService>();
+            services.AddScoped<IOccupationServiceImpl, OccupationService>();
+            services.AddScoped<IOtherNameServiceImpl, OtherNameService>();
+            services.AddScoped<IPrintPdfServiceImpl, PrintPdfServiceImpl>();
+            services.AddScoped<IGuarantorServiceImpl, GuarantorService>();
+            services.AddScoped<IRoleServiceImpl, RoleService>();
+            services.AddScoped<ISpotRateServiceImpl, SpotRateService>();
+            services.AddScoped<ISettingServiceImpl, SettingService>();
+            services.AddScoped<ISalutationServiceImpl, SalutationService>();
+            services.AddScoped<IVendorServiceImpl, VendorService>();
+            services.AddScoped<IFileUploadServiceImp, FileUploadService>();
+            services.AddScoped<IPrintExelServiceImpl, PrintExelServiceImpl>();
+            return services;
+
+        }
+
+        public static IServiceCollection AddValidationServices(this IServiceCollection services)
+        {
+
+            services.AddScoped<IValidator<RoleDtoUpdate>, RoleDtoUpdateValidator>();
+            services.AddScoped<IValidator<AproveLoanDtoCreate>, AprovedLoanDtoCreateValidator>();
             return services;
 
         }

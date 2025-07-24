@@ -4,13 +4,9 @@ using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Services.Customers;
 using Applications.Services.LIsts;
-using Microsoft.AspNetCore.Components;
-using Radzen;
-using Microsoft.AspNetCore.Components.Authorization;
 using Radzen.Blazor;
 using TrapchumApp.Pages.Lists.Collaterals;
 using Domains.Models.Identity;
-using System.Threading.Tasks;
 
 namespace TrapchumApp.Pages.Lists.Customers
 {
@@ -27,7 +23,7 @@ namespace TrapchumApp.Pages.Lists.Customers
             _collateralService = collateralService;
         }
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
-        [Parameter, SupplyParameterFromQuery] public int? BranchId { get; set; } = 0;
+        [Parameter] public int? BranchId { get; set; } = 0;
         [Parameter, SupplyParameterFromQuery] public string? UserId { get; set; }
         [Parameter, EditorRequired] public string? CustomerId { get; set; }
         [Parameter] public EventCallback<int> Close { get; set; }

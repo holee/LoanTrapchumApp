@@ -1,5 +1,4 @@
-﻿
-using Applications.Interfaces.Identity;
+﻿using Applications.Interfaces.Identity;
 using Applications.Requests.Identity;
 using Applications.Responses;
 using Applications.Responses.Auths;

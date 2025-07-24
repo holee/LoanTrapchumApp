@@ -1,4 +1,5 @@
 ﻿@page "/App/Request/{BranchId:int}/Branches"
+@using Applications.Features.LoanRequests.Services
 @using TrapchumApp.Services
 <PageTitle>Loan Request</PageTitle>
 @attribute [MustHasPermission(Modules.LoanRequest,Feature.Read)]
@@ -22,10 +23,10 @@
                 <LoanRequestRequested BranchId="@BranchId"
                                       UserId="@UserId"/>
             </RadzenTabsItem>
-            <RadzenTabsItem Text="Approved" Icon="fact_check">
+            <RadzenTabsItem Text="Approved" Icon="@IconNames.Approval">
                 <LoanRequestApprove BranchId="@BranchId" UserId="@UserId"/>
             </RadzenTabsItem>
-            <RadzenTabsItem Text="Completed" Icon="done_outline">
+            <RadzenTabsItem Text="Completed" Icon="@IconNames.Done">
                 <LoanRequestCompleted BranchId="@BranchId" CreditAgentId="@UserId"/>
             </RadzenTabsItem>
         </Tabs>

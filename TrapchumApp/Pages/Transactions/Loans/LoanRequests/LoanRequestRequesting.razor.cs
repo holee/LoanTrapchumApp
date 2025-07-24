@@ -194,20 +194,10 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
 
 
-
-        void GotoLoanRequest()
-        {
-            createRequestUrl = new Dictionary<string, object?>
-        {
-            {"BranchId",BranchId},
-            {"UserId",UserId}
-        }.AddQueryString($"/Loan/0/Customer/0/Request");
-            NavigationManager.NavigateTo(createRequestUrl);
-        }
-
         async void PageChanged(int size)
         {
             pageSize = size;
+            pageIndex = 0;
             await GetLoanRequestAsync(UserId);
 
         }

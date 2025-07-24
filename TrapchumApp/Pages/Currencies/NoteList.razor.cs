@@ -1,8 +1,6 @@
 using Applications.Interfaces.Currencies;
 using Applications.Requests.Lists.Currency;
 using Applications.Responses.ViewModels.Currencies;
-using Microsoft.AspNetCore.Components;
-using Radzen;
 
 namespace TrapchumApp.Pages.Currencies
 {
@@ -20,7 +18,7 @@ namespace TrapchumApp.Pages.Currencies
         [Parameter, SupplyParameterFromQuery] public int BranchId { get; set; }
         private List<VCurrencyNotes> CurrencyCounters = new List<VCurrencyNotes>();
         private int pageIndex = 1;
-        private int pageSize = 10;
+        private int pageSize = 15;
         private string sortField = "CurrencyName";
         private string sortDir = "ASC";
         private bool includeInactive = false;
@@ -38,21 +36,6 @@ namespace TrapchumApp.Pages.Currencies
         {
             await DialogService.OpenAsync<NoteModalCreate>("Note");
         }
-
-        //async Task LoadPages(int pageIndex = 1, int pageSize = 10, string sortField = "CurrencyName", string sortDir = "ASC")
-        //{
-        //    var param = new QueryParam
-        //    {
-        //        PageIndex = pageIndex,
-        //        PageSize = pageSize,
-        //        SortDescending = true,
-        //        SortColumn = sortField
-        //    };
-
-        //    //var data = await _currencyService.GetCurrencies(param, includeInactive, searctText);
-
-        //    // StateHasChanged();
-        //}
 
         async Task LoadPages(int branchId)
         {

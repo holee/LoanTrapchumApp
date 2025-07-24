@@ -15,6 +15,7 @@ namespace TrapchumApp.Pages.Transactions.Branches
     public partial class OpenBranch
     {
         readonly IOpenBranchServiceImpl obService;
+
         readonly ICurrencyServiceImpl curService;
         public OpenBranch(IOpenBranchServiceImpl obService, ICurrencyServiceImpl curService)
         {

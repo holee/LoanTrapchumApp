@@ -1,90 +1,100 @@
 ﻿@page "/App/Currencies/CurrencyCounter"
+@using Applications.Features.LoanRequests.Services
+@using Applications.Responses.ViewModels.Currencies
 @using TrapchumApp.Services
 <PageTitle>Currency Note</PageTitle>
-<Containers Fluid>
-    <Card>
-        <CardHeader>
-            <RadzenStack Orientation="Orientation.Horizontal"
-                         class="rz-m-2"
-                         AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                <RadzenButton Click="DisplayCurrencyDialogue"
-                              Icon="add"
-                              Text="New Note"
-                              Size="ButtonSize.Small"
-                              ButtonStyle="ButtonStyle.Primary" />
-                <div class="rz-text-align-center">
-                    <RadzenCheckBox TValue="bool"
-                                    @bind-Value="includeInactive">
-                    </RadzenCheckBox>
-                    <RadzenLabel> Inlcude Inactive</RadzenLabel>
-                </div>
+<GridToolbar>
+    <LeftChildren>
+        <RadzenButton Click="DisplayCurrencyDialogue"
+                      Icon="add"
+                      Text="New Note"
+                      Size="ButtonSize.ExtraSmall"
+                      ButtonStyle="ButtonStyle.Primary" />
+    </LeftChildren>
+    <RightChildren>
+        <div class="rz-text-align-center">
+            <RadzenCheckBox TValue="bool"
+                            @bind-Value="includeInactive">
+            </RadzenCheckBox>
+            <RadzenLabel>Inlcude Inactive</RadzenLabel>
+        </div>
+    </RightChildren>
+</GridToolbar>
+<RadzenDataGrid AllowPaging="true"
+                PageSize="@pageSize"
+                IsLoading="@isLoading"
+                Density="Density.Compact"
+                AllowAlternatingRows="true"
+                TItem="VCurrencyNotes"
+                ShowPagingSummary="true"
+                AllowColumnPicking="true"
+                GridLines="DataGridGridLines.Both"
+                RowSelect="@OnRowSelect"
+                PagerHorizontalAlign="HorizontalAlign.Right"
+                PageSizeOptions="@StorageConstant.PageSizeOptions"
+                PageSizeChanged="SelectPageSizeChanged"
+                Data="@CurrencyCounters">
+    <HeaderTemplate>
 
-            </RadzenStack>
-        </CardHeader>
-        <CardBody>
-            <RadzenRow AlignItems="AlignItems.Center" class="my-2">
-                <RadzenColumn Size="12">
-                    <PageDropDown PageSizeChanged="SelectPageSizeChanged" />
-                </RadzenColumn>
-            </RadzenRow>
-            <RadzenRow AlignItems="AlignItems.Center">
-                <RadzenDataGrid AllowPaging="true"
-                                PageSize="10"
-                                IsLoading="isLoading"
-                                Density="Density.Compact"
-                                Data="CurrencyCounters">
-                    <Columns>
-                        <RadzenDataGridColumn Context="item"
-                                              Title="Currency Name"
-                                              Property="CurrencyName">
-                            <Template>
-                                <input @bind="item.Id" type="hidden" />
-                                @item?.CurrencyName
-                            </Template>
-                        </RadzenDataGridColumn>
-                        <RadzenDataGridColumn Context="item"
-                                              Title="Currency Code"
-                                              Property="CurrencyCode">
-                            <Template>
-                                @item?.CurrencyCode
-                            </Template>
-                        </RadzenDataGridColumn>
-                        <RadzenDataGridColumn Context="item"
-                                              Title="Value"
-                                              Property="CurrencyValue">
-                            <Template>
-                                @item?.CurrencyValue
-                            </Template>
-                        </RadzenDataGridColumn>
-                        <RadzenDataGridColumn Context="item"
-                                              Title="Quantity"
-                                              Property="Quantity">
-                            <Template>
-                                @item?.Quantity
-                            </Template>
-                        </RadzenDataGridColumn>
-                        <RadzenDataGridColumn Context="item"
-                                              Title="Description"
-                                              Property="Description">
-                            <Template>
-                                @item?.Description
-                            </Template>
-                        </RadzenDataGridColumn>
-                        <RadzenDataGridColumn Context="item"
-                                              Width="4rem"
-                                              Title="IsActive"
-                                              Property="IsActive">
-                            <Template>
-                                <RadzenCheckBox TValue="bool"
-                                                Change="@((arg)=>makeInactiveOrActive(arg,item.Id))"
-                                                @bind-Value="item.IsActive" />
-                            </Template>
-                        </RadzenDataGridColumn>
-                    </Columns>
-                </RadzenDataGrid>
-            </RadzenRow>
-        </CardBody>
-    </Card>
-</Containers>
-
-
+    </HeaderTemplate>
+    <Columns>
+        <RadzenDataGridColumn Context="item"
+                              Title="Currency Name"
+                              Property="CurrencyName">
+            <Template>
+                <input @bind="item.Id" type="hidden" />
+                @item?.CurrencyName
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Context="item"
+                              Title="Currency Code"
+                              Property="@nameof(VCurrencyNotes.CurrencyCode)">
+            <Template>
+                @item?.CurrencyCode
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Context="item"
+                              Title="Value"
+                              Width="7rem"
+                              Property="@nameof(VCurrencyNotes.CurrencyValue)">
+            <Template>
+                @item?.CurrencyValue
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Context="item"
+                              Title="Quantity"
+                              TextAlign="TextAlign.Right"
+                              Width="7rem"
+                              Property="@nameof(VCurrencyNotes.Quantity)">
+            <Template>
+                @item?.Quantity
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Context="item"
+                              Title="Description"
+                              Property="@nameof(VCurrencyNotes.Description)">
+            <Template>
+                @item?.Description
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Context="item"
+                              Width="4rem"
+                              Title="IsActive"
+                              TextAlign="TextAlign.Center"
+                              Property="@nameof(VCurrencyNotes.IsActive)">
+            <Template>
+                <RadzenCheckBox TValue="bool"
+                                Change="@((arg)=>makeInactiveOrActive(arg,item.Id))"
+                                @bind-Value="item.IsActive" />
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+    <LoadingTemplate>
+        <RadzenProgressBarCircular ShowValue="false"
+                                   ProgressBarStyle="ProgressBarStyle.Danger"
+                                   Value="100" Mode="ProgressBarMode.Indeterminate" />
+    </LoadingTemplate>
+</RadzenDataGrid>
+@code {
+    void OnRowSelect() { }
+}

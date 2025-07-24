@@ -360,8 +360,7 @@ public class CurrencyService : ICurrencyService
     {
         using var context = await _contextFactory.CreateDbContextAsync();
 
-        var queries = context.Database
-            .SqlQuery<VCurrencyNotes>($"SELECT * FROM fGetCurrencyNotesByBranch({branchId})");
+        var queries = context.Database.SqlQuery<VCurrencyNotes>($"SELECT * FROM fGetCurrencyNotesByBranch({branchId})");
         if (!queries.Any())
         {
             return Result.Failure<IEnumerable<VCurrencyNotes>>(ErrorResponse.NotFound("No Data Found."));

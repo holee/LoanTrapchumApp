@@ -26,7 +26,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.2" />
     <PackageReference Include="Microsoft.Playwright" Version="1.51.0" />
     <PackageReference Include="QuestPDF" Version="2025.4.0" />
-    <PackageReference Include="Radzen.Blazor" Version="7.0.7" />
+    <PackageReference Include="Radzen.Blazor" Version="7.1.5" />
     <PackageReference Include="Razor.Templating.Core" Version="2.1.0" />
   </ItemGroup>
 
@@ -36,7 +36,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Views\Reports\" />
+    <Folder Include="Views\" />
     <Folder Include="wwwroot\documents\files\" />
     <Folder Include="wwwroot\schedules\" />
     <Folder Include="wwwroot\uploads\" />
@@ -56,12 +56,12 @@
     <AdditionalFiles Include="Pages\Currencies\TableCurrenctRate.razor" />
     <AdditionalFiles Include="Pages\Error.razor" />
     <AdditionalFiles Include="Pages\Home.razor" />
-    <AdditionalFiles Include="Pages\Identity\AccessDenied.razor" />
+    <AdditionalFiles Include="Pages\Identity\Authentications\AccessDenied.razor" />
     <AdditionalFiles Include="Pages\Identity\Authentications\Login.razor" />
     <AdditionalFiles Include="Pages\Identity\Authentications\RedirectToLogin.razor" />
     <AdditionalFiles Include="Pages\Identity\Authentications\Register.razor" />
     <AdditionalFiles Include="Pages\Identity\Authentications\StatusMessage.razor" />
-    <AdditionalFiles Include="Pages\Identity\Authentications\_Imports.razor" />
+    <AdditionalFiles Include="Pages\Identity\Shared\_Imports.razor" />
     <AdditionalFiles Include="Pages\Identity\ManageUserLoanSize.razor" />
     <AdditionalFiles Include="Pages\Identity\Permissions.razor" />
     <AdditionalFiles Include="Pages\Identity\Roles\Index.razor" />

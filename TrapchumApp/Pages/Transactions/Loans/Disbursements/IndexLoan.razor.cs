@@ -1,5 +1,5 @@
+using Applications.Features.Loans.Services;
 using Applications.Responses.ViewModels.Loans;
-using Applications.Services.Loans;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;

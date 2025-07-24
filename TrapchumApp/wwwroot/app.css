@@ -1,9 +1,6 @@
 :root {
-    --input-text-sm: calc(1.5em + 0.5rem + calc(var(--bs-border-width) * 2));
-    --input-text-lg: calc(1.5em + 1rem + calc(var(--bs-border-width) * 2));
-    /*    --rz-grid-header-background-color: #94d1b8 !important;
-    --rz-grid-header-color: white;
-    --rz-grid-header-background-color: red;*/
+    --rz-numeric-input-padding-block: 0.25rem;
+    --rz-tabs-padding:0.45rem !important;
     --rz-lookup-search: 2rem !important;
     --rz-panel-menu-item-background-color: #25476a !important;
     --rz-panel-menu-item-hover-background-color: #94d1b8 !important;
@@ -18,8 +15,6 @@
     --rz-sidebar-background-color: #25476a !important;
     --rz-header-background-color: #25476a;
     --rz-menu-top-item-background-color: #25476a;
-    /*--rz-profile-menu-top-item-background-color: #25476a;
-    --rz-profile-menu-background-color: rgb(200,200, 200) !important;*/
     --rz-profile-menu-item-hover-background-color: #94d1b8 !important;
     --rz-input-height: 2.125rem !important;
     --rz-body-font-size: 0.9rem !important;
@@ -28,8 +23,6 @@
     --rz-dropdown-item-hover-background-color: #94d1b8 !important;
     --rz-menu-item-hover-color: #030303 !important;
     --rz-menu-item-hover-background-color: #94d1b8 !important;
-    /*--rz-grid-header-background-color: #66cc8f !important;*/
-    /* --rz-grid-cell-line-height: 1.3rem !important;*/
     --rz-badge-font-size: 0.75rem !important;
     --rz-badge-padding: 0.125rem 0.25rem;
     --rz-badge-line-height: 0.8rem !important;
@@ -45,8 +38,7 @@ table.table th {
 }
 
 .rz-data-row {
-    background-color: yellowgreen;
-    color: red;
+    background-color: #bbdda8;
     cursor: pointer;
 }
 
@@ -54,11 +46,32 @@ table.table th {
     background-color: #d4d5d6 !important;
 }
 
-html, body {
+.table-sm {
+    width: 100%;
+    border-collapse: collapse; /* Ensures no extra spacing between cells */
+}
+
+    .table-sm th,
+    .table-sm td {
+        padding: 0.25rem; /* Default Bootstrap .table-sm padding is halved (from 0.5rem to 0.25rem) */
+        border: 1px solid #dee2e6; /* Optional: Adds borders similar to the image */
+        vertical-align: middle; /* Centers content vertically */
+    }
+
+    .table-sm th {
+        background-color: var(--rz-base-100); /* Optional: Light background for header */
+        font-weight: bold; /* Optional: Bold header text */
+        text-align: left;
+        padding-left: 0.35rem;
+    }
+
+html,
+body {
     font-family: kh_siemreap, Arial, sans-serif !important;
 }
 
-a, .btn-link {
+a,
+.btn-link {
     color: #006bb7;
 }
 
@@ -71,14 +84,14 @@ a, .btn-link {
     .wellNameFormat .first {
         flex: 2;
         display: block;
-        color:red;
+        /*  color: red;*/
     }
 
     .wellNameFormat .second {
         flex: 3;
         display: block;
         text-align: left;
-        color:hotpink;
+        /*  color: hotpink;*/
     }
 
 .address {
@@ -90,35 +103,45 @@ a, .btn-link {
     .address .province {
         flex: 3;
         display: block;
-        color: red;
+        /*  color: red;*/
     }
 
     .address .district {
         flex: 3;
         display: block;
         text-align: left;
-        color: rebeccapurple;
+        /*  color: rebeccapurple;*/
     }
 
     .address .commune {
         flex: 3;
         display: block;
         text-align: left;
-        color: blueviolet;
+        /*  color: blueviolet;*/
     }
 
     .address .village {
         flex: 3;
         display: block;
         text-align: left;
-        color: deeppink
+        /*  color: deeppink;*/
     }
 
 .rz-grid-table td .rz-cell-data {
     line-height: normal !important;
-    /*    font-size: 0.8rem;*/
+    font-size: 0.8rem;
 }
 
+
+rz-data-grid {
+    height: 30rem;
+    max-height: 45rem;
+    min-height: 30rem;
+}
+
+.rz-tabview-panel{
+
+}
 
 .btn-primary {
     color: #fff;
@@ -126,7 +149,11 @@ a, .btn-link {
     border-color: #1861ac;
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
+.form-check-input:focus {
     box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
@@ -137,7 +164,163 @@ a, .btn-link {
     color: palevioletred;
 }
 
-@Keyframes fadeBackground {
+.small-box {
+    border-radius: 0.25rem;
+    box-shadow: 0 0 1px rgba(0, 0, 0, 0.125), 0 1px 3px rgba(0, 0, 0, 0.2);
+    display: block;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.bg-info {
+    background-color: #17a2b8 !important;
+}
+
+.input-group-sm {
+    padding: 0.25rem 0.5rem; /* Smaller padding */
+    font-size: 0.875rem; /* 14px */
+    line-height: 1.5rem;
+    border-radius: 0.2rem; /* Smaller rounded corners */
+}
+
+.input-group {
+    position: relative;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    width: 100%;
+}
+
+.input-group-sm {
+    font-size: 0.875rem;
+}
+
+.input-group .input-group-text {
+    display: flex;
+    align-items: center;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #495057;
+    text-align: center;
+    white-space: nowrap;
+    background-color: #e9ecef;
+    border: 1px solid #ced4da;
+    border-radius: 0.2rem;
+    width: fit-content;
+}
+
+.input-group .form-control {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: 0.2rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+    .input-group .form-control:focus {
+        color: #495057;
+        background-color: #fff;
+        border-color: #80bdff;
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+
+.input-group .input-group-text:first-child {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.input-group .form-control:not(:first-child) {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.mb-3 {
+    margin-bottom: 1rem !important;
+}
+
+
+
+
+*,
+::after,
+::before {
+    box-sizing: border-box;
+}
+
+.small-box > .inner {
+    padding: 10px;
+}
+
+.small-box .icon {
+    color: rgba(0, 0, 0, 0.15);
+    z-index: 0;
+}
+
+.small-box > .small-box-footer {
+    background-color: rgba(0, 0, 0, 0.1);
+    color: rgba(255, 255, 255, 0.8);
+    display: block;
+    padding: 3px 0;
+    position: relative;
+    text-align: center;
+    text-decoration: none;
+    z-index: 10;
+}
+
+.bg-info,
+.bg-info > a {
+    color: #fff !important;
+}
+
+.bg-success,
+.bg-success > a {
+    color: #fff !important;
+}
+
+.small-box h3,
+.small-box p {
+    z-index: 5;
+}
+
+.small-box p {
+    font-size: 1rem;
+}
+
+.small-box h3 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin: 0 0 10px;
+    padding: 0;
+    white-space: nowrap;
+}
+
+.small-box h3,
+.small-box p {
+    z-index: 5;
+}
+
+.bg-danger,
+.bg-danger > a {
+    color: #fff !important;
+}
+
+.bg-warning,
+.bg-warning > a {
+    color: #1f2d3d !important;
+}
+
+@keyframes fadeBackground {
     0% {
         background-color: aliceblue;
     }
@@ -147,9 +330,6 @@ a, .btn-link {
     }
 }
 
-
-
-
 .content {
     padding-top: 1.1rem;
 }
@@ -158,7 +338,7 @@ h1:focus {
     outline: none;
 }
 
-.valid.modified:not([type=checkbox]) {
+.valid.modified:not([type="checkbox"]) {
     outline: 1px solid #26b050;
 }
 
@@ -177,19 +357,21 @@ h1:focus {
 }
 
     .blazor-error-boundary::after {
-        content: "An error has occurred."
+        content: "An error has occurred.";
     }
 
 .darker-border-checkbox.form-check-input {
     border-color: #929292;
 }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
+.form-floating > .form-control-plaintext::placeholder,
+.form-floating > .form-control::placeholder {
     color: var(--bs-secondary-color);
     text-align: end;
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
+.form-floating > .form-control-plaintext:focus::placeholder,
+.form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
 
@@ -200,7 +382,7 @@ h1:focus {
 
 @font-face {
     font-family: kh_krasar;
-    src: url("lib/dist/fonts/KRASAR.TTF")
+    src: url("lib/dist/fonts/KRASAR.TTF");
 }
 
 @font-face {
@@ -262,24 +444,23 @@ h1:focus {
 }
 
 @font-face {
-    font-family: 'Font Awesome';
+    font-family: "Font Awesome";
     font-style: normal;
     font-weight: 200;
-    src: url('font-awesome/webfonts/fa-solid-900.woff2') format('woff2');
+    src: url("font-awesome/webfonts/fa-solid-900.woff2") format("woff2");
 }
 
-
 @font-face {
-    font-family: 'line awesome';
+    font-family: "line awesome";
     font-style: normal;
     font-weight: 900;
-    src: url('line-awesome/fonts/la-solid-900.woff2') format('woff2');
+    src: url("line-awesome/fonts/la-solid-900.woff2") format("woff2");
 }
 
 .fa {
-    --rz-icon-font-family: 'Font Awesome'
+    --rz-icon-font-family: "Font Awesome";
 }
 
 .la {
-    --rz-icon-font-family: 'line awesome'
+    --rz-icon-font-family: "line awesome";
 }

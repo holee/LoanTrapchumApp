@@ -1,13 +1,10 @@
-using System.Security.Claims;
-using System.Text.Json;
-using Applications.Responses.ViewModels.Loans.Schedules;
-using Applications.Schedules;
+using Applications.Features.Loans.Services;
 using Applications.Services.Loans;
 using Domains.Models.Identity;
-using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using QuestPDF.Fluent;
+using System.Security.Claims;
+using System.Text.Json;
 
 namespace TrapchumApp.Services;
 
@@ -22,7 +19,7 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
         var accountGroup = endpoints.MapGroup("/Account");
 
 
-        accountGroup.MapPost("/Logout", async (ClaimsPrincipal user, 
+        accountGroup.MapPost("/Logout", async (ClaimsPrincipal user,
             [FromServices] SignInManager<ApplicationUser> signInManager,
             [FromForm] string returnUrl) =>
         {
@@ -94,18 +91,46 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
         {
             var rsp = await printer.DownLoadScheduleAsPdf(branchId, loanId);
 
-            return TypedResults.File(rsp.Data!, contentType: "application/pdf",$"{Guid.CreateVersion7()}.pdf");
+            return TypedResults.File(rsp.Data!, contentType: "application/pdf", $"{Guid.CreateVersion7()}.pdf");
+
+        });
+
+        reportGroup.MapGet("/Schedules/Pdf/{loanId}/{branchId:int}", async ([FromServices] SchedulePrintService pdf,
+            [FromServices] IWebHostEnvironment env, string loanId, int branchId) =>
+        {
+
+            var rsp = await pdf.DownLoadScheduleAsPdf(branchId, loanId);
+
+            if (!rsp.IsSuccess)
+            {
+                return Results.NoContent();
+            }
+
+            return TypedResults.File(rsp.Data!, contentType: "application/pdf", $"{Guid.CreateVersion7()}.pdf");
+
+        });
+
+        reportGroup.MapGet("/Schedules/Pdf/{loanId}/{branchId:int}/{scheduleId:int}", async ([FromServices] SchedulePrintService pdf,
+           [FromServices] IWebHostEnvironment env, string loanId, int branchId, int scheduleId) =>
+        {
+
+            var rsp = await pdf.DownLoadScheduleAsPdf(branchId, loanId, scheduleId);
+
+            if (!rsp.IsSuccess)
+            {
+                return Results.NoContent();
+            }
+
+            return TypedResults.File(rsp.Data!, contentType: "application/pdf", $"{Guid.CreateVersion7()}.pdf");
 
         });
 
 
 
 
-
-
         reportGroup.MapGet("/Schedules/{loanId}/{branchId:int}/Exel", async ([FromServices] IPrintPdfServiceImpl printer,
-            [FromServices] IWebHostEnvironment env, 
-            [FromServices] IPrintExelServiceImpl exel, 
+            [FromServices] IWebHostEnvironment env,
+            [FromServices] IPrintExelServiceImpl exel,
             string loanId, int branchId) =>
         {
 
@@ -146,7 +171,6 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
 
 
 
-        await Task.CompletedTask;
 
         return accountGroup;
     }

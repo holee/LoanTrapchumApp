@@ -1,59 +1,74 @@
 using Applications.Interfaces.Identity;
 using Applications.Requests.Identity;
+using Applications.Responses.Paginations;
+using System.Threading.Tasks;
+using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Identity.Roles
 {
     public partial class Index
     {
         private readonly IRoleService _roleService;
-
+        private int pageIndex = 0;
+        private int pageSize = 15;
+        private int counts = 0;
+        private bool includeInActive = false;
+        protected bool IsLoading = true;
+        protected int index = 0;
+        private string _filter = string.Empty;
+        private string sortField = "Name";
+        private bool sortDescending = false;
+        protected IEnumerable<RoleDto>? Roles = Enumerable.Empty<RoleDto>();
         public Index(IRoleService roleService)
         {
             _roleService = roleService;
         }
-
-
-        int pageSize = 15;
         void PageSizeChanged(int size)
         {
             pageSize = size;
+            pageIndex = 0;
         }
 
-        async Task RoleRefresh()
-        {
-            await GetRoles();
-        }
         void ManageRolePermissions(string roleId)
         {
             NavigationManager.NavigateTo($"/App/Account/Roles/{roleId}/Permissions");
         }
-        protected bool IsLoading = true;
-
-        protected int index = 0;
-
-        protected IEnumerable<RoleDto>? Roles = Enumerable.Empty<RoleDto>();
 
         protected override async Task OnInitializedAsync()
         {
-
             await GetRoles();
-
             await base.OnInitializedAsync();
         }
 
-        protected async Task GetRoles()
+        private async Task LoadRoleData(LoadDataArgs args)
         {
-            var result = await _roleService.GetRolesAsync(string.Empty,string.Empty);
+            pageIndex = args.Skip ?? 0;
 
-            if (result.IsSuccess)
-            {
-                Roles = result.Data;
-            }
-            else
-            {
-                Roles = [];
-            }
+            pageSize = args.Top ?? 15;
 
+            (sortField, sortDescending) = args.PageInfo();
+
+            await GetRoles(_filter);
+
+        }
+
+        async Task SearchChanged(string? filter)
+        {
+            _filter = filter ?? string.Empty;
+
+            await GetRoles(filter);
+        }
+
+
+        protected async Task GetRoles(string? filter = null)
+        {
+            var param = new QueryParam(pageIndex, pageSize, sortField, includeInActive, sortDescending, filter: filter);
+
+            var result = await _roleService.GetRolesAsync(string.Empty, param);
+
+            Roles = result.Items;
+
+            counts = result.Count;
 
         }
     }

@@ -1,0 +1,38 @@
+@using Applications.Features.LoanRequests.Services
+@using TrapchumApp.Services
+<RadzenBadge BadgeStyle="@(Model.IsAssignedToRole == true ? BadgeStyle.Info : BadgeStyle.Primary)"
+             Shade="Shade.Light"
+             Style="margin:0.25rem;width:100%;">
+    <input type="hidden" @bind="@Model.RoleId" />
+    <input type="hidden" @bind="@Model.ClaimType" />
+    <input type="hidden" @bind="@Model.ClaimValue" />
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 AlignItems="AlignItems.Center"
+                 Style="padding:0.25rem 0; text-transform: none;">
+        <RadzenCheckBox TValue="bool"
+                        @bind-Value="@Model.IsAssignedToRole"
+                        Change="@(value => OnCheckChanged(Model, value))"
+                        Name="@(Model.ClaimValue)" />
+        <RadzenLabel Text="@(Model.Description)" Component="@(Model.ClaimValue)" />
+    </RadzenStack>
+</RadzenBadge>
+@code {
+    [Parameter]
+    public string? Id { get; set; } = Guid.NewGuid().ToString("N");
+
+    [Parameter]
+    public RolePermissionsViewModel Model { get; set; } = new();
+
+    [Parameter]
+    public EventCallback<RolePermissionsViewModel> OnChange { get; set; }
+
+
+    void OnCheckChanged(RolePermissionsViewModel model, bool arg)
+    {
+        model.IsAssignedToRole = arg;
+
+        OnChange.InvokeAsync(model);
+    }
+
+
+}

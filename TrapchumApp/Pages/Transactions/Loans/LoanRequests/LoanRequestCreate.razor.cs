@@ -124,7 +124,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             {
             };
             IEnumerable<FileModel> uploadedFiles = await DialogService.OpenAsync<FileUploadDialogue>("Upload", options: options);
-           
+
             if (uploadedFiles is null || !uploadedFiles.Any())
             {
                 return;
@@ -183,7 +183,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
                     FullName = g.FullName,
                     GuarantorName = g.GuarantorName,
                     Phone = g.Phone,
-                    Address=g.ToString(),
+                    Address = g.ToString(),
                 };
 
 
@@ -204,7 +204,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
                 FullName = g.FullName,
                 GuarantorName = g.GuarantorName,
                 Phone = g.Phone,
-               Address= g.ToString(),
+                Address = g.ToString(),
             };
 
             if (Guarantors.Any(x => x.GuarantorId == g.Id))
@@ -315,7 +315,9 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             var options = new DialogOptions
             {
                 Width = "100vw",
-                Height = "100vh",
+                ShowClose = true,
+                Resizable = false,
+                Draggable = false,
                 AutoFocusFirstElement = false
             };
 
@@ -477,11 +479,11 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
                 model.BranchRefId = BranchId;
                 model.AprovedAmount = model.RequestAmount;
 
-                var resp = await _loanRequestService.CreateNewLoanRequestAsync(model);
+                var resp = await _loanRequestService.CreateNewRequestAsync(model);
 
                 if (resp.IsSuccess)
                 {
-                    NotificationService.Notify(NotificationSeverity.Success, resp.Data);
+                    NotificationService.Notify(NotificationSeverity.Success, resp.Data!.message);
 
                     NavigationManager.NavigateTo($"/App/Request/{BranchId}/Branches/?UserId={UserId}");
                 }

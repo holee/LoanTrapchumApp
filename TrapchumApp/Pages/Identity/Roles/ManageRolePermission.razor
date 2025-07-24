@@ -1,90 +1,133 @@
 ﻿@page "/App/Account/Roles/{Id}/Permissions"
+@using Applications.Features.LoanRequests.Services
 @using TrapchumApp.Services
 <PageTitle>Role-Permissions</PageTitle>
+<style>
+    table tr > th {
+        background-color: cornflowerblue;
+        color: white;
+    }
+
+        table tr > th.group {
+            width: 8rem;
+            height: 2rem;
+            text-align: left;
+            padding-left: 0.9rem;
+        }
+
+        table tr > th.feature {
+            padding:0 0.9rem;
+        }
+
+    table tr.Administrator {
+        background-color: cadetblue;
+    }
+
+    table tr.Operation {
+        background-color: aquamarine;
+    }
+
+    table tr.Accounting {
+        background-color: blueviolet;
+        color: white;
+    }
+
+    .grid-container {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr); /* 2 columns */
+        gap: 10px; /* space between rows and columns */
+    }
+
+        .grid-container .grid-item {
+            width: 100%; /* Fills column */
+        }
+</style>
 <RadzenProgressBar ShowValue="false" Value="100" Mode="ProgressBarMode.Indeterminate"
                    ProgressBarStyle="ProgressBarStyle.Primary" Visible="IsLoading"></RadzenProgressBar>
-@* @attribute [MustHasPermission(AppFeatures.Roles, AppAction.Read)] *@
-<RadzenCard>
-    <RadzenStack>
-        <RadzenButton ButtonStyle="ButtonStyle.Success" Shade="Shade.Lighter" class="rz-shadow-0">
-            <RadzenBadge BadgeStyle="BadgeStyle.Secondary"
-                         IsPill="@true"
-                         Text="@rolePermissions!.Role!.Name"
-                         class="rz-ml-2" />
-        </RadzenButton>
-    </RadzenStack>
-    <RadzenStack>
-        <RadzenTabs class="rz-background-color-base-100" Change="OnChange"
-                    TabPosition="TabPosition.Top"
-                    RenderMode="TabRenderMode.Client">
-            <Tabs>
-                @foreach (var group in RoleClaimsGrouped.Keys)
-                {
-                    var allClaimsInGroup = RoleClaimsGrouped[group].OrderBy(x => x.ClaimValue).ToList();
-                    <RadzenTabsItem Text="@group">
-                        <Template>
-                            <span style="display: flex; gap: 6px">
-                                @group
-                                <RadzenBadge BadgeStyle="BadgeStyle.Secondary"
-                                             Shade="Shade.Light"
-                                             IsPill="@true" Text="@(allClaimsInGroup.Count.ToString())" class="rz-ms-0" />
-                            </span>
-                        </Template>
-                        <ChildContent>
-                            <PageDropDown PageSizeChanged="PageSizeChanged" />
-                            <RadzenDataGrid Density="Density.Compact"
-                                            Responsive
-                                            Style="min-height:25rem;height:25rem;max-height:40rem;"
-                                            ColumnWidth="15rem"
-                                            AllowPaging="true"
-                                            PagerHorizontalAlign="HorizontalAlign.Right"
-                                            ShowPagingSummary="true"
-                                            PageSize="pageSize"
-                                            AllowAlternatingRows="true"
-                                            GridLines="DataGridGridLines.Both"
-                                            Data="allClaimsInGroup">
-                                <Columns>
-                                    <RadzenDataGridColumn Width="10rem" Property="Group" Title="Group" />
-                                    <RadzenDataGridColumn Width="8rem" Property="ClaimType" Title="Type" />
-                                    <RadzenDataGridColumn Width="12rem" Property="ClaimValue" Title="Value" />
-                                    <RadzenDataGridColumn Property="Description" Title="Description" />
-                                    <RadzenDataGridColumn TextAlign="TextAlign.Center" Width="6rem" Property="Group" Title="Assigned" Context="item">
-                                        <Template>
-                                            <RadzenCheckBox TValue="bool"
-                                                            @bind-Value="@item.IsAssignedToRole"
-                                                            Name="CheckStatus" />
-                                        </Template>
-                                    </RadzenDataGridColumn>
-                                </Columns>
-                            </RadzenDataGrid>
-                        </ChildContent>
+<RadzenFieldset AllowCollapse="false">
+    <HeaderTemplate>
+        <RadzenBadge BadgeStyle="BadgeStyle.Info" Shade="Shade.Dark">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem" Style="padding: 0 0.25rem 0 0; text-transform: none;">
+                <RadzenIcon Icon="@IconNames.AssignmentInd" />
+                <RadzenText TextStyle="TextStyle.DisplayH6"
+                            Text="@rolePermissions!.Role!.Name"
+                            TagName="TagName.H3"></RadzenText>
+            </RadzenStack>
+        </RadzenBadge>
+    </HeaderTemplate>
+    <ChildContent>
+        <table border="1" style="border-collapse:collapse;text-align:center;">
+            <tr>
+                <th class="group">Group</th>
+                <th style="width:5rem;">
+                    <RadzenCheckBox TValue="bool"
+                                    @bind-Value="@_selectAll"
+                                    Change="@((arg) => OnSelectAllChanged(arg))" />
+                </th>
+                <th style="text-align:left;">Feature</th>
+            </tr>
+            @foreach (var group in _roleClaimsGrouped ?? [])
+            {
+                <tr class="@group.Group">
+                    <th class="group">
+                        @group.Group
+                    </th>
+                    <td style="vertical-align:central;">
+                        <RadzenCheckBox TValue="bool"
+                                        @bind-Value="@group.GroupCheck"
+                                        Name="@group.Group"
+                                        Change="@((arg) => OnGroupSelectAllChanged(group, arg))" />
+                    </td>
+                    <td style="padding:0 0.5rem;">
+                        <RadzenRow Gap="0.5rem" RowGap="0.1rem">
+                            @foreach (var item in group.Permissions)
+                            {
+                                <RadzenColumn Size="3">
+                                    <RoleCheck Model="@item" @key="@Guid.NewGuid().ToString("N")"
+                                               OnChange="((arg)=>OnCheckChanged(arg))" />
 
-                    </RadzenTabsItem>
-                }
-            </Tabs>
-        </RadzenTabs>
-    </RadzenStack>
-    <RadzenStack AlignItems="AlignItems.Center"
-                 Gap="1rem"
-                 Orientation="Orientation.Horizontal"
-                 class="rz-mt-2"
-                 JustifyContent="JustifyContent.End">
-        <RadzenButton ButtonStyle="ButtonStyle.Success"
-                      Click="SubmitHandler"
-                      Icon="save"
-                      Text="Save Changed"
-                      Size="ButtonSize.Small" />
-        <RadzenLink Icon="cancel"
-                    IconColor="@Colors.White"
-                    Text="Back"
-                    Path="/App/Account/Roles">
-            Back
-        </RadzenLink>
-    </RadzenStack>
-</RadzenCard>
+                                </RadzenColumn>
+                            }
+                        </RadzenRow>
+                    </td>
+                </tr>
+            }
+        </table>
+
+    </ChildContent>
+</RadzenFieldset>
+<RadzenStack>
+
+</RadzenStack>
+@* <RadzenStack class="rz-w-100 rz-mt-2" AlignItems="AlignItems.Center"
+             Orientation="Orientation.Horizontal"
+             JustifyContent="JustifyContent.End">
+    <RadzenDropDown Data="@groups" TValue="string"></RadzenDropDown>
+</RadzenStack> *@
+
+<RadzenStack AlignItems="AlignItems.Center"
+             Gap="1rem"
+             Orientation="Orientation.Horizontal"
+             class="rz-mt-2"
+             JustifyContent="JustifyContent.End">
+    <RadzenButton ButtonStyle="ButtonStyle.Success"
+                  Click="SubmitHandler"
+                  Icon="save"
+                  Text="Save Changed"
+                  Size="ButtonSize.ExtraSmall" />
+    <RadzenLink Icon="cancel"
+                Text="Back"
+                Path="/App/Account/Roles">
+        Back
+    </RadzenLink>
+</RadzenStack>
 @code {
     private string groupText = "";
     int pageSize = 10;
+
+
+
+
 
     void PageSizeChanged(int size)
     {
@@ -93,7 +136,7 @@
 
     void SearchGroup()
     {
-        groups = groups.Where(x => x.StartsWith(groupText)).ToList();
+        //groups = groups.Where(x => x.StartsWith(groupText)).ToList();
     }
 
     void OnChange(int index)
@@ -102,3 +145,45 @@
     }
 }
 
+
+
+@*   @foreach (var group in RoleClaimsGrouped.Keys)
+            {
+                var allClaimsInGroup = RoleClaimsGrouped[group].OrderBy(x => x.ClaimValue).ToList();
+                <RadzenTabsItem Text="@group">
+                    <Template>
+
+                    </Template>
+                    <ChildContent>
+                        <GridToolbar></GridToolbar>
+                        <RadzenDataGrid Density="Density.Compact"
+                                        Responsive
+                                        Style="min-height:25rem;height:25rem;max-height:40rem;"
+                                        ColumnWidth="15rem"
+                                        AllowPaging="true"
+                                        PagerHorizontalAlign="HorizontalAlign.Right"
+                                        ShowPagingSummary="true"
+                                        PageSize="@pageSize"
+                                        AllowAlternatingRows="true"
+                                        PageSizeChanged="@PageSizeChanged"
+                                        GridLines="DataGridGridLines.Both"
+                                        Data="allClaimsInGroup">
+                            <Columns>
+                                <RadzenDataGridColumn Width="10rem" Property="Group" Title="Group" />
+                                <RadzenDataGridColumn Width="8rem" Property="ClaimType" Title="Type" />
+                                <RadzenDataGridColumn Width="12rem" Property="ClaimValue" Title="Value" />
+                                <RadzenDataGridColumn Property="Description" Title="Description" />
+                                <RadzenDataGridColumn TextAlign="TextAlign.Center" Width="6rem" Property="Group" Title="Assigned" Context="item">
+                                    <Template>
+                                        <RadzenCheckBox TValue="bool"
+                                                        @bind-Value="@item.IsAssignedToRole"
+                                                        Name="CheckStatus" />
+                                    </Template>
+                                </RadzenDataGridColumn>
+                            </Columns>
+                        </RadzenDataGrid>
+                    </ChildContent>
+
+                </RadzenTabsItem>
+            }
+         *@

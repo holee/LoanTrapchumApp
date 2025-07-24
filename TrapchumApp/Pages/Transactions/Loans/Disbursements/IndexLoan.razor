@@ -1,9 +1,10 @@
 ﻿@page "/App/Loan/{BranchId:int}/Branches"
+@using Applications.Features.LoanRequests.Services
 @using Applications.Responses.ViewModels.Loans
 @using Microsoft.AspNetCore.Components.Web
 @using TrapchumApp.Services
 <PageTitle>All</PageTitle>
-@attribute [Authorize]
+@* @attribute [Authorize(Roles ="Account")] *@
 <RadzenTabs TabPosition="TabPosition.Top" RenderMode="TabRenderMode.Server" SelectedIndex="0">
     <Tabs>
         <RadzenTabsItem Text="All Loans">

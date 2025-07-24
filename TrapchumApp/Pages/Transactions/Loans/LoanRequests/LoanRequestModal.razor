@@ -1,11 +1,12 @@
-﻿@using TrapchumApp.Services
+﻿@using Applications.Features.LoanRequests.Services
+@using TrapchumApp.Services
 <Containers Fluid CssClass="rz-background-color-base-100 rz-p-2">
     <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
         <RadzenColumn Size="3">
             Customer
         </RadzenColumn>
         <RadzenColumn Size="9">
-            <RadzenDropDownDataGrid TValue="long"
+            <RadzenDropDownDataGrid TValue="string"
                                     Data="@Customers"
                                     TextProperty="AltName"
                                     class="w-100"
@@ -20,7 +21,7 @@
             Request By
         </RadzenColumn>
         <RadzenColumn Size="9">
-            <RadzenDropDownDataGrid TValue="long"
+            <RadzenDropDownDataGrid TValue="string"
                                     Data="@RequestUsers"
                                     TextProperty="FullName"
                                     Value="RequestUserId"
@@ -58,7 +59,7 @@
             Accept By
         </RadzenColumn>
         <RadzenColumn Size="9">
-            <RadzenDropDownDataGrid TValue="long"
+            <RadzenDropDownDataGrid TValue="string"
                                     Data="@AcceptUsers"
                                     TextProperty="FullName"
                                     Value="UserId"

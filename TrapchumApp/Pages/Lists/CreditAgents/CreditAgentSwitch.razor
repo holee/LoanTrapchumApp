@@ -1,32 +1,35 @@
-﻿@using Applications.Requests.Loans.CreditAgents
+﻿@using Applications.Features.LoanRequests.Services
+@using Applications.Requests.Loans.CreditAgents
 @using TrapchumApp.Services
 
 <input type="hidden" @bind="CreditAgent.EditSeq" />
 <input type="hidden" @bind="CreditAgent.EmployeeRefId" />
-<RadzenCheckBox TValue="bool"
-                Change="OnCheckChanged"
-                Value="CreditAgent.IsRemove" />
-
+<RadzenButton Icon="@IconNames.Delete"
+              Variant="Variant.Text"
+              Shade="Shade.Lighter"
+              IconColor="@Colors.Danger"
+              Click="OnCheckChanged"
+              Size="ButtonSize.ExtraSmall" />
 @code {
     [Inject] protected ICreditAgentServiceImpl CreditAgentService { get; set; } = default!;
     [Parameter] public VCreditAgent CreditAgent { get; set; } = default!;
     [Parameter] public EventCallback Reload { get; set; }
-    async Task OnCheckChanged(bool x)
+    async Task OnCheckChanged()
     {
         var confirm = await DialogService.Confirm("do you want to remove C.O from list?", "Confirm");
         if (confirm == false) return;
-        CreditAgent.IsRemove = x;
+        CreditAgent.IsRemove = true;
         var creditDto = new LoanCreditAgentDtoActivate
-            {
-                IsRemove = x,
-                EditSeq = CreditAgent.EditSeq,
-                EmployeeRefId = CreditAgent.EmployeeRefId,
-            };
+        {
+            IsRemove = true,
+            EditSeq = CreditAgent.EditSeq,
+            EmployeeRefId = CreditAgent.EmployeeRefId,
+        };
         var respnse = await CreditAgentService.ActivateOrDeactivateCreditAgent(creditDto);
 
         if (respnse.IsSuccess)
         {
-            NotificationService.Notify(NotificationSeverity.Success,respnse.Data);
+            NotificationService.Notify(NotificationSeverity.Success, respnse.Data);
 
             await Reload.InvokeAsync();
         }

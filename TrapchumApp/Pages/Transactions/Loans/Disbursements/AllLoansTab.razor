@@ -1,4 +1,5 @@
-﻿@using Applications.Responses.ViewModels.Loans
+﻿@using Applications.Features.LoanRequests.Services
+@using Applications.Responses.ViewModels.Loans
 @using Microsoft.AspNetCore.Components.Web
 @using TrapchumApp.Services
 <GridToolbar SearchChanged="@TextLoanSearchChanged">
@@ -51,7 +52,7 @@
                               Title="Name"
                               Sortable="true">
             <Template>
-                @p.AltName
+                <TrapchumApp.Pages.Lists.KhmerName AltName="@p.AltName" />
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Context="p"

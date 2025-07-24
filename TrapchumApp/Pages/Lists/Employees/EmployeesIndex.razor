@@ -1,4 +1,5 @@
 ﻿@page "/App/Employee"
+@using Applications.Features.LoanRequests.Services
 @using Applications.Requests.Lists.Employees
 @using Applications.Responses.Lists.Entities
 @using Applications.Responses.ViewModels.Employees
@@ -81,14 +82,7 @@
                     </RadzenDataGridColumn>
                     <RadzenDataGridColumn Title="Name" Property="@nameof(VEmployeeList.AltName)" Context="e">
                         <Template>
-                            <div class="wellNameFormat">
-                                <span class="first">
-                                    @e.AltName?.WellFormName().First
-                                </span>
-                                <span class="second">
-                                    @e.AltName?.WellFormName().Last
-                                </span>
-                            </div>
+                            <KhmerName AltName="@e.AltName" />
                         </Template>
                     </RadzenDataGridColumn>
                     <RadzenDataGridColumn Title="Phone" Property="@nameof(VEmployeeList.Phone)" />

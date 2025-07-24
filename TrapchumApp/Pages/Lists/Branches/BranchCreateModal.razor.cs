@@ -74,6 +74,7 @@ namespace TrapchumApp.Pages.Lists.Branches
                 if (response.IsSuccess)
                 {
                     NotificationService.Notify(NotificationSeverity.Success, "New Branch", "Branch created successfully!");
+                   
                     DialogService.Close(true);
                 }
                 else

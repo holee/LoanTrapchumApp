@@ -1,13 +1,6 @@
-﻿using Applications.Enumerations;
-using Applications.Interfaces.Loans;
-using Applications.Responses;
+﻿using Applications.Interfaces.Loans;
 using Applications.Responses.ViewModels.Loans;
-using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Responses.ViewModels.Reports;
-using Applications.Schedules;
-using Applications.Services.Identity;
-using Applications.Services.Loans;
-using QuestPDF.Fluent;
 
 namespace Applications.Services.Reports
 {

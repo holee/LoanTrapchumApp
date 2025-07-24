@@ -1,160 +1,159 @@
-﻿@using TrapchumApp.Helpers.Constants
+﻿@using Applications.Features.LoanRequests.Services
+@using TrapchumApp.Helpers.Constants
 @using TrapchumApp.Pages.Transactions.Exchanges
 @using TrapchumApp.Services
-<div class="container-fluid rz-background-color-base-100">
-    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
-    JustifyContent="JustifyContent.End">
-        <RadzenButton Size="ButtonSize.ExtraSmall" Click="OpenSide">Show Exchange</RadzenButton>
-    </RadzenStack>
-    <RadzenRow AlignItems="AlignItems.Center" class="rz-px-1 rz-py-2 rz-m-0">
-        <RadzenColumn Size="5">
-            <RadzenBadge BadgeStyle="BadgeStyle.Light" Shade="Shade.Dark">
-                <RadzenStack Orientation="Orientation.Horizontal"
-                             AlignItems="AlignItems.Center"
-                             Gap="0.25rem"
-                             Style="padding: 0.4rem 0.25rem 0.4rem 0; text-transform: none;">
-                    Paid Amount
-                    <strong style="font-size:1rem;color:black;">
-                        @(LoanRepayment.AmountWithoutPenalty.Format(CurrencyId))
-                    </strong>
-                </RadzenStack>
-            </RadzenBadge>
-        </RadzenColumn>
-        <RadzenColumn Size="4">
-            <RadzenBadge BadgeStyle="BadgeStyle.Light" Shade="Shade.Dark">
-                <RadzenStack Orientation="Orientation.Horizontal"
-                             AlignItems="AlignItems.Center"
-                             Gap="0.25rem"
-                             Style="padding: 0.4rem 0.25rem 0.4rem 0; text-transform: none;">
-                    Penalty Amount
-                    <strong style="font-size:1rem;color:black;">
-                        @(LoanRepayment.PaidPenaltyAmount.Format(CurrencyId))
-                    </strong>
-                </RadzenStack>
-            </RadzenBadge>
-        </RadzenColumn>
-        <RadzenColumn Size="3">
+<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
+             JustifyContent="JustifyContent.End">
+    <RadzenButton Size="ButtonSize.ExtraSmall" Click="OpenSide">Show Exchange</RadzenButton>
+</RadzenStack>
+<RadzenRow AlignItems="AlignItems.Center" class="rz-px-1 rz-py-2 rz-m-0">
+    <RadzenColumn Size="5">
+        <RadzenBadge BadgeStyle="BadgeStyle.Light" Shade="Shade.Dark">
             <RadzenStack Orientation="Orientation.Horizontal"
-                         JustifyContent="JustifyContent.End"
-                         AlignItems="AlignItems.Center">
-                <RadzenButton Click="RestoreDefault"
-                              ButtonStyle="ButtonStyle.Primary"
-                              Text="Set Default"
-                              Size="ButtonSize.Small">
-                </RadzenButton>
+                         AlignItems="AlignItems.Center"
+                         Gap="0.25rem"
+                         Style="padding: 0.4rem 0.25rem 0.4rem 0; text-transform: none;">
+                Paid Amount
+                <strong style="font-size:1rem;color:black;">
+                    @(LoanRepayment.AmountWithoutPenalty.Format(CurrencyId))
+                </strong>
             </RadzenStack>
-        </RadzenColumn>
-    </RadzenRow>
-    <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
-        <RadzenColumn Size="4"></RadzenColumn>
-        <RadzenColumn Size="4">
-            <RadzenBadge BadgeStyle="BadgeStyle.Info" Shade="Shade.Dark" class="w-100">
-                <RadzenStack Orientation="Orientation.Horizontal"
-                             AlignItems="AlignItems.Center"
-                             JustifyContent="JustifyContent.Center"
-                             Gap="0.25rem"
-                             Style="padding: 0.2rem 0.25rem 0.2rem 0; text-transform:uppercase;">
-                    <strong>USD</strong>
-                </RadzenStack>
-            </RadzenBadge>
-        </RadzenColumn>
-        <RadzenColumn Size="4">
-            <RadzenBadge BadgeStyle="BadgeStyle.Info" Shade="Shade.Dark" class="w-100">
-                <RadzenStack Orientation="Orientation.Horizontal"
-                             AlignItems="AlignItems.Center"
-                             JustifyContent="JustifyContent.Center"
-                             Gap="0.25rem"
-                             Style="padding: 0.2rem 0.25rem 0.2rem 0; text-transform: uppercase;">
-                    <strong>KHR</strong>
-                </RadzenStack>
-            </RadzenBadge>
-        </RadzenColumn>
-    </RadzenRow>
-    <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
-        <RadzenColumn Size="4">
-            <RadzenLabel>Reciept No</RadzenLabel>
-        </RadzenColumn>
-        <RadzenColumn Size="8">
-            <RadzenTextBox @bind-Value="LoanRepayment.OfficialReceiptNo"
-                           class="w-100"
-                           Style="height:var(--input-text-sm)" />
-        </RadzenColumn>
-    </RadzenRow>
-    <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
-        <RadzenColumn Size="4">
-            <RadzenLabel>Penalty Amount</RadzenLabel>
-        </RadzenColumn>
-        <RadzenColumn Size="8">
-            <RadzenNumeric TValue="decimal?"
-                           Value="LoanRepayment.PenaltyAmount"
-                           onclick="this.querySelector('.rz-numeric-input').select()"
-                           TextAlign="TextAlign.End"
-                           class="w-100"
-                           Format="#,##0.00"
-                           Style="height:var(--input-text-sm)"
-                           Min="0"
-                           @oninput="CalculatePenaltyAmount"
-                           ShowUpDown="false" />
-        </RadzenColumn>
-    </RadzenRow>
-    <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
-        <RadzenColumn Size="4">
-            <RadzenLabel>Total Amount</RadzenLabel>
-        </RadzenColumn>
-        <RadzenColumn Size="8">
-            <RadzenNumeric TValue="decimal?"
-                           Value="LoanRepayment.SubTotal"
-                           ShowUpDown="false"
-                           TextAlign="TextAlign.End"
-                           class="w-100"
-                           ReadOnly
-                           Min="0"
-                           Style="height:var(--input-text-sm)"
-                           Format="#,##0.00" />
-        </RadzenColumn>
-    </RadzenRow>
-    <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
-        <RadzenColumn Size="4">
-            <RadzenLabel>
-                Recieve Amount
-            </RadzenLabel>
-        </RadzenColumn>
-        <RadzenColumn Size="8">
-            <RadzenNumeric TValue="decimal?"
-                           ShowUpDown="false"
-                           class="w-100"
-                           onclick="this.querySelector('.rz-numeric-input').select()"
-                           @bind-Value="LoanRepayment.RecieveAmount"
-                           Format="#,##0.00"
-                           Style="height:var(--input-text-sm)"
-                           Min="0"
-                           @oninput="@ReceivePaymentChanged"
-                           @onfocusout="ReceivePaymentFocus"
-                           TextAlign="TextAlign.End" />
-        </RadzenColumn>
-    </RadzenRow>
-    <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
-        <RadzenColumn Size="4">
-            <RadzenLabel>Change</RadzenLabel>
-        </RadzenColumn>
-        <RadzenColumn Size="8">
-            <RadzenNumeric TValue="decimal?"
-                           @bind-Value="LoanRepayment.ChangeAmount"
-                           TextAlign="TextAlign.End"
-                           class="w-100"
-                           Format="#,##0.00"
-                           ReadOnly
-                           @ondblclick="CalculateExhanged"
-                           Min="0"
-                           Style="cursor:not-allowed;height:var(--input-text-sm)"
-                           ShowUpDown="false">
-            </RadzenNumeric>
-        </RadzenColumn>
-    </RadzenRow>
-</div>
+        </RadzenBadge>
+    </RadzenColumn>
+    <RadzenColumn Size="4">
+        <RadzenBadge BadgeStyle="BadgeStyle.Light" Shade="Shade.Dark">
+            <RadzenStack Orientation="Orientation.Horizontal"
+                         AlignItems="AlignItems.Center"
+                         Gap="0.25rem"
+                         Style="padding: 0.4rem 0.25rem 0.4rem 0; text-transform: none;">
+                Penalty Amount
+                <strong style="font-size:1rem;color:black;">
+                    @(LoanRepayment.PaidPenaltyAmount.Format(CurrencyId))
+                </strong>
+            </RadzenStack>
+        </RadzenBadge>
+    </RadzenColumn>
+    <RadzenColumn Size="3">
+        <RadzenStack Orientation="Orientation.Horizontal"
+                     JustifyContent="JustifyContent.End"
+                     AlignItems="AlignItems.Center">
+            <RadzenButton Click="RestoreDefault"
+                          ButtonStyle="ButtonStyle.Primary"
+                          Text="Set Default"
+                          Size="ButtonSize.Small">
+            </RadzenButton>
+        </RadzenStack>
+    </RadzenColumn>
+</RadzenRow>
+<RadzenRow AlignItems="AlignItems.Center" class="rz-mt-2">
+    <RadzenColumn Size="4"></RadzenColumn>
+    <RadzenColumn Size="4">
+        <RadzenBadge BadgeStyle="BadgeStyle.Info" Shade="Shade.Dark" class="rz-w-100">
+            <RadzenStack Orientation="Orientation.Horizontal"
+                         AlignItems="AlignItems.Center"
+                         JustifyContent="JustifyContent.Center"
+                         Gap="0.25rem"
+                         Style="padding: 0.2rem 0.25rem 0.2rem 0; text-transform:uppercase;">
+                <strong>USD</strong>
+            </RadzenStack>
+        </RadzenBadge>
+    </RadzenColumn>
+    <RadzenColumn Size="4">
+        <RadzenBadge BadgeStyle="BadgeStyle.Info" Shade="Shade.Dark" class="rz-w-100">
+            <RadzenStack Orientation="Orientation.Horizontal"
+                         AlignItems="AlignItems.Center"
+                         JustifyContent="JustifyContent.Center"
+                         Gap="0.25rem"
+                         Style="padding: 0.2rem 0.25rem 0.2rem 0; text-transform: uppercase;">
+                <strong>KHR</strong>
+            </RadzenStack>
+        </RadzenBadge>
+    </RadzenColumn>
+</RadzenRow>
+<RadzenRow AlignItems="AlignItems.Center" class="rz-mt-2">
+    <RadzenColumn Size="4">
+        <RadzenLabel>Reciept No</RadzenLabel>
+    </RadzenColumn>
+    <RadzenColumn Size="8">
+        <RadzenTextBox @bind-Value="LoanRepayment.OfficialReceiptNo"
+                       class="rz-w-100"
+                       Style="height:var(--input-text-sm)" />
+    </RadzenColumn>
+</RadzenRow>
+<RadzenRow AlignItems="AlignItems.Center" class="rz-mt-2">
+    <RadzenColumn Size="4">
+        <RadzenLabel>Penalty Amount</RadzenLabel>
+    </RadzenColumn>
+    <RadzenColumn Size="8">
+        <RadzenNumeric TValue="decimal?"
+                       Value="LoanRepayment.PenaltyAmount"
+                       onclick="this.querySelector('.rz-numeric-input').select()"
+                       TextAlign="TextAlign.End"
+                       class="rz-w-100"
+                       Format="#,##0.00"
+                       Style="height:var(--input-text-sm)"
+                       Min="0"
+                       @oninput="CalculatePenaltyAmount"
+                       ShowUpDown="false" />
+    </RadzenColumn>
+</RadzenRow>
+<RadzenRow AlignItems="AlignItems.Center" class="rz-mt-2">
+    <RadzenColumn Size="4">
+        <RadzenLabel>Total Amount</RadzenLabel>
+    </RadzenColumn>
+    <RadzenColumn Size="8">
+        <RadzenNumeric TValue="decimal?"
+                       Value="LoanRepayment.SubTotal"
+                       ShowUpDown="false"
+                       TextAlign="TextAlign.End"
+                       class="rz-w-100"
+                       ReadOnly
+                       Min="0"
+                       Style="height:var(--input-text-sm)"
+                       Format="#,##0.00" />
+    </RadzenColumn>
+</RadzenRow>
+<RadzenRow AlignItems="AlignItems.Center" class="rz-mt-2">
+    <RadzenColumn Size="4">
+        <RadzenLabel>
+            Recieve Amount
+        </RadzenLabel>
+    </RadzenColumn>
+    <RadzenColumn Size="8">
+        <RadzenNumeric TValue="decimal?"
+                       ShowUpDown="false"
+                       class="rz-w-100"
+                       onclick="this.querySelector('.rz-numeric-input').select()"
+                       @bind-Value="LoanRepayment.RecieveAmount"
+                       Format="#,##0.00"
+                       Style="height:var(--input-text-sm)"
+                       Min="0"
+                       @oninput="@ReceivePaymentChanged"
+                       @onfocusout="ReceivePaymentFocus"
+                       TextAlign="TextAlign.End" />
+    </RadzenColumn>
+</RadzenRow>
+<RadzenRow AlignItems="AlignItems.Center" class="rz-mt-2">
+    <RadzenColumn Size="4">
+        <RadzenLabel>Change</RadzenLabel>
+    </RadzenColumn>
+    <RadzenColumn Size="8">
+        <RadzenNumeric TValue="decimal?"
+                       @bind-Value="LoanRepayment.ChangeAmount"
+                       TextAlign="TextAlign.End"
+                       class="rz-w-100"
+                       Format="#,##0.00"
+                       ReadOnly
+                       @ondblclick="@CalculateExhanged"
+                       Min="0"
+                       Style="cursor:not-allowed;height:var(--input-text-sm)"
+                       ShowUpDown="false">
+        </RadzenNumeric>
+    </RadzenColumn>
+</RadzenRow>
 <RadzenStack Orientation="Orientation.Horizontal"
              AlignItems="AlignItems.Center"
-             class="mt-3"
+             class="rz-mt-3"
              JustifyContent="JustifyContent.End"
              Gap="1rem">
     <RadzenButton ButtonStyle="ButtonStyle.Success"

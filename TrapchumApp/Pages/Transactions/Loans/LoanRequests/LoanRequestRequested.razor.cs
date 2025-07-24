@@ -116,6 +116,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         async void PageChanged(int size)
         {
             pageSize = size;
+            pageIndex = 0;
             await GetLoanRequestAsync(UserId);
 
         }

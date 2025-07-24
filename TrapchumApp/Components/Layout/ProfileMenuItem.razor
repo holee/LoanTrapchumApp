@@ -1,4 +1,5 @@
-﻿@using Microsoft.AspNetCore.Components.Routing
+﻿@using Applications.Features.LoanRequests.Services
+@using Microsoft.AspNetCore.Components.Routing
 @using TrapchumApp.Services
 <AuthorizeView>
     <Authorized>
@@ -7,7 +8,7 @@
                 <form action="/Account/Logout" method="post">
                     <AntiforgeryToken />
                     <input type="hidden" name="ReturnUrl" value="@currentUrl" />
-                    <button type="submit" class="nav-link rz-navigation-item-link">
+                    <button type="submit" class="rz-navigation-item-link" style="background-color:transparent;border:none;">
                         <i class="notranslate rzi rz-navigation-item-icon">logout</i>
                         <span class="rz-navigation-item-text">
                             Logout
@@ -37,6 +38,4 @@
     {
         NavigationManager.LocationChanged -= OnLocationChanged;
     }
-}
-
 }

@@ -1,3 +1,4 @@
+@using Applications.Features.LoanRequests.Services
 @using Applications.Responses.ViewModels.Loans.Requests
 @using TrapchumApp.Services
 <GridToolbar SearchChanged="@FilterTextChanged" Placeholder="Type something to search........">
@@ -23,7 +24,8 @@
                 IsLoading="isLoading"
                 GridLines="DataGridGridLines.Both"
                 AllowPaging="true"
-                Style="height:30rem;min-height:30rem;max-height:45rem;--rz-grid-cell-line-height:1.4rem;"
+                PageSizeOptions="@StorageConstant.PageSizeOptions"
+                PageSizeChanged="@PageChanged"
                 ShowPagingSummary="true">
     <Columns>
         <RadzenDataGridColumn Property="@(nameof(VLoanRequests.RequestDate))"
@@ -33,7 +35,11 @@
                 @r.RequestDate.DayFirst()
             </Template>
         </RadzenDataGridColumn>
-        <RadzenDataGridColumn Property="@(nameof(VLoanRequests.AltName))" Title="Name" />
+        <RadzenDataGridColumn Property="@(nameof(VLoanRequests.AltName))" Title="Name" Context="c">
+            <Template>
+                <TrapchumApp.Pages.Lists.KhmerName AltName="@c.AltName" />
+            </Template>
+        </RadzenDataGridColumn>
         <RadzenDataGridColumn Property="@(nameof(VLoanRequests.BranchName))" Title="Branch Name" />
         <RadzenDataGridColumn Property="@(nameof(VLoanRequests.Summiter))" Title="Summiter" />
         <RadzenDataGridColumn Property="@(nameof(VLoanRequests.CurrencyName))" Title="Currency" />

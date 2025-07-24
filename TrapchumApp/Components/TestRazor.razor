@@ -1,5 +1,4 @@
-﻿@using TrapchumApp.Services
-<style>
+﻿<style>
    body{
         display:flex;
         align-items:center;
@@ -14,8 +13,8 @@
         margin:auto;
     }
 </style>
-<h3>TestRazor</h3>
+<h3>TestRazor: @Name</h3>
 
 @code {
-
+    [Parameter] public string? Name{ get; set; }
 }

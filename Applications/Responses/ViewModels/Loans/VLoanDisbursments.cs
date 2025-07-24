@@ -6,6 +6,8 @@ public sealed class VLoanDisbursments
 {
     public string? LoanId { get; set; }
     public string? LoanRequestId { get; set; }
+    public string? RequestUserRefId { get; set; } 
+    public string? AprovedUserId { get; set; } 
     public int? BranchId { get; set; }
     public string? ContractNumber { get; set; }
     public string? BranchName { get; set; }
@@ -41,5 +43,5 @@ public sealed class VLoanDisbursments
     public int? Period { get; set; }
     public string? PeriodName { get; set; }
     public string? InstallmentType { get; set; }
-    public ICollection<VSchedule> Schedules { get; set; } = [];
+    public List<VSchedule> Schedules { get; set; } = [];
 }

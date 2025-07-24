@@ -125,18 +125,6 @@ namespace TrapchumApp.Pages.Lists.Collaterals
             lines.AddRange(insertedProperties);
             lines.AddRange(insertedPersanals);
 
-            //lines = lines.Union(insertedProperties).Union(insertedPersanals).ToList();
-
-            //lines!.ForEach(x =>
-            //{
-            //    var subType = allSubTypes!.Where(a => a.Id == x.SubCategoryRefId).FirstOrDefault();
-
-            //    if (subType is not null)
-            //    {
-            //        x.CollateralSubTypeName = subType.CollateralSubTypeName;
-            //    }
-            //});
-
             model.CollateralLines?.AddRange(lines);
 
             if (CustomerId.IsNullOrEmpty())

@@ -1,9 +1,9 @@
 using Applications.Enumerations;
 using Applications.Extensions.Identity.Policies;
 using Applications.Extensions.Web;
+using Applications.Features.LoanRequests.Services;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Requests;
-using Applications.Services.Loans;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -35,7 +35,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         string sortColumn = "RequestDate";
         string createRequestUrl = "";
         int pageIndex = 0;
-        int pageSize = 10;
+        int pageSize = 15;
         bool sortDescending = false;
         bool isIncludeInactive = false;
         bool isLoading = false;
@@ -127,6 +127,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         async void PageChanged(int size)
         {
             pageSize = size;
+            pageIndex = 0;
             await GetLoanRequestAsync();
 
         }

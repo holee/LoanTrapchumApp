@@ -15,7 +15,7 @@ using System.Data.Common;
 
 namespace Infrastructures.Implements
 {
-    public sealed class LoanReportService(ILogger<LoanService> logger, IDapperConnectionFactory connectionFactory, IDbContextFactory<DataContext> contextFactory) : ILoanReportService
+    public sealed class LoanReportService(ILogger<LoanDisbursementRepository> logger, IDapperConnectionFactory connectionFactory, IDbContextFactory<DataContext> contextFactory) : ILoanReportService
     {
 
         public async Task<DisbursmentsRpt?> GetLoanScheduleAsync(int? branchId, string? loanId)

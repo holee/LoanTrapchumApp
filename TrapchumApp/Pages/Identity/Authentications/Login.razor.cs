@@ -2,12 +2,28 @@ using Applications.Requests.Identity;
 using Applications.Services.Identity;
 using Domains.Models.Identity;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
 using TrapchumApp.Services;
 
 namespace TrapchumApp.Pages.Identity.Authentications
 {
+
+    public sealed class Input 
+    {
+        [Required]
+        [StringLength(100)]
+        public string Email { get; set; } = string.Empty;
+        [Required]
+        [StringLength(100)]
+        [DataType(DataType.Password)]
+        public string Password { get; set; } = string.Empty;
+
+        [Display(Name = "Remember me?")]
+        public bool RememberMe { get; set; } = false;
+    }
+
+
     public partial class Login
     {
         private string? errorMessage;
@@ -26,13 +42,12 @@ namespace TrapchumApp.Pages.Identity.Authentications
             _redirectManager = redirectManager;
         }
         [CascadingParameter] HttpContext HttpContext { get; set; } = default!;
-        [SupplyParameterFromForm] private LoginRequest Input { get; set; } = new();
+
+
+        [SupplyParameterFromForm]
+        private Input Input { get; set; } = new();
         [SupplyParameterFromQuery] private string? ReturnUrl { get; set; }
 
-
-
-        private AuthenticationScheme[] externalLogins = [];
-        
         protected override async Task OnInitializedAsync()
         {
             if (HttpContext is not null && HttpMethods.IsGet(HttpContext!.Request.Method))
@@ -42,17 +57,8 @@ namespace TrapchumApp.Pages.Identity.Authentications
             }
         }
 
-        private void RedirectTo(string redirectionUrl)
-        {
-            ArgumentNullException.ThrowIfNull(HttpContext);
-            HttpContext.Response.Headers.Append("blazor-enhanced-nav-redirect-location", redirectionUrl);
-            HttpContext.Response.StatusCode = 200;
-        }
-
-
         public async Task LoginUser()
         {
-
 
             var loginUser = await _userManager.FindByEmailAsync(Input.Email);
 
@@ -64,7 +70,8 @@ namespace TrapchumApp.Pages.Identity.Authentications
                 return;
             }
 
-            if (loginUser.IsActive==false) {
+            if (loginUser.IsActive == false)
+            {
 
                 errorMessage = $"Error:User is already deactive....";
 
@@ -87,8 +94,9 @@ namespace TrapchumApp.Pages.Identity.Authentications
             {
                 _logger.LogInformation("{UserName} has logged in.", Input.Email);
 
-                _redirectManager.RedirectTo(ReturnUrl ?? "/");
+                //_redirectManager.RedirectTo(ReturnUrl ?? "/");
 
+                NavigationManager.NavigateTo(ReturnUrl ?? "/", true);
             }
 
         }

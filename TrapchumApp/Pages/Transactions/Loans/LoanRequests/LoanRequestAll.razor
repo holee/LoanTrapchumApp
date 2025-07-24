@@ -1,4 +1,5 @@
-﻿@using Applications.Responses.ViewModels.Loans.Requests
+﻿@using Applications.Features.LoanRequests.Services
+@using Applications.Responses.ViewModels.Loans.Requests
 @using TrapchumApp.Services
 <GridToolbar SearchChanged="@FilterTextChanged" Placeholder="Type something to search........">
       <LeftChildren>
@@ -34,7 +35,11 @@
                 @r.RequestDate.DayFirst()
             </Template>
         </RadzenDataGridColumn>
-        <RadzenDataGridColumn Property="@(nameof(VLoanRequests.AltName))" Title="Name" />
+        <RadzenDataGridColumn Property="@(nameof(VLoanRequests.AltName))" Title="Name" Context="c">
+            <Template>
+                <TrapchumApp.Pages.Lists.KhmerName AltName="@c.AltName" />
+            </Template>
+        </RadzenDataGridColumn>
         <RadzenDataGridColumn Property="@(nameof(VLoanRequests.BranchName))" Title="Branch Name" />
         <RadzenDataGridColumn Width="5rem"
                               Property="@(nameof(VLoanRequests.CurrencyName))" Title="Currency" />

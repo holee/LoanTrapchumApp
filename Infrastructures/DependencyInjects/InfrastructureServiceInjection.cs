@@ -1,4 +1,5 @@
-﻿using Applications.Interfaces.Addresses;
+﻿using Applications.Interfaces;
+using Applications.Interfaces.Addresses;
 using Applications.Interfaces.Audits;
 using Applications.Interfaces.Banks;
 using Applications.Interfaces.Branches;
@@ -19,6 +20,7 @@ using Infrastructures.Implements;
 using Infrastructures.Implements.Audits;
 using Infrastructures.Implements.Identity;
 using Infrastructures.Persistence.Interceptors;
+using Infrastructures.Repository;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -27,23 +29,33 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Infrastructures.DependencyInjects
 {
-    public static class InfrastructureServiceInjection 
+    public static class InfrastructureServiceInjection
     {
         public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
         {
 
-            services.AddDbContextFactory<UserDataContext>(options =>
-            {
-                options.UseSqlServer(configuration.GetConnectionString("MyConnection"));
-            });
+            var connectionString = configuration.GetConnectionString("MyConnection") ?? throw new InvalidOperationException(nameof(configuration));
 
             services.AddDbContextFactory<DataContext>(options =>
             {
-                options.UseSqlServer(configuration.GetConnectionString("MyConnection"));
+                options.UseSqlServer(connectionString);
             });
+
+            services.AddDbContext<UserDataContext>(options =>
+            {
+                options.UseSqlServer(connectionString);
+            });
+
+
             services.AddScoped<Seeds.DatabaseSeeder>();
 
-            services.AddHttpContextAccessor();
+
+            services.AddAuthentication(options =>
+            {
+                options.DefaultScheme = IdentityConstants.ApplicationScheme;
+                options.DefaultSignInScheme = IdentityConstants.ApplicationScheme;
+
+            }).AddIdentityCookies();
 
             services.AddIdentityCore<ApplicationUser>()
                 .AddRoles<ApplicationRole>()
@@ -52,74 +64,62 @@ namespace Infrastructures.DependencyInjects
                 .AddSignInManager()
                 .AddDefaultTokenProviders();
 
-            services.AddAuthentication(options =>
-            {
-                options.DefaultScheme = IdentityConstants.ApplicationScheme;
-                options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
-                options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
-                options.DefaultChallengeScheme = IdentityConstants.ApplicationScheme;
-            }).AddIdentityCookies(options =>
-            {
-                
-            });
-
             services.ConfigureApplicationCookie(options =>
             {
                 options.ExpireTimeSpan = TimeSpan.FromDays(15);
                 options.SlidingExpiration = true;
-                //options.SessionStore = new MemoryCacheTicketStore();
-                //options.LoginPath = LOGIN_PATH;
             });
             services.AddSingleton<AuditingSaveChangesInterceptor>();
             services.AddSingleton<ICurrentUserService, CurrentUserService>();
             services.AddScoped<IAuditReadService, AuditReadService>();
-            services.TryAddTransient<IAppSettingService, AppSettingService>();
-            services.TryAddTransient<ILoanSettingService, LoanSettingService>();
-            services.TryAddTransient<IForiegnCurrencyExchange, ForiegnCurrencyExchange>();
-            services.TryAddTransient<IJournalService, JournalService>();
-            services.TryAddTransient<ISpotRateService, SpotRateService>();
-            services.TryAddTransient<ILedgerService, LedgerService>();
-            services.TryAddTransient<IUserService, UserService>();
-            services.TryAddTransient<IRoleService, RoleService>();
-            services.TryAddTransient<IOpenBranchService, OpenBranchService>();
-            services.TryAddTransient<IOccupationService, OccupationService>();
-            services.TryAddTransient<IOtherNameService, OtherNameService>();
-            services.TryAddTransient<ILoginService, LoginService>();
-            services.TryAddTransient<IBranchService, BranchService>();
-            services.TryAddTransient<IBankService, BankService>();
-            services.TryAddTransient<IDepartmentService, DepartmentService>();
-            services.TryAddTransient<IEmployeeService, EmployeeService>();
-            services.TryAddTransient<IEntityNameService, EntityNameService>();
-            services.TryAddTransient<IAddressService, AddressService>();
-            services.TryAddTransient<ICashVaultService, CashVaultService>();
-            services.TryAddTransient<ICashVaultService, CashVaultService>();
-            services.TryAddTransient<ICustomerService, CustomerService>();
-            services.TryAddTransient<ICollateralsService, CollateralsService>();
-            services.TryAddTransient<ICurrencyService, CurrencyService>();
-            services.TryAddTransient<ICreditAgentService, CreditAgentService>();
-            services.TryAddTransient<ICustomerIncomeExpendService, CustomerIncomeExpendService>();
-            services.TryAddTransient<IHolidayService, HolidayService>();
-            services.TryAddTransient<IGuarantorService, GuarantorService>();
-            services.TryAddTransient<ILoanSettingService, LoanSettingService>();
-            services.TryAddTransient<ILoanProductService, LoanProductService>();
-            services.TryAddTransient<ILoanPaymentService, LoanPaymentService>();
-            services.TryAddTransient<ILoanScheduleService, LoanScheduleService>();
-            services.TryAddTransient<ILoanService, LoanService>();
-            services.TryAddTransient<ILoanCategoryService, LoanCategoryService>();
-            services.TryAddTransient<ILoanRequestService, LoanRequestService>();
-            services.TryAddTransient<ILoanReportService, LoanReportService>();
-            services.TryAddTransient<ISalutationService, SalutaionService>();
-            services.TryAddTransient<INationalityService, NationalityService>();
-            services.TryAddTransient<IFileUploadService, FileUploadService>();
+            services.AddScoped<IAppSettingService, AppSettingService>();
+            services.AddScoped<ILoanSettingService, LoanSettingService>();
+            services.AddScoped<IForiegnCurrencyExchange, ForiegnCurrencyExchange>();
+            services.AddScoped<IJournalService, JournalService>();
+            services.AddScoped<ISpotRateService, SpotRateService>();
+            services.AddScoped<ILedgerService, LedgerService>();
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IRoleService, RoleRepository>();
+            services.AddScoped<IOpenBranchService, OpenBranchService>();
+            services.AddScoped<IOccupationService, OccupationService>();
+            services.AddScoped<IOtherNameService, OtherNameService>();
+            services.AddScoped<ILoginService, LoginService>();
+            services.AddScoped<IBranchService, BranchService>();
+            services.AddScoped<IBankService, BankService>();
+            services.AddScoped<IDepartmentService, DepartmentService>();
+            services.AddScoped<IEmployeeService, EmployeeService>();
+            services.AddScoped<IEntityNameService, EntityNameService>();
+            services.AddScoped<IAddressService, AddressService>();
+            services.AddScoped<ICashVaultService, CashVaultService>();
+            services.AddScoped<ICashVaultService, CashVaultService>();
+            services.AddScoped<ICustomerService, CustomerService>();
+            services.AddScoped<ICollateralsService, CollateralsService>();
+            services.AddScoped<ICurrencyService, CurrencyService>();
+            services.AddScoped<ICreditAgentService, CreditAgentService>();
+            services.AddScoped<ICustomerIncomeExpendService, IncomeExpendRepository>();
+            services.AddScoped<IHolidayService, HolidayService>();
+            services.AddScoped<IGuarantorService, GuarantorService>();
+            services.AddScoped<ILoanSettingService, LoanSettingService>();
+            services.AddScoped<ILoanProductService, LoanProductService>();
+            services.AddScoped<ILoanPaymentService, LoanPaymentService>();
+            services.AddScoped<ILoanScheduleService, LoanScheduleService>();
+            services.AddScoped<ILoanService, LoanDisbursementRepository>();
+            services.AddScoped<ILoanCategoryService, LoanCategoryService>();
+            services.AddScoped<ILoanRequestService, LoanRequestService>();
+            services.AddScoped<ILoanReportService, LoanReportService>();
+            services.AddScoped<ISalutationService, SalutaionService>();
+            services.AddScoped<INationalityService, NationalityService>();
+            services.AddScoped<IFileUploadService, FileUploadService>();
             services.AddScoped<IDapperConnectionFactory, DapperConnectionFactory>();
-            services.TryAddTransient<IVendorService, VendorService>();
-            services.TryAddTransient<IProvinceService, ProvinceService>();
-            services.TryAddTransient<IDistrictService, DistrictService>();
-            services.TryAddTransient<ICommuneService, CommuneService>();
-            services.TryAddTransient<IVillageServer, VillageService>();
+            services.AddScoped<IVendorService, VendorService>();
+            services.AddScoped<IProvinceService, ProvinceService>();
+            services.AddScoped<IDistrictService, DistrictService>();
+            services.AddScoped<ICommuneService, CommuneService>();
+            services.AddScoped<IVillageServer, VillageService>();
+            services.AddScoped<ILoanScheduleRepo, LoanScheduleRepository>();
             return services;
 
         }
-        
+
     }
 }

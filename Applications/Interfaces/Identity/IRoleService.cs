@@ -1,6 +1,8 @@
 ﻿using Applications.Requests.Identity;
 using Applications.Responses;
 using Applications.Responses.Auths;
+using Applications.Responses.Paginations;
+using Applications.Responses.ViewModels.Auths;
 
 namespace Applications.Interfaces.Identity
 {
@@ -8,9 +10,15 @@ namespace Applications.Interfaces.Identity
     {
         Task<Result> AddRolePermissions(RolePermissionRequest permission);
         Task<Result> CreateAsync(RoleCreateDto role);
+        Task<Result<RoleDtoUpdate>> EditAsync(string? roleId);
+        List<RolePermissionsViewModel> GetAllPermisses();
+        List<PermissionsDtoCreate> GetAllPermissions();
         Task<Result<RolePermissions>> GetPermissionsByRoleAsync(string roleId);
+        Task<Result<RolePermissions>> GetPermissionsByRoleByIdAsync(string roleId);
         Task<Result<RoleDto>> GetRoleByIdAsync(string id);
         Task<Result<IEnumerable<RoleDto>>> GetRolesAsync(string roleId, string? name = null);
         Task<Result<IEnumerable<string>>> GetRolesAsync(string? name = null);
+        Task<Pager<RoleDto>> GetRolesAsync(string? roleId, QueryParam param, CancellationToken cancellation = default);
+        Task<Result<string>> UpdateAsync(RoleDtoUpdate role);
     }
 }

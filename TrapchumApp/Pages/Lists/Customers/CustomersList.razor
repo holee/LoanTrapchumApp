@@ -1,4 +1,5 @@
-﻿@using CommunityToolkit.HighPerformance
+﻿@using Applications.Features.LoanRequests.Services
+@using CommunityToolkit.HighPerformance
 @using Microsoft.AspNetCore.Components.Web
 @using TrapchumApp.Helpers.Constants
 @using TrapchumApp.Helpers.Extensions
@@ -69,15 +70,13 @@
                               Width="8rem"
                               Title="Name">
             <Template>
-                <div class="wellNameFormat">
-                    <span class="first">@c.AltName?.WellFormName().First</span>
-                    <span class="second">@c.AltName?.WellFormName().Last</span>
-                </div>
+                <KhmerName AltName="@c.AltName" />
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Property="@nameof(VCustomerList.FullName)"
                               Context="c"
                               Width="8rem"
+                              Visible="false"
                               Title="FullName">
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Title="@nameof(VCustomerList.Phone)"
@@ -99,20 +98,10 @@
                               Filterable="false"
                               Title="Address">
             <Template>
-                <div class="address">
-                    <span class="province">
-                        @c.ProInKhmer
-                    </span>
-                    <span class="district">
-                        @c.DisInKhmer
-                    </span>
-                    <span class="commune">
-                        @c.ComInKhmer
-                    </span>
-                    <span class="village">
-                        @c.VilInKhmer
-                    </span>
-                </div>
+                <AddressInfo ComInKhmer="@c.ComInKhmer"
+                             ProInKhmer="@c.ProInKhmer"
+                             DisInKhmer="@c.DisInKhmer"
+                             VilInKhmer="@c.VilInKhmer" />
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Context="c"

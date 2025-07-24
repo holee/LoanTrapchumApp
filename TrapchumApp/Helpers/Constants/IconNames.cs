@@ -3,6 +3,7 @@
     public static class IconNames
     {
         public const string Comment = "comment";
+        public const string Done = "done_outline"; 
         public const string Checked = "check";
         public const string ArrowCircleUp = "arrow_circle_up"; 
         public const string ArrowCircleLeft = "arrow_circle_left";
@@ -89,5 +90,9 @@
         public const string Policy = "policy";
         public const string View = "visibility";
         public const string SwitchAccount = "switch_account";
+        public const string? Password = "password";  
+        public const string AssignmentInd = "assignment_ind";
+        public const string Pdf = "picture_as_pdf";
+        public const string Excel = "picture_as_pdf"; 
     }  
 }

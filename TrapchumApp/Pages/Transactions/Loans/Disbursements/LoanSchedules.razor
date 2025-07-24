@@ -1,9 +1,7 @@
-﻿@using Applications.Requests.Loans.Disbursements
+﻿@using Applications.Features.LoanRequests.Services
+@using Applications.Requests.Loans.Disbursements
 @using TrapchumApp.Services
-<Containers Fluid>
-
-
-    <RadzenDataGrid Responsive="true"
+<RadzenDataGrid Responsive="true"
                     Density="Density.Compact"
                     GridLines="DataGridGridLines.Both"
                     AllowSorting="false"
@@ -81,13 +79,10 @@
             </RadzenDataGridColumn>
         </Columns>
     </RadzenDataGrid>
-</Containers>
 @code {
     [Parameter] public int? CurrencyId { get; set; } = 1;
     [Parameter] public VCustomerList? Customer { get; set; }
     [Parameter] public IEnumerable<LoanScheduleDtoCreate> Schedules { get; set; } = [];
-
-
 
     void OnRowRender(RowRenderEventArgs<LoanScheduleDtoCreate> arg)
     {

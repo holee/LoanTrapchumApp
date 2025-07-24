@@ -1,4 +1,152 @@
 ﻿@page "/"
+@using Applications.Features.LoanRequests.Services
 <PageTitle>Home</PageTitle>
+<button @onclick="PrintPage" class="btn">Print This Page</button>
+<AuthorizeView Roles="@AppRoles.Co">
+    <Authorized>
+        <InfoBox Title="CO"
+                 Subtitle="This Month"
+                 Count="1250"
+                 PercentageIncrease="15.5"
+                 Icon="shopping_cart"
+                 GradientStart="#2196F3"
+                 GradientEnd="#2196FA"
+                 OnMoreInfoClick="@HandleMoreInfo">
+                 <ChildContent>
+                      <RadzenRow class="rz-my-2">
+        <RadzenColumn Size="2">
+            <RadzenPanelMenu Click="OnParentClicked" Multiple="@multiple">
+                <RadzenPanelMenuItem Text="Today" Path="buttons" Icon="account_circle"></RadzenPanelMenuItem>
+                <RadzenPanelMenuItem Text="This Week" Path="menu" Icon="line_weight"></RadzenPanelMenuItem>
+                <RadzenPanelMenuItem Text="This Month" Path="fileinput" Icon="attach_file"></RadzenPanelMenuItem>
+                <RadzenPanelMenuItem Text="This Quarter" Path="dialog" Icon="perm_media"></RadzenPanelMenuItem>
+                <RadzenPanelMenuItem Text="This Symester" Path="notification" Icon="announcement"></RadzenPanelMenuItem>
+                 <RadzenPanelMenuItem Text="This Year" Path="notification" Icon="announcement"></RadzenPanelMenuItem>
+                 <RadzenPanelMenuItem Text="Custom" Path="notification" Icon="announcement"></RadzenPanelMenuItem>
+            </RadzenPanelMenu>
+        </RadzenColumn>
+        <RadzenColumn Size="10">
+            <div style="background-color:aliceblue">
+                  <RadzenChart>
+                <RadzenColumnSeries Data="@revenue1" CategoryProperty="Quarter" LineType="LineType.Dashed"                               
+                                ValueProperty="Revenue" />
+                <RadzenColumnSeries Data="@revenue2" CategoryProperty="Quarter" 
+                                LineType="LineType.Dashed" 
+                                ValueProperty="Revenue" />
+            </RadzenChart>
+            </div>
+        </RadzenColumn>
+    </RadzenRow>
+                 </ChildContent>
+             </InfoBox>
+    </Authorized>
+</AuthorizeView>
+<AuthorizeView Roles="@AppRoles.Manager">
+    <Authorized>
+        <InfoBox Title="BM"
+                 Subtitle="This Month"
+                 Count="1250"
+                 PercentageIncrease="15.5"
+                 Icon="shopping_cart"
+                 GradientStart="#2196F3"
+                 GradientEnd="#64B5F6"
+                 OnMoreInfoClick="@HandleMoreInfo" />
+    </Authorized>
+</AuthorizeView>
+<AuthorizeView Roles="@($"{AppRoles.Account},{AppRoles.Teller}")">
+    <Authorized>
+        <InfoBox Title="Account,Teller"
+                 Subtitle="This Month"
+                 Count="1250"
+                 PercentageIncrease="15.5"
+                 Icon="shopping_cart"
+                 GradientStart="#2196F3"
+                 GradientEnd="#64B5F6"
+                 OnMoreInfoClick="@HandleMoreInfo" />
+    </Authorized>
+</AuthorizeView>
+<AuthorizeView Roles="@AppRoles.Rbm">
+    <Authorized>
+        <InfoBox Title="RBM"
+                 Subtitle="This Month"
+                 Count="1250"
+                 PercentageIncrease="15.5"
+                 Icon="shopping_cart"
+                 GradientStart="#2196F3"
+                 GradientEnd="#64B5F6"
+                 OnMoreInfoClick="@HandleMoreInfo" />
+    </Authorized>
+</AuthorizeView>
 
-<RadzenTextBox  class="rz-w-100"></RadzenTextBox>
+@code {
+    [Inject]
+    private IServiceProvider ServiceProvider { get; set; }
+    bool multiple = true;
+    void OnParentClicked(MenuItemEventArgs args)
+    {
+
+    }
+
+    void OnChildClicked(MenuItemEventArgs args)
+    {
+
+    }
+
+    private async Task PrintPage()
+    {
+        //await js.InvokeVoidAsync("printPage");
+
+        var logFactory = ServiceProvider.GetRequiredService<ILoggerFactory>();
+
+        var htmlRender = new HtmlRenderer(ServiceProvider, logFactory);
+
+        var htmlString =await htmlRender.Dispatcher.InvokeAsync(async () =>
+        {
+
+            var parameters = new Dictionary<string, object?>
+            {
+                {"Name","Mon Minh"}
+            };
+
+
+            var paraView = ParameterView.FromDictionary(parameters);
+
+            var output =await htmlRender.RenderComponentAsync<TestRazor>(paraView);
+
+            return output.ToHtmlString();
+
+        });
+
+        Console.WriteLine(htmlString);
+    }
+
+
+    private void HandleMoreInfo()
+    {
+        // Handle more info click
+    }
+    @code {
+        class DataItem
+        {
+            public string? Quarter { get; set; }
+            public double Revenue { get; set; }
+            public int Size{ get; set; }
+        }
+
+            DataItem[] revenue1 = new DataItem[]
+            {
+                new DataItem { Quarter = "Q1", Revenue = 234000,Size=4 },
+                new DataItem { Quarter = "Q2", Revenue = 284000,Size=5 },
+                new DataItem { Quarter = "Q3", Revenue = 274000,Size=10 },
+                new DataItem { Quarter = "Q4", Revenue = 294000,Size=1 }
+            };
+
+            DataItem[] revenue2 = new DataItem[]
+            {
+                new DataItem { Quarter = "Q1", Revenue = 324000 },
+                new DataItem { Quarter = "Q2", Revenue = 224000 },
+                new DataItem { Quarter = "Q3", Revenue = 444000 },
+                new DataItem { Quarter = "Q4", Revenue = 564000 }
+            };
+        }
+}

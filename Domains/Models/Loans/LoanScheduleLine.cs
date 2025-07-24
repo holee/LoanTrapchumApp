@@ -13,5 +13,6 @@ public sealed class ScheduleLine
     public int? RepaymentModeRefId { get; set; } = 0;
     public int? ScheduleStatusRefId { get; set; } = 0;
     public int? BranchId { get; set; }
+    public int? ScheduleNum { get; set; } = 1;
     public string? CreditAgentRefId { get; set; }=string.Empty;
 }

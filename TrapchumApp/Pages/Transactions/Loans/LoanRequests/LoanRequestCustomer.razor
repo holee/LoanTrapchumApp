@@ -1,9 +1,10 @@
-﻿@using TrapchumApp.Services
+﻿@using Applications.Features.LoanRequests.Services
+@using TrapchumApp.Services
 <Containers Fluid>
-    <table class="table table-bordered table-sm">
+    <table class="table-sm">
         <tbody>
             <tr>
-                <th style="background-color:#F1F1F4" class="w-25">
+                <th class="rz-w-25">
                     Customer Name
                 </th>
                 <td>
@@ -11,7 +12,7 @@
                 </td>
             </tr>
             <tr>
-                <th style="background-color:#F1F1F4" class="w-25">
+                <th class="rz-w-25">
                     Phone
                 </th>
                 <td>
@@ -19,7 +20,7 @@
                 </td>
             </tr>
             <tr>
-                <th style="background-color:#F1F1F4" class="w-25">DateOfBirth</th>
+                <th class="rz-w-25">DateOfBirth</th>
                 <td>
                     <span>
                         @Customer?.DateOfBirth
@@ -27,7 +28,7 @@
                 </td>
             </tr>
             <tr>
-                <th style="background-color:#F1F1F4" class="w-25">
+                <th class="rz-w-25">
                     Occupation
                 </th>
                 <td>
@@ -37,13 +38,13 @@
                 </td>
             </tr>
             <tr>
-                <th style="background-color:#F1F1F4" class="w-25">ID Card</th>
+                <th class="rz-w-25">ID Card</th>
                 <td>
                     @Customer?.IdCard
                 </td>
             </tr>
             <tr>
-                <th style="background-color:#F1F1F4" class="w-25">
+                <th class="rz-w-25">
                     Circle
                 </th>
                 <td>
@@ -51,7 +52,7 @@
                 </td>
             </tr>
             <tr>
-                <th style="background-color:#F1F1F4" class="w-25">
+                <th class="rz-w-25">
                     Salutation
                 </th>
                 <td>
@@ -59,7 +60,7 @@
                 </td>
             </tr>
             <tr>
-                <th style="background-color:#F1F1F4" class="w-25">
+                <th class="rz-w-25">
                     Address
                 </th>
                 <td>
@@ -67,11 +68,11 @@
                 </td>
             </tr>
             <tr>
-                <th style="background-color:#F1F1F4" class="w-25">Income</th>
+                <th class="rz-w-25">Income</th>
                 <td>@Customer?.CustomerIncomes?.Sum(x => x?.IncomeAmount)</td>
             </tr>
             <tr>
-                <th style="background-color:#F1F1F4" class="w-25">Expend</th>
+                <th class="rz-w-25">Expend</th>
                 <td>
                     @Customer?.CustomerExpenses?.Sum(x => x?.ExpendAmount)
                 </td>

@@ -1,0 +1,100 @@
+@using Applications.Features.LoanRequests.Services
+@using TrapchumApp.Pages.Lists.Collaterals
+@using TrapchumApp.Services
+<RadzenRow>
+    <RadzenColumn Size="2">
+        <RadzenStack Orientation="Orientation.Vertical"
+                     AlignItems="AlignItems.Center"
+                     Wrap="FlexWrap.Wrap"
+                     class="rz-mx-auto"
+                     JustifyContent="JustifyContent.Center">
+            <RadzenImage Path="@Customer?.Photo"
+                         Style="width:10rem;height:10rem;border-radius:50%;object-fit:cover;"
+                         AlternateText="Customer">
+            </RadzenImage>
+        </RadzenStack>
+    </RadzenColumn>
+    <RadzenColumn Size="10">
+        <table class="table-sm">
+            <tbody>
+                <tr>
+                    <th class="rz-w-max-25">Name</th>
+                    <td>
+                        @Customer?.AltName
+                    </td>
+                    <th class="rz-w-max-25">En-Name</th>
+                    <td>
+                        @Customer?.FullName
+                    </td>
+                </tr>
+                <tr>
+                    <th class="rz-w-max-25">Salutation</th>
+                    <td>
+                        @Customer?.Salutation
+                    </td>
+                    <th class="rz-w-max-25">Spouse Name</th>
+                    <td>
+                        @Customer?.SpouseName
+                    </td>
+                </tr>
+                <tr>
+                    <th class="rz-w-max-25">Phone</th>
+                    <td>
+                        @Customer?.Phone
+                    </td>
+                    <th class="rz-w-max-25">Children</th>
+                    <td>
+                        @Customer?.NoOfChildren
+                    </td>
+                </tr>
+                <tr>
+                    <th class="rz-w-max-25">Circle</th>
+                    <td>
+                        @Customer?.Circle
+                    </td>
+                    <th class="rz-w-max-25">Occupation</th>
+                    <td>
+                        @Customer?.Occupation
+                    </td>
+                </tr>
+                <tr>
+                    <th class="rz-w-max-25">Email</th>
+                    <td>
+                        @Customer?.EmailAddress
+                    </td>
+                    <th class="rz-w-max-25">Address</th>
+                    <td>
+                        @Customer?.ToString()
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </RadzenColumn>
+</RadzenRow>
+
+@code
+{
+    [Parameter]
+    public VCustomerList? Customer { get; set; }
+    [Parameter]
+    public string? CustomerId { get; set; } = string.Empty;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        if (Customer is null || !string.IsNullOrEmpty(CustomerId))
+        {
+            var rsp = await _customerService.GetCustomerDetailsByIdAsync(CustomerId, false);
+
+            if (rsp.IsSuccess && rsp.Data is not null)
+            {
+                Customer = rsp.Data;
+            }
+        }
+
+        await base.OnInitializedAsync();
+    }
+
+ 
+}

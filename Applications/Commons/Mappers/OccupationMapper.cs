@@ -28,7 +28,7 @@ namespace Applications.Commons.Mappers
         {
             return new Occupation
             {
-                OccupationTitle = source.OccupationTitle,
+                OccupationTitle = source.OccupationTitle!,
                 Khmer = source.Khmer,
                 TypeOf = source.TypeOf,
             };

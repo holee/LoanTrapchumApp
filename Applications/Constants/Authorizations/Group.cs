@@ -3,44 +3,23 @@
     public static class Group
     {
         public const string Administrator = nameof(Administrator);
+        public const string Accounting = nameof(Accounting);
+        public const string Operation = nameof(Operation);
         public const string ManagementHierarchy = nameof(ManagementHierarchy);
         public const string CreditOffice = nameof(CreditOffice);
         public const string Manager = nameof(Manager);
         public const string User = nameof(User);
-        //public const string Lists = nameof(Lists);
-        //public const string Names = nameof(Names);
-        //public const string LoanRequest = nameof(LoanRequest);
-        //public const string LoanRepayment = nameof(LoanRepayment);
-        //public const string Report = nameof(Report);
-        //public const string UserRoles = nameof(UserRoles);
-        //public const string AdminOnly = nameof(AdminOnly);
-        //public const string AccountOnly = nameof(AccountOnly);
-        //public const string CreditOfficerOnly = nameof(CreditOfficerOnly);
-        //public static class Dashboard
-        //{
-        //    public const string Account = nameof(Account);
-        //    public const string Administrator = nameof(Administrator);
-        //    public const string Loan = nameof(Loan);
-        //    public const string Branch = nameof(Branch);
-        //    public const string Department = nameof(Department);
-        //    public const string OperatedPerson = nameof(OperatedPerson);
-        //    public const string Setting = nameof(Setting);
-        //    public const string Report = nameof(Report);
-        //    public const string CreditOfficer = nameof(CreditOfficer);
-        //    public const string Currency = nameof(Currency);
-        //}
-        //public static class Transactions
-        //{
-        //    public const string LoanRequest = nameof(LoanRequest);
-        //    public const string LoanRepayment = nameof(LoanRepayment);
-        //    public const string Repayments = nameof(Repayments);
-        //    public const string Loans = nameof(Loans);
-        //    public const string Ledgers = nameof(Ledgers);
-        //    public const string Journals = nameof(Journals);
-        //    public const string Transaction = nameof(Transaction);
-        //}
 
-
+        public const string AccountDashboard = nameof(AccountDashboard);
+        public const string CoDashboard = nameof(CoDashboard);
+        public const string AdminDashboard = nameof(AdminDashboard);
+        public const string CeoDashboard = nameof(CeoDashboard);
+        public const string BbDashboard = nameof(BbDashboard);
+        public const string RbmDashboard = nameof(RbmDashboard);
+        public const string CurrencyDashboard = nameof(CurrencyDashboard);
+        public const string ReportDashboard = nameof(ReportDashboard);
+        public const string LoanDashboard = nameof(LoanDashboard);
+        public const string LoanRequestDashboard = nameof(LoanRequestDashboard);
     }
 
 

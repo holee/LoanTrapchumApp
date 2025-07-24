@@ -1,4 +1,5 @@
 ﻿@page "/App/Currencies"
+@using Applications.Features.LoanRequests.Services
 @using Microsoft.AspNetCore.Components.Web
 @using TrapchumApp.Services
 <PageTitle>Currency List</PageTitle>
@@ -73,8 +74,8 @@
                     </Columns>
                 </RadzenDataGrid>
             </RadzenTabsItem>
-            <RadzenTabsItem Text="Set spot rate" Icon="currency_exchange">
-                <SetDailySpotRate />
+            <RadzenTabsItem Text="Set spot rate" Icon="@IconNames.CurrencyExchange">
+                <TrapchumApp.Pages.Transactions.Exchanges.SetDailySpotRate />
             </RadzenTabsItem>
         </Tabs>
     </RadzenTabs>
@@ -86,7 +87,6 @@
     @<RadzenMenu Style="font-size:0.8rem;">
         <RadzenMenuItem Click="(()=>ShowCurrencyDetials(id))" Icon="info" Text="Details" Value="@id"></RadzenMenuItem>
         <RadzenMenuItem Click="(()=>SpotRateCurrency(id))" Icon="info" Text="Set Spot Rate" Value="@id"></RadzenMenuItem>
-
     </RadzenMenu>
     );
     }

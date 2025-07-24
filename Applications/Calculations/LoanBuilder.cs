@@ -214,6 +214,8 @@ namespace Applications.Calculations
 
             _effectiveBalance = req.Principle ?? 0.00M;
 
+            int scheduleNum = 1;
+
             for (int i = 1; i <= _periodInMonth; i++)
             {
                 beginBalance = lastBalance;
@@ -296,6 +298,12 @@ namespace Applications.Calculations
                     totalPayAmount = CalculatorExtensions.TotalPay(principal, interestAmount, effAmount);
                 }
 
+
+                if (i % 5 == 0)
+                {
+                    scheduleNum = scheduleNum + 1;
+                }
+
                 ScheduleLine line = new ScheduleLine()
                 {
                     InstallmentNo = i,
@@ -307,6 +315,7 @@ namespace Applications.Calculations
                     TotalPay = totalPayAmount,
                     OutStanding = lastBalance,
                     BranchId = req.BranchId,
+                    ScheduleNum = scheduleNum,
                     CreditAgentRefId = req.CreditAgentRefId,
                     RepaymentModeRefId = req.RepaymentModeRefId,
                 };
@@ -339,6 +348,9 @@ namespace Applications.Calculations
             DateTimeOffset? previusDate;
 
             _effectiveBalance = req.Principle ?? 0.00M;
+
+            int scheduleNum = 1;
+
 
             for (int i = 1; i <= periodInMonth; i++)
             {
@@ -395,6 +407,13 @@ namespace Applications.Calculations
 
                 totalPay = CalculatorExtensions.TotalPay(principalPaid, interest, effAmount);
 
+
+                if (i % 5 == 0)
+                {
+                    scheduleNum = scheduleNum + 1;
+                }
+
+
                 ScheduleLine line = new ScheduleLine()
                 {
                     InstallmentNo = i,
@@ -406,6 +425,7 @@ namespace Applications.Calculations
                     OutStanding = lastBalance,
                     CollectionFeeAmount = effAmount,
                     BranchId = req.BranchId,
+                    ScheduleNum = scheduleNum,
                     CreditAgentRefId = req.CreditAgentRefId,
                     RepaymentModeRefId = req.RepaymentModeRefId,
                 };
@@ -429,6 +449,8 @@ namespace Applications.Calculations
             _effectiveBalance = req.Principle ?? 0.00M;
 
             var _collectionFeeAmount = 0M;
+
+            int scheduleNum = 1;
 
             for (int i = 1; i <= req.Installments; i++)
             {
@@ -493,6 +515,11 @@ namespace Applications.Calculations
                     lastBalance = 0;
                 }
 
+                if (i % 5 == 0)
+                {
+                    scheduleNum = scheduleNum + 1;
+                }
+
                 ScheduleLine line = new ScheduleLine()
                 {
                     InstallmentNo = i,
@@ -502,6 +529,7 @@ namespace Applications.Calculations
                     Interest = interest,
                     TotalPay = totalPay,
                     OutStanding = lastBalance,
+                    ScheduleNum = scheduleNum,
                     CollectionFeeAmount = _collectionFeeAmount,
                     BranchId = req.BranchId,
                     CreditAgentRefId = req.CreditAgentRefId,
@@ -537,6 +565,10 @@ namespace Applications.Calculations
             beginBalance = lastBalance = _amount;
 
             _effectiveBalance = req.Principle ?? 0.00M;
+
+
+            int scheduleNum = 1;
+
 
             for (int i = 1; i <= period; i++)
             {
@@ -598,6 +630,13 @@ namespace Applications.Calculations
                     lastBalance = 0;
                 }
 
+
+                if (i % 5 == 0)
+                {
+                    scheduleNum = scheduleNum + 1;
+                }
+
+
                 ScheduleLine line = new ScheduleLine()
                 {
                     InstallmentNo = i,
@@ -609,6 +648,7 @@ namespace Applications.Calculations
                     OutStanding = lastBalance,
                     CollectionFeeAmount = _collectionFeeAmount,
                     BranchId = req.BranchId,
+                    ScheduleNum = scheduleNum,
                     CreditAgentRefId = req.CreditAgentRefId,
                     RepaymentModeRefId = req.RepaymentModeRefId,
                 };

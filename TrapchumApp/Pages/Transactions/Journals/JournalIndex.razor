@@ -1,5 +1,6 @@
 ﻿@page "/App/Account/Journals/{BranchId:int}/Branches"
 @attribute [Authorize(Policy = "AccountOnly")]
+@using Applications.Features.LoanRequests.Services
 @using Applications.Responses.ViewModels.Journals
 @using Microsoft.AspNetCore.Components.Web
 @using TrapchumApp.Services

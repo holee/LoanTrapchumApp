@@ -1,0 +1,37 @@
+@using Applications.Features.LoanRequests.Services
+@using TrapchumApp.Services
+<RadzenBadge BadgeStyle="@(Model.IsSelected == true ? BadgeStyle.Info : BadgeStyle.Primary)"
+             Shade="Shade.Light" Style="margin:0.25rem;width:100%;">
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 AlignItems="AlignItems.Center"
+                 Gap="0.5rem"
+                 Style="padding: 0.2rem; text-transform: none;">
+        <RadzenCheckBox TValue="bool"
+                        @bind-Value="@Model.IsSelected"
+                        Change="@(value => OnCheckChanged(Model, value))"
+                        Name="@(Model.ClaimValue)" />
+        <input type="hidden" @bind="@Model.ClaimType" />
+        <input type="hidden" @bind="@Model.ClaimValue" />
+        <RadzenLabel Text="@(Model.Description)" Component="@(Model.ClaimValue)" />
+    </RadzenStack>
+</RadzenBadge>
+@code {
+    [Parameter]
+    public string? Id { get; set; } = Guid.NewGuid().ToString("N");
+
+    [Parameter]
+    public PermissionsDtoCreate Model { get; set; } = new();
+
+    [Parameter]
+    public EventCallback<PermissionsDtoCreate> OnChange { get; set; }
+
+
+    void OnCheckChanged(PermissionsDtoCreate model, bool arg)
+    {
+        model.IsSelected = arg;
+
+        OnChange.InvokeAsync(model);
+    }
+
+
+}

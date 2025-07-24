@@ -7,7 +7,6 @@ using Applications.Responses.Auths;
 using Applications.Responses.Message;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Auths;
-using Applications.Services.Identity;
 using Dapper;
 using Domains.Models.Files;
 using Domains.Models.Identity;
@@ -15,13 +14,9 @@ using Domains.Shared;
 using Infrastructures.DataAccess;
 using Mapster;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Rewrite;
 using Microsoft.EntityFrameworkCore;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 namespace Infrastructures.Implements;
 
 public sealed class UserService : IUserService
@@ -31,14 +26,14 @@ public sealed class UserService : IUserService
     private readonly SignInManager<ApplicationUser> _signinManager;
     private readonly RoleManager<ApplicationRole> _roleManager;
     private readonly IWebHostEnvironment _env;
-    private readonly IDbContextFactory<UserDataContext> _dbContextFactory;
+    private readonly IDbContextFactory<DataContext> _dbContextFactory;
     private readonly IDapperConnectionFactory connectionFactory;
     public UserService(UserManager<ApplicationUser> userManager,
          RoleManager<ApplicationRole> roleManager,
          UserDataContext userContext,
          IWebHostEnvironment env,
          SignInManager<ApplicationUser> signinManager,
-         IDbContextFactory<UserDataContext> dbContextFactory,
+         IDbContextFactory<DataContext> dbContextFactory,
          IDapperConnectionFactory connectionFactory)
     {
         _userManager = userManager;
@@ -320,10 +315,7 @@ public sealed class UserService : IUserService
             return Result.Failure<FileModel>(ErrorResponse.Validation("No file was provided."));
         }
 
-        await using var context = await _dbContextFactory.CreateDbContextAsync(cancellation);
-
-
-        var existingProfile = await context.UserProfiles
+        var existingProfile = await _userContext.UserProfiles
                                             .AsNoTracking()
                                             .FirstOrDefaultAsync(x => x.UserRefId == userId);
 
@@ -347,17 +339,17 @@ public sealed class UserService : IUserService
 
         if (existingProfile is null)
         {
-            context.UserProfiles.Add(userProfile);
+            _userContext.UserProfiles.Add(userProfile);
         }
         else
         {
-            context.UserProfiles.Update(userProfile);
+            _userContext.UserProfiles.Update(userProfile);
         }
 
 
         DeleteOldProfileFile(existingProfile?.FileName);
 
-        await context.SaveChangesAsync();
+        await _userContext.SaveChangesAsync();
 
         return Result.Success<FileModel>(fileResult);
 
@@ -366,7 +358,6 @@ public sealed class UserService : IUserService
     public async Task<Result<string>> ChangeProfile(UserProfiles profile, CancellationToken cancellation = default)
     {
 
-        await using var context = await _dbContextFactory.CreateDbContextAsync(cancellation);
 
         if (string.IsNullOrEmpty(profile.UserRefId))
         {
@@ -377,8 +368,6 @@ public sealed class UserService : IUserService
             _userContext.UserProfiles.Update(profile);
         }
 
-
-        //DeleteOldProfileFile(existingProfile?.FileName);
 
         await _userContext.SaveChangesAsync();
 

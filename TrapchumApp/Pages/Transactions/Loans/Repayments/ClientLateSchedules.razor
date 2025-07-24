@@ -1,34 +1,34 @@
+@using Applications.Features.LoanRequests.Services
 @using Microsoft.AspNetCore.Components.Web
 @using TrapchumApp.Helpers.Constants
 @using TrapchumApp.Services
-<PageDropDown PageSizeChanged="ChangedPageSize"
-              ShowSearchBox="true"
-              OnTextChanged="GetLoanDataFilter"
-              ShowReload="false">
-    <RightChildContent>
+<GridToolbar SearchChanged="GetLoanDataFilter">
+    <RightChildren>
         <RadzenDatePicker @bind-Value="paymentDate"
                           @bind-Value:format="yyyy/MM/dd"
                           @bind-Value:after="SelectedDateChanged"
                           DateFormat="dd/MM/yyyy"
                           ShowCalendarWeek="true" />
-    </RightChildContent>
-</PageDropDown>
+    </RightChildren>
+</GridToolbar>
 <RadzenDataGrid AllowPaging="true"
+                Responsive="true"
                 TItem="VSchedule"
                 AllowAlternatingRows="true"
                 AllowRowSelectOnRowClick="true"
                 AllowSorting="false"
                 PagerHorizontalAlign="HorizontalAlign.Right"
                 Density="Density.Compact"
-                IsLoading="isLoading"
+                IsLoading="@isLoading"
                 GridLines="DataGridGridLines.Both"
                 PageSize="@pageSize"
                 ShowPagingSummary="true"
                 PageSizeOptions="@StorageConstant.PageSizeOptions"
-                Count="counts"
+                Count="@counts"
                 CellRender="RowRenderChanged"
+                PageSizeChanged="ChangedPageSize"
                 @bind-Value="SelectedPaymentSchedules"
-                Data="LatePaymentSchedules">
+                Data="@LatePaymentSchedules">
     <Columns>
         <RadzenDataGridColumn Title="#"
                               Width="2rem"

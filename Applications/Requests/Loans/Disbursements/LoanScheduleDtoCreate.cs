@@ -14,6 +14,7 @@
         public decimal? CollectionFee { get; set; } 
         public decimal? TotalPay { get; set; }
         public decimal? LoanOutstanding { get; set; }
-        public int? ScheduleStatusRefId { get; set; } = 2;   
+        public int? ScheduleStatusRefId { get; set; } = 2;
+        public int? ScheduleNum { get; set; } = 1;
     }
 }

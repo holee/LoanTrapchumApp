@@ -3,6 +3,7 @@ using Applications.Commons.Mappers;
 using Applications.Enumerations;
 using Applications.Extensions.mappers;
 using Applications.Extensions.NumberExtensions;
+using Applications.Features.Loans.Services;
 using Applications.Requests.Loans.Payments;
 using Applications.Responses.ViewModels.Branches;
 using Applications.Responses.ViewModels.Loans;

@@ -1,0 +1,174 @@
+﻿@using Applications.Features.LoanRequests.Services
+<PageTitle>Role-Permissions</PageTitle>
+<style>
+    table tr > th {
+        background-color: cornflowerblue;
+    }
+
+        table tr > th.group {
+            width: 8rem;
+            height: 2rem;
+        }
+
+    table tr.Administrator {
+        background-color: cadetblue;
+    }
+
+    table tr.Operation {
+        background-color: aquamarine;
+    }
+
+    table tr.Accounting {
+        background-color: blueviolet;
+        color: white;
+    }
+</style>
+<RadzenFieldset AllowCollapse="false" Text="Select Permissions">
+    <table border="1" style="border-collapse:collapse;text-align:center;">
+        <tr>
+            <th class="group">Group</th>
+            <th style="width:5rem;">
+                <RadzenCheckBox TValue="bool"
+                                @bind-Value="@_selectAll"
+                                Change="@((arg) => OnSelectAllChanged(arg))" />
+            </th>
+            <th style="text-align:left;">Feature</th>
+        </tr>
+        @foreach (var group in RoleClaimsGrouped ?? [])
+        {
+            <tr class="@group.Group">
+                <td>
+                    @group.Group
+                </td>
+                <td style="vertical-align:central;">
+                    <RadzenCheckBox TValue="bool"
+                                    @bind-Value="@group.GroupCheck"
+                                    Name="@group.Group"
+                                    Change="@((arg) => OnGroupSelectAllChanged(group, arg))" />
+                </td>
+                <td>
+                    <div style="display:flex;align-items:center;justify-content:flex-start;flex-wrap:wrap;">
+                        @foreach (var item in group.Permissions)
+                        {
+                            <RoleCheck Model="@item" @key="@Guid.NewGuid().ToString("N")"
+                                       OnChange="((arg)=>OnCheckChanged(arg))" />
+                        }
+                    </div>
+                </td>
+            </tr>
+        }
+    </table>
+</RadzenFieldset>
+
+@code {
+
+    [Parameter]
+    public List<RolePermissionsDto>? RoleClaimsGrouped { get; set; } = [];
+
+    private readonly IRoleServiceImpl _roleService;
+
+    public PermissionsRoleCreate(IRoleServiceImpl roleService)
+    {
+        _roleService = roleService;
+    }
+
+
+    private List<string> groups = [];
+
+    bool _selectAll = false;
+
+    private void OnSelectAllChanged(bool isChecked)
+    {
+        _selectAll = isChecked;
+
+        foreach (var group in RoleClaimsGrouped ?? [])
+        {
+            group.GroupCheck = isChecked;
+
+            foreach (var permission in group.Permissions)
+            {
+                permission.IsAssignedToRole = isChecked;
+            }
+        }
+    }
+
+    private void OnGroupSelectAllChanged(RolePermissionsDto group, bool isChecked)
+    {
+        group.GroupCheck = isChecked;
+
+        foreach (var permission in group.Permissions)
+        {
+            permission.IsAssignedToRole = isChecked;
+        }
+
+        // Update global select all
+        UpdateGlobalSelectAll();
+    }
+
+
+    void OnCheckChanged(RolePermissionsViewModel arg)
+    {
+        var gr = RoleClaimsGrouped?.Where(x => x.Group == arg.Group).FirstOrDefault();
+
+        gr!.Permissions.Where(x => x.ClaimValue == arg.ClaimValue && x.ClaimType == arg.ClaimType)
+                      .First().IsAssignedToRole = arg.IsAssignedToRole;
+
+        gr!.GroupCheck = gr.Permissions.All(y => y.IsAssignedToRole == true);
+
+        UpdateGlobalSelectAll();
+
+    }
+
+    private void UpdateGlobalSelectAll()
+    {
+        _selectAll = RoleClaimsGrouped!.All(g => g.Permissions.All(p => p.IsAssignedToRole));
+    }
+
+
+    private void GetPermissions()
+    {
+        var rsp = _roleService.GetPermissions();
+
+        if (rsp.Any())
+        {
+            RoleClaimsGrouped = rsp.GroupBy(g => g.Group)
+                                    .Select(x => new RolePermissionsDto
+                                    {
+                                        Group = x.Key,
+                                        Permissions = x.ToList(),
+                                        GroupCheck = x.All(y => y.IsAssignedToRole)
+                                    }).ToList();
+        }
+
+    }
+
+    protected override void OnInitialized()
+    {
+        GetPermissions();
+        base.OnInitialized();
+    }
+
+    protected void SubmitHandler()
+    {
+        // var request = new RolePermissionRequest(Id, rolePermissions!.Permissions);
+
+        // formEdit?.EditContext?.Validate();
+
+        // var responseResult = await _roleService.AddRolePermissions(request);.AssignPermissionAsync(request);
+
+        // if (responseResult!.IsSuccess)
+        // {
+        //     NotificationService.Notify(NotificationSeverity.Success, "Permissions were assigned.");
+
+        //     NavigationManager.NavigateTo("/App/Account/Roles");
+        // }
+        // else
+        // {
+        //     NotificationService.Notify(NotificationSeverity.Error, responseResult.ErrMessage);
+        // }
+    }
+
+}
+
+
+

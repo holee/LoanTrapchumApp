@@ -1,0 +1,36 @@
+﻿@using Applications.Features.LoanRequests.Services
+@using TrapchumApp.Services
+<EditForm Model="model" @ref="roleCreateForm">
+    <FluentValidationValidator DisableAssemblyScanning="true" />
+    <ValidationSummary  />
+    <input type="hidden" value="@model.RoleId" />
+    <RadzenRow Gap="1rem" class="rz-my-1">
+        <RadzenColumn Size="12">
+            <RadzenFormField Text="Role Name (*)" Variant="Variant.Outlined" Style="width: 100%;">
+                <ChildContent>
+                    <RadzenTextBox @bind-Value="@model.RoleName" />
+                </ChildContent>
+                <Helper>
+                    <ValidationMessage For="@(() => model.RoleName)" />
+                </Helper>
+            </RadzenFormField>
+        </RadzenColumn>
+        <RadzenColumn Size="12">
+            <RadzenFormField Text="Description" Variant="Variant.Outlined" Style="width: 100%;">
+                <RadzenTextBox @bind-Value="@model.Description" />
+            </RadzenFormField>
+        </RadzenColumn>
+    </RadzenRow>
+</EditForm>
+<RadzenStack Orientation="Orientation.Horizontal"
+             class="rz-mt-2"
+             JustifyContent="JustifyContent.End">
+    <RadzenButton Click="@CreateRole"
+                  Size="ButtonSize.ExtraSmall"
+                  Icon="@IconNames.Save"
+                  Text="Save" ButtonStyle="ButtonStyle.Success" />
+    <RadzenButton Size="ButtonSize.ExtraSmall"
+                  Icon="@IconNames.Close"
+                  Click="@(() => DialogService.Close(false))"
+                  Text="Close" ButtonStyle="ButtonStyle.Danger" />
+</RadzenStack>

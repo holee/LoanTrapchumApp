@@ -1,10 +1,11 @@
 using Applications.Calculations;
 using Applications.Commons.Mappers;
 using Applications.Enumerations;
+using Applications.Features.Loans.Responses;
+using Applications.Features.Loans.Services;
 using Applications.Requests.Loans.Payments;
 using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Schedules;
-using Applications.Services.Loans;
 using Domains.Models.Loans;
 using System.Threading.Tasks;
 
@@ -12,10 +13,11 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments;
 public partial class PaymentDetails
 {
     readonly ILoanServiceImpl _dService;
-
-    public PaymentDetails(ILoanServiceImpl dService)
+    private readonly ScheduleService _scheduleService;
+    public PaymentDetails(ILoanServiceImpl dService, ScheduleService scheduleService)
     {
         _dService = dService;
+        _scheduleService = scheduleService;
     }
 
     [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
@@ -31,6 +33,8 @@ public partial class PaymentDetails
 
     IEnumerable<VSchedule> Schedules = [];
 
+    IEnumerable<LoanScheduleResponse> _loanSchedules = [];
+
     bool collapse = false;
     string collapseIcon = "expand_more";
     bool isVible = false;
@@ -38,9 +42,15 @@ public partial class PaymentDetails
     string receiptNo = "";
     bool ShowAll = false;
     int? selectedItem = 0;
-    void SelectedTabChanged(int index)
+    async Task SelectedTabChanged(int index)
     {
         selectedTabIndex = index;
+
+        if ((index == 1))
+        {
+           await GetSplitSchedules();
+        }
+
     }
 
     void CellRender(DataGridCellRenderEventArgs<VSchedule> args)
@@ -170,6 +180,18 @@ public partial class PaymentDetails
             await GetLoanSchedulesById(ScheduleStatus.Unpaid);
         }
     }
+
+    async Task GetSplitSchedules()
+    {
+        var rsp = await _scheduleService.GetLoanSchedule2(BranchId, LoanId);
+
+        if (rsp.IsSuccess) {
+
+            _loanSchedules = rsp.Data ?? [];
+        }
+    }
+
+
 
     async Task GetLoanSchedulesById(ScheduleStatus status = ScheduleStatus.All)
     {

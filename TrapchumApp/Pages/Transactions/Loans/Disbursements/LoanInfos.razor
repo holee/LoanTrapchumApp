@@ -1,4 +1,5 @@
-﻿@using TrapchumApp.Services
+﻿@using Applications.Features.LoanRequests.Services
+@using TrapchumApp.Services
 
 <RadzenStack AlignItems="AlignItems.Center"
              Gap="1rem"
@@ -20,10 +21,10 @@
         <RadzenIcon Icon="info" /><strong>Loan Information</strong>
     </HeaderTemplate>
     <ChildContent>
-        <table class="table table-sm table-bordered">
+        <table class="table-sm">
             <tbody>
                 <tr>
-                    <th class="w-25">Name</th>
+                    <th class="rz-w-25">Name</th>
                     <td>@LoanSchedule?.AltName</td>
                     <th>Address</th>
                     <td colspan="3">@LoanSchedule?.Address</td>

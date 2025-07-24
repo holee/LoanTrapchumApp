@@ -1,6 +1,7 @@
-﻿@using Applications.Responses.ViewModels.OtherNames
-@using Radzen.Blazor.Rendering
+﻿@using Applications.Features.LoanRequests.Services
+@using Applications.Responses.ViewModels.OtherNames
 @using Microsoft.AspNetCore.Components.Web
+@using Radzen.Blazor.Rendering
 @using TrapchumApp.Services
 <style type="text/css">
     .my-popup1 {
@@ -31,9 +32,13 @@
                         AllowSorting="true"
                         Style="height:200px;width:100%;">
             <Columns>
+                <RadzenDataGridColumn Context="c" Property="@nameof(VGuarantor.GuarantorName)" Title="Name">
+                    <Template>
+                        <KhmerName AltName="@c.GuarantorName" />
+                    </Template>
+                </RadzenDataGridColumn>
                 <RadzenDataGridColumn Property="@nameof(VGuarantor.FullName)" Title="FullName" />
                 <RadzenDataGridColumn Property="@nameof(VGuarantor.Gender)" Title="Salutation" />
-                <RadzenDataGridColumn Property="@nameof(VGuarantor.GuarantorName)" Title="Name" />
                 <RadzenDataGridColumn Property="@nameof(VGuarantor.Phone)" Title="Phone" />
             </Columns>
         </RadzenDataGrid>

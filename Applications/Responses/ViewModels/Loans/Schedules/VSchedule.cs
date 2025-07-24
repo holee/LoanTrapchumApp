@@ -46,7 +46,7 @@ public sealed class VSchedule
     public int? ScheduleStatusId { get; set; }
     public string? ScheduleStatus { get; set; }
     public bool IsLate { get; set; } = false;
-
+    public int? ScheduleNum { get; set; } = 1;
     [NotMapped] public bool Selected { get; set; } = false;
     [NotMapped] public bool IsPaid => ScheduleStatusId == 1;
     [NotMapped] public bool IsPartialPaid => ScheduleStatusId == 4;

@@ -7,6 +7,13 @@
     document.body.removeChild(link);
 };
 
+
+function printPage() {
+    window.print();
+}
+
+
+
 window.printPdf = (pdfDataUrl) => {
     // Create an iframe to load the PDF
     const iframe = document.createElement('iframe');

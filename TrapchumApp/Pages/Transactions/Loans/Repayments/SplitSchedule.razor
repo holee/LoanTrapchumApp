@@ -1,0 +1,216 @@
+﻿@using Applications.Features.LoanRequests.Services
+@using Applications.Features.Loans.Responses
+@using Applications.Responses.ViewModels.Loans
+@using TrapchumApp.Services
+<div class="rz-mt-2">
+    <RadzenFieldset AllowCollapse="true" Collapsed="true">
+        <HeaderTemplate>
+            <RadzenIcon Icon="info" />
+            <strong>
+                <strong>-Schedule-@ScheduleNum</strong>
+            </strong>
+        </HeaderTemplate>
+        <ChildContent>
+            <RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal"
+                         class="rz-p-2"
+                         JustifyContent="JustifyContent.End">
+                <RadzenButton Click="() => DownLoadScheduleAsPdf(ScheduleNum)"
+                              Size="ButtonSize.ExtraSmall"
+                              ButtonStyle="ButtonStyle.Primary"
+                              Text="Export Pdf"
+                              Icon="picture_as_pdf" />
+            </RadzenStack>
+            <table class="table-sm">
+                <tbody>
+                    <tr>
+                        <th class="rz-w-25">Name</th>
+                        <td>@LoanSchedule?.AltName</td>
+                        <th>Address</th>
+                        <td colspan="3">@LoanSchedule?.Address</td>
+                    </tr>
+                    <tr>
+                        <th>Contract</th>
+                        <td>#</td>
+                        <th>Amount</th>
+                        <td>
+                            @LoanSchedule?.Principle.Format(_currencyId)
+                        </td>
+                        <th>Phone</th>
+                        <td>@LoanSchedule?.Phone</td>
+                    </tr>
+                    <tr>
+                        <th>Account Number</th>
+                        <td>@LoanSchedule?.Principle</td>
+                        <th>Expiry Date</th>
+                        <td>
+                            @LoanSchedule?.LastPaymentDate.DayFirst()
+                        </td>
+                        <th>Interest Rate</th>
+                        <td>@LoanSchedule?.InterestRate</td>
+                    </tr>
+                    <tr>
+                        <th>Date</th>
+                        <td>
+                            @LoanSchedule?.RegisterDate.DayFirst()
+                        </td>
+                        <th>Agent</th>
+                        <td>@LoanSchedule?.CreditAgentKhmer</td>
+                        <th>Phone</th>
+                        <td>@LoanSchedule?.AgentPhone</td>
+                    </tr>
+                    <tr>
+                        <th>Period</th>
+                        <td>@LoanSchedule?.PeriodName</td>
+                        <th>Office</th>
+                        <td>Trapchum</td>
+                        <th>Circle</th>
+                        <td>@LoanSchedule?.Circle</td>
+                    </tr>
+                    <tr>
+                        <th>OutStanding</th>
+                        <td colspan="5">@LoanSchedule?.OutStanding.Format(_currencyId)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </ChildContent>
+    </RadzenFieldset>
+    <RadzenDataGrid Data="@LoanSchedule?.Schedules"
+                    Density="Density.Compact"
+                    Responsive
+                    AllowAlternatingRows="true"
+                    GridLines="DataGridGridLines.Both"
+                    RowSelect="@OnRowSelect"
+                    TItem="ScheduleResponse">
+        <Columns>
+            <RadzenDataGridColumn Property="@(nameof(ScheduleResponse.RowNum))"
+                                  Title="#"
+                                  Width="2rem"
+                                  Context="c"
+                                  Sortable="false">
+                <Template>
+                    @(LoanSchedule?.Schedules.IndexOf(c) + 1)
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Property="@(nameof(ScheduleResponse.PaymentDate))"
+                                  Title="Date"
+                                  Width="5rem"
+                                  Sortable="false">
+                <Template>
+                    @context.PaymentDate.DayFirst()
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Property="@(nameof(ScheduleResponse.TotalDay))"
+                                  Title="Days"
+                                  Width="3rem"
+                                  Context="c"
+                                  TextAlign="TextAlign.Center"
+                                  Sortable="false">
+                <Template>
+                    @c.TotalDay
+                </Template>
+                <FooterTemplate>
+                    @(LoanSchedule?.Schedules.Sum(x => x.TotalDay))
+                </FooterTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Property="@(nameof(ScheduleResponse.Principle))"
+                                  Title="Principal"
+                                  TextAlign="TextAlign.Right"
+                                  Width="6rem"
+                                  Context="c"
+                                  Sortable="false">
+                <Template>
+                    @c.Principle.Format(_currencyId)
+                </Template>
+                <FooterTemplate>
+                    <strong>
+                        @(LoanSchedule!.Schedules.Sum(x => x.Principle).Format(_currencyId))
+                    </strong>
+                </FooterTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Property="@(nameof(ScheduleResponse.Interest))"
+                                  Title="Interest"
+                                  TextAlign="TextAlign.Right"
+                                  Width="6rem"
+                                  Sortable="false">
+                <Template>
+                    @context.Interest.Format(_currencyId)
+                </Template>
+                <FooterTemplate>
+                    <strong>
+                        @(LoanSchedule!.Schedules.Sum(x => x.Interest).Format(_currencyId))
+                    </strong>
+                </FooterTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Property="@(nameof(ScheduleResponse.CollectionFee))"
+                                  Title="Collection Fee"
+                                  Width="6rem"
+                                  TextAlign="TextAlign.Right"
+                                  Sortable="false">
+                <Template>
+                    @context.CollectionFee.Format(_currencyId)
+                </Template>
+                <FooterTemplate>
+                    <strong>
+                        @(LoanSchedule!.Schedules.Sum(x => x.CollectionFee).Format(_currencyId))
+                    </strong>
+                </FooterTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Property="@(nameof(ScheduleResponse.TotalPay))"
+                                  Title="Amount"
+                                  TextAlign="TextAlign.Right"
+                                  Width="6rem"
+                                  Context="c"
+                                  Sortable="false">
+                <Template>
+                    @c.TotalPay.Format(_currencyId)
+                </Template>
+                <FooterTemplate>
+                    <strong>
+                        @(LoanSchedule!.Schedules.Sum(x => x.TotalPay).Format(_currencyId))
+                    </strong>
+                </FooterTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Property="@(nameof(ScheduleResponse.LoanOutstanding))"
+                                  Title="OutStanding"
+                                  Width="7rem"
+                                  TextAlign="TextAlign.Right"
+                                  Sortable="false">
+                <Template>
+                    @context.LoanOutstanding.Format(_currencyId)
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+</div>
+
+@code {
+
+    [Parameter] public LoanScheduleResponse? LoanSchedule { get; set; } = new();
+    [Parameter] public int? BranchId { get; set; }
+    [Parameter] public string? LoanId { get; set; }
+    [Parameter] public int? ScheduleNum { get; set; }
+    private int _currencyId = 0;
+
+    protected override void OnParametersSet()
+    {
+        _currencyId = LoanSchedule?.CurrencyId ?? 0;
+
+        base.OnParametersSet();
+    }
+
+    async Task DownLoadScheduleAsPdf(int? schuduleNum = 1)
+    {
+        if (LoanId.IsNotNullOrEmpty() && BranchId > 0)
+        {
+            await js.InvokeVoidAsync("open", $"/Reports/Schedules/Pdf/{LoanId}/{BranchId}/{schuduleNum}", "_blank");
+        }
+    }
+
+
+
+
+    void OnRowSelect(ScheduleResponse s)
+    {
+
+    }
+}

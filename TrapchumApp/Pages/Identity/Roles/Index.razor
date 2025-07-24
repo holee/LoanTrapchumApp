@@ -1,4 +1,5 @@
 ﻿@page "/App/Account/Roles"
+@using Applications.Features.LoanRequests.Services
 @using Microsoft.AspNetCore.Components.Web
 @using TrapchumApp.Services
 <PageTitle>Roles</PageTitle>
@@ -6,7 +7,7 @@
 <RadzenTabs RenderMode="TabRenderMode.Server">
     <Tabs>
         <RadzenTabsItem Text="Roles" Icon="list">
-            <GridToolbar>
+            <GridToolbar SearchChanged="@SearchChanged">
                 <LeftChildren>
                     <RadzenButton Icon="@IconNames.Add"
                                   ButtonStyle="ButtonStyle.Primary"
@@ -16,7 +17,7 @@
                 </LeftChildren>
                 <RightChildren>
                     <div class="rz-p-0 rz-text-align-center">
-                        <RadzenCheckBox Name="InlcudeInActive" Value="true" />
+                        <RadzenCheckBox Name="InlcudeInActive" @bind-Value="@includeInActive" />
                         <RadzenLabel Text="Inlcude InActive" Component="InlcudeInActive" class="rz-ms-0" />
                     </div>
                 </RightChildren>
@@ -25,17 +26,22 @@
                             GridLines="DataGridGridLines.Both"
                             Responsive
                             TItem="RoleDto"
+                            Count="@counts"
                             AllowPaging="true"
-                            ColumnWidth="12.5rem"
+                            AllowSorting="true"
                             PageSize="@pageSize"
                             PagerHorizontalAlign="HorizontalAlign.Right"
                             PageSizeOptions="@StorageConstant.PageSizeOptions"
                             PageSizeChanged="@PageSizeChanged"
+                            RowSelect="@OnRowSelected"
+                            LoadData="@LoadRoleData"
                             Data="Roles">
                 <Columns>
                     <RadzenDataGridColumn Property="Id" Title="#"
                                           Width="3rem"
-                                          Sortable="false" TextAlign="TextAlign.Center" Context="r">
+                                          Sortable="false"
+                                          TextAlign="TextAlign.Center"
+                                          Context="r">
                         <Template>
                             @(Roles?.ToList().IndexOf(r) + 1)
                         </Template>
@@ -89,6 +95,10 @@
                     Click="@(()=>ManageRolePermissions(userId))"
                     Text="Manage Role"
                     Value="@userId" />
+    <RadzenMenuItem Icon="@IconNames.Edit"
+                    Click="@(()=>UpdateRole(userId))"
+                    Text="Edit Role"
+                    Value="@userId" />
 </RadzenMenu>
 
     );
@@ -97,6 +107,40 @@
 
     async Task AddUserRole()
     {
-        await DialogService.OpenAsync<RoleCreate>("Add Role");
+        var options = new DialogOptions
+        {
+            Width = "100vw",
+            ShowClose = true,
+            Resizable = false,
+            Draggable = false
+        };
+        var dia = await DialogService.OpenAsync<RoleCreate>("Add Role", options: options);
+
+        if (dia is bool success && success)
+        {
+            await GetRoles();
+        }
     }
+
+    async Task UpdateRole(string? roleId)
+    {
+        var options = new DialogOptions
+        {
+            ShowClose = false,
+            Draggable = true
+        };
+        var parameters = new Dictionary<string, object?>
+        {
+            {"RoleId",roleId}
+        };
+        var dia = await DialogService.OpenAsync<UpdateRole>("Update Role", parameters, options: options);
+
+        if (dia is bool success && success)
+        {
+            await GetRoles(_filter);
+        }
+    }
+
+
+    void OnRowSelected(RoleDto arg) { }
 }

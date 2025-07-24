@@ -1,27 +1,28 @@
-﻿@using Applications.Responses.ViewModels.Loans.Payments
+﻿@using Applications.Features.LoanRequests.Services
+@using Applications.Responses.ViewModels.Loans.Payments
 @using TrapchumApp.Services
-<table class="table table-bordered table-sm">
+<table class="table-sm">
     <thead>
         <tr>
-            <th class="w-25 rz-background-color-base-100">Principle</th>
+            <th class="rz-w-25">Principle</th>
             <td>
                 @Schedule.Principle.Format(CurrencyId)
             </td>
         </tr>
         <tr>
-            <th class="w-25 rz-background-color-base-100">Interest</th>
+            <th class="rz-w-25">Interest</th>
             <td>
                 @Schedule.Interest.Format(CurrencyId)
             </td>
         </tr>
         <tr>
-            <th class="w-25 rz-background-color-base-100">Collection Fee</th>
+            <th class="rz-w-25">Collection Fee</th>
             <td>
                 @Schedule.CollectionFee.Format(CurrencyId)
             </td>
         </tr>
         <tr>
-            <th class="w-25 rz-background-color-base-100">Payment Date</th>
+            <th class="rz-w-25">Payment Date</th>
             <td>
                 @Schedule.PaymentDate.DayFirst()
             </td>

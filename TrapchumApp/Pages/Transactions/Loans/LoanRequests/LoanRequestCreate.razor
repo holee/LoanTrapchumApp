@@ -1,4 +1,5 @@
 ﻿@page "/App/Request/{BranchId:int}/Branches/{UserId}/CreateNew"
+@using Applications.Features.LoanRequests.Services
 @using Applications.Responses.Auths
 @using Applications.Responses.Lists.Collaterals
 @using Applications.Responses.Loans.Disbursements
@@ -70,7 +71,7 @@
                     <RadzenFieldset>
                         <RadzenRow AlignItems="AlignItems.Center">
                             <RadzenColumn Size="12">
-                                <RadzenTextArea Rows="15" @bind-Value="model.Memo" class="form-control">
+                                <RadzenTextArea Rows="5" @bind-Value="model.Memo" class="rz-w-100">
 
                                 </RadzenTextArea>
                             </RadzenColumn>
@@ -86,7 +87,6 @@
                      JustifyContent="JustifyContent.End"
                      Gap="0.5rem"
                      AlignItems="AlignItems.Center">
-
             <RadzenButton
                 Size="ButtonSize.Small"
                 Click="HandleCreateNew"

@@ -2,9 +2,6 @@
 using Applications.Requests.Identity;
 using Applications.Responses.Auths;
 using Applications.Responses.ViewModels.Auths;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Forms;
-using Radzen;
 
 namespace TrapchumApp.Pages.Identity.Roles;
 
@@ -27,12 +24,15 @@ public partial class ManageRolePermission
     protected EditForm formEdit = default!;
 
     protected bool IsLoading = true;
-    protected Dictionary<string, List<RolePermissionsViewModel>> RoleClaimsGrouped { get; } = new();
 
-    protected List<string> groups = [];
+    bool _selectAll = false;
+
+    private List<RolePermissionsDto>? _roleClaimsGrouped = [];
+    private List<string> groups = [];
     protected override async Task OnInitializedAsync()
     {
         await GetPermissions();
+
         await base.OnInitializedAsync();
     }
 
@@ -40,46 +40,81 @@ public partial class ManageRolePermission
     {
         IsLoading = true;
 
-        var resultResponse = await _roleService.GetPermissionsByRoleAsync(Id);
+        var rsp = await _roleService.GetPermissionsByRoleByIdAsync(Id);
 
-        if (resultResponse.IsSuccess)
+        if (rsp.IsSuccess && rsp.Data is not null)
         {
-            rolePermissions = resultResponse.Data!;
+            rolePermissions = rsp.Data;
 
-            if (rolePermissions is not null)
-            {
+            _roleClaimsGrouped = rolePermissions.Permissions?
+                                    .GroupBy(g => g.Group)
+                                    .Select(x => new RolePermissionsDto
+                                    {
+                                        Group = x.Key,
+                                        Permissions = x.ToList(),
+                                        GroupCheck = x.All(y => y.IsAssignedToRole)
+                                    }).ToList();
+            UpdateGlobalSelectAll();
 
-                RoleClaimsGrouped.Add("All", rolePermissions.Permissions!);
-
-                foreach (var permission in rolePermissions.Permissions!)
-                {
-                    if (RoleClaimsGrouped.ContainsKey(permission.Group))
-                    {
-                        RoleClaimsGrouped[permission.Group].Add(permission);
-                    }
-                    else
-                    {
-                        RoleClaimsGrouped.Add(permission.Group, new List<RolePermissionsViewModel> { permission });
-                    }
-                }
-
-                if (RoleClaimsGrouped.Count > 0)
-                {
-
-                    groups = RoleClaimsGrouped.Select(x => x.Key).ToList();
-
-                }
-            }
+            groups = _roleClaimsGrouped?.Select(x => x.Group!).ToList() ?? [];
+            groups.Add("All");
         }
         else
         {
-            NotificationService.Notify(NotificationSeverity.Error, resultResponse.ErrMessage);
+            NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
         }
 
         IsLoading = false;
     }
 
-    protected async void SubmitHandler()
+
+    private void UpdateGlobalSelectAll()
+    {
+        _selectAll = _roleClaimsGrouped!.All(g => g.Permissions.All(p => p.IsAssignedToRole));
+    }
+
+
+    private void OnSelectAllChanged(bool isChecked)
+    {
+        _selectAll = isChecked;
+
+        foreach (var group in _roleClaimsGrouped ?? [])
+        {
+            group.GroupCheck = isChecked;
+
+            foreach (var permission in group.Permissions)
+            {
+                permission.IsAssignedToRole = isChecked;
+            }
+        }
+    }
+    private void OnGroupSelectAllChanged(RolePermissionsDto group, bool isChecked)
+    {
+        group.GroupCheck = isChecked;
+
+        foreach (var permission in group.Permissions)
+        {
+            permission.IsAssignedToRole = isChecked;
+        }
+
+        // Update global select all
+        UpdateGlobalSelectAll();
+    }
+
+    void OnCheckChanged(RolePermissionsViewModel arg)
+    {
+        var gr = _roleClaimsGrouped?.Where(x => x.Group == arg.Group).FirstOrDefault();
+
+        gr!.Permissions.Where(x => x.ClaimValue == arg.ClaimValue && x.ClaimType == arg.ClaimType)
+                      .First().IsAssignedToRole = arg.IsAssignedToRole;
+
+        gr!.GroupCheck = gr.Permissions.All(y => y.IsAssignedToRole == true);
+
+        UpdateGlobalSelectAll();
+
+    }
+
+    protected async Task SubmitHandler()
     {
         var request = new RolePermissionRequest(Id, rolePermissions!.Permissions);
 
@@ -102,3 +137,24 @@ public partial class ManageRolePermission
 
 
 }
+
+//protected List<string> groups = [];
+//protected Dictionary<string, List<RolePermissionsViewModel>> RoleClaimsGrouped { get; } = new();
+//foreach (var permission in rolePermissions.Permissions!)
+//{
+//    if (RoleClaimsGrouped.ContainsKey(permission.Group))
+//    {
+//        RoleClaimsGrouped[permission.Group].Add(permission);
+//    }
+//    else
+//    {
+//        RoleClaimsGrouped.Add(permission.Group, new List<RolePermissionsViewModel> { permission });
+//    }
+//}
+
+//if (RoleClaimsGrouped.Count > 0)
+//{
+
+//    groups = RoleClaimsGrouped.Select(x => x.Key).ToList();
+
+//}

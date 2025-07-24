@@ -1,4 +1,5 @@
 ﻿@page "/App/Vendor"
+@using Applications.Features.LoanRequests.Services
 @using Applications.Responses.ViewModels.Vendors
 @using Microsoft.AspNetCore.Components.Web
 @using TrapchumApp.Services
@@ -21,11 +22,10 @@
                                   ButtonStyle="ButtonStyle.Primary" />
                 </LeftChildren>
                 <RightChildren>
-                    <div class="text-center">
-                        <RadzenCheckBox 
-                                TValue="bool" @bind-Value="@includeInactive" 
-                                Change="ex => IncludeInActiveChanged(ex)" 
-                                Name="CheckBox1" />
+                    <div>
+                        <RadzenCheckBox TValue="bool" @bind-Value="@includeInactive"
+                                        Change="ex => IncludeInActiveChanged(ex)"
+                                        Name="CheckBox1" />
                         <RadzenLabel Text="Include InActive" Component="CheckBox1" Style="margin-left: 8px; vertical-align: middle;" />
                     </div>
                 </RightChildren>
@@ -43,12 +43,17 @@
                             PageSizeOptions="@StorageConstant.PageSizeOptions"
                             PagerHorizontalAlign="HorizontalAlign.Right"
                             ShowPagingSummary="true"
+                            GridLines="DataGridGridLines.Both"
                             IsLoading="@isLoading"
                             FilterMode="FilterMode.Advanced"
                             FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
                             PagerPosition="PagerPosition.Bottom"
                             PageSizeChanged="@PageSizeChanged"
+                            AllowColumnPicking="true"
                             Data="@Vendors">
+                <HeaderTemplate>
+
+                </HeaderTemplate>
                 <Columns>
                     <RadzenDataGridColumn Width="5rem"
                                           TextAlign="TextAlign.Center"
@@ -61,15 +66,22 @@
                             @(Vendors.IndexOf(v) + 1)
                         </Template>
                     </RadzenDataGridColumn>
-                    <RadzenDataGridColumn Width="10rem" Title="Name" Property="@(nameof(VendorVm.AltName))" />
+                    <RadzenDataGridColumn Context="c" Width="10rem" Title="Name" Property="@(nameof(VendorVm.AltName))">
+                        <Template>
+                            <KhmerName AltName="@c.AltName" />
+                        </Template>
+                    </RadzenDataGridColumn>
                     <RadzenDataGridColumn Width="6rem" Title="Title" Property="@(nameof(VendorVm.Salutation))" />
                     <RadzenDataGridColumn Width="8rem" Title="Phone" Property="@(nameof(VendorVm.Phone))" />
-                    <RadzenDataGridColumn Width="15rem" Title="Email" Property="@(nameof(VendorVm.EmailAddress))" />
+                    <RadzenDataGridColumn Width="15rem" Title="Email" Property="@(nameof(VendorVm.EmailAddress))" Visible="false" />
                     <RadzenDataGridColumn Sortable="false"
                                           Filterable="false"
                                           Title="Address" Property="@(nameof(VendorVm.Description))" Context="v">
                         <Template>
-                            @v.ToString()
+                            <AddressInfo ProInKhmer="@v.ProInKhmer"
+                                         DisInKhmer="@v.DisInKhmer"
+                                         ComInKhmer="@v.ComInKhmer"
+                                         VilInKhmer="@v.VilInKhmer" />
                         </Template>
                     </RadzenDataGridColumn>
                     <RadzenDataGridColumn Sortable="false"

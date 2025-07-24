@@ -1,87 +1,40 @@
 ﻿@page "/App/Customers/{CustomerId}/Details"
+@using Applications.Features.LoanRequests.Services
 @using TrapchumApp.Pages.Lists.Collaterals
 @using TrapchumApp.Services
 <PageTitle>Customer</PageTitle>
 <RadzenFieldset AllowCollapse="true" Collapsed="false">
     <HeaderTemplate>
-        <RadzenIcon Icon="people" /><strong>@Customer.AltName</strong>
+        <RadzenIcon Icon="people" />
     </HeaderTemplate>
     <ChildContent>
-        <RadzenRow>
-            <RadzenColumn Size="2">
-                <RadzenStack Orientation="Orientation.Vertical"
-                             AlignItems="AlignItems.Center"
-                             Wrap="FlexWrap.Wrap"
-                             class="rz-mx-auto"
-                             JustifyContent="JustifyContent.Center">
-                    <RadzenImage Path="@Customer.Photo"
-                                 Style="width:10rem;height:10rem;border-radius:50%;object-fit:cover;"
-                                 AlternateText="Customer">
-                    </RadzenImage>
-                    <RadzenStack AlignItems="AlignItems.Center"
-                                 Orientation="Orientation.Horizontal"
-                                 JustifyContent="JustifyContent.SpaceBetween">
-                        <AuthorizeView Policy="@CustomersPolicies.Update">
-                            <Authorized>
-                                <RadzenButton ButtonType="ButtonType.Button"
-                                              Size="ButtonSize.ExtraSmall"
-                                              Text="Edit"
-                                              Icon="edit"
-                                              Click="ShowEditCustomer"
-                                              ButtonStyle="ButtonStyle.Success" />
-                            </Authorized>
-                        </AuthorizeView>
-                        <AuthorizeView Policy="@CustomersPolicies.Delete">
-                            <Authorized>
-                                <RadzenButton ButtonType="ButtonType.Button"
-                                              Size="ButtonSize.ExtraSmall"
-                                              Text="Delete"
-                                              Icon="delete"
-                                              Click="DeleteCustomer"
-                                              ButtonStyle="ButtonStyle.Danger">
-                                </RadzenButton>
-                            </Authorized>
-                        </AuthorizeView>
-                    </RadzenStack>
-                </RadzenStack>
-            </RadzenColumn>
-            <RadzenColumn Size="10">
-                <table class="table table-sm">
-                    <tbody>
-                        <tr>
-                            <th class="rz-background-color-base-100 w-25">Name</th>
-                            <td>
-                                @Customer!.AltName ( @Customer?.FullName )
-                            </td>
-                        </tr>
-                        <tr>
-                            <th class="rz-background-color-base-100 w-25">Salutation</th>
-                            <td>
-                                @Customer!.Salutation
-                            </td>
-                        </tr>
-                        <tr>
-                            <th class="rz-background-color-base-100 w-25">Phone</th>
-                            <td>
-                                @Customer.Phone
-                            </td>
-                        </tr>
-                        <tr>
-                            <th class="rz-background-color-base-100 w-25">Occupation</th>
-                            <td>
-                                @Customer?.Circle
-                            </td>
-                        </tr>
-                        <tr>
-                            <th class="rz-background-color-base-100 w-25">Address</th>
-                            <td>
-                                @Customer?.ToString()
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </RadzenColumn>
-        </RadzenRow>
+            <CustomerInfo Customer="@Customer" />
+            <RadzenStack AlignItems="AlignItems.Center"
+                        class="rz-my-2"
+                         Orientation="Orientation.Horizontal"
+                         JustifyContent="JustifyContent.Normal" Gap="1rem">
+                <AuthorizeView Policy="@CustomersPolicies.Update">
+                    <Authorized>
+                        <RadzenButton ButtonType="ButtonType.Button"
+                                      Size="ButtonSize.ExtraSmall"
+                                      Text="Edit"
+                                      Icon="edit"
+                                      Click="@ShowEditCustomer"
+                                      ButtonStyle="ButtonStyle.Success" />
+                    </Authorized>
+                </AuthorizeView>
+                <AuthorizeView Policy="@CustomersPolicies.Delete">
+                    <Authorized>
+                        <RadzenButton ButtonType="ButtonType.Button"
+                                      Size="ButtonSize.ExtraSmall"
+                                      Text="Delete"
+                                      Icon="delete"
+                                      Click="DeleteCustomer"
+                                      ButtonStyle="ButtonStyle.Danger">
+                        </RadzenButton>
+                    </Authorized>
+                </AuthorizeView>
+            </RadzenStack>
     </ChildContent>
 </RadzenFieldset>
 <RadzenCard class="rz-mt-2">

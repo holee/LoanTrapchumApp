@@ -1,4 +1,5 @@
-﻿@using TrapchumApp.Services
+﻿@using Applications.Features.LoanRequests.Services
+@using TrapchumApp.Services
 <RadzenPanelMenuItem Text="Currencies" Icon="money" Visible="IsBranchOpen">
     <RadzenPanelMenuItem Text="Currencies List" Icon="attach_money" Path="/App/Currencies" />
     <RadzenPanelMenuItem Text="Currency Note" Icon="money" Path="@($"/App/Currencies/CurrencyCounter?BranchId={BranchId}")" />

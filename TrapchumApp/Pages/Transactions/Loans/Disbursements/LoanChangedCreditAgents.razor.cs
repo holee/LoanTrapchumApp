@@ -1,14 +1,12 @@
-using Applications.Enumerations;
 using Applications.Extensions;
+using Applications.Features.Loans.Services;
 using Applications.Requests.Loans.CreditAgents;
 using Applications.Responses.Paginations;
+using Applications.Responses.ViewModels.Branches;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Responses.ViewModels.Loans;
 using Applications.Services.Lists;
-using Applications.Services.Loans;
 using Domains.Models.Identity;
-using Microsoft.AspNetCore.Components;
-using Radzen;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 {
@@ -16,10 +14,12 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
     {
 
         private readonly ILoanServiceImpl _loanService;
+
         private readonly ICreditAgentServiceImpl _creditAgentService;
         public LoanChangedCreditAgents(ILoanServiceImpl loanService, ICreditAgentServiceImpl creditAgentService)
         {
             _loanService = loanService;
+
             _creditAgentService = creditAgentService;
         }
 
@@ -35,8 +35,12 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 
         IList<VLoanDisbursments>? _selectedSchedules;
 
+        IEnumerable<VBranchResponse>? _newBranches = [];
+
         string? _newCreditAgentId = null;
+
         string? UserId = null;
+
         int _pageSize = 15;
 
         VLoanDisbursments _existingLoan = new();
@@ -44,7 +48,8 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
         int _counts = 0;
 
         bool _isLoading = false;
-        bool disabledOldCreditAgent => !string.IsNullOrWhiteSpace(CreditAgentId);
+
+        bool disabledOldCreditAgent = false;//=> !string.IsNullOrWhiteSpace(CreditAgentId);
         protected override async Task OnInitializedAsync()
         {
 
@@ -58,11 +63,27 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
             if (!string.IsNullOrWhiteSpace(CreditAgentId))
             {
                 await GetLoanByCreditAgents(CreditAgentId);
+
+                disabledOldCreditAgent = true;
             }
+
+
+            await GetBranches();
 
 
             await base.OnInitializedAsync();
 
+        }
+
+
+        async Task GetBranches()
+        {
+            var rsp = await _branchService.GetBranchesAsync<VBranchResponse>(0, new QueryParam(0, 0));
+
+            if (rsp.IsSuccess)
+            {
+                _newBranches = rsp.Data.Items ?? [];
+            }
         }
 
         async Task GetLoansByCreditAgents(object? arg)

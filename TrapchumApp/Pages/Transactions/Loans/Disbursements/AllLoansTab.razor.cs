@@ -1,14 +1,12 @@
 ﻿using Applications.Enumerations;
 using Applications.Extensions;
+using Applications.Features.Loans.Services;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Branches;
 using Applications.Responses.ViewModels.Loans;
-using Applications.Services.Loans;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
-using Radzen;
 using TrapchumApp.Helpers.Extensions;
+using TrapchumApp.Shared;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 {
@@ -25,20 +23,37 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
         [Parameter] public string? UserId { get; set; }
         [Parameter] public EventCallback<int> GetLoanChanged { get; set; }
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+        [CascadingParameter] CascadingAppState bState { get; set; } = default!;
+
         private List<VLoanDisbursments> LoanItems = [];
+
         private IList<VLoanDisbursments> SelectedLoans = [];
+
         private string? filter = string.Empty;
+
         protected IEnumerable<VBranchResponse> Branches = [];
+
         private int selectedBranchId;
+
         bool branchStatus = false;
+
         int counts = 0;
+
         int pageSize = 15;
+
         bool isLoading = false;
+
         bool isProgess = false;
+
         bool includeInactive = false;
+
         string sortField = "RegisterDate";
+
         bool sortDescending = true;
+
         int pageIndex = 0;
+
+        bool _isCreditAgent = false;
         async Task ChangedPageSize(int page)
         {
             pageSize = page;
@@ -68,7 +83,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
         void ChangeCreditAgent(VLoanDisbursments p)
         {
             NavigationManager.NavigateTo($"/App/Loan/{p.LoanId}/CreditAgent/{p.CreditAgentRefId}?CustomerId={p.CustomerId}&BranchId={p.BranchId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
-           
+
             return;
         }
         void CustomerPayOff(VLoanDisbursments p)
@@ -78,6 +93,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
         }
         protected override async Task OnInitializedAsync()
         {
+
             await GetLoanDisbursements();
 
             await GetLoanCount();
@@ -102,7 +118,13 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 
                 isLoading = true;
 
-                var res = await _dService.GetLoansByBranchIdAsync(BranchId, null, LoanStatuses.Active, param);
+                var auth = await AuthenticationState;
+
+                await bState.CheckedIsCreditAgent(auth.User);
+
+                var userId = bState.IsCreditAgent ? UserId : string.Empty;
+
+                var res = await _dService.GetLoansByBranchIdAsync(BranchId, userId, LoanStatuses.Active, param);
 
                 LoanItems = res.Items;
 

@@ -1,9 +1,8 @@
-﻿@using Microsoft.AspNetCore.Components.Web
+﻿@using Applications.Features.LoanRequests.Services
+@using Microsoft.AspNetCore.Components.Web
 @using TrapchumApp.Services
-<PageDropDown PageSizeChanged="ChangedPageSize"
-              OnTextChanged="TextLoanSearchChanged"
-              ShowSearchBox="true">
-    <RightChildContent>
+<GridToolbar SearchChanged="TextLoanSearchChanged">
+    <RightChildren>
         <RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal">
             <RadzenCheckBox TValue="bool"
                             @bind-Value="includeInactive"
@@ -12,8 +11,8 @@
             <RadzenLabel Text="Include Inactive"
                          Component="IncludeInactive" class="rz-ms-2" />
         </RadzenStack>
-    </RightChildContent>
-</PageDropDown>
+    </RightChildren>
+</GridToolbar>
 <RadzenDataGrid Data="ScheduleItems"
                 TItem="VSchedule"
                 Count="@counts"
@@ -28,7 +27,8 @@
                 ShowPagingSummary="true"
                 PagerHorizontalAlign="HorizontalAlign.Right"
                 IsLoading="isLoading"
-                Style="min-height:30rem;height:30rem;max-height:35rem;"
+                PageSizeOptions="@StorageConstant.PageSizeOptions"
+                PageSizeChanged="ChangedPageSize"
                 AllowRowSelectOnRowClick="true"
                 AllowPaging="true">
     <Columns>

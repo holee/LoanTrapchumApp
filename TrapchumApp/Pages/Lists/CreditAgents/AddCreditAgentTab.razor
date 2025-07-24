@@ -1,3 +1,4 @@
+@using Applications.Features.LoanRequests.Services
 @using Applications.Requests.Loans.CreditAgents
 @using Applications.Responses.Paginations
 @using Applications.Responses.ViewModels.Employees;
@@ -21,11 +22,15 @@
                 PageSizeChanged="@PageSizeChanged"
                 LoadData="@LoanCreditData"
                 GridLines="DataGridGridLines.Both"
+                AllowColumnPicking="true"
                 Data="@empCreditAgents">
+    <HeaderTemplate>
+
+    </HeaderTemplate>
     <Columns>
         <RadzenDataGridColumn Width="5rem"
                               TextAlign="TextAlign.Center"
-                              Property="@nameof(VEmployeeCreditAgent.EmployeeId)" 
+                              Property="@nameof(VEmployeeCreditAgent.EmployeeId)"
                               Sortable="false"
                               Filterable="false"
                               Title="#">
@@ -35,14 +40,19 @@
                 </strong>
             </Template>
         </RadzenDataGridColumn>
-        <RadzenDataGridColumn Property="FirstName" Title="First Name" />
-        <RadzenDataGridColumn Property="LastName" Title="Last Name" />
+        <RadzenDataGridColumn Property="@nameof(VEmployeeCreditAgent.AltName)" Title="Name" Context="c">
+            <Template>
+                <KhmerName AltName="@c.AltName" />
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="FirstName" Title="First Name" Visible="false" />
+        <RadzenDataGridColumn Property="LastName" Title="Last Name" Visible="false" />
         <RadzenDataGridColumn Property="Phone" Title="Phone" />
         <RadzenDataGridColumn Property="Gender" Title="Gender" />
         <RadzenDataGridColumn Property="BranchName" Title="Branch Name" />
-        <RadzenDataGridColumn Width="6rem" 
-            Filterable="false"
-            Title="Action" Sortable="false">
+        <RadzenDataGridColumn Width="6rem"
+                              Filterable="false"
+                              Title="Action" Sortable="false">
             <Template>
                 <RadzenButton Size="ButtonSize.ExtraSmall"
                               Click="@(()=>AddCreditAgent(context!.EmployeeId))"
@@ -98,12 +108,12 @@
         await LoadPageList(BranchId, null);
     }
 
-    async Task LoadPageList(int? branchId,string? filter = null)
+    async Task LoadPageList(int? branchId, string? filter = null)
     {
 
-        var param = new QueryParam(_skip,_pageSize,_sortField,_isIncludeInActive,_sortDescending,_filter,_filterColumn);
+        var param = new QueryParam(_skip, _pageSize, _sortField, _isIncludeInActive, _sortDescending, _filter, _filterColumn);
 
-        var rsp = await _creditAgentService.GetEmployeeCreditAgents(branchId,null,param);
+        var rsp = await _creditAgentService.GetEmployeeCreditAgents(branchId, null, param);
 
         empCreditAgents = rsp.Items;
 
