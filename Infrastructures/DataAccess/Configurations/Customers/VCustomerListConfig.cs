@@ -113,7 +113,7 @@ namespace Infrastructures.DataAccess.Configurations.Customers
 
             builder.HasMany(x => x.CollateralLines)
                    .WithOne()
-                   .HasForeignKey(x => x.CollateralId);
+                   .HasForeignKey(x => x.CollateralRefId);
 
         }
     }

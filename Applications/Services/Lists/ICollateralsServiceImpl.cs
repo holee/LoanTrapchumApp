@@ -19,10 +19,9 @@ public interface ICollateralsServiceImpl
     Task<Result<VCustomerCollaterals>> GetCustomerCollateralsAsync(string? customerId);
     Task<Result<VCustomerCollaterals>> GetCustomerCollateralsAsync(string? customerId, bool includeInUsed);
     Task<Result<string>> UpdateAsync(CollateralSubType entity);
-
-    Task<Result<string>> CreateAsync(CollateralDtoCreate entity);
     Task<Result<string>> UpdateAsync(CollateralDtoUpdate entity);
     Task<Result<string>> CreateAsync(CollateralLineDtoCreate entity, CancellationToken cancellation = default);
     Task<Result<string>> UpdateAsync(CollateralLineDtoUpdate entity, CancellationToken cancellation = default);
     Task<Result<string>> UpsertAsync(CollateralSubTypeDtoCreate entity);
+    Task<Result<string>> CreateAsync(CollateralDtoCreate entity, bool detarching=false);
 }

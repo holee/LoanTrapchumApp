@@ -244,7 +244,7 @@
         var collateralLink = new CollateralLink
         {
             CollateralLineRefId = c.Id,
-            CollateralRefId = c.CollateralId,
+            CollateralRefId = c.CollateralRefId,
             ModifiedDt = DateTime.Now
         };
 
@@ -257,7 +257,7 @@
             var item = new VLoanRequestCollateralLines
             {
                 CollateralLineId = c.Id,
-                CollateralId = c.CollateralId,
+                CollateralId = c.CollateralRefId,
                 OwnerName = c.OwnerName,
                 ReferenceNo = c.ReferenceNo,
                 TypeName = c.TypeName,
@@ -279,12 +279,12 @@
         foreach (var g in cs)
         {
 
-            if (CollateralLines.Any(x => x.CollateralId == g.CollateralId)) continue;
+            if (CollateralLines.Any(x => x.CollateralId == g.CollateralRefId)) continue;
 
             var collateralLink = new CollateralLink
             {
                  CollateralLineRefId=g.Id,
-                 CollateralRefId=g.CollateralId,
+                 CollateralRefId=g.CollateralRefId,
                  ModifiedDt=DateTime.Now
             };
 
@@ -293,7 +293,7 @@
             var item = new VLoanRequestCollateralLines
                 {
                     CollateralLineId = g.Id,
-                    CollateralId = g.CollateralId,
+                    CollateralId = g.CollateralRefId,
                     OwnerName = g.OwnerName,
                     ReferenceNo = g.ReferenceNo,
                     TypeName = g.TypeName,

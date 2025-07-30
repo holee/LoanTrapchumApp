@@ -93,7 +93,9 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             if (CustomerId.IsNotNullOrEmpty() && Model.CustomerRefId.IsNullOrEmpty())
             {
                 Model.CustomerRefId = CustomerId;
+
                 await GetCustomers(CustomerId);
+
                 Model.FullName = Customers.First().FullName;
             }
 
@@ -122,11 +124,15 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         {
             var queryParam = new QueryParam(0, take, string.Empty, filter: filter);
 
-            var rsp = await _customerService!.GetCustomersAsync<VCustomerList>(customerId, queryParam);
+            var rsp = await _customerService.GetCustomersAsync(customerId, queryParam);
 
-            if (rsp.IsSuccess)
+            if (rsp.Items.Any())
             {
-                Customers = rsp.Data!.Items;
+                Customers = rsp.Items;
+            }
+            else
+            {
+                Customers = [];
             }
         }
 

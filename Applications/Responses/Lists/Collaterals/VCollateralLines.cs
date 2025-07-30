@@ -5,7 +5,7 @@ namespace Applications.Responses.Lists.Collaterals;
 public sealed class VCollateralLines
 {
     public long Id { get; set; }
-    public string? CollateralId { get; set; }
+    public string? CollateralRefId { get; set; }
     public int? CategoryRefId { get; set; }
     public string? TypeName { get; set; }
     public int? SubCategoryRefId { get; set; }
@@ -38,7 +38,7 @@ public static class VCollateralLinesExtensions
         return new VCollateralLines
         {
             Id = lines.Id,
-            CollateralId = lines.CollateralId,
+            CollateralRefId = lines.CollateralRefId,
             CategoryRefId = lines.CategoryRefId,
             TypeName = lines.TypeName,
             SubCategoryRefId = lines.SubCategoryRefId,
@@ -67,7 +67,7 @@ public static class VCollateralLinesExtensions
         return new VCollateralLines
         {
             Id = loanCollateral.CollateralLineId ?? 0, // Use CollateralLineId as Id, default to 0 if null
-            CollateralId = loanCollateral.CollateralId,
+            CollateralRefId = loanCollateral.CollateralId,
             CategoryRefId = null, // No direct mapping
             TypeName = loanCollateral.TypeName,
             SubCategoryRefId = null, // No direct mapping
@@ -110,7 +110,7 @@ public static class VCollateralLinesExtensions
             BranchId = null, // No direct mapping
             LoanRequestId = null, // No direct mapping
             CollateralLineId = collateral.Id, // Map Id to CollateralLineId
-            CollateralId = collateral.CollateralId,
+            CollateralId = collateral.CollateralRefId,
             CollateralNo = collateral.CollateralNo,
             ReferenceNo = collateral.ReferenceNo,
             Location = collateral.Location,

@@ -22,7 +22,6 @@ public interface ICustomerServiceImpl
     Task<Result<EntityNames>> GetCustomerByIdAsync(string? customerId);
     Task<Result<Customer>> GetCustomerByIdAsync(string? customerId, params string[] includes);
     Task<Result<IEnumerable<VCollateralLines>>> GetCustomerCollateralLines(string? customerId, bool includeInUsed = false);
-    //Task<Result<VCustomerList>> GetCustomerDetailsByIdAsync(string? customerId, bool include = false);
     Task<Result<VCustomerList>> GetCustomerForRequestLoanAsync(string? customerId);
     Task<Result<IEnumerable<VLoanDisbursments>>> GetCustomerLoanHistoryAsync(string? customerId);
     Task<Pager<VCustomerList>> GetCustomers(QueryParam param);
@@ -30,7 +29,7 @@ public interface ICustomerServiceImpl
     Task<Result<EntityCustomerCreate>> GetCustomerUpdateAsync(string? customerId);
     Task<Result<IEnumerable<VCustomerNotes>>> GetCusomerNotesAsync(string? customerId);
     Task<Result<IEnumerable<T>>> GetCusomerActivies<T>(string? customerId) where T : class;
-    Task<Result<Pager<T>>> GetCustomersAsync<T>(string? customerId, QueryParam param) where T : class;
+    Task<Pager<VCustomerList>> GetCustomersAsync(string? customerId, QueryParam param);
     Task<Result<IEnumerable<VLoanRequests>>> GetCustomerLoanRequestAsync(int? branchId, string? customerId, bool include = false, CancellationToken cancellation = default);
     Task<Result<VCustomerList>> GetCustomerDetailsByIdAsync(string? customerId, bool include = false, CancellationToken cancellation = default);
     Task<Result<VCustomerList>> GetCustomerDetailsByIdAsync(string? customerId, CancellationToken cancellation = default);
@@ -139,10 +138,9 @@ public sealed class CustomerService(ICustomerService cusService) : ICustomerServ
         throw new NotImplementedException();
     }
 
-    public async Task<Result<Pager<T>>> GetCustomersAsync<T>(string? customerId, QueryParam param)
-        where T : class
+    public async Task<Pager<VCustomerList>> GetCustomersAsync(string? customerId, QueryParam param)
     {
-        return await cusService.GetCustomersAsync<T>(customerId, param);
+        return await cusService.GetCustomersAsync(customerId, param);
     }
 
 

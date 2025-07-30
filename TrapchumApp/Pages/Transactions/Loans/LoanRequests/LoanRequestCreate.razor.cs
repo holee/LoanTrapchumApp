@@ -262,7 +262,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             {
                 Id = c.Id,
                 CollateralLineId = c.Id,
-                CollateralId = c.CollateralId,
+                CollateralId = c.CollateralRefId,
                 OwnerName = c.OwnerName,
                 ReferenceNo = c.ReferenceNo,
                 TypeName = c.TypeName,
@@ -292,7 +292,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
                 var item = new VLoanRequestCollateralLines
                 {
                     CollateralLineId = g.Id,
-                    CollateralId = g.CollateralId,
+                    CollateralId = g.CollateralRefId,
                     OwnerName = g.OwnerName,
                     ReferenceNo = g.ReferenceNo,
                     TypeName = g.TypeName,
@@ -315,9 +315,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             var options = new DialogOptions
             {
                 Width = "100vw",
-                ShowClose = true,
-                Resizable = false,
-                Draggable = false,
+                Height = "100vh",
                 AutoFocusFirstElement = false
             };
 
@@ -351,21 +349,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             await CollateralRef.CollateralReload();
         }
 
-        async Task SetCustomer(string? customerId)
-        {
-            if (string.IsNullOrEmpty(customerId))
-            {
-                isCustomerSelected = false;
 
-                return;
-            }
-
-            CustomerId = customerId;
-
-            model.CustomerRefId = customerId;
-
-            await GetCustomers(CustomerId, 1);
-        }
 
         protected override async Task OnInitializedAsync()
         {
@@ -388,17 +372,15 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         {
             var queryParam = new QueryParam(0, take, string.Empty, filter: filter);
 
-            var customerResponse = await _customerService!.GetCustomersAsync<VCustomerList>(customerId, queryParam);
+            var customerResponse = await _customerService!.GetCustomersAsync(customerId, queryParam);
 
-            if (customerResponse.IsSuccess)
+            if (customerResponse.Items.Any())
             {
-                Customers = customerResponse.Data!.Items;
+                Customers = customerResponse.Items;
             }
             else
             {
                 Customers = [];
-
-                NotificationService.Notify(NotificationSeverity.Error, customerResponse.ErrMessage);
             }
         }
 

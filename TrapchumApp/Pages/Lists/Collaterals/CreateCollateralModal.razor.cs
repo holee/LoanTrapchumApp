@@ -37,6 +37,7 @@ namespace TrapchumApp.Pages.Lists.Collaterals
             try
             {
                 var response = await _customerService.GetCustomersAsync(null, 25, includeisactive, false, q);
+
                 if (response.IsSuccess)
                 {
                     custlist = response.Data!;

@@ -396,17 +396,15 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             var queryParam = new QueryParam(0, take, string.Empty, filter: filter);
 
 
-            var customerResponse = await _customerService!.GetCustomersAsync<VCustomerList>(customerId, queryParam);
+            var customerResponse = await _customerService.GetCustomersAsync(customerId, queryParam);
 
-            if (customerResponse.IsSuccess)
+            if (customerResponse.Items.Any())
             {
-                Customers = customerResponse.Data!.Items;
+                Customers = customerResponse.Items;
             }
             else
             {
                 Customers = [];
-
-                NotificationService.Notify(NotificationSeverity.Error, customerResponse.ErrMessage);
             }
         }
 

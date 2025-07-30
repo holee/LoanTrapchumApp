@@ -1,3 +1,4 @@
+@using Applications.Constants.Others
 @using Applications.Features.LoanRequests.Services
 @using Applications.Requests.Lists.OtherNames
 @using Domains.Models.Bases
@@ -18,13 +19,13 @@
                 <RadzenRow>
                     <RadzenColumn Size="5">
                         <RadzenTextBox @bind-Value="Model.AltName"
-                                       class="w-100"
+                                       class="rz-w-100"
                                        Placeholder="Khmer Name"/>
                         <ValidationMessage For="@(() => Model.AltName)"></ValidationMessage>
                     </RadzenColumn>
                     <RadzenColumn Size="5">
                         <RadzenTextBox @bind-Value="Model.Name"
-                                       class="w-100"
+                                       class="rz-w-100"
                                        Change="SetFirstName"
                                        Placeholder="Your Name"/>
                     </RadzenColumn>
@@ -47,33 +48,33 @@
                     <RadzenColumn Size="2">
                         <RadzenDropDown TValue="string"
                                         Data="StorageConstant.Salutations"
-                                        TextProperty="label"
-                                        ValueProperty="value"
-                                        class="w-100"
+                                        TextProperty="@nameof(Salutations.label)"
+                                        ValueProperty="@nameof(Salutations.value)"
+                                        class="rz-w-100"
                                         @bind-Value="Model.Gender">
                         </RadzenDropDown>
                         <ValidationMessage For="@(() => Model.Gender)"/>
                     </RadzenColumn>
                     <RadzenColumn Size="4">
-                        <RadzenTextBox Placeholder="Firstname..."
-                                       class="w-100"
+                        <RadzenTextBox Placeholder="First Name..."
+                                       class="rz-w-100"
                                        @bind-Value="Model.FirstName"/>
                         <ValidationMessage For="@(() => Model.FirstName)"/>
                     </RadzenColumn>
                     <RadzenColumn Size="2">
-                        <RadzenTextBox class="w-100"
+                        <RadzenTextBox class="rz-w-100"
                                        Placeholder="Middle Name..."
                                        @bind-Value="Model.MiddleName"/>
                     </RadzenColumn>
                     <RadzenColumn Size="4">
-                        <RadzenTextBox class="w-100"
+                        <RadzenTextBox class="rz-w-100"
                                        Placeholder="Last Name"
                                        @bind-Value="Model.LastName"/>
                     </RadzenColumn>
                 </RadzenRow>
             </RadzenColumn>
         </RadzenRow>
-        <RadzenRow AlignItems="AlignItems.Center" class="mb-2">
+        <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
             <RadzenColumn Size="2">
                 <RadzenLabel>Contact Number</RadzenLabel>
             </RadzenColumn>
@@ -86,23 +87,23 @@
                     </RadzenColumn>
                     <RadzenColumn Size="4">
                         <RadzenTextBox Placeholder="Alternate Phone"
-                                       class="w-100"
+                                       class="rz-w-100"
                                        @bind-Value="Model.AltPhone"/>
                     </RadzenColumn>
                     <RadzenColumn Size="4">
                         <RadzenTextBox Placeholder="Email..."
-                                       class="w-100"
+                                       class="rz-w-100"
                                        @bind-Value="Model.EmailAddress"/>
                     </RadzenColumn>
                 </RadzenRow>
             </RadzenColumn>
         </RadzenRow>
-        <RadzenRow AlignItems="AlignItems.Center" class="mb-2">
+        <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
             <RadzenColumn Size="2">
                 <RadzenLabel>Note</RadzenLabel>
             </RadzenColumn>
             <RadzenColumn Size="10">
-                <RadzenTextArea class="w-100"
+                <RadzenTextArea class="rz-w-100"
                                 @bind-Value="Model.Description"></RadzenTextArea>
             </RadzenColumn>
         </RadzenRow>

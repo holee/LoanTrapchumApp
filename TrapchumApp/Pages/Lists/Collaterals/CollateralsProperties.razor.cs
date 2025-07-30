@@ -7,7 +7,7 @@ namespace TrapchumApp.Pages.Lists.Collaterals
     {
         RadzenDataGrid<VCollateralLines> propertiesGrid = default!;
         IEnumerable<CollateralSubTypeResponse> CollateralProperties = [];
-        List<VCollateralLines> Properties = [];
+        List<VCollateralLines> _collateralLines = []; 
         void SelectedPeopleChanged()
         {
 

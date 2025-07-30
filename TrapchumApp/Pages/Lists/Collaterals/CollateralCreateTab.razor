@@ -5,6 +5,7 @@
 <Containers CssClass="rz-background-color-base-200" Fluid>
     <EditForm Model="model" @ref="editForm">
         <DataAnnotationsValidator />
+        sdsdsd
         <input type="hidden" @bind="model.CollateralId" />
         <RadzenFieldset Text="Summary Information">
             <RadzenRow AlignItems="AlignItems.Center">
@@ -81,7 +82,7 @@
                             <RadzenDataGridColumn Property="Id" Title="#" Width="2rem">
                                 <Template Context="c">
                                     <input type="hidden" @bind="c.Id" />
-                                    <input type="hidden" @bind="c.CollateralId" />
+                                    <input type="hidden" @bind="c.CollateralRefId" />
                                     @(Properties.IndexOf(c) + 1)
                                 </Template>
                             </RadzenDataGridColumn>
@@ -210,7 +211,7 @@
                             <RadzenDataGridColumn Property="Id" Title="#" Width="2rem">
                                 <Template Context="c">
                                     <input type="hidden" @bind="c.Id" />
-                                    <input type="hidden" @bind="c.CollateralId" />
+                                    <input type="hidden" @bind="c.CollateralRefId" />
                                     @(Personals.IndexOf(c) + 1)
                                 </Template>
                             </RadzenDataGridColumn>

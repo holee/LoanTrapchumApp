@@ -9,6 +9,9 @@
   <ItemGroup>
     <Folder Include="Extensions\Identity\Constants\" />
     <Folder Include="Bases\" />
+    <Folder Include="Features\Customers\Validations\" />
+    <Folder Include="Features\Customers\Requests\" />
+    <Folder Include="Features\Customers\Response\" />
     <Folder Include="Requests\Vendors\" />
     <Folder Include="Responses\Transactions\" />
     <Folder Include="Responses\Vendors\" />

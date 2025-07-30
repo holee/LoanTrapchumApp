@@ -1,4 +1,5 @@
-﻿using Applications.Interfaces;
+﻿using ActualLab.DependencyInjection;
+using Applications.Interfaces;
 using Applications.Interfaces.Addresses;
 using Applications.Interfaces.Audits;
 using Applications.Interfaces.Banks;
@@ -92,8 +93,8 @@ namespace Infrastructures.DependencyInjects
             services.AddScoped<IAddressService, AddressService>();
             services.AddScoped<ICashVaultService, CashVaultService>();
             services.AddScoped<ICashVaultService, CashVaultService>();
-            services.AddScoped<ICustomerService, CustomerService>();
-            services.AddScoped<ICollateralsService, CollateralsService>();
+            services.AddScoped<ICustomerService, CustomerRepository>();
+            services.AddScoped<ICollateralsService, CollateralsRepository>();
             services.AddScoped<ICurrencyService, CurrencyService>();
             services.AddScoped<ICreditAgentService, CreditAgentService>();
             services.AddScoped<ICustomerIncomeExpendService, IncomeExpendRepository>();
@@ -110,13 +111,13 @@ namespace Infrastructures.DependencyInjects
             services.AddScoped<ISalutationService, SalutaionService>();
             services.AddScoped<INationalityService, NationalityService>();
             services.AddScoped<IFileUploadService, FileUploadService>();
-            services.AddScoped<IDapperConnectionFactory, DapperConnectionFactory>();
             services.AddScoped<IVendorService, VendorService>();
             services.AddScoped<IProvinceService, ProvinceService>();
             services.AddScoped<IDistrictService, DistrictService>();
             services.AddScoped<ICommuneService, CommuneService>();
             services.AddScoped<IVillageServer, VillageService>();
             services.AddScoped<ILoanScheduleRepo, LoanScheduleRepository>();
+            services.AddSingleton<IDapperConnectionFactory, DapperConnectionFactory>();
             return services;
 
         }

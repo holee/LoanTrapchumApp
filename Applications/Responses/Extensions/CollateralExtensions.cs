@@ -31,7 +31,7 @@ namespace Applications.Responses.Extensions
             return collateralLines!.Select(x => new VCollateralLines
             {
                 Id = x.Id,
-                CollateralId = x.CollateralRefId,
+                CollateralRefId = x.CollateralRefId,
                 TypeName = x.TypeName,
                 SubCategoryRefId = x.SubCategoryRefId,
                 CategoryRefId = x.CategoryRefId,
@@ -60,7 +60,7 @@ namespace Applications.Responses.Extensions
                 .Select(x => new VCollateralLines
                 {
                     Id = x.Id,
-                    CollateralId = x.CollateralId,
+                    CollateralRefId = x.CollateralRefId,
                     TypeName = x.TypeName,
                     SubCategoryRefId = x.SubCategoryRefId,
                     CategoryRefId = x.CategoryRefId,
@@ -89,7 +89,7 @@ namespace Applications.Responses.Extensions
                 .Select(x => new VCollateralLines
                 {
                     Id = x.Id,
-                    CollateralId = x.CollateralId,
+                    CollateralRefId = x.CollateralRefId,
                     TypeName = x.TypeName,
                     SubCategoryRefId = x.SubCategoryRefId,
                     CategoryRefId = x.CategoryRefId,

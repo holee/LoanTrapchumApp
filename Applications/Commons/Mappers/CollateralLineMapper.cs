@@ -25,6 +25,7 @@ namespace Applications.Commons.Mappers
         {
             return new CollateralLine
             {
+                Id = dto.Id,
                 CollateralRefId = dto.CollateralRefId,
                 CategoryRefId = dto.CategoryRefId,
                 TypeName = dto.TypeName,
@@ -74,7 +75,7 @@ namespace Applications.Commons.Mappers
             return new CollateralLineDtoCreate
             {
                 Id = sourse.Id,
-                CollateralRefId = sourse.CollateralId,
+                CollateralRefId = sourse.CollateralRefId,
                 CategoryRefId = sourse.CategoryRefId,
                 TypeName = sourse.TypeName,
                 SubCategoryRefId = sourse.SubCategoryRefId!.Value,
@@ -99,7 +100,7 @@ namespace Applications.Commons.Mappers
             return new CollateralLineDtoUpdate
             {
                 Id = sourse.Id,
-                CollateralRefId = sourse.CollateralId,
+                CollateralRefId = sourse.CollateralRefId,
                 CategoryRefId = sourse.CategoryRefId,
                 TypeName = sourse.TypeName,
                 SubCategoryRefId = sourse.SubCategoryRefId,

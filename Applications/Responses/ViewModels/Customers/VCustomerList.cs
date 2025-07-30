@@ -1,7 +1,6 @@
 ﻿using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Requests;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Applications.Responses.ViewModels.Customers;
 

@@ -70,16 +70,15 @@ public class CollateralsService(ICollateralsService collateralsService) : IColla
         return await collateralsService.GetsCollateralAysnc(q);
     }
 
-    public async Task<Result<string>> CreateAsync(CollateralDtoCreate entity)
+    public async Task<Result<string>> CreateAsync(CollateralDtoCreate entity, bool detarching = false)
     {
 
         var insertModel = entity.MapCollateral();
 
-        return await collateralsService.InsertOrUpdate(insertModel);
+        return await collateralsService.InsertOrUpdate(insertModel, detarching);
 
     }
 
-    
     public async Task<Result<string>> UpsertAsync(CollateralSubTypeDtoCreate entity)
     {
 
@@ -93,16 +92,16 @@ public class CollateralsService(ICollateralsService collateralsService) : IColla
 
         var insertModel = entity.MapCollateralLine();
 
-        return await collateralsService.UpSertAsync(insertModel,cancellation);
+        return await collateralsService.UpSertAsync(insertModel, cancellation);
 
     }
 
-    public async Task<Result<string>> UpdateAsync(CollateralLineDtoUpdate entity,CancellationToken cancellation=default)
+    public async Task<Result<string>> UpdateAsync(CollateralLineDtoUpdate entity, CancellationToken cancellation = default)
     {
 
-        var model= entity.MapCollateralLine();
+        var model = entity.MapCollateralLine();
 
-        return await collateralsService.UpSertAsync(model,cancellation);
+        return await collateralsService.UpSertAsync(model, cancellation);
     }
 
 

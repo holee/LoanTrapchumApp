@@ -1,5 +1,4 @@
-﻿using Applications.Enumerations;
-using Applications.Extensions;
+﻿using Applications.Extensions;
 using Applications.Interfaces.Customers;
 using Applications.Responses;
 using Applications.Responses.Lists.Collaterals;
@@ -17,64 +16,14 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Data;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Infrastructures.Implements;
 
-public class CustomerService(
-    DataContext context,
+public sealed class CustomerRepository(
     IDbContextFactory<DataContext> contextFactory,
     IDapperConnectionFactory dapperFactory,
-    ILogger<CustomerService> logger) : ICustomerService
+    ILogger<CustomerRepository> logger) : ICustomerService
 {
-    public async Task<Result<IEnumerable<T>>> GetCustomersAsync<T>(string? customerId, int take = 0,
-        bool includeInactive = false,
-        bool exceptActiveLoan = true,
-        string? searchTerm = null) where T : class
-    {
-        IQueryable<VCustomerList> customerQueries = context.VCustomerLists;
-
-        if (includeInactive)
-        {
-            customerQueries = customerQueries.IgnoreQueryFilters();
-        }
-
-        if (exceptActiveLoan)
-        {
-            customerQueries = customerQueries.Where(x => x.IsLoanActive == false);
-        }
-
-        if (!string.IsNullOrEmpty(searchTerm))
-        {
-            customerQueries = customerQueries.Where(x => (EF.Functions.Like(x.FullName!, $"%{searchTerm}%") ||
-                                                          EF.Functions.Like(x.AltName!, $"%{searchTerm}%") ||
-                                                          EF.Functions.Like(
-                                                              EF.Functions.Collate(x.CustomerId!.ToString(),
-                                                                  "Khmer_100_CI_AI_SC_UTF8"), $"%{searchTerm}%") ||
-                                                          EF.Functions.Like(x.Phone!, $"%{searchTerm}%")));
-        }
-
-        if (customerId.IsNotNullOrEmpty())
-        {
-            customerQueries = customerQueries.Where(x => x.CustomerId == customerId);
-        }
-
-        if (take > 0)
-        {
-            customerQueries = customerQueries.Take(take).OrderBy(x => x.CustomerId);
-        }
-
-        if (!customerQueries.Any())
-        {
-            return Result.Failure<IEnumerable<T>>(ErrorResponse.NotFound("no customer found."));
-        }
-
-        var results = await customerQueries
-            .ProjectToType<T>()
-            .AsNoTracking()
-            .ToListAsync();
-        return Result.Success<IEnumerable<T>>(results);
-    }
 
     public async Task<Pager<VCustomerList>> GetCustomersAsync(QueryParam q, CancellationToken cancellation = default)
     {
@@ -115,120 +64,41 @@ public class CustomerService(
         };
     }
 
-    public async Task<Result<Pager<T>>> GetCustomersAsync<T>(string? customerId, QueryParam param)
-        where T : class
+    public async Task<Pager<VCustomerList>> GetCustomersAsync(string? customerId, QueryParam param)
     {
-        try
+        await using var cxt = await contextFactory.CreateDbContextAsync();
+
+        var queries = cxt.VCustomerLists
+                            .AsNoTracking()
+                            .Where(x => x.IsLoanActive == false);
+
+        if (!string.IsNullOrEmpty(param.Filter))
         {
-
-            await using var cxt = await contextFactory.CreateDbContextAsync();
-
-            var queries = cxt.VCustomerLists
-                            .Where(x => x.IsLoanActive == false && x.IsActive == true)
-                            .AsNoTracking();
-
-            if (!string.IsNullOrEmpty(param.Filter))
-            {
-                queries = queries.Where(x => EF.Functions.Like(x.FullName!, $"%{param.Filter}%") ||
-                                             EF.Functions.Like(x.AltName!, $"%{param.Filter}%") ||
-                                             EF.Functions.Like(x.AltPhone!, $"%{param.Filter}%") ||
-                                             EF.Functions.Like(x.FirstName, $"%{param.Filter}%") ||
-                                             EF.Functions.Like(x.LastName, $"%{param.Filter}%"));
-            }
-
-
-            if (customerId.IsNotNullOrEmpty())
-            {
-                queries = queries.Where(x => x.CustomerId == customerId);
-            }
-
-            var counts = queries.Count();
-
-            var items = await queries
-                                    .OrderBy(x => x.FirstName)
-                                    .ThenBy(x => x.LastName)
-                                    .ProjectToType<T>()
-                                    .AsNoTracking()
-                                    .Skip(param.Skip)
-                                    .Take(param.PageSize)
-                                    .ToListAsync();
-            return Result.Success<Pager<T>>(new Pager<T>(items, counts));
+            queries = queries.Where(x => EF.Functions.Like(x.FullName!, $"{param.Filter}%") ||
+                                         EF.Functions.Like(x.AltName!, $"{param.Filter}%") ||
+                                         EF.Functions.Like(x.AltPhone!, $"{param.Filter}%") ||
+                                         EF.Functions.Like(x.FirstName, $"{param.Filter}%") ||
+                                         EF.Functions.Like(x.LastName, $"{param.Filter}%"));
         }
-        catch (SqlException ex)
+
+
+        if (customerId.IsNotNullOrEmpty())
         {
-            return Result.Failure<Pager<T>>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
+            queries = queries.Where(x => x.CustomerId == customerId);
         }
-    }
-
-    public async Task<Result<VCustomerList>> GetCustomerDetailByIdAsync(string? customerId, bool include = false)
-    {
-        try
-        {
-            using var db = await dapperFactory.CreateConnectionAsync();
-
-            if (!include)
-            {
-                var customer = await db.QueryFirstOrDefaultAsync<VCustomerList>("spGetCustomerDetailsById",
-                    new
-                    {
-                        customerId = customerId,
-                        include = include
-                    }, commandType: CommandType.StoredProcedure);
-
-                if (customer is null)
-                {
-                    return Result.Failure<VCustomerList>(
-                        ErrorResponse.NotFound("no data found."));
-                }
-
-                return Result.Success(customer);
-            }
-
-            var coustmerDictionary = new Dictionary<string, VCustomerList>();
-            //"spGetCustomerDetailsById"
-            var customerInclude = await db.QueryAsync(ProcedureConstant.SpGetCustomerDetailsById,
-                (VCustomerList customer, VLoanDisbursments loan, VLoanRequests loanRequest,
-                    VCollateralLines collateralLine, VCustomerIncomes customerIncome, VCustomerExpenses customerExpense,
-                    VCustomerNotes customerNote) =>
-                {
-                    if (coustmerDictionary.TryGetValue(customer.CustomerId!, out var existingCustomer))
-                    {
-                        customer = existingCustomer;
-                    }
-                    else
-                    {
-                        coustmerDictionary.Add(customer.CustomerId!, customer);
-                    }
-
-                    customer.Loans.Add(loan);
-                    customer.LoanRequests.Add(loanRequest);
-                    customer.CollateralLines.Add(collateralLine!);
-                    customer.CustomerExpenses.Add(customerExpense);
-                    customer.CustomerIncomes.Add(customerIncome);
-                    customer.CustomerNotes.Add(customerNote);
-                    return customer;
-                },
-                new
-                {
-                    customerId = customerId,
-                    include = include
-                },
-                commandType: CommandType.StoredProcedure,
-                splitOn: "Id,LoanRequestId,CustomerRefId,IncomeId,ExpendId,NoteId");
 
 
-            if (!customerInclude.Any())
-                return Result.Failure<VCustomerList>(ErrorResponse.NotFound("No note found."));
+        var totalCountTask = await queries.CountAsync();
 
-            var item = customerInclude.First();
+        var dataTask = await queries
+                        .OrderBy(x => x.FirstName)
+                        .ThenBy(x => x.LastName)
+                        .Skip(param.Skip)
+                        .Take(param.PageSize)
+                        .ToListAsync();
 
-            return Result.Success(item);
-        }
-        catch (SqlException ex)
-        {
-            return Result.Failure<VCustomerList>(
-                ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
-        }
+        return new Pager<VCustomerList>(dataTask, totalCountTask);
+
     }
 
 
@@ -269,7 +139,7 @@ public class CustomerService(
         return Result.Success(customer);
 
     }
-
+   
     public async Task<Result<VCustomerList>> GetCustomerDetailByIdAsync(string? customerId, CancellationToken cancellationToken = default)
     {
         logger.LogInformation("Fetching customer details for ID {CustomerId}", customerId);
@@ -294,7 +164,6 @@ public class CustomerService(
         return Result.Success(customer);
 
     }
-
     public async Task<Result<IEnumerable<VLoanRequests>>> GetCustomerLoanRequestAsync(int? branchId, string? customerId, bool onlyComplete = false, CancellationToken cancellation = default)
     {
         try
@@ -344,8 +213,13 @@ public class CustomerService(
         try
         {
             logger.LogInformation("try adding new customer note");
+
+            await using var context = await contextFactory.CreateDbContextAsync();
+
             context.CustomerNote.Add(model);
+
             await context.SaveChangesAsync();
+
             return Result.Success(Messages.DataCreated);
         }
         catch (Exception e)
@@ -381,27 +255,25 @@ public class CustomerService(
         logger.LogInformation("try adding new customer note");
         try
         {
-            await using var context = await contextFactory.CreateDbContextAsync();
+           using var connection=await dapperFactory.CreateConnectionAsync(cancellation);
 
-            var notes = await context.Database
-                .SqlQuery<T>($@"
+            var sql = @"
                      SELECT 
-	                 c.NoteId,
-	                 c.CustomerRefId,
-	                 CASE
-		                WHEN c.CreditAgentName IS NULL THEN 'Administrator'
-		                ELSE c.CreditAgentName
-	                END AS CreditAgentName,
-	                c.Description,
-	                c.Created
-                    FROM VCustomerNotes c WHERE c.CustomerRefId={customerId}")
-                .ProjectToType<T>()
-                .AsNoTracking()
-                .ToListAsync();
+	                    c.NoteId,
+	                    c.CustomerRefId,
+	                    CASE
+		                    WHEN c.CreditAgentName IS NULL THEN 'Administrator'
+		                    ELSE c.CreditAgentName
+	                    END AS CreditAgentName,
+	                    c.Description,
+	                    c.Created
+                    FROM VCustomerNotes c WHERE c.CustomerRefId=@customerId";
+
+            var notes = await connection.QueryAsync<T>(sql, new { customerId });
 
             if (notes.Any())
             {
-                return Result.Success<IEnumerable<T>>(notes);
+                return Result.Success(notes);
             }
 
             return Result.Failure<IEnumerable<T>>(ErrorResponse.NotFound("There is no any notes."));
@@ -409,6 +281,7 @@ public class CustomerService(
         catch (Exception e)
         {
             logger.LogError(e.Message, e);
+
             return Result.Failure<IEnumerable<T>>(ErrorResponse.ServerError(e.Message));
         }
     }
@@ -504,8 +377,6 @@ public class CustomerService(
         }
         return Result.Success(customer);
     }
-
-
     public async Task<Result<IEnumerable<VCollateralLines>>> GetCustomerCollateralLines(string? customerId, bool includeInUsed = false)
     {
         using var db = dapperFactory.CreateConnection();
@@ -686,3 +557,127 @@ public class CustomerService(
 }
 
 
+
+
+    //public async Task<Result<VCustomerList>> GetCustomerDetailByIdAsync(string? customerId, bool include = false)
+    //{
+    //    try
+    //    {
+    //        using var db = await dapperFactory.CreateConnectionAsync();
+
+    //        if (!include)
+    //        {
+    //            var customer = await db.QueryFirstOrDefaultAsync<VCustomerList>("spGetCustomerDetailsById",
+    //                new
+    //                {
+    //                    customerId = customerId,
+    //                    include = include
+    //                }, commandType: CommandType.StoredProcedure);
+
+    //            if (customer is null)
+    //            {
+    //                return Result.Failure<VCustomerList>(
+    //                    ErrorResponse.NotFound("no data found."));
+    //            }
+
+    //            return Result.Success(customer);
+    //        }
+
+    //        var coustmerDictionary = new Dictionary<string, VCustomerList>();
+    //        //"spGetCustomerDetailsById"
+    //        var customerInclude = await db.QueryAsync(ProcedureConstant.SpGetCustomerDetailsById,
+    //            (VCustomerList customer, VLoanDisbursments loan, VLoanRequests loanRequest,
+    //                VCollateralLines collateralLine, VCustomerIncomes customerIncome, VCustomerExpenses customerExpense,
+    //                VCustomerNotes customerNote) =>
+    //            {
+    //                if (coustmerDictionary.TryGetValue(customer.CustomerId!, out var existingCustomer))
+    //                {
+    //                    customer = existingCustomer;
+    //                }
+    //                else
+    //                {
+    //                    coustmerDictionary.Add(customer.CustomerId!, customer);
+    //                }
+
+    //                customer.Loans.Add(loan);
+    //                customer.LoanRequests.Add(loanRequest);
+    //                customer.CollateralLines.Add(collateralLine!);
+    //                customer.CustomerExpenses.Add(customerExpense);
+    //                customer.CustomerIncomes.Add(customerIncome);
+    //                customer.CustomerNotes.Add(customerNote);
+    //                return customer;
+    //            },
+    //            new
+    //            {
+    //                customerId = customerId,
+    //                include = include
+    //            },
+    //            commandType: CommandType.StoredProcedure,
+    //            splitOn: "Id,LoanRequestId,CustomerRefId,IncomeId,ExpendId,NoteId");
+
+
+    //        if (!customerInclude.Any())
+    //            return Result.Failure<VCustomerList>(ErrorResponse.NotFound("No note found."));
+
+    //        var item = customerInclude.First();
+
+    //        return Result.Success(item);
+    //    }
+    //    catch (SqlException ex)
+    //    {
+    //        return Result.Failure<VCustomerList>(
+    //            ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
+    //    }
+    //}
+
+
+
+//public async Task<Result<IEnumerable<T>>> GetCustomersAsync<T>(string? customerId, int take = 0,
+//    bool includeInactive = false,
+//    bool exceptActiveLoan = true,
+//    string? searchTerm = null) where T : class
+//{
+//    await using var context =await contextFactory.CreateDbContextAsync();
+//    IQueryable<VCustomerList> customerQueries = context.VCustomerLists;
+
+//    if (includeInactive)
+//    {
+//        customerQueries = customerQueries.IgnoreQueryFilters();
+//    }
+
+//    if (exceptActiveLoan)
+//    {
+//        customerQueries = customerQueries.Where(x => x.IsLoanActive == false);
+//    }
+
+//    if (!string.IsNullOrEmpty(searchTerm))
+//    {
+//        customerQueries = customerQueries.Where(x => (EF.Functions.Like(x.FullName!, $"%{searchTerm}%") ||
+//                                                      EF.Functions.Like(x.AltName!, $"%{searchTerm}%") ||
+//                                                      EF.Functions.Like(
+//                                                          EF.Functions.Collate(x.CustomerId!.ToString(),
+//                                                              "Khmer_100_CI_AI_SC_UTF8"), $"%{searchTerm}%") ||
+//                                                      EF.Functions.Like(x.Phone!, $"%{searchTerm}%")));
+//    }
+
+//    if (customerId.IsNotNullOrEmpty())
+//    {
+//        customerQueries = customerQueries.Where(x => x.CustomerId == customerId);
+//    }
+
+//    if (take > 0)
+//    {
+//        customerQueries = customerQueries.Take(take).OrderBy(x => x.CustomerId);
+//    }
+
+//    if (!customerQueries.Any())
+//    {
+//        return Result.Failure<IEnumerable<T>>(ErrorResponse.NotFound("no customer found."));
+//    }
+
+//    var results = await customerQueries
+//        .ProjectToType<T>()
+//        .AsNoTracking()
+//        .ToListAsync();
+//    return Result.Success<IEnumerable<T>>(results);
+//}

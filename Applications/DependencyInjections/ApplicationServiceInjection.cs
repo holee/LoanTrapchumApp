@@ -1,4 +1,6 @@
-﻿using Applications.Features.Identity.Roles.Validation;
+﻿using Applications.Features.Collaterals.Services;
+using Applications.Features.Customers.Services;
+using Applications.Features.Identity.Roles.Validation;
 using Applications.Features.LoanRequests.Services;
 using Applications.Features.LoanRequests.Validations;
 using Applications.Features.Loans.Services;
@@ -30,6 +32,8 @@ namespace Applications.DependencyInjections
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
             services.AddScoped<ScheduleService>();
+            services.AddScoped<CollateralServices>();
+            services.AddScoped<CustomerNoteService>();
             services.AddScoped<SchedulePrintService>();
             services.AddScoped<IAddressServiceImpl, AddressService>();
             services.AddScoped<IBranchServiceImpl, BranchService>();

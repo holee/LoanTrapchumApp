@@ -9,8 +9,9 @@ public class VCollateralLineConfig : IBaseEntityTypeConfigurations<VCollateralLi
     public void Configure(EntityTypeBuilder<VCollateralLines> builder)
     {
         builder.ToTable("VCustomerCollateralLines");
-        builder.HasKey(x => new { x.Id, x.CollateralId });
+        builder.HasKey(x => new { x.Id, x.CollateralRefId });
         builder.Property(x => x.Id).ValueGeneratedOnAdd();
+        builder.Property(x => x.CollateralRefId).HasColumnName("CollateralId");
         builder.Property(x => x.IsReturn).HasDefaultValue(false);
         builder.Property(x => x.IsAvailable).HasDefaultValue(true);
         builder.Property(x => x.MarketPrice).HasPrecision(18, 3);

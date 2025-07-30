@@ -7,6 +7,7 @@ using Applications.Responses.ViewModels.Customers;
 using Applications.Responses.ViewModels.Loans;
 using Applications.Services.Lists;
 using Domains.Models.Identity;
+using System.Threading.Tasks;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 {
@@ -57,8 +58,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 
             UserId = auth.User.GetId();
 
-            await GetOldCreditAgents();
-
+            //await GetOldCreditAgents();
 
             if (!string.IsNullOrWhiteSpace(CreditAgentId))
             {
@@ -76,9 +76,25 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
         }
 
 
-        async Task GetBranches()
+        async Task OnSelectedItemChanged(object? arg)
         {
-            var rsp = await _branchService.GetBranchesAsync<VBranchResponse>(0, new QueryParam(0, 0));
+            if (arg is not null)
+            {
+
+                BranchId = ((VBranchResponse)arg).BranchId;
+
+                await GetOldCreditAgents();
+
+            }
+            _newCreditAgents = [];
+            _items = [];
+        }
+
+
+
+        async Task GetBranches(int? branchId = 0)
+        {
+            var rsp = await _branchService.GetBranchesAsync<VBranchResponse>(branchId, new QueryParam(0, 0));
 
             if (rsp.IsSuccess)
             {

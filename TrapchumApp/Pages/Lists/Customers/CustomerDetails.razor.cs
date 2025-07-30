@@ -7,6 +7,7 @@ using Applications.Services.LIsts;
 using Radzen.Blazor;
 using TrapchumApp.Pages.Lists.Collaterals;
 using Domains.Models.Identity;
+using Applications.Features.Customers.Services;
 
 namespace TrapchumApp.Pages.Lists.Customers
 {
@@ -16,11 +17,14 @@ namespace TrapchumApp.Pages.Lists.Customers
 
         private readonly ICollateralsServiceImpl _collateralService;
 
-        public CustomerDetails(IIncomeExpendServiceImpl customerIncomeService, ICollateralsServiceImpl collateralService)
+        private readonly CustomerNoteService _customerNoteService;
+        public CustomerDetails(IIncomeExpendServiceImpl customerIncomeService, ICollateralsServiceImpl collateralService, CustomerNoteService customerNoteService)
         {
             _customerIncomeService = customerIncomeService;
 
             _collateralService = collateralService;
+
+            _customerNoteService = customerNoteService;
         }
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
         [Parameter] public int? BranchId { get; set; } = 0;

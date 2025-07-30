@@ -1,0 +1,124 @@
+﻿@using Applications.Features.LoanRequests.Services
+@using Applications.Responses.Lists.Collaterals
+@using TrapchumApp.Services
+<RadzenRow class="rz-mb-2">
+    <RadzenColumn Size="3">
+        <input type="hidden" @bind="@_collateralLine.Id" />
+        <input type="hidden" @bind="_collateralLine.CollateralRefId" />
+        <input type="hidden" @bind="_collateralLine.SubCategoryRefId" />
+        <RadzenLabel>Type</RadzenLabel>
+    </RadzenColumn>
+    <RadzenColumn Size="9"></RadzenColumn>
+</RadzenRow>
+<RadzenRow class="rz-mb-2">
+    <RadzenColumn Size="3">
+        <RadzenLabel>CollateralNo</RadzenLabel>
+    </RadzenColumn>
+    <RadzenColumn Size="9">
+        <RadzenTextBox class="rz-w-100"
+                       @bind-Value="@_collateralLine.CollateralNo"></RadzenTextBox>
+    </RadzenColumn>
+</RadzenRow>
+<RadzenRow class="rz-mb-2">
+    <RadzenColumn Size="3">
+        <RadzenLabel>Type</RadzenLabel>
+    </RadzenColumn>
+    <RadzenColumn Size="9">
+        <RadzenDropDown TValue="int?"
+                        class="rz-w-100"
+                        Data="collateralTypes"
+                        TextProperty="@nameof(CollateralTypeResponse.CollateralTypeCode)"
+                        ValueProperty="@nameof(CollateralTypeResponse.CollateralTypeId)"
+                        @bind-Value="@_collateralLine.SubCategoryRefId">
+        </RadzenDropDown>
+    </RadzenColumn>
+</RadzenRow>
+<RadzenRow class="rz-mb-2">
+    <RadzenColumn Size="3">
+        <RadzenLabel>Owner Name</RadzenLabel>
+    </RadzenColumn>
+    <RadzenColumn Size="9">
+        <RadzenTextBox class="rz-w-100"
+                       @bind-Value="@_collateralLine.OwnerName"></RadzenTextBox>
+    </RadzenColumn>
+</RadzenRow>
+<RadzenRow class="rz-mb-2">
+    <RadzenColumn Size="3">
+        <RadzenLabel>Size</RadzenLabel>
+    </RadzenColumn>
+    <RadzenColumn Size="9">
+        <RadzenTextBox class="rz-w-100"
+                       @bind-Value="@_collateralLine.Size"></RadzenTextBox>
+    </RadzenColumn>
+</RadzenRow>
+<RadzenRow class="rz-mb-2">
+    <RadzenColumn Size="3">
+        <RadzenLabel>Quantity</RadzenLabel>
+    </RadzenColumn>
+    <RadzenColumn Size="9">
+        <RadzenNumeric ShowUpDown="false"
+                       Min="0"
+                       Placeholder="Quantity"
+                       class="rz-w-100"
+                       TextAlign="TextAlign.End"
+                       @bind-Value="@_collateralLine.Quantity" />
+    </RadzenColumn>
+</RadzenRow>
+<RadzenRow class="rz-mb-2">
+    <RadzenColumn Size="3">
+        <RadzenLabel>Market Price</RadzenLabel>
+    </RadzenColumn>
+    <RadzenColumn Size="9">
+        <RadzenNumeric ShowUpDown="false"
+                       Min="0"
+                       Placeholder="Market Price"
+                       class="rz-w-100"
+                       TextAlign="TextAlign.End"
+                       @bind-Value="@_collateralLine.MarketPrice" />
+    </RadzenColumn>
+</RadzenRow>
+<RadzenRow class="rz-mb-2">
+    <RadzenColumn Size="3">
+        <RadzenLabel>Hot Price</RadzenLabel>
+    </RadzenColumn>
+    <RadzenColumn Size="9">
+        <RadzenNumeric ShowUpDown="false"
+                       Min="0"
+                       Placeholder="Hot Price"
+                       class="rz-w-100"
+                       TextAlign="TextAlign.End"
+                       @bind-Value="@_collateralLine.HotPrice" />
+    </RadzenColumn>
+</RadzenRow>
+<RadzenRow class="rz-mb-2">
+    <RadzenColumn Size="3">
+        <RadzenLabel>Pawn Price</RadzenLabel>
+    </RadzenColumn>
+    <RadzenColumn Size="9">
+        <RadzenNumeric ShowUpDown="false"
+                       Min="0"
+                       class="rz-w-100"
+                       Placeholder="Pawn Price"
+                       @bind-Value="@_collateralLine.PawnPrice"
+                       TextAlign="TextAlign.End" />
+    </RadzenColumn>
+</RadzenRow>
+<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
+             class="rz-mt-3"
+             JustifyContent="JustifyContent.End">
+    <RadzenButton Icon="@IconNames.Save"
+                  ButtonStyle="ButtonStyle.Success"
+                  Text="Save"
+                  Size="ButtonSize.ExtraSmall">
+    </RadzenButton>
+    <RadzenButton Icon="@IconNames.Close"
+                  ButtonStyle="ButtonStyle.Danger"
+                  Text="Close"
+                  Size="ButtonSize.ExtraSmall">
+    </RadzenButton>
+</RadzenStack>
+
+
+@code {
+
+}

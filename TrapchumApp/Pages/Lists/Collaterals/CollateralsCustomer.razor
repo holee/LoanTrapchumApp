@@ -14,7 +14,7 @@
                      Visible="@ShowCommand"
                      JustifyContent="JustifyContent.End">
             <RadzenButton Size="ButtonSize.Small"
-                          Click="Add"
+                          Click="@Add"
                           Icon="add"
                           Text="Add New"
                           Visible="@(ShowAdd && ShowCommand)"
@@ -22,45 +22,45 @@
         </RadzenStack>
         <RadzenDataGrid GridLines="DataGridGridLines.Both"
                         Responsive
-                        @ref="refGrid"
+                        @ref="@refGrid"
                         TItem="VCollateralLines"
                         Density="Density.Compact"
-                        Style="min-height:20rem;height:20rem;max-height:20rem;"
                         Data="CollateralLines">
             <Columns>
                 <RadzenDataGridColumn Title="ReferenceNo" Property="ReferenceNo" Context="c" />
                 <RadzenDataGridColumn Title="Type Name" Property="TypeName" Context="c" />
                 <RadzenDataGridColumn Title="Owner Name" Property="OwnerName" Context="c" />
                 <RadzenDataGridColumn Title="Location" Property="Location" Context="c" />
-                <RadzenDataGridColumn Title="Hot Price" Context="c" TextAlign="TextAlign.Right">
-                    <Template>
-                        @c.HotPrice
-                    </Template>
-                </RadzenDataGridColumn>
-                <RadzenDataGridColumn Title="Hot Price" Context="c" TextAlign="TextAlign.Right">
+                <RadzenDataGridColumn Width="3rem" Title="Qty" Property="Quantity" Sortable="false" />
+                <RadzenDataGridColumn Title="Market Price" Context="c" TextAlign="TextAlign.Right">
                     <Template>
                         @c.MarketPrice
                     </Template>
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn Title="Hot Price" Context="c" TextAlign="TextAlign.Right">
                     <Template>
+                        @c.HotPrice
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Title="Pawn Price" Context="c" TextAlign="TextAlign.Right">
+                    <Template>
                         @c.PawnPrice
                     </Template>
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn Title="Size" Property="Size" Sortable="false" />
-                <RadzenDataGridColumn Width="3rem" Title="Qty" Property="Quantity" Sortable="false" />
                 <RadzenDataGridColumn Width="3.5rem" Context="c" TextAlign="TextAlign.Center" Title="Status" Sortable="false">
                     <Template>
-                        <RadzenSwitch @bind-Value="c.IsAvailable"
-                                      Disabled></RadzenSwitch>
+                        <RadzenCheckBox @bind-Value="c.IsAvailable" Disabled></RadzenCheckBox>
                     </Template>
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn Visible="@ShowAcction" Width="3.5rem" Context="c" TextAlign="TextAlign.Center" Title="Action" Sortable="false">
                     <Template>
                         <RadzenButton Size="ButtonSize.ExtraSmall"
                                       ButtonStyle="ButtonStyle.Primary"
-                                      Shade="Shade.Lighter"
-                                      Icon="delete" />
+                                      Variant="Variant.Text"
+                                      Shade="Shade.Dark"
+                                      Click="()=>OnCollateralLineEdit(c)"
+                                      Icon="@IconNames.Edit" />
                     </Template>
                 </RadzenDataGridColumn>
             </Columns>

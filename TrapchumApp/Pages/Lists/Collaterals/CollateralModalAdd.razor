@@ -1,5 +1,6 @@
 ﻿@using Applications.Features.LoanRequests.Services
 @using Applications.Responses.Lists.Collaterals
+@using Domains.Models.Collaterals
 @using TrapchumApp.Services
 
 <EditForm Model="model" @ref="editForm">
@@ -42,13 +43,13 @@
                                 ColumnWidth="15rem"
                                 EditMode="DataGridEditMode.Single"
                                 @ref="propertiesGrid"
-                                RowUpdate="@PropertyRowUpdate"
-                                RowCreate="@PropertyRowCreate"
+                                RowUpdate="@((arg)=>OnRowUpdate(arg,CollateralTypeEnum.Property))"
+                                RowCreate="@((arg)=>OnRowCreate(arg,CollateralTypeEnum.Property))"
                                 Data="@_properties">
                     <HeaderTemplate>
                         <RadzenButton Size="ButtonSize.Small"
                                       ButtonStyle="ButtonStyle.Primary"
-                                      Click="@InsertPropertyRow"
+                                      Click="()=>InsertNewRow(CollateralTypeEnum.Property)"
                                       Icon="add_circle"
                                       Text="Add" />
                     </HeaderTemplate>
@@ -56,7 +57,7 @@
                         <RadzenDataGridColumn Property="Id" Title="#" Width="2rem">
                             <Template Context="c">
                                 <input type="hidden" @bind="c.Id" />
-                                <input type="hidden" @bind="c.CollateralId" />
+                                <input type="hidden" @bind="c.CollateralRefId" />
                                 <input type="hidden" @bind="c.CategoryRefId" />
                                 @(_properties.IndexOf(c) + 1)
                             </Template>
@@ -74,7 +75,7 @@
                             </Template>
                             <EditTemplate>
                                 <RadzenDropDown TValue="int?"
-                                                class="w-100"
+                                                class="rz-w-100"
                                                 Data="@CollateralProperties"
                                                 TextProperty="@nameof(CollateralSubTypeResponse.CollateralSubTypeName)"
                                                 ValueProperty="@nameof(CollateralSubTypeResponse.Id)"
@@ -92,7 +93,7 @@
                                 @c.CollateralNo
                             </Template>
                             <EditTemplate>
-                                <RadzenTextBox class="w-100"
+                                <RadzenTextBox class="rz-w-100"
                                                Style="height:2rem;line-height:2rem;"
                                                @bind-Value="c.CollateralNo"></RadzenTextBox>
                             </EditTemplate>
@@ -102,7 +103,7 @@
                                 @c.OwnerName
                             </Template>
                             <EditTemplate>
-                                <RadzenTextBox class="w-100"
+                                <RadzenTextBox class="rz-w-100"
                                                Style="height:2rem;line-height:2rem;"
                                                @bind-Value="c.OwnerName"></RadzenTextBox>
                             </EditTemplate>
@@ -115,16 +116,16 @@
                                 @c.Size
                             </Template>
                             <EditTemplate>
-                                <RadzenTextBox class="w-100"
+                                <RadzenTextBox class="rz-w-100"
                                                Style="height:2rem;line-height:2rem;"
                                                @bind-Value="c.Size" />
                             </EditTemplate>
                         </RadzenDataGridColumn>
 
-                        <RadzenDataGridColumn Width="6rem"
+                        <RadzenDataGridColumn Width="4rem"
                                               Context="c"
-                                              TextAlign="TextAlign.End"
-                                              Property="Quantity" Title="Quantity">
+                                              TextAlign="TextAlign.Right"
+                                              Property="Quantity" Title="Qty">
                             <Template>
                                 @c.Quantity
                             </Template>
@@ -135,6 +136,7 @@
                         <RadzenDataGridColumn Width="6rem"
                                               Property="MarketPrice"
                                               Context="c"
+                                              TextAlign="TextAlign.Right"
                                               Title="Market Price">
                             <Template>
                                 @c.MarketPrice
@@ -146,6 +148,7 @@
                         <RadzenDataGridColumn Width="6rem"
                                               Property="HotPrice"
                                               Context="c"
+                                              TextAlign="TextAlign.Right"
                                               Title="Hot Price">
                             <Template>
                                 @c.HotPrice
@@ -157,6 +160,7 @@
                         <RadzenDataGridColumn Width="6rem"
                                               Property="PawnPrice"
                                               Context="c"
+                                              TextAlign="TextAlign.Right"
                                               Title="Pawn Price">
                             <Template>
                                 @c.PawnPrice
@@ -170,7 +174,7 @@
                                               Context="c"
                                               Property="Id" Title="Actions">
                             <Template>
-                                <RadzenButton Click="@(() => EditRow(c, 1))"
+                                <RadzenButton Click="@(() => EditRow(c, CollateralTypeEnum.Property))"
                                               Icon="edit"
                                               ButtonStyle="ButtonStyle.Secondary"
                                               Variant="Variant.Text"
@@ -178,15 +182,21 @@
                                 </RadzenButton>
                             </Template>
                             <EditTemplate>
-                                <RadzenButton Click="@(() => SavePropertyRow(c))"
-                                              Icon="check"
+                                <RadzenButton Click="@(() => SaveRow(c, CollateralTypeEnum.Property))"
+                                              Icon="@IconNames.Save"
                                               ButtonStyle="ButtonStyle.Success"
                                               Variant="Variant.Text"
                                               Size="ButtonSize.ExtraSmall">
                                 </RadzenButton>
-                                <RadzenButton Click="@(() => CancelPropertyEdit(c))"
+                                <RadzenButton Click="@(() => CancelEdit(c, CollateralTypeEnum.Property))"
                                               Icon="@IconNames.Undo"
                                               ButtonStyle="ButtonStyle.Primary"
+                                              Variant="Variant.Text"
+                                              Size="ButtonSize.ExtraSmall">
+                                </RadzenButton>
+                                <RadzenButton Click="@(() => DeleteRow(c, CollateralTypeEnum.Property))"
+                                              Icon="@IconNames.Delete"
+                                              ButtonStyle="ButtonStyle.Danger"
                                               Variant="Variant.Text"
                                               Size="ButtonSize.ExtraSmall">
                                 </RadzenButton>
@@ -202,13 +212,13 @@
                                 ColumnWidth="15rem"
                                 EditMode="DataGridEditMode.Multiple"
                                 @ref="personalGrid"
-                                RowUpdate="@PersonalRowUpdate"
-                                RowCreate="@PersonalRowCreate"
+                                RowUpdate="@((arg)=>OnRowUpdate(arg,CollateralTypeEnum.Personal))"
+                                RowCreate="@((arg)=>OnRowCreate(arg,CollateralTypeEnum.Personal))"
                                 Data="@_personals">
                     <HeaderTemplate>
                         <RadzenButton Size="ButtonSize.Small"
                                       ButtonStyle="ButtonStyle.Primary"
-                                      Click="InsertPersonRow"
+                                      Click="()=>InsertNewRow(CollateralTypeEnum.Personal)"
                                       Icon="add_circle"
                                       Text="Add" />
                     </HeaderTemplate>
@@ -216,7 +226,7 @@
                         <RadzenDataGridColumn Property="Id" Title="#" Width="2rem">
                             <Template Context="c">
                                 <input type="hidden" @bind="c.Id" />
-                                <input type="hidden" @bind="c.CollateralId" />
+                                <input type="hidden" @bind="c.CollateralRefId" />
                                 <input type="hidden" @bind="c.CategoryRefId" />
                                 @(_personals.IndexOf(c) + 1)
                             </Template>
@@ -232,7 +242,7 @@
                             </Template>
                             <EditTemplate>
                                 <RadzenDropDown TValue="int?"
-                                                class="w-100"
+                                                class="rz-w-100"
                                                 Data="@CollateralPersonals"
                                                 TextProperty="@nameof(CollateralSubTypeResponse.CollateralSubTypeName)"
                                                 ValueProperty="@nameof(CollateralSubTypeResponse.Id)"
@@ -249,7 +259,7 @@
                                 @c.CollateralNo
                             </Template>
                             <EditTemplate>
-                                <RadzenTextBox class="w-100"
+                                <RadzenTextBox class="rz-w-100"
                                                Style="height:2rem;line-height:2rem;"
                                                @bind-Value="c.CollateralNo"></RadzenTextBox>
                             </EditTemplate>
@@ -259,7 +269,7 @@
                                 @c.OwnerName
                             </Template>
                             <EditTemplate>
-                                <RadzenTextBox class="w-100"
+                                <RadzenTextBox class="rz-w-100"
                                                Style="height:2rem;line-height:2rem;"
                                                @bind-Value="c.OwnerName"></RadzenTextBox>
                             </EditTemplate>
@@ -269,16 +279,17 @@
                                 @c.Size
                             </Template>
                             <EditTemplate>
-                                <RadzenTextBox class="w-100"
+                                <RadzenTextBox class="rz-w-100"
                                                Disabled
                                                Style="height:2rem;line-height:2rem;"
                                                @bind-Value="c.Size"></RadzenTextBox>
                             </EditTemplate>
                         </RadzenDataGridColumn>
 
-                        <RadzenDataGridColumn Width="6rem"
+                        <RadzenDataGridColumn Width="4rem"
                                               Context="c"
-                                              Property="Quantity" Title="Quantity">
+                                              TextAlign="TextAlign.Right"
+                                              Property="Quantity" Title="Qty">
                             <Template>
                                 @c.Quantity
                             </Template>
@@ -286,14 +297,14 @@
                                 <RadzenNumeric ShowUpDown="false"
                                                Min="0"
                                                Placeholder="Qty"
-                                               class="w-100"
+                                               class="rz-w-100"
                                                TextAlign="TextAlign.End"
-                                               Style="height:2rem;line-height:1rem;"
                                                @bind-Value="c.Quantity" />
                             </EditTemplate>
                         </RadzenDataGridColumn>
                         <RadzenDataGridColumn Width="6rem"
                                               Context="c"
+                                              TextAlign="TextAlign.Right"
                                               Property="MarketPrice" Title="Market Price">
                             <Template>
                                 @c.MarketPrice
@@ -302,7 +313,9 @@
                                 <TCNumbers @bind-Value="c.MarketPrice" />
                             </EditTemplate>
                         </RadzenDataGridColumn>
-                        <RadzenDataGridColumn Width="6rem" Property="HotPrice" Title="Hot Price" Context="c">
+                        <RadzenDataGridColumn Width="6rem" Property="HotPrice"
+                                              TextAlign="TextAlign.Right"
+                                              Title="Hot Price" Context="c">
                             <Template>
                                 @c.HotPrice
                             </Template>
@@ -310,7 +323,9 @@
                                 <TCNumbers @bind-Value="c.HotPrice" />
                             </EditTemplate>
                         </RadzenDataGridColumn>
-                        <RadzenDataGridColumn Width="6rem" Property="PawnPrice" Title="Pawn Price" Context="c">
+                        <RadzenDataGridColumn Width="6rem"
+                                              TextAlign="TextAlign.Right"
+                                              Property="PawnPrice" Title="Pawn Price" Context="c">
                             <Template>
                                 @c.PawnPrice
                             </Template>
@@ -323,7 +338,7 @@
                                               Context="c"
                                               Property="Id" Title="Actions">
                             <Template>
-                                <RadzenButton Click="@(() => EditRow(c, 3))"
+                                <RadzenButton Click="@(() => EditRow(c, CollateralTypeEnum.Personal))"
                                               Icon="@IconNames.EditPen"
                                               Variant="Variant.Text"
                                               ButtonStyle="ButtonStyle.Secondary"
@@ -331,14 +346,20 @@
                                 </RadzenButton>
                             </Template>
                             <EditTemplate>
-                                <RadzenButton Click="@(() => SavePersonRow(c))"
-                                              Icon="@IconNames.Checked"
+                                <RadzenButton Click="@(() => SaveRow(c, CollateralTypeEnum.Personal))"
+                                              Icon="@IconNames.Save"
                                               Variant="Variant.Text"
                                               ButtonStyle="ButtonStyle.Success"
                                               Size="ButtonSize.ExtraSmall">
                                 </RadzenButton>
-                                <RadzenButton Click="@(() => CancelPersonEdit(c))"
+                                <RadzenButton Click="@(() => CancelEdit(c, CollateralTypeEnum.Personal))"
                                               Icon="@IconNames.Undo"
+                                              Variant="Variant.Text"
+                                              ButtonStyle="ButtonStyle.Primary"
+                                              Size="ButtonSize.ExtraSmall">
+                                </RadzenButton>
+                                <RadzenButton Click="@(() => DeleteRow(c, CollateralTypeEnum.Personal))"
+                                              Icon="@IconNames.Delete"
                                               Variant="Variant.Text"
                                               ButtonStyle="ButtonStyle.Danger"
                                               Size="ButtonSize.ExtraSmall">
@@ -359,6 +380,7 @@
                   Icon="save"
                   ButtonStyle="ButtonStyle.Success"
                   Size="ButtonSize.Small"
+                  Visible="false"
                   Click="@FormValidate" />
     <RadzenButton Text="Close"
                   Icon="close"

@@ -46,7 +46,9 @@
                                      UserId="@UserId" />
             </RadzenTabsItem>
             <RadzenTabsItem Text="Collaterals">
-                <CollateralsCustomer ShowCommand="true" CustomerId="@CustomerId" ShowAdd="true" @key="@Guid.NewGuid().ToString("N")" />
+                <CollateralsCustomer ShowCommand="true"
+                                     ShowAcction="true"
+                        CustomerId="@CustomerId" ShowAdd="true" @key="@Guid.NewGuid().ToString("N")" />
             </RadzenTabsItem>
             <RadzenTabsItem Text="Income & Expense">
                 <RadzenRow AlignItems="AlignItems.Center"

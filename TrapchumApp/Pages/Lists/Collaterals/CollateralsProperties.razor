@@ -6,7 +6,7 @@
                 Responsive
                 ColumnWidth="15rem"
                 @ref="propertiesGrid"
-                Data="Properties">
+                Data="_collateralLines">
     <HeaderTemplate>
         <RadzenButton Size="ButtonSize.Small"
                       ButtonStyle="ButtonStyle.Primary"
@@ -17,7 +17,7 @@
         <RadzenDataGridColumn Property="Id" Title="#" Width="2rem">
             <Template Context="c">
                 <input type="hidden" @bind="c.Id" />
-                <input type="hidden" @bind="c.CollateralId" />
+                <input type="hidden" @bind="c.CollateralRefId" />
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Property="SubCategoryRefId" Title="Category">

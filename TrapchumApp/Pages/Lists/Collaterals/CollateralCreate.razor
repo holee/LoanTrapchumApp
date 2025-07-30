@@ -2,6 +2,7 @@
 @using Applications.Responses.Lists.Collaterals
 @using Radzen.Blazor
 @using TrapchumApp.Services
+dshdshdshgdhsg
 <RadzenCard>
     <EditForm Model="model" @ref="editForm">
         <DataAnnotationsValidator />
@@ -80,7 +81,7 @@
                             <RadzenDataGridColumn Property="Id" Title="#" Width="2rem">
                                 <Template Context="c">
                                     <input type="hidden" @bind="c.Id" />
-                                    <input type="hidden" @bind="c.CollateralId" />
+                                    <input type="hidden" @bind="c.CollateralRefId" />
                                     <input type="hidden" @bind="c.CategoryRefId" />
                                     @(Personals.IndexOf(c) + 1)
                                 </Template>
@@ -155,7 +156,7 @@
                             </RadzenDataGridColumn>
                             <RadzenDataGridColumn Width="6rem"
                                                   Property="PawnPrice"
-                                                  Title="Hot Price">
+                                                  Title="Pawn Price">
                                 <Template Context="c">
                                     <RadzenNumeric ShowUpDown="false"
                                                    Min="0"
@@ -199,7 +200,7 @@
                             <RadzenDataGridColumn Property="Id" Title="#" Width="2rem">
                                 <Template Context="c">
                                     <input type="hidden" @bind="c.Id" />
-                                    <input type="hidden" @bind="c.CollateralId" />
+                                    <input type="hidden" @bind="c.CollateralRefId" />
                                     <input type="hidden" @bind="c.CategoryRefId" />
                                     @(Personals.IndexOf(c) + 1)
                                 </Template>
@@ -207,7 +208,7 @@
                             <RadzenDataGridColumn Property="SubCategoryRefId" Title="Category">
                                 <Template Context="c">
                                     <RadzenDropDown TValue="int?"
-                                                    class="w-100"
+                                                    class="rz-w-100"
                                                     Data="CollateralPersonals"
                                                     TextProperty="CollateralSubTypeName"
                                                     ValueProperty="Id"
@@ -219,19 +220,19 @@
                             <RadzenDataGridColumn Width="8rem"
                                                   Property="CollateralNo" Title="Collateral No">
                                 <Template Context="c">
-                                    <RadzenTextBox class="w-100"
+                                    <RadzenTextBox class="rz-w-100"
                                                    @bind-Value="c.CollateralNo"></RadzenTextBox>
                                 </Template>
                             </RadzenDataGridColumn>
                             <RadzenDataGridColumn Property="OwnerName" Title="Owner Name">
                                 <Template Context="c">
-                                    <RadzenTextBox class="w-100"
+                                    <RadzenTextBox class="rz-w-100"
                                                    @bind-Value="c.OwnerName"></RadzenTextBox>
                                 </Template>
                             </RadzenDataGridColumn>
                             <RadzenDataGridColumn Width="5rem" Property="Size" Title="Size">
                                 <Template Context="c">
-                                    <RadzenTextBox class="w-100"
+                                    <RadzenTextBox class="rz-w-100"
                                                    @bind-Value="c.Size"></RadzenTextBox>
                                 </Template>
                             </RadzenDataGridColumn>
@@ -252,7 +253,7 @@
                                     <RadzenNumeric ShowUpDown="false"
                                                    Min="0"
                                                    Placeholder="Market Price"
-                                                   class="w-100"
+                                                   class="rz-w-100"
                                                    @bind-Value="c.MarketPrice" />
                                 </Template>
                             </RadzenDataGridColumn>
@@ -260,7 +261,7 @@
                                 <Template Context="c">
                                     <RadzenNumeric @bind-Value="c.HotPrice"
                                                    Min="0"
-                                                   class="w-100"
+                                                   class="rz-w-100"
                                                    ShowUpDown="false"
                                                    Placeholder="Hot Price"
                                                    TextAlign="TextAlign.End" />
@@ -270,7 +271,7 @@
                                 <Template Context="c">
                                     <RadzenNumeric ShowUpDown="false"
                                                    Min="0"
-                                                   class="w-100"
+                                                   class="rz-w-100"
                                                    Placeholder="Pawn Price"
                                                    @bind-Value="c.PawnPrice"
                                                    TextAlign="TextAlign.End" />
