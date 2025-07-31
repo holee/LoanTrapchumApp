@@ -1,23 +1,24 @@
 using Applications.Extensions;
+using Applications.Features.Customers.Services;
 using Applications.Requests.Lists.Collaterals;
 using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Services.LIsts;
 using Domains.Models.Collaterals;
 using Mapster;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Forms;
-using Radzen;
 
 namespace TrapchumApp.Pages.Lists.Collaterals
 {
     public partial class CollateralCreate
     {
 
-        readonly ICollateralsServiceImpl _cService;
-        public CollateralCreate(ICollateralsServiceImpl collateralService)
+        private readonly ICollateralsServiceImpl _cService;
+
+        private readonly CustomerCollateralServices _cusCollateralService;
+        public CollateralCreate(ICollateralsServiceImpl collateralService, CustomerCollateralServices cusCollateralService)
         {
             _cService = collateralService;
+            _cusCollateralService = cusCollateralService;
         }
 
         [Parameter] public string? CustomerId { get; set; }
@@ -71,7 +72,7 @@ namespace TrapchumApp.Pages.Lists.Collaterals
 
         protected async Task GetCustomerCollateralAsync()
         {
-            var customerResult = await _cService.GetCustomerCollateralsAsync(CustomerId, false);
+            var customerResult = await _cusCollateralService.GetCustomerCollateralAsync(CustomerId, false);
 
             if (customerResult.IsSuccess)
             {

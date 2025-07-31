@@ -1,5 +1,6 @@
-using Applications.Commons.Mappers;
 using Applications.Extensions;
+using Applications.Features.Customers.Mappers;
+using Applications.Features.Customers.Services;
 using Applications.Requests.Lists.Collaterals;
 using Applications.Responses.Extensions;
 using Applications.Responses.Lists.Collaterals;
@@ -14,6 +15,8 @@ namespace TrapchumApp.Pages.Lists.Collaterals
     {
 
         private readonly ICollateralsServiceImpl _collateralService;
+
+        private readonly CustomerCollateralServices _cusCollateralServices;
         [Parameter] public string? CustomerId { get; set; } = string.Empty;
         [Parameter] public string? CustomerName { get; set; } = string.Empty;
 
@@ -42,9 +45,10 @@ namespace TrapchumApp.Pages.Lists.Collaterals
         List<VCollateralLines> _propertiesToUpdate = [];
         List<VCollateralLines> _propertiesToInert = [];
         List<VCollateralLines> _properties = [];
-        public CollateralModalAdd(ICollateralsServiceImpl collateralService)
+        public CollateralModalAdd(ICollateralsServiceImpl collateralService, CustomerCollateralServices cusCollateralServices)
         {
             _collateralService = collateralService;
+            _cusCollateralServices = cusCollateralServices;
         }
 
         void CloseDialogue()
@@ -74,7 +78,8 @@ namespace TrapchumApp.Pages.Lists.Collaterals
             {
                 return;
             }
-            var customerResult = await _collateralService.GetCustomerCollateralsAsync(CustomerId, true);
+
+            var customerResult = await _cusCollateralServices.GetCustomerCollateralAsync(CustomerId, true);
 
             if (customerResult.IsSuccess)
             {
@@ -234,9 +239,9 @@ namespace TrapchumApp.Pages.Lists.Collaterals
             var confirm = await DialogService.Confirm("Are you sure?", "Delete");
 
 
-            if (confirm == false )
+            if (confirm == false)
             {
-                CancelEdit(e, type);    
+                CancelEdit(e, type);
 
                 return;
             }
@@ -393,7 +398,7 @@ namespace TrapchumApp.Pages.Lists.Collaterals
             if (type == CollateralTypeEnum.Property && _originalsProperties.TryGetValue(row.Id, out var original))
             {
                 row.Id = original.Id;
-                row.CollateralRefId = original.CollateralRefId;
+                row.CollateralId = original.CollateralId;
                 row.CategoryRefId = original.CategoryRefId;
                 row.CollateralNo = original.CollateralNo;
                 row.TypeName = original.TypeName;
@@ -413,7 +418,7 @@ namespace TrapchumApp.Pages.Lists.Collaterals
             if (type == CollateralTypeEnum.Personal && _originalsPersonals.TryGetValue(row.Id, out var origin))
             {
                 row.Id = origin.Id;
-                row.CollateralRefId = origin.CollateralRefId;
+                row.CollateralId = origin.CollateralId;
                 row.CollateralNo = origin.CollateralNo;
                 row.CategoryRefId = origin.CategoryRefId;
                 row.TypeName = origin.TypeName;
@@ -443,7 +448,7 @@ namespace TrapchumApp.Pages.Lists.Collaterals
                 _originalsProperties[row.Id] = new VCollateralLines
                 {
                     Id = row.Id,
-                    CollateralRefId = row.CollateralRefId,
+                    CollateralId = row.CollateralId,
                     CollateralNo = row.CollateralNo,
                     SubCategoryRefId = row.SubCategoryRefId,
                     CategoryRefId = row.CategoryRefId,
@@ -465,7 +470,7 @@ namespace TrapchumApp.Pages.Lists.Collaterals
                 _originalsPersonals[row.Id] = new VCollateralLines
                 {
                     Id = row.Id,
-                    CollateralRefId = row.CollateralRefId,
+                    CollateralId = row.CollateralId,
                     CollateralNo = row.CollateralNo,
                     SubCategoryRefId = row.SubCategoryRefId,
                     CategoryRefId = row.CategoryRefId,

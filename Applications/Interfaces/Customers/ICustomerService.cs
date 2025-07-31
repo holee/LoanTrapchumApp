@@ -5,6 +5,7 @@ using Applications.Responses.ViewModels.Customers;
 using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Domains.Models.Lists.Customers;
+using System.Linq.Expressions;
 
 namespace Applications.Interfaces.Customers;
 
@@ -28,4 +29,5 @@ public interface ICustomerService
     Task<Result<VCustomerList>> GetCustomerForRequestLoanAsync(string? customerId, CancellationToken cancellation = default);
     Task<Result<IEnumerable<VLoanRequests>>> GetCustomerLoanRequestAsync(int? branchId, string? customerId, bool includeComplete = false, CancellationToken cancellation = default);
     Task<Result<VCustomerList>> GetCustomerDetailByIdAsync(string? customerId, CancellationToken cancellationToken = default);
+    Task<Result<VCustomerList>> GetCustomerDetailByIdAsync(string? customerId, params IEnumerable<Expression<Func<VCustomerList, object>>> includes);
 }

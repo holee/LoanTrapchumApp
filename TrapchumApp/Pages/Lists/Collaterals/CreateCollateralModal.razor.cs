@@ -13,7 +13,6 @@ namespace TrapchumApp.Pages.Lists.Collaterals
     {
         private readonly ICollateralsServiceImpl _service;
         private readonly ILogger<CreateCollateralModal> _logger;
-
         private IEnumerable<VCustomerList> custlist = [];
         protected IEnumerable<CustomerCollateral>? cusName = [];
         private IEnumerable<CollateralTypeResponse> collateralTypes = [];
@@ -21,9 +20,19 @@ namespace TrapchumApp.Pages.Lists.Collaterals
         private IEnumerable<CollateralSubTypeResponse> collateralPersonals = [];
         private IEnumerable<CollateralSubTypeResponse> allSubTypes = [];
         protected EditForm editForm { get; set; } = default!;
+
         protected CollateralTypeResponse? SelectCollateralType;
+
         protected CustomerCollateral? SelectedCustomer = new();
+
         protected CollateralDtoCreate model = new();
+        public CreateCollateralModal(ICollateralsServiceImpl service, ILogger<CreateCollateralModal> logger)
+        {
+            _service = service;
+
+            _logger = logger;
+        }
+
         /// <summary>
         /// end Model include
         /// </summary>
@@ -36,21 +45,28 @@ namespace TrapchumApp.Pages.Lists.Collaterals
         {
             try
             {
+
                 var response = await _customerService.GetCustomersAsync(null, 25, includeisactive, false, q);
 
-                if (response.IsSuccess)
+                if (response.IsSuccess && response.Data is not null)
                 {
                     custlist = response.Data!;
+
                     cusName = custlist.Select(x => new CustomerCollateral
                     {
                         CustomerId = x.CustomerId,
                         Name = x.AltName,
                     });
                 }
+
                 collateralTypes = await _service.GetCollateralTypes();
+
                 collateralProperties = await _service.GetCollateralSubTypes(1);
+
                 collateralPersonals = await _service.GetCollateralSubTypes(3);
+
                 model.RegisterDate = DateTime.UtcNow;
+
                 allSubTypes = await _service.GetCollateralSubTypes();
 
             }
@@ -78,6 +94,7 @@ namespace TrapchumApp.Pages.Lists.Collaterals
         protected async Task<IEnumerable<CustomerCollateral?>> SearchCustomer(string searchText = "")
         {
             var response = await _customerService.GetCustomersAsync(null, 25, includeisactive, false, searchText);
+
             if (response.IsSuccess)
             {
                 custlist = response.Data!;
@@ -92,6 +109,7 @@ namespace TrapchumApp.Pages.Lists.Collaterals
         protected async Task SelectCustomerChanged()
         {
             var rsp = await _service.GetCollateralByIdAsync(SelectedCustomer!.CustomerId);
+
             if (rsp.IsSuccess)
             {
                 CollateralId = rsp.Data!.CollateralId;
@@ -116,12 +134,6 @@ namespace TrapchumApp.Pages.Lists.Collaterals
         }
 
         string selectedTab = "property";
-
-        public CreateCollateralModal(ICollateralsServiceImpl service, ILogger<CreateCollateralModal> logger)
-        {
-            _service = service;
-            _logger = logger;
-        }
 
         private Task OnSelectedTabChanged(string name)
         {

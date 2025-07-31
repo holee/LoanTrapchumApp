@@ -1,55 +1,20 @@
-﻿using Applications.Commons.Mappers;
+﻿using Applications.Features.Collaterals.Mapper;
+using Applications.Features.Customers.Mappers;
+using Applications.Interfaces.Customers;
 using Applications.Interfaces.Lists;
 using Applications.Requests.Lists.Collaterals;
 using Applications.Responses;
 using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Collaterals;
+using Applications.Services.LIsts;
 using Domains.Models.Collaterals;
-using Mapster;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
-namespace Applications.Services.LIsts;
+namespace Applications.Services.Lists;
 
-public class CollateralsService(ICollateralsService collateralsService) : ICollateralsServiceImpl
+public sealed class CollateralsService(ICollateralsService collateralsService, ICustomerCollateralService cuscollateralsService, ILogger<CollateralsService> logger) : ICollateralsServiceImpl
 {
-    public async Task<Result<VCustomerCollaterals>> GetCustomerCollateralAsync(string? customerId)
-    {
-
-        var resp = await collateralsService.GetCustomerCollateralAsync(customerId);
-
-        return resp;
-
-    }
-
-    public async Task<Result<VCustomerCollaterals>> GetCustomerCollateralsAsync(string? customerId)
-    {
-
-        var resp = await collateralsService.GetCustomerCollateralsAsync(customerId);
-
-        return resp;
-
-    }
-
-    public async Task<Result<VCustomerCollaterals>> GetCustomerCollateralsAsync(string? customerId, bool includeInUsed)
-    {
-
-        var resp = await collateralsService.GetCustomerCollateralsAsync(customerId, includeInUsed);
-
-        return resp;
-
-    }
-
-    public async Task<Result<VCustomerCollaterals>> GetCollateralByIdAsync(string? collateralId)
-    {
-        return await collateralsService.GetCollateralByIdAsync(collateralId);
-    }
-
-    public async Task<IEnumerable<Responses.Lists.Collaterals.VCollateralLines>> GetCollateralLinesAsync(string? collateralId)
-    {
-        return await collateralsService.GetCollateralLinesAsync(collateralId);
-    }
-
     public async Task<Pager<VCollateral>> GetCollateralsAysnc(QueryParam param)
     {
         return await collateralsService.GetCollateralsAysnc(param);
@@ -75,9 +40,10 @@ public class CollateralsService(ICollateralsService collateralsService) : IColla
 
         var insertModel = entity.MapCollateral();
 
-        return await collateralsService.InsertOrUpdate(insertModel, detarching);
+        return await cuscollateralsService.InsertOrUpdate(insertModel, detarching);
 
     }
+
 
     public async Task<Result<string>> UpsertAsync(CollateralSubTypeDtoCreate entity)
     {
@@ -87,32 +53,21 @@ public class CollateralsService(ICollateralsService collateralsService) : IColla
         return await collateralsService.Upsert(insertModel);
 
     }
-    public async Task<Result<string>> CreateAsync(CollateralLineDtoCreate entity, CancellationToken cancellation = default)
-    {
-
-        var insertModel = entity.MapCollateralLine();
-
-        return await collateralsService.UpSertAsync(insertModel, cancellation);
-
-    }
-
-    public async Task<Result<string>> UpdateAsync(CollateralLineDtoUpdate entity, CancellationToken cancellation = default)
-    {
-
-        var model = entity.MapCollateralLine();
-
-        return await collateralsService.UpSertAsync(model, cancellation);
-    }
-
-
-    public Task<Result<string>> UpdateAsync(CollateralDtoUpdate entity)
-    {
-        throw new NotImplementedException();
-    }
-
     public Task<Result<string>> UpdateAsync(CollateralSubType entity)
     {
+        logger.LogInformation("Updating collateral subtype: {CollateralSubType}", entity);
+
         return collateralsService.InsertOrUpdateAsync(entity);
     }
 
+    public async Task<Result<VCustomerCollaterals>> GetCollateralByIdAsync(string? collateralId)
+    {
+        logger.LogInformation("Fetching collateral by ID: {CollateralId}", collateralId);
+
+        if (string.IsNullOrWhiteSpace(collateralId))
+        {
+            return Result.Failure<VCustomerCollaterals>(ErrorResponse.Validation("Collateral ID is required"));
+        }
+        return await cuscollateralsService.GetCollateralByIdAsync(collateralId);
+    }
 }

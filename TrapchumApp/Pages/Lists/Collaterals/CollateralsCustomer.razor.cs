@@ -1,10 +1,11 @@
 using Applications.Extensions;
-using Applications.Features.Collaterals.Services;
+using Applications.Features.Customers.Services;
 using Applications.Responses.Lists.Collaterals;
 using Applications.Services.LIsts;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 using Radzen.Blazor;
+using System.Threading.Tasks;
 
 namespace TrapchumApp.Pages.Lists.Collaterals
 {
@@ -13,10 +14,11 @@ namespace TrapchumApp.Pages.Lists.Collaterals
 
         private readonly ICollateralsServiceImpl _collateralService;
 
-        private readonly CollateralServices _collateralsService;
-        public CollateralsCustomer(ICollateralsServiceImpl collateralService, CollateralServices collateralsService)
+        private readonly CustomerCollateralServices _collateralsService;
+        public CollateralsCustomer(ICollateralsServiceImpl collateralService, CustomerCollateralServices collateralsService)
         {
             _collateralService = collateralService;
+
             _collateralsService = collateralsService;
         }
 
@@ -63,13 +65,34 @@ namespace TrapchumApp.Pages.Lists.Collaterals
             }
         }
 
-        async void CollateralReload()
+
+
+        async void AddOne() 
         {
-            await Reload.InvokeAsync();
+            if (CustomerId.IsNullOrEmpty())
+            {
+                NotificationService.Notify(NotificationSeverity.Error, "Please selected customer first");
+                return;
+            }
 
-            await GetCustomerCollaterals();
+            var parameters = new Dictionary<string, object?> {
 
+            {"CollateralId", CustomerId }
+        };
+
+            var options = new DialogOptions
+            {
+               Width="50vw"
+            };
+
+            var dia = await DialogService.OpenAsync<CustomerCollateralLineCreate>("Add Collateral", parameters, options);
+
+            if (dia is bool result && result == true)
+            {
+                await GetCustomerCollaterals();
+            }
         }
+
 
         async Task GetCustomerCollaterals()
         {
@@ -85,7 +108,8 @@ namespace TrapchumApp.Pages.Lists.Collaterals
             StateHasChanged();
         }
 
-        void OnCollateralLineEdit(VCollateralLines arg)
+
+        async Task OnCollateralLineEdit(VCollateralLines arg)
         {
             var options = new SideDialogOptions
             {
@@ -95,10 +119,16 @@ namespace TrapchumApp.Pages.Lists.Collaterals
             var parameters = new Dictionary<string, object?>
             {
                 {"Id",arg.Id },
-                {"CollateralId",arg.CollateralRefId }
+                {"CollateralId",arg.CollateralId }
             };
 
-            DialogService.OpenSide<CustomerCollateralLineEdit>("Collateral", parameters, options: options);
+            var dia = await DialogService.OpenSideAsync<CustomerCollateralLineEdit>("Collateral", parameters, options: options);
+
+            if (dia is bool result && result == true)
+            {
+                await GetCustomerCollaterals();
+            }
+
         }
     }
 }

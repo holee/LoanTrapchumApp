@@ -4,6 +4,7 @@
     {
         public long Id { get; set; }
         public string? CollateralRefId { get; set; }
+        public string? CustomerName { get; set; }
         public int? CategoryRefId { get; set; }
         public string? TypeName { get; set; }
         public int? SubCategoryRefId { get; set; }

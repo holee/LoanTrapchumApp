@@ -14,6 +14,12 @@
                      Visible="@ShowCommand"
                      JustifyContent="JustifyContent.End">
             <RadzenButton Size="ButtonSize.Small"
+                          Click="@AddOne"
+                          Icon="add"
+                          Text="Add New"
+                          Visible="@(ShowAdd && ShowCommand)"
+                          ButtonStyle="ButtonStyle.Secondary"></RadzenButton>
+            <RadzenButton Size="ButtonSize.Small"
                           Click="@Add"
                           Icon="add"
                           Text="Add New"

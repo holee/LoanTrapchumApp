@@ -72,6 +72,7 @@ namespace Infrastructures.DependencyInjects
             });
             services.AddSingleton<AuditingSaveChangesInterceptor>();
             services.AddSingleton<ICurrentUserService, CurrentUserService>();
+            services.AddSingleton<ICustomerCollateralService, CustomerCollateralRepository>();
             services.AddScoped<IAuditReadService, AuditReadService>();
             services.AddScoped<IAppSettingService, AppSettingService>();
             services.AddScoped<ILoanSettingService, LoanSettingService>();

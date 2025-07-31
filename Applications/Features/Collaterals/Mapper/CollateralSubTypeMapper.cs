@@ -1,7 +1,7 @@
 using Applications.Requests.Lists.Collaterals;
 using Domains.Models.Collaterals;
 
-namespace Applications.Commons.Mappers;
+namespace Applications.Features.Collaterals.Mapper;
 
 public static class CollateralSubTypeMapper
 {

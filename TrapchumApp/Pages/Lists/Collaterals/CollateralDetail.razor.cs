@@ -1,3 +1,4 @@
+using Applications.Features.Customers.Services;
 using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Services.LIsts;
@@ -9,10 +10,11 @@ namespace TrapchumApp.Pages.Lists.Collaterals
     public partial class CollateralDetail
     {
         private readonly ICollateralsServiceImpl _collateralsService;
-
-        public CollateralDetail(ICollateralsServiceImpl collateralsService)
+        private readonly CustomerCollateralServices _custCollateralServices;
+        public CollateralDetail(ICollateralsServiceImpl collateralsService, CustomerCollateralServices custCollateralServices)
         {
             _collateralsService = collateralsService;
+            _custCollateralServices = custCollateralServices;
         }
 
         [Parameter] public EventCallback Close { get; set; }
@@ -25,21 +27,10 @@ namespace TrapchumApp.Pages.Lists.Collaterals
         [Parameter] public string? CustomerId { get; set; }
         [Parameter] public LoanCustomerQuery? SelectedCustomer { get; set; }
         [Parameter] public List<VCollateralLines>? CollateralLines { get; set; } = [];
-        //private async Task AddCollateralByCustomer()
-        //{
-        //    if (Model!.CollateralId.IsNullOrEmpty())
-        //    {
-        //        NotificationService.Notify(NotificationSeverity.Info, "Try getting data not found!");
-        //        return;
-        //    }
-        //    await AddMoreCollateral.InvokeAsync(Model.CollateralId);
-
-        //    StateHasChanged();
-        //}
 
         async Task GetCollateralById(string collateralId)
         {
-            var rsp = await _collateralsService.GetCustomerCollateralAsync(collateralId);
+            var rsp = await _custCollateralServices.GetCustomerCollateralAsync(collateralId);
 
             if (rsp.IsSuccess)
             {
@@ -58,6 +49,7 @@ namespace TrapchumApp.Pages.Lists.Collaterals
         protected override async Task OnParametersSetAsync()
         {
             await GetCollateralById(CustomerId!);
+
             await base.OnParametersSetAsync();
         }
 

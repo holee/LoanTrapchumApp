@@ -10,6 +10,7 @@ using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Domains.Models.Lists.Customers;
 using Mapster;
+using System.Linq.Expressions;
 namespace Applications.Services.Customers;
 
 public interface ICustomerServiceImpl
@@ -33,6 +34,7 @@ public interface ICustomerServiceImpl
     Task<Result<IEnumerable<VLoanRequests>>> GetCustomerLoanRequestAsync(int? branchId, string? customerId, bool include = false, CancellationToken cancellation = default);
     Task<Result<VCustomerList>> GetCustomerDetailsByIdAsync(string? customerId, bool include = false, CancellationToken cancellation = default);
     Task<Result<VCustomerList>> GetCustomerDetailsByIdAsync(string? customerId, CancellationToken cancellation = default);
+    Task<Result<VCustomerList>> GetCustomerDetailByIdAsync(string? customerId, params IEnumerable<Expression<Func<VCustomerList, object>>> includes);
 }
 
 public sealed class CustomerService(ICustomerService cusService) : ICustomerServiceImpl
@@ -117,6 +119,20 @@ public sealed class CustomerService(ICustomerService cusService) : ICustomerServ
 
         return await cusService.GetCustomerDetailByIdAsync(customerId, cancellation);
     }
+
+
+    public async Task<Result<VCustomerList>> GetCustomerDetailByIdAsync(string? customerId, params IEnumerable<Expression<Func<VCustomerList, object>>> includes)
+    {
+        if (string.IsNullOrEmpty(customerId)) 
+        {
+            return Result.Failure<VCustomerList>(ErrorResponse.Validation("Customer ID Is Required."));
+        }
+
+        return await cusService.GetCustomerDetailByIdAsync(customerId, includes);
+    }
+
+
+
     public async Task<Result<VCustomerList>> GetCustomerForRequestLoanAsync(string? customerId)
     {
         return await cusService.GetCustomerForRequestLoanAsync(customerId);

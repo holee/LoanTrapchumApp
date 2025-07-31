@@ -16,6 +16,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Data;
+using System.Linq.Expressions;
 
 namespace Infrastructures.Implements;
 
@@ -68,9 +69,7 @@ public sealed class CustomerRepository(
     {
         await using var cxt = await contextFactory.CreateDbContextAsync();
 
-        var queries = cxt.VCustomerLists
-                            .AsNoTracking()
-                            .Where(x => x.IsLoanActive == false);
+        var queries = cxt.VCustomerLists.AsNoTracking().Where(x => x.IsLoanActive == false);
 
         if (!string.IsNullOrEmpty(param.Filter))
         {
@@ -86,7 +85,6 @@ public sealed class CustomerRepository(
         {
             queries = queries.Where(x => x.CustomerId == customerId);
         }
-
 
         var totalCountTask = await queries.CountAsync();
 
@@ -139,7 +137,7 @@ public sealed class CustomerRepository(
         return Result.Success(customer);
 
     }
-   
+
     public async Task<Result<VCustomerList>> GetCustomerDetailByIdAsync(string? customerId, CancellationToken cancellationToken = default)
     {
         logger.LogInformation("Fetching customer details for ID {CustomerId}", customerId);
@@ -164,6 +162,37 @@ public sealed class CustomerRepository(
         return Result.Success(customer);
 
     }
+
+    public async Task<Result<VCustomerList>> GetCustomerDetailByIdAsync(string? customerId, params IEnumerable<Expression<Func<VCustomerList, object>>> includes)
+    {
+        logger.LogInformation("Fetching customer details for ID {CustomerId}", customerId);
+
+        await using var context = contextFactory.CreateDbContext();
+
+        var baseQuery = context.VCustomerLists.AsQueryable();
+
+        if (includes.Any())
+        {
+            foreach (var include in includes)
+            {
+                baseQuery = baseQuery.Include(include);
+            }
+        }
+
+        var customer = await baseQuery
+                            .AsSplitQuery()
+                            .AsNoTracking()
+                            .FirstOrDefaultAsync(x => x.CustomerId == customerId);
+
+        if (customer is null)
+            return Result.Failure<VCustomerList>(ErrorResponse.NotFound("Customer Not Found."));
+
+        return Result.Success(customer);
+
+    }
+
+
+
     public async Task<Result<IEnumerable<VLoanRequests>>> GetCustomerLoanRequestAsync(int? branchId, string? customerId, bool onlyComplete = false, CancellationToken cancellation = default)
     {
         try
@@ -255,7 +284,7 @@ public sealed class CustomerRepository(
         logger.LogInformation("try adding new customer note");
         try
         {
-           using var connection=await dapperFactory.CreateConnectionAsync(cancellation);
+            using var connection = await dapperFactory.CreateConnectionAsync(cancellation);
 
             var sql = @"
                      SELECT 
@@ -559,76 +588,76 @@ public sealed class CustomerRepository(
 
 
 
-    //public async Task<Result<VCustomerList>> GetCustomerDetailByIdAsync(string? customerId, bool include = false)
-    //{
-    //    try
-    //    {
-    //        using var db = await dapperFactory.CreateConnectionAsync();
+//public async Task<Result<VCustomerList>> GetCustomerDetailByIdAsync(string? customerId, bool include = false)
+//{
+//    try
+//    {
+//        using var db = await dapperFactory.CreateConnectionAsync();
 
-    //        if (!include)
-    //        {
-    //            var customer = await db.QueryFirstOrDefaultAsync<VCustomerList>("spGetCustomerDetailsById",
-    //                new
-    //                {
-    //                    customerId = customerId,
-    //                    include = include
-    //                }, commandType: CommandType.StoredProcedure);
+//        if (!include)
+//        {
+//            var customer = await db.QueryFirstOrDefaultAsync<VCustomerList>("spGetCustomerDetailsById",
+//                new
+//                {
+//                    customerId = customerId,
+//                    include = include
+//                }, commandType: CommandType.StoredProcedure);
 
-    //            if (customer is null)
-    //            {
-    //                return Result.Failure<VCustomerList>(
-    //                    ErrorResponse.NotFound("no data found."));
-    //            }
+//            if (customer is null)
+//            {
+//                return Result.Failure<VCustomerList>(
+//                    ErrorResponse.NotFound("no data found."));
+//            }
 
-    //            return Result.Success(customer);
-    //        }
+//            return Result.Success(customer);
+//        }
 
-    //        var coustmerDictionary = new Dictionary<string, VCustomerList>();
-    //        //"spGetCustomerDetailsById"
-    //        var customerInclude = await db.QueryAsync(ProcedureConstant.SpGetCustomerDetailsById,
-    //            (VCustomerList customer, VLoanDisbursments loan, VLoanRequests loanRequest,
-    //                VCollateralLines collateralLine, VCustomerIncomes customerIncome, VCustomerExpenses customerExpense,
-    //                VCustomerNotes customerNote) =>
-    //            {
-    //                if (coustmerDictionary.TryGetValue(customer.CustomerId!, out var existingCustomer))
-    //                {
-    //                    customer = existingCustomer;
-    //                }
-    //                else
-    //                {
-    //                    coustmerDictionary.Add(customer.CustomerId!, customer);
-    //                }
+//        var coustmerDictionary = new Dictionary<string, VCustomerList>();
+//        //"spGetCustomerDetailsById"
+//        var customerInclude = await db.QueryAsync(ProcedureConstant.SpGetCustomerDetailsById,
+//            (VCustomerList customer, VLoanDisbursments loan, VLoanRequests loanRequest,
+//                VCollateralLines collateralLine, VCustomerIncomes customerIncome, VCustomerExpenses customerExpense,
+//                VCustomerNotes customerNote) =>
+//            {
+//                if (coustmerDictionary.TryGetValue(customer.CustomerId!, out var existingCustomer))
+//                {
+//                    customer = existingCustomer;
+//                }
+//                else
+//                {
+//                    coustmerDictionary.Add(customer.CustomerId!, customer);
+//                }
 
-    //                customer.Loans.Add(loan);
-    //                customer.LoanRequests.Add(loanRequest);
-    //                customer.CollateralLines.Add(collateralLine!);
-    //                customer.CustomerExpenses.Add(customerExpense);
-    //                customer.CustomerIncomes.Add(customerIncome);
-    //                customer.CustomerNotes.Add(customerNote);
-    //                return customer;
-    //            },
-    //            new
-    //            {
-    //                customerId = customerId,
-    //                include = include
-    //            },
-    //            commandType: CommandType.StoredProcedure,
-    //            splitOn: "Id,LoanRequestId,CustomerRefId,IncomeId,ExpendId,NoteId");
+//                customer.Loans.Add(loan);
+//                customer.LoanRequests.Add(loanRequest);
+//                customer.CollateralLines.Add(collateralLine!);
+//                customer.CustomerExpenses.Add(customerExpense);
+//                customer.CustomerIncomes.Add(customerIncome);
+//                customer.CustomerNotes.Add(customerNote);
+//                return customer;
+//            },
+//            new
+//            {
+//                customerId = customerId,
+//                include = include
+//            },
+//            commandType: CommandType.StoredProcedure,
+//            splitOn: "Id,LoanRequestId,CustomerRefId,IncomeId,ExpendId,NoteId");
 
 
-    //        if (!customerInclude.Any())
-    //            return Result.Failure<VCustomerList>(ErrorResponse.NotFound("No note found."));
+//        if (!customerInclude.Any())
+//            return Result.Failure<VCustomerList>(ErrorResponse.NotFound("No note found."));
 
-    //        var item = customerInclude.First();
+//        var item = customerInclude.First();
 
-    //        return Result.Success(item);
-    //    }
-    //    catch (SqlException ex)
-    //    {
-    //        return Result.Failure<VCustomerList>(
-    //            ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
-    //    }
-    //}
+//        return Result.Success(item);
+//    }
+//    catch (SqlException ex)
+//    {
+//        return Result.Failure<VCustomerList>(
+//            ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
+//    }
+//}
 
 
 

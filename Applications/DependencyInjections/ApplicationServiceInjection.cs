@@ -1,11 +1,12 @@
-﻿using Applications.Features.Collaterals.Services;
-using Applications.Features.Customers.Services;
+﻿using Applications.Features.Customers.Services;
+using Applications.Features.Customers.Validations;
 using Applications.Features.Identity.Roles.Validation;
 using Applications.Features.LoanRequests.Services;
 using Applications.Features.LoanRequests.Validations;
 using Applications.Features.Loans.Services;
 using Applications.Interfaces.Addresses;
 using Applications.Requests.Identity;
+using Applications.Requests.Lists.Collaterals;
 using Applications.Requests.Loans.LoanRequests;
 using Applications.Services.Addresses;
 using Applications.Services.Banks;
@@ -32,7 +33,7 @@ namespace Applications.DependencyInjections
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
             services.AddScoped<ScheduleService>();
-            services.AddScoped<CollateralServices>();
+            services.AddScoped<CustomerCollateralServices>();
             services.AddScoped<CustomerNoteService>();
             services.AddScoped<SchedulePrintService>();
             services.AddScoped<IAddressServiceImpl, AddressService>();
@@ -85,6 +86,9 @@ namespace Applications.DependencyInjections
 
             services.AddScoped<IValidator<RoleDtoUpdate>, RoleDtoUpdateValidator>();
             services.AddScoped<IValidator<AproveLoanDtoCreate>, AprovedLoanDtoCreateValidator>();
+            services.AddScoped<IValidator<CollateralDtoCreate>, CollateralCreateValidator>();
+            services.AddScoped<IValidator<CollateralLineDtoCreate>, CollateralLineCreateValidator>();
+            
             return services;
 
         }

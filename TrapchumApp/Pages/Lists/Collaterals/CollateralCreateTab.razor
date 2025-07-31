@@ -82,7 +82,7 @@
                             <RadzenDataGridColumn Property="Id" Title="#" Width="2rem">
                                 <Template Context="c">
                                     <input type="hidden" @bind="c.Id" />
-                                    <input type="hidden" @bind="c.CollateralRefId" />
+                                    <input type="hidden" @bind="c.CollateralId" />
                                     @(Properties.IndexOf(c) + 1)
                                 </Template>
                             </RadzenDataGridColumn>
@@ -211,7 +211,7 @@
                             <RadzenDataGridColumn Property="Id" Title="#" Width="2rem">
                                 <Template Context="c">
                                     <input type="hidden" @bind="c.Id" />
-                                    <input type="hidden" @bind="c.CollateralRefId" />
+                                    <input type="hidden" @bind="c.CollateralId" />
                                     @(Personals.IndexOf(c) + 1)
                                 </Template>
                             </RadzenDataGridColumn>

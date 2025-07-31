@@ -262,7 +262,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             {
                 Id = c.Id,
                 CollateralLineId = c.Id,
-                CollateralId = c.CollateralRefId,
+                CollateralId = c.CollateralId,
                 OwnerName = c.OwnerName,
                 ReferenceNo = c.ReferenceNo,
                 TypeName = c.TypeName,
@@ -292,7 +292,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
                 var item = new VLoanRequestCollateralLines
                 {
                     CollateralLineId = g.Id,
-                    CollateralId = g.CollateralRefId,
+                    CollateralId = g.CollateralId,
                     OwnerName = g.OwnerName,
                     ReferenceNo = g.ReferenceNo,
                     TypeName = g.TypeName,

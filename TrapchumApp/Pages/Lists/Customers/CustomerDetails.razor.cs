@@ -167,7 +167,7 @@ namespace TrapchumApp.Pages.Lists.Customers
                     UserId ??= auth.User.GetId();
                 }
 
-                var response = await _customerService.GetCustomerDetailsByIdAsync(CustomerId, default);
+                var response = await _customerService.GetCustomerDetailByIdAsync(CustomerId, o => o.Loans);
 
                 if (response.IsSuccess)
                 {

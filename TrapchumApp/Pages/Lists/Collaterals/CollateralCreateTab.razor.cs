@@ -1,4 +1,5 @@
 using Applications.Extensions;
+using Applications.Features.Customers.Services;
 using Applications.Requests.Lists.Collaterals;
 using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.ViewModels.Customers;
@@ -14,10 +15,11 @@ namespace TrapchumApp.Pages.Lists.Collaterals
     public partial class CollateralCreateTab
     {
         private readonly ICollateralsServiceImpl _collateralService;
-
-        public CollateralCreateTab(ICollateralsServiceImpl collateralsService)
+        private readonly CustomerCollateralServices _cusCollateralSevice;
+        public CollateralCreateTab(ICollateralsServiceImpl collateralsService, CustomerCollateralServices cusCollateralSevice)
         {
             _collateralService = collateralsService;
+            _cusCollateralSevice = cusCollateralSevice;
         }
 
         RadzenDataGrid<VCollateralLines> personalGrid = default!;
@@ -87,7 +89,7 @@ namespace TrapchumApp.Pages.Lists.Collaterals
                 return;
             }
 
-            var customerResult = await _collateralService.GetCustomerCollateralsAsync(CustomerId, false);
+            var customerResult = await _cusCollateralSevice.GetCustomerCollateralAsync(CustomerId, false);
 
             if (customerResult.IsSuccess)
             {

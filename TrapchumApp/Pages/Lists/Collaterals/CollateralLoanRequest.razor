@@ -25,7 +25,7 @@
                               TextAlign="TextAlign.Center"
                               Context="g"
                               Width="3rem"
-                              Property="@(nameof(VCollateralLines.CollateralRefId))">
+                              Property="@(nameof(VCollateralLines.CollateralId))">
             <Template>
                 @(CollateralLines.ToList().IndexOf(g) + 1)
             </Template>
@@ -34,7 +34,7 @@
                               TextAlign="TextAlign.Center"
                               Context="g"
                               Width="3rem"
-                              Property="@(nameof(VCollateralLines.CollateralRefId))">
+                              Property="@(nameof(VCollateralLines.CollateralId))">
             <HeaderTemplate>
                 <RadzenCheckBox InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Select item" }})"
                                 Value="@HeaderChecked"
