@@ -1,10 +1,17 @@
-using Applications.Requests.Lists.Customers;
-using Microsoft.AspNetCore.Components;
+using Applications.Features.Customers.Requests;
+using Applications.Features.Customers.UseCases;
 
 namespace TrapchumApp.Pages.Lists.Customers
 {
     public partial class CustomerNoteAdd
     {
+        private readonly AddCustomerNotesUseCase _custNoteAdd;
+
+        public CustomerNoteAdd(AddCustomerNotesUseCase custNoteAdd)
+        {
+            _custNoteAdd = custNoteAdd;
+        }
+
         [Parameter] public string? CustomerId { get; set; }
         [Parameter] public string? UserId { get; set; }
         bool isBusy = false;
@@ -18,13 +25,13 @@ namespace TrapchumApp.Pages.Lists.Customers
 
             model.CreditAgentRefId = UserId;
 
-            var noteResponse = await _customerService.AddCusomerNoteAsync(model);
+            var noteResponse = await _custNoteAdd.ExecuteAsync(model);
 
             if (noteResponse.IsSuccess)
             {
                 isBusy = false;
 
-                DialogService.Close(false);
+                DialogService.Close(true);
             }
 
         }

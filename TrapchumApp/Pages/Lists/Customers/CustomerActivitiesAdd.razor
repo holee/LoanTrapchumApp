@@ -1,27 +1,46 @@
-﻿@using Applications.Features.LoanRequests.Services
-@using Applications.Requests.Lists.Customers
+﻿@using Applications.Features.Addresses
+@using Applications.Features.Branches
+@using Applications.Features.Currencies
+@using Applications.Features.Customers.Requests
+@using Applications.Features.Customers.Services
+@using Applications.Features.Customers.UseCases
+@using Applications.Features.Employees
+@using Applications.Features.LoanRequests.Services
 @using Microsoft.AspNetCore.Components.Authorization
 @using TrapchumApp.Services
 
-<EditForm Model="activity"  OnValidSubmit="@HandleFormSubmit">
-        <FluentValidationValidator DisableAssemblyScanning="true" />
-         <RadzenSwitch @bind-Value="@activity.Status" />
-         <RadzenTextArea @bind-Value="@activity.Description" class="form-control" />
-         <RadzenStack class="rz-mt-2" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
-        <RadzenButton Size="ButtonSize.ExtraSmall" class="rz-mt-2" 
-                    ButtonType="ButtonType.Submit" 
-                    Text="Save" 
-                    ButtonStyle="ButtonStyle.Success" />
+<EditForm Model="activity" OnValidSubmit="@HandleFormSubmit">
+    <FluentValidationValidator DisableAssemblyScanning="true" />
+    <RadzenFormField Text="Description" AllowFloatingLabel="true" class="rz-w-100">
+        <RadzenTextArea @bind-Value="@activity.Description" class="rz-w-100" />
+    </RadzenFormField>
+    <RadzenStack class="rz-mt-2" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+        <RadzenButton Size="ButtonSize.ExtraSmall" class="rz-mt-2"
+                      ButtonType="ButtonType.Submit"
+                      Text="Save"
+                      Icon="@IconNames.Save"
+                      ButtonStyle="ButtonStyle.Success" />
+        <RadzenButton Size="ButtonSize.ExtraSmall" class="rz-mt-2"
+                      ButtonType="ButtonType.Button"
+                      Text="Close"
+                      Icon="@IconNames.Close"
+                      ButtonStyle="ButtonStyle.Danger" />
 
     </RadzenStack>
 
-    </EditForm>
+</EditForm>
 @code {
     [CascadingParameter]
-    Task<AuthenticationState> AuthenticationState { get; set; }=default!;
+    Task<AuthenticationState> AuthenticationState { get; set; } = default!;
     [Parameter] public string? CustomerId { get; set; }
     CustomerActivityDtoCreate activity = new CustomerActivityDtoCreate();
 
+    private readonly AddCustomerActivityUseCase _custActivityAdd;
+
+    public CustomerActivitiesAdd(AddCustomerActivityUseCase custActivityAdd)
+    {
+        _custActivityAdd = custActivityAdd;
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -36,15 +55,15 @@
 
     async Task HandleFormSubmit()
     {
-        var rsp = await _customerService.AddCusomerActivyAsync(activity);
+        var rsp = await _custActivityAdd.ExecuteAsync(activity);
 
         if (!rsp.IsSuccess)
         {
-            NotificationService.Notify(NotificationSeverity.Error, "Error", rsp.ErrMessage);   
+            NotificationService.Notify(NotificationSeverity.Error, "Error", rsp.ErrMessage);
             return;
         }
 
-        DialogService.Close(true);  
+        DialogService.Close(true);
 
     }
 

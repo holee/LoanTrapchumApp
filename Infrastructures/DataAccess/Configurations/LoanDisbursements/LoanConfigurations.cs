@@ -6,23 +6,25 @@ namespace Infrastructures.DataAccess.Configurations.LoanDisbursements
 {
     public sealed class LoanConfigurations : IEntityTypeConfiguration<LoanDisbursment>
     {
+        private const string SQL= "COALESCE([Principle],0)-COALESCE([AdminFeeAmount],0)";
         public void Configure(EntityTypeBuilder<LoanDisbursment> builder)
         {
             builder.ToTable("tt_loanDisbursements");
             builder.HasKey(x => x.LoanId);
             builder.Property(x => x.LoanId).HasMaxLength(250);
+            builder.Property(x => x.LoanAccountCode).HasMaxLength(50);
             builder.Property(x => x.IsGroupLoan).HasDefaultValue(false);
             builder.Property(x => x.Principle).HasPrecision(18, 2);
             builder.Property(x => x.Remark).HasMaxLength(400);
             builder.Property(x => x.InstallmentType).HasMaxLength(20);
-            builder.Property(x => x.LoanAccountCode).HasMaxLength(50);
             builder.Property(x => x.AdminFeeRate).HasPrecision(18, 2);
             builder.Property(x => x.InterestRate).HasPrecision(18, 2);
             builder.Property(x => x.AccruedArreaRate).HasPrecision(18, 2);
             builder.Property(x => x.ArrearRate).HasPrecision(18, 2);
             builder.Property(x => x.CollectionFeeRate).HasPrecision(18, 2);
-            builder.Property(x => x.Amount).HasPrecision(18, 2)
-                   .HasComputedColumnSql("COALESCE([Principle],0)-COALESCE([AdminFeeAmount],0)", stored:true);
+            builder.Property(x => x.Amount)
+                   .HasPrecision(18, 2)
+                   .HasComputedColumnSql(SQL, stored:true);
             builder.Property(x => x.PaidInterest).HasPrecision(18, 2);
             builder.Property(x => x.AccruedAmount).HasPrecision(18, 2);
             builder.Property(x => x.Adjustment).HasPrecision(18, 2);

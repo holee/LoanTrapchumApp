@@ -2,7 +2,7 @@
 
 namespace Applications.Enumerations
 {
-    public enum CashStatus 
+    public enum CashStatusEnum  
     {
         [Description("Cash comes in through transaction")]
         IN = 1, 

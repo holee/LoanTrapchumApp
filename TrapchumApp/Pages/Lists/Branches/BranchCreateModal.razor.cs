@@ -25,7 +25,7 @@ namespace TrapchumApp.Pages.Lists.Branches
 
         protected IEnumerable<string> filteredItems = [];
 
-        EditContext editContext=default!;
+        EditContext editContext = default!;
 
         protected override async Task OnInitializedAsync()
         {
@@ -74,7 +74,7 @@ namespace TrapchumApp.Pages.Lists.Branches
                 if (response.IsSuccess)
                 {
                     NotificationService.Notify(NotificationSeverity.Success, "New Branch", "Branch created successfully!");
-                   
+
                     DialogService.Close(true);
                 }
                 else

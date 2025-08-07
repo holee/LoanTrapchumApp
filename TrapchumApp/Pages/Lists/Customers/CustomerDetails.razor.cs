@@ -2,7 +2,6 @@
 using Applications.Extensions.Web;
 using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.ViewModels.Customers;
-using Applications.Services.Customers;
 using Applications.Services.LIsts;
 using Radzen.Blazor;
 using TrapchumApp.Pages.Lists.Collaterals;
@@ -17,14 +16,14 @@ namespace TrapchumApp.Pages.Lists.Customers
 
         private readonly ICollateralsServiceImpl _collateralService;
 
-        private readonly CustomerNoteService _customerNoteService;
-        public CustomerDetails(IIncomeExpendServiceImpl customerIncomeService, ICollateralsServiceImpl collateralService, CustomerNoteService customerNoteService)
+        private readonly ILogger<CustomerDetails> _logger;
+        public CustomerDetails(IIncomeExpendServiceImpl customerIncomeService, ICollateralsServiceImpl collateralService, ILogger<CustomerDetails> logger)
         {
             _customerIncomeService = customerIncomeService;
 
             _collateralService = collateralService;
 
-            _customerNoteService = customerNoteService;
+            _logger = logger;
         }
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
         [Parameter] public int? BranchId { get; set; } = 0;
@@ -50,37 +49,6 @@ namespace TrapchumApp.Pages.Lists.Customers
         string collapseIcon = "expand_less";
 
         bool ShowEditTab = false;
-        async void SelectedTabIndexChanged()
-        {
-            if (selectedIndex == 0)
-            {
-                //await GetCustomerLoanReuquests();
-            }
-
-            if (selectedIndex == 1)
-            {
-                await GetCustomerCollateralLines();
-            }
-
-            if (selectedIndex == 2)
-            {
-                // await GetCustomerIncomeAndExpense();
-                // await GetCustomerIncomeAndExpense();
-            }
-
-            if (selectedIndex == 3)
-            {
-                // await GetCustomerLoanHistory();
-            }
-
-            if (selectedIndex == 5)
-            {
-                //await GetCustomerNotes();
-            }
-
-            StateHasChanged();
-        }
-
 
         async Task DeleteCustomer()
         {
@@ -130,29 +98,6 @@ namespace TrapchumApp.Pages.Lists.Customers
             }
         }
 
-        protected async Task AddLoanRequest()
-        {
-            if (CustomerId.IsNullOrEmpty())
-            {
-                NotificationService.Notify(NotificationSeverity.Error, "Please selected customer first");
-                return;
-            }
-
-            var auth = await AuthenticationState;
-
-            var branchId = 1; // auth.User.getBranchId;
-
-            var userId = auth.User.GetId();
-
-            var uri = new Dictionary<string, object?>
-            {
-                { "BranchId", branchId },
-                { "UserId", userId }
-            }.AddQueryString($"/Loan/Request/{CustomerId}/CreateNewUser");
-            NavigationManager.NavigateTo(uri);
-        }
-
-
         protected override async Task OnInitializedAsync()
         {
             try
@@ -167,9 +112,9 @@ namespace TrapchumApp.Pages.Lists.Customers
                     UserId ??= auth.User.GetId();
                 }
 
-                var response = await _customerService.GetCustomerDetailByIdAsync(CustomerId, o => o.Loans);
+                var response = await _customerService.GetCustomerDetailByIdAsync(CustomerId, o => o.LoanRequests);
 
-                if (response.IsSuccess)
+                if (response.IsSuccess && response.Data is not null)
                 {
                     Customer = response.Data!;
                 }
@@ -182,7 +127,9 @@ namespace TrapchumApp.Pages.Lists.Customers
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+
+                _logger.LogError(ex, ex.Message);
+
                 IsLoading = false;
             }
 

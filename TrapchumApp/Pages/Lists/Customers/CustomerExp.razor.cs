@@ -1,8 +1,6 @@
 using Applications.Extensions;
+using Applications.Features.Customers.Services;
 using Applications.Responses.ViewModels.Customers;
-using Applications.Services.Customers;
-using Microsoft.AspNetCore.Components;
-using Radzen;
 using Radzen.Blazor;
 
 namespace TrapchumApp.Pages.Lists.Customers

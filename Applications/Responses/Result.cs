@@ -15,6 +15,20 @@ public class Result
         Errors = error;
     }
     public string ErrMessage => !IsSuccess ? Errors.ErrMessage : string.Empty;
+    
+    public IList<string> GetErrors 
+    {
+        get
+        {
+            if (IsSuccess) return [];
+
+            var errors = Errors.FieldErrors?
+                               .Values.SelectMany(x => x)
+                               .ToList() ?? [];
+
+            return errors;
+        }
+    }
     public bool IsSuccess { get; }
     public ErrorResponse Errors { get; }
     public static Result<T> Success<T>(T data) => new(true, ErrorResponse.None, data);

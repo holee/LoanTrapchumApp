@@ -1,4 +1,4 @@
-using Applications.Services.Currencies;
+using Applications.Features.Currencies;
 
 namespace TrapchumApp.Pages.Transactions.Branches;
 

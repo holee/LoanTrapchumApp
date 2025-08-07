@@ -2,6 +2,7 @@ using Applications.Commons.Mappers;
 using Applications.Enumerations;
 using Applications.Extensions;
 using Applications.Extensions.Maths;
+using Applications.Features.Settings.UseCases;
 using Applications.Interfaces.Lists;
 using Applications.Requests.Loans.Disbursements;
 using Applications.Requests.Loans.LoanRequests;
@@ -13,7 +14,6 @@ using Applications.Responses.ViewModels.Loans.Requests;
 using Applications.Responses.ViewModels.Options;
 using Applications.Responses.ViewModels.Settings;
 using Applications.Services.Loans;
-using Applications.Services.Settings;
 using Microsoft.AspNetCore.Components;
 
 namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests

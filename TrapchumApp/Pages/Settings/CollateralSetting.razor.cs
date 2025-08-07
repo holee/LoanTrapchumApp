@@ -1,7 +1,7 @@
+using Applications.Features.Settings.UseCases;
 using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.Paginations;
 using Applications.Services.LIsts;
-using Applications.Services.Settings;
 using Domains.Models.Collaterals;
 using Microsoft.EntityFrameworkCore;
 using Radzen.Blazor;

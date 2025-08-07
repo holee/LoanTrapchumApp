@@ -11,6 +11,7 @@ public class CustomerConfiguration : IEntityTypeConfiguration<Customer>
 
         builder.ToTable("lt_entcustomers");
         builder.HasKey(x => x.CustomerId);
+        builder.Property(p => p.CustomerInfId).ValueGeneratedOnAdd();
         builder.Property(p => p.CustomerId).HasMaxLength(250);
         builder.Property(p => p.Dependents).HasMaxLength(100);
         builder.Property(p => p.NoOfChildren).HasDefaultValue(0);

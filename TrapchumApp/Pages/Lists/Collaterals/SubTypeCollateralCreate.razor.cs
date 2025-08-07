@@ -9,7 +9,6 @@ public partial class SubTypeCollateralCreate
     private readonly ICollateralsServiceImpl _collateralService;
     private CollateralSubTypeDtoCreate model = new();
     private List<CollateralTypeResponse> _collateralTypes = [];
-
     public SubTypeCollateralCreate(ICollateralsServiceImpl collateralService)
     {
         _collateralService = collateralService;
@@ -18,12 +17,14 @@ public partial class SubTypeCollateralCreate
     async Task GetCollateralTypes()
     {
         var rsp=await _collateralService.GetCollateralTypes();
+
         _collateralTypes = rsp.ToList();
     }
 
     protected override async Task OnInitializedAsync()
     {
         await GetCollateralTypes();
+
         await base.OnInitializedAsync();
     }
 
@@ -33,8 +34,15 @@ public partial class SubTypeCollateralCreate
        
        if (rsp.IsSuccess)
        {
-           DialogService.Close(true);
-       }
+            NotificationService.Notify(NotificationSeverity.Error, rsp.Data);
+
+            DialogService.Close(true);
+
+        }
+        else
+        {
+            NotificationService.Notify(NotificationSeverity.Error,rsp.ErrMessage);
+        }
     }
 
     private void CancelForm()

@@ -1,6 +1,7 @@
 using Applications.Extensions.DateTimes;
 using Applications.Extensions.Identity.Authorizations.Extensions;
 using Applications.Extensions.Identity.Policies;
+using Applications.Features.Customers.UseCases;
 using Applications.Responses.Lists.Customers;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Customers;
@@ -10,6 +11,14 @@ namespace TrapchumApp.Pages.Lists.Customers
 {
     public partial class CustomersList
     {
+
+        private readonly GetCustomersCommand _getCustomerCommand;
+
+        public CustomersList(GetCustomersCommand getCustomerCommand)
+        {
+            _getCustomerCommand = getCustomerCommand;
+        }
+
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
         [Parameter] public EventCallback<string?> ClickedDetails { get; set; }
         [Parameter] public EventCallback<int?> ClickedAdd { get; set; }
@@ -45,7 +54,7 @@ namespace TrapchumApp.Pages.Lists.Customers
         private bool sortDescending = false;
 
         int branchId = 0;
-        
+
         void OnMenuItemClick(MenuItemEventArgs args)
         {
             ContextMenuService.Close();
@@ -90,7 +99,7 @@ namespace TrapchumApp.Pages.Lists.Customers
             {
                 Width = "100vw",
                 Height = "100vh",
-                AutoFocusFirstElement=false
+                AutoFocusFirstElement = false
             };
 
             await DialogService.OpenAsync<CollateralModalAdd>("Collateral", param, options);
@@ -229,7 +238,7 @@ namespace TrapchumApp.Pages.Lists.Customers
 
                 var param = new QueryParam(pageIndex, pageSize, sortField, includeInactive, sortDescending, filter);
 
-                var res = await _customerService.GetCustomers(param);
+                var res = await _getCustomerCommand.ExecuteAsync(null,param);
 
                 VCustomers = res.Items;
 
@@ -256,25 +265,25 @@ namespace TrapchumApp.Pages.Lists.Customers
             {
 
                 args.Attributes.Add("class", "rz-state-highlight rz-data-row recently-edited");
-                
+
             }
         }
 
         void OnCellRender(RowRenderEventArgs<VCustomerList> e)
         {
-            
+
         }
 
-        
+
         private void OnRowSelected(VCustomerList args)
         {
-            
+
         }
 
         private async Task OnChanged(bool arg)
         {
-            includeInactive=arg;
-            
+            includeInactive = arg;
+
             await LoadCustomerPageList(filterText);
         }
     }

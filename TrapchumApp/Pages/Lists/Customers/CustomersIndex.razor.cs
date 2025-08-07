@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
 using Radzen.Blazor;
 
 namespace TrapchumApp.Pages.Lists.Customers

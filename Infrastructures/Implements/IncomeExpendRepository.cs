@@ -23,7 +23,7 @@ namespace Infrastructures.Implements
             _logger = logger;
             this.connectionFactory = connectionFactory;
         }
-        public async Task<Result> AddExpensesAsync(string? customerRefId, List<CustomerExpense> req)
+        public async Task<Result<string>> AddExpensesAsync(string? customerRefId, List<CustomerExpense> req)
         {
             try
             {
@@ -36,7 +36,7 @@ namespace Infrastructures.Implements
 
                 if (customer is null)
                 {
-                    return Result.Failure(ErrorResponse.NotFound("no customer is selected"));
+                    return Result.Failure<string>(ErrorResponse.NotFound("no customer is selected"));
                 }
                 customer.CustomerExpenses = req;
                 await _context.SaveChangesAsync();
@@ -46,12 +46,12 @@ namespace Infrastructures.Implements
             catch (Exception ex)
             {
                 _logger.LogError(ex, ex.Message);
-                return Result.Failure(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
+                return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
             }
 
         }
 
-        public async Task<Result> AddIncomesAsync(string? customerRefId, List<CustomerIncome> req)
+        public async Task<Result<string>> AddIncomesAsync(string? customerRefId, List<CustomerIncome> req)
         {
             try
             {
@@ -62,7 +62,7 @@ namespace Infrastructures.Implements
                                             .FirstOrDefaultAsync(x => x.CustomerId == customerRefId);
                 if (customer is null)
                 {
-                    return Result.Failure(ErrorResponse.NotFound("no customer is selected"));
+                    return Result.Failure<string>(ErrorResponse.NotFound("no customer is selected"));
                 }
 
                 customer.CustomerIncomes = req;
@@ -75,13 +75,13 @@ namespace Infrastructures.Implements
             catch (Exception ex)
             {
                 _logger.LogError(ex, ex.Message);
-                return Result.Failure(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
+                return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
             }
 
 
         }
 
-        public async Task<Result> AddOrUpdateExpensesAsync(string? customerId, List<CustomerExpense> req)
+        public async Task<Result<string>> AddOrUpdateExpensesAsync(string? customerId, List<CustomerExpense> req)
         {
             try
             {
@@ -93,7 +93,7 @@ namespace Infrastructures.Implements
 
                 if (existingCustomer is null)
                 {
-                    return Result.Failure(ErrorResponse.NotFound("no customer is selected"));
+                    return Result.Failure<string>(ErrorResponse.NotFound("no customer is selected"));
                 }
 
                 _context.Entry(existingCustomer).CurrentValues.SetValues(req);
@@ -128,11 +128,11 @@ namespace Infrastructures.Implements
             catch (Exception ex)
             {
                 _logger.LogError(ex, ex.Message);
-                return Result.Failure(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
+                return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
             }
         }
 
-        public async Task<Result> AddOrUpdateIncomesAsync(string? customerId, List<CustomerIncome> req)
+        public async Task<Result<string>> AddOrUpdateIncomesAsync(string? customerId, List<CustomerIncome> req)
         {
             try
             {
@@ -143,7 +143,7 @@ namespace Infrastructures.Implements
                                             .FirstOrDefaultAsync(x => x.CustomerId == customerId);
                 if (existingCustomer is null)
                 {
-                    return Result.Failure(ErrorResponse.NotFound("no customer is selected"));
+                    return Result.Failure<string>(ErrorResponse.NotFound("no customer is selected"));
                 }
 
                 _context.Entry(existingCustomer).CurrentValues.SetValues(req);
@@ -180,7 +180,7 @@ namespace Infrastructures.Implements
             catch (Exception ex)
             {
                 _logger.LogError(ex, ex.Message);
-                return Result.Failure(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
+                return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
             }
 
 

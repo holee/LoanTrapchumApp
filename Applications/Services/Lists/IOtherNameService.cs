@@ -1,15 +1,9 @@
 ﻿using Applications.Commons.Mappers;
 using Applications.Interfaces.Lists;
-using Applications.Requests.Lists.Customers;
-using Applications.Requests.Lists.Employees;
-using Applications.Requests.Lists.Entities;
 using Applications.Requests.Lists.OtherNames;
-using Applications.Requests.Lists.Vendors;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.OtherNames;
-using Domains.Models.Bases;
-using Domains.Models.Lists;
 using Domains.Models.Lists.Customers;
 using Domains.Models.Lists.Employees;
 using Domains.Models.Lists.Vendors;

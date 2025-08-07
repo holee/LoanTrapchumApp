@@ -1,4 +1,4 @@
-﻿using Applications.Requests.Lists.Collaterals;
+﻿using Applications.Features.Collaterals.Requests;
 
 namespace Applications.Responses.Lists.Collaterals;
 

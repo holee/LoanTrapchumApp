@@ -14,7 +14,6 @@ namespace Applications.Interfaces.Loans
 
     public interface ILoanService
     {
-        Task<Result<string>> CreateLoanAsync(LoanDtoCreate disbursement);
         Task<Result<bool>> CreateLoanAsync(LoanDisbursment req);
         Task<Result<string>> DeleteAsync(string? loanId,int? branchId);
         Task<Result<string>> UpdateAsync(LoanDisbursment disbursement);

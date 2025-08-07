@@ -5,7 +5,6 @@ using Applications.Responses;
 using Applications.Responses.Message;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Currencies;
-using Applications.Services.Currencies;
 using Dapper;
 using Domains.Models.Currencies;
 using Infrastructures.Constants.Procedures;

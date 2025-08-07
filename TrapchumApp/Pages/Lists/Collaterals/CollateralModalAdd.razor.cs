@@ -1,13 +1,17 @@
 using Applications.Extensions;
+using Applications.Features.Collaterals.Requests;
 using Applications.Features.Customers.Mappers;
 using Applications.Features.Customers.Services;
+using Applications.Features.Customers.Validations;
 using Applications.Requests.Lists.Collaterals;
 using Applications.Responses.Extensions;
 using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Services.LIsts;
+using Blazored.FluentValidation;
 using Domains.Models.Collaterals;
 using Radzen.Blazor;
+using TrapchumApp.Helpers.Validations;
 
 namespace TrapchumApp.Pages.Lists.Collaterals
 {
@@ -56,7 +60,24 @@ namespace TrapchumApp.Pages.Lists.Collaterals
             DialogService.Close(true);
         }
 
+        private FluentValidationValidator? _fluentValidationValidator;
+        private EditContext editContext = default!;
+        private ValidationMessageStore messageStore = default!;
         protected override async Task OnInitializedAsync()
+        {
+
+            editContext = new EditContext(model);
+            messageStore = new ValidationMessageStore(editContext);
+            await GetCollateralSubTypes();
+
+            allSubTypes = await _collateralService.GetCollateralSubTypes();
+
+            await GetCustomerCollaterals();
+
+            await base.OnInitializedAsync();
+        }
+
+        private async Task GetCollateralSubTypes()
         {
 
             CollateralTypes = await _collateralService.GetCollateralTypes(0);
@@ -64,12 +85,6 @@ namespace TrapchumApp.Pages.Lists.Collaterals
             CollateralProperties = await _collateralService.GetCollateralSubTypes((int)CollateralTypeEnum.Property);
 
             CollateralPersonals = await _collateralService.GetCollateralSubTypes((int)CollateralTypeEnum.Personal);
-
-            await GetCustomerCollaterals();
-
-            allSubTypes = await _collateralService.GetCollateralSubTypes();
-
-            await base.OnInitializedAsync();
         }
 
         protected async Task GetCustomerCollaterals()
@@ -88,6 +103,8 @@ namespace TrapchumApp.Pages.Lists.Collaterals
                 CollateralId = CustomerId;
 
                 model = collateral.ToCollateralDtoCreate();
+
+                model.CollateralLines = [];
 
                 _personals = collateral.ToPersonals();
 
@@ -166,8 +183,8 @@ namespace TrapchumApp.Pages.Lists.Collaterals
             }
         }
 
-
         private Dictionary<long, VCollateralLines> _originalsProperties = new();
+
         private Dictionary<long, VCollateralLines> _originalsPersonals = new();
 
         async Task EditRow(VCollateralLines row, CollateralTypeEnum type)
@@ -218,7 +235,8 @@ namespace TrapchumApp.Pages.Lists.Collaterals
 
                 await propertiesGrid.InsertRow(prop);
             }
-            else
+
+            if (type == CollateralTypeEnum.Personal)
             {
                 if (!personalGrid.IsValid) return;
 
@@ -230,6 +248,10 @@ namespace TrapchumApp.Pages.Lists.Collaterals
 
                 await personalGrid.InsertRow(prop);
             }
+
+
+
+
         }
 
 
@@ -296,10 +318,24 @@ namespace TrapchumApp.Pages.Lists.Collaterals
             }
 
         }
-
-
         async Task SaveRow(VCollateralLines e, CollateralTypeEnum type)
         {
+            var validator = new VCollateralLineCreateValidator();
+
+            var validatorResult = validator.Validate(e);
+
+            if (!validatorResult.IsValid)
+            {
+
+                var errors = validatorResult.Errors.Select(e => e.ErrorMessage).ToList();
+
+                messageStore.ApplyValidationSummary(editContext, errors);
+
+                return;
+            }
+
+            messageStore.ClearMessages(editContext);
+
             switch (type)
             {
                 case CollateralTypeEnum.Property:
@@ -312,16 +348,11 @@ namespace TrapchumApp.Pages.Lists.Collaterals
                     break;
             }
 
-            StateHasChanged();
         }
 
         async Task OnRowUpdate(VCollateralLines arg, CollateralTypeEnum type)
         {
             Reset(arg, type);
-
-            var prop = arg.MapCollateralLineCreate();
-
-            model.CollateralLines.Add(prop);
 
             var rsp = await _collateralService.CreateAsync(model, false);
 
@@ -362,6 +393,9 @@ namespace TrapchumApp.Pages.Lists.Collaterals
 
         async Task OnRowCreate(VCollateralLines arg, CollateralTypeEnum type)
         {
+
+            model.CollateralLines.Clear();
+
             var prop = arg.MapCollateralLineCreate();
 
             model.CollateralLines.Add(prop);
@@ -374,7 +408,13 @@ namespace TrapchumApp.Pages.Lists.Collaterals
             }
             else
             {
-                NotificationService.Notify(NotificationSeverity.Error, rsp.Data);
+                //NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
+
+                //var errors = rsp.Errors.FieldErrors.Values;
+
+                editContext.ApplyValidationSummary<CollateralDtoCreate>(rsp.GetErrors);
+
+                return;
             }
 
             if (type == CollateralTypeEnum.Property)
@@ -437,10 +477,6 @@ namespace TrapchumApp.Pages.Lists.Collaterals
 
 
         }
-
-
-
-
         private void DeepCopy(VCollateralLines row, CollateralTypeEnum type)
         {
             if (type == CollateralTypeEnum.Property)

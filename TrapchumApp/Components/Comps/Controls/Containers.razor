@@ -1,0 +1,24 @@
+﻿@using Applications.Features.Addresses
+@using Applications.Features.Branches
+@using Applications.Features.Currencies
+@using Applications.Features.Customers.Services
+@using Applications.Features.Employees
+@using Applications.Features.LoanRequests.Services
+@using TrapchumApp.Services
+<div class="@(!Fluid?"container":"container-fluid") @CssClass" style="@Style">
+    @if (ChildContent is not null)
+    {
+        @ChildContent
+    }
+</div>
+
+@code {
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; } = null;
+    [Parameter]
+    public bool Fluid { get; set; } = false;
+    [Parameter]
+    public string CssClass { get; set; } = string.Empty;
+    [Parameter]
+    public string Style { get; set; } = string.Empty;
+}

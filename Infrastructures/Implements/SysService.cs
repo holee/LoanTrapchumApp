@@ -1,5 +1,4 @@
 ﻿using Applications.Interfaces.setting;
-using Applications.Services.Settings;
 using Domains.Models.Collaterals;
 using Domains.Models.Loans;
 using Domains.Models.Transaction;

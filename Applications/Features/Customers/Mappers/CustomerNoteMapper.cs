@@ -1,4 +1,4 @@
-﻿using Applications.Requests.Lists.Customers;
+﻿using Applications.Features.Customers.Requests;
 using Domains.Models.Lists.Customers;
 using System;
 using System.Collections.Generic;

@@ -1,4 +1,5 @@
-﻿using Applications.Requests.Lists.Collaterals;
+﻿using Applications.Features.Collaterals.Requests;
+using Applications.Requests.Lists.Collaterals;
 using Applications.Responses.Lists.Collaterals;
 using Domains.Models.Collaterals;
 
@@ -25,7 +26,7 @@ namespace Applications.Features.Customers.Mappers
         {
             return new CollateralLine
             {
-                Id= dto.Id,
+                Id = dto.Id,
                 CollateralRefId = dto.CollateralRefId,
                 CategoryRefId = dto.CategoryRefId,
                 TypeName = dto.TypeName,
@@ -70,26 +71,29 @@ namespace Applications.Features.Customers.Mappers
         }
 
 
-        public static CollateralLineDtoCreate MapCollateralLineCreate(this VCollateralLines sourse)
+        public static CollateralLineDtoCreate MapCollateralLineCreate(this VCollateralLines? source)
         {
+
+            if (source is null) return new();
+
             return new CollateralLineDtoCreate
             {
-                Id = sourse.Id,
-                CollateralRefId = sourse.CollateralId,
-                CategoryRefId = sourse.CategoryRefId,
-                TypeName = sourse.TypeName,
-                SubCategoryRefId = sourse.SubCategoryRefId!.Value,
-                CollateralSubTypeName = sourse.CollateralSubTypeName,
-                CollateralNo = sourse.CollateralNo,
-                OwnerName = sourse.OwnerName,
-                WareHouse = sourse.WareHouse,
-                Location = sourse.Location,
-                Size = sourse.Size,
-                Quantity = sourse.Quantity,
-                MarketPrice = sourse.MarketPrice,
-                HotPrice = sourse.HotPrice,
-                PawnPrice = sourse.PawnPrice,
-                Description = sourse.Description,
+                Id = source.Id,
+                CollateralRefId = source.CollateralId,
+                CategoryRefId = source.CategoryRefId,
+                TypeName = source.TypeName,
+                SubCategoryRefId = source.SubCategoryRefId!.Value,
+                CollateralSubTypeName = source.CollateralSubTypeName,
+                CollateralNo = source.CollateralNo,
+                OwnerName = source.OwnerName,
+                WareHouse = source.WareHouse,
+                Location = source.Location,
+                Size = source.Size,
+                Quantity = source.Quantity,
+                MarketPrice = source.MarketPrice,
+                HotPrice = source.HotPrice,
+                PawnPrice = source.PawnPrice,
+                Description = source.Description,
             };
 
         }
@@ -97,6 +101,9 @@ namespace Applications.Features.Customers.Mappers
 
         public static CollateralLineDtoCreate MapCollateralLineEdit(this VCollateralLines sourse)
         {
+
+            if (sourse is null) return new();
+
             return new CollateralLineDtoCreate
             {
                 Id = sourse.Id,

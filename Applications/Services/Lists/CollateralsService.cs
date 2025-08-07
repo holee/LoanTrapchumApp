@@ -1,5 +1,7 @@
 ﻿using Applications.Features.Collaterals.Mapper;
+using Applications.Features.Collaterals.Requests;
 using Applications.Features.Customers.Mappers;
+using Applications.Features.Customers.Validations;
 using Applications.Interfaces.Customers;
 using Applications.Interfaces.Lists;
 using Applications.Requests.Lists.Collaterals;
@@ -9,11 +11,15 @@ using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Collaterals;
 using Applications.Services.LIsts;
 using Domains.Models.Collaterals;
+using FluentValidation;
 using Microsoft.Extensions.Logging;
 
 namespace Applications.Services.Lists;
 
-public sealed class CollateralsService(ICollateralsService collateralsService, ICustomerCollateralService cuscollateralsService, ILogger<CollateralsService> logger) : ICollateralsServiceImpl
+public sealed class CollateralsService(ICollateralsService collateralsService,
+        ICustomerCollateralService cuscollateralsService,
+        IValidator<CollateralDtoCreate> collValidator,
+        ILogger<CollateralsService> logger) : ICollateralsServiceImpl
 {
     public async Task<Pager<VCollateral>> GetCollateralsAysnc(QueryParam param)
     {
@@ -37,6 +43,17 @@ public sealed class CollateralsService(ICollateralsService collateralsService, I
 
     public async Task<Result<string>> CreateAsync(CollateralDtoCreate entity, bool detarching = false)
     {
+
+        logger.LogInformation("Creating collateral: {Collateral}", entity);
+
+        var validationResult = collValidator.Validate(entity);
+
+        if (!validationResult.IsValid)
+        {
+            var errors = validationResult.ToDictionary();
+
+            return Result.Failure<string>(ErrorResponse.Validation(errors));
+        }
 
         var insertModel = entity.MapCollateral();
 

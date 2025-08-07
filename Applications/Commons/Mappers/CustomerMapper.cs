@@ -109,6 +109,7 @@ public static class CustomerMapper
             Converted=false,
             Customer = new Customer
             {
+                CustomerKey=dto.CustomerKey,
                 Photo = dto.Photo,
                 Dependents = dto.Dependents,
                 Expenditure = dto.Expenditure,
@@ -171,6 +172,7 @@ public static class CustomerMapper
             Customer = new Customer
             {
                 CustomerId=dto.Id,
+                CustomerKey = dto.CustomerKey,
                 Photo = dto.Photo,
                 Dependents = dto.Dependents,
                 Expenditure = dto.Expenditure,

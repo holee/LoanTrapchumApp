@@ -1,5 +1,6 @@
 ﻿using Applications.Enumerations;
 using Applications.Extensions.mappers;
+using Applications.Features.Currencies;
 using Applications.Helpers;
 using Applications.Requests.Journals;
 using Applications.Requests.Transactions.Journals;
@@ -7,7 +8,6 @@ using Applications.Responses.Lists.Currency;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Journals;
 using Applications.Responses.ViewModels.Ledgers;
-using Applications.Services.Currencies;
 using Applications.Services.Lists;
 using Applications.Services.Transactions.Journals;
 using System.Threading.Tasks;

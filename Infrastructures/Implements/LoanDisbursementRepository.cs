@@ -21,7 +21,6 @@ using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Data;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Infrastructures.Implements
 {
@@ -36,104 +35,17 @@ namespace Infrastructures.Implements
                                           IDbContextFactory<DataContext> dbContextFactory)
         {
             this.logger = logger;
-
             this.connectionFactory = connectionFactory;
             this.dbContextFactory = dbContextFactory;
         }
 
-        public async Task<Result<string>> CreateLoanAsync(LoanDtoCreate req)
-        {
-
-
-            await using var _context = await dbContextFactory.CreateDbContextAsync();
-
-
-            await using var trans = await _context.Database.BeginTransactionAsync();
-
-            try
-            {
-                var customerInActiveLoan = await _context.Customers
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(c => c.CustomerId == req.CustomerRefId && c.IsLoanActive == true);
-
-                if (customerInActiveLoan is not null)
-                {
-                    return Result.Failure<string>(ErrorResponse.Conflict("This Customer Is Already disburse"));
-                }
-
-                var tranx = new LoanTransaction
-                {
-                    TransactionsId = $"trx-{Guid.CreateVersion7()}",
-                    UserRefId = req.UserRefId,
-                    TransactionTypeName = "Loan Disbursement",
-                    TranTypeRefId = 19,
-                    IsActive = true
-                };
-
-                var cashMgt = new CashManagement
-                {
-                    Id = $"cash-{Guid.CreateVersion7()}",
-
-                    BankRefId = req.BankRefId,
-
-                    BranchRefId = req.BranchId,
-
-                    Amount = req.PaidAmount,
-
-                    CurrencyRefId = req.CurrencyRefId,
-
-                    CashStatusRefId = 2,
-
-                    Remark = "Cash goes through transaction",
-
-                    TransactionDate = req.RegisterDate,
-
-                    BusinessDate = req.RegisterDate,
-
-                    Balance = 0,
-
-                    EmployeeRefId = req.UserRefId
-                };
-
-                tranx.CashManagements.Add(cashMgt);
-
-                var model = req.MapLoanCreate();
-
-                model.LoanTransaction = tranx;
-
-                _context.LoanDisbursments.Add(model);
-
-                await _context.SaveChangesAsync();
-
-                await _context.Customers.Where(x => x.CustomerId == req.CustomerRefId)
-                    .ExecuteUpdateAsync(p => p.SetProperty(x => x.IsLoanActive, true));
-
-                await _context.LoanRequests.Where(x => x.LoanRequestId == req.LoanRequestId &&
-                                                      x.CustomerRefId == req.CustomerRefId)
-                    .ExecuteUpdateAsync(prop => prop
-                        .SetProperty(p => p.LoanRequestStatusRefId, (int)RequestStatus.Completed)
-                        .SetProperty(p => p.ModifiedDt, DateTime.UtcNow));
-
-                await trans.CommitAsync();
-
-                return Result.Success(new string("New Loan Disbursement was added."));
-            }
-            catch (DbUpdateException ex)
-            {
-                await trans.RollbackAsync();
-
-                return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}"));
-            }
-        }
-
-
         public async Task<Result<bool>> CreateLoanAsync(LoanDisbursment req)
         {
 
-            await using var _context = await dbContextFactory.CreateDbContextAsync();
+            await using var context = await dbContextFactory.CreateDbContextAsync();
 
 
-            await using var trans = await _context.Database.BeginTransactionAsync();
+            await using var trans = await context.Database.BeginTransactionAsync();
 
             try
             {
@@ -147,15 +59,17 @@ namespace Infrastructures.Implements
                     return Result.Failure<bool>(ErrorResponse.Conflict("This Customer Is Already disburse"));
                 }
 
-                _context.LoanDisbursments.Add(req);
+                req.LoanAccountCode = await GetMaxLoanAccountCode(context);
 
-                await _context.SaveChangesAsync();
+                context.LoanDisbursments.Add(req);
 
-                await _context.Customers
+                await context.SaveChangesAsync();
+
+                await context.Customers
                              .Where(x => x.CustomerId == req.CustomerRefId)
                              .ExecuteUpdateAsync(p => p.SetProperty(x => x.IsLoanActive, true));
 
-                await _context.LoanRequests.Where(x => x.LoanRequestId == req.LoanRequestId &&
+                await context.LoanRequests.Where(x => x.LoanRequestId == req.LoanRequestId &&
                                                       x.CustomerRefId == req.CustomerRefId)
                     .ExecuteUpdateAsync(prop => prop
                         .SetProperty(p => p.LoanRequestStatusRefId, (int)RequestStatus.Completed)
@@ -163,13 +77,13 @@ namespace Infrastructures.Implements
 
                 await trans.CommitAsync();
 
-                return Result.Success<bool>(true);
+                return Result.Success(true);
             }
             catch (DbUpdateException ex)
             {
                 await trans.RollbackAsync();
 
-                return Result.Failure<bool>(ErrorResponse.ServerError($"{ex.Message}"));
+                return Result.Failure<bool>(ErrorResponse.ServerError($"{ex.Message}")); 
             }
         }
 
@@ -649,6 +563,14 @@ namespace Infrastructures.Implements
             return new Pager<VLoanDisbursments>(items, counts);
         }
 
+
+
+        private async Task<long> GetMaxLoanAccountCode(DataContext context)
+        {
+            var maxCode = await context.LoanDisbursments
+                                        .MaxAsync(x => x.LoanAccountCode);
+            return maxCode > 0 ? maxCode + 1 : 1;
+        }
     }
 }
 
@@ -796,3 +718,89 @@ namespace Infrastructures.Implements
 ////{
 
 ////}
+///        //public async Task<Result<string>> CreateLoanAsync(LoanDtoCreate req)
+//{
+
+
+//    await using var context = await dbContextFactory.CreateDbContextAsync();
+
+
+//    await using var trans = await context.Database.BeginTransactionAsync();
+
+//    try
+//    {
+//        var customerInActiveLoan = await context.Customers
+//            .AsNoTracking()
+//            .FirstOrDefaultAsync(c => c.CustomerId == req.CustomerRefId && c.IsLoanActive == true);
+
+//        if (customerInActiveLoan is not null)
+//        {
+//            return Result.Failure<string>(ErrorResponse.Conflict("This Customer Is Already disburse"));
+//        }
+
+//        var tranx = new LoanTransaction
+//        {
+//            TransactionsId = $"trx-{Guid.CreateVersion7()}",
+//            UserRefId = req.UserRefId,
+//            TransactionTypeName = "Loan Disbursement",
+//            TranTypeRefId = 19,
+//            IsActive = true
+//        };
+
+//        var cashMgt = new CashManagement
+//        {
+//            Id = $"cash-{Guid.CreateVersion7()}",
+
+//            BankRefId = req.BankRefId,
+
+//            BranchRefId = req.BranchId,
+
+//            Amount = req.PaidAmount,
+
+//            CurrencyRefId = req.CurrencyRefId,
+
+//            CashStatusRefId = (int)CashStatusEnum.OUT,
+
+//            Remark = "Cash goes through transaction",
+
+//            TransactionDate = req.RegisterDate,
+
+//            BusinessDate = req.RegisterDate,
+
+//            Balance = 0,
+
+//            EmployeeRefId = req.UserRefId
+//        };
+
+//        tranx.CashManagements.Add(cashMgt);
+
+//        var model = req.MapLoanCreate();
+
+//        model.LoanAccountCode = await GetMaxLoanAccountCode(context);
+
+//        model.LoanTransaction = tranx;
+
+//        context.LoanDisbursments.Add(model);
+
+//        await context.SaveChangesAsync();
+
+//        await context.Customers.Where(x => x.CustomerId == req.CustomerRefId)
+//            .ExecuteUpdateAsync(p => p.SetProperty(x => x.IsLoanActive, true));
+
+//        await context.LoanRequests.Where(x => x.LoanRequestId == req.LoanRequestId &&
+//                                              x.CustomerRefId == req.CustomerRefId)
+//            .ExecuteUpdateAsync(prop => prop
+//                .SetProperty(p => p.LoanRequestStatusRefId, (int)RequestStatus.Completed)
+//                .SetProperty(p => p.ModifiedDt, DateTime.UtcNow));
+
+//        await trans.CommitAsync();
+
+//        return Result.Success(new string("New Loan Disbursement was added."));
+//    }
+//    catch (DbUpdateException ex)
+//    {
+//        await trans.RollbackAsync();
+
+//        return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}"));
+//    }
+//}

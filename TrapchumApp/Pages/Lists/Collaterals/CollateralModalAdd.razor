@@ -1,10 +1,18 @@
-﻿@using Applications.Features.LoanRequests.Services
+﻿@using Applications.Features.Addresses
+@using Applications.Features.Customers.Services
+@using Applications.Features.Employees
+@using Applications.Features.LoanRequests.Services
 @using Applications.Responses.Lists.Collaterals
 @using Domains.Models.Collaterals
 @using TrapchumApp.Services
+ollaterals
+@using TrapchumApp.Services
+laterals
+@using TrapchumApp.Services
 
-<EditForm Model="model" @ref="editForm">
+<EditForm  @ref="editForm" EditContext="@editContext">
     <DataAnnotationsValidator />
+    <ValidationSummary />
     <input type="hidden" @bind="model.CollateralId" />
     <RadzenFieldset Text="Summary Information">
         <RadzenRow AlignItems="AlignItems.Center" class="rz-my-2">
@@ -42,7 +50,7 @@
                                 Responsive
                                 ColumnWidth="15rem"
                                 EditMode="DataGridEditMode.Single"
-                                @ref="propertiesGrid"
+                                @ref="@propertiesGrid"
                                 RowUpdate="@((arg)=>OnRowUpdate(arg,CollateralTypeEnum.Property))"
                                 RowCreate="@((arg)=>OnRowCreate(arg,CollateralTypeEnum.Property))"
                                 Data="@_properties">
@@ -210,8 +218,8 @@
                                 TItem="VCollateralLines"
                                 Responsive
                                 ColumnWidth="15rem"
-                                EditMode="DataGridEditMode.Multiple"
-                                @ref="personalGrid"
+                                EditMode="DataGridEditMode.Single"
+                                @ref="@personalGrid"
                                 RowUpdate="@((arg)=>OnRowUpdate(arg,CollateralTypeEnum.Personal))"
                                 RowCreate="@((arg)=>OnRowCreate(arg,CollateralTypeEnum.Personal))"
                                 Data="@_personals">
@@ -341,6 +349,7 @@
                                 <RadzenButton Click="@(() => EditRow(c, CollateralTypeEnum.Personal))"
                                               Icon="@IconNames.EditPen"
                                               Variant="Variant.Text"
+                                              @onclick:stopPropagation="true"
                                               ButtonStyle="ButtonStyle.Secondary"
                                               Size="ButtonSize.ExtraSmall">
                                 </RadzenButton>

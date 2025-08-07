@@ -1,4 +1,5 @@
 using Applications.Extensions.mappers;
+using Applications.Features.Collaterals.Requests;
 using Applications.Requests.Lists.Collaterals;
 using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.ViewModels.Customers;

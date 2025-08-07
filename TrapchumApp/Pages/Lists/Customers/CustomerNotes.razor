@@ -1,4 +1,10 @@
-﻿@using Applications.Features.LoanRequests.Services
+﻿@using Applications.Features.Addresses
+@using Applications.Features.Branches
+@using Applications.Features.Currencies
+@using Applications.Features.Customers.Services
+@using Applications.Features.Customers.UseCases
+@using Applications.Features.Employees
+@using Applications.Features.LoanRequests.Services
 @using Domains.Models.Identity
 @using Microsoft.AspNetCore.Components.Authorization
 @using TrapchumApp.Services
@@ -7,7 +13,7 @@
              Visible="ShowCommand"
              AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
     <RadzenButton ButtonStyle="ButtonStyle.Primary"
-                  Click="AddNewNote"
+                  Click="@AddNewNote"
                   Visible="@(ShowAdd && ShowCommand)"
                   Size="ButtonSize.Small" Icon="add" Text="Add Note"></RadzenButton>
 </RadzenStack>
@@ -25,10 +31,9 @@
                               Title="Create By"
                               Property="CreditAgentName"></RadzenDataGridColumn>
         <RadzenDataGridColumn Title="Description" Property="Description"></RadzenDataGridColumn>
-        <RadzenDataGridColumn 
-                        Width="6rem" 
-                        Title="Created"
-                        Property="Created">
+        <RadzenDataGridColumn Width="6rem"
+                              Title="Created"
+                              Property="Created">
             <Template>
                 @context.Created.DayFirst()
             </Template>
@@ -42,6 +47,13 @@
     [Parameter] public bool ShowAdd { get; set; } = false;
     [Parameter] public bool ShowCommand { get; set; } = false;
     [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+
+    private readonly GetCustomerNotesUseCase _custNoteGet;
+
+    public CustomerNotes(GetCustomerNotesUseCase custNoteGet)
+    {
+        _custNoteGet = custNoteGet;
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -81,17 +93,12 @@
 
     async Task GetCustomerNotes(string? customerId)
     {
-        var noteResponse = await _customerService.GetCusomerNotesAsync(customerId);
+        var rsp = await _custNoteGet.ExecuteAsync(customerId);
 
-        if (noteResponse.IsSuccess)
+        if (rsp.IsSuccess && rsp.Data is not null)
         {
-            Notes = noteResponse.Data!;
-        }
-        else
-        {
-            Notes = [];
-        }
-
+            Notes = rsp.Data;
+        } 
         StateHasChanged();
     }
 

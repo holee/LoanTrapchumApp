@@ -10,10 +10,10 @@ public static class CollateralSubTypeMapper
         return new CollateralSubType
         {
             CollateralTypeRefId = dto.CollateralTypeRefId,
-            CollateralSubTypeName = dto.SubTypeName,    
+            CollateralSubTypeName = dto.SubTypeName,
             LoanSizeAmuntMin = dto.LoanSizeAmuntMin,
             LoanSizeAmuntMax = dto.LoanSizeAmuntMax,
-            IsActive = dto.IsActive,
+            IsActive = dto.IsActive ?? true,
             ValueRate = dto.ValueRate,
             CollateralSubTypeNameInKhmer = dto.SubTypeNameInKhmer,
         };
@@ -24,7 +24,7 @@ public static class CollateralSubTypeMapper
         {
             Id = dto.Id,
             CollateralTypeRefId = dto.CollateralTypeRefId,
-            CollateralSubTypeName = dto.SubTypeName,    
+            CollateralSubTypeName = dto.SubTypeName,
             LoanSizeAmuntMin = dto.LoanSizeAmuntMin,
             LoanSizeAmuntMax = dto.LoanSizeAmuntMax,
             IsActive = dto.IsActive,
@@ -32,6 +32,6 @@ public static class CollateralSubTypeMapper
             CollateralSubTypeNameInKhmer = dto.SubTypeNameInKhmer,
         };
     }
-    
-    
+
+
 }

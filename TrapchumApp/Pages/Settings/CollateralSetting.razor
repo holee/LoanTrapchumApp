@@ -1,6 +1,10 @@
-﻿@using Applications.Features.LoanRequests.Services
+﻿@using Applications.Features.Addresses
+@using Applications.Features.Branches
+@using Applications.Features.Currencies
+@using Applications.Features.Customers.Services
+@using Applications.Features.Employees
+@using Applications.Features.LoanRequests.Services
 @using Applications.Responses.Lists.Collaterals
-@using Applications.Services.Settings
 @using Domains.Models.Collaterals
 @using TrapchumApp.Pages.Lists.Collaterals
 <style>
@@ -129,8 +133,8 @@
             </EditTemplate>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Property="@nameof(CollateralSubType.IsActive)"
-                              Title="IsActive"
-                              Width="6rem"
+                              Title="Status"
+                              Width="4rem"
                               Filterable="false"
                               Sortable="false"
                               TextAlign="TextAlign.Center"
@@ -150,19 +154,15 @@
                               Sortable="false"
                               Context="c">
             <Template>
-                <RadzenButton Icon="@IconNames.EditPen"
+                <RadzenButton Icon="@IconNames.Edit"
                               Variant="Variant.Text"
                               Size="ButtonSize.ExtraSmall"
                               class="rz-my-1 rz-ms-1"
                               Click="@(args => EditRow(c))"
                               @onclick:stopPropagation="true" />
-                @*                 <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger"
-                              Variant="Variant.Flat" Size="ButtonSize.ExtraSmall"
-                              Shade="Shade.Lighter" class="rz-my-1 rz-ms-1"
-                              Click="@(args => DeleteRow(c))" @onclick:stopPropagation="true" /> *@
             </Template>
             <EditTemplate Context="order">
-                <RadzenButton Icon="@IconNames.Checked" ButtonStyle="ButtonStyle.Success"
+                <RadzenButton Icon="@IconNames.Save" ButtonStyle="ButtonStyle.Success"
                               Variant="Variant.Text"
                               Size="ButtonSize.ExtraSmall"
                               Click="@((args) => SaveRow(order))"
@@ -170,11 +170,8 @@
                 <RadzenButton Icon="@IconNames.Undo" ButtonStyle="ButtonStyle.Danger"
                               Variant="Variant.Text"
                               Size="ButtonSize.ExtraSmall"
-                              class="rz-my-1 rz-ms-1" Click="@((args) => CancelEdit(order))" aria-label="Cancel" />
-                @*                 <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger"
-                              Variant="Variant.Flat" Size="ButtonSize.ExtraSmall"
-                              Shade="Shade.Lighter" class="rz-my-1 rz-ms-1"
-                              Click="@(args => DeleteRow(order))" aria-label="Delete" /> *@
+                              class="rz-my-1 rz-ms-1" 
+                              Click="@((args) => CancelEdit(order))" aria-label="Cancel" />
             </EditTemplate>
         </RadzenDataGridColumn>
     </Columns>
@@ -190,7 +187,7 @@
     {
         var options = new DialogOptions
         {
-            Width = "65vw",
+            AutoFocusFirstElement=false,
         };
         var dia= await DialogService.OpenAsync<SubTypeCollateralCreate>("Add", options: options);
 

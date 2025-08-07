@@ -1,9 +1,9 @@
 using Applications.Enumerations;
 using Applications.Extensions.Identity.Authorizations.Extensions;
 using Applications.Extensions.Identity.Policies;
+using Applications.Features.Currencies;
 using Applications.Requests.Transactions.OpenBranches;
 using Applications.Responses.ViewModels.Currencies;
-using Applications.Services.Currencies;
 using Applications.Services.Transactions.Branches;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;

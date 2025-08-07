@@ -1,5 +1,10 @@
 ﻿@page "/App/Account/Journals/{BranchId:int}/Branches"
 @attribute [Authorize(Policy = "AccountOnly")]
+@using Applications.Features.Addresses
+@using Applications.Features.Branches
+@using Applications.Features.Currencies
+@using Applications.Features.Customers.Services
+@using Applications.Features.Employees
 @using Applications.Features.LoanRequests.Services
 @using Applications.Responses.ViewModels.Journals
 @using Microsoft.AspNetCore.Components.Web

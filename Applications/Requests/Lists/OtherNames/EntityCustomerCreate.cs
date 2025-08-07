@@ -3,6 +3,7 @@
 public sealed class EntityCustomerCreate : BaseEntityNamesCreate
 {
     public string? CustomerId { get; set; }
+    public string? CustomerKey { get; set; }
     public int? Dependents { get; set; }
     public int? NoOfChildren { get; set; }
     public decimal? Income { get; set; }

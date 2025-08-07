@@ -1,12 +1,12 @@
 using Applications.Calculations;
 using Applications.Extensions.Maths;
 using Applications.Extensions.NumberExtensions;
+using Applications.Features.Settings.UseCases;
 using Applications.Interfaces.Loans;
 using Applications.Requests.Loans.Payments;
 using Applications.Requests.Transactions.ForiegnExchanges;
 using Applications.Requests.Transactions.LoanTransactions;
 using Applications.Responses.ViewModels.Currencies;
-using Applications.Services.Settings;
 using Domains.Models.Settings;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;

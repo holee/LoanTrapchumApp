@@ -37,7 +37,6 @@ public sealed record ErrorResponse
     public ErrorCode Code { get; } = ErrorCode.Ok;
     public string ErrMessage { get; } = string.Empty;
     public IDictionary<string, string[]>? FieldErrors { get; set; }
-
     public bool HasErrors => FieldErrors!.Any();
     public static ErrorResponse Validation(string errorMessages) => new(ErrorCode.Validation, errorMessages);
     public static ErrorResponse Validation(IDictionary<string, string[]>? fieldErrors) => new(ErrorCode.Validation, fieldErrors);

@@ -1,0 +1,18 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Applications.Features.Loans.UseCases
+{
+    public sealed class GetLoansUseCase : IGetLoansUseCase
+    {
+
+    }
+
+    public interface IGetLoansUseCase
+    {
+
+    }
+}

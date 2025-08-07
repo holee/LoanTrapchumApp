@@ -1,7 +1,7 @@
 using Applications.Extensions;
+using Applications.Features.Settings.UseCases;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Settings;
-using Applications.Services.Settings;
 using Radzen;
 
 namespace TrapchumApp.Pages.Identity;

@@ -1,4 +1,5 @@
 using Applications.Extensions;
+using Applications.Features.Collaterals.Requests;
 using Applications.Features.Customers.Services;
 using Applications.Requests.Lists.Collaterals;
 using Applications.Responses.Lists.Collaterals;

@@ -1,5 +1,5 @@
+using Applications.Features.Settings.UseCases;
 using Applications.Requests.Settings;
-using Applications.Services.Settings;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 

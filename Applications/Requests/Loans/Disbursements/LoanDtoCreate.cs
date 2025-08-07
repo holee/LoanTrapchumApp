@@ -16,7 +16,7 @@ public sealed class LoanDtoCreate : CalculatorBase, ICalculatorBase
     public int? InstallmentNo { get; set; }
     public string? UserRefId { get; set; }
     public int? LoanProductRefId { get; set; }
-    public string? LoanAccountCode { get; set; }
+    public long LoanAccountCode { get; set; }
     public int? Period { get; set; }
     public string? PeriodName { get; set; }
     public int? CurrencyRefId { get; set; }

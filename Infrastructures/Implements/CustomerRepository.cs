@@ -26,58 +26,32 @@ public sealed class CustomerRepository(
     ILogger<CustomerRepository> logger) : ICustomerService
 {
 
-    public async Task<Pager<VCustomerList>> GetCustomersAsync(QueryParam q, CancellationToken cancellation = default)
+    public async Task<Pager<VCustomerList>> GetCustomersAsync(string? customerId, QueryParam param, CancellationToken cancellation = default)
     {
-
         await using var cxt = await contextFactory.CreateDbContextAsync(cancellation);
-
-        IQueryable<VCustomerList> queries = cxt.VCustomerLists.OrderByDescending(x => x.ModifiedDT);
-
-        var counts = queries.Count();
-
-        if (!q.IsIncludeInActive)
-        {
-            queries = queries.Where(x => x.IsActive == true);
-        }
-
-        if (!string.IsNullOrEmpty(q.Filter))
-        {
-            queries = queries.Where(x => (EF.Functions.Like(x.FullName!, $"%{q.Filter}%") ||
-                                          EF.Functions.Like(EF.Functions.Collate(x.CustomerId, "Khmer_100_CI_AI_SC_UTF8"),
-                                              $"%{q.Filter}%") ||
-                                          EF.Functions.Like(x.AltName!, $"%{q.Filter}%") ||
-                                          EF.Functions.Like(x.Phone!, $"%{q.Filter}%")));
-        }
-
-        if (q.SortDescending)
-        {
-            queries = queries.OrderByDescending(x => EF.Property<object>(x, q.SortColumn));
-        }
-
-        var count = queries.Count();
-
-        var customers = queries.AsNoTracking().Skip(q.Skip).Take(q.PageSize);
-
-        return new Pager<VCustomerList>
-        {
-            Items = await customers.ToListAsync(),
-            Count = count,
-        };
-    }
-
-    public async Task<Pager<VCustomerList>> GetCustomersAsync(string? customerId, QueryParam param)
-    {
-        await using var cxt = await contextFactory.CreateDbContextAsync();
 
         var queries = cxt.VCustomerLists.AsNoTracking().Where(x => x.IsLoanActive == false);
 
-        if (!string.IsNullOrEmpty(param.Filter))
+
+        if (!string.IsNullOrEmpty(param.Filter) && string.IsNullOrEmpty(param.FilterColumn))
         {
-            queries = queries.Where(x => EF.Functions.Like(x.FullName!, $"{param.Filter}%") ||
-                                         EF.Functions.Like(x.AltName!, $"{param.Filter}%") ||
-                                         EF.Functions.Like(x.AltPhone!, $"{param.Filter}%") ||
-                                         EF.Functions.Like(x.FirstName, $"{param.Filter}%") ||
-                                         EF.Functions.Like(x.LastName, $"{param.Filter}%"));
+            queries = queries.Where(x => EF.Functions.Like(x.FullName ?? "", $"{param.Filter}%") ||
+                                         EF.Functions.Like(x.AltName ?? "", $"{param.Filter}%") ||
+                                         EF.Functions.Like(x.AltPhone ?? "", $"{param.Filter}%") ||
+                                         EF.Functions.Like(x.FirstName ?? "", $"{param.Filter}%") ||
+                                         EF.Functions.Like(x.LastName ?? "", $"{param.Filter}%") ||
+                                         x.CustomerKey == param.Filter);
+        }
+
+        if (!string.IsNullOrEmpty(param.Filter) && !string.IsNullOrEmpty(param.FilterColumn))
+        {
+            var property = typeof(VCustomerList).GetProperty(param.FilterColumn);
+
+            if (property != null)
+            {
+                queries = queries.Where(e =>
+                    EF.Functions.Like(EF.Property<string>(e, param.FilterColumn), $"{param.Filter}%"));
+            }
         }
 
 
@@ -86,20 +60,19 @@ public sealed class CustomerRepository(
             queries = queries.Where(x => x.CustomerId == customerId);
         }
 
-        var totalCountTask = await queries.CountAsync();
+        queries = ApplyOrdering(queries, param);
+
+        var countTask =await queries.CountAsync(cancellation);
 
         var dataTask = await queries
-                        .OrderBy(x => x.FirstName)
-                        .ThenBy(x => x.LastName)
                         .Skip(param.Skip)
                         .Take(param.PageSize)
-                        .ToListAsync();
+                        .ToListAsync(cancellation);
 
-        return new Pager<VCustomerList>(dataTask, totalCountTask);
+        return new Pager<VCustomerList>(dataTask, countTask);
 
     }
-
-
+   
     public async Task<Result<VCustomerList>> GetCustomerDetailByIdAsync(string? customerId, bool include = false, CancellationToken cancellationToken = default)
     {
         logger.LogInformation("Fetching customer details for ID {CustomerId} (Include Related: {Include})", customerId, include);
@@ -133,36 +106,9 @@ public sealed class CustomerRepository(
         customer.CustomerExpenses = (await multi.ReadAsync<VCustomerExpenses>()).ToList();
         customer.CustomerNotes = (await multi.ReadAsync<VCustomerNotes>()).ToList();
         customer.CustomerActivities = (await multi.ReadAsync<VCustomerActivities>()).ToList();
-
         return Result.Success(customer);
 
     }
-
-    public async Task<Result<VCustomerList>> GetCustomerDetailByIdAsync(string? customerId, CancellationToken cancellationToken = default)
-    {
-        logger.LogInformation("Fetching customer details for ID {CustomerId}", customerId);
-
-        await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
-
-        var customer = await context.VCustomerLists
-                            .Include(x => x.CustomerActivities)
-                            .Include(x => x.CustomerExpenses)
-                            .Include(x => x.CustomerIncomes)
-                            .Include(x => x.CustomerNotes)
-                            .Include(x => x.CollateralLines)
-                            .Include(x => x.LoanRequests)
-                            .Include(x => x.Loans)
-                            .AsSplitQuery()
-                            .AsNoTracking()
-                            .FirstOrDefaultAsync(x => x.CustomerId == customerId, cancellationToken);
-
-        if (customer is null)
-            return Result.Failure<VCustomerList>(ErrorResponse.NotFound("Customer Not Found."));
-
-        return Result.Success(customer);
-
-    }
-
     public async Task<Result<VCustomerList>> GetCustomerDetailByIdAsync(string? customerId, params IEnumerable<Expression<Func<VCustomerList, object>>> includes)
     {
         logger.LogInformation("Fetching customer details for ID {CustomerId}", customerId);
@@ -190,33 +136,17 @@ public sealed class CustomerRepository(
         return Result.Success(customer);
 
     }
-
-
-
-    public async Task<Result<IEnumerable<VLoanRequests>>> GetCustomerLoanRequestAsync(int? branchId, string? customerId, bool onlyComplete = false, CancellationToken cancellation = default)
+    public async Task<Result<IEnumerable<VLoanRequests>>> GetCustomerLoanRequestAsync(string? customerId, bool onlyComplete = false, CancellationToken cancellation = default)
     {
         try
         {
-
             using var db = await dapperFactory.CreateConnectionAsync(cancellation);
 
-            var sql = @"SELECT
-                            r.LoanRequestId,
-				            r.RequestDate,
-				            r.CreditAgentId,
-				            r.RequestAmount,
-				            r.AprovedAmount,
-				            r.AprovedBy,
-				            r.AprovedDate,
-				            r.CurrencyId,
-				            r.CurrencyName,
-				            r.AltName,
-				            r.BranchId,
-				            r.BranchName,
-				            r.[Status]
-                        FROM VLoanRequests r WHERE r.CustomerId=@customerId AND ((@onlyComplete='TRUE' AND r.StatusId=7) OR @onlyComplete='FALSE')";
-
-
+            var sql = @"SELECT *
+                            FROM VLoanRequests r 
+                        WHERE r.CustomerId=@customerId AND 
+                        ((@onlyComplete='TRUE' AND r.StatusId=7) OR 
+                        @onlyComplete='FALSE')";
             var parameters = new DynamicParameters();
             parameters.Add("@customerId", customerId);
             parameters.Add("@onlyComplete", onlyComplete);
@@ -232,116 +162,32 @@ public sealed class CustomerRepository(
             return Result.Failure<IEnumerable<VLoanRequests>>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
         }
     }
-
-
-
-
-
-    public async Task<Result<string>> AddCustomerNote(CustomerNote model)
+    public async Task<Result<IEnumerable<VLoanDisbursments>>> GetCustomerLoanAsync(string? customerId, CancellationToken cancellation = default)
     {
         try
         {
-            logger.LogInformation("try adding new customer note");
+            using var db = await dapperFactory.CreateConnectionAsync(cancellation);
 
-            await using var context = await contextFactory.CreateDbContextAsync();
+            var sql = @"SELECT * FROM  VLoanDisbursments r WHERE r.CustomerId=@customerId";
 
-            context.CustomerNote.Add(model);
+            var parameters = new DynamicParameters();
 
-            await context.SaveChangesAsync();
+            parameters.Add("@customerId", customerId);
 
-            return Result.Success(Messages.DataCreated);
-        }
-        catch (Exception e)
-        {
-            logger.LogError(e.Message, e);
-            return Result.Failure<string>(ErrorResponse.ServerError(e.Message));
-        }
-    }
+            var rsp = await db.QueryAsync<VLoanDisbursments>(sql, parameters);
 
-    public async Task<Result<string>> AddCustomerActivity(CustomerActivity model)
-    {
-        logger.LogInformation("try adding new customer note");
-        try
-        {
-            await using var context = await contextFactory.CreateDbContextAsync();
-
-            context.CustomerActivites.Add(model);
-
-            await context.SaveChangesAsync();
-
-            return Result.Success(Messages.DataCreated);
-        }
-        catch (Exception e)
-        {
-            logger.LogError(e.Message, e);
-            return Result.Failure<string>(ErrorResponse.ServerError(e.Message));
-        }
-    }
-
-    public async Task<Result<IEnumerable<T>>> GetCustomerNotes<T>(string? customerId, CancellationToken cancellation = default)
-        where T : class
-    {
-        logger.LogInformation("try adding new customer note");
-        try
-        {
-            using var connection = await dapperFactory.CreateConnectionAsync(cancellation);
-
-            var sql = @"
-                     SELECT 
-	                    c.NoteId,
-	                    c.CustomerRefId,
-	                    CASE
-		                    WHEN c.CreditAgentName IS NULL THEN 'Administrator'
-		                    ELSE c.CreditAgentName
-	                    END AS CreditAgentName,
-	                    c.Description,
-	                    c.Created
-                    FROM VCustomerNotes c WHERE c.CustomerRefId=@customerId";
-
-            var notes = await connection.QueryAsync<T>(sql, new { customerId });
-
-            if (notes.Any())
+            if (!rsp.Any())
             {
-                return Result.Success(notes);
+                return Result.Failure<IEnumerable<VLoanDisbursments>>(ErrorResponse.NotFound("No note found."));
             }
 
-            return Result.Failure<IEnumerable<T>>(ErrorResponse.NotFound("There is no any notes."));
+            return Result.Success(rsp);
         }
-        catch (Exception e)
+        catch (SqlException ex)
         {
-            logger.LogError(e.Message, e);
-
-            return Result.Failure<IEnumerable<T>>(ErrorResponse.ServerError(e.Message));
+            return Result.Failure<IEnumerable<VLoanDisbursments>>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
         }
     }
-
-    public async Task<Result<IEnumerable<T>>> GetCustomerActivies<T>(string? customerId, CancellationToken cancellation = default) where T : class
-    {
-        logger.LogInformation("try adding new customer note");
-        try
-        {
-            await using var context = await contextFactory.CreateDbContextAsync(cancellation);
-            var notes = await context.Database
-                .SqlQuery<T>($"SELECT * FROM VCustomerActivities WHERE CustomerRefId={customerId}")
-                .ProjectToType<T>()
-                .AsNoTracking()
-                .ToListAsync();
-
-            if (notes.Any())
-            {
-                return Result.Success<IEnumerable<T>>(notes);
-            }
-
-            return Result.Failure<IEnumerable<T>>(ErrorResponse.NotFound("Something went wrong with server."));
-        }
-        catch (Exception e)
-        {
-            logger.LogError(e.Message, e);
-
-            return Result.Failure<IEnumerable<T>>(ErrorResponse.ServerError(e.Message));
-        }
-    }
-
     public async Task<Result<EntityNames>> GetCustomerByIdAsync(string? customerId)
     {
 
@@ -359,7 +205,6 @@ public sealed class CustomerRepository(
 
         return Result.Success(customer);
     }
-
     public async Task<Result<Customer>> GetCustomerByIdAsync(string? customerId, params string[] includes)
     {
 
@@ -392,7 +237,6 @@ public sealed class CustomerRepository(
 
         return Result.Success(customer);
     }
-
     public async Task<Result<VCustomerList>> GetCustomerForRequestLoanAsync(string? customerId, CancellationToken cancellation = default)
     {
 
@@ -431,7 +275,6 @@ public sealed class CustomerRepository(
 
         return Result.Success(items);
     }
-
     public async Task<Result<IEnumerable<VLoanDisbursments>>> GetCustomerLoanHistoryAsync(string? customerId)
     {
         using var db = dapperFactory.CreateConnection();
@@ -442,7 +285,6 @@ public sealed class CustomerRepository(
 
         return Result.Success(loanHistories);
     }
-
     public async Task<Result<string>> DeleteCustomerAsync(string? customerId, CancellationToken cancellation = default)
     {
         try
@@ -477,8 +319,6 @@ public sealed class CustomerRepository(
             return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
         }
     }
-
-
     public async Task<Result<string>> MakeCustomerInActiveAsync(string? customerId, bool state, CancellationToken cancellation = default)
     {
         try
@@ -506,7 +346,6 @@ public sealed class CustomerRepository(
             return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
         }
     }
-
     public async Task<Result<string>> CreateAsync(EntityNames model, CancellationToken cancellation = default)
     {
         try
@@ -517,6 +356,12 @@ public sealed class CustomerRepository(
             }
 
             await using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+            var customerSequence = await GetMaxSequenceNUmber(context);
+
+            model.Customer!.CustomerInfId = customerSequence;
+
+            model.Customer.CustomerKey = CreateCustomerKey(customerSequence, model.FirstName, model.LastName);
 
             context.EntityNames.Add(model);
 
@@ -529,7 +374,6 @@ public sealed class CustomerRepository(
             return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
         }
     }
-
     public async Task<Result<string>> UpdateAsync(EntityNames model, CancellationToken cancellation = default)
     {
         try
@@ -553,8 +397,6 @@ public sealed class CustomerRepository(
             return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
         }
     }
-
-
     private async Task<bool> IsCustomerInUsed(string? customerId, CancellationToken cancellation = default)
     {
         await using var _context = await contextFactory.CreateDbContextAsync(cancellation);
@@ -564,7 +406,6 @@ public sealed class CustomerRepository(
                                    .AnyAsync(x => x.CustomerRefId == customerId, cancellation);
         return customerInUse;
     }
-
     private async Task<bool> IsCustomerRegister(string? customerId, string? phoneNumber, string? idCard, CancellationToken cancellation = default)
     {
         if (string.IsNullOrWhiteSpace(phoneNumber))
@@ -582,11 +423,101 @@ public sealed class CustomerRepository(
                                 cancellation);
 
     }
+    private async Task<long> GetMaxSequenceNUmber(DataContext context)
+    {
+        var maxSequence = await context.EntityNames
+                      .Include(x => x.Customer)
+                      .AsNoTracking()
+                      .Select(x => x.Customer!.CustomerInfId)
+                      .MaxAsync();
+        return maxSequence > 0 ? maxSequence + 1 : 1;
+    }
+    private string? CreateCustomerKey(long? customerSequence, string? firstName, string? lastName)
+    {
+        var customerKey = "";
+
+        if (!string.IsNullOrWhiteSpace(firstName))
+        {
+            var key = firstName.Substring(0, 1);
+
+            customerKey = $"{customerSequence}{key}".ToUpper();
+        }
+        else
+        {
+            var key = lastName?.Substring(0, 1);
+
+            customerKey = $"{customerSequence}{key}".ToUpper();
+        }
+
+        return customerKey;
+    }
+
+    private IQueryable<VCustomerList> ApplyOrdering(IQueryable<VCustomerList> query, QueryParam param)
+    {
+        if (!string.IsNullOrWhiteSpace(param.SortColumn))
+        {
+            var isDescending = param.SortDescending;
+
+            var property = typeof(VCustomerList).GetProperty(param.SortColumn);
+
+            if (property != null)
+            {
+                query = isDescending
+                    ? query.OrderByDescending(e => EF.Property<object>(e, param.SortColumn))
+                    : query.OrderBy(e => EF.Property<object>(e, param.SortColumn));
+            }
+        }
+        else
+        {
+            query = query.OrderBy(x => x.FirstName).ThenBy(x => x.LastName);
+        }
+
+        return query;
+    }
+
 
 }
 
 
 
+//public async Task<Pager<VCustomerList>> GetCustomersAsync(QueryParam q, CancellationToken cancellation = default)
+//{
+
+//    await using var cxt = await contextFactory.CreateDbContextAsync(cancellation);
+
+//    IQueryable<VCustomerList> queries = cxt.VCustomerLists.OrderByDescending(x => x.ModifiedDT);
+
+//    var counts = queries.Count();
+
+//    if (!q.IsIncludeInActive)
+//    {
+//        queries = queries.Where(x => x.IsActive == true);
+//    }
+
+//    if (!string.IsNullOrEmpty(q.Filter))
+//    {
+//        queries = queries.Where(x => (EF.Functions.Like(x.FullName!, $"%{q.Filter}%") ||
+//                                      EF.Functions.Like(EF.Functions.Collate(x.CustomerId, "Khmer_100_CI_AI_SC_UTF8"),
+//                                          $"%{q.Filter}%") ||
+//                                      EF.Functions.Like(x.AltName!, $"%{q.Filter}%") ||
+//                                      EF.Functions.Like(x.Phone!, $"%{q.Filter}%")));
+//    }
+
+//    if (q.SortDescending)
+//    {
+//        queries = queries.OrderByDescending(x => EF.Property<object>(x, q.SortColumn));
+//    }
+
+//    var count = queries.Count();
+
+//    var customers = queries.AsNoTracking().Skip(q.Skip).Take(q.PageSize);
+
+//    return new Pager<VCustomerList>
+//    {
+//        Items = await customers.ToListAsync(),
+//        Count = count,
+//    };
+//}
 
 //public async Task<Result<VCustomerList>> GetCustomerDetailByIdAsync(string? customerId, bool include = false)
 //{
@@ -709,4 +640,28 @@ public sealed class CustomerRepository(
 //        .AsNoTracking()
 //        .ToListAsync();
 //    return Result.Success<IEnumerable<T>>(results);
+//}
+//public async Task<Result<VCustomerList>> GetCustomerDetailByIdAsync(string? customerId, CancellationToken cancellationToken = default)
+//{
+//    logger.LogInformation("Fetching customer details for ID {CustomerId}", customerId);
+
+//    await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+
+//    var customer = await context.VCustomerLists
+//                        .Include(x => x.CustomerActivities)
+//                        .Include(x => x.CustomerExpenses)
+//                        .Include(x => x.CustomerIncomes)
+//                        .Include(x => x.CustomerNotes)
+//                        .Include(x => x.CollateralLines)
+//                        .Include(x => x.LoanRequests)
+//                        .Include(x => x.Loans)
+//                        .AsSplitQuery()
+//                        .AsNoTracking()
+//                        .FirstOrDefaultAsync(x => x.CustomerId == customerId, cancellationToken);
+
+//    if (customer is null)
+//        return Result.Failure<VCustomerList>(ErrorResponse.NotFound("Customer Not Found."));
+
+//    return Result.Success(customer);
+
 //}

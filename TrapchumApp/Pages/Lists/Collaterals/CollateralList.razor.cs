@@ -1,9 +1,9 @@
 using Applications.Extensions;
+using Applications.Features.Customers.Services;
 using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Collaterals;
 using Applications.Responses.ViewModels.Customers;
-using Applications.Services.Customers;
 using Applications.Services.LIsts;
 using Radzen;
 using Radzen.Blazor;
@@ -62,93 +62,7 @@ public partial class CollateralList
         pageIndex = 0;
     }
 
-    async Task AddedMoreCollateral(string? Id)
-    {
-        try
-        {
-            var response = await _cusService.GetCustomersAsync(null, 25, CustomerInActive, false);
 
-            if (response.IsSuccess)
-            {
-                custlist = response.Data!;
-
-                cusName = custlist.Select(x => new CustomerCollateral
-                {
-                    CustomerId = x.CustomerId,
-                    Name = x.AltName,
-                });
-            }
-            collateralTypes = await _colService.GetCollateralTypes();
-            collateralProperties = await _colService.GetCollateralSubTypes(1);
-            collateralPersonals = await _colService.GetCollateralSubTypes(3);
-            IsShowAdd = true;
-            selectedIndex = 1;
-            tabs!.Reload();
-            var rsp = await _colService.GetCollateralByIdAsync(Id);
-            if (rsp.IsSuccess)
-            {
-                var collateral = rsp.Data!;
-                CollateralId = collateral!.CollateralId;
-                SelectedCollateral!.CollateralId = collateral!.CollateralId;
-                SelectedCustomer!.CustomerId = collateral!.CollateralId;
-                SelectedCustomer!.Name = collateral!.CustomerName;
-                SelectedCollateral.CustomerName = collateral.CustomerName;
-                SelectedCollateral.CollateralLines = collateral!.CollateralLines;
-                SelectedCollateral.Remark = collateral!.Remark;
-                SelectedCollateral.DocumentKeeping = collateral!.DocumentKeeping;
-                SelectedCollateral.RegisterDate = collateral!.RegisterDate;
-
-            }
-            StateHasChanged();
-
-            // IsProgress = false;
-        }
-        catch (Exception ex)
-        {
-            NotificationService.Notify(NotificationSeverity.Error, "Exception", ex!.Message);
-            Console.WriteLine(ex.Message);
-            // IsProgress = false;
-
-        }
-        await InvokeAsync(StateHasChanged);
-    }
-    async void AddNewTab()
-    {
-        // IsProgress = true;
-        try
-        {
-            IsShowAdd = true;
-            selectedIndex = 1;
-            tabs!.Reload();
-            SelectedCollateral = new();
-            SelectedCustomer = new();
-            var response = await _cusService.GetCustomersAsync(null, 25, CustomerInActive, false);
-            if (response.IsSuccess)
-            {
-                custlist = response.Data!;
-                if (custlist.Any())
-                {
-                    cusName = custlist.Select(x => new CustomerCollateral
-                    {
-                        CustomerId = x.CustomerId,
-                        Name = x.AltName,
-                    });
-                }
-            }
-            collateralTypes = await _colService.GetCollateralTypes();
-            collateralProperties = await _colService.GetCollateralSubTypes(1);
-            collateralPersonals = await _colService.GetCollateralSubTypes(3);
-            StateHasChanged();
-        }
-        catch (Exception ex)
-        {
-            NotificationService.Notify(NotificationSeverity.Error, "Exception", ex!.Message);
-            Console.WriteLine(ex.Message);
-            // IsProgress = false;
-
-        }
-
-    }
     void Delete(string? customerId) { }
     void AddDetailsTab(string? customerId)
     {
@@ -233,3 +147,94 @@ public partial class CollateralList
 
     }
 }
+
+
+
+//async Task AddedMoreCollateral(string? Id)
+//{
+//    try
+//    {
+//        var response = await _cusService.GetCustomersAsync(null, 25, CustomerInActive, false);
+
+//        if (response.IsSuccess)
+//        {
+//            custlist = response.Data!;
+
+//            cusName = custlist.Select(x => new CustomerCollateral
+//            {
+//                CustomerId = x.CustomerId,
+//                Name = x.AltName,
+//            });
+//        }
+//        collateralTypes = await _colService.GetCollateralTypes();
+//        collateralProperties = await _colService.GetCollateralSubTypes(1);
+//        collateralPersonals = await _colService.GetCollateralSubTypes(3);
+//        IsShowAdd = true;
+//        selectedIndex = 1;
+//        tabs!.Reload();
+//        var rsp = await _colService.GetCollateralByIdAsync(Id);
+//        if (rsp.IsSuccess)
+//        {
+//            var collateral = rsp.Data!;
+//            CollateralId = collateral!.CollateralId;
+//            SelectedCollateral!.CollateralId = collateral!.CollateralId;
+//            SelectedCustomer!.CustomerId = collateral!.CollateralId;
+//            SelectedCustomer!.Name = collateral!.CustomerName;
+//            SelectedCollateral.CustomerName = collateral.CustomerName;
+//            SelectedCollateral.CollateralLines = collateral!.CollateralLines;
+//            SelectedCollateral.Remark = collateral!.Remark;
+//            SelectedCollateral.DocumentKeeping = collateral!.DocumentKeeping;
+//            SelectedCollateral.RegisterDate = collateral!.RegisterDate;
+
+//        }
+//        StateHasChanged();
+
+//        // IsProgress = false;
+//    }
+//    catch (Exception ex)
+//    {
+//        NotificationService.Notify(NotificationSeverity.Error, "Exception", ex!.Message);
+//        Console.WriteLine(ex.Message);
+//        // IsProgress = false;
+
+//    }
+//    await InvokeAsync(StateHasChanged);
+//}
+
+//async void AddNewTab()
+//{
+//    // IsProgress = true;
+//    try
+//    {
+//        IsShowAdd = true;
+//        selectedIndex = 1;
+//        tabs!.Reload();
+//        SelectedCollateral = new();
+//        SelectedCustomer = new();
+//        var response = await _cusService.GetCustomersAsync(null, 25, CustomerInActive, false);
+//        if (response.IsSuccess)
+//        {
+//            custlist = response.Data!;
+//            if (custlist.Any())
+//            {
+//                cusName = custlist.Select(x => new CustomerCollateral
+//                {
+//                    CustomerId = x.CustomerId,
+//                    Name = x.AltName,
+//                });
+//            }
+//        }
+//        collateralTypes = await _colService.GetCollateralTypes();
+//        collateralProperties = await _colService.GetCollateralSubTypes(1);
+//        collateralPersonals = await _colService.GetCollateralSubTypes(3);
+//        StateHasChanged();
+//    }
+//    catch (Exception ex)
+//    {
+//        NotificationService.Notify(NotificationSeverity.Error, "Exception", ex!.Message);
+//        Console.WriteLine(ex.Message);
+//        // IsProgress = false;
+
+//    }
+
+//}

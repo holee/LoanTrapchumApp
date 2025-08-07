@@ -12,7 +12,7 @@ public sealed class LoanDisbursment : BaseEntity
     public string? TransactionsRefId { get; set; }
     public string? AccIdInsurance { get; set; }
     public string? LinkWithAccountRefId { get; set; }
-    public string? LoanAccountCode { get; set; }
+    public long LoanAccountCode { get; set; }
     public string? InstallmentType { get; set; }
     public string? ContractNumber { get; set; }
     public string? AccountNumber { get; set; }
@@ -25,8 +25,8 @@ public sealed class LoanDisbursment : BaseEntity
     public int? RepaymentModeRefId { get; set; }
     public int? LoanSubTypeRefId { get; set; }
     public int? LoanCategoryRefId { get; set; }
-    public int? BankRefId { get; set; }
-    public int? LoanProductRefId { get; set; }
+    public int? BankRefId { get; set; } = 11;
+    public int? LoanProductRefId { get; set; } = 1;
     public int? LoanCheckSum { get; set; }
     public int? Installments { get; set; }
     public int? CurrencyRefId { get; set; }

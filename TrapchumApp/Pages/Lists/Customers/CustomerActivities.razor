@@ -1,11 +1,17 @@
-﻿@using Applications.Features.LoanRequests.Services
+﻿@using Applications.Features.Addresses
+@using Applications.Features.Branches
+@using Applications.Features.Currencies
+@using Applications.Features.Customers.Services
+@using Applications.Features.Customers.UseCases
+@using Applications.Features.Employees
+@using Applications.Features.LoanRequests.Services
 @using TrapchumApp.Services
 <RadzenStack Orientation="Orientation.Horizontal"
              class="rz-mb-2"
              Visible="ShowCommand"
              AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
     <RadzenButton Text="Add Activity"
-                  Click="AddNewActivity"
+                  Click="@AddNewActivity"
                   Icon="add"
                   Visible="@(ShowAdd && ShowCommand)"
                   ButtonStyle="ButtonStyle.Primary"
@@ -28,14 +34,16 @@
                 TItem="VCustomerActivities"
                 Density="Density.Compact">
     <Columns>
-        <RadzenDataGridColumn Property="ActivityId" Context="c" Title="#" Width="3rem">
+        <RadzenDataGridColumn Context="c" Width="5rem"
+                              Property="@nameof(VCustomerActivities.CreatedDT)" 
+                              Title="Created">
             <Template>
-                @c.ActivityId
+                @c.CreatedDT.DayFirst()
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Context="c"
                               Width="10rem"
-                              Property="@nameof(VCustomerActivities.Description)" Title="Expense">
+                              Property="@nameof(VCustomerActivities.Description)" Title="Description">
             <Template>
                 @c.Description
             </Template>
@@ -45,15 +53,10 @@
                               TextAlign="TextAlign.Center"
                               Property="@nameof(VCustomerActivities.Status)" Title="Status">
             <Template>
-                <RadzenSwitch Value="@c.Status" />
+                <RadzenCheckBox Value="@c.Status" ReadOnly />
             </Template>
         </RadzenDataGridColumn>
-        <RadzenDataGridColumn Context="c" Width="5rem"
-                              Property="@nameof(VCustomerActivities.CreatedDT)" Title="CreateNewUserd">
-            <Template>
-                @c.CreatedDT.DayFirst()
-            </Template>
-        </RadzenDataGridColumn>
+        
     </Columns>
     <LoadingTemplate>
         <RadzenProgressBarCircular ProgressBarStyle="ProgressBarStyle.Primary" Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
@@ -68,6 +71,14 @@
     [Parameter] public bool ShowReload { get; set; } = false;
     [Parameter] public bool ShowCommand { get; set; } = false;
     [Parameter] public IEnumerable<VCustomerActivities> Items { get; set; } = [];
+
+
+    private readonly GetCustomerActivityUseCase _custActivityGet;
+
+    public CustomerActivities(GetCustomerActivityUseCase custActivityGet)
+    {
+        _custActivityGet = custActivityGet;
+    }
 
     bool isLoading = false;
 
@@ -102,7 +113,7 @@
     {
         isLoading = true;
 
-        var rsp = await _customerService.GetCusomerActivies<VCustomerActivities>(CustomerId);
+        var rsp = await _custActivityGet.GetCustomerActivities(CustomerId);
 
         if (rsp.IsSuccess)
         {

@@ -1,23 +1,31 @@
-﻿@using Applications.Features.LoanRequests.Services
+﻿@using Applications.Features.Addresses
+@using Applications.Features.Branches
+@using Applications.Features.Currencies
+@using Applications.Features.Customers.Services
+@using Applications.Features.Employees
+@using Applications.Features.LoanRequests.Services
 @using TrapchumApp.Services
-<EditForm Model="model" OnValidSubmit="FormSubmit">
-    <RadzenRow AlignItems="AlignItems.Center">
-        <RadzenColumn Size="12">
-            <RadzenLabel>Note</RadzenLabel>
-            <RadzenTextArea @bind-Value="model.Description" class="w-100"></RadzenTextArea>
-        </RadzenColumn>
-    </RadzenRow>
+<EditForm Model="model" OnValidSubmit="@FormSubmit">
+    <RadzenFormField Text="Note" AllowFloatingLabel="true" class="rz-w-100">
+        <RadzenTextArea @bind-Value="model.Description" class="rz-w-100"></RadzenTextArea>
+    </RadzenFormField>
     <RadzenStack AlignItems="AlignItems.Center"
-    Orientation="Orientation.Horizontal"
-    JustifyContent="JustifyContent.End">
+                 Orientation="Orientation.Horizontal"
+                 JustifyContent="JustifyContent.End">
         <RadzenButton ButtonType="ButtonType.Submit"
                       IsBusy="isBusy"
-                      Icon="save"
+                      Icon="@IconNames.Save"
+                      class="rz-mt-2"
                       Size="ButtonSize.Small"
                       ButtonStyle="ButtonStyle.Success"
                       Text="Save">
         </RadzenButton>
-    </RadzenStack> 
+        <RadzenButton Size="ButtonSize.ExtraSmall" class="rz-mt-2"
+                      ButtonType="ButtonType.Button"
+                      Text="Close"
+                      Icon="@IconNames.Close"
+                      ButtonStyle="ButtonStyle.Danger" />
+    </RadzenStack>
 </EditForm>
 
 
