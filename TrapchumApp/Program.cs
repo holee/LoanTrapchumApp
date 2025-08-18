@@ -5,18 +5,14 @@ using Infrastructures.Authorizations;
 using Infrastructures.DependencyInjects;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using QuestPDF.Infrastructure;
-using Radzen;
 using TrapchumApp.Components;
 using TrapchumApp.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 
 QuestPDF.Settings.License = LicenseType.Community;
-//builder.WebHost.UseStaticWebAssets();
-// Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddRadzenComponents();

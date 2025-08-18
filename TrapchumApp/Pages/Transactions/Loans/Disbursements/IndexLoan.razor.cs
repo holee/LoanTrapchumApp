@@ -1,8 +1,6 @@
 using Applications.Features.Loans.Services;
 using Applications.Responses.ViewModels.Loans;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.JSInterop;
+using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 {
@@ -17,7 +15,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
             _dService = dService;
         }
         [Parameter] public int BranchId { get; set; } = 0;
-        [Parameter, SupplyParameterFromQuery] public string? UserId { get; set; }
+   
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
 
         bool branchStatus = false;
@@ -31,53 +29,23 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
         bool isScheduleTab = false;
         bool includeInactive = false;
         int selectedTabIndex = 0;
-        List<int> tabCounts = [0];
         string sortField = "RegisterDate";
+        private string? _userId;
         bool sortDescending = true;
         int pageIndex = 0;
 
-        void ChangedPageSize(int page)
+
+
+        protected override async Task OnInitializedAsync()
         {
-            pageSize = page;
+            _userId = (await AuthenticationState).GetUserId();  
+
+            await base.OnInitializedAsync();
         }
-
-
-        void AddNewLoanTab()
-        {
-            NavigationManager.NavigateTo("/Loan/Disbursement/CreateNewUser");
-        }
-        void CloseLoanTab()
-        {
-
-            if (tabCounts.Count == 1) return;
-            if (selectedTabIndex == 1)
-            {
-                tabCounts.Remove(1);
-                isNewLoan = false;
-            }
-            if (selectedTabIndex == 2)
-            {
-                tabCounts.Remove(2);
-                isScheduleTab = false;
-            }
-            selectedTabIndex = tabCounts.Count - 1;
-        }
-
-
-        void SelectedTabChanged(int selectedIndex)
-        {
-            selectedTabIndex = selectedIndex;
-        }
-
-
         void DownLoadScheduleAsExcel(string? loanRefId, int? branchId)
         {
             ContextMenuService.Close();
             isProgess = true;
-
-            //var stream = await _dService.DownLoadScheduleAsExcel(loanRefId, branchId);
-            //using var streamRef = new DotNetStreamReference(stream: stream);
-            //await js.InvokeVoidAsync("downloadFileFromStream", "Schedule.xlsx", streamRef);
             isProgess = false;
             StateHasChanged();
         }
@@ -91,12 +59,6 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 
             isProgess = true;
 
-            //var stream = await _dService.DownLoadScheduleAsPdf(loanRefId, branchId);
-
-            //using var streamRef = new DotNetStreamReference(stream: stream);
-
-            //await js.InvokeVoidAsync("downloadFileFromStream", "Schedule.pdf", streamRef);
-            //isProgess = false;
             StateHasChanged();
         }
 
@@ -108,36 +70,25 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 
         void GetLoanDetails(VLoanDisbursments p)
         {
-            NavigationManager.NavigateTo($"/Loans/Details/{p.LoanId}?BranchId={p.BranchId}&CreditAgentId={p.CreditAgentRefId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
-            return;
+            NavigationManager.NavigateTo($"/Loans/Details/{p.LoanId}?BranchId={p.BranchId}&CreditAgentId={p.CreditAgentRefId}&CurrencyId={p.CurrencyId}&UserId={_userId}");
         }
         void GetPaymentSchedules(VLoanDisbursments p)
         {
-            NavigationManager.NavigateTo($"/Loans/{p.LoanId}/Repayment?BranchId={p.BranchId}&CreditAgentId={p.CreditAgentRefId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
+            NavigationManager.NavigateTo($"/Loans/{p.LoanId}/Repayment?BranchId={p.BranchId}&CreditAgentId={p.CreditAgentRefId}&CurrencyId={p.CurrencyId}&UserId={_userId}");
             return;
         }
 
         void ChangeCreditAgent(VLoanDisbursments p)
         {
-            NavigationManager.NavigateTo($"/Loan/CreditAgent/{p.LoanId}/Changed?CustomerId={p.CustomerId}&BranchId={p.BranchId}&CreditAgentId={p.CreditAgentRefId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
+            NavigationManager.NavigateTo($"/Loan/CreditAgent/{p.LoanId}/Changed?CustomerId={p.CustomerId}&BranchId={p.BranchId}&CreditAgentId={p.CreditAgentRefId}&CurrencyId={p.CurrencyId}&UserId={_userId}");
             return;
         }
         void CustomerPayOff(VLoanDisbursments p)
         {
-            NavigationManager.NavigateTo($"/Loan/CreditAgent/{p.LoanId}/Changed?CustomerId={p.CustomerId}&BranchId={p.BranchId}&CreditAgentId={p.CreditAgentRefId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
+            NavigationManager.NavigateTo($"/Loan/CreditAgent/{p.LoanId}/Changed?CustomerId={p.CustomerId}&BranchId={p.BranchId}&CreditAgentId={p.CreditAgentRefId}&CurrencyId={p.CurrencyId}&UserId={_userId}");
             return;
         }
 
-        //async Task GetBranchStatus(int branchId)
-        //{
-        //    var resultResponse = await _branchService.GetBranchStatus(branchId);
-
-        //    if (resultResponse.IsSuccess)
-        //    {
-        //        branchStatus = resultResponse.Data!.IsOpen;
-
-        //    }
-        //}
 
     }
 }

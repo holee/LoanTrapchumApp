@@ -10,145 +10,140 @@
     <DataAnnotationsValidator />
     <FluentValidationValidator DisableAssemblyScanning="true" />
     <ValidationSummary />
-    <RadzenRow class="rz-mb-2">
-        <RadzenColumn Size="6">
-            <RadzenFormField Text="Customer" class="rz-w-100">
-                <RadzenTextBox class="rz-w-100" Disabled
-                               @bind-Value="@model.CustomerName"></RadzenTextBox>
-            </RadzenFormField>
-        </RadzenColumn>
-        <RadzenColumn Size="6">
-            <RadzenFormField Text="Document Keeping">
-                <RadzenDatePicker class="rz-w-100"
-                                  @bind-Value="@model.RegisterDate" />
-            </RadzenFormField>
-        </RadzenColumn>
-    </RadzenRow>
-    <RadzenRow class="rz-mb-2">
-        <RadzenColumn Size="6">
-            <RadzenFormField Text="Remark" class="rz-w-100">
-                <RadzenTextBox class="rz-w-100"
-                               @bind-Value="@model.Remark"></RadzenTextBox>
-            </RadzenFormField>
-        </RadzenColumn>
-        <RadzenColumn Size="6">
-            <RadzenFormField Text="Document Keeping" class="rz-w-100">
-                <RadzenTextBox class="rz-w-100"
-                               @bind-Value="@model.DocumentKeeping"></RadzenTextBox>
-            </RadzenFormField>
-        </RadzenColumn>
-    </RadzenRow>
-    <RadzenRow class="rz-mb-2">
-        <RadzenColumn Size="6">
-            <RadzenFormField Text="Type" class="rz-w-100">
-                <RadzenDropDown TValue="int?"
-                                class="rz-w-100"
-                                Data="collateralTypes"
-                                TextProperty="@nameof(CollateralTypeResponse.CollateralTypeCode)"
-                                ValueProperty="@nameof(CollateralTypeResponse.CollateralTypeId)"
-                                SelectedItemChanged="@GetCollateralSubTypes"
-                                @bind-Value="@collateralLineDto.CategoryRefId">
-                </RadzenDropDown>
-            </RadzenFormField>
-        </RadzenColumn>
-        <RadzenColumn Size="6">
-            <RadzenFormField Text="SubTypeName" class="rz-w-100">
-                <RadzenDropDown TValue="int?"
-                                class="rz-w-100"
-                                Data="@allSubTypes"
-                                TextProperty="@nameof(CollateralSubTypeResponse.CollateralSubTypeName)"
-                                ValueProperty="@nameof(CollateralSubTypeResponse.Id)"
-                                @bind-Value="@collateralLineDto.SubCategoryRefId">
-                </RadzenDropDown>
-            </RadzenFormField>
-        </RadzenColumn>
-    </RadzenRow>
-    <RadzenRow class="rz-mb-2">
-        <RadzenColumn Size="6">
-            <RadzenFormField Text="Owner Name" class="rz-w-100">
-                <RadzenTextBox class="rz-w-100"
-                               @bind-Value="@collateralLineDto.OwnerName"></RadzenTextBox>
-            </RadzenFormField>
-        </RadzenColumn>
-        <RadzenColumn Size="6">
-            <RadzenFormField Text="CollateralNo" class="rz-w-100">
-                <RadzenTextBox class="rz-w-100"
-                               @bind-Value="@collateralLineDto.CollateralNo"></RadzenTextBox>
-            </RadzenFormField>
-        </RadzenColumn>
-    </RadzenRow>
-    <RadzenRow class="rz-mb-2">
-        <RadzenColumn Size="6">
-            <RadzenFormField Text="Location" class="rz-w-100">
-                <RadzenTextBox class="rz-w-100"
-                               @bind-Value="@collateralLineDto.Location"></RadzenTextBox>
-            </RadzenFormField>
-        </RadzenColumn>
-        <RadzenColumn Size="6">
-            <RadzenFormField Text="Size" class="rz-w-100">
-                <RadzenTextBox class="rz-w-100"
-                               @bind-Value="@collateralLineDto.Size"></RadzenTextBox>
-            </RadzenFormField>
-        </RadzenColumn>
-    </RadzenRow>
-    <RadzenRow class="rz-mb-2">
-        <RadzenColumn Size="6">
-            <RadzenFormField Text="Quantity" class="rz-w-100">
-                <RadzenNumeric ShowUpDown="false"
-                               Min="0"
-                               Placeholder="Quantity"
-                               class="rz-w-100"
-                               TextAlign="TextAlign.End"
-                               @bind-Value="@collateralLineDto.Quantity" />
-            </RadzenFormField>
-        </RadzenColumn>
-        <RadzenColumn Size="6">
-            <RadzenFormField Text="Market Price" class="rz-w-100">
-                <RadzenNumeric ShowUpDown="false"
-                               Min="0"
-                               Placeholder="Market Price"
-                               class="rz-w-100"
-                               TextAlign="TextAlign.End"
-                               @bind-Value="@collateralLineDto.MarketPrice" />
-            </RadzenFormField>
-        </RadzenColumn>
-    </RadzenRow>
-    <RadzenRow class="rz-mb-2">
-        <RadzenColumn Size="6">
-            <RadzenFormField Text="Hot Price" class="rz-w-100">
-                <RadzenNumeric ShowUpDown="false"
-                               Min="0"
-                               Placeholder="Hot Price"
-                               class="rz-w-100"
-                               TextAlign="TextAlign.End"
-                               @bind-Value="@collateralLineDto.HotPrice" />
-            </RadzenFormField>
-        </RadzenColumn>
-        <RadzenColumn Size="6">
-            <RadzenFormField Text="Pawn Price" class="rz-w-100">
-                <RadzenNumeric ShowUpDown="false"
-                               Min="0"
-                               class="rz-w-100"
-                               Placeholder="Pawn Price"
-                               @bind-Value="@collateralLineDto.PawnPrice"
-                               TextAlign="TextAlign.End" />
-            </RadzenFormField>
-        </RadzenColumn>
-    </RadzenRow>
+    <RadzenFieldset Text="Customer Info">
+        <RadzenRow class="rz-mb-2">
+            <RadzenColumn Size="6">
+                <RadzenFormField Text="Customer" class="rz-w-100">
+                    <RadzenTextBox class="rz-w-100" Disabled
+                                   @bind-Value="@model.CustomerName"></RadzenTextBox>
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="6">
+                <RadzenFormField Text="Register Date">
+                    <RadzenDatePicker class="rz-w-100"
+                                      @bind-Value="@model.RegisterDate" />
+                </RadzenFormField>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow class="rz-mb-2">
+            <RadzenColumn Size="6">
+                <RadzenFormField Text="Remark" class="rz-w-100">
+                    <RadzenTextBox class="rz-w-100"
+                                   @bind-Value="@model.Remark"></RadzenTextBox>
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="6">
+                <RadzenFormField Text="Document Keeping" class="rz-w-100">
+                    <RadzenTextBox class="rz-w-100"
+                                   @bind-Value="@model.DocumentKeeping"></RadzenTextBox>
+                </RadzenFormField>
+            </RadzenColumn>
+        </RadzenRow>
+
+    </RadzenFieldset>
+    <RadzenFieldset Text="Collateral Info">
+        <RadzenRow class="rz-mb-2">
+            <RadzenColumn Size="6">
+                <RadzenFormField Text="Type" class="rz-w-100">
+                    <RadzenDropDown TValue="int?"
+                                    class="rz-w-100"
+                                    Data="collateralTypes"
+                                    TextProperty="@nameof(CollateralTypeResponse.CollateralTypeCode)"
+                                    ValueProperty="@nameof(CollateralTypeResponse.CollateralTypeId)"
+                                    SelectedItemChanged="@GetCollateralSubTypes"
+                                    @bind-Value="@collateralLineDto.CategoryRefId">
+                    </RadzenDropDown>
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="6">
+                <RadzenFormField Text="SubTypeName" class="rz-w-100">
+                    <RadzenDropDown TValue="int?"
+                                    class="rz-w-100"
+                                    Data="@allSubTypes"
+                                    TextProperty="@nameof(CollateralSubTypeResponse.CollateralSubTypeName)"
+                                    ValueProperty="@nameof(CollateralSubTypeResponse.Id)"
+                                    @bind-Value="@collateralLineDto.SubCategoryRefId">
+                    </RadzenDropDown>
+                </RadzenFormField>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow class="rz-mb-2">
+            <RadzenColumn Size="6">
+                <RadzenFormField Text="Owner Name" class="rz-w-100">
+                    <RadzenTextBox class="rz-w-100"
+                                   @bind-Value="@collateralLineDto.OwnerName"></RadzenTextBox>
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="6">
+                <RadzenFormField Text="CollateralNo" class="rz-w-100">
+                    <RadzenTextBox class="rz-w-100"
+                                   @bind-Value="@collateralLineDto.CollateralNo"></RadzenTextBox>
+                </RadzenFormField>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow class="rz-mb-2">
+            <RadzenColumn Size="6">
+                <RadzenFormField Text="Location" class="rz-w-100">
+                    <RadzenTextBox class="rz-w-100"
+                                   @bind-Value="@collateralLineDto.Location"></RadzenTextBox>
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="6">
+                <RadzenFormField Text="Size" class="rz-w-100">
+                    <RadzenTextBox class="rz-w-100"
+                                   @bind-Value="@collateralLineDto.Size"></RadzenTextBox>
+                </RadzenFormField>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow class="rz-mb-2">
+            <RadzenColumn Size="6">
+                <RadzenFormField Text="Quantity" class="rz-w-100">
+                    <RadzenNumeric ShowUpDown="false"
+                                   Min="0"
+                                   Placeholder="Quantity"
+                                   class="rz-w-100"
+                                   TextAlign="TextAlign.End"
+                                   @bind-Value="@collateralLineDto.Quantity" />
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="6">
+                <RadzenFormField Text="Market Price" class="rz-w-100">
+                    <TCNumbers 
+                                   Placeholder="Market Price"
+                               OnValueChanged="@((arg)=>OnMarketPriceChanged(arg,collateralLineDto))"
+                                   @bind-Value="@collateralLineDto.MarketPrice" />
+                </RadzenFormField>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow class="rz-mb-2">
+            <RadzenColumn Size="6">
+                <TCNumbers Label="Hot Price" IsFloatLabel="true"
+                           Placeholder="Hot Price"
+                           @bind-Value="@collateralLineDto.HotPrice"
+                           TextAlign="TextAlign.End" />
+            </RadzenColumn>
+            <RadzenColumn Size="6">
+                <TCNumbers Label="Pawn Price" IsFloatLabel="true"
+                           Placeholder="Pawn Price"
+                           @bind-Value="@collateralLineDto.PawnPrice"
+                           TextAlign="TextAlign.End" />
+            </RadzenColumn>
+        </RadzenRow>
+    </RadzenFieldset>
     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
-                 class="rz-mt-3"
+                 class="@AppValue.MarginT"
                  JustifyContent="JustifyContent.End">
         <RadzenButton Icon="@IconNames.Save"
-                      ButtonStyle="ButtonStyle.Success"
+                      ButtonStyle="@AppValue.Save"
                       ButtonType="ButtonType.Submit"
                       Text="Save"
-                      Size="ButtonSize.ExtraSmall">
+                      Size="@AppValue.DefaultButton">
         </RadzenButton>
         <RadzenButton Icon="@IconNames.Close"
-                      ButtonStyle="ButtonStyle.Danger"
+                      ButtonStyle="@AppValue.Cancel"
                       Text="Close"
                       Click="()=>DialogService.Close(success)"
-                      Size="ButtonSize.ExtraSmall">
+                      Size="@AppValue.DefaultButton">
         </RadzenButton>
     </RadzenStack>
 </EditForm>

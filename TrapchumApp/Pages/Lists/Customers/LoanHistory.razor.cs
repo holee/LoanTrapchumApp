@@ -6,7 +6,9 @@ namespace TrapchumApp.Pages.Lists.Customers
     public partial class LoanHistory
     {
         [Parameter] public string? CustomerId { get; set; }
+
         IEnumerable<VLoanDisbursments> VLoanDisbursements = [];
+
         async Task GetCustomerLoanHistory()
         {
             var rsp = await _customerService.GetCustomerLoanHistoryAsync(CustomerId);

@@ -1,12 +1,7 @@
-using Applications.Calculations;
 using Applications.Commons.Mappers;
 using Applications.Requests.Loans.Payments;
 using Applications.Responses.ViewModels.Loans.Schedules;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
-using Radzen;
 using Radzen.Blazor;
-using System.Threading.Tasks;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments;
 public partial class PaymentMultiples

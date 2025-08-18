@@ -20,9 +20,9 @@ public sealed class CollateralLineDtoCreate
     public int? Quantity { get; set; }
     public string? Size { get; set; }
     public string? Description { get; set; }
-    public decimal? MarketPrice { get; set; }
-    public decimal? HotPrice { get; set; }
-    public decimal? PawnPrice { get; set; }
+    public decimal? MarketPrice { get; set; } = 0.00M;
+    public decimal? HotPrice { get; set; } = 0.00M;
+    public decimal? PawnPrice { get; set; } = 0.00M;
     public string? CollateralSubTypeName { get; set; }
     public bool IsUsed { get; set; } = false;
 }

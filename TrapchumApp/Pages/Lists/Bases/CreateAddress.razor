@@ -1,5 +1,119 @@
-<h3>CreateAddress</h3>
+@using Domains.Models.Addresses
+<RadzenFieldset AllowCollapse="true" Collapsed="false" class="rz-my-2">
+    <HeaderTemplate>
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+            <RadzenIcon Icon="home" /><strong>Address</strong>
+        </RadzenStack>
+    </HeaderTemplate>
+    <ChildContent>
+        <RadzenRow AlignItems="AlignItems.Center">
+            <RadzenColumn Size="6">
+                <RadzenFormField AllowFloatingLabel="true" Text="Country" class="rz-w-100">
+                    <RadzenDropDown class="rz-w-100"
+                                    Data="Countries"
+                                    AllowFiltering="true"
+                                    Placeholder="Search Countries"
+                                    FilterOperator="StringFilterOperator.Contains"
+                                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                    TextProperty="@nameof(Country.DesInKhmer)"
+                                    ValueProperty="@nameof(Country.DesInKhmer)"
+                                    @bind-Value="CountryName">
+                    </RadzenDropDown>
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="6">
+                <RadzenFormField AllowFloatingLabel="true" Text="City" class="rz-w-100">
+                    <RadzenDropDown class="rz-w-100"
+                                    Data="Cities"
+                                    TValue="string"
+                                    Placeholder="Search City"
+                                    AllowFiltering="true"
+                                    FilterOperator="StringFilterOperator.Contains"
+                                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                    @bind-Value="CityName">
+                        <HeaderTemplate>
+                            <div class="rz-dropdown-filter-container">
+                                <input aria-label="Search" id="@Guid.NewGuid().ToString("N")"
+                                       tabindex="0"
+                                       placeholder="type to search..."
+                                       class="rz-dropdown-filter rz-inputtext"
+                                       autocomplete="Off"
+                                       aria-autocomplete="none"
+                                       autofocus="autofocus"
+                                       @bind="@searchText"
+                                       @oninput="@OnSearchTextChanged"
+                                       @onkeypress="@OnKeyPress"
+                                       type="search">
+                                <span class="notranslate rz-dropdown-filter-icon rzi rzi-search"></span>
+                            </div>
+                        </HeaderTemplate>
+                    </RadzenDropDown>
+                </RadzenFormField>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow AlignItems="AlignItems.Center" class="rz-mt-2">
+            <RadzenColumn Size="6">
+                <RadzenFormField Text="Province" AllowFloatingLabel="true" class="rz-w-100">
+                    <RadzenDropDown class="rz-w-100"
+                                    Data="Provinces"
+                                    Placeholder="Search Province"
+                                    AllowFiltering="true"
+                                    TextProperty="@nameof(ProvinceDto.ProInKhmer)"
+                                    ValueProperty="@nameof(ProvinceDto.ProvinceId)"
+                                    SelectedItemChanged="@SelectedProvinceChanged"
+                                    FilterOperator="StringFilterOperator.Contains"
+                                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                    @bind-Value="ProvinceRefId">
+                    </RadzenDropDown>
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="6">
+                <RadzenFormField Text="District" AllowFloatingLabel="true" class="rz-w-100">
+                    <RadzenDropDown class="rz-w-100"
+                                    Data="Districts"
+                                    Placeholder="Search District"
+                                    AllowFiltering="true"
+                                    TextProperty="@nameof(DistrictDto.DisInKhmer)"
+                                    ValueProperty="@nameof(DistrictDto.DistrictId)"
+                                    SelectedItemChanged="SelectedDistrictChanged"
+                                    FilterOperator="StringFilterOperator.Contains"
+                                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                    @bind-Value="DistrictRefId">
+                    </RadzenDropDown>
+                </RadzenFormField>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow AlignItems="AlignItems.Center" class="rz-mt-2">
+            <RadzenColumn Size="6">
+                <RadzenFormField AllowFloatingLabel="true" Text="Commune" class="rz-w-100">
+                    <RadzenDropDown class="rz-w-100"
+                                    Data="Communes"
+                                    Placeholder="Search Commune"
+                                    AllowFiltering="true"
+                                    TextProperty="@nameof(CommuneDto.ComInKhmer)"
+                                    ValueProperty="@nameof(CommuneDto.CommuneId)"
+                                    SelectedItemChanged="SelectedCommuneChanged"
+                                    FilterOperator="StringFilterOperator.Contains"
+                                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                    @bind-Value="CommuneRefId">
+                    </RadzenDropDown>
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="6">
+                <RadzenFormField Text="Village" AllowFloatingLabel="false" class="rz-w-100">
+                    <RadzenDropDown class="rz-w-100"
+                                    Data="Villages"
+                                    Placeholder="Search Village"
+                                    AllowFiltering="true"
+                                    TextProperty="@nameof(VillageDto.VilInKhmer)"
+                                    ValueProperty="@nameof(VillageDto.VillageId)"
+                                    SelectedItemChanged="SelectedVillageChanged"
+                                    FilterOperator="StringFilterOperator.Contains"
+                                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                    @bind-Value="VillageRefId"></RadzenDropDown>
+                </RadzenFormField>
+            </RadzenColumn>
+        </RadzenRow>
+    </ChildContent>
+</RadzenFieldset>
 
-@code {
-    
-}

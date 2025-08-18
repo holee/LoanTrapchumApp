@@ -2,6 +2,7 @@ using Applications.Interfaces.Transactions;
 using Applications.Responses.ViewModels.Currencies;
 using Microsoft.AspNetCore.Components;
 using Radzen;
+using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Transactions.Exchanges
 {
@@ -15,32 +16,31 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
         }
 
         [Parameter, EditorRequired] public int BranchId { get; set; }
-        [Parameter, EditorRequired] public string? UserId { get; set; }
+        [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+        private string? _userId = string.Empty;
+        private IEnumerable<VttCurrencyExchanges> ExchangeHostories = [];
+        private int counts = 0;
+        private int pageSize = 10;
+        private int pageIndex = 1;
+        private bool isLoading = false;
+        private bool sortDescending = false;
+        private DateTime? transactionDate=DateTime.UtcNow;
+        string sortField = "TransactionDate";
 
-        IEnumerable<VttCurrencyExchanges> ExchangeHostories = [];
-        int counts = 0;
-        int pageSize = 10;
-        int pageIndex = 1;
-        bool isLoading = false;
-        bool sortDescending = false;
-        DateTime? transactionDate;
         protected override async Task OnInitializedAsync()
         {
+
+            _userId = (await AuthenticationState).GetUserId();
+
             await GetExchangeHistories();
 
             await base.OnInitializedAsync();
         }
         async Task LoadData(LoadDataArgs args)
         {
-            string sortField = "TransactionDate";
-            bool sortDescending = false;
-            pageIndex = args.Skip!.Value;
-            if (!string.IsNullOrEmpty(args.OrderBy))
-            {
-                sortField = args.OrderBy.Split(" ")[0];
-                string dir = args.OrderBy.Split(" ")[1];
-                sortDescending = dir.Contains("asc") ? false : true;
-            }
+            pageIndex = args.Skip ?? 0;
+
+            (sortField, sortDescending) = args.PageInfo();
 
             await GetExchangeHistories();
         }
@@ -52,7 +52,9 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
             var exchangeResp = await _exService.GetCurrencyExchange(BranchId, pageIndex, pageSize, traxDate);
 
             counts = exchangeResp.Count;
+
             ExchangeHostories = exchangeResp.Items;
+
             isLoading = false;
 
             StateHasChanged();
@@ -62,6 +64,9 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
         async void PageSizeChange(int page)
         {
             pageSize = page;
+
+            pageIndex = 0;  
+
             await GetExchangeHistories(transactionDate);
         }
 
@@ -73,7 +78,7 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
         async Task ShowCurrencyDialogue()
         {
 
-            var param = new Dictionary<string, object?> { { "BranchId", BranchId }, { "UserId", UserId }, { "ShowCloseButton", true } };
+            var param = new Dictionary<string, object?> { { "BranchId", BranchId }, { "UserId", _userId }, { "ShowCloseButton", true } };
 
             var options = new DialogOptions
             {

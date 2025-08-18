@@ -1,8 +1,6 @@
 using Applications.Enumerations;
 using Applications.Interfaces.Currencies;
 using Applications.Responses.ViewModels.Currencies;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
 
 namespace TrapchumApp.Pages.Transactions.Exchanges
 {

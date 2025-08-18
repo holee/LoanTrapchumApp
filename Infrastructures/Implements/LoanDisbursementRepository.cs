@@ -269,6 +269,42 @@ namespace Infrastructures.Implements
 
             if (!string.IsNullOrEmpty(param?.Filter))
             {
+                queries = queries.Where(x => EF.Functions.Like(x.CustomerName!, $"{param!.Filter}%") ||
+                                             EF.Functions.Like(x.AgentName!, $"{param!.Filter}%") ||
+                                             EF.Functions.Like(x.Phone!, $"{param!.Filter}%") ||
+                                             EF.Functions.Like(x.AltName!, $"{param!.Filter}%"));
+            }
+
+
+            if (param!.SortDescending)
+            {
+                queries = queries.OrderByDescending(x => EF.Property<object>(x, param!.SortColumn));
+            }
+
+            var counts = await queries.CountAsync(cancellation);
+
+            var items = await queries.Skip(param.Skip).Take(param.PageSize)
+                            .AsNoTracking()
+                            .ToListAsync(cancellation);
+
+            return new Pager<VLoanDisbursments>(items, counts);
+        }
+
+
+        public async Task<(Pager<VLoanDisbursments>,int Count)> GetLoansByBranchAsync(int? branchId, string? creditAgentId, LoanStatuses status = LoanStatuses.Active, QueryParam? param = null, CancellationToken cancellation = default)
+        {
+
+            await using var _context = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+            var queries = _context.VLoanDisbursements
+                                 .Where(x => x.BranchId == branchId)
+                                 .WhereIf((int)status > 0, x => x.LoanstatusId == (int)status)
+                                 .WhereIf(!string.IsNullOrEmpty(creditAgentId), x => x.CreditAgentRefId == creditAgentId ||
+                                                                                     x.AprovedUserId == creditAgentId ||
+                                                                                     x.RequestUserRefId == creditAgentId);
+
+            if (!string.IsNullOrEmpty(param?.Filter))
+            {
                 queries = queries.Where(x => EF.Functions.Like(x.CustomerName!, $"%{param!.Filter}%") ||
                                              EF.Functions.Like(x.AgentName!, $"%{param!.Filter}%") ||
                                              EF.Functions.Like(x.Phone!, $"%{param!.Filter}%") ||
@@ -283,14 +319,12 @@ namespace Infrastructures.Implements
 
             var counts = await queries.CountAsync(cancellation);
 
-            var items = await queries.Skip(param!.Skip).Take(param!.PageSize)
+            var items = await queries.Skip(param.Skip).Take(param.PageSize)
                             .AsNoTracking()
                             .ToListAsync(cancellation);
 
-            return new Pager<VLoanDisbursments>(items, counts);
+            return (new Pager<VLoanDisbursments>(items, counts),counts);
         }
-
-
 
 
         public async Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus status, bool include = false)
@@ -359,9 +393,6 @@ namespace Infrastructures.Implements
 
             return Result.Success(result);
         }
-
-
-
 
 
         public async Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus status, bool include = false, CancellationToken cancellation = default)

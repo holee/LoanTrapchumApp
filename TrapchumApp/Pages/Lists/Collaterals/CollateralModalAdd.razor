@@ -5,11 +5,6 @@
 @using Applications.Responses.Lists.Collaterals
 @using Domains.Models.Collaterals
 @using TrapchumApp.Services
-ollaterals
-@using TrapchumApp.Services
-laterals
-@using TrapchumApp.Services
-
 <EditForm  @ref="editForm" EditContext="@editContext">
     <DataAnnotationsValidator />
     <ValidationSummary />
@@ -88,6 +83,7 @@ laterals
                                                 TextProperty="@nameof(CollateralSubTypeResponse.CollateralSubTypeName)"
                                                 ValueProperty="@nameof(CollateralSubTypeResponse.Id)"
                                                 Style="height:2rem;line-height:1rem;"
+                                                SelectedItemChanged="@((arg)=>PropSelectedItemChanged(arg,c))"
                                                 InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Select Sub Collateral" }})"
                                                 @bind-Value="c.SubCategoryRefId">
                                 </RadzenDropDown>
@@ -150,21 +146,13 @@ laterals
                                 @c.MarketPrice
                             </Template>
                             <EditTemplate>
-                                <TCNumbers @bind-Value="@c.MarketPrice" Min="0" />
+                                <TCNumbers 
+                                        @bind-Value="@c.MarketPrice"
+                                        OnValueChanged="@((arg)=>OnMarketPriceChanged(arg,c))"
+                                        Min="0" />
                             </EditTemplate>
                         </RadzenDataGridColumn>
-                        <RadzenDataGridColumn Width="6rem"
-                                              Property="HotPrice"
-                                              Context="c"
-                                              TextAlign="TextAlign.Right"
-                                              Title="Hot Price">
-                            <Template>
-                                @c.HotPrice
-                            </Template>
-                            <EditTemplate>
-                                <TCNumbers @bind-Value="@c.HotPrice" Min="0" />
-                            </EditTemplate>
-                        </RadzenDataGridColumn>
+
                         <RadzenDataGridColumn Width="6rem"
                                               Property="PawnPrice"
                                               Context="c"
@@ -177,6 +165,20 @@ laterals
                                 <TCNumbers @bind-Value="@c.PawnPrice" Min="0" />
                             </EditTemplate>
                         </RadzenDataGridColumn>
+
+                        <RadzenDataGridColumn Width="6rem"
+                                              Property="HotPrice"
+                                              Context="c"
+                                              TextAlign="TextAlign.Right"
+                                              Title="Hot Price">
+                            <Template>
+                                @c.HotPrice
+                            </Template>
+                            <EditTemplate>
+                                <TCNumbers @bind-Value="@c.HotPrice" Min="0" />
+                            </EditTemplate>
+                        </RadzenDataGridColumn>
+                       
                         <RadzenDataGridColumn Width="4rem"
                                               TextAlign="TextAlign.Center"
                                               Context="c"
@@ -255,6 +257,7 @@ laterals
                                                 TextProperty="@nameof(CollateralSubTypeResponse.CollateralSubTypeName)"
                                                 ValueProperty="@nameof(CollateralSubTypeResponse.Id)"
                                                 Style="height:2rem;line-height:1rem;"
+                                                SelectedItemChanged="@((arg)=>PropSelectedItemChanged(arg,c))"
                                                 InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Select Sub Collateral" }})"
                                                 @bind-Value="c.SubCategoryRefId">
                                 </RadzenDropDown>
@@ -318,17 +321,7 @@ laterals
                                 @c.MarketPrice
                             </Template>
                             <EditTemplate>
-                                <TCNumbers @bind-Value="c.MarketPrice" />
-                            </EditTemplate>
-                        </RadzenDataGridColumn>
-                        <RadzenDataGridColumn Width="6rem" Property="HotPrice"
-                                              TextAlign="TextAlign.Right"
-                                              Title="Hot Price" Context="c">
-                            <Template>
-                                @c.HotPrice
-                            </Template>
-                            <EditTemplate>
-                                <TCNumbers @bind-Value="c.HotPrice" />
+                                <TCNumbers @bind-Value="c.MarketPrice" OnValueChanged="@((arg) => OnMarketPriceChanged(arg, c))" />
                             </EditTemplate>
                         </RadzenDataGridColumn>
                         <RadzenDataGridColumn Width="6rem"
@@ -341,6 +334,17 @@ laterals
                                 <TCNumbers @bind-Value="c.PawnPrice" />
                             </EditTemplate>
                         </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Width="6rem" Property="HotPrice"
+                                              TextAlign="TextAlign.Right"
+                                              Title="Hot Price" Context="c">
+                            <Template>
+                                @c.HotPrice
+                            </Template>
+                            <EditTemplate>
+                                <TCNumbers @bind-Value="c.HotPrice" />
+                            </EditTemplate>
+                        </RadzenDataGridColumn>
+                       
                         <RadzenDataGridColumn Width="4rem"
                                               TextAlign="TextAlign.Center"
                                               Context="c"

@@ -10,23 +10,21 @@
 <PageTitle>Villages</PageTitle>
 
 <RadzenCard>
-    <PageDropDown ShowSearchBox="true"
-                  PlaceHolder="Search village"
-                  OnTextChanged="TextChanged"
-                  PageSizeChanged="PageSizeChanged">
-        <LeftChildContent>
+    <GridToolbar PlaceHolder="Search village"
+                 SearchChanged="TextChanged">
+        <LeftChildren>
             <RadzenButton Text="New Village"
                           ButtonStyle="ButtonStyle.Primary"
                           Size="ButtonSize.Small"
                           Icon="add"
                           Click="ShowCreate" />
-        </LeftChildContent>
-        <RightChildContent>
+        </LeftChildren>
+        <RightChildren>
             <RadzenStack Orientation="Orientation.Horizontal">
 
             </RadzenStack>
-        </RightChildContent>
-    </PageDropDown>
+        </RightChildren>
+    </GridToolbar>
     <RadzenDataGrid Responsive="true"
                     AllowSorting="true"
                     Count="@counts"
@@ -35,7 +33,8 @@
                     ShowPagingSummary="true"
                     AllowPaging="true"
                     AllowFiltering="true"
-                    
+                    PageSizeChanged="PageSizeChanged"
+                    PageSizeOptions="@StorageConstant.PageSizeOptions"
                     FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
                     TItem="VVillages"
                     Density="Density.Compact"
@@ -45,7 +44,7 @@
         <Columns>
             <RadzenDataGridColumn Width="7rem"
                                   Filterable="false"
-                Title="#" Property="@nameof(VVillages.VillageId)" />
+                                  Title="#" Property="@nameof(VVillages.VillageId)" />
             <RadzenDataGridColumn Property="@nameof(VVillages.VillDescription)"
                                   Title="Village-English"
                                   Sortable="true" />
@@ -55,16 +54,14 @@
             <RadzenDataGridColumn Property="@nameof(VVillages.ComDescription)"
                                   Title="Commune-English"
                                   Width="14rem"
-                                  Sortable="true"
-                                  />
+                                  Sortable="true" />
             <RadzenDataGridColumn Property="@nameof(VVillages.ComInKhmer)"
                                   Title="Commune-Khmer"
                                   Width="14rem"
-                                  Sortable="true"
-                                 />
-
-
-            <RadzenDataGridColumn Title="Actions" Sortable="false" Filterable="false" Context="c" Width="7rem">
+                                  Sortable="true" />
+            <RadzenDataGridColumn Title="Actions" 
+                        TextAlign="TextAlign.Center"
+                        Sortable="false" Filterable="false" Context="c" Width="7rem">
                 <Template>
                     <RadzenButton Size="ButtonSize.ExtraSmall"
                                   Icon="more_vert"
@@ -87,9 +84,9 @@
         ContextMenuService.Open(args, ds =>
     @<RadzenMenu>
     <RadzenMenuItem Icon="@IconNames.Info" Click="@(() => Details(id ?? default))" Text="Details" Value="@id"></RadzenMenuItem>
-        <RadzenMenuItem Icon="edit" Click="@(() => Edit(id ?? default))" Text="Edit" Value="@id"></RadzenMenuItem>
-        <RadzenMenuItem Icon="delete" Click="@(() => Delete(id ?? default))" Text="Delete" Value="@id"></RadzenMenuItem>
-    </RadzenMenu>
+    <RadzenMenuItem Icon="edit" Click="@(() => Edit(id ?? default))" Text="Edit" Value="@id"></RadzenMenuItem>
+    <RadzenMenuItem Icon="delete" Click="@(() => Delete(id ?? default))" Text="Delete" Value="@id"></RadzenMenuItem>
+</RadzenMenu>
     );
     }
 }

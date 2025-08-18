@@ -1,4 +1,5 @@
 ﻿using Applications.Responses.ViewModels.Loans.Requests;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Applications.Responses.Lists.Collaterals;
 
@@ -26,6 +27,7 @@ public sealed class VCollateralLines
     public decimal? PawnPrice { get; set; } = 0.00M;
     public string? Description { get; set; }
     public bool IsUsed { get; set; } = false;
+    public decimal ValueRate { get; set; }
 
 }
 

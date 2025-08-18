@@ -6,34 +6,43 @@
 @using Applications.Features.LoanRequests.Services
 @using Applications.Responses.ViewModels.Currencies
 @using TrapchumApp.Services
-<PageDropDown PageSizeChanged="@PageSizeChange">
-    <LeftChildContent>
+<PageTitle>Currency Exchange</PageTitle>
+<GridToolbar ShowSearchBox="false">
+    <LeftChildren>
         <RadzenButton Size="ButtonSize.Small"
                       Click="ShowCurrencyDialogue"
-                      Text="Exchange" ButtonStyle="ButtonStyle.Primary" />
-    </LeftChildContent>
-    <RightChildContent>
-        <RadzenFormField AllowFloatingLabel="false">
+                      Icon="@IconNames.AddNew"
+                      Text="Exchange" ButtonStyle="@AppValue.AddNew" />
+    </LeftChildren>
+    <RightChildren>
+        <RadzenFormField AllowFloatingLabel="false" class="rz-mb-2">
             <Start>
                 <RadzenIcon Icon="search" />
             </Start>
             <ChildContent>
-                <RadzenDatePicker DateFormat="dd/MM/yyyy"
+                <RadzenDatePicker DateFormat="@AppValue.DefaultDateFormat"
                                   TValue="DateTime?"
-                                  CurrentDateChanged="CurrentDateChanged"
+                                  CurrentDateChanged="@CurrentDateChanged"
                                   @bind-Value="transactionDate" />
             </ChildContent>
         </RadzenFormField>
-    </RightChildContent>
-</PageDropDown>
+    </RightChildren>
+</GridToolbar>
 <RadzenDataGrid Density="Density.Compact"
-                AllowAlternatingRows
+                AllowAlternatingRows="true"
+                AllowPaging="true"
                 TItem="VttCurrencyExchanges"
                 Count="@counts"
                 PageSize="@pageSize"
                 GridLines="DataGridGridLines.Both"
-                IsLoading="isLoading"
+                IsLoading="@isLoading"
                 Responsive="true"
+                PageSizeChanged="@PageSizeChange"
+                PageSizeOptions="@StorageConstant.PageSizeOptions"
+                ShowPagingSummary="true"
+                PagerHorizontalAlign="HorizontalAlign.Right"
+                PagerPosition="PagerPosition.Bottom"
+                LoadData="@LoadData"
                 Data="ExchangeHostories">
     <Columns>
         <RadzenDataGridColumn Property="@nameof(VttCurrencyExchanges.TransactionDate)"
@@ -47,6 +56,9 @@
                               Title="TransactionType Name" Context="c" />
         <RadzenDataGridColumn Property="@nameof(VttCurrencyExchanges.BranchName)"
                               Title="Branch" Context="c" />
+        <RadzenDataGridColumn Property="@nameof(VttCurrencyExchanges.ExchangeRate)"
+                              TextAlign="TextAlign.Right"
+                              Title="Exchange Rate" Context="c" />
         <RadzenDataGridColumn Property="@nameof(VttCurrencyExchanges.BuyCurrencyName)"
                               Title="Buy Currency Name" Context="c" />
         <RadzenDataGridColumn Property="@nameof(VttCurrencyExchanges.BuyAmount)"
@@ -66,5 +78,11 @@
             </Template>
         </RadzenDataGridColumn>
     </Columns>
+    <LoadingTemplate>
+        <RadzenStack Gap="0.5rem" JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center">
+            <RadzenProgressBar Mode="ProgressBarMode.Indeterminate" Value="100" ShowValue="false" />
+            <RadzenText TagName="TagName.Span">Loading...</RadzenText>
+        </RadzenStack>
+    </LoadingTemplate>
 </RadzenDataGrid>
 

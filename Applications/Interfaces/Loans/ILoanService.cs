@@ -27,6 +27,7 @@ namespace Applications.Interfaces.Loans
         Task<VLoanDisbursments?> GetLoanByCreditAgentIdAsync(string? creditAgentId, string? loanId, int? branchId, CancellationToken cancellation = default);
         Task<Pager<VLoanDisbursments>> GetLoanByCreditAgentAsync(string? creditAgentId, int? branchId, CancellationToken cancellation = default);
         Task<IEnumerable<VSchedule>> GetLoanSchedulesAsync(string? loanId, int? branchId, ScheduleStatus status, bool include = false, QueryParam? param = null, CancellationToken cancellation = default);
+        Task<(Pager<VLoanDisbursments>, int Count)> GetLoansByBranchAsync(int? branchId, string? creditAgentId, LoanStatuses status = LoanStatuses.Active, QueryParam? param = null, CancellationToken cancellation = default);
     }
 
 }

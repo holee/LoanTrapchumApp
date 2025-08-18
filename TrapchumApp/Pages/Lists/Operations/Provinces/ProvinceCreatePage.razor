@@ -9,16 +9,6 @@
 <RadzenStack Gap="1rem" Orientation="Orientation.Vertical" JustifyContent="JustifyContent.SpaceBetween" Style="height: 100%;">
     <RadzenTemplateForm TItem="ProvinceDtoCreate" Data=@Req Submit=@Create>
         <RadzenStack>
-           @*  <RadzenRow>
-                <RadzenColumn Size="12">
-                    <RadzenColumn Size="12" SizeMD="6" SizeLG="3">
-                        <RadzenFormField Text="Province ID *" Variant="Variant.Flat" Style="width:100%">
-                            <RadzenNumeric Name="ProvinceId"  @bind-Value="Req.ProvinceId" Style="width:100%" />
-                            <RadzenRequiredValidator Component="ProvinceId" Text="Province ID is required" />
-                        </RadzenFormField>
-                    </RadzenColumn>
-                </RadzenColumn>
-            </RadzenRow> *@
             <RadzenRow>
                 <RadzenColumn Size="12">
                     <RadzenColumn Size="12" SizeMD="6" SizeLG="3">
@@ -68,19 +58,19 @@
 
             </RadzenRow>
         </RadzenStack>
-        <RadzenStack Orientation="Orientation.Horizontal" class="mt-2"
+        <RadzenStack Orientation="Orientation.Horizontal" class="rz-mt-2"
                      JustifyContent="JustifyContent.End" Gap="0.5rem">
             <RadzenButton ButtonType="ButtonType.Submit"
                           Text="Save"
                           Size="ButtonSize.Small"
                           ButtonStyle="ButtonStyle.Primary"
-                          Icon="save"></RadzenButton>
+                          Icon="@IconNames.Save"></RadzenButton>
             <RadzenButton Click="@((args) => DialogService!.Close(true))"
                           Variant="Variant.Flat"
                           Size="ButtonSize.Small"
                           Text="Close"
-                          Icon="cancel"
-                          ButtonStyle="ButtonStyle.Secondary" />
+                          Icon="@IconNames.Cancel"
+                          ButtonStyle="ButtonStyle.Danger" />
         </RadzenStack>
     </RadzenTemplateForm>
 </RadzenStack>

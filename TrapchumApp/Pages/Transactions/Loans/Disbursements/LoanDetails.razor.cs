@@ -6,26 +6,30 @@ using Applications.Features.Loans.Services;
 using Applications.Requests.Loans.Payments;
 using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Schedules;
-using Domains.Models.Loans;
-using System.Threading.Tasks;
+using TrapchumApp.Helpers.Extensions;
+using TrapchumApp.Pages.Transactions.Loans.Repayments;
 
-namespace TrapchumApp.Pages.Transactions.Loans.Repayments;
-public partial class PaymentDetails
+namespace TrapchumApp.Pages.Transactions.Loans.Disbursements;
+public partial class LoanDetails
 {
-    readonly ILoanServiceImpl _dService;
+    private readonly ILoanServiceImpl _dService;
+
     private readonly ScheduleService _scheduleService;
-    public PaymentDetails(ILoanServiceImpl dService, ScheduleService scheduleService)
+    public LoanDetails(ILoanServiceImpl dService, ScheduleService scheduleService)
     {
         _dService = dService;
+
         _scheduleService = scheduleService;
     }
 
     [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
     [Parameter] public int BranchId { get; set; }
     [Parameter] public string? LoanId { get; set; }
-    [Parameter, SupplyParameterFromQuery] public int CurrencyId { get; set; }
-    [Parameter, SupplyParameterFromQuery] public string? CreditAgentId { get; set; }
-    [Parameter, SupplyParameterFromQuery] public string? UserId { get; set; }
+    [Parameter] public int CurrencyId { get; set; }
+
+    private string? _creditAgentId = string.Empty;
+
+    private string? _userId = string.Empty;
 
     private VLoanDisbursments? loanSchedule = new();
 
@@ -35,22 +39,21 @@ public partial class PaymentDetails
 
     IEnumerable<LoanScheduleResponse> _loanSchedules = [];
 
-    bool collapse = false;
-    string collapseIcon = "expand_more";
-    bool isVible = false;
-    int selectedTabIndex = 0;
     string receiptNo = "";
-    bool ShowAll = false;
-    int? selectedItem = 0;
+
+    bool isVible = false;
     async Task SelectedTabChanged(int index)
     {
-        selectedTabIndex = index;
+        _selectedTabIndex = index;
 
-        if ((index == 1))
+        if (index == 1)
         {
-           await GetSplitSchedules();
+            await GetSplitSchedules();
         }
-
+        if (index != 2 && _isPaymentTab)
+        {
+            _isPaymentTab = false;
+        }
     }
 
     void CellRender(DataGridCellRenderEventArgs<VSchedule> args)
@@ -62,9 +65,9 @@ public partial class PaymentDetails
 
     }
 
-    async Task OnRowDoubleClick(DataGridRowMouseEventArgs<VSchedule> arg)
+    void OnRowDoubleClick(DataGridRowMouseEventArgs<VSchedule> arg)
     {
-       await PayBySchedules(arg.Data);
+        PayBySchedules(arg.Data);
     }
 
 
@@ -72,16 +75,29 @@ public partial class PaymentDetails
     {
         ContextMenuService.Close();
 
-        selectedTabIndex = 1;
+        _selectedTabIndex = 1;
     }
 
-    async Task PayBySchedules(VSchedule p)
+
+    private bool _isPaymentTab = false;
+
+    private int _selectedTabIndex = 0;
+
+    private LoanPaymentDtoCreate? _loanPayment = new();
+    void CloseTab()
+    {
+        _isPaymentTab = false;
+
+        _selectedTabIndex = 0;
+    }
+
+    void PayBySchedules(VSchedule p)
     {
         ContextMenuService.Close();
 
         var schedulesList = loanSchedule?.Schedules?.ToList();
 
-        var firstSchedule = schedulesList?.First(x=>x.IsPaid==false);
+        var firstSchedule = schedulesList?.First(x => x.IsPaid == false);
 
         if (p != firstSchedule)
         {
@@ -118,19 +134,19 @@ public partial class PaymentDetails
 
         var loanPaymentLine = p!.MapToLoanPaymentLine();
 
-        var create = loanRepaymentLines.ToPaymentCreate(CurrencyId); 
+        var create = loanRepaymentLines.ToPaymentCreate(CurrencyId);
 
-        var options = new DialogOptions 
-        { 
+        var options = new DialogOptions
+        {
             Resizable = false,
-             
+
             Draggable = true,
 
             CssClass = "rz-p-1 rz-m-0 rz-background-color-base-200"
         };
 
 
-        var loanPayment = loanSchedule?.Create(UserId, "");
+        var loanPayment = loanSchedule?.Create(_userId, "");
 
         if (loanPayment is null)
         {
@@ -140,21 +156,33 @@ public partial class PaymentDetails
         }
 
         loanPayment.LoanPaymentLines.Add(loanPaymentLine);
+
+        if (loanPayment is not null)
         {
-            var parameters = new Dictionary<string, object?>();
+            _loanPayment = loanPayment;
 
-            parameters.Add("CurrencyId", CurrencyId);
+            _isPaymentTab = true;
 
-            parameters.Add("LoanPaymentCreate", loanPayment);
+            _selectedTabIndex = 2;
+        }
 
-            var message = $"Recieve Payment from {loanSchedule!.AltName}";
 
-            bool? confirm = await DialogService.OpenAsync<PaymentModal>(message, parameters, options);
 
-            if (confirm is not null && confirm == true)
-            {
-                NotificationService.Notify(NotificationSeverity.Success, "Receive successfully.");
-            }
+        {
+            //var parameters = new Dictionary<string, object?>();
+
+            //parameters.Add("CurrencyId", CurrencyId);
+
+            //parameters.Add("LoanPaymentCreate", loanPayment);
+
+            //var message = $"Recieve Payment from {loanSchedule!.AltName}";
+
+            //bool? confirm = await DialogService.OpenAsync<PaymentModal>(message, parameters, options);
+
+            //if (confirm is not null && confirm == true)
+            //{
+            //    NotificationService.Notify(NotificationSeverity.Success, "Receive successfully.");
+            //}
 
         }
 
@@ -163,29 +191,18 @@ public partial class PaymentDetails
     {
         ContextMenuService.Close();
 
-        NavigationManager.NavigateTo($"/App/Loans/{BranchId}/Branches/{LoanId}/Schedules?CreditAgentId={CreditAgentId}&CurrencyId={CurrencyId}&UserId={UserId}");
-       
+        NavigationManager.NavigateTo($"/App/Loans/{BranchId}/Branches/{LoanId}/Schedules?CreditAgentId={_creditAgentId}&CurrencyId={CurrencyId}&UserId={_userId}");
+
         return;
     }
 
-
-    async Task OnChanged(bool args)
-    {
-        if (args)
-        {
-            await GetLoanSchedulesById(ScheduleStatus.All);
-        }
-        else
-        {
-            await GetLoanSchedulesById(ScheduleStatus.Unpaid);
-        }
-    }
 
     async Task GetSplitSchedules()
     {
         var rsp = await _scheduleService.GetLoanSchedule2(BranchId, LoanId);
 
-        if (rsp.IsSuccess) {
+        if (rsp.IsSuccess)
+        {
 
             _loanSchedules = rsp.Data ?? [];
         }
@@ -202,6 +219,8 @@ public partial class PaymentDetails
         if (rsp.IsSuccess)
         {
             loanSchedule = rsp.Data!;
+
+            _creditAgentId = loanSchedule.CreditAgentRefId;
 
             Schedules = rsp.Data!.Schedules ?? [];
 
@@ -248,6 +267,9 @@ public partial class PaymentDetails
     {
         try
         {
+
+            _userId = (await AuthenticationState).GetUserId();
+
             await GetLoanSchedulesById(ScheduleStatus.Unpaid);
         }
         catch (Exception ex)
@@ -255,22 +277,6 @@ public partial class PaymentDetails
             Console.WriteLine(ex.InnerException!.Message);
         }
         await base.OnInitializedAsync();
-    }
-
-    private void DownLoadScheduleAsExcel(string loanRefId)
-    {
-        //var stream = await _dService.DownLoadScheduleAsExcel(loanRefId, BranchId);
-        //using var streamRef = new DotNetStreamReference(stream: stream);
-        //await js.InvokeVoidAsync("downloadFileFromStream", "Schedule.xlsx", streamRef);
-    }
-
-    private void DownLoadScheduleAsPdf(string loanRefId)
-    {
-        //var stream = await _dService.DownLoadScheduleAsPdf(loanRefId, BranchId);
-
-        //using var streamRef = new DotNetStreamReference(stream: stream);
-
-        //await js.InvokeVoidAsync("downloadFileFromStream", "Schedule.pdf", streamRef);
     }
 }
 

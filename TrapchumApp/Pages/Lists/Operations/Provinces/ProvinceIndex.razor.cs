@@ -3,6 +3,7 @@ using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Addresses;
 using Applications.Responses.ViewModels.Departments;
 using Domains.Models.Addresses;
+using System.Threading.Tasks;
 using TrapchumApp.Pages.Lists.Operations.Districts;
 
 namespace TrapchumApp.Pages.Lists.Operations.Provinces
@@ -12,7 +13,7 @@ namespace TrapchumApp.Pages.Lists.Operations.Provinces
         private readonly IProvinceService _proService;
         private readonly IDistrictService districtService;
 
-        public ProvinceIndex(IProvinceService proService,IDistrictService districtService)
+        public ProvinceIndex(IProvinceService proService, IDistrictService districtService)
         {
             _proService = proService;
             this.districtService = districtService;
@@ -25,23 +26,24 @@ namespace TrapchumApp.Pages.Lists.Operations.Provinces
 
         int pageSize = 10;
 
-        int counts= 0;
+        int counts = 0;
 
         bool sortDescending = false;
 
         string sortField = "";
 
-        protected List<ProvinceViewModel> ProvincesList= [];
-        protected List<District> districtList= [];
+        protected List<ProvinceViewModel> ProvincesList = [];
+        protected List<District> districtList = [];
         protected override async Task OnInitializedAsync()
         {
-                await GetProvinces();
-   
+            await GetProvinces();
             await base.OnInitializedAsync();
         }
-        void PageSizeChanged(int page)
+        async Task PageSizeChanged(int page)
         {
             pageSize = page;
+            pageIndex = 0; // Reset to first page when page size changes
+            await GetProvinces();
         }
         private async Task GetProvinces(string? filter = null)
         {
@@ -56,7 +58,7 @@ namespace TrapchumApp.Pages.Lists.Operations.Provinces
             {
                 throw new Exception($"Error loading provinces: {ex.Message}");
             }
-                
+
         }
         async Task LoadData(LoadDataArgs args)
         {
@@ -79,10 +81,10 @@ namespace TrapchumApp.Pages.Lists.Operations.Provinces
 
             var filterString = filterColumns ?? string.Empty;
 
-            await LoadProvincePageList(pageIndex, sortField, sortDescending,filterString);
+            await LoadProvincePageList(pageIndex, sortField, sortDescending, filterString);
         }
 
-        async Task LoadProvincePageList(int pageIndex = 0, string sortField = "ProvinceId", bool sortDescending = false, string? filter=null)
+        async Task LoadProvincePageList(int pageIndex = 0, string sortField = "ProvinceId", bool sortDescending = false, string? filter = null)
         {
             try
             {
@@ -96,11 +98,11 @@ namespace TrapchumApp.Pages.Lists.Operations.Provinces
 
                 StateHasChanged();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new Exception($"Error loading provinces: {ex.Message}");
             }
-                
+
         }
         protected async Task TextChanged(string? searchtext = null)
         {
@@ -195,7 +197,7 @@ namespace TrapchumApp.Pages.Lists.Operations.Provinces
                 NotificationService.Notify(NotificationSeverity.Error, ex.Message);
                 return;
             }
-            
+
 
         }
     }

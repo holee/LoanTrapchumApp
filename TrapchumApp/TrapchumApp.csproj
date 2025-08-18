@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="Pages\Lists\Bases\AddressBaseCreate.razor" />
     <Content Remove="Pages\Lists\OtherNames\GaurantorCreate.razor" />
   </ItemGroup>
 
@@ -52,8 +53,6 @@
     <AdditionalFiles Include="Pages\Currencies\NoteList.razor" />
     <AdditionalFiles Include="Pages\Currencies\NoteListModal.razor" />
     <AdditionalFiles Include="Pages\Currencies\NoteModalCreate.razor" />
-    <AdditionalFiles Include="Pages\Currencies\NoteTableRow.razor" />
-    <AdditionalFiles Include="Pages\Currencies\TableCurrenctRate.razor" />
     <AdditionalFiles Include="Pages\Error.razor" />
     <AdditionalFiles Include="Pages\Home.razor" />
     <AdditionalFiles Include="Pages\Identity\Authentications\AccessDenied.razor" />
@@ -79,13 +78,11 @@
     <AdditionalFiles Include="Pages\Identity\Users\UserChangePassword.razor" />
     <AdditionalFiles Include="Pages\Identity\Users\UserCreateModal.razor" />
     <AdditionalFiles Include="Pages\Identity\Users\UserManagement.razor" />
-    <AdditionalFiles Include="Pages\Lists\AddressBaseCreate.razor" />
+    <AdditionalFiles Include="Pages\Lists\AddressCreate.razor" />
     <AdditionalFiles Include="Pages\Lists\Branches\BranchCreateModal.razor" />
     <AdditionalFiles Include="Pages\Lists\Branches\BranchDetailModal.razor" />
     <AdditionalFiles Include="Pages\Lists\Branches\BranchList.razor" />
     <AdditionalFiles Include="Pages\Lists\Branches\BranchUpdateModal.razor" />
-    <AdditionalFiles Include="Pages\Lists\Collaterals\CollateralCreate.razor" />
-    <AdditionalFiles Include="Pages\Lists\Collaterals\CollateralCreateTab.razor" />
     <AdditionalFiles Include="Pages\Lists\Collaterals\CollateralDetail.razor" />
     <AdditionalFiles Include="Pages\Lists\Collaterals\CollateralList.razor" />
     <AdditionalFiles Include="Pages\Lists\Collaterals\CollateralLoanRequest.razor" />
@@ -167,7 +164,6 @@
     <AdditionalFiles Include="Pages\Transactions\Branches\VaultOutRow.razor" />
     <AdditionalFiles Include="Pages\Transactions\Exchanges\ExchangeCurrency.razor" />
     <AdditionalFiles Include="Pages\Transactions\Exchanges\ExchangeHistory.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Exchanges\ExchangeList.razor" />
     <AdditionalFiles Include="Pages\Transactions\Exchanges\ExchangesSidebar.razor" />
     <AdditionalFiles Include="Pages\Transactions\Exchanges\MoneyExchanges.razor" />
     <AdditionalFiles Include="Pages\Transactions\Exchanges\SetDailySpotRate.razor" />
@@ -232,7 +228,7 @@
     <AdditionalFiles Include="Pages\Transactions\Loans\Repayments\CustomerLoanInformation.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\Repayments\LateScheduleDetail.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\Repayments\LoanPaymentHistory.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\Repayments\PaymentDetails.razor" />
+    <AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\LoanDetails.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\Repayments\PaymentIndex.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\Repayments\PaymentLines.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\Repayments\PaymentModal.razor" />

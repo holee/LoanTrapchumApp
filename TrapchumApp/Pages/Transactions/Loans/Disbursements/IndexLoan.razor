@@ -9,7 +9,6 @@
 @using Microsoft.AspNetCore.Components.Web
 @using TrapchumApp.Services
 <PageTitle>All</PageTitle>
-@* @attribute [Authorize(Roles ="Account")] *@
 <RadzenTabs TabPosition="TabPosition.Top" RenderMode="TabRenderMode.Server" SelectedIndex="0">
     <Tabs>
         <RadzenTabsItem Text="All Loans">
@@ -20,7 +19,7 @@
                 </span>
             </Template>
             <ChildContent>
-                <AllLoansTab GetLoanChanged="GetLoanCount" BranchId="@BranchId" UserId="@UserId" />
+                <AllLoansTab GetLoanChanged="GetLoanCount" BranchId="@BranchId" UserId="@_userId" />
             </ChildContent>
         </RadzenTabsItem>
     </Tabs>

@@ -7,99 +7,99 @@
 @using Applications.Features.LoanRequests.Services
 @using TrapchumApp.Helpers.Constants
 @using TrapchumApp.Services
-<Containers Fluid CssClass="rz-background-color-base-200 p-2">
+<Containers Fluid CssClass="rz-background-color-base-200 rz-p-2">
     <EditForm Model="model" OnValidSubmit="HandleFormSubmit">
         <FluentValidationValidator DisableAssemblyScanning="true"></FluentValidationValidator>  
         <ValidationSummary />
         <input type="hidden" @bind="@model.UserRefId" />
-        <RadzenRow AlignItems="AlignItems.Center" class="my-1">
+        <RadzenRow AlignItems="AlignItems.Center" class="rz-my-1">
             <RadzenColumn Size="3" SizeMD="3">
                 <RadzenLabel Component="MinLoanSize">Min Usd Size</RadzenLabel>
             </RadzenColumn>
             <RadzenColumn Size="9" SizeMD="9">
                 <RadzenNumeric @bind-Value="model.MinUsdLoanSize"
-                               class="w-100" Min="0"
-                               Format="#,##0.00"
+                               class="rz-w-100" Min="0"
+                               Format="@AppValue.DefaultCurrencyFormat"
                                Name="MinLoanSize"
                                TextAlign="TextAlign.End"
                                ShowUpDown="false" />
                 <ValidationMessage For="@(()=>model.MinUsdLoanSize)"></ValidationMessage>
             </RadzenColumn>
         </RadzenRow>
-        <RadzenRow AlignItems="AlignItems.Center" class="my-1">
+        <RadzenRow AlignItems="AlignItems.Center" class="rz-my-1">
             <RadzenColumn Size="3" SizeMD="3">
                 <RadzenLabel Component="MaxLoanSize">Max Usd Size</RadzenLabel>
             </RadzenColumn>
             <RadzenColumn Size="9" SizeMD="9">
                 <RadzenNumeric @bind-Value="model.MaxUsdLoanSize"
-                               class="w-100" Min="0"
+                               class="rz-w-100" Min="0"
                                Name="MaxLoanSize"
                                TextAlign="TextAlign.End"
                                ShowUpDown="false"
-                               Format="#,##0.00" />
+                               Format="@AppValue.DefaultCurrencyFormat" />
                 <ValidationMessage For="@(()=>model.MaxUsdLoanSize)"></ValidationMessage>
             </RadzenColumn>
         </RadzenRow>
 
-        <RadzenRow AlignItems="AlignItems.Center" class="my-1">
+        <RadzenRow AlignItems="AlignItems.Center" class="rz-my-1">
             <RadzenColumn Size="3" SizeMD="3">
                 <RadzenLabel Component="MinLoanSize">Min Khr Size</RadzenLabel>
             </RadzenColumn>
             <RadzenColumn Size="9" SizeMD="9">
                 <RadzenNumeric @bind-Value="model.MinKhrLoanSize"
-                               class="w-100" Min="0"
-                               Format="#,##0.00"
+                               class="rz-w-100" Min="0"
+                               Format="@AppValue.DefaultCurrencyFormat"
                                Name="MinLoanSize"
                                TextAlign="TextAlign.End"
                                ShowUpDown="false" />
                 <ValidationMessage For="@(() => model.MinKhrLoanSize)"></ValidationMessage>
             </RadzenColumn>
         </RadzenRow>
-        <RadzenRow AlignItems="AlignItems.Center" class="my-1">
+        <RadzenRow AlignItems="AlignItems.Center" class="rz-my-1">
             <RadzenColumn Size="3" SizeMD="3">
                 <RadzenLabel Component="MaxLoanSize">Max Khr Size</RadzenLabel>
             </RadzenColumn>
             <RadzenColumn Size="9" SizeMD="9">
                 <RadzenNumeric @bind-Value="model.MaxKhrLoanSize"
-                               class="w-100" Min="0"
+                               class="rz-w-100" Min="0"
                                Name="MaxLoanSize"
                                TextAlign="TextAlign.End"
                                ShowUpDown="false"
-                               Format="#,##0.00" />
+                               Format="@AppValue.DefaultCurrencyFormat" />
                 <ValidationMessage For="@(() => model.MaxKhrLoanSize)"></ValidationMessage>
             </RadzenColumn>
         </RadzenRow>
-        <RadzenRow AlignItems="AlignItems.Center" class="my-1">
+        <RadzenRow AlignItems="AlignItems.Center" class="rz-my-1">
             <RadzenColumn Size="3" SizeMD="3">
                 <RadzenLabel Component="StartDate">Valid From</RadzenLabel>
             </RadzenColumn>
             <RadzenColumn Size="9" SizeMD="9">
                 <RadzenDatePicker @bind-Value="model.StartDate"
-                               class="w-100"
+                                  class="rz-w-100"
                                Name="StartDate"
                                   Change="StartDateChanged"
-                               DateFormat="dd/MM/yyyy" />
+                               DateFormat="@AppValue.DefaultDateFormat" />
                 <ValidationMessage For="@(()=>model.StartDate)"></ValidationMessage>
             </RadzenColumn>
         </RadzenRow>
-        <RadzenRow AlignItems="AlignItems.Center" class="my-1">
+        <RadzenRow AlignItems="AlignItems.Center" class="rz-my-1">
             <RadzenColumn Size="3" SizeMD="3">
                 <RadzenLabel Component="EndDate">Until</RadzenLabel>
             </RadzenColumn>
             <RadzenColumn Size="9" SizeMD="9">
                 <RadzenDatePicker @bind-Value="model.EndDate"
-                                  class="w-100"
+                                  class="rz-w-100"
                                   Name="EndDate"
-                                  DateFormat="dd/MM/yyyy" />
+                                  DateFormat="@AppValue.DefaultDateFormat" />
                 <ValidationMessage For="@(() => model.EndDate)"></ValidationMessage>
             </RadzenColumn>
         </RadzenRow>
-        <RadzenRow AlignItems="AlignItems.Center" class="my-1">
+        <RadzenRow AlignItems="AlignItems.Center" class="rz-my-1">
             <RadzenColumn Size="3" SizeMD="3">
                 <RadzenLabel Component="Description">Description</RadzenLabel>
             </RadzenColumn>
             <RadzenColumn Size="9" SizeMD="9">
-                <RadzenTextArea @bind-Value="model.Description" class="w-100" Min="0" Name="Description">
+                <RadzenTextArea @bind-Value="model.Description" class="rz-w-100" Min="0" Name="Description">
 
                 </RadzenTextArea>
             </RadzenColumn>

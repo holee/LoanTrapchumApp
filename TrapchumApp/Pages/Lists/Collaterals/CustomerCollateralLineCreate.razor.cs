@@ -33,6 +33,54 @@ public partial class CustomerCollateralLineCreate
     }
 
 
+    void OnMarketPriceChanged(decimal? arg, CollateralLineDtoCreate line)
+    {
+
+        if(!line.SubCategoryRefId.HasValue || line.SubCategoryRefId == 0)
+        {
+            collateralLineDto.MarketPrice = 0.00M;
+            collateralLineDto.HotPrice = 0.00M;
+            collateralLineDto.PawnPrice = 0.00M;
+            return;
+        }
+
+        var maxPrice = allSubTypes.Where(x => x.Id == line.SubCategoryRefId)
+                                  .Select(x => x.LoanSizeAmuntMax)
+                                  .FirstOrDefault();
+        var valueRate = allSubTypes.Where(x => x.Id == line.SubCategoryRefId)
+                                  .Select(x => x.ValueRate)
+                                  .FirstOrDefault();
+        if (maxPrice > 0 && arg > maxPrice)
+        {
+            NotificationService.Notify(NotificationSeverity.Warning, $"Market Price must be less than {maxPrice}");
+
+            collateralLineDto.MarketPrice = maxPrice ?? 0;
+
+            collateralLineDto.HotPrice = maxPrice * valueRate;
+
+            collateralLineDto.PawnPrice = line.HotPrice * valueRate;
+
+            return;
+        }
+
+        if (arg.HasValue && valueRate > 0)
+        {
+            collateralLineDto.HotPrice = arg.Value * valueRate;
+
+            collateralLineDto.PawnPrice = collateralLineDto.HotPrice * valueRate;
+        }
+        else
+        {
+            collateralLineDto.PawnPrice = arg;
+
+            collateralLineDto.HotPrice = arg;
+        }
+
+        StateHasChanged();
+    }
+
+
+
     public CustomerCollateralLineCreate(ICollateralsServiceImpl service, CustomerCollateralServices collateralServices)
     {
         _service = service;

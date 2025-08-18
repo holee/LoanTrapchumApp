@@ -7,7 +7,7 @@
 @using Applications.Features.LoanRequests.Services
 @using Microsoft.AspNetCore.Components.Web
 @using TrapchumApp.Services
-@if (string.IsNullOrEmpty(Label))
+@if (string.IsNullOrEmpty(Label) && (IsFloatLabel == false || IsFloatLabel))
 {
     <RadzenNumeric TValue="decimal?"
                    Value="@Value"
@@ -27,38 +27,37 @@
                    Placeholder="@Placeholder"
                    Format="@Format" />
 }
-else
+@if (!string.IsNullOrEmpty(Label) && !IsFloatLabel)
 {
-
-    @if (Orientation is Orientation.Horizontal)
-    {
-        <div class="row mb-2">
-            <label for="@Id" class="col-sm-2 col-form-label">@Label</label>
-            <div class="col-sm-10">
-                <RadzenNumeric TValue="decimal?"
-                               Value="@Value"
-                               Name="@Name"
-                               id="@Id"
-                               ValueExpression="@ValueExpression"
-                               Change="@OnChanged"
-                               @oninput="@OnTextChanged"
-                               onclick="this.querySelector('.rz-numeric-input').select()"
-                               ShowUpDown="false"
-                               TextAlign="TextAlign"
-                               class="form-control"
-                               Disabled="@Disabled"
-                               Min="@Min"
-                               ValueChanged="@ValueChanged"
-                               Placeholder="@Placeholder"
-                               Format="Format" />
-                <ValidationMessage For="@ValueExpression" />
-            </div>
-        </div>
-    }
-    else
-    {
-        <div class="mb-2">
-            <label for="@Id" class="form-label">@Label</label>
+    <RadzenRow AlignItems="AlignItems.Center">
+        <RadzenColumn Size="2" SizeMD="2" SizeSM="12">
+            @Label
+        </RadzenColumn>
+        <RadzenColumn Size="10" SizeMD="10" SizeSM="12">
+            <RadzenNumeric TValue="decimal?"
+                           Value="@Value"
+                           Name="@Name"
+                           id="@Id"
+                           ValueExpression="@ValueExpression"
+                           Change="@OnChanged"
+                           @oninput="@OnTextChanged"
+                           onclick="this.querySelector('.rz-numeric-input').select()"
+                           ShowUpDown="false"
+                           TextAlign="TextAlign"
+                           class="rz-w-100"
+                           Disabled="@Disabled"
+                           Min="@Min"
+                           ValueChanged="@ValueChanged"
+                           Placeholder="@Placeholder"
+                           Format="Format" />
+            <ValidationMessage For="@ValueExpression" />
+        </RadzenColumn>
+    </RadzenRow>
+}
+@if (!string.IsNullOrEmpty(Label) && IsFloatLabel)
+{
+    <RadzenFormField AllowFloatingLabel="true" class="rz-w-100" Text="@Label">
+        <ChildContent>
             <RadzenNumeric TValue="decimal?"
                            id="@Id"
                            Name="@Name"
@@ -71,22 +70,24 @@ else
                            TextAlign="TextAlign"
                            Disabled="@Disabled"
                            Min="@Min"
-                           class="form-control"
+                           class="rz-w-100"
                            ValueChanged="ValueChanged"
                            Format="@Format" />
+        </ChildContent>
+        <Helper>
             <ValidationMessage For="@ValueExpression" />
-        </div>
-    }
+        </Helper>
+    </RadzenFormField>
 }
-
 @code {
     [Parameter] public string? Label { get; set; } = string.Empty;
     [Parameter] public string? Name { get; set; } = Guid.NewGuid().ToString("N");
     [Parameter] public string Id { get; set; } = Guid.NewGuid().ToString("N");
-    [Parameter] public string? Format { get; set; } = "#,##0.00";
+    [Parameter] public string? Format { get; set; } = AppValue.DefaultCurrencyFormat;
     [Parameter] public string? Placeholder { get; set; } = "";
     [Parameter] public decimal? Value { get; set; }
     [Parameter] public bool Disabled { get; set; }
+    [Parameter] public bool IsFloatLabel { get; set; } = false;
     [Parameter] public TextAlign TextAlign { get; set; } = TextAlign.End;
     [Parameter] public Orientation Orientation { get; set; } = Orientation.Horizontal;
     [Parameter] public EventCallback<decimal?> ValueChanged { get; set; }

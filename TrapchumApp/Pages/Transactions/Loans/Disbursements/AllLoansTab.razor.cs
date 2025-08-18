@@ -71,7 +71,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
         }
         void GetLoanDetails(VLoanDisbursments p)
         {
-            NavigationManager.NavigateTo($"/App/Loan/{BranchId}/Branches/{p.LoanId}/Details?CreditAgentId={p.CreditAgentRefId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
+            NavigationManager.NavigateTo($"/App/Loan/{p.LoanId}/Branches/{BranchId}/Currencies/{p.CurrencyId}");
             return;
         }
         void GetPaymentSchedules(VLoanDisbursments p)

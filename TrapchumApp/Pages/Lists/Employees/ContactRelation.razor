@@ -1,0 +1,61 @@
+@using Applications.Features.Addresses
+@using Applications.Features.Branches
+@using Applications.Features.Currencies
+@using Applications.Features.Customers.Services
+@using Applications.Features.Employees
+@using Applications.Features.LoanRequests.Services
+@using Applications.Requests.Lists.OtherNames
+@using Applications.Responses.Lists.Entities
+@using Applications.Responses.Paginations
+@using Domains.Models.Addresses
+@using Domains.Models.Files
+@using Domains.Shared.Enums
+@using TrapchumApp.Services
+
+<RadzenFieldset AllowCollapse="true" Collapsed="true" class="rz-my-2">
+    <HeaderTemplate>
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
+            <RadzenIcon Icon="contact_emergency" /><strong>Emergency Contact</strong>
+        </RadzenStack>
+    </HeaderTemplate>
+    <ChildContent>
+        <RadzenStack Gap="1rem">
+            <RadzenRow AlignItems="AlignItems.Center">
+                <RadzenColumn Size="12" SizeMD="4">
+                    <RadzenFormField Text="Contact Name" class="rz-w-100">
+                        <RadzenTextBox Placeholder="Enter contact name" class="rz-w-100" @bind-Text="@ContactName" />
+                    </RadzenFormField>
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="4">
+                    <RadzenFormField Text="Contact Phone" class="rz-w-100">
+                        <RadzenTextBox Placeholder="Enter contact phone" class="rz-w-100" @bind-Text="@ContactPhone" />
+                    </RadzenFormField>
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="4">
+                    <RadzenFormField Text="Relation" class="rz-w-100">
+                        <RadzenDropDown Data="@Relations"
+                                        @bind-Value="@Relation"
+                                        class="rz-w-100"
+                                        Name="Relations" />
+                    </RadzenFormField>
+                </RadzenColumn>
+            </RadzenRow>
+        </RadzenStack>
+    </ChildContent>
+</RadzenFieldset>
+
+@code {
+    [Parameter]
+    public string ContactName { get; set; } = string.Empty;
+    [Parameter]
+    public string ContactPhone { get; set; } = string.Empty;
+    [Parameter]
+    public string Relation { get; set; } = string.Empty;
+    private List<int> Relations { get; set; } = new List<int>
+    {
+        1,
+        2,
+        3,
+        4,
+    };
+}

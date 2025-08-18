@@ -2,10 +2,10 @@
 {
     public sealed class VttCurrencyExchanges
     {
-        public long TranId { get; set; }
+        public string? TransactionsId { get; set; }
         public string? TransactionTypeName { get; set; }
         public DateTime? TransactionDate { get; set; }
-        public long? UserRefId { get; set; }
+        public string? UserRefId { get; set; }
         public long Id { get; set; }
         public int? BankRefId { get; set; }
         public int? BuyCurrencyRefId { get; set; }

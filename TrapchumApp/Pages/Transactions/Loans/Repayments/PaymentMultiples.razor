@@ -22,30 +22,31 @@
             border-left: 10px solid transparent;
         }
 </style>
-<table class="table table-sm table-bordered">
+<table class="table-sm">
     <tr>
-        <th class="w-25">Customer Name</th>
-        <td>@LoanPayment?.CustomerName
+        <th class="rz-w-25">Customer Name</th>
+        <td>
+            @LoanPayment?.CustomerName
         </td>
     </tr>
     <tr>
-        <th class="w-25">PaidPrinciple</th>
+        <th class="rz-w-25">PaidPrinciple</th>
         <td>@LoanPayment?.PaidPrinciple</td>
     </tr>
     <tr>
-        <th class="w-25">PaidInterest</th>
+        <th class="rz-w-25">PaidInterest</th>
         <td>@LoanPayment?.PaidInterest</td>
     </tr>
     <tr>
-        <th class="w-25">PaidFeeAmount</th>
+        <th class="rz-w-25">PaidFeeAmount</th>
         <td>@LoanPayment?.PaidFeeAmount</td>
     </tr>
     <tr>
-        <th class="w-25">Penalty Amount</th>
+        <th class="rz-w-25">Penalty Amount</th>
         <td>@LoanPayment?.PaidPenaltyAmount</td>
     </tr>
     <tr>
-        <th class="w-25">Total</th>
+        <th class="rz-w-25">Total</th>
         <td>@LoanPayment?.AmountWithPenalty</td>
     </tr>
 </table>
@@ -90,9 +91,7 @@
                               Sortable="false">
             <Template>
                 <small>
-                    <strong>@c.PaymentDate.DayFirst()</strong>
-                    <br />
-                    <em><small>@c.PaymentDate.DayName()</small></em>
+                    @c.PaymentDate.DayFirst()
                 </small>
             </Template>
         </RadzenDataGridColumn>

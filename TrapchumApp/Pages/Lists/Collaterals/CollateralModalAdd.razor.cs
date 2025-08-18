@@ -10,7 +10,9 @@ using Applications.Responses.ViewModels.Customers;
 using Applications.Services.LIsts;
 using Blazored.FluentValidation;
 using Domains.Models.Collaterals;
+using Microsoft.JSInterop;
 using Radzen.Blazor;
+using System.Threading.Tasks;
 using TrapchumApp.Helpers.Validations;
 
 namespace TrapchumApp.Pages.Lists.Collaterals
@@ -61,13 +63,17 @@ namespace TrapchumApp.Pages.Lists.Collaterals
         }
 
         private FluentValidationValidator? _fluentValidationValidator;
+
         private EditContext editContext = default!;
+
         private ValidationMessageStore messageStore = default!;
         protected override async Task OnInitializedAsync()
         {
 
             editContext = new EditContext(model);
+
             messageStore = new ValidationMessageStore(editContext);
+
             await GetCollateralSubTypes();
 
             allSubTypes = await _collateralService.GetCollateralSubTypes();
@@ -85,6 +91,50 @@ namespace TrapchumApp.Pages.Lists.Collaterals
             CollateralProperties = await _collateralService.GetCollateralSubTypes((int)CollateralTypeEnum.Property);
 
             CollateralPersonals = await _collateralService.GetCollateralSubTypes((int)CollateralTypeEnum.Personal);
+        }
+
+        void PropSelectedItemChanged(object? arg, VCollateralLines line)
+        {
+            if (arg is not null)
+            {
+                line.ValueRate = ((CollateralSubTypeResponse)arg).ValueRate ?? 0;
+            }
+        }
+        void OnMarketPriceChanged(decimal? arg, VCollateralLines line)
+        {
+            var maxPrice = allSubTypes.Where(x=>x.Id == line.SubCategoryRefId)
+                                      .Select(x => x.LoanSizeAmuntMax)
+                                      .FirstOrDefault();
+            var valueRate = allSubTypes.Where(x => x.Id == line.SubCategoryRefId)
+                                      .Select(x => x.ValueRate)
+                                      .FirstOrDefault();
+            if (maxPrice > 0 && arg > maxPrice)
+            {
+                NotificationService.Notify(NotificationSeverity.Warning, $"Market Price must be less than {maxPrice}");
+               
+                line.MarketPrice = maxPrice ?? 0;
+
+                line.HotPrice = maxPrice * valueRate;
+
+                line.PawnPrice = line.HotPrice * valueRate;
+
+                return;
+            }
+
+            if (arg.HasValue && valueRate > 0)
+            {
+                line.HotPrice = arg.Value * valueRate;
+
+                line.PawnPrice = line.HotPrice * valueRate;
+            }
+            else
+            {
+                line.PawnPrice = arg;
+
+                line.HotPrice = arg;
+            }
+
+            StateHasChanged();
         }
 
         protected async Task GetCustomerCollaterals()

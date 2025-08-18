@@ -12,10 +12,7 @@ using Applications.Responses.ViewModels.Options;
 using Domains.Models.Settings;
 using Domains.Models.Transaction;
 using Mapster;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Forms;
-using Microsoft.AspNetCore.Components.Web;
-using Radzen;
+using TrapchumApp.Helpers.Constants;
 using TrapchumApp.Shared;
 
 namespace TrapchumApp.Pages.Transactions.Exchanges
@@ -25,6 +22,7 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
         [CascadingParameter] CascadingAppState bState { get; set; } = default!;
         [Parameter] public int BranchId { get; set; } = 0;
         [Parameter] public string? UserId { get; set; }
+        [Parameter] public bool IsSideBar { get; set; } = true;
 
         ForeignExchangeDtoCreate c = new ForeignExchangeDtoCreate();
 
@@ -44,7 +42,7 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
 
         bool isBuy = true;
 
-        bool isBusy = false; 
+        bool isBusy = false;
 
         private readonly ICurrencyService cuService;
 
@@ -85,8 +83,8 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
             }
             else
             {
-                mx.ExchangeRate = 4000;
-                mx.SpotRate = 3900;
+                mx.ExchangeRate = AppValue.DefaultExchangeRate;
+                mx.SpotRate = AppValue.DefaultSpotRate;
             }
             isBuy = true;
             await base.OnInitializedAsync();
@@ -114,7 +112,7 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
             {
                 isBuy = true;
 
-                mx.ExchangedMode = "Sell Currency";
+                mx.ExchangedMode = AppValue.SellCurrency;
 
                 mx.ExchangeRate = Currency!.BuyingRate!.Value;
             }
@@ -122,7 +120,7 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
             {
                 isBuy = false;
 
-                mx.ExchangedMode = "Buy Currency";
+                mx.ExchangedMode = AppValue.BuyCurrency;
 
                 mx.ExchangeRate = Currency!.SellingRate!.Value;
             }
@@ -182,8 +180,11 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
             if (rate <= 0)
             {
                 mx.ExchangeRate = 0;
+
                 mx.TotalAmount = 0;
+
                 NotificationService.Notify(NotificationSeverity.Warning, "Invalid input Exchange Rate.");
+
                 return;
             }
 
@@ -212,13 +213,16 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
             if (total <= 0)
             {
                 mx.TotalAmount = 0;
+
                 NotificationService.Notify(NotificationSeverity.Warning, "Invalid input Total Amount.");
+
                 return;
             }
 
             if (mx.Amount == 0)
             {
                 mx.TotalAmount = 0;
+
                 return;
             }
 
@@ -272,16 +276,27 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
                 return;
             }
             model.UserRefId = UserId ?? bState.UserId;
+
             model.TranTypeRefId = 67;
+
             model.BranchRefId = BranchId > 0 ? BranchId : bState.BranchId;
-            model.TransactionTypeName =TransactionTypes.CFX.GetDescription() ;//"Currency Foreign Exchange";
+
+            model.TransactionTypeName = TransactionTypes.CFX.GetDescription();//"Currency Foreign Exchange";
+
             c.StaffRefId = UserId ?? bState.UserId;
-            c.StaffAuthRefId =UserId ?? bState.UserId;
+
+            c.StaffAuthRefId = UserId ?? bState.UserId;
+
             c.BranchRefId = BranchId > 0 ? BranchId : bState.BranchId;
+
             c.BankRefId = 11;
+
             c.SpotRate = mx.SpotRate;
+
             c.Remark = mx.Description;
-            c.NameRefId= bState.UserId;
+
+            c.NameRefId = bState.UserId;
+
             if (isBuy)
             {
                 c.BuyAmount = mx.Amount;
@@ -341,7 +356,9 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
             if (!result.IsSuccess)
             {
                 NotificationService.Notify(NotificationSeverity.Error, result.ErrMessage);
+
                 isBusy = false;
+
                 return;
             }
 

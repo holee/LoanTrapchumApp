@@ -16,10 +16,8 @@
         </RadzenStack>
     </HeaderTemplate>
     <ChildContent>
-        <PageDropDown ShowSearchBox="true"
-                      OnTextChanged="SearchTextChanged"
-                      PageSizeChanged="PageSizeChanged">
-            <RightChildContent>
+        <GridToolbar SearchChanged="@SearchTextChanged">
+            <RightChildren>
                 <div class="rz-p-2 rz-text-align-center">
                     <RadzenCheckBox TValue="bool"
                                     Change="CheckedChanged"
@@ -27,8 +25,8 @@
                                     Value="@isIncludeInActive" />
                     <RadzenLabel Text="Include In Active" Component="isIncludeInActive" class="rz-ms-2" />
                 </div>
-            </RightChildContent>
-        </PageDropDown>
+            </RightChildren>
+        </GridToolbar>
         <RadzenDataGrid Data="@_loanSizes"
                         Responsive="true"
                         Density="Density.Compact"
@@ -36,15 +34,18 @@
                         AllowPaging="true"
                         IsLoading="@isLoading"
                         Count="@_counts"
-                        PagerHorizontalAlign="HorizontalAlign.Right"
-                        PagerPosition="PagerPosition.Bottom"
                         ColumnWidth="10rem"
                         AllowSorting="true"
                         TItem="VUserLoanSizes"
-                        RowSelect="SelectedRowChanged"
+                        RowSelect="@SelectedRowChanged"
                         PageSize="@pageSize"
                         GridLines="DataGridGridLines.Both"
-                        LoadData="LoadData">
+                        PageSizeChanged="@PageSizeChanged"
+                        PageSizeOptions="@StorageConstant.PageSizeOptions"
+                        PagerHorizontalAlign="HorizontalAlign.Right"
+                        PagerPosition="PagerPosition.Bottom"
+                        ShowPagingSummary="true"
+                        LoadData="@LoadData">
             <Columns>
                 <RadzenDataGridColumn Title="Name"
                                       Property="@nameof(VUserLoanSizes.FullName)">

@@ -50,7 +50,22 @@ namespace Infrastructures.Implements
             }
 
             int counts = await queries.CountAsync();
-            var items = await queries.ToListAsync();
+
+            var items =await queries.Select(x => new VttCurrencyExchanges
+            {
+                TransactionsId= x.TransactionsId,
+                TransactionDate = x.TransactionDate,
+                TransactionTypeName = x.TransactionTypeName,
+                BranchName= x.BranchName,
+                BuyCurrencyName= x.BuyCurrencyName,
+                BuyAmount = x.BuyAmount,
+                SellCurrencyName = x.SellCurrencyName,
+                SellAmount = x.SellAmount,
+                ExchangeRate = x.ExchangeRate,
+            })
+            .AsNoTracking()
+            .ToListAsync();
+
             return new Pager<VttCurrencyExchanges>(items, counts);
 
 

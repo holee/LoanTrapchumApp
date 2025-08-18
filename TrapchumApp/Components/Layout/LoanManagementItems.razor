@@ -9,10 +9,11 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @using TrapchumApp.Services
 <RadzenPanelMenuItem Text="Loan Management" Icon="dataset">
-        <RadzenPanelMenuItem Text="Loans" Icon="lists" Path="@($"/App/Loan/{BranchId}/Branches?UserId={UserId}")" Visible="@_canShowLoan" />
+        <RadzenPanelMenuItem Text="Loans" Icon="lists" Path="@($"/App/Loan/{BranchId}/Branches")" Visible="@_canShowLoan" />
         <RadzenPanelMenuItem Text="Client Due Pay" Icon="schedule" Path="@($"/App/Loan/{BranchId}/Branches/{UserId}/Users/Schedules")" Visible="@_canShowLoan"/>
-        <RadzenPanelMenuItem Text="Loan Write Off" Icon="person_off" Path="/App/Loan/WriteOff" Visible="@_isAccountOnly"/>
-        <RadzenPanelMenuItem Text="Loan Request" Icon="request_quote" Path="@($"/App/Request/{BranchId}/Branches/?UserId={UserId}")" Visible="@_isAccountOnly" />
+        <RadzenPanelMenuItem Text="Loan Write Off" Icon="person_off" Path="/app/loan/write-off" Visible="@_isAccountOnly"/>
+    <RadzenPanelMenuItem Text="Loan Pay Off" Icon="person_off" Path="/app/loan/pay-off" Visible="@_isAccountOnly" />
+        <RadzenPanelMenuItem Text="Loan Request" Icon="request_quote" Path="@($"/App/Request/{BranchId}/Branches")" Visible="@_isAccountOnly" />
 </RadzenPanelMenuItem>
 
 @code {

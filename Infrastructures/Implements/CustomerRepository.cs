@@ -72,7 +72,6 @@ public sealed class CustomerRepository(
         return new Pager<VCustomerList>(dataTask, countTask);
 
     }
-   
     public async Task<Result<VCustomerList>> GetCustomerDetailByIdAsync(string? customerId, bool include = false, CancellationToken cancellationToken = default)
     {
         logger.LogInformation("Fetching customer details for ID {CustomerId} (Include Related: {Include})", customerId, include);
@@ -279,7 +278,7 @@ public sealed class CustomerRepository(
     {
         using var db = dapperFactory.CreateConnection();
 
-        var sql = @"SELECT * FROM VLoanDisbursments WHERE CustomerId=@customerId";
+        var sql = @"SELECT * FROM VLoansDisbursments WHERE CustomerId=@customerId";
 
         var loanHistories = await db.QueryAsync<VLoanDisbursments>(sql, new { @customerId = customerId });
 

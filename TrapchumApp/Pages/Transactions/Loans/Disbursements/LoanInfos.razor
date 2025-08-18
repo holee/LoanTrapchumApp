@@ -11,6 +11,10 @@
              class="rz-mb-2"
              Orientation="Orientation.Horizontal"
              JustifyContent="JustifyContent.End">
+    @if (ChildContent is not null)
+    {
+        @ChildContent
+    }
     <RadzenButton Size="ButtonSize.ExtraSmall"
                   Click="@DownLoadScheduleAsExcel"
                   ButtonStyle="ButtonStyle.Success"
@@ -88,3 +92,6 @@
         </table>
     </ChildContent>
 </RadzenFieldset>
+@code {
+    [Parameter] public RenderFragment ChildContent { get; set; } = default!;
+}

@@ -25,7 +25,8 @@ public sealed class CollateralLine
     public decimal? MarketPrice { get; set; }
     public decimal? HotPrice { get; set; }
     public decimal? PawnPrice { get; set; }
-    public bool IsUsed { get; set; } = false; 
+    public bool IsUsed { get; set; } = false;
+    public decimal? ValueRate { get; set; } = 0;
     public DateTime? CreatedDt { get; set; } = DateTime.UtcNow;
     public DateTime? ModifiedDt { get; set; }= DateTime.UtcNow;
     public List<CollateralLink> CollateralLinesLink { get; set; } = [];

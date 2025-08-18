@@ -5,6 +5,7 @@ namespace Applications.Responses.ViewModels.Loans;
 public sealed class VLoanDisbursments
 {
     public string? LoanId { get; set; }
+    public string? LoanAccount { get; set; }
     public string? LoanRequestId { get; set; }
     public string? RequestUserRefId { get; set; } 
     public string? AprovedUserId { get; set; } 

@@ -116,10 +116,10 @@
                     @if (bState.IsCreditAgent)
                     {
                         <RadzenPanelMenuItem Text="Loan Management" Icon="dataset">
-                            <RadzenPanelMenuItem Text="Customers" Icon="group" Path="@($"/App/Customer/{branchId}/Branches?UserId={userId}")" />
+                            <RadzenPanelMenuItem Text="Customers" Icon="group" Path="@($"/App/Customer/{branchId}/Branches")" />
                             <RadzenPanelMenuItem Text="Collaterals" Icon="invert_colors" Path="/App/Customer/Collateral" />
-                            <RadzenPanelMenuItem Text="Request" Icon="request_quote" Path="@($"/App/Request/{branchId}/Branches/?UserId={userId}")" />
-                            <RadzenPanelMenuItem Text="Loans" Icon="@IconNames.MoneyBag" Path="@($"/App/Loan/{branchId}/Branches?UserId={userId}")" />
+                            <RadzenPanelMenuItem Text="Request" Icon="request_quote" Path="@($"/App/Request/{branchId}/Branches")" />
+                            <RadzenPanelMenuItem Text="Loans" Icon="@IconNames.MoneyBag" Path="@($"/App/Loan/{branchId}/Branches")" />
                         </RadzenPanelMenuItem>
 
                     }
@@ -144,7 +144,7 @@
             </AuthorizeView>
             <AuthorizeView Policy="@RolePolicies.AccountOnly">
                 <Authorized>
-                    <CurrencyItems IsBranchOpen="@bState.State" />
+                    <CurrencyItems IsBranchOpen="@bState.State" BranchId="@branchId" />
                 </Authorized>
             </AuthorizeView>
             <AuthorizeView Policy="@RolePolicies.AdminOnly">
@@ -157,7 +157,7 @@
             </AuthorizeView>
         </RadzenPanelMenu>
     </RadzenSidebar>
-    <RadzenBody class="rz-background-color-base-200">
+    <RadzenBody>
         @Body
     </RadzenBody>
 </RadzenLayout>
@@ -207,16 +207,17 @@
 
     async Task ShowCurrencyDialogue()
     {
-        var param = new Dictionary<string, object?> { { "BranchId", branchId }, { "UserId", userId }, { "ShowCloseButton", true } };
-
-        var options = new DialogOptions
-        {
-            Draggable = true,
-            Resizable = false,
-            Width = "50rem"
+        var param = new Dictionary<string, object?> {
+            { "BranchId", branchId },
+            { "UserId", userId }
         };
 
-        await DialogService.OpenAsync<MoneyExchanges>("Currency Exchange", param, options);
+        var options = new SideDialogOptions
+        {
+
+        };
+
+        await DialogService.OpenSideAsync<ExchangesSidebar>("Currency Exchange", param, options);
     }
 
 }

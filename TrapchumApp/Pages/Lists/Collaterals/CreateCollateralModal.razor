@@ -95,71 +95,7 @@
                                         </th>
                                     </tr>
                                 </thead>
-                               @*  <tbody>
-                                    @if (Model?.CollateralLines!.Count > 0)
-                                    {
-                                        var properties = Model?.CollateralLines!
-                                        .Where(x => x.TypeName == "Property")
-                                        .ToList();
-
-                                        @for (int x = 0; x < properties?.Count; x++)
-                                        {
-                                            var row = x;
-                                            var currentrow = x + 1;
-                                        <td>
-                                                @currentrow
-                                            <input type="hidden" @bind="properties[row]!.Id" />
-                                            <input type="hidden" @bind="properties[row]!.CollateralRefId" />
-                                        </td>
-                                        <td Style="width:15%;">
-                                            <RadzenDropDown TValue="int?"
-                                                            Data="collateralProperties"
-                                                            TextProperty="CollateralSubTypeName"
-                                                            ValueProperty="Id"
-                                                            @bind-Value="properties[row].SubCategoryRefId">
-                                            </RadzenDropDown>
-                                        </td>
-                                        <td Style="width:15%;">
-                                            <RadzenTextBox @bind-Value="properties[row]!.CollateralNo"></RadzenTextBox>
-                                        </td>
-                                        <td>
-                                            <RadzenTextBox Placeholder="Owner"
-                                                           @bind-Value="properties[row]!.OwnerName"></RadzenTextBox>
-                                        </td>
-                                        <td>
-                                            <RadzenTextBox Placeholder="Size"
-                                                           @bind-Value="properties[row]!.Size" />
-                                        </td>
-                                        <td>
-                                            <RadzenNumeric Placeholder="Qty"
-                                                           ShowUpDown="false"
-                                                           @bind-Value="properties[row]!.Quantity" />
-                                        </td>
-                                        <td>
-                                            <RadzenNumeric @bind-Value="properties[row]!.MarketPrice"
-                                                           ShowUpDown="false"
-                                                           TextAlign="TextAlign.End" />
-                                        </td>
-                                        <td>
-                                            <RadzenNumeric @bind-Value="properties[row]!.HotPrice"
-                                                           ShowUpDown="false"
-                                                           TextAlign="TextAlign.End" />
-                                        </td>
-                                        <td>
-                                            <RadzenNumeric @bind-Value="properties[row]!.PawnPrice"
-                                                           ShowUpDown="false"
-                                                           TextAlign="TextAlign.End" />
-                                        </td>
-                                        <td>
-                                            <RadzenButton Click="@(()=>Remove(properties[row]))"
-                                                          ButtonStyle="ButtonStyle.Danger"
-                                                          Icon="revmove"
-                                                          Size="ButtonSize.Small">
-                                            </RadzenButton>
-                                        </td>
-                                        }
-                                    }
-                                </tbody> *@
+                              
                             </table>
                         </RadzenTabsItem>
                         <RadzenTabsItem Text="Personal">

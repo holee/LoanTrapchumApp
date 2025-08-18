@@ -9,14 +9,13 @@
     <RadzenPanelMenuItem Text="Currencies List" Icon="attach_money" Path="/App/Currencies" />
     <RadzenPanelMenuItem Text="Currency Note" Icon="money" Path="@($"/App/Currencies/CurrencyCounter?BranchId={BranchId}")" />
     <RadzenPanelMenuItem Text="Set Daily Spot Rate" Icon="mintmark" Path="/App/Currencies/SetDailySpotRate" />
-    <RadzenPanelMenuItem Text="Money Exchange" Icon="currency_exchange" Path="@($"/App/Currencies/Exchange/{BranchId}/Branches/?UserId={UserId}")" />
+    <RadzenPanelMenuItem Text="Money Exchange" Icon="currency_exchange" Path="@($"/App/Currencies/Exchange/{BranchId}/Branches")" />
 </RadzenPanelMenuItem>
 @code {
     [Parameter] public string? UserId { get; set; } = string.Empty;
     [Parameter] public int BranchId { get; set; } = 0;
     [Parameter] public bool IsBranchOpen { get; set; } = false;
     [Parameter] public EventCallback ShowDialogue { get; set; } = default!;
-
     async Task ShowCurrencyDialogue()
     {
         await ShowDialogue.InvokeAsync();

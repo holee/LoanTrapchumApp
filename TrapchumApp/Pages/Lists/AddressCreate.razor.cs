@@ -3,7 +3,7 @@ using Applications.Requests.Lists.OtherNames;
 using Domains.Models.Addresses;
 namespace TrapchumApp.Pages.Lists
 {
-    public partial class AddressBaseCreate
+    public partial class AddressCreate 
     {
         [Parameter] public BaseEntityNamesCreate model { get; set; }
         [Parameter] public IEnumerable<string> Cities { get; set; } = [];

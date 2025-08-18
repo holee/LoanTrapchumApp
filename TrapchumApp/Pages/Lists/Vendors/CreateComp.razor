@@ -40,7 +40,7 @@
                 <RadzenRow>
                     <RadzenColumn Size="12">
                         <RadzenTextBox @bind-Value="model.FirstName"
-                                       class="w-100"
+                                       class="rz-w-100"
                                        Placeholder="First name..." />
                         <ValidationMessage For="@(() => model.FirstName)" />
                     </RadzenColumn>
@@ -59,14 +59,14 @@
                 <RadzenRow>
                     <RadzenColumn Size="12">
                         <RadzenTextBox @bind-Value="model.LastName"
-                                       class="w-100"
+                                       class="rz-w-100"
                                        Placeholder="Last Name.." />
                         <ValidationMessage For="@(() => model.LastName)" />
                     </RadzenColumn>
                 </RadzenRow>
             </RadzenColumn>
         </RadzenRow>
-        <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+        <RadzenRow AlignItems="AlignItems.Center" class="rz-mt-2">
             <RadzenColumn Size="6">
                 <RadzenRow AlignItems="AlignItems.Center">
                     <RadzenColumn Size="3">
@@ -74,7 +74,7 @@
                     </RadzenColumn>
                     <RadzenColumn Size="9">
                         <RadzenTextBox @bind-Value="model.AltName"
-                                       class="w-100"
+                                       class="rz-w-100"
                                        Placeholder="ឈ្មោះខ្មែរ..." />
                     </RadzenColumn>
                 </RadzenRow>
@@ -86,19 +86,19 @@
                     </RadzenColumn>
                     <RadzenColumn Size="9">
                         <RadzenDropDown @bind-Value="model.MarritalStatus"
-                                        class="w-100"
+                                        class="rz-w-100"
                                         Data="Statuses">
                         </RadzenDropDown>
                     </RadzenColumn>
                 </RadzenRow>
             </RadzenColumn>
         </RadzenRow>
-        <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+        <RadzenRow AlignItems="AlignItems.Center" class="rz-mt-2">
             <RadzenColumn Size="6">
                 <RadzenRow AlignItems="AlignItems.Center">
                     <RadzenColumn Size="3">Occupation</RadzenColumn>
                     <RadzenColumn Size="9">
-                        <RadzenDropDown class="w-100"
+                        <RadzenDropDown class="rz-w-100"
                                         Data="Occupations"
                                         AllowFiltering="true"
                                         FilterOperator="StringFilterOperator.Contains"
@@ -120,7 +120,7 @@
                                           @bind-Value="model.DateOfBirth"
                                           @bind-Value:format="yyyy-MMM-dd"
                                           DateFormat="dd/MM/yyyy"
-                                          class="w-100"
+                                          class="rz-w-100"
                                           Placeholder="Date Of Birth">
                         </RadzenDatePicker>
                     </RadzenColumn>
@@ -132,7 +132,7 @@
                 <RadzenRow AlignItems="AlignItems.Center">
                     <RadzenColumn Size="3">Passport</RadzenColumn>
                     <RadzenColumn Size="9">
-                        <RadzenTextBox class="w-100"
+                        <RadzenTextBox class="rz-w-100"
                                        @bind-Value="model.PassportId"
                                        Placeholder="Passport...." />
                     </RadzenColumn>
@@ -145,7 +145,7 @@
                         <RadzenDropDown Data="@Nationalities"
                                         TextProperty="@nameof(Nationality.NationalityName)"
                                         ValueProperty="@nameof(Nationality.NationalityName)"
-                                        class="w-100"
+                                        class="rz-w-100"
                                         @bind-Value="model.Nationality" />
                     </RadzenColumn>
                 </RadzenRow>
@@ -161,14 +161,14 @@
         </RadzenStack>
     </HeaderTemplate>
     <ChildContent>
-        <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+        <RadzenRow AlignItems="AlignItems.Center" class="rz-mt-2">
             <RadzenColumn Size="6" SizeMD="6" SizeSM="12">
                 <RadzenRow AlignItems="AlignItems.Center">
                     <RadzenColumn Size="3" SizeMD="3" SizeSM="12">
                         <RadzenLabel Component="Model.Phone">Phone</RadzenLabel>
                     </RadzenColumn>
                     <RadzenColumn Size="9" SizeMD="9" SizeSM="12">
-                        <RadzenTextBox class="w-100"
+                        <RadzenTextBox class="rz-w-100"
                                        Name="Model.Phone"
                                        @bind-Value="model.Phone"
                                        Placeholder="Mobile phone..." />
@@ -176,14 +176,14 @@
                 </RadzenRow>
             </RadzenColumn>
         </RadzenRow> 
-        <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+        <RadzenRow AlignItems="AlignItems.Center" class="rz-mt-2">
             <RadzenColumn Size="6" SizeMD="6" SizeSM="12">
                 <RadzenRow AlignItems="AlignItems.Center">
                     <RadzenColumn Size="3" SizeMD="3" SizeSM="12">
                         <RadzenLabel Component="Model.Phone">Alt. Phone</RadzenLabel>
                     </RadzenColumn>
                     <RadzenColumn Size="9" SizeMD="9" SizeSM="12">
-                        <RadzenTextBox class="w-100"
+                        <RadzenTextBox class="rz-w-100"
                                        Name="Model.Phone"
                                        @bind-Value="model.AltPhone"
                                        Placeholder="Alternate Phone..." />
@@ -204,12 +204,12 @@
                 </RadzenRow>
             </RadzenColumn>
         </RadzenRow>
-        <RadzenRow AlignItems="AlignItems.Center" class="mt-2">
+        <RadzenRow AlignItems="AlignItems.Center" class="rz-mt-2">
             <RadzenColumn Size="6" SizeMD="6" SizeSM="12">
                 <RadzenRow AlignItems="AlignItems.Center">
                     <RadzenColumn Size="3">Company Name</RadzenColumn>
                     <RadzenColumn Size="9">
-                        <RadzenTextBox class="w-100"
+                        <RadzenTextBox class="rz-w-100"
                                        @bind-Value="model.CompanyName"
                                        Placeholder="Company Name...." />
                     </RadzenColumn>
@@ -219,7 +219,7 @@
                 <RadzenRow AlignItems="AlignItems.Center">
                     <RadzenColumn Size="3">Company Address</RadzenColumn>
                     <RadzenColumn Size="9">
-                        <RadzenTextBox class="w-100"
+                        <RadzenTextBox class="rz-w-100"
                                        @bind-Value="model.CompanyAddress"
                                        Placeholder="Company Address" />
                     </RadzenColumn>

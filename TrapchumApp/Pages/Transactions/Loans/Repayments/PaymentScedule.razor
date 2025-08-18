@@ -12,7 +12,7 @@
                            TextAlign="TextAlign.End"
                            ShowUpDown="false"
                            class="rz-w-100"
-                           Format="#,##0.00"
+                           Format="@AppValue.DefaultCurrencyFormat"
                            Value="@SelectedSchedule?.LeftPrinciple" />
         </RadzenFormField>
     </RadzenColumn>
@@ -22,7 +22,7 @@
                            TextAlign="TextAlign.End"
                            class="rz-w-100"
                            ShowUpDown="false"
-                           Format="#,##0.00"
+                           Format="@AppValue.DefaultCurrencyFormat"
                            Value="@SelectedSchedule?.LeftInterestAmount" />
         </RadzenFormField>
     </RadzenColumn>
@@ -32,7 +32,7 @@
                            TextAlign="TextAlign.End"
                            class="rz-w-100"
                            ShowUpDown="false"
-                           Format="#,##0.00"
+                           Format="@AppValue.DefaultCurrencyFormat"
                            Value="@SelectedSchedule?.LeftCollectionFeeAmount" />
         </RadzenFormField>
     </RadzenColumn>
@@ -42,7 +42,7 @@
                            TextAlign="TextAlign.End"
                            class="rz-w-100"
                            ShowUpDown="false"
-                           Format="#,##0.00"
+                           Format="@AppValue.DefaultCurrencyFormat"
                            Value="@SelectedSchedule?.LeftAmount" />
         </RadzenFormField>
     </RadzenColumn>

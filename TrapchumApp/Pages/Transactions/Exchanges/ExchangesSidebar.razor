@@ -17,7 +17,7 @@
             <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
                 <RadzenColumn Size="6">
                     <RadzenDropDown Data="@StorageConstant.ExchangedTypes"
-                                    class="w-100"
+                                    class="rz-w-100"
                                     TextProperty="@nameof(Items.Label)"
                                     ValueProperty="@nameof(Items.Value)"
                                     @bind-Value="mx.CurrencyTypeId"
@@ -26,7 +26,7 @@
                 </RadzenColumn>
                 <RadzenColumn Size="6">
                     <RadzenDropDown TextProperty="@nameof(Items.Label)"
-                                    class="w-100"
+                                    class="rz-w-100"
                                     @bind-Value="mx.BuyCurrencyId"
                                     ValueProperty="@nameof(Items.Value)"
                                     Data="buyCurrencies">
@@ -35,9 +35,9 @@
             </RadzenRow>
             <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
                 <RadzenColumn Size="6">
-                    <RadzenLabel Component="sellCurrencies" class="w-100">
+                    <RadzenLabel Component="sellCurrencies" class="rz-w-100">
                         <RadzenBadge BadgeStyle="BadgeStyle.Primary"
-                                     class="rz-p-2 w-100"
+                                     class="rz-p-2 rz-w-100"
                                      Shade="Shade.Darker">
                             @mx.ExchangedMode
                         </RadzenBadge>
@@ -46,7 +46,7 @@
                 <RadzenColumn Size="6">
                     <RadzenDropDown TextProperty="@nameof(Items.Label)"
                                     @bind-Value="mx.SellCurrencyId"
-                                    class="w-100"
+                                    class="rz-w-100"
                                     Name="sellCurrencies"
                                     ValueProperty="@nameof(Items.Value)"
                                     Data="sellCurrencies">
@@ -89,7 +89,7 @@
                     <RadzenLabel Component="DESCRIPTION">DESCRIPTION</RadzenLabel>
                 </RadzenColumn>
                 <RadzenColumn Size="8">
-                    <RadzenTextArea class="w-100"
+                    <RadzenTextArea class="rz-w-100"
                                     Name="DESCRIPTION"
                                     Placeholder="Description"
                                     @bind-Value="mx.Description"></RadzenTextArea>
@@ -99,17 +99,17 @@
     </RadzenStack>
     <RadzenStack Gap="1rem" Orientation="Orientation.Horizontal"
                  AlignItems="AlignItems.Center"
-                 class="mt-2"
-                 Style="position:absolute;bottom:1rem;right:0.5rem;"
+                 class="rz-mt-2"
+                 Style="@(IsSideBar ? "position:absolute;bottom:1rem;right:0.5rem;":"")"
                  JustifyContent="JustifyContent.End">
         <RadzenButton Icon="save"
                       ButtonType="ButtonType.Button"
-                      Text="Save & New"
-                      Click="SaveAndNew"
+                      Text="Save"
+                      Click="@SaveAndNew"
                       BusyText="Please wait...."
                       IsBusy="isBusy"
                       ButtonStyle="ButtonStyle.Success"
-                      Size="ButtonSize.Small" />
+                      Size="ButtonSize.ExtraSmall" />
         <RadzenButton Icon="@IconNames.Cancel"
                       ButtonType="ButtonType.Button"
                       Text="Close"
@@ -117,7 +117,8 @@
                       BusyText="Please wait...."
                       IsBusy="isBusy"
                       ButtonStyle="ButtonStyle.Danger"
-                      Size="ButtonSize.Small" />
+                      Visible="@IsSideBar"
+                      Size="ButtonSize.ExtraSmall" />
     </RadzenStack>
 </RadzenStack>
 
