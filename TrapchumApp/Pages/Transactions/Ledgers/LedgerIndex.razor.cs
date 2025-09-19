@@ -162,7 +162,7 @@ public partial class LedgerIndex
             Draggable = true,
             Resizable = false
         };
-        var confirm = await DialogService.OpenAsync<CreateLedgerModal>("CreateNewUser", options: options);
+        var confirm = await DialogService.OpenAsync<CreateLedgerModal>("Create Ledger", options: options);
 
         if ((bool)confirm == true)
         {

@@ -1,11 +1,8 @@
-﻿using Applications.Requests.Loans.Categories;
-using Applications.Responses.Loans.Disbursements;
+﻿using Applications.Responses.Loans.Disbursements;
 using Domains.Models.Loans;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Applications.Features.Categories.Requests;
+
+
 
 namespace Applications.Commons.Mappers
 {

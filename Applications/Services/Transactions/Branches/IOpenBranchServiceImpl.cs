@@ -1,6 +1,7 @@
-﻿using Applications.Requests.Transactions.OpenBranches;
+﻿using Applications.Features.CashManagements.Responses;
+using Applications.Features.Transactions.OpenBranches;
+using Applications.Features.Transactions.OpenBranches;
 using Applications.Responses;
-using Applications.Responses.ViewModels.Currencies;
 
 namespace Applications.Services.Transactions.Branches
 {

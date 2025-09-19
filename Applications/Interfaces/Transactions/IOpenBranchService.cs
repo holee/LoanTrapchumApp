@@ -1,7 +1,5 @@
-﻿using Applications.Requests.Transactions.LoanTransactions;
-using Applications.Requests.Transactions.OpenBranches;
+﻿using Applications.Features.CashManagements.Responses;
 using Applications.Responses;
-using Applications.Responses.ViewModels.Currencies;
 using Domains.Models.Transaction;
 
 namespace Applications.Interfaces.Transactions

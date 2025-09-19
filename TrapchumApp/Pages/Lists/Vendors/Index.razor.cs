@@ -1,11 +1,11 @@
 using Applications.Extensions;
+using Applications.Features.Addresses.Responses;
+using Applications.Features.OtherNames;
 using Applications.Interfaces.Lists;
 using Applications.Interfaces.Vendors;
-using Applications.Requests.Lists.Addreses;
-using Applications.Requests.Lists.OtherNames;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Vendors;
-using Applications.Services.LIsts;
+using Applications.Services.Lists;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 using Radzen.Blazor;

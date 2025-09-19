@@ -42,6 +42,7 @@
         public const string Contact = "contact_mail";
         public const string PersonSearch = "person_search";
         public const string VerifiedUser = "verified_user";
+        public const string LoginUser = "login"; 
         public const string Edit = "edit_square";
         public const string EditPen = "edit"; 
         public const string PersonRemove = "person_remove";

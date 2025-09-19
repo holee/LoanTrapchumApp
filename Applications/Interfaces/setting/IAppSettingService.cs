@@ -1,5 +1,4 @@
-﻿using Applications.Requests.Settings;
-using Applications.Responses;
+﻿using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Settings;
 using Domains.Models.Collaterals;
@@ -8,7 +7,7 @@ using Domains.Models.Settings;
 
 namespace Applications.Interfaces.setting;
 
-public interface IAppSettingService
+public interface IAppSettingService 
 {
     Task<Result<string>> Delete(long? id, CancellationToken cancellation = default);
     Task<Result<string>> Save(AppSettings entity, CancellationToken cancellation = default);

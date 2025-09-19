@@ -4,69 +4,73 @@
 @using Applications.Features.Currencies
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Services
+@using Applications.Features.LoanRequests.Interfaces
 @using TrapchumApp.Services
-@if (!string.IsNullOrEmpty(Text))
-{
-    @if (Orientation == Orientation.Horizontal)
+
+    @if (!string.IsNullOrEmpty(Text) && (!IsFloatLabel))
     {
-        <div class="row mb-2">
-            <label for="@Id" class="col-sm-2 col-form-label">@Text</label>
-            <div class="col-sm-10">
-                <RadzenDatePicker InputClass="w-100"
+        <RadzenRow>
+            <RadzenColumn Size="2" SizeMD="2" SizeSM="12">
+                <RadzenLabel Component="@Id" Text="@Text" />
+            </RadzenColumn>
+            <RadzenColumn Size="10" SizeMD="10" SizeSM="12">
+                <RadzenDatePicker InputClass="@Styles.W100"
                                   Value="@Value"
                                   Change="@Changed"
                                   ValueChanged="@ValueChanged"
                                   ValueExpression="@ValueExpression"
                                   TValue="DateTime?"
                                   id="@Id"
-                                  DateFormat="dd/MM/yyyy" />
+                                  Name="@Id"
+                                  DateFormat="@Defaults.DefaultDateFormat" />
                 @if (ShowError)
                 {
-                    <div class="invalid-feedback">
+                    <div class="@Styles.TextDanger">
                         <ValidationMessage For="@ValueExpression" />
                     </div>
                 }
-            </div>
-        </div>
+            </RadzenColumn>
+        </RadzenRow>
     }
-    else
+    @if (!string.IsNullOrEmpty(Text) && (IsFloatLabel))
     {
-        <div class="mb-2">
-            <label for="@Id" class="form-label">@Text</label>
-            <RadzenDatePicker InputClass="w-100"
-                              Value="@Value"
-                              Change="@Changed"
-                              ValueChanged="@ValueChanged"
-                              ValueExpression="@ValueExpression"
-                              TValue="DateTime?"
-                              id="@Id"
-                              DateFormat="dd/MM/yyyy" />
-            @if (ShowError)
-            {
-                <div class="invalid-feedback">
-                    <ValidationMessage For="@ValueExpression" />
-                </div>
-            }
-        </div>
-
+        <RadzenFormField class="@Styles.W100" Text="@Text" AllowFloatingLabel="true">
+            <ChildContent>
+                <RadzenDatePicker InputClass="@Styles.W100"
+                                  Value="@Value"
+                                  Change="@Changed"
+                                  ValueChanged="@ValueChanged"
+                                  ValueExpression="@ValueExpression"
+                                  TValue="DateTime?"
+                                  id="@Id"
+                                  DateFormat="@Defaults.DefaultDateFormat" />
+            </ChildContent>
+            <Helper>
+                <ValidationMessage For="@ValueExpression" />
+            </Helper>
+        </RadzenFormField>
     }
-}else{
-    <RadzenDatePicker InputClass="rz-w-100"
-                      Value="@Value"
-                      Change="@Changed"
-                      ValueChanged="@ValueChanged"
-                      ValueExpression="@ValueExpression"
-                      TValue="DateTime?"
-                      id="@Id"
-                      DateFormat="dd/MM/yyyy" />
-}
+    @if (string.IsNullOrEmpty(Text) && (IsFloatLabel || !IsFloatLabel))
+    {
+        <RadzenDatePicker class="@Styles.W100"
+                          Value="@Value"
+                          Change="@Changed"
+                          ValueChanged="@ValueChanged"
+                          ValueExpression="@ValueExpression"
+                          TValue="DateTime?"
+                          id="@Id"
+                          Name="@Id"
+                          DateFormat="@Defaults.DefaultDateFormat" />
+    }
+
+
 @code {
     [Parameter] public Orientation Orientation { get; set; } = Orientation.Horizontal;
     [Parameter] public string Id { get; set; } = Guid.NewGuid().ToString("N");
     [Parameter] public string? Text { get; set; } = string.Empty;
     [Parameter] public DateTime? Value { get; set; }
     [Parameter] public bool ShowError { get; set; } = false;
+    [Parameter] public bool IsFloatLabel { get; set; } = false;
     [Parameter] public EventCallback<DateTime?> Changed { get; set; }
     [Parameter] public EventCallback<DateTime?> ValueChanged { get; set; }
     [Parameter] public Expression<Func<DateTime?>>? ValueExpression { get; set; }

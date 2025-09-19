@@ -1,13 +1,14 @@
 ﻿using Applications.Commons.Mappers;
+using Applications.Features.OtherNames;
 using Applications.Interfaces.Vendors;
-using Applications.Requests.Lists.OtherNames;
 using Applications.Responses;
 using Applications.Responses.Message;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Vendors;
 using Domains.Models.Bases;
+using Domains.Models.Lists;
 
-namespace Applications.Services.LIsts
+namespace Applications.Services.Lists
 {
     public sealed class VendorService(IVendorService vService) : IVendorServiceImpl
     {

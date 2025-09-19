@@ -1,9 +1,8 @@
 using Applications.Extensions;
 using Applications.Features.Collaterals.Requests;
 using Applications.Features.Customers.Services;
-using Applications.Requests.Lists.Collaterals;
 using Applications.Responses.Lists.Collaterals;
-using Applications.Services.LIsts;
+using Applications.Services.Lists;
 
 namespace TrapchumApp.Pages.Lists.Collaterals;
 public partial class CustomerCollateralLineCreate

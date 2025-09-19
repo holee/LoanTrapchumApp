@@ -1,4 +1,4 @@
-﻿using Applications.Requests.Lists.Entities;
+﻿using Applications.Features.Entities;
 using Applications.Responses;
 using Applications.Responses.ViewModels.Customers;
 using Domains.Models.Lists.Customers;
@@ -7,7 +7,7 @@ namespace Applications.Features.Customers.Services
 {
     public interface IIncomeExpendServiceImpl
     {
-        Task<Result> AddExpensesAsync(string? customerRefId, List<CustomerExpenseDtoCreate> req);
+        Task<Result> AddExpensesAsync(string? customerRefId, List<CustomerExpenseDtoCreate> req); 
         Task<Result> AddIncomesAsync(string? customerRefId, List<CustomerIncomeDtoCreate> req);
         Task<Result> AddOrUpdateExpensesAsync(string? customerId, List<CustomerExpenseDtoCreate> req);
         Task<Result> AddOrUpdateIncomesAsync(string? customerId, List<CustomerIncomeDtoCreate> req);

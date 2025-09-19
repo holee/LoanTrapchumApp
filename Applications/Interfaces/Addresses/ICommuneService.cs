@@ -1,17 +1,12 @@
-﻿using Applications.Requests.Lists.Addreses;
+﻿using Applications.Features.Addresses.Responses;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Addresses;
 using Domains.Models.Addresses;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Applications.Interfaces.Addresses
+namespace Applications.Interfaces.Addresses  
 {
-    public interface ICommuneService
+    public interface ICommuneService 
     {
         Task<Result<Commune>> GetByIdAsync(int? Id);
         Task<Result<IEnumerable<Commune>>> GetAllAsync(int? proId = 0, int take = 0, string? condition = null);

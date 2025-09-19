@@ -1,12 +1,11 @@
 ﻿using Applications.Features.Collaterals.Requests;
-using Applications.Requests.Lists.Collaterals;
 using Applications.Responses;
 using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Collaterals;
 using Domains.Models.Collaterals;
 
-namespace Applications.Services.LIsts;
+namespace Applications.Services.Lists;
 
 public interface ICollateralsServiceImpl
 {

@@ -1,5 +1,5 @@
+using Applications.Features.Currencies.Responses;
 using Applications.Interfaces.Transactions;
-using Applications.Responses.ViewModels.Currencies;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 using TrapchumApp.Helpers.Extensions;

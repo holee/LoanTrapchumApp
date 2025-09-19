@@ -1,6 +1,5 @@
 ﻿using Applications.Enumerations;
-using Applications.Requests.Transactions.CashManagements;
-using Microsoft.AspNetCore.Components;
+using Applications.Features.Transactions.CashManagements;
 
 namespace TrapchumApp.Pages.Transactions.Branches
 {
@@ -23,13 +22,15 @@ namespace TrapchumApp.Pages.Transactions.Branches
 
             if (qty > 0)
             {
-                Item.TotalValue = Item.CurrencyNoteValue * qty;
+                Item.TotalValue = (Item.CurrencyNoteValue) * (qty);
             }
             else
             {
                 Item.TotalValue = 0;
             }
+
             sp = "#,##0.00";
+
             CalTotal();
 
         }
@@ -63,7 +64,7 @@ namespace TrapchumApp.Pages.Transactions.Branches
 
         void Reset()
         {
-           // Item!.Quantity = 0;
+            // Item!.Quantity = 0;
             Item!.TotalValue = 0;
         }
 

@@ -1,7 +1,7 @@
 ﻿using Applications.Commons.Mappers;
 using Applications.Extensions;
+using Applications.Features.Settings.Requests;
 using Applications.Interfaces.setting;
-using Applications.Requests.Settings;
 using Applications.Responses;
 using Applications.Responses.Message;
 using Applications.Responses.Paginations;
@@ -13,7 +13,7 @@ using Domains.Models.Settings;
 namespace Applications.Features.Settings.UseCases
 {
 
-
+ 
     public sealed class SettingService(IAppSettingService sSeting) : ISettingServiceImpl
     {
         public async Task<Result<string>> CreateUserLoanSizeAsync(UserLoanSizeDtoCreate req)

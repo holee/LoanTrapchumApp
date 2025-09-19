@@ -1,4 +1,5 @@
-﻿using Applications.Requests.Lists.OtherNames;
+﻿using Applications.Features.OtherNames;
+using Domains.Models.Lists;
 using Domains.Models.Lists.Vendors;
 
 namespace Applications.Commons.Mappers;

@@ -1,5 +1,6 @@
 ﻿using Applications.Calculations;
-using Applications.Requests.Loans.Payments;
+using Applications.Features.LoanPayments.Requests;
+using Applications.Features.LoanPayments.Requests;
 using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Responses.ViewModels.Reports;

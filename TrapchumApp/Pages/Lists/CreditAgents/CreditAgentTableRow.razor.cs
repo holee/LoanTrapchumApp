@@ -1,4 +1,4 @@
-using Applications.Requests.Loans.CreditAgents;
+using Applications.Features.CreditAgents.Requests;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Services.Lists;
 using Microsoft.AspNetCore.Components;

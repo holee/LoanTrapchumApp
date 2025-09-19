@@ -1,5 +1,5 @@
-using Applications.Requests.Lists.Addreses;
-using Applications.Requests.Lists.OtherNames;
+using Applications.Features.Addresses.Responses;
+using Applications.Features.OtherNames;
 using Applications.Services.Lists;
 using Domains.Models.Bases;
 using Domains.Models.Lists;

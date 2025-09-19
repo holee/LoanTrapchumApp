@@ -1,7 +1,6 @@
 ﻿using Applications.Extensions;
 using Applications.Interfaces.Customers;
 using Applications.Responses;
-using Applications.Responses.Extensions;
 using Applications.Responses.Lists.Collaterals;
 using Dapper;
 using Domains.Models.Collaterals;
@@ -10,6 +9,7 @@ using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Data;
+using Applications.Features.Collaterals.Extensions;
 
 namespace Infrastructures.Implements;
 

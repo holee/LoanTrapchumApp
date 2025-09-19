@@ -2,14 +2,11 @@ using System.Security.Claims;
 using Applications.Commons.Mappers;
 using Applications.Enumerations;
 using Applications.Extensions;
-using Applications.Requests.Loans.LoanRequests;
+using Applications.Features.LoanRequests.Requests;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Domains.Models.Identity;
 using Infrastructures.Authorizations;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
-using Radzen;
 using TrapchumApp.Shared;
 
 namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
@@ -18,12 +15,11 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
     {
         [CascadingParameter] Task<AuthenticationState> State { get; set; } = default!;
         [CascadingParameter] public CascadingAppState AppState { get; set; } = default!;
-        [Parameter, SupplyParameterFromQuery] public string? LoanRequestId { get; set; }
-        [Parameter, SupplyParameterFromQuery] public string? CustomerId { get; set; }
-        [Parameter, SupplyParameterFromQuery] public string? UserId { get; set; }
+        [Parameter] public string? LoanRequestId { get; set; }
         [Parameter] public int? BranchId { get; set; }
-
-
+        [Parameter] public string? CustomerId { get; set; }
+        [Parameter, SupplyParameterFromQuery] public string? CreditAgentId { get; set; } = string.Empty;
+        
         VLoanRequests? data = new();
 
         string memo = "";
@@ -40,11 +36,10 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
         protected override async Task OnInitializedAsync()
         {
-
             user = (await State).User;
 
             aprovedUserId = user.GetId();
-
+            
             await AppState.CheckedCanApprved(user);
 
             await AppState.CheckedCanDisbursemnt(user);
@@ -74,21 +69,19 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
                 var description = new LoanDescriptionsDtoCreate(memo, aprovedUserId, LoanRequestId);
 
                 model.LoanDescriptions.Add(description);
-
             }
 
-            if(model is null)
+            if (model is null)
             {
                 NotificationService.Notify(NotificationSeverity.Error, "Loan request data is null.");
 
                 return;
             }
 
-            var rsp = await _loanRequestService.CreateLoanRequestAsync(model);
+            var rsp = await _loanRequestService.CreateNewLoanRequestAsync(model);
 
             if (rsp.IsSuccess)
             {
-                //success = rsp.Data;
 
                 NotificationService.Notify(NotificationSeverity.Success, "Success");
 
@@ -103,24 +96,26 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
         async Task GetLoanRequestDetails(ClaimsPrincipal user, bool include = true)
         {
-            
             var resp = await _loanRequestService.GetLoanRequestAsync(BranchId, CustomerId, LoanRequestId, include);
 
             if (resp.IsSuccess)
             {
                 data = resp.Data;
 
-                canAllow = (await _authorizeService.AuthorizeAsync(user, data, new SameUserRequestRequirement())).Succeeded;
-               
-                canApprove = (await _authorizeService.AuthorizeAsync(user, data, new SameUserApprovedRequirement())).Succeeded;
-               
+                canAllow = (await _authorizeService.AuthorizeAsync(user, data, new SameUserRequestRequirement()))
+                    .Succeeded;
+
+                canApprove = (await _authorizeService.AuthorizeAsync(user, data, new SameUserApprovedRequirement()))
+                    .Succeeded;
+
                 success = data?.StatusId == (int)RequestStatus.Requested ? false : true;
 
-                disableTextbox = data?.StatusId == (int)RequestStatus.Aprove ? true : false ;
+                disableTextbox = data?.StatusId == (int)RequestStatus.Approved ? true : false;
             }
         }
 
         private bool disableTextbox = false;
+
         async Task AprovedLoanRequest()
         {
             var options = new DialogOptions
@@ -130,8 +125,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             {
                 { "LoanRequestId", LoanRequestId },
                 { "BranchId", BranchId },
-                { "CustomerId", CustomerId },
-                { "UserId", UserId }
+                { "CustomerId", CustomerId }
             };
 
             bool dialogueResult = await DialogService.OpenAsync<ConfirmModal>("Confirm", param, options);
@@ -162,8 +156,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
             if (rsp.IsSuccess)
             {
-
-                var description = new LoanDescriptionsDtoCreate(memo,UserId,LoanRequestId);
+                var description = new LoanDescriptionsDtoCreate(memo, aprovedUserId, LoanRequestId);
 
                 await _loanRequestService.AddDescriptionAsync(description);
 
@@ -186,7 +179,8 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
                 return;
             }
 
-            var req = new RecheckedRequestDtoCreate(BranchId, CustomerId, LoanRequestId, DateTime.UtcNow,RequestStatus.Rechecked, memo);
+            var req = new RecheckedRequestDtoCreate(BranchId, CustomerId, LoanRequestId, DateTime.UtcNow,
+                RequestStatus.Rechecked, memo);
 
             var rsp = await _loanRequestService.RecheckedLoanRequestAsync(req);
 

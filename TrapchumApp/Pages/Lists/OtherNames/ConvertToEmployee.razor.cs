@@ -1,4 +1,4 @@
-using Applications.Requests.Lists.OtherNames;
+using Applications.Features.OtherNames;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Branches;
 using Applications.Responses.ViewModels.OtherNames;

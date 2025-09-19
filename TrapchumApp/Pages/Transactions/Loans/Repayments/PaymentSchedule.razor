@@ -1,16 +1,7 @@
 ﻿@page "/App/Loans/{BranchId:int}/Branches/{LoanId}/Schedules"
-@using Applications.ApplicationPolicies
-@using Applications.Features.Addresses
-@using Applications.Features.Branches
-@using Applications.Features.Currencies
-@using Applications.Features.Customers.Services
-@using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Services
-@using TrapchumApp.Helpers.Constants
+@using Applications.Features.LoanRequests.Interfaces
 @using TrapchumApp.Pages.Transactions.Exchanges
 @using TrapchumApp.Pages.Transactions.Loans.Disbursements
-@using TrapchumApp.Services
-@using static Applications.ApplicationPolicies.Policies
 <PageTitle>Repayment</PageTitle>
 <LoanInfos BranchId="@BranchId"
            LoanId="@LoanId"
@@ -21,7 +12,7 @@
                       Visible="@_isPaymentTab"
                       Size="ButtonSize.ExtraSmall"
                       Icon="@IconNames.CurrencyExchange"
-                      Click="@ShowChanged"
+                      Click="@ToggleExchangeChanged"
                       ButtonStyle="ButtonStyle.Secondary" />
     </ChildContent>
 </LoanInfos>
@@ -111,7 +102,7 @@
                                                       Sortable="false">
                                     <Template>
                                         <small>
-                                            ​@c.DayArrea
+                                            @c.DayArrea
                                         </small>
                                     </Template>
                                 </RadzenDataGridColumn>
@@ -203,7 +194,7 @@
                                                                Min="0"
                                                                Max="@SelectedSchedule?.LeftPrinciple"
                                                                @oninput="PrincipleAmountValueChanged"
-                                                               @bind-Value="loanPaymentLine!.PaidPrinciple">
+                                                               @bind-Value="_loanPaymentLine!.PaidPrinciple">
                                                 </RadzenNumeric>
                                             </ChildContent>
                                         </RadzenFormField>
@@ -220,7 +211,7 @@
                                                            onclick="this.querySelector('.rz-numeric-input').select()"
                                                            ShowUpDown="false"
                                                            @oninput="InterestAmountValueChanged"
-                                                           @bind-Value="loanPaymentLine!.PaidInterest">
+                                                           @bind-Value="_loanPaymentLine!.PaidInterest">
                                             </RadzenNumeric>
                                         </RadzenFormField>
                                     </RadzenColumn>
@@ -233,7 +224,7 @@
                                                            Format="#,##0.00"
                                                            Min="0"
                                                            onclick="this.querySelector('.rz-numeric-input').select()"
-                                                           @bind-Value="loanPaymentLine!.PaidCollectionFee"
+                                                           @bind-Value="_loanPaymentLine!.PaidCollectionFee"
                                                            @oninput="CollectionFeeAmountValueChanged"
                                                            Max="@SelectedSchedule?.LeftCollectionFeeAmount"
                                                            ShowUpDown="false" />
@@ -247,7 +238,7 @@
                                                            class="rz-w-auto"
                                                            Min="0"
                                                            onclick="this.querySelector('.rz-numeric-input').select()"
-                                                           @bind-Value="loanPaymentLine!.PaidPenaltyAmount"
+                                                           @bind-Value="_loanPaymentLine!.PaidPenaltyAmount"
                                                            Disabled="!isPaidNow"
                                                            Max="@SelectedSchedule?.PenaltyAmount"
                                                            ShowUpDown="false" />
@@ -257,14 +248,14 @@
                                 <RadzenRow class="rz-mt-2" AlignItems="AlignItems.Center">
                                     <RadzenColumn Size="3" Offset="6">
                                         <RadzenFormField Text="Reciept No">
-                                            <RadzenTextBox @bind-Value="loanPaymentLine.OfficialReceiptNo"
+                                            <RadzenTextBox @bind-Value="@_loanPaymentLine.OfficialReceiptNo"
                                                            class="rz-w-100" />
                                         </RadzenFormField>
                                     </RadzenColumn>
                                     <RadzenColumn Size="3">
                                         <RadzenFormField Text="Total">
                                             <ChildContent>
-                                                <RadzenNumeric Value="@loanPaymentLine?.TotalWithPenalty"
+                                                <RadzenNumeric Value="@_loanPaymentLine?.TotalWithPenalty"
                                                                ShowUpDown="false"
                                                                Format="#,##0.00"
                                                                class="rz-m-0 rz-p-0"
@@ -306,7 +297,7 @@
                                       Click="@ApplySchedulePayment"
                                       Visible="!isAllowMultiplePayment"
                                       Text="Applied Payment" />
-                        <RadzenLink Path="@($"/App/Loan/{BranchId}/Branches?UserId={UserId}")"
+                        <RadzenLink Path="@($"/app/loan/disbursment/{BranchId}/Branches")"
                                     Text="Cancel" />
                     </RadzenStack>
                 </RadzenFieldset>
@@ -327,21 +318,11 @@
                                     LoanPaymentCreate="@_loanPayment" />
                     </RadzenColumn>
                     <RadzenColumn Size="6" SizeMD="6" SizeSM="12"
-                                  Visible="@_showExhanged">
-                        <ExchangesSidebar BranchId="@BranchId" UserId="@UserId" IsSideBar="false" />
+                                  Visible="@_showExchanged">
+                        <ExchangesSidebar BranchId="@BranchId" UserId="@_userId" IsSideBar="false" />
                     </RadzenColumn>
                 </RadzenRow>
             </RadzenTabsItem>
         </Tabs>
     </RadzenTabs>
 </div>
-
-@*  <AuthorizeView Policy="@RepaymentPolicies.PayOff">
-                <Authorized>
-                    <RadzenButton Icon="@IconNames.Paid"
-                                  Size="ButtonSize.Small"
-                                  ButtonStyle="ButtonStyle.Secondary"
-                                  Click="ApplySchedulePayment"
-                                  Text="PayOff" />
-                </Authorized>
-            </AuthorizeView> *@

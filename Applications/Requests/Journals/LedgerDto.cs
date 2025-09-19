@@ -1,4 +1,5 @@
-﻿using Applications.Requests.Transactions.Journals;
+﻿using Applications.Features.Transactions.Journals;
+using Applications.Features.Transactions.Journals;
 using Applications.Responses.Lists.Currency;
 namespace Applications.Requests.Journals;
 

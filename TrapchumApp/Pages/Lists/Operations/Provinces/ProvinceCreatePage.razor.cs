@@ -1,8 +1,7 @@
 using Applications.Commons.Mappers;
+using Applications.Features.Addresses.Responses;
 using Applications.Interfaces.Addresses;
 using Applications.Interfaces.Lists;
-using Applications.Requests.Lists.Addreses;
-using Applications.Requests.Lists.Entities;
 using Domains.Models.Addresses;
 using Domains.Models.Lists;
 using Mapster;

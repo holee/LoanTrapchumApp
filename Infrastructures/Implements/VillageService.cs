@@ -1,20 +1,14 @@
 ﻿
 using Applications.Interfaces.Addresses;
-using Applications.Requests.Lists.Addreses;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Addresses;
-using Applications.Responses.ViewModels.Currencies;
 using Domains.Models.Addresses;
 using Infrastructures.DataAccess;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Applications.Features.Addresses.Responses;
 
 namespace Infrastructures.Implements
 {
@@ -152,7 +146,7 @@ namespace Infrastructures.Implements
                 if (result is null) return Result.Failure<VVillageDetails>(ErrorResponse.NotFound("No village found."));
 
                 var data = await result.AsNoTracking().FirstOrDefaultAsync();
-                return Result.Success<VVillageDetails>(data);
+                return Result.Success<VVillageDetails>(data!);
 
             }
             catch(Exception ex)

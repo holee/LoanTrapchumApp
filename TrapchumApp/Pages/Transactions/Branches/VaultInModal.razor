@@ -3,9 +3,14 @@
 @using Applications.Features.Currencies
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Services
+@using Applications.Features.LoanRequests.Interfaces
 @using TrapchumApp.Services
+@inject ExcelImportService excel
 <RadzenFieldset Text="Please verify amount and balance then start cash vault.">
+    <RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal">
+        <InputFile OnChange="@OnInputFileChange"
+                   accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.shee" />
+    </RadzenStack>
     <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
         <RadzenColumn SizeSM="12" Size="12" SizeMD="4">
             <InputGroup Size="InputSize.Small">
@@ -24,9 +29,8 @@
             <InputGroup Size="InputSize.Small">
                 <Start>User Balance</Start>
                 <ChildContent>
-                    <InputNumber 
-                        @bind-Value="userBalance" 
-                        class="form-control text-end" disabled />
+                    <InputNumber @bind-Value="userBalance"
+                                 class="form-control text-end" disabled />
                 </ChildContent>
             </InputGroup>
         </RadzenColumn>
@@ -64,23 +68,23 @@
             </tbody>
             <tfoot>
                 <tr>
-                    <td colspan="3" class="text-end">TOTAL</td>
-                    <td class="text-end">
+                    <td colspan="3" class="rz-text-end">TOTAL</td>
+                    <td class="rz-text-end">
                         @total.Format(CurrencyId)
                     </td>
-                    <td class="text-end">
+                    <td class="rz-text-end">
                         @cashMDList.Sum(x => x.TotalQuantity)
                     </td>
-                    <td class="text-end">
+                    <td class="rz-text-end">
                         @{
-                            var value = cashMDList?.Sum(x => x.TotalValue);
+                            var value = cashMDList?.Sum(x => x.Value);
                             @value.Format(CurrencyId)
                         }
                     </td>
                 </tr>
                 <tr>
-                    <td class="text-end" colspan="3">CURRENT BALANCE</td>
-                    <td class="text-end">
+                    <td class="rz-text-end" colspan="3">CURRENT BALANCE</td>
+                    <td class="rz-text-end">
                         @vCashVault?.UserBalance.Format(CurrencyId)
                     </td>
                     <td class="" colspan="2">
@@ -111,3 +115,30 @@
     </RadzenStack>
 
 </RadzenFieldset>
+@code {
+
+    private async Task OnInputFileChange(InputFileChangeEventArgs args)
+    {
+
+
+        var file = args.File;
+
+        if (file is null || file.Size == 0) return;
+
+        using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
+
+        using var ms = new MemoryStream();
+
+        await stream.CopyToAsync(ms);
+
+        ms.Position = 0;
+
+        cashMDList = excel.GetCashValaultIn(stream).ToList();
+
+
+        StateHasChanged();
+
+        // People = MiniExcel.Query<Person>(ms).ToList();
+
+    }
+}

@@ -1,6 +1,6 @@
 ﻿using Applications.Enumerations;
 using Applications.Extensions.DateTimes;
-using Applications.Requests.Loans.Disbursements;
+using Applications.Features.Loans.Requests;
 using Applications.Responses.ViewModels.Holidays;
 using Domains.Enumerations;
 using Domains.Models.Loans;

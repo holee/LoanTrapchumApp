@@ -1,16 +1,15 @@
 using Applications.Extensions;
-using Applications.Requests.Lists.Addreses;
-using Applications.Requests.Lists.Entities;
-using Applications.Requests.Lists.OtherNames;
-using Applications.Requests.Settings;
+using Applications.Features.Addresses.Responses;
+using Applications.Features.Entities;
+using Applications.Features.OtherNames;
+using Applications.Features.Settings.Requests;
 using Applications.Responses.Lists.Entities;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels;
 using Applications.Services.Files;
 using Applications.Services.Lists;
 using Domains.Models.Files;
 using Domains.Models.Lists;
-using Domains.Shared.Enums;
+using Domains.Shared.Enums; 
 
 namespace TrapchumApp.Pages.Lists.Employees
 {

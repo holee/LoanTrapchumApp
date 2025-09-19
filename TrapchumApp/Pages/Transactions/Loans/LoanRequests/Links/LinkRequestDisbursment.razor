@@ -4,12 +4,13 @@
 @using Applications.Features.Currencies
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Services
+@using Applications.Features.LoanRequests.Interfaces
 @using Applications.Responses.ViewModels.Loans.Requests
+@using TrapchumApp.Helpers.Extensions
 @using TrapchumApp.Services
-@if (LoanRequest?.StatusId == (int)RequestStatus.Aprove)
+@if (LoanRequest?.StatusId == (int)RequestStatus.Approved)
 {
-    <a href="@requestLoanUrl">
+    <a href="@_disburseRequestLoanUrl">
         <RadzenBadge Variant="Variant.Filled"
                      BadgeStyle="BadgeStyle.Success"
                      Style="font-size:0.5rem;"
@@ -18,7 +19,7 @@
 }
 else
 {
-    <NavLink href="@loanRequestDetailsUrl">
+    <NavLink href="@_loanRequestDetailsUrl">
         <RadzenBadge Variant="Variant.Text"
                      BadgeStyle="BadgeStyle.Secondary"
                      Text="Details"></RadzenBadge>
@@ -26,15 +27,28 @@ else
 
 }
 @code {
+    [CascadingParameter] private Task<AuthenticationState> AuthenticationState { get; set; } = default!;
     [Parameter, EditorRequired] public VLoanRequests? LoanRequest { get; set; }
     [Parameter, EditorRequired] public int? BranchId { get; set; }
-    [Parameter, EditorRequired] public string? UserId { get; set; }  
-    string? requestLoanUrl = "";
-    string? loanRequestDetailsUrl = "";
+    [Parameter] public string? UserId { get; set; } = string.Empty;
+    string? _disburseRequestLoanUrl = "";
+    string? _loanRequestDetailsUrl = "";
     protected override void OnInitialized()
     {
-        loanRequestDetailsUrl = $"App/Loan/{BranchId}/Branches/Request/Details?UserId={UserId}&CustomerId={LoanRequest?.CustomerId}&LoanRequestId={LoanRequest?.LoanRequestId}";
-        requestLoanUrl = $"/Loan/Disbursement/CreateNew?BranchId={BranchId}&UserId={UserId}&CustomerRequestId={LoanRequest?.CustomerId}&LoanRequestId={LoanRequest?.LoanRequestId}";
+        //loanRequestDetailsUrl = $"app/loan/{LoanRequest?.LoanRequestId}/request/{BranchId}/branches/details?CreditAgentId={LoanRequest?.CreditAgentId}&CustomerId={LoanRequest?.CustomerId}";
+        _loanRequestDetailsUrl = $"app/loan/{LoanRequest?.LoanRequestId}/request/{BranchId}/branches/{LoanRequest?.CustomerId}/details";
+        _disburseRequestLoanUrl = $"/app/loan/request/{LoanRequest?.LoanRequestId}/disbursement/{BranchId}/branches/CreateNew?UserId={UserId}&CustomerRequestId={LoanRequest?.CustomerId}";
+        ///app/loan/{LoanRequest?.LoanRequestId}/request/{BranchId}/branches/{LoanRequest?.CustomerId}/edit
+    }
 
+    protected override async Task OnInitializedAsync()
+    {
+
+        if (string.IsNullOrEmpty(UserId))
+        {
+            UserId = (await AuthenticationState).GetUserId();
+        }
+
+        await base.OnInitializedAsync();
     }
 }

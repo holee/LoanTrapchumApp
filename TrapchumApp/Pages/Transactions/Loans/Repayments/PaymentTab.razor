@@ -1,12 +1,5 @@
-﻿@using Applications.Features.Addresses
-@using Applications.Features.Branches
-@using Applications.Features.Currencies
-@using Applications.Features.Customers.Services
-@using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Services
-@using TrapchumApp.Helpers.Constants
+﻿@using Applications.Features.LoanRequests.Interfaces
 @using TrapchumApp.Pages.Transactions.Exchanges
-@using TrapchumApp.Services
 <RadzenFieldset>
     <RadzenRow AlignItems="AlignItems.Center" class="rz-px-1 rz-py-2 rz-m-0">
         <RadzenColumn Size="5">
@@ -51,8 +44,9 @@
     </RadzenRow>
     <RadzenRow AlignItems="AlignItems.Center" class="rz-mt-2">
         <RadzenColumn Size="12">
-            <RadzenFormField Text="Penalty Amount" AllowFloatingLabel="true" class="rz-w-100">
+            <RadzenFormField Text="Receipt No" AllowFloatingLabel="true" class="rz-w-100">
                 <RadzenTextBox @bind-Value="LoanRepayment.OfficialReceiptNo"
+                                ReadOnly="@(!(string.IsNullOrEmpty(LoanRepayment.OfficialReceiptNo)))"
                                class="rz-w-100" />
             </RadzenFormField>
         </RadzenColumn>

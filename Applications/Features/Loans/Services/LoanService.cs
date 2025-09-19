@@ -1,10 +1,10 @@
 ﻿using Applications.Enumerations;
+using Applications.Features.CreditAgents.Requests;
 using Applications.Features.Loans.Mappers;
+using Applications.Features.Loans.Requests;
 using Applications.Features.Loans.Responses;
 using Applications.Interfaces.Lists;
 using Applications.Interfaces.Loans;
-using Applications.Requests.Loans.CreditAgents;
-using Applications.Requests.Loans.Disbursements;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans;
@@ -28,9 +28,7 @@ namespace Applications.Features.Loans.Services
 
             return await creditAgentService.ChangedCreditAgents(branchId, model);
         }
-
-
-
+        
         public async Task<Result<bool>> CreateLoanAsync(LoanDtoCreate req)
         {
 
@@ -76,7 +74,6 @@ namespace Applications.Features.Loans.Services
 
             return await loanService.CreateLoanAsync(model);
         }
-
         public async Task<DisburseResult> CreateAsync(LoanDtoCreate req)
         {
 
@@ -124,8 +121,7 @@ namespace Applications.Features.Loans.Services
 
             return rsp.IsSuccess ? new DisburseResult(true, "New Loan Was Disbursed") : new DisburseResult();
         }
-
-
+        
         public Task<Result<string>> UpdateAsync(LoanDisbursment disbursement)
         {
             throw new NotImplementedException();
@@ -177,7 +173,7 @@ namespace Applications.Features.Loans.Services
             return await loanService.GetLoanByCreditAgentAsync(creditAgentId, branchId, cancellation);
         }
 
-
+       
     }
 
 }

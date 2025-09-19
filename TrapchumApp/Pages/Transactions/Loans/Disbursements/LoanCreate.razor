@@ -5,7 +5,7 @@
 @using Applications.Features.Currencies
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Services
+@using Applications.Features.LoanRequests.Interfaces
 @using Domains.Enumerations
 @using TrapchumApp.Helpers.Constants
 @using TrapchumApp.Pages.Lists.Customers
@@ -221,7 +221,7 @@
                              class="rz-my-2"
                              AlignItems="AlignItems.Center">
 
-                    @if (!disburseStatus && RequestStatusId == (int)RequestStatus.Aprove)
+                    @if (!disburseStatus && RequestStatusId == (int)RequestStatus.Approved)
                     {
                         <RadzenButton Click="HandleFormSubmit"
                                       Size="ButtonSize.Small"

@@ -2,10 +2,11 @@ using System.Security.Claims;
 using Applications.Enumerations;
 using Applications.Extensions.Identity.Policies;
 using Applications.Extensions.Web;
-using Applications.Features.LoanRequests.Services;
+using Applications.Features.LoanRequests.Interfaces;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Microsoft.AspNetCore.Authorization;
+using TrapchumApp.Helpers.Extensions;
 using TrapchumApp.Shared;
 
 namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
@@ -32,16 +33,19 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         string createRequestUrl = "";
         int pageIndex = 0;
         int pageSize = 15;
-        bool sortDescending = false;
+        bool sortDescending = true;
         bool isIncludeInactive = false;
         bool isLoading = false;
         int statusId = 1;
 
         protected override async Task OnInitializedAsync()
         {
-            createRequestUrl = $"/App/Request/{BranchId}/Branches/{UserId}/CreateNew";
+            createRequestUrl = $"/app/loan/request/{BranchId}/Branches/CreateNew";
+
             var auth = await AuthenticationState;
+
             _user = auth.User;
+
             CanRequestLoan = (await _authorizeService.AuthorizeAsync(_user, RequestsPolicies.CanCreate()))
                 .Succeeded;
             CanDisburseLoan = (await _authorizeService.AuthorizeAsync(_user, RequestsPolicies.CanDisburseLoan()))
@@ -58,18 +62,11 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
         async Task LoadLoanData(LoadDataArgs args)
         {
-            pageIndex = args.Skip!.Value;
+            pageIndex = args.Skip ?? 0;
 
             filtertext = args.Filter ?? string.Empty;
 
-            if (!string.IsNullOrEmpty(args.OrderBy))
-            {
-                sortColumn = args.OrderBy.Split(" ")[0];
-
-                string dir = args.OrderBy.Split(" ")[1];
-
-                sortDescending = dir.Contains("asc") ? false : true;
-            }
+            (sortColumn, sortDescending)=args.PageInfo();
 
             await GetLoanRequestAsync();
         }
@@ -107,17 +104,6 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             // {
             //     await GetLoanRequestAsync(UserId);
             // }
-        }
-
-
-        void GotoLoanRequest()
-        {
-            createRequestUrl = new Dictionary<string, object?>
-            {
-                { "BranchId", BranchId },
-                { "UserId", UserId }
-            }.AddQueryString($"/Loan/0/Customer/0/Request");
-            NavigationManager.NavigateTo(createRequestUrl);
         }
 
         async void PageChanged(int size)

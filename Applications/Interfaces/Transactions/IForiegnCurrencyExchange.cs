@@ -1,6 +1,6 @@
-﻿using Applications.Responses;
+﻿using Applications.Features.Currencies.Responses;
+using Applications.Responses;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Currencies;
 using Domains.Models.Transaction;
 
 namespace Applications.Interfaces.Transactions

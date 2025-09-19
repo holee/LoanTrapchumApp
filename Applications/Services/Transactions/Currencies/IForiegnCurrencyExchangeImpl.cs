@@ -1,7 +1,7 @@
-﻿using Applications.Requests.Transactions.ForiegnExchanges;
+﻿using Applications.Features.Currencies.Responses;
+using Applications.Features.Transactions.ForiegnExchanges;
 using Applications.Responses;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Currencies;
 using Domains.Models.Transaction;
 
 namespace Applications.Services.Transactions.Currencies

@@ -1,9 +1,8 @@
 ﻿using Applications.Calculations;
+using Applications.Features.LoanPayments.Requests;
+using Applications.Features.Transactions.ForiegnExchanges;
 using Applications.Interfaces.Loans;
-using Applications.Requests.Loans.Payments;
-using Applications.Requests.Transactions.ForiegnExchanges;
 using Applications.Responses.ViewModels.Branches;
-using Applications.Responses.ViewModels.Currencies;
 using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Services.Loans;
@@ -11,6 +10,7 @@ using Microsoft.AspNetCore.Components;
 using Radzen;
 using Microsoft.AspNetCore.Components.Authorization;
 using Radzen.Blazor;
+using Applications.Features.Currencies.Responses;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments;
 

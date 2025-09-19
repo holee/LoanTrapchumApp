@@ -1,11 +1,10 @@
+using Applications.Features.Currencies;
 using Applications.Interfaces.Currencies;
 using Applications.Interfaces.Transactions;
-using Applications.Requests.Lists.Currency;
 using Applications.Responses.Lists.Currency;
 using Applications.Responses.Paginations;
 using Domains.Models.Currencies;
 using Mapster;
-using Microsoft.AspNetCore.Components;
 
 namespace TrapchumApp.Pages.Currencies
 {
@@ -23,36 +22,7 @@ namespace TrapchumApp.Pages.Currencies
         [Parameter] public int Id { get; set; }
         bool isActive = false;
         private CurrencyDtoSpotRate selectedSpotRate = new CurrencyDtoSpotRate();
-
-
-        Task DisplayCurrencyDialogue()
-        {
-            return Task.CompletedTask;
-            // return ModalService.Show<NoteListModal>(param =>
-            // {
-            //     param.Add(x => x.Id, Id);
-            // }, new ModalInstanceOptions
-            //     {
-            //         UseModalStructure = false,
-            //         FocusTrap = true,
-            //         Size = ModalSize.ExtraLarge
-            //     });
-        }
-
-        Task DisplayCurrencyNoteDialogue()
-        {
-            return Task.CompletedTask;
-            // return ModalService.Show<NoteModalCreate>(param =>
-            // {
-            // }, new ModalInstanceOptions
-            //     {
-            //         UseModalStructure = false,
-            //         FocusTrap = true,
-            //         Size = ModalSize.Large
-            //     });
-        }
-
-
+        
         void Close()
         {
             NavigationManager.NavigateTo("/Account/Currencies");
@@ -96,28 +66,7 @@ namespace TrapchumApp.Pages.Currencies
             }
             StateHasChanged();
         }
-
-        void SelectedValueChanged()
-        {
-            //var result = await spotRateService.GetSpotRate(Id, reqDate!.Value);
-
-            //if (result.IsSuccess)
-            //{
-            //    SpotRateDtoCreate.SpotRate = result.Data!.SpotRate;
-            //    SpotRateDtoCreate.BuyingRate = result.Data.BuyingRate;
-            //    SpotRateDtoCreate.SellingRate = result.Data.SellingRate;
-            //    SpotRateDtoCreate.TransactionDate = result.Data.TransactionDate;
-            //    SpotRateDtoCreate.EditSeq = result.Data.EditSeq;
-            //}
-            //else
-            //{
-            //    SpotRateDtoCreate = new CurrencyDtoSpotRateCreate();
-            //    SpotRateDtoCreate.TransactionDate = reqDate;
-            //}
-
-            //StateHasChanged();
-        }
-
+        
         async Task SelectPageChanged(int page)
         {
             try
@@ -175,7 +124,7 @@ namespace TrapchumApp.Pages.Currencies
                 Skip = pageIndex,
                 PageSize = pageSize
             };
-            CurrencyPaginatedList = await spotRateService.GetSpotRates(Id, qparam);
+            CurrencyPaginatedList = await spotRateService.GetSpotRates(Id, qparam); 
             currencySpotRates = CurrencyPaginatedList.Items;
         }
 

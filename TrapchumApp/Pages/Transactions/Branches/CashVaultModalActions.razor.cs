@@ -1,24 +1,28 @@
+using Applications.Features.CashManagements.Responses;
+using Applications.Features.Entities;
 using Applications.Interfaces.Transactions;
-using Applications.Requests.Lists.Entities;
 using Applications.Responses.Lists.Currency;
 using Applications.Responses.ViewModels.Branches;
-using Applications.Responses.ViewModels.Currencies;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
-using Radzen;
+using TrapchumApp.Helpers.Extensions;
 using TrapchumApp.Shared;
 
 namespace TrapchumApp.Pages.Transactions.Branches
 {
     public partial class CashVaultModalActions
     {
-        [Inject] ICashVaultService caVaultService { get; set; } = default!;
+        private readonly ICashVaultService caVaultService;
+        public CashVaultModalActions(ICashVaultService caVaultService)
+        {
+            this.caVaultService = caVaultService;
+        }
 
         [CascadingParameter]
         Task<AuthenticationState> AuthState { get; set; } = default!;
         [CascadingParameter] CascadingAppState bState { get; set; } = default!;
-        [Parameter, SupplyParameterFromQuery] public string UserId { get; set; } = string.Empty;
         [Parameter] public int BranchId { get; set; }
+        [Parameter] public int BankId { get; set; } = 11;
+
+        private string? _userId = string.Empty;
 
         protected IEnumerable<BankResponse>? bankList = [];
 
@@ -33,13 +37,17 @@ namespace TrapchumApp.Pages.Transactions.Branches
         protected int? CurrencyId;
 
         private bool IsDisabled = false;
+
         bool canVaultOut = false;
+
         bool canVaultIn = false;
 
         DialogOptions options = new DialogOptions
         {
             ShowTitle = false,
-            Style = "min-width:75rem"
+            Width = "100vw",
+            Height = "100vh",
+            AutoFocusFirstElement = false,
         };
         protected override async Task OnInitializedAsync()
         {
@@ -48,18 +56,15 @@ namespace TrapchumApp.Pages.Transactions.Branches
 
                 var user = (await AuthState).User;
 
-                //canVaultOut = await _authorizeService.MustHasPermissionAsync(user, TranxPolicies.VaultOut);
-
-                //canVaultIn = await _authorizeService.MustHasPermissionAsync(user, TranxPolicies.VaultIn);
+                _userId = (await AuthState).GetUserId();
 
                 await bState.GetAuthenticatedUser(user);
 
+                var bResponse = await _branchService.GetBranchesByUser(_userId, 0);
 
-                var branchResponse = await _branchService.GetBranchesByUser(UserId, 0);
-
-                if (branchResponse.IsSuccess)
+                if (bResponse.IsSuccess)
                 {
-                    Branches = branchResponse.Data!;
+                    Branches = bResponse.Data!;
                 }
 
                 var resp = await caVaultService.GetCashVaultsAsync(BranchId);
@@ -77,28 +82,28 @@ namespace TrapchumApp.Pages.Transactions.Branches
 
         protected async void OnCashVaultOut()
         {
-            var resultModal = await DialogService.OpenAsync<VaultOutModal>("Vault Out",
-                new Dictionary<string, object> {
-                    { "UserId", UserId },
+
+            var param = new Dictionary<string, object?> {
                     { "BranchId", BranchId },
-                }, options);
-            if (resultModal != null)
-            {
-                await OnInitializedAsync();
-                Console.WriteLine("Vault Out...");
-            }
+                    { "BankId", BankId },
+                };
+
+            var resultModal = await DialogService.OpenAsync<VaultOutModal>("Vault Out", param, options);
 
         }
         protected async void OnCashVaultIn()
         {
-            var resultModal = await DialogService.OpenAsync<VaultInModal>("Vault In",
-                new Dictionary<string, object> {
-                    { "UserId", UserId },
+
+            var param = new Dictionary<string, object?> {
                     { "BranchId", BranchId },
-                }, options);
+                    { "BankId", BankId },
+                };
+
+            var resultModal = await DialogService.OpenAsync<VaultInModal>("Vault In", param, options);
+
             if (resultModal != null)
             {
-                await OnInitializedAsync();
+
             }
         }
     }

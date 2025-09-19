@@ -1,6 +1,6 @@
 ﻿using Applications.Extensions;
+using Applications.Features.Entities;
 using Applications.Interfaces.Branches;
-using Applications.Requests.Lists.Entities;
 using Applications.Responses;
 using Applications.Responses.Auths;
 using Applications.Responses.Message;
@@ -410,7 +410,7 @@ public class BranchService(IDbContextFactory<DataContext> contextFactory) : IBra
         return Result.Success(item);
     }
 
-    public async Task<Result<UserBranchesResponse>> GetBranchesByUser(string userId)
+    public async Task<Result<UserBranchesResponse>> GetBranchesByUser(string? userId)
     {
         if (string.IsNullOrEmpty(userId))
         {

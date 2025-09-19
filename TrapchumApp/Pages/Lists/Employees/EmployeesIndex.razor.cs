@@ -1,20 +1,15 @@
 using Applications.Extensions;
 using Applications.Interfaces.Lists;
-using Applications.Requests.Lists.Addreses;
-using Applications.Requests.Lists.Employees;
-using Applications.Requests.Lists.Entities;
 using Applications.Responses.Lists.Employees;
-using Applications.Responses.Lists.Entities;
+using Applications.Responses.Lists.Entities; 
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Currencies;
-using Applications.Responses.ViewModels.Customers;
 using Applications.Responses.ViewModels.Employees;
 using Domains.Models.Addresses;
 using Domains.Models.Lists;
-using Microsoft.AspNetCore.Components;
-using Radzen;
 using Radzen.Blazor;
-using System.Threading.Tasks;
+using Applications.Features.Addresses.Responses;
+using Applications.Features.Employees.Requests;
+using Applications.Features.Entities;
 
 namespace TrapchumApp.Pages.Lists.Employees
 {

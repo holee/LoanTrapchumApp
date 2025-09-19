@@ -1,10 +1,5 @@
-﻿@using Applications.Features.Addresses
-@using Applications.Features.Branches
-@using Applications.Features.Currencies
-@using Applications.Features.Customers.Services
-@using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Services
-@using TrapchumApp.Services
+﻿@using Applications.Features.Entities
+@using Applications.Features.LoanRequests.Interfaces
 <PageTitle>Create Department</PageTitle>
 <RadzenStack Gap="1rem" Orientation="Orientation.Vertical" JustifyContent="JustifyContent.SpaceBetween" Style="height: 100%;">
     <RadzenTemplateForm TItem="DepartmentDtoCreate" Data=@Req Submit=@Create>

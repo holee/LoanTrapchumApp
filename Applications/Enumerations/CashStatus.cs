@@ -13,13 +13,13 @@ namespace Applications.Enumerations
         [Description("Branch Manager settles money to Cash Vault")]
         DAYClOSE = 4,
         [Description("User will send money to other user")]
-        SEND = 1,
+        SEND = 5,
         [Description("User will receive money from other user")]
-        RECEIVE = 2,
+        RECEIVE = 6,
         [Description("Manager will return the  money to Cash Vault")]
-        VAULTIN = 3,
+        VAULTIN = 7,
         [Description("Manager will get the money from Cash Vault")]
-        VAULTOUT = 4
+        VAULTOUT = 8
 
     }
 }

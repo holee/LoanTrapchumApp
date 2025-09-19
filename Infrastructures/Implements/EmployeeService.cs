@@ -13,19 +13,18 @@ using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Data;
+using Domains.Models.Lists;
 
 namespace Infrastructures.Implements;
 
 public class EmployeeService : IEmployeeService
 {
-    private readonly DataContext _context;
     private readonly IDapperConnectionFactory connectionFactory;
     private readonly IDbContextFactory<DataContext> _dbContextFactory;
     private readonly ILogger<EmployeeService> _logger;
-    public EmployeeService(DataContext app, IDapperConnectionFactory connectionFactory,
+    public EmployeeService(IDapperConnectionFactory connectionFactory,
         IDbContextFactory<DataContext> dbContextFactory, ILogger<EmployeeService> logger)
     {
-        this._context = app;
         this.connectionFactory = connectionFactory;
         _dbContextFactory = dbContextFactory;
         _logger = logger;
@@ -35,6 +34,8 @@ public class EmployeeService : IEmployeeService
     {
         try
         {
+            await using var _context = await _dbContextFactory.CreateDbContextAsync(cancellation);
+
             _context.EntityNames.Add(employee);
 
             await _context.SaveChangesAsync();
@@ -76,6 +77,8 @@ public class EmployeeService : IEmployeeService
     {
         try
         {
+            await using var _context = await _dbContextFactory.CreateDbContextAsync(cancellation);
+
             var employee = await _context.EntityNames
                                             .Where(x => x.Id == id)
                                             .Include(x => x.Employee)
@@ -102,9 +105,11 @@ public class EmployeeService : IEmployeeService
     {
         try
         {
+            await using var _context = await _dbContextFactory.CreateDbContextAsync(cancellation);
+
             var employee = await _context.EntityNames.AsNoTracking()
-                .IgnoreQueryFilters()
-                .FirstOrDefaultAsync(emp => emp.Id == id);
+                                            .IgnoreQueryFilters()
+                                            .FirstOrDefaultAsync(emp => emp.Id == id);
             if (employee == null)
             {
                 return Result.Failure<string>(ErrorResponse.NotFound("No Employee found."));
@@ -132,11 +137,11 @@ public class EmployeeService : IEmployeeService
         }
     }
 
-    public async Task<Result<IReadOnlyList<VEmployeeList>>> GetEmployeesAsync(string? employeeId,
-        int branchId = 0,
-        bool isActive = true,
-        string? q = null)
+    public async Task<Result<IReadOnlyList<VEmployeeList>>> GetEmployeesAsync(string? employeeId,int branchId = 0,bool isActive = true,string? q = null)
     {
+
+        await using var _context = await _dbContextFactory.CreateDbContextAsync();
+
         IQueryable<VEmployeeList> queries = _context.EmployeeLists;
 
         if (!isActive)

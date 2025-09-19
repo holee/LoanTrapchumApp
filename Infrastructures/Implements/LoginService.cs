@@ -1,8 +1,7 @@
-﻿using Applications.Interfaces.Identity;
-using Applications.Requests.Identity;
+﻿using Applications.Features.Identity.Users;
+using Applications.Interfaces.Identity;
 using Applications.Responses;
 using Domains.Models.Identity;
-using Infrastructures.DataAccess;
 using Microsoft.AspNetCore.Identity;
 namespace Infrastructures.Implements;
 
@@ -10,7 +9,7 @@ public class LoginService(UserManager<ApplicationUser> userManager, SignInManage
 {
     public async Task<Result<string>> LoginUser(LoginRequest request)
     {
-        try
+        try 
         {
             var user = await userManager.FindByEmailAsync(request.Email);
 

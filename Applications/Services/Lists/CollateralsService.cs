@@ -1,20 +1,17 @@
 ﻿using Applications.Features.Collaterals.Mapper;
 using Applications.Features.Collaterals.Requests;
 using Applications.Features.Customers.Mappers;
-using Applications.Features.Customers.Validations;
 using Applications.Interfaces.Customers;
 using Applications.Interfaces.Lists;
-using Applications.Requests.Lists.Collaterals;
 using Applications.Responses;
 using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Collaterals;
-using Applications.Services.LIsts;
 using Domains.Models.Collaterals;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
 
-namespace Applications.Services.Lists;
+namespace Applications.Services.Lists; 
 
 public sealed class CollateralsService(ICollateralsService collateralsService,
         ICustomerCollateralService cuscollateralsService,

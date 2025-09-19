@@ -1,6 +1,7 @@
+using Applications.Features.Addresses.Requests;
+using Applications.Features.Addresses.Responses;
+using Applications.Features.Entities;
 using Applications.Interfaces.Banks;
-using Applications.Requests.Lists.Addreses;
-using Applications.Requests.Lists.Entities;
 using Applications.Responses.Lists.Currency;
 using Domains.Models.Addresses;
 using Domains.Models.Lists;

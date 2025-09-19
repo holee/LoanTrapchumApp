@@ -1,13 +1,13 @@
 ﻿using Applications.Enumerations;
 using Applications.Extensions;
 using Applications.Interfaces.Lists;
-using Applications.Requests.Lists.Entities;
 using Applications.Responses;
 using Applications.Responses.Message;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.OtherNames;
 using Domains.Models.Bases;
+using Domains.Models.Lists;
 using Domains.Models.Lists.Customers;
 using Domains.Models.Lists.Employees;
 using Domains.Models.Lists.Vendors;

@@ -1,5 +1,5 @@
 ﻿using Applications.Extensions.Maths;
-using Applications.Requests.Loans.Payments;
+using Applications.Features.LoanPayments.Requests;
 using Applications.Responses.ViewModels.Loans.Schedules;
 
 namespace Applications.Calculations

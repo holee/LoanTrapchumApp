@@ -2,9 +2,7 @@
 
 public sealed class CashVault
 {
-    public string CashVaultsId { get; set; } =null!;
-    
-    public int CvId { get; set; }
+    public string CashVaultsId { get; set; } =null!; 
     public int? BranchRefId { get; set; }
     public int? BankRefId { get; set; }
     public string? TransactionRefId { get; set; }

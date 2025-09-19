@@ -3,7 +3,7 @@
 @using Applications.Features.Currencies
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Services
+@using Applications.Features.LoanRequests.Interfaces
 @using TrapchumApp.Services
 @* @page "/Administrator/Users/{Id:long}/Permissions"
 @attribute [Authorize]
@@ -48,7 +48,7 @@
             </SpinLoader>
         </CardBody>
         <CardFooter>
-            <Button Color="Color.Success" @onclick="SubmitOnVaid" Size="Blazorise.Size.Small">Save Changed</Button>
+            <Button Color="Color.Success" @onclick="SubmitOnVaid" Size="Blazorise.Size.DefaultSizeall">Save Changed</Button>
             <a href="/Administrator/Users" class="btn btn-sm btn-success">Back</a>
         </CardFooter>
     </Card>

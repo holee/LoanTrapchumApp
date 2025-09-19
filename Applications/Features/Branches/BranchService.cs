@@ -1,5 +1,6 @@
-﻿using Applications.Interfaces.Branches;
-using Applications.Requests.Lists.Entities;
+﻿using Applications.Features.Branches.Interfaces;
+using Applications.Features.Entities;
+using Applications.Interfaces.Branches;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Branches;
@@ -8,24 +9,7 @@ using Mapster;
 
 namespace Applications.Features.Branches
 {
-    public interface IBranchServiceImpl
-    {
-        Task<Result> CreateAsync(Branch branch);
-        Task<Result> DeleteAsync(int? id);
-        Task<Result> UpdateAsync(BranchDtoUpdate branch);
-        Task<Result<ResultStatus>> GetBrachStatus(int? branchRefId);
-        Task<Result<Branch>> GetBranchById(int? id);
-        Task<Pager<VBranchResponse>> GetBranchesAsync(QueryParam param);
-        Task<Result<Pager<T>>> GetBranchesAsync<T>(int? branchId, QueryParam param) where T : class;
-        Task<Result<IEnumerable<VBranchResponse>>> GetBranchesByUser(string? userId, int? branchId);
-        Task<Result<UserBranchesResponse>> GetBranchesByUser(string userId);
-        Task<Result<Branch>> GetBranchForVault(int? id);
-        Task<Result<BranchDtoUpdate>> GetUpdateBranchById(int? branchId);
-        Task<Result> UpdateStatusAsync(int? branchId);
-        Task<Result<T>> GetBranchById<T>(int? id) where T : class;
-        Task<Result<string>> UpdateStatusAsync(int? branchId, bool state);
-    }
-
+    
     public sealed class BranchService(IBranchService branchService) : IBranchServiceImpl
     {
         public async Task<Result> CreateAsync(Branch branch)
@@ -69,7 +53,7 @@ namespace Applications.Features.Branches
             return await branchService.GetBranchesByUser(userId, branchId);
         }
 
-        public async Task<Result<UserBranchesResponse>> GetBranchesByUser(string userId) => await branchService.GetBranchesByUser(userId);
+        public async Task<Result<UserBranchesResponse>> GetBranchesByUser(string? userId) => await branchService.GetBranchesByUser(userId);
 
 
         public async Task<Result<Branch>> GetBranchForVault(int? id)

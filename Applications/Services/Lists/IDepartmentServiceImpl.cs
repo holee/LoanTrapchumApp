@@ -1,4 +1,4 @@
-﻿using Applications.Requests.Lists.Entities;
+﻿using Applications.Features.Entities;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Departments;
@@ -9,7 +9,7 @@ namespace Applications.Services.Lists;
 public interface IDepartmentServiceImpl
 {
     Task<Result<string>> ActivateOrDeactivate(int? id, bool req);
-    Task<Result<string>> CreateAsync(DepartmentDtoCreate department);
+    Task<Result<string>> CreateAsync(DepartmentDtoCreate department); 
     Task<Result<string>> DeleteAsync(int? departmentId);
     Task<Result<string>> UpdateAsync(DepartmentDtoUpdate department);
     Task<Result<Department>> GetDepartmentById(int? departmentId);

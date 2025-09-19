@@ -1,6 +1,6 @@
 ﻿using Applications.Enumerations;
-using Applications.Requests.Loans.CreditAgents;
-using Applications.Requests.Loans.LoanRequests;
+using Applications.Features.CreditAgents.Requests;
+using Applications.Features.LoanRequests.Requests;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Requests;
@@ -12,7 +12,7 @@ namespace Applications.Interfaces.Loans
     {
         Task<Result<string>> ChangedLoanRequestAsync(LoanChangeStatusDtoCreate req);
         Task<Result<string>> CreateNewLoanRequestAsync(LoanRequest request, CancellationToken cancellationToken = default);
-        Task<Result<string>> CreateLoanRequestAsync(LoanRequest req, CancellationToken cancellation = default);
+        //Task<Result<string>> CreateLoanRequestAsync(LoanRequest req, CancellationToken cancellation = default);
         Task<Result<string>> SaveLoanRequestAsync(LoanRequest req, CancellationToken cancellationToken = default);
         Task<Result<string>> AprovedLoanRequestAsync(AproveLoanDtoCreate req);
         Task<Result<VLoanRequests>> RecheckedLoanRequestAsync(RecheckedRequestDtoCreate req);
@@ -39,5 +39,6 @@ namespace Applications.Interfaces.Loans
         Task<bool> IsCustomerBusy(string? customerId, CancellationToken cancellation = default);
         Task<Result<string>> AddDescription(LoanDescriptions descriptions, CancellationToken cancellation = default);
         Task<Result<VLoanRequests>> GetApprovedLoanRequestAsync(int? branchId, string? customerId, string? loanRequestId, bool include);
+        Task<Result<string>> EditLoanRequestAsync(LoanRequest req, CancellationToken cancellationToken = default);
     }
 }

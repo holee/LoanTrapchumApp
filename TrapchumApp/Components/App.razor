@@ -3,7 +3,7 @@
 @using Applications.Features.Currencies
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Services
+@using Applications.Features.LoanRequests.Interfaces
 <!DOCTYPE html>
 <html lang="en">
 
@@ -16,7 +16,7 @@
     <ImportMap  />
     <link rel="icon" type="image/png" href="/assets/logo/tch_Logo.ico" />
     <HeadOutlet @rendermode="@PageRenderMode" />
-    <RadzenTheme Theme="standard" @rendermode="@InteractiveServer" />
+    <RadzenTheme Theme="material" @rendermode="@InteractiveServer" />
 </head>
 
 <body>
@@ -24,6 +24,7 @@
     <script src="_framework/blazor.web.js"></script>
     <script src="@Assets["_content/Radzen.Blazor/Radzen.Blazor.js?v=@(typeof(Radzen.Colors).Assembly.GetName().Version)"]"></script>
     <script src="@Assets["assets/js/printer.js"]"></script>
+    <script src="@Assets["assets/js/toggle.js"]"></script>
 </body>
 
 </html>

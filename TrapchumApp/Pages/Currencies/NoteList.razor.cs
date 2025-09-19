@@ -1,6 +1,6 @@
+using Applications.Features.Currencies;
+using Applications.Features.Currencies.Responses;
 using Applications.Interfaces.Currencies;
-using Applications.Requests.Lists.Currency;
-using Applications.Responses.ViewModels.Currencies;
 
 namespace TrapchumApp.Pages.Currencies
 {
@@ -16,7 +16,7 @@ namespace TrapchumApp.Pages.Currencies
 
         [Parameter] public int Id { get; set; } = 2;
         [Parameter, SupplyParameterFromQuery] public int BranchId { get; set; }
-        private List<VCurrencyNotes> CurrencyCounters = new List<VCurrencyNotes>();
+        private List<VCurrencyCounter> CurrencyCounters = new List<VCurrencyCounter>();
         private int pageIndex = 1;
         private int pageSize = 15;
         private string sortField = "CurrencyName";
@@ -78,7 +78,7 @@ namespace TrapchumApp.Pages.Currencies
             await LoadPages(BranchId);
         }
 
-        async Task AllowRemovedRow(VCurrencyNotes note)
+        async Task AllowRemovedRow(VCurrencyCounter note)
         {
             if (!includeInactive && !note.IsActive)
             {

@@ -1,4 +1,5 @@
-﻿using Applications.Requests.Loans.LoanRequests;
+﻿using Applications.Features.LoanRequests.Requests;
+using Applications.Features.LoanRequests.Requests;
 using Applications.Responses.ViewModels.Loans.LoanRequests;
 using Applications.Responses.ViewModels.Loans.Requests;
 

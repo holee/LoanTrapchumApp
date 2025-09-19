@@ -4,7 +4,7 @@
 @using Applications.Features.Currencies
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Services
+@using Applications.Features.LoanRequests.Interfaces
 @using TrapchumApp.Services
 @if (string.IsNullOrEmpty(Label))
 {
@@ -39,7 +39,7 @@
     </RadzenFormField>
 }
 
-@if (!string.IsNullOrEmpty(Label) && @IsFloatLabel)
+@if (!string.IsNullOrEmpty(Label) && !IsFloatLabel)
 {
     <RadzenRow  AlignItems="AlignItems.Center">
         <RadzenColumn Size="2" SizeSM="12" SizeMD="2">

@@ -8,7 +8,7 @@
         New = 1,
         Requested,
         Checking,
-        Aprove,
+        Approved,
         Denied,
         Rechecked,
         Completed,

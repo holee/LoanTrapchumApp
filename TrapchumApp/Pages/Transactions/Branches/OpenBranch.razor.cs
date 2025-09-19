@@ -1,13 +1,15 @@
 using Applications.Enumerations;
 using Applications.Extensions.Identity.Authorizations.Extensions;
 using Applications.Extensions.Identity.Policies;
+using Applications.Features.CashManagements.Responses;
 using Applications.Features.Currencies;
-using Applications.Requests.Transactions.OpenBranches;
-using Applications.Responses.ViewModels.Currencies;
+using Applications.Features.Currencies.Responses;
+using Applications.Features.Transactions.OpenBranches;
 using Applications.Services.Transactions.Branches;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Radzen;
+using TrapchumApp.Helpers.Extensions;
 using TrapchumApp.Shared;
 
 namespace TrapchumApp.Pages.Transactions.Branches
@@ -25,8 +27,8 @@ namespace TrapchumApp.Pages.Transactions.Branches
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
         [CascadingParameter] CascadingAppState bState { get; set; } = default!;
         [Parameter] public int? BranchId { get; set; } = 0;
-        [Parameter, SupplyParameterFromQuery] public string? UserId { get; set; }
-        IEnumerable<VCurrencyNotes> CurrencyNotes = [];
+        private string? _userId { get; set; }
+        IEnumerable<VCurrencyCounter> CurrencyNotes = [];
         IEnumerable<VCashVaultBalance> CashVaultBalances = [];
         OpenBranchTransactionDto? transactionOpenBranch;
         TransactionCloseBranchDto? transactionCloseBranch;
@@ -42,45 +44,48 @@ namespace TrapchumApp.Pages.Transactions.Branches
         protected override async Task OnInitializedAsync()
         {
             var auth = await AuthenticationState;
-           
+
+            _userId = auth.GetUserId();
+
             canOpenBranch = await _authorizeService.MustHasPermissionAsync(auth.User, TranxsPolicies.OpenBranch);
-           
+
             canCloseBranch = await _authorizeService.MustHasPermissionAsync(auth.User, TranxsPolicies.CloseBranch);
-           
+
             canVaultOut = await _authorizeService.MustHasPermissionAsync(auth.User, TranxsPolicies.VaultOut);
-           
+
             canVaultIn = await _authorizeService.MustHasPermissionAsync(auth.User, TranxsPolicies.VaultIn);
 
-            var balanceResp = await obService.GetCashVaultBalance(BranchId);
+            var rsp = await obService.GetCashVaultBalance(BranchId);
 
-            if (balanceResp.IsSuccess)
+            if (rsp.IsSuccess)
             {
-                CashVaultBalances = balanceResp.Data ?? [];
+                CashVaultBalances = rsp.Data ?? [];
             }
 
             if (CashVaultBalances.Any())
             {
-                await  GetCurrencies((int)CurrenciesType.Khr);
+                await GetCurrencies((int)CurrenciesType.Khr);
 
                 await GetCurrencyNotes(currencyId, BranchId);
             }
 
-           
+
 
             await bState.GetBranchState(BranchId);
 
             await base.OnInitializedAsync();
         }
 
-        async Task GetCurrencies(int id=0)
+        async Task GetCurrencies(int id = 0)
         {
             var rsp = await curService.GetCurrencies<VCurrencyList>(id);
 
-            if (rsp.IsSuccess) { 
+            if (rsp.IsSuccess)
+            {
 
-                currencyId=rsp.Data!.First().CurrencyId;
+                currencyId = rsp.Data!.First().CurrencyId;
 
-            } 
+            }
 
         }
 
@@ -106,8 +111,8 @@ namespace TrapchumApp.Pages.Transactions.Branches
                 TransactionsId = $"trx_{Guid.CreateVersion7()}",
                 TransactionTypeName = "Close Branch",
                 TranTypeRefId = 68,
-                UserRefId = UserId,
-                BranchRefId= BranchId,
+                UserRefId = _userId,
+                BranchRefId = BranchId,
                 OpenBranch = new CloseBranchDtoUpdate
                 {
                     OpenBranchId = $"trx-{Guid.CreateVersion7()}",
@@ -136,7 +141,7 @@ namespace TrapchumApp.Pages.Transactions.Branches
 
         async Task OpenSideDialog(int? currencyId)
         {
-           await GetCurrencyNotes(currencyId!.Value,BranchId);
+            await GetCurrencyNotes(currencyId!.Value, BranchId);
         }
 
         async Task SubmitOpenBranch()
@@ -151,14 +156,15 @@ namespace TrapchumApp.Pages.Transactions.Branches
             {
                 return;
             }
-           var  openBranch = new OpenBranchTransactionDto()
+            var openBranch = new OpenBranchTransactionDto()
             {
                 TransactionsId = $"trx-{Guid.CreateVersion7()}",
                 TranTypeRefId = 68,
                 TransactionTypeName = "Open Branch",
-                UserRefId = UserId,
-                BranchRefId=BranchId,
-                OpenBranch = new OpenBranchDtoCreate() {
+                UserRefId = _userId,
+                BranchRefId = BranchId,
+                OpenBranch = new OpenBranchDtoCreate()
+                {
                     OpenBranchId = $"trx-{Guid.CreateVersion7()}",
                     BankRefId = 11,
                     BranchRefId = BranchId,
@@ -205,13 +211,14 @@ namespace TrapchumApp.Pages.Transactions.Branches
         {
             var resultModal = await DialogService.OpenAsync<VaultOutModal>("Vault Out",
                 new Dictionary<string, object?> {
-                    { "UserId", UserId },
+                    { "UserId", _userId },
                     { "BranchId", BranchId },
                                                                                                                                                                                                                 },
             new DialogOptions
             {
                 ShowTitle = false,
-                Style = "min-width:75rem"
+                Width = "100vw",
+                Height = "100vh",
             });
             if (resultModal != null)
             {
@@ -224,7 +231,7 @@ namespace TrapchumApp.Pages.Transactions.Branches
 
         public void Dispose()
         {
-           
+
         }
 
     }

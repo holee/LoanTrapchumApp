@@ -1,6 +1,6 @@
 using Applications.Commons.Mappers;
+using Applications.Features.Addresses.Responses;
 using Applications.Interfaces.Addresses;
-using Applications.Requests.Lists.Addreses;
 using Azure;
 using BitMiracle.LibTiff.Classic;
 using Domains.Models.Addresses;

@@ -1,7 +1,5 @@
 ﻿using Applications.Commons.Mappers;
-using Applications.Features.Customers.Requests;
 using Applications.Interfaces.Customers;
-using Applications.Requests.Lists.OtherNames;
 using Applications.Responses;
 using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.Paginations;
@@ -9,13 +7,15 @@ using Applications.Responses.ViewModels.Customers;
 using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Domains.Models.Lists.Customers;
-using Mapster;
 using System.Linq.Expressions;
+using Applications.Features.OtherNames;
+using Domains.Models.Lists;
+
 namespace Applications.Features.Customers.Services;
 
 public sealed class CustomerService(ICustomerService cusService) : ICustomerServiceImpl
 {
-    public async Task<Result<string>> UpdateAsync(EntityCustomerCreate customer, CancellationToken cancellation = default)
+    public async Task<Result<string>> UpdateAsync(EntityCustomerCreate customer, CancellationToken cancellation = default) 
     {
 
         var cust = customer.ToCustomerEdit();

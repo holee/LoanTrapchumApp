@@ -3,7 +3,7 @@
 @using Applications.Features.Currencies
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Services
+@using Applications.Features.LoanRequests.Interfaces
 @using TrapchumApp.Services
 <RadzenFieldset Text="Please verify amount and balance then start cash vault." class="rz-p-0 rz-m-0">
     <RadzenStack Orientation="Orientation.Horizontal"
@@ -13,7 +13,7 @@
                      Orientation="Orientation.Horizontal">
             <RadzenLabel Text="CURRENCY" Component="DropDownBindValue" Style="margin-right: 8px" />
             <RadzenDropDown @bind-Value="@CurrencyId"
-                            ValueProperty="@nameof(Currency.CurrencyId)"
+                            ValueProperty="@nameof(Domains.Models.Currencies.Currency.CurrencyId)"
                             TextProperty="@nameof(Currency.CurrencyCode)"
                             Data="@CurrencyList"
                             SelectedItemChanged="OnSelectChanges"

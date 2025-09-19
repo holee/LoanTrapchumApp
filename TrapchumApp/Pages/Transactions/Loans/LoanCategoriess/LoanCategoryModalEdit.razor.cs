@@ -1,4 +1,4 @@
-using Applications.Requests.Loans.Categories;
+using Applications.Features.Categories.Requests;
 using Applications.Services.Loans;
 using Microsoft.AspNetCore.Components;
 using Radzen;

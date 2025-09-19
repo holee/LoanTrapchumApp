@@ -52,7 +52,7 @@ namespace Infrastructures.DataAccess.Configurations.CashManagements
 
             builder.HasMany(x => x.CashManagementDetails)
                 .WithOne()
-                .HasForeignKey(x => x.CashmanagmentRefId);
+                .HasForeignKey(x => x.CachmanagementRefId);
 
         }
     }

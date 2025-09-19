@@ -1,12 +1,13 @@
 ﻿using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Employees;
+using Domains.Models.Lists;
 
 namespace Applications.Interfaces.Employees
 {
 
 
-    public interface IEmployeeService
+    public interface IEmployeeService 
     {
         Task<Result<string>> DeleteAsync(string? id, CancellationToken cancellation = default);
         Task<Result<EntityNames>> GetByIdAsync(string? id);

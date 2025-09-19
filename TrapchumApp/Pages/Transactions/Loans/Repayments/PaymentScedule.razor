@@ -1,10 +1,4 @@
-﻿@using Applications.Features.Addresses
-@using Applications.Features.Branches
-@using Applications.Features.Currencies
-@using Applications.Features.Customers.Services
-@using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Services
-@using TrapchumApp.Services
+﻿@using Applications.Features.LoanRequests.Interfaces
 <RadzenRow AlignItems="AlignItems.Center">
     <RadzenColumn Size="3">
         <RadzenFormField Text="ប្រាក់ដើម">
@@ -12,7 +6,7 @@
                            TextAlign="TextAlign.End"
                            ShowUpDown="false"
                            class="rz-w-100"
-                           Format="@AppValue.DefaultCurrencyFormat"
+                           Format="@Defaults.DefaultCurrencyFormat"
                            Value="@SelectedSchedule?.LeftPrinciple" />
         </RadzenFormField>
     </RadzenColumn>
@@ -22,7 +16,7 @@
                            TextAlign="TextAlign.End"
                            class="rz-w-100"
                            ShowUpDown="false"
-                           Format="@AppValue.DefaultCurrencyFormat"
+                           Format="@Defaults.DefaultCurrencyFormat"
                            Value="@SelectedSchedule?.LeftInterestAmount" />
         </RadzenFormField>
     </RadzenColumn>
@@ -32,7 +26,7 @@
                            TextAlign="TextAlign.End"
                            class="rz-w-100"
                            ShowUpDown="false"
-                           Format="@AppValue.DefaultCurrencyFormat"
+                           Format="@Defaults.DefaultCurrencyFormat"
                            Value="@SelectedSchedule?.LeftCollectionFeeAmount" />
         </RadzenFormField>
     </RadzenColumn>
@@ -42,7 +36,7 @@
                            TextAlign="TextAlign.End"
                            class="rz-w-100"
                            ShowUpDown="false"
-                           Format="@AppValue.DefaultCurrencyFormat"
+                           Format="@Defaults.DefaultCurrencyFormat"
                            Value="@SelectedSchedule?.LeftAmount" />
         </RadzenFormField>
     </RadzenColumn>

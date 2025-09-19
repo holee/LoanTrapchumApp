@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.SignalR;
-
-namespace Applications.Responses;
+﻿namespace Applications.Responses;
 
 public class Result
 {

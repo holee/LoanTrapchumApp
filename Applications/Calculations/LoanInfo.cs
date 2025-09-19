@@ -1,4 +1,4 @@
-﻿using Applications.Requests.Loans.Disbursements;
+﻿using Applications.Features.Loans.Requests;
 
 namespace Applications.Calculations
 {

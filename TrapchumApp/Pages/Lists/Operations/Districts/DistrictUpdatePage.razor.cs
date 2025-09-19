@@ -1,10 +1,10 @@
 using Applications.Interfaces.Addresses;
-using Applications.Requests.Lists.Addreses;
 using Applications.Responses.Message;
 using Domains.Models.Addresses;
 using Mapster;
 using Microsoft.AspNetCore.Components;
 using System.Net.Sockets;
+using Applications.Features.Addresses.Responses;
 
 namespace TrapchumApp.Pages.Lists.Operations.Districts
 {

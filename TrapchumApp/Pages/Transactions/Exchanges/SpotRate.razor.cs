@@ -1,11 +1,10 @@
+using Applications.Features.Currencies;
 using Applications.Interfaces.Currencies;
 using Applications.Interfaces.Transactions;
-using Applications.Requests.Lists.Currency;
 using Applications.Responses.Lists.Currency;
 using Applications.Responses.Paginations;
 using Domains.Models.Currencies;
 using Mapster;
-using Microsoft.AspNetCore.Components;
 using Radzen.Blazor;
 
 namespace TrapchumApp.Pages.Transactions.Exchanges

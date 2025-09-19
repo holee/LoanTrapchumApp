@@ -1,10 +1,10 @@
 ﻿@using Applications.Features.Addresses
 @using Applications.Features.Branches
 @using Applications.Features.Currencies
+@using Applications.Features.Currencies.Responses
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Services
-@using Applications.Responses.ViewModels.Currencies
+@using Applications.Features.LoanRequests.Interfaces
 @using TrapchumApp.Services
 <PageTitle>Currency Exchange</PageTitle>
 <GridToolbar ShowSearchBox="false">
@@ -12,7 +12,7 @@
         <RadzenButton Size="ButtonSize.Small"
                       Click="ShowCurrencyDialogue"
                       Icon="@IconNames.AddNew"
-                      Text="Exchange" ButtonStyle="@AppValue.AddNew" />
+                      Text="Exchange" ButtonStyle="@Defaults.AddNew" />
     </LeftChildren>
     <RightChildren>
         <RadzenFormField AllowFloatingLabel="false" class="rz-mb-2">
@@ -20,7 +20,7 @@
                 <RadzenIcon Icon="search" />
             </Start>
             <ChildContent>
-                <RadzenDatePicker DateFormat="@AppValue.DefaultDateFormat"
+                <RadzenDatePicker DateFormat="@Defaults.DefaultDateFormat"
                                   TValue="DateTime?"
                                   CurrentDateChanged="@CurrentDateChanged"
                                   @bind-Value="transactionDate" />

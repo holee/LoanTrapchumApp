@@ -1,4 +1,4 @@
-using Applications.Requests.Lists.OtherNames;
+using Applications.Features.OtherNames;
 
 namespace TrapchumApp.Pages.Lists.OtherNames
 {

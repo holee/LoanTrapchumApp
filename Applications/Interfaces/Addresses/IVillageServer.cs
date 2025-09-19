@@ -1,17 +1,11 @@
-﻿using Applications.Requests.Lists.Addreses;
+﻿using Applications.Features.Addresses.Responses;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Addresses;
 using Domains.Models.Addresses;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Applications.Interfaces.Addresses
 {
-    public interface IVillageServer
+    public interface IVillageServer 
     {
         Task<Result<Village>> GetByIdAsync(int? Id);
         Task<Result<VVillageDetails>> GetDettailsAsync(int? Id);

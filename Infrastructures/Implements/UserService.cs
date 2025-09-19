@@ -1,7 +1,7 @@
 ﻿using Applications.Constants.Authorizations;
 using Applications.Extensions;
+using Applications.Features.Identity.Users;
 using Applications.Interfaces.Identity;
-using Applications.Requests.Identity;
 using Applications.Responses;
 using Applications.Responses.Auths;
 using Applications.Responses.Message;
@@ -25,13 +25,13 @@ public sealed class UserService : IUserService
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signinManager;
     private readonly RoleManager<ApplicationRole> _roleManager;
-    private readonly IWebHostEnvironment _env;
+    private readonly IHostingEnvironment _env;
     private readonly IDbContextFactory<DataContext> _dbContextFactory;
     private readonly IDapperConnectionFactory connectionFactory;
     public UserService(UserManager<ApplicationUser> userManager,
          RoleManager<ApplicationRole> roleManager,
          UserDataContext userContext,
-         IWebHostEnvironment env,
+         IHostingEnvironment env,
          SignInManager<ApplicationUser> signinManager,
          IDbContextFactory<DataContext> dbContextFactory,
          IDapperConnectionFactory connectionFactory)

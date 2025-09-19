@@ -1,5 +1,5 @@
+using Applications.Features.Entities;
 using Applications.Interfaces.Lists;
-using Applications.Requests.Lists.Entities;
 using Domains.Models.Lists;
 using Mapster;
 

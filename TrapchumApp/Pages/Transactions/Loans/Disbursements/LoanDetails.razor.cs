@@ -1,9 +1,10 @@
 using Applications.Calculations;
+using Applications.Calculations.Extensions;
 using Applications.Commons.Mappers;
 using Applications.Enumerations;
+using Applications.Features.LoanPayments.Requests;
 using Applications.Features.Loans.Responses;
 using Applications.Features.Loans.Services;
-using Applications.Requests.Loans.Payments;
 using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using TrapchumApp.Helpers.Extensions;

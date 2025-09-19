@@ -1,6 +1,4 @@
-﻿using Applications.Requests.Lists.Entities;
-using Applications.Requests.Loans.CreditAgents;
-using Applications.Responses.Lists.Entities;
+﻿using Applications.Responses.Lists.Entities;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Responses.ViewModels.Employees;
@@ -12,6 +10,8 @@ using Radzen.Blazor;
 using TrapchumApp.Pages.Identity.Users;
 using TrapchumApp.Helpers.Extensions;
 using System.Threading.Tasks;
+using Applications.Features.CreditAgents.Requests;
+using Applications.Features.Entities;
 
 namespace TrapchumApp.Pages.Lists.CreditAgents;
 

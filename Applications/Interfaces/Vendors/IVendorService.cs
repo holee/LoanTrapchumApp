@@ -1,5 +1,4 @@
-﻿using Applications.Requests.Lists.Entities;
-using Applications.Responses;
+﻿using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Vendors;
 using Domains.Models.Lists;

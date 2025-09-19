@@ -1,9 +1,8 @@
 using Applications.Extensions.mappers;
 using Applications.Features.Collaterals.Requests;
-using Applications.Requests.Lists.Collaterals;
 using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.ViewModels.Customers;
-using Applications.Services.LIsts;
+using Applications.Services.Lists;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Radzen;

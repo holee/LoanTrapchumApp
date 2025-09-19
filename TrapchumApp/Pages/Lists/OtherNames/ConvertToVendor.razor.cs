@@ -1,4 +1,4 @@
-using Applications.Requests.Lists.OtherNames;
+using Applications.Features.OtherNames;
 using Applications.Responses.ViewModels.OtherNames;
 using Applications.Services.Lists;
 using Microsoft.AspNetCore.Components;

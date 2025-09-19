@@ -1,9 +1,10 @@
 using Applications.Commons.Mappers;
+using Applications.Features.OtherNames;
 using Applications.Interfaces.Lists;
-using Applications.Requests.Lists.OtherNames;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.OtherNames;
+using Domains.Models.Lists;
 using Mapster;
 
 namespace Applications.Services.Lists;

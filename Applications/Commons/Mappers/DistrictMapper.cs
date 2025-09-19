@@ -1,10 +1,6 @@
-﻿using Applications.Requests.Lists.Addreses;
-using Domains.Models.Addresses;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Domains.Models.Addresses;
+using Applications.Features.Addresses.Responses;
+
 
 namespace Applications.Commons.Mappers
 {

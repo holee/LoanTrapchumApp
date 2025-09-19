@@ -114,9 +114,7 @@ namespace TrapchumApp.Pages.Lists.Customers
                 NotificationService.Notify(NotificationSeverity.Error, "This customer cannot request loan again.");
                 return;
             }
-
-            var uri = $"/App/Request/{BranchId}/Branches/{UserId}/CreateNew?CustomerId={customerId}";
-
+            var uri = $"app/loan/request/{BranchId}/branches/createNew/{customerId}/customer";
             NavigationManager.NavigateTo(uri);
         }
 

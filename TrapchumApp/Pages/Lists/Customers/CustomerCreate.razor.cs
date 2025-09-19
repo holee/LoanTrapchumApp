@@ -1,12 +1,12 @@
-﻿using Applications.Requests.Lists.Addreses;
-using Applications.Requests.Lists.OtherNames;
-using Applications.Responses.Lists.Entities;
+﻿using Applications.Responses.Lists.Entities;
 using Applications.Services.Files;
 using Applications.Services.Lists;
 using Domains.Models.Addresses;
 using Domains.Models.Lists;
 using Radzen.Blazor;
 using Applications.Enumerations;
+using Applications.Features.Addresses.Responses;
+using Applications.Features.OtherNames;
 
 namespace TrapchumApp.Pages.Lists.Customers
 {

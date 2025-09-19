@@ -1,4 +1,4 @@
-﻿using Applications.Requests.Loans.Disbursements;
+﻿using Applications.Features.Loans.Requests;
 using Domains.Models.Loans;
 
 namespace Applications.Features.Loans.Mappers;
@@ -80,14 +80,14 @@ public static class LoanDtoCreateMapper
             CollectionFee = s.CollectionFee,
             PaymentDate = s.PaymentDate,
             ScheduleNum = s.ScheduleNum,
-            ScheduleStatusRefId = s.ScheduleStatusRefId,
-            TotalDay = s.TotalDay,
+            ScheduleStatusRefId =  s.ScheduleStatusRefId,
+            TotalDay = s.TotalDay, 
             TotalPay = s.TotalPay,
             LoanOutstanding = s.LoanOutstanding
         }).ToList();
+        
+
     }
-
-
 }
 
 

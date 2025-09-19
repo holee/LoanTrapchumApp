@@ -1,12 +1,12 @@
 using Applications.Extensions;
 using Applications.Extensions.Maths;
 using Applications.Extensions.NumberExtensions;
+using Applications.Features.Currencies.Responses;
+using Applications.Features.LoanPayments.Requests;
+using Applications.Features.Transactions.ForiegnExchanges;
+using Applications.Features.Transactions.LoanTransactions;
 using Applications.Interfaces.Currencies;
 using Applications.Interfaces.Loans;
-using Applications.Requests.Loans.Payments;
-using Applications.Requests.Transactions.ForiegnExchanges;
-using Applications.Requests.Transactions.LoanTransactions;
-using Applications.Responses.ViewModels.Currencies;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Services.Transactions.Currencies;
 

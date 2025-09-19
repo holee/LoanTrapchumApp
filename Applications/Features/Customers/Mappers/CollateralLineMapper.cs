@@ -1,6 +1,5 @@
 ﻿using Applications.Features.Collaterals.Requests;
-using Applications.Requests.Lists.Collaterals;
-using Applications.Responses.Lists.Collaterals;
+using Applications.Responses.Lists.Collaterals; 
 using Domains.Models.Collaterals;
 
 namespace Applications.Features.Customers.Mappers

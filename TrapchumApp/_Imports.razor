@@ -10,15 +10,15 @@
 @using Applications.Extensions.Identity.Policies
 @using Applications.Extensions.Maths
 @using Applications.Features.Addresses
+@using Applications.Features.Addresses.Interfaces
 @using Applications.Features.Branches
+@using Applications.Features.Branches.Interfaces
 @using Applications.Features.Currencies
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Services
-@using Applications.Requests.Identity
-@using Applications.Requests.Lists.Addreses;
-@using Applications.Requests.Lists.Currency;
-@using Applications.Requests.Lists.Entities;
+@using Applications.Features.Employees.Interfaces
+@using Applications.Features.LoanRequests.Interfaces
+@using Applications.Features.LoanRequests.UseCases
 @using Applications.Responses.ViewModels.Auths
 @using Applications.Responses.ViewModels.Customers
 @using Applications.Responses.ViewModels.Departments
@@ -46,6 +46,7 @@
 @using TrapchumApp.Helpers.Constants
 @using TrapchumApp.Pages.Transactions.Loans.LoanRequests.Links
 @using TrapchumApp.Services
+@using TrapchumApp.Shared
 @using static Microsoft.AspNetCore.Components.Web.RenderMode
 @attribute [Authorize]
 @inject IJSRuntime js
@@ -60,7 +61,7 @@
 @inject IAddressServiceImpl _addressService;
 @inject IEmployeeServiceImpl _employeeService;
 @inject IBranchServiceImpl _branchService
-@inject IUserServiceImpl _userService
 @inject ICustomerServiceImpl _customerService
 @inject ICurrencyServiceImpl _curService
 @inject ILoanRequestServiceImpl _loanRequestService
+@inject IUserServiceImpl _userService

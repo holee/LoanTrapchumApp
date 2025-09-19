@@ -17,9 +17,6 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             await base.OnInitializedAsync();
         }
 
-
-
-
         async Task GetCustomerLoanReuqest(string? customerId)
         {
             var resp = await _customerService.GetCustomerForRequestLoanAsync(customerId);

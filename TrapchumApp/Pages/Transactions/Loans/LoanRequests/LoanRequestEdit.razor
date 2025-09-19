@@ -1,26 +1,19 @@
-﻿@page "/App/Request/{BranchId:int}/Branches/{UserId}/Customer/{CustomerId}/Edit"
-@using Applications.Features.Addresses
-@using Applications.Features.Branches
-@using Applications.Features.Currencies
-@using Applications.Features.Customers.Services
-@using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Services
-@using Applications.Requests.Loans.LoanRequests
-@using Applications.Responses.Auths
+﻿@page "/app/loan/{LoanRequestId}/request/{BranchId:int}/branches/{CustomerId}/edit"
+@using Applications.Features.LoanRequests.Interfaces
+@using Applications.Features.LoanRequests.Requests
 @using Applications.Responses.Lists.Collaterals
-@using Applications.Responses.Loans.Disbursements
 @using Applications.Responses.ViewModels.Loans.Requests
 @using Applications.Responses.ViewModels.OtherNames
 @using Domains.Models.Collaterals
 @using Domains.Models.Loans
-@using Radzen.Blazor
 @using Radzen.Blazor.Rendering
-@using TrapchumApp.Helpers.Constants
-@using TrapchumApp.Services
 <PageTitle>Loan Request</PageTitle>
 <Card>
     <EditForm Model="model" @ref="editForm">
         <input type="hidden" @bind="model.LoanRequestId" />
+        <input type="hidden" @bind="model.CreditAgentRefId" />
+        <input type="hidden" @bind="model.RequestUserRefId" />
+        <input type="hidden" @bind="model.CustomerRefId" />
         <FluentValidationValidator DisableAssemblyScanning="true" />
         <CardBody BodyCssClass="rz-background-color-base-200">
             <RadzenTabs SelectedIndexChanged="SelectTabIndexChanged" RenderMode="TabRenderMode.Client">
@@ -36,7 +29,7 @@
                                                             ShowRemove="true"
                                                             @ref="CollateralRef"
                                                             Add="AddCollaterals"
-                                                            RemoveCollateral="RemovedCollateral"
+                                                            RemoveCollateral="@RemovedCollateral"
                                                             Collaterals="CollateralLines">
                                         <SearchBoxTemplate>
                                             <CollateralSearchList CustomerId="@CustomerId"
@@ -72,45 +65,44 @@
                     </RadzenTabsItem>
                     <RadzenTabsItem Text="អតិថិជន" Icon="@IconNames.Customers">
                         <RadzenFieldset>
-                            <CustomerRequest CustomerId="@CustomerId" />
+                            <CustomerRequest CustomerId="@CustomerId" ShowAdditionalInfo="true" />
                         </RadzenFieldset>
                     </RadzenTabsItem>
                     <RadzenTabsItem Text="Notes" Icon="@IconNames.Comment">
                         <RadzenFieldset>
-                          <RadzenRow AlignItems="AlignItems.Center">
-                              <RadzenColumn Size="12">
-                                  <RadzenTextArea Rows="10" @bind-Value="model.Memo" class="form-control">
+                            <RadzenRow AlignItems="AlignItems.Center">
+                                <RadzenColumn Size="12">
+                                    <RadzenTextArea @bind-Value="model.Memo" class="@Styles.W100">
 
-                                  </RadzenTextArea>
-                              </RadzenColumn>
-                          </RadzenRow>
-                            <LoanRequestNotes Data="@_loanDescriptions" />
+                                    </RadzenTextArea>
+                                </RadzenColumn>
+                            </RadzenRow>
+                            <LoanRequestNotes Data="@_loanDescriptions" @key="@Guid.NewGuid().ToString("N")" />
                         </RadzenFieldset>
                     </RadzenTabsItem>
                 </Tabs>
             </RadzenTabs>
         </CardBody>
         <CardFooter>
-            <RadzenStack class="mt-2"
+            <RadzenStack class="rz-mt-2"
                          Orientation="Orientation.Horizontal"
                          JustifyContent="JustifyContent.End"
                          Gap="0.5rem"
                          AlignItems="AlignItems.Center">
 
-                <RadzenButton Disabled="model.RequestAmount <=0"
-                              Size="ButtonSize.Small"
-                              Click="HandleCreateNew"
+                <RadzenButton Disabled="model.RequestAmount <= 0"
+                              Size="@Styles.DefaultSize"
+                              Click="HandleSaveLoanRequest"
                               Text="Save"
                               Icon="save"
                               ButtonStyle="ButtonStyle.Primary" />
-                <RadzenButton Disabled="model.RequestAmount <=0"
-                              Size="ButtonSize.Small"
+                <RadzenButton Disabled="model.RequestAmount <= 0"
+                              Size="@Styles.DefaultSize"
                               Click="HandleCreateRequest"
                               Text="Request"
                               Icon="save"
                               ButtonStyle="ButtonStyle.Success" />
-                <RadzenLink Path="@($"/App/Request/{BranchId}/Branches?UserId={UserId}")"
-                            Text="Back" />
+                <BackButton Href="@($"/app/loan/request/{BranchId}/branches")" />
             </RadzenStack>
         </CardFooter>
     </EditForm>
@@ -129,10 +121,10 @@
 
         var gLinks = new LoanRequestGuarantorsDtoCreate
         {
-             BranchRefId=BranchId,
-             CustomerRefId=CustomerId,
-             LoanRequestId=LoanRequestId,
-             GuarantorsLink=[]
+            BranchRefId = BranchId,
+            CustomerRefId = CustomerId,
+            LoanRequestId = LoanRequestId,
+            GuarantorsLink = []
         };
 
         foreach (var g in gs)
@@ -141,22 +133,22 @@
 
             var guarantor = new LoanGuarantorLink
             {
-                 EntityNameRefId=g.Id,
-                 IsActive=true,
-                 BranchId=BranchId,
-                 LoanRequestRefId=LoanRequestId
+                EntityNameRefId = g.Id,
+                IsActive = true,
+                BranchId = BranchId,
+                LoanRequestRefId = LoanRequestId
             };
 
             gLinks.GuarantorsLink.Add(guarantor);
 
             var item = new VLoanRequestGuarantor
-                {
-                    GuarantorId = g.Id,
-                    FullName = g.FullName,
-                    GuarantorName = g.GuarantorName,
-                    Phone = g.Phone,
-                    Address=g.ToString()
-                };
+            {
+                GuarantorId = g.Id,
+                FullName = g.FullName,
+                GuarantorName = g.GuarantorName,
+                Phone = g.Phone,
+                Address = g.ToString()
+            };
 
             Guarantors.Add(item);
         }
@@ -182,7 +174,7 @@
         if (Guarantors.Any(x => x.GuarantorId == g.Id))
         {
             NotificationService.Notify(NotificationSeverity.Info, "Guarantor already exists");
-            
+
             return;
         }
 
@@ -216,7 +208,7 @@
                 FullName = g.FullName,
                 GuarantorName = g.GuarantorName,
                 Phone = g.Phone,
-                Address=g.ToString()
+                Address = g.ToString()
             };
 
             Guarantors.Add(gs);
@@ -228,7 +220,7 @@
             NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
         }
 
-        
+
     }
 
 
@@ -240,6 +232,7 @@
         if (CollateralLines.Any(x => x.Id == c.Id))
         {
             NotificationService.Notify(NotificationSeverity.Info, "Collateral already exists");
+
             return;
         }
 
@@ -249,7 +242,9 @@
         var collateralLink = new CollateralLink
         {
             CollateralLineRefId = c.Id,
+
             CollateralRefId = c.CollateralId,
+
             ModifiedDt = DateTime.Now
         };
 
@@ -279,7 +274,7 @@
     {
         if (!cs.Any()) return;
 
-        var collaterals = new LoanCollateralRequest(BranchId,LoanRequestId,CustomerId);
+        var collaterals = new LoanCollateralRequest(BranchId, LoanRequestId, CustomerId);
 
         foreach (var g in cs)
         {
@@ -288,27 +283,27 @@
 
             var collateralLink = new CollateralLink
             {
-                 CollateralLineRefId=g.Id,
-                 CollateralRefId=g.CollateralId,
-                 ModifiedDt=DateTime.Now
+                CollateralLineRefId = g.Id,
+                CollateralRefId = g.CollateralId,
+                ModifiedDt = DateTime.Now
             };
 
             collaterals.CollateralLinesLink.Add(collateralLink);
 
             var item = new VLoanRequestCollateralLines
-                {
-                    CollateralLineId = g.Id,
-                    CollateralId = g.CollateralId,
-                    OwnerName = g.OwnerName,
-                    ReferenceNo = g.ReferenceNo,
-                    TypeName = g.TypeName,
-                    Quantity = g.Quantity,
-                };
+            {
+                CollateralLineId = g.Id,
+                CollateralId = g.CollateralId,
+                OwnerName = g.OwnerName,
+                ReferenceNo = g.ReferenceNo,
+                TypeName = g.TypeName,
+                Quantity = g.Quantity,
+            };
 
             CollateralLines.Add(item);
         }
 
-        var rsp= await _loanRequestService.AddLoanRequestCollateralAsync(collaterals);
+        var rsp = await _loanRequestService.AddLoanRequestCollateralAsync(collaterals);
 
         if (rsp.IsSuccess)
         {

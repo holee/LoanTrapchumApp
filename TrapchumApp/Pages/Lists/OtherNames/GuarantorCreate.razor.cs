@@ -1,4 +1,4 @@
-using Applications.Requests.Lists.OtherNames;
+using Applications.Features.OtherNames;
 using Applications.Services.Lists;
 using Domains.Models.Bases;
 using Microsoft.AspNetCore.Components;

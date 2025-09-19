@@ -1,5 +1,6 @@
 using Applications.Responses.ViewModels.Vendors;
-using Applications.Services.LIsts;
+using Applications.Services.Lists;
+using Applications.Services.Lists;
 using Microsoft.AspNetCore.Components;
 
 namespace TrapchumApp.Pages.Lists.Vendors

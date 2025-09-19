@@ -1,4 +1,5 @@
-﻿using Applications.Requests.Lists.OtherNames;
+﻿using Applications.Features.OtherNames;
+using Domains.Models.Lists;
 using Domains.Models.Lists.Customers;
 
 namespace Applications.Commons.Mappers;
@@ -128,7 +129,7 @@ public static class CustomerMapper
 
     }
 
-    public static EntityNames ToCustomerEdit(this EntityCustomerCreate dto)
+    public static EntityNames ToCustomerEdit(this EntityCustomerCreate dto) 
     {
 
         return new EntityNames

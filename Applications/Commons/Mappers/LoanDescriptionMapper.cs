@@ -1,11 +1,6 @@
-﻿using Applications.Requests.Loans.LoanRequests;
+﻿using Applications.Features.LoanRequests.Requests;
 using Applications.Responses.ViewModels.Loans.LoanRequests;
 using Domains.Models.Loans;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Applications.Commons.Mappers
 {

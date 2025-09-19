@@ -1,6 +1,6 @@
+using Applications.Features.Currencies.Responses;
 using Applications.Interfaces.Currencies;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Currencies;
 using Microsoft.AspNetCore.Components;
 
 namespace TrapchumApp.Pages.Currencies
@@ -9,7 +9,7 @@ namespace TrapchumApp.Pages.Currencies
     {
         [Inject] ICurrencyService CurrencyService { get; set; } = default!;
         [Parameter] public int Id { get; set; }
-        private List<VCurrencyNotes> CurrencyCounters = [];
+        private List<VCurrencyCounter> CurrencyCounters = [];
         private int pageIndex = 1;
         private int pageSize = 10;
         private bool includeInactive = false;

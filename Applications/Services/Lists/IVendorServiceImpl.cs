@@ -1,11 +1,10 @@
-﻿using Applications.Requests.Lists.Entities;
-using Applications.Requests.Lists.OtherNames;
+﻿using Applications.Features.OtherNames;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Vendors;
 using Domains.Models.Lists;
 
-namespace Applications.Services.LIsts
+namespace Applications.Services.Lists
 {
     public interface IVendorServiceImpl
     {

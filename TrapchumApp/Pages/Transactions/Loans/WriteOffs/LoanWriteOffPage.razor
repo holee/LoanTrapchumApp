@@ -1,6 +1,56 @@
-﻿@page "/app/loan/write-off"
+﻿@page "/app/loan/disbursement/write-off/{BranchId:int}"
+@using Applications.Features.LoanRequests.Interfaces
+@using Applications.Responses.ViewModels.Loans
+@using TrapchumApp.Pages.Transactions.Loans.Disbursements
 <PageTitle>Loan Write Off</PageTitle>
-<h3>LoanWriteOffPage</h3>
-@code {
+<PageTitle>Loan Pay Off</PageTitle>
+<RadzenTabs>
+    <Tabs>
+        <RadzenTabsItem Text="All">
+            <AllLoansTab BranchId="@BranchId">
+                <ChildMenu>
+                    <RadzenButton Size="ButtonSize.ExtraSmall"
+                                  Icon="@IconNames.HMoreVert"
+                                  Variant="Variant.Text"
+                                  Click="@((args)=>ShowContextMenuWithContent(args))" />
+                </ChildMenu>
+            </AllLoansTab>
+        </RadzenTabsItem>
+        <RadzenTabsItem Text="Some">
 
+        </RadzenTabsItem>
+    </Tabs>
+</RadzenTabs>
+@code {
+    [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+    [CascadingParameter] CascadingAppState bState { get; set; } = default!;
+    [Parameter] public int BranchId { get; set; }
+    void ShowContextMenuWithContent(MouseEventArgs args)
+    {
+
+        ContextMenuService.Open(args, ds =>@<RadzenMenu Style="font-size:0.8rem;">
+            <RadzenMenuItem Icon="money"
+                            Text="Recieve Payment"></RadzenMenuItem>
+            <RadzenMenuItem Icon="paid"
+                            Text="PayOff"></RadzenMenuItem>
+            <RadzenMenuItem Icon="change_circle"
+                            Text="Change Credit Agent"></RadzenMenuItem>
+            <RadzenMenuItem Icon="info"
+                            Text="Details"></RadzenMenuItem>
+        </RadzenMenu>
+    );
+    }
+
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        var authState = await AuthenticationState;
+
+        await bState.GetBranchIdByUser();
+
+        await base.OnInitializedAsync();
+    }
 }

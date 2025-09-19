@@ -3,7 +3,7 @@
 @using Applications.Features.Currencies
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Services
+@using Applications.Features.LoanRequests.Interfaces
 @using Applications.Responses.Lists.Collaterals
 @using TrapchumApp.Services
 <EditForm Model="@model" FormName="collateralLineEdt" OnValidSubmit="@HandleFormSubmit">
@@ -12,31 +12,31 @@
     <input type="hidden" @bind="@model.Id" />
     <input type="hidden" @bind="model.CollateralRefId" />
     <input type="hidden" @bind="model.SubCategoryRefId" />
-    <RadzenRow class="@AppValue.MarginB">
+    <RadzenRow class="@Defaults.Mb2">
         <RadzenColumn Size="12">
             <TCTextbox IsFloatLabel="true" Disabled Label="SubType Name"
                            @bind-Value="@model.SubTypeName" />
         </RadzenColumn>
     </RadzenRow>
-    <RadzenRow class="@AppValue.MarginB">
+    <RadzenRow class="@Defaults.Mb2">
         <RadzenColumn Size="12">
             <TCTextbox Disabled IsFloatLabel="true"
                        Label="Reference No"
                            @bind-Value="@model.ReferenceNo" />
         </RadzenColumn>
     </RadzenRow>
-    <RadzenRow class="@AppValue.MarginB">
+    <RadzenRow class="@Defaults.Mb2">
         <RadzenColumn Size="12">
             <TCTextbox @bind-Value="@model.CollateralNo" 
                      IsFloatLabel="true"
                        Label="Collateral No" />
         </RadzenColumn>
     </RadzenRow>
-    <RadzenRow class="@AppValue.MarginB">
+    <RadzenRow class="@Defaults.Mb2">
         <RadzenColumn Size="12">
-            <RadzenFormField Text="Type" AllowFloatingLabel="true">
+            <RadzenFormField Text="Type" AllowFloatingLabel="true" class="@Defaults.W100">
                 <RadzenDropDown TValue="int?"
-                                class="@AppValue.Width100"
+                                class="@Defaults.W100"
                                 Data="collateralTypes"
                                 TextProperty="@nameof(CollateralTypeResponse.CollateralTypeCode)"
                                 ValueProperty="@nameof(CollateralTypeResponse.CollateralTypeId)"
@@ -46,10 +46,10 @@
             </RadzenFormField>       
         </RadzenColumn>
     </RadzenRow>
-    <RadzenRow class="@AppValue.MarginB">
+    <RadzenRow class="@Defaults.Mb2">
         <RadzenColumn Size="12">
             <RadzenDropDown TValue="int?"
-                            class="@AppValue.Width100"
+                            class="@Defaults.W100"
                             Data="@allSubTypes"
                             TextProperty="@nameof(CollateralSubTypeResponse.CollateralSubTypeName)"
                             ValueProperty="@nameof(CollateralSubTypeResponse.Id)"
@@ -57,7 +57,7 @@
             </RadzenDropDown>
         </RadzenColumn>
     </RadzenRow>
-    <RadzenRow class="@AppValue.MarginB">
+    <RadzenRow class="@Defaults.Mb2">
         <RadzenColumn Size="12">
             <TCTextbox @bind-Value="@model.OwnerName"
                        Placeholder="Owner Name"
@@ -65,32 +65,32 @@
                        Label="Owner Name"/>
         </RadzenColumn>
     </RadzenRow>
-    <RadzenRow class="@AppValue.MarginB">
+    <RadzenRow class="@Defaults.Mb2">
         <RadzenColumn Size="12">
             <TCTextbox IsFloatLabel="true" Label="Location"
                        PlaceHolder="Location"
                            @bind-Value="@model.Location" />
         </RadzenColumn>
     </RadzenRow>
-    <RadzenRow class="@AppValue.MarginB">
+    <RadzenRow class="@Defaults.Mb2">
         <RadzenColumn Size="12">
             <TCTextbox IsFloatLabel="true" Label="Size"
                            @bind-Value="@model.Size"></TCTextbox>
         </RadzenColumn>
     </RadzenRow>
-    <RadzenRow class="@AppValue.MarginB">
+    <RadzenRow class="@Defaults.Mb2">
         <RadzenColumn Size="12">
-            <RadzenFormField Text="Quantity" AllowFloatingLabel="true" class="@AppValue.Width100">
+            <RadzenFormField Text="Quantity" AllowFloatingLabel="true" class="@Defaults.W100">
                 <RadzenNumeric ShowUpDown="false"
                                Min="0"
                                Placeholder="Quantity"
-                               class="@AppValue.Width100"
+                               class="@Defaults.W100"
                                TextAlign="TextAlign.End"
                                @bind-Value="@model.Quantity" />
             </RadzenFormField>
         </RadzenColumn>
     </RadzenRow>
-    <RadzenRow class="@AppValue.MarginB">
+    <RadzenRow class="@Defaults.Mb2">
         <RadzenColumn Size="12">
             <TCNumbers Placeholder="Market Price" IsFloatLabel="true"
                        Label="Market Price"
@@ -99,7 +99,7 @@
             <ValidationMessage For="() => model.MarketPrice" />
         </RadzenColumn>
     </RadzenRow>
-    <RadzenRow class="@AppValue.MarginB">
+    <RadzenRow class="@Defaults.Mb2">
         <RadzenColumn Size="12">
             <TCNumbers Placeholder="Hot Price" IsFloatLabel="true" Label="Hot Price"
                        TextAlign="TextAlign.End"
@@ -107,7 +107,7 @@
             <ValidationMessage For="() => model.HotPrice" />
         </RadzenColumn>
     </RadzenRow>
-    <RadzenRow class="@AppValue.MarginB">
+    <RadzenRow class="@Defaults.Mb2">
         <RadzenColumn Size="12">
             <TCNumbers Placeholder="Pawn Price" Label="Pawn Price"
                        @bind-Value="@model.PawnPrice"
@@ -117,7 +117,7 @@
         </RadzenColumn>
     </RadzenRow>
     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
-                 class="@AppValue.MarginB"
+                 class="@Defaults.Mb2"
                  JustifyContent="JustifyContent.End">
         <RadzenButton Icon="@IconNames.Save"
                       ButtonStyle="ButtonStyle.Success"

@@ -1,5 +1,5 @@
+using Applications.Features.Addresses.Responses;
 using Applications.Interfaces.Addresses;
-using Applications.Requests.Lists.Addreses;
 using Applications.Responses.Message;
 using Azure;
 using Domains.Models.Addresses;

@@ -1,15 +1,19 @@
 ﻿using Applications.Calculations;
+using Applications.Calculations.Extensions;
 using Applications.Commons.Mappers;
 using Applications.Enumerations;
 using Applications.Extensions.NumberExtensions;
+using Applications.Features.LoanPayments.Interfaces;
+using Applications.Features.LoanPayments.Requests;
 using Applications.Features.Loans.Services;
-using Applications.Requests.Loans.Payments;
 using Applications.Responses.ViewModels.Branches;
 using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Services.Loans;
 using Domains.Models.Loans;
 using Radzen.Blazor;
+using System.Threading.Tasks;
+using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments;
 
@@ -19,18 +23,22 @@ public partial class PaymentSchedule
     private readonly ILoanServiceImpl _loanService;
 
     private readonly ILoanScheduleServiceImpl _scheduleService;
-    public PaymentSchedule(ILoanServiceImpl loanService, ILoanScheduleServiceImpl loanScheduleService)
+
+    private readonly IAddRecieptNumberUseCase _addRecieptNumberUseCase;
+    public PaymentSchedule(ILoanServiceImpl loanService, ILoanScheduleServiceImpl loanScheduleService, IAddRecieptNumberUseCase addRecieptNumberUseCase)
     {
         _loanService = loanService;
 
         _scheduleService = loanScheduleService;
+
+        _addRecieptNumberUseCase = addRecieptNumberUseCase;
     }
 
     [Parameter] public string? LoanId { get; set; }
     [Parameter] public int BranchId { get; set; }
     [Parameter, SupplyParameterFromQuery] public string? CreditAgentId { get; set; }
     [Parameter, SupplyParameterFromQuery] public int CurrencyId { get; set; }
-    [Parameter, SupplyParameterFromQuery] public string? UserId { get; set; }
+    private string? _userId = string.Empty;
     [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
 
     DateTime paymentDate = DateTime.Now;
@@ -56,100 +64,65 @@ public partial class PaymentSchedule
     VLoanDisbursments? vLoan = new();
 
     IList<VSchedule>? _selectedSchedules = null;
-
     DataGridSelectionMode gridSelectionMode = DataGridSelectionMode.Single;
-
     bool isAllowMultiplePayment = false;
-
     bool allowRowSelected = true;
-
     PaymentDtoCreate recievePayment = new();
-
     decimal? principleAmount = 0;
-
     decimal? interestAmount = 0;
-
     decimal? collectionfeeAmount = 0;
-
     decimal? totalPaidAmount = 0;
-
     decimal? penaltyAmount = 0;
-
     decimal? totalPaymentAmount = 0.00M;
-
     decimal? penaltyRate = 0;
-
     int selectedIndex = 0;
-
     bool isPaidNow = false;
-
     bool isLoading = false;
-
     bool includePaid = false;
-
     bool? canPaidNow = false;
-
     bool? isRestoreDefault = false;
-
     bool disableIsPaidNow = true;
-
     bool btnDisabled = false;
-
     string receiptNo = string.Empty;
-
     string recieptNumber = "";
-
     int pageIndex = 1;
-
     int pageSize = 25;
-
     string sortField = "LoanId";
-
     string filter = string.Empty;
-
     int selectIndex = 0;
-
     int counts = 0;
-
-    bool isSelectionLocked = false;
-
+    private bool _isSelectionLocked = false;
     bool _isPaymentTab = false;
     bool _isMultiplePaymentTab = false;
     int _selectedIndexTab = 0;
-
-    LoanPaymentLineDtoCreate loanPaymentLine = new();
+    private LoanPaymentLineDtoCreate _loanPaymentLine = new();
 
     LoanPaymentDtoCreate _loanPayment = new();
 
     protected override async Task OnInitializedAsync()
     {
         //btnDisabled = true;
+        _userId = (await AuthenticationState).GetUserId();
 
         await GetLoanWithSchedules(BranchId, LoanId);
 
-        if (!isAllowMultiplePayment)
-        {
-            isSelectionLocked = true;
-        }
-        else
-        {
-            isSelectionLocked = false;
-        }
+        _isSelectionLocked = !isAllowMultiplePayment;
 
         await base.OnInitializedAsync();
     }
 
 
-    bool _showExhanged = false;
-    void ShowChanged()
+    bool _showExchanged = false;
+
+    void ToggleExchangeChanged()
     {
-        if (_isPaymentTab)
+        if (_isPaymentTab && _showExchanged)
         {
-            _showExhanged = true;
+            _showExchanged = true;
         }
         else
         {
-            _showExhanged = false;
+            _showExchanged = false;
         }
     }
 
@@ -173,10 +146,11 @@ public partial class PaymentSchedule
             isPaidNow = false;
         }
 
+        _showExchanged = false;
 
         await GetLoanWithSchedules(BranchId, LoanId);
 
-        loanPaymentLine = new();
+        _loanPaymentLine = new();
     }
 
 
@@ -258,13 +232,13 @@ public partial class PaymentSchedule
             CreditAgentRefId = CreditAgentId,
             BranchRefId = BranchId,
             CurrencyRefId = CurrencyId,
-            UserRefId = UserId,
+            UserRefId = _userId,
             PayDate = DateTime.Now,
             CustomerName = LoanSchedule!.AltName,
-            OfficialReceiptNo = loanPaymentLine.OfficialReceiptNo
+            OfficialReceiptNo = _loanPaymentLine.OfficialReceiptNo
         };
 
-        loanPayment.LoanPaymentLines.Add(loanPaymentLine);
+        loanPayment.LoanPaymentLines.Add(_loanPaymentLine);
 
         _isPaymentTab = true;
 
@@ -336,7 +310,7 @@ public partial class PaymentSchedule
             PayDate = DateTime.Now,
             OfficialReceiptNo = "",
             BranchRefId = BranchId,
-            UserRefId = UserId,
+            UserRefId = _userId,
             CurrencyRefId = CurrencyId,
             CustomerName = LoanSchedule!.AltName
         };
@@ -386,13 +360,13 @@ public partial class PaymentSchedule
     }
 
 
-    void CheckPaymentChanged(bool arg)
+    async Task CheckPaymentChanged(bool arg)
     {
 
         if (!arg)
         {
 
-            loanPaymentLine = new();
+            _loanPaymentLine = new();
 
             isPaidNow = false;
 
@@ -400,7 +374,7 @@ public partial class PaymentSchedule
             {
                 _isPaymentTab = false;
 
-                _selectedIndexTab = 0;  
+                _selectedIndexTab = 0;
             }
 
             return;
@@ -434,9 +408,14 @@ public partial class PaymentSchedule
 
         if (total > 0)
         {
-            //recievePayment = SelectedSchedule!.ToPaymentDtoCreate();
+            _loanPaymentLine = SelectedSchedule.MapToLoanPaymentLine();
 
-            loanPaymentLine = SelectedSchedule.MapToLoanPaymentLine();
+            var rsp = await _addRecieptNumberUseCase.ExecuteAsync();
+
+            if (rsp.IsSuccess)
+            {
+                _loanPaymentLine.OfficialReceiptNo = rsp.Data!;
+            }
 
             btnDisabled = false;
         }

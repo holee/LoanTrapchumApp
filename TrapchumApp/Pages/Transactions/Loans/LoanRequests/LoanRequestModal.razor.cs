@@ -1,6 +1,6 @@
 using Applications.Extensions.mappers;
-using Applications.Requests.Lists.Entities;
-using Applications.Requests.Loans.LoanRequests;
+using Applications.Features.Entities;
+using Applications.Features.LoanRequests.Requests;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Auths;
 using Applications.Responses.ViewModels.Branches;

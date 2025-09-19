@@ -1,5 +1,5 @@
+using Applications.Features.Products.Requests;
 using Applications.Interfaces.Loans;
-using Applications.Requests.Loans.Products;
 using Microsoft.AspNetCore.Components;
 
 namespace TrapchumApp.Pages.Transactions.Loans.LoanProducts

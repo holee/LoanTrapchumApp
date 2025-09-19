@@ -3,16 +3,16 @@
 @using Applications.Features.Currencies
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Services
+@using Applications.Features.LoanRequests.Interfaces
 @using TrapchumApp.Services
 <RadzenPanelMenuItem Text="Branches" Icon="auto_awesome">
     <RadzenPanelMenuItem Text="Open/Close Branch"
                          Icon="lock_open_right"
-                         Path="@($"/Branches/{BranchId}/OpenBranch?UserId={UserId}")" />
+                         Path="@($"/Branches/{BranchId}/OpenBranch")" />
     <RadzenPanelMenuItem Text="Cash Valutl In/Out"
                          Icon="check_in_out"
                          Visible="@IsBranchOpen"
-                         Path="@($"/App/Branches/{BranchId}/CashVault?UserId={UserId}")" />
+                         Path="@($"/App/Branches/{BranchId}/CashVault")" />
 </RadzenPanelMenuItem>
 <RadzenPanelMenuItem Text="Accounts" Icon="deployed_code_account" Visible="IsBranchOpen">
     <RadzenPanelMenuItem Text="Ledger" Icon="finance" Path="@($"/App/Account/Ledgers/{BranchId}/Branches")" />
@@ -25,7 +25,7 @@
     <RadzenPanelMenuItem Text="Payment Voucher" Icon="source_environment" />
 </RadzenPanelMenuItem>
 <RadzenPanelMenuItem Text="Payroll" Icon="deployed_code_account" Visible="IsBranchOpen">
-    <RadzenPanelMenuItem Text="Employee" Icon="finance" />
+    <RadzenPanelMenuItem Text="Employee" Icon="finance" Path="/app/employee" />
     <RadzenPanelMenuItem Text="Taxation" Icon="data_table" />
     <RadzenPanelMenuItem Text="E-Filing" Icon="source_environment" />
 </RadzenPanelMenuItem>

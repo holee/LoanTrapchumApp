@@ -1,8 +1,8 @@
-﻿using Applications.Requests.Lists.Addreses;
-using Applications.Requests.Lists.OtherNames;
+﻿using Applications.Features.Addresses.Requests;
+using Applications.Features.Addresses.Responses;
+using Applications.Features.OtherNames;
 using Applications.Responses.Lists.Entities;
 using Applications.Services.Lists;
-using Applications.Services.LIsts;
 using Domains.Models.Addresses;
 using Domains.Models.Lists;
 using Microsoft.AspNetCore.Components;

@@ -1,12 +1,8 @@
-﻿using Applications.Requests.Loans.LoanRequests;
-using Applications.Responses.ViewModels.Loans.Requests;
+﻿using System;
+using System.Collections.Generic;
+using Applications.Features.LoanRequests.Requests;
 using Domains.Models.Lists;
 using Domains.Models.Loans;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Applications.Commons.Mappers
 {
@@ -40,7 +36,7 @@ namespace Applications.Commons.Mappers
            
         }
 
-        public static List<LoanGuarantorLink> MapToGuarantorCreate(this LoanRequestGuarantorsDtoCreate source) 
+        public static List<LoanGuarantorLink> MapToGuarantorCreate(this LoanRequestGuarantorsDtoCreate? source) 
         {
             if (source is not null && source.GuarantorsLink.Any())
             {

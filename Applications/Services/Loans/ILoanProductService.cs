@@ -1,5 +1,5 @@
-﻿using Applications.Interfaces.Loans;
-using Applications.Requests.Loans.Products;
+﻿using Applications.Features.Products.Requests;
+using Applications.Interfaces.Loans;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Products;

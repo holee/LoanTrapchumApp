@@ -1,5 +1,5 @@
+using Applications.Features.Currencies;
 using Applications.Interfaces.Currencies;
-using Applications.Requests.Lists.Currency;
 using Microsoft.AspNetCore.Components.Forms;
 
 namespace TrapchumApp.Pages.Currencies

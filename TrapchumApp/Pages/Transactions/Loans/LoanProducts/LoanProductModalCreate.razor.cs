@@ -1,6 +1,6 @@
 using Applications.Extensions.mappers;
+using Applications.Features.Products.Requests;
 using Applications.Interfaces.Currencies;
-using Applications.Requests.Loans.Products;
 using Applications.Responses.Lists.Currency;
 using Applications.Services.Loans;
 using Radzen;

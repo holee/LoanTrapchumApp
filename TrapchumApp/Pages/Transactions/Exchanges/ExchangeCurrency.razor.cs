@@ -1,6 +1,6 @@
 using Applications.Enumerations;
+using Applications.Features.Currencies.Responses;
 using Applications.Interfaces.Currencies;
-using Applications.Responses.ViewModels.Currencies;
 
 namespace TrapchumApp.Pages.Transactions.Exchanges
 {

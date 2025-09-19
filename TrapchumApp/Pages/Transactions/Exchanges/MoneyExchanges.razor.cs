@@ -1,11 +1,11 @@
 using Applications.Extensions.Maths;
 using Applications.Extensions.NumberExtensions;
+using Applications.Features.Currencies;
+using Applications.Features.Currencies.Responses;
+using Applications.Features.Transactions.ForiegnExchanges;
 using Applications.Interfaces.Currencies;
 using Applications.Interfaces.setting;
 using Applications.Interfaces.Transactions;
-using Applications.Requests.Lists.Currency;
-using Applications.Requests.Transactions.ForiegnExchanges;
-using Applications.Responses.ViewModels.Currencies;
 using Applications.Responses.ViewModels.Options;
 using Domains.Models.Settings;
 using Domains.Models.Transaction;

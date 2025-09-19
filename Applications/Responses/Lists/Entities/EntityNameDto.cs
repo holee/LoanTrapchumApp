@@ -1,10 +1,9 @@
-﻿using Applications.Requests.Lists.Addreses;
-using Applications.Responses.Lists.Addreses;
+﻿using Applications.Responses.Lists.Addreses;
 using Domains.Models.Bases;
 
 namespace Applications.Responses.Lists.Entities;
 
-public class EntityNameDto:BaseEntity
+public class EntityNameDto:BaseEntity 
 {
     public long EntId { get; set; }
     public string? Name { get; set; }

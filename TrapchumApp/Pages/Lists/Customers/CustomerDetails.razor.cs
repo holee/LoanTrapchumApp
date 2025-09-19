@@ -2,11 +2,12 @@
 using Applications.Extensions.Web;
 using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.ViewModels.Customers;
-using Applications.Services.LIsts;
 using Radzen.Blazor;
 using TrapchumApp.Pages.Lists.Collaterals;
 using Domains.Models.Identity;
 using Applications.Features.Customers.Services;
+using Applications.Services.Lists;
+using Applications.Services.Lists;
 
 namespace TrapchumApp.Pages.Lists.Customers
 {

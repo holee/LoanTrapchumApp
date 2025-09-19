@@ -1,4 +1,4 @@
-using Applications.Requests.Lists.Collaterals;
+using Applications.Features.Collaterals.Requests;
 using Domains.Models.Collaterals;
 
 namespace Applications.Features.Collaterals.Mapper;

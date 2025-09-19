@@ -16,8 +16,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         [CascadingParameter]
         Task<AuthenticationState> AuthenticationState { get; set; } = default!;
         [Parameter] public int BranchId { get; set; } = 0;
-        [Parameter, SupplyParameterFromQuery] public string? UserId { get; set; }
-
+        private string? _userId = string.Empty;
         IEnumerable<VLoanRequests> LoanRequests = [];
         int counts = 0;
         string uri = "";
@@ -33,11 +32,9 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         bool CanDisburseLoan = false;
         bool CanAprovedLoan = false;
         int status = 0;
-
         bool IsAccount = false;
         bool IsCreditAgent = false;
         bool IsManager = false;
-
         void SelectedIndexChanged(int selectedIndex)
         {
 
@@ -59,7 +56,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             createRequestUrl = new Dictionary<string, object?>
         {
             {"BranchId",BranchId},
-            {"UserId",UserId},
+            {"UserId",_userId},
             { "ActionMode",ActionMode.Create}
         }.AddQueryString($"/Loan/Customer/Request");
             base.OnParametersSet();
@@ -92,12 +89,12 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             //int statusId = 0;
             if (CanRequestLoan)
             {
-                creditAgentId = UserId;
+                creditAgentId = _userId;
                 //aproveUserId = 0;
             }
             if (CanAprovedLoan)
             {
-                aproveUserId = UserId;
+                aproveUserId = _userId;
                // creditAgentId = 0;
             }
 
@@ -110,7 +107,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
             var param = new QueryParam(pageIndex, pageSize, sortColumn, sortDescending, isIncludeInactive, filtertext);
 
-            var rsp = await _loanRequestService.GetLoanRequestsAsync(UserId, BranchId, RequestStatus.All, param);
+            var rsp = await _loanRequestService.GetLoanRequestsAsync(_userId, BranchId, RequestStatus.All, param);
 
             LoanRequests = rsp.Items;
 
@@ -127,7 +124,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             createRequestUrl = new Dictionary<string, object?>
                 {
                     {"BranchId",BranchId},
-                    {"UserId",UserId}
+                    {"UserId",_userId}
                 }.AddQueryString($"/Loan/0/Customer/0/Request");
             NavigationManager.NavigateTo(createRequestUrl);
         }
@@ -181,12 +178,12 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
         void CheckLoanRequest(VLoanRequests req)
         {
-            NavigationManager.NavigateTo($"/Loan/{req.CustomerId}/Request/{req.LoanRequestId}?BranchId={req.BranchId}&UserId={UserId}");
+            NavigationManager.NavigateTo($"/Loan/{req.CustomerId}/Request/{req.LoanRequestId}?BranchId={req.BranchId}&UserId={_userId}");
         }
 
         void LoanDisbursment(long? CustomerId, long? loanRequestId)
         {
-            NavigationManager.NavigateTo($"/Loan/Disbursement/CreateNewUser?BranchId={BranchId}&UserId={UserId}&CustomerRequestId={CustomerId}&LoanRequestId={loanRequestId}");
+            NavigationManager.NavigateTo($"/Loan/Disbursement/CreateNewUser?BranchId={BranchId}&UserId={_userId}&CustomerRequestId={CustomerId}&LoanRequestId={loanRequestId}");
         }
 
 

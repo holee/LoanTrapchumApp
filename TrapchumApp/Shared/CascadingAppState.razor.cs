@@ -21,10 +21,9 @@ namespace TrapchumApp.Shared
         private bool _canApproved;
         private bool _canRequest;
         private bool _vaultIn;
-
         private int _branchId;
         private string? _userId;
-
+        private string? _employeeId;
         public bool VaultIn
         {
             get { return _vaultIn; }
@@ -43,6 +42,7 @@ namespace TrapchumApp.Shared
             set
             {
                 _vaultOut = value;
+
                 StateHasChanged();
             }
         }
@@ -66,6 +66,7 @@ namespace TrapchumApp.Shared
             set
             {
                 _isAdmin = value;
+
                 StateHasChanged();
             }
         }
@@ -276,11 +277,11 @@ namespace TrapchumApp.Shared
 
         internal async Task GetUserId()
         {
-            var authState = await AuthenticationState;  
+            var authState = await AuthenticationState;
 
             var user = authState.User;
 
-            if(user.Identity?.IsAuthenticated == true)
+            if (user.Identity?.IsAuthenticated == true)
             {
                 _userId = user.GetId();
             }
@@ -290,7 +291,29 @@ namespace TrapchumApp.Shared
             }
         }
 
-        internal async Task GetBranchIdByUser()  
+
+        internal async Task<string?> GetEmployeeId()
+        {
+            var authState = await AuthenticationState;
+
+            var user = authState.User;
+
+            if (user.Identity?.IsAuthenticated == true)
+            {
+
+                var rsp =await _userService.GetUserByIdAsync(user.GetId());
+
+                _employeeId = rsp.Data?.EmployeeRefId;
+            }
+            else
+            {
+                _employeeId = string.Empty;
+            }
+
+            return _employeeId;
+        }
+
+        internal async Task GetBranchIdByUser()
         {
             var authState = await AuthenticationState;
 
@@ -300,15 +323,15 @@ namespace TrapchumApp.Shared
             {
                 _userId = user.GetId();
 
-               var rsp= await _branchService.GetBranchesByUser(_userId!);
+                var rsp = await _branchService.GetBranchesByUser(_userId!);
 
-               if(rsp.IsSuccess && rsp.Data is not null)
-               {
-                       _branchId = rsp.Data.BranchId;
-               }
-               else
-               {
-                   _branchId = 0;
+                if (rsp.IsSuccess && rsp.Data is not null)
+                {
+                    _branchId = rsp.Data.BranchId;
+                }
+                else
+                {
+                    _branchId = 0;
                 }
             }
             else

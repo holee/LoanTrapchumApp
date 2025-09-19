@@ -1,11 +1,7 @@
-﻿using Applications.Requests.Lists.OtherNames;
-using Domains.Models.Lists.Customers;
-using Domains.Models.Lists.Vendors;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Domains.Models.Lists.Vendors;
+using Applications.Features.OtherNames;
+using Domains.Models.Lists;
+
 
 namespace Applications.Commons.Mappers
 {

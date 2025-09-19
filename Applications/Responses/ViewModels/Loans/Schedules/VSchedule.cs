@@ -1,5 +1,4 @@
-﻿using Applications.Requests.Loans.Payments;
-using Applications.Responses.Paginations;
+﻿using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Payments;
 using System.ComponentModel.DataAnnotations.Schema;
 

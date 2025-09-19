@@ -1,4 +1,4 @@
-﻿using Applications.Requests.Lists.Collaterals;
+﻿using Applications.Features.Collaterals.Requests;
 using FluentValidation;
 
 namespace Applications.Features.Customers.Validations;

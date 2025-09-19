@@ -3,7 +3,7 @@
 @using Applications.Features.Currencies
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Services
+@using Applications.Features.LoanRequests.Interfaces
 @using Applications.Responses.ViewModels.Loans
 @using Microsoft.AspNetCore.Components.Web
 @using TrapchumApp.Services
@@ -20,6 +20,7 @@
     </RightChildren>
 </GridToolbar>
 <RadzenDataGrid Data="LoanItems"
+                TItem="VLoanDisbursments"
                 Count="@counts"
                 PageSize="pageSize"
                 Density="Density.Compact"
@@ -33,6 +34,7 @@
                 IsLoading="@isLoading"
                 AllowRowSelectOnRowClick="true"
                 PageSizeChanged="@ChangedPageSize"
+                RowSelect="@OnRowSelected"
                 PageSizeOptions="@StorageConstant.PageSizeOptions"
                 AllowPaging="true">
     <Columns>
@@ -121,10 +123,17 @@
                               TextAlign="TextAlign.Center"
                               Sortable="true">
             <Template>
-                <RadzenButton Size="ButtonSize.ExtraSmall"
-                              Icon="more_vert"
-                              Variant="Variant.Text"
-                              Click="@((args)=>ShowContextMenuWithContent(args,p))" />
+                @if(ChildMenu is not null)
+                {
+                    @ChildMenu
+                }
+                else
+                {
+                    <RadzenButton Size="ButtonSize.ExtraSmall"
+                                  Icon="more_vert"
+                                  Variant="Variant.Text"
+                                  Click="@((args)=>ShowContextMenuWithContent(args,p))" />
+                }
             </Template>
         </RadzenDataGridColumn>
     </Columns>
@@ -136,6 +145,8 @@
 </RadzenDataGrid>
 
 @code {
+
+    [Parameter] public RenderFragment? ChildMenu { get; set; } = default!;
 
     void ShowContextMenuWithContent(MouseEventArgs args, VLoanDisbursments p)
     {
@@ -160,5 +171,12 @@
                     Text="Export Loan to Pdf" />
 </RadzenMenu>
     );
+    }
+
+
+
+    void OnRowSelected(VLoanDisbursments arg)
+    {
+        
     }
 }

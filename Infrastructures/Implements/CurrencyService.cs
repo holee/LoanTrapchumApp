@@ -1,10 +1,8 @@
 ﻿using Applications.Extensions;
 using Applications.Interfaces.Currencies;
-using Applications.Requests.Lists.Currency;
 using Applications.Responses;
 using Applications.Responses.Message;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Currencies;
 using Dapper;
 using Domains.Models.Currencies;
 using Infrastructures.Constants.Procedures;
@@ -12,6 +10,8 @@ using Infrastructures.DataAccess;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
+using Applications.Features.Currencies;
+using Applications.Features.Currencies.Responses;
 
 namespace Infrastructures.Implements;
 
@@ -150,12 +150,12 @@ public class CurrencyService : ICurrencyService
         return currency ?? default!;
     }
 
-    public async Task<Result<Pager<VCurrencyNotes>>> GetCurrencyNotes(QueryParam param)
+    public async Task<Result<Pager<VCurrencyCounter>>> GetCurrencyNotes(QueryParam param)
     {
         using var context = await _contextFactory.CreateDbContextAsync();
 
-        IQueryable<VCurrencyNotes> queries = context.Database
-            .SqlQuery<VCurrencyNotes>(@$"SELECT * FROM VCurrencyNotes")
+        IQueryable<VCurrencyCounter> queries = context.Database
+            .SqlQuery<VCurrencyCounter>(@$"SELECT * FROM VCurrencyNotes")
             .WhereIf(!param.IsIncludeInActive, x => x.IsActive == true);
 
         if (!string.IsNullOrEmpty(param.Filter))
@@ -170,7 +170,7 @@ public class CurrencyService : ICurrencyService
 
         if (!queries.Any())
         {
-            return Result.Failure<Pager<VCurrencyNotes>>(ErrorResponse.NotFound("No Data Found"));
+            return Result.Failure<Pager<VCurrencyCounter>>(ErrorResponse.NotFound("No Data Found"));
         }
 
         queries = queries.Skip(param.Skip).Take(param.PageSize);
@@ -179,16 +179,16 @@ public class CurrencyService : ICurrencyService
 
         var items = await queries.AsNoTracking().ToListAsync();
 
-        var pager = new Pager<VCurrencyNotes>(items, counts);
+        var pager = new Pager<VCurrencyCounter>(items, counts);
 
         return Result.Success(pager);
     }
 
-    public async Task<Result<Pager<VCurrencyNotes>>> GetCurrencyNotes(int? currencyId, QueryParam param)
+    public async Task<Result<Pager<VCurrencyCounter>>> GetCurrencyNotes(int? currencyId, QueryParam param)
     {
         using var context = await _contextFactory.CreateDbContextAsync();
 
-        IQueryable<VCurrencyNotes> queries = context.VCurrencyNotes
+        IQueryable<VCurrencyCounter> queries = context.VCurrencyNotes
             .Where(x => x.CurrencyRefId == currencyId);
 
         if (param.IsIncludeInActive)
@@ -212,7 +212,7 @@ public class CurrencyService : ICurrencyService
 
         var items = await queries.AsNoTracking().ToListAsync();
 
-        var pager = new Pager<VCurrencyNotes>(items, counts);
+        var pager = new Pager<VCurrencyCounter>(items, counts);
 
         return Result.Success(pager);
     }
@@ -355,44 +355,44 @@ public class CurrencyService : ICurrencyService
         }
     }
 
-    public async Task<Result<IEnumerable<VCurrencyNotes>>> GetCurrencyNotes(int? branchId)
+    public async Task<Result<IEnumerable<VCurrencyCounter>>> GetCurrencyNotes(int? branchId)
     {
         using var context = await _contextFactory.CreateDbContextAsync();
 
-        var queries = context.Database.SqlQuery<VCurrencyNotes>($"SELECT * FROM fGetCurrencyNotesByBranch({branchId})");
+        var queries = context.Database.SqlQuery<VCurrencyCounter>($"SELECT * FROM fGetCurrencyNotesByBranch({branchId})");
         if (!queries.Any())
         {
-            return Result.Failure<IEnumerable<VCurrencyNotes>>(ErrorResponse.NotFound("No Data Found."));
+            return Result.Failure<IEnumerable<VCurrencyCounter>>(ErrorResponse.NotFound("No Data Found."));
         }
 
         var items = await queries.AsNoTracking().ToListAsync();
 
-        return Result.Success<IEnumerable<VCurrencyNotes>>(items);
+        return Result.Success<IEnumerable<VCurrencyCounter>>(items);
     }
 
-    public async Task<Result<IEnumerable<VCurrencyNotes>>> GetCurrencyNotes(int? currencyId, int? branchId)
+    public async Task<Result<IEnumerable<VCurrencyCounter>>> GetCurrencyNotes(int? currencyId, int? branchId)
     {
         using var db=await _connectionFactory.CreateConnectionAsync();
 
 
-        var queries =await db.QueryAsync<VCurrencyNotes>(ProcedureConstant.GetCurrencyNotes, 
+        var queries =await db.QueryAsync<VCurrencyCounter>(ProcedureConstant.GetCurrencyNotes, 
                                         new { currencyId, branchId },
                                         commandType:CommandType.StoredProcedure);
         if (!queries.Any())
         {
-            return Result.Failure<IEnumerable<VCurrencyNotes>>(ErrorResponse.NotFound("No Data was found"));
+            return Result.Failure<IEnumerable<VCurrencyCounter>>(ErrorResponse.NotFound("No Data was found"));
         }
 
-        return Result.Success<IEnumerable<VCurrencyNotes>>(queries);
+        return Result.Success<IEnumerable<VCurrencyCounter>>(queries);
     }
 
 
-    public async Task<IEnumerable<VCurrencyNotes>> GetCurrecyNotesss(int? branchRefId)
+    public async Task<IEnumerable<VCurrencyCounter>> GetCurrecyNotesss(int? branchRefId)
     {
         using var context = await _contextFactory.CreateDbContextAsync();
 
         var currencyNotes =
-            context.Database.SqlQuery<VCurrencyNotes>($"EXEC sprGetCurrencyNotes @branchId={branchRefId}");
+            context.Database.SqlQuery<VCurrencyCounter>($"EXEC sprGetCurrencyNotes @branchId={branchRefId}");
 
         return await currencyNotes.AsNoTracking().ToListAsync();
     }

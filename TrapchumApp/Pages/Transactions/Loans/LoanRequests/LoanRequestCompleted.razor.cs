@@ -1,7 +1,7 @@
 using Applications.Enumerations;
 using Applications.Extensions.Identity.Policies;
 using Applications.Extensions.Web;
-using Applications.Features.LoanRequests.Services;
+using Applications.Features.LoanRequests.Interfaces;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Microsoft.AspNetCore.Authorization;

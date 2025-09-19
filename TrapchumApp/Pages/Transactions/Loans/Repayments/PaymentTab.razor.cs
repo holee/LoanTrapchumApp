@@ -2,12 +2,12 @@ using Applications.Commons.Extensions;
 using Applications.Enumerations;
 using Applications.Extensions.NumberExtensions;
 using Applications.Features.Settings.UseCases;
-using Applications.Requests.Loans.Payments;
-using Applications.Requests.Transactions.LoanTransactions;
 using Applications.Services.Loans;
 using Domains.Models.Identity;
 using Microsoft.JSInterop;
 using System.Threading.Tasks;
+using Applications.Features.LoanPayments.Requests;
+using Applications.Features.Transactions.LoanTransactions;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments;
 public partial class PaymentTab

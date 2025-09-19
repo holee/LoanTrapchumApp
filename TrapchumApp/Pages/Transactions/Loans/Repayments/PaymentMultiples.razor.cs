@@ -1,5 +1,5 @@
 using Applications.Commons.Mappers;
-using Applications.Requests.Loans.Payments;
+using Applications.Features.LoanPayments.Requests;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Radzen.Blazor;
 
@@ -10,7 +10,7 @@ public partial class PaymentMultiples
     [Parameter] public LoanPaymentDtoCreate? LoanPayment { set; get; } = new();
     [Parameter] public int? CurrencyId { get; set; } = 1;
 
-    RadzenDataGrid<VSchedule> gridPopup = default!;
+    RadzenDataGrid<VSchedule> gridPopup = default!; 
 
     private List<VSchedule> _schedules = [];
 

@@ -1,29 +1,44 @@
+using Applications.Commons.Extensions;
 using Applications.Enumerations;
-using Applications.Features.Currencies;
-using Applications.Requests.Lists.Entities;
-using Applications.Requests.Transactions.CashManagements;
+using Applications.Features.CashManagements.Extensions;
+using Applications.Features.CashManagements.Interfaces;
+using Applications.Features.CashManagements.Responses;
+using Applications.Features.CashManagements.UseCases;
+using Applications.Features.Currencies.Responses;
+using Applications.Features.Entities;
+using Applications.Features.Transactions.CashManagements;
 using Applications.Responses.Lists.Currency;
-using Applications.Responses.ViewModels.Currencies;
 using Applications.Services.Transactions.Branches;
-using Domains.Models.Transaction;
-using Mapster;
-using Microsoft.AspNetCore.Components;
-using Radzen;
-
+using Domains.Enumerations;
+using TrapchumApp.Helpers.Extensions;
+using Applications.Features.Currencies.Extensions;
 namespace TrapchumApp.Pages.Transactions.Branches
 {
-    public partial class VaultOutModal(ICurrencyServiceImpl curService, ICashVaultServiceImpl caVaultService)
+    public partial class VaultOutModal
     {
+        private readonly ICashVaultServiceImpl _caVaultService;
+        private readonly IStartVaultOutUseCase _startVaultOut;
+        private readonly IGetCashVaultUseCase _getCashVault;
+        public VaultOutModal(ICashVaultServiceImpl caVaultService, IStartVaultOutUseCase startVaultOut, IGetCashVaultUseCase getCashVault)
+        {
+            _caVaultService = caVaultService;
+            _startVaultOut = startVaultOut;
+            _getCashVault = getCashVault;
+        }
+
         [Parameter] public int BranchId { get; set; }
-        [Parameter] public string? UserId { get; set; }
+        [Parameter] public int BankId { get; set; } = 11;
+        [CascadingParameter] Task<AuthenticationState> AuthState { get; set; } = default!;
 
-        private IEnumerable<VCashVaults>? vCashVaults;
+        private string? _userId = string.Empty;
 
-        private IEnumerable<ViewModelCurrencyNotes>? CurrencyNotes;
+        private IEnumerable<VCashVaults>? vCashVaults = [];
+
+        private IEnumerable<VCurrencyNotes>? CurrencyNotes = [];
 
         private VCashVaults? vCashVault;
 
-        private TransactionCashVaultDtoCreate transaction = new TransactionCashVaultDtoCreate();
+        private TrnxCashVaultDtoCreate transaction = new TrnxCashVaultDtoCreate();
 
         private List<CashManagementDetailDtoCreate> cashMDList = [];
 
@@ -42,10 +57,14 @@ namespace TrapchumApp.Pages.Transactions.Branches
         private bool visible = false;
         private IEnumerable<CurrencyResponse>? CurrencyList { get; set; }
         private CurrencyResponse? Currency { get; set; } = new CurrencyResponse();
-
         protected override async Task OnInitializedAsync()
         {
-            var rsp = await curService!.GetCurrencies<CurrencyResponse>(0);
+
+            var auth = await AuthState;
+
+            _userId = auth.GetUserId();
+
+            var rsp = await _curService.GetCurrencies<CurrencyResponse>(0);
 
             if (rsp.IsSuccess)
             {
@@ -56,11 +75,11 @@ namespace TrapchumApp.Pages.Transactions.Branches
 
             CurrencyId = (int?)CurrenciesType.Khr;
 
-            var resultResp = await caVaultService!.GetCurrencyNotesAsync(BranchId);
+            var noteResp = await _caVaultService!.GetCurrencyNotesAsync(BranchId);
 
-            if (resultResp.Any())
+            if (noteResp.Any())
             {
-                CurrencyNotes = resultResp ?? [];
+                CurrencyNotes = noteResp ?? [];
 
                 OnGetCurrencyNote(CurrencyId);
             }
@@ -69,7 +88,6 @@ namespace TrapchumApp.Pages.Transactions.Branches
         }
 
         string sp = "#,#0";
-
         private async Task OnSelectChanges(object? arg)
         {
             try
@@ -78,7 +96,7 @@ namespace TrapchumApp.Pages.Transactions.Branches
                 {
                     var id = ((CurrencyResponse)arg)?.CurrencyId;
 
-                    CurrencyId= id;
+                    CurrencyId = id;
 
                     Currency = ((CurrencyResponse)arg!);
 
@@ -88,9 +106,9 @@ namespace TrapchumApp.Pages.Transactions.Branches
 
                     total = 0;
 
-                    var currency = await curService.GetCurrencyById(id);
+                    var currency = await _curService.GetCurrencyById(id);
 
-                    sp = Currency?.CurrencyCode == "KHR" ? "#,#0" : "#,#0.00";
+                    sp = Currency?.CurrencyCode == CurrencyEnum.KHR.ToString() ? "#,#0" : "#,#0.00";
                 }
 
                 NewCashMDVOut = new();
@@ -109,19 +127,7 @@ namespace TrapchumApp.Pages.Transactions.Branches
         {
             if (CurrencyId.HasValue)
             {
-                cashMDList = CurrencyNotes!.Where(x => x.CurrencyRefId == currencyId).Select(x =>
-                    new CashManagementDetailDtoCreate
-                    {
-                        BranchRefId = BranchId,
-                        BankRefId = branch?.BankRefId,
-                        CurrencyRefId = x.CurrencyRefId,
-                        CurrencyRefName = x.CurrencyCode,
-                        CurrencyNoteRefId = x.Id,
-                        CurrencyNoteValue = (int?)x.CurrencyValue,
-                        QOnHand = x.Quantity == null ? 0 : x.Quantity,
-                        TotalValue = 0
-                    }).ToList();
-                    //.Where(x => x.QOnHand > 0).ToList();
+                cashMDList = CurrencyNotes!.ToCashManagementDetail(currencyId, BranchId, BankId);
             }
             StateHasChanged();
         }
@@ -129,105 +135,77 @@ namespace TrapchumApp.Pages.Transactions.Branches
 
         async Task GetCashVaults()
         {
-            var cashVaultResp = await caVaultService.GetCashVaultsAsync(BranchId);
+            var rsp = await _getCashVault.ExecuteAsync(BranchId);
 
-            if (cashVaultResp.IsSuccess)
+            if (rsp.IsSuccess)
             {
-                vCashVaults = cashVaultResp.Data ?? [];
+                vCashVaults = rsp.Data ?? [];
             }
         }
 
         protected async Task OnSaveChangesClose()
         {
-            NewCashMDVOut = cashMDList.Select(x => new CashManagementDetailDtoCreate
+
+            NewCashMDVOut = cashMDList.ToCashVaultOut(11, BranchId);
+
+            if (totalAmount <= 0)
             {
-                BranchRefId = branch?.BranchId,
-                BankRefId = branch?.BankRefId,
-                CurrencyRefId = x.CurrencyRefId,
-                CurrencyRefName = x.CurrencyRefName,
-                CurrencyNoteRefId = x.CurrencyNoteRefId,
-                CurrencyNoteValue = x.CurrencyNoteValue,
-                Quantity = x.Quantity,
-                TotalValue = x.TotalValue
-            }).Where(x => x.Quantity!.Value < 0).ToList();
-            try
-            {
-                if (totalAmount > 0)
-                {
-                    await GetCashVaults();
+                NotificationService.Notify(NotificationSeverity.Error, "Vault Out", "Transaction of vault out was failed!");
 
-                    vCashVault = vCashVaults?.Where(x => x.CurrencyRefId == CurrencyId).FirstOrDefault();
-
-                    if (totalAmount <= vCashVault?.VaultBalance)
-                    {
-                        //Valid vault balance
-                        bool confirm = (bool)await DialogService!.Confirm(
-                            $"Are you sure!\n You want to vault out?\n Total amount: {totalAmount}", "Vault Out",
-                            new ConfirmOptions() { OkButtonText = "Okay", CancelButtonText = "Cancel" });
-                        if (confirm)
-                        {
-                            //Transaction 
-                            transaction.TranTypeRefId = 78;
-                            transaction.TransactionTypeName = "CashVault";
-                            transaction.UserRefId = UserId;
-
-                            //Cash vault
-                            transaction.CashVault!.BranchRefId = branch?.BranchId;
-                            transaction.CashVault.BankRefId = branch?.BankRefId;
-                            transaction.CashVault.UserRefId = UserId;
-                            transaction.CashVault.CvStatusRefId = 8;
-                            transaction.CashVault.CvDate = DateTime.Now;
-
-                            //CashManagement 
-                            transaction.CashManagements.Add(new CashManagementDtoCreate
-                            {
-                                BankRefId = branch?.BankRefId,
-                                CurrencyRefId = CurrencyId,
-                                BranchRefId = branch?.BranchId,
-                                Amount = totalAmount,
-                                Balance = totalAmount + vCashVault.UserBalance,
-                                CashStatusRefId = 8,
-                                TransactionDate = DateTime.Now,
-                                BusinessDate = DateTime.Now,
-                                DelegateToStaffRefId = 0,
-                                TmpAmount = 0,
-                                Remark = "VaultOut",
-                                CashManagementDetails = NewCashMDVOut,
-                            });
-
-                            var tranx = transaction.Adapt<LoanTransaction>();
-
-                            var result = await caVaultService.CreateCashVaultAsync(transaction);
-
-                            if (result.IsSuccess)
-                            {
-                                NotificationService.Notify(NotificationSeverity.Success, "Vault Out",
-                                    "Vault out is succeed!");
-                                transaction = new();
-                                DialogService.Close(true);
-                            }
-                            else
-                            {
-                                CurrencyNotes = new List<ViewModelCurrencyNotes>();
-                                NewCashMDVOut = new();
-                                NotificationService.Notify(NotificationSeverity.Success, "Vault Out",
-                                    result.ErrMessage);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        NotificationService.Notify(NotificationSeverity.Success, "Vault Out",
-                            "Amount and vault balance is invalid");
-                    }
-                }
+                return;
             }
-            catch (Exception ex)
-            {
-                NotificationService.Notify(NotificationSeverity.Success, "Vault Out",
-                    "Transaction of vault out was failed!");
 
-                Console.WriteLine(ex.Message);
+
+            await GetCashVaults();
+
+            vCashVault = vCashVaults?.Where(x => x.CurrencyRefId == CurrencyId).FirstOrDefault();
+
+            if (totalAmount > vCashVault?.VaultBalance)
+            {
+                NotificationService.Notify(NotificationSeverity.Error, "Vault Out", "Transaction of vault out was failed!");
+
+                return;
+            }
+
+
+            //Valid vault balance
+            bool confirm = (bool)await DialogService!.Confirm($"Are you sure!\n You want to vault out?\n Total amount: {totalAmount}", "Vault Out", new ConfirmOptions() { OkButtonText = "Okay", CancelButtonText = "Cancel" });
+
+            if (confirm == false) return;
+
+            //Transaction 
+
+            var trnx = TrnxCashVaultDtoCreate.Create(BranchId, (int)TransactionTypes.CSV,
+                                             TransactionTypes.CSV.GetDescription(), 
+                                             _userId, DateTime.Now);
+            //Cash vault
+
+            var cashToVault = CashVaultDtoCreate.Create(BranchId, BankId, _userId, (int)CashStatusEnum.VAULTOUT, DateTime.Now);
+
+            transaction.CashVault = cashToVault;
+
+
+            //CashManagement 
+
+            decimal? balance = totalAmount + vCashVault!.UserBalance;
+
+            var cashMgn = CashManagementDtoCreate.Create(BranchId, BankId, CurrencyId, totalAmount, balance, (int)Applications.Enumerations.CashStatusEnum.VAULTOUT, "VaultOut", NewCashMDVOut);
+
+            transaction.CashManagements.Add(cashMgn);
+
+            var result = await _startVaultOut.ExecuteAsync(transaction);
+
+            if (result.IsSuccess)
+            {
+                NotificationService.Notify(NotificationSeverity.Success, "Vault Out", "Vault out is succeed!");
+                transaction = new();
+                DialogService.Close(true);
+            }
+            else
+            {
+                CurrencyNotes = new List<VCurrencyNotes>();
+                NewCashMDVOut = new();
+                NotificationService.Notify(NotificationSeverity.Error, "Vault Out", result.ErrMessage);
             }
         }
 
@@ -235,123 +213,76 @@ namespace TrapchumApp.Pages.Transactions.Branches
         {
             total = 0;
             totalAmount = 0;
-            CurrencyNotes = new List<ViewModelCurrencyNotes>();
+            CurrencyNotes = [];
             NewCashMDVOut = new();
         }
 
         private async Task OnSaveChanges()
         {
             var confirmOption = new ConfirmOptions() { OkButtonText = "Okay", CancelButtonText = "Cancel" };
+
             var comfirmMessage = $"Are you sure!\n You want to vault out?\n Total amount: {totalAmount}";
-            NewCashMDVOut = cashMDList.Select(x => new CashManagementDetailDtoCreate
+
+            NewCashMDVOut = cashMDList.ToCashVaultOut(BranchId, BankId);
+
+            if (totalAmount <= 0)
             {
-                BranchRefId = branch?.BranchId,
-                BankRefId = branch?.BankRefId,
-                CurrencyRefId = x.CurrencyRefId,
-                CurrencyRefName = x.CurrencyRefName,
-                CurrencyNoteRefId = x.CurrencyNoteRefId,
-                CurrencyNoteValue = x.CurrencyNoteValue,
-                //Quantity = Utility.ToNegative(x.Quantity)
-                // TotalValue = Utility.ToNegative(x.TotalValue)
-            }).Where(x => x.Quantity!.Value < 0).ToList();
-            try
+                NotificationService.Notify(NotificationSeverity.Error, "Vault Out", "Amount and vault balance is invalid");
+
+                return;
+            }
+
+            await GetCashVaults();
+
+            vCashVault = vCashVaults?.Where(x => x.CurrencyRefId == CurrencyId).FirstOrDefault();
+
+            var confirm = await DialogService!.Confirm(comfirmMessage, "Vault Out", confirmOption);
+
+            // Valid vault balance
+            if (totalAmount <= vCashVault?.VaultBalance && confirm == true)
             {
-                if (totalAmount > 0)
+
+                //Transaction 
+
+                transaction = TrnxCashVaultDtoCreate.Create(BranchId, (int)TransactionTypes.CSV, TransactionTypes.CSV.GetDescription(), _userId);
+
+                //Cash vault
+                var cashvault = CashVaultDtoCreate.Create(BranchId, BankId, _userId, (int)CashStatusEnum.VAULTOUT, DateTime.Now);
+
+                transaction.CashVault = cashvault;
+
+                //CashManagement 
+
+                var balance = totalAmount + vCashVault.UserBalance;
+
+                var cashMgn = CashManagementDtoCreate.Create(BranchId, BankId, CurrencyId, totalAmount, balance, (int)CashStatusEnum.VAULTOUT, "VaultOut", NewCashMDVOut);
+
+                transaction.CashManagements.Add(cashMgn);
+
+                var result = await _caVaultService.CreateCashVaultAsync(transaction);
+
+                if (result.IsSuccess == true)
                 {
-                    await GetCashVaults();
+                    NotificationService.Notify(NotificationSeverity.Success, "Vault Out", "Vault out is succeed!");
 
-                    vCashVault = vCashVaults?.Where(x => x.CurrencyRefId == CurrencyId).FirstOrDefault();
+                    transaction = new();
 
-                    if (totalAmount <= vCashVault?.VaultBalance)
-                    {
-                        // Valid vault balance
-                        var confirm = await DialogService!.Confirm(comfirmMessage, "Vault Out", confirmOption);
-                        if (confirm == true)
-                        {
-                            //Transaction 
-                            transaction.TranTypeRefId = 78;
+                    OnClear();
 
-                            transaction.TransactionTypeName = "CashVault";
+                    DialogService.Refresh();
 
-                            transaction.UserRefId = UserId!;
-
-                            //Cash vault
-                            transaction.CashVault.BranchRefId = branch?.BranchId;
-
-                            transaction.CashVault.BankRefId = branch?.BankRefId;
-
-                            transaction.CashVault.UserRefId = UserId;
-
-                            transaction.CashVault.CvStatusRefId = 8;
-
-                            transaction.CashVault.CvDate = DateTime.Now;
-
-                            //CashManagement 
-                            transaction.CashManagements.Add(new CashManagementDtoCreate
-                            {
-                                BankRefId = branch?.BankRefId,
-                                //StaffRefId = UserId,
-                                CurrencyRefId = CurrencyId,
-                                BranchRefId = branch?.BranchId,
-                                Amount = totalAmount,
-                                Balance = totalAmount + vCashVault.UserBalance,
-                                CashStatusRefId = 8,
-                                TransactionDate = DateTime.Now,
-                                BusinessDate = DateTime.Now,
-                                DelegateToStaffRefId = 0,
-                                TmpAmount = 0,
-                                Remark = "VaultOut",
-                                CashManagementDetails = NewCashMDVOut,
-                            });
-
-                            var result = await caVaultService.CreateCashVaultAsync(transaction);
-
-                            if (result.IsSuccess == true)
-                            {
-                                NotificationService.Notify(NotificationSeverity.Success, "Vault Out",
-                                    "Vault out is succeed!");
-
-                                transaction = new();
-                                OnClear();
-                                DialogService.Refresh();
-                                await OnInitializedAsync();
-                            }
-                            else
-                            {
-                                OnClear();
-                                NotificationService.Notify(NotificationSeverity.Success, "Vault Out",
-                                    result.ErrMessage);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        NotificationService.Notify(NotificationSeverity.Success, "Vault Out",
-                            "Amount and vault balance is invalid");
-                    }
+                    await OnInitializedAsync();
+                }
+                else
+                {
+                    OnClear();
+                    NotificationService.Notify(NotificationSeverity.Success, "Vault Out", result.ErrMessage);
                 }
             }
-            catch (Exception ex)
-            {
-                NotificationService.Notify(NotificationSeverity.Success, "Vault Out",
-                    "Transaction of vault out was failed!");
-                Console.WriteLine(ex.Message);
-            }
-        }
 
 
-        void ShowMessage(string message)
-        {
-            if (string.IsNullOrEmpty(message))
-            {
-                visible = false;
-            }
-            else
-            {
-                visible = true;
-                messageAlert = message;
-            }
         }
+
 
         void Calculate()
         {
@@ -359,13 +290,37 @@ namespace TrapchumApp.Pages.Transactions.Branches
             totalAmount = total;
         }
 
-        void SelectedItemChanged(object obj)
-        {
-            if (obj is not null)
-            {
-                var selectedResult = (CurrencyResponse)obj;
-                Console.WriteLine(CurrencyId);
-            }
-        }
     }
 }
+
+
+//Transaction 
+//transaction.TranTypeRefId = (int)TransactionTypes.CSV;// 78;
+//transaction.TransactionTypeName = TransactionTypes.CSV.GetDescription();
+//transaction.UserRefId = _userId;
+
+
+//Cash vault
+//transaction.CashVault!.CashVaultsId = Guid.CreateVersion7().ToString();
+//transaction.CashVault!.BranchRefId = BranchId;
+//transaction.CashVault.BankRefId = 11;
+//transaction.CashVault.UserRefId = _userId;
+//transaction.CashVault.CvStatusRefId = (int)CashStatusEnum.VAULTOUT; //8;
+//transaction.CashVault.CvDate = DateTime.Now;
+
+//CashManagement 
+
+//transaction.CashManagements.Add(new CashManagementDtoCreate
+//{
+//    Id = Guid.CreateVersion7().ToString(),
+//    BankRefId = 11,
+//    CurrencyRefId = CurrencyId,
+//    BranchRefId = BranchId,
+//    Amount = totalAmount,
+//    Balance = totalAmount + vCashVault!.UserBalance,
+//    CashStatusRefId = (int)CashStatusEnum.VAULTOUT,
+//    TransactionDate = DateTime.Now,
+//    BusinessDate = DateTime.Now,
+//    Remark = "VaultOut",
+//    CashManagementDetails = NewCashMDVOut,
+//});

@@ -1,13 +1,11 @@
 using Applications.Features.Customers.Services;
 using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.ViewModels.Customers;
-using Applications.Services.LIsts;
-using Microsoft.AspNetCore.Components;
-using Radzen;
+using Applications.Services.Lists;
 
 namespace TrapchumApp.Pages.Lists.Collaterals
 {
-    public partial class CollateralDetail
+    public partial class CollateralDetail 
     {
         private readonly ICollateralsServiceImpl _collateralsService;
         private readonly CustomerCollateralServices _custCollateralServices;

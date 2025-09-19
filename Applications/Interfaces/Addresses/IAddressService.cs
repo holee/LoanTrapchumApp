@@ -1,4 +1,4 @@
-﻿using Applications.Requests.Lists.Addreses;
+﻿using Applications.Features.Addresses.Responses;
 using Applications.Responses;
 using Domains.Models.Addresses;
 

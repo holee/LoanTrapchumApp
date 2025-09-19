@@ -1,4 +1,4 @@
-﻿using Applications.Requests.Settings;
+﻿using Applications.Features.Settings.Requests;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Settings;
@@ -8,7 +8,7 @@ using Domains.Models.Settings;
 
 namespace Applications.Features.Settings.UseCases
 {
-    public interface ISettingServiceImpl
+    public interface ISettingServiceImpl 
     {
         Task<Result<string>> CreateUserLoanSizeAsync(UserLoanSizeDtoCreate model);
         Task<Result<string>> DeActivateUserLoanSizeAsync(long? id, string userRefId, CancellationToken cancellation = default);

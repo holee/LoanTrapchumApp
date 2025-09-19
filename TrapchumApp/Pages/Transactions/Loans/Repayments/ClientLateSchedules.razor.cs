@@ -13,25 +13,36 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
         {
             _scheduleService = schedulesService;
         }
-
         [Parameter, EditorRequired] public int BranchId { get; set; } = 0;
         [Parameter, EditorRequired] public string? UserId { get; set; } = string.Empty;
         [Parameter] public EventCallback<int> GetCountChanged { get; set; }
+        
+        [Parameter] public EventCallback<VSchedule?> GetScheduleChanged { get; set; } 
+        
         IList<VSchedule> LatePaymentSchedules = [];
+        
         IList<VSchedule> SelectedPaymentSchedules = [];
+        
         bool isLoading = false;
+        
         int counts = 0;
-        int pageSize = 10;
-        int pageIndex = 1;
+        
+        int pageSize = 15;
+        
+        int pageIndex = 0;
+        
         string sortColumn = "LoanId";
+        
         DateTime paymentDate = DateTime.Now;
+        
         string? filterText = "";
+        
         bool sortDescending = false;
-
-
+        
         void GetPaymentSchedules(VSchedule p)
         {
             ContextMenuService.Close();
+            
             NavigationManager.NavigateTo($"/App/Loans/{BranchId}/Branches/{p.LoanId}/Schedules?CreditAgentId={p.CreditAgentId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
         }
 
@@ -42,22 +53,26 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 
         }
 
-        async Task GetCustomerLateSchedules(VSchedule p)
+        async Task GetCustomerLateSchedules(VSchedule? p)
         {
-            ContextMenuService.Close();
-
-            var parameters = new Dictionary<string, object?>{
-                        { "LoanId",p.LoanId },
-                        { "BranchId",BranchId },
-                        { "PaymentDate",paymentDate}
-                    };
-            var sideOptions = new SideDialogOptions() { 
-                Width = "70vw",
-                CloseDialogOnOverlayClick=true,
-                ShowMask = true,
-            };
-
-            await DialogService.OpenSideAsync<LateScheduleDetail>("Late Schedule Detail", parameters, sideOptions);
+            if (p is not null)
+            {
+                await GetScheduleChanged.InvokeAsync(p);
+            }
+            
+            
+            // var parameters = new Dictionary<string, object?>{
+            //             { "LoanId",p.LoanId },
+            //             { "BranchId",BranchId },
+            //             { "PaymentDate",paymentDate}
+            //         };
+            // var sideOptions = new SideDialogOptions() { 
+            //     Width = "70vw",
+            //     CloseDialogOnOverlayClick=true,
+            //     ShowMask = true,
+            // };
+            //
+            // await DialogService.OpenSideAsync<LateScheduleDetail>("Late Schedule Detail", parameters, sideOptions);
 
 
         }
@@ -123,22 +138,20 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 
         private void RowRenderChanged(DataGridCellRenderEventArgs<VSchedule> args)
         {
-
-            if (args.Data.DayArrea >= 1 && args.Data.DayArrea <= 7)
+            switch (args.Data.DayArrea)
             {
-                args.Attributes.Add("style", "background-color: orange; color: #721c24;"); // Light red background for late schedules
-            }
-            else if (args.Data.DayArrea > 7 && args.Data.DayArrea <= 14)
-            {
-                args.Attributes.Add("style", "background-color: orange; color: #856404;"); // Light orange background for schedules with more than 7 days late
-            }
-            else if (args.Data.DayArrea > 14)
-            {
-                args.Attributes.Add("style", "background-color: yellow; color: #856404;"); // Light yellow background for schedules with more than 14 days late
-            }
-            else
-            {
-                args.Attributes.Add("style", "background-color: white; color: black;"); // Default style for non-late schedules
+                case >= 1 and <= 7:
+                    args.Attributes.Add("style", "background-color: orange; color: #721c24;"); // Light red background for late schedules
+                    break;
+                case > 7 and <= 14:
+                    args.Attributes.Add("style", "background-color: orange; color: #856404;"); // Light orange background for schedules with more than 7 days late
+                    break;
+                case > 14:
+                    args.Attributes.Add("style", "background-color: #E9D1FF; color: #856404;"); // Light yellow background for schedules with more than 14 days late
+                    break;
+                default:
+                    args.Attributes.Add("style", "background-color: white; color: black;"); // Default style for non-late schedules
+                    break;
             }
         }
     }

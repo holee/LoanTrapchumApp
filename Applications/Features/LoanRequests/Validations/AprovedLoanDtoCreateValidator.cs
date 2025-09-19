@@ -1,10 +1,10 @@
-﻿using Applications.Requests.Loans.LoanRequests;
-using FluentValidation;
+﻿using FluentValidation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Applications.Features.LoanRequests.Requests;
 
 namespace Applications.Features.LoanRequests.Validations
 {

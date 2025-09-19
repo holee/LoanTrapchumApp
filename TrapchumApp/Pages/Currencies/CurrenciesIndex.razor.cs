@@ -1,6 +1,6 @@
+using Applications.Features.Currencies.Responses;
 using Applications.Interfaces.Currencies;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Currencies;
 using Radzen;
 
 namespace TrapchumApp.Pages.Currencies

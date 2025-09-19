@@ -1,7 +1,4 @@
 using Applications.Extensions;
-using Applications.Requests.Lists.Addreses;
-using Applications.Requests.Lists.OtherNames;
-using Applications.Requests.Settings;
 using Applications.Responses.Lists.Entities;
 using Applications.Services.Files;
 using Applications.Services.Lists;
@@ -10,6 +7,8 @@ using Domains.Models.Files;
 using Domains.Models.Lists;
 using Domains.Shared.Enums;
 using System.Threading.Tasks;
+using Applications.Features.OtherNames;
+using Applications.Features.Settings.Requests;
 
 namespace TrapchumApp.Pages.Lists.Customers
 {

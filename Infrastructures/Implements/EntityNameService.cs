@@ -1,12 +1,12 @@
-﻿using Applications.Interfaces.Lists;
-using Applications.Requests.Lists.Entities;
+﻿using Applications.Features.Entities;
+using Applications.Interfaces.Lists;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.OtherNames;
 using Domains.Models.Lists;
 
 namespace Infrastructures.Implements
 {
-    public class EntityNameService : IEntityNameService
+    public sealed class EntityNameService : IEntityNameService
     {
         public Task<string> AddMarriedStatus(MarritalStatus marrital)
         {

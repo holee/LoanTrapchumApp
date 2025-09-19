@@ -1,6 +1,6 @@
 using Applications.Extensions.mappers;
+using Applications.Features.Currencies;
 using Applications.Interfaces.Currencies;
-using Applications.Requests.Lists.Currency;
 using Applications.Responses.Lists.Currency;
 using Domains.Models.Currencies;
 using Mapster;

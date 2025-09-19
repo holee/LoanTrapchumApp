@@ -1,6 +1,4 @@
-﻿using Applications.Requests.Lists.Collaterals;
-
-namespace Applications.Features.Collaterals.Requests
+﻿namespace Applications.Features.Collaterals.Requests 
 {
     public sealed class CollateralDtoCreate
     {

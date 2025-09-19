@@ -1,5 +1,5 @@
-﻿using Applications.Requests.Lists.Entities;
-using Applications.Requests.Lists.OtherNames;
+﻿using Applications.Features.Entities;
+using Applications.Features.OtherNames;
 using FluentValidation;
 namespace Applications.Validations.NameEntities
 {

@@ -1,4 +1,5 @@
-using Applications.Requests.Lists.Addreses;
+using Applications.Features.Addresses.Requests;
+using Applications.Features.Addresses.Responses;
 using Domains.Models.Addresses;
 
 namespace TrapchumApp.Pages.Lists.Bases;

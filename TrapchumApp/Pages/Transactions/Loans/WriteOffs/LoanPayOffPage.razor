@@ -1,7 +1,19 @@
-﻿@page "/app/loan/pay-off"
+﻿@page "/app/loan/disbursement/pay-off/{branchId:int}"
+@using Applications.Features.LoanRequests.Interfaces
+@using TrapchumApp.Pages.Transactions.Loans.Disbursements
 <PageTitle>Loan Pay Off</PageTitle>
-<h3>LoanPayOffPage</h3>
+<RadzenTabs>
+    <Tabs>
+        <RadzenTabsItem Text="All">
+            <AllLoansTab BranchId="@BranchId" />
+        </RadzenTabsItem>
+        <RadzenTabsItem Text="Some">
 
+        </RadzenTabsItem>
+    </Tabs>
+</RadzenTabs>
 @code {
+
+    [Parameter] public int BranchId{ get; set; }
 
 }

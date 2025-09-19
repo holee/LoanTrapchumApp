@@ -1,5 +1,6 @@
-﻿using Applications.Interfaces.Loans;
-using Applications.Requests.Loans.Categories;
+﻿using Applications.Features.Categories.Requests;
+using Applications.Features.Categories.Requests;
+using Applications.Interfaces.Loans;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Categories;

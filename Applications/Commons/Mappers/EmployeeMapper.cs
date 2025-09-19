@@ -1,4 +1,5 @@
-﻿using Applications.Requests.Lists.OtherNames;
+﻿using Applications.Features.OtherNames;
+using Domains.Models.Lists;
 using Domains.Models.Lists.Employees;
 
 namespace Applications.Commons.Mappers
@@ -58,7 +59,7 @@ namespace Applications.Commons.Mappers
 
 
         public static EntityNames ToEmployeeCreate(this EntityEmployeeCreate dto)
-        {
+        { 
 
             return new EntityNames
             {

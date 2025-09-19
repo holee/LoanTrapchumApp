@@ -1,4 +1,4 @@
-﻿using Applications.Requests.Transactions.Journals;
+﻿using Applications.Features.Transactions.Journals;
 using FluentValidation;
 namespace Applications.Validations.Transactions
 {

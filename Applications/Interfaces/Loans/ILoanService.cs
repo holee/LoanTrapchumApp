@@ -1,6 +1,5 @@
 ﻿using Applications.Enumerations;
-using Applications.Requests.Loans.CreditAgents;
-using Applications.Requests.Loans.Disbursements;
+using Applications.Features.CreditAgents.Requests;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans;

@@ -1,4 +1,5 @@
-﻿using Applications.Requests.Transactions.Journals;
+﻿using Applications.Features.Transactions.Journals;
+using Applications.Features.Transactions.Journals;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Journals;
 using Applications.Responses.ViewModels.Ledgers;

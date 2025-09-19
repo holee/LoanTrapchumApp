@@ -1,6 +1,5 @@
 using Applications.Extensions;
 using Applications.Interfaces.Lists;
-using Applications.Requests.Lists.Entities;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans;
@@ -14,6 +13,8 @@ using Infrastructures.DataAccess;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
+using Applications.Features.Entities;
+using Domains.Models.Lists;
 
 namespace Infrastructures.Implements;
 public class GuarantorService : IGuarantorService

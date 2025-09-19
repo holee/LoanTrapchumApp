@@ -1,5 +1,4 @@
-﻿using Applications.Requests.Lists.Entities;
-using FluentValidation;
+﻿using FluentValidation;
 
 namespace Applications.Requests.Validations
 {

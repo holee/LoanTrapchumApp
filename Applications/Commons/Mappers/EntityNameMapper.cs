@@ -1,4 +1,5 @@
-using Applications.Requests.Lists.OtherNames;
+using Applications.Features.OtherNames;
+using Domains.Models.Lists;
 using Mapster;
 
 namespace Applications.Commons.Mappers;
@@ -32,7 +33,7 @@ public static class EntityNameMapper
     //    entityNamesCreate.CompanyAddress = c.Vendor?.CompanyAddress;
     //    return entityNamesCreate;
     //}
-
+ 
 
     public static EntityEmployeeCreate ToEmployeeCreate(this EntityNames c)  
     {

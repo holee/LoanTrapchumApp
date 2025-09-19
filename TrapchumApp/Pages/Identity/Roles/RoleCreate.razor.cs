@@ -1,5 +1,5 @@
-﻿using Applications.Interfaces.Identity;
-using Applications.Requests.Identity;
+﻿using Applications.Features.Identity.Roles.Requests;
+using Applications.Interfaces.Identity;
 using Applications.Responses.ViewModels.Auths;
 using Applications.Services.Identity;
 

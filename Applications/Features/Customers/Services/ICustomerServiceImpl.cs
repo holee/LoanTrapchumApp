@@ -1,5 +1,4 @@
 ﻿using Applications.Features.Customers.Requests;
-using Applications.Requests.Lists.OtherNames;
 using Applications.Responses;
 using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.Paginations;
@@ -8,13 +7,16 @@ using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Domains.Models.Lists.Customers;
 using System.Linq.Expressions;
+using Applications.Features.OtherNames;
+using Domains.Models.Lists;
+
 namespace Applications.Features.Customers.Services;
 
 public interface ICustomerServiceImpl
 {
     Task<Result<string>> UpdateAsync(EntityCustomerCreate customer, CancellationToken cancellation = default);
     Task<Result<string>> CreateAsync(EntityCustomerCreate entity, CancellationToken cancellation = default);
-    Task<Result<string>> DeleteCustomerAsync(string? customerId);
+    Task<Result<string>> DeleteCustomerAsync(string? customerId); 
     Task<Result<EntityNames>> GetCustomerByIdAsync(string? customerId);
     Task<Result<Customer>> GetCustomerByIdAsync(string? customerId, params string[] includes);
     Task<Result<IEnumerable<VCollateralLines>>> GetCustomerCollateralLines(string? customerId, bool includeInUsed = false);

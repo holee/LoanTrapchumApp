@@ -1,4 +1,4 @@
-﻿using Applications.Requests.Identity;
+﻿using Applications.Features.Identity.Users;
 using Applications.Responses;
 using Applications.Responses.Auths;
 using Applications.Responses.Paginations;
@@ -13,7 +13,7 @@ public interface IUserServiceImpl
     Task<Result<string>> AddOrRemovedUserRolesAsync(List<UserRolesViewModel> useroles, string userId);
     Task<Result<string>> ChangePassword(ChangePasswordDto req, CancellationToken cancellation = default);
     Task<Result<FileModel>> ChangeProfile(string? userId, ProfileDtoCreate req);
-    Task<Result<string>> CreateUserAsync(RegisterRequest model);
+    Task<Result<string>> CreateUserAsync(RegisterRequest model); 
     Task<Result> EditUserAsync(string userId, EditUserDto model);
     Task<Pager<PermissionsVm>> GetPermissionsAsync(QueryParam req);
     Task<Result<VUser>> GetUserByIdAsync(string? userId, CancellationToken cancellation = default);

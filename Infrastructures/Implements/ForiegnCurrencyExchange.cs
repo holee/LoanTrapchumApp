@@ -1,7 +1,7 @@
-﻿using Applications.Interfaces.Transactions;
+﻿using Applications.Features.Currencies.Responses;
+using Applications.Interfaces.Transactions;
 using Applications.Responses;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Currencies;
 using Domains.Models.Transaction;
 using Infrastructures.DataAccess;
 using Microsoft.EntityFrameworkCore;

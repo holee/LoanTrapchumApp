@@ -3,7 +3,7 @@
 @using Applications.Features.Currencies
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Services
+@using Applications.Features.LoanRequests.Interfaces
 @using Applications.Responses.Lists.Collaterals
 @using TrapchumApp.Services
 <EditForm Model="@model" FormName="collateralLineCreate" OnValidSubmit="@HandleFormSubmit">
@@ -19,7 +19,7 @@
                 </RadzenFormField>
             </RadzenColumn>
             <RadzenColumn Size="6">
-                <RadzenFormField Text="Register Date">
+                <RadzenFormField Text="Register Date" class="@Defaults.W100">
                     <RadzenDatePicker class="rz-w-100"
                                       @bind-Value="@model.RegisterDate" />
                 </RadzenFormField>
@@ -131,19 +131,19 @@
         </RadzenRow>
     </RadzenFieldset>
     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
-                 class="@AppValue.MarginT"
+                 class="@Defaults.Mt2"
                  JustifyContent="JustifyContent.End">
         <RadzenButton Icon="@IconNames.Save"
-                      ButtonStyle="@AppValue.Save"
+                      ButtonStyle="@Defaults.Save"
                       ButtonType="ButtonType.Submit"
                       Text="Save"
-                      Size="@AppValue.DefaultButton">
+                      Size="@Defaults.DefaultButton">
         </RadzenButton>
         <RadzenButton Icon="@IconNames.Close"
-                      ButtonStyle="@AppValue.Cancel"
+                      ButtonStyle="@Defaults.Cancel"
                       Text="Close"
                       Click="()=>DialogService.Close(success)"
-                      Size="@AppValue.DefaultButton">
+                      Size="@Defaults.DefaultButton">
         </RadzenButton>
     </RadzenStack>
 </EditForm>

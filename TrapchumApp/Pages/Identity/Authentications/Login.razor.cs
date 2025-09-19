@@ -1,4 +1,3 @@
-using Applications.Requests.Identity;
 using Applications.Services.Identity;
 using Domains.Models.Identity;
 using Microsoft.AspNetCore.Authentication;

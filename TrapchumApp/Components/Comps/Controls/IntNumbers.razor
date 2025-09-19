@@ -1,13 +1,6 @@
 ﻿@using System.Linq.Expressions
-@using Applications.Features.Addresses
-@using Applications.Features.Branches
-@using Applications.Features.Currencies
-@using Applications.Features.Customers.Services
-@using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Services
-@using Microsoft.AspNetCore.Components.Web
-@using TrapchumApp.Services
-@if (string.IsNullOrEmpty(Label))
+@using Applications.Features.LoanRequests.Interfaces
+@if (string.IsNullOrEmpty(Label) && (IsFloatLabel && !IsFloatLabel))
 {
     <RadzenNumeric TValue="int?"
                    Value="@Value"
@@ -20,41 +13,45 @@
                    onclick="this.querySelector('.rz-numeric-input').select()"
                    ShowUpDown="false"
                    TextAlign="TextAlign"
-                   class="form-control"
+                   class="@Styles.W100"
                    Disabled="@Disabled"
                    Min="@Min"
-                   ValueChanged="@ValueChanged" />
+                   Placeholder="@PlaceHolder"
+                   ValueChanged="@ValueChanged"/>
 }
-else
-{
 
-    @if (Orientation is Orientation.Horizontal)
-    {
-        <div class="row mb-2">
-            <label for="@Id" class="col-sm-2 col-form-label">@Label</label>
-            <div class="col-sm-10">
-                <RadzenNumeric TValue="int?"
-                               Value="@Value"
-                               Name="@Name"
-                               id="@Id"
-                               ValueExpression="@ValueExpression"
-                               Change="@OnChanged"
-                               @oninput="@OnTextChanged"
-                               onclick="this.querySelector('.rz-numeric-input').select()"
-                               ShowUpDown="false"
-                               TextAlign="TextAlign"
-                               class="form-control"
-                               Disabled="@Disabled"
-                               Min="@Min"
-                               ValueChanged="@ValueChanged" />
-                <ValidationMessage For="@ValueExpression" />
-            </div>
-        </div>
-    }
-    else
-    {
-        <div class="mb-2">
-            <label for="@Id" class="form-label">@Label</label>
+@if (!string.IsNullOrEmpty(Label) && IsFloatLabel)
+{
+    <RadzenFormField Text="@Label" AllowFloatingLabel="true" class="@Styles.W100">
+        <ChildContent>
+            <RadzenNumeric TValue="int?"
+                           Value="@Value"
+                           Name="@Name"
+                           id="@Id"
+                           ValueExpression="@ValueExpression"
+                           Change="@OnChanged"
+                           @oninput="@OnTextChanged"
+                           onclick="this.querySelector('.rz-numeric-input').select()"
+                           ShowUpDown="false"
+                           TextAlign="TextAlign"
+                           class="@Styles.W100"
+                           Disabled="@Disabled"
+                           Min="@Min"
+                           Placeholder="@PlaceHolder"
+                           ValueChanged="@ValueChanged"/>
+        </ChildContent>
+        <Helper>
+            <ValidationMessage For="@ValueExpression"/>
+        </Helper>
+    </RadzenFormField>
+}
+@if (!string.IsNullOrEmpty(Label) && !IsFloatLabel)
+{
+    <RadzenRow AlignItems="AlignItems.Center">
+        <RadzenColumn Size="2" SizeMD="2" SizeSM="12">
+            <RadzenLabel Text="@Label"></RadzenLabel>
+        </RadzenColumn>
+        <RadzenColumn Size="10" SizeMD="10" SizeSM="12">
             <RadzenNumeric TValue="int?"
                            id="@Id"
                            Name="@Name"
@@ -67,17 +64,22 @@ else
                            TextAlign="TextAlign"
                            Disabled="@Disabled"
                            Min="@Min"
-                           class="form-control"
-                           ValueChanged="ValueChanged" />
-            <ValidationMessage For="@ValueExpression" />
-        </div>
-    }
+                           class="@Styles.W100"
+                           Placeholder="@PlaceHolder"
+                           ValueChanged="ValueChanged"/>
+            <span class="rz-text-danger">
+                <ValidationMessage For="@ValueExpression"/>
+            </span>
+        </RadzenColumn>
+       
+    </RadzenRow>
 }
 
 @code {
     [Parameter] public string? Label { get; set; } = string.Empty;
     [Parameter] public string? Name { get; set; } = Guid.NewGuid().ToString("N");
     [Parameter] public string Id { get; set; } = Guid.NewGuid().ToString("N");
+    [Parameter] public string? PlaceHolder { get; set; } = "Number";
     [Parameter] public string? Format { get; set; } = "#,##0.00";
     [Parameter] public int? Value { get; set; }
     [Parameter] public bool Disabled { get; set; }
@@ -89,6 +91,7 @@ else
     [Parameter] public decimal? Min { get; set; } = 0;
     [Parameter] public EventCallback<int?> OnValueChanged { get; set; }
     [Parameter] public EventCallback<FocusEventArgs> MouseOut { get; set; }
+    [Parameter] public bool IsFloatLabel { get; set; } = false;
 
     async Task OnTextChanged(ChangeEventArgs e)
     {
@@ -107,12 +110,11 @@ else
                 await OnValueChanged.InvokeAsync(0);
             }
         }
-
-
     }
 
     async Task OnMouseOut(FocusEventArgs e)
     {
         await MouseOut.InvokeAsync(e);
     }
+
 }

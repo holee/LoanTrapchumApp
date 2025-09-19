@@ -1,5 +1,5 @@
 using Applications.Extensions;
-using Applications.Requests.Lists.OtherNames;
+using Applications.Features.OtherNames;
 using Applications.Services.Lists;
 using Domains.Models.Lists;
 using Microsoft.AspNetCore.Components;

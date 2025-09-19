@@ -1,5 +1,5 @@
 using Applications.Features.Customers.Services;
-using Applications.Requests.Lists.Entities;
+using Applications.Features.Entities;
 using Applications.Responses.ViewModels.Customers;
 using Radzen.Blazor;
 

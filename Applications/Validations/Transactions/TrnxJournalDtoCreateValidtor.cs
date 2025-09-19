@@ -1,6 +1,6 @@
-﻿using Applications.Requests.Transactions.Journals;
+﻿using Applications.Features.Transactions.Journals;
 using FluentValidation;
-namespace Applications.Validations.Transactions
+namespace Applications.Validations.Transactions 
 {
     public class TrnxJournalDtoCreateValidtor : AbstractValidator<TrnxJournalDtoCreate>
     {

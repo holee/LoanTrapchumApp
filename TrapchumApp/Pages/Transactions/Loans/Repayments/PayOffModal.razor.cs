@@ -1,12 +1,12 @@
 using Applications.Calculations;
 using Applications.Extensions.Maths;
 using Applications.Extensions.NumberExtensions;
+using Applications.Features.Currencies.Responses;
+using Applications.Features.LoanPayments.Requests;
 using Applications.Features.Settings.UseCases;
+using Applications.Features.Transactions.ForiegnExchanges;
+using Applications.Features.Transactions.LoanTransactions;
 using Applications.Interfaces.Loans;
-using Applications.Requests.Loans.Payments;
-using Applications.Requests.Transactions.ForiegnExchanges;
-using Applications.Requests.Transactions.LoanTransactions;
-using Applications.Responses.ViewModels.Currencies;
 using Domains.Models.Settings;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -14,7 +14,7 @@ using Radzen;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 {
-    public partial class PayOffModal
+    public partial class PayOffModal 
     {
         private readonly ISettingServiceImpl _settingService;
         private readonly ILoanPaymentService _repaymentService;

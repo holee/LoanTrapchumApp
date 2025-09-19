@@ -1,12 +1,12 @@
-﻿using Applications.Responses.ViewModels.Currencies;
+﻿using Applications.Features.Currencies.Responses;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructures.DataAccess.Configurations.Currencies
 {
-    public class CurrencyViewNoteConfig : IEntityTypeConfiguration<VCurrencyNotes>
+    public class CurrencyViewNoteConfig : IEntityTypeConfiguration<VCurrencyCounter>
     {
-        public void Configure(EntityTypeBuilder<VCurrencyNotes> builder)
+        public void Configure(EntityTypeBuilder<VCurrencyCounter> builder)
         {
             builder.ToView("VCurrencyNotes");
             builder.HasNoKey();

@@ -4,17 +4,20 @@
 @using Applications.Features.Currencies
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Services
-@using Applications.Requests.Transactions.CashManagements
+@using Applications.Features.LoanRequests.Interfaces
+@using Applications.Features.Transactions.CashManagements
 @using TrapchumApp.Services
 <tr class="align-middle" @key="@Item">
     <td class="text-end">@Item?.CurrencyNoteValue</td>
     <td class="text-end">@Item?.QOnHand</td>
     <td>
-        <IntNumbers TextAlign="TextAlign.Right"
-                    OnValueChanged="CalculateByQuantity"
-                    Min="0"
-                    @bind-Value="Item!.Quantity" />
+        <RadzenNumeric TValue="int?"
+                       ShowUpDown="false"
+                       TextAlign="TextAlign.Right"
+                       Change="@CalculateByQuantity"
+                       class="@Styles.W100"
+                       onclick="this.querySelector('.rz-numeric-input').select()"
+                       @bind-Value="Item!.Quantity" Min="0" />
     </td>
     <td>
         <TCNumbers Format="@sp"

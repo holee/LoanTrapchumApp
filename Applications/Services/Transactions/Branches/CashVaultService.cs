@@ -1,15 +1,11 @@
 ﻿using Applications.Interfaces.Transactions;
-using Applications.Requests.Transactions.LoanTransactions;
 using Applications.Responses;
-using Applications.Responses.ViewModels.Currencies;
 using Domains.Models.Transaction;
 using Mapster;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Applications.Requests.Transactions.CashManagements;
+using Applications.Features.Transactions.CashManagements;
+using Applications.Features.Transactions.LoanTransactions;
+using Applications.Features.Currencies.Responses;
+using Applications.Features.CashManagements.Responses;
 
 namespace Applications.Services.Transactions.Branches
 {
@@ -31,9 +27,13 @@ namespace Applications.Services.Transactions.Branches
             return await cService.CreateCashVaultAsync(req);
         }
 
-        public Task<Result<string>> CreateCashVaultAsync(TransactionCashVaultDtoCreate transaction)
+        public async Task<Result<bool>> CreateCashVaultAsync(TrnxCashVaultDtoCreate transaction)
         {
-            throw new NotImplementedException();
+            var req = transaction.Adapt<LoanTransaction>();
+
+            var rsp = await cService.CreateCashVaultAsync(req);
+
+            return rsp.IsSuccess ? Result.Success(true) : Result.Failure<bool>(ErrorResponse.ServerError(rsp.ErrMessage));
         }
 
         public Task<Result<IEnumerable<VCashVaults>>> GetCashVaultsAsync(int? branchId)
@@ -41,7 +41,7 @@ namespace Applications.Services.Transactions.Branches
             throw new NotImplementedException();
         }
 
-        public async Task<IEnumerable<ViewModelCurrencyNotes>> GetCurrencyNotesAsync(int? branchId)
+        public async Task<IEnumerable<VCurrencyNotes>> GetCurrencyNotesAsync(int? branchId)
         {
             return await cService.GetCurrencyNotesAsync(branchId);
         }

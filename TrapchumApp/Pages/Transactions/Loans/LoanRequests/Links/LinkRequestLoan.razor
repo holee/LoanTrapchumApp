@@ -1,18 +1,11 @@
 ﻿@using System.Security.Claims
 @using Applications.Enumerations
-@using Applications.Features.Addresses
-@using Applications.Features.Branches
-@using Applications.Features.Currencies
-@using Applications.Features.Customers.Services
-@using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Services
+@using Applications.Features.LoanRequests.Interfaces
 @using Applications.Responses.ViewModels.Loans.Requests
 @using Infrastructures.Authorizations
-@using Microsoft.AspNetCore.Components.Authorization
-@using TrapchumApp.Services
 @if (isAllow && LoanRequest?.StatusId == (int)RequestStatus.New)
 {
-    <NavLink href="@loanRequestUrl">
+    <NavLink href="@_requestLoanRequestUrl">
         <RadzenBadge Variant="Variant.Filled"
                      Style="font-size:0.7rem;"
                      Text="Request" BadgeStyle="BadgeStyle.Secondary" />
@@ -20,7 +13,7 @@
 }
 else
 {
-    <NavLink href="@loanRequestDetailsUrl">
+    <NavLink href="@_loanRequestDetailsUrl">
         <RadzenBadge Variant="Variant.Filled"
                      Style="font-size:0.7rem;"
                      Text="Details" BadgeStyle="BadgeStyle.Secondary" />
@@ -31,8 +24,8 @@ else
     [Parameter, EditorRequired] public int? BranchId { get; set; }
     [Parameter, EditorRequired] public string? CreditAgentId { get; set; }
     [Parameter] public ClaimsPrincipal? User { get; set; } = default!;
-    string loanRequestDetailsUrl = "";
-    string loanRequestUrl = "";
+    string _loanRequestDetailsUrl = "";
+    string _requestLoanRequestUrl = "";
     bool isAllow = false;
     Task<AuthenticationState> Auth { get; set; } = default!;
 
@@ -48,10 +41,9 @@ else
 
     protected override void OnInitialized()
     {
-        loanRequestDetailsUrl = $"App/Loan/{BranchId}/Branches/Request/Details?UserId={CreditAgentId}&CustomerId={LoanRequest?.CustomerId}&LoanRequestId={LoanRequest?.LoanRequestId}";
-
-        loanRequestUrl = $"/App/Request/{BranchId}/Branches/{CreditAgentId}/Customer/{LoanRequest?.CustomerId}/Edit?LoanRequestId={LoanRequest?.LoanRequestId}";
-        
+        _loanRequestDetailsUrl = $"app/loan/{LoanRequest?.LoanRequestId}/request/{BranchId}/branches/{LoanRequest?.CustomerId}/details";
+        //loanRequestDetailsUrl = $"/app/loan/{LoanRequest?.LoanRequestId}/request/{BranchId}/branches/details?CreditAgentId={CreditAgentId}&CustomerId={LoanRequest?.CustomerId}";
+        _requestLoanRequestUrl = $"/app/loan/{LoanRequest?.LoanRequestId}/request/{BranchId}/branches/{LoanRequest?.CustomerId}/edit";
         base.OnInitialized();
     }
 

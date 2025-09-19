@@ -1,13 +1,14 @@
 using Domains.Models.Lists.Customers;
 using Domains.Models.Lists.Employees;
 using Domains.Models.Lists.Vendors;
-using Infrastructures.DataAccess.Configurations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-public class EntityNamesConfiguration : IBaseEntityTypeConfigurations<EntityNames>
+namespace Infrastructures.DataAccess.Configurations.EntityNames;
+
+public class EntityNamesConfiguration : IBaseEntityTypeConfigurations<Domains.Models.Lists.EntityNames>
 {
-    public void Configure(EntityTypeBuilder<EntityNames> builder)
+    public void Configure(EntityTypeBuilder<Domains.Models.Lists.EntityNames> builder)
     {
         builder.ToTable("lt_entityNames");
         builder.HasKey(x => x.Id);
@@ -45,19 +46,18 @@ public class EntityNamesConfiguration : IBaseEntityTypeConfigurations<EntityName
         builder.Property(e => e.ModifiedDt).HasDefaultValueSql("GETDATE()");
 
         builder.HasOne(x => x.Customer).WithOne()
-                .HasForeignKey<Customer>(x => x.CustomerId)
-                .OnDelete(DeleteBehavior.Cascade);
+            .HasForeignKey<Customer>(x => x.CustomerId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(x => x.Employee).WithOne(x => x.EntityNames)
-                 .HasForeignKey<Employee>(x => x.EmployeeId)
-                 .OnDelete(DeleteBehavior.Cascade);
+            .HasForeignKey<Employee>(x => x.EmployeeId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(x => x.Vendor)
-                .WithOne(x => x.EntityNames)
-                .HasForeignKey<Vendor>(x => x.VendorId)
-                .OnDelete(DeleteBehavior.Cascade);
+            .WithOne(x => x.EntityNames)
+            .HasForeignKey<Vendor>(x => x.VendorId)
+            .OnDelete(DeleteBehavior.Cascade);
 
     }
 
 }
-

@@ -184,7 +184,11 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             {
                 _collateralLines = resp.Data!;
             }
-            StateHasChanged();
+            else
+            {
+                _collateralLines = [];
+            }
+                StateHasChanged();
         }
 
         private async Task ToggleRowSelection(VCollateralLines item)

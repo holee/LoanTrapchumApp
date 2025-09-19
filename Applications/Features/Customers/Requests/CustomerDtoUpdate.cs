@@ -1,4 +1,5 @@
-﻿using Applications.Requests.Lists.Addreses;
+﻿using Applications.Features.Addresses.Responses;
+
 namespace Applications.Features.Customers.Requests
 {
     public class CustomerDtoUpdate : AddressBaseDto

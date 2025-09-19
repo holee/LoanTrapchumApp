@@ -464,3 +464,7 @@ h1:focus {
 .la {
     --rz-icon-font-family: "line awesome";
 }
+
+textarea {
+    resize:none;
+}

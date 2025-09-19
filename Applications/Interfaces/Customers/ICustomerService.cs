@@ -6,6 +6,7 @@ using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Domains.Models.Lists.Customers;
 using System.Linq.Expressions;
+using Domains.Models.Lists;
 
 namespace Applications.Interfaces.Customers;
 
@@ -16,7 +17,7 @@ public interface ICustomerService
     Task<Result<string>> UpdateAsync(EntityNames model, CancellationToken cancellation = default);
     Task<Result<IEnumerable<VCollateralLines>>> GetCustomerCollateralLines(string? customerId, bool includeInUsed = false);
     Task<Result<IEnumerable<VLoanDisbursments>>> GetCustomerLoanHistoryAsync(string? customerId);
-    Task<Result<Customer>> GetCustomerByIdAsync(string? customerId, params string[] includes);
+    Task<Result<Customer>> GetCustomerByIdAsync(string? customerId, params string[] includes); 
     Task<Result<EntityNames>> GetCustomerByIdAsync(string? customerId);
     Task<Pager<VCustomerList>> GetCustomersAsync(string? customerId, QueryParam param, CancellationToken cancellation = default);
     Task<Result<string>> MakeCustomerInActiveAsync(string? customerId, bool state, CancellationToken cancellation = default);

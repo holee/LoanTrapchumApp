@@ -1,9 +1,7 @@
 ﻿using Applications.Interfaces.Lists;
-using Applications.Requests.Lists.Entities;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Departments;
-using Radzen;
-using System.Threading.Tasks;
+using Applications.Features.Entities;
 
 namespace TrapchumApp.Pages.Lists.Departments
 {

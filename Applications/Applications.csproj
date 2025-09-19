@@ -9,15 +9,58 @@
   <ItemGroup>
     <Folder Include="Extensions\Identity\Constants\" />
     <Folder Include="Bases\" />
+    <Folder Include="Features\Addresses\UseCases\" />
+    <Folder Include="Features\Addresses\Validations\" />
+    <Folder Include="Features\Branches\Extensions\" />
+    <Folder Include="Features\Branches\Mappers\" />
+    <Folder Include="Features\Branches\Requests\" />
+    <Folder Include="Features\Branches\Responses\" />
+    <Folder Include="Features\CashManagements\Validations\" />
+    <Folder Include="Features\CashManagements\Requests\" />
     <Folder Include="Features\Collaterals\UseCases\" />
+    <Folder Include="Features\CreditAgents\UseCases\" />
+    <Folder Include="Features\Currencies\UseCases\" />
     <Folder Include="Features\Customers\Response\" />
-    <Folder Include="Requests\Vendors\" />
+    <Folder Include="Features\Employees\Extensions\" />
+    <Folder Include="Features\Employees\Mappers\" />
+    <Folder Include="Features\Employees\Responses\" />
+    <Folder Include="Features\Identity\Users\Interfaces\" />
+    <Folder Include="Features\Identity\Users\Mappers\" />
+    <Folder Include="Features\Identity\Users\Validations\" />
+    <Folder Include="Features\LoanPayments\Enums\" />
+    <Folder Include="Features\LoanPayments\Extensions\" />
+    <Folder Include="Features\LoanPayments\Mappers\" />
+    <Folder Include="Features\LoanRequests\Enums\" />
+    <Folder Include="Features\LoanRequests\Extensions\" />
+    <Folder Include="Features\LoanRequests\Mappers\" />
+    <Folder Include="Features\Loans\Interfaces\" />
+    <Folder Include="Features\LoanTransactions\Journals\Extensions\" />
+    <Folder Include="Features\LoanTransactions\Journals\Mappers\" />
+    <Folder Include="Features\LoanTransactions\Journals\UseCases\" />
+    <Folder Include="Features\LoanTransactions\Journals\Interfaces\" />
+    <Folder Include="Features\LoanTransactions\Ledgeres\Interfaces\" />
+    <Folder Include="Features\LoanTransactions\Ledgeres\Mappers\" />
+    <Folder Include="Features\LoanTransactions\Ledgeres\Requests\" />
+    <Folder Include="Features\LoanTransactions\Ledgeres\Responses\" />
+    <Folder Include="Features\LoanTransactions\Transactions\Interfaces\" />
+    <Folder Include="Features\LoanTransactions\Transactions\Mappers\" />
+    <Folder Include="Features\LoanTransactions\Transactions\Requests\" />
+    <Folder Include="Features\LoanTransactions\Transactions\Responses\" />
+    <Folder Include="Features\Products\Mappers\" />
+    <Folder Include="Features\Products\Responses\" />
+    <Folder Include="Features\Products\UseCases\" />
+    <Folder Include="Features\Products\Validations\" />
+    <Folder Include="Features\Settings\Responses\" />
+    <Folder Include="Features\Vendors\Interfaces\" />
+    <Folder Include="Features\Vendors\Mapperes\" />
+    <Folder Include="Features\Vendors\UseCases\" />
+    <Folder Include="Requests\Identity\" />
     <Folder Include="Responses\Transactions\" />
     <Folder Include="Responses\Vendors\" />
     <Folder Include="Responses\ViewModels\Trans\" />
     <Folder Include="Responses\ViewModels\Users\" />
     <Folder Include="Services\Customers\" />
-    <Folder Include="Validations\Customers\" />
+    <Folder Include="Validations\Loans\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -35,9 +78,9 @@
     <PackageReference Include="Mapster.EFCore" Version="5.1.1" />
     <PackageReference Include="MemoryPack" Version="1.21.4" />
     <PackageReference Include="MessagePack" Version="3.1.3" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.3.1" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.3.0" />
     <PackageReference Include="QuestPDF" Version="2025.4.0" />
     <PackageReference Include="ZiggyCreatures.FusionCache" Version="2.2.0" />
   </ItemGroup>

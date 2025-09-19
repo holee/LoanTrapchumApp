@@ -3,16 +3,15 @@ using Applications.Features.Collaterals.Requests;
 using Applications.Features.Customers.Mappers;
 using Applications.Features.Customers.Services;
 using Applications.Features.Customers.Validations;
-using Applications.Requests.Lists.Collaterals;
-using Applications.Responses.Extensions;
 using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.ViewModels.Customers;
-using Applications.Services.LIsts;
 using Blazored.FluentValidation;
 using Domains.Models.Collaterals;
 using Microsoft.JSInterop;
 using Radzen.Blazor;
 using System.Threading.Tasks;
+using Applications.Features.Collaterals.Extensions;
+using Applications.Services.Lists;
 using TrapchumApp.Helpers.Validations;
 
 namespace TrapchumApp.Pages.Lists.Collaterals

@@ -1,7 +1,7 @@
 ﻿using Applications.Commons.Mappers;
+using Applications.Features.LoanPayments.Requests;
+using Applications.Features.Transactions.LoanTransactions;
 using Applications.Interfaces.Loans;
-using Applications.Requests.Loans.Payments;
-using Applications.Requests.Transactions.LoanTransactions;
 using Applications.Responses;
 using Applications.Responses.ViewModels.Loans.Payments;
 using Applications.Responses.ViewModels.Loans.Schedules;

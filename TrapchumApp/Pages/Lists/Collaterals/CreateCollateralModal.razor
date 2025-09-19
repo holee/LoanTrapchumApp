@@ -3,7 +3,7 @@
 @using Applications.Features.Currencies
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Services
+@using Applications.Features.LoanRequests.Interfaces
 @using TrapchumApp.Services
 <div class="contianer-fluid">
     <EditForm Model="@model" @ref="editForm">
@@ -166,7 +166,7 @@
                                                 <td class="text-end">
                                                     <RadzenButton Click="@(()=>Remove(people[row]))"
                                                                   Icon="remove"
-                                                                  ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small">
+                                                                  ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.DefaultSizeall">
                                                     </RadzenButton>
                                                 </td>
 

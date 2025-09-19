@@ -1,32 +1,28 @@
-﻿using Applications.Features.Addresses;
+﻿using Applications.Features.Addresses.Interfaces;
 using Applications.Features.Banks;
 using Applications.Features.Branches;
-using Applications.Features.Collaterals.Requests;
+using Applications.Features.Branches.Interfaces;
+using Applications.Features.CashManagements.Interfaces;
+using Applications.Features.CashManagements.UseCases;
 using Applications.Features.Currencies;
 using Applications.Features.Customers.Services;
 using Applications.Features.Customers.UseCases;
-using Applications.Features.Customers.Validations;
-using Applications.Features.Employees;
-using Applications.Features.Identity.Roles.Validation;
-using Applications.Features.LoanRequests.Services;
-using Applications.Features.LoanRequests.Validations;
+using Applications.Features.Employees.Interfaces;
+using Applications.Features.Employees.UseCases;
+using Applications.Features.LoanPayments.Interfaces;
+using Applications.Features.LoanPayments.UseCases;
+using Applications.Features.LoanRequests.Interfaces;
+using Applications.Features.LoanRequests.UseCases;
 using Applications.Features.Loans.Services;
 using Applications.Features.Settings.UseCases;
-using Applications.Interfaces.Addresses;
-using Applications.Requests.Identity;
-using Applications.Requests.Lists.Collaterals;
-using Applications.Requests.Loans.LoanRequests;
-using Applications.Responses.Lists.Collaterals;
 using Applications.Services.Files;
 using Applications.Services.Identity;
 using Applications.Services.Lists;
-using Applications.Services.LIsts;
 using Applications.Services.Loans;
 using Applications.Services.Reports;
 using Applications.Services.Transactions.Branches;
 using Applications.Services.Transactions.Currencies;
 using Applications.Services.Transactions.Journals;
-using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 namespace Applications.DependencyInjections
 {
@@ -34,6 +30,34 @@ namespace Applications.DependencyInjections
     {
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
+
+            services.AddScoped<ICreateNewLoanRequestUseCase,CreateNewLoanRequestUseCase>();
+
+            services.AddScoped<ISaveLoanRequestUseCase, SaveLoanRequestUseCase>();
+
+            services.AddScoped<IApprovedLoanRequestUseCase, ApprovedLoanRequestUseCase>();
+
+            services.AddScoped<IDeniedLoanRequestUseCase, DeniedLoanRequestUseCase>();
+
+            services.AddScoped<IRecheckedLoanRequestUseCase, RecheckedLoanRequestUseCase>();
+
+            services.AddScoped<IEditLoanRequestUseCase, EditLoanRequestUseCase>();
+
+            services.AddScoped<IAddRecieptNumberUseCase, AddRecieptNumberUseCase>();
+
+            services.AddScoped<IStartVaultInUseCase, StartVaultInUseCase>();
+
+            services.AddScoped<IStartVaultOutUseCase, StartVaultOutUseCase>();
+
+            services.AddScoped<IGetCashVaultUseCase, GetCashVaultUseCase>();
+
+
+
+
+
+
+
+
             services.AddScoped<ScheduleService>();
             services.AddScoped<CustomerCollateralServices>();
             services.AddScoped<AddCustomerActivityUseCase>();
@@ -85,18 +109,6 @@ namespace Applications.DependencyInjections
             services.AddScoped<IVendorServiceImpl, VendorService>();
             services.AddScoped<IFileUploadServiceImp, FileUploadService>();
             services.AddScoped<IPrintExelServiceImpl, PrintExelServiceImpl>();
-            return services;
-
-        }
-
-        public static IServiceCollection AddValidationServices(this IServiceCollection services)
-        {
-
-            services.AddScoped<IValidator<RoleDtoUpdate>, RoleDtoUpdateValidator>();
-            services.AddScoped<IValidator<AproveLoanDtoCreate>, AprovedLoanDtoCreateValidator>();
-            services.AddScoped<IValidator<CollateralDtoCreate>, CollateralCreateValidator>();
-            services.AddScoped<IValidator<CollateralLineDtoCreate>, CollateralLineCreateValidator>();
-            services.AddScoped<IValidator<VCollateralLines>, VCollateralLineCreateValidator>();
             return services;
 
         }

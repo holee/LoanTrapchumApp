@@ -1,11 +1,8 @@
 using Applications.Extensions;
 using Applications.Features.Customers.Services;
 using Applications.Responses.Lists.Collaterals;
-using Applications.Services.LIsts;
-using Microsoft.AspNetCore.Components;
-using Radzen;
 using Radzen.Blazor;
-using System.Threading.Tasks;
+using Applications.Services.Lists; 
 
 namespace TrapchumApp.Pages.Lists.Collaterals
 {

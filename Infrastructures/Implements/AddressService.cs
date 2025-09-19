@@ -1,6 +1,6 @@
 ﻿using Applications.Extensions;
+using Applications.Features.Addresses.Responses;
 using Applications.Interfaces.Addresses;
-using Applications.Requests.Lists.Addreses;
 using Applications.Responses;
 using Domains.Models.Addresses;
 using Infrastructures.DataAccess;

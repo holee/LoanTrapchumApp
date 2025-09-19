@@ -1,5 +1,5 @@
-using Applications.Requests.Lists.Entities;
-using Applications.Requests.Lists.OtherNames;
+using Applications.Features.OtherNames;
+using Applications.Features.OtherNames;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.OtherNames;

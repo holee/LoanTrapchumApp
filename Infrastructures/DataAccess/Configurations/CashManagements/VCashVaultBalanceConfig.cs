@@ -1,4 +1,4 @@
-﻿using Applications.Responses.ViewModels.Currencies;
+﻿using Applications.Features.CashManagements.Responses;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

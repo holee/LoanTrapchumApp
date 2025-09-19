@@ -4,7 +4,7 @@
 @using Applications.Features.Currencies
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Services
+@using Applications.Features.LoanRequests.Interfaces
 @using TrapchumApp.Pages.Identity.Shared
 @using TrapchumApp.Services
 <PageTitle>Login</PageTitle>
@@ -19,22 +19,33 @@
     <StatusMessage Message="@errorMessage" />
     <EditForm Model="@Input" OnValidSubmit="@LoginUser" FormName="login" method="post">
         <DataAnnotationsValidator />
-        <div class="form-group">
-            <InputText @bind-Value="Input.Email" placeholder="Email or Password" />
-            <ValidationMessage For="() => Input.Email" />
-        </div>
-        <div class="form-group">
-            <InputText @bind-Value="Input.Password"
-                       type="@(password ? "password" : "text")"
-                       placeholder="Password"
-                       autocomplete="on" />
-            <ValidationMessage For="() => Input.Password" />
-        </div>
-        <div class="remember-me">
+        <RadzenFormField Text="Email Or UserName" class="@Styles.W100">
+            <ChildContent>
+                <RadzenTextBox class="@Styles.W100"
+                               Name="Input.Email"
+                               @bind-Value="@Input.Email"
+                               placeholder="abc@email.com" />
+            </ChildContent>
+            <Helper>
+                <ValidationMessage For="() => Input.Email" />
+            </Helper>
+        </RadzenFormField>
+        <PasswordInput Value="@Input.Password"
+                       @rendermode="InteractiveServer"
+                       Name="Input.Password">
+        </PasswordInput>
+        <RadzenStack Orientation="Orientation.Horizontal"
+                     JustifyContent="JustifyContent.Start"
+                     AlignItems="AlignItems.Center">
             <InputCheckbox @bind-Value="Input.RememberMe" id="RememberMe" />
-            <label for="RememberMe">Remember me</label>
-        </div>
-        <button type="submit" class="btn-login">Log in</button>
+            <label class="rz-ms-1" for="RememberMe">Remember me</label>
+        </RadzenStack>
+        <RadzenButton ButtonType="ButtonType.Submit"
+                      Size="ButtonSize.Small"
+                      Text="Log in"
+                      class="@Styles.Mt2"
+                      Icon="@IconNames.LoginUser"
+                      ButtonStyle="ButtonStyle.Success" />
     </EditForm>
 </div>
 

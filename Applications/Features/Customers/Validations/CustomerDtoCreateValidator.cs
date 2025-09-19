@@ -1,9 +1,9 @@
-﻿using Applications.Requests.Lists.OtherNames;
+﻿using Applications.Features.OtherNames;
 using FluentValidation;
 namespace Applications.Features.Customers.Validations;
 public class CustomerDtoCreateValidator : AbstractValidator<EntityCustomerCreate>
 {
-    public CustomerDtoCreateValidator()
+    public CustomerDtoCreateValidator() 
     {
         RuleFor(x => x.FirstName)
                .NotEmpty().WithMessage("Please input First Name Field")

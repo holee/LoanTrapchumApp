@@ -1,7 +1,9 @@
-﻿using Applications.Requests.Loans.Payments;
+﻿using Applications.Features.LoanPayments.Requests;
+using Applications.Features.LoanPayments.Requests;
 using Applications.Responses;
 using Applications.Responses.ViewModels.Loans.Payments;
 using Applications.Responses.ViewModels.Loans.Schedules;
+using Domains.Models.Lists;
 using Domains.Models.Transaction;
 
 namespace Applications.Interfaces.Loans;
@@ -14,4 +16,5 @@ public interface ILoanPaymentService
     Task<Result<string>> RecievePayment(LoanTransaction req,CancellationToken cancellation = default);
     Task<Result<ScheduleVm>> GetScheduleByIdAsync(long? loanScheduleId, int? branchId, string? loanId);
     Task<Result<string>> CreatePayment(LoanTransaction req, CancellationToken cancellation = default);
+    Task<Result<Reciept>> GenerateRecieptNumber(CancellationToken cancellation = default);
 }

@@ -1,4 +1,4 @@
-﻿using Applications.Requests.Identity;
+﻿using Applications.Features.Identity.Roles.Requests;
 using FluentValidation;
 
 namespace Applications.Features.Identity.Roles.Validation

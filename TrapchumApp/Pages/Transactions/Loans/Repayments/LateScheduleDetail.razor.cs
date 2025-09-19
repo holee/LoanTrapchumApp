@@ -1,14 +1,11 @@
 using Applications.Commons.Mappers;
 using Applications.Enumerations;
+using Applications.Features.LoanPayments.Requests;
 using Applications.Features.Loans.Services;
-using Applications.Requests.Loans.Payments;
 using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Services.Loans;
-using Domains.Models.Currencies;
 using Domains.Models.Identity;
-using Domains.Models.Loans;
-using Microsoft.AspNetCore.Components;
 using Radzen.Blazor;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments
@@ -26,6 +23,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 
         [Parameter] public string? LoanId { get; set; }
         [Parameter] public int BranchId { get; set; }
+        [Parameter] public EventCallback Close { get; set; }
         [Parameter] public DateTime? PaymentDate { get; set; } = DateTime.Now;
         [CascadingParameter]
         Task<AuthenticationState> AuthenticationState { get; set; } = default!;
@@ -84,7 +82,10 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
             }
         }
 
-
+        private async Task OnClose()
+        {
+            await Close.InvokeAsync();
+        }
         void RowSelectedChanged(VSchedule schedule)
         {
             //if (SelectedSchedules == null)

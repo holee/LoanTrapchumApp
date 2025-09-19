@@ -1,6 +1,6 @@
 ﻿using Applications.Extensions.mappers;
+using Applications.Features.Entities;
 using Applications.Interfaces.Customers;
-using Applications.Requests.Lists.Entities;
 using Applications.Responses;
 using Applications.Responses.ViewModels.Customers;
 using Domains.Models.Lists.Customers;
@@ -8,8 +8,8 @@ using Domains.Models.Lists.Customers;
 namespace Applications.Features.Customers.Services
 {
 
-
-    public class CustomerIncomeExpendService(ICustomerIncomeExpendService cusService) : IIncomeExpendServiceImpl
+ 
+    public class CustomerIncomeExpendService(ICustomerIncomeExpendService cusService) : IIncomeExpendServiceImpl 
     {
         public async Task<Result> AddExpensesAsync(string? customerRefId, List<CustomerExpenseDtoCreate> req)
         {

@@ -1,6 +1,6 @@
 ﻿using Applications.Responses;
 
-namespace Applications.Services.LIsts
+namespace Applications.Services.Lists
 {
     public interface IBaseServiceImpl<T> where T : class
     {

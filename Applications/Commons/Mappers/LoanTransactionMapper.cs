@@ -1,5 +1,6 @@
-﻿using Applications.Requests.Loans.Payments;
-using Applications.Requests.Transactions.LoanTransactions;
+﻿using Applications.Features.LoanPayments.Requests;
+using Applications.Features.LoanPayments.Requests;
+using Applications.Features.Transactions.LoanTransactions;
 using Domains.Models.Loans;
 using Domains.Models.Transaction;
 

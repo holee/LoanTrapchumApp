@@ -1,0 +1,13 @@
+﻿<RadzenLink Path="@Href">
+    <RadzenButton Size="@Size"
+                  Icon="@IconNames.ArrowCircleLeft"
+                  Text="@Text"
+                  Variant="Variant.Text"
+                  ButtonStyle="@ButtonStyle.Success" />
+</RadzenLink>
+
+@code {
+    [Parameter] public string? Href { get; set; } = "/";
+    [Parameter] public string Text { get; set; } = "Edit";
+    [Parameter] public ButtonSize Size { get; set; } = Styles.DefaultSize;
+}

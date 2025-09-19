@@ -1,15 +1,15 @@
-﻿using Applications.Interfaces.Lists;
-using Applications.Requests.Lists.Entities;
+﻿using Applications.Features.Entities;
+using Applications.Interfaces.Lists;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Departments;
 using Domains.Models.Lists;
 using Mapster;
 
-namespace Applications.Services.Lists;
-public sealed class DepartmentService(IDepartmentService deService) : IDepartmentServiceImpl
+namespace Applications.Services.Lists; 
+public sealed class DepartmentService(IDepartmentService deService) : IDepartmentServiceImpl 
 {
-
+ 
     public async Task<Result<string>> ActivateOrDeactivate(int? id, bool req)
     {
         return await deService.ActivateOrDeactivate(id, req);

@@ -1,4 +1,3 @@
-using Applications.Requests.Loans.Categories;
 using Applications.Responses.Loans.Disbursements;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Categories;
@@ -9,6 +8,7 @@ using Microsoft.AspNetCore.Components;
 using Radzen;
 using Radzen.Blazor;
 using System.Threading.Tasks;
+using Applications.Features.Categories.Requests;
 using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Transactions.Loans.LoanCategoriess

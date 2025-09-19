@@ -1,10 +1,10 @@
-using Applications.Requests.Lists.Collaterals;
+using Applications.Features.Collaterals.Requests;
 using Applications.Responses.Lists.Collaterals;
-using Applications.Services.LIsts;
+using Applications.Services.Lists;
 
 namespace TrapchumApp.Pages.Lists.Collaterals;
 
-public partial class SubTypeCollateralCreate
+public partial class SubTypeCollateralCreate 
 {
     private readonly ICollateralsServiceImpl _collateralService;
     private CollateralSubTypeDtoCreate model = new();

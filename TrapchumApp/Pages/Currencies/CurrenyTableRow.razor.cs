@@ -1,4 +1,4 @@
-using Applications.Responses.ViewModels.Currencies;
+using Applications.Features.Currencies.Responses;
 using Microsoft.AspNetCore.Components;
 
 namespace TrapchumApp.Pages.Currencies

@@ -4,7 +4,7 @@
 @using Applications.Features.Currencies
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Services
+@using Applications.Features.LoanRequests.Interfaces
 @using TrapchumApp.Services
 <PageTitle>Open Branch</PageTitle>
 @implements IDisposable
@@ -128,7 +128,7 @@
                         {
                             @if (bState.VaultOut)
                             {
-                                <RadzenButton Click="OnCashVaultOut"
+                                <RadzenButton Click="@OnCashVaultOut"
                                               Size="ButtonSize.Small"
                                               ButtonStyle="ButtonStyle.Success"
                                               Icon="lock_open"
@@ -138,7 +138,7 @@
                             }
                             @if (canOpenBranch)
                             {
-                                <RadzenButton Click="SubmitCloseBranch"
+                                <RadzenButton Click="@SubmitCloseBranch"
                                               Icon="lock_open"
                                               ButtonStyle="ButtonStyle.Secondary"
                                               ButtonType="ButtonType.Button"

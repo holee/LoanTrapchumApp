@@ -1,12 +1,12 @@
 using Applications.Commons.Mappers;
 using Applications.Enumerations;
-using Applications.Requests.Loans.Payments;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Radzen.Blazor;
 using System.Threading.Tasks;
+using Applications.Features.LoanPayments.Requests;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments;
-public partial class PaymentMultiplesTab
+public partial class PaymentMultiplesTab 
 {
     [Parameter, EditorRequired] public IEnumerable<VSchedule> Schedules { get; set; } = [];
     [Parameter, EditorRequired] public LoanPaymentDtoCreate? LoanPayment { set; get; } = new();

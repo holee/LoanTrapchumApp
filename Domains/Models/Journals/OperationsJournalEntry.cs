@@ -2,7 +2,7 @@ namespace Domains.Models.Journals;
 
 public sealed class OperationsJournalEntry
 {
-    public string OpJournalEntryId { get; set; }
+    public string? OpJournalEntryId { get; set; }
     public string? TransactionsRefId { get; set; }
     public int? BranchRefId { get; set; }
     public int? BankRefId { get; set; }

@@ -1,6 +1,6 @@
 ﻿using Applications.Extensions.mappers;
+using Applications.Features.Entities;
 using Applications.Interfaces.Customers;
-using Applications.Requests.Lists.Entities;
 using Applications.Responses;
 using Domains.Models.Lists.Customers;
 using Mapster;
@@ -9,7 +9,7 @@ namespace Applications.Features.Customers.UseCases;
 
 public sealed class AddCustomerExpenseUseCase
 {
-    private readonly ICustomerIncomeExpendService _custInomeSerivce;
+    private readonly ICustomerIncomeExpendService _custInomeSerivce; 
 
     public AddCustomerExpenseUseCase(ICustomerIncomeExpendService custInomeSerivce)
     {

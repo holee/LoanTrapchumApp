@@ -2,12 +2,11 @@
 using Applications.Extensions.Maths;
 using Applications.Responses;
 using Applications.Services.Reports;
-using Microsoft.AspNetCore.Hosting;
 using MiniExcelLibs;
-
+using Microsoft.AspNetCore.Hosting;
 namespace Applications.Services.Loans
 {
-    public sealed class PrintExelServiceImpl(IWebHostEnvironment env, ILoanReportServiceImpl loanService) : IPrintExelServiceImpl
+    public sealed class PrintExelServiceImpl(IHostingEnvironment env, ILoanReportServiceImpl loanService) : IPrintExelServiceImpl
     {
         public async Task<Result<Stream>> DownLoadScheduleAsExcel(string? loanId, int? branchId)
         {

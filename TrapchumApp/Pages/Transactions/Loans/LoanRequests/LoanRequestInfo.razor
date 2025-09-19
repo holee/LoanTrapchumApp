@@ -3,7 +3,7 @@
 @using Applications.Features.Currencies
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Services
+@using Applications.Features.LoanRequests.Interfaces
 @using Applications.Responses.Auths
 @using Applications.Responses.Lists.Collaterals
 @using Applications.Responses.Loans.Disbursements
@@ -28,6 +28,7 @@
         border-radius: var(--rz-border-radius)
     }
 </style>
+<div class="@Styles.Bg200">
 <RadzenFieldset>
     <RadzenRow AlignItems="AlignItems.Center">
         <RadzenColumn Size="12" SizeMD="6">
@@ -120,10 +121,9 @@
                             <TCNumbers @bind-Value="Model.CollectionFeeRate" />
                         </ChildContent>
                         <End>
-                            <span class="input-group-text">%</span>
+                            <span>%</span>
                         </End>
                     </RadzenFormField>
-
                 </RadzenColumn>
                 <RadzenColumn Size="4">
                     <RadzenFormField>
@@ -291,7 +291,7 @@
         </RadzenColumn>
     </RadzenRow>
 </RadzenFieldset>
-
+</div>
 @code
 {
     RadzenTextBox textBox = default!;

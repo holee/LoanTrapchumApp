@@ -1,10 +1,10 @@
-﻿@page "/App/Request/{BranchId:int}/Branches"
+﻿@page "/app/loan/request/{BranchId:int}/branches"
 @using Applications.Features.Addresses
 @using Applications.Features.Branches
 @using Applications.Features.Currencies
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Services
+@using Applications.Features.LoanRequests.Interfaces
 @using TrapchumApp.Services
 <PageTitle>Loan Request</PageTitle>
 @attribute [MustHasPermission(Modules.LoanRequest,Feature.Read)]
@@ -18,21 +18,21 @@
     <RadzenTabs SelectedIndexChanged="SelectedIndexChanged" RenderMode="TabRenderMode.Server">
         <Tabs>
             <RadzenTabsItem Icon="list" Text="All">
-                <LoanRequestAll BranchId="@BranchId" UserId="@UserId"/>
+                <LoanRequestAll BranchId="@BranchId" UserId="@_userId"/>
             </RadzenTabsItem>
             <RadzenTabsItem Text="Requesting" Icon="pending_actions">
                 <LoanRequestRequesting BranchId="@BranchId"
-                                       UserId="@UserId"/>
+                                       UserId="@_userId"/>
             </RadzenTabsItem>
             <RadzenTabsItem Text="Requested" Icon="request_quote">
                 <LoanRequestRequested BranchId="@BranchId"
-                                      UserId="@UserId"/>
+                                      UserId="@_userId"/>
             </RadzenTabsItem>
             <RadzenTabsItem Text="Approved" Icon="@IconNames.Approval">
-                <LoanRequestApprove BranchId="@BranchId" UserId="@UserId"/>
+                <LoanRequestApprove BranchId="@BranchId" UserId="@_userId"/>
             </RadzenTabsItem>
             <RadzenTabsItem Text="Completed" Icon="@IconNames.Done">
-                <LoanRequestCompleted BranchId="@BranchId" CreditAgentId="@UserId"/>
+                <LoanRequestCompleted BranchId="@BranchId" CreditAgentId="@_userId"/>
             </RadzenTabsItem>
         </Tabs>
     </RadzenTabs>

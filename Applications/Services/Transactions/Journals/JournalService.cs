@@ -1,6 +1,7 @@
 ﻿using Applications.Commons.Mappers;
+using Applications.Features.Transactions.Journals;
+using Applications.Features.Transactions.Journals;
 using Applications.Interfaces.Transactions;
-using Applications.Requests.Transactions.Journals;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Journals;

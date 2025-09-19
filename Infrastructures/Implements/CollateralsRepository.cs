@@ -1,7 +1,6 @@
 ﻿using Applications.Extensions;
 using Applications.Interfaces.Lists;
 using Applications.Responses;
-using Applications.Responses.Extensions;
 using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Collaterals;

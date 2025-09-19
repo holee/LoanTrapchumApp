@@ -1,15 +1,7 @@
 ﻿using Applications.Responses;
-using Applications.Requests.Lists.Addreses;
-using Applications.Responses.Paginations;
+using Applications.Responses.Paginations; 
 using Applications.Responses.ViewModels.Addresses;
-using Applications.Responses.ViewModels.Departments;
 using Domains.Models.Addresses;
-using Domains.Models.Lists;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Applications.Interfaces.Addresses
 {

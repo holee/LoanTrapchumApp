@@ -10,12 +10,12 @@ namespace Infrastructures.Implements
 {
     public class FileUploadService : IFileUploadService
     {
-        private readonly IWebHostEnvironment _env;
+        private readonly IHostingEnvironment _env;
         private readonly DataContext _context;
         private string fileUploadPath = "";
         private readonly ILogger<FileUploadService> _logger;
         private readonly IDbContextFactory<DataContext> _dbContextFactory;
-        public FileUploadService(IWebHostEnvironment env, DataContext context, ILogger<FileUploadService> logger, IDbContextFactory<DataContext> dbContextFactory)
+        public FileUploadService(IHostingEnvironment env, DataContext context, ILogger<FileUploadService> logger, IDbContextFactory<DataContext> dbContextFactory)
         {
             _env = env;
             _context = context;

@@ -1,5 +1,6 @@
-﻿using Applications.Interfaces.Identity;
-using Applications.Requests.Identity;
+﻿using Applications.Features.Identity.Users;
+using Applications.Features.Identity.Users;
+using Applications.Interfaces.Identity;
 using Applications.Responses;
 using Applications.Responses.Auths;
 using Applications.Responses.Paginations;

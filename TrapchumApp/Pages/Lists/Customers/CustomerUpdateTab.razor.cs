@@ -1,6 +1,6 @@
 ﻿using Applications.Enumerations;
+using Applications.Features.OtherNames;
 using Applications.Interfaces.Lists;
-using Applications.Requests.Lists.OtherNames;
 using Applications.Responses.Lists.Entities;
 using Applications.Services.Files;
 using Applications.Services.Lists;

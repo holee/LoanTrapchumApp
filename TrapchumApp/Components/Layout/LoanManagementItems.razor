@@ -1,24 +1,19 @@
-﻿@using Applications.ApplicationPolicies
-@using Applications.Extensions.Identity.Authorizations.Extensions
-@using Applications.Features.Addresses
-@using Applications.Features.Branches
-@using Applications.Features.Currencies
-@using Applications.Features.Customers.Services
-@using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Services
-@using Microsoft.AspNetCore.Components.Authorization
-@using TrapchumApp.Services
+﻿@using Applications.Extensions.Identity.Authorizations.Extensions
+@using Applications.Features.LoanRequests.Interfaces
+@using TrapchumApp.Helpers.Extensions
 <RadzenPanelMenuItem Text="Loan Management" Icon="dataset">
-        <RadzenPanelMenuItem Text="Loans" Icon="lists" Path="@($"/App/Loan/{BranchId}/Branches")" Visible="@_canShowLoan" />
-        <RadzenPanelMenuItem Text="Client Due Pay" Icon="schedule" Path="@($"/App/Loan/{BranchId}/Branches/{UserId}/Users/Schedules")" Visible="@_canShowLoan"/>
-        <RadzenPanelMenuItem Text="Loan Write Off" Icon="person_off" Path="/app/loan/write-off" Visible="@_isAccountOnly"/>
-    <RadzenPanelMenuItem Text="Loan Pay Off" Icon="person_off" Path="/app/loan/pay-off" Visible="@_isAccountOnly" />
-        <RadzenPanelMenuItem Text="Loan Request" Icon="request_quote" Path="@($"/App/Request/{BranchId}/Branches")" Visible="@_isAccountOnly" />
+    <RadzenPanelMenuItem Text="Loans" Icon="lists" Path="@($"/app/loan/disbursment/{BranchId}/branches")" Visible="@_canShowLoan" />
+    <RadzenPanelMenuItem Text="Client Due Pay"
+                         Icon="schedule"
+                         Path="@($"/app/loan/schedules/{BranchId}/branches")" Visible="@_canShowLoan"/>
+    <RadzenPanelMenuItem Text="Loan Write Off" Icon="person_off" Path="@($"/app/loan/disbursement/write-off/{BranchId}")" Visible="@_isAccountOnly" />
+    <RadzenPanelMenuItem Text="Loan Pay Off" Icon="person_off" Path="@($"/app/loan/disbursement/pay-off/{BranchId}")" Visible="@_isAccountOnly" />
+    <RadzenPanelMenuItem Text="Loan Request" Icon="request_quote" Path="@($"/app/loan/request/{BranchId}/branches")"
+                         Visible="@_isAccountOnly"/>
 </RadzenPanelMenuItem>
 
 @code {
     [Parameter] public int BranchId { get; set; } = 0;
-    [Parameter] public string UserId { get; set; } = string.Empty;
     [Parameter] public bool BranchState { get; set; } = false;
     [CascadingParameter] private Task<AuthenticationState> AuthenticationState { get; set; } = default!;
     string _loanRequestUrl = "";
@@ -26,6 +21,7 @@
     string _clientDuePayUrl = "";
     string _customerUrl = "";
     string _loanUrl = "";
+    private string? _userId = string.Empty;
     bool _canShowLoan = false;
     bool _canShowLoanRequest = false;
     bool _isAdminOnly = false;
@@ -33,11 +29,14 @@
     bool _isManagerOnly = false;
     bool _canReadLoanRequest = false;
     bool _isAccountOnly = false;
+
     protected override async Task OnInitializedAsync()
     {
         var state = await AuthenticationState;
 
         var user = state.User;
+        
+        _userId = state.GetUserId();
 
         _canShowLoan = await _authorizeService.MustHasPermissionAsync(user, LoanPolicies.Read);
 
@@ -52,17 +51,17 @@
         _canReadLoanRequest = await _authorizeService.MustHasPermissionAsync(user, AppPermission.RuleFor(Modules.LoanRequest, Feature.Read));
 
         _isAccountOnly = await _authorizeService.MustHasPermissionAsync(user, RolePolicies.AccountOnly);
-        
-        _changeCreditUrl = $"/App/Loan/CreditAgent/{BranchId}/Branches?UserId={UserId}";
 
-        _loanRequestUrl = $"/App/Request/{BranchId}/Branches/?UserId={UserId}";
+        _changeCreditUrl = $"/App/Loan/CreditAgent/{BranchId}/Branches";
 
-        _clientDuePayUrl = $"/App/Loan/{BranchId}/Branches/{UserId}/Users/Schedules";
+        _loanRequestUrl = $"/App/Request/{BranchId}/Branches";
 
-        _customerUrl = $"/App/Customer/{BranchId}/Branches?UserId={UserId}";
+        _clientDuePayUrl = $"/App/Loan/{BranchId}/Branches/Schedules";
 
-        _loanUrl = $"/App/Loan/{BranchId}/Branches?UserId={UserId}";
-        
+        _customerUrl = $"/App/Customer/{BranchId}/Branches";
+
+        _loanUrl = $"/App/Loan/{BranchId}/Branches";
+
         await base.OnInitializedAsync();
     }
 

@@ -1,6 +1,5 @@
 ﻿using Applications.Constants.Authorizations;
 using Applications.Interfaces.Identity;
-using Applications.Requests.Identity;
 using Applications.Responses;
 using Applications.Responses.Auths;
 using Applications.Responses.Paginations;
@@ -11,10 +10,11 @@ using Infrastructures.DataAccess;
 using Mapster;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Security.Claims;
+using Applications.Features.Identity.Roles.Requests;
+using Applications.Features.Identity.Roles.Responses;
+using Applications.Features.Identity.Users;
 
-namespace Infrastructures.Implements;
+namespace Infrastructures.Implements; 
 
 public sealed class RoleRepository(
     RoleManager<ApplicationRole> roleManager,

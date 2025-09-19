@@ -4,8 +4,6 @@ using Applications.Enumerations;
 using Applications.Extensions.Enums;
 using Applications.Extensions.NumberExtensions;
 using Applications.Features.Settings.UseCases;
-using Applications.Requests.Loans.Payments;
-using Applications.Requests.Transactions.LoanTransactions;
 using Applications.Services.Loans;
 using Domains.Models.Identity;
 using Domains.Models.Loans;
@@ -15,6 +13,8 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
 using Radzen;
 using System.Threading.Tasks;
+using Applications.Features.LoanPayments.Requests;
+using Applications.Features.Transactions.LoanTransactions;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 {
@@ -37,6 +37,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 
         bool isBusy = false;
 
+        EditForm editForm;
         void CloseModal()
         {
             DialogService.Close(false);
@@ -132,6 +133,13 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 
         async Task OnSaveChanges()
         {
+
+
+            if (editForm.EditContext?.Validate() == false)
+            {
+                return;
+            }
+
             var confirmOption = new ConfirmOptions
             {
                 CancelButtonText = "Cancel",
@@ -183,6 +191,8 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
                 var confirmPayment = await DialogService.Confirm(message, "Payment", confirmOption);
 
                 if (confirmPayment == false) return;
+
+             
 
                 var result = await _loanPaymentService.RecievePayment(tran, LoanRepayment.BranchRefId);
 

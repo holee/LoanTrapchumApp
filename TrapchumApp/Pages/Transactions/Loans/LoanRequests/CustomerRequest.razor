@@ -3,7 +3,7 @@
 @using Applications.Features.Currencies
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Services
+@using Applications.Features.LoanRequests.Interfaces
 @using TrapchumApp.Pages.Lists.Collaterals
 @using TrapchumApp.Pages.Lists.Customers
 @using TrapchumApp.Services
@@ -85,7 +85,6 @@
         </tr>
     </tbody>
 </table>
-
 <RadzenRow AlignItems="AlignItems.Center" Visible="@ShowAdditionalInfo">
     <RadzenColumn Size="12" SizeMD="6">
         <CustomerInc CustomerId="@CustomerId" ShowAdd="true" ShowReload="false" ShowCommand="true" />

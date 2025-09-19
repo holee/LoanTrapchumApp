@@ -1,11 +1,7 @@
-﻿using Applications.Requests.Settings;
-using Applications.Responses.ViewModels;
+﻿using Applications.Responses.ViewModels;
 using Domains.Models.Lists;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Applications.Features.Settings.Requests;
+
 
 namespace Applications.Commons.Mappers
 {

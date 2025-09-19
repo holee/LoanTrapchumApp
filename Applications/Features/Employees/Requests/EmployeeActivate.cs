@@ -1,0 +1,9 @@
+﻿namespace Applications.Features.Employees.Requests
+{
+    public sealed class EmployeeActivate(long employeeId, bool isActive, int editSequent)
+    {
+        public long EmployeeId { get;} = employeeId;
+        public bool IsActive { get;} = isActive;
+        public int EditSequent { get; } = editSequent;
+    }
+}

@@ -1,17 +1,15 @@
-﻿@using Applications.ApplicationPolicies
-@using Applications.Features.Addresses
+﻿@using Applications.Features.Addresses
 @using Applications.Features.Branches
 @using Applications.Features.Currencies
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Services
+@using Applications.Features.LoanRequests.Interfaces
 @using Microsoft.AspNetCore.Components.Routing
 @using TrapchumApp.Helpers.Constants
 @using TrapchumApp.Pages.Transactions.Exchanges
 @using TrapchumApp.Services
 @implements IDisposable
 @inherits LayoutComponentBase
-@attribute [StreamRendering(false)]
 @inject LoadingTrackerService Tracker
 <RadzenComponents @rendermode="InteractiveServer" />
 <RadzenProgressBar Visible="@isLoading"
@@ -46,7 +44,8 @@
         <RadzenPanelMenu DisplayStyle="@(sidebarExpanded? MenuItemDisplayStyle.IconAndText: MenuItemDisplayStyle.Icon)">
             <RadzenPanelMenuItem Path="/" Text="សហគ្រាសបញ្ចាំទ្រព្យជុំ" Icon="dashboard" />
         </RadzenPanelMenu>
-        <RadzenPanelMenu DisplayStyle="@(sidebarExpanded? MenuItemDisplayStyle.IconAndText: MenuItemDisplayStyle.Icon)"
+        <RadzenPanelMenu
+                         DisplayStyle="@(sidebarExpanded? MenuItemDisplayStyle.IconAndText: MenuItemDisplayStyle.Icon)"
                          ShowArrow="sidebarExpanded">
             <AuthorizeView>
                 <Authorized>
@@ -98,38 +97,45 @@
                     {
                         <RadzenPanelMenuItem Text="Loan Management" Icon="dataset">
                             <RadzenPanelMenuItem Text="Guarantor" Icon="how_to_reg" Path="/App/Customer/Guarantor" />
-                            <RadzenPanelMenuItem Text="Credit Officer" Icon="switch_account" Path="/App/Employee/CreditAgent" />
-                            <RadzenPanelMenuItem Text="Loan Product" Icon="inventory_2" Path="/App/Loan/LoanProduct" />
-                            <RadzenPanelMenuItem Text="Loan Category" Icon="lists" Path="/App/Loan/Categories" />
-                            <RadzenPanelMenuItem Text="Collaterals" Icon="invert_colors" Path="/App/Customer/Collateral" />
-                            <RadzenPanelMenuItem Text="Holidays" Icon="calendar_add_on" Path="/App/Holiday" />
-                            <RadzenPanelMenuItem Text="Change Credit Agent" Icon="@IconNames.SwitchAccount" Path="@($"/App/Loan/CreditAgent/{branchId}/Branches")" />
+                            <RadzenPanelMenuItem Text="Credit Officer" Icon="switch_account"
+                                                 Path="/app/employee/credit-agent" />
+                            <RadzenPanelMenuItem Text="Loan Product" Icon="inventory_2" Path="/app/loan/product" />
+                            <RadzenPanelMenuItem Text="Loan Category" Icon="lists" Path="/app/loan/categories" />
+                            <RadzenPanelMenuItem Text="Collaterals" Icon="invert_colors"
+                                                 Path="/app/customer/collateral" />
+                            <RadzenPanelMenuItem Text="Holidays" Icon="calendar_add_on" Path="/app/holiday" />
+                            <RadzenPanelMenuItem Text="Change Credit Agent" Icon="@IconNames.SwitchAccount"
+                                                 Path="@($"/app/loan/disbursment/credit-agent/{branchId}/branches")" />
                         </RadzenPanelMenuItem>
                     }
-                    @if (bState.IsAccount && bState.State)
+                    @if (bState is { IsAccount: true, State: true })
                     {
-                        <LoanManagementItems UserId="@userId"
-                                             BranchId="@branchId"
+                        <LoanManagementItems BranchId="@branchId"
                                              BranchState="@bState.State" />
                     }
 
                     @if (bState.IsCreditAgent)
                     {
                         <RadzenPanelMenuItem Text="Loan Management" Icon="dataset">
-                            <RadzenPanelMenuItem Text="Customers" Icon="group" Path="@($"/App/Customer/{branchId}/Branches")" />
-                            <RadzenPanelMenuItem Text="Collaterals" Icon="invert_colors" Path="/App/Customer/Collateral" />
-                            <RadzenPanelMenuItem Text="Request" Icon="request_quote" Path="@($"/App/Request/{branchId}/Branches")" />
-                            <RadzenPanelMenuItem Text="Loans" Icon="@IconNames.MoneyBag" Path="@($"/App/Loan/{branchId}/Branches")" />
+                            <RadzenPanelMenuItem Text="Customers" Icon="group"
+                                                 Path="@($"/app/customer/{branchId}/branches")" />
+                            <RadzenPanelMenuItem Text="Collaterals" Icon="invert_colors"
+                                                 Path="/app/customer/collateral" />
+                            <RadzenPanelMenuItem Text="Request" Icon="request_quote"
+                                                 Path="@($"/app/loan/request/{branchId}/branches")" />
+                            <RadzenPanelMenuItem Text="Loans" Icon="@IconNames.MoneyBag"
+                                                 Path="@($"/app/loan/disbursment/{branchId}/branches")" />
                         </RadzenPanelMenuItem>
-
                     }
 
                     @if (bState.IsManager)
                     {
                         <RadzenPanelMenuItem Text="Loan Management" Icon="dataset">
-                            <RadzenPanelMenuItem Text="Loan Request" Icon="request_quote" Path="@($"/App/Request/{branchId}/Branches/?UserId={userId}")" />
+                            <RadzenPanelMenuItem Text="Loan Request" Icon="request_quote"
+                                                 Path="@($"/app/loan/request/{branchId}/branches")" />
+                            <RadzenPanelMenuItem Text="Loans" Icon="@IconNames.MoneyBag"
+                                                 Path="@($"/app/loan/disbursment/{branchId}/branches")" />
                         </RadzenPanelMenuItem>
-
                     }
 
                 </Authorized>
@@ -183,14 +189,10 @@
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
-
         currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
 
         StateHasChanged();
     }
-
-
-
 
 
     public void Dispose()
@@ -207,14 +209,14 @@
 
     async Task ShowCurrencyDialogue()
     {
-        var param = new Dictionary<string, object?> {
+        var param = new Dictionary<string, object?>
+        {
             { "BranchId", branchId },
             { "UserId", userId }
         };
 
         var options = new SideDialogOptions
         {
-
         };
 
         await DialogService.OpenSideAsync<ExchangesSidebar>("Currency Exchange", param, options);

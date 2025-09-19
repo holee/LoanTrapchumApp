@@ -1,7 +1,6 @@
 
+using Applications.Features.Addresses.Responses;
 using Applications.Interfaces.Addresses;
-using Applications.Requests.Lists.Addreses;
-using Applications.Requests.Lists.Entities;
 using Applications.Responses.Message;
 using Domains.Models.Addresses;
 using Domains.Models.Lists;

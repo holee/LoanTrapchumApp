@@ -1,8 +1,8 @@
-﻿using Applications.Responses.ViewModels.Addresses;
+﻿using Applications.Features.Currencies.Responses;
+using Applications.Responses.ViewModels.Addresses;
 using Applications.Responses.ViewModels.Auths;
 using Applications.Responses.ViewModels.Branches;
 using Applications.Responses.ViewModels.Collaterals;
-using Applications.Responses.ViewModels.Currencies;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Responses.ViewModels.Departments;
 using Applications.Responses.ViewModels.Employees;
@@ -34,7 +34,6 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage;
 using System.Data;
 using System.Reflection;
-using System.Reflection.Emit;
 
 namespace Infrastructures.DataAccess
 {
@@ -53,9 +52,9 @@ namespace Infrastructures.DataAccess
             foreach (var property in builder.Model.GetEntityTypes()
                .SelectMany(t => t.GetProperties())
                .Where(p => p.ClrType == typeof(decimal) || p.ClrType == typeof(decimal?)))
-                {
-                    property.SetColumnType("decimal(18,3)");
-                }
+            {
+                property.SetColumnType("decimal(18,3)");
+            }
 
             builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
@@ -122,24 +121,13 @@ namespace Infrastructures.DataAccess
         }
 
 
-
-
-        /// <summary>
-        /// Handles the DbSet properties for the DataContext.
-        /// </summary>
-
         //public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         //{
 
-        //    //var auditEntries = OnBeforeSaveChanges();
+        //    ProcessSaveChangedAsync();
 
-        //    //ProcessSaveChangedAsync();
+        //    return await base.SaveChangesAsync(cancellationToken);
 
-        //    var result = await base.SaveChangesAsync(cancellationToken);
-
-        //   // await OnAfterSaveChanges(auditEntries);
-
-        //    return result;
         //}
 
 
@@ -158,6 +146,7 @@ namespace Infrastructures.DataAccess
         public DbSet<Department> Departments => Set<Department>();
         public DbSet<UserLoanSize> UserLoanSizes => Set<UserLoanSize>();
         public DbSet<Salutation> Salutations => Set<Salutation>();
+        public DbSet<Reciept> Reciepts => Set<Reciept>();
         public DbSet<Employee> Employees => Set<Employee>();
         public DbSet<Vendor> Vendors => Set<Vendor>();
         public DbSet<LoanCreditAgent> LoanCreditAgents => Set<LoanCreditAgent>();
@@ -223,21 +212,21 @@ namespace Infrastructures.DataAccess
         public DbSet<AppSettings> AppSettings => Set<AppSettings>();
         public DbSet<VUser> VUsers => Set<VUser>();
         public DbSet<VCurrenciesList> VCurrenciesList => Set<VCurrenciesList>();
-        public DbSet<VCurrencyNotes> VCurrencyNotes => Set<VCurrencyNotes>();
+        public DbSet<VCurrencyCounter> VCurrencyNotes => Set<VCurrencyCounter>();
         public DbSet<VBranchResponse> VBranchs => Set<VBranchResponse>();
         public DbSet<VDepartment> VDepartments => Set<VDepartment>();
         public DbSet<VSpotRate> VSpotRates => Set<VSpotRate>();
         public DbSet<VLoanDisbursments> VLoanDisbursements => Set<VLoanDisbursments>();
-        public DbSet<VSchedule> VSchedules => Set<VSchedule>(); 
+        public DbSet<VSchedule> VSchedules => Set<VSchedule>();
         public DbSet<VLoanRepaymentLine> VLoanRepaymentLines => Set<VLoanRepaymentLine>();
         public DbSet<VCollateral> VCollaterals => Set<VCollateral>();
         public DbSet<JournalEntryVm> VJournals => Set<JournalEntryVm>();
         public DbSet<VLedger> VLedgers => Set<VLedger>();
         public DbSet<VendorVm> VVendor => Set<VendorVm>();
         public DbSet<VGuarantor> VGuarantors => Set<VGuarantor>();
-        public DbSet<VEmployeeCreditAgent> EmployeeCreditAgent => Set<VEmployeeCreditAgent>(); 
+        public DbSet<VEmployeeCreditAgent> EmployeeCreditAgent => Set<VEmployeeCreditAgent>();
         public DbSet<VOtherNames> VOtherNames => Set<VOtherNames>();
-        public DbSet<NameListVm> VNameLists => Set<NameListVm>(); 
+        public DbSet<NameListVm> VNameLists => Set<NameListVm>();
         public DbSet<VEmployeeList> EmployeeLists => Set<VEmployeeList>();
         public DbSet<VCustomerList> VCustomerLists => Set<VCustomerList>();
         public DbSet<VCreditAgent> VCreditAgents => Set<VCreditAgent>();

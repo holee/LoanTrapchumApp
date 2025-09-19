@@ -1,5 +1,5 @@
-﻿using Applications.Interfaces.Addresses;
-using Applications.Requests.Lists.Addreses;
+﻿using Applications.Features.Addresses.Responses;
+using Applications.Interfaces.Addresses;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Addresses;
@@ -8,15 +8,9 @@ using Infrastructures.DataAccess;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Infrastructures.Implements
 {
-    public class CommuneService : ICommuneService
+    public sealed class CommuneService : ICommuneService 
     {
         private readonly IDbContextFactory<DataContext> contextFactory;
         private readonly ILogger<CommuneService> logger;

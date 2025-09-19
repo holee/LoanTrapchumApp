@@ -1,11 +1,11 @@
-﻿using Applications.Interfaces.Lists;
-using Applications.Requests.Loans.CreditAgents;
+﻿using Applications.Features.CreditAgents.Requests;
+using Applications.Interfaces.Lists;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Responses.ViewModels.Employees;
 using Domains.Models.Lists.CreditAgents;
-using Domains.Models.Loans;
+using Domains.Models.Loans; 
 using Mapster;
 
 namespace Applications.Services.Lists

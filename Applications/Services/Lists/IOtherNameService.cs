@@ -1,9 +1,10 @@
 ﻿using Applications.Commons.Mappers;
+using Applications.Features.OtherNames;
 using Applications.Interfaces.Lists;
-using Applications.Requests.Lists.OtherNames;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.OtherNames;
+using Domains.Models.Lists;
 using Domains.Models.Lists.Customers;
 using Domains.Models.Lists.Employees;
 using Domains.Models.Lists.Vendors;
@@ -11,7 +12,7 @@ using Mapster;
 
 namespace Applications.Services.Lists
 {
-    public interface IOtherNameServiceImpl
+    public interface IOtherNameServiceImpl  
     {
         Task<Result<string>> ConvertToCustomerAsync(string? id, ConvertCreateCustomer customer);
         Task<Result<string>> ConvertToEmployeeAsync(string? id, ConvertCreateEmployee employee);
@@ -20,7 +21,7 @@ namespace Applications.Services.Lists
         Task<Result<string>> UpdateAsync(EntityNamesCreate othername);
         Task<Result<string>> CreateGaurantorAsync(EntityNamesCreate othername);
         Task<Result<string>> DeleteAsync(string? othernameId);
-        Task<Result<EntityNames>> GetByIdAsync(string? id);
+        Task<Result<EntityNames>> GetByIdAsync(string? id); 
         Task<Result<T>> GetDetailAsync<T>(string? id) where T : class;
         Task<Result<EntityNamesCreate>> GetEditNameByIdAsync(string? id);
         Task<IEnumerable<T>> GetNameLists<T>(string? nameId, QueryParam q) where T : class, new();

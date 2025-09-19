@@ -17,6 +17,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Data;
 using System.Linq.Expressions;
+using Domains.Models.Lists;
 
 namespace Infrastructures.Implements;
 
@@ -62,7 +63,7 @@ public sealed class CustomerRepository(
 
         queries = ApplyOrdering(queries, param);
 
-        var countTask =await queries.CountAsync(cancellation);
+        var countTask = await queries.CountAsync(cancellation);
 
         var dataTask = await queries
                         .Skip(param.Skip)
@@ -274,6 +275,7 @@ public sealed class CustomerRepository(
 
         return Result.Success(items);
     }
+
     public async Task<Result<IEnumerable<VLoanDisbursments>>> GetCustomerLoanHistoryAsync(string? customerId)
     {
         using var db = dapperFactory.CreateConnection();
@@ -356,7 +358,7 @@ public sealed class CustomerRepository(
 
             await using var context = await contextFactory.CreateDbContextAsync(cancellation);
 
-            var customerSequence = await GetMaxSequenceNUmber(context);
+            var customerSequence = await GetMaxSequenceNumber(context);
 
             model.Customer!.CustomerInfId = customerSequence;
 
@@ -422,7 +424,7 @@ public sealed class CustomerRepository(
                                 cancellation);
 
     }
-    private async Task<long> GetMaxSequenceNUmber(DataContext context)
+    private async Task<long> GetMaxSequenceNumber(DataContext context)
     {
         var maxSequence = await context.EntityNames
                       .Include(x => x.Customer)
@@ -431,6 +433,7 @@ public sealed class CustomerRepository(
                       .MaxAsync();
         return maxSequence > 0 ? maxSequence + 1 : 1;
     }
+
     private string? CreateCustomerKey(long? customerSequence, string? firstName, string? lastName)
     {
         var customerKey = "";

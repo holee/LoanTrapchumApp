@@ -1,5 +1,4 @@
 ﻿using Domains.Models.Transaction;
-using Infrastructures.DataAccess.Conversions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

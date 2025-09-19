@@ -1,4 +1,5 @@
-﻿using Applications.Requests.Identity;
+﻿using Applications.Features.Identity.Users;
+using Applications.Features.Identity.Users;
 
 namespace Applications.Responses.ViewModels.Auths
 {

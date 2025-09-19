@@ -3,9 +3,10 @@
 @using Applications.Features.Currencies
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Services
+@using Applications.Features.LoanRequests.Interfaces
 @using Microsoft.AspNetCore.Components.Web
 @using TrapchumApp.Helpers.Constants
+@using TrapchumApp.Pages.Lists
 @using TrapchumApp.Services
 <GridToolbar SearchChanged="GetLoanDataFilter">
     <RightChildren>
@@ -29,9 +30,9 @@
                 PageSize="@pageSize"
                 ShowPagingSummary="true"
                 PageSizeOptions="@StorageConstant.PageSizeOptions"
+                PageSizeChanged="ChangedPageSize"
                 Count="@counts"
                 CellRender="RowRenderChanged"
-                PageSizeChanged="ChangedPageSize"
                 @bind-Value="SelectedPaymentSchedules"
                 Data="@LatePaymentSchedules">
     <Columns>
@@ -43,7 +44,7 @@
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Title="Payment Date"
-                              Width="8rem"
+                              Width="7.5rem"
                               Property="PaymentDate"
                               Context="p">
             <Template>
@@ -52,7 +53,7 @@
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Title="Day Arrea"
                               Property="DayArrea"
-                              Width="7rem"
+                              Width="6rem"
                               Context="p">
             <Template>
                 <span>@p.DayArrea <b>(ថ្ងៃ)</b></span>
@@ -63,7 +64,7 @@
                               Width="10rem"
                               Context="p">
             <Template>
-                @p.AltName
+                <KhmerName AltName="@p.AltName" />
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Title="Principle"
@@ -131,9 +132,10 @@
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Title="Actions"
                               Width="5rem"
+                              TextAlign="TextAlign.Center"
                               Context="p">
             <Template>
-                <RadzenButton Size="ButtonSize.ExtraSmall"
+                <RadzenButton Size="@Styles.DefaultSize"
                               Icon="@IconNames.Edit"
                               Variant="Variant.Text"
                               Click="@(()=>GetCustomerLateSchedules(p))" />

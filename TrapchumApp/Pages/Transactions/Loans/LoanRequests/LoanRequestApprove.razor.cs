@@ -1,13 +1,10 @@
 using Applications.Enumerations;
 using Applications.Extensions.Identity.Policies;
 using Applications.Extensions.Web;
-using Applications.Features.LoanRequests.Services;
+using Applications.Features.LoanRequests.Interfaces;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
-using Radzen;
 
 namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 {
@@ -105,7 +102,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             var param = new QueryParam(pageIndex, pageSize, sortColumn, sortDescending, isIncludeInactive, filtertext);
 
 
-            var rsp = await _requestService.GetLoanRequestsAsync(userId, BranchId, RequestStatus.Aprove, param);
+            var rsp = await _requestService.GetLoanRequestsAsync(userId, BranchId, RequestStatus.Approved, param);
 
 
             LoanRequests = rsp.Items;

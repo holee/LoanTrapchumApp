@@ -1,11 +1,4 @@
-﻿@using Applications.Features.Addresses
-@using Applications.Features.Branches
-@using Applications.Features.Currencies
-@using Applications.Features.Customers.Services
-@using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Services
-@using TrapchumApp.Helpers.Constants
-@using TrapchumApp.Services
+﻿@using Applications.Features.LoanRequests.Interfaces
 <style>
     .table-cell-edited {
         position: relative;
@@ -21,7 +14,7 @@
             border-top: 10px solid red;
             border-left: 10px solid transparent;
         }
-</style>
+</style> 
 <table class="table-sm">
     <tr>
         <th class="rz-w-25">Customer Name</th>

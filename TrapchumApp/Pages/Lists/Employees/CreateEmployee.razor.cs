@@ -1,4 +1,4 @@
-using Applications.Requests.Lists.OtherNames;
+using Applications.Features.OtherNames;
 using Domains.Models.Bases;
 using Microsoft.AspNetCore.Components;
 using Radzen;

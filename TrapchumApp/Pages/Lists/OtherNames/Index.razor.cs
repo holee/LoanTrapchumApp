@@ -1,6 +1,4 @@
 using Applications.Extensions;
-using Applications.Requests.Lists.Addreses;
-using Applications.Requests.Lists.OtherNames;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.OtherNames;
 using Applications.Services.Lists;
@@ -9,6 +7,8 @@ using Microsoft.AspNetCore.Components;
 using Radzen;
 using Radzen.Blazor;
 using System.Threading.Tasks;
+using Applications.Features.Addresses.Responses;
+using Applications.Features.OtherNames;
 using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Lists.OtherNames;

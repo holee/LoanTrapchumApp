@@ -1,4 +1,5 @@
-﻿using Applications.Requests.Lists.Entities;
+﻿using Applications.Features.Entities;
+using Applications.Features.Entities;
 using Applications.Responses;
 using Applications.Responses.Auths;
 using Applications.Responses.Paginations;
@@ -20,7 +21,7 @@ namespace Applications.Interfaces.Branches
         Task<Result<IEnumerable<VBranchResponse>>> GetBranchesByUser(string? userId, int? branchId);
       
         Task<Result<ResultStatus>> GetBrachStatus(int? branchId);
-        Task<Result<UserBranchesResponse>> GetBranchesByUser(string userId);
+        Task<Result<UserBranchesResponse>> GetBranchesByUser(string? userId);
         Task<Pager<VBranchResponse>> GetBranchesAsync(QueryParam param);
         Task<Result<Pager<T>>> GetBranchesAsync<T>(int? branchId, QueryParam param) where T : class;
         Task<Result<IEnumerable<T>>> GetBranchesByUser<T>(string? userId, int? branchId = 0) where T : class;

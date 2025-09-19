@@ -3,103 +3,100 @@
 @using Applications.Features.Currencies
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Services
+@using Applications.Features.LoanRequests.Interfaces
 @using TrapchumApp.Helpers.Constants
 @using TrapchumApp.Services
 <RadzenStack Gap="1rem" Orientation="Orientation.Vertical"
              JustifyContent="JustifyContent.SpaceBetween"
              Style="width:100%;">
     <RadzenStack>
-        <EditForm Model="mx" @ref="form">
+        <EditForm Model="_mx" @ref="form">
             <ValidationSummary />
             <FluentValidationValidator DisableAssemblyScanning="true" />
-            <input type="hidden" value="@mx.SpotRate" />
-            <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
+            <input type="hidden" value="@_mx.SpotRate" />
+            <RadzenRow AlignItems="AlignItems.Center" class="@Styles.Mb2">
                 <RadzenColumn Size="6">
                     <RadzenDropDown Data="@StorageConstant.ExchangedTypes"
-                                    class="rz-w-100"
+                                    class="@Styles.W100"
                                     TextProperty="@nameof(Items.Label)"
                                     ValueProperty="@nameof(Items.Value)"
-                                    @bind-Value="mx.CurrencyTypeId"
+                                    @bind-Value="_mx.CurrencyTypeId"
                                     SelectedItemChanged="@CurrencyModeSelected">
                     </RadzenDropDown>
                 </RadzenColumn>
                 <RadzenColumn Size="6">
                     <RadzenDropDown TextProperty="@nameof(Items.Label)"
-                                    class="rz-w-100"
-                                    @bind-Value="mx.BuyCurrencyId"
+                                    class="@Styles.W100"
+                                    @bind-Value="_mx.BuyCurrencyId"
                                     ValueProperty="@nameof(Items.Value)"
-                                    Data="buyCurrencies">
+                                    Data="_buyCurrencies">
                     </RadzenDropDown>
                 </RadzenColumn>
             </RadzenRow>
-            <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
+            <RadzenRow AlignItems="AlignItems.Center" class="@Styles.Mb2">
                 <RadzenColumn Size="6">
-                    <RadzenLabel Component="sellCurrencies" class="rz-w-100">
+                    <RadzenLabel Component="sellCurrencies" class="@Styles.W100">
                         <RadzenBadge BadgeStyle="BadgeStyle.Primary"
-                                     class="rz-p-2 rz-w-100"
+                                     class="@Styles.P2W100"
                                      Shade="Shade.Darker">
-                            @mx.ExchangedMode
+                            @_mx.ExchangedMode
                         </RadzenBadge>
                     </RadzenLabel>
                 </RadzenColumn>
                 <RadzenColumn Size="6">
                     <RadzenDropDown TextProperty="@nameof(Items.Label)"
-                                    @bind-Value="mx.SellCurrencyId"
-                                    class="rz-w-100"
+                                    @bind-Value="_mx.SellCurrencyId"
+                                    class="@Styles.W100"
                                     Name="sellCurrencies"
                                     ValueProperty="@nameof(Items.Value)"
-                                    Data="sellCurrencies">
+                                    Data="_sellCurrencies">
                     </RadzenDropDown>
                 </RadzenColumn>
             </RadzenRow>
-            <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
-                <RadzenColumn Size="4">
-                    <RadzenLabel Component="ExchangeRate">Ex.RATE</RadzenLabel>
-                </RadzenColumn>
-                <RadzenColumn Size="8">
+            <RadzenRow AlignItems="AlignItems.Center" class="@Styles.Mb2">
+                <RadzenColumn Size="12">
                     <TCNumbers OnValueChanged="ExchangedTextChanged"
                                MouseLeave="MouseOut"
+                               IsFloatLabel="true"
+                               Label="Ex.RATE"
                                Name="ExchangeRate"
-                               @bind-Value="mx.ExchangeRate" />
+                               @bind-Value="_mx.ExchangeRate" />
                 </RadzenColumn>
             </RadzenRow>
-            <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
-                <RadzenColumn Size="4">
-                    <RadzenLabel Component="Amount">AMOUNT</RadzenLabel>
-                </RadzenColumn>
-                <RadzenColumn Size="8">
-                    <TCNumbers @bind-Value="mx.Amount"
+            <RadzenRow AlignItems="AlignItems.Center" class="@Styles.Mb2">
+                <RadzenColumn Size="12">
+                    <TCNumbers @bind-Value="_mx.Amount"
                                Name="Amount"
+                               IsFloatLabel="true"
+                               Label="AMOUNT"
                                OnValueChanged="AmountTextChanged" />
                 </RadzenColumn>
             </RadzenRow>
-            <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
-                <RadzenColumn Size="4">
-                    <RadzenLabel Component="TotalAmount">TOTAL</RadzenLabel>
-                </RadzenColumn>
-                <RadzenColumn Size="8">
+            <RadzenRow AlignItems="AlignItems.Center" class="@Styles.Mb2">
+                <RadzenColumn Size="12">
                     <TCNumbers OnValueChanged="TextTotalChanged"
+                               IsFloatLabel="true"
+                               Label="TOTAL"
                                Name="TotalAmount"
-                               @bind-Value="mx.TotalAmount" />
+                               @bind-Value="_mx.TotalAmount" />
                 </RadzenColumn>
             </RadzenRow>
-            <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
-                <RadzenColumn Size="4">
-                    <RadzenLabel Component="DESCRIPTION">DESCRIPTION</RadzenLabel>
-                </RadzenColumn>
-                <RadzenColumn Size="8">
-                    <RadzenTextArea class="rz-w-100"
-                                    Name="DESCRIPTION"
-                                    Placeholder="Description"
-                                    @bind-Value="mx.Description"></RadzenTextArea>
+            <RadzenRow AlignItems="AlignItems.Center" class="@Styles.Mb2">
+                <RadzenColumn Size="12">
+                    <RadzenFormField Text="DESCRIPTION" AllowFloatingLabel="true" class="@Styles.W100">
+                        <RadzenTextArea class="@Styles.W100"
+                                        Name="DESCRIPTION"
+                                        Placeholder="Description"
+                                         Style="resize:none;"
+                                        @bind-Value="_mx.Description"></RadzenTextArea>
+                    </RadzenFormField>
                 </RadzenColumn>
             </RadzenRow>
         </EditForm>
     </RadzenStack>
     <RadzenStack Gap="1rem" Orientation="Orientation.Horizontal"
                  AlignItems="AlignItems.Center"
-                 class="rz-mt-2"
+                 class="@Styles.Mt2"
                  Style="@(IsSideBar ? "position:absolute;bottom:1rem;right:0.5rem;":"")"
                  JustifyContent="JustifyContent.End">
         <RadzenButton Icon="save"
@@ -107,18 +104,18 @@
                       Text="Save"
                       Click="@SaveAndNew"
                       BusyText="Please wait...."
-                      IsBusy="isBusy"
-                      ButtonStyle="ButtonStyle.Success"
+                      IsBusy="_isBusy"
+                      ButtonStyle="@Styles.Save"
                       Size="ButtonSize.ExtraSmall" />
         <RadzenButton Icon="@IconNames.Cancel"
                       ButtonType="ButtonType.Button"
                       Text="Close"
                       Click="ClosingSidebar"
                       BusyText="Please wait...."
-                      IsBusy="isBusy"
-                      ButtonStyle="ButtonStyle.Danger"
+                      IsBusy="_isBusy"
+                      ButtonStyle="@Styles.Cancel"
                       Visible="@IsSideBar"
-                      Size="ButtonSize.ExtraSmall" />
+                      Size="@Styles.DefaultSize" />
     </RadzenStack>
 </RadzenStack>
 

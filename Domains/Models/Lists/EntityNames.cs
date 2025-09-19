@@ -1,8 +1,9 @@
 using Domains.Models.Bases;
-using Domains.Models.Lists;
 using Domains.Models.Lists.Customers;
 using Domains.Models.Lists.Employees;
 using Domains.Models.Lists.Vendors;
+
+namespace Domains.Models.Lists;
 
 public sealed class EntityNames : BaseEntity
 {

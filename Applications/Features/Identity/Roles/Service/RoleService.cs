@@ -1,16 +1,11 @@
 ﻿using Applications.Interfaces.Identity;
-using Applications.Requests.Identity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Applications.Features.Identity.Roles.Requests;
 
 namespace Applications.Features.Identity.Roles.Service
 {
     public sealed class RoleService
     {
-        private readonly IRoleService _roleService;
+        private readonly IRoleService _roleService; 
 
         public RoleService(IRoleService roleService)
         {

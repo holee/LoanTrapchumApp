@@ -5,7 +5,7 @@
         public static IServiceCollection AddOtherServices(this IServiceCollection services) { 
        
             services.AddSingleton<LoadingTrackerService>();
-
+            services.AddScoped<ExcelImportService>();
             return services;
         
         }

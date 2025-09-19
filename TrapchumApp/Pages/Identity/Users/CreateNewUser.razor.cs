@@ -1,6 +1,6 @@
-﻿using Applications.Interfaces.Identity;
-using Applications.Requests.Identity;
-using Applications.Requests.Lists.Entities;
+﻿using Applications.Features.Entities;
+using Applications.Features.Identity.Users;
+using Applications.Interfaces.Identity;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Employees;
 using Microsoft.AspNetCore.Components.Forms;

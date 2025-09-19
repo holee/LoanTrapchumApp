@@ -1,4 +1,4 @@
-using Applications.Requests.Identity;
+using Applications.Features.Identity.Users;
 
 namespace TrapchumApp.Pages.Identity.Users
 {

@@ -1,8 +1,9 @@
 using Applications.Responses.ViewModels.OtherNames;
 using Domains.Models.Bases;
-using Infrastructures.DataAccess.Configurations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace Infrastructures.DataAccess.Configurations.EntityNames;
 
 public class EntityVOThernameConfiguration : IBaseEntityTypeConfigurations<VOtherNames>
 {
@@ -14,4 +15,3 @@ public class EntityVOThernameConfiguration : IBaseEntityTypeConfigurations<VOthe
     }
 
 }
-

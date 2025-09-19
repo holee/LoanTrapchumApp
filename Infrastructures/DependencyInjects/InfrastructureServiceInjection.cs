@@ -25,7 +25,7 @@ using Infrastructures.Repository;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection; 
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Infrastructures.DependencyInjects
@@ -70,6 +70,7 @@ namespace Infrastructures.DependencyInjects
                 options.ExpireTimeSpan = TimeSpan.FromDays(15);
                 options.SlidingExpiration = true;
             });
+
             services.AddSingleton<AuditingSaveChangesInterceptor>();
             services.AddSingleton<ICurrentUserService, CurrentUserService>();
             services.AddSingleton<ICustomerCollateralService, CustomerCollateralRepository>();
@@ -90,7 +91,7 @@ namespace Infrastructures.DependencyInjects
             services.AddScoped<IBankService, BankRepository>();
             services.AddScoped<IDepartmentService, DepartmentService>();
             services.AddScoped<IEmployeeService, EmployeeService>();
-            services.AddScoped<IEntityNameService, EntityNameService>();
+            services.AddScoped<IEntityNameService, EntityNameService>(); 
             services.AddScoped<IAddressService, AddressService>();
             services.AddScoped<ICashVaultService, CashVaultService>();
             services.AddScoped<ICashVaultService, CashVaultService>();
@@ -105,11 +106,11 @@ namespace Infrastructures.DependencyInjects
             services.AddScoped<IGuarantorService, GuarantorService>();
             services.AddScoped<ILoanSettingService, LoanSettingService>();
             services.AddScoped<ILoanProductService, LoanProductService>();
-            services.AddScoped<ILoanPaymentService, LoanPaymentService>();
+            services.AddScoped<ILoanPaymentService, LoanPaymentRepository>();
             services.AddScoped<ILoanScheduleService, LoanScheduleService>();
             services.AddScoped<ILoanService, LoanDisbursementRepository>();
             services.AddScoped<ILoanCategoryService, LoanCategoryService>();
-            services.AddScoped<ILoanRequestService, LoanRequestService>();
+            services.AddScoped<ILoanRequestService, LoanRequestRepository>();
             services.AddScoped<ILoanReportService, LoanReportService>();
             services.AddScoped<ISalutationService, SalutaionService>();
             services.AddScoped<INationalityService, NationalityService>();

@@ -1,11 +1,14 @@
-using Applications.Requests.Loans.LoanRequests;
+using Applications.Features.LoanRequests.Requests;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Mapster;
+using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 {
     public partial class ConfirmModal
     {
+        [CascadingParameter] private Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+
         [Parameter] public string? CustomerId { get; set; }
         [Parameter] public int BranchId { get; set; } = 0;
         [Parameter] public string? LoanRequestId { get; set; }
@@ -16,6 +19,19 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         AproveLoanDtoCreate? model = new();
 
         EditForm? refEditForm;
+
+
+        protected override async Task OnInitializedAsync()
+        {
+            if (!string.IsNullOrWhiteSpace(UserId))
+            {
+                UserId = (await AuthenticationState).GetUserId();
+            }
+
+            await base.OnInitializedAsync();
+        }
+
+
 
         async Task HandleFormRequest()
         {

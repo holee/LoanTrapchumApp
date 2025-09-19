@@ -1,4 +1,4 @@
-﻿using Applications.Requests.Lists.Employees;
+﻿using Applications.Features.Employees.Requests;
 using FluentValidation;
 namespace Applications.Validations.Employees
 {

@@ -1,10 +1,10 @@
 using Applications.Calculations;
 using Applications.Enumerations;
 using Applications.Extensions;
+using Applications.Features.LoanRequests.Requests;
 using Applications.Features.Loans.Mappers;
+using Applications.Features.Loans.Requests;
 using Applications.Features.Loans.Services;
-using Applications.Requests.Loans.Disbursements;
-using Applications.Requests.Loans.LoanRequests;
 using Applications.Responses.ViewModels.Branches;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Responses.ViewModels.Holidays;

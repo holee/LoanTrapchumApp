@@ -12,6 +12,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         [Parameter] public bool ShowCommand { get; set; } = false; 
         [Parameter] public bool ShowRemove { get; set; } = false;
         [Parameter] public EventCallback Add { get; set; }
+        
         [Parameter] public EventCallback Reload { get; set; }
         [Parameter] public EventCallback<VLoanRequestGuarantor> Remove { get; set; }
 
@@ -27,8 +28,6 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         async void ClickedAdd()
         {
             await Add.InvokeAsync();
-            //await Reload.InvokeAsync();
-            //await gridGuarantors.Reload();
         }
         async void ClickedRevmove(VLoanRequestGuarantor g)
         {

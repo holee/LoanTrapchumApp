@@ -1,11 +1,11 @@
 using Applications.Features.Settings.UseCases;
 using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.Paginations;
-using Applications.Services.LIsts;
 using Domains.Models.Collaterals;
 using Microsoft.EntityFrameworkCore;
 using Radzen.Blazor;
 using System.Threading.Tasks;
+using Applications.Services.Lists;
 
 namespace TrapchumApp.Pages.Settings
 {

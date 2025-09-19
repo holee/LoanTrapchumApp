@@ -1,4 +1,4 @@
-﻿using Applications.Requests.Settings;
+﻿using Applications.Features.Settings.Requests;
 using Applications.Responses.ViewModels.Settings;
 using Domains.Models.Loans;
 
@@ -8,7 +8,7 @@ namespace Applications.Commons.Mappers
     {
         public static UserLoanSize MapToCreate(this UserLoanSizeDtoCreate source)
         {
-            return new UserLoanSize
+            return new UserLoanSize 
             {
                 UserRefId = source.UserRefId,
                 MinUsdLoanSize = source.MinUsdLoanSize,

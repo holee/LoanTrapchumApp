@@ -3,9 +3,9 @@
 @using Applications.Features.Currencies
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Services
+@using Applications.Features.LoanRequests.Interfaces
+@using Applications.Features.Transactions.Journals
 @using Applications.Requests.Journals
-@using Applications.Requests.Transactions.Journals
 @using Applications.Responses.Lists.Currency
 @using Applications.Responses.ViewModels.Journals
 @using Applications.Responses.ViewModels.Ledgers
@@ -618,12 +618,12 @@
                                           Property="@nameof(JournalLineDto.LedgerRefId)">
                         <Template>
                             <RadzenButton Icon="@IconNames.Add"
-                                          Size="ButtonSize.ExtraSmall"
+                                          Size="ButtonSize.ExtraDefaultSizeall"
                                           ButtonStyle="ButtonStyle.Success"
                                           Click="@(()=>InsertAfterRow(jl))"
                                           Variant="Variant.Text" />
                             <RadzenButton Icon="@IconNames.EditPen"
-                                          Size="ButtonSize.ExtraSmall"
+                                          Size="ButtonSize.ExtraDefaultSizeall"
                                           ButtonStyle="ButtonStyle.Secondary"
                                           Click="@(args => EditRow(jl))"
                                           @onclick:stopPropagation="true"
@@ -631,18 +631,18 @@
                         </Template>
                         <EditTemplate>
                             <RadzenButton Icon="@IconNames.Checked"
-                                          Size="ButtonSize.ExtraSmall"
+                                          Size="ButtonSize.ExtraDefaultSizeall"
                                           ButtonStyle="ButtonStyle.Success"
                                           Click="@(() => SaveRow(jl))" aria-label="Save"
                                           Variant="Variant.Text" />
                             <RadzenButton Icon="@IconNames.Undo"
-                                          Size="ButtonSize.ExtraSmall"
+                                          Size="ButtonSize.ExtraDefaultSizeall"
                                           ButtonStyle="ButtonStyle.Primary"
                                           Click="@((args) => CancelEdit(jl))"
                                           aria-label="Cancel"
                                           Variant="Variant.Text" />
                             <RadzenButton Icon="@IconNames.Delete"
-                                          Size="ButtonSize.ExtraSmall"
+                                          Size="ButtonSize.ExtraDefaultSizeall"
                                           ButtonStyle="ButtonStyle.Danger"
                                           Variant="Variant.Text" />
                         </EditTemplate>

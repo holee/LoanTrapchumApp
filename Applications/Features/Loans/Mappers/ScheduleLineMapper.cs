@@ -1,17 +1,13 @@
 ﻿using Applications.Enumerations;
-using Applications.Requests.Loans.Disbursements;
 using Domains.Models.Loans;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Applications.Features.Loans.Requests;
 
 namespace Applications.Features.Loans.Mappers
 {
     public static class ScheduleLineMapper
     {
-        public static IEnumerable<LoanScheduleDtoCreate> MapToLoanSchedule(this IEnumerable<ScheduleLine> source, LoanDtoCreate req)
+        public static IEnumerable<LoanScheduleDtoCreate> MapToLoanSchedule(this IEnumerable<ScheduleLine> source,
+            LoanDtoCreate req)
         {
 
             ArgumentNullException.ThrowIfNull(source, nameof(source));
@@ -34,7 +30,8 @@ namespace Applications.Features.Loans.Mappers
             });
         }
 
-        public static IEnumerable<LoanScheduleDtoCreate> MapToLoanSchedule(this IEnumerable<ScheduleLine> source, string? creditAgentId, int repaymentModeId = 1)
+        public static IEnumerable<LoanScheduleDtoCreate> MapToLoanSchedule(this IEnumerable<ScheduleLine> source,
+            string? creditAgentId, int repaymentModeId = 1)
         {
 
             ArgumentNullException.ThrowIfNull(source, nameof(source));
@@ -56,7 +53,7 @@ namespace Applications.Features.Loans.Mappers
                 ScheduleStatusRefId = (int)ScheduleStatus.Unpaid,
             });
         }
-       
+
         public static IEnumerable<LoanScheduleDtoCreate> MapToLoanSchedules(this IEnumerable<ScheduleLine> source)
         {
 
@@ -85,9 +82,8 @@ namespace Applications.Features.Loans.Mappers
                 ScheduleNum = source.ScheduleNum,
                 AgentRefId = source.CreditAgentRefId ?? string.Empty,
                 RepaymentModeRefId = source.RepaymentModeRefId ?? 1,
-                ScheduleStatusRefId = (int)ScheduleStatus.Unpaid,
+                ScheduleStatusRefId = (int)ScheduleStatus.Unpaid
             };
         }
-
     }
 }

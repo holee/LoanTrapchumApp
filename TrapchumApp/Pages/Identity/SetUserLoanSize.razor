@@ -4,7 +4,7 @@
 @using Applications.Features.Currencies
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Services
+@using Applications.Features.LoanRequests.Interfaces
 @using TrapchumApp.Helpers.Constants
 @using TrapchumApp.Services
 <Containers Fluid CssClass="rz-background-color-base-200 rz-p-2">
@@ -19,7 +19,7 @@
             <RadzenColumn Size="9" SizeMD="9">
                 <RadzenNumeric @bind-Value="model.MinUsdLoanSize"
                                class="rz-w-100" Min="0"
-                               Format="@AppValue.DefaultCurrencyFormat"
+                               Format="@Defaults.DefaultCurrencyFormat"
                                Name="MinLoanSize"
                                TextAlign="TextAlign.End"
                                ShowUpDown="false" />
@@ -36,7 +36,7 @@
                                Name="MaxLoanSize"
                                TextAlign="TextAlign.End"
                                ShowUpDown="false"
-                               Format="@AppValue.DefaultCurrencyFormat" />
+                               Format="@Defaults.DefaultCurrencyFormat" />
                 <ValidationMessage For="@(()=>model.MaxUsdLoanSize)"></ValidationMessage>
             </RadzenColumn>
         </RadzenRow>
@@ -48,7 +48,7 @@
             <RadzenColumn Size="9" SizeMD="9">
                 <RadzenNumeric @bind-Value="model.MinKhrLoanSize"
                                class="rz-w-100" Min="0"
-                               Format="@AppValue.DefaultCurrencyFormat"
+                               Format="@Defaults.DefaultCurrencyFormat"
                                Name="MinLoanSize"
                                TextAlign="TextAlign.End"
                                ShowUpDown="false" />
@@ -65,7 +65,7 @@
                                Name="MaxLoanSize"
                                TextAlign="TextAlign.End"
                                ShowUpDown="false"
-                               Format="@AppValue.DefaultCurrencyFormat" />
+                               Format="@Defaults.DefaultCurrencyFormat" />
                 <ValidationMessage For="@(() => model.MaxKhrLoanSize)"></ValidationMessage>
             </RadzenColumn>
         </RadzenRow>
@@ -78,7 +78,7 @@
                                   class="rz-w-100"
                                Name="StartDate"
                                   Change="StartDateChanged"
-                               DateFormat="@AppValue.DefaultDateFormat" />
+                               DateFormat="@Defaults.DefaultDateFormat" />
                 <ValidationMessage For="@(()=>model.StartDate)"></ValidationMessage>
             </RadzenColumn>
         </RadzenRow>
@@ -90,7 +90,7 @@
                 <RadzenDatePicker @bind-Value="model.EndDate"
                                   class="rz-w-100"
                                   Name="EndDate"
-                                  DateFormat="@AppValue.DefaultDateFormat" />
+                                  DateFormat="@Defaults.DefaultDateFormat" />
                 <ValidationMessage For="@(() => model.EndDate)"></ValidationMessage>
             </RadzenColumn>
         </RadzenRow>

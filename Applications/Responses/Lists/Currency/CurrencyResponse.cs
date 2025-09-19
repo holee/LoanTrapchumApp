@@ -1,4 +1,5 @@
-﻿using Applications.Requests.Lists.Currency;
+﻿using Applications.Features.Currencies;
+using Applications.Features.Currencies;
 
 namespace Applications.Responses.Lists.Currency;
 
