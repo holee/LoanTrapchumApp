@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using Applications.Responses.ViewModels.Customers;
+using Applications.Features.Customers.Response;
 using Applications.Responses.ViewModels.Loans.LoanRequests;
 
 namespace Applications.Responses.ViewModels.Loans.Requests;
@@ -53,5 +53,5 @@ public sealed class VLoanRequests
     [NotMapped] public IEnumerable<VLoanRequestCollateralLines> Collaterals { get; set; } = [];
     [NotMapped] public IEnumerable<VLoanRequestsDocuments> Documents { get; set; } = [];
     [NotMapped] public IEnumerable<VLoanRequestDescription> Descriptions { get; set; } = []; 
-    [NotMapped] public VCustomerList Customer { get; set; } = new();
+    [NotMapped] public VCustomerDetails Customer { get; set; } = new();
 }

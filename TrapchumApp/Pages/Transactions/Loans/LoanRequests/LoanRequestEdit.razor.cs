@@ -4,6 +4,8 @@ using Applications.Commons.Mappers;
 using Applications.Enumerations;
 using Applications.Extensions;
 using Applications.Features.Customers.Extensions;
+using Applications.Features.Customers.Response;
+using Applications.Features.Customers.UseCases;
 using Applications.Features.LoanRequests.Interfaces;
 using Applications.Features.LoanRequests.Requests;
 using Applications.Features.LoanRequests.UseCases;
@@ -16,7 +18,6 @@ using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.Loans.Disbursements;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Auths;
-using Applications.Responses.ViewModels.Customers;
 using Applications.Responses.ViewModels.Loans.LoanRequests;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Domains.Models.Files;
@@ -36,8 +37,9 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         private readonly ILogger<LoanRequestCreate> _logger;
         private readonly IEditLoanRequestUseCase _saveLoanRequestUseCase;
         private readonly ICreateNewLoanRequestUseCase _createNewLoanRequestUseCase;
+        private readonly GetCustomersUseCase _getCustomerUseCase;
         public LoanRequestEdit(ILoanSettingService loanSettingService, IAppSettingService settingService,
-            IHolidayService holidayService, ILogger<LoanRequestCreate> logger, IEditLoanRequestUseCase saveLoanRequestUseCase, ICreateNewLoanRequestUseCase createNewLoanRequestUseCase)
+            IHolidayService holidayService, ILogger<LoanRequestCreate> logger, IEditLoanRequestUseCase saveLoanRequestUseCase, ICreateNewLoanRequestUseCase createNewLoanRequestUseCase, GetCustomersUseCase getCustomerUseCase)
         {
             _loanSettingService = loanSettingService;
             _settingsServiceImpl = settingService;
@@ -45,14 +47,15 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             _logger = logger;
             _saveLoanRequestUseCase = saveLoanRequestUseCase;
             _createNewLoanRequestUseCase = createNewLoanRequestUseCase;
+            _getCustomerUseCase = getCustomerUseCase;
         }
         [Parameter] public int? BranchId { get; set; } = 0;
         [Parameter] public string? CustomerId { get; set; }
         [Parameter] public string? LoanRequestId { get; set; }
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
         IEnumerable<LoanScheduleDtoCreate> previewSchedule = [];
-        IEnumerable<VCustomerList> Customers = [];
-        IEnumerable<VCustomerList>? CustomersList = [];
+        IEnumerable<VCustomerList> _customers = [];
+        IEnumerable<VCustomerDetails>? CustomersList = [];
         List<VLoanRequestGuarantor> Guarantors = [];
         List<VLoanRequestCollateralLines> CollateralLines = [];
         List<VLoanRequestsDocuments> Documents = [];
@@ -62,12 +65,12 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         LoanRequestDtoCreate model = new();
         DateTime? RegisterDate = DateTime.Now;
         EditForm editForm = default!;
-        VCustomerList? SelectedCustomer = new();
+        VCustomerDetails? SelectedCustomer = new();
         LoanRequestDocument DocumentRef = default!;
         LoanRequestGaurantor GuarantorRef = default!;
         LoanRequestCollaterals CollateralRef = default!;
         List<VCollateralLines> _collateralLines = [];
-        VCustomerList? selectedCustomer = new();
+        VCustomerDetails? selectedCustomer = new();
         DateTime firstPayment;
         LoanCategoryResponse? SelectedLoanCategory;
         VUser _user = new();
@@ -360,7 +363,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
                 model.CustomerRefId = CustomerId;
 
-                FullName = reqResp.Data?.FullName;
+                FullName = reqResp.Data?.AltName;
 
                 CollateralLines = data!.ToLoanRequestCollaterals();
 
@@ -384,16 +387,15 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         {
             var queryParam = new QueryParam(0, take, string.Empty, filter: filter);
 
+            var rsp = await  _getCustomerUseCase.ExecuteAsync(null,null,customerId, queryParam);
 
-            var customerResponse = await _customerService.GetCustomersAsync(customerId, queryParam);
-
-            if (customerResponse.Items.Any())
+            if (rsp.Items.Any())
             {
-                Customers = customerResponse.Items;
+                _customers = rsp.Items;
             }
             else
             {
-                Customers = [];
+                _customers = [];
             }
         }
 

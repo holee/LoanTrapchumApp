@@ -1,10 +1,8 @@
 using Applications.Extensions;
 using Applications.Features.Collaterals.Requests;
 using Applications.Features.Customers.Mappers;
-using Applications.Features.Customers.Services;
 using Applications.Features.Customers.Validations;
 using Applications.Responses.Lists.Collaterals;
-using Applications.Responses.ViewModels.Customers;
 using Blazored.FluentValidation;
 using Domains.Models.Collaterals;
 using Microsoft.JSInterop;
@@ -13,6 +11,8 @@ using System.Threading.Tasks;
 using Applications.Features.Collaterals.Extensions;
 using Applications.Services.Lists;
 using TrapchumApp.Helpers.Validations;
+using Applications.Features.Customers.Response;
+using Applications.Features.Customers.UseCases;
 
 namespace TrapchumApp.Pages.Lists.Collaterals
 {
@@ -38,7 +38,7 @@ namespace TrapchumApp.Pages.Lists.Collaterals
 
         CollateralDtoCreate model { get; set; } = new();
 
-        VCustomerList Customer = new();
+        VCustomerDetails Customer = new();
 
         string? CollateralId = string.Empty;
 

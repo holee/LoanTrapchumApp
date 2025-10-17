@@ -20,6 +20,7 @@ namespace TrapchumApp.Pages.Lists.Customers
         [Parameter] public bool ShowReload { get; set; } = false;
         [Parameter] public bool ShowCommand { get; set; } = false;
         [Parameter] public IEnumerable<VCustomerExpenses> Items { get; set; } = [];
+        [Parameter] public EventCallback<IEnumerable<VCustomerExpenses>> GetExpenses { get; set; } 
         bool isLoading = false;
         RadzenDataGrid<VCustomerExpenses>? grid = default!;
         protected override async Task OnInitializedAsync()
@@ -62,7 +63,7 @@ namespace TrapchumApp.Pages.Lists.Customers
         protected async Task AddExpenseModal()
         {
 
-            if (!CustomerId.IsNotNullOrEmpty())
+            if (!CustomerId.IsNotNullOrEmpty() || !Items.Any())
             {
                 NotificationService.Notify(NotificationSeverity.Info, "Please Select cusotmer..");
                 return;
@@ -83,6 +84,7 @@ namespace TrapchumApp.Pages.Lists.Customers
             if (bool.TryParse(result.ToString(), out bool success) && success)
             {
                 await GetCustomerExpense(CustomerId);
+                await GetExpenses.InvokeAsync(Items);
             }
 
         }

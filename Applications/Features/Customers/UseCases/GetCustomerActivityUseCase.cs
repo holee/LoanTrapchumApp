@@ -19,7 +19,7 @@ namespace Applications.Features.Customers.UseCases
             {
                 return Result.Failure<IEnumerable<VCustomerActivities>>(ErrorResponse.Validation("Customer ID Is Required."));
             }
-            return await _actService.GetCustomerActivies<VCustomerActivities>(customerId, cancellation);
+            return await _actService.GetCustomerActivies(customerId, cancellation);
         }
     }
 

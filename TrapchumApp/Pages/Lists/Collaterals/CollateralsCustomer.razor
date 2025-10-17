@@ -63,13 +63,35 @@
                                       ButtonStyle="ButtonStyle.Primary"
                                       Variant="Variant.Text"
                                       Shade="Shade.Dark"
-                                      Click="()=>OnCollateralLineEdit(c)"
-                                      Icon="@IconNames.Edit" />
+                                      Click="@((args)=>ShowContextMenuWithContent(args,c))"
+                                      Icon="@IconNames.MoreVert" />
                     </Template>
                 </RadzenDataGridColumn>
             </Columns>
         </RadzenDataGrid>
-
     </ChildContent>
 </RadzenFieldset>
 
+@code {
+    
+    void ShowContextMenuWithContent(MouseEventArgs args, VCollateralLines c)
+    { 
+        ContextMenuService.Open(args, ds =>
+            @<RadzenMenu Style="font-size:0.8rem;">
+                <RadzenMenuItem Click="()=>HandleDetails(c.Id)" Icon="info" Text="Details" Value="@c.Id"></RadzenMenuItem>
+                <RadzenMenuItem Click="()=>OnCollateralLineEdit(c)" Icon="info" Text="Edit" Value="@c.Id"></RadzenMenuItem>
+                <RadzenMenuItem Click="()=>HandleDelete(c.Id)" Icon="delete" Text="Delete" Value="@c.Id"></RadzenMenuItem>
+            </RadzenMenu>
+        );
+    } 
+    private Task HandleDetails(long? id)
+    {
+        throw new NotImplementedException();
+    }
+
+    private Task HandleDelete(long? id)
+    {
+        throw new NotImplementedException();
+    }
+
+}

@@ -37,12 +37,14 @@
             </Template>
             <EditTemplate>
                 <RadzenTextBox @bind-Value="c.ExpenseTitle"
-                               class="w-100"
+                               class="rz-w-100"
                                Style="height:2rem;line-height:1rem;"/>
             </EditTemplate>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Width="8rem"
-                              Context="c" TextAlign="TextAlign.Right" Title="Amount" Property="IncomeAmount">
+                              Context="c" 
+                              TextAlign="TextAlign.Right" 
+                              Title="Amount" Property="IncomeAmount">
             <Template>
                 @c.ExpendAmount
             </Template>
@@ -55,7 +57,7 @@
                 @c.ExDescription
             </Template>
             <EditTemplate>
-                <RadzenTextBox @bind-Value="c.ExDescription" class="w-100" Style="height:2rem;line-height:1rem;"/>
+                <RadzenTextBox @bind-Value="c.ExDescription" class="rz-w-100" />
             </EditTemplate>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn TextAlign="TextAlign.Center" Context="c" Title="Action" Width="4rem">
@@ -92,7 +94,7 @@
     </Columns>
 </RadzenDataGrid>
 <RadzenStack Orientation="Orientation.Horizontal"
-             class="mt-3"
+             class="rz-mt-3"
              AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
     <RadzenButton Text="Save"
                   Click="SaveChanged"

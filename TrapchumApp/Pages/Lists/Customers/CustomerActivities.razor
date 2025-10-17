@@ -35,28 +35,27 @@
                 Density="Density.Compact">
     <Columns>
         <RadzenDataGridColumn Context="c" Width="5rem"
-                              Property="@nameof(VCustomerActivities.CreatedDT)" 
-                              Title="Created">
+                              Property="@nameof(VCustomerActivities.ActivityDate)"
+                              Title="Activity Date">
             <Template>
-                @c.CreatedDT.DayFirst()
+                @c.ActivityDate.DayFirst()
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Context="c"
-                              Width="10rem"
-                              Property="@nameof(VCustomerActivities.Description)" Title="Description">
+                              Property="@nameof(VCustomerActivities.Description)" 
+                              Title="Description">
             <Template>
                 @c.Description
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Context="c"
-                              Width="5rem"
+                              Width="2.5rem"
                               TextAlign="TextAlign.Center"
                               Property="@nameof(VCustomerActivities.Status)" Title="Status">
             <Template>
                 <RadzenCheckBox Value="@c.Status" ReadOnly />
             </Template>
         </RadzenDataGridColumn>
-        
     </Columns>
     <LoadingTemplate>
         <RadzenProgressBarCircular ProgressBarStyle="ProgressBarStyle.Primary" Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />

@@ -1,4 +1,4 @@
-using Applications.DependencyInjections;
+using Applications;
 using Applications.Validations;
 using Domains.Models.Identity;
 using Infrastructures.Authorizations;

@@ -1,3 +1,4 @@
+@using Applications.Features.Customers.Response
 @using Applications.Features.LoanRequests.Interfaces
 <RadzenRow>
     <RadzenColumn Size="2">
@@ -73,7 +74,7 @@
 @code
 {
     [Parameter]
-    public VCustomerList? Customer { get; set; }
+    public VCustomerDetails? Customer { get; set; }
     [Parameter]
     public string? CustomerId { get; set; } = string.Empty;
 

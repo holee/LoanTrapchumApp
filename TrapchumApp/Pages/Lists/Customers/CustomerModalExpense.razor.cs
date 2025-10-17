@@ -84,8 +84,21 @@ namespace TrapchumApp.Pages.Lists.Customers
         async void InsertedRow()
         {
             var income = new VCustomerExpenses();
+
+            var row = Expenses.Any() ? Expenses.Last() : null;
+
             Expenses.Add(income);
-            await incomeGrid.InsertRow(income);
+
+            if(row is null)
+            {
+                await incomeGrid.InsertRow(income);
+            }
+            else
+            {
+                await incomeGrid.InsertAfterRow(income, row);
+            }
+
+              
         }
 
         async Task DeleteRow(VCustomerExpenses income)

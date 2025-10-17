@@ -1,4 +1,6 @@
 ﻿using Applications.Features.Currencies.Responses;
+using Applications.Features.Customers.Response;
+using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.ViewModels.Addresses;
 using Applications.Responses.ViewModels.Auths;
 using Applications.Responses.ViewModels.Branches;
@@ -216,7 +218,6 @@ namespace Infrastructures.DataAccess
         public DbSet<VBranchResponse> VBranchs => Set<VBranchResponse>();
         public DbSet<VDepartment> VDepartments => Set<VDepartment>();
         public DbSet<VSpotRate> VSpotRates => Set<VSpotRate>();
-        public DbSet<VLoanDisbursments> VLoanDisbursements => Set<VLoanDisbursments>();
         public DbSet<VSchedule> VSchedules => Set<VSchedule>();
         public DbSet<VLoanRepaymentLine> VLoanRepaymentLines => Set<VLoanRepaymentLine>();
         public DbSet<VCollateral> VCollaterals => Set<VCollateral>();
@@ -228,9 +229,19 @@ namespace Infrastructures.DataAccess
         public DbSet<VOtherNames> VOtherNames => Set<VOtherNames>();
         public DbSet<NameListVm> VNameLists => Set<NameListVm>();
         public DbSet<VEmployeeList> EmployeeLists => Set<VEmployeeList>();
-        public DbSet<VCustomerList> VCustomerLists => Set<VCustomerList>();
-        public DbSet<VCreditAgent> VCreditAgents => Set<VCreditAgent>();
+        
+        public DbSet<VCustomerDetails> VCustomerLists => Set<VCustomerDetails>();
+        public DbSet<VCustomerNotes> VCustomerNotes => Set<VCustomerNotes>();
+        public DbSet<VCustomerExpenses> VCustomerExpenses => Set<VCustomerExpenses>();
+        public DbSet<VCustomerIncomes> VCustomerIncomes => Set<VCustomerIncomes>();
+        public DbSet<VCustomerActivities> VCustomerActivities => Set<VCustomerActivities>();
+        public DbSet<VCollateralLines> VCollateralLines => Set<VCollateralLines>(); 
         public DbSet<VLoanRequests> VLoanRequests => Set<VLoanRequests>();
+        public DbSet<VLoanDisbursments> VLoanDisbursements => Set<VLoanDisbursments>();
+
+
+
+        public DbSet<VCreditAgent> VCreditAgents => Set<VCreditAgent>();
         public DbSet<VDistricts> VDistricts => Set<VDistricts>();
         public DbSet<VCommunes> VCommunes => Set<VCommunes>();
         public DbSet<VVillages> VVillages => Set<VVillages>();

@@ -1,5 +1,7 @@
 using Applications.Enumerations;
 using Applications.Extensions.DateTimes;
+using Applications.Features.Customers.Response;
+using Applications.Features.Customers.UseCases;
 using Applications.Features.LoanPayments.Requests;
 using Applications.Features.LoanRequests.Interfaces;
 using Applications.Features.LoanRequests.Requests;
@@ -12,7 +14,6 @@ using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.Loans.Disbursements;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Auths;
-using Applications.Responses.ViewModels.Customers;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Applications.Responses.ViewModels.Options;
 using Applications.Responses.ViewModels.OtherNames;
@@ -31,7 +32,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         private readonly ISaveLoanRequestUseCase _saveLoanRequestUseCase;
         private readonly IHolidayService _holidayService;
         private readonly ILogger<LoanRequestCreate> _logger;
-
+        private readonly GetCustomersUseCase _getCustomersUseCase;
         [Parameter] public int? BranchId { get; set; } = 0;
         [Parameter] public string? CustomerId { get; set; } = string.Empty;
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
@@ -40,7 +41,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
         IEnumerable<ApprovedUser> AprovedUsers = [];
 
-        IEnumerable<VCustomerList> Customers = [];
+        IEnumerable<VCustomerList> _customers = [];
 
         IEnumerable<LoanRepaymentModeDto>? LoanRepaymentModes = [];
 
@@ -50,7 +51,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
         IEnumerable<LoanCategoryResponse>? loanCategories = [];
 
-        IEnumerable<VCustomerList>? CustomersList = [];
+        IEnumerable<VCustomerDetails>? CustomersList = [];
 
         IEnumerable<LoanInstallmentTypeDto>? LoanInstallments = [];
 
@@ -71,7 +72,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         EditForm editForm = default!;
         LoanInstallmentTypeDto? SelectedInstallment { get; set; }
 
-        VCustomerList? SelectedCustomer = new();
+        VCustomerDetails? SelectedCustomer = new();
 
         LoanRequestDocument DocumentRef = default!;
 
@@ -79,7 +80,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
         LoanRequestCollaterals CollateralRef = default!;
 
-        VCustomerList? selectedCustomer = new();
+        VCustomerDetails? selectedCustomer = new();
         DateTime firstPayment;
         LoanCategoryResponse? SelectedLoanCategory;
         VUser _user = new();
@@ -109,7 +110,8 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             IHolidayService holidayService,
             ILogger<LoanRequestCreate> logger,
             ISaveLoanRequestUseCase saveLoanRequestUseCase,
-            ICreateNewLoanRequestUseCase createNewLoanRequestUseCase)
+            ICreateNewLoanRequestUseCase createNewLoanRequestUseCase,
+            GetCustomersUseCase getCustomersUseCase)
         {
             _holidayService = holidayService;
             _logger = logger;
@@ -117,6 +119,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             _settingsServiceImpl = settingService;
             _createNewLoanRequestUseCase = createNewLoanRequestUseCase;
             _saveLoanRequestUseCase = saveLoanRequestUseCase;
+            _getCustomersUseCase = getCustomersUseCase;
         }
 
         void SelectTabIndexChanged(int tabIndex)
@@ -378,15 +381,15 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         {
             var queryParam = new QueryParam(0, take, string.Empty, filter: filter);
 
-            var customerResponse = await _customerService!.GetCustomersAsync(customerId, queryParam);
+            var customerResponse = await _getCustomersUseCase!.ExecuteAsync(0, null, customerId, queryParam);
 
             if (customerResponse.Items.Any())
             {
-                Customers = customerResponse.Items;
+                _customers = customerResponse.Items;
             }
             else
             {
-                Customers = [];
+                _customers = [];
             }
         }
 

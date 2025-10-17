@@ -1,10 +1,10 @@
 using Applications.Extensions.mappers;
+using Applications.Features.Customers.Response;
 using Applications.Features.Entities;
 using Applications.Features.LoanRequests.Requests;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Auths;
 using Applications.Responses.ViewModels.Branches;
-using Applications.Responses.ViewModels.Customers;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 
@@ -20,7 +20,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         [Parameter] public string? LoanRequestId { get; set; } = string.Empty;
         [Parameter] public string? AprovedUserId { get; set; } = string.Empty;
         IEnumerable<VUser> RequestUsers = [];
-        IEnumerable<VCustomerList> Customers = [];
+        IEnumerable<VCustomerDetails> Customers = [];
         IEnumerable<BranchDto> Branches = [];
         IEnumerable<VUser> AcceptUsers = [];
         string memo = "";

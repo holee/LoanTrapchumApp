@@ -9,6 +9,7 @@ namespace Applications.Interfaces.Customers
         Task<Result<string>> AddExpensesAsync(string? customerRefId, List<CustomerExpense> req);
         Task<Result<string>> AddIncomesAsync(string? customerRefId, List<CustomerIncome> req);
         Task<Result<string>> AddOrUpdateExpensesAsync(string? customerId, List<CustomerExpense> req);
+        Task<Result<VCustomerIncomes>> AddOrUpdateIncomeAsync(string? customerId, CustomerIncome req);
         Task<Result<string>> AddOrUpdateIncomesAsync(string? customerId, List<CustomerIncome> req);
         Task<Result<IEnumerable<VCustomerExpenses>>> GetCustomerCustomerExpenses(string? customerId);
         Task<Result<IEnumerable<T>>> GetCustomerCustomerExpenses<T>(string? customerId) where T : class;

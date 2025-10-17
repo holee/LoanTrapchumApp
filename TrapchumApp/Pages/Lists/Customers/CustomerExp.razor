@@ -30,7 +30,7 @@
                           Visible="@(ShowReload && ShowCommand)"
                           Size="ButtonSize.ExtraSmall" />
         </RadzenStack>
-        <RadzenDataGrid Data="Items"
+        <RadzenDataGrid Data="@Items"
                         GridLines="DataGridGridLines.Both"
                         Responsive
                         IsLoading="isLoading"
@@ -40,7 +40,10 @@
             <Columns>
                 <RadzenDataGridColumn Property="ExpendId" Context="c" Title="#" Width="3rem">
                     <Template>
-                        @c.ExpendId
+                        @{
+                            var index = Items.ToList()!.IndexOf(c) + 1;
+                        }
+                        @index
                     </Template>
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn Context="c"

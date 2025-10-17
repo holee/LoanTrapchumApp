@@ -1,4 +1,5 @@
 ﻿using Applications.Extensions;
+using Applications.Features.Customers.Response;
 using Applications.Interfaces.Customers;
 using Applications.Responses;
 using Applications.Responses.Lists.Collaterals;
@@ -8,16 +9,17 @@ using Applications.Responses.ViewModels.Customers;
 using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Dapper;
+using Domains.Models.Lists;
 using Domains.Models.Lists.Customers;
 using Infrastructures.Constants.Procedures;
 using Infrastructures.DataAccess;
+using Infrastructures.Implements.Extensions;
 using Mapster;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Data;
 using System.Linq.Expressions;
-using Domains.Models.Lists;
 
 namespace Infrastructures.Implements;
 
@@ -27,53 +29,38 @@ public sealed class CustomerRepository(
     ILogger<CustomerRepository> logger) : ICustomerService
 {
 
-    public async Task<Pager<VCustomerList>> GetCustomersAsync(string? customerId, QueryParam param, CancellationToken cancellation = default)
+
+
+
+    public async Task<Pager<VCustomerList>> GetCustomersAsync(int? branchId, string? userId, string? customerId, QueryParam param, CancellationToken cancellation = default)
     {
         await using var cxt = await contextFactory.CreateDbContextAsync(cancellation);
 
-        var queries = cxt.VCustomerLists.AsNoTracking().Where(x => x.IsLoanActive == false);
+        var queries = BuildCustomerQueriesAsync(cxt, branchId, userId, cancellation);
 
-
-        if (!string.IsNullOrEmpty(param.Filter) && string.IsNullOrEmpty(param.FilterColumn))
-        {
-            queries = queries.Where(x => EF.Functions.Like(x.FullName ?? "", $"{param.Filter}%") ||
-                                         EF.Functions.Like(x.AltName ?? "", $"{param.Filter}%") ||
-                                         EF.Functions.Like(x.AltPhone ?? "", $"{param.Filter}%") ||
-                                         EF.Functions.Like(x.FirstName ?? "", $"{param.Filter}%") ||
-                                         EF.Functions.Like(x.LastName ?? "", $"{param.Filter}%") ||
-                                         x.CustomerKey == param.Filter);
-        }
-
-        if (!string.IsNullOrEmpty(param.Filter) && !string.IsNullOrEmpty(param.FilterColumn))
-        {
-            var property = typeof(VCustomerList).GetProperty(param.FilterColumn);
-
-            if (property != null)
-            {
-                queries = queries.Where(e =>
-                    EF.Functions.Like(EF.Property<string>(e, param.FilterColumn), $"{param.Filter}%"));
-            }
-        }
-
-
-        if (customerId.IsNotNullOrEmpty())
+        if (!string.IsNullOrEmpty(customerId))
         {
             queries = queries.Where(x => x.CustomerId == customerId);
         }
+
+        queries = ApplyFiltering(queries, param);
 
         queries = ApplyOrdering(queries, param);
 
         var countTask = await queries.CountAsync(cancellation);
 
         var dataTask = await queries
-                        .Skip(param.Skip)
-                        .Take(param.PageSize)
-                        .ToListAsync(cancellation);
+            .Skip(param.Skip)
+            .Take(param.PageSize)
+            .ToListAsync(cancellation);
 
         return new Pager<VCustomerList>(dataTask, countTask);
 
     }
-    public async Task<Result<VCustomerList>> GetCustomerDetailByIdAsync(string? customerId, bool include = false, CancellationToken cancellationToken = default)
+
+
+
+    public async Task<Result<VCustomerDetails>> GetCustomerDetailByIdAsync(string? customerId, bool include = false, CancellationToken cancellationToken = default)
     {
         logger.LogInformation("Fetching customer details for ID {CustomerId} (Include Related: {Include})", customerId, include);
 
@@ -87,11 +74,11 @@ public sealed class CustomerRepository(
 
         using var multi = await db.QueryMultipleAsync(ProcedureConstant.SpGetCustomerDetailsById, parameters, commandType: CommandType.StoredProcedure);
 
-        var customer = await multi.ReadSingleOrDefaultAsync<VCustomerList>();
+        var customer = await multi.ReadSingleOrDefaultAsync<VCustomerDetails>();
 
         if (customer == null)
         {
-            return Result.Failure<VCustomerList>(ErrorResponse.NotFound("Customer not found."));
+            return Result.Failure<VCustomerDetails>(ErrorResponse.NotFound("Customer not found."));
         }
 
         if (!include)
@@ -106,33 +93,6 @@ public sealed class CustomerRepository(
         customer.CustomerExpenses = (await multi.ReadAsync<VCustomerExpenses>()).ToList();
         customer.CustomerNotes = (await multi.ReadAsync<VCustomerNotes>()).ToList();
         customer.CustomerActivities = (await multi.ReadAsync<VCustomerActivities>()).ToList();
-        return Result.Success(customer);
-
-    }
-    public async Task<Result<VCustomerList>> GetCustomerDetailByIdAsync(string? customerId, params IEnumerable<Expression<Func<VCustomerList, object>>> includes)
-    {
-        logger.LogInformation("Fetching customer details for ID {CustomerId}", customerId);
-
-        await using var context = contextFactory.CreateDbContext();
-
-        var baseQuery = context.VCustomerLists.AsQueryable();
-
-        if (includes.Any())
-        {
-            foreach (var include in includes)
-            {
-                baseQuery = baseQuery.Include(include);
-            }
-        }
-
-        var customer = await baseQuery
-                            .AsSplitQuery()
-                            .AsNoTracking()
-                            .FirstOrDefaultAsync(x => x.CustomerId == customerId);
-
-        if (customer is null)
-            return Result.Failure<VCustomerList>(ErrorResponse.NotFound("Customer Not Found."));
-
         return Result.Success(customer);
 
     }
@@ -168,7 +128,7 @@ public sealed class CustomerRepository(
         {
             using var db = await dapperFactory.CreateConnectionAsync(cancellation);
 
-            var sql = @"SELECT * FROM  VLoanDisbursments r WHERE r.CustomerId=@customerId";
+            var sql = @"SELECT * FROM  VLoansDisbursments r WHERE r.CustomerId=@customerId";
 
             var parameters = new DynamicParameters();
 
@@ -237,7 +197,7 @@ public sealed class CustomerRepository(
 
         return Result.Success(customer);
     }
-    public async Task<Result<VCustomerList>> GetCustomerForRequestLoanAsync(string? customerId, CancellationToken cancellation = default)
+    public async Task<Result<VCustomerDetails>> GetCustomerForRequestLoanAsync(string? customerId, CancellationToken cancellation = default)
     {
 
         await using var cxt = await contextFactory.CreateDbContextAsync(cancellation);
@@ -246,7 +206,7 @@ public sealed class CustomerRepository(
 
         if (customer is null)
         {
-            return Result.Failure<VCustomerList>(ErrorResponse.ServerError($"no customer found"));
+            return Result.Failure<VCustomerDetails>(ErrorResponse.ServerError($"no customer found"));
         }
         return Result.Success(customer);
     }
@@ -398,6 +358,13 @@ public sealed class CustomerRepository(
             return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
         }
     }
+
+
+
+
+
+
+
     private async Task<bool> IsCustomerInUsed(string? customerId, CancellationToken cancellation = default)
     {
         await using var _context = await contextFactory.CreateDbContextAsync(cancellation);
@@ -454,6 +421,30 @@ public sealed class CustomerRepository(
         return customerKey;
     }
 
+    private IQueryable<VCustomerDetails> ApplyOrdering(IQueryable<VCustomerDetails> query, QueryParam param)
+    {
+        if (!string.IsNullOrWhiteSpace(param.SortColumn))
+        {
+            var isDescending = param.SortDescending;
+
+            var property = typeof(VCustomerDetails).GetProperty(param.SortColumn);
+
+            if (property != null)
+            {
+                query = isDescending
+                    ? query.OrderByDescending(e => EF.Property<object>(e, param.SortColumn))
+                    : query.OrderBy(e => EF.Property<object>(e, param.SortColumn));
+            }
+        }
+        else
+        {
+            query = query.OrderBy(x => x.FirstName).ThenBy(x => x.LastName);
+        }
+
+        return query;
+    }
+
+
     private IQueryable<VCustomerList> ApplyOrdering(IQueryable<VCustomerList> query, QueryParam param)
     {
         if (!string.IsNullOrWhiteSpace(param.SortColumn))
@@ -478,192 +469,275 @@ public sealed class CustomerRepository(
     }
 
 
+    private IQueryable<VCustomerDetails> ApplyFiltering(IQueryable<VCustomerDetails> queries, QueryParam param)
+    {
+        if (!string.IsNullOrEmpty(param.Filter) && string.IsNullOrEmpty(param.FilterColumn))
+        {
+            queries = queries.Where(x => EF.Functions.Like(x.FullName ?? "", $"{param.Filter}%") ||
+                                         EF.Functions.Like(x.AltName ?? "", $"{param.Filter}%") ||
+                                         EF.Functions.Like(x.AltPhone ?? "", $"{param.Filter}%") ||
+                                         EF.Functions.Like(x.FirstName ?? "", $"{param.Filter}%") ||
+                                         EF.Functions.Like(x.LastName ?? "", $"{param.Filter}%") ||
+                                         x.CustomerKey == param.Filter);
+        }
+
+        if (!string.IsNullOrEmpty(param.Filter) && !string.IsNullOrEmpty(param.FilterColumn))
+        {
+            var property = typeof(VCustomerDetails).GetProperty(param.FilterColumn);
+
+            if (property != null)
+            {
+                queries = queries.Where(e =>
+                    EF.Functions.Like(EF.Property<string>(e, param.FilterColumn), $"{param.Filter}%"));
+            }
+        }
+
+        return queries;
+    }
+
+
+    private IQueryable<VCustomerList> ApplyFiltering(IQueryable<VCustomerList> queries, QueryParam param)
+    {
+        var filter = param.Filter?.Trim();
+
+        if (!string.IsNullOrEmpty(filter) && string.IsNullOrEmpty(param.FilterColumn))
+        {
+            var props = new[] { "FullName", "AltName", "Phone", "FirstName", "LastName" };
+
+            queries = queries.WhereMatchesFilter(filter, props);
+        }
+
+        if (!string.IsNullOrEmpty(param.Filter) && !string.IsNullOrEmpty(param.FilterColumn))
+        {
+            var property = typeof(VCustomerList).GetProperty(param.FilterColumn);
+
+            if (property != null)
+            {
+                queries = queries.Where(e =>
+                    EF.Functions.Like(EF.Property<string>(e, param.FilterColumn), $"{param.Filter}%"));
+            }
+        }
+
+        return queries;
+    }
+
+
+    private static Expression<Func<VCustomerDetails, VCustomerList>> ProjectToCustomerList()
+    {
+        return x => new VCustomerList
+        {
+            CustomerId = x.CustomerId,
+            CustomerKey = x.CustomerKey,
+            FirstName = x.FirstName,
+            LastName = x.LastName,
+            FullName = x.FullName,
+            AltName = x.AltName,
+            Phone = x.Phone,
+            EmailAddress = x.EmailAddress,
+            IsLoanActive = x.IsLoanActive,
+            City = x.City,
+            VilInKhmer = x.VilInKhmer,
+            ComInKhmer = x.ComInKhmer,
+            DisInKhmer = x.DisInKhmer,
+            ProInKhmer = x.ProInKhmer
+        };
+    }
+
+    private static Expression<Func<VCustomerList, VCustomerList>> ProjectTo()
+    {
+        return x => new VCustomerList
+        {
+            CustomerId = x.CustomerId,
+            CustomerKey = x.CustomerKey,
+            FirstName = x.FirstName,
+            LastName = x.LastName,
+            FullName = x.FullName,
+            AltName = x.AltName,
+            Phone = x.Phone,
+            EmailAddress = x.EmailAddress,
+            IsLoanActive = x.IsLoanActive,
+            City = x.City,
+            VilInKhmer = x.VilInKhmer,
+            ComInKhmer = x.ComInKhmer,
+            DisInKhmer = x.DisInKhmer,
+            ProInKhmer = x.ProInKhmer
+        };
+    }
+
+    private IQueryable<VCustomerList> BuildCustomerQueriesAsync(DataContext cxt, int? branchId, string? userId, CancellationToken cancellation)
+    {
+        if (branchId > 0 || !string.IsNullOrEmpty(userId))
+        {
+            return GetCustomersByBranchOrUserAsync(cxt, branchId, userId, cancellation);
+        }
+
+        return GetCustomersWithoutActiveLoan(cxt);
+    }
+
+    private IQueryable<VCustomerList> GetCustomersByBranchOrUserAsync(DataContext cxt, int? branchId, string? userId, CancellationToken cancellation)
+    {
+        return cxt.Database.SqlQuery<VCustomerList>($@"
+                    SELECT 
+                        c.*,
+                        d.BranchId,
+                        d.BranchName,
+                        d.UserRequestId
+                    FROM [VCustomerList] c
+                    INNER JOIN VLoanRequests d 
+                    ON c.CustomerId = d.CustomerId
+                    WHERE (d.BranchId = {branchId} OR {branchId} IS NULL)
+                          AND 
+                          (d.UserRequestId = {userId} OR {userId} IS NULL)
+                    ")
+                .Select(ProjectTo())
+                .AsQueryable();
+    }
+
+    private IQueryable<VCustomerList> GetCustomersWithoutActiveLoan(DataContext cxt)
+    {
+        return cxt.VCustomerLists
+        .Where(x => x.IsLoanActive == false)
+        .Select(ProjectToCustomerList());
+    }
 }
 
 
 
-//public async Task<Pager<VCustomerList>> GetCustomersAsync(QueryParam q, CancellationToken cancellation = default)
+//public async Task<Pager<VCustomerList>> GetCustomersAsync(string? customerId, QueryParam param, CancellationToken cancellation = default)
 //{
-
 //    await using var cxt = await contextFactory.CreateDbContextAsync(cancellation);
 
-//    IQueryable<VCustomerList> queries = cxt.VCustomerLists.OrderByDescending(x => x.ModifiedDT);
-
-//    var counts = queries.Count();
-
-//    if (!q.IsIncludeInActive)
-//    {
-//        queries = queries.Where(x => x.IsActive == true);
-//    }
-
-//    if (!string.IsNullOrEmpty(q.Filter))
-//    {
-//        queries = queries.Where(x => (EF.Functions.Like(x.FullName!, $"%{q.Filter}%") ||
-//                                      EF.Functions.Like(EF.Functions.Collate(x.CustomerId, "Khmer_100_CI_AI_SC_UTF8"),
-//                                          $"%{q.Filter}%") ||
-//                                      EF.Functions.Like(x.AltName!, $"%{q.Filter}%") ||
-//                                      EF.Functions.Like(x.Phone!, $"%{q.Filter}%")));
-//    }
-
-//    if (q.SortDescending)
-//    {
-//        queries = queries.OrderByDescending(x => EF.Property<object>(x, q.SortColumn));
-//    }
-
-//    var count = queries.Count();
-
-//    var customers = queries.AsNoTracking().Skip(q.Skip).Take(q.PageSize);
-
-//    return new Pager<VCustomerList>
-//    {
-//        Items = await customers.ToListAsync(),
-//        Count = count,
-//    };
-//}
-
-//public async Task<Result<VCustomerList>> GetCustomerDetailByIdAsync(string? customerId, bool include = false)
-//{
-//    try
-//    {
-//        using var db = await dapperFactory.CreateConnectionAsync();
-
-//        if (!include)
-//        {
-//            var customer = await db.QueryFirstOrDefaultAsync<VCustomerList>("spGetCustomerDetailsById",
-//                new
-//                {
-//                    customerId = customerId,
-//                    include = include
-//                }, commandType: CommandType.StoredProcedure);
-
-//            if (customer is null)
-//            {
-//                return Result.Failure<VCustomerList>(
-//                    ErrorResponse.NotFound("no data found."));
-//            }
-
-//            return Result.Success(customer);
-//        }
-
-//        var coustmerDictionary = new Dictionary<string, VCustomerList>();
-//        //"spGetCustomerDetailsById"
-//        var customerInclude = await db.QueryAsync(ProcedureConstant.SpGetCustomerDetailsById,
-//            (VCustomerList customer, VLoanDisbursments loan, VLoanRequests loanRequest,
-//                VCollateralLines collateralLine, VCustomerIncomes customerIncome, VCustomerExpenses customerExpense,
-//                VCustomerNotes customerNote) =>
-//            {
-//                if (coustmerDictionary.TryGetValue(customer.CustomerId!, out var existingCustomer))
-//                {
-//                    customer = existingCustomer;
-//                }
-//                else
-//                {
-//                    coustmerDictionary.Add(customer.CustomerId!, customer);
-//                }
-
-//                customer.Loans.Add(loan);
-//                customer.LoanRequests.Add(loanRequest);
-//                customer.CollateralLines.Add(collateralLine!);
-//                customer.CustomerExpenses.Add(customerExpense);
-//                customer.CustomerIncomes.Add(customerIncome);
-//                customer.CustomerNotes.Add(customerNote);
-//                return customer;
-//            },
-//            new
-//            {
-//                customerId = customerId,
-//                include = include
-//            },
-//            commandType: CommandType.StoredProcedure,
-//            splitOn: "Id,LoanRequestId,CustomerRefId,IncomeId,ExpendId,NoteId");
+//    var baseQueries = cxt.VCustomerLists.AsNoTracking().Where(x => x.IsLoanActive == false);
 
 
-//        if (!customerInclude.Any())
-//            return Result.Failure<VCustomerList>(ErrorResponse.NotFound("No note found."));
-
-//        var item = customerInclude.First();
-
-//        return Result.Success(item);
-//    }
-//    catch (SqlException ex)
-//    {
-//        return Result.Failure<VCustomerList>(
-//            ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
-//    }
-//}
-
-
-
-//public async Task<Result<IEnumerable<T>>> GetCustomersAsync<T>(string? customerId, int take = 0,
-//    bool includeInactive = false,
-//    bool exceptActiveLoan = true,
-//    string? searchTerm = null) where T : class
-//{
-//    await using var context =await contextFactory.CreateDbContextAsync();
-//    IQueryable<VCustomerList> customerQueries = context.VCustomerLists;
-
-//    if (includeInactive)
-//    {
-//        customerQueries = customerQueries.IgnoreQueryFilters();
-//    }
-
-//    if (exceptActiveLoan)
-//    {
-//        customerQueries = customerQueries.Where(x => x.IsLoanActive == false);
-//    }
-
-//    if (!string.IsNullOrEmpty(searchTerm))
-//    {
-//        customerQueries = customerQueries.Where(x => (EF.Functions.Like(x.FullName!, $"%{searchTerm}%") ||
-//                                                      EF.Functions.Like(x.AltName!, $"%{searchTerm}%") ||
-//                                                      EF.Functions.Like(
-//                                                          EF.Functions.Collate(x.CustomerId!.ToString(),
-//                                                              "Khmer_100_CI_AI_SC_UTF8"), $"%{searchTerm}%") ||
-//                                                      EF.Functions.Like(x.Phone!, $"%{searchTerm}%")));
-//    }
+//    baseQueries = ApplyFiltering(baseQueries, param);
 
 //    if (customerId.IsNotNullOrEmpty())
 //    {
-//        customerQueries = customerQueries.Where(x => x.CustomerId == customerId);
+//        baseQueries = baseQueries.Where(x => x.CustomerId == customerId);
 //    }
 
-//    if (take > 0)
-//    {
-//        customerQueries = customerQueries.Take(take).OrderBy(x => x.CustomerId);
-//    }
+//    baseQueries = ApplyOrdering(baseQueries, param);
 
-//    if (!customerQueries.Any())
-//    {
-//        return Result.Failure<IEnumerable<T>>(ErrorResponse.NotFound("no customer found."));
-//    }
+//    var finalQueries = baseQueries.Select(ProjectToCustomerList());
 
-//    var results = await customerQueries
-//        .ProjectToType<T>()
-//        .AsNoTracking()
-//        .ToListAsync();
-//    return Result.Success<IEnumerable<T>>(results);
+//    var countTask = finalQueries.CountAsync(cancellation);
+
+//    var dataTask = finalQueries
+//                    .Skip(param.Skip)
+//                    .Take(param.PageSize)
+//                    .ToListAsync(cancellation);
+
+
+//    await Task.WhenAll(dataTask, countTask);
+
+//    return new Pager<VCustomerList>(dataTask.Result, countTask.Result);
+
 //}
-//public async Task<Result<VCustomerList>> GetCustomerDetailByIdAsync(string? customerId, CancellationToken cancellationToken = default)
+
+
+
+
+
+//private async Task<List<VCustomerActivities>> GetCustomerActivities(string? customerId, DataContext context, CancellationToken cancellation)
+//{
+//    return await context.VCustomerActivities
+//        .Where(x => x.CustomerRefId == customerId)
+//        .AsNoTracking()
+//        .ToListAsync(cancellation);
+//}
+
+//private async Task<List<VCollateralLines>> GetCustomerCollateral(string? customerId, DataContext context, CancellationToken cancellation)
+//{
+//    return await context.VCollateralLines
+//        .Where(x => x.CollateralId == customerId)
+//        .AsNoTracking()
+//        .ToListAsync(cancellation);
+//}
+
+//private async Task<List<VCustomerIncomes>> GetCustomerIncomes(string? customerId, DataContext context, CancellationToken cancellation)
+//{
+//    return await context.VCustomerIncomes
+//                .Where(x => x.CustomerRefId == customerId)
+//                .AsNoTracking()
+//                .ToListAsync(cancellation);
+//}
+
+//private async Task<List<VCustomerExpenses>> GetCustomerExpenses(string? customerId, DataContext context, CancellationToken cancellation)
+//{
+//    return await context.VCustomerExpenses
+//        .Where(x => x.CustomerRefId == customerId)
+//        .AsNoTracking()
+//        .ToListAsync(cancellation);
+//}
+
+//private async Task<List<VCustomerNotes>> GetCustomerNotes(string? customerId, DataContext context, CancellationToken cancellation)
+//{
+//    return await context.VCustomerNotes
+//                .Where(x => x.CustomerRefId == customerId)
+//                .AsNoTracking()
+//                .ToListAsync(cancellation);
+//}
+
+//private async Task<List<VLoanDisbursments>> GetCustomerLoans(string? customerId, DataContext context, CancellationToken cancellation)
+//{
+//    return await context.VLoanDisbursements
+//        .Where(x => x.CustomerId == customerId)
+//        .AsNoTracking()
+//        .ToListAsync(cancellation);
+//}
+
+//private async Task<List<VLoanRequests>> GetCustomerLoanRequests(string? customerId, DataContext context, CancellationToken cancellation)
+//{
+//    return await context.VLoanRequests
+//                .Where(x => x.CustomerId == customerId)
+//                .AsNoTracking()
+//                .ToListAsync(cancellation);
+//}
+
+
+
+//public async Task<Result<VCustomerDetails>> GetCustomerDetailIdAsync(string? customerId, bool includes, CancellationToken cancellation = default)
 //{
 //    logger.LogInformation("Fetching customer details for ID {CustomerId}", customerId);
 
-//    await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+//    await using var context = await contextFactory.CreateDbContextAsync(cancellation);
 
 //    var customer = await context.VCustomerLists
-//                        .Include(x => x.CustomerActivities)
-//                        .Include(x => x.CustomerExpenses)
-//                        .Include(x => x.CustomerIncomes)
-//                        .Include(x => x.CustomerNotes)
-//                        .Include(x => x.CollateralLines)
-//                        .Include(x => x.LoanRequests)
-//                        .Include(x => x.Loans)
-//                        .AsSplitQuery()
-//                        .AsNoTracking()
-//                        .FirstOrDefaultAsync(x => x.CustomerId == customerId, cancellationToken);
+//                               .AsNoTracking()
+//                               .FirstOrDefaultAsync(x => x.CustomerId == customerId);
 
 //    if (customer is null)
-//        return Result.Failure<VCustomerList>(ErrorResponse.NotFound("Customer Not Found."));
+//    {
+//        return Result.Failure<VCustomerDetails>(ErrorResponse.NotFound("Customer Not Found."));
+//    }
+
+//    if (!includes)
+//    {
+//        return Result.Success(customer);
+//    }
+
+//    List<VLoanRequests> loanRequestsTask = await GetCustomerLoanRequests(customerId, context, cancellation);
+
+//    List<VLoanDisbursments> loanDisbursementsTask = await GetCustomerLoans(customerId, context, cancellation);
+
+//    List<VCustomerNotes> customerNotesTask = await GetCustomerNotes(customerId, context, cancellation);
+
+//    List<VCustomerExpenses> customerExpensesTask = await GetCustomerExpenses(customerId, context, cancellation);
+
+//    List<VCustomerIncomes> customerIncomesTask = await GetCustomerIncomes(customerId, context, cancellation);
+
+//    List<VCollateralLines> collateralLinesTask = await GetCustomerCollateral(customerId, context, cancellation);
+
+//    List<VCustomerActivities> customerActivitiesTask = await GetCustomerActivities(customerId, context, cancellation);
+
+//    customer.LoanRequests = loanRequestsTask;
+//    customer.Loans = loanDisbursementsTask;
+//    customer.CustomerNotes = customerNotesTask;
+//    customer.CustomerExpenses = customerExpensesTask;
+//    customer.CustomerIncomes = customerIncomesTask;
+//    customer.CollateralLines = collateralLinesTask;
+//    customer.CustomerActivities = customerActivitiesTask;
 
 //    return Result.Success(customer);
-
 //}

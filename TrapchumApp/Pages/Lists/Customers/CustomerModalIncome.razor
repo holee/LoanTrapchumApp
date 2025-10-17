@@ -43,8 +43,7 @@
                 </Template>
                 <EditTemplate>
                     <RadzenTextBox @bind-Value="c.IncomeSource"
-                                   class="w-100"
-                                   Style="height:2rem;line-height:1rem;" />
+                                   class="rz-w-100" />
                 </EditTemplate>
             </RadzenDataGridColumn>
             <RadzenDataGridColumn Width="8rem"
@@ -57,10 +56,9 @@
                 <EditTemplate>
                     <RadzenNumeric TValue="decimal?"
                                    @bind-Value="c.IncomeAmount"
-                                   class="w-100"
+                                   class="rz-w-100"
                                    Format="#,##0.00"
-                                   ShowUpDown="false"
-                                   Style="height:2rem;line-height:1rem;" />
+                                   ShowUpDown="false" />
                 </EditTemplate>
             </RadzenDataGridColumn>
             <RadzenDataGridColumn Context="c" Title="Description" Property="InDescription">
@@ -68,13 +66,12 @@
                     @c.InDescription
                 </Template>
                 <EditTemplate>
-                    <RadzenTextBox @bind-Value="c.InDescription" class="w-100"
-                                   Style="height:2rem;line-height:1rem;" />
+                    <RadzenTextBox @bind-Value="c.InDescription" class="rz-w-100"/>
                 </EditTemplate>
             </RadzenDataGridColumn>
             <RadzenDataGridColumn TextAlign="TextAlign.Center" Context="c" Title="Action" Width="4rem">
                 <Template>
-                    <RadzenButton Variant="Variant.Flat"
+                    <RadzenButton Variant="Variant.Text"
                                   Icon="edit"
                                   ButtonStyle="ButtonStyle.Primary"
                                   Click="@(()=>EditRow(c))"
@@ -89,13 +86,13 @@
                 </Template>
                 <EditTemplate>
                     <RadzenButton Variant="Variant.Flat"
-                                  Icon="check"
+                                  Icon="@IconNames.Checked"
                                   Click="@(()=>SaveRow(c))"
                                   ButtonStyle="ButtonStyle.Success"
                                   @onclick:stopPropagation="true"
                                   Size="ButtonSize.ExtraSmall" />
-                    <RadzenButton Variant="Variant.Flat"
-                                  Icon="close"
+                    <RadzenButton Variant="Variant.Text"
+                                  Icon="@IconNames.Undo"
                                   ButtonStyle="ButtonStyle.Warning"
                                   Click="@(()=>CancelEdit(c))"
                                   @onclick:stopPropagation="true"
@@ -107,7 +104,7 @@
     </RadzenDataGrid>
 </RadzenStack>
 <RadzenStack Orientation="Orientation.Horizontal"
-             class="mt-3"
+             class="rz-mt-3"
              AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
     <RadzenButton Text="Save"
                   Click="SaveChanged"

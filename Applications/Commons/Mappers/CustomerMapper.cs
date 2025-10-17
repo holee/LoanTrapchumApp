@@ -108,6 +108,7 @@ public static class CustomerMapper
             VilInKhmer = dto.VilInKhmer,
             Description = dto.Description,
             Converted=false,
+            CreatedBy=dto.CreatedBy,
             Customer = new Customer
             {
                 CustomerKey=dto.CustomerKey,

@@ -1,5 +1,6 @@
 ﻿@page "/app/loan/request/{BranchId:int}/branches/createNew"
 @page "/app/loan/request/{BranchId:int}/branches/createNew/{CustomerId}/customer"
+@using Applications.Features.Customers.Response
 @using Applications.Features.LoanRequests.Interfaces
 @using Applications.Responses.Lists.Collaterals
 @using Radzen.Blazor.Rendering
@@ -110,9 +111,9 @@
     RadzenTextBox textBox = default!;
     string? FullName = "";
     Popup popup = default!;
-    RadzenDataGrid<VCustomerList> grid = default!;
+    RadzenDataGrid<VCustomerDetails> grid = default!;
 
-    async Task OnRowSelect(VCustomerList customer)
+    async Task OnRowSelect(VCustomerDetails customer)
     {
         FullName = "";
         model.CustomerRefId = customer.CustomerId;
@@ -144,7 +145,7 @@
 
     async Task OnKeyDown(KeyboardEventArgs args)
     {
-        var items = Customers;
+        var items = _customers;
 
         var popupOpened = await js.InvokeAsync<bool>("popupOpened", "popup");
 

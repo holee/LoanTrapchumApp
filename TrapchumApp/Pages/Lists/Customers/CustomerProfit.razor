@@ -1,0 +1,85 @@
+﻿@using Applications.Features.Customers.Commands.CustomerExpenseQuery
+@using Applications.Features.Customers.Commands.CustomerIncomeQuery
+@using Applications.Features.Customers.UseCases
+@using Applications.Utils
+@using Applications.Features.Addresses
+@using Applications.Features.Branches
+@using Applications.Features.Currencies
+@using Applications.Features.Customers.Services
+@using Applications.Features.Employees
+@using Applications.Features.LoanRequests.Interfaces
+@using TrapchumApp.Services
+<RadzenRow>
+    <RadzenColumn Size="6" SizeMD="6" SizeSM="12">
+
+
+        <CustomerInc Items="@_incomes" ShowCommand="true"
+                     CustomerId="@CustomerId"
+                     GetIncomes="@GetIncomes"
+                     ShowAdd="true" />
+
+    </RadzenColumn>
+    <RadzenColumn Size="6" SizeMD="6" SizeSM="12">
+        <CustomerExp Items="@_expenses" ShowCommand="true"
+                     CustomerId="@CustomerId"
+                     GetExpenses="@GetExpenses"
+                     ShowAdd="true" />
+    </RadzenColumn>
+</RadzenRow>
+
+<RadzenStack AlignItems="AlignItems.Center"
+             JustifyContent="JustifyContent.Normal">
+    <RadzenButton ButtonStyle="ButtonStyle.Primary" class="rz-w-100">
+        Profit
+        <RadzenBadge Variant="Variant.Outlined" BadgeStyle="BadgeStyle.Light"
+                     Text="@(_profits.ToString())" class="rz-ms-2" />
+    </RadzenButton>
+
+</RadzenStack>
+@code {
+    [Parameter] public string? CustomerId { get; set; } = string.Empty;
+
+    private decimal? _profits = 0.0M;
+    private readonly IMediator _med;
+    private IEnumerable<VCustomerIncomes> _incomes = [];
+    private IEnumerable<VCustomerExpenses> _expenses = [];
+    public CustomerProfit(IMediator med)
+    {
+        _med = med;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        _incomes = await _med.Send(new GetCustomerIncomeQuery { CustomerId = CustomerId });
+
+        _expenses = await _med.Send(new GetCustomerExpenseQuery { CustomerId = CustomerId });
+
+        _profits = (_incomes.Sum(x => x.IncomeAmount) ?? 0) - (_expenses.Sum(x => x.ExpendAmount) ?? 0);
+
+
+        await base.OnInitializedAsync();
+
+    }
+
+    void GetIncomes(IEnumerable<VCustomerIncomes> args)
+    {
+
+        _incomes = args;
+
+        _profits = (_incomes.Sum(x => x.IncomeAmount) ?? 0) - (_expenses.Sum(x => x.ExpendAmount) ?? 0);
+
+
+        StateHasChanged();
+    }
+
+    void GetExpenses(IEnumerable<VCustomerExpenses> args)
+    {
+        _expenses = args;
+
+        _profits = (_incomes.Sum(x => x.IncomeAmount) ?? 0) - (_expenses.Sum(x => x.ExpendAmount) ?? 0);
+
+        StateHasChanged();
+    }
+
+}

@@ -1,7 +1,7 @@
 using Applications.Extensions.mappers;
 using Applications.Features.Collaterals.Requests;
+using Applications.Features.Customers.Response;
 using Applications.Responses.Lists.Collaterals;
-using Applications.Responses.ViewModels.Customers;
 using Applications.Services.Lists;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
@@ -13,7 +13,7 @@ namespace TrapchumApp.Pages.Lists.Collaterals
     {
         private readonly ICollateralsServiceImpl _service;
         private readonly ILogger<CreateCollateralModal> _logger;
-        private IEnumerable<VCustomerList> custlist = [];
+        private IEnumerable<VCustomerDetails> custlist = [];
         protected IEnumerable<CustomerCollateral>? cusName = [];
         private IEnumerable<CollateralTypeResponse> collateralTypes = [];
         private IEnumerable<CollateralSubTypeResponse> collateralProperties = [];

@@ -2,6 +2,8 @@ using Applications.Commons.Mappers;
 using Applications.Enumerations;
 using Applications.Extensions;
 using Applications.Extensions.Maths;
+using Applications.Features.Customers.Response;
+using Applications.Features.Customers.UseCases;
 using Applications.Features.LoanPayments.Requests;
 using Applications.Features.LoanRequests.Requests;
 using Applications.Features.Loans.Requests;
@@ -9,7 +11,6 @@ using Applications.Features.Settings.UseCases;
 using Applications.Interfaces.Lists;
 using Applications.Responses.Loans.Disbursements;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Customers;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Applications.Responses.ViewModels.Options;
 using Applications.Responses.ViewModels.Settings;
@@ -22,6 +23,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         ILoanSettingServiceImpl loanSettingService,
         ISettingServiceImpl settingsServiceImpl,
         IHolidayService holidayService,
+        GetCustomersUseCase getCustomersUseCase,
         ILogger<LoanRequestCreate> logger)
     {
         private readonly ILogger<LoanRequestCreate> _logger = logger;
@@ -49,7 +51,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
         IEnumerable<LoanCategoryResponse>? loanCategories = [];
 
-        IEnumerable<VCustomerList>? CustomersList = [];
+        IEnumerable<VCustomerDetails>? CustomersList = [];
 
         IEnumerable<LoanInstallmentTypeDto>? LoanInstallments = [];
 
@@ -61,7 +63,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
         IEnumerable<LoanRequestDocumentsDtoCreate> _documents = [];
 
-        VCustomerList? selectedCustomer = new();
+        VCustomerDetails? selectedCustomer = new();
 
         DateTime firstPayment;
 
@@ -96,7 +98,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
                 await GetCustomers(CustomerId);
 
-                Model.FullName = Customers.First().FullName;
+                Model.FullName = Customers.First(x => x.CustomerId == CustomerId).AltName;
             }
 
             await base.OnInitializedAsync();
@@ -124,7 +126,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         {
             var queryParam = new QueryParam(0, take, string.Empty, filter: filter);
 
-            var rsp = await _customerService.GetCustomersAsync(customerId, queryParam);
+            var rsp = await getCustomersUseCase.ExecuteAsync(0, null, customerId, queryParam);
 
             if (rsp.Items.Any())
             {

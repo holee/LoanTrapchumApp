@@ -1,8 +1,8 @@
 using Applications.Extensions;
-using Applications.Features.Customers.Services;
 using Applications.Responses.Lists.Collaterals;
 using Radzen.Blazor;
-using Applications.Services.Lists; 
+using Applications.Services.Lists;
+using Applications.Features.Customers.UseCases;
 
 namespace TrapchumApp.Pages.Lists.Collaterals
 {

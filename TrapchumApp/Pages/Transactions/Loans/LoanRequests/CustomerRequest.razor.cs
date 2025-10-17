@@ -1,12 +1,12 @@
 using Applications.Extensions;
-using Applications.Responses.ViewModels.Customers;
+using Applications.Features.Customers.Response;
 
 namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 {
     public partial class CustomerRequest
     {
         [Parameter] public string? CustomerId { get; set; }
-        [Parameter] public VCustomerList? Customer { get; set; } = new();
+        [Parameter] public VCustomerDetails? Customer { get; set; } = new();
         [Parameter] public bool ShowAdditionalInfo { get; set; } = false;
         protected override async Task OnInitializedAsync()
         {

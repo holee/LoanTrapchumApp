@@ -56,15 +56,7 @@
                         CustomerId="@CustomerId" ShowAdd="true" @key="@Guid.NewGuid().ToString("N")" />
             </RadzenTabsItem>
             <RadzenTabsItem Text="Income & Expense">
-                <RadzenRow AlignItems="AlignItems.Center"
-                           Gap="1rem">
-                    <RadzenColumn Size="6">
-                        <CustomerInc CustomerId="@CustomerId" ShowCommand="true" ShowAdd="true" @key="@Guid.NewGuid().ToString("N")" />
-                    </RadzenColumn>
-                    <RadzenColumn Size="6">
-                        <CustomerExp CustomerId="@CustomerId" ShowCommand="true" ShowAdd="true" @key="@Guid.NewGuid().ToString("N")" />
-                    </RadzenColumn>
-                </RadzenRow>
+                  <CustomerProfit CustomerId="@CustomerId" />
             </RadzenTabsItem>
             <RadzenTabsItem Text="Loan History">
                 <LoanHistory CustomerId="@CustomerId" @key="@Guid.NewGuid().ToString("N")" />

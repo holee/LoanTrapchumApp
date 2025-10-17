@@ -1,9 +1,18 @@
+using Applications.Features.Customers.Interfaces;
+using Applications.Responses.Paginations;
 using Radzen.Blazor;
 
 namespace TrapchumApp.Pages.Lists.Customers
 {
     public partial class CustomersIndex
     {
+        private readonly IGetCustomersByUseCase _getCustomersByUseCase;
+
+        public CustomersIndex(IGetCustomersByUseCase getCustomersByUseCase)
+        {
+            _getCustomersByUseCase = getCustomersByUseCase;
+        }
+
         [CascadingParameter]
         Task<AuthenticationState> AuthenticationState { get; set; } = default!;
         [Parameter, SupplyParameterFromQuery] public string? UserId { get; set; }
@@ -99,6 +108,12 @@ namespace TrapchumApp.Pages.Lists.Customers
 
             selectedIndex = 0;
 
+        }
+
+        protected override async Task OnInitializedAsync()
+        {
+
+            await base.OnInitializedAsync();
         }
 
     }

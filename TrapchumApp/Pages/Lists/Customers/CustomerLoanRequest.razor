@@ -71,13 +71,27 @@
             <Template>
                 <AuthorizeView Policy="@RequestsPolicies.Request">
                     <Authorized>
-                        <RadzenLink Path="@($"App/Loan/{BranchId}/Branches/Request/Details?UserId={UserId}&CustomerId={CustomerId}&LoanRequestId={c?.LoanRequestId}")" Text="Detail" />
+                        <NavLink href="@($"/app/loan/{c.LoanRequestId}/request/{c.BranchId}/branches/{c.CustomerId}/details")">
+                            Request
+                        </NavLink>
                     </Authorized>
+                    <NotAuthorized>
+                        <NavLink href="@($"/app/loan/{c.LoanRequestId}/request/{c.BranchId}/branches/{c.CustomerId}/details")">
+                            Details
+                        </NavLink>
+                    </NotAuthorized>
                 </AuthorizeView>
                 <AuthorizeView Policy="@RequestsPolicies.Disburse">
                     <Authorized>
-                        <RadzenLink Path="@($"App/Loan/{BranchId}/Branches/Request/Details?UserId={UserId}&CustomerId={CustomerId}&LoanRequestId={c?.LoanRequestId}")" Text="Detail" />
+                        <NavLink href="@($"/app/loan/{c.LoanRequestId}/request/{c.BranchId}/branches/{c.CustomerId}/details")">
+                            Details
+                        </NavLink>
                     </Authorized>
+                    <NotAuthorized>
+                        <NavLink href="@($"/app/loan/{c.LoanRequestId}/request/{c.BranchId}/branches/{c.CustomerId}/details")">
+                            Details
+                        </NavLink>
+                    </NotAuthorized>
                 </AuthorizeView>
             </Template>
         </RadzenDataGridColumn>

@@ -39,7 +39,12 @@
             <Columns>
                 <RadzenDataGridColumn OrderIndex="0" Property="IncomeId" Context="c" Title="#" Width="3rem">
                     <Template>
-                        @c.IncomeId
+                        @{
+                            var index = Items.ToList().IndexOf(c) + 1;
+                        }
+
+                        @index
+
                     </Template>
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn Context="c"

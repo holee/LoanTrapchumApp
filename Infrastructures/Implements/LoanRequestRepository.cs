@@ -17,6 +17,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Applications.Features.CreditAgents.Requests;
 using Applications.Features.LoanRequests.Requests;
+using Applications.Features.Customers.Response;
 
 namespace Infrastructures.Implements;
 
@@ -1418,10 +1419,10 @@ public sealed class LoanRequestRepository(
     }
 
 
-    private async Task<Result<VCustomerList>> GetLoanCustomer(string? customerId)
+    private async Task<Result<VCustomerDetails>> GetLoanCustomer(string? customerId)
     {
         if (string.IsNullOrWhiteSpace(customerId))
-            return Result.Failure<VCustomerList>(ErrorResponse.NotFound("Customer ID is required."));
+            return Result.Failure<VCustomerDetails>(ErrorResponse.NotFound("Customer ID is required."));
 
         using var db = await dapperFactory.CreateConnectionAsync();
 
@@ -1443,9 +1444,9 @@ public sealed class LoanRequestRepository(
         var parameters = new DynamicParameters();
         parameters.Add("@CustomerId", customerId);
 
-        var lookup = new Dictionary<string, VCustomerList>();
+        var lookup = new Dictionary<string, VCustomerDetails>();
 
-        await db.QueryAsync<VCustomerList, VCustomerIncomes, VCustomerExpenses, VCustomerList>(
+        await db.QueryAsync<VCustomerDetails, VCustomerIncomes, VCustomerExpenses, VCustomerDetails>(
             sql,
             (customer, income, expense) =>
             {
@@ -1471,7 +1472,7 @@ public sealed class LoanRequestRepository(
         );
 
         if (!lookup.TryGetValue(customerId, out var finalCustomer))
-            return Result.Failure<VCustomerList>(ErrorResponse.NotFound("Customer data not found."));
+            return Result.Failure<VCustomerDetails>(ErrorResponse.NotFound("Customer data not found."));
 
         return Result.Success(finalCustomer);
     }

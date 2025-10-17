@@ -1,6 +1,7 @@
 ﻿using Applications.Interfaces.Customers;
 using Applications.Responses;
 using Applications.Responses.Message;
+using Applications.Responses.ViewModels.Customers;
 using Domains.Models.Lists.Customers;
 using Infrastructures.DataAccess;
 using Mapster;
@@ -37,34 +38,50 @@ namespace Infrastructures.Implements
             catch (Exception e)
             {
                 _logger.LogError(e.Message, e);
+
                 return Result.Failure<string>(ErrorResponse.ServerError(e.Message));
             }
         }
-        public async Task<Result<IEnumerable<T>>> GetCustomerActivies<T>(string? customerId, CancellationToken cancellation = default) where T : class
+
+        public async Task<Result<IEnumerable<VCustomerActivities>>> GetCustomerActivies(string? customerId, CancellationToken cancellation = default)
         {
             _logger.LogInformation("try adding new customer note");
+            
             try
             {
+                
                 await using var context = await _contextFactory.CreateDbContextAsync(cancellation);
+                
                 var notes = await context.Database
-                    .SqlQuery<T>($"SELECT * FROM VCustomerActivities WHERE CustomerRefId={customerId}")
-                    .ProjectToType<T>()
+                    .SqlQuery<VCustomerActivities>($"SELECT * FROM VCustomerActivities WHERE CustomerRefId={customerId}")
                     .AsNoTracking()
+                    .Select(ProjectTo())
                     .ToListAsync();
 
                 if (notes.Any())
                 {
-                    return Result.Success<IEnumerable<T>>(notes);
+                    return Result.Success<IEnumerable<VCustomerActivities>>(notes);
                 }
 
-                return Result.Failure<IEnumerable<T>>(ErrorResponse.NotFound("Something went wrong with server."));
+                return Result.Failure<IEnumerable<VCustomerActivities>>(ErrorResponse.NotFound("Something went wrong with server."));
             }
             catch (Exception e)
             {
                 _logger.LogError(e.Message, e);
 
-                return Result.Failure<IEnumerable<T>>(ErrorResponse.ServerError(e.Message));
+                return Result.Failure<IEnumerable<VCustomerActivities>>(ErrorResponse.ServerError(e.Message));
             }
+        }
+
+        private static System.Linq.Expressions.Expression<Func<VCustomerActivities, VCustomerActivities>> ProjectTo()
+        {
+            return x => new VCustomerActivities
+            {
+                ActivityId = x.ActivityId,
+                Description = x.Description,
+                Status = x.Status,
+                ActivityDate = x.ActivityDate,
+            };
         }
     }
 }

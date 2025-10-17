@@ -40,5 +40,6 @@ public abstract class BaseEntityNamesCreate
     public string? VilInKhmer { get; set; }
     public string? Description { get; set; }
     public bool Converted { get; set; } = false;
+    public string? CreatedBy { get; set; }=string.Empty;
 
 }

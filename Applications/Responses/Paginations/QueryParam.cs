@@ -43,7 +43,7 @@ public sealed class QueryParam
         Filter = filter;
     }
     public QueryParam(int skip, int pageSize, string sortField, bool isIncludeInActive = false, bool sortDescending = false, string? filter = null, string? filterColumn = null)
-       : this(skip, pageSize, sortField, isIncludeInActive, sortDescending,filter)
+       : this(skip, pageSize, sortField, isIncludeInActive, sortDescending, filter)
     {
         FilterColumn = filterColumn;
     }
@@ -53,5 +53,6 @@ public sealed class QueryParam
     public bool SortDescending { get; set; } = false;
     public bool IsIncludeInActive { get; set; } = false;
     public string? FilterColumn { get; set; } = string.Empty;
+    public string[]? FilterColumns { get; set; } = [];
     public string? Filter { get; set; } = string.Empty;
 }

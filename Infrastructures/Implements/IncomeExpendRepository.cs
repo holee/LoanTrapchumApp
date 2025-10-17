@@ -132,6 +132,8 @@ namespace Infrastructures.Implements
             }
         }
 
+
+
         public async Task<Result<string>> AddOrUpdateIncomesAsync(string? customerId, List<CustomerIncome> req)
         {
             try
@@ -186,12 +188,80 @@ namespace Infrastructures.Implements
 
         }
 
+
+
+
+        public async Task<Result<VCustomerIncomes>> AddOrUpdateIncomeAsync(string? customerId, CustomerIncome req)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(customerId))
+                {
+                    return Result.Failure<VCustomerIncomes>(ErrorResponse.NotFound("Customer ID is required"));
+                }
+
+                _logger.LogInformation("Adding or updating income for customer {CustomerId}...", customerId);
+
+                var existingCustomer = await _context.Customers
+                                    .Include(x => x.CustomerIncomes)
+                                    .FirstOrDefaultAsync(x => x.CustomerId == customerId);
+
+                if (existingCustomer is null)
+                {
+                    return Result.Failure<VCustomerIncomes>(ErrorResponse.NotFound("No customer is selected"));
+                }
+
+                if (req.Id != 0)
+                {
+                    var existingIncome = existingCustomer.CustomerIncomes?
+                                    .FirstOrDefault(x => x.Id == req.Id);
+
+                    if (existingIncome is not null)
+                    {
+                        _context.Entry(existingIncome).CurrentValues.SetValues(req);
+                    }
+                    else
+                    {
+                        return Result.Failure<VCustomerIncomes>(ErrorResponse.NotFound("Income record not found"));
+                    }
+                }
+                else
+                {
+                    existingCustomer.CustomerIncomes ??= new List<CustomerIncome>();
+
+                    existingCustomer.CustomerIncomes.Add(req);
+                }
+
+                await _context.SaveChangesAsync();
+
+
+                var addedOrUpdatedIncome = await _context.CustomerIncomes
+                    .Select(ProjectTo())
+                    .FirstOrDefaultAsync(x => x.IncomeId == req.Id);
+
+                if (addedOrUpdatedIncome is not null)
+                {
+                    return Result.Success(addedOrUpdatedIncome);
+                }
+
+                return Result.Failure<VCustomerIncomes>(ErrorResponse.ServerError("Failed to retrieve the added or updated income record"));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error adding or updating income for customer {CustomerId}", customerId);
+                return Result.Failure<VCustomerIncomes>(ErrorResponse.ServerError(ex.InnerException?.Message ?? ex.Message));
+            }
+
+        }
+
+
+
         public async Task<Result<IEnumerable<VCustomerExpenses>>> GetCustomerCustomerExpenses(string? customerId)
         {
 
             using var db = connectionFactory.CreateConnection();
 
-            var expense = await db.QueryAsync<VCustomerExpenses>($"SELECT * FROM VCustomerExpenses WHERE CustomerRefId=@customerId",new { customerId});
+            var expense = await db.QueryAsync<VCustomerExpenses>($"SELECT * FROM VCustomerExpenses WHERE CustomerRefId=@customerId", new { customerId });
 
             if (expense is null)
             {
@@ -251,6 +321,20 @@ namespace Infrastructures.Implements
 
             return Result.Success<IEnumerable<T>>(expense);
 
+        }
+
+
+
+        private static System.Linq.Expressions.Expression<Func<CustomerIncome, VCustomerIncomes>> ProjectTo()
+        {
+            return x => new VCustomerIncomes
+            {
+                IncomeId = x.Id,
+                CustomerRefId = x.CustomerRefId,
+                IncomeSource = x.IncomeSource,
+                IncomeAmount = x.Amount,
+                InDescription = x.Description
+            };
         }
 
     }

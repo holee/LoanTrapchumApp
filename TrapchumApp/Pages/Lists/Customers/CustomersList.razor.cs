@@ -1,10 +1,11 @@
 using Applications.Extensions.DateTimes;
 using Applications.Extensions.Identity.Authorizations.Extensions;
 using Applications.Extensions.Identity.Policies;
+using Applications.Features.Customers.Response;
 using Applications.Features.Customers.UseCases;
 using Applications.Responses.Lists.Customers;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Customers;
+using TrapchumApp.Helpers.Enums;
 using TrapchumApp.Pages.Lists.Collaterals;
 
 namespace TrapchumApp.Pages.Lists.Customers
@@ -12,9 +13,9 @@ namespace TrapchumApp.Pages.Lists.Customers
     public partial class CustomersList
     {
 
-        private readonly GetCustomersCommand _getCustomerCommand;
+        private readonly GetCustomersUseCase _getCustomerCommand;
 
-        public CustomersList(GetCustomersCommand getCustomerCommand)
+        public CustomersList(GetCustomersUseCase getCustomerCommand)
         {
             _getCustomerCommand = getCustomerCommand;
         }
@@ -28,7 +29,7 @@ namespace TrapchumApp.Pages.Lists.Customers
         [Parameter] public EventCallback<string?> ClickedAddCollateral { get; set; }
         [Parameter, SupplyParameterFromQuery] public string? UserId { get; set; } = string.Empty;
         [Parameter] public int? BranchId { get; set; } = 0;
-        [Parameter] public EventCallback<VCustomerList> SelectedRowChanged { get; set; }
+        [Parameter] public EventCallback<VCustomerDetails> SelectedRowChanged { get; set; }
         [Parameter] public RenderFragment? ChildContent { get; set; } = default!;
 
         bool IsAccountOnly = false;
@@ -60,7 +61,7 @@ namespace TrapchumApp.Pages.Lists.Customers
             ContextMenuService.Close();
         }
 
-        IList<VCustomerList> SelectedCustomers = [];
+        IList<VCustomerDetails> SelectedCustomers = [];
 
         bool isLoading = false;
 
@@ -75,6 +76,31 @@ namespace TrapchumApp.Pages.Lists.Customers
             await LoadCustomerPageList(filterText);
 
         }
+
+        void SelectedItemChanged(object? e)
+        {
+            if (e is not null)
+            {
+                var id = ((FilterCustomer)e).Id;
+
+                if (id == (int)CustomerFilter.All)
+                {
+
+                }
+                if (id == (int)CustomerFilter.MyCustomer)
+                {
+
+                }
+
+                if (id == (int)CustomerFilter.ByBranch)
+                {
+
+                }
+            }
+        }
+
+
+
 
         private async Task AddInComeModal(string? customerId)
         {
@@ -210,10 +236,10 @@ namespace TrapchumApp.Pages.Lists.Customers
                 sortDescending = args.Sorts.First().SortOrder == SortOrder.Descending;
             }
 
-            var filterColumn = args.Filters?.FirstOrDefault(f => f.Property == nameof(VCustomerList.FullName) ||
-                                                            f.Property == nameof(VCustomerList.AltName) ||
-                                                           f.Property == nameof(VCustomerList.CustomerId) ||
-                                                           f.Property == nameof(VCustomerList.Phone))?.FilterValue?.ToString();
+            var filterColumn = args.Filters?.FirstOrDefault(f => f.Property == nameof(VCustomerDetails.FullName) ||
+                                                            f.Property == nameof(VCustomerDetails.AltName) ||
+                                                           f.Property == nameof(VCustomerDetails.CustomerId) ||
+                                                           f.Property == nameof(VCustomerDetails.Phone))?.FilterValue?.ToString();
 
             filterText = filterColumn ?? string.Empty;
 
@@ -236,7 +262,7 @@ namespace TrapchumApp.Pages.Lists.Customers
 
                 var param = new QueryParam(pageIndex, pageSize, sortField, includeInactive, sortDescending, filter);
 
-                var res = await _getCustomerCommand.ExecuteAsync(null,param);
+                var res = await _getCustomerCommand.ExecuteAsync(null, null, null, param);
 
                 VCustomers = res.Items;
 
@@ -276,6 +302,14 @@ namespace TrapchumApp.Pages.Lists.Customers
         private void OnRowSelected(VCustomerList args)
         {
 
+        }
+
+        void OnRowDoubleClick(DataGridRowMouseEventArgs<VCustomerList> args)
+        {
+            // Handle row double click event
+            _ = AddDetails(args.Data.CustomerId);
+
+            // await ClickedDetails.InvokeAsync(customerId);
         }
 
         private async Task OnChanged(bool arg)

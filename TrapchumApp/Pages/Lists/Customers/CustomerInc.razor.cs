@@ -15,8 +15,9 @@ namespace TrapchumApp.Pages.Lists.Customers
         [Parameter] public string? CustomerId { get; set; }
         [Parameter] public bool ShowAdd { get; set; } = true;
         [Parameter] public bool ShowReload { get; set; } = false;
-        [Parameter] public bool ShowCommand { get; set; } = false; 
+        [Parameter] public bool ShowCommand { get; set; } = false;
         [Parameter] public IEnumerable<VCustomerIncomes> Items { get; set; } = [];
+        [Parameter] public EventCallback<IEnumerable<VCustomerIncomes>> GetIncomes { get; set; }
         bool isLoading = false;
         protected override async Task OnInitializedAsync()
         {
@@ -30,7 +31,7 @@ namespace TrapchumApp.Pages.Lists.Customers
 
             isLoading = true;
 
-            if (customerId.IsNotNullOrEmpty())
+            if (customerId.IsNotNullOrEmpty() || !Items.Any())
             {
                 var resp = await _incomeExpendServiceImpl.GetCustomerCustomerIncomes(customerId);
 
@@ -76,9 +77,11 @@ namespace TrapchumApp.Pages.Lists.Customers
 
             bool? result = await DialogService.OpenAsync<CustomerModalIncome>("Add Income", param, options);
 
-            if (result==true)
+            if (result == true)
             {
                 await GetCustomerIncomes(CustomerId);
+
+                await GetIncomes.InvokeAsync(Items);
             }
 
         }

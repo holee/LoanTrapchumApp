@@ -1,13 +1,13 @@
 ﻿using Applications.Extensions;
 using Applications.Extensions.Web;
 using Applications.Responses.Lists.Collaterals;
-using Applications.Responses.ViewModels.Customers;
 using Radzen.Blazor;
 using TrapchumApp.Pages.Lists.Collaterals;
 using Domains.Models.Identity;
 using Applications.Features.Customers.Services;
 using Applications.Services.Lists;
 using Applications.Services.Lists;
+using Applications.Features.Customers.Response;
 
 namespace TrapchumApp.Pages.Lists.Customers
 {
@@ -33,7 +33,7 @@ namespace TrapchumApp.Pages.Lists.Customers
         [Parameter] public EventCallback<int> Close { get; set; }
         [Parameter] public EventCallback<int> EditClick { get; set; }
 
-        protected VCustomerList Customer = new();
+        protected VCustomerDetails Customer = new();
 
         protected IEnumerable<VCollateralLines> CollateralLines = [];
 
@@ -113,7 +113,7 @@ namespace TrapchumApp.Pages.Lists.Customers
                     UserId ??= auth.User.GetId();
                 }
 
-                var response = await _customerService.GetCustomerDetailByIdAsync(CustomerId, o => o.LoanRequests);
+                var response = await _customerService.GetCustomerDetailsByIdAsync(CustomerId,true);
 
                 if (response.IsSuccess && response.Data is not null)
                 {

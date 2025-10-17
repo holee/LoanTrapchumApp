@@ -1,4 +1,5 @@
 using Applications.Extensions;
+using Applications.Features.Customers.Response;
 using Applications.Features.Customers.Services;
 using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.Paginations;
@@ -35,7 +36,7 @@ public partial class CollateralList
     VCustomerCollaterals? SelectedCollateral = new();
     LoanCustomerQuery? SelectedCustomers = new();
     string? CollateralId = string.Empty;
-    IEnumerable<VCustomerList> custlist = [];
+    IEnumerable<VCustomerDetails> custlist = [];
     IEnumerable<CustomerCollateral>? cusName = [];
     CustomerCollateral? SelectedCustomer = new();
     IEnumerable<CollateralTypeResponse> collateralTypes = [];
@@ -64,6 +65,17 @@ public partial class CollateralList
 
 
     void Delete(string? customerId) { }
+
+
+    void CloseDetails(int index)
+    {
+        if (index == 1 && IsShowDetails)
+        {
+            selectedIndex = 0;
+            
+            IsShowDetails = false;
+        }
+    }
     void AddDetailsTab(string? customerId)
     {
 
@@ -89,12 +101,7 @@ public partial class CollateralList
     {
         selectedIndex = index;
     }
-    void CloseDetail()
-    {
-        IsShowDetails = false;
-        selectedIndex = 0;
-        StateHasChanged();
-    }
+
     void RemoveTab()
     {
         IsShowAdd = false;

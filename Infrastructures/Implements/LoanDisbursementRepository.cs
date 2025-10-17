@@ -3,7 +3,6 @@ using Applications.Extensions;
 using Applications.Interfaces.Loans;
 using Applications.Responses;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Customers; 
 using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Applications.Responses.ViewModels.Loans.Schedules;
@@ -18,6 +17,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Data;
 using Applications.Features.CreditAgents.Requests;
+using Applications.Features.Customers.Response;
 
 namespace Infrastructures.Implements
 {
@@ -106,7 +106,7 @@ namespace Infrastructures.Implements
             var parameter = new DynamicParameters();
             parameter.Add("@CustomerId", customerId);
             parameter.Add("@IsLoanActive", true);
-            var customerInActiveLoan = await db.QueryAsync<VCustomerList>(SqlConstant.CustomerInActiveLoan, parameter);
+            var customerInActiveLoan = await db.QueryAsync<VCustomerDetails>(SqlConstant.CustomerInActiveLoan, parameter);
             return customerInActiveLoan.Any();
         }
 

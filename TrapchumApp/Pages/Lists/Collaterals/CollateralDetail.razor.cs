@@ -1,4 +1,4 @@
-using Applications.Features.Customers.Services;
+using Applications.Features.Customers.UseCases;
 using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Services.Lists;
@@ -52,5 +52,6 @@ namespace TrapchumApp.Pages.Lists.Collaterals
         }
 
 
+       
     }
 }

@@ -1,4 +1,5 @@
 ﻿@page "/app/loan/{LoanRequestId}/request/{BranchId:int}/branches/{CustomerId}/edit"
+@using Applications.Features.Customers.Response
 @using Applications.Features.LoanRequests.Interfaces
 @using Applications.Features.LoanRequests.Requests
 @using Applications.Responses.Lists.Collaterals
@@ -113,7 +114,7 @@
     RadzenTextBox textBox = default!;
     string? FullName = "";
     Popup popup = default!;
-    RadzenDataGrid<VCustomerList> grid = default!;
+    RadzenDataGrid<VCustomerDetails> grid = default!;
 
     async Task SelectMany(IEnumerable<VGuarantor> gs)
     {

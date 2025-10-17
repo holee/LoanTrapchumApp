@@ -41,7 +41,6 @@ public sealed class LoanRequestDtoCreate
     public string? Summiter { get; set; }
     public decimal? AdminFeeRate { get; set; }
     public decimal? AdminFeeAmount { get; set; }
-
     public decimal? PenaltyRate { get; set; }
     public string? Remark { get; set; }
     public string? Memo { get; set; }

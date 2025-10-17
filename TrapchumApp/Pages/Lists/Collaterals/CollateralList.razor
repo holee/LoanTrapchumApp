@@ -1,12 +1,4 @@
 ﻿@page "/app/customer/collateral"
-@using Applications.Features.Addresses
-@using Applications.Features.Branches
-@using Applications.Features.Currencies
-@using Applications.Features.Customers.Services
-@using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Interfaces
-@using Microsoft.AspNetCore.Components.Web
-@using TrapchumApp.Services
 @attribute [Authorize]
 <PageTitle>Collateral</PageTitle>
 <RadzenProgressBar Value="100" Visible="IsProgress" ProgressBarStyle="ProgressBarStyle.Info" Style="height:1px" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
@@ -43,7 +35,7 @@
                         </Template>
                     </RadzenDataGridColumn>
                     <RadzenDataGridColumn Property="Remark" Title="Remark" />
-                    <RadzenDataGridColumn Width="5rem" TextAlign="TextAlign.Center" Property="CustomerId" Title="Action" Context="c">
+                    <RadzenDataGridColumn Width="6rem" TextAlign="TextAlign.Center" Property="CustomerId" Title="Action" Context="c">
                         <Template>
                             <RadzenButton Size="ButtonSize.ExtraSmall"
                                           Icon="more_vert"
@@ -55,18 +47,23 @@
             </RadzenDataGrid>
         </RadzenTabsItem>
         <RadzenTabsItem Text="Details" Visible="IsShowDetails" Icon="info">
-            <CollateralDetail CustomerId="@CustomerId" Close="CloseDetail" />
+            <Template>
+                <CloseTabButton Title="Details" Closed="()=>CloseDetails(1)" />
+            </Template>
+            <ChildContent>
+                <CollateralDetail CustomerId="@CustomerId" Close="()=>CloseDetails(1)" />
+            </ChildContent>
         </RadzenTabsItem>
     </Tabs>
 </RadzenTabs>
 @code {
     void ShowContextMenuWithContent(MouseEventArgs args, string? id)
-    {
+    { 
         ContextMenuService.Open(args, ds =>
     @<RadzenMenu Style="font-size:0.8rem;">
-    <RadzenMenuItem Click="@(() => AddDetailsTab(id))" Icon="info" Text="Details" Value="@id"></RadzenMenuItem>
-    <RadzenMenuItem Click="@(() => Delete(id))" Icon="delete" Text="Delete" Value="@id"></RadzenMenuItem>
-</RadzenMenu>
+        <RadzenMenuItem Click="@(() => AddDetailsTab(id))" Icon="info" Text="Details" Value="@id"></RadzenMenuItem>
+        <RadzenMenuItem Click="@(() => Delete(id))" Icon="delete" Text="Delete" Value="@id"></RadzenMenuItem>
+    </RadzenMenu>
     );
     }
 

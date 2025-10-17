@@ -1,6 +1,7 @@
 @using Applications.Features.Addresses
 @using Applications.Features.Branches
 @using Applications.Features.Currencies
+@using Applications.Features.Customers.Response
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
 @using Applications.Features.LoanRequests.Interfaces
@@ -55,20 +56,20 @@
                                         AllowSorting="true"
                                         Style="height:360px">
                             <Columns>
-                                <RadzenDataGridColumn Property="@nameof(VCustomerList.CustomerId)"
+                                    <RadzenDataGridColumn Property="@nameof(VCustomerList.CustomerId)"
                                                       Context="c"
                                                       Title="#">
                                     <Template>
                                         <span>@(Customers.ToList().IndexOf(c) + 1)</span>
                                     </Template>
                                 </RadzenDataGridColumn>
-                                <RadzenDataGridColumn Property="@nameof(VCustomerList.FullName)"
+                                    <RadzenDataGridColumn Property="@nameof(VCustomerList.FullName)"
                                                       Title="FullName" />
-                                <RadzenDataGridColumn Property="@nameof(VCustomerList.Salutation)"
+                                    <RadzenDataGridColumn Property="@nameof(VCustomerList.Salutation)"
                                                       Title="Salutation" />
-                                <RadzenDataGridColumn Property="@nameof(VCustomerList.AltName)"
+                                    <RadzenDataGridColumn Property="@nameof(VCustomerList.AltName)"
                                                       Title="Name" />
-                                <RadzenDataGridColumn Property="@nameof(VCustomerList.Phone)"
+                                    <RadzenDataGridColumn Property="@nameof(VCustomerList.Phone)"
                                                       Title="Phone" />
                             </Columns>
                         </RadzenDataGrid>
@@ -307,9 +308,8 @@
         {
             Model.CustomerRefId = customer.CustomerId;
 
-            Model.FullName = customer.FullName;
+            Model.FullName = customer.AltName;
 
-            //await SetCustomerId(customer.CustomerId);
         }
         await popup.CloseAsync();
     }
@@ -356,7 +356,7 @@
             if (popupOpened && (key == "Enter" || key == "NumpadEnter"))
             {
 
-                Model.FullName = items.ElementAtOrDefault(selectedIndex)?.FullName;
+                Model.FullName = items.ElementAtOrDefault(selectedIndex)?.AltName;
 
                 Model.CustomerRefId = items.ElementAtOrDefault(selectedIndex)?.CustomerId;
 

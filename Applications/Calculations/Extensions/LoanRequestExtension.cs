@@ -43,7 +43,7 @@ namespace Applications.Calculations
                 AdminFeeAmount = req.AdminFeeAmount,
                 Remark = req.Remark,
                 Memo = req.Memo,
-                FullName = req.FullName
+                FullName = req.AltName
             };
         }
 
