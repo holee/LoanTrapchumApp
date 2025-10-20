@@ -1,4 +1,4 @@
-﻿namespace Applications.DependencyInjections
+﻿namespace Applications
 {
     public interface ITransient
     {

@@ -8,13 +8,8 @@
 @using TrapchumApp.Services
 <PageTitle>Permissions</PageTitle>
 <RadzenCard>
-    <PageDropDown ShowSearchBox="true"
-                  OnTextChanged="OnTextChanged"
-        PageSizeChanged="PageSizeChanged">
-        <RightChildContent>
-
-        </RightChildContent>
-    </PageDropDown>
+    <GridToolbar SearchChanged="@OnTextChanged">
+    </GridToolbar>
     <RadzenDataGrid 
         Count="@counts"
         PageSize="@pageSize"
@@ -26,6 +21,8 @@
                     AllowPaging="true"
                     PagerPosition="PagerPosition.Bottom"
                     PagerHorizontalAlign="HorizontalAlign.Right"
+                    PageSizeChanged="@PageSizeChanged"
+                    PageSizeOptions="@StorageConstant.PageSizeOptions"
         Data="@permissions">
         <Columns>
             <RadzenDataGridColumn Property="@nameof(PermissionsVm.Module)" Title="Module" />
@@ -40,7 +37,7 @@
                 TextAlign="TextAlign.Center"
                 Context="p" Property="@nameof(PermissionsVm.IsBasic)" Title="Is Basic">
                 <Template>
-                       <RadzenCheckBox TValue="bool?" Value="@p.IsBasic" />
+                       <RadzenCheckBox TValue="bool?" Value="@p.IsBasic" ReadOnly />
                 </Template>
             </RadzenDataGridColumn>
         </Columns>

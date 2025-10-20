@@ -1,23 +1,34 @@
-﻿using Applications.Extensions;
+﻿using Applications.Bases;
+using Applications.Extensions;
+using Applications.Features.Collaterals.Extensions;
 using Applications.Interfaces.Customers;
 using Applications.Responses;
 using Applications.Responses.Lists.Collaterals;
 using Dapper;
 using Domains.Models.Collaterals;
 using Infrastructures.DataAccess;
+using Infrastructures.DataAccess.Factories;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Data;
-using Applications.Features.Collaterals.Extensions;
+using System.Linq.Expressions;
 
 namespace Infrastructures.Implements;
 
-public sealed class CustomerCollateralRepository(ILogger<CustomerCollateralRepository> logger,
-      IDbContextFactory<DataContext> dbContextFactory,
-      IDapperConnectionFactory connectionFactory)
-    : ICustomerCollateralService
+public sealed class CustomerCollateralRepository : ICustomerCollateralService
 {
+    private readonly ILogger<CustomerCollateralRepository> logger;
+    private readonly IDbContextFactory<DataContext> dbContextFactory;
+    private readonly IDapperConnectionFactory connectionFactory;
+
+    public CustomerCollateralRepository(ILogger<CustomerCollateralRepository> logger, IDbContextFactory<DataContext> dbContextFactory, IDapperConnectionFactory connectionFactory)
+    {
+        this.logger = logger;
+        this.dbContextFactory = dbContextFactory;
+        this.connectionFactory = connectionFactory;
+    }
+
     public async Task<Result<VCustomerCollaterals>> GetCollateralByIdAsync(string? collateralId)
     {
         try
@@ -52,6 +63,7 @@ public sealed class CustomerCollateralRepository(ILogger<CustomerCollateralRepos
         }
 
     }
+
     public async Task<IEnumerable<VCollateralLines>> GetCollateralLinesAsync(string? collateralId)
     {
 
@@ -64,6 +76,22 @@ public sealed class CustomerCollateralRepository(ILogger<CustomerCollateralRepos
 
         return lines;
     }
+
+    public async Task<VCollateralLines?> GetCollateralLinesAsync(long? id, string? collateralId)
+    {
+        if (id is null || string.IsNullOrWhiteSpace(collateralId))
+
+            return null;
+
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+        return await context.CollateralLines
+            .AsNoTracking()
+            .Where(x => x.Id == id && x.CollateralRefId == collateralId)
+            .Select(ProjectToView())
+            .FirstOrDefaultAsync();
+    }
+
     public async Task<Result<VCustomerCollaterals>> GetCustomerCollateralAsync(string? customerId)
     {
 
@@ -131,8 +159,8 @@ public sealed class CustomerCollateralRepository(ILogger<CustomerCollateralRepos
                              .Include(x => x!.Customer)
                                 .ThenInclude(x => x!.Collateral)
                                 .ThenInclude(x => x!.CollateralLines)
+                         .AsNoTracking()
                         .Select(x => x.ToCollateralResponse())
-                        .AsNoTracking()
                         .FirstOrDefaultAsync();
 
         if (collateral is null)
@@ -276,7 +304,8 @@ public sealed class CustomerCollateralRepository(ILogger<CustomerCollateralRepos
         }
 
     }
-    public async Task<Result<string>> DeleteCollateralLineAsync(int? id, string? collateralId, CancellationToken cancellation = default)
+
+    public async Task<Result<DeleteResult>> DeleteCollateralLineAsync(long? id, string? collateralId, CancellationToken cancellation = default)
     {
         logger.LogInformation("Upserting collateral line with ID: {Id} & Collateral:{collateralId}", id, collateralId);
         try
@@ -284,28 +313,71 @@ public sealed class CustomerCollateralRepository(ILogger<CustomerCollateralRepos
             await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);
 
 
+            //check collateral line is in use
+
+            if (await IsCollateralInUsed(id, collateralId, context))
+            {
+                return Result.Success(DeleteResult.InUse("Collateral line is in use and cannot be deleted."));
+            }
+
             var model = await context.CollateralLines
                                     .FirstOrDefaultAsync(x => x.Id == id &&
-                                                             x.CollateralRefId == collateralId, cancellation);
+                                                         x.CollateralRefId == collateralId, cancellation);
 
             if (model is null)
             {
-                return Result.Failure<string>(ErrorResponse.NotFound($"No Collateral Not Found."));
+                return Result.Success(DeleteResult.NotFound("No Collateral Not Found"));
             }
 
             context.CollateralLines.Remove(model);
 
             await context.SaveChangesAsync(cancellation);
 
-            return Result.Success("Collateral was updated.");
+            return Result.Success(new DeleteResult(DeleteStatus.Success, "Collateral line was deleted."));
         }
         catch (DbUpdateConcurrencyException ex)
         {
             logger.LogError(ex, $"Concurrency error while upserting collateral line with {ex!.Message}");
 
-            return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}"));
+            return Result.Failure<DeleteResult>(ErrorResponse.ServerError($"{ex.Message}"));
         }
 
+    }
+
+    private async Task<bool> IsCollateralInUsed(long? id, string? collateralId, DataContext context)
+    {
+        var query = context.VCustomerCollateralLines.AsNoTracking().AsQueryable();
+
+        if (id.HasValue)
+            query = query.Where(x => x.Id == id.Value);
+
+        if (!string.IsNullOrEmpty(collateralId))
+            query = query.Where(x => x.CollateralId == collateralId);
+
+        return await query.AnyAsync(x => x.IsUsed == true);
+    }
+
+    private static Expression<Func<CollateralLine, VCollateralLines>> ProjectToView()
+    {
+        return x => new VCollateralLines
+        {
+            Id = x.Id,
+            ReferenceNo = x.ReferenceNo,
+            CollateralId = x.CollateralRefId,
+            OwnerName = x.OwnerName,
+            CollateralSubTypeName = x.SubTypeName,
+            CollateralNo = x.CollateralNo,
+            TypeName = x.TypeName,
+            Size = x.Size,
+            HotPrice = x.HotPrice,
+            PawnPrice = x.PawnPrice,
+            MarketPrice = x.MarketPrice,
+            Location = x.Location,
+            Description = x.Description,
+            Quantity = x.Quantity,
+            IsUsed = x.IsUsed,
+            WareHouse = x.WareHouse
+        };
     }
 
 }

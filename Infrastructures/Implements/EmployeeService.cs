@@ -17,7 +17,7 @@ using Domains.Models.Lists;
 
 namespace Infrastructures.Implements;
 
-public class EmployeeService : IEmployeeService
+public sealed class EmployeeService : IEmployeeService
 {
     private readonly IDapperConnectionFactory connectionFactory;
     private readonly IDbContextFactory<DataContext> _dbContextFactory;

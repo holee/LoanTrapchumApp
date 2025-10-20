@@ -2,6 +2,7 @@
 @using Applications.Features.Addresses
 @using Applications.Features.Branches
 @using Applications.Features.Currencies
+@using Applications.Features.Customers.Response
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
 @using Applications.Features.LoanRequests.Interfaces
@@ -20,11 +21,22 @@
         </Authorized>
     </AuthorizeView>
 </RadzenStack>
-<RadzenDataGrid Data="_vLoanRequests"
+<RadzenDataGrid Data="@_vLoanRequests"
                 Responsive
+                GridLines="DataGridGridLines.Both"
                 TItem="VLoanRequests"
+                RowRender="@OnRowRender"
                 Density="Density.Compact">
     <Columns>
+        <RadzenDataGridColumn Property="@nameof(VLoanRequests.LoanRequestId)"
+                              Title="#"
+                              Width="3rem"
+                              Context="c"
+                              Sortable="false">
+            <Template>
+                @c.RowIndex
+            </Template>
+        </RadzenDataGridColumn>
         <RadzenDataGridColumn Property="@nameof(VLoanRequests.RequestDate)"
                               Title="Date"
                               Context="c"
@@ -69,7 +81,55 @@
                               Context="c"
                               Sortable="false">
             <Template>
-                <AuthorizeView Policy="@RequestsPolicies.Request">
+                <RadzenButton Size="ButtonSize.ExtraSmall"
+                              Icon="@IconNames.MoreVert"
+                              Variant="Variant.Text"
+                              Click="@((args)=>ShowContextMenu(args,c))" />
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+    <LoadingTemplate>
+        <RadzenProgressBarCircular ProgressBarStyle="ProgressBarStyle.Primary" Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+    </LoadingTemplate>
+</RadzenDataGrid>
+@code {
+
+    void OnRowRender(RowRenderEventArgs<VLoanRequests> arg)
+    {
+        arg.Data.RowIndex = arg.Index + 1;
+    }
+
+    void ShowContextMenu(MouseEventArgs args, VLoanRequests c)
+    {
+        ContextMenuService.Open(args, ds =>
+    @<RadzenMenu Style="font-size:0.8rem;">
+    <RadzenMenuItem Visible="@IsCanRequest"
+                    Icon="@IconNames.Approval"
+                    Text="Request Now"
+                    Path="@($"/app/loan/{c.LoanRequestId}/request/{c.BranchId}/branches/{c.CustomerId}/details")"
+                    Value="@c.CustomerId" />
+    <RadzenMenuItem Visible="@(IsCanRequest && c.StatusId == (int)RequestStatus.New)"
+                    Icon="@IconNames.Edit"
+                    Text="Edit Loan Request"
+                    Path="@($"/app/loan/{c.LoanRequestId}/request/{c.BranchId}/branches/{c.CustomerId}/edit")"
+                    Value="@c.CustomerId" />
+    <RadzenMenuItem Visible="@(IsAccountOnly && c.StatusId == (int)RequestStatus.Approved)"
+                    Icon="@IconNames.Paid"
+                    Text="Disburse Now"
+                    Value="@c.CustomerId" />
+    <RadzenMenuItem Visible="@IsAdminOnly"
+                    Icon="@IconNames.Info"
+                    Text="Details"
+                    Path="@($"/app/loan/{c.LoanRequestId}/request/{c.BranchId}/branches/{c.CustomerId}/details")"
+                    Value="@c.CustomerId" />
+</RadzenMenu>
+    );
+    }
+}
+
+@*
+
+ <AuthorizeView Policy="@RequestsPolicies.Request">
                     <Authorized>
                         <NavLink href="@($"/app/loan/{c.LoanRequestId}/request/{c.BranchId}/branches/{c.CustomerId}/details")">
                             Request
@@ -92,11 +152,4 @@
                             Details
                         </NavLink>
                     </NotAuthorized>
-                </AuthorizeView>
-            </Template>
-        </RadzenDataGridColumn>
-    </Columns>
-    <LoadingTemplate>
-        <RadzenProgressBarCircular ProgressBarStyle="ProgressBarStyle.Primary" Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
-    </LoadingTemplate>
-</RadzenDataGrid>
+                </AuthorizeView> *@

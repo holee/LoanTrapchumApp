@@ -1,6 +1,7 @@
 ﻿using Applications.Features.Branches.Validations;
 using Applications.Features.Collaterals.Requests;
 using Applications.Features.Currencies;
+using Applications.Features.Customers.Commands.ActivitiesCommand.CreateActivity;
 using Applications.Features.Customers.Requests;
 using Applications.Features.Customers.Validations;
 using Applications.Features.Employees.Requests;
@@ -48,7 +49,7 @@ namespace Applications.Validations
             services.AddTransient<IValidator<UserLoanSizeDtoCreate>, UserLoanSizeDtoCreateValidater>();
             services.AddTransient<IValidator<LoanRequestDtoCreate>, LoanRequestValidator>();
             services.AddTransient<IValidator<ExchangeDtoCreate>, CurrencyExchangeValidator>();
-            services.AddTransient<IValidator<CustomerActivityDtoCreate>, CustomerActivityDtoCreateValidator>();
+            services.AddTransient<IValidator<ActivityDtoCreate>, CustomerActivityDtoCreateValidator>();
             services.AddTransient<IValidator<CollateralSubTypeDtoCreate>, CollateralSubTypeValidator>();
             services.AddTransient<IValidator<ProfileDtoCreate>, ProfileValidator>();
             return services;

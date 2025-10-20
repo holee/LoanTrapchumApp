@@ -1,14 +1,4 @@
-﻿@using Applications.Features.Addresses
-@using Applications.Features.Branches
-@using Applications.Features.Currencies
-@using Applications.Features.Customers.Requests
-@using Applications.Features.Customers.Services
-@using Applications.Features.Customers.UseCases
-@using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Interfaces
-@using Microsoft.AspNetCore.Components.Authorization
-@using TrapchumApp.Services
-
+﻿@using Applications.Features.Customers.Commands.ActivitiesCommand.CreateActivity
 <EditForm Model="activity" OnValidSubmit="@HandleFormSubmit">
     <FluentValidationValidator DisableAssemblyScanning="true" />
     <RadzenFormField Text="Activity Date" AllowFloatingLabel="true" class="rz-w-100">
@@ -23,7 +13,7 @@
     <RadzenStack class="rz-mt-2" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
         <RadzenButton Size="ButtonSize.ExtraSmall" class="rz-mt-2"
                       ButtonType="ButtonType.Submit"
-                      Text="Save"
+                      Text="Save" 
                       Icon="@IconNames.Save"
                       ButtonStyle="ButtonStyle.Success" />
         <RadzenButton Size="ButtonSize.ExtraSmall" class="rz-mt-2"
@@ -40,14 +30,16 @@
     [CascadingParameter]
     Task<AuthenticationState> AuthenticationState { get; set; } = default!;
     [Parameter] public string? CustomerId { get; set; }
-    CustomerActivityDtoCreate activity = new CustomerActivityDtoCreate();
+    [Parameter] public long? ActivityId { get; set; } = 0;
+
+    ActivityDtoCreate activity = new ActivityDtoCreate();
 
     private readonly AddCustomerActivityUseCase _custActivityAdd;
 
     public CustomerActivitiesAdd(AddCustomerActivityUseCase custActivityAdd)
     {
         _custActivityAdd = custActivityAdd;
-    }
+    } 
 
     protected override async Task OnInitializedAsync()
     {
@@ -59,6 +51,17 @@
         }
         await base.OnInitializedAsync();
     }
+
+    void GetActivityDetails(int? id)
+    {
+
+        if (id.HasValue && id.Value > 0)
+        {
+            
+        }
+        // To be implemented if needed
+    }
+
 
     async Task HandleFormSubmit()
     {

@@ -1,9 +1,9 @@
-using Applications.Features.Customers.Requests;
+using Applications.Features.Customers.Commands.ActivitiesCommand.CreateActivity;
 using FluentValidation;
 
 namespace Applications.Features.Customers.Validations
 {
-    public sealed class CustomerActivityDtoCreateValidator : AbstractValidator<CustomerActivityDtoCreate>
+    public sealed class CustomerActivityDtoCreateValidator : AbstractValidator<ActivityDtoCreate>
     {
         public CustomerActivityDtoCreateValidator()
         {

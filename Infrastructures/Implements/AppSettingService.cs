@@ -301,7 +301,7 @@ public sealed class AppSettingService(IDbContextFactory<DataContext> dbContextFa
 
         return updated > 0 ?
                Result.Success<string>(new("Data was changed")) :
-               Result.Failure<string>(new(Messages.DataNotFound));
+               Result.Failure<string>(ErrorResponse.ServerError(Messages.DataNotFound));
     }
 
 

@@ -60,7 +60,7 @@
     void ShowContextMenuWithContent(MouseEventArgs args, string? id)
     { 
         ContextMenuService.Open(args, ds =>
-    @<RadzenMenu Style="font-size:0.8rem;">
+    @<RadzenMenu Style="font-size:0.8rem;"> 
         <RadzenMenuItem Click="@(() => AddDetailsTab(id))" Icon="info" Text="Details" Value="@id"></RadzenMenuItem>
         <RadzenMenuItem Click="@(() => Delete(id))" Icon="delete" Text="Delete" Value="@id"></RadzenMenuItem>
     </RadzenMenu>

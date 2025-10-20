@@ -1,6 +1,6 @@
-﻿namespace Applications.Features.Customers.Requests
+﻿namespace Applications.Features.Customers.Commands.ActivitiesCommand.CreateActivity
 {
-    public sealed class CustomerActivityDtoCreate
+    public sealed class ActivityDtoEdit 
     {
         public int? Id { get; set; }
         public string? CustomerRefId { get; set; }

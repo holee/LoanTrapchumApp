@@ -1,4 +1,5 @@
 ﻿using Applications.Features.Currencies.Responses;
+using Applications.Features.Customers.Commands.Queries;
 using Applications.Features.Customers.Response;
 using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.ViewModels.Addresses;
@@ -235,7 +236,7 @@ namespace Infrastructures.DataAccess
         public DbSet<VCustomerExpenses> VCustomerExpenses => Set<VCustomerExpenses>();
         public DbSet<VCustomerIncomes> VCustomerIncomes => Set<VCustomerIncomes>();
         public DbSet<VCustomerActivities> VCustomerActivities => Set<VCustomerActivities>();
-        public DbSet<VCollateralLines> VCollateralLines => Set<VCollateralLines>(); 
+        public DbSet<VCustomerCollateralLine> VCustomerCollateralLines => Set<VCustomerCollateralLine>(); 
         public DbSet<VLoanRequests> VLoanRequests => Set<VLoanRequests>();
         public DbSet<VLoanDisbursments> VLoanDisbursements => Set<VLoanDisbursments>();
 

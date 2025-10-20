@@ -52,10 +52,6 @@ public sealed class CustomerService(ICustomerService cusService) : ICustomerServ
         return await cusService.GetCustomerCollateralLines(customerId, includeInUsed);
     }
 
-    public async Task<Result<VCustomerDetails>> GetCustomerDetailsByIdAsync(string? customerId, bool include = false)
-    {
-        return await cusService.GetCustomerDetailByIdAsync(customerId, include);
-    }
 
     public async Task<Result<VCustomerDetails>> GetCustomerDetailsByIdAsync(string? customerId, bool include = false, CancellationToken cancellation = default)
     {

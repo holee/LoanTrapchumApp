@@ -1,4 +1,5 @@
-﻿using Applications.Responses;
+﻿using Applications.Bases;
+using Applications.Responses;
 using Applications.Responses.Lists.Collaterals;
 using Domains.Models.Collaterals;
 
@@ -6,9 +7,10 @@ namespace Applications.Interfaces.Customers
 {
     public interface ICustomerCollateralService
     {
-        Task<Result<string>> DeleteCollateralLineAsync(int? id, string? collateralId, CancellationToken cancellation = default);
+        Task<Result<DeleteResult>> DeleteCollateralLineAsync(long? id, string? collateralId, CancellationToken cancellation = default);
         Task<Result<VCustomerCollaterals>> GetCollateralByIdAsync(string? collateralId);
         Task<IEnumerable<VCollateralLines>> GetCollateralLinesAsync(string? collateralId);
+        Task<VCollateralLines?> GetCollateralLinesAsync(long? id, string? collateralId);
         Task<Result<VCustomerCollaterals>> GetCustomerCollateralAsync(string? customerId);
         Task<Result<VCollateralLines>> GetCustomerCollateralLineAsync(long? id, string? collateralId);
         Task<Result<IEnumerable<VCollateralLines>>> GetCustomerCollateralLinesAsync(string? collateralId);

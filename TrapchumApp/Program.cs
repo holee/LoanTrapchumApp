@@ -1,8 +1,8 @@
 using Applications;
 using Applications.Validations;
 using Domains.Models.Identity;
+using Infrastructures;
 using Infrastructures.Authorizations;
-using Infrastructures.DependencyInjects;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;

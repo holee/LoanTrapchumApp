@@ -72,16 +72,16 @@ public sealed class CustomerCollateralServices
     }
 
 
-    public async Task<Result<string>> DeleteCollateralLine(int? id, string? collateralId)
-    {
+    //public async Task<Result<string>> DeleteCollateralLine(int? id, string? collateralId)
+    //{
 
-        if (!id.HasValue || string.IsNullOrWhiteSpace(collateralId))
-        {
-            return Result.Failure<string>(ErrorResponse.Validation("Collateral Line ID and Collateral Reference ID are required"));
-        }
+    //    if (!id.HasValue || string.IsNullOrWhiteSpace(collateralId))
+    //    {
+    //        return Result.Failure<string>(ErrorResponse.Validation("Collateral Line ID and Collateral Reference ID are required"));
+    //    }
 
-        return await _cusCollateralService.DeleteCollateralLineAsync(id, collateralId);
-    }
+    //    return await _cusCollateralService.DeleteCollateralLineAsync(id, collateralId);
+    //}
 
 
 

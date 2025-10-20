@@ -1,6 +1,7 @@
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Auths;
 using Radzen;
+using System.Threading.Tasks;
 
 namespace TrapchumApp.Pages.Identity
 {
@@ -30,23 +31,15 @@ namespace TrapchumApp.Pages.Identity
             permissions = rsp.Items;
         }
 
-        private void PageSizeChanged(int args)
+        private async Task PageSizeChanged(int args)
         {
             pageSize = args;    
+            pageNumber = 0;
+            await GetPermissions();
         }
         private async Task LoadData(LoadDataArgs args)
         {
             pageNumber = args.Skip!.Value;
-
-            //if(!string.IsNullOrEmpty(args.OrderBy))
-            //{
-            //    var orderBy = args.OrderBy.;
-
-            //    if (orderBy != null)
-            //    {
-            //        pageSize = args.Top!.Value;
-            //    }
-            //}
 
             if (args.Filter != null)
             {

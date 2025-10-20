@@ -22,8 +22,8 @@ public static class RequestsPolicies
     private static string delete = AppPermission.RuleFor(Modules.LoanRequest, Feature.Delete);
     private static string aprove = AppPermission.RuleFor(Modules.LoanRequest, Feature.ApproveRequest);
     private static string reject = AppPermission.RuleFor(Modules.LoanRequest, Feature.RejectRequest);
-
-    public static AuthorizationPolicy CanDisburseLoan()
+    private static string request = AppPermission.RuleFor(Modules.LoanRequest, Feature.Request);
+    public static AuthorizationPolicy CanDisburseLoan() 
     {
         return new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
@@ -47,7 +47,7 @@ public static class RequestsPolicies
         return new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
                     .RequireRole(AppRoles.Co)
-                    .RequireClaim(AppClaim.Permission, create)
+                    .RequireClaim(AppClaim.Permission, request)
                     .Build();
     }
     public static AuthorizationPolicy CanUpdate()

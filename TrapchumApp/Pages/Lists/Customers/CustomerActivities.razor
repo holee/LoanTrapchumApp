@@ -17,7 +17,7 @@
                   ButtonStyle="ButtonStyle.Primary"
                   Size="ButtonSize.Small" />
 
-    <RadzenButton Click="RefreshActivity"
+    <RadzenButton Click="RefreshActivity" 
                   Icon="refresh"
                   ButtonStyle="ButtonStyle.Secondary"
                   class="ml-2"
@@ -29,31 +29,52 @@
                 GridLines="DataGridGridLines.Both"
                 Responsive
                 IsLoading="isLoading"
-                ColumnWidth="10rem"
-                Style="height:20rem;max-height:30rem;"
                 TItem="VCustomerActivities"
+                RowRender="@OnRowRender"
                 Density="Density.Compact">
     <Columns>
-        <RadzenDataGridColumn Context="c" Width="5rem"
+        <RadzenDataGridColumn Context="c"
+                              Width="3rem"
+                              Property="@nameof(VCustomerActivities.ActivityId)"
+                              Title="#">
+            <Template>
+                @c.RowIndex
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Context="c" 
+                              Width="8rem"
                               Property="@nameof(VCustomerActivities.ActivityDate)"
-                              Title="Activity Date">
+                              Title="Date">
             <Template>
                 @c.ActivityDate.DayFirst()
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Context="c"
-                              Property="@nameof(VCustomerActivities.Description)" 
+                              Property="@nameof(VCustomerActivities.Description)"
                               Title="Description">
             <Template>
                 @c.Description
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Context="c"
-                              Width="2.5rem"
+                              Width="5rem"
                               TextAlign="TextAlign.Center"
                               Property="@nameof(VCustomerActivities.Status)" Title="Status">
             <Template>
                 <RadzenCheckBox Value="@c.Status" ReadOnly />
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Width="5rem"
+                              Title="Action"
+                              TextAlign="TextAlign.Center"
+                              Property="Created">
+            <Template>
+                <RadzenButton Size="ButtonSize.Small"
+                              Shade="Shade.Dark"
+                              Variant="Variant.Text"
+                              Icon="@IconNames.MoreVert"
+                              ButtonStyle="ButtonStyle.Info">
+                </RadzenButton>
             </Template>
         </RadzenDataGridColumn>
     </Columns>
@@ -65,6 +86,20 @@
 
 
 @code {
+
+
+    void ShowContextMenu(MouseEventArgs args, VCustomerActivities c)
+    {
+        ContextMenuService.Open(args, ds =>
+    @<RadzenMenu Style="font-size:0.8rem;">
+        <RadzenMenuItem Click="@(() => Details(c))" Icon="add" Text="Details" Value="@c.ActivityId" />
+        <RadzenMenuItem Click="@(() => Edit(c))" Icon="money" Text="Edit" Value="@c.ActivityId" />
+        <RadzenMenuItem Click="@(() => Delete(c))" Icon="money" Text="Edit" Value="@c.ActivityId" />
+    </RadzenMenu>
+    );
+    }
+
+
     [Parameter] public string? CustomerId { get; set; } = string.Empty;
     [Parameter] public bool ShowAdd { get; set; } = false;
     [Parameter] public bool ShowReload { get; set; } = false;
@@ -90,6 +125,35 @@
         }
 
         await base.OnInitializedAsync();
+    }
+
+
+    void Details(VCustomerActivities c)
+    {
+        var param = new Dictionary<string, object?>
+        {
+            {"ActivityId",c.ActivityId}
+        };
+        //DialogService.OpenAsync<CustomerActivitiesDetails>("Activity Details", param);
+    }
+
+    void Edit(VCustomerActivities c)
+    {
+        var param = new Dictionary<string, object?>
+        {
+            {"ActivityId",c.ActivityId}
+        };
+        //DialogService.OpenAsync<CustomerActivitiesEdit>("Edit Activity", param);
+    }
+
+    void Delete(VCustomerActivities c)
+    {
+        var param = new Dictionary<string, object?>
+        {
+            {"ActivityId",c.ActivityId}
+        };
+
+        //DialogService.OpenAsync<CustomerActivitiesDelete>("Delete Activity", param);
     }
 
     async Task AddNewActivity()
@@ -120,5 +184,11 @@
         }
 
         isLoading = false;
+    }
+
+
+    void OnRowRender(RowRenderEventArgs<VCustomerActivities> args)
+    {
+        args.Data.RowIndex = args.Index + 1; // store 1-based index
     }
 }

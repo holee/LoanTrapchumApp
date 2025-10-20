@@ -34,6 +34,7 @@ namespace Applications.Features.Collaterals.Extensions
                 PawnPrice = x.PawnPrice,
                 HotPrice = x.HotPrice,
                 Size = x.Size,
+                IsUsed=x.IsUsed,
                 Description = x.Description,
                 OwnerName = x.OwnerName,
                 WareHouse = x.WareHouse,

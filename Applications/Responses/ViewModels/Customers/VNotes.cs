@@ -1,6 +1,8 @@
-﻿namespace Applications.Responses.ViewModels.Customers;
+﻿using Applications.Bases;
 
-public sealed class VCustomerNotes
+namespace Applications.Responses.ViewModels.Customers;
+
+public sealed class VCustomerNotes : BasePropEntity
 {
     public int NoteId { get; set; }
     public string? CustomerRefId { get; set; } 

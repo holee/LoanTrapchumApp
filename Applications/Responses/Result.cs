@@ -7,14 +7,18 @@ public class Result
         IsSuccess = false;
         Errors = ErrorResponse.None;
     }
-    public Result(bool isSuccess, ErrorResponse error)
+    public Result(bool isSuccess)
     {
         IsSuccess = isSuccess;
+        Errors = ErrorResponse.None;
+    }
+    public Result(bool isSuccess, ErrorResponse error) : this(isSuccess)
+    {
         Errors = error;
     }
     public string ErrMessage => !IsSuccess ? Errors.ErrMessage : string.Empty;
-    
-    public IList<string> GetErrors 
+
+    public IList<string> GetErrors
     {
         get
         {
@@ -37,6 +41,7 @@ public class Result
     public static Result Failure(ErrorResponse error) => new(false, error);
     public static Task<Result> FailureAsyn(ErrorResponse error) => Task.FromResult(Failure(error));
     public static Result<T> Failure<T>(ErrorResponse error) => new(false, error, default);
+    public static Result<T> Failure<T>(T data) => new(false, ErrorResponse.None, data);
     public static Task<Result<T>> FailureAsync<T>(ErrorResponse error) => Task.FromResult(Failure<T>(error));
 }
 

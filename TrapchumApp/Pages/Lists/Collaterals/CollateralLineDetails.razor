@@ -1,0 +1,69 @@
+﻿@using Applications.Features.Collaterals.Commands.CollateralLineQuery
+@using Applications.Features.Collaterals.Commands.Queries.GetCollateralLineById
+@using Applications.Responses.Lists.Collaterals
+@using Applications.Utils
+<table class="table table-sm">
+    <tr>
+        <th class="rz-w-25">Reference No</th>
+        <td>@_collateralLine?.ReferenceNo</td>
+    </tr>
+    <tr>
+        <th class="rz-w-25">Type Name</th>
+        <td>@_collateralLine?.TypeName</td>
+    </tr>
+    <tr>
+        <th class="rz-w-25">Owner Name</th>
+        <td>@_collateralLine?.OwnerName</td>
+    </tr>
+    <tr>
+        <th class="rz-w-25">Location</th>
+        <td>@_collateralLine?.Location</td>
+    </tr>
+    <tr>
+        <th class="rz-w-25">Quantity</th>
+        <td class="rz-text-end">@_collateralLine?.Quantity</td>
+    </tr>
+    <tr>
+        <th class="rz-w-25">Market Price</th>
+        <td class="rz-text-end">@_collateralLine?.MarketPrice.Format()</td>
+    </tr>
+    <tr>
+        <th class="w-25">Hot Price</th>
+        <td class="rz-text-end">@_collateralLine?.HotPrice.Format()</td>
+    </tr>
+    <tr>
+        <th class="rz-w-25">Pawn Price</th>
+        <td class="rz-text-end">@_collateralLine?.PawnPrice.Format()</td>
+
+    </tr>
+</table>
+@code {
+
+    [Parameter] public long Id { get; set; } = 0;
+
+    [Parameter] public string CollateralId { get; set; } = string.Empty;
+
+    IMediator _mediator;
+
+    VCollateralLines? _collateralLine = null;
+
+    public CollateralLineDetails(IMediator mediator)
+    {
+        _mediator = mediator;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        var request = await _mediator.Send(new GetCollateralLineDetailQuery(Id, CollateralId));
+
+        if (!request.IsError)
+        {
+            _collateralLine = request.Value;
+        }
+
+        await base.OnInitializedAsync();
+
+
+    }
+}

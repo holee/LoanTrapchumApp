@@ -1,5 +1,8 @@
-﻿@using Applications.Features.LoanRequests.Interfaces
+﻿@using Applications.Bases
+@using Applications.Features.Collaterals.Commands.DeleteCOmmand
+@using Applications.Features.LoanRequests.Interfaces
 @using Applications.Responses.Lists.Collaterals
+@using Domains.Models.Collaterals
 <RadzenFieldset>
     <HeaderTemplate>
         <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
@@ -29,8 +32,14 @@
                         @ref="@refGrid"
                         TItem="VCollateralLines"
                         Density="Density.Compact"
+                        RowRender="@OnRowRender"
                         Data="CollateralLines">
             <Columns>
+                <RadzenDataGridColumn Title="#" Width="3rem" Property="ReferenceNo" Context="c">
+                    <Template>
+                        @c.RowIndex
+                    </Template>
+                </RadzenDataGridColumn>
                 <RadzenDataGridColumn Title="ReferenceNo" Property="ReferenceNo" Context="c" />
                 <RadzenDataGridColumn Title="Type Name" Property="TypeName" Context="c" />
                 <RadzenDataGridColumn Title="Owner Name" Property="OwnerName" Context="c" />
@@ -73,25 +82,96 @@
 </RadzenFieldset>
 
 @code {
-    
+
     void ShowContextMenuWithContent(MouseEventArgs args, VCollateralLines c)
-    { 
+    {
         ContextMenuService.Open(args, ds =>
             @<RadzenMenu Style="font-size:0.8rem;">
-                <RadzenMenuItem Click="()=>HandleDetails(c.Id)" Icon="info" Text="Details" Value="@c.Id"></RadzenMenuItem>
-                <RadzenMenuItem Click="()=>OnCollateralLineEdit(c)" Icon="info" Text="Edit" Value="@c.Id"></RadzenMenuItem>
-                <RadzenMenuItem Click="()=>HandleDelete(c.Id)" Icon="delete" Text="Delete" Value="@c.Id"></RadzenMenuItem>
-            </RadzenMenu>
+    <RadzenMenuItem Click="() => HandleDetails(c)" Icon="info" Text="Details" Value="@c.Id"></RadzenMenuItem>
+    <RadzenMenuItem Click="() => OnCollateralLineEdit(c)" Icon="info" Text="Edit" Value="@c.Id"></RadzenMenuItem>
+    <RadzenMenuItem Click="() => HandleDelete(c)" Icon="delete"
+                    Disabled="@c.IsUsed"
+                    Text="Delete" Value="@c.Id"></RadzenMenuItem>
+</RadzenMenu>
         );
-    } 
-    private Task HandleDetails(long? id)
+    }
+    private async Task HandleDetails(VCollateralLines c)
     {
-        throw new NotImplementedException();
+
+        ContextMenuService.Close();
+        
+        var parameters = new Dictionary<string, object?>
+        {
+           { "Id",c.Id},
+           {"CollateralId",c.CollateralId}
+        };
+
+        var options = new SideDialogOptions
+        {
+            Width = "30rem",
+            Position = DialogPosition.Right,
+            ShowMask = true,
+            CloseDialogOnOverlayClick = true
+        };
+
+        DialogService.OpenSide<CollateralLineDetails>("CollateralLine Detail", parameters, options);
     }
 
-    private Task HandleDelete(long? id)
+    private async Task HandleDelete(VCollateralLines c)
     {
-        throw new NotImplementedException();
+        var parameters = new Dictionary<string, object?>
+        {
+           { "Id",c.Id},
+           {"CollateralId",c.CollateralId}
+        };
+
+        var confirmOptions = new ConfirmOptions
+        {
+            OkButtonText = "Yes, Delete",
+            CancelButtonText = "No, Cancel",
+            Width = "30rem"
+        };
+
+        var message = @"
+                        Are you sure you want to delete this collateral line?
+                        Your Collateral Line will not recover after this action.
+                      ";
+
+
+        var confirm = await DialogService.Confirm(message, "Delete Collateral Line", confirmOptions);
+
+        if (confirm == false) return;
+
+        var rsp = await _mediator.Send(new DeleteCollateralLineCommand
+        {
+            Id = c.Id,
+            CollateralId = c.CollateralId
+        });
+
+        if (rsp.IsError)
+        {
+
+        }
+
+        if (rsp.Value.Status == DeleteStatus.InUse)
+        {
+
+              var delMessage = @"Collateral was used by other loan, so you cannot delete it from system.
+                                 Do you want to disable instead of delete?
+                               ";
+
+            var confirmDel = await DialogService.Confirm(delMessage, "Delete Collateral Line", confirmOptions);
+
+
+            if (confirmDel == false) return;
+
+        }
+
     }
 
+
+    void OnRowRender(RowRenderEventArgs<VCollateralLines> args)
+    {
+        args.Data.RowIndex = args.Index + 1; // store 1-based index
+    }
 }

@@ -25,10 +25,10 @@ using Infrastructures.Repository;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection; 
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace Infrastructures.DependencyInjects
+namespace Infrastructures
 {
     public static class InfrastructureServiceInjection
     {
@@ -73,7 +73,6 @@ namespace Infrastructures.DependencyInjects
 
             services.AddSingleton<AuditingSaveChangesInterceptor>();
             services.AddSingleton<ICurrentUserService, CurrentUserService>();
-            services.AddSingleton<ICustomerCollateralService, CustomerCollateralRepository>();
             services.AddScoped<IAuditReadService, AuditReadService>();
             services.AddScoped<IAppSettingService, AppSettingService>();
             services.AddScoped<ILoanSettingService, LoanSettingService>();
@@ -95,13 +94,14 @@ namespace Infrastructures.DependencyInjects
             services.AddScoped<IAddressService, AddressService>();
             services.AddScoped<ICashVaultService, CashVaultService>();
             services.AddScoped<ICashVaultService, CashVaultService>();
-            services.AddScoped<ICollateralsService, CollateralsRepository>();
             services.AddScoped<ICurrencyService, CurrencyService>();
             services.AddScoped<ICreditAgentService, CreditAgentService>();
             services.AddScoped<ICustomerService, CustomerRepository>();
             services.AddScoped<ICustomerIncomeExpendService, IncomeExpendRepository>();
             services.AddScoped<ICustomerNoteService, CustomerNoteRepository>();
+            services.AddScoped<ICollateralsService, CollateralsRepository>();
             services.AddScoped<ICustomerActivityService, CustomerActivityRepository>();
+            services.AddScoped<ICustomerCollateralService, CustomerCollateralRepository>();
             services.AddScoped<IHolidayService, HolidayService>();
             services.AddScoped<IGuarantorService, GuarantorService>();
             services.AddScoped<ILoanSettingService, LoanSettingService>();

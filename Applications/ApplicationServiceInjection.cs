@@ -1,10 +1,17 @@
-﻿using Applications.Features.Addresses.Interfaces;
+﻿using Applications.Bases;
+using Applications.Features.Addresses.Interfaces;
 using Applications.Features.Banks;
 using Applications.Features.Branches;
 using Applications.Features.Branches.Interfaces;
 using Applications.Features.CashManagements.Interfaces;
 using Applications.Features.CashManagements.UseCases;
+using Applications.Features.Collaterals.Commands.CollateralLineQuery;
+using Applications.Features.Collaterals.Commands.DeleteCOmmand;
+using Applications.Features.Collaterals.Commands.Queries.GetCollateralLineByCollateralId;
+using Applications.Features.Collaterals.Commands.Queries.GetCollateralLineById;
 using Applications.Features.Currencies;
+using Applications.Features.Customers.Commands.ActivitiesCommand.ActitvityQuery.GetActivityByCustomer;
+using Applications.Features.Customers.Commands.ActivitiesCommand.CreateActivity;
 using Applications.Features.Customers.Commands.CustomerExpenseQuery;
 using Applications.Features.Customers.Commands.CustomerIncomeQuery;
 using Applications.Features.Customers.Commands.GetCustomerActivityQuery;
@@ -19,6 +26,7 @@ using Applications.Features.LoanRequests.Interfaces;
 using Applications.Features.LoanRequests.UseCases;
 using Applications.Features.Loans.Services;
 using Applications.Features.Settings.UseCases;
+using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Services.Files;
 using Applications.Services.Identity;
@@ -29,6 +37,7 @@ using Applications.Services.Transactions.Branches;
 using Applications.Services.Transactions.Currencies;
 using Applications.Services.Transactions.Journals;
 using Applications.Utils;
+using ErrorOr;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 namespace Applications
@@ -123,12 +132,16 @@ namespace Applications
 
 
 
-            services.AddValidatorsFromAssemblyContaining<GetCustomerExpenseQueryHandler>();
+            services.AddValidatorsFromAssemblyContaining<GetCollateralLineQueryValiator>();
             services.AddScoped<IMediator, SimpleMediator>();
             services.AddScoped<IRequestHandler<GetCustomerIncomeQuery, IEnumerable<VCustomerIncomes>>, GetCustomerIncomeQueryHandler>();
             services.AddScoped<IRequestHandler<GetCustomerExpenseQuery, IEnumerable<VCustomerExpenses>>, GetCustomerExpenseQueryHandler>();
             services.AddScoped<IRequestHandler<GetCustomerActivityQuery, IEnumerable<VCustomerActivities>>, GetCustomerActivityQueryHandler>();
-
+            
+            services.AddScoped<IRequestHandler<DeleteCollateralLineCommand, ErrorOr<DeleteResult>>, DeleteCollateralLineCommandHandler>();
+            services.AddScoped<IRequestHandler<GetCollateralLineByCollateralIdQuery, ErrorOr<IEnumerable<VCollateralLines>>>,GetCustomerCollateralLineByIdHandler>();
+            services.AddScoped<IRequestHandler<GetCollateralLineDetailQuery, ErrorOr<VCollateralLines>>, GetCollateralLineDetailQueryHandler>();
+            services.AddScoped<IRequestHandler<GetActivityByCustomerIdQuery, ErrorOr<IEnumerable<VCustomerActivities>>>, GetActivityByCustomerIdQueryHandler>();
 
             return services;
 

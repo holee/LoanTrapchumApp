@@ -2,6 +2,7 @@
 @using Applications.Features.Addresses
 @using Applications.Features.Branches
 @using Applications.Features.Currencies
+@using Applications.Features.Customers.Response
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
 @using Applications.Features.LoanRequests.Interfaces
@@ -13,50 +14,50 @@
         <RadzenIcon Icon="people" />
     </HeaderTemplate>
     <ChildContent>
-            <CustomerInfo Customer="@Customer" />
-            <RadzenStack AlignItems="AlignItems.Center"
-                        class="rz-my-2"
-                         Orientation="Orientation.Horizontal"
-                         JustifyContent="JustifyContent.Normal" Gap="1rem">
-                <AuthorizeView Policy="@CustomersPolicies.Update">
-                    <Authorized>
-                        <RadzenButton ButtonType="ButtonType.Button"
-                                      Size="ButtonSize.ExtraSmall"
-                                      Text="Edit"
-                                      Icon="edit"
-                                      Click="@ShowEditCustomer"
-                                      ButtonStyle="ButtonStyle.Success" />
-                    </Authorized>
-                </AuthorizeView>
-                <AuthorizeView Policy="@CustomersPolicies.Delete">
-                    <Authorized>
-                        <RadzenButton ButtonType="ButtonType.Button"
-                                      Size="ButtonSize.ExtraSmall"
-                                      Text="Delete"
-                                      Icon="delete"
-                                      Click="DeleteCustomer"
-                                      ButtonStyle="ButtonStyle.Danger">
-                        </RadzenButton>
-                    </Authorized>
-                </AuthorizeView>
-            </RadzenStack>
+        <CustomerInfo Customer="@Customer" />
+        <RadzenStack AlignItems="AlignItems.Center"
+                     class="rz-my-2"
+                     Orientation="Orientation.Horizontal"
+                     JustifyContent="JustifyContent.Normal" Gap="1rem">
+            <AuthorizeView Policy="@CustomersPolicies.Update">
+                <Authorized>
+                    <RadzenButton ButtonType="ButtonType.Button"
+                                  Size="ButtonSize.ExtraSmall"
+                                  Text="Edit"
+                                  Icon="edit"
+                                  Click="@ShowEditCustomer"
+                                  ButtonStyle="ButtonStyle.Success" />
+                </Authorized>
+            </AuthorizeView>
+            <AuthorizeView Policy="@CustomersPolicies.Delete">
+                <Authorized>
+                    <RadzenButton ButtonType="ButtonType.Button"
+                                  Size="ButtonSize.ExtraSmall"
+                                  Text="Delete"
+                                  Icon="delete"
+                                  Click="DeleteCustomer"
+                                  ButtonStyle="ButtonStyle.Danger">
+                    </RadzenButton>
+                </Authorized>
+            </AuthorizeView>
+        </RadzenStack>
     </ChildContent>
 </RadzenFieldset>
 <RadzenCard class="rz-mt-2">
     <RadzenTabs RenderMode="TabRenderMode.Server">
         <Tabs>
             <RadzenTabsItem Text="Loan Request">
-                <CustomerLoanRequest CustomerId="@CustomerId" 
+                <CustomerLoanRequest CustomerId="@CustomerId"
                                      BranchId="@BranchId"
                                      UserId="@UserId" />
             </RadzenTabsItem>
             <RadzenTabsItem Text="Collaterals">
                 <CollateralsCustomer ShowCommand="true"
                                      ShowAcction="true"
-                        CustomerId="@CustomerId" ShowAdd="true" @key="@Guid.NewGuid().ToString("N")" />
+                                     CustomerId="@CustomerId" ShowAdd="true" @key="@Guid.NewGuid().ToString("N")" />
             </RadzenTabsItem>
             <RadzenTabsItem Text="Income & Expense">
-                  <CustomerProfit CustomerId="@CustomerId" />
+                <CustomerProfit CustomerId="@CustomerId" />
             </RadzenTabsItem>
             <RadzenTabsItem Text="Loan History">
                 <LoanHistory CustomerId="@CustomerId" @key="@Guid.NewGuid().ToString("N")" />

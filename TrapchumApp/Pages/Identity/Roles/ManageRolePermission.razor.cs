@@ -28,6 +28,7 @@ public partial class ManageRolePermission
     bool _selectAll = false;
 
     private List<RolePermissionsDto>? _roleClaimsGrouped = [];
+
     private List<string> groups = [];
     protected override async Task OnInitializedAsync()
     {
@@ -57,6 +58,7 @@ public partial class ManageRolePermission
             UpdateGlobalSelectAll();
 
             groups = _roleClaimsGrouped?.Select(x => x.Group!).ToList() ?? [];
+
             groups.Add("All");
         }
         else

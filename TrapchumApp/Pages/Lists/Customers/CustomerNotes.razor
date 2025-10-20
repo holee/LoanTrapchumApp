@@ -22,20 +22,42 @@
                 TItem="VCustomerNotes"
                 PagerHorizontalAlign="HorizontalAlign.Right"
                 AllowPaging="true"
-                PageSize="10"
+                PageSize="15"
                 AllowSorting="false"
                 GridLines="DataGridGridLines.Both"
+                RowRender="@OnRowRender"
                 Density="Density.Compact">
     <Columns>
+        <RadzenDataGridColumn Width="3rem"
+                              Title="#"
+                              Property="Created">
+            <Template>
+                @context.RowIndex
+            </Template>
+
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Width="6rem"
+                              Title="Date"
+                              Property="Created">
+            <Template>
+                @context.Created.DayFirst()
+            </Template>
+        </RadzenDataGridColumn>
         <RadzenDataGridColumn Width="10rem"
                               Title="Create By"
                               Property="CreditAgentName"></RadzenDataGridColumn>
         <RadzenDataGridColumn Title="Description" Property="Description"></RadzenDataGridColumn>
-        <RadzenDataGridColumn Width="6rem"
-                              Title="Created"
+        <RadzenDataGridColumn Width="5rem"
+                              Title="Action"
+                              TextAlign="TextAlign.Center"
                               Property="Created">
             <Template>
-                @context.Created.DayFirst()
+                <RadzenButton Size="ButtonSize.Small"
+                              Shade="Shade.Dark"
+                              Variant="Variant.Text"
+                              Icon="@IconNames.MoreVert"
+                              ButtonStyle="ButtonStyle.Info">
+                </RadzenButton>
             </Template>
         </RadzenDataGridColumn>
     </Columns>
@@ -98,8 +120,15 @@
         if (rsp.IsSuccess && rsp.Data is not null)
         {
             Notes = rsp.Data;
-        } 
+        }
         StateHasChanged();
+    }
+
+
+
+    void OnRowRender(RowRenderEventArgs<VCustomerNotes> args)
+    {
+        args.Data.RowIndex = args.Index + 1; // store 1-based index
     }
 
 }

@@ -283,111 +283,45 @@ public sealed class RoleRepository(
 
     public async Task<Result<RolePermissions>> GetPermissionsByRoleAsync(string roleId)
     {
-        var roleInDb = await roleManager.FindByIdAsync(roleId.ToString());
-
-        if (roleInDb is null)
-        {
-            return Result.Failure<RolePermissions>(ErrorResponse.NotFound("There is any roles in the system."));
-        }
-
-        var allPermissions = ApplicationPermissions.AllPermissions;
-
-        var roleClaimResponse = new RolePermissions(new(roleId, roleInDb.Name!, roleInDb.Description!), new());
-
-        var currentRoleClaims = await GetAllClaimsForRoleAsync(roleId);
-
-        var allPermissionsNames = allPermissions.Select(p => p.For).ToList();
-
-        var currentRoleClaimsValues = currentRoleClaims.Select(crc => crc.ClaimValue).ToList();
-
-        var currentlyAssignedRoleClaimsNames = allPermissionsNames
-            .Intersect(currentRoleClaimsValues)
-            .ToList();
-
-        foreach (var permission in allPermissions)
-        {
-            if (currentlyAssignedRoleClaimsNames.Any(carc => carc == permission.For))
-            {
-                roleClaimResponse.Permissions!.Add(new RolePermissionsViewModel
-                {
-                    RoleId = roleId,
-                    ClaimType = AppClaim.Permission,
-                    ClaimValue = permission.For,
-                    Description = permission.Description,
-                    Group = permission.Group,
-                    IsAssignedToRole = true
-                });
-            }
-            else
-            {
-                roleClaimResponse!.Permissions!.Add(new RolePermissionsViewModel
-                {
-                    RoleId = roleId,
-                    ClaimType = AppClaim.Permission,
-                    ClaimValue = permission.For,
-                    Description = permission.Description,
-                    Group = permission.Group,
-                    IsAssignedToRole = false
-                });
-            }
-        }
-
-        return Result.Success(roleClaimResponse);
+        return await GetPermissionsByRoleInternalAsync(roleId, ApplicationPermissions.AllPermissions, p => p.Group);
     }
-
-
-
-
 
     public async Task<Result<RolePermissions>> GetPermissionsByRoleByIdAsync(string roleId)
     {
-        var roleInDb = await roleManager.FindByIdAsync(roleId.ToString());
+        return await GetPermissionsByRoleInternalAsync(roleId, AppPermissions.AllPermissions, p => p.Module);
+    }
+
+    private async Task<Result<RolePermissions>> GetPermissionsByRoleInternalAsync(
+        string roleId,  IEnumerable<dynamic> allPermissions,Func<dynamic, string> groupSelector)
+    {
+        var roleInDb = await roleManager.FindByIdAsync(roleId);
 
         if (roleInDb is null)
         {
-            return Result.Failure<RolePermissions>(ErrorResponse.NotFound("There is any roles in the system."));
+            return Result.Failure<RolePermissions>(ErrorResponse.NotFound("Role not found in the system."));
         }
 
-        var allPermissions = AppPermissions.AllPermissions;
-
-        var roleClaimResponse = new RolePermissions(new(roleId, roleInDb.Name!, roleInDb.Description!), new());
+        var roleClaimResponse = new RolePermissions(
+            new(roleId, roleInDb.Name!, roleInDb.Description!), 
+            new());
 
         var currentRoleClaims = await GetAllClaimsForRoleAsync(roleId);
 
-        var allPermissionsNames = allPermissions.Select(p => p.For).ToList();
-
-        var currentRoleClaimsValues = currentRoleClaims.Select(crc => crc.ClaimValue).ToList();
-
-        var currentlyAssignedRoleClaimsNames = allPermissionsNames
-            .Intersect(currentRoleClaimsValues)
-            .ToList();
+        var assignedClaimValues = new HashSet<string>(
+                                        currentRoleClaims.Select(crc => crc.ClaimValue), 
+                                        StringComparer.OrdinalIgnoreCase);
 
         foreach (var permission in allPermissions)
         {
-            if (currentlyAssignedRoleClaimsNames.Any(carc => carc == permission.For))
+            roleClaimResponse.Permissions!.Add(new RolePermissionsViewModel
             {
-                roleClaimResponse.Permissions!.Add(new RolePermissionsViewModel
-                {
-                    RoleId = roleId,
-                    ClaimType = AppClaim.Permission,
-                    ClaimValue = permission.For,
-                    Description = permission.Description,
-                    Group = permission.Module,
-                    IsAssignedToRole = true
-                });
-            }
-            else
-            {
-                roleClaimResponse!.Permissions!.Add(new RolePermissionsViewModel
-                {
-                    RoleId = roleId,
-                    ClaimType = AppClaim.Permission,
-                    ClaimValue = permission.For,
-                    Description = permission.Description,
-                    Group = permission.Module,
-                    IsAssignedToRole = false
-                });
-            }
+                RoleId = roleId,
+                ClaimType = AppClaim.Permission,
+                ClaimValue = permission.For,
+                Description = permission.Description,
+                Group = groupSelector(permission),
+                IsAssignedToRole = assignedClaimValues.Contains(permission.For)
+            });
         }
 
         return Result.Success(roleClaimResponse);

@@ -1,11 +1,13 @@
-﻿namespace Applications.Exceptions
+﻿namespace Applications.Exceptions;
+
+public sealed class NotFoundExceptions : Exception
 {
-    public sealed class NotFoundExceptions : Exception
+    public NotFoundExceptions() { }
+
+    public NotFoundExceptions(string message) : base(message)
     {
-        public NotFoundExceptions() { }
-        public NotFoundExceptions(string message) : base(message) { }
 
     }
 
-
+    
 }

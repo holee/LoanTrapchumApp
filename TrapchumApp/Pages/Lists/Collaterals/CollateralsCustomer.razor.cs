@@ -2,7 +2,8 @@ using Applications.Extensions;
 using Applications.Responses.Lists.Collaterals;
 using Radzen.Blazor;
 using Applications.Services.Lists;
-using Applications.Features.Customers.UseCases;
+using Applications.Utils;
+using Applications.Features.Collaterals.Commands.Queries.GetCollateralLineByCollateralId;
 
 namespace TrapchumApp.Pages.Lists.Collaterals
 {
@@ -11,15 +12,14 @@ namespace TrapchumApp.Pages.Lists.Collaterals
 
         private readonly ICollateralsServiceImpl _collateralService;
 
-        private readonly CustomerCollateralServices _collateralsService;
-        public CollateralsCustomer(ICollateralsServiceImpl collateralService, CustomerCollateralServices collateralsService)
+        private readonly IMediator _mediator;
+        public CollateralsCustomer(IMediator mediator, ICollateralsServiceImpl collateralService)
         {
+            _mediator = mediator;
             _collateralService = collateralService;
-
-            _collateralsService = collateralsService;
         }
 
-        [Parameter] public string? CustomerId { get; set; } = string.Empty;
+        [Parameter] public string CustomerId { get; set; } = string.Empty;
         [Parameter] public bool ShowAdd { get; set; } = true;
         [Parameter] public bool ShowCommand { get; set; } = false;
         [Parameter] public bool ShowAcction { get; set; } = false;
@@ -64,7 +64,7 @@ namespace TrapchumApp.Pages.Lists.Collaterals
 
 
 
-        async void AddOne() 
+        async void AddOne()
         {
             if (CustomerId.IsNullOrEmpty())
             {
@@ -79,7 +79,7 @@ namespace TrapchumApp.Pages.Lists.Collaterals
 
             var options = new DialogOptions
             {
-               Width="50vw"
+                Width = "50vw"
             };
 
             var dia = await DialogService.OpenAsync<CustomerCollateralLineCreate>("Add Collateral", parameters, options);
@@ -93,11 +93,12 @@ namespace TrapchumApp.Pages.Lists.Collaterals
 
         async Task GetCustomerCollaterals()
         {
-            var resp = await _collateralsService.GetCustomerCollateralLines(CustomerId);
 
-            if (resp.IsSuccess)
+            var resp = await _mediator.Send(new GetCollateralLineByCollateralIdQuery(CustomerId));
+
+            if (!resp.IsError)
             {
-                CollateralLines = resp.Data ?? [];
+                CollateralLines = resp.Value;
             }
 
             await refGrid.Reload();
@@ -108,6 +109,9 @@ namespace TrapchumApp.Pages.Lists.Collaterals
 
         async Task OnCollateralLineEdit(VCollateralLines arg)
         {
+
+            ContextMenuService.Close();
+
             var options = new SideDialogOptions
             {
                 Width = "40rem"

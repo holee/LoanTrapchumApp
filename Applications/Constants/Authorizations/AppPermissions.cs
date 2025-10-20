@@ -67,6 +67,7 @@ public sealed class AppPermissions
         new(Modules.LoanRequest,Feature.Delete, "Delete Loan Request"),
         new(Modules.LoanRequest,Feature.Disburse, "Loan Disburse"),
         new(Modules.LoanRequest,Feature.RejectRequest, "Reject Loan Request"),
+        new(Modules.LoanRequest,Feature.Request, "Loan Request"),
         new(Modules.LoanRequest,Feature.ApproveRequest, "Approved Request Loan"),
         new(Modules.Repayments,Feature.Read, "Read Payment"),
         new(Modules.Repayments,Feature.Create, "Create Payment"),

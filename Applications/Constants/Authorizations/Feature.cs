@@ -15,6 +15,7 @@
         public const string Disburse = nameof(Disburse);
         public const string Reschedule = nameof(Reschedule);
         public const string ApproveRequest = nameof(ApproveRequest);
+        public const string Request = nameof(Request);
         public const string ExchangeMoney = nameof(ExchangeMoney);
         public const string RejectRequest = nameof(RejectRequest);
         public const string Grant = nameof(Grant);

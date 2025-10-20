@@ -22,14 +22,22 @@ namespace Infrastructures.Implements
             _logger = logger;
         }
 
-        public async Task<Result<string>> AddCustomerActivity(CustomerActivity model, CancellationToken cancellation = default)
+        public async Task<Result<string>> AddOrUpdateActivity(CustomerActivity model, CancellationToken cancellation = default)
         {
             _logger.LogInformation("try adding new customer note");
+
             try
             {
-                await using var context = await _contextFactory.CreateDbContextAsync();
+                await using var context = await _contextFactory.CreateDbContextAsync(cancellation);
 
-                context.CustomerActivites.Add(model);
+                if (model.Id > 0)
+                {
+                    context.CustomerActivites.Update(model);
+                }
+                else
+                {
+                    context.CustomerActivites.Add(model);
+                }
 
                 await context.SaveChangesAsync(cancellation);
 
@@ -46,12 +54,12 @@ namespace Infrastructures.Implements
         public async Task<Result<IEnumerable<VCustomerActivities>>> GetCustomerActivies(string? customerId, CancellationToken cancellation = default)
         {
             _logger.LogInformation("try adding new customer note");
-            
+
             try
             {
-                
+
                 await using var context = await _contextFactory.CreateDbContextAsync(cancellation);
-                
+
                 var notes = await context.Database
                     .SqlQuery<VCustomerActivities>($"SELECT * FROM VCustomerActivities WHERE CustomerRefId={customerId}")
                     .AsNoTracking()

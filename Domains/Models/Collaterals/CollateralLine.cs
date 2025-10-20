@@ -9,12 +9,10 @@ public sealed class CollateralLine
     public int? CategoryRefId { get; set; }
     public string? TypeName { get; set; }
     public int? SubCategoryRefId { get; set; }
-    public string? SubTypeName { get; set; }    
-    [NotMapped]
-    public string? ReferenceNo { get; set; }
+    public string? SubTypeName { get; set; }
     public string? CollateralNo { get; set; }
     public bool? IsAvailable { get; set; } = true;
-    public bool? IsReturn { get; set; }=false;
+    public bool? IsReturn { get; set; } = false;
     public DateTime? ReturnDate { get; set; }
     public string? OwnerName { get; set; }
     public string? Location { get; set; }
@@ -27,8 +25,10 @@ public sealed class CollateralLine
     public decimal? PawnPrice { get; set; }
     public bool IsUsed { get; set; } = false;
     public decimal? ValueRate { get; set; } = 0;
+    [NotMapped]
+    public string? ReferenceNo { get; set; }
     public DateTime? CreatedDt { get; set; } = DateTime.UtcNow;
-    public DateTime? ModifiedDt { get; set; }= DateTime.UtcNow;
+    public DateTime? ModifiedDt { get; set; } = DateTime.UtcNow;
     public List<CollateralLink> CollateralLinesLink { get; set; } = [];
     public Collateral? Collateral { get; set; }
 

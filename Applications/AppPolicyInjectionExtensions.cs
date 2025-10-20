@@ -1,5 +1,4 @@
 ﻿using Applications.Constants.Authorizations;
-using Applications.DependencyInjections;
 using Applications.Extensions.Identity.Policies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;

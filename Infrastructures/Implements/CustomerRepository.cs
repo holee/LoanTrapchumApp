@@ -222,7 +222,7 @@ public sealed class CustomerRepository(
 
         var sql = $@"SELECT * FROM VCustomerCollateralLines 
                     WHERE CollateralId=@customerId AND 
-                    ((@includeInUsed='FALSE' AND IsInUsed=CAST(0 AS BIT)) OR 
+                    ((@includeInUsed='FALSE' AND IsUsed=CAST(0 AS BIT)) OR 
                       @includeInUsed=CAST(1 AS BIT));
                     ";
 
