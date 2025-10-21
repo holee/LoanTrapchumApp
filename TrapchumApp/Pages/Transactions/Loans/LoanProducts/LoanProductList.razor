@@ -1,13 +1,5 @@
 ﻿@page "/app/poan/product"
-@using Applications.Features.Addresses
-@using Applications.Features.Branches
-@using Applications.Features.Currencies
-@using Applications.Features.Customers.Services
-@using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Interfaces
 @using Applications.Responses.ViewModels.Loans.Products
-@using Microsoft.AspNetCore.Components.Web
-@using TrapchumApp.Services
 <PageTitle>Loan Products</PageTitle>
 <RadzenTabs @ref="tabs" RenderMode="TabRenderMode.Server" @bind-SelectedIndex="SelectIndex">
     <Tabs>

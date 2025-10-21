@@ -1,17 +1,10 @@
-﻿@using Applications.Features.Addresses
-@using Applications.Features.Branches
-@using Applications.Features.Currencies
-@using Applications.Features.Customers.Services
-@using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Interfaces
-@using Applications.Responses.Lists.Collaterals
-@using TrapchumApp.Services
+﻿@using Applications.Responses.Lists.Collaterals
 <EditForm Model="@model" FormName="collateralLineEdt" OnValidSubmit="@HandleFormSubmit">
     <DataAnnotationsValidator />
     <FluentValidationValidator DisableAssemblyScanning="true" />
     <input type="hidden" @bind="@model.Id" />
     <input type="hidden" @bind="model.CollateralRefId" />
-    <input type="hidden" @bind="model.SubCategoryRefId" />
+    <input type="hidden" @bind="model.SubCategoryRefId" /> 
     <RadzenRow class="@Defaults.Mb2">
         <RadzenColumn Size="12">
             <TCTextbox IsFloatLabel="true" Disabled Label="SubType Name"

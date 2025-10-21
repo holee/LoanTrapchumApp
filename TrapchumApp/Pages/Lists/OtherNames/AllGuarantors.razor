@@ -1,13 +1,4 @@
-@using Applications.Features.Addresses
-@using Applications.Features.Branches
-@using Applications.Features.Currencies
-@using Applications.Features.Customers.Services
-@using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Interfaces
-@using Applications.Responses.Paginations
 @using Applications.Responses.ViewModels.OtherNames
-@using Microsoft.AspNetCore.Components.Web
-@using TrapchumApp.Services
 <GridToolbar SearchChanged="SearchTextChanged">
     <RightChildren>
         <div class="rz-text-align-center">
@@ -17,7 +8,7 @@
                             Value="@includeInactive" />
             <RadzenLabel Text="Include Active Loan" Component="IncludeInActive" />
         </div>
-    </RightChildren>
+    </RightChildren> 
 </GridToolbar>
 <RadzenDataGrid Data="guarantors"
                 TItem="VGuarantor"

@@ -1,6 +1,7 @@
-﻿using FluentValidation;
+﻿using Applications.Features.Customers.Commands.ActivitiesCommand.CreateActivity;
+using FluentValidation;
 
-namespace Applications.Features.Customers.Commands.ActivitiesCommand.CreateActivity
+namespace Applications.Features.Customers.Commands.ActivitiesCommand.EditActivity
 {
     public sealed class EditActivityCommandValidator : AbstractValidator<CreateActivityCommand>
     {

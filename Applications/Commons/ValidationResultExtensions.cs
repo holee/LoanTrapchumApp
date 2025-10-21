@@ -11,7 +11,17 @@ public static class ValidationResultExtensions
         var errors = validationResult.Errors
             .Select(f => Error.Validation(f.PropertyName, f.ErrorMessage))
             .ToList();
-
         return errors;
     }
+    
+    
+    public static ErrorOr<ValidationResult> ToErrorOr(this ValidationResult validationResult)
+    {
+        var errors = validationResult.Errors
+            .Select(f => Error.Validation(f.PropertyName, f.ErrorMessage))
+            .ToList();
+        return errors;
+    }
+    
+    
 }

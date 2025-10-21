@@ -1,12 +1,11 @@
 ﻿@page "/App/Account/Ledgers/{BranchId:int}/Branches"
-@using Applications.Features.LoanRequests.Interfaces
 @using Applications.Responses.ViewModels.Ledgers
 <PageTitle>Ledgers</PageTitle>
 <RadzenTabs>
     <Tabs>
         <RadzenTabsItem Text="Ledger List" Icon="data_table">
             <GridToolbar SearchChanged="OnFilters">
-                <LeftChildren>
+                <LeftChildren> 
                     <RadzenButton Click="DisplayModal"
                                   ButtonStyle="ButtonStyle.Primary"
                                   Icon="add"

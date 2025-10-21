@@ -1,12 +1,4 @@
-﻿@using Applications.Features.Addresses
-@using Applications.Features.Branches
-@using Applications.Features.Currencies
-@using Applications.Features.Customers.Services
-@using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Interfaces
-@using Microsoft.AspNetCore.Components.Web
-@using TrapchumApp.Services
-<GridToolbar SearchChanged="@TextLoanSearchChanged">
+﻿<GridToolbar SearchChanged="@TextLoanSearchChanged">
     <RightChildren>
         <RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal">
             <RadzenCheckBox TValue="bool"

@@ -1,11 +1,10 @@
 ﻿@page "/app/loan/schedules/{BranchId:int}/branches"
-@using Applications.Features.LoanRequests.Interfaces
 <PageTitle>Schedules</PageTitle>
 <RadzenTabs RenderMode="TabRenderMode.Server" @bind-SelectedIndex="@_selectedIndex">
     <Tabs>
         <RadzenTabsItem Text="All" Icon="@IconNames.List">
             <Template>
-                <span class="rz-ms-2">
+                <span class="rz-ms-2"> 
                     All
                     <RadzenBadge BadgeStyle="BadgeStyle.Primary" IsPill="@true" Text="@AllScheduleCounts.ToString()"
                                  class="rz-ms-1"/>

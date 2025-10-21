@@ -12,17 +12,16 @@ using Mapster;
 
 namespace Applications.Features.Customers.Commands.ActivitiesCommand.CreateActivity
 {
-    public sealed class CreateActivityCommandHandler : IRequestHandler<CreateActivityCommand,ErrorOr<VCustomerActivities>>
+    public sealed class CreateActivityCommandHandler : IRequestHandler<CreateActivityCommand,ErrorOr<int>>
     {
         private readonly ICustomerActivityService _actService;
 
-        public async Task<ErrorOr<VCustomerActivities>> Handle(CreateActivityCommand request, CancellationToken cancellationToken = default)
+        public async Task<ErrorOr<int>> Handle(CreateActivityCommand request, CancellationToken cancellationToken = default)
         {
             var model = request.Adapt<CustomerActivity>();
 
-            await _actService.AddOrUpdateActivity(model, cancellationToken);
-
-            return new ErrorOr<VCustomerActivities>();
+            return await _actService.AddOrUpdateActivity(model, cancellationToken);
+            
         }
     }
 }

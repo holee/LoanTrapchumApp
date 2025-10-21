@@ -1,28 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Applications.Interfaces.Customers;
-using Applications.Responses.ViewModels.Customers;
+﻿using Applications.Interfaces.Customers;
 using Applications.Utils;
-using Domains.Models.Lists.Customers;
 using ErrorOr;
-using Mapster;
+using FluentValidation; 
 
-namespace Applications.Features.Customers.Commands.ActivitiesCommand.CreateActivity
+namespace Applications.Features.Customers.Commands.ActivitiesCommand.EditActivity
 {
-    public sealed class EditActivityCommandHandler : IRequestHandler<CreateActivityCommand,ErrorOr<VCustomerActivities>>
+    public sealed class EditActivityCommandHandler : IRequestHandler<EditActivityCommand,ErrorOr<int>>
     {
         private readonly ICustomerActivityService _actService;
-
-        public async Task<ErrorOr<VCustomerActivities>> Handle(CreateActivityCommand request, CancellationToken cancellationToken = default)
+        
+        public EditActivityCommandHandler(ICustomerActivityService actService)
         {
-            var model = request.Adapt<CustomerActivity>();
+            _actService = actService;
+        }
 
-            await _actService.AddOrUpdateActivity(model, cancellationToken);
+        public async Task<ErrorOr<int>> Handle(EditActivityCommand request, CancellationToken cancellationToken = default)
+        {
+            var model = request.ToActivity();
+            return await _actService.AddOrUpdateActivity(model, cancellationToken);
 
-            return new ErrorOr<VCustomerActivities>();
         }
     }
 }

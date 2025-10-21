@@ -5,7 +5,7 @@ using Applications.Features.Customers.Response;
 using Applications.Features.Customers.UseCases;
 using Applications.Responses.Lists.Customers;
 using Applications.Responses.Paginations;
-using TrapchumApp.Helpers.Enums;
+using TrapchumApp.Helpers.Enums; 
 using TrapchumApp.Pages.Lists.Collaterals;
 
 namespace TrapchumApp.Pages.Lists.Customers

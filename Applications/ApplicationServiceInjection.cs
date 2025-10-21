@@ -11,7 +11,9 @@ using Applications.Features.Collaterals.Commands.Queries.GetCollateralLineByColl
 using Applications.Features.Collaterals.Commands.Queries.GetCollateralLineById;
 using Applications.Features.Currencies;
 using Applications.Features.Customers.Commands.ActivitiesCommand.ActitvityQuery.GetActivityByCustomer;
+using Applications.Features.Customers.Commands.ActivitiesCommand.ActitvityQuery.GetActivityById;
 using Applications.Features.Customers.Commands.ActivitiesCommand.CreateActivity;
+using Applications.Features.Customers.Commands.ActivitiesCommand.EditActivity;
 using Applications.Features.Customers.Commands.CustomerExpenseQuery;
 using Applications.Features.Customers.Commands.CustomerIncomeQuery;
 using Applications.Features.Customers.Commands.GetCustomerActivityQuery;
@@ -136,13 +138,21 @@ namespace Applications
             services.AddScoped<IMediator, SimpleMediator>();
             services.AddScoped<IRequestHandler<GetCustomerIncomeQuery, IEnumerable<VCustomerIncomes>>, GetCustomerIncomeQueryHandler>();
             services.AddScoped<IRequestHandler<GetCustomerExpenseQuery, IEnumerable<VCustomerExpenses>>, GetCustomerExpenseQueryHandler>();
-            services.AddScoped<IRequestHandler<GetCustomerActivityQuery, IEnumerable<VCustomerActivities>>, GetCustomerActivityQueryHandler>();
-            
+           
             services.AddScoped<IRequestHandler<DeleteCollateralLineCommand, ErrorOr<DeleteResult>>, DeleteCollateralLineCommandHandler>();
             services.AddScoped<IRequestHandler<GetCollateralLineByCollateralIdQuery, ErrorOr<IEnumerable<VCollateralLines>>>,GetCustomerCollateralLineByIdHandler>();
             services.AddScoped<IRequestHandler<GetCollateralLineDetailQuery, ErrorOr<VCollateralLines>>, GetCollateralLineDetailQueryHandler>();
+            
+            
+            
+            services.AddScoped<IRequestHandler<CreateActivityCommand, ErrorOr<int>>, CreateActivityCommandHandler>();
+            services.AddScoped<IRequestHandler<EditActivityCommand, ErrorOr<int>>, EditActivityCommandHandler>();
+            services.AddScoped<IRequestHandler<GetCustomerActivityQuery, IEnumerable<VCustomerActivities>>, GetCustomerActivityQueryHandler>();
             services.AddScoped<IRequestHandler<GetActivityByCustomerIdQuery, ErrorOr<IEnumerable<VCustomerActivities>>>, GetActivityByCustomerIdQueryHandler>();
+            services.AddScoped<IRequestHandler<GetActivityByIdQuery, ErrorOr<VCustomerActivities>>, GetActivityByIdQueryHandler>();
 
+
+            
             return services;
 
         }

@@ -1,14 +1,5 @@
 ﻿@page "/App/Loan/{LoanId}/Branches/{BranchId:int}/Currencies/{CurrencyId:int}"
-@using Applications.Features.Addresses
-@using Applications.Features.Branches
-@using Applications.Features.Currencies
-@using Applications.Features.Customers.Services
-@using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Interfaces
-@using Microsoft.AspNetCore.Components.Web
-@using TrapchumApp.Pages.Transactions.Loans.Disbursements
 @using TrapchumApp.Pages.Transactions.Loans.Repayments
-@using TrapchumApp.Services
 <PageTitle>Loan Details</PageTitle>
 <LoanInfos LoanSchedule="@loanSchedule" Currency="@CurrencyId" LoanId="@LoanId" BranchId="@BranchId" />
 <RadzenTabs Change="SelectedTabChanged" RenderMode="TabRenderMode.Server" SelectedIndex="@_selectedTabIndex">

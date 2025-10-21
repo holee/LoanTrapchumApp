@@ -1,24 +1,13 @@
 ﻿@page "/App/Employee"
-@using Applications.Features.Addresses
-@using Applications.Features.Branches
-@using Applications.Features.Currencies
-@using Applications.Features.Customers.Services
-@using Applications.Features.Employees
 @using Applications.Features.Entities
-@using Applications.Features.LoanRequests.Interfaces
-@using Applications.Responses.Lists.Entities
 @using Applications.Responses.ViewModels.Employees
-@using Domains.Models.Addresses
-@using Microsoft.AspNetCore.Components.Web
-@using TrapchumApp.Helpers.Extensions
-@using TrapchumApp.Services
 <PageTitle>Employees</PageTitle>
 <style>
     .rz-grid-table td .rz-cell-data {
         line-height: 1.5rem;
         font-size: 0.8rem;
     }
-</style>
+</style> 
 <RadzenTabs @ref="tabs" RenderMode="TabRenderMode.Server" Change="TabChanged" @bind-SelectedIndex="selectedIndex">
     <Tabs>
         <RadzenTabsItem Text="Employees" Icon="group">

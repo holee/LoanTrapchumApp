@@ -1,13 +1,11 @@
 ﻿@page "/app/loan/disbursement/write-off/{BranchId:int}"
-@using Applications.Features.LoanRequests.Interfaces
-@using Applications.Responses.ViewModels.Loans
 @using TrapchumApp.Pages.Transactions.Loans.Disbursements
 <PageTitle>Loan Write Off</PageTitle>
 <PageTitle>Loan Pay Off</PageTitle>
 <RadzenTabs>
     <Tabs>
         <RadzenTabsItem Text="All">
-            <AllLoansTab BranchId="@BranchId">
+            <AllLoansTab BranchId="@BranchId"> 
                 <ChildMenu>
                     <RadzenButton Size="ButtonSize.ExtraSmall"
                                   Icon="@IconNames.HMoreVert"

@@ -1,12 +1,5 @@
 ﻿@page "/App/Operation-Area/Districts"
-@using Applications.Features.Addresses
-@using Applications.Features.Branches
-@using Applications.Features.Currencies
-@using Applications.Features.Customers.Services
-@using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Interfaces
 @using Applications.Responses.ViewModels.Addresses;
-@using TrapchumApp.Helpers.Constants
 <PageTitle>Districts</PageTitle>
 <div class="rz-background-color-base-200">
     <GridToolbar SearchChanged="@TextChanged" Placeholder="Search district">
@@ -15,7 +8,7 @@
                           ButtonStyle="ButtonStyle.Primary"
                           Size="ButtonSize.Small"
                           Icon="add"
-                          Click="ShowCreate" />
+                          Click="ShowCreate" /> 
         </LeftChildren>
     </GridToolbar>
     <RadzenDataGrid Responsive="true"

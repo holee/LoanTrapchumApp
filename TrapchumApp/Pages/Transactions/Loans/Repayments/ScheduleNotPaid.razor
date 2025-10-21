@@ -1,14 +1,6 @@
-﻿@using Applications.Features.Addresses
-@using Applications.Features.Branches
-@using Applications.Features.Currencies
-@using Applications.Features.Customers.Services
-@using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Interfaces
-@using Microsoft.AspNetCore.Components.Web
-@using TrapchumApp.Services
-<RadzenStack JustifyContent="JustifyContent.End"
+﻿<RadzenStack JustifyContent="JustifyContent.End"
              Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
-    <div class="rz-p-1 rz-text-align-center">
+    <div class="rz-p-1 rz-text-align-center"> 
         <RadzenCheckBox @bind-Value="ShowUnPaindOnly" Name="ShowUnPaindOnly" />
         <RadzenLabel Text="Show UnPaind Only" Component="ShowUnPaindOnly" class="rz-ms-2" />
     </div>

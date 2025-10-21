@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Applications.Utils;
+﻿using Applications.Utils;
 
-namespace Applications.Features.Customers.Commands.ActivitiesCommand.CreateActivity
+namespace Applications.Features.Customers.Commands.ActivitiesCommand.EditActivity
 {
     public sealed class EditActivityCommand : IRequest<int>
     {
-        public int? Id { get; set; }
+        public int Id { get; set; }
         public string? CustomerRefId { get; set; }
         public DateTime? ActivityDate { get; set; }
         public string? Description { get; set; } = string.Empty;
