@@ -1,8 +1,9 @@
 ﻿using Applications.Utils;
+using ErrorOr;
 
 namespace Applications.Features.Customers.Commands.ActivitiesCommand.EditActivity
 {
-    public sealed class EditActivityCommand : IRequest<int>
+    public sealed class EditActivityCommand : IRequest<ErrorOr<int>>
     {
         public int Id { get; set; }
         public string? CustomerRefId { get; set; }

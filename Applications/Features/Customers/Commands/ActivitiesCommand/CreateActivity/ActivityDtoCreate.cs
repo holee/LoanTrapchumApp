@@ -2,7 +2,7 @@
 {
     public sealed class ActivityDtoCreate 
     {
-        public int? Id { get; set; }
+        public int Id { get; set; }
         public string? CustomerRefId { get; set; }
         public DateTime? ActivityDate { get; set; }
         public string? Description { get; set; } = string.Empty;

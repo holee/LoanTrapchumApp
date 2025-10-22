@@ -17,7 +17,7 @@
                   ButtonStyle="ButtonStyle.Primary"
                   Size="ButtonSize.Small" />
 
-    <RadzenButton Click="RefreshActivity" 
+    <RadzenButton Click="RefreshActivity"
                   Icon="refresh"
                   ButtonStyle="ButtonStyle.Secondary"
                   class="ml-2"
@@ -41,7 +41,7 @@
                 @c.RowIndex
             </Template>
         </RadzenDataGridColumn>
-        <RadzenDataGridColumn Context="c" 
+        <RadzenDataGridColumn Context="c"
                               Width="8rem"
                               Property="@nameof(VCustomerActivities.ActivityDate)"
                               Title="Date">
@@ -67,12 +67,14 @@
         <RadzenDataGridColumn Width="5rem"
                               Title="Action"
                               TextAlign="TextAlign.Center"
+                              Context="c"
                               Property="Created">
             <Template>
                 <RadzenButton Size="ButtonSize.Small"
                               Shade="Shade.Dark"
                               Variant="Variant.Text"
                               Icon="@IconNames.MoreVert"
+                              Click="@((arg) => ShowContextMenu(arg,c))"
                               ButtonStyle="ButtonStyle.Info">
                 </RadzenButton>
             </Template>
@@ -92,10 +94,10 @@
     {
         ContextMenuService.Open(args, ds =>
     @<RadzenMenu Style="font-size:0.8rem;">
-        <RadzenMenuItem Click="@(() => Details(c))" Icon="add" Text="Details" Value="@c.ActivityId" />
-        <RadzenMenuItem Click="@(() => Edit(c))" Icon="money" Text="Edit" Value="@c.ActivityId" />
-        <RadzenMenuItem Click="@(() => Delete(c))" Icon="money" Text="Edit" Value="@c.ActivityId" />
-    </RadzenMenu>
+    <RadzenMenuItem Click="@(() => Details(c))" Icon="add" Text="Details" Value="@c.ActivityId" />
+    <RadzenMenuItem Click="@(() => Edit(c))" Icon="money" Text="Edit" Value="@c.ActivityId" />
+    <RadzenMenuItem Click="@(() => Delete(c))" Icon="@IconNames.Delete" Text="Delete" Value="@c.ActivityId" />
+</RadzenMenu>
     );
     }
 
@@ -141,16 +143,18 @@
     {
         var param = new Dictionary<string, object?>
         {
-            {"ActivityId",c.ActivityId}
+            {"ActivityId",c.ActivityId},
+            {"CustomerId",CustomerId}
         };
-        //DialogService.OpenAsync<CustomerActivitiesEdit>("Edit Activity", param);
+        DialogService.OpenAsync<CustomerActivitiesAdd>("Edit Activity", param);
     }
 
     void Delete(VCustomerActivities c)
     {
         var param = new Dictionary<string, object?>
         {
-            {"ActivityId",c.ActivityId}
+            {"ActivityId",c.ActivityId} 
+
         };
 
         //DialogService.OpenAsync<CustomerActivitiesDelete>("Delete Activity", param);
