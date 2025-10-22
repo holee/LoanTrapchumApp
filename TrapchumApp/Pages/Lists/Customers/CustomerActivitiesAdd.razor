@@ -67,9 +67,9 @@
     {
         var rsp = await _custActivityAdd.ExecuteAsync(activity);
 
-        if (!rsp.IsSuccess)
+        if (!rsp.IsError)
         {
-            NotificationService.Notify(NotificationSeverity.Error, "Error", rsp.ErrMessage);
+            NotificationService.Notify(NotificationSeverity.Error, "Error", rsp.FirstError.Description);
             return;
         }
 
