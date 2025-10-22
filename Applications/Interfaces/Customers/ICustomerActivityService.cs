@@ -9,5 +9,5 @@ public interface ICustomerActivityService
 {
     Task<ErrorOr<int>> AddOrUpdateActivity(CustomerActivity model, CancellationToken cancellation = default);
     Task<Result<IEnumerable<VCustomerActivities>>> GetCustomerActivies(string? customerId, CancellationToken cancellation = default);
-    Task<Result<VCustomerActivities>> GetCustomerActivity(int? id, string customerId, CancellationToken cancellationToken=default);
+    Task<Result<VCustomerActivities>> GetCustomerActivity(int? id, string? customerId, CancellationToken cancellationToken=default);
 }

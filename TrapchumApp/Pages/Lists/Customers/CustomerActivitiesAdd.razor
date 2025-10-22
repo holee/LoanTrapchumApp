@@ -1,26 +1,32 @@
-﻿@using Applications.Features.Customers.Commands.ActivitiesCommand.CreateActivity
-<EditForm Model="activity" OnValidSubmit="@HandleFormSubmit">
+﻿@using Applications.Commons.Messages.Activities
+@using Applications.Exceptions
+@using Applications.Features.Customers.Commands.ActivitiesCommand.ActitvityQuery.GetActivityById
+@using Applications.Features.Customers.Commands.ActivitiesCommand.CreateActivity
+@using Applications.Features.Customers.Commands.ActivitiesCommand.EditActivity
+@using Applications.Utils
+<EditForm Model="_activity" OnValidSubmit="@HandleFormSubmit">
+    <input type="hidden" @bind="_activity.Id" />
     <FluentValidationValidator DisableAssemblyScanning="true" />
     <RadzenFormField Text="Activity Date" AllowFloatingLabel="true" class="rz-w-100">
-        <RadzenDatePicker @bind-Value="@activity.ActivityDate"
+        <RadzenDatePicker @bind-Value="@_activity.ActivityDate"
                           @bind-Value:format="yyyy-MMM-dd"
                           DateFormat="dd-MM-yyyy"
                           class="rz-w-100"></RadzenDatePicker>
     </RadzenFormField>
     <RadzenFormField Text="Description" AllowFloatingLabel="true" class="rz-w-100">
-        <RadzenTextArea @bind-Value="@activity.Description" class="rz-w-100" />
+        <RadzenTextArea @bind-Value="@_activity.Description" class="rz-w-100" />
     </RadzenFormField>
     <RadzenStack class="rz-mt-2" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
         <RadzenButton Size="ButtonSize.ExtraSmall" class="rz-mt-2"
                       ButtonType="ButtonType.Submit"
-                      Text="Save" 
+                      Text="Save"
                       Icon="@IconNames.Save"
                       ButtonStyle="ButtonStyle.Success" />
         <RadzenButton Size="ButtonSize.ExtraSmall" class="rz-mt-2"
                       ButtonType="ButtonType.Button"
                       Text="Close"
                       Icon="@IconNames.Close"
-                      Click="()=>DialogService.Close(false)"
+                      Click="() => DialogService.Close(false)"
                       ButtonStyle="ButtonStyle.Danger" />
 
     </RadzenStack>
@@ -30,16 +36,16 @@
     [CascadingParameter]
     Task<AuthenticationState> AuthenticationState { get; set; } = default!;
     [Parameter] public string? CustomerId { get; set; }
-    [Parameter] public long? ActivityId { get; set; } = 0;
+    [Parameter] public int? ActivityId { get; set; } = 0;
 
-    ActivityDtoCreate activity = new ActivityDtoCreate();
+    private ActivityDtoCreate _activity = new ActivityDtoCreate();
 
-    private readonly AddCustomerActivityUseCase _custActivityAdd;
+    private readonly IMediator _mediator;
 
-    public CustomerActivitiesAdd(AddCustomerActivityUseCase custActivityAdd)
+    public CustomerActivitiesAdd(IMediator mediator)
     {
-        _custActivityAdd = custActivityAdd;
-    } 
+        _mediator = mediator;
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -47,33 +53,96 @@
 
         if (auth.User.Identity!.IsAuthenticated)
         {
-            activity.CustomerRefId = CustomerId;
+            _activity.CustomerRefId = CustomerId;
         }
+
+        if (ActivityId > 0)
+        {
+            await GetActivityDetails(ActivityId);
+        }
+
+
         await base.OnInitializedAsync();
     }
 
-    void GetActivityDetails(int? id)
+    async Task GetActivityDetails(int? id)
     {
 
-        if (id.HasValue && id.Value > 0)
+        if (!id.HasValue && id.Value <= 0)
         {
-            
+            return;
         }
+
+        var req = new GetActivityByIdQuery(ActivityId, CustomerId);
+
+        var rsp = await _mediator.Send(req);
+
+        if (!rsp.IsError)
+        {
+            _activity = new ActivityDtoCreate
+            {
+                Id = rsp.Value.ActivityId,
+                Description = rsp.Value.Description,
+                CustomerRefId = rsp.Value.CustomerRefId,
+                Status = rsp.Value.Status,
+                ActivityDate = rsp.Value.ActivityDate
+            };
+        }
+
         // To be implemented if needed
     }
 
 
     async Task HandleFormSubmit()
     {
-        var rsp = await _custActivityAdd.ExecuteAsync(activity);
 
-        if (!rsp.IsSuccess)
+        try
         {
-            NotificationService.Notify(NotificationSeverity.Error, "Error", rsp.ErrMessage);
-            return;
-        }
 
-        DialogService.Close(true);
+            if (_activity.Id > 0)
+            {
+                var rsp = await _mediator.Send(new EditActivityCommand
+                {
+                    Id = _activity.Id,
+                    Description = _activity.Description,
+                    CustomerRefId = _activity.CustomerRefId,
+                    ActivityDate = _activity.ActivityDate
+                });
+
+                if (!rsp.IsError)
+                {
+                    NotificationService.Notify(NotificationSeverity.Success, ActivityMessage.UpdateSuccess);
+                    DialogService.Close(true);
+                    return;
+                }
+
+            }
+            else
+            {
+                var rsp = await _mediator.Send(new CreateActivityCommand
+                {
+                    Description = _activity.Description,
+                    CustomerRefId = _activity.CustomerRefId,
+                    ActivityDate = _activity.ActivityDate
+                });
+
+                if (!rsp.IsError)
+                {
+                    NotificationService.Notify(NotificationSeverity.Success, ActivityMessage.CreateSuccess);
+                    DialogService.Close(true);
+                    return;
+                }
+
+            }
+
+
+
+
+        }
+        catch (MediatorException ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Error", ex.Message);
+        }
 
     }
 

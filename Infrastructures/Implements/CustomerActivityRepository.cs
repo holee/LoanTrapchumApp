@@ -82,7 +82,7 @@ namespace Infrastructures.Implements
             }
         }
 
-        public async Task<Result<VCustomerActivities>> GetCustomerActivity(int? id, string customerId, CancellationToken cancellationToken = default)
+        public async Task<Result<VCustomerActivities>> GetCustomerActivity(int? id, string? customerId, CancellationToken cancellationToken = default)
         {
             await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
             

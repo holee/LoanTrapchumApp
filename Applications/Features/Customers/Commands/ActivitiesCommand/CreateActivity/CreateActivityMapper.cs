@@ -5,7 +5,7 @@ namespace Applications.Features.Customers.Commands.ActivitiesCommand.CreateActiv
 
 public static class CreateActivityMapper
 {
-    public static CustomerActivity ActivityToCustomerActivity(CreateActivityCommand source)
+    public static CustomerActivity ToCreateActivity(this CreateActivityCommand source)
     {
         return new CustomerActivity
         {

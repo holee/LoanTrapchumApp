@@ -1,14 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Applications.Interfaces.Customers;
-using Applications.Responses.ViewModels.Customers;
+﻿using Applications.Interfaces.Customers;
 using Applications.Utils;
-using Domains.Models.Lists.Customers;
 using ErrorOr;
-using Mapster;
 
 namespace Applications.Features.Customers.Commands.ActivitiesCommand.CreateActivity
 {
@@ -16,11 +8,18 @@ namespace Applications.Features.Customers.Commands.ActivitiesCommand.CreateActiv
     {
         private readonly ICustomerActivityService _actService;
 
+        public CreateActivityCommandHandler(ICustomerActivityService actService)
+        {
+            _actService = actService;
+        }
+
         public async Task<ErrorOr<int>> Handle(CreateActivityCommand request, CancellationToken cancellationToken = default)
         {
-            var model = request.Adapt<CustomerActivity>();
+            var model = request.ToCreateActivity();
 
-            return await _actService.AddOrUpdateActivity(model, cancellationToken);
+             await _actService.AddOrUpdateActivity(model, cancellationToken);
+
+            return 1;
             
         }
     }
