@@ -2,37 +2,62 @@ using Applications.Enumerations;
 using Applications.Extensions;
 using Applications.Features.Loans.Services;
 using Applications.Responses.ViewModels.Loans;
-using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
-using Radzen;
 using TrapchumApp.Pages.Transactions.Loans.Repayments;
+using TrapchumApp.Services;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 {
     public partial class LoanInfos
     {
         private readonly ILoanServiceImpl _loanService;
+        private readonly ExcelExportService _excelExportService;
 
-        public LoanInfos(ILoanServiceImpl loanService)
+        public LoanInfos(ILoanServiceImpl loanService, ExcelExportService excelExportService)
         {
             _loanService = loanService;
+            _excelExportService = excelExportService;
         }
 
         [Parameter] public VLoanDisbursments? LoanSchedule { get; set; } = new();
-        [Parameter] public string? LoanId { get; set; }=string.Empty;
+        [Parameter] public string? LoanId { get; set; } = string.Empty;
         [Parameter] public int BranchId { get; set; } = 1;
-        [Parameter] public int? Currency { get; set; } = 1; 
+        [Parameter] public int? Currency { get; set; } = 1;
+        private bool showLoader = false;
         private async Task DownLoadScheduleAsExcel()
         {
             if (LoanId.IsNotNullOrEmpty() && BranchId > 0)
             {
-                await js.InvokeVoidAsync("open", $"/Reports/Schedules/{LoanId}/{BranchId}/Exel", "_blank");
+                try
+                {
+                    showLoader = true;
+                    //await js.InvokeVoidAsync("open", $"/Reports/Schedules/{LoanId}/{BranchId}/Exel", "_blank");
+                    var fileName = $"Loan_Schedule_{LoanId}.xlsx";
+                    var stream = _excelExportService.ScheduleExportAll(
+                        LoanSchedule,
+                        LoanSchedule?.Schedules
+                    );
+
+                    var base64 = Convert.ToBase64String(stream!.ToArray());
+                    if (stream != null)
+                    {
+                        await js.InvokeVoidAsync("downloadFile", fileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", base64);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+                finally
+                {
+                    showLoader = false;
+                }
             }
         }
 
         protected override async Task OnInitializedAsync()
         {
-            if (LoanId.IsNotNullOrEmpty() && BranchId > 0 
+            if (LoanId.IsNotNullOrEmpty() && BranchId > 0
                 && LoanSchedule!.LoanId.IsNullOrEmpty())
             {
                 await GetLoanWithSchedules(BranchId, LoanId);
@@ -74,7 +99,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
         }
 
 
-        private  async Task Priner()
+        private async Task Priner()
         {
             await js.InvokeVoidAsync("printPdfFromUrl", $"/Reports/Schedules/{LoanId}/{BranchId}");
         }
@@ -91,13 +116,13 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 
             var options = new SideDialogOptions
             {
-                Width="62vw",
-                ShowMask=true,
-                CloseDialogOnOverlayClick=true,
-                Title="Paid Schedule"
+                Width = "62vw",
+                ShowMask = true,
+                CloseDialogOnOverlayClick = true,
+                Title = "Paid Schedule"
             };
 
-            DialogService.OpenSide<SchedulesPaid>("Paid Schedule",parametets,options);
+            DialogService.OpenSide<SchedulesPaid>("Paid Schedule", parametets, options);
         }
     }
 }

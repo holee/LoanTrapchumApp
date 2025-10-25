@@ -7,7 +7,12 @@
 @using Applications.Features.Loans.Responses
 @using Applications.Responses.ViewModels.Loans
 @using TrapchumApp.Services
+@using Mapster;
 <div class="rz-mt-2">
+    @if(isProgess)
+    {
+        <RadzenProgressBar Mode="ProgressBarMode.Indeterminate" Style="height:4px" />
+	}
     <RadzenFieldset AllowCollapse="true" Collapsed="true">
         <HeaderTemplate>
             <RadzenIcon Icon="info" />
@@ -24,6 +29,11 @@
                               ButtonStyle="ButtonStyle.Primary"
                               Text="Export Pdf"
                               Icon="picture_as_pdf" />
+                <RadzenButton Click="() => ExportToExcel(ScheduleNum)"
+                              Size="ButtonSize.ExtraSmall"
+                              ButtonStyle="ButtonStyle.Success"
+                              Text="Export Excel"
+                              Icon="file_download" />
             </RadzenStack>
             <table class="table-sm">
                 <tbody>
@@ -195,7 +205,8 @@
     [Parameter] public string? LoanId { get; set; }
     [Parameter] public int? ScheduleNum { get; set; }
     private int _currencyId = 0;
-
+    private bool isProgess = false;
+    [Inject] ExcelExportService _excelExportService { get; set; } = default!;
     protected override void OnParametersSet()
     {
         _currencyId = LoanSchedule?.CurrencyId ?? 0;
@@ -211,9 +222,57 @@
         }
     }
 
+    async Task ExportToExcel(int? schuduleNum = 1)
+    {
+        if (LoanId.IsNotNullOrEmpty() && BranchId > 0)
+        {
+            try
+            {
+                isProgess = true;
+    //             var loan = new VLoanDisbursments();
 
+    //             loan.AltName = LoanSchedule?.AltName ?? "";
+    //             loan.Address = LoanSchedule?.Address ?? "";
+    //             loan.Principle = LoanSchedule?.Principle ?? 0;
+    //             loan.Phone = LoanSchedule?.Phone ?? "";
+    //             loan.LastPaymentDate = LoanSchedule?.LastPaymentDate ?? DateTime.Now;
+    //             loan.InterestRate = LoanSchedule?.InterestRate ?? 0;
+    //             loan.RegisterDate = LoanSchedule?.RegisterDate ?? DateTime.Now;
+    //             loan.CreditAgentKhmer = LoanSchedule?.CreditAgentKhmer ?? "";
+    //             loan.AgentPhone = LoanSchedule?.AgentPhone ?? "";
+    //             loan.PeriodName = LoanSchedule?.PeriodName ?? "";
+    //             loan.Circle = LoanSchedule?.Circle;
+    //             loan.OutStanding = LoanSchedule?.OutStanding ?? 0;
+    //             loan.CurrencyId= LoanSchedule?.CurrencyId ?? 0;
+				// loan.ContractNumber = LoanSchedule?.ContractNumber ?? "";
+				// loan.AgentPhone = LoanSchedule?.AgentPhone ?? "";
+				// loan.CreditAgentKhmer = LoanSchedule?.CreditAgentKhmer ?? "";
+				// loan.BranchName = LoanSchedule?.BranchName ?? "";
 
+                var fileName = $"Loan_Schedule_{schuduleNum}.xlsx";
+                var sheetName = $"Schedule_{schuduleNum}";
+                var stream = _excelExportService.ScheduleExportAll(
+                    LoanSchedule.Adapt<VLoanDisbursments>(),
+                    LoanSchedule?.Schedules.Adapt<List<VSchedule>>(),
+                    sheetName
+                );
 
+                var base64 = Convert.ToBase64String(stream!.ToArray());
+                if (stream != null)
+                {
+                    await js.InvokeVoidAsync("downloadFile", fileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", base64);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            finally
+            {
+                isProgess = false;
+            }
+        }
+    }
     void OnRowSelect(ScheduleResponse s)
     {
 

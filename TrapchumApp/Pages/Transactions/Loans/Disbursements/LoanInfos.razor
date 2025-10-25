@@ -5,7 +5,10 @@
 @using Applications.Features.Employees
 @using Applications.Features.LoanRequests.Interfaces
 @using TrapchumApp.Services
-
+@if (showLoader)
+{
+    <RadzenProgressBar Mode="ProgressBarMode.Indeterminate" Style="height:4px;" class="rz-mb-2" />
+}
 <RadzenStack AlignItems="AlignItems.Center"
              Gap="1rem"
              class="rz-mb-2"
