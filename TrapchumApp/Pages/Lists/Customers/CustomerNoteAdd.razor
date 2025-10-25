@@ -6,6 +6,10 @@
 @using Applications.Features.LoanRequests.Interfaces
 @using TrapchumApp.Services
 <EditForm Model="model" OnValidSubmit="@FormSubmit">
+    <input type="hidden" @bind="NoteId" />
+    <RadzenFormField Text="Note Date" AllowFloatingLabel="true" class="rz-w-100">
+        <RadzenDatePicker @bind-Value="model.NoteDate" class="rz-w-100"></RadzenDatePicker>
+    </RadzenFormField>
     <RadzenFormField Text="Note" AllowFloatingLabel="true" class="rz-w-100">
         <RadzenTextArea @bind-Value="model.Description" class="rz-w-100"></RadzenTextArea>
     </RadzenFormField>

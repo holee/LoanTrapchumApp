@@ -1,12 +1,16 @@
-﻿@using Applications.Features.Addresses
+﻿@using Applications.Exceptions
+@using Applications.Features.Addresses
 @using Applications.Features.Branches
 @using Applications.Features.Currencies
+@using Applications.Features.Customers.Commands.NotesCommand.Queries.GetNoteByCustomerId
 @using Applications.Features.Customers.Services
 @using Applications.Features.Customers.UseCases
 @using Applications.Features.Employees
 @using Applications.Features.LoanRequests.Interfaces
+@using Applications.Utils
 @using Domains.Models.Identity
 @using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.Extensions.Logging
 @using TrapchumApp.Services
 <RadzenStack Orientation="Orientation.Horizontal"
              class="rz-mb-2"
@@ -50,11 +54,13 @@
         <RadzenDataGridColumn Width="5rem"
                               Title="Action"
                               TextAlign="TextAlign.Center"
+                              Context="c"
                               Property="Created">
             <Template>
                 <RadzenButton Size="ButtonSize.Small"
                               Shade="Shade.Dark"
                               Variant="Variant.Text"
+                              Click="@((arg)=>ShowContextMenu(arg,c))"
                               Icon="@IconNames.MoreVert"
                               ButtonStyle="ButtonStyle.Info">
                 </RadzenButton>
@@ -62,73 +68,20 @@
         </RadzenDataGridColumn>
     </Columns>
 </RadzenDataGrid>
+
 @code {
 
-    [Parameter] public IEnumerable<VCustomerNotes> Notes { get; set; } = [];
-    [Parameter] public string? CustomerId { get; set; } = string.Empty;
-    [Parameter] public bool ShowAdd { get; set; } = false;
-    [Parameter] public bool ShowCommand { get; set; } = false;
-    [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+    int value = 0;
 
-    private readonly GetCustomerNotesUseCase _custNoteGet;
 
-    public CustomerNotes(GetCustomerNotesUseCase custNoteGet)
+    void ShowContextMenu(MouseEventArgs args, VCustomerNotes c)
     {
-        _custNoteGet = custNoteGet;
+    ContextMenuService.Open(args, ds =>
+    @<RadzenMenu Style="font-size:0.8rem;">
+    <RadzenMenuItem Click="@(() => GetEditNotes(c))" Icon="@IconNames.Edit" Text="Edit Note" Value="@c.NoteId" />
+    <RadzenMenuItem Click="@(() => GetEditNotes(c))" Icon="@IconNames.Details" Text="Show Note" Value="@c.NoteId" />
+    <RadzenMenuItem Click="@(() => GetEditNotes(c))" Icon="@IconNames.Delete" Text="Delete Note" Value="@c.NoteId" />
+    </RadzenMenu>
+    );
     }
-
-    protected override async Task OnInitializedAsync()
-    {
-
-        if (CustomerId.IsNotNullOrEmpty() && !Notes.Any())
-        {
-            await GetCustomerNotes(CustomerId);
-        }
-
-        await base.OnInitializedAsync();
-    }
-
-    async Task AddNewNote()
-    {
-        var auth = await AuthenticationState;
-
-        if (auth.User.Identity!.IsAuthenticated == false)
-        {
-            return;
-        }
-
-        var userId = auth.User!.GetId();
-
-        bool? dialogueResult = await DialogService.OpenAsync<CustomerNoteAdd>("New Note", new Dictionary<string, object?>
-            {
-                { "CustomerId", CustomerId },
-                { "UserId", userId }
-            });
-
-        if (dialogueResult is not null && dialogueResult == true)
-        {
-            await GetCustomerNotes(CustomerId);
-        }
-
-    }
-
-
-    async Task GetCustomerNotes(string? customerId)
-    {
-        var rsp = await _custNoteGet.ExecuteAsync(customerId);
-
-        if (rsp.IsSuccess && rsp.Data is not null)
-        {
-            Notes = rsp.Data;
-        }
-        StateHasChanged();
-    }
-
-
-
-    void OnRowRender(RowRenderEventArgs<VCustomerNotes> args)
-    {
-        args.Data.RowIndex = args.Index + 1; // store 1-based index
-    }
-
 }

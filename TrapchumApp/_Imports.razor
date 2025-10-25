@@ -47,6 +47,7 @@
 @using TrapchumApp.Pages.Transactions.Loans.LoanRequests.Links
 @using TrapchumApp.Services
 @using TrapchumApp.Shared
+@using Applications.Utils
 @using static Microsoft.AspNetCore.Components.Web.RenderMode
 @attribute [Authorize]
 @inject IJSRuntime js
@@ -65,3 +66,4 @@
 @inject ICurrencyServiceImpl _curService
 @inject ILoanRequestServiceImpl _loanRequestService
 @inject IUserServiceImpl _userService
+@inject IMediator mediator

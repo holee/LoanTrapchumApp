@@ -17,6 +17,11 @@ using Applications.Features.Customers.Commands.ActivitiesCommand.EditActivity;
 using Applications.Features.Customers.Commands.CustomerExpenseQuery;
 using Applications.Features.Customers.Commands.CustomerIncomeQuery;
 using Applications.Features.Customers.Commands.GetCustomerActivityQuery;
+using Applications.Features.Customers.Commands.NotesCommand.CreateNoteCommand;
+using Applications.Features.Customers.Commands.NotesCommand.DeleteNoteCommand;
+using Applications.Features.Customers.Commands.NotesCommand.EditNoteCommand;
+using Applications.Features.Customers.Commands.NotesCommand.Queries.GetNoteByCustomerId;
+using Applications.Features.Customers.Commands.NotesCommand.Queries.GetNoteById;
 using Applications.Features.Customers.Interfaces;
 using Applications.Features.Customers.Services;
 using Applications.Features.Customers.UseCases;
@@ -79,9 +84,7 @@ namespace Applications
             services.AddScoped<ScheduleService>();
             services.AddScoped<CustomerCollateralServices>();
             services.AddScoped<AddCustomerActivityUseCase>();
-            services.AddScoped<AddCustomerNotesUseCase>();
             services.AddScoped<GetCustomerActivityUseCase>();
-            services.AddScoped<GetCustomerNotesUseCase>();
             services.AddScoped<GetCustomersUseCase>();
             services.AddScoped<GetCustomerIncomeUseCase>();
             services.AddScoped<GetCustomerExpenseUseCase>();
@@ -138,13 +141,13 @@ namespace Applications
             services.AddScoped<IMediator, SimpleMediator>();
             services.AddScoped<IRequestHandler<GetCustomerIncomeQuery, IEnumerable<VCustomerIncomes>>, GetCustomerIncomeQueryHandler>();
             services.AddScoped<IRequestHandler<GetCustomerExpenseQuery, IEnumerable<VCustomerExpenses>>, GetCustomerExpenseQueryHandler>();
-           
+
             services.AddScoped<IRequestHandler<DeleteCollateralLineCommand, ErrorOr<DeleteResult>>, DeleteCollateralLineCommandHandler>();
-            services.AddScoped<IRequestHandler<GetCollateralLineByCollateralIdQuery, ErrorOr<IEnumerable<VCollateralLines>>>,GetCustomerCollateralLineByIdHandler>();
+            services.AddScoped<IRequestHandler<GetCollateralLineByCollateralIdQuery, ErrorOr<IEnumerable<VCollateralLines>>>, GetCustomerCollateralLineByIdHandler>();
             services.AddScoped<IRequestHandler<GetCollateralLineDetailQuery, ErrorOr<VCollateralLines>>, GetCollateralLineDetailQueryHandler>();
-            
-            
-            
+
+
+
             services.AddScoped<IRequestHandler<CreateActivityCommand, ErrorOr<int>>, CreateActivityCommandHandler>();
             services.AddScoped<IRequestHandler<EditActivityCommand, ErrorOr<int>>, EditActivityCommandHandler>();
             services.AddScoped<IRequestHandler<GetCustomerActivityQuery, IEnumerable<VCustomerActivities>>, GetCustomerActivityQueryHandler>();
@@ -152,7 +155,14 @@ namespace Applications
             services.AddScoped<IRequestHandler<GetActivityByIdQuery, ErrorOr<VCustomerActivities>>, GetActivityByIdQueryHandler>();
 
 
-            
+            services.AddScoped<IRequestHandler<GetNoteByIdQuery, ErrorOr<VCustomerNotes>>, GetNoteByIdQueryHandler>();
+            services.AddScoped<IRequestHandler<GetNotesByCustomerIdQuery, ErrorOr<IEnumerable<VCustomerNotes>>>, GetNotesByCustomerIdQueryHandler>();
+            services.AddScoped<IRequestHandler<AddNoteCommand, ErrorOr<int>>, CreateNoteCommandHandler>();
+            services.AddScoped<IRequestHandler<EditUpdateCommand, ErrorOr<int>>, EditNoteCommandHandler>();
+            services.AddScoped<IRequestHandler<DeleteNoteCommand, ErrorOr<bool>>, DeleteNoteCommandHandler>();
+
+
+
             return services;
 
         }
