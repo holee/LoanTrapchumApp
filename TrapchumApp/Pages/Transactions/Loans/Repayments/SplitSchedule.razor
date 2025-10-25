@@ -229,6 +229,26 @@
             try
             {
                 isProgess = true;
+    //             var loan = new VLoanDisbursments();
+
+    //             loan.AltName = LoanSchedule?.AltName ?? "";
+    //             loan.Address = LoanSchedule?.Address ?? "";
+    //             loan.Principle = LoanSchedule?.Principle ?? 0;
+    //             loan.Phone = LoanSchedule?.Phone ?? "";
+    //             loan.LastPaymentDate = LoanSchedule?.LastPaymentDate ?? DateTime.Now;
+    //             loan.InterestRate = LoanSchedule?.InterestRate ?? 0;
+    //             loan.RegisterDate = LoanSchedule?.RegisterDate ?? DateTime.Now;
+    //             loan.CreditAgentKhmer = LoanSchedule?.CreditAgentKhmer ?? "";
+    //             loan.AgentPhone = LoanSchedule?.AgentPhone ?? "";
+    //             loan.PeriodName = LoanSchedule?.PeriodName ?? "";
+    //             loan.Circle = LoanSchedule?.Circle;
+    //             loan.OutStanding = LoanSchedule?.OutStanding ?? 0;
+    //             loan.CurrencyId= LoanSchedule?.CurrencyId ?? 0;
+				// loan.ContractNumber = LoanSchedule?.ContractNumber ?? "";
+				// loan.AgentPhone = LoanSchedule?.AgentPhone ?? "";
+				// loan.CreditAgentKhmer = LoanSchedule?.CreditAgentKhmer ?? "";
+				// loan.BranchName = LoanSchedule?.BranchName ?? "";
+
                 var fileName = $"Loan_Schedule_{schuduleNum}.xlsx";
                 var sheetName = $"Schedule_{schuduleNum}";
                 var stream = _excelExportService.ScheduleExportAll(

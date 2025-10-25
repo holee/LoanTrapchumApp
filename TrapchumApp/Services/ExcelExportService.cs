@@ -49,7 +49,7 @@ namespace TrapchumApp.Services
                 sheet.Range("B9:C9").Merge().Value = "ថ្ងៃខ្ចីប្រាក់ :";
                 sheet.Range("D9:E9").Merge().Value = LoanSchedule?.RegisterDate?.ToString("dd-MM-yyyy");
                 sheet.Range("B10:C10").Merge().Value = "រយៈពេលខ្ចីប្រាក់ :";
-                sheet.Range("D10:E10").Merge().Value = LoanSchedule?.Period;
+                sheet.Range("D10:E10").Merge().Value = LoanSchedule?.PeriodName;
                 var infoSection1 = sheet.Range("B6:C10");
                 infoSection1.Style.Font.FontName = "Khmer OS Battambang";
                 infoSection1.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Right;
@@ -62,10 +62,24 @@ namespace TrapchumApp.Services
                 sheet.Range("G6:J6").Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
                 sheet.Cell("F7").Value = "ចំនួនទឹកប្រាក់ខ្ចី :";
                 sheet.Cell("G7").Value = LoanSchedule?.Principle;
+                var infoSectionCurrency = sheet.Cell("G7");
+                if (LoanSchedule?.CurrencyId == 2)
+                {
+                    infoSectionCurrency.Style.NumberFormat.Format = "#,##0.00 $";
+                    infoSectionCurrency.Style.Font.FontName = "Times New Roman";
+                }
+
+                else
+                {
+                    infoSectionCurrency.Style.Font.FontName = "Khmer OS Battambang";
+                    infoSectionCurrency.Style.NumberFormat.Format = "#,##0 ៛";
+
+                }
+
                 sheet.Cell("F8").Value = "ថ្ងៃផុតកំណត់ :";
                 sheet.Cell("G8").Value = LoanSchedule?.LastPaymentDate?.ToString("dd-MM-yyyy");
                 sheet.Cell("F9").Value = "ភ្នាក់ងារ :";
-                sheet.Cell("G9").Value = LoanSchedule?.AgentName;
+                sheet.Cell("G9").Value = LoanSchedule?.AgentName ?? LoanSchedule?.CreditAgentKhmer;
                 sheet.Cell("F10").Value = "ការិយាល័យ :";
                 sheet.Cell("G10").Value = LoanSchedule?.BranchName;
                 var infoSection2 = sheet.Range("F6:F10");
@@ -119,12 +133,14 @@ namespace TrapchumApp.Services
                     tableRow.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
                     tableRow.Style.Border.SetOutsideBorder(XLBorderStyleValues.Hair)
                         .Border.SetInsideBorder(XLBorderStyleValues.Hair);
+
                     var currencyRow = sheet.Range(currentRow, 5, currentRow, 8);
-                    currencyRow.Style.Font.FontName = "Times New Roman";
                     currencyRow.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Right;
                     currencyRow.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
                     currencyRow.Style.Border.SetOutsideBorder(XLBorderStyleValues.Hair)
                         .Border.SetInsideBorder(XLBorderStyleValues.Hair);
+
+
                     currentRow++;
                 }
                 // Total Row
@@ -143,11 +159,18 @@ namespace TrapchumApp.Services
                 sheet.Range(currentRow, 2, currentRow, 8).Style.Border.SetOutsideBorder(XLBorderStyleValues.Hair)
                     .Border.SetInsideBorder(XLBorderStyleValues.Hair);
                 //Format currency cells
-                if (LoanSchedule!.CurrencyId == 2) // assuming 1 is for USD
+                if (LoanSchedule!.CurrencyId == 2)
+                {
+                    sheet.Range($"E13:H{currentRow}").Style.Font.FontName = "Times New Roman";
                     sheet.Range($"E13:H{currentRow}").Style.NumberFormat.Format = "#,##0.00 $";
-                else // assuming other value is for KHR
+
+                }
+                else
+                {
+                    sheet.Range($"E13:H{currentRow}").Style.Font.FontName = "Khmer OS Battambang";
                     sheet.Range($"E13:H{currentRow}").Style.NumberFormat.Format = "#,##0 ៛";
 
+                }
 
                 // signature Section
                 var signatureRange = sheet.Range($"C{currentRow + 1}:B{currentRow + 1}").Merge();
@@ -166,6 +189,8 @@ namespace TrapchumApp.Services
                 signateAgentDateRange.Style.Border.TopBorder = XLBorderStyleValues.Thin;
                 // Adjust column widths
                 sheet.Columns().AdjustToContents();
+                sheet.Columns(2, 2).Width = 8; // Set width for column B
+
 
                 using var stream = new MemoryStream();
                 workbook.SaveAs(stream);
