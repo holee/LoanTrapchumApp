@@ -78,9 +78,9 @@
     {
     ContextMenuService.Open(args, ds =>
     @<RadzenMenu Style="font-size:0.8rem;">
-    <RadzenMenuItem Click="@(() => GetEditNotes(c))" Icon="@IconNames.Edit" Text="Edit Note" Value="@c.NoteId" />
-    <RadzenMenuItem Click="@(() => GetEditNotes(c))" Icon="@IconNames.Details" Text="Show Note" Value="@c.NoteId" />
-    <RadzenMenuItem Click="@(() => GetEditNotes(c))" Icon="@IconNames.Delete" Text="Delete Note" Value="@c.NoteId" />
+    <RadzenMenuItem Click="@(() => GetDetailNotes(c))" Icon="@IconNames.Info" Text="Edit Note" Value="@c.NoteId" />
+    <RadzenMenuItem Click="@(() => GetEditNotes(c))" Icon="@IconNames.Edit" Text="Show Note" Value="@c.NoteId" />
+    <RadzenMenuItem Click="@(() => DeleteNotes(c))" Icon="@IconNames.Delete" Text="Delete Note" Value="@c.NoteId" />
     </RadzenMenu>
     );
     }

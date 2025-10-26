@@ -1,5 +1,6 @@
 using Applications.Exceptions;
 using Applications.Extensions;
+using Applications.Features.Customers.Commands.NotesCommand.DeleteNoteCommand;
 using Applications.Features.Customers.Commands.NotesCommand.Queries.GetNoteByCustomerId;
 using Applications.Features.Customers.Commands.NotesCommand.Queries.GetNoteById;
 using Applications.Responses.ViewModels.Customers;
@@ -155,23 +156,28 @@ namespace TrapchumApp.Pages.Lists.Customers
         }
 
 
-        async Task GetDeleteNotes(VCustomerNotes note)
+        async Task DeleteNotes(VCustomerNotes note)
         {
             try
             {
                 if (note.CustomerRefId.IsNullOrEmpty()) return;
 
-                var rsp = await mediator.Send(new GetNoteByIdQuery(note.NoteId, note.CustomerRefId));
+                var confirm = await DialogService.Confirm("Are you sure you want to delete this note?", "Delete Note", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
 
-                var parameters = new Dictionary<string, object?>
+                if (confirm == false) return;
+
+                var rsp = await mediator.Send(new DeleteNoteCommand(note.NoteId, note.CustomerRefId));
+
+                if(rsp.IsError)
                 {
-                    { "CustomerId", note.CustomerRefId },
-                    { "UserId", _userId },
-                    { "NoteId", note.NoteId }
-                };
+                    NotificationService.Notify(NotificationSeverity.Error, rsp.FirstError.Description ?? "An error occurred while deleting the note.");
+                   
+                    return;
+                }
 
-                await DialogService.OpenAsync<CustomerNoteAdd>("Edit", parameters);
+                NotificationService.Notify(NotificationSeverity.Success, "Note deleted successfully.");
 
+                await GetCustomerNotes(CustomerId);
             }
             catch (MediatorException ex)
             {

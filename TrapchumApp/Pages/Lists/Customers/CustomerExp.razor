@@ -72,6 +72,18 @@
                         @c.ExDescription
                     </Template>
                 </RadzenDataGridColumn>
+                 <RadzenDataGridColumn Context="c"
+                                      TextAlign="TextAlign.Center"
+                                      Width="3.5rem"
+                                      Property="InDescription"
+                                      Title="Actions">
+                    <Template>
+                        <RadzenButton Size="ButtonSize.ExtraSmall"
+                                      Variant="Variant.Text"
+                                      Click="@((arg) => ShowContextMenu(arg, c))"
+                                      Icon="@IconNames.MoreVert" />
+                    </Template>
+                </RadzenDataGridColumn>
             </Columns>
             <LoadingTemplate>
                 <RadzenProgressBarCircular ProgressBarStyle="ProgressBarStyle.Primary" Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
@@ -79,3 +91,27 @@
         </RadzenDataGrid>
     </ChildContent>
 </RadzenFieldset>
+@code {
+
+
+    void ShowContextMenu(MouseEventArgs args, VCustomerExpenses c)
+    {
+    ContextMenuService.Open(args, ds =>
+    @<RadzenMenu Style="font-size:0.8rem;">
+    <RadzenMenuItem Click="@(() => GetEditExpense(c))" Icon="@IconNames.Edit" Text="Edit Expense" Value="@c.ExpendId" />
+    <RadzenMenuItem Click="@(() => DeleteExpense(c))" Icon="@IconNames.Delete" Text="Delete Expense" Value="@c.ExpendId" />
+    </RadzenMenu>
+    );
+    }
+
+
+    void GetEditExpense(VCustomerExpenses c)
+    {
+        
+    }
+
+     void DeleteExpense(VCustomerExpenses c)
+    {
+        
+    }
+    }

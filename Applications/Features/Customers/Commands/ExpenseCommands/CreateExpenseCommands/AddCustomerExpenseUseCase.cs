@@ -5,7 +5,7 @@ using Applications.Responses;
 using Domains.Models.Lists.Customers;
 using Mapster;
 
-namespace Applications.Features.Customers.UseCases;
+namespace Applications.Features.Customers.Commands.ExpenseCommands.CreateExpenseCommands;
 
 public sealed class AddCustomerExpenseUseCase
 {

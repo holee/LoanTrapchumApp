@@ -87,11 +87,10 @@
     {
         ContextMenuService.Open(args, ds =>
             @<RadzenMenu Style="font-size:0.8rem;">
-    <RadzenMenuItem Click="() => HandleDetails(c)" Icon="info" Text="Details" Value="@c.Id"></RadzenMenuItem>
-    <RadzenMenuItem Click="() => OnCollateralLineEdit(c)" Icon="info" Text="Edit" Value="@c.Id"></RadzenMenuItem>
-    <RadzenMenuItem Click="() => HandleDelete(c)" Icon="delete"
-                    Disabled="@c.IsUsed"
-                    Text="Delete" Value="@c.Id"></RadzenMenuItem>
+    <RadzenMenuItem Click="() => HandleDetails(c)" Icon="@IconNames.Info" Text="Details" Value="@c.Id"></RadzenMenuItem>
+    <RadzenMenuItem Click="() => OnCollateralLineEdit(c)" Icon="@IconNames.Edit" Text="Edit Collateral" Value="@c.Id"></RadzenMenuItem>
+    <RadzenMenuItem Click="() => HandleDelete(c)" Icon="@IconNames.Delete"
+                    Disabled="@c.IsUsed" Text="Delete Collateral" Value="@c.Id"></RadzenMenuItem>
 </RadzenMenu>
         );
     }

@@ -16,7 +16,10 @@ using Applications.Features.Customers.Commands.ActivitiesCommand.CreateActivity;
 using Applications.Features.Customers.Commands.ActivitiesCommand.EditActivity;
 using Applications.Features.Customers.Commands.CustomerExpenseQuery;
 using Applications.Features.Customers.Commands.CustomerIncomeQuery;
+using Applications.Features.Customers.Commands.ExpenseCommands.Queries.GetExpenseByCustomerId;
 using Applications.Features.Customers.Commands.GetCustomerActivityQuery;
+using Applications.Features.Customers.Commands.IncomeCommands.CreateIncomeCommands;
+using Applications.Features.Customers.Commands.IncomeCommands.Queries.GetIncomeByCustomerId;
 using Applications.Features.Customers.Commands.NotesCommand.CreateNoteCommand;
 using Applications.Features.Customers.Commands.NotesCommand.DeleteNoteCommand;
 using Applications.Features.Customers.Commands.NotesCommand.EditNoteCommand;
@@ -86,7 +89,7 @@ namespace Applications
             services.AddScoped<AddCustomerActivityUseCase>();
             services.AddScoped<GetCustomerActivityUseCase>();
             services.AddScoped<GetCustomersUseCase>();
-            services.AddScoped<GetCustomerIncomeUseCase>();
+            services.AddScoped<GetIncomeByCustomerQueryHandler>();
             services.AddScoped<GetCustomerExpenseUseCase>();
             services.AddScoped<GetCustomerDetailByIdUseCase>();
             services.AddScoped<GetCustomerByIdCommand>();
@@ -147,6 +150,7 @@ namespace Applications
             services.AddScoped<IRequestHandler<GetCollateralLineDetailQuery, ErrorOr<VCollateralLines>>, GetCollateralLineDetailQueryHandler>();
 
 
+            ///Activities
 
             services.AddScoped<IRequestHandler<CreateActivityCommand, ErrorOr<int>>, CreateActivityCommandHandler>();
             services.AddScoped<IRequestHandler<EditActivityCommand, ErrorOr<int>>, EditActivityCommandHandler>();
@@ -155,11 +159,22 @@ namespace Applications
             services.AddScoped<IRequestHandler<GetActivityByIdQuery, ErrorOr<VCustomerActivities>>, GetActivityByIdQueryHandler>();
 
 
+            ///Notes
+
             services.AddScoped<IRequestHandler<GetNoteByIdQuery, ErrorOr<VCustomerNotes>>, GetNoteByIdQueryHandler>();
             services.AddScoped<IRequestHandler<GetNotesByCustomerIdQuery, ErrorOr<IEnumerable<VCustomerNotes>>>, GetNotesByCustomerIdQueryHandler>();
             services.AddScoped<IRequestHandler<AddNoteCommand, ErrorOr<int>>, CreateNoteCommandHandler>();
             services.AddScoped<IRequestHandler<EditUpdateCommand, ErrorOr<int>>, EditNoteCommandHandler>();
             services.AddScoped<IRequestHandler<DeleteNoteCommand, ErrorOr<bool>>, DeleteNoteCommandHandler>();
+
+            ///Incomes
+
+            services.AddScoped<IRequestHandler<GetIncomeByCustomerQuery, ErrorOr<IEnumerable<VCustomerIncomes>>>, GetIncomeByCustomerQueryHandler>();
+            services.AddScoped<IRequestHandler<GetIncomeByIdQuery, ErrorOr<VCustomerIncomes>>, GetIncomeByIdQueryHandler>();
+            services.AddScoped<IRequestHandler<AddIncomeCommand, ErrorOr<string>>, AddIncomeCommandHandler>();
+            services.AddScoped<IRequestHandler<AddIncomesCommand, ErrorOr<string>>, AddIncomesCommandHandler>();
+
+
 
 
 

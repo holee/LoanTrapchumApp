@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Commons\Messages\Customers\" />
     <Folder Include="Commons\Messages\Loanrequests\" />
     <Folder Include="Commons\Messages\LoanDisbursements\" />
     <Folder Include="Commons\Messages\Employees\" />
@@ -29,6 +28,11 @@
     <Folder Include="Features\Currencies\UseCases\" />
     <Folder Include="Features\Customers\Commands\ActivitiesCommand\DeleteActivity\" />
     <Folder Include="Features\Customers\Commands\CustomerCollateralQuery\" />
+    <Folder Include="Features\Customers\Commands\IncomeCommands\DeleteIncomeCommand\" />
+    <Folder Include="Features\Customers\Commands\IncomeCommands\Queries\GetIncomeById\" />
+    <Folder Include="Features\Customers\Commands\ExpenseCommands\EditExpensCommands\" />
+    <Folder Include="Features\Customers\Commands\ExpenseCommands\DeleteExpenseCommand\" />
+    <Folder Include="Features\Customers\Commands\ExpenseCommands\Queries\GetExpenseById\" />
     <Folder Include="Features\Employees\Extensions\" />
     <Folder Include="Features\Employees\Mappers\" />
     <Folder Include="Features\Employees\Responses\" />

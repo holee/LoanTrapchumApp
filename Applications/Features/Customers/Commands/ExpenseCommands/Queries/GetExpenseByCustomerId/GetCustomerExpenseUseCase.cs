@@ -2,7 +2,7 @@
 using Applications.Responses;
 using Applications.Responses.ViewModels.Customers;
 
-namespace Applications.Features.Customers.UseCases;
+namespace Applications.Features.Customers.Commands.ExpenseCommands.Queries.GetExpenseByCustomerId;
 
 public sealed class GetCustomerExpenseUseCase
 {
