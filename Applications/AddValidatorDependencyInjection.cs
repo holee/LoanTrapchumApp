@@ -1,4 +1,4 @@
-﻿using Applications.Features.Collaterals.Requests;
+﻿using Applications.Features.Collaterals.Dtos;
 using Applications.Features.Customers.Validations;
 using Applications.Features.Identity.Roles.Requests;
 using Applications.Features.Identity.Roles.Validation;

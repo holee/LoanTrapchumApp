@@ -4,7 +4,7 @@ using ErrorOr;
 
 namespace Applications.Features.Customers.Commands.NotesCommand.EditNoteCommand;
 
-public sealed class EditNoteCommandHandler:IRequestHandler<EditUpdateCommand,ErrorOr<int>>
+public sealed class EditNoteCommandHandler:IRequestHandler<EditNoteCommand,ErrorOr<int>>
 {
     private readonly ICustomerNoteService noteService;
 
@@ -13,7 +13,7 @@ public sealed class EditNoteCommandHandler:IRequestHandler<EditUpdateCommand,Err
         this.noteService = noteService;
     }
 
-    public async Task<ErrorOr<int>> Handle(EditUpdateCommand request, CancellationToken cancellationToken = default)
+    public async Task<ErrorOr<int>> Handle(EditNoteCommand request, CancellationToken cancellationToken = default)
     {
         var model = request.ToEditNote();
 

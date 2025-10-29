@@ -117,6 +117,7 @@ namespace TrapchumApp.Pages.Lists.Customers
         protected async Task AddCollateral(string? customerId)
         {
             ContextMenuService.Close();
+
             var param = new Dictionary<string, object?>
             {
                 { "CustomerId", customerId}

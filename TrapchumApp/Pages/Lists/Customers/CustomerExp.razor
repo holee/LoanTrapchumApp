@@ -1,14 +1,11 @@
-﻿@using Applications.Features.Addresses
-@using Applications.Features.Branches
-@using Applications.Features.Currencies
-@using Applications.Features.Customers.Services
-@using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Interfaces
-@using TrapchumApp.Services
+﻿@using Applications.Commons.Messages.Expenses
+@using Applications.Features.Customers.Commands.ExpenseCommands.Queries.GetExpenseByCustomerId
+@using Applications.Features.Customers.Commands.Expenses.DeleteExpenseCommand
 <RadzenFieldset>
     <HeaderTemplate>
         <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
-            <RadzenIcon Icon="payments" /><b>Expense</b>
+            <RadzenIcon Icon="payments"/>
+            <b>Expense</b>
         </RadzenStack>
     </HeaderTemplate>
     <ChildContent>
@@ -22,13 +19,13 @@
                           Icon="add"
                           Visible="@(ShowAdd && ShowCommand)"
                           ButtonStyle="ButtonStyle.Primary"
-                          Size="ButtonSize.ExtraSmall" />
+                          Size="ButtonSize.ExtraSmall"/>
             <RadzenButton Click="RefreshIncome"
                           Icon="refresh"
                           ButtonStyle="ButtonStyle.Secondary"
                           class="ml-2"
                           Visible="@(ShowReload && ShowCommand)"
-                          Size="ButtonSize.ExtraSmall" />
+                          Size="ButtonSize.ExtraSmall"/>
         </RadzenStack>
         <RadzenDataGrid Data="@Items"
                         GridLines="DataGridGridLines.Both"
@@ -72,7 +69,7 @@
                         @c.ExDescription
                     </Template>
                 </RadzenDataGridColumn>
-                 <RadzenDataGridColumn Context="c"
+                <RadzenDataGridColumn Context="c"
                                       TextAlign="TextAlign.Center"
                                       Width="3.5rem"
                                       Property="InDescription"
@@ -81,37 +78,80 @@
                         <RadzenButton Size="ButtonSize.ExtraSmall"
                                       Variant="Variant.Text"
                                       Click="@((arg) => ShowContextMenu(arg, c))"
-                                      Icon="@IconNames.MoreVert" />
+                                      Icon="@IconNames.MoreVert"/>
                     </Template>
                 </RadzenDataGridColumn>
             </Columns>
             <LoadingTemplate>
-                <RadzenProgressBarCircular ProgressBarStyle="ProgressBarStyle.Primary" Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+                <RadzenProgressBarCircular ProgressBarStyle="ProgressBarStyle.Primary" Value="100" ShowValue="false"
+                                           Mode="ProgressBarMode.Indeterminate"/>
             </LoadingTemplate>
         </RadzenDataGrid>
     </ChildContent>
 </RadzenFieldset>
+
 @code {
 
 
     void ShowContextMenu(MouseEventArgs args, VCustomerExpenses c)
     {
-    ContextMenuService.Open(args, ds =>
-    @<RadzenMenu Style="font-size:0.8rem;">
-    <RadzenMenuItem Click="@(() => GetEditExpense(c))" Icon="@IconNames.Edit" Text="Edit Expense" Value="@c.ExpendId" />
-    <RadzenMenuItem Click="@(() => DeleteExpense(c))" Icon="@IconNames.Delete" Text="Delete Expense" Value="@c.ExpendId" />
-    </RadzenMenu>
-    );
+        ContextMenuService.Open(args, ds =>
+            @<RadzenMenu Style="font-size:0.8rem;">
+                <RadzenMenuItem Click="@(() => GetEditExpense(c))" Icon="@IconNames.Edit" Text="Edit Expense"
+                                Value="@c.ExpendId"/>
+                <RadzenMenuItem Click="@(() => DeleteExpense(c))" Icon="@IconNames.Delete" Text="Delete Expense"
+                                Value="@c.ExpendId"/>
+            </RadzenMenu>
+        );
     }
 
 
-    void GetEditExpense(VCustomerExpenses c)
+    async Task GetEditExpense(VCustomerExpenses c)
     {
-        
+        var query = new GetExpenseByIdQuery(c.ExpendId, CustomerId);
+
+        var rsp = await mediator.Send(query);
+
+        if (rsp.IsError)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, rsp.FirstError.Description);
+            return;
+        }
+
+        var parameters = new Dictionary<string, object?>
+        {
+            { "Id", c.ExpendId },
+            { "CustomerId", CustomerId }
+        };
+
+        var dia = await DialogService.OpenAsync<CustomerModalExpenseEdit>("Expenses", parameters);
+
+        if (dia is bool and true)
+        {
+            await GetCustomerExpense(CustomerId);
+        }
     }
 
-     void DeleteExpense(VCustomerExpenses c)
+    async Task DeleteExpense(VCustomerExpenses c)
     {
+        var confirm = await DialogService.Confirm(ExpenseMessage.ConfirmDelete, "Delete");
+
+        if (confirm == false) return;
+
+        var command = new DeleteExpenseCommand(c.ExpendId, CustomerId);
+
+        var rsp = await mediator.Send(command);
+
+        if (rsp.IsError)
+        {
+            NotificationService.Notify(NotificationSeverity.Error,rsp.FirstError.Description);
+            return;
+        }
         
+        NotificationService.Notify(NotificationSeverity.Success,rsp.Value);
+        
+        await GetCustomerExpense(CustomerId);
+
     }
-    }
+
+}

@@ -2,7 +2,7 @@ using FluentValidation;
 
 namespace Applications.Features.Customers.Commands.NotesCommand.EditNoteCommand;
 
-public sealed class EditDtoUpdateCommandValidator:AbstractValidator<EditUpdateCommand>
+public sealed class EditDtoUpdateCommandValidator:AbstractValidator<EditNoteCommand>
 {
     public EditDtoUpdateCommandValidator()
     {

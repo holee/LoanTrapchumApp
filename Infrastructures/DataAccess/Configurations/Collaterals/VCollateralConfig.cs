@@ -1,4 +1,4 @@
-﻿using Applications.Responses.ViewModels.Collaterals;
+﻿using Applications.Features.Collaterals.Dtos;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

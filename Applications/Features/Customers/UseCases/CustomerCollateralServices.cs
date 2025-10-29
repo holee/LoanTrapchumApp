@@ -1,4 +1,4 @@
-﻿using Applications.Features.Collaterals.Requests;
+﻿using Applications.Features.Collaterals.Dtos;
 using Applications.Features.Customers.Mappers;
 using Applications.Interfaces.Customers;
 using Applications.Responses;

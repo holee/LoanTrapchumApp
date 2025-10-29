@@ -1,4 +1,5 @@
-﻿using Applications.Extensions;
+﻿using Applications.Commons;
+using Applications.Extensions;
 using Applications.Interfaces.Customers;
 using Applications.Responses.Lists.Collaterals;
 using Applications.Utils;

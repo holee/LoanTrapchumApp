@@ -1,4 +1,5 @@
 using Applications.Extensions;
+using Applications.Features.Customers.Commands.IncomeCommands.Queries.GetIncomeByCustomerId;
 using Applications.Features.Customers.Services;
 using Applications.Responses.ViewModels.Customers;
 
@@ -31,13 +32,19 @@ namespace TrapchumApp.Pages.Lists.Customers
 
             isLoading = true;
 
+            if (string.IsNullOrEmpty(customerId))
+            {
+                isLoading = false;
+                return;
+            }
+
             if (customerId.IsNotNullOrEmpty() || !Items.Any())
             {
-                var resp = await _incomeExpendServiceImpl.GetCustomerCustomerIncomes(customerId);
+                var resp = await mediator.Send(new GetIncomeByCustomerQuery(customerId));
 
-                if (resp.IsSuccess)
+                if (!resp.IsError)
                 {
-                    Items = resp.Data!;
+                    Items = resp.Value;
                     isLoading = false;
                 }
                 ;

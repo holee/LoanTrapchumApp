@@ -6,7 +6,7 @@ namespace Applications.Features.Customers.Commands.NotesCommand.EditNoteCommand
     public static class NoteEditMapper
     {
 
-        public static CustomerNote ToEditNote(this EditUpdateCommand command) => new CustomerNote
+        public static CustomerNote ToEditNote(this EditNoteCommand command) => new CustomerNote
         {
             NoteId = command.NoteId,
             CustomerRefId = command.CustomerRefId,
@@ -15,7 +15,7 @@ namespace Applications.Features.Customers.Commands.NotesCommand.EditNoteCommand
             Description = command.Description,
         };
 
-        public static EditUpdateCommand ToEditNote(this AddNoteCommand command) => new EditUpdateCommand
+        public static EditNoteCommand ToEditNote(this AddNoteCommand command) => new EditNoteCommand
         {
             NoteId = command.NoteId,
             CustomerRefId = command.CustomerRefId,

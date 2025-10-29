@@ -1,6 +1,8 @@
-﻿@using Applications.Features.Addresses
+﻿@using Applications.Commons.Messages.Incomes
+@using Applications.Features.Addresses
 @using Applications.Features.Branches
 @using Applications.Features.Currencies
+@using Applications.Features.Customers.Commands.Incomes.DeleteIncome
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
 @using Applications.Features.LoanRequests.Interfaces
@@ -8,7 +10,8 @@
 <RadzenFieldset>
     <HeaderTemplate>
         <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
-            <RadzenIcon Icon="money_bag" /><b>Income</b>
+            <RadzenIcon Icon="money_bag"/>
+            <b>Income</b>
         </RadzenStack>
     </HeaderTemplate>
     <ChildContent>
@@ -20,13 +23,13 @@
                           Icon="add"
                           ButtonStyle="ButtonStyle.Primary"
                           Visible="@(ShowAdd && ShowCommand)"
-                          Size="ButtonSize.ExtraSmall" />
+                          Size="ButtonSize.ExtraSmall"/>
             <RadzenButton Click="RefreshIncome"
                           Icon="refresh"
                           class="ml-2"
                           Visible="@(ShowReload && ShowCommand)"
                           ButtonStyle="ButtonStyle.Secondary"
-                          Size="ButtonSize.ExtraSmall" />
+                          Size="ButtonSize.ExtraSmall"/>
 
         </RadzenStack>
         <RadzenDataGrid Data="Items"
@@ -84,35 +87,78 @@
                         <RadzenButton Size="ButtonSize.ExtraSmall"
                                       Variant="Variant.Text"
                                       Click="@((arg) => ShowContextMenu(arg, c))"
-                                      Icon="@IconNames.MoreVert" />
+                                      Icon="@IconNames.MoreVert"/>
                     </Template>
                 </RadzenDataGridColumn>
             </Columns>
             <LoadingTemplate>
-                <RadzenProgressBarCircular ProgressBarStyle="ProgressBarStyle.Primary" Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+                <RadzenProgressBarCircular ProgressBarStyle="ProgressBarStyle.Primary" Value="100" ShowValue="false"
+                                           Mode="ProgressBarMode.Indeterminate"/>
             </LoadingTemplate>
         </RadzenDataGrid>
     </ChildContent>
 </RadzenFieldset>
+
 @code {
+
     void ShowContextMenu(MouseEventArgs args, VCustomerIncomes c)
     {
-    ContextMenuService.Open(args, ds =>
-    @<RadzenMenu Style="font-size:0.8rem;">
-    <RadzenMenuItem Click="@(() => GetEditIncome(c))" Icon="@IconNames.Edit" Text="Edit Income" Value="@c.IncomeId" />
-    <RadzenMenuItem Click="@(() => DeleteIncome(c))" Icon="@IconNames.Delete" Text="Delete Income" Value="@c.IncomeId" />
-    </RadzenMenu>
-    );
+        ContextMenuService.Open(args, ds =>
+            @<RadzenMenu Style="font-size:0.8rem;">
+                <RadzenMenuItem Click="@(() => GetEditIncome(c))" Icon="@IconNames.Edit" Text="Edit Income"
+                                Value="@c.IncomeId"/>
+                <RadzenMenuItem Click="@(() => DeleteIncome(c))" Icon="@IconNames.Delete" Text="Delete Income"
+                                Value="@c.IncomeId"/>
+            </RadzenMenu>
+        );
     }
 
 
-    void GetEditIncome(VCustomerIncomes c)
+    async Task GetEditIncome(VCustomerIncomes c)
     {
-        
+        var parameters = new Dictionary<string, object?>()
+        {
+            { "Id", c.IncomeId },
+            { "CustomerId", CustomerId }
+        };
+
+        var dia = await DialogService.OpenAsync<CustomerModalIncomeEdit>("Edit Income", parameters);
+
+        if (dia is bool && dia == true)
+        {
+            await GetCustomerIncomes(CustomerId);
+        }
     }
 
-     void DeleteIncome(VCustomerIncomes c)
+    async Task DeleteIncome(VCustomerIncomes c)
     {
+        var parameters = new Dictionary<string, object?>
+        {
+            { "Id", c.IncomeId },
+            { "CustomerId", CustomerId }
+        };
+
+        var options = new ConfirmOptions
+        {
+            OkButtonText = "Ok",
+            CancelButtonText = "Cancel"
+        };
+
+        var confirm =await DialogService.Confirm(IncomeMessage.confirmDelete, "Confirm Delete", options);
         
+        if (confirm == false) return;
+
+        var command = new DeleteIncomeCommand(c.IncomeId,CustomerId);
+
+        var rsp =await mediator.Send(command);
+
+        if (rsp.IsError)
+        {
+            NotificationService.Notify(NotificationSeverity.Error,rsp.FirstError.Description);
+            return;
+        }
+
+        await GetCustomerIncomes(CustomerId);
     }
+
 }

@@ -1,4 +1,4 @@
-﻿using Applications.Features.Collaterals.Requests;
+﻿using Applications.Features.Collaterals.Dtos;
 using FluentValidation;
 using System;
 using System.Collections.Generic;

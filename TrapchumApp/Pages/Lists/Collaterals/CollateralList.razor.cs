@@ -1,9 +1,9 @@
 using Applications.Extensions;
+using Applications.Features.Collaterals.Dtos;
 using Applications.Features.Customers.Response;
 using Applications.Features.Customers.Services;
 using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Collaterals;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Services.Lists;
 using Radzen;

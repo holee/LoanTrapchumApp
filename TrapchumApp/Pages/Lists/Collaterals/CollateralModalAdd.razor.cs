@@ -1,5 +1,4 @@
 using Applications.Extensions;
-using Applications.Features.Collaterals.Requests;
 using Applications.Features.Customers.Mappers;
 using Applications.Features.Customers.Validations;
 using Applications.Responses.Lists.Collaterals;
@@ -13,6 +12,7 @@ using Applications.Services.Lists;
 using TrapchumApp.Helpers.Validations;
 using Applications.Features.Customers.Response;
 using Applications.Features.Customers.UseCases;
+using Applications.Features.Collaterals.Dtos;
 
 namespace TrapchumApp.Pages.Lists.Collaterals
 {

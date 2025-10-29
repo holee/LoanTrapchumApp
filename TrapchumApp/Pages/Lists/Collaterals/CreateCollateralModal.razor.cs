@@ -1,5 +1,5 @@
 using Applications.Extensions.mappers;
-using Applications.Features.Collaterals.Requests;
+using Applications.Features.Collaterals.Dtos;
 using Applications.Features.Customers.Response;
 using Applications.Responses.Lists.Collaterals;
 using Applications.Services.Lists;

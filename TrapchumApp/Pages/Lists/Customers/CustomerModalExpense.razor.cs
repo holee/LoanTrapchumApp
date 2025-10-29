@@ -1,5 +1,9 @@
+using Applications.Features.Customers.Commands.ExpenseCommands.CreateExpenseCommands;
+using Applications.Features.Customers.Commands.ExpenseCommands.Queries.GetExpenseByCustomerId;
+using Applications.Features.Customers.Commands.Expenses.CreateExpensesCommands;
+using Applications.Features.Customers.Commands.Expenses.Dto;
+using Applications.Features.Customers.Commands.IncomeCommands.Queries.GetIncomeByCustomerId;
 using Applications.Features.Customers.Services;
-using Applications.Features.Entities;
 using Applications.Responses.ViewModels.Customers;
 using Radzen.Blazor;
 
@@ -15,22 +19,31 @@ namespace TrapchumApp.Pages.Lists.Customers
             _cusExspenseAndIncome = cusExspenseAndIncome;
         }
 
-        List<CustomerExpenseDtoCreate> CustomerExpenses = new List<CustomerExpenseDtoCreate>();
+        List<ExpenseDtoCreate> CustomerExpenses = new List<ExpenseDtoCreate>();
+
         RadzenDataGrid<VCustomerExpenses> incomeGrid = default!;
+
         List<VCustomerExpenses> Expenses = [];
-        [Parameter] public string? CustomerId { get; set; }
+
+        [Parameter] public string CustomerId { get; set; } = string.Empty;
         protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
+
             await GetCustomerIncome(CustomerId);
         }
 
         async Task GetCustomerIncome(string? customerId)
         {
-            var resp = await _cusExspenseAndIncome.GetCustomerCustomerExpenses(customerId);
-            if (resp.IsSuccess)
+
+            if (string.IsNullOrEmpty(customerId)) return;
+
+
+            var resp = await mediator.Send(new GetExpenseByCustomerQuery(customerId));
+
+            if (!resp.IsError)
             {
-                Expenses = resp.Data!.ToList();
+                Expenses = resp.Value.ToList();
             }
         }
 
@@ -46,14 +59,14 @@ namespace TrapchumApp.Pages.Lists.Customers
             try
             {
                 var model = Expenses.Where(x => x.ExpendAmount > 0)
-                                  .Select(x => new CustomerExpenseDtoCreate(x.ExpendId, CustomerId, x.ExpenseTitle, x.ExpendAmount, x.ExDescription))
+                                  .Select(x => new ExpenseDtoCreate(x.ExpendId, CustomerId, x.ExpenseTitle, x.ExpendAmount, x.ExDescription))
                                   .ToList();
 
                 if (!model.Any()) return;
 
-                var response = await _cusExspenseAndIncome.AddOrUpdateExpensesAsync(CustomerId ,model);
+                var rsp = await mediator.Send(new AddExpensesCommand(CustomerId, model));
 
-                if (response.IsSuccess)
+                if (!rsp.IsError)
                 {
                     NotificationService.Notify(NotificationSeverity.Success, "Added");
 
@@ -61,7 +74,7 @@ namespace TrapchumApp.Pages.Lists.Customers
                 }
                 else
                 {
-                    NotificationService.Notify(NotificationSeverity.Error, response.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Error, rsp.FirstError.Description);
                 }
             }
             catch (Exception ex)
@@ -89,7 +102,7 @@ namespace TrapchumApp.Pages.Lists.Customers
 
             Expenses.Add(income);
 
-            if(row is null)
+            if (row is null)
             {
                 await incomeGrid.InsertRow(income);
             }
@@ -98,7 +111,7 @@ namespace TrapchumApp.Pages.Lists.Customers
                 await incomeGrid.InsertAfterRow(income, row);
             }
 
-              
+
         }
 
         async Task DeleteRow(VCustomerExpenses income)

@@ -1,6 +1,4 @@
-﻿@using Applications.Features.Customers.Commands.CustomerExpenseQuery
-@using Applications.Features.Customers.Commands.CustomerIncomeQuery
-@using Applications.Features.Customers.UseCases
+﻿@using Applications.Features.Customers.UseCases
 @using Applications.Utils
 @using Applications.Features.Addresses
 @using Applications.Features.Branches
@@ -34,50 +32,4 @@
     </RadzenButton>
 
 </RadzenStack>
-@code {
-    [Parameter] public string? CustomerId { get; set; } = string.Empty;
 
-    private decimal? _profits = 0.0M;
-    private readonly IMediator _med;
-    private IEnumerable<VCustomerIncomes> _incomes = [];
-    private IEnumerable<VCustomerExpenses> _expenses = [];
-    public CustomerProfit(IMediator med)
-    {
-        _med = med;
-    }
-
-    protected override async Task OnInitializedAsync()
-    {
-
-        _incomes = await _med.Send(new GetCustomerIncomeQuery { CustomerId = CustomerId });
-
-        _expenses = await _med.Send(new GetCustomerExpenseQuery { CustomerId = CustomerId });
-
-        _profits = (_incomes.Sum(x => x.IncomeAmount) ?? 0) - (_expenses.Sum(x => x.ExpendAmount) ?? 0);
-
-
-        await base.OnInitializedAsync();
-
-    }
-
-    void GetIncomes(IEnumerable<VCustomerIncomes> args)
-    {
-
-        _incomes = args;
-
-        _profits = (_incomes.Sum(x => x.IncomeAmount) ?? 0) - (_expenses.Sum(x => x.ExpendAmount) ?? 0);
-
-
-        StateHasChanged();
-    }
-
-    void GetExpenses(IEnumerable<VCustomerExpenses> args)
-    {
-        _expenses = args;
-
-        _profits = (_incomes.Sum(x => x.IncomeAmount) ?? 0) - (_expenses.Sum(x => x.ExpendAmount) ?? 0);
-
-        StateHasChanged();
-    }
-
-}

@@ -1,4 +1,4 @@
-﻿using Applications.Features.Collaterals.Requests;
+﻿using Applications.Features.Collaterals.Dtos;
 using Applications.Features.Entities.Guarantors;
 
 namespace Applications.Features.LoanRequests.Requests;

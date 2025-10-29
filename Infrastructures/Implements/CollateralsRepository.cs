@@ -1,10 +1,8 @@
-﻿using Applications.Extensions;
+﻿using Applications.Features.Collaterals.Dtos;
 using Applications.Interfaces.Lists;
 using Applications.Responses;
 using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Collaterals;
-using Dapper;
 using Domains.Models.Collaterals;
 using Infrastructures.DataAccess;
 using Mapster;
@@ -19,8 +17,10 @@ public sealed class CollateralsRepository(ILogger<CollateralsRepository> logger,
     public async Task<IEnumerable<CollateralSubTypeResponse>> GetCollateralSubTypes(int? id, string? searchText = null)
     {
 
-        await using var context = dbContextFactory.CreateDbContext();
 
+        logger.LogInformation("GetCollateralSubTypes called with id: {Id} and searchText: {SearchText}", id, searchText);
+
+        await using var context = dbContextFactory.CreateDbContext();
 
         IQueryable<CollateralSubType> queries = context.CollateralSubTypes;
 
@@ -39,8 +39,9 @@ public sealed class CollateralsRepository(ILogger<CollateralsRepository> logger,
     public async Task<IEnumerable<CollateralTypeResponse>> GetCollateralTypes(int? collateralTypeId = 0, string? q = null)
     {
 
-        await using var context = dbContextFactory.CreateDbContext();
+        logger.LogInformation("GetCollateralTypes called with collateralTypeId: {CollateralTypeId} and q: {Q}", collateralTypeId, q);
 
+        await using var context = dbContextFactory.CreateDbContext();
 
         IQueryable<CollateralType> query = context.CollateralTypes;
 
@@ -65,7 +66,7 @@ public sealed class CollateralsRepository(ILogger<CollateralsRepository> logger,
 
         if (!string.IsNullOrEmpty(q))
         {
-            queries = queries.Where(x => EF.Functions.Like(x.CustomerId, $"%{q}%") ||
+            queries = queries.Where(x => EF.Functions.Like(x.FullName, $"%{q}%") ||
                                          EF.Functions.Like(x.CustomerName!, $"%{q}%") ||
                                          EF.Functions.Like(x.RegisterDate!.ToString(), $"%{q}%"));
         }
@@ -73,18 +74,20 @@ public sealed class CollateralsRepository(ILogger<CollateralsRepository> logger,
         return await queries.AsNoTracking().ToListAsync();
 
     }
-    public async Task<Pager<VCollateral>> GetCollateralsAysnc(QueryParam param)
+    public async Task<Pager<VCollateral>> GetCollateralsAysnc(QueryParam param,CancellationToken cancellation=default)
     {
 
-        await using var context = dbContextFactory.CreateDbContext();
+        logger.LogInformation("GetCollateralsAysnc called with QueryParam: {QueryParam}", param);
+
+        await using var context =await dbContextFactory.CreateDbContextAsync(cancellation);
 
         IQueryable<VCollateral> queries = context.VCollaterals;
 
         if (!string.IsNullOrEmpty(param.Filter))
         {
-            queries = queries.Where(x => (EF.Functions.Like(x.CustomerId, $"%{param.Filter}%") ||
+            queries = queries.Where(x => (EF.Functions.Like(x.FullName, $"%{param.Filter}%") ||
                                           EF.Functions.Like(x.RegisterDate.ToString(), $"%{param.Filter}%") ||
-                                          EF.Functions.Like(x.CustomerName!, "%" + param.Filter + "%")));
+                                          EF.Functions.Like(x.CustomerName!, $"%{param.Filter}%")));
         }
 
         if (param.SortDescending)
@@ -99,7 +102,7 @@ public sealed class CollateralsRepository(ILogger<CollateralsRepository> logger,
             queries = queries.Skip(param.Skip).Take(param.PageSize);
         }
 
-        var collaterals = await queries.AsNoTracking().ToListAsync();
+        var collaterals = await queries.AsNoTracking().ToListAsync(cancellation);
 
         return new Pager<VCollateral>
         {

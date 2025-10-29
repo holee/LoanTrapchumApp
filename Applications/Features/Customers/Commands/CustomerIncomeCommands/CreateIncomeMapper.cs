@@ -9,7 +9,7 @@ namespace Applications.Features.Customers.Commands.CustomerIncomeCommands
 {
     internal static class CreateIncomeMapper
     {
-        internal static CustomerIncome ToCreateCommand(this CreateCustomerIncomeCommand  customerIncome)
+        internal static CustomerIncome ToCreateCommand(this CreateIncomeCommand  customerIncome)
         {
             return new CustomerIncome
             {

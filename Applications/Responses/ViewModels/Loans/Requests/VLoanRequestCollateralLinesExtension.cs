@@ -1,5 +1,4 @@
-﻿using Applications.Features.Collaterals.Requests;
-using Applications.Features.Collaterals.Requests;
+﻿using Applications.Features.Collaterals.Dtos;
 using Domains.Models.Collaterals;
 
 namespace Applications.Responses.ViewModels.Loans.Requests;

@@ -1,3 +1,7 @@
+using Applications.Features.Customers.Commands.IncomeCommands.CreateIncomeCommands;
+using Applications.Features.Customers.Commands.IncomeCommands.Queries.GetIncomeByCustomerId;
+using Applications.Features.Customers.Commands.Incomes.CreateIncomes;
+using Applications.Features.Customers.Commands.Incomes.Dto;
 using Applications.Features.Customers.Services;
 using Applications.Features.Entities;
 using Applications.Responses.ViewModels.Customers;
@@ -51,10 +55,13 @@ namespace TrapchumApp.Pages.Lists.Customers
 
         async Task GetCustomerIncome(string? customerId)
         {
-            var resp = await _oiService.GetCustomerCustomerIncomes(customerId);
-            if (resp.IsSuccess)
+            if (string.IsNullOrEmpty(customerId)) return;
+
+            var resp = await mediator.Send(new GetIncomeByCustomerQuery(customerId));
+
+            if (!resp.IsError)
             {
-                Incomes = resp.Data!.ToList();
+                Incomes = resp.Value.ToList();
             }
         }
 
@@ -67,22 +74,26 @@ namespace TrapchumApp.Pages.Lists.Customers
             try
             {
                 var model = Incomes.Where(x => x.IncomeAmount > 0)
-                                    .Select(x => new CustomerIncomeDtoCreate(x.IncomeId, CustomerId, x.IncomeSource, x.IncomeAmount, x.InDescription))
+                                    .Select(x => new CreateIncomeDto(x.IncomeId, CustomerId, x.IncomeSource, x.IncomeAmount, x.InDescription))
                                     .ToList();
 
                 if (!model.Any()) return;
 
-                var rsp = await _oiService.AddOrUpdateIncomesAsync(CustomerId, model);
+                if (string.IsNullOrEmpty(CustomerId)) return;
 
-                if (rsp.IsSuccess)
+                var incomes = new CreateIncomesCommand(CustomerId, model);
+
+
+                var rsp = await mediator.Send(incomes);
+
+                if (!rsp.IsError)
                 {
-                    NotificationService.Notify(NotificationSeverity.Success,"Added.");
+                    NotificationService.Notify(NotificationSeverity.Success, "Added.");
                     DialogService.Close(true);
                 }
                 else
                 {
-                    NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
-
+                    NotificationService.Notify(NotificationSeverity.Error, rsp.FirstError.Description);
                 }
             }
             catch (Exception ex)

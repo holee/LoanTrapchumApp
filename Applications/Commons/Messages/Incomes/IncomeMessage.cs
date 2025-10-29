@@ -13,7 +13,9 @@ namespace Applications.Commons.Messages.Incomes
         public const string Created = "Income created successfully.";
         public const string Updated = "Income updated successfully.";
         public const string Deleted = "Income deleted successfully.";
-
-
+        public const string Retrieved = "Income retrieved successfully.";
+        public const string ListRetrieved = "Income list retrieved successfully.";
+        public const string ServerError = "An error occurred while processing the income.";
+        public const string confirmDelete = "Do you want to delete the income record?";
     }
 }

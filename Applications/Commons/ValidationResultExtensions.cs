@@ -1,8 +1,7 @@
-using System.Linq;
 using ErrorOr;
 using FluentValidation.Results;
 
-namespace Applications.Extensions;
+namespace Applications.Commons;
 
 public static class ValidationResultExtensions
 {

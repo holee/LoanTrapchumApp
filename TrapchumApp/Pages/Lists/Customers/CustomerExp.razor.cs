@@ -1,4 +1,5 @@
 using Applications.Extensions;
+using Applications.Features.Customers.Commands.ExpenseCommands.Queries.GetExpenseByCustomerId;
 using Applications.Features.Customers.Services;
 using Applications.Responses.ViewModels.Customers;
 using Radzen.Blazor;
@@ -15,7 +16,7 @@ namespace TrapchumApp.Pages.Lists.Customers
             _incomeExpendServiceImpl = incomeExpendServiceImpl;
         }
 
-        [Parameter] public string? CustomerId { get; set; }
+        [Parameter] public string CustomerId { get; set; }=string.Empty;    
         [Parameter] public bool ShowAdd { get; set; } = false;
         [Parameter] public bool ShowReload { get; set; } = false;
         [Parameter] public bool ShowCommand { get; set; } = false;
@@ -35,13 +36,20 @@ namespace TrapchumApp.Pages.Lists.Customers
 
             isLoading = true;
 
+            if(string.IsNullOrEmpty(customerId))
+            {
+                isLoading = false;
+                return;
+            }
+
+
             if (CustomerId.IsNotNullOrEmpty())
             {
-                var resp = await _incomeExpendServiceImpl.GetCustomerCustomerExpenses(customerId);
+                var resp = await mediator.Send(new GetExpenseByCustomerQuery(customerId));
 
-                if (resp.IsSuccess)
+                if (!resp.IsError)
                 {
-                    Items = resp.Data!;
+                    Items = resp.Value;
 
                     isLoading = false;
                 }
