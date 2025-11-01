@@ -1,5 +1,6 @@
 ﻿namespace TrapchumApp.Helpers.Validations
 {
+    using ErrorOr;
     using Microsoft.AspNetCore.Components.Forms;
 
     public static class ValidationHelper
@@ -66,7 +67,7 @@
             editContext.NotifyValidationStateChanged();
         }
 
-        public static void ApplyValidationSummary<TModel>(this EditContext editContext, params IList<string> errors)
+        public static void ApplyValidationSummaries<TModel>(this EditContext editContext, IList<string> errors)
         {
             var messageStore = new ValidationMessageStore(editContext);
 
@@ -81,6 +82,23 @@
 
             editContext.NotifyValidationStateChanged();
         }
+
+        public static void ApplyValidationSummaries<TModel>(this EditContext editContext, List<Error> errors)
+        {
+            var messageStore = new ValidationMessageStore(editContext);
+
+            messageStore.Clear();
+
+            var field = new FieldIdentifier(editContext.Model, string.Empty);
+
+            foreach (var err in errors)
+            {
+                messageStore.Add(field, err.Description);
+            }
+
+            editContext.NotifyValidationStateChanged();
+        }
+
 
         public static void ApplyValidationSummary(this ValidationMessageStore store, EditContext editContext, IList<string> errors)
         {

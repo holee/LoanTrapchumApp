@@ -1,6 +1,8 @@
+using Applications.Commons.Messages.Incomes;
 using Applications.Extensions;
-using Applications.Features.Customers.Commands.IncomeCommands.Queries.GetIncomeByCustomerId;
 using Applications.Features.Customers.Services;
+using Applications.Features.Incomes.Command.DeleteIncome;
+using Applications.Features.Incomes.Queries.GetIncomeByCustomerId;
 using Applications.Responses.ViewModels.Customers;
 
 namespace TrapchumApp.Pages.Lists.Customers
@@ -26,6 +28,55 @@ namespace TrapchumApp.Pages.Lists.Customers
 
             await base.OnInitializedAsync();
         }
+
+
+        async Task GetEditIncome(VCustomerIncomes c)
+        {
+            var parameters = new Dictionary<string, object?>()
+        {
+            { "Id", c.IncomeId },
+            { "CustomerId", CustomerId }
+        };
+
+            var dia = await DialogService.OpenAsync<CustomerModalIncomeEdit>("Edit Income", parameters);
+
+            if (dia is bool && dia == true)
+            {
+                await GetCustomerIncomes(CustomerId);
+            }
+        }
+
+        async Task DeleteIncome(VCustomerIncomes c)
+        {
+            var parameters = new Dictionary<string, object?>
+            {
+                { "Id", c.IncomeId },
+                { "CustomerId", CustomerId }
+            };
+
+            var options = new ConfirmOptions
+            {
+                OkButtonText = "Ok",
+                CancelButtonText = "Cancel"
+            };
+
+            var confirm = await DialogService.Confirm(IncomeMessage.confirmDelete, "Confirm Delete", options);
+
+            if (confirm == false) return;
+
+            var command = new DeleteIncomeCommand(c.IncomeId, CustomerId);
+
+            var rsp = await mediator.Send(command);
+
+            if (rsp.IsError)
+            {
+                NotificationService.Notify(NotificationSeverity.Error, rsp.FirstError.Description);
+                return;
+            }
+
+            await GetCustomerIncomes(CustomerId);
+        }
+
 
         async Task GetCustomerIncomes(string? customerId)
         {

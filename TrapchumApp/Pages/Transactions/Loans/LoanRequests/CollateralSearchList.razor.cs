@@ -1,9 +1,9 @@
-using Applications.Responses.Lists.Collaterals;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using Microsoft.AspNetCore.Components.Web;
 using Radzen.Blazor;
 using Radzen.Blazor.Rendering;
+using Applications.Features.Collaterals.Dtos;
 
 namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 {

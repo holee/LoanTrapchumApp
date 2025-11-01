@@ -1,4 +1,3 @@
-using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Microsoft.AspNetCore.Components;
 using Radzen;

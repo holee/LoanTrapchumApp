@@ -1,5 +1,6 @@
 using Applications.Enumerations;
 using Applications.Extensions.DateTimes;
+using Applications.Features.Collaterals.Dtos;
 using Applications.Features.Customers.Response;
 using Applications.Features.Customers.UseCases;
 using Applications.Features.LoanPayments.Requests;
@@ -10,7 +11,6 @@ using Applications.Interfaces.Lists;
 using Applications.Interfaces.Loans;
 using Applications.Interfaces.setting;
 using Applications.Responses.Auths;
-using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.Loans.Disbursements;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Auths;

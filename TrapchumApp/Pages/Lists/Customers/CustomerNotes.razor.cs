@@ -1,8 +1,8 @@
 using Applications.Exceptions;
 using Applications.Extensions;
-using Applications.Features.Customers.Commands.NotesCommand.DeleteNoteCommand;
-using Applications.Features.Customers.Commands.NotesCommand.Queries.GetNoteByCustomerId;
-using Applications.Features.Customers.Commands.NotesCommand.Queries.GetNoteById;
+using Applications.Features.Notes.Command.DeleteNote;
+using Applications.Features.Notes.Queries.GetNoteByCustomerId;
+using Applications.Features.Notes.Queries.GetNoteById;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Utils;
 using Domains.Models.Identity;

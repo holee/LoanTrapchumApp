@@ -1,9 +1,9 @@
 using Applications.Extensions;
-using Applications.Responses.Lists.Collaterals;
 using Radzen.Blazor;
 using Applications.Services.Lists;
 using Applications.Utils;
-using Applications.Features.Collaterals.Commands.Queries.GetCollateralLineByCollateralId;
+using Applications.Features.Collaterals.Dtos;
+using Applications.Features.Collaterals.Queries.GetCollateralLineByCollateralId;
 
 namespace TrapchumApp.Pages.Lists.Collaterals
 {
@@ -11,11 +11,8 @@ namespace TrapchumApp.Pages.Lists.Collaterals
     {
 
         private readonly ICollateralsServiceImpl _collateralService;
-
-        private readonly IMediator _mediator;
-        public CollateralsCustomer(IMediator mediator, ICollateralsServiceImpl collateralService)
+        public CollateralsCustomer(ICollateralsServiceImpl collateralService)
         {
-            _mediator = mediator;
             _collateralService = collateralService;
         }
 
@@ -94,7 +91,7 @@ namespace TrapchumApp.Pages.Lists.Collaterals
         async Task GetCustomerCollaterals()
         {
 
-            var resp = await _mediator.Send(new GetCollateralLineByCollateralIdQuery(CustomerId));
+            var resp = await mediator.Send(new GetCollateralLineByCollateralIdQuery(CustomerId));
 
             if (!resp.IsError)
             {

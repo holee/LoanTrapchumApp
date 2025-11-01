@@ -101,7 +101,7 @@ namespace Infrastructures
             services.AddScoped<ICustomerNoteService, CustomerNoteRepository>();
             services.AddScoped<ICollateralsService, CollateralsRepository>();
             services.AddScoped<ICustomerActivityService, CustomerActivityRepository>();
-            services.AddScoped<ICustomerCollateralService, CustomerCollateralRepository>();
+            services.AddScoped<ICollateralService, CollateralRepository>();
             services.AddScoped<IHolidayService, HolidayService>();
             services.AddScoped<IGuarantorService, GuarantorService>();
             services.AddScoped<ILoanSettingService, LoanSettingService>();

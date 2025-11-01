@@ -1,6 +1,5 @@
 ﻿using Applications.Features.Customers.Requests;
 using Applications.Responses;
-using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Requests;
@@ -9,6 +8,7 @@ using System.Linq.Expressions;
 using Applications.Features.OtherNames;
 using Domains.Models.Lists;
 using Applications.Features.Customers.Response;
+using Applications.Features.Collaterals.Dtos;
 
 namespace Applications.Features.Customers.Services;
 

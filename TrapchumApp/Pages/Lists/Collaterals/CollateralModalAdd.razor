@@ -1,11 +1,11 @@
 ﻿@using Applications.Features.Addresses
+@using Applications.Features.Collaterals.Dtos
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
 @using Applications.Features.LoanRequests.Interfaces
-@using Applications.Responses.Lists.Collaterals
 @using Domains.Models.Collaterals
 @using TrapchumApp.Services
-<EditForm  @ref="editForm" EditContext="@editContext">
+<EditForm @ref="editForm" EditContext="@editContext">
     <DataAnnotationsValidator />
     <ValidationSummary />
     <input type="hidden" @bind="model.CollateralId" />
@@ -21,7 +21,7 @@
                     <RadzenDatePicker Type="InputDateType.Date"
                                       @bind-Value="model.RegisterDate"
                                       @bind-Value:format="dd/MM/yyyy"
-                                      TValue="DateTime?"
+                                      TValue="DateTime ?"
                                       class="rz-w-100" />
                 </RadzenFormField>
             </RadzenColumn>
@@ -134,7 +134,12 @@
                                 @c.Quantity
                             </Template>
                             <EditTemplate>
-                                <IntNumbers @bind-Value="c.Quantity" Min="0" />
+                                <RadzenNumeric ShowUpDown="false"
+                                               Min="0"
+                                               Placeholder="Qty"
+                                               class="rz-w-100"
+                                               TextAlign="TextAlign.End"
+                                               @bind-Value="c.Quantity" />
                             </EditTemplate>
                         </RadzenDataGridColumn>
                         <RadzenDataGridColumn Width="6rem"
@@ -146,10 +151,9 @@
                                 @c.MarketPrice
                             </Template>
                             <EditTemplate>
-                                <TCNumbers 
-                                        @bind-Value="@c.MarketPrice"
-                                        OnValueChanged="@((arg)=>OnMarketPriceChanged(arg,c))"
-                                        Min="0" />
+                                <TCNumbers @bind-Value="@c.MarketPrice"
+                                           OnValueChanged="@((arg)=>OnMarketPriceChanged(arg,c))"
+                                           Min="0" />
                             </EditTemplate>
                         </RadzenDataGridColumn>
 
@@ -178,7 +182,7 @@
                                 <TCNumbers @bind-Value="@c.HotPrice" Min="0" />
                             </EditTemplate>
                         </RadzenDataGridColumn>
-                       
+
                         <RadzenDataGridColumn Width="4rem"
                                               TextAlign="TextAlign.Center"
                                               Context="c"
@@ -344,7 +348,7 @@
                                 <TCNumbers @bind-Value="c.HotPrice" />
                             </EditTemplate>
                         </RadzenDataGridColumn>
-                       
+
                         <RadzenDataGridColumn Width="4rem"
                                               TextAlign="TextAlign.Center"
                                               Context="c"

@@ -1,4 +1,4 @@
-using Applications.Responses.Lists.Collaterals;
+using Applications.Features.Collaterals.Dtos;
 using Applications.Services.Lists;
 using Microsoft.AspNetCore.Components;
 using Radzen;

@@ -1,4 +1,5 @@
-﻿using Applications.Interfaces.Customers;
+﻿using Applications.Commons.Messages.Activities;
+using Applications.Interfaces.Customers;
 using Applications.Responses;
 using Applications.Responses.ViewModels.Customers;
 using Domains.Models.Lists.Customers;
@@ -41,7 +42,7 @@ namespace Infrastructures.Implements
 
                 await context.SaveChangesAsync(cancellation);
 
-                
+
                 return model.Id;
             }
             catch (Exception e)
@@ -51,6 +52,37 @@ namespace Infrastructures.Implements
                 return Error.Unexpected(e.Message);
             }
         }
+
+
+        public async Task<ErrorOr<bool>> DeleteActivityAsync(int? id, string customerId, CancellationToken cancellation = default)
+        {
+            _logger.LogInformation("try adding new customer note");
+
+            try
+            {
+                await using var context = await _contextFactory.CreateDbContextAsync(cancellation);
+
+                var model = await context.CustomerActivites.FirstOrDefaultAsync(x => x.Id == id && x.CustomerRefId == customerId, cancellation);
+
+                if(model is null)
+                {
+                    return Error.NotFound(ActivityMessage.NotFound);
+                }
+
+                context.CustomerActivites.Remove(model);
+
+                await context.SaveChangesAsync(cancellation);
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message, e);
+
+                return Error.Unexpected(e.Message);
+            }
+        }
+
 
         public async Task<Result<IEnumerable<VCustomerActivities>>> GetCustomerActivies(string? customerId, CancellationToken cancellation = default)
         {
@@ -85,10 +117,10 @@ namespace Infrastructures.Implements
         public async Task<Result<VCustomerActivities>> GetCustomerActivity(int? id, string? customerId, CancellationToken cancellationToken = default)
         {
             await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
-            
-            var activity=await context.CustomerActivites
-                                                .AsNoTracking() 
-                                                .Select(x=> new VCustomerActivities
+
+            var activity = await context.CustomerActivites
+                                                .AsNoTracking()
+                                                .Select(x => new VCustomerActivities
                                                 {
                                                     ActivityId = x.Id,
                                                     Description = x.Description,
@@ -96,7 +128,7 @@ namespace Infrastructures.Implements
                                                     Status = x.Status.Value,
                                                     CustomerRefId = x.CustomerRefId,
                                                 })
-                                                .FirstOrDefaultAsync(x=>x.ActivityId==id && x.CustomerRefId==customerId);
+                                                .FirstOrDefaultAsync(x => x.ActivityId == id && x.CustomerRefId == customerId);
 
             if (activity is not null)
             {

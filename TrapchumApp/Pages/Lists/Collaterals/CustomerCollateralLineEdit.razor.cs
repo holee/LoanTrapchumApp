@@ -1,10 +1,11 @@
+using Applications.Features.Collaterals.Commands.CreateCollateralLines;
 using Applications.Features.Collaterals.Dtos;
-using Applications.Features.Customers.Mappers;
-using Applications.Features.Customers.UseCases;
-using Applications.Responses.Lists.Collaterals;
+using Applications.Features.Collaterals.Queries.GetCollateralDetails;
+using Applications.Features.Collaterals.Queries.GetCollateralLineById;
 using Applications.Services.Lists;
 
 namespace TrapchumApp.Pages.Lists.Collaterals;
+
 public partial class CustomerCollateralLineEdit
 {
     private IEnumerable<CollateralTypeResponse> collateralTypes = [];
@@ -15,13 +16,13 @@ public partial class CustomerCollateralLineEdit
 
     private readonly ICollateralsServiceImpl _service;
 
-    private readonly CustomerCollateralServices collateralServices;
+    private readonly GetCollateralDetailQueryHandler collateralServices;
 
     private bool success = false;
-    [Parameter] public long? Id { get; set; }
-    [Parameter] public string? CollateralId { get; set; }
+    [Parameter] public long Id { get; set; } = 0;
+    [Parameter] public string CollateralId { get; set; } = string.Empty;
 
-    public CustomerCollateralLineEdit(ICollateralsServiceImpl service, CustomerCollateralServices collateralServices)
+    public CustomerCollateralLineEdit(ICollateralsServiceImpl service, GetCollateralDetailQueryHandler collateralServices)
     {
         _service = service;
 
@@ -92,11 +93,13 @@ public partial class CustomerCollateralLineEdit
 
         collateralTypes = await _service.GetCollateralTypes();
 
-        var rsp = await collateralServices.GetCustomerCollateralLine(Id, CollateralId);
+        var query = new GetCollateralLineByIdEditQuery(Id, CollateralId);
 
-        if (rsp.IsSuccess && rsp.Data is not null)
+        var rsp = await mediator.Send(query);
+
+        if (!rsp.IsError)
         {
-            model = rsp.Data.MapCollateralLineEdit();
+            model = rsp.Value;
 
             await GetCollateralSubTypes(model.CategoryRefId);
         }
@@ -112,13 +115,17 @@ public partial class CustomerCollateralLineEdit
     async Task HandleFormSubmit()
     {
 
-        var rsp = await collateralServices.UpsertCollateralLine(model);
 
-        if (rsp.IsSuccess)
+        var command = new AddOrUpdateCollateralLineCommand(model);
+
+
+        var rsp = await mediator.Send(command);//collateralServices.UpsertCollateralLine(model);
+
+        if (!rsp.IsError)
         {
             success = true;
 
-            NotificationService.Notify(NotificationSeverity.Success, rsp.Data);
+            NotificationService.Notify(NotificationSeverity.Success, rsp.Value);
 
             DialogService.CloseSide(success);
         }
@@ -126,7 +133,7 @@ public partial class CustomerCollateralLineEdit
         {
             success = false;
 
-            NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
+            NotificationService.Notify(NotificationSeverity.Error, rsp.FirstError.Description);
         }
     }
 }

@@ -2,7 +2,6 @@ using Applications.Extensions;
 using Applications.Features.Collaterals.Dtos;
 using Applications.Features.Customers.Response;
 using Applications.Features.Customers.Services;
-using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Services.Lists;
@@ -32,7 +31,7 @@ public partial class CollateralList
     int selectedIndex = 0;
     string CustomerId = string.Empty;
     VCustomerCollaterals? Collateral { get; set; } = new();
-    IEnumerable<Applications.Responses.Lists.Collaterals.VCollateralLines>? CollateralLines = [];
+    IEnumerable<VCollateralLines>? CollateralLines = [];
     VCustomerCollaterals? SelectedCollateral = new();
     LoanCustomerQuery? SelectedCustomers = new();
     string? CollateralId = string.Empty;

@@ -1,8 +1,4 @@
-﻿using Applications.Features.Customers.Mappers;
-using Applications.Features.Customers.Requests;
-using Applications.Interfaces.Customers;
-using Applications.Responses;
-using Applications.Responses.Lists.Customers;
+﻿using Applications.Interfaces.Customers;
 
 namespace Applications.Features.Customers.UseCases
 {

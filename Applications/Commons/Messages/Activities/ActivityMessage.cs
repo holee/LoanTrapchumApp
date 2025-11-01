@@ -16,6 +16,9 @@ namespace Applications.Commons.Messages.Activities
         public const string UpdateFailed = "Failed to update activity.";
         public const string DeleteSuccess = "Activity deleted successfully.";
         public const string DeleteFailed = "Failed to delete activity."; 
+        public const string NotFound = "Customer Activity not found.";
+
+        public const string ConfirmDelete = "Are you sure you want to delete this activity?"; 
 
     }
 }

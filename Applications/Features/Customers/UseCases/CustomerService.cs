@@ -1,7 +1,6 @@
 ﻿using Applications.Commons.Mappers;
 using Applications.Interfaces.Customers;
 using Applications.Responses;
-using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Requests;
@@ -11,6 +10,7 @@ using Applications.Features.OtherNames;
 using Domains.Models.Lists;
 using Applications.Features.Customers.Response;
 using Applications.Features.Customers.Services;
+using Applications.Features.Collaterals.Dtos;
 
 namespace Applications.Features.Customers.UseCases;
 

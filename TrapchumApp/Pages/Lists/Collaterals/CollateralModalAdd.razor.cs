@@ -1,19 +1,15 @@
 using Applications.Extensions;
-using Applications.Features.Customers.Mappers;
-using Applications.Features.Customers.Validations;
-using Applications.Responses.Lists.Collaterals;
 using Blazored.FluentValidation;
 using Domains.Models.Collaterals;
-using Microsoft.JSInterop;
 using Radzen.Blazor;
-using System.Threading.Tasks;
-using Applications.Features.Collaterals.Extensions;
 using Applications.Services.Lists;
 using TrapchumApp.Helpers.Validations;
 using Applications.Features.Customers.Response;
-using Applications.Features.Customers.UseCases;
 using Applications.Features.Collaterals.Dtos;
-
+using Applications.Commons.Mappers.Collaterals;
+using Applications.Features.Collaterals.Queries.GetCollateralDetails;
+using Applications.Features.Collaterals.Commands.AddOrUpdateCollaterals;
+using Applications.Commons.Messages.Collaterals;
 namespace TrapchumApp.Pages.Lists.Collaterals
 {
     public partial class CollateralModalAdd
@@ -21,8 +17,8 @@ namespace TrapchumApp.Pages.Lists.Collaterals
 
         private readonly ICollateralsServiceImpl _collateralService;
 
-        private readonly CustomerCollateralServices _cusCollateralServices;
-        [Parameter] public string? CustomerId { get; set; } = string.Empty;
+        private readonly GetCollateralDetailQueryHandler _cusCollateralServices;
+        [Parameter] public string CustomerId { get; set; } = string.Empty;
         [Parameter] public string? CustomerName { get; set; } = string.Empty;
 
         IEnumerable<CollateralTypeResponse> CollateralTypes = [];
@@ -50,7 +46,7 @@ namespace TrapchumApp.Pages.Lists.Collaterals
         List<VCollateralLines> _propertiesToUpdate = [];
         List<VCollateralLines> _propertiesToInert = [];
         List<VCollateralLines> _properties = [];
-        public CollateralModalAdd(ICollateralsServiceImpl collateralService, CustomerCollateralServices cusCollateralServices)
+        public CollateralModalAdd(ICollateralsServiceImpl collateralService, GetCollateralDetailQueryHandler cusCollateralServices)
         {
             _collateralService = collateralService;
             _cusCollateralServices = cusCollateralServices;
@@ -101,7 +97,7 @@ namespace TrapchumApp.Pages.Lists.Collaterals
         }
         void OnMarketPriceChanged(decimal? arg, VCollateralLines line)
         {
-            var maxPrice = allSubTypes.Where(x=>x.Id == line.SubCategoryRefId)
+            var maxPrice = allSubTypes.Where(x => x.Id == line.SubCategoryRefId)
                                       .Select(x => x.LoanSizeAmuntMax)
                                       .FirstOrDefault();
             var valueRate = allSubTypes.Where(x => x.Id == line.SubCategoryRefId)
@@ -110,7 +106,7 @@ namespace TrapchumApp.Pages.Lists.Collaterals
             if (maxPrice > 0 && arg > maxPrice)
             {
                 NotificationService.Notify(NotificationSeverity.Warning, $"Market Price must be less than {maxPrice}");
-               
+
                 line.MarketPrice = maxPrice ?? 0;
 
                 line.HotPrice = maxPrice * valueRate;
@@ -143,11 +139,14 @@ namespace TrapchumApp.Pages.Lists.Collaterals
                 return;
             }
 
-            var customerResult = await _cusCollateralServices.GetCustomerCollateralAsync(CustomerId, true);
+            var query = new GetCollateralDetailQuery(CustomerId);
 
-            if (customerResult.IsSuccess)
+            var rsp = await mediator.Send(query);
+
+
+            if (!rsp.IsError)
             {
-                var collateral = customerResult.Data!;
+                var collateral = rsp.Value;
 
                 CollateralId = CustomerId;
 
@@ -403,15 +402,20 @@ namespace TrapchumApp.Pages.Lists.Collaterals
         {
             Reset(arg, type);
 
-            var rsp = await _collateralService.CreateAsync(model, false);
 
-            if (rsp.IsSuccess)
+            var command = new AddOrUpdateCollateralCommand(model);
+
+            var rsp = await mediator.Send(command);
+
+            //await _collateralService.CreateAsync(model, false);
+
+            if (!rsp.IsError)
             {
-                NotificationService.Notify(NotificationSeverity.Success, rsp.Data);
+                NotificationService.Notify(NotificationSeverity.Success, CollateralMessages.Created);
             }
             else
             {
-                NotificationService.Notify(NotificationSeverity.Error, rsp.Data);
+                NotificationService.Notify(NotificationSeverity.Error, rsp.FirstError.Description);
             }
         }
 
@@ -449,19 +453,20 @@ namespace TrapchumApp.Pages.Lists.Collaterals
 
             model.CollateralLines.Add(prop);
 
-            var rsp = await _collateralService.CreateAsync(model, false);
+            //var rsp = await _collateralService.CreateAsync(model, false);
 
-            if (rsp.IsSuccess)
+            var command = new AddOrUpdateCollateralCommand(model);
+
+            var rsp = await mediator.Send(command);
+
+            if (!rsp.IsError)
             {
-                NotificationService.Notify(NotificationSeverity.Success, rsp.Data);
+                NotificationService.Notify(NotificationSeverity.Success,CollateralMessages.Created);
             }
             else
             {
-                //NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
 
-                //var errors = rsp.Errors.FieldErrors.Values;
-
-                editContext.ApplyValidationSummary<CollateralDtoCreate>(rsp.GetErrors);
+                editContext.ApplyValidationSummaries<CollateralDtoCreate>(rsp.Errors);
 
                 return;
             }

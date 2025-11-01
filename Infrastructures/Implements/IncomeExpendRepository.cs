@@ -1,17 +1,18 @@
 ﻿using Applications.Commons.Messages.Customers;
 using Applications.Commons.Messages.Expenses;
 using Applications.Commons.Messages.Incomes;
+using Applications.Features.Expenses.Dto;
 using Applications.Interfaces.Customers;
-using Applications.Responses;
 using Applications.Responses.ViewModels.Customers;
 using Dapper;
 using Domains.Models.Lists.Customers;
 using ErrorOr;
 using Infrastructures.DataAccess;
-using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-
+using Applications.Commons.Mappers.Expenses;
+using Applications.Features.Incomes.Dto;
+using Applications.Commons.Mappers.Incomes;
 namespace Infrastructures.Implements
 {
     public class IncomeExpendRepository : ICustomerIncomeExpendService
@@ -105,7 +106,7 @@ namespace Infrastructures.Implements
         }
 
 
-        public async Task<ErrorOr<CustomerExpense>> GetEditExpensesAsync(long? id, string? customerId, CancellationToken cancellation = default)
+        public async Task<ErrorOr<ExpenseDtoUpdate>> GetEditExpensesAsync(long? id, string? customerId, CancellationToken cancellation = default)
         {
             try
             {
@@ -121,7 +122,10 @@ namespace Infrastructures.Implements
                     return Error.NotFound(ExpenseMessage.NotFound);
                 }
 
-                return expense;
+
+                var editExpense = expense.ToEditExpense() ;
+
+                return editExpense;
 
             }
             catch (Exception ex)
@@ -132,7 +136,6 @@ namespace Infrastructures.Implements
                 return Error.Unexpected(ex.Message);
             }
         }
-
 
         public async Task<ErrorOr<string>> AddOrUpdateExpensesAsync(string? customerId, List<CustomerExpense> req)
         {
@@ -312,7 +315,7 @@ namespace Infrastructures.Implements
 
         }
 
-       
+
         public async Task<ErrorOr<IEnumerable<VCustomerIncomes>>> GetIncomesAsync(string? customerId)
         {
             using var db = _connectionFactory.CreateConnection();
@@ -329,8 +332,8 @@ namespace Infrastructures.Implements
             return incomes.ToList();
         }
 
-       
-        public async Task<ErrorOr<VCustomerIncomes>> GetIncomeAsync(long? id, string? customerId)
+
+        public async Task<ErrorOr<VCustomerIncomes>> GetIncomeByIdAsync(long? id, string? customerId)
         {
             using var db = _connectionFactory.CreateConnection();
 
@@ -347,7 +350,7 @@ namespace Infrastructures.Implements
         }
 
 
-        public async Task<ErrorOr<CustomerIncome>> GetEditIncomeAsync(long? id, string? customerId, CancellationToken cancellation = default)
+        public async Task<ErrorOr<EditIncomeDto>> GetEditIncomeAsync(long? id, string? customerId, CancellationToken cancellation = default)
         {
             _logger.LogInformation("Adding income...");
 
@@ -361,7 +364,7 @@ namespace Infrastructures.Implements
                 return Error.NotFound(IncomeMessage.NotFound);
             }
 
-            return income;
+            return income.ToIncomeEdit();
         }
 
         public async Task<ErrorOr<long>> AddOrUpdateIncomeAsync(CustomerIncome req)

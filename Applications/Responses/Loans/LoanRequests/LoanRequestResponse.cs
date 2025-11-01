@@ -1,4 +1,4 @@
-﻿using Applications.Responses.Lists.Collaterals;
+﻿using Applications.Features.Collaterals.Dtos;
 using Applications.Responses.Lists.Entities;
 using Applications.Responses.Loans.Disbursements;
 

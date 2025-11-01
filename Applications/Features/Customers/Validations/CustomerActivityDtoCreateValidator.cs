@@ -1,4 +1,4 @@
-using Applications.Features.Customers.Commands.ActivitiesCommand.CreateActivity;
+using Applications.Features.Activities.Command.CreateActivity;
 using FluentValidation;
 
 namespace Applications.Features.Customers.Validations

@@ -1,9 +1,8 @@
-using Applications.Features.Customers.Commands.IncomeCommands.CreateIncomeCommands;
-using Applications.Features.Customers.Commands.IncomeCommands.Queries.GetIncomeByCustomerId;
-using Applications.Features.Customers.Commands.Incomes.CreateIncomes;
-using Applications.Features.Customers.Commands.Incomes.Dto;
 using Applications.Features.Customers.Services;
 using Applications.Features.Entities;
+using Applications.Features.Incomes.Command.CreateIncomes;
+using Applications.Features.Incomes.Dto;
+using Applications.Features.Incomes.Queries.GetIncomeByCustomerId;
 using Applications.Responses.ViewModels.Customers;
 using Radzen.Blazor;
 
@@ -11,6 +10,8 @@ namespace TrapchumApp.Pages.Lists.Customers
 {
     public partial class CustomerModalIncome
     {
+        List<VCustomerIncomes> Incomes = [];
+        [Parameter] public string? CustomerId { get; set; } = string.Empty;
 
         private readonly IIncomeExpendServiceImpl _oiService;
 
@@ -19,10 +20,10 @@ namespace TrapchumApp.Pages.Lists.Customers
             _oiService = customerService;
         }
 
-        List<CustomerIncomeDtoCreate> CustomerIncomes = new List<CustomerIncomeDtoCreate>();
-        List<VCustomerIncomes> Incomes = [];
-        [Parameter] public string? CustomerId { get; set; }
+        List<CustomerIncomeDtoCreate> CustomerIncomes = [];
+
         RadzenDataGrid<VCustomerIncomes> incomeGrid = default!;
+
         List<VCustomerIncomes> insertGrid = [];
         private void AddNewRow()
         {

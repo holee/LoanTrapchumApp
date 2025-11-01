@@ -1,8 +1,8 @@
 ﻿@page "/app/loan/request/{BranchId:int}/branches/createNew"
 @page "/app/loan/request/{BranchId:int}/branches/createNew/{CustomerId}/customer"
+@using Applications.Features.Collaterals.Dtos
 @using Applications.Features.Customers.Response
 @using Applications.Features.LoanRequests.Interfaces
-@using Applications.Responses.Lists.Collaterals
 @using Radzen.Blazor.Rendering
 @attribute [MustHasPermission(Modules.LoanRequest, Feature.Read)]
 <PageTitle>Create New</PageTitle>

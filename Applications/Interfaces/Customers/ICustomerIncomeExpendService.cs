@@ -1,4 +1,6 @@
-﻿using Applications.Responses;
+﻿using Applications.Features.Expenses.Dto;
+using Applications.Features.Incomes.Dto;
+using Applications.Responses;
 using Applications.Responses.ViewModels.Customers;
 using Domains.Models.Lists.Customers;
 using ErrorOr;
@@ -13,17 +15,17 @@ namespace Applications.Interfaces.Customers
         Task<ErrorOr<long>> AddOrUpdateExpenseAsync(CustomerExpense req, CancellationToken cancellation = default);
         Task<ErrorOr<IEnumerable<VCustomerExpenses>>> GetExpenses(string? customerId);
         Task<ErrorOr<VCustomerExpenses>> GetExpense(long? id, string? customerId, CancellationToken cancellation = default);
-        Task<ErrorOr<CustomerExpense>> GetEditExpensesAsync(long? id, string? customerId, CancellationToken cancellation = default);
+        Task<ErrorOr<ExpenseDtoUpdate>> GetEditExpensesAsync(long? id, string? customerId, CancellationToken cancellation = default);
 
 
 
        
         Task<ErrorOr<string>> AddOrUpdateIncomesAsync(string? customerId, List<CustomerIncome> req);
-        Task<ErrorOr<VCustomerIncomes>> GetIncomeAsync(long? id, string? customerId);
+        Task<ErrorOr<VCustomerIncomes>> GetIncomeByIdAsync(long? id, string? customerId);
         Task<ErrorOr<IEnumerable<VCustomerIncomes>>> GetIncomesAsync(string? customerId);
         Task<ErrorOr<long>> AddOrUpdateIncomeAsync(CustomerIncome req);
         Task<ErrorOr<bool>> DeleteIncomeAsync(long? id, string? customerId, CancellationToken cancellationToken = default);
-        Task<ErrorOr<CustomerIncome>> GetEditIncomeAsync(long? id, string? customerId, CancellationToken cancellation = default);
+        Task<ErrorOr<EditIncomeDto>> GetEditIncomeAsync(long? id, string? customerId, CancellationToken cancellation = default);
        
     }
 }

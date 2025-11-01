@@ -1,12 +1,11 @@
-﻿using Applications.Features.Collaterals.Dtos;
-using Applications.Features.Customers.Validations;
+﻿using Applications.Features.Collaterals.Commands.AddOrUpdateCollaterals;
+using Applications.Features.Collaterals.Dtos;
 using Applications.Features.Identity.Roles.Requests;
 using Applications.Features.Identity.Roles.Validation;
 using Applications.Features.LoanPayments.Requests;
 using Applications.Features.LoanPayments.Validations;
 using Applications.Features.LoanRequests.Requests;
 using Applications.Features.LoanRequests.Validations;
-using Applications.Responses.Lists.Collaterals;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 

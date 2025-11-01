@@ -1,8 +1,8 @@
+using Applications.Commons.Mappers.Incomes;
 using Applications.Commons.Messages.Incomes;
-using Applications.Features.Customers.Commands.Incomes.Dto;
-using Applications.Features.Customers.Commands.Incomes.EditIncome;
-using Applications.Features.Customers.Commands.Incomes.Mappers;
-using Applications.Features.Customers.Commands.Incomes.Queries.GetEditIncome;
+using Applications.Features.Incomes.Command.EditIncome;
+using Applications.Features.Incomes.Dto;
+using Applications.Features.Incomes.Queries.GetEditIncome;
 
 namespace TrapchumApp.Pages.Lists.Customers
 {
@@ -29,7 +29,7 @@ namespace TrapchumApp.Pages.Lists.Customers
             }
             else
             {
-                model = resp.Value.ToIncomeEdit();
+                model = resp.Value;
             }
 
             await base.OnInitializedAsync();

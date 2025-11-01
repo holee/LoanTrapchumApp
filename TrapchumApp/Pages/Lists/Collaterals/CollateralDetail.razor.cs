@@ -1,5 +1,5 @@
-using Applications.Features.Customers.UseCases;
-using Applications.Responses.Lists.Collaterals;
+using Applications.Features.Collaterals.Dtos;
+using Applications.Features.Collaterals.Queries.GetCollateralDetails;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Services.Lists;
 
@@ -8,11 +8,10 @@ namespace TrapchumApp.Pages.Lists.Collaterals
     public partial class CollateralDetail 
     {
         private readonly ICollateralsServiceImpl _collateralsService;
-        private readonly CustomerCollateralServices _custCollateralServices;
-        public CollateralDetail(ICollateralsServiceImpl collateralsService, CustomerCollateralServices custCollateralServices)
+
+        public CollateralDetail(ICollateralsServiceImpl collateralsService)
         {
             _collateralsService = collateralsService;
-            _custCollateralServices = custCollateralServices;
         }
 
         [Parameter] public EventCallback Close { get; set; }
@@ -28,17 +27,19 @@ namespace TrapchumApp.Pages.Lists.Collaterals
 
         async Task GetCollateralById(string collateralId)
         {
-            var rsp = await _custCollateralServices.GetCustomerCollateralAsync(collateralId);
 
-            if (rsp.IsSuccess)
+            var query = new GetCollateralDetailQuery(collateralId);
+
+
+            var rsp = await mediator.Send(query);
+
+            if (!rsp.IsError)
             {
-                Model = rsp.Data;
-
-                //CollateralLines = rsp.Data!.CollateralLines;
+                Model = rsp.Value;
             }
             else
             {
-                NotificationService.Notify(NotificationSeverity.Error,rsp.ErrMessage);
+                NotificationService.Notify(NotificationSeverity.Error,rsp.FirstError.Description);
             }
 
 

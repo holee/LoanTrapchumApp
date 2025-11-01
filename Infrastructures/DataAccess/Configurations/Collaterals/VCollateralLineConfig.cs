@@ -1,4 +1,4 @@
-﻿using Applications.Features.Customers.Commands.Queries;
+﻿using Applications.Features.Customers.Queries;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

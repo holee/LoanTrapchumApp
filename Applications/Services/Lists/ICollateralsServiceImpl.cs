@@ -1,6 +1,5 @@
 ﻿using Applications.Features.Collaterals.Dtos;
 using Applications.Responses;
-using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.Paginations;
 using Domains.Models.Collaterals;
 

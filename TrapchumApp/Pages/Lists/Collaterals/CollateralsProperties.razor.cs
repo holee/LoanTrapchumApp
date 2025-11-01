@@ -1,4 +1,4 @@
-using Applications.Responses.Lists.Collaterals;
+using Applications.Features.Collaterals.Dtos;
 using Radzen.Blazor;
 
 namespace TrapchumApp.Pages.Lists.Collaterals

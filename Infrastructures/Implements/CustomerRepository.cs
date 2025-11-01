@@ -1,8 +1,8 @@
 ﻿using Applications.Extensions;
+using Applications.Features.Collaterals.Dtos;
 using Applications.Features.Customers.Response;
 using Applications.Interfaces.Customers;
 using Applications.Responses;
-using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.Message;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Customers;

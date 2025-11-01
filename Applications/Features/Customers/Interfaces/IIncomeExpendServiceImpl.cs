@@ -1,10 +1,4 @@
-﻿using Applications.Features.Customers.Commands.ExpenseCommands.CreateExpenseCommands;
-using Applications.Features.Entities;
-using Applications.Responses;
-using Applications.Responses.ViewModels.Customers;
-using Domains.Models.Lists.Customers;
-
-namespace Applications.Features.Customers.Services
+﻿namespace Applications.Features.Customers.Services
 {
     public interface IIncomeExpendServiceImpl
     {

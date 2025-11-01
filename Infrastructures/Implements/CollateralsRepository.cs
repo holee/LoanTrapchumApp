@@ -1,7 +1,6 @@
 ﻿using Applications.Features.Collaterals.Dtos;
 using Applications.Interfaces.Lists;
 using Applications.Responses;
-using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.Paginations;
 using Domains.Models.Collaterals;
 using Infrastructures.DataAccess;

@@ -1,7 +1,7 @@
 using Applications.Extensions;
 using Applications.Features.Collaterals.Dtos;
-using Applications.Features.Customers.UseCases;
-using Applications.Responses.Lists.Collaterals;
+using Applications.Features.Collaterals.Queries.GetCollateralByCustomers;
+using Applications.Features.Collaterals.Queries.GetCollateralDetails;
 using Applications.Services.Lists;
 
 namespace TrapchumApp.Pages.Lists.Collaterals;
@@ -17,7 +17,7 @@ public partial class CustomerCollateralLineCreate
 
     private readonly ICollateralsServiceImpl _service;
 
-    private readonly CustomerCollateralServices _cusCollateralServices;
+    private readonly GetCollateralDetailQueryHandler _cusCollateralServices;
 
     private bool success = false;
     [Parameter] public string? CollateralId { get; set; }
@@ -80,7 +80,7 @@ public partial class CustomerCollateralLineCreate
 
 
 
-    public CustomerCollateralLineCreate(ICollateralsServiceImpl service, CustomerCollateralServices collateralServices)
+    public CustomerCollateralLineCreate(ICollateralsServiceImpl service, GetCollateralDetailQueryHandler collateralServices)
     {
         _service = service;
 
@@ -124,11 +124,14 @@ public partial class CustomerCollateralLineCreate
             return;
         }
 
-        var rsp = await _cusCollateralServices.GetCustomerCollateralAsync(collateralId, true);
+        var query=new GetCollateralDetailQuery(collateralId!);
 
-        if (rsp.IsSuccess && rsp.Data is not null)
+
+        var rsp = await mediator.Send(query);
+
+        if (!rsp.IsError)
         {
-            var collateral = rsp.Data!;
+            var collateral = rsp.Value;
 
             CollateralId = collateralId;
 

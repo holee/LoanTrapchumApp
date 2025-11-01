@@ -1,7 +1,7 @@
-using Applications.Features.Customers.Commands.NotesCommand.CreateNoteCommand;
-using Applications.Features.Customers.Commands.NotesCommand.Queries.GetNoteById;
-using Applications.Features.Customers.Commands.NotesCommand.EditNoteCommand;
 using Domains.Models.Identity;
+using Applications.Features.Notes.Command.CreateNote;
+using Applications.Features.Notes.Command.EditNote;
+using Applications.Features.Notes.Queries.GetNoteById;
 namespace TrapchumApp.Pages.Lists.Customers
 {
     public partial class CustomerNoteAdd

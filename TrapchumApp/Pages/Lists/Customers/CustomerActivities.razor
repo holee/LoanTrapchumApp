@@ -1,10 +1,14 @@
-﻿@using Applications.Features.Addresses
+﻿@using Applications.Commons.Messages.Activities
+@using Applications.Features.Activities.ActitvityQuery.GetActivityByCustomer
+@using Applications.Features.Activities.Command.DeleteActivity
+@using Applications.Features.Addresses
 @using Applications.Features.Branches
 @using Applications.Features.Currencies
 @using Applications.Features.Customers.Services
 @using Applications.Features.Customers.UseCases
 @using Applications.Features.Employees
 @using Applications.Features.LoanRequests.Interfaces
+@using System.Threading.Tasks
 @using TrapchumApp.Services
 <RadzenStack Orientation="Orientation.Horizontal"
              class="rz-mb-2"
@@ -94,7 +98,7 @@
     {
         ContextMenuService.Open(args, ds =>
     @<RadzenMenu Style="font-size:0.8rem;">
-    <RadzenMenuItem Click="@(() => Details(c))" Icon="add" Text="Details" Value="@c.ActivityId" />
+    <RadzenMenuItem Click="@(() => Details(c))" Icon="add" Text="Details" Value="@c.ActivityId" Visible="false" />
     <RadzenMenuItem Click="@(() => Edit(c))" Icon="money" Text="Edit" Value="@c.ActivityId" />
     <RadzenMenuItem Click="@(() => Delete(c))" Icon="@IconNames.Delete" Text="Delete" Value="@c.ActivityId" />
 </RadzenMenu>
@@ -102,7 +106,7 @@
     }
 
 
-    [Parameter] public string? CustomerId { get; set; } = string.Empty;
+    [Parameter] public string CustomerId { get; set; } = string.Empty;
     [Parameter] public bool ShowAdd { get; set; } = false;
     [Parameter] public bool ShowReload { get; set; } = false;
     [Parameter] public bool ShowCommand { get; set; } = false;
@@ -139,25 +143,44 @@
         //DialogService.OpenAsync<CustomerActivitiesDetails>("Activity Details", param);
     }
 
-    void Edit(VCustomerActivities c)
+    async Task Edit(VCustomerActivities c)
     {
         var param = new Dictionary<string, object?>
         {
             {"ActivityId",c.ActivityId},
             {"CustomerId",CustomerId}
         };
-        DialogService.OpenAsync<CustomerActivitiesAdd>("Edit Activity", param);
+
+        var dia = await DialogService.OpenAsync<CustomerActivitiesAdd>("Edit Activity", param);
+
+        if (dia is bool b && b == true)
+        {
+            await RefreshActivity();
+        }
     }
 
-    void Delete(VCustomerActivities c)
+    async Task Delete(VCustomerActivities c)
     {
-        var param = new Dictionary<string, object?>
+        var confirm = await DialogService.Confirm(ActivityMessage.ConfirmDelete, "Confirm Delete");
+
+        if (confirm == false) return;
+
+        var command = new DeleteActivityCommand(c.ActivityId, CustomerId);
+
+        var result = await mediator.Send(command);
+
+        if (!result.IsError)
         {
-            {"ActivityId",c.ActivityId} 
 
-        };
+            await RefreshActivity();
 
-        //DialogService.OpenAsync<CustomerActivitiesDelete>("Delete Activity", param);
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Success", Detail = ActivityMessage.DeleteSuccess, Duration = 4000 });
+        }
+        else
+        {
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Error", Detail = result.FirstError.Description, Duration = 4000 });
+        }
+
     }
 
     async Task AddNewActivity()
@@ -178,13 +201,15 @@
     }
     async Task RefreshActivity()
     {
+
         isLoading = true;
+        var query = new GetActivityByCustomerIdQuery(CustomerId);
 
-        var rsp = await _custActivityGet.GetCustomerActivities(CustomerId);
+        var rsp = await mediator.Send(query); //_custActivityGet.GetCustomerActivities(CustomerId);
 
-        if (rsp.IsSuccess)
+        if (!rsp.IsError)
         {
-            Items = rsp.Data ?? [];
+            Items = rsp.Value;
         }
 
         isLoading = false;

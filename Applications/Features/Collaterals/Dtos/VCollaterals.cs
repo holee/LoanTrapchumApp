@@ -1,5 +1,4 @@
-﻿using Applications.Responses.Lists.Collaterals;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Applications.Features.Collaterals.Dtos;
 

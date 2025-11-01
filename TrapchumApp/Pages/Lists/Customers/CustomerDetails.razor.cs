@@ -1,6 +1,5 @@
 ﻿using Applications.Extensions;
 using Applications.Extensions.Web;
-using Applications.Responses.Lists.Collaterals;
 using Radzen.Blazor;
 using TrapchumApp.Pages.Lists.Collaterals;
 using Domains.Models.Identity;
@@ -8,6 +7,7 @@ using Applications.Features.Customers.Services;
 using Applications.Services.Lists;
 using Applications.Services.Lists;
 using Applications.Features.Customers.Response;
+using Applications.Features.Collaterals.Dtos;
 
 namespace TrapchumApp.Pages.Lists.Customers
 {

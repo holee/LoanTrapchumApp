@@ -1,22 +1,33 @@
-﻿using Applications.Features.Collaterals.Dtos;
+﻿using Applications.Commons.Mappers.Collaterals;
+using Applications.Features.Collaterals.Dtos;
 using Applications.Features.Collaterals.Mapper;
-using Applications.Features.Customers.Mappers;
 using Applications.Interfaces.Customers;
 using Applications.Interfaces.Lists;
 using Applications.Responses;
-using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.Paginations;
 using Domains.Models.Collaterals;
+using ErrorOr;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
 
 namespace Applications.Services.Lists; 
 
-public sealed class CollateralsService(ICollateralsService collateralsService,
-        ICustomerCollateralService cuscollateralsService,
-        IValidator<CollateralDtoCreate> collValidator,
-        ILogger<CollateralsService> logger) : ICollateralsServiceImpl
+public sealed class CollateralsService : ICollateralsServiceImpl
 {
+    private readonly ICollateralsService collateralsService;
+    private readonly ICollateralService cuscollateralsService;
+    private readonly ILogger<CollateralsService> logger;
+
+    public CollateralsService(ICollateralsService collateralsService,
+            ICollateralService cuscollateralsService,
+            IValidator<CollateralDtoCreate> collValidator,
+            ILogger<CollateralsService> logger)
+    {
+        this.collateralsService = collateralsService;
+        this.cuscollateralsService = cuscollateralsService;
+        this.logger = logger;
+    }
+
     public async Task<Pager<VCollateral>> GetCollateralsAysnc(QueryParam param)
     {
         return await collateralsService.GetCollateralsAysnc(param);
@@ -37,19 +48,10 @@ public sealed class CollateralsService(ICollateralsService collateralsService,
         return await collateralsService.GetsCollateralAysnc(q);
     }
 
-    public async Task<Result<string>> CreateAsync(CollateralDtoCreate entity, bool detarching = false)
+    public async Task<ErrorOr<string>> CreateAsync(CollateralDtoCreate entity, bool detarching = false)
     {
 
         logger.LogInformation("Creating collateral: {Collateral}", entity);
-
-        var validationResult = collValidator.Validate(entity);
-
-        if (!validationResult.IsValid)
-        {
-            var errors = validationResult.ToDictionary();
-
-            return Result.Failure<string>(ErrorResponse.Validation(errors));
-        }
 
         var insertModel = entity.MapCollateral();
 
@@ -73,14 +75,20 @@ public sealed class CollateralsService(ICollateralsService collateralsService,
         return collateralsService.InsertOrUpdateAsync(entity);
     }
 
-    public async Task<Result<VCustomerCollaterals>> GetCollateralByIdAsync(string? collateralId)
+    public async Task<ErrorOr<VCustomerCollaterals>> GetCollateralByIdAsync(string? collateralId)
     {
         logger.LogInformation("Fetching collateral by ID: {CollateralId}", collateralId);
 
-        if (string.IsNullOrWhiteSpace(collateralId))
-        {
-            return Result.Failure<VCustomerCollaterals>(ErrorResponse.Validation("Collateral ID is required"));
-        }
-        return await cuscollateralsService.GetCollateralByIdAsync(collateralId);
+        return await cuscollateralsService.GetCollateralDetailAsync(collateralId);
+    }
+
+    Task<Result<VCustomerCollaterals>> ICollateralsServiceImpl.GetCollateralByIdAsync(string? collateralId)
+    {
+        throw new NotImplementedException();
+    }
+
+    Task<Result<string>> ICollateralsServiceImpl.CreateAsync(CollateralDtoCreate entity, bool detarching)
+    {
+        throw new NotImplementedException();
     }
 }

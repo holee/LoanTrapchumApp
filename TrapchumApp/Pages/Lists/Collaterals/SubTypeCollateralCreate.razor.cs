@@ -1,5 +1,4 @@
 using Applications.Features.Collaterals.Dtos;
-using Applications.Responses.Lists.Collaterals;
 using Applications.Services.Lists;
 
 namespace TrapchumApp.Pages.Lists.Collaterals;

@@ -1,6 +1,9 @@
+using Applications.Commons.Messages.Expenses;
 using Applications.Extensions;
-using Applications.Features.Customers.Commands.ExpenseCommands.Queries.GetExpenseByCustomerId;
 using Applications.Features.Customers.Services;
+using Applications.Features.Expenses.DeleteExpenseCommand;
+using Applications.Features.Expenses.Queries.GetExpenseByCustomerId;
+using Applications.Features.Expenses.Queries.GetExpenseById;
 using Applications.Responses.ViewModels.Customers;
 using Radzen.Blazor;
 
@@ -30,6 +33,56 @@ namespace TrapchumApp.Pages.Lists.Customers
 
             await GetCustomerExpense(CustomerId);
         }
+
+
+        async Task GetEditExpense(VCustomerExpenses c)
+        {
+            var query = new GetExpenseByIdQuery(c.ExpendId, CustomerId);
+
+            var rsp = await mediator.Send(query);
+
+            if (rsp.IsError)
+            {
+                NotificationService.Notify(NotificationSeverity.Error, rsp.FirstError.Description);
+                return;
+            }
+
+            var parameters = new Dictionary<string, object?>
+        {
+            { "Id", c.ExpendId },
+            { "CustomerId", CustomerId }
+        };
+
+            var dia = await DialogService.OpenAsync<CustomerModalExpenseEdit>("Expenses", parameters);
+
+            if (dia is bool and true)
+            {
+                await GetCustomerExpense(CustomerId);
+            }
+        }
+
+        async Task DeleteExpense(VCustomerExpenses c)
+        {
+            var confirm = await DialogService.Confirm(ExpenseMessage.ConfirmDelete, "Delete");
+
+            if (confirm == false) return;
+
+            var command = new DeleteExpenseCommand(c.ExpendId, CustomerId);
+
+            var rsp = await mediator.Send(command);
+
+            if (rsp.IsError)
+            {
+                NotificationService.Notify(NotificationSeverity.Error, rsp.FirstError.Description);
+                return;
+            }
+
+            NotificationService.Notify(NotificationSeverity.Success, rsp.Value);
+
+            await GetCustomerExpense(CustomerId);
+
+        }
+
 
         async Task GetCustomerExpense(string? customerId)
         {

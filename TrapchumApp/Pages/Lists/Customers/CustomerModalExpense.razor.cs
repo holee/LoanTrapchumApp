@@ -1,9 +1,7 @@
-using Applications.Features.Customers.Commands.ExpenseCommands.CreateExpenseCommands;
-using Applications.Features.Customers.Commands.ExpenseCommands.Queries.GetExpenseByCustomerId;
-using Applications.Features.Customers.Commands.Expenses.CreateExpensesCommands;
-using Applications.Features.Customers.Commands.Expenses.Dto;
-using Applications.Features.Customers.Commands.IncomeCommands.Queries.GetIncomeByCustomerId;
 using Applications.Features.Customers.Services;
+using Applications.Features.Expenses.CreateExpensesCommands;
+using Applications.Features.Expenses.Dto;
+using Applications.Features.Expenses.Queries.GetExpenseByCustomerId;
 using Applications.Responses.ViewModels.Customers;
 using Radzen.Blazor;
 
@@ -11,14 +9,6 @@ namespace TrapchumApp.Pages.Lists.Customers
 {
     public partial class CustomerModalExpense
     {
-
-        private readonly IIncomeExpendServiceImpl _cusExspenseAndIncome;
-
-        public CustomerModalExpense(IIncomeExpendServiceImpl cusExspenseAndIncome)
-        {
-            _cusExspenseAndIncome = cusExspenseAndIncome;
-        }
-
         List<ExpenseDtoCreate> CustomerExpenses = new List<ExpenseDtoCreate>();
 
         RadzenDataGrid<VCustomerExpenses> incomeGrid = default!;

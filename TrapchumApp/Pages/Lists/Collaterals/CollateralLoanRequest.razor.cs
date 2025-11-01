@@ -1,5 +1,5 @@
 using Applications.Extensions;
-using Applications.Responses.Lists.Collaterals;
+using Applications.Features.Collaterals.Dtos;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 using Radzen.Blazor;

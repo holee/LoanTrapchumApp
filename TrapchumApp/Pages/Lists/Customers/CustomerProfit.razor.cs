@@ -1,5 +1,5 @@
-using Applications.Features.Customers.Commands.ExpenseCommands.Queries.GetExpenseByCustomerId;
-using Applications.Features.Customers.Commands.IncomeCommands.Queries.GetIncomeByCustomerId;
+using Applications.Features.Expenses.Queries.GetExpenseByCustomerId;
+using Applications.Features.Incomes.Queries.GetIncomeByCustomerId;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Utils;
 

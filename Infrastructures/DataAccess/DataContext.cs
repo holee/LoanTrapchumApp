@@ -1,8 +1,7 @@
 ﻿using Applications.Features.Collaterals.Dtos;
 using Applications.Features.Currencies.Responses;
-using Applications.Features.Customers.Commands.Queries;
+using Applications.Features.Customers.Queries;
 using Applications.Features.Customers.Response;
-using Applications.Responses.Lists.Collaterals;
 using Applications.Responses.ViewModels.Addresses;
 using Applications.Responses.ViewModels.Auths;
 using Applications.Responses.ViewModels.Branches;
