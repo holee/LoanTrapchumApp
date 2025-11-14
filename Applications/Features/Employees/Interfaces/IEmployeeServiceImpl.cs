@@ -1,4 +1,4 @@
-﻿using Applications.Features.OtherNames;
+﻿using Applications.Features.Employees.Dto;
 using Applications.Responses;
 using Applications.Responses.Lists.Entities;
 using Applications.Responses.Paginations;

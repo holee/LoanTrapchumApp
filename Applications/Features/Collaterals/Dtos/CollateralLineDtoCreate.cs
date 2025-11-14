@@ -2,6 +2,14 @@
 
 public sealed class CollateralLineDtoCreate
 {
+    public CollateralLineDtoCreate()
+    {
+
+    }
+    public CollateralLineDtoCreate(string? collateralId) : this()
+    {
+        CollateralRefId = collateralId;
+    }
     public long Id { get; set; }
     public string? CollateralRefId { get; set; }
     public string? CustomerName { get; set; }
@@ -17,7 +25,7 @@ public sealed class CollateralLineDtoCreate
     public string? OwnerName { get; set; }
     public string? Location { get; set; }
     public string? WareHouse { get; set; }
-    public int? Quantity { get; set; }
+    public int? Quantity { get; set; } = 1;
     public string? Size { get; set; }
     public string? Description { get; set; }
     public decimal? MarketPrice { get; set; } = 0.00M;

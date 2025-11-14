@@ -1,10 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using System.Reflection;
 using Ardalis.Specification.EntityFrameworkCore;
-using AutoMapper.QueryableExtensions;
 using Ardalis.Specification;
-using Microsoft.Extensions.Configuration;
 using Domains.Commons.Entities;
 namespace Applications.Commons.Extensions.QueryableExtensions;
 public static class QueryableExtensions

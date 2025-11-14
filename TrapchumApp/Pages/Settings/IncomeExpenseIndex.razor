@@ -1,0 +1,70 @@
+﻿@using Applications.Features.Incomes.Dto
+@using TrapchumApp.Pages.Settings.Menu
+@page "/App/Settings/Income-Expense"
+<PageTitle>Income/Expense</PageTitle>
+<GridToolbar @bind-Value="_filter">
+    <LeftChildren>
+        <RadzenButton ButtonStyle="ButtonStyle.Primary"
+                      Size="ButtonSize.Small"
+                      Click="@OnAddClick"
+                      Text="Add" Icon="@IconNames.Add"/>
+    </LeftChildren>
+</GridToolbar>
+<RadzenDataGrid AllowAlternatingRows="true"
+                AllowFiltering="false"
+                Density="Density.Compact"
+                SelectionMode="DataGridSelectionMode.Single"
+                GridLines="DataGridGridLines.Both"
+                Responsive
+                TItem="IncomeExpenseDto"
+                RowRender="@OnRowRender"
+                LoadData="@OnLoadData"
+                Count="@_counts"
+                PageSizeOptions="@StorageConstant.PageSizeOptions"
+                PagerPosition="PagerPosition.Bottom"
+                PagerHorizontalAlign="HorizontalAlign.Right"
+                Data="@_incomeExpense">
+    <Columns>
+        <RadzenDataGridColumn Property="@nameof(IncomeExpenseDto.Id)"
+                              Filterable="false"
+                              Title="#" Frozen="true"
+                              Width="3rem"
+                              TextAlign="TextAlign.Center">
+            <Template>
+                @context.RowIndex
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="@nameof(IncomeExpenseDto.Description)" Title="Description" Frozen="true"/>
+        <RadzenDataGridColumn Property="@nameof(IncomeExpenseDto.Types)"
+                              Context="s"
+                              Title="Types"
+                              Width="6rem"/>
+        <RadzenDataGridColumn Title="Action" Width="4rem" TextAlign="TextAlign.Center" Context="s">
+            <Template>
+                <RadzenButton Size="ButtonSize.ExtraSmall"
+                              Icon="@IconNames.MoreVert"
+                              Variant="Variant.Text"
+                              Click="((arg)=>OpenContextMenu(arg,s))"
+                              @onclick:stopPropagation="true">
+                </RadzenButton>
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+    <LoadingTemplate>
+        <RadzenProgressBar Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" Visible="@isLoading"/>
+    </LoadingTemplate>
+</RadzenDataGrid>
+
+@code
+{
+    void OpenContextMenu(MouseEventArgs e, IncomeExpenseDto dto)
+    {
+        ContextMenuService.Open(e,
+            ds => @<IncomeExpenseMenu
+                      ClickEdit="@ClickEdit"
+                      ClickDelete="@ClickDelete"
+                      ClickDetails="@ClickDetails"
+                      Id="@dto.Id"/>);
+    }
+}
+

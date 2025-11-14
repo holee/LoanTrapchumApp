@@ -21,7 +21,6 @@
 @using Applications.Features.LoanRequests.UseCases
 @using Applications.Responses.ViewModels.Auths
 @using Applications.Responses.ViewModels.Customers
-@using Applications.Responses.ViewModels.Departments
 @using Applications.Responses.ViewModels.Loans.Schedules
 @using Applications.Responses.ViewModels.Options
 @using Applications.Services.Identity
@@ -51,16 +50,17 @@
 @using static Microsoft.AspNetCore.Components.Web.RenderMode
 @attribute [Authorize]
 @inject IJSRuntime js
+@inject NavigationService _navService
 @inject LoadingTrackerService Tracker
-@inject IAuthorizationService _authorizeService;
+@inject IAuthorizationService _authorizeService
 @inject NotificationService NotificationService
 @inject DialogService DialogService
 @inject NavigationManager NavigationManager
 @inject ContextMenuService ContextMenuService
 @inject TooltipService tooltipService
 @inject IdentityRedirectManager RedirectManager
-@inject IAddressServiceImpl _addressService;
-@inject IEmployeeServiceImpl _employeeService;
+@inject IAddressServiceImpl _addressService
+@inject IEmployeeServiceImpl _employeeService
 @inject IBranchServiceImpl _branchService
 @inject ICustomerServiceImpl _customerService
 @inject ICurrencyServiceImpl _curService

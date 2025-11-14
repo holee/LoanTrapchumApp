@@ -113,7 +113,6 @@
                         <LoanManagementItems BranchId="@branchId"
                                              BranchState="@bState.State" />
                     }
-
                     @if (bState.IsCreditAgent)
                     {
                         <RadzenPanelMenuItem Text="Loan Management" Icon="dataset">
@@ -121,13 +120,12 @@
                                                  Path="@($"/app/customer/{branchId}/branches")" />
                             <RadzenPanelMenuItem Text="Collaterals" Icon="invert_colors"
                                                  Path="/app/customer/collateral" />
-                            <RadzenPanelMenuItem Text="Request" Icon="request_quote"
+                            <RadzenPanelMenuItem Text="Loan Request" Icon="request_quote"
                                                  Path="@($"/app/loan/request/{branchId}/branches")" />
-                            <RadzenPanelMenuItem Text="Loans" Icon="@IconNames.MoneyBag"
+                            <RadzenPanelMenuItem Text="Loans Disbursement" Icon="@IconNames.MoneyBag"
                                                  Path="@($"/app/loan/disbursment/{branchId}/branches")" />
                         </RadzenPanelMenuItem>
                     }
-
                     @if (bState.IsManager)
                     {
                         <RadzenPanelMenuItem Text="Loan Management" Icon="dataset">
@@ -137,7 +135,6 @@
                                                  Path="@($"/app/loan/disbursment/{branchId}/branches")" />
                         </RadzenPanelMenuItem>
                     }
-
                 </Authorized>
             </AuthorizeView>
             <AuthorizeView>
@@ -156,6 +153,10 @@
             <AuthorizeView Policy="@RolePolicies.AdminOnly">
                 <Authorized>
                     <AdminstrationsItems />
+                </Authorized>
+            </AuthorizeView>
+            <AuthorizeView Policy="@RolePolicies.CEOOnly">
+                <Authorized>
                     <RadzenPanelMenuItem Text="Audit Trail" Icon="@IconNames.DataProtection">
                         <RadzenPanelMenuItem Text="Audit" Icon="@IconNames.PolicyAlert" Path="/App/Audit" />
                     </RadzenPanelMenuItem>

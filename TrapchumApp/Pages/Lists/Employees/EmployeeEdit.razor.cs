@@ -1,6 +1,6 @@
 using Applications.Features.Addresses.Responses;
+using Applications.Features.Employees.Dto;
 using Applications.Features.Entities;
-using Applications.Features.OtherNames;
 using Applications.Responses.Lists.Entities;
 using Applications.Responses.Paginations;
 using Applications.Services.Lists;

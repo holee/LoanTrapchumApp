@@ -10,13 +10,3 @@ public record AppPermission(string Module, string Action, string Group, string D
     }
 }
 
-
-
-
-public enum AccessRole
-{
-    Admin = 1,
-    Account,
-    CreditOfficer,
-    All
-}

@@ -12,6 +12,9 @@
         public const string OpenBranch = nameof(OpenBranch);
         public const string MultiplePayment = nameof(MultiplePayment);
         public const string PayOff = nameof(PayOff);
+        public const string RecievePayment = nameof(RecievePayment);
+        public const string WriteOff = nameof(WriteOff);
+        public const string Restructure = nameof(Restructure);
         public const string Disburse = nameof(Disburse);
         public const string Reschedule = nameof(Reschedule);
         public const string ApproveRequest = nameof(ApproveRequest);
@@ -19,7 +22,6 @@
         public const string ExchangeMoney = nameof(ExchangeMoney);
         public const string RejectRequest = nameof(RejectRequest);
         public const string Grant = nameof(Grant);
-
 
         public const string ReadAccountDashboard = nameof(ReadAccountDashboard);
         public const string ReadCoDashboard = nameof(ReadCoDashboard);

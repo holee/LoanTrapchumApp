@@ -79,8 +79,8 @@
                               Width="8rem"
                               Title="Name">
             <Template>
-                <NavLink href="@($"/App/Customers/{c.CustomerId}/Details")">
-                    <KhmerName AltName="@c.AltName" />
+                <NavLink @onclick="@(() => OnRowDoubleClick(c))">
+                        <KhmerName AltName="@c.AltName" />
                 </NavLink>
             </Template>
         </RadzenDataGridColumn>
@@ -90,9 +90,7 @@
                               Visible="false"
                               Title="FullName">
             <Template>
-                <NavLink>
-                    @c.FullName
-                </NavLink>
+                @c.FullName
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Title="@nameof(VCustomerDetails.Phone)"

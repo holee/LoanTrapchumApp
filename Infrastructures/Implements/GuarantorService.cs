@@ -2,7 +2,6 @@ using Applications.Extensions;
 using Applications.Interfaces.Lists;
 using Applications.Responses;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Disbursements;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Applications.Responses.ViewModels.OtherNames;
@@ -15,6 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Data;
 using Applications.Features.Entities;
 using Domains.Models.Lists;
+using Applications.Features.Loans.Responses;
 
 namespace Infrastructures.Implements;
 public class GuarantorService : IGuarantorService

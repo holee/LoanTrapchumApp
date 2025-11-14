@@ -91,7 +91,7 @@
                                       TextAlign="TextAlign.Center"
                                       Context="g" Property="@nameof(VCollateralLines.Id)" Title="Action">
                     <Template>
-                        <RadzenButton Icon="@IconNames.Add"
+                        <RadzenButton Icon="@IconNames.MoreVert"
                                       Click="@(()=>GetSelectedCollater(g))"
                                       Size="ButtonSize.ExtraSmall"
                                       Variant="Variant.Outlined" />
@@ -104,7 +104,7 @@
                              class="rz-m-2"
                              JustifyContent="JustifyContent.End">
                     <RadzenButton Icon="done_all"
-                                  Text="Accept"
+                                  Text="All"
                                   Click="@(()=>GetSelectedGuarantors(_selectedCollateralLines))"
                                   Size="ButtonSize.ExtraSmall" />
                 </RadzenStack>

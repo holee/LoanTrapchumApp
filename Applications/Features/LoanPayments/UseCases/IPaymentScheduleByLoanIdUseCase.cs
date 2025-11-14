@@ -1,6 +1,6 @@
 ﻿using Applications.Enumerations;
+using Applications.Features.Loans.Responses;
 using Applications.Responses;
-using Applications.Responses.ViewModels.Loans;
 
 namespace Applications.Features.LoanPayments.UseCases
 {

@@ -1,4 +1,4 @@
-using Applications.Responses.ViewModels.Loans;
+using Applications.Features.Loans.Responses;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 

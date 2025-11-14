@@ -1,5 +1,5 @@
+using Applications.Features.Loans.Responses;
 using Applications.Features.Loans.Services;
-using Applications.Responses.ViewModels.Loans;
 using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Disbursements

@@ -17,7 +17,6 @@
     <Folder Include="Commons\Messages\LoanDisbursements\" />
     <Folder Include="Commons\Messages\Journals\" />
     <Folder Include="Commons\Messages\Leadgers\" />
-    <Folder Include="Commons\Messages\Settings\" />
     <Folder Include="Extensions\Identity\Constants\" />
     <Folder Include="Features\Addresses\UseCases\" />
     <Folder Include="Features\Addresses\Validations\" />
@@ -31,6 +30,8 @@
     <Folder Include="Features\CreditAgents\UseCases\" />
     <Folder Include="Features\Currencies\UseCases\" />
     <Folder Include="Features\Customers\Mappers\" />
+    <Folder Include="Features\Departments\Commands\" />
+    <Folder Include="Features\Departments\Queries\" />
     <Folder Include="Features\Employees\Extensions\" />
     <Folder Include="Features\Employees\Mappers\" />
     <Folder Include="Features\Employees\Responses\" />

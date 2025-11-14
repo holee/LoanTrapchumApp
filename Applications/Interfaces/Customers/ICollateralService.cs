@@ -1,5 +1,6 @@
 ﻿using Applications.Bases;
 using Applications.Features.Collaterals.Dtos;
+using Applications.Responses.Paginations;
 using Domains.Models.Collaterals;
 using ErrorOr;
 
@@ -27,6 +28,8 @@ public interface ICollateralService
         CancellationToken cancellation = default);
 
     Task<ErrorOr<CollateralLine>> GetCollateralLineByIdAsync(long? id, string? collateralId);
+    Task<ErrorOr<Collateral>> GetEditCollateralByIdAsync(long lineId, string? customerId, CancellationToken cancellation = default);
+    Task<Pager<VCollateralLines>> GetCollateralLinesAsPaging(string? customerId, QueryParam query, CancellationToken cancellationToken);
 }
 
 

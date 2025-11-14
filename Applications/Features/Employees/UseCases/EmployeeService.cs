@@ -1,6 +1,6 @@
 ﻿using Applications.Commons.Mappers;
+using Applications.Features.Employees.Dto;
 using Applications.Features.Employees.Interfaces;
-using Applications.Features.OtherNames;
 using Applications.Interfaces.Employees;
 using Applications.Interfaces.Lists;
 using Applications.Responses;
@@ -64,22 +64,11 @@ namespace Applications.Features.Employees.UseCases
             return Result.Success(employee);
         }
 
-        public async Task<Result<T>> GetEmployeeById<T>(string? employeeId)
-            where T : class
-        {
-            return await empService.GetByIdAsync<T>(employeeId);
-        }
-
 
         public async Task<Result<VEmployeeList>> GetEmployeeById(string? employeeId, int? branchId, bool include = false)
         {
             return await empService.GetByIdAsync(employeeId, branchId, include);
         }
-
-        //public async Task<Result<VEmployeeList>> GetEmployeeById(string? employeeId,CancellationToken cancellation=default)
-        //{
-        //    return await empService.GetByIdAsync(employeeId,cancellation);
-        //}
 
         public async Task<Result<VEmployeeList>> GetEmployeeById(string? employeeId, CancellationToken cancellation = default)
         {

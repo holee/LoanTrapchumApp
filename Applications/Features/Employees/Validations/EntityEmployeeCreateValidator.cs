@@ -1,4 +1,4 @@
-﻿using Applications.Features.OtherNames;
+﻿using Applications.Features.Employees.Dto;
 using FluentValidation;
 namespace Applications.Validations.Employees
 {

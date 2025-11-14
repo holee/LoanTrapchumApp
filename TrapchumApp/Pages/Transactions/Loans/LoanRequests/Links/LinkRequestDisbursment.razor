@@ -10,12 +10,12 @@
 @using TrapchumApp.Services
 @if (LoanRequest?.StatusId == (int)RequestStatus.Approved)
 {
-    <a href="@_disburseRequestLoanUrl">
+    <NavLink href="@_disburseRequestLoanUrl">
         <RadzenBadge Variant="Variant.Filled"
                      BadgeStyle="BadgeStyle.Success"
                      Style="font-size:0.5rem;"
                      Text="Disburse"></RadzenBadge>
-    </a>
+    </NavLink>
 }
 else
 {

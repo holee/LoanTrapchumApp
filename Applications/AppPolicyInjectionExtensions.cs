@@ -49,6 +49,7 @@ namespace Applications
             options.AddPolicy(PaymentsPolicies.Read, PaymentsPolicies.CanRead());
             options.AddPolicy(PaymentsPolicies.Update, PaymentsPolicies.CanUpdate());
             options.AddPolicy(PaymentsPolicies.Delete, PaymentsPolicies.CanDelete());
+            options.AddPolicy(PaymentsPolicies.RecievePayment, PaymentsPolicies.CanRecievePayment());
             options.AddPolicy(RequestsPolicies.Read, RequestsPolicies.CanRead());
             options.AddPolicy(RequestsPolicies.Create, RequestsPolicies.CanCreate());
             options.AddPolicy(RequestsPolicies.Request, RequestsPolicies.CanRequest());
@@ -68,7 +69,8 @@ namespace Applications
             options.AddPolicy(DashboardPolicies.ShowAdminDashboard, DashboardPolicies.CanShowAdminDashboard());
             options.AddPolicy(RolePolicies.AdminOnly, AppPolicies.IsAdminOnly());
             options.AddPolicy(RolePolicies.AccountOnly, AppPolicies.IsAccountOnly());
-            options.AddPolicy(RolePolicies.CreditOfficerOnly, AppPolicies.CreditOfficerOnly());
+            options.AddPolicy(RolePolicies.CEOOnly, AppPolicies.IsCEOOnly());
+            options.AddPolicy(RolePolicies.CreditOfficerOnly, AppPolicies.IsCreditOfficerOnly());
             options.AddPolicy(RolePolicies.ManagerOnly, AppPolicies.IsManagerOnly());
             options.AddPolicy(CustomersPolicies.Read, CustomersPolicies.CanRead());
             options.AddPolicy(CustomersPolicies.Create, CustomersPolicies.CanCreate());

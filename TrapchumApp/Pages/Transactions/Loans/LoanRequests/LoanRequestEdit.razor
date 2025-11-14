@@ -30,7 +30,7 @@
                                                             ShowRemove="true"
                                                             @ref="CollateralRef"
                                                             Add="AddCollaterals"
-                                                            RemoveCollateral="@RemovedCollateral"
+                                                            RemoveCollateral="@RemovedCollateral" 
                                                             Collaterals="CollateralLines">
                                         <SearchBoxTemplate>
                                             <CollateralSearchList CustomerId="@CustomerId"
@@ -38,7 +38,6 @@
                                                                   SingleSelected="SelectedCollateral" />
                                         </SearchBoxTemplate>
                                     </LoanRequestCollaterals>
-
                                 </RadzenTabsItem>
                                 <RadzenTabsItem Icon="@IconNames.Group" Text="Guarantors">
                                     <LoanRequestGaurantor Guarantors="Guarantors"
@@ -52,7 +51,6 @@
                                             <GuarantorSearchList OnSelected="SelectedGuarantors" SelectMany="SelectMany" />
                                         </SearchBoxTemplate>
                                     </LoanRequestGaurantor>
-
                                 </RadzenTabsItem>
                                 <RadzenTabsItem Icon="@IconNames.AttachFile" Text="Attarchment">
                                     <LoanRequestDocument Documents="@Documents"
@@ -73,9 +71,7 @@
                         <RadzenFieldset>
                             <RadzenRow AlignItems="AlignItems.Center">
                                 <RadzenColumn Size="12">
-                                    <RadzenTextArea @bind-Value="model.Memo" class="@Styles.W100">
-
-                                    </RadzenTextArea>
+                                    <RadzenTextArea @bind-Value="model.Memo" class="@Styles.W100"></RadzenTextArea>
                                 </RadzenColumn>
                             </RadzenRow>
                             <LoanRequestNotes Data="@_loanDescriptions" @key="@Guid.NewGuid().ToString("N")" />

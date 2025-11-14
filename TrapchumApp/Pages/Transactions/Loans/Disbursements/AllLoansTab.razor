@@ -1,4 +1,6 @@
-﻿@using Applications.Responses.ViewModels.Loans
+﻿@using Applications.Features.Loans.Responses
+@using Applications.Responses.ViewModels.Loans
+@using TrapchumApp.Pages.Transactions.Loans.Menu
 <GridToolbar SearchChanged="@TextLoanSearchChanged">
     <RightChildren>
         <RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal">
@@ -27,6 +29,7 @@
                 AllowRowSelectOnRowClick="true"
                 PageSizeChanged="@ChangedPageSize"
                 RowSelect="@OnRowSelected"
+                RowRender="@OnRowRender"
                 PageSizeOptions="@StorageConstant.PageSizeOptions"
                 AllowPaging="true">
     <Columns>
@@ -35,7 +38,7 @@
                               Title="#"
                               Sortable="false">
             <Template>
-                @(LoanItems.IndexOf(p) + 1)
+                @p.RowIndex
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Property="RegisterDate"
@@ -115,7 +118,7 @@
                               TextAlign="TextAlign.Center"
                               Sortable="true">
             <Template>
-                @if(ChildMenu is not null)
+                @if (ChildMenu is not null)
                 {
                     @ChildMenu
                 }
@@ -139,10 +142,27 @@
 @code {
 
     [Parameter] public RenderFragment? ChildMenu { get; set; } = default!;
+   
+    [CascadingParameter]
+    Task<AuthenticationState> AuthState { get; set; } = default!;
 
     void ShowContextMenuWithContent(MouseEventArgs args, VLoanDisbursments p)
     {
-        ContextMenuService.Open(args, ds =>@<RadzenMenu Style="font-size:0.8rem;">
+        ContextMenuService.Open(args, ds =>@<LoanMenu Data="@p" />);
+    }
+
+    void OnRowSelected(VLoanDisbursments arg)
+    {
+
+    }
+
+    void OnRowRender(RowRenderEventArgs<VLoanDisbursments> arg)
+    {
+        arg.Data.RowIndex = arg.Index + 1;
+    }
+}
+
+@* <RadzenMenu Style="font-size:0.8rem;">
     <RadzenMenuItem Icon="money"
                     Click="@(()=>GetPaymentSchedules(p))"
                     Text="Recieve Payment"></RadzenMenuItem>
@@ -161,14 +181,4 @@
     <RadzenMenuItem Icon="picture_as_pdf"
                     Click="@(()=>DownLoadScheduleAsPdf(p.LoanId,p.BranchId!.Value))"
                     Text="Export Loan to Pdf" />
-</RadzenMenu>
-    );
-    }
-
-
-
-    void OnRowSelected(VLoanDisbursments arg)
-    {
-        
-    }
-}
+</RadzenMenu> *@

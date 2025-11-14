@@ -1,12 +1,12 @@
 ﻿using Applications.Extensions;
 using Applications.Features.Collaterals.Dtos;
 using Applications.Features.Customers.Response;
+using Applications.Features.Loans.Responses;
 using Applications.Interfaces.Customers;
 using Applications.Responses;
 using Applications.Responses.Message;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Customers;
-using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Dapper;
 using Domains.Models.Lists;
@@ -421,29 +421,7 @@ public sealed class CustomerRepository(
         return customerKey;
     }
 
-    private IQueryable<VCustomerDetails> ApplyOrdering(IQueryable<VCustomerDetails> query, QueryParam param)
-    {
-        if (!string.IsNullOrWhiteSpace(param.SortColumn))
-        {
-            var isDescending = param.SortDescending;
-
-            var property = typeof(VCustomerDetails).GetProperty(param.SortColumn);
-
-            if (property != null)
-            {
-                query = isDescending
-                    ? query.OrderByDescending(e => EF.Property<object>(e, param.SortColumn))
-                    : query.OrderBy(e => EF.Property<object>(e, param.SortColumn));
-            }
-        }
-        else
-        {
-            query = query.OrderBy(x => x.FirstName).ThenBy(x => x.LastName);
-        }
-
-        return query;
-    }
-
+   
 
     private IQueryable<VCustomerList> ApplyOrdering(IQueryable<VCustomerList> query, QueryParam param)
     {
@@ -469,32 +447,7 @@ public sealed class CustomerRepository(
     }
 
 
-    private IQueryable<VCustomerDetails> ApplyFiltering(IQueryable<VCustomerDetails> queries, QueryParam param)
-    {
-        if (!string.IsNullOrEmpty(param.Filter) && string.IsNullOrEmpty(param.FilterColumn))
-        {
-            queries = queries.Where(x => EF.Functions.Like(x.FullName ?? "", $"{param.Filter}%") ||
-                                         EF.Functions.Like(x.AltName ?? "", $"{param.Filter}%") ||
-                                         EF.Functions.Like(x.AltPhone ?? "", $"{param.Filter}%") ||
-                                         EF.Functions.Like(x.FirstName ?? "", $"{param.Filter}%") ||
-                                         EF.Functions.Like(x.LastName ?? "", $"{param.Filter}%") ||
-                                         x.CustomerKey == param.Filter);
-        }
-
-        if (!string.IsNullOrEmpty(param.Filter) && !string.IsNullOrEmpty(param.FilterColumn))
-        {
-            var property = typeof(VCustomerDetails).GetProperty(param.FilterColumn);
-
-            if (property != null)
-            {
-                queries = queries.Where(e =>
-                    EF.Functions.Like(EF.Property<string>(e, param.FilterColumn), $"{param.Filter}%"));
-            }
-        }
-
-        return queries;
-    }
-
+ 
 
     private IQueryable<VCustomerList> ApplyFiltering(IQueryable<VCustomerList> queries, QueryParam param)
     {
@@ -601,6 +554,57 @@ public sealed class CustomerRepository(
     }
 }
 
+
+   //private IQueryable<VCustomerDetails> ApplyFiltering(IQueryable<VCustomerDetails> queries, QueryParam param)
+   // {
+   //     if (!string.IsNullOrEmpty(param.Filter) && string.IsNullOrEmpty(param.FilterColumn))
+   //     {
+   //         queries = queries.Where(x => EF.Functions.Like(x.FullName ?? "", $"{param.Filter}%") ||
+   //                                      EF.Functions.Like(x.AltName ?? "", $"{param.Filter}%") ||
+   //                                      EF.Functions.Like(x.AltPhone ?? "", $"{param.Filter}%") ||
+   //                                      EF.Functions.Like(x.FirstName ?? "", $"{param.Filter}%") ||
+   //                                      EF.Functions.Like(x.LastName ?? "", $"{param.Filter}%") ||
+   //                                      x.CustomerKey == param.Filter);
+   //     }
+
+   //     if (!string.IsNullOrEmpty(param.Filter) && !string.IsNullOrEmpty(param.FilterColumn))
+   //     {
+   //         var property = typeof(VCustomerDetails).GetProperty(param.FilterColumn);
+
+   //         if (property != null)
+   //         {
+   //             queries = queries.Where(e =>
+   //                 EF.Functions.Like(EF.Property<string>(e, param.FilterColumn), $"{param.Filter}%"));
+   //         }
+   //     }
+
+   //     return queries;
+   // }
+
+
+
+//private IQueryable<VCustomerDetails> ApplyOrdering(IQueryable<VCustomerDetails> query, QueryParam param)
+//{
+//    if (!string.IsNullOrWhiteSpace(param.SortColumn))
+//    {
+//        var isDescending = param.SortDescending;
+
+//        var property = typeof(VCustomerDetails).GetProperty(param.SortColumn);
+
+//        if (property != null)
+//        {
+//            query = isDescending
+//                ? query.OrderByDescending(e => EF.Property<object>(e, param.SortColumn))
+//                : query.OrderBy(e => EF.Property<object>(e, param.SortColumn));
+//        }
+//    }
+//    else
+//    {
+//        query = query.OrderBy(x => x.FirstName).ThenBy(x => x.LastName);
+//    }
+
+//    return query;
+//}
 
 
 //public async Task<Pager<VCustomerList>> GetCustomersAsync(string? customerId, QueryParam param, CancellationToken cancellation = default)

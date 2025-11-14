@@ -1,9 +1,6 @@
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Services.Loans;
-using Microsoft.AspNetCore.Components;
-using System.Threading.Tasks;
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 {
     public partial class ClientLateSchedules
@@ -55,6 +52,8 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 
         async Task GetCustomerLateSchedules(VSchedule? p)
         {
+            ContextMenuService.Close();
+
             if (p is not null)
             {
                 await GetScheduleChanged.InvokeAsync(p);

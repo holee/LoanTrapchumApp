@@ -1,9 +1,9 @@
 ﻿using Applications.Enumerations;
 using Applications.Features.LoanPayments.Interfaces;
+using Applications.Features.Loans.Responses;
 using Applications.Interfaces.Loans;
 using Applications.Responses;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Loans;
 using System;
 using System.Collections.Generic;
 using System.Linq;

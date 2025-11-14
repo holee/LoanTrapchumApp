@@ -3,16 +3,14 @@ using Applications.Extensions.Identity.Policies;
 using Applications.Extensions.Web;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Requests;
+using Domains.Models.Identity;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
-using Radzen;
 
 namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 {
     public partial class Index
     {
-        
+
         [CascadingParameter]
         Task<AuthenticationState> AuthenticationState { get; set; } = default!;
         [Parameter] public int BranchId { get; set; } = 0;
@@ -44,6 +42,13 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         protected override async Task OnInitializedAsync()
         {
             var auth = await AuthenticationState;
+
+            IsAccount = (await _authorizeService.AuthorizeAsync(auth.User, AppPolicies.IsAccountOnly())).Succeeded;
+           
+            IsCreditAgent = (await _authorizeService.AuthorizeAsync(auth.User, AppPolicies.IsCreditOfficerOnly())).Succeeded;
+           
+            IsManager = (await _authorizeService.AuthorizeAsync(auth.User, AppPolicies.IsManagerOnly())).Succeeded;
+
             CanRequestLoan = (await _authorizeService.AuthorizeAsync(auth.User, RequestsPolicies.CanCreate())).Succeeded;
             CanDisburseLoan = (await _authorizeService.AuthorizeAsync(auth.User, RequestsPolicies.CanDisburseLoan())).Succeeded;
             CanAprovedLoan = (await _authorizeService.AuthorizeAsync(auth.User, RequestsPolicies.CanAproveRequest())).Succeeded;
@@ -95,7 +100,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             if (CanAprovedLoan)
             {
                 aproveUserId = _userId;
-               // creditAgentId = 0;
+                // creditAgentId = 0;
             }
 
             if (CanDisburseLoan)

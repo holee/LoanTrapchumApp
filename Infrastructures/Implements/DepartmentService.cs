@@ -1,8 +1,8 @@
-﻿using Applications.Interfaces.Lists;
+﻿using Applications.Features.Departments.Dto;
+using Applications.Interfaces.Lists;
 using Applications.Responses;
 using Applications.Responses.Message;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Departments;
 using Domains.Models.Lists;
 using Infrastructures.DataAccess;
 using Mapster;

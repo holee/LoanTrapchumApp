@@ -1,11 +1,15 @@
 ﻿using Applications.Bases;
 using Applications.Commons.Messages.Collaterals;
 using Applications.Features.Collaterals.Dtos;
+using Applications.Features.Customers.Response;
+using Applications.Features.Loans.Responses;
 using Applications.Interfaces.Customers;
+using Applications.Responses.Paginations;
 using Dapper;
 using Domains.Models.Collaterals;
 using ErrorOr;
 using Infrastructures.DataAccess;
+using Infrastructures.Implements.Extensions;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -28,7 +32,7 @@ public sealed class CollateralRepository : ICollateralService
         this.connectionFactory = connectionFactory;
     }
 
-   
+
     public async Task<ErrorOr<CollateralLine>> GetCollateralLineByIdAsync(long? id, string? collateralId)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
@@ -77,16 +81,67 @@ public sealed class CollateralRepository : ICollateralService
         return collateral is null ? Error.NotFound(CollateralMessages.NotFound) : collateral;
     }
 
+    public async Task<ErrorOr<Collateral>> GetEditCollateralByIdAsync(long lineId, string? customerId, CancellationToken cancellation = default)
+    {
+        await using var context = dbContextFactory.CreateDbContext();
+
+        var collateral = await context.Collaterals
+            .Include(c => c.CollateralLines)
+            .AsNoTracking()
+            .Where(c => c.CollateralLines.Any(line =>
+                line.Id == lineId && line.CollateralRefId == customerId))
+            .FirstOrDefaultAsync(cancellation);
+
+        if (collateral is null)
+            return Error.NotFound(CollateralMessages.NotFound);
+
+        return collateral;
+    }
+
+
+
+
     public async Task<ErrorOr<VCollateralLines>> GetCollateralLineDetailAsync(long? id, string? collateralId,
         CancellationToken cancellation = default)
     {
-        using var connection = connectionFactory.CreateConnection();
+        using var connection = await connectionFactory.CreateConnectionAsync(cancellation);
 
-        var sql = "SELECT * FROM VCollateralLines WHERE Id=@Id AND CollateralId=@CollateralId";
+        var sql = @"
+                SELECT * FROM VCollateralLines WHERE Id=@Id AND CollateralId=@CollateralId;
+                SELECT 
+                    d.LoanId,
+                    d.InstallmentType,
+                    d.Principle,
+                    d.PeriodName,
+                    d.InterestRate,
+                    d.PaidPrinciple,
+                    d.PaidInterest,
+                    d.OutStanding,
+                    d.BranchName,
+                    d.LoanStatus
+                    FROM VLoansDisbursments d
+                    INNER JOIN VLoanRequestCollaterals r
+                    ON d.LoanRequestId=r.LoanRequestId
+                    WHERE r.CollateralLineId=@Id AND r.CollateralId=@CollateralId;
+                ";
 
-        var item = await connection.QueryFirstOrDefaultAsync<VCollateralLines>(sql, new { id, collateralId });
+        var items = await connection.QueryMultipleAsync(sql, new { id, collateralId });
 
-        return item is null ? Error.NotFound(CollateralMessages.NotFound) : item;
+        var item = await items.ReadFirstOrDefaultAsync<VCollateralLines>();
+
+        if (item is null)
+        {
+            return Error.NotFound(CollateralMessages.NotFound);
+        }
+
+        var loanDisbursements = (await items.ReadAsync<VLoanDisbursments>()).ToList();
+
+        if (loanDisbursements.Count > 0)
+        {
+            item.LoanDisbursements = loanDisbursements;
+        }
+
+        return item;
     }
 
     public async Task<ErrorOr<IEnumerable<VCollateralLines>>> GetCollateralLinesAsync(string? collateralId)
@@ -196,8 +251,7 @@ public sealed class CollateralRepository : ICollateralService
         }
     }
 
-    public async Task<ErrorOr<string>> InsertOrUpdateCollateralLineAsync(CollateralLine model,
-        CancellationToken cancellation = default)
+    public async Task<ErrorOr<string>> InsertOrUpdateCollateralLineAsync(CollateralLine model, CancellationToken cancellation = default)
     {
         logger.LogInformation("Upserting collateral line with ID: {Id}", model.Id);
         try
@@ -225,8 +279,7 @@ public sealed class CollateralRepository : ICollateralService
         }
     }
 
-    public async Task<ErrorOr<DeleteResult>> DeleteCollateralLineAsync(long? id, string? collateralId,
-        CancellationToken cancellation = default)
+    public async Task<ErrorOr<DeleteResult>> DeleteCollateralLineAsync(long? id, string? collateralId, CancellationToken cancellation = default)
     {
         logger.LogInformation("Upserting collateral line with ID: {Id} & Collateral:{collateralId}", id, collateralId);
         try
@@ -298,6 +351,90 @@ public sealed class CollateralRepository : ICollateralService
             WareHouse = x.WareHouse
         };
     }
+
+    public async Task<Pager<VCollateralLines>> GetCollateralLinesAsPaging(string? customerId, QueryParam query, CancellationToken cancellation = default)
+    {
+        await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+        var baseQuery = context.VCollateralLines.AsQueryable();
+
+        if (!string.IsNullOrEmpty(customerId))
+        {
+            baseQuery = baseQuery.Where(x => x.CollateralId == customerId);
+        }
+
+        // Apply filtering
+        baseQuery = ApplyFilter(query, baseQuery);
+
+        // Continue with pagination logic here
+
+        baseQuery = ApplyOrdering(baseQuery, query);
+
+        var totalItems = await baseQuery.CountAsync(cancellation);
+
+        var items = await baseQuery
+                                .Skip(query.Skip)
+                                .Take(query.PageSize)
+                                .AsNoTracking()
+                                .ToListAsync(cancellation);
+        return new Pager<VCollateralLines>(items, totalItems);
+    }
+
+
+    private IQueryable<VCollateralLines> ApplyOrdering(IQueryable<VCollateralLines> query, QueryParam param)
+    {
+        if (!string.IsNullOrWhiteSpace(param.SortColumn))
+        {
+            var property = typeof(VCollateralLines).GetProperty(param.SortColumn);
+
+            if (property != null)
+            {
+                query = query.ApplyOrdering(param);
+            }
+        }
+        else
+        {
+            query = query.OrderBy(x => x.RegisterDate).ThenBy(x => x.TypeName);
+        }
+
+        return query;
+    }
+
+
+
+    private static IQueryable<VCollateralLines> ApplyFilter(QueryParam query, IQueryable<VCollateralLines> baseQuery)
+    {
+        // No filter supplied -> return original query
+
+        var filterValue = query.Filter ?? string.Empty;
+
+        var pattern = $"%{filterValue}%";
+
+        // If a specific column is targeted, apply a narrowed predicate
+
+        if (!string.IsNullOrEmpty(pattern) && string.IsNullOrWhiteSpace(query.FilterColumn))
+        {
+            string[] filterColumns = [nameof(VCollateralLines.TypeName), nameof(VCollateralLines.CollateralSubTypeName), nameof(VCollateralLines.OwnerName), nameof(VCollateralLines.CollateralNo)];
+
+            baseQuery = baseQuery.WhereMatchesFilter(pattern, filterColumns);
+
+            return baseQuery;
+
+        }
+
+
+        if (!string.IsNullOrEmpty(pattern) && !string.IsNullOrEmpty(query.FilterColumn))
+        {
+            var property = typeof(VCollateralLines).GetProperty(query.FilterColumn);
+
+            if (property != null)
+            {
+                baseQuery = baseQuery.Where(e => EF.Functions.Like(EF.Property<string>(e, query.FilterColumn), $"{pattern}%"));
+            }
+        }
+
+        return baseQuery;
+    }
 }
 
 
@@ -347,7 +484,3 @@ public sealed class CollateralRepository : ICollateralService
 //      {
 //          return Result.Failure<VCustomerCollaterals>(ErrorResponse.NotFound("No collateral found"));
 //      }
-
-
-//      return Result.Success(collateral);
-//  }

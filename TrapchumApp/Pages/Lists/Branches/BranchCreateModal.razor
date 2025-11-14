@@ -12,6 +12,7 @@
 <EditForm OnValidSubmit="@OnSubmit" EditContext="@editContext">
     <FluentValidationValidator DisableAssemblyScanning="true" />
     <ValidationSummary />
+    <input type="hidden" @bind="model.BankRefId" />
     <RadzenFieldset AllowCollapse="false" Collapsed="false" Gap="0.25rem">
         <HeaderTemplate>
             <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
@@ -94,7 +95,7 @@
                                        class="rz-dropdown-filter rz-inputtext"
                                        autocomplete="Off"
                                        aria-autocomplete="none"
-                                       autofocus="true"
+                                       autofocus
                                        @bind="@searchText"
                                        @oninput="@OnSearchTextChanged"
                                        @onkeypress="@OnKeyPress"

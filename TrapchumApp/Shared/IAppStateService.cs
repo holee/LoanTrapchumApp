@@ -2,11 +2,13 @@
 
 public interface IAppStateService
 {
-    bool State { get; set; }
-    bool IsAdmin { get; set; }
-    bool IsAccount { get; set; }
-    bool IsCreditAgent { get; set; }
-    bool CanDisbursed { get; set; }
-    bool CanApproved { get; set; }
-    bool CanRequest { get; set; }
+    bool State { get; protected set; }
+    bool IsAdmin { get; protected set; }
+    bool IsAccount { get; protected set; }
+    bool IsCreditAgent { get; protected set; }
+    bool CanDisbursed { get; protected set; }
+    bool CanApproved { get; protected set; }
+    bool CanRequest { get; protected set; }
+    bool CanRecievePayment { get; protected set; }
+    bool CanWriteOff { get;protected set; }
 }

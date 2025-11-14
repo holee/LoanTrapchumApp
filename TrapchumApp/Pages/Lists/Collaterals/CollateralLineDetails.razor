@@ -1,65 +1,90 @@
 ﻿@using Applications.Features.Collaterals.Commands.CollateralLineQuery
 @using Applications.Features.Collaterals.Dtos
 @using Applications.Features.Collaterals.Queries.GetCollateralLineDetails
+@using Applications.Features.Loans.Responses
 @using Applications.Utils
-<table class="table table-sm">
-    <tr>
-        <th class="rz-w-25">Reference No</th>
-        <td>@_collateralLine?.ReferenceNo</td>
-    </tr>
-    <tr>
-        <th class="rz-w-25">Type Name</th>
-        <td>@_collateralLine?.TypeName</td>
-    </tr>
-    <tr>
-        <th class="rz-w-25">Owner Name</th>
-        <td>@_collateralLine?.OwnerName</td>
-    </tr>
-    <tr>
-        <th class="rz-w-25">Location</th>
-        <td>@_collateralLine?.Location</td>
-    </tr>
-    <tr>
-        <th class="rz-w-25">Quantity</th>
-        <td class="rz-text-end">@_collateralLine?.Quantity</td>
-    </tr>
-    <tr>
-        <th class="rz-w-25">Market Price</th>
-        <td class="rz-text-end">@_collateralLine?.MarketPrice.Format()</td>
-    </tr>
-    <tr>
-        <th class="w-25">Hot Price</th>
-        <td class="rz-text-end">@_collateralLine?.HotPrice.Format()</td>
-    </tr>
-    <tr>
-        <th class="rz-w-25">Pawn Price</th>
-        <td class="rz-text-end">@_collateralLine?.PawnPrice.Format()</td>
+@attribute [StreamRendering]
+<RadzenStack Orientation="Orientation.Horizontal" class="@Styles.Mb2" AlignItems="AlignItems.Center">
+    <table class="table table-sm">
+        <tr>
+            <th class="rz-w-25">Reference No</th>
+            <td>@_collateralLine?.ReferenceNo</td>
+        </tr>
+        <tr>
+            <th class="rz-w-25">Type Name</th>
+            <td>@_collateralLine?.TypeName</td>
+        </tr>
+        <tr>
+            <th class="rz-w-25">Owner Name</th>
+            <td>@_collateralLine?.OwnerName</td>
+        </tr>
+        <tr>
+            <th class="rz-w-25">Location</th>
+            <td>@_collateralLine?.Location</td>
+        </tr>
+        <tr>
+            <th class="rz-w-25">Quantity</th>
+            <td class="rz-text-end">@_collateralLine?.Quantity</td>
+        </tr>
+        <tr>
+            <th class="rz-w-25">Market Price</th>
+            <td class="rz-text-end">@_collateralLine?.MarketPrice.Format()</td>
+        </tr>
+        <tr>
+            <th class="w-25">Hot Price</th>
+            <td class="rz-text-end">@_collateralLine?.HotPrice.Format()</td>
+        </tr>
+        <tr>
+            <th class="rz-w-25">Pawn Price</th>
+            <td class="rz-text-end">@_collateralLine?.PawnPrice.Format()</td>
+        </tr>
+        <tr>
+            <th class="rz-w-25">Description</th>
+            <td class="rz-text-end">@_collateralLine?.Description</td>
+        </tr>
+    </table>
 
-    </tr>
-</table>
+</RadzenStack>
+<RadzenDataGrid Data="@_items"
+                Responsive="true"
+                GridLines="DataGridGridLines.Both"
+                AllowAlternatingRows="true"
+                Density="Density.Compact"
+                TItem="VLoanDisbursments">
+    <Columns>
+        <RadzenDataGridColumn TextAlign="TextAlign.Right" Property="@nameof(VLoanDisbursments.Principle)" Title="Principle" />
+        <RadzenDataGridColumn TextAlign="TextAlign.Right" Property="@nameof(VLoanDisbursments.InterestRate)" Title="Interest Rate" />
+        <RadzenDataGridColumn TextAlign="TextAlign.Right" Property="@nameof(VLoanDisbursments.PaidPrinciple)" Title="Paid Principle" />
+        <RadzenDataGridColumn TextAlign="TextAlign.Right" Property="@nameof(VLoanDisbursments.PaidInterest)" Title="Paid Interest" />
+        <RadzenDataGridColumn TextAlign="TextAlign.Right" Property="@nameof(VLoanDisbursments.OutStanding)" Title="OutStanding" />
+        <RadzenDataGridColumn TextAlign="TextAlign.Center" Property="@nameof(VLoanDisbursments.LoanStatus)" Title="Status" />
+        <RadzenDataGridColumn TextAlign="TextAlign.Center" Property="@nameof(VLoanDisbursments.LoanStatus)" Width="5rem" Title="Action">
+            <Template>
+                <RadzenButton Size="ButtonSize.ExtraSmall" Variant="Variant.Text"
+                              Icon="@IconNames.MoreVert" />
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
 @code {
 
     [Parameter] public long Id { get; set; } = 0;
 
     [Parameter] public string CollateralId { get; set; } = string.Empty;
 
-    IMediator _mediator;
-
     VCollateralLines? _collateralLine = null;
 
-    public CollateralLineDetails(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
+    IEnumerable<VLoanDisbursments> _items = [];
 
     protected override async Task OnInitializedAsync()
     {
 
-        var request = await _mediator.Send(new GetCollateralLineDetailQuery(Id, CollateralId));
+        var request = await mediator.Send(new GetCollateralLineDetailQuery(Id, CollateralId));
 
         if (!request.IsError)
         {
             _collateralLine = request.Value;
+            _items = request.Value.LoanDisbursements;
         }
 
         await base.OnInitializedAsync();

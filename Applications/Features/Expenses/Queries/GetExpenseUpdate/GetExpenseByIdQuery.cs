@@ -5,5 +5,5 @@ using ErrorOr;
 
 namespace Applications.Features.Expenses.Queries.GetExpenseById;
 
-public sealed record GetExpenseByIdUpdateQuery(long Id,string CustomerId) : IRequest<ErrorOr<ExpenseDtoUpdate>>;
+public  record GetExpenseByIdUpdateQuery(long Id,string CustomerId) : IRequest<ErrorOr<ExpenseDtoUpdate>>;
  

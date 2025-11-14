@@ -7,7 +7,6 @@ using Applications.Interfaces.Lists;
 using Applications.Interfaces.Loans;
 using Applications.Responses;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Loans;
 using Domains.Models.Lists.CreditAgents;
 using Domains.Models.Loans;
 using Domains.Models.Transaction;

@@ -1,9 +1,5 @@
-﻿using Applications.Extensions.mappers;
-using Applications.Features.Customers.Services;
-using Applications.Features.Entities;
+﻿using Applications.Features.Customers.Services;
 using Applications.Interfaces.Customers;
-using Applications.Responses;
-using Domains.Models.Lists.Customers;
 
 namespace Applications.Features.Customers.UseCases
 {

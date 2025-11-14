@@ -1,0 +1,41 @@
+﻿@using Applications.Features.Collaterals.Dtos
+@using System.Threading.Tasks
+<RadzenMenu Style="font-size:0.8rem;">
+    <RadzenMenuItem Icon="info" Text="Details" Click="@ClickDetails"></RadzenMenuItem>
+    <RadzenMenuItem Icon="edit" Text="Edit" Click="@ClickEdit"></RadzenMenuItem>
+    <RadzenMenuItem Icon="delete" Text="Delete" Click="@ClickDelete"></RadzenMenuItem>
+    <RadzenMenuItem Icon="edit" Text="Withdraw"></RadzenMenuItem>
+</RadzenMenu>
+
+@code {
+    [Parameter] public VCollateralLines? Item { get; set; }
+
+    [Parameter] public EventCallback<VCollateralLines> OnSelectItem { get; set; }
+
+    //[Parameter] public EventCallback<VCollateralLines> OnSelectEdit { get; set; }
+
+    public async Task ClickDetails()
+    {
+        if (Item != null && OnSelectItem.HasDelegate)
+        {
+            await OnSelectItem.InvokeAsync(Item);
+        }   
+    }
+
+    public async Task ClickEdit()
+    {
+        if (Item != null)
+        {
+            await OnSelectItem.InvokeAsync(Item);
+        }
+    }
+
+    public async Task ClickDelete()
+    {
+        // Implement delete logic here
+        if (Item != null)
+        {
+            await OnSelectItem.InvokeAsync(Item);
+        }
+    }   
+}

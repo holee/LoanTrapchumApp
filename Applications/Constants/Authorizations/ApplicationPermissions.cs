@@ -74,6 +74,8 @@ public sealed class ApplicationPermissions
         new(Modules.Repayments,Feature.Delete, Group.Operation, "Delete Payment", true),
         new(Modules.Repayments,Feature.MultiplePayment, Group.Accounting, "Allow Multiple Payment", true),
         new(Modules.Repayments,Feature.PayOff, Group.Accounting, "Allow Pay Off Loan", true),
+        new(Modules.Repayments,Feature.WriteOff, Group.Accounting, "Allow Write Off Loan", true),
+        new(Modules.Repayments,Feature.RecievePayment, Group.Accounting, "Allow Recieve Payment Loan", true),
         new(Modules.Transactions,Feature.Read, Group.Accounting, "Read Transaction", true),
         new(Modules.Transactions,Feature.Create, Group.Accounting, "Create Transaction", true),
         new(Modules.Transactions,Feature.Update, Group.Accounting, "Update Transaction", true),

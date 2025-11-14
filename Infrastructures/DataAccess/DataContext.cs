@@ -1,16 +1,16 @@
 ﻿using Applications.Features.Collaterals.Dtos;
 using Applications.Features.Currencies.Responses;
-using Applications.Features.Customers.Queries;
+using Applications.Features.Customers.Dto;
 using Applications.Features.Customers.Response;
+using Applications.Features.Departments.Dto;
+using Applications.Features.Loans.Responses;
 using Applications.Responses.ViewModels.Addresses;
 using Applications.Responses.ViewModels.Auths;
 using Applications.Responses.ViewModels.Branches;
 using Applications.Responses.ViewModels.Customers;
-using Applications.Responses.ViewModels.Departments;
 using Applications.Responses.ViewModels.Employees;
 using Applications.Responses.ViewModels.Journals;
 using Applications.Responses.ViewModels.Ledgers;
-using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Responses.ViewModels.OtherNames;
@@ -155,6 +155,7 @@ namespace Infrastructures.DataAccess
         public DbSet<Customer> Customers => Set<Customer>();
         public DbSet<CustomerExpense> CustomerExpenses => Set<CustomerExpense>();
         public DbSet<CustomerIncome> CustomerIncomes => Set<CustomerIncome>();
+        public DbSet<IncomeExpense> IncomeExpenses => Set<IncomeExpense>();
         public DbSet<EntityNames> EntityNames => Set<EntityNames>();
         public DbSet<Occupation> Occupations => Set<Occupation>();
         public DbSet<Address> Addresses => Set<Address>();
@@ -235,7 +236,8 @@ namespace Infrastructures.DataAccess
         public DbSet<VCustomerExpenses> VCustomerExpenses => Set<VCustomerExpenses>();
         public DbSet<VCustomerIncomes> VCustomerIncomes => Set<VCustomerIncomes>();
         public DbSet<VCustomerActivities> VCustomerActivities => Set<VCustomerActivities>();
-        public DbSet<VCustomerCollateralLine> VCustomerCollateralLines => Set<VCustomerCollateralLine>(); 
+        public DbSet<VCustomerCollateralLine> VCustomerCollateralLines => Set<VCustomerCollateralLine>();
+        public DbSet<VCollateralLines> VCollateralLines => Set<VCollateralLines>(); 
         public DbSet<VLoanRequests> VLoanRequests => Set<VLoanRequests>();
         public DbSet<VLoanDisbursments> VLoanDisbursements => Set<VLoanDisbursments>();
 

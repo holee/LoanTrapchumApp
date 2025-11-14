@@ -13,16 +13,19 @@ using Applications.Features.CashManagements.Interfaces;
 using Applications.Features.CashManagements.UseCases;
 using Applications.Features.Collaterals.Commands.AddOrUpdateCollaterals;
 using Applications.Features.Collaterals.Commands.CollateralLineQuery;
+using Applications.Features.Collaterals.Commands.CreateCollateralLines;
 using Applications.Features.Collaterals.Commands.DeleteCOmmand;
 using Applications.Features.Collaterals.Dtos;
 using Applications.Features.Collaterals.Queries.GetCollateralDetails;
 using Applications.Features.Collaterals.Queries.GetCollateralLineByCollateralId;
 using Applications.Features.Collaterals.Queries.GetCollateralLineById;
 using Applications.Features.Collaterals.Queries.GetCollateralLineDetails;
+using Applications.Features.Collaterals.Queries.GetCollateralLinesAsPaging;
 using Applications.Features.Currencies;
 using Applications.Features.Customers.Commands.Customers.Queries.GetCustomerAsPaging;
 using Applications.Features.Customers.Commands.Customers.Queries.GetCustomerById;
 using Applications.Features.Customers.Interfaces;
+using Applications.Features.Customers.Queries.GetCustomerAsPaging;
 using Applications.Features.Customers.Response;
 using Applications.Features.Customers.Services;
 using Applications.Features.Customers.UseCases;
@@ -31,18 +34,24 @@ using Applications.Features.Employees.UseCases;
 using Applications.Features.Expenses.CreateExpenseCommands;
 using Applications.Features.Expenses.CreateExpensesCommands;
 using Applications.Features.Expenses.DeleteExpenseCommand;
+using Applications.Features.Expenses.Dto;
 using Applications.Features.Expenses.EditExpenseCommands;
 using Applications.Features.Expenses.EditExpensesCommands;
 using Applications.Features.Expenses.Queries.GetExpenseByCustomerId;
 using Applications.Features.Expenses.Queries.GetExpenseById;
 using Applications.Features.Incomes.Command.CreateIncome;
+using Applications.Features.Incomes.Command.CreateIncomeExpenseSource;
 using Applications.Features.Incomes.Command.CreateIncomes;
 using Applications.Features.Incomes.Command.DeleteIncome;
 using Applications.Features.Incomes.Command.EditIncome;
+using Applications.Features.Incomes.Command.EditIncomeExpenseSource;
+using Applications.Features.Incomes.Command.GetEditIncomeExpenseSource;
 using Applications.Features.Incomes.Dto;
 using Applications.Features.Incomes.Queries.GetEditIncome;
+using Applications.Features.Incomes.Queries.GetEditIncomeExpenseSource;
 using Applications.Features.Incomes.Queries.GetIncomeByCustomerId;
 using Applications.Features.Incomes.Queries.GetIncomeById;
+using Applications.Features.Incomes.Queries.GetIncomeExpense;
 using Applications.Features.LoanPayments.Interfaces;
 using Applications.Features.LoanPayments.UseCases;
 using Applications.Features.LoanRequests.Interfaces;
@@ -162,12 +171,14 @@ namespace Applications
             services.AddScoped<IMediator, SimpleMediator>();
 
 
+            services.AddScoped<IRequestHandler<AddOrUpdateCollateralLineCommand, ErrorOr<string>>, AddOrUpdateCollateralLineCommandHandler>();
             services.AddScoped<IRequestHandler<AddOrUpdateCollateralCommand, ErrorOr<string>>, AddOrUpdateCollateralCommandHandler>();
             services.AddScoped<IRequestHandler<DeleteCollateralLineCommand, ErrorOr<DeleteResult>>, DeleteCollateralLineCommandHandler>();
             services.AddScoped<IRequestHandler<GetCollateralLineByCollateralIdQuery, ErrorOr<IEnumerable<VCollateralLines>>>, GetCustomerCollateralLineByIdHandler>();
             services.AddScoped<IRequestHandler<GetCollateralLineDetailQuery, ErrorOr<VCollateralLines>>, GetCollateralLineDetailQueryHandler>();
             services.AddScoped<IRequestHandler<GetCollateralDetailQuery, ErrorOr<VCustomerCollaterals>>, GetCollateralDetailQueryHandler>();
             services.AddScoped<IRequestHandler<GetCollateralLineByIdEditQuery, ErrorOr<CollateralLineDtoCreate>>, GetCollateralLineByIdQueryEditHandler>();
+            services.AddScoped<IRequestHandler<GetCollateralLineAsPagingQuery, Pager<VCollateralLines>>, GetColleralLineAsPagingQueryHandler>();
 
             ///Activities
             services.AddScoped<IRequestHandler<DeleteActivityCommand, ErrorOr<bool>>, DeleteActivityCommandHandler>();
@@ -190,7 +201,11 @@ namespace Applications
             services.AddScoped<IRequestHandler<CreateIncomesCommand, ErrorOr<string>>, CreateIncomesCommandHandler>();
             services.AddScoped<IRequestHandler<DeleteIncomeCommand, ErrorOr<bool>>, DeleteIncomeCommandHandler>();
             services.AddScoped<IRequestHandler<EditIncomeCommand, ErrorOr<long>>, EditIncomeCommandHandler>();
-      
+            services.AddScoped<IRequestHandler<GetIncomeExpenseQuery, Pager<IncomeExpenseDto>>, GetIncomeExpenseAsPagingQuery>();
+
+
+
+
 
 
             services.AddScoped<IRequestHandler<GetEditIncomeCommand, ErrorOr<EditIncomeDto>>, GetEditIncomeCommandHandler>();
@@ -201,6 +216,7 @@ namespace Applications
             services.AddScoped<IRequestHandler<AddExpensesCommand, ErrorOr<string>>, AddExpensesCommandHandler>();
             services.AddScoped<IRequestHandler<AddExpenseCommand, ErrorOr<long>>, AddExpenseCommandHandler>();
             services.AddScoped<IRequestHandler<DeleteExpenseCommand, ErrorOr<string>>, DeleteExpenseCommandHandler>();
+            services.AddScoped<IRequestHandler<GetExpenseByIdUpdateQuery, ErrorOr<ExpenseDtoUpdate>>, GetExpenseByIdUpdateQueryHandler>();
 
 
 
@@ -210,6 +226,13 @@ namespace Applications
 
 
 
+
+            services.AddScoped<IRequestHandler<GetCustomerAsPagingQuery, Pager<VCustomerList>>, GetCustomerAsPagingQueryHandler>();
+
+
+            services.AddScoped<IRequestHandler<CreateIncomeExpenseCommand, ErrorOr<int>>, CreateIncomeExpenseCommandHandler>();
+            services.AddScoped<IRequestHandler<EditIncomeExpenseCommand, ErrorOr<int>>, EditIncomeExpenseCommandHandler>();
+            services.AddScoped<IRequestHandler<GetEditIncomeExpenseQuery, ErrorOr<IncomeExpenseDto>>, GetEditIncomeExpenseQueryHandler>();
 
 
 

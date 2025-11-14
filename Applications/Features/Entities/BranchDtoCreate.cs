@@ -4,9 +4,7 @@ namespace Applications.Features.Entities;
 
 public class BranchDtoCreate 
 {
-    public int? BankRefId { get; set; }
-    [Required]
-    [StringLength(100)] 
+    public int? BankRefId { get; set; } = 11;
     public string? BranchName { get; set; }
     public string? Description { get; set; }
     public string? CountryName { get; set; }

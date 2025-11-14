@@ -1,5 +1,5 @@
-﻿using Applications.Responses.ViewModels.Loans;
-using Applications.Features.LoanPayments.Requests;
+﻿using Applications.Features.LoanPayments.Requests;
+using Applications.Features.Loans.Responses;
 
 
 namespace Applications.Commons.Mappers

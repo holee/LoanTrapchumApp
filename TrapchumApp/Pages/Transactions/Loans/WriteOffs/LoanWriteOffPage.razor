@@ -1,16 +1,15 @@
-﻿@page "/app/loan/disbursement/write-off/{BranchId:int}"
+﻿@page "/App/Loan/{LoanId}/Customer/{CustomerId}/WriteOff"
 @using TrapchumApp.Pages.Transactions.Loans.Disbursements
 <PageTitle>Loan Write Off</PageTitle>
 <PageTitle>Loan Pay Off</PageTitle>
 <RadzenTabs>
     <Tabs>
         <RadzenTabsItem Text="All">
-            <AllLoansTab BranchId="@BranchId"> 
+            <AllLoansTab BranchId="@BranchId">
                 <ChildMenu>
                     <RadzenButton Size="ButtonSize.ExtraSmall"
                                   Icon="@IconNames.HMoreVert"
-                                  Variant="Variant.Text"
-                                  Click="@((args)=>ShowContextMenuWithContent(args))" />
+                                  Variant="Variant.Text" />
                 </ChildMenu>
             </AllLoansTab>
         </RadzenTabsItem>
@@ -22,25 +21,9 @@
 @code {
     [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
     [CascadingParameter] CascadingAppState bState { get; set; } = default!;
-    [Parameter] public int BranchId { get; set; }
-    void ShowContextMenuWithContent(MouseEventArgs args)
-    {
-
-        ContextMenuService.Open(args, ds =>@<RadzenMenu Style="font-size:0.8rem;">
-            <RadzenMenuItem Icon="money"
-                            Text="Recieve Payment"></RadzenMenuItem>
-            <RadzenMenuItem Icon="paid"
-                            Text="PayOff"></RadzenMenuItem>
-            <RadzenMenuItem Icon="change_circle"
-                            Text="Change Credit Agent"></RadzenMenuItem>
-            <RadzenMenuItem Icon="info"
-                            Text="Details"></RadzenMenuItem>
-        </RadzenMenu>
-    );
-    }
-
-
-
+    [Parameter, SupplyParameterFromQuery] public int BranchId { get; set; }
+    [Parameter] public string? LoanId { get; set; } = string.Empty;
+    [Parameter] public string? CustomerId { get; set; } = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {

@@ -1,6 +1,6 @@
-﻿using Applications.Interfaces.Customers;
+﻿using Applications.Features.Loans.Responses;
+using Applications.Interfaces.Customers;
 using Applications.Responses;
-using Applications.Responses.ViewModels.Loans;
 
 namespace Applications.Features.Customers.UseCases;
 

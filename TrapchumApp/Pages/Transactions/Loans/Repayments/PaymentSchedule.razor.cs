@@ -5,9 +5,9 @@ using Applications.Enumerations;
 using Applications.Extensions.NumberExtensions;
 using Applications.Features.LoanPayments.Interfaces;
 using Applications.Features.LoanPayments.Requests;
+using Applications.Features.Loans.Responses;
 using Applications.Features.Loans.Services;
 using Applications.Responses.ViewModels.Branches;
-using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Services.Loans;
 using Domains.Models.Loans;
@@ -38,6 +38,7 @@ public partial class PaymentSchedule
     [Parameter] public int BranchId { get; set; }
     [Parameter, SupplyParameterFromQuery] public string? CreditAgentId { get; set; }
     [Parameter, SupplyParameterFromQuery] public int CurrencyId { get; set; }
+
     private string? _userId = string.Empty;
     [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
 

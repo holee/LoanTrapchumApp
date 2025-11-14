@@ -1,17 +1,13 @@
 ﻿using Applications.Enumerations;
+using Applications.Features.Loans.Responses;
 using Applications.Interfaces.Loans;
-using Applications.Responses;
-using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Responses.ViewModels.Reports;
 using Dapper;
-using Infrastructures.Constants.Procedures;
 using Infrastructures.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Data;
-using System.Data.Common;
 
 namespace Infrastructures.Implements
 {
@@ -75,7 +71,7 @@ namespace Infrastructures.Implements
                         s.LoanId,
                         s.BranchId,
                         s.OutStanding
-                    FROM VLoanDisbursments s
+                    FROM VLoansDisbursments s
                     WHERE 
                         s.LoanId=@LoanId AND 
                         s.BranchId=@BranchId
@@ -122,7 +118,7 @@ namespace Infrastructures.Implements
                         ts.TotalPay,
                         ts.LoanOutstanding,
                         ts.ScheduleStatusId
-                FROM VLoanDisbursments d
+                FROM VLoansDisbursments d
                 LEFT JOIN FilteredBalance fb
                     ON d.LoanId = fb.LoanId AND d.BranchId = fb.BranchId
                 LEFT JOIN TopSchedules ts

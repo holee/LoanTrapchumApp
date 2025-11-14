@@ -99,7 +99,6 @@
                             </table>
                         </RadzenTabsItem>
                         <RadzenTabsItem Text="Personal">
-                            <table class="table table-sm">
                                 <thead>
                                     <tr>
                                         <th>#</th>
@@ -117,64 +116,7 @@
                                         </th>
                                     </tr>
                                 </thead>
-                              @*   <tbody>
-                                    @if (Model.CollateralLines?.Count > 0)
-                                    {
-                                        var people = Model.CollateralLines
-                                        .Where(x => x.TypeName == "Personal")
-                                        .ToList();
-                                        @for (int x = 0; x < people?.Count; x++)
-                                        {
-                                            var row = x;
-                                            var currentrow = x + 1;
-                                            <tr>
-                                                <td>
-                                                    @currentrow
-                                                    <input type="hidden" @bind="people[row]!.Id" />
-                                                    <input type="hidden" @bind="people[row]!.CollateralRefId" />
-                                                </td>
-                                                <td style="width:15%;">
-                                                    <RadzenDropDown TValue="int?"
-                                                                    Data="collateralPersonals"
-                                                                    TextProperty="CollateralSubTypeName"
-                                                                    ValueProperty="Id"
-                                                                    @bind-Value:after="SelectedPeopleChanged"
-                                                                    @bind-Value="people[row].SubCategoryRefId">
-                                                    </RadzenDropDown>
-                                                </td>
-                                                <td style="width:15%;">
-                                                    <RadzenTextBox @bind-Value="people[row].CollateralNo"></RadzenTextBox>
-                                                </td>
-                                                <td>
-                                                    <RadzenTextBox Placeholder="Owner" @bind-Value="people[row].OwnerName"></RadzenTextBox>
-                                                </td>
-                                                <td>
-                                                    <RadzenNumeric ShowUpDown="false"
-                                                                   Placeholder="Qty" @bind-Value="people[row].Quantity" />
-                                                </td>
-                                                <td>
-                                                    <RadzenNumeric ShowUpDown="false"
-                                                                   @bind-Value="people[row].MarketPrice" TextAlign="TextAlign.End" />
-                                                </td>
-                                                <td>
-                                                    <RadzenNumeric @bind-Value="people[row].HotPrice" TextAlign="TextAlign.End" />
-                                                </td>
-                                                <td>
-                                                    <RadzenNumeric ShowUpDown="false"
-                                                                   @bind-Value="people[row].PawnPrice" TextAlign="TextAlign.End" />
-                                                </td>
-                                                <td class="text-end">
-                                                    <RadzenButton Click="@(()=>Remove(people[row]))"
-                                                                  Icon="remove"
-                                                                  ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.DefaultSizeall">
-                                                    </RadzenButton>
-                                                </td>
-
-                                            </tr>
-                                        }
-                                    }
-                                </tbody> *@
-                            </table>
+                           
                         </RadzenTabsItem>
 
                     </Tabs>

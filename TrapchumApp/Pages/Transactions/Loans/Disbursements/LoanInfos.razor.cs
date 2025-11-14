@@ -1,7 +1,7 @@
 using Applications.Enumerations;
 using Applications.Extensions;
+using Applications.Features.Loans.Responses;
 using Applications.Features.Loans.Services;
-using Applications.Responses.ViewModels.Loans;
 using Microsoft.JSInterop;
 using TrapchumApp.Pages.Transactions.Loans.Repayments;
 using TrapchumApp.Services;
@@ -94,7 +94,14 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 
             if (LoanId.IsNotNullOrEmpty() && BranchId > 0)
             {
-                await js.InvokeVoidAsync("open", $"/Reports/Schedules/{LoanId}/{BranchId}", "_blank");
+
+                var fileName = $"Loan_Schedule_{Guid.CreateVersion7()}.pdf";
+
+                await js.InvokeVoidAsync("open", $"/Reports/Schedules/{LoanId}/{BranchId}/{fileName}", "_blank");
+
+
+                //NavigationManager.NavigateTo($"/Reports/Schedules/{LoanId}/{BranchId}/{fileName}", true);
+
             }
         }
 

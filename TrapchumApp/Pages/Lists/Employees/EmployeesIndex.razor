@@ -7,8 +7,8 @@
         line-height: 1.5rem;
         font-size: 0.8rem;
     }
-</style> 
-<RadzenTabs @ref="tabs" RenderMode="TabRenderMode.Server" Change="TabChanged" @bind-SelectedIndex="selectedIndex">
+</style>
+<RadzenTabs @ref="@tabs" RenderMode="TabRenderMode.Server" Change="TabChanged" @bind-SelectedIndex="@selectedIndex">
     <Tabs>
         <RadzenTabsItem Text="Employees" Icon="group">
             <GridToolbar SearchChanged="PerformSearch">
@@ -62,6 +62,7 @@
                             AllowAlternatingRows="true"
                             AllowRowSelectOnRowClick="true"
                             AllowSorting="true"
+                            RowDoubleClick="@OnRowDoubleClick"
                             TItem="VEmployeeList">
                 <Columns>
                     <RadzenDataGridColumn Context="c"
@@ -71,7 +72,7 @@
                                           Sortable="false"
                                           Property="@nameof(VEmployeeList.EmployeeId)">
                         <Template>
-                            @(Employees.IndexOf(c) + 1)
+                            @c.RowIndex
                         </Template>
                     </RadzenDataGridColumn>
                     <RadzenDataGridColumn Title="Name" Property="@nameof(VEmployeeList.AltName)" Context="e">
@@ -128,21 +129,75 @@
             </RadzenDataGrid>
         </RadzenTabsItem>
         <RadzenTabsItem Visible="IsEnableNew" Text="New" Icon="person_add">
-            <CreateEmployee OnClose="OnClosing"
-                            Reloaded="Reload" />
+            <Template>
+                <CloseTabButton Title="Employee Create" Closed="@(() => CloseTabe(1))" />
+            </Template>
+            <ChildContent>
+                <CreateEmployee OnClose="OnClosing"
+                                Reloaded="Reload" />
+            </ChildContent>
         </RadzenTabsItem>
         <RadzenTabsItem Visible="IsEnableEdit" Text="Edit" Icon="edit">
-            <EmployeeEdit OnClose="OnIsEditClose"
-                          EmployeeId="@_empId"
-                          Reloaded="Reload" />
+            <Template>
+                <CloseTabButton Title="Employee Edit" Closed="@(() => CloseTabe(2))" />
+            </Template>
+            <ChildContent>
+                <EmployeeEdit OnClose="OnIsEditClose"
+                              EmployeeId="@_empId"
+                              Reloaded="Reload" />
+            </ChildContent>
         </RadzenTabsItem>
-        <RadzenTabsItem Visible="IsEnableDetail" Text="Details" Icon="info">
-            <EmployeeDetails OnEdit="OnEditTab" EmployeeId="@_empId" Close="OnIsDetailClose" />
+        <RadzenTabsItem Visible="@IsEnableDetail" Text="Details" Icon="info">
+            <Template>
+                <CloseTabButton Title="Employee Details" Closed="@(() => CloseTabe(3))" />
+            </Template>
+            <ChildContent>
+                <EmployeeDetails OnEdit="OnEditTab" EmployeeId="@_empId" Close="OnIsDetailClose" />
+            </ChildContent>
         </RadzenTabsItem>
 
     </Tabs>
 </RadzenTabs>
 @code {
+
+    int tabCount = 0;   
+    void CloseTabe(int closeTabIndex)
+    {
+
+        if (closeTabIndex == 1)
+        {
+            IsEnableNew = false;
+        }
+
+        if (closeTabIndex == 2)
+        {
+            IsEnableEdit = false;
+        }
+
+        if (closeTabIndex == 3)
+        {
+            IsEnableDetail = false;
+        }
+
+        if(closeTabIndex == 4)
+        {
+            IsEnableEdit = false;  
+        }
+
+        // if(tabCount > 0)
+        // {
+        //     tabCount--;
+        // }
+        // else
+        // {
+        //     tabCount = 0;
+        // }
+
+        selectedIndex = 0;
+
+    }
+
+
 
     void ShowContextMenuWithContent(MouseEventArgs args, string? id)
     {

@@ -183,7 +183,10 @@
     {
         if (LoanId.IsNotNullOrEmpty() && BranchId > 0)
         {
-            await js.InvokeVoidAsync("open", $"/Reports/Schedules/Pdf/{LoanId}/{BranchId}", "_blank");
+
+            var fileName = $"Loan_Schedule_{LoanId}_{BranchId}.pdf";
+
+            await js.InvokeVoidAsync("open", $"/Reports/Schedules/Pdf/{LoanId}/{BranchId}/{fileName}", "_blank");
         }
     }
 

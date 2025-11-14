@@ -1,13 +1,9 @@
-﻿@using Applications.Features.LoanRequests.Interfaces
+﻿@using Applications.Enumerations
+@using Applications.Features.LoanRequests.Interfaces
 @using Applications.Responses.ViewModels.Loans.Requests
+@using TrapchumApp.Pages.Transactions.Loans.LoanRequests
+@using TrapchumApp.Pages.Transactions.Loans.Menu
 <GridToolbar SearchChanged="@FilterTextChanged" Placeholder="Type something to search........">
-      <LeftChildren>
-        <AuthorizeView Policy="@RequestsPolicies.Request">
-            <Authorized>
-                <RadzenLink class="rz-button rz-button-sm rz-primary" Path="@createRequestUrl" Text="Request" Icon="add" />
-            </Authorized>
-        </AuthorizeView>
-    </LeftChildren>
 </GridToolbar>
 <RadzenDataGrid Data="LoanRequests"
                 TItem="VLoanRequests"
@@ -69,27 +65,13 @@
                               Width="5rem"
                               TextAlign="TextAlign.Center">
             <Template>
-                <AuthorizeView Policy="@RequestsPolicies.Request">
+                <AuthorizeView>
                     <Authorized>
-                        <LinkRequestLoan BranchId="@BranchId"
-                                         LoanRequest="@r"
-                                         User="@_user"
-                                         CreditAgentId="@UserId" />
-                    </Authorized>
-                </AuthorizeView>
-                <AuthorizeView Policy="@RequestsPolicies.Disburse">
-                    <Authorized>
-                        <LinkRequestDisbursment LoanRequest="@r"
-                                                BranchId="@BranchId"
-                                                UserId="@UserId" />
-                    </Authorized>
-                </AuthorizeView>
-                <AuthorizeView Policy="@RequestsPolicies.Approve">
-                    <Authorized>
-                        <LinkRequestApproved LoanRequest="@r"
-                                             UserId="@UserId"
-                                             User="@_user"
-                                             BranchId="@BranchId" />
+                        <RadzenButton Size="ButtonSize.Small"
+                                      Variant="Variant.Text"
+                                      Click="@((arg)=>ShowLoanRequestMenu(arg,r))"
+                                      Icon="@IconNames.MoreVert">
+                        </RadzenButton>
                     </Authorized>
                 </AuthorizeView>
             </Template>
@@ -104,6 +86,15 @@
 </RadzenDataGrid>
 
 @code {
+
+
+    string _loanRequestDetailsUrl = "";
+    string _requestLoanRequestUrl = "";
+
+    void ShowLoanRequestMenu(MouseEventArgs args, VLoanRequests c)
+    {
+        ContextMenuService.Open(args, ds =>@<LoanRequestMenu Request="@c" />);
+    }
 
     BadgeStyle BadgeStyle = BadgeStyle.Primary;
 
@@ -121,3 +112,29 @@
     }
 
 }
+
+@* 
+
+ //_requestLoanRequestUrl = $"/app/loan/{c?.LoanRequestId}/request/{BranchId}/branches/{c?.CustomerId}/edit";
+
+  
+                         <LinkRequestLoan BranchId="@BranchId"
+                                         LoanRequest="@r"
+                                         User="@_user"
+                                         CreditAgentId="@UserId" />    
+
+<AuthorizeView Policy="@RequestsPolicies.Disburse">
+                    <Authorized>
+                        <LinkRequestDisbursment LoanRequest="@r"
+                                                BranchId="@BranchId"
+                                                UserId="@UserId" />
+                    </Authorized>
+                </AuthorizeView>
+                <AuthorizeView Policy="@RequestsPolicies.Approve">
+                    <Authorized>
+                        <LinkRequestApproved LoanRequest="@r"
+                                             UserId="@UserId"
+                                             User="@_user"
+                                             BranchId="@BranchId" />
+                    </Authorized>
+                </AuthorizeView> *@

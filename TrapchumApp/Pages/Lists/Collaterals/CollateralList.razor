@@ -1,5 +1,4 @@
-﻿@page "/app/customer/collateral"
-@attribute [Authorize]
+﻿@attribute [Authorize]
 <PageTitle>Collateral</PageTitle>
 <RadzenProgressBar Value="100" Visible="IsProgress" ProgressBarStyle="ProgressBarStyle.Info" Style="height:1px" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
 <RadzenTabs @ref="tabs" RenderMode="TabRenderMode.Server" Change="IndexChanged" @bind-SelectedIndex="selectedIndex">

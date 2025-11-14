@@ -1,4 +1,5 @@
 @using TrapchumApp.Pages.Lists
+@using TrapchumApp.Pages.Transactions.Loans.Repayments.Menu
 <GridToolbar SearchChanged="GetLoanDataFilter">
     <RightChildren>
         <RadzenDatePicker @bind-Value="paymentDate"
@@ -127,9 +128,9 @@
                               Context="p">
             <Template>
                 <RadzenButton Size="@Styles.DefaultSize"
-                              Icon="@IconNames.Edit"
+                              Icon="@IconNames.MoreVert"
                               Variant="Variant.Text"
-                              Click="@(()=>GetCustomerLateSchedules(p))" />
+                              Click="@((arg)=>ShowContextMenu(arg,p))" />
             </Template>
         </RadzenDataGridColumn>
     </Columns>
@@ -138,18 +139,26 @@
 @code {
     void ShowContextMenu(MouseEventArgs args, VSchedule p)
     {
-        ContextMenuService.Open(args, ds =>@<RadzenMenu Style="font-size:0.8rem;">
-    <RadzenMenuItem Icon="money"
-                    Visible="!p.IsPaid"
-                    Click="@(()=>GetPaymentSchedules(p))"
-                    Text="Recieve Payment" />
-    <RadzenMenuItem Icon="paid"
-                    Click="@(()=>CustomerPayOff(p))"
-                    Text="PayOff" />
+        ContextMenuService.Close();
+        ContextMenuService.Open(args,
+                                ds =>@<LateScheduleMenu GetScheduleChanged="(() => GetCustomerLateSchedules(p))"
+                  Schedule="@p" />
+    );
+    }
+}
+
+@*
+<RadzenMenu Style="font-size:0.8rem;">
     <RadzenMenuItem Icon="info"
                     Click="@(()=>GetCustomerLateSchedules(p))"
                     Text="Show Late Schedule" />
 </RadzenMenu>
-    );
-    }
-}
+
+ <RadzenMenuItem Icon="money"
+                Visible="!p.IsPaid"
+                Click="@(()=>GetPaymentSchedules(p))"
+                Text="Recieve Payment" />
+<RadzenMenuItem Icon="paid"
+                Click="@(()=>CustomerPayOff(p))"
+                Text="PayOff" />
+            *@

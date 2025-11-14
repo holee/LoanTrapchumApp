@@ -1,5 +1,5 @@
 ﻿using Applications.Enumerations;
-using Applications.Responses.ViewModels.Loans;
+using Applications.Features.Loans.Responses;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

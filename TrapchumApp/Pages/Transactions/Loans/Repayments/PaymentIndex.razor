@@ -1,17 +1,18 @@
 ﻿@page "/app/loan/schedules/{BranchId:int}/branches"
+@using TrapchumApp.Pages.Transactions.Loans.Repayments.Menu
 <PageTitle>Schedules</PageTitle>
 <RadzenTabs RenderMode="TabRenderMode.Server" @bind-SelectedIndex="@_selectedIndex">
     <Tabs>
         <RadzenTabsItem Text="All" Icon="@IconNames.List">
             <Template>
-                <span class="rz-ms-2"> 
+                <span class="rz-ms-2">
                     All
                     <RadzenBadge BadgeStyle="BadgeStyle.Primary" IsPill="@true" Text="@AllScheduleCounts.ToString()"
-                                 class="rz-ms-1"/>
+                                 class="rz-ms-1" />
                 </span>
             </Template>
             <ChildContent>
-                <ClientAllPayTab UserId="@_userId" BranchId="@BranchId" ShowCounts="@GetCount"/>
+                <ClientAllPayTab UserId="@_userId" BranchId="@BranchId" ShowCounts="@GetCount" />
             </ChildContent>
         </RadzenTabsItem>
         <RadzenTabsItem Icon="@IconNames.MoneyBag">
@@ -19,11 +20,11 @@
                 <span class="rz-ms-2">
                     Client Due Pay
                     <RadzenBadge BadgeStyle="BadgeStyle.Primary" IsPill="@true" Text="@DuePaymentCounts.ToString()"
-                                 class="rz-ms-1"/>
+                                 class="rz-ms-1" />
                 </span>
             </Template>
             <ChildContent>
-                <ClientDuePayTab UserId="@_userId" BranchId="@BranchId" GetCountChanged="GetDueDateScheduleCount"/>
+                <ClientDuePayTab UserId="@_userId" BranchId="@BranchId" GetCountChanged="GetDueDateScheduleCount" />
             </ChildContent>
         </RadzenTabsItem>
         <RadzenTabsItem>
@@ -32,25 +33,28 @@
                     Late Schedule
                     <RadzenBadge BadgeStyle="BadgeStyle.Primary"
                                  IsPill="@true" Text="@AllLateScheduleCounts.ToString()"
-                                 class="rz-ms-1"/>
+                                 class="rz-ms-1" />
                 </span>
             </Template>
             <ChildContent>
-                <ClientLateSchedules
-                    BranchId="@BranchId"
-                    UserId="@_userId"
-                    GetScheduleChanged="@GetScheduleChanged"
-                    GetCountChanged="@GetLateScheduleCount"/>
+                <ClientLateSchedules BranchId="@BranchId"
+                                     UserId="@_userId"
+                                     GetScheduleChanged="@GetScheduleChanged"
+                                     GetCountChanged="@GetLateScheduleCount" />
             </ChildContent>
         </RadzenTabsItem>
         <RadzenTabsItem Text="Details"
                         Icon="@IconNames.SendMoney"
                         Visible="@_isLateTab">
-            <LateScheduleDetail
-                LoanId="@loanId"
-                PaymentDate="@paymentDate"
-                Close="Close"
-                BranchId="@BranchId"/>
+            <Template>
+                <CloseTabButton Closed="(() => Close())" Title="Details" />
+            </Template>
+            <ChildContent>
+                <LateScheduleDetail LoanId="@loanId"
+                                    PaymentDate="@paymentDate"
+                                    Close="Close"
+                                    BranchId="@BranchId" />
+            </ChildContent>
         </RadzenTabsItem>
     </Tabs>
 </RadzenTabs>
@@ -63,22 +67,25 @@
         _isLateTab = false;
         _selectedIndex = 2;
     }
-    
+
     void ShowContextMenu(MouseEventArgs args, VSchedule p)
     {
-        ContextMenuService.Open(args, ds => @<RadzenMenu Style="font-size:0.8rem;">
-                                                <RadzenMenuItem Icon="money"
-                                                                Visible="!p.IsPaid"
-                                                                Click="@(() => ShowCustomerPayment(p))"
-                                                                Text="Receive Payment"/>
-                                                <RadzenMenuItem Icon="paid"
-                                                                Click="@(() => CustomerPayOff(p))"
-                                                                Text="PayOff"/>
-                                                <RadzenMenuItem Icon="info"
-                                                                Click="@(() => GetCustomerLateSchedules(p))"
-                                                                Text="Show Late Schedule"/>
-                                            </RadzenMenu>
-        );
+        ContextMenuService.Open(args, ds =>@<AllScheduleMenu GetLateSchedule="@GetCustomerLateSchedules"
+                         GetPayOffSchedule="@CustomerPayOff"
+                         Schedule="@p" />);
     }
 
 }
+
+@* <RadzenMenu Style="font-size:0.8rem;">
+    <RadzenMenuItem Icon="money"
+                    Visible="!p.IsPaid"
+                    Click="@(() => ShowCustomerPayment(p))"
+                    Text="Receive Payment" />
+    <RadzenMenuItem Icon="paid"
+                    Click="@(() => CustomerPayOff(p))"
+                    Text="PayOff" />
+    <RadzenMenuItem Icon="info"
+                    Click="@(() => GetCustomerLateSchedules(p))"
+                    Text="Show Late Schedule" />
+</RadzenMenu> *@

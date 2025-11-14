@@ -1,7 +1,7 @@
+using Applications.Features.Loans.Responses;
 using Applications.Features.Loans.Services;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Branches;
-using Applications.Responses.ViewModels.Loans;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Radzen;

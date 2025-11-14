@@ -2,13 +2,13 @@
 @using Applications.Features.LoanRequests.Interfaces
 @using TrapchumApp.Helpers.Extensions
 <RadzenPanelMenuItem Text="Loan Management" Icon="dataset">
-    <RadzenPanelMenuItem Text="Loans" Icon="lists" Path="@($"/app/loan/disbursment/{BranchId}/branches")" Visible="@_canShowLoan" />
+    <RadzenPanelMenuItem Text="Loans Disbursement" Icon="lists" Path="@($"/app/loan/disbursment/{BranchId}/branches")" Visible="@_canShowLoan" />
     <RadzenPanelMenuItem Text="Client Due Pay"
                          Icon="schedule"
                          Path="@($"/app/loan/schedules/{BranchId}/branches")" Visible="@_canShowLoan"/>
     <RadzenPanelMenuItem Text="Loan Write Off" Icon="person_off" Path="@($"/app/loan/disbursement/write-off/{BranchId}")" Visible="@_isAccountOnly" />
     <RadzenPanelMenuItem Text="Loan Pay Off" Icon="person_off" Path="@($"/app/loan/disbursement/pay-off/{BranchId}")" Visible="@_isAccountOnly" />
-    <RadzenPanelMenuItem Text="Loan Request" Icon="request_quote" Path="@($"/app/loan/request/{BranchId}/branches")"
+    <RadzenPanelMenuItem Text="Loans Request" Icon="request_quote" Path="@($"/app/loan/request/{BranchId}/branches")"
                          Visible="@_isAccountOnly"/>
 </RadzenPanelMenuItem>
 

@@ -1,18 +1,24 @@
-﻿using Applications.Commons.Messages.Customers;
+﻿using Applications.Commons.Mappers.Expenses;
+using Applications.Commons.Mappers.Incomes;
+using Applications.Commons.Messages.Customers;
 using Applications.Commons.Messages.Expenses;
 using Applications.Commons.Messages.Incomes;
+using Applications.Extensions;
 using Applications.Features.Expenses.Dto;
+using Applications.Features.Incomes.Dto;
 using Applications.Interfaces.Customers;
+using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Customers;
 using Dapper;
+using Domains.Enumerations;
 using Domains.Models.Lists.Customers;
 using ErrorOr;
 using Infrastructures.DataAccess;
+using Infrastructures.Implements.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Applications.Commons.Mappers.Expenses;
-using Applications.Features.Incomes.Dto;
-using Applications.Commons.Mappers.Incomes;
+using System.Linq.Expressions;
+
 namespace Infrastructures.Implements
 {
     public class IncomeExpendRepository : ICustomerIncomeExpendService
@@ -51,15 +57,13 @@ namespace Infrastructures.Implements
         }
 
 
-
-
-
-        public async Task<ErrorOr<VCustomerExpenses>> GetExpense(long? id, string? customerId, CancellationToken cancellation = default)
+        public async Task<ErrorOr<VCustomerExpenses>> GetExpense(long? id, string? customerId,
+            CancellationToken cancellation = default)
         {
             using var db = await _connectionFactory.CreateConnectionAsync(cancellation);
 
             var expense = await db.QueryFirstOrDefaultAsync<VCustomerExpenses>(
-                    @"SELECT TOP(1) * FROM 
+                @"SELECT TOP(1) * FROM 
                         VCustomerExpenses 
                     WHERE CustomerRefId=@customerId AND ExpendId=@Id", new { customerId, id });
 
@@ -71,16 +75,16 @@ namespace Infrastructures.Implements
             return expense;
         }
 
-        public async Task<ErrorOr<string>> DeleteExpensesAsync(long? id, string? customerRefId, CancellationToken cancellation = default)
+        public async Task<ErrorOr<string>> DeleteExpensesAsync(long? id, string? customerRefId,
+            CancellationToken cancellation = default)
         {
             _logger.LogInformation("Adding income...");
 
             var context = await _contextFactory.CreateDbContextAsync(cancellation);
 
             var existing = await context.CustomerExpenses
-                                        .FirstOrDefaultAsync(x => x.Id == id && x.CustomerRefId == customerRefId);
-
-
+                .FirstOrDefaultAsync(x => x.Id == id && x.CustomerRefId == customerRefId);
+            
             if (existing is null)
             {
                 Error.NotFound(ExpenseMessage.NotFound);
@@ -102,11 +106,11 @@ namespace Infrastructures.Implements
             {
                 return Error.Unexpected(ex.Message);
             }
-
         }
 
 
-        public async Task<ErrorOr<ExpenseDtoUpdate>> GetEditExpensesAsync(long? id, string? customerId, CancellationToken cancellation = default)
+        public async Task<ErrorOr<ExpenseDtoUpdate>> GetEditExpensesAsync(long? id, string? customerId,
+            CancellationToken cancellation = default)
         {
             try
             {
@@ -115,7 +119,7 @@ namespace Infrastructures.Implements
                 var context = await _contextFactory.CreateDbContextAsync();
 
                 var expense = await context.CustomerExpenses
-                                            .FirstOrDefaultAsync(x => x.Id == id && x.CustomerRefId == customerId);
+                    .FirstOrDefaultAsync(x => x.Id == id && x.CustomerRefId == customerId);
 
                 if (expense is null)
                 {
@@ -123,14 +127,12 @@ namespace Infrastructures.Implements
                 }
 
 
-                var editExpense = expense.ToEditExpense() ;
+                var editExpense = expense.ToEditExpense();
 
                 return editExpense;
-
             }
             catch (Exception ex)
             {
-
                 _logger.LogError(ex, ex.Message);
 
                 return Error.Unexpected(ex.Message);
@@ -142,8 +144,7 @@ namespace Infrastructures.Implements
             try
             {
                 _logger.LogInformation("Adding income...");
-
-
+                
                 var context = await _contextFactory.CreateDbContextAsync();
 
                 var existingCustomer = await context.Customers
@@ -192,11 +193,13 @@ namespace Infrastructures.Implements
             }
         }
 
-        public async Task<ErrorOr<long>> AddOrUpdateExpenseAsync(CustomerExpense req, CancellationToken cancellation = default)
+        public async Task<ErrorOr<long>> AddOrUpdateExpenseAsync(CustomerExpense req,
+            CancellationToken cancellation = default)
         {
             _logger.LogInformation("Adding income...");
 
             var context = await _contextFactory.CreateDbContextAsync(cancellation);
+
             try
             {
                 if (req.Id > 0)
@@ -211,7 +214,6 @@ namespace Infrastructures.Implements
                 await context.SaveChangesAsync(cancellation);
 
                 return req.Id;
-
             }
             catch (DbUpdateException ex)
             {
@@ -221,10 +223,6 @@ namespace Infrastructures.Implements
             {
                 return Error.Unexpected(ex.Message);
             }
-
-
-
-
         }
 
 
@@ -238,8 +236,8 @@ namespace Infrastructures.Implements
                 var context = await _contextFactory.CreateDbContextAsync();
 
                 var existingCustomer = await context.Customers
-                                            .Include(x => x.CustomerIncomes)
-                                            .FirstOrDefaultAsync(x => x.CustomerId == customerId);
+                    .Include(x => x.CustomerIncomes)
+                    .FirstOrDefaultAsync(x => x.CustomerId == customerId);
                 if (existingCustomer is null)
                 {
                     return Error.NotFound("no customer is selected");
@@ -282,12 +280,13 @@ namespace Infrastructures.Implements
             }
         }
 
-        public async Task<ErrorOr<bool>> DeleteIncomeAsync(long? id, string? customerId, CancellationToken cancellationToken = default)
+        public async Task<ErrorOr<bool>> DeleteIncomeAsync(long? id, string? customerId,
+            CancellationToken cancellationToken = default)
         {
             var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
 
             var existing = await context.CustomerIncomes
-                                        .FirstOrDefaultAsync(x => x.Id == id && x.CustomerRefId == customerId, cancellationToken);
+                .FirstOrDefaultAsync(x => x.Id == id && x.CustomerRefId == customerId, cancellationToken);
 
             if (existing is null)
             {
@@ -312,7 +311,6 @@ namespace Infrastructures.Implements
                 _logger.LogError(ex, ex.Message);
                 return Error.Unexpected("Income.DeleteError", $"Unexpected error while deleting income: {ex.Message}");
             }
-
         }
 
 
@@ -350,14 +348,15 @@ namespace Infrastructures.Implements
         }
 
 
-        public async Task<ErrorOr<EditIncomeDto>> GetEditIncomeAsync(long? id, string? customerId, CancellationToken cancellation = default)
+        public async Task<ErrorOr<EditIncomeDto>> GetEditIncomeAsync(long? id, string? customerId,
+            CancellationToken cancellation = default)
         {
             _logger.LogInformation("Adding income...");
 
             var context = await _contextFactory.CreateDbContextAsync(cancellation);
 
             var income = await context.CustomerIncomes
-                                    .FirstOrDefaultAsync(x => x.Id == id && x.CustomerRefId == customerId);
+                .FirstOrDefaultAsync(x => x.Id == id && x.CustomerRefId == customerId);
 
             if (income is null)
             {
@@ -397,24 +396,148 @@ namespace Infrastructures.Implements
             }
         }
 
-
-
-        private static System.Linq.Expressions.Expression<Func<CustomerIncome, VCustomerIncomes>> ProjectTo()
+        public async Task<Pager<IncomeExpenseDto>> GetIncomeExpenseAsPagingAsync(int? id, IncomeExpenseTypes type,
+            QueryParam query, CancellationToken cancellation = default)
         {
-            return x => new VCustomerIncomes
+            _logger.LogInformation("Try Getting income...");
+
+            var context = await _contextFactory.CreateDbContextAsync(cancellation);
+
+            var source = context.IncomeExpenses
+                .WhereIf(id.HasValue && id > 0, x => x.Id == id);
+
+            source = type switch
             {
-                IncomeId = x.Id,
-                CustomerRefId = x.CustomerRefId,
-                IncomeSource = x.IncomeSource,
-                IncomeAmount = x.Amount,
-                InDescription = x.Description
+                IncomeExpenseTypes.Expense => source.Where(x => x.Types == IncomeExpenseTypes.Expense),
+                IncomeExpenseTypes.Income => source.Where(x => x.Types == IncomeExpenseTypes.Income),
+                _ => source
+            };
+
+            source = ApplyFilter(source, query);
+
+            source = source.ApplyOrdering(query, x => x.Types);
+
+            var counts = await source.CountAsync(cancellation);
+
+            var items = await source
+                .Skip(query.Skip)
+                .Take(query.PageSize)
+                .Select(ProjectToIncomeExpense())
+                .ToListAsync(cancellation);
+
+            return new Pager<IncomeExpenseDto>
+            {
+                Count = counts,
+                Items = items
             };
         }
 
+        public async Task<ErrorOr<int>> AddOrUpdateIncomeExpenseAsync(IncomeExpense req,
+            CancellationToken cancellation = default)
+        {
+            try
+            {
+                await using var context = await _contextFactory.CreateDbContextAsync(cancellation);
 
+                if (req.Id == 0)
+                {
+                    context.IncomeExpenses.Add(req);
+                }
+                else
+                {
+                    context.IncomeExpenses.Update(req);
+                }
+
+                await context.SaveChangesAsync();
+
+                return req.Id;
+            }
+            catch (DbUpdateException ex)
+            {
+                return Error.Unexpected(ex.Message);
+            }
+        }
+
+        public async Task<ErrorOr<IncomeExpenseDto>> GetEditIncomeExpenseAsync(int? id,
+            CancellationToken cancellation = default)
+        {
+            _logger.LogInformation("Try Getting income...");
+
+            var context = await _contextFactory.CreateDbContextAsync(cancellation);
+
+            var source = await context.IncomeExpenses
+                .Select(x => new IncomeExpenseDto
+                {
+                    Id = x.Id,
+                    Description = x.Description,
+                    Types = x.Types.ToString()
+                })
+                .FirstOrDefaultAsync(x => x.Id == id, cancellation);
+
+            if (source is not null)
+            {
+                return source;
+            }
+
+            return Error.NotFound(IncomeExpenseMessages.NotFound);
+        }
+
+        public async Task<ErrorOr<IncomeExpense>> GetIncomeExpenseAsync(int? id, CancellationToken cancellationToken)
+        {
+            _logger.LogInformation("Try Getting income...");
+
+            var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
+
+            var source = await context.IncomeExpenses.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+
+            if (source is not null)
+            {
+                return source;
+            }
+
+            return Error.NotFound(IncomeExpenseMessages.NotFound);
+        }
+
+        private static Expression<Func<IncomeExpense, IncomeExpenseDto>> ProjectToIncomeExpense()
+        {
+            return x => new IncomeExpenseDto
+            {
+                Id = x.Id,
+                Description = x.Description,
+                Types = x.Types.ToString()
+            };
+        }
+
+        private IQueryable<IncomeExpense> ApplyFilter(IQueryable<IncomeExpense> source, QueryParam query)
+        {
+            if (string.IsNullOrWhiteSpace(query.Filter)) return source;
+
+            string pattern = $"%{query.Filter}%";
+
+            if (!string.IsNullOrWhiteSpace(query.FilterColumn))
+            {
+                string[] filterColums = [nameof(IncomeExpense.Description), nameof(IncomeExpense.Types)];
+
+                source = source.WhereMatchesFilter(pattern, filterColums);
+            }
+
+
+            source = source.Where(x => EF.Functions.Like(x.Description, pattern) ||
+                                       EF.Functions.Like(x.Types.ToString(), pattern));
+
+            return source;
+        }
+
+        private static Expression<Func<CustomerIncome, VCustomerIncomes>> ProjectTo() => x => new VCustomerIncomes
+        {
+            IncomeId = x.Id,
+            CustomerRefId = x.CustomerRefId,
+            IncomeSource = x.IncomeSource,
+            IncomeAmount = x.Amount,
+            InDescription = x.Description
+        };
     }
 }
-
 
 
 //public async Task<Result<string>> AddIncomesAsync(string? customerRefId, List<CustomerIncome> req)
@@ -595,4 +718,3 @@ namespace Infrastructures.Implements
 //            ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
 //    }
 //}
-

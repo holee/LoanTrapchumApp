@@ -3,11 +3,11 @@ using Applications.Features.Loans.Services;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Branches;
 using Applications.Responses.ViewModels.Customers;
-using Applications.Responses.ViewModels.Loans;
 using Applications.Services.Lists;
 using Domains.Models.Identity;
 using System.Threading.Tasks;
 using Applications.Features.CreditAgents.Requests;
+using Applications.Features.Loans.Responses;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 {

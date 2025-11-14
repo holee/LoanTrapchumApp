@@ -1,15 +1,15 @@
 using Applications.Extensions;
+using Applications.Features.Addresses.Responses;
+using Applications.Features.Employees.Requests;
+using Applications.Features.Entities;
 using Applications.Interfaces.Lists;
 using Applications.Responses.Lists.Employees;
-using Applications.Responses.Lists.Entities; 
+using Applications.Responses.Lists.Entities;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Employees;
 using Domains.Models.Addresses;
 using Domains.Models.Lists;
 using Radzen.Blazor;
-using Applications.Features.Addresses.Responses;
-using Applications.Features.Employees.Requests;
-using Applications.Features.Entities;
 
 namespace TrapchumApp.Pages.Lists.Employees
 {
@@ -42,6 +42,8 @@ namespace TrapchumApp.Pages.Lists.Employees
             {
                 //e.Attributes.Add("style", "color:red;background-color:yellow;");
             }
+
+            e.Data.RowIndex = e.Index + 1; // store 1-based index
         }
 
         bool IsEnableEdit = false;
@@ -74,7 +76,7 @@ namespace TrapchumApp.Pages.Lists.Employees
         }
 
 
-        async Task OnCheckChanged(string? employeeId,bool state)
+        async Task OnCheckChanged(string? employeeId, bool state)
         {
 
             var confirm = await DialogService.Confirm($"Do you want to Deactivate/Activate Employee with ID#{branchId}?", options: new ConfirmOptions
@@ -128,6 +130,7 @@ namespace TrapchumApp.Pages.Lists.Employees
             IsEnableNew = true;
             selectedIndex = 1;
             tabs.Reload();
+            tabCount++;
             StateHasChanged();
         }
 
@@ -346,6 +349,11 @@ namespace TrapchumApp.Pages.Lists.Employees
 
                 await GetEmployees(branchId, searchText);
             }
+        }
+        private void OnRowDoubleClick(DataGridRowMouseEventArgs<VEmployeeList> args)
+        {
+            AddDetailsTab(args.Data.EmployeeId);
+            tabCount++;
         }
     }
 }

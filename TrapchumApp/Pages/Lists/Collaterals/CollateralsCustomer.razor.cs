@@ -109,9 +109,9 @@ namespace TrapchumApp.Pages.Lists.Collaterals
 
             ContextMenuService.Close();
 
-            var options = new SideDialogOptions
+            var options = new DialogOptions
             {
-                Width = "40rem"
+              
             };
 
             var parameters = new Dictionary<string, object?>
@@ -120,7 +120,7 @@ namespace TrapchumApp.Pages.Lists.Collaterals
                 {"CollateralId",arg.CollateralId }
             };
 
-            var dia = await DialogService.OpenSideAsync<CustomerCollateralLineEdit>("Collateral", parameters, options: options);
+            var dia = await DialogService.OpenAsync<CustomerCollateralLineEdit>("Edit", parameters, options: options);
 
             if (dia is bool result && result == true)
             {

@@ -7,6 +7,8 @@ using Applications.Responses.Lists.Customers;
 using Applications.Responses.Paginations;
 using TrapchumApp.Helpers.Enums; 
 using TrapchumApp.Pages.Lists.Collaterals;
+using TrapchumApp.Pages.Lists.Customers.Expenses;
+using TrapchumApp.Pages.Lists.Customers.Incomes;
 
 namespace TrapchumApp.Pages.Lists.Customers
 {
@@ -310,6 +312,13 @@ namespace TrapchumApp.Pages.Lists.Customers
             // Handle row double click event
             _ = AddDetails(args.Data.CustomerId);
 
+            // await ClickedDetails.InvokeAsync(customerId);
+        }
+
+        void OnRowDoubleClick(VCustomerList args)
+        {
+            // Handle row double click event
+            _ = AddDetails(args.CustomerId);
             // await ClickedDetails.InvokeAsync(customerId);
         }
 

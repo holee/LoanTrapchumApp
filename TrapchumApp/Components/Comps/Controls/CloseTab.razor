@@ -1,0 +1,24 @@
+﻿@using Applications.Features.LoanRequests.Interfaces
+@using System.Threading.Tasks
+<span style="display: flex;">
+    @if (!string.IsNullOrEmpty(Title))
+    {
+        @Title
+    }
+    <RadzenButton Icon="@IconNames.Close" @onclick:stopPropagation
+                  Variant="Variant.Text"
+                  Shade="Shade.Lighter"
+                  Click="@ClosedTab"
+                  Size="ButtonSize.ExtraSmall" />
+</span>
+@code {
+
+    [Parameter] public long TabId { get; set; } = 0;
+    [Parameter] public EventCallback<long> Closed { get; set; }
+    [Parameter] public string? Title { get; set; } = string.Empty;
+
+    async Task ClosedTab()
+    {
+        await Closed.InvokeAsync(TabId);
+    }
+}

@@ -1,7 +1,7 @@
 ﻿using Applications.Constants.Authorizations;
 using Applications.Extensions.Identity.Enumerations;
 using Microsoft.AspNetCore.Authorization;
-
+using Applications.Enumerations;
 namespace Applications.Extensions.Identity.Policies;
 
 public static class PaymentsPolicies
@@ -13,13 +13,16 @@ public static class PaymentsPolicies
     public const string Read = $"{prefix}.{nameof(Read)}";
     public const string MultiplePayment = $"{prefix}.{nameof(MultiplePayment)}";
     public const string PayOff = $"{prefix}.{nameof(PayOff)}";
-
+    public const string RecievePayment = $"{prefix}:{nameof(RecievePayment)}";
+    public const string WriteOff = $"{prefix}:{nameof(WriteOff)}";
     private static string read = AppPermission.RuleFor(Modules.Repayments, Feature.Read);
     private static string update = AppPermission.RuleFor(Modules.Repayments, Feature.Update);
     private static string create = AppPermission.RuleFor(Modules.Repayments, Feature.Create);
     private static string delete = AppPermission.RuleFor(Modules.Repayments, Feature.Delete);
     private static string multiple = AppPermission.RuleFor(Modules.Repayments, Feature.MultiplePayment);
     private static string payoff = AppPermission.RuleFor(Modules.Repayments, Feature.PayOff);
+    private static string recievePayment = AppPermission.RuleFor(Modules.Repayments, Feature.RecievePayment);
+    private static string writeOff = AppPermission.RuleFor(Modules.Repayments, Feature.WriteOff);  
     public static AuthorizationPolicy CanCreate()
     {
         return new AuthorizationPolicyBuilder()
@@ -66,10 +69,29 @@ public static class PaymentsPolicies
     {
         return new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
-                    .RequireRole(AppRoles.Account)
+                    .RequireRole(AppRoles.Account, AppRoles.ChiefAccount, AppRoles.SeniorAccount, AppRoles.Teller)
                     .RequireClaim(AppClaim.Permission, payoff)
                     .Build();
     }
 
+    public static AuthorizationPolicy CanRecievePayment()  
+    {
+
+        return new AuthorizationPolicyBuilder()
+                    .RequireAuthenticatedUser()
+                    .RequireRole(AppRoles.Account, AppRoles.ChiefAccount, AppRoles.SeniorAccount, AppRoles.Teller)
+                    .RequireClaim(AppClaim.Permission, recievePayment)
+                    .Build();
+    }
+
+    public static AuthorizationPolicy CanWriteOff() 
+    {
+
+        return new AuthorizationPolicyBuilder()
+                    .RequireAuthenticatedUser()
+                    .RequireRole(AppRoles.Account, AppRoles.ChiefAccount, AppRoles.SeniorAccount, AppRoles.Teller)
+                    .RequireClaim(AppClaim.Permission, writeOff)
+                    .Build();
+    }
 
 }

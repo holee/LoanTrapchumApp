@@ -1,19 +1,20 @@
 using Applications.Extensions;
+using Applications.Features.Collaterals.Commands.AddOrUpdateCollaterals;
 using Applications.Features.Collaterals.Dtos;
-using Applications.Features.Collaterals.Queries.GetCollateralByCustomers;
 using Applications.Features.Collaterals.Queries.GetCollateralDetails;
 using Applications.Services.Lists;
 
 namespace TrapchumApp.Pages.Lists.Collaterals;
+
 public partial class CustomerCollateralLineCreate
 {
     private IEnumerable<CollateralTypeResponse> collateralTypes = [];
 
     private IEnumerable<CollateralSubTypeResponse> allSubTypes = [];
 
-    CollateralDtoCreate model = new();
+    CollateralDtoCreate baseModel = new();
 
-    CollateralLineDtoCreate collateralLineDto=new();
+    CollateralLineDtoCreate model = new();
 
     private readonly ICollateralsServiceImpl _service;
 
@@ -22,24 +23,14 @@ public partial class CustomerCollateralLineCreate
     private bool success = false;
     [Parameter] public string? CollateralId { get; set; }
 
-
-    protected override void OnParametersSet()
-    {
-
-        collateralLineDto ??= new CollateralLineDtoCreate();
-
-        base.OnParametersSet();
-    }
-
-
     void OnMarketPriceChanged(decimal? arg, CollateralLineDtoCreate line)
     {
 
-        if(!line.SubCategoryRefId.HasValue || line.SubCategoryRefId == 0)
+        if (!line.SubCategoryRefId.HasValue || line.SubCategoryRefId == 0)
         {
-            collateralLineDto.MarketPrice = 0.00M;
-            collateralLineDto.HotPrice = 0.00M;
-            collateralLineDto.PawnPrice = 0.00M;
+            model.MarketPrice = 0.00M;
+            model.HotPrice = 0.00M;
+            model.PawnPrice = 0.00M;
             return;
         }
 
@@ -53,26 +44,26 @@ public partial class CustomerCollateralLineCreate
         {
             NotificationService.Notify(NotificationSeverity.Warning, $"Market Price must be less than {maxPrice}");
 
-            collateralLineDto.MarketPrice = maxPrice ?? 0;
+            model.MarketPrice = maxPrice ?? 0;
 
-            collateralLineDto.HotPrice = maxPrice * valueRate;
+            model.HotPrice = maxPrice * valueRate;
 
-            collateralLineDto.PawnPrice = line.HotPrice * valueRate;
+            model.PawnPrice = line.HotPrice * valueRate;
 
             return;
         }
 
         if (arg.HasValue && valueRate > 0)
         {
-            collateralLineDto.HotPrice = arg.Value * valueRate;
+            model.HotPrice = arg.Value * valueRate;
 
-            collateralLineDto.PawnPrice = collateralLineDto.HotPrice * valueRate;
+            model.PawnPrice = model.HotPrice * valueRate;
         }
         else
         {
-            collateralLineDto.PawnPrice = arg;
+            model!.PawnPrice = arg;
 
-            collateralLineDto.HotPrice = arg;
+            model.HotPrice = arg;
         }
 
         StateHasChanged();
@@ -100,6 +91,9 @@ public partial class CustomerCollateralLineCreate
     }
     protected override async Task OnInitializedAsync()
     {
+
+        model ??= new CollateralLineDtoCreate(CollateralId);
+
         await GetCollateralTypes();
 
         await GetCustomerCollaterals(CollateralId);
@@ -124,8 +118,7 @@ public partial class CustomerCollateralLineCreate
             return;
         }
 
-        var query=new GetCollateralDetailQuery(collateralId!);
-
+        var query = new GetCollateralDetailQuery(collateralId!);
 
         var rsp = await mediator.Send(query);
 
@@ -135,9 +128,9 @@ public partial class CustomerCollateralLineCreate
 
             CollateralId = collateralId;
 
-            model = collateral.ToCollateralDtoCreate();
+            baseModel = collateral.ToCollateralDtoCreate();
 
-            model.CollateralLines.Add(collateralLineDto);
+            baseModel.CollateralLines.Add(model!);
         }
     }
 
@@ -147,15 +140,15 @@ public partial class CustomerCollateralLineCreate
     async Task HandleFormSubmit()
     {
 
- 
+        var command = new AddOrUpdateCollateralCommand(baseModel);
 
-        var rsp = await _service.CreateAsync(model);
+        var rsp =await mediator.Send(command);
 
-        if (rsp.IsSuccess)
+        if (!rsp.IsError)
         {
             success = true;
 
-            NotificationService.Notify(NotificationSeverity.Success, rsp.Data);
+            NotificationService.Notify(NotificationSeverity.Success, rsp.Value);
 
             DialogService.Close(success);
         }
@@ -163,7 +156,7 @@ public partial class CustomerCollateralLineCreate
         {
             success = false;
 
-            NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
+            NotificationService.Notify(NotificationSeverity.Error, rsp.FirstError.Description);
         }
     }
 }

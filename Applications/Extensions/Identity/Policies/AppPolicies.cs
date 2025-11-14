@@ -1,5 +1,4 @@
-﻿using Applications.Constants.Authorizations;
-using Applications.Extensions.Identity.Enumerations;
+﻿using Applications.Extensions.Identity.Enumerations;
 using Microsoft.AspNetCore.Authorization;
 
 namespace Applications.Extensions.Identity.Policies;
@@ -23,7 +22,7 @@ public static class AppPolicies
                     .Build();
     }
 
-    public static AuthorizationPolicy CreditOfficerOnly()
+    public static AuthorizationPolicy IsCreditOfficerOnly()
     { 
         return new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
@@ -36,6 +35,14 @@ public static class AppPolicies
         return new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
                     .RequireRole(AppRoles.Manager,AppRoles.ChiefBm, AppRoles.Dbm, AppRoles.Rbm, AppRoles.Bm)
+                    .Build();
+    }
+
+    public static AuthorizationPolicy IsCEOOnly() 
+    {
+        return new AuthorizationPolicyBuilder()
+                    .RequireAuthenticatedUser()
+                    .RequireRole(AppRoles.Ceo)
                     .Build();
     }
 

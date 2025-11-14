@@ -1,9 +1,9 @@
 ﻿using Applications.Enumerations;
 using Applications.Extensions;
+using Applications.Features.Loans.Responses;
 using Applications.Features.Loans.Services;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Branches;
-using Applications.Responses.ViewModels.Loans;
 using Microsoft.JSInterop;
 using TrapchumApp.Helpers.Extensions;
 using TrapchumApp.Shared;
@@ -69,28 +69,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
         {
             await GetLoanDisbursements();
         }
-        void GetLoanDetails(VLoanDisbursments p)
-        {
-            NavigationManager.NavigateTo($"/App/Loan/{p.LoanId}/Branches/{BranchId}/Currencies/{p.CurrencyId}");
-            return;
-        }
-        void GetPaymentSchedules(VLoanDisbursments p)
-        {
-            NavigationManager.NavigateTo($"/App/Loans/{p.BranchId}/Branches/{p.LoanId}/Schedules?CreditAgentId={p.CreditAgentRefId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
-            return;
-        }
 
-        void ChangeCreditAgent(VLoanDisbursments p)
-        {
-            NavigationManager.NavigateTo($"/App/Loan/{p.LoanId}/CreditAgent/{p.CreditAgentRefId}?CustomerId={p.CustomerId}&BranchId={p.BranchId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
-
-            return;
-        }
-        void CustomerPayOff(VLoanDisbursments p)
-        {
-            NavigationManager.NavigateTo($"/Loan/CreditAgent/{p.LoanId}/{p.CreditAgentRefId}?CustomerId={p.CustomerId}&BranchId={p.BranchId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
-            return;
-        }
         protected override async Task OnInitializedAsync()
         {
 
@@ -147,60 +126,74 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 
         }
 
-
-        async Task DownLoadScheduleAsExcel(string? loanRefId, int? branchId)
-        {
-            ContextMenuService.Close();
-
-            if (loanRefId.IsNotNullOrEmpty() && branchId > 0)
-            {
-                await js.InvokeVoidAsync("open", $"/Reports/Schedules/{loanRefId}/{branchId}/Exel", "_blank");
-            }
-        }
-
         async Task GetLoanCount()
         {
             await GetLoanChanged.InvokeAsync(counts);
         }
 
-
-
-
-
-        async Task DownLoadScheduleAsPdf(string? loanRefId, int? branchId)
-        {
-
-            ContextMenuService.Close();
-
-            if (loanRefId.IsNotNullOrEmpty() && BranchId > 0)
-            {
-                await js.InvokeVoidAsync("open", $"/Reports/Schedules/{loanRefId}/{branchId}", "_blank");
-            }
-        }
-
-
-
-        //async void ShowPaidSchedules(long loanId, int branchId)
-        //{
-        //    ContextMenuService.Close();
-
-        //    var response = await _dService.GetPaymentSchedulesByLoanId(loanId, branchId);
-
-        //    if (response.IsSuccess)
-        //    {
-        //        PaidSchedules = response.Data!;
-        //    }
-        //    else
-        //    {
-
-        //        PaidSchedules = [];
-
-        //        var error = response.Errors!.FirstOrDefault();
-
-        //        NotificationService.Notify(NotificationSeverity.Error, error);
-        //    }
-        //    StateHasChanged();
-        //}
-
     }
 }
+
+
+
+//async Task DownLoadScheduleAsExcel(string? loanRefId, int? branchId)
+//{
+//    ContextMenuService.Close();
+
+//    if (loanRefId.IsNotNullOrEmpty() && branchId > 0)
+//    {
+//        await js.InvokeVoidAsync("open", $"/Reports/Schedules/{loanRefId}/{branchId}/Exel", "_blank");
+//    }
+//}
+
+//async Task DownLoadScheduleAsPdf(string? loanRefId, int? branchId)
+//{
+
+//    ContextMenuService.Close();
+
+//    if (loanRefId.IsNotNullOrEmpty() && BranchId > 0)
+//    {
+//        await js.InvokeVoidAsync("open", $"/Reports/Schedules/{loanRefId}/{branchId}", "_blank");
+//    }
+//}
+//async void ShowPaidSchedules(long loanId, int branchId)
+//{
+//    ContextMenuService.Close();
+
+//    var response = await _dService.GetPaymentSchedulesByLoanId(loanId, branchId);
+
+//    if (response.IsSuccess)
+//    {
+//        PaidSchedules = response.Data!;
+//    }
+//    else
+//    {
+
+//        PaidSchedules = [];
+
+//        var error = response.Errors!.FirstOrDefault();
+
+//        NotificationService.Notify(NotificationSeverity.Error, error);
+//    }
+//    StateHasChanged();
+//}
+
+
+//void GetLoanDetails(VLoanDisbursments p)
+//{
+//    NavigationManager.NavigateTo($"/App/Loan/{p.LoanId}/Branches/{BranchId}/Currencies/{p.CurrencyId}");
+//}
+//void GetPaymentSchedules(VLoanDisbursments p)
+//{
+//    NavigationManager.NavigateTo($"/App/Loans/{p.BranchId}/Branches/{p.LoanId}/Schedules?CreditAgentId={p.CreditAgentRefId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
+//}
+
+//void ChangeCreditAgent(VLoanDisbursments p)
+//{
+//    NavigationManager.NavigateTo($"/App/Loan/{p.LoanId}/CreditAgent/{p.CreditAgentRefId}?CustomerId={p.CustomerId}&BranchId={p.BranchId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
+//}
+//void CustomerPayOff(VLoanDisbursments p)
+//{
+//    NavigationManager.NavigateTo($"/Loan/CreditAgent/{p.LoanId}/{p.CreditAgentRefId}?CustomerId={p.CustomerId}&BranchId={p.BranchId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
+//    return;
+//}

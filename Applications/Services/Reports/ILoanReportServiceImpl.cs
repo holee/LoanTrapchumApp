@@ -1,5 +1,5 @@
-﻿using Applications.Interfaces.Loans;
-using Applications.Responses.ViewModels.Loans;
+﻿using Applications.Features.Loans.Responses;
+using Applications.Interfaces.Loans;
 using Applications.Responses.ViewModels.Reports;
 
 namespace Applications.Services.Reports

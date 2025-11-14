@@ -127,7 +127,7 @@ public partial class CustomerCollateralLineEdit
 
             NotificationService.Notify(NotificationSeverity.Success, rsp.Value);
 
-            DialogService.CloseSide(success);
+            DialogService.Close(success);
         }
         else
         {

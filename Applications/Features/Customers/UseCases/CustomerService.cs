@@ -2,7 +2,6 @@
 using Applications.Interfaces.Customers;
 using Applications.Responses;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Domains.Models.Lists.Customers;
 using System.Linq.Expressions;
@@ -11,6 +10,7 @@ using Domains.Models.Lists;
 using Applications.Features.Customers.Response;
 using Applications.Features.Customers.Services;
 using Applications.Features.Collaterals.Dtos;
+using Applications.Features.Loans.Responses;
 
 namespace Applications.Features.Customers.UseCases;
 

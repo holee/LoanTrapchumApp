@@ -1347,55 +1347,66 @@ public sealed class LoanRequestRepository(
 
 
 
+
     public async Task<Pager<VLoanRequests>> GetLoanRequestsAsync(string? userId, int? branchId, RequestStatus requestStatus, QueryParam param)
     {
-        await using var cxt = await contextFactory.CreateDbContextAsync();
+        await using var context = await contextFactory.CreateDbContextAsync();
 
-        IQueryable<VLoanRequests> resultQueries = cxt.VLoanRequests
-                .Where(x => x.BranchId == branchId)
-                .WhereIf(!string.IsNullOrEmpty(param.Filter),
-                         x => EF.Functions.Like(x.BranchName!, $"%{param.Filter}%") ||
-                              EF.Functions.Like(x.AltName!, $"%{param.Filter}%") ||
-                              EF.Functions.Like(x.FullName!, $"%{param.Filter}%"));
-        switch (requestStatus)
+        IQueryable<VLoanRequests> query = context.VLoanRequests
+            .Where(x => x.BranchId == branchId)
+            .WhereIf(!string.IsNullOrEmpty(param.Filter),
+                x => EF.Functions.Like(x.BranchName!, $"%{param.Filter}%") ||
+                     EF.Functions.Like(x.AltName!, $"%{param.Filter}%") ||
+                     EF.Functions.Like(x.FullName!, $"%{param.Filter}%"));
+
+        // --- CASE 1: Anonymous (no userId)
+        if (string.IsNullOrEmpty(userId))
         {
-            case RequestStatus.All:
-                break;
-            case RequestStatus.New:
-            case RequestStatus.Rechecked:
-            case RequestStatus.Denied:
-                resultQueries = resultQueries.Where(x => (x.StatusId == (int)RequestStatus.New ||
-                                                          x.StatusId == (int)RequestStatus.Rechecked ||
-                                                          x.StatusId == (int)RequestStatus.Denied) &&
-                                                         x.UserRequestId == userId);
-                break;
-            case RequestStatus.Requested:
-            case RequestStatus.Checking:
-                resultQueries = resultQueries.Where(x =>
-                    (x.StatusId == (int)RequestStatus.Requested ||
-                     x.StatusId == (int)RequestStatus.Checking) &&
-                    x.AprovedUserId == userId);
-                break;
-            case RequestStatus.Approved:
-                resultQueries = resultQueries.Where(x => x.StatusId == (int)RequestStatus.Approved);
-                break;
-            default:
-                resultQueries = resultQueries.Where(x => x.StatusId == (int)requestStatus);
-                break;
+            query = query.Where(x => x.StatusId == (int)RequestStatus.Approved &&
+                                     x.BranchId == branchId);
+        }
+        else
+        {
+            // --- CASE 2: Authenticated user (has userId)
+            query = requestStatus switch
+            {
+                RequestStatus.All
+                    => query.Where(x => x.AprovedUserId == userId || x.UserRequestId == userId), // no filter
+                RequestStatus.New or RequestStatus.Rechecked or RequestStatus.Denied
+                    => query.Where(x =>
+                        (x.StatusId == (int)RequestStatus.New ||
+                         x.StatusId == (int)RequestStatus.Rechecked ||
+                         x.StatusId == (int)RequestStatus.Denied) &&
+                        x.UserRequestId == userId),
+
+                RequestStatus.Requested or RequestStatus.Checking
+                    => query.Where(x =>
+                        (x.StatusId == (int)RequestStatus.Requested ||
+                         x.StatusId == (int)RequestStatus.Checking) &&
+                        x.AprovedUserId == userId),
+
+                RequestStatus.Completed
+                    => query.Where(x => x.StatusId == (int)RequestStatus.Completed &&
+                        (x.AprovedUserId == userId || x.UserRequestId == userId)),
+
+                _ => query.Where(x => x.StatusId == (int)requestStatus)
+            };
         }
 
-
+        // --- Sorting
         if (param.SortDescending)
-        {
-            resultQueries = resultQueries.OrderByDescending(x => EF.Property<object>(x, param.SortColumn));
-        }
+            query = query.OrderByDescending(x => EF.Property<object>(x, param.SortColumn));
+        else
+            query = query.OrderBy(x => EF.Property<object>(x, param.SortColumn));
 
-        var counts = resultQueries.Count();
+        // --- Paging
+        var totalCount = await query.CountAsync();
+        var items = await query.Skip(param.Skip).Take(param.PageSize).AsNoTracking().ToListAsync();
 
-        var items = await resultQueries.Skip(param.Skip).Take(param.PageSize).AsNoTracking().ToListAsync();
-
-        return new Pager<VLoanRequests>(items, counts);
+        return new Pager<VLoanRequests>(items, totalCount);
     }
+
+
 
 
 
@@ -1667,6 +1678,90 @@ public sealed class LoanRequestRepository(
             (existing, newItem) => existing.Id == newItem.Id);
     }
 
+
+
+
+
+    public async Task<Pager<VLoanRequests>> GetLoanRequestsAsync(string? userId, string? userRole, int? branchId, RequestStatus requestStatus, QueryParam param)
+    {
+        await using var context = await contextFactory.CreateDbContextAsync();
+
+        IQueryable<VLoanRequests> query = context.VLoanRequests
+            .Where(x => x.BranchId == branchId)
+            .WhereIf(!string.IsNullOrEmpty(param.Filter),
+                x => EF.Functions.Like(x.BranchName!, $"%{param.Filter}%") ||
+                     EF.Functions.Like(x.AltName!, $"%{param.Filter}%") ||
+                     EF.Functions.Like(x.FullName!, $"%{param.Filter}%"));
+
+        // CASE 1: Anonymous user
+        if (string.IsNullOrEmpty(userId))
+        {
+            query = query.Where(x => x.StatusId == (int)RequestStatus.Approved);
+        }
+        else
+        {
+            // CASE 2: Authenticated user — filter based on role
+            switch (userRole?.ToLower())
+            {
+                case "admin":
+                case "manager":
+                    // Admin or manager can view all loan requests for the branch
+                    query = ApplyStatusFilter(query, requestStatus);
+                    break;
+
+                case "loanofficer":
+                    // Loan officer sees only their own requests
+                    query = ApplyStatusFilter(query.Where(x => x.UserRequestId == userId), requestStatus);
+                    break;
+
+                case "approver":
+                case "checker":
+                    // Approvers/checkers see requests assigned to them
+                    query = ApplyStatusFilter(query.Where(x => x.AprovedUserId == userId), requestStatus);
+                    break;
+
+                default:
+                    // Default fallback: treat as normal user
+                    query = ApplyStatusFilter(query.Where(x => x.UserRequestId == userId), requestStatus);
+                    break;
+            }
+        }
+
+        // Sorting
+        query = param.SortDescending
+            ? query.OrderByDescending(x => EF.Property<object>(x, param.SortColumn))
+            : query.OrderBy(x => EF.Property<object>(x, param.SortColumn));
+
+        // Paging
+        var totalCount = await query.CountAsync();
+        var items = await query.Skip(param.Skip).Take(param.PageSize).AsNoTracking().ToListAsync();
+
+        return new Pager<VLoanRequests>(items, totalCount);
+    }
+
+    private static IQueryable<VLoanRequests> ApplyStatusFilter(IQueryable<VLoanRequests> query, RequestStatus requestStatus)
+    {
+        return requestStatus switch
+        {
+            RequestStatus.All => query,
+
+            RequestStatus.New or RequestStatus.Rechecked or RequestStatus.Denied =>
+                query.Where(x => x.StatusId == (int)RequestStatus.New ||
+                                 x.StatusId == (int)RequestStatus.Rechecked ||
+                                 x.StatusId == (int)RequestStatus.Denied),
+
+            RequestStatus.Requested or RequestStatus.Checking =>
+                query.Where(x => x.StatusId == (int)RequestStatus.Requested ||
+                                 x.StatusId == (int)RequestStatus.Checking),
+
+            RequestStatus.Approved =>
+                query.Where(x => x.StatusId == (int)RequestStatus.Approved),
+
+            _ => query.Where(x => x.StatusId == (int)requestStatus)
+        };
+    }
+
+
 }
 
 
@@ -1893,5 +1988,68 @@ public sealed class LoanRequestRepository(
 //        logger.LogError(ex, "Failed to create loan request for CustomerRefId: {CustomerRefId}", req.CustomerRefId);
 //        return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}"));
 //    }
+//}
+
+
+
+
+
+
+//public async Task<Pager<VLoanRequests>> GetLoanRequestsAsync(string? userId, int? branchId, RequestStatus requestStatus, QueryParam param)
+//{
+//    await using var cxt = await contextFactory.CreateDbContextAsync();
+
+//    IQueryable<VLoanRequests> resultQueries = cxt.VLoanRequests
+//            .Where(x => x.BranchId == branchId)
+//            .WhereIf(!string.IsNullOrEmpty(param.Filter),
+//                     x => EF.Functions.Like(x.BranchName!, $"%{param.Filter}%") ||
+//                          EF.Functions.Like(x.AltName!, $"%{param.Filter}%") ||
+//                          EF.Functions.Like(x.FullName!, $"%{param.Filter}%"));
+
+//    if (string.IsNullOrEmpty(userId))
+//    {
+//        resultQueries = resultQueries.Where(x => x.StatusId == ((int)RequestStatus.Approved));
+//    }
+//    else
+//    {
+
+//        switch (requestStatus)
+//        {
+//            case RequestStatus.All:
+//                break;
+//            case RequestStatus.New:
+//            case RequestStatus.Rechecked:
+//            case RequestStatus.Denied:
+//                resultQueries = resultQueries.Where(x => (x.StatusId == (int)RequestStatus.New ||
+//                                                          x.StatusId == (int)RequestStatus.Rechecked ||
+//                                                          x.StatusId == (int)RequestStatus.Denied) &&
+//                                                         x.UserRequestId == userId);
+//                break;
+//            case RequestStatus.Requested:
+//            case RequestStatus.Checking:
+//                resultQueries = resultQueries.Where(x =>
+//                    (x.StatusId == (int)RequestStatus.Requested ||
+//                     x.StatusId == (int)RequestStatus.Checking) &&
+//                    x.AprovedUserId == userId);
+//                break;
+//            case RequestStatus.Approved:
+//                resultQueries = resultQueries.Where(x => x.StatusId == (int)RequestStatus.Approved);
+//                break;
+//            default:
+//                resultQueries = resultQueries.Where(x => x.StatusId == (int)requestStatus);
+//                break;
+//        }
+
+//    }
+//    if (param.SortDescending)
+//    {
+//        resultQueries = resultQueries.OrderByDescending(x => EF.Property<object>(x, param.SortColumn));
+//    }
+
+//    var counts = resultQueries.Count();
+
+//    var items = await resultQueries.Skip(param.Skip).Take(param.PageSize).AsNoTracking().ToListAsync();
+
+//    return new Pager<VLoanRequests>(items, counts);
 //}
 

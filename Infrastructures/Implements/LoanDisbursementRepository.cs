@@ -3,7 +3,6 @@ using Applications.Extensions;
 using Applications.Interfaces.Loans;
 using Applications.Responses;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Dapper;
@@ -18,6 +17,7 @@ using Microsoft.Extensions.Logging;
 using System.Data;
 using Applications.Features.CreditAgents.Requests;
 using Applications.Features.Customers.Response;
+using Applications.Features.Loans.Responses;
 
 namespace Infrastructures.Implements
 {

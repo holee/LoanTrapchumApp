@@ -1,9 +1,7 @@
 using Applications.Interfaces.Addresses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Addresses;
-using Applications.Responses.ViewModels.Departments;
 using Domains.Models.Addresses;
-using System.Threading.Tasks;
 using TrapchumApp.Pages.Lists.Operations.Districts;
 
 namespace TrapchumApp.Pages.Lists.Operations.Provinces

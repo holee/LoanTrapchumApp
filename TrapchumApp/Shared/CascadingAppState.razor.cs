@@ -3,7 +3,6 @@ using System.Text.Json;
 using Applications.Extensions.Identity.Authorizations.Extensions;
 using Applications.Extensions.Identity.Policies;
 using Domains.Models.Identity;
-using Microsoft.AspNetCore.Components;
 
 namespace TrapchumApp.Shared
 {
@@ -15,6 +14,7 @@ namespace TrapchumApp.Shared
         private bool _state;
         private bool _isAdmin;
         private bool _isAccount;
+        private bool _isCeo;
         private bool _isManager;
         private bool _isCreditAgent;
         private bool _canDisbursed;
@@ -24,6 +24,34 @@ namespace TrapchumApp.Shared
         private int _branchId;
         private string? _userId;
         private string? _employeeId;
+        private bool _canRecievePayment; 
+        private bool _canPayOff;
+
+
+        public bool CanPayOff
+        {
+            get { return _canPayOff; }
+
+            set
+            {
+                _canPayOff = value;
+                StateHasChanged();
+            }
+        }
+
+
+        public bool CanRecievePayment
+        {
+            get { return _canRecievePayment; }
+
+            set
+            {
+                _canRecievePayment = value;
+
+                StateHasChanged();
+            }
+        }
+
         public bool VaultIn
         {
             get { return _vaultIn; }
@@ -35,7 +63,7 @@ namespace TrapchumApp.Shared
         }
 
         private bool _vaultOut;
-
+        private bool _canWriteOff;
         public bool VaultOut
         {
             get { return _vaultOut; }
@@ -86,6 +114,7 @@ namespace TrapchumApp.Shared
         public bool IsCreditAgent
         {
             get => _isCreditAgent;
+
             set
             {
                 _isCreditAgent = value;
@@ -97,9 +126,11 @@ namespace TrapchumApp.Shared
         public bool CanDisbursed
         {
             get => _canDisbursed;
+
             set
             {
                 _canDisbursed = value;
+
                 StateHasChanged();
             }
         }
@@ -107,9 +138,11 @@ namespace TrapchumApp.Shared
         public bool CanApproved
         {
             get => _canApproved;
+
             set
             {
                 _canApproved = value;
+
                 StateHasChanged();
             }
         }
@@ -117,6 +150,7 @@ namespace TrapchumApp.Shared
         public bool CanRequest
         {
             get => _canRequest;
+
             set
             {
                 _canRequest = value;
@@ -128,6 +162,7 @@ namespace TrapchumApp.Shared
         public bool IsManager
         {
             get => _isManager;
+
             set
             {
                 _isManager = value;
@@ -136,8 +171,31 @@ namespace TrapchumApp.Shared
             }
         }
 
+
+        public bool IsCEO
+        {
+            get => _isCeo;
+
+            set
+            {
+                _isCeo = value;
+
+                StateHasChanged();
+            }
+        }
+
         public int BranchId { get => _branchId; set => _branchId = value; }
         public string? UserId { get => _userId; set => _userId = value; }
+        public bool CanWriteOff
+        {
+            get => _canWriteOff;
+            set
+            {
+                _canWriteOff = value;
+
+                StateHasChanged();
+            }
+        }
 
         internal async Task CheckedIsAdmin(ClaimsPrincipal user)
         {
@@ -151,6 +209,34 @@ namespace TrapchumApp.Shared
             _isAdmin = await _authorizeService.MustHasPermissionAsync(user!, RolePolicies.AdminOnly);
         }
 
+
+        internal async Task CheckedCanPayOff(ClaimsPrincipal user)
+        {
+            if (user is not null && user?.Identity?.IsAuthenticated == false)
+            {
+                _canPayOff = await _authorizeService.MustHasPermissionAsync(user, PaymentsPolicies.PayOff);
+            }
+            else
+            {
+                _canPayOff = false;
+            }
+
+        }
+
+
+        internal async Task CheckedCanWriteOff(ClaimsPrincipal user)
+        {
+            if (user is not null && user?.Identity?.IsAuthenticated == false)
+            {
+                CanWriteOff = await _authorizeService.MustHasPermissionAsync(user, PaymentsPolicies.WriteOff);
+            }
+            else
+            {
+                CanWriteOff = false;
+            }
+
+        }
+
         internal async Task CheckedIsManager(ClaimsPrincipal user)
         {
             if (user is null && user?.Identity?.IsAuthenticated == false)
@@ -160,6 +246,33 @@ namespace TrapchumApp.Shared
             }
             _isManager = await _authorizeService.MustHasPermissionAsync(user!, RolePolicies.ManagerOnly);
         }
+
+        internal async Task CheckedIsCEO(ClaimsPrincipal user)
+        {
+            if (user is not null && user?.Identity?.IsAuthenticated == true)
+            {
+                _isCeo = await _authorizeService.MustHasPermissionAsync(user!, RolePolicies.CEOOnly);
+
+                return;
+            }
+
+            _isManager = false;
+
+        }
+
+
+        internal async Task CheckRecievePayment(ClaimsPrincipal user)
+        {
+            if (user is not null && user?.Identity?.IsAuthenticated == true)
+            {
+                _canRecievePayment = await _authorizeService.MustHasPermissionAsync(user, PaymentsPolicies.RecievePayment);
+            }
+            else
+            {
+                _canRecievePayment = false;
+            }
+        }
+
 
         internal async Task CheckedIsAccount(ClaimsPrincipal user)
         {
@@ -194,6 +307,10 @@ namespace TrapchumApp.Shared
 
             _canDisbursed = await _authorizeService.MustHasPermissionAsync(user!, RequestsPolicies.Disburse);
         }
+
+
+
+
 
         internal async Task CheckedCanVaultIn(ClaimsPrincipal user)
         {
@@ -258,7 +375,11 @@ namespace TrapchumApp.Shared
             await CheckedIsCreditAgent(user);
             await CheckedCanVaultIn(user);
             await CheckedCanVaultOut(user);
+            await CheckedIsCEO(user);
+            await CheckRecievePayment(user);
+            await CheckedCanWriteOff(user);
         }
+
 
 
         public async Task GetBranchState(int? branchId)
@@ -301,7 +422,7 @@ namespace TrapchumApp.Shared
             if (user.Identity?.IsAuthenticated == true)
             {
 
-                var rsp =await _userService.GetUserByIdAsync(user.GetId());
+                var rsp = await _userService.GetUserByIdAsync(user.GetId());
 
                 _employeeId = rsp.Data?.EmployeeRefId;
             }

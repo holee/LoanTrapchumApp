@@ -1,19 +1,21 @@
-﻿using Applications.Extensions;
+﻿using Applications.Bases;
+using Applications.Commons.Messages.Employees;
+using Applications.Extensions;
+using Applications.Features.Loans.Responses;
 using Applications.Interfaces.Employees;
 using Applications.Responses;
 using Applications.Responses.Message;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Employees;
-using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Dapper;
+using Domains.Models.Lists;
+using ErrorOr;
 using Infrastructures.Constants.Procedures;
 using Infrastructures.DataAccess;
-using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Data;
-using Domains.Models.Lists;
 
 namespace Infrastructures.Implements;
 
@@ -40,11 +42,11 @@ public sealed class EmployeeService : IEmployeeService
 
             await _context.SaveChangesAsync();
 
-            return Result.Success<string>(new("New Employee was Added."));
+            return Applications.Responses.Result.Success<string>(new("New Employee was Added."));
         }
         catch (Exception ex)
         {
-            return Result.Failure<string>(ErrorResponse.Failure($"{ex.InnerException!.Message}"));
+            return Applications.Responses.Result.Failure<string>(ErrorResponse.Failure($"{ex.InnerException!.Message}"));
         }
     }
 
@@ -54,21 +56,13 @@ public sealed class EmployeeService : IEmployeeService
         {
 
             await using var context = await _dbContextFactory.CreateDbContextAsync(cancellation);
-
-
             context.EntityNames.Update(employee);
-
-            //_context.Entry(employee).State = EntityState.Modified;
-
-            //_context.Entry(employee.Employee!).State = EntityState.Modified;
-
             await context.SaveChangesAsync(cancellation);
-
-            return Result.Success<string>(new("New Employee was Updated."));
+            return Applications.Responses.Result.Success<string>(new("New Employee was Updated."));
         }
         catch (Exception ex)
         {
-            return Result.Failure<string>(ErrorResponse.Failure($"{ex.InnerException!.Message}"));
+            return Applications.Responses.Result.Failure<string>(ErrorResponse.Failure($"{ex.InnerException!.Message}"));
         }
     }
 
@@ -85,19 +79,19 @@ public sealed class EmployeeService : IEmployeeService
                                             .FirstOrDefaultAsync();
             if (employee is null)
             {
-                return Result.Failure<string>(ErrorResponse.NotFound("There is no Employee in then context."));
+                return Applications.Responses.Result.Failure<string>(ErrorResponse.NotFound("There is no Employee in then context."));
             }
 
             _context.EntityNames.Remove(employee);
 
             await _context.SaveChangesAsync();
 
-            return Result.Success("One Employee was delete from database.");
+            return Applications.Responses.Result.Success("One Employee was delete from database.");
         }
 
         catch (Exception ex)
         {
-            return Result.Failure<string>(ErrorResponse.NotFound($"{ex.InnerException!.Message}"));
+            return Applications.Responses.Result.Failure<string>(ErrorResponse.NotFound($"{ex.InnerException!.Message}"));
         }
     }
 
@@ -112,7 +106,7 @@ public sealed class EmployeeService : IEmployeeService
                                             .FirstOrDefaultAsync(emp => emp.Id == id);
             if (employee == null)
             {
-                return Result.Failure<string>(ErrorResponse.NotFound("No Employee found."));
+                return Applications.Responses.Result.Failure<string>(ErrorResponse.NotFound("No Employee found."));
             }
 
             int editSeq = employee!.EditSeq + 1;
@@ -126,18 +120,18 @@ public sealed class EmployeeService : IEmployeeService
                 );
             if (rowEffect > 0)
             {
-                return Result.Success<string>(new("Employee was updated!"));
+                return Applications.Responses.Result.Success<string>(new("Employee was updated!"));
             }
 
-            return Result.Failure<string>(ErrorResponse.ServerError("Cannot update employee"));
+            return Applications.Responses.Result.Failure<string>(ErrorResponse.ServerError("Cannot update employee"));
         }
         catch (DbUpdateException ex)
         {
-            return Result.Failure<string>(ErrorResponse.NotFound($"{ex.InnerException!.Message}"));
+            return Applications.Responses.Result.Failure<string>(ErrorResponse.NotFound($"{ex.InnerException!.Message}"));
         }
     }
 
-    public async Task<Result<IReadOnlyList<VEmployeeList>>> GetEmployeesAsync(string? employeeId,int branchId = 0,bool isActive = true,string? q = null)
+    public async Task<Result<IReadOnlyList<VEmployeeList>>> GetEmployeesAsync(string? employeeId, int branchId = 0, bool isActive = true, string? q = null)
     {
 
         await using var _context = await _dbContextFactory.CreateDbContextAsync();
@@ -169,7 +163,7 @@ public sealed class EmployeeService : IEmployeeService
             queries = queries.Where(x => x.BranchId == branchId);
         }
 
-        return Result.Success<IReadOnlyList<VEmployeeList>>(await queries.AsNoTracking().ToListAsync());
+        return Applications.Responses.Result.Success<IReadOnlyList<VEmployeeList>>(await queries.AsNoTracking().ToListAsync());
     }
 
     public async Task<Pager<VEmployeeList>> GetEmployeesAsync(int? branchId, string? employeeId, QueryParam q)
@@ -224,43 +218,40 @@ public sealed class EmployeeService : IEmployeeService
 
             if (employees is not null)
             {
-                return Result.Success(employees);
+                return Applications.Responses.Result.Success(employees);
             }
 
-            return Result.Failure<EntityNames>(ErrorResponse.NotFound("No Employee Found."));
+            return Applications.Responses.Result.Failure<EntityNames>(ErrorResponse.NotFound("No Employee Found."));
         }
         catch (Exception ex)
         {
-            return Result.Failure<EntityNames>(ErrorResponse.NotFound($"{ex.Message}."));
+            return Applications.Responses.Result.Failure<EntityNames>(ErrorResponse.NotFound($"{ex.Message}."));
         }
     }
 
-
-    public async Task<Result<T>> GetByIdAsync<T>(string? id)
-        where T : class
+    public async Task<ErrorOr<EntityNames>> GetByIdAsync(string? id, int? branchId, CancellationToken cancellation = default)
     {
         try
         {
-            await using var context = await _dbContextFactory.CreateDbContextAsync();
+            await using var context = await _dbContextFactory.CreateDbContextAsync(cancellation);
 
-            var employees = await context.EmployeeLists
-                .Where(x => x.EmployeeId == id && x.IsActive == true)
-                .ProjectToType<T>()
-                .AsNoTracking()
-                .FirstOrDefaultAsync();
-            if (employees is not null)
+            var employee = await context.EntityNames
+                                .Include(e => e.Employee)
+                                .AsNoTracking()
+                                .FirstOrDefaultAsync(e => e.Id == id, cancellation);
+
+            if (employee is not null)
             {
-                return Result.Success(employees);
+                return employee;
             }
 
-            return Result.Failure<T>(ErrorResponse.NotFound("No Employee Found."));
+            return Error.NotFound(EmployeeMessage.NotFound);
         }
         catch (Exception ex)
         {
-            return Result.Failure<T>(ErrorResponse.NotFound($"{ex.Message}."));
+            return Error.Unexpected($"{ex.Message}.");
         }
     }
-
 
     //spGetLoansByEmployeeId
 
@@ -270,7 +261,7 @@ public sealed class EmployeeService : IEmployeeService
         {
             if (id.IsNullOrEmpty())
             {
-                return Result.Failure<VEmployeeList>(ErrorResponse.NotFound("No Employee Found."));
+                return Applications.Responses.Result.Failure<VEmployeeList>(ErrorResponse.NotFound("No Employee Found."));
             }
 
             using var db = connectionFactory.CreateConnection();
@@ -291,10 +282,10 @@ public sealed class EmployeeService : IEmployeeService
 
                 if (employee is not null)
                 {
-                    return Result.Success(employee);
+                    return Applications.Responses.Result.Success(employee);
                 }
 
-                return Result.Failure<VEmployeeList>(ErrorResponse.NotFound("No Employee Found."));
+                return Applications.Responses.Result.Failure<VEmployeeList>(ErrorResponse.NotFound("No Employee Found."));
             }
 
             using (var multiMap = await db.QueryMultipleAsync("spGetEmployeeByIdWithLoans", parameters,
@@ -308,19 +299,19 @@ public sealed class EmployeeService : IEmployeeService
 
                 if (existingItem is null)
                 {
-                    return Result.Failure<VEmployeeList>(ErrorResponse.NotFound("No Employee Found."));
+                    return Applications.Responses.Result.Failure<VEmployeeList>(ErrorResponse.NotFound("No Employee Found."));
                 }
 
                 existingItem.LoanRequests = loanRequests ?? [];
 
                 existingItem.LoanDisbursments = loanDisbursments ?? [];
 
-                return Result.Success(existingItem);
+                return Applications.Responses.Result.Success(existingItem);
             }
         }
         catch (Exception ex)
         {
-            return Result.Failure<VEmployeeList>(ErrorResponse.NotFound($"{ex.Message}."));
+            return Applications.Responses.Result.Failure<VEmployeeList>(ErrorResponse.NotFound($"{ex.Message}."));
         }
     }
 
@@ -333,7 +324,7 @@ public sealed class EmployeeService : IEmployeeService
 
         if (string.IsNullOrEmpty(employeeId))
         {
-            return Result.Failure<VEmployeeList>(ErrorResponse.NotFound(""));
+            return Applications.Responses.Result.Failure<VEmployeeList>(ErrorResponse.NotFound(""));
         }
 
         using var db = await connectionFactory.CreateConnectionAsync(cancellation);
@@ -371,10 +362,10 @@ public sealed class EmployeeService : IEmployeeService
 
         if (item is null)
         {
-            return Result.Failure<VEmployeeList>(ErrorResponse.NotFound(Messages.DataNotFound));
+            return Applications.Responses.Result.Failure<VEmployeeList>(ErrorResponse.NotFound(Messages.DataNotFound));
         }
 
-        return Result.Success(item);
+        return Applications.Responses.Result.Success(item);
     }
 
 
@@ -394,12 +385,99 @@ public sealed class EmployeeService : IEmployeeService
                                 .FirstOrDefaultAsync(x => x.EmployeeId == employeeId, cancellation);
         if (item is null)
         {
-            return Result.Failure<VEmployeeList>(ErrorResponse.NotFound(Messages.DataNotFound));
+            return Applications.Responses.Result.Failure<VEmployeeList>(ErrorResponse.NotFound(Messages.DataNotFound));
         }
 
-        return Result.Success(item);
+        return Applications.Responses.Result.Success(item);
     }
 
+    public async Task<ErrorOr<DeleteResult>> DeleteAsync(string? id, int? branchId, CancellationToken cancellation = default)
+    {
+        await using var context = await _dbContextFactory.CreateDbContextAsync(cancellation);
 
+        //chekc employee is exist
 
+        var employee = await context.EntityNames
+                                     .Include(x => x.Employee)
+                                     .FirstOrDefaultAsync(x => x.Id == id
+                                                          && x.Employee!.BranchRefId == branchId, cancellation);
+        if (employee is null)
+        {
+            return Error.NotFound(EmployeeMessage.NotFound);
+        }
+
+        //check if employee has loans request
+
+        bool hasLoanRequests = await IsEmployeeHasLoanRequest(id, context, cancellation);
+
+        if (hasLoanRequests)
+        {
+            return DeleteResult.InUse(EmployeeMessage.InUsed);
+        }
+
+        bool hasLoanDisbursments = await IsEmployeeHasLoanDisbursement(id, context, cancellation);
+
+        if (hasLoanDisbursments)
+        {
+            return DeleteResult.InUse(EmployeeMessage.InUsed);
+        }
+
+        try
+        {
+            context.EntityNames.Remove(employee);
+
+            await context.SaveChangesAsync(cancellation);
+
+            return DeleteResult.Success(EmployeeMessage.Deleted);
+        }
+        catch (DbUpdateException ex)
+        {
+            _logger.LogError(ex, ex.Message);
+
+            return Error.Unexpected(ex.Message);
+        }
+
+    }
+
+    private static async Task<bool> IsEmployeeHasLoanDisbursement(string? id, DataContext context, CancellationToken cancellation)
+    {
+        return await context.LoanDisbursments
+                                               .AsNoTracking()
+                                               .AnyAsync(ld => ld.CreditAgentRefId == id, cancellation);
+    }
+
+    private static async Task<bool> IsEmployeeHasLoanRequest(string? id, DataContext context, CancellationToken cancellation)
+    {
+        return await context.LoanRequests
+                                       .AsNoTracking()
+                                       .AnyAsync(lr => lr.CreditAgentRefId == id, cancellation);
+    }
 }
+
+
+
+
+//public async Task<Result<T>> GetByIdAsync<T>(string? id)
+//    where T : class
+//{
+//    try
+//    {
+//        await using var context = await _dbContextFactory.CreateDbContextAsync();
+
+//        var employees = await context.EmployeeLists
+//            .Where(x => x.EmployeeId == id && x.IsActive == true)
+//            .ProjectToType<T>()
+//            .AsNoTracking()
+//            .FirstOrDefaultAsync();
+//        if (employees is not null)
+//        {
+//            return Result.Success(employees);
+//        }
+
+//        return Result.Failure<T>(ErrorResponse.NotFound("No Employee Found."));
+//    }
+//    catch (Exception ex)
+//    {
+//        return Result.Failure<T>(ErrorResponse.NotFound($"{ex.Message}."));
+//    }
+//}

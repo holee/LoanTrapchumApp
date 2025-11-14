@@ -1,6 +1,6 @@
-﻿using Applications.Responses;
+﻿using Applications.Features.Departments.Dto;
+using Applications.Responses;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Departments;
 using Domains.Models.Lists;
 
 namespace Applications.Interfaces.Lists;

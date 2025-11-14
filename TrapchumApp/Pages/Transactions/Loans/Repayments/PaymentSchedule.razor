@@ -297,7 +297,7 @@
                                       Click="@ApplySchedulePayment"
                                       Visible="!isAllowMultiplePayment"
                                       Text="Applied Payment" />
-                        <RadzenLink Path="@($"/app/loan/disbursment/{BranchId}/Branches")"
+                        <RadzenLink Path="@_navService.PreviousUrl"
                                     Text="Cancel" />
                     </RadzenStack>
                 </RadzenFieldset>
@@ -326,3 +326,5 @@
         </Tabs>
     </RadzenTabs>
 </div>
+
+                                    @* ($"/app/loan/disbursment/{BranchId}/Branches") *@

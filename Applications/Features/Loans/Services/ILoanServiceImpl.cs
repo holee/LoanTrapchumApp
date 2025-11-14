@@ -4,7 +4,6 @@ using Applications.Features.Loans.Requests;
 using Applications.Features.Loans.Responses;
 using Applications.Responses;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Loans;
 using Domains.Models.Loans;
 
 namespace Applications.Features.Loans.Services;

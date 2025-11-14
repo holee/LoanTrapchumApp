@@ -5,6 +5,7 @@ using Applications.Extensions.Web;
 using Applications.Features.LoanRequests.Interfaces;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Requests;
+using Domains.Models.Identity;
 using Microsoft.AspNetCore.Authorization;
 using TrapchumApp.Helpers.Extensions;
 using TrapchumApp.Shared;
@@ -46,6 +47,8 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
             _user = auth.User;
 
+            UserId = _user.GetId();
+
             CanRequestLoan = (await _authorizeService.AuthorizeAsync(_user, RequestsPolicies.CanCreate()))
                 .Succeeded;
             CanDisburseLoan = (await _authorizeService.AuthorizeAsync(_user, RequestsPolicies.CanDisburseLoan()))
@@ -66,7 +69,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
             filtertext = args.Filter ?? string.Empty;
 
-            (sortColumn, sortDescending)=args.PageInfo();
+            (sortColumn, sortDescending) = args.PageInfo();
 
             await GetLoanRequestAsync();
         }
@@ -75,18 +78,24 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         {
             isLoading = true;
 
-
-            var param = new QueryParam(pageIndex, pageSize, sortColumn,false, sortDescending, filtertext);
+            var param = new QueryParam(pageIndex, pageSize, sortColumn, false, sortDescending, filtertext);
 
             if (bState.CanDisbursed)
             {
-                userId = string.Empty;
+                var rsp = await _requestService.GetLoanRequestsAsync(string.Empty, CanDisburseLoan, BranchId, RequestStatus.All, param);
+               
+                LoanRequests = rsp.Items;
+
+                counts = rsp.Count;
             }
-            var rsp = await _requestService.GetLoanRequestsAsync(userId, CanDisburseLoan, BranchId, RequestStatus.All, param);
+            else
+            {
+                var rsp = await _requestService.GetLoanRequestsAsync(userId, BranchId, RequestStatus.All, param);
+               
+                LoanRequests = rsp.Items;
 
-            LoanRequests = rsp.Items;
-
-            counts = rsp.Count;
+                counts = rsp.Count;
+            }
 
             isLoading = false;
 

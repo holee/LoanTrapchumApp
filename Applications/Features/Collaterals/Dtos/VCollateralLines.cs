@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using Applications.Features.Loans.Responses;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Applications.Features.Collaterals.Dtos;
 
@@ -31,4 +32,6 @@ public sealed class VCollateralLines
     [NotMapped]
     public int RowIndex { get; set; } = 1;
 
+    [NotMapped]
+    public IEnumerable<VLoanDisbursments> LoanDisbursements { get; set; } = [];
 }

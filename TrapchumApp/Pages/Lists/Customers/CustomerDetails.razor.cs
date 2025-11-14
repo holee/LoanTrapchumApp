@@ -8,6 +8,8 @@ using Applications.Services.Lists;
 using Applications.Services.Lists;
 using Applications.Features.Customers.Response;
 using Applications.Features.Collaterals.Dtos;
+using TrapchumApp.Pages.Lists.Customers.Expenses;
+using TrapchumApp.Pages.Lists.Customers.Incomes;
 
 namespace TrapchumApp.Pages.Lists.Customers
 {

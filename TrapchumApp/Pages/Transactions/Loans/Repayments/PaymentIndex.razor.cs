@@ -95,22 +95,29 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
         void GetCustomerLateSchedules(VSchedule? p)
         {
             ContextMenuService.Close();
+
             if (p is null) return;
+
             if (!isShowLateSchedule)
             {
                 isShowLateSchedule = true;
+
                 tabcounts.Add(1);
             }
 
             selectedTabIndex = 1;
+
             loanId = p.LoanId!;
+
             StateHasChanged();
         }
 
         void CustomerPayOff(VSchedule? p)
         {
             ContextMenuService.Close();
+
             if (p is null) return;
+
             if (!isShowLateSchedule)
             {
                 isShowLateSchedule = true;
@@ -118,7 +125,9 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
             }
 
             selectedTabIndex = 1;
+
             loanId = p.LoanId!;
+
             StateHasChanged();
         }
 
@@ -153,18 +162,17 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 
         void ShowCustomerPayment(VSchedule p)
         {
-            var parameters = new Dictionary<string, object?>
-            {
-                { "LoanPayment", p },
-                { "CurrencyId", p.CurrencyId!.Value },
-                { "LoanId", p.LoanId! },
-                { "UserId", _userId },
-                {
-                    "CreditAgentId", p.CreditAgentId!
-                }
-            };
-            NavigationManager.NavigateTo(
-                $"/Loans/Repayment/{p.LoanId}/Multiple?BranchId={p.BranchId}&CreditAgentId={p.CreditAgentId}&CurrencyId={p.CurrencyId}&UserId={_userId}");
+            //var parameters = new Dictionary<string, object?>
+            //{
+            //    { "LoanPayment", p },
+            //    { "CurrencyId", p.CurrencyId!.Value },
+            //    { "LoanId", p.LoanId! },
+            //    { "UserId", _userId },
+            //    {
+            //        "CreditAgentId", p.CreditAgentId!
+            //    }
+            //};
+            NavigationManager.NavigateTo($"/Loans/Repayment/{p.LoanId}/Multiple?BranchId={p.BranchId}&CreditAgentId={p.CreditAgentId}&CurrencyId={p.CurrencyId}&UserId={_userId}");
         }
 
 

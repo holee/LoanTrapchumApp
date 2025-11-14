@@ -7,7 +7,7 @@
 @using Applications.Features.LoanRequests.Interfaces
 @using TrapchumApp.Services
 <PageTitle>Loan Request</PageTitle>
-@attribute [MustHasPermission(Modules.LoanRequest,Feature.Read)]
+@attribute [MustHasPermission(Modules.LoanRequest, Feature.Read)]
 <style>
     .rz-grid-table td .rz-cell-data {
         line-height: 1.5rem;
@@ -18,21 +18,27 @@
     <RadzenTabs SelectedIndexChanged="SelectedIndexChanged" RenderMode="TabRenderMode.Server">
         <Tabs>
             <RadzenTabsItem Icon="list" Text="All">
-                <LoanRequestAll BranchId="@BranchId" UserId="@_userId"/>
+                <LoanRequestAll BranchId="@BranchId" UserId="@_userId" />
             </RadzenTabsItem>
-            <RadzenTabsItem Text="Requesting" Icon="pending_actions">
+            <RadzenTabsItem Text="Requesting"
+                            Visible="@IsCreditAgent"
+                            Icon="pending_actions">
                 <LoanRequestRequesting BranchId="@BranchId"
-                                       UserId="@_userId"/>
+                                       UserId="@_userId" />
             </RadzenTabsItem>
-            <RadzenTabsItem Text="Requested" Icon="request_quote">
+            <RadzenTabsItem Text="Requested"
+                            Visible="@IsManager"
+                            Icon="request_quote">
                 <LoanRequestRequested BranchId="@BranchId"
-                                      UserId="@_userId"/>
+                                      UserId="@_userId" />
             </RadzenTabsItem>
-            <RadzenTabsItem Text="Approved" Icon="@IconNames.Approval">
-                <LoanRequestApprove BranchId="@BranchId" UserId="@_userId"/>
+            <RadzenTabsItem Text="Approved"
+                            Visible="@IsAccount"
+                            Icon="@IconNames.Approval">
+                <LoanRequestApprove BranchId="@BranchId" UserId="@_userId" />
             </RadzenTabsItem>
             <RadzenTabsItem Text="Completed" Icon="@IconNames.Done">
-                <LoanRequestCompleted BranchId="@BranchId" CreditAgentId="@_userId"/>
+                <LoanRequestCompleted BranchId="@BranchId" CreditAgentId="@_userId" />
             </RadzenTabsItem>
         </Tabs>
     </RadzenTabs>

@@ -1,7 +1,7 @@
 ﻿using Applications.Interfaces.Lists;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Departments;
 using Applications.Features.Entities;
+using Applications.Features.Departments.Dto;
 
 namespace TrapchumApp.Pages.Lists.Departments
 {

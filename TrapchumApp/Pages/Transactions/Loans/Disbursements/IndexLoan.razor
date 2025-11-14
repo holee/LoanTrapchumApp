@@ -1,4 +1,5 @@
 ﻿@page "/app/loan/disbursment/{BranchId:int}/branches"
+@using Applications.Features.Loans.Responses
 @using Applications.Responses.ViewModels.Loans
 <PageTitle>All</PageTitle>
 <RadzenTabs TabPosition="TabPosition.Top" RenderMode="TabRenderMode.Server" SelectedIndex="0">
@@ -18,29 +19,29 @@
 </RadzenTabs>
 
 @code {
-    void ShowContextMenuWithContent(MouseEventArgs args, VLoanDisbursments p)
-    {
-        ContextMenuService.Open(args, ds =>@<RadzenMenu Style="font-size:0.8rem;">
-        <RadzenMenuItem Icon="money"
-                        Click="@(()=>GetPaymentSchedules(p))"
-                        Text="Recieve Payment"></RadzenMenuItem>
-        <RadzenMenuItem Icon="paid"
-                        Click="@(()=>CustomerPayOff(p))"
-                        Text="PayOff"></RadzenMenuItem>
-        <RadzenMenuItem Icon="change_circle"
-                        Click="@(()=>ChangeCreditAgent(p))"
-                        Text="Change Credit Agent"></RadzenMenuItem>
-        <RadzenMenuItem Icon="info"
-                        Click="@(()=>GetLoanDetails(p))"
-                        Text="Loan Details"></RadzenMenuItem>
-        <RadzenMenuItem Icon="file_download"
-                        Click="@(()=>DownLoadScheduleAsExcel(p.LoanId,p.BranchId!.Value))"
-                        Text="Export Loan to Excel" />
-        <RadzenMenuItem Icon="picture_as_pdf"
-                        Click="@(()=>DownLoadScheduleAsPdf(p.LoanId,p.BranchId!.Value))"
-                        Text="Export Loan to Pdf" />
-    </RadzenMenu>
-    );
-    }
+    // void ShowContextMenuWithContent(MouseEventArgs args, VLoanDisbursments p)
+    // {
+    //     ContextMenuService.Open(args, ds =>@<RadzenMenu Style="font-size:0.8rem;">
+    //     <RadzenMenuItem Icon="money"
+    //                     Click="@(()=>GetPaymentSchedules(p))"
+    //                     Text="Recieve Payment"></RadzenMenuItem>
+    //     <RadzenMenuItem Icon="paid"
+    //                     Click="@(()=>CustomerPayOff(p))"
+    //                     Text="PayOff"></RadzenMenuItem>
+    //     <RadzenMenuItem Icon="change_circle"
+    //                     Click="@(()=>ChangeCreditAgent(p))"
+    //                     Text="Change Credit Agent"></RadzenMenuItem>
+    //     <RadzenMenuItem Icon="info"
+    //                     Click="@(()=>GetLoanDetails(p))"
+    //                     Text="Loan Details"></RadzenMenuItem>
+    //     <RadzenMenuItem Icon="file_download"
+    //                     Click="@(()=>DownLoadScheduleAsExcel(p.LoanId,p.BranchId!.Value))"
+    //                     Text="Export Loan to Excel" />
+    //     <RadzenMenuItem Icon="picture_as_pdf"
+    //                     Click="@(()=>DownLoadScheduleAsPdf(p.LoanId,p.BranchId!.Value))"
+    //                     Text="Export Loan to Pdf" />
+    // </RadzenMenu>
+    // );
+    // }
 
 }

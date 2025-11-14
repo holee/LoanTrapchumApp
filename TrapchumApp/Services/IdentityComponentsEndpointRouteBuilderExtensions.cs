@@ -83,30 +83,34 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
 
         var reportGroup = endpoints.MapGroup("/Reports");
 
-
-
-
-
-        reportGroup.MapGet("/Schedules/{loanId}/{branchId:int}", async ([FromServices] IPrintPdfServiceImpl printer, string loanId, int branchId) =>
+        reportGroup.MapGet("/Schedules/{loanId}/{branchId:int}/{fileName}", async ([FromServices] IPrintPdfServiceImpl printer, string loanId, int branchId) =>
         {
+           
             var rsp = await printer.DownLoadScheduleAsPdf(branchId, loanId);
 
-            return TypedResults.File(rsp.Data!, contentType: "application/pdf", $"{Guid.CreateVersion7()}.pdf");
+            if(rsp.IsSuccess == false)
+            {
+                return Results.Problem("Failed to generate PDF or no data returned.", statusCode: StatusCodes.Status500InternalServerError);
+            }
+
+            return TypedResults.File(rsp.Data!, contentType: "application/pdf",null, enableRangeProcessing: true);
+
+            //, $"{Guid.CreateVersion7()}.pdf"
 
         });
 
-        reportGroup.MapGet("/Schedules/Pdf/{loanId}/{branchId:int}", async ([FromServices] SchedulePrintService pdf,
+        reportGroup.MapGet("/Schedules/Pdf/{loanId}/{branchId:int}/{fileName}", async ([FromServices] SchedulePrintService pdf,
             [FromServices] IWebHostEnvironment env, string loanId, int branchId) =>
         {
 
             var rsp = await pdf.DownLoadScheduleAsPdf(branchId, loanId);
 
-            if (!rsp.IsSuccess)
+            if (!rsp.IsSuccess) 
             {
-                return Results.NoContent();
+                return Results.Problem("Failed to generate PDF or no data returned.", statusCode: StatusCodes.Status500InternalServerError);
             }
 
-            return TypedResults.File(rsp.Data!, contentType: "application/pdf", $"{Guid.CreateVersion7()}.pdf");
+            return TypedResults.File(rsp.Data!, contentType: "application/pdf",null, enableRangeProcessing: true);
 
         });
 

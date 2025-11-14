@@ -1,0 +1,72 @@
+﻿@using System.Threading.Tasks
+<AuthorizeView>
+    <Authorized>
+        @if (Schedule is not null)
+        {
+            <RadzenMenu Style="font-size:0.8rem;">
+                @if (bState.CanRecievePayment)
+                {
+                    <RadzenMenuItem Icon="@IconNames.MoneyBag"
+                                    Visible="!Schedule!.IsPaid"
+                                    Path="@recievePaymentUrl"
+                                    Text="Receive Payment" />
+                }
+                <RadzenMenuItem Icon="@IconNames.Info"
+                                Path="@scheduleDetailsUrl"
+                                Text="Schedule Details" />
+                <RadzenMenuItem Icon="@IconNames.Info"
+                                Click="@GetCustomerLateSchedules"
+                                Text="Show Late Schedule" />
+            </RadzenMenu>
+        }
+    </Authorized>
+</AuthorizeView>
+@code {
+
+    [Parameter] public VSchedule? Schedule { get; set; }
+    [Parameter] public EventCallback<VSchedule?> GetSchedule { get; set; }
+    [Parameter] public EventCallback<VSchedule?> GetLateSchedule { get; set; }
+    [Parameter] public EventCallback<VSchedule?> GetPayOffSchedule { get; set; }
+    [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+    [CascadingParameter] CascadingAppState bState { get; set; } = default!;
+    private string recievePaymentUrl = "";
+    private string scheduleDetailsUrl = "";
+    private string payOffUrl = "";
+    protected override void OnInitialized()
+    {
+        if (Schedule is not null)
+        {
+            recievePaymentUrl = $"/App/Loans/{Schedule.BranchId}/Branches/{Schedule.LoanId}/Schedules?CreditAgentId={Schedule.CreditAgentId}&CurrencyId={Schedule.CurrencyId}";
+            //recievePaymentUrl = $"/Loans/Repayment/{Schedule.LoanId}/Multiple?BranchId={Schedule.BranchId}&CreditAgentId={Schedule.CreditAgentId}&CurrencyId={Schedule.CurrencyId}";
+        }
+        base.OnInitialized();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        var authState = await AuthenticationState;
+
+        if (authState.User.Identity is not null && authState.User.Identity.IsAuthenticated)
+        {
+            await bState.GetAuthenticatedUser(authState.User);
+        }
+
+
+        await base.OnInitializedAsync();
+    }
+
+
+
+
+
+    async Task ShowCustomerPayOff()
+    {
+        await GetPayOffSchedule.InvokeAsync(Schedule);
+    }
+
+    async Task GetCustomerLateSchedules()
+    {
+        await GetLateSchedule.InvokeAsync(Schedule);
+    }
+}

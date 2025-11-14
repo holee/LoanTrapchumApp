@@ -1,12 +1,5 @@
 @using Applications.Responses.ViewModels.Loans.Requests
 <GridToolbar SearchChanged="@FilterTextChanged" Placeholder="Type something to search........">
-    <LeftChildren>
-        <AuthorizeView Policy="@RequestsPolicies.Request">
-            <Authorized>
-                <RadzenLink class="rz-button rz-button-sm rz-primary" Path="@createRequestUrl" Text="Request" Icon="add" />
-            </Authorized>
-        </AuthorizeView>
-    </LeftChildren>
 </GridToolbar>
 <RadzenDataGrid Data="LoanRequests"
                 TItem="VLoanRequests"

@@ -1,5 +1,5 @@
+using Applications.Features.Loans.Responses;
 using Applications.Responses.ViewModels.Employees;
-using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Microsoft.AspNetCore.Components;
 using Radzen;

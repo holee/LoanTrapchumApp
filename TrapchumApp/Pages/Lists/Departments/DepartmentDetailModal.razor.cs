@@ -1,9 +1,5 @@
+using Applications.Features.Departments.Dto;
 using Applications.Interfaces.Lists;
-using Applications.Responses.Lists.Entities;
-using Applications.Responses.ViewModels.Departments;
-using Mapster;
-using Microsoft.AspNetCore.Components;
-using Radzen;
 
 namespace TrapchumApp.Pages.Lists.Departments
 {

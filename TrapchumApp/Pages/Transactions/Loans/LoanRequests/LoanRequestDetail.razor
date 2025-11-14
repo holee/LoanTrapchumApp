@@ -92,35 +92,24 @@
                 </RadzenTabsItem>
                 <RadzenTabsItem Text="ទ្រព្យបញ្ចាំនិងអ្នកធានា" Icon="@IconNames.Collaterals">
                     <LoanRequestCollaterals CustomerId="@CustomerId"
-                                            ShowAdd="true"
-                                            ShowCommand="true"
+                                            ShowAdd="false"
+                                            ShowCommand="false"
                                             Collaterals="@data?.Collaterals.ToList()">
                         <SearchBoxTemplate>
                             <CollateralSearchList CustomerId="@CustomerId" />
                         </SearchBoxTemplate>
                     </LoanRequestCollaterals>
-                    <LoanRequestGaurantor ShowAdd="true"
-                                          ShowCommand="true"
+                    <LoanRequestGaurantor ShowAdd="false"
+                                          ShowCommand="false"
                                           Guarantors="@data?.Guarantors" @key="@(Guid.NewGuid().ToString("N"))">
-                        <SearchBoxTemplate>
-                            <GuarantorSearchList />
-                        </SearchBoxTemplate>
                     </LoanRequestGaurantor>
                 </RadzenTabsItem>
                 <RadzenTabsItem Text="ចំណូលនិងចំណាយ" Icon="@IconNames.MoneyBag">
-                    <RadzenRow AlignItems="AlignItems.Center">
-                        <RadzenColumn Size="6" SizeMD="6" SizeSM="12">
-                            <CustomerInc Items="@data!.Customer.CustomerIncomes" ShowAdd="false"
-                                         @key="@(Guid.NewGuid().ToString("N"))" />
-                        </RadzenColumn>
-                        <RadzenColumn Size="6" SizeMD="6" SizeSM="12">
-                            <CustomerExp Items="@data!.Customer.CustomerExpenses" ShowAdd="false"
-                                         @key="@(Guid.NewGuid().ToString("N"))" />
-                        </RadzenColumn>
-                    </RadzenRow>
+                    <CustomerProfit CustomerId="@CustomerId" ShowAction="false" ShowCommand="false" />
                 </RadzenTabsItem>
                 <RadzenTabsItem Text="ឯកសារផ្សេងៗ" Icon="@IconNames.AttachFile">
-                    <LoanRequestDocument Documents="@data?.Documents.ToList()" ShowUpload="false"
+                    <LoanRequestDocument Documents="@data?.Documents.ToList()" 
+                            ShowUpload="false"
                                          @key="@(Guid.NewGuid().ToString("N"))" />
                 </RadzenTabsItem>
                 <RadzenTabsItem Text="Note" Icon="@IconNames.Comment">

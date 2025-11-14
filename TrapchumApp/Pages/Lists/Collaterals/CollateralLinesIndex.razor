@@ -1,0 +1,199 @@
+﻿@page "/app/customer/collateral"
+@using System.Threading.Tasks
+@using Applications.Features.Collaterals.Dtos
+@using Applications.Features.Customers.Response
+@using TrapchumApp.Helpers.Extensions
+@using TrapchumApp.Pages.Lists.Collaterals.Menu
+@using TrapchumApp.Pages.Lists.Collaterals.Tabs
+<PageTitle>Collateral</PageTitle>
+<RadzenTabs RenderMode="TabRenderMode.Client"
+            Change="@OnTabChanged"
+            @ref="@tabs" SelectedIndex="@selectedIndex">
+    <Tabs>
+        <RadzenTabsItem Text="Collaterals" Icon="reorder" @key="001">
+            <GridToolbar @bind-Value="@_searchString" SearchChanged="@OnSearch">
+                <LeftChildren>
+                    <RadzenDropDown TValue="VCustomerList"
+                                    TextProperty="@nameof(VCustomerList.AltName)"
+                                    ValueProperty="@nameof(VCustomerList.CustomerId)"
+                                    AllowFiltering="true"
+                                    AllowClear="true"
+                                    class="@Styles.W50"
+                                    Change="@OnCustomerChange"
+                                    SelectedItemChanged="@SelectedItemChanged"
+                                    LoadData="@OnLoadCustomerData"
+                                    Data="@_customers">
+
+                    </RadzenDropDown>
+                </LeftChildren>
+            </GridToolbar>
+            <RadzenDataGrid Responsive
+                            GridLines="DataGridGridLines.Horizontal"
+                            Density="Density.Compact"
+                            PageSize="@_pageSize"
+                            Count="@_count"
+                            AllowAlternatingRows="true"
+                            AllowSorting="true"
+                            AllowPaging="true"
+                            ShowPagingSummary="true"
+                            PagerPosition="PagerPosition.Bottom"
+                            PageSizeOptions="@StorageConstant.PageSizeOptions"
+                            PagerHorizontalAlign="HorizontalAlign.Right"
+                            PageSizeChanged="@PageSizeChanged"
+                            TItem="VCollateralLines"
+                            RowRender="@OnRowRender"
+                            LoadData="@OnLoadData"
+                            Data="@_CollateralLines">
+                <Columns>
+                    <RadzenDataGridColumn Width="5rem" TextAlign="TextAlign.Center"
+                                          Title="#" Property="@nameof(VCollateralLines.Id)" Context="c">
+                        <Template>
+                            @c.RowIndex
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Property="@nameof(VCollateralLines.CollateralNo)" Title="CollateralNo" />
+                    <RadzenDataGridColumn Property="@nameof(VCollateralLines.OwnerName)" Title="Owner Name" />
+                    <RadzenDataGridColumn Property="@nameof(VCollateralLines.TypeName)" Title="Type Name" />
+                    <RadzenDataGridColumn Property="@nameof(VCollateralLines.RegisterDate)" Title="Register Date" Context="c">
+                        <Template>
+                            @c.RegisterDate.DayFirst()
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Property="@nameof(VCollateralLines.Description)" Title="Remark" />
+                    <RadzenDataGridColumn Property="@nameof(VCollateralLines.IsUsed)" Title="Used" />
+                    <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                          Property="@nameof(VCollateralLines.MarketPrice)" Title="Market Price" />
+                    <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                          Property="@nameof(VCollateralLines.HotPrice)" Title="Hot Price" />
+                    <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                          Property="@nameof(VCollateralLines.PawnPrice)" Title="Pawn Price" />
+                    <RadzenDataGridColumn Width="6rem"
+                                          TextAlign="TextAlign.Center"
+                                          Property="@nameof(VCollateralLines.CollateralId)" Title="Action" Context="c">
+                        <Template>
+                            <RadzenButton Size="ButtonSize.ExtraSmall"
+                                          Icon="more_vert"
+                                          Variant="Variant.Text"
+                                          Click="@((args)=>ShowContextMenuWithContent(args,c))" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+                <LoadingTemplate>
+                    <div class="p-4 text-center">
+                        <RadzenProgressBar Visible="true" Mode="ProgressBarMode.Indeterminate" Style="height: 4px;" />
+                    </div>
+                </LoadingTemplate>
+            </RadzenDataGrid>
+        </RadzenTabsItem>
+        @foreach (var tab in _tabs)
+        {
+            <RadzenTabsItem Text="@tab.Title" @key="@tab.TabId">
+                <Template>
+                    <CloseTab Title="@tab.Title" Closed="CloseTab" TabId="@tab.Id" />
+                </Template>
+                <ChildContent>
+                    @tab.ChildContent
+                </ChildContent>
+            </RadzenTabsItem>
+        }
+    </Tabs>
+</RadzenTabs>
+@code {
+
+    private RadzenTabs? tabs;
+    private int selectedIndex = 0;
+    private List<DynamicTab> _tabs = new();
+    private int nextId = 1;
+
+    async Task OnLoadData(LoadDataArgs arg)
+    {
+        _skip = arg.Skip ?? 0;
+
+        _pageSize = arg.Top ?? 15;
+
+        (_sortColumn, _sortDescending) = arg.PageInfo();
+
+        await GetCollateralLines();
+
+    }
+
+
+    void OnTabChanged()
+    {
+        selectedIndex = tabs?.SelectedIndex ?? 0;
+
+        tabs?.Reload();
+    }
+
+
+    void ShowContextMenuWithContent(MouseEventArgs args, VCollateralLines line)
+    {
+        ContextMenuService.Open(args, ds =>
+            @<CollateralLineMenu Item="@line" OnSelectItem="@OnSelectItem" />
+        );
+    }
+
+    private async Task OnSelectItem(VCollateralLines item)
+    {
+        ContextMenuService.Close();
+        AddTab(item);
+        //tabs?.Reload();
+    }
+
+    private void AddTab(VCollateralLines item)
+    {
+        int customerId = nextId++;
+
+        string customerName = $"Customer {customerId}";
+
+        var existingTabIndex = _tabs.FindIndex(t => t.Id == item.Id && t.CollateralId == item.CollateralId);
+
+        if (existingTabIndex != -1)
+        {
+
+            selectedIndex = existingTabIndex + 1;
+
+            StateHasChanged();
+
+            return;
+        }
+
+        // RenderFragment with child component
+        RenderFragment content = builder =>
+        {
+            builder.OpenComponent<CollateralLineDetails>(0);
+            builder.AddAttribute(1, "Id", item.Id);
+            builder.AddAttribute(2, "CollateralId", item.CollateralId);
+            builder.SetKey(item.Id);
+            builder.CloseComponent();
+        };
+
+        _tabs.Add(new DynamicTab
+        {
+            Id = item.Id,
+            TabId = Guid.NewGuid().ToString("N"),
+            CollateralId = item.CollateralId,
+            Title = item.OwnerName,
+            ChildContent = content
+        });
+
+        selectedIndex = _tabs.Count;
+    }
+
+
+    private void CloseTab(long id)
+    {
+        var tab = _tabs.FirstOrDefault(t => t.Id == id);
+
+        if (tab != null)
+        {
+            var idx = _tabs.IndexOf(tab);
+
+            _tabs.Remove(tab);
+
+            selectedIndex = Math.Max(0, idx - 1);
+        }
+    }
+
+}
+

@@ -1,7 +1,7 @@
-﻿using Applications.Interfaces.Vendors;
+﻿using Applications.Features.Loans.Responses;
+using Applications.Interfaces.Vendors;
 using Applications.Responses;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Vendors;
 using Domains.Models.Lists;
 using Infrastructures.DataAccess;

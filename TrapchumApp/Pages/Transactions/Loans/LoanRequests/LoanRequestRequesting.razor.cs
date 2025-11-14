@@ -4,6 +4,7 @@ using Applications.Extensions.Identity.Policies;
 using Applications.Extensions.Web;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Requests;
+using Domains.Models.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -39,20 +40,18 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         {
 
             var auth = await AuthenticationState;
+
             _user = auth.User;
+
+            UserId = auth.User.GetId();
+
             CanRequestLoan = (await _authorizeService.AuthorizeAsync(_user, RequestsPolicies.CanCreate())).Succeeded;
+          
             CanDisburseLoan = (await _authorizeService.AuthorizeAsync(_user, RequestsPolicies.CanDisburseLoan())).Succeeded;
+           
             CanAprovedLoan = (await _authorizeService.AuthorizeAsync(_user, RequestsPolicies.CanAproveRequest())).Succeeded;
 
             await GetLoanRequestAsync(UserId);
-
-
-            createRequestUrl = new Dictionary<string, object?>{
-                {"BranchId",BranchId},
-                {"UserId",UserId},
-                { "ActionMode",ActionMode.Create}
-             }.AddQueryString($"/Loan/Customer/Request");
-
 
             await base.OnInitializedAsync();
         }
@@ -244,3 +243,11 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
     }
 }
+
+
+//createRequestUrl = new Dictionary<string, object?>{
+//    {"BranchId",BranchId},
+//    {"UserId",UserId},
+//    { "ActionMode",ActionMode.Create}
+// }.AddQueryString($"/Loan/Customer/Request");
+

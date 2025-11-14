@@ -1,7 +1,7 @@
-﻿using Applications.Features.Loans.Services;
+﻿using Applications.Features.Loans.Responses;
+using Applications.Features.Loans.Services;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Branches;
-using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Services.Loans;
 using Microsoft.AspNetCore.Components;

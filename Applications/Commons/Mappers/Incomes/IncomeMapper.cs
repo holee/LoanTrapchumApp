@@ -4,89 +4,88 @@ using Applications.Features.Incomes.Dto;
 using Applications.Responses.ViewModels.Customers;
 using Domains.Models.Lists.Customers;
 
-namespace Applications.Commons.Mappers.Incomes
+namespace Applications.Commons.Mappers.Incomes;
+
+public static class IncomeMapper
 {
-    public static class IncomeMapper
+    private static CustomerIncome ToDto(this CreateIncomeDto source)
     {
-        private static CustomerIncome ToDto(this CreateIncomeDto source)
+
+        if (source is null)
+            throw new ArgumentNullException(nameof(source));
+
+        return new CustomerIncome
         {
+            Amount = source.Amount,
+            IncomeSource = source.IncomeSource,
+            CustomerRefId = source.CustomerId,
+            Description = source.Description
+        };
+    }
 
-            if (source is null)
-                throw new ArgumentNullException(nameof(source));
+    public static CustomerIncome ToDto(this CreateIncomeCommand sources)
+    {
 
-            return new CustomerIncome
-            {
-                Amount = source.Amount,
-                IncomeSource = source.IncomeSource,
-                CustomerRefId = source.CustomerId,
-                Description = source.Description
-            };
-        }
+        if (sources is null)
+            throw new ArgumentNullException(nameof(sources));
 
-        public static CustomerIncome ToDto(this CreateIncomeCommand sources)
+        return sources.Request.ToDto();
+    }
+
+    public static List<CustomerIncome> ToDtos(this CreateIncomesCommand sources)
+    {
+
+        if (sources is null)
+            throw new ArgumentNullException(nameof(sources));
+
+        return sources.Request.Select(source => source.ToDto()).ToList();
+    }
+
+
+
+    public static EditIncomeDto ToIncomeEdit(this CreateIncomeDto source)
+    {
+
+        if (source is null)
+            throw new ArgumentNullException(nameof(source));
+
+        return new EditIncomeDto
         {
+            Id = source.Id,
+            Amount = source.Amount,
+            IncomeSource = source.IncomeSource,
+            CustomerId = source.CustomerId,
+            Description = source.Description
+        };
+    }
 
-            if (sources is null)
-                throw new ArgumentNullException(nameof(sources));
+    public static EditIncomeDto ToIncomeEdit(this VCustomerIncomes source)
+    {
 
-            return sources.Request.ToDto();
-        }
-
-        public static List<CustomerIncome> ToDtos(this CreateIncomesCommand sources)
+        if (source is null)
+            throw new ArgumentNullException(nameof(source));
+        return new EditIncomeDto
         {
+            Id = source.IncomeId,
+            Amount = source.IncomeAmount,
+            IncomeSource = source.IncomeSource,
+            CustomerId = source.CustomerRefId,
+            Description = source.InDescription
+        };
+    }
 
-            if (sources is null)
-                throw new ArgumentNullException(nameof(sources));
+    public static EditIncomeDto ToIncomeEdit(this CustomerIncome source)
+    {
 
-            return sources.Request.Select(source => source.ToDto()).ToList();
-        }
-
-
-
-        public static EditIncomeDto ToIncomeEdit(this CreateIncomeDto source)
+        if (source is null)
+            throw new ArgumentNullException(nameof(source));
+        return new EditIncomeDto
         {
-
-            if (source is null)
-                throw new ArgumentNullException(nameof(source));
-
-            return new EditIncomeDto
-            {
-                Id = source.Id,
-                Amount = source.Amount,
-                IncomeSource = source.IncomeSource,
-                CustomerId = source.CustomerId,
-                Description = source.Description
-            };
-        }
-        
-        public static EditIncomeDto ToIncomeEdit(this VCustomerIncomes source)
-        {
-
-            if (source is null)
-                throw new ArgumentNullException(nameof(source));
-            return new EditIncomeDto
-            {
-                Id = source.IncomeId,
-                Amount = source.IncomeAmount,
-                IncomeSource = source.IncomeSource,
-                CustomerId = source.CustomerRefId,
-                Description = source.InDescription
-            };
-        }
-        
-        public static EditIncomeDto ToIncomeEdit(this CustomerIncome source)
-        {
-
-            if (source is null)
-                throw new ArgumentNullException(nameof(source));
-            return new EditIncomeDto
-            {
-                Id = source.Id,
-                Amount = source.Amount,
-                IncomeSource = source.IncomeSource,
-                CustomerId = source.CustomerRefId,
-                Description = source.Description
-            };
-        }
+            Id = source.Id,
+            Amount = source.Amount,
+            IncomeSource = source.IncomeSource,
+            CustomerId = source.CustomerRefId,
+            Description = source.Description
+        };
     }
 }

@@ -1,5 +1,4 @@
-using Applications.Responses.ViewModels.Loans;
-using Microsoft.AspNetCore.Components;
+using Applications.Features.Loans.Responses;
 
 namespace TrapchumApp.Pages.Lists.Customers
 {

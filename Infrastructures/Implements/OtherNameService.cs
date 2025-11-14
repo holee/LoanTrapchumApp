@@ -1,10 +1,10 @@
 ﻿using Applications.Enumerations;
 using Applications.Extensions;
+using Applications.Features.Loans.Responses;
 using Applications.Interfaces.Lists;
 using Applications.Responses;
 using Applications.Responses.Message;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.OtherNames;
 using Domains.Models.Bases;
 using Domains.Models.Lists;

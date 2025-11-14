@@ -161,7 +161,7 @@ namespace Applications.Features.LoanRequests.UseCases
 
         public async Task<Pager<VLoanRequests>> GetLoanRequestsAsync(string? userId, bool candisburse, int? branchId, RequestStatus requestStatus, QueryParam param)
         {
-            return await reqService.GetLoanRequestsAsync(userId, candisburse, branchId, requestStatus, param);
+            return await reqService.GetLoanRequestsAsync(userId, candisburse,branchId, requestStatus, param);
         }
 
 

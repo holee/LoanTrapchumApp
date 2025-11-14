@@ -23,15 +23,15 @@
             </RadzenColumn>
             <RadzenColumn Size="4">
                 <RadzenStack Orientation="Orientation.Horizontal"
-                            JustifyContent="JustifyContent.End">
-                 <RadzenButton Text="Add New"
-                              ButtonStyle="ButtonStyle.Primary"
-                              Icon="add"
-                              Click="@ClickedAdd"
-                              Size="ButtonSize.Small"
-                              Visible="@(ShowAdd && ShowCommand)"
-                              ButtonType="ButtonType.Button"></RadzenButton>
-        </RadzenStack>
+                             JustifyContent="JustifyContent.End">
+                    <RadzenButton Text="Add New"
+                                  ButtonStyle="ButtonStyle.Primary"
+                                  Icon="add"
+                                  Click="@ClickedAdd"
+                                  Size="ButtonSize.Small"
+                                  Visible="@(ShowAdd && ShowCommand)"
+                                  ButtonType="ButtonType.Button"></RadzenButton>
+                </RadzenStack>
             </RadzenColumn>
         </RadzenRow>
         <RadzenDataGrid GridLines="DataGridGridLines.Both"
@@ -55,27 +55,28 @@
                 <RadzenDataGridColumn Title="Type" Property="@(nameof(VLoanRequestCollateralLines.TypeName))" Context="c" />
                 <RadzenDataGridColumn Title="Owner" Property="@(nameof(VLoanRequestCollateralLines.OwnerName))" Context="c" />
                 <RadzenDataGridColumn Title="Quantity" Property="@(nameof(VLoanRequestCollateralLines.Quantity))" Context="c" />
-                @if (ShowRemove)
-                {
-                    <RadzenDataGridColumn Context="g" TextAlign="TextAlign.Center"
-                                          Width="4rem" Property="ProInKhmer"
-                                          Title="Action">
-                        <Template>
-                            <RadzenButton Icon="delete"
-                                          Shade="Shade.Lighter"
-                                          Size="ButtonSize.ExtraSmall"
-                                          Click="()=>ClickedRemove(g)"
-                                          Variant="Variant.Outlined" />
-                        </Template>
-                    </RadzenDataGridColumn>
-                }
+                <RadzenDataGridColumn Title="MarketPrice" Property="@(nameof(VLoanRequestCollateralLines.MarketPrice))" Context="c" />
+                <RadzenDataGridColumn Title="PawnPrice" Property="@(nameof(VLoanRequestCollateralLines.PawnPrice))" Context="c" />
+                <RadzenDataGridColumn Title="HotPrice" Property="@(nameof(VLoanRequestCollateralLines.HotPrice))" Context="c" />
+                <RadzenDataGridColumn Context="g" TextAlign="TextAlign.Center"
+                                      Width="4rem" Property="@(nameof(VLoanRequestCollateralLines.Id))"
+                                      Visible="@ShowRemove"
+                                      Title="Action">
+                    <Template>
+                        <RadzenButton Icon="delete"
+                                      Visible="@ShowRemove"
+                                      Size="ButtonSize.ExtraSmall"
+                                      Click="()=>ClickedRemove(g)"
+                                      Variant="Variant.Text" />
+                    </Template>
+                </RadzenDataGridColumn>
             </Columns>
         </RadzenDataGrid>
     </ChildContent>
 </RadzenFieldset>
-@code{
-    [Parameter] public RenderFragment? SearchBoxTemplate { get; set; } 
-   
+@code {
+    [Parameter] public RenderFragment? SearchBoxTemplate { get; set; }
+
 }
 
 

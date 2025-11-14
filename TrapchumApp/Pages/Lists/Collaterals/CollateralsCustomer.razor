@@ -20,12 +20,12 @@
                           Icon="add"
                           Text="Add New"
                           Visible="@(ShowAdd && ShowCommand)"
-                          ButtonStyle="ButtonStyle.Secondary"></RadzenButton>
+                          ButtonStyle="ButtonStyle.Primary"></RadzenButton>
             <RadzenButton Size="ButtonSize.Small"
                           Click="@Add"
                           Icon="add"
                           Text="Add New"
-                          Visible="@(ShowAdd && ShowCommand)"
+                          Visible="false"
                           ButtonStyle="ButtonStyle.Primary"></RadzenButton>
         </RadzenStack>
         <RadzenDataGrid GridLines="DataGridGridLines.Both"
@@ -151,10 +151,11 @@
         {
             var confirmDel = await DialogService.Confirm(CollateralMessages.ConfirmDisable, "Delete Collateral Line", confirmOptions);
 
-
             if (confirmDel == false) return;
 
         }
+
+        await GetCustomerCollaterals();
 
     }
 

@@ -6,20 +6,24 @@
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
 @using Applications.Features.LoanRequests.Interfaces
+@using TrapchumApp.Pages.Lists.Customers.Expenses
+@using TrapchumApp.Pages.Lists.Customers.Incomes
 @using TrapchumApp.Services
 <RadzenRow>
     <RadzenColumn Size="6" SizeMD="6" SizeSM="12">
-        <CustomerInc Items="@_incomes" ShowCommand="true"
+        <CustomerInc Items="@_incomes" ShowCommand="@ShowCommand"
                      CustomerId="@CustomerId"
                      GetIncomes="@GetIncomes"
-                     ShowAdd="true" />
+                     ShowAction="@ShowAction"
+                     ShowAdd="@ShowCommand" />
 
     </RadzenColumn>
     <RadzenColumn Size="6" SizeMD="6" SizeSM="12">
-        <CustomerExp Items="@_expenses" ShowCommand="true"
+        <CustomerExp Items="@_expenses" ShowCommand="@ShowCommand"
                      CustomerId="@CustomerId"
                      GetExpenses="@GetExpenses"
-                     ShowAdd="true" />
+                     ShowAction="@ShowAction"
+                     ShowAdd="@ShowCommand" />
     </RadzenColumn>
 </RadzenRow>
 

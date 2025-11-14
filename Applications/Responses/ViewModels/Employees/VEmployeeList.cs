@@ -1,4 +1,4 @@
-﻿using Applications.Responses.ViewModels.Loans;
+﻿using Applications.Features.Loans.Responses;
 using Applications.Responses.ViewModels.Loans.Requests;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -53,6 +53,8 @@ public sealed class VEmployeeList
     }
 
 
-   public ICollection<VLoanDisbursments> LoanDisbursments { get; set; } = [];
-   public ICollection<VLoanRequests> LoanRequests { get; set; } = [];
+    [NotMapped]
+    public int RowIndex { get; set; } = 1;
+    public ICollection<VLoanDisbursments> LoanDisbursments { get; set; } = [];
+    public ICollection<VLoanRequests> LoanRequests { get; set; } = [];
 }

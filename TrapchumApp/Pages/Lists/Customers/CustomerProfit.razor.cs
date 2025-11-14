@@ -8,7 +8,8 @@ namespace TrapchumApp.Pages.Lists.Customers
     public partial class CustomerProfit
     {
         [Parameter] public string CustomerId { get; set; } = string.Empty;
-
+        [Parameter] public bool ShowAction { get;set; } = true;
+        [Parameter] public bool ShowCommand { get; set; } = true;
         private decimal? _profits = 0.0M;
         private readonly IMediator _med;
         private IEnumerable<VCustomerIncomes> _incomes = [];

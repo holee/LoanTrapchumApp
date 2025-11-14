@@ -8,6 +8,11 @@ public sealed class CreateIncomeDto
     {
     }
 
+    public CreateIncomeDto(string customerId)
+    {
+        CustomerId= customerId ?? throw new ArgumentNullException(nameof(customerId));
+    }
+
     public CreateIncomeDto(long id, string? customerId, string? incomeSource, decimal? incomeAmount,
         string? inDescription)
     {

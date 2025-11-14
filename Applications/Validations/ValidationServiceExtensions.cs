@@ -4,6 +4,7 @@ using Applications.Features.Collaterals.Dtos;
 using Applications.Features.Currencies;
 using Applications.Features.Customers.Requests;
 using Applications.Features.Customers.Validations;
+using Applications.Features.Employees.Dto;
 using Applications.Features.Employees.Requests;
 using Applications.Features.Entities;
 using Applications.Features.Identity.Roles.Requests;

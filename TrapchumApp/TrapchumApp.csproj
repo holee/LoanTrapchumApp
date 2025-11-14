@@ -19,16 +19,19 @@
   <ItemGroup>
     <PackageReference Include="Blazored.FluentValidation" Version="2.2.0" />
     <PackageReference Include="ClosedXML" Version="0.105.0" />
-    <PackageReference Include="FluentValidation" Version="12.0.0" />
-    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.0.0" />
-    <PackageReference Include="IronPdf" Version="2025.4.4" />
-    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="9.0.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.2" />
-    <PackageReference Include="Microsoft.Playwright" Version="1.51.0" />
+    <PackageReference Include="FluentValidation" Version="12.1.0" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.0" />
+    <PackageReference Include="IronPdf" Version="2025.10.8" />
+    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="9.0.10" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.10" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.10" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.10">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Playwright" Version="1.55.0" />
     <PackageReference Include="QuestPDF" Version="2025.4.0" />
-    <PackageReference Include="Radzen.Blazor" Version="8.0.4" />
+    <PackageReference Include="Radzen.Blazor" Version="8.2.0" />
     <PackageReference Include="Razor.Templating.Core" Version="2.1.0" />
   </ItemGroup>
 
@@ -96,18 +99,18 @@
     <AdditionalFiles Include="Pages\Lists\CreditAgents\CreditAgentDialog.razor" />
     <AdditionalFiles Include="Pages\Lists\CreditAgents\CreditAgentSwitch.razor" />
     <AdditionalFiles Include="Pages\Lists\CreditAgents\CreditAgentTableRow.razor" />
-    <AdditionalFiles Include="Pages\Lists\Customers\CustomerActivities.razor" />
-    <AdditionalFiles Include="Pages\Lists\Customers\CustomerActivitiesAdd.razor" />
+    <AdditionalFiles Include="Pages\Lists\Customers\Activties\CustomerActivities.razor" />
+    <AdditionalFiles Include="Pages\Lists\Customers\Activties\CustomerActivitiesAdd.razor" />
     <AdditionalFiles Include="Pages\Lists\Customers\CustomerAddress.razor" />
     <AdditionalFiles Include="Pages\Lists\Customers\CustomerCreate.razor" />
     <AdditionalFiles Include="Pages\Lists\Customers\CustomerDetails.razor" />
-    <AdditionalFiles Include="Pages\Lists\Customers\CustomerExp.razor" />
-    <AdditionalFiles Include="Pages\Lists\Customers\CustomerInc.razor" />
+    <AdditionalFiles Include="Pages\Lists\Customers\Expenses\CustomerExp.razor" />
+    <AdditionalFiles Include="Pages\Lists\Customers\Incomes\CustomerInc.razor" />
     <AdditionalFiles Include="Pages\Lists\Customers\CustomerLoanRequest.razor" />
-    <AdditionalFiles Include="Pages\Lists\Customers\CustomerModalExpense.razor" />
-    <AdditionalFiles Include="Pages\Lists\Customers\CustomerModalIncome.razor" />
-    <AdditionalFiles Include="Pages\Lists\Customers\CustomerNoteAdd.razor" />
-    <AdditionalFiles Include="Pages\Lists\Customers\CustomerNotes.razor" />
+    <AdditionalFiles Include="Pages\Lists\Customers\Expenses\CustomerModalExpense.razor" />
+    <AdditionalFiles Include="Pages\Lists\Customers\Incomes\CustomerModalIncome.razor" />
+    <AdditionalFiles Include="Pages\Lists\Customers\Notes\CustomerNoteAdd.razor" />
+    <AdditionalFiles Include="Pages\Lists\Customers\Notes\CustomerNotes.razor" />
     <AdditionalFiles Include="Pages\Lists\Customers\CustomersIndex.razor" />
     <AdditionalFiles Include="Pages\Lists\Customers\CustomersList.razor" />
     <AdditionalFiles Include="Pages\Lists\Customers\CustomerUpdateTab.razor" />

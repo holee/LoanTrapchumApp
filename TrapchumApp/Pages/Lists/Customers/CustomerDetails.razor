@@ -7,6 +7,8 @@
 @using Applications.Features.Employees
 @using Applications.Features.LoanRequests.Interfaces
 @using TrapchumApp.Pages.Lists.Collaterals
+@using TrapchumApp.Pages.Lists.Customers.Activties
+@using TrapchumApp.Pages.Lists.Customers.Notes
 @using TrapchumApp.Services
 <PageTitle>Customer</PageTitle>
 <RadzenFieldset AllowCollapse="true" Collapsed="false">
@@ -46,21 +48,21 @@
 <RadzenCard class="rz-mt-2">
     <RadzenTabs RenderMode="TabRenderMode.Server">
         <Tabs>
-            <RadzenTabsItem Text="Loan Request">
-                <CustomerLoanRequest CustomerId="@CustomerId"
-                                     BranchId="@BranchId"
-                                     UserId="@UserId" />
+            <RadzenTabsItem Text="Loan History">
+                <LoanHistory CustomerId="@CustomerId" @key="@Guid.NewGuid().ToString("N")" />
+            </RadzenTabsItem>
+            <RadzenTabsItem Text="Income & Expense">
+                <CustomerProfit CustomerId="@CustomerId" />
             </RadzenTabsItem>
             <RadzenTabsItem Text="Collaterals">
                 <CollateralsCustomer ShowCommand="true"
                                      ShowAcction="true"
                                      CustomerId="@CustomerId" ShowAdd="true" @key="@Guid.NewGuid().ToString("N")" />
             </RadzenTabsItem>
-            <RadzenTabsItem Text="Income & Expense">
-                <CustomerProfit CustomerId="@CustomerId" />
-            </RadzenTabsItem>
-            <RadzenTabsItem Text="Loan History">
-                <LoanHistory CustomerId="@CustomerId" @key="@Guid.NewGuid().ToString("N")" />
+            <RadzenTabsItem Text="Loan Request">
+                <CustomerLoanRequest CustomerId="@CustomerId"
+                                     BranchId="@BranchId"
+                                     UserId="@UserId" />
             </RadzenTabsItem>
             <RadzenTabsItem Text="Activities">
                 <CustomerActivities CustomerId="@CustomerId" ShowAdd="true" ShowCommand="true" @key="@Guid.NewGuid().ToString("N")" />

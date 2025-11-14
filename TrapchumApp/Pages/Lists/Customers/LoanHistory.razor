@@ -1,3 +1,5 @@
+@using Applications.Features.Loans.Responses
+@using Applications.Responses.ViewModels.Loans
 <RadzenDataGrid GridLines="DataGridGridLines.Both"
                 Responsive
                 Density="Density.Compact"
@@ -62,8 +64,26 @@
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Title="Action" Context="c">
             <Template>
+                <RadzenButton Icon="@IconNames.MoreVert"
+                              Size="ButtonSize.Small"
+                              ButtonStyle="ButtonStyle.Light"
+                              Variant="Variant.Text">
+                </RadzenButton>
                 <NavLink href="@($"/App/Loan/{c.LoanId}/Branches/{c.BranchId}/Currencies/{c.CurrencyId}")">Details</NavLink>
             </Template>
         </RadzenDataGridColumn>
     </Columns>
 </RadzenDataGrid>
+
+@code {
+
+    void ShowContextMenu(MouseEventArgs args, VLoanDisbursments b)
+    {
+        ContextMenuService.Open(args, ds =>
+    @<RadzenMenu Style="font-size:0.8rem;">
+    <RadzenMenuItem Icon="add" Text="Details" Value="@b.LoanId" Visible="false" />
+    <RadzenMenuItem Icon="money" Text="Recieve Payment" Value="@b.LoanId" />
+</RadzenMenu>
+    );
+    }
+}

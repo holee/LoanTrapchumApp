@@ -5,13 +5,13 @@ using Applications.Features.Transactions.ForiegnExchanges;
 using Applications.Interfaces.Currencies;
 using Applications.Interfaces.Loans;
 using Applications.Responses.ViewModels.Branches;
-using Applications.Responses.ViewModels.Loans;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 using Microsoft.AspNetCore.Components.Authorization;
 using Radzen.Blazor;
 using Applications.Features.Currencies.Responses;
+using Applications.Features.Loans.Responses;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 {
