@@ -7,24 +7,28 @@
 @using TrapchumApp.Pages.Lists.Collaterals.Tabs
 <PageTitle>Collateral</PageTitle>
 <RadzenTabs RenderMode="TabRenderMode.Client"
-            Change="@OnTabChanged"
-            @ref="@tabs" SelectedIndex="@selectedIndex">
+            @ref="@tabs"
+            SelectedIndex="@selectedIndex">
     <Tabs>
         <RadzenTabsItem Text="Collaterals" Icon="reorder" @key="001">
-            <GridToolbar @bind-Value="@_searchString" SearchChanged="@OnSearch">
+            <GridToolbar @bind-Value="@_filterText" SearchChanged="@OnSearch">
                 <LeftChildren>
-                    <RadzenDropDown TValue="VCustomerList"
+                    <RadzenDropDown TValue="string"
                                     TextProperty="@nameof(VCustomerList.AltName)"
                                     ValueProperty="@nameof(VCustomerList.CustomerId)"
                                     AllowFiltering="true"
                                     AllowClear="true"
                                     class="@Styles.W50"
                                     Change="@OnCustomerChange"
+                                    @bind-Value="@_customerId"
                                     SelectedItemChanged="@SelectedItemChanged"
                                     LoadData="@OnLoadCustomerData"
                                     Data="@_customers">
-
                     </RadzenDropDown>
+                    <RadzenButton Icon="@IconNames.Add" Size="ButtonSize.Small"
+                                  ButtonStyle="ButtonStyle.Primary"
+                                  Click="@AddCollateral"
+                                  Text="Add Collateral" />
                 </LeftChildren>
             </GridToolbar>
             <RadzenDataGrid Responsive
@@ -60,7 +64,11 @@
                         </Template>
                     </RadzenDataGridColumn>
                     <RadzenDataGridColumn Property="@nameof(VCollateralLines.Description)" Title="Remark" />
-                    <RadzenDataGridColumn Property="@nameof(VCollateralLines.IsUsed)" Title="Used" />
+                    <RadzenDataGridColumn Property="@nameof(VCollateralLines.IsUsed)" Title="Used">
+                        <Template Context="c">
+                            <RadzenCheckBox Value="@c.IsUsed" ReadOnly />
+                        </Template>
+                    </RadzenDataGridColumn>
                     <RadzenDataGridColumn TextAlign="TextAlign.Right"
                                           Property="@nameof(VCollateralLines.MarketPrice)" Title="Market Price" />
                     <RadzenDataGridColumn TextAlign="TextAlign.Right"
@@ -137,7 +145,6 @@
     {
         ContextMenuService.Close();
         AddTab(item);
-        //tabs?.Reload();
     }
 
     private void AddTab(VCollateralLines item)

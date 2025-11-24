@@ -281,7 +281,7 @@ public sealed class CollateralRepository : ICollateralService
 
     public async Task<ErrorOr<DeleteResult>> DeleteCollateralLineAsync(long? id, string? collateralId, CancellationToken cancellation = default)
     {
-        logger.LogInformation("Upserting collateral line with ID: {Id} & Collateral:{collateralId}", id, collateralId);
+        logger.LogInformation("try to delete collateral line with ID: {Id} & Collateral:{collateralId}", id, collateralId);
         try
         {
             await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);

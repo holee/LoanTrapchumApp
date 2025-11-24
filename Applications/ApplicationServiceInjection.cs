@@ -12,9 +12,8 @@ using Applications.Features.Branches.Interfaces;
 using Applications.Features.CashManagements.Interfaces;
 using Applications.Features.CashManagements.UseCases;
 using Applications.Features.Collaterals.Commands.AddOrUpdateCollaterals;
-using Applications.Features.Collaterals.Commands.CollateralLineQuery;
 using Applications.Features.Collaterals.Commands.CreateCollateralLines;
-using Applications.Features.Collaterals.Commands.DeleteCOmmand;
+using Applications.Features.Collaterals.Commands.DeleteCollateralLines;
 using Applications.Features.Collaterals.Dtos;
 using Applications.Features.Collaterals.Queries.GetCollateralDetails;
 using Applications.Features.Collaterals.Queries.GetCollateralLineByCollateralId;
@@ -54,8 +53,15 @@ using Applications.Features.Incomes.Queries.GetIncomeById;
 using Applications.Features.Incomes.Queries.GetIncomeExpense;
 using Applications.Features.LoanPayments.Interfaces;
 using Applications.Features.LoanPayments.UseCases;
+using Applications.Features.LoanRequests.Command.ApprovedLoanRequest;
+using Applications.Features.LoanRequests.Command.CreateLoanRequest;
+using Applications.Features.LoanRequests.Command.DenyLoanRequest;
+using Applications.Features.LoanRequests.Command.RecheckedLoanRequest;
+using Applications.Features.LoanRequests.Command.SaveLoanRequest;
 using Applications.Features.LoanRequests.Interfaces;
+using Applications.Features.LoanRequests.Responses;
 using Applications.Features.LoanRequests.UseCases;
+using Applications.Features.Loans.Responses;
 using Applications.Features.Loans.Services;
 using Applications.Features.Notes.Command.CreateNote;
 using Applications.Features.Notes.Command.DeleteNote;
@@ -63,6 +69,7 @@ using Applications.Features.Notes.Command.EditNote;
 using Applications.Features.Notes.Queries.GetNoteByCustomerId;
 using Applications.Features.Notes.Queries.GetNoteById;
 using Applications.Features.Settings.UseCases;
+using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Services.Files;
@@ -89,11 +96,11 @@ namespace Applications
 
             services.AddScoped<ISaveLoanRequestUseCase, SaveLoanRequestUseCase>();
 
-            services.AddScoped<IApprovedLoanRequestUseCase, ApprovedLoanRequestUseCase>();
+            //services.AddScoped<IApprovedLoanRequestUseCase, ApprovedLoanRequestUseCase>();
 
             services.AddScoped<IDeniedLoanRequestUseCase, DeniedLoanRequestUseCase>();
 
-            services.AddScoped<IRecheckedLoanRequestUseCase, RecheckedLoanRequestUseCase>();
+            //services.AddScoped<IRecheckedLoanRequestUseCase, RecheckedLoanRequestUseCase>();
 
             services.AddScoped<IEditLoanRequestUseCase, EditLoanRequestUseCase>();
 
@@ -233,6 +240,12 @@ namespace Applications
             services.AddScoped<IRequestHandler<CreateIncomeExpenseCommand, ErrorOr<int>>, CreateIncomeExpenseCommandHandler>();
             services.AddScoped<IRequestHandler<EditIncomeExpenseCommand, ErrorOr<int>>, EditIncomeExpenseCommandHandler>();
             services.AddScoped<IRequestHandler<GetEditIncomeExpenseQuery, ErrorOr<IncomeExpenseDto>>, GetEditIncomeExpenseQueryHandler>();
+
+
+
+            services.AddScoped<IRequestHandler<SaveLoanRequestCommand, ErrorOr<RequestResult>>, SaveLoanRequestCommandHandler>();
+            //services.AddScoped<IRequestHandler<CreateLoanRequestCommand, Result<RequesResult>>, CreateLoanRequestCommandHandler>();
+            services.AddScoped<IRequestHandler<CreateLoanRequestCommand, ErrorOr<RequestResult>>, CreateLoanRequestCommandHandler>();
 
 
 

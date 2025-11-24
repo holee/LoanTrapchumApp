@@ -1,4 +1,5 @@
-﻿@using TrapchumApp.Pages.Transactions.Loans.Menu
+﻿@using System.Threading.Tasks
+@using TrapchumApp.Pages.Transactions.Loans.Menu
 <GridToolbar SearchChanged="@TextLoanSearchChanged">
     <RightChildren>
         <RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal">
@@ -147,30 +148,20 @@
     void ShowContextMenuWithContent(MouseEventArgs args, VSchedule p)
     {
         ContextMenuService.Open(args, ds =>@<AllScheduleMenu 
-                 GetLateSchedule="@GetCustomerLateSchedules"
+                 GetLateSchedule="@ShowLateSchedules"
                  GetPayOffSchedule="@CustomerPayOff"
                  Schedule="@p" />
 
     );
     }
 
-    void GetCustomerLateSchedules(VSchedule? p)
+    async Task ShowLateSchedules(VSchedule p)
     {
         ContextMenuService.Close();
 
-        if (p is null) return;
+        //GetPaymentSchedules(p);
 
-        // if (!isShowLateSchedule)
-        // {
-        //     isShowLateSchedule = true;
-
-        //     tabcounts.Add(1);
-        // }
-
-        // selectedTabIndex = 1;
-
-        // loanId = p.LoanId!;
-        GetPaymentSchedules(p);
+        await ShowLateSchedule.InvokeAsync(p);
 
         StateHasChanged();
     }

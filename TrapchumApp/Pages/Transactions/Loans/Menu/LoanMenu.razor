@@ -25,7 +25,7 @@
                         Text="Change Credit Agent"></RadzenMenuItem>
 
         <RadzenMenuItem Icon="info"
-                        Click="@GetLoanDetails"
+                        Click="(()=>GetLoanDetails(Data))"
                         Text="Details"></RadzenMenuItem>
 
         <RadzenMenuItem Icon="file_download"
@@ -46,7 +46,8 @@
     [CascadingParameter]
     Task<AuthenticationState> AuthState { get; set; } = default!;
     [CascadingParameter] CascadingAppState bState { get; set; } = default!;
-
+    [Parameter]
+    public EventCallback<VLoanDisbursments> OpenDetailTab { get; set; }
 
     private string _getPaymentSchedulesUrl = "";
     private string _getSchedulePayOffUrl = "";
@@ -74,10 +75,16 @@
         await base.OnInitializedAsync();
     }
 
-    void GetLoanDetails()
+    void GetLoanDetails(VLoanDisbursments item)
     {
         ContextMenuService.Close();
-        NavigationManager.NavigateTo($"/App/Loan/{Data!.LoanId}/Branches/{Data!.BranchId}/Currencies/{Data.CurrencyId}");
+        //NavigationManager.NavigateTo($"/App/Loan/{Data!.LoanId}/Branches/{Data!.BranchId}/Currencies/{Data.CurrencyId}");
+        if (OpenDetailTab.HasDelegate)
+        {
+            OpenDetailTab.InvokeAsync(item);
+        }
+        ;
+
     }
     void GetPaymentSchedules()
     {

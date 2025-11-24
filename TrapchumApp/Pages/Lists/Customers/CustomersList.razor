@@ -11,7 +11,7 @@
 <input type="hidden" @bind="@filterText" />
 <GridToolbar SearchChanged="SearchCustomer"
              CommandText="Add Customer"
-             Value="@filterText"
+             @bind-Value="@filterText"
              ShowCommandIcon="@IconNames.PersonAdd"
              ShowAddCommand="true"
              AddClick="@(() => AddCustomerTab(1))"
@@ -50,7 +50,7 @@
     <HeaderTemplate>
         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
             <RadzenLabel id="DropDownEditLabel" Text="Filter" Component="DropDownEdit" />
-            <RadzenDropDown @bind-Value=@value
+            <RadzenDropDown @bind-Value="selectedValue"
                             Placeholder="Filter by"
                             TValue="int"
                             Data="@FilterConstant.CustomerFilters"
@@ -147,8 +147,7 @@
 </RadzenDataGrid>
 @code {
 
-    int value = 0;
-
+    int selectedValue = 0;
 
     void ShowContextMenu(MouseEventArgs args, VCustomerList c)
     {

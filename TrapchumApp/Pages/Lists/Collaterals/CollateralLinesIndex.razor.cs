@@ -3,6 +3,7 @@ using Applications.Features.Collaterals.Queries.GetCollateralLinesAsPaging;
 using Applications.Features.Customers.Queries.GetCustomerAsPaging;
 using Applications.Features.Customers.Response;
 using Applications.Responses.Paginations;
+using System.Threading.Tasks;
 
 namespace TrapchumApp.Pages.Lists.Collaterals;
 
@@ -14,15 +15,15 @@ public partial class CollateralLinesIndex
     private int _count = 0;
     private int _pageSize = 15;
     private int _skip = 0;
-    private string _searchString = string.Empty;
+    private string _filterText = string.Empty;
     private string _customerId = string.Empty;
     private string _sortColumn = nameof(VCollateralLines.TypeName);
     private bool _sortDescending = false;
     protected override async Task OnInitializedAsync()
     {
 
-        await GetCollateralLines(_searchString);
-        //await GetCustomers(null);
+        await GetCollateralLines(string.Empty, _filterText);
+        await GetCustomers(string.Empty);
         await base.OnInitializedAsync();
     }
 
@@ -39,23 +40,22 @@ public partial class CollateralLinesIndex
 
         if (string.IsNullOrEmpty(filter))
         {
-            await GetCollateralLines();
+            await GetCollateralLines(_customerId, _filterText);
         }
 
     }
 
     async Task OnCustomerChange(object? arg)
     {
-        if(arg is not null)
+        if (arg is not null)
         {
-            _customerId = (arg as VCustomerList)?.CustomerId!; 
+            //_customerId = (arg as VCustomerList)?.CustomerId!;
+            //await GetCollateralLines(_customerId, _filterText);
         }
         else
         {
-            _customerId = string.Empty;
-
-            await GetCollateralLines();
-        }  
+            await GetCollateralLines(null, _filterText);
+        }
     }
     async Task SelectedItemChanged(object? arg)
     {
@@ -63,18 +63,22 @@ public partial class CollateralLinesIndex
         {
             _customerId = (arg as VCustomerList)?.CustomerId!;
 
-            _searchString = string.Empty;
+            _filterText = string.Empty;
 
             _skip = 0;
 
-            await GetCollateralLines();
+            await GetCollateralLines(_customerId, _filterText);
         }
+        //else
+        //{
+        //    await GetCollateralLines(null, _filterText);
+        //}
 
     }
 
     async Task OnSearch(string e)
     {
-        _searchString = e;
+        _filterText = e;
 
         await GetCollateralLines(e);
 
@@ -87,6 +91,31 @@ public partial class CollateralLinesIndex
         _skip = 0;
     }
 
+    async void AddCollateral()
+    {
+        if (string.IsNullOrEmpty(_customerId))
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Please selected customer first");
+            return;
+        }
+
+        var parameters = new Dictionary<string, object?> {
+
+            {"CollateralId", _customerId }
+        };
+
+        var options = new DialogOptions
+        {
+            Width = "50vw"
+        };
+
+        var dia = await DialogService.OpenAsync<CustomerCollateralLineCreate>("Add Collateral", parameters, options);
+
+        if (dia is bool result && result == true)
+        {
+            await GetCollateralLines(_customerId, _filterText);
+        }
+    }
 
     private async Task GetCustomers(string? filter)
     {
@@ -100,7 +129,7 @@ public partial class CollateralLinesIndex
 
     }
 
-    protected async Task GetCollateralLines(string? filter = null)
+    protected async Task GetCollateralLines(string? customerId = null, string? filter = null)
     {
         try
         {
@@ -113,7 +142,7 @@ public partial class CollateralLinesIndex
                 Filter = filter
             };
 
-            var query = new GetCollateralLineAsPagingQuery(_customerId, param);
+            var query = new GetCollateralLineAsPagingQuery(customerId, param);
 
             var rsp = await mediator.Send(query);
 

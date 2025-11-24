@@ -1,7 +1,17 @@
 ﻿@page "/app/loan/schedules/{BranchId:int}/branches"
-@using TrapchumApp.Pages.Transactions.Loans.Repayments.Menu
+@using TrapchumApp.Pages.Transactions.Loans.Menu
 <PageTitle>Schedules</PageTitle>
-<RadzenTabs RenderMode="TabRenderMode.Server" @bind-SelectedIndex="@_selectedIndex">
+<RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal">
+    <RadzenButton Size="ButtonSize.ExtraSmall"
+                  Text="Show CLient Due Date"
+                  Click="(()=>ShowDueDateScheduleTab(BranchId.ToString()))"
+                  ButtonStyle="ButtonStyle.Primary" />
+    <RadzenButton Size="ButtonSize.ExtraSmall"
+                  Text="Show Late Schedule"
+                  Click="@ShowLateSchedule"
+                  ButtonStyle="ButtonStyle.Secondary" />
+</RadzenStack>
+<RadzenTabs RenderMode="TabRenderMode.Server" SelectedIndex="@_selectedIndex">
     <Tabs>
         <RadzenTabsItem Text="All" Icon="@IconNames.List">
             <Template>
@@ -12,65 +22,183 @@
                 </span>
             </Template>
             <ChildContent>
-                <ClientAllPayTab UserId="@_userId" BranchId="@BranchId" ShowCounts="@GetCount" />
+                <ClientAllPayTab ShowLateSchedule="@ShowLateSchedule" BranchId="@BranchId" ShowCounts="@GetCount" />
             </ChildContent>
         </RadzenTabsItem>
-        <RadzenTabsItem Icon="@IconNames.MoneyBag">
-            <Template>
-                <span class="rz-ms-2">
-                    Client Due Pay
-                    <RadzenBadge BadgeStyle="BadgeStyle.Primary" IsPill="@true" Text="@DuePaymentCounts.ToString()"
-                                 class="rz-ms-1" />
-                </span>
-            </Template>
-            <ChildContent>
-                <ClientDuePayTab UserId="@_userId" BranchId="@BranchId" GetCountChanged="GetDueDateScheduleCount" />
-            </ChildContent>
-        </RadzenTabsItem>
-        <RadzenTabsItem>
-            <Template>
-                <span class="rz-ms-2">
-                    Late Schedule
-                    <RadzenBadge BadgeStyle="BadgeStyle.Primary"
-                                 IsPill="@true" Text="@AllLateScheduleCounts.ToString()"
-                                 class="rz-ms-1" />
-                </span>
-            </Template>
-            <ChildContent>
-                <ClientLateSchedules BranchId="@BranchId"
-                                     UserId="@_userId"
-                                     GetScheduleChanged="@GetScheduleChanged"
-                                     GetCountChanged="@GetLateScheduleCount" />
-            </ChildContent>
-        </RadzenTabsItem>
-        <RadzenTabsItem Text="Details"
-                        Icon="@IconNames.SendMoney"
-                        Visible="@_isLateTab">
-            <Template>
-                <CloseTabButton Closed="(() => Close())" Title="Details" />
-            </Template>
-            <ChildContent>
-                <LateScheduleDetail LoanId="@loanId"
-                                    PaymentDate="@paymentDate"
-                                    Close="Close"
-                                    BranchId="@BranchId" />
-            </ChildContent>
-        </RadzenTabsItem>
+
+        @foreach (var item in _tabs)
+        {
+            <RadzenTabsItem Icon="@item.Icon" Text="@item.Title" @key="@item.Key">
+                <Template>
+                    <CloseTabButton Title="@item.Title"
+                                    Closed="(() => CloseTab(item.Key))" />
+                </Template>
+                <ChildContent>
+                    @item.Content
+                </ChildContent>
+            </RadzenTabsItem>
+
+        }
+
     </Tabs>
 </RadzenTabs>
 
 @code {
 
+    private List<CustomTab> _tabs = [];
+
+
+
+    private void ShowLateScheduleDetails(string loanId)
+    {
+        var existingIndex = _tabs.FindIndex(t => t.Key == loanId);
+
+        if (existingIndex != -1)
+        {
+
+            _selectedIndex = existingIndex + 1;
+
+            StateHasChanged();
+
+            return;
+        }
+
+        RenderFragment content = builder =>
+        {
+            builder.OpenComponent(0, typeof(LateScheduleDetail));
+            builder.AddAttribute(1, "LoanId", loanId);
+            builder.AddAttribute(2, "PaymentDate", paymentDate);
+            builder.AddAttribute(3, "BranchId", BranchId);
+            builder.AddAttribute(4, "Close", EventCallback.Factory.Create(this, () =>
+            {
+                CloseTab(loanId);
+
+            }));
+            builder.SetKey(loanId);
+            builder.CloseComponent();
+        };
+
+        var newTab = new CustomTab(loanId, "Late Schedule Details", TabActions.Details, content);
+
+        _tabs.Add(newTab);
+
+        _selectedIndex = _tabs.Count;
+
+    }
+
+
+    private void ShowDueDateScheduleTab(string key)
+    {
+
+        var newKey = $"{key}_DueDateSchedules";
+
+        var existingIndex = _tabs.FindIndex(t => t.Key == newKey);
+
+        if (existingIndex != -1)
+        {
+
+            _selectedIndex = existingIndex + 1;
+
+            StateHasChanged();
+
+            return;
+        }
+
+        int counts = 0;
+
+        RenderFragment content = builder =>
+        {
+            builder.OpenComponent(0, typeof(ClientDuePayTab));
+            builder.AddAttribute(1, "BranchId", BranchId);
+            builder.AddAttribute(2, "GetCounts", EventCallback.Factory.Create(this, (int x) =>
+            {
+                counts = x;
+            }));
+            builder.SetKey(newKey);
+            builder.CloseComponent();
+        };
+
+        var newTab = new CustomTab(newKey, $"Client Due Day({counts})", TabActions.Details, content);
+
+        _tabs.Add(newTab);
+
+        _selectedIndex = _tabs.Count;
+    }
+
+
+    private void ShowLateSchedule()
+    {
+
+        var newKey = $"{BranchId}_LateSchedules";
+
+        var existingIndex = _tabs.FindIndex(t => t.Key == newKey);
+
+        if (existingIndex != -1)
+        {
+
+            _selectedIndex = existingIndex + 1;
+
+            StateHasChanged();
+
+            return;
+        }
+
+        RenderFragment content = builder =>
+        {
+            builder.OpenComponent(0, typeof(ClientLateSchedules));
+            builder.AddAttribute(1, "BranchId", BranchId);
+            builder.AddAttribute(2, "GetScheduleChanged", EventCallback.Factory.Create(this, (VSchedule x) =>
+            {
+                ShowLateScheduleDetails(x.LoanId!);
+            }));
+
+            builder.AddAttribute(3, "GetCounts", EventCallback.Factory.Create(this, (int x) =>
+           {
+               GetLateScheduleCount(newKey, x);
+           }));
+            builder.SetKey(newKey);
+
+            builder.CloseComponent();
+        };
+
+        var newTab = new CustomTab(newKey, $"Late Schedules({AllLateScheduleCounts})", TabActions.Details, content);
+
+        _tabs.Add(newTab);
+
+        _selectedIndex = _tabs.Count;
+
+    }
+
+
+
 
     void Close()
     {
         _isLateTab = false;
+
         _selectedIndex = 2;
     }
 
+
+    void CloseTab(string tabId)
+    {
+        var tabIndex = _tabs.FirstOrDefault(t => t.Key == tabId);
+
+        if (tabIndex is not null)
+        {
+            _tabs.Remove(tabIndex);
+
+            _selectedIndex = _tabs.Count;
+        }
+    }
+
+
+
+
     void ShowContextMenu(MouseEventArgs args, VSchedule p)
     {
-        ContextMenuService.Open(args, ds =>@<AllScheduleMenu GetLateSchedule="@GetCustomerLateSchedules"
+        ContextMenuService.Open(args, ds =>@<AllScheduleMenu 
+                         GetLateSchedule="@GetCustomerLateSchedules"
                          GetPayOffSchedule="@CustomerPayOff"
                          Schedule="@p" />);
     }
@@ -89,3 +217,49 @@
                     Click="@(() => GetCustomerLateSchedules(p))"
                     Text="Show Late Schedule" />
 </RadzenMenu> *@
+
+
+@* <RadzenTabsItem Icon="@IconNames.MoneyBag">
+    <Template>
+        <span class="rz-ms-2">
+            Client Due Pay
+            <RadzenBadge BadgeStyle="BadgeStyle.Primary" IsPill="@true" Text="@DuePaymentCounts.ToString()"
+                         class="rz-ms-1" />
+        </span>
+    </Template>
+    <ChildContent>
+        <ClientDuePayTab BranchId="@BranchId" GetCounts="GetDueDateScheduleCount" />
+    </ChildContent>
+</RadzenTabsItem>
+
+
+<RadzenTabsItem>
+    <Template>
+        <span class="rz-ms-2">
+            Late Schedule
+            <RadzenBadge BadgeStyle="BadgeStyle.Primary"
+                         IsPill="@true" Text="@AllLateScheduleCounts.ToString()"
+                         class="rz-ms-1" />
+        </span>
+    </Template>
+    <ChildContent>
+        <ClientLateSchedules BranchId="@BranchId"
+                             GetScheduleChanged="@GetScheduleChanged"
+                             GetCounts="@GetLateScheduleCount" />
+    </ChildContent>
+</RadzenTabsItem>
+
+
+<RadzenTabsItem Text="Details"
+                Icon="@IconNames.SendMoney"
+                Visible="@_isLateTab">
+    <Template>
+        <CloseTabButton Closed="(() => Close())" Title="Details" />
+    </Template>
+    <ChildContent>
+        <LateScheduleDetail LoanId="@loanId"
+                            PaymentDate="@paymentDate"
+                            Close="@Close"
+                            BranchId="@BranchId" />
+    </ChildContent>
+</RadzenTabsItem> *@

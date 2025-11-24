@@ -1,3 +1,4 @@
+using Applications.Features.LoanRequests.Command.ApprovedLoanRequest;
 using Applications.Features.LoanRequests.Requests;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Mapster;
@@ -45,23 +46,25 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             if (confirm == true && model is not null)
             {
 
-                var resp = await _loanRequestService.AprovedRequestAsync(model);
+                var command = new ApprovedLoanRequestCommand(model);
 
-                if (resp.IsSuccess)
+                var resp = await mediator.Send(command);// _loanRequestService.AprovedRequestAsync(model);
+
+                if (!resp.IsError)
                 {
 
                     var description = new LoanDescriptionsDtoCreate(model.Memo, UserId, LoanRequestId);
 
                     await _loanRequestService.AddDescriptionAsync(description);
 
-                    NotificationService.Notify(NotificationSeverity.Success, resp.Data!.message);
+                    NotificationService.Notify(NotificationSeverity.Success, resp.Value.Message);
 
                     DialogService.Close(true);
                 }
                 else
                 {
 
-                    NotificationService.Notify(NotificationSeverity.Error, resp.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Error, resp.FirstError.Description);
                 }
             }
         }

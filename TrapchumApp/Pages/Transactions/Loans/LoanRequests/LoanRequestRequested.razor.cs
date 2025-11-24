@@ -1,13 +1,14 @@
-using System.Security.Claims;
 using Applications.Enumerations;
 using Applications.Extensions.Identity.Policies;
 using Applications.Extensions.Web;
+using Applications.Features.LoanRequests.Queryies.GetLoanRequestsWithCanDisburse;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Radzen;
+using System.Security.Claims;
 
 namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 {
@@ -41,12 +42,12 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
             var auth = await AuthenticationState;
 
-            _user=auth.User;
-           
+            _user = auth.User;
+
             CanRequestLoan = (await _authorizeService.AuthorizeAsync(_user, RequestsPolicies.CanCreate())).Succeeded;
-            
+
             CanDisburseLoan = (await _authorizeService.AuthorizeAsync(_user, RequestsPolicies.CanDisburseLoan())).Succeeded;
-            
+
             CanAprovedLoan = (await _authorizeService.AuthorizeAsync(_user, RequestsPolicies.CanAproveRequest())).Succeeded;
 
             await GetLoanRequestAsync(UserId);
@@ -97,7 +98,9 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
             var param = new QueryParam(pageIndex, pageSize, sortColumn, sortDescending, isIncludeInactive, filtertext);
 
-            var rsp = await _loanRequestService.GetLoanRequestsAsync(userId,false, BranchId, RequestStatus.Requested, param);
+            var query = new GetLoanRequestsWithCanDisburseQuery(userId, false, BranchId, RequestStatus.Requested, param);
+
+            var rsp = await mediator.Send(query);  
 
             LoanRequests = rsp.Items;
 

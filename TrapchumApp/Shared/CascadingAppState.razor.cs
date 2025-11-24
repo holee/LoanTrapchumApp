@@ -26,8 +26,6 @@ namespace TrapchumApp.Shared
         private string? _employeeId;
         private bool _canRecievePayment; 
         private bool _canPayOff;
-
-
         public bool CanPayOff
         {
             get { return _canPayOff; }
@@ -214,7 +212,7 @@ namespace TrapchumApp.Shared
         {
             if (user is not null && user?.Identity?.IsAuthenticated == false)
             {
-                _canPayOff = await _authorizeService.MustHasPermissionAsync(user, PaymentsPolicies.PayOff);
+                _canPayOff = await _authorizeService.MustHasPermissionAsync(user, Policies.PayOff);
             }
             else
             {
@@ -228,7 +226,7 @@ namespace TrapchumApp.Shared
         {
             if (user is not null && user?.Identity?.IsAuthenticated == false)
             {
-                CanWriteOff = await _authorizeService.MustHasPermissionAsync(user, PaymentsPolicies.WriteOff);
+                CanWriteOff = await _authorizeService.MustHasPermissionAsync(user, Policies.WriteOff);
             }
             else
             {
@@ -265,7 +263,7 @@ namespace TrapchumApp.Shared
         {
             if (user is not null && user?.Identity?.IsAuthenticated == true)
             {
-                _canRecievePayment = await _authorizeService.MustHasPermissionAsync(user, PaymentsPolicies.RecievePayment);
+                _canRecievePayment = await _authorizeService.MustHasPermissionAsync(user, Policies.RecievePayment);
             }
             else
             {

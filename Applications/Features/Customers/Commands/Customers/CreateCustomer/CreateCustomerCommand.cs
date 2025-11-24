@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Applications.Features.Customers.Dto;
+using Applications.Responses;
+using Applications.Utils;
 
-namespace Applications.Features.Customers.Commands.Customers.CreateCustomer
-{
-    internal class CreateCustomerCommand
-    {
-    }
-}
+namespace Applications.Features.Customers.Commands.Customers.CreateCustomer;
+
+public record CreateCustomerCommand(EntityCustomerCreate Request) : IRequest<Result<string>>;

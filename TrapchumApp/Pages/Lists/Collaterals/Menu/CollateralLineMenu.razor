@@ -1,25 +1,28 @@
-﻿@using Applications.Features.Collaterals.Dtos
+﻿@using Applications.Bases
+@using Applications.Commons.Messages.Collaterals
+@using Applications.Features.Collaterals.Commands.DeleteCollateralLines
+@using Applications.Features.Collaterals.Dtos
 @using System.Threading.Tasks
-<RadzenMenu Style="font-size:0.8rem;">
-    <RadzenMenuItem Icon="info" Text="Details" Click="@ClickDetails"></RadzenMenuItem>
-    <RadzenMenuItem Icon="edit" Text="Edit" Click="@ClickEdit"></RadzenMenuItem>
-    <RadzenMenuItem Icon="delete" Text="Delete" Click="@ClickDelete"></RadzenMenuItem>
-    <RadzenMenuItem Icon="edit" Text="Withdraw"></RadzenMenuItem>
-</RadzenMenu>
-
+@if (Item is not null)
+{
+    <RadzenMenu Style="font-size:0.8rem;">
+        <RadzenMenuItem Icon="info" Text="Details" Click="@ClickDetails"></RadzenMenuItem>
+        <RadzenMenuItem Icon="edit" Text="Edit" Click="@ClickEdit"></RadzenMenuItem>
+        <RadzenMenuItem Icon="delete" Text="Delete" Click="@ClickDelete"></RadzenMenuItem>
+        <RadzenMenuItem Icon="edit" Text="Withdraw" Visible="@Item.IsUsed"></RadzenMenuItem>
+    </RadzenMenu>
+}
 @code {
     [Parameter] public VCollateralLines? Item { get; set; }
 
     [Parameter] public EventCallback<VCollateralLines> OnSelectItem { get; set; }
-
-    //[Parameter] public EventCallback<VCollateralLines> OnSelectEdit { get; set; }
 
     public async Task ClickDetails()
     {
         if (Item != null && OnSelectItem.HasDelegate)
         {
             await OnSelectItem.InvokeAsync(Item);
-        }   
+        }
     }
 
     public async Task ClickEdit()
@@ -33,9 +36,45 @@
     public async Task ClickDelete()
     {
         // Implement delete logic here
-        if (Item != null)
+
+        if (Item is null) return;
+
+        var confirm = await DialogService.Confirm("Are you sure you want to delete this collateral line?", "Confirm Delete", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
+
+        if (confirm == false) return;
+
+        var command = new DeleteCollateralLineCommand(Item.Id, Item.CollateralId!);
+
+        var result = await mediator.Send(command);
+
+        if (result.IsError)
         {
-            await OnSelectItem.InvokeAsync(Item);
+
+            NotificationService.Notify(NotificationSeverity.Error, "Error", result.FirstError.Description);
+
+            return;
         }
-    }   
+
+        var confirmOptions = new ConfirmOptions
+        {
+            OkButtonText = "Yes, Delete",
+            Icon = "warning",
+            CancelButtonText = "No, Cancel",
+            Width = "30rem"
+        };
+
+        if (result.Value.Status == DeleteStatus.InUse)
+        {
+
+            var confirmDel = await DialogService.Confirm(CollateralMessages.ConfirmDisable, "Delete Collateral Line", confirmOptions);
+
+            if (confirmDel == false) return;
+
+
+            return;
+        }
+
+
+        NotificationService.Notify(NotificationSeverity.Success, "Success", "Collateral line deleted successfully.");
+    }
 }

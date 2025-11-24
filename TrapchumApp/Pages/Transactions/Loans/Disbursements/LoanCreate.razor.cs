@@ -2,6 +2,7 @@ using Applications.Calculations;
 using Applications.Enumerations;
 using Applications.Extensions;
 using Applications.Features.Customers.Response;
+using Applications.Features.LoanRequests.Queryies.GetApprovedLoanRequest;
 using Applications.Features.LoanRequests.Requests;
 using Applications.Features.Loans.Mappers;
 using Applications.Features.Loans.Requests;
@@ -46,7 +47,7 @@ public partial class LoanCreate(ILoanServiceImpl loanService, IHolidayServiceImp
 
     bool disburseStatus = false;
 
-    private string memo=string.Empty;
+    private string memo = string.Empty;
 
     int RequestStatusId = 0;
 
@@ -57,26 +58,28 @@ public partial class LoanCreate(ILoanServiceImpl loanService, IHolidayServiceImp
 
     VLoanRequests req = new VLoanRequests();
 
-    VCustomerDetails _customer=new VCustomerDetails();
-   
+    VCustomerDetails _customer = new VCustomerDetails();
+
     async Task GetLoanRequest()
     {
         IsLoading = true;
 
-        var request = await _loanRequestService.GetApprovedLoanRequestAsync(BranchId, CustomerRequestId, LoanRequestId, true);
+        var query = new GetApprovedLoanRequestQuery(BranchId, CustomerRequestId, LoanRequestId, true);
 
-        if (request.IsSuccess)
+        var request = await mediator.Send(query);// _loanRequestService.GetApprovedLoanRequestAsync(BranchId, CustomerRequestId, LoanRequestId, true);
+
+        if (!request.IsError)
         {
-            req = request.Data!;
+            req = request.Value;
 
-            RequestStatusId = request.Data!.StatusId!.Value;
+            RequestStatusId = request.Value.StatusId!.Value;
 
-            _customer = request.Data.Customer;
+            _customer = request.Value.Customer;
         }
 
         IsLoading = false;
     }
-    private async Task GetHolidayes(DateTimeOffset? date,int? installment=12)
+    private async Task GetHolidayes(DateTimeOffset? date, int? installment = 12)
     {
         var yearAdded = (installment / 12) + 1;
 
@@ -100,7 +103,7 @@ public partial class LoanCreate(ILoanServiceImpl loanService, IHolidayServiceImp
 
                 model.ScheduleMode = AdjustmentOption.After;
 
-                await GetHolidayes(model.FirstPaymentDate,model.Installments);
+                await GetHolidayes(model.FirstPaymentDate, model.Installments);
 
                 model.Holidays = holidays.ToList();
             }
@@ -140,11 +143,11 @@ public partial class LoanCreate(ILoanServiceImpl loanService, IHolidayServiceImp
     async Task SendRechecked()
     {
 
-        var req = new RecheckedRequestDtoCreate(BranchId, CustomerRequestId, LoanRequestId,DateTime.Now,RequestStatus.Rechecked,memo);
+        var req = new RecheckedRequestDtoCreate(BranchId, CustomerRequestId, LoanRequestId, DateTime.Now, RequestStatus.Rechecked, memo);
 
-        var rsp= await _loanRequestService.RecheckedLoanRequestAsync(req);
+        var rsp = await _loanRequestService.RecheckedLoanRequestAsync(req);
 
-        if (rsp.IsSuccess) 
+        if (rsp.IsSuccess)
         {
             RequestStatusId = rsp.Data!.StatusId!.Value;
 
@@ -152,13 +155,13 @@ public partial class LoanCreate(ILoanServiceImpl loanService, IHolidayServiceImp
 
             await _loanRequestService.AddDescriptionAsync(description);
 
-            NotificationService.Notify(NotificationSeverity.Success,"Request was sent successfully.");
+            NotificationService.Notify(NotificationSeverity.Success, "Request was sent successfully.");
 
             StateHasChanged();
         }
         else
         {
-            NotificationService.Notify(NotificationSeverity.Error,rsp.ErrMessage);
+            NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
         }
 
     }

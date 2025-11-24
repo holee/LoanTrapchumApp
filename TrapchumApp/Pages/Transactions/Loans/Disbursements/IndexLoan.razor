@@ -1,8 +1,9 @@
-﻿@page "/app/loan/disbursment/{BranchId:int}/branches"
+﻿@page "/App/Loan/Disbursment/{BranchId:int}/Branches"
 @using Applications.Features.Loans.Responses
 @using Applications.Responses.ViewModels.Loans
+@using TrapchumApp.Pages.Transactions.Loans.LoanTabs
 <PageTitle>All</PageTitle>
-<RadzenTabs TabPosition="TabPosition.Top" RenderMode="TabRenderMode.Server" SelectedIndex="0">
+<RadzenTabs TabPosition="TabPosition.Top" RenderMode="TabRenderMode.Server" SelectedIndex="@_selectedIndex">
     <Tabs>
         <RadzenTabsItem Text="All Loans">
             <Template>
@@ -12,13 +13,130 @@
                 </span>
             </Template>
             <ChildContent>
-                <AllLoansTab GetLoanChanged="GetLoanCount" BranchId="@BranchId" UserId="@_userId" />
+                <AllLoansTab GetLoanChanged="GetLoanCount"
+                             OpenDetailTab="@OpenDetailsTab"
+                             BranchId="@BranchId" UserId="@_userId" />
             </ChildContent>
         </RadzenTabsItem>
+
+        @foreach (var item in _loanTabs)
+        {
+            <RadzenTabsItem Text="@item.Title" @key="@item.TabId">
+                <Template>
+                    <ClosedTab Closed="@CloseTab" Title="@item.Title" TabId="@item.TabId" />
+                </Template>
+                <ChildContent>
+                    @item.ChildContent
+                </ChildContent>
+            </RadzenTabsItem>
+
+        }
+
     </Tabs>
 </RadzenTabs>
 
 @code {
+
+    private List<LoanTab> _loanTabs = [];
+    private int _selectedIndex = 0;
+
+    // void AddDetailTab()
+    // {
+    //     var newTabId = Guid.NewGuid().ToString("N");
+
+    //     var existingIndex = _loanTabs.FindIndex(x => x.TabId == newTabId);
+
+    //     if (existingIndex != -1)
+    //     {
+
+    //         _selectedIndex = existingIndex + 1;
+
+    //         StateHasChanged();
+
+    //         return;
+    //     }
+
+    //     RenderFragment content = builder =>
+    //    {
+    //        builder.OpenComponent<Example>(0);
+    //        builder.AddAttribute(1, "Id", item.Id);
+    //        builder.AddAttribute(2, "CollateralId", item.CollateralId);
+    //        builder.SetKey(item.Id);
+    //        builder.CloseComponent();
+    //    };
+
+    //     var newTab = new LoanTab
+    //     {
+    //         TabId = newTabId,
+    //         Title = "Loan Details",
+    //         ChildContent = content
+    //     };
+
+
+    //     _loanTabs.Add(newTab);
+
+    //     _selectedIndex = _loanTabs.Count; Select the newly added tab
+    // }
+
+
+    void OpenDetailsTab(VLoanDisbursments item)
+    {
+
+        var existingIndex = _loanTabs.FindIndex(x => x.TabId == item.LoanId);
+
+        if (existingIndex != -1)
+        {
+
+            _selectedIndex = existingIndex + 1;
+
+            StateHasChanged();
+
+            return;
+        }
+
+        RenderFragment content = builder =>
+       {
+           builder.OpenComponent<LoanDetails>(0);
+           builder.AddAttribute(1, "LoanId", item.LoanId);
+           builder.AddAttribute(2, "BranchId", item.BranchId);
+           builder.AddAttribute(3, "CurrencyId", item.CurrencyId);
+           builder.SetKey(item.LoanId);
+           builder.CloseComponent();
+       };
+
+        var newTab = new LoanTab
+        {
+            TabId = item.LoanId ?? string.Empty,
+            Title = item.AltName ?? string.Empty,
+            ChildContent = content
+        };
+
+
+        _loanTabs.Add(newTab);
+
+        _selectedIndex = _loanTabs.Count; // Select the newly added tab
+
+    }
+
+
+    private void CloseTab(string id)
+    {
+        var tab = _loanTabs.FirstOrDefault(t => t.TabId == id);
+
+        if (tab != null)
+        {
+            var idx = _loanTabs.IndexOf(tab);
+
+            _loanTabs.Remove(tab);
+
+            _selectedIndex = Math.Max(0, idx);
+        }
+    }
+
+
+
+
+
     // void ShowContextMenuWithContent(MouseEventArgs args, VLoanDisbursments p)
     // {
     //     ContextMenuService.Open(args, ds =>@<RadzenMenu Style="font-size:0.8rem;">

@@ -6,7 +6,8 @@ using Domains.Models.Lists;
 using Radzen.Blazor;
 using Applications.Enumerations;
 using Applications.Features.Addresses.Responses;
-using Applications.Features.OtherNames;
+using Applications.Features.Customers.Dto;
+using Applications.Features.Customers.Commands.Customers.CreateCustomer;
 
 namespace TrapchumApp.Pages.Lists.Customers
 {
@@ -26,7 +27,7 @@ namespace TrapchumApp.Pages.Lists.Customers
         }
 
         [Parameter] public EventCallback<int> Closed { get; set; } = default!;
-        [Parameter] public EventCallback<int?> SelectedValueChanged { get; set; }
+
         IEnumerable<string> Salutations = [];
         IEnumerable<ProvinceDto> Provinces = [];
         IEnumerable<string> Cities = [];
@@ -48,23 +49,21 @@ namespace TrapchumApp.Pages.Lists.Customers
             model.Salutation = "Mr";
             model.MarritalStatus = "Single";
             model.Nationality = "Khmer";
-            
+
             var rsp1 = await _salutationService.GetSalutions();
 
             if (rsp1.IsSuccess)
             {
-                Salutations = rsp1.Data.Select(x => x.Title).ToList();
+                Salutations = rsp1.Data!.Select(x => x.Title!).ToList();
             }
 
             model.Photo = "/Profiles/profile.png";
-
-
 
             await base.OnInitializedAsync();
         }
 
         IEnumerable<Nationality> Nationalities { get; set; } = [];
-        
+
         RadzenFileInput<string> fileUpload = default!;
         string selectedTab = "info";
         string city = "";
@@ -79,10 +78,10 @@ namespace TrapchumApp.Pages.Lists.Customers
 
             var rsp = await _addressService.GetCountries(105);
 
-            if(rsp.IsSuccess)
+            if (rsp.IsSuccess)
             {
                 Countries = rsp.Data ?? [];
-            }   
+            }
             Cities = await _addressService.GetCities();
         }
         private async Task GetSalutations()
@@ -107,9 +106,9 @@ namespace TrapchumApp.Pages.Lists.Customers
 
                 model.Photo ??= "/Profiles/profile.png";
 
-                var response = await _customerService.CreateAsync(model);
+                var rsp = await mediator.Send(new CreateCustomerCommand(model));  //await _customerService.CreateAsync(model);
 
-                if (response.IsSuccess)
+                if (rsp.IsSuccess)
                 {
 
                     await Close();
@@ -121,7 +120,7 @@ namespace TrapchumApp.Pages.Lists.Customers
                 else
                 {
 
-                    NotificationService.Notify(NotificationSeverity.Error, response.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
                 }
 
             }
@@ -133,7 +132,7 @@ namespace TrapchumApp.Pages.Lists.Customers
 
 
 
-        protected async Task CreateAsync(bool saveClosed=false)
+        protected async Task CreateAsync(bool saveClosed = false)
         {
             try
             {
@@ -141,7 +140,7 @@ namespace TrapchumApp.Pages.Lists.Customers
 
                 model.Photo ??= "/Profiles/profile.png";
 
-                var rsp = await _customerService.CreateAsync(model);
+                var rsp = await mediator.Send(new CreateCustomerCommand(model));  //await _customerService.CreateAsync(model);
 
                 if (rsp.IsSuccess)
                 {
@@ -197,9 +196,13 @@ namespace TrapchumApp.Pages.Lists.Customers
             await Closed.InvokeAsync(1);
         }
 
+        protected async Task CloseTab()
+        {
+            await Closed.InvokeAsync();
+        }
+
+
     }
-
-
 }
 
 

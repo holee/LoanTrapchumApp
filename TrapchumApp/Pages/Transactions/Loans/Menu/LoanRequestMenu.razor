@@ -9,12 +9,18 @@
 
         @if (bState.CanRequest)
         {
-            <RadzenMenuItem Path="@_requestLoanRequestUrl"
-                            Visible="Request.StatusId == (int)RequestStatus.New" Icon="@IconNames.Edit" Text="Request Now" Value="@Request.CustomerId" />
+            <RadzenMenuItem Path="@_requestNowUrl"
+                            Visible="Request.StatusId == (int)RequestStatus.New" Icon="@IconNames.SendMoney" Text="Request Now" Value="@Request.CustomerId" />
+
+            <RadzenMenuItem Visible="Request.StatusId == (int)RequestStatus.New"
+                            Path="@_requestLoanRequestUrl"
+                            Icon="@IconNames.Edit" 
+                            Text="Edit Request" Value="@Request.CustomerId" />
 
             <RadzenMenuItem Visible="Request.StatusId == (int)RequestStatus.Rechecked"
                             Path="@_requestLoanRequestUrl"
-                            Icon="@IconNames.Edit" Text="Review Request" Value="@Request.CustomerId" />
+                            Icon="@IconNames.Edit" 
+                            Text="Review Request" Value="@Request.CustomerId" />
         }
 
         @if (bState.CanApproved)
@@ -34,7 +40,7 @@
         <RadzenMenuItem Icon="@IconNames.Details"
                         Visible="Request.StatusId == (int)RequestStatus.Completed"
                         Path="@_loanRequestDetailsUrl"
-                        Text="Details" Value="@Request.CustomerId" />
+                        Text="Request Details" Value="@Request.CustomerId" />
     </RadzenMenu>
 }
 @code {
@@ -46,10 +52,12 @@
     private string _disburseRequestLoanUrl = "";
     private string _loanRequestDetailsUrl = "";
     private string _checkloanRequestUrl = "";
+    private string _requestNowUrl = "";
     protected override void OnInitialized()
     {
         if (Request is not null)
         {
+            _requestNowUrl = $"/app/loan/{Request?.LoanRequestId}/request/{Request?.BranchId}/branches/{Request?.CustomerId}/details";
             _checkloanRequestUrl = $"app/loan/{Request?.LoanRequestId}/request/{Request?.BranchId}/branches/{Request?.CustomerId}/details";
             _loanRequestDetailsUrl = $"app/loan/{Request?.LoanRequestId}/request/{Request?.BranchId}/branches/{Request?.CustomerId}/details";
             _requestLoanRequestUrl = $"/app/loan/{Request?.LoanRequestId}/request/{Request?.BranchId}/branches/{Request?.CustomerId}/edit";

@@ -4,6 +4,7 @@ using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Branches;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Services.Loans;
+using Domains.Models.Identity;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 {
@@ -11,7 +12,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
     {
         private readonly ILoanServiceImpl _dService;
         private readonly ILoanScheduleServiceImpl _loanScheduleService;
-        public ClientAllPayTab(ILoanServiceImpl loanService, 
+        public ClientAllPayTab(ILoanServiceImpl loanService,
                               ILoanScheduleServiceImpl loanScheduleService)
         {
             _dService = loanService;
@@ -19,14 +20,15 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
         }
 
         [Parameter] public int BranchId { get; set; } = 0;
-        [Parameter] public string? UserId { get; set; } = string.Empty;
         [Parameter] public EventCallback<string> ShowCounts { get; set; }
+        [Parameter] public EventCallback ShowLateSchedule { get; set; }  
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
         private List<VSchedule> ScheduleItems = [];
         private IList<VLoanDisbursments> SelectedLoans = [];
         private string? filter = string.Empty;
         protected IEnumerable<VBranchResponse> Branches = [];
         protected string filterText = string.Empty;
+        private string? _userId { get; set; } = string.Empty;
         int counts = 0;
         int pageSize = 15;
         int pageIndex = 1;
@@ -61,20 +63,26 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 
         void GetPaymentSchedules(VSchedule p)
         {
-            NavigationManager.NavigateTo($"/App/Loans/{p.BranchId}/Branches/{p.LoanId}/Schedules?CreditAgentId={p.CreditAgentId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
+            NavigationManager.NavigateTo($"/App/Loans/{p.BranchId}/Branches/{p.LoanId}/Schedules?CreditAgentId={p.CreditAgentId}&CurrencyId={p.CurrencyId}&UserId={_userId}");
             return;
         }
 
 
         void CustomerPayOff(VSchedule p)
         {
-            NavigationManager.NavigateTo($"/Loan/CreditAgent/{p.LoanId}/Changed?CustomerId={p.CustomerId}&BranchId={p.BranchId}&CreditAgentId={p.CreditAgentId}&CurrencyId={p.CurrencyId}&UserId={UserId}");
+            NavigationManager.NavigateTo($"/Loan/CreditAgent/{p.LoanId}/Changed?CustomerId={p.CustomerId}&BranchId={p.BranchId}&CreditAgentId={p.CreditAgentId}&CurrencyId={p.CurrencyId}&UserId={_userId}");
             return;
         }
         protected override async Task OnInitializedAsync()
         {
+            var auth = await AuthenticationState;
+
+            _userId = auth.User.GetId();
+
             await GetLoansAsync();
+
             await GetCount();
+
             await base.OnInitializedAsync();
         }
         private async Task LoadData(LoadDataArgs args)
@@ -98,9 +106,9 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
             {
                 isLoading = true;
 
-                var param = new QueryParam(pageIndex, pageSize, sortField,false, sortDescending, filter);
+                var param = new QueryParam(pageIndex, pageSize, sortField, false, sortDescending, filter);
 
-                var res = await _loanScheduleService.GetLoanSchedulesByPaymentDateAsync( BranchId, paymentDate, true, false, param);
+                var res = await _loanScheduleService.GetLoanSchedulesByPaymentDateAsync(BranchId, paymentDate, true, false, param);
 
                 ScheduleItems = res.Items;
 

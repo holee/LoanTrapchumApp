@@ -1,6 +1,7 @@
 ﻿@page "/app/loan/{LoanRequestId}/request/{BranchId:int}/branches/{CustomerId}/edit"
 @using Applications.Features.Collaterals.Dtos
 @using Applications.Features.Customers.Response
+@using Applications.Features.LoanRequests.Command.AddLoanRequestCollateral
 @using Applications.Features.LoanRequests.Interfaces
 @using Applications.Features.LoanRequests.Requests
 @using Applications.Responses.ViewModels.Loans.Requests
@@ -247,9 +248,10 @@
 
         collaterals.CollateralLinesLink.Add(collateralLink);
 
-        var rsp = await _loanRequestService.AddLoanRequestCollateralAsync(collaterals);
+        var rsp = await mediator.Send(new AddLoanRequestCollateralCommand(collaterals));
 
-        if (rsp.IsSuccess)
+
+        if (!rsp.IsError)
         {
             var item = new VLoanRequestCollateralLines
             {
@@ -300,16 +302,17 @@
             CollateralLines.Add(item);
         }
 
-        var rsp = await _loanRequestService.AddLoanRequestCollateralAsync(collaterals);
+        var rsp = await mediator.Send(new AddLoanRequestCollateralCommand(collaterals));
 
-        if (rsp.IsSuccess)
+        if (!rsp.IsError)
         {
-            NotificationService.Notify(NotificationSeverity.Success, rsp.Data);
+            NotificationService.Notify(NotificationSeverity.Success, rsp.Value);
+
             await GuarantorRef.GuarantorReload();
         }
         else
         {
-            NotificationService.Notify(NotificationSeverity.Success, rsp.ErrMessage);
+            NotificationService.Notify(NotificationSeverity.Success, rsp.FirstError.Description);
         }
 
     }

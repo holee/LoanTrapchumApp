@@ -2,6 +2,8 @@
 using Applications.Features.Branches.Validations;
 using Applications.Features.Collaterals.Dtos;
 using Applications.Features.Currencies;
+using Applications.Features.Customers.Commands.Customers.CreateCustomer;
+using Applications.Features.Customers.Dto;
 using Applications.Features.Customers.Requests;
 using Applications.Features.Customers.Validations;
 using Applications.Features.Employees.Dto;

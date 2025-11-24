@@ -8,12 +8,9 @@
 
   <ItemGroup>
     <Folder Include="Commons\Mappers\activities\" />
-    <Folder Include="Commons\Mappers\Customers\" />
     <Folder Include="Commons\Mappers\Employees\" />
     <Folder Include="Commons\Mappers\LoanDisbursements\" />
-    <Folder Include="Commons\Mappers\LoanRequests\" />
     <Folder Include="Commons\Mappers\NewFolder\" />
-    <Folder Include="Commons\Messages\Loanrequests\" />
     <Folder Include="Commons\Messages\LoanDisbursements\" />
     <Folder Include="Commons\Messages\Journals\" />
     <Folder Include="Commons\Messages\Leadgers\" />
@@ -27,6 +24,7 @@
     <Folder Include="Features\CashManagements\Validations\" />
     <Folder Include="Features\CashManagements\Requests\" />
     <Folder Include="Features\Collaterals\Commands\CreateCollaterals\" />
+    <Folder Include="Features\Collaterals\Commands\DeleteCollaterals\" />
     <Folder Include="Features\CreditAgents\UseCases\" />
     <Folder Include="Features\Currencies\UseCases\" />
     <Folder Include="Features\Customers\Mappers\" />
@@ -58,6 +56,7 @@
     <Folder Include="Features\LoanTransactions\Transactions\Mappers\" />
     <Folder Include="Features\LoanTransactions\Transactions\Requests\" />
     <Folder Include="Features\LoanTransactions\Transactions\Responses\" />
+    <Folder Include="Features\NewFolder\" />
     <Folder Include="Features\Products\Mappers\" />
     <Folder Include="Features\Products\Responses\" />
     <Folder Include="Features\Products\UseCases\" />

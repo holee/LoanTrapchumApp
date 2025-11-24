@@ -11,7 +11,7 @@
         visibility: hidden;
     }
 </style>
-<RadzenTabs RenderMode="TabRenderMode.Server" SelectedIndex="@selectedIndex"
+<RadzenTabs RenderMode="TabRenderMode.Client" SelectedIndex="@selectedIndex"
             SelectedIndexChanged="SelectedTabChanged">
     <Tabs>
         <RadzenTabsItem Text="Customer" Icon="group">
@@ -19,19 +19,60 @@
                            ClickedAddCollateral="AddCollateralTab"
                            BranchId="@BranchId"
                            EditIndex="@EditIndex"
-                           ClickedAdd="AddCustomerTab"
-                           ClickedDetails="Details">
+                           ClickedAdd="@AddCustomerTab"
+                           ClickedDetails="@Details">
                 <ChildContent>
                     <RadzenButton Icon="person_add"
                                   Text="Add Customer"
                                   ButtonStyle="ButtonStyle.Primary"
-                                  Click="AddCustomerTab"
+                                  Click="@AddCustomerTab"
                                   Size="ButtonSize.Small">
                     </RadzenButton>
                 </ChildContent>
             </CustomersList>
         </RadzenTabsItem>
-        <RadzenTabsItem Text="New Customer" Icon="person_add" Visible="isNewTab">
+        @foreach (var item in _tabs)
+        {
+            <RadzenTabsItem Icon="@item.Icon" Text="@item.Title" @key="@item.TabId">
+                <Template>
+                    <ClosedTab Title="@item.Title"
+                               TabId="@item.TabId"
+                               Closed="(() => CloseTab(item.TabId))" />
+                </Template>
+                <ChildContent>
+                    @item.ChildContent
+                </ChildContent>
+            </RadzenTabsItem>
+        }
+    </Tabs>
+</RadzenTabs>
+
+@code {
+
+    void EditIndex(int selectedTabIndex)
+    {
+        // selectedIndex = selectedTabIndex;
+
+        // isEditTab = true;
+    }
+
+    async Task CreateCustomerQuick()
+    {
+
+        var options = new DialogOptions
+        {
+            Width = "45vw",
+            Draggable = true,
+            Resizable = false
+        };
+
+        await DialogService.OpenAsync<CustomerCreateQuick>("Quick Add", options: options);
+    }
+}
+
+
+
+@* <RadzenTabsItem Text="New Customer" Icon="person_add" Visible="isNewTab">
             <Template>
                 <CloseTabButton Title="New Customr" Closed="() => CloseTabe(selectedIndex)" />
             </Template>
@@ -51,29 +92,4 @@
                         Icon="@IconNames.PersonEdit"
                         Visible="@isEditTab">
             <CustomerUpdateTab CustomerId="@customerId" Closed="CloseTabe" />
-        </RadzenTabsItem>
-
-
-    </Tabs>
-</RadzenTabs>
-@code {
-    void EditIndex(int selectedTabIndex)
-    {
-        selectedIndex = selectedTabIndex;
-
-        isEditTab = true;
-    }
-
-    async Task CreateCustomerQuick()
-    {
-
-        var options = new DialogOptions
-        {
-            Width = "45vw",
-            Draggable = true,
-            Resizable = false
-        };
-
-        await DialogService.OpenAsync<CustomerCreateQuick>("Quick Add", options: options);
-    }
-}
+        </RadzenTabsItem> *@

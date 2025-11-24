@@ -97,7 +97,7 @@
                 Text="Request"
                 Icon="save"
                 ButtonStyle="ButtonStyle.Success"/>
-            <RadzenLink Path="@($"/app/loan/request/{BranchId}/branches")"
+            <RadzenLink Path="@_navService.PreviousUrl"
                         Icon="@IconNames.ArrowCircleLeft"
                         IconColor="@Colors.Danger"
                         Text="Back"/>

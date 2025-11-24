@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Applications.Features.Customers.Dto;
+using Applications.Responses;
+using Applications.Utils;
 
-namespace Applications.Features.Customers.Commands.Customers.EditCustomer
-{
-    public sealed class EditCustomerCommand
-    {
+namespace Applications.Features.Customers.Commands.Customers.EditCustomer;
 
-    }
-}
+public record EditCustomerCommand(EntityCustomerCreate Request) : IRequest<Result<string>>;

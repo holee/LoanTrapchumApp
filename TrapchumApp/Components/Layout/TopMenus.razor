@@ -5,11 +5,18 @@
 @using Applications.Features.Employees
 @using Applications.Features.LoanRequests.Interfaces
 @using TrapchumApp.Services
-<RadzenMenu>
-    <RadzenMenuItem Text="Currencies" Icon="payment" Visible="@IsBranchOpen">
-        <RadzenMenuItem  Text="Exchnage" Click="@ShowCurrencyDialogue" Icon="check_circle"></RadzenMenuItem>
-    </RadzenMenuItem>
-</RadzenMenu>
+<AuthorizeView Policy="@Policies.CanExchanged">
+    <Authorized>
+        <RadzenMenu>
+            <RadzenMenuItem Text="Currencies" Icon="payment" Visible="@IsBranchOpen">
+                <RadzenMenuItem Text="Exchnage"
+                                Click="@ShowCurrencyDialogue"
+                                Icon="check_circle"></RadzenMenuItem>
+            </RadzenMenuItem>
+        </RadzenMenu>
+    </Authorized>
+</AuthorizeView>
+
 @code {
     [Parameter]
     public EventCallback ShowDialogue { get; set; } = default!;

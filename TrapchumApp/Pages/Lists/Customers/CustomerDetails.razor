@@ -27,7 +27,7 @@
                                   Size="ButtonSize.ExtraSmall"
                                   Text="Edit"
                                   Icon="edit"
-                                  Click="@ShowEditCustomer"
+                                  Click="(()=>ShowEditCustomer(CustomerId))"
                                   ButtonStyle="ButtonStyle.Success" />
                 </Authorized>
             </AuthorizeView>
@@ -62,7 +62,7 @@
             <RadzenTabsItem Text="Loan Request">
                 <CustomerLoanRequest CustomerId="@CustomerId"
                                      BranchId="@BranchId"
-                                     UserId="@UserId" />
+                                     UserId="@_userId" />
             </RadzenTabsItem>
             <RadzenTabsItem Text="Activities">
                 <CustomerActivities CustomerId="@CustomerId" ShowAdd="true" ShowCommand="true" @key="@Guid.NewGuid().ToString("N")" />

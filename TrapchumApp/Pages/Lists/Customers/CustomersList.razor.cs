@@ -3,9 +3,12 @@ using Applications.Extensions.Identity.Authorizations.Extensions;
 using Applications.Extensions.Identity.Policies;
 using Applications.Features.Customers.Response;
 using Applications.Features.Customers.UseCases;
+using Applications.Features.LoanRequests.Command.IsCustomerBusy;
 using Applications.Responses.Lists.Customers;
 using Applications.Responses.Paginations;
-using TrapchumApp.Helpers.Enums; 
+using Domains.Models.Identity;
+using System.Threading.Tasks;
+using TrapchumApp.Helpers.Enums;
 using TrapchumApp.Pages.Lists.Collaterals;
 using TrapchumApp.Pages.Lists.Customers.Expenses;
 using TrapchumApp.Pages.Lists.Customers.Incomes;
@@ -58,6 +61,7 @@ namespace TrapchumApp.Pages.Lists.Customers
 
         int branchId = 0;
 
+        private string? _userId = string.Empty;
         void OnMenuItemClick(MenuItemEventArgs args)
         {
             ContextMenuService.Close();
@@ -75,29 +79,35 @@ namespace TrapchumApp.Pages.Lists.Customers
 
             pageIndex = 0; // Reset to first page when page size changes
 
-            await LoadCustomerPageList(filterText);
-
+            await FIlterCustomers(selectedValue);
         }
 
-        void SelectedItemChanged(object? e)
+        private async Task FIlterCustomers(int? value)
         {
+            if (value == (int)CustomerFilter.All)
+            {
+                await LoadCustomerPageList(0, null, filterText);
+            }
+
+            if (value == (int)CustomerFilter.MyCustomer)
+            {
+                await LoadCustomerPageList(null, _userId, filterText);
+            }
+            if (value == (int)CustomerFilter.ByBranch)
+            {
+                await LoadCustomerPageList(BranchId, null, filterText);
+            }
+        }
+
+        async Task SelectedItemChanged(object? e)
+        {
+            pageIndex = 0;
+
             if (e is not null)
             {
                 var id = ((FilterCustomer)e).Id;
 
-                if (id == (int)CustomerFilter.All)
-                {
-
-                }
-                if (id == (int)CustomerFilter.MyCustomer)
-                {
-
-                }
-
-                if (id == (int)CustomerFilter.ByBranch)
-                {
-
-                }
+                await FIlterCustomers(id);
             }
         }
 
@@ -106,7 +116,7 @@ namespace TrapchumApp.Pages.Lists.Customers
 
         private async Task AddInComeModal(string? customerId)
         {
-            await DialogService.OpenAsync<CustomerModalIncome>("Income", options: new DialogOptions
+            await DialogService.OpenAsync<IncomeCreate>("Income", options: new DialogOptions
             {
                 Resizable = false,
                 Draggable = true,
@@ -122,34 +132,40 @@ namespace TrapchumApp.Pages.Lists.Customers
 
             var param = new Dictionary<string, object?>
             {
-                { "CustomerId", customerId}
+                { "CollateralId", customerId}
             };
             var options = new DialogOptions
             {
-                Width = "100vw",
-                Height = "100vh",
                 AutoFocusFirstElement = false
             };
 
-            await DialogService.OpenAsync<CollateralModalAdd>("Collateral", param, options);
+            await DialogService.OpenAsync<CustomerCollateralLineCreate>("Collateral", param, options);
         }
 
         private async Task AddLoanRequest(string? customerId)
         {
             ContextMenuService.Close();
 
-            if (await _loanRequestService.IsCustomerBusy(customerId))
+            var query = new IsCustomerBusyQuery(customerId);
+
+            var rsp = await mediator.Send(query);
+
+            if (rsp.IsError == false && rsp.Value)
             {
+
                 NotificationService.Notify(NotificationSeverity.Error, "This customer cannot request loan again.");
+
                 return;
             }
+
             var uri = $"app/loan/request/{BranchId}/branches/createNew/{customerId}/customer";
+
             NavigationManager.NavigateTo(uri);
         }
 
         private async void AddExpenseModal(string? customerId)
         {
-            await DialogService.OpenAsync<CustomerModalExpense>("Add Expense", options: new DialogOptions
+            await DialogService.OpenAsync<CreateExpense>("Add Expense", options: new DialogOptions
             {
                 Resizable = false,
                 Draggable = true,
@@ -193,7 +209,7 @@ namespace TrapchumApp.Pages.Lists.Customers
             {
                 NotificationService.Notify(NotificationSeverity.Success, rsp.Data);
 
-                await LoadCustomerPageList(filterText);
+                await LoadCustomerPageList(null, null, filterText);
             }
             else
             {
@@ -206,12 +222,14 @@ namespace TrapchumApp.Pages.Lists.Customers
         {
             filterText = searchText ?? string.Empty;
 
-            await LoadCustomerPageList(searchText);
+            await LoadCustomerPageList(null, null, filterText);
         }
 
         protected override async Task OnInitializedAsync()
         {
             var auth = await AuthenticationState;
+
+            _userId = auth.User.GetId();
 
             CanRequestLoan = await _authorizeService.MustHasPermissionAsync(auth.User, RequestsPolicies.Request);
 
@@ -219,7 +237,7 @@ namespace TrapchumApp.Pages.Lists.Customers
 
             IsAdminOnly = await _authorizeService.MustHasPermissionAsync(auth.User, RolePolicies.AdminOnly);
 
-            await LoadCustomerPageList(filterText);
+            await LoadCustomerPageList(null, null, filterText);
 
             await base.OnInitializedAsync();
         }
@@ -246,7 +264,7 @@ namespace TrapchumApp.Pages.Lists.Customers
 
             filterText = filterColumn ?? string.Empty;
 
-            await LoadCustomerPageList(filterText);
+            await FIlterCustomers(selectedValue);
         }
 
 
@@ -257,7 +275,7 @@ namespace TrapchumApp.Pages.Lists.Customers
             await ClickedAdd.InvokeAsync(selectedIndex);
         }
 
-        async Task LoadCustomerPageList(string? filter = null)
+        async Task LoadCustomerPageList(int? branchId = null, string? userId = null, string? filter = null)
         {
             try
             {
@@ -265,7 +283,7 @@ namespace TrapchumApp.Pages.Lists.Customers
 
                 var param = new QueryParam(pageIndex, pageSize, sortField, includeInactive, sortDescending, filter);
 
-                var res = await _getCustomerCommand.ExecuteAsync(null, null, null, param);
+                var res = await _getCustomerCommand.ExecuteAsync(branchId, userId, null, param);
 
                 VCustomers = res.Items;
 
@@ -326,7 +344,7 @@ namespace TrapchumApp.Pages.Lists.Customers
         {
             includeInactive = arg;
 
-            await LoadCustomerPageList(filterText);
+            await LoadCustomerPageList(0, null, filterText);
         }
     }
 }

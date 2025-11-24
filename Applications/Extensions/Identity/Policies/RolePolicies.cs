@@ -1,14 +1,17 @@
 ﻿namespace Applications.Extensions.Identity.Policies;
-
-public static partial class Policies
+public static class RolePolicies
 {
-    public class RolePolicies
-    {
-        private const string prefix = "roles";
-        public const string Create = $"{prefix}.{nameof(Create)}";
-        public const string Read = $"{prefix}.{nameof(Read)}";
-        public const string Update = $"{prefix}.{nameof(Update)}";
-        public const string Delete = $"{prefix}.{nameof(Delete)}";
-        public const string Grant = $"{prefix}.{nameof(Grant)}";
-    }
+
+    private const string prefix = "roles";
+    public const string Create = $"{prefix}.{nameof(Create)}";
+    public const string Read = $"{prefix}.{nameof(Read)}";
+    public const string Update = $"{prefix}.{nameof(Update)}";
+    public const string Delete = $"{prefix}.{nameof(Delete)}";
+    public const string Grant = $"{prefix}.{nameof(Grant)}";
+
+    public const string AdminOnly = nameof(AdminOnly);
+    public const string AccountOnly = nameof(AccountOnly);
+    public const string CreditOfficerOnly = nameof(CreditOfficerOnly);
+    public const string ManagerOnly = nameof(ManagerOnly);
+    public const string CEOOnly = nameof(CEOOnly);
 }

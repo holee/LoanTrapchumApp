@@ -13,12 +13,16 @@
 </span>
 @code {
 
-    [Parameter] public long TabId { get; set; } = 0;
+    [Parameter] public long TabId { get; set; }
     [Parameter] public EventCallback<long> Closed { get; set; }
     [Parameter] public string? Title { get; set; } = string.Empty;
 
     async Task ClosedTab()
     {
-        await Closed.InvokeAsync(TabId);
+        if (Closed.HasDelegate && TabId > -1)
+        {
+            await Closed.InvokeAsync(TabId);
+        }
+
     }
 }

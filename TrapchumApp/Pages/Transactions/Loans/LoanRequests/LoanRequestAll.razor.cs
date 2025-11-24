@@ -1,12 +1,13 @@
-using System.Security.Claims;
 using Applications.Enumerations;
 using Applications.Extensions.Identity.Policies;
 using Applications.Extensions.Web;
 using Applications.Features.LoanRequests.Interfaces;
+using Applications.Features.LoanRequests.Queryies.GetLoanRequestsWithCanDisburse;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Domains.Models.Identity;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 using TrapchumApp.Helpers.Extensions;
 using TrapchumApp.Shared;
 
@@ -82,18 +83,16 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
             if (bState.CanDisbursed)
             {
-                var rsp = await _requestService.GetLoanRequestsAsync(string.Empty, CanDisburseLoan, BranchId, RequestStatus.All, param);
-               
-                LoanRequests = rsp.Items;
 
+                var query = new GetLoanRequestsWithCanDisburseQuery(string.Empty, CanDisburseLoan, BranchId, RequestStatus.All, param);
+                var rsp = await mediator.Send(query);             
+                LoanRequests = rsp.Items;
                 counts = rsp.Count;
             }
             else
             {
                 var rsp = await _requestService.GetLoanRequestsAsync(userId, BranchId, RequestStatus.All, param);
-               
                 LoanRequests = rsp.Items;
-
                 counts = rsp.Count;
             }
 

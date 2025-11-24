@@ -1,4 +1,5 @@
-﻿using Applications.Enumerations;
+﻿using Applications.Commons.Mappers.LoanRequests;
+using Applications.Enumerations;
 using Applications.Features.LoanRequests.Interfaces;
 using Applications.Features.LoanRequests.Requests;
 using Applications.Features.Loans.Responses;
@@ -18,7 +19,7 @@ namespace Applications.Features.LoanRequests.UseCases
 
         public async Task<Result<RequestResult>> ExecuteAsync(LoanRequestDtoCreate request, CancellationToken cancellation = default)
         {
-            var req = request.MapToLoanRequestCreate();
+            var req = request.MapToLoanRequestSave();
 
             req.LoanRequestStatusRefId = (int)RequestStatus.New;
 

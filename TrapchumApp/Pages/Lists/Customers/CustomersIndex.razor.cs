@@ -1,5 +1,6 @@
+using Applications.Features.Customers.Dto;
 using Applications.Features.Customers.Interfaces;
-using Applications.Responses.Paginations;
+using Microsoft.JSInterop;
 using Radzen.Blazor;
 
 namespace TrapchumApp.Pages.Lists.Customers
@@ -23,6 +24,7 @@ namespace TrapchumApp.Pages.Lists.Customers
         }
         RadzenTabs tabs = default!;
         List<int> tabCounts = [0];
+        private List<CustomerTab> _tabs = new();
         protected int totalCstomers;
         int tabIndex = 1;
         int selectedIndex = 0;
@@ -33,19 +35,55 @@ namespace TrapchumApp.Pages.Lists.Customers
         bool isVisble = false;
         bool isCollateralTab = false;
         bool IsLoading = true;
+
         void Details(string? id)
         {
-            isVisble = true;
 
-            if (!isDetailsTab)
+            var existingTabIndex = _tabs.FindIndex(t => t.TabId == id);
+
+            if (existingTabIndex != -1)
             {
-                isDetailsTab = true;
+                selectedIndex = existingTabIndex + 1;
+
+                StateHasChanged();
+
+                return;
             }
-            customerId = id;
 
-            selectedIndex = 2;
+            RenderFragment childContent = builer =>
+            {
+                builer.OpenComponent(0, typeof(CustomerDetails));
+                builer.AddAttribute(1, "BranchId", BranchId);
+                builer.AddAttribute(2, "CustomerId", id);
+                builer.AddAttribute(3, "Closed", EventCallback.Factory.Create(this, (int x) =>
+                {
+                    CloseTab(id);
+                }));
 
-            isVisble = false;
+                builer.AddAttribute(4, "EditClick", EventCallback.Factory.Create(this, async (string x) =>
+                {
+                    AddEditTab(id);
+
+                }));
+
+                builer.CloseComponent();
+
+            };
+
+            var newTab = new CustomerTab
+            {
+                TabId = id ?? string.Empty,
+
+                Title = "Details",
+
+                CustomerAction = CustomerAction.Details,
+
+                ChildContent = childContent,
+            };
+
+            _tabs.Add(newTab);
+
+            selectedIndex = _tabs.Count;
         }
 
         void AddCollateralTab(string? id)
@@ -58,7 +96,7 @@ namespace TrapchumApp.Pages.Lists.Customers
             {
                 isCollateralTab = true;
             }
-           
+
             selectedIndex = 4;
 
             isVisble = false;
@@ -66,36 +104,102 @@ namespace TrapchumApp.Pages.Lists.Customers
 
         void AddEditTab(string? id)
         {
-            isVisble = true;
+            var editTabId = string.IsNullOrEmpty(id) ? Guid.NewGuid().ToString("N") : $"{id}_edit";
 
+            var existingTabIndex = _tabs.FindIndex(t => t.TabId == editTabId);
 
-            customerId = id;
-
-
-            if (!isEditTab)
+            if (existingTabIndex != -1)
             {
-                isEditTab = true;
+                selectedIndex = existingTabIndex + 1;
+
+                return;
             }
 
-            selectedIndex = 3;
+            RenderFragment childContent = builer =>
+            {
+                builer.OpenComponent(0, typeof(CustomerUpdateTab));
+                builer.AddAttribute(1, "CustomerId", id);
+                builer.AddAttribute(2, "Closed", EventCallback.Factory.Create(this, (int x) =>
+                {
+                    CloseTab(editTabId);
+                }));
 
-            isVisble = false;
+                builer.SetKey(editTabId);
+
+                builer.CloseComponent();
+            };
+
+
+            var newTab = new CustomerTab
+            {
+                TabId = editTabId,
+
+                Title = "Edit Customer",
+
+                CustomerAction = CustomerAction.Update,
+
+                ChildContent = childContent,
+            };
+
+            _tabs.Add(newTab);
+
+            selectedIndex = _tabs.Count;
+
+
         }
         void AddCustomerTab()
         {
-            if (!isNewTab)
+            var newTabId = Guid.NewGuid().ToString("N");
+
+            RenderFragment childContent = builer =>
             {
-                isNewTab = true;
-            }
-            selectedIndex = 1;
+                builer.OpenComponent(0, typeof(CustomerNewCreate));
+                builer.AddAttribute(1, "CustomerModel", new EntityCustomerCreate());
+                builer.AddAttribute(2, "Closed", EventCallback.Factory.Create(this, (int x) =>
+                 {
+                     CloseTab(newTabId);
+                 }));
+                builer.SetKey(newTabId);
+                builer.CloseComponent();
+            };
+
+            var newTab = new CustomerTab
+            {
+                TabId = newTabId,
+                Title = "New Customer",
+                CustomerAction = CustomerAction.Create,
+                ChildContent = childContent,
+            };
+
+            _tabs.Add(newTab);
+
+            selectedIndex = _tabs.Count;
         }
+
+        private void CloseTab(string? id)
+        {
+            var tab = _tabs.FirstOrDefault(t => t.TabId == id);
+
+            if (tab != null)
+            {
+                var idx = _tabs.IndexOf(tab);
+
+                _tabs.Remove(tab);
+
+                selectedIndex = Math.Max(0, idx);
+            }
+
+        }
+
+
+
         void CloseTabe(int closeTabIndex)
         {
             if (closeTabIndex == 1)
             {
                 isNewTab = false;
             }
-          
+
             if (closeTabIndex == 2)
             {
                 isDetailsTab = false;
@@ -103,18 +207,11 @@ namespace TrapchumApp.Pages.Lists.Customers
 
             if (closeTabIndex == 3)
             {
-                 isEditTab= false;
+                isEditTab = false;
             }
 
             selectedIndex = 0;
 
         }
-
-        protected override async Task OnInitializedAsync()
-        {
-
-            await base.OnInitializedAsync();
-        }
-
     }
 }

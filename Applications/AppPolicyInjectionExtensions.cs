@@ -43,13 +43,13 @@ namespace Applications
                 options.AddPolicy(permission.Name, policy => policy.RequireClaim(AppClaim.Permission, permission.Name));
             }
 
-            options.AddPolicy(PaymentsPolicies.PayOff, PaymentsPolicies.CanPayOff());
-            options.AddPolicy(PaymentsPolicies.MultiplePayment, PaymentsPolicies.CanPayMultiple());
-            options.AddPolicy(PaymentsPolicies.Create, PaymentsPolicies.CanCreate());
-            options.AddPolicy(PaymentsPolicies.Read, PaymentsPolicies.CanRead());
-            options.AddPolicy(PaymentsPolicies.Update, PaymentsPolicies.CanUpdate());
-            options.AddPolicy(PaymentsPolicies.Delete, PaymentsPolicies.CanDelete());
-            options.AddPolicy(PaymentsPolicies.RecievePayment, PaymentsPolicies.CanRecievePayment());
+            options.AddPolicy(Policies.PayOff, Policies.CanPayOff());
+            options.AddPolicy(Policies.MultiplePayment, Policies.CanPayMultiple());
+            options.AddPolicy(Policies.Create, Policies.CanCreate());
+            options.AddPolicy(Policies.Read, Policies.CanRead());
+            options.AddPolicy(Policies.Update, Policies.CanUpdate());
+            options.AddPolicy(Policies.Delete, Policies.CanDelete());
+            options.AddPolicy(Policies.RecievePayment, Policies.CanRecievePayment());
             options.AddPolicy(RequestsPolicies.Read, RequestsPolicies.CanRead());
             options.AddPolicy(RequestsPolicies.Create, RequestsPolicies.CanCreate());
             options.AddPolicy(RequestsPolicies.Request, RequestsPolicies.CanRequest());
@@ -67,11 +67,11 @@ namespace Applications
             options.AddPolicy(DashboardPolicies.ShowAccountDashboard, DashboardPolicies.CanShowAccountDashboard());
             options.AddPolicy(DashboardPolicies.ShowReportDashboard, DashboardPolicies.CanShowReportDashboard());
             options.AddPolicy(DashboardPolicies.ShowAdminDashboard, DashboardPolicies.CanShowAdminDashboard());
-            options.AddPolicy(RolePolicies.AdminOnly, AppPolicies.IsAdminOnly());
-            options.AddPolicy(RolePolicies.AccountOnly, AppPolicies.IsAccountOnly());
-            options.AddPolicy(RolePolicies.CEOOnly, AppPolicies.IsCEOOnly());
-            options.AddPolicy(RolePolicies.CreditOfficerOnly, AppPolicies.IsCreditOfficerOnly());
-            options.AddPolicy(RolePolicies.ManagerOnly, AppPolicies.IsManagerOnly());
+            options.AddPolicy(RolePolicies.AdminOnly, Policies.IsAdminOnly());
+            options.AddPolicy(RolePolicies.AccountOnly, Policies.IsAccountOnly());
+            options.AddPolicy(RolePolicies.CEOOnly, Policies.IsCEOOnly());
+            options.AddPolicy(RolePolicies.CreditOfficerOnly, Policies.IsCreditOfficerOnly());
+            options.AddPolicy(RolePolicies.ManagerOnly, Policies.IsManagerOnly());
             options.AddPolicy(CustomersPolicies.Read, CustomersPolicies.CanRead());
             options.AddPolicy(CustomersPolicies.Create, CustomersPolicies.CanCreate());
             options.AddPolicy(CustomersPolicies.Update, CustomersPolicies.CanUpdate());
@@ -94,6 +94,10 @@ namespace Applications
             options.AddPolicy(TranxsPolicies.OpenBranch, TranxsPolicies.CanOpenBranch());
             options.AddPolicy(TranxsPolicies.CloseBranch, TranxsPolicies.CanClosedBranch());
 
+
+
+
+            options.AddPolicy(Policies.CanExchanged, Policies.CanExchangeMoney());
         }
 
         public static IServiceCollection AddPolicyServices(this IServiceCollection services)

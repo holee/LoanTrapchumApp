@@ -43,11 +43,11 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         {
             var auth = await AuthenticationState;
 
-            IsAccount = (await _authorizeService.AuthorizeAsync(auth.User, AppPolicies.IsAccountOnly())).Succeeded;
+            IsAccount = (await _authorizeService.AuthorizeAsync(auth.User, Policies.IsAccountOnly())).Succeeded;
            
-            IsCreditAgent = (await _authorizeService.AuthorizeAsync(auth.User, AppPolicies.IsCreditOfficerOnly())).Succeeded;
+            IsCreditAgent = (await _authorizeService.AuthorizeAsync(auth.User, Policies.IsCreditOfficerOnly())).Succeeded;
            
-            IsManager = (await _authorizeService.AuthorizeAsync(auth.User, AppPolicies.IsManagerOnly())).Succeeded;
+            IsManager = (await _authorizeService.AuthorizeAsync(auth.User, Policies.IsManagerOnly())).Succeeded;
 
             CanRequestLoan = (await _authorizeService.AuthorizeAsync(auth.User, RequestsPolicies.CanCreate())).Succeeded;
             CanDisburseLoan = (await _authorizeService.AuthorizeAsync(auth.User, RequestsPolicies.CanDisburseLoan())).Succeeded;

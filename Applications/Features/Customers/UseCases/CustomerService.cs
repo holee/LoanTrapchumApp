@@ -1,16 +1,16 @@
-﻿using Applications.Commons.Mappers;
-using Applications.Interfaces.Customers;
+﻿using Applications.Interfaces.Customers;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Domains.Models.Lists.Customers;
 using System.Linq.Expressions;
-using Applications.Features.OtherNames;
 using Domains.Models.Lists;
 using Applications.Features.Customers.Response;
 using Applications.Features.Customers.Services;
 using Applications.Features.Collaterals.Dtos;
 using Applications.Features.Loans.Responses;
+using Applications.Commons.Mappers.Customers;
+using Applications.Features.Customers.Dto;
 
 namespace Applications.Features.Customers.UseCases;
 
@@ -99,7 +99,7 @@ public sealed class CustomerService(ICustomerService cusService) : ICustomerServ
 
     public async Task<Result<IEnumerable<VLoanRequests>>> GetCustomerLoanRequestAsync(int? branchId, string? customerId, bool include = false, CancellationToken cancellation = default)
     {
-        return await cusService.GetCustomerLoanRequestAsync(customerId, include, cancellation);
+        return await cusService.GetCustomerLoanRequestAsync(customerId,cancellation);
     }
 
 }

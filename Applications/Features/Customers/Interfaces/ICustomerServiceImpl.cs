@@ -4,11 +4,11 @@ using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Domains.Models.Lists.Customers;
 using System.Linq.Expressions;
-using Applications.Features.OtherNames;
 using Domains.Models.Lists;
 using Applications.Features.Customers.Response;
 using Applications.Features.Collaterals.Dtos;
 using Applications.Features.Loans.Responses;
+using Applications.Features.Customers.Dto;
 
 namespace Applications.Features.Customers.Services;
 

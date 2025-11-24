@@ -39,7 +39,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
         protected override async Task OnInitializedAsync()
         {
             _userId = (await AuthenticationState).GetUserId();
-            
+
             await base.OnInitializedAsync();
         }
 
@@ -58,6 +58,21 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
             AllLateScheduleCounts = count;
         }
 
+        void GetLateScheduleCount(string key, int count)
+        {
+            AllLateScheduleCounts = count;
+
+            var findkey = $"{key}_LateSchedules";     // <- same key you used
+
+            var tab = _tabs.FirstOrDefault(t => t.Key == key);
+
+            if (tab != null)
+            {
+                tab.Title = $"Late Schedules({count})";
+            }
+
+            StateHasChanged();
+        }
 
         void CloseTab()
         {
@@ -92,24 +107,24 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
             return;
         }
 
-        void GetCustomerLateSchedules(VSchedule? p)
+        void GetCustomerLateSchedules(VSchedule p)
         {
             ContextMenuService.Close();
 
-            if (p is null) return;
+            //if (p is null) return;
 
-            if (!isShowLateSchedule)
-            {
-                isShowLateSchedule = true;
+            //if (!isShowLateSchedule)
+            //{
+            //    isShowLateSchedule = true;
 
-                tabcounts.Add(1);
-            }
+            //    tabcounts.Add(1);
+            //}
 
-            selectedTabIndex = 1;
+            //selectedTabIndex = 1;
 
-            loanId = p.LoanId!;
+            //loanId = p.LoanId!;
 
-            StateHasChanged();
+            //StateHasChanged();
         }
 
         void CustomerPayOff(VSchedule? p)
@@ -176,8 +191,8 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
         }
 
 
-        
-        
+
+
         async Task selectedPageSizeChanged()
         {
             await GetCustomerSchedules();
@@ -309,8 +324,6 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
         {
             if (obj is not null)
             {
-                _isLateTab = true;
-                _selectedIndex = 3;
                 loanId = obj.LoanId;
             }
         }

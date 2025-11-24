@@ -1,6 +1,7 @@
 using Applications.Extensions;
 using Applications.Extensions.Identity.Authorizations.Extensions;
 using Applications.Extensions.Identity.Policies;
+using Applications.Features.LoanRequests.Command.IsCustomerBusy;
 using Applications.Responses.ViewModels.Loans.Requests;
 namespace TrapchumApp.Pages.Lists.Customers
 {
@@ -49,9 +50,11 @@ namespace TrapchumApp.Pages.Lists.Customers
 
         protected async Task AddLoanRequest()
         {
+            var query = new IsCustomerBusyQuery(CustomerId);
 
+            var rsp = await mediator.Send(query);
 
-            if (await _loanRequestService.IsCustomerBusy(CustomerId))
+            if (rsp.IsError == false && rsp.Value)
             {
                 NotificationService.Notify(NotificationSeverity.Error, "This customer cannot request loan again.");
                

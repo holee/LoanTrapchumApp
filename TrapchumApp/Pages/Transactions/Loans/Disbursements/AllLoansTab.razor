@@ -146,9 +146,13 @@
     [CascadingParameter]
     Task<AuthenticationState> AuthState { get; set; } = default!;
 
+    [Parameter]
+    public EventCallback<VLoanDisbursments> OpenDetailTab { get; set; }
+
+
     void ShowContextMenuWithContent(MouseEventArgs args, VLoanDisbursments p)
     {
-        ContextMenuService.Open(args, ds =>@<LoanMenu Data="@p" />);
+        ContextMenuService.Open(args, ds =>@<LoanMenu Data="@p" OpenDetailTab="@OpenDetailTab" />);
     }
 
     void OnRowSelected(VLoanDisbursments arg)

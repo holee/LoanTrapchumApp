@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using Applications.Calculations;
 using Applications.Commons.Mappers;
 using Applications.Enumerations;
@@ -7,7 +6,16 @@ using Applications.Features.Collaterals.Dtos;
 using Applications.Features.Customers.Extensions;
 using Applications.Features.Customers.Response;
 using Applications.Features.Customers.UseCases;
+using Applications.Features.LoanRequests.Command.AddLoanRequestDocument;
+using Applications.Features.LoanRequests.Command.CreateLoanRequest;
+using Applications.Features.LoanRequests.Command.DeleteLoanRequestCollateral;
+using Applications.Features.LoanRequests.Command.DeleteLoanRequestDocument;
+using Applications.Features.LoanRequests.Command.DeleteLoanRequestGuarantor;
+using Applications.Features.LoanRequests.Command.SaveLoanRequest;
 using Applications.Features.LoanRequests.Interfaces;
+using Applications.Features.LoanRequests.Queryies.GetLoanRequestById;
+using Applications.Features.LoanRequests.Queryies.GetLoanRequestDetailById;
+using Applications.Features.LoanRequests.Queryies.GetLoanRequestsDocuments;
 using Applications.Features.LoanRequests.Requests;
 using Applications.Features.LoanRequests.UseCases;
 using Applications.Features.Loans.Requests;
@@ -23,6 +31,7 @@ using Applications.Responses.ViewModels.Loans.Requests;
 using Domains.Models.Files;
 using Infrastructures.Authorizations;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 using TrapchumApp.Helpers.Extensions;
 using TrapchumApp.Pages.Lists.Collaterals;
 using TrapchumApp.Pages.Lists.OtherNames;
@@ -144,29 +153,31 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
                 var documents = Documents.ToLoanDocumentsEdit();
 
-                var res = await _loanRequestService.AddLoanRequestDocumentAsync(documents);
+                var res = await mediator.Send(new AddLoanRequestDocumentsCommand(documents)); //_loanRequestService.AddLoanRequestDocumentAsync(documents);
 
-                if (!res.IsSuccess)
+                if (!res.IsError)
                 {
-                    NotificationService.Notify(NotificationSeverity.Error, res.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Error, res.Value);
 
                     return;
                 }
 
                 await GetLoanRequestDocuments();
 
-                NotificationService.Notify(NotificationSeverity.Success, res.Data);
+                NotificationService.Notify(NotificationSeverity.Success, res.FirstError.Description);
             }
         }
 
         async Task GetLoanRequestDocuments()
         {
 
-            var resp = await _loanRequestService.GetLoanRequestDocumentAsync(LoanRequestId, BranchId);
+            var query = new GetLoanRequestDocumentQuery(LoanRequestId, BranchId);
 
-            if (resp.IsSuccess)
+            var resp = await mediator.Send(query);// _loanRequestService.GetLoanRequestDocumentAsync(LoanRequestId, BranchId);
+
+            if (!resp.IsError)
             {
-                Documents = resp.Data!.ToList();
+                Documents = resp.Value.ToList();
 
                 DocumentRef.ReloadDocument();
             }
@@ -191,9 +202,12 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
             if (LoanRequestId.IsNotNullOrEmpty() && doc.Id > 0)
             {
-                var resp = await _loanRequestService.DeleteLoanRequestDocumentAsync(LoanRequestId, BranchId, doc.Id);
 
-                if (resp.IsSuccess)
+                var command = new DeleteLoanRequestDocumentCommand(LoanRequestId, BranchId, doc.Id);
+
+                var resp = await mediator.Send(command);
+
+                if (!resp.IsError)
                 {
                     Documents.Remove(doc);
 
@@ -204,7 +218,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
                     return;
                 }
 
-                NotificationService.Notify(NotificationSeverity.Error, resp.ErrMessage);
+                NotificationService.Notify(NotificationSeverity.Error, resp.FirstError.Description);
             }
             if (doc.LoanRequestId.IsNotNullOrEmpty() || doc.Id == 0)
             {
@@ -259,12 +273,14 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
             if (Guarantors.Any() && g.Id > 0)
             {
-                var res = await _loanRequestService.DeleteLoanRequestGuarantorAsync(LoanRequestId, BranchId, g.Id);
 
-                if (res.IsSuccess)
+                var command = new DeleteLoanRequestGuarantorCommand(LoanRequestId, BranchId, g.Id);
+
+                var res = await mediator.Send(command);
+
+                if (!res.IsError)
                 {
                     Guarantors.Remove(g);
-
                     await GuarantorRef.GuarantorReload();
                 }
             }
@@ -300,9 +316,12 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
             if (CollateralLines.Any() && c.Id > 0)
             {
-                var res = await _loanRequestService.DeleteLoanRequestCollateralAsync(BranchId, LoanRequestId, c.Id);
 
-                if (res.IsSuccess)
+                var command = new DeleteLoanRequestCollateralCommand(BranchId, LoanRequestId, c.Id);
+
+                var res = await mediator.Send(command);
+
+                if (!res.IsError)
                 {
                     NotificationService.Notify(NotificationSeverity.Success, "Collateral was removed.");
 
@@ -346,24 +365,28 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
                 await GetCustomers(CustomerId, 1);
 
-                var reqResp = await _loanRequestService.GetLoanRequestAsync(BranchId, CustomerId, LoanRequestId, true);
 
-                if (!reqResp.IsSuccess && reqResp.Data is null)
+                var query = new GetLoanRequestDetailByIdQuery(BranchId, CustomerId, LoanRequestId);
+
+
+                var reqResp = await mediator.Send(query);// _loanRequestService.GetLoanRequestAsync(BranchId, CustomerId, LoanRequestId, true);
+
+                if (reqResp.IsError && reqResp.Value is null)
                 {
-                    NotificationService.Notify(NotificationSeverity.Error, reqResp.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Error, reqResp.FirstError.Description);
 
                     NavigationManager.NavigateTo($"/app/loan/request/{BranchId}/branches");
 
                     return;
                 }
 
-                var data = reqResp.Data;
+                var data = reqResp.Value;
 
                 isAllow = (await _authorizeService.AuthorizeAsync(user, data, new SameUserRequestRequirement())).Succeeded;
 
                 model.CustomerRefId = CustomerId;
 
-                FullName = reqResp.Data?.AltName;
+                FullName = reqResp.Value?.AltName;
 
                 CollateralLines = data!.ToLoanRequestCollaterals();
 
@@ -387,7 +410,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         {
             var queryParam = new QueryParam(0, take, string.Empty, filter: filter);
 
-            var rsp = await  _getCustomerUseCase.ExecuteAsync(null,null,customerId, queryParam);
+            var rsp = await _getCustomerUseCase.ExecuteAsync(null, null, customerId, queryParam);
 
             if (rsp.Items.Any())
             {
@@ -464,12 +487,6 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
                 model.BranchRefId = BranchId;
 
-                //model.RequestUserRefId = _userId;
-
-                //model.CreditAgentRefId = _user.EmployeeRefId;
-
-                //model.CustomerRefId = CustomerId;
-
                 model.RequestDate = DateTime.Now;
 
                 model.LoanRequestStatusRefId = (int)state;
@@ -478,22 +495,22 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
                 model.AprovedAmount = model.RequestAmount;
 
-                var resp = state switch 
+                var resp = state switch
                 {
-                    RequestStatus.New => await _saveLoanRequestUseCase.ExecuteAsync(model),
-                    RequestStatus.Requested => await _createNewLoanRequestUseCase.ExecuteAsync(model),
-                    _ => await _saveLoanRequestUseCase.ExecuteAsync(model)
+                    RequestStatus.New => await mediator.Send(new SaveLoanRequestCommand(model)),
+                    RequestStatus.Requested => await mediator.Send(new CreateLoanRequestCommand(model)),
+                    _ => await mediator.Send(new SaveLoanRequestCommand(model))
                 };
 
-                if (resp.IsSuccess)
+                if (!resp.IsError)
                 {
-                    NotificationService.Notify(NotificationSeverity.Success, resp.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Success, resp.Value.Message);
 
                     NavigationManager.NavigateTo($"/app/loan/request/{BranchId}/branches");
                 }
                 else
                 {
-                    NotificationService.Notify(NotificationSeverity.Error, resp.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Error, resp.FirstError.Description);
                 }
             }
             catch (Exception ex)

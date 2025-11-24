@@ -1,4 +1,5 @@
 ﻿@page "/App/Loan/{LoanId}/Branches/{BranchId:int}/Currencies/{CurrencyId:int}"
+@using TrapchumApp.Pages.Transactions.Loans.Menu
 @using TrapchumApp.Pages.Transactions.Loans.Repayments
 <PageTitle>Loan Details</PageTitle>
 <LoanInfos LoanSchedule="@loanSchedule" Currency="@CurrencyId" LoanId="@LoanId" BranchId="@BranchId" />
@@ -174,10 +175,9 @@
 </RadzenTabs>
 <RadzenStack Orientation="Orientation.Horizontal"
              AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
-    <RadzenLink Path="@($"/App/Loan/{BranchId}/Branches")" Text="Back" />
+    <RadzenLink Path="@_navService.PreviousUrl" Text="Back" />
 </RadzenStack>
 @code {
-
 
     async Task DownLoadScheduleAsPdf()
     {
@@ -193,7 +193,17 @@
 
     void ShowContextMenu(MouseEventArgs args, VSchedule p)
     {
-        ContextMenuService.Open(args, ds =>@<RadzenMenu Style="font-size:0.8rem;">
+        ContextMenuService.Open(args,
+                                ds =>@<LoanDetailsMenu Schedule="@p"
+                 ScheduleChanged="@PayBySchedules"
+                 CreditAgentId="@_creditAgentId" />
+    );
+    }
+
+
+}
+
+@* <RadzenMenu Style="font-size:0.8rem;">
     <RadzenMenuItem Icon="schedule"
                     Visible="@(!p.IsPaid || p.IsPartialPaid)"
                     Click="@(()=>PayBySchedules(p))"
@@ -209,9 +219,4 @@
     <RadzenMenuItem Icon="paid"
                     Click="@(()=>ShowScheduleDetails(p))"
                     Text="Details"></RadzenMenuItem>
-</RadzenMenu>
-    );
-    }
-
-
-}
+</RadzenMenu> *@

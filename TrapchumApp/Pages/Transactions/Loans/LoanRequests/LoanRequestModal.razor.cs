@@ -1,6 +1,7 @@
 using Applications.Extensions.mappers;
 using Applications.Features.Customers.Response;
 using Applications.Features.Entities;
+using Applications.Features.LoanRequests.Command.ApplyLoanRequest;
 using Applications.Features.LoanRequests.Requests;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Auths;
@@ -70,16 +71,15 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
         async void LoanRequestVerified()
         {
-            var resp = await _loanRequestService.AppliedLoanRequestAsync(new RequestDtoBaseCreate(BranchId, CustomerId, LoanRequestId, memo));
-
-            if (resp.IsSuccess)
+            var resp = await mediator.Send(new AppliedLoanRequestCommand(new RequestDtoBaseCreate(BranchId, CustomerId, LoanRequestId, memo)));
+            if (!resp.IsError)
             {
-                NotificationService.Notify(NotificationSeverity.Success, resp.Data);
+                NotificationService.Notify(NotificationSeverity.Success, resp.Value.Message);
                 DialogService.Close(true);
             }
             else
             {
-                NotificationService.Notify(NotificationSeverity.Error, resp.ErrMessage);
+                NotificationService.Notify(NotificationSeverity.Error, resp.FirstError.Description);
             }
         }
 

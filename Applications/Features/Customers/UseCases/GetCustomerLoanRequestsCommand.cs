@@ -26,7 +26,7 @@ public sealed class GetCustomerLoanRequestsCommand
             Result.Failure(ErrorResponse.Validation("Customer ID Is Required."));
         }
 
-        return await _customerService.GetCustomerLoanRequestAsync(customerId, onlyComplete, cancellation);
+        return await _customerService.GetCustomerLoanRequestAsync(customerId,cancellation);
 
     }
 

@@ -1,5 +1,6 @@
 ﻿@using Applications.Enumerations
 @using Applications.Responses.ViewModels.Loans.Requests
+@using TrapchumApp.Pages.Lists.Customers.Menu
 <RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End"
              class="rz-mb-2"
              Orientation="Orientation.Horizontal">
@@ -93,8 +94,12 @@
 
     void ShowContextMenu(MouseEventArgs args, VLoanRequests c)
     {
-        ContextMenuService.Open(args, ds =>
-    @<RadzenMenu Style="font-size:0.8rem;">
+        ContextMenuService.Open(args, ds =>@<CustomerRequestMenu LoanRequest="@c" />);
+    }
+}
+
+@*
+<RadzenMenu Style="font-size:0.8rem;">
     <RadzenMenuItem Visible="@IsCanRequest"
                     Icon="@IconNames.Approval"
                     Text="Request Now"
@@ -115,12 +120,6 @@
                     Path="@($"/app/loan/{c.LoanRequestId}/request/{c.BranchId}/branches/{c.CustomerId}/details")"
                     Value="@c.CustomerId" />
 </RadzenMenu>
-    );
-    }
-}
-
-@*
-
  <AuthorizeView Policy="@RequestsPolicies.Request">
                     <Authorized>
                         <NavLink href="@($"/app/loan/{c.LoanRequestId}/request/{c.BranchId}/branches/{c.CustomerId}/details")">

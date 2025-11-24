@@ -1,4 +1,5 @@
 @using Applications.Responses.ViewModels.Loans.Requests
+@using TrapchumApp.Pages.Transactions.Loans.Menu
 <GridToolbar SearchChanged="@FilterTextChanged" Placeholder="Type something to search........">
 </GridToolbar>
 <RadzenDataGrid Data="LoanRequests"
@@ -55,8 +56,29 @@
                 </AuthorizeView>
             </Template>
         </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="Actions"
+                              Context="r" Width="4rem"
+                              TextAlign="TextAlign.Center">
+            <Template>
+                <RadzenButton Size="ButtonSize.ExtraSmall"
+                              Variant="Variant.Text"
+                              Click="((args)=>ShowContextMenu(args,r))"
+                              Icon="@IconNames.MoreVert">
+                </RadzenButton>
+            </Template>
+        </RadzenDataGridColumn>
     </Columns>
 </RadzenDataGrid>
+
+@code {
+    void ShowContextMenu(MouseEventArgs args, VLoanRequests loanRequest)
+    {
+        ContextMenuService.Open(args, ds =>@<LoanRequestMenu Request="@loanRequest" />);
+    }
+
+}
+
+
 
 @* <NotAuthorized>
                         <NavLink href="@($"/App/Loan/{BranchId}/Branches/Request/Details?UserId={UserId}&LoanRequestId={r?.LoanRequestId}&CustomerId={r?.CustomerId}")">

@@ -1,6 +1,6 @@
 ﻿@using Applications.Bases
 @using Applications.Commons.Messages.Collaterals
-@using Applications.Features.Collaterals.Commands.DeleteCOmmand
+@using Applications.Features.Collaterals.Commands.DeleteCollateralLines
 @using Applications.Features.Collaterals.Dtos
 @using Applications.Features.LoanRequests.Interfaces
 @using Domains.Models.Collaterals
@@ -62,9 +62,9 @@
                     </Template>
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn Title="Size" Property="Size" Sortable="false" />
-                <RadzenDataGridColumn Width="3.5rem" Context="c" TextAlign="TextAlign.Center" Title="Status" Sortable="false">
+                <RadzenDataGridColumn Width="3.5rem" Context="c" TextAlign="TextAlign.Center" Title="IsUsed" Sortable="false">
                     <Template>
-                        <RadzenCheckBox @bind-Value="c.IsAvailable" Disabled></RadzenCheckBox>
+                        <RadzenCheckBox @bind-Value="c.IsUsed" Disabled></RadzenCheckBox>
                     </Template>
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn Visible="@ShowAcction" Width="3.5rem" Context="c" TextAlign="TextAlign.Center" Title="Action" Sortable="false">
@@ -136,11 +136,7 @@
 
         if (confirm == false) return;
 
-        var rsp = await mediator.Send(new DeleteCollateralLineCommand
-        {
-            Id = c.Id,
-            CollateralId = c.CollateralId
-        });
+        var rsp = await mediator.Send(new DeleteCollateralLineCommand(c.Id,c.CollateralId!));
 
         if (rsp.IsError)
         {

@@ -1,10 +1,8 @@
 ﻿using Applications.Extensions;
-using Applications.Extensions.Web;
 using Radzen.Blazor;
 using TrapchumApp.Pages.Lists.Collaterals;
 using Domains.Models.Identity;
 using Applications.Features.Customers.Services;
-using Applications.Services.Lists;
 using Applications.Services.Lists;
 using Applications.Features.Customers.Response;
 using Applications.Features.Collaterals.Dtos;
@@ -30,10 +28,9 @@ namespace TrapchumApp.Pages.Lists.Customers
         }
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
         [Parameter] public int? BranchId { get; set; } = 0;
-        [Parameter, SupplyParameterFromQuery] public string? UserId { get; set; }
         [Parameter, EditorRequired] public string? CustomerId { get; set; }
-        [Parameter] public EventCallback<int> Close { get; set; }
-        [Parameter] public EventCallback<int> EditClick { get; set; }
+        [Parameter] public EventCallback<int> Closed { get; set; }
+        [Parameter] public EventCallback<string?> EditClick { get; set; }
 
         protected VCustomerDetails Customer = new();
 
@@ -51,6 +48,8 @@ namespace TrapchumApp.Pages.Lists.Customers
 
         string collapseIcon = "expand_less";
 
+        private string? _userId { get; set; }
+
         bool ShowEditTab = false;
 
         async Task DeleteCustomer()
@@ -67,9 +66,9 @@ namespace TrapchumApp.Pages.Lists.Customers
             NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
         }
 
-        async Task ShowEditCustomer()
+        async Task ShowEditCustomer(string? customerId)
         {
-            await EditClick.InvokeAsync(2);
+            await EditClick.InvokeAsync(customerId);
 
         }
         protected async Task AddCollateral()
@@ -112,7 +111,7 @@ namespace TrapchumApp.Pages.Lists.Customers
 
                 if (auth.User.Identity!.IsAuthenticated)
                 {
-                    UserId ??= auth.User.GetId();
+                    _userId ??= auth.User.GetId();
                 }
 
                 var response = await _customerService.GetCustomerDetailsByIdAsync(CustomerId,true);
@@ -190,7 +189,7 @@ namespace TrapchumApp.Pages.Lists.Customers
 
         async Task CloseTab()
         {
-            await Close.InvokeAsync(2);
+            await Closed.InvokeAsync(2);
         }
     }
 }

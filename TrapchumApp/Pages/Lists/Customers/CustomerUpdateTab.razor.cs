@@ -1,11 +1,10 @@
 ﻿using Applications.Enumerations;
-using Applications.Features.OtherNames;
+using Applications.Features.Customers.Dto;
 using Applications.Interfaces.Lists;
 using Applications.Responses.Lists.Entities;
 using Applications.Services.Files;
 using Applications.Services.Lists;
 using Domains.Models.Addresses;
-using Domains.Models.Files;
 using Domains.Models.Lists;
 namespace TrapchumApp.Pages.Lists.Customers
 {
@@ -25,8 +24,7 @@ namespace TrapchumApp.Pages.Lists.Customers
         }
 
         [Parameter] public EventCallback<int> Closed { get; set; }
-        [Parameter] public bool ShowEditTab { get; set; } = false;
-
+        [Parameter] public string? CustomerId { get; set; }
         string selectedTab = "info";
 
         string city = "";
@@ -57,8 +55,7 @@ namespace TrapchumApp.Pages.Lists.Customers
                 Salutations = rsp1.Data!.Select(x => x.Title!).ToList();
             }
         }
-        [Parameter] public EventCallback<int?> SelectedValueChanged { get; set; }
-        [Parameter] public string? CustomerId { get; set; }
+
         IEnumerable<string> Salutations = [];
         IEnumerable<string> Cities = [];
         IEnumerable<OcupationResponse> Occupations = [];

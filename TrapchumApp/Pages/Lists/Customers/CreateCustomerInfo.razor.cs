@@ -7,8 +7,8 @@ using Domains.Models.Files;
 using Domains.Models.Lists;
 using Domains.Shared.Enums;
 using System.Threading.Tasks;
-using Applications.Features.OtherNames;
 using Applications.Features.Settings.Requests;
+using Applications.Features.Customers.Dto;
 
 namespace TrapchumApp.Pages.Lists.Customers
 {

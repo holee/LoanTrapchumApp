@@ -104,12 +104,9 @@ public sealed class CustomerRepository(
 
             var sql = @"SELECT *
                             FROM VLoanRequests r 
-                        WHERE r.CustomerId=@customerId AND 
-                        ((@onlyComplete='TRUE' AND r.StatusId=7) OR 
-                        @onlyComplete='FALSE')";
+                        WHERE r.CustomerId=@customerId AND r.StatusId NOT IN (7)";
             var parameters = new DynamicParameters();
             parameters.Add("@customerId", customerId);
-            parameters.Add("@onlyComplete", onlyComplete);
             var rsp = await db.QueryAsync<VLoanRequests>(sql, parameters);
             if (!rsp.Any())
             {
@@ -122,6 +119,35 @@ public sealed class CustomerRepository(
             return Result.Failure<IEnumerable<VLoanRequests>>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
         }
     }
+
+
+
+    public async Task<Result<IEnumerable<VLoanRequests>>> GetCustomerLoanRequestAsync(string? customerId,CancellationToken cancellation = default)
+    {
+        try
+        {
+            using var db = await dapperFactory.CreateConnectionAsync(cancellation);
+
+            var sql = @"SELECT *
+                            FROM VLoanRequests r 
+                        WHERE r.CustomerId=@customerId AND r.StatusId NOT IN (7)";
+            var parameters = new DynamicParameters();
+            parameters.Add("@customerId", customerId);
+            var rsp = await db.QueryAsync<VLoanRequests>(sql, parameters);
+            if (!rsp.Any())
+            {
+                return Result.Failure<IEnumerable<VLoanRequests>>(ErrorResponse.NotFound("No note found."));
+            }
+            return Result.Success(rsp);
+        }
+        catch (SqlException ex)
+        {
+            return Result.Failure<IEnumerable<VLoanRequests>>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
+        }
+    }
+
+
+
     public async Task<Result<IEnumerable<VLoanDisbursments>>> GetCustomerLoanAsync(string? customerId, CancellationToken cancellation = default)
     {
         try

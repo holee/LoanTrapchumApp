@@ -26,7 +26,7 @@
                                      JustifyContent="JustifyContent.End"
                                      class="rz-mb-2"
                                      AlignItems="AlignItems.Center">
-                            <AuthorizeView Policy="@RepaymentPolicies.MultiplePayment">
+                            <AuthorizeView Policy="@Policies.MultiplePayment">
                                 <Authorized>
                                     <div class="input-group">
                                         <div class="input-group-text">
@@ -281,7 +281,7 @@
                                  class="rz-mt-3"
                                  Gap="1rem"
                                  AlignItems="AlignItems.Center">
-                        <AuthorizeView Policy="@RepaymentPolicies.MultiplePayment">
+                        <AuthorizeView Policy="@Policies.MultiplePayment">
                             <Authorized>
                                 <RadzenButton Icon="@IconNames.Paid"
                                               Size="ButtonSize.Small"
@@ -326,5 +326,3 @@
         </Tabs>
     </RadzenTabs>
 </div>
-
-                                    @* ($"/app/loan/disbursment/{BranchId}/Branches") *@
