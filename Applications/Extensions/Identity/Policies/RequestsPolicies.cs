@@ -4,73 +4,75 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace Applications.Extensions.Identity.Policies;
 
-public static class RequestsPolicies  
+public partial class Policies  
 {
-    private const string prefix = "loanRequests";
-    public const string Create = $"{prefix}.{nameof(Create)}";
-    public const string Update = $"{prefix}.{nameof(Update)}";
-    public const string Delete = $"{prefix}.{nameof(Delete)}";
-    public const string Read = $"{prefix}.{nameof(Read)}";
-    public const string Approve = $"{prefix}.{nameof(Approve)}";
-    public const string Disburse = $"{prefix}.{nameof(Disburse)}";
-    public const string Request = $"{prefix}.{nameof(Request)}";
-    public const string Reject = $"{prefix}.{nameof(Reject)}";
+    private const string req_prefix = "loanRequests";
+    public const string CreateLoanRequest = $"{req_prefix}.{nameof(CreateLoanRequest)}";
+    public const string UpdateLoanRequest = $"{req_prefix}.{nameof(UpdateLoanRequest)}";
+    public const string DeleteLoanRequest = $"{req_prefix}.{nameof(DeleteLoanRequest)}";
+    public const string ReadLoanRequest = $"{req_prefix}.{nameof(ReadLoanRequest)}";
+    public const string ApproveLoanRequest = $"{req_prefix}.{nameof(ApproveLoanRequest)}";
+    public const string Disburse = $"{req_prefix}.{nameof(Disburse)}";
+    public const string RequestLoanRequest = $"{req_prefix}.{nameof(RequestLoanRequest)}";
+    public const string RejectLoanRequest = $"{req_prefix}.{nameof(RejectLoanRequest)}";
 
-    private static string read = AppPermission.RuleFor(Modules.LoanRequest, Feature.Read);
-    private static string update = AppPermission.RuleFor(Modules.LoanRequest, Feature.Update);
-    private static string create = AppPermission.RuleFor(Modules.LoanRequest, Feature.Create);
-    private static string delete = AppPermission.RuleFor(Modules.LoanRequest, Feature.Delete);
-    private static string aprove = AppPermission.RuleFor(Modules.LoanRequest, Feature.ApproveRequest);
-    private static string reject = AppPermission.RuleFor(Modules.LoanRequest, Feature.RejectRequest);
-    private static string request = AppPermission.RuleFor(Modules.LoanRequest, Feature.Request);
-    public static AuthorizationPolicy CanDisburseLoan() 
+    private static string read_loanRequest = AppPermission.RuleFor(Modules.LoanRequest, Feature.Read);
+    private static string update_loanRequest = AppPermission.RuleFor(Modules.LoanRequest, Feature.Update);
+    private static string create_loanRequest = AppPermission.RuleFor(Modules.LoanRequest, Feature.Create);
+    private static string delete_loanRequest = AppPermission.RuleFor(Modules.LoanRequest, Feature.Delete);
+    private static string approve_loanRequest = AppPermission.RuleFor(Modules.LoanRequest, Feature.ApproveRequest);
+    private static string reject_loanRequest = AppPermission.RuleFor(Modules.LoanRequest, Feature.RejectRequest);
+    private static string request_loanRequest = AppPermission.RuleFor(Modules.LoanRequest, Feature.Request);
+    private static string disburse_loanRequest = AppPermission.RuleFor(Modules.LoanRequest, Feature.Disburse);
+     
+    public static AuthorizationPolicy CanDisburseLoan()  
     {
         return new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
                     .RequireRole(AppRoles.Account, AppRoles.SeniorAccount, AppRoles.ChiefAccount)
-                    .RequireClaim(AppClaim.Permission, AppPermission.RuleFor(Modules.LoanRequest, Feature.Disburse))
+                    .RequireClaim(AppClaim.Permission, disburse_loanRequest)
                     .Build();
     }
 
 
-    public static AuthorizationPolicy CanCreate()
+    public static AuthorizationPolicy CanCreateLoanRequest()
     {
         return new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
                     .RequireRole(AppRoles.Co)
-                    .RequireClaim(AppClaim.Permission, create)
+                    .RequireClaim(AppClaim.Permission, create_loanRequest)
                     .Build();
     }
 
-    public static AuthorizationPolicy CanRequest() 
+    public static AuthorizationPolicy CanRequestLoanRequest() 
     {
         return new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
                     .RequireRole(AppRoles.Co)
-                    .RequireClaim(AppClaim.Permission, request)
+                    .RequireClaim(AppClaim.Permission, request_loanRequest)
                     .Build();
     }
-    public static AuthorizationPolicy CanUpdate()
+    public static AuthorizationPolicy CanUpdateLoanRequest()
     {
         return new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
-                     .RequireClaim(AppClaim.Permission, update)
-                    .Build();
-    }
-
-    public static AuthorizationPolicy CanRead()
-    {
-        return new AuthorizationPolicyBuilder()
-                    .RequireAuthenticatedUser()
-                    .RequireClaim(AppClaim.Permission, read)
+                     .RequireClaim(AppClaim.Permission, update_loanRequest)
                     .Build();
     }
 
-    public static AuthorizationPolicy CanDelete()
+    public static AuthorizationPolicy CanReadLoanRequest()
     {
         return new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
-                    .RequireClaim(AppClaim.Permission, delete)
+                    .RequireClaim(AppClaim.Permission, read_loanRequest)
+                    .Build();
+    }
+
+    public static AuthorizationPolicy CanDeleteLoanRequest() 
+    {
+        return new AuthorizationPolicyBuilder()
+                    .RequireAuthenticatedUser()
+                    .RequireClaim(AppClaim.Permission, delete_loanRequest)
                     .Build();
     }
 
@@ -79,7 +81,7 @@ public static class RequestsPolicies
         return new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
                     .RequireRole(AppRoles.Manager,AppRoles.ChiefBm, AppRoles.Bm, AppRoles.Rbm, AppRoles.Dbm)
-                    .RequireClaim(AppClaim.Permission, aprove)
+                    .RequireClaim(AppClaim.Permission, approve_loanRequest)
                     .Build();
     }
 
@@ -88,7 +90,7 @@ public static class RequestsPolicies
         return new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
                      .RequireRole(AppRoles.Manager, AppRoles.Bm, AppRoles.Rbm, AppRoles.Dbm)
-                    .RequireClaim(AppClaim.Permission, reject)
+                    .RequireClaim(AppClaim.Permission, reject_loanRequest)
                     .Build();
     }
 

@@ -77,8 +77,26 @@ namespace TrapchumApp.Pages.Lists.Holidays
         }
         protected void DisplayModal()
         {
-            visibleAdd = true;
-            SelectedIndex = 1;
+            // visibleAdd = true;
+            // SelectedIndex = 1;
+            var newKey = Guid.NewGuid().ToString("N");
+
+            RenderFragment content = (builder) =>
+            {
+                builder.AddContent(0, typeof(CreateHolidayModal));
+                builder.AddAttribute(1, "OnClose", EventCallback.Factory.Create(this, () =>
+                {
+
+                }));
+                builder.SetKey(newKey);
+                builder.CloseComponent();
+            };
+
+            var newTab = new CustomTab(newKey, "Create Holiday", TabActions.Create, content);
+
+            _tabs.Add(newTab);
+
+            SelectedIndex = _tabs.Count;
         }
         protected async void OnSelectChange()
         {
@@ -104,7 +122,7 @@ namespace TrapchumApp.Pages.Lists.Holidays
                 {"id", id}
             };
 
-            var options=new DialogOptions()
+            var options = new DialogOptions()
             {
                 ShowClose = true,
                 Width = "75rem",
@@ -112,7 +130,7 @@ namespace TrapchumApp.Pages.Lists.Holidays
                 Resizable = true,
                 Draggable = true,
             };
-            await DialogService.OpenAsync<UpdateHolidayModal>("Holiday", parameters: param,options);
+            await DialogService.OpenAsync<UpdateHolidayModal>("Holiday", parameters: param, options);
 
             await GetsHolidays(searchField);
 
@@ -144,7 +162,7 @@ namespace TrapchumApp.Pages.Lists.Holidays
                     NotificationService.Notify(NotificationSeverity.Error, deleteResponse.ErrMessage);
                 }
                 StateHasChanged();
-                
+
             }
             else
             {

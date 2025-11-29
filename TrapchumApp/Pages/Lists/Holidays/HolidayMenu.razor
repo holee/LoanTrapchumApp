@@ -1,0 +1,56 @@
+﻿@using Applications.Features.Holidays.Command.DeleteHoliday
+@using TrapchumApp.Helpers.Extensions
+<RadzenMenu Style="font-size:0.8rem;">
+    <RadzenMenuItem Click="Delete" Icon="delete" Text="Delete" Value="@Id" />
+    <RadzenMenuItem Click="@(() => ShowEdit(Id))" Icon="edit" Text="Edit" Value="@Id" />
+</RadzenMenu>
+@code {
+
+    [Parameter] public long Id { get; set; }
+    [Parameter] public EventCallback Refresh { get; set; }
+    void ShowEdit(long id)
+    {
+
+    }
+    protected async Task Delete()
+    {
+        ContextMenuService.Close();
+
+        var comfirm = await DialogService.Confirm("Holiday deleted will not be able to recover, would you like to continue?",
+            "Delete Holiday",
+                 new ConfirmOptions
+                 {
+                     OkButtonText = "OK",
+                     CancelButtonText = "Cancel",
+                     CloseDialogOnEsc = true,
+
+                 });
+        if (comfirm == true)
+        {
+
+            var command = new DeleteHolidayCommand(Id);
+
+            var deleteResponse = await mediator.Send(command);// _holidayService!.DeleteHoliday(id);
+
+            if (!deleteResponse.IsError)
+            {
+                await OnInitializedAsync();
+
+                NotificationService.Notify(NotificationSeverity.Success, deleteResponse.Value.Message);
+
+                await Refresh.InvokeAsync();
+            }
+            else
+            {
+                NotificationService.Notify(NotificationSeverity.Error, deleteResponse.GetMessage());
+            }
+
+
+        }
+        else
+        {
+
+            NotificationService.Notify(NotificationSeverity.Warning, "Delete was cancel");
+        }
+    }
+}

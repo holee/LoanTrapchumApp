@@ -205,7 +205,7 @@ namespace TrapchumApp.Shared
                 return;
             }
 
-            _isAdmin = await _authorizeService.MustHasPermissionAsync(user!, RolePolicies.AdminOnly);
+            _isAdmin = await _authorizeService.MustHasPermissionAsync(user!, Policies.AdminOnly);
         }
 
 
@@ -243,14 +243,14 @@ namespace TrapchumApp.Shared
                 _isManager = false;
                 return;
             }
-            _isManager = await _authorizeService.MustHasPermissionAsync(user!, RolePolicies.ManagerOnly);
+            _isManager = await _authorizeService.MustHasPermissionAsync(user!, Policies.ManagerOnly);
         }
 
         internal async Task CheckedIsCEO(ClaimsPrincipal user)
         {
             if (user is not null && user?.Identity?.IsAuthenticated == true)
             {
-                _isCeo = await _authorizeService.MustHasPermissionAsync(user!, RolePolicies.CEOOnly);
+                _isCeo = await _authorizeService.MustHasPermissionAsync(user!, Policies.CEOOnly);
 
                 return;
             }
@@ -281,7 +281,7 @@ namespace TrapchumApp.Shared
                 return;
             }
 
-            _isAccount = await _authorizeService.MustHasPermissionAsync(user!, RolePolicies.AccountOnly);
+            _isAccount = await _authorizeService.MustHasPermissionAsync(user!, Policies.AccountOnly);
         }
 
         internal async Task CheckedIsCreditAgent(ClaimsPrincipal user)
@@ -292,7 +292,7 @@ namespace TrapchumApp.Shared
                 return;
             }
 
-            _isCreditAgent = await _authorizeService.MustHasPermissionAsync(user!, RolePolicies.CreditOfficerOnly);
+            _isCreditAgent = await _authorizeService.MustHasPermissionAsync(user!, Policies.CreditOfficerOnly);
         }
 
         internal async Task CheckedCanDisbursemnt(ClaimsPrincipal user)
@@ -304,7 +304,7 @@ namespace TrapchumApp.Shared
                 return;
             }
 
-            _canDisbursed = await _authorizeService.MustHasPermissionAsync(user!, RequestsPolicies.Disburse);
+            _canDisbursed = await _authorizeService.MustHasPermissionAsync(user!, Policies.Disburse);
         }
 
 
@@ -346,7 +346,7 @@ namespace TrapchumApp.Shared
                 return;
             }
 
-            _canApproved = await _authorizeService.MustHasPermissionAsync(user!, RequestsPolicies.Approve);
+            _canApproved = await _authorizeService.MustHasPermissionAsync(user!, Policies.ApproveLoanRequest);
         }
 
         internal async Task CheckedCanRequest(ClaimsPrincipal user)
@@ -358,7 +358,7 @@ namespace TrapchumApp.Shared
                 return;
             }
 
-            _canRequest = await _authorizeService.MustHasPermissionAsync(user!, RequestsPolicies.Request);
+            _canRequest = await _authorizeService.MustHasPermissionAsync(user!, Policies.RequestLoanRequest);
         }
 
 

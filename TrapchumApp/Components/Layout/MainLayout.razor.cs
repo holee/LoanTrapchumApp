@@ -32,13 +32,13 @@ namespace TrapchumApp.Components.Layout
 
             _user = auth.User;
 
-            IsAdminOnly = await _authorizeService.MustHasPermissionAsync(_user, RolePolicies.AdminOnly);
+            IsAdminOnly = await _authorizeService.MustHasPermissionAsync(_user, Policies.AdminOnly);
 
-            IsAccountOnly = await _authorizeService.MustHasPermissionAsync(_user, RolePolicies.AccountOnly);
+            IsAccountOnly = await _authorizeService.MustHasPermissionAsync(_user, Policies.AccountOnly);
 
-            IsCreditAgentOnly = await _authorizeService.MustHasPermissionAsync(_user, RolePolicies.CreditOfficerOnly);
+            IsCreditAgentOnly = await _authorizeService.MustHasPermissionAsync(_user, Policies.CreditOfficerOnly);
 
-            IsManagerOnly = await _authorizeService.MustHasPermissionAsync(_user, RolePolicies.ManagerOnly);
+            IsManagerOnly = await _authorizeService.MustHasPermissionAsync(_user, Policies.ManagerOnly);
 
 
             if (_user.Identity!.IsAuthenticated)

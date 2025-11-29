@@ -33,11 +33,11 @@ namespace TrapchumApp.Pages.Lists.Customers
 
             var auth = await Auth;
 
-            IsCanRequest = await _authorizeService.MustHasPermissionAsync(auth.User, RequestsPolicies.Request);
+            IsCanRequest = await _authorizeService.MustHasPermissionAsync(auth.User, Policies.RequestLoanRequest);
 
-            IsAccountOnly = await _authorizeService.MustHasPermissionAsync(auth.User, RolePolicies.AccountOnly);
+            IsAccountOnly = await _authorizeService.MustHasPermissionAsync(auth.User, Policies.AccountOnly);
 
-            IsAdminOnly = await _authorizeService.MustHasPermissionAsync(auth.User, RolePolicies.AdminOnly);
+            IsAdminOnly = await _authorizeService.MustHasPermissionAsync(auth.User, Policies.AdminOnly);
 
 
             if (CustomerId.IsNotNullOrEmpty())

@@ -34,6 +34,7 @@
     <Folder Include="Features\Employees\Mappers\" />
     <Folder Include="Features\Employees\Responses\" />
     <Folder Include="Features\Expenses\Mapper\" />
+    <Folder Include="Features\Holidays\Queries\" />
     <Folder Include="Features\Identity\Users\Interfaces\" />
     <Folder Include="Features\Identity\Users\Mappers\" />
     <Folder Include="Features\Identity\Users\Validations\" />

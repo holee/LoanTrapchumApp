@@ -102,7 +102,7 @@ namespace Infrastructures
             services.AddScoped<ICollateralsService, CollateralsRepository>();
             services.AddScoped<ICustomerActivityService, CustomerActivityRepository>();
             services.AddScoped<ICollateralService, CollateralRepository>();
-            services.AddScoped<IHolidayService, HolidayService>();
+            services.AddScoped<IHolidayService, HolidayRepository>();
             services.AddScoped<IGuarantorService, GuarantorService>();
             services.AddScoped<ILoanSettingService, LoanSettingService>();
             services.AddScoped<ILoanProductService, LoanProductService>();

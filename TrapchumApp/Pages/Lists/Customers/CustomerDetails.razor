@@ -21,7 +21,7 @@
                      class="rz-my-2"
                      Orientation="Orientation.Horizontal"
                      JustifyContent="JustifyContent.Normal" Gap="1rem">
-            <AuthorizeView Policy="@CustomersPolicies.Update">
+            <AuthorizeView Policy="@Policies.UpdateCustomer">
                 <Authorized>
                     <RadzenButton ButtonType="ButtonType.Button"
                                   Size="ButtonSize.ExtraSmall"
@@ -31,7 +31,7 @@
                                   ButtonStyle="ButtonStyle.Success" />
                 </Authorized>
             </AuthorizeView>
-            <AuthorizeView Policy="@CustomersPolicies.Delete">
+            <AuthorizeView Policy="@Policies.DeleteCustomer">
                 <Authorized>
                     <RadzenButton ButtonType="ButtonType.Button"
                                   Size="ButtonSize.ExtraSmall"

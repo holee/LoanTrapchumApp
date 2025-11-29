@@ -1,4 +1,5 @@
-﻿using Applications.Extensions;
+﻿using Applications.Bases;
+using Applications.Extensions;
 using Applications.Extensions.DateTimes;
 using Applications.Interfaces.Lists;
 using Applications.Responses;
@@ -12,7 +13,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructures.Implements
 {
-    public class HolidayService : IHolidayService
+    public sealed class HolidayRepository : IHolidayService
     {
         private readonly DataContext _context;
 
@@ -20,12 +21,12 @@ namespace Infrastructures.Implements
 
         private readonly IDbContextFactory<DataContext> _contextFactory;
         private readonly IDapperConnectionFactory _connectionFactory;
-        private readonly ILogger<HolidayService> logger;
+        private readonly ILogger<HolidayRepository> logger;
 
-        public HolidayService(DataContext context, 
-            IDbContextFactory<DataContext> contextFactory, 
+        public HolidayRepository(DataContext context,
+            IDbContextFactory<DataContext> contextFactory,
             IDapperConnectionFactory connectionFactory,
-            ILogger<HolidayService> logger)
+            ILogger<HolidayRepository> logger)
         {
             _context = context;
 
@@ -133,11 +134,11 @@ namespace Infrastructures.Implements
                 }
                 return Result.Success(result);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return Result.Failure<Holiday>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
             }
-           
+
         }
 
 
@@ -164,12 +165,12 @@ namespace Infrastructures.Implements
                                             .ToListAsync();
                 return queries;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 logger.LogError($"Error in GetHolidays: {ex.Message}", ex);
                 throw new Exception($"Error in GetHolidays: {ex.Message}");
             }
-            
+
         }
 
 
@@ -203,7 +204,7 @@ namespace Infrastructures.Implements
                 logger.LogError($"Error in GetHolidays: {ex.Message}", ex);
                 throw new Exception($"Error in GetHolidays: {ex.Message}");
             }
-            
+
         }
 
         public async Task<Pager<Holiday>> GetHolidays(int pageNumber, int pageSize, string sortColumn = "HolidayName",
@@ -240,12 +241,12 @@ namespace Infrastructures.Implements
                     Items = await queries.AsNoTracking().ToListAsync()
                 };
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 logger.LogError($"Error in GetHolidays: {ex.Message}", ex);
                 throw new Exception($"Error in GetHolidays: {ex.Message}");
             }
-           
+
         }
 
         public async Task<Pager<HolidayVm>> GetHolidays(QueryParam q)
@@ -295,16 +296,16 @@ namespace Infrastructures.Implements
                     Items = items
                 };
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 logger.LogError($"Error in GetHolidays: {ex.Message}", ex);
                 throw new Exception($"Error in GetHolidays: {ex.Message}");
             }
-           
+
         }
 
 
-        public async Task<IEnumerable<HolidayVm>> GetActiveHolidays(DateTime? selectedDate,int? selectedYear=0)
+        public async Task<IEnumerable<HolidayVm>> GetActiveHolidays(DateTime? selectedDate, int? selectedYear = 0)
         {
             try
             {
@@ -327,13 +328,13 @@ namespace Infrastructures.Implements
 
                 return queries ?? [];
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 logger.LogError($"Error in GetActiveHolidays: {ex.Message}", ex);
                 throw new Exception($"Error in GetActiveHolidays: {ex.Message}");
             }
 
-            
+
         }
 
 
@@ -349,12 +350,12 @@ namespace Infrastructures.Implements
                                 .ToListAsync();
                 return query.Any();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 logger.LogError($"Error in ExistHolidays: {ex.Message}", ex);
                 throw new Exception($"Error in ExistHolidays: {ex.Message}");
             }
-            
+
         }
         public async Task<Result<string>> ActivateOrDeactivate(int id, Holiday req)
         {
@@ -455,6 +456,43 @@ namespace Infrastructures.Implements
             {
                 return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
             }
+        }
+
+        public async Task<ErrorOr.ErrorOr<DeleteResult>> DeleteHoliday(long? id, CancellationToken cancellation = default)
+        {
+            try
+            {
+                await using var ctx = await _contextFactory.CreateDbContextAsync(cancellation);
+
+                var result = await ctx.Holidays.FirstOrDefaultAsync(x => x.Id == id);
+
+                if (result is null)
+                {
+                    return ErrorOr.Error.NotFound("No Holiday found");
+                }
+
+                if (await IsHolidayInUsed(ctx, result, cancellation))
+                {
+                    return DeleteResult.InUse("Holiday is currently in use and cannot be deleted.");
+                }
+
+                ctx.Holidays.Remove(result);
+
+                await ctx.SaveChangesAsync(cancellation);
+
+                return DeleteResult.Success("Holiday was deleted successfully!");
+            }
+            catch (Exception ex)
+            {
+                return ErrorOr.Error.Unexpected($"{ex.InnerException!.Message}");
+            }
+        }
+
+        private async Task<bool> IsHolidayInUsed(DataContext ctx, Holiday result, CancellationToken cancellation)
+        {
+            var isInUse = await ctx.LoanSchedules
+                                 .AnyAsync(el => el.PaymentDate == result.HolidayDt, cancellation);
+            return isInUse;
         }
     }
 }

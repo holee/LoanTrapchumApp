@@ -3,63 +3,51 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace Applications.Extensions.Identity.Policies
 {
-    public static class LoanPolicies
+    public partial class Policies
     {
-        private const string prefix = "loans";
-        public const string Create = $"{prefix}.{nameof(Create)}";
-        public const string Update = $"{prefix}.{nameof(Update)}";
-        public const string Delete = $"{prefix}.{nameof(Delete)}";
-        public const string Read = $"{prefix}.{nameof(Read)}";
+        private const string loan_prefix = "loans";
+        public const string CreateLoan = $"{loan_prefix}.{nameof(CreateLoan)}";
+        public const string UpdateLoan = $"{loan_prefix}.{nameof(UpdateLoan)}";
+        public const string DeleteLoan = $"{loan_prefix}.{nameof(DeleteLoan)}";
+        public const string ReadLoan = $"{loan_prefix}.{nameof(ReadLoan)}";
 
-        private static string read = AppPermission.RuleFor(Modules.Loans, Feature.Read);
-        private static string create = AppPermission.RuleFor(Modules.Loans, Feature.Create);
-        private static string update = AppPermission.RuleFor(Modules.Loans, Feature.Update);
-        private static string delete = AppPermission.RuleFor(Modules.Loans, Feature.Delete);
-        public static AuthorizationPolicy CanRead()
+        private static string read_loan = AppPermission.RuleFor(Modules.Loans, Feature.Read);
+        private static string create_loan = AppPermission.RuleFor(Modules.Loans, Feature.Create);
+        private static string update_loan = AppPermission.RuleFor(Modules.Loans, Feature.Update);
+        private static string delete_loan = AppPermission.RuleFor(Modules.Loans, Feature.Delete);
+        public static AuthorizationPolicy CanReadLoan()
         {
             return new AuthorizationPolicyBuilder()
                         .RequireAuthenticatedUser()
-                        .RequireClaim(AppClaim.Permission, read)
+                        .RequireClaim(AppClaim.Permission, read_loan)
                         .Build();
 
         }
 
-        public static AuthorizationPolicy CanCreate()
+        public static AuthorizationPolicy CanCreateLoan()
         {
             return new AuthorizationPolicyBuilder()
                         .RequireAuthenticatedUser()
-                        .RequireClaim(AppClaim.Permission, create)
+                        .RequireClaim(AppClaim.Permission, create_loan)
                         .Build();
 
         }
-        public static AuthorizationPolicy CanUpdate()
+        public static AuthorizationPolicy CanUpdateLoan()
         {
             return new AuthorizationPolicyBuilder()
                         .RequireAuthenticatedUser()
-                        .RequireClaim(AppClaim.Permission, update)
+                        .RequireClaim(AppClaim.Permission, update_loan)
                         .Build();
 
         }
-        public static AuthorizationPolicy CanDelete()
+        public static AuthorizationPolicy CanDeleteLoan()
         {
             return new AuthorizationPolicyBuilder()
                         .RequireAuthenticatedUser()
-                        .RequireClaim(AppClaim.Permission, delete)
+                        .RequireClaim(AppClaim.Permission, delete_loan)
                         .Build();
 
         }
-
-        //public static AuthorizationPolicy CanDisburseLoan()
-        //{
-        //    return new AuthorizationPolicyBuilder()
-        //                .RequireAuthenticatedUser()
-        //                .RequireRole(AppRoles.Account, AppRoles.SeniorAccount, AppRoles.ChiefAccount)
-        //                .RequireClaim(AppClaim.Permission, AppPermission.RuleFor(Modules.Loans, Feature.Disburse))
-        //                .Build();
-        //}
-
-
-
 
     }
 

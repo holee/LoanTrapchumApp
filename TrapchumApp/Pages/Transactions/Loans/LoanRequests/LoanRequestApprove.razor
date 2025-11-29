@@ -43,7 +43,7 @@
         <RadzenDataGridColumn TextAlign="TextAlign.Right" Width="4rem" Property="@(nameof(VLoanRequests.InterestRate))" Title="Rate" />
         <RadzenDataGridColumn Title="Status" Context="r" Width="7rem" TextAlign="TextAlign.Center">
             <Template>
-                <AuthorizeView Policy="@RequestsPolicies.Disburse">
+                <AuthorizeView Policy="@Policies.Disburse">
                     <Authorized>
                         <LinkRequestDisbursment LoanRequest="@r"
                                                 BranchId="@BranchId"

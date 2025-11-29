@@ -1,7 +1,9 @@
-﻿using Applications.Responses;
+﻿using Applications.Bases;
+using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Holidays;
 using Domains.Models.Lists;
+using ErrorOr;
 
 namespace Applications.Interfaces.Lists
 {
@@ -23,5 +25,6 @@ namespace Applications.Interfaces.Lists
         Task<IEnumerable<HolidayVm>> GetActiveHolidays(DateTime? selectedDate,int? selectedYear= 0);
         Task<Result<IEnumerable<HolidayVm>>> CreateHolidays(IEnumerable<Holiday> entities);
         Task<Result<string>> ActivateOrDeactivate(int id, Holiday req);
+        Task<ErrorOr<DeleteResult>> DeleteHoliday(long? id, CancellationToken cancellation = default);
     }
 }

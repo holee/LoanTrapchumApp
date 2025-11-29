@@ -38,11 +38,11 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
             CreditAgentId = auth.User.GetId();
 
-            CanRequestLoan = (await _authorizeService.AuthorizeAsync(auth.User, RequestsPolicies.CanCreate())).Succeeded;
+            CanRequestLoan = (await _authorizeService.AuthorizeAsync(auth.User, Policies.CanCreate())).Succeeded;
            
-            CanDisburseLoan = (await _authorizeService.AuthorizeAsync(auth.User, RequestsPolicies.CanDisburseLoan())).Succeeded;
+            CanDisburseLoan = (await _authorizeService.AuthorizeAsync(auth.User, Policies.CanDisburseLoan())).Succeeded;
             
-            CanAprovedLoan = (await _authorizeService.AuthorizeAsync(auth.User, RequestsPolicies.CanAproveRequest())).Succeeded;
+            CanAprovedLoan = (await _authorizeService.AuthorizeAsync(auth.User, Policies.CanAproveRequest())).Succeeded;
             
             await GetLoanRequestAsync();
 

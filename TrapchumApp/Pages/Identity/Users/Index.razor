@@ -8,7 +8,7 @@
             <RadzenTabsItem Text="Users" Icon="group">
                 <GridToolbar SearchChanged="@OnUserTextChanges">
                     <LeftChildren>
-                        <AuthorizeView Policy="@RolePolicies.AdminOnly">
+                        <AuthorizeView Policy="@Policies.AdminOnly">
                             <Authorized>
                                 <RadzenButton Icon="@IconNames.PersonAdd"
                                               ButtonStyle="ButtonStyle.Primary"

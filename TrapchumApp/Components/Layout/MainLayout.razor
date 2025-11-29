@@ -47,14 +47,14 @@
 
                 </Authorized>
             </AuthorizeView>
-            <AuthorizeView Policy="@RolePolicies.AdminOnly">
+            <AuthorizeView Policy="@Policies.AdminOnly">
                 <Authorized>
                     <RadzenPanelMenuItem Text="Departments" Icon="auto_awesome">
                         <RadzenPanelMenuItem Text="Departments List" Path="/App/Department" Icon="list" />
                     </RadzenPanelMenuItem>
                 </Authorized>
             </AuthorizeView>
-            <AuthorizeView Policy="@RolePolicies.AccountOnly">
+            <AuthorizeView Policy="@Policies.AccountOnly">
                 <Authorized>
                     <RadzenPanelMenuItem Text="Bussiness Insight" Icon="dataset">
                         <RadzenPanelMenuItem Icon="lists" Path="#">
@@ -66,7 +66,7 @@
                     </RadzenPanelMenuItem>
                 </Authorized>
             </AuthorizeView>
-            <AuthorizeView Policy="@RolePolicies.AdminOnly">
+            <AuthorizeView Policy="@Policies.AdminOnly">
                 <Authorized>
                     <RadzenPanelMenuItem Text="Branches" Icon="auto_awesome">
                         <RadzenPanelMenuItem Text="Branches List"
@@ -76,12 +76,12 @@
                     </RadzenPanelMenuItem>
                 </Authorized>
             </AuthorizeView>
-            <AuthorizeView Policy="@RolePolicies.AccountOnly">
+            <AuthorizeView Policy="@Policies.AccountOnly">
                 <Authorized>
                     <AccountsItems UserId="@userId" BranchId="@branchId" IsBranchOpen="@bState.State" />
                 </Authorized>
             </AuthorizeView>
-            <AuthorizeView Policy="@RolePolicies.AdminOnly">
+            <AuthorizeView Policy="@Policies.AdminOnly">
                 <Authorized>
                     <OperatedPerson UserId="@userId" BranchId="@branchId" />
                 </Authorized>
@@ -140,17 +140,17 @@
                     }
                 </Authorized>
             </AuthorizeView>
-            <AuthorizeView Policy="@RolePolicies.AccountOnly">
+            <AuthorizeView Policy="@Policies.AccountOnly">
                 <Authorized>
                     <CurrencyItems IsBranchOpen="@bState.State" BranchId="@branchId" />
                 </Authorized>
             </AuthorizeView>
-            <AuthorizeView Policy="@RolePolicies.AdminOnly">
+            <AuthorizeView Policy="@Policies.AdminOnly">
                 <Authorized>
                     <AdminstrationsItems />
                 </Authorized>
             </AuthorizeView>
-            <AuthorizeView Policy="@RolePolicies.CEOOnly">
+            <AuthorizeView Policy="@Policies.CEOOnly">
                 <Authorized>
                     <RadzenPanelMenuItem Text="Audit Trail" Icon="@IconNames.DataProtection">
                         <RadzenPanelMenuItem Text="Audit" Icon="@IconNames.PolicyAlert" Path="/App/Audit" />

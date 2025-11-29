@@ -1,6 +1,6 @@
 ﻿@page "/App/Holiday"
 @using Applications.Responses.ViewModels.Holidays
-<PageTitle>Holiday</PageTitle> 
+<PageTitle>Holiday</PageTitle>
 <RadzenTabs @bind-SelectedIndex="SelectedIndex" RenderMode="TabRenderMode.Server">
     <Tabs>
         <RadzenTabsItem Text="Holidays" Icon="list">
@@ -85,23 +85,32 @@
                 </LoadingTemplate>
             </RadzenDataGrid>
         </RadzenTabsItem>
-        <RadzenTabsItem Text="Add Holiday" Visible="visibleAdd" Icon="edit_calendar">
-            <CreateHolidayModal Closed="CloseTab" />
-        </RadzenTabsItem>
+        @foreach (var tab in _tabs)
+        {
+            <RadzenTabsItem Text="@tab.Title" Icon="@tab.Icon" @key="@tab.Key">
+                <Template>
+                    <ClosedTab Title="@tab.Title" TabId="@tab.Key" />
+                </Template>
+                <ChildContent>
+                    @tab.Content
+                </ChildContent>
+            </RadzenTabsItem>
+        }
     </Tabs>
 </RadzenTabs>
 @code {
     bool visibleAdd = false;
     bool isLoading = false;
+    private List<CustomTab> _tabs = [];
+
     [Parameter] public int SelectedIndex { get; set; } = 0;
+
+
+
+
     void ShowContextMenuWithContent(MouseEventArgs args, long id)
     {
-        ContextMenuService.Open(args, ds =>
-    @<RadzenMenu Style="font-size:0.8rem;">
-    <RadzenMenuItem Click="@(() => Delete(id))" Icon="delete" Text="Delete" Value="@id" />
-    <RadzenMenuItem Click="@(() => ShowEdit(id))" Icon="edit" Text="Edit" Value="@id" />
-</RadzenMenu>
-    );
+        ContextMenuService.Open(args, ds => @<HolidayMenu Id="@id" />);
     }
     void CloseTab()
     {
@@ -145,3 +154,8 @@
     }
 
 }
+
+@* <RadzenMenu Style="font-size:0.8rem;">
+    <RadzenMenuItem Click="@(() => Delete(id))" Icon="delete" Text="Delete" Value="@id" />
+    <RadzenMenuItem Click="@(() => ShowEdit(id))" Icon="edit" Text="Edit" Value="@id" />
+</RadzenMenu> *@

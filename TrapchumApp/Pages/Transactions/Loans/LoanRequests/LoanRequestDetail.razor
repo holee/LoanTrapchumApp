@@ -129,7 +129,7 @@
 <RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal"
              class="rz-m-2"
              JustifyContent="JustifyContent.End">
-    <AuthorizeView Policy="@RequestsPolicies.Request">
+    <AuthorizeView Policy="@Policies.RequestLoanRequest">
         <Authorized>
             @if (data!.IsRequesting)
             {
@@ -142,7 +142,7 @@
         </Authorized>
     </AuthorizeView>
 
-    <AuthorizeView Policy="@RequestsPolicies.Approve">
+    <AuthorizeView Policy="@Policies.ApproveLoanRequest">
         <Authorized>
             @if (data!.IsRequested)
             {
@@ -159,14 +159,14 @@
                               Click="DeniedLoanRequest"
                               Text="Denied"></RadzenButton>
                 <RadzenButton ButtonStyle="ButtonStyle.Primary"
-                              Icon="@IconNames.Undo" Size="ButtonSize.ExtraSmall"
+                              Icon="@IconNames.Undo" Size="ButtonSize.Small"
                               Click="RecheckedLoanRequest"
                               Text="Rechecked"></RadzenButton>
             }
         </Authorized>
     </AuthorizeView>
 
-    <AuthorizeView Policy="@RequestsPolicies.Disburse">
+    <AuthorizeView Policy="@Policies.Disburse">
         <Authorized>
             @if (data!.IsApproved)
             {

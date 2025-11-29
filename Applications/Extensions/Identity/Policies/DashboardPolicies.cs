@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace Applications.Extensions.Identity.Policies;
 
-public static class DashboardPolicies 
+public partial class Policies 
 {
     public const string ShowBranchDashboard = nameof(ShowBranchDashboard);
     public const string ShowLoanDashboard = nameof(ShowLoanDashboard);

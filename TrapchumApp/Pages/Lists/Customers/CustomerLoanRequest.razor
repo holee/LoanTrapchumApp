@@ -4,7 +4,7 @@
 <RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End"
              class="rz-mb-2"
              Orientation="Orientation.Horizontal">
-    <AuthorizeView Policy="@RequestsPolicies.Create">
+    <AuthorizeView Policy="@Policies.CreateLoanRequest">
         <Authorized>
             <RadzenButton Icon="add"
                           Click="AddLoanRequest"

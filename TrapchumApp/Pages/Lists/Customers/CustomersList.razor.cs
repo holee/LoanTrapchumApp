@@ -231,11 +231,11 @@ namespace TrapchumApp.Pages.Lists.Customers
 
             _userId = auth.User.GetId();
 
-            CanRequestLoan = await _authorizeService.MustHasPermissionAsync(auth.User, RequestsPolicies.Request);
+            CanRequestLoan = await _authorizeService.MustHasPermissionAsync(auth.User, Policies.RequestLoanRequest);
 
-            IsAccountOnly = await _authorizeService.MustHasPermissionAsync(auth.User, RolePolicies.AccountOnly);
+            IsAccountOnly = await _authorizeService.MustHasPermissionAsync(auth.User, Policies.AccountOnly);
 
-            IsAdminOnly = await _authorizeService.MustHasPermissionAsync(auth.User, RolePolicies.AdminOnly);
+            IsAdminOnly = await _authorizeService.MustHasPermissionAsync(auth.User, Policies.AdminOnly);
 
             await LoadCustomerPageList(null, null, filterText);
 

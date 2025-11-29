@@ -65,7 +65,7 @@ public partial class Index
 
             var user = (await AuthenticationState).User;
 
-            AdminOnly = await _authorizeService.MustHasPermissionAsync(user, RolePolicies.AdminOnly);
+            AdminOnly = await _authorizeService.MustHasPermissionAsync(user, Policies.AdminOnly);
 
             if (user is not null && user.Identity!.IsAuthenticated)
             {

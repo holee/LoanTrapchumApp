@@ -9,7 +9,7 @@
 @using TrapchumApp.Pages.Identity.Users
 @using TrapchumApp.Services
 <RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal" class="rz-p-2">
-    <AuthorizeView Policy="@RolePolicies.AdminOnly">
+    <AuthorizeView Policy="@Policies.AdminOnly">
         <Authorized>
             <RadzenButton Text="Create New User"
                           ButtonStyle="ButtonStyle.Secondary"

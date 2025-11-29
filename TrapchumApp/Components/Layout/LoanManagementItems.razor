@@ -38,19 +38,19 @@
         
         _userId = state.GetUserId();
 
-        _canShowLoan = await _authorizeService.MustHasPermissionAsync(user, LoanPolicies.Read);
+        _canShowLoan = await _authorizeService.MustHasPermissionAsync(user, Policies.ReadLoan);
 
-        _canShowLoanRequest = await _authorizeService.MustHasPermissionAsync(user, RequestsPolicies.Read);
+        _canShowLoanRequest = await _authorizeService.MustHasPermissionAsync(user, Policies.ReadLoanRequest);
 
-        _isAdminOnly = await _authorizeService.MustHasPermissionAsync(user, RolePolicies.AdminOnly);
+        _isAdminOnly = await _authorizeService.MustHasPermissionAsync(user, Policies.AdminOnly);
 
-        _isCreditAgentOnly = await _authorizeService.MustHasPermissionAsync(user, RolePolicies.CreditOfficerOnly);
+        _isCreditAgentOnly = await _authorizeService.MustHasPermissionAsync(user, Policies.CreditOfficerOnly);
 
-        _isManagerOnly = await _authorizeService.MustHasPermissionAsync(user, RolePolicies.ManagerOnly);
+        _isManagerOnly = await _authorizeService.MustHasPermissionAsync(user, Policies.ManagerOnly);
 
         _canReadLoanRequest = await _authorizeService.MustHasPermissionAsync(user, AppPermission.RuleFor(Modules.LoanRequest, Feature.Read));
 
-        _isAccountOnly = await _authorizeService.MustHasPermissionAsync(user, RolePolicies.AccountOnly);
+        _isAccountOnly = await _authorizeService.MustHasPermissionAsync(user, Policies.AccountOnly);
 
         _changeCreditUrl = $"/App/Loan/CreditAgent/{BranchId}/Branches";
 

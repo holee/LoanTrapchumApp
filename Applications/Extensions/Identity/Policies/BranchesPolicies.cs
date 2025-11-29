@@ -3,49 +3,49 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace Applications.Extensions.Identity.Policies;
 
-public static class BranchesPolicies
+public partial class Policies
 {
-    private const string prefix = "branches";
-    public const string Create = $"{prefix}.{nameof(Create)}";
-    public const string Read = $"{prefix}.{nameof(Read)}";
-    public const string Update = $"{prefix}.{nameof(Update)}";
-    public const string Delete = $"{prefix}.{nameof(Delete)}";
-    public const string ShowBranch = $"{prefix}.{nameof(ShowBranch)}";
+    private const string br_prefix = "branches";
+    public const string BranchCreate = $"{br_prefix}.{nameof(BranchCreate)}";
+    public const string BranchRead = $"{br_prefix}.{nameof(BranchRead)}";
+    public const string BranchUpdate = $"{br_prefix}.{nameof(BranchUpdate)}";
+    public const string BranchDelete = $"{br_prefix}.{nameof(BranchDelete)}";
+    public const string BranchShowBranch = $"{br_prefix}.{nameof(BranchShowBranch)}";
 
-    private static string read = AppPermission.RuleFor(Modules.BranchesDashboard, Feature.Read);
-    private static string update = AppPermission.RuleFor(Modules.BranchesDashboard, Feature.Update);
-    private static string create = AppPermission.RuleFor(Modules.BranchesDashboard, Feature.Create);
-    private static string delete = AppPermission.RuleFor(Modules.BranchesDashboard, Feature.Delete);
+    private static string br_read = AppPermission.RuleFor(Modules.BranchesDashboard, Feature.Read);
+    private static string br_update = AppPermission.RuleFor(Modules.BranchesDashboard, Feature.Update);
+    private static string br_create = AppPermission.RuleFor(Modules.BranchesDashboard, Feature.Create);
+    private static string br_delete = AppPermission.RuleFor(Modules.BranchesDashboard, Feature.Delete);
 
-    public static AuthorizationPolicy CanCreate()
+    public static AuthorizationPolicy CanCreateBranch()
     {
         return new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
-                    .RequireClaim(AppClaim.Permission, create)
+                    .RequireClaim(AppClaim.Permission, br_create)
                     .Build();
     }
 
-    public static AuthorizationPolicy CanUpdate()
+    public static AuthorizationPolicy CanUpdateBranch()
     {
         return new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
-                     .RequireClaim(AppClaim.Permission, update)
+                     .RequireClaim(AppClaim.Permission, br_update)
                     .Build();
     }
 
-    public static AuthorizationPolicy CanRead()
+    public static AuthorizationPolicy CanReadBranch()
     {
         return new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
-                    .RequireClaim(AppClaim.Permission, read)
+                    .RequireClaim(AppClaim.Permission, br_read)
                     .Build();
     }
 
-    public static AuthorizationPolicy CanDelete()
+    public static AuthorizationPolicy CanDeleteBranch()
     {
         return new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
-                    .RequireClaim(AppClaim.Permission, delete)
+                    .RequireClaim(AppClaim.Permission, br_delete)
                     .Build();
     }
 

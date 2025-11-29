@@ -3,49 +3,49 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace Applications.Extensions.Identity.Policies;
 
-public static class CustomersPolicies
+public partial class Policies
 {
-    private const string prefix = "customers";
-    public const string Create = $"{prefix}.{nameof(Create)}";
-    public const string Read = $"{prefix}.{nameof(Read)}";
-    public const string Update = $"{prefix}.{nameof(Update)}";
-    public const string Delete = $"{prefix}.{nameof(Delete)}";
+    private const string cust_prefix = "customers";
+    public const string CreateCustomer = $"{cust_prefix}.{nameof(CreateCustomer)}";
+    public const string ReadCustomer = $"{cust_prefix}.{nameof(ReadCustomer)}";
+    public const string UpdateCustomer = $"{cust_prefix}.{nameof(UpdateCustomer)}";
+    public const string DeleteCustomer = $"{cust_prefix}.{nameof(DeleteCustomer)}";
 
-    private static string read = AppPermission.RuleFor(Modules.Customers, Feature.Read);
-    private static string update = AppPermission.RuleFor(Modules.Customers, Feature.Update);
-    private static string create = AppPermission.RuleFor(Modules.Customers, Feature.Create);
-    private static string delete = AppPermission.RuleFor(Modules.Customers, Feature.Delete);
-    public static AuthorizationPolicy CanCreate()
+    private static string read_customer = AppPermission.RuleFor(Modules.Customers, Feature.Read);
+    private static string update_customer = AppPermission.RuleFor(Modules.Customers, Feature.Update);
+    private static string create_customer = AppPermission.RuleFor(Modules.Customers, Feature.Create);
+    private static string delete_customer = AppPermission.RuleFor(Modules.Customers, Feature.Delete);
+    public static AuthorizationPolicy CanCreateCustomer()
     {
         return new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
-                    .RequireClaim(AppClaim.Permission, create)
+                    .RequireClaim(AppClaim.Permission, create_customer)
                     .Build();
     }
 
-    public static AuthorizationPolicy CanUpdate()
+    public static AuthorizationPolicy CanUpdateCustomer() 
     {
         return new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
-                     .RequireClaim(AppClaim.Permission, update)
-                    .Build();
-    }
-
-
-    public static AuthorizationPolicy CanRead()
-    {
-        return new AuthorizationPolicyBuilder()
-                    .RequireAuthenticatedUser()
-                    .RequireClaim(AppClaim.Permission, read)
+                     .RequireClaim(AppClaim.Permission, update_customer)
                     .Build();
     }
 
 
-    public static AuthorizationPolicy CanDelete()
+    public static AuthorizationPolicy CanReadCustomer()
     {
         return new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
-                    .RequireClaim(AppClaim.Permission, delete)
+                    .RequireClaim(AppClaim.Permission, read_customer)
+                    .Build();
+    }
+
+
+    public static AuthorizationPolicy CanDeleteCustomer()
+    {
+        return new AuthorizationPolicyBuilder()
+                    .RequireAuthenticatedUser()
+                    .RequireClaim(AppClaim.Permission, delete_customer)
                     .Build();
     }
 

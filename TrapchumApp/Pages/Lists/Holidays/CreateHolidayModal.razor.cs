@@ -11,6 +11,8 @@ namespace TrapchumApp.Pages.Lists.Holidays
 {
     public partial class CreateHolidayModal
     {
+        [Parameter] public EventCallback OnClose { get; set; }
+
 
         private readonly IHolidayServiceImpl _holidayService;
 
