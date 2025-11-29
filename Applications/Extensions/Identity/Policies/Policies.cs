@@ -6,13 +6,14 @@ namespace Applications.Extensions.Identity.Policies;
 
 public partial class Policies
 {
-    private static string _canExchanged = AppPermission.RuleFor(Modules.Currencies, Feature.ExchangeMoney);
-    public const string CanExchanged = nameof(CanExchanged);
+    private static string _canExchanged = AppPermission.RuleFor(Modules.Transactions, Feature.ExchangeMoney);
+
+    public const string CanExchanged = $"tranx.{nameof(CanExchanged)}";
     public static AuthorizationPolicy CanExchangeMoney()
     {
         return new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
-                    .RequireRole(AppRoles.Account, AppRoles.ChiefAccount, AppRoles.Teller)
+                    .RequireRole(AppRoles.Account, AppRoles.SeniorAccount, AppRoles.ChiefAccount, AppRoles.Teller)
                     .RequireClaim(AppClaim.Permission, _canExchanged)
                     .Build();
 

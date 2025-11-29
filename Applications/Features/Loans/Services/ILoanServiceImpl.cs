@@ -18,7 +18,7 @@ public interface ILoanServiceImpl
     Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus status, bool include = false, CancellationToken cancellation = default);
     Task<Result<VLoanDisbursments>> GetLoanByCreditAgentIdAsync(string? creditAgentId,string? loanId, int? branchId, CancellationToken cancellation = default);
     Task<Pager<VLoanDisbursments>> GetLoanByCreditAgentsAsync(string? creditAgentId, int? branchId, CancellationToken cancellation = default);
-    Task<DisburseResult> CreateAsync(LoanDtoCreate req);
+    //Task<DisburseResult> CreateAsync(LoanDtoCreate req);
 }
 
 

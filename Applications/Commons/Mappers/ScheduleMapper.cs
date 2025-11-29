@@ -1,9 +1,5 @@
-﻿using Applications.Calculations;
-using Applications.Features.LoanPayments.Requests;
-using Applications.Features.LoanPayments.Requests;
-using Applications.Responses.ViewModels.Loans;
+﻿using Applications.Features.LoanPayments.Requests;
 using Applications.Responses.ViewModels.Loans.Schedules;
-using Applications.Responses.ViewModels.Reports;
 
 namespace Applications.Commons.Mappers
 {

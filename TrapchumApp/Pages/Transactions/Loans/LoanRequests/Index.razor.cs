@@ -1,6 +1,7 @@
 using Applications.Enumerations;
 using Applications.Extensions.Identity.Policies;
 using Applications.Extensions.Web;
+using Applications.Features.LoanRequests.Queryies.GetLoanRequestAsPaging;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Domains.Models.Identity;
@@ -44,9 +45,9 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             var auth = await AuthenticationState;
 
             IsAccount = (await _authorizeService.AuthorizeAsync(auth.User, Policies.IsAccountOnly())).Succeeded;
-           
+
             IsCreditAgent = (await _authorizeService.AuthorizeAsync(auth.User, Policies.IsCreditOfficerOnly())).Succeeded;
-           
+
             IsManager = (await _authorizeService.AuthorizeAsync(auth.User, Policies.IsManagerOnly())).Succeeded;
 
             CanRequestLoan = (await _authorizeService.AuthorizeAsync(auth.User, RequestsPolicies.CanCreate())).Succeeded;
@@ -112,7 +113,9 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
             var param = new QueryParam(pageIndex, pageSize, sortColumn, sortDescending, isIncludeInactive, filtertext);
 
-            var rsp = await _loanRequestService.GetLoanRequestsAsync(_userId, BranchId, RequestStatus.All, param);
+            var query = new GetLoanRequestAsPagingQuery(_userId, BranchId, RequestStatus.All, param);
+
+            var rsp = await mediator.Send(query);
 
             LoanRequests = rsp.Items;
 

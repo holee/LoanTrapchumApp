@@ -141,24 +141,8 @@
     {
         ContextMenuService.Close();
         ContextMenuService.Open(args,
-                                ds =>@<LateScheduleMenu GetScheduleChanged="(() => GetCustomerLateSchedules(p))"
+                                ds =>@<LateScheduleMenu GetScheduleChanged="@ShowLateSchedules"
                   Schedule="@p" />
     );
     }
 }
-
-@*
-<RadzenMenu Style="font-size:0.8rem;">
-    <RadzenMenuItem Icon="info"
-                    Click="@(()=>GetCustomerLateSchedules(p))"
-                    Text="Show Late Schedule" />
-</RadzenMenu>
-
- <RadzenMenuItem Icon="money"
-                Visible="!p.IsPaid"
-                Click="@(()=>GetPaymentSchedules(p))"
-                Text="Recieve Payment" />
-<RadzenMenuItem Icon="paid"
-                Click="@(()=>CustomerPayOff(p))"
-                Text="PayOff" />
-            *@

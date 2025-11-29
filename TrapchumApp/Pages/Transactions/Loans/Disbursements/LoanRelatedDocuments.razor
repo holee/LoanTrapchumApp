@@ -1,0 +1,64 @@
+﻿@using Applications.Features.Loans.Queries.GetLoanRelatedDocuments
+@using Applications.Features.Loans.Queries.GetLoanRelatedGuarantors
+@using Applications.Features.Loans.Responses
+@using Applications.Responses.ViewModels.Loans.Requests
+<RadzenDataGrid Data="@_loanDocuments"
+                TItem="VLoanRequestsDocuments"
+                AllowAlternatingRows="true"
+                GridLines="DataGridGridLines.Default"
+                AllowFiltering="true"
+                Density="Density.Compact"
+                AllowPaging="true"
+                PageSize="10"
+                AllowSorting="true"
+                Responsive="true"
+                RowRender="@OnRowRender"
+                Class="rz-mt-2">
+    <Columns>
+        <RadzenDataGridColumn TItem="VLoanRequestsDocuments"
+                              Property="@nameof(VLoanRequestsDocuments.Id)"
+                              Title="#"
+                              Width="8rem"
+                              TextAlign="TextAlign.Center">
+            <Template>
+                @context.RowIndex
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="VLoanRequestsDocuments"
+                              Property="@nameof(VLoanRequestsDocuments.OriginalName)"
+                              Title="Original Name"/>
+        <RadzenDataGridColumn TItem="VLoanRequestsDocuments"
+                              Property="@nameof(VLoanRequestsDocuments.NewFileName)"
+                              Title="Name" />
+        <RadzenDataGridColumn TItem="VLoanRequestsDocuments"
+                              Property="@nameof(VLoanRequestsDocuments.AltText)"
+                              Title="AltText"/>
+        <RadzenDataGridColumn TItem="VLoanRequestsDocuments"
+                              Property="@nameof(VLoanRequestsDocuments.Description)"
+                              Title="Description">
+            <Template>
+                @context.Description
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+@code {
+    [Parameter] public string LoanId { get; set; } = string.Empty;
+    [Parameter] public int? BranchId { get; set; } = 0;
+
+    private IEnumerable<VLoanRequestsDocuments> _loanDocuments = Array.Empty<VLoanRequestsDocuments>();
+
+    void OnRowRender(RowRenderEventArgs<VLoanRequestsDocuments> args)
+    {
+        args.Data.RowIndex = args.Index + 1;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var query = new GetLoanRelatedDocumentsQuery(LoanId, BranchId);
+
+        _loanDocuments = await mediator.Send(query);
+
+        await base.OnInitializedAsync();
+    }
+}

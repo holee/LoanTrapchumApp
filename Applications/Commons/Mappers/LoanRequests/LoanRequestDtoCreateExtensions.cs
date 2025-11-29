@@ -3,6 +3,7 @@ using Applications.Features.Entities.Guarantors;
 using Applications.Features.LoanRequests.Command.CreateLoanRequest;
 using Applications.Features.LoanRequests.Command.SaveLoanRequest;
 using Applications.Features.LoanRequests.Requests;
+using Applications.Responses.ViewModels.Loans.Requests;
 using Domains.Models.Collaterals;
 using Domains.Models.Lists;
 using Domains.Models.Loans;
@@ -174,6 +175,24 @@ public static class LoanRequestDtoCreateExtensions
     {
         return req.Request.MapToLoanRequestSave();
     }
+
+
+
+
+
+    public static AproveLoanDtoCreate ApprovedLoanRequestDtoCreate(this ApprovedRequest req)
+    {
+        return new AproveLoanDtoCreate
+        {
+            LoanRequestId = req.LoanRequestId,
+            CustomerId = req.CustomerId,
+            BranchId = req.BranchId,
+            AdminFeeAmount = req.AdminFeeAmount,
+            AprovedAmount = req.AprovedAmount,
+            AprovedDate = DateTime.Now,
+        };
+    }
+
 
 
 }

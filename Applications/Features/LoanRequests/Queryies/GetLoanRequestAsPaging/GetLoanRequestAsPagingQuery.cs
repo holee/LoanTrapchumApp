@@ -10,5 +10,4 @@ using System.Threading.Tasks;
 
 namespace Applications.Features.LoanRequests.Queryies.GetLoanRequestAsPaging;
 
-public record GetLoanRequestAsPagingQuery(string? userId, int? branchId, RequestStatus requestStatus, QueryParam param)
-              : IRequest<Pager<VLoanRequests>>;
+public record GetLoanRequestAsPagingQuery(string? UserId, int? BranchId, RequestStatus RequestStatus, QueryParam Param): IRequest<Pager<VLoanRequests>>;

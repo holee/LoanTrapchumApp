@@ -1,7 +1,9 @@
 ﻿@page "/App/Loans/{BranchId:int}/Branches/{LoanId}/Schedules"
+@using Applications.Features.LoanPayments.Requests
 @using Applications.Features.LoanRequests.Interfaces
 @using TrapchumApp.Pages.Transactions.Exchanges
 @using TrapchumApp.Pages.Transactions.Loans.Disbursements
+@using TrapchumApp.Pages.Transactions.Loans.Menu
 <PageTitle>Repayment</PageTitle>
 <LoanInfos BranchId="@BranchId"
            LoanId="@LoanId"
@@ -17,7 +19,7 @@
     </ChildContent>
 </LoanInfos>
 <div class="rz-background-color-base-200 rz-m-0 rz-mt-2">
-    <RadzenTabs SelectedIndex="@_selectedIndexTab">
+    <RadzenTabs SelectedIndex="@selectedIndex">
         <Tabs>
             <RadzenTabsItem Text="Loan Schedules" Icon="@IconNames.List">
                 <RadzenFieldset class="rz-m-0 rz-background-color-base-200">
@@ -163,6 +165,18 @@
                                         @s.ScheduleStatus
                                     </Template>
                                 </RadzenDataGridColumn>
+                                <RadzenDataGridColumn TextAlign="TextAlign.Center"
+                                                      Title="Actions"
+                                                      Sortable="false"
+                                                      Width="5rem"
+                                                      Context="s">
+                                    <Template>
+                                        <RadzenButton Size="ButtonSize.ExtraSmall"
+                                                      Variant="Variant.Text"
+                                                      Click="((arg)=>ShowContextMenu(arg,s))"
+                                                      Icon="@IconNames.MoreVert" />
+                                    </Template>
+                                </RadzenDataGridColumn>
                             </Columns>
                         </RadzenDataGrid>
                     </div>
@@ -286,7 +300,7 @@
                                 <RadzenButton Icon="@IconNames.Paid"
                                               Size="ButtonSize.Small"
                                               ButtonStyle="ButtonStyle.Primary"
-                                              Click="ApplyMultipleSchedulePayment"
+                                              Click="@ApplyMultipleSchedulePayment"
                                               Visible="isAllowMultiplePayment"
                                               Text="ApplySchedulePayment" />
                             </Authorized>
@@ -302,14 +316,120 @@
                     </RadzenStack>
                 </RadzenFieldset>
             </RadzenTabsItem>
-            <RadzenTabsItem Text="Payments" Icon="paid" Visible="@_isMultiplePaymentTab">
+            @foreach (var item in _tabs)
+            {
+                <RadzenTabsItem @key="@item.Key" Icon="@item.Icon" Text="@item.Title">
+                    <Template>
+                        <ClosedTab TabId="@item.Key" Title="@item.Title" Closed="(() => CloseTab(item.Key))" />
+                    </Template>
+                    <ChildContent>
+                        @item.Content
+                    </ChildContent>
+                </RadzenTabsItem>
+            }
+        </Tabs>
+    </RadzenTabs>
+</div>
+
+@code {
+    private List<CustomTab> _tabs = [];
+
+    private void AddMultiplePaymentTab(IEnumerable<VSchedule>? Schedules, LoanPaymentDtoCreate? LoanPayment)
+    {
+        var newKey = $"{LoanPayment?.LoanRefId}_details";
+
+        var existingIndex = _tabs.FindIndex(x => x.Key == newKey);
+
+        if (existingIndex != -1)
+        {
+            _tabs.RemoveAt(existingIndex);
+        }
+
+        RenderFragment content = builder =>
+        {
+            builder.OpenComponent(0, typeof(PaymentMultiples));
+            builder.AddAttribute(1, "Schedules", Schedules);
+            builder.AddAttribute(2, "LoanPayment", LoanPayment);
+            builder.AddAttribute(3, "CurrencyId", CurrencyId);
+            builder.AddAttribute(4, "OnClose", EventCallback.Factory.Create(this, () =>
+            {
+                CloseTab(newKey);
+            }));
+            builder.SetKey(newKey);
+            builder.CloseComponent();
+        };
+
+        var newTab = new CustomTab(newKey, "Multiple Payment", TabActions.Details, content);
+
+        _tabs.Add(newTab);
+
+        selectedIndex = _tabs.Count;
+
+    }
+
+
+
+    private void AddPaymentTab(string? loanId, long? scheduleId)
+    {
+        var newKey = $"{loanId}_{scheduleId}_details";
+
+        var existingIndex = _tabs.FindIndex(x => x.Key == newKey);
+
+        if (existingIndex != -1)
+        {
+            selectIndex = existingIndex + 1;
+            return;
+        }
+
+        RenderFragment content = builder =>
+        {
+
+
+        };
+
+        var newTab = new CustomTab(newKey, "Schedule Details", TabActions.Details, content);
+
+        _tabs.Add(newTab);
+
+        selectedIndex = _tabs.Count;
+
+    }
+
+
+    private void CloseTab(string? key)
+    {
+        var tab = _tabs.FirstOrDefault(t => t.Key == key);
+
+        if (tab != null)
+        {
+            var idx = _tabs.IndexOf(tab);
+
+            _tabs.Remove(tab);
+
+            selectedIndex = _tabs.Count; //Math.Max(0, idx);
+        }
+
+    }
+
+
+
+    void ShowContextMenu(MouseEventArgs args, VSchedule schedule)
+    {
+        ContextMenuService.Open(args,ds=>@<LoanDetailsMenu Schedule="@schedule" />);
+    }
+
+}
+
+
+
+@* <RadzenTabsItem Text="Payments" Icon="paid" Visible="@_isMultiplePaymentTab">
                 <PaymentMultiplesTab CurrencyId="@CurrencyId"
                                      LoanPayment="@_loanPayment"
                                      ClosedTab="@ClosedTab"
                                      CreatePayment="@CreatePayment"
                                      Schedules="@_selectedSchedules" />
-            </RadzenTabsItem>
-            <RadzenTabsItem Text="Payments" Icon="paid"
+            </RadzenTabsItem> *@
+@* <RadzenTabsItem Text="Payments" Icon="paid"
                             Visible="@_isPaymentTab">
                 <RadzenRow>
                     <RadzenColumn Size="6" SizeMD="6" SizeSM="12">
@@ -322,7 +442,4 @@
                         <ExchangesSidebar BranchId="@BranchId" UserId="@_userId" IsSideBar="false" />
                     </RadzenColumn>
                 </RadzenRow>
-            </RadzenTabsItem>
-        </Tabs>
-    </RadzenTabs>
-</div>
+            </RadzenTabsItem> *@

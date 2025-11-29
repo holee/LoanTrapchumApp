@@ -53,14 +53,29 @@ using Applications.Features.Incomes.Queries.GetIncomeById;
 using Applications.Features.Incomes.Queries.GetIncomeExpense;
 using Applications.Features.LoanPayments.Interfaces;
 using Applications.Features.LoanPayments.UseCases;
+using Applications.Features.LoanRequests.Command.AddDescription;
+using Applications.Features.LoanRequests.Command.AddLoanRequestCollateral;
+using Applications.Features.LoanRequests.Command.AddLoanRequestDescription;
+using Applications.Features.LoanRequests.Command.AddLoanRequestDocument;
+using Applications.Features.LoanRequests.Command.AddLoanRequestGuarantor;
+using Applications.Features.LoanRequests.Command.ApplyLoanRequest;
 using Applications.Features.LoanRequests.Command.ApprovedLoanRequest;
 using Applications.Features.LoanRequests.Command.CreateLoanRequest;
+using Applications.Features.LoanRequests.Command.DeleteLoanRequestCollateral;
+using Applications.Features.LoanRequests.Command.DeleteLoanRequestDocument;
+using Applications.Features.LoanRequests.Command.DeleteLoanRequestGuarantor;
 using Applications.Features.LoanRequests.Command.DenyLoanRequest;
+using Applications.Features.LoanRequests.Command.IsCustomerBusy;
 using Applications.Features.LoanRequests.Command.RecheckedLoanRequest;
 using Applications.Features.LoanRequests.Command.SaveLoanRequest;
-using Applications.Features.LoanRequests.Interfaces;
-using Applications.Features.LoanRequests.Responses;
-using Applications.Features.LoanRequests.UseCases;
+using Applications.Features.LoanRequests.Command.VerifiedLoanRequest;
+using Applications.Features.LoanRequests.Queryies.GetLoanRequestAsPaging;
+using Applications.Features.LoanRequests.Queryies.GetLoanRequestById;
+using Applications.Features.LoanRequests.Queryies.GetLoanRequestDetailById;
+using Applications.Features.LoanRequests.Queryies.GetLoanRequestsWithCanDisburse;
+using Applications.Features.Loans.Queries.GetLoanRelatedCollaterals;
+using Applications.Features.Loans.Queries.GetLoanRelatedDocuments;
+using Applications.Features.Loans.Queries.GetLoanRelatedGuarantors;
 using Applications.Features.Loans.Responses;
 using Applications.Features.Loans.Services;
 using Applications.Features.Notes.Command.CreateNote;
@@ -69,9 +84,9 @@ using Applications.Features.Notes.Command.EditNote;
 using Applications.Features.Notes.Queries.GetNoteByCustomerId;
 using Applications.Features.Notes.Queries.GetNoteById;
 using Applications.Features.Settings.UseCases;
-using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Customers;
+using Applications.Responses.ViewModels.Loans.Requests;
 using Applications.Services.Files;
 using Applications.Services.Identity;
 using Applications.Services.Lists;
@@ -92,17 +107,17 @@ namespace Applications
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
 
-            services.AddScoped<ICreateNewLoanRequestUseCase, CreateNewLoanRequestUseCase>();
+            // services.AddScoped<ICreateNewLoanRequestUseCase, CreateNewLoanRequestUseCase>();
 
-            services.AddScoped<ISaveLoanRequestUseCase, SaveLoanRequestUseCase>();
+            //services.AddScoped<ISaveLoanRequestUseCase, SaveLoanRequestUseCase>();
 
             //services.AddScoped<IApprovedLoanRequestUseCase, ApprovedLoanRequestUseCase>();
 
-            services.AddScoped<IDeniedLoanRequestUseCase, DeniedLoanRequestUseCase>();
+            //services.AddScoped<IDeniedLoanRequestUseCase, DeniedLoanRequestUseCase>();
 
             //services.AddScoped<IRecheckedLoanRequestUseCase, RecheckedLoanRequestUseCase>();
 
-            services.AddScoped<IEditLoanRequestUseCase, EditLoanRequestUseCase>();
+            //services.AddScoped<IEditLoanRequestUseCase, EditLoanRequestUseCase>();
 
             services.AddScoped<IAddRecieptNumberUseCase, AddRecieptNumberUseCase>();
 
@@ -149,7 +164,7 @@ namespace Applications
             services.AddScoped<IForiegnCurrencyExchangeImpl, ForiegnCurrencyExchange>();
             services.AddScoped<IJournalServiceImpl, JournalService>();
             services.AddScoped<ILedgerServiceImpl, LedgerService>();
-            services.AddScoped<ILoanRequestServiceImpl, LoanRequestService>();
+            //services.AddScoped<ILoanRequestServiceImpl, LoanRequestService>();
             services.AddScoped<ILoanServiceImpl, LoanService>();
             services.AddScoped<ILoanScheduleServiceImpl, LoanScheduleService>();
             services.AddScoped<ILoanCategoryServiceImpl, LoanCategoryService>();
@@ -242,10 +257,33 @@ namespace Applications
             services.AddScoped<IRequestHandler<GetEditIncomeExpenseQuery, ErrorOr<IncomeExpenseDto>>, GetEditIncomeExpenseQueryHandler>();
 
 
-
+            //// Loan Requests Commands and Queries
             services.AddScoped<IRequestHandler<SaveLoanRequestCommand, ErrorOr<RequestResult>>, SaveLoanRequestCommandHandler>();
-            //services.AddScoped<IRequestHandler<CreateLoanRequestCommand, Result<RequesResult>>, CreateLoanRequestCommandHandler>();
             services.AddScoped<IRequestHandler<CreateLoanRequestCommand, ErrorOr<RequestResult>>, CreateLoanRequestCommandHandler>();
+            services.AddScoped<IRequestHandler<DeleteLoanRequestCollateralCommand, ErrorOr<string>>, DeleteLoanRequestCollateralCommandHandler>();
+            services.AddScoped<IRequestHandler<DeleteLoanRequestDocumentCommand, ErrorOr<string>>, DeleteLoanRequestDocumentCommandHandler>();
+            services.AddScoped<IRequestHandler<DeleteLoanRequestGuarantorCommand, ErrorOr<string>>, DeleteLoanRequestGuarantorCommandHandler>();
+            services.AddScoped<IRequestHandler<ApprovedLoanRequestCommand, ErrorOr<RequestResult>>, ApprovedLoanRequestCommandHandler>();
+            services.AddScoped<IRequestHandler<AppliedLoanRequestCommand, ErrorOr<RequestResult>>, AppliedLoanRequestCommandHandler>();
+            services.AddScoped<IRequestHandler<AddLoanRequestGuarantorCommand, ErrorOr<string>>, AddLoanRequestGuarantorCommandHandler>();
+            services.AddScoped<IRequestHandler<AddLoanRequestDocumentsCommand, ErrorOr<string>>, AddLoanRequestDocumentsCommandHandler>();
+            services.AddScoped<IRequestHandler<AddLoanRequestDescriptionCommand, ErrorOr<string>>, AddLoanRequestDescriptionCommandHandler>();
+            services.AddScoped<IRequestHandler<AddLoanRequestCollateralCommand, ErrorOr<string>>, AddLoanRequestCollateralCommandHandler>();
+            services.AddScoped<IRequestHandler<AddDescriptionCommand, ErrorOr<string>>, AddDescriptionCommandHandler>();
+            services.AddScoped<IRequestHandler<DeniedLoanRequestCommand, ErrorOr<RequestResult>>, DeniedLoanRequestCommandHandler>();
+            services.AddScoped<IRequestHandler<RecheckedLoanRequestCommand, ErrorOr<RequestResult>>, RecheckedLoanRequestCommandHandler>();
+            services.AddScoped<IRequestHandler<VerifiedLoanRequestCommand, ErrorOr<RequestResult>>, VerifiedLoanRequestCommandHandler>();
+            services.AddScoped<IRequestHandler<IsCustomerBusyQuery, ErrorOr<bool>>, IsCustomerBusyQueryHandler>();
+            services.AddScoped<IRequestHandler<GetLoanRequestAsPagingQuery, Pager<VLoanRequests>>, GetLoanRequestAsPagingQueryHandler>();
+            services.AddScoped<IRequestHandler<GetLoanRequestDetailByIdQuery, ErrorOr<VLoanRequests>>, GetLoanRequestDetailByIdQueryHandler>();
+            services.AddScoped<IRequestHandler<GetLoanRequestByIdQuery, ErrorOr<VLoanRequests>>, GetLoanRequestByIdQueryHandler>();
+            services.AddScoped<IRequestHandler<GetLoanRequestsWithCanDisburseQuery, Pager<VLoanRequests>>, GetLoanRequestsWithCanDisburseQueryHandler>();
+
+
+            //Commands for Loans disubursed
+            services.AddScoped<IRequestHandler<GetLoanRelatedGuarantorsQuery, IEnumerable<VLoanGuarantors>>, GetLoanRelatedGuarantorsQueryHandler>();
+            services.AddScoped<IRequestHandler<GetLoanRelatedDocumentsQuery, IEnumerable<VLoanRequestsDocuments>>, GetLoanRelatedDocumentsQueryHandler>();
+            services.AddScoped<IRequestHandler<GetLoanRelatedCollateralsQuery, IEnumerable<VCollateralLines>>, GetLoanRelatedCollateralsQueryHandler>();
 
 
 

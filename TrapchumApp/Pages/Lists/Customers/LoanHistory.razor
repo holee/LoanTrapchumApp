@@ -1,5 +1,6 @@
 @using Applications.Features.Loans.Responses
 @using Applications.Responses.ViewModels.Loans
+@using TrapchumApp.Pages.Transactions.Loans.Menu
 <RadzenDataGrid GridLines="DataGridGridLines.Both"
                 Responsive
                 Density="Density.Compact"
@@ -62,14 +63,15 @@
                 @c.LoanStatus
             </Template>
         </RadzenDataGridColumn>
-        <RadzenDataGridColumn Title="Action" Context="c">
+        <RadzenDataGridColumn Title="Action"
+                              TextAlign="TextAlign.Center"
+                              Context="c" Width="5rem">
             <Template>
                 <RadzenButton Icon="@IconNames.MoreVert"
                               Size="ButtonSize.Small"
-                              ButtonStyle="ButtonStyle.Light"
+                              Click="((arg)=>ShowContextMenu(arg,c))"
                               Variant="Variant.Text">
                 </RadzenButton>
-                <NavLink href="@($"/App/Loan/{c.LoanId}/Branches/{c.BranchId}/Currencies/{c.CurrencyId}")">Details</NavLink>
             </Template>
         </RadzenDataGridColumn>
     </Columns>
@@ -79,11 +81,13 @@
 
     void ShowContextMenu(MouseEventArgs args, VLoanDisbursments b)
     {
-        ContextMenuService.Open(args, ds =>
-    @<RadzenMenu Style="font-size:0.8rem;">
-    <RadzenMenuItem Icon="add" Text="Details" Value="@b.LoanId" Visible="false" />
-    <RadzenMenuItem Icon="money" Text="Recieve Payment" Value="@b.LoanId" />
-</RadzenMenu>
+        ContextMenuService.Open(args, ds =>@<LoanMenu Data="@b" />
     );
     }
 }
+
+@* <RadzenMenu Style="font-size:0.8rem;">
+    <RadzenMenuItem Icon="add" Text="Details" Value="@b.LoanId" Visible="false" />
+    <RadzenMenuItem Icon="money" Text="Recieve Payment" Value="@b.LoanId" />
+</RadzenMenu> *@
+@* <NavLink href="@($"/App/Loan/{c.LoanId}/Branches/{c.BranchId}/Currencies/{c.CurrencyId}")">Details</NavLink> *@

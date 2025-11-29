@@ -11,10 +11,10 @@ public sealed class GetApprovedLoanRequestQueryHandler(ILoanRequestService loanR
     public async Task<ErrorOr<VLoanRequests>> Handle(GetApprovedLoanRequestQuery request, CancellationToken cancellationToken)
     {
         return await loanRequestRepository.GetApprovedLoanRequestAsync(
-            request.branchId,
-            request.customerId,
-            request.loanRequestId,
-            request.include);
+            request.BranchId,
+            request.CustomerId,
+            request.LoanRequestId,
+            request.Include);
 
     }
 }

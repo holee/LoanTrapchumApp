@@ -137,6 +137,12 @@
                  class="@Styles.Mt2"
                  JustifyContent="JustifyContent.End"
                  Gap="1rem">
+        <RadzenButton Size="ButtonSize.Small"
+                      ButtonStyle="ButtonStyle.Danger"
+                      Icon="cancel"
+                      Text="Close"
+                      Click="@CloseModal">
+        </RadzenButton>
         <RadzenButton ButtonStyle="ButtonStyle.Success"
                       Size="ButtonSize.Small"
                       Icon="@IconNames.Save"
@@ -144,12 +150,6 @@
                       IsBusy="isBusy"
                       BusyText="Recieving..."
                       Click="@OnSaveChanges">
-        </RadzenButton>
-        <RadzenButton Size="ButtonSize.Small"
-                      ButtonStyle="ButtonStyle.Danger"
-                      Icon="cancel"
-                      Text="Close"
-                      Click="@CloseModal">
         </RadzenButton>
     </RadzenStack>
 </EditForm>

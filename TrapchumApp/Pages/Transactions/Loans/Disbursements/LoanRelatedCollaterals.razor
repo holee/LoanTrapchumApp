@@ -1,0 +1,76 @@
+﻿@using Applications.Features.Collaterals.Dtos
+@using Applications.Features.Loans.Queries.GetLoanRelatedCollaterals
+@using Applications.Features.Loans.Queries.GetLoanRelatedDocuments
+@using Applications.Features.Loans.Queries.GetLoanRelatedGuarantors
+@using Applications.Features.Loans.Responses
+@using Applications.Responses.ViewModels.Loans.Requests
+<RadzenDataGrid Data="@_loanCollaterals"
+                TItem="VCollateralLines"
+                AllowAlternatingRows="true"
+                GridLines="DataGridGridLines.Default"
+                AllowFiltering="true"
+                Density="Density.Compact"
+                AllowPaging="true"
+                PageSize="10"
+                AllowSorting="true"
+                Responsive="true"
+                RowRender="@OnRowRender"
+                Class="rz-mt-2">
+    <Columns>
+        <RadzenDataGridColumn TItem="VCollateralLines"
+                              Property="@nameof(VCollateralLines.Id)"
+                              Title="#"
+                              Width="8rem"
+                              TextAlign="TextAlign.Center">
+            <Template>
+                @context.RowIndex
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="VCollateralLines"
+                              Property="@nameof(VCollateralLines.CollateralNo)"
+                              Title="Collateral No" />
+        <RadzenDataGridColumn TItem="VCollateralLines"
+                              Property="@nameof(VCollateralLines.OwnerName)"
+                              Title="Owner Name" />
+        <RadzenDataGridColumn TItem="VCollateralLines"
+                              Property="@nameof(VCollateralLines.Description)"
+                              Title="Description" />
+        <RadzenDataGridColumn TItem="VCollateralLines"
+                              Property="@nameof(VCollateralLines.PawnPrice)"
+                              Width="8rem"
+                              Title="Pawn Price" TextAlign="TextAlign.Right" />
+        <RadzenDataGridColumn TItem="VCollateralLines"
+                              Property="@nameof(VCollateralLines.HotPrice)"
+                              Title="Hot Price"
+                              TextAlign="TextAlign.Right"
+                              Width="10rem" />
+        <RadzenDataGridColumn TItem="VCollateralLines"
+                              Property="@nameof(VCollateralLines.MarketPrice)"
+                              TextAlign="TextAlign.Right"
+                              Title="Market Price">
+            <Template>
+                @context.MarketPrice
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+@code {
+    [Parameter] public string LoanId { get; set; } = string.Empty;
+    [Parameter] public int? BranchId { get; set; } = 0;
+
+    private IEnumerable<VCollateralLines> _loanCollaterals = Array.Empty<VCollateralLines>();
+
+    void OnRowRender(RowRenderEventArgs<VCollateralLines> args)
+    {
+        args.Data.RowIndex = args.Index + 1;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var query = new GetLoanRelatedCollateralsQuery(LoanId, BranchId);
+
+        _loanCollaterals = await mediator.Send(query);
+
+        await base.OnInitializedAsync();
+    }
+}

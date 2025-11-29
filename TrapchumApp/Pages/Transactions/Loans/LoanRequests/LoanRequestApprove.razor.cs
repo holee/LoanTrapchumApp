@@ -2,6 +2,7 @@ using Applications.Enumerations;
 using Applications.Extensions.Identity.Policies;
 using Applications.Extensions.Web;
 using Applications.Features.LoanRequests.Interfaces;
+using Applications.Features.LoanRequests.Queryies.GetLoanRequestAsPaging;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Microsoft.AspNetCore.Authorization;
@@ -10,13 +11,6 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 {
     public partial class LoanRequestApprove
     {
-        private readonly ILoanRequestServiceImpl _requestService;
-
-        public LoanRequestApprove(ILoanRequestServiceImpl loanRequestService)
-        {
-            _requestService = loanRequestService;
-        }
-
         [CascadingParameter]
         Task<AuthenticationState> AuthenticationState { get; set; } = default!;
         [Parameter] public int BranchId { get; set; }
@@ -98,12 +92,11 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         {
             isLoading = true;
 
-
             var param = new QueryParam(pageIndex, pageSize, sortColumn, sortDescending, isIncludeInactive, filtertext);
 
+            var query = new GetLoanRequestAsPagingQuery(userId, BranchId, RequestStatus.Approved, param);
 
-            var rsp = await _requestService.GetLoanRequestsAsync(userId, BranchId, RequestStatus.Approved, param);
-
+            var rsp = await mediator.Send(query);
 
             LoanRequests = rsp.Items;
 

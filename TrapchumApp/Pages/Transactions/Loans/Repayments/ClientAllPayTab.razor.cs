@@ -21,7 +21,8 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 
         [Parameter] public int BranchId { get; set; } = 0;
         [Parameter] public EventCallback<string> ShowCounts { get; set; }
-        [Parameter] public EventCallback ShowLateSchedule { get; set; }  
+        [Parameter] public EventCallback<VSchedule> ShowLateScheduleDetails { get; set; }
+        [Parameter] public EventCallback<VSchedule> RecievePayment { get; set; } 
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
         private List<VSchedule> ScheduleItems = [];
         private IList<VLoanDisbursments> SelectedLoans = [];

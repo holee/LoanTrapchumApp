@@ -1,5 +1,6 @@
 ﻿using Applications.Enumerations;
 using Applications.Features.CreditAgents.Requests;
+using Applications.Features.Loans.Command.CreateLoan;
 using Applications.Features.Loans.Mappers;
 using Applications.Features.Loans.Requests;
 using Applications.Features.Loans.Responses;
@@ -116,9 +117,15 @@ namespace Applications.Features.Loans.Services
 
             model.LoanTransaction = tranx;
 
-            var rsp = await loanService.CreateLoanAsync(model);
+            var command=new CreateLoanCommand(req);
 
-            return rsp.IsSuccess ? new DisburseResult(true, "New Loan Was Disbursed") : new DisburseResult();
+
+            var rsp = await  loanService.CreateAsync(model);
+
+            return rsp.Value;
+
+
+            //return rsp.IsSuccess ? new DisburseResult(true, "New Loan Was Disbursed") : new DisburseResult();
         }
         
         public Task<Result<string>> UpdateAsync(LoanDisbursment disbursement)

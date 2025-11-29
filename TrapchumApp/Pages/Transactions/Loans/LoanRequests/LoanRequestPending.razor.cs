@@ -1,6 +1,8 @@
 using Applications.Enumerations;
+using Applications.Features.LoanRequests.Queryies.GetLoanRequestAsPaging;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Requests;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 
@@ -23,10 +25,9 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         async Task GetLoanRequestAsync()
         {
             isLoading = true;
-
             var param = new QueryParam(pageIndex, pageSize, sortColumn, sortDescending, isIncludeInactive, filtertext);
-
-            var rsp = await _loanRequestService.GetLoanRequestsAsync(UserId, BranchId, RequestStatus.All, param);
+            var query = new GetLoanRequestAsPagingQuery(UserId, BranchId, RequestStatus.All, param);
+            var rsp = await mediator.Send(query);
             LoanRequests = rsp.Items;
             counts = rsp.Count;
             isLoading = false;

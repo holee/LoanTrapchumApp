@@ -33,6 +33,7 @@ namespace TrapchumApp.Shared
             set
             {
                 _canPayOff = value;
+
                 StateHasChanged();
             }
         }
@@ -319,7 +320,7 @@ namespace TrapchumApp.Shared
                 return;
             }
 
-            _vaultIn = await _authorizeService.MustHasPermissionAsync(user!, TranxsPolicies.VaultIn);
+            _vaultIn = await _authorizeService.MustHasPermissionAsync(user!, Policies.TranxVaultIn);
         }
 
         internal async Task CheckedCanVaultOut(ClaimsPrincipal user)
@@ -331,7 +332,7 @@ namespace TrapchumApp.Shared
                 return;
             }
 
-            _vaultOut = await _authorizeService.MustHasPermissionAsync(user!, TranxsPolicies.VaultOut);
+            _vaultOut = await _authorizeService.MustHasPermissionAsync(user!, Policies.TranxVaultOut);
         }
 
 

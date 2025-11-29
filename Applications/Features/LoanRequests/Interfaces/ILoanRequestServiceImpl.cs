@@ -28,17 +28,17 @@ namespace Applications.Features.LoanRequests.Interfaces
         //Task<Result<IEnumerable<VLoanRequestCollateralLines>>> GetLoanRequestCollateralAsync(int? branchId, string? loanRequestId);
         //Task<Result<IEnumerable<VLoanRequestsDocuments>>> GetLoanRequestDocumentAsync(string? loanRequestId, int? branchId);
         //Task<Result<IEnumerable<VLoanRequestGuarantors>>> GetLoanRequestGuarantorAsync(int? branchId, string? loanRequestId, string? customerId);
-        Task<Pager<VLoanRequests>> GetLoanRequestsAsync(string? userId, int? branchId, RequestStatus requestStatus, QueryParam param);
+        //Task<Pager<VLoanRequests>> GetLoanRequestsAsync(string? userId, int? branchId, RequestStatus requestStatus, QueryParam param);
         //Task<Result<VLoanRequests>> GetLoanRequestAsync(int? branchId, string? customerId, string? loanRequestId, bool v);
-        Task<Result<T>> GetLoanRequestAsync<T>(int? branchId, string? customerId, string? loanRequestId) where T : class;
-        Task<Result<VLoanRequests>> RecheckedLoanRequestAsync(RecheckedRequestDtoCreate req);
-        Task<Result<string>> VerifiedLoanRequestAsync(RequestDtoBaseCreate req);
+        //Task<Result<T>> GetLoanRequestAsync<T>(int? branchId, string? customerId, string? loanRequestId) where T : class;
+        //Task<Result<VLoanRequests>> RecheckedLoanRequestAsync(RecheckedRequestDtoCreate req);
+        //Task<Result<string>> VerifiedLoanRequestAsync(RequestDtoBaseCreate req);
 
        // Task<Result<VLoanRequests>> GetLoanRequestAsync(int? branchId, string? userId, string? customerId,
         //    string? loanRequestId, bool v);
         //Task<Pager<VLoanRequests>> GetLoanRequestsAsync(string? userId, bool candisburse, int? branchId, RequestStatus requestStatus, QueryParam param);
         //Task<bool> IsCustomerBusy(string? customerId, CancellationToken cancellation = default);
-        Task<Result<string>> AddDescriptionAsync(LoanDescriptionsDtoCreate req, CancellationToken cancellation = default);
+        //Task<Result<string>> AddDescriptionAsync(LoanDescriptionsDtoCreate req, CancellationToken cancellation = default);
         //Task<Result<VLoanRequests>> GetApprovedLoanRequestAsync(int? branchId, string? customerId, string? loanRequestId, bool include);
         //Task<Result<DisburseResult>> CreateNewRequestAsync(LoanRequestDtoCreate request, CancellationToken cancellation = default);
         

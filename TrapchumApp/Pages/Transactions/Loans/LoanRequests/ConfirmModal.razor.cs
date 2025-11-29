@@ -1,9 +1,11 @@
+using Applications.Commons.Mappers.LoanRequests;
+using Applications.Features.LoanRequests.Command.AddDescription;
 using Applications.Features.LoanRequests.Command.ApprovedLoanRequest;
+using Applications.Features.LoanRequests.Queryies.GetLoanRequestBy;
 using Applications.Features.LoanRequests.Requests;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Mapster;
 using TrapchumApp.Helpers.Extensions;
-
 namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 {
     public partial class ConfirmModal
@@ -55,7 +57,9 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
                     var description = new LoanDescriptionsDtoCreate(model.Memo, UserId, LoanRequestId);
 
-                    await _loanRequestService.AddDescriptionAsync(description);
+                    var cmd = new AddDescriptionCommand(description);
+
+                    await mediator.Send(cmd);
 
                     NotificationService.Notify(NotificationSeverity.Success, resp.Value.Message);
 
@@ -78,13 +82,16 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
         async Task GetLoanRequest()
         {
-            var rsp = await _loanRequestService.GetLoanRequestAsync<ApprovedRequest>(BranchId, CustomerId, LoanRequestId);
 
-            if (rsp.IsSuccess)
+            var query = new GetLoanRequestApprovedQuery(BranchId, CustomerId, LoanRequestId);
+
+            var rsp = await mediator.Send(query);
+
+            if (!rsp.IsError)
             {
-                Data = rsp.Data;
+                Data = rsp.Value;
 
-                model = Data!.Adapt<AproveLoanDtoCreate>();
+                model = rsp.Value.ApprovedLoanRequestDtoCreate();
             }
         }
 

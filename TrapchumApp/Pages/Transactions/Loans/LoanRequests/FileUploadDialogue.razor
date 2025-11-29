@@ -17,8 +17,15 @@
               Style="width: 100%" />
 <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End">
     <RadzenButton Size="ButtonSize.Small"
+                  Icon="@IconNames.Cancel"
+                  Text="Close"
+                  ButtonStyle="ButtonStyle.Danger"
+                  Click="@CloseModal"
+                  class="rz-mt-8" />
+    <RadzenButton Size="ButtonSize.Small"
                   Icon="upload"
                   Text="Upload"
+                  ButtonStyle="ButtonStyle.Success"
                   Click="@HandleUploadFiles"
                   class="rz-mt-8" />
 </RadzenStack>

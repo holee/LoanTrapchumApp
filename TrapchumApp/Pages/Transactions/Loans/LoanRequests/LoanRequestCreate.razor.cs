@@ -4,6 +4,8 @@ using Applications.Features.Collaterals.Dtos;
 using Applications.Features.Customers.Response;
 using Applications.Features.Customers.UseCases;
 using Applications.Features.LoanPayments.Requests;
+using Applications.Features.LoanRequests.Command.CreateLoanRequest;
+using Applications.Features.LoanRequests.Command.SaveLoanRequest;
 using Applications.Features.LoanRequests.Interfaces;
 using Applications.Features.LoanRequests.Requests;
 using Applications.Features.Loans.Requests;
@@ -28,8 +30,8 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
     {
         private readonly ILoanSettingService _loanSettingService;
         private readonly IAppSettingService _settingsServiceImpl;
-        private readonly ICreateNewLoanRequestUseCase _createNewLoanRequestUseCase;
-        private readonly ISaveLoanRequestUseCase _saveLoanRequestUseCase;
+        //private readonly ICreateNewLoanRequestUseCase _createNewLoanRequestUseCase;
+        //private readonly ISaveLoanRequestUseCase _saveLoanRequestUseCase;
         private readonly IHolidayService _holidayService;
         private readonly ILogger<LoanRequestCreate> _logger;
         private readonly GetCustomersUseCase _getCustomersUseCase;
@@ -109,16 +111,14 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             IAppSettingService settingService,
             IHolidayService holidayService,
             ILogger<LoanRequestCreate> logger,
-            ISaveLoanRequestUseCase saveLoanRequestUseCase,
-            ICreateNewLoanRequestUseCase createNewLoanRequestUseCase,
             GetCustomersUseCase getCustomersUseCase)
         {
             _holidayService = holidayService;
             _logger = logger;
             _loanSettingService = loanSettingService;
             _settingsServiceImpl = settingService;
-            _createNewLoanRequestUseCase = createNewLoanRequestUseCase;
-            _saveLoanRequestUseCase = saveLoanRequestUseCase;
+            //_createNewLoanRequestUseCase = createNewLoanRequestUseCase;
+            //_saveLoanRequestUseCase = saveLoanRequestUseCase;
             _getCustomersUseCase = getCustomersUseCase;
         }
 
@@ -469,25 +469,29 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
                 model.BranchRefId = BranchId;
                 model.AprovedAmount = model.RequestAmount;
 
+                var commandCreate = new CreateLoanRequestCommand(model);
+                
+                var commandSave = new SaveLoanRequestCommand(model);
+
                 var resp = state switch
                 {
-                    RequestStatus.New => await _createNewLoanRequestUseCase.ExecuteAsync(model),
+                    RequestStatus.New => await mediator.Send(commandSave),
 
-                    RequestStatus.Requested => await _createNewLoanRequestUseCase.ExecuteAsync(model),
+                    RequestStatus.Requested => await mediator.Send(commandCreate),
 
-                    _ => await _saveLoanRequestUseCase.ExecuteAsync(model)
+                    _ => await mediator.Send(commandCreate)
 
                 };
 
-                if (resp.IsSuccess)
+                if (!resp.IsError)
                 {
-                    NotificationService.Notify(NotificationSeverity.Success, resp.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Success, resp.Value.Message);
 
                     NavigationManager.NavigateTo($"/app/loan/request/{BranchId}/branches");
                 }
                 else
                 {
-                    NotificationService.Notify(NotificationSeverity.Error, resp.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Error, resp.GetMessage());
                 }
             }
             catch (Exception ex)

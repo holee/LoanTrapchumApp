@@ -1,0 +1,65 @@
+﻿@using Applications.Features.Loans.Queries.GetLoanRelatedGuarantors
+@using Applications.Features.Loans.Responses
+<RadzenDataGrid Data="@_loanGaurantors"
+                TItem="VLoanGuarantors"
+                AllowAlternatingRows="true"
+                GridLines="DataGridGridLines.Default"
+                AllowFiltering="true"
+                Density="Density.Compact"
+                AllowPaging="true"
+                PageSize="10"
+                AllowSorting="true"
+                Responsive="true"
+                RowRender="@OnRowRender"
+                Class="rz-mt-2">
+    <Columns>
+        <RadzenDataGridColumn TItem="VLoanGuarantors"
+                              Property="@nameof(VLoanGuarantors.Id)"
+                              Title="#"
+                              Width="8rem"
+                              TextAlign="TextAlign.Center">
+            <Template>
+                @context.RowIndex
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="VLoanGuarantors"
+                              Property="@nameof(VLoanGuarantors.GuarantorName)"
+                              Title="Customer"
+                              Width="150px" />
+        <RadzenDataGridColumn TItem="VLoanGuarantors"
+                              Property="@nameof(VLoanGuarantors.Gender)"
+                              Width="8rem"
+                              Title="Gender" />
+        <RadzenDataGridColumn TItem="VLoanGuarantors"
+                              Property="@nameof(VLoanGuarantors.Phone)"
+                              Title="Phone"
+                              Width="10rem" />
+        <RadzenDataGridColumn TItem="VLoanGuarantors"
+                              Property="@nameof(VLoanGuarantors.Address)"
+                              Title="Address">
+            <Template>
+                @context.Address
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+@code {
+    [Parameter] public string LoanId { get; set; } = string.Empty;
+    [Parameter] public int? BranchId { get; set; } = 0;
+
+    private IEnumerable<VLoanGuarantors> _loanGaurantors = Array.Empty<VLoanGuarantors>();
+
+    void OnRowRender(RowRenderEventArgs<VLoanGuarantors> args)
+    {
+        args.Data.RowIndex = args.Index + 1;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var query = new GetLoanRelatedGuarantorsQuery(LoanId, BranchId);
+
+        _loanGaurantors = await mediator.Send(query);
+
+        await base.OnInitializedAsync();
+    }
+}

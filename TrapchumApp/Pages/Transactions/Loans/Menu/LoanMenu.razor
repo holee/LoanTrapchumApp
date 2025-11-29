@@ -107,19 +107,24 @@
     {
         ContextMenuService.Close();
 
-        if (Data!.LoanId.IsNotNullOrEmpty() && Data!.BranchId > 0)
+        if (Data is not null)
         {
-            await js.InvokeVoidAsync("open", $"/Reports/Schedules/{Data!.LoanId}/{Data!.BranchId}/Exel", "_blank");
+            if (Data.LoanId.IsNotNullOrEmpty() && Data.BranchId > 0)
+            {
+                await js.InvokeVoidAsync("open", $"/Reports/Schedules/{Data.LoanId}/{Data.BranchId}/Exel", "_blank");
+            }
         }
     }
-    async Task DownLoadScheduleAsPdf()
+    private async Task DownLoadScheduleAsPdf()
     {
-
-        ContextMenuService.Close();
-
-        if (Data!.LoanId.IsNotNullOrEmpty() && Data!.BranchId > 0)
+        if (Data is not null)
         {
-            await js.InvokeVoidAsync("open", $"/Reports/Schedules/{Data!.LoanId}/{Data!.BranchId}", "_blank");
+            var fileName = $"Loan_Schedule_{Guid.CreateVersion7()}.pdf";
+
+            if (Data.LoanId.IsNotNullOrEmpty() && Data.BranchId > 0)
+            {
+                await js.InvokeVoidAsync("open", $"/Reports/Schedules/{Data.LoanId}/{Data.BranchId}/{fileName}", "_blank");
+            }
         }
     }
 }

@@ -33,13 +33,13 @@
 }
 @code {
     [Parameter] public VSchedule? Schedule { get; set; }
-    
+
     [Parameter] public EventCallback<VSchedule?> ScheduleChanged { get; set; }
-   
+
     [Parameter] public string? CreditAgentId { get; set; } = string.Empty;
-    
+
     private string _getPaymentSchedulesUrl = "";
-   
+
     async Task PayBySchedules(VSchedule p)
     {
         ContextMenuService.Close();
@@ -55,8 +55,7 @@
         if (Schedule is not null)
         {
             _getPaymentSchedulesUrl = $"/App/Loans/{Schedule.BranchId}/Branches/{Schedule.LoanId}/Schedules?CreditAgentId={CreditAgentId}&CurrencyId={Schedule.CurrencyId}";
-        
-            //https://localhost:7039/App/Loans/3/Branches/dis-019820b3-9919-7411-999a-d9c5790697b5/Schedules?CreditAgentId=0A79ECA3-CEF5-431E-88BC-E4E8E14B244B&CurrencyId=2
+            _getPaymentSchedulesUrl = $"/App/Loans/{Schedule.BranchId}/Branches/{Schedule.LoanId}/Schedules?CreditAgentId={CreditAgentId}&CurrencyId={Schedule.CurrencyId}";
         }
 
         base.OnInitialized();

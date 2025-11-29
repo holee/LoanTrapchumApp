@@ -3,12 +3,15 @@
 @using Applications.Responses.ViewModels.Loans.Requests
 @using TrapchumApp.Pages.Transactions.Loans.LoanRequests
 @using TrapchumApp.Pages.Transactions.Loans.Menu
-<GridToolbar SearchChanged="@FilterTextChanged" Placeholder="Type something to search........">
+<GridToolbar SearchChanged="@FilterTextChanged"
+             @bind-Value="@filtertext"
+             Placeholder="Type something to search........">
 </GridToolbar>
 <RadzenDataGrid Data="LoanRequests"
                 TItem="VLoanRequests"
                 Responsive="true"
                 AllowAlternatingRows="true"
+                AllowSorting="true"
                 PagerHorizontalAlign="HorizontalAlign.Right"
                 RowSelect="RowSelectedChanged"
                 LoadData="LoadLoanData"
@@ -20,8 +23,17 @@
                 AllowPaging="true"
                 PageSizeOptions="StorageConstant.PageSizeOptions"
                 PageSizeChanged="@PageChanged"
+                RowRender="@OnRowRender"
                 ShowPagingSummary="true">
     <Columns>
+        <RadzenDataGridColumn Property="@(nameof(VLoanRequests.RowIndex))"
+                              Context="r"
+                              Width="2rem"
+                              Title="#">
+            <Template>
+                @r.RowIndex
+            </Template>
+        </RadzenDataGridColumn>
         <RadzenDataGridColumn Property="@(nameof(VLoanRequests.RequestDate))"
                               Context="r"
                               Width="8rem"
@@ -54,6 +66,7 @@
         <RadzenDataGridColumn TextAlign="TextAlign.Right" Width="6rem"
                               Property="@(nameof(VLoanRequests.Status))"
                               Context="x"
+                              Sortable="false"
                               Title="State">
             <Template>
                 <RadzenBadge Variant="Variant.Text" BadgeStyle="@ChangeBadgeStyle(x.StatusId)">
@@ -63,6 +76,7 @@
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Title="Action" Context="r"
                               Width="5rem"
+                              Sortable="false"
                               TextAlign="TextAlign.Center">
             <Template>
                 <AuthorizeView>
@@ -94,6 +108,11 @@
     void ShowLoanRequestMenu(MouseEventArgs args, VLoanRequests c)
     {
         ContextMenuService.Open(args, ds =>@<LoanRequestMenu Request="@c" />);
+    }
+
+    void OnRowRender(RowRenderEventArgs<VLoanRequests> args)
+    {
+        args.Data.RowIndex = args.Index + 1;   
     }
 
     BadgeStyle BadgeStyle = BadgeStyle.Primary;

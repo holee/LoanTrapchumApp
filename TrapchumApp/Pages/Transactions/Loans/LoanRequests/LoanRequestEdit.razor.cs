@@ -13,7 +13,6 @@ using Applications.Features.LoanRequests.Command.DeleteLoanRequestDocument;
 using Applications.Features.LoanRequests.Command.DeleteLoanRequestGuarantor;
 using Applications.Features.LoanRequests.Command.SaveLoanRequest;
 using Applications.Features.LoanRequests.Interfaces;
-using Applications.Features.LoanRequests.Queryies.GetLoanRequestById;
 using Applications.Features.LoanRequests.Queryies.GetLoanRequestDetailById;
 using Applications.Features.LoanRequests.Queryies.GetLoanRequestsDocuments;
 using Applications.Features.LoanRequests.Requests;
@@ -22,7 +21,6 @@ using Applications.Features.Loans.Requests;
 using Applications.Interfaces.Lists;
 using Applications.Interfaces.Loans;
 using Applications.Interfaces.setting;
-using Applications.Responses;
 using Applications.Responses.Loans.Disbursements;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Auths;
@@ -44,18 +42,15 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         private readonly IAppSettingService _settingsServiceImpl;
         private readonly IHolidayService _holidayService;
         private readonly ILogger<LoanRequestCreate> _logger;
-        private readonly IEditLoanRequestUseCase _saveLoanRequestUseCase;
-        private readonly ICreateNewLoanRequestUseCase _createNewLoanRequestUseCase;
+        //private readonly ICreateNewLoanRequestUseCase _createNewLoanRequestUseCase;
         private readonly GetCustomersUseCase _getCustomerUseCase;
         public LoanRequestEdit(ILoanSettingService loanSettingService, IAppSettingService settingService,
-            IHolidayService holidayService, ILogger<LoanRequestCreate> logger, IEditLoanRequestUseCase saveLoanRequestUseCase, ICreateNewLoanRequestUseCase createNewLoanRequestUseCase, GetCustomersUseCase getCustomerUseCase)
+            IHolidayService holidayService, ILogger<LoanRequestCreate> logger, GetCustomersUseCase getCustomerUseCase)
         {
             _loanSettingService = loanSettingService;
             _settingsServiceImpl = settingService;
             _holidayService = holidayService;
             _logger = logger;
-            _saveLoanRequestUseCase = saveLoanRequestUseCase;
-            _createNewLoanRequestUseCase = createNewLoanRequestUseCase;
             _getCustomerUseCase = getCustomerUseCase;
         }
         [Parameter] public int? BranchId { get; set; } = 0;

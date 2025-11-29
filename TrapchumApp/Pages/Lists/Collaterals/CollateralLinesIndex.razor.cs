@@ -47,14 +47,9 @@ public partial class CollateralLinesIndex
 
     async Task OnCustomerChange(object? arg)
     {
-        if (arg is not null)
+        if (arg is null)
         {
-            //_customerId = (arg as VCustomerList)?.CustomerId!;
-            //await GetCollateralLines(_customerId, _filterText);
-        }
-        else
-        {
-            await GetCollateralLines(null, _filterText);
+            await GetCollateralLines(string.Empty, _filterText);
         }
     }
     async Task SelectedItemChanged(object? arg)
@@ -69,11 +64,6 @@ public partial class CollateralLinesIndex
 
             await GetCollateralLines(_customerId, _filterText);
         }
-        //else
-        //{
-        //    await GetCollateralLines(null, _filterText);
-        //}
-
     }
 
     async Task OnSearch(string e)

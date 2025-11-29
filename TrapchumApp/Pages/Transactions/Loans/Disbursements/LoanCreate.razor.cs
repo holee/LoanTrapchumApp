@@ -2,6 +2,8 @@ using Applications.Calculations;
 using Applications.Enumerations;
 using Applications.Extensions;
 using Applications.Features.Customers.Response;
+using Applications.Features.LoanRequests.Command.AddDescription;
+using Applications.Features.LoanRequests.Command.RecheckedLoanRequest;
 using Applications.Features.LoanRequests.Queryies.GetApprovedLoanRequest;
 using Applications.Features.LoanRequests.Requests;
 using Applications.Features.Loans.Mappers;
@@ -13,6 +15,7 @@ using Applications.Responses.ViewModels.Loans.Requests;
 using Applications.Services.Lists;
 using Domains.Enumerations;
 using Radzen.Blazor;
+using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Disbursements;
 
@@ -145,15 +148,19 @@ public partial class LoanCreate(ILoanServiceImpl loanService, IHolidayServiceImp
 
         var req = new RecheckedRequestDtoCreate(BranchId, CustomerRequestId, LoanRequestId, DateTime.Now, RequestStatus.Rechecked, memo);
 
-        var rsp = await _loanRequestService.RecheckedLoanRequestAsync(req);
+        var command = new RecheckedLoanRequestCommand(req);
 
-        if (rsp.IsSuccess)
+        var rsp = await mediator.Send(command);
+
+        if (!rsp.IsError)
         {
-            RequestStatusId = rsp.Data!.StatusId!.Value;
+            //RequestStatusId = rsp.Value.Success;
 
             var description = new LoanDescriptionsDtoCreate(memo, UserId, LoanRequestId);
 
-            await _loanRequestService.AddDescriptionAsync(description);
+            var cmd = new AddDescriptionCommand(description);
+
+            await mediator.Send(cmd);
 
             NotificationService.Notify(NotificationSeverity.Success, "Request was sent successfully.");
 
@@ -161,7 +168,7 @@ public partial class LoanCreate(ILoanServiceImpl loanService, IHolidayServiceImp
         }
         else
         {
-            NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
+            NotificationService.Notify(NotificationSeverity.Error, rsp.GetMessage());
         }
 
     }

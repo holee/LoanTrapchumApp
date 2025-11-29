@@ -31,11 +31,7 @@
             <RadzenStack Orientation="Orientation.Horizontal"
                          JustifyContent="JustifyContent.SpaceBetween"
                          AlignItems="AlignItems.Center">
-                <AuthorizeView>
-                    <Authorized>
-                        <TopMenus IsBranchOpen="@bState.State" ShowDialogue="ShowCurrencyDialogue" />
-                    </Authorized>
-                </AuthorizeView>
+                <TopMenus IsBranchOpen="true" ShowDialogue="ShowCurrencyDialogue" />
                 <Profiles UserId="@userId" />
             </RadzenStack>
         </RadzenStack>
@@ -44,8 +40,7 @@
         <RadzenPanelMenu DisplayStyle="@(sidebarExpanded? MenuItemDisplayStyle.IconAndText: MenuItemDisplayStyle.Icon)">
             <RadzenPanelMenuItem Path="/" Text="សហគ្រាសបញ្ចាំទ្រព្យជុំ" Icon="dashboard" />
         </RadzenPanelMenu>
-        <RadzenPanelMenu
-                         DisplayStyle="@(sidebarExpanded? MenuItemDisplayStyle.IconAndText: MenuItemDisplayStyle.Icon)"
+        <RadzenPanelMenu DisplayStyle="@(sidebarExpanded? MenuItemDisplayStyle.IconAndText: MenuItemDisplayStyle.Icon)"
                          ShowArrow="sidebarExpanded">
             <AuthorizeView>
                 <Authorized>

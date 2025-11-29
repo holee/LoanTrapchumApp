@@ -19,7 +19,7 @@ public sealed class ApplicationPermissions
         new(Modules.Collaterals,Feature.Update,Group.Operation, "Update Collateral"),
         new(Modules.Collaterals,Feature.Delete,Group.Operation, "Delete Collateral"),
         
-        new(Modules.Currencies,Feature.ExchangeMoney, Group.Accounting, "Money exchange", true),
+        
         new(Modules.Currencies,Feature.Read, Group.Operation, "Read Currency",true),
         new(Modules.Currencies,Feature.Create, Group.Administrator, "Create Currency"),
         new(Modules.Currencies,Feature.Update, Group.Administrator, "Update Currency"),
@@ -97,7 +97,8 @@ public sealed class ApplicationPermissions
         new(Modules.Transactions,Feature.VaultOut,Group.Accounting, "Start ValaultOut", true),
         new(Modules.Transactions,Feature.OpenBranch, Group.Accounting, "Open branch", true),
         new(Modules.Transactions,Feature.CloseBranch, Group.Accounting, "Close Branch", true),
-       
+        new(Modules.Transactions,Feature.ExchangeMoney, Group.Accounting, "Money exchange", true),
+
         new(Modules.Reports,Feature.Delete, Group.Operation, "Delete Report", true),
         new(Modules.Reports,Feature.Read, Group.Operation, "Read Report", true),
         new(Modules.Reports,Feature.Create, Group.Operation, "Create Report", true),

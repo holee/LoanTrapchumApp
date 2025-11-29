@@ -1,7 +1,7 @@
-using System.Security.Claims;
 using Applications.Enumerations;
 using Applications.Extensions.Identity.Policies;
 using Applications.Extensions.Web;
+using Applications.Features.LoanRequests.Queryies.GetLoanRequestAsPaging;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Domains.Models.Identity;
@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Radzen;
+using System.Security.Claims;
 
 namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 {
@@ -99,8 +100,10 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
             var param = new QueryParam(pageIndex, pageSize, sortColumn, sortDescending, isIncludeInactive, filtertext);
 
-            var rsp = await _loanRequestService.GetLoanRequestsAsync(userId, BranchId, RequestStatus.New, param);
 
+            var query = new GetLoanRequestAsPagingQuery(userId, BranchId, RequestStatus.New, param);
+           
+            var rsp = await mediator.Send(query);
 
             LoanRequests = rsp.Items;
 
@@ -119,8 +122,9 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             var param = new QueryParam(pageIndex, pageSize, sortColumn, sortDescending, isIncludeInactive, filtertext);
 
 
-            var rsp = await _loanRequestService.GetLoanRequestsAsync(userId, BranchId, RequestStatus.New, param);
+            var query = new GetLoanRequestAsPagingQuery(userId, BranchId, RequestStatus.New, param);
 
+            var rsp = await mediator.Send(query);
 
             LoanRequests = rsp.Items;
 
@@ -138,8 +142,9 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
             var param = new QueryParam(pageIndex, pageSize, sortColumn, sortDescending, isIncludeInactive, filtertext);
 
-            var rsp = await _loanRequestService.GetLoanRequestsAsync(userId, BranchId, RequestStatus.Completed, param);
-
+            var query = new GetLoanRequestAsPagingQuery(userId, BranchId, RequestStatus.Completed, param);
+            
+            var rsp = await mediator.Send(query);
 
             LoanRequests = rsp.Items;
 
@@ -158,8 +163,9 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
             var param = new QueryParam(pageIndex, pageSize, sortColumn, sortDescending, isIncludeInactive, filtertext);
 
-            var rsp = await _loanRequestService.GetLoanRequestsAsync(userId, BranchId, RequestStatus.Approved, param);
+            var query = new GetLoanRequestAsPagingQuery(userId, BranchId, RequestStatus.Approved, param);
 
+            var rsp = await mediator.Send(query);
 
             LoanRequests = rsp.Items;
 
@@ -177,8 +183,9 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
             var param = new QueryParam(pageIndex, pageSize, sortColumn, sortDescending, isIncludeInactive, filtertext);
 
-            var rsp = await _loanRequestService.GetLoanRequestsAsync(userId, BranchId, RequestStatus.Checking, param);
-
+            var query = new GetLoanRequestAsPagingQuery(userId, BranchId, RequestStatus.New, param);
+           
+            var rsp = await mediator.Send(query);
 
             LoanRequests = rsp.Items;
 

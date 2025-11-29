@@ -41,7 +41,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             {
                 NotificationService.Notify(NotificationSeverity.Error, "There is no any file to upload");
 
-                DialogService.Close(Enumerable.Empty<FileModel>());
+                CloseModal();
 
                 return;
             }
@@ -61,6 +61,12 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             files = [];
 
             DialogService.Close(resp.Data);
+        }
+
+
+        void CloseModal()
+        {
+            DialogService.Close(Enumerable.Empty<FileModel>());
         }
 
         private async Task OnFileUpload(UploadChangeEventArgs args)
@@ -83,7 +89,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
                     {
                         await fileStream.CopyToAsync(stream); // ✅ Read the file content
 
-                        files.Add(new FileModel(file.Name, originalName,file.Size, stream.ToArray()));
+                        files.Add(new FileModel(file.Name, originalName, file.Size, stream.ToArray()));
                     }
 
                 }

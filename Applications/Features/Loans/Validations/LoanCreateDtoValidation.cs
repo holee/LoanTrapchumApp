@@ -4,9 +4,9 @@ using FluentValidation;
 
 namespace Applications.Requests.Validations.Loans
 {
-    public class LoanCreateDtoValidator : AbstractValidator<LoanDtoCreate>
+    public class CreateLoanCommandValidation : AbstractValidator<LoanDtoCreate>
     {
-        public LoanCreateDtoValidator()
+        public CreateLoanCommandValidation()
         {
             RuleFor(c => c.CustomerRefId).NotEmpty().WithMessage("Please select customer")
                                        .NotNull().WithMessage("Please selet customer");

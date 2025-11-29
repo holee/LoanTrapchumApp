@@ -18,6 +18,8 @@ using System.Data;
 using Applications.Features.CreditAgents.Requests;
 using Applications.Features.Customers.Response;
 using Applications.Features.Loans.Responses;
+using Applications.Features.Collaterals.Dtos;
+using Applications.Bases;
 
 namespace Infrastructures.Implements
 {
@@ -28,7 +30,7 @@ namespace Infrastructures.Implements
         private readonly IDapperConnectionFactory connectionFactory;
         private readonly IDbContextFactory<DataContext> dbContextFactory;
         public LoanDisbursementRepository(ILogger<LoanDisbursementRepository> logger,
-                                          IDapperConnectionFactory connectionFactory, 
+                                          IDapperConnectionFactory connectionFactory,
                                           IDbContextFactory<DataContext> dbContextFactory)
         {
             this.logger = logger;
@@ -36,31 +38,30 @@ namespace Infrastructures.Implements
             this.dbContextFactory = dbContextFactory;
         }
 
-        public async Task<Result<bool>> CreateLoanAsync(LoanDisbursment req)
+        public async Task<Result<bool>> CreateLoanAsync(LoanDisbursment req, CancellationToken cancellation = default)
         {
 
-            await using var context = await dbContextFactory.CreateDbContextAsync();
+            if (await CustomerAlreadyRequest(req.CustomerRefId))
+            {
+                return Result.Failure<bool>(ErrorResponse.Conflict("This Customer Is Already Requested"));
+            }
 
+            if (await CustomerInActiveLoan(req.CustomerRefId))
+            {
+                return Result.Failure<bool>(ErrorResponse.Conflict("This Customer Is Already disburse"));
+            }
 
-            await using var trans = await context.Database.BeginTransactionAsync();
+            await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+            await using var trans = await context.Database.BeginTransactionAsync(cancellation);
 
             try
             {
-                if (await CustomerAlreadyRequest(req.CustomerRefId))
-                {
-                    return Result.Failure<bool>(ErrorResponse.Conflict("This Customer Is Already Requested"));
-                }
-
-                if (await CustomerInActiveLoan(req.CustomerRefId))
-                {
-                    return Result.Failure<bool>(ErrorResponse.Conflict("This Customer Is Already disburse"));
-                }
-
                 req.LoanAccountCode = await GetMaxLoanAccountCode(context);
 
                 context.LoanDisbursments.Add(req);
 
-                await context.SaveChangesAsync();
+                await context.SaveChangesAsync(cancellation);
 
                 await context.Customers
                              .Where(x => x.CustomerId == req.CustomerRefId)
@@ -78,58 +79,153 @@ namespace Infrastructures.Implements
             }
             catch (DbUpdateException ex)
             {
-                await trans.RollbackAsync();
+                await trans.RollbackAsync(cancellation);
 
-                return Result.Failure<bool>(ErrorResponse.ServerError($"{ex.Message}")); 
+                return Result.Failure<bool>(ErrorResponse.ServerError($"{ex.Message}"));
             }
         }
 
-        private async Task<bool> CustomerAlreadyRequest(string? customerId)
+        public async Task<ErrorOr.ErrorOr<DisburseResult>> CreateAsync(LoanDisbursment req, CancellationToken cancellation = default)
         {
-            if (string.IsNullOrEmpty(customerId)) return false;
 
-            using var db = await connectionFactory.CreateConnectionAsync();
+            if (await CustomerAlreadyRequest(req.CustomerRefId))
+            {
+                return ErrorOr.Error.Conflict("This Customer Is Already Requested");
+            }
 
-            var parameter = new DynamicParameters();
+            if (await CustomerInActiveLoan(req.CustomerRefId))
+            {
+                return ErrorOr.Error.Conflict("This Customer Is Already disburse");
+            }
 
-            parameter.Add("@CustomerId", customerId);
+            await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);
 
-            var existingLoanRequest = await db.QueryAsync<VLoanRequests>(SqlConstant.CustomerAlreadyRequest, parameter);
+            await using var trans = await context.Database.BeginTransactionAsync(cancellation);
 
-            return existingLoanRequest.Any();
+            try
+            {
+                req.LoanAccountCode = await GetMaxLoanAccountCode(context);
+
+                context.LoanDisbursments.Add(req);
+
+                await context.SaveChangesAsync(cancellation);
+
+                await context.Customers
+                             .Where(x => x.CustomerId == req.CustomerRefId)
+                             .ExecuteUpdateAsync(p => p.SetProperty(x => x.IsLoanActive, true));
+
+                await context.LoanRequests.Where(x => x.LoanRequestId == req.LoanRequestId &&
+                                                      x.CustomerRefId == req.CustomerRefId)
+                    .ExecuteUpdateAsync(prop => prop
+                        .SetProperty(p => p.LoanRequestStatusRefId, (int)RequestStatus.Completed)
+                        .SetProperty(p => p.ModifiedDt, DateTime.UtcNow));
+
+                await trans.CommitAsync();
+
+                return new DisburseResult(true, req.LoanId, req.BranchRefId, "Loan disbursed successfully.");
+            }
+            catch (DbUpdateException ex)
+            {
+                await trans.RollbackAsync(cancellation);
+
+                return ErrorOr.Error.Unexpected($"{ex.Message}");
+            }
         }
 
-        private async Task<bool> CustomerInActiveLoan(string? customerId)
+        public async Task<IEnumerable<VCollateralLines>> GetRelatedCollaterals(string? loanId, int? branchId, CancellationToken cancellation = default)
         {
-            if (string.IsNullOrEmpty(customerId)) return false;
-            using var db = await connectionFactory.CreateConnectionAsync();
-            var parameter = new DynamicParameters();
-            parameter.Add("@CustomerId", customerId);
-            parameter.Add("@IsLoanActive", true);
-            var customerInActiveLoan = await db.QueryAsync<VCustomerDetails>(SqlConstant.CustomerInActiveLoan, parameter);
-            return customerInActiveLoan.Any();
+            var db = await connectionFactory.CreateConnectionAsync(cancellation);
+
+            string sql = @"SELECT 
+	                    lr.CollateralLineId,
+	                    lr.LoanRequestId,
+	                    lr.BranchId,
+	                    lr.CollateralNo,
+	                    lr.ReferenceNo,
+	                    lr.Location,
+	                    lr.OwnerName,
+	                    lr.Quantity,
+	                    lr.MarketPrice,
+	                    lr.HotPrice,
+	                    lr.PawnPrice,
+	                    lr.TypeName,
+	                    lr.SubTypeName
+                    FROM VLoansDisbursments  d INNER JOIN VLoanRequestCollaterals lr 
+                    ON d.LoanRequestId=lr.LoanRequestId
+                    WHERE d.LoanId=@LoanId AND d.BranchId=@BranchId";
+
+            var result = await db.QueryAsync<VCollateralLines>(sql, new { LoanId = loanId, BranchId = branchId });
+
+            return await Task.FromResult(result);
+
         }
 
+        public async Task<IEnumerable<VLoanGuarantors>> GetRelatedGaurantors(string? loanId, int? branchId, CancellationToken cancellation = default)
+        {
+            var db = await connectionFactory.CreateConnectionAsync(cancellation);
 
-        public async Task<Result<string>> DeleteAsync(string? loanId, int? branchId)
+            string sql = @"SELECT 
+	                        g.Id,
+	                        g.GuarantorId,
+	                        g.GuarantorName,
+	                        g.Gender,
+	                        g.Phone,
+	                        g.Address
+                        FROM VLoansDisbursments  d INNER JOIN VLoanRequestGuarantors g
+                        ON d.LoanRequestId=g.LoanRequestRefId AND g.BranchId=d.BranchId
+                        WHERE d.LoanId=@LoanId AND d.BranchId=@BranchId";
+
+            var result = await db.QueryAsync<VLoanGuarantors>(sql, new { LoanId = loanId, BranchId = branchId });
+
+            return await Task.FromResult(result);
+
+        }
+
+        public async Task<IEnumerable<VLoanRequestsDocuments>> GetRelatedDocuments(string? loanId, int? branchId, CancellationToken cancellation = default)
+        {
+            var db = await connectionFactory.CreateConnectionAsync(cancellation);
+
+            string sql = @"SELECT 
+	                        do.Id,
+	                        do.OriginalName,
+	                        do.AltText,
+	                        do.FileUrl,
+	                        do.Description
+                        FROM VLoansDisbursments d
+                        INNER JOIN VLoanDocuments do ON d.LoanRequestId=do.LoanRequestId 
+                            AND d.BranchId=do.BranchRefId 
+                        WHERE d.LoanId = @LoanId AND do.BranchRefId=@BranchId;";
+
+            var result = await db.QueryAsync<VLoanRequestsDocuments>(sql, new { LoanId = loanId, BranchId = branchId });
+
+            return await Task.FromResult(result);
+
+        }
+
+        public async Task<ErrorOr.ErrorOr<DeleteResult>> DeleteAsync(string? loanId, int? branchId, CancellationToken cancellation = default)
         {
 
-            await using var _context = await dbContextFactory.CreateDbContextAsync();
+            await using var _context = await dbContextFactory.CreateDbContextAsync(cancellation);
 
+            if(await IsLoanIsActive(_context, loanId, branchId))
+            {
+                return ErrorOr.Error.Conflict("Cannot delete an active loan.");
+            }
 
-            var loan = _context.LoanDisbursments.Where(x => x.LoanId == loanId && x.BranchRefId == branchId)
-                .FirstOrDefault();
+            var loan = _context.LoanDisbursments
+                                .FirstOrDefault(x => x.LoanId == loanId &&
+                                            x.BranchRefId == branchId);
 
             if (loan is null)
             {
-                return Result.Failure<string>(ErrorResponse.NotFound("No Loan Data."));
+                return ErrorOr.Error.NotFound("No Loan Data.");
             }
 
             _context.LoanDisbursments.Remove(loan);
 
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellation);
 
-            return Result.Success(new string("data wad delete."));
+            return DeleteResult.Success("Loan disbursement was deleted successfully.");
         }
 
         public async Task<Result<string>> UpdateAsync(LoanDisbursment disbursement)
@@ -256,7 +352,7 @@ namespace Infrastructures.Implements
         {
 
             await using var _context = await dbContextFactory.CreateDbContextAsync(cancellation);
-             
+
             var queries = _context.VLoanDisbursements
                                  .Where(x => x.BranchId == branchId)
                                  .WhereIf((int)status > 0, x => x.LoanstatusId == (int)status)
@@ -288,7 +384,7 @@ namespace Infrastructures.Implements
         }
 
 
-        public async Task<(Pager<VLoanDisbursments>,int Count)> GetLoansByBranchAsync(int? branchId, string? creditAgentId, LoanStatuses status = LoanStatuses.Active, QueryParam? param = null, CancellationToken cancellation = default)
+        public async Task<(Pager<VLoanDisbursments>, int Count)> GetLoansByBranchAsync(int? branchId, string? creditAgentId, LoanStatuses status = LoanStatuses.Active, QueryParam? param = null, CancellationToken cancellation = default)
         {
 
             await using var _context = await dbContextFactory.CreateDbContextAsync(cancellation);
@@ -320,7 +416,7 @@ namespace Infrastructures.Implements
                             .AsNoTracking()
                             .ToListAsync(cancellation);
 
-            return (new Pager<VLoanDisbursments>(items, counts),counts);
+            return (new Pager<VLoanDisbursments>(items, counts), counts);
         }
 
 
@@ -393,7 +489,7 @@ namespace Infrastructures.Implements
 
 
         public async Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus status, bool include = false, CancellationToken cancellation = default)
-        { 
+        {
 
             await using var _context = await dbContextFactory.CreateDbContextAsync(cancellation);
 
@@ -445,7 +541,7 @@ namespace Infrastructures.Implements
 
             int?[] filter = status switch
             {
-                ScheduleStatus.Paid => [1], 
+                ScheduleStatus.Paid => [1],
                 ScheduleStatus.Unpaid => [2, 4],
                 ScheduleStatus.All => [1, 2, 4],
                 _ => [1, 2, 4]
@@ -598,6 +694,40 @@ namespace Infrastructures.Implements
             var maxCode = await context.LoanDisbursments
                                         .MaxAsync(x => x.LoanAccountCode);
             return maxCode > 0 ? maxCode + 1 : 1;
+        }
+
+        private async Task<bool> CustomerAlreadyRequest(string? customerId)
+        {
+            if (string.IsNullOrEmpty(customerId)) return false;
+
+            using var db = await connectionFactory.CreateConnectionAsync();
+
+            var parameter = new DynamicParameters();
+
+            parameter.Add("@CustomerId", customerId);
+
+            var existingLoanRequest = await db.QueryAsync<VLoanRequests>(SqlConstant.CustomerAlreadyRequest, parameter);
+
+            return existingLoanRequest.Any();
+        }
+
+        private async Task<bool> CustomerInActiveLoan(string? customerId)
+        {
+            if (string.IsNullOrEmpty(customerId)) return false;
+            using var db = await connectionFactory.CreateConnectionAsync();
+            var parameter = new DynamicParameters();
+            parameter.Add("@CustomerId", customerId);
+            parameter.Add("@IsLoanActive", true);
+            var customerInActiveLoan = await db.QueryAsync<VCustomerDetails>(SqlConstant.CustomerInActiveLoan, parameter);
+            return customerInActiveLoan.Any();
+        }
+
+        private async Task<bool> IsLoanIsActive(DataContext context, string? loanId, int? branchId)
+        {
+            return await context.VLoanDisbursements
+                   .AnyAsync(x => x.LoanId == loanId &&
+                                  x.BranchId == branchId &&
+                                  x.LoanstatusId == (int)LoanStatuses.Active);
         }
     }
 }

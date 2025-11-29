@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using Applications.Enumerations;
 using Applications.Features.Customers.Response;
 using Applications.Responses.ViewModels.Loans.LoanRequests;
 
@@ -48,11 +49,45 @@ public sealed class VLoanRequests
     public string? CollectionFeeModeName { get; set; } = string.Empty;
     public string? AprovedBy { get; set; } = string.Empty;
 
+    [NotMapped] public bool IsCompleted => StatusId == (int)RequestStatus.Completed;
+    [NotMapped] public bool IsApproved => StatusId == (int)RequestStatus.Approved;
+    [NotMapped]
+    public bool IsRequested
+    {
+        get
+        {
+            if(!StatusId.HasValue && StatusId == 0)
+            {
+                return false;
+            }
+
+            return StatusId == (int)RequestStatus.Requested ||
+                   StatusId == (int)RequestStatus.Checking ||
+                   StatusId == (int)RequestStatus.Rechecking;
+        }
+    }
+
+    [NotMapped]
+    public bool IsRequesting
+    {
+        get
+        {
+            if (!StatusId.HasValue && StatusId == 0)
+            {
+                return false;
+            }
+
+            return StatusId == (int)RequestStatus.New ||
+                   StatusId == (int)RequestStatus.Rechecked;
+        }
+    }
+
+
     [NotMapped] public int RowIndex { get; set; } = 1;
     [NotMapped] public string? Memo { get; set; }
     [NotMapped] public IEnumerable<VLoanRequestGuarantor> Guarantors { get; set; } = [];
     [NotMapped] public IEnumerable<VLoanRequestCollateralLines> Collaterals { get; set; } = [];
     [NotMapped] public IEnumerable<VLoanRequestsDocuments> Documents { get; set; } = [];
-    [NotMapped] public IEnumerable<VLoanRequestDescription> Descriptions { get; set; } = []; 
+    [NotMapped] public IEnumerable<VLoanRequestDescription> Descriptions { get; set; } = [];
     [NotMapped] public VCustomerDetails Customer { get; set; } = new();
 }

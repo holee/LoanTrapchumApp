@@ -85,19 +85,16 @@ namespace Applications
             options.AddPolicy(BranchesPolicies.Update, BranchesPolicies.CanUpdate());
             options.AddPolicy(BranchesPolicies.Delete, BranchesPolicies.CanDelete());
             options.AddPolicy(BranchesPolicies.ShowBranch, BranchesPolicies.CanDelete());
-            options.AddPolicy(TranxsPolicies.Read, TranxsPolicies.CanRead());
-            options.AddPolicy(TranxsPolicies.Create, TranxsPolicies.CanCreate());
-            options.AddPolicy(TranxsPolicies.Update, TranxsPolicies.CanUpdate());
-            options.AddPolicy(TranxsPolicies.Delete, TranxsPolicies.CanDelete());
-            options.AddPolicy(TranxsPolicies.VaultOut, TranxsPolicies.CanVaultOut());
-            options.AddPolicy(TranxsPolicies.VaultIn, TranxsPolicies.CanVaultIn());
-            options.AddPolicy(TranxsPolicies.OpenBranch, TranxsPolicies.CanOpenBranch());
-            options.AddPolicy(TranxsPolicies.CloseBranch, TranxsPolicies.CanClosedBranch());
-
-
-
-
+            options.AddPolicy(Policies.TranxRead, Policies.TranxCanRead());
+            options.AddPolicy(Policies.TranxCreate, Policies.TranxCanCreate());
+            options.AddPolicy(Policies.TranxUpdate, Policies.TranxCanUpdate());
+            options.AddPolicy(Policies.TranxDelete, Policies.TranxCanDelete());
+            options.AddPolicy(Policies.TranxVaultOut, Policies.CanVaultOut());
+            options.AddPolicy(Policies.TranxVaultIn, Policies.CanVaultIn());
+            options.AddPolicy(Policies.OpenBranch, Policies.CanOpenBranch());
+            options.AddPolicy(Policies.CloseBranch, Policies.CanClosedBranch());
             options.AddPolicy(Policies.CanExchanged, Policies.CanExchangeMoney());
+
         }
 
         public static IServiceCollection AddPolicyServices(this IServiceCollection services)

@@ -14,7 +14,7 @@ using Mapster;
 
 namespace Applications.Features.LoanRequests.UseCases
 {
-    public sealed class LoanRequestService(ILoanRequestService reqService) : ILoanRequestServiceImpl
+    public sealed class LoanRequestService() : ILoanRequestServiceImpl
     {
         //public async Task<Result<string>> AddLoanRequestCollateralAsync(LoanCollateralRequest req)
         //{
@@ -153,16 +153,15 @@ namespace Applications.Features.LoanRequests.UseCases
         //    return await GetLoanRequestGuarantorAsync(branchId, loanRequestId, customerId);
         //}
 
-        public async Task<Pager<VLoanRequests>> GetLoanRequestsAsync(string? userId, int? branchId,
-            RequestStatus requestStatus, QueryParam param)
-        {
-            return await reqService.GetLoanRequestsAsync(userId, branchId, requestStatus, param);
-        }
+        //public async Task<Pager<VLoanRequests>> GetLoanRequestsAsync(string? userId, int? branchId,RequestStatus requestStatus, QueryParam param)
+        //{
+        //    return await reqService.GetLoanRequestsAsync(userId, branchId, requestStatus, param);
+        //}
 
-        public async Task<Pager<VLoanRequests>> GetLoanRequestsAsync(string? userId, bool candisburse, int? branchId, RequestStatus requestStatus, QueryParam param)
-        {
-            return await reqService.GetLoanRequestsAsync(userId, candisburse,branchId, requestStatus, param);
-        }
+        //public async Task<Pager<VLoanRequests>> GetLoanRequestsAsync(string? userId, bool candisburse, int? branchId, RequestStatus requestStatus, QueryParam param)
+        //{
+        //    return await reqService.GetLoanRequestsAsync(userId, candisburse,branchId, requestStatus, param);
+        //}
 
 
         //public async Task<Result<VLoanRequests>> GetLoanRequestAsync(int? branchId, string? customerId, string? loanRequestId, bool include)
@@ -182,27 +181,27 @@ namespace Applications.Features.LoanRequests.UseCases
         //    return await reqService.GetLoanRequestAsync(branchId, userId, customerId, loanRequestId, v);
         //}
 
-        public async Task<Result<T>> GetLoanRequestAsync<T>(int? branchId, string? customerId, string? loanRequestId)
-            where T : class
-        {
-            return await reqService.GetLoanRequestAsync<T>(branchId, customerId, loanRequestId);
-        }
+        //public async Task<Result<T>> GetLoanRequestAsync<T>(int? branchId, string? customerId, string? loanRequestId)
+        //    where T : class
+        //{
+        //    return await reqService.GetLoanRequestAsync<T>(branchId, customerId, loanRequestId);
+        //}
 
-        public async Task<Result<VLoanRequests>> RecheckedLoanRequestAsync(RecheckedRequestDtoCreate req)
-        {
-            return await reqService.RecheckedLoanRequestAsync(req);
-        }
+        //public async Task<Result<VLoanRequests>> RecheckedLoanRequestAsync(RecheckedRequestDtoCreate req)
+        //{
+        //    return await reqService.RecheckedLoanRequestAsync(req);
+        //}
 
-        public async Task<Result<string>> AddDescriptionAsync(LoanDescriptionsDtoCreate req, CancellationToken cancellation = default)
-        {
-            var model = req.MapToDescriptionCreate();
-            return await reqService.AddDescription(model, cancellation);
-        }
+        //public async Task<Result<string>> AddDescriptionAsync(LoanDescriptionsDtoCreate req, CancellationToken cancellation = default)
+        //{
+        //    var model = req.MapToDescriptionCreate();
+        //    return await reqService.AddDescription(model, cancellation);
+        //}
 
-        public async Task<Result<string>> VerifiedLoanRequestAsync(RequestDtoBaseCreate req)
-        {
-            return await reqService.VerifiedLoanRequestAsync(req);
-        }
+        //public async Task<Result<string>> VerifiedLoanRequestAsync(RequestDtoBaseCreate req)
+        //{
+        //    return await reqService.VerifiedLoanRequestAsync(req);
+        //}
 
 
         //public async Task<bool> IsCustomerBusy(string? customerId, CancellationToken cancellation = default)

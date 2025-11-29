@@ -29,6 +29,7 @@
                 AllowRowSelectOnRowClick="true"
                 PageSizeOptions="@StorageConstant.PageSizeOptions"
                 PageSizeChanged="@ChangedPageSize"
+                RowRender="@OnRowRender"
                 AllowPaging="true">
     <Columns>
         <RadzenDataGridColumn Context="p"
@@ -105,7 +106,7 @@
             <Template>
                 @if (p.PenaltyAmount > 0)
                 {
-                    <strong class="text-danger">
+                    <strong class="rz-color-danger">
                         @p.PenaltyAmount.FormatUp(2, p.CurrencyId!.Value)
                     </strong>
                 }
@@ -147,49 +148,35 @@
 @code {
     void ShowContextMenuWithContent(MouseEventArgs args, VSchedule p)
     {
-        ContextMenuService.Open(args, ds =>@<AllScheduleMenu 
-                 GetLateSchedule="@ShowLateSchedules"
-                 GetPayOffSchedule="@CustomerPayOff"
+        ContextMenuService.Open(args, ds =>@<AllScheduleMenu ShowOnTab="true"
+                 ShowLateScheduleDetails="@ShowLateDetails"
+                 RecievePayment="@ShowRecievePayment"
                  Schedule="@p" />
 
     );
     }
 
-    async Task ShowLateSchedules(VSchedule p)
+    void OnRowRender(RowRenderEventArgs<VSchedule> args)
+    {
+        args.Attributes.Add("style", $"color:{(args.Data.PenaltyAmount > 0 ? "red" : "black")}");
+    }
+
+    async Task ShowLateDetails(VSchedule p)
     {
         ContextMenuService.Close();
 
-        //GetPaymentSchedules(p);
-
-        await ShowLateSchedule.InvokeAsync(p);
+        await ShowLateScheduleDetails.InvokeAsync(p);
 
         StateHasChanged();
     }
 
+    async Task ShowRecievePayment(VSchedule p)
+    {
+        ContextMenuService.Close();
+
+        await RecievePayment.InvokeAsync(p);
+
+        StateHasChanged();
+    }
 
 }
-
-
-
-@* <RadzenMenu Style="font-size:0.8rem;">
-
-    <RadzenMenuItem Icon="money"
-                    Click="@(()=>GetPaymentSchedules(p))"
-                    Text="Recieve Payment"></RadzenMenuItem>
-    <RadzenMenuItem Icon="money"
-                    Click="@(()=>GetPaymentSchedules(p))"
-                    Text="Schedule Details"></RadzenMenuItem>
-    <RadzenMenuItem Icon="paid"
-                    Click="@(()=>CustomerPayOff(p))"
-                    Text="PayOff"></RadzenMenuItem>
-</RadzenMenu> *@
-
-
-
-
-@* <RadzenMenuItem Icon="file_download"
-                Click="@(()=>DownLoadScheduleAsExcel(p.LoanId!.Value,p.BranchId))"
-                Text="Export Loan to Excel" />
-<RadzenMenuItem Icon="picture_as_pdf"
-                Click="@(()=>DownLoadScheduleAsPdf(p.LoanId!.Value,p.BranchId))"
-                Text="Export Loan to Pdf" /> *@

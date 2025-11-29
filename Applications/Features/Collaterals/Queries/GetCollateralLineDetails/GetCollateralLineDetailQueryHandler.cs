@@ -14,7 +14,7 @@ public sealed class GetCollateralLineDetailQueryHandler : IRequestHandler<GetCol
     }
     public async Task<ErrorOr<VCollateralLines>> Handle(GetCollateralLineDetailQuery request, CancellationToken cancellationToken)
     {
-        return await _collateralService.GetCollateralLineDetailAsync(request.Id, request.CollateralId);
+        return await _collateralService.GetCollateralLineDetailAsync(request.Id, request.CollateralId,cancellationToken);
         
     }
 }

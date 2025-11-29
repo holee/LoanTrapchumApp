@@ -13,7 +13,7 @@ namespace Applications.Services.Loans
         Task<Pager<VSchedule>> GetLoanSchedulesByPaymentDateAsync(int? branchId, DateTimeOffset? paymentDate, bool isIncludeLate = false, bool isLateOnly = false, QueryParam? param = null);
         Task<Pager<VSchedule>> GetLateScedulesAsync(int? branchId, string? loanId, DateTimeOffset? paymentDate, CancellationToken cancellation = default);
         Task<Result<LoanScheduleVm>> GetLoanSchedulesAsync(int? branchId, string? loanId, string? customerId);
-        Task<Result<IEnumerable<VSchedule>>> GetLoanScheduleByIdAsync(string? loanId, int? branchId, ScheduleStatus status = ScheduleStatus.All);
+        //Task<Result<IEnumerable<VSchedule>>> GetLoanScheduleByIdAsync(string? loanId, int? branchId, ScheduleStatus status = ScheduleStatus.All);
     }
 
     public sealed class LoanScheduleService(ILoanScheduleService loanSchedule) : ILoanScheduleServiceImpl

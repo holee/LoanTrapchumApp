@@ -40,9 +40,11 @@
     <Folder Include="Features\LoanPayments\Enums\" />
     <Folder Include="Features\LoanPayments\Extensions\" />
     <Folder Include="Features\LoanPayments\Mappers\" />
+    <Folder Include="Features\LoanPayments\Command\" />
     <Folder Include="Features\LoanRequests\Enums\" />
     <Folder Include="Features\LoanRequests\Extensions\" />
     <Folder Include="Features\LoanRequests\Mappers\" />
+    <Folder Include="Features\Loans\Command\UpdateLoan\" />
     <Folder Include="Features\Loans\Interfaces\" />
     <Folder Include="Features\LoanTransactions\Journals\Extensions\" />
     <Folder Include="Features\LoanTransactions\Journals\Mappers\" />

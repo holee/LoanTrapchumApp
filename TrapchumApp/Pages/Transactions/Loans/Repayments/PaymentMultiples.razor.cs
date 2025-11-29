@@ -9,6 +9,7 @@ public partial class PaymentMultiples
     [Parameter] public IEnumerable<VSchedule> Schedules { get; set; } = [];
     [Parameter] public LoanPaymentDtoCreate? LoanPayment { set; get; } = new();
     [Parameter] public int? CurrencyId { get; set; } = 1;
+    [Parameter] public EventCallback OnClose { get; set; }
 
     RadzenDataGrid<VSchedule> gridPopup = default!; 
 
@@ -301,8 +302,7 @@ public partial class PaymentMultiples
      
         var options = new DialogOptions
         {
-            CloseDialogOnOverlayClick = false,
-            Left = "10%",
+            CloseDialogOnOverlayClick = false
         };
 
         var parameters = new Dictionary<string, object?>

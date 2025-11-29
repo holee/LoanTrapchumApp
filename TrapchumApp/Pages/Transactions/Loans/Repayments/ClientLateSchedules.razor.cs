@@ -52,7 +52,7 @@ public partial class ClientLateSchedules
 
     }
 
-    async Task GetCustomerLateSchedules(VSchedule? p)
+    async Task ShowLateSchedules(VSchedule? p) 
     {
         ContextMenuService.Close();
 

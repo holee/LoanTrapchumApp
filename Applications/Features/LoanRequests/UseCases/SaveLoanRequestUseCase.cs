@@ -17,17 +17,17 @@ namespace Applications.Features.LoanRequests.UseCases
             _loanRequestService = loanRequestService;
         }
 
-        public async Task<Result<RequestResult>> ExecuteAsync(LoanRequestDtoCreate request, CancellationToken cancellation = default)
-        {
-            var req = request.MapToLoanRequestSave();
+        //public async Task<Result<RequestResult>> ExecuteAsync(LoanRequestDtoCreate request, CancellationToken cancellation = default)
+        //{
+        //    var req = request.MapToLoanRequestSave();
 
-            req.LoanRequestStatusRefId = (int)RequestStatus.New;
+        //    req.LoanRequestStatusRefId = (int)RequestStatus.New;
 
-            var rsp = await _loanRequestService.SaveLoanRequestAsync(req, cancellation);
+        //    var rsp = await _loanRequestService.SaveLoanRequestAsync(req, cancellation);
 
-            return rsp.IsSuccess ? Result.Success(new RequestResult(true, rsp.Data))
-                                 : Result.Failure<RequestResult>(ErrorResponse.ServerError(rsp.ErrMessage));
-        }
+        //    return rsp.IsSuccess ? Result.Success(new RequestResult(true, rsp.Data))
+        //                         : Result.Failure<RequestResult>(ErrorResponse.ServerError(rsp.ErrMessage));
+        //}
 
     }
 }

@@ -6,6 +6,7 @@ using Applications.Features.LoanPayments.Requests;
 using Applications.Features.Loans.Responses;
 using Applications.Features.Loans.Services;
 using Applications.Responses.ViewModels.Loans.Schedules;
+using System.Threading.Tasks;
 using TrapchumApp.Helpers.Extensions;
 using TrapchumApp.Pages.Transactions.Loans.Repayments;
 
@@ -65,9 +66,9 @@ public partial class LoanDetails
 
     }
 
-    void OnRowDoubleClick(DataGridRowMouseEventArgs<VSchedule> arg)
+    async Task OnRowDoubleClick(DataGridRowMouseEventArgs<VSchedule> arg)
     {
-        PayBySchedules(arg.Data);
+       await PayBySchedules(arg.Data);
     }
 
 
@@ -91,7 +92,7 @@ public partial class LoanDetails
         _selectedTabIndex = 0;
     }
 
-    void PayBySchedules(VSchedule p)
+    async Task PayBySchedules(VSchedule p)
     {
         ContextMenuService.Close();
 
@@ -161,28 +162,26 @@ public partial class LoanDetails
         {
             _loanPayment = loanPayment;
 
-            _isPaymentTab = true;
+            //_isPaymentTab = true;
 
-            _selectedTabIndex = 2;
+            //_selectedTabIndex = 2;
         }
 
-
-
         {
-            //var parameters = new Dictionary<string, object?>();
+            var parameters = new Dictionary<string, object?>();
 
-            //parameters.Add("CurrencyId", CurrencyId);
+            parameters.Add("CurrencyId", CurrencyId);
 
-            //parameters.Add("LoanPaymentCreate", loanPayment);
+            parameters.Add("LoanPaymentCreate", loanPayment);
 
-            //var message = $"Recieve Payment from {loanSchedule!.AltName}";
+            var message = $"Recieve Payment from {loanSchedule!.AltName}";
 
-            //bool? confirm = await DialogService.OpenAsync<PaymentModal>(message, parameters, options);
+            bool? confirm = await DialogService.OpenAsync<PaymentModal>(message, parameters, options);
 
-            //if (confirm is not null && confirm == true)
-            //{
-            //    NotificationService.Notify(NotificationSeverity.Success, "Receive successfully.");
-            //}
+            if (confirm is not null && confirm == true)
+            {
+                NotificationService.Notify(NotificationSeverity.Success, "Receive successfully.");
+            }
 
         }
 

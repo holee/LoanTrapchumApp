@@ -108,20 +108,19 @@
                     <CustomerProfit CustomerId="@CustomerId" ShowAction="false" ShowCommand="false" />
                 </RadzenTabsItem>
                 <RadzenTabsItem Text="ឯកសារផ្សេងៗ" Icon="@IconNames.AttachFile">
-                    <LoanRequestDocument Documents="@data?.Documents.ToList()" 
-                            ShowUpload="false"
+                    <LoanRequestDocument Documents="@data?.Documents.ToList()"
+                                         ShowUpload="false"
                                          @key="@(Guid.NewGuid().ToString("N"))" />
                 </RadzenTabsItem>
                 <RadzenTabsItem Text="Note" Icon="@IconNames.Comment">
-                    <RadzenRow AlignItems="AlignItems.Center">
+                    <RadzenRow AlignItems="AlignItems.Center" Visible="!data!.IsCompleted">
                         <RadzenColumn Size="12">
-                            <RadzenTextArea Rows="5" class="rz-w-100" @bind-Value="memo" Disabled="@disableTextbox">
+                            <RadzenTextArea Rows="5" class="rz-w-100" @bind-Value="memo">
 
                             </RadzenTextArea>
                         </RadzenColumn>
                     </RadzenRow>
-                    <LoanRequestNotes Data="@data?.Descriptions"
-                                      @key="@(Guid.NewGuid().ToString("N"))" />
+                    <LoanRequestNotes Data="@data?.Descriptions" @key="@(Guid.NewGuid().ToString("N"))" />
                 </RadzenTabsItem>
             </Tabs>
         </RadzenTabs>
@@ -132,8 +131,7 @@
              JustifyContent="JustifyContent.End">
     <AuthorizeView Policy="@RequestsPolicies.Request">
         <Authorized>
-            @if (canAllow && (data?.StatusId == (int)RequestStatus.New ||
-                        data?.StatusId == (int)RequestStatus.Rechecked))
+            @if (data!.IsRequesting)
             {
                 <RadzenButton ButtonStyle="@Styles.Save"
                               Icon="request_quote" Size="ButtonSize.ExtraSmall"
@@ -146,9 +144,7 @@
 
     <AuthorizeView Policy="@RequestsPolicies.Approve">
         <Authorized>
-            @if (canApprove && (data?.StatusId == (int)RequestStatus.Requested ||
-                        data?.StatusId == (int)RequestStatus.Checking) ||
-                        data?.StatusId == (int)RequestStatus.Rechecked)
+            @if (data!.IsRequested)
             {
                 <RadzenButton ButtonStyle="ButtonStyle.Primary"
                               Icon="@IconNames.Save" Size="ButtonSize.ExtraSmall"
@@ -172,7 +168,7 @@
 
     <AuthorizeView Policy="@RequestsPolicies.Disburse">
         <Authorized>
-            @if ((data?.StatusId == (int)RequestStatus.Approved))
+            @if (data!.IsApproved)
             {
                 <RadzenButton ButtonStyle="ButtonStyle.Primary"
                               Icon="request_quote" Size="ButtonSize.ExtraSmall"

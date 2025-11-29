@@ -4,6 +4,7 @@ using Applications.Commons.Mappers;
 using Applications.Enumerations;
 using Applications.Extensions.NumberExtensions;
 using Applications.Features.LoanPayments.Interfaces;
+using Applications.Features.LoanPayments.Queries.GetLoanSchedulesByLoanIdAsPaging;
 using Applications.Features.LoanPayments.Requests;
 using Applications.Features.Loans.Responses;
 using Applications.Features.Loans.Services;
@@ -188,7 +189,7 @@ public partial class PaymentSchedule
     }
 
 
-    void ApplySchedulePayment()
+    async Task ApplySchedulePayment()
     {
 
         if (!isAllowMultiplePayment && !isPaidNow)
@@ -241,39 +242,33 @@ public partial class PaymentSchedule
 
         loanPayment.LoanPaymentLines.Add(_loanPaymentLine);
 
-        _isPaymentTab = true;
+        //_isPaymentTab = true;
 
-        _selectedIndexTab = 2;
+        //_selectedIndexTab = 2;
 
         _loanPayment = loanPayment;
 
         //LoanPaymentCreate
-        //var parameters = new Dictionary<string, object?>{
-        //        {"CurrencyId" , CurrencyId},
-        //        {"LoanPaymentCreate",loanPayment },
-        //    };
+        var parameters = new Dictionary<string, object?>{
+                {"CurrencyId" , CurrencyId},
+                {"LoanPaymentCreate",loanPayment },
+            };
 
-        //var message = $"Recieve Payment from {LoanSchedule!.AltName}";
+        var message = $"Recieve Payment from {LoanSchedule!.AltName}";
 
-        //bool? confirm = await DialogService.OpenAsync<PaymentModal>(message, parameters, options);
+        bool? confirm = await DialogService.OpenAsync<PaymentModal>(message, parameters, options);
 
+        if (confirm is not null && confirm == true)
+        {
+            NotificationService.Notify(NotificationSeverity.Success, "Receive successfully.");
 
+            await GetSchedulesByLoanIdAsync(ScheduleStatus.Unpaid);
 
+            LoanPaymentLines.Clear();
 
-        //if (confirm is not null && confirm == true)
-        //{
-        //    NotificationService.Notify(NotificationSeverity.Success, "Receive successfully.");
+            await gridSchedule.Reload();
 
-        //    await GetSchedulesByLoanIdAsync(ScheduleStatus.Unpaid);
-
-        //    LoanPaymentLines.Clear();
-
-        //    await gridSchedule.Reload();
-
-        //    Reset();
-        //}
-
-
+        }
 
     }
 
@@ -296,12 +291,12 @@ public partial class PaymentSchedule
 
         }
 
-        var confirm = await DialogService.Confirm("Do you want to apply this schedules?", "Receive Payment");
+        //var confirm = await DialogService.Confirm("Do you want to apply this schedules?", "Receive Payment");
 
-        if (confirm == false)
-        {
-            return;
-        }
+        //if (confirm == false)
+        //{
+        //    return;
+        //}
 
 
         var loanPayment = new LoanPaymentDtoCreate
@@ -325,26 +320,23 @@ public partial class PaymentSchedule
             {"LoanPayment" , loanPayment},
         };
 
-        var options = new SideDialogOptions
-        {
-            Width = "50vw",
 
-            CloseDialogOnOverlayClick = true,
+        AddMultiplePaymentTab(_selectedSchedules, loanPayment);
 
-            Position = DialogPosition.Right
-        };
+        //var options = new SideDialogOptions
+        //{
+        //    Width = "50vw",
 
+        //    CloseDialogOnOverlayClick = true,
 
-        _selectedIndexTab = 1;
-
-        _isMultiplePaymentTab = true;
-
+        //    Position = DialogPosition.Right
+        //};
 
         //var result = await DialogService.OpenSideAsync<PaymentMultiples>("Payment", parameters, options);
 
         //if (result is bool dialogueResult && dialogueResult)
         //{
-        //    SelectedSchedules!.Clear();
+        //   // SelectedSchedules!.Clear();
 
         //    await GetSchedulesByLoanIdAsync(ScheduleStatus.Unpaid);
 
@@ -352,7 +344,7 @@ public partial class PaymentSchedule
         //}
         //else
         //{
-        //    SelectedSchedules!.Clear();
+        //    //SelectedSchedules!.Clear();
 
         //    await GetSchedulesByLoanIdAsync(ScheduleStatus.Unpaid);
 
@@ -543,11 +535,16 @@ public partial class PaymentSchedule
 
             _selectedSchedules = [];
 
-            var rsp = await _scheduleService.GetLoanScheduleByIdAsync(LoanId, BranchId, status);
+            //var rsp = await _scheduleService.GetLoanScheduleByIdAsync(LoanId, BranchId, status);
 
-            if (rsp.IsSuccess)
+            var query = new GetLoanSchedulesByLoanIdQuery(LoanId, BranchId, status);
+
+            var rsp = await mediator.Send(query);
+
+
+            if (!rsp.IsError)
             {
-                schedules = rsp.Data!;
+                schedules = rsp.Value;
 
                 _selectedSchedules = schedules.Take(1).ToList();
             }

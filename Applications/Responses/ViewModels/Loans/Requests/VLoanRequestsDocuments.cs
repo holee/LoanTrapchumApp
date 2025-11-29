@@ -1,4 +1,6 @@
-﻿namespace Applications.Responses.ViewModels.Loans.Requests;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Applications.Responses.ViewModels.Loans.Requests;
 
 public sealed class VLoanRequestsDocuments
 {
@@ -12,4 +14,5 @@ public sealed class VLoanRequestsDocuments
     public string? Description { get; set; }
     public long? FileSize { get; set; }
     public DateTime CreatedUtc { get; set; }
+    [NotMapped]public int RowIndex { get; set; } = 1;
 }

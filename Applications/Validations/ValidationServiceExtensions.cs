@@ -45,7 +45,7 @@ namespace Applications.Validations
             services.AddTransient<IValidator<EntityCustomerCreate>, CustomerDtoCreateValidator>();
             //services.AddTransient<IValidator<EntityVendorCreate>, VendorValidator>();
             services.AddTransient<IValidator<CustomerDtoUpdate>, CustomerDtoUpdateValidator>();
-            services.AddTransient<IValidator<LoanDtoCreate>, LoanCreateDtoValidator>();
+            services.AddTransient<IValidator<LoanDtoCreate>, CreateLoanCommandValidation>();
             services.AddTransient<IValidator<LedgerCreateDto>, LedegerCreateDtoValidator>();
             services.AddTransient<IValidator<LedgerUpdateDto>, LedegerUpdateDtoValidator>();
             services.AddTransient<IValidator<ChangePasswordDto>, ChangedPasswordValidator>();

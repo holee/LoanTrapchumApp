@@ -47,13 +47,13 @@ namespace TrapchumApp.Pages.Transactions.Branches
 
             _userId = auth.GetUserId();
 
-            canOpenBranch = await _authorizeService.MustHasPermissionAsync(auth.User, TranxsPolicies.OpenBranch);
+            canOpenBranch = await _authorizeService.MustHasPermissionAsync(auth.User, Policies.OpenBranch);
 
-            canCloseBranch = await _authorizeService.MustHasPermissionAsync(auth.User, TranxsPolicies.CloseBranch);
+            canCloseBranch = await _authorizeService.MustHasPermissionAsync(auth.User, Policies.CloseBranch);
 
-            canVaultOut = await _authorizeService.MustHasPermissionAsync(auth.User, TranxsPolicies.VaultOut);
+            canVaultOut = await _authorizeService.MustHasPermissionAsync(auth.User, Policies.TranxVaultOut);
 
-            canVaultIn = await _authorizeService.MustHasPermissionAsync(auth.User, TranxsPolicies.VaultIn);
+            canVaultIn = await _authorizeService.MustHasPermissionAsync(auth.User, Policies.TranxVaultIn);
 
             var rsp = await obService.GetCashVaultBalance(BranchId);
 

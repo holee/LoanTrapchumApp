@@ -2,6 +2,7 @@
 @using Applications.Features.Collaterals.Dtos
 @using Applications.Features.Customers.Response
 @using Applications.Features.LoanRequests.Command.AddLoanRequestCollateral
+@using Applications.Features.LoanRequests.Command.AddLoanRequestGuarantor
 @using Applications.Features.LoanRequests.Interfaces
 @using Applications.Features.LoanRequests.Requests
 @using Applications.Responses.ViewModels.Loans.Requests
@@ -9,6 +10,7 @@
 @using Domains.Models.Collaterals
 @using Domains.Models.Loans
 @using Radzen.Blazor.Rendering
+@using TrapchumApp.Helpers.Extensions
 <PageTitle>Loan Request</PageTitle>
 <Card>
     <EditForm Model="model" @ref="editForm">
@@ -151,16 +153,20 @@
             Guarantors.Add(item);
         }
 
-        var rsp = await _loanRequestService.AddLoanRequestGuarantorAsync(gLinks);
+        var command = new AddLoanRequestGuarantorCommand(gLinks);
 
-        if (rsp.IsSuccess)
+
+        var rsp = await mediator.Send(command);  //_loanRequestService.AddLoanRequestGuarantorAsync(gLinks);
+
+        if (rsp.IsSuccess())
         {
-            NotificationService.Notify(NotificationSeverity.Success, rsp.Data);
+            NotificationService.Notify(NotificationSeverity.Success, rsp.Value);
+
             await GuarantorRef.GuarantorReload();
         }
         else
         {
-            NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
+            NotificationService.Notify(NotificationSeverity.Error, rsp.GetMessage());
         }
 
     }
@@ -194,11 +200,14 @@
 
         gLinks.GuarantorsLink.Add(guarantor);
 
-        var rsp = await _loanRequestService.AddLoanRequestGuarantorAsync(gLinks);
 
-        if (rsp.IsSuccess)
+        var command = new AddLoanRequestGuarantorCommand(gLinks);
+
+        var rsp = await mediator.Send(command);// _loanRequestService.AddLoanRequestGuarantorAsync(gLinks);
+
+        if (rsp.IsSuccess())
         {
-            NotificationService.Notify(NotificationSeverity.Success, rsp.Data);
+            NotificationService.Notify(NotificationSeverity.Success, rsp.Value);
 
             var gs = new VLoanRequestGuarantor
             {
@@ -215,7 +224,7 @@
         }
         else
         {
-            NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
+            NotificationService.Notify(NotificationSeverity.Error, rsp.GetMessage());
         }
 
 

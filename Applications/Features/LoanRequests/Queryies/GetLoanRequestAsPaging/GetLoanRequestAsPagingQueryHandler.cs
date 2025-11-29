@@ -10,6 +10,6 @@ public class GetLoanRequestAsPagingQueryHandler(ILoanRequestService loanRequestS
 {
     public async Task<Pager<VLoanRequests>> Handle(GetLoanRequestAsPagingQuery request, CancellationToken cancellationToken)
     {
-        return await loanRequestService.GetLoanRequestsAsync(request.userId, request.branchId, request.requestStatus, request.param);
+        return await loanRequestService.GetLoanRequestsAsync(request.UserId, request.BranchId, request.RequestStatus, request.Param);
     }
 }

@@ -2,6 +2,7 @@ using Applications.Enumerations;
 using Applications.Extensions.Identity.Policies;
 using Applications.Extensions.Web;
 using Applications.Features.LoanRequests.Interfaces;
+using Applications.Features.LoanRequests.Queryies.GetLoanRequestAsPaging;
 using Applications.Features.LoanRequests.Queryies.GetLoanRequestsWithCanDisburse;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Requests;
@@ -13,10 +14,8 @@ using TrapchumApp.Shared;
 
 namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 {
-    public partial class LoanRequestAll(ILoanRequestServiceImpl loanRequestService)
+    public partial class LoanRequestAll
     {
-        private readonly ILoanRequestServiceImpl _requestService = loanRequestService;
-
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
         [CascadingParameter] private CascadingAppState bState { get; set; } = default!;
         [Parameter] public int BranchId { get; set; }
@@ -24,6 +23,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         bool CanRequestLoan { get; set; } = false;
         bool CanDisburseLoan { get; set; } = false;
         bool CanAprovedLoan { get; set; } = false;
+
         ClaimsPrincipal? _user;
 
         IEnumerable<VLoanRequests> LoanRequests = [];
@@ -59,7 +59,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
             await bState.CheckedCanDisbursemnt(_user);
 
-            await GetLoanRequestAsync(UserId);
+            await GetLoanRequestAsync();
 
             await base.OnInitializedAsync();
         }
@@ -70,54 +70,54 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
             filtertext = args.Filter ?? string.Empty;
 
-            (sortColumn, sortDescending) = args.PageInfo();
+            (sortColumn, sortDescending) = args.PageInfo("AltName");
 
             await GetLoanRequestAsync();
         }
 
-        async Task GetLoanRequestAsync(string? userId)
+        async Task GetLoanRequestAsync()
         {
+            //var query = new GetLoanRequestsWithCanDisburseQuery(string.Empty, CanDisburseLoan, BranchId, RequestStatus.All, param);
+            //var query = new GetLoanRequestAsPagingQuery(string.Empty, BranchId, RequestStatus.All, param);
+            //var rsp = await mediator.Send(query);
+            //LoanRequests = rsp.Items;
+            //counts = rsp.Count;
+
             isLoading = true;
+
+            string? userId = string.Empty;
 
             var param = new QueryParam(pageIndex, pageSize, sortColumn, false, sortDescending, filtertext);
 
             if (bState.CanDisbursed)
             {
-
-                var query = new GetLoanRequestsWithCanDisburseQuery(string.Empty, CanDisburseLoan, BranchId, RequestStatus.All, param);
-                var rsp = await mediator.Send(query);             
-                LoanRequests = rsp.Items;
-                counts = rsp.Count;
+                userId = string.Empty;
             }
             else
             {
-                var rsp = await _requestService.GetLoanRequestsAsync(userId, BranchId, RequestStatus.All, param);
-                LoanRequests = rsp.Items;
-                counts = rsp.Count;
+                await bState.GetUserId();
+                userId = bState.UserId;
             }
+
+            var query = new GetLoanRequestAsPagingQuery(userId, BranchId, RequestStatus.All, param);
+
+            var rsp = await mediator.Send(query);
+
+            LoanRequests = rsp.Items;
+
+            counts = rsp.Count;
 
             isLoading = false;
 
             StateHasChanged();
         }
 
-
-        async Task GetLoanRequestAsync()
-        {
-            // if (CanDisburseLoan)
-            // {
-            await GetLoanRequestAsync(null);
-            // }
-            // else
-            // {
-            //     await GetLoanRequestAsync(UserId);
-            // }
-        }
-
         async void PageChanged(int size)
         {
             pageSize = size;
+
             pageIndex = 0;
+
             await GetLoanRequestAsync();
         }
 
@@ -130,8 +130,8 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
         void RowSelectedChanged()
         {
-        }
 
+        }
 
         void LoanRequestChecked(VLoanRequests param)
         {

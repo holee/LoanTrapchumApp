@@ -1,5 +1,6 @@
 ﻿@page "/app/loan/schedules/{BranchId:int}/branches"
 @using TrapchumApp.Pages.Transactions.Loans.Menu
+@using TrapchumApp.Pages.Transactions.RecievePayements
 <PageTitle>Schedules</PageTitle>
 <RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal">
     <RadzenButton Size="ButtonSize.ExtraSmall"
@@ -22,7 +23,10 @@
                 </span>
             </Template>
             <ChildContent>
-                <ClientAllPayTab ShowLateSchedule="@ShowLateSchedule" BranchId="@BranchId" ShowCounts="@GetCount" />
+                <ClientAllPayTab ShowLateScheduleDetails="@LateScheduleDetails"
+                                 BranchId="@BranchId"
+                                 RecievePayment="@ShowPaymentSchedule"
+                                 ShowCounts="@GetCount" />
             </ChildContent>
         </RadzenTabsItem>
 
@@ -86,6 +90,43 @@
 
     }
 
+    private void LateScheduleDetails(VSchedule schedule)
+    {
+
+        var existingIndex = _tabs.FindIndex(t => t.Key == schedule.LoanId);
+
+        if (existingIndex != -1)
+        {
+
+            _selectedIndex = existingIndex + 1;
+
+            StateHasChanged();
+
+            return;
+        }
+
+        RenderFragment content = builder =>
+        {
+            builder.OpenComponent(0, typeof(LateScheduleDetail));
+            builder.AddAttribute(1, "LoanId", schedule.LoanId);
+            builder.AddAttribute(2, "PaymentDate", paymentDate);
+            builder.AddAttribute(3, "BranchId", BranchId);
+            builder.AddAttribute(4, "Close", EventCallback.Factory.Create(this, () =>
+            {
+                CloseTab(schedule.LoanId!);
+
+            }));
+            builder.SetKey(schedule.LoanId);
+            builder.CloseComponent();
+        };
+
+        var newTab = new CustomTab(schedule.LoanId!, $"Customer:{schedule.AltName}", TabActions.Details, content);
+
+        _tabs.Add(newTab);
+
+        _selectedIndex = _tabs.Count;
+
+    }
 
     private void ShowDueDateScheduleTab(string key)
     {
@@ -125,7 +166,6 @@
         _selectedIndex = _tabs.Count;
     }
 
-
     private void ShowLateSchedule()
     {
 
@@ -146,7 +186,9 @@
         RenderFragment content = builder =>
         {
             builder.OpenComponent(0, typeof(ClientLateSchedules));
+
             builder.AddAttribute(1, "BranchId", BranchId);
+
             builder.AddAttribute(2, "GetScheduleChanged", EventCallback.Factory.Create(this, (VSchedule x) =>
             {
                 ShowLateScheduleDetails(x.LoanId!);
@@ -169,14 +211,50 @@
 
     }
 
-
-
-
-    void Close()
+    private void ShowPaymentSchedule(VSchedule schedule) 
     {
-        _isLateTab = false;
 
-        _selectedIndex = 2;
+        var newKey = $"{schedule.LoanId}_RecievePayment";
+
+        var existingIndex = _tabs.FindIndex(t => t.Key == newKey);
+
+        if (existingIndex != -1)
+        {
+            _selectedIndex = existingIndex + 1;
+
+            StateHasChanged();
+
+            return;
+        }
+
+        RenderFragment content = builder =>
+        {
+            builder.OpenComponent(0, typeof(RecievePayementSchesules));
+
+            builder.AddAttribute(1, "LoanId", schedule.LoanId);
+
+            builder.AddAttribute(2, "BranchId", BranchId);
+
+            builder.AddAttribute(3, "CreditAgentId", schedule.CreditAgentId);
+
+            builder.AddAttribute(4, "CurrencyId", currencyId);
+
+            builder.AddAttribute(5, "OnClose", EventCallback.Factory.Create(this, (string x) =>
+            {
+                CloseTab(schedule.LoanId!);
+
+            }));
+            builder.SetKey(schedule.LoanId);
+
+            builder.CloseComponent();
+        };
+
+        var newTab = new CustomTab(newKey, $"Receive From: {schedule.AltName}", TabActions.Details, content);
+
+        _tabs.Add(newTab);
+
+        _selectedIndex = _tabs.Count;
+
     }
 
 
@@ -197,8 +275,7 @@
 
     void ShowContextMenu(MouseEventArgs args, VSchedule p)
     {
-        ContextMenuService.Open(args, ds =>@<AllScheduleMenu 
-                         GetLateSchedule="@GetCustomerLateSchedules"
+        ContextMenuService.Open(args, ds =>@<AllScheduleMenu ShowLateScheduleDetails="@GetCustomerLateSchedules"
                          GetPayOffSchedule="@CustomerPayOff"
                          Schedule="@p" />);
     }
