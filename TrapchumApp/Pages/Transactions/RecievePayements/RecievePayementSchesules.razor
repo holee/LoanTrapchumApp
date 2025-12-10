@@ -293,7 +293,10 @@
                       Click="@ApplySchedulePayment"
                       Visible="!isAllowMultiplePayment"
                       Text="Applied Payment" />
-        <RadzenLink Path="@_navService.PreviousUrl"
-                    Text="Cancel" />
+        <RadzenButton Icon="save"
+                      Size="ButtonSize.Small"
+                      ButtonStyle="ButtonStyle.Danger"
+                      Click="@CloseOpenTab"
+                      Text="Close" />
     </RadzenStack>
 </RadzenFieldset>

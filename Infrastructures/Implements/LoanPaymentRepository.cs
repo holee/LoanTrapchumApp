@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Data;
 using Applications.Features.LoanPayments.Requests;
 using Domains.Models.Lists;
+using Applications.Commons.Messages.LoanPayments;
 
 namespace Infrastructures.Implements;
 
@@ -118,7 +119,7 @@ public class LoanPaymentRepository(IDbContextFactory<DataContext> dbContextFacto
     }
 
 
-    public async Task<Result<string>> RecievePayment(LoanTransaction req, CancellationToken cancellation = default)
+    public async Task<ErrorOr.ErrorOr<string>> RecievePayment(LoanTransaction req, CancellationToken cancellation = default)
     {
         await using var db = await dbContextFactory.CreateDbContextAsync(cancellation);
 
@@ -146,13 +147,13 @@ public class LoanPaymentRepository(IDbContextFactory<DataContext> dbContextFacto
 
             await tranx.CommitAsync(cancellation);
 
-            return Result.Success<string>(new("Payment successfully."));
+            return LoanPaymentMessage.LOAN_PAYMENT_RECEIVED;
         }
         catch (Exception ex)
         {
             await tranx.RollbackAsync(cancellation);
 
-            return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}"));
+            return ErrorOr.Error.Unexpected($"{ex.Message}");
         }
     }
 
@@ -452,7 +453,7 @@ public class LoanPaymentRepository(IDbContextFactory<DataContext> dbContextFacto
             .Select(x => x.RecieptNumber)
             .MaxAsync();
         var nextNumber = string.IsNullOrEmpty(maxSequence) ?
-                                                            1:
+                                                            1 :
                                                             Convert.ToInt32(maxSequence) + 1;
 
         return nextNumber.ToString("D6"); // Always 6 digits padded with zeros

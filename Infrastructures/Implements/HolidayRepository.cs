@@ -80,6 +80,36 @@ namespace Infrastructures.Implements
         }
 
 
+
+        public async Task<ErrorOr.ErrorOr<long>> CreateOrUpdate(Holiday entities, CancellationToken cancellation = default)
+        {
+            try
+            {
+
+                await using var ctx = await _contextFactory.CreateDbContextAsync(cancellation);
+
+                if (entities.Id <= 0)
+                {
+                    ctx.Holidays.Add(entities);
+                }
+                else
+                {
+                    ctx.Holidays.Update(entities);
+                }
+
+                await ctx.SaveChangesAsync();
+
+                return entities.Id;
+
+            }
+            catch (Exception ex)
+            {
+                return ErrorOr.Error.Unexpected($"{ex.InnerException!.Message}");
+            }
+        }
+
+
+
         public async Task<Result<IEnumerable<HolidayVm>>> CreateHolidays(IEnumerable<Holiday> entities)
         {
             try
@@ -118,6 +148,44 @@ namespace Infrastructures.Implements
             }
         }
 
+
+        public async Task<ErrorOr.ErrorOr<IEnumerable<HolidayVm>>> CreateHolidays(List<Holiday> entities)
+        {
+            try
+            {
+                await using var context = await _contextFactory.CreateDbContextAsync();
+
+                ICollection<Holiday> addedEntitities = new List<Holiday>();
+
+                foreach (var entity in entities)
+                {
+
+                    if (await ExistHolidays(entity.HolidayDt)) continue;
+
+                    addedEntitities.Add(entity);
+
+                }
+
+                if (!addedEntitities.Any())
+                {
+                    return ErrorOr.Error.NotFound("No new holidays were added!");
+                }
+
+
+                context.Holidays.AddRange(addedEntitities);
+
+                await context.SaveChangesAsync();
+
+                var mapper = addedEntitities.ToHolidays();
+
+                return ErrorOr.ErrorOrFactory.From(mapper);
+
+            }
+            catch (Exception ex)
+            {
+                return ErrorOr.Error.Unexpected($"{ex.InnerException!.Message}");
+            }
+        }
 
 
         public async Task<Result<Holiday>> GetHoliday(long id)
@@ -249,12 +317,12 @@ namespace Infrastructures.Implements
 
         }
 
-        public async Task<Pager<HolidayVm>> GetHolidays(QueryParam q)
+        public async Task<Pager<HolidayVm>> GetHolidays(QueryParam q, CancellationToken cancellation = default)
         {
             try
             {
                 logger.LogInformation("Fetching paginated holidays with query parameters.");
-                await using var context = await _contextFactory.CreateDbContextAsync();
+                await using var context = await _contextFactory.CreateDbContextAsync(cancellation);
 
 
                 var queries = context.Database
@@ -263,7 +331,7 @@ namespace Infrastructures.Implements
                                       .WhereIf(!string.IsNullOrEmpty(q.Filter),
                                                 x => EF.Functions.Like(x.Description, $"%{q.Filter}%") ||
                                                     EF.Functions.Like(x.HolidayNum.ToString(), $"%{q.Filter}%") ||
-                                                    EF.Functions.Like(x.HolidayName.ToString(), $"%{q.Filter}%") ||
+                                                    EF.Functions.Like(x.HolidayName!.ToString(), $"%{q.Filter}%") ||
                                                     EF.Functions.Like(x.HolidayDt.ToString(), $"%{q.Filter}%"));
 
                 if (q.SortDescending)
@@ -285,9 +353,7 @@ namespace Infrastructures.Implements
 
                 }
 
-                //var builder = new SqlBuilder();
-
-                var items = await queries.AsNoTracking().ToListAsync();
+                var items = await queries.AsNoTracking().ToListAsync(cancellation);
 
                 return new Pager<HolidayVm>
                 {

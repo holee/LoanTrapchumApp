@@ -3,7 +3,10 @@ using Applications.Commons.Extensions;
 using Applications.Enumerations;
 using Applications.Extensions.Enums;
 using Applications.Extensions.NumberExtensions;
+using Applications.Features.LoanPayments.Command.RecievePayment;
+using Applications.Features.LoanPayments.Requests;
 using Applications.Features.Settings.UseCases;
+using Applications.Features.Transactions.LoanTransactions;
 using Applications.Services.Loans;
 using Domains.Models.Identity;
 using Domains.Models.Loans;
@@ -13,8 +16,7 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
 using Radzen;
 using System.Threading.Tasks;
-using Applications.Features.LoanPayments.Requests;
-using Applications.Features.Transactions.LoanTransactions;
+using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 {
@@ -22,11 +24,9 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
     {
         private readonly ISettingServiceImpl _settingService;
 
-        private readonly ILoanPaymentServiceImpl _loanPaymentService;
-        public PaymentModal(ISettingServiceImpl settingService, ILoanPaymentServiceImpl loanPaymentService)
+        public PaymentModal(ISettingServiceImpl settingService)
         {
             _settingService = settingService;
-            _loanPaymentService = loanPaymentService;
         }
 
         [Parameter] public int CurrencyId { get; set; }
@@ -37,7 +37,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 
         bool isBusy = false;
 
-        EditForm editForm;
+        EditForm? editForm;
         void CloseModal()
         {
             DialogService.Close(false);
@@ -135,7 +135,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
         {
 
 
-            if (editForm.EditContext?.Validate() == false)
+            if (editForm?.EditContext?.Validate() == false)
             {
                 return;
             }
@@ -192,17 +192,17 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 
                 if (confirmPayment == false) return;
 
-             
+                var command = new RecievePaymentCommand(tran);
 
-                var result = await _loanPaymentService.RecievePayment(tran, LoanRepayment.BranchRefId);
+                var result = await mediator.Send(command);//_loanPaymentService.RecievePayment(tran, LoanRepayment.BranchRefId);
 
-                if (result.IsSuccess)
+                if (result.IsSuccess())
                 {
                     DialogService.Close(true);
                 }
                 else
                 {
-                    NotificationService.Notify(NotificationSeverity.Error, result.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Error, result.GetMessage());
                 }
 
                 isBusy = false;

@@ -1,32 +1,20 @@
 using Applications.Extensions.DateTimes;
 using Applications.Features.Holidays;
-using Applications.Features.Holidays;
+using Applications.Features.Holidays.Command.CreateHoliday;
+using Applications.Features.Holidays.Command.DeleteHoliday;
+using Applications.Features.Holidays.Queries.GetHolidays;
 using Applications.Responses.ViewModels.Holidays;
 using Applications.Services.Lists;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
-using Radzen;
+using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Lists.Holidays
 {
     public partial class CreateHolidayModal
     {
         [Parameter] public EventCallback OnClose { get; set; }
-
-
-        private readonly IHolidayServiceImpl _holidayService;
-
-        public CreateHolidayModal(IHolidayServiceImpl holidayService)
-        {
-            _holidayService = holidayService;
-        }
-
         private List<HolidayCreateDto> model = new List<HolidayCreateDto>();
-
         private HolidayCreateDto modelDTO = new();
-
         private IEnumerable<HolidayVm> listvm = [];
-
         DateTime currentdt = DateTime.Now;
         bool IsMultiYear = false;
         bool IsDisible = true;
@@ -58,11 +46,11 @@ namespace TrapchumApp.Pages.Lists.Holidays
                     modelDTO.Id = 0;
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
-            
+
         }
         protected async Task FormValidSubmit()
         {
@@ -76,9 +64,11 @@ namespace TrapchumApp.Pages.Lists.Holidays
 
                 modelDTO.HolidayNum = SelectedDate.DayNum();
 
-                var rsp = await _holidayService.CreateOrUpdateHoliday(modelDTO);
+                var command = new CreateHolidayCommand(modelDTO);
 
-                if (rsp.IsSuccess)
+                var rsp = await mediator.Send(command);
+
+                if (rsp.IsSuccess())
                 {
 
                     await GetHolidays(modelDTO.HolidayDt);
@@ -90,7 +80,7 @@ namespace TrapchumApp.Pages.Lists.Holidays
                 }
                 else
                 {
-                    NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Error, rsp.GetMessage());
 
                     modelDTO = new();
 
@@ -111,7 +101,10 @@ namespace TrapchumApp.Pages.Lists.Holidays
         {
             try
             {
-                var rsp = await _holidayService.GetHolidays(dt);
+
+                var query = new GetHolidaysQuery(dt ?? DateTime.Now);
+
+                var rsp = await mediator.Send(query);
 
                 if (rsp.Any())
                 {
@@ -143,16 +136,20 @@ namespace TrapchumApp.Pages.Lists.Holidays
             {
                 try
                 {
-                    var deleteResponse = await _holidayService!.DeleteHoliday(id);
 
-                    if (deleteResponse.IsSuccess)
+                    var command = new DeleteHolidayCommand(id);
+
+                    var rsp = await mediator.Send(command); // _holidayService!.DeleteHoliday(id);
+
+                    if (rsp.IsSuccess())
                     {
                         await GetHolidays(SelectedDate);
-                        NotificationService.Notify(NotificationSeverity.Success, deleteResponse.Data);
+
+                        NotificationService.Notify(NotificationSeverity.Success, rsp.Value.Message);
                     }
                     else
                     {
-                        NotificationService.Notify(NotificationSeverity.Error, "Can not delete");
+                        NotificationService.Notify(NotificationSeverity.Error, rsp.GetMessage());
                     }
                     StateHasChanged();
 

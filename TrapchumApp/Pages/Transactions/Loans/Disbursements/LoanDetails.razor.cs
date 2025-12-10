@@ -3,9 +3,11 @@ using Applications.Calculations.Extensions;
 using Applications.Commons.Mappers;
 using Applications.Enumerations;
 using Applications.Features.LoanPayments.Requests;
+using Applications.Features.Loans.Queries.GetLoanById;
 using Applications.Features.Loans.Responses;
 using Applications.Features.Loans.Services;
 using Applications.Responses.ViewModels.Loans.Schedules;
+using DocumentFormat.OpenXml.Vml.Spreadsheet;
 using System.Threading.Tasks;
 using TrapchumApp.Helpers.Extensions;
 using TrapchumApp.Pages.Transactions.Loans.Repayments;
@@ -213,22 +215,25 @@ public partial class LoanDetails
     {
         isVible = true;
 
-        var rsp = await _dService.GetLoanByIdAsync(LoanId, BranchId, status, true, default);
 
-        if (rsp.IsSuccess)
+        var query = new GetLoanByIdQuery(LoanId, BranchId, status, true);
+
+        var rsp = await mediator.Send(query);  //_dService.GetLoanByIdAsync();
+
+        if (rsp.IsSuccess())
         {
-            loanSchedule = rsp.Data!;
+            loanSchedule = rsp.Value;
 
             _creditAgentId = loanSchedule.CreditAgentRefId;
 
-            Schedules = rsp.Data!.Schedules ?? [];
+            Schedules = rsp.Value.Schedules ?? [];
 
         }
         else
         {
             loanSchedule = new();
 
-            NotificationService.Notify(NotificationSeverity.Info, rsp.ErrMessage);
+            NotificationService.Notify(NotificationSeverity.Info, rsp.GetMessage());
         }
 
         isVible = false;

@@ -1,13 +1,15 @@
 using Applications.Commons.Extensions;
 using Applications.Enumerations;
 using Applications.Extensions.NumberExtensions;
+using Applications.Features.LoanPayments.Command.RecievePayment;
+using Applications.Features.LoanPayments.Requests;
 using Applications.Features.Settings.UseCases;
+using Applications.Features.Transactions.LoanTransactions;
 using Applications.Services.Loans;
 using Domains.Models.Identity;
 using Microsoft.JSInterop;
 using System.Threading.Tasks;
-using Applications.Features.LoanPayments.Requests;
-using Applications.Features.Transactions.LoanTransactions;
+using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments;
 public partial class PaymentTab
@@ -181,15 +183,17 @@ public partial class PaymentTab
                 return;
             }
 
-            var result = await _loanPaymentService.RecievePayment(tran, LoanRepayment.BranchRefId);
+            var command=new RecievePaymentCommand(tran);
 
-            if (result.IsSuccess)
+            var result = await mediator.Send(command); 
+
+            if (result.IsSuccess())
             {
                 await CloseTab.InvokeAsync();
             }
             else
             {
-                NotificationService.Notify(NotificationSeverity.Error, result.ErrMessage);
+                NotificationService.Notify(NotificationSeverity.Error, result.GetMessage());
             }
 
             isBusy = false;

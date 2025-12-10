@@ -1,20 +1,21 @@
 using Applications.Calculations;
+using Applications.Calculations.Extensions;
+using Applications.Commons.Mappers;
 using Applications.Enumerations;
 using Applications.Extensions.NumberExtensions;
 using Applications.Features.LoanPayments.Interfaces;
 using Applications.Features.LoanPayments.Queries.GetLoanSchedulesByLoanIdAsPaging;
 using Applications.Features.LoanPayments.Requests;
+using Applications.Features.Loans.Queries.GetLoanById;
 using Applications.Features.Loans.Responses;
 using Applications.Features.Loans.Services;
 using Applications.Responses.ViewModels.Branches;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Services.Loans;
 using Radzen.Blazor;
+using System.Threading.Tasks;
 using TrapchumApp.Helpers.Extensions;
 using TrapchumApp.Pages.Transactions.Loans.Repayments;
-using Applications.Calculations.Extensions;
-using Applications.Commons.Mappers;
-using System.Threading.Tasks;
 namespace TrapchumApp.Pages.Transactions.RecievePayements;
 
 public partial class RecievePayementSchesules
@@ -36,6 +37,7 @@ public partial class RecievePayementSchesules
     [Parameter] public string? LoanId { get; set; }
     [Parameter] public int BranchId { get; set; } = 0;
     [Parameter] public EventCallback<string> OnClose { get; set; }
+    [Parameter] public EventCallback ReloadTab { get; set; }
     [Parameter, SupplyParameterFromQuery] public string? CreditAgentId { get; set; }
     [Parameter, SupplyParameterFromQuery] public int CurrencyId { get; set; }
 
@@ -187,6 +189,10 @@ public partial class RecievePayementSchesules
 
     }
 
+    private async Task CloseOpenTab()
+    {
+        await OnClose.InvokeAsync(LoanId);
+    }
 
     async Task ApplySchedulePayment()
     {
@@ -249,6 +255,19 @@ public partial class RecievePayementSchesules
         var message = $"Recieve Payment from {LoanSchedule!.AltName}";
 
         bool? confirm = await DialogService.OpenAsync<PaymentModal>(message, parameters, options);
+
+
+        if (confirm == true)
+        {
+
+            disableIsPaidNow = true;
+
+            isPaidNow = false;
+
+            await GetSchedulesByLoanIdAsync(ScheduleStatus.Unpaid);
+
+            await ReloadTab.InvokeAsync();
+        }
 
     }
 
@@ -452,9 +471,12 @@ public partial class RecievePayementSchesules
 
         isLoading = true;
 
-        var responseSchedule = await _loanService.GetLoanByIdAsync(loanId, BranchId, ScheduleStatus.Unpaid, true);
 
-        if (!responseSchedule.IsSuccess && responseSchedule.Data is null)
+        var query = new GetLoanByIdQuery(LoanId, BranchId, ScheduleStatus.Unpaid, true);
+
+        var rsp = await mediator.Send(query);  //_dService.GetLoanByIdAsync();
+
+        if (!rsp.IsSuccess())
         {
             LoanSchedule = null;
             schedules = [];
@@ -463,7 +485,7 @@ public partial class RecievePayementSchesules
             return;
         }
 
-        LoanSchedule = responseSchedule.Data;
+        LoanSchedule = rsp.Value;
 
         if (LoanSchedule is null)
         {

@@ -1,9 +1,8 @@
 ﻿using Applications.Enumerations;
-using Applications.Features.Loans.Responses;
 using Applications.Responses;
-using Applications.Utils;
+using ErrorOr;
 
 namespace Applications.Features.Loans.Queries.GetLoanById;
 
 public record GetLoanByIdQuery(string? LoanId, int? BranchId, ScheduleStatus Status, bool Include = false)
-    : IRequest<Result<VLoanDisbursments>>; 
+    : IRequest<ErrorOr<VLoanDisbursments>>; 

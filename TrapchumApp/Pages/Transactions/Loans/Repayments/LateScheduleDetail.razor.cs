@@ -1,12 +1,15 @@
 using Applications.Commons.Mappers;
 using Applications.Enumerations;
 using Applications.Features.LoanPayments.Requests;
+using Applications.Features.Loans.Queries.GetLoanById;
 using Applications.Features.Loans.Responses;
 using Applications.Features.Loans.Services;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Services.Loans;
 using Domains.Models.Identity;
+using Grpc.Core;
 using Radzen.Blazor;
+using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 {
@@ -62,21 +65,26 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
         async Task GetLoanWithSchedules(int? branchId, string? loanId)
         {
 
-            var rsp = await _loanService.GetLoanByIdAsync(loanId, BranchId, ScheduleStatus.All, false);
 
-            if (rsp.IsSuccess == false)
+            var query = new GetLoanByIdQuery(LoanId, BranchId, ScheduleStatus.All, true);
+
+            var rsp = await mediator.Send(query);  //_dService.GetLoanByIdAsync();
+
+            //var rsp = await _loanService.GetLoanByIdAsync(loanId, BranchId, ScheduleStatus.All, false);
+
+            if (!rsp.IsSuccess())
             {
                 NotificationService.Notify(new NotificationMessage
                 {
                     Severity = NotificationSeverity.Error,
                     Summary = "Error",
-                    Detail = rsp.ErrMessage,
+                    Detail = rsp.GetMessage(),
                     Duration = 3000
                 });
             }
             else
             {
-                LoanSchedule = rsp.Data;
+                LoanSchedule = rsp.Value;
 
                 currencyId = LoanSchedule?.CurrencyId;
             }

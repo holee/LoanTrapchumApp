@@ -12,7 +12,7 @@
                   Click="@ShowLateSchedule"
                   ButtonStyle="ButtonStyle.Secondary" />
 </RadzenStack>
-<RadzenTabs RenderMode="TabRenderMode.Server" SelectedIndex="@_selectedIndex">
+<RadzenTabs RenderMode="TabRenderMode.Server" SelectedIndex="@_selectedIndex" @ref="@refTabs">
     <Tabs>
         <RadzenTabsItem Text="All" Icon="@IconNames.List">
             <Template>
@@ -50,9 +50,7 @@
 @code {
 
     private List<CustomTab> _tabs = [];
-
-
-
+    private RadzenTabs refTabs = default!;
     private void ShowLateScheduleDetails(string loanId)
     {
         var existingIndex = _tabs.FindIndex(t => t.Key == loanId);
@@ -211,7 +209,7 @@
 
     }
 
-    private void ShowPaymentSchedule(VSchedule schedule) 
+    private void ShowPaymentSchedule(VSchedule schedule)
     {
 
         var newKey = $"{schedule.LoanId}_RecievePayment";
@@ -244,6 +242,12 @@
                 CloseTab(schedule.LoanId!);
 
             }));
+
+            builder.AddAttribute(6, "ReloadTab", EventCallback.Factory.Create(this, () =>
+            {
+                refTabs.Reload();
+            }));
+
             builder.SetKey(schedule.LoanId);
 
             builder.CloseComponent();

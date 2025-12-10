@@ -21,7 +21,7 @@
                 <RadzenStack Orientation="Orientation.Horizontal" class="w-100">
                     <RadzenDatePicker TValue="DateTime"
                                       AllowInput="true"
-                                      class="w-100"
+                                      class="rz-w-100"
                                       DateFormat="dd/MM/yyyy"
                                       Placeholder="select holiday date"
                                       @bind-Value="selectedDate"
@@ -36,7 +36,7 @@
             </RadzenColumn>
             <RadzenColumn Size="9">
                 <RadzenDropDown @bind-Value="selectedYear"
-                                class="w-100"
+                                class="rz-w-100"
                                 Data="@years" TValue="int">
 
                 </RadzenDropDown>
@@ -48,7 +48,7 @@
             </RadzenColumn>
             <RadzenColumn Size="9">
                 <RadzenTextArea Placeholder="Enter here..." @bind-Value="Description"
-                                class="h-100 w-100 form-control"
+                                class="rz-h-100 rz-w-100"
                                 aria-label="TextArea with placeholder" />
             </RadzenColumn>
         </RadzenRow>
@@ -64,7 +64,7 @@
              class="rz-m-2"
              Gap="1rem"
              Orientation="Orientation.Horizontal">
-    <RadzenButton Text="Set"
+    <RadzenButton Text="Save"
                   Icon="add"
                   ButtonStyle="ButtonStyle.Success"
                   Click="FormValidSubmit"

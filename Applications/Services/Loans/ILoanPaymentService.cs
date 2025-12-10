@@ -16,7 +16,7 @@ public interface ILoanPaymentServiceImpl
     Task<Result<IEnumerable<LoanPaymentLineVm>>> GetPaymentLinesAsync(int? branchId, string? loanRefId, int? installmentNo);
     Task<Result<ScheduleVm>> GetScheduleByIdAsync(long? scheduleId, int? branchId, string? loanRefId);
     Task<Result<string>> RecievePayment(LoanPaymentDtoCreate req);
-    Task<Result<string>> RecievePayment(LoanPaymentTransactionDtoCreate req, int? brancId);
+    //Task<Result<string>> RecievePayment(LoanPaymentTransactionDtoCreate req, int? brancId);
 }
 
 
@@ -45,19 +45,19 @@ public sealed class LoanPaymentService(ILoanPaymentService lnService) : ILoanPay
         return await lnService.RecievePayment(req);
     }
 
-    public async Task<Result<string>> RecievePayment(LoanPaymentTransactionDtoCreate req, int? branchId)
-    {
+    //public async Task<Result<string>> RecievePayment(LoanPaymentTransactionDtoCreate req, int? branchId)
+    //{
 
-        if (!branchId.HasValue)
-        {
-            return Result.Failure<string>(ErrorResponse.Validation("We required branch to do operation!."));
-        }
+    //    if (!branchId.HasValue)
+    //    {
+    //        return Result.Failure<string>(ErrorResponse.Validation("We required branch to do operation!."));
+    //    }
 
-        var model = req.ToLoanTransction(branchId);
+    //    var model = req.ToLoanTransction(branchId);
 
-        return await lnService.RecievePayment(model);
+    //    return await lnService.RecievePayment(model);
 
-    }
+    //}
 
     public async Task<Result<string>> CreatePayment(LoanPaymentTransactionDtoCreate req, CancellationToken cancellation = default)
     {

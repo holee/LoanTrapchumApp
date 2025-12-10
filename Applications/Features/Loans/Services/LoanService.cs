@@ -137,15 +137,15 @@ namespace Applications.Features.Loans.Services
             throw new NotImplementedException();
         }
 
-        public async Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus status, bool include = false, CancellationToken cancellation = default)
-        {
-            if (string.IsNullOrEmpty(loanId) || !branchId.HasValue)
-            {
-                return Result.Failure<VLoanDisbursments>(ErrorResponse.Validation("LoanId and BranchId must be provided."));
-            }
+        //public async Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus status, bool include = false, CancellationToken cancellation = default)
+        //{
+        //    if (string.IsNullOrEmpty(loanId) || !branchId.HasValue)
+        //    {
+        //        return Result.Failure<VLoanDisbursments>(ErrorResponse.Validation("LoanId and BranchId must be provided."));
+        //    }
 
-            return await loanService.GetLoanByIdAsync(loanId, branchId, status, include, cancellation);
-        }
+        //    return await loanService.GetLoanByIdAsync(loanId, branchId, status, include, cancellation);
+        //}
 
         public async Task<Pager<VLoanDisbursments>> GetLoansByBranchIdAsync(int? branchId, string? userId, LoanStatuses status = LoanStatuses.Active, QueryParam? param = null, CancellationToken cancellation = default)
         {

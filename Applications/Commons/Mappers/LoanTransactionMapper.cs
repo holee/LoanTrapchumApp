@@ -1,4 +1,4 @@
-﻿using Applications.Features.LoanPayments.Requests;
+﻿using Applications.Features.LoanPayments.Command.RecievePayment;
 using Applications.Features.LoanPayments.Requests;
 using Applications.Features.Transactions.LoanTransactions;
 using Domains.Models.Loans;
@@ -42,6 +42,12 @@ public static class LoanTransactionMapper
             CashManagements = req.CashManagements!.ToCashManagements()
         };
     }
+
+    public static LoanTransaction RecieveLoanTransction(this RecievePaymentCommand req)
+    {
+        return req.Request.ToLoanTransction(req.Request.BranchRefId);
+    }
+
 
     public static LoanPayment ToLoanPayment(this LoanPaymentDtoCreate req, int? branchId)
     {

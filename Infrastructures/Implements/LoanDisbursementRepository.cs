@@ -20,6 +20,7 @@ using Applications.Features.Customers.Response;
 using Applications.Features.Loans.Responses;
 using Applications.Features.Collaterals.Dtos;
 using Applications.Bases;
+using Applications.Commons.Messages.LoanDisbursements;
 
 namespace Infrastructures.Implements
 {
@@ -207,7 +208,7 @@ namespace Infrastructures.Implements
 
             await using var _context = await dbContextFactory.CreateDbContextAsync(cancellation);
 
-            if(await IsLoanIsActive(_context, loanId, branchId))
+            if (await IsLoanIsActive(_context, loanId, branchId))
             {
                 return ErrorOr.Error.Conflict("Cannot delete an active loan.");
             }
@@ -239,6 +240,47 @@ namespace Infrastructures.Implements
 
             return Result.Success(new string("New Loan Disbursement was added."));
         }
+
+        public async Task<ErrorOr.ErrorOr<string>> CloseLoanDisbursementAsync(int? branchId, string? loanId, string? customerId, CancellationToken cancellation = default)
+        {
+            await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+            var existingLoan = await context.LoanDisbursments
+                                            .FirstOrDefaultAsync(x => x.LoanId == loanId &&
+                                                                    x.BranchRefId == branchId &&
+                                                                    x.CustomerRefId == customerId &&
+                                                                    x.LoanStatusRefId == (int)LoanStatuses.Active,
+                                                                cancellation);
+
+            if (existingLoan is null)
+            {
+                return ErrorOr.Error.NotFound("No Loan Data found");
+            }
+            // Start Transaction
+            await using var transaction = await context.Database.BeginTransactionAsync(cancellation);
+
+            try
+            {
+                existingLoan.LoanStatusRefId = (int)LoanStatuses.Close;
+
+
+                await context.Customers.Where(x => x.CustomerId == customerId)
+                                 .ExecuteUpdateAsync(p => p.SetProperty(x => x.IsLoanActive, false), cancellation);
+
+                await context.SaveChangesAsync(cancellation);
+
+                await transaction.CommitAsync(cancellation);
+
+                return "Loan disbursement was closed successfully.";
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, ex.InnerException!.Message);
+                await transaction.RollbackAsync(cancellation);
+                return ErrorOr.Error.Failure($"{ex.InnerException!.Message}");
+            }
+        }
+
 
         public async Task<Result<string>> ChangedCreditAgent(int? branchId, LoanChangedCaDtoCreate req)
         {
@@ -420,7 +462,7 @@ namespace Infrastructures.Implements
         }
 
 
-        public async Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus status, bool include = false)
+        public async Task<ErrorOr.ErrorOr<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus status, bool include = false)
         {
             using var db = connectionFactory.CreateConnection();
 
@@ -460,10 +502,10 @@ namespace Infrastructures.Implements
 
                 if (item is null)
                 {
-                    return Result.Failure<VLoanDisbursments>(ErrorResponse.NotFound("No Data was found."));
+                    return ErrorOr.Error.NotFound(LoanMessages.LoanNotFound);
                 }
 
-                return Result.Success(item);
+                return item;
             }
 
             var result = await db.QueryFirstOrDefaultAsync<VLoanDisbursments>("spGetLoanById",
@@ -481,14 +523,14 @@ namespace Infrastructures.Implements
 
             if (result is null)
             {
-                return Result.Failure<VLoanDisbursments>(ErrorResponse.NotFound("No Data was found."));
+                return ErrorOr.Error.NotFound(LoanMessages.LoanNotFound);
             }
 
-            return Result.Success(result);
+            return result;
         }
 
 
-        public async Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus status, bool include = false, CancellationToken cancellation = default)
+        public async Task<ErrorOr.ErrorOr<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus status, bool include = false, CancellationToken cancellation = default)
         {
 
             await using var _context = await dbContextFactory.CreateDbContextAsync(cancellation);
@@ -504,8 +546,8 @@ namespace Infrastructures.Implements
                 var loanDisbursement = await queries.FirstOrDefaultAsync(cancellation);
 
                 return loanDisbursement is not null
-                    ? Result.Success(loanDisbursement)
-                    : Result.Failure<VLoanDisbursments>(ErrorResponse.Validation("No loan disbursement found."));
+                    ? loanDisbursement
+                    : ErrorOr.Error.Validation("No loan disbursement found.");
 
             }
 
@@ -524,8 +566,8 @@ namespace Infrastructures.Implements
                                 .FirstOrDefaultAsync(cancellation);
 
             return item1 is not null
-                                ? Result.Success(item1)
-                                : Result.Failure<VLoanDisbursments>(ErrorResponse.NotFound("No loan disbursement found.")); ;
+                                ? item1
+                                : ErrorOr.Error.NotFound("No loan disbursement found.");
         }
 
 
@@ -729,6 +771,8 @@ namespace Infrastructures.Implements
                                   x.BranchId == branchId &&
                                   x.LoanstatusId == (int)LoanStatuses.Active);
         }
+
+
     }
 }
 

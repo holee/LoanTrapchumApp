@@ -11,7 +11,6 @@
     <Folder Include="Commons\Mappers\Employees\" />
     <Folder Include="Commons\Mappers\LoanDisbursements\" />
     <Folder Include="Commons\Mappers\NewFolder\" />
-    <Folder Include="Commons\Messages\LoanDisbursements\" />
     <Folder Include="Commons\Messages\Journals\" />
     <Folder Include="Commons\Messages\Leadgers\" />
     <Folder Include="Extensions\Identity\Constants\" />
@@ -34,14 +33,12 @@
     <Folder Include="Features\Employees\Mappers\" />
     <Folder Include="Features\Employees\Responses\" />
     <Folder Include="Features\Expenses\Mapper\" />
-    <Folder Include="Features\Holidays\Queries\" />
     <Folder Include="Features\Identity\Users\Interfaces\" />
     <Folder Include="Features\Identity\Users\Mappers\" />
     <Folder Include="Features\Identity\Users\Validations\" />
     <Folder Include="Features\LoanPayments\Enums\" />
     <Folder Include="Features\LoanPayments\Extensions\" />
     <Folder Include="Features\LoanPayments\Mappers\" />
-    <Folder Include="Features\LoanPayments\Command\" />
     <Folder Include="Features\LoanRequests\Enums\" />
     <Folder Include="Features\LoanRequests\Extensions\" />
     <Folder Include="Features\LoanRequests\Mappers\" />

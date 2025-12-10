@@ -1,20 +1,16 @@
+using Applications.Features.Holidays.Command.DeleteHoliday;
+using Applications.Features.Holidays.Queries.GetHolidaysAsPaging;
 using Applications.Interfaces.Lists;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Holidays;
 using Domains.Models.Lists;
 using Radzen;
+using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Lists.Holidays
 {
     public partial class HolidayList
     {
-        private readonly IHolidayService _holidayService;
-
-        public HolidayList(IHolidayService holidayService)
-        {
-            _holidayService = holidayService;
-        }
-
         protected string? searchField = string.Empty;
 
         protected int holiid;
@@ -52,26 +48,15 @@ namespace TrapchumApp.Pages.Lists.Holidays
         {
             isLoading = true;
 
-            try
-            {
+            var param = new QueryParam(pageIndex, pageSize, sortColumn, IsPreviousSelected, sortDescending, q);
 
-                var param = new QueryParam(pageIndex, pageSize, sortColumn, IsPreviousSelected, sortDescending, q);
+            var gridItems = await mediator.Send(new GetHolidaysAsPagingQuery(param));// _holidayService.GetHolidays(param);
 
-                var gridItems = await _holidayService.GetHolidays(param);
+            HolidaysList = gridItems.Items;
 
-                HolidaysList = gridItems.Items;
+            counts = gridItems.Count;
 
-                counts = gridItems.Count;
-
-                isLoading = false;
-            }
-            catch (Exception ex)
-            {
-                HolidaysList = [];
-
-                NotificationService.Notify(NotificationSeverity.Success, $"{ex.InnerException!.Message}");
-
-            }
+            isLoading = false;
 
             StateHasChanged();
         }
@@ -83,10 +68,10 @@ namespace TrapchumApp.Pages.Lists.Holidays
 
             RenderFragment content = (builder) =>
             {
-                builder.AddContent(0, typeof(CreateHolidayModal));
-                builder.AddAttribute(1, "OnClose", EventCallback.Factory.Create(this, () =>
+                builder.OpenComponent(0, typeof(CreateHolidayModal));
+                builder.AddAttribute(1, "Closed", EventCallback.Factory.Create(this, () =>
                 {
-
+                    CloseAddTab(newKey);
                 }));
                 builder.SetKey(newKey);
                 builder.CloseComponent();
@@ -98,6 +83,20 @@ namespace TrapchumApp.Pages.Lists.Holidays
 
             SelectedIndex = _tabs.Count;
         }
+
+        private void CloseAddTab(string key)
+        {
+            var tabToRemove = _tabs.FirstOrDefault(t => t.Key == key);
+
+            if (tabToRemove != null)
+            {
+                _tabs.Remove(tabToRemove);
+
+                SelectedIndex = _tabs.Count;
+            }
+        }
+
+
         protected async void OnSelectChange()
         {
             await GetsHolidays(searchField);
@@ -150,16 +149,20 @@ namespace TrapchumApp.Pages.Lists.Holidays
                      });
             if (comfirm == true)
             {
-                var deleteResponse = await _holidayService!.DeleteHoliday(id);
 
-                if (deleteResponse.IsSuccess)
+                var command = new DeleteHolidayCommand(id);
+
+
+                var rsp = await mediator.Send(command);// _holidayService!.DeleteHoliday(id);
+
+                if (rsp.IsSuccess())
                 {
                     await OnInitializedAsync();
-                    NotificationService.Notify(NotificationSeverity.Success, deleteResponse.Data);
+                    NotificationService.Notify(NotificationSeverity.Success, rsp.Value.Message);
                 }
                 else
                 {
-                    NotificationService.Notify(NotificationSeverity.Error, deleteResponse.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Error, rsp.GetMessage());
                 }
                 StateHasChanged();
 
@@ -169,21 +172,6 @@ namespace TrapchumApp.Pages.Lists.Holidays
 
                 NotificationService.Notify(NotificationSeverity.Warning, "Delete was cancel");
             }
-        }
-        protected async Task OnCheckChanged(long id)
-        {
-
-            holidayvm.Status = false;
-            //var message = await _holidayService.ActivateOrDeactivat(id, holidayvm);
-            //if (message!.IsSuccess)
-            //{
-            //    NotificationService.Notify(NotificationSeverity.Success, message.Message);
-            //}
-            //else
-            //    NotificationService.Notify(NotificationSeverity.Error, message.Message);
-
-
-            await Task.CompletedTask;
         }
 
 

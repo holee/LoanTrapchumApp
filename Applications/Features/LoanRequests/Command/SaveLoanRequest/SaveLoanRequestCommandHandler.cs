@@ -22,8 +22,8 @@ public sealed class SaveLoanRequestCommandHandler : IRequestHandler<SaveLoanRequ
 
         req.LoanRequestStatusRefId = (int)RequestStatus.New;
 
-        return await _loanRequestService.EditLoanRequestAsync(req, cancellationToken);
+        //return await _loanRequestService.EditLoanRequestAsync(req, cancellationToken);
 
-       
+        return await _loanRequestService.SaveLoanRequestAsync(req, cancellationToken);
     }
 }

@@ -1,0 +1,17 @@
+﻿using Applications.Commons.Mappers;
+using Applications.Interfaces.Loans;
+using ErrorOr;
+
+namespace Applications.Features.LoanPayments.Command.RecievePayment;
+
+public sealed class RecievePaymentCommandHandler(ILoanPaymentService _loanPaymentService) : IRequestHandler<RecievePaymentCommand, ErrorOr<string>>
+{
+    public async Task<ErrorOr<string>> Handle(RecievePaymentCommand request, CancellationToken cancellationToken)
+    {
+
+        var model = request.RecieveLoanTransction();
+
+        return await _loanPaymentService.RecievePayment(model, cancellationToken);
+
+    }
+}

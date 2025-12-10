@@ -9,10 +9,6 @@ namespace Applications.Features.LoanPayments.Queries.GetLoanSchedulesByLoanIdAsP
 public sealed class GetLoanSchedulesByLoanIdQueryHandler(ILoanScheduleService loanScheduleService)
     : IRequestHandler<GetLoanSchedulesByLoanIdQuery, ErrorOr<IEnumerable<VSchedule>>>
 {
-    public IEnumerator<VSchedule> GetEnumerator()
-    {
-        throw new NotImplementedException();
-    }
 
     public async Task<ErrorOr<IEnumerable<VSchedule>>> Handle(GetLoanSchedulesByLoanIdQuery request, CancellationToken cancellationToken)
     {

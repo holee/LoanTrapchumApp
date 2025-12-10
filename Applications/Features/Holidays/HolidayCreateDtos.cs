@@ -22,6 +22,11 @@ namespace Applications.Features.Holidays
         {
             return source.Select(x => x.ToHoliday());
         }
+
+        public static List<Holiday> ToHolidays(this List<HolidayCreateDto> source)
+        {
+            return source.Select(x => x.ToHoliday()).ToList();
+        }
     }
 
     public class HolidayCreateDto

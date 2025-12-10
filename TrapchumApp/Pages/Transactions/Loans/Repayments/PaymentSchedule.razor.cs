@@ -6,6 +6,7 @@ using Applications.Extensions.NumberExtensions;
 using Applications.Features.LoanPayments.Interfaces;
 using Applications.Features.LoanPayments.Queries.GetLoanSchedulesByLoanIdAsPaging;
 using Applications.Features.LoanPayments.Requests;
+using Applications.Features.Loans.Queries.GetLoanById;
 using Applications.Features.Loans.Responses;
 using Applications.Features.Loans.Services;
 using Applications.Responses.ViewModels.Branches;
@@ -242,12 +243,7 @@ public partial class PaymentSchedule
 
         loanPayment.LoanPaymentLines.Add(_loanPaymentLine);
 
-        //_isPaymentTab = true;
-
-        //_selectedIndexTab = 2;
-
-        _loanPayment = loanPayment;
-
+        // _loanPayment = loanPayment;
         //LoanPaymentCreate
         var parameters = new Dictionary<string, object?>{
                 {"CurrencyId" , CurrencyId},
@@ -266,7 +262,11 @@ public partial class PaymentSchedule
 
             LoanPaymentLines.Clear();
 
-            await gridSchedule.Reload();
+            _loanPaymentLine = new();
+
+            disableIsPaidNow = true;
+
+            isPaidNow = false;
 
         }
 
@@ -290,14 +290,6 @@ public partial class PaymentSchedule
             return;
 
         }
-
-        //var confirm = await DialogService.Confirm("Do you want to apply this schedules?", "Receive Payment");
-
-        //if (confirm == false)
-        //{
-        //    return;
-        //}
-
 
         var loanPayment = new LoanPaymentDtoCreate
         {
@@ -488,9 +480,11 @@ public partial class PaymentSchedule
 
         isLoading = true;
 
-        var responseSchedule = await _loanService.GetLoanByIdAsync(loanId, BranchId, ScheduleStatus.Unpaid, true);
+        var query = new GetLoanByIdQuery(loanId, BranchId, ScheduleStatus.Unpaid, true);
 
-        if (!responseSchedule.IsSuccess && responseSchedule.Data is null)
+        var rsp = await mediator.Send(query);
+
+        if (!rsp.IsSuccess() && rsp.Value is null)
         {
             LoanSchedule = null;
             schedules = [];
@@ -499,7 +493,7 @@ public partial class PaymentSchedule
             return;
         }
 
-        LoanSchedule = responseSchedule.Data;
+        LoanSchedule = rsp.Value;
 
         if (LoanSchedule is null)
         {
@@ -527,40 +521,34 @@ public partial class PaymentSchedule
 
     async Task GetSchedulesByLoanIdAsync(ScheduleStatus status)
     {
-        try
+        isLoading = true;
+
+        schedules = [];
+
+        _selectedSchedules = [];
+
+        var query = new GetLoanSchedulesByLoanIdQuery(LoanId, BranchId, status);
+
+        var rsp = await mediator.Send(query);
+
+
+        if (rsp.IsSuccess())
         {
-            isLoading = true;
+            schedules = rsp.Value;
 
-            schedules = [];
-
-            _selectedSchedules = [];
-
-            //var rsp = await _scheduleService.GetLoanScheduleByIdAsync(LoanId, BranchId, status);
-
-            var query = new GetLoanSchedulesByLoanIdQuery(LoanId, BranchId, status);
-
-            var rsp = await mediator.Send(query);
-
-
-            if (!rsp.IsError)
-            {
-                schedules = rsp.Value;
-
-                _selectedSchedules = schedules.Take(1).ToList();
-            }
-
-            isLoading = false;
+            _selectedSchedules = schedules.Take(1).ToList();
         }
-        catch (Exception ex)
+        else
         {
-            NotificationService.Notify(NotificationSeverity.Error, ex.Message);
+            NotificationService.Notify(NotificationSeverity.Error, rsp.GetMessage());
+        }
 
-            isLoading = false;
-        }
-        finally
-        {
-            isLoading = false;
-        }
+        isLoading = false;
+
+
+        StateHasChanged();
+
+
     }
 
     async Task SelectedRowEvt(VSchedule schedule)

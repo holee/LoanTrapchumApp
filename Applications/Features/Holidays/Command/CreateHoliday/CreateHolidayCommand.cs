@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Applications.Utils;
+using ErrorOr;
 
-namespace Applications.Features.Holidays.Command.CreateHoliday
-{
-    internal class CreateHolidayCommand
-    {
-    }
-}
+namespace Applications.Features.Holidays.Command.CreateHoliday;
+
+public record CreateHolidayCommand(HolidayCreateDto Request) : IRequest<ErrorOr<long>>;

@@ -455,51 +455,46 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
             model.LoanDocuments.AddRange(documents);
 
-            editForm.EditContext!.Validate();
-
-            try
+            if (editForm.EditContext!.Validate() == false)
             {
-                model.BankRefId = 11;
-                model.LoanSubTypeRefId = 1;
-                model.BranchRefId = BranchId;
-                model.RequestUserRefId = _userId;
-                model.CreditAgentRefId = _user.EmployeeRefId;
-                model.RequestDate = DateTime.UtcNow;
-                model.LoanRequestStatusRefId = (int)state;
-                model.BranchRefId = BranchId;
-                model.AprovedAmount = model.RequestAmount;
-
-                var commandCreate = new CreateLoanRequestCommand(model);
-                
-                var commandSave = new SaveLoanRequestCommand(model);
-
-                var resp = state switch
-                {
-                    RequestStatus.New => await mediator.Send(commandSave),
-
-                    RequestStatus.Requested => await mediator.Send(commandCreate),
-
-                    _ => await mediator.Send(commandCreate)
-
-                };
-
-                if (!resp.IsError)
-                {
-                    NotificationService.Notify(NotificationSeverity.Success, resp.Value.Message);
-
-                    NavigationManager.NavigateTo($"/app/loan/request/{BranchId}/branches");
-                }
-                else
-                {
-                    NotificationService.Notify(NotificationSeverity.Error, resp.GetMessage());
-                }
+                return;
             }
-            catch (Exception ex)
+
+            model.BankRefId = 11;
+            model.LoanSubTypeRefId = 1;
+            model.BranchRefId = BranchId;
+            model.RequestUserRefId = _userId;
+            model.CreditAgentRefId = _user.EmployeeRefId;
+            model.RequestDate = DateTime.UtcNow;
+            model.LoanRequestStatusRefId = (int)state;
+            model.BranchRefId = BranchId;
+            model.AprovedAmount = model.RequestAmount;
+
+            var commandCreate = new CreateLoanRequestCommand(model);
+
+            var commandSave = new SaveLoanRequestCommand(model);
+
+            var resp = state switch
             {
-                NotificationService.Notify(NotificationSeverity.Error, ex.Message);
+                RequestStatus.New => await mediator.Send(commandSave),
 
-                _logger.LogError(ex, ex.Message);
+                RequestStatus.Requested => await mediator.Send(commandCreate),
+
+                _ => await mediator.Send(commandCreate)
+
+            };
+
+            if (!resp.IsError)
+            {
+                NotificationService.Notify(NotificationSeverity.Success, resp.Value.Message);
+
+                NavigationManager.NavigateTo($"/app/loan/request/{BranchId}/branches");
             }
+            else
+            {
+                NotificationService.Notify(NotificationSeverity.Error, resp.GetMessage());
+            }
+
         }
 
 

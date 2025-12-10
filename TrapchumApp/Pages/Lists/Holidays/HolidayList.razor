@@ -89,7 +89,7 @@
         {
             <RadzenTabsItem Text="@tab.Title" Icon="@tab.Icon" @key="@tab.Key">
                 <Template>
-                    <ClosedTab Title="@tab.Title" TabId="@tab.Key" />
+                    <ClosedTab Title="@tab.Title" TabId="@tab.Key" Closed="@(() => CloseAddTab(tab.Key))" />
                 </Template>
                 <ChildContent>
                     @tab.Content

@@ -1,18 +1,14 @@
 ﻿using Applications.Extensions.DateTimes;
 using Applications.Features.Holidays;
+using Applications.Features.Holidays.Command.CreateHolidays;
 using Applications.Services.Lists;
 using Radzen;
+using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Lists.Holidays
 {
     public partial class CreateMultipleModal
     {
-        private readonly IHolidayServiceImpl _holidayService;
-
-        public CreateMultipleModal(IHolidayServiceImpl holidayService)
-        {
-            _holidayService = holidayService;
-        }
 
         IReadOnlyList<int> years = [1, 5, 10, 15, 20];
 
@@ -29,8 +25,7 @@ namespace TrapchumApp.Pages.Lists.Holidays
             {
                 visibled = true;
 
-                ICollection<HolidayCreateDto> model = [];
-
+                List<HolidayCreateDto> model = [];
 
                 for (int i = 1; i <= selectedYear; i++)
                 {
@@ -47,9 +42,11 @@ namespace TrapchumApp.Pages.Lists.Holidays
                     model.Add(item);
                 }
 
-                var rsp = await _holidayService.CreateHolidays(model);
+                var command = new CreateHolidaysCommand(model);
 
-                if (rsp.IsSuccess)
+                var rsp = await mediator.Send(command);
+
+                if (!rsp.IsError)
                 {
 
                     NotificationService.Notify(NotificationSeverity.Success, "Holiday were added.");
@@ -60,7 +57,7 @@ namespace TrapchumApp.Pages.Lists.Holidays
                 }
                 else
                 {
-                    NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Error, rsp.GetMessage());
 
                     visibled = false;
 
