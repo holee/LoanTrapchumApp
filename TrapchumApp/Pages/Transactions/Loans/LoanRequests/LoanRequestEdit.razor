@@ -58,7 +58,7 @@
                                 <RadzenTabsItem Icon="@IconNames.AttachFile" Text="Attarchment">
                                     <LoanRequestDocument Documents="@Documents"
                                                          UploadDocument="@HandleFileDialogue"
-                                                         RemoveDocument="RemoveFile"
+                                                         RemoveDocument="@RemoveFile"
                                                          @ref="DocumentRef"
                                                          ShowDelete="true" />
                                 </RadzenTabsItem>
@@ -92,13 +92,13 @@
 
                 <RadzenButton Disabled="model.RequestAmount <= 0"
                               Size="@Styles.DefaultSize"
-                              Click="HandleSaveLoanRequest"
+                              Click="@HandleSaveLoanRequest"
                               Text="Save"
                               Icon="save"
                               ButtonStyle="ButtonStyle.Primary" />
                 <RadzenButton Disabled="model.RequestAmount <= 0"
                               Size="@Styles.DefaultSize"
-                              Click="HandleCreateRequest"
+                              Click="@HandleCreateRequest"
                               Text="Request"
                               Icon="save"
                               ButtonStyle="ButtonStyle.Success" />

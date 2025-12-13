@@ -11,6 +11,7 @@ using Applications.Features.LoanRequests.Command.CreateLoanRequest;
 using Applications.Features.LoanRequests.Command.DeleteLoanRequestCollateral;
 using Applications.Features.LoanRequests.Command.DeleteLoanRequestDocument;
 using Applications.Features.LoanRequests.Command.DeleteLoanRequestGuarantor;
+using Applications.Features.LoanRequests.Command.SaveEditLoanRequest;
 using Applications.Features.LoanRequests.Command.SaveLoanRequest;
 using Applications.Features.LoanRequests.Interfaces;
 using Applications.Features.LoanRequests.Queryies.GetLoanRequestDetailById;
@@ -137,30 +138,32 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
                 DocumentRef.ReloadDocument();
             }
 
-            if (LoanRequestId.IsNotNullOrEmpty())
+            if (string.IsNullOrEmpty(LoanRequestId))
             {
-                if (!Documents.Any())
-                {
-                    NotificationService.Notify(NotificationSeverity.Error, "There is no any file to upload");
-
-                    return;
-                }
-
-                var documents = Documents.ToLoanDocumentsEdit();
-
-                var res = await mediator.Send(new AddLoanRequestDocumentsCommand(documents)); //_loanRequestService.AddLoanRequestDocumentAsync(documents);
-
-                if (!res.IsError)
-                {
-                    NotificationService.Notify(NotificationSeverity.Error, res.Value);
-
-                    return;
-                }
-
-                await GetLoanRequestDocuments();
-
-                NotificationService.Notify(NotificationSeverity.Success, res.FirstError.Description);
+                return;
             }
+
+            if (!Documents.Any())
+            {
+                NotificationService.Notify(NotificationSeverity.Error, "There is no any file to upload");
+
+                return;
+            }
+
+            var documents = Documents.ToLoanDocumentsEdit();
+
+            var res = await mediator.Send(new AddLoanRequestDocumentsCommand(documents)); 
+
+            if (!res.IsSuccess())
+            {
+                NotificationService.Notify(NotificationSeverity.Error, res.GetMessage());
+                return;
+            }
+
+            await GetLoanRequestDocuments();
+
+            NotificationService.Notify(NotificationSeverity.Success, res.Value);
+
         }
 
         async Task GetLoanRequestDocuments()
@@ -168,7 +171,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
             var query = new GetLoanRequestDocumentQuery(LoanRequestId, BranchId);
 
-            var resp = await mediator.Send(query);// _loanRequestService.GetLoanRequestDocumentAsync(LoanRequestId, BranchId);
+            var resp = await mediator.Send(query);
 
             if (!resp.IsError)
             {
@@ -292,15 +295,14 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         {
             var param = new Dictionary<string, object?>
             {
-                { "CustomerId", model.CustomerRefId }
+                { "CollateralId", model.CustomerRefId }
             };
             var options = new DialogOptions
             {
-                Width = "100vw",
-                Height = "100vh",
+
             };
 
-            await DialogService.OpenAsync<CollateralModalAdd>("Collateral", param, options);
+            await DialogService.OpenAsync<CustomerCollateralLineCreate>("Collateral", param, options);
         }
 
         async void RemovedCollateral(VLoanRequestCollateralLines c)
@@ -490,11 +492,19 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
                 model.AprovedAmount = model.RequestAmount;
 
+                var commandCreate = new CreateLoanRequestCommand(model);
+
+                var commandSaveEdit = new SaveEditLoanRequestCommand(model);
+
+                var commandSave = new SaveLoanRequestCommand(model);
+
                 var resp = state switch
                 {
-                    RequestStatus.New => await mediator.Send(new SaveLoanRequestCommand(model)),
-                    RequestStatus.Requested => await mediator.Send(new CreateLoanRequestCommand(model)),
-                    _ => await mediator.Send(new SaveLoanRequestCommand(model))
+                    RequestStatus.New => await mediator.Send(commandSaveEdit),
+
+                    RequestStatus.Requested => await mediator.Send(commandCreate),
+
+                    _ => await mediator.Send(commandSave)
                 };
 
                 if (!resp.IsError)

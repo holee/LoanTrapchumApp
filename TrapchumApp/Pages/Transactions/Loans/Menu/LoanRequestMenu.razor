@@ -52,19 +52,6 @@
     private string _loanRequestDetailsUrl = "";
     private string _checkloanRequestUrl = "";
     private string _requestNowUrl = "";
-    protected override void OnInitialized()
-    {
-        if (Request is not null)
-        {
-            _requestNowUrl = $"/app/loan/{Request?.LoanRequestId}/request/{Request?.BranchId}/branches/{Request?.CustomerId}/details";
-            _checkloanRequestUrl = $"app/loan/{Request?.LoanRequestId}/request/{Request?.BranchId}/branches/{Request?.CustomerId}/details";
-            _loanRequestDetailsUrl = $"app/loan/{Request?.LoanRequestId}/request/{Request?.BranchId}/branches/{Request?.CustomerId}/details";
-            _requestLoanRequestUrl = $"/app/loan/{Request?.LoanRequestId}/request/{Request?.BranchId}/branches/{Request?.CustomerId}/edit";
-            _disburseRequestLoanUrl = $"/app/loan/request/{Request?.LoanRequestId}/disbursement/{Request?.BranchId}/branches/CreateNew?CustomerRequestId={Request?.CustomerId}";
-        }
-
-        base.OnInitialized();
-    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -75,8 +62,25 @@
             await bState.GetAuthenticatedUser(auth.User);
         }
 
+
+        
+
         await base.OnInitializedAsync();
     }
 
+    protected override void OnParametersSet()
+    {
+
+        if (Request is not null)
+        {
+            _requestNowUrl = $"/app/loan/{Request?.LoanRequestId}/request/{Request?.BranchId}/branches/{Request?.CustomerId}/details";
+            _checkloanRequestUrl = $"app/loan/{Request?.LoanRequestId}/request/{Request?.BranchId}/branches/{Request?.CustomerId}/details";
+            _loanRequestDetailsUrl = $"app/loan/{Request?.LoanRequestId}/request/{Request?.BranchId}/branches/{Request?.CustomerId}/details";
+            _requestLoanRequestUrl = $"/app/loan/{Request?.LoanRequestId}/request/{Request?.BranchId}/branches/{Request?.CustomerId}/edit";
+            _disburseRequestLoanUrl = $"/app/loan/request/{Request?.LoanRequestId}/disbursement/{Request?.BranchId}/branches/CreateNew?CustomerRequestId={Request?.CustomerId}";
+        }
+
+        base.OnParametersSet();
+    }
 
 }

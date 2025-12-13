@@ -33,7 +33,6 @@ public sealed class LoanRequest : BaseEntity
     public decimal? InterestRate { get; set; }
     public decimal? CollectionFeeRate { get; set; }
     public int? Circle { get; set; } = 1;
-   
     public DateTime? AprovedDate { get; set; }
     public decimal? AdminFeeRate { get; set; }
     public decimal? AdminFeeAmount { get; set; }

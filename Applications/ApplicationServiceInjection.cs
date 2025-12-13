@@ -2,6 +2,8 @@
 using Applications.Features.Holidays.Queries.GetHolidaysAsPaging;
 using Applications.Features.LoanPayments.Command.RecievePayment;
 using Applications.Features.LoanPayments.Queries.GetLoanSchedulesByLoanIdAsPaging;
+using Applications.Features.LoanRequests.Command.SaveEditLoanRequest;
+using Applications.Features.LoanRequests.Queryies.GetLoanRequestsDocuments;
 using Applications.Features.Loans.Command.CloseLoanDisbursment;
 using Applications.Features.Loans.Queries.GetLoanById;
 using Applications.Responses.ViewModels.Loans.Schedules;
@@ -142,6 +144,8 @@ public static class ApplicationServiceInjection
 
 
         //// Loan Requests Commands and Queries
+        ///
+        services.AddScoped<IRequestHandler<SaveEditLoanRequestCommand, ErrorOr<RequestResult>>, SaveEditLoanRequestCommandHandler>();
         services.AddScoped<IRequestHandler<SaveLoanRequestCommand, ErrorOr<RequestResult>>, SaveLoanRequestCommandHandler>();
         services.AddScoped<IRequestHandler<CreateLoanRequestCommand, ErrorOr<RequestResult>>, CreateLoanRequestCommandHandler>();
         services.AddScoped<IRequestHandler<DeleteLoanRequestCollateralCommand, ErrorOr<string>>, DeleteLoanRequestCollateralCommandHandler>();
@@ -162,6 +166,7 @@ public static class ApplicationServiceInjection
         services.AddScoped<IRequestHandler<GetLoanRequestDetailByIdQuery, ErrorOr<VLoanRequests>>, GetLoanRequestDetailByIdQueryHandler>();
         services.AddScoped<IRequestHandler<GetLoanRequestByIdQuery, ErrorOr<VLoanRequests>>, GetLoanRequestByIdQueryHandler>();
         services.AddScoped<IRequestHandler<GetLoanRequestsWithCanDisburseQuery, Pager<VLoanRequests>>, GetLoanRequestsWithCanDisburseQueryHandler>();
+        services.AddScoped<IRequestHandler<GetLoanRequestDocumentQuery,ErrorOr<IEnumerable<VLoanRequestsDocuments>>>, GetLoanRequestDocumentQueryHandler>();
 
 
         //Commands for Loans disubursed

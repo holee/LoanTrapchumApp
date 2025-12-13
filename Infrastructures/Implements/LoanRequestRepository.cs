@@ -20,6 +20,7 @@ using Infrastructures.DataAccess;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Threading;
 
 namespace Infrastructures.Implements;
 
@@ -811,30 +812,30 @@ public sealed class LoanRequestRepository(
                 return Error.NotFound("Loan Request does not exist.");
             }
 
-            var documents = request.Adapt<List<LoanDocuments>>();
+            //var documents = request.Adapt<List<LoanDocuments>>();
 
-            foreach (var item in documents)
+            //foreach (var item in documents)
+            //{
+            var existingDoc = existingRequest.LoanDocuments.FirstOrDefault(x => x.Id == request.Id);
+
+            if (existingDoc is null || request.Id == 0)
             {
-                var existingDoc = existingRequest.LoanDocuments.FirstOrDefault(x => x.Id == item.Id);
-
-                if (existingDoc is null || item.Id == 0)
-                {
-                    existingRequest.LoanDocuments.Add(item);
-                }
-                else
-                {
-                    context.Entry(existingDoc).CurrentValues.SetValues(item);
-                }
+                existingRequest.LoanDocuments.Add(request);
             }
-
-
-            foreach (var item in existingRequest.LoanDocuments)
+            else
             {
-                if (!(documents.Any(x => x.Id == item.Id)))
-                {
-                    //context.Remove(item);
-                }
+                context.Entry(existingDoc).CurrentValues.SetValues(request);
             }
+            // }
+
+
+            //foreach (var item in existingRequest.LoanDocuments)
+            //{
+            //    if (!(documents.Any(x => x.Id == item.Id)))
+            //    {
+            //        //context.Remove(item);
+            //    }
+            //}
 
             await context.SaveChangesAsync(cancellation);
 
@@ -845,7 +846,7 @@ public sealed class LoanRequestRepository(
         {
             logger.LogError(ex, ex.Message);
 
-            return Error.Unexpected(ex.Message);
+            return Error.Unexpected("NOT ADDED");
         }
     }
 
@@ -927,24 +928,6 @@ public sealed class LoanRequestRepository(
             }
 
             existingDocument.LoanDocuments = documents;
-
-            //context.Entry(existingDocument).CurrentValues.SetValues(documents);
-
-            //foreach (var item in documents)
-            //{
-            //    var existing = existingDocuments
-            //                        .FirstOrDefault(x => x.Id == item.Id);
-
-            //    if(existing is null || existing.Id == 0)
-            //    {
-            //        context.Add(item);
-            //    }
-            //    else
-            //    {
-            //        context.Entry(existing).CurrentValues.SetValues(item);
-            //    }
-
-            //}
 
             await context.SaveChangesAsync(cancellation);
 
@@ -1062,6 +1045,39 @@ public sealed class LoanRequestRepository(
         }
     }
 
+
+    public async Task<ErrorOr<LoanRequest>> GetEditLoanRequestAsync(int? branchId, string? customerId, string? loanRequestId, CancellationToken cancellation = default)
+    {
+        try
+        {
+            await using var ctx = await contextFactory.CreateDbContextAsync(cancellation);
+
+            var existingRequest = await ctx.LoanRequests
+               .Include(c => c.CollateralLinesLink)
+                   .ThenInclude(x => x.CollateralLine)
+               .Include(g => g.GuarantorsLink)
+                   .ThenInclude(x => x.Guarantor)
+               .Include(x => x.LoanDocuments)
+               .Include(x => x.LoanDescriptions)
+               .FirstOrDefaultAsync(x => x.LoanRequestId == loanRequestId &&
+                           x.CustomerRefId == customerId &&
+                           x.BranchRefId == branchId &&
+                           (x.LoanRequestStatusRefId == (int)RequestStatus.New ||
+                           x.LoanRequestStatusRefId == (int)RequestStatus.Rechecked), cancellation);
+
+
+            if (existingRequest is null)
+            {
+                return Error.NotFound("No Data not found.");
+            }
+            return existingRequest;
+
+        }
+        catch (Exception ex)
+        {
+            return Error.Unexpected($"{ex.Message}");
+        }
+    }
 
 
     public async Task<ErrorOr<VLoanRequests>> GetApprovedLoanRequestAsync(int? branchId, string? customerId, string? loanRequestId, bool include)
@@ -1205,8 +1221,7 @@ public sealed class LoanRequestRepository(
         }
     }
 
-    public async Task<ErrorOr<IEnumerable<VLoanRequestsDocuments>>> GetLoanRequestDocumentAsync(string? loanRequestId,
-    int? branchId)
+    public async Task<ErrorOr<IEnumerable<VLoanRequestsDocuments>>> GetLoanRequestDocumentAsync(string? loanRequestId, int? branchId)
     {
         using var db = await dapperFactory.CreateConnectionAsync();
 

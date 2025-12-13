@@ -1,6 +1,7 @@
 using Applications.Features.Collaterals.Dtos;
 using Applications.Features.Entities.Guarantors;
 using Applications.Features.LoanRequests.Command.CreateLoanRequest;
+using Applications.Features.LoanRequests.Command.SaveEditLoanRequest;
 using Applications.Features.LoanRequests.Command.SaveLoanRequest;
 using Applications.Features.LoanRequests.Requests;
 using Applications.Responses.ViewModels.Loans.Requests;
@@ -176,7 +177,10 @@ public static class LoanRequestDtoCreateExtensions
         return req.Request.MapToLoanRequestSave();
     }
 
-
+    public static LoanRequest MapToLoanRequestSave(this SaveEditLoanRequestCommand req)
+    {
+        return req.Request.MapToLoanRequestSave();
+    }
 
 
 

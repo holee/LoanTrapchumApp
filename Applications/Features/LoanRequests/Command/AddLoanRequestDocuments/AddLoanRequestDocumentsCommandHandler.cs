@@ -16,7 +16,7 @@ public sealed class AddLoanRequestDocumentsCommandHandler : IRequestHandler<AddL
     public async Task<ErrorOr<string>> Handle(AddLoanRequestDocumentsCommand request, CancellationToken cancellationToken)
     {
         
-        var model = request.Requests.Adapt<LoanDocuments>();
+        var model = request.Requests.Adapt<List<LoanDocuments>>();
       
         return await _loanRequestService.AddLoanRequestDocumentAsync(model);
     }

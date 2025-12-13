@@ -136,31 +136,28 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             var options = new DialogOptions
             {
             };
-            IEnumerable<FileModel> uploadedFiles =
-                await DialogService.OpenAsync<FileUploadDialogue>("Upload", options: options);
+            IEnumerable<FileModel> uploadedFiles = await DialogService.OpenAsync<FileUploadDialogue>("Upload", options: options);
 
             if (uploadedFiles is null || !uploadedFiles.Any())
             {
                 return;
             }
 
-            if (uploadedFiles.Any())
+            foreach (var f in uploadedFiles)
             {
-                foreach (var f in uploadedFiles)
+                Documents.Add(new VLoanRequestsDocuments
                 {
-                    Documents.Add(new VLoanRequestsDocuments
-                    {
-                        OriginalName = f.OriginalName,
-                        NewFileName = f.FileName,
-                        FileUrl = f.FileUrl,
-                        FileSize = f.FileSize,
-                        AltText = f.OriginalName,
-                        Description = f.OriginalName
-                    });
-                }
-
-                DocumentRef.ReloadDocument();
+                    OriginalName = f.OriginalName,
+                    NewFileName = f.FileName,
+                    FileUrl = f.FileUrl,
+                    FileSize = f.FileSize,
+                    AltText = f.OriginalName,
+                    Description = f.OriginalName
+                });
             }
+
+            DocumentRef.ReloadDocument();
+
         }
 
 
@@ -321,7 +318,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         {
             var param = new Dictionary<string, object?>
             {
-                { "CustomerId", model.CustomerRefId }
+                { "CollateralId", model.CustomerRefId }
             };
             var options = new DialogOptions
             {
@@ -330,7 +327,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
                 AutoFocusFirstElement = false
             };
 
-            await DialogService.OpenAsync<CollateralModalAdd>("Collateral", param, options);
+            await DialogService.OpenAsync<CustomerCollateralLineCreate>("Collateral", param, options);
         }
 
         async void RemovedCollateral(VLoanRequestCollateralLines c)

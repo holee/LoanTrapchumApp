@@ -10,7 +10,6 @@ public sealed class GetLoanRequestDocumentQueryHandler(ILoanRequestService loanR
 {
     public async Task<ErrorOr<IEnumerable<VLoanRequestsDocuments>>> Handle(GetLoanRequestDocumentQuery request, CancellationToken cancellationToken)
     {
-
         return await loanRequestService.GetLoanRequestDocumentAsync(request.LoanRequestId, request.BranchId);
     }
 }

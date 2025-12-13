@@ -6,6 +6,8 @@
 @using Applications.Features.LoanRequests.Interfaces
 @using TrapchumApp.Pages.Lists.Collaterals
 @using TrapchumApp.Pages.Lists.Customers
+@using TrapchumApp.Pages.Lists.Customers.Expenses
+@using TrapchumApp.Pages.Lists.Customers.Incomes
 @using TrapchumApp.Services
 <table class="table-sm rz-mb-2">
     <tbody>
@@ -86,11 +88,8 @@
     </tbody>
 </table>
 <RadzenRow AlignItems="AlignItems.Center" Visible="@ShowAdditionalInfo">
-    <RadzenColumn Size="12" SizeMD="6">
-        <CustomerInc CustomerId="@CustomerId" ShowAdd="true" ShowReload="false" ShowCommand="true" />
-    </RadzenColumn>
-    <RadzenColumn Size="12" SizeMD="6">
-        <CustomerExp CustomerId="@CustomerId" ShowAdd="true" ShowReload="false" ShowCommand="true" />
+    <RadzenColumn Size="12" SizeMD="12">
+        <CustomerProfit CustomerId="@CustomerId" ShowCommand="true" ShowAction="true" />
     </RadzenColumn>
 </RadzenRow>
 <RadzenRow AlignItems="AlignItems.Center" Visible="@ShowAdditionalInfo">

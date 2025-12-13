@@ -23,6 +23,8 @@
         <RadzenStack Orientation="Orientation.Horizontal"
                      JustifyContent="JustifyContent.SpaceBetween"
                      AlignItems="AlignItems.Center" Gap="0">
+
+
             <RadzenStack Orientation="Orientation.Horizontal"
                          JustifyContent="JustifyContent.SpaceBetween"
                          AlignItems="AlignItems.Center">
@@ -31,6 +33,10 @@
             <RadzenStack Orientation="Orientation.Horizontal"
                          JustifyContent="JustifyContent.SpaceBetween"
                          AlignItems="AlignItems.Center">
+                <RadzenButton ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small">
+                    Notifications
+                    <RadzenBadge Variant="Variant.Outlined" BadgeStyle="BadgeStyle.Light" Text="15" class="rz-ms-2" />
+                </RadzenButton>
                 <TopMenus IsBranchOpen="true" ShowDialogue="ShowCurrencyDialogue" />
                 <Profiles UserId="@userId" />
             </RadzenStack>

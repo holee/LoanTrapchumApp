@@ -52,7 +52,7 @@
                                 <RadzenTabsItem Text="Attarchment" Icon="@IconNames.AttachFile">
                                     <LoanRequestDocument Documents="@Documents"
                                                          UploadDocument="@HandleFileDialogue"
-                                                         RemoveDocument="RemoveFile"
+                                                         RemoveDocument="@RemoveFile"
                                                          @ref="DocumentRef"
                                                          ShowDelete="true"/>
                                 </RadzenTabsItem>
