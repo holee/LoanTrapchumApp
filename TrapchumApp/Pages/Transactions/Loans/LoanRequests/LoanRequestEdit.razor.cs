@@ -1,5 +1,6 @@
 using Applications.Calculations;
 using Applications.Commons.Mappers;
+using Applications.Commons.Mappers.Notifications;
 using Applications.Enumerations;
 using Applications.Extensions;
 using Applications.Features.Collaterals.Dtos;
@@ -7,18 +8,19 @@ using Applications.Features.Customers.Extensions;
 using Applications.Features.Customers.Response;
 using Applications.Features.Customers.UseCases;
 using Applications.Features.LoanRequests.Command.AddLoanRequestDocument;
+using Applications.Features.LoanRequests.Command.ApprovedLoanRequest;
 using Applications.Features.LoanRequests.Command.CreateLoanRequest;
 using Applications.Features.LoanRequests.Command.DeleteLoanRequestCollateral;
 using Applications.Features.LoanRequests.Command.DeleteLoanRequestDocument;
 using Applications.Features.LoanRequests.Command.DeleteLoanRequestGuarantor;
 using Applications.Features.LoanRequests.Command.SaveEditLoanRequest;
 using Applications.Features.LoanRequests.Command.SaveLoanRequest;
-using Applications.Features.LoanRequests.Interfaces;
 using Applications.Features.LoanRequests.Queryies.GetLoanRequestDetailById;
 using Applications.Features.LoanRequests.Queryies.GetLoanRequestsDocuments;
 using Applications.Features.LoanRequests.Requests;
-using Applications.Features.LoanRequests.UseCases;
 using Applications.Features.Loans.Requests;
+using Applications.Features.Notifications.Command.CreateNotification;
+using Applications.Features.Notifications.Dto;
 using Applications.Interfaces.Lists;
 using Applications.Interfaces.Loans;
 using Applications.Interfaces.setting;
@@ -27,6 +29,7 @@ using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Auths;
 using Applications.Responses.ViewModels.Loans.LoanRequests;
 using Applications.Responses.ViewModels.Loans.Requests;
+using Domains.Enumerations;
 using Domains.Models.Files;
 using Infrastructures.Authorizations;
 using Microsoft.AspNetCore.Authorization;
@@ -34,6 +37,7 @@ using System.Security.Claims;
 using TrapchumApp.Helpers.Extensions;
 using TrapchumApp.Pages.Lists.Collaterals;
 using TrapchumApp.Pages.Lists.OtherNames;
+using TrapchumApp.Shared;
 
 namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 {
@@ -43,7 +47,6 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         private readonly IAppSettingService _settingsServiceImpl;
         private readonly IHolidayService _holidayService;
         private readonly ILogger<LoanRequestCreate> _logger;
-        //private readonly ICreateNewLoanRequestUseCase _createNewLoanRequestUseCase;
         private readonly GetCustomersUseCase _getCustomerUseCase;
         public LoanRequestEdit(ILoanSettingService loanSettingService, IAppSettingService settingService,
             IHolidayService holidayService, ILogger<LoanRequestCreate> logger, GetCustomersUseCase getCustomerUseCase)
@@ -58,6 +61,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         [Parameter] public string? CustomerId { get; set; }
         [Parameter] public string? LoanRequestId { get; set; }
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+        [CascadingParameter] CascadingAppState bState { get; set; } = default!;
         IEnumerable<LoanScheduleDtoCreate> previewSchedule = [];
         IEnumerable<VCustomerList> _customers = [];
         IEnumerable<VCustomerDetails>? CustomersList = [];
@@ -152,7 +156,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
             var documents = Documents.ToLoanDocumentsEdit();
 
-            var res = await mediator.Send(new AddLoanRequestDocumentsCommand(documents)); 
+            var res = await mediator.Send(new AddLoanRequestDocumentsCommand(documents));
 
             if (!res.IsSuccess())
             {
@@ -492,31 +496,45 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
                 model.AprovedAmount = model.RequestAmount;
 
-                var commandCreate = new CreateLoanRequestCommand(model);
-
                 var commandSaveEdit = new SaveEditLoanRequestCommand(model);
 
-                var commandSave = new SaveLoanRequestCommand(model);
+                var resp = await mediator.Send(commandSaveEdit);
 
-                var resp = state switch
-                {
-                    RequestStatus.New => await mediator.Send(commandSaveEdit),
-
-                    RequestStatus.Requested => await mediator.Send(commandCreate),
-
-                    _ => await mediator.Send(commandSave)
-                };
-
-                if (!resp.IsError)
-                {
-                    NotificationService.Notify(NotificationSeverity.Success, resp.Value.Message);
-
-                    NavigationManager.NavigateTo($"/app/loan/request/{BranchId}/branches");
-                }
-                else
+                if (resp.IsError)
                 {
                     NotificationService.Notify(NotificationSeverity.Error, resp.FirstError.Description);
+
+                    return;
                 }
+
+
+                var notificationCreate = new NotificationDtoCreate
+                {
+                    BranchId = BranchId,
+                    ReferenceId = LoanRequestId,
+                    UserId = _userId,
+                    Title = "Loan Request",
+                    Type = NotificationType.Request.ToString(),
+                    CustomerId = CustomerId,
+                    Message = $"Loan request for {SelectedCustomer?.FullName} has been created.",
+                    Url = $"/App/Loans/Requests/Details/{BranchId}/{CustomerId}/{LoanRequestId}",
+                    IsRead = false,
+                    CreatedAt = DateTime.Now
+                };
+
+                var commandCreateNoficaiton = new CreateNotificationCommand(notificationCreate);
+
+                var rsp = await mediator.Send(commandCreateNoficaiton);
+
+                if (rsp.IsSuccess())
+                {
+                    _notiService.AddNotification(notificationCreate.ToDtoAddNotification());
+                }
+
+                NotificationService.Notify(NotificationSeverity.Success, resp.Value.Message);
+
+                NavigationManager.NavigateTo($"/App/Loans/Requests/{BranchId}/Branches");
+
             }
             catch (Exception ex)
             {

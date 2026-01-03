@@ -1,5 +1,11 @@
-﻿using Applications.Enumerations;
+﻿using Applications.Bases;
+using Applications.Commons.Messages.LoanDisbursements;
+using Applications.Enumerations;
 using Applications.Extensions;
+using Applications.Features.Collaterals.Dtos;
+using Applications.Features.CreditAgents.Requests;
+using Applications.Features.Customers.Response;
+using Applications.Features.Loans.Responses;
 using Applications.Interfaces.Loans;
 using Applications.Responses;
 using Applications.Responses.Paginations;
@@ -15,17 +21,11 @@ using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Data;
-using Applications.Features.CreditAgents.Requests;
-using Applications.Features.Customers.Response;
-using Applications.Features.Loans.Responses;
-using Applications.Features.Collaterals.Dtos;
-using Applications.Bases;
-using Applications.Commons.Messages.LoanDisbursements;
 
 namespace Infrastructures.Implements
 {
 
-    public class LoanDisbursementRepository : ILoanService
+    public sealed class LoanDisbursementRepository : ILoanService
     {
         private readonly ILogger<LoanDisbursementRepository> logger;
         private readonly IDapperConnectionFactory connectionFactory;
@@ -366,29 +366,6 @@ namespace Infrastructures.Implements
             }
         }
 
-        public async Task<Pager<VLoanDisbursments>> GetLoansByBranchId(int? branchId, string? creditAgentId, LoanStatuses status = LoanStatuses.Active, QueryParam? param = null)
-        {
-            using var db = connectionFactory.CreateConnection();
-
-            var queries = await db.QueryAsync<VLoanDisbursments>(ProcedureConstant.SpGetLoansByBranchId, new
-            {
-                @BranchId = branchId,
-                @CreditAgentId = creditAgentId,
-                @LoanStatusId = (int)status,
-                @SortColumn = param?.SortColumn,
-                @SortDescending = param?.SortDescending,
-                @PageIndex = param?.Skip ?? 1,
-                @PageSize = param?.PageSize ?? 25,
-                @Filter = param?.Filter ?? string.Empty
-            }, commandType: CommandType.StoredProcedure);
-
-            var counts = queries.Count();
-
-            var items = queries.ToList();
-
-            return new Pager<VLoanDisbursments>(items, counts);
-        }
-
 
         public async Task<Pager<VLoanDisbursments>> GetLoansByBranchId(int? branchId, string? creditAgentId, LoanStatuses status = LoanStatuses.Active, QueryParam? param = null, CancellationToken cancellation = default)
         {
@@ -424,6 +401,55 @@ namespace Infrastructures.Implements
 
             return new Pager<VLoanDisbursments>(items, counts);
         }
+
+
+        public async Task<Pager<VLoanDisbursments>> GetLoansByBranchId(int? branchId, string? userId, LoanStatuses status = LoanStatuses.Active, DateTime? start = null, DateTime? to = null, QueryParam? param = null, CancellationToken cancellation = default)
+        {
+
+            param ??= new QueryParam();
+
+            await using var _context = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+            var queries = _context.VLoanDisbursements
+                                 .Where(x => x.BranchId == branchId)
+                                 .WhereIf((int)status > 0, x => x.LoanstatusId == (int)status)
+                                 .WhereIf(!string.IsNullOrEmpty(userId), x => x.CreditAgentRefId == userId ||
+                                                                                     x.AprovedUserId == userId ||
+                                                                                     x.RequestUserRefId == userId);
+
+            if (start.HasValue)
+            {
+                var filterTo = to ?? DateTime.Now;
+                queries = queries.Where(x => x.RegisterDate >= start && x.RegisterDate <= filterTo);
+            }
+
+            if (!string.IsNullOrEmpty(param?.Filter))
+            {
+                queries = queries.Where(x => EF.Functions.Like(x.CustomerName!, $"{param!.Filter}%") ||
+                                             EF.Functions.Like(x.AgentName!, $"{param!.Filter}%") ||
+                                             EF.Functions.Like(x.Phone!, $"{param!.Filter}%") ||
+                                             EF.Functions.Like(x.AltName!, $"{param!.Filter}%"));
+            }
+
+
+            // 🔹 Sorting
+            if (!string.IsNullOrWhiteSpace(param!.SortColumn))
+            {
+                queries = param.SortDescending
+                    ? queries.OrderByDescending(x => EF.Property<object>(x, param.SortColumn))
+                    : queries.OrderBy(x => EF.Property<object>(x, param.SortColumn));
+            }
+
+            var counts = await queries.CountAsync(cancellation);
+
+            var items = await queries.Skip(param.Skip).Take(param.PageSize)
+                            .AsNoTracking()
+                            .ToListAsync(cancellation);
+
+            return new Pager<VLoanDisbursments>(items, counts);
+        }
+
+
 
 
         public async Task<(Pager<VLoanDisbursments>, int Count)> GetLoansByBranchAsync(int? branchId, string? creditAgentId, LoanStatuses status = LoanStatuses.Active, QueryParam? param = null, CancellationToken cancellation = default)
@@ -1006,3 +1032,27 @@ namespace Infrastructures.Implements
 //        return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}"));
 //    }
 //}
+
+//public async Task<Pager<VLoanDisbursments>> GetLoansByBranchId(int? branchId, string? creditAgentId, LoanStatuses status = LoanStatuses.Active, QueryParam? param = null)
+//{
+//    using var db = connectionFactory.CreateConnection();
+
+//    var queries = await db.QueryAsync<VLoanDisbursments>(ProcedureConstant.SpGetLoansByBranchId, new
+//    {
+//        @BranchId = branchId,
+//        @CreditAgentId = creditAgentId,
+//        @LoanStatusId = (int)status,
+//        @SortColumn = param?.SortColumn,
+//        @SortDescending = param?.SortDescending,
+//        @PageIndex = param?.Skip ?? 1,
+//        @PageSize = param?.PageSize ?? 25,
+//        @Filter = param?.Filter ?? string.Empty
+//    }, commandType: CommandType.StoredProcedure);
+
+//    var counts = queries.Count();
+
+//    var items = queries.ToList();
+
+//    return new Pager<VLoanDisbursments>(items, counts);
+//}
+

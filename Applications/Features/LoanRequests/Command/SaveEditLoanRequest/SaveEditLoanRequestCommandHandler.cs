@@ -20,8 +20,6 @@ public sealed class SaveEditLoanRequestCommandHandler : IRequestHandler<SaveEdit
 
         var req = request.MapToLoanRequestSave();
 
-        req.LoanRequestStatusRefId = (int)RequestStatus.New;
-
         return await _loanRequestService.EditLoanRequestAsync(req, cancellationToken);
 
     }

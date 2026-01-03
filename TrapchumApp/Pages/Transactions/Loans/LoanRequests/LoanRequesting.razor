@@ -1,0 +1,21 @@
+﻿@page "/App/Loans/Requestings/{BranchId:int}/Branches"
+@using Domains.Models.Identity
+<LoanRequestRequesting BranchId="@BranchId" />
+@code {
+    [CascadingParameter] Task<AuthenticationState> AuthState { get; set; } = default!;
+    [CascadingParameter] CascadingAppState AppState { get; set; } = default!;
+    [Parameter] public int BranchId { get; set; } = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var auth = await AuthState;
+
+        if (auth.User.Identity is not null && auth.User.Identity.IsAuthenticated)
+        {
+            //await AppState.GetNotifications(auth.User.GetId(), BranchId);
+
+        }
+
+        await base.OnInitializedAsync();
+    }
+}

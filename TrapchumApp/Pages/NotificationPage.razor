@@ -1,0 +1,406 @@
+﻿@page "/App/Notifications"
+@attribute [StreamRendering()]
+@using Applications.Enumerations
+@using Applications.Features.Notifications.Dto
+@using Applications.Features.Notifications.Queries.GetNotification
+@using Applications.Responses.Paginations
+@using Domains.Enumerations
+@using Humanizer
+@using System.Threading.Tasks
+@using TrapchumApp.Helpers.Extensions
+<PageTitle>Notification</PageTitle>
+<RadzenFieldset Text="Notifications">
+    <GridToolbar>
+        <LeftChildren>
+            <RadzenDropDown Data="@NotificationStatuses"
+                            TValue="string"
+                            TextProperty="@nameof(BaseEnum.Name)"
+                            ValueProperty="@nameof(BaseEnum.Name)"
+                            @bind-Value="@_selectedStatus"
+                            SelectedItemChanged="@SelectedStatusItemChanged"
+                            Placeholder="Select Status">
+            </RadzenDropDown>
+            <RadzenDropDown Data="@NotificationTypes"
+                            TValue="string"
+                            TextProperty="@nameof(BaseEnum.Name)"
+                            ValueProperty="@nameof(BaseEnum.Name)"
+                            SelectedItemChanged="@SelectedItemChanged"
+                            @bind-Value="@_selectedNotificationType"
+                            Placeholder="Select a notification type">
+            </RadzenDropDown>
+        </LeftChildren>
+    </GridToolbar>
+    <RadzenDataGrid Data="@_notifications"
+                    Responsive="true"
+                    Density="Density.Compact"
+                    AllowAlternatingRows="true"
+                    AllowPaging="true"
+                    RowRender="@OnRowRender"
+                    GridLines="DataGridGridLines.Both"
+                    IsLoading="@_isLoading"
+                    RowDoubleClick="@OnRowDoubleClick"
+                    RowSelect="@OnRowSelected"
+                    Count="@_counts"
+                    PageSize="@_pageSize"
+                    PageSizeOptions="@StorageConstant.PageSizeOptions"
+                    PagerHorizontalAlign="HorizontalAlign.Right"
+                    PagerPosition="PagerPosition.Bottom"
+                    LoadData="@OnLoadData"
+                    PageSizeChanged="@OnPageSizeChanged"
+                    TItem="NotificationDto">
+        <Columns>
+            <RadzenDataGridColumn TItem="NotificationDto"
+                                  Property="@nameof(NotificationDto.Id)"
+                                  Width="5rem"
+                                  TextAlign="TextAlign.Center"
+                                  Title="#">
+                <Template>
+                    @context.RowIndex
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="NotificationDto"
+                                  Property="@nameof(NotificationDto.Type)"
+                                  Title="Type" />
+            <RadzenDataGridColumn TItem="NotificationDto"
+                                  Property="@nameof(NotificationDto.Message)"
+                                  Title="Message" />
+            <RadzenDataGridColumn TItem="NotificationDto"
+                                  Property="@nameof(NotificationDto.Title)"
+                                  Title="Title" />
+            <RadzenDataGridColumn TItem="NotificationDto"
+                                  Property="@nameof(NotificationDto.CreatedAt)"
+                                  Title="Created">
+                <Template>
+                    <span>@context.CreatedAt.ToString("g")</span>
+                    <small class="text-muted">@context.CreatedAt.Humanize()</small>
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="NotificationDto"
+                                  Property="@nameof(NotificationDto.IsRead)"
+                                  Width="6rem"
+                                  TextAlign="TextAlign.Center"
+                                  Title="Is Read">
+                <Template>
+
+                    @if (context.IsRead)
+                    {
+                        <RadzenText Text="Read" TagName="TagName.Span" TextStyle="TextStyle.Subtitle2" />
+                    }
+                    else
+                    {
+                        <RadzenText Text="Unread" TagName="TagName.Span" TextStyle="TextStyle.Subtitle2" />
+                    }
+
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="NotificationDto"
+                                  Property="@nameof(NotificationDto.CreatedAt)"
+                                  TextAlign="TextAlign.Center"
+                                  Width="5rem"
+                                  Title="Actions">
+                <Template>
+                    <RadzenButton Variant="Variant.Text"
+                                  Size="ButtonSize.ExtraSmall"
+                                  Click="@((args)=>ShowMenus(args, context))"
+                                  Icon="@IconNames.MoreVert">
+
+                    </RadzenButton>
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+
+</RadzenFieldset>
+
+@code {
+    private IEnumerable<NotificationDto> _notifications = [];
+    private BaseEnum[] NotificationTypes = [];
+    private BaseEnum[] NotificationStatuses = [];
+    private int _pageIndex = 0;
+    private int _pageSize = 15;
+    private int _counts = 0;
+    private string? _filter = null;
+    private bool _isLoading = false;
+    private string _selectedNotificationType = "";
+    private string _selectedStatus = "";
+    [CascadingParameter] Task<AuthenticationState> AuthState { get; set; } = default!;
+    [CascadingParameter] CascadingAppState AppState { get; set; } = default!;
+    protected override void OnInitialized()
+    {
+        NotificationTypes = default(NotificationType).ToEnumArray();
+
+        NotificationStatuses = default(NotificationStatus).ToEnumArray();
+
+        _selectedNotificationType = NotificationType.All.ToString();
+
+        _selectedStatus = NotificationStatus.Unread.ToString();
+
+        base.OnInitialized();
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthState;
+
+        var selectedType = _selectedStatus.ToEnum<NotificationStatus>();
+
+        if (authState is not null && authState.User.Identity!.IsAuthenticated)
+        {
+            await AppState.GetBranchIdByUser();
+
+            await AppState.GetUserId();
+
+            await GetNotifications();
+
+        }
+
+        await base.OnInitializedAsync();
+    }
+
+    private async Task OnLoadData(LoadDataArgs args)
+    {
+
+        _pageIndex = args.Skip ?? 0;
+
+        _pageSize = args.Top ?? 15;
+
+        _filter = args.Filter.Trim() ?? string.Empty;
+
+        await GetNotifications(_filter);
+
+    }
+
+    private async Task SelectedStatusItemChanged(object value)
+    {
+        var selected = value as BaseEnum;
+
+        var selectedType = selected!.Name.ToEnum<NotificationStatus>();
+
+        _selectedStatus = selectedType.ToString();
+
+        await GetNotifications(_filter);
+
+
+    }
+
+
+    private async Task SelectedItemChanged(object value)
+    {
+        var selected = value as BaseEnum;
+
+        var statusSelected = _selectedStatus.ToEnum<NotificationStatus>();
+
+        if (selected != null)
+        {
+            if (selected.Name == NotificationType.All.ToString())
+            {
+                await GetNotifications();
+            }
+            else
+            {
+                await GetNotifications(selected.Name);
+            }
+        }
+    }
+
+    private void OnPageSizeChanged(int size)
+    {
+        _pageIndex = 0;
+
+        _pageSize = size;
+
+        _ = GetNotifications(_filter);
+    }
+
+
+    private async Task GetNotifications(string? filter = null)
+    {
+
+        _isLoading = true;
+
+        var statusSelected = _selectedStatus.ToEnum<NotificationStatus>();
+
+        var param = new QueryParam(_pageIndex, _pageSize, string.Empty, filter: filter);
+
+        var query = new GetNotificationAsPagingQuery(AppState.UserId, AppState.BranchId, statusSelected, param);
+
+        var command = await mediator.Send(query);
+
+        _notifications = command.Items;
+
+        _counts = command.Count;
+
+        _isLoading = false;
+
+        StateHasChanged();
+    }
+
+
+
+
+    private void OnRowRender(RowRenderEventArgs<NotificationDto> args)
+    {
+        if (!args.Data.IsRead)
+        {
+            args.Attributes.Add("style", "cursor:pointer;");
+        }
+
+        args.Data.RowIndex = args.Index + 1;
+
+    }
+
+    private async Task OnRowDoubleClick(DataGridRowMouseEventArgs<NotificationDto> args)
+    {
+
+        var arg = args.Data;
+
+        await OnRowDoubleClick(arg);
+    }
+
+
+
+    private async Task OnRowDoubleClick(NotificationDto arg)
+    {
+
+        if (AppState.CanRequest && arg.Type == NotificationType.New.ToString())
+        {
+            var result = await mediator.Send(new MarkUnreadNotificationCommand(arg.Id, arg.BranchId));
+
+            if (result.IsSuccess())
+            {
+
+                _notiService.MarkAsRead(arg);
+
+                NavigationManager.NavigateTo($"App/Loans/{arg.ReferenceId}/Requests/{arg.BranchId}/Branches/{arg.CustomerId}/Details");
+            }
+
+        }
+
+
+        if (AppState.CanApproved && arg.Type == NotificationType.Request.ToString()
+                 && arg.IsRead == false)
+        {
+            var result = await mediator.Send(new MarkUnreadNotificationCommand(arg.Id, arg.BranchId));
+
+            if (result.IsSuccess())
+            {
+                _notiService.MarkAsRead(arg);
+
+                NavigationManager.NavigateTo($"App/Loans/{arg.ReferenceId}/Requests/{arg.BranchId}/Branches/{arg.CustomerId}/Details");
+            }
+
+        }
+        else
+        {
+            // var result = await mediator.Send(new MarkUnreadNotificationCommand(arg.Id, arg.BranchId));
+
+            // if (result.IsSuccess())
+            // {
+            //     _notiService.MarkAsRead(arg);
+
+            //     NavigationManager.NavigateTo($"App/Loans/{arg.ReferenceId}/Requests/{arg.BranchId}/Branches/{arg.CustomerId}/Details");
+            // }
+        }
+
+
+        if (AppState.CanDisbursed && arg.Type == NotificationType.Disbursement.ToString())
+        {
+            var result = await mediator.Send(new MarkUnreadNotificationCommand(arg.Id, arg.BranchId));
+
+            if (result.IsSuccess())
+            {
+                _notiService.MarkAsRead(arg);
+
+                NavigationManager.NavigateTo($"/App/Loans/{arg.ReferenceId}/Disbursements/{arg.BranchId}/Branches/CreateNew?CustomerId={arg.CustomerId}");
+            }
+        }
+
+        if (AppState.CanRecievePayment && arg.Type == NotificationType.Payment.ToString())
+        {
+
+            var result = await mediator.Send(new MarkUnreadNotificationCommand(arg.Id, arg.BranchId));
+
+            if (result.IsSuccess())
+            {
+                _notiService.MarkAsRead(arg);
+
+                NavigationManager.NavigateTo($@"/App/Loans/{arg.BranchId}/Branches/{arg.ReferenceId}/Schedules");
+            }
+        }
+
+    }
+
+
+
+    void OnRowSelected(NotificationDto args)
+    {
+        // No implementation needed for now
+    }
+
+
+    void ShowMenus(MouseEventArgs args, NotificationDto notification)
+    {
+        ContextMenuService.Open(args, ds =>@<RadzenMenu>
+
+        @if (AppState.CanDisbursed && notification.Type == NotificationType.Disbursement.ToString()
+            && notification.IsRead == false)
+        {
+
+                <RadzenMenuItem Visible="@(AppState.CanDisbursed && notification.Type == NotificationType.Disbursement.ToString())"
+                                Click="@(()=>OnRowDoubleClick(notification))"
+                                Text="Disburse Loan" />
+        }
+        @if (AppState.CanDisbursed && notification.Type == NotificationType.Disbursement.ToString()
+            && notification.IsRead)
+        {
+                <RadzenMenuItem Text="Disburse Details"
+                                Click="@(()=>OnRowDoubleClick(notification))" />
+
+        }
+
+        @if (AppState.CanApproved && notification.Type == NotificationType.Request.ToString()
+            && !notification.IsRead)
+        {
+                <RadzenMenuItem Visible="@AppState.CanApproved"
+                                Click="@(()=>OnRowDoubleClick(notification))"
+                                Text="Approve Loan" />
+        }
+        @if (AppState.CanApproved && notification.Type == NotificationType.Request.ToString()
+            && notification.IsRead)
+        {
+                <RadzenMenuItem Text="Request Details"
+                                Click="@(()=>OnRowDoubleClick(notification))" />
+        }
+
+
+        @if (AppState.CanRecievePayment && notification.Type == NotificationType.Payment.ToString()
+            && !notification.IsRead)
+        {
+                <RadzenMenuItem Visible="@(AppState.CanRecievePayment && notification.Type == NotificationType.Payment.ToString())"
+                                Icon="@IconNames.Paid"
+                                Click="@(()=>OnRowDoubleClick(notification))"
+                                Text="Receive Payment" />
+        }
+        @if (AppState.CanRecievePayment && notification.Type == NotificationType.Payment.ToString()
+            && notification.IsRead)
+        {
+                <RadzenMenuItem Text="Schedule Details"
+                                Click="@(()=>OnRowDoubleClick(notification))" />
+        }
+
+        @if (AppState.CanRequest && notification.Type == NotificationType.New.ToString() &&
+            !notification.IsRead)
+        {
+                <RadzenMenuItem Visible="@(AppState.CanRequest && notification.Type == NotificationType.New.ToString())"
+                                Click="@(()=>OnRowDoubleClick(notification))"
+                                Text="Request Loan" />
+        }
+        @if (AppState.CanRequest && notification.Type == NotificationType.New.ToString() &&
+            notification.IsRead)
+        {
+                <RadzenMenuItem Visible="@(AppState.CanRequest && notification.Type == NotificationType.New.ToString())"
+                                Click="@(()=>OnRowDoubleClick(notification))"
+                                Text="Request Details" />
+        }
+        </RadzenMenu>);
+    }
+}

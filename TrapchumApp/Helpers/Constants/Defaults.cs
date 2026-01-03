@@ -2,8 +2,8 @@
 
     public static class Defaults
     {
-        public const decimal DefaultExchangeRate = 4000.00M;
-        public const decimal DefaultSpotRate = 3900.00M;
+        public const decimal ExchangeRate = 4000.00M;
+        public const decimal SpotRate = 3900.00M;
         public const string SellCurrency = "Sell Currency";
         public const string BuyCurrency = "Buy Currency";
         public const string FXGAIN_KHR = "FXGAIN-KHR";

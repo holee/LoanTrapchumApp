@@ -69,8 +69,6 @@ namespace TrapchumApp.Pages.Transactions.Branches
                 await GetCurrencyNotes(currencyId, BranchId);
             }
 
-
-
             await bState.GetBranchState(BranchId);
 
             await base.OnInitializedAsync();

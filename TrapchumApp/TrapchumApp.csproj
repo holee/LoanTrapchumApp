@@ -24,6 +24,7 @@
     <PackageReference Include="IronPdf" Version="2025.10.8" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="9.0.10" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.10" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.11" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.10">
       <PrivateAssets>all</PrivateAssets>
@@ -41,6 +42,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Helpers\Filters\" />
     <Folder Include="Views\" />
     <Folder Include="wwwroot\documents\files\" />
     <Folder Include="wwwroot\schedules\" />

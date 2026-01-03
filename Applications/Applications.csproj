@@ -25,6 +25,8 @@
     <Folder Include="Features\Collaterals\Commands\CreateCollaterals\" />
     <Folder Include="Features\Collaterals\Commands\DeleteCollaterals\" />
     <Folder Include="Features\CreditAgents\UseCases\" />
+    <Folder Include="Features\Currencies\Queries\GetCurrenciesAsPaging\" />
+    <Folder Include="Features\Currencies\Queries\GetCurrencyNotes\" />
     <Folder Include="Features\Currencies\UseCases\" />
     <Folder Include="Features\Customers\Mappers\" />
     <Folder Include="Features\Departments\Commands\" />

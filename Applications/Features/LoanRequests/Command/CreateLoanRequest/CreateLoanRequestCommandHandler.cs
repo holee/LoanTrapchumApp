@@ -1,8 +1,4 @@
 ﻿using Applications.Commons.Mappers.LoanRequests;
-using Applications.Features.Loans.Responses;
-using Applications.Interfaces.Loans;
-using Applications.Responses;
-using Applications.Utils;
 using ErrorOr;
 
 namespace Applications.Features.LoanRequests.Command.CreateLoanRequest;

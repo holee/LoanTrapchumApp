@@ -112,14 +112,14 @@
                                                       Context="c"
                                                       Title="ប្រាក់ដើមត្រូវបង់" Sortable="false">
                                     <Template>
-                                        @c.LeftPrinciple.Format(CurrencyId)
+                                        @c.LeftPrinciple.Format(c.CurrencyId)
                                     </Template>
                                 </RadzenDataGridColumn>
                                 <RadzenDataGridColumn TextAlign="TextAlign.End"
                                                       Context="c"
                                                       Title="ការប្រាក់ត្រូវបង់" Sortable="false">
                                     <Template>
-                                        @c.LeftInterestAmount.Format(CurrencyId)
+                                        @c.LeftInterestAmount.Format(c.CurrencyId)
                                     </Template>
                                 </RadzenDataGridColumn>
                                 <RadzenDataGridColumn TextAlign="TextAlign.Right"
@@ -127,7 +127,7 @@
                                                       Context="c"
                                                       Sortable="false">
                                     <Template>
-                                        @c.LeftCollectionFeeAmount.Format(CurrencyId)
+                                        @c.LeftCollectionFeeAmount.Format(c.CurrencyId)
                                     </Template>
                                 </RadzenDataGridColumn>
                                 <RadzenDataGridColumn TextAlign="TextAlign.Right"
@@ -135,7 +135,7 @@
                                                       Context="c"
                                                       Sortable="false">
                                     <Template>
-                                        @c.PenaltyAmount.Format(CurrencyId)
+                                        @c.PenaltyAmount.Format(c.CurrencyId)
                                     </Template>
                                 </RadzenDataGridColumn>
                                 <RadzenDataGridColumn TextAlign="TextAlign.Right"
@@ -144,7 +144,7 @@
                                                       Context="c"
                                                       Sortable="false">
                                     <Template>
-                                        @c.LeftAmount.Format(CurrencyId)
+                                        @c.LeftAmount.Format(c.CurrencyId)
                                     </Template>
                                 </RadzenDataGridColumn>
                                 <RadzenDataGridColumn TextAlign="TextAlign.Right"
@@ -153,7 +153,7 @@
                                                       Title="ប្រាក់ដើមនៅសល់"
                                                       Sortable="false">
                                     <Template>
-                                        @c.LoanOutstanding.Format(CurrencyId)
+                                        @c.LoanOutstanding.Format(c.CurrencyId)
                                     </Template>
                                 </RadzenDataGridColumn>
                                 <RadzenDataGridColumn TextAlign="TextAlign.Center"

@@ -1,4 +1,6 @@
-﻿namespace TrapchumApp.Shared
+﻿using Applications.Features.Notifications.Dto;
+
+namespace TrapchumApp.Shared
 {
     public sealed class AppStateService : IAppStateService
     {
@@ -11,5 +13,7 @@
         public bool CanRequest { get; set; }
         public bool CanRecievePayment { get; set; }
         public bool CanWriteOff { get; set; }
+        public int UnReadCount { get; set; }
+        public List<NotificationDto> Notifications { get; set; } = [];
     }
 }

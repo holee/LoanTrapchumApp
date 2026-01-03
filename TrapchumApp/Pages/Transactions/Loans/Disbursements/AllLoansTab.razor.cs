@@ -1,10 +1,8 @@
 ﻿using Applications.Enumerations;
-using Applications.Extensions;
+using Applications.Features.Loans.Queries.GetLoanByBranchId;
 using Applications.Features.Loans.Responses;
-using Applications.Features.Loans.Services;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Branches;
-using Microsoft.JSInterop;
 using TrapchumApp.Helpers.Extensions;
 using TrapchumApp.Shared;
 
@@ -12,13 +10,6 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 {
     public partial class AllLoansTab
     {
-        private readonly ILoanServiceImpl _dService;
-
-        public AllLoansTab(ILoanServiceImpl dService)
-        {
-            _dService = dService;
-        }
-
         [Parameter] public int BranchId { get; set; } = 0;
         [Parameter] public string? UserId { get; set; }
         [Parameter] public EventCallback<int> GetLoanChanged { get; set; }
@@ -32,10 +23,6 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
         private string? filter = string.Empty;
 
         protected IEnumerable<VBranchResponse> Branches = [];
-
-        private int selectedBranchId;
-
-        bool branchStatus = false;
 
         int counts = 0;
 
@@ -53,7 +40,9 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 
         int pageIndex = 0;
 
-        bool _isCreditAgent = false;
+        private DateTime? _from = null;
+
+        private DateTime? _to = null;
         async Task ChangedPageSize(int page)
         {
             pageSize = page;
@@ -73,6 +62,10 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
         protected override async Task OnInitializedAsync()
         {
 
+            var auth = await AuthenticationState;
+
+            await bState.CheckedIsCreditAgent(auth.User);
+
             await GetLoanDisbursements();
 
             await GetLoanCount();
@@ -89,41 +82,53 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
             await GetLoanDisbursements();
         }
 
-        private async Task GetLoanDisbursements()
+        private async Task GetLoanDisbursements(DateTime? from = null, DateTime? to = null)
         {
-            try
+
+            isLoading = true;
+
+            var param = new QueryParam(pageIndex, pageSize, sortField, false, sortDescending, filter);
+
+            var userId = bState.IsCreditAgent ? UserId : string.Empty;
+
+            var query = new GetLoanByBranchIdQuery(BranchId, userId, LoanStatuses.Active, from, to, param);
+
+            var res = await mediator.Send(query); 
+
+            LoanItems = res.Items;
+
+            counts = res.Count;
+
+            isLoading = false;
+
+            StateHasChanged();
+
+        }
+
+
+        private async Task DateFromChanged(DateTime? from)
+        {
+            if (from.HasValue)
             {
-                var param = new QueryParam(pageIndex, pageSize, sortField, false, sortDescending, filter);
-
-                isLoading = true;
-
-                var auth = await AuthenticationState;
-
-                await bState.CheckedIsCreditAgent(auth.User);
-
-                var userId = bState.IsCreditAgent ? UserId : string.Empty;
-
-                var res = await _dService.GetLoansByBranchIdAsync(BranchId, userId, LoanStatuses.Active, param);
-
-                LoanItems = res.Items;
-
-                counts = res.Count;
-
-                isLoading = false;
-
-                StateHasChanged();
+                await GetLoanDisbursements(from, _to);
             }
-            catch (Exception ex)
+            else
             {
-                isLoading = false;
-
-                NotificationService.Notify(NotificationSeverity.Error, ex.Message);
+                await GetLoanDisbursements(null, _to);
             }
-            finally
+        }
+
+
+        private async Task DateToChanged(DateTime? to)
+        {
+            if (to.HasValue)
             {
-                isLoading = false;
+                await GetLoanDisbursements(_from, to);
             }
-
+            else
+            {
+                await GetLoanDisbursements(_from, null);
+            }
         }
 
         async Task GetLoanCount()

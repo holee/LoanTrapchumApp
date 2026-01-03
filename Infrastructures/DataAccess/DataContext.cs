@@ -240,12 +240,10 @@ namespace Infrastructures.DataAccess
         public DbSet<VCollateralLines> VCollateralLines => Set<VCollateralLines>(); 
         public DbSet<VLoanRequests> VLoanRequests => Set<VLoanRequests>();
         public DbSet<VLoanDisbursments> VLoanDisbursements => Set<VLoanDisbursments>();
-
-
-
         public DbSet<VCreditAgent> VCreditAgents => Set<VCreditAgent>();
         public DbSet<VDistricts> VDistricts => Set<VDistricts>();
         public DbSet<VCommunes> VCommunes => Set<VCommunes>();
         public DbSet<VVillages> VVillages => Set<VVillages>();
+        public DbSet<Notification> Notifications => Set<Notification>();
     }
 }

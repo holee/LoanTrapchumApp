@@ -1,18 +1,8 @@
-﻿@page "/app/loan/schedules/{BranchId:int}/branches"
+﻿@page "/App/Loans/Schedules/{BranchId:int}/Branches"
 @using TrapchumApp.Pages.Transactions.Loans.Menu
 @using TrapchumApp.Pages.Transactions.RecievePayements
 <PageTitle>Schedules</PageTitle>
-<RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal">
-    <RadzenButton Size="ButtonSize.ExtraSmall"
-                  Text="Show CLient Due Date"
-                  Click="(()=>ShowDueDateScheduleTab(BranchId.ToString()))"
-                  ButtonStyle="ButtonStyle.Primary" />
-    <RadzenButton Size="ButtonSize.ExtraSmall"
-                  Text="Show Late Schedule"
-                  Click="@ShowLateSchedule"
-                  ButtonStyle="ButtonStyle.Secondary" />
-</RadzenStack>
-<RadzenTabs RenderMode="TabRenderMode.Server" SelectedIndex="@_selectedIndex" @ref="@refTabs">
+<RadzenTabs RenderMode="TabRenderMode.Client" SelectedIndex="@_selectedIndex" @ref="@refTabs">
     <Tabs>
         <RadzenTabsItem Text="All" Icon="@IconNames.List">
             <Template>
@@ -50,7 +40,9 @@
 @code {
 
     private List<CustomTab> _tabs = [];
+
     private RadzenTabs refTabs = default!;
+
     private void ShowLateScheduleDetails(string loanId)
     {
         var existingIndex = _tabs.FindIndex(t => t.Key == loanId);
@@ -280,7 +272,6 @@
     void ShowContextMenu(MouseEventArgs args, VSchedule p)
     {
         ContextMenuService.Open(args, ds =>@<AllScheduleMenu ShowLateScheduleDetails="@GetCustomerLateSchedules"
-                         GetPayOffSchedule="@CustomerPayOff"
                          Schedule="@p" />);
     }
 

@@ -1,35 +1,42 @@
 ﻿using Applications.Enumerations;
+using Applications.Extensions;
+using Applications.Interfaces.Identity;
 using Applications.Interfaces.Loans;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Payments;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Dapper;
+using Domains.Enumerations;
+using Domains.Models;
 using Infrastructures.Constants.Procedures;
 using Infrastructures.DataAccess;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Data;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+using System.Security.Claims;
 
 namespace Infrastructures.Implements
 {
     public class LoanScheduleService : ILoanScheduleService
     {
-        private readonly DataContext _context;
         private readonly ILogger<LoanDisbursementRepository> _logger;
         private readonly IDapperConnectionFactory _connectionFactory;
-        public LoanScheduleService(DataContext context, ILogger<LoanDisbursementRepository> logger, IDapperConnectionFactory connectionFactory)
+        private readonly IDbContextFactory<DataContext> _contextFactory;
+        private readonly ICurrentUserService _currentUser;
+        public LoanScheduleService(ILogger<LoanDisbursementRepository> logger, IDapperConnectionFactory connectionFactory, IDbContextFactory<DataContext> contextFactory, ICurrentUserService currentUser)
         {
-            _context = context;
             _logger = logger;
             _connectionFactory = connectionFactory;
+            _contextFactory = contextFactory;
+            _currentUser = currentUser;
         }
 
 
         public async Task<Result<IEnumerable<VSchedule>>> GetLoanPaymentSchedules(DateTime paymentDate, int branchId, bool includeLateSchedule = true, string? filter = null)
         {
-            using var db = _context.Database.GetDbConnection();
+            using var db = _contextFactory.CreateDbContext().Database.GetDbConnection();
 
             var schedules = await db.QueryAsync<VSchedule>("spGetCustomerPayementSchedules", new
             {
@@ -47,8 +54,7 @@ namespace Infrastructures.Implements
 
         public async Task<Result<VSchedule>> GetSchedulesByIdAsync(string? loanId, int? branchId, long? scheduleId)
         {
-            using var db = _context.Database.GetDbConnection();
-
+            using var db = _contextFactory.CreateDbContext().Database.GetDbConnection();
 
             var items = await db.QueryMultipleAsync(ProcedureConstant.GetLoanById,
                new
@@ -116,7 +122,7 @@ namespace Infrastructures.Implements
 
         public async Task<Pager<VSchedule>> GetLoanScheduleByIdAsync(string? loanId, int? branchId, ScheduleStatus status = ScheduleStatus.All, QueryParam? param = null)
         {
-            var items = await _context.Database.SqlQuery<VSchedule>($"""
+            var items = await _contextFactory.CreateDbContext().Database.SqlQuery<VSchedule>($"""
                                                                         EXEC spGetVSchedulesByLoanId
                                                                             {loanId},
                                                                             {branchId},
@@ -158,7 +164,7 @@ namespace Infrastructures.Implements
 
         public async Task<Pager<VSchedule>> GetLoanSchedulesByPaymentDateAsync(DateTimeOffset? paymentDate, int? branchId, bool isIncludeLate = false, bool isLateOnly = false, QueryParam? param = null)
         {
-            
+
             using var db = _connectionFactory.CreateConnection();
 
             param ??= new QueryParam();
@@ -187,13 +193,59 @@ namespace Infrastructures.Implements
                                     commandType: CommandType.StoredProcedure
                                 );
 
-            var items=result.ToList();
+            var items = result.ToList();
+
+            if (items.Count > 0)
+            {
+                await AddNotifications(items, CancellationToken.None);
+            }
 
             return new Pager<VSchedule>(items, items.Count);
 
+        }
 
+
+
+        public async Task<Pager<VSchedule>> GetLoanSchedulesMonthToDateAsync(int? branchId, DateTimeOffset? startDate, DateTimeOffset? endDate, QueryParam? Param, CancellationToken token = default)
+        {
+
+            Param ??= new QueryParam();
+
+            await using var db = await _contextFactory.CreateDbContextAsync(token);
+
+            // 🔹 Resolve date range
+            var start = startDate ?? DateTimeOffset.Now;
+            var end = endDate ?? start.AddDays(28);
+
+            var baseQueries = db.VSchedules
+                                .Where(b => b.BranchId == branchId)
+                                .Where(x => x.PaymentDate >= start && x.PaymentDate <= end);
+
+            if (!string.IsNullOrEmpty(Param.Filter))
+            {
+
+                var filter = $"{Param.Filter.Trim()}%";
+
+                baseQueries = baseQueries.Where(x => EF.Functions.Like(x.AltName, filter));
+            }
+
+            if (!string.IsNullOrEmpty(Param.SortColumn))
+            {
+                baseQueries = baseQueries.OrderByDescendingIf(Param.SortDescending, p => EF.Property<object>(p, Param.SortColumn));
+            }
+
+            var counts = await baseQueries.CountAsync(token);
+
+            var items = await baseQueries
+                                    .AsNoTracking()
+                                    .Skip(Param.Skip)
+                                    .Take(Param.PageSize)
+                                    .ToListAsync(token);
+
+            return new Pager<VSchedule>(items, counts);
 
         }
+
 
 
 
@@ -212,7 +264,7 @@ namespace Infrastructures.Implements
 
             var counts = queries.Count();
 
-            var items= queries.ToList();
+            var items = queries.ToList();
 
             return new Pager<VSchedule>(items, counts);
         }
@@ -240,6 +292,58 @@ namespace Infrastructures.Implements
             return Result.Success(paymentLines);
         }
 
+        private async Task AddNotifications(IEnumerable<VSchedule> schedules, CancellationToken cancellationToken = default)
+        {
+
+            if (!schedules.Any())
+                return;
+
+            var userId = _currentUser.UserId;
+
+            await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
+
+            var loanIds = schedules.Select(x => x.LoanId).Distinct().ToArray();
+
+            var branchIds = schedules.Select(x => x.BranchId).Distinct().ToArray();
+
+            // 🔹 Load existing unread payment notifications
+            var existingKeys = await context.Notifications
+                                    .Where(n =>
+                                        n.Type == NotificationType.Payment &&
+                                        !n.IsRead &&
+                                        loanIds.Contains(n.ReferenceId) &&
+                                        branchIds.Contains(n.BranchId))
+                                    .Select(n => new { n.ReferenceId, n.BranchId })
+                                    .ToListAsync(cancellationToken);
+
+
+            var existingSet = existingKeys.Select(x => (x.ReferenceId, x.BranchId))
+                                        .ToHashSet();
+
+
+            var notifications = schedules
+                           .Where(x => !existingSet.Contains((x.LoanId, x.BranchId)))
+                           .Select(x => new Notification
+                           {
+                               Title = "Receive Payment",
+                               Message = "Receive Payment",
+                               Type = NotificationType.Payment,
+                               ReferenceId = x.LoanId,
+                               BranchId = x.BranchId,
+                               UserId = userId,          // ✅ MUST be valid
+                               IsRead = false,
+                               CreatedAt = DateTime.UtcNow
+                           })
+                           .ToList();
+
+
+            if (notifications.Count == 0)
+                return;
+
+            context.Notifications.AddRange(notifications);
+            await context.SaveChangesAsync(cancellationToken);
+
+        }
 
     }
 }

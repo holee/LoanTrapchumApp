@@ -1,5 +1,6 @@
 ﻿namespace Infrastructures.DataAccess
 {
+    using Applications.Responses.Paginations;
     using System.Linq.Expressions;
     using System.Reflection;
 
@@ -30,7 +31,7 @@
             foreach (string propertyName in properties)
             {
                 // Find matching property in source
-                PropertyInfo? sourceProperty = sourceType.GetProperty(propertyName,BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+                PropertyInfo? sourceProperty = sourceType.GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
 
                 if (sourceProperty == null)
                     throw new ArgumentException($"Property '{propertyName}' not found on type {sourceType.Name}");
@@ -108,7 +109,7 @@
         public static IQueryable<T> AndWhere<T>(this IQueryable<T> source, Expression<Func<T, bool>> predicate)
         {
             if (source == null)
-                throw new ArgumentNullException(nameof(source)); 
+                throw new ArgumentNullException(nameof(source));
 
             if (predicate == null)
                 throw new ArgumentNullException(nameof(predicate));
@@ -141,6 +142,18 @@
                     source.Expression,
                     Expression.Quote(lambda)));
         }
+
+
+        public static IQueryable<T> ApplyPaging<T>(this IQueryable<T> query, QueryParam param)
+        {
+            if (param.Skip <= 0)
+                return query.Take(param.PageSize);
+
+            return query
+                .Skip(param.Skip)
+                .Take(param.PageSize);
+        }
+
 
         // Helper class to rebind parameters in expression trees
         private class ParameterRebinder : ExpressionVisitor

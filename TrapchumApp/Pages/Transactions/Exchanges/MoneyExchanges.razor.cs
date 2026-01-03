@@ -1,27 +1,28 @@
+using Applications.Enumerations;
+using Applications.Extensions.Enums;
 using Applications.Extensions.Maths;
 using Applications.Extensions.NumberExtensions;
-using Applications.Features.Currencies;
+using Applications.Features.Currencies.Queries.GetCurrencyDetails;
+using Applications.Features.Currencies.Requests;
 using Applications.Features.Currencies.Responses;
 using Applications.Features.Transactions.ForiegnExchanges;
 using Applications.Interfaces.Currencies;
 using Applications.Interfaces.setting;
 using Applications.Interfaces.Transactions;
 using Applications.Responses.ViewModels.Options;
+using Domains.Enumerations;
 using Domains.Models.Settings;
 using Domains.Models.Transaction;
 using Mapster;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Forms;
-using Microsoft.AspNetCore.Components.Web;
-using Radzen;
-
+using TrapchumApp.Helpers.Extensions;
+using TrapchumApp.Helpers.Constants;
 namespace TrapchumApp.Pages.Transactions.Exchanges
 {
     public partial class MoneyExchanges
     {
         [Parameter] public int BranchId { get; set; } = 0;
-        [Parameter] public string? UserId { get; set; }
         [Parameter] public bool ShowCloseButton { get; set; } = false;
+        [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
         ForeignExchangeDtoCreate c = new ForeignExchangeDtoCreate();
         TrxForeignExchangeDtoCreate model = new TrxForeignExchangeDtoCreate();
         ExchangeDtoCreate mx = new();
@@ -35,7 +36,7 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
         private readonly ICurrencyService cuService;
         private readonly IAppSettingService settingService;
         private readonly IForiegnCurrencyExchange _exchangeService;
-
+        private string? _userId = string.Empty;
         public MoneyExchanges(ICurrencyService currencyService, IAppSettingService settingsServiceImpl, IForiegnCurrencyExchange exchangeServiceImpl)
         {
             cuService = currencyService;
@@ -45,32 +46,44 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
 
         protected override async Task OnInitializedAsync()
         {
+
+            var authState = await AuthenticationState;
+
+            _userId = authState.GetUserId();
+
             var resultSetting = await settingService.GetSysSettings();
 
             if (resultSetting.IsSuccess)
             {
                 settings = resultSetting.Data!;
             }
+
             mx.SellCurrencyId = 1;
 
             mx.BuyCurrencyId = 2;
 
             mx.CurrencyTypeId = 1;
 
-            var currencyResp = await cuService.GetCurrencyAsync(1);
+            var rsp = await mediator.Send(new GetCurrencyDetailsByIdQuery(1));  //cuService.GetCurrencyAsync(1);
 
-            if (currencyResp.IsSuccess)
+            if (rsp.IsSuccess())
             {
-                Currency = currencyResp.Data!;
-                mx.ExchangeRate = Currency.BuyingRate!.Value;
-                mx.SpotRate = Currency.SpotRate!.Value;
+                Currency = rsp.Value;
+
+                mx.ExchangeRate = Currency.BuyingRate;
+
+                mx.SpotRate = Currency.SpotRate;
             }
             else
             {
-                mx.ExchangeRate = 4000;
-                mx.SpotRate = 3900;
+                mx.ExchangeRate = Defaults.ExchangeRate;
+
+                mx.SpotRate = Defaults.SpotRate;
+
             }
+
             isBuy = true;
+
             await base.OnInitializedAsync();
         }
 
@@ -247,11 +260,11 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
                 isBusy = false;
                 return;
             }
-            model.UserRefId = UserId;
-            model.TranTypeRefId = 67;
-            model.TransactionTypeName = "Currency Foreign Exchange";
-            //c.StaffRefId = UserId;
-            //c.StaffAuthRefId = UserId;
+            model.UserRefId = _userId;
+            model.TranTypeRefId = (int)TransactionTypes.CFX;// 67;
+            model.TransactionTypeName = TransactionTypes.CFX.Description(); //"Currency Foreign Exchange";
+            c.StaffRefId = _userId;
+            c.StaffAuthRefId = _userId;
             c.BranchRefId = BranchId;
             c.BankRefId = 11;
             c.SpotRate = mx.SpotRate;
@@ -260,8 +273,8 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
             {
                 c.BuyAmount = mx.Amount;
                 c.SellAmount = mx.TotalAmount;
-                c.BuyCurrencyRefId = 2;
-                c.SellCurrencyRefId = 1;
+                c.BuyCurrencyRefId = (int)CurrencyEnum.USD; //2;
+                c.SellCurrencyRefId = (int)CurrencyEnum.KHR;//1;
                 c.ExchangeRate = mx.ExchangeRate;
                 c.BuyLedgerRefId = 1;
                 c.SellLedgerRefId = 2;
@@ -284,8 +297,8 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
             {
                 c.BuyAmount = mx.TotalAmount;
                 c.SellAmount = mx.Amount;
-                c.BuyCurrencyRefId = 1;
-                c.SellCurrencyRefId = 2;
+                c.BuyCurrencyRefId = (int)CurrencyEnum.KHR; //1;
+                c.SellCurrencyRefId = (int)CurrencyEnum.USD;//2;
                 c.ExchangeRate = mx.ExchangeRate;
                 c.BuyLedgerRefId = 2;
                 c.SellLedgerRefId = 1;

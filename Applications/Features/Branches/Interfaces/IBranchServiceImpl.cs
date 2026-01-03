@@ -16,7 +16,7 @@ namespace Applications.Features.Branches.Interfaces
         Task<Pager<VBranchResponse>> GetBranchesAsync(QueryParam param);
         Task<Result<Pager<T>>> GetBranchesAsync<T>(int? branchId, QueryParam param) where T : class;
         Task<Result<IEnumerable<VBranchResponse>>> GetBranchesByUser(string? userId, int? branchId);
-        Task<Result<UserBranchesResponse>> GetBranchesByUser(string userId);
+        Task<Result<UserBranchesResponse>> GetBranchesByUser(string? userId);
         Task<Result<Branch>> GetBranchForVault(int? id);
         Task<Result<BranchDtoUpdate>> GetUpdateBranchById(int? branchId);
         Task<Result> UpdateStatusAsync(int? branchId);

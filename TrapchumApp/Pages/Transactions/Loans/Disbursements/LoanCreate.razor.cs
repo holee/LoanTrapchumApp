@@ -14,6 +14,7 @@ using Applications.Responses.ViewModels.Holidays;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Applications.Services.Lists;
 using Domains.Enumerations;
+using Domains.Models.Identity;
 using Radzen.Blazor;
 using TrapchumApp.Helpers.Extensions;
 
@@ -21,7 +22,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements;
 
 public partial class LoanCreate(ILoanServiceImpl loanService, IHolidayServiceImpl holidayService)
 {
-    [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+
     bool collapse = false;
     string collapseIcon = "expand_more";
     bool isVible = false;
@@ -46,18 +47,19 @@ public partial class LoanCreate(ILoanServiceImpl loanService, IHolidayServiceImp
 
     decimal penaltyRate = 0.0M;
 
-    IEnumerable<HolidayVm> holidays = [];
+    private IEnumerable<HolidayVm> holidays = [];
 
-    bool disburseStatus = false;
+    private bool disburseStatus = false;
 
     private string memo = string.Empty;
 
-    int RequestStatusId = 0;
+    private int RequestStatusId = 0;
 
-    [Parameter, SupplyParameterFromQuery] public int BranchId { get; set; }
-    [Parameter, SupplyParameterFromQuery] public string? UserId { get; set; }
-    [Parameter, SupplyParameterFromQuery] public string? CustomerRequestId { get; set; } = string.Empty;
-    [Parameter, SupplyParameterFromQuery] public string? LoanRequestId { get; set; } = string.Empty;
+    private string? _userId = string.Empty;
+    [Parameter] public int BranchId { get; set; }
+    [Parameter] public string? LoanRequestId { get; set; } = string.Empty;
+    [Parameter, SupplyParameterFromQuery] public string? CustomerId { get; set; } = string.Empty;
+    [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
 
     VLoanRequests req = new VLoanRequests();
 
@@ -67,9 +69,9 @@ public partial class LoanCreate(ILoanServiceImpl loanService, IHolidayServiceImp
     {
         IsLoading = true;
 
-        var query = new GetApprovedLoanRequestQuery(BranchId, CustomerRequestId, LoanRequestId, true);
+        var query = new GetApprovedLoanRequestQuery(BranchId, CustomerId, LoanRequestId, true);
 
-        var request = await mediator.Send(query);// _loanRequestService.GetApprovedLoanRequestAsync(BranchId, CustomerRequestId, LoanRequestId, true);
+        var request = await mediator.Send(query); 
 
         if (!request.IsError)
         {
@@ -95,8 +97,11 @@ public partial class LoanCreate(ILoanServiceImpl loanService, IHolidayServiceImp
     {
         try
         {
+            var authState = await AuthenticationState;
 
-            if (CustomerRequestId.IsNotNullOrEmpty() && LoanRequestId.IsNotNullOrEmpty())
+            _userId = authState.User?.GetId();
+
+            if (CustomerId.IsNotNullOrEmpty() && LoanRequestId.IsNotNullOrEmpty())
             {
                 await GetLoanRequest();
 
@@ -133,7 +138,7 @@ public partial class LoanCreate(ILoanServiceImpl loanService, IHolidayServiceImp
 
         model.LoanSubTypeRefId = 1;
 
-        model.UserRefId = UserId;
+        model.UserRefId = _userId;
 
         model.PenaltyRate = penaltyRate;
 
@@ -146,7 +151,7 @@ public partial class LoanCreate(ILoanServiceImpl loanService, IHolidayServiceImp
     async Task SendRechecked()
     {
 
-        var req = new RecheckedRequestDtoCreate(BranchId, CustomerRequestId, LoanRequestId, DateTime.Now, RequestStatus.Rechecked, memo);
+        var req = new RecheckedRequestDtoCreate(BranchId, CustomerId, LoanRequestId, DateTime.Now, RequestStatus.Rechecked, memo);
 
         var command = new RecheckedLoanRequestCommand(req);
 
@@ -154,9 +159,8 @@ public partial class LoanCreate(ILoanServiceImpl loanService, IHolidayServiceImp
 
         if (!rsp.IsError)
         {
-            //RequestStatusId = rsp.Value.Success;
 
-            var description = new LoanDescriptionsDtoCreate(memo, UserId, LoanRequestId);
+            var description = new LoanDescriptionsDtoCreate(memo, _userId, LoanRequestId);
 
             var cmd = new AddDescriptionCommand(description);
 
@@ -190,7 +194,7 @@ public partial class LoanCreate(ILoanServiceImpl loanService, IHolidayServiceImp
         model.LoanStatusRefId = (int)LoanStatuses.Active;
         model.LoanSubTypeRefId = 1;
         model.BranchId = BranchId;
-        model.UserRefId = UserId;
+        model.UserRefId = _userId;
         model.PenaltyRate = penaltyRate;
 
         var scheduleDto = model.GenerateSchedules();  //.CreateSchedules().MapToLoanSchedules();

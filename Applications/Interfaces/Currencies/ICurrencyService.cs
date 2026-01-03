@@ -27,5 +27,6 @@ namespace Applications.Interfaces.Currencies
 
         Task<Result<IEnumerable<T>>> GetCurrencies<T>(int? currencyId, string? q = null)
             where T : class, new();
+        Task<VCurrenciesList?> GetCurrencyDetailById(int? id, CancellationToken cancellation = default);
     }
 }

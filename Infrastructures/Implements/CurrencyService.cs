@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Data;
 using Applications.Features.Currencies;
 using Applications.Features.Currencies.Responses;
+using Applications.Exceptions;
 
 namespace Infrastructures.Implements;
 
@@ -129,7 +130,7 @@ public class CurrencyService : ICurrencyService
     public async Task<Result<IEnumerable<T>>> GetCurrencies<T>(int? currencyId, string? q = null)
         where T : class, new()
     {
-        
+
         await using var context = await _contextFactory.CreateDbContextAsync();
 
         var queries = await context.Currencies
@@ -372,12 +373,12 @@ public class CurrencyService : ICurrencyService
 
     public async Task<Result<IEnumerable<VCurrencyCounter>>> GetCurrencyNotes(int? currencyId, int? branchId)
     {
-        using var db=await _connectionFactory.CreateConnectionAsync();
+        using var db = await _connectionFactory.CreateConnectionAsync();
 
 
-        var queries =await db.QueryAsync<VCurrencyCounter>(ProcedureConstant.GetCurrencyNotes, 
+        var queries = await db.QueryAsync<VCurrencyCounter>(ProcedureConstant.GetCurrencyNotes,
                                         new { currencyId, branchId },
-                                        commandType:CommandType.StoredProcedure);
+                                        commandType: CommandType.StoredProcedure);
         if (!queries.Any())
         {
             return Result.Failure<IEnumerable<VCurrencyCounter>>(ErrorResponse.NotFound("No Data was found"));
@@ -412,4 +413,18 @@ public class CurrencyService : ICurrencyService
 
         return Result.Success<Currency>(currency);
     }
+
+
+    public async Task<VCurrenciesList?> GetCurrencyDetailById(int? id, CancellationToken cancellation = default)
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync(cancellation); 
+
+        var currency = await context.VCurrenciesList
+                              .AsNoTracking()
+                              .FirstOrDefaultAsync(x => x.CurrencyId == id, cancellation);
+        return currency;
+
+    }
+
+
 }

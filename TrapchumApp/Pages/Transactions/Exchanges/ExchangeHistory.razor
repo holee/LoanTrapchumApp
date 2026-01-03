@@ -21,7 +21,7 @@
             </Start>
             <ChildContent>
                 <RadzenDatePicker DateFormat="@Defaults.DefaultDateFormat"
-                                  TValue="DateTime?"
+                                  TValue="DateTime ?"
                                   CurrentDateChanged="@CurrentDateChanged"
                                   @bind-Value="transactionDate" />
             </ChildContent>
@@ -53,7 +53,7 @@
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Property="@nameof(VttCurrencyExchanges.TransactionTypeName)"
-                              Title="TransactionType Name" Context="c" />
+                              Title="Type Name" Context="c" />
         <RadzenDataGridColumn Property="@nameof(VttCurrencyExchanges.BranchName)"
                               Title="Branch" Context="c" />
         <RadzenDataGridColumn Property="@nameof(VttCurrencyExchanges.ExchangeRate)"
@@ -77,6 +77,13 @@
                 @c.SellAmount.Format(c.SellCurrencyRefId)
             </Template>
         </RadzenDataGridColumn>
+        <RadzenDataGridColumn Property="@nameof(VttCurrencyExchanges.TransactionsId)"
+                              TextAlign="TextAlign.Center"
+                              Title="Actions" Context="c">
+            <Template>
+                <ActionButton ButtonClick="@((arg) => OpenContentMenu(arg, c))" />
+            </Template>
+        </RadzenDataGridColumn>
     </Columns>
     <LoadingTemplate>
         <RadzenStack Gap="0.5rem" JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center">
@@ -85,4 +92,19 @@
         </RadzenStack>
     </LoadingTemplate>
 </RadzenDataGrid>
+
+@code {
+    void OpenContentMenu(MouseEventArgs args, VttCurrencyExchanges cur)
+    {
+        ContextMenuService.Open(args, ds => @<RadzenMenu>
+            <RadzenMenuItem Text="Edit"
+                            Icon="@IconNames.Edit"
+                            Click="@(() => ShowEditCurrencyDialogue(cur))"
+                            Disabled="@(!cur.IsEditable)" />
+            <RadzenMenuItem Text="Delete" Icon="@IconNames.Delete"></RadzenMenuItem>
+            <RadzenMenuItem Text="View Details" Icon="@IconNames.View"></RadzenMenuItem>
+        </RadzenMenu>);
+
+    }
+}
 

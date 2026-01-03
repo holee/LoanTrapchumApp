@@ -26,7 +26,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Infrastructures
 {
@@ -70,9 +69,10 @@ namespace Infrastructures
                 options.ExpireTimeSpan = TimeSpan.FromDays(15);
                 options.SlidingExpiration = true;
             });
-
+            services.AddHttpContextAccessor();
             services.AddSingleton<AuditingSaveChangesInterceptor>();
             services.AddSingleton<ICurrentUserService, CurrentUserService>();
+            services.AddSingleton<ICurrentUserServices, CurrentUserRepository>();
             services.AddScoped<IAuditReadService, AuditReadService>();
             services.AddScoped<IAppSettingService, AppSettingService>();
             services.AddScoped<ILoanSettingService, LoanSettingService>();
@@ -121,6 +121,7 @@ namespace Infrastructures
             services.AddScoped<ICommuneService, CommuneService>();
             services.AddScoped<IVillageServer, VillageService>();
             services.AddScoped<ILoanScheduleRepo, LoanScheduleRepository>();
+            services.AddScoped<INotificationService, NotificationRepository>();
             services.AddSingleton<IDapperConnectionFactory, DapperConnectionFactory>();
             return services;
 

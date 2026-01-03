@@ -1,7 +1,6 @@
 using Applications.Features.Currencies.Responses;
 using Applications.Interfaces.Transactions;
-using Microsoft.AspNetCore.Components;
-using Radzen;
+using Applications.Responses.Paginations;
 using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Transactions.Exchanges
@@ -24,7 +23,7 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
         private int pageIndex = 1;
         private bool isLoading = false;
         private bool sortDescending = false;
-        private DateTime? transactionDate=DateTime.UtcNow;
+        private DateTime? transactionDate = DateTime.UtcNow;
         string sortField = "TransactionDate";
 
         protected override async Task OnInitializedAsync()
@@ -49,7 +48,7 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
         {
             isLoading = true;
 
-            var exchangeResp = await _exService.GetCurrencyExchange(BranchId, pageIndex, pageSize, traxDate);
+            var exchangeResp = await _exService.GetCurrenciesExchange(BranchId, null, new QueryParam());
 
             counts = exchangeResp.Count;
 
@@ -65,7 +64,7 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
         {
             pageSize = page;
 
-            pageIndex = 0;  
+            pageIndex = 0;
 
             await GetExchangeHistories(transactionDate);
         }
@@ -78,7 +77,7 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
         async Task ShowCurrencyDialogue()
         {
 
-            var param = new Dictionary<string, object?> { { "BranchId", BranchId }, { "UserId", _userId }, { "ShowCloseButton", true } };
+            var param = new Dictionary<string, object?> { { "BranchId", BranchId }, { "ShowCloseButton", true } };
 
             var options = new DialogOptions
             {
@@ -90,6 +89,23 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
 
             await DialogService.OpenAsync<MoneyExchanges>("Currency Exchange", param, options);
         }
+
+        async Task ShowEditCurrencyDialogue(VttCurrencyExchanges cur)
+        {
+
+            var param = new Dictionary<string, object?> { { "BranchId", BranchId }, { "TransactionId", cur.TransactionsId }, { "ShowCloseButton", true } };
+
+            var options = new DialogOptions
+            {
+                Draggable = true,
+                AutoFocusFirstElement = false,
+                Resizable = false,
+                Width = "50rem"
+            };
+
+            await DialogService.OpenAsync<MoneyExchangesEdit>("Currency Exchange", param, options);
+        }
+
 
     }
 }

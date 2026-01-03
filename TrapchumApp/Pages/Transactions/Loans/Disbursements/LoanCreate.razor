@@ -1,4 +1,4 @@
-﻿@page "/Loan/Disbursement/CreateNew"
+﻿@page "/App/Loans/{LoanRequestId}/Disbursements/{BranchId:int}/Branches/CreateNew"
 @using Applications.Enumerations
 @using Applications.Features.Addresses
 @using Applications.Features.Branches
@@ -242,7 +242,7 @@
                                       ButtonStyle="ButtonStyle.Primary" Text="Preview" />
                     }
                     <RadzenLink Icon="arrow_back"
-                                Path="@($"/App/Request/{BranchId}/Branches?UserId={UserId}")"
+                                Path="@($"/App/Request/{BranchId}/Branches?UserId={_userId}")"
                                 Text="Back" />
                 </RadzenStack>
             </ChildContent>

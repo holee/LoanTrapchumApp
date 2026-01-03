@@ -1,4 +1,4 @@
-﻿@page "/app/loan/{LoanRequestId}/request/{BranchId:int}/branches/{CustomerId}/details"
+﻿@page "/App/Loans/{LoanRequestId}/Requests/{BranchId:int}/Branches/{CustomerId}/Details"
 @using Applications.Enumerations
 @using Applications.Features.LoanRequests.Interfaces
 @using TrapchumApp.Pages.Lists.Customers
@@ -137,7 +137,7 @@
                               Icon="request_quote" Size="ButtonSize.ExtraSmall"
                               Click="@CreateLoanRequest"
                               Text="Request Now"></RadzenButton>
-                <EditLinkButton Href="@($"/app/loan/{LoanRequestId}/request/{BranchId}/branches/{CustomerId}/edit")" />
+                <EditLinkButton Href="@($"/App/Loans/{LoanRequestId}/Requests/{BranchId}/Branches/{CustomerId}/Edit")" />
             }
         </Authorized>
     </AuthorizeView>
@@ -183,3 +183,5 @@
     </AuthorizeView>
     <BackButton Href="@_navService.PreviousUrl" />
 </RadzenStack>
+
+

@@ -1,4 +1,5 @@
-﻿using Applications.Features.Loans.Responses;
+﻿using Applications.Features.Loans.Queries.GetLoanSchedulesByPaymentDate;
+using Applications.Features.Loans.Responses;
 using Applications.Features.Loans.Services;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Branches;
@@ -8,17 +9,18 @@ using Domains.Models.Identity;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Radzen;
+using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 {
     public partial class ClientDuePayTab
     {
         private readonly ILoanScheduleServiceImpl _scheduleService;
-        private readonly ILoanServiceImpl _loanService;
+        //private readonly ILoanServiceImpl _loanService;
         public ClientDuePayTab(ILoanScheduleServiceImpl loanScheduleService, ILoanServiceImpl loanService)
         {
             _scheduleService = loanScheduleService;
-            _loanService = loanService;
+            //_loanService = loanService;
         }
 
         [Parameter] public int BranchId { get; set; } = 0;
@@ -50,12 +52,12 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
         async void TextLoanSearchChanged(string filterText)
         {
             filterText = filterText ?? string.Empty;
-            await GetLoans();
+            await GetLoanSchedulesDueDate();
         }
 
         async void CheckedIncludeChanged()
         {
-            await GetLoans();
+            await GetLoanSchedulesDueDate();
         }
 
         void GetPaymentSchedules(VSchedule p)
@@ -75,7 +77,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 
             _userId = auth.User.GetId();
 
-            await GetLoans();
+            await GetLoanSchedulesDueDate();
 
             await GetCount();
 
@@ -83,47 +85,31 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
         }
         private async Task LoadData(LoadDataArgs args)
         {
-            pageIndex = args.Skip!.Value;
+            pageIndex = args.Skip ?? 0;
 
-            if (!string.IsNullOrEmpty(args.OrderBy))
-            {
-                sortField = args.OrderBy.Split(" ")[0];
+            (sortField, sortDescending) = args.PageInfo(nameof(VSchedule.PaymentDate));
 
-                string dir = args.OrderBy.Split(" ")[1];
-
-                sortDescending = dir.Contains("asc") ? false : true;
-            }
-            await GetLoans();
+            await GetLoanSchedulesDueDate();
         }
 
-        private async Task GetLoans()
+        private async Task GetLoanSchedulesDueDate()
         {
-            try
-            {
-                isLoading = true;
 
-                var param = new QueryParam(pageIndex, pageSize, sortField, false, sortDescending, filterText);
+            isLoading = true;
 
-                var res = await _scheduleService.GetLoanSchedulesByPaymentDateAsync(BranchId, paymentDate, false, false, param);
+            var param = new QueryParam(pageIndex, pageSize, sortField, false, sortDescending, filterText);
 
-                ScheduleItems = res.Items;
+            var query = new GetLoanSchedulesByPaymentDateQuery(BranchId, paymentDate, false, false, param);
 
-                counts = res.Count;
+            var res = await mediator.Send(query);
 
-                isLoading = false;
+            ScheduleItems = res.Items;
 
-                StateHasChanged();
-            }
-            catch (Exception ex)
-            {
-                isLoading = false;
-                NotificationService.Notify(NotificationSeverity.Error, ex.Message);
-            }
-            finally
-            {
-                isLoading = false;
-            }
+            counts = res.Count;
 
+            isLoading = false;
+
+            StateHasChanged();
         }
 
 

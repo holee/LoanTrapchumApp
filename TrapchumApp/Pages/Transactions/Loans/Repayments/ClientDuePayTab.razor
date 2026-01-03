@@ -1,4 +1,12 @@
 ﻿<GridToolbar SearchChanged="TextLoanSearchChanged">
+    <LeftChildren>
+        <RadzenFormField Text="Start Date">
+            <RadzenDatePicker TValue="DateTimeOffset ?" />
+        </RadzenFormField>
+        <RadzenFormField Text="End Date">
+            <RadzenDatePicker TValue="DateTimeOffset ?" />
+        </RadzenFormField>
+    </LeftChildren>
     <RightChildren>
         <RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal">
             <RadzenCheckBox TValue="bool"
@@ -132,8 +140,8 @@
     </Columns>
     <LoadingTemplate>
         <RadzenProgressBarCircular Visible="isProgess" ShowValue="false"
-                           ProgressBarStyle="ProgressBarStyle.Primary"
-                           Mode="ProgressBarMode.Determinate"></RadzenProgressBarCircular>
+                                   ProgressBarStyle="ProgressBarStyle.Primary"
+                                   Mode="ProgressBarMode.Determinate"></RadzenProgressBarCircular>
     </LoadingTemplate>
 </RadzenDataGrid>
 @code {
@@ -141,14 +149,14 @@
     {
         ContextMenuService.Open(args, ds =>@<RadzenMenu Style="font-size:0.8rem;">
 
-        <RadzenMenuItem Icon="money"
-                        Click="@(()=>GetPaymentSchedules(p))"
-                        Text="Recieve Payment"></RadzenMenuItem>
-        <RadzenMenuItem Icon="paid"
-                        Click="@(()=>CustomerPayOff(p))"
-                        Text="PayOff"></RadzenMenuItem>
+    <RadzenMenuItem Icon="money"
+                    Click="@(()=>GetPaymentSchedules(p))"
+                    Text="Recieve Payment"></RadzenMenuItem>
+    <RadzenMenuItem Icon="paid"
+                    Click="@(()=>CustomerPayOff(p))"
+                    Text="PayOff"></RadzenMenuItem>
 
-    </RadzenMenu>
+</RadzenMenu>
 
     );
     }

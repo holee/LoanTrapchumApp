@@ -13,6 +13,7 @@ namespace Applications.Interfaces.Loans
         Task<Result<LoanScheduleVm>> GetLoanSchedulesAsync(int? branchId,string? loanId, string? customerId);
         Task<Result<IEnumerable<VSchedule>>> GetLoanScheduleByIdAsync(string? loanId, int? branchId, ScheduleStatus status = ScheduleStatus.All);
         Task<Pager<VSchedule>> GetLateSchedulesAsync(int? branchId, string? loanId, DateTimeOffset? paymentDate, CancellationToken cancellation = default);
+        Task<Pager<VSchedule>> GetLoanSchedulesMonthToDateAsync(int? branchId, DateTimeOffset? startDate, DateTimeOffset? endDate, QueryParam? Param, CancellationToken token = default);
     }
 
 }

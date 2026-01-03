@@ -1,0 +1,59 @@
+﻿@using Radzen
+@inject NotificationService NotificationService
+
+<CascadingValue Value="this">
+    @ChildContent
+</CascadingValue>
+
+@code {
+    [Parameter] public RenderFragment ChildContent { get; set; }
+
+    public void Show(NotificationMessage message)
+    {
+        NotificationService.Notify(message);
+    }
+
+    public void ShowSuccess(string summary, string detail = "", double duration = 3000)
+    {
+        NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Success,
+                Summary = summary,
+                Detail = detail,
+                Duration = duration
+            });
+    }
+
+    public void ShowError(string summary, string detail = "", double duration = 3000)
+    {
+        NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Error,
+                Summary = summary,
+                Detail = detail,
+                Duration = duration
+            });
+    }
+
+    public void ShowInfo(string summary, string detail = "", double duration = 3000)
+    {
+        NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Info,
+                Summary = summary,
+                Detail = detail,
+                Duration = duration
+            });
+    }
+
+    public void ShowWarning(string summary, string detail = "", double duration = 3000)
+    {
+        NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Warning,
+                Summary = summary,
+                Detail = detail,
+                Duration = duration
+            });
+    }
+}

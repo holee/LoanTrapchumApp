@@ -1,5 +1,6 @@
 ﻿@using Applications.Features.Customers.Response
 @using TrapchumApp.Helpers.Enums
+@using TrapchumApp.Helpers.Options
 @attribute [MustHasPermission(Modules.Customers, Feature.Read)]
 <style>
     .rz-grid-table td .rz-cell-data {
@@ -53,9 +54,9 @@
             <RadzenDropDown @bind-Value="selectedValue"
                             Placeholder="Filter by"
                             TValue="int"
-                            Data="@FilterConstant.CustomerFilters"
-                            TextProperty="@nameof(FilterCustomer.Name)"
-                            ValueProperty="@nameof(FilterCustomer.Id)"
+                            Data="@Filters.CustomerFilters"
+                            TextProperty="@nameof(ListItem.Name)"
+                            ValueProperty="@nameof(ListItem.Id)"
                             SelectedItemChanged="@SelectedItemChanged"
                             Name="DropDownEdit">
             </RadzenDropDown>

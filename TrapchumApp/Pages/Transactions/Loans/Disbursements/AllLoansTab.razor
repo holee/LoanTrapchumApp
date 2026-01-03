@@ -2,6 +2,21 @@
 @using Applications.Responses.ViewModels.Loans
 @using TrapchumApp.Pages.Transactions.Loans.Menu
 <GridToolbar SearchChanged="@TextLoanSearchChanged">
+    <LeftChildren>
+        <RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal">
+            <RadzenText TagName="TagName.Span" Text="Filter By:" TextStyle="TextStyle.Body2" />
+            <RadzenFormField Text="From">
+                <RadzenDatePicker TValue="DateTime?" 
+                    Change="@DateFromChanged"
+                    DateFormat="dd/MM/yyyy" @bind-Value="@_from" />
+            </RadzenFormField>
+            <RadzenFormField Text="To">
+                <RadzenDatePicker TValue="DateTime?" 
+                    Change="@DateToChanged"
+                    DateFormat="dd/MM/yyyy" @bind-Value="@_to" />
+            </RadzenFormField>
+        </RadzenStack>
+    </LeftChildren>
     <RightChildren>
         <RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal">
             <RadzenCheckBox TValue="bool"
@@ -142,7 +157,7 @@
 @code {
 
     [Parameter] public RenderFragment? ChildMenu { get; set; } = default!;
-   
+
     [CascadingParameter]
     Task<AuthenticationState> AuthState { get; set; } = default!;
 

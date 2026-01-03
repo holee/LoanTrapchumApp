@@ -1,13 +1,15 @@
-﻿using System.Security.Claims;
-using System.Text.Json;
-using Applications.Extensions.Identity.Authorizations.Extensions;
+﻿using Applications.Extensions.Identity.Authorizations.Extensions;
 using Applications.Extensions.Identity.Policies;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Domains.Models.Identity;
+using System.Security.Claims;
+using System.Text.Json;
 
 namespace TrapchumApp.Shared
 {
     public partial class CascadingAppState : ComponentBase, IAppStateService
     {
+        public event Action? OnChange;
         [Parameter] public RenderFragment ChildContent { get; set; } = default!;
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
 
@@ -24,8 +26,9 @@ namespace TrapchumApp.Shared
         private int _branchId;
         private string? _userId;
         private string? _employeeId;
-        private bool _canRecievePayment; 
+        private bool _canRecievePayment;
         private bool _canPayOff;
+        private int _unreadCount;
         public bool CanPayOff
         {
             get { return _canPayOff; }
@@ -379,11 +382,27 @@ namespace TrapchumApp.Shared
             await CheckedCanWriteOff(user);
         }
 
-
-
         public async Task GetBranchState(int? branchId)
         {
             var branchStateResponse = await _branchService.GetBrachStatus(branchId);
+
+            if (branchStateResponse.IsSuccess)
+            {
+                _state = branchStateResponse.Data!.IsOpen;
+            }
+            else
+            {
+                _state = false;
+            }
+        }
+
+
+        public async Task GetBranchState()
+        {
+
+            await GetBranchIdByUser();
+
+            var branchStateResponse = await _branchService.GetBrachStatus(_branchId);
 
             if (branchStateResponse.IsSuccess)
             {
@@ -439,11 +458,11 @@ namespace TrapchumApp.Shared
 
             var user = authState.User;
 
-            if (user.Identity?.IsAuthenticated == true)
+            if (user is not null && user.Identity?.IsAuthenticated == true)
             {
                 _userId = user.GetId();
 
-                var rsp = await _branchService.GetBranchesByUser(_userId!);
+                var rsp = await _branchService.GetBranchesByUser(_userId);
 
                 if (rsp.IsSuccess && rsp.Data is not null)
                 {
@@ -460,8 +479,7 @@ namespace TrapchumApp.Shared
             }
         }
 
-
-
+        private void NotifyStateChanged() => OnChange?.Invoke();
 
         public IAppStateService CopyState()
         {

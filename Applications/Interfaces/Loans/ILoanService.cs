@@ -18,7 +18,7 @@ namespace Applications.Interfaces.Loans
         Task<Result<string>> ChangedCreditAgent(int? branchId, LoanChangedCaDtoCreate req);
         Task<Result<string>> ChangedCreditAgents(int? branchId, List<LoanChangedCa> req);
         Task<ErrorOr.ErrorOr<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus status, bool include = false);
-        Task<Pager<VLoanDisbursments>> GetLoansByBranchId(int? branchId, string? userId, LoanStatuses status = LoanStatuses.Active, QueryParam? param = null);
+        //Task<Pager<VLoanDisbursments>> GetLoansByBranchId(int? branchId, string? userId, LoanStatuses status = LoanStatuses.Active, QueryParam? param = null);
         Task<Result<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId);
         Task<Pager<VLoanDisbursments>> GetLoansByBranchId(int? branchId, string? creditAgentId, LoanStatuses status = LoanStatuses.Active, QueryParam? param = null, CancellationToken cancellation = default);
         Task<ErrorOr.ErrorOr<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus status, bool include = false, CancellationToken cancellation = default);
@@ -31,6 +31,7 @@ namespace Applications.Interfaces.Loans
         Task<IEnumerable<VLoanRequestsDocuments>> GetRelatedDocuments(string? loanId, int? branchId, CancellationToken cancellation = default);
         Task<ErrorOr<DisburseResult>> CreateAsync(LoanDisbursment req, CancellationToken cancellation = default);
         Task<ErrorOr<string>> CloseLoanDisbursementAsync(int? branchId, string? loanId, string? customerId, CancellationToken cancellation = default);
+        Task<Pager<VLoanDisbursments>> GetLoansByBranchId(int? branchId, string? userId, LoanStatuses status = LoanStatuses.Active, DateTime? start = null, DateTime? to = null, QueryParam? param = null, CancellationToken cancellation = default);
     }
 
 }

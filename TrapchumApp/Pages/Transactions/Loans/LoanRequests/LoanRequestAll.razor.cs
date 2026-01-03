@@ -1,13 +1,8 @@
 using Applications.Enumerations;
-using Applications.Extensions.Identity.Policies;
-using Applications.Extensions.Web;
-using Applications.Features.LoanRequests.Interfaces;
 using Applications.Features.LoanRequests.Queryies.GetLoanRequestAsPaging;
-using Applications.Features.LoanRequests.Queryies.GetLoanRequestsWithCanDisburse;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Domains.Models.Identity;
-using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using TrapchumApp.Helpers.Extensions;
 using TrapchumApp.Shared;
@@ -20,9 +15,6 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         [CascadingParameter] private CascadingAppState bState { get; set; } = default!;
         [Parameter] public int BranchId { get; set; }
         [Parameter] public string? UserId { get; set; }
-        bool CanRequestLoan { get; set; } = false;
-        bool CanDisburseLoan { get; set; } = false;
-        bool CanAprovedLoan { get; set; } = false;
 
         ClaimsPrincipal? _user;
 
@@ -39,7 +31,8 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         bool isIncludeInactive = false;
         bool isLoading = false;
         int statusId = 1;
-
+        private BaseEnum[] _dropDownItrem = [];
+        private string SelectedStatus = "";
         protected override async Task OnInitializedAsync()
         {
             createRequestUrl = $"/app/loan/request/{BranchId}/Branches/CreateNew";
@@ -50,12 +43,9 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
             UserId = _user.GetId();
 
-            CanRequestLoan = (await _authorizeService.AuthorizeAsync(_user, Policies.CanCreate()))
-                .Succeeded;
-            CanDisburseLoan = (await _authorizeService.AuthorizeAsync(_user, Policies.CanDisburseLoan()))
-                .Succeeded;
-            CanAprovedLoan = (await _authorizeService.AuthorizeAsync(_user, Policies.CanAproveRequest()))
-                .Succeeded;
+            _dropDownItrem = default(RequestStatus).ToEnumArray();
+
+            SelectedStatus = RequestStatus.All.ToString();
 
             await bState.CheckedCanDisbursemnt(_user);
 
@@ -77,12 +67,6 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
         async Task GetLoanRequestAsync()
         {
-            //var query = new GetLoanRequestsWithCanDisburseQuery(string.Empty, CanDisburseLoan, BranchId, RequestStatus.All, param);
-            //var query = new GetLoanRequestAsPagingQuery(string.Empty, BranchId, RequestStatus.All, param);
-            //var rsp = await mediator.Send(query);
-            //LoanRequests = rsp.Items;
-            //counts = rsp.Count;
-
             isLoading = true;
 
             string? userId = string.Empty;
@@ -112,6 +96,39 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             StateHasChanged();
         }
 
+
+        async Task GetLoanRequestAsync(RequestStatus status)
+        {
+            isLoading = true;
+
+            string? userId = string.Empty;
+
+            var param = new QueryParam(pageIndex, pageSize, sortColumn, false, sortDescending, filtertext);
+
+            if (bState.CanDisbursed)
+            {
+                userId = string.Empty;
+            }
+            else
+            {
+                await bState.GetUserId();
+                userId = bState.UserId;
+            }
+
+            var query = new GetLoanRequestAsPagingQuery(userId, BranchId, status, param);
+
+            var rsp = await mediator.Send(query);
+
+            LoanRequests = rsp.Items;
+
+            counts = rsp.Count;
+
+            isLoading = false;
+
+            StateHasChanged();
+        }
+
+
         async void PageChanged(int size)
         {
             pageSize = size;
@@ -133,34 +150,18 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
         }
 
-        void LoanRequestChecked(VLoanRequests param)
+        void SelectedItemChanged(object? value)
         {
-            var baseURL = $"/Loan/Request/{param.LoanRequestId}/Review";
-            var newUri = new Dictionary<string, object?>
-            {
-                { "BranchId", param.BranchId },
-                { "CustomerId", param.CustomerId },
-                { "UserId", UserId }
-            }.AddQueryString(baseURL);
+            var SelectedStatus = (BaseEnum?)value;
 
-            NavigationManager.NavigateTo(newUri);
-        }
-
-        async Task VerifiedLoanRequest(VLoanRequests req)
-        {
-            var options = new DialogOptions
+            if (SelectedStatus is not null && SelectedStatus.Name.TryToEnum<RequestStatus>(out var status))
             {
-            };
-            var param = new Dictionary<string, object?>
+                _ = GetLoanRequestAsync(status);
+            }
+            else
             {
-                { "CustomerId", req.CustomerId },
-                { "RequestUserId", req.CreditAgentId },
-                { "BranchId", req.BranchId },
-                { "Amount", req.RequestAmount },
-                { "LoanRequestId", req.LoanRequestId }
-            };
-
-            var result = await DialogService.OpenAsync<LoanRequestModal>("Loan Request", param, options: options);
+                _ = GetLoanRequestAsync(RequestStatus.All);
+            }
         }
     }
 }

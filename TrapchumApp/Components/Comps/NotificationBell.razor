@@ -1,0 +1,247 @@
+﻿@using Applications.Features.Notifications.Dto
+@using Applications.Features.Notifications.Queries.GetNotification
+@using Applications.Features.Notifications.Queries.GetUnreadNotifications
+@using Domains.Enumerations
+@using Humanizer
+@using System.Threading.Tasks
+@using TrapchumApp.Helpers.Extensions
+@implements IAsyncDisposable
+
+<div class="notification-wrapper" @ref="@WrapperRef">
+    <a class="nav-link" @onclick="@Toggle" @onclick:preventDefault>
+        <i class="far fa-comments"></i>
+        <span class="navbar-badge badge-@(_notiService.UnReadCount > 0 ? "danger" : "secondary")">
+            @_notiService.UnReadCount
+        </span>
+    </a>
+    @if (IsOpen)
+    {
+        <div class="dropdown-menu dropdown-menu-lg show">
+            @if (_notiService.Notifications.Count <= 0)
+            {
+                <div class="dropdown-item empty-state">
+                    <i class="far fa-bell-slash"></i>
+                    <span>No new notifications</span>
+                </div>
+            }
+            else
+            {
+                <div class="notification-list">
+                    @foreach (var msg in _notiService.Notifications)
+                    {
+                        <a href="#" class="dropdown-item @(msg.IsRead ? "" : "unread")" @onclick="() => OpenMessage(msg)" >
+                            <div class="media">
+                                <div class="media-left">
+                                    <span class="notification-icon @GetIconBackground(msg)">
+                                        <i class="@GetNotificationIcon(msg)"></i>
+                                    </span>
+                                </div>
+                                <div class="media-body">
+                                    <h3 class="dropdown-item-title">
+                                        @msg.Type
+                                        <span class="float-right">
+                                            <i class="fas fa-star @GetStarClass(msg)"></i>
+                                        </span>
+                                    </h3>
+                                    <p class="text-sm">@msg.Title</p>
+                                    <p class="text-sm text-muted">
+                                        <i class="far fa-clock"></i> @msg.CreatedAt.Humanize()
+                                    </p>
+                                </div>
+                            </div>
+                        </a>
+                        <div class="dropdown-divider"></div>
+                    }
+                </div>
+            }
+
+            <a href="#" class="dropdown-item dropdown-footer" @onclick="@ViewAll" @onclick:preventDefault>
+                See All Messages
+            </a>
+        </div>
+    }
+</div>
+
+@code {
+    [CascadingParameter] CascadingAppState AppState { get; set; } = default!;
+    [CascadingParameter] public Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+
+    private bool IsOpen;
+    private bool _isNavigating;
+
+    private ElementReference WrapperRef;
+
+    private DotNetObjectReference<NotificationBell>? _objRef;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _notiService.OnChange += OnNotificationChanged;
+
+        var auth = await AuthenticationState;
+
+        await AppState.GetAuthenticatedUser(auth.User);
+
+        await AppState.GetBranchIdByUser();
+
+        await LoadNotifications();
+
+        await base.OnInitializedAsync();
+    }
+
+    private async Task LoadNotifications()
+    {
+        var userId = AppState.UserId;
+
+        var branchId = AppState.BranchId;
+
+        var query = new GetUnreadNotificationsQuery(userId, branchId, new(0, 0));
+
+        var result = await mediator.Send(query);
+
+        _notiService.Notifications = result.Items;
+
+        _notiService.UnReadCount = result.Count;
+    }
+
+    private void OnNotificationChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    void Toggle() => IsOpen = !IsOpen;
+
+    async Task OpenMessage(NotificationDto arg)
+    {
+        // Prevent double-click
+        if (_isNavigating) return;
+
+        _isNavigating = true;
+
+        // Close dropdown first
+        IsOpen = false;
+
+        var targetUrl = GetNavigationUrl(arg);
+
+        if (string.IsNullOrEmpty(targetUrl))
+        {
+            _isNavigating = false;
+
+            return;
+        }
+
+        try
+        {
+            // Mark as read in database and wait for completion
+            var result = await mediator.Send(new MarkUnreadNotificationCommand(arg.Id, arg.BranchId));
+
+            if (result.IsSuccess())
+            {
+                // Update local state immediately (in case we stay on the same circuit)
+                _notiService.MarkAsRead(arg);
+
+                // Small delay to ensure database transaction is committed
+                await Task.Delay(50);
+
+                // Navigate with forceLoad to ensure page content refreshes
+                NavigationManager.NavigateTo(targetUrl, false);
+
+                StateHasChanged();
+
+            }
+        }
+        finally
+        {
+            _isNavigating = false;
+        }
+    }
+
+    private string? GetNavigationUrl(NotificationDto arg)
+    {
+        return (AppState.CanRequest, AppState.CanApproved, AppState.CanDisbursed, AppState.CanRecievePayment, arg.Type) switch
+        {
+            (true, _, _, _, var t) when t == NotificationType.New.ToString()
+                => $"/App/Loans/{arg.ReferenceId}/Requests/{arg.BranchId}/Branches/{arg.CustomerId}/Details",
+
+            (_, true, _, _, var t) when t == NotificationType.Request.ToString()
+                => $"/App/Loans/{arg.ReferenceId}/Requests/{arg.BranchId}/Branches/{arg.CustomerId}/Details",
+
+            (_, _, true, _, var t) when t == NotificationType.Disbursement.ToString()
+                => $"/App/Loans/{arg.ReferenceId}/Disbursements/{arg.BranchId}/Branches/CreateNew",
+
+            (_, _, _, true, var t) when t == NotificationType.Payment.ToString()
+                => $"/App/Loans/{arg.BranchId}/Branches/{arg.ReferenceId}/Schedules",
+
+            _ => null
+        };
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _objRef = DotNetObjectReference.Create(this);
+
+            await js.InvokeVoidAsync("dropdownOutsideClick.register", WrapperRef, _objRef);
+        }
+    }
+
+    [JSInvokable]
+    public void CloseDropdown()
+    {
+        if (IsOpen)
+        {
+            IsOpen = false;
+
+            InvokeAsync(StateHasChanged);
+        }
+    }
+
+    void ViewAll()
+    {
+        IsOpen = false;
+
+        NavigationManager.NavigateTo("/App/Notifications");
+    }
+
+    string GetNotificationIcon(NotificationDto msg)
+    {
+        return msg.Type switch
+        {
+            nameof(NotificationType.New) => "fas fa-file",
+            nameof(NotificationType.Request) => "fas fa-paper-plane",
+            nameof(NotificationType.Disbursement) => "fas fa-money-bill-wave",
+            nameof(NotificationType.Payment) => "fas fa-dollar-sign",
+            _ => "fas fa-bell"
+        };
+    }
+
+    string GetIconBackground(NotificationDto msg)
+    {
+        return msg.Type switch
+        {
+            nameof(NotificationType.New) => "bg-info",
+            nameof(NotificationType.Request) => "bg-primary",
+            nameof(NotificationType.Disbursement) => "bg-success",
+            nameof(NotificationType.Payment) => "bg-warning",
+            _ => "bg-secondary"
+        };
+    }
+
+    string GetStarClass(NotificationDto msg) => msg.IsRead ? "text-muted" : "text-warning";
+
+    public async ValueTask DisposeAsync()
+    {
+        _notiService.OnChange -= OnNotificationChanged;
+
+        try
+        {
+            await js.InvokeVoidAsync("dropdownOutsideClick.unregister", WrapperRef);
+        }
+        catch (JSDisconnectedException)
+        {
+            // Ignore if the circuit is already disconnected
+        }
+
+        _objRef?.Dispose();
+    }
+}

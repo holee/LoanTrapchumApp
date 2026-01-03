@@ -1,3 +1,4 @@
+@using Applications.Enumerations
 @using Applications.Responses.ViewModels.Loans.Requests
 @using TrapchumApp.Pages.Transactions.Loans.Menu
 <GridToolbar SearchChanged="@FilterTextChanged" Placeholder="Type something to search........">
@@ -51,7 +52,7 @@
                         <LinkRequestLoan BranchId="@BranchId"
                                          LoanRequest="@r"
                                          User="@_user"
-                                         CreditAgentId="@UserId" />
+                                         CreditAgentId="@_userId" />
                     </Authorized>
                 </AuthorizeView>
             </Template>
@@ -71,19 +72,60 @@
 </RadzenDataGrid>
 
 @code {
-    void ShowContextMenu(MouseEventArgs args, VLoanRequests loanRequest)
+    [CascadingParameter] CascadingAppState bState { get; set; } = default!;
+    void ShowContextMenu(MouseEventArgs args, VLoanRequests Request)
     {
-        ContextMenuService.Open(args, ds =>@<LoanRequestMenu Request="@loanRequest" />);
+        if (Request is null) return;
+        var requestNowUrl = $"/App/Loans/{Request.LoanRequestId}/Requests/{Request.BranchId}/Branches/{Request.CustomerId}/Details";
+        var checkloanRequestUrl = $"App/Loans/{Request.LoanRequestId}/Requests/{Request.BranchId}/Branches/{Request.CustomerId}/Details";
+        var loanRequestDetailsUrl = $"App/Loans/{Request.LoanRequestId}/Requests/{Request.BranchId}/Branches/{Request.CustomerId}/Details";
+        var requestLoanRequestUrl = $"/App/Loans/{Request.LoanRequestId}/Requests/{Request.BranchId}/Branches/{Request.CustomerId}/Edit";
+        var disburseRequestLoanUrl = $"/App/Loans/{Request.LoanRequestId}/Requests/{Request.BranchId}/Branches/{Request.CustomerId}/Disbursement/CreateNew?CustomerId={Request.CustomerId}";
+        ContextMenuService.Open(args, ds =>@<RadzenMenu Style="font-size:0.8rem;">
+
+        @if (bState.CanRequest)
+        {
+                <RadzenMenuItem Path="@requestNowUrl"
+                                Visible="Request.StatusId == (int)RequestStatus.New" Icon="@IconNames.SendMoney" Text="Request Now" Value="@Request.CustomerId" />
+
+                <RadzenMenuItem Visible="Request.StatusId == (int)RequestStatus.New"
+                                Path="@requestLoanRequestUrl"
+                                Icon="@IconNames.Edit"
+                                Text="Edit Request" Value="@Request.CustomerId" />
+
+                <RadzenMenuItem Visible="Request.StatusId == (int)RequestStatus.Rechecked"
+                                Path="@requestLoanRequestUrl"
+                                Icon="@IconNames.Edit"
+                                Text="Review Request" Value="@Request.CustomerId" />
+        }
+
+        @if (bState.CanApproved)
+        {
+                <RadzenMenuItem Visible="Request.StatusId == (int)RequestStatus.Requested"
+                                Path="@checkloanRequestUrl"
+                                Icon="@IconNames.Info" Text="Approved Now" Value="@Request.CustomerId" />
+        }
+
+        @if (bState.CanDisbursed)
+        {
+                <RadzenMenuItem Visible="Request.StatusId == (int)RequestStatus.Approved"
+                                Path="@disburseRequestLoanUrl"
+                                Icon="@IconNames.Info" Text="Disburse Now" Value="@Request.CustomerId" />
+        }
+
+    <RadzenMenuItem Icon="@IconNames.Details"
+                    Path="@loanRequestDetailsUrl"
+                    Text="Request Details" Value="@Request.CustomerId" />
+</RadzenMenu>
+        );
     }
+
+
+
+
+
+
+
 
 }
 
-
-
-@* <NotAuthorized>
-                        <NavLink href="@($"/App/Loan/{BranchId}/Branches/Request/Details?UserId={UserId}&LoanRequestId={r?.LoanRequestId}&CustomerId={r?.CustomerId}")">
-                            <RadzenBadge Variant="Variant.Text"
-                                         Style="font-size:0.7rem;"
-                                         Text="@r?.Status" BadgeStyle="BadgeStyle.Secondary" />
-                        </NavLink>
-                    </NotAuthorized> *@

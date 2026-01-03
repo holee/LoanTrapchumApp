@@ -1,10 +1,12 @@
-﻿using Applications.Features.Loans.Responses;
+﻿using Applications.Features.Loans.Queries.GetLoanSchedulesByPaymentDate;
+using Applications.Features.Loans.Responses;
 using Applications.Features.Loans.Services;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Branches;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Services.Loans;
 using Domains.Models.Identity;
+using TrapchumApp.Helpers.Enums;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 {
@@ -22,7 +24,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
         [Parameter] public int BranchId { get; set; } = 0;
         [Parameter] public EventCallback<string> ShowCounts { get; set; }
         [Parameter] public EventCallback<VSchedule> ShowLateScheduleDetails { get; set; }
-        [Parameter] public EventCallback<VSchedule> RecievePayment { get; set; } 
+        [Parameter] public EventCallback<VSchedule> RecievePayment { get; set; }
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
         private List<VSchedule> ScheduleItems = [];
         private IList<VLoanDisbursments> SelectedLoans = [];
@@ -39,11 +41,67 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
         string sortField = "LoanId";
         bool sortDescending = true;
 
-        DateTime paymentDate = DateTime.Now;
+        DateTime paymentDate = DateTime.UtcNow;
+        private DateTime? _start;
+        private DateTime? _end;
+        private int _selectedFilter = 0;
+
+        void OnStartDateChanged()
+        {
+            var daysToAdd = _selectedFilter switch
+            {
+                (int)ScheduleFilter.MonthToDate => 28,
+
+                (int)ScheduleFilter.NextWeek => 7,
+
+                _ => (int?)null
+            };
+
+            if (daysToAdd.HasValue)
+            {
+                _end = _start!.Value.AddDays(daysToAdd.Value);
+            }
+
+            _ = OnFilterChanged();
+        }
+
+        async Task OnFilterChanged()
+        {
+
+            if (_selectedFilter == (int)ScheduleFilter.All)
+            {
+                await GetLoansAsync();
+            }
+
+            if (_selectedFilter == (int)ScheduleFilter.Today)
+            {
+                await GetLoanSchedulesDueDate();
+            }
+
+            if (_selectedFilter == (int)ScheduleFilter.OverDueDate)
+            {
+                await GetLoanSchedulesOverDueDate();
+            }
+
+            if (_selectedFilter == (int)ScheduleFilter.MonthToDate)
+            {
+                await GetLoanSchedulesMonthToDate();
+            }
+
+            if (_selectedFilter == (int)ScheduleFilter.NextWeek)
+            {
+                await GetLoanSchedulesNextWeek();
+            }
+            await GetCount();
+
+        }
+
         async Task ChangedPageSize(int page)
         {
             pageSize = page;
+
             pageIndex = 0;
+
             await GetLoansAsync();
         }
 
@@ -57,23 +115,6 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
             await GetLoansAsync();
         }
 
-        async void CheckedIncludeChanged()
-        {
-            await GetLoansAsync();
-        }
-
-        void GetPaymentSchedules(VSchedule p)
-        {
-            NavigationManager.NavigateTo($"/App/Loans/{p.BranchId}/Branches/{p.LoanId}/Schedules?CreditAgentId={p.CreditAgentId}&CurrencyId={p.CurrencyId}&UserId={_userId}");
-            return;
-        }
-
-
-        void CustomerPayOff(VSchedule p)
-        {
-            NavigationManager.NavigateTo($"/Loan/CreditAgent/{p.LoanId}/Changed?CustomerId={p.CustomerId}&BranchId={p.BranchId}&CreditAgentId={p.CreditAgentId}&CurrencyId={p.CurrencyId}&UserId={_userId}");
-            return;
-        }
         protected override async Task OnInitializedAsync()
         {
             var auth = await AuthenticationState;
@@ -103,33 +144,106 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 
         private async Task GetLoansAsync()
         {
-            try
-            {
-                isLoading = true;
+            isLoading = true;
 
-                var param = new QueryParam(pageIndex, pageSize, sortField, false, sortDescending, filter);
+            var param = new QueryParam(pageIndex, pageSize, sortField, false, sortDescending, filter);
 
-                var res = await _loanScheduleService.GetLoanSchedulesByPaymentDateAsync(BranchId, paymentDate, true, false, param);
+            var query = new GetLoanSchedulesByPaymentDateQuery(BranchId, paymentDate, true, false, param);
 
-                ScheduleItems = res.Items;
+            var res = await mediator.Send(query);
 
-                counts = res.Count;
+            ScheduleItems = res.Items;
 
-                isLoading = false;
+            counts = res.Count;
 
-                StateHasChanged();
-            }
-            catch (Exception ex)
-            {
-                isLoading = false;
-                NotificationService.Notify(NotificationSeverity.Error, ex.Message);
-            }
-            finally
-            {
-                isLoading = false;
-            }
+            isLoading = false;
 
+            StateHasChanged();
         }
+
+
+        private async Task GetLoanSchedulesDueDate()
+        {
+
+            isLoading = true;
+
+            var param = new QueryParam(pageIndex, pageSize, sortField, false, sortDescending, filterText);
+
+            var query = new GetLoanSchedulesByPaymentDateQuery(BranchId, DateTimeOffset.Now, false, false, param);
+
+            var res = await mediator.Send(query);
+
+            ScheduleItems = res.Items;
+
+            counts = res.Count;
+
+            isLoading = false;
+
+            StateHasChanged();
+        }
+
+
+        private async Task GetLoanSchedulesOverDueDate()
+        {
+
+            isLoading = true;
+
+            var param = new QueryParam(pageIndex, pageSize, sortField, false, sortDescending, filterText);
+
+            var query = new GetLoanSchedulesByPaymentDateQuery(BranchId, paymentDate, true, true, param);
+
+            var res = await mediator.Send(query);
+
+            ScheduleItems = res.Items;
+
+            counts = res.Count;
+
+            isLoading = false;
+
+            StateHasChanged();
+        }
+
+        private async Task GetLoanSchedulesNextWeek()
+        {
+
+            isLoading = true;
+
+            var param = new QueryParam(pageIndex, pageSize, sortField, false, sortDescending, filterText);
+
+            var query = new GetLoanSchedulesByPaymentDateQuery(BranchId, paymentDate, true, true, param);
+
+            var res = await mediator.Send(query);
+
+            ScheduleItems = res.Items;
+
+            counts = res.Count;
+
+            isLoading = false;
+
+            StateHasChanged();
+        }
+
+
+        private async Task GetLoanSchedulesMonthToDate()
+        {
+
+            isLoading = true;
+
+            var param = new QueryParam(pageIndex, pageSize, sortField, false, sortDescending, filterText);
+
+            var query = new GetLoanSchedulesMonthToDateQuery(BranchId, _start, _end, param);
+
+            var res = await mediator.Send(query);
+
+            ScheduleItems = res.Items;
+
+            counts = res.Count;
+
+            isLoading = false;
+
+            StateHasChanged();
+        }
+
 
         void RowSelected(VSchedule schedule) { }
 
@@ -137,31 +251,13 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 }
 
 
-//async Task DownLoadScheduleAsExcel(Guid loanRefId, int branchId)
+//void GetPaymentSchedules(VSchedule p)
 //{
-//    ContextMenuService.Close();
-//    isProgess = true;
-
-//    var stream = await _dService.DownLoadScheduleAsExcel(loanRefId, branchId);
-//    using var streamRef = new DotNetStreamReference(stream: stream);
-//    await js.InvokeVoidAsync("downloadFileFromStream", "Schedule.xlsx", streamRef);
-//    isProgess = false;
-//    StateHasChanged();
+//    NavigationManager.NavigateTo($"/App/Loans/{p.BranchId}/Branches/{p.LoanId}/Schedules?CreditAgentId={p.CreditAgentId}&CurrencyId={p.CurrencyId}&UserId={_userId}");
+//    return;
 //}
-
-
-
-//async Task DownLoadScheduleAsPdf(Guid loanRefId, int branchId)
+//void CustomerPayOff(VSchedule p)
 //{
-
-//    ContextMenuService.Close();
-
-//    isProgess = true;
-//    var stream = await _dService.DownLoadScheduleAsPdf(loanRefId, branchId);
-
-//    using var streamRef = new DotNetStreamReference(stream: stream);
-
-//    await js.InvokeVoidAsync("downloadFileFromStream", "Schedule.pdf", streamRef);
-//    isProgess = false;
-//    StateHasChanged();
+//    NavigationManager.NavigateTo($"/Loan/CreditAgent/{p.LoanId}/Changed?CustomerId={p.CustomerId}&BranchId={p.BranchId}&CreditAgentId={p.CreditAgentId}&CurrencyId={p.CurrencyId}&UserId={_userId}");
+//    return;
 //}

@@ -6,7 +6,6 @@
 @using Applications.Features.Employees
 @using Applications.Features.LoanRequests.Interfaces
 <PageTitle>Home</PageTitle>
-<button @onclick="PrintPage" class="btn">Print This Page</button>
 <AuthorizeView Roles="@AppRoles.Co">
     <Authorized>
         <InfoBox Title="CO"
@@ -84,9 +83,30 @@
 </AuthorizeView>
 
 @code {
+
+    [CascadingParameter] Task<AuthenticationState> AuthState { get; set; }=default!;
+    [CascadingParameter] CascadingAppState bState { get; set; } = default!;
+
     [Inject]
     private IServiceProvider ServiceProvider { get; set; }
     bool multiple = true;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        var auth = await AuthState;
+
+        // if(auth.User is not null)
+        // {
+        //     await bState.GetAuthenticatedUser(auth.User);
+
+        //     await bState.GetNotifications(new (0,15));
+
+        // }
+        await base.OnInitializedAsync();
+    }
+
     void OnParentClicked(MenuItemEventArgs args)
     {
 

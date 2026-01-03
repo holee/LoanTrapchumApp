@@ -1,4 +1,4 @@
-﻿@page "/app/loan/{LoanRequestId}/request/{BranchId:int}/branches/{CustomerId}/edit"
+﻿@page "/App/Loans/{LoanRequestId}/Requests/{BranchId:int}/Branches/{CustomerId}/Edit"
 @using Applications.Features.Collaterals.Dtos
 @using Applications.Features.Customers.Response
 @using Applications.Features.LoanRequests.Command.AddLoanRequestCollateral
@@ -102,7 +102,7 @@
                               Text="Request"
                               Icon="save"
                               ButtonStyle="ButtonStyle.Success" />
-                <BackButton Href="@($"/app/loan/request/{BranchId}/branches")" />
+                <BackButton Href="@($"/App/Loans/Requests/{BranchId}/branches")" />
             </RadzenStack>
         </CardFooter>
     </EditForm>

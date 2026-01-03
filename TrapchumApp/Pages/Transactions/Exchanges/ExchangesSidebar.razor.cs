@@ -2,7 +2,7 @@ using Applications.Commons.Extensions;
 using Applications.Enumerations;
 using Applications.Extensions.Maths;
 using Applications.Extensions.NumberExtensions;
-using Applications.Features.Currencies;
+using Applications.Features.Currencies.Requests;
 using Applications.Features.Currencies.Responses;
 using Applications.Features.Transactions.ForiegnExchanges;
 using Applications.Interfaces.Currencies;
@@ -71,8 +71,8 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
             }
             else
             {
-                _mx.ExchangeRate = Defaults.DefaultExchangeRate;
-                _mx.SpotRate = Defaults.DefaultSpotRate;
+                _mx.ExchangeRate = Defaults.ExchangeRate;
+                _mx.SpotRate = Defaults.SpotRate;
             }
             _isBuy = true;
             await base.OnInitializedAsync();

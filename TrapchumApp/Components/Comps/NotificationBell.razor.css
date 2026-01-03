@@ -1,0 +1,218 @@
+/* AdminLTE Message Dropdown Styles */
+
+.notification-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+/* Nav link / Bell button */
+.nav-link {
+    position: relative;
+    cursor: pointer;
+    padding: 0.5rem 0.75rem;
+    color: var(--rz-text-color, #333);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-link:hover {
+    color: var(--rz-primary, #007bff);
+}
+
+.nav-link > i {
+    font-size: 1.4rem;
+}
+
+/* Badge */
+.navbar-badge {
+    font-size: 0.5rem;
+    font-weight: 600;
+    padding: 4px 6px;
+    position: absolute;
+    right: 0;
+    top: 0;
+    background-color: #dc3545;
+    color: #fff;
+    border-radius: 50%;
+    min-width: 18px;
+    height: 18px;
+    line-height: 10px;
+    text-align: center;
+}
+
+/* Dropdown menu */
+.dropdown-menu-lg {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 10px);
+    min-width: 260px;
+    max-width: 280px;
+    padding: 0;
+    margin: 0;
+    background: #fff;
+    border-radius: 0.25rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.175);
+    z-index: 1050;
+    border: 0 solid rgba(0, 0, 0, 0.15);
+}
+
+.dropdown-menu-lg.show {
+    display: block;
+}
+
+/* Notification list - scrollable */
+.notification-list {
+    max-height: 280px;
+    overflow-y: auto;
+}
+
+/* Divider */
+.dropdown-divider {
+    height: 0;
+    margin: 0;
+    overflow: hidden;
+    border-top: 1px solid #e9ecef;
+}
+
+/* Dropdown items */
+.dropdown-item {
+    display: block;
+    padding: 0.4rem 0.75rem;
+    color: #212529;
+    text-decoration: none;
+    cursor: pointer;
+    background-color: transparent;
+    border: 0;
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+    background-color: #f4f6f9;
+    color: #16181b;
+}
+
+/* Media layout */
+.media {
+    display: flex;
+    align-items: flex-start;
+}
+
+.media-left {
+    flex-shrink: 0;
+    margin-right: 0.6rem;
+}
+
+.media-body {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Notification icon (circle avatar replacement) */
+.notification-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 0.8rem;
+}
+
+/* Background colors */
+.bg-info {
+    background-color: #17a2b8 !important;
+}
+
+.bg-primary {
+    background-color: #007bff !important;
+}
+
+.bg-success {
+    background-color: #28a745 !important;
+}
+
+.bg-warning {
+    background-color: #ffc107 !important;
+    color: #212529 !important;
+}
+
+.bg-secondary {
+    background-color: #6c757d !important;
+}
+
+/* Title row */
+.dropdown-item-title {
+    font-size: 0.8rem;
+    margin: 0 0 0.15rem 0;
+    color: #495057;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dropdown-item-title .float-right {
+    margin-left: auto;
+}
+
+.dropdown-item-title .fa-star {
+    font-size: 0.7rem;
+}
+
+/* Text styles */
+.text-sm {
+    font-size: 0.75rem;
+    margin: 0 0 0.15rem 0;
+    color: #6c757d;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.text-muted {
+    color: #6c757d !important;
+}
+
+.text-warning {
+    color: #ffc107 !important;
+}
+
+/* Footer - always visible */
+.dropdown-item.dropdown-footer {
+    text-align: center;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    background-color: #f8f9fa;
+    color: #6c757d;
+    border-top: 1px solid #e9ecef;
+}
+
+.dropdown-item.dropdown-footer:hover {
+    background-color: #e9ecef;
+    color: #495057;
+}
+
+/* Empty state */
+.dropdown-item.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem 0.75rem;
+    color: #6c757d;
+    gap: 0.4rem;
+    font-size: 0.75rem;
+}
+
+.dropdown-item.empty-state i {
+    font-size: 1.5rem;
+}
+
+/* Clock icon spacing */
+.far.fa-clock {
+    margin-right: 0.2rem;
+    font-size: 0.7rem;
+}

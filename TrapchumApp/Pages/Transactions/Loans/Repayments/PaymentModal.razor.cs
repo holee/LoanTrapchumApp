@@ -1,4 +1,3 @@
-using Applications.Calculations;
 using Applications.Commons.Extensions;
 using Applications.Enumerations;
 using Applications.Extensions.Enums;
@@ -7,15 +6,8 @@ using Applications.Features.LoanPayments.Command.RecievePayment;
 using Applications.Features.LoanPayments.Requests;
 using Applications.Features.Settings.UseCases;
 using Applications.Features.Transactions.LoanTransactions;
-using Applications.Services.Loans;
 using Domains.Models.Identity;
-using Domains.Models.Loans;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
-using Radzen;
-using System.Threading.Tasks;
 using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments

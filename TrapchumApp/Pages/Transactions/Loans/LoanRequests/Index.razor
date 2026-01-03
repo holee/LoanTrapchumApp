@@ -1,4 +1,4 @@
-﻿@page "/app/loan/request/{BranchId:int}/branches"
+﻿@page "/App/Loans/Requests/{BranchId:int}/Branches"
 @using Applications.Features.Addresses
 @using Applications.Features.Branches
 @using Applications.Features.Currencies
@@ -23,8 +23,7 @@
             <RadzenTabsItem Text="Requesting"
                             Visible="@IsCreditAgent"
                             Icon="pending_actions">
-                <LoanRequestRequesting BranchId="@BranchId"
-                                       UserId="@_userId" />
+                <LoanRequestRequesting BranchId="@BranchId" />
             </RadzenTabsItem>
             <RadzenTabsItem Text="Requested"
                             Visible="@IsManager"

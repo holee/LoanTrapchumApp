@@ -6,7 +6,6 @@
 
     <RadzenMenu Style="font-size:0.8rem;">
 
-
         @if (bState.CanRequest)
         {
             <RadzenMenuItem Path="@_requestNowUrl"
@@ -41,6 +40,7 @@
                         Path="@_loanRequestDetailsUrl"
                         Text="Request Details" Value="@Request.CustomerId" />
     </RadzenMenu>
+
 }
 @code {
 

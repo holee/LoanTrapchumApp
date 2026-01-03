@@ -1,14 +1,43 @@
 ﻿@using System.Threading.Tasks
+@using Applications.Features.Loans.Queries.GetLoanSchedulesByPaymentDate
+@using Applications.Responses.Paginations
+@using TrapchumApp.Helpers.Enums
+@using TrapchumApp.Helpers.Options
+@using TrapchumApp.Pages.Lists
 @using TrapchumApp.Pages.Transactions.Loans.Menu
+
 <GridToolbar SearchChanged="@TextLoanSearchChanged">
+    <LeftChildren>
+        <RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal">
+            <RadzenFormField Text="Filter By">
+                <RadzenDropDown Data="@Filters.ScheduleFilters"
+                                @bind-Value="@_selectedFilter"
+                                ValueProperty="@nameof(ListItem.Id)"
+                                TextProperty="@nameof(ListItem.Name)"
+                                Change="@OnFilterChanged"
+                                Style="width:50%;"
+                                TValue="int">
+                </RadzenDropDown>
+            </RadzenFormField>
+
+            @if (_selectedFilter == (int)ScheduleFilter.MonthToDate ||
+                        _selectedFilter == (int)ScheduleFilter.NextWeek)
+            {
+                <RadzenFormField Text="Start" AllowFloatingLabel="true">
+                    <RadzenDatePicker TValue="DateTime?"
+                                      DateFormat="dd/MM/yyy"
+                                      Change="@OnStartDateChanged"
+                                      @bind-Value="@_start" />
+                </RadzenFormField>
+                <RadzenFormField Text="End" AllowFloatingLabel="true">
+                    <RadzenDatePicker TValue="DateTime?" DateFormat="dd/MM/yyy" @bind-Value="@_end" />
+                </RadzenFormField>
+            }
+        </RadzenStack>
+    </LeftChildren>
     <RightChildren>
         <RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal">
-            <RadzenCheckBox TValue="bool"
-                            @bind-Value="includeInactive"
-                            @bind-Value:after="CheckedIncludeChanged"
-                            Name="IncludeInactive" />
-            <RadzenLabel Text="Include Inactive"
-                         Component="IncludeInactive" class="rz-ms-2" />
+
         </RadzenStack>
     </RightChildren>
 </GridToolbar>
@@ -30,6 +59,7 @@
                 PageSizeOptions="@StorageConstant.PageSizeOptions"
                 PageSizeChanged="@ChangedPageSize"
                 RowRender="@OnRowRender"
+                CellRender="@RowRenderChanged"
                 AllowPaging="true">
     <Columns>
         <RadzenDataGridColumn Context="p"
@@ -64,7 +94,7 @@
                               Title="Name"
                               Sortable="true">
             <Template>
-                @p.AltName
+                <KhmerName AltName="@p.AltName" />
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Context="p"
@@ -146,6 +176,7 @@
     </LoadingTemplate>
 </RadzenDataGrid>
 @code {
+
     void ShowContextMenuWithContent(MouseEventArgs args, VSchedule p)
     {
         ContextMenuService.Open(args, ds =>@<AllScheduleMenu ShowOnTab="true"
@@ -156,9 +187,29 @@
     );
     }
 
+
+    private void RowRenderChanged(DataGridCellRenderEventArgs<VSchedule> args)
+    {
+        switch (args.Data.DayArrea)
+        {
+            case >= 1 and <= 7:
+                args.Attributes.Add("style", "background-color: orange; color: #721c24;"); // Light red background for late schedules
+                break;
+            case > 7 and <= 14:
+                args.Attributes.Add("style", "background-color: orange; color: #856404;"); // Light orange background for schedules with more than 7 days late
+                break;
+            case > 14:
+                args.Attributes.Add("style", "background-color: #E9D1FF; color: #856404;"); // Light yellow background for schedules with more than 14 days late
+                break;
+            default:
+                args.Attributes.Add("style", "background-color: white; color: black;"); // Default style for non-late schedules
+                break;
+        }
+    }
+
     void OnRowRender(RowRenderEventArgs<VSchedule> args)
     {
-        args.Attributes.Add("style", $"color:{(args.Data.PenaltyAmount > 0 ? "red" : "black")}");
+        //args.Attributes.Add("style", $"color:{(args.Data.PenaltyAmount > 0 ? "red" : "black")}");
     }
 
     async Task ShowLateDetails(VSchedule p)
@@ -178,5 +229,6 @@
 
         StateHasChanged();
     }
+
 
 }

@@ -4,8 +4,8 @@ public sealed class QueryParam
 {
     public QueryParam()
     {
-        Skip = 1;
-        PageSize = 10;
+        Skip = 0;
+        PageSize = 15;
         SortColumn = string.Empty;
         SortDescending = false;
         IsIncludeInActive = false;

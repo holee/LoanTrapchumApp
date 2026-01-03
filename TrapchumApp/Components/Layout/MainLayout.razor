@@ -4,20 +4,19 @@
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
 @using Applications.Features.LoanRequests.Interfaces
+@using Applications.Features.Notifications.Dto
 @using Microsoft.AspNetCore.Components.Routing
 @using TrapchumApp.Helpers.Constants
 @using TrapchumApp.Pages.Transactions.Exchanges
 @using TrapchumApp.Services
-@implements IDisposable
 @inherits LayoutComponentBase
-@inject LoadingTrackerService Tracker
 <RadzenComponents @rendermode="InteractiveServer" />
 <RadzenProgressBar Visible="@isLoading"
                    Mode="ProgressBarMode.Indeterminate"
                    Value="100"
                    ShowValue="false"
                    ProgressBarStyle="ProgressBarStyle.Danger"
-                   Style="height: 3px; position: fixed; top: 0; left: 0; width: 100%; z-index: 9999;" />
+                   Style="height: 2px; position: fixed; top: 0; left: 0; width: 100%; z-index: 9999;" />
 <RadzenLayout>
     <RadzenHeader>
         <RadzenStack Orientation="Orientation.Horizontal"
@@ -33,10 +32,7 @@
             <RadzenStack Orientation="Orientation.Horizontal"
                          JustifyContent="JustifyContent.SpaceBetween"
                          AlignItems="AlignItems.Center">
-                <RadzenButton ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small">
-                    Notifications
-                    <RadzenBadge Variant="Variant.Outlined" BadgeStyle="BadgeStyle.Light" Text="15" class="rz-ms-2" />
-                </RadzenButton>
+                <NotificationBell />
                 <TopMenus IsBranchOpen="true" ShowDialogue="ShowCurrencyDialogue" />
                 <Profiles UserId="@userId" />
             </RadzenStack>
@@ -77,7 +73,7 @@
                     <RadzenPanelMenuItem Text="Branches" Icon="auto_awesome">
                         <RadzenPanelMenuItem Text="Branches List"
                                              Icon="color_lens"
-                                             Visible="IsAdminOnly"
+                                             Visible="@bState.IsAdmin"
                                              Path="/App/Branches" />
                     </RadzenPanelMenuItem>
                 </Authorized>
@@ -89,7 +85,7 @@
             </AuthorizeView>
             <AuthorizeView Policy="@Policies.AdminOnly">
                 <Authorized>
-                    <OperatedPerson UserId="@userId" BranchId="@branchId" />
+                    <OperatedPerson BranchId="@branchId" />
                 </Authorized>
             </AuthorizeView>
             <AuthorizeView>
@@ -99,14 +95,14 @@
                         <RadzenPanelMenuItem Text="Loan Management" Icon="dataset">
                             <RadzenPanelMenuItem Text="Guarantor" Icon="how_to_reg" Path="/App/Customer/Guarantor" />
                             <RadzenPanelMenuItem Text="Credit Officer" Icon="switch_account"
-                                                 Path="/app/employee/credit-agent" />
-                            <RadzenPanelMenuItem Text="Loan Product" Icon="inventory_2" Path="/app/loan/product" />
-                            <RadzenPanelMenuItem Text="Loan Category" Icon="lists" Path="/app/loan/categories" />
+                                                 Path="/App/Employees/Credit-Agent" />
+                            <RadzenPanelMenuItem Text="Loan Product" Icon="inventory_2" Path="/App/Loans/Products" />
+                            <RadzenPanelMenuItem Text="Loan Category" Icon="lists" Path="/Ppp/Loans/Categories" />
                             <RadzenPanelMenuItem Text="Collaterals" Icon="invert_colors"
-                                                 Path="/app/customer/collateral" />
-                            <RadzenPanelMenuItem Text="Holidays" Icon="calendar_add_on" Path="/app/holiday" />
+                                                 Path="/App/Customers/Collateral" />
+                            <RadzenPanelMenuItem Text="Holidays" Icon="calendar_add_on" Path="/App/Holidays" />
                             <RadzenPanelMenuItem Text="Change Credit Agent" Icon="@IconNames.SwitchAccount"
-                                                 Path="@($"/app/loan/disbursment/credit-agent/{branchId}/branches")" />
+                                                 Path="@($"/App/Loans/Disbursments/Credit-Agent/{branchId}/Branches")" />
                         </RadzenPanelMenuItem>
                     }
                     @if (bState is { IsAccount: true, State: true })
@@ -118,22 +114,29 @@
                     {
                         <RadzenPanelMenuItem Text="Loan Management" Icon="dataset">
                             <RadzenPanelMenuItem Text="Customers" Icon="group"
-                                                 Path="@($"/app/customer/{branchId}/branches")" />
+                                                 Path="@($"/App/Customers/{branchId}/Branches")" />
                             <RadzenPanelMenuItem Text="Collaterals" Icon="invert_colors"
-                                                 Path="/app/customer/collateral" />
+                                                 Path="/App/Customer/Collaterals" />
                             <RadzenPanelMenuItem Text="Loan Request" Icon="request_quote"
-                                                 Path="@($"/app/loan/request/{branchId}/branches")" />
+                                                 Path="@($"/App/Loans/Requests/{branchId}/Branches")" />
                             <RadzenPanelMenuItem Text="Loans Disbursement" Icon="@IconNames.MoneyBag"
-                                                 Path="@($"/app/loan/disbursment/{branchId}/branches")" />
+                                                 Path="@($"/App/Loans/Disbursements/{branchId}/Branches")" />
+                            <RadzenPanelMenuItem Text="Notifications"
+                                                 Icon="notifications"
+                                                 Path="/App/Notifications" />
+
                         </RadzenPanelMenuItem>
                     }
                     @if (bState.IsManager)
                     {
                         <RadzenPanelMenuItem Text="Loan Management" Icon="dataset">
                             <RadzenPanelMenuItem Text="Loan Request" Icon="request_quote"
-                                                 Path="@($"/app/loan/request/{branchId}/branches")" />
-                            <RadzenPanelMenuItem Text="Loans" Icon="@IconNames.MoneyBag"
-                                                 Path="@($"/app/loan/disbursment/{branchId}/branches")" />
+                                                 Path="@($"/App/Loans/Requests/{branchId}/Branches")" />
+                            <RadzenPanelMenuItem Text="Loans Disbursement" Icon="@IconNames.MoneyBag"
+                                                 Path="@($"/App/Loans/Disbursements/{branchId}/Branches")" />
+                            <RadzenPanelMenuItem Text="Notifications"
+                                                 Icon="notifications"
+                                                 Path="/App/Notifications" />
                         </RadzenPanelMenuItem>
                     }
                 </Authorized>
@@ -174,6 +177,10 @@
 
     private string? currentUrl;
     private bool isLoading;
+    private bool ShowPanel;
+    private Action<bool>? _loadingHandler;
+
+    private void TogglePanel() => ShowPanel = !ShowPanel;
 
     protected override void OnInitialized()
     {
@@ -181,12 +188,15 @@
 
         NavigationManager.LocationChanged += OnLocationChanged;
 
-        Tracker.OnLoadingChanged += state =>
+        _loadingHandler = state =>
         {
             isLoading = state;
-
             InvokeAsync(StateHasChanged);
         };
+
+        Tracker.OnLoadingChanged += _loadingHandler;
+
+        bState.OnChange += StateHasChanged;
     }
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
@@ -194,19 +204,6 @@
         currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
 
         StateHasChanged();
-    }
-
-
-    public void Dispose()
-    {
-        NavigationManager.LocationChanged -= OnLocationChanged;
-
-        Tracker.OnLoadingChanged -= state =>
-        {
-            isLoading = state;
-
-            InvokeAsync(StateHasChanged);
-        };
     }
 
     async Task ShowCurrencyDialogue()

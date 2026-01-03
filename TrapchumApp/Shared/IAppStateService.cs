@@ -1,4 +1,6 @@
-﻿namespace TrapchumApp.Shared;
+﻿using Applications.Features.Notifications.Dto;
+
+namespace TrapchumApp.Shared;
 
 public interface IAppStateService
 {

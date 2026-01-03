@@ -13,6 +13,8 @@ using Applications.Responses.ViewModels.Customers;
 using Applications.Responses.ViewModels.Loans.LoanRequests;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Dapper;
+using Domains.Enumerations;
+using Domains.Models;
 using Domains.Models.Lists.Customers;
 using Domains.Models.Loans;
 using ErrorOr;
@@ -20,7 +22,6 @@ using Infrastructures.DataAccess;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System.Threading;
 
 namespace Infrastructures.Implements;
 
@@ -30,9 +31,6 @@ public sealed class LoanRequestRepository(
     IDapperConnectionFactory dapperFactory,
     IDbContextFactory<DataContext> contextFactory) : ILoanRequestService
 {
-
-
-
     public async Task<ErrorOr<RequestResult>> CreateNewLoanRequestAsync(LoanRequest req, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(req, nameof(req));
@@ -127,6 +125,8 @@ public sealed class LoanRequestRepository(
 
             }
 
+            AddNotification(cxt, req, NotificationType.Request);
+
             await cxt.SaveChangesAsync(cancellationToken);
 
             await transaction.CommitAsync(cancellationToken);
@@ -144,7 +144,6 @@ public sealed class LoanRequestRepository(
         }
 
     }
-
 
     public async Task<ErrorOr<RequestResult>> SaveLoanRequestAsync(LoanRequest req, CancellationToken cancellationToken = default)
     {
@@ -242,6 +241,8 @@ public sealed class LoanRequestRepository(
 
                 }
 
+                AddNotification(cxt, req, NotificationType.New);
+
                 await cxt.SaveChangesAsync(cancellationToken);
 
                 await transaction.CommitAsync(cancellationToken);
@@ -264,10 +265,8 @@ public sealed class LoanRequestRepository(
         }
     }
 
-
     public async Task<ErrorOr<RequestResult>> EditLoanRequestAsync(LoanRequest req, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(req, nameof(req));
 
         logger.LogInformation("Creating loan request for CustomerRefId: {CustomerRefId}", req.CustomerRefId);
         try
@@ -307,6 +306,15 @@ public sealed class LoanRequestRepository(
                     existingRequest.LoanDescriptions.AddRange(req.LoanDescriptions);
                 }
 
+                var type = req.LoanRequestStatusRefId switch
+                {
+                    (int)RequestStatus.New => NotificationType.New,
+                    (int)RequestStatus.Requested => NotificationType.Request,
+                    _ => NotificationType.Request
+                };
+
+                AddNotification(cxt, req, type);
+
                 await cxt.SaveChangesAsync(cancellationToken);
 
                 await transaction.CommitAsync(cancellationToken);
@@ -327,7 +335,6 @@ public sealed class LoanRequestRepository(
             return Error.Unexpected(ex.Message);
         }
     }
-
 
     public async Task<ErrorOr<string>> ChangedLoanRequestAsync(LoanChangeStatusDtoCreate req)
     {
@@ -355,32 +362,38 @@ public sealed class LoanRequestRepository(
 
     public async Task<ErrorOr<RequestResult>> AprovedLoanRequestAsync(AproveLoanDtoCreate req, CancellationToken cancellationToken = default)
     {
+
+        await using var cxt = await contextFactory.CreateDbContextAsync();
+
+        var existingLoanRequest = await cxt.LoanRequests
+            .FirstOrDefaultAsync(x => x.LoanRequestId == req.LoanRequestId &&
+                        x.BranchRefId == req.BranchId &&
+                        x.CustomerRefId == req.CustomerId, cancellationToken);
+        if (existingLoanRequest is null)
+        {
+            return Error.NotFound(LoanRequestMessage.REQUEST_NOT_FOUND);
+        }
+
+        if (existingLoanRequest.EditSeq != existingLoanRequest.EditSeq)
+        {
+            return Error.NotFound(LoanRequestMessage.REQUEST_NOT_FOUND);
+        }
+        using var transaction = await cxt.Database.BeginTransactionAsync(cancellationToken);
         try
         {
-            var existingLoanRequest = await context.LoanRequests
-                .FirstOrDefaultAsync(x => x.LoanRequestId == req.LoanRequestId &&
-                            x.BranchRefId == req.BranchId &&
-                            x.CustomerRefId == req.CustomerId, cancellationToken);
-
-            if (existingLoanRequest is null)
-            {
-                return Error.NotFound(LoanRequestMessage.REQUEST_NOT_FOUND);
-            }
-
-            if (existingLoanRequest.EditSeq != existingLoanRequest.EditSeq)
-            {
-                return Error.NotFound(LoanRequestMessage.REQUEST_NOT_FOUND);
-            }
             existingLoanRequest.LoanRequestStatusRefId = (int)RequestStatus.Approved;
             existingLoanRequest.ModifiedDt = DateTime.UtcNow;
             existingLoanRequest.AprovedDate = req.AprovedDate;
             existingLoanRequest.AprovedAmount = req.AprovedAmount;
             existingLoanRequest.AdminFeeAmount = req.AdminFeeAmount;
-            await context.SaveChangesAsync(cancellationToken);
+            AddNotification(cxt, existingLoanRequest, NotificationType.Approved);
+            await cxt.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
             return new RequestResult(true, "Loan Request was Aproved");
         }
         catch (Exception ex)
         {
+            await transaction.RollbackAsync(cancellationToken);
             return Error.Unexpected($"{ex.Message}");
         }
     }
@@ -812,10 +825,6 @@ public sealed class LoanRequestRepository(
                 return Error.NotFound("Loan Request does not exist.");
             }
 
-            //var documents = request.Adapt<List<LoanDocuments>>();
-
-            //foreach (var item in documents)
-            //{
             var existingDoc = existingRequest.LoanDocuments.FirstOrDefault(x => x.Id == request.Id);
 
             if (existingDoc is null || request.Id == 0)
@@ -826,16 +835,6 @@ public sealed class LoanRequestRepository(
             {
                 context.Entry(existingDoc).CurrentValues.SetValues(request);
             }
-            // }
-
-
-            //foreach (var item in existingRequest.LoanDocuments)
-            //{
-            //    if (!(documents.Any(x => x.Id == item.Id)))
-            //    {
-            //        //context.Remove(item);
-            //    }
-            //}
 
             await context.SaveChangesAsync(cancellation);
 
@@ -890,8 +889,6 @@ public sealed class LoanRequestRepository(
                     ctx.Remove(existing);
                 }
             }
-
-            //context.UpdateRange(documents);
 
             await ctx.SaveChangesAsync(cancellation);
 
@@ -989,9 +986,9 @@ public sealed class LoanRequestRepository(
         {
             using var db = await dapperFactory.CreateConnectionAsync();
 
-            var sql = @"SELECT * FROM VLoanRequests WHERE BranchId=@branchId AND 
-                                                         CustomerId=@customerId AND  
-                                                         LoanRequestId=@loanRequestId";
+            var sql = @"SELECT * 
+                        FROM VLoanRequests WHERE BranchId=@branchId AND 
+                            CustomerId=@customerId AND LoanRequestId=@loanRequestId";
 
             var resultQueries = await db.QueryFirstOrDefaultAsync<VLoanRequests>(sql, new
             {
@@ -1009,19 +1006,12 @@ public sealed class LoanRequestRepository(
             {
                 return resultQueries;
             }
-
-            // Fetch related data concurrently
             var guarantorsTask = GetLoanGuarantors(loanRequestId, branchId);
-
             var collateralsTask = GetLoanCollateralLines(loanRequestId, branchId);
-
             var documentsTask = GetLoanDocuments(loanRequestId, branchId);
-
-            var customerTask = GetLoanCustomer(customerId);
-
             var descriptionsTask = GetLoanRequestDescriptions(loanRequestId);
-
-            await Task.WhenAll(guarantorsTask, collateralsTask, documentsTask, customerTask, descriptionsTask);
+            var customerTask = GetLoanCustomer(customerId);
+            await Task.WhenAll(guarantorsTask, collateralsTask, documentsTask, descriptionsTask, customerTask);
 
             resultQueries.Guarantors = guarantorsTask.Result.ToList();
 
@@ -1389,63 +1379,6 @@ public sealed class LoanRequestRepository(
     }
 
 
-    private async Task<ErrorOr<VCustomerDetails>> GetLoanCustomer(string? customerId)
-    {
-        if (string.IsNullOrWhiteSpace(customerId))
-            return Error.NotFound("Customer ID is required.");
-
-        using var db = await dapperFactory.CreateConnectionAsync();
-
-        var sql = @"
-        SELECT c.*,
-               c1.IncomeId,
-               COALESCE(c1.IncomeAmount, 0) AS IncomeAmount,
-               c1.IncomeSource,
-               c1.InDescription,
-               c2.ExpendId,
-               COALESCE(c2.ExpendAmount, 0) AS ExpendAmount,
-               c2.ExpenseTitle,
-               c2.ExDescription
-        FROM VCustomerList AS c
-        LEFT JOIN VCustomerIncomes AS c1 ON c1.CustomerRefId = c.CustomerId
-        LEFT JOIN VCustomerExpenses AS c2 ON c2.CustomerRefId = c.CustomerId
-        WHERE c.CustomerId = @CustomerId;";
-
-        var parameters = new DynamicParameters();
-        parameters.Add("@CustomerId", customerId);
-
-        var lookup = new Dictionary<string, VCustomerDetails>();
-
-        await db.QueryAsync<VCustomerDetails, VCustomerIncomes, VCustomerExpenses, VCustomerDetails>(
-            sql,
-            (customer, income, expense) =>
-            {
-                if (!lookup.TryGetValue(customer.CustomerId!, out var existingCustomer))
-                {
-                    customer.CustomerIncomes = new List<VCustomerIncomes>();
-                    customer.CustomerExpenses = new List<VCustomerExpenses>();
-                    lookup[customer.CustomerId!] = customer;
-                }
-
-                var currentCustomer = lookup[customer.CustomerId!];
-
-                if (income?.IncomeId != null)
-                    currentCustomer.CustomerIncomes.Add(income);
-
-                if (expense?.ExpendId != null)
-                    currentCustomer.CustomerExpenses.Add(expense);
-
-                return currentCustomer;
-            },
-            param: parameters,
-            splitOn: "IncomeId,ExpendId"
-        );
-
-        if (!lookup.TryGetValue(customerId, out var finalCustomer))
-            return Error.NotFound("Customer data not found.");
-
-        return finalCustomer;
-    }
 
     private async Task<bool> CheckExistingHasLoan(string? customerId)
     {
@@ -1581,12 +1514,65 @@ public sealed class LoanRequestRepository(
             new { LoanRequestId = loanRequestId, BranchId = branchId }
         );
     }
+    private async Task<ErrorOr<VCustomerDetails>> GetLoanCustomer(string? customerId)
+    {
+        if (string.IsNullOrWhiteSpace(customerId))
+            return Error.NotFound("Customer ID is required.");
 
+        using var db = await dapperFactory.CreateConnectionAsync();
 
+        var sql = @"
+        SELECT c.*,
+               c1.IncomeId,
+               COALESCE(c1.IncomeAmount, 0) AS IncomeAmount,
+               c1.IncomeSource,
+               c1.InDescription,
+               c2.ExpendId,
+               COALESCE(c2.ExpendAmount, 0) AS ExpendAmount,
+               c2.ExpenseTitle,
+               c2.ExDescription
+        FROM VCustomerList AS c
+        LEFT JOIN VCustomerIncomes AS c1 ON c1.CustomerRefId = c.CustomerId
+        LEFT JOIN VCustomerExpenses AS c2 ON c2.CustomerRefId = c.CustomerId
+        WHERE c.CustomerId = @CustomerId;";
 
+        var parameters = new DynamicParameters();
+        parameters.Add("@CustomerId", customerId);
 
-    private void UpdateCollectionAsync<T>(DbContext context, ICollection<T> existingItems,
-    ICollection<T> newItems, Func<T, T, bool> matchPredicate) where T : class
+        var lookup = new Dictionary<string, VCustomerDetails>();
+
+        await db.QueryAsync<VCustomerDetails, VCustomerIncomes, VCustomerExpenses, VCustomerDetails>(
+            sql,
+            (customer, income, expense) =>
+            {
+                if (!lookup.TryGetValue(customer.CustomerId!, out var existingCustomer))
+                {
+                    customer.CustomerIncomes = new List<VCustomerIncomes>();
+                    customer.CustomerExpenses = new List<VCustomerExpenses>();
+                    lookup[customer.CustomerId!] = customer;
+                }
+
+                var currentCustomer = lookup[customer.CustomerId!];
+
+                if (income?.IncomeId != null)
+                    currentCustomer.CustomerIncomes.Add(income);
+
+                if (expense?.ExpendId != null)
+                    currentCustomer.CustomerExpenses.Add(expense);
+
+                return currentCustomer;
+            },
+            param: parameters,
+            splitOn: "IncomeId,ExpendId"
+        );
+
+        if (!lookup.TryGetValue(customerId, out var finalCustomer))
+            return Error.NotFound("Customer data not found.");
+
+        return finalCustomer;
+    }
+
+    private void UpdateCollectionAsync<T>(DbContext context, ICollection<T> existingItems, ICollection<T> newItems, Func<T, T, bool> matchPredicate) where T : class
     {
         // Remove items not in new collection
         var itemsToRemove = existingItems
@@ -1633,10 +1619,6 @@ public sealed class LoanRequestRepository(
             req.CollateralLinesLink,
             (existing, newItem) => existing.Id == newItem.Id);
     }
-
-
-
-
 
     public async Task<Pager<VLoanRequests>> GetLoanRequestsAsync(string? userId, string? userRole, int? branchId, RequestStatus requestStatus, QueryParam param)
     {
@@ -1717,360 +1699,24 @@ public sealed class LoanRequestRepository(
         };
     }
 
+    private void AddNotification(DataContext context, LoanRequest req, NotificationType type = NotificationType.New)
+    {
+        var notification = new Notification
+        {
+            UserId = req.RequestUserRefId,
+            Type = type,
+            BranchId = req.BranchRefId,
+            IsRead = false,
+            Message = "Loan Request",
+            Title = "Request",
+            ReferenceId = req.LoanRequestId,
+            CustomerId = req.CustomerRefId,
+            CreatedAt = DateTime.UtcNow,
+        };
 
-
+        context.Notifications.Add(notification);
+    }
 
 }
 
 
-//private async Task<bool> CheckExistingLoanRequestAsync(string customerRefId, CancellationToken cancellationToken)
-//{
-//    await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
-//    return await context.LoanRequests
-//        .AnyAsync(x => x.CustomerRefId == customerRefId &&
-//                      x.LoanRequestStatusRefId == (int)RequestStatus.New,
-//                      cancellationToken);
-//}
-
-//private async Task<bool> CheckExistingHasLoanAsync(string customerRefId, CancellationToken cancellationToken)
-//{
-//    await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
-//    return await context.LoanDisbursments
-//        .AnyAsync(x => x.CustomerRefId == customerRefId &&
-//                      x.LoanStatusRefId == (int)LoanStatus.,
-//                      cancellationToken);
-//}
-
-//resultQueries.Guarantors = await GetLoanGuarantors(loanRequestId, branchId);
-
-//resultQueries.Collaterals = await GetLoanCollateralLines(loanRequestId, branchId);
-
-//resultQueries.Documents = await GetLoanDocuments(loanRequestId, branchId);
-
-//var rsp = await GetLoanCustomer(customerId);
-
-//if (rsp is { IsSuccess: true, Data: not null })
-//{
-//    resultQueries.Customer = rsp.Data;
-//}
-
-//return Result.Success(resultQueries);
-
-//private async Task<IEnumerable<VLoanRequestGuarantors>> GetLoanGuarantors(string? loanRequestId, int? branchId)
-//{
-//    using var db = await dapperFactory.CreateConnectionAsync();
-//    var loanGuarantors = await db.QueryAsync<VLoanRequestGuarantors>(@"SELECT * FROM VLoanRequestGuarators 
-//                                                                        WHERE LoanRequestRefId=@LoanRequestId AND 
-//                                                                        BranchRefId=@BranchId", new
-//    {
-//        branchId,
-//        loanRequestId
-//    });
-//    return loanGuarantors;
-//}
-
-//private async Task<IEnumerable<VLoanRequestCollateralLines>> GetLoanCollateralLines(string? loanRequestId,
-//    int? branchId)
-//{
-//    await using var cxt = await contextFactory.CreateDbContextAsync();
-
-//    var loanCollateralLines = await cxt.Database
-//        .SqlQuery<VLoanRequestCollateralLines>($@"SELECT * FROM VLoanRequestCollaterals 
-//                                                   WHERE LoanRequestId={loanRequestId} AND 
-//                                                   BranchId={branchId}
-//                                                ")
-//        .AsNoTracking()
-//        .ToListAsync();
-//    return loanCollateralLines;
-//}
-
-//private async Task<IEnumerable<VLoanRequestsDocuments>> GetLoanDocuments(string? loanRequestId, int? branchId)
-//{
-//    await using var cxt = await contextFactory.CreateDbContextAsync();
-
-//    var loanDocuments = await cxt.Database
-//        .SqlQuery<VLoanRequestsDocuments>($@"SELECT * FROM VLoanRequestDocuments 
-//                                             WHERE LoanRequestId={loanRequestId} AND 
-//                                             branchRefId={branchId}
-//        ").AsNoTracking()
-//        .ToListAsync();
-//    return loanDocuments;
-//}
-
-
-//private async Task<Result<VCustomerList>> GetLoanCustomer(string? customerId)
-//{
-
-//    using var db = await dapperFactory.CreateConnectionAsync();
-
-//    var sql = @"
-//           SELECT c.*,
-//                   c1.IncomeId,
-//                   COALESCE (c1.IncomeAmount, 0) AS IncomeAmount,
-//                   c1.IncomeSource,
-//                   c1.InDescription,
-//               c2.ExpendId,
-//               COALESCE (c2.ExpendAmount, 0) AS ExpendAmount,
-//               c2.ExpenseTitle,
-//               c2.ExDescription
-//            FROM   VCustomerList AS c LEFT OUTER JOIN
-//                   VCustomerIncomes AS c1 ON c1.CustomerRefId = c.CustomerId LEFT OUTER JOIN
-//                   VCustomerExpenses AS c2 ON c2.CustomerRefId = c.CustomerId
-//            WHERE  c.CustomerId = @customerId;";
-
-//    var paramerters = new DynamicParameters();
-
-//    paramerters.Add("@CustomerId", customerId);
-
-//    var lookup = new Dictionary<string, VCustomerList>();
-
-//    var customerDict = await db.QueryAsync<VCustomerList, VCustomerIncomes, VCustomerExpenses, VCustomerList>(sql,
-//        (customer, income, expense) =>
-//        {
-//            if (!lookup.TryGetValue(customer.CustomerId!, out var existingCustomer))
-//            {
-//                customer.CustomerIncomes = new List<VCustomerIncomes>();
-//                customer.CustomerExpenses = new List<VCustomerExpenses>();
-//                lookup.Add(customer.CustomerId!, customer);
-//                existingCustomer = customer;
-//            }
-
-//            if (income?.IncomeId != null)
-//            {
-//                existingCustomer.CustomerIncomes.Add(income);
-//            }
-
-//            if (expense?.ExpendId != null)
-//            {
-//                existingCustomer.CustomerExpenses.Add(expense);
-//            }
-
-//            return existingCustomer;
-
-
-//        }, paramerters,
-//        splitOn: "IncomeId,ExpendId");
-
-//    var customer = lookup.Values.FirstOrDefault(x => x.CustomerId == customerId);
-
-//    if (customer is null)
-//    {
-//        return Result.Failure<VCustomerList>(ErrorResponse.NotFound("No Data not found."));
-//    }
-
-
-//    return Result.Success(customer);
-//}
-
-
-// await using var cxt = await contextFactory.CreateDbContextAsync();
-//
-// var customer = await cxt.CustomerLists.Where(c => c.CustomerId == customerId)
-//     .AsNoTracking()
-//     .FirstOrDefaultAsync();
-
-
-// if (customer is not null)
-// {
-//     var incomes = await cxt.Database
-//         .SqlQuery<VCustomerIncomes>($"SELECT * FROM VCustomerIncomes WHERE CustomerRefId={customerId}")
-//         .AsNoTracking()
-//         .ToListAsync();
-//
-//     var expenses = await cxt.Database
-//         .SqlQuery<VCustomerExpenses>($"SELECT * FROM VCustomerExpenses WHERE CustomerRefId={customerId}")
-//         .AsNoTracking()
-//         .ToListAsync();
-//
-//     customer.CustomerExpenses = expenses;
-//
-//     customer.CustomerIncomes = incomes;
-// }
-
-
-//public async Task<Result<string>> CreateLoanRequestAsync(LoanRequest req, CancellationToken cancellation = default)
-//{
-//    logger.LogInformation("Creating loan request for CustomerRefId: {CustomerRefId}", req.CustomerRefId);
-
-
-//    if (await CheckExistingLoanRequest(req.CustomerRefId))
-//    {
-//        return Result.Failure<string>(ErrorResponse.Conflict("Loan Request already exists."));
-//    }
-
-//    if (await CheckExistingHasLoan(req.CustomerRefId))
-//    {
-//        return Result.Failure<string>(ErrorResponse.Conflict("Customer has active loan."));
-//    }
-
-//    await using var cxt = await contextFactory.CreateDbContextAsync(cancellation);
-
-
-//    var existingRequest = await cxt.LoanRequests
-//        .AsNoTracking()
-//        .FirstOrDefaultAsync(x => x.LoanRequestId == req.LoanRequestId &&
-//                                  x.BranchRefId == req.BranchRefId &&
-//                                  x.RequestUserRefId == req.RequestUserRefId &&
-//                                  x.LoanRequestStatusRefId == (int)RequestStatus.New);
-
-//    if (existingRequest is null)
-//    {
-//        return Result.Failure<string>(ErrorResponse.Conflict("Loan Request does not exist."));
-//    }
-
-//    try
-//    {
-
-//        using var transaction = await cxt.Database.BeginTransactionAsync(cancellation);
-
-//        try
-//        {
-//            cxt.LoanRequests.Update(req);
-
-//            await cxt.SaveChangesAsync(cancellation);
-
-//            await transaction.CommitAsync(cancellation);
-
-//            return Result.Success(new string("New Loan Request was created."));
-//        }
-//        catch (Exception)
-//        {
-//            await transaction.RollbackAsync(cancellation);
-//            throw;
-//        }
-
-//    }
-
-//    catch (Exception ex)
-//    {
-//        logger.LogError(ex, "Failed to create loan request for CustomerRefId: {CustomerRefId}", req.CustomerRefId);
-//        return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}"));
-//    }
-//}
-
-
-
-
-
-
-//public async Task<Pager<VLoanRequests>> GetLoanRequestsAsync(string? userId, int? branchId, RequestStatus requestStatus, QueryParam param)
-//{
-//    await using var cxt = await contextFactory.CreateDbContextAsync();
-
-//    IQueryable<VLoanRequests> resultQueries = cxt.VLoanRequests
-//            .Where(x => x.BranchId == branchId)
-//            .WhereIf(!string.IsNullOrEmpty(param.Filter),
-//                     x => EF.Functions.Like(x.BranchName!, $"%{param.Filter}%") ||
-//                          EF.Functions.Like(x.AltName!, $"%{param.Filter}%") ||
-//                          EF.Functions.Like(x.FullName!, $"%{param.Filter}%"));
-
-//    if (string.IsNullOrEmpty(userId))
-//    {
-//        resultQueries = resultQueries.Where(x => x.StatusId == ((int)RequestStatus.Approved));
-//    }
-//    else
-//    {
-
-//        switch (requestStatus)
-//        {
-//            case RequestStatus.All:
-//                break;
-//            case RequestStatus.New:
-//            case RequestStatus.Rechecked:
-//            case RequestStatus.Denied:
-//                resultQueries = resultQueries.Where(x => (x.StatusId == (int)RequestStatus.New ||
-//                                                          x.StatusId == (int)RequestStatus.Rechecked ||
-//                                                          x.StatusId == (int)RequestStatus.Denied) &&
-//                                                         x.UserRequestId == userId);
-//                break;
-//            case RequestStatus.Requested:
-//            case RequestStatus.Checking:
-//                resultQueries = resultQueries.Where(x =>
-//                    (x.StatusId == (int)RequestStatus.Requested ||
-//                     x.StatusId == (int)RequestStatus.Checking) &&
-//                    x.AprovedUserId == userId);
-//                break;
-//            case RequestStatus.Approved:
-//                resultQueries = resultQueries.Where(x => x.StatusId == (int)RequestStatus.Approved);
-//                break;
-//            default:
-//                resultQueries = resultQueries.Where(x => x.StatusId == (int)requestStatus);
-//                break;
-//        }
-
-//    }
-//    if (param.SortDescending)
-//    {
-//        resultQueries = resultQueries.OrderByDescending(x => EF.Property<object>(x, param.SortColumn));
-//    }
-
-//    var counts = resultQueries.Count();
-
-//    var items = await resultQueries.Skip(param.Skip).Take(param.PageSize).AsNoTracking().ToListAsync();
-
-//    return new Pager<VLoanRequests>(items, counts);
-//}
-
-//public async Task<ErrorOr<VLoanRequests>> RecheckedLoanRequestAsync(RecheckedRequestDtoCreate req)
-//{
-//    await using var cxt = await contextFactory.CreateDbContextAsync();
-
-//    try
-//    {
-//        var existingLoanRequest = await cxt.LoanRequests
-//            .AsNoTracking()
-//            .FirstOrDefaultAsync(x => x.LoanRequestId == req.LoanRequestId &&
-//                                      x.BranchRefId == req.BranchId &&
-//                                      x.CustomerRefId == req.CustomerId);
-
-//        if (existingLoanRequest is null)
-//        {
-//            return Error.NotFound(Messages.DataNotFound);
-//        }
-
-//        var lastEditSequent = existingLoanRequest.EditSeq + 1;
-
-//        var updateResult = await cxt.LoanRequests
-//            .Where(x => x.LoanRequestId == req.LoanRequestId &&
-//                        x.BranchRefId == req.BranchId &&
-//                        x.EditSeq == existingLoanRequest.EditSeq &&
-//                        x.CustomerRefId == req.CustomerId)
-//            .ExecuteUpdateAsync(prop => prop
-//                .SetProperty(p => p.LoanRequestStatusRefId, req.RequestStatusId)
-//                .SetProperty(p => p.ModifiedDt, DateTime.UtcNow)
-//                .SetProperty(p => p.AprovedDate, req.CheckedDate)
-//                .SetProperty(p => p.Remark, req.Remark)
-//                .SetProperty(p => p.EditSeq, lastEditSequent));
-
-
-//        if (updateResult > 0)
-//        {
-//            var result = await cxt.Database
-//                   .SqlQuery<VLoanRequests>($@"
-//                                SELECT * FROM VLoanRequests WHERE LoanRequestId={req.LoanRequestId}
-//                                    AND BranchId={req.BranchId}
-//                                    AND CustomerId={req.CustomerId}")
-//                   .Select(x => new VLoanRequests
-//                   {
-//                       LoanRequestId = x.LoanRequestId,
-//                       CustomerId = x.CustomerId,
-//                       BranchId = x.BranchId,
-//                       StatusId = x.StatusId
-//                   })
-//                   .AsNoTracking()
-//                   .FirstOrDefaultAsync();
-
-//            if (result is not null)
-//            {
-//                return result;
-//            }
-
-//        }
-
-//        return Error.Unexpected($"cannot be aproved the loan Request.");
-//    }
-//    catch (Exception ex)
-//    {
-//        return Error.Unexpected($"Error due to : {ex.Message}");
-//    }
-//}

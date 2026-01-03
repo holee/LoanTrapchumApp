@@ -7,8 +7,8 @@ using Applications.Features.LoanRequests.Command.IsCustomerBusy;
 using Applications.Responses.Lists.Customers;
 using Applications.Responses.Paginations;
 using Domains.Models.Identity;
-using System.Threading.Tasks;
 using TrapchumApp.Helpers.Enums;
+using TrapchumApp.Helpers.Options;
 using TrapchumApp.Pages.Lists.Collaterals;
 using TrapchumApp.Pages.Lists.Customers.Expenses;
 using TrapchumApp.Pages.Lists.Customers.Incomes;
@@ -105,7 +105,7 @@ namespace TrapchumApp.Pages.Lists.Customers
 
             if (e is not null)
             {
-                var id = ((FilterCustomer)e).Id;
+                var id = ((ListItem)e).Id;
 
                 await FIlterCustomers(id);
             }

@@ -1,12 +1,23 @@
 ﻿
+using Applications.Features.Currencies.Queries.GetCurrencyDetails;
+using Applications.Features.Currencies.Queries.GetEditMoneyExchange;
+using Applications.Features.Currencies.Requests;
+using Applications.Features.Currencies.Responses;
 using Applications.Features.Holidays.Queries.GetHolidaysAsPaging;
 using Applications.Features.LoanPayments.Command.RecievePayment;
 using Applications.Features.LoanPayments.Queries.GetLoanSchedulesByLoanIdAsPaging;
 using Applications.Features.LoanRequests.Command.SaveEditLoanRequest;
 using Applications.Features.LoanRequests.Queryies.GetLoanRequestsDocuments;
 using Applications.Features.Loans.Command.CloseLoanDisbursment;
+using Applications.Features.Loans.Queries.GetLoanByBranchId;
 using Applications.Features.Loans.Queries.GetLoanById;
+using Applications.Features.Loans.Queries.GetLoanSchedulesByPaymentDate;
+using Applications.Features.Notifications.Command.CreateNotification;
+using Applications.Features.Notifications.Dto;
+using Applications.Features.Notifications.Queries.GetNotification;
+using Applications.Features.Notifications.Queries.GetUnreadNotifications;
 using Applications.Responses.ViewModels.Loans.Schedules;
+using Domains.Models.Currencies;
 using ErrorOr;
 
 namespace Applications;
@@ -77,6 +88,11 @@ public static class ApplicationServiceInjection
 
         services.AddValidatorsFromAssemblyContaining<GetCollateralLineDetailQueryValidator>();
         services.AddScoped<IMediator, SimpleMediator>();
+
+
+        services.AddScoped<IRequestHandler<GetCurrencyDetailsByIdQuery, ErrorOr<VCurrenciesList>>, GetCurrencyDetailsByIdQueryHandler>();
+        services.AddScoped<IRequestHandler<GetCurrencyByIdQuery, ErrorOr<Currency>>, GetCurrencyByIdQueryHandler>();
+
 
 
         services.AddScoped<IRequestHandler<AddOrUpdateCollateralLineCommand, ErrorOr<string>>, AddOrUpdateCollateralLineCommandHandler>();
@@ -166,7 +182,7 @@ public static class ApplicationServiceInjection
         services.AddScoped<IRequestHandler<GetLoanRequestDetailByIdQuery, ErrorOr<VLoanRequests>>, GetLoanRequestDetailByIdQueryHandler>();
         services.AddScoped<IRequestHandler<GetLoanRequestByIdQuery, ErrorOr<VLoanRequests>>, GetLoanRequestByIdQueryHandler>();
         services.AddScoped<IRequestHandler<GetLoanRequestsWithCanDisburseQuery, Pager<VLoanRequests>>, GetLoanRequestsWithCanDisburseQueryHandler>();
-        services.AddScoped<IRequestHandler<GetLoanRequestDocumentQuery,ErrorOr<IEnumerable<VLoanRequestsDocuments>>>, GetLoanRequestDocumentQueryHandler>();
+        services.AddScoped<IRequestHandler<GetLoanRequestDocumentQuery, ErrorOr<IEnumerable<VLoanRequestsDocuments>>>, GetLoanRequestDocumentQueryHandler>();
 
 
         //Commands for Loans disubursed
@@ -191,9 +207,30 @@ public static class ApplicationServiceInjection
 
         services.AddScoped<IRequestHandler<GetLoanSchedulesByLoanIdQuery, ErrorOr<IEnumerable<VSchedule>>>, GetLoanSchedulesByLoanIdQueryHandler>();
         services.AddScoped<IRequestHandler<GetLoanByIdQuery, ErrorOr<VLoanDisbursments>>, GetLoanByIdQueryHandler>();
+        services.AddScoped<IRequestHandler<GetLoanByBranchIdQuery, Pager<VLoanDisbursments>>, GetLoanByBranchIdQueryHandler>();
 
         //
-        //
+        services.AddScoped<IRequestHandler<GetUnreadNotificationQuery, int>, GetUnreadNotificationQueryHandler>();
+        services.AddScoped<IRequestHandler<GetNotificationAsPagingQuery, Pager<NotificationDto>>, GetNotificationAsPagingQueryHandler>();
+        services.AddScoped<IRequestHandler<MarkUnreadNotificationCommand, ErrorOr<NotificationDto>>, MarkUnreadNotificationCommandHandler>();
+        services.AddScoped<IRequestHandler<GetUnreadNotificationSummaryQuery, NotificationSummaryDto>, GetUnreadNotificationQuerySummaryHandler>();
+        services.AddScoped<IRequestHandler<GetUnreadNotificationsQuery, Pager<NotificationDto>>, GetUnreadNotificationsQueryHandler>();
+        services.AddScoped<IRequestHandler<CreateNotificationCommand, ErrorOr<Guid>>, CreateNotificationCommandHandler>();
+
+
+
+
+        ///Schedules
+        services.AddScoped<IRequestHandler<GetLoanSchedulesMonthToDateQuery, Pager<VSchedule>>, GetLoanSchedulesMonthToDateQueryHandler>();
+
+        services.AddScoped<IRequestHandler<GetLoanSchedulesByPaymentDateQuery, Pager<VSchedule>>, GetLoanSchedulesByPaymentDateQueryHandler>();
+
+
+
+        //Exchanged
+        services.AddScoped<IRequestHandler<GetEditMoneyExchangeQuery, ErrorOr<ExchangeDtoEdit>>, GetEditMoneyExchangeQueryHandler>();
+        services.AddScoped<IRequestHandler<GetMoneyExchangeAsPagingQuery, Pager<VttCurrencyExchanges>>, GetMoneyExchangeQueryAsPagingHandler>();
+
         return services;
 
     }
