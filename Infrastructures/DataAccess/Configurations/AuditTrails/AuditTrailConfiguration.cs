@@ -17,9 +17,9 @@ public class AuditTrailConfiguration : IEntityTypeConfiguration<AuditEntry>
                .IsRequired();
         builder.Property(e => e.CreatedAt).IsRequired();      
         builder.Property(e => e.ActionType).IsRequired(false);
-        builder.Property(e => e.CreatedAt).HasColumnType("DATETIME").IsRequired(true);
-        builder.Property(e => e.DeletedAt).HasColumnType("DATETIME").IsRequired(false);
-        builder.Property(e => e.UpdatedAt).HasColumnType("DATETIME").IsRequired(false);
+        builder.Property(e => e.CreatedAt).IsRequired(true);
+        builder.Property(e => e.DeletedAt).IsRequired(false);
+        builder.Property(e => e.UpdatedAt).IsRequired(false);
         // JSON properties
         builder.Property(e => e.KeyValues).HasMaxLength(450);
         builder.Property(e => e.OldValues)

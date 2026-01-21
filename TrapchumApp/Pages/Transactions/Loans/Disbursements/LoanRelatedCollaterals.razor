@@ -4,21 +4,21 @@
 @using Applications.Features.Loans.Queries.GetLoanRelatedGuarantors
 @using Applications.Features.Loans.Responses
 @using Applications.Responses.ViewModels.Loans.Requests
+@using System.Threading.Tasks
 <RadzenDataGrid Data="@_loanCollaterals"
-                TItem="VCollateralLines"
+                TItem="VLoanDisbursementCollateral"
                 AllowAlternatingRows="true"
-                GridLines="DataGridGridLines.Default"
-                AllowFiltering="true"
+                GridLines="DataGridGridLines.Both"
+                AllowFiltering="false"
                 Density="Density.Compact"
                 AllowPaging="true"
                 PageSize="10"
-                AllowSorting="true"
+                AllowSorting="false"
                 Responsive="true"
                 RowRender="@OnRowRender"
                 Class="rz-mt-2">
     <Columns>
-        <RadzenDataGridColumn TItem="VCollateralLines"
-                              Property="@nameof(VCollateralLines.Id)"
+        <RadzenDataGridColumn Property="@nameof(VLoanDisbursementCollateral.Id)"
                               Title="#"
                               Width="8rem"
                               TextAlign="TextAlign.Center">
@@ -26,30 +26,38 @@
                 @context.RowIndex
             </Template>
         </RadzenDataGridColumn>
-        <RadzenDataGridColumn TItem="VCollateralLines"
-                              Property="@nameof(VCollateralLines.CollateralNo)"
+        <RadzenDataGridColumn TItem="VLoanDisbursementCollateral"
+                              Property="@nameof(VLoanDisbursementCollateral.CollateralNo)"
                               Title="Collateral No" />
-        <RadzenDataGridColumn TItem="VCollateralLines"
-                              Property="@nameof(VCollateralLines.OwnerName)"
+        <RadzenDataGridColumn TItem="VLoanDisbursementCollateral"
+                              Property="@nameof(VLoanDisbursementCollateral.OwnerName)"
                               Title="Owner Name" />
-        <RadzenDataGridColumn TItem="VCollateralLines"
-                              Property="@nameof(VCollateralLines.Description)"
+        <RadzenDataGridColumn TItem="VLoanDisbursementCollateral"
+                              Property="@nameof(VLoanDisbursementCollateral.Description)"
                               Title="Description" />
-        <RadzenDataGridColumn TItem="VCollateralLines"
-                              Property="@nameof(VCollateralLines.PawnPrice)"
+        <RadzenDataGridColumn TItem="VLoanDisbursementCollateral"
+                              Property="@nameof(VLoanDisbursementCollateral.PawnPrice)"
                               Width="8rem"
                               Title="Pawn Price" TextAlign="TextAlign.Right" />
-        <RadzenDataGridColumn TItem="VCollateralLines"
-                              Property="@nameof(VCollateralLines.HotPrice)"
+        <RadzenDataGridColumn TItem="VLoanDisbursementCollateral"
+                              Property="@nameof(VLoanDisbursementCollateral.HotPrice)"
                               Title="Hot Price"
                               TextAlign="TextAlign.Right"
                               Width="10rem" />
-        <RadzenDataGridColumn TItem="VCollateralLines"
-                              Property="@nameof(VCollateralLines.MarketPrice)"
+        <RadzenDataGridColumn TItem="VLoanDisbursementCollateral"
+                              Property="@nameof(VLoanDisbursementCollateral.MarketPrice)"
                               TextAlign="TextAlign.Right"
                               Title="Market Price">
             <Template>
                 @context.MarketPrice
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="VLoanDisbursementCollateral"
+                              Property="@nameof(VLoanDisbursementCollateral.LoanId)"
+                              TextAlign="TextAlign.Right"
+                              Title="Actions">
+            <Template>
+                <ActionButton ButtonClick="@ShowCollateralRequest" />
             </Template>
         </RadzenDataGridColumn>
     </Columns>
@@ -58,9 +66,9 @@
     [Parameter] public string LoanId { get; set; } = string.Empty;
     [Parameter] public int? BranchId { get; set; } = 0;
 
-    private IEnumerable<VCollateralLines> _loanCollaterals = Array.Empty<VCollateralLines>();
+    private IEnumerable<VLoanDisbursementCollateral> _loanCollaterals = Array.Empty<VLoanDisbursementCollateral>();
 
-    void OnRowRender(RowRenderEventArgs<VCollateralLines> args)
+    void OnRowRender(RowRenderEventArgs<VLoanDisbursementCollateral> args)
     {
         args.Data.RowIndex = args.Index + 1;
     }
@@ -72,5 +80,29 @@
         _loanCollaterals = await mediator.Send(query);
 
         await base.OnInitializedAsync();
+    }
+
+
+    private void ShowCollateralRequest(MouseEventArgs args)
+    {
+        ContextMenuService.Open(args, ds =>@<RadzenMenu>
+    <RadzenMenuItem Text="Widthrawal" Icon="@IconNames.Undo" Click="ShowWithdrawalRequest"></RadzenMenuItem>
+    <RadzenMenuItem Text="Example" Icon="@IconNames.Checked"></RadzenMenuItem>
+</RadzenMenu>
+    );
+    }
+
+
+    private async Task ShowWithdrawalRequest()
+    {
+
+        var parameters = new Dictionary<string, object?>()
+        {
+            { "LoanId", LoanId },
+            {"CollateralLineId", 1L },
+            { "BranchId", BranchId }
+        };
+
+        var dia = await DialogService.OpenAsync<WidthrawalCollateral>("Collateral", parameters);
     }
 }

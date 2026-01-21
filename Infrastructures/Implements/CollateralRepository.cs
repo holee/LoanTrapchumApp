@@ -394,7 +394,8 @@ public sealed class CollateralRepository : ICollateralService
         }
         else
         {
-            query = query.OrderBy(x => x.RegisterDate).ThenBy(x => x.TypeName);
+            query = query.OrderBy(x => x.LoanStatus)
+                          .ThenBy(x => x.TypeName);
         }
 
         return query;

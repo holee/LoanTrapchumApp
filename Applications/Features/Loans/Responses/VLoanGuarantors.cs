@@ -6,9 +6,14 @@ public sealed class VLoanGuarantors
 {
     public long Id { get; set; }
     public string? GuarantorId { get; set; }
+    public string? LoanId { get; set; }
     public string GuarantorName { get; set; } = string.Empty;
     public string Gender { get; set; }= string.Empty;
     public string Phone { get; set; } = string.Empty;
+    public string? ProInKhmer { get; set; } = string.Empty;
+    public string? DisInKhmer { get; set; }= string.Empty;
+    public string? ComInKhmer { get; set; }= string.Empty;
+    public string? VilInKhmer { get; set; }= string.Empty;
     public string Address { get; set; } = string.Empty;
     [NotMapped]public int RowIndex { get; set; } = 1;
 

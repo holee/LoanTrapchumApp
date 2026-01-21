@@ -49,8 +49,16 @@
                 GridLines="DataGridGridLines.Both"
                 AllowAlternatingRows="true"
                 Density="Density.Compact"
+                RowRender="@OnRowRenderChanged"
                 TItem="VLoanDisbursments">
     <Columns>
+        <RadzenDataGridColumn TextAlign="TextAlign.Center"
+                              Width="4rem"
+                              Property="@nameof(VLoanDisbursments.Principle)" Title="#">
+            <Template>
+                @context.RowIndex
+            </Template>
+        </RadzenDataGridColumn>
         <RadzenDataGridColumn TextAlign="TextAlign.Right" Property="@nameof(VLoanDisbursments.Principle)" Title="Principle" />
         <RadzenDataGridColumn TextAlign="TextAlign.Right" Property="@nameof(VLoanDisbursments.InterestRate)" Title="Interest Rate" />
         <RadzenDataGridColumn TextAlign="TextAlign.Right" Property="@nameof(VLoanDisbursments.PaidPrinciple)" Title="Paid Principle" />
@@ -90,5 +98,10 @@
         await base.OnInitializedAsync();
 
 
+    }
+
+    void OnRowRenderChanged(RowRenderEventArgs<VLoanDisbursments> args)
+    {
+        args.Data.RowIndex = args.Index + 1;
     }
 }

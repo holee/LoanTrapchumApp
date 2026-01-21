@@ -22,13 +22,13 @@ public sealed class Flat : LoanCaloulator, ICalculator
 
         decimal beginBalance = 0, lastBalance = 0;
 
-        DateTimeOffset? paymentDate = FirstPayment;
+        DateTime? paymentDate = FirstPayment;
 
         beginBalance = lastBalance = amount;
 
         var effAmount = 0M;
 
-        DateTimeOffset? previusDate;
+        DateTime? previusDate = null;
 
         for (int i = 1; i <= periodInMonth; i++)
         {
@@ -101,10 +101,10 @@ public sealed class Flat : LoanCaloulator, ICalculator
         List<ScheduleLine> scheduleLines = [];
         var principalPaid = PaidPrincipal(amount!.Value, periodInMonth!.Value);
         decimal beginBalance = 0, lastBalance = 0;
-        DateTimeOffset? paymentDate = FirstPayment;
+        DateTime? paymentDate = FirstPayment;
         beginBalance = lastBalance = amount!.Value;
         var effAmount = 0M;
-        DateTimeOffset? previusDate;
+        DateTime? previusDate = null;
         for (int i = 1; i <= periodInMonth; i++)
         {
             beginBalance = lastBalance;
@@ -171,7 +171,7 @@ public sealed class Flat : LoanCaloulator, ICalculator
 
         return scheduleLines;
     }
-    public override List<ScheduleLine> Calculate(int? periodInMonth, decimal? monthlyRate, decimal? amount, DateTimeOffset? firstPayment)
+    public override List<ScheduleLine> Calculate(int? periodInMonth, decimal? monthlyRate, decimal? amount, DateTime? firstPayment = null)
     {
         List<ScheduleLine> scheduleLines = [];
 
@@ -179,13 +179,13 @@ public sealed class Flat : LoanCaloulator, ICalculator
 
         decimal beginBalance = 0, lastBalance = 0;
 
-        DateTimeOffset? paymentDate = FirstPayment;
+        DateTime? paymentDate = FirstPayment;
 
         beginBalance = lastBalance = amount!.Value;
 
         var effAmount = 0M;
 
-        DateTimeOffset? previusDate;
+        DateTime? previusDate = null;
 
         for (int i = 1; i <= periodInMonth; i++)
         {

@@ -3,6 +3,7 @@
 @using Applications.Features.Currencies
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
+@using Applications.Features.Guarantor.Dtos
 @using Applications.Features.LoanRequests.Interfaces
 @using Applications.Responses.ViewModels.Loans.Requests
 @using Applications.Responses.ViewModels.OtherNames
@@ -75,7 +76,7 @@
                                       TextAlign="TextAlign.Center"
                                       Context="g" Property="@nameof(VGuarantor.Id)" Title="Action">
                     <Template>
-                        <RadzenButton Icon="add_task"
+                        <RadzenButton Icon="@IconNames.Add"
                                       Click="@(()=>GetSelectedGuarantor(g))"
                                       Size="ButtonSize.ExtraSmall"
                                       Variant="Variant.Outlined" />

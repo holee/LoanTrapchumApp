@@ -1,6 +1,6 @@
+using Applications.Features.Guarantor.Dtos;
 using Applications.Responses;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.OtherNames;
 using Domains.Models.Lists;
 
 namespace Applications.Interfaces.Lists;
@@ -17,4 +17,5 @@ public interface IGuarantorService
     Task<Pager<VGuarantor>> GetGuarantorsAsync(QueryParam param, CancellationToken cancellation = default);
     Task<Result<VGuarantor>> GetGuarantorWithByIdAsync(string? id);
     Task<Result<VGuarantor>> GetGuarantorByIdAsync(string? id, CancellationToken cancellation = default);
+    Task<VGuarantor> CreateGuarantorAsync(EntityNames othername, CancellationToken cancellation = default);
 }

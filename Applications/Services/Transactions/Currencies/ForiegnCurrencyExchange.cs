@@ -1,9 +1,7 @@
 ﻿using Applications.Features.Currencies.Responses;
 using Applications.Features.Transactions.ForiegnExchanges;
-using Applications.Features.Transactions.ForiegnExchanges;
 using Applications.Interfaces.Transactions;
 using Applications.Responses;
-using Applications.Responses.Paginations;
 using Domains.Models.Transaction;
 using Mapster;
 

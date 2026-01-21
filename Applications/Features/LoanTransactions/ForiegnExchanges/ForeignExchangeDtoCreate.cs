@@ -1,6 +1,6 @@
 ﻿namespace Applications.Features.Transactions.ForiegnExchanges;
 
-public sealed class ForeignExchangeDtoCreate 
+public sealed class ForeignExchangeDtoCreate
 {
     public string? StaffRefId { get; set; }
     public string? TranRefId { get; set; }
@@ -23,5 +23,7 @@ public sealed class ForeignExchangeDtoCreate
     public int? FxpaLedgerRefId { get; set; }
     public decimal? FXPA_Amount { get; set; }
     public string? Remark { get; set; }
+    public TransactionBase? Transaction { get; set; } = new();
+    public bool IsBuy { get; set; } = false;
 
 }

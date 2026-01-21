@@ -5,6 +5,6 @@ namespace Applications.Extensions.LoanCalculators
     {
         List<ScheduleLine> Calculate(int periodInMonth, decimal monthlyRate, decimal amount);
         List<ScheduleLine> Calculate(int? periodInMonth, decimal? monthlyRate, decimal? amount);
-        List<ScheduleLine> Calculate(int? periodInMonth, decimal? monthlyRate, decimal? amount, DateTimeOffset? firstPayment=null);
+        List<ScheduleLine> Calculate(int? periodInMonth, decimal? monthlyRate, decimal? amount, DateTime? firstPayment = null);
     }
 }

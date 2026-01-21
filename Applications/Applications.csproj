@@ -45,7 +45,6 @@
     <Folder Include="Features\LoanRequests\Extensions\" />
     <Folder Include="Features\LoanRequests\Mappers\" />
     <Folder Include="Features\Loans\Command\UpdateLoan\" />
-    <Folder Include="Features\Loans\Interfaces\" />
     <Folder Include="Features\LoanTransactions\Journals\Extensions\" />
     <Folder Include="Features\LoanTransactions\Journals\Mappers\" />
     <Folder Include="Features\LoanTransactions\Journals\UseCases\" />
@@ -76,6 +75,7 @@
     <Folder Include="Responses\ViewModels\Users\" />
     <Folder Include="Services\Customers\" />
     <Folder Include="Validations\Loans\" />
+    <Folder Include="Validations\NameEntities\" />
   </ItemGroup>
 
   <ItemGroup>

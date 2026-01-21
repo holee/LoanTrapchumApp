@@ -131,7 +131,7 @@
              JustifyContent="JustifyContent.End">
     <AuthorizeView Policy="@Policies.RequestLoanRequest">
         <Authorized>
-            @if (data!.IsRequesting)
+            @if (data!.IsRequesting && _result.Success == false)
             {
                 <RadzenButton ButtonStyle="@Styles.Save"
                               Icon="request_quote" Size="ButtonSize.ExtraSmall"

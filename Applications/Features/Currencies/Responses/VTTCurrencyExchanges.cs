@@ -23,7 +23,7 @@ namespace Applications.Features.Currencies.Responses
         public string? BranchName { get; set; }
         public string? Remark { get; set; }
 
-
+        public bool IsBuy { get; set; } = false;
         [NotMapped] public int RowIndex { get; set; }
 
         [NotMapped]

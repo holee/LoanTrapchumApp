@@ -40,5 +40,6 @@ namespace Applications.Interfaces.Loans
         Task<ErrorOr<bool>> IsCustomerBusy(string? customerId, CancellationToken cancellation = default);
         Task<ErrorOr<string>> AddDescription(LoanDescriptions descriptions, CancellationToken cancellation = default);
         Task<ErrorOr<VLoanRequests>> GetApprovedLoanRequestAsync(int? branchId, string? customerId, string? loanRequestId, bool include);
+        Task<ErrorOr<LoanRequest>> GetEditLoanRequestAsync(int? branchId, string? customerId, string? loanRequestId, CancellationToken cancellation = default);
     }
 }

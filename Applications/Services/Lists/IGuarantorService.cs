@@ -1,8 +1,7 @@
-using Applications.Features.OtherNames;
+using Applications.Features.Guarantor.Dtos;
 using Applications.Features.OtherNames;
 using Applications.Responses;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.OtherNames;
 using Domains.Models.Lists;
 
 namespace Applications.Services.Lists;

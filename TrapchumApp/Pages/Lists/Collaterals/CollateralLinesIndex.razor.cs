@@ -3,7 +3,6 @@ using Applications.Features.Collaterals.Queries.GetCollateralLinesAsPaging;
 using Applications.Features.Customers.Queries.GetCustomerAsPaging;
 using Applications.Features.Customers.Response;
 using Applications.Responses.Paginations;
-using System.Threading.Tasks;
 
 namespace TrapchumApp.Pages.Lists.Collaterals;
 
@@ -17,7 +16,7 @@ public partial class CollateralLinesIndex
     private int _skip = 0;
     private string _filterText = string.Empty;
     private string _customerId = string.Empty;
-    private string _sortColumn = nameof(VCollateralLines.TypeName);
+    private string _sortColumn = nameof(VCollateralLines.LoanStatus);
     private bool _sortDescending = false;
     protected override async Task OnInitializedAsync()
     {

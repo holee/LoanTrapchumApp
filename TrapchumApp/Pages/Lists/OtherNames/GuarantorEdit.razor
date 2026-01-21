@@ -3,13 +3,12 @@
 @using Applications.Features.Currencies
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Interfaces
 @using TrapchumApp.Services
 <EditForm Model="model" OnValidSubmit="OnSaveChanges">
     <input type="hidden" @bind="model.Id" />
     <FluentValidationValidator DisableAssemblyScanning="false"></FluentValidationValidator> 
     <GaurantorCreateComp Model="@model" />
-    <AddressBaseCreate model="model" />
+    <AddressCreate model="model" />
     <RadzenStack Orientation="Orientation.Horizontal"
                  AlignItems="AlignItems.Center"
                  Gap="1rem"

@@ -1,5 +1,5 @@
 using Applications.Features.Collaterals.Dtos;
-using Applications.Features.Entities.Guarantors;
+using Applications.Features.Guarantor.Dtos;
 using Applications.Features.LoanRequests.Command.CreateLoanRequest;
 using Applications.Features.LoanRequests.Command.SaveEditLoanRequest;
 using Applications.Features.LoanRequests.Command.SaveLoanRequest;

@@ -3,14 +3,14 @@
 @using Applications.Features.Loans.Responses
 @using Applications.Responses.ViewModels.Loans.Requests
 <RadzenDataGrid Data="@_loanDocuments"
-                TItem="VLoanRequestsDocuments"
+                TItem="VLoanDisbursementDocuments"
                 AllowAlternatingRows="true"
-                GridLines="DataGridGridLines.Default"
-                AllowFiltering="true"
+                GridLines="DataGridGridLines.Both"
+                AllowFiltering="false"
                 Density="Density.Compact"
-                AllowPaging="true"
+                AllowPaging="false"
                 PageSize="10"
-                AllowSorting="true"
+                AllowSorting="false"
                 Responsive="true"
                 RowRender="@OnRowRender"
                 Class="rz-mt-2">
@@ -26,13 +26,13 @@
         </RadzenDataGridColumn>
         <RadzenDataGridColumn TItem="VLoanRequestsDocuments"
                               Property="@nameof(VLoanRequestsDocuments.OriginalName)"
-                              Title="Original Name"/>
+                              Title="Original Name" />
         <RadzenDataGridColumn TItem="VLoanRequestsDocuments"
                               Property="@nameof(VLoanRequestsDocuments.NewFileName)"
                               Title="Name" />
         <RadzenDataGridColumn TItem="VLoanRequestsDocuments"
                               Property="@nameof(VLoanRequestsDocuments.AltText)"
-                              Title="AltText"/>
+                              Title="AltText" />
         <RadzenDataGridColumn TItem="VLoanRequestsDocuments"
                               Property="@nameof(VLoanRequestsDocuments.Description)"
                               Title="Description">
@@ -46,9 +46,9 @@
     [Parameter] public string LoanId { get; set; } = string.Empty;
     [Parameter] public int? BranchId { get; set; } = 0;
 
-    private IEnumerable<VLoanRequestsDocuments> _loanDocuments = Array.Empty<VLoanRequestsDocuments>();
+    private IEnumerable<VLoanDisbursementDocuments> _loanDocuments = Array.Empty<VLoanDisbursementDocuments>();
 
-    void OnRowRender(RowRenderEventArgs<VLoanRequestsDocuments> args)
+    void OnRowRender(RowRenderEventArgs<VLoanDisbursementDocuments> args)
     {
         args.Data.RowIndex = args.Index + 1;
     }

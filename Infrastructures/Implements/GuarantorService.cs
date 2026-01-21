@@ -4,7 +4,6 @@ using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Disbursements;
 using Applications.Responses.ViewModels.Loans.Requests;
-using Applications.Responses.ViewModels.OtherNames;
 using Dapper;
 using FluentValidation;
 using Infrastructures.Constants.Procedures;
@@ -15,18 +14,16 @@ using System.Data;
 using Applications.Features.Entities;
 using Domains.Models.Lists;
 using Applications.Features.Loans.Responses;
+using Applications.Features.Guarantor.Dtos;
 
 namespace Infrastructures.Implements;
+
 public class GuarantorService : IGuarantorService
 {
-    private readonly DataContext _context;
     private readonly IDbContextFactory<DataContext> _contextFactory;
-    private readonly IValidator<EntityNameDtoCreate> _validator;
     private readonly IDapperConnectionFactory dapperConnection;
-    public GuarantorService(DataContext context, IValidator<EntityNameDtoCreate> validator, IDbContextFactory<DataContext> contextFactory, IDapperConnectionFactory dapperConnection)
+    public GuarantorService(IDbContextFactory<DataContext> contextFactory, IDapperConnectionFactory dapperConnection)
     {
-        _context = context;
-        _validator = validator;
         _contextFactory = contextFactory;
         this.dapperConnection = dapperConnection;
     }
@@ -46,6 +43,25 @@ public class GuarantorService : IGuarantorService
         catch (Exception ex)
         {
             return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}"));
+        }
+    }
+    public async Task<VGuarantor> CreateGuarantorAsync(EntityNames othername, CancellationToken cancellation = default)
+    {
+        try
+        {
+            await using var context = await _contextFactory.CreateDbContextAsync(cancellation);
+
+            context.EntityNames.Add(othername);
+
+            await context.SaveChangesAsync();
+
+            var guarantor = await GetGuarantorDetailByIdAsync(othername.Id, cancellation);
+
+            return guarantor;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Error creating guarantor: {ex.Message}");
         }
     }
     public async Task<Result<string>> UpdateAsync(EntityNames othername, CancellationToken cancellation = default)
@@ -115,7 +131,6 @@ public class GuarantorService : IGuarantorService
         return Result.Success(guarantors);
 
     }
-
     public async Task<Pager<VGuarantor>> GetGuarantorsAsync(QueryParam param, CancellationToken cancellation = default)
     {
         await using var context = await _contextFactory.CreateDbContextAsync(cancellation);
@@ -128,7 +143,7 @@ public class GuarantorService : IGuarantorService
                                                                  EF.Functions.Like(x.Gender!, $"%{param.Filter}%") ||
                                                                  EF.Functions.Like(x.Phone!, $"%{param.Filter}%"))
                                 .WhereIf(!param.IsIncludeInActive, x => x.IsActive == false)
-                                .OrderBy(x=>x.FullName)
+                                .OrderBy(x => x.FullName)
                                 .AsNoTracking();
 
         if (param.SortDescending)
@@ -149,8 +164,6 @@ public class GuarantorService : IGuarantorService
         return new Pager<VGuarantor>(items, counts);
 
     }
-
-
     public async Task<Result<IEnumerable<VGuarantor>>> GetGuarantorsAsync(string? id, bool allGuarantors = true, string? q = null)
     {
 
@@ -171,7 +184,6 @@ public class GuarantorService : IGuarantorService
         return Result.Success<IEnumerable<VGuarantor>>(result);
 
     }
-
     public async Task<Pager<VGuarantor>> GetGuarantorsAsync(string? id, QueryParam q)
     {
 
@@ -201,8 +213,6 @@ public class GuarantorService : IGuarantorService
         return new Pager<VGuarantor>(items, counts);
 
     }
-
-
     public async Task<Result<VGuarantor>> GetGuarantorByIdAsync(string? id, bool allGuarantors = false, bool includeRequest = true)
     {
 
@@ -326,12 +336,10 @@ public class GuarantorService : IGuarantorService
 
     }
 
-
-
     public async Task<Result<VGuarantor>> GetGuarantorByIdAsync(string? id, CancellationToken cancellation = default)
     {
 
-        await using var context = await _contextFactory.CreateDbContextAsync(cancellation); 
+        await using var context = await _contextFactory.CreateDbContextAsync(cancellation);
 
         var guarantor = await context.VGuarantors
                                 .Include(x => x.GuarantorLoans)
@@ -348,5 +356,24 @@ public class GuarantorService : IGuarantorService
 
     }
 
+
+    private async Task<VGuarantor> GetGuarantorDetailByIdAsync(string? id, CancellationToken cancellation = default)
+    {
+
+        var parameters = new DynamicParameters();
+
+        parameters.Add("@Id", id);
+
+        using var db = await dapperConnection.CreateConnectionAsync(cancellation);
+
+        var guarantor = await db.QueryFirstOrDefaultAsync<VGuarantor>("SELECT * FROM VGuarantors WHERE Id = @Id", new { id });
+
+        if (guarantor is null)
+        {
+            throw new Exception("There is no guarantor avalable.");
+        }
+        return guarantor;
+
+    }
 
 }

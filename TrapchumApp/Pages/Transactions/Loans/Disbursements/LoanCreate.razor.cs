@@ -6,6 +6,7 @@ using Applications.Features.LoanRequests.Command.AddDescription;
 using Applications.Features.LoanRequests.Command.RecheckedLoanRequest;
 using Applications.Features.LoanRequests.Queryies.GetApprovedLoanRequest;
 using Applications.Features.LoanRequests.Requests;
+using Applications.Features.Loans.Command.CreateLoan;
 using Applications.Features.Loans.Mappers;
 using Applications.Features.Loans.Requests;
 using Applications.Features.Loans.Services;
@@ -20,7 +21,7 @@ using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Disbursements;
 
-public partial class LoanCreate(ILoanServiceImpl loanService, IHolidayServiceImpl holidayService)
+public partial class LoanCreate(IHolidayServiceImpl holidayService)
 {
 
     bool collapse = false;
@@ -71,7 +72,7 @@ public partial class LoanCreate(ILoanServiceImpl loanService, IHolidayServiceImp
 
         var query = new GetApprovedLoanRequestQuery(BranchId, CustomerId, LoanRequestId, true);
 
-        var request = await mediator.Send(query); 
+        var request = await mediator.Send(query);
 
         if (!request.IsError)
         {
@@ -144,7 +145,7 @@ public partial class LoanCreate(ILoanServiceImpl loanService, IHolidayServiceImp
 
         previewSchedule = model.CreateSchedules().MapToLoanSchedules();
 
-        selectedTabIndex = 3;
+        ShowPreviewTab(previewSchedule, model.CurrencyRefId);
 
     }
 
@@ -196,13 +197,9 @@ public partial class LoanCreate(ILoanServiceImpl loanService, IHolidayServiceImp
         model.BranchId = BranchId;
         model.UserRefId = _userId;
         model.PenaltyRate = penaltyRate;
-
         var scheduleDto = model.GenerateSchedules();  //.CreateSchedules().MapToLoanSchedules();
-
         var lastDate = scheduleDto!.LastOrDefault()!.PaymentDate;
-
         model.LastPaymentDate = lastDate;
-
         try
         {
             editForm.EditContext!.Validate();
@@ -211,16 +208,18 @@ public partial class LoanCreate(ILoanServiceImpl loanService, IHolidayServiceImp
 
             model.LoanSchedules = scheduleDto.ToList();
 
-            var rsp = await loanService.CreateLoanAsync(model);
+            var command = new CreateLoanCommand(model);
 
-            if (!rsp.IsSuccess)
+            var rsp = await mediator.Send(command); //await loanService.CreateLoanAsync(command);
+
+            if (!rsp.IsSuccess())
             {
-                NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
+                NotificationService.Notify(NotificationSeverity.Error, rsp.GetMessage());
 
                 return;
             }
 
-            disburseStatus = rsp.Data;
+            disburseStatus = rsp.Value.Success;
 
             StateHasChanged();
 
@@ -230,4 +229,20 @@ public partial class LoanCreate(ILoanServiceImpl loanService, IHolidayServiceImp
             NotificationService.Notify(NotificationSeverity.Error, ex.Message);
         }
     }
+    private void OnStartDateChanged(DateTime? args)
+    {
+        int addedDays = model.InstallmentTypeId switch
+        {
+            (int)InstallmentOption.Weekly => 7,
+            (int)InstallmentOption.BiWeekly => 14,
+            (int)InstallmentOption.Monthly => 28,
+            _ => 1,
+        };
+
+        if (args.HasValue)
+        {
+            model.FirstPaymentDate = args.Value.AddDays(addedDays);
+        }
+    }
+
 }

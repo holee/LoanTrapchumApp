@@ -1,5 +1,4 @@
 ﻿using Applications.Calculations;
-using Applications.Responses.ViewModels.Holidays;
 using Domains.Enumerations;
 
 namespace Applications.Features.Loans.Requests;
@@ -21,13 +20,13 @@ public sealed class LoanDtoCreate : CalculatorBase, ICalculatorBase
     public string? PeriodName { get; set; }
     public int? CurrencyRefId { get; set; }
     public decimal? PenaltyRate { get; set; }
-    public DateTimeOffset? StartDate { get; set; }
-    public DateTimeOffset? FirstPaymentDate { get; set; }
-    public DateTimeOffset? LastPaymentDate { get; set; }
+    public DateTime? StartDate { get; set; }
+    public DateTime? FirstPaymentDate { get; set; }
+    public DateTime? LastPaymentDate { get; set; }
     public int? TermTypeId { get; set; }
     public int? InstallmentTypeId { get; set; }
     public string? CustomerRefId { get; set; }
-    public DateTimeOffset? RegisterDate { get; set; }
+    public DateTime? RegisterDate { get; set; } 
     public int? PayEvery { get; set; }
     public decimal? AdminFeeRate { get; set; }
     public decimal? AdminFeeAmount { get; set; }

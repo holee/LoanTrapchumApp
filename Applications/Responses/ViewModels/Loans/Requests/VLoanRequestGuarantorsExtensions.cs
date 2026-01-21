@@ -1,5 +1,4 @@
-﻿using Applications.Features.Entities.Guarantors;
-using Applications.Features.Entities.Guarantors;
+﻿using Applications.Features.Guarantor.Dtos;
 
 namespace Applications.Responses.ViewModels.Loans.Requests;
 

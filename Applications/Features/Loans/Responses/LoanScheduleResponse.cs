@@ -4,6 +4,7 @@ public sealed class LoanScheduleResponse
 {
     public int? CurrencyId { get; set; }
     public string? ContractNumber { get; set; }
+    public string? LoanAccount { get; set; }=string.Empty;
     public string? BranchName { get; set; }
     public string? AltName { get; set; }
     public string? Phone { get; set; }

@@ -22,7 +22,7 @@ namespace Applications.Features.Loans.Services
                 return Result.Failure<IEnumerable<LoanScheduleResponse>>(ErrorResponse.Validation($"We need branchId and LoanId to fetch data."));
             }
 
-            return await _scheduleService.GetLoanDisbursments2(branchId, loanId); 
+            return await _scheduleService.GetLoanWithSchedules2(branchId, loanId); 
         }
 
         public async Task<Result<LoanScheduleResponse>> CreatePdf(int? branchId, string? loanId, int? scheduleId)

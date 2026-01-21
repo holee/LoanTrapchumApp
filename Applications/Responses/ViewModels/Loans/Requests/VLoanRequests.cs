@@ -9,7 +9,6 @@ public sealed class VLoanRequests
 {
     public string LoanRequestId { get; set; } = null!;
     public int? BranchId { get; set; }
-    public DateTime? RequestDate { get; set; }
     public decimal? RequestAmount { get; set; }
     public decimal? AprovedAmount { get; set; }
     public decimal? InterestRate { get; set; }
@@ -17,7 +16,6 @@ public sealed class VLoanRequests
     public string? InstallmentType { get; set; }
     public string? RepaymentMode { get; set; }
     public string? AprovedUserId { get; set; }
-    public DateTime? AprovedDate { get; set; }
     public string? Summiter { get; set; }
     public string? Remark { get; set; }
     public int? CurrencyId { get; set; }
@@ -38,6 +36,8 @@ public sealed class VLoanRequests
     public decimal? CollectionFeeRate { get; set; }
     public DateTime? FirstPaymentDate { get; set; }
     public DateTime? LastPaymentDate { get; set; }
+    public DateTime? AprovedDate { get; set; }
+    public DateTime? RequestDate { get; set; }
     public string? InstallmentName { get; set; }
     public int? InstallmentTypeId { get; set; }
     public int? RepaymentModeRefId { get; set; }

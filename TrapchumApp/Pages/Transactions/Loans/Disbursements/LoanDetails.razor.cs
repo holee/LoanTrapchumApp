@@ -4,24 +4,20 @@ using Applications.Commons.Mappers;
 using Applications.Enumerations;
 using Applications.Features.LoanPayments.Requests;
 using Applications.Features.Loans.Queries.GetLoanById;
+using Applications.Features.Loans.Queries.GetLoanWithScedules;
 using Applications.Features.Loans.Responses;
 using Applications.Features.Loans.Services;
 using Applications.Responses.ViewModels.Loans.Schedules;
-using DocumentFormat.OpenXml.Vml.Spreadsheet;
-using System.Threading.Tasks;
 using TrapchumApp.Helpers.Extensions;
 using TrapchumApp.Pages.Transactions.Loans.Repayments;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Disbursements;
+
 public partial class LoanDetails
 {
-    private readonly ILoanServiceImpl _dService;
-
     private readonly ScheduleService _scheduleService;
-    public LoanDetails(ILoanServiceImpl dService, ScheduleService scheduleService)
+    public LoanDetails(ScheduleService scheduleService)
     {
-        _dService = dService;
-
         _scheduleService = scheduleService;
     }
 
@@ -53,10 +49,7 @@ public partial class LoanDetails
         {
             await GetSplitSchedules();
         }
-        if (index != 2 && _isPaymentTab)
-        {
-            _isPaymentTab = false;
-        }
+
     }
 
     void CellRender(DataGridCellRenderEventArgs<VSchedule> args)
@@ -70,7 +63,7 @@ public partial class LoanDetails
 
     async Task OnRowDoubleClick(DataGridRowMouseEventArgs<VSchedule> arg)
     {
-       await PayBySchedules(arg.Data);
+        await PayBySchedules(arg.Data);
     }
 
 
@@ -200,13 +193,17 @@ public partial class LoanDetails
 
     async Task GetSplitSchedules()
     {
-        var rsp = await _scheduleService.GetLoanSchedule2(BranchId, LoanId);
 
-        if (rsp.IsSuccess)
+        var query = new GetLoanWithScedulesQuery(BranchId, LoanId);
+
+        var rsp = await mediator.Send(query);
+
+        if (rsp.IsSuccess())
         {
-
-            _loanSchedules = rsp.Data ?? [];
+            _loanSchedules = rsp.Value ?? [];
         }
+
+        StateHasChanged();
     }
 
 
@@ -215,10 +212,9 @@ public partial class LoanDetails
     {
         isVible = true;
 
-
         var query = new GetLoanByIdQuery(LoanId, BranchId, status, true);
 
-        var rsp = await mediator.Send(query);  //_dService.GetLoanByIdAsync();
+        var rsp = await mediator.Send(query);
 
         if (rsp.IsSuccess())
         {
@@ -269,17 +265,11 @@ public partial class LoanDetails
 
     protected override async Task OnInitializedAsync()
     {
-        try
-        {
 
-            _userId = (await AuthenticationState).GetUserId();
+        _userId = (await AuthenticationState).GetUserId();
 
-            await GetLoanSchedulesById(ScheduleStatus.Unpaid);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.InnerException!.Message);
-        }
+        await GetLoanSchedulesById(ScheduleStatus.Unpaid);
+
         await base.OnInitializedAsync();
     }
 }

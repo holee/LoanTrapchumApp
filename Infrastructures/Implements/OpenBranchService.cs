@@ -91,7 +91,7 @@ namespace Infrastructures.Implements
 
 
 
-        private async Task<bool> IsAllreadyVaultIn(int brnchId, DateTime transactionDt)
+        private async Task<bool> IsAllreadyVaultIn(int brnchId, DateTimeOffset transactionDt)
         {
             //var cashVualt=await context.CashVaults
             //                     .OrderByDescending(x=>x.CVDate)

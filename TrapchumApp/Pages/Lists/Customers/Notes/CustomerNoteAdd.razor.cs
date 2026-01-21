@@ -49,7 +49,7 @@ namespace TrapchumApp.Pages.Lists.Customers.Notes
                     model = new AddNoteCommand
                     {
                         NoteId = noteRsp.Value.NoteId,
-                        NoteDate = noteRsp.Value.Created,
+                        NoteDate = noteRsp.Value.NoteDate,
                         CustomerRefId = noteRsp.Value.CustomerRefId,
                         CreditAgentRefId = UserId,
                         Description = noteRsp.Value.Description,

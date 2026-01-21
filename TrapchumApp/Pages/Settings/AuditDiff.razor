@@ -10,7 +10,7 @@
 
 <div class="p-4">
     <h5>@Audit.TableName (@Audit.ActionType)</h5>
-    <p><small>@Audit.CreatedAt.ToLocalTime()</small></p>
+    <p><small>@Audit.CreatedAt!.Value.DateTime.ToLocalTime()</small></p>
 
     @if (Old is not null || New is not null)
     {

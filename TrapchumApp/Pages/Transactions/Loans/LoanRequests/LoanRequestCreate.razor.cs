@@ -1,8 +1,10 @@
 using Applications.Enumerations;
 using Applications.Extensions.DateTimes;
 using Applications.Features.Collaterals.Dtos;
+using Applications.Features.Customers.Queries.GetCustomerAsPaging;
 using Applications.Features.Customers.Response;
 using Applications.Features.Customers.UseCases;
+using Applications.Features.Guarantor.Dtos;
 using Applications.Features.LoanPayments.Requests;
 using Applications.Features.LoanRequests.Command.CreateLoanRequest;
 using Applications.Features.LoanRequests.Command.SaveLoanRequest;
@@ -18,11 +20,12 @@ using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Auths;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Applications.Responses.ViewModels.Options;
-using Applications.Responses.ViewModels.OtherNames;
+using DocumentFormat.OpenXml.Vml.Spreadsheet;
 using Domains.Models.Files;
 using TrapchumApp.Helpers.Extensions;
 using TrapchumApp.Pages.Lists.Collaterals;
 using TrapchumApp.Pages.Lists.OtherNames;
+using TrapchumApp.Shared;
 
 namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 {
@@ -30,14 +33,13 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
     {
         private readonly ILoanSettingService _loanSettingService;
         private readonly IAppSettingService _settingsServiceImpl;
-        //private readonly ICreateNewLoanRequestUseCase _createNewLoanRequestUseCase;
-        //private readonly ISaveLoanRequestUseCase _saveLoanRequestUseCase;
         private readonly IHolidayService _holidayService;
         private readonly ILogger<LoanRequestCreate> _logger;
         private readonly GetCustomersUseCase _getCustomersUseCase;
         [Parameter] public int? BranchId { get; set; } = 0;
         [Parameter] public string? CustomerId { get; set; } = string.Empty;
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+        [CascadingParameter] CascadingAppState BState { get; set; } = default!;
 
         IEnumerable<LoanScheduleDtoCreate> previewSchedule = [];
 
@@ -117,8 +119,6 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             _logger = logger;
             _loanSettingService = loanSettingService;
             _settingsServiceImpl = settingService;
-            //_createNewLoanRequestUseCase = createNewLoanRequestUseCase;
-            //_saveLoanRequestUseCase = saveLoanRequestUseCase;
             _getCustomersUseCase = getCustomersUseCase;
         }
 
@@ -133,9 +133,8 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
         async Task HandleFileDialogue()
         {
-            var options = new DialogOptions
-            {
-            };
+            var options = new DialogOptions { };
+
             IEnumerable<FileModel> uploadedFiles = await DialogService.OpenAsync<FileUploadDialogue>("Upload", options: options);
 
             if (uploadedFiles is null || !uploadedFiles.Any())
@@ -236,7 +235,12 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
                 Width = "60vw"
             };
 
-            bool? results = await DialogService.OpenAsync<GuarantorAddModal>("Add New Guarantor", options: options);
+            var dia = await DialogService.OpenAsync<GuarantorAddModal>("Add New Guarantor", options: options);
+
+            if (dia is VGuarantor g && g is not null)
+            {
+
+            }
         }
 
         async void RemoveGaurantor(VLoanRequestGuarantor g)
@@ -361,6 +365,8 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
             _userId = (await AuthenticationState).GetUserId();
 
+            await BState.GetEmployeeId();
+
             var rsp1 = await _userService.GetUserByIdAsync(_userId, CancellationToken.None, "EmployeeRefId");
 
             if (rsp1 is { IsSuccess: true, Data: not null })
@@ -378,16 +384,11 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         {
             var queryParam = new QueryParam(0, take, string.Empty, filter: filter);
 
-            var customerResponse = await _getCustomersUseCase!.ExecuteAsync(0, null, customerId, queryParam);
+            var query = new GetCustomerAsPagingQuery(0, null, customerId, queryParam);
 
-            if (customerResponse.Items.Any())
-            {
-                _customers = customerResponse.Items;
-            }
-            else
-            {
-                _customers = [];
-            }
+            var rsp = await mediator.Send(query);
+
+            _customers = rsp.Items;
         }
 
 
@@ -469,23 +470,13 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
             var commandCreate = new CreateLoanRequestCommand(model);
 
-            var commandSave = new SaveLoanRequestCommand(model);
-
-            var resp = state switch
-            {
-                RequestStatus.New => await mediator.Send(commandSave),
-
-                RequestStatus.Requested => await mediator.Send(commandCreate),
-
-                _ => await mediator.Send(commandCreate)
-
-            };
+            var resp = await mediator.Send(commandCreate);
 
             if (!resp.IsError)
             {
                 NotificationService.Notify(NotificationSeverity.Success, resp.Value.Message);
 
-                NavigationManager.NavigateTo($"/app/loan/request/{BranchId}/branches");
+                NavigationManager.NavigateTo($"/App/Loans/Requests/{BranchId}/Branches");
             }
             else
             {
@@ -494,54 +485,41 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
         }
 
+        //private async Task GetHolidays(int period)
+        //{
+        //    var cur = DateTime.Now;
+        //    period += 2;
+        //    var fut = cur.AddMonths(period);
+        //    var hols = await _holidayService.GetHolidays(false, cur, fut);
+        //    Holidays = hols.Select(x => x.HolidayDt!.Value).ToList();
+        //}
 
-        void SelectedInstallmentChanged(object? arg)
-        {
-            if (arg is not null)
-            {
-                var installType = (Items)arg;
-                installmentType = installType.Value;
-                model.InstallmentType = installType.Label;
-                ChangedDate();
-            }
-        }
+        //void ChangedDate()
+        //{
+        //    if (installmentType == 1)
+        //    {
+        //        firstPayment = DateTime.UtcNow.AddMonths(1);
+        //    }
 
+        //    if (installmentType == 2)
+        //    {
+        //        firstPayment = DateTime.UtcNow.AddDays(14);
+        //    }
 
-        private async Task GetHolidays(int period)
-        {
-            var cur = DateTime.Now;
-            period += 2;
-            var fut = cur.AddMonths(period);
-            var hols = await _holidayService.GetHolidays(false, cur, fut);
-            Holidays = hols.Select(x => x.HolidayDt!.Value).ToList();
-        }
+        //    if (installmentType == 3)
+        //    {
+        //        firstPayment = DateTime.UtcNow.AddDays(7);
+        //    }
 
-        void ChangedDate()
-        {
-            if (installmentType == 1)
-            {
-                firstPayment = DateTime.UtcNow.AddMonths(1);
-            }
+        //    if (installmentType == 4)
+        //    {
+        //        firstPayment = DateTime.UtcNow.AddDays(1);
+        //    }
 
-            if (installmentType == 2)
-            {
-                firstPayment = DateTime.UtcNow.AddDays(14);
-            }
+        //    HolidayHelper.SetHoliday(Holidays, ref firstPayment);
 
-            if (installmentType == 3)
-            {
-                firstPayment = DateTime.UtcNow.AddDays(7);
-            }
-
-            if (installmentType == 4)
-            {
-                firstPayment = DateTime.UtcNow.AddDays(1);
-            }
-
-            HolidayHelper.SetHoliday(Holidays, ref firstPayment);
-
-            model.FirstPaymentDate = firstPayment;
-        }
+        //    model.FirstPaymentDate = firstPayment;
+        //}
 
 
         void SetDefault()

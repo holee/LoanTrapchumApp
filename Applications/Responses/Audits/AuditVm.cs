@@ -1,21 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Applications.Responses.Audits;
 
-namespace Applications.Responses.Audits
+public sealed class AuditVm
 {
-    public sealed class AuditVm
-    {
-        public Guid Id { get; init; }
-        public string UserId { get; init; } = default!;
-        public string? FullName { get; set; } = string.Empty;
-        public string TableName { get; init; } = default!;
-        public string ActionType { get; init; } = default!;
-        public string KeyValues { get; init; } = default!;
-        public string? OldValues { get; init; }
-        public string? NewValues { get; init; }
-        public DateTime CreatedAt { get; init; }
-    }
+    public Guid Id { get; init; }
+    public string UserId { get; init; } = default!;
+    public string? FullName { get; set; } = string.Empty;
+    public string TableName { get; init; } = default!;
+    public string ActionType { get; init; } = default!;
+    public string KeyValues { get; init; } = default!;
+    public string? OldValues { get; init; }
+    public string? NewValues { get; init; }
+    public DateTimeOffset? CreatedAt { get; init; }
 }

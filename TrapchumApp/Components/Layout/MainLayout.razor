@@ -93,13 +93,12 @@
                     @if (bState.IsAdmin)
                     {
                         <RadzenPanelMenuItem Text="Loan Management" Icon="dataset">
-                            <RadzenPanelMenuItem Text="Guarantor" Icon="how_to_reg" Path="/App/Customer/Guarantor" />
                             <RadzenPanelMenuItem Text="Credit Officer" Icon="switch_account"
                                                  Path="/App/Employees/Credit-Agent" />
                             <RadzenPanelMenuItem Text="Loan Product" Icon="inventory_2" Path="/App/Loans/Products" />
-                            <RadzenPanelMenuItem Text="Loan Category" Icon="lists" Path="/Ppp/Loans/Categories" />
+                            <RadzenPanelMenuItem Text="Loan Category" Icon="lists" Path="/App/Loans/Categories" />
                             <RadzenPanelMenuItem Text="Collaterals" Icon="invert_colors"
-                                                 Path="/App/Customers/Collateral" />
+                                                 Path="/App/Customer/Collaterals" />
                             <RadzenPanelMenuItem Text="Holidays" Icon="calendar_add_on" Path="/App/Holidays" />
                             <RadzenPanelMenuItem Text="Change Credit Agent" Icon="@IconNames.SwitchAccount"
                                                  Path="@($"/App/Loans/Disbursments/Credit-Agent/{branchId}/Branches")" />

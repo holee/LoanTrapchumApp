@@ -14,7 +14,7 @@ using Radzen;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 {
-    public partial class PayOffModal 
+    public partial class PayOffModal
     {
         private readonly ISettingServiceImpl _settingService;
         private readonly ILoanPaymentService _repaymentService;
@@ -185,7 +185,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
                         GainAndLostLedgerRefId = gainOrLostAmount < 0 ? lostLedgerRefId : gainLedgerRefId,
                         SpotRate = selectedCurrency!.SpotRate,
                     };
-                    model.ForeignExchanges!.Add(currencyExchanges);
+                    model.ForeignExchanges = currencyExchanges;
                 }
                 if (isExchangedChanged)
                 {
@@ -206,7 +206,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
                         GainAndLostLedgerRefId = gainOrLostAmount < 0 ? lostLedgerRefId : gainLedgerRefId,
                         SpotRate = spotRate
                     };
-                    model.ForeignExchanges!.Add(currencyExchanges);
+                    model.ForeignExchanges = currencyExchanges;
                 }
                 var confirmOption = new ConfirmOptions
                 {

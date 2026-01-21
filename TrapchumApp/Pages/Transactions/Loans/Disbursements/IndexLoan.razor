@@ -40,45 +40,6 @@
     private List<LoanTab> _loanTabs = [];
     private int _selectedIndex = 0;
 
-    // void AddDetailTab()
-    // {
-    //     var newTabId = Guid.NewGuid().ToString("N");
-
-    //     var existingIndex = _loanTabs.FindIndex(x => x.TabId == newTabId);
-
-    //     if (existingIndex != -1)
-    //     {
-
-    //         _selectedIndex = existingIndex + 1;
-
-    //         StateHasChanged();
-
-    //         return;
-    //     }
-
-    //     RenderFragment content = builder =>
-    //    {
-    //        builder.OpenComponent<Example>(0);
-    //        builder.AddAttribute(1, "Id", item.Id);
-    //        builder.AddAttribute(2, "CollateralId", item.CollateralId);
-    //        builder.SetKey(item.Id);
-    //        builder.CloseComponent();
-    //    };
-
-    //     var newTab = new LoanTab
-    //     {
-    //         TabId = newTabId,
-    //         Title = "Loan Details",
-    //         ChildContent = content
-    //     };
-
-
-    //     _loanTabs.Add(newTab);
-
-    //     _selectedIndex = _loanTabs.Count; Select the newly added tab
-    // }
-
-
     void OpenDetailsTab(VLoanDisbursments item)
     {
 
@@ -86,11 +47,8 @@
 
         if (existingIndex != -1)
         {
-
             _selectedIndex = existingIndex + 1;
-
             StateHasChanged();
-
             return;
         }
 

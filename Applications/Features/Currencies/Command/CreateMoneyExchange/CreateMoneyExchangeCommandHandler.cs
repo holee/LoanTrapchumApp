@@ -1,22 +1,26 @@
-﻿using Applications.Interfaces.Transactions;
+﻿using Applications.Commons.Mappers.Exchanges;
+using Applications.Features.Currencies.Responses;
+using Applications.Interfaces.Transactions;
 using Domains.Models.Transaction;
 using ErrorOr;
 using Mapster;
 
 namespace Applications.Features.Currencies.Command;
 
-public sealed class CreateMoneyExchangeCommandHandler : IRequestHandler<CreateMoneyExchangeCommand, ErrorOr<string>>
+public sealed class CreateMoneyExchangeCommandHandler : IRequestHandler<CreateMoneyExchangeCommand, ErrorOr<VttCurrencyExchanges>>
 {
     private readonly IForiegnCurrencyExchange _currencyExchangeService;
-    public CreateMoneyExchangeCommandHandler(IForiegnCurrencyExchange currencyExchangeService) 
+    public CreateMoneyExchangeCommandHandler(IForiegnCurrencyExchange currencyExchangeService)
     {
         _currencyExchangeService = currencyExchangeService;
     }
-    public async Task<ErrorOr<string>> Handle(CreateMoneyExchangeCommand request, CancellationToken cancellationToken)
+    public async Task<ErrorOr<VttCurrencyExchanges>> Handle(CreateMoneyExchangeCommand request, CancellationToken cancellationToken)
     {
 
-        var model = request.Request.Adapt<LoanTransaction>();
+        var model = request.Request.ToModel();
 
-        return await _currencyExchangeService.CreateExchangeAsync(model);
+        model.TransactionRefId =$"trx-{Guid.CreateVersion7()}";
+
+        return await _currencyExchangeService.CreateExchangeAsync(model, cancellationToken);
     }
 }

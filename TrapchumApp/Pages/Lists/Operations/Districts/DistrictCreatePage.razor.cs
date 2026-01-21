@@ -1,11 +1,6 @@
 using Applications.Commons.Mappers;
 using Applications.Features.Addresses.Responses;
 using Applications.Interfaces.Addresses;
-using Azure;
-using BitMiracle.LibTiff.Classic;
-using Domains.Models.Addresses;
-using Mapster;
-using Microsoft.AspNetCore.Components;
 
 namespace TrapchumApp.Pages.Lists.Operations.Districts
 {

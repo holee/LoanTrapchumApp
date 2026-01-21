@@ -119,7 +119,7 @@ namespace Infrastructures.Implements
                                                       x.CustomerRefId == req.CustomerRefId)
                     .ExecuteUpdateAsync(prop => prop
                         .SetProperty(p => p.LoanRequestStatusRefId, (int)RequestStatus.Completed)
-                        .SetProperty(p => p.ModifiedDt, DateTime.UtcNow));
+                        .SetProperty(p => p.ModifiedDt, DateTimeOffset.UtcNow));
 
                 await trans.CommitAsync();
 
@@ -133,73 +133,90 @@ namespace Infrastructures.Implements
             }
         }
 
-        public async Task<IEnumerable<VCollateralLines>> GetRelatedCollaterals(string? loanId, int? branchId, CancellationToken cancellation = default)
+        public async Task<IEnumerable<VLoanDisbursementCollateral>> GetRelatedCollaterals(string? loanId, int? branchId, CancellationToken cancellation = default)
         {
             var db = await connectionFactory.CreateConnectionAsync(cancellation);
 
             string sql = @"SELECT 
-	                    lr.CollateralLineId,
-	                    lr.LoanRequestId,
-	                    lr.BranchId,
-	                    lr.CollateralNo,
-	                    lr.ReferenceNo,
-	                    lr.Location,
-	                    lr.OwnerName,
-	                    lr.Quantity,
-	                    lr.MarketPrice,
-	                    lr.HotPrice,
-	                    lr.PawnPrice,
-	                    lr.TypeName,
-	                    lr.SubTypeName
-                    FROM VLoansDisbursments  d INNER JOIN VLoanRequestCollaterals lr 
-                    ON d.LoanRequestId=lr.LoanRequestId
+	                     d.CollateralLineId,
+	                    d.LoanRequestId,
+	                    d.BranchId,
+	                    d.CollateralNo,
+	                    d.ReferenceNo,
+	                    d.Location,
+	                    d.OwnerName,
+	                    d.Quantity,
+	                    d.MarketPrice,
+	                    d.HotPrice,
+	                    d.PawnPrice,
+	                    d.TypeName,
+	                    d.SubTypeName
+                    FROM VLoanDisbursementCollaterals  d 
                     WHERE d.LoanId=@LoanId AND d.BranchId=@BranchId";
 
-            var result = await db.QueryAsync<VCollateralLines>(sql, new { LoanId = loanId, BranchId = branchId });
+            var result = await db.QueryAsync<VLoanDisbursementCollateral>(sql, new { LoanId = loanId, BranchId = branchId });
 
-            return await Task.FromResult(result);
+            return result;
 
         }
 
-        public async Task<IEnumerable<VLoanGuarantors>> GetRelatedGaurantors(string? loanId, int? branchId, CancellationToken cancellation = default)
+        public async Task<IEnumerable<VLoanDisbursementGuarantors>> GetRelatedGaurantors(string? loanId, int? branchId, CancellationToken cancellation = default)
         {
             var db = await connectionFactory.CreateConnectionAsync(cancellation);
 
             string sql = @"SELECT 
-	                        g.Id,
-	                        g.GuarantorId,
-	                        g.GuarantorName,
-	                        g.Gender,
-	                        g.Phone,
-	                        g.Address
-                        FROM VLoansDisbursments  d INNER JOIN VLoanRequestGuarantors g
-                        ON d.LoanRequestId=g.LoanRequestRefId AND g.BranchId=d.BranchId
+	                        d.Id,
+	                        d.GuarantorId,
+	                        d.GuarantorName,
+	                        d.Gender,
+	                        d.Phone,
+                            d.ProInKhmer,
+                            d.DisInKhmer,
+                            d.ComInKhmer,
+                            d.VilInKhmer,
+	                        d.Address
+                        FROM VLoanDisbursementGuarantors d 
                         WHERE d.LoanId=@LoanId AND d.BranchId=@BranchId";
 
-            var result = await db.QueryAsync<VLoanGuarantors>(sql, new { LoanId = loanId, BranchId = branchId });
+            var result = await db.QueryAsync<VLoanDisbursementGuarantors>(sql, new { LoanId = loanId, BranchId = branchId });
 
-            return await Task.FromResult(result);
+            return result;
 
         }
 
-        public async Task<IEnumerable<VLoanRequestsDocuments>> GetRelatedDocuments(string? loanId, int? branchId, CancellationToken cancellation = default)
+        public async Task<IEnumerable<VLoanDisbursementGuarantors>> GetRelatedGaurantors(string? loanId, int? branchId, CancellationToken cancellation = default, params string[] columns)
+        {
+            var db = await connectionFactory.CreateConnectionAsync(cancellation);
+
+            var cols = columns.Length == 0 ? "*" : string.Join(",", columns);
+
+            string sql = @$"SELECT {cols}  FROM VLoanDisbursementGuarantors d 
+                            WHERE d.LoanId=@LoanId AND d.BranchId=@BranchId
+                           ";
+
+            var result = await db.QueryAsync<VLoanDisbursementGuarantors>(sql, new { LoanId = loanId, BranchId = branchId });
+
+            return result;
+
+        }
+
+        public async Task<IEnumerable<VLoanDisbursementDocuments>> GetRelatedDocuments(string? loanId, int? branchId, CancellationToken cancellation = default)
         {
             var db = await connectionFactory.CreateConnectionAsync(cancellation);
 
             string sql = @"SELECT 
-	                        do.Id,
-	                        do.OriginalName,
-	                        do.AltText,
-	                        do.FileUrl,
-	                        do.Description
-                        FROM VLoansDisbursments d
-                        INNER JOIN VLoanDocuments do ON d.LoanRequestId=do.LoanRequestId 
-                            AND d.BranchId=do.BranchRefId 
-                        WHERE d.LoanId = @LoanId AND do.BranchRefId=@BranchId;";
+	                        d.Id,
+	                        d.OriginalName,
+	                        d.AltText,
+	                        d.FileUrl,
+	                        d.Description
+                        FROM VLoanDisbursementDocuments d
+                            WHERE d.LoanId = @LoanId AND d.BranchId = @BranchId;
+                        ";
 
-            var result = await db.QueryAsync<VLoanRequestsDocuments>(sql, new { LoanId = loanId, BranchId = branchId });
+            var result = await db.QueryAsync<VLoanDisbursementDocuments>(sql, new { LoanId = loanId, BranchId = branchId });
 
-            return await Task.FromResult(result);
+            return result;
 
         }
 
@@ -759,9 +776,12 @@ namespace Infrastructures.Implements
 
         private async Task<long> GetMaxLoanAccountCode(DataContext context)
         {
+
             var maxCode = await context.LoanDisbursments
-                                        .MaxAsync(x => x.LoanAccountCode);
-            return maxCode > 0 ? maxCode + 1 : 1;
+                            .Select(x => (long?)x.LoanAccountCode)
+                            .MaxAsync() ?? 0;
+
+            return maxCode + 1;
         }
 
         private async Task<bool> CustomerAlreadyRequest(string? customerId)

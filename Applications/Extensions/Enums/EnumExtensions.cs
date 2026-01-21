@@ -62,6 +62,7 @@ public static class EnumExtensions
     public static string ReadDescription<U>(this Enum e) where U : class, IDescription
     {
         Type type = e.GetType();
+
         Array values = Enum.GetValues(type);
 
         foreach (int val in values)
@@ -83,9 +84,22 @@ public static class EnumExtensions
 
     public static string Description(this Enum value)
     {
-        var field = value.GetType().GetField(value.ToString());
-        var attr = field?.GetCustomAttribute<DescriptionAttribute>();
-        return attr?.Description ?? value.ToString(); 
+
+        var type = value.GetType();
+
+        var name = Enum.GetName(type, value);
+
+        if (name == null)
+            return value.ToString(); // fallback for invalid values
+
+        var field = type.GetField(name);
+
+        if (field == null)
+            return name;
+
+        var attr = field.GetCustomAttribute<System.ComponentModel.DescriptionAttribute>();
+
+        return attr?.Description ?? name;
     }
 
 }

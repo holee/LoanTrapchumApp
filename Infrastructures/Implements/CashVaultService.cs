@@ -209,7 +209,7 @@ namespace Infrastructures.Implements
         }
 
 
-        private async Task<bool> IsAlreadyVaultIn(DataContext context, int? branchId, DateTime? trnxDate)
+        private async Task<bool> IsAlreadyVaultIn(DataContext context, int? branchId, DateTimeOffset? trnxDate)
         {
             return await context.LoanTransaction
                 .Where(x => x.TransactionDate == trnxDate)

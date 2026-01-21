@@ -9,6 +9,8 @@
     <ValidationSummary />
     <FluentValidationValidator DisableAssemblyScanning="true" />
     <input type="hidden" value="@mx.SpotRate" />
+    <input type="hidden" @bind="@mx.Id" />
+    <input type="hidden" @bind="@mx.TransactionId" />
     <RadzenRow AlignItems="AlignItems.Center">
         <RadzenColumn Size="6">
             <RadzenRow AlignItems="AlignItems.Center">
@@ -17,7 +19,7 @@
                                     class="rz-w-100"
                                     TextProperty="@nameof(Items.Label)"
                                     ValueProperty="@nameof(Items.Value)"
-                                    @bind-Value="mx.CurrencyTypeId"
+                                    @bind-Value="mx.ActionTypeId"
                                     SelectedItemChanged="@CurrencyModeSelected">
                     </RadzenDropDown>
                 </RadzenColumn>

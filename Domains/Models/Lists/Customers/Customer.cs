@@ -22,8 +22,10 @@ public sealed class Customer
     public string? Photo { get; set; }
     public bool? IsLoanActive { get; set; } = false;
     public Collateral? Collateral { get; set; }
+    public EntityNames? EntityNames { get; set; }
     public ICollection<CustomerExpense> CustomerExpenses { get; set; } = [];
     public ICollection<CustomerIncome> CustomerIncomes { get; set; } = [];
     public ICollection<LoanRequest> LoanRequests { get; set; } = [];
-    //public EntityNames? EntityNames { get; set; } 
+    public ICollection<LoanDisbursment> LoanDisbursments { get; set; } = [];
+
 }

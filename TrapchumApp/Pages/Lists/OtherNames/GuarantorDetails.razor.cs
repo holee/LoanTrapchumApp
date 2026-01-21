@@ -1,7 +1,7 @@
+using Applications.Features.Guarantor.Dtos;
 using Applications.Features.Loans.Responses;
 using Applications.Responses.ViewModels.Loans.Disbursements;
 using Applications.Responses.ViewModels.Loans.Requests;
-using Applications.Responses.ViewModels.OtherNames;
 using Applications.Services.Lists;
 using Microsoft.AspNetCore.Components;
 using Radzen;
@@ -18,8 +18,7 @@ namespace TrapchumApp.Pages.Lists.OtherNames
         }
 
         [Parameter] public string? Id { get; set; }
-        [Parameter] public EventCallback Refresh { get; set; }
-        [Parameter] public EventCallback<int> Closing { get; set; } 
+        [Parameter] public EventCallback ClosedTab { get; set; }
 
         VGuarantor? Guarantor = new VGuarantor();
 
@@ -27,18 +26,17 @@ namespace TrapchumApp.Pages.Lists.OtherNames
 
         List<VGuarantorsLoanRequest> LoanRequest = [];
 
-        List<VGuarantorLoan> Loans = []; 
+        List<VGuarantorLoan> Loans = [];
         protected override async Task OnInitializedAsync()
         {
             await GetGuarantorByIdAsync();
-
             await base.OnInitializedAsync();
         }
 
-        private async Task GetGuarantorByIdAsync() 
+        private async Task GetGuarantorByIdAsync()
         {
 
-            var rsp = await _gService.GetGuarantorByIdAsync(Id,default);
+            var rsp = await _gService.GetGuarantorByIdAsync(Id, default);
 
             if (rsp.IsSuccess && rsp.Data is not null)
             {
@@ -55,10 +53,9 @@ namespace TrapchumApp.Pages.Lists.OtherNames
 
         }
 
-
         async Task CloseGuarantorTab()
         {
-            await Closing.InvokeAsync(3);
+            await ClosedTab.InvokeAsync();
         }
     }
 }

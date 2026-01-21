@@ -1,4 +1,4 @@
-using Applications.Features.OtherNames;
+using Applications.Features.Guarantor.Dtos;
 
 namespace TrapchumApp.Pages.Lists.OtherNames
 {

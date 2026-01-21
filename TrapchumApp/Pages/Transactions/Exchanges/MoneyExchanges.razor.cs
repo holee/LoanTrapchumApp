@@ -2,20 +2,18 @@ using Applications.Enumerations;
 using Applications.Extensions.Enums;
 using Applications.Extensions.Maths;
 using Applications.Extensions.NumberExtensions;
+using Applications.Features.Currencies.Command;
 using Applications.Features.Currencies.Queries.GetCurrencyDetails;
 using Applications.Features.Currencies.Requests;
 using Applications.Features.Currencies.Responses;
 using Applications.Features.Transactions.ForiegnExchanges;
 using Applications.Interfaces.Currencies;
 using Applications.Interfaces.setting;
-using Applications.Interfaces.Transactions;
 using Applications.Responses.ViewModels.Options;
 using Domains.Enumerations;
 using Domains.Models.Settings;
-using Domains.Models.Transaction;
-using Mapster;
-using TrapchumApp.Helpers.Extensions;
 using TrapchumApp.Helpers.Constants;
+using TrapchumApp.Helpers.Extensions;
 namespace TrapchumApp.Pages.Transactions.Exchanges
 {
     public partial class MoneyExchanges
@@ -23,8 +21,7 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
         [Parameter] public int BranchId { get; set; } = 0;
         [Parameter] public bool ShowCloseButton { get; set; } = false;
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
-        ForeignExchangeDtoCreate c = new ForeignExchangeDtoCreate();
-        TrxForeignExchangeDtoCreate model = new TrxForeignExchangeDtoCreate();
+        ForeignExchangeDtoCreate fcx = new ForeignExchangeDtoCreate();
         ExchangeDtoCreate mx = new();
         EditForm form = default!;
         IEnumerable<Items> buyCurrencies = [new Items(2, "US Dollar")];
@@ -35,13 +32,11 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
         bool isBusy = false;
         private readonly ICurrencyService cuService;
         private readonly IAppSettingService settingService;
-        private readonly IForiegnCurrencyExchange _exchangeService;
         private string? _userId = string.Empty;
-        public MoneyExchanges(ICurrencyService currencyService, IAppSettingService settingsServiceImpl, IForiegnCurrencyExchange exchangeServiceImpl)
+        public MoneyExchanges(ICurrencyService currencyService, IAppSettingService settingsServiceImpl)
         {
             cuService = currencyService;
             settingService = settingsServiceImpl;
-            _exchangeService = exchangeServiceImpl;
         }
 
         protected override async Task OnInitializedAsync()
@@ -58,13 +53,15 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
                 settings = resultSetting.Data!;
             }
 
-            mx.SellCurrencyId = 1;
+            mx.SellCurrencyId = (int)CurrencyEnum.KHR;// 1;
 
-            mx.BuyCurrencyId = 2;
+            mx.BuyCurrencyId = (int)CurrencyEnum.USD;// 2;
 
-            mx.CurrencyTypeId = 1;
+            mx.ActionTypeId = (int)ExchangeAction.BuyCurrency;
 
-            var rsp = await mediator.Send(new GetCurrencyDetailsByIdQuery(1));  //cuService.GetCurrencyAsync(1);
+            mx.IsBuy = true;
+
+            var rsp = await mediator.Send(new GetCurrencyDetailsByIdQuery(1));
 
             if (rsp.IsSuccess())
             {
@@ -105,21 +102,26 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
 
             var selectedValue = ((Items)o).Value;
 
-            if (selectedValue == 1)
+            if (selectedValue == (int)ExchangeAction.BuyCurrency) //1
             {
                 isBuy = true;
 
+                mx.IsBuy = true;
+
                 mx.ExchangedMode = "Sell Currency";
 
-                mx.ExchangeRate = Currency!.BuyingRate!.Value;
+                mx.ExchangeRate = Currency!.BuyingRate;
             }
-            if (selectedValue == 2)
+
+            if (selectedValue == (int) ExchangeAction.SellCurrency)//2
             {
                 isBuy = false;
 
+                mx.IsBuy = false;
+
                 mx.ExchangedMode = "Buy Currency";
 
-                mx.ExchangeRate = Currency!.SellingRate!.Value;
+                mx.ExchangeRate = Currency!.SellingRate;
             }
 
             var temp = mx.ExchangeRate * mx.Amount;
@@ -232,7 +234,9 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
         async Task Save(bool saveNew = true)
         {
             form.EditContext!.Validate();
+
             isBusy = true;
+
             var FXGAIN_KHR_ID = settings.FirstOrDefault(p => p.Code == "FXGAIN-KHR")!.Value.ToNumer<int>();
 
             var FXLOSS_KHR_ID = settings.FirstOrDefault(p => p.Code == "FXLOSS-KHR")!.Value.ToNumer<int>();
@@ -260,75 +264,82 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
                 isBusy = false;
                 return;
             }
-            model.UserRefId = _userId;
-            model.TranTypeRefId = (int)TransactionTypes.CFX;// 67;
-            model.TransactionTypeName = TransactionTypes.CFX.Description(); //"Currency Foreign Exchange";
-            c.StaffRefId = _userId;
-            c.StaffAuthRefId = _userId;
-            c.BranchRefId = BranchId;
-            c.BankRefId = 11;
-            c.SpotRate = mx.SpotRate;
-            c.Remark = mx.Description;
+
+            fcx.Transaction = new TransactionBase
+            {
+                UserRefId = _userId,
+                TranTypeRefId = (int)TransactionTypes.CFX,
+                TransactionTypeName = TransactionTypes.CFX.Description(),
+                BranchRefId = BranchId
+            };
+
+            fcx.StaffRefId = _userId;
+            fcx.StaffAuthRefId = _userId;
+            fcx.BranchRefId = BranchId;
+            fcx.BankRefId = 11;
+            fcx.SpotRate = mx.SpotRate;
+            fcx.Remark = mx.Description;
             if (isBuy)
             {
-                c.BuyAmount = mx.Amount;
-                c.SellAmount = mx.TotalAmount;
-                c.BuyCurrencyRefId = (int)CurrencyEnum.USD; //2;
-                c.SellCurrencyRefId = (int)CurrencyEnum.KHR;//1;
-                c.ExchangeRate = mx.ExchangeRate;
-                c.BuyLedgerRefId = 1;
-                c.SellLedgerRefId = 2;
-                c.GainAndLostAmount = (mx.Amount * mx.SpotRate) - mx.TotalAmount;
-                c.FXEPA_Amount = mx.Amount;//FXEPA_Amount
-                c.FXPA_Amount = mx.Amount * mx.SpotRate;//FXPA_Amount
-                c.FxepaLedgerRefId = FXEPA_USD_ID;//FXEPA_LedgerRefId
-                c.FxpaLedgerRefId = FXPA_KHR_ID;//FXPA_LedgerRefId
-                c.SpotRate = mx.SpotRate;
-                if (c.GainAndLostAmount > 0)
+                fcx.BuyAmount = mx.Amount;
+                fcx.IsBuy = mx.IsBuy;
+                fcx.SellAmount = mx.TotalAmount;
+                fcx.BuyCurrencyRefId = (int)CurrencyEnum.USD; //2;
+                fcx.SellCurrencyRefId = (int)CurrencyEnum.KHR;//1;
+                fcx.ExchangeRate = mx.ExchangeRate;
+                fcx.BuyLedgerRefId = (int)CurrencyEnum.KHR;// 1;
+                fcx.SellLedgerRefId = (int)CurrencyEnum.USD;//2
+                fcx.GainAndLostAmount = (mx.Amount * mx.SpotRate) - mx.TotalAmount;
+                fcx.FXEPA_Amount = mx.Amount;//FXEPA_Amount
+                fcx.FXPA_Amount = mx.Amount * mx.SpotRate;//FXPA_Amount
+                fcx.FxepaLedgerRefId = FXEPA_USD_ID;//FXEPA_LedgerRefId
+                fcx.FxpaLedgerRefId = FXPA_KHR_ID;//FXPA_LedgerRefId
+                fcx.SpotRate = mx.SpotRate;
+                if (fcx.GainAndLostAmount > 0)
                 {
-                    c.GainAndLostLedgerRefId = FXGAIN_KHR_ID;
+                    fcx.GainAndLostLedgerRefId = FXGAIN_KHR_ID;
                 }
                 else
                 {
-                    c.GainAndLostLedgerRefId = FXLOSS_KHR_ID;
+                    fcx.GainAndLostLedgerRefId = FXLOSS_KHR_ID;
                 }
             }
             else
             {
-                c.BuyAmount = mx.TotalAmount;
-                c.SellAmount = mx.Amount;
-                c.BuyCurrencyRefId = (int)CurrencyEnum.KHR; //1;
-                c.SellCurrencyRefId = (int)CurrencyEnum.USD;//2;
-                c.ExchangeRate = mx.ExchangeRate;
-                c.BuyLedgerRefId = 2;
-                c.SellLedgerRefId = 1;
-                c.GainAndLostAmount = mx.TotalAmount - (mx.Amount * mx.SpotRate);
-                c.FXEPA_Amount = mx.Amount;
-                c.FXPA_Amount = mx.Amount * mx.SpotRate;
-                c.SpotRate = mx.SpotRate;
-                c.FxepaLedgerRefId = FXEPA_USD_ID;
-                c.FxpaLedgerRefId = FXPA_KHR_ID;
-                if (c.GainAndLostAmount > 0)
+                fcx.IsBuy = mx.IsBuy;
+                fcx.BuyAmount = mx.TotalAmount;
+                fcx.SellAmount = mx.Amount;
+                fcx.BuyCurrencyRefId = (int)CurrencyEnum.KHR; //1;
+                fcx.SellCurrencyRefId = (int)CurrencyEnum.USD;//2;
+                fcx.ExchangeRate = mx.ExchangeRate;
+                fcx.BuyLedgerRefId = (int)CurrencyEnum.USD;//2;
+                fcx.SellLedgerRefId = (int)CurrencyEnum.KHR;//1;
+                fcx.GainAndLostAmount = mx.TotalAmount - (mx.Amount * mx.SpotRate);
+                fcx.FXEPA_Amount = mx.Amount;
+                fcx.FXPA_Amount = mx.Amount * mx.SpotRate;
+                fcx.SpotRate = mx.SpotRate;
+                fcx.FxepaLedgerRefId = FXEPA_USD_ID;
+                fcx.FxpaLedgerRefId = FXPA_KHR_ID;
+                if (fcx.GainAndLostAmount > 0)
                 {
-                    c.GainAndLostLedgerRefId = FXGAIN_KHR_ID;
+                    fcx.GainAndLostLedgerRefId = FXGAIN_KHR_ID;
                 }
                 else
                 {
-                    c.GainAndLostLedgerRefId = FXLOSS_KHR_ID;
+                    fcx.GainAndLostLedgerRefId = FXLOSS_KHR_ID;
                 }
             }
 
-            model.ForeignExchanges!.Add(c);
+            var command = new CreateMoneyExchangeCommand(fcx);
 
-            var req = model.Adapt<LoanTransaction>();
+            var result = await mediator.Send(command);
 
-
-            var result = await _exchangeService.Exchange(req);
-
-            if (!result.IsSuccess)
+            if (!result.IsSuccess())
             {
-                NotificationService.Notify(NotificationSeverity.Error, result.ErrMessage);
+                NotificationService.Notify(NotificationSeverity.Error, result.GetMessage());
+
                 isBusy = false;
+
                 return;
             }
 
@@ -340,16 +351,13 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
 
             isBusy = false;
 
-            NotificationService.Notify(NotificationSeverity.Success, result.Data);
+            NotificationService.Notify(NotificationSeverity.Success, "Exchange created successfully.");
 
-            if (!saveNew)
-            {
-                DialogService.Close(true);
-            }
+            DialogService.Close(result.Value);
 
         }
 
-        void Close() => DialogService.Close(false);
+        void Close() => DialogService.Close(null);
 
     }
 }

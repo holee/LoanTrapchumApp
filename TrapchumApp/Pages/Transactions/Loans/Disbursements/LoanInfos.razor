@@ -108,8 +108,11 @@
 </RadzenFieldset>
 @code {
     [Parameter] public RenderFragment ChildContent { get; set; } = default!;
+
     string buttonText => _showCustomer ? "Hide Customer Info" : "Show Customer Info";
+
     private bool _showCustomer = false;
+
     void Toggle()
     {
         _showCustomer = !_showCustomer;

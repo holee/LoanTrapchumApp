@@ -27,6 +27,7 @@ public sealed class VCollateralLines
     public string? Description { get; set; }
     public bool IsUsed { get; set; } = false;
     public decimal ValueRate { get; set; }
+    public string? LoanStatus { get; set; }=string.Empty;
     public DateTime? RegisterDate { get; set; }
 
     [NotMapped]

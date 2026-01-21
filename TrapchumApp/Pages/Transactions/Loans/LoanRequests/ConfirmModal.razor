@@ -26,15 +26,16 @@
                 <tr>
                     <th>Approve Amount</th>
                     <td>
-                        <TCNumbers @bind-Value="model!.AprovedAmount" Min="0" />
-                        <ValidationMessage For="()=>model.AprovedAmount" />
+                        <TCNumbers @bind-Value="model!.AprovedAmount" Min="0" Format="@currencyFormat" />
+                        <ValidationMessage For="() => model.AprovedAmount" />
                     </td>
                 </tr>
                 <tr>
                     <th>Admin Fee</th>
                     <td>
                         <RadzenText TextAlign="TextAlign.Right"
-                                    Text="@($"{Data?.AdminFeeAmount}")" TagName="TagName.P" />
+                                    Text="@($"{Data?.AdminFeeAmount}")"
+                                    TagName="TagName.P" />
                     </td>
                 </tr>
                 <tr>
@@ -56,7 +57,7 @@
                 <tr>
                     <th> Note</th>
                     <td>
-                        <RadzenTextArea class="rz-w-100" @bind-Value="model.Memo" />
+                        <RadzenTextArea Style="resize:none;" class="rz-w-100" @bind-Value="model.Memo" />
                     </td>
                 </tr>
             </tbody>

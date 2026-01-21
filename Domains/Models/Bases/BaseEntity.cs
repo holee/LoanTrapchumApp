@@ -2,8 +2,8 @@
 
 public abstract class BaseEntity
 {
-    public DateTime? CreatedDt { get; set; } = DateTime.Now;
-    public DateTime? ModifiedDt { get; set; } = DateTime.Now;
+    public DateTimeOffset? CreatedDt { get; set; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset? ModifiedDt { get; set; } = DateTimeOffset.UtcNow;
     public int EditSeq { get; set; } = 0;
 }
 
@@ -28,8 +28,8 @@ public abstract class BaseEnt<KeyType>
 {
 
     public KeyType Key { get; set; } = default!;
-    public DateTime CreatedDt { get; set; }
-    public DateTime? ModifiedDt { get; set; }
+    public DateTimeOffset? CreatedDt { get; set; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset? ModifiedDt { get; set; } = DateTimeOffset.UtcNow;
     public int EditSeq { get; set; } = 0;
     public bool IsActive { get; set; } = false;
 }

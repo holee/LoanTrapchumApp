@@ -1,12 +1,8 @@
-﻿using Applications.Features.Collaterals.Dtos;
-using Applications.Interfaces.Loans;
-using Applications.Utils;
+﻿namespace Applications.Features.Loans.Queries.GetLoanRelatedCollaterals;
 
-namespace Applications.Features.Loans.Queries.GetLoanRelatedCollaterals;
-
-public sealed class GetLoanRelatedCollateralsQueryHandler(ILoanService loanService) : IRequestHandler<GetLoanRelatedCollateralsQuery, IEnumerable<VCollateralLines>>
+public sealed class GetLoanRelatedCollateralsQueryHandler(ILoanService loanService) : IRequestHandler<GetLoanRelatedCollateralsQuery, IEnumerable<VLoanDisbursementCollateral>>
 {
-    public async Task<IEnumerable<VCollateralLines>> Handle(GetLoanRelatedCollateralsQuery request, CancellationToken cancellationToken)
+    public async Task<IEnumerable<VLoanDisbursementCollateral>> Handle(GetLoanRelatedCollateralsQuery request, CancellationToken cancellationToken)
     {
         return await loanService.GetRelatedCollaterals(request.LoanId, request.BranchId,cancellationToken);
     }

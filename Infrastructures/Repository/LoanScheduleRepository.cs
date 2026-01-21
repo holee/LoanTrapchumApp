@@ -1,4 +1,5 @@
-﻿using Applications.Features.Loans.Responses;
+﻿using Applications.Features.Loans.Requests;
+using Applications.Features.Loans.Responses;
 using Applications.Interfaces;
 using Applications.Responses;
 using Dapper;
@@ -70,7 +71,7 @@ namespace Infrastructures.Repository
 
 
 
-        public async Task<Result<IEnumerable<LoanScheduleResponse>>> GetLoanDisbursments2(int? branchId, string? loanId, CancellationToken cancellation = default)
+        public async Task<Result<IEnumerable<LoanScheduleResponse>>> GetLoanWithSchedules2(int? branchId, string? loanId, CancellationToken cancellation = default)
         {
 
             var parameters = new { branchId, loanId };
@@ -86,28 +87,21 @@ namespace Infrastructures.Repository
 
             var scheduleQueries = (await multiResult.ReadAsync<ScheduleResponse>()).ToList();
 
-            var grouped = new Dictionary<int, List<ScheduleResponse>>();
-
-            foreach (var schedule in scheduleQueries)
-            {
-                int key = schedule.ScheduleNum ?? 1;
-
-                if (!grouped.ContainsKey(key)) grouped[key] = new List<ScheduleResponse>();
-
-                grouped[key].Add(schedule);
-            }
+            var groups = scheduleQueries.Chunk(4)
+                                .Select((chunk, index) => new
+                                {
+                                    Index = index,
+                                    Group = BuildGroup(chunk)
+                                })
+                                .ToDictionary(x => x.Index, x => x.Group);
 
             var loanSchedules = new List<LoanScheduleResponse>();
 
             int groupNum = 1;
 
-            foreach (var group in grouped.OrderBy(g => g.Key))
+            foreach (var group in groups.OrderBy(g => g.Key))
             {
                 var response = DeepCopyWithoutSchedule(loanQuery);
-
-                decimal? firstPrinciple = null;
-
-                decimal? firstOutstanding = null;
 
                 int? scheduleNum = 1;
 
@@ -117,20 +111,8 @@ namespace Infrastructures.Repository
 
                     schedule.RowNum = i + 1;
 
-                    if (i == 0)
-                    {
-                        firstPrinciple = schedule.Principle;
-
-                        firstOutstanding = schedule.LoanOutstanding;
-
-                        scheduleNum = schedule.ScheduleNum;
-                    }
-
                     response.Schedules.Add(schedule);
                 }
-
-                response.OutStanding = firstPrinciple + firstOutstanding;
-
                 response.ScheduleNum = scheduleNum;
 
                 loanSchedules.Add(response);
@@ -140,6 +122,52 @@ namespace Infrastructures.Repository
 
             return Result.Success<IEnumerable<LoanScheduleResponse>>(loanSchedules);
         }
+
+
+        public async Task<Result<IEnumerable<LoanScheduleResponse>>> GetLoanWithSchedules(int? branchId, string? loanId, CancellationToken cancellation = default)
+        {
+            var parameters = new { branchId, loanId };
+
+            using var multiResult = await db.QueryMultipleAsync(SqlConstant.GetLoanResponse, parameters);
+
+            var loan = await multiResult.ReadFirstOrDefaultAsync<LoanScheduleResponse>();
+
+            if (loan is null)
+            {
+                return Result.Failure<IEnumerable<LoanScheduleResponse>>(
+                    ErrorResponse.NotFound("No Loan Found.")
+                );
+            }
+
+            var schedules = (await multiResult.ReadAsync<ScheduleResponse>())
+                            .OrderBy(s => s.InstallmentNo) // ensure correct order first
+                            .ToList();
+
+            var loanSchedules = new List<LoanScheduleResponse>();
+
+            int installmentCounter = 1;
+
+            foreach (var chunk in schedules.Chunk(4))
+            {
+                var response = DeepCopyWithoutSchedule(loan);
+
+                var groupedSchedules = BuildGroup(chunk);
+
+                for (int i = 0; i < groupedSchedules.Count; i++)
+                {
+                    groupedSchedules[i].RowNum = i + 1;
+
+                    groupedSchedules[i].InstallmentNo = installmentCounter++;
+                }
+
+                response.Schedules.AddRange(groupedSchedules);
+
+                loanSchedules.Add(response);
+            }
+
+            return Result.Success<IEnumerable<LoanScheduleResponse>>(loanSchedules);
+        }
+
 
 
         public async Task<Result<LoanScheduleResponse>> CreatdPdf(int? branchId, string? loanId, int? scheduleNum, CancellationToken cancellation = default)
@@ -190,6 +218,7 @@ namespace Infrastructures.Repository
                 CurrencyId = source.CurrencyId,
                 ContractNumber = source.ContractNumber,
                 BranchName = source.BranchName,
+                LoanAccount = source.LoanAccount,
                 AltName = source.AltName,
                 Phone = source.Phone,
                 Salutation = source.Salutation,
@@ -208,5 +237,131 @@ namespace Infrastructures.Repository
             };
         }
 
+
+        private static List<ScheduleResponse> BuildGroup(IEnumerable<ScheduleResponse> source)
+        {
+
+            if (!source.Any()) return [];
+
+            var group = source.ToList();
+
+            var first = group.First();
+
+            var last = group.Last();
+
+            var opening = CreateOpeningRow(first);
+
+            var closing = CreateClosingRow(last);
+
+            group.Add(opening);
+
+            group.Add(closing);
+
+            return group
+                .OrderBy(x => x.InstallmentNo)
+                .ToList();
+        }
+
+        private static ScheduleResponse CreateOpeningRow(ScheduleResponse first)
+        {
+            return new ScheduleResponse
+            {
+                InstallmentNo = 0,
+                PaymentDate = first.PaymentDate,
+                TotalDay = 0,
+                Principle = 0,
+                Interest = 0,
+                CollectionFee = 0,
+                TotalPay = 0,
+                LoanOutstanding = first.LoanOutstanding + first.Principle
+            };
+        }
+
+        private static ScheduleResponse CreateClosingRow(ScheduleResponse last)
+        {
+            return new ScheduleResponse
+            {
+                InstallmentNo = last.InstallmentNo + 1,
+                PaymentDate = last.PaymentDate,
+                TotalDay = 0,
+                Principle = last.LoanOutstanding,
+                Interest = 0,
+                CollectionFee = 0,
+                TotalPay = 0,
+                LoanOutstanding = 0
+            };
+        }
+
     }
 }
+
+//public async Task<Result<IEnumerable<LoanScheduleResponse>>> GetLoanWithSchedules(int? branchId, string? loanId, CancellationToken cancellation = default)
+//{
+
+//    var parameters = new { branchId, loanId };
+
+//    var multiResult = await db.QueryMultipleAsync(SqlConstant.GetLoanResponse, parameters);
+
+//    var loanQuery = await multiResult.ReadFirstOrDefaultAsync<LoanScheduleResponse>();
+
+//    if (loanQuery is null)
+//    {
+//        return Result.Failure<IEnumerable<LoanScheduleResponse>>(ErrorResponse.NotFound("No Loan Found."));
+//    }
+
+//    var scheduleQueries = (await multiResult.ReadAsync<ScheduleResponse>()).ToList();
+
+//    var groups = new Dictionary<int, List<ScheduleResponse>>();
+
+//    foreach (var schedule in scheduleQueries)
+//    {
+//        int key = schedule.ScheduleNum ?? 1;
+
+//        if (!groups.ContainsKey(key)) groups[key] = new List<ScheduleResponse>();
+
+//        groups[key].Add(schedule);
+//    }
+
+//    var loanSchedules = new List<LoanScheduleResponse>();
+
+//    int groupNum = 1;
+
+//    foreach (var group in groups.OrderBy(g => g.Key))
+//    {
+//        var response = DeepCopyWithoutSchedule(loanQuery);
+
+//        decimal? firstPrinciple = null;
+
+//        decimal? firstOutstanding = null;
+
+//        int? scheduleNum = 1;
+
+//        for (int i = 0; i < group.Value.Count; i++)
+//        {
+//            var schedule = group.Value[i];
+
+//            schedule.RowNum = i + 1;
+
+//            if (i == 0)
+//            {
+//                firstPrinciple = schedule.Principle;
+
+//                firstOutstanding = schedule.LoanOutstanding;
+
+//                scheduleNum = schedule.ScheduleNum;
+//            }
+
+//            response.Schedules.Add(schedule);
+//        }
+
+//        response.OutStanding = firstPrinciple + firstOutstanding;
+
+//        response.ScheduleNum = scheduleNum;
+
+//        loanSchedules.Add(response);
+
+//        groupNum++;
+//    }
+
+//    return Result.Success<IEnumerable<LoanScheduleResponse>>(loanSchedules);
+//}

@@ -6,8 +6,8 @@
     <RadzenPanelMenuItem Text="Client Due Pay"
                          Icon="schedule"
                          Path="@($"/App/Loans/Schedules/{BranchId}/Branches")" Visible="@_canShowLoan" />
-    <RadzenPanelMenuItem Text="Loan Write Off" Icon="person_off" Path="@($"/App/Loans/Disbursements/write-off/{BranchId}")" Visible="@BState.IsAccount" />
-    <RadzenPanelMenuItem Text="Loan Pay Off" Icon="person_off" Path="@($"/App/Loans/Disbursements/pay-off/{BranchId}")" Visible="@BState.IsAccount" />
+    <RadzenPanelMenuItem Text="Loan Write Off" Icon="person_off" Path="@($"/App/Loans/Disbursements/{BranchId}/Write-Off")" Visible="@BState.IsAccount" />
+    <RadzenPanelMenuItem Text="Loan Pay Off" Icon="person_off" Path="@($"/App/Loans/Disbursements/{BranchId}/Pay-Off")" Visible="@BState.IsAccount" />
     <RadzenPanelMenuItem Text="Loans Request" Icon="request_quote" Path="@($"/App/Loans/Requests/{BranchId}/Branches")"
                          Visible="@BState.IsAccount" />
     <RadzenPanelMenuItem Text="Notifications"

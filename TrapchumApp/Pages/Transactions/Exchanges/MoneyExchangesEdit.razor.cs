@@ -1,5 +1,9 @@
+using Applications.Enumerations;
+using Applications.Extensions.Enums;
 using Applications.Extensions.Maths;
 using Applications.Extensions.NumberExtensions;
+using Applications.Features.Currencies.Command.EditMoneyExchange;
+using Applications.Features.Currencies.Queries.GetCurrencyDetails;
 using Applications.Features.Currencies.Queries.GetEditMoneyExchange;
 using Applications.Features.Currencies.Requests;
 using Applications.Features.Currencies.Responses;
@@ -11,8 +15,8 @@ using Domains.Enumerations;
 using Domains.Models.Settings;
 using Domains.Models.Transaction;
 using Mapster;
+using TrapchumApp.Helpers.Constants;
 using TrapchumApp.Helpers.Extensions;
-
 namespace TrapchumApp.Pages.Transactions.Exchanges;
 
 public partial class MoneyExchangesEdit
@@ -21,8 +25,7 @@ public partial class MoneyExchangesEdit
     [Parameter] public string TransactionId { get; set; } = string.Empty;
     [Parameter] public bool ShowCloseButton { get; set; } = false;
     [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
-    ForeignExchangeDtoCreate c = new ForeignExchangeDtoCreate();
-    TrxForeignExchangeDtoCreate model = new TrxForeignExchangeDtoCreate();
+    ForeignExchangeDtoUpdate _cfx = new();
     ExchangeDtoEdit mx = new();
     EditForm form = default!;
     IEnumerable<Items> buyCurrencies = [new Items(2, "US Dollar")];
@@ -56,6 +59,17 @@ public partial class MoneyExchangesEdit
 
         await GetEditMoneyExchangeResponse();
 
+        var rsp = await mediator.Send(new GetCurrencyDetailsByIdQuery(1));
+
+        if (rsp.IsSuccess())
+        {
+            Currency = rsp.Value;
+            mx.SpotRate = Currency.SpotRate;
+        }
+        else
+        {
+            mx.SpotRate = Defaults.SpotRate;
+        }
         await base.OnInitializedAsync();
     }
 
@@ -63,8 +77,6 @@ public partial class MoneyExchangesEdit
     {
         try
         {
-            isBuy = true;
-
             var query = new GetEditMoneyExchangeQuery(BranchId, TransactionId, DateTimeOffset.UtcNow);
 
             var result = await mediator.Send(query);
@@ -72,8 +84,39 @@ public partial class MoneyExchangesEdit
             if (result.IsSuccess())
             {
                 mx = result.Value;
+
+                if (mx.IsBuy)
+                {
+                    isBuy = mx.IsBuy;
+
+                    mx.ActionTypeId = (int)ExchangeAction.BuyCurrency;// (int)CurrencyEnum.KHR;
+
+                    mx.ExchangedMode = "Sell Currency";
+
+                    mx.Amount = mx.BuyAmount;
+
+                    mx.TotalAmount = mx.SellAmount;
+                }
+                else
+                {
+                    isBuy = mx.IsBuy;
+
+                    mx.ActionTypeId = (int)ExchangeAction.SellCurrency;// (int)CurrencyEnum.USD;
+
+                    mx.ExchangedMode = " Buy Currency";
+
+                    mx.Amount = mx.SellAmount;
+
+                    mx.BuyCurrencyId = (int)CurrencyEnum.USD;
+
+                    mx.SellCurrencyId = (int)CurrencyEnum.KHR;
+
+                    mx.TotalAmount = mx.BuyAmount;
+
+                }
+
+
             }
-            isBusy = false;
         }
         catch (Exception ex)
         {
@@ -81,9 +124,9 @@ public partial class MoneyExchangesEdit
             isBusy = false;
 
             NotificationService.Notify(NotificationSeverity.Error, ex.Message);
-           
+
         }
-       
+
     }
 
 
@@ -111,6 +154,8 @@ public partial class MoneyExchangesEdit
         {
             isBuy = true;
 
+            mx.IsBuy = true;
+
             mx.ExchangedMode = "Sell Currency";
 
             mx.ExchangeRate = Currency!.BuyingRate;
@@ -118,6 +163,8 @@ public partial class MoneyExchangesEdit
         if (selectedValue == (int)ExchangeAction.SellCurrency)//2
         {
             isBuy = false;
+
+            mx.IsBuy = false;
 
             mx.ExchangedMode = "Buy Currency";
 
@@ -153,6 +200,7 @@ public partial class MoneyExchangesEdit
         if (mx.ExchangeRate == 0)
         {
             mx.TotalAmount = 0;
+
             return;
         }
 
@@ -209,7 +257,9 @@ public partial class MoneyExchangesEdit
         if (total <= 0)
         {
             mx.TotalAmount = 0;
+
             NotificationService.Notify(NotificationSeverity.Warning, "Invalid input Total Amount.");
+
             return;
         }
 
@@ -262,78 +312,81 @@ public partial class MoneyExchangesEdit
             isBusy = false;
             return;
         }
-        model.UserRefId = _userId;
-        model.TranTypeRefId = 67;
-        model.TransactionTypeName = "Currency Foreign Exchange";
-        //c.StaffRefId = UserId;
-        //c.StaffAuthRefId = UserId;
-        c.BranchRefId = BranchId;
-        c.BankRefId = 11;
-        c.SpotRate = mx.SpotRate;
-        c.Remark = mx.Description;
+
+        _cfx.Transaction = new TransactionBase
+        {
+            TransactionId = mx.TransactionId,
+            UserRefId = _userId,
+            TranTypeRefId = (int)TransactionTypes.CFX,
+            TransactionTypeName = TransactionTypes.CFX.Description(),
+            TransactionDate = DateTimeOffset.UtcNow,
+            BranchRefId = BranchId
+        };
+        _cfx.TranRefId = mx.TransactionId;
+        _cfx.Id = mx.Id;
+        _cfx.StaffRefId = _userId;
+        _cfx.StaffAuthRefId = _userId;
+        _cfx.BranchRefId = BranchId;
+        _cfx.BankRefId = 11;
+        _cfx.SpotRate = mx.SpotRate;
+        _cfx.Remark = mx.Description;
         if (isBuy)
         {
-            c.BuyAmount = mx.Amount;
-            c.SellAmount = mx.TotalAmount;
-            c.BuyCurrencyRefId = 2;
-            c.SellCurrencyRefId = 1;
-            c.ExchangeRate = mx.ExchangeRate;
-            c.BuyLedgerRefId = 1;
-            c.SellLedgerRefId = 2;
-            c.GainAndLostAmount = (mx.Amount * mx.SpotRate) - mx.TotalAmount;
-            c.FXEPA_Amount = mx.Amount;//FXEPA_Amount
-            c.FXPA_Amount = mx.Amount * mx.SpotRate;//FXPA_Amount
-            c.FxepaLedgerRefId = FXEPA_USD_ID;//FXEPA_LedgerRefId
-            c.FxpaLedgerRefId = FXPA_KHR_ID;//FXPA_LedgerRefId
-            c.SpotRate = mx.SpotRate;
-            if (c.GainAndLostAmount > 0)
-            {
-                c.GainAndLostLedgerRefId = FXGAIN_KHR_ID;
-            }
-            else
-            {
-                c.GainAndLostLedgerRefId = FXLOSS_KHR_ID;
-            }
+            _cfx.IsBusy = true;
+            _cfx.BuyAmount = mx.Amount;
+            _cfx.SellAmount = mx.TotalAmount;
+            _cfx.BuyCurrencyRefId = (int)CurrencyEnum.USD;// 2;
+            _cfx.SellCurrencyRefId = (int)CurrencyEnum.KHR;// 1;
+            _cfx.ExchangeRate = mx.ExchangeRate;
+            _cfx.BuyLedgerRefId = 1;
+            _cfx.SellLedgerRefId = 2;
+            _cfx.GainAndLostAmount = (mx.Amount * mx.SpotRate) - mx.TotalAmount;
+            _cfx.FXEPA_Amount = mx.Amount;//FXEPA_Amount
+            _cfx.FXPA_Amount = mx.Amount * mx.SpotRate;//FXPA_Amount
+            _cfx.FXEPALedgerRefId = FXEPA_USD_ID;//FXEPA_LedgerRefId
+            _cfx.FXPALedgerRefId = FXPA_KHR_ID;//FXPA_LedgerRefId
+            _cfx.SpotRate = mx.SpotRate;
         }
         else
         {
-            c.BuyAmount = mx.TotalAmount;
-            c.SellAmount = mx.Amount;
-            c.BuyCurrencyRefId = 1;
-            c.SellCurrencyRefId = 2;
-            c.ExchangeRate = mx.ExchangeRate;
-            c.BuyLedgerRefId = 2;
-            c.SellLedgerRefId = 1;
-            c.GainAndLostAmount = mx.TotalAmount - (mx.Amount * mx.SpotRate);
-            c.FXEPA_Amount = mx.Amount;
-            c.FXPA_Amount = mx.Amount * mx.SpotRate;
-            c.SpotRate = mx.SpotRate;
-            c.FxepaLedgerRefId = FXEPA_USD_ID;
-            c.FxpaLedgerRefId = FXPA_KHR_ID;
-            if (c.GainAndLostAmount > 0)
-            {
-                c.GainAndLostLedgerRefId = FXGAIN_KHR_ID;
-            }
-            else
-            {
-                c.GainAndLostLedgerRefId = FXLOSS_KHR_ID;
-            }
+            _cfx.IsBusy = false;
+            _cfx.BuyAmount = mx.TotalAmount;
+            _cfx.SellAmount = mx.Amount;
+            _cfx.BuyCurrencyRefId = (int)CurrencyEnum.KHR;// 1;
+            _cfx.SellCurrencyRefId = (int)CurrencyEnum.USD;// 2;
+            _cfx.ExchangeRate = mx.ExchangeRate;
+            _cfx.BuyLedgerRefId = 2;
+            _cfx.SellLedgerRefId = 1;
+            _cfx.GainAndLostAmount = mx.TotalAmount - (mx.Amount * mx.SpotRate);
+            _cfx.FXEPA_Amount = mx.Amount;
+            _cfx.FXPA_Amount = mx.Amount * mx.SpotRate;
+            _cfx.SpotRate = mx.SpotRate;
+            _cfx.FXEPALedgerRefId = FXEPA_USD_ID;
+            _cfx.FXPALedgerRefId = FXPA_KHR_ID;
         }
 
-        model.ForeignExchanges!.Add(c);
+        if (_cfx.GainAndLostAmount > 0)
+        {
+            _cfx.GainAndLostLedgerRefId = FXGAIN_KHR_ID;
+        }
+        else
+        {
+            _cfx.GainAndLostLedgerRefId = FXLOSS_KHR_ID;
+        }
+        var command = new EditMoneyExchangeCommand(_cfx);
 
-        var req = model.Adapt<LoanTransaction>();
+        var response = await mediator.Send(command);
 
-        //var result = await _exchangeService.Exchange(req);
+        if (!response.IsSuccess())
+        {
+            NotificationService.Notify(NotificationSeverity.Error, response.GetMessage());
 
-        //if (!result.IsSuccess)
-        //{
-        //    NotificationService.Notify(NotificationSeverity.Error, result.ErrMessage);
+            isBusy = false;
 
-        //    isBusy = false;
+            return;
+        }
 
-        //    return;
-        //}
+        NotificationService.Notify(NotificationSeverity.Success, "Money Exchange was changed successfully.");
 
         mx.Amount = 0;
 
@@ -343,14 +396,8 @@ public partial class MoneyExchangesEdit
 
         isBusy = false;
 
-        //NotificationService.Notify(NotificationSeverity.Success, result.Data);
-
-        //if (!saveNew)
-        //{
-        //    DialogService.Close(true);
-        //}
-
+        DialogService.Close(response.Value);
     }
 
-    void Close() => DialogService.Close(false);
+    void Close() => DialogService.Close(null);
 }

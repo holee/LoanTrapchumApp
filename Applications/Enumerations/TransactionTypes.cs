@@ -1,212 +1,212 @@
-﻿using System.ComponentModel;
+﻿
 namespace Applications.Enumerations;
 
 public enum TransactionTypes
 {
-    [Description("Cash Deposit")]
+    [System.ComponentModel.Description("Cash Deposit")]
     CD = 1,
 
-    [Description("Cash Withdrawal")]
+    [System.ComponentModel.Description("Cash Withdrawal")]
     CW = 2,
 
-    [Description("Overdraft")]
+    [System.ComponentModel.Description("Overdraft")]
     OD = 3,
 
-    [Description("Commission")]
+    [System.ComponentModel.Description("Commission")]
     COMM = 4,
 
-    [Description("Cheque Deposit")]
+    [System.ComponentModel.Description("Cheque Deposit")]
     CHQD = 5,
 
-    [Description("Cheque Withdrawal")]
+    [System.ComponentModel.Description("Cheque Withdrawal")]
     CHQW = 6,
 
-    [Description("Account Transfer")]
+    [System.ComponentModel.Description("Account Transfer")]
     TRF = 7,
 
-    [Description("Saving Account Interest")]
+    [System.ComponentModel.Description("Saving Account Interest")]
     SAINT = 8,
 
-    [Description("Overdraft Interest")]
+    [System.ComponentModel.Description("Overdraft Interest")]
     ODINT = 9,
 
-    [Description("Inward Remittance")]
+    [System.ComponentModel.Description("Inward Remittance")]
     INR = 10,
 
-    [Description("Outward Remittance")]
+    [System.ComponentModel.Description("Outward Remittance")]
     OUR = 11,
 
-    [Description("Cashier's Order")]
+    [System.ComponentModel.Description("Cashier's Order")]
     CO = 12,
 
-    [Description("Demand Draft")]
+    [System.ComponentModel.Description("Demand Draft")]
     DD = 13,
 
-    [Description("Service Charge")]
+    [System.ComponentModel.Description("Service Charge")]
     SC = 14,
 
-    [Description("Fixed Deposit")]
+    [System.ComponentModel.Description("Fixed Deposit")]
     FD = 15,
 
-    [Description("Fixed Deposit Rollover")]
+    [System.ComponentModel.Description("Fixed Deposit Rollover")]
     FDRO = 16,
 
-    [Description("Fixed Deposit Interest")]
+    [System.ComponentModel.Description("Fixed Deposit Interest")]
     FDINT = 17,
 
-    [Description("Fixed Deposit Withdrawn")]
+    [System.ComponentModel.Description("Fixed Deposit Withdrawn")]
     FDW = 18,
 
-    [Description("Loan Disbursement")]
+    [System.ComponentModel.Description("Loan Disbursement")]
     LD = 19,
 
-    [Description("Loan Principal Repayment")]
+    [System.ComponentModel.Description("Loan Principal Repayment")]
     LP = 20,
 
-    [Description("Loan Interest")]
+    [System.ComponentModel.Description("Loan Interest")]
     LINT = 21,
 
-    [Description("Penalizing Charge for late payment")]
+    [System.ComponentModel.Description("Penalizing Charge for late payment")]
     PC = 22,
 
-    [Description("Letter of Credit")]
+    [System.ComponentModel.Description("Letter of Credit")]
     LC = 23,
 
-    [Description("Banker's Guarantee")]
+    [System.ComponentModel.Description("Banker's Guarantee")]
     BG = 24,
 
-    [Description("Shipping Guarantee")]
+    [System.ComponentModel.Description("Shipping Guarantee")]
     SG = 25,
 
-    [Description("Inward Bills")]
+    [System.ComponentModel.Description("Inward Bills")]
     IB = 26,
 
-    [Description("Reversal Entry")]
+    [System.ComponentModel.Description("Reversal Entry")]
     REV = 27,
 
-    [Description("Correction Entry")]
+    [System.ComponentModel.Description("Correction Entry")]
     CORR = 28,
 
-    [Description("Accrued Interest")]
+    [System.ComponentModel.Description("Accrued Interest")]
     ACCINT = 29,
 
-    [Description("Outward Cheque Clearance")]
+    [System.ComponentModel.Description("Outward Cheque Clearance")]
     OUTCLR = 30,
 
-    [Description("Inward Cheque Clearance")]
+    [System.ComponentModel.Description("Inward Cheque Clearance")]
     INCLR = 31,
 
-    [Description("Officer Tasks")]
+    [System.ComponentModel.Description("Officer Tasks")]
     OFFTSK = 32,
 
-    [Description("Journal Entries")]
+    [System.ComponentModel.Description("Journal Entries")]
     JORNL = 33,
 
-    [Description("Savings Account Tax Payment")]
+    [System.ComponentModel.Description("Savings Account Tax Payment")]
     SAVTAX = 34,
 
-    [Description("Cheque Return")]
+    [System.ComponentModel.Description("Cheque Return")]
     CHQR = 35,
 
-    [Description("Cheque Clear")]
+    [System.ComponentModel.Description("Cheque Clear")]
     CHQC = 36,
 
-    [Description("Balance Brought Forward")]
+    [System.ComponentModel.Description("Balance Brought Forward")]
     BF = 37,
 
-    [Description("Customer Initial Balance")]
+    [System.ComponentModel.Description("Customer Initial Balance")]
     INI = 38,
 
-    [Description("Interest Adjustment")]
+    [System.ComponentModel.Description("Interest Adjustment")]
     INTADJ = 39,
 
-    [Description("Fixed Deposit Withholding tax")]
+    [System.ComponentModel.Description("Fixed Deposit Withholding tax")]
     FDTAX = 40,
 
-    [Description("Fixed Deposit With Cheque")]
+    [System.ComponentModel.Description("Fixed Deposit With Cheque")]
     FDWC = 50,
 
-    [Description("Yearly Close")]
+    [System.ComponentModel.Description("Yearly Close")]
     YAEREND = 51,
 
-    [Description("Daily Depreciation")]
+    [System.ComponentModel.Description("Daily Depreciation")]
     DDPC = 52,
 
-    [Description("Loan Transfer")]
+    [System.ComponentModel.Description("Loan Transfer")]
     LTRF = 53,
 
-    [Description("Accumulate Gain/Loss daily")]
+    [System.ComponentModel.Description("Accumulate Gain/Loss daily")]
     AGL = 54,
 
-    [Description("Daily close capital ledger")]
+    [System.ComponentModel.Description("Daily close capital ledger")]
     DCL = 55,
 
-    [Description("Clear Accrued Interest to Due from NBC")]
+    [System.ComponentModel.Description("Clear Accrued Interest to Due from NBC")]
     CA_NBC = 56,
 
-    [Description("Loan Add Facility")]
+    [System.ComponentModel.Description("Loan Add Facility")]
     LAF = 57,
 
-    [Description("Loan Reduce Facility")]
+    [System.ComponentModel.Description("Loan Reduce Facility")]
     LRF = 58,
 
-    [Description("Loan Transfer Accrued Interest")]
+    [System.ComponentModel.Description("Loan Transfer Accrued Interest")]
     LTINT = 59,
 
-    [Description("Loan Delete")]
+    [System.ComponentModel.Description("Loan Delete")]
     LDEL = 60,
 
-    [Description("Close Saving Account")]
+    [System.ComponentModel.Description("Close Saving Account")]
     CSA = 61,
 
-    [Description("Dormant Account Charge")]
+    [System.ComponentModel.Description("Dormant Account Charge")]
     DAC = 62,
 
-    [Description("Cheque Certify")]
+    [System.ComponentModel.Description("Cheque Certify")]
     CHQCTF = 63,
 
-    [Description("Cheque Certify Settlement")]
+    [System.ComponentModel.Description("Cheque Certify Settlement")]
     CHQCSM = 64,
 
-    [Description("Letter of Credit Acceptance")]
+    [System.ComponentModel.Description("Letter of Credit Acceptance")]
     LCA = 65,
 
-    [Description("Letter of Credit Settlement")]
+    [System.ComponentModel.Description("Letter of Credit Settlement")]
     LCS = 66,
 
-    [Description("Currency Foreign Exchange")]
+    [System.ComponentModel.Description("Currency Foreign Exchange")]
     CFX = 67,
 
-    [Description("Revalue Gain/Loss daily")]
+    [System.ComponentModel.Description("Revalue Gain/Loss daily")]
     RGL = 68,
 
-    [Description("Open Branch")]
+    [System.ComponentModel.Description("Open Branch")]
     OP = 69,
 
-    [Description("Loan Transfer Interest Income")]
+    [System.ComponentModel.Description("Loan Transfer Interest Income")]
     LTII = 70,
 
-    [Description("Provision For Loan Outstanding")]
+    [System.ComponentModel.Description("Provision For Loan Outstanding")]
     PLP = 71,
 
-    [Description("Reverse Provision")]
+    [System.ComponentModel.Description("Reverse Provision")]
     RP = 72,
 
-    [Description("Reverse Loan Disbursement")]
+    [System.ComponentModel.Description("Reverse Loan Disbursement")]
     RLD = 73,
 
-    [Description("Reverse Loan Payment")]
+    [System.ComponentModel.Description("Reverse Loan Payment")]
     RLP = 74,
 
-    [Description("Clear AIR and Interest Income on paid off loan")]
+    [System.ComponentModel.Description("Clear AIR and Interest Income on paid off loan")]
     CAI = 75,
 
-    [Description("Write off Loan")]
+    [System.ComponentModel.Description("Write off Loan")]
     WL = 76,
 
-    [Description("Amount Added to Principal of Restructured Loan")]
+    [System.ComponentModel.Description("Amount Added to Principal of Restructured Loan")]
     AAPRL = 77,
 
-    [Description("Cash Vault")]
+    [System.ComponentModel.Description("Cash Vault")]
     CSV = 78
 }

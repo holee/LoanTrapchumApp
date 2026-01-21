@@ -3,6 +3,7 @@ using Applications.Features.Currencies.Responses;
 using Applications.Features.Customers.Dto;
 using Applications.Features.Customers.Response;
 using Applications.Features.Departments.Dto;
+using Applications.Features.Guarantor.Dtos;
 using Applications.Features.Loans.Responses;
 using Applications.Responses.ViewModels.Addresses;
 using Applications.Responses.ViewModels.Auths;
@@ -87,15 +88,15 @@ namespace Infrastructures.DataAccess
                                 .Where(e => e.Entity is BaseAddress && e.State == EntityState.Added))
             {
                 BaseAddress baseEntry = (BaseAddress)item.Entity;
-                baseEntry.CreatedDt = DateTime.Now;
-                baseEntry.ModifiedDt = DateTime.Now;
+                baseEntry.CreatedDt = DateTimeOffset.UtcNow;
+                baseEntry.ModifiedDt = DateTimeOffset.UtcNow;
             }
 
             foreach (var item in ChangeTracker.Entries()
                                .Where(e => e.Entity is BaseAddress && e.State == EntityState.Modified))
             {
                 var baseEntries = (BaseAddress)item.Entity;
-                baseEntries.ModifiedDt = DateTime.Now;
+                baseEntries.ModifiedDt = DateTimeOffset.UtcNow;
                 baseEntries.EditSeq += 1;
                 item.Property(nameof(BaseAddress.CreatedDt)).IsModified = false;
 
@@ -114,7 +115,7 @@ namespace Infrastructures.DataAccess
                                .Where(e => e.Entity is BaseEntity && e.State == EntityState.Modified))
             {
                 var baseEntries = (BaseEntity)item.Entity;
-                baseEntries.ModifiedDt = DateTime.Now;
+                baseEntries.ModifiedDt = DateTimeOffset.UtcNow;
                 baseEntries.EditSeq += 1;
                 item.Property(nameof(BaseEntity.CreatedDt)).IsModified = false;
 

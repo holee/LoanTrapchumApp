@@ -3,4 +3,4 @@ using Applications.Utils;
 
 namespace Applications.Features.Loans.Queries.GetLoanRelatedCollaterals;
 
-public record GetLoanRelatedCollateralsQuery(string? LoanId, int? BranchId) : IRequest<IEnumerable<VCollateralLines>>;
+public record GetLoanRelatedCollateralsQuery(string? LoanId, int? BranchId) : IRequest<IEnumerable<VLoanDisbursementCollateral>>;

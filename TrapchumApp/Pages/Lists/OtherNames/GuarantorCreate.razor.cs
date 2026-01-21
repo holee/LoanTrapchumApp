@@ -1,39 +1,36 @@
-using Applications.Features.OtherNames;
+using Applications.Features.Guarantor.Command.CreateGuarantor;
+using Applications.Features.Guarantor.Dtos;
 using Applications.Services.Lists;
 using Domains.Models.Bases;
-using Microsoft.AspNetCore.Components;
-using Radzen;
+using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Lists.OtherNames
 {
     public partial class GuarantorCreate
     {
-        private readonly IGuarantorServiceImpl _gService;
-
-        public GuarantorCreate(IGuarantorServiceImpl gService) 
-        {
-            _gService = gService;
-        }
-
+        [Parameter] public EventCallback ClosedTab { get; set; }
+        [Parameter] public EventCallback<VGuarantor> GetGuarantor { get; set; } 
         private EntityGuarantorCreate model { get; set; } = new();
-        [Parameter] public EventCallback<int> Closed { get; set; } 
         async Task TabClosing()
         {
-            await Closed.InvokeAsync(1);
+            await ClosedTab.InvokeAsync();
         }
 
-      
         protected async Task OnSaveChanges()
         {
             model.EntType = EntType.OtherName.ToString();
 
             model.Id = Guid.CreateVersion7().ToString();
 
-            var rsp = await _gService.CreateAsync(model);
+            var command = new CreateGuarantorCommand(model);
 
-            if (rsp.IsSuccess)
+            var rsp = await mediator.Send(command);
+
+            if (rsp.IsSuccess())
             {
-                NotificationService.Notify(NotificationSeverity.Success, rsp.Data);
+                NotificationService.Notify(NotificationSeverity.Success, "New Guarantor was created successfully.");
+
+                await GetGuarantor.InvokeAsync(rsp.Value);
 
                 model = new();
 
@@ -42,7 +39,7 @@ namespace TrapchumApp.Pages.Lists.OtherNames
 
             else
             {
-                NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
+                NotificationService.Notify(NotificationSeverity.Error, rsp.GetMessage());
             }
         }
     }

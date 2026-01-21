@@ -1,6 +1,6 @@
 using Applications.Extensions;
+using Applications.Features.Guarantor.Dtos;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.OtherNames;
 using Applications.Services.Lists;
 using Radzen;
 using Radzen.Blazor;

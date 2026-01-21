@@ -1,22 +1,22 @@
-﻿using Applications.Interfaces.Transactions;
-using Domains.Models.Transaction;
+﻿using Applications.Commons.Mappers.Exchanges;
+using Applications.Features.Currencies.Responses;
+using Applications.Interfaces.Transactions;
 using ErrorOr;
-using Mapster;
 
 namespace Applications.Features.Currencies.Command.EditMoneyExchange;
 
-public sealed class EditMoneyExchangeCommandHandler : IRequestHandler<EditMoneyExchangeCommand, ErrorOr<string>>
+public sealed class EditMoneyExchangeCommandHandler : IRequestHandler<EditMoneyExchangeCommand, ErrorOr<VttCurrencyExchanges>>
 {
     private readonly IForiegnCurrencyExchange _currencyExchangeService;
     public EditMoneyExchangeCommandHandler(IForiegnCurrencyExchange currencyExchangeService)
     {
         _currencyExchangeService = currencyExchangeService;
     }
-    public async Task<ErrorOr<string>> Handle(EditMoneyExchangeCommand request, CancellationToken cancellationToken)
+    public async Task<ErrorOr<VttCurrencyExchanges>> Handle(EditMoneyExchangeCommand request, CancellationToken cancellationToken)
     {
 
-        var model = request.Request.Adapt<LoanTransaction>();
+        var model = request.Request.ToModel();
 
-        return await _currencyExchangeService.EditExchangeAsync(model);
+        return await _currencyExchangeService.EditExchangeAsync(model, cancellationToken);
     }
 }

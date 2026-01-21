@@ -7,7 +7,9 @@
 @using Applications.Features.LoanRequests.Interfaces
 @using Applications.Features.Loans.Requests
 @using TrapchumApp.Services
-<RadzenDataGrid Responsive="true"
+@foreach (var item in groupedSchedules)
+{
+    <RadzenDataGrid Responsive="true"
                     Density="Density.Compact"
                     GridLines="DataGridGridLines.Both"
                     AllowSorting="false"
@@ -15,7 +17,7 @@
                     RowSelect="@OnRowSelect"
                     RowRender="@OnRowRender"
                     TItem="LoanScheduleDtoCreate"
-                    Data="@Schedules">
+                    Data="@item.Value">
         <Columns>
             <RadzenDataGridColumn Width="2.5rem" TextAlign="TextAlign.Center" Property="InstallmentNo" Title="No" Context="c">
                 <Template>
@@ -28,8 +30,8 @@
                                   Context="c">
                 <Template>
                     <small>
-                        @c.PaymentDate.DayFirst()-
-                        <small>@c.PaymentDate!.Value.DayOfWeek</small>
+                        @c.PaymentDate.DayFirst()
+                        @* <small>@c.PaymentDate!.Value.DayOfWeek</small> *@
                     </small>
                 </Template>
             </RadzenDataGridColumn>
@@ -39,7 +41,7 @@
                 </Template>
                 <FooterTemplate>
                     <strong>
-                        @Schedules.Sum(p => p.TotalDay)
+                        @item.Value.Sum(p => p.TotalDay)
                     </strong>
                 </FooterTemplate>
             </RadzenDataGridColumn>
@@ -49,7 +51,7 @@
                 </Template>
                 <FooterTemplate>
                     <strong>
-                        @Schedules.Sum(p => p.Principal).Format(CurrencyId)
+                        @item.Value.Sum(p => p.Principal).Format(CurrencyId)
                     </strong>
                 </FooterTemplate>
             </RadzenDataGridColumn>
@@ -59,7 +61,7 @@
                 </Template>
                 <FooterTemplate>
                     <strong>
-                        @Schedules.Sum(p => p.Interest).Format(CurrencyId)
+                        @item.Value.Sum(p => p.Interest).Format(CurrencyId)
                     </strong>
                 </FooterTemplate>
             </RadzenDataGridColumn>
@@ -69,7 +71,7 @@
                 </Template>
                 <FooterTemplate>
                     <strong>
-                        @Schedules.Sum(p => p.CollectionFee).Format(CurrencyId)
+                        @item.Value.Sum(p => p.CollectionFee).Format(CurrencyId)
                     </strong>
                 </FooterTemplate>
             </RadzenDataGridColumn>
@@ -85,16 +87,70 @@
             </RadzenDataGridColumn>
         </Columns>
     </RadzenDataGrid>
+}
 @code {
     [Parameter] public int? CurrencyId { get; set; } = 1;
     [Parameter] public VCustomerDetails? Customer { get; set; }
     [Parameter] public IEnumerable<LoanScheduleDtoCreate> Schedules { get; set; } = [];
 
+    private List<LoanScheduleDtoCreate> group1 = new();
+
+    private Dictionary<int, List<LoanScheduleDtoCreate>> groupedSchedules = new();
+
+    int counts = 0;
+
+    protected override void OnInitialized()
+    {
+
+        // var groups = Schedules.Chunk(4).ToList();
+
+        // for (int i = 0; i < groups.Count; i++)
+        // {
+        //     var group = groups[i].ToList();
+
+        //     var firstGroup = group.First();
+        //     var lastGroup = group.Last();
+
+        //     var addNewFirst = new LoanScheduleDtoCreate
+        //     {
+        //         InstallmentNo = 0,
+        //         PaymentDate = null,
+        //         TotalDay = 0,
+        //         Principal = 0,
+        //         Interest = 0,
+        //         CollectionFee = 0,
+        //         TotalPay = 0,
+        //         LoanOutstanding = (firstGroup.LoanOutstanding + firstGroup.Principal)
+        //     };
+
+        //     var addNewLast = new LoanScheduleDtoCreate
+        //     {
+        //         InstallmentNo = lastGroup.InstallmentNo + 1,
+        //         PaymentDate = null,
+        //         TotalDay = 0,
+        //         Principal = lastGroup.LoanOutstanding,
+        //         Interest = 0,
+        //         CollectionFee = 0,
+        //         TotalPay = 0,
+        //         LoanOutstanding = 0
+        //     };
+        //     group.Add(addNewFirst);
+        //     group.Add(addNewLast);
+        //     group = group.OrderBy(x => x.InstallmentNo).ToList();
+        //     groupedSchedules.Add(i, group);
+        // }
+
+
+        CreateGroupedSchedules();
+
+        base.OnInitialized();
+    }
+
     void OnRowRender(RowRenderEventArgs<LoanScheduleDtoCreate> arg)
     {
         if (arg.Data.InstallmentNo % 5 == 0)
         {
-            arg.Attributes.Add("class", "rz-state-highlight rz-data-row recently-edited");
+            //arg.Attributes.Add("class", "rz-state-highlight rz-data-row recently-edited");
         }
     }
 
@@ -102,4 +158,76 @@
     {
         // Handle row selection if needed
     }
+
+
+
+
+    private void CreateGroupedSchedules()
+    {
+        if (Schedules == null || !Schedules.Any())
+        {
+            return;
+        }
+
+        groupedSchedules = Schedules
+            .Chunk(4)
+            .Select((chunk, index) => new
+            {
+                Index = index,
+                Group = BuildGroup(chunk)
+            })
+            .ToDictionary(x => x.Index, x => x.Group);
+
+        base.OnInitialized();
+    }
+
+    private static List<LoanScheduleDtoCreate> BuildGroup(IEnumerable<LoanScheduleDtoCreate> source)
+    {
+        var group = source.ToList();
+
+        var first = group.First();
+        var last = group.Last();
+
+        var opening = CreateOpeningRow(first);
+        var closing = CreateClosingRow(last);
+
+        group.Add(opening);
+        group.Add(closing);
+
+        return group
+            .OrderBy(x => x.InstallmentNo)
+            .ToList();
+    }
+
+    private static LoanScheduleDtoCreate CreateOpeningRow(LoanScheduleDtoCreate first)
+    {
+        return new LoanScheduleDtoCreate
+        {
+            InstallmentNo = 0,
+            PaymentDate = null,
+            TotalDay = 0,
+            Principal = 0,
+            Interest = 0,
+            CollectionFee = 0,
+            TotalPay = 0,
+            LoanOutstanding = first.LoanOutstanding + first.Principal
+        };
+    }
+
+
+    private static LoanScheduleDtoCreate CreateClosingRow(LoanScheduleDtoCreate last)
+    {
+        return new LoanScheduleDtoCreate
+        {
+            InstallmentNo = last.InstallmentNo + 1,
+            PaymentDate = null,
+            TotalDay = 0,
+            Principal = last.LoanOutstanding,
+            Interest = 0,
+            CollectionFee = 0,
+            TotalPay = 0,
+            LoanOutstanding = 0
+        };
+    }
+
 }

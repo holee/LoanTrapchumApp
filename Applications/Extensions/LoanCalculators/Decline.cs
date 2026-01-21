@@ -12,7 +12,7 @@ public sealed class Decline : LoanCaloulator, ICalculator
         int currencyId, int installmentTypeId, DateTime firstPayment, DateTime startDate)
         : base(payEvery, effectiveRate, collectionFeeMode, day, currencyId, installmentTypeId, firstPayment, startDate)
     {
-         
+
     }
 
 
@@ -26,7 +26,7 @@ public sealed class Decline : LoanCaloulator, ICalculator
 
         decimal beginBalance = 0, lastBalance = 0;
 
-        DateTimeOffset? paymentDate = FirstPayment;
+        DateTime? paymentDate = FirstPayment;
 
         beginBalance = lastBalance = amount;
 
@@ -40,7 +40,7 @@ public sealed class Decline : LoanCaloulator, ICalculator
 
             beginBalance = lastBalance;
 
-            DateTimeOffset? previusDate;
+            DateTime? previusDate = null;
 
             if (i == 1)
             {
@@ -113,7 +113,7 @@ public sealed class Decline : LoanCaloulator, ICalculator
 
         decimal beginBalance = 0, lastBalance = 0;
 
-        DateTimeOffset? paymentDate = FirstPayment;
+        DateTime? paymentDate = FirstPayment;
 
         beginBalance = lastBalance = _amount;
 
@@ -123,7 +123,7 @@ public sealed class Decline : LoanCaloulator, ICalculator
             var interest = 0.00M;
             var totalDays = 0;
             beginBalance = lastBalance;
-            DateTimeOffset? previusDate;
+            DateTime? previusDate = null;
             if (i == 1)
             {
                 previusDate = StartDate;
@@ -175,7 +175,7 @@ public sealed class Decline : LoanCaloulator, ICalculator
         return loanScheduleLines;
     }
 
-    public override List<ScheduleLine> Calculate(int? periodInMonth, decimal? monthlyRate, decimal? amount, DateTimeOffset? firstPayment=null)
+    public override List<ScheduleLine> Calculate(int? periodInMonth, decimal? monthlyRate, decimal? amount, DateTime? firstPayment = null)
     {
         List<ScheduleLine> loanScheduleLines = [];
 
@@ -191,7 +191,7 @@ public sealed class Decline : LoanCaloulator, ICalculator
 
         decimal beginBalance = 0, lastBalance = 0;
 
-        DateTimeOffset? paymentDate = firstPayment;
+        DateTime? paymentDate = firstPayment;
 
         beginBalance = lastBalance = _amount;
 
@@ -205,7 +205,7 @@ public sealed class Decline : LoanCaloulator, ICalculator
 
             beginBalance = lastBalance;
 
-            DateTimeOffset? previusDate;
+            DateTime? previusDate = null;
             if (i == 1)
             {
                 previusDate = StartDate;

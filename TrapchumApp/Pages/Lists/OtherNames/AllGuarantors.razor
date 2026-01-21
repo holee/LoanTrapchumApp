@@ -1,5 +1,12 @@
+@using Applications.Features.Guarantor.Dtos
 @using Applications.Responses.ViewModels.OtherNames
 <GridToolbar SearchChanged="SearchTextChanged">
+    <LeftChildren>
+        @if(ChildContent is not null)
+        {
+            @ChildContent
+        }
+    </LeftChildren>
     <RightChildren>
         <div class="rz-text-align-center">
             <RadzenCheckBox TValue="bool"
@@ -31,11 +38,7 @@
                 RowSelect="@OnRowSelected"
                 LoadData="@LoadGuarantors">
     <HeaderTemplate>
-        <RadzenButton Text="Add New"
-                      Icon="add"
-                      Size="ButtonSize.Small"
-                      Click="AddAddTab"
-                      ButtonStyle="ButtonStyle.Primary" />
+    
     </HeaderTemplate>
     <Columns>
         <RadzenDataGridColumn Width="4rem"
@@ -67,49 +70,6 @@
         <RadzenDataGridColumn Property="@nameof(VGuarantor.Phone)"
                               Width="8rem"
                               Title="Phone" />
-        
-        <RadzenDataGridColumn TextAlign="TextAlign.Center"
-                              Width="5rem"
-                              Context="g"
-                              Filterable="false"
-                              Sortable="false"
-                              Title="Loan Active">
-            <Template>
-                @if (g.IsActive)
-                {
-                    <RadzenIcon IconStyle="@IconStyle.Dark"
-                                Style="font-size:0.9rem;"
-                                Icon="check_box" IconColor="@Colors.Success" />
-                }
-                else
-                {
-                    <RadzenIcon IconStyle="@IconStyle.Primary"
-                                Style="font-size:0.9rem;"
-                                Icon="check_box_outline_blank" IconColor="@Colors.Danger" />
-                }
-
-                @* <RadzenCheckBox @bind-Value="g.IsActive" ReadOnly /> *@
-            </Template>
-        </RadzenDataGridColumn>
-
-        <RadzenDataGridColumn TextAlign="TextAlign.Right"
-                              Context="g"
-                              Width="8rem"
-                              Property="@nameof(VGuarantor.NumberOfLoan)"
-                              Title="Loans">
-            <Template>
-                @g.NumberOfLoan
-            </Template>
-        </RadzenDataGridColumn>
-        <RadzenDataGridColumn TextAlign="TextAlign.Right"
-                              Context="g"
-                              Width="10rem"
-                              Property="@nameof(VGuarantor.Requests)"
-                              Title="Requests">
-            <Template>
-                @g.Requests
-            </Template>
-        </RadzenDataGridColumn>
         <RadzenDataGridColumn Context="g"
                               Property="@nameof(VGuarantor.ProInKhmer)"
                               Filterable="false"
@@ -120,6 +80,38 @@
                              ComInKhmer="@g?.ComInKhmer"
                              ProInKhmer="@g?.ProInKhmer"
                              DisInKhmer="@g?.DisInKhmer" />
+            </Template>
+        </RadzenDataGridColumn>
+        
+        <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                              Context="g"
+                              Width="8rem"
+                              Visible="false"
+                              Property="@nameof(VGuarantor.NumberOfLoan)"
+                              Title="Loans">
+            <Template>
+                @g.NumberOfLoan
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                              Context="g"
+                              Width="10rem"
+                              Visible="false"
+                              Property="@nameof(VGuarantor.Requests)"
+                              Title="Requests">
+            <Template>
+                @g.Requests
+            </Template>
+        </RadzenDataGridColumn>
+        
+        <RadzenDataGridColumn TextAlign="TextAlign.Center"
+                              Width="5rem"
+                              Context="g"
+                              Filterable="false"
+                              Sortable="false"
+                              Title="Loan Active">
+            <Template>
+                <RadzenCheckBox Value="@g.IsActive" ReadOnly />
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Width="5rem"

@@ -1,5 +1,5 @@
+using Applications.Features.Guarantor.Dtos;
 using Applications.Interfaces.Lists;
-using Applications.Responses.ViewModels.OtherNames;
 using Applications.Responses.ViewModels.Vendors;
 using Microsoft.AspNetCore.Components;
 using TrapchumApp.Pages.Lists.OtherNames;

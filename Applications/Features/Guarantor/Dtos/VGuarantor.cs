@@ -3,7 +3,7 @@ using Applications.Features.Loans.Responses;
 using Applications.Responses.ViewModels.Loans.Disbursements;
 using Applications.Responses.ViewModels.Loans.Requests;
 
-namespace Applications.Responses.ViewModels.OtherNames;
+namespace Applications.Features.Guarantor.Dtos;
 
 public sealed class VGuarantor
 {

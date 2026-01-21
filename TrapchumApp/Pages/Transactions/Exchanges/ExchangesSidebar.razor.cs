@@ -59,7 +59,7 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
 
             _mx.BuyCurrencyId = 2;
 
-            _mx.CurrencyTypeId = 1;
+            _mx.ActionTypeId = 1;
 
             var currencyResp = await currencyService.GetCurrencyAsync(1);
 
@@ -117,7 +117,7 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
             _mx.TotalAmount = _isBuy ? temp.RoundDown(-2) : temp.RoundUp(-2);
         }
 
-        void AmountTextChanged(decimal? amount) 
+        void AmountTextChanged(decimal? amount)
         {
 
             if (amount <= 0)
@@ -134,10 +134,10 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
             if (_mx.ExchangeRate == 0)
             {
                 _mx.TotalAmount = 0;
-                
+
                 return;
             }
-            
+
             var temp = _mx.ExchangeRate * amount;
 
             _mx.TotalAmount = _isBuy ? temp.RoundDown(-2) : temp.RoundUp(-2);
@@ -305,7 +305,7 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
                 c.GainAndLostLedgerRefId = c.GainAndLostAmount > 0 ? FXGAIN_KHR_ID : FXLOSS_KHR_ID;
             }
 
-            _model.ForeignExchanges!.Add(c);
+            _model.ForeignExchanges = c;
 
             var req = _model.Adapt<LoanTransaction>();
 

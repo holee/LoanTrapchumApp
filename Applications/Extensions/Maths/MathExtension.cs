@@ -200,11 +200,14 @@ namespace Applications.Extensions.Maths
         }
         public static MarkupString Format(this decimal? d, int? currencyId = 1)
         {
+
+            //if (!d.HasValue || d == 0) return (MarkupString)"-";
+
             return currencyId switch
             {
-                1 => (MarkupString)string.Format("{0:##,0.00} {1}", d, "&#6107;"),
+                1 => (MarkupString)string.Format("{0:##,0.##} {1}", d, "&#6107;"),
                 2 => (MarkupString)string.Format("{0:##,0.00} {1}", d, "&dollar;"),
-                _ => (MarkupString)string.Format("{0:##,0.00} {1}", d, "&#6107;"),
+                _ => (MarkupString)string.Format("{0:##,0.##} {1}", d, "&#6107;"),
             };
         }
 
@@ -221,6 +224,9 @@ namespace Applications.Extensions.Maths
 
         public static string Formats(this decimal? d, int? currencyId)
         {
+
+            //if (!d.HasValue || d == 0) return "-";
+
             return currencyId switch
             {
                 1 => string.Format(UserCulture(CurrenciesType.Khr), "{0:C}", d),
@@ -228,7 +234,7 @@ namespace Applications.Extensions.Maths
                 _ => string.Format(UserCulture(CurrenciesType.Khr), "{0:C}", d),
             };
         }
-        public static string SetFormat(this decimal? d, int? currencyId) 
+        public static string SetFormat(this decimal? d, int? currencyId)
         {
             return currencyId switch
             {

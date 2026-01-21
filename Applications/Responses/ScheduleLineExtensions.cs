@@ -1,14 +1,11 @@
 ﻿using Applications.Enumerations;
 using Applications.Features.Loans.Requests;
-using Applications.Features.Loans.Requests;
 using Domains.Models.Loans;
 namespace Applications.Responses;
 
 public static class ScheduleLineExtensions
 {
-    public static IEnumerable<LoanScheduleDtoCreate> ToSchedules(this IEnumerable<ScheduleLine> source,
-        int? branchId,string? creditAgentId,int? repaymentModeId = 2, 
-        ScheduleStatus status = ScheduleStatus.Unpaid)
+    public static IEnumerable<LoanScheduleDtoCreate> ToSchedules(this IEnumerable<ScheduleLine> source, int? branchId, string? creditAgentId, int? repaymentModeId = 2, ScheduleStatus status = ScheduleStatus.Unpaid)
     {
 
         ArgumentNullException.ThrowIfNull(source, nameof(source));
@@ -26,7 +23,7 @@ public static class ScheduleLineExtensions
             TotalDay = x.TotalDay,
             TotalPay = x.TotalPay,
             AgentRefId = creditAgentId ?? string.Empty,
-            RepaymentModeRefId = repaymentModeId ?? 1,
+            RepaymentModeRefId = repaymentModeId ?? (int)RepaymentOption.Balloon,//1
             ScheduleStatusRefId = (int)status,
         });
     }

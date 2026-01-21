@@ -1,8 +1,8 @@
-﻿namespace Applications.Features.Entities.Guarantors
+﻿namespace Applications.Features.Guarantor.Dtos
 {
-    public class GuarantorDto
+    public class GuarantorDtoUpdate
     {
-        public int Id { get; set; } 
+        public int Id { get; set; }
         public Guid? EntityNameRefId { get; set; }
         public string? GuarantorName { get; set; }
         public Guid? CustomerRefId { get; set; }

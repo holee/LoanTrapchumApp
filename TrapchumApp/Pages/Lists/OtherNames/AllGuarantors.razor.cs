@@ -1,10 +1,7 @@
 using Applications.Extensions;
-using Applications.Features.OtherNames;
+using Applications.Features.Guarantor.Dtos;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.OtherNames;
 using Applications.Services.Lists;
-using Microsoft.AspNetCore.Components;
-using Radzen;
 using Radzen.Blazor;
 using TrapchumApp.Helpers.Extensions;
 
@@ -44,14 +41,9 @@ namespace TrapchumApp.Pages.Lists.OtherNames
         string? SelectedGuarantorId = string.Empty;
 
         List<VGuarantor> guarantors = [];
-
-        EntityNamesCreate modelCreate = new EntityNamesCreate();
-
-        EntityNamesCreate modelEdit = new EntityNamesCreate();
-        [Parameter] public EventCallback<int> OpenAddTab { get; set; }
-        [Parameter] public EventCallback<int> OpenDetailTab { get; set; }
-        [Parameter] public EventCallback<int> OpenEditTab { get; set; }
-        [Parameter] public EventCallback<string> SetGuarantorId { get; set; }
+        [Parameter] public EventCallback<string> ShowDetails { get; set; } 
+        [Parameter] public EventCallback<string> ShowEdit { get; set; }
+        [Parameter] public RenderFragment? ChildContent { get; set; }
         async Task LoadGuarantors(LoadDataArgs e)
         {
             pageIndex = e.Skip ?? 0;
@@ -101,15 +93,6 @@ namespace TrapchumApp.Pages.Lists.OtherNames
             await GetGuarantors(filter);
         }
 
-        async Task AddAddTab()
-        {
-            await OpenAddTab.InvokeAsync(1);
-        }
-        async Task Reload()
-        {
-            await GetGuarantors();
-        }
-
         async Task GetGuarantors(string? filter = null)
         {
             isLoading = true;
@@ -131,18 +114,21 @@ namespace TrapchumApp.Pages.Lists.OtherNames
         {
             ContextMenuService.Close();
 
-            await SetGuarantorId.InvokeAsync(id);
-
-            await OpenDetailTab.InvokeAsync(3);
+            if (!string.IsNullOrEmpty(id))
+            {
+                await ShowDetails.InvokeAsync(id);
+            }
         }
 
         async Task GetEditGuarantor(string? id)
         {
             ContextMenuService.Close();
-            await SetGuarantorId.InvokeAsync(id);
-            await OpenEditTab.InvokeAsync(2);
-            StateHasChanged();
 
+            if (!string.IsNullOrEmpty(id))
+            {
+                await ShowEdit.InvokeAsync(id);
+            }
+           
         }
 
         protected async Task DeleteGuarantorAsync(string? id)

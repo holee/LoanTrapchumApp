@@ -158,7 +158,7 @@ namespace TrapchumApp.Pages.Lists.Customers
                 return;
             }
 
-            var uri = $"app/loan/request/{BranchId}/branches/createNew/{customerId}/customer";
+            var uri = $"/App/Loans/Requests/{BranchId}/Branches/CreateNew/{customerId}/Customers";
 
             NavigationManager.NavigateTo(uri);
         }
@@ -308,7 +308,7 @@ namespace TrapchumApp.Pages.Lists.Customers
 
             if (args.Data.ModifiedDT.IsRecently())
             {
-
+                var d = DateTime.Now;
                 args.Attributes.Add("class", "rz-state-highlight rz-data-row recently-edited");
 
             }

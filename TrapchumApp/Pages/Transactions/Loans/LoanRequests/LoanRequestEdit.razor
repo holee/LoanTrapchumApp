@@ -1,6 +1,7 @@
 ﻿@page "/App/Loans/{LoanRequestId}/Requests/{BranchId:int}/Branches/{CustomerId}/Edit"
 @using Applications.Features.Collaterals.Dtos
 @using Applications.Features.Customers.Response
+@using Applications.Features.Guarantor.Dtos
 @using Applications.Features.LoanRequests.Command.AddLoanRequestCollateral
 @using Applications.Features.LoanRequests.Command.AddLoanRequestGuarantor
 @using Applications.Features.LoanRequests.Interfaces
@@ -11,7 +12,7 @@
 @using Domains.Models.Loans
 @using Radzen.Blazor.Rendering
 @using TrapchumApp.Helpers.Extensions
-<PageTitle>Loan Request</PageTitle>
+<PageTitle>Loan Request Edit</PageTitle>
 <Card>
     <EditForm Model="model" @ref="editForm">
         <input type="hidden" @bind="model.LoanRequestId" />

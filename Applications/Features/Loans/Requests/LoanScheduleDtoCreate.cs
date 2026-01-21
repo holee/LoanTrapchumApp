@@ -6,7 +6,7 @@
         public string? AgentRefId { get; set; } 
         public int? InstallmentNo { get; set; }
         public int? RepaymentModeRefId { get; set; }
-        public DateTimeOffset? PaymentDate { get; set; }
+        public DateTime? PaymentDate { get; set; }
         public int? TotalDay { get; set; } = 0;
         public decimal? Principal { get; set; }
         public decimal? InterestRate { get; set; }

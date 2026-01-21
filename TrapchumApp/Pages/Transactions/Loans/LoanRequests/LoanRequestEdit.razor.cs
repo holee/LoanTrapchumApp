@@ -7,6 +7,7 @@ using Applications.Features.Collaterals.Dtos;
 using Applications.Features.Customers.Extensions;
 using Applications.Features.Customers.Response;
 using Applications.Features.Customers.UseCases;
+using Applications.Features.Guarantor.Dtos;
 using Applications.Features.LoanRequests.Command.AddLoanRequestDocument;
 using Applications.Features.LoanRequests.Command.ApprovedLoanRequest;
 using Applications.Features.LoanRequests.Command.CreateLoanRequest;
@@ -241,29 +242,11 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
                 Width = "65rem"
             };
 
-            bool? results = await DialogService.OpenAsync<GuarantorAddModal>("Add New Guarantor", options: options);
+            var dia = await DialogService.OpenAsync<GuarantorAddModal>("Add New Guarantor", options: options);
 
-            if (results is not null && results == true)
+            if (dia is VGuarantor g && g is not null)
             {
-                //var gs = results.Select(g => new VLoanRequestGuarantors
-                //{
-                //    EmployeeRefId = g.Id,
-                //    FullName = g.FullName,
-                //    AltName = g.GuarantorName,
-                //    Phone = g.Phone,
-                //    VilInKhmer = g.VilInKhmer,
-                //    ComInKhmer = g.ComInKhmer,
-                //    DisInKhmer = g.DisInKhmer,
-                //    ProInKhmer = g.ProInKhmer
-                //});
-                //foreach (var item in gs)
-                //{
-                //    if (Guarantors.Contains(item)) continue;
 
-                //    Guarantors.Add(item);
-                //}
-
-                //await GuarantorRef.GuarantorReload();
             }
         }
 
@@ -366,17 +349,15 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
                 await GetCustomers(CustomerId, 1);
 
+                var query = new GetLoanRequestDetailByIdQuery(BranchId, CustomerId, LoanRequestId,true);
 
-                var query = new GetLoanRequestDetailByIdQuery(BranchId, CustomerId, LoanRequestId);
-
-
-                var reqResp = await mediator.Send(query);// _loanRequestService.GetLoanRequestAsync(BranchId, CustomerId, LoanRequestId, true);
+                var reqResp = await mediator.Send(query);
 
                 if (reqResp.IsError && reqResp.Value is null)
                 {
                     NotificationService.Notify(NotificationSeverity.Error, reqResp.FirstError.Description);
 
-                    NavigationManager.NavigateTo($"/app/loan/request/{BranchId}/branches");
+                    NavigationManager.NavigateTo($"/App/Loan/Requests/{BranchId}/Branches");
 
                     return;
                 }

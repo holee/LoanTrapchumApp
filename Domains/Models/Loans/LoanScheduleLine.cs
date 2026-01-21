@@ -3,7 +3,7 @@
 public sealed class ScheduleLine
 {
     public int InstallmentNo { get; set; }
-    public DateTimeOffset? PaymentDate { get; set; }
+    public DateTime? PaymentDate { get; set; }
     public int TotalDay { get; set; } = 0;
     public decimal? Principal { get; set; } = 0;
     public decimal? Interest { get; set; } = 0;

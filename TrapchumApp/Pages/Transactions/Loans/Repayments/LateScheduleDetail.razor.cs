@@ -7,7 +7,6 @@ using Applications.Features.Loans.Services;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Services.Loans;
 using Domains.Models.Identity;
-using Grpc.Core;
 using Radzen.Blazor;
 using TrapchumApp.Helpers.Extensions;
 

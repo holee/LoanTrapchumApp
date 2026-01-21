@@ -14,7 +14,7 @@ public sealed class NotificationDto
     public string? ReferenceId { get; set; }        // LoanId / PaymentId
     public string? Url { get; set; } = string.Empty;
     public bool IsRead { get; set; } = false;
-    public DateTime CreatedAt { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
     public string Icon => Type switch
     {
         "LoanRequest" => "account_balance",

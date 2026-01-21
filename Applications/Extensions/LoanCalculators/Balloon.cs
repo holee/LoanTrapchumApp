@@ -33,7 +33,7 @@ public sealed class Balloon : LoanCaloulator, ICalculator
             var totalDays = 0;
             var principal = PaidPrincipal(amount, circles);
 
-            DateTimeOffset? previusDate;
+            DateTime? previusDate = null;
 
             if (i == 1)
             {
@@ -138,7 +138,7 @@ public sealed class Balloon : LoanCaloulator, ICalculator
             var effAmount = 0.00M;
             var totalDays = 0;
             var principal = PaidPrincipal(_amount, circles);
-            DateTimeOffset? previusDate;
+            DateTime? previusDate = null;
             if (i == 1)
             {
                 previusDate = StartDate;
@@ -207,7 +207,7 @@ public sealed class Balloon : LoanCaloulator, ICalculator
         return schedules;
     }
    
-    public override List<ScheduleLine> Calculate(int? periodInMonth, decimal? monthlyRate, decimal? amount, DateTimeOffset? firstPayment=null)
+    public override List<ScheduleLine> Calculate(int? periodInMonth, decimal? monthlyRate, decimal? amount, DateTime? firstPayment=null)
     {
         var schedules = new List<ScheduleLine>();
 
@@ -241,7 +241,7 @@ public sealed class Balloon : LoanCaloulator, ICalculator
 
             var principal = PaidPrincipal(_amount, circles);
 
-            DateTimeOffset? previusDate;
+            DateTime? previusDate;
 
             if (i == 1)
             {

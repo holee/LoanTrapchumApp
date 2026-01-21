@@ -16,6 +16,7 @@
         }
         public static string DayFirst(this DateTime? dt)
         {
+            if (dt is null) return string.Empty;
             return string.Format("{0:dd/MM/yyyy}", dt);
         }
 
@@ -55,10 +56,10 @@
 
             var _second = DateOnly.FromDateTime(second ?? DateTime.Now);
 
-            return _first.CompareTo(_second)==0;
+            return _first.CompareTo(_second) == 0;
         }
-        
-        
+
+
         public static double Days(this DateTime? first, DateTime? second)
         {
             var _first = first ?? DateTime.Now;
@@ -66,11 +67,19 @@
             var _second = second ?? DateTime.Now;
 
             var timestampse = _second - _first;
-            
+
             return timestampse.TotalDays;
         }
 
         public static bool IsRecently(this DateTime? current)
+        {
+            if (!current.HasValue)
+                return false;
+            var timeSince = DateTime.UtcNow - current.Value.ToUniversalTime();
+            return timeSince.Minutes < 2;
+        }
+
+        public static bool IsRecently(this DateTimeOffset? current)
         {
             if (!current.HasValue)
                 return false;

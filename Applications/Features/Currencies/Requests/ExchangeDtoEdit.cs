@@ -2,7 +2,7 @@
 
 public sealed class ExchangeDtoEdit : ExchangeDtoCreate
 {
+    public long Id { get; set; } = 0;
     public string? TransactionId { get; set; }
     public DateTimeOffset? TransactionDate { get; set; }
-    public string? Remark { get; internal set; }
 }

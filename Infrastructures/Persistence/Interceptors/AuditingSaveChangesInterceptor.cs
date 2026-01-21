@@ -21,7 +21,7 @@ public sealed class AuditingSaveChangesInterceptor : SaveChangesInterceptor
         CancellationToken cancellationToken = default)
     {
 
-        var now = DateTime.Now;
+        var now = DateTimeOffset.UtcNow;
 
         var context = (DataContext)eventData.Context!;
 
@@ -80,7 +80,7 @@ public sealed class AuditingSaveChangesInterceptor : SaveChangesInterceptor
     }
 
 
-    private AuditEntry BuildAuditEntry(EntityEntry entry, DateTime now)
+    private AuditEntry BuildAuditEntry(EntityEntry entry, DateTimeOffset now)
     {
         var pk = entry.Properties
                      .Where(p => p.Metadata.IsPrimaryKey())
@@ -111,7 +111,7 @@ public sealed class AuditingSaveChangesInterceptor : SaveChangesInterceptor
         };
     }
 
-    private static void ApplyTimestamps(EntityEntry entry, DateTime now)
+    private static void ApplyTimestamps(EntityEntry entry, DateTimeOffset now)
     {
         switch (entry.Entity)
         {

@@ -45,11 +45,13 @@ public class EntityNamesConfiguration : IBaseEntityTypeConfigurations<Domains.Mo
         builder.Property(e => e.CreatedDt).HasDefaultValueSql("GETDATE()");
         builder.Property(e => e.ModifiedDt).HasDefaultValueSql("GETDATE()");
 
-        builder.HasOne(x => x.Customer).WithOne()
+        builder.HasOne(x => x.Customer)
+            .WithOne(x => x.EntityNames)
             .HasForeignKey<Customer>(x => x.CustomerId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasOne(x => x.Employee).WithOne(x => x.EntityNames)
+        builder.HasOne(x => x.Employee)
+            .WithOne(x => x.EntityNames)
             .HasForeignKey<Employee>(x => x.EmployeeId)
             .OnDelete(DeleteBehavior.Cascade);
 

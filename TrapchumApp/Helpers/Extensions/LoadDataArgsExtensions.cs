@@ -18,5 +18,21 @@
             return (sortColumns ?? "", false);
         }
 
+
+        public static (string FilterProperty, T? FilterValue) DataArgs<T>(this LoadDataArgs args)
+        {
+
+            if (!args.Filters.Any()) return (string.Empty, default(T));  
+
+            var filterDescriptor = args.Filters?.FirstOrDefault();
+
+            var filterProperty = filterDescriptor?.Property;
+
+            var filterValue = filterDescriptor?.FilterValue;
+
+            return (filterProperty ?? string.Empty, (T?)filterValue);
+
+        }
+
     }
 }

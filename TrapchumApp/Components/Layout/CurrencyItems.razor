@@ -7,9 +7,9 @@
 @using TrapchumApp.Services
 <RadzenPanelMenuItem Text="Currencies" Icon="money" Visible="IsBranchOpen">
     <RadzenPanelMenuItem Text="Currencies List" Icon="attach_money" Path="/App/Currencies" />
-    <RadzenPanelMenuItem Text="Currency Note" Icon="money" Path="@($"/App/Currencies/CurrencyCounter?BranchId={BranchId}")" />
-    <RadzenPanelMenuItem Text="Set Daily Spot Rate" Icon="mintmark" Path="/App/Currencies/SetDailySpotRate" />
-    <RadzenPanelMenuItem Text="Money Exchange" Icon="currency_exchange" Path="@($"/App/Currencies/Exchange/{BranchId}/Branches")" />
+    <RadzenPanelMenuItem Text="Currency Note" Icon="money" Path="@($"/App/Notes/CurrencyCounter?BranchId={BranchId}")" />
+    <RadzenPanelMenuItem Text="Set Daily Spot Rate" Icon="mintmark" Path="/App/SetDailySpotRates" />
+    <RadzenPanelMenuItem Text="Money Exchange" Icon="currency_exchange" Path="@($"/App/Exchanges/{BranchId}/Branches")" />
 </RadzenPanelMenuItem>
 @code {
     [Parameter] public string? UserId { get; set; } = string.Empty;

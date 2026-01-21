@@ -80,6 +80,8 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             await base.OnParametersSetAsync();
         }
 
+        string currencyFormat = "N2";
+
         async Task GetLoanRequest()
         {
 

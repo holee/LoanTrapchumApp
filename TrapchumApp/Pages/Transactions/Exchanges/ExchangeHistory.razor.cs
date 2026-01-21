@@ -1,6 +1,7 @@
 using Applications.Features.Currencies.Responses;
 using Applications.Interfaces.Transactions;
 using Applications.Responses.Paginations;
+using Radzen.Blazor;
 using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Transactions.Exchanges
@@ -25,7 +26,7 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
         private bool sortDescending = false;
         private DateTime? transactionDate = DateTime.UtcNow;
         string sortField = "TransactionDate";
-
+        private RadzenDataGrid<VttCurrencyExchanges> dataGrid = default!;
         protected override async Task OnInitializedAsync()
         {
 
@@ -87,7 +88,14 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
                 Width = "50rem"
             };
 
-            await DialogService.OpenAsync<MoneyExchanges>("Currency Exchange", param, options);
+            var dia = await DialogService.OpenAsync<MoneyExchanges>("Currency Exchange", param, options);
+
+            if (dia is VttCurrencyExchanges result && result is not null)
+            {
+                await dataGrid.InsertRow(result);
+
+                await dataGrid.Reload();
+            }
         }
 
         async Task ShowEditCurrencyDialogue(VttCurrencyExchanges cur)
@@ -103,7 +111,15 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
                 Width = "50rem"
             };
 
-            await DialogService.OpenAsync<MoneyExchangesEdit>("Currency Exchange", param, options);
+            var dia = await DialogService.OpenAsync<MoneyExchangesEdit>("Currency Exchange", param, options);
+
+            if(dia is VttCurrencyExchanges result && result is not null)
+            {
+                await dataGrid.UpdateRow(result);
+
+                await dataGrid.Reload();
+            }
+
         }
 
 

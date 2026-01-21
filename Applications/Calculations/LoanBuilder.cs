@@ -1,9 +1,9 @@
 ﻿using Applications.Enumerations;
 using Applications.Extensions.DateTimes;
 using Applications.Features.Loans.Requests;
-using Applications.Responses.ViewModels.Holidays;
 using Domains.Enumerations;
 using Domains.Models.Loans;
+using System.Security.Principal;
 
 namespace Applications.Calculations
 {
@@ -26,11 +26,11 @@ namespace Applications.Calculations
 
         decimal? _collectionFeeRate = 0;
 
-        DateTimeOffset? _firstPayment = DateTimeOffset.Now;
+        DateTime? _firstPayment = DateTime.Now;
 
-        DateTimeOffset? _startDate = DateTimeOffset.Now;
+        DateTime? _startDate = DateTime.UtcNow;
 
-        IEnumerable<HolidayVm> holidays = []; 
+        IEnumerable<HolidayVm> _holidays = [];
 
         decimal? _effectiveBalance = 0;
         public LoanBuilder(LoanDtoCreate req)
@@ -47,11 +47,11 @@ namespace Applications.Calculations
 
             _collectionFeeRate = req.CollectionFeeRate;// .effectiveRate;
 
-            _firstPayment = req.FirstPaymentDate ?? DateTimeOffset.Now;
+            _firstPayment = req.FirstPaymentDate ?? DateTime.Now;
 
-            _startDate = req.StartDate ?? DateTimeOffset.Now;
+            _startDate = req.StartDate ?? DateTime.UtcNow;
 
-            holidays = req.Holidays ?? [];
+            _holidays = req.Holidays ?? [];
 
             _sechuleMode = req.ScheduleMode;
         }
@@ -60,13 +60,13 @@ namespace Applications.Calculations
         {
             return _repaymentModeId switch
             {
-                1 => Balloon(req),
+                (int)RepaymentOption.Balloon => Balloon(req),
 
-                2 => Decline(req),
+                (int)RepaymentOption.Declined => Decline(req),
 
-                3 => Flat(req),
+                (int)RepaymentOption.IRR => Flat(req),
 
-                4 => Annurity(req),
+                (int)RepaymentOption.Annurity => Annurity(req),
 
                 _ => Flat(req)
             };
@@ -80,6 +80,12 @@ namespace Applications.Calculations
             paymentDate = FindValidDate(paymentDate);
         }
 
+        private void SetHoliday(ref DateTime? paymentDate)
+        {
+            if (paymentDate == null) return; // No date to process
+
+            paymentDate = FindValidDate(paymentDate);
+        }
 
 
         private static bool IsHolidayOrSunday(DateTime date, List<DateTime> holidays)
@@ -172,6 +178,39 @@ namespace Applications.Calculations
         }
 
 
+
+        private DateTime? FindValidDate(DateTime? date)
+        {
+            // Check if date is a Sunday or holiday
+            bool isInvalid = IsSunday(date) || IsHoliday(date);
+
+            // For Skip mode, return the original date regardless of validity
+            if (_sechuleMode == AdjustmentOption.Skip)
+            {
+                return date;
+            }
+
+            // Base case: Date is valid (not a Sunday or holiday)
+            if (!isInvalid)
+            {
+                return date;
+            }
+
+            // Recursive case: Adjust date based on schedule mode
+            DateTime? newDate = _sechuleMode switch
+            {
+                AdjustmentOption.Before => date!.Value.AddDays(-1),
+
+                AdjustmentOption.After => date!.Value.AddDays(1),
+
+                _ => throw new InvalidOperationException("Invalid schedule mode")
+            };
+
+            // Recursively check the new date
+            return FindValidDate(newDate);
+        }
+
+
         private bool IsSunday(DateTimeOffset date)
         {
             return date.DayOfWeek == DayOfWeek.Sunday;
@@ -179,7 +218,7 @@ namespace Applications.Calculations
 
         private bool IsHoliday(DateTimeOffset date)
         {
-            foreach (var holiday in holidays)
+            foreach (var holiday in _holidays)
             {
                 if (holiday.HolidayDt.HasValue &&
                     holiday.HolidayDt.Value.Date == date.DateTime.Date &&
@@ -190,8 +229,8 @@ namespace Applications.Calculations
             }
             return false;
         }
-       
-      
+
+
         private IEnumerable<ScheduleLine> Balloon(CalculatorBase req)
         {
             var schedules = new List<ScheduleLine>();
@@ -230,7 +269,7 @@ namespace Applications.Calculations
 
                 var principal = CalculatorExtensions.PaidPrincipal(_currencyId, _amount, circles);
 
-                DateTimeOffset? previusDate;
+                DateTime? previusDate;
 
                 if (i == 1)
                 {
@@ -339,13 +378,13 @@ namespace Applications.Calculations
 
             decimal beginBalance = 0, lastBalance = 0;
 
-            DateTimeOffset? paymentDate = _firstPayment;
+            DateTime? paymentDate = _firstPayment;
 
             beginBalance = lastBalance = amount;
 
             var effAmount = 0M;
 
-            DateTimeOffset? previusDate;
+            DateTime? previusDate;
 
             _effectiveBalance = req.Principle ?? 0.00M;
 
@@ -442,7 +481,7 @@ namespace Applications.Calculations
 
             decimal beginBalance = 0, lastBalance = 0;
 
-            DateTimeOffset? paymentDate = _firstPayment;
+            DateTime? paymentDate = _firstPayment;
 
             beginBalance = lastBalance = req.Principle!.Value;
 
@@ -464,7 +503,7 @@ namespace Applications.Calculations
 
                 beginBalance = lastBalance;
 
-                DateTimeOffset? previusDate;
+                DateTime? previusDate;
 
                 if (i == 1)
                 {
@@ -550,25 +589,23 @@ namespace Applications.Calculations
 
             int period = req.Installments ?? 0;
 
-            decimal _amount = req.Principle ?? 0.00M;
+            decimal loanAmount = req.Principle ?? 0.00M;
 
             decimal rate = req.InterestRate ?? 0;
 
-            var principalPaid = CalculatorExtensions.PaidPrincipal(_currencyId, _amount, period);
+            var principalPaid = CalculatorExtensions.PaidPrincipal(_currencyId, loanAmount, period);
 
-            var _collectionFeeAmount = 0M;
+            var collectionFeeAmount = 0M;
 
             decimal beginBalance = 0, lastBalance = 0;
 
-            DateTimeOffset? paymentDate = _firstPayment;
+            DateTime? paymentDate = _firstPayment;
 
-            beginBalance = lastBalance = _amount;
+            beginBalance = lastBalance = loanAmount;
 
             _effectiveBalance = req.Principle ?? 0.00M;
 
-
             int scheduleNum = 1;
-
 
             for (int i = 1; i <= period; i++)
             {
@@ -580,7 +617,7 @@ namespace Applications.Calculations
 
                 beginBalance = lastBalance;
 
-                DateTimeOffset? previusDate;
+                DateTime? previusDate;
 
                 if (i == 1)
                 {
@@ -607,17 +644,17 @@ namespace Applications.Calculations
                         _effectiveBalance = lastBalance;
                     }
 
-                    _collectionFeeAmount = CalculatorExtensions.CollectionFee(_currencyId, _effectiveBalance, _collectionFeeRate, totalDays);
+                    collectionFeeAmount = CalculatorExtensions.CollectionFee(_currencyId, _effectiveBalance, _collectionFeeRate, totalDays);
                 }
 
                 if (_collectionFeeModeId == (int)EffectiveEnum.Declined)
                 {
-                    _collectionFeeAmount = CalculatorExtensions.CollectionFee(_currencyId, beginBalance, _collectionFeeRate, totalDays);
+                    collectionFeeAmount = CalculatorExtensions.CollectionFee(_currencyId, beginBalance, _collectionFeeRate, totalDays);
                 }
 
                 interest = CalculatorExtensions.Interest(_currencyId, beginBalance, rate, totalDays);
 
-                totalPay = CalculatorExtensions.TotalPay(principalPaid, interest, _collectionFeeAmount);
+                totalPay = CalculatorExtensions.TotalPay(principalPaid, interest, collectionFeeAmount);
 
                 if (i < period)
                 {
@@ -637,7 +674,7 @@ namespace Applications.Calculations
                 }
 
 
-                ScheduleLine line = new ScheduleLine()
+                ScheduleLine line = new ScheduleLine
                 {
                     InstallmentNo = i,
                     PaymentDate = paymentDate,
@@ -646,7 +683,7 @@ namespace Applications.Calculations
                     TotalDay = totalDays,
                     TotalPay = totalPay,
                     OutStanding = lastBalance,
-                    CollectionFeeAmount = _collectionFeeAmount,
+                    CollectionFeeAmount = collectionFeeAmount,
                     BranchId = req.BranchId,
                     ScheduleNum = scheduleNum,
                     CreditAgentRefId = req.CreditAgentRefId,
@@ -677,14 +714,26 @@ namespace Applications.Calculations
             return value.DayOfWeek == DayOfWeek.Sunday;
         }
 
+        private bool IsSunday(DateTime? date)
+        {
+            var value = date ?? DateTime.Now;
+
+            return value.DayOfWeek == DayOfWeek.Sunday;
+        }
 
         private bool IsHoliday(DateTimeOffset? paymentDate)
         {
             var value = paymentDate.DayNum();
-            return holidays.Any(x => x.HolidayDt.HasValue && x.HolidayDt == paymentDate && x.HolidayNum == value);
+            return _holidays.Any(x => x.HolidayDt.HasValue && x.HolidayDt == paymentDate && x.HolidayNum == value);
         }
 
+        private bool IsHoliday(DateTime? paymentDate)
+        {
+            var value = paymentDate.DayNum();
 
+            return _holidays.Any(x => x.HolidayDt.HasValue && x.HolidayDt == paymentDate && x.HolidayNum == value);
+       
+        }
         private DateTimeOffset? SetPaymentDate(DateTimeOffset? date)
         {
             return _installmentTypeId switch
@@ -697,6 +746,17 @@ namespace Applications.Calculations
             };
         }
 
+        private DateTime? SetPaymentDate(DateTime? date)
+        {
+            return _installmentTypeId switch
+            {
+                1 => date!.Value.AddMonths(1),
+                2 => date!.Value.AddDays(14),
+                3 => date!.Value.AddDays(7),
+                4 => date!.Value.AddDays(1),
+                _ => DateTime.Now,
+            };
+        }
 
     }
 }

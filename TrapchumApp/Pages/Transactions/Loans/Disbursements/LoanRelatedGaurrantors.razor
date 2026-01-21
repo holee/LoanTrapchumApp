@@ -1,14 +1,15 @@
 ﻿@using Applications.Features.Loans.Queries.GetLoanRelatedGuarantors
 @using Applications.Features.Loans.Responses
+@using TrapchumApp.Pages.Lists
 <RadzenDataGrid Data="@_loanGaurantors"
-                TItem="VLoanGuarantors"
+                TItem="VLoanDisbursementGuarantors"
                 AllowAlternatingRows="true"
-                GridLines="DataGridGridLines.Default"
-                AllowFiltering="true"
+                GridLines="DataGridGridLines.Both"
+                AllowFiltering="false"
                 Density="Density.Compact"
-                AllowPaging="true"
+                AllowPaging="false"
                 PageSize="10"
-                AllowSorting="true"
+                AllowSorting="false"
                 Responsive="true"
                 RowRender="@OnRowRender"
                 Class="rz-mt-2">
@@ -38,7 +39,20 @@
                               Property="@nameof(VLoanGuarantors.Address)"
                               Title="Address">
             <Template>
-                @context.Address
+                <AddressInformation>
+                    <ProInKhmer>
+                        @context.ProInKhmer
+                    </ProInKhmer>
+                    <DisInKhmer>
+                        @context.DisInKhmer
+                    </DisInKhmer>
+                    <ComInKhmer>
+                        @context.ComInKhmer
+                    </ComInKhmer>
+                    <VilInKhmer>
+                        @context.VilInKhmer
+                    </VilInKhmer>
+                </AddressInformation>
             </Template>
         </RadzenDataGridColumn>
     </Columns>
@@ -47,9 +61,11 @@
     [Parameter] public string LoanId { get; set; } = string.Empty;
     [Parameter] public int? BranchId { get; set; } = 0;
 
-    private IEnumerable<VLoanGuarantors> _loanGaurantors = Array.Empty<VLoanGuarantors>();
+    private string[] _address = [];
 
-    void OnRowRender(RowRenderEventArgs<VLoanGuarantors> args)
+    private IEnumerable<VLoanDisbursementGuarantors> _loanGaurantors = Array.Empty<VLoanDisbursementGuarantors>();
+
+    void OnRowRender(RowRenderEventArgs<VLoanDisbursementGuarantors> args)
     {
         args.Data.RowIndex = args.Index + 1;
     }

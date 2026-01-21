@@ -3,7 +3,7 @@
 @using TrapchumApp.Pages.Transactions.Loans.Repayments
 <PageTitle>Loan Details</PageTitle>
 <LoanInfos LoanSchedule="@loanSchedule" Currency="@CurrencyId" LoanId="@LoanId" BranchId="@BranchId" />
-<RadzenTabs Change="SelectedTabChanged" RenderMode="TabRenderMode.Server" SelectedIndex="@_selectedTabIndex">
+<RadzenTabs Change="SelectedTabChanged" RenderMode="TabRenderMode.Server" @bind-SelectedIndex="@_selectedTabIndex">
     <Tabs>
         <RadzenTabsItem Text="Schedule" Icon="schedule">
             <RadzenDataGrid Data="@Schedules"
@@ -165,7 +165,11 @@
             @foreach (var s in _loanSchedules ?? [])
             {
                 <RadzenCard Variant="Variant.Outlined" class="rz-my-2">
-                    <SplitSchedule LoanSchedule="@s" BranchId="@BranchId" LoanId="@LoanId" ScheduleNum="@s.ScheduleNum" />
+                    <SplitSchedule LoanSchedule="@s" 
+                        BranchId="@BranchId" 
+                        LoanId="@LoanId" 
+                        TotalScedules="@_loanSchedules!.Count()"
+                        ScheduleNum="@s.ScheduleNum" />
                 </RadzenCard>
 
             }

@@ -8,15 +8,15 @@ public abstract class LoanCaloulator : ICalculator
     {
         PayEvery = 1;
         EffectiveRate = 0;
-        FirstPayment = DateTimeOffset.UtcNow;
-        StartDate = DateTimeOffset.UtcNow;
+        FirstPayment = DateTime.UtcNow;
+        StartDate = DateTime.UtcNow;
         CollectionFeeMode = 1;
         Day = 30;
         CurrencyId = 1;
         InstallmentTypeId = 1;
     }
     public LoanCaloulator(int payEvery, decimal effectiveRate, int collectionFeeMode, int day,
-        int currencyId, int installmentTypeId, DateTimeOffset? firstPayment, DateTimeOffset? startDate)
+        int currencyId, int installmentTypeId, DateTime? firstPayment, DateTime? startDate)
     {
         PayEvery = payEvery;
         EffectiveRate = effectiveRate;
@@ -30,8 +30,8 @@ public abstract class LoanCaloulator : ICalculator
 
     public int PayEvery { get; set; }
     public decimal EffectiveRate { get; set; } = 0;
-    public DateTimeOffset? FirstPayment { get; set; }
-    public DateTimeOffset? StartDate { get; set; }
+    public DateTime? FirstPayment { get; set; }
+    public DateTime? StartDate { get; set; }
     public int CollectionFeeMode { get; set; } = 1;
     public int Day { get; set; } = 30;
     public int CurrencyId { get; set; } = 1;
@@ -97,7 +97,7 @@ public abstract class LoanCaloulator : ICalculator
         return dateDiff.Days;
 
     }
-    protected DateTimeOffset SetPaymentDate(DateTimeOffset? date)
+    protected DateTime SetPaymentDate(DateTime? date)
     {
         return InstallmentTypeId switch
         {
@@ -105,7 +105,7 @@ public abstract class LoanCaloulator : ICalculator
             2 => date!.Value.AddDays(14),
             3 => date!.Value.AddDays(7),
             4 => date!.Value.AddDays(1),
-            _ => DateTimeOffset.UtcNow,
+            _ => DateTime.UtcNow,
         };
     }
     private bool IsSunday(DateTimeOffset? date)
@@ -119,7 +119,7 @@ public abstract class LoanCaloulator : ICalculator
         return days == 0;
 
     }
-    public void SetHoliday(ref DateTimeOffset? paymentDate)
+    public void SetHoliday(ref DateTime? paymentDate)
     {
         foreach (var holiday in Holidays)
         {
@@ -135,6 +135,6 @@ public abstract class LoanCaloulator : ICalculator
     }
     public abstract List<ScheduleLine> Calculate(int periodInMonth, decimal monthlyRate, decimal amount);
     public abstract List<ScheduleLine> Calculate(int? periodInMonth, decimal? monthlyRate, decimal? amount);
-    public abstract List<ScheduleLine> Calculate(int? periodInMonth, decimal? monthlyRate, decimal? amount, DateTimeOffset? firstPayment=null);
+    public abstract List<ScheduleLine> Calculate(int? periodInMonth, decimal? monthlyRate, decimal? amount, DateTime? firstPayment = null);
 
 }

@@ -1,8 +1,8 @@
+using Applications.Features.Guarantor.Dtos;
 using Applications.Features.OtherNames;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.OtherNames;
 using Applications.Services.Lists;
-using Radzen.Blazor; 
+using Radzen.Blazor;
 
 namespace TrapchumApp.Pages.Lists.OtherNames
 {

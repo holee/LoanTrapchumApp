@@ -1,7 +1,6 @@
-﻿@page "/App/Loan/{LoanId}/Customer/{CustomerId}/WriteOff"
+﻿@page "/App/Loans/Disbursements/{BranchId:int}/Write-Off"
 @using TrapchumApp.Pages.Transactions.Loans.Disbursements
 <PageTitle>Loan Write Off</PageTitle>
-<PageTitle>Loan Pay Off</PageTitle>
 <RadzenTabs>
     <Tabs>
         <RadzenTabsItem Text="All">
@@ -13,17 +12,14 @@
                 </ChildMenu>
             </AllLoansTab>
         </RadzenTabsItem>
-        <RadzenTabsItem Text="Some">
-
-        </RadzenTabsItem>
     </Tabs>
 </RadzenTabs>
 @code {
     [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
     [CascadingParameter] CascadingAppState bState { get; set; } = default!;
-    [Parameter, SupplyParameterFromQuery] public int BranchId { get; set; }
-    [Parameter] public string? LoanId { get; set; } = string.Empty;
-    [Parameter] public string? CustomerId { get; set; } = string.Empty;
+    [Parameter] public int BranchId { get; set; }
+    [Parameter, SupplyParameterFromQuery] public string? LoanId { get; set; } = string.Empty;
+    [Parameter, SupplyParameterFromQuery] public string? CustomerId { get; set; } = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {

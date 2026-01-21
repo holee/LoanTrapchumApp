@@ -6,14 +6,13 @@ namespace TrapchumApp.Services
     public class ExcelExportService(IWebHostEnvironment env)
     {
 
-        public MemoryStream? ScheduleExportAll(
-            VLoanDisbursments? LoanSchedule,
-            List<VSchedule>? schedule,
-            string? sheetName = "Loan Schedule"
+        public MemoryStream? ScheduleExportAll(VLoanDisbursments? LoanSchedule,List<VSchedule>? schedule,string? sheetName = "Loan Schedule"
             )
         {
             if (schedule == null) return null;
+
             var logoPath = Path.Combine(env.WebRootPath, "");
+
             try
             {
                 using var workbook = new XLWorkbook();

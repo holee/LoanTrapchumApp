@@ -30,6 +30,10 @@
                                   Click="@AddCollateral"
                                   Text="Add Collateral" />
                 </LeftChildren>
+                <RightChildren>
+                    <TrapchumCheckbox @bind-Value="@_isUsedOnly" Title="Loan Active" />
+                    <TrapchumCheckbox @bind-Value="@_isUsedOnly" Title="Is Use Only" />
+                </RightChildren>
             </GridToolbar>
             <RadzenDataGrid Responsive
                             GridLines="DataGridGridLines.Horizontal"
@@ -47,7 +51,11 @@
                             TItem="VCollateralLines"
                             RowRender="@OnRowRender"
                             LoadData="@OnLoadData"
+                             AllowColumnPicking="true"
                             Data="@_CollateralLines">
+                <HeaderTemplate>
+
+                </HeaderTemplate>
                 <Columns>
                     <RadzenDataGridColumn Width="5rem" TextAlign="TextAlign.Center"
                                           Title="#" Property="@nameof(VCollateralLines.Id)" Context="c">
@@ -58,12 +66,14 @@
                     <RadzenDataGridColumn Property="@nameof(VCollateralLines.CollateralNo)" Title="CollateralNo" />
                     <RadzenDataGridColumn Property="@nameof(VCollateralLines.OwnerName)" Title="Owner Name" />
                     <RadzenDataGridColumn Property="@nameof(VCollateralLines.TypeName)" Title="Type Name" />
-                    <RadzenDataGridColumn Property="@nameof(VCollateralLines.RegisterDate)" Title="Register Date" Context="c">
+                    <RadzenDataGridColumn Visible="false"
+                                          Property="@nameof(VCollateralLines.RegisterDate)" Title="Register Date" Context="c">
                         <Template>
                             @c.RegisterDate.DayFirst()
                         </Template>
                     </RadzenDataGridColumn>
-                    <RadzenDataGridColumn Property="@nameof(VCollateralLines.Description)" Title="Remark" />
+                    <RadzenDataGridColumn Visible="false"
+                                          Property="@nameof(VCollateralLines.Description)" Title="Remark" />
                     <RadzenDataGridColumn Property="@nameof(VCollateralLines.IsUsed)" Title="Used">
                         <Template Context="c">
                             <RadzenCheckBox Value="@c.IsUsed" ReadOnly />
@@ -75,14 +85,13 @@
                                           Property="@nameof(VCollateralLines.HotPrice)" Title="Hot Price" />
                     <RadzenDataGridColumn TextAlign="TextAlign.Right"
                                           Property="@nameof(VCollateralLines.PawnPrice)" Title="Pawn Price" />
+                    <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                          Property="@nameof(VCollateralLines.LoanStatus)" Title="Loan" />
                     <RadzenDataGridColumn Width="6rem"
                                           TextAlign="TextAlign.Center"
                                           Property="@nameof(VCollateralLines.CollateralId)" Title="Action" Context="c">
                         <Template>
-                            <RadzenButton Size="ButtonSize.ExtraSmall"
-                                          Icon="more_vert"
-                                          Variant="Variant.Text"
-                                          Click="@((args)=>ShowContextMenuWithContent(args,c))" />
+                            <ActionButton ButtonClick="@((args) => ShowContextMenuWithContent(args, c))" />
                         </Template>
                     </RadzenDataGridColumn>
                 </Columns>
@@ -107,7 +116,7 @@
     </Tabs>
 </RadzenTabs>
 @code {
-
+    private bool _isUsedOnly = false;
     private RadzenTabs? tabs;
     private int selectedIndex = 0;
     private List<DynamicTab> _tabs = new();

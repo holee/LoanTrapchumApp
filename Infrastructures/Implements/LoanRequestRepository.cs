@@ -33,8 +33,6 @@ public sealed class LoanRequestRepository(
 {
     public async Task<ErrorOr<RequestResult>> CreateNewLoanRequestAsync(LoanRequest req, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(req, nameof(req));
-
         logger.LogInformation("Creating loan request for CustomerRefId: {CustomerRefId}", req.CustomerRefId);
 
         await using var cxt = await contextFactory.CreateDbContextAsync();
@@ -122,7 +120,6 @@ public sealed class LoanRequestRepository(
                     }
                 }
 
-
             }
 
             AddNotification(cxt, req, NotificationType.Request);
@@ -147,8 +144,6 @@ public sealed class LoanRequestRepository(
 
     public async Task<ErrorOr<RequestResult>> SaveLoanRequestAsync(LoanRequest req, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(req, nameof(req));
-
         logger.LogInformation("Creating loan request for CustomerRefId: {CustomerRefId}", req.CustomerRefId);
         try
         {
@@ -1011,6 +1006,7 @@ public sealed class LoanRequestRepository(
             var documentsTask = GetLoanDocuments(loanRequestId, branchId);
             var descriptionsTask = GetLoanRequestDescriptions(loanRequestId);
             var customerTask = GetLoanCustomer(customerId);
+          
             await Task.WhenAll(guarantorsTask, collateralsTask, documentsTask, descriptionsTask, customerTask);
 
             resultQueries.Guarantors = guarantorsTask.Result.ToList();
@@ -1038,35 +1034,29 @@ public sealed class LoanRequestRepository(
 
     public async Task<ErrorOr<LoanRequest>> GetEditLoanRequestAsync(int? branchId, string? customerId, string? loanRequestId, CancellationToken cancellation = default)
     {
-        try
+        await using var ctx = await contextFactory.CreateDbContextAsync(cancellation);
+
+        var existingRequest = await ctx.LoanRequests
+           .Include(x => x.Customer)
+                .ThenInclude(x => x!.EntityNames)
+           .Include(c => c.CollateralLinesLink)
+               .ThenInclude(x => x.CollateralLine)
+           .Include(g => g.GuarantorsLink)
+               .ThenInclude(x => x.Guarantor)
+           .Include(x => x.LoanDocuments)
+           .Include(x => x.LoanDescriptions)
+           .FirstOrDefaultAsync(x => x.LoanRequestId == loanRequestId &&
+                       x.CustomerRefId == customerId &&
+                       x.BranchRefId == branchId &&
+                       (x.LoanRequestStatusRefId == (int)RequestStatus.New ||
+                       x.LoanRequestStatusRefId == (int)RequestStatus.Rechecked), cancellation);
+
+
+        if (existingRequest is null)
         {
-            await using var ctx = await contextFactory.CreateDbContextAsync(cancellation);
-
-            var existingRequest = await ctx.LoanRequests
-               .Include(c => c.CollateralLinesLink)
-                   .ThenInclude(x => x.CollateralLine)
-               .Include(g => g.GuarantorsLink)
-                   .ThenInclude(x => x.Guarantor)
-               .Include(x => x.LoanDocuments)
-               .Include(x => x.LoanDescriptions)
-               .FirstOrDefaultAsync(x => x.LoanRequestId == loanRequestId &&
-                           x.CustomerRefId == customerId &&
-                           x.BranchRefId == branchId &&
-                           (x.LoanRequestStatusRefId == (int)RequestStatus.New ||
-                           x.LoanRequestStatusRefId == (int)RequestStatus.Rechecked), cancellation);
-
-
-            if (existingRequest is null)
-            {
-                return Error.NotFound("No Data not found.");
-            }
-            return existingRequest;
-
+            return Error.NotFound("No Data not found.");
         }
-        catch (Exception ex)
-        {
-            return Error.Unexpected($"{ex.Message}");
-        }
+        return existingRequest;
     }
 
 

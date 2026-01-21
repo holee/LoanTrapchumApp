@@ -2,7 +2,6 @@ using Applications.Enumerations;
 using Applications.Extensions;
 using Applications.Features.Loans.Queries.GetLoanById;
 using Applications.Features.Loans.Responses;
-using Applications.Features.Loans.Services;
 using Microsoft.JSInterop;
 using TrapchumApp.Helpers.Extensions;
 using TrapchumApp.Pages.Transactions.Loans.Repayments;
@@ -12,12 +11,10 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 {
     public partial class LoanInfos
     {
-        private readonly ILoanServiceImpl _loanService;
         private readonly ExcelExportService _excelExportService;
 
-        public LoanInfos(ILoanServiceImpl loanService, ExcelExportService excelExportService)
+        public LoanInfos(ExcelExportService excelExportService)
         {
-            _loanService = loanService;
             _excelExportService = excelExportService;
         }
 
@@ -25,6 +22,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
         [Parameter] public string? LoanId { get; set; } = string.Empty;
         [Parameter] public int BranchId { get; set; } = 1;
         [Parameter] public int? Currency { get; set; } = 1;
+
         private bool showLoader = false;
         private async Task DownLoadScheduleAsExcel()
         {
@@ -59,8 +57,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 
         protected override async Task OnInitializedAsync()
         {
-            if (LoanId.IsNotNullOrEmpty() && BranchId > 0
-                && LoanSchedule!.LoanId.IsNullOrEmpty())
+            if (LoanId.IsNotNullOrEmpty() && BranchId > 0 && LoanSchedule!.LoanId.IsNullOrEmpty())
             {
                 await GetLoanWithSchedules(BranchId, LoanId);
             }
@@ -74,7 +71,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 
             var query = new GetLoanByIdQuery(loanId, BranchId, ScheduleStatus.All, false);
 
-            var rsp = await mediator.Send(query);  //_loanService.GetLoanByIdAsync(query);
+            var rsp = await mediator.Send(query);
 
             if (!rsp.IsSuccess())
             {

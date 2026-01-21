@@ -1,12 +1,8 @@
-﻿using Applications.Features.Loans.Responses;
-using Applications.Interfaces.Loans;
-using Applications.Utils;
+﻿namespace Applications.Features.Loans.Queries.GetLoanRelatedGuarantors;
 
-namespace Applications.Features.Loans.Queries.GetLoanRelatedGuarantors;
-
-public sealed class GetLoanRelatedGuarantorsQueryHandler(ILoanService loanService) : IRequestHandler<GetLoanRelatedGuarantorsQuery, IEnumerable<VLoanGuarantors>>
+public sealed class GetLoanRelatedGuarantorsQueryHandler(ILoanService loanService) : IRequestHandler<GetLoanRelatedGuarantorsQuery, IEnumerable<VLoanDisbursementGuarantors>>
 {
-    public async Task<IEnumerable<VLoanGuarantors>> Handle(GetLoanRelatedGuarantorsQuery request, CancellationToken cancellationToken)
+    public async Task<IEnumerable<VLoanDisbursementGuarantors>> Handle(GetLoanRelatedGuarantorsQuery request, CancellationToken cancellationToken)
     {
         return await loanService.GetRelatedGaurantors(request.LoanId, request.BranchId, cancellationToken);
     }

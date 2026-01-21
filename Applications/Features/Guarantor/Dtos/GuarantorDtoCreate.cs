@@ -1,4 +1,4 @@
-﻿namespace Applications.Features.Entities.Guarantors;
+﻿namespace Applications.Features.Guarantor.Dtos;
 
 public class GuarantorDtoCreate
 {

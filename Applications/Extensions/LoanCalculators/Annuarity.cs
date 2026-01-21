@@ -1,11 +1,12 @@
 ﻿using Domains.Models.Loans;
 using Microsoft.VisualBasic;
 namespace Applications.Extensions.LoanCalculators;
+
 public sealed class Annuarity : LoanCaloulator, ICalculator
 {
     public Annuarity() : base()
     {
-         
+
     }
     public Annuarity(int payEvery, decimal effectiveRate, int collectionFeeMode, int day,
         int currencyId, int installmentTypeId, DateTime firstPayment, DateTime startDate)
@@ -33,7 +34,7 @@ public sealed class Annuarity : LoanCaloulator, ICalculator
 
         decimal beginBalance = 0, lastBalance = 0;
 
-        DateTimeOffset? paymentDate = FirstPayment;
+        DateTime? paymentDate = FirstPayment;
 
         beginBalance = lastBalance = amount;
 
@@ -51,7 +52,7 @@ public sealed class Annuarity : LoanCaloulator, ICalculator
 
             beginBalance = lastBalance;
 
-            DateTimeOffset? previusDate;
+            DateTime? previusDate = null;
 
             if (i == 1)
             {
@@ -120,7 +121,7 @@ public sealed class Annuarity : LoanCaloulator, ICalculator
 
         decimal beginBalance = 0, lastBalance = 0;
 
-        DateTimeOffset? paymentDate = FirstPayment;
+        DateTime? paymentDate = FirstPayment;
 
         beginBalance = lastBalance = amount!.Value;
 
@@ -133,7 +134,7 @@ public sealed class Annuarity : LoanCaloulator, ICalculator
             var totalDays = 0;
             var principal = 0.00M;
             beginBalance = lastBalance;
-            DateTimeOffset? previusDate;
+            DateTime? previusDate;
             if (i == 1)
             {
                 previusDate = StartDate;
@@ -195,9 +196,9 @@ public sealed class Annuarity : LoanCaloulator, ICalculator
 
         return loanScheduleLines;
     }
-   
-    
-    public override List<ScheduleLine> Calculate(int? periodInMonth, decimal? monthlyRate, decimal? amount, DateTimeOffset? firstPayment)
+
+
+    public override List<ScheduleLine> Calculate(int? periodInMonth, decimal? monthlyRate, decimal? amount, DateTime? firstPayment)
     {
         List<ScheduleLine> loanScheduleLines = [];
 
@@ -205,7 +206,7 @@ public sealed class Annuarity : LoanCaloulator, ICalculator
 
         decimal beginBalance = 0, lastBalance = 0;
 
-        DateTimeOffset? paymentDate = firstPayment;
+        DateTime? paymentDate = firstPayment;
 
         beginBalance = lastBalance = amount!.Value;
 
@@ -223,7 +224,7 @@ public sealed class Annuarity : LoanCaloulator, ICalculator
 
             beginBalance = lastBalance;
 
-            DateTimeOffset? previusDate;
+            DateTime? previusDate = null;
 
             if (i == 1)
             {

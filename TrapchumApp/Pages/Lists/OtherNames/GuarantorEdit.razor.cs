@@ -1,10 +1,7 @@
 using Applications.Extensions;
-using Applications.Features.OtherNames;
+using Applications.Features.Guarantor.Dtos;
 using Applications.Services.Lists;
 using Domains.Models.Lists;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
-using Radzen;
 
 namespace TrapchumApp.Pages.Lists.OtherNames
 {
@@ -25,7 +22,7 @@ namespace TrapchumApp.Pages.Lists.OtherNames
         [Parameter] public string? NameId { get; set; }
         [Parameter] public EntityGuarantorCreate model { get; set; } = new();
         [Parameter] public IEnumerable<string> Salutations { get; set; } = [];
-        [Parameter] public EventCallback<int> Closing { get; set; }
+        [Parameter] public EventCallback ClosedTab { get; set; }
 
         protected string? newSalution = "";
 
@@ -56,6 +53,7 @@ namespace TrapchumApp.Pages.Lists.OtherNames
                 if (resultResponse.IsSuccess)
                 {
                     NotificationService.Notify(NotificationSeverity.Success, resultResponse.Data);
+                   
                     await TabClosing();
                 }
                 else
@@ -84,7 +82,7 @@ namespace TrapchumApp.Pages.Lists.OtherNames
 
         async Task TabClosing()
         {
-            await Closing.InvokeAsync(2);
+            await ClosedTab.InvokeAsync();
         }
 
 

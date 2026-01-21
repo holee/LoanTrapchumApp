@@ -1,0 +1,26 @@
+﻿@using Applications.Features.Addresses
+@using Applications.Features.Branches
+@using Applications.Features.Currencies
+@using Applications.Features.Customers.Services
+@using Applications.Features.Employees
+@using Applications.Features.LoanRequests.Interfaces
+<div class="address">
+    <span class="province">
+        @ProInKhmer
+    </span>
+    <span class="district">
+        @DisInKhmer
+    </span>
+    <span class="commune">
+        @ComInKhmer
+    </span>
+    <span class="village">
+        @VilInKhmer
+    </span>
+</div>
+@code {
+    [Parameter] public RenderFragment? ProInKhmer { get; set; } = null;
+    [Parameter] public RenderFragment? DisInKhmer { get; set; } = null;
+    [Parameter] public RenderFragment? ComInKhmer { get; set; } = null;
+    [Parameter] public RenderFragment? VilInKhmer { get; set; } = null;
+}

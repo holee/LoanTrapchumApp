@@ -1,9 +1,12 @@
-﻿using Applications.Features.Loans.Requests;
+﻿using Applications.Enumerations;
+using Applications.Extensions.Enums;
+using Applications.Features.Loans.Requests;
 using Domains.Models.Loans;
+using Domains.Models.Transaction;
 
 namespace Applications.Features.Loans.Mappers;
 
-public static class LoanDtoCreateMapper 
+public static class LoanDtoCreateMapper
 {
     public static LoanDisbursment MapLoanCreate(this LoanDtoCreate dto)
     {
@@ -26,13 +29,13 @@ public static class LoanDtoCreateMapper
             PeriodName = dto.PeriodName,
             CurrencyRefId = dto.CurrencyRefId,
             PenaltyRate = dto.PenaltyRate,
-            StartDate = dto.StartDate?.UtcDateTime,
-            FirstPaymentDate = dto.FirstPaymentDate?.UtcDateTime,
-            LastPaymentDate = dto.LastPaymentDate?.UtcDateTime,
+            StartDate = dto.StartDate,
+            FirstPaymentDate = dto.FirstPaymentDate,
+            LastPaymentDate = dto.LastPaymentDate,
             TermTypeId = dto.TermTypeId,
             InstallmentTypeId = dto.InstallmentTypeId,
             CustomerRefId = dto.CustomerRefId,
-            RegisterDate = dto.RegisterDate?.UtcDateTime ?? DateTime.UtcNow,
+            RegisterDate = dto.RegisterDate ?? DateTime.UtcNow,
             PayEvery = dto.PayEvery,
             AdminFeeRate = dto.AdminFeeRate,
             AdminFeeAmount = dto.AdminFeeAmount,
@@ -43,11 +46,20 @@ public static class LoanDtoCreateMapper
             Circle = dto.Circle,
             RepaymentModeRefId = dto.RepaymentModeRefId,
             InterestRate = dto.InterestRate,
-            LoanSchedules = dto.LoanSchedules?.MapScedules()
+            LoanSchedules = dto.LoanSchedules?.MapScedules(),
+            LoanTransaction = new LoanTransaction
+            {
+                TransactionsId = $"trx-{Guid.CreateVersion7()}",
+                BranchRefId = dto.BranchId,
+                TransactionDate = DateTime.UtcNow,
+                TransactionTypeName = TransactionTypes.LD.Description(),
+                TranTypeRefId = (int)TransactionTypes.LD,
+                UserRefId = dto.UserRefId
+            }
         };
     }
 
-    
+
     public static LoanSchedule MapSchedule(this LoanScheduleDtoCreate s)
     {
         return new LoanSchedule
@@ -80,12 +92,12 @@ public static class LoanDtoCreateMapper
             CollectionFee = s.CollectionFee,
             PaymentDate = s.PaymentDate,
             ScheduleNum = s.ScheduleNum,
-            ScheduleStatusRefId =  s.ScheduleStatusRefId,
-            TotalDay = s.TotalDay, 
+            ScheduleStatusRefId = s.ScheduleStatusRefId,
+            TotalDay = s.TotalDay,
             TotalPay = s.TotalPay,
             LoanOutstanding = s.LoanOutstanding
         }).ToList();
-        
+
 
     }
 }

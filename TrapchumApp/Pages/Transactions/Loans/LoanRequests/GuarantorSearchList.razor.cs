@@ -1,11 +1,11 @@
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.OtherNames;
 using Applications.Services.Lists;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using Microsoft.AspNetCore.Components.Web;
 using Radzen.Blazor;
 using Radzen.Blazor.Rendering;
+using Applications.Features.Guarantor.Dtos;
 
 namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 {

@@ -50,12 +50,15 @@ namespace Infrastructures.DataAccess.Configurations.LoanDisbursements
             builder.Property(x => x.LastPaymentDate).HasColumnType("DATE");
             builder.Property(x => x.TransactionsRefId).HasMaxLength(250);
             builder.Property(x => x.LoanRequestId).HasMaxLength(250);
+           
             builder.HasMany(x => x.LoanSchedules)
                     .WithOne()
                     .HasForeignKey(x => x.LoanRefId);
+
             builder.HasOne(x => x.LoanRequest)
                    .WithOne()
                    .HasForeignKey<LoanDisbursment>(x => x.LoanRequestId);
+
             builder.HasOne(x => x.LoanTransaction)
                 .WithOne()
                 .HasForeignKey<LoanDisbursment>(x => x.TransactionsRefId);

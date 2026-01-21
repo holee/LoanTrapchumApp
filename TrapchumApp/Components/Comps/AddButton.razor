@@ -1,0 +1,19 @@
+﻿<RadzenButton Size="ButtonSize.Small"
+              Text="@Title"
+              Click="@HandleClick"
+              ButtonStyle="ButtonStyle.Primary"
+              Icon="@IconNames.Add"></RadzenButton>
+@code {
+    [Parameter]
+    public string Title { get; set; } = "Add";
+    [Parameter]
+    public EventCallback OnClick { get; set; }
+
+    private void HandleClick()
+    {
+        if (OnClick.HasDelegate)
+        {
+            OnClick.InvokeAsync();
+        }
+    }
+}

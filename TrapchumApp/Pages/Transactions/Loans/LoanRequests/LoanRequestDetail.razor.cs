@@ -5,11 +5,13 @@ using Applications.Features.LoanRequests.Command.AddDescription;
 using Applications.Features.LoanRequests.Command.CreateLoanRequest;
 using Applications.Features.LoanRequests.Command.DenyLoanRequest;
 using Applications.Features.LoanRequests.Command.RecheckedLoanRequest;
+using Applications.Features.LoanRequests.Command.SaveEditLoanRequest;
+using Applications.Features.LoanRequests.Command.SaveLoanRequest;
 using Applications.Features.LoanRequests.Command.VerifiedLoanRequest;
 using Applications.Features.LoanRequests.Queryies.GetLoanRequestDetailById;
 using Applications.Features.LoanRequests.Requests;
+using Applications.Features.Loans.Responses;
 using Applications.Responses.ViewModels.Loans.Requests;
-using DocumentFormat.OpenXml.EMMA;
 using Domains.Models.Identity;
 using Infrastructures.Authorizations;
 using Microsoft.AspNetCore.Authorization;
@@ -29,6 +31,8 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         [Parameter, SupplyParameterFromQuery] public string? CreditAgentId { get; set; } = string.Empty;
 
         VLoanRequests? data = new();
+
+        private RequestResult _result = new();
 
         string memo = "";
 
@@ -89,13 +93,18 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
                 return;
             }
 
-            var command = new CreateLoanRequestCommand(model);
+            var command = new SaveEditLoanRequestCommand(model);
 
             var rsp = await mediator.Send(command);
 
+            _result = rsp.Value with
+            {
+                Message = rsp.Value.Message,
+                Success = rsp.Value.Success
+            };
+
             if (!rsp.IsError)
             {
-
                 NotificationService.Notify(NotificationSeverity.Success, "Success");
 
                 StateHasChanged();

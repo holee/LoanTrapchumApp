@@ -49,7 +49,7 @@ public sealed class VCustomerDetails
     public bool IsLoanActive { get; set; } = false;
     public int? Circle { get; set; }
     public string? Photo { get; set; }=string.Empty;
-    public DateTime? ModifiedDT { get; set; }
+    public DateTimeOffset? ModifiedDT { get; set; }
     public int? LoanCounts { get; set; } = 0;
     public int? LoanRequestCounts { get; set; } = 0;
     public override string ToString()

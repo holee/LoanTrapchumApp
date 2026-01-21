@@ -23,6 +23,8 @@ public sealed class LoanCollateralRequest
     public string? LoanRequestId { get; set; }
     
     public string? CustomerId { get; set; }
-    
+
+    public string? LoanRefId { get; set; }
+
     public List<CollateralLink> CollateralLinesLink { get; set; } = [];
 }

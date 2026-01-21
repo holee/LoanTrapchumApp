@@ -1,14 +1,7 @@
 ﻿using System.ComponentModel;
 
-namespace Applications.Enumerations
+namespace Domains.Enumerations 
 {
-    public enum CollectionFeeOption
-    {  
-        [Description("Flat")]
-        IRR = 1,
-        [Description("Declined")]
-        Declined = 2,
-    }
 
     public enum InstallmentOption 
     {

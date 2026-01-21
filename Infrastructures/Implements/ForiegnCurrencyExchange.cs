@@ -12,21 +12,21 @@ namespace Infrastructures.Implements
 {
     public sealed class ForiegnCurrencyExchange : IForiegnCurrencyExchange
     {
-        private readonly DataContext _context;
         private readonly IDbContextFactory<DataContext> _contextFactory;
-        public ForiegnCurrencyExchange(DataContext context, IDbContextFactory<DataContext> contextFactory)
+        public ForiegnCurrencyExchange(IDbContextFactory<DataContext> contextFactory)
         {
-            _context = context;
             _contextFactory = contextFactory;
         }
 
         public async Task<Result<string>> Exchange(LoanTransaction transaction)
         {
+            await using var context = await _contextFactory.CreateDbContextAsync();
+
             try
             {
-                _context.LoanTransaction.Add(transaction);
+                context.LoanTransaction.Add(transaction);  
 
-                await _context.SaveChangesAsync();
+                await context.SaveChangesAsync();
 
                 return Result.Success(new string("Exchange Success."));
             }
@@ -39,11 +39,13 @@ namespace Infrastructures.Implements
 
         public async Task<ErrorOr.ErrorOr<string>> CreateExchangeAsync(LoanTransaction transaction, CancellationToken cancellation = default)
         {
+            await using var context = await _contextFactory.CreateDbContextAsync(cancellation);
+
             try
             {
-                _context.LoanTransaction.Add(transaction);
+                context.LoanTransaction.Add(transaction);
 
-                await _context.SaveChangesAsync(cancellation);
+                await context.SaveChangesAsync(cancellation);
 
                 return transaction.TransactionsId;
             }
@@ -53,19 +55,43 @@ namespace Infrastructures.Implements
             }
         }
 
-        public async Task<ErrorOr.ErrorOr<string>> EditExchangeAsync(LoanTransaction transaction, CancellationToken cancellation = default)
+        public async Task<ErrorOr.ErrorOr<VttCurrencyExchanges>> CreateExchangeAsync(ForeignExchange transaction, CancellationToken cancellation = default)
         {
             await using var context = await _contextFactory.CreateDbContextAsync(cancellation);
 
             try
             {
-                context.LoanTransaction.Update(transaction);
+                context.ForeignExchanges.Add(transaction);
 
                 await context.SaveChangesAsync(cancellation);
 
-                return transaction.TransactionsId;
+                var result = await GetCurrencyExchange(context, transaction.BranchRefId, transaction.TransactionRefId, cancellation);
+
+                return result;
             }
             catch (DbUpdateException ex)
+            {
+                return ErrorOr.Error.Failure("Error", ex.Message);
+            }
+        }
+
+
+        public async Task<ErrorOr.ErrorOr<VttCurrencyExchanges>> EditExchangeAsync(ForeignExchange transaction, CancellationToken cancellation = default)
+        {
+            
+            await using var context = await _contextFactory.CreateDbContextAsync(cancellation);
+
+            try
+            {
+                context.ForeignExchanges.Update(transaction);
+
+                await context.SaveChangesAsync(cancellation);
+
+                var result = await GetCurrencyExchange(context, transaction.BranchRefId, transaction.TransactionRefId, cancellation);
+
+                return result;
+            }
+            catch (DbUpdateConcurrencyException ex)
             {
                 return ErrorOr.Error.Failure("Error", ex.Message);
             }
@@ -122,13 +148,33 @@ namespace Infrastructures.Implements
                                     BranchName = x.BranchName,
                                     BuyCurrencyName = x.BuyCurrencyName,
                                     BuyAmount = x.BuyAmount,
+                                    BuyCurrencyRefId = x.BuyCurrencyRefId,
                                     SellCurrencyName = x.SellCurrencyName,
                                     SellAmount = x.SellAmount,
+                                    SellCurrencyRefId = x.SellCurrencyRefId,
                                     ExchangeRate = x.ExchangeRate,
+                                    IsBuy=x.IsBuy,
                                 })
                                 .ToListAsync(cancellation);
 
             return VttCurrencyExchanges.Create(items, totalRecords);
+        }
+
+
+        private async Task<VttCurrencyExchanges> GetCurrencyExchange(DataContext context, int? branchId, string? transactionId, CancellationToken cancellation = default)
+        {
+
+            var result = await context.Database
+                                .SqlQuery<VttCurrencyExchanges>($"SELECT * FROM VTTExchangeTransactions WHERE branchId={branchId} AND transactionsId={transactionId}")
+                                .AsNoTracking()
+                                .FirstOrDefaultAsync(cancellation);
+
+            if (result is null)
+            {
+                throw new CurrencyNotFoundException();
+            }
+
+            return result;
         }
     }
 }

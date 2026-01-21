@@ -121,11 +121,11 @@
 
     void ShowLoanRequestMenu(MouseEventArgs args, VLoanRequests Request)
     {
-        var requestNowUrl = $"/App/Loans/{Request?.LoanRequestId}/Requests/{Request?.BranchId}/branches/{Request?.CustomerId}/Details";
-        var checkloanRequestUrl = $"/App/Loans/{Request?.LoanRequestId}/Requests/{Request?.BranchId}/branches/{Request?.CustomerId}/Details";
-        var loanRequestDetailsUrl = $"/App/Loans/{Request?.LoanRequestId}/Requests/{Request?.BranchId}/branches/{Request?.CustomerId}/Details";
-        var requestLoanRequestUrl = $"/App/Loans/{Request?.LoanRequestId}/Requests/{Request?.BranchId}/branches/{Request?.CustomerId}/Edit";
-        var disburseRequestLoanUrl = $"/App/Loans/Requests/{Request?.LoanRequestId}/Disbursements/{Request?.BranchId}/branches/CreateNew?CustomertId={Request?.CustomerId}";
+        var requestNowUrl = $"/App/Loans/{Request?.LoanRequestId}/Requests/{Request?.BranchId}/Branches/{Request?.CustomerId}/Details";
+        var checkloanRequestUrl = $"/App/Loans/{Request?.LoanRequestId}/Requests/{Request?.BranchId}/Branches/{Request?.CustomerId}/Details";
+        var loanRequestDetailsUrl = $"/App/Loans/{Request?.LoanRequestId}/Requests/{Request?.BranchId}/Branches/{Request?.CustomerId}/Details";
+        var requestLoanRequestUrl = $"/App/Loans/{Request?.LoanRequestId}/Requests/{Request?.BranchId}/Branches/{Request?.CustomerId}/Edit";
+        var disburseRequestLoanUrl = $"/App/Loans/{Request?.LoanRequestId}/Disbursements/{Request?.BranchId}/Branches/CreateNew?CustomerId={Request?.CustomerId}";
 
         ContextMenuService.Open(args, ds =>@<RadzenMenu Style="font-size:0.8rem;">
 

@@ -1,4 +1,4 @@
-using Applications.Responses.ViewModels.OtherNames;
+using Applications.Features.Guarantor.Dtos;
 using Applications.Services.Lists;
 using Microsoft.AspNetCore.Components;
 using Radzen;

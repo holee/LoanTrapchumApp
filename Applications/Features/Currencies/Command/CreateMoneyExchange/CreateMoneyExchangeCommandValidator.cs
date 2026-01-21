@@ -1,6 +1,8 @@
-﻿namespace Applications.Features.Currencies.Command.EditMoneyExchange;
+﻿using Applications.Features.Transactions.ForiegnExchanges;
 
-public sealed class CreateMoneyExchangeCommandValidator : AbstractValidator<EditMoneyExchangeCommand>
+namespace Applications.Features.Currencies.Command.EditMoneyExchange;
+
+public sealed class CreateMoneyExchangeCommandValidator : AbstractValidator<CreateMoneyExchangeCommand>
 {
     public CreateMoneyExchangeCommandValidator()
     {

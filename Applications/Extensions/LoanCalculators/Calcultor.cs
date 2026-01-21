@@ -2,12 +2,13 @@
 using Domains.Models.Loans;
 using Microsoft.VisualBasic;
 namespace Applications.Extensions.LoanCalculators;
+
 public interface ILoanCalculatorInterface
 {
     public int PayEvery { get; set; }
     public decimal EffectiveRate { get; set; }
-    public DateTimeOffset? FirstPayment { get; set; }
-    public DateTimeOffset? StartDate { get; set; }
+    public DateTime? FirstPayment { get; set; }
+    public DateTime? StartDate { get; set; }
     public int SelectedCollectionFee { get; set; }
     public int Day { get; set; }
     public int CurrencyRefId { get; set; }
@@ -18,8 +19,8 @@ public sealed class Calcultor : ILoanCalculatorInterface
 {
     public int PayEvery { get; set; } = 1;
     public decimal EffectiveRate { get; set; } = 0;
-    public DateTimeOffset? FirstPayment { get; set; } = DateTime.Now;
-    public DateTimeOffset? StartDate { get; set; } = DateTime.Now;
+    public DateTime? FirstPayment { get; set; } = DateTime.Now;
+    public DateTime? StartDate { get; set; } = DateTime.Now;
     public int SelectedCollectionFee { get; set; } = 1;
     public int Day { get; set; } = 30;
     public int CurrencyRefId { get; set; } = 1;
@@ -38,7 +39,7 @@ public sealed class Calcultor : ILoanCalculatorInterface
         };
     }
 
-    public void SetHoliday(ref DateTimeOffset? paymentDate)
+    public void SetHoliday(ref DateTime? paymentDate)
     {
         foreach (var holiday in Holidays)
         {
@@ -115,13 +116,13 @@ public sealed class Calcultor : ILoanCalculatorInterface
     {
         return holidaies.Where(x => x == holiday).Count();
     }
-    internal int TotalDays(DateTimeOffset? start, DateTimeOffset? end)
+    internal int TotalDays(DateTime? start, DateTime? end)
     {
         TimeSpan dateDiff = end!.Value.Subtract(start!.Value);
 
         return dateDiff.Days;
     }
-    DateTimeOffset? SetPaymentDate(DateTimeOffset? date)
+    private DateTime? SetPaymentDate(DateTime? date)
     {
         return InstallmentType switch
         {
@@ -159,7 +160,7 @@ public sealed class Calcultor : ILoanCalculatorInterface
         var circles = periodInMonth / PayEvery;
         decimal? beginBalance = 0.00M;
         decimal? lastBalance = 0.00M;
-        DateTimeOffset? paymentDate = FirstPayment;
+        DateTime? paymentDate = FirstPayment;
         beginBalance = lastBalance = amount;
         int scheduleNum = 1;
         for (int i = 1; i <= periodInMonth; i++)
@@ -176,7 +177,7 @@ public sealed class Calcultor : ILoanCalculatorInterface
 
             var principal = PaidPrincipal(amount!.Value, circles!.Value);
 
-            DateTimeOffset? previusDate;
+            DateTime? previusDate = null;
 
             if (i == 1)
             {
@@ -238,7 +239,7 @@ public sealed class Calcultor : ILoanCalculatorInterface
                 totalPayAmount = TotalPay(principal, interestAmount, effAmount);
             }
 
-            if(i % 5 == 0)
+            if (i % 5 == 0)
             {
                 scheduleNum++;
             }
@@ -267,7 +268,7 @@ public sealed class Calcultor : ILoanCalculatorInterface
         var principalPaid = PaidPrincipal(amount!.Value, period!.Value);
         var effAmount = 0M;
         decimal beginBalance = 0, lastBalance = 0;
-        DateTimeOffset? paymentDate = FirstPayment;
+        DateTime? paymentDate = FirstPayment;
         beginBalance = lastBalance = amount!.Value;
         int scheduleNum = 1;
         for (int i = 1; i <= period; i++)
@@ -280,7 +281,7 @@ public sealed class Calcultor : ILoanCalculatorInterface
 
             beginBalance = lastBalance;
 
-            DateTimeOffset? previusDate;
+            DateTime? previusDate = null;
 
             if (i == 1)
             {
@@ -318,7 +319,7 @@ public sealed class Calcultor : ILoanCalculatorInterface
                 lastBalance = 0;
             }
 
-            if(i % 5== 0)
+            if (i % 5 == 0)
             {
                 scheduleNum++;
             }
@@ -345,10 +346,10 @@ public sealed class Calcultor : ILoanCalculatorInterface
         List<ScheduleLine> scheduleLines = [];
         var principalPaid = PaidPrincipal(amount!.Value, periodInMonth!.Value);
         decimal beginBalance = 0, lastBalance = 0;
-        DateTimeOffset? paymentDate = FirstPayment;
+        DateTime? paymentDate = FirstPayment;
         beginBalance = lastBalance = amount!.Value;
         var effAmount = 0M;
-        DateTimeOffset? previusDate;
+        DateTime? previusDate;
         int scheduleNum = 1;
         for (int i = 1; i <= periodInMonth; i++)
         {
@@ -424,7 +425,7 @@ public sealed class Calcultor : ILoanCalculatorInterface
         List<ScheduleLine> loanScheduleLines = [];
         var principleAndInterestAmount = CalcPmt(period!.Value, rate!.Value, -amount!.Value);    //Pmt(period,rate,amount); 
         decimal beginBalance = 0, lastBalance = 0;
-        DateTimeOffset? paymentDate = FirstPayment;
+        DateTime? paymentDate = FirstPayment;
         beginBalance = lastBalance = amount.Value;
         var effAmount = 0M;
         int scheduleNum = 1;
@@ -440,7 +441,7 @@ public sealed class Calcultor : ILoanCalculatorInterface
 
             beginBalance = lastBalance;
 
-            DateTimeOffset? previusDate;
+            DateTime? previusDate = null;
             if (i == 1)
             {
                 previusDate = StartDate;
@@ -494,7 +495,7 @@ public sealed class Calcultor : ILoanCalculatorInterface
                 TotalPay = totalPay,
                 OutStanding = lastBalance,
                 CollectionFeeAmount = effAmount,
-                ScheduleNum= scheduleNum
+                ScheduleNum = scheduleNum
 
             };
             loanScheduleLines.Add(line);

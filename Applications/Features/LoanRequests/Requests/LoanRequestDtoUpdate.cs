@@ -1,5 +1,5 @@
 ﻿using Applications.Features.Collaterals.Dtos;
-using Applications.Features.Entities.Guarantors;
+using Applications.Features.Guarantor.Dtos;
 using Domains.Models.Loans;
 
 namespace Applications.Features.LoanRequests.Requests;

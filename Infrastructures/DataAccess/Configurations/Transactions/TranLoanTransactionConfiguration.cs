@@ -27,9 +27,9 @@ namespace Infrastructures.DataAccess.Configurations.Transactions
                        .WithOne()
                        .HasForeignKey(fk => fk.TransactionRefId);
 
-            builder.HasMany(x => x.ForeignExchanges)
-                       .WithOne()
-                       .HasForeignKey(fk => fk.TransactionRefId);
+            builder.HasOne(x => x.ForeignExchanges)
+                       .WithOne(p => p.LoanTransaction)
+                       .HasForeignKey<ForeignExchange>(fk => fk.TransactionRefId);
 
             builder.HasOne(x => x.OpenBranch)
                       .WithOne()
@@ -39,8 +39,6 @@ namespace Infrastructures.DataAccess.Configurations.Transactions
             builder.HasOne(x => x.CashVault)
                        .WithOne()
                        .HasForeignKey<CashVault>(fk => fk.TransactionRefId);
-
-
 
             builder.HasOne(x => x.LoanPayment)
                 .WithOne(x => x.LoanTransaction)

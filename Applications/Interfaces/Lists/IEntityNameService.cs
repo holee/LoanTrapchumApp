@@ -1,7 +1,7 @@
 ﻿using Applications.Features.Entities;
 using Applications.Features.Entities;
+using Applications.Features.Guarantor.Dtos;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.OtherNames;
 using Domains.Models.Lists;
 
 namespace Applications.Interfaces.Lists
