@@ -7,6 +7,7 @@ using Domains.Models.Lists;
 using Applications.Features.Customers.Response;
 using Applications.Features.Collaterals.Dtos;
 using Applications.Features.Loans.Responses;
+using ErrorOr;
 
 namespace Applications.Interfaces.Customers;
 
@@ -27,4 +28,6 @@ public interface ICustomerService
     Task<Result<VCustomerDetails>> GetCustomerDetailByIdAsync(string? customerId, bool include = false, CancellationToken cancellationToken = default);
     Task<Result<IEnumerable<VLoanDisbursments>>> GetCustomerLoanAsync(string? customerId, CancellationToken cancellation = default);
     Task<Result<IEnumerable<VLoanRequests>>> GetCustomerLoanRequestAsync(string? customerId, CancellationToken cancellation = default);
+    Task<ErrorOr<VCustomerList>> UpdateCustomerAsync(EntityNames model, CancellationToken cancellation = default);
+    Task<ErrorOr<VCustomerList>> CreateCustomerAsync(EntityNames model, CancellationToken cancellation = default);
 } 

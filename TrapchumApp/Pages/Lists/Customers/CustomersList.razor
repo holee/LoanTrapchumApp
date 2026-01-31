@@ -22,7 +22,7 @@
             <RadzenCheckBox TValue="bool" Value="@includeInactive" Change="@OnChanged" />
             <RadzenLabel Text="Include InActive" />
         </div>
-    </RightChildren> 
+    </RightChildren>
 </GridToolbar>
 <RadzenDataGrid Count="@counts"
                 AllowColumnPicking="true"
@@ -47,6 +47,7 @@
                 RowSelect="OnRowSelected"
                 CellRender="@OnCellRender"
                 RowDoubleClick="@OnRowDoubleClick"
+                @ref="@_gridCustomer"
                 Data="@VCustomers">
     <HeaderTemplate>
         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
@@ -81,7 +82,7 @@
                               Title="Name">
             <Template>
                 <NavLink @onclick="@(() => OnRowDoubleClick(c))">
-                        <KhmerName AltName="@c.AltName" />
+                    <KhmerName AltName="@c.AltName" />
                 </NavLink>
             </Template>
         </RadzenDataGridColumn>
@@ -124,9 +125,23 @@
                               TextAlign="TextAlign.Center"
                               Sortable="false"
                               Filterable="false"
+                              Property="@nameof(VCustomerDetails.IsLoanActive)"
                               Title="Loan Active">
             <Template>
                 <RadzenCheckBox Value="@c.IsLoanActive" Disabled />
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Context="c"
+                              Width="5rem"
+                              TextAlign="TextAlign.Center"
+                              Sortable="false"
+                              Filterable="false"
+                              Property="@nameof(VCustomerDetails.IsActive)"
+                              Title="Is Active">
+            <Template>
+                <RadzenCheckBox @bind-Value="@c.IsActive"
+                                Change="ChangedCustomerStatus"
+                                TValue="bool" />
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Context="c"
@@ -146,10 +161,11 @@
         </RadzenDataGridColumn>
     </Columns>
 </RadzenDataGrid>
+
 @code {
 
-    int selectedValue = 0;
-
+    private int selectedValue = 0;
+    private RadzenDataGrid<VCustomerList> _gridCustomer = default!;
     void ShowContextMenu(MouseEventArgs args, VCustomerList c)
     {
         ContextMenuService.Open(args, ds =>
@@ -168,5 +184,12 @@
 </RadzenMenu>
     );
     }
+
+    void ChangedCustomerStatus(bool args)
+    {
+
+    }
+
+
 }
 

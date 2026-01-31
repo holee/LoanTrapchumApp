@@ -8,6 +8,7 @@ using Applications.Enumerations;
 using Applications.Features.Addresses.Responses;
 using Applications.Features.Customers.Dto;
 using Applications.Features.Customers.Commands.Customers.CreateCustomer;
+using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Lists.Customers
 {
@@ -108,7 +109,7 @@ namespace TrapchumApp.Pages.Lists.Customers
 
                 var rsp = await mediator.Send(new CreateCustomerCommand(model));  //await _customerService.CreateAsync(model);
 
-                if (rsp.IsSuccess)
+                if (rsp.IsSuccess())
                 {
 
                     await Close();
@@ -120,7 +121,7 @@ namespace TrapchumApp.Pages.Lists.Customers
                 else
                 {
 
-                    NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Error, rsp.GetMessage());
                 }
 
             }
@@ -142,7 +143,7 @@ namespace TrapchumApp.Pages.Lists.Customers
 
                 var rsp = await mediator.Send(new CreateCustomerCommand(model));  //await _customerService.CreateAsync(model);
 
-                if (rsp.IsSuccess)
+                if (rsp.IsSuccess())
                 {
                     NotificationService.Notify(NotificationSeverity.Success, "Customer was created successfully!");
 
@@ -158,7 +159,7 @@ namespace TrapchumApp.Pages.Lists.Customers
                 else
                 {
 
-                    NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Error, rsp.GetMessage());
                 }
 
             }

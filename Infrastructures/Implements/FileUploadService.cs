@@ -123,7 +123,7 @@ namespace Infrastructures.Implements
 
                 var fileContent = await file.ReadAsStreamAsync();
 
-                var fileName = System.Net.Http.Headers.ContentDispositionHeaderValue.Parse(file.Headers.ContentDisposition!.Name).FileName?.Trim('"');
+                var fileName = System.Net.Http.Headers.ContentDispositionHeaderValue.Parse(file.Headers.ContentDisposition!.Name!).FileName?.Trim('"');
 
                 return await SaveFile(fileName ?? "", fileContent);
             }

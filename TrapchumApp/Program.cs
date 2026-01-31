@@ -16,8 +16,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 QuestPDF.Settings.License = LicenseType.Community;
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 builder.Services.AddRadzenComponents();
 builder.Services.AddAuthorization();
 builder.Services.AddHttpContextAccessor();
@@ -70,8 +69,8 @@ else
 app.UseHttpsRedirection();
 app.UseAntiforgery();
 app.MapStaticAssets();
-app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
+app.UseStaticFiles();
+app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
 // Add additional endpoints required by the Identity /Account Razor components.
 app.MapControllers();

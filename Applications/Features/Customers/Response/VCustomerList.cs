@@ -40,7 +40,7 @@ public sealed class VCustomerList
     public string? DisInKhmer { get; set; }
     public string? ComInKhmer { get; set; }
     public string? VilInKhmer { get; set; }
-    public bool IsActive { get; set; } = true;
+    public bool IsActive { get; set; } = false;
     public bool IsLoanActive { get; set; } = false;
     public int? Circle { get; set; }
     public string? Photo { get; set; } = string.Empty;

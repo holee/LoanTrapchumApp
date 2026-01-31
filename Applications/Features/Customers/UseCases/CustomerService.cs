@@ -19,7 +19,7 @@ public sealed class CustomerService(ICustomerService cusService) : ICustomerServ
     public async Task<Result<string>> UpdateAsync(EntityCustomerCreate customer, CancellationToken cancellation = default) 
     {
 
-        var cust = customer.ToCustomerEdit();
+        var cust = customer.ToCustomerUpdate();
 
         return await cusService.UpdateAsync(cust, cancellation);
     }

@@ -1,40 +1,171 @@
+using Applications.Extensions.DateTimes;
 using Applications.Features.Customers.Dto;
-using Applications.Features.Customers.Interfaces;
-using Microsoft.JSInterop;
+using Applications.Features.Customers.Queries.GetCustomerAsPaging;
+using Applications.Features.Customers.Response;
+using Applications.Features.LoanRequests.Command.IsCustomerBusy;
+using Applications.Responses.Lists.Customers;
+using Applications.Responses.Paginations;
+using Domains.Models.Identity;
 using Radzen.Blazor;
+using TrapchumApp.Helpers.Enums;
+using TrapchumApp.Helpers.Options;
+using TrapchumApp.Pages.Lists.Collaterals;
+using TrapchumApp.Pages.Lists.Customers.Expenses;
+using TrapchumApp.Pages.Lists.Customers.Incomes;
+using TrapchumApp.Shared;
 
 namespace TrapchumApp.Pages.Lists.Customers
 {
     public partial class CustomersIndex
     {
-        private readonly IGetCustomersByUseCase _getCustomersByUseCase;
 
-        public CustomersIndex(IGetCustomersByUseCase getCustomersByUseCase)
+        [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+        [CascadingParameter] CascadingAppState BState { get; set; } = default!;
+        [Parameter] public int? BranchId { get; set; }
+        private List<CustomerTab> _tabs = new();
+        protected int totalCstomers;
+        private int selectedIndex = 0;
+        private string? customerId = string.Empty;
+        private bool isLoading = false;
+        private CustomerResponse? Customer;
+        private List<VCustomerList>? VCustomers = [];
+        private bool includeInactive = false;
+
+        private string filterText = string.Empty;
+
+        private int counts = 0;
+
+        private int pageSize = 15;
+
+        private int pageIndex = 0;
+
+        private string sortField = nameof(VCustomerList.ModifiedDT);
+
+        private bool sortDescending = true;
+
+        private IList<VCustomerDetails> SelectedCustomers = [];
+
+        private string? _userId = string.Empty;
+
+        private string? _lastRowId = string.Empty;
+        protected override async Task OnInitializedAsync()
         {
-            _getCustomersByUseCase = getCustomersByUseCase;
+            var authState = await AuthenticationState;
+
+            var user = authState.User;
+
+            _userId = user.GetId();
+
+            await BState.GetAuthenticatedUser(user);
+
+            await LoadCustomerPageList(null, null, filterText);
+
+            await base.OnInitializedAsync();
         }
 
-        [CascadingParameter]
-        Task<AuthenticationState> AuthenticationState { get; set; } = default!;
-        [Parameter, SupplyParameterFromQuery] public string? UserId { get; set; }
-        [Parameter] public int? BranchId { get; set; }
+
         void SelectedTabChanged(int index)
         {
             selectedIndex = index;
         }
-        RadzenTabs tabs = default!;
-        List<int> tabCounts = [0];
-        private List<CustomerTab> _tabs = new();
-        protected int totalCstomers;
-        int tabIndex = 1;
-        int selectedIndex = 0;
-        bool isNewTab = false;
-        bool isDetailsTab = false;
-        bool isEditTab = false;
-        string? customerId = string.Empty;
-        bool isVisble = false;
-        bool isCollateralTab = false;
-        bool IsLoading = true;
+
+
+        async Task SearchCustomer(string? searchText = null)
+        {
+            filterText = searchText ?? string.Empty;
+
+            await LoadCustomerPageList(null, null, filterText);
+        }
+
+        private async Task OnChanged(bool arg)
+        {
+            includeInactive = arg;
+
+            await LoadCustomerPageList(0, null, filterText);
+        }
+
+        protected async Task AddCollateral(string? customerId)
+        {
+            ContextMenuService.Close();
+
+            var param = new Dictionary<string, object?>
+            {
+                { "CollateralId", customerId}
+            };
+            var options = new DialogOptions
+            {
+                AutoFocusFirstElement = false
+            };
+
+            await DialogService.OpenAsync<CustomerCollateralLineCreate>("Collateral", param, options);
+        }
+
+        private async Task AddInComeModal(string? customerId)
+        {
+            await DialogService.OpenAsync<IncomeCreate>("Income", options: new DialogOptions
+            {
+                Resizable = false,
+                Draggable = true,
+            }, parameters: new Dictionary<string, object?>
+            {
+                { "CustomerId", customerId }
+            });
+        }
+
+
+        private async void AddExpenseModal(string? customerId)
+        {
+            await DialogService.OpenAsync<CreateExpense>("Add Expense", options: new DialogOptions
+            {
+                Resizable = false,
+                Draggable = true,
+            }, parameters: new Dictionary<string, object?>
+            {
+                { "CustomerId", customerId }
+            });
+        }
+
+
+        private async Task AddDetails(string? customerId)
+        {
+            ContextMenuService.Close();
+
+            Details(customerId);
+        }
+
+        private async Task AddEdit(string? customerId)
+        {
+            ContextMenuService.Close();
+
+            AddEditTab(customerId);
+        }
+
+        private async void AddDelete(string? customerId)
+        {
+            var confirm = await DialogService.Confirm("do you want to delete this customer?", "Delete",
+                options: new ConfirmOptions
+                {
+                    OkButtonText = "Yes",
+                    CancelButtonText = "No"
+                });
+            if (confirm == false) return;
+
+            var rsp = await _customerService.DeleteCustomerAsync(customerId);
+
+            if (rsp.IsSuccess)
+            {
+                NotificationService.Notify(NotificationSeverity.Success, rsp.Data);
+
+                await LoadCustomerPageList(null, null, filterText);
+            }
+            else
+            {
+                NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
+            }
+
+        }
+
+
 
         void Details(string? id)
         {
@@ -63,7 +194,6 @@ namespace TrapchumApp.Pages.Lists.Customers
                 builer.AddAttribute(4, "EditClick", EventCallback.Factory.Create(this, async (string x) =>
                 {
                     AddEditTab(id);
-
                 }));
 
                 builer.CloseComponent();
@@ -86,22 +216,6 @@ namespace TrapchumApp.Pages.Lists.Customers
             selectedIndex = _tabs.Count;
         }
 
-        void AddCollateralTab(string? id)
-        {
-            isVisble = true;
-
-            customerId = id;
-
-            if (!isCollateralTab)
-            {
-                isCollateralTab = true;
-            }
-
-            selectedIndex = 4;
-
-            isVisble = false;
-        }
-
         void AddEditTab(string? id)
         {
             var editTabId = string.IsNullOrEmpty(id) ? Guid.NewGuid().ToString("N") : $"{id}_edit";
@@ -122,6 +236,20 @@ namespace TrapchumApp.Pages.Lists.Customers
                 builer.AddAttribute(2, "Closed", EventCallback.Factory.Create(this, (int x) =>
                 {
                     CloseTab(editTabId);
+                }));
+
+                builer.AddAttribute(3, "UpdateChanged", EventCallback.Factory.Create(this, async (VCustomerList x) =>
+                {
+
+                    var foundIndex = VCustomers?.FindIndex(c => c.CustomerId == x.CustomerId) ?? -1;
+
+                    if (foundIndex != -1)
+                    {
+                        VCustomers![foundIndex] = x;
+                    }
+
+                    await _gridCustomer.Reload();
+
                 }));
 
                 builer.SetKey(editTabId);
@@ -147,6 +275,7 @@ namespace TrapchumApp.Pages.Lists.Customers
 
 
         }
+
         void AddCustomerTab()
         {
             var newTabId = Guid.NewGuid().ToString("N");
@@ -159,6 +288,11 @@ namespace TrapchumApp.Pages.Lists.Customers
                  {
                      CloseTab(newTabId);
                  }));
+                builer.AddAttribute(3, "UpdateState", EventCallback.Factory.Create(this, async (VCustomerList x) =>
+                {
+                    _lastRowId = x.CustomerId;
+                    await _gridCustomer.Reload();
+                }));
                 builer.SetKey(newTabId);
                 builer.CloseComponent();
             };
@@ -193,25 +327,147 @@ namespace TrapchumApp.Pages.Lists.Customers
 
 
 
-        void CloseTabe(int closeTabIndex)
+        void OnRowRender(RowRenderEventArgs<VCustomerList> args)
         {
-            if (closeTabIndex == 1)
+            if (args.Data.IsLoanActive)
             {
-                isNewTab = false;
+                args.Attributes.Add("style", "font-weight:bold;color:red;background-color:yellow;");
             }
 
-            if (closeTabIndex == 2)
+            if (args.Data.ModifiedDT.IsRecently())
             {
-                isDetailsTab = false;
-            }
+                args.Attributes.Add("class", "rz-state-highlight rz-data-row recently-edited");
 
-            if (closeTabIndex == 3)
+            }
+        }
+
+        void OnCellRender(RowRenderEventArgs<VCustomerList> e)
+        {
+            if (e.Data.CustomerId == _lastRowId)
             {
-                isEditTab = false;
+                e.Attributes.Add("class", "rz-state-highlight rz-data-row recently-edited");
             }
+        }
 
-            selectedIndex = 0;
+
+        private void OnRowSelected(VCustomerList args)
+        {
 
         }
+
+        void OnRowDoubleClick(DataGridRowMouseEventArgs<VCustomerList> args)
+        {
+            _ = AddDetails(args.Data.CustomerId);
+        }
+
+        void OnRowDoubleClick(VCustomerList args)
+        {
+            _ = AddDetails(args.CustomerId);
+        }
+
+        async Task LoadCustomerPageList(int? branchId = null, string? userId = null, string? filter = null)
+        {
+            try
+            {
+                isLoading = true;
+
+                var param = new QueryParam(pageIndex, pageSize, sortField, includeInactive, sortDescending, filter);
+
+                var command = new GetCustomerAsPagingQuery(branchId, userId, string.Empty, param);
+
+                var rsp = await mediator.Send(command);
+
+                VCustomers = rsp.Items;
+
+                counts = rsp.Count;
+
+                isLoading = false;
+
+                StateHasChanged();
+            }
+            catch
+            {
+                isLoading = false;
+            }
+        }
+
+
+        private async Task AddLoanRequest(string? customerId)
+        {
+            ContextMenuService.Close();
+
+            var query = new IsCustomerBusyQuery(customerId);
+
+            var rsp = await mediator.Send(query);
+
+            if (rsp.IsError == false && rsp.Value)
+            {
+
+                NotificationService.Notify(NotificationSeverity.Error, "This customer cannot request loan again.");
+
+                return;
+            }
+
+            var uri = $"/App/Loans/Requests/{BranchId}/Branches/CreateNew/{customerId}/Customers";
+
+            NavigationManager.NavigateTo(uri);
+        }
+
+
+
+
+        async Task LoadData(LoadDataArgs args)
+        {
+            pageIndex = args.Skip ?? 0;
+
+            if (args.Sorts.Any())
+            {
+                sortField = args.Sorts.First().Property;
+
+                sortDescending = args.Sorts.First().SortOrder == SortOrder.Descending;
+            }
+
+            var filterColumn = args.Filters?.FirstOrDefault(f => f.Property == nameof(VCustomerDetails.FullName) ||
+                                                            f.Property == nameof(VCustomerDetails.AltName) ||
+                                                           f.Property == nameof(VCustomerDetails.CustomerId) ||
+                                                           f.Property == nameof(VCustomerDetails.Phone))?.FilterValue?.ToString();
+
+            filterText = filterColumn ?? string.Empty;
+
+            await FIlterCustomers(selectedValue);
+        }
+
+        private async Task FIlterCustomers(int? value)
+        {
+            if (value == (int)CustomerFilter.All)
+            {
+                await LoadCustomerPageList(0, null, filterText);
+            }
+
+            if (value == (int)CustomerFilter.MyCustomer)
+            {
+                await LoadCustomerPageList(null, _userId, filterText);
+            }
+            if (value == (int)CustomerFilter.ByBranch)
+            {
+                await LoadCustomerPageList(BranchId, null, filterText);
+            }
+        }
+
+
+
+        async Task SelectedItemChanged(object? e)
+        {
+            pageIndex = 0;
+
+            if (e is not null)
+            {
+                var id = ((ListItem)e).Id;
+
+                await FIlterCustomers(id);
+            }
+        }
+
+
     }
 }

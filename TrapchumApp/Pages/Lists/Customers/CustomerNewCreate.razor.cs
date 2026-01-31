@@ -2,12 +2,14 @@ using Applications.Enumerations;
 using Applications.Features.Addresses.Responses;
 using Applications.Features.Customers.Commands.Customers.CreateCustomer;
 using Applications.Features.Customers.Dto;
+using Applications.Features.Customers.Response;
 using Applications.Responses.Lists.Entities;
 using Applications.Services.Files;
 using Applications.Services.Lists;
 using Domains.Models.Addresses;
 using Domains.Models.Lists;
 using Radzen.Blazor;
+using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Lists.Customers;
 
@@ -26,6 +28,7 @@ public partial class CustomerNewCreate
     }
 
     [Parameter] public EventCallback<int> Closed { get; set; } = default!;
+    [Parameter] public EventCallback<VCustomerList> UpdateState { get; set; }
     [Parameter] public EntityCustomerCreate CustomerModel { get; set; } = new();
     IEnumerable<string> Salutations = [];
     IEnumerable<ProvinceDto> Provinces = [];
@@ -42,10 +45,15 @@ public partial class CustomerNewCreate
     {
 
         await GetAdditionalInformation();
+
         CustomerModel.City = "Siem Reap";
+
         CustomerModel.CountryName = "ប្រទេសកម្ពុជា";
+
         CustomerModel.Salutation = "Mr";
+
         CustomerModel.MarritalStatus = "Single";
+
         CustomerModel.Nationality = "Khmer";
 
         var rsp1 = await _salutationService.GetSalutions();
@@ -63,7 +71,9 @@ public partial class CustomerNewCreate
     IEnumerable<Nationality> Nationalities { get; set; } = [];
 
     RadzenFileInput<string> fileUpload = default!;
+
     string selectedTab = "info";
+
     string city = "";
 
     async Task GetAdditionalInformation()
@@ -96,74 +106,40 @@ public partial class CustomerNewCreate
         }
     }
 
-    protected async void FormSubmit()
-    {
-        try
-        {
-            CustomerModel.EntType = EntityTypes.Customer.ToString();
-
-            CustomerModel.Photo ??= "/Profiles/profile.png";
-
-            var rsp = await mediator.Send(new CreateCustomerCommand(CustomerModel));  //await _customerService.CreateAsync(model);
-
-            if (rsp.IsSuccess)
-            {
-
-                await Close();
-
-                CustomerModel = new();
-
-                NotificationService.Notify(NotificationSeverity.Success, "Customer was created successfully!");
-            }
-            else
-            {
-
-                NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
-            }
-
-        }
-        catch (Exception ex)
-        {
-            NotificationService.Notify(NotificationSeverity.Error, ex.Message);
-        }
-    }
-
-
-
     protected async Task CreateAsync(bool saveClosed = false)
     {
-        try
+
+        CustomerModel.Id = $"ent-{Guid.CreateVersion7()}";
+
+        CustomerModel.EntType = EntityTypes.Customer.ToString();
+
+        CustomerModel.Photo ??= "/Profiles/profile.png";
+
+        var rsp = await mediator.Send(new CreateCustomerCommand(CustomerModel));
+
+        if (rsp.IsSuccess())
         {
-            CustomerModel.EntType = EntityTypes.Customer.ToString();
+            NotificationService.Notify(NotificationSeverity.Success, "Customer was created successfully!");
 
-            CustomerModel.Photo ??= "/Profiles/profile.png";
-
-            var rsp = await mediator.Send(new CreateCustomerCommand(CustomerModel));  //await _customerService.CreateAsync(model);
-
-            if (rsp.IsSuccess)
+            if (saveClosed)
             {
-                NotificationService.Notify(NotificationSeverity.Success, "Customer was created successfully!");
+                await Close();
 
-                if (saveClosed)
-                {
-                    await Close();
-                }
-                else
-                {
-                    CustomerModel = new();
-                }
+                await UpdateState.InvokeAsync(rsp.Value);
             }
             else
             {
+                CustomerModel = new();
 
-                NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
+                await UpdateState.InvokeAsync(rsp.Value);
             }
-
         }
-        catch (Exception ex)
+        else
         {
-            NotificationService.Notify(NotificationSeverity.Error, ex.Message);
+
+            NotificationService.Notify(NotificationSeverity.Error, rsp.GetMessage());
         }
+
     }
 
 
@@ -200,3 +176,33 @@ public partial class CustomerNewCreate
     }
 
 }
+
+
+//protected async void FormSubmit()
+//{
+
+//    CustomerModel.EntType = EntityTypes.Customer.ToString();
+
+//    CustomerModel.Photo ??= "/Profiles/profile.png";
+
+//    var rsp = await mediator.Send(new CreateCustomerCommand(CustomerModel));  //await _customerService.CreateAsync(model);
+
+//    if (rsp.IsSuccess())
+//    {
+
+//        await Close();
+
+//        CustomerModel = new();
+
+//        await UpdateState.InvokeAsync(rsp.Value);
+
+//        NotificationService.Notify(NotificationSeverity.Success, "Customer was created successfully!");
+//    }
+//    else
+//    {
+
+//        NotificationService.Notify(NotificationSeverity.Error, rsp.GetMessage());
+//    }
+
+//}
+

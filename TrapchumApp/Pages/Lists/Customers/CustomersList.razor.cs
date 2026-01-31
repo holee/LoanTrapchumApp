@@ -1,6 +1,7 @@
 using Applications.Extensions.DateTimes;
 using Applications.Extensions.Identity.Authorizations.Extensions;
 using Applications.Extensions.Identity.Policies;
+using Applications.Features.Customers.Queries.GetCustomerAsPaging;
 using Applications.Features.Customers.Response;
 using Applications.Features.Customers.UseCases;
 using Applications.Features.LoanRequests.Command.IsCustomerBusy;
@@ -18,13 +19,6 @@ namespace TrapchumApp.Pages.Lists.Customers
     public partial class CustomersList
     {
 
-        private readonly GetCustomersUseCase _getCustomerCommand;
-
-        public CustomersList(GetCustomersUseCase getCustomerCommand)
-        {
-            _getCustomerCommand = getCustomerCommand;
-        }
-
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
         [Parameter] public EventCallback<string?> ClickedDetails { get; set; }
         [Parameter] public EventCallback<int?> ClickedAdd { get; set; }
@@ -32,22 +26,24 @@ namespace TrapchumApp.Pages.Lists.Customers
         [Parameter] public EventCallback<int> EditIndex { get; set; }
         [Parameter] public EventCallback<string> ClickedDelete { get; set; }
         [Parameter] public EventCallback<string?> ClickedAddCollateral { get; set; }
-        [Parameter, SupplyParameterFromQuery] public string? UserId { get; set; } = string.Empty;
+        [Parameter] public EventCallback UpdateStateChanged { get; set; }       
         [Parameter] public int? BranchId { get; set; } = 0;
         [Parameter] public EventCallback<VCustomerDetails> SelectedRowChanged { get; set; }
         [Parameter] public RenderFragment? ChildContent { get; set; } = default!;
 
-        bool IsAccountOnly = false;
+        private bool IsAccountOnly = false;
 
-        bool IsAdminOnly = false;
+        private bool IsAdminOnly = false;
 
-        protected CustomerResponse? Customer;
+        private string? UserId = string.Empty;
 
-        protected List<VCustomerList>? VCustomers = [];
+        private CustomerResponse? Customer;
 
-        protected bool includeInactive = false;
+        private List<VCustomerList>? VCustomers = [];
 
-        protected string filterText = string.Empty;
+        private bool includeInactive = false;
+
+        private string filterText = string.Empty;
 
         private int counts = 0;
 
@@ -248,7 +244,7 @@ namespace TrapchumApp.Pages.Lists.Customers
 
             sortDescending = false;
 
-            pageIndex = args.Skip!.Value;
+            pageIndex = args.Skip ?? 0;
 
             if (args.Sorts.Any())
             {
@@ -283,11 +279,13 @@ namespace TrapchumApp.Pages.Lists.Customers
 
                 var param = new QueryParam(pageIndex, pageSize, sortField, includeInactive, sortDescending, filter);
 
-                var res = await _getCustomerCommand.ExecuteAsync(branchId, userId, null, param);
+                var command = new GetCustomerAsPagingQuery(branchId, userId, string.Empty, param);
 
-                VCustomers = res.Items;
+                var rsp = await mediator.Send(command);
 
-                counts = res.Count;
+                VCustomers = rsp.Items;
+
+                counts = rsp.Count;
 
                 isLoading = false;
 
@@ -309,6 +307,7 @@ namespace TrapchumApp.Pages.Lists.Customers
             if (args.Data.ModifiedDT.IsRecently())
             {
                 var d = DateTime.Now;
+
                 args.Attributes.Add("class", "rz-state-highlight rz-data-row recently-edited");
 
             }

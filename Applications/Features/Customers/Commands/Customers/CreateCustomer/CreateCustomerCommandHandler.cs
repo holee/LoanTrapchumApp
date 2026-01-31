@@ -1,11 +1,10 @@
 ﻿using Applications.Commons.Mappers.Customers;
 using Applications.Interfaces.Customers;
-using Applications.Responses;
-using Applications.Utils;
+using ErrorOr;
 
 namespace Applications.Features.Customers.Commands.Customers.CreateCustomer;
 
-public sealed class CreateCustomerCommandHandler : IRequestHandler<CreateCustomerCommand, Result<string>>
+public sealed class CreateCustomerCommandHandler : IRequestHandler<CreateCustomerCommand, ErrorOr<VCustomerList>>
 {
     private readonly ICustomerService _customerRepository;
 
@@ -13,20 +12,12 @@ public sealed class CreateCustomerCommandHandler : IRequestHandler<CreateCustome
     {
         _customerRepository = customerRepository;
     }
-    public async Task<Result<string>> Handle(CreateCustomerCommand request, CancellationToken cancellationToken)
+    public async Task<ErrorOr<VCustomerList>> Handle(CreateCustomerCommand request, CancellationToken cancellationToken)
     {
-        try
-        {
-            var customer = request.Request.ToCustomerCreate();
 
-            cancellationToken.ThrowIfCancellationRequested();
+        var customer = request.ToCustomerCreate(); 
 
-            return await _customerRepository.CreateAsync(customer, cancellationToken);
+        return await _customerRepository.CreateCustomerAsync(customer, cancellationToken);
 
-        }
-        catch (Exception ex)
-        {
-            return Result.Failure<string>(ErrorResponse.ServerError(ex.Message));
-        }
     }
 }

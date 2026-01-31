@@ -1,30 +1,23 @@
 ﻿using Applications.Commons.Mappers.Customers;
+using Applications.Features.Customers.Commands.Customers.EditCustomer;
 using Applications.Interfaces.Customers;
-using Applications.Responses;
-using Applications.Utils;
+using ErrorOr;
 
 namespace Applications.Features.Customers.Commands.Customers.CreateCustomer;
 
-public sealed class EditCustomerCommandHandler : IRequestHandler<CreateCustomerCommand, Result<string>>
+public sealed class EditCustomerCommandHandler : IRequestHandler<EditCustomerCommand, ErrorOr<VCustomerList>>
 {
     private readonly ICustomerService _customerRepository;
 
-    public EditCustomerCommandHandler(ICustomerService customerRepository) 
+    public EditCustomerCommandHandler(ICustomerService customerRepository)
     {
         _customerRepository = customerRepository;
     }
-    public async Task<Result<string>> Handle(CreateCustomerCommand request, CancellationToken cancellationToken)
+    public async Task<ErrorOr<VCustomerList>> Handle(EditCustomerCommand request, CancellationToken cancellationToken)
     {
-        try 
-        {
-            var customer = request.ToCustomerCreate();
 
-            return await _customerRepository.UpdateAsync(customer, cancellationToken);
+        var customer = request.ToCustomerEdit();
 
-        }
-        catch (Exception ex)
-        {
-            return Result.Failure<string>(ErrorResponse.ServerError(ex.Message));
-        }
+        return await _customerRepository.UpdateCustomerAsync(customer, cancellationToken);
     }
 }

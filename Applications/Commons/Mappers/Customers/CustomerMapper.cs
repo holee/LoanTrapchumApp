@@ -66,7 +66,7 @@ public static class CustomerMapper
 
     }
 
-    
+
     public static EntityNames ToCustomerCreate(this EntityCustomerCreate dto)
     {
 
@@ -131,10 +131,9 @@ public static class CustomerMapper
 
     }
 
-    
-    public static EntityNames ToCustomerCreate(this CreateCustomerCommand dto) => dto.ToCustomerCreate();
-    
-    public static EntityNames ToCustomerEdit(this EntityCustomerCreate dto)
+    public static EntityNames ToCustomerCreate(this CreateCustomerCommand dto) => dto.Request.ToCustomerCreate();
+
+    public static EntityNames ToCustomerUpdate(this EntityCustomerCreate dto)
     {
 
         return new EntityNames
@@ -195,9 +194,9 @@ public static class CustomerMapper
         };
 
     }
-    
-    public static EntityNames ToCustomerEdit(this EditCustomerCommand source) => source.ToCustomerEdit();
-    
+
+    public static EntityNames ToCustomerEdit(this EditCustomerCommand source) => source.Request.ToCustomerUpdate();
+
 }
 
 

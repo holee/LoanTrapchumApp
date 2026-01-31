@@ -5,6 +5,8 @@ using Applications.Features.Currencies.Queries.GetCurrencyDetails;
 using Applications.Features.Currencies.Queries.GetEditMoneyExchange;
 using Applications.Features.Currencies.Requests;
 using Applications.Features.Currencies.Responses;
+using Applications.Features.Customers.Commands.Customers.CreateCustomer;
+using Applications.Features.Customers.Commands.Customers.EditCustomer;
 using Applications.Features.Guarantor.Command.CreateGuarantor;
 using Applications.Features.Guarantor.Dtos;
 using Applications.Features.Holidays.Queries.GetHolidaysAsPaging;
@@ -176,8 +178,10 @@ public static class ApplicationServiceInjection
 
 
         services.AddScoped<IRequestHandler<GetCustomerAsPagingQuery, Pager<VCustomerList>>, GetCustomerAsPagingQueryHandler>();
+        services.AddScoped<IRequestHandler<CreateCustomerCommand, ErrorOr<VCustomerList>>, CreateCustomerCommandHandler>();
+        services.AddScoped<IRequestHandler<EditCustomerCommand, ErrorOr<VCustomerList>>, EditCustomerCommandHandler>();
 
-
+            
         services.AddScoped<IRequestHandler<CreateIncomeExpenseCommand, ErrorOr<int>>, CreateIncomeExpenseCommandHandler>();
         services.AddScoped<IRequestHandler<EditIncomeExpenseCommand, ErrorOr<int>>, EditIncomeExpenseCommandHandler>();
         services.AddScoped<IRequestHandler<GetEditIncomeExpenseQuery, ErrorOr<IncomeExpenseDto>>, GetEditIncomeExpenseQueryHandler>();

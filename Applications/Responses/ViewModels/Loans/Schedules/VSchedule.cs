@@ -37,11 +37,12 @@ public sealed class VSchedule
     public decimal? PaidPrinciple { get; set; }
     public decimal? PaidInterest { get; set; }
     public decimal? PaidCollectionFee { get; set; }
-    public decimal? PaidAmount { get; set; }
-    public decimal? LeftInterestAmount { get; set; }
-    public decimal? LeftCollectionFeeAmount { get; set; }
-    public decimal? LeftPrinciple { get; set; }
-    public decimal? LeftAmount { get; set; }
+    public decimal? PaidAmount { get; set; } = 0;
+    public decimal? LeftInterestAmount { get; set; } = 0;
+    public decimal? LeftCollectionFeeAmount { get; set; } = 0;
+    public decimal? LeftPrinciple { get; set; } = 0;
+    public decimal? LeftAmount { get; set; } = 0;
+    public decimal? TotalFee { get; set; } = 0;
     public int? ScheduleStatusId { get; set; }
     public string? ScheduleStatus { get; set; }
     public bool IsLate { get; set; } = false;

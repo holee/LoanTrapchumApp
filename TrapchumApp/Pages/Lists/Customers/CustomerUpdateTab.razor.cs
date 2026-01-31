@@ -1,11 +1,14 @@
 ﻿using Applications.Enumerations;
+using Applications.Features.Customers.Commands.Customers.EditCustomer;
 using Applications.Features.Customers.Dto;
+using Applications.Features.Customers.Response;
 using Applications.Interfaces.Lists;
 using Applications.Responses.Lists.Entities;
 using Applications.Services.Files;
 using Applications.Services.Lists;
 using Domains.Models.Addresses;
 using Domains.Models.Lists;
+using TrapchumApp.Helpers.Extensions;
 namespace TrapchumApp.Pages.Lists.Customers
 {
     public partial class CustomerUpdateTab
@@ -24,7 +27,9 @@ namespace TrapchumApp.Pages.Lists.Customers
         }
 
         [Parameter] public EventCallback<int> Closed { get; set; }
+        [Parameter] public EventCallback<VCustomerList> UpdateChanged { get; set; } 
         [Parameter] public string? CustomerId { get; set; }
+
         string selectedTab = "info";
 
         string city = "";
@@ -99,17 +104,24 @@ namespace TrapchumApp.Pages.Lists.Customers
             try
             {
                 model.EntType = EntityTypes.Customer.ToString();
-                var rsp = await _customerService.UpdateAsync(model);
 
-                if (rsp.IsSuccess)
+                var command=new EditCustomerCommand(model);
+
+                var rsp = await mediator.Send(command);  //_customerService.UpdateAsync(model);
+
+                if (rsp.IsSuccess())
                 {
+
+                    await UpdateChanged.InvokeAsync(rsp.Value);
+                    
                     await CloseTab(3);
 
                     NotificationService.Notify(NotificationSeverity.Success, "Customer was edited successfully!");
+                
                 }
                 else
                 {
-                    NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Error, rsp.GetMessage());
                 }
 
             }
@@ -147,6 +159,7 @@ namespace TrapchumApp.Pages.Lists.Customers
         private async Task GetSalutations()
         {
             var salutations = await _salutationService.GetSalutions();
+
             if (salutations.IsSuccess)
             {
                 Salutations = salutations!.Data!.Select(x => x.Title!).ToList();

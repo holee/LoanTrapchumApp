@@ -83,8 +83,20 @@
         {
             if (!current.HasValue)
                 return false;
-            var timeSince = DateTime.UtcNow - current.Value.ToUniversalTime();
-            return timeSince.Minutes < 2;
+            return DateTimeOffset.UtcNow - current.Value <= TimeSpan.FromHours(23);
         }
+
+
+        public static bool IsRecently(this DateTimeOffset? value, TimeSpan? threshold = null)
+        {
+            if (value is null)
+                return false;
+
+            var limit = threshold ?? TimeSpan.FromMinutes(2);
+
+            return DateTimeOffset.UtcNow - value.Value <= limit;
+
+        }
+
     }
 }

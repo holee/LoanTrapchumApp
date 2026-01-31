@@ -1,9 +1,4 @@
-﻿using Applications.Features.Collaterals.Dtos;
-using Applications.Features.Loans.Responses;
-using Applications.Responses.ViewModels.Customers;
-using Applications.Responses.ViewModels.Loans.Requests;
-
-namespace Applications.Features.Customers.Response;
+﻿namespace Applications.Features.Customers.Response;
 
 public sealed class VCustomerDetails
 {
