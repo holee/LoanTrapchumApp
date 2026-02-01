@@ -57,7 +57,7 @@ namespace TrapchumApp.Pages.Lists.Customers
         {
             try
             {
-                if (!args.Files.Any())
+                if (args.Files is not null && !args.Files.Any())
                 {
                     if (!string.IsNullOrEmpty(tempUrl))
                     {
@@ -70,7 +70,7 @@ namespace TrapchumApp.Pages.Lists.Customers
                     return;
                 }
 
-                var file = args.Files.FirstOrDefault();
+                var file = args.Files?.FirstOrDefault();
 
                 if (file is null || (file is not null && file.Size > maxFileSize))
                 {

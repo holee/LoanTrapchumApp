@@ -16,7 +16,8 @@ public sealed class CreateIncomeCommandValidator : AbstractValidator<CreateIncom
 
         When(x => x.Request is not null, () =>
         {
-            RuleFor(x => x.Request.Amount)
+            RuleFor(x => x.Request.Amount).Cascade(CascadeMode.Stop)
+                .NotNull().WithMessage("Amount is required.")
                 .GreaterThan(0)
                 .WithMessage("Amount must be greater than zero.");
             RuleFor(x => x.Request.IncomeSource)

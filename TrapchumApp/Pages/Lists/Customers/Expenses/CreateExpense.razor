@@ -1,19 +1,19 @@
 ﻿@using Applications.Features.Incomes.Dto
 <EditForm Model="@model" OnValidSubmit="@HandleFormSubmit">
-    <ValidationSummary />
     <FluentValidationValidator DisableAssemblyScanning="false" />
     <RadzenRow>
         <RadzenColumn Size="6">
             <RadzenFormField class="rz-w-100" Text="Expense Title" AllowFloatingLabel="true">
                 <ChildContent>
                     <RadzenDropDown Data="@_incomeExpenses"
+                                    class="rz-w-100"
                                     TextProperty="@nameof(IncomeExpenseDto.Description)"
                                     ValueProperty="@nameof(IncomeExpenseDto.Description)"
-                                    AllowFiltering="true"
                                     LoadData="@LoadData"
-                                    class="rz-w-100"
+                                    AllowFiltering="true"
+                                    Close="@ClosedDropDown"
+                                    @bind-SearchText="@searchText"
                                     @bind-Value="model.ExpenseTitle">
-
                     </RadzenDropDown>
                 </ChildContent>
                 <Helper>
@@ -32,7 +32,7 @@
             </RadzenFormField>
         </RadzenColumn>
     </RadzenRow>
-    
+
     <RadzenFormField class="rz-w-100 rz-mt-2" Text="Description" AllowFloatingLabel="true">
         <ChildContent>
             <RadzenTextArea @bind-Value="model.Description" class="rz-w-100" />
@@ -58,3 +58,49 @@
 </EditForm>
 
 
+@code {
+
+    private string? searchText = string.Empty;
+
+    public string? SearchText
+    {
+        get => searchText;
+
+        set
+        {
+            if (searchText != value)
+            {
+                searchText = value;
+            }
+        }
+    }
+
+    void ClosedDropDown()
+    {
+        _ = AddIfNotExists(SearchText ?? "");
+    }
+
+    private async Task AddIfNotExists(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+            return;
+
+        model.ExpenseTitle = text;
+
+        var exists = _incomeExpenses
+                    .Any(x => x.Description
+                        .Equals(text, StringComparison.OrdinalIgnoreCase));
+
+        if (!exists)
+        {
+            var newItem = new IncomeExpenseDto
+            {
+                Description = text
+            };
+
+            _incomeExpenses.Insert(0, newItem);
+        }
+
+        StateHasChanged();
+    }
+}

@@ -106,9 +106,9 @@ namespace TrapchumApp.Pages.Lists.Customers
             {
                 Resizable = false,
                 Draggable = true,
-            }, parameters: new Dictionary<string, object?>
+            }, parameters: new Dictionary<string, object>
             {
-                { "CustomerId", customerId }
+                { "CustomerId", customerId! }
             });
         }
 
@@ -119,9 +119,9 @@ namespace TrapchumApp.Pages.Lists.Customers
             {
                 Resizable = false,
                 Draggable = true,
-            }, parameters: new Dictionary<string, object?>
+            }, parameters: new Dictionary<string, object>
             {
-                { "CustomerId", customerId }
+                { "CustomerId", customerId! }
             });
         }
 
@@ -291,7 +291,9 @@ namespace TrapchumApp.Pages.Lists.Customers
                 builer.AddAttribute(3, "UpdateState", EventCallback.Factory.Create(this, async (VCustomerList x) =>
                 {
                     _lastRowId = x.CustomerId;
+
                     await _gridCustomer.Reload();
+
                 }));
                 builer.SetKey(newTabId);
                 builer.CloseComponent();
@@ -329,12 +331,12 @@ namespace TrapchumApp.Pages.Lists.Customers
 
         void OnRowRender(RowRenderEventArgs<VCustomerList> args)
         {
-            if (args.Data.IsLoanActive)
+            if (args.Data!.IsLoanActive)
             {
                 args.Attributes.Add("style", "font-weight:bold;color:red;background-color:yellow;");
             }
 
-            if (args.Data.ModifiedDT.IsRecently())
+            if (args.Data!.ModifiedDT.IsRecently())
             {
                 args.Attributes.Add("class", "rz-state-highlight rz-data-row recently-edited");
 
@@ -343,7 +345,7 @@ namespace TrapchumApp.Pages.Lists.Customers
 
         void OnCellRender(RowRenderEventArgs<VCustomerList> e)
         {
-            if (e.Data.CustomerId == _lastRowId)
+            if (e.Data!.CustomerId == _lastRowId)
             {
                 e.Attributes.Add("class", "rz-state-highlight rz-data-row recently-edited");
             }
@@ -357,7 +359,7 @@ namespace TrapchumApp.Pages.Lists.Customers
 
         void OnRowDoubleClick(DataGridRowMouseEventArgs<VCustomerList> args)
         {
-            _ = AddDetails(args.Data.CustomerId);
+            _ = AddDetails(args.Data!.CustomerId);
         }
 
         void OnRowDoubleClick(VCustomerList args)

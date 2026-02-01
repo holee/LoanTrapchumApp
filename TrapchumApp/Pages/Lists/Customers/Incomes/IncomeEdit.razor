@@ -1,36 +1,44 @@
 ﻿@using Applications.Features.Incomes.Dto
 <EditForm Model="@model" OnValidSubmit="HandleFormSubmit">
-    <ValidationSummary />
+    <FluentValidationValidator DisableAssemblyScanning="true" />
     <input type="hidden" @bind="model.CustomerId"/>
-    <RadzenFormField class="rz-w-100" Text="Income Source" AllowFloatingLabel="true">
-        <ChildContent>
-            <RadzenDropDown Data="@_incomeExpenses"
-                            TextProperty="@nameof(IncomeExpenseDto.Description)"
-                            ValueProperty="@nameof(IncomeExpenseDto.Description)"
-                            AllowFiltering="true"
-                            LoadData="@LoadData"
-                            class="rz-w-100"
-                            @bind-Value="model.IncomeSource">
-            </RadzenDropDown>
-        </ChildContent>
-        <Helper>
-            <ValidationMessage For="() => model.IncomeSource" />
-        </Helper>
-    </RadzenFormField>
+    <RadzenRow>
+        <RadzenColumn Size="6">
+            <RadzenFormField class="rz-w-100" Text="Income Source" AllowFloatingLabel="true">
+                <ChildContent>
+                    <RadzenDropDown Data="@_incomeExpenses"
+                                    TextProperty="@nameof(IncomeExpenseDto.Description)"
+                                    ValueProperty="@nameof(IncomeExpenseDto.Description)"
+                                    AllowFiltering="true"
+                                    LoadData="@LoadData"
+                                    class="rz-w-100"
+                                    Close="@ClosedDropDown"
+                                    @bind-SearchText="@SearchText"
+                                    @bind-Value="model.IncomeSource">
+                    </RadzenDropDown>
+                </ChildContent>
+                <Helper>
+                    <ValidationMessage For="() => model.IncomeSource" />
+                </Helper>
+            </RadzenFormField>
+        </RadzenColumn>
+        <RadzenColumn Size="6">
+            <RadzenFormField class="rz-w-100 rz-mt-2" Text="Amount" AllowFloatingLabel="true">
+                <ChildContent>
+                    <TCNumbers @bind-Value="model.Amount" Min="0" />
+                </ChildContent>
+                <Helper>
+                    <ValidationMessage For="@(() => model.Amount)" />
+                </Helper>
+            </RadzenFormField>
+        </RadzenColumn>
+    </RadzenRow>
+  
     <RadzenFormField class="rz-w-100 rz-mt-2" Text="Description" AllowFloatingLabel="true">
         <ChildContent>
             <RadzenTextArea @bind-Value="model.Description" class="rz-w-100" />
         </ChildContent>
     </RadzenFormField>
-    <RadzenFormField class="rz-w-100 rz-mt-2" Text="Amount" AllowFloatingLabel="true">
-        <ChildContent>
-            <TCNumbers @bind-Value="model.Amount" Min="0"/>
-        </ChildContent>
-        <Helper>
-            <ValidationMessage For="@(() => model.Amount)" />
-        </Helper>
-    </RadzenFormField>
-
     <RadzenStack Orientation="Orientation.Horizontal"
                  JustifyContent="JustifyContent.End"
                  class="rz-mt-2"
@@ -50,3 +58,49 @@
 </EditForm>
 
 
+@code {
+
+    private string? searchText = string.Empty;
+
+    public string? SearchText
+    {
+        get => searchText;
+
+        set
+        {
+            if (searchText != value)
+            {
+                searchText = value;
+            }
+        }
+    }
+
+    void ClosedDropDown()
+    {
+        _ = AddIfNotExists(SearchText ?? "");
+    }
+
+    private async Task AddIfNotExists(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+            return;
+
+        model.IncomeSource = text;
+
+        var exists = _incomeExpenses
+                    .Any(x => x.Description
+                        .Equals(text, StringComparison.OrdinalIgnoreCase));
+
+        if (!exists)
+        {
+            var newItem = new IncomeExpenseDto
+            {
+                Description = text
+            };
+
+            _incomeExpenses.Insert(0, newItem);
+        }
+
+        StateHasChanged();
+    }
+}

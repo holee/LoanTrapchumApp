@@ -1,5 +1,9 @@
 using Applications.Extensions;
+using Applications.Extensions.DateTimes;
 using Applications.Features.Addresses.Responses;
+using Applications.Features.Customers.Response;
+using Applications.Features.Employees.Commands.ChangeEmployeeState;
+using Applications.Features.Employees.Queries.GetEmployeeAsPaging;
 using Applications.Features.Employees.Requests;
 using Applications.Features.Entities;
 using Applications.Interfaces.Lists;
@@ -10,68 +14,83 @@ using Applications.Responses.ViewModels.Employees;
 using Domains.Models.Addresses;
 using Domains.Models.Lists;
 using Radzen.Blazor;
+using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Lists.Employees
 {
     public partial class EmployeesIndex
     {
+
+        private int selectedIndex = 0;
         private readonly INationalityService _nationalityService;
         private readonly IDepartmentService _departmentService;
         private readonly ILogger<EmployeesIndex> _logger;
+        private string? _lastEmployeeId = string.Empty;
+        List<BranchDto> Branches = [];
+        int pageSize = 15;
+        int counts = 0;
+        int pageIndex = 1;
+        string sortField = nameof(VEmployeeList.ModifiedDT);
+        bool sortDescending = true;
+        string? _empId = string.Empty;
+        int branchId = 0;
+        public EmployeeDto? employee;
 
-        public EmployeesIndex(INationalityService nationalityService,
-            IDepartmentService departmentService,
-            ILogger<EmployeesIndex> logger)
+        string searchText = string.Empty;
+
+        [PersistentState(AllowUpdates = true)]
+        public List<VEmployeeList> Employees { get; set; }
+
+        protected bool includeInActive = false;
+
+        bool isLoading = false;
+
+        private RadzenDataGrid<VEmployeeList> _gridEmployee = default!;
+        public EmployeesIndex(INationalityService nationalityService, IDepartmentService departmentService, ILogger<EmployeesIndex> logger)
         {
             _nationalityService = nationalityService;
             _departmentService = departmentService;
             _logger = logger;
         }
-
-        RadzenTabs tabs = default!;
-
-        List<TabItems> tabItems = [];
+        private List<CustomTab> _tabs = [];
 
         string? filter = string.Empty;
 
         IList<VEmployeeList> SelectedEmployees = [];
 
-        void OnRowRender(RowRenderEventArgs<VEmployeeList> e)
-        {
-            if (e.Data.IsActive)
-            {
-                //e.Attributes.Add("style", "color:red;background-color:yellow;");
-            }
 
-            e.Data.RowIndex = e.Index + 1; // store 1-based index
+        void OnCellRender(RowRenderEventArgs<VEmployeeList> e)
+        {
+            if (e.Data!.EmployeeId == _lastEmployeeId)
+            {
+                e.Attributes.Add("class", "rz-state-highlight rz-data-row recently-edited");
+            }
         }
 
-        bool IsEnableEdit = false;
-        bool IsEnableNew = false;
-        bool IsEnableDetail = false;
-        [Parameter] public int selectedIndex { get; set; } = 0;
-        EmployeeDto Employee = new();
-        IEnumerable<ProvinceDto> Provinces = [];
-        IEnumerable<string> Salutations = [];
-        List<BranchDto> Branches = [];
-        IEnumerable<DepartmentDto> Departments = [];
-        IEnumerable<Country> Countries = [];
-        IEnumerable<Nationality> Nationalities = [];
-        IEnumerable<OcupationResponse>? Occuptions = [];
-        IEnumerable<string> Cities = [];
-        EmployeeDtoUpdate EmployeeEdit = new();
-        int pageSize = 15;
-        int counts = 0;
-        int pageIndex = 1;
-        string sortField = "EmployeeId";
-        bool sortDescending = false;
-        string? _empId = string.Empty;
-        int branchId = 0;
+
+        private void OnRowSelected(VEmployeeList args)
+        {
+
+        }
+
+        void OnRowRender(RowRenderEventArgs<VEmployeeList> args)
+        {
+
+            if (args.Data!.ModifiedDT.IsRecently())
+            {
+                args.Attributes.Add("class", "rz-state-highlight rz-data-row recently-edited");
+
+            }
+
+            args.Data.RowIndex = args.Index + 1; // store 1-based index
+        }
 
         async Task PageSizeChanged(int page)
         {
             pageSize = page;
+
             pageIndex = 0;
+
             await GetEmployees(branchId, filter);
         }
 
@@ -88,19 +107,28 @@ namespace TrapchumApp.Pages.Lists.Employees
 
             if (confirm == false) return;
 
+            var command = new ChangeEmployeeStateCommand(employeeId, state);
 
-            var responseResult = await _employeeService!.UpdateIsActiveAsync(employeeId, state);
+            var rsp = await mediator.Send(command);
 
-            if (!responseResult.IsSuccess)
+            if (!rsp.IsSuccess())
             {
-                NotificationService.Notify(NotificationSeverity.Error, responseResult.ErrMessage);
+                NotificationService.Notify(NotificationSeverity.Error, rsp.GetMessage());
 
                 return;
             }
 
-            NotificationService.Notify(NotificationSeverity.Success, responseResult.Data);
+            NotificationService.Notify(NotificationSeverity.Success, "Employee was changed");
 
-            await GetEmployees(branchId, searchText);
+            var foundIndex = Employees.FindIndex(e => e.EmployeeId == rsp.Value.EmployeeId);
+
+            if (foundIndex != -1)
+            {
+                Employees[foundIndex] = rsp.Value;
+            }
+
+            await _gridEmployee.Reload();
+
         }
 
         async Task GetBranches()
@@ -124,72 +152,194 @@ namespace TrapchumApp.Pages.Lists.Employees
             }
         }
 
-
-        void AddNewTab()
+        void CreateNewEmployeeTab()
         {
-            IsEnableNew = true;
-            selectedIndex = 1;
-            tabs.Reload();
-            tabCount++;
-            StateHasChanged();
+
+            var newTabId = Guid.NewGuid().ToString("N");
+
+            RenderFragment childContent = builer =>
+            {
+                builer.OpenComponent(0, typeof(CreateEmployee));
+
+                builer.AddAttribute(1, "OnClose", EventCallback.Factory.Create(this, () =>
+                {
+                    CloseTab(newTabId);
+
+                }));
+                builer.AddAttribute(2, "Reloaded", EventCallback.Factory.Create(this, async (VEmployeeList x) =>
+                {
+                    // _lastRowId = x.CustomerId;
+                    // await _gridCustomer.Reload();
+                }));
+
+                builer.AddAttribute(3, "UpdateStateChanged", EventCallback.Factory.Create(this, async (VEmployeeList x) =>
+                {
+                    _lastEmployeeId = x.EmployeeId;
+                    await _gridEmployee.Reload();
+                }));
+
+
+                builer.SetKey(newTabId);
+                builer.CloseComponent();
+            };
+
+            var newTab = new CustomTab
+            {
+                Key = newTabId,
+                Title = "New Customer",
+                TabAction = TabActions.Create,
+                Content = childContent,
+            };
+
+            _tabs.Add(newTab);
+
+            selectedIndex = _tabs.Count;
+
+
         }
 
 
-        void AddDetailsTab(string? employeeId)
+        void AddEditTab(string? id)
+        {
+
+            ContextMenuService.Close();
+
+            var editTabId = string.IsNullOrEmpty(id) ? Guid.NewGuid().ToString("N") : $"{id}_edit";
+
+            var existingTabIndex = _tabs.FindIndex(t => t.Key == editTabId);
+
+            if (existingTabIndex != -1)
+            {
+                selectedIndex = existingTabIndex + 1;
+                return;
+            }
+
+            RenderFragment childContent = builer =>
+            {
+                builer.OpenComponent(0, typeof(EmployeeEdit));
+
+                builer.AddAttribute(1, "EmployeeId", id);
+
+                builer.AddAttribute(2, "OnClose", EventCallback.Factory.Create(this, () =>
+                {
+                    CloseTab(editTabId);
+                }));
+
+                builer.AddAttribute(3, "Reloaded", EventCallback.Factory.Create(this, () =>
+                {
+
+                }));
+
+                builer.AddAttribute(4, "UpdateChanged", EventCallback.Factory.Create(this, async (VEmployeeList x) =>
+                {
+
+                    var foundIndex = Employees?.FindIndex(c => c.EmployeeId == x.EmployeeId) ?? -1;
+
+                    if (foundIndex != -1)
+                    {
+                        Employees![foundIndex] = x;
+                    }
+
+                    await _gridEmployee.Reload();
+
+                }));
+
+                builer.SetKey(editTabId);
+
+                builer.CloseComponent();
+            };
+
+
+            var newTab = new CustomTab
+            {
+                Key = editTabId,
+
+                Title = "Edit",
+
+                TabAction = TabActions.Edit,
+
+                Content = childContent,
+            };
+
+            _tabs.Add(newTab);
+
+            selectedIndex = _tabs.Count;
+
+
+        }
+
+
+        void AddDetailsTab(string? id)
         {
             ContextMenuService.Close();
-            try
+
+            var existingTabIndex = _tabs.FindIndex(t => t.Key == id);
+
+            if (existingTabIndex != -1)
             {
-                _empId = employeeId;
-                IsEnableDetail = true;
-                selectedIndex = 3;
-                tabs.Reload();
+                selectedIndex = existingTabIndex + 1;
+
                 StateHasChanged();
+
+                return;
             }
-            catch (Exception ex)
+
+            RenderFragment childContent = builer =>
             {
-                NotificationService.Notify(NotificationSeverity.Error, ex.Message);
+                builer.OpenComponent(0, typeof(EmployeeDetails));
+                builer.AddAttribute(1, "BranchId", branchId);
+                builer.AddAttribute(2, "EmployeeId", id);
+                builer.AddAttribute(3, "Close", EventCallback.Factory.Create(this, () =>
+                {
+                    CloseTab(id);
+                }));
+
+                builer.AddAttribute(4, "OnEdit", EventCallback.Factory.Create(this, async (string x) =>
+                {
+                    AddEditTab(x);
+                }));
+
+                builer.CloseComponent();
+
+            };
+
+            var newTab = new CustomTab
+            {
+                Key = id ?? string.Empty,
+
+                Title = "Details",
+
+                TabAction = TabActions.Details,
+
+                Content = childContent,
+            };
+
+            _tabs.Add(newTab);
+
+            selectedIndex = _tabs.Count;
+        }
+
+
+
+        private void CloseTab(string? id)
+        {
+            var tab = _tabs.FirstOrDefault(t => t.Key == id);
+
+            if (tab != null)
+            {
+                var idx = _tabs.IndexOf(tab);
+
+                _tabs.Remove(tab);
+
+                selectedIndex = Math.Max(0, idx);
             }
+
         }
 
-        void AddEditTab(string? employeeId)
-        {
-            ContextMenuService.Close();
-
-            _empId = employeeId;
-
-            IsEnableEdit = true;
-
-            selectedIndex = 2;
-
-            StateHasChanged();
-        }
-
-        void OnEditTab(string? employeeId)
-        {
-            _empId = employeeId;
-            IsEnableEdit = true;
-            selectedIndex = 2;
-            StateHasChanged();
-        }
 
         void TabChanged(int e)
         {
             selectedIndex = e;
-            StateHasChanged();
-        }
-
-        void OnIsEditClose(bool isEditCloses)
-        {
-            IsEnableEdit = isEditCloses;
-            selectedIndex = 0;
-            StateHasChanged();
-        }
-
-        void OnIsDetailClose(bool isDetailCloses)
-        {
-            IsEnableDetail = isDetailCloses;
-            selectedIndex = 0;
             StateHasChanged();
         }
 
@@ -198,32 +348,12 @@ namespace TrapchumApp.Pages.Lists.Employees
             await GetEmployees(branchId, searchText);
         }
 
-        public EmployeeDto? employee;
-
-        string searchText = string.Empty;
-
-        List<VEmployeeList> Employees = [];
-
-        protected bool includeInActive = false;
-
-        bool isLoading = false;
-
         protected async Task PerformSearch(string? searchtext = null)
         {
             searchText = searchtext ?? string.Empty;
 
             await GetEmployees(branchId, searchText);
         }
-
-        void OnClosing(bool isNewClosed)
-        {
-            IsEnableNew = isNewClosed;
-
-            selectedIndex = 0;
-
-            StateHasChanged();
-        }
-
 
         protected async Task Reload()
         {
@@ -232,16 +362,11 @@ namespace TrapchumApp.Pages.Lists.Employees
 
         protected override async Task OnInitializedAsync()
         {
-            try
-            {
-                await GetBranches();
 
-                await GetEmployees(branchId);
-            }
-            catch (Exception ex)
-            {
-                NotificationService.Notify(NotificationSeverity.Error, ex.Message);
-            }
+            await GetBranches();
+
+            await GetEmployees(branchId);
+
         }
 
         async Task Delete(string? employeeId)
@@ -289,7 +414,9 @@ namespace TrapchumApp.Pages.Lists.Employees
             {
                 var param = new QueryParam(pageIndex, pageSize, sortField, includeInActive, sortDescending, q);
 
-                var pageDate = await _employeeService.GetEmployeesAsync(branchId, null, param);
+                var query = new GetEmployeeAsPagingQuery(branchId, null, param);
+
+                var pageDate = await mediator.Send(query);
 
                 counts = pageDate.Count;
 
@@ -318,22 +445,16 @@ namespace TrapchumApp.Pages.Lists.Employees
 
             pageSize = e.Top ?? 15;
 
-            if (e.Sorts.Any())
-            {
-                sortField = e.Sorts.FirstOrDefault()!.Property;
+            (sortField, sortDescending) = e.PageInfo(nameof(VEmployeeList.ModifiedDT));
 
-                sortDescending = e.Sorts.FirstOrDefault()?.SortOrder == SortOrder.Descending;
-            }
+            var filterValue = e.GetFilterValue(nameof(VEmployeeList.AltName),
+                                               nameof(VEmployeeList.Phone),
+                                               nameof(VEmployeeList.EmailAddress),
+                                               nameof(VEmployeeList.DepartmentName),
+                                               nameof(VEmployeeList.Occupation),
+                                               nameof(VEmployeeList.BranchName));
 
-            var filterColumn = e.Filters?.FirstOrDefault(p => p.Property == nameof(VEmployeeList.AltName) ||
-                                                            p.Property == nameof(VEmployeeList.Phone) ||
-                                                            p.Property == nameof(VEmployeeList.EmailAddress) ||
-                                                            p.Property == nameof(VEmployeeList.DepartmentName) ||
-                                                            p.Property == nameof(VEmployeeList.Occupation) ||
-                                                            p.Property == nameof(VEmployeeList.BranchName))?.FilterValue?.ToString() ?? string.Empty;
-
-
-            searchText = filterColumn ?? string.Empty;
+            searchText = filterValue ?? string.Empty;
 
             await GetEmployees(branchId, searchText);
         }
@@ -352,7 +473,7 @@ namespace TrapchumApp.Pages.Lists.Employees
         }
         private void OnRowDoubleClick(DataGridRowMouseEventArgs<VEmployeeList> args)
         {
-            AddDetailsTab(args.Data.EmployeeId);
+            AddDetailsTab(args.Data?.EmployeeId);
             tabCount++;
         }
     }

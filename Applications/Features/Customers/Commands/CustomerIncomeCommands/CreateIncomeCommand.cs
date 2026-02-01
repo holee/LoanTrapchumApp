@@ -1,7 +1,4 @@
-﻿using Applications.Responses;
-using Applications.Responses.ViewModels.Customers;
-
-namespace Applications.Features.Customers.Commands.CustomerIncomeCommands;
+﻿namespace Applications.Features.Customers.Commands.CustomerIncomeCommands;
 
 public sealed class CreateIncomeCommand
 {
@@ -11,3 +8,4 @@ public sealed class CreateIncomeCommand
     public string? Description { get; set; }
 
 }
+

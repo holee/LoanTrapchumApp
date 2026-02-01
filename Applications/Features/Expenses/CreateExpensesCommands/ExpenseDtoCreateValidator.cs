@@ -8,6 +8,7 @@ public sealed class ExpenseDtoCreateValidator : AbstractValidator<ExpenseDtoCrea
     public ExpenseDtoCreateValidator()
     {
         RuleFor(x => x.Amount)
+            .NotNull().WithMessage("Expense amount is required.")
            .GreaterThan(0)
            .WithMessage("Expense amount must be greater than zero.");
 

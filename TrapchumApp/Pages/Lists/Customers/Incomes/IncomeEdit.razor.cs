@@ -17,7 +17,7 @@ namespace TrapchumApp.Pages.Lists.Customers.Incomes
         [Parameter] public EventCallback<bool> OnClose { get; set; }
 
         private EditIncomeDto model = new EditIncomeDto();
-        private IEnumerable<IncomeExpenseDto> _incomeExpenses = [];
+        private List<IncomeExpenseDto> _incomeExpenses = [];
         private string _filter = String.Empty;
         async Task LoadData(LoadDataArgs arg)
         {

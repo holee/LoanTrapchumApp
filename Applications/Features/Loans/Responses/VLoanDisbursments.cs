@@ -19,6 +19,8 @@ public sealed class VLoanDisbursments
     public string? Phone { get; set; }
     public string? Salutation { get; set; }
     public DateTime? RegisterDate { get; set; }
+
+    public string? ManagerId { get; set; } = string.Empty;
     public string? CreditAgentRefId { get; set; }
     public string? AgentName { get; set; }
     public string? CreditAgentKhmer { get; set; }

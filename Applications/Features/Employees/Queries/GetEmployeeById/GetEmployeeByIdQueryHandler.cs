@@ -9,6 +9,6 @@ public sealed class GetEmployeeByIdQueryHandler(IEmployeeService empService) : I
 {
     public async Task<ErrorOr<EntityNames>> Handle(GetEmployeeByIdQuery request, CancellationToken cancellationToken)
     {
-        return await empService.GetByIdAsync(request.EmployeeId, request.BranchId);
+        return await empService.GetByIdAsync(request.EmployeeId, request.BranchId, cancellationToken);
     }
 }

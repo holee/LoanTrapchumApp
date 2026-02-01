@@ -15,7 +15,7 @@ public interface IDepartmentServiceImpl
     Task<Result<Department>> GetDepartmentById(int? departmentId);
     Task<Result<VDepartment>> GetDepartmentDetails(int? departmentId);
     Task<Result<IEnumerable<Department>>> GetDepartments(int? departmentId, int take = 0, string? condition = null);
-    Task<Result<IEnumerable<T>>> GetDepartments<T>(int? departmentId, int take = 0, string? condition = null) where T:class;
+    //Task<Result<IEnumerable<T>>> GetDepartments<T>(int? departmentId, int take = 0, string? condition = null) where T:class;
 
     Task<Pager<VDepartment>> GetDepartments(QueryParam param);
 }

@@ -18,7 +18,7 @@ public partial class CustomerModalExpenseEdit
 
     private string _filter = string.Empty;
 
-    private IEnumerable<IncomeExpenseDto> _incomeExpenses = [];
+    private List<IncomeExpenseDto> _incomeExpenses = [];
     async Task LoadData(LoadDataArgs arg)
     {
         _filter = arg.Filter ?? String.Empty;

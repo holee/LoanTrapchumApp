@@ -37,11 +37,13 @@ public sealed class VEmployeeList
     public string? DepartmentName { get; set; } = string.Empty;
     public string? UserId { get; set; }
     public string? UserName { get; set; }
+
+    public string? ManagerId { get; set; } = string.Empty;
+    public DateTimeOffset? ModifiedDT { get; set; } 
     public override string ToString()
     {
         return $"{DisInKhmer!} {DisInKhmer!} {ComInKhmer!} {VilInKhmer!}";
     }
-
 
     [NotMapped]
     public string FullName

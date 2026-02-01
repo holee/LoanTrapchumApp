@@ -13,7 +13,7 @@
     <base href="/" />
     <link rel="stylesheet" href="@Assets["app.css"]" />
     <link rel="stylesheet" href="@Assets["TrapchumApp.styles.css"]" />
-    <ImportMap  />
+    <ImportMap />
     <link rel="icon" type="image/png" href="/assets/logo/tch_Logo.ico" />
     <HeadOutlet @rendermode="@PageRenderMode" />
     <RadzenTheme Theme="material" @rendermode="@InteractiveServer" />
@@ -21,11 +21,20 @@
 
 <body>
     <Routes @rendermode="@PageRenderMode" />
-    <script src="_framework/blazor.web.js"></script>
+    <script src="@Assets["_framework/blazor.web.js"]"></script>
     <script src="@Assets["_content/Radzen.Blazor/Radzen.Blazor.js?v=@(typeof(Radzen.Colors).Assembly.GetName().Version)"]"></script>
     <script src="@Assets["assets/js/printer.js"]"></script>
     <script src="@Assets["assets/js/toggle.js"]"></script>
     <script src="@Assets["assets/js/dropdownoutsideclick.js"]"></script>
+    <script>
+        document.addEventListener("visibilitychange",()=>{
+            if(document.hidden){
+                Blazor.pauseCircuit();
+            }else{
+                Blazor.resumeCircuit();
+            }
+        });
+    </script>
 </body>
 
 </html>
@@ -38,5 +47,5 @@
        ? null
        : new InteractiveServerRenderMode(false);
 
-    private IComponentRenderMode? PageRenderMode => HttpContext.AcceptsInteractiveRouting() ? new InteractiveServerRenderMode(prerender:false) : null;
+    private IComponentRenderMode? PageRenderMode => HttpContext.AcceptsInteractiveRouting() ? new InteractiveServerRenderMode() : null;
 }

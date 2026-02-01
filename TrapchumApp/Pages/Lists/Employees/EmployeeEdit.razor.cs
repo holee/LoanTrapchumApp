@@ -1,23 +1,26 @@
 using Applications.Features.Addresses.Responses;
+using Applications.Features.Employees.Commands.EditEmployee;
 using Applications.Features.Employees.Dto;
+using Applications.Features.Employees.Queries.GetEditEmployee;
 using Applications.Features.Entities;
 using Applications.Responses.Lists.Entities;
 using Applications.Responses.Paginations;
+using Applications.Responses.ViewModels.Employees;
 using Applications.Services.Lists;
 using Domains.Models.Addresses;
 using Domains.Models.Files;
 using Domains.Models.Lists;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Forms;
-using Microsoft.AspNetCore.Components.Web;
-using Radzen;
+using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Lists.Employees
 {
     public partial class EmployeeEdit
     {
-        [Parameter] public EventCallback<bool> OnClose { get; set; }
+        [Parameter] public EventCallback OnClose { get; set; }
+        [Parameter] public EventCallback<VEmployeeList> UpdateChanged { get; set; }
         [Parameter] public string? EmployeeId { get; set; }
+        [Parameter] public EventCallback Reloaded { get; set; }
+
         private readonly INationalityServiceImpl _nationalityService;
         private readonly IDepartmentServiceImpl _departmentService;
         private readonly ISalutationServiceImpl _salutationService;
@@ -43,7 +46,7 @@ namespace TrapchumApp.Pages.Lists.Employees
         IEnumerable<string> Cities = [];
         protected EntityEmployeeCreate model = new EntityEmployeeCreate
         {
-            Id=$"emp-{Guid.CreateVersion7()}"
+            Id = $"emp-{Guid.CreateVersion7()}"
         };
         protected FileModel? fileModelDTO;
         protected EditForm? editForm;
@@ -53,71 +56,6 @@ namespace TrapchumApp.Pages.Lists.Employees
         private IEnumerable<string> supervisors = new List<string> { "Supervisor", "Manager", "CEO" };
         private IEnumerable<string> genders = new List<string> { "Male", "Female", "Other" };
         private IEnumerable<string> maritalStatuses = new List<string> { "Single", "Married", "Divorced", "Widowed" };
-        async void SelectedProvinceChanged(object arg)
-        {
-            if (arg is not null)
-            {
-                model.ProInKhmer = ((ProvinceDto)arg).ProInKhmer;
-                Districts = await _addressService!.GetDistrictsByProvinceId(((ProvinceDto)arg).ProvinceId);
-                StateHasChanged();
-            }
-
-        }
-        async void SelectedDistrictChanged(object arg)
-        {
-            if (arg is not null)
-            {
-                model.DisInKhmer = ((DistrictDto)arg).DisInKhmer;
-                Communes = await _addressService!.GetCommunesByDistrictId(((DistrictDto)arg).DistrictId);
-                StateHasChanged();
-            }
-
-        }
-        async void SelectedCommuneChanged(object arg)
-        {
-            if (arg is not null)
-            {
-                model.ComInKhmer = ((CommuneDto)arg).ComInKhmer;
-                Villages = await _addressService!.GetVillagesByCommuneId(((CommuneDto)arg).CommuneId);
-                StateHasChanged();
-            }
-
-        }
-        void SelectedVillageChanged(object arg)
-        {
-            if (arg is not null)
-            {
-                model.VilInKhmer = ((VillageDto)arg).VilInKhmer;
-                StateHasChanged();
-            }
-
-        }
-
-        void OnProgress(UploadProgressArgs args, string name)
-        {
-            if (args.Progress == 100)
-            {
-                foreach (var file in args.Files)
-                {
-
-                }
-            }
-        }
-        void SetFirstNameToName()
-        {
-            model.Name = model.FirstName;
-        }
-
-        void OnChange(string value, string name)
-        {
-
-        }
-
-        void OnError(UploadErrorEventArgs args, string name)
-        {
-        }
-
-        [Parameter] public EventCallback Reloaded { get; set; }
 
         async void Reload()
         {
@@ -173,11 +111,14 @@ namespace TrapchumApp.Pages.Lists.Employees
 
         async Task GetEditEmployee()
         {
-            var rsp = await _employeeService.GetEmployeeForUpdate(EmployeeId);
 
-            if (rsp.IsSuccess)
+            var query = new GetEditEmployeeQuery(EmployeeId);
+
+            var rsp = await mediator.Send(query); 
+
+            if (rsp.IsSuccess())
             {
-                model = rsp.Data!;
+                model = rsp.Value;
             }
 
             Districts = model is not null && model.ProvinceRefId == 0 ? [] : await _addressService.GetDistrictsByProvinceId(model?.ProvinceRefId);
@@ -228,19 +169,18 @@ namespace TrapchumApp.Pages.Lists.Employees
             try
             {
 
-                var rsp = await _employeeService.UpdateAsync(model);
+                var command = new EditEmployeeCommand(model);
 
-                if (rsp.IsSuccess)
+                var rsp = await mediator.Send(command); //_employeeService.UpdateAsync(model);
+
+                if (rsp.IsSuccess())
                 {
-                    NotificationService.Notify(NotificationSeverity.Success, rsp.Data);
-
-                    await CloseTab();
-
-                    Reload();
+                    NotificationService.Notify(NotificationSeverity.Success, "Employee was updated successfully.");
+                    
                 }
                 else
                 {
-                    NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Error, rsp.GetMessage());
                 }
             }
             catch (Exception ex)
@@ -251,3 +191,68 @@ namespace TrapchumApp.Pages.Lists.Employees
         }
     }
 }
+
+//async void SelectedProvinceChanged(object arg)
+//{
+//    if (arg is not null)
+//    {
+//        model.ProInKhmer = ((ProvinceDto)arg).ProInKhmer;
+//        Districts = await _addressService!.GetDistrictsByProvinceId(((ProvinceDto)arg).ProvinceId);
+//        StateHasChanged();
+//    }
+
+//}
+//async void SelectedDistrictChanged(object arg)
+//{
+//    if (arg is not null)
+//    {
+//        model.DisInKhmer = ((DistrictDto)arg).DisInKhmer;
+//        Communes = await _addressService!.GetCommunesByDistrictId(((DistrictDto)arg).DistrictId);
+//        StateHasChanged();
+//    }
+
+//}
+//async void SelectedCommuneChanged(object arg)
+//{
+//    if (arg is not null)
+//    {
+//        model.ComInKhmer = ((CommuneDto)arg).ComInKhmer;
+//        Villages = await _addressService!.GetVillagesByCommuneId(((CommuneDto)arg).CommuneId);
+//        StateHasChanged();
+//    }
+
+//}
+//void SelectedVillageChanged(object arg)
+//{
+//    if (arg is not null)
+//    {
+//        model.VilInKhmer = ((VillageDto)arg).VilInKhmer;
+//        StateHasChanged();
+//    }
+
+//}
+
+//void OnProgress(UploadProgressArgs args, string name)
+//{
+//    if (args.Progress == 100)
+//    {
+//        foreach (var file in args.Files)
+//        {
+
+//        }
+//    }
+//}
+//void SetFirstNameToName()
+//{
+//    model.Name = model.FirstName;
+//}
+
+//void OnChange(string value, string name)
+//{
+
+//}
+
+//void OnError(UploadErrorEventArgs args, string name)
+//{
+//}
+

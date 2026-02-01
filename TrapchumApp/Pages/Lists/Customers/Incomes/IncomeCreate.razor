@@ -1,6 +1,6 @@
 ﻿@using Applications.Features.Incomes.Dto
 <EditForm Model="@model" OnValidSubmit="HandleFormSubmit">
-    <ValidationSummary />
+    <FluentValidationValidator DisableAssemblyScanning="true" />
     <input type="hidden" @bind="model.CustomerId" />
     <RadzenRow AlignItems="AlignItems.Center">
         <RadzenColumn Size="6">
@@ -12,6 +12,8 @@
                                     AllowFiltering="true"
                                     LoadData="@LoadData"
                                     class="rz-w-100"
+                                    Close="ClosedDropDown"
+                                    @bind-SearchText="@SearchText"
                                     @bind-Value="model.IncomeSource">
 
                     </RadzenDropDown>
@@ -38,7 +40,7 @@
             <RadzenTextArea @bind-Value="model.Description" class="rz-w-100" />
         </ChildContent>
     </RadzenFormField>
-   
+
     <RadzenStack Orientation="Orientation.Horizontal"
                  JustifyContent="JustifyContent.End"
                  class="rz-mt-2"
@@ -56,5 +58,50 @@
                       Icon="@IconNames.Close" />
     </RadzenStack>
 </EditForm>
+@code {
 
+    private string? searchText = string.Empty;
 
+    public string? SearchText
+    {
+        get => searchText;
+
+        set
+        {
+            if (searchText != value)
+            {
+                searchText = value;
+            }
+        }
+    }
+
+    void ClosedDropDown()
+    {
+        _ = AddIfNotExists(SearchText ?? "");
+    }
+
+    private async Task AddIfNotExists(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+            return;
+
+        model.IncomeSource = text;
+
+        var exists = _incomeExpenses
+                    .Any(x => x.Description
+                        .Equals(text, StringComparison.OrdinalIgnoreCase));
+
+        if (!exists)
+        {
+            var newItem = new IncomeExpenseDto
+            {
+                Description = text
+            };
+
+            _incomeExpenses.Insert(0, newItem);
+        }
+
+        StateHasChanged();
+    }
+
+}

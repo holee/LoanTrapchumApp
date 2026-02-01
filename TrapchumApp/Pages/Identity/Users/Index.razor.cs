@@ -1,5 +1,7 @@
 ﻿using Applications.Extensions.Identity.Authorizations.Extensions;
 using Applications.Extensions.Identity.Policies;
+using Applications.Features.Employees.Queries.GetEmployeeAsPaging;
+using Applications.Features.Employees.Queries.GetEmployeeById;
 using Applications.Features.Entities;
 using Applications.Features.Identity.Users;
 using Applications.Interfaces.Employees;
@@ -12,6 +14,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Forms;
 using Radzen;
+using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Identity.Users;
 
@@ -86,7 +89,7 @@ public partial class Index
 
     private async Task GetBranches()
     {
-        var rsp =await _branchService.GetBranchesAsync<BranchDto>(0,new QueryParam(1,0,""));
+        var rsp = await _branchService.GetBranchesAsync<BranchDto>(0, new QueryParam(1, 0, ""));
 
         var unionBranches = new List<BranchDto>()
         {
@@ -101,11 +104,11 @@ public partial class Index
         {
             var branches = rsp.Data.Items.Union(unionBranches);
 
-            Branches=branches.OrderBy(x=>x.BranchId).ToList();
+            Branches = branches.OrderBy(x => x.BranchId).ToList();
         }
     }
 
-    async Task LoadAllUsers(string? userId=null, string? filter = null)
+    async Task LoadAllUsers(string? userId = null, string? filter = null)
     {
         try
         {
@@ -180,6 +183,7 @@ public partial class Index
         catch (Exception ex)
         {
             IsSuccess = false;
+
             NotificationService.Notify(NotificationSeverity.Error, ex.Message);
         }
 
@@ -190,11 +194,13 @@ public partial class Index
     {
         if (model.BranchRefId > 0)
         {
-            var employeeResponse = await _empService.GetEmployeesAsync(string.Empty, model.BranchRefId);
-            if (employeeResponse.IsSuccess)
-            {
-                bEmployees = employeeResponse.Data!;
-            }
+
+            var query = new GetEmployeeAsPagingQuery(model.BranchRefId, string.Empty, new QueryParam(0, 15));
+
+            var rsp = await mediator.Send(query);  //_empService.GetEmployeesAsync(string.Empty, model.BranchRefId);
+
+            bEmployees = rsp.Items;
+
         }
         else
         {
@@ -208,6 +214,7 @@ public partial class Index
     {
 
         var selectedEmployee = bEmployees.FirstOrDefault(x => x.EmployeeId == model.EmployeeId);
+       
         if (selectedEmployee is not null)
         {
             var username = selectedEmployee.FullName!.Split(" ");
@@ -232,9 +239,9 @@ public partial class Index
 
         if (args is not null)
         {
-           selectedBranchId=((BranchDto?)args)!.BranchId;
+            selectedBranchId = ((BranchDto?)args)!.BranchId;
 
-           await LoadAllUsers(string.Empty);
+            await LoadAllUsers(string.Empty);
         }
     }
 

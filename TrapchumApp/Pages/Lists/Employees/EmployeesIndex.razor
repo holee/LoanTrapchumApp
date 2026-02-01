@@ -2,20 +2,14 @@
 @using Applications.Features.Entities
 @using Applications.Responses.ViewModels.Employees
 <PageTitle>Employees</PageTitle>
-<style>
-    .rz-grid-table td .rz-cell-data {
-        line-height: 1.5rem;
-        font-size: 0.8rem;
-    }
-</style>
-<RadzenTabs @ref="@tabs" RenderMode="TabRenderMode.Server" Change="TabChanged" @bind-SelectedIndex="@selectedIndex">
+<RadzenTabs RenderMode="TabRenderMode.Client" Change="TabChanged" @bind-SelectedIndex="@selectedIndex">
     <Tabs>
         <RadzenTabsItem Text="Employees" Icon="group">
             <GridToolbar SearchChanged="PerformSearch">
                 <LeftChildren>
                     <RadzenButton Size="ButtonSize.Small"
                                   ButtonStyle="ButtonStyle.Primary"
-                                  Click="AddNewTab"
+                                  Click="@CreateNewEmployeeTab"
                                   Text="Add Employee" />
                     <div class="rz-p-1">
                         <RadzenCheckBox @bind-Value="includeInActive"
@@ -46,8 +40,10 @@
                             GridLines="DataGridGridLines.Both"
                             ColumnWidth="10rem"
                             RowRender="@OnRowRender"
+                            CellRender="@OnCellRender"
+                            RowSelect="@OnRowSelected"
                             LoadData="@LoadData"
-                            Responsive
+                            Responsive="true"
                             Density="Density.Compact"
                             IsLoading="@isLoading"
                             Count="@counts"
@@ -63,6 +59,7 @@
                             AllowRowSelectOnRowClick="true"
                             AllowSorting="true"
                             RowDoubleClick="@OnRowDoubleClick"
+                            @ref="@_gridEmployee"
                             TItem="VEmployeeList">
                 <Columns>
                     <RadzenDataGridColumn Context="c"
@@ -70,6 +67,7 @@
                                           TextAlign="TextAlign.Center"
                                           Title="#"
                                           Sortable="false"
+                                          Filterable="false"
                                           Property="@nameof(VEmployeeList.EmployeeId)">
                         <Template>
                             @c.RowIndex
@@ -81,15 +79,15 @@
                         </Template>
                     </RadzenDataGridColumn>
                     <RadzenDataGridColumn Title="Phone" Property="@nameof(VEmployeeList.Phone)" />
-                    <RadzenDataGridColumn Title="Email"
-                                          Sortable="false"
-                                          Property="@nameof(VEmployeeList.EmailAddress)" />
                     <RadzenDataGridColumn Title="Department"
                                           Property="@nameof(VEmployeeList.DepartmentName)" />
                     <RadzenDataGridColumn Title="Occupation"
                                           Property="@nameof(VEmployeeList.Occupation)" />
                     <RadzenDataGridColumn Title="Branch"
                                           Property="@nameof(VEmployeeList.BranchName)" />
+                    <RadzenDataGridColumn Title="Email"
+                                          Sortable="false"
+                                          Property="@nameof(VEmployeeList.EmailAddress)" />
                     <RadzenDataGridColumn Width="5rem"
                                           Sortable="false"
                                           TextAlign="TextAlign.Center"
@@ -128,76 +126,24 @@
                 </LoadingTemplate>
             </RadzenDataGrid>
         </RadzenTabsItem>
-        <RadzenTabsItem Visible="IsEnableNew" Text="New" Icon="person_add">
-            <Template>
-                <CloseTabButton Title="Employee Create" Closed="@(() => CloseTabe(1))" />
-            </Template>
-            <ChildContent>
-                <CreateEmployee OnClose="OnClosing"
-                                Reloaded="Reload" />
-            </ChildContent>
-        </RadzenTabsItem>
-        <RadzenTabsItem Visible="IsEnableEdit" Text="Edit" Icon="edit">
-            <Template>
-                <CloseTabButton Title="Employee Edit" Closed="@(() => CloseTabe(2))" />
-            </Template>
-            <ChildContent>
-                <EmployeeEdit OnClose="OnIsEditClose"
-                              EmployeeId="@_empId"
-                              Reloaded="Reload" />
-            </ChildContent>
-        </RadzenTabsItem>
-        <RadzenTabsItem Visible="@IsEnableDetail" Text="Details" Icon="info">
-            <Template>
-                <CloseTabButton Title="Employee Details" Closed="@(() => CloseTabe(3))" />
-            </Template>
-            <ChildContent>
-                <EmployeeDetails OnEdit="OnEditTab" EmployeeId="@_empId" Close="OnIsDetailClose" />
-            </ChildContent>
-        </RadzenTabsItem>
+
+        @foreach (var item in _tabs)
+        {
+            <RadzenTabsItem Text="@item.Title" Icon="@item.Icon">
+                <Template>
+                    <ClosedTab TabId="@item.Key" Title="@item.Title" Closed="@(() => CloseTab(item.Key))" />
+                </Template>
+                <ChildContent>
+                    @item.Content
+                </ChildContent>
+            </RadzenTabsItem>
+        }
 
     </Tabs>
 </RadzenTabs>
 @code {
 
-    int tabCount = 0;   
-    void CloseTabe(int closeTabIndex)
-    {
-
-        if (closeTabIndex == 1)
-        {
-            IsEnableNew = false;
-        }
-
-        if (closeTabIndex == 2)
-        {
-            IsEnableEdit = false;
-        }
-
-        if (closeTabIndex == 3)
-        {
-            IsEnableDetail = false;
-        }
-
-        if(closeTabIndex == 4)
-        {
-            IsEnableEdit = false;  
-        }
-
-        // if(tabCount > 0)
-        // {
-        //     tabCount--;
-        // }
-        // else
-        // {
-        //     tabCount = 0;
-        // }
-
-        selectedIndex = 0;
-
-    }
-
-
+    int tabCount = 0;
 
     void ShowContextMenuWithContent(MouseEventArgs args, string? id)
     {

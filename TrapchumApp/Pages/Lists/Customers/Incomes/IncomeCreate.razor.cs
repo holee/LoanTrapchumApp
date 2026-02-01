@@ -13,7 +13,7 @@ namespace TrapchumApp.Pages.Lists.Customers.Incomes
         [Parameter] public string CustomerId { get; set; } = string.Empty;
         [Parameter] public EventCallback<bool> OnClose { get; set; }
 
-        private IEnumerable<IncomeExpenseDto> _incomeExpenses = [];
+        private List<IncomeExpenseDto> _incomeExpenses = [];
 
         private CreateIncomeDto model = new CreateIncomeDto();
 

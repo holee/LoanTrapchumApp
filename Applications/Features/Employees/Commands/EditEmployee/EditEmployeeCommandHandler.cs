@@ -1,22 +1,17 @@
 ﻿using Applications.Commons.Mappers;
+using Applications.Features.Employees.Commands.EditEmployee;
 using Applications.Interfaces.Employees;
-using Applications.Utils;
+using Applications.Responses.ViewModels.Employees;
 using ErrorOr;
 namespace Applications.Features.Employees.Commands.CreateEmployee;
 
-public sealed class EditEmployeeCommandHandler(IEmployeeService empService) : IRequestHandler<CreateEmployeeCommand, ErrorOr<string>>
+public sealed class EditEmployeeCommandHandler(IEmployeeService empService) : IRequestHandler<EditEmployeeCommand, ErrorOr<VEmployeeList>>
 {
-    public async Task<ErrorOr<string>> Handle(CreateEmployeeCommand request, CancellationToken cancellationToken = default)
+    public async Task<ErrorOr<VEmployeeList>> Handle(EditEmployeeCommand request, CancellationToken cancellationToken = default)
     {
         var emp = request.Request.ToEmployeeEdit();
 
-        var rsp = await empService.UpdateAsync(emp); 
+        return await empService.UpdateAsync(emp); 
 
-        if (rsp.IsSuccess && rsp.Data is not null)
-        {
-            return rsp.Data;
-        }
-
-        return Error.Unexpected(rsp.ErrMessage);
     }
 }

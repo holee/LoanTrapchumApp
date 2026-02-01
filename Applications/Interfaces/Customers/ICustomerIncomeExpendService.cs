@@ -29,14 +29,11 @@ namespace Applications.Interfaces.Customers
 
         Task<ErrorOr<VCustomerIncomes>> GetIncomeByIdAsync(long? id, string? customerId);
         Task<ErrorOr<IEnumerable<VCustomerIncomes>>> GetIncomesAsync(string? customerId);
-        Task<ErrorOr<long>> AddOrUpdateIncomeAsync(CustomerIncome req);
+        Task<ErrorOr<long>> AddOrUpdateIncomeAsync(CustomerIncome req, CancellationToken cancellation = default);
 
-        Task<ErrorOr<bool>> DeleteIncomeAsync(long? id, string? customerId,
-            CancellationToken cancellationToken = default);
+        Task<ErrorOr<bool>> DeleteIncomeAsync(long? id, string? customerId, CancellationToken cancellationToken = default);
 
-        Task<ErrorOr<EditIncomeDto>> GetEditIncomeAsync(long? id, string? customerId,
-            CancellationToken cancellation = default);
-
+        Task<ErrorOr<EditIncomeDto>> GetEditIncomeAsync(long? id, string? customerId, CancellationToken cancellation = default);
 
         Task<ErrorOr<int>> AddOrUpdateIncomeExpenseAsync(IncomeExpense req, CancellationToken cancellation = default);
 
@@ -44,7 +41,7 @@ namespace Applications.Interfaces.Customers
             CancellationToken cancellation = default);
 
         Task<ErrorOr<IncomeExpenseDto>> GetEditIncomeExpenseAsync(int? id, CancellationToken cancellation = default);
-        Task<ErrorOr<IncomeExpense>> GetIncomeExpenseAsync(int? requestId, CancellationToken cancellationToken=default);
+        Task<ErrorOr<IncomeExpense>> GetIncomeExpenseAsync(int? requestId, CancellationToken cancellationToken = default);
     }
 }
 

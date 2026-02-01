@@ -1,10 +1,12 @@
-﻿using Applications.Features.Departments.Dto;
+﻿using Applications.Extensions;
+using Applications.Features.Departments.Dto;
 using Applications.Interfaces.Lists;
 using Applications.Responses;
 using Applications.Responses.Message;
 using Applications.Responses.Paginations;
 using Domains.Models.Lists;
 using Infrastructures.DataAccess;
+using Infrastructures.Implements.Extensions;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -167,9 +169,8 @@ public class DepartmentService : IDepartmentService
 
         var department = context.VDepartments
                                 .IgnoreQueryFilters()
-                                .Where(dept => dept.DepartmentId == departmentId)
                                 .AsNoTracking()
-                                .FirstOrDefault();
+                                .FirstOrDefault(dept => dept.DepartmentId == departmentId);
 
         if (department is null) return Result.Failure<VDepartment>(ErrorResponse.NotFound("Deapartment found."));
 
@@ -211,41 +212,7 @@ public class DepartmentService : IDepartmentService
         return Result.Success<IEnumerable<Department>>(depts);
 
     }
-    public async Task<Result<IEnumerable<T>>> GetDepartments<T>(int? departmentId, int take = 10, string? filter = null)
-        where T : class
-    {
-
-        _logger.LogInformation("Fetching departments of type {Type} with parameters - DepartmentId: {DepartmentId}, Take: {Take}, Filter: {Filter}", typeof(T).Name, departmentId, take, filter);
-
-        await using var context = await _contextFactory.CreateDbContextAsync();
-
-
-        IQueryable<Department> depsQuery = context.Departments;
-
-
-        if (!string.IsNullOrEmpty(filter))
-        {
-            depsQuery = depsQuery.Where(x => x.DepartmentName!.Contains(filter));
-        }
-
-        if (departmentId > 0)
-        {
-            depsQuery = depsQuery.Where(x => x.DepartmentId == departmentId);
-        }
-
-        if (take > 0)
-        {
-            depsQuery = depsQuery.Take(take).OrderByDescending(x => x.DepartmentName);
-        }
-
-        var depts = await depsQuery
-                                .ProjectToType<T>()
-                                .AsNoTracking()
-                                .ToListAsync();
-
-        return Result.Success<IEnumerable<T>>(depts);
-
-    }
+ 
     public async Task<Pager<VDepartment>> GetDepartments(QueryParam param)
     {
 
@@ -290,6 +257,29 @@ public class DepartmentService : IDepartmentService
 
     }
 
+
+    public async Task<Pager<VDepartment>> GetDepartments(int? departmentId, QueryParam param, CancellationToken cancellation = default)
+    {
+
+        _logger.LogInformation("Fetching paginated departments with parameters - Skip: {Skip}, PageSize: {PageSize}, Filter: {Filter}, SortColumn: {SortColumn}, SortDescending: {SortDescending}, IsIncludeInActive: {IsIncludeInActive}", param.Skip, param.PageSize, param.Filter, param.SortColumn, param.SortDescending, param.IsIncludeInActive);
+
+        await using var context = await _contextFactory.CreateDbContextAsync(cancellation);
+
+        var query = ApplyFilter(departmentId, param, context);
+
+        query = ApplyOrder(param, query);
+
+        var counts = await query.CountAsync();
+
+        var data = await query.Skip(param.Skip)
+                               .Take(param.PageSize)
+                               .AsNoTracking()
+                               .ToListAsync(cancellation);
+        return new Pager<VDepartment>(data, counts);
+
+    }
+
+   
     private async Task<bool> IsDepartmentInUsed(int? departmentId, CancellationToken cancellation = default)
     {
         await using var context = await _contextFactory.CreateDbContextAsync(cancellation);
@@ -319,4 +309,38 @@ public class DepartmentService : IDepartmentService
         return dep.Any();
 
     }
+
+    private static IQueryable<VDepartment> ApplyOrder(QueryParam param, IQueryable<VDepartment> query)
+    {
+        if (param.SortDescending)
+        {
+            query = query.OrderByDescending(x => EF.Property<object>(x, param.SortColumn));
+        }
+        else
+        {
+            query = query.OrderBy(x => EF.Property<object>(x, param.SortColumn));
+        }
+
+        return query;
+    }
+
+    private static IQueryable<VDepartment> ApplyFilter(int? departmentId, QueryParam param, DataContext context)
+    {
+        var query = context.VDepartments.WhereIf(departmentId.HasValue && departmentId > 0);
+
+        if (param.IsIncludeInActive == true)
+        {
+            query = query.IgnoreQueryFilters();
+        }
+
+        if (!string.IsNullOrEmpty(param.Filter))
+        {
+            string[] filterColumns = ["DepartmentName", "Description"];
+
+            query = query.WhereMatchesFilter(param.Filter, filterColumns);
+        }
+
+        return query;
+    }
+
 }

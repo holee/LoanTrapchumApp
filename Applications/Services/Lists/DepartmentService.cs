@@ -54,10 +54,10 @@ public sealed class DepartmentService(IDepartmentService deService) : IDepartmen
         return await deService.GetDepartments(departmentId, take,false, filter);
     }
 
-    public async Task<Result<IEnumerable<T>>> GetDepartments<T>(int? departmentId, int take = 0, string? filter = null) where T : class
-    {
-        return await deService.GetDepartments<T>(departmentId, take, filter);
-    }
+    //public async Task<Result<IEnumerable<T>>> GetDepartments<T>(int? departmentId, int take = 0, string? filter = null) where T : class
+    //{
+    //    return await deService.GetDepartments<T>(departmentId, take, filter);
+    //}
 
     public async Task<Result<string>> UpdateAsync(DepartmentDtoUpdate department)
     {

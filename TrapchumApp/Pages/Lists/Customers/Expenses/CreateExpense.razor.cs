@@ -6,6 +6,7 @@ using Applications.Features.Incomes.Queries.GetIncomeExpense;
 using Applications.Responses.Paginations;
 using Domains.Enumerations;
 namespace TrapchumApp.Pages.Lists.Customers.Expenses;
+
 public partial class CreateExpense
 {
     [Parameter] public string CustomerId { get; set; } = string.Empty;
@@ -13,7 +14,7 @@ public partial class CreateExpense
     private ExpenseDtoCreate model = new();
 
     private List<IncomeExpenseDto> _incomeExpenses = new();
-    
+
     private string _filter = string.Empty;
 
     async Task LoadData(LoadDataArgs arg)
@@ -34,6 +35,7 @@ public partial class CreateExpense
         var result = await mediator.Send(query);
 
         _incomeExpenses = result.Items;
+
     }
 
 
@@ -57,11 +59,11 @@ public partial class CreateExpense
 
         if (rsp.IsError)
         {
-            NotificationService.Notify(NotificationSeverity.Error,rsp.FirstError.Description);
+            NotificationService.Notify(NotificationSeverity.Error, rsp.FirstError.Description);
             return;
         }
 
-        NotificationService.Notify(NotificationSeverity.Success,ExpenseMessage.Created);
+        NotificationService.Notify(NotificationSeverity.Success, ExpenseMessage.Created);
 
         DialogService.Close(true);
 
@@ -70,6 +72,6 @@ public partial class CreateExpense
     private void HandleClose(MouseEventArgs args)
     {
         DialogService.Close(false);
-        
+
     }
 }

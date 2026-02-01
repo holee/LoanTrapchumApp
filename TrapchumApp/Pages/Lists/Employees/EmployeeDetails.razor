@@ -3,6 +3,7 @@
 @using Applications.Features.Currencies
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
+@using Applications.Features.Employees.Queries.GetEmployeeById
 @using Applications.Features.LoanRequests.Interfaces
 @using Applications.Responses.ViewModels.Loans
 @using Applications.Responses.ViewModels.Loans.Requests
@@ -150,7 +151,10 @@
 {
     async Task CreateNewUser()
     {
-        var emp = await _employeeService.GetEmployeeById(EmployeeId, 0, false);
+
+        var query = new GetEmployeeDetailsByIdQuery(EmployeeId, null, false);
+
+        var emp = await mediator.Send(query);
 
         var options = new DialogOptions
         {
@@ -160,10 +164,11 @@
         var parameters = new Dictionary<string, object?>
         {
             { "EmployeeId", EmployeeId },
+
              { "BranchId", 0 }
         };
 
-        var dialogue = DialogService.OpenAsync<UserCreateModal>("New User", parameters: parameters, options: options);
+        var dialogue = DialogService.OpenAsync<UserCreateModal>("New User", parameters: parameters!, options: options);
     }
 
 }

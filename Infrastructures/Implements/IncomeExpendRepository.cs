@@ -29,7 +29,8 @@ namespace Infrastructures.Implements
 
         private readonly IDapperConnectionFactory _connectionFactory;
 
-        public IncomeExpendRepository(IDbContextFactory<DataContext> context, ILogger<IncomeExpendRepository> logger,
+        public IncomeExpendRepository(IDbContextFactory<DataContext> context,
+            ILogger<IncomeExpendRepository> logger,
             IDapperConnectionFactory connectionFactory)
         {
             _contextFactory = context;
@@ -56,9 +57,7 @@ namespace Infrastructures.Implements
             return ErrorOrFactory.From(expenses);
         }
 
-
-        public async Task<ErrorOr<VCustomerExpenses>> GetExpense(long? id, string? customerId,
-            CancellationToken cancellation = default)
+        public async Task<ErrorOr<VCustomerExpenses>> GetExpense(long? id, string? customerId, CancellationToken cancellation = default)
         {
             using var db = await _connectionFactory.CreateConnectionAsync(cancellation);
 
@@ -75,8 +74,7 @@ namespace Infrastructures.Implements
             return expense;
         }
 
-        public async Task<ErrorOr<string>> DeleteExpensesAsync(long? id, string? customerRefId,
-            CancellationToken cancellation = default)
+        public async Task<ErrorOr<string>> DeleteExpensesAsync(long? id, string? customerRefId, CancellationToken cancellation = default)
         {
             _logger.LogInformation("Adding income...");
 
@@ -84,7 +82,7 @@ namespace Infrastructures.Implements
 
             var existing = await context.CustomerExpenses
                 .FirstOrDefaultAsync(x => x.Id == id && x.CustomerRefId == customerRefId);
-            
+
             if (existing is null)
             {
                 Error.NotFound(ExpenseMessage.NotFound);
@@ -109,8 +107,7 @@ namespace Infrastructures.Implements
         }
 
 
-        public async Task<ErrorOr<ExpenseDtoUpdate>> GetEditExpensesAsync(long? id, string? customerId,
-            CancellationToken cancellation = default)
+        public async Task<ErrorOr<ExpenseDtoUpdate>> GetEditExpensesAsync(long? id, string? customerId, CancellationToken cancellation = default)
         {
             try
             {
@@ -143,8 +140,8 @@ namespace Infrastructures.Implements
         {
             try
             {
-                _logger.LogInformation("Adding income...");
-                
+                _logger.LogInformation("Adding or updating Expense for customer {CustomerId}...", customerId);
+
                 var context = await _contextFactory.CreateDbContextAsync();
 
                 var existingCustomer = await context.Customers
@@ -193,15 +190,32 @@ namespace Infrastructures.Implements
             }
         }
 
-        public async Task<ErrorOr<long>> AddOrUpdateExpenseAsync(CustomerExpense req,
-            CancellationToken cancellation = default)
+        public async Task<ErrorOr<long>> AddOrUpdateExpenseAsync(CustomerExpense req, CancellationToken cancellation = default)
         {
-            _logger.LogInformation("Adding income...");
+            _logger.LogInformation("Adding or updating income for customer {CustomerId}...", req.CustomerRefId);
 
             var context = await _contextFactory.CreateDbContextAsync(cancellation);
-
             try
             {
+
+                var incomeSource = req.ExpenseTitle?.Trim();
+
+                // ✅ normalize early
+                if (!string.IsNullOrWhiteSpace(incomeSource))
+                {
+                    var exists = await context.IncomeExpenses
+                        .AnyAsync(x => x.Description.ToLower() == incomeSource.ToLower());
+
+                    if (!exists)
+                    {
+                        context.IncomeExpenses.Add(new IncomeExpense
+                        {
+                            Description = incomeSource,
+                            Types = IncomeExpenseTypes.Expense
+                        });
+                    }
+                }
+
                 if (req.Id > 0)
                 {
                     context.CustomerExpenses.Update(req);
@@ -230,8 +244,7 @@ namespace Infrastructures.Implements
         {
             try
             {
-                _logger.LogInformation("Adding income...");
-
+                _logger.LogInformation("Adding or updating income for customer {CustomerId}...", customerId);
 
                 var context = await _contextFactory.CreateDbContextAsync();
 
@@ -280,8 +293,7 @@ namespace Infrastructures.Implements
             }
         }
 
-        public async Task<ErrorOr<bool>> DeleteIncomeAsync(long? id, string? customerId,
-            CancellationToken cancellationToken = default)
+        public async Task<ErrorOr<bool>> DeleteIncomeAsync(long? id, string? customerId, CancellationToken cancellationToken = default)
         {
             var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
 
@@ -309,6 +321,7 @@ namespace Infrastructures.Implements
             catch (Exception ex)
             {
                 _logger.LogError(ex, ex.Message);
+
                 return Error.Unexpected("Income.DeleteError", $"Unexpected error while deleting income: {ex.Message}");
             }
         }
@@ -366,13 +379,32 @@ namespace Infrastructures.Implements
             return income.ToIncomeEdit();
         }
 
-        public async Task<ErrorOr<long>> AddOrUpdateIncomeAsync(CustomerIncome req)
+        public async Task<ErrorOr<long>> AddOrUpdateIncomeAsync(CustomerIncome req, CancellationToken cancellation = default)
         {
             try
             {
                 _logger.LogInformation("Adding or updating income for customer {CustomerId}...", req.CustomerRefId);
 
-                var context = await _contextFactory.CreateDbContextAsync();
+                var context = await _contextFactory.CreateDbContextAsync(cancellation);
+
+                var incomeSource = req.IncomeSource?.Trim();
+
+
+                // ✅ normalize early
+                if (!string.IsNullOrWhiteSpace(incomeSource))
+                {
+                    var exists = await context.IncomeExpenses
+                        .AnyAsync(x => x.Description.ToLower() == incomeSource.ToLower());
+
+                    if (!exists)
+                    {
+                        context.IncomeExpenses.Add(new IncomeExpense
+                        {
+                            Description = incomeSource,
+                            Types = IncomeExpenseTypes.Income
+                        });
+                    }
+                }
 
                 if (req.Id != 0)
                 {
@@ -383,8 +415,7 @@ namespace Infrastructures.Implements
                     context.CustomerIncomes.Add(req);
                 }
 
-                await context.SaveChangesAsync();
-
+                await context.SaveChangesAsync(cancellation);
 
                 return req.Id;
             }

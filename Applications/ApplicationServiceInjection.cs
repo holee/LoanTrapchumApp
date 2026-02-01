@@ -7,6 +7,13 @@ using Applications.Features.Currencies.Requests;
 using Applications.Features.Currencies.Responses;
 using Applications.Features.Customers.Commands.Customers.CreateCustomer;
 using Applications.Features.Customers.Commands.Customers.EditCustomer;
+using Applications.Features.Employees.Commands.ChangeEmployeeState;
+using Applications.Features.Employees.Commands.CreateEmployee;
+using Applications.Features.Employees.Commands.EditEmployee;
+using Applications.Features.Employees.Dto;
+using Applications.Features.Employees.Queries.GetEditEmployee;
+using Applications.Features.Employees.Queries.GetEmployeeAsPaging;
+using Applications.Features.Employees.Queries.GetEmployeeById;
 using Applications.Features.Guarantor.Command.CreateGuarantor;
 using Applications.Features.Guarantor.Dtos;
 using Applications.Features.Holidays.Queries.GetHolidaysAsPaging;
@@ -26,6 +33,7 @@ using Applications.Features.Notifications.Command.CreateNotification;
 using Applications.Features.Notifications.Dto;
 using Applications.Features.Notifications.Queries.GetNotification;
 using Applications.Features.Notifications.Queries.GetUnreadNotifications;
+using Applications.Responses.ViewModels.Employees;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Domains.Models.Currencies;
 using Domains.Models.Transaction;
@@ -47,6 +55,16 @@ public static class ApplicationServiceInjection
         services.AddScoped<IRequestHandler<CreateLoanCommand, ErrorOr<DisburseResult>>, CreateLoanCommandHandler>();
 
         services.AddScoped<IRequestHandler<GetLoanWithScedulesQuery, ErrorOr<IEnumerable<LoanScheduleResponse>>>, GetLoanWithScedulesQueryHandler>();
+
+
+
+        services.AddScoped<IRequestHandler<GetEmployeeAsPagingQuery, Pager<VEmployeeList>>, GetEmployeeAsPagingQueryHandler>();
+        services.AddScoped<IRequestHandler<ChangeEmployeeStateCommand, ErrorOr<VEmployeeList>>, ChangeEmployeeStateCommandHandler>();
+        services.AddScoped<IRequestHandler<GetEmployeeDetailsByIdQuery, ErrorOr<VEmployeeList>>, GetEmployeeDetailsByIdQueryHandler>();
+        services.AddScoped<IRequestHandler<EditEmployeeCommand, ErrorOr<VEmployeeList>>, EditEmployeeCommandHandler>();
+        services.AddScoped<IRequestHandler<CreateEmployeeCommand, ErrorOr<VEmployeeList>>, CreateEmployeeCommandHandler>();
+        services.AddScoped<IRequestHandler<GetEmployeeByIdQuery, ErrorOr<EntityNames>>, GetEmployeeByIdQueryHandler>();
+        services.AddScoped<IRequestHandler<GetEditEmployeeQuery, ErrorOr<EntityEmployeeCreate>>, GetEditEmployeeQueryHandler>();
 
         //GetLoanRequestApprovedQuery
 
