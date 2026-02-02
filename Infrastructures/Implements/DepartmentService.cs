@@ -4,7 +4,9 @@ using Applications.Interfaces.Lists;
 using Applications.Responses;
 using Applications.Responses.Message;
 using Applications.Responses.Paginations;
+using Dapper;
 using Domains.Models.Lists;
+using ErrorOr;
 using Infrastructures.DataAccess;
 using Infrastructures.Implements.Extensions;
 using Mapster;
@@ -27,7 +29,7 @@ public class DepartmentService : IDepartmentService
         _logger = logger;
     }
 
-    public async Task<Result<string>> CreateAsync(Department req, CancellationToken cancellation = default)
+    public async Task<ErrorOr<VDepartment>> CreateAsync(Department req, CancellationToken cancellation = default)
     {
 
         _logger.LogInformation("Creating new department with name: {DepartmentName}", req.DepartmentName);
@@ -37,25 +39,34 @@ public class DepartmentService : IDepartmentService
 
             if (await IsDepartmentExist(null, req.DepartmentName))
             {
-                return Result.Failure<string>(ErrorResponse.Conflict("Department already exists."));
+                return Error.Conflict("Department already exists.");
             }
 
             await using var context = await _contextFactory.CreateDbContextAsync();
 
             await context.Departments.AddAsync(req);
 
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(cancellation);
 
-            return Result.Success<string>(new("new department added."));
+            return await GetDepartmentDetailsById(req.DepartmentId, 0, cancellation);
         }
         catch (DbUpdateException ex)
         {
-            return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
+            return Error.Unexpected("Error", ex.InnerException!.Message);
         }
 
     }
 
-    public async Task<Result<string>> UpdateAsync(Department req, CancellationToken cancellation = default)
+    public async Task<bool> ExistsByNameAsync(string name, int branchId, CancellationToken ct)
+    {
+        return await _context.Departments
+            .AnyAsync(x =>
+                EF.Functions.Collate(x.DepartmentName, "SQL_Latin1_General_CP1_CI_AS") == name
+                                        && x.BranchId == branchId, ct);
+    }
+
+
+    public async Task<ErrorOr<VDepartment>> UpdateAsync(Department req, CancellationToken cancellation = default)
     {
         _logger.LogInformation("Updating department with ID: {DepartmentId}", req.DepartmentId);
 
@@ -64,7 +75,7 @@ public class DepartmentService : IDepartmentService
 
             if (await IsDepartmentExist(req.DepartmentId, req.DepartmentName, cancellation))
             {
-                return Result.Failure<string>(ErrorResponse.Conflict("Department Name already exist or invalid sequence.!"));
+                return Error.Conflict("Department Name already exist or invalid sequence.");
             }
 
             await using var context = await _contextFactory.CreateDbContextAsync(cancellation);
@@ -73,52 +84,52 @@ public class DepartmentService : IDepartmentService
 
             await context.SaveChangesAsync(cancellation);
 
-            return Result.Success(new string("department was updated"));
+            return await GetDepartmentDetailsById(req.DepartmentId, 0, cancellation);
         }
         catch (DbUpdateException ex)
         {
-            return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
+            return Error.Unexpected("Error", ex.InnerException!.Message);
         }
 
     }
 
-    public async Task<Result<string>> ActivateOrDeactivate(int? id, bool state)
+    public async Task<ErrorOr<VDepartment>> ActivateOrDeactivate(int? id, bool state, CancellationToken cancellation = default)
     {
         _logger.LogInformation("Activating or deactivating department with ID: {DepartmentId}", id);
 
         try
         {
 
-            await using var context = await _contextFactory.CreateDbContextAsync();
+            await using var context = await _contextFactory.CreateDbContextAsync(cancellation);
 
             var dep = await context.Departments
                                    .IgnoreQueryFilters()
-                                   .FirstOrDefaultAsync(x => x.DepartmentId == id);
+                                   .FirstOrDefaultAsync(x => x.DepartmentId == id, cancellation);
 
             if (dep is null)
             {
-                return Result.Failure<string>(ErrorResponse.NotFound(Messages.DataNotFound));
+                return Error.NotFound(Messages.DataNotFound);
             }
 
             dep.IsActive = state;
 
             dep.ModifiedDt = DateTime.Now;
 
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(cancellation);
 
-            return Result.Success<string>(new("department was updated."));
+            return await GetDepartmentDetailsById(dep.DepartmentId, 0, cancellation);
 
         }
         catch (Exception ex)
         {
-            return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
+            return Error.Unexpected("Error", ex.InnerException!.Message);
         }
 
     }
 
 
 
-    public async Task<Result<string>> DeleteAsync(int? id, CancellationToken cancellation = default)
+    public async Task<ErrorOr<string>> DeleteAsync(int? id, CancellationToken cancellation = default)
     {
         _logger.LogInformation("Deleting department with ID: {DepartmentId}", id);
         try
@@ -129,134 +140,75 @@ public class DepartmentService : IDepartmentService
                                     .IgnoreQueryFilters()
                                     .FirstOrDefaultAsync(x => x.DepartmentId == id, cancellation);
 
-            if (dept is null) return Result.Failure<string>(ErrorResponse.NotFound("No Department Found."));
+            if (dept is null) return Error.NotFound("No Department Found.");
 
             if (await IsDepartmentInUsed(id))
             {
-                return Result.Failure<string>(ErrorResponse.Validation("Can not delete department because is already used."));
+                return Error.Validation("Can not delete department because is already used.");
             }
 
             context.Departments.Remove(dept);
 
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(cancellation);
 
-            return Result.Success<string>(new("department was deleted."));
+            return "department was deleted.";
 
         }
         catch (Exception ex)
         {
-            return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
+            return Error.Unexpected("Error", ex.InnerException!.Message);
         }
 
     }
-    public async Task<Result<Department>> GetDepartmentById(int? departmentId)
+
+    public async Task<ErrorOr<Department>> GetDepartmentById(int? departmentId, int? branchId, CancellationToken cancellation = default)
     {
         _logger.LogInformation("Fetching department with ID: {DepartmentId}", departmentId);
 
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        await using var context = await _contextFactory.CreateDbContextAsync(cancellation);
 
-        var department = await context.Departments.Where(dept => dept.DepartmentId == departmentId).FirstOrDefaultAsync();
+        var department = await context.Departments
+                                    .AsNoTracking()
+                                    .FirstOrDefaultAsync(dept => dept.DepartmentId == departmentId);
 
-        if (department is null) return Result.Failure<Department>(ErrorResponse.NotFound("No Deapartment found."));
+        if (department is null)
+            return ErrorOr.Error.NotFound("No Deapartment found.");
 
-        return Result.Success<Department>(department);
+        return department;
     }
-    public async Task<Result<VDepartment>> GetDepartmentDetails(int? departmentId)
+
+
+    public async Task<ErrorOr<VDepartment>> GetDepartmentDetailsById(int? departmentId, int? branchId, CancellationToken cancellation = default, params string[] columns)
     {
         _logger.LogInformation("Fetching department details with ID: {DepartmentId}", departmentId);
 
-        await using var context = await _contextFactory.CreateDbContextAsync();
+        var context = await _dapperFactory.CreateConnectionAsync(cancellation);
 
-        var department = context.VDepartments
-                                .IgnoreQueryFilters()
-                                .AsNoTracking()
-                                .FirstOrDefault(dept => dept.DepartmentId == departmentId);
+        // safer column handling
+        var allowedColumns = typeof(VDepartment)
+            .GetProperties()
+            .Select(p => p.Name)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        if (department is null) return Result.Failure<VDepartment>(ErrorResponse.NotFound("Deapartment found."));
+        var selectedColumns = (columns?.Length > 0
+                ? columns.Where(c => allowedColumns.Contains(c))
+                : allowedColumns)
+            .ToArray();
 
-        return Result.Success<VDepartment>(department);
+        var columnSql = string.Join(", ", selectedColumns);
+
+        var sql = $@"
+            SELECT {columnSql}
+            FROM VDepartments
+            WHERE DepartmentId = @DepartmentId OR (@BranchId IS NULL OR BranchId = @BranchId)
+        ";
+
+        var department = await context.QueryFirstOrDefaultAsync<VDepartment>(sql, new { DepartmentId = departmentId, BranchId = branchId });
+
+        if (department is null) return ErrorOr.Error.NotFound("No Department found.");
+
+        return department;
     }
-    public async Task<Result<IEnumerable<Department>>> GetDepartments(int? departmentId = 0, int take = 0, bool includeInactive = false, string? condition = null)
-    {
-
-        _logger.LogInformation("Fetching departments with parameters - DepartmentId: {DepartmentId}, Take: {Take}, IncludeInactive: {IncludeInactive}, Condition: {Condition}", departmentId, take, includeInactive, condition);
-
-        await using var context = await _contextFactory.CreateDbContextAsync();
-
-        IQueryable<Department> depsQuery = context.Departments;
-
-        if (!includeInactive)
-        {
-            depsQuery = context.Departments.Where(x => x.IsActive == true);
-        }
-
-        if (condition is not null)
-        {
-            depsQuery = depsQuery.Where(x => x.DepartmentName != null
-                                        && x.DepartmentName.Contains(condition));
-        }
-
-        if (departmentId > 0)
-        {
-
-            depsQuery = depsQuery.Where(x => x.DepartmentId == departmentId);
-        }
-
-        if (take > 0)
-        {
-            depsQuery = depsQuery.Take(take).OrderByDescending(x => x.DepartmentName);
-        }
-
-        var depts = await depsQuery.AsNoTracking().ToListAsync();
-
-        return Result.Success<IEnumerable<Department>>(depts);
-
-    }
- 
-    public async Task<Pager<VDepartment>> GetDepartments(QueryParam param)
-    {
-
-        _logger.LogInformation("Fetching paginated departments with parameters - Skip: {Skip}, PageSize: {PageSize}, Filter: {Filter}, SortColumn: {SortColumn}, SortDescending: {SortDescending}, IsIncludeInActive: {IsIncludeInActive}", param.Skip, param.PageSize, param.Filter, param.SortColumn, param.SortDescending, param.IsIncludeInActive);
-
-        await using var context = await _contextFactory.CreateDbContextAsync();
-
-
-        IQueryable<VDepartment> query = context.VDepartments;
-
-        if (param.IsIncludeInActive == true)
-        {
-            query = query.IgnoreQueryFilters();
-        }
-
-        if (!string.IsNullOrEmpty(param.Filter))
-        {
-
-            query = query.Where(x =>
-                EF.Functions.Like(x.DepartmentId.ToString()!, $"%{param.Filter}%") ||
-                EF.Functions.Like(x.DepartmentName!, $"%{param.Filter}%") ||
-                EF.Functions.Like(x.Description!, $"%{param.Filter}%")
-            );
-        }
-
-        if (param.SortDescending)
-        {
-            query = query.OrderByDescending(x => EF.Property<object>(x, param.SortColumn));
-        }
-        else
-        {
-            query = query.OrderBy(x => EF.Property<object>(x, param.SortColumn));
-        }
-
-        var counts = await query.CountAsync();
-
-        var data = await query.Skip(param.Skip)
-                       .Take(param.PageSize)
-                       .AsNoTracking()
-                       .ToListAsync();
-        return new Pager<VDepartment>(data, counts);
-
-    }
-
 
     public async Task<Pager<VDepartment>> GetDepartments(int? departmentId, QueryParam param, CancellationToken cancellation = default)
     {
@@ -271,15 +223,17 @@ public class DepartmentService : IDepartmentService
 
         var counts = await query.CountAsync();
 
-        var data = await query.Skip(param.Skip)
-                               .Take(param.PageSize)
-                               .AsNoTracking()
-                               .ToListAsync(cancellation);
+        if (param.Skip > 0)
+        {
+            query = query.Skip(param.Skip).Take(param.PageSize);
+        }
+
+        var data = await query.AsNoTracking().ToListAsync(cancellation);
+
         return new Pager<VDepartment>(data, counts);
 
     }
 
-   
     private async Task<bool> IsDepartmentInUsed(int? departmentId, CancellationToken cancellation = default)
     {
         await using var context = await _contextFactory.CreateDbContextAsync(cancellation);
@@ -312,13 +266,20 @@ public class DepartmentService : IDepartmentService
 
     private static IQueryable<VDepartment> ApplyOrder(QueryParam param, IQueryable<VDepartment> query)
     {
-        if (param.SortDescending)
+
+        var sort = param.SortDescending;
+
+        if (!string.IsNullOrEmpty(param.SortColumn))
         {
-            query = query.OrderByDescending(x => EF.Property<object>(x, param.SortColumn));
+            query = sort ?
+                    query.OrderByDescending(x => EF.Property<object>(x, param.SortColumn)) :
+                    query.OrderBy(x => EF.Property<object>(x, param.SortColumn));
         }
         else
         {
-            query = query.OrderBy(x => EF.Property<object>(x, param.SortColumn));
+            query = sort ?
+                    query.OrderByDescending(x => x.DepartmentName) :
+                    query.OrderBy(x => x.DepartmentName);
         }
 
         return query;
@@ -326,7 +287,7 @@ public class DepartmentService : IDepartmentService
 
     private static IQueryable<VDepartment> ApplyFilter(int? departmentId, QueryParam param, DataContext context)
     {
-        var query = context.VDepartments.WhereIf(departmentId.HasValue && departmentId > 0);
+        var query = context.VDepartments.WhereIf(departmentId.HasValue && departmentId > 0, x => x.DepartmentId == departmentId);
 
         if (param.IsIncludeInActive == true)
         {
@@ -344,3 +305,47 @@ public class DepartmentService : IDepartmentService
     }
 
 }
+
+//public async Task<Pager<VDepartment>> GetDepartments(QueryParam param)
+//{
+
+//    _logger.LogInformation("Fetching paginated departments with parameters - Skip: {Skip}, PageSize: {PageSize}, Filter: {Filter}, SortColumn: {SortColumn}, SortDescending: {SortDescending}, IsIncludeInActive: {IsIncludeInActive}", param.Skip, param.PageSize, param.Filter, param.SortColumn, param.SortDescending, param.IsIncludeInActive);
+
+//    await using var context = await _contextFactory.CreateDbContextAsync();
+
+
+//    IQueryable<VDepartment> query = context.VDepartments;
+
+//    if (param.IsIncludeInActive == true)
+//    {
+//        query = query.IgnoreQueryFilters();
+//    }
+
+//    if (!string.IsNullOrEmpty(param.Filter))
+//    {
+
+//        query = query.Where(x =>
+//            EF.Functions.Like(x.DepartmentId.ToString()!, $"%{param.Filter}%") ||
+//            EF.Functions.Like(x.DepartmentName!, $"%{param.Filter}%") ||
+//            EF.Functions.Like(x.Description!, $"%{param.Filter}%")
+//        );
+//    }
+
+//    if (param.SortDescending)
+//    {
+//        query = query.OrderByDescending(x => EF.Property<object>(x, param.SortColumn));
+//    }
+//    else
+//    {
+//        query = query.OrderBy(x => EF.Property<object>(x, param.SortColumn));
+//    }
+
+//    var counts = await query.CountAsync();
+
+//    var data = await query.Skip(param.Skip)
+//                   .Take(param.PageSize)
+//                   .AsNoTracking()
+//                   .ToListAsync();
+//    return new Pager<VDepartment>(data, counts);
+
+//}

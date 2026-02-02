@@ -1,5 +1,5 @@
 ﻿using Applications.Extensions;
-using Applications.Features.Entities;
+using Applications.Features.Branches.Dtos;
 using Applications.Interfaces.Branches;
 using Applications.Responses;
 using Applications.Responses.Auths;

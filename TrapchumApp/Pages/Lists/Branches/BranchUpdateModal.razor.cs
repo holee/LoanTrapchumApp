@@ -1,6 +1,6 @@
 using Applications.Features.Addresses.Requests;
 using Applications.Features.Addresses.Responses;
-using Applications.Features.Entities;
+using Applications.Features.Branches.Dtos;
 using Applications.Interfaces.Banks;
 using Applications.Responses.Lists.Currency;
 using Domains.Models.Addresses;

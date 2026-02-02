@@ -1,6 +1,6 @@
 using Applications.Extensions.mappers;
+using Applications.Features.Branches.Dtos;
 using Applications.Features.Customers.Response;
-using Applications.Features.Entities;
 using Applications.Features.LoanRequests.Command.ApplyLoanRequest;
 using Applications.Features.LoanRequests.Requests;
 using Applications.Responses.Paginations;

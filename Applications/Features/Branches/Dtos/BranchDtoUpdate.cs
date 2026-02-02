@@ -1,10 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿namespace Applications.Features.Branches.Dtos; 
 
-namespace Applications.Features.Entities; 
-
-public class BranchDtoCreate 
+public sealed class BranchDtoUpdate
 {
-    public int? BankRefId { get; set; } = 11;
+    public int BranchId { get; set; }
+    public int? BankRefId { get; set; }
     public string? BranchName { get; set; }
     public string? Description { get; set; }
     public string? CountryName { get; set; }
@@ -21,6 +20,7 @@ public class BranchDtoCreate
     public int? VillageRefId { get; set; }
     public string? VillDescription { get; set; }
     public string? VilInKhmer { get; set; }
-    public bool IsActive { get; set; } = true;
-   
+    public int? EditSeq { get; set; }
+    public bool IsActive { get; set; }
+  
 }

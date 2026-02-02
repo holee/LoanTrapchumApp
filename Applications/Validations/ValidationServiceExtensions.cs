@@ -1,4 +1,5 @@
 ﻿using Applications.Features.Activities.Command.CreateActivity;
+using Applications.Features.Branches.Dtos;
 using Applications.Features.Branches.Validations;
 using Applications.Features.Collaterals.Dtos;
 using Applications.Features.Currencies.Requests;

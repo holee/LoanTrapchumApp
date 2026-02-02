@@ -1,7 +1,9 @@
 using Applications.Extensions;
 using Applications.Features.Addresses.Responses;
+using Applications.Features.Branches.Dtos;
+using Applications.Features.Departments.Dto;
+using Applications.Features.Departments.Queries.GetDepartmentAsPaging;
 using Applications.Features.Employees.Dto;
-using Applications.Features.Entities;
 using Applications.Features.Settings.Requests;
 using Applications.Responses.Lists.Entities;
 using Applications.Responses.Paginations;
@@ -20,13 +22,11 @@ namespace TrapchumApp.Pages.Lists.Employees
 
         private readonly ISalutationServiceImpl _salutationService;
         private readonly INationalityServiceImpl _nationalityService;
-        private readonly IDepartmentServiceImpl _departmentService;
         private readonly IOccupationServiceImpl _occupationService;
-        public EmployeeComp(ISalutationServiceImpl salutationService, INationalityServiceImpl nationalityService, IDepartmentServiceImpl departmentService, IFileUploadServiceImp fileUploadService, IOccupationServiceImpl occupationService)
+        public EmployeeComp(ISalutationServiceImpl salutationService, INationalityServiceImpl nationalityService, IFileUploadServiceImp fileUploadService, IOccupationServiceImpl occupationService)
         {
             _salutationService = salutationService;
             _nationalityService = nationalityService;
-            _departmentService = departmentService;
             _fileUploadService = fileUploadService;
             _occupationService = occupationService;
         }
@@ -38,7 +38,7 @@ namespace TrapchumApp.Pages.Lists.Employees
         IEnumerable<VillageDto> Villages = [];
         IEnumerable<ProvinceDto> Provinces = [];
         IEnumerable<BranchDto> Branches = [];
-        IEnumerable<DepartmentDto> Departments = [];
+        IEnumerable<VDepartment> Departments = [];
         IEnumerable<Nationality> Nationalities = [];
         IEnumerable<OcupationResponse> Occupations = [];
         IEnumerable<string> Cities = [];
@@ -53,7 +53,7 @@ namespace TrapchumApp.Pages.Lists.Employees
 
             if (model.Photo.IsNotNullOrEmpty())
             {
-                tempPath = model.Photo!;
+                tempPath = model.Photo ?? string.Empty;
             }
 
             await base.OnInitializedAsync();
@@ -68,12 +68,12 @@ namespace TrapchumApp.Pages.Lists.Employees
             {
                 Branches = results!.Data!.Items;
             }
-            var deptResponse = await _departmentService.GetDepartments<DepartmentDto>(0, 0);
 
-            if (deptResponse.IsSuccess)
-            {
-                Departments = deptResponse.Data!;
-            }
+            var query = new GetDepartmentAsPagingQuery(null, new QueryParam(0, 25, string.Empty));
+
+            var rsp1 = await mediator.Send(query);
+
+            Departments = rsp1.Items;
 
             Nationalities = await _nationalityService!.GetNationalities();
 

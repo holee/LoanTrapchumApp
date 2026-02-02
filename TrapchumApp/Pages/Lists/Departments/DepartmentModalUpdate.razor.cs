@@ -1,10 +1,10 @@
-using Applications.Features.Entities;
+using Applications.Features.Departments.Commands.EditDepartment;
+using Applications.Features.Departments.Dto;
+using Applications.Features.Departments.Queries.GetDepartmentById;
 using Applications.Interfaces.Lists;
-using Applications.Responses.Message;
 using Domains.Models.Lists;
 using Mapster;
-using Microsoft.AspNetCore.Components;
-using Radzen;
+using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Lists.Departments
 {
@@ -26,23 +26,25 @@ namespace TrapchumApp.Pages.Lists.Departments
             try
             {
 
-                var confirm = await DialogService.Confirm($"Do you want to update with ID#{Id}?",options:new ConfirmOptions
+                var confirm = await DialogService.Confirm($"Do you want to update with ID#{Id}?", options: new ConfirmOptions
                 {
                     CancelButtonText = "Cancel",
 
                     OkButtonText = "OK",
                 });
 
-                if(confirm != true)
+                if (confirm != true)
                 {
                     return;
                 }
 
                 var req = model.Adapt<Department>();
 
-                var response = await _depService.UpdateAsync(req);
+                var command = new EditDepartmentCommand(model);
 
-                if (response!.IsSuccess)
+                var response = await mediator.Send(command);
+
+                if (response.IsSuccess())
                 {
                     NotificationService.Notify(NotificationSeverity.Success, "Department was updated successful!");
 
@@ -50,7 +52,7 @@ namespace TrapchumApp.Pages.Lists.Departments
                 }
                 else
                 {
-                    NotificationService.Notify(NotificationSeverity.Error, response.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Error, response.GetMessage());
                 }
             }
             catch (Exception ex)
@@ -64,15 +66,18 @@ namespace TrapchumApp.Pages.Lists.Departments
         {
             try
             {
-                var response = await _depService.GetDepartmentById(Id);
 
-                if (response.IsSuccess)
+                var command = new GetDepartmentById(Id, 0);
+
+                var rsp = await mediator.Send(command);
+
+                if (rsp.IsSuccess())
                 {
-                    model = response.Data!.Adapt<DepartmentDtoUpdate>();
+                    model = rsp.Value.Adapt<DepartmentDtoUpdate>();
                 }
                 else
                 {
-                    NotificationService.Notify(NotificationSeverity.Error, "Department", response.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Error, "Department", rsp.GetMessage());
                 }
 
             }

@@ -1,7 +1,9 @@
-using Applications.Features.Entities;
+using Applications.Features.Departments.Commands.CreateDepartment;
+using Applications.Features.Departments.Dto;
 using Applications.Interfaces.Lists;
 using Domains.Models.Lists;
 using Mapster;
+using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Lists.Departments
 {
@@ -20,16 +22,19 @@ namespace TrapchumApp.Pages.Lists.Departments
 
             var model = Req.Adapt<Department>();
 
-            var response = await depService.CreateAsync(model);
+            var command = new CreateDepartmentCommand(Req);
 
-            if (response!.IsSuccess)
+            var response = await mediator.Send(command);
+
+            if (response.IsSuccess())
             {
                 NotificationService.Notify(NotificationSeverity.Success, "Department record was created successful!");
+              
                 DialogService.Close(true);
             }
             else
             {
-                NotificationService.Notify(NotificationSeverity.Error, response.ErrMessage);
+                NotificationService.Notify(NotificationSeverity.Error, response.GetMessage());
             }
 
         }

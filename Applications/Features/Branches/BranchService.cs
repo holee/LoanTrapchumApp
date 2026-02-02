@@ -1,5 +1,5 @@
-﻿using Applications.Features.Branches.Interfaces;
-using Applications.Features.Entities;
+﻿using Applications.Features.Branches.Dtos;
+using Applications.Features.Branches.Interfaces;
 using Applications.Interfaces.Branches;
 using Applications.Responses;
 using Applications.Responses.Paginations;

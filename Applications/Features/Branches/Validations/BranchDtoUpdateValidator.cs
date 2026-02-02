@@ -1,4 +1,4 @@
-﻿using Applications.Features.Entities;
+﻿using Applications.Features.Branches.Dtos;
 using FluentValidation;
 
 namespace Applications.Features.Branches.Validations

@@ -1,13 +1,13 @@
 using Applications.Commons.Extensions;
 using Applications.Enumerations;
 using Applications.Extensions.Enums;
+using Applications.Features.Branches.Dtos;
 using Applications.Features.CashManagements.Extensions;
 using Applications.Features.CashManagements.Interfaces;
 using Applications.Features.CashManagements.Responses;
 using Applications.Features.Currencies;
 using Applications.Features.Currencies.Extensions;
 using Applications.Features.Currencies.Responses;
-using Applications.Features.Entities;
 using Applications.Features.Transactions.CashManagements;
 using Applications.Responses.Lists.Currency;
 using Applications.Services.Transactions.Branches;

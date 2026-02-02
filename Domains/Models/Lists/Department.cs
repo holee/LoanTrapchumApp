@@ -6,6 +6,7 @@ namespace Domains.Models.Lists
     public class Department:BaseEntity
     {
         public int DepartmentId { get; set; }
+        public int? BranchId { get; set; }
         public string DepartmentName { get; set; }=string.Empty;
         public string? Description { get; set; }
         public bool IsActive { get; set; } = true;

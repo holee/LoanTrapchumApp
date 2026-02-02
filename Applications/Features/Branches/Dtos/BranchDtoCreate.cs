@@ -1,16 +1,12 @@
-﻿using Domains.Models.Bases;
-using Domains.Models.Currencies;
-using Domains.Models.Lists.Employees;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace Applications.Features.Entities;
+namespace Applications.Features.Branches.Dtos; 
 
-public class BranchDto:BaseEntity
+public class BranchDtoCreate 
 {
-    public int BranchId { get; set; }
-    public int? BankRefId { get; set; }
-    public string BranchName { get; set; } = default!;
+    public int? BankRefId { get; set; } = 11;
+    public string? BranchName { get; set; }
     public string? Description { get; set; }
-    public long? AddressRefId { get; set; }
     public string? CountryName { get; set; }
     public string? City { get; set; }
     public int? ProvinceRefId { get; set; }
@@ -25,7 +21,6 @@ public class BranchDto:BaseEntity
     public int? VillageRefId { get; set; }
     public string? VillDescription { get; set; }
     public string? VilInKhmer { get; set; }
-    public bool IsActive { get; set; }
-    public Bank? Bank { get; set; }
-    public List<Employee>? Employees { get; set; }
+    public bool IsActive { get; set; } = true;
+   
 }

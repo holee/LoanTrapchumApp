@@ -1,8 +1,10 @@
 using Applications.Features.Addresses.Responses;
+using Applications.Features.Branches.Dtos;
+using Applications.Features.Departments.Dto;
+using Applications.Features.Departments.Queries.GetDepartmentAsPaging;
 using Applications.Features.Employees.Commands.EditEmployee;
 using Applications.Features.Employees.Dto;
 using Applications.Features.Employees.Queries.GetEditEmployee;
-using Applications.Features.Entities;
 using Applications.Responses.Lists.Entities;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Employees;
@@ -39,7 +41,7 @@ namespace TrapchumApp.Pages.Lists.Employees
         IEnumerable<VillageDto> Villages = [];
         IEnumerable<ProvinceDto> Provinces = [];
         IEnumerable<BranchDto> Branches = [];
-        IEnumerable<DepartmentDto> Departments = [];
+        IEnumerable<VDepartment> Departments = [];
         IEnumerable<Country> Countries = [];
         IEnumerable<Nationality> Nationalities = [];
         IEnumerable<OcupationResponse> Occuptions = [];
@@ -114,7 +116,7 @@ namespace TrapchumApp.Pages.Lists.Employees
 
             var query = new GetEditEmployeeQuery(EmployeeId);
 
-            var rsp = await mediator.Send(query); 
+            var rsp = await mediator.Send(query);
 
             if (rsp.IsSuccess())
             {
@@ -135,12 +137,12 @@ namespace TrapchumApp.Pages.Lists.Employees
             {
                 Branches = results!.Data!.Items;
             }
-            var deptResponse = await _departmentService.GetDepartments<DepartmentDto>(0, 0);
 
-            if (deptResponse.IsSuccess)
-            {
-                Departments = deptResponse.Data!;
-            }
+            var query = new GetDepartmentAsPagingQuery(0, new QueryParam(0, 25, string.Empty));
+
+            var rspDept = await mediator.Send(query);
+
+            Departments = rspDept.Items;
 
             Nationalities = await _nationalityService!.GetNationalities();
 
@@ -176,7 +178,7 @@ namespace TrapchumApp.Pages.Lists.Employees
                 if (rsp.IsSuccess())
                 {
                     NotificationService.Notify(NotificationSeverity.Success, "Employee was updated successfully.");
-                    
+
                 }
                 else
                 {

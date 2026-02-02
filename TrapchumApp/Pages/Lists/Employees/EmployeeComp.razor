@@ -1,3 +1,5 @@
+@using Applications.Features.Branches.Dtos
+@using Applications.Features.Departments.Dto
 @using Applications.Features.Entities
 @using Applications.Features.LoanRequests.Interfaces
 @using Applications.Responses.Lists.Entities
@@ -208,8 +210,8 @@
                                                 AllowFiltering="true"
                                                 Data="@Departments"
                                                 AllowClear="false"
-                                                TextProperty="@nameof(DepartmentDto.DepartmentName)"
-                                                ValueProperty="@nameof(DepartmentDto.DepartmentId)"
+                                                TextProperty="@nameof(VDepartment.DepartmentName)"
+                                                ValueProperty="@nameof(VDepartment.DepartmentId)"
                                                 Style="width: 100%;"
                                                 Name="Department"
                                                 @bind-Value="model.DepartmentRefId"

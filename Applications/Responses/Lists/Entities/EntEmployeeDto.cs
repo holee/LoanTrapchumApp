@@ -1,5 +1,4 @@
-﻿using Applications.Features.Entities;
-using Applications.Features.Entities;
+﻿using Applications.Features.Branches.Dtos;
 using Domains.Models.Loans;
 
 namespace Applications.Responses.Lists.Entities;

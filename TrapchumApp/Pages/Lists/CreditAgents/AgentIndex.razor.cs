@@ -3,15 +3,11 @@ using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Responses.ViewModels.Employees;
 using Applications.Services.Lists;
-using Microsoft.AspNetCore.Components;
-using Radzen;
-using Microsoft.AspNetCore.Components.Authorization;
 using Radzen.Blazor;
 using TrapchumApp.Pages.Identity.Users;
 using TrapchumApp.Helpers.Extensions;
-using System.Threading.Tasks;
 using Applications.Features.CreditAgents.Requests;
-using Applications.Features.Entities;
+using Applications.Features.Branches.Dtos;
 
 namespace TrapchumApp.Pages.Lists.CreditAgents;
 

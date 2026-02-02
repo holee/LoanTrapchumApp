@@ -1,4 +1,4 @@
-using Applications.Features.Entities;
+using Applications.Features.Branches.Dtos;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Branches;

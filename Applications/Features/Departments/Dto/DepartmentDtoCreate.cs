@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Applications.Features.Entities; 
+namespace Applications.Features.Departments.Dto; 
 
 public class DepartmentDtoCreate
 {

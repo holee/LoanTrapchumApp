@@ -1,5 +1,4 @@
-﻿using Applications.Features.Entities;
-using Applications.Features.Entities;
+﻿using Applications.Features.Branches.Dtos;
 using Applications.Responses;
 using Applications.Responses.Auths;
 using Applications.Responses.Paginations;

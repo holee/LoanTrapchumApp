@@ -1,8 +1,8 @@
 ﻿using Applications.Extensions.Identity.Authorizations.Extensions;
 using Applications.Extensions.Identity.Policies;
+using Applications.Features.Branches.Dtos;
 using Applications.Features.Employees.Queries.GetEmployeeAsPaging;
 using Applications.Features.Employees.Queries.GetEmployeeById;
-using Applications.Features.Entities;
 using Applications.Features.Identity.Users;
 using Applications.Interfaces.Employees;
 using Applications.Responses.Paginations;

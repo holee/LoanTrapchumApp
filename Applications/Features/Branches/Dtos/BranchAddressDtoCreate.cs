@@ -1,6 +1,6 @@
-﻿namespace Applications.Features.Entities
+﻿namespace Applications.Features.Branches.Dtos
 {
-    public class BranchAddressDtoUpdate 
+    public class BranchAddressDtoCreate
     {
         public string? Country { get; set; } = string.Empty;
         public string? City { get; set; } = string.Empty;

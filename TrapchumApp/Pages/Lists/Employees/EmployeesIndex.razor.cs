@@ -1,11 +1,11 @@
 using Applications.Extensions;
 using Applications.Extensions.DateTimes;
 using Applications.Features.Addresses.Responses;
+using Applications.Features.Branches.Dtos;
 using Applications.Features.Customers.Response;
 using Applications.Features.Employees.Commands.ChangeEmployeeState;
 using Applications.Features.Employees.Queries.GetEmployeeAsPaging;
 using Applications.Features.Employees.Requests;
-using Applications.Features.Entities;
 using Applications.Interfaces.Lists;
 using Applications.Responses.Lists.Employees;
 using Applications.Responses.Lists.Entities;
@@ -166,11 +166,6 @@ namespace TrapchumApp.Pages.Lists.Employees
                     CloseTab(newTabId);
 
                 }));
-                builer.AddAttribute(2, "Reloaded", EventCallback.Factory.Create(this, async (VEmployeeList x) =>
-                {
-                    // _lastRowId = x.CustomerId;
-                    // await _gridCustomer.Reload();
-                }));
 
                 builer.AddAttribute(3, "UpdateStateChanged", EventCallback.Factory.Create(this, async (VEmployeeList x) =>
                 {
@@ -223,11 +218,6 @@ namespace TrapchumApp.Pages.Lists.Employees
                 builer.AddAttribute(2, "OnClose", EventCallback.Factory.Create(this, () =>
                 {
                     CloseTab(editTabId);
-                }));
-
-                builer.AddAttribute(3, "Reloaded", EventCallback.Factory.Create(this, () =>
-                {
-
                 }));
 
                 builer.AddAttribute(4, "UpdateChanged", EventCallback.Factory.Create(this, async (VEmployeeList x) =>

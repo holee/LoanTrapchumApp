@@ -20,7 +20,7 @@ namespace TrapchumApp.Pages.Lists.Departments
         {
             try
             {
-                var resultResponse = await _departmentService.GetDepartmentDetails(Id);
+                var resultResponse = await _departmentService.GetDepartmentDetailsById(Id);
 
                 if (resultResponse.IsSuccess)
                 {

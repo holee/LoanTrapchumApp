@@ -7,6 +7,12 @@ using Applications.Features.Currencies.Requests;
 using Applications.Features.Currencies.Responses;
 using Applications.Features.Customers.Commands.Customers.CreateCustomer;
 using Applications.Features.Customers.Commands.Customers.EditCustomer;
+using Applications.Features.Departments.Commands.CreateDepartment;
+using Applications.Features.Departments.Commands.DeleteDepartment;
+using Applications.Features.Departments.Commands.EditDepartment;
+using Applications.Features.Departments.Dto;
+using Applications.Features.Departments.Queries.GetDepartmentAsPaging;
+using Applications.Features.Departments.Queries.GetDepartmentById;
 using Applications.Features.Employees.Commands.ChangeEmployeeState;
 using Applications.Features.Employees.Commands.CreateEmployee;
 using Applications.Features.Employees.Commands.EditEmployee;
@@ -45,6 +51,15 @@ public static class ApplicationServiceInjection
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
+        services.AddScoped<IRequestHandler<GetDepartmentAsPagingQuery, Pager<VDepartment>>, GetDepartmentAsPagingQueryHandler>();
+        services.AddScoped<IRequestHandler<GetDepartmentDetailsById, ErrorOr<VDepartment>>, GetDepartmentDetailsByIdHandler>();
+        services.AddScoped<IRequestHandler<GetDepartmentById, ErrorOr<Department>>, GetDepartmentByIdHandler>();
+        services.AddScoped<IRequestHandler<CreateDepartmentCommand, ErrorOr<VDepartment>>, CreateDepartmentCommandHandler>();
+        services.AddScoped<IRequestHandler<EditDepartmentCommand, ErrorOr<VDepartment>>, EditDepartmentCommandHandler>();
+        services.AddScoped<IRequestHandler<DeleteDepartmentCommand, ErrorOr<string>>, DeleteDepartmentCommandHandler>();
+
+
+
 
         services.AddScoped<IRequestHandler<CreateGuarantorCommand, ErrorOr<VGuarantor>>, CreateGuarantorCommandHandler>();
 

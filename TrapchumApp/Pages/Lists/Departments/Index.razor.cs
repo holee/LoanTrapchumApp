@@ -1,7 +1,10 @@
 ﻿using Applications.Interfaces.Lists;
 using Applications.Responses.Paginations;
-using Applications.Features.Entities;
 using Applications.Features.Departments.Dto;
+using Applications.Features.Branches.Dtos;
+using Applications.Features.Departments.Queries.GetDepartmentAsPaging;
+using TrapchumApp.Helpers.Extensions;
+using Applications.Features.Departments.Commands.DeleteDepartment;
 
 namespace TrapchumApp.Pages.Lists.Departments
 {
@@ -74,9 +77,10 @@ namespace TrapchumApp.Pages.Lists.Departments
         {
             isLoading = true;
             var param = new QueryParam(pageIndex, pageSize, sortField, includeInactive, sortDescending, filter);
-            var resultResponse = await _depService.GetDepartments(param);
-            counts = resultResponse.Count;
-            Departments = resultResponse.Items ?? [];
+            var command = new GetDepartmentAsPagingQuery(null, param);
+            var rsp = await mediator.Send(command);
+            counts = rsp.Count;
+            Departments = rsp.Items ?? [];
             isLoading = false;
             StateHasChanged();
         }
@@ -110,20 +114,9 @@ namespace TrapchumApp.Pages.Lists.Departments
         private async Task LoadDepartmentData(LoadDataArgs args)
         {
 
-            pageIndex = args.Skip ?? 0;
+            (pageIndex, pageSize, sortField, sortDescending) = args.Page();
 
-            pageSize = args.Top ?? 10;
-
-            if (args.OrderBy.Any())
-            {
-                sortField = args.Sorts.First().Property;
-
-                sortDescending = args.Sorts.First().SortOrder == SortOrder.Descending;
-            }
-
-            var filterColumns = args.Filters?.FirstOrDefault(f => f.Property == nameof(VDepartment.DepartmentName) ||
-                                                                f.Property == nameof(VDepartment.Description) ||
-                                                                f.Property == nameof(VDepartment.DepartmentId))?.FilterValue?.ToString();
+            var filterColumns = args.GetFilterValue(nameof(VDepartment.DepartmentName), nameof(VDepartment.Description));
 
             var filterString = filterColumns ?? string.Empty;
 
@@ -133,35 +126,29 @@ namespace TrapchumApp.Pages.Lists.Departments
 
         protected async Task Delete(int departmentId)
         {
-            try
+
+            var confirm = await DialogService.Confirm("Do you want to delete?", "Delete", new ConfirmOptions
             {
-                var confirm = await DialogService.Confirm("Do you want to delete?", "Delete", new ConfirmOptions
-                {
-                    CancelButtonText = "Cancel",
-                    OkButtonText = "OK",
-                });
-                if (confirm == true)
-                {
-                    var result = await _depService.DeleteAsync(departmentId);
+                CancelButtonText = "Cancel",
+                OkButtonText = "OK",
+            });
 
-                    if (result.IsSuccess)
-                    {
-                        NotificationService.Notify(NotificationSeverity.Success, "Department record was deleted successful!");
-                        await GetDepartments(searchText);
-                    }
-                    else
-                    {
-                        NotificationService.Notify(NotificationSeverity.Error, result.ErrMessage);
-                    }
-                }
-            }
-            catch (Exception ex)
+            if (confirm == false) return;
+
+            var command = new DeleteDepartmentCommand(departmentId, 0);
+
+            var result = await mediator.Send(command);
+
+            if (result.IsSuccess())
             {
-                NotificationService.Notify(NotificationSeverity.Error, ex.Message);
-                return;
+                NotificationService.Notify(NotificationSeverity.Success, result.Value);
+
+                await GetDepartments(searchText);
             }
-
-
+            else
+            {
+                NotificationService.Notify(NotificationSeverity.Error, result.GetMessage());
+            }
         }
 
     }

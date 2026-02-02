@@ -57,5 +57,24 @@
         }
 
 
+
+        public static (int Skip, int Take, string, bool) Page(this LoadDataArgs args, string? sortColumns = null)
+        {
+            int skip = args.Skip ?? 0;
+
+            int take = args.Top ?? 15;
+
+            if (args.Sorts!.Any())
+            {
+                var sortField = args.Sorts!.FirstOrDefault()?.Property ?? "Id";
+
+                var sortDescending = args.Sorts!.FirstOrDefault()?.SortOrder == SortOrder.Ascending;
+
+                return (skip, take, sortField, sortDescending);
+
+            }
+
+            return (skip, take, sortColumns ?? "", false);
+        }
     }
 }

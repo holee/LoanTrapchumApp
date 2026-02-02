@@ -5,13 +5,13 @@ using Applications.Features.CashManagements.Interfaces;
 using Applications.Features.CashManagements.Responses;
 using Applications.Features.CashManagements.UseCases;
 using Applications.Features.Currencies.Responses;
-using Applications.Features.Entities;
 using Applications.Features.Transactions.CashManagements;
 using Applications.Responses.Lists.Currency;
 using Applications.Services.Transactions.Branches;
 using Domains.Enumerations;
 using TrapchumApp.Helpers.Extensions;
 using Applications.Features.Currencies.Extensions;
+using Applications.Features.Branches.Dtos;
 namespace TrapchumApp.Pages.Transactions.Branches
 {
     public partial class VaultOutModal

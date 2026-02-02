@@ -22,10 +22,10 @@
     <Folder Include="Extensions\Identity\Constants\" />
     <Folder Include="Features\Addresses\UseCases\" />
     <Folder Include="Features\Addresses\Validations\" />
+    <Folder Include="Features\Branches\Command\EditBranch\" />
+    <Folder Include="Features\Branches\Command\DeleteBranch\" />
     <Folder Include="Features\Branches\Extensions\" />
     <Folder Include="Features\Branches\Mappers\" />
-    <Folder Include="Features\Branches\Requests\" />
-    <Folder Include="Features\Branches\Responses\" />
     <Folder Include="Features\CashManagements\Validations\" />
     <Folder Include="Features\CashManagements\Requests\" />
     <Folder Include="Features\Collaterals\Commands\CreateCollaterals\" />
@@ -34,9 +34,6 @@
     <Folder Include="Features\Currencies\Queries\GetCurrenciesAsPaging\" />
     <Folder Include="Features\Currencies\Queries\GetCurrencyNotes\" />
     <Folder Include="Features\Currencies\UseCases\" />
-    <Folder Include="Features\Departments\Commands\" />
-    <Folder Include="Features\Departments\Queries\GetDepartmentById\" />
-    <Folder Include="Features\Departments\Queries\GetDepartmentDetailsById\" />
     <Folder Include="Features\Employees\Extensions\" />
     <Folder Include="Features\Employees\Mappers\" />
     <Folder Include="Features\Employees\Responses\" />

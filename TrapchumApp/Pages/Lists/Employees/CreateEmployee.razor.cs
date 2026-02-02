@@ -9,13 +9,7 @@ namespace TrapchumApp.Pages.Lists.Employees
     public partial class CreateEmployee
     {
         [Parameter] public EventCallback OnClose { get; set; }
-        [Parameter] public EventCallback<VEmployeeList> Reloaded { get; set; }
-
         [Parameter] public EventCallback<VEmployeeList> UpdateStateChanged { get; set; }
-        async void Reload()
-        {
-            await Reloaded.InvokeAsync();
-        }
         private async Task CloseTab()
         {
             await OnClose.InvokeAsync();
@@ -31,33 +25,26 @@ namespace TrapchumApp.Pages.Lists.Employees
         }
         protected async Task FormValidSubmit()
         {
-            try
+
+            model.Id = $"{Guid.CreateVersion7()}";
+
+            model.EntType = EntType.Employee.ToString();
+
+            var command = new CreateEmployeeCommand(model);
+
+            var rsp = await mediator.Send(command);
+
+            if (rsp.IsSuccess())
             {
-                model.Id = $"{Guid.CreateVersion7()}";
+                NotificationService.Notify(NotificationSeverity.Success, "New Employee was Created");
+                await OnClose.InvokeAsync();
+                await UpdateStateChanged.InvokeAsync(rsp.Value);
 
-                model.EntType = EntType.Employee.ToString();
-
-                var command = new CreateEmployeeCommand(model);
-
-                var rsp = await mediator.Send(command);
-
-                if (rsp.IsSuccess())
-                {
-                    NotificationService.Notify(NotificationSeverity.Success, "New Employee was Created");
-                    await OnClose.InvokeAsync();
-                    await UpdateStateChanged.InvokeAsync(rsp.Value);
-
-                }
-                else
-                {
-                    NotificationService.Notify(NotificationSeverity.Error, rsp.GetMessage());
-                }
             }
-            catch (Exception ex)
+            else
             {
-                NotificationService.Notify(NotificationSeverity.Error, ex.Message);
+                NotificationService.Notify(NotificationSeverity.Error, rsp.GetMessage());
             }
-
         }
 
     }
