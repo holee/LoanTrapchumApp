@@ -1,9 +1,15 @@
 using Applications.Features.Addresses.Requests;
 using Applications.Features.Addresses.Responses;
+using Applications.Features.Branches.Command.ChangeBranchState;
+using Applications.Features.Branches.Command.EditBranch;
 using Applications.Features.Branches.Dtos;
+using Applications.Features.Branches.Queries.GetBranchByUser;
+using Applications.Features.Branches.Queries.GetUpdateBranch;
+using Applications.Features.Expenses.Queries.GetExpenseById;
 using Applications.Interfaces.Banks;
 using Applications.Responses.Lists.Currency;
 using Domains.Models.Addresses;
+using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Lists.Branches
 {
@@ -57,9 +63,20 @@ namespace TrapchumApp.Pages.Lists.Branches
         {
             try
             {
-                var result = await _branchService!.GetUpdateBranchById(Id);
 
-                model = result.Data!;
+                var command = new GetUpdateBranchQuery(Id);
+
+                var result = await mediator.Send(command);  //_branchService!.GetUpdateBranchById(Id);
+
+                if (result.IsError)
+                {
+                    NotificationService.Notify(NotificationSeverity.Error, "Error", result.GetMessage());
+                    DialogService.Close();
+                    return;
+                }
+
+
+                model = result.Value;
 
                 ProvinceList = await _addressService!.GetsProvinces(string.Empty);
 
@@ -72,7 +89,7 @@ namespace TrapchumApp.Pages.Lists.Branches
 
                 Cities = await _addressService.GetCities();
 
-                if (result.IsSuccess)
+                if (result.IsSuccess())
                 {
                     if (model.DistrictRefId.HasValue)
                     {
@@ -100,22 +117,20 @@ namespace TrapchumApp.Pages.Lists.Branches
         }
         async Task OnSubmit()
         {
-            try
+            var command = new EditBranchCommand(model);
+
+            var rsp = await mediator.Send(command);
+
+            if (rsp.IsSuccess())
             {
+                NotificationService.Notify(NotificationSeverity.Success, "Branch updated successfully!");
 
-                var response = await _branchService.UpdateAsync(model);
+                DialogService.Close(true);
 
-                if (response!.IsSuccess)
-                {
-                    NotificationService.Notify(NotificationSeverity.Success, "Branch updated successfully!");
-
-                    DialogService.Close(true);
-                }
+                return;
             }
-            catch (Exception ex)
-            {
-                NotificationService.Notify(NotificationSeverity.Error, "Exception ", ex.Message);
-            }
+
+            NotificationService.Notify(NotificationSeverity.Error, "Error", rsp.GetMessage());
         }
 
         async Task GetCities(string? filter = null)

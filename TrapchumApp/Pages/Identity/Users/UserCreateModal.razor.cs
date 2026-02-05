@@ -1,4 +1,5 @@
 using Applications.Features.Branches.Dtos;
+using Applications.Features.Branches.Queries.GetBranchAsPaging;
 using Applications.Features.Identity.Users;
 using Applications.Interfaces.Identity;
 using Applications.Responses.Paginations;
@@ -23,7 +24,7 @@ namespace TrapchumApp.Pages.Identity.Users
 
         EditForm _form = default!;
 
-        IEnumerable<BranchDto> _branches = [];
+        IEnumerable<VBranch> _branches = [];
 
         IEnumerable<VEmployeeList> _bEmployees = [];
 
@@ -90,9 +91,12 @@ namespace TrapchumApp.Pages.Identity.Users
 
         async Task GetBranches(int? branchId = 0)
         {
-            var rsp = await _branchService.GetBranchesAsync<BranchDto>(branchId, new QueryParam(0, 0, string.Empty));
 
-            _branches = rsp!.IsSuccess ? rsp.Data!.Items : [];
+            var command = new GetBranchAsPagingQuery(0, new QueryParam(0, 0, string.Empty));
+
+            var rsp = await mediator.Send(command);
+
+            _branches = rsp.Items;
         }
 
 

@@ -3,6 +3,8 @@ using TrapchumApp.Shared;
 using Domains.Models.Identity;
 using Applications.Features.Notifications.Queries.GetNotification;
 using Domains.Enumerations;
+using TrapchumApp.Helpers.Extensions;
+using Applications.Features.Branches.Queries.GetBranchState;
 
 namespace TrapchumApp.Components.Layout
 {
@@ -65,7 +67,8 @@ namespace TrapchumApp.Components.Layout
 
                 _notiService.Notifications = result.Items;
 
-                _notiService.UnReadCount = result.Count; //await mediator.Send(new GetUnreadNotificationQuery(userId, branchId));
+                _notiService.UnReadCount = result.Count; 
+
             }
             catch (Exception ex)
             {
@@ -75,17 +78,19 @@ namespace TrapchumApp.Components.Layout
 
         async Task GetBranchState(string? userId)
         {
-            var rsp = await _branchService.GetBranchesByUser(userId);
+            var getBranch = new GetBranchStateQuery(userId);
 
-            if (rsp.IsSuccess)
+            var rsp = await mediator.Send(getBranch);
+
+            if (rsp.IsSuccess())
             {
-                branchId = rsp.Data!.BranchId;
+                bState.GetBranchState(rsp.Value.IsOpen);
+            }
+            else
+            {
+                bState.GetBranchState(false);
             }
 
-            if (branchId > 0)
-            {
-                await bState.GetBranchState(branchId);
-            }
         }
 
         public async ValueTask DisposeAsync()

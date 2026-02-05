@@ -1,6 +1,9 @@
+using Applications.Features.Branches.Dtos;
+using Applications.Features.Branches.Queries.GetBranchAsPaging;
+using Applications.Features.Departments.Dto;
+using Applications.Features.Departments.Queries.GetDepartmentAsPaging;
 using Applications.Features.OtherNames;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Branches;
 using Applications.Responses.ViewModels.OtherNames;
 using Applications.Services.Lists;
 using Domains.Models.Lists;
@@ -15,16 +18,21 @@ namespace TrapchumApp.Pages.Lists.OtherNames
 
 
         private readonly IOtherNameServiceImpl _nameService;
+
         private readonly IDepartmentServiceImpl _departmentService;
         public ConvertToEmployee(IOtherNameServiceImpl otherNameService, IDepartmentServiceImpl departmentService)
         {
             _nameService = otherNameService;
             _departmentService = departmentService;
         }
-        IEnumerable<VBranchResponse> branches = [];
-        IEnumerable<Department> depts = [];
+        IEnumerable<VBranch> branches = [];
+
+        IEnumerable<VDepartment> depts = [];
+
         VOtherNames? name = new VOtherNames();
+
         ConvertCreateEmployee model = new ConvertCreateEmployee();
+
         IEnumerable<string> Statuses = ["Single", "Married", "Divorced", "Widow"];
         protected override async Task OnParametersSetAsync()
         {
@@ -40,7 +48,7 @@ namespace TrapchumApp.Pages.Lists.OtherNames
 
             if (rsp.IsSuccess)
             {
-                NotificationService.Notify(NotificationSeverity.Success, "Success",rsp.Data);
+                NotificationService.Notify(NotificationSeverity.Success, "Success", rsp.Data);
                 DialogService.Close(true);
             }
             else
@@ -73,29 +81,24 @@ namespace TrapchumApp.Pages.Lists.OtherNames
 
         async Task GetBranches()
         {
-            var rsp = await _branchService.GetBranchesAsync<VBranchResponse>(0, new QueryParam(0, 0, string.Empty));
-            if (rsp.IsSuccess)
-            {
-                branches = rsp.Data!.Items;
-            }
-            else
-            {
-                branches = [];
-            }
+
+            var command = new GetBranchAsPagingQuery(0, new QueryParam(0, 0, string.Empty));
+
+            var rsp = await mediator.Send(command);
+
+            branches = rsp.Items;
+
         }
 
         async Task GetDepartment()
         {
-            var rsp = await _departmentService.GetDepartments(0,0);
 
-            if (rsp.IsSuccess)
-            {
-                depts = rsp.Data!;
-            }
-            else
-            {
-                depts = [];
-            }
+            var command = new GetDepartmentAsPagingQuery(0, new QueryParam(0, 0, string.Empty));
+
+            var rsp = await mediator.Send(command);
+
+            depts = rsp.Items;
+
         }
 
     }

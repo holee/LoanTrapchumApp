@@ -28,6 +28,8 @@ namespace TrapchumApp.Shared
         private string? _employeeId;
         private bool _canRecievePayment;
         private bool _canPayOff;
+        private bool _canRefund;
+        private bool _canOpenBranch; 
         private int _unreadCount;
         public bool CanPayOff
         {
@@ -144,6 +146,18 @@ namespace TrapchumApp.Shared
             set
             {
                 _canApproved = value;
+
+                StateHasChanged();
+            }
+        }
+
+        public bool CanOpenBranch
+        {
+            get => _canOpenBranch;
+
+            set
+            {
+                _canOpenBranch = value;
 
                 StateHasChanged();
             }
@@ -352,6 +366,21 @@ namespace TrapchumApp.Shared
             _canApproved = await _authorizeService.MustHasPermissionAsync(user!, Policies.ApproveLoanRequest);
         }
 
+
+        internal async Task CheckedCanOpenBranch(ClaimsPrincipal user)
+        {
+
+            if (user is null && user?.Identity?.IsAuthenticated == false)
+            {
+                _canOpenBranch = false;
+
+                return;
+            }
+
+            _canOpenBranch = await _authorizeService.MustHasPermissionAsync(user!, Policies.OpenBranch);
+    
+        }
+
         internal async Task CheckedCanRequest(ClaimsPrincipal user)
         {
             if (user is null && user?.Identity?.IsAuthenticated == false)
@@ -384,16 +413,21 @@ namespace TrapchumApp.Shared
 
         public async Task GetBranchState(int? branchId)
         {
-            var branchStateResponse = await _branchService.GetBrachStatus(branchId);
+            var rsp = await _branchService.GetBrachStatus(branchId);
 
-            if (branchStateResponse.IsSuccess)
+            if (rsp.IsSuccess)
             {
-                _state = branchStateResponse.Data!.IsOpen;
+                _state = rsp.Data!.IsOpen;
             }
             else
             {
                 _state = false;
             }
+        }
+
+        public void GetBranchState(bool state)
+        {
+            _state = state;
         }
 
 
@@ -402,11 +436,11 @@ namespace TrapchumApp.Shared
 
             await GetBranchIdByUser();
 
-            var branchStateResponse = await _branchService.GetBrachStatus(_branchId);
+            var rsp = await _branchService.GetBrachStatus(_branchId);
 
-            if (branchStateResponse.IsSuccess)
+            if (rsp.IsSuccess)
             {
-                _state = branchStateResponse.Data!.IsOpen;
+                _state = rsp.Data!.IsOpen;
             }
             else
             {

@@ -5,7 +5,6 @@ using Applications.Features.LoanRequests.Command.ApplyLoanRequest;
 using Applications.Features.LoanRequests.Requests;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Auths;
-using Applications.Responses.ViewModels.Branches;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 
@@ -52,7 +51,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             {
                 Customers = custResp.Data!;
             }
-            var branchResp = await _branchService.GetBranchesAsync<VBranchResponse>(BranchId, new QueryParam(0, 25, string.Empty));
+            var branchResp = await _branchService.GetBranchesAsync<VBranch>(BranchId, new QueryParam(0, 25, string.Empty));
 
             if (branchResp.IsSuccess)
             {

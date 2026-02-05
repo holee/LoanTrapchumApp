@@ -1,6 +1,7 @@
 using Applications.Enumerations;
 using Applications.Extensions.Identity.Authorizations.Extensions;
 using Applications.Extensions.Identity.Policies;
+using Applications.Features.Branches.Queries.GetBranchState;
 using Applications.Features.CashManagements.Responses;
 using Applications.Features.Currencies;
 using Applications.Features.Currencies.Responses;
@@ -35,10 +36,10 @@ namespace TrapchumApp.Pages.Transactions.Branches
         bool isClicked = false;
         long userRefId = 0;
         int currencyId = 1;
-        bool canOpenBranch = false;
-        bool canCloseBranch = false;
-        bool canVaultOut = false;
-        bool canVaultIn = false;
+        //bool canOpenBranch = false;
+        //bool canCloseBranch = false;
+        //bool canVaultOut = false;
+        //bool canVaultIn = false;
         private AlertStyle alertStyle;
 
         protected override async Task OnInitializedAsync()
@@ -46,14 +47,6 @@ namespace TrapchumApp.Pages.Transactions.Branches
             var auth = await AuthenticationState;
 
             _userId = auth.GetUserId();
-
-            canOpenBranch = await _authorizeService.MustHasPermissionAsync(auth.User, Policies.OpenBranch);
-
-            canCloseBranch = await _authorizeService.MustHasPermissionAsync(auth.User, Policies.CloseBranch);
-
-            canVaultOut = await _authorizeService.MustHasPermissionAsync(auth.User, Policies.TranxVaultOut);
-
-            canVaultIn = await _authorizeService.MustHasPermissionAsync(auth.User, Policies.TranxVaultIn);
 
             var rsp = await obService.GetCashVaultBalance(BranchId);
 
@@ -69,7 +62,18 @@ namespace TrapchumApp.Pages.Transactions.Branches
                 await GetCurrencyNotes(currencyId, BranchId);
             }
 
-            await bState.GetBranchState(BranchId);
+            var command = new GetBranchStateQuery(_userId);
+
+            var rsp1 = await mediator.Send(command);
+
+            if (rsp1.IsSuccess())
+            {
+                bState.GetBranchState(rsp1.Value.IsOpen);
+            }
+            else
+            {
+                bState.GetBranchState(false);
+            }
 
             await base.OnInitializedAsync();
         }
@@ -176,6 +180,7 @@ namespace TrapchumApp.Pages.Transactions.Branches
             if (result!.IsSuccess)
             {
                 bState.State = true;
+
                 NotificationService.Notify(NotificationSeverity.Success, result.Data);
             }
             else
@@ -207,17 +212,20 @@ namespace TrapchumApp.Pages.Transactions.Branches
 
         protected async void OnCashVaultOut()
         {
-            var resultModal = await DialogService.OpenAsync<VaultOutModal>("Vault Out",
-                new Dictionary<string, object?> {
-                    { "UserId", _userId },
-                    { "BranchId", BranchId },
-                                                                                                                                                                                                                },
-            new DialogOptions
+            if (BranchId is null && BranchId <= 0)
+                return;
+
+            var param = new Dictionary<string, object> { { "BranchId", BranchId! } };
+
+            var options = new DialogOptions
             {
                 ShowTitle = false,
                 Width = "100vw",
                 Height = "100vh",
-            });
+            };
+
+            var resultModal = await DialogService.OpenAsync<VaultOutModal>("Vault Out", param, options);
+
             if (resultModal != null)
             {
                 await OnInitializedAsync();
@@ -234,3 +242,12 @@ namespace TrapchumApp.Pages.Transactions.Branches
 
     }
 }
+
+
+//canOpenBranch = await _authorizeService.MustHasPermissionAsync(auth.User, Policies.OpenBranch);
+
+//canCloseBranch = await _authorizeService.MustHasPermissionAsync(auth.User, Policies.CloseBranch);
+
+//canVaultOut = await _authorizeService.MustHasPermissionAsync(auth.User, Policies.TranxVaultOut);
+
+//canVaultIn = await _authorizeService.MustHasPermissionAsync(auth.User, Policies.TranxVaultIn);

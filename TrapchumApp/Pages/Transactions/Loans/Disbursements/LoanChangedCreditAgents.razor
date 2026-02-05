@@ -1,12 +1,12 @@
 ﻿@page "/App/Loans/Disbursments/Credit-Agent/{BranchId:int}/Branches"
 @using Applications.Features.Addresses
 @using Applications.Features.Branches
+@using Applications.Features.Branches.Dtos
 @using Applications.Features.Currencies
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
 @using Applications.Features.LoanRequests.Interfaces
 @using Applications.Features.Loans.Responses
-@using Applications.Responses.ViewModels.Branches
 @using Applications.Responses.ViewModels.Loans
 @using TrapchumApp.Services
 <PageTitle>Change Credit Agent</PageTitle>
@@ -22,8 +22,8 @@
                 <RadzenFormField AllowFloatingLabel="true" Text="Branch" class="rz-w-100">
                     <RadzenDropDown class="rz-w-100"
                                     PageSize="10"
-                                    TextProperty="@nameof(VBranchResponse.BranchName)"
-                                    ValueProperty="@nameof(VBranchResponse.BranchId)"
+                                    TextProperty="@nameof(VBranch.BranchName)"
+                                    ValueProperty="@nameof(VBranch.BranchId)"
                                     SelectedItemChanged="@OnSelectedItemChanged"
                                     @bind-Value="@BranchId"
                                     Placeholder="Branch Name"

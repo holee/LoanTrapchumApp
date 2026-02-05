@@ -86,7 +86,7 @@ namespace Infrastructures
             services.AddScoped<IOccupationService, OccupationService>();
             services.AddScoped<IOtherNameService, OtherNameService>();
             services.AddScoped<ILoginService, LoginService>();
-            services.AddScoped<IBranchService, BranchService>();
+            services.AddScoped<IBranchService, BranchRepository>();
             services.AddScoped<IBankService, BankRepository>();
             services.AddScoped<IDepartmentService, DepartmentService>();
             services.AddScoped<IEmployeeService, EmployeeService>();

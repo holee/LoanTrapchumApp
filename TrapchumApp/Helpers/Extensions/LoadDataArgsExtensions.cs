@@ -58,7 +58,7 @@
 
 
 
-        public static (int Skip, int Take, string, bool) Page(this LoadDataArgs args, string? sortColumns = null)
+        public static (int Skip, int Take, string SortField, bool SortDescending) Page(this LoadDataArgs args, string? sortColumns = null)
         {
             int skip = args.Skip ?? 0;
 
@@ -76,5 +76,28 @@
 
             return (skip, take, sortColumns ?? "", false);
         }
+
+        public static (int Skip, int Take, string SortField, bool SortDescending, string FilterValue) Page(this LoadDataArgs args, string? sortColumns = null, params string[] properties)
+        {
+            int skip = args.Skip ?? 0;
+
+            int take = args.Top ?? 15;
+
+            var filterValue = args.GetFilterValue(properties) ?? string.Empty;
+
+            if (args.Sorts!.Any())
+            {
+                var sortField = args.Sorts!.FirstOrDefault()?.Property ?? "Id";
+
+                var sortDescending = args.Sorts!.FirstOrDefault()?.SortOrder == SortOrder.Ascending;
+
+                return (skip, take, sortField, sortDescending, filterValue);
+
+            }
+
+            return (skip, take, sortColumns ?? "", false, filterValue);
+        }
+
+
     }
 }

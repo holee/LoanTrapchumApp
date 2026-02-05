@@ -8,8 +8,11 @@
 
   <ItemGroup>
     <Compile Remove="Features\Customers\Mappers\**" />
+    <Compile Remove="Responses\Lists\Collaterals\**" />
     <EmbeddedResource Remove="Features\Customers\Mappers\**" />
+    <EmbeddedResource Remove="Responses\Lists\Collaterals\**" />
     <None Remove="Features\Customers\Mappers\**" />
+    <None Remove="Responses\Lists\Collaterals\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -22,9 +25,6 @@
     <Folder Include="Extensions\Identity\Constants\" />
     <Folder Include="Features\Addresses\UseCases\" />
     <Folder Include="Features\Addresses\Validations\" />
-    <Folder Include="Features\Branches\Command\EditBranch\" />
-    <Folder Include="Features\Branches\Command\DeleteBranch\" />
-    <Folder Include="Features\Branches\Extensions\" />
     <Folder Include="Features\Branches\Mappers\" />
     <Folder Include="Features\CashManagements\Validations\" />
     <Folder Include="Features\CashManagements\Requests\" />
@@ -70,9 +70,9 @@
     <Folder Include="Features\Vendors\Mapperes\" />
     <Folder Include="Features\Vendors\UseCases\" />
     <Folder Include="Requests\Identity\" />
-    <Folder Include="Responses\Lists\Collaterals\" />
     <Folder Include="Responses\Transactions\" />
     <Folder Include="Responses\Vendors\" />
+    <Folder Include="Responses\ViewModels\Branches\" />
     <Folder Include="Responses\ViewModels\Collaterals\" />
     <Folder Include="Responses\ViewModels\Trans\" />
     <Folder Include="Responses\ViewModels\Users\" />

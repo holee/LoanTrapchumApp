@@ -1,6 +1,8 @@
 ﻿@page "/App/Department"
 @using Applications.Features.Departments
+@using Applications.Features.Departments.Commands.ChangeDepartmentState
 @using Applications.Features.Departments.Dto
+@using TrapchumApp.Helpers.Extensions
 <PageTitle>Departments</PageTitle>
 <RadzenTabs>
     <Tabs>
@@ -118,18 +120,21 @@
 
         if (confirm == false) return;
 
-        var resultResponse = await _depService.ActivateOrDeactivate(id, state);
 
-        if (resultResponse.IsSuccess)
+        var command = new ChangeDepartmentStateCommand(id,state);
+
+        var rsp = await mediator.Send(command);
+
+        if (rsp.IsSuccess())
         {
 
-            NotificationService.Notify(NotificationSeverity.Success, resultResponse.Data);
+            NotificationService.Notify(NotificationSeverity.Success,"Department State was changed.");
 
             await GetDepartments(searchText);
         }
         else
         {
-            NotificationService.Notify(NotificationSeverity.Success, resultResponse.ErrMessage);
+            NotificationService.Notify(NotificationSeverity.Success, rsp.GetMessage());
         }
 
     }

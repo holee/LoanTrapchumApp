@@ -8,13 +8,14 @@ using TrapchumApp.Pages.Identity.Users;
 using TrapchumApp.Helpers.Extensions;
 using Applications.Features.CreditAgents.Requests;
 using Applications.Features.Branches.Dtos;
+using Applications.Features.Branches.Queries.GetBranchAsPaging;
 
 namespace TrapchumApp.Pages.Lists.CreditAgents;
 
 public partial class AgentIndex
 {
     [CascadingParameter] Task<AuthenticationState> AuthState { get; set; } = default!;
-
+    [Parameter] public int Index { get; set; } = 1;
 
     private readonly ICreditAgentServiceImpl _creditAgentService;
 
@@ -24,7 +25,6 @@ public partial class AgentIndex
     }
     int BranchId;
     string? BranchName;
-    [Parameter] public int Index { get; set; } = 1;
     int selectedBranchId = 0;
     bool isLoading = false;
     bool ShowAddedTab = false;
@@ -35,7 +35,7 @@ public partial class AgentIndex
 
     protected string? _filter = "";
 
-    List<BranchDto> Branches = [];
+    List<VBranch> Branches = [];
     protected string? UserId { get; set; }
 
     int pageIndex = 0;
@@ -53,7 +53,6 @@ public partial class AgentIndex
     List<VEmployeeCreditAgent> empCreditAgents = [];
 
     int selectedTabIndex = 0;
-
 
     async Task ChangedPageSize(int page)
     {
@@ -142,13 +141,16 @@ public partial class AgentIndex
     {
         try
         {
-            var branchResponse = await _branchService.GetBranchesAsync<BranchDto>(0, new QueryParam(0, 25, string.Empty));
 
-            if (branchResponse.IsSuccess)
+            var command = new GetBranchAsPagingQuery(0, new QueryParam(0, 0, string.Empty));
+
+            var rsp = await mediator.Send(command);
+
+            if (rsp.IsSuccess)
             {
-                Branches = branchResponse.Data!.Items;
+                Branches = rsp.Items;
 
-                Branches.Add(new BranchDto
+                Branches.Add(new VBranch
                 {
                     BranchId = 0,
                     BranchName = "All"
@@ -232,7 +234,7 @@ public partial class AgentIndex
         {
             ShowAddedTab = false;
 
-            await GetCreditAgents(BranchId,_filter);
+            await GetCreditAgents(BranchId, _filter);
         }
 
         selectedTabIndex = 0;

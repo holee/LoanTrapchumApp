@@ -1,6 +1,7 @@
 using Applications.Calculations;
 using Applications.Enumerations;
 using Applications.Extensions;
+using Applications.Features.Branches.Dtos;
 using Applications.Features.Customers.Response;
 using Applications.Features.LoanRequests.Command.AddDescription;
 using Applications.Features.LoanRequests.Command.RecheckedLoanRequest;
@@ -10,7 +11,6 @@ using Applications.Features.Loans.Command.CreateLoan;
 using Applications.Features.Loans.Mappers;
 using Applications.Features.Loans.Requests;
 using Applications.Features.Loans.Services;
-using Applications.Responses.ViewModels.Branches;
 using Applications.Responses.ViewModels.Holidays;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Applications.Services.Lists;
@@ -40,7 +40,7 @@ public partial class LoanCreate(IHolidayServiceImpl holidayService)
     protected int SelectedCollectionFee = 1;
     protected decimal? TotalAdminFee = 0;
     protected int SelectedPeriodName = 1;
-    protected IEnumerable<VBranchResponse> Branches = [];
+    protected IEnumerable<VBranch> Branches = [];
 
     DateTime firstPayment;
 

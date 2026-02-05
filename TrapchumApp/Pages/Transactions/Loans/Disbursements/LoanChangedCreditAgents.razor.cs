@@ -1,13 +1,13 @@
 using Applications.Extensions;
 using Applications.Features.Loans.Services;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Branches;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Services.Lists;
 using Domains.Models.Identity;
 using System.Threading.Tasks;
 using Applications.Features.CreditAgents.Requests;
 using Applications.Features.Loans.Responses;
+using Applications.Features.Branches.Dtos;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 {
@@ -36,7 +36,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 
         IList<VLoanDisbursments>? _selectedSchedules;
 
-        IEnumerable<VBranchResponse>? _newBranches = [];
+        IEnumerable<VBranch>? _newBranches = [];
 
         string? _newCreditAgentId = null;
 
@@ -81,7 +81,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
             if (arg is not null)
             {
 
-                BranchId = ((VBranchResponse)arg).BranchId;
+                BranchId = ((VBranch)arg).BranchId;
 
                 await GetOldCreditAgents();
 
@@ -94,7 +94,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 
         async Task GetBranches(int? branchId = 0)
         {
-            var rsp = await _branchService.GetBranchesAsync<VBranchResponse>(branchId, new QueryParam(0, 0));
+            var rsp = await _branchService.GetBranchesAsync<VBranch>(branchId, new QueryParam(0, 0));
 
             if (rsp.IsSuccess)
             {

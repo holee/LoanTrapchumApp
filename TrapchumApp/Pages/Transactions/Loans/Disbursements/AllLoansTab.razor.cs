@@ -1,8 +1,8 @@
 ﻿using Applications.Enumerations;
+using Applications.Features.Branches.Dtos;
 using Applications.Features.Loans.Queries.GetLoanByBranchId;
 using Applications.Features.Loans.Responses;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Branches;
 using TrapchumApp.Helpers.Extensions;
 using TrapchumApp.Shared;
 
@@ -22,7 +22,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 
         private string? filter = string.Empty;
 
-        protected IEnumerable<VBranchResponse> Branches = [];
+        protected IEnumerable<VBranch> Branches = [];
 
         int counts = 0;
 

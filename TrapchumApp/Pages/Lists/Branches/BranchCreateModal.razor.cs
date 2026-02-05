@@ -1,11 +1,13 @@
 using Applications.Features.Addresses.Requests;
 using Applications.Features.Addresses.Responses;
+using Applications.Features.Branches.Command.CreateBranch;
 using Applications.Features.Branches.Dtos;
 using Applications.Interfaces.Banks;
 using Applications.Responses.Lists.Currency;
 using Domains.Models.Addresses;
 using Domains.Models.Lists;
 using Mapster;
+using TrapchumApp.Helpers.Extensions;
 using TrapchumApp.Helpers.Validations;
 
 namespace TrapchumApp.Pages.Lists.Branches
@@ -62,30 +64,24 @@ namespace TrapchumApp.Pages.Lists.Branches
         }
         async Task OnSubmit()
         {
-            try
+
+            var bank = bankList?.FirstOrDefault();
+
+            model.BankRefId = bank?.BankId;
+
+            var command = new CreateBranchCommand(model);
+
+            var response = await mediator.Send(command);
+
+            if (response.IsSuccess())
             {
-                var bank = bankList?.FirstOrDefault();
+                NotificationService.Notify(NotificationSeverity.Success, "New Branch", "Branch created successfully!");
 
-                model.BankRefId = bank?.BankId;
-
-                var createModel = model.Adapt<Branch>();
-
-                var response = await _branchService.CreateAsync(createModel);
-
-                if (response.IsSuccess)
-                {
-                    NotificationService.Notify(NotificationSeverity.Success, "New Branch", "Branch created successfully!");
-
-                    DialogService.Close(true);
-                }
-                else
-                {
-                    editContext.ApplyValidationSummary<BranchDtoCreate>(response.ErrMessage);
-                }
+                DialogService.Close(true);
             }
-            catch (Exception ex)
+            else
             {
-                NotificationService.Notify(NotificationSeverity.Error, "Exception", ex.Message);
+                editContext.ApplyValidationSummary<BranchDtoCreate>(response.GetMessage());
             }
         }
         protected async Task AddCity()

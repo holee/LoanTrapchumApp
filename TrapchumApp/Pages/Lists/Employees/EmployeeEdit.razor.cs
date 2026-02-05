@@ -1,5 +1,6 @@
 using Applications.Features.Addresses.Responses;
 using Applications.Features.Branches.Dtos;
+using Applications.Features.Branches.Queries.GetBranchAsPaging;
 using Applications.Features.Departments.Dto;
 using Applications.Features.Departments.Queries.GetDepartmentAsPaging;
 using Applications.Features.Employees.Commands.EditEmployee;
@@ -40,7 +41,7 @@ namespace TrapchumApp.Pages.Lists.Employees
         IEnumerable<CommuneDto> Communes = [];
         IEnumerable<VillageDto> Villages = [];
         IEnumerable<ProvinceDto> Provinces = [];
-        IEnumerable<BranchDto> Branches = [];
+        IEnumerable<VBranch> Branches = [];
         IEnumerable<VDepartment> Departments = [];
         IEnumerable<Country> Countries = [];
         IEnumerable<Nationality> Nationalities = [];
@@ -131,11 +132,14 @@ namespace TrapchumApp.Pages.Lists.Employees
 
         async Task GetAdditionalInformation()
         {
-            var results = await _branchService.GetBranchesAsync<BranchDto>(0, new QueryParam(0, 25, string.Empty));
+
+            var command=new GetBranchAsPagingQuery(0, new QueryParam(0, 0, string.Empty));
+
+            var results = await mediator.Send(command); //_branchService.GetBranchesAsync<BranchDto>(0, new QueryParam(0, 25, string.Empty));
 
             if (results.IsSuccess)
             {
-                Branches = results!.Data!.Items;
+                Branches = results.Items;
             }
 
             var query = new GetDepartmentAsPagingQuery(0, new QueryParam(0, 25, string.Empty));

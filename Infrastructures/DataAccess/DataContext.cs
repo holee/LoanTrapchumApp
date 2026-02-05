@@ -1,4 +1,5 @@
-﻿using Applications.Features.Collaterals.Dtos;
+﻿using Applications.Features.Branches.Dtos;
+using Applications.Features.Collaterals.Dtos;
 using Applications.Features.Currencies.Responses;
 using Applications.Features.Customers.Dto;
 using Applications.Features.Customers.Response;
@@ -7,7 +8,6 @@ using Applications.Features.Guarantor.Dtos;
 using Applications.Features.Loans.Responses;
 using Applications.Responses.ViewModels.Addresses;
 using Applications.Responses.ViewModels.Auths;
-using Applications.Responses.ViewModels.Branches;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Responses.ViewModels.Employees;
 using Applications.Responses.ViewModels.Journals;
@@ -217,7 +217,7 @@ namespace Infrastructures.DataAccess
         public DbSet<VUser> VUsers => Set<VUser>();
         public DbSet<VCurrenciesList> VCurrenciesList => Set<VCurrenciesList>();
         public DbSet<VCurrencyCounter> VCurrencyNotes => Set<VCurrencyCounter>();
-        public DbSet<VBranchResponse> VBranchs => Set<VBranchResponse>();
+        public DbSet<VBranch> VBranchs => Set<VBranch>();
         public DbSet<VDepartment> VDepartments => Set<VDepartment>();
         public DbSet<VSpotRate> VSpotRates => Set<VSpotRate>();
         public DbSet<VSchedule> VSchedules => Set<VSchedule>();

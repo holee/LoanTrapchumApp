@@ -1,8 +1,8 @@
 using Applications.Features.Branches.Dtos;
+using Applications.Features.Branches.Queries.GetBranchByUser;
 using Applications.Features.CashManagements.Responses;
 using Applications.Interfaces.Transactions;
 using Applications.Responses.Lists.Currency;
-using Applications.Responses.ViewModels.Branches;
 using TrapchumApp.Helpers.Extensions;
 using TrapchumApp.Shared;
 
@@ -28,7 +28,7 @@ namespace TrapchumApp.Pages.Transactions.Branches
 
         private IEnumerable<VCashVaults>? vCashVaults = [];
 
-        protected IEnumerable<VBranchResponse> Branches = [];
+        protected IEnumerable<VBranch> Branches = [];
 
         protected BankResponse? bank;
 
@@ -60,11 +60,13 @@ namespace TrapchumApp.Pages.Transactions.Branches
 
                 await bState.GetAuthenticatedUser(user);
 
-                var bResponse = await _branchService.GetBranchesByUser(_userId, 0);
+                var command = new GetBranchByUserQuery(_userId, 0);
 
-                if (bResponse.IsSuccess)
+                var bResponse = await mediator.Send(command);
+
+                if (bResponse.IsSuccess())
                 {
-                    Branches = bResponse.Data!;
+                    Branches = bResponse.Value;
                 }
 
                 var resp = await caVaultService.GetCashVaultsAsync(BranchId);

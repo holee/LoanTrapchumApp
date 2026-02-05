@@ -12,5 +12,6 @@ public interface IAppStateService
     bool CanApproved { get; protected set; }
     bool CanRequest { get; protected set; }
     bool CanRecievePayment { get; protected set; }
-    bool CanWriteOff { get;protected set; }
+    bool CanWriteOff { get; protected set; }
+    bool CanOpenBranch { get; protected set; } 
 }

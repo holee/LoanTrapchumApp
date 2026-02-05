@@ -1,11 +1,12 @@
 using Applications.Extensions.Identity.Enumerations;
 using Applications.Features.Branches.Dtos;
+using Applications.Features.Branches.Queries.GetBranchAsPaging;
 using Applications.Features.Identity.Users;
 using Applications.Interfaces.Identity;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Employees;
 
-namespace TrapchumApp.Pages.Identity.Users 
+namespace TrapchumApp.Pages.Identity.Users
 {
     public partial class CreditAgentUserCreate
     {
@@ -16,7 +17,7 @@ namespace TrapchumApp.Pages.Identity.Users
 
         EditForm form = default!;
 
-        IEnumerable<BranchDto> Branches = [];
+        IEnumerable<VBranch> Branches = [];
 
         IEnumerable<string?> roles = [];
 
@@ -32,7 +33,7 @@ namespace TrapchumApp.Pages.Identity.Users
         {
             await base.OnInitializedAsync();
 
-            var empRsp = await _employeeService.GetEmployeesAsync(BranchId, EmployeeId,new(0,0));
+            var empRsp = await _employeeService.GetEmployeesAsync(BranchId, EmployeeId, new(0, 0));
 
             var getRoles = await _roleService.GetRolesAsync(null);
 
@@ -55,19 +56,21 @@ namespace TrapchumApp.Pages.Identity.Users
         private async Task GetBranches()
         {
 
-            var branchResponse = await _branchService.GetBranchesAsync<BranchDto>(BranchId, new QueryParam(0, 25, string.Empty));
+            var command = new GetBranchAsPagingQuery(0, new QueryParam(0, 0));
 
-            if (branchResponse!.IsSuccess)
+            var rsp = await mediator.Send(command);
+
+            if (rsp!.IsSuccess)
             {
 
-                Branches = branchResponse.Data.Items ?? [];
+                Branches = rsp.Items ?? [];
 
                 model.BranchRefId = BranchId;
 
             }
             else
             {
-                Branches = [];
+                Branches = Enumerable.Empty<VBranch>();
             }
 
             await Task.CompletedTask;

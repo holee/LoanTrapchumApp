@@ -2,7 +2,6 @@
 using Applications.Features.LoanPayments.Requests;
 using Applications.Features.Transactions.ForiegnExchanges;
 using Applications.Interfaces.Loans;
-using Applications.Responses.ViewModels.Branches;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Services.Loans;
 using Microsoft.AspNetCore.Components;
@@ -11,6 +10,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Radzen.Blazor;
 using Applications.Features.Currencies.Responses;
 using Applications.Features.Loans.Responses;
+using Applications.Features.Branches.Dtos;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments;
 
@@ -27,8 +27,8 @@ public partial class RepaymentMultiple
     List<LoanPaymentLineDtoCreate> loanRepaymentLines = [];
     LoanPaymentLineDtoCreate? LineStore = new();
     LoanPaymentDtoCreate LoanRepayment = new();
-    IEnumerable<VBranchResponse> Branches = [];
-    VBranchResponse _selectedBranchResponse = new();
+    IEnumerable<VBranch> Branches = [];
+    VBranch _selectedBranchResponse = new();
     VSchedule? selectedRepayment = new();
     List<VSchedule>? selectedRepayments = [];
     DateTime paymentDate = DateTime.Now;

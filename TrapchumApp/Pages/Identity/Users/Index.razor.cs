@@ -1,6 +1,7 @@
 ﻿using Applications.Extensions.Identity.Authorizations.Extensions;
 using Applications.Extensions.Identity.Policies;
 using Applications.Features.Branches.Dtos;
+using Applications.Features.Branches.Queries.GetBranchAsPaging;
 using Applications.Features.Employees.Queries.GetEmployeeAsPaging;
 using Applications.Features.Employees.Queries.GetEmployeeById;
 using Applications.Features.Identity.Users;
@@ -48,9 +49,9 @@ public partial class Index
     protected EditForm form = default!;
     protected IEnumerable<string?> roles = [];
     protected IEnumerable<VEmployeeList> Employees = [];
-    protected List<BranchDto> Branches = [];
+    protected List<VBranch> Branches = [];
     protected IEnumerable<VEmployeeList> bEmployees = [];
-    protected BranchDto SelectedBranch = default!;
+    protected VBranch SelectedBranch = default!;
     string? filterText = string.Empty;
     int pageIndex = 0;
     int pageSize = 15;
@@ -89,11 +90,14 @@ public partial class Index
 
     private async Task GetBranches()
     {
-        var rsp = await _branchService.GetBranchesAsync<BranchDto>(0, new QueryParam(1, 0, ""));
 
-        var unionBranches = new List<BranchDto>()
+        var command = new GetBranchAsPagingQuery(0, new QueryParam(1, 0, ""));
+
+        var rsp = await mediator.Send(command);
+
+        var unionBranches = new List<VBranch>()
         {
-            new BranchDto
+            new VBranch
             {
                 BranchId=0,
                 BranchName="All"
@@ -102,7 +106,7 @@ public partial class Index
 
         if (rsp.IsSuccess)
         {
-            var branches = rsp.Data.Items.Union(unionBranches);
+            var branches = rsp.Items.Union(unionBranches);
 
             Branches = branches.OrderBy(x => x.BranchId).ToList();
         }
@@ -214,7 +218,7 @@ public partial class Index
     {
 
         var selectedEmployee = bEmployees.FirstOrDefault(x => x.EmployeeId == model.EmployeeId);
-       
+
         if (selectedEmployee is not null)
         {
             var username = selectedEmployee.FullName!.Split(" ");

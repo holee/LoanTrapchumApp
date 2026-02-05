@@ -1,7 +1,7 @@
+using Applications.Features.Branches.Dtos;
 using Applications.Features.Loans.Responses;
 using Applications.Features.Loans.Services;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Branches;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Radzen;
@@ -22,7 +22,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.WriteOffs
         [Parameter] public Guid? UserId { get; set; }
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
         List<VLoanDisbursments> LoanItems = [];
-        IEnumerable<VBranchResponse> Branches = [];
+        IEnumerable<VBranch> Branches = [];
         bool isLoading = false;
         int pageSize = 10;
         string sortField = "RegisterDate";

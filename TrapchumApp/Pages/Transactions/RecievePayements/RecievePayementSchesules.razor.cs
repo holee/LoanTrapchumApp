@@ -3,13 +3,13 @@ using Applications.Calculations.Extensions;
 using Applications.Commons.Mappers;
 using Applications.Enumerations;
 using Applications.Extensions.NumberExtensions;
+using Applications.Features.Branches.Dtos;
 using Applications.Features.LoanPayments.Interfaces;
 using Applications.Features.LoanPayments.Queries.GetLoanSchedulesByLoanIdAsPaging;
 using Applications.Features.LoanPayments.Requests;
 using Applications.Features.Loans.Queries.GetLoanById;
 using Applications.Features.Loans.Responses;
 using Applications.Features.Loans.Services;
-using Applications.Responses.ViewModels.Branches;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Services.Loans;
 using Radzen.Blazor;
@@ -52,7 +52,7 @@ public partial class RecievePayementSchesules
 
     LoanPaymentDtoCreate LoanRepayment = new();
 
-    IEnumerable<VBranchResponse> Branches = [];
+    IEnumerable<VBranch> Branches = [];
 
     VSchedule? SelectedSchedule = new();
 

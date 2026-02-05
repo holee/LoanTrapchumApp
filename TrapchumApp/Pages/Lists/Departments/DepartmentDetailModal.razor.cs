@@ -1,5 +1,7 @@
 using Applications.Features.Departments.Dto;
+using Applications.Features.Departments.Queries.GetDepartmentById;
 using Applications.Interfaces.Lists;
+using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Lists.Departments
 {
@@ -18,24 +20,18 @@ namespace TrapchumApp.Pages.Lists.Departments
 
         protected override async Task OnInitializedAsync()
         {
-            try
-            {
-                var resultResponse = await _departmentService.GetDepartmentDetailsById(Id);
+            var command = new GetDepartmentDetailsById(Id, null);
 
-                if (resultResponse.IsSuccess)
-                {
-                    department = resultResponse.Data;
-                }
-                else
-                {
-                    NotificationService.Notify(NotificationSeverity.Error, resultResponse.ErrMessage);
-                }
-            }
-            catch (Exception ex)
+            var rsp = await mediator.Send(command);
+
+            if (rsp.IsSuccess())
             {
-                NotificationService.Notify(NotificationSeverity.Error, "Error", ex.Message);
+                department = rsp.Value;
             }
-            
+            else
+            {
+                NotificationService.Notify(NotificationSeverity.Error, rsp.GetMessage());
+            }
 
             await base.OnInitializedAsync();
         }

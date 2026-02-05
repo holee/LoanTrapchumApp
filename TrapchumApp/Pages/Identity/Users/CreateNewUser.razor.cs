@@ -1,4 +1,5 @@
 ﻿using Applications.Features.Branches.Dtos;
+using Applications.Features.Branches.Queries.GetBranchAsPaging;
 using Applications.Features.Identity.Users;
 using Applications.Interfaces.Identity;
 using Applications.Responses.Paginations;
@@ -22,7 +23,7 @@ public partial class CreateNewUser
     EditForm form = default!;
     IEnumerable<string?> roles = new List<string>();
     IEnumerable<VEmployeeList> Employees = [];
-    IEnumerable<BranchDto> Branches = [];
+    IEnumerable<VBranch> Branches = [];
     IEnumerable<VEmployeeList> bEmployees = [];
     BranchDto SelectedBranch = default!;
     protected override async Task OnInitializedAsync()
@@ -43,16 +44,12 @@ public partial class CreateNewUser
                 Employees = rsp.Items;
             }
 
-            var bRsp = await _branchService.GetBranchesAsync<BranchDto>(0, new QueryParam(0, 0));
+            var command = new GetBranchAsPagingQuery(0, new QueryParam(0, 0));
 
-            if (bRsp!.IsSuccess)
-            {
-                Branches = bRsp.Data.Items;
-            }
-            else
-            {
-                Branches = Enumerable.Empty<BranchDto>();
-            }
+            var bRsp = await mediator.Send(command);
+
+            Branches = bRsp.Items;
+
         }
         catch (Exception ex)
         {

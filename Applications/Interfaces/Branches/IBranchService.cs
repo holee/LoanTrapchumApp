@@ -1,30 +1,29 @@
 ﻿using Applications.Features.Branches.Dtos;
 using Applications.Responses;
 using Applications.Responses.Auths;
-using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Branches;
-using Domains.Models.Lists;
-
+using ErrorOr;
+using System.Linq.Expressions;
 namespace Applications.Interfaces.Branches
 {
     public interface IBranchService
     {
-        Task<Result<VBranchResponse>> CreateAsync(Branch branch, CancellationToken cancellation = default);
-        Task<Result> UpdateAsync(Branch branch);
-        Task<Result<BranchDtoUpdate>> GetUpdateBranchById(int? branchId);
-        Task<Result> UpdateStatusAsync(int? branchId);
-        Task<Result> DeleteAsync(int? id);
-        Task<Result<Branch>> GetBranchById(int? id);
-        Task<Result<T>> GetBranchById<T>(int? id) where T:class;
-        Task<Result<Branch>> GetBranchForVault(int? id);
-        Task<Result<IEnumerable<VBranchResponse>>> GetBranchesByUser(string? userId, int? branchId);
-      
-        Task<Result<ResultStatus>> GetBrachStatus(int? branchId);
-        Task<Result<UserBranchesResponse>> GetBranchesByUser(string? userId);
-        Task<Pager<VBranchResponse>> GetBranchesAsync(QueryParam param);
-        Task<Result<Pager<T>>> GetBranchesAsync<T>(int? branchId, QueryParam param) where T : class;
-        Task<Result<IEnumerable<T>>> GetBranchesByUser<T>(string? userId, int? branchId = 0) where T : class;
-        Task<Result<IEnumerable<ApprovedUser>>> GetApprovedUser(int? branchId, string? filter);
-        Task<Result<string>> UpdateStatusAsync(int? branchId, bool state);
+        Task<ErrorOr<VBranch>> CreateAsync(Branch branch, CancellationToken cancellation = default);
+        Task<ErrorOr<VBranch>> UpdateAsync(Branch branch, CancellationToken cancellation = default);
+        Task<ErrorOr<BranchDtoUpdate>> GetUpdateBranchById(int? branchId, CancellationToken cancellation = default);
+        Task<ErrorOr<VBranch>> UpdateStatusAsync(int? branchId, CancellationToken cancellation = default);
+        Task<ErrorOr<VBranch>> UpdateStatusAsync(int? branchId, bool state, CancellationToken cancellation = default);
+        Task<ErrorOr<DeleteResult>> DeleteAsync(int? id, CancellationToken cancellation = default);
+        Task<ErrorOr<Branch>> GetBranchById(int? id, CancellationToken cancellation = default);
+        Task<ErrorOr<VBranch>> GetBranchForVault(int? id, CancellationToken cancellation = default);
+        Task<ErrorOr<UserBranchesResponse?>> GetBranchesByUser(string? userId, CancellationToken cancellation = default);     
+        Task<ErrorOr<IEnumerable<VBranch>>> GetBranchesByUser(string? userId, int? branchId, CancellationToken cancellation = default);
+        Task<ErrorOr<BranchStatus>> GetBranchStatus(int? branchId, CancellationToken cancellation = default);
+       
+        Task<Pager<VBranch>> GetBranchesAsync(int? branchId, QueryParam param, CancellationToken cancellation = default);
+        Task<ErrorOr<IEnumerable<ApprovedUser>>> GetApprovedUser(int? branchId, string? filter, CancellationToken cancellation = default);
+        Task<VBranch?> GetBranchDetailsById(int? branchId, Expression<Func<VBranch, object>> selector, CancellationToken cancellation = default);
+        Task<VBranch?> GetBranchDetailsById(int? branchId, CancellationToken cancellation = default, params string[] columns);
+        Task<Pager<VBranch>> GetBranchesAsync(int? branchId, QueryParam param, CancellationToken cancellation = default, params string[] columns);
+        Task<ErrorOr<BranchStatus>> GetBranchStatus(string? userId, CancellationToken cancellation = default);
     }
 }

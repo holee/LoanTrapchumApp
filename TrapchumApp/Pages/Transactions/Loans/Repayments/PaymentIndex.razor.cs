@@ -1,4 +1,4 @@
-using Applications.Responses.ViewModels.Branches;
+using Applications.Features.Branches.Dtos;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Radzen.Blazor;
 using TrapchumApp.Helpers.Extensions;
@@ -22,7 +22,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
         IList<VSchedule> PaymentSchedulesOnDate = [];
         IEnumerable<VSchedule> LateSchedules = [];
         IList<VSchedule> SelectedPaymentSchedules = [];
-        IEnumerable<VBranchResponse> Branches = [];
+        IEnumerable<VBranch> Branches = [];
         DateTime paymentDate = DateTime.Now;
         VSchedule? SelectedSchedule = new();
         string? filterText = "";

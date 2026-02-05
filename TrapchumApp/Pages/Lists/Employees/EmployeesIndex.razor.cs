@@ -1,18 +1,12 @@
-using Applications.Extensions;
 using Applications.Extensions.DateTimes;
-using Applications.Features.Addresses.Responses;
 using Applications.Features.Branches.Dtos;
-using Applications.Features.Customers.Response;
+using Applications.Features.Branches.Queries.GetBranchAsPaging;
 using Applications.Features.Employees.Commands.ChangeEmployeeState;
 using Applications.Features.Employees.Queries.GetEmployeeAsPaging;
-using Applications.Features.Employees.Requests;
 using Applications.Interfaces.Lists;
 using Applications.Responses.Lists.Employees;
-using Applications.Responses.Lists.Entities;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Employees;
-using Domains.Models.Addresses;
-using Domains.Models.Lists;
 using Radzen.Blazor;
 using TrapchumApp.Helpers.Extensions;
 
@@ -26,7 +20,7 @@ namespace TrapchumApp.Pages.Lists.Employees
         private readonly IDepartmentService _departmentService;
         private readonly ILogger<EmployeesIndex> _logger;
         private string? _lastEmployeeId = string.Empty;
-        List<BranchDto> Branches = [];
+        List<VBranch> Branches = [];
         int pageSize = 15;
         int counts = 0;
         int pageIndex = 1;
@@ -133,11 +127,16 @@ namespace TrapchumApp.Pages.Lists.Employees
 
         async Task GetBranches()
         {
-            var results = await _branchService.GetBranchesAsync<BranchDto>(0, new QueryParam(0, 0));
 
-            var unionBranches = new List<BranchDto>
+
+            var command = new GetBranchAsPagingQuery(0, new QueryParam(0, 0));
+
+
+            var results = await mediator.Send(command);
+
+            var unionBranches = new List<VBranch>
             {
-                new BranchDto
+                new VBranch
                 {
                     BranchId = 0,
                     BranchName = "All"
@@ -146,7 +145,7 @@ namespace TrapchumApp.Pages.Lists.Employees
 
             if (results.IsSuccess)
             {
-                var branches = results!.Data!.Items.Union(unionBranches);
+                var branches = results.Items.Union(unionBranches);
 
                 Branches = branches.OrderBy(x => x.BranchId).ToList();
             }

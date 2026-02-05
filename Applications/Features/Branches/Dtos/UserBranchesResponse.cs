@@ -1,7 +1,7 @@
 ﻿using Applications.Responses.Lists.Entities;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Applications.Responses.ViewModels.Branches
+namespace Applications.Features.Branches.Dtos
 {
     public sealed class UserBranchesResponse
     {

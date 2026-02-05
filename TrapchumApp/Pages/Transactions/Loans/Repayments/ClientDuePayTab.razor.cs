@@ -1,8 +1,8 @@
-﻿using Applications.Features.Loans.Queries.GetLoanSchedulesByPaymentDate;
+﻿using Applications.Features.Branches.Dtos;
+using Applications.Features.Loans.Queries.GetLoanSchedulesByPaymentDate;
 using Applications.Features.Loans.Responses;
 using Applications.Features.Loans.Services;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Branches;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Services.Loans;
 using Domains.Models.Identity;
@@ -28,7 +28,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
         private List<VSchedule> ScheduleItems = [];
         private IList<VLoanDisbursments> SelectedLoans = [];
-        protected IEnumerable<VBranchResponse> Branches = [];
+        protected IEnumerable<VBranch> Branches = [];
         protected string filterText = string.Empty;
         private string? _userId { get; set; } = string.Empty;
         int counts = 0;

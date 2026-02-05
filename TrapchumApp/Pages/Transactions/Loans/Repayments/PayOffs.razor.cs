@@ -4,7 +4,6 @@ using Applications.Features.LoanPayments.Requests;
 using Applications.Features.Transactions.ForiegnExchanges;
 using Applications.Interfaces.Currencies;
 using Applications.Interfaces.Loans;
-using Applications.Responses.ViewModels.Branches;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Microsoft.AspNetCore.Components;
 using Radzen;
@@ -12,6 +11,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Radzen.Blazor;
 using Applications.Features.Currencies.Responses;
 using Applications.Features.Loans.Responses;
+using Applications.Features.Branches.Dtos;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 {
@@ -38,7 +38,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
         List<LoanRepaymentDto> RepaymentLists = [];
         List<LoanPaymentLineDtoCreate> loanRepaymentLines = [];
         LoanPaymentDtoCreate LoanRepayment = new();
-        IEnumerable<VBranchResponse> Branches = [];
+        IEnumerable<VBranch> Branches = [];
         VSchedule? SelectedSchedule = new();
         List<VSchedule>? selectedRepayments = [];
         VLoanDisbursments? LoanSchedule = new();

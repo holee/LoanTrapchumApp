@@ -1,4 +1,12 @@
 ﻿
+using Applications.Features.Branches.Command.DeleteBranch;
+using Applications.Features.Branches.Dtos;
+using Applications.Features.Branches.Queries.GetBranchAsPaging;
+using Applications.Features.Branches.Queries.GetBranchById;
+using Applications.Features.Branches.Queries.GetBranchDetailsById;
+using Applications.Features.Branches.Queries.GetBranchForVault;
+using Applications.Features.Branches.Queries.GetBranchState;
+using Applications.Features.Branches.Queries.GetUpdateBranch;
 using Applications.Features.Currencies.Command;
 using Applications.Features.Currencies.Command.EditMoneyExchange;
 using Applications.Features.Currencies.Queries.GetCurrencyDetails;
@@ -7,6 +15,7 @@ using Applications.Features.Currencies.Requests;
 using Applications.Features.Currencies.Responses;
 using Applications.Features.Customers.Commands.Customers.CreateCustomer;
 using Applications.Features.Customers.Commands.Customers.EditCustomer;
+using Applications.Features.Departments.Commands.ChangeDepartmentState;
 using Applications.Features.Departments.Commands.CreateDepartment;
 using Applications.Features.Departments.Commands.DeleteDepartment;
 using Applications.Features.Departments.Commands.EditDepartment;
@@ -39,10 +48,10 @@ using Applications.Features.Notifications.Command.CreateNotification;
 using Applications.Features.Notifications.Dto;
 using Applications.Features.Notifications.Queries.GetNotification;
 using Applications.Features.Notifications.Queries.GetUnreadNotifications;
+using Applications.Responses;
 using Applications.Responses.ViewModels.Employees;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Domains.Models.Currencies;
-using Domains.Models.Transaction;
 using ErrorOr;
 
 namespace Applications;
@@ -51,12 +60,30 @@ public static class ApplicationServiceInjection
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
+
+
+        services.AddScoped<IRequestHandler<GetBranchStateQuery, ErrorOr<BranchStatus>>, GetBranchStateQueryHandler>();
+        services.AddScoped<IRequestHandler<GetBranchForVaultQuery, ErrorOr<VBranch>>, GetBranchForVaultQueryHandler>();
+        services.AddScoped<IRequestHandler<GetBranchDetailsByIdQuery, ErrorOr<VBranch?>>, GetBranchDetailsByIdQueryHandler>();
+        services.AddScoped<IRequestHandler<GetBranchByIdQuery, ErrorOr<Branch>>, GetBranchByIdQueryHandler>();
+        services.AddScoped<IRequestHandler<GetBranchAsPagingQuery, Pager<VBranch>>, GetBranchAsPagingQueryHandler>();
+        services.AddScoped<IRequestHandler<DeleteBranchCommand, ErrorOr<DeleteResult>>, DeleteBranchCommandHandler>();
+        services.AddScoped<IRequestHandler<GetUpdateBranchQuery, ErrorOr<BranchDtoUpdate>>, GetUpdateBranchQueryHandler>();
+
+
+
+
+
+
+
+
         services.AddScoped<IRequestHandler<GetDepartmentAsPagingQuery, Pager<VDepartment>>, GetDepartmentAsPagingQueryHandler>();
         services.AddScoped<IRequestHandler<GetDepartmentDetailsById, ErrorOr<VDepartment>>, GetDepartmentDetailsByIdHandler>();
         services.AddScoped<IRequestHandler<GetDepartmentById, ErrorOr<Department>>, GetDepartmentByIdHandler>();
         services.AddScoped<IRequestHandler<CreateDepartmentCommand, ErrorOr<VDepartment>>, CreateDepartmentCommandHandler>();
         services.AddScoped<IRequestHandler<EditDepartmentCommand, ErrorOr<VDepartment>>, EditDepartmentCommandHandler>();
         services.AddScoped<IRequestHandler<DeleteDepartmentCommand, ErrorOr<string>>, DeleteDepartmentCommandHandler>();
+        services.AddScoped<IRequestHandler<ChangeDepartmentStateCommand, ErrorOr<VDepartment>>, ChangeDepartmentStateCommandHandler>();
 
 
 
@@ -98,7 +125,7 @@ public static class ApplicationServiceInjection
         services.AddScoped<GetCustomerByIdCommand>();
         services.AddScoped<SchedulePrintService>();
         services.AddScoped<IAddressServiceImpl, AddressService>();
-        services.AddScoped<IBranchServiceImpl, BranchService>();
+        //services.AddScoped<IBranchServiceImpl, BranchService>();
         services.AddScoped<IBankServiceImpl, BankService>();
         services.AddScoped<IOpenBranchServiceImpl, OpenBranchService>();
         services.AddScoped<ICurrencyServiceImpl, CurrencyService>();
@@ -214,7 +241,7 @@ public static class ApplicationServiceInjection
         services.AddScoped<IRequestHandler<CreateCustomerCommand, ErrorOr<VCustomerList>>, CreateCustomerCommandHandler>();
         services.AddScoped<IRequestHandler<EditCustomerCommand, ErrorOr<VCustomerList>>, EditCustomerCommandHandler>();
 
-            
+
         services.AddScoped<IRequestHandler<CreateIncomeExpenseCommand, ErrorOr<int>>, CreateIncomeExpenseCommandHandler>();
         services.AddScoped<IRequestHandler<EditIncomeExpenseCommand, ErrorOr<int>>, EditIncomeExpenseCommandHandler>();
         services.AddScoped<IRequestHandler<GetEditIncomeExpenseQuery, ErrorOr<IncomeExpenseDto>>, GetEditIncomeExpenseQueryHandler>();

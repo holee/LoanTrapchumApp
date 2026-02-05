@@ -136,7 +136,7 @@
                                               ButtonType="ButtonType.Button" />
 
                             }
-                            @if (canOpenBranch)
+                            @if (bState.CanOpenBranch)
                             {
                                 <RadzenButton Click="@SubmitCloseBranch"
                                               Icon="lock_open"
@@ -150,7 +150,7 @@
                         else
                         {
 
-                            @if (canOpenBranch)
+                            @if (bState.CanOpenBranch)
                             {
                                 <RadzenButton Click="SubmitOpenBranch"
                                               ButtonType="ButtonType.Button"
