@@ -4,8 +4,8 @@ public sealed class GetBranchStateQueryValidator : AbstractValidator<GetBranchSt
 {
     public GetBranchStateQueryValidator()
     {
-        RuleFor(x => x.UserId)
-            .NotNull().WithMessage("UserId is required.")
-            .Empty().WithMessage("UserId must be not empty.");
+        //RuleFor(x => x.UserId)
+        //    .NotNull().WithMessage("UserId is required.")
+        //    .Empty().WithMessage("UserId must be not empty.");
     }
 }

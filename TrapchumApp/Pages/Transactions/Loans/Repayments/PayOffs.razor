@@ -98,7 +98,7 @@
                       ButtonStyle="ButtonStyle.Success"
                       Click="ApplySchedulePayment"
                       Text="Applied Payment" />
-        <RadzenLink Path="@($"/Loans?BranchId={BranchId}&UserId={UserId}")"
+        <RadzenLink Path="@($"/Loans?BranchId={BranchId}&UserId={_userId}")"
                     Text="Cancel" />
     </RadzenStack>
 </Containers>

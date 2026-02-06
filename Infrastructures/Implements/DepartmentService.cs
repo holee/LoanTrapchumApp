@@ -184,18 +184,7 @@ public class DepartmentService : IDepartmentService
 
         var context = await _dapperFactory.CreateConnectionAsync(cancellation);
 
-        // safer column handling
-        var allowedColumns = typeof(VDepartment)
-            .GetProperties()
-            .Select(p => p.Name)
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-        var selectedColumns = (columns?.Length > 0
-                ? columns.Where(c => allowedColumns.Contains(c))
-                : allowedColumns)
-            .ToArray();
-
-        var columnSql = string.Join(", ", selectedColumns);
+        var columnSql = SqlColumnHelper.BuildSafeColumnList<VDepartment>(columns);
 
         var sql = $@"
             SELECT {columnSql}

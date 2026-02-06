@@ -89,7 +89,7 @@ namespace Infrastructures
             services.AddScoped<IBranchService, BranchRepository>();
             services.AddScoped<IBankService, BankRepository>();
             services.AddScoped<IDepartmentService, DepartmentService>();
-            services.AddScoped<IEmployeeService, EmployeeService>();
+            services.AddScoped<IEmployeeService, EmployeeRepository>();
             services.AddScoped<IEntityNameService, EntityNameService>(); 
             services.AddScoped<IAddressService, AddressService>();
             services.AddScoped<ICashVaultService, CashVaultService>();

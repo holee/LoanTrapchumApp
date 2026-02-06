@@ -1,17 +1,14 @@
 ﻿using Applications.Bases;
 using Applications.Commons.Messages.Employees;
 using Applications.Extensions;
-using Applications.Features.Customers.Response;
 using Applications.Features.Loans.Responses;
 using Applications.Interfaces.Employees;
 using Applications.Responses;
-using Applications.Responses.Message;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Employees;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Dapper;
 using Domains.Models.Lists;
-using Domains.Models.Lists.Employees;
 using ErrorOr;
 using Infrastructures.Constants.Procedures;
 using Infrastructures.DataAccess;
@@ -23,17 +20,11 @@ using System.Linq.Expressions;
 
 namespace Infrastructures.Implements;
 
-public sealed class EmployeeService : IEmployeeService
+public sealed class EmployeeRepository(IDapperConnectionFactory connectionFactory, IDbContextFactory<DataContext> dbContextFactory, ILogger<EmployeeRepository> logger) : IEmployeeService
 {
-    private readonly IDapperConnectionFactory _connectionFactory;
-    private readonly IDbContextFactory<DataContext> _dbContextFactory;
-    private readonly ILogger<EmployeeService> _logger;
-    public EmployeeService(IDapperConnectionFactory connectionFactory, IDbContextFactory<DataContext> dbContextFactory, ILogger<EmployeeService> logger)
-    {
-        _connectionFactory = connectionFactory;
-        _dbContextFactory = dbContextFactory;
-        _logger = logger;
-    }
+    private readonly IDapperConnectionFactory _connectionFactory = connectionFactory;
+    private readonly IDbContextFactory<DataContext> _dbContextFactory = dbContextFactory;
+    private readonly ILogger<EmployeeRepository> _logger = logger;
 
     public async Task<ErrorOr<VEmployeeList>> CreateAsync(EntityNames employee, CancellationToken cancellation = default)
     {
@@ -172,40 +163,6 @@ public sealed class EmployeeService : IEmployeeService
 
 
 
-    public async Task<Result<IReadOnlyList<VEmployeeList>>> GetEmployeesAsync(string? employeeId, int branchId = 0, bool isActive = true, string? q = null)
-    {
-
-        await using var _context = await _dbContextFactory.CreateDbContextAsync();
-
-        IQueryable<VEmployeeList> queries = _context.EmployeeLists;
-
-        if (!isActive)
-        {
-            queries = queries.Where(x => x.IsActive == true);
-        }
-
-        if (!string.IsNullOrEmpty(q))
-        {
-            queries = queries.Where(x => EF.Functions.Like(x.LastName!, $"%{q}%")
-                                         || EF.Functions.Like(x.LastName!, $"%{q}%")
-                                         || EF.Functions.Like(x.AltName!, $"%{q}%")
-                                         || EF.Functions.Like(EF.Functions.Collate(x.Phone!, "Khmer_100_CI_AI_SC_UTF8"),
-                                             $"%{q}%")
-                                         || EF.Functions.Like(x.BranchName!, $"%{q}%"));
-        }
-
-        if (employeeId.IsNotNullOrEmpty())
-        {
-            queries = queries.Where(x => x.EmployeeId == employeeId);
-        }
-
-        if (branchId > 0)
-        {
-            queries = queries.Where(x => x.BranchId == branchId);
-        }
-
-        return Applications.Responses.Result.Success<IReadOnlyList<VEmployeeList>>(await queries.AsNoTracking().ToListAsync());
-    }
 
     public async Task<Pager<VEmployeeList>> GetEmployeesAsync(int? branchId, string? employeeId, QueryParam q, CancellationToken cancellation = default)
     {
@@ -228,6 +185,39 @@ public sealed class EmployeeService : IEmployeeService
                                 .Select(ProjectionTo())
                                 .ToListAsync(cancellation);
         return new Pager<VEmployeeList>(items, counts);
+    }
+
+    public async Task<Pager<VEmployeeList>> GetEmployeesAsync(int? branchId, string? employeeId, QueryParam q, CancellationToken cancellation = default, params string[] columns)
+    {
+        using var connection = await _connectionFactory.CreateConnectionAsync(cancellation);
+
+        var selectColumns = SqlColumnHelper.BuildSafeColumnList<VEmployeeList>(columns);
+
+        var parameters = new
+        {
+            BranchId = branchId,
+            EmployeeId = employeeId,
+            Filter = q.Filter,
+            FilterColumn = q.FilterColumn,
+            SortColumn = q.SortColumn,
+            SortDescending = q.SortDescending,
+            SelectColumns = selectColumns,
+            Skip = q.Skip,
+            PageSize = q.PageSize
+        };
+
+        using var multi = await connection.QueryMultipleAsync("dbo.spGetEmployees_Dynamic",
+                                            parameters,
+                                            commandType: CommandType.StoredProcedure);
+
+        var totalCount = await multi.ReadSingleAsync<int>();
+
+        var items = (await multi.ReadAsync<VEmployeeList>()).ToList();
+
+        return new Pager<VEmployeeList>(items, totalCount);
+
+
+
     }
 
     public async Task<ErrorOr<EntityNames>> GetByIdAsync(string? id, int? branchId, CancellationToken cancellation = default)
@@ -412,7 +402,7 @@ public sealed class EmployeeService : IEmployeeService
             {
                 query = isDescending
                     ? query
-                        .OrderByDescending(x=>x.ModifiedDT)
+                        .OrderByDescending(x => x.ModifiedDT)
                         .ThenByDescending(e => EF.Property<object>(e, param.SortColumn))
                     : query
                             .OrderBy(x => x.ModifiedDT)
@@ -467,6 +457,7 @@ public sealed class EmployeeService : IEmployeeService
 
 }
 
+#region commented code
 //public async Task<Result<VEmployeeList>> GetEmployeeByIdAsync(string? employeeId, CancellationToken cancellation = default)
 //{
 
@@ -564,3 +555,39 @@ public sealed class EmployeeService : IEmployeeService
 //        return Result.Failure<T>(ErrorResponse.NotFound($"{ex.Message}."));
 //    }
 //}
+//public async Task<Result<IReadOnlyList<VEmployeeList>>> GetEmployeesAsync(string? employeeId, int branchId = 0, bool isActive = true, string? q = null)
+//{
+
+//    await using var _context = await _dbContextFactory.CreateDbContextAsync();
+
+//    IQueryable<VEmployeeList> queries = _context.EmployeeLists;
+
+//    if (!isActive)
+//    {
+//        queries = queries.Where(x => x.IsActive == true);
+//    }
+
+//    if (!string.IsNullOrEmpty(q))
+//    {
+//        queries = queries.Where(x => EF.Functions.Like(x.LastName!, $"%{q}%")
+//                                     || EF.Functions.Like(x.LastName!, $"%{q}%")
+//                                     || EF.Functions.Like(x.AltName!, $"%{q}%")
+//                                     || EF.Functions.Like(EF.Functions.Collate(x.Phone!, "Khmer_100_CI_AI_SC_UTF8"),
+//                                         $"%{q}%")
+//                                     || EF.Functions.Like(x.BranchName!, $"%{q}%"));
+//    }
+
+//    if (employeeId.IsNotNullOrEmpty())
+//    {
+//        queries = queries.Where(x => x.EmployeeId == employeeId);
+//    }
+
+//    if (branchId > 0)
+//    {
+//        queries = queries.Where(x => x.BranchId == branchId);
+//    }
+
+//    return Applications.Responses.Result.Success<IReadOnlyList<VEmployeeList>>(await queries.AsNoTracking().ToListAsync());
+//}
+
+#endregion

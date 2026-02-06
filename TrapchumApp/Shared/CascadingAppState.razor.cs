@@ -29,7 +29,7 @@ namespace TrapchumApp.Shared
         private bool _canRecievePayment;
         private bool _canPayOff;
         private bool _canRefund;
-        private bool _canOpenBranch; 
+        private bool _canOpenBranch;
         private int _unreadCount;
         public bool CanPayOff
         {
@@ -358,27 +358,29 @@ namespace TrapchumApp.Shared
 
             if (user is null && user?.Identity?.IsAuthenticated == false)
             {
-                _canApproved = false;
 
-                return;
+                _canApproved = await _authorizeService.MustHasPermissionAsync(user!, Policies.ApproveLoanRequest);
+
+            }
+            else
+            {
+                _canApproved = false;
             }
 
-            _canApproved = await _authorizeService.MustHasPermissionAsync(user!, Policies.ApproveLoanRequest);
         }
 
 
         internal async Task CheckedCanOpenBranch(ClaimsPrincipal user)
         {
 
-            if (user is null && user?.Identity?.IsAuthenticated == false)
+            if (user is not null && user?.Identity?.IsAuthenticated == false)
+            {
+                _canOpenBranch = await _authorizeService.MustHasPermissionAsync(user, Policies.OpenBranch);
+            }
+            else
             {
                 _canOpenBranch = false;
-
-                return;
             }
-
-            _canOpenBranch = await _authorizeService.MustHasPermissionAsync(user!, Policies.OpenBranch);
-    
         }
 
         internal async Task CheckedCanRequest(ClaimsPrincipal user)
@@ -409,43 +411,13 @@ namespace TrapchumApp.Shared
             await CheckedIsCEO(user);
             await CheckRecievePayment(user);
             await CheckedCanWriteOff(user);
+            await CheckedCanOpenBranch(user);
         }
 
-        public async Task GetBranchState(int? branchId)
-        {
-            var rsp = await _branchService.GetBrachStatus(branchId);
-
-            if (rsp.IsSuccess)
-            {
-                _state = rsp.Data!.IsOpen;
-            }
-            else
-            {
-                _state = false;
-            }
-        }
 
         public void GetBranchState(bool state)
         {
             _state = state;
-        }
-
-
-        public async Task GetBranchState()
-        {
-
-            await GetBranchIdByUser();
-
-            var rsp = await _branchService.GetBrachStatus(_branchId);
-
-            if (rsp.IsSuccess)
-            {
-                _state = rsp.Data!.IsOpen;
-            }
-            else
-            {
-                _state = false;
-            }
         }
 
         internal async Task GetUserId()
@@ -496,16 +468,16 @@ namespace TrapchumApp.Shared
             {
                 _userId = user.GetId();
 
-                var rsp = await _branchService.GetBranchesByUser(_userId);
+                //var rsp = await _branchService.GetBranchesByUser(_userId);
 
-                if (rsp.IsSuccess && rsp.Data is not null)
-                {
-                    _branchId = rsp.Data.BranchId;
-                }
-                else
-                {
-                    _branchId = 0;
-                }
+                //if (rsp.IsSuccess && rsp.Data is not null)
+                //{
+                //    _branchId = rsp.Data.BranchId;
+                //}
+                //else
+                //{
+                //    _branchId = 0;
+                //}
             }
             else
             {

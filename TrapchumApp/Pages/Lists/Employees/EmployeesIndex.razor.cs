@@ -17,7 +17,6 @@ namespace TrapchumApp.Pages.Lists.Employees
 
         private int selectedIndex = 0;
         private readonly INationalityService _nationalityService;
-        private readonly IDepartmentService _departmentService;
         private readonly ILogger<EmployeesIndex> _logger;
         private string? _lastEmployeeId = string.Empty;
         List<VBranch> Branches = [];
@@ -33,17 +32,16 @@ namespace TrapchumApp.Pages.Lists.Employees
         string searchText = string.Empty;
 
         [PersistentState(AllowUpdates = true)]
-        public List<VEmployeeList> Employees { get; set; }
+        public List<VEmployeeList>? Employees { get; set; }
 
         protected bool includeInActive = false;
 
         bool isLoading = false;
 
         private RadzenDataGrid<VEmployeeList> _gridEmployee = default!;
-        public EmployeesIndex(INationalityService nationalityService, IDepartmentService departmentService, ILogger<EmployeesIndex> logger)
+        public EmployeesIndex(INationalityService nationalityService, ILogger<EmployeesIndex> logger)
         {
             _nationalityService = nationalityService;
-            _departmentService = departmentService;
             _logger = logger;
         }
         private List<CustomTab> _tabs = [];
@@ -114,7 +112,7 @@ namespace TrapchumApp.Pages.Lists.Employees
 
             NotificationService.Notify(NotificationSeverity.Success, "Employee was changed");
 
-            var foundIndex = Employees.FindIndex(e => e.EmployeeId == rsp.Value.EmployeeId);
+            var foundIndex = Employees!.FindIndex(e => e.EmployeeId == rsp.Value.EmployeeId);
 
             if (foundIndex != -1)
             {
@@ -129,7 +127,7 @@ namespace TrapchumApp.Pages.Lists.Employees
         {
 
 
-            var command = new GetBranchAsPagingQuery(0, new QueryParam(0, 0));
+            var command = new GetBranchAsPagingQuery(0, new QueryParam(0, 0, nameof(VBranch.BranchName)));
 
 
             var results = await mediator.Send(command);
@@ -143,12 +141,11 @@ namespace TrapchumApp.Pages.Lists.Employees
                 }
             };
 
-            if (results.IsSuccess)
-            {
-                var branches = results.Items.Union(unionBranches);
 
-                Branches = branches.OrderBy(x => x.BranchId).ToList();
-            }
+            var branches = results.Items.Union(unionBranches);
+
+            Branches = branches.OrderBy(x => x.BranchId).ToList();
+
         }
 
         void CreateNewEmployeeTab()
@@ -169,6 +166,7 @@ namespace TrapchumApp.Pages.Lists.Employees
                 builer.AddAttribute(3, "UpdateStateChanged", EventCallback.Factory.Create(this, async (VEmployeeList x) =>
                 {
                     _lastEmployeeId = x.EmployeeId;
+                    Employees?.Insert(0, x);
                     await _gridEmployee.Reload();
                 }));
 
@@ -453,7 +451,7 @@ namespace TrapchumApp.Pages.Lists.Employees
         {
             if (arg is not null)
             {
-                var branchId = ((BranchDto)arg).BranchId;
+                var branchId = ((VBranch)arg).BranchId;
 
                 this.branchId = branchId;
 

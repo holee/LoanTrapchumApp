@@ -64,13 +64,13 @@ namespace TrapchumApp.Pages.Lists.Employees
         async Task GetAdditionalInformation()
         {
 
-            var command = new GetBranchAsPagingQuery(null, new QueryParam(0, 0, string.Empty));
+            var command = new GetBranchAsPagingQuery(null, new QueryParam(0, 0));
 
             var results = await mediator.Send(command);  //_branchService.GetBranchesAsync<BranchDto>(0, new QueryParam(0, 25, string.Empty));
 
             Branches = results.Items;
 
-            var query = new GetDepartmentAsPagingQuery(null, new QueryParam(0, 25, string.Empty));
+            var query = new GetDepartmentAsPagingQuery(null, new QueryParam(0,0));
 
             var rsp1 = await mediator.Send(query);
 
@@ -160,12 +160,13 @@ namespace TrapchumApp.Pages.Lists.Employees
         }
 
         private readonly IFileUploadServiceImp _fileUploadService;
+
         const long maxFileSize = 2L * 1024 * 1024 * 1024;
         private async Task OnFileUpload(UploadChangeEventArgs args)
         {
             try
             {
-                if (!args.Files.Any())
+                if (!args.Files!.Any())
                 {
                     if (tempPath.IsNotNullOrEmpty())
                     {
@@ -179,7 +180,7 @@ namespace TrapchumApp.Pages.Lists.Employees
                     return;
                 }
 
-                var file = args.Files.FirstOrDefault();
+                var file = args.Files!.FirstOrDefault();
 
                 if (file is null || (file is not null && file.Size > maxFileSize))
                 {

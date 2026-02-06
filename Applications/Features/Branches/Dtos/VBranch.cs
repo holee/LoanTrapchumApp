@@ -25,9 +25,9 @@ public sealed class VBranch
     }
 
     [NotMapped] public int RowIndex { get; set; } = 1;
-    [NotMapped] public int? ProvinceRefId { get; set; }
-    [NotMapped] public int? DistrictRefId { get; set; }
-    [NotMapped] public int? CommuneRefId { get; set; }
-    [NotMapped] public int? VillageRefId { get; set; }
+    public int? ProvinceRefId { get; set; }
+    public int? DistrictRefId { get; set; }
+    public int? CommuneRefId { get; set; }
+     public int? VillageRefId { get; set; }
 
 }

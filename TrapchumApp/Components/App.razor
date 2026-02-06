@@ -27,13 +27,15 @@
     <script src="@Assets["assets/js/toggle.js"]"></script>
     <script src="@Assets["assets/js/dropdownoutsideclick.js"]"></script>
     <script>
-        document.addEventListener("visibilitychange",()=>{
-            if(document.hidden){
-                Blazor.pauseCircuit();
-            }else{
-                Blazor.resumeCircuit();
-            }
-        });
+       // document.addEventListener('visibilitychange', () => {
+       //  if (document.hidden) {
+       //         console.debug("Document hidden - pausing Blazor");
+       //         Blazor.pauseCircuit();
+       //     } else {
+       //         console.debug("Document visible - resuming Blazor");
+       //         Blazor.resumeCircuit();
+       //     }
+       // });
     </script>
 </body>
 
@@ -47,5 +49,5 @@
        ? null
        : new InteractiveServerRenderMode(false);
 
-    private IComponentRenderMode? PageRenderMode => HttpContext.AcceptsInteractiveRouting() ? new InteractiveServerRenderMode(prerender: false) : null;
+    private IComponentRenderMode? PageRenderMode => HttpContext.AcceptsInteractiveRouting() ? new InteractiveServerRenderMode(prerender:false) : null;
 }

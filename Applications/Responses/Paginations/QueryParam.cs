@@ -49,10 +49,10 @@ public sealed class QueryParam
     }
     public int Skip { get; set; } = 0;
     public int PageSize { get; set; } = 15;
-    public string SortColumn { get; set; } = "Id";
+    public string? SortColumn { get; set; } = string.Empty;
     public bool SortDescending { get; set; } = false;
     public bool IsIncludeInActive { get; set; } = false;
     public string? FilterColumn { get; set; } = string.Empty;
-    public string[]? FilterColumns { get; set; } = [];
+    public string[] SelectColumns { get; set; } = []; 
     public string? Filter { get; set; } = string.Empty;
 }

@@ -485,7 +485,7 @@ public class BranchRepository(IDbContextFactory<DataContext> contextFactory,
 
         if (!string.IsNullOrEmpty(param.Filter) && string.IsNullOrEmpty(param.FilterColumn))
         {
-            string[] props = { "BranchName", "BranchId" };
+            string[] props = { "BranchName"};
 
             queries = queries.WhereMatchesFilter(param.Filter, props);
 

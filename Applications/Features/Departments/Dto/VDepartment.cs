@@ -1,4 +1,6 @@
-﻿namespace Applications.Features.Departments.Dto;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Applications.Features.Departments.Dto;
 
 public sealed class VDepartment
 {
@@ -9,4 +11,6 @@ public sealed class VDepartment
     public int? BranchId { get; set; }
     public string? BranchName { get; set; }
     public bool Used { get; set; } = false;
+    public DateTimeOffset? ModifiedDT { get; set; }
+    [NotMapped]public int RowIndex { get; set; } = 0;
 }

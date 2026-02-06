@@ -12,6 +12,8 @@ using Radzen.Blazor;
 using Applications.Features.Currencies.Responses;
 using Applications.Features.Loans.Responses;
 using Applications.Features.Branches.Dtos;
+using Applications.Features.Branches.Queries.GetBranchByUser;
+using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 {
@@ -20,7 +22,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 
         private readonly ICurrencyService _currencyService;
         private readonly ILoanPaymentService _repaymentService;
-        public PayOffs(ICurrencyService currencyService,  ILoanPaymentService loanPaymentService)
+        public PayOffs(ICurrencyService currencyService, ILoanPaymentService loanPaymentService)
         {
             _currencyService = currencyService;
             _repaymentService = loanPaymentService;
@@ -30,7 +32,6 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
         [Parameter, SupplyParameterFromQuery] public int BranchId { get; set; }
         [Parameter, SupplyParameterFromQuery] public long CreditAgentId { get; set; }
         [Parameter, SupplyParameterFromQuery] public int CurrencyId { get; set; }
-        [Parameter, SupplyParameterFromQuery] public Guid? UserId { get; set; }
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
 
         DateTime paymentDate = DateTime.UtcNow;
@@ -71,25 +72,25 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
         bool btnDisabled = false;
         string receiptNo = string.Empty;
         string recieptNumber = "";
+        private string? _userId = string.Empty;
         protected override async Task OnInitializedAsync()
         {
             btnDisabled = true;
 
+            var auth = await AuthenticationState;
+
+            _userId ??= auth.GetUserId();
+
             await GetCustomerPaymentSchedulesByLoanIdAsync(1);
 
-            var branchResponse = await _branchService.GetBranchesByUser(UserId!.ToString(),0);
+            var command = new GetBranchByUserQuery(_userId, null);
 
-            if (branchResponse.IsSuccess)
+            var rsp = await mediator.Send(command);
+
+            if (rsp.IsSuccess())
             {
-                Branches = branchResponse.Data!;
+                Branches = rsp.Value;
             }
-
-            // Currencies = await _currencyService.GetCurrencies();
-            //
-            // if (Currencies.Any())
-            // {
-            //     selectedCurrency = Currencies.FirstOrDefault(x => x.CurrencyId == 1);
-            // }
 
             await base.OnInitializedAsync();
         }
@@ -130,7 +131,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
                 { "BranchId",BranchId },
                 { "ReceiptNo",receiptNo },
                 { "CustomerName",LoanSchedule!.AltName!},
-                {"UserId",UserId}
+                {"UserId",_userId}
             };
 
             var message = $"Recieve Payment from {LoanSchedule!.AltName}";

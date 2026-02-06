@@ -45,13 +45,11 @@ namespace TrapchumApp.Components.Layout
 
             if (_user?.Identity?.IsAuthenticated == true && !string.IsNullOrEmpty(userId))
             {
-                // Start SignalR connection via NotificationServices
+
                 var baseUrl = NavigationManager.BaseUri.TrimEnd('/');
 
                 await _notiService.StartConnectionAsync(baseUrl, userId, branchId);
 
-                // Load initial notifications
-                //await LoadInitialNotifications();
             }
 
             await base.OnAfterRenderAsync(firstRender);
@@ -67,7 +65,7 @@ namespace TrapchumApp.Components.Layout
 
                 _notiService.Notifications = result.Items;
 
-                _notiService.UnReadCount = result.Count; 
+                _notiService.UnReadCount = result.Count;
 
             }
             catch (Exception ex)
@@ -84,11 +82,11 @@ namespace TrapchumApp.Components.Layout
 
             if (rsp.IsSuccess())
             {
-                bState.GetBranchState(rsp.Value.IsOpen);
+                bState.State = rsp.Value.IsOpen;
             }
             else
             {
-                bState.GetBranchState(false);
+                bState.State = false;
             }
 
         }

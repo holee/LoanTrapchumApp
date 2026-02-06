@@ -207,11 +207,7 @@
 
     async Task ShowCurrencyDialogue()
     {
-        var param = new Dictionary<string, object?>
-        {
-            { "BranchId", branchId },
-            { "UserId", userId }
-        };
+        var param = new Dictionary<string, object> { { "BranchId", branchId } };
 
         var options = new SideDialogOptions
         {

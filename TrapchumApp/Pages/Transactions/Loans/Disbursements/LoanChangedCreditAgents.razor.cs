@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Applications.Features.CreditAgents.Requests;
 using Applications.Features.Loans.Responses;
 using Applications.Features.Branches.Dtos;
+using Applications.Features.Branches.Queries.GetBranchAsPaging;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 {
@@ -94,11 +95,14 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 
         async Task GetBranches(int? branchId = 0)
         {
-            var rsp = await _branchService.GetBranchesAsync<VBranch>(branchId, new QueryParam(0, 0));
+
+            var command = new GetBranchAsPagingQuery(branchId, new QueryParam(0, 0));
+
+            var rsp = await mediator.Send(command); //_branchService.GetBranchesAsync<VBranch>(branchId, new QueryParam(0, 0));
 
             if (rsp.IsSuccess)
             {
-                _newBranches = rsp.Data.Items ?? [];
+                _newBranches = rsp.Items ?? [];
             }
         }
 

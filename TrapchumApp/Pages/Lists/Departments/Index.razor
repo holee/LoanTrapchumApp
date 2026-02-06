@@ -37,14 +37,19 @@
                             AllowSorting="true"
                             IsLoading="@isLoading"
                             PageSizeOptions="@StorageConstant.PageSizeOptions"
+                            CellRender="@OnCellRender"
+                            RowRender="@OnRowRender"
+                            RowSelect="@OnRowSelect"
+                            @ref="@_depRef"
                             Data="@Departments">
                 <Columns>
                     <RadzenDataGridColumn Width="5rem" Title="#"
                                           Context="c"
                                           Sortable="false"
+                                          Filterable="false"
                                           Property="@nameof(VDepartment.DepartmentId)">
                         <Template>
-                            @(Departments.IndexOf(c) + 1)
+                            @c.RowIndex
                         </Template>
                     </RadzenDataGridColumn>
                     <RadzenDataGridColumn Property="@nameof(VDepartment.DepartmentName)"
@@ -100,6 +105,11 @@
 </RadzenMenu>
     );
     }
+
+  
+
+
+
 
     async void SelectedPageChanged(int page)
     {

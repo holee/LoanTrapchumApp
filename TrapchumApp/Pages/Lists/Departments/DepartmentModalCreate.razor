@@ -1,4 +1,5 @@
-﻿@using Applications.Features.Departments.Dto
+﻿@using Applications.Features.Branches.Dtos
+@using Applications.Features.Departments.Dto
 @using Applications.Features.Entities
 @using Applications.Features.LoanRequests.Interfaces
 <PageTitle>Create Department</PageTitle>
@@ -18,6 +19,24 @@
             <RadzenRow>
                 <RadzenColumn Size="12">
                     <RadzenColumn Size="12" SizeMD="6" SizeLG="3">
+                        <RadzenFormField Text="Branch Name*" Variant="Variant.Flat" Style="width:100%">
+                            <RadzenDropDown Name="DepartmentName"
+                                            @bind-Value="Req.BranchId"
+                                            Data="@vBranches"
+                                            ValueProperty="@nameof(VBranch.BranchId)"
+                                            TextProperty="@nameof(VBranch.BranchName)"
+                                            AllowFiltering="true"
+                                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                            Style="width:100%">
+                            </RadzenDropDown>
+                            <RadzenRequiredValidator Component="DepartmentName" Text="Department name is required" Style="position: absolute" />
+                        </RadzenFormField>
+                    </RadzenColumn>
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow>
+                <RadzenColumn Size="12">
+                    <RadzenColumn Size="12" SizeMD="6" SizeLG="3">
                         <RadzenFormField Text="Description" Variant="Variant.Flat" Style="width:100%;margin-top:10px">
                             <RadzenTextBox Name="Description" @bind-Value="Req.Description" Style="width:100%" />
                         </RadzenFormField>
@@ -26,14 +45,14 @@
 
             </RadzenRow>
         </RadzenStack>
-        <RadzenStack Orientation="Orientation.Horizontal" class="mt-2" 
-        JustifyContent="JustifyContent.End" Gap="0.5rem">
+        <RadzenStack Orientation="Orientation.Horizontal" class="rz-mt-2"
+                     JustifyContent="JustifyContent.End" Gap="0.5rem">
             <RadzenButton ButtonType="ButtonType.Submit"
                           Text="Save"
                           Size="ButtonSize.Small"
                           ButtonStyle="ButtonStyle.Primary"
                           Icon="save"></RadzenButton>
-            <RadzenButton Click="@((args) => DialogService!.Close(true))"
+            <RadzenButton Click="@Closed"
                           Variant="Variant.Flat"
                           Size="ButtonSize.Small"
                           Text="Close"

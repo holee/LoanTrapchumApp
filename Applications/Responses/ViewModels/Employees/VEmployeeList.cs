@@ -1,6 +1,4 @@
-﻿using Applications.Features.Loans.Responses;
-using Applications.Responses.ViewModels.Loans.Requests;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Applications.Responses.ViewModels.Employees;
 

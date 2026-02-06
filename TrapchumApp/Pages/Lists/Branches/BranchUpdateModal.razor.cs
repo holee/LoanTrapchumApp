@@ -1,11 +1,8 @@
 using Applications.Features.Addresses.Requests;
 using Applications.Features.Addresses.Responses;
-using Applications.Features.Branches.Command.ChangeBranchState;
 using Applications.Features.Branches.Command.EditBranch;
 using Applications.Features.Branches.Dtos;
-using Applications.Features.Branches.Queries.GetBranchByUser;
 using Applications.Features.Branches.Queries.GetUpdateBranch;
-using Applications.Features.Expenses.Queries.GetExpenseById;
 using Applications.Interfaces.Banks;
 using Applications.Responses.Lists.Currency;
 using Domains.Models.Addresses;

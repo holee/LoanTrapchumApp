@@ -1,15 +1,10 @@
 using Applications.Enumerations;
-using Applications.Extensions.Identity.Authorizations.Extensions;
-using Applications.Extensions.Identity.Policies;
 using Applications.Features.Branches.Queries.GetBranchState;
 using Applications.Features.CashManagements.Responses;
 using Applications.Features.Currencies;
 using Applications.Features.Currencies.Responses;
 using Applications.Features.Transactions.OpenBranches;
 using Applications.Services.Transactions.Branches;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
-using Radzen;
 using TrapchumApp.Helpers.Extensions;
 using TrapchumApp.Shared;
 
@@ -47,6 +42,10 @@ namespace TrapchumApp.Pages.Transactions.Branches
             var auth = await AuthenticationState;
 
             _userId = auth.GetUserId();
+
+
+            await bState.GetAuthenticatedUser(auth.User);
+
 
             var rsp = await obService.GetCashVaultBalance(BranchId);
 

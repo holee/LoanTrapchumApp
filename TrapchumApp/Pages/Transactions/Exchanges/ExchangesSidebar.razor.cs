@@ -13,6 +13,7 @@ using Domains.Models.Settings;
 using Domains.Models.Transaction;
 using Mapster;
 using TrapchumApp.Helpers.Constants;
+using TrapchumApp.Helpers.Extensions;
 using TrapchumApp.Shared;
 
 namespace TrapchumApp.Pages.Transactions.Exchanges
@@ -23,8 +24,8 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
         IForiegnCurrencyExchange exchangeServiceImpl)
     {
         [CascadingParameter] private CascadingAppState BState { get; set; } = default!;
+        [CascadingParameter] private Task<AuthenticationState> AuthenticateState { get; set; } = default!;
         [Parameter] public int BranchId { get; set; } = 0;
-        [Parameter] public string? UserId { get; set; }
         [Parameter] public bool IsSideBar { get; set; } = true;
 
         ForeignExchangeDtoCreate c = new ForeignExchangeDtoCreate();
@@ -34,6 +35,8 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
         private ExchangeDtoCreate _mx = new();
 
         EditForm form = default!;
+
+        private string? _userId = string.Empty;
 
         private readonly IEnumerable<Items> _buyCurrencies = [new Items(2, "US Dollar")];
 
@@ -49,6 +52,11 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
 
         protected override async Task OnInitializedAsync()
         {
+
+            var auth = await AuthenticateState;
+
+            _userId = auth.GetUserId();
+
             var resultSetting = await settingsServiceImpl.GetSysSettings();
 
             if (resultSetting.IsSuccess)
@@ -241,7 +249,7 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
                 _isBusy = false;
                 return;
             }
-            _model.UserRefId = UserId ?? BState.UserId;
+            _model.UserRefId = _userId ?? BState.UserId;
 
             _model.TranTypeRefId = 67;
 
@@ -249,9 +257,9 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
 
             _model.TransactionTypeName = TransactionTypes.CFX.GetDescription();//"Currency Foreign Exchange";
 
-            c.StaffRefId = UserId ?? BState.UserId;
+            c.StaffRefId = _userId ?? BState.UserId;
 
-            c.StaffAuthRefId = UserId ?? BState.UserId;
+            c.StaffAuthRefId = _userId ?? BState.UserId;
 
             c.BranchRefId = BranchId > 0 ? BranchId : BState.BranchId;
 

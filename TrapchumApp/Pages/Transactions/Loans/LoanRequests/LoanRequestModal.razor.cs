@@ -1,12 +1,10 @@
-using Applications.Extensions.mappers;
 using Applications.Features.Branches.Dtos;
+using Applications.Features.Branches.Queries.GetBranchAsPaging;
 using Applications.Features.Customers.Response;
 using Applications.Features.LoanRequests.Command.ApplyLoanRequest;
 using Applications.Features.LoanRequests.Requests;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Auths;
-using Microsoft.AspNetCore.Components;
-using Radzen;
 
 namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 {
@@ -21,20 +19,16 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         [Parameter] public string? AprovedUserId { get; set; } = string.Empty;
         IEnumerable<VUser> RequestUsers = [];
         IEnumerable<VCustomerDetails> Customers = [];
-        IEnumerable<BranchDto> Branches = [];
+        IEnumerable<VBranch> Branches = [];
         IEnumerable<VUser> AcceptUsers = [];
         string memo = "";
-        string? UserId;
+        string? _userId;
 
-        protected override void OnParametersSet()
-        {
-            //UserId = _stateProvider.AuthenticationStateUser.GetId();
-            base.OnParametersSet();
-        }
 
         protected override async Task OnInitializedAsync()
         {
             await GetAllData();
+
             await base.OnInitializedAsync();
         }
         async Task GetAllData()
@@ -51,14 +45,17 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             {
                 Customers = custResp.Data!;
             }
-            var branchResp = await _branchService.GetBranchesAsync<VBranch>(BranchId, new QueryParam(0, 25, string.Empty));
+        
+            var command = new GetBranchAsPagingQuery(BranchId, new QueryParam(0, 0));
 
-            if (branchResp.IsSuccess)
+            var rsp = await mediator.Send(command);
+
+            if (rsp.IsSuccess)
             {
-                Branches = branchResp.Data!.Maps<BranchDto>();
+                Branches = rsp.Items;
             }
 
-            var userResp = await _userService.GetUsersAsync(UserId, string.Empty);
+            var userResp = await _userService.GetUsersAsync(_userId, string.Empty);
 
             if (userResp.IsSuccess)
             {
@@ -71,9 +68,11 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         async void LoanRequestVerified()
         {
             var resp = await mediator.Send(new AppliedLoanRequestCommand(new RequestDtoBaseCreate(BranchId, CustomerId, LoanRequestId, memo)));
+         
             if (!resp.IsError)
             {
                 NotificationService.Notify(NotificationSeverity.Success, resp.Value.Message);
+               
                 DialogService.Close(true);
             }
             else

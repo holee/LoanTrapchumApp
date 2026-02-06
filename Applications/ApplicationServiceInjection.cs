@@ -1,5 +1,7 @@
 ﻿
+using Applications.Features.Branches.Command.CreateBranch;
 using Applications.Features.Branches.Command.DeleteBranch;
+using Applications.Features.Branches.Command.EditBranch;
 using Applications.Features.Branches.Dtos;
 using Applications.Features.Branches.Queries.GetBranchAsPaging;
 using Applications.Features.Branches.Queries.GetBranchById;
@@ -69,6 +71,8 @@ public static class ApplicationServiceInjection
         services.AddScoped<IRequestHandler<GetBranchAsPagingQuery, Pager<VBranch>>, GetBranchAsPagingQueryHandler>();
         services.AddScoped<IRequestHandler<DeleteBranchCommand, ErrorOr<DeleteResult>>, DeleteBranchCommandHandler>();
         services.AddScoped<IRequestHandler<GetUpdateBranchQuery, ErrorOr<BranchDtoUpdate>>, GetUpdateBranchQueryHandler>();
+        services.AddScoped<IRequestHandler<CreateBranchCommand, ErrorOr<VBranch>>, CreateBranchCommandHandler>();
+        services.AddScoped<IRequestHandler<EditBranchCommand, ErrorOr<VBranch>>, EditBranchCommandHandler>();
 
 
 
