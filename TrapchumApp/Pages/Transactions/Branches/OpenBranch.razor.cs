@@ -67,11 +67,11 @@ namespace TrapchumApp.Pages.Transactions.Branches
 
             if (rsp1.IsSuccess())
             {
-                bState.GetBranchState(rsp1.Value.IsOpen);
+                bState.State = rsp1.Value.IsOpen;
             }
             else
             {
-                bState.GetBranchState(false);
+                bState.State = false;
             }
 
             await base.OnInitializedAsync();

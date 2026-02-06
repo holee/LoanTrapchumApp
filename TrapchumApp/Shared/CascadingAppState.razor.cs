@@ -414,12 +414,6 @@ namespace TrapchumApp.Shared
             await CheckedCanOpenBranch(user);
         }
 
-
-        public void GetBranchState(bool state)
-        {
-            _state = state;
-        }
-
         internal async Task GetUserId()
         {
             var authState = await AuthenticationState;
