@@ -523,11 +523,9 @@ public sealed class CurrencyRepository(IDbContextFactory<DataContext> contextFac
 
     private static IQueryable<VCurrencyNotes> ApplyFilters(int? currencyId, QueryParam param, DataContext db, IQueryable<VCurrencyNotes> queries)
     {
-        if (currencyId.HasValue && currencyId > 0)
-        {
-            queries = db.Set<VCurrencyNotes>()
-                              .WhereIf(currencyId.HasValue && currencyId > 0, x => x.CurrencyId == currencyId);
-        }
+
+        queries = db.Set<VCurrencyNotes>()
+                          .WhereIf(currencyId.HasValue && currencyId > 0, x => x.CurrencyId == currencyId);
 
         if (!string.IsNullOrEmpty(param.Filter))
         {
