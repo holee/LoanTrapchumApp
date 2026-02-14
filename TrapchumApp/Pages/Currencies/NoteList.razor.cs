@@ -12,14 +12,6 @@ namespace TrapchumApp.Pages.Currencies
 {
     public partial class NoteList
     {
-
-        private readonly ICurrencyService _currencyService;
-
-        public NoteList(ICurrencyService currencyService)
-        {
-            _currencyService = currencyService;
-        }
-
         [Parameter] public int Id { get; set; } = 2;
         [Parameter, SupplyParameterFromQuery] public int BranchId { get; set; }
         private List<VCurrencyCounter> CurrencyCounters = [];
@@ -49,9 +41,11 @@ namespace TrapchumApp.Pages.Currencies
             {
                 isLoading = true;
 
-                var query = new GetCurrencyCounterQuery(branchId, new QueryParam(0, 0));
+                var query = new GetCurrencyCounterQuery(0, branchId);
 
-                var rsp = await mediator.Send(query);  //_currencyService.GetCurrencyNotes(branchId, 0);
+                var rsp = await mediator.Send(query);  
+                
+                //_currencyService.GetCurrencyNotes(branchId, 0);
 
                 CurrencyCounters = rsp.Items;
 
@@ -111,9 +105,9 @@ namespace TrapchumApp.Pages.Currencies
         async Task makeInactiveOrActive(bool arg, int id)
         {
             var req = new NoteActivateDto(arg);
-           
-            var command= new ToggleNoteCommand(id, req);
-            
+
+            var command = new ToggleNoteCommand(id, req);
+
             var rsp = await mediator.Send(command);  //_currencyService.ActivateOrDeactivateNote(id, req);
 
             if (rsp.IsSuccess())

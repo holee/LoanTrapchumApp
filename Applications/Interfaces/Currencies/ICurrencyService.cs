@@ -21,7 +21,7 @@ namespace Applications.Interfaces.Currencies
         Task<IEnumerable<VCurrenciesList>> GetCurrencies(string? q);
         Task<ErrorOr<VCurrenciesList>> GetCurrencyDetailById(int? id, CancellationToken cancellation = default);
 
-        Task<ErrorOr<IEnumerable<VCurrencyCounter>>> GetCurrencyNotes(int? branchId, int? currencyId, CancellationToken cancellation = default);
+        Task<Pager<VCurrencyCounter>> GetCurrencyCounter(int? branchId, int? currencyId, CancellationToken cancellation = default);
         Task<Pager<VCurrencyCounter>> GetCurrencyCounter(int? currencyId, QueryParam param, CancellationToken cancellation = default);
 
         Task<Pager<CurrencyNoteViewDto>> GetCurrencyNotes(int? branchId, int? currencyId, QueryParam param, CancellationToken cancellation = default);

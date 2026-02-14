@@ -225,20 +225,15 @@ public sealed class CurrencyRepository(IDbContextFactory<DataContext> contextFac
         }
     }
 
-    public async Task<ErrorOr<IEnumerable<VCurrencyCounter>>> GetCurrencyNotes(int? branchId, int? currencyId, CancellationToken ca = default)
+    public async Task<Pager<VCurrencyCounter>> GetCurrencyCounter(int? branchId, int? currencyId, CancellationToken ca = default)
     {
         using var db = await connectionFactory.CreateConnectionAsync(ca);
-
 
         var queries = await db.QueryAsync<VCurrencyCounter>(ProcedureConstant.GetCurrencyNotes,
                                         new { currencyId, branchId },
                                         commandType: CommandType.StoredProcedure);
-        if (!queries.Any())
-        {
-            return Error.NotFound("No Data was found");
-        }
 
-        return queries.ToList();
+        return PagerExtensions.Create(queries.ToList(), queries.Count());
     }
 
     public async Task<Pager<VCurrencyNotes>> GetCurrenciesNotes(int? branchId, int? currencyId, QueryParam param, CancellationToken ca = default)

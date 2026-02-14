@@ -20,7 +20,7 @@ namespace TrapchumApp.Pages.Currencies
         {
             var param = new QueryParam(pageIndex, pageSize, "CurrencyValue");
 
-            var command = new GetCurrencyCounterQuery(Id, param);
+            var command = new GetCurrencyCounterQuery(0,Id);
 
             var resp = await mediator.Send(command);  //CurrencyService.GetCurrencyCounter(Id, param);
 

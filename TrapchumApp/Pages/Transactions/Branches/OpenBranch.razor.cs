@@ -19,14 +19,6 @@ namespace TrapchumApp.Pages.Transactions.Branches
 {
     public partial class OpenBranch
     {
-        private readonly IOpenBranchServiceImpl obService;
-
-        private readonly ICurrencyServiceImpl curService;
-        public OpenBranch(IOpenBranchServiceImpl obService, ICurrencyServiceImpl curService)
-        {
-            this.obService = obService;
-            this.curService = curService;
-        }
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
         [CascadingParameter] CascadingAppState bState { get; set; } = default!;
         [Parameter] public int? BranchId { get; set; } = 0;
@@ -38,12 +30,7 @@ namespace TrapchumApp.Pages.Transactions.Branches
         bool isClicked = false;
         long userRefId = 0;
         int currencyId = 1;
-        //bool canOpenBranch = false;
-        //bool canCloseBranch = false;
-        //bool canVaultOut = false;
-        //bool canVaultIn = false;
         private AlertStyle alertStyle;
-
         protected override async Task OnInitializedAsync()
         {
             if (string.IsNullOrEmpty(UserId))
@@ -220,7 +207,7 @@ namespace TrapchumApp.Pages.Transactions.Branches
 
             this.currencyId = currencyId;
 
-            var query = new GetCurrencyCounterQuery(currencyId, new QueryParam(0, 0));
+            var query = new GetCurrencyCounterQuery(currencyId, branchRefId);
 
             var rsp = await mediator.Send(query);
 

@@ -1,6 +1,5 @@
 ﻿using Applications.Features.Currencies.Responses;
 using Applications.Interfaces.Currencies;
-using ErrorOr;
 
 namespace Applications.Features.Currencies.Queries.GetCurrencyCounter;
 
@@ -8,6 +7,6 @@ public sealed class GetCurrencyCounterQueryHandler(ICurrencyService currencyServ
 {
     public async Task<Pager<VCurrencyCounter>> Handle(GetCurrencyCounterQuery request, CancellationToken cancellationToken)
     {
-        return await currencyService.GetCurrencyCounter(request.CurrencyId, request.Param, cancellationToken);
+        return await currencyService.GetCurrencyCounter(request.BranchId, request.CurrencyId, cancellationToken);
     }
 }

@@ -3,4 +3,4 @@ using ErrorOr;
 
 namespace Applications.Features.Currencies.Queries.GetCurrencyCounter;
 
-public record GetCurrencyCounterQuery(int? CurrencyId, QueryParam Param) : IRequest<Pager<VCurrencyCounter>>;
+public record GetCurrencyCounterQuery(int? CurrencyId, int? BranchId) : IRequest<Pager<VCurrencyCounter>>;
