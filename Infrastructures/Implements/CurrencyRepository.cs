@@ -246,9 +246,10 @@ public sealed class CurrencyRepository(IDbContextFactory<DataContext> contextFac
         await using var db = await contextFactory.CreateDbContextAsync(ca);
 
         var queries = db.Set<VCurrencyNotes>()
-                              .WhereIf(branchId.HasValue && branchId > 0, x => x.BranchId == branchId);
+                         .Where(x => x.BranchId == branchId)
+                         .WhereIf(currencyId.HasValue && currencyId > 0, x => x.CurrencyId == currencyId);
 
-        queries = ApplyFilters(currencyId, param, db, queries);
+        queries = ApplyFilters(currencyId, param, queries);
 
         queries = ApplySort(param, queries);
 
@@ -521,28 +522,22 @@ public sealed class CurrencyRepository(IDbContextFactory<DataContext> contextFac
         return queries;
     }
 
-    private static IQueryable<VCurrencyNotes> ApplyFilters(int? currencyId, QueryParam param, DataContext db, IQueryable<VCurrencyNotes> queries)
+    private static IQueryable<VCurrencyNotes> ApplyFilters(int? currencyId, QueryParam param, IQueryable<VCurrencyNotes> queries)
     {
+        var filter = param.Filter!.Trim();
 
-        queries = db.Set<VCurrencyNotes>()
-                          .WhereIf(currencyId.HasValue && currencyId > 0, x => x.CurrencyId == currencyId);
+        if (string.IsNullOrEmpty(filter)) return queries;
 
-        if (!string.IsNullOrEmpty(param.Filter))
+        if (string.IsNullOrEmpty(param.FilterColumn))
         {
-            var filter = param.Filter.Trim();
-
-            if (string.IsNullOrEmpty(param.FilterColumn))
+            queries = queries.WhereMatchesFilter(filter, AllowProps.ToArray());
+        }
+        else
+        {
+            if (AllowProps.Contains(param.FilterColumn))
             {
-                queries = queries.WhereMatchesFilter(filter, AllowProps.ToArray());
+                queries = queries.WhereLike(filter, param.FilterColumn);
             }
-            else
-            {
-                if (AllowProps.Contains(param.FilterColumn))
-                {
-                    queries = queries.WhereLike(filter, param.FilterColumn);
-                }
-            }
-
         }
 
         return queries;

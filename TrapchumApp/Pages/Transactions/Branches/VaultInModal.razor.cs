@@ -10,12 +10,14 @@ using Applications.Features.Currencies.Command.CreateCashVaultIn;
 using Applications.Features.Currencies.Extensions;
 using Applications.Features.Currencies.Queries.GetCashVault;
 using Applications.Features.Currencies.Queries.GetCurrencies;
+using Applications.Features.Currencies.Queries.GetCurrencyDetails;
 using Applications.Features.Currencies.Queries.GetCurrencyNotes;
 using Applications.Features.Currencies.Responses;
 using Applications.Features.Transactions.CashManagements;
 using Applications.Responses.Lists.Currency;
 using Applications.Responses.Paginations;
 using Applications.Services.Transactions.Branches;
+using Domains.Enumerations;
 using Mapster;
 using TrapchumApp.Helpers.Extensions;
 
@@ -81,13 +83,17 @@ namespace TrapchumApp.Pages.Transactions.Branches
 
         private async Task GetCurrencies()
         {
-            var query = new GetCurrenciesQuery(BranchId, new QueryParam(0, 25));
+            var query = new GetCurrenciesQuery(0, new QueryParam(0, 25));
 
-            var rsp = await mediator.Send(query); //curService.GetCurrencies(query);
+            var rsp = await mediator.Send(query);
 
             CurrencyList = rsp.Items.Adapt<IEnumerable<CurrencyResponse>>();
 
-            Currency = CurrencyList!.FirstOrDefault();
+            var command = new GetCurrencyByIdQuery((int)CurrencyEnum.KHR);
+
+            var rsp1 = await mediator.Send(command);
+
+            Currency = rsp1.Value.Adapt<CurrencyResponse>(); //CurrencyList!.FirstOrDefault();
 
             CurrencyId = Currency?.CurrencyId;
 
@@ -100,13 +106,10 @@ namespace TrapchumApp.Pages.Transactions.Branches
 
             var rsp1 = await mediator.Send(command);  //caVaultService.GetViewCashVaultAsync();
 
-            if (rsp1.Items.Any())
-            {
-                _vCashVaults = rsp1.Items ?? [];
+            _vCashVaults = rsp1.Items ?? [];
 
-                userBalance = GetUserBalance(_vCashVaults);
+            userBalance = GetUserBalance(_vCashVaults);
 
-            }
         }
 
         private async Task GetCurrencyNotes()

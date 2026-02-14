@@ -74,7 +74,7 @@ namespace TrapchumApp.Pages.Transactions.Branches
 
             await GetCurrenciesList();
 
-            await GetCurrency((int)CurrenciesType.Khr);
+            await GetCurrency((int)CurrencyEnum.KHR);
 
             await GetCurrencyNotes();
 

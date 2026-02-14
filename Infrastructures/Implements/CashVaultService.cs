@@ -136,7 +136,7 @@ namespace Infrastructures.Implements
                 }
 
                 // Add root entity (cascades children because of lists)
-                
+
                 await context.LoanTransaction.AddAsync(trnx!, cancellation);
 
                 await context.SaveChangesAsync(cancellation);
@@ -186,12 +186,12 @@ namespace Infrastructures.Implements
             await using var context = await _context.CreateDbContextAsync(cancellation);
 
             var vaults = context.Set<VCashVaults>()
-                                .WhereIf(branchId.HasValue && branchId > 0, x => x.BranchRefId == branchId)
+                                .Where(x => x.BranchRefId == branchId)
                                 .AsNoTracking();
 
             var counts = await vaults.CountAsync(cancellation);
 
-            var items = await vaults.ToListAsync(cancellation);
+            var items = await vaults.AsNoTracking().ToListAsync(cancellation);
 
             return new Pager<VCashVaults>(items, counts);
         }
