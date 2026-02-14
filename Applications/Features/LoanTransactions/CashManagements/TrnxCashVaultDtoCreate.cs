@@ -54,7 +54,7 @@ namespace Applications.Features.Transactions.CashManagements
         public string TransactionTypeName { get; set; } = string.Empty;
         public string? UserRefId { get; set; }
         public DateTime? TransactionDate { get; set; } = DateTime.Now;
-        public CashVaultDtoCreate? CashVault { get; set; }
+        public CashVaultDtoCreate CashVault { get; set; } = new();
         public ICollection<CashManagementDtoCreate> CashManagements { get; set; } = [];
 
         public static TrnxCashVaultDtoCreate Create(int? branchId, int? tranTypeRefId, string trnxName, string? userRefId, DateTime? trnxDate = null)

@@ -4,7 +4,7 @@ public sealed class GetCurrencyByIdQueryValidator : AbstractValidator<GetCurrenc
 {
     public GetCurrencyByIdQueryValidator()
     { 
-        RuleFor(x => x.Id).Cascade(CascadeMode.Stop)
+        RuleFor(x => x.CurrencyId).Cascade(CascadeMode.Stop)
             .NotNull().WithMessage("Currency Id is required.")
             .GreaterThan(0).WithMessage("Currency Id must be greater than zero.");
     }

@@ -1,11 +1,9 @@
-using Applications.Features.Currencies;
+using Applications.Features.Currencies.Dto;
 using Applications.Features.Currencies.Responses;
 using Applications.Interfaces.Currencies;
 using Applications.Interfaces.Transactions;
 using Domains.Models.Currencies;
 using Mapster;
-using Microsoft.AspNetCore.Components.Web;
-using Radzen;
 
 namespace TrapchumApp.Pages.Transactions.Exchanges
 {

@@ -1,0 +1,717 @@
+﻿using Applications.Commons.Extensions.QueryableExtensions;
+using Applications.Extensions;
+using Applications.Features.Currencies.Dto;
+using Applications.Features.Currencies.Responses;
+using Applications.Interfaces.Currencies;
+using Applications.Responses.Message;
+using Applications.Responses.Paginations;
+using Dapper;
+using Domains.Models.Currencies;
+using ErrorOr;
+using Infrastructures.Constants.Procedures;
+using Infrastructures.DataAccess;
+using Infrastructures.Implements.Extensions;
+using Microsoft.EntityFrameworkCore;
+using System.Data;
+using System.Linq.Expressions;
+
+namespace Infrastructures.Implements;
+
+public sealed class CurrencyRepository(IDbContextFactory<DataContext> contextFactory,
+        IDapperConnectionFactory connectionFactory) : ICurrencyService
+{
+    public async Task<ErrorOr<Currency>> GetCurrencyWithSpotRates(int? currencyId, CancellationToken cancellation = default)
+    {
+        using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+        var currency = await context.Currencies
+                            .Include(sp => sp.SpotRates)
+                            .AsNoTracking()
+                            .FirstOrDefaultAsync(c => c.CurrencyId == currencyId, cancellation);
+
+        if (currency is null) return Error.NotFound(Messages.DataNotFound);
+        return currency;
+    }
+
+
+    public async Task<ErrorOr<Currency>> GetCurrencyById(int? id, CancellationToken cancellation = default)
+    {
+        await using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+        var currency = await context.Currencies
+                                .AsNoTracking()
+                                .FirstOrDefaultAsync(c => c.CurrencyId == id, cancellation);
+        if (currency is null) return Error.NotFound(Messages.DataNotFound);
+
+        return currency;
+    }
+
+    public async Task<ErrorOr<Currency>> GetCurrencyByIdAsync(int currencyId, CancellationToken cancellationToken = default, params Expression<Func<Currency, object>>[] includes)
+    {
+        await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+
+        IQueryable<Currency> query = context.Currencies.AsNoTracking();
+
+        if (includes is not null && includes.Length > 0)
+        {
+            foreach (var include in includes)
+            {
+                query = query.Include(include);
+            }
+        }
+
+        var currency = await query.SingleOrDefaultAsync(x => x.CurrencyId == currencyId, cancellationToken);
+
+        return currency is null
+            ? Error.NotFound(Messages.DataNotFound)
+            : currency;
+    }
+
+
+
+    public async Task<Pager<VCurrenciesList>> GetCurrencies(QueryParam param, CancellationToken cancellation = default)
+    {
+        await using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+        var queries = context.VCurrenciesList.AsQueryable();
+
+        queries = ApplyFilters(param, queries);
+
+        queries = ApplySort(param, queries);
+
+        var counts = queries.Count();
+
+        if (param.Skip > 0)
+        {
+            queries = queries.Skip(param.Skip).Take(param.PageSize);
+        }
+
+        var items = await queries.AsNoTracking()
+                                .ToListAsync(cancellation);
+
+        return new Pager<VCurrenciesList>(items, counts);
+    }
+
+
+    public async Task<IEnumerable<VCurrenciesList>> GetCurrencies(string? filter)
+    {
+        await using var _ctx = await contextFactory.CreateDbContextAsync();
+
+        var queries = await _ctx.Database
+            .SqlQuery<VCurrenciesList>(@$"SELECT c.* FROM  VCurrenciesLists c WHERE c.IsActive = 1")
+            .WhereIf(!string.IsNullOrEmpty(filter), x => EF.Functions.Like(x.CurrencyCode, $"%{filter}%") ||
+                                                         EF.Functions.Like(x.CurrencyName, $"%{filter}%"))
+            .AsNoTracking()
+            .ToListAsync();
+        return queries;
+    }
+
+
+    public async Task<ErrorOr<VCurrenciesList>> SaveOrUpdate(Currency currency, CancellationToken cancellation = default)
+    {
+        try
+        {
+            using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+            if (currency.CurrencyId == 0)
+            {
+                var cur = await CheckMoneyExist(currency.CurrencyCode);
+
+                if (cur.Exist)
+                    return Error.Conflict("Cuurency Code You are added already exist.");
+
+                context.Currencies.Add(currency);
+            }
+            else
+            {
+                var cur = await CheckMoneyExist(currency.CurrencyId, currency.CurrencyCode);
+
+                if (cur) return Error.Conflict("You are enter duplicate currency code.");
+
+                context.Currencies.Update(currency);
+            }
+
+            var createdCurrency = await GetCurrencyDetailById(1, cancellation);
+
+            return createdCurrency;
+        }
+        catch (Exception ex)
+        {
+            return Error.Unexpected("ServerError", ex.Message);
+        }
+    }
+
+    public async Task<ErrorOr<VCurrencyCounter>> AddNote(CurrencyCounter model, CancellationToken cancellation = default)
+    {
+        try
+        {
+            using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+            var existing = await context.CurrencyCounters
+                        .AsNoTracking()
+                        .AnyAsync(x =>
+                    x.CurrencyRefId == model.CurrencyRefId &&
+                    x.CurrencyValue == model.CurrencyValue, cancellation);
+
+            if (existing) return Error.Conflict("Currency Note Value Already exist.");
+
+            context.CurrencyCounters.Add(model);
+
+            await context.SaveChangesAsync(cancellation);
+
+            var createdNote = await GetCurrencyNote(model.Id, cancellation);
+
+            return createdNote;
+        }
+        catch (Exception ex)
+        {
+            return Error.Unexpected("ServerError", ex.Message);
+        }
+    }
+
+    public async Task<ErrorOr<VCurrencyCounter>> AddNote(int? currencyId, CurrencyCounter model, CancellationToken cancellation = default)
+    {
+        try
+        {
+            using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+            var currency = await context.Currencies.Where(x => x.CurrencyId == currencyId).FirstOrDefaultAsync();
+
+            if (currency is null) return ErrorOr.Error.NotFound("No Currency were selected.");
+
+            var existing = context.CurrencyCounters.Where(x =>
+                    x.CurrencyRefId == model.CurrencyRefId &&
+                    x.CurrencyValue == model.CurrencyValue)
+                .Any();
+
+            if (existing) return Error.Conflict("Currency Note Value Already exist.");
+
+            currency.CurrencyCounters!.Add(model);
+
+            await context.SaveChangesAsync();
+
+            var createdNote = await GetCurrencyNote(model.Id, cancellation);
+
+            return createdNote;
+        }
+        catch (Exception ex)
+        {
+            return Error.Unexpected("ServerError", ex.Message);
+        }
+    }
+
+    public async Task<ErrorOr<string>> ActivateOrDeactivateNote(int? noteId, NoteActivateDto model, CancellationToken cancellation = default)
+    {
+        try
+        {
+            using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+            var note = await context.CurrencyCounters.FirstOrDefaultAsync(x => x.Id == noteId);
+
+            if (note is null)
+            {
+                return Error.NotFound("There is no any Note in the list.");
+            }
+
+            note.IsActive = model.IsActive;
+
+            await context.SaveChangesAsync(cancellation);
+
+            return Messages.DataUpdated;
+        }
+        catch (Exception ex)
+        {
+            return Error.Unexpected("ServerError", ex.Message);
+        }
+    }
+
+    public async Task<ErrorOr<IEnumerable<VCurrencyCounter>>> GetCurrencyNotes(int? branchId, int? currencyId, CancellationToken ca = default)
+    {
+        using var db = await connectionFactory.CreateConnectionAsync(ca);
+
+
+        var queries = await db.QueryAsync<VCurrencyCounter>(ProcedureConstant.GetCurrencyNotes,
+                                        new { currencyId, branchId },
+                                        commandType: CommandType.StoredProcedure);
+        if (!queries.Any())
+        {
+            return Error.NotFound("No Data was found");
+        }
+
+        return queries.ToList();
+    }
+
+    public async Task<Pager<VCurrencyNotes>> GetCurrenciesNotes(int? branchId, int? currencyId, QueryParam param, CancellationToken ca = default)
+    {
+        await using var db = await contextFactory.CreateDbContextAsync(ca);
+
+        var queries = db.Set<VCurrencyNotes>()
+                              .WhereIf(branchId.HasValue && branchId > 0, x => x.BranchId == branchId);
+
+        queries = ApplyFilters(currencyId, param, db, queries);
+
+        queries = ApplySort(param, queries);
+
+        var counts = await queries.CountAsync(ca);
+
+        if (param.PageSize > 0)
+        {
+            queries = queries.Skip(param.Skip).Take(param.PageSize);
+        }
+
+        var items = await queries.AsNoTracking().ToListAsync(ca);
+
+        return PagerExtensions.Create(items, counts);
+    }
+
+    public async Task<ErrorOr<VCurrencyCounter>> GetCurrencyNote(int? noteId, CancellationToken cancellation = default)
+    {
+        using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+        var queries = await context.VCurrencyNotes
+                                    .AsNoTracking()
+                                    .FirstOrDefaultAsync(x => x.Id == noteId, cancellation);
+
+        if (queries is null)
+        {
+            return Error.NotFound(Messages.DataNotFound);
+        }
+
+        return queries;
+
+    }
+
+    public async Task<Pager<VCurrencyCounter>> GetCurrencyCounter(int? currencyId, QueryParam param, CancellationToken cancellation = default)
+    {
+        using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+        IQueryable<VCurrencyCounter> queries = context.VCurrencyNotes
+                                                .WhereIf(currencyId.HasValue && currencyId > 0, x => x.CurrencyRefId == currencyId);
+
+        queries = ApplyFilter(param, queries);
+
+        queries = ApplySort(param, queries);
+
+        var counts = queries.Count();
+
+        if (param.Skip > 0)
+        {
+            queries = queries.Skip(param.Skip).Take(param.PageSize);
+
+        }
+
+        var items = await queries.AsNoTracking().ToListAsync(cancellation);
+
+        var pager = new Pager<VCurrencyCounter>(items, counts);
+
+        return pager;
+    }
+
+    public async Task<Pager<CurrencyNoteViewDto>> GetCurrencyNotes(int? branchId, int? currencyId, QueryParam param, CancellationToken cancellation = default)
+    {
+        await using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+        var queries = context.Set<CurrencyNoteViewDto>()
+                             .WhereIf(branchId.HasValue && branchId > 0, x => x.BranchRefId == branchId);
+
+        queries = ApplyFilter(currencyId, param, queries);
+
+        queries = ApplySort(param, queries);
+
+        var counts = await queries.CountAsync(cancellation);
+
+        if (param.Skip > 0)
+        {
+            queries = queries.Skip(param.Skip).Take(param.PageSize);
+        }
+
+        var items = await queries
+                             .AsNoTracking()
+                            .ToListAsync(cancellation);
+
+        return new Pager<CurrencyNoteViewDto>(items, counts);
+    }
+
+    public async Task<Pager<Currency>> GetCurrencies(int? currencyId, QueryParam param, CancellationToken cancellation = default)
+    {
+        using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+        var baseQueries = context.Currencies
+                            .Include(x => x.SpotRates)
+                            .WhereIf(currencyId.HasValue && currencyId > 0, x => x.CurrencyId == currencyId)
+                            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(param.Filter))
+        {
+            var filter = param.Filter.Trim();
+
+            if (string.IsNullOrWhiteSpace(param.FilterColumn))
+            {
+                string[] props = { nameof(Currency.CurrencyCode), nameof(Currency.Description) };
+
+                baseQueries = baseQueries.WhereMatchesFilter(filter, props);
+            }
+            else
+            {
+
+                baseQueries = baseQueries.WhereLike(filter, param.FilterColumn);
+            }
+        }
+
+        var counts = await baseQueries.CountAsync(cancellation);
+
+        if (param.PageSize > 0)
+        {
+            baseQueries = baseQueries.Skip(param.Skip).Take(param.PageSize);
+        }
+
+        var items = await baseQueries
+                            .AsNoTracking()
+                            .ToListAsync(cancellation);
+
+        return PagerExtensions.Create(items, counts);
+
+    }
+
+    public async Task<ErrorOr<VCurrenciesList>> GetCurrencyDetailById(int? currencyId, CancellationToken cancellation = default)
+    {
+        await using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+        var currency = await context.VCurrenciesList
+                              .AsNoTracking()
+                              .FirstOrDefaultAsync(x => x.CurrencyId == currencyId, cancellation);
+        if (currency is null) return Error.NotFound(Messages.DataNotFound);
+
+        return currency;
+
+    }
+
+
+
+
+    private static IQueryable<VCurrenciesList> ApplyFilters(QueryParam param, IQueryable<VCurrenciesList> queries)
+    {
+
+        var filterParam = param.Filter?.Trim();
+
+        if (!string.IsNullOrEmpty(param.FilterColumn))
+        {
+            queries = queries.Where(x => EF.Functions.Like(param.FilterColumn, $"{param.Filter}%"));
+        }
+        else
+        {
+
+            string[] props = ["CurrencyCode", "CurrencyName"];
+
+            queries = queries.WhereMatchesFilter(filterParam, props);
+        }
+
+        return queries;
+    }
+
+    private static IQueryable<VCurrenciesList> ApplySort(QueryParam param, IQueryable<VCurrenciesList> queries)
+    {
+        var sortDescending = param.SortDescending;
+
+        if (!string.IsNullOrEmpty(param.SortColumn))
+        {
+            queries = sortDescending ?
+                        queries.OrderByDescending(x => EF.Property<object>(x, param.SortColumn)) :
+                        queries.OrderBy(x => EF.Property<object>(x, param.SortColumn));
+
+            return queries;
+        }
+
+        queries = sortDescending ?
+                    queries.OrderByDescending(c => c.CurrencyName)
+                            .ThenByDescending(c => c.CurrencyId)
+                            .ThenByDescending(c => c.CurrencyCode) :
+                    queries.OrderBy(x => x.CurrencyName)
+                            .ThenBy(x => x.CurrencyId)
+                            .ThenBy(x => x.CurrencyCode);
+        return queries;
+    }
+
+    private static IQueryable<CurrencyNoteViewDto> ApplyFilter(int? currencyId, QueryParam param, IQueryable<CurrencyNoteViewDto> queries)
+    {
+        if (currencyId.HasValue && currencyId > 0)
+        {
+            queries = queries.Where(x => x.CurrencyRefId == currencyId);
+        }
+
+        if (!string.IsNullOrEmpty(param.Filter) && string.IsNullOrEmpty(param.FilterColumn))
+        {
+            var filter = $"%{param.Filter.Trim()}%";
+
+            string[] props = { "CurrencyName", "CurrencyCode" };
+
+            queries = queries.WhereMatchesFilter(filter, props);
+        }
+
+        if (!string.IsNullOrEmpty(param.Filter) && !string.IsNullOrEmpty(param.FilterColumn))
+        {
+            var filter = $"%{param.Filter.Trim()}%";
+
+            string[] props = { "CurrencyName", "CurrencyCode" };
+
+            queries = queries.Where(x => EF.Functions.Like(param.SortColumn, filter));
+        }
+
+        return queries;
+    }
+
+    private static IQueryable<CurrencyNoteViewDto> ApplySort(QueryParam param, IQueryable<CurrencyNoteViewDto> queries)
+    {
+        var sortDescending = param.SortDescending;
+
+        if (!string.IsNullOrEmpty(param.SortColumn))
+        {
+            queries = sortDescending ?
+                        queries.OrderByDescending(x => EF.Property<object>(x, param.SortColumn)) :
+                        queries.OrderBy(x => EF.Property<object>(x, param.SortColumn));
+        }
+        else
+        {
+            queries = sortDescending ?
+                        queries.OrderByDescending(c => c.CurrencyName)
+                                .ThenByDescending(c => c.CurrencyValue) :
+                        queries.OrderBy(x => x.CurrencyName)
+                                .ThenBy(x => x.CurrencyValue);
+        }
+
+        return queries;
+    }
+
+    private static IQueryable<VCurrencyCounter> ApplySort(QueryParam param, IQueryable<VCurrencyCounter> queries)
+    {
+
+        var sortDescending = param.SortDescending;
+
+
+        if (!string.IsNullOrEmpty(param.SortColumn))
+        {
+            queries = sortDescending ?
+                        queries.OrderByDescending(x => EF.Property<object>(x, param.SortColumn)) :
+                         queries.OrderBy(x => EF.Property<object>(x, param.SortColumn));
+        }
+        else
+        {
+            queries = sortDescending ?
+                        queries.OrderByDescending(c => c.CurrencyName)
+                                .ThenByDescending(c => c.CurrencyValue) :
+                        queries.OrderBy(x => x.CurrencyName)
+                                .ThenBy(x => x.CurrencyValue);
+        }
+
+        return queries;
+    }
+
+    private static IQueryable<VCurrencyCounter> ApplyFilter(QueryParam param, IQueryable<VCurrencyCounter> queries)
+    {
+        if (param.IsIncludeInActive)
+        {
+            queries = queries.IgnoreQueryFilters();
+        }
+
+        if (!string.IsNullOrEmpty(param.Filter))
+        {
+            queries = queries.Where(x => EF.Functions.Like(x.CurrencyName!, $"%{param.Filter}%"));
+        }
+
+        return queries;
+    }
+
+    private static IQueryable<VCurrencyNotes> ApplyFilters(int? currencyId, QueryParam param, DataContext db, IQueryable<VCurrencyNotes> queries)
+    {
+        if (currencyId.HasValue && currencyId > 0)
+        {
+            queries = db.Set<VCurrencyNotes>()
+                              .WhereIf(currencyId.HasValue && currencyId > 0, x => x.CurrencyId == currencyId);
+        }
+
+        if (!string.IsNullOrEmpty(param.Filter))
+        {
+            var filter = param.Filter.Trim();
+
+            if (string.IsNullOrEmpty(param.FilterColumn))
+            {
+                queries = queries.WhereMatchesFilter(filter, AllowProps.ToArray());
+            }
+            else
+            {
+                if (AllowProps.Contains(param.FilterColumn))
+                {
+                    queries = queries.WhereLike(filter, param.FilterColumn);
+                }
+            }
+
+        }
+
+        return queries;
+    }
+
+    private static IQueryable<VCurrencyNotes> ApplySort(QueryParam param, IQueryable<VCurrencyNotes> queries)
+    {
+        var sortDescending = param.SortDescending;
+
+        if (!string.IsNullOrEmpty(param.SortColumn))
+        {
+            queries = sortDescending ?
+                    queries.OrderByDescending(x => param.SortColumn) :
+                    queries.OrderBy(x => param.SortColumn);
+        }
+        else
+        {
+            queries = sortDescending ?
+                    queries.OrderByDescending(x => x.CurrencyCode)
+                                .ThenByDescending(x => x.CurrencyValue)
+                                    .ThenByDescending(x => x.CurrencyName) :
+                    queries.OrderBy(x => x.CurrencyCode)
+                            .ThenBy(x => x.CurrencyValue)
+                                .ThenBy(x => x.CurrencyName);
+        }
+
+        return queries;
+    }
+
+    private async Task<(bool Exist, Currency Currency)> CheckMoneyExist(string code)
+    {
+        using var context = await contextFactory.CreateDbContextAsync();
+
+        var currency = await context.Currencies.Where(c => c.CurrencyCode.ToLower() == code.ToLower())
+            .FirstOrDefaultAsync();
+
+        if (currency is null)
+        {
+            return (false, default!);
+        }
+
+        return (true, currency);
+    }
+
+    private async Task<bool> CheckMoneyExist(int id, string code)
+    {
+        using var context = await contextFactory.CreateDbContextAsync();
+
+        return context.Currencies.Where(c => c.CurrencyCode.ToLower() == code.ToLower() &&
+                                             c.CurrencyId != id).Any();
+    }
+
+
+    private static readonly HashSet<string> AllowedFilterColumns = new HashSet<string>
+    {
+        nameof(Currency.CurrencyCode),
+        nameof(Currency.Description)
+    };
+
+
+    private static readonly HashSet<string> AllowProps = new HashSet<string> {
+                       nameof(VCurrencyNotes.CurrencyName),
+                       nameof(VCurrencyNotes.CurrencyValue),
+                       nameof(VCurrencyNotes.CurrencyCode),
+                       nameof(VCurrencyNotes.Description),
+                };
+
+}
+
+
+//public async Task<Result<IEnumerable<Currency>>> GetCurrencies(int? currencyId, string? q = null)
+//{
+//    using var context = await contextFactory.CreateDbContextAsync();
+
+//    IQueryable<Currency> queries = context.Currencies;
+
+//    if (!string.IsNullOrEmpty(q))
+//    {
+//        queries = queries.Where(x => EF.Functions.Like(x.Description, $"%{q}%"));
+//    }
+
+//    if (currencyId > 0)
+//    {
+//        queries = queries.Where(x => x.CurrencyId == currencyId);
+//    }
+
+//    var currencies = await queries.AsNoTracking().ToListAsync();
+
+//    return Result.Success<IEnumerable<Currency>>(currencies);
+//}
+
+//public async Task<Result<Currency>> GetCurrencyById(int? currencyId, CancellationToken cancellation = default)
+//{
+//    using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+//    var currency = await context.Currencies
+//        .AsNoTracking()
+//        .FirstOrDefaultAsync(x => x.CurrencyId == currencyId, cancellation);
+//    if (currency is null)
+//    {
+//        return Result.Failure<Currency>(ErrorResponse.NotFound(Messages.DataNotFound));
+//    }
+
+//    return Result.Success<Currency>(currency);
+//}
+
+
+//public async Task<IEnumerable<VCurrencyCounter>> GetCurrecyNotesss(int? branchRefId)
+//{
+//    using var context = await contextFactory.CreateDbContextAsync();
+
+//    var currencyNotes =
+//        context.Database.SqlQuery<VCurrencyCounter>($"EXEC sprGetCurrencyNotes @branchId={branchRefId}");
+
+//    return await currencyNotes.AsNoTracking().ToListAsync();
+//}
+
+//public async Task<Result<IEnumerable<VCurrencyCounter>>> GetCurrencyNotes(int? branchId)
+//{
+//    using var context = await contextFactory.CreateDbContextAsync();
+
+//    var queries = context.Database.SqlQuery<VCurrencyCounter>($"SELECT * FROM fGetCurrencyNotesByBranch({branchId})");
+
+//    if (!queries.Any())
+//    {
+//        return Result.Failure<IEnumerable<VCurrencyCounter>>(ErrorResponse.NotFound("No Data Found."));
+//    }
+
+//    var items = await queries.AsNoTracking().ToListAsync();
+
+//    return Result.Success<IEnumerable<VCurrencyCounter>>(items);
+//}
+
+//public async Task<CurrencyCounter> GetCurrencyCounter(int id)
+//{
+//    var currency = await context.CurrencyCounters
+//        .Include(l => l.Currency)
+//        .Where(c => c.Id == id)
+//        .FirstOrDefaultAsync();
+//    return currency ?? default!;
+//}
+//public async Task<Result<VCurrenciesList>> GetCurrencyAsync(int? currencyId, CancellationToken cancellation = default)
+//{
+//    using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+//    var item = await context.VCurrenciesList
+//                            .AsNoTracking()
+//                            .FirstOrDefaultAsync(c => c.CurrencyId == currencyId, cancellation);
+//    if (item is not null)
+//    {
+//        return Result.Success(item);
+//    }
+
+//    return Result.Failure<VCurrenciesList>(ErrorResponse.NotFound("No Currency found."));
+//}
+
+//public async Task<Result<IEnumerable<T>>> GetCurrencies<T>(int? currencyId, string? q = null)
+//    where T : class, new()
+//{
+
+//    await using var context = await contextFactory.CreateDbContextAsync();
+
+//    var queries = await context.Currencies
+//        .WhereIf(currencyId > 0, x => x.CurrencyId == currencyId)
+//        .WhereIf(!string.IsNullOrEmpty(q), x => EF.Functions.Like(x.Description, $"%{q}%"))
+//        .ProjectToType<T>()
+//        .AsNoTracking()
+//        .ToListAsync();
+//    return Result.Success<IEnumerable<T>>(queries);
+//}

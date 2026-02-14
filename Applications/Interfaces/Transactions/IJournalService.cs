@@ -1,8 +1,11 @@
-﻿using Applications.Responses;
+﻿using Applications.Commons;
+using Applications.Features.Journals.Dtos;
+using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Journals;
 using Domains.Models.Journals;
 using Domains.Models.Transaction;
+using ErrorOr;
 
 namespace Applications.Interfaces.Transactions;
 
@@ -22,4 +25,9 @@ public interface IJournalService
     Task<Pager<JournalEntryVm>> GetJournalsAsync(int? branchId,QueryParam param);
     Task<Result<string>> CreateJournalAsync(LoanTransaction model, CancellationToken cancellation = default);
     Task<Result<string>> UpdateJournalAsync(LoanTransaction tranx, CancellationToken cancellation = default);
+    Task<Pager<JournalTypeDto>> GetJournalTypesAsync(int? journalTypeId, QueryParam param, CancellationToken cancellation = default);
+    Task<PaginationResult<JournalEntryDto>> GetJournalsAsync(string? journalId, QueryParam param, CancellationToken cancellation = default);
+    Task<JournalEntryDto?> GetJournalDetailByIdAsync(string? journalEntryId, CancellationToken cancellation = default);
+    Task<JournalEntry?> GetJournalByIdAsync(string? journalEntryId, CancellationToken cancellation = default);
+    Task<ErrorOr<JournalEntry?>> CreateAsync(LoanTransaction model, CancellationToken cancellation = default);
 }

@@ -1,9 +1,5 @@
-﻿using Applications.Commons.Mappers.Exchanges;
-using Applications.Exceptions;
-using Applications.Features.Currencies.Requests;
-using Applications.Features.Currencies.Responses;
+﻿using Applications.Features.Currencies.Responses;
 using Applications.Interfaces.Transactions;
-using ErrorOr;
 
 namespace Applications.Features.Currencies.Queries.GetEditMoneyExchange;
 

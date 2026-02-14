@@ -1,6 +1,6 @@
 ﻿namespace Applications.Features.Currencies.Responses;
 
-public class VCurrenciesList
+public sealed class VCurrenciesList
 {
     public int CurrencyId { get; set; }
     public string? CurrencyCode { get; set; }

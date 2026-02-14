@@ -1,5 +1,4 @@
-﻿using Applications.Features.Currencies.Responses;
-using Applications.Interfaces.Currencies;
+﻿using Applications.Interfaces.Currencies;
 using Domains.Models.Currencies;
 using ErrorOr;
 
@@ -14,12 +13,6 @@ public sealed class GetCurrencyByIdQueryHandler : IRequestHandler<GetCurrencyByI
     }
     public async Task<ErrorOr<Currency>> Handle(GetCurrencyByIdQuery request, CancellationToken cancellationToken)
     {
-        var result = await _currencyRepository.GetCurrencyById(request.Id);
-
-        if (result is { IsSuccess: false, Data: null })
-        {
-            return Error.NotFound("NotFound", $"Currency with Id {request.Id} not found.");
-        }
-        return result.Data!;
+        return await _currencyRepository.GetCurrencyById(request.CurrencyId, cancellationToken);
     }
 }

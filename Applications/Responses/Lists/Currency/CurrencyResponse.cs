@@ -1,9 +1,6 @@
-﻿using Applications.Features.Currencies;
-using Applications.Features.Currencies;
+﻿namespace Applications.Responses.Lists.Currency;
 
-namespace Applications.Responses.Lists.Currency;
-
-public class CurrencyResponse
+public sealed class CurrencyResponse
 {
     public int CurrencyId { get; set; }
     public string? CurrencyCode { get; set; } = string.Empty;

@@ -1,10 +1,13 @@
 using Applications.Features.Currencies;
+using Applications.Features.Currencies.Dto;
+using Applications.Features.Currencies.Queries.GetCurrencyDetails;
 using Applications.Interfaces.Currencies;
 using Applications.Interfaces.Transactions;
 using Applications.Responses.Lists.Currency;
 using Applications.Responses.Paginations;
 using Domains.Models.Currencies;
 using Mapster;
+using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Currencies
 {
@@ -12,6 +15,9 @@ namespace TrapchumApp.Pages.Currencies
     {
         [Inject] ICurrencyService CurrencyServiceImpl { get; set; } = default!;
         [Inject] ISpotRateService spotRateService { get; set; } = default!;
+
+        [Parameter] public int Id { get; set; }
+
         private CurrencyResponse Currency { get; set; } = new();
 
         private CurrencyDtoSpotRateCreate SpotRateDtoCreate = new CurrencyDtoSpotRateCreate();
@@ -19,30 +25,28 @@ namespace TrapchumApp.Pages.Currencies
         private PaginatedList<CurrencyDtoSpotRate> CurrencyPaginatedList { get; set; } = default!;
         private int pageIndex = 1;
         private DateTime? reqDate = DateTime.UtcNow;
-        [Parameter] public int Id { get; set; }
         bool isActive = false;
         private CurrencyDtoSpotRate selectedSpotRate = new CurrencyDtoSpotRate();
-        
+
         void Close()
         {
             NavigationManager.NavigateTo("/Account/Currencies");
         }
         protected override async Task OnInitializedAsync()
         {
-            try
+
+            SpotRateDtoCreate.TransactionDate = DateTime.Now;
+
+            var command = new GetCurrencyByIdQuery(Id);
+
+            var curResult = await mediator.Send(command); //CurrencyServiceImpl.GetCurrencyById(Id);
+
+            if (curResult.IsSuccess())
             {
-                SpotRateDtoCreate.TransactionDate = DateTime.Now;
-                var curResult = await CurrencyServiceImpl.GetCurrencyById(Id);
-                if (curResult.IsSuccess)
-                {
-                    Currency = curResult.Data.Adapt<CurrencyResponse>();
-                }
-                await ChangePageIndex(pageIndex);
+                Currency = curResult.Value.Adapt<CurrencyResponse>();
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
+
+            await ChangePageIndex(pageIndex);
 
             await base.OnInitializedAsync();
         }
@@ -66,7 +70,7 @@ namespace TrapchumApp.Pages.Currencies
             }
             StateHasChanged();
         }
-        
+
         async Task SelectPageChanged(int page)
         {
             try
@@ -124,7 +128,7 @@ namespace TrapchumApp.Pages.Currencies
                 Skip = pageIndex,
                 PageSize = pageSize
             };
-            CurrencyPaginatedList = await spotRateService.GetSpotRates(Id, qparam); 
+            CurrencyPaginatedList = await spotRateService.GetSpotRates(Id, qparam);
             currencySpotRates = CurrencyPaginatedList.Items;
         }
 

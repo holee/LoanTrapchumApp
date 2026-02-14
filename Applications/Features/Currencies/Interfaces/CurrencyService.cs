@@ -1,64 +1,54 @@
-﻿using Applications.Features.Currencies.Responses;
+﻿using Applications.Features.Currencies.Dto;
+using Applications.Features.Currencies.Responses;
 using Applications.Interfaces.Currencies;
 using Applications.Responses;
-using Applications.Responses.Paginations;
 using Domains.Models.Currencies;
 
-namespace Applications.Features.Currencies  
+namespace Applications.Features.Currencies
 {
     public interface ICurrencyServiceImpl
     {
-        Task<Result> ActivateOrDeactivateNote(int? noteId, NoteActivateDto model);
-        Task<Result> AddNote(CurrencyCounter model);
-        Task<Result> AddNote(int? id, CurrencyCounter model);
-        Task<IEnumerable<VCurrencyCounter>> GetCurrecyNotesss(int? branchRefId);
-        Task<Result<IEnumerable<Currency>>> GetCurrencies(int? currencyId, string? q = null);
-        Task<Pager<VCurrenciesList>> GetCurrencies(QueryParam param);
-        Task<IEnumerable<VCurrenciesList>> GetCurrencies(string? q);
-        Task<Result<VCurrenciesList>> GetCurrencyAsync(int? currencyId);
-        Task<Result<Currency>> GetCurrencyById(int? id);
-        Task<Result<IEnumerable<VCurrencyCounter>>> GetCurrencyNotes(int? branchId);
-        Task<Result<IEnumerable<VCurrencyCounter>>> GetCurrencyNotes(int? currencyId, int? branchId);
-        Task<Result<Pager<VCurrencyCounter>>> GetCurrencyNotes(int? currencyId, QueryParam param);
-        Task<Result<Pager<VCurrencyCounter>>> GetCurrencyNotes(QueryParam param);
-        Task<Currency> GetCurrencyWithSpotRates(int? id);
-        Task<Result> SaveOrUpdate(Currency currency);
+        //Task<Result> ActivateOrDeactivateNote(int? noteId, NoteActivateDto model);
+        //Task<Result> AddNote(CurrencyCounter model);
+        //Task<Result> AddNote(int? id, CurrencyCounter model);
+        //Task<IEnumerable<VCurrencyCounter>> GetCurrecyNotesss(int? branchRefId);
+        //Task<Result<IEnumerable<Currency>>> GetCurrencies(int? currencyId, string? q = null);
+       // Task<Pager<VCurrenciesList>> GetCurrencies(QueryParam param);
+      //  Task<IEnumerable<VCurrenciesList>> GetCurrencies(string? q);
+       // Task<ErrorOr.ErrorOr<VCurrenciesList>> GetCurrencyAsync(int? currencyId, CancellationToken cancellation = default);
+       // Task<Result<Currency>> GetCurrencyById(int? id);
+       // Task<Result<IEnumerable<VCurrencyCounter>>> GetCurrencyNotes(int? branchId);
+       // Task<Result<IEnumerable<VCurrencyCounter>>> GetCurrencyNotes(int? currencyId, int? branchId);
+       // Task<Result<Pager<VCurrencyCounter>>> GetCurrencyNotes(int? currencyId, QueryParam param);
+      //  Task<Result<Pager<VCurrencyCounter>>> GetCurrencyNotes(QueryParam param);
+     //   Task<Currency> GetCurrencyWithSpotRates(int? id);
+      //  Task<Result> SaveOrUpdate(Currency currency);
 
-        Task<Result<IEnumerable<T>>> GetCurrencies<T>(int? currencyId, string? q = null)
-            where T : class, new();
+       // Task<Result<IEnumerable<T>>> GetCurrencies<T>(int? currencyId, string? q = null)
+       //     where T : class, new();
     }
 
     public sealed class CurrencyService(ICurrencyService currencyService) : ICurrencyServiceImpl
     {
-        public async Task<Result> ActivateOrDeactivateNote(int? noteId, NoteActivateDto model)
-        {
-            return await currencyService.ActivateOrDeactivateNote(noteId, model);
-        }
+        //public async Task<Result> ActivateOrDeactivateNote(int? noteId, NoteActivateDto model)
+        //{
+        //    return await currencyService.ActivateOrDeactivateNote(noteId, model);
+        //}
 
-        public async Task<Result> AddNote(CurrencyCounter model)
-        {
-            return await currencyService.AddNote(model);
-        }
+        //public async Task<Result> AddNote(CurrencyCounter model)
+        //{
+        //    return await currencyService.AddNote(model);
+        //}
 
-        public async Task<Result> AddNote(int? id, CurrencyCounter model)
-        {
-            return await currencyService.AddNote(id, model);
-        }
+        //public async Task<Result> AddNote(int? id, CurrencyCounter model)
+        //{
+        //    return await currencyService.AddNote(id, model);
+        //}
 
-        public async Task<Result<IEnumerable<VCurrencyCounter>>> GetCurrencyNotes(int? branchId)
-        {
-            return await currencyService.GetCurrencyNotes(branchId);
-        }
-
-        public async Task<Result<IEnumerable<VCurrencyCounter>>> GetCurrencyNotes(int? currencyId, int? branchId)
-        {
-            return await currencyService.GetCurrencyNotes(currencyId, branchId);
-        }
-
-        public async Task<IEnumerable<VCurrencyCounter>> GetCurrecyNotesss(int? branchRefId)
-        {
-            return await currencyService.GetCurrecyNotesss(branchRefId);
-        }
+        //public async Task<IEnumerable<VCurrencyCounter>> GetCurrecyNotesss(int? branchRefId)
+        //{
+        //    return await currencyService.GetCurrecyNotesss(branchRefId);
+        //}
 
         public async Task<Pager<VCurrenciesList>> GetCurrencies(QueryParam param)
         {
@@ -70,46 +60,46 @@ namespace Applications.Features.Currencies
             return await currencyService.GetCurrencies(q);
         }
 
-        public async Task<Result<IEnumerable<Currency>>> GetCurrencies(int? currencyId, string? q = null)
-        {
-            return await currencyService.GetCurrencies(currencyId, q);
-        }
+        //public async Task<Result<IEnumerable<Currency>>> GetCurrencies(int? currencyId, string? q = null)
+        //{
+        //    return await currencyService.GetCurrencies(currencyId,);
+        //}
 
-        public async Task<Result<IEnumerable<T>>> GetCurrencies<T>(int? currencyId, string? q = null)
-            where T : class, new()
-        {
-            return await currencyService.GetCurrencies<T>(currencyId, q);
-        }
+        //public async Task<Result<IEnumerable<T>>> GetCurrencies<T>(int? currencyId, string? q = null)
+        //    where T : class, new()
+        //{
+            //return await currencyService.GetCurrencies<T>(currencyId, q);
+        //}
 
-        public async Task<Result<VCurrenciesList>> GetCurrencyAsync(int? currencyId)
-        {
-            return await currencyService.GetCurrencyAsync(currencyId);
-        }
+        //public async Task<Result<VCurrenciesList>> GetCurrencyAsync(int? currencyId)
+        //{
+        //    return await currencyService.GetCurrencyDetailById(currencyId);
+        //}
 
-        public async Task<Result<Currency>> GetCurrencyById(int? id)
-        {
-            return await currencyService.GetCurrencyById(id);
-        }
+        //public async Task<Result<Currency>> GetCurrencyById(int? id)
+        //{
+        //    return await currencyService.GetCurrencyById(id);
+        //}
 
-        public async Task<Result<Pager<VCurrencyCounter>>> GetCurrencyNotes(QueryParam param)
-        {
-            return await currencyService.GetCurrencyNotes(param);
-        }
+        //public async Task<Result<Pager<VCurrencyCounter>>> GetCurrencyNotes(QueryParam param)
+        //{
+        //    return await currencyService.GetCurrencyNotes(0,param);
+        //}
 
-        public async Task<Result<Pager<VCurrencyCounter>>> GetCurrencyNotes(int? currencyId, QueryParam param)
-        {
-            return await currencyService.GetCurrencyNotes(currencyId, param);
-        }
+        //public async Task<Result<Pager<VCurrencyCounter>>> GetCurrencyNotes(int? currencyId, QueryParam param)
+        //{
+        //    return await currencyService.GetCurrencyNotes(currencyId, param);
+        //}
 
-        public async Task<Currency> GetCurrencyWithSpotRates(int? id) 
+        public async Task<Currency> GetCurrencyWithSpotRates(int? id)
         {
             return await GetCurrencyWithSpotRates(id);
         }
 
-        public async Task<Result> SaveOrUpdate(Currency currency)
-        {
-            return await currencyService.SaveOrUpdate(currency);
-        }
+        //public async Task<Result> SaveOrUpdate(Currency currency)
+        //{
+        //    return await currencyService.SaveOrUpdate(currency);
+        //}
     }
 
     //public interface ICurrencyService

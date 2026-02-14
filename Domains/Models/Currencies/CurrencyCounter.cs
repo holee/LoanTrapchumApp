@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domains.Models.Currencies;
 
-public class CurrencyCounter
+public sealed class CurrencyCounter
 {
     public int Id { get; set; }
     public int? CurrencyRefId { get; set; }

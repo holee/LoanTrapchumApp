@@ -12,6 +12,11 @@ using Domains.Enumerations;
 using TrapchumApp.Helpers.Extensions;
 using Applications.Features.Currencies.Extensions;
 using Applications.Features.Branches.Dtos;
+using Applications.Features.Currencies.Queries.GetCurrencies;
+using Applications.Responses.Paginations;
+using Mapster;
+using Applications.Features.Currencies.Queries.GetCurrencyDetails;
+using Applications.Features.Currencies.Queries.GetCurrencyNotes;
 namespace TrapchumApp.Pages.Transactions.Branches
 {
     public partial class VaultOutModal
@@ -29,8 +34,7 @@ namespace TrapchumApp.Pages.Transactions.Branches
         [Parameter] public int BranchId { get; set; }
         [Parameter] public int BankId { get; set; } = 11;
         [CascadingParameter] Task<AuthenticationState> AuthState { get; set; } = default!;
-
-        private string? _userId = string.Empty;
+        [PersistentState]public string? UserId { get; set; }
 
         private IEnumerable<VCashVaults>? vCashVaults = [];
 
@@ -60,31 +64,59 @@ namespace TrapchumApp.Pages.Transactions.Branches
         protected override async Task OnInitializedAsync()
         {
 
-            var auth = await AuthState;
-
-            _userId = auth.GetUserId();
-
-            var rsp = await _curService.GetCurrencies<CurrencyResponse>(0);
-
-            if (rsp.IsSuccess)
+            if (string.IsNullOrEmpty(UserId))
             {
-                CurrencyList = rsp.Data;
 
-                Currency = rsp.Data?.FirstOrDefault();
+                var auth = await AuthState;
+
+                UserId = auth.GetUserId();
             }
 
-            CurrencyId = (int?)CurrenciesType.Khr;
+            await GetCurrenciesList();
 
-            var noteResp = await _caVaultService!.GetCurrencyNotesAsync(BranchId);
+            await GetCurrency((int)CurrenciesType.Khr);
 
-            if (noteResp.Any())
-            {
-                CurrencyNotes = noteResp ?? [];
-
-                OnGetCurrencyNote(CurrencyId);
-            }
+            await GetCurrencyNotes();
 
             await base.OnInitializedAsync();
+        }
+
+        private async Task GetCurrencyNotes()
+        {
+
+            var command = new GetCurrencyNotesQuery(BranchId, null, new QueryParam(0, 0));
+
+            var noteResp = await mediator.Send(command);
+
+            CurrencyNotes = noteResp.Items;
+
+            OnGetCurrencyNote(CurrencyId);
+
+        }
+
+        private async Task GetCurrency(int? currencyId)
+        {
+            var command = new GetCurrencyByIdQuery(currencyId);
+
+            var rsp = await mediator.Send(command);
+
+            if (rsp.IsSuccess())
+            {
+                Currency = rsp.Value.Adapt<CurrencyResponse>();
+
+                CurrencyId = currencyId;
+            }
+
+        }
+
+        private async Task GetCurrenciesList()
+        {
+            var command = new GetCurrenciesQuery(0, new QueryParam(0, 0));
+
+            var rsp = await mediator.Send(command);  //_curService.GetCurrencies<CurrencyResponse>(0);
+
+            CurrencyList = rsp.Items.Adapt<IEnumerable<CurrencyResponse>>();
+
         }
 
         string sp = "#,#0";
@@ -106,9 +138,9 @@ namespace TrapchumApp.Pages.Transactions.Branches
 
                     total = 0;
 
-                    var currency = await _curService.GetCurrencyById(id);
-
+                    await GetCurrency(id);
                     sp = Currency?.CurrencyCode == CurrencyEnum.KHR.ToString() ? "#,#0" : "#,#0.00";
+
                 }
 
                 NewCashMDVOut = new();
@@ -176,11 +208,11 @@ namespace TrapchumApp.Pages.Transactions.Branches
             //Transaction 
 
             var trnx = TrnxCashVaultDtoCreate.Create(BranchId, (int)TransactionTypes.CSV,
-                                             TransactionTypes.CSV.GetDescription(), 
-                                             _userId, DateTime.Now);
+                                             TransactionTypes.CSV.GetDescription(),
+                                             UserId, DateTime.Now);
             //Cash vault
 
-            var cashToVault = CashVaultDtoCreate.Create(BranchId, BankId, _userId, (int)CashStatusEnum.VAULTOUT, DateTime.Now);
+            var cashToVault = CashVaultDtoCreate.Create(BranchId, BankId, UserId, (int)CashStatusEnum.VAULTOUT, DateTime.Now);
 
             transaction.CashVault = cashToVault;
 
@@ -244,10 +276,10 @@ namespace TrapchumApp.Pages.Transactions.Branches
 
                 //Transaction 
 
-                transaction = TrnxCashVaultDtoCreate.Create(BranchId, (int)TransactionTypes.CSV, TransactionTypes.CSV.GetDescription(), _userId);
+                transaction = TrnxCashVaultDtoCreate.Create(BranchId, (int)TransactionTypes.CSV, TransactionTypes.CSV.GetDescription(), UserId);
 
                 //Cash vault
-                var cashvault = CashVaultDtoCreate.Create(BranchId, BankId, _userId, (int)CashStatusEnum.VAULTOUT, DateTime.Now);
+                var cashvault = CashVaultDtoCreate.Create(BranchId, BankId, UserId, (int)CashStatusEnum.VAULTOUT, DateTime.Now);
 
                 transaction.CashVault = cashvault;
 

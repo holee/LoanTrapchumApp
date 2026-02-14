@@ -1,4 +1,4 @@
-﻿using Applications.Features.Currencies.Requests;
+﻿using Applications.Features.Currencies.Dto;
 using Applications.Features.Currencies.Responses;
 using Applications.Features.Transactions.ForiegnExchanges;
 using Domains.Commons.Entities;

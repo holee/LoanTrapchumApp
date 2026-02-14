@@ -22,7 +22,7 @@ public sealed class JournalService(IJournalService jService) : IJournalServiceIm
     }
 
     //
-    public async Task<Result<string>> CreateOrUpdateJournalAsync(string? journalId, JournalEntry journalEntry)
+    public async Task<Result<string>> CreateOrUpdateJournalAsync(string? journalId, Domains.Models.Journals.JournalEntry journalEntry)
     {
         return await jService.UpdateJournalAsync(journalId, journalEntry);
     }
@@ -32,7 +32,7 @@ public sealed class JournalService(IJournalService jService) : IJournalServiceIm
         return await jService.DeleteJournalAsync(id);
     }
 
-    public async Task<JournalEntry?> GetJournalByIdAsync(string? id)
+    public async Task<Domains.Models.Journals.JournalEntry?> GetJournalByIdAsync(string? id)
     {
         return await jService.GetJournalByIdAsync(id);
     }
@@ -48,7 +48,7 @@ public sealed class JournalService(IJournalService jService) : IJournalServiceIm
         return await jService.GetJournalsAsync(pageIndex, pageSize, sortColumn, sortDescending, q);
     }
 
-    public async Task<IEnumerable<JournalEntry>> GetJournalsAsync(string? journalId, string? q = null)
+    public async Task<IEnumerable<Domains.Models.Journals.JournalEntry>> GetJournalsAsync(string? journalId, string? q = null)
     {
         return await jService.GetJournalsAsync(journalId, q);
     }

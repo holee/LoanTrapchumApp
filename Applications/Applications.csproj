@@ -31,8 +31,7 @@
     <Folder Include="Features\Collaterals\Commands\CreateCollaterals\" />
     <Folder Include="Features\Collaterals\Commands\DeleteCollaterals\" />
     <Folder Include="Features\CreditAgents\UseCases\" />
-    <Folder Include="Features\Currencies\Queries\GetCurrenciesAsPaging\" />
-    <Folder Include="Features\Currencies\Queries\GetCurrencyNotes\" />
+    <Folder Include="Features\Currencies\Requests\" />
     <Folder Include="Features\Currencies\UseCases\" />
     <Folder Include="Features\Employees\Extensions\" />
     <Folder Include="Features\Employees\Mappers\" />
@@ -60,6 +59,7 @@
     <Folder Include="Features\LoanTransactions\Transactions\Mappers\" />
     <Folder Include="Features\LoanTransactions\Transactions\Requests\" />
     <Folder Include="Features\LoanTransactions\Transactions\Responses\" />
+    <Folder Include="Features\NewFolder1\" />
     <Folder Include="Features\NewFolder\" />
     <Folder Include="Features\Products\Mappers\" />
     <Folder Include="Features\Products\Responses\" />

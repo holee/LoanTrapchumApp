@@ -1,4 +1,4 @@
-﻿using Applications.Features.Currencies.Requests;
+﻿using Applications.Features.Currencies.Dto;
 using FluentValidation;
 
 namespace Applications.Requests.Validations.Currencies   

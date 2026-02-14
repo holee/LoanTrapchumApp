@@ -1,27 +1,20 @@
 using Applications.Extensions.mappers;
-using Applications.Features.Currencies;
-using Applications.Interfaces.Currencies;
+using Applications.Features.Currencies.Command.AddCurrencyNote;
+using Applications.Features.Currencies.Dto;
+using Applications.Features.Currencies.Queries.GetCurrencies;
 using Applications.Responses.Lists.Currency;
+using Applications.Responses.Paginations;
 using Domains.Models.Currencies;
 using Mapster;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Forms;
-using Radzen;
+using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Currencies
 {
     public partial class NoteModalCreate
     {
-        private readonly ICurrencyService _currencyService;
-
-        public NoteModalCreate(ICurrencyService currencyService)
-        {
-            _currencyService = currencyService;
-        }
-
         [Parameter] public int Id { get; set; }
+        
         private bool isValid = true;
-
         CurrencyNoteDtoCreate model = new CurrencyNoteDtoCreate();
         EditForm? editForm;
         IEnumerable<CurrencyResponse> Currencies = new List<CurrencyResponse>();
@@ -29,11 +22,16 @@ namespace TrapchumApp.Pages.Currencies
         protected override async Task OnInitializedAsync()
         {
             model.CurrencyRefId = Id == 0 ? 1 : Id;
+
             model.Quantity = 0;
-            var currenciesResponse = await _currencyService.GetCurrencies(0);
+
+            var command = new GetCurrenciesQuery(0, new QueryParam(0, 0));
+
+            var currenciesResponse = await mediator.Send(command);   //_currencyService.GetCurrencies();
+
             if (currenciesResponse.IsSuccess)
             {
-                Currencies = currenciesResponse.Data!.Maps<CurrencyResponse>();
+                Currencies = currenciesResponse.Items.Maps<CurrencyResponse>();
             }
 
             await base.OnInitializedAsync();
@@ -46,10 +44,11 @@ namespace TrapchumApp.Pages.Currencies
 
             var req = model.Adapt<CurrencyCounter>();
 
+            var command = new AddCurrencyNoteCommand(model);
 
-            var response = await _currencyService.AddNote(req);
+            var response = await mediator.Send(command);  //_currencyService.AddNote(req);
 
-            if (response.IsSuccess)
+            if (response.IsSuccess())
             {
                 Close();
             }

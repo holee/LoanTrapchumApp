@@ -1,5 +1,4 @@
-﻿using Applications.Features.Currencies.Requests;
-using Applications.Features.Transactions.ForiegnExchanges;
+﻿using Applications.Features.Transactions.ForiegnExchanges;
 
 namespace Applications.Features.Currencies.Command.EditMoneyExchange;
 

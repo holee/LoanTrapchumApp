@@ -2,7 +2,7 @@ using Applications.Commons.Extensions;
 using Applications.Enumerations;
 using Applications.Extensions.Maths;
 using Applications.Extensions.NumberExtensions;
-using Applications.Features.Currencies.Requests;
+using Applications.Features.Currencies.Dto;
 using Applications.Features.Currencies.Responses;
 using Applications.Features.Transactions.ForiegnExchanges;
 using Applications.Interfaces.Currencies;
@@ -18,10 +18,7 @@ using TrapchumApp.Shared;
 
 namespace TrapchumApp.Pages.Transactions.Exchanges
 {
-    public partial class ExchangesSidebar(
-        ICurrencyService currencyService,
-        IAppSettingService settingsServiceImpl,
-        IForiegnCurrencyExchange exchangeServiceImpl)
+    public partial class ExchangesSidebar(ICurrencyService currencyService, IAppSettingService settingsServiceImpl, IForiegnCurrencyExchange exchangeServiceImpl)
     {
         [CascadingParameter] private CascadingAppState BState { get; set; } = default!;
         [CascadingParameter] private Task<AuthenticationState> AuthenticateState { get; set; } = default!;
@@ -69,19 +66,19 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
 
             _mx.ActionTypeId = 1;
 
-            var currencyResp = await currencyService.GetCurrencyAsync(1);
+            //var currencyResp = await currencyService.GetCurrencyDetailById(1);
 
-            if (currencyResp.IsSuccess)
-            {
-                _currency = currencyResp.Data!;
-                _mx.ExchangeRate = _currency.BuyingRate!.Value;
-                _mx.SpotRate = _currency.SpotRate!.Value;
-            }
-            else
-            {
-                _mx.ExchangeRate = Defaults.ExchangeRate;
-                _mx.SpotRate = Defaults.SpotRate;
-            }
+            //if (currencyResp.IsSuccess)
+            //{
+            //    _currency = currencyResp.Data!;
+            //    _mx.ExchangeRate = _currency.BuyingRate!.Value;
+            //    _mx.SpotRate = _currency.SpotRate!.Value;
+            //}
+            //else
+            //{
+            //    _mx.ExchangeRate = Defaults.ExchangeRate;
+            //    _mx.SpotRate = Defaults.SpotRate;
+            //}
             _isBuy = true;
             await base.OnInitializedAsync();
         }

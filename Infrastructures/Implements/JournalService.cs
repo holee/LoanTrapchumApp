@@ -1,5 +1,7 @@
-﻿using System.Data;
+﻿using Applications.Commons;
+using Applications.Commons.Mappers;
 using Applications.Extensions;
+using Applications.Features.Journals.Dtos;
 using Applications.Interfaces.Transactions;
 using Applications.Responses;
 using Applications.Responses.Message;
@@ -10,22 +12,19 @@ using Dapper;
 using Domains.Models.Journals;
 using Domains.Models.Transaction;
 using Infrastructures.DataAccess;
+using Infrastructures.Implements.Extensions;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Data;
 
 namespace Infrastructures.Implements;
 
-public class JournalService(
-    DataContext context,
-    ILogger<JournalService> logger,
-    IDbContextFactory<DataContext> dbContextFactory,
+public class JournalService(DataContext context, ILogger<JournalService> logger, IDbContextFactory<DataContext> dbContextFactory,
     IDapperConnectionFactory dapperConnectionFactory)
     : IJournalService
 {
-    private readonly IDapperConnectionFactory _dapperConnectionFactory = dapperConnectionFactory;
-
-    public async Task<Result<string>> UpdateJournalAsync(string? journalId, JournalEntry journalEntry)
+    public async Task<Result<string>> UpdateJournalAsync(string? journalId, Domains.Models.Journals.JournalEntry journalEntry)
     {
         logger.LogInformation("Attempt to create Journal");
         //context.Database.BeginTransaction();
@@ -199,7 +198,7 @@ public class JournalService(
         {
             logger.LogError("Error Server: " + ex, ex.Message);
 
-            return Result.Failure<JournalEntry>(ErrorResponse.ServerError($"Error Server: {ex.Message}"));
+            return Result.Failure<Domains.Models.Journals.JournalEntry>(ErrorResponse.ServerError($"Error Server: {ex.Message}"));
         }
     }
 
@@ -227,6 +226,28 @@ public class JournalService(
         }
     }
 
+
+    public async Task<ErrorOr.ErrorOr<JournalEntry?>> CreateAsync(LoanTransaction model, CancellationToken cancellation = default)
+    {
+        logger.LogInformation("Attempt to create Journal");
+
+        await using var dataContext = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+        try
+        {
+            var addedModel = dataContext.LoanTransaction.Add(model).Entity;
+
+            await dataContext.SaveChangesAsync(cancellation);
+
+            return addedModel.JournalEntry;
+        }
+        catch (DbUpdateException ex)
+        {
+            logger.LogError("Error Server: " + ex, ex.Message);
+
+            return ErrorOr.Error.Unexpected($"Error Server: {ex.InnerException?.Message}");
+        }
+    }
 
 
 
@@ -351,16 +372,11 @@ public class JournalService(
         };
     }
 
-    public async Task<IEnumerable<JournalEntry>> GetJournalsAsync(string? journalId, string? q = null)
+    public async Task<IEnumerable<Domains.Models.Journals.JournalEntry>> GetJournalsAsync(string? journalId, string? q = null)
     {
-        IQueryable<JournalEntry> queries = context.JournalEntries
-            //.Include(x => x.LoanTransaction)
-            .Include(x => x.JournalEntryLines);
-
-        if (journalId.IsNotNullOrEmpty())
-        {
-            queries = queries.Where(x => x.JournalEntryId == journalId);
-        }
+        var queries = context.JournalEntries
+                             .Include(x => x.JournalEntryLines)
+                             .WhereIf(!string.IsNullOrEmpty(journalId), x => x.JournalEntryId == journalId);
 
         if (!string.IsNullOrEmpty(q))
         {
@@ -375,6 +391,28 @@ public class JournalService(
     }
 
 
+    public async Task<PaginationResult<Applications.Features.Journals.Dtos.JournalEntryDto>> GetJournalsAsync(string? journalId, QueryParam param, CancellationToken cancellation = default)
+    {
+
+        await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+        var queries = context.Set<JournalEntryDto>()
+                             .WhereIf(!string.IsNullOrEmpty(journalId), x => x.JournalEntryId == journalId);
+
+        queries = ApplyFilter(param, queries);
+
+        if (!string.IsNullOrEmpty(param.SortColumn))
+        {
+            var sortDescending = param.SortDescending;
+
+            queries = sortDescending
+                ? queries.OrderByDescending(x => EF.Property<object>(x, param.SortColumn))
+                : queries.OrderBy(x => EF.Property<object>(x, param.SortColumn));
+        }
+
+        return await PaginationExtensions.CreateAsync(queries, param.Skip, param.PageSize, cancellation);
+    }
+
     public async Task<Result<JournalEntryVm>> GetJournalByIdAsync(string? journalId, bool include)
     {
         //spGetJournalEntries
@@ -384,7 +422,7 @@ public class JournalService(
                 ErrorResponse.NotFound($"There is no journal with this id:{journalId}."));
         }
 
-        using var db = _dapperConnectionFactory.CreateConnection();
+        using var db = dapperConnectionFactory.CreateConnection();
 
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         var parameters = new DynamicParameters();
@@ -428,12 +466,59 @@ public class JournalService(
             : Result.Success(item2);
     }
 
-    public async Task<JournalEntry?> GetJournalByIdAsync(string? id)
+    public async Task<Domains.Models.Journals.JournalEntry?> GetJournalByIdAsync(string? id)
     {
         var journal = context.JournalEntries
             .Where(x => x.JournalEntryId == id)
             .Include(a => a.JournalEntryLines);
         return await journal.AsNoTracking().FirstOrDefaultAsync();
+    }
+
+
+    public async Task<Domains.Models.Journals.JournalEntry?> GetJournalByIdAsync(string? journalEntryId, CancellationToken cancellation = default)
+    {
+        var foundItem = await context.JournalEntries
+                                .Include(a => a.JournalEntryLines)
+                                .AsNoTracking()
+                                .FirstOrDefaultAsync(x => x.JournalEntryId == journalEntryId, cancellation);
+        return foundItem;
+    }
+
+
+    public async Task<Applications.Features.Journals.Dtos.JournalEntryDto?> GetJournalDetailByIdAsync(string? journalEntryId, CancellationToken cancellation = default)
+    {
+        using var db = await dapperConnectionFactory.CreateConnectionAsync(cancellation);
+
+        var parameters = new DynamicParameters();
+
+        parameters.Add("@JournalEntryId", journalEntryId); // ✅ fixed typo
+
+        var journalDictionary = new Dictionary<string, Applications.Features.Journals.Dtos.JournalEntryDto>();
+
+        var result = await db.QueryAsync(
+            "spGetJournalEntryDetailsById", (Applications.Features.Journals.Dtos.JournalEntryDto journal, JournalEntryLineDto line) =>
+            {
+                if (!journalDictionary.TryGetValue(journal.JournalEntryId!, out var existingJournal))
+                {
+                    existingJournal = journal;
+
+                    existingJournal.JournalEntryLines = new List<JournalEntryLineDto>();
+
+                    journalDictionary.Add(existingJournal.JournalEntryId!, existingJournal);
+                }
+
+                if (line != null)
+                {
+                    existingJournal.JournalEntryLines.Add(line);
+                }
+
+                return existingJournal;
+            },
+            param: parameters,
+            splitOn: "JournalLineId",
+            commandType: CommandType.StoredProcedure);
+
+        return journalDictionary.Values.FirstOrDefault();
     }
 
 
@@ -450,9 +535,36 @@ public class JournalService(
         return await journalTypes.AsNoTracking().ToListAsync() ?? Enumerable.Empty<JournalType>();
     }
 
+    public async Task<Pager<JournalTypeDto>> GetJournalTypesAsync(int? journalTypeId, QueryParam param, CancellationToken cancellation = default)
+    {
+        await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+        var queries = context.JournalTypes
+                                  .WhereIf(journalTypeId.HasValue && journalTypeId > 0, x => x.Id == journalTypeId);
+        queries = ApplyFilters(param, queries);
+
+        queries = ApplySort(param, queries);
+
+        var counts = await queries.CountAsync(cancellation);
+
+        if (param.PageSize > 0)
+        {
+            queries = queries.Skip(param.Skip)
+                             .Take(param.PageSize);
+        }
+
+        var items = await queries.OrderByDescending(x => x.Id)
+                        .AsNoTracking()
+                        .Select(x => x.ToDto())
+                       .ToListAsync(cancellation);
+
+        return PagerExtensions.Create(items, counts);
+    }
+
+
     public async Task<IEnumerable<VNameList>> GetNameLists(long? id = 0, int takeRows = 0, string? q = null)
     {
-        await using var context = await dbContextFactory.CreateDbContextAsync(); 
+        await using var context = await dbContextFactory.CreateDbContextAsync();
 
         var queries = context.VNameLists.AsNoTracking();
 
@@ -500,9 +612,95 @@ public class JournalService(
 
         return items;
     }
+
+
+
+    private static IQueryable<Applications.Features.Journals.Dtos.JournalEntryDto> ApplyFilter(QueryParam param, IQueryable<Applications.Features.Journals.Dtos.JournalEntryDto> queries)
+    {
+        var filter = param.Filter?.Trim().ToLower();
+
+        if (string.IsNullOrEmpty(filter)) return queries;
+
+        var like = "%" + filter + "%";
+
+        if (string.IsNullOrEmpty(param.FilterColumn))
+        {
+            queries = queries.WhereMatchesFilter(like, AllowJournalEntryColumns.ToArray());
+        }
+        else if (AllowJournalEntryColumns.Contains(param.FilterColumn))
+        {
+            queries = queries.WhereMatchesFilter(like, param.FilterColumn);
+        }
+
+        return queries;
+    }
+
+
+    private static readonly HashSet<string> AllowJournalTypeColumns = new HashSet<string> {
+        nameof(JournalType.Code),
+        nameof(JournalType.Description)
+    };
+
+    private static readonly HashSet<string> AllowJournalEntryColumns = new HashSet<string> {
+        nameof(JournalEntryDto.ReferrenceNum),
+        nameof(JournalEntryDto.JournalType),
+        nameof(JournalEntryDto.JournalEntryId),
+        nameof(JournalEntryDto.JournalCode),
+        nameof(JournalEntryDto.JournalDate),
+        nameof(JournalEntryDto.BranchName),
+        nameof(JournalEntryDto.TotalCr),
+        nameof(JournalEntryDto.TotalDr),
+    };
+
+    private static IQueryable<JournalType> ApplySort(QueryParam param, IQueryable<JournalType> queries)
+    {
+        var sortDescending = param.SortDescending;
+
+        if (!string.IsNullOrEmpty(param.SortColumn))
+        {
+            queries = sortDescending ?
+                        queries.OrderByDescending(x => EF.Property<object>(x, param.SortColumn)) :
+                        queries.OrderBy(x => EF.Property<object>(x, param.SortColumn));
+        }
+        else
+        {
+            queries = sortDescending ?
+                      queries.OrderByDescending(x => x.Code)
+                                .ThenByDescending(x => x.Description) :
+                      queries.OrderBy(x => x.Code)
+                             .ThenBy(x => x.Description);
+        }
+
+        return queries;
+    }
+
+    private static IQueryable<JournalType> ApplyFilters(QueryParam param, IQueryable<JournalType> queries)
+    {
+        var filter = param.Filter?.Trim();
+
+        if (string.IsNullOrEmpty(filter))
+        {
+            return queries;
+        }
+
+        if (string.IsNullOrEmpty(param.FilterColumn))
+        {
+            queries = queries.WhereMatchesFilter(filter, AllowJournalTypeColumns.ToArray());
+        }
+        else
+        {
+            if (AllowJournalTypeColumns.Contains(param.FilterColumn))
+            {
+                queries = queries.WhereMatchesFilter(filter, param.FilterColumn);
+            }
+        }
+
+        return queries;
+    }
+
 }
 
-//public async Task<JournalEntry?> FindJournal(Expression<Func<JournalEntry, bool>> expression, params string[] includes)
+//public async Task<JournalEntry?> FindJournal(Expression<Func<JournalEntry, bool>> expression, params String[] includes)
 //{
 //    IQueryable<JournalEntry> journalEntries = context.JournalEntries;
 //    if (includes.Length > 0)

@@ -79,12 +79,12 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 
         private async Task GetCurrencies()
         {
-            var currencyResponse = await _currencyService.GetCurrencyAsync(1);
+            var currencyResponse = await _currencyService.GetCurrencyDetailById(1);
 
-            if (currencyResponse.IsSuccess)
-            {
-                selectedCurrency = currencyResponse.Data!;
-            }
+            //if (currencyResponse.IsSuccess)
+            //{
+            //    selectedCurrency = currencyResponse.Data!;
+            //}
         }
 
         void GetTotalPaidAmount()

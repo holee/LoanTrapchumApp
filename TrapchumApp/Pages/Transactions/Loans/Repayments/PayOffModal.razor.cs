@@ -1,6 +1,7 @@
 using Applications.Calculations;
 using Applications.Extensions.Maths;
 using Applications.Extensions.NumberExtensions;
+using Applications.Features.Currencies.Queries.GetCurrencyDetails;
 using Applications.Features.Currencies.Responses;
 using Applications.Features.LoanPayments.Requests;
 using Applications.Features.Settings.UseCases;
@@ -11,19 +12,12 @@ using Domains.Models.Settings;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Radzen;
+using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 {
-    public partial class PayOffModal
+    public partial class PayOffModal(ISettingServiceImpl settingService, ILoanPaymentService repaymentService)
     {
-        private readonly ISettingServiceImpl _settingService;
-        private readonly ILoanPaymentService _repaymentService;
-        public PayOffModal(ISettingServiceImpl settingService, ILoanPaymentService repaymentService)
-        {
-            _settingService = settingService;
-            _repaymentService = repaymentService;
-        }
-
         [Parameter] public int CurrencyId { get; set; }
         [Parameter] public string? CreditAgentId { get; set; }
         [Parameter] public string? UserId { get; set; }
@@ -79,15 +73,23 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
         bool isExchangedChanged = false;
         protected override async Task OnParametersSetAsync()
         {
-            var currencyResponse = await _curService.GetCurrencyAsync(1);
-            if (currencyResponse.IsSuccess)
+
+            var command = new GetCurrencyDetailsByIdQuery(1);
+
+            var rsp = await mediator.Send(command); //var currencyResponse = await _curService.GetCurrencyAsync(1);
+
+            if (rsp.IsSuccess())
             {
-                selectedCurrency = currencyResponse.Data!;
-                buyingRate = currencyResponse.Data!.BuyingRate;
-                sellingRate = currencyResponse.Data!.SellingRate;
-                spotRate = currencyResponse.Data!.SpotRate;
+                selectedCurrency = rsp.Value;
+
+                buyingRate = rsp.Value.BuyingRate;
+
+                sellingRate = rsp.Value.SellingRate;
+
+                spotRate = rsp.Value.SpotRate;
             }
-            var resultSetting = await _settingService.GetSysSettings();
+
+            var resultSetting = await settingService.GetSysSettings();
 
             if (resultSetting.IsSuccess)
             {
@@ -223,7 +225,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
                 model.TranTypeRefId = 67;
                 model.TransactionTypeName = "Currency Foreign Exchange";
                 //LoanRepayment.ForeignExchangeTrx = Model;
-                var result = await _repaymentService.RecievePayment(LoanRepayment);
+                var result = await repaymentService.RecievePayment(LoanRepayment);
 
                 if (result.IsSuccess)
                 {

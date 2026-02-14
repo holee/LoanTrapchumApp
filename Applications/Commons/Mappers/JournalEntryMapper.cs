@@ -21,9 +21,9 @@ public static class JournalEntryMapper
         };
     }
 
-    public static JournalEntry MapJournalCreate(this JournalEntryDtoCreate dto)
+    public static Domains.Models.Journals.JournalEntry MapJournalCreate(this JournalEntryDtoCreate dto)
     {
-        return new JournalEntry
+        return new Domains.Models.Journals.JournalEntry
         {
             JournalEntryId = $"jrn-{Guid.CreateVersion7()}",
             BankRefId = dto.BankRefId,
@@ -37,7 +37,7 @@ public static class JournalEntryMapper
             TotalCr = dto.TotalCr,
             TotalDr = dto.TotalDr,
             ReferrenceNum = dto.ReferrenceNum,
-            JournalEntryLines=dto.JournalEntryLines?.Select(x=>x.MapJournalLineCreate()).ToList()
+            JournalEntryLines= dto.JournalEntryLines?.Select(x => x.MapJournalLineCreate()).ToList()
         };
     }
 

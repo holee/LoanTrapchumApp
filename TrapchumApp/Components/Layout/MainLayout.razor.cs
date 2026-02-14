@@ -83,12 +83,21 @@ namespace TrapchumApp.Components.Layout
             if (rsp.IsSuccess())
             {
                 bState.State = rsp.Value.IsOpen;
+
+                branchId = rsp.Value.BranchId;
             }
             else
             {
                 bState.State = false;
+
+                branchId = rsp.Value.BranchId;
             }
 
+            //var command2 = new GetBranchByUserQuery(userId, null);
+
+            //var rsp2 = await mediator.Send(command2);
+
+            //branchId = rsp2.Value.FirstOrDefault()?.BranchId ?? 0;
         }
 
         public async ValueTask DisposeAsync()

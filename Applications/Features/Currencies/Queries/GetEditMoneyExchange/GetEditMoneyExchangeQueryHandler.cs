@@ -1,6 +1,6 @@
 ﻿using Applications.Commons.Mappers.Exchanges;
 using Applications.Exceptions;
-using Applications.Features.Currencies.Requests;
+using Applications.Features.Currencies.Dto;
 using Applications.Interfaces.Transactions;
 using ErrorOr;
 

@@ -1,4 +1,6 @@
 using Applications.Features.Currencies;
+using Applications.Features.Currencies.Dto;
+using Applications.Features.Currencies.Queries.GetCurrencyDetails;
 using Applications.Interfaces.Currencies;
 using Applications.Interfaces.Transactions;
 using Applications.Responses.Lists.Currency;
@@ -6,6 +8,7 @@ using Applications.Responses.Paginations;
 using Domains.Models.Currencies;
 using Mapster;
 using Radzen.Blazor;
+using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Transactions.Exchanges
 {
@@ -66,12 +69,18 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
         protected override async Task OnInitializedAsync()
         {
             SpotRateDtoCreate.TransactionDate = DateTime.Now;
-            var curResult = await CurrencyServiceImpl.GetCurrencyById(Id);
-            if (curResult.IsSuccess)
+
+            var command = new GetCurrencyByIdQuery(Id);
+
+            var curResult = await mediator.Send(command);  //CurrencyServiceImpl.GetCurrencyById(Id);
+
+            if (curResult.IsSuccess())
             {
-                Currency = curResult.Adapt<CurrencyResponse>();
+                Currency = curResult.Value.Adapt<CurrencyResponse>();
             }
+
             await ChangePageIndex(pageIndex);
+
             await base.OnInitializedAsync();
         }
 

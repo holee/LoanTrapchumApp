@@ -1,8 +1,11 @@
+using Applications.Features.Currencies.Queries.GetCurrencies;
 using Applications.Interfaces.Currencies;
 using Applications.Interfaces.Transactions;
 using Applications.Requests.Journals;
 using Applications.Responses.Lists.Currency;
+using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Ledgers;
+using Domains.Enumerations;
 using Domains.Models.Journals;
 using Mapster;
 using Microsoft.AspNetCore.Components.Forms;
@@ -67,7 +70,7 @@ namespace TrapchumApp.Pages.Transactions.Ledgers
         //    //    NotificationService.Notify(NotificationSeverity.Error, resp.ErrMessage);
         //    //}
         //}
-       
+
         async Task LoadDataTextChanged(LoadDataArgs e)
         {
             ledgerSearchText = e.Filter ?? string.Empty;
@@ -132,35 +135,29 @@ namespace TrapchumApp.Pages.Transactions.Ledgers
 
         protected override async Task OnInitializedAsync()
         {
-            try
+
+            var resp = await _ledgerService.FindLedgerTypes();
+
+            if (resp.IsSuccess)
             {
-                var resp = await _ledgerService.FindLedgerTypes();
-
-                if (resp.IsSuccess)
-                {
-                    LedgerTypes = resp.Data!.Adapt<IEnumerable<LedgerTypeDto>>();
-                    counts = resp.Data!.Count();
-                }
-                else
-                {
-                    counts = 0;
-                    NotificationService.Notify(NotificationSeverity.Error, resp.ErrMessage);
-                }
-
-                var currenciesRsponse = await _currencyService.GetCurrencies(0);
-
-                model.CurrencyRefId = 1;
-
-                if (currenciesRsponse.IsSuccess)
-                {
-                    Currencies = currenciesRsponse.Data!.Adapt<IEnumerable<CurrencyResponse>>();
-                }
-                await GetLedgers(selectedCurrencyId);
+                LedgerTypes = resp.Data!.Adapt<IEnumerable<LedgerTypeDto>>();
+                counts = resp.Data!.Count();
             }
-            catch (Exception ex)
+            else
             {
-                NotificationService.Notify(NotificationSeverity.Success, $"{ex.Message}");
+                counts = 0;
+                NotificationService.Notify(NotificationSeverity.Error, resp.ErrMessage);
             }
+
+            var command = new GetCurrenciesQuery(0, new QueryParam(0, 0));
+
+            var rsp = await mediator.Send(command); //_currencyService.GetCurrencies(0);
+
+            model.CurrencyRefId = (int)CurrencyEnum.KHR;
+
+            Currencies = rsp.Items.Adapt<IEnumerable<CurrencyResponse>>();
+
+            await GetLedgers(selectedCurrencyId);
 
             await base.OnInitializedAsync();
         }

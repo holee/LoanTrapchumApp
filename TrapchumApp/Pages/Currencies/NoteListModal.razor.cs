@@ -1,3 +1,4 @@
+using Applications.Features.Currencies.Queries.GetCurrencyCounter;
 using Applications.Features.Currencies.Responses;
 using Applications.Interfaces.Currencies;
 using Applications.Responses.Paginations;
@@ -19,12 +20,11 @@ namespace TrapchumApp.Pages.Currencies
         {
             var param = new QueryParam(pageIndex, pageSize, "CurrencyValue");
 
-            var resp = await CurrencyService.GetCurrencyNotes(Id, param);
+            var command = new GetCurrencyCounterQuery(Id, param);
 
-            if (resp.IsSuccess)
-            {
-                CurrencyCounters = resp.Data.Items;
-            }
+            var resp = await mediator.Send(command);  //CurrencyService.GetCurrencyCounter(Id, param);
+
+            CurrencyCounters = resp.Items;
 
             await base.OnInitializedAsync();
         }

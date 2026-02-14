@@ -1,21 +1,23 @@
 ﻿using Applications.Features.CashManagements.Responses;
 using Applications.Interfaces.Transactions;
 using Applications.Responses;
+using Dapper;
 using Domains.Models.Transaction;
 using Infrastructures.DataAccess;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace Infrastructures.Implements
 {
     public class OpenBranchService(IDbContextFactory<DataContext> contextFactory, IDapperConnectionFactory connectionFactory) : IOpenBranchService
     {
-        public async Task<Result<IEnumerable<VCashVaultBalance>>> GetCashVaultBalance(int? branchRefId)
+        public async Task<ErrorOr.ErrorOr<IEnumerable<VCashVaultBalance>>> GetCashVaultBalance(int? branchRefId, CancellationToken cancellation = default)
         {
 
-            using var context = await contextFactory.CreateDbContextAsync();
+            using var context = await contextFactory.CreateDbContextAsync(cancellation);
 
-            var    queries = await context.Database
+            var queries = await context.Database
                                .SqlQuery<VCashVaultBalance>($@"
                                SELECT
 			                        c.CurrencyId,
@@ -27,17 +29,17 @@ namespace Infrastructures.Implements
                                 WHERE BranchRefId={branchRefId}
                                 ")
                                .AsNoTracking()
-                               .ToListAsync();
-                return Result.Success<IEnumerable<VCashVaultBalance>>(queries);
+                               .ToListAsync(cancellation);
+            return queries;
 
         }
 
-        public async Task<Result<string>> OpenBranchAsync(LoanTransaction tranx)
+        public async Task<ErrorOr.ErrorOr<BranchStatus>> OpenBranchAsync(LoanTransaction tranx, CancellationToken cancellation = default)
         {
 
             try
             {
-                await using var context = await contextFactory.CreateDbContextAsync();
+                await using var context = await contextFactory.CreateDbContextAsync(cancellation);
 
                 var transaction = tranx.Adapt<LoanTransaction>();
 
@@ -45,24 +47,24 @@ namespace Infrastructures.Implements
 
                 context.LoanTransaction.Add(transaction);
 
-                await context.SaveChangesAsync();
+                await context.SaveChangesAsync(cancellation);
 
-                return Result.Success(new string("Branch Open Successfully."));
+                return await GetBranchStatus(tranx.UserRefId, cancellation);
 
             }
             catch (DbUpdateException ex)
             {
-                return Result.Failure<string>(ErrorResponse.ServerError(ex.Message));
+                return ErrorOr.Error.Unexpected(ex.Message);
             }
         }
 
 
-        public async Task<Result<string>> CloseBranchAsync(LoanTransaction transaction)
+        public async Task<ErrorOr.ErrorOr<BranchStatus>> CloseBranchAsync(LoanTransaction transaction, CancellationToken cancellation = default)
         {
 
             try
             {
-                await using var context = await contextFactory.CreateDbContextAsync();
+                await using var context = await contextFactory.CreateDbContextAsync(cancellation);
 
                 var branchId = transaction.OpenBranch!.BranchRefId!.Value;
 
@@ -70,7 +72,7 @@ namespace Infrastructures.Implements
 
                 if (!(await IsAllreadyVaultIn(branchId, closeDate)))
                 {
-                    return Result.Failure<string>(ErrorResponse.NotFound("Cannot Close Branch Now, Please VaultIn First."));
+                    return ErrorOr.Error.NotFound("Cannot Close Branch Now, Please VaultIn First.");
                 }
 
                 transaction.TransactionDate = DateTime.UtcNow;
@@ -79,11 +81,11 @@ namespace Infrastructures.Implements
 
                 await context.SaveChangesAsync();
 
-                return Result.Success(new string("Branch Close Successfully"));
+                return await GetBranchStatus(transaction.UserRefId, cancellation);
             }
             catch (DbUpdateException ex)
             {
-                return Result.Failure<string>(ErrorResponse.ServerError(ex.Message));
+                return ErrorOr.Error.Unexpected(ex.Message);
             }
 
 
@@ -105,6 +107,26 @@ namespace Infrastructures.Implements
             return true;
         }
 
+
+
+
+
+        private async Task<ErrorOr.ErrorOr<BranchStatus>> GetBranchStatus(string? userId, CancellationToken cancellation = default)
+        {
+            using var context = await connectionFactory.CreateConnectionAsync(cancellation);
+
+            var branch = await context.QueryFirstOrDefaultAsync<BranchStatus>("spGetBranchStatus",
+                                        new { UserId = userId },
+                                        commandType: CommandType.StoredProcedure);
+
+            if (branch is null)
+            {
+                return new BranchStatus(0, false, "No branch found for the user.");
+            }
+
+            return branch;
+
+        }
 
     }
 }

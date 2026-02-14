@@ -1,4 +1,4 @@
-using Applications.Features.Currencies;
+using Applications.Features.Currencies.Dto;
 using Applications.Interfaces.Currencies;
 using Microsoft.AspNetCore.Components.Forms;
 
@@ -14,6 +14,7 @@ namespace TrapchumApp.Pages.Currencies
         }
 
         private CurrencyDtoCreate model = new CurrencyDtoCreate();
+
         private EditForm? editForm;
 
 

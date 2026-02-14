@@ -1,8 +1,10 @@
 using Applications.Extensions.mappers;
+using Applications.Features.Currencies.Queries.GetCurrencies;
 using Applications.Interfaces.Currencies;
 using Applications.Interfaces.Transactions;
 using Applications.Requests.Journals;
 using Applications.Responses.Lists.Currency;
+using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Ledgers;
 using Domains.Models.Journals;
 using Mapster;
@@ -115,12 +117,14 @@ namespace TrapchumApp.Pages.Transactions.Ledgers
                 NotificationService.Notify(NotificationSeverity.Error, resp.ErrMessage);
             }
 
-            var currenciesRsponse = await _currencyService.GetCurrencies(0);
 
-            if (currenciesRsponse.IsSuccess)
-            {
-                Currencies = currenciesRsponse.Data?.Maps<CurrencyResponse>();
-            }
+            var command = new GetCurrenciesQuery(null, new QueryParam(0, 0));
+
+            var rsp = await mediator.Send(command); //_currencyService.GetCurrencies(0);
+
+            //var currenciesRsponse = await _currencyService.GetCurrencies(0);
+
+            Currencies = rsp.Items.Maps<CurrencyResponse>();
 
             await base.OnParametersSetAsync();
         }

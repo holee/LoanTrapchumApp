@@ -48,13 +48,14 @@
 @using TrapchumApp.Shared
 @using Applications.Utils
 @using static Microsoft.AspNetCore.Components.Web.RenderMode
+@using Applications.Responses.Paginations 
 @attribute [Authorize]
 @inject IJSRuntime js
 @inject NavigationService _navService
 @inject LoadingTrackerService Tracker
 @inject IAuthorizationService _authorizeService
 @inject NotificationService NotificationService
-@inject DialogService DialogService
+@inject DialogService DialogService 
 @inject NavigationManager NavigationManager
 @inject ContextMenuService ContextMenuService
 @inject TooltipService tooltipService

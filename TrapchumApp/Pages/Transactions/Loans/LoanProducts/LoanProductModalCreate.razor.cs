@@ -1,7 +1,9 @@
 using Applications.Extensions.mappers;
+using Applications.Features.Currencies.Queries.GetCurrencies;
 using Applications.Features.Products.Requests;
 using Applications.Interfaces.Currencies;
 using Applications.Responses.Lists.Currency;
+using Applications.Responses.Paginations;
 using Applications.Services.Loans;
 using Radzen;
 
@@ -27,12 +29,13 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanProducts
         private bool isValid = true;
         protected override async Task OnInitializedAsync()
         {
-            var currenciesRsponse = await _currencyService.GetCurrencies(0);
 
-            if (currenciesRsponse.IsSuccess)
-            {
-                _currencies = currenciesRsponse.Data!.Maps<CurrencyResponse>();
-            }
+            var command = new GetCurrenciesQuery(null, new QueryParam(0, 0));
+
+            var rsp = await mediator.Send(command);
+           
+            _currencies = rsp.Items.Maps<CurrencyResponse>();
+            
             await base.OnInitializedAsync();
         }
         protected async Task OnSaveNew()

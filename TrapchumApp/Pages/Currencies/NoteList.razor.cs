@@ -1,6 +1,12 @@
 using Applications.Features.Currencies;
+using Applications.Features.Currencies.Command.ActivateOrDeactivateNote;
+using Applications.Features.Currencies.Dto;
+using Applications.Features.Currencies.Queries.GetCurrencyCounter;
+using Applications.Features.Currencies.Queries.GetCurrencyNotes;
 using Applications.Features.Currencies.Responses;
 using Applications.Interfaces.Currencies;
+using Applications.Responses.Paginations;
+using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Currencies
 {
@@ -16,7 +22,7 @@ namespace TrapchumApp.Pages.Currencies
 
         [Parameter] public int Id { get; set; } = 2;
         [Parameter, SupplyParameterFromQuery] public int BranchId { get; set; }
-        private List<VCurrencyCounter> CurrencyCounters = new List<VCurrencyCounter>();
+        private List<VCurrencyCounter> CurrencyCounters = [];
         private int pageIndex = 1;
         private int pageSize = 15;
         private string sortField = "CurrencyName";
@@ -43,16 +49,11 @@ namespace TrapchumApp.Pages.Currencies
             {
                 isLoading = true;
 
-                var responseRsult = await _currencyService.GetCurrencyNotes(branchId);
+                var query = new GetCurrencyCounterQuery(branchId, new QueryParam(0, 0));
 
-                if (responseRsult.IsSuccess)
-                {
-                    CurrencyCounters = responseRsult.Data!.ToList();
-                }
-                else
-                {
-                    CurrencyCounters = [];
-                }
+                var rsp = await mediator.Send(query);  //_currencyService.GetCurrencyNotes(branchId, 0);
+
+                CurrencyCounters = rsp.Items;
 
                 isLoading = false;
             }
@@ -61,15 +62,13 @@ namespace TrapchumApp.Pages.Currencies
                 isLoading = false;
             }
 
-
-
-
             StateHasChanged();
         }
 
         async Task SelectPageChanged(int pageIndex)
         {
             this.pageIndex = pageIndex;
+
             await LoadPages(BranchId);
         }
 
@@ -85,6 +84,7 @@ namespace TrapchumApp.Pages.Currencies
                 CurrencyCounters.Remove(note);
             }
             StateHasChanged();
+
             await Task.CompletedTask;
 
         }
@@ -110,19 +110,19 @@ namespace TrapchumApp.Pages.Currencies
 
         async Task makeInactiveOrActive(bool arg, int id)
         {
-            var req = new NoteActivateDto
-            {
-                IsActive = arg
-            };
-            var resultResponse = await _currencyService.ActivateOrDeactivateNote(id, req);
+            var req = new NoteActivateDto(arg);
+           
+            var command= new ToggleNoteCommand(id, req);
+            
+            var rsp = await mediator.Send(command);  //_currencyService.ActivateOrDeactivateNote(id, req);
 
-            if (resultResponse.IsSuccess)
+            if (rsp.IsSuccess())
             {
-                NotificationService.Notify(NotificationSeverity.Success, "");
+                NotificationService.Notify(NotificationSeverity.Success, rsp.Value);
             }
             else
             {
-                NotificationService.Notify(NotificationSeverity.Error, resultResponse.ErrMessage);
+                NotificationService.Notify(NotificationSeverity.Error, rsp.GetMessage());
             }
         }
     }

@@ -12,5 +12,7 @@ namespace Applications.Interfaces.Transactions
         Task<IEnumerable<VCurrencyNotes>> GetCurrencyNotesAsync(int? branchId,CancellationToken cancellation = default);
         Task<Result> CreateCashManagementAsync(LoanTransaction cashTrsansaction, CancellationToken cancellation = default); 
         Task<Result> CreateCashVaultAsync(LoanTransaction transaction, CancellationToken cancellation = default);
+        Task<Pager<VCashVaults>> GetViewCashVaultAsync(int? branchId, CancellationToken cancellation = default);
+        Task<ErrorOr.ErrorOr<string>> CashVaultAsync(LoanTransaction trnx, CancellationToken cancellation = default);
     }
 }

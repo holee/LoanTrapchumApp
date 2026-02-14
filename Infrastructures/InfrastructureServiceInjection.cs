@@ -94,7 +94,7 @@ namespace Infrastructures
             services.AddScoped<IAddressService, AddressService>();
             services.AddScoped<ICashVaultService, CashVaultService>();
             services.AddScoped<ICashVaultService, CashVaultService>();
-            services.AddScoped<ICurrencyService, CurrencyService>();
+            services.AddScoped<ICurrencyService, CurrencyRepository>();
             services.AddScoped<ICreditAgentService, CreditAgentService>();
             services.AddScoped<ICustomerService, CustomerRepository>();
             services.AddScoped<ICustomerIncomeExpendService, IncomeExpendRepository>();

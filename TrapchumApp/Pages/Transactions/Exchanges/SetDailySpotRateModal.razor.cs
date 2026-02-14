@@ -1,4 +1,4 @@
-using Applications.Features.Currencies;
+using Applications.Features.Currencies.Dto;
 using Applications.Features.Currencies.Responses;
 using Applications.Interfaces.Transactions;
 using Domains.Models.Currencies;

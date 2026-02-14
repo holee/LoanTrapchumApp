@@ -373,13 +373,21 @@ namespace TrapchumApp.Shared
         internal async Task CheckedCanOpenBranch(ClaimsPrincipal user)
         {
 
-            if (user is not null && user?.Identity?.IsAuthenticated == false)
+            //canOpenBranch = await _authorizeService.MustHasPermissionAsync(auth.User, Policies.OpenBranch);
+
+            //canCloseBranch = await _authorizeService.MustHasPermissionAsync(auth.User, Policies.CloseBranch);
+
+            //canVaultOut = await _authorizeService.MustHasPermissionAsync(auth.User, Policies.TranxVaultOut);
+
+            //canVaultIn = await _authorizeService.MustHasPermissionAsync(auth.User, Policies.TranxVaultIn);
+
+            if (user is null && user?.Identity?.IsAuthenticated == false)
             {
-                _canOpenBranch = await _authorizeService.MustHasPermissionAsync(user, Policies.OpenBranch);
+                _canOpenBranch = false;
             }
             else
             {
-                _canOpenBranch = false;
+                _canOpenBranch = await _authorizeService.MustHasPermissionAsync(user!, Policies.OpenBranch);
             }
         }
 

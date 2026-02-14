@@ -11,14 +11,14 @@ using Applications.Services.Lists;
 using Applications.Services.Transactions.Journals;
 using System.Threading.Tasks;
 using Applications.Features.Transactions.Journals;
+using Applications.Features.Currencies.Queries.GetCurrencyDetails;
+using Applications.Features.Currencies.Queries.GetCurrencies;
+using Applications.Features.Journals.Command.CreateJournal;
+using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Transactions.Journals;
-
-public partial class JournalEntryCreate(
-    ICurrencyServiceImpl currencyService,
-    ILedgerServiceImpl ledgerService,
-    IJournalServiceImpl journalService,
-    IOtherNameServiceImpl nameService)
+//ICurrencyServiceImpl currencyService,
+public partial class JournalEntryCreate(ILedgerServiceImpl ledgerService, IJournalServiceImpl journalService, IOtherNameServiceImpl nameService)
 {
     protected JournalEntryDtoCreate JLe = new JournalEntryDtoCreate();
     protected List<JournalLineDtoCreate> JournalLines = [];
@@ -65,12 +65,14 @@ public partial class JournalEntryCreate(
 
     private async Task LoadRelatedData()
     {
-        var currenciesRsponse = await currencyService.GetCurrencies(0);
 
-        if (currenciesRsponse.IsSuccess)
-        {
-            _currencies = currenciesRsponse.Data!.Maps<CurrencyResponse>();
-        }
+        var command = new GetCurrenciesQuery(0, new QueryParam(0, 0));
+
+        var rsp = await mediator.Send(command);
+
+        //var currenciesRsponse = await currencyService.GetCurrencies(0);
+
+        _currencies = rsp.Items.Maps<CurrencyResponse>();//  Adapt<IEnumerable<CurrencyResponse>>();
 
         var journalTypes = await journalService.GetJournalTypesAsync(null);
 
@@ -260,17 +262,17 @@ public partial class JournalEntryCreate(
                 return;
             }
 
-            var resp = await journalService.CreateJournalAsync(trx);
+            var command = new CreateJournalCommand(trx);
 
-            if (resp.IsSuccess)
+            var resp = await mediator.Send(command);  //journalService.CreateJournalAsync(trx);
+
+            if (resp.IsSuccess())
             {
                 NotificationService.Notify(NotificationSeverity.Success, "Journal", "Journal Entry created successful!");
 
                 JLe = new();
 
                 JournalLines = [];
-
-                //AddNewRow();
 
                 _isMessage = false;
 
@@ -282,18 +284,17 @@ public partial class JournalEntryCreate(
             }
             else
             {
-                NotificationService.Notify(NotificationSeverity.Warning, "Journal", resp.ErrMessage);
+                NotificationService.Notify(NotificationSeverity.Warning, "Journal", resp.GetMessage());
                 _isMessage = false;
                 _visibled = false;
             }
         }
-        catch (Exception ex)
+        catch
         {
             _visibled = false;
 
             _isMessage = false;
 
-            NotificationService.Notify(NotificationSeverity.Error, "Exception", ex.InnerException?.Message);
         }
     }
 

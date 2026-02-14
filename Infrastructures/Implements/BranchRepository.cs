@@ -6,12 +6,9 @@ using Applications.Features.Branches.Dtos;
 using Applications.Interfaces.Branches;
 using Applications.Responses;
 using Applications.Responses.Auths;
-using Applications.Responses.Lists.Entities;
-using Applications.Responses.Message;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Auths;
 using Dapper;
-using Domains.Enumerations;
 using Domains.Models.Lists;
 using ErrorOr;
 using Infrastructures.DataAccess;
@@ -98,6 +95,7 @@ public class BranchRepository(IDbContextFactory<DataContext> contextFactory,
             return Error.Unexpected("ServerError", ex.Message);
         }
     }
+   
     public async Task<ErrorOr<VBranch>> UpdateAsync(Branch branch, CancellationToken cancellation = default)
     {
         try
@@ -133,38 +131,7 @@ public class BranchRepository(IDbContextFactory<DataContext> contextFactory,
             return Error.Unexpected("Server.Error", ex.InnerException!.Message);
         }
     }
-    public async Task<ErrorOr<VBranch>> UpdateStatusAsync(int? branchId, CancellationToken cancellation = default)
-    {
-        try
-        {
-            await using var context = await contextFactory.CreateDbContextAsync(cancellation);
 
-            var existingBranch = await context.Branches.FindAsync(branchId);
-
-            if (existingBranch is null)
-            {
-                return Error.NotFound(BranchMessage.BranchNotFound);
-            }
-
-            existingBranch.IsActive = !existingBranch.IsActive;
-
-            existingBranch.EditSeq = existingBranch.EditSeq + 1;
-
-            context.Branches.Update(existingBranch);
-
-            await context.SaveChangesAsync();
-
-            VBranch? updatedBranch = await GetBranchDetailsById(branchId, cancellation);
-
-            if (updatedBranch is null) return Error.NotFound(BranchMessage.BranchNotFound);
-
-            return updatedBranch;
-        }
-        catch (Exception ex)
-        {
-            return Error.Unexpected("ServerError", ex.Message);
-        }
-    }
     public async Task<ErrorOr<VBranch>> UpdateStatusAsync(int? branchId, bool state, CancellationToken cancellation = default)
     {
         try
@@ -280,8 +247,6 @@ public class BranchRepository(IDbContextFactory<DataContext> contextFactory,
         return new Pager<VBranch>(items, counts);
     }
 
-
-
     public async Task<ErrorOr<IEnumerable<VBranch>>> GetBranchesByUser(string? userId, int? branchId, CancellationToken cancellation = default)
     {
         await using var context = await contextFactory.CreateDbContextAsync(cancellation);
@@ -316,25 +281,7 @@ public class BranchRepository(IDbContextFactory<DataContext> contextFactory,
 
         return items;
     }
-
-    public async Task<ErrorOr<BranchStatus>> GetBranchStatus(int? branchId, CancellationToken cancellation = default)
-    {
-        using var context = await contextFactory.CreateDbContextAsync(cancellation);
-
-        var branch = await context.VBranchs
-                                .AsNoTracking()
-                                .FirstOrDefaultAsync(x => x.BranchId == branchId &&
-                                                    x.IsActive == true, cancellation);
-
-        if (branch is null)
-        {
-            return Error.NotFound(BranchMessage.BranchNotFound);
-        }
-
-        return branch.OpenStatus == (int)BranchStateEnum.Open ? new BranchStatus(true, "Open") : new BranchStatus(false, "Closed");
-    }
-
-
+   
     public async Task<ErrorOr<BranchStatus>> GetBranchStatus(string? userId, CancellationToken cancellation = default)
     {
         using var context = await connectionFactory.CreateConnectionAsync(cancellation);
@@ -345,14 +292,12 @@ public class BranchRepository(IDbContextFactory<DataContext> contextFactory,
 
         if (branch is null)
         {
-            return Error.NotFound(BranchMessage.BranchNotFound);
+            return new BranchStatus(0, false, "No branch found for the user.");
         }
 
         return branch;
 
     }
-
-
 
     public async Task<ErrorOr<VBranch>> GetBranchForVault(int? branchId, CancellationToken cancellation = default)
     {
@@ -396,26 +341,6 @@ public class BranchRepository(IDbContextFactory<DataContext> contextFactory,
         return item;
     }
 
-    public async Task<ErrorOr<UserBranchesResponse?>> GetBranchesByUser(string? userId, CancellationToken cancellation = default)
-    {
-
-        using var context = await connectionFactory.CreateConnectionAsync(cancellation);
-
-        var sql = @"SELECT u.Id,
-                           u.UserName,
-                           u.BranchId,
-                           b.BranchName    
-                    FROM VUsers u
-                    WHERE u.Id = @UserId";
-
-        var sqlParam = new DynamicParameters();
-
-        sqlParam.Add("@UserId", userId);
-
-        var user = await context.QueryFirstOrDefaultAsync<UserBranchesResponse>(sql, sqlParam);
-
-        return user;
-    }
 
     public async Task<ErrorOr<IEnumerable<ApprovedUser>>> GetApprovedUser(int? branchId, string? filter, CancellationToken cancellation = default)
     {

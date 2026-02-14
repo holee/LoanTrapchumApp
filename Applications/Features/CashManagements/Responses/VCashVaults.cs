@@ -1,6 +1,6 @@
 ﻿namespace Applications.Features.CashManagements.Responses
 {
-    public class VCashVaults
+    public sealed class VCashVaults
     {
         public int? BankRefId { get; set; }
         public int? BranchRefId { get; set; }

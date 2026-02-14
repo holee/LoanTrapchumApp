@@ -1,9 +1,11 @@
 ﻿using Applications.Enumerations;
+using Applications.Extensions;
 using Applications.Features.CashManagements.Responses;
 using Applications.Features.Currencies.Responses;
 using Applications.Interfaces.Transactions;
 using Applications.Responses;
 using Applications.Responses.Message;
+using Applications.Responses.Paginations;
 using Domains.Models.Transaction;
 using Infrastructures.DataAccess;
 using Microsoft.EntityFrameworkCore;
@@ -42,41 +44,6 @@ namespace Infrastructures.Implements
             }
 
         }
-
-        //public async Task<Result> CreateCashVaultAsync(LoanTransaction transaction, CancellationToken cancellation = default)
-        //{
-        //    await using var context = await _context.CreateDbContextAsync(cancellation);
-
-        //    try
-        //    {
-        //        await context.Database.BeginTransactionAsync(cancellation);
-
-        //        context.LoanTransaction.Add(transaction);
-
-        //        await context.SaveChangesAsync(cancellation);
-
-        //        var cash = transaction?.CashManagements?.FirstOrDefault();
-
-        //        cash?.CashManagementDetails?.ForEach(x =>
-        //        {
-        //            x.TransactionRefId = transaction!.TransactionsId;
-        //        });
-
-        //        context.Update(transaction!);
-
-        //        await context.SaveChangesAsync(cancellation);
-
-        //        await context.Database.CommitTransactionAsync();
-
-        //        return Result.Success("Cash vault transaction succeed");
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        context.Database.RollbackTransaction();
-
-        //        return Result.Failure(ErrorResponse.ServerError($"{ex.Message}"));
-        //    }
-        //}
 
 
         public async Task<Result> CreateCashVaultAsync(LoanTransaction trnx, CancellationToken cancellation = default)
@@ -134,6 +101,59 @@ namespace Infrastructures.Implements
 
 
 
+
+        public async Task<ErrorOr.ErrorOr<string>> CashVaultAsync(LoanTransaction trnx, CancellationToken cancellation = default)
+        {
+            await using var context = await _context.CreateDbContextAsync(cancellation);
+
+            if (await IsAlreadyVaultIn(context, trnx.BranchRefId, trnx.TransactionDate))
+            {
+                return ErrorOr.Error.Validation("Selected Branch is already vault in.");
+            }
+
+            await using var dbTransaction = await context.Database.BeginTransactionAsync(cancellation);
+
+            try
+            {
+
+                // Set FK values before saving
+                if (trnx?.CashManagements is not null)
+                {
+                    foreach (var cash in trnx.CashManagements)
+                    {
+                        cash.TransactionRefId = trnx.TransactionsId;
+
+                        if (cash.CashManagementDetails!.Any())
+                        {
+                            foreach (var detail in cash.CashManagementDetails!)
+                            {
+                                detail.TransactionsRefId = trnx.TransactionsId;
+
+                                detail.CachmanagementRefId = cash.Id;
+                            }
+                        }
+                    }
+                }
+
+                // Add root entity (cascades children because of lists)
+                
+                await context.LoanTransaction.AddAsync(trnx!, cancellation);
+
+                await context.SaveChangesAsync(cancellation);
+
+                await dbTransaction.CommitAsync(cancellation);
+
+                return "Cash vault transaction succeed";
+            }
+            catch (Exception ex)
+            {
+                await dbTransaction.RollbackAsync(cancellation);
+                return ErrorOr.Error.Unexpected($"Failed to create cash vault: {ex.Message}");
+            }
+        }
+
+
+
         public async Task<IEnumerable<VCurrencyNotes>> GetCurrencyNotesAsync(int? branchId, CancellationToken cancellation = default)
         {
 
@@ -145,18 +165,12 @@ namespace Infrastructures.Implements
                                .ToListAsync();
             return items ?? [];
 
-            //using var db = await _dapperFactory.CreateConnectionAsync(cancellation);
-
-            //var queries = await db.QueryAsync<VCurrencyNotes>(ProcedureConstant.GetCurrencyNotesByBranchId, new { branchId }, commandType: CommandType.StoredProcedure);
-
-            //return queries;
         }
 
         public async Task<IEnumerable<VCashVaults>> GetViewCashVaultAsync(CancellationToken cancellation = default)
         {
 
             await using var context = await _context.CreateDbContextAsync(cancellation);
-
 
             var results = context.Database.SqlQuery<VCashVaults>($@"SELECT * FROM VCashVaults");
 
@@ -166,16 +180,20 @@ namespace Infrastructures.Implements
         }
 
 
-        public async Task<IEnumerable<VCashVaults>> GetViewCashVaultAsync(int? branchId, CancellationToken cancellation = default)
+        public async Task<Pager<VCashVaults>> GetViewCashVaultAsync(int? branchId, CancellationToken cancellation = default)
         {
 
             await using var context = await _context.CreateDbContextAsync(cancellation);
 
-            var results = context.Database.SqlQuery<VCashVaults>($@"SELECT * FROM VCashVaults WHERE BranchRefId={branchId}");
+            var vaults = context.Set<VCashVaults>()
+                                .WhereIf(branchId.HasValue && branchId > 0, x => x.BranchRefId == branchId)
+                                .AsNoTracking();
 
-            var vaults = await results.AsNoTracking().ToListAsync(cancellation);
+            var counts = await vaults.CountAsync(cancellation);
 
-            return vaults;
+            var items = await vaults.ToListAsync(cancellation);
+
+            return new Pager<VCashVaults>(items, counts);
         }
 
         public async Task<VCashVaults?> GetCashVaultAsync(int? currencyId, int? branchId, CancellationToken cancellation = default)
@@ -224,3 +242,40 @@ namespace Infrastructures.Implements
 
     }
 }
+
+
+//public async Task<Result> CreateCashVaultAsync(LoanTransaction transaction, CancellationToken cancellation = default)
+//{
+//    await using var context = await _context.CreateDbContextAsync(cancellation);
+
+//    try
+//    {
+//        await context.Database.BeginTransactionAsync(cancellation);
+
+//        context.LoanTransaction.Add(transaction);
+
+//        await context.SaveChangesAsync(cancellation);
+
+//        var cash = transaction?.CashManagements?.FirstOrDefault();
+
+//        cash?.CashManagementDetails?.ForEach(x =>
+//        {
+//            x.TransactionRefId = transaction!.TransactionsId;
+//        });
+
+//        context.Update(transaction!);
+
+//        await context.SaveChangesAsync(cancellation);
+
+//        await context.Database.CommitTransactionAsync();
+
+//        return Result.Success("Cash vault transaction succeed");
+//    }
+//    catch (Exception ex)
+//    {
+//        context.Database.RollbackTransaction();
+
+//        return Result.Failure(ErrorResponse.ServerError($"{ex.Message}"));
+//    }
+//}
+

@@ -1,11 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Applications.Extensions
 {
@@ -53,8 +48,8 @@ namespace Applications.Extensions
 
             return source.Where(predicate);
         }
-        
-        public static IQueryable<T> WhereIf<T>(this IQueryable<T> source, bool condition, 
+
+        public static IQueryable<T> WhereIf<T>(this IQueryable<T> source, bool condition,
             params Expression<Func<T, bool>>[]? predicates)
         {
             if (!condition || predicates == null || !predicates.Any())
@@ -142,6 +137,27 @@ namespace Applications.Extensions
                 : queries.OrderBy(o => EF.Property<object>(o, sortColumn));
         }
 
+        public static IQueryable<T> ApplySafeSorting<T>(this IQueryable<T> queries, QueryParam param)
+        {
+            if (string.IsNullOrEmpty(param.SortColumn))
+                return queries; // Or apply a default sort
+
+            // Validate the sort column
+            var propertyInfo = typeof(T).GetProperty(param.SortColumn,
+                BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+            if (propertyInfo == null)
+            {
+                throw new ArgumentException($"Invalid sort column: {param.SortColumn}");
+                // Or return queries with a default sort: return queries.OrderBy(e => EF.Property<object>(e, "Id"));
+            }
+
+            // Apply sorting
+            return param.SortDescending
+                ? queries.OrderByDescending(o => EF.Property<object>(o, param.SortColumn))
+                : queries.OrderBy(o => EF.Property<object>(o, param.SortColumn));
+        }
+
+
         public static IQueryable<T> ApplySafeSorting<T>(this IQueryable<T> queries, string sortColumn,
             bool sortDescending, bool caseInsensitive)
         {
@@ -165,7 +181,7 @@ namespace Applications.Extensions
                 ? queries.OrderByDescending(keySelector)
                 : queries.OrderBy(keySelector);
         }
-        
+
         public static IQueryable<T> Search<T>(this IQueryable<T> source, string filter,
             params Expression<Func<T, string>>[] properties)
         {
@@ -174,7 +190,7 @@ namespace Applications.Extensions
 
             // Sanitize filter (e.g., escape special characters)
             filter = filter.Replace("[", "[[]").Replace("%", "[%]").Replace("_", "[_]");
-            
+
             filter = $"%{filter}%";
 
             var parameter = Expression.Parameter(typeof(T), "x");
@@ -199,8 +215,8 @@ namespace Applications.Extensions
             var predicate = Expression.Lambda<Func<T, bool>>(predicateBody, parameter);
             return source.Where(predicate);
         }
-        
-        
+
+
         public static IQueryable<T> FullTextSearch<T>(this IQueryable<T> source, string filter,
             params Expression<Func<T, string>>[] properties)
         {
@@ -230,6 +246,6 @@ namespace Applications.Extensions
             var predicate = Expression.Lambda<Func<T, bool>>(predicateBody, parameter);
             return source.Where(predicate);
         }
-        
+
     }
 }

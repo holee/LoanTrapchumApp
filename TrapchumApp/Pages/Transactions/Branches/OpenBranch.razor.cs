@@ -1,9 +1,16 @@
 using Applications.Enumerations;
+using Applications.Features.Branches.Command.CloseBranch;
+using Applications.Features.Branches.Command.OpenBranch;
 using Applications.Features.Branches.Queries.GetBranchState;
+using Applications.Features.Branches.Queries.GetCashVaultBalance;
 using Applications.Features.CashManagements.Responses;
 using Applications.Features.Currencies;
+using Applications.Features.Currencies.Queries.GetCurrencyCounter;
+using Applications.Features.Currencies.Queries.GetCurrencyDetails;
+using Applications.Features.Currencies.Queries.GetCurrencyNotes;
 using Applications.Features.Currencies.Responses;
 using Applications.Features.Transactions.OpenBranches;
+using Applications.Responses.Paginations;
 using Applications.Services.Transactions.Branches;
 using TrapchumApp.Helpers.Extensions;
 using TrapchumApp.Shared;
@@ -12,9 +19,9 @@ namespace TrapchumApp.Pages.Transactions.Branches
 {
     public partial class OpenBranch
     {
-        readonly IOpenBranchServiceImpl obService;
+        private readonly IOpenBranchServiceImpl obService;
 
-        readonly ICurrencyServiceImpl curService;
+        private readonly ICurrencyServiceImpl curService;
         public OpenBranch(IOpenBranchServiceImpl obService, ICurrencyServiceImpl curService)
         {
             this.obService = obService;
@@ -23,11 +30,11 @@ namespace TrapchumApp.Pages.Transactions.Branches
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
         [CascadingParameter] CascadingAppState bState { get; set; } = default!;
         [Parameter] public int? BranchId { get; set; } = 0;
-        private string? _userId { get; set; }
-        IEnumerable<VCurrencyCounter> CurrencyNotes = [];
-        IEnumerable<VCashVaultBalance> CashVaultBalances = [];
+        [PersistentState] public string? UserId { get; set; }
+        [PersistentState] public IEnumerable<VCurrencyCounter>? CurrencyNotes { get; set; }
+        [PersistentState] public IEnumerable<VCashVaultBalance>? CashVaultBalances { get; set; }
         OpenBranchTransactionDto? transactionOpenBranch;
-        TransactionCloseBranchDto? transactionCloseBranch;
+        OpenBranchTransactionDto? transactionCloseBranch;
         bool isClicked = false;
         long userRefId = 0;
         int currencyId = 1;
@@ -39,29 +46,43 @@ namespace TrapchumApp.Pages.Transactions.Branches
 
         protected override async Task OnInitializedAsync()
         {
-            var auth = await AuthenticationState;
-
-            _userId = auth.GetUserId();
-
-
-            await bState.GetAuthenticatedUser(auth.User);
-
-
-            var rsp = await obService.GetCashVaultBalance(BranchId);
-
-            if (rsp.IsSuccess)
+            if (string.IsNullOrEmpty(UserId))
             {
-                CashVaultBalances = rsp.Data ?? [];
+                var auth = await AuthenticationState;
+
+                UserId = auth.GetUserId();
+
+                await bState.GetAuthenticatedUser(auth.User);
+            }
+            await GetCashVault();
+
+            await GetBranchState();
+
+            await base.OnInitializedAsync();
+        }
+
+        private async Task GetCashVault()
+        {
+            var command1 = new GetCashVaultBalanceQuery(BranchId);
+
+            var rsp = await mediator.Send(command1);
+
+            if (rsp.IsSuccess())
+            {
+                CashVaultBalances = rsp.Value ?? [];
             }
 
-            if (CashVaultBalances.Any())
+            if (CashVaultBalances is not null && CashVaultBalances.Any())
             {
                 await GetCurrencies((int)CurrenciesType.Khr);
 
                 await GetCurrencyNotes(currencyId, BranchId);
             }
+        }
 
-            var command = new GetBranchStateQuery(_userId);
+        private async Task GetBranchState()
+        {
+            var command = new GetBranchStateQuery(UserId);
 
             var rsp1 = await mediator.Send(command);
 
@@ -73,19 +94,18 @@ namespace TrapchumApp.Pages.Transactions.Branches
             {
                 bState.State = false;
             }
-
-            await base.OnInitializedAsync();
         }
 
         async Task GetCurrencies(int id = 0)
         {
-            var rsp = await curService.GetCurrencies<VCurrencyList>(id);
 
-            if (rsp.IsSuccess)
+            var query = new GetCurrencyDetailsByIdQuery(id);
+
+            var rsp = await mediator.Send(query);  //curService.GetCurrencies<VCurrencyList>(id);
+
+            if (rsp.IsSuccess())
             {
-
-                currencyId = rsp.Data!.First().CurrencyId;
-
+                currencyId = rsp.Value.CurrencyId;
             }
 
         }
@@ -107,36 +127,38 @@ namespace TrapchumApp.Pages.Transactions.Branches
                 return;
             }
 
-            transactionCloseBranch = new TransactionCloseBranchDto
+            transactionCloseBranch = new OpenBranchTransactionDto
             {
                 TransactionsId = $"trx_{Guid.CreateVersion7()}",
                 TransactionTypeName = "Close Branch",
                 TranTypeRefId = 68,
-                UserRefId = _userId,
+                UserRefId = UserId,
                 BranchRefId = BranchId,
-                OpenBranch = new CloseBranchDtoUpdate
+                OpenBranch = new OpenBranchDtoCreate
                 {
                     OpenBranchId = $"trx-{Guid.CreateVersion7()}",
                     BranchRefId = BranchId,
                     OpenDate = DateTime.Now,
                     BankRefId = 11,
-                    OpenStatus = "0",
+                    OpenStatus = 0,
                 }
             };
 
-            var result = await obService.CloseBranchAsync(transactionCloseBranch);
+            var closeBranchCommand = new CloseBranchCommand(transactionCloseBranch);
 
-            if (result!.IsSuccess)
+            var result = await mediator.Send(closeBranchCommand); //obService.CloseBranchAsync(transactionCloseBranch);
+
+            if (result.IsSuccess())
             {
 
                 bState.State = false;
 
-                NotificationService.Notify(NotificationSeverity.Success, result.Data);
+                NotificationService.Notify(NotificationSeverity.Success, "Close Branch successful");
 
             }
             else
             {
-                NotificationService.Notify(NotificationSeverity.Error, result.ErrMessage);
+                NotificationService.Notify(NotificationSeverity.Error, result.GetMessage());
             }
         }
 
@@ -162,29 +184,32 @@ namespace TrapchumApp.Pages.Transactions.Branches
                 TransactionsId = $"trx-{Guid.CreateVersion7()}",
                 TranTypeRefId = 68,
                 TransactionTypeName = "Open Branch",
-                UserRefId = _userId,
+                UserRefId = UserId,
                 BranchRefId = BranchId,
                 OpenBranch = new OpenBranchDtoCreate()
                 {
                     OpenBranchId = $"trx-{Guid.CreateVersion7()}",
                     BankRefId = 11,
                     BranchRefId = BranchId,
-                    OpenStatus = "1",
+                    OpenStatus = 1,
                     OpenDate = DateTime.Now
                 }
             };
 
-            var result = await obService.OpenBranchAsync(openBranch);
 
-            if (result!.IsSuccess)
+            var openBranchCommand = new OpenBranchCommand(openBranch);
+
+            var result = await mediator.Send(openBranchCommand);
+
+            if (!result.IsSuccess())
             {
-                bState.State = true;
-
-                NotificationService.Notify(NotificationSeverity.Success, result.Data);
+                NotificationService.Notify(NotificationSeverity.Error, result.GetMessage());
             }
             else
             {
-                NotificationService.Notify(NotificationSeverity.Error, result.ErrMessage);
+                bState.State = true;
+
+                NotificationService.Notify(NotificationSeverity.Success, "Open Branch successful");
             }
 
         }
@@ -195,16 +220,12 @@ namespace TrapchumApp.Pages.Transactions.Branches
 
             this.currencyId = currencyId;
 
-            var currencyResponse = await curService.GetCurrencyNotes(currencyId, branchRefId);
+            var query = new GetCurrencyCounterQuery(currencyId, new QueryParam(0, 0));
 
-            if (currencyResponse.IsSuccess)
-            {
-                CurrencyNotes = currencyResponse.Data!;
-            }
-            else
-            {
-                CurrencyNotes = [];
-            }
+            var rsp = await mediator.Send(query);
+
+            CurrencyNotes = rsp.Items;
+
         }
 
 
