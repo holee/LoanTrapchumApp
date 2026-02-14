@@ -7,15 +7,15 @@ public static class ViewModelCurrencyNotesExtension
 {
     public static List<CashManagementDetailDtoCreate> CashManagementsDtoCreate(this IEnumerable<VCurrencyCounter>? note, int? branchId, int? currencyId, int? bankId = 11)
     {
-        return note!.Where(x => x.CurrencyRefId == currencyId).Select(x => new CashManagementDetailDtoCreate
+        return note!.Where(x => x.CurrencyId == currencyId).Select(x => new CashManagementDetailDtoCreate
         {
             BranchRefId = branchId,
             BankRefId = bankId,
-            CurrencyRefId = x.CurrencyRefId,
+            CurrencyRefId = x.CurrencyId,
             CurrencyRefName = x.CurrencyCode,
             CurrencyNoteRefId = x.Id,
             CurrencyNoteValue = (int?)x.CurrencyValue,
-            QOnHand = x.Quantity == null ? 0 : x.Quantity,
+            QOnHand = x.TotalQty == null ? 0 : x.TotalQty,
             TotalValue = 0
         }).ToList();
     }
@@ -44,11 +44,11 @@ public static class ViewModelCurrencyNotesExtension
         {
             BranchRefId = branchId,
             BankRefId = bankId,
-            CurrencyRefId = note!.CurrencyRefId,
+            CurrencyRefId = note!.CurrencyId,
             CurrencyRefName = note!.CurrencyCode,
             CurrencyNoteRefId = note!.Id,
             CurrencyNoteValue = (int?)note!.CurrencyValue,
-            QOnHand = note!.Quantity == null ? 0 : note!.Quantity,
+            QOnHand = note!.TotalQty == null ? 0 : note!.TotalQty,
             //Quantity = 0,
             TotalValue = 0
         };

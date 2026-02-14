@@ -287,7 +287,7 @@ public sealed class CurrencyRepository(IDbContextFactory<DataContext> contextFac
         using var context = await contextFactory.CreateDbContextAsync(cancellation);
 
         IQueryable<VCurrencyCounter> queries = context.VCurrencyNotes
-                                                .WhereIf(currencyId.HasValue && currencyId > 0, x => x.CurrencyRefId == currencyId);
+                                                .WhereIf(currencyId.HasValue && currencyId > 0, x => x.CurrencyId == currencyId);
 
         queries = ApplyFilter(param, queries);
 

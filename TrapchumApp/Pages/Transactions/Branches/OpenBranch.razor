@@ -94,10 +94,10 @@
                                                   TextAlign="TextAlign.Right"
                                                   Property="Quantity">
                                 <Template>
-                                    @(c.Quantity ?? 0)
+                                    @(c.TotalQty ?? 0)
                                 </Template>
                                 <FooterTemplate>
-                                    @CurrencyNotes?.Sum(x => x.Quantity)
+                                    @CurrencyNotes?.Sum(x => x.TotalQty)
                                 </FooterTemplate>
                             </RadzenDataGridColumn>
                             <RadzenDataGridColumn Title="Sub Total"
@@ -105,11 +105,11 @@
                                                   TextAlign="TextAlign.Right"
                                                   Property="Quantity">
                                 <Template>
-                                    @((c.Quantity * c.CurrencyValue) ?? 0)
+                                    @((c.TotalQty * c.CurrencyValue) ?? 0)
                                 </Template>
                                 <FooterTemplate>
                                     @{
-                                        var value = CurrencyNotes?.Sum(x => x.Quantity * x.CurrencyValue);
+                                        var value = CurrencyNotes?.Sum(x => x.TotalQty * x.CurrencyValue);
                                     }
                                     @value.Format(currencyId)
                                 </FooterTemplate>
