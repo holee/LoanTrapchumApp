@@ -3,7 +3,7 @@
 public sealed class VCurrencyCounter 
 {
     public int Id { get; set; }
-    public int? CurrencyId { get; set; }
+    public int? CurrencyId { get; set; } 
     public string? CurrencyCode { get; set; } = string.Empty;
     public string? CurrencyName { get; set; } = string.Empty;
     public decimal? CurrencyValue { get; set; }
