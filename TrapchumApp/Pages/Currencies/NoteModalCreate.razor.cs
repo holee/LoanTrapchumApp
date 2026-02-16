@@ -2,7 +2,6 @@ using Applications.Extensions.mappers;
 using Applications.Features.Currencies.Command.AddCurrencyNote;
 using Applications.Features.Currencies.Dto;
 using Applications.Features.Currencies.Queries.GetCurrencies;
-using Applications.Responses.Lists.Currency;
 using Applications.Responses.Paginations;
 using Domains.Models.Currencies;
 using Mapster;
@@ -17,7 +16,7 @@ namespace TrapchumApp.Pages.Currencies
         private bool isValid = true;
         CurrencyNoteDtoCreate model = new CurrencyNoteDtoCreate();
         EditForm? editForm;
-        IEnumerable<CurrencyResponse> Currencies = new List<CurrencyResponse>();
+        IEnumerable<CurrencyDto> Currencies = new List<CurrencyDto>();
         void Close() => DialogService.Close(false);
         protected override async Task OnInitializedAsync()
         {
@@ -31,7 +30,7 @@ namespace TrapchumApp.Pages.Currencies
 
             if (currenciesResponse.IsSuccess)
             {
-                Currencies = currenciesResponse.Items.Maps<CurrencyResponse>();
+                Currencies = currenciesResponse.Items.Maps<CurrencyDto>();
             }
 
             await base.OnInitializedAsync();

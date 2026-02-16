@@ -1,4 +1,4 @@
-﻿namespace Applications.Requests.Journals;
+﻿namespace Applications.Features.Ledgers.Dto;
 
 public class LedgerTypeDto
 {

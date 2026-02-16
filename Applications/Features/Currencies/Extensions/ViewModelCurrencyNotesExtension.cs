@@ -16,7 +16,8 @@ public static class ViewModelCurrencyNotesExtension
             CurrencyNoteRefId = x.Id,
             CurrencyNoteValue = (int?)x.CurrencyValue,
             QOnHand = x.Quantity == null ? 0 : x.Quantity,
-            TotalValue = 0
+            TotalValue = 0,
+            CurrencyRefDesc = x.Description
         }).ToList();
     }
 
@@ -32,7 +33,8 @@ public static class ViewModelCurrencyNotesExtension
             CurrencyNoteRefId = x.Id,
             CurrencyNoteValue = (int?)x.CurrencyValue,
             QOnHand = x.Qty == null ? 0 : x.Qty,
-            TotalValue = 0
+            TotalValue = 0,
+            CurrencyRefDesc = x.Description
         }).ToList();
     }
 

@@ -3,7 +3,6 @@ using Applications.Extensions.mappers;
 using Applications.Features.Currencies;
 using Applications.Helpers;
 using Applications.Requests.Journals;
-using Applications.Responses.Lists.Currency;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Journals;
 using Applications.Responses.ViewModels.Ledgers;
@@ -15,6 +14,7 @@ using Applications.Features.Currencies.Queries.GetCurrencyDetails;
 using Applications.Features.Currencies.Queries.GetCurrencies;
 using Applications.Features.Journals.Command.CreateJournal;
 using TrapchumApp.Helpers.Extensions;
+using Applications.Features.Currencies.Dto;
 
 namespace TrapchumApp.Pages.Transactions.Journals;
 //ICurrencyServiceImpl currencyService,
@@ -22,7 +22,7 @@ public partial class JournalEntryCreate(ILedgerServiceImpl ledgerService, IJourn
 {
     protected JournalEntryDtoCreate JLe = new JournalEntryDtoCreate();
     protected List<JournalLineDtoCreate> JournalLines = [];
-    private IEnumerable<CurrencyResponse>? _currencies = [];
+    private IEnumerable<CurrencyDto>? _currencies = [];
     private IEnumerable<JournalTypeDto>? _journalTypes = [];
     protected IEnumerable<VLedger>? Ledgers = [];
     protected IEnumerable<VNameList> NameLists = [];
@@ -72,7 +72,7 @@ public partial class JournalEntryCreate(ILedgerServiceImpl ledgerService, IJourn
 
         //var currenciesRsponse = await currencyService.GetCurrencies(0);
 
-        _currencies = rsp.Items.Maps<CurrencyResponse>();//  Adapt<IEnumerable<CurrencyResponse>>();
+        _currencies = rsp.Items.Maps<CurrencyDto>();//  Adapt<IEnumerable<CurrencyResponse>>();
 
         var journalTypes = await journalService.GetJournalTypesAsync(null);
 
@@ -556,7 +556,7 @@ public partial class JournalEntryCreate(ILedgerServiceImpl ledgerService, IJourn
         if (obj is not null)
         {
 
-            var item = (CurrencyResponse)obj;
+            var item = (CurrencyDto)obj;
 
             await GetLedgerByCurrency(item.CurrencyId, filter);
 

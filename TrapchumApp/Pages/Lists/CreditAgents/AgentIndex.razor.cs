@@ -23,7 +23,7 @@ public partial class AgentIndex
     {
         _creditAgentService = creditAgentService;
     }
-    int BranchId;
+    int? BranchId;
     string? BranchName;
     int selectedBranchId = 0;
     bool isLoading = false;

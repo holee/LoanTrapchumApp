@@ -1,4 +1,4 @@
-﻿using Applications.Requests.Journals;
+﻿using Applications.Features.Ledgers.Dto;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Ledgers;

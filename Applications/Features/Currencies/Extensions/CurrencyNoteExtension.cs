@@ -19,7 +19,8 @@ public static class CurrencyNoteExtension
                     CurrencyNoteValue = (int?)x.CurrencyValue,
                     QOnHand = x.Qty == null ? 0 : x.Qty,
                     Quantity = 0,
-                    TotalValue = 0
+                    TotalValue = 0,
+                    CurrencyRefDesc = x.Description
                 }).ToList();
     }
 }

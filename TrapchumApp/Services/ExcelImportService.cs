@@ -17,6 +17,22 @@ namespace TrapchumApp.Services
             return items;
         }
 
+        public async Task<IEnumerable<CashManagementDetailDtoCreate>> GetCashValaultInFromExcel(Stream stream)
+        {
+            if (stream is null)
+                return Enumerable.Empty<CashManagementDetailDtoCreate>(); 
+
+            using var memoryStream = new MemoryStream();
+
+            await stream.CopyToAsync(memoryStream);
+
+            memoryStream.Position = 0;
+
+            var items = memoryStream.Query<CashManagementDetailDtoCreate>();
+
+            return items.ToList();
+        }
+
 
 
     }

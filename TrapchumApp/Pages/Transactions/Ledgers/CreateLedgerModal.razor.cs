@@ -1,8 +1,8 @@
+using Applications.Features.Currencies.Dto;
 using Applications.Features.Currencies.Queries.GetCurrencies;
+using Applications.Features.Ledgers.Dto;
 using Applications.Interfaces.Currencies;
 using Applications.Interfaces.Transactions;
-using Applications.Requests.Journals;
-using Applications.Responses.Lists.Currency;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Ledgers;
 using Domains.Enumerations;
@@ -25,7 +25,7 @@ namespace TrapchumApp.Pages.Transactions.Ledgers
 
         EditForm editForm = default!;
         IEnumerable<LedgerTypeDto>? LedgerTypes = [];
-        IEnumerable<CurrencyResponse>? Currencies = [];
+        IEnumerable<CurrencyDto>? Currencies = [];
         IEnumerable<VLedger>? FilterLedgers = [];
         bool IsSubTypeOf { get; set; }
         LedgerCreateDto model = new();
@@ -80,7 +80,7 @@ namespace TrapchumApp.Pages.Transactions.Ledgers
         {
             if (o is not null)
             {
-                selectedCurrencyId = ((CurrencyResponse)o).CurrencyId;
+                selectedCurrencyId = ((CurrencyDto)o).CurrencyId;
             }
             else
             {
@@ -155,7 +155,7 @@ namespace TrapchumApp.Pages.Transactions.Ledgers
 
             model.CurrencyRefId = (int)CurrencyEnum.KHR;
 
-            Currencies = rsp.Items.Adapt<IEnumerable<CurrencyResponse>>();
+            Currencies = rsp.Items.Adapt<IEnumerable<CurrencyDto>>();
 
             await GetLedgers(selectedCurrencyId);
 

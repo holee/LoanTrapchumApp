@@ -65,7 +65,7 @@
                     <RadzenDataGrid Density="Density.Compact"
                                     Responsive
                                     GridLines="DataGridGridLines.Both"
-                                    Data="CurrencyNotes">
+                                    Data="@_currencyCounter">
                         <Columns>
                             <RadzenDataGridColumn Title="Currency Name"
                                                   Context="c"
@@ -97,7 +97,7 @@
                                     @(c.Quantity ?? 0)
                                 </Template>
                                 <FooterTemplate>
-                                    @CurrencyNotes?.Sum(x => x.Quantity)
+                                    @_currencyCounter?.Sum(x => x.Quantity)
                                 </FooterTemplate>
                             </RadzenDataGridColumn>
                             <RadzenDataGridColumn Title="Sub Total"
@@ -109,7 +109,7 @@
                                 </Template>
                                 <FooterTemplate>
                                     @{
-                                        var value = CurrencyNotes?.Sum(x => x.Quantity * x.CurrencyValue);
+                                        var value = _currencyCounter?.Sum(x => x.Quantity * x.CurrencyValue);
                                     }
                                     @value.Format(currencyId)
                                 </FooterTemplate>

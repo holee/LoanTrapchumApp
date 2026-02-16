@@ -1,11 +1,10 @@
-using Applications.Features.Currencies;
 using Applications.Features.Currencies.Command.ActivateOrDeactivateNote;
 using Applications.Features.Currencies.Dto;
+using Applications.Features.Currencies.Queries.GetCurrencies;
 using Applications.Features.Currencies.Queries.GetCurrencyCounter;
-using Applications.Features.Currencies.Queries.GetCurrencyNotes;
 using Applications.Features.Currencies.Responses;
-using Applications.Interfaces.Currencies;
 using Applications.Responses.Paginations;
+using Domains.Models.Currencies;
 using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Currencies
@@ -25,36 +24,60 @@ namespace TrapchumApp.Pages.Currencies
         private bool isLoading = false;
         protected override async Task OnInitializedAsync()
         {
+
+            await GetCurrencies();
+
             await LoadPages(BranchId);
 
             await base.OnInitializedAsync();
         }
+
+
+        private async Task GetCurrencies()
+        {
+            if (Currencies is null)
+            {
+                var query = new GetCurrenciesQuery(0, new QueryParam(0, 0));
+
+                var rsp = await mediator.Send(query);
+
+                var temp = rsp.Items;
+
+                temp.Add(new Currency { CurrencyId = 0, CurrencyCode = "All" });
+
+                Currencies = temp.OrderBy(x => x.CurrencyId).ToList();
+            }
+
+        }
+
+        async Task SelectedItemChanged(object obj)
+        {
+            if (obj is not null)
+            {
+                var selectedResult = (Currency)obj;
+
+                await LoadPages(BranchId, selectedResult.CurrencyId);
+            }
+
+        }
+
 
         async Task DisplayCurrencyDialogue()
         {
             await DialogService.OpenAsync<NoteModalCreate>("Note");
         }
 
-        async Task LoadPages(int branchId)
+        async Task LoadPages(int branchId, int? currencyId = 0)
         {
-            try
-            {
-                isLoading = true;
+            isLoading = true;
 
-                var query = new GetCurrencyCounterQuery(0, branchId);
+            var query = new GetCurrencyCounterQuery(currencyId, branchId);
 
-                var rsp = await mediator.Send(query);  
-                
-                //_currencyService.GetCurrencyNotes(branchId, 0);
+            var rsp = await mediator.Send(query);
 
-                CurrencyCounters = rsp.Items;
+            CurrencyCounters = rsp.Items;
 
-                isLoading = false;
-            }
-            catch
-            {
-                isLoading = false;
-            }
+            isLoading = false;
 
             StateHasChanged();
         }

@@ -4,7 +4,9 @@
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
 @using Applications.Features.LoanRequests.Interfaces
+@using Applications.Features.Transactions.CashManagements
 @using TrapchumApp.Services
+<PageTitle>Cash Vault In</PageTitle>
 @inject ExcelImportService excel
 <RadzenFieldset Text="Please verify amount and balance then start cash vault.">
     <RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal">
@@ -12,20 +14,33 @@
                    accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.shee" />
     </RadzenStack>
     <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
-        <RadzenColumn SizeSM="12" Size="12" SizeMD="4">
+        <RadzenColumn SizeSM="12" Size="12" SizeMD="3">
             <InputGroup Size="InputSize.Small">
                 <Start>CURRENCY</Start>
                 <ChildContent>
                     <RadzenDropDown @bind-Value="@CurrencyId"
                                     ValueProperty="CurrencyId"
                                     TextProperty="CurrencyCode"
-                                    Data="@CurrencyList"
+                                    Data="@_currencyList"
                                     SelectedItemChanged="SelectedItemChanged"
                                     Name="DropDownBindValue" />
                 </ChildContent>
             </InputGroup>
         </RadzenColumn>
-        <RadzenColumn Size="12" SizeSM="12" SizeMD="4">
+        <RadzenColumn SizeSM="12" Size="12" SizeMD="3">
+            <InputGroup Size="InputSize.Small">
+                <Start>CURRENCY</Start>
+                <ChildContent>
+                    <RadzenDropDown @bind-Value="@CurrencyId"
+                                    ValueProperty="CurrencyId"
+                                    TextProperty="CurrencyCode"
+                                    Data="@_currencyList"
+                                    SelectedItemChanged="SelectedItemChanged"
+                                    Name="DropDownBindValue" />
+                </ChildContent>
+            </InputGroup>
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeSM="12" SizeMD="3">
             <InputGroup Size="InputSize.Small">
                 <Start>User Balance</Start>
                 <ChildContent>
@@ -34,7 +49,7 @@
                 </ChildContent>
             </InputGroup>
         </RadzenColumn>
-        <RadzenColumn SizeSM="12" Size="12" SizeMD="4">
+        <RadzenColumn SizeSM="12" Size="12" SizeMD="3">
             <InputGroup Size="InputSize.Small">
                 <Start>AMOUNT</Start>
                 <ChildContent>
@@ -46,54 +61,112 @@
             </InputGroup>
         </RadzenColumn>
     </RadzenRow>
-    <div class="table-responsive">
-        <table class="table table-bordered table-sm">
-            <thead>
-                <tr>
-                    <th class="text-end">Note</th>
-                    <th class="text-end">Qty In Vault</th>
-                    <th class="text-end">Quantity</th>
-                    <th class="text-end">Sub Total</th>
-                    <th class="text-end">Total Quantity</th>
-                    <th class="text-end">Total Value</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var cn in cashMDList)
-                {
-                    <VaultInRow Item="@cn"
-                                Calculate="@CalTotal"
-                                CurrencyId="@CurrencyId" />
-                }
-            </tbody>
-            <tfoot>
-                <tr>
-                    <td colspan="3" class="rz-text-end">TOTAL</td>
-                    <td class="rz-text-end">
-                        @total.Format(CurrencyId)
-                    </td>
-                    <td class="rz-text-end">
-                        @cashMDList.Sum(x => x.TotalQuantity)
-                    </td>
-                    <td class="rz-text-end">
-                        @{
-                            var value = cashMDList?.Sum(x => x.Value);
-                            @value.Format(CurrencyId)
-                        }
-                    </td>
-                </tr>
-                <tr>
-                    <td class="rz-text-end" colspan="3">CURRENT BALANCE</td>
-                    <td class="rz-text-end">
-                        @vCashVault?.UserBalance.Format(CurrencyId)
-                    </td>
-                    <td class="" colspan="2">
-                    </td>
-                </tr>
-            </tfoot>
-        </table>
-    </div>
+    <RadzenDataGrid Responsive
+                    GridLines="DataGridGridLines.Both"
+                    Data="cashMDList"
+                    TItem="CashManagementDetailDtoCreate"
+                    @ref="@grid"
+                    EditMode="DataGridEditMode.Single"
+                    CellClick="@OnCellClick"
+                    RowUpdate="@OnUpdateRow"
+                    Density="Density.Compact">
+        <Columns>
+            <RadzenDataGridColumn TItem="CashManagementDetailDtoCreate"
+                                  Property="CurrencyNoteValue"
+                                  Title="Note Value">
+                <Template>
+                    <strong>@context.CurrencyNoteValue</strong>
+                    (<span class="rz-ml-1">
+                        @context.CurrencyRefDesc
+                    </span>)
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="CashManagementDetailDtoCreate"
+                                  Property="QOnHand"
+                                  Context="c"
+                                  TextAlign="TextAlign.Right"
+                                  Title="Qty In Vault">
+                <Template>
+                    @c.QOnHand
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="CashManagementDetailDtoCreate"
+                                  IsInEditMode="@IsEditing"
+                                  Property="@nameof(CashManagementDetailDtoCreate.Quantity)"
+                                  TextAlign="TextAlign.Right"
+                                  Context="c"
+                                  Title="Quantity">
+                <Template>
+                    @c.Quantity
+                </Template>
+                <EditTemplate Context="item">
+                    <RadzenNumeric TValue="int?"
+                                   ShowUpDown="false"
+                                   TextAlign="TextAlign.Right"
+                                   class="@Styles.W100"
+                                   onclick="this.querySelector('.rz-numeric-input').select()"
+                                   @bind-Value="item.Quantity"
+                                   Min="0"
+                                   @ref="editor"
+                                   @key="item.CurrencyNoteValue"
+                                   InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Select Quantity" }})"
+                                   Change="@(args => CalculateByQuantity(item, args))" />
+                </EditTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="CashManagementDetailDtoCreate"
+                                  Property="@nameof(CashManagementDetailDtoCreate.TotalValue)"
+                                  Context="c"
+                                  IsInEditMode="@IsEditing"
+                                  CalculatedCssClass="@IsEdited"
+                                  TextAlign="TextAlign.Right"
+                                  Title="Sub Total">
+                <Template>
+                    @c.TotalValue
+                </Template>
+                <EditTemplate Context="item">
+                    <RadzenNumeric TValue="decimal?"
+                                   ShowUpDown="false"
+                                   TextAlign="TextAlign.Right"
+                                   class="@Styles.W100"
+                                   onclick="this.querySelector('.rz-numeric-input').select()"
+                                   @bind-Value="item.TotalValue"
+                                   Min="0"
+                                   Format="@sp"
+                                   @key="item.CurrencyNoteValue"
+                                   @ref="editor"
+                                   InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Select Total Value" }})"
+                                   Change="@(args => CalculateByAmount(item, args))" />
+                </EditTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="CashManagementDetailDtoCreate"
+                                  Property="@nameof(CashManagementDetailDtoCreate.TotalQuantity)"
+                                  Context="c"
+                                  TextAlign="TextAlign.Right"
+                                  Title="Total Quantity">
+                <Template>
+                    @c.TotalQuantity
+                </Template>
+                <FooterTemplate>
+                    @cashMDList?.Sum(x => x.TotalQuantity)
+                </FooterTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="CashManagementDetailDtoCreate"
+                                  Property="@nameof(CashManagementDetailDtoCreate.TotalValue)"
+                                  Context="c"
+                                  TextAlign="TextAlign.Right"
+                                  Title="Total Value">
+                <Template>
+                    @c.Value.Format(CurrencyId)
+                </Template>
+                <FooterTemplate>
+                    @cashMDList?.Sum(x => x.Value).Format(CurrencyId)
+                </FooterTemplate>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+    
     <RadzenStack JustifyContent="JustifyContent.End"
+                 class="rz-mt-2"
                  Orientation="Orientation.Horizontal">
         <RadzenButton Size="ButtonSize.Small"
                       ButtonStyle="ButtonStyle.Success"
@@ -133,12 +206,235 @@
 
         ms.Position = 0;
 
-        cashMDList = excel.GetCashValaultIn(stream).ToList();
+        var rsp = await excel.GetCashValaultInFromExcel(ms);
+        cashMDList = rsp.ToList();
+        //StateHasChanged();
+        await grid.Reload();
+    }
+
+    RadzenDataGrid<CashManagementDetailDtoCreate> grid = default!;
+    IRadzenFormComponent editor = default!;
+    bool editorFocused = false;
+    string? columnEditing;
+    List<KeyValuePair<int?, string>> editedFields = new List<KeyValuePair<int?, string>>();
+    List<CashManagementDetailDtoCreate> ordersToUpdate = new List<CashManagementDetailDtoCreate>();
+
+    bool IsEditing(string columnName, CashManagementDetailDtoCreate order)
+    {
+        return columnEditing == columnName && ordersToUpdate.Contains(order);
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (!editorFocused && editor != null)
+        {
+            editorFocused = true;
+
+            try
+            {
+                await editor.FocusAsync();
+            }
+            catch
+            {
+                //
+            }
+        }
+    }
+    void CalculateByQuantity(CashManagementDetailDtoCreate item, int? qty)
+    {
+        qty ??= 0;
+
+        if (qty > 0)
+        {
+            item.TotalValue = item.CurrencyNoteValue * qty.Value;
+        }
+        else
+        {
+            item.TotalValue = 0;
+        }
+
+        _ = Update();
+
+        CalTotal1();
+
+       // grid?.Reload();
+    }
+
+    void CalculateByAmount(CashManagementDetailDtoCreate item, decimal? value)
+    {
+        value ??= 0;
+
+        var qty = Convert.ToInt32(value / item.CurrencyNoteValue);
+
+        if (qty > 0 && value > 0)
+        {
+            item.Quantity = qty;
+
+            item.TotalValue = value.Value;
+        }
+
+        _ = Update();
+
+        CalTotal1();
+
+        //grid?.Reload();
+    }
+
+    void CalTotal1()
+    {
+        total = cashMDList?.Sum(x => x.TotalValue) ?? 0;
+
+        totalAmount = cashMDList?.Sum(x => x.TotalValue) ?? 0;
+    }
 
 
-        StateHasChanged();
+    async Task OnCellClick(DataGridCellMouseEventArgs<CashManagementDetailDtoCreate> args)
+    {
+        if (grid == null) return;
+        if (args.Data is null) return;
+        if (args.Column is null) return;
 
-        // People = MiniExcel.Query<Person>(ms).ToList();
+        if (!grid.IsValid ||
+            (ordersToUpdate.Contains(args.Data) && columnEditing == args.Column.Property)) return;
 
+        // Record the previous edited field, if you're not using IRevertibleChangeTracking to track object changes
+        if (ordersToUpdate.Any())
+        {
+            editedFields.Add(new(ordersToUpdate.First().CurrencyNoteValue, columnEditing!));
+            await Update();
+        }
+
+        // This sets which column is currently being edited.
+        columnEditing = args.Column.Property;
+
+        // This sets the Item to be edited.
+        await EditRow(args.Data);
+    }
+
+
+    async Task Update()
+    {
+        editorFocused = false;
+
+        if (ordersToUpdate.Any())
+        {
+            await grid.UpdateRow(ordersToUpdate.First());
+        }
+    }
+
+
+    async Task EditRow(CashManagementDetailDtoCreate? order)
+    {
+        Reset();
+
+        if (order is not null)
+        {
+            ordersToUpdate.Add(order);
+
+            await grid.EditRow(order);
+        }
+    }
+
+    void Reset(CashManagementDetailDtoCreate? order = null)
+    {
+        editorFocused = false;
+
+        if (order != null)
+        {
+            ordersToUpdate.Remove(order);
+        }
+        else
+        {
+            ordersToUpdate.Clear();
+        }
+    }
+
+    void OnUpdateRow(CashManagementDetailDtoCreate order)
+    {
+        Reset(order);
+
+        // dbContext.Update(order);
+
+        // dbContext.SaveChanges();
+
+        // If you were doing row-level edits and handling RowDeselect, you could use the line below to
+        // clear edits for the current record.
+
+        //editedFields = editedFields.Where(c => c.Key != order.OrderID).ToList();
+    }
+
+    string IsEdited(RadzenDataGridColumn<CashManagementDetailDtoCreate> column, CashManagementDetailDtoCreate order)
+    {
+        // In a real scenario, you might use IRevertibleChangeTracking to check the current column
+        //  against a list of the object's edited fields.
+        return editedFields.Where(c => c.Key == order.CurrencyNoteValue && c.Value == column.Property).Any() ?
+            "table-cell-edited" : string.Empty;
     }
 }
+
+<style>
+    .table-cell-edited {
+        position: relative;
+    }
+
+        .table-cell-edited::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 0;
+            height: 0;
+            border-top: 10px solid red;
+            border-left: 10px solid transparent;
+        }
+</style>
+
+@* <div class="table-responsive">
+        <table class="table table-bordered table-sm">
+            <thead>
+                <tr>
+                    <th class="text-end">Note</th>
+                    <th class="text-end">Qty In Vault</th>
+                    <th class="text-end">Quantity</th>
+                    <th class="text-end">Sub Total</th>
+                    <th class="text-end">Total Quantity</th>
+                    <th class="text-end">Total Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var cn in cashMDList)
+                {
+                    <VaultInRow Item="@cn"
+                                Calculate="@CalTotal"
+                                @key="cn.CurrencyNoteValue"
+                                CurrencyId="@CurrencyId" />
+                }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3" class="rz-text-end">TOTAL</td>
+                    <td class="rz-text-end">
+                        @total.Format(CurrencyId)
+                    </td>
+                    <td class="rz-text-end">
+                        @cashMDList.Sum(x => x.TotalQuantity)
+                    </td>
+                    <td class="rz-text-end">
+                        @{
+                            var value = cashMDList?.Sum(x => x.Value);
+                            @value.Format(CurrencyId)
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <td class="rz-text-end" colspan="3">CURRENT BALANCE</td>
+                    <td class="rz-text-end">
+                        @vCashVault?.UserBalance.Format(CurrencyId)
+                    </td>
+                    <td class="" colspan="2">
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div> *@

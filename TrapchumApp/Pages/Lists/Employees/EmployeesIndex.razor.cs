@@ -26,7 +26,7 @@ namespace TrapchumApp.Pages.Lists.Employees
         string sortField = nameof(VEmployeeList.ModifiedDT);
         bool sortDescending = true;
         string? _empId = string.Empty;
-        int branchId = 0;
+        int? branchId = 0;
         public EmployeeDto? employee;
 
         string searchText = string.Empty;

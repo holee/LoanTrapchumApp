@@ -1,6 +1,6 @@
-﻿using Applications.Interfaces.Banks;
+﻿using Applications.Features.Currencies.Dto;
+using Applications.Interfaces.Banks;
 using Applications.Responses;
-using Applications.Responses.Lists.Currency;
 
 namespace Applications.Features.Banks.UseCases
 {

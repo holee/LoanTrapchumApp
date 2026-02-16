@@ -1,79 +1,7 @@
-﻿
-using Applications.Features.Branches.Command.CloseBranch;
-using Applications.Features.Branches.Command.CreateBranch;
-using Applications.Features.Branches.Command.DeleteBranch;
-using Applications.Features.Branches.Command.EditBranch;
-using Applications.Features.Branches.Command.OpenBranch;
-using Applications.Features.Branches.Dtos;
-using Applications.Features.Branches.Queries.GetBranchAsPaging;
-using Applications.Features.Branches.Queries.GetBranchById;
-using Applications.Features.Branches.Queries.GetBranchByUser;
-using Applications.Features.Branches.Queries.GetBranchDetailsById;
-using Applications.Features.Branches.Queries.GetBranchForVault;
-using Applications.Features.Branches.Queries.GetBranchState;
-using Applications.Features.Branches.Queries.GetCashVaultBalance;
-using Applications.Features.Branches.Queries.GetUpdateBranch;
-using Applications.Features.CashManagements.Responses;
-using Applications.Features.Currencies.Command;
-using Applications.Features.Currencies.Command.AddCurrencyNote;
-using Applications.Features.Currencies.Command.CreateCashVaultIn;
-using Applications.Features.Currencies.Command.CreateCashVaultOut;
-using Applications.Features.Currencies.Command.EditMoneyExchange;
-using Applications.Features.Currencies.Dto;
-using Applications.Features.Currencies.Queries.GetCashVault;
-using Applications.Features.Currencies.Queries.GetCurrencies;
-using Applications.Features.Currencies.Queries.GetCurrencyCounter;
-using Applications.Features.Currencies.Queries.GetCurrencyDetails;
-using Applications.Features.Currencies.Queries.GetCurrencyNotes;
-using Applications.Features.Currencies.Queries.GetEditMoneyExchange;
-using Applications.Features.Currencies.Responses;
-using Applications.Features.Customers.Commands.Customers.CreateCustomer;
-using Applications.Features.Customers.Commands.Customers.EditCustomer;
-using Applications.Features.Departments.Commands.ChangeDepartmentState;
-using Applications.Features.Departments.Commands.CreateDepartment;
-using Applications.Features.Departments.Commands.DeleteDepartment;
-using Applications.Features.Departments.Commands.EditDepartment;
-using Applications.Features.Departments.Dto;
-using Applications.Features.Departments.Queries.GetDepartmentAsPaging;
-using Applications.Features.Departments.Queries.GetDepartmentById;
-using Applications.Features.Employees.Commands.ChangeEmployeeState;
-using Applications.Features.Employees.Commands.CreateEmployee;
-using Applications.Features.Employees.Commands.EditEmployee;
-using Applications.Features.Employees.Dto;
-using Applications.Features.Employees.Queries.GetEditEmployee;
-using Applications.Features.Employees.Queries.GetEmployeeAsPaging;
-using Applications.Features.Employees.Queries.GetEmployeeById;
-using Applications.Features.Guarantor.Command.CreateGuarantor;
-using Applications.Features.Guarantor.Dtos;
-using Applications.Features.Holidays.Queries.GetHolidaysAsPaging;
-using Applications.Features.Journals.Command.CreateJournal;
-using Applications.Features.Journals.Dtos;
-using Applications.Features.Journals.Queries.GetJournalById;
-using Applications.Features.Journals.Queries.GetJournalEntryDetailById;
-using Applications.Features.Journals.Queries.GetJournalTypes;
-using Applications.Features.LoanPayments.Command.RecievePayment;
-using Applications.Features.LoanPayments.Queries.GetLoanSchedulesByLoanIdAsPaging;
-using Applications.Features.LoanRequests.Command.SaveEditLoanRequest;
-using Applications.Features.LoanRequests.Queryies.GetApprovedLoanRequest;
-using Applications.Features.LoanRequests.Queryies.GetLoanRequestBy;
-using Applications.Features.LoanRequests.Queryies.GetLoanRequestsDocuments;
-using Applications.Features.Loans.Command.CloseLoanDisbursment;
-using Applications.Features.Loans.Command.CreateLoan;
-using Applications.Features.Loans.Queries.GetLoanByBranchId;
-using Applications.Features.Loans.Queries.GetLoanById;
-using Applications.Features.Loans.Queries.GetLoanSchedulesByPaymentDate;
-using Applications.Features.Loans.Queries.GetLoanWithScedules;
-using Applications.Features.Notifications.Command.CreateNotification;
-using Applications.Features.Notifications.Dto;
-using Applications.Features.Notifications.Queries.GetNotification;
-using Applications.Features.Notifications.Queries.GetUnreadNotifications;
-using Applications.Responses;
-using Applications.Responses.ViewModels.Employees;
-using Applications.Responses.ViewModels.Loans.Schedules;
-using Domains.Models.Currencies;
-using Domains.Models.Journals;
+﻿using Applications.Features.CashManagements.Command.CreateCashVaultIn;
+using Applications.Features.CashManagements.Command.CreateCashVaultOut;
+using Applications.Features.Currencies.Queries.GetCurrencyById;
 using ErrorOr;
-
 namespace Applications;
 
 public static class ApplicationServiceInjection
@@ -87,8 +15,8 @@ public static class ApplicationServiceInjection
         services.AddScoped<IRequestHandler<GetJournalTypesQuery, Pager<JournalTypeDto>>, GetJournalTypesQueryHandler>();
 
 
-
         services.AddScoped<IRequestHandler<GetBranchStateQuery, ErrorOr<BranchStatus>>, GetBranchStateQueryHandler>();
+        services.AddScoped<IRequestHandler<GetCurrenciesDtoQuery, Pager<CurrencyDto>>, GetCurrenciesDtoQueryHandler>();
 
         services.AddScoped<IRequestHandler<GetBranchForVaultQuery, ErrorOr<VBranch>>, GetBranchForVaultQueryHandler>();
         services.AddScoped<IRequestHandler<GetBranchDetailsByIdQuery, ErrorOr<VBranch?>>, GetBranchDetailsByIdQueryHandler>();
@@ -108,8 +36,8 @@ public static class ApplicationServiceInjection
         services.AddScoped<IRequestHandler<GetCurrenciesQuery, Pager<Currency>>, GetCurrenciesQueryHandler>();
         services.AddScoped<IRequestHandler<GetCashVaultQuery, Pager<VCashVaults>>, GetCashVaultQueryHandler>();
         services.AddScoped<IRequestHandler<AddCurrencyNoteCommand, ErrorOr<VCurrencyCounter>>, AddCurrencyNoteCommandHandler>();
-        services.AddScoped<IRequestHandler<CreateCashVaultIn, ErrorOr<string>>, CreateCashVaultInHandler>();
-        services.AddScoped<IRequestHandler<CreateCashVaultOut, ErrorOr<string>>, CreateCashVaultOutHandler>();
+        services.AddScoped<IRequestHandler<StartCashVaultIn, ErrorOr<string>>, CreateCashVaultInHandler>();
+        services.AddScoped<IRequestHandler<StartCashVaultOut, ErrorOr<string>>, StartCashVaultOutHandler>();
 
 
 
@@ -215,7 +143,7 @@ public static class ApplicationServiceInjection
 
 
         services.AddScoped<IRequestHandler<GetCurrencyDetailsByIdQuery, ErrorOr<VCurrenciesList>>, GetCurrencyDetailsByIdQueryHandler>();
-        services.AddScoped<IRequestHandler<GetCurrencyByIdQuery, ErrorOr<Currency>>, GetCurrencyByIdQueryHandler>();
+        services.AddScoped<IRequestHandler<GetCurrencyByIdQuery, ErrorOr<CurrencyDto>>, GetCurrencyByIdQueryHandler>();
         services.AddScoped<IRequestHandler<CreateMoneyExchangeCommand, ErrorOr<VttCurrencyExchanges>>, CreateMoneyExchangeCommandHandler>();
         services.AddScoped<IRequestHandler<EditMoneyExchangeCommand, ErrorOr<VttCurrencyExchanges>>, EditMoneyExchangeCommandHandler>();
 

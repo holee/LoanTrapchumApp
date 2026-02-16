@@ -25,7 +25,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
             _creditAgentService = creditAgentService;
         }
 
-        [Parameter] public int BranchId { get; set; }
+        [Parameter] public int? BranchId { get; set; }
         [Parameter, SupplyParameterFromQuery] public string? CreditAgentId { get; set; }
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
 

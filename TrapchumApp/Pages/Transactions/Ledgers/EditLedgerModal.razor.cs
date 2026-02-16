@@ -1,9 +1,9 @@
 using Applications.Extensions.mappers;
+using Applications.Features.Currencies.Dto;
 using Applications.Features.Currencies.Queries.GetCurrencies;
+using Applications.Features.Ledgers.Dto;
 using Applications.Interfaces.Currencies;
 using Applications.Interfaces.Transactions;
-using Applications.Requests.Journals;
-using Applications.Responses.Lists.Currency;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Ledgers;
 using Domains.Models.Journals;
@@ -26,7 +26,7 @@ namespace TrapchumApp.Pages.Transactions.Ledgers
 
         [Parameter] public int Id { get; set; }
         IEnumerable<LedgerTypeDto>? LedgerTypes = [];
-        IEnumerable<CurrencyResponse>? Currencies = [];
+        IEnumerable<CurrencyDto>? Currencies = [];
         IEnumerable<VLedger>? FilterLedgers = [];
         LedgerUpdateDto model = new LedgerUpdateDto();
         EditForm? editForm;
@@ -124,7 +124,7 @@ namespace TrapchumApp.Pages.Transactions.Ledgers
 
             //var currenciesRsponse = await _currencyService.GetCurrencies(0);
 
-            Currencies = rsp.Items.Maps<CurrencyResponse>();
+            Currencies = rsp.Items.Maps<CurrencyDto>();
 
             await base.OnParametersSetAsync();
         }
@@ -154,7 +154,7 @@ namespace TrapchumApp.Pages.Transactions.Ledgers
 
         protected async Task CurrencySelectedChanged(object param)
         {
-            var currencyId = ((CurrencyResponse)param).CurrencyId;
+            var currencyId = ((CurrencyDto)param).CurrencyId;
 
             if (!model.IsMainGl && currencyId == tempCurrencyId)
             {

@@ -20,30 +20,11 @@ public sealed class Currency:BaseEntity
     public List<CurrencySpotRate>? SpotRates { get; set; }
     public List<CurrencyCounter>? CurrencyCounters { get; set; }
     public List<LoanProduct>? LoanProducts { get; set; }
-    //public void AddSpotRates(IEnumerable<CurrencySpotRate> spotRates)
-    //{
-    //    SpotRates = new List<CurrencySpotRate>();
-    //    SpotRates.AddRange(spotRates);
-    //}
 
     public void AddSpotRate(CurrencySpotRate spotRates) 
     {
         SpotRates = new List<CurrencySpotRate>();
         SpotRates.Add(spotRates);
     }
-
-    //public void AddCounters(IEnumerable<CurrencyCounter> counters) 
-    //{
-    //    CurrencyCounters = new List<CurrencyCounter>();
-    //    CurrencyCounters.AddRange(counters);
-    //}
-
-    //public void AddCounter(CurrencyCounter counter)
-    //{
-    //    CurrencyCounters = new List<CurrencyCounter>();
-    //    CurrencyCounters.Add(counter);
-    //}
-
-
 
 }

@@ -3,8 +3,8 @@ using Applications.Features.Addresses.Responses;
 using Applications.Features.Branches.Command.EditBranch;
 using Applications.Features.Branches.Dtos;
 using Applications.Features.Branches.Queries.GetUpdateBranch;
+using Applications.Features.Currencies.Dto;
 using Applications.Interfaces.Banks;
-using Applications.Responses.Lists.Currency;
 using Domains.Models.Addresses;
 using TrapchumApp.Helpers.Extensions;
 

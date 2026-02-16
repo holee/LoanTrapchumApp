@@ -1,8 +1,8 @@
 using Applications.Extensions.mappers;
+using Applications.Features.Currencies.Dto;
 using Applications.Features.Currencies.Queries.GetCurrencies;
 using Applications.Features.Products.Requests;
 using Applications.Interfaces.Currencies;
-using Applications.Responses.Lists.Currency;
 using Applications.Responses.Paginations;
 using Applications.Services.Loans;
 using Radzen;
@@ -22,7 +22,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanProducts
 
         protected LoanProductDtoCreate model = new LoanProductDtoCreate();
 
-        protected IEnumerable<CurrencyResponse> _currencies = [];
+        protected IEnumerable<CurrencyDto> _currencies = [];
 
         protected bool IsActive = false;
 
@@ -34,7 +34,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanProducts
 
             var rsp = await mediator.Send(command);
            
-            _currencies = rsp.Items.Maps<CurrencyResponse>();
+            _currencies = rsp.Items.Maps<CurrencyDto>();
             
             await base.OnInitializedAsync();
         }

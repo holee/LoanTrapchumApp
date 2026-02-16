@@ -1,11 +1,4 @@
 ﻿using Applications.Features.Transactions.CashManagements;
-using Domains.Models.Lists;
-using Domains.Models.Transaction;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Applications.Features.CashManagements.Extensions
 {
@@ -40,7 +33,8 @@ namespace Applications.Features.CashManagements.Extensions
                 CurrencyNoteRefId = x.CurrencyNoteRefId,
                 CurrencyNoteValue = x.CurrencyNoteValue,
                 Quantity = x.Quantity,
-                TotalValue = x.TotalValue
+                TotalValue = x.TotalValue,
+                CurrencyRefDesc = x.CurrencyRefDesc,
             }).Where(x => x.Quantity > 0).ToList();
         }
 

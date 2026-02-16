@@ -3,7 +3,6 @@ using Applications.Features.Currencies.Dto;
 using Applications.Features.Currencies.Queries.GetCurrencyDetails;
 using Applications.Interfaces.Currencies;
 using Applications.Interfaces.Transactions;
-using Applications.Responses.Lists.Currency;
 using Applications.Responses.Paginations;
 using Domains.Models.Currencies;
 using Mapster;
@@ -16,7 +15,7 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
     {
         [Inject] ICurrencyService CurrencyServiceImpl { get; set; } = default!;
         [Inject] ISpotRateService spotRateService { get; set; } = default!;
-        private CurrencyResponse? Currency { get; set; } = new();
+        private CurrencyDto? Currency { get; set; } = new();
         private CurrencyDtoSpotRateCreate SpotRateDtoCreate = new CurrencyDtoSpotRateCreate();
         private List<CurrencyDtoSpotRate> currencySpotRates { get; set; } = default!;
         private PaginatedList<CurrencyDtoSpotRate> CurrencyPaginatedList { get; set; } = default!;
@@ -76,7 +75,7 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
 
             if (curResult.IsSuccess())
             {
-                Currency = curResult.Value.Adapt<CurrencyResponse>();
+                Currency = curResult.Value.Adapt<CurrencyDto>();
             }
 
             await ChangePageIndex(pageIndex);

@@ -1,10 +1,9 @@
 using Applications.Features.Branches.Dtos;
 using Applications.Features.Branches.Queries.GetBranchByUser;
-using Applications.Features.Branches.Queries.GetCashVaultBalance;
 using Applications.Features.CashManagements.Responses;
+using Applications.Features.Currencies.Dto;
 using Applications.Features.Currencies.Queries.GetCashVault;
-using Applications.Interfaces.Transactions;
-using Applications.Responses.Lists.Currency;
+using Domains.Models.Identity;
 using TrapchumApp.Helpers.Extensions;
 using TrapchumApp.Shared;
 
@@ -17,26 +16,20 @@ public partial class CashVaultModalActions
     [CascadingParameter] CascadingAppState bState { get; set; } = default!;
     [Parameter] public int BranchId { get; set; }
     [Parameter] public int BankId { get; set; } = 11;
-
-    private string? _userId = string.Empty;
+    [PersistentState] public string? UserId { get; set; }
+    [PersistentState] public IEnumerable<VCashVaults>? vCashVaults { get; set; }
 
     protected IEnumerable<BankResponse>? bankList = [];
 
-    private IEnumerable<VCashVaults>? vCashVaults = [];
+    private IEnumerable<VBranch> Branches = [];
 
-    protected IEnumerable<VBranch> Branches = [];
+    private BankResponse? bank;
 
-    protected BankResponse? bank;
+    private BranchDto? branch;
 
-    protected BranchDto? branch;
-
-    protected int? CurrencyId;
+    private int? CurrencyId;
 
     private bool IsDisabled = false;
-
-    bool canVaultOut = false;
-
-    bool canVaultIn = false;
 
     DialogOptions options = new DialogOptions
     {
@@ -50,27 +43,16 @@ public partial class CashVaultModalActions
         try
         {
 
-            var user = (await AuthState).User;
-
-            _userId = (await AuthState).GetUserId();
-
-            await bState.GetAuthenticatedUser(user);
-
-            var command = new GetBranchByUserQuery(_userId, 0);
-
-            var bResponse = await mediator.Send(command);
-
-            if (bResponse.IsSuccess())
+            if (string.IsNullOrEmpty(UserId))
             {
-                Branches = bResponse.Value;
+                var user = (await AuthState).User;
+
+                UserId = user.GetId();
+
+                await bState.GetAuthenticatedUser(user);
             }
 
-            var command1 = new GetCashVaultQuery(BranchId);
-
-            var resp = await mediator.Send(command1);
-
-            vCashVaults = resp.Items;
-
+            await GetCashVault();
 
         }
         catch (Exception ex)
@@ -78,6 +60,27 @@ public partial class CashVaultModalActions
             NotificationService!.Notify(NotificationSeverity.Error, ex.Message);
         }
         await base.OnInitializedAsync();
+    }
+
+    private async Task GetBranchByUser(string? userId)
+    {
+        var command = new GetBranchByUserQuery(userId, 0);
+
+        var bResponse = await mediator.Send(command);
+
+        if (bResponse.IsSuccess())
+        {
+            Branches = bResponse.Value;
+        }
+    }
+
+    private async Task GetCashVault()
+    {
+        var command1 = new GetCashVaultQuery(BranchId);
+
+        var resp = await mediator.Send(command1);
+
+        vCashVaults = resp.Items;
     }
 
     protected async void OnCashVaultOut()

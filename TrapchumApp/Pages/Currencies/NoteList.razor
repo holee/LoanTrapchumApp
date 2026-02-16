@@ -6,6 +6,7 @@
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
 @using Applications.Features.LoanRequests.Interfaces
+@using Domains.Models.Currencies
 @using TrapchumApp.Services
 <PageTitle>Currency Note</PageTitle>
 <GridToolbar>
@@ -40,7 +41,12 @@
                 PageSizeChanged="SelectPageSizeChanged"
                 Data="@CurrencyCounters">
     <HeaderTemplate>
-
+        <RadzenDropDown @bind-Value="@_currencyId"
+                        ValueProperty="@nameof(Currency.CurrencyId)"
+                        TextProperty="@nameof(Currency.CurrencyCode)"
+                        Data="@Currencies"
+                        SelectedItemChanged="SelectedItemChanged"
+                        Name="DropDownBindValue" />
     </HeaderTemplate>
     <Columns>
         <RadzenDataGridColumn Context="item"
@@ -102,4 +108,9 @@
 </RadzenDataGrid>
 @code {
     void OnRowSelect() { }
+
+    private int? _currencyId = 0;
+
+    [PersistentState] public IEnumerable<Currency>? Currencies { get; set; }
+
 }

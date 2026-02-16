@@ -1,6 +1,6 @@
 ﻿using Applications.Extensions;
+using Applications.Features.Ledgers.Dto;
 using Applications.Interfaces.Transactions;
-using Applications.Requests.Journals;
 using Applications.Responses;
 using Applications.Responses.Message;
 using Applications.Responses.Paginations;

@@ -1,4 +1,4 @@
-﻿namespace Applications.Responses.Lists.Currency;
+﻿namespace Applications.Features.Currencies.Dto;
 
 public class CurrencyNoteResponse
 {

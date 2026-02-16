@@ -95,7 +95,7 @@ public class BranchRepository(IDbContextFactory<DataContext> contextFactory,
             return Error.Unexpected("ServerError", ex.Message);
         }
     }
-   
+
     public async Task<ErrorOr<VBranch>> UpdateAsync(Branch branch, CancellationToken cancellation = default)
     {
         try
@@ -251,37 +251,45 @@ public class BranchRepository(IDbContextFactory<DataContext> contextFactory,
     {
         await using var context = await contextFactory.CreateDbContextAsync(cancellation);
 
-        var user = await context.Database
-                            .SqlQuery<VUser>($"SELECT * FROM VUsers WHERE id={userId}")
+        var branches = await context
+                            .Set<VUser>()
+                            .Where(x => x.Id == userId)
                             .WhereIf(branchId.HasValue && branchId > 0, x => x.BranchId == branchId)
                             .AsNoTracking()
-                            .FirstOrDefaultAsync();
-
-        if (user is null)
-        {
-            return Error.NotFound("No User found in the branch.");
-        }
-
-        if (string.IsNullOrEmpty(user.EmployeeRefId))
-        {
-            return Error.NotFound("No User found in the branch.");
-        }
-
-        var queries = context.VBranchs.Where(x => x.BranchId == user.BranchId);
-
-        if (branchId > 0)
-        {
-            queries = queries.Where(x => x.BranchId == branchId);
-        }
-
-        var items = await queries
-                            .AsNoTracking()
+                            .Select(b => new VBranch
+                            {
+                                BranchId = b.BranchId,
+                                BranchName = b.BranchName
+                            })
                             .ToListAsync(cancellation);
 
+        return branches;
 
-        return items;
+        //if (branches is null || !branches.Any())
+        //{
+        //    return Error.NotFound("No User found in the branch.");
+        //}
+
+        //if (string.IsNullOrEmpty(user.First().EmployeeRefId))
+        //{
+        //    return Error.NotFound("No User found in the branch.");
+        //}
+
+        //var queries = context.VBranchs.Where(x => x.BranchId == user.BranchId);
+
+        //if (branchId > 0)
+        //{
+        //    queries = queries.Where(x => x.BranchId == branchId);
+        //}
+
+        //var items = await queries
+        //                    .AsNoTracking()
+        //                    .ToListAsync(cancellation);
+
+
+
     }
-   
+
     public async Task<ErrorOr<BranchStatus>> GetBranchStatus(string? userId, CancellationToken cancellation = default)
     {
         using var context = await connectionFactory.CreateConnectionAsync(cancellation);
@@ -410,7 +418,7 @@ public class BranchRepository(IDbContextFactory<DataContext> contextFactory,
 
         if (!string.IsNullOrEmpty(param.Filter) && string.IsNullOrEmpty(param.FilterColumn))
         {
-            string[] props = { "BranchName"};
+            string[] props = { "BranchName" };
 
             queries = queries.WhereMatchesFilter(param.Filter, props);
 

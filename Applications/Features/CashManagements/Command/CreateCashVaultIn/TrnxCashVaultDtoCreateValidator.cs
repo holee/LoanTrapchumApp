@@ -1,6 +1,6 @@
 ﻿using Applications.Features.Transactions.CashManagements;
 
-namespace Applications.Features.Currencies.Command.CreateCashVaultIn;
+namespace Applications.Features.CashManagements.Command.CreateCashVaultIn;
 
 public sealed class TrnxCashVaultDtoCreateValidator : AbstractValidator<TrnxCashVaultDtoCreate>
 {

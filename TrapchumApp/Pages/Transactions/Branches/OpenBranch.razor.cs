@@ -23,13 +23,13 @@ namespace TrapchumApp.Pages.Transactions.Branches
         [CascadingParameter] CascadingAppState bState { get; set; } = default!;
         [Parameter] public int? BranchId { get; set; } = 0;
         [PersistentState] public string? UserId { get; set; }
-        [PersistentState] public IEnumerable<VCurrencyCounter>? CurrencyNotes { get; set; }
+        [PersistentState] public IEnumerable<VCurrencyCounter>? _currencyCounter { get; set; }
         [PersistentState] public IEnumerable<VCashVaultBalance>? CashVaultBalances { get; set; }
         OpenBranchTransactionDto? transactionOpenBranch;
         OpenBranchTransactionDto? transactionCloseBranch;
         bool isClicked = false;
         long userRefId = 0;
-        int currencyId = 1;
+        int? currencyId = 1;
         private AlertStyle alertStyle;
         protected override async Task OnInitializedAsync()
         {
@@ -63,7 +63,7 @@ namespace TrapchumApp.Pages.Transactions.Branches
             {
                 await GetCurrencies((int)CurrenciesType.Khr);
 
-                await GetCurrencyNotes(currencyId, BranchId);
+                await GetCurrencyCounter(currencyId, BranchId);
             }
         }
 
@@ -151,7 +151,7 @@ namespace TrapchumApp.Pages.Transactions.Branches
 
         async Task OpenSideDialog(int? currencyId)
         {
-            await GetCurrencyNotes(currencyId!.Value, BranchId);
+            await GetCurrencyCounter(currencyId, BranchId);
         }
 
         async Task SubmitOpenBranch()
@@ -201,7 +201,7 @@ namespace TrapchumApp.Pages.Transactions.Branches
 
         }
 
-        async Task GetCurrencyNotes(int currencyId, int? branchRefId)
+        async Task GetCurrencyCounter(int? currencyId, int? branchRefId)
         {
             isClicked = !isClicked;
 
@@ -211,7 +211,7 @@ namespace TrapchumApp.Pages.Transactions.Branches
 
             var rsp = await mediator.Send(query);
 
-            CurrencyNotes = rsp.Items;
+            _currencyCounter = rsp.Items;
 
         }
 

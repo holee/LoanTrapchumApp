@@ -4,16 +4,16 @@ using Domains.Models.Transaction;
 using ErrorOr;
 using Mapster;
 
-namespace Applications.Features.Currencies.Command.CreateCashVaultOut;
+namespace Applications.Features.CashManagements.Command.CreateCashVaultOut;
 
-public sealed class CreateCashVaultOutHandler : IRequestHandler<CreateCashVaultOut, ErrorOr<string>>
+public sealed class StartCashVaultOutHandler : IRequestHandler<StartCashVaultOut, ErrorOr<string>>
 {
     private readonly ICashVaultService _startVaultOutUseCase;
-    public CreateCashVaultOutHandler(ICashVaultService startVaultOutUseCase)
+    public StartCashVaultOutHandler(ICashVaultService startVaultOutUseCase)
     {
         _startVaultOutUseCase = startVaultOutUseCase;
     }
-    public async Task<ErrorOr<string>> Handle(CreateCashVaultOut request, CancellationToken cancellationToken)
+    public async Task<ErrorOr<string>> Handle(StartCashVaultOut request, CancellationToken cancellationToken)
     {
 
         var req = request.TrnxCashVault.Adapt<LoanTransaction>();

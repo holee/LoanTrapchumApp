@@ -4,7 +4,7 @@ namespace Applications.Features.Branches.Dtos;
 
 public sealed class VBranch
 {
-    public int BranchId { get; set; }
+    public int? BranchId { get; set; }
     public int? BankRefId { get; set; }
     public string? BankName { get; set; }
     public string? BranchName { get; set; }

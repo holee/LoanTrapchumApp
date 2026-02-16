@@ -1,12 +1,12 @@
 ﻿@using Applications.Features.Addresses
 @using Applications.Features.Branches
 @using Applications.Features.Currencies
+@using Applications.Features.Currencies.Dto
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
 @using Applications.Features.LoanRequests.Interfaces
 @using Applications.Features.Transactions.Journals
 @using Applications.Requests.Journals
-@using Applications.Responses.Lists.Currency
 @using Applications.Responses.ViewModels.Journals
 @using Applications.Responses.ViewModels.Ledgers
 @using TrapchumApp.Services
@@ -43,8 +43,8 @@
                 <RadzenDropDown @bind-Value="@JLe.CurrencyRefId"
                                 class="form-control"
                                 Data="@_currencies"
-                                TextProperty="@nameof(CurrencyResponse.CurrencyCode)"
-                                ValueProperty="@nameof(CurrencyResponse.CurrencyId)"
+                                TextProperty="@nameof(CurrencyDto.CurrencyCode)"
+                                ValueProperty="@nameof(CurrencyDto.CurrencyId)"
                                 SelectedItemChanged="SelectedCurrencyChanged"
                                 Name="DropDownBindValue" />
             </RadzenColumn>
@@ -298,13 +298,13 @@
     async Task OnCellClick(DataGridCellMouseEventArgs<JournalLineDtoCreate> args)
     {
 
-        if (args.Column.Property == nameof(JournalLineDtoCreate.LineSeq))
+        if (args.Column?.Property == nameof(JournalLineDtoCreate.LineSeq))
         {
             return;
         }
 
 
-        var selectedIndex = JournalLines.IndexOf(args.Data);
+        var selectedIndex = JournalLines.IndexOf(args.Data!);
 
         if (selectedIndex > 0)
         {

@@ -1,4 +1,4 @@
-﻿using Applications.Requests.Journals;
+﻿using Applications.Features.Ledgers.Dto;
 using FluentValidation;
 namespace Applications.Validations.Ledgeres
 {

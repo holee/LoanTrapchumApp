@@ -93,8 +93,6 @@ namespace TrapchumApp.Pages.Identity.Authentications
             {
                 _logger.LogInformation("{UserName} has logged in.", Input.Email);
 
-                //_redirectManager.RedirectTo(ReturnUrl ?? "/");
-
                 NavigationManager.NavigateTo(ReturnUrl ?? "/", true);
             }
 

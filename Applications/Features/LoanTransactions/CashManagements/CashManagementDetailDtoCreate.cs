@@ -8,7 +8,8 @@ namespace Applications.Features.Transactions.CashManagements
         { }
         public CashManagementDetailDtoCreate(int? bankRefId, int? branchRefId,
             int? currencyRefId, string? currencyRefName,
-            int? currencyNoteRefId, int? currencyNoteValue, int? quantity)
+            int? currencyNoteRefId, int? currencyNoteValue, 
+            int? quantity)
         {
             BankRefId = bankRefId;
             BranchRefId = branchRefId;
@@ -25,6 +26,7 @@ namespace Applications.Features.Transactions.CashManagements
         public int? BranchRefId { get; set; }
         public int? CurrencyRefId { get; set; }
         public string? CurrencyRefName { get; set; }
+        public string? CurrencyRefDesc { get; set; } 
         public int? CurrencyNoteRefId { get; set; }
         public int? CurrencyNoteValue { get; set; }
         [NotMapped] public int? QOnHand { get; set; } = 0;

@@ -6,7 +6,6 @@ using Applications.Features.CashManagements.Responses;
 using Applications.Features.CashManagements.UseCases;
 using Applications.Features.Currencies.Responses;
 using Applications.Features.Transactions.CashManagements;
-using Applications.Responses.Lists.Currency;
 using Applications.Services.Transactions.Branches;
 using Domains.Enumerations;
 using TrapchumApp.Helpers.Extensions;
@@ -17,6 +16,9 @@ using Applications.Responses.Paginations;
 using Mapster;
 using Applications.Features.Currencies.Queries.GetCurrencyDetails;
 using Applications.Features.Currencies.Queries.GetCurrencyNotes;
+using Applications.Features.Currencies.Dto;
+using Applications.Features.CashManagements.Command.CreateCashVaultOut;
+using Applications.Features.Currencies.Queries.GetCashVault;
 namespace TrapchumApp.Pages.Transactions.Branches
 {
     public partial class VaultOutModal
@@ -34,7 +36,7 @@ namespace TrapchumApp.Pages.Transactions.Branches
         [Parameter] public int BranchId { get; set; }
         [Parameter] public int BankId { get; set; } = 11;
         [CascadingParameter] Task<AuthenticationState> AuthState { get; set; } = default!;
-        [PersistentState]public string? UserId { get; set; }
+        [PersistentState] public string? UserId { get; set; }
 
         private IEnumerable<VCashVaults>? vCashVaults = [];
 
@@ -59,8 +61,8 @@ namespace TrapchumApp.Pages.Transactions.Branches
         private string? messageAlert;
 
         private bool visible = false;
-        private IEnumerable<CurrencyResponse>? CurrencyList { get; set; }
-        private CurrencyResponse? Currency { get; set; } = new CurrencyResponse();
+        private IEnumerable<CurrencyDto>? CurrencyList { get; set; }
+        private CurrencyDto? Currency { get; set; } = new CurrencyDto();
         protected override async Task OnInitializedAsync()
         {
 
@@ -102,7 +104,7 @@ namespace TrapchumApp.Pages.Transactions.Branches
 
             if (rsp.IsSuccess())
             {
-                Currency = rsp.Value.Adapt<CurrencyResponse>();
+                Currency = rsp.Value.Adapt<CurrencyDto>();
 
                 CurrencyId = currencyId;
             }
@@ -115,7 +117,7 @@ namespace TrapchumApp.Pages.Transactions.Branches
 
             var rsp = await mediator.Send(command);  //_curService.GetCurrencies<CurrencyResponse>(0);
 
-            CurrencyList = rsp.Items.Adapt<IEnumerable<CurrencyResponse>>();
+            CurrencyList = rsp.Items.Adapt<IEnumerable<CurrencyDto>>();
 
         }
 
@@ -126,11 +128,11 @@ namespace TrapchumApp.Pages.Transactions.Branches
             {
                 if (arg is not null)
                 {
-                    var id = ((CurrencyResponse)arg)?.CurrencyId;
+                    var id = ((CurrencyDto)arg)?.CurrencyId;
 
                     CurrencyId = id;
 
-                    Currency = ((CurrencyResponse)arg!);
+                    Currency = ((CurrencyDto)arg!);
 
                     OnGetCurrencyNote(id);
 
@@ -167,12 +169,13 @@ namespace TrapchumApp.Pages.Transactions.Branches
 
         async Task GetCashVaults()
         {
-            var rsp = await _getCashVault.ExecuteAsync(BranchId);
 
-            if (rsp.IsSuccess)
-            {
-                vCashVaults = rsp.Data ?? [];
-            }
+            var command = new GetCashVaultQuery(BranchId);
+
+            var rsp = await mediator.Send(command);  //_getCashVault.ExecuteAsync(BranchId);
+
+            vCashVaults = rsp.Items;
+
         }
 
         protected async Task OnSaveChangesClose()
@@ -291,9 +294,11 @@ namespace TrapchumApp.Pages.Transactions.Branches
 
                 transaction.CashManagements.Add(cashMgn);
 
-                var result = await _caVaultService.CreateCashVaultAsync(transaction);
+                var command = new StartCashVaultOut(transaction);
 
-                if (result.IsSuccess == true)
+                var result = await mediator.Send(command);  //_caVaultService.CreateCashVaultAsync(transaction);
+
+                if (result.IsSuccess())
                 {
                     NotificationService.Notify(NotificationSeverity.Success, "Vault Out", "Vault out is succeed!");
 
@@ -308,7 +313,8 @@ namespace TrapchumApp.Pages.Transactions.Branches
                 else
                 {
                     OnClear();
-                    NotificationService.Notify(NotificationSeverity.Success, "Vault Out", result.ErrMessage);
+
+                    NotificationService.Notify(NotificationSeverity.Success, "Vault Out", result.GetMessage());
                 }
             }
 
@@ -318,7 +324,8 @@ namespace TrapchumApp.Pages.Transactions.Branches
 
         void Calculate()
         {
-            total = cashMDList.Sum(x => x.TotalValue)!.Value;
+            total = cashMDList.Sum(x => x.TotalValue) ?? 0;
+
             totalAmount = total;
         }
 

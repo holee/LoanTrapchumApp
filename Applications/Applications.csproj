@@ -7,11 +7,20 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Features\Currencies\Requests\**" />
+    <Compile Remove="Features\Currencies\UseCases\**" />
     <Compile Remove="Features\Customers\Mappers\**" />
+    <Compile Remove="Features\NewFolder1\**" />
     <Compile Remove="Responses\Lists\Collaterals\**" />
+    <EmbeddedResource Remove="Features\Currencies\Requests\**" />
+    <EmbeddedResource Remove="Features\Currencies\UseCases\**" />
     <EmbeddedResource Remove="Features\Customers\Mappers\**" />
+    <EmbeddedResource Remove="Features\NewFolder1\**" />
     <EmbeddedResource Remove="Responses\Lists\Collaterals\**" />
+    <None Remove="Features\Currencies\Requests\**" />
+    <None Remove="Features\Currencies\UseCases\**" />
     <None Remove="Features\Customers\Mappers\**" />
+    <None Remove="Features\NewFolder1\**" />
     <None Remove="Responses\Lists\Collaterals\**" />
   </ItemGroup>
 
@@ -31,8 +40,6 @@
     <Folder Include="Features\Collaterals\Commands\CreateCollaterals\" />
     <Folder Include="Features\Collaterals\Commands\DeleteCollaterals\" />
     <Folder Include="Features\CreditAgents\UseCases\" />
-    <Folder Include="Features\Currencies\Requests\" />
-    <Folder Include="Features\Currencies\UseCases\" />
     <Folder Include="Features\Employees\Extensions\" />
     <Folder Include="Features\Employees\Mappers\" />
     <Folder Include="Features\Employees\Responses\" />
@@ -59,8 +66,6 @@
     <Folder Include="Features\LoanTransactions\Transactions\Mappers\" />
     <Folder Include="Features\LoanTransactions\Transactions\Requests\" />
     <Folder Include="Features\LoanTransactions\Transactions\Responses\" />
-    <Folder Include="Features\NewFolder1\" />
-    <Folder Include="Features\NewFolder\" />
     <Folder Include="Features\Products\Mappers\" />
     <Folder Include="Features\Products\Responses\" />
     <Folder Include="Features\Products\UseCases\" />
@@ -70,6 +75,7 @@
     <Folder Include="Features\Vendors\Mapperes\" />
     <Folder Include="Features\Vendors\UseCases\" />
     <Folder Include="Requests\Identity\" />
+    <Folder Include="Responses\Lists\Currency\" />
     <Folder Include="Responses\Transactions\" />
     <Folder Include="Responses\Vendors\" />
     <Folder Include="Responses\ViewModels\Branches\" />

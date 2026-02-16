@@ -2,9 +2,11 @@
 using Applications.Extensions;
 using Applications.Features.Currencies.Dto;
 using Applications.Features.Currencies.Responses;
+using Applications.Features.Ledgers.Dto;
 using Applications.Interfaces.Currencies;
 using Applications.Responses.Message;
 using Applications.Responses.Paginations;
+using Applications.Responses.ViewModels.Options;
 using Dapper;
 using Domains.Models.Currencies;
 using ErrorOr;
@@ -17,36 +19,10 @@ using System.Linq.Expressions;
 
 namespace Infrastructures.Implements;
 
-public sealed class CurrencyRepository(IDbContextFactory<DataContext> contextFactory,
-        IDapperConnectionFactory connectionFactory) : ICurrencyService
+public sealed class CurrencyRepository(IDbContextFactory<DataContext> contextFactory, IDapperConnectionFactory connectionFactory) : ICurrencyService
 {
-    public async Task<ErrorOr<Currency>> GetCurrencyWithSpotRates(int? currencyId, CancellationToken cancellation = default)
-    {
-        using var context = await contextFactory.CreateDbContextAsync(cancellation);
 
-        var currency = await context.Currencies
-                            .Include(sp => sp.SpotRates)
-                            .AsNoTracking()
-                            .FirstOrDefaultAsync(c => c.CurrencyId == currencyId, cancellation);
-
-        if (currency is null) return Error.NotFound(Messages.DataNotFound);
-        return currency;
-    }
-
-
-    public async Task<ErrorOr<Currency>> GetCurrencyById(int? id, CancellationToken cancellation = default)
-    {
-        await using var context = await contextFactory.CreateDbContextAsync(cancellation);
-
-        var currency = await context.Currencies
-                                .AsNoTracking()
-                                .FirstOrDefaultAsync(c => c.CurrencyId == id, cancellation);
-        if (currency is null) return Error.NotFound(Messages.DataNotFound);
-
-        return currency;
-    }
-
-    public async Task<ErrorOr<Currency>> GetCurrencyByIdAsync(int currencyId, CancellationToken cancellationToken = default, params Expression<Func<Currency, object>>[] includes)
+    public async Task<ErrorOr<Currency>> GetCurrencyByIdAsync(int? currencyId, CancellationToken cancellationToken = default, params Expression<Func<Currency, object>>[] includes)
     {
         await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
 
@@ -67,6 +43,60 @@ public sealed class CurrencyRepository(IDbContextFactory<DataContext> contextFac
             : currency;
     }
 
+
+    public async Task<ErrorOr<CurrencyDto>> GetCurrencyById(int? currencyId, CancellationToken cancellationToken = default, params Expression<Func<Currency, object>>[] includes)
+    {
+        await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
+
+        var query = context.Currencies.AsQueryable();
+
+        if (includes is not null && includes.Length > 0)
+        {
+            foreach (var include in includes)
+            {
+                query = query.Include(include);
+            }
+        }
+
+        var currency = await query
+                            .AsNoTracking()
+                            .AsSplitQuery()
+                            .Select(x => new CurrencyDto
+                            {
+                                CurrencyId = x.CurrencyId,
+                                CurrencyCode = x.CurrencyCode,
+                                Description = x.Description,
+                                ExchangeRate = x.ExchangeRate,
+                                SpotRate = x.SpotRate,
+                                CurrencyType = x.CurrencyType,
+                                Limited = x.Limited,
+                                IsBaseCurrency = x.IsBaseCurrency ?? false,
+                                IsActive = x.IsActive,
+                                CurrencySpotRates = x.SpotRates!.Select(s => new CurrencySpotRateDto
+                                {
+                                    SpotRateId = s.SpotRateId,
+                                    BuyingRate = s.BuyingRate,
+                                    AvgRate = s.AvgRate,
+                                    Description = s.Description,
+                                    TransactionDate = s.TransactionDate,
+                                    SellingRate = s.SellingRate,
+                                    SpotRate = s.SpotRate
+                                }).ToList(),
+                                CurrencyCounters = x.CurrencyCounters!.Select(c => new CurrencyCounterDto
+                                {
+                                    Id = c.Id,
+                                    CurrencyValue = c.CurrencyValue,
+                                    Description = c.Description,
+                                    Quantity = c.Quantity,
+                                    IsActive = c.IsActive
+                                }).ToList()
+                            })
+                        .SingleOrDefaultAsync(x => x.CurrencyId == currencyId, cancellationToken);
+
+        return currency is null
+            ? Error.NotFound(Messages.DataNotFound)
+            : currency;
+    }
 
 
     public async Task<Pager<VCurrenciesList>> GetCurrencies(QueryParam param, CancellationToken cancellation = default)
@@ -227,13 +257,30 @@ public sealed class CurrencyRepository(IDbContextFactory<DataContext> contextFac
 
     public async Task<Pager<VCurrencyCounter>> GetCurrencyCounter(int? branchId, int? currencyId, CancellationToken ca = default)
     {
-        using var db = await connectionFactory.CreateConnectionAsync(ca);
+        await using var db = await contextFactory.CreateDbContextAsync(ca);
 
-        var queries = await db.QueryAsync<VCurrencyCounter>(ProcedureConstant.GetCurrencyNotes,
-                                        new { currencyId, branchId },
-                                        commandType: CommandType.StoredProcedure);
+        var queries = db.Set<VCurrencyCounter>()
+                        .Where(x => x.BranchId == branchId)
+                        .WhereIf(currencyId.HasValue && currencyId > 0, x => x.CurrencyId == currencyId);
 
-        return PagerExtensions.Create(queries.ToList(), queries.Count());
+        var counts = await queries.CountAsync(ca);
+        var items = await queries
+                        .AsNoTracking()
+                        .Select(x => new VCurrencyCounter
+                        {
+                            Id = x.Id,
+                            CurrencyId = x.CurrencyId,
+                            CurrencyCode = x.CurrencyCode,
+                            CurrencyName = x.CurrencyName,
+                            CurrencyValue = x.CurrencyValue,
+                            Description = x.Description,
+                            Quantity = x.Quantity,
+                            IsActive = x.IsActive
+                        })
+                        .OrderBy(x => x.CurrencyCode)
+                        .ToListAsync(ca);
+        return PagerExtensions.Create(items, counts);
+
     }
 
     public async Task<Pager<VCurrencyNotes>> GetCurrenciesNotes(int? branchId, int? currencyId, QueryParam param, CancellationToken ca = default)
@@ -303,31 +350,6 @@ public sealed class CurrencyRepository(IDbContextFactory<DataContext> contextFac
         return pager;
     }
 
-    public async Task<Pager<CurrencyNoteViewDto>> GetCurrencyNotes(int? branchId, int? currencyId, QueryParam param, CancellationToken cancellation = default)
-    {
-        await using var context = await contextFactory.CreateDbContextAsync(cancellation);
-
-        var queries = context.Set<CurrencyNoteViewDto>()
-                             .WhereIf(branchId.HasValue && branchId > 0, x => x.BranchRefId == branchId);
-
-        queries = ApplyFilter(currencyId, param, queries);
-
-        queries = ApplySort(param, queries);
-
-        var counts = await queries.CountAsync(cancellation);
-
-        if (param.Skip > 0)
-        {
-            queries = queries.Skip(param.Skip).Take(param.PageSize);
-        }
-
-        var items = await queries
-                             .AsNoTracking()
-                            .ToListAsync(cancellation);
-
-        return new Pager<CurrencyNoteViewDto>(items, counts);
-    }
-
     public async Task<Pager<Currency>> GetCurrencies(int? currencyId, QueryParam param, CancellationToken cancellation = default)
     {
         using var context = await contextFactory.CreateDbContextAsync(cancellation);
@@ -369,6 +391,59 @@ public sealed class CurrencyRepository(IDbContextFactory<DataContext> contextFac
 
     }
 
+    public async Task<Pager<CurrencyDto>> GetCurrenciesAsync(int? currencyId, QueryParam param, CancellationToken cancellation = default)
+    {
+        using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+        var baseQueries = context.Currencies
+                            .Include(x => x.SpotRates)
+                            .WhereIf(currencyId.HasValue && currencyId > 0, x => x.CurrencyId == currencyId)
+                            .AsQueryable();
+
+        baseQueries = ApplyFilter(param, baseQueries);
+
+        baseQueries = ApplySort(param, baseQueries);
+
+        var counts = await baseQueries.CountAsync(cancellation);
+
+        if (param.PageSize > 0)
+        {
+            baseQueries = baseQueries.Skip(param.Skip).Take(param.PageSize);
+        }
+
+        var items = await baseQueries
+                            .AsNoTracking()
+                            .Select(x => ProjectCurrencyDto(x))
+                            .ToListAsync(cancellation);
+
+        return PagerExtensions.Create(items, counts);
+
+    }
+
+    private static IQueryable<Currency> ApplySort(QueryParam param, IQueryable<Currency> baseQueries)
+    {
+        var sortDescending = param.SortDescending;
+
+        if (!string.IsNullOrEmpty(param.FilterColumn))
+        {
+
+            baseQueries = sortDescending ?
+                        baseQueries.OrderByDescending(x => EF.Property<object>(x, param.FilterColumn)) :
+                        baseQueries.OrderBy(x => EF.Property<object>(x, param.FilterColumn));
+
+        }
+        else
+        {
+            baseQueries = sortDescending ?
+                        baseQueries.OrderByDescending(c => c.CurrencyCode)
+                                .ThenByDescending(c => c.Description) :
+                        baseQueries.OrderBy(x => x.CurrencyCode)
+                                .ThenBy(x => x.Description);
+        }
+
+        return baseQueries;
+    }
+
     public async Task<ErrorOr<VCurrenciesList>> GetCurrencyDetailById(int? currencyId, CancellationToken cancellation = default)
     {
         await using var context = await contextFactory.CreateDbContextAsync(cancellation);
@@ -383,7 +458,42 @@ public sealed class CurrencyRepository(IDbContextFactory<DataContext> contextFac
     }
 
 
+    private static CurrencyDto ProjectCurrencyDto(Currency x)
+    {
+        return new CurrencyDto
+        {
+            CurrencyId = x.CurrencyId,
+            CurrencyCode = x.CurrencyCode,
+            Description = x.Description,
+            ExchangeRate = x.ExchangeRate,
+            SpotRate = x.SpotRate,
+            CurrencyType = x.CurrencyType,
+            Limited = x.Limited,
+            IsBaseCurrency = x.IsBaseCurrency ?? false,
+            IsActive = x.IsActive
+        };
+    }
 
+    private static IQueryable<Currency> ApplyFilter(QueryParam param, IQueryable<Currency> baseQueries)
+    {
+        var filter = param.Filter?.Trim();
+
+        if (string.IsNullOrWhiteSpace(filter)) return baseQueries;
+
+        if (string.IsNullOrWhiteSpace(param.FilterColumn))
+        {
+            string[] props = { nameof(Currency.CurrencyCode), nameof(Currency.Description) };
+
+            baseQueries = baseQueries.WhereMatchesFilter(filter, props);
+        }
+        else
+        {
+
+            baseQueries = baseQueries.WhereLike(filter, param.FilterColumn);
+        }
+
+        return baseQueries;
+    }
 
     private static IQueryable<VCurrenciesList> ApplyFilters(QueryParam param, IQueryable<VCurrenciesList> queries)
     {
@@ -603,6 +713,35 @@ public sealed class CurrencyRepository(IDbContextFactory<DataContext> contextFac
 }
 
 
+
+//public async Task<ErrorOr<Currency>> GetCurrencyWithSpotRates(int? currencyId, CancellationToken cancellation = default)
+//{
+//    using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+//    var currency = await context.Currencies
+//                        .Include(sp => sp.SpotRates)
+//                        .AsNoTracking()
+//                        .FirstOrDefaultAsync(c => c.CurrencyId == currencyId, cancellation);
+
+//    if (currency is null) return Error.NotFound(Messages.DataNotFound);
+//    return currency;
+//}
+
+
+//public async Task<ErrorOr<Currency>> GetCurrencyById(int? id, CancellationToken cancellation = default)
+//{
+//    await using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+//    var currency = await context.Currencies
+//                            .AsNoTracking()
+//                            .FirstOrDefaultAsync(c => c.CurrencyId == id, cancellation);
+//    if (currency is null) return Error.NotFound(Messages.DataNotFound);
+
+//    return currency;
+//}
+
+
+
 //public async Task<Result<IEnumerable<Currency>>> GetCurrencies(int? currencyId, string? q = null)
 //{
 //    using var context = await contextFactory.CreateDbContextAsync();
@@ -702,4 +841,28 @@ public sealed class CurrencyRepository(IDbContextFactory<DataContext> contextFac
 //        .AsNoTracking()
 //        .ToListAsync();
 //    return Result.Success<IEnumerable<T>>(queries);
+//}
+//public async Task<Pager<CurrencyNoteViewDto>> GetCurrencyNotes(int? branchId, int? currencyId, QueryParam param, CancellationToken cancellation = default)
+//{
+//    await using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+//    var queries = context.Set<CurrencyNoteViewDto>()
+//                         .WhereIf(branchId.HasValue && branchId > 0, x => x.BranchRefId == branchId);
+
+//    queries = ApplyFilter(currencyId, param, queries);
+
+//    queries = ApplySort(param, queries);
+
+//    var counts = await queries.CountAsync(cancellation);
+
+//    if (param.Skip > 0)
+//    {
+//        queries = queries.Skip(param.Skip).Take(param.PageSize);
+//    }
+
+//    var items = await queries
+//                         .AsNoTracking()
+//                        .ToListAsync(cancellation);
+
+//    return new Pager<CurrencyNoteViewDto>(items, counts);
 //}
