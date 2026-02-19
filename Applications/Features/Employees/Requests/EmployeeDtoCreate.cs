@@ -1,4 +1,4 @@
-﻿using Applications.Features.Addresses.Requests;
+﻿using Applications.Features.Addresses.Dto;
 
 namespace Applications.Features.Employees.Requests
 {

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Applications.Features.Addresses.Responses;
+namespace Applications.Features.Addresses.Dto;
 
 public class ProvinceDto
 {

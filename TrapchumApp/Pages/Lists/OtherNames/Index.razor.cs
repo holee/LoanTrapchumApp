@@ -7,9 +7,9 @@ using Microsoft.AspNetCore.Components;
 using Radzen;
 using Radzen.Blazor;
 using System.Threading.Tasks;
-using Applications.Features.Addresses.Responses;
 using Applications.Features.OtherNames;
 using TrapchumApp.Helpers.Extensions;
+using Applications.Features.Addresses.Dto;
 
 namespace TrapchumApp.Pages.Lists.OtherNames;
 

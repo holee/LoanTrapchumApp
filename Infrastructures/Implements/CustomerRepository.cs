@@ -47,7 +47,7 @@ public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFac
         var countTask = await queries.CountAsync(cancellation);
 
         var dataTask = await queries
-            .Skip(param.Skip)
+            .Skip(param.Page)
             .Take(param.PageSize)
             .ToListAsync(cancellation);
 
@@ -550,7 +550,7 @@ public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFac
     {
         var filter = param.Filter?.Trim();
 
-        if (param.IsIncludeInActive)
+        if (param.IncludeInActive)
         {
             queries = queries.IgnoreQueryFilters();
         }

@@ -178,7 +178,7 @@ public sealed class EmployeeRepository(IDapperConnectionFactory connectionFactor
 
         if (q.PageSize > 0)
         {
-            queries = queries.Skip(q.Skip).Take(q.PageSize);
+            queries = queries.Skip(q.Page).Take(q.PageSize);
         }
 
         var items = await queries.AsNoTracking()
@@ -202,7 +202,7 @@ public sealed class EmployeeRepository(IDapperConnectionFactory connectionFactor
             SortColumn = q.SortColumn,
             SortDescending = q.SortDescending,
             SelectColumns = selectColumns,
-            Skip = q.Skip,
+            Skip = q.Page,
             PageSize = q.PageSize
         };
 
@@ -363,7 +363,7 @@ public sealed class EmployeeRepository(IDapperConnectionFactory connectionFactor
         queries = queries.WhereIf(branchId > 0, x => x.BranchId == branchId)
                          .WhereIf(employeeId.IsNotNullOrEmpty(), x => x.EmployeeId == employeeId);
 
-        if (param.IsIncludeInActive)
+        if (param.IncludeInActive)
         {
             queries = queries.IgnoreQueryFilters();
         }

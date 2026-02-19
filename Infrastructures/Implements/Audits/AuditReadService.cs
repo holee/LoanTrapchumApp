@@ -38,7 +38,7 @@ public sealed class AuditReadService : IAuditReadService
 
         if (param.PageSize > 0)
         {
-            query = query.Skip(param.Skip).Take(param.PageSize);
+            query = query.Skip(param.Page).Take(param.PageSize);
         }
 
         var projection = await query

@@ -119,7 +119,7 @@ public partial class CollateralList
         {
             var param = new QueryParam
             {
-                Skip = pageIndex,
+                Page = pageIndex,
                 PageSize = pageSize,
                 SortColumn = sortColumn,
                 SortDescending = sortDecending,

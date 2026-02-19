@@ -1,4 +1,4 @@
-﻿using Applications.Features.Addresses.Responses;
+﻿using Applications.Features.Addresses.Dto;
 using Domains.Models.Addresses;
 
 namespace Applications.Commons.Mappers

@@ -47,7 +47,7 @@ namespace TrapchumApp.Pages.Currencies
                 isLoading = true;
                 var param = new QueryParam
                 {
-                    Skip = pageIndex,
+                    Page = pageIndex,
                     PageSize = pageSize,
                     SortColumn = "CurrencyCode",
                     SortDescending = false,

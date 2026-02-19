@@ -1,4 +1,4 @@
-using Applications.Features.Addresses.Responses;
+using Applications.Features.Addresses.Dto;
 using Applications.Features.OtherNames;
 using Applications.Services.Lists;
 using Domains.Models.Lists;

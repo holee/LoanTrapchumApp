@@ -72,7 +72,7 @@ namespace Infrastructures.Implements
 
             IQueryable<Province> query = context.Provinces;
 
-            if (param.IsIncludeInActive == true)
+            if (param.IncludeInActive == true)
             {
                 query = query.IgnoreQueryFilters();
             }
@@ -90,7 +90,7 @@ namespace Infrastructures.Implements
 
             var counts = await query.CountAsync();
 
-            var data = await query.Skip(param.Skip)
+            var data = await query.Skip(param.Page)
                            .Take(param.PageSize)
                            .Select(x => new ProvinceViewModel
                            {

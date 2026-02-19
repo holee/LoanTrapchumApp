@@ -1,5 +1,5 @@
-﻿using Applications.Features.Addresses.Responses;
-using Applications.Responses;
+﻿using Applications.Commons;
+using Applications.Features.Addresses.Dto;
 using Domains.Models.Addresses;
 
 namespace Applications.Interfaces.Addresses
@@ -31,5 +31,13 @@ namespace Applications.Interfaces.Addresses
 
         Task<T?> GetsProvinceById<T>(int? id) where T : class;
         Task<IEnumerable<ProvinceDto>> GetsProvinces(int? provinceId, string? expression);
+        Task<PageMetaData<ProvinceDto>> GetProvinces(int? provinceId, QueryParam param, CancellationToken cancellation = default);
+        Task<PageMetaData<DistrictDto>> GetDistrictsByProvinceId(int? provinceId, int? districtId, QueryParam param, CancellationToken cancellation = default);
+        Task<PageMetaData<CommuneDto>> GetCommunesByDistrictId(int? districtId, int? communeId, QueryParam param, CancellationToken cancellation = default);
+        Task<PageMetaData<VillageDto>> GetVillagesByCommuneId(int? communeId, int? villageId, QueryParam param, CancellationToken cancellation = default);
+        Task<ErrorOr.ErrorOr<CityDto>> AddCity(City city, CancellationToken cancellation = default);
+        Task<ErrorOr.ErrorOr<CityDto>> UpdateCity(City city, CancellationToken cancellation = default);
+        Task<PageMetaData<CountryDto>> GetCountries(int? countryId, QueryParam param, CancellationToken cancellation = default);
+        Task<PageMetaData<CityDto>> GetCities(int? cityId, QueryParam param, CancellationToken cancellation = default);
     }
 }

@@ -1,4 +1,4 @@
-using Applications.Features.Addresses.Responses;
+using Applications.Features.Addresses.Dto;
 using Applications.Features.Branches.Dtos;
 using Applications.Features.Branches.Queries.GetBranchAsPaging;
 using Applications.Features.Departments.Dto;

@@ -137,7 +137,7 @@ namespace Infrastructures.Implements
 
             var totalRecords = await queries.CountAsync(cancellation);
             var items = await queries
-                                .Skip(param.Skip)
+                                .Skip(param.Page)
                                 .Take(param.PageSize)
                                 .Select(x => new VttCurrencyExchanges
                                 {

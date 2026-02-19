@@ -222,7 +222,7 @@ public class LedgerService : ILedgerService
         await using var context = await _dbContextFactory.CreateDbContextAsync(cancellation);
 
         var queries = context.VLedgers
-                            .IgnoreFilterIf(q.IsIncludeInActive)
+                            .IgnoreFilterIf(q.IncludeInActive)
                             .WhereIf(currencyId > 0, x => x.CurrencyId == currencyId)
                             .OrderBy(x => x.LedgerTypeId)
                             .ThenBy(x => x.LedgerTypeCode)
@@ -247,7 +247,7 @@ public class LedgerService : ILedgerService
 
 
         var counts = await queries.CountAsync();
-        var items = await queries.Skip(q.Skip)
+        var items = await queries.Skip(q.Page)
                                     .Take(q.PageSize)
                                     .AsNoTracking()
                                     .ToListAsync();

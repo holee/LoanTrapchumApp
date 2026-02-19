@@ -1,5 +1,5 @@
 using Applications.Extensions;
-using Applications.Features.Addresses.Responses;
+using Applications.Features.Addresses.Dto;
 using Applications.Features.OtherNames;
 using Applications.Interfaces.Lists;
 using Applications.Interfaces.Vendors;

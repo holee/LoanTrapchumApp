@@ -361,7 +361,7 @@ public class JournalService(DataContext context, ILogger<JournalService> logger,
 
         var pageCount = await queries.CountAsync();
 
-        var pageItems = await queries.Skip(param.Skip).Take(param.PageSize)
+        var pageItems = await queries.Skip(param.Page).Take(param.PageSize)
             .AsNoTracking()
             .ToListAsync();
 
@@ -391,7 +391,7 @@ public class JournalService(DataContext context, ILogger<JournalService> logger,
     }
 
 
-    public async Task<PaginationResult<Applications.Features.Journals.Dtos.JournalEntryDto>> GetJournalsAsync(string? journalId, QueryParam param, CancellationToken cancellation = default)
+    public async Task<PageMetaData<JournalEntryDto>> GetJournalsAsync(string? journalId, QueryParam param, CancellationToken cancellation = default)
     {
 
         await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);
@@ -410,7 +410,7 @@ public class JournalService(DataContext context, ILogger<JournalService> logger,
                 : queries.OrderBy(x => EF.Property<object>(x, param.SortColumn));
         }
 
-        return await PaginationExtensions.CreateAsync(queries, param.Skip, param.PageSize, cancellation);
+        return await queries.ToPagedAsync(param.Page, param.PageSize, cancellation);
     }
 
     public async Task<Result<JournalEntryVm>> GetJournalByIdAsync(string? journalId, bool include)
@@ -549,7 +549,7 @@ public class JournalService(DataContext context, ILogger<JournalService> logger,
 
         if (param.PageSize > 0)
         {
-            queries = queries.Skip(param.Skip)
+            queries = queries.Skip(param.Page)
                              .Take(param.PageSize);
         }
 

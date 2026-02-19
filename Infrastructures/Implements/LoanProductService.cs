@@ -131,7 +131,7 @@ namespace Infrastructures.Implements
 
             IQueryable<VlProductList> queries = _context.Database.SqlQuery<VlProductList>($@"SELECT * FROM VLProductList");
 
-            if (param.IsIncludeInActive == false)
+            if (param.IncludeInActive == false)
             {
                 queries = queries.Where(x => x.IsActive == true);
             }
@@ -151,10 +151,10 @@ namespace Infrastructures.Implements
 
             if (param.PageSize > 0)
             {
-                queries = queries.Skip(param.Skip).Take(param.PageSize);
+                queries = queries.Skip(param.Page).Take(param.PageSize);
             }
 
-            var items = await queries.Skip(param.Skip)
+            var items = await queries.Skip(param.Page)
                                         .Take(param.PageSize)
                                         .ProjectToType<T>()
                                         .AsNoTracking()
@@ -171,7 +171,7 @@ namespace Infrastructures.Implements
 
             var queries = context.Database
                                  .SqlQuery<VlProductList>($"SELECT * FROM VLProductList")
-                                 .WhereIf(!param.IsIncludeInActive, x => x.IsActive == true)
+                                 .WhereIf(!param.IncludeInActive, x => x.IsActive == true)
                                  .WhereIf(!string.IsNullOrEmpty(param.Filter),
                                            e => EF.Functions.Like(e.LoanProductName!, $"%{param.Filter}%") ||
                                                 EF.Functions.Like(e.LoanSize!, $"%{param.Filter}%") ||
@@ -185,7 +185,7 @@ namespace Infrastructures.Implements
 
             if (param.PageSize > 0)
             {
-                queries = queries.Skip(param.Skip).Take(param.PageSize);
+                queries = queries.Skip(param.Page).Take(param.PageSize);
             }
 
             var items = await queries.AsNoTracking()

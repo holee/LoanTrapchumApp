@@ -111,9 +111,9 @@ public sealed class CurrencyRepository(IDbContextFactory<DataContext> contextFac
 
         var counts = queries.Count();
 
-        if (param.Skip > 0)
+        if (param.Page > 0)
         {
-            queries = queries.Skip(param.Skip).Take(param.PageSize);
+            queries = queries.Skip(param.Page).Take(param.PageSize);
         }
 
         var items = await queries.AsNoTracking()
@@ -299,7 +299,7 @@ public sealed class CurrencyRepository(IDbContextFactory<DataContext> contextFac
 
         if (param.PageSize > 0)
         {
-            queries = queries.Skip(param.Skip).Take(param.PageSize);
+            queries = queries.Skip(param.Page).Take(param.PageSize);
         }
 
         var items = await queries.AsNoTracking().ToListAsync(ca);
@@ -337,9 +337,9 @@ public sealed class CurrencyRepository(IDbContextFactory<DataContext> contextFac
 
         var counts = queries.Count();
 
-        if (param.Skip > 0)
+        if (param.Page > 0)
         {
-            queries = queries.Skip(param.Skip).Take(param.PageSize);
+            queries = queries.Skip(param.Page).Take(param.PageSize);
 
         }
 
@@ -380,7 +380,7 @@ public sealed class CurrencyRepository(IDbContextFactory<DataContext> contextFac
 
         if (param.PageSize > 0)
         {
-            baseQueries = baseQueries.Skip(param.Skip).Take(param.PageSize);
+            baseQueries = baseQueries.Skip(param.Page).Take(param.PageSize);
         }
 
         var items = await baseQueries
@@ -408,7 +408,7 @@ public sealed class CurrencyRepository(IDbContextFactory<DataContext> contextFac
 
         if (param.PageSize > 0)
         {
-            baseQueries = baseQueries.Skip(param.Skip).Take(param.PageSize);
+            baseQueries = baseQueries.Skip(param.Page).Take(param.PageSize);
         }
 
         var items = await baseQueries
@@ -614,7 +614,7 @@ public sealed class CurrencyRepository(IDbContextFactory<DataContext> contextFac
 
     private static IQueryable<VCurrencyCounter> ApplyFilter(QueryParam param, IQueryable<VCurrencyCounter> queries)
     {
-        if (param.IsIncludeInActive)
+        if (param.IncludeInActive)
         {
             queries = queries.IgnoreQueryFilters();
         }

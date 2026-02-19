@@ -1,11 +1,9 @@
-using Applications.Features.Addresses.Requests;
-using Applications.Features.Addresses.Responses;
+using Applications.Features.Addresses.Dto;
 using Applications.Features.Branches.Command.CreateBranch;
 using Applications.Features.Branches.Dtos;
 using Applications.Features.Currencies.Dto;
 using Applications.Interfaces.Banks;
 using Domains.Models.Addresses;
-using Domains.Models.Lists;
 using Mapster;
 using TrapchumApp.Helpers.Extensions;
 using TrapchumApp.Helpers.Validations;

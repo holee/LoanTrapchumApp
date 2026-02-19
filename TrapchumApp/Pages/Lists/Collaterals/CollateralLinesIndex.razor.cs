@@ -124,7 +124,7 @@ public partial class CollateralLinesIndex
         {
             var param = new QueryParam
             {
-                Skip = _skip,
+                Page = _skip,
                 PageSize = _pageSize,
                 SortColumn = _sortColumn,
                 SortDescending = _sortDescending,

@@ -1,12 +1,9 @@
 using Applications.Commons.Extensions;
 using Applications.Enumerations;
 using Applications.Features.CashManagements.Extensions;
-using Applications.Features.CashManagements.Interfaces;
 using Applications.Features.CashManagements.Responses;
-using Applications.Features.CashManagements.UseCases;
 using Applications.Features.Currencies.Responses;
 using Applications.Features.Transactions.CashManagements;
-using Applications.Services.Transactions.Branches;
 using Domains.Enumerations;
 using TrapchumApp.Helpers.Extensions;
 using Applications.Features.Currencies.Extensions;
@@ -23,15 +20,6 @@ namespace TrapchumApp.Pages.Transactions.Branches
 {
     public partial class VaultOutModal
     {
-        private readonly ICashVaultServiceImpl _caVaultService;
-        private readonly IStartVaultOutUseCase _startVaultOut;
-        private readonly IGetCashVaultUseCase _getCashVault;
-        public VaultOutModal(ICashVaultServiceImpl caVaultService, IStartVaultOutUseCase startVaultOut, IGetCashVaultUseCase getCashVault)
-        {
-            _caVaultService = caVaultService;
-            _startVaultOut = startVaultOut;
-            _getCashVault = getCashVault;
-        }
 
         [Parameter] public int BranchId { get; set; }
         [Parameter] public int BankId { get; set; } = 11;
@@ -228,9 +216,11 @@ namespace TrapchumApp.Pages.Transactions.Branches
 
             transaction.CashManagements.Add(cashMgn);
 
-            var result = await _startVaultOut.ExecuteAsync(transaction);
+            var command = new StartCashVaultOut(transaction);
 
-            if (result.IsSuccess)
+            var result = await mediator.Send(command); //_startVaultOut.ExecuteAsync(transaction);
+
+            if (result.IsSuccess())
             {
                 NotificationService.Notify(NotificationSeverity.Success, "Vault Out", "Vault out is succeed!");
                 transaction = new();
@@ -240,7 +230,7 @@ namespace TrapchumApp.Pages.Transactions.Branches
             {
                 CurrencyNotes = new List<VCurrencyNotes>();
                 NewCashMDVOut = new();
-                NotificationService.Notify(NotificationSeverity.Error, "Vault Out", result.ErrMessage);
+                NotificationService.Notify(NotificationSeverity.Error, "Vault Out", result.GetMessage());
             }
         }
 

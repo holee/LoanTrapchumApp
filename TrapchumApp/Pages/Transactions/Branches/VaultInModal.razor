@@ -207,8 +207,9 @@
         ms.Position = 0;
 
         var rsp = await excel.GetCashValaultInFromExcel(ms);
+
         cashMDList = rsp.ToList();
-        //StateHasChanged();
+
         await grid.Reload();
     }
 

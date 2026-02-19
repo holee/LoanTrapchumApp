@@ -4,54 +4,55 @@ public sealed class QueryParam
 {
     public QueryParam()
     {
-        Skip = 0;
+        Page = 0;
         PageSize = 15;
         SortColumn = string.Empty;
         SortDescending = false;
-        IsIncludeInActive = false;
+        IncludeInActive = false;
         Filter = string.Empty;
     }
-    public QueryParam(int skip, int pageSize)
+    public QueryParam(int page, int pageSize)
     {
-        Skip = skip;
+        Page = page;
         PageSize = pageSize;
     }
-    public QueryParam(int skip, int pageSize, string sortField)
-        : this(skip, pageSize)
+    public QueryParam(int page, int pageSize, string sortField)
+        : this(page, pageSize)
     {
         SortColumn = sortField;
     }
-    public QueryParam(int skip, int pageSize, string sortField, string? filter = null)
-        : this(skip, pageSize, sortField)
+    public QueryParam(int page, int pageSize, string sortField, string? filter = null)
+        : this(page, pageSize, sortField)
     {
         Filter = filter;
     }
 
-    public QueryParam(int skip, int pageSize, string sortField, bool isIncludeInActive = false)
-        : this(skip, pageSize, sortField)
+    public QueryParam(int page, int pageSize, string sortField, bool isIncludeInActive = false)
+        : this(page, pageSize, sortField)
     {
-        IsIncludeInActive = isIncludeInActive;
+        IncludeInActive = isIncludeInActive;
     }
-    public QueryParam(int skip, int pageSize, string sortField, bool isIncludeInActive = false, bool sortDescending = false)
-        : this(skip, pageSize, sortField, isIncludeInActive)
+    public QueryParam(int page, int pageSize, string sortField, bool isIncludeInActive = false, bool sortDescending = false)
+        : this(page, pageSize, sortField, isIncludeInActive)
     {
         SortDescending = sortDescending;
     }
-    public QueryParam(int skip, int pageSize, string sortField, bool isIncludeInActive = false, bool sortDescending = false, string? filter = null)
-        : this(skip, pageSize, sortField, isIncludeInActive, sortDescending)
+    public QueryParam(int page, int pageSize, string sortField, 
+           bool isIncludeInActive = false, bool sortDescending = false, string? filter = null)
+        : this(page, pageSize, sortField, isIncludeInActive, sortDescending)
     {
         Filter = filter;
     }
-    public QueryParam(int skip, int pageSize, string sortField, bool isIncludeInActive = false, bool sortDescending = false, string? filter = null, string? filterColumn = null)
-       : this(skip, pageSize, sortField, isIncludeInActive, sortDescending, filter)
+    public QueryParam(int page, int pageSize, string sortField, bool isIncludeInActive = false, bool sortDescending = false, string? filter = null, string? filterColumn = null)
+       : this(page, pageSize, sortField, isIncludeInActive, sortDescending, filter)
     {
         FilterColumn = filterColumn;
     }
-    public int Skip { get; set; } = 0;
+    public int Page { get; set; } = 0;
     public int PageSize { get; set; } = 15;
     public string? SortColumn { get; set; } = string.Empty;
     public bool SortDescending { get; set; } = false;
-    public bool IsIncludeInActive { get; set; } = false;
+    public bool IncludeInActive { get; set; } = false;
     public string? FilterColumn { get; set; } = string.Empty;
     public string[] SelectColumns { get; set; } = []; 
     public string? Filter { get; set; } = string.Empty;

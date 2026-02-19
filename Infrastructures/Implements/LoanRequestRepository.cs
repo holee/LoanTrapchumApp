@@ -1284,9 +1284,9 @@ public sealed class LoanRequestRepository(
         // Paging
         var totalCount = await baseQuery.CountAsync();
 
-        var skip = (param.Skip - 1) * param.PageSize;
+        var skip = (param.Page - 1) * param.PageSize;
 
-        var items = await baseQuery.Skip(param.Skip).Take(param.PageSize).AsNoTracking().ToListAsync();
+        var items = await baseQuery.Skip(param.Page).Take(param.PageSize).AsNoTracking().ToListAsync();
 
         return new Pager<VLoanRequests>(items, totalCount);
     }
@@ -1344,7 +1344,7 @@ public sealed class LoanRequestRepository(
 
         // --- Paging
         var totalCount = await query.CountAsync();
-        var items = await query.Skip(param.Skip).Take(param.PageSize).AsNoTracking().ToListAsync();
+        var items = await query.Skip(param.Page).Take(param.PageSize).AsNoTracking().ToListAsync();
 
         return new Pager<VLoanRequests>(items, totalCount);
     }
@@ -1662,7 +1662,7 @@ public sealed class LoanRequestRepository(
 
         // Paging
         var totalCount = await query.CountAsync();
-        var items = await query.Skip(param.Skip).Take(param.PageSize).AsNoTracking().ToListAsync();
+        var items = await query.Skip(param.Page).Take(param.PageSize).AsNoTracking().ToListAsync();
 
         return new Pager<VLoanRequests>(items, totalCount);
     }

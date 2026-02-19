@@ -223,11 +223,11 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanCategoriess
             {
                 var param = new QueryParam
                 {
-                    Skip = pageIndex,
+                    Page = pageIndex,
                     PageSize = pageSize,
                     Filter = filter,
                     SortColumn = sortColumn,
-                    IsIncludeInActive = InActive,
+                    IncludeInActive = InActive,
                     SortDescending = sortDescending
                 };
 

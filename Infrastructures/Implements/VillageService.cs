@@ -8,7 +8,7 @@ using Infrastructures.DataAccess;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Applications.Features.Addresses.Responses;
+using Applications.Features.Addresses.Dto;
 
 namespace Infrastructures.Implements
 {
@@ -105,7 +105,7 @@ namespace Infrastructures.Implements
 
             var counts = await query.CountAsync();
 
-            var data = await query.Skip(param.Skip)
+            var data = await query.Skip(param.Page)
                            .Take(param.PageSize)
                            .AsNoTracking()
                            .ToListAsync();

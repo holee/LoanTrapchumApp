@@ -1,4 +1,4 @@
-﻿namespace Applications.Features.Addresses.Responses;
+﻿namespace Applications.Features.Addresses.Dto;
 
 public class VillageDto
 {

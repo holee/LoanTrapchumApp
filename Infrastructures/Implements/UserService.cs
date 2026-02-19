@@ -196,7 +196,7 @@ public sealed class UserService : IUserService
 
         var queries = context.Database
                             .SqlQuery<VUser>($"SELECT * FROM vUsers")
-                            .WhereIf(!param.IsIncludeInActive, x => x.IsActive == true)
+                            .WhereIf(!param.IncludeInActive, x => x.IsActive == true)
                             .WhereIf(!string.IsNullOrWhiteSpace(param.Filter), e => EF.Functions.Like(e.UserName!, $"%{param.Filter}%") ||
                                                                                     EF.Functions.Like(e.Email!, $"%{param.Filter}%"))
                             .WhereIf(userId.IsNotNullOrEmpty(), u => u.Id == userId)
@@ -207,7 +207,7 @@ public sealed class UserService : IUserService
 
         if (param.PageSize > 0)
         {
-            queries = queries.Skip(param.Skip).Take(param.PageSize);
+            queries = queries.Skip(param.Page).Take(param.PageSize);
         }
 
 
@@ -226,7 +226,7 @@ public sealed class UserService : IUserService
         var queries = context.Database
                             .SqlQuery<VUser>($"SELECT * FROM vUsers")
                             .WhereIf(branchId > 0, x => x.BranchId == branchId)
-                            .WhereIf(!param.IsIncludeInActive, x => x.IsActive == true)
+                            .WhereIf(!param.IncludeInActive, x => x.IsActive == true)
                             .WhereIf(!string.IsNullOrWhiteSpace(param.Filter), e => EF.Functions.Like(e.UserName!, $"%{param.Filter}%") ||
                                                                                     EF.Functions.Like(e.Email!, $"%{param.Filter}%"))
                             .WhereIf(userId.IsNotNullOrEmpty(), u => u.Id == userId)
@@ -238,7 +238,7 @@ public sealed class UserService : IUserService
 
         if (param.PageSize > 0)
         {
-            queries = queries.Skip(param.Skip).Take(param.PageSize);
+            queries = queries.Skip(param.Page).Take(param.PageSize);
         }
 
         var users = await queries.AsNoTracking().ToListAsync();
@@ -744,7 +744,7 @@ public sealed class UserService : IUserService
         if (q.PageSize > 0)
         {
             queries = queries
-                    .Skip(q.Skip)
+                    .Skip(q.Page)
                     .Take(q.PageSize)
                     .OrderBy(x => x.Module);
         }

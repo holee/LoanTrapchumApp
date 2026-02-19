@@ -142,7 +142,7 @@ public class GuarantorService : IGuarantorService
                                                                  EF.Functions.Like(x.NumberOfLoan!.ToString(), $"%{param.Filter}%") ||
                                                                  EF.Functions.Like(x.Gender!, $"%{param.Filter}%") ||
                                                                  EF.Functions.Like(x.Phone!, $"%{param.Filter}%"))
-                                .WhereIf(!param.IsIncludeInActive, x => x.IsActive == false)
+                                .WhereIf(!param.IncludeInActive, x => x.IsActive == false)
                                 .OrderBy(x => x.FullName)
                                 .AsNoTracking();
 
@@ -155,7 +155,7 @@ public class GuarantorService : IGuarantorService
 
         if (param.PageSize > 0)
         {
-            guarantors = guarantors.Skip(param.Skip).Take(param.PageSize);
+            guarantors = guarantors.Skip(param.Page).Take(param.PageSize);
         }
 
         var items = await guarantors.AsNoTracking()
@@ -195,7 +195,7 @@ public class GuarantorService : IGuarantorService
                                                                        EF.Functions.Like(x.Gender!, $"%{q.Filter}%") ||
                                                                        EF.Functions.Like(x.Phone!, $"%{q.Filter}%"))
                                 .WhereIf(!string.IsNullOrEmpty(id), x => x.Id == id)
-                                .WhereIf(!q.IsIncludeInActive, x => x.IsActive == false);
+                                .WhereIf(!q.IncludeInActive, x => x.IsActive == false);
         if (!guarantors.Any())
         {
             return new Pager<VGuarantor>([], 0);
@@ -203,7 +203,7 @@ public class GuarantorService : IGuarantorService
 
         if (q.PageSize > 0)
         {
-            guarantors = guarantors.Skip(q.Skip).Take(q.PageSize);
+            guarantors = guarantors.Skip(q.Page).Take(q.PageSize);
         }
 
         var counts = await guarantors.CountAsync();

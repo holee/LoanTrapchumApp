@@ -451,7 +451,7 @@ namespace Infrastructures.Implements
             var counts = await source.CountAsync(cancellation);
 
             var items = await source
-                .Skip(query.Skip)
+                .Skip(query.Page)
                 .Take(query.PageSize)
                 .Select(ProjectToIncomeExpense())
                 .ToListAsync(cancellation);

@@ -1,5 +1,5 @@
 ﻿using Domains.Models.Addresses;
-using Applications.Features.Addresses.Responses;
+using Applications.Features.Addresses.Dto;
 
 
 namespace Applications.Commons.Mappers

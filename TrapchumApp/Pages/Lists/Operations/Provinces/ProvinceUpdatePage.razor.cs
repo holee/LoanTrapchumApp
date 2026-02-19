@@ -1,5 +1,5 @@
 
-using Applications.Features.Addresses.Responses;
+using Applications.Features.Addresses.Dto;
 using Applications.Interfaces.Addresses;
 using Applications.Responses.Message;
 using Domains.Models.Addresses;

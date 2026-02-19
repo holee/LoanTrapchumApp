@@ -29,7 +29,7 @@ namespace TrapchumApp.Pages.Lists.Customers.Incomes
         {
             var query = new GetIncomeExpenseQuery(0, IncomeExpenseTypes.Income, new QueryParam
             {
-                Skip = 0,
+                Page = 0,
                 PageSize = 10,
                 Filter = filter
             });

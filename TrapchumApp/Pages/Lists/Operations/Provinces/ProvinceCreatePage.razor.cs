@@ -1,5 +1,5 @@
 using Applications.Commons.Mappers;
-using Applications.Features.Addresses.Responses;
+using Applications.Features.Addresses.Dto;
 using Applications.Interfaces.Addresses;
 using Applications.Interfaces.Lists;
 using Domains.Models.Addresses;

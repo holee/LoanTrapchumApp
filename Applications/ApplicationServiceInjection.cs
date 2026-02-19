@@ -1,4 +1,13 @@
-﻿using Applications.Features.CashManagements.Command.CreateCashVaultIn;
+﻿using Applications.Commons;
+using Applications.Features.Addresses.Command.CreateCity;
+using Applications.Features.Addresses.Command.UpdateCity;
+using Applications.Features.Addresses.Dto;
+using Applications.Features.Addresses.Queries.GetCities;
+using Applications.Features.Addresses.Queries.GetCommunes;
+using Applications.Features.Addresses.Queries.GetDistricts;
+using Applications.Features.Addresses.Queries.GetProvinces;
+using Applications.Features.Addresses.Queries.GetVillages;
+using Applications.Features.CashManagements.Command.CreateCashVaultIn;
 using Applications.Features.CashManagements.Command.CreateCashVaultOut;
 using Applications.Features.Currencies.Queries.GetCurrencyById;
 using ErrorOr;
@@ -8,8 +17,18 @@ public static class ApplicationServiceInjection
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
+        services.AddScoped<IRequestHandler<GetCitiesQuery, PageMetaData<CityDto>>, GetCitiesQueryHandler>();
+        services.AddScoped<IRequestHandler<GetCommunesQuery, PageMetaData<CommuneDto>>, GetCommunesQueryHandler>();
+        services.AddScoped<IRequestHandler<GetDistrictsQuery, PageMetaData<DistrictDto>>, GetDistrictsQueryHandler>();
+        services.AddScoped<IRequestHandler<GetProvincesQuery, PageMetaData<ProvinceDto>>, GetProvincesQueryHandler>();
+        services.AddScoped<IRequestHandler<GetVillagesQuery, PageMetaData<VillageDto>>, GetVillagesQueryHandler>();
+        services.AddScoped<IRequestHandler<CreateCityCommand, ErrorOr<CityDto>>, CreateCityCommandHandler>();
+        services.AddScoped<IRequestHandler<UpdateCityCommand, ErrorOr<CityDto>>, UpdateCityCommandHandler>();
+
+
 
         services.AddScoped<IRequestHandler<CreateJournalCommand, ErrorOr<JournalEntry?>>, CreateJournalCommandHandler>();
+        
         services.AddScoped<IRequestHandler<GetJournalByIdQuery, ErrorOr<JournalEntry>>, GetJournalByIdQueryHandler>();
         services.AddScoped<IRequestHandler<GetJournalEntryDetailByIdQuery, ErrorOr<JournalEntryDto>>, GetJournalEntryDetailByIdHandler>();
         services.AddScoped<IRequestHandler<GetJournalTypesQuery, Pager<JournalTypeDto>>, GetJournalTypesQueryHandler>();

@@ -154,7 +154,7 @@ namespace Infrastructures.Implements
             }
 
             var counts = await queries.CountAsync();
-            var items = await queries.Skip(q.Skip).Take(q.PageSize).ToListAsync();
+            var items = await queries.Skip(q.Page).Take(q.PageSize).ToListAsync();
             return new Pager<VOtherNames>(items, counts);
         }
 
@@ -175,7 +175,7 @@ namespace Infrastructures.Implements
                                              EF.Functions.Like(e.AltName, $"%{q.Filter}%"));
             }
 
-            if (!q.IsIncludeInActive)
+            if (!q.IncludeInActive)
             {
                 queries = queries.Where(x => x.IsActive == true);
             }
@@ -189,7 +189,7 @@ namespace Infrastructures.Implements
 
             if (q.PageSize > 0)
             {
-                queries = queries.Skip(q.Skip).Take(q.PageSize);
+                queries = queries.Skip(q.Page).Take(q.PageSize);
             }
 
 

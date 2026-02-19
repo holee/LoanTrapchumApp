@@ -40,7 +40,7 @@ namespace Infrastructures.Implements
 
             IQueryable<VlCategoryList> query = context.Database.SqlQuery<VlCategoryList>($@"SELECT * FROM VLCategoryList");
 
-            if (param.IsIncludeInActive == false)
+            if (param.IncludeInActive == false)
             {
                 query = query.Where(x => x.IsActive == true);
             }
@@ -63,7 +63,7 @@ namespace Infrastructures.Implements
 
             if (param.PageSize > 0)
             {
-                query = query.Skip(param.Skip).Take(param.PageSize);
+                query = query.Skip(param.Page).Take(param.PageSize);
             }
 
             var items = await query.AsNoTracking().ToListAsync();

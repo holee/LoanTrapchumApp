@@ -146,7 +146,7 @@ namespace Infrastructures.Implements
                                                         .ThenByDescending(x => x.LastName)
                                                         .AsNoTracking();
 
-            if (param.IsIncludeInActive)
+            if (param.IncludeInActive)
             {
                 queries = queries.IgnoreQueryFilters();
             }
@@ -168,7 +168,7 @@ namespace Infrastructures.Implements
 
             if (param.PageSize > 0)
             {
-                queries = queries.Skip(param.Skip).Take(param.PageSize);
+                queries = queries.Skip(param.Page).Take(param.PageSize);
 
             }
 
@@ -220,7 +220,7 @@ namespace Infrastructures.Implements
             var counts = await queries.CountAsync(cancellation);
 
             var items = await queries
-                            .Skip(param.Skip)
+                            .Skip(param.Page)
                             .Take(param.PageSize)
                             .AsNoTracking().ToListAsync(cancellation);
 

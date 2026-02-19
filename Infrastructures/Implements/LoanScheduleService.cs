@@ -127,7 +127,7 @@ namespace Infrastructures.Implements
                                                                             {loanId},
                                                                             {branchId},
                                                                             {(int)status},
-                                                                            {param?.Skip},
+                                                                            {param?.Page},
                                                                             {param?.PageSize},
                                                                             {param?.Filter}
                                                                       """)
@@ -169,7 +169,7 @@ namespace Infrastructures.Implements
 
             param ??= new QueryParam();
 
-            var pageNumber = (int)Math.Floor((param.Skip) / (double)(param.PageSize)) + 1;
+            var pageNumber = (int)Math.Floor((param.Page) / (double)(param.PageSize)) + 1;
 
             var parameters = new DynamicParameters();
 
@@ -238,7 +238,7 @@ namespace Infrastructures.Implements
 
             var items = await baseQueries
                                     .AsNoTracking()
-                                    .Skip(Param.Skip)
+                                    .Skip(Param.Page)
                                     .Take(Param.PageSize)
                                     .ToListAsync(token);
 

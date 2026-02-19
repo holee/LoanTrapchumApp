@@ -27,7 +27,7 @@ public partial class CreateExpense
     {
         var query = new GetIncomeExpenseQuery(0, IncomeExpenseTypes.Expense, new QueryParam
         {
-            Skip = 0,
+            Page = 0,
             PageSize = 10,
             Filter = filter
         });

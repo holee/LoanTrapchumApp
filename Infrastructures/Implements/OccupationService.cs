@@ -178,7 +178,7 @@ namespace Infrastructures.Implements
             if (param.PageSize > 0)
             {
 
-                queries = queries.Skip(param.Skip).Take(param.PageSize);
+                queries = queries.Skip(param.Page).Take(param.PageSize);
             }
 
             var items = await queries.AsNoTracking()

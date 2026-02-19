@@ -1,5 +1,4 @@
-using Applications.Features.Addresses.Requests;
-using Applications.Features.Addresses.Responses;
+using Applications.Features.Addresses.Dto;
 using Applications.Features.OtherNames;
 using Domains.Models.Addresses;
 

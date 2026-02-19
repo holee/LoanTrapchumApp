@@ -412,7 +412,7 @@ namespace Infrastructures.Implements
 
             var counts = await queries.CountAsync(cancellation);
 
-            var items = await queries.Skip(param.Skip).Take(param.PageSize)
+            var items = await queries.Skip(param.Page).Take(param.PageSize)
                             .AsNoTracking()
                             .ToListAsync(cancellation);
 
@@ -459,7 +459,7 @@ namespace Infrastructures.Implements
 
             var counts = await queries.CountAsync(cancellation);
 
-            var items = await queries.Skip(param.Skip).Take(param.PageSize)
+            var items = await queries.Skip(param.Page).Take(param.PageSize)
                             .AsNoTracking()
                             .ToListAsync(cancellation);
 
@@ -497,7 +497,7 @@ namespace Infrastructures.Implements
 
             var counts = await queries.CountAsync(cancellation);
 
-            var items = await queries.Skip(param.Skip).Take(param.PageSize)
+            var items = await queries.Skip(param.Page).Take(param.PageSize)
                             .AsNoTracking()
                             .ToListAsync(cancellation);
 

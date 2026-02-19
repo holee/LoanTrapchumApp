@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Applications.Features.Addresses.Responses;
+using Applications.Features.Addresses.Dto;
 
 namespace Applications.Features.Customers.Requests;
 

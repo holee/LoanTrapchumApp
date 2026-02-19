@@ -1,6 +1,6 @@
 ﻿using Domains.Models.Bases;
 
-namespace Applications.Features.Addresses.Responses
+namespace Applications.Features.Addresses.Dto
 {
     public abstract class AddressBaseDto: BaseEntity
     {

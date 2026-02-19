@@ -1,7 +1,5 @@
-﻿using Applications.Features.Addresses.Requests;
-using Applications.Features.Addresses.Responses;
+﻿using Applications.Features.Addresses.Dto;
 using Applications.Interfaces.Addresses;
-using Applications.Responses;
 using Domains.Models.Addresses;
 using Mapster;
 

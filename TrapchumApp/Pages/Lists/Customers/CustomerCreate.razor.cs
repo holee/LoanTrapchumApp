@@ -5,10 +5,10 @@ using Domains.Models.Addresses;
 using Domains.Models.Lists;
 using Radzen.Blazor;
 using Applications.Enumerations;
-using Applications.Features.Addresses.Responses;
 using Applications.Features.Customers.Dto;
 using Applications.Features.Customers.Commands.Customers.CreateCustomer;
 using TrapchumApp.Helpers.Extensions;
+using Applications.Features.Addresses.Dto;
 
 namespace TrapchumApp.Pages.Lists.Customers
 {

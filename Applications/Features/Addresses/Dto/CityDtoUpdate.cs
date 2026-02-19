@@ -1,4 +1,4 @@
-﻿namespace Applications.Features.Addresses.Requests
+﻿namespace Applications.Features.Addresses.Dto
 {
     public class CityDtoUpdate: CityDtoCreate
     {

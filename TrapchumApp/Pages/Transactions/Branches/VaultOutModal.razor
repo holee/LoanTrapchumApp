@@ -25,6 +25,7 @@
 </style>
 <RadzenFieldset Text="Please verify amount and balance then start cash vault." class="rz-p-0 rz-m-0">
     <RadzenStack Orientation="Orientation.Horizontal"
+                 class="rz-mb-2"
                  JustifyContent="JustifyContent.SpaceBetween">
         <RadzenStack AlignItems="AlignItems.Center"
                      class="w-50"
@@ -51,7 +52,6 @@
         </RadzenStack>
 
     </RadzenStack>
-
 
     <RadzenDataGrid Responsive
                     GridLines="DataGridGridLines.Both"
@@ -98,10 +98,15 @@
                                    class="@Styles.W100"
                                    @bind-Value="item.Quantity"
                                    Min="0"
+                                   Name="Quantity"
                                    @ref="editor"
                                    @key="item.CurrencyNoteValue"
                                    InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Select Quantity" }})"
                                    Change="@(args => CalculateByQuantity(item, args))" />
+                    <RadzenCustomValidator Component="Quantity"
+                                           Validator="@(() => ValidateInputQty(item))"
+                                           Popup="true"
+                                           Text="Invalid quantity" />
                 </EditTemplate>
             </RadzenDataGridColumn>
             <RadzenDataGridColumn TItem="CashManagementDetailDtoCreate"
@@ -124,8 +129,13 @@
                                    Format="@sp"
                                    @key="item.CurrencyNoteValue"
                                    @ref="editor"
+                                   Name="TotalValue"
                                    InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Select Total Value" }})"
                                    Change="@(args => CalculateByAmount(item, args))" />
+                    <RadzenCustomValidator Component="TotalValue"
+                                           Validator="@(() => ValidateInputValue(item))"
+                                           Popup="true"
+                                           Text="Invalid input quantity" />
                 </EditTemplate>
             </RadzenDataGridColumn>
             <RadzenDataGridColumn TItem="CashManagementDetailDtoCreate"
@@ -185,6 +195,37 @@
     string? columnEditing;
     List<KeyValuePair<int?, string>> editedFields = new List<KeyValuePair<int?, string>>();
     List<CashManagementDetailDtoCreate> ordersToUpdate = new List<CashManagementDetailDtoCreate>();
+    private bool hasError = false;
+
+    private bool ValidateInputQty(CashManagementDetailDtoCreate item)
+    {
+
+        cashMDList ??= new List<CashManagementDetailDtoCreate>();
+
+        if (item == null) return false;
+
+        var existingItem = cashMDList.Where(x => x.CurrencyNoteValue == item.CurrencyNoteValue).First();
+
+        return (existingItem.Quantity >= 0 && item.Quantity < existingItem.QOnHand);
+
+
+    }
+
+
+    private bool ValidateInputValue(CashManagementDetailDtoCreate item)
+    {
+
+        cashMDList ??= new List<CashManagementDetailDtoCreate>();
+
+        if (item == null) return false;
+
+        var existingItem = cashMDList.Where(x => x.CurrencyNoteValue == item.CurrencyNoteValue).First();
+
+        var qty = Convert.ToInt32(item.TotalValue / item.CurrencyNoteValue);
+
+        return (existingItem.Quantity >= 0 && qty < existingItem.QOnHand);
+
+    }
 
     bool IsEditing(string columnName, CashManagementDetailDtoCreate order)
     {
@@ -212,23 +253,33 @@
     }
     void CalculateByQuantity(CashManagementDetailDtoCreate item, int? qty)
     {
+
         qty ??= 0;
 
-        if (qty > 0)
+        hasError = (qty >= 0 && qty > item.QOnHand);
+
+        if (hasError)
         {
-            item.TotalValue = item.CurrencyNoteValue * qty.Value;
+            //ResetValue(item);
+            return;
         }
-        else
-        {
-            item.TotalValue = 0;
-        }
+
+        item.TotalValue = item.CurrencyNoteValue * qty.Value;
 
         _ = Update();
 
         CalTotal1();
 
-        grid?.Reload();
+        //grid?.Reload();
     }
+
+    void ResetValue(CashManagementDetailDtoCreate item)
+    {
+        item.Quantity = 0;
+
+        item.TotalValue = 0;
+    }
+
 
     void CalculateByAmount(CashManagementDetailDtoCreate item, decimal? value)
     {
@@ -236,18 +287,23 @@
 
         var qty = Convert.ToInt32(value / item.CurrencyNoteValue);
 
-        if (qty > 0 && value > 0)
-        {
-            item.Quantity = qty;
+        hasError = (qty >= 0 && qty > item.QOnHand);
 
-            item.TotalValue = value.Value;
+        if (hasError)
+        {
+            //ResetValue(item);
+            return;
         }
+
+        item.Quantity = qty;
+
+        item.TotalValue = value.Value;
 
         _ = Update();
 
         CalTotal1();
 
-        grid?.Reload();
+        //grid?.Reload();
     }
 
     void CalTotal1()

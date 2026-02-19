@@ -1,10 +1,11 @@
-﻿namespace Applications.Features.Addresses.Requests;
+﻿namespace Applications.Features.Addresses.Dto;
 
-public class AddressDtoCreate
+public class AddressDtoUpdate
 {
+    public long AddressId { get; set; }
+    public string? CountryName { get; set; } 
+    public string? City { get; set; } 
     public int? ProvinceRefId { get; set; }
-    public string? CountryName { get; set; }
-    public string? City { get; set; }
     public string? ProDescription { get; set; }
     public string? ProInKhmer { get; set; }
     public int? DistrictRefId { get; set; }

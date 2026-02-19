@@ -327,7 +327,7 @@ namespace Infrastructures.Implements
 
                 var queries = context.Database
                                       .SqlQuery<HolidayVm>($"SELECT * FROM VHolidaysVm")
-                                      .WhereIf(!q.IsIncludeInActive, d => d.HolidayDt >= DateTime.Now)
+                                      .WhereIf(!q.IncludeInActive, d => d.HolidayDt >= DateTime.Now)
                                       .WhereIf(!string.IsNullOrEmpty(q.Filter),
                                                 x => EF.Functions.Like(x.Description, $"%{q.Filter}%") ||
                                                     EF.Functions.Like(x.HolidayNum.ToString(), $"%{q.Filter}%") ||
@@ -348,7 +348,7 @@ namespace Infrastructures.Implements
                 if (q.PageSize > 0)
                 {
                     queries = queries
-                                    .Skip(q.Skip)
+                                    .Skip(q.Page)
                                     .Take(q.PageSize);
 
                 }

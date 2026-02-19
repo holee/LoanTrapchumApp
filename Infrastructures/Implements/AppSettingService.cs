@@ -232,7 +232,7 @@ public sealed class AppSettingService(IDbContextFactory<DataContext> dbContextFa
             var queries = cxt.Database
                                   .SqlQuery<VUserLoanSizes>($"SELECT * FROM VUserLoanSizes")
                                   .WhereIf(userRefId.IsNotNullOrEmpty(), u => u.UserRefId == userRefId)
-                                  .WhereIf(!q.IsIncludeInActive, x => x.IsActive == true);
+                                  .WhereIf(!q.IncludeInActive, x => x.IsActive == true);
 
             if (q.Filter.IsNotNullOrEmpty())
             {
@@ -256,7 +256,7 @@ public sealed class AppSettingService(IDbContextFactory<DataContext> dbContextFa
 
             if (q.PageSize > 0)
             {
-                queries = queries.Skip(q.Skip).Take(q.PageSize);
+                queries = queries.Skip(q.Page).Take(q.PageSize);
             }
 
             var items = await queries.AsNoTracking().ToListAsync(cancellation);
@@ -312,7 +312,7 @@ public sealed class AppSettingService(IDbContextFactory<DataContext> dbContextFa
         var queries = cxt.CollateralSubTypes.AsNoTracking();
 
 
-        if (!param.IsIncludeInActive)
+        if (!param.IncludeInActive)
         {
             queries = queries.Where(x => x.IsActive == true);
         }
@@ -331,7 +331,7 @@ public sealed class AppSettingService(IDbContextFactory<DataContext> dbContextFa
 
         var counts = await queries.CountAsync(cancellation);
 
-        var items = await queries.Skip(param.Skip)
+        var items = await queries.Skip(param.Page)
                                     .Take(param.PageSize)
                                     .AsNoTracking()
                                     .ToListAsync(cancellation);

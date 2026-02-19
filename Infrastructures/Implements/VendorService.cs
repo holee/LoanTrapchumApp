@@ -183,7 +183,7 @@ namespace Infrastructures.Implements
                                          EF.Functions.Like(e.AltName!, $"%{q.Filter}%"));
             }
 
-            if (!q.IsIncludeInActive)
+            if (!q.IncludeInActive)
             {
                 queries = queries.Where(x => x.IsActive == true);
             }
@@ -197,7 +197,7 @@ namespace Infrastructures.Implements
 
             if (q.PageSize > 0)
             {
-                queries = queries.Skip(q.Skip).Take(q.PageSize);
+                queries = queries.Skip(q.Page).Take(q.PageSize);
             }
             var items = await queries.AsNoTracking().ToListAsync();
 

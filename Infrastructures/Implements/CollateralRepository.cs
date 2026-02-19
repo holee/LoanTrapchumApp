@@ -373,7 +373,7 @@ public sealed class CollateralRepository : ICollateralService
         var totalItems = await baseQuery.CountAsync(cancellation);
 
         var items = await baseQuery
-                                .Skip(query.Skip)
+                                .Skip(query.Page)
                                 .Take(query.PageSize)
                                 .AsNoTracking()
                                 .ToListAsync(cancellation);

@@ -70,10 +70,10 @@ namespace Infrastructures.Implements
 
             var total = await queries.CountAsync(cancellation);
 
-            if (Param.Skip > 0)
+            if (Param.Page > 0)
             {
                 queries = queries
-                             .Skip(Param.Skip)
+                             .Skip(Param.Page)
                              .Take(Param.PageSize);
             }
 

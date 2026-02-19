@@ -1,4 +1,4 @@
-﻿using Applications.Features.Addresses.Responses;
+﻿using Applications.Features.Addresses.Dto;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Addresses;

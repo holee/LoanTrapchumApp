@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using Applications.Features.Addresses.Responses;
-using Applications.Features.Addresses.Responses;
+using Applications.Features.Addresses.Dto;
 using Domains.Models.Lists;
 
 namespace Applications.Responses.Lists.Employees

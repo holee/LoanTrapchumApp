@@ -1,4 +1,4 @@
-﻿using Applications.Features.Addresses.Responses;
+﻿using Applications.Features.Addresses.Dto;
 using Applications.Interfaces.Addresses;
 using Applications.Responses;
 using Applications.Responses.Paginations;
@@ -102,7 +102,7 @@ namespace Infrastructures.Implements
 
             var counts = await query.CountAsync();
 
-            var data = await query.Skip(param.Skip)
+            var data = await query.Skip(param.Page)
                            .Take(param.PageSize)
                            .AsNoTracking()
                            .ToListAsync();

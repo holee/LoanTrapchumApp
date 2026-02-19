@@ -1,6 +1,6 @@
 ﻿namespace Domains.Models.Addresses
 {
-    public class Country
+    public sealed class Country
     {
         public int CountryId { get; set; }
         public string? CountryName { get; set; }
