@@ -3,19 +3,11 @@ using ErrorOr;
 
 namespace Applications.Features.Loans.Queries.GetLoanWithScedules;
 
-public sealed class GetLoanWithScedulesQueryHandler(ILoanScheduleRepo scheduleRepo) : IRequestHandler<GetLoanWithScedulesQuery, ErrorOr<IEnumerable<LoanScheduleResponse>>>
+public sealed class GetLoanWithScedulesQueryHandler(IScheduleService scheduleRepo) : IRequestHandler<GetLoanWithScedulesQuery, ErrorOr<IEnumerable<LoanResponse>>>
 {
-    public async Task<ErrorOr<IEnumerable<LoanScheduleResponse>>> Handle(GetLoanWithScedulesQuery request, CancellationToken cancellationToken)
+    public async Task<ErrorOr<IEnumerable<LoanResponse>>> Handle(GetLoanWithScedulesQuery request, CancellationToken cancellationToken)
     {
 
-        var result = await scheduleRepo.GetLoanWithSchedules(request.BranchId, request.LoanId, cancellationToken);
-
-        if (result.IsSuccess && result.Data is not null)
-        {
-            return ErrorOrFactory.From(result.Data);
-        }
-
-        return Error.NotFound("LoanSchedules.NotFound", "No loan schedules found for the given criteria.");
-
+        return await scheduleRepo.GetLoanWithSchedules(request.BranchId, request.LoanId, cancellationToken);
     }
 }

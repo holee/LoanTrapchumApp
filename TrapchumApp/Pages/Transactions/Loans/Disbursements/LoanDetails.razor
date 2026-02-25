@@ -164,14 +164,17 @@
 
             @foreach (var s in _loanSchedules ?? [])
             {
+                int x = 1;
+
                 <RadzenCard Variant="Variant.Outlined" class="rz-my-2">
-                    <SplitSchedule LoanSchedule="@s" 
-                        BranchId="@BranchId" 
-                        LoanId="@LoanId" 
-                        TotalScedules="@_loanSchedules!.Count()"
-                        ScheduleNum="@s.ScheduleNum" />
+                    <SplitSchedule LoanSchedule="@s"
+                                   BranchId="@BranchId"
+                                   LoanId="@LoanId"
+                                   TotalScedules="@_loanSchedules!.Count()"
+                                   ScheduleNum="@s.ScheduleNum" />
                 </RadzenCard>
 
+                x++;
             }
 
         </RadzenTabsItem>
@@ -185,20 +188,29 @@
 
     async Task DownLoadScheduleAsPdf()
     {
-        if (LoanId.IsNotNullOrEmpty() && BranchId > 0)
+        if (string.IsNullOrEmpty(LoanId) || BranchId <= 0)
         {
-
-            var fileName = $"Loan_Schedule_{LoanId}_{BranchId}.pdf";
-
-            await js.InvokeVoidAsync("open", $"/Reports/Schedules/Pdf/{LoanId}/{BranchId}/{fileName}", "_blank");
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Warning,
+                Summary = "Warning",
+                Detail = "LoanId and BranchId are required to download the schedule as PDF.",
+                Duration = 3000
+            });
+            return;
         }
+
+        var fileName = $"Loan_Schedule_{Guid.CreateVersion7()}.pdf";
+
+        await js.InvokeVoidAsync("open", $"/reports/schedules/{LoanId}/{BranchId}/{fileName}", "_blank");
+
     }
 
 
     void ShowContextMenu(MouseEventArgs args, VSchedule p)
     {
         ContextMenuService.Open(args,
-                                ds =>@<LoanDetailsMenu Schedule="@p"
+                                ds => @<LoanDetailsMenu Schedule="@p"
                  ScheduleChanged="@PayBySchedules"
                  CreditAgentId="@_creditAgentId" />
     );

@@ -10,6 +10,8 @@ using Applications.Features.Addresses.Queries.GetVillages;
 using Applications.Features.CashManagements.Command.CreateCashVaultIn;
 using Applications.Features.CashManagements.Command.CreateCashVaultOut;
 using Applications.Features.Currencies.Queries.GetCurrencyById;
+using Applications.Features.Schedules.GetLoanScheduleBySchedule;
+using Applications.Features.Schedules.GetLoanWithSchedule;
 using ErrorOr;
 namespace Applications;
 
@@ -17,6 +19,10 @@ public static class ApplicationServiceInjection
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
+        services.AddScoped<IRequestHandler<GetLoanScheduleByScheduleQuery, ErrorOr<LoanResponse>>, GetLoanScheduleByScheduleQueryHandler>();
+
+        services.AddScoped<IRequestHandler<GetLoanWithScheduleQuery, ErrorOr<LoanResponse>>, GetLoanWithScheduleQueryHandler>();
+
         services.AddScoped<IRequestHandler<GetCitiesQuery, PageMetaData<CityDto>>, GetCitiesQueryHandler>();
         services.AddScoped<IRequestHandler<GetCommunesQuery, PageMetaData<CommuneDto>>, GetCommunesQueryHandler>();
         services.AddScoped<IRequestHandler<GetDistrictsQuery, PageMetaData<DistrictDto>>, GetDistrictsQueryHandler>();
@@ -83,7 +89,7 @@ public static class ApplicationServiceInjection
 
         services.AddScoped<IRequestHandler<CreateLoanCommand, ErrorOr<DisburseResult>>, CreateLoanCommandHandler>();
 
-        services.AddScoped<IRequestHandler<GetLoanWithScedulesQuery, ErrorOr<IEnumerable<LoanScheduleResponse>>>, GetLoanWithScedulesQueryHandler>();
+        services.AddScoped<IRequestHandler<GetLoanWithScedulesQuery, ErrorOr<IEnumerable<LoanResponse>>>, GetLoanWithScedulesQueryHandler>();
 
 
 

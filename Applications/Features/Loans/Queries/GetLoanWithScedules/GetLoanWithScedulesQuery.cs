@@ -7,4 +7,4 @@ using System.Threading.Tasks;
 
 namespace Applications.Features.Loans.Queries.GetLoanWithScedules;
 
-public record GetLoanWithScedulesQuery(int? BranchId, string? LoanId) : IRequest<ErrorOr<IEnumerable<LoanScheduleResponse>>>;
+public record GetLoanWithScedulesQuery(int? BranchId, string? LoanId) : IRequest<ErrorOr<IEnumerable<LoanResponse>>>;

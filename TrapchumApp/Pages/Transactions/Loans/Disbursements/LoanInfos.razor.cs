@@ -9,50 +9,61 @@ using TrapchumApp.Services;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 {
-    public partial class LoanInfos
+    public partial class LoanInfos(ExcelExportService excelExportService)
     {
-        private readonly ExcelExportService _excelExportService;
-
-        public LoanInfos(ExcelExportService excelExportService)
-        {
-            _excelExportService = excelExportService;
-        }
-
         [Parameter] public VLoanDisbursments? LoanSchedule { get; set; } = new();
         [Parameter] public string? LoanId { get; set; } = string.Empty;
         [Parameter] public int BranchId { get; set; } = 1;
         [Parameter] public int? Currency { get; set; } = 1;
 
         private bool showLoader = false;
+
         private async Task DownLoadScheduleAsExcel()
         {
-            if (LoanId.IsNotNullOrEmpty() && BranchId > 0)
-            {
-                try
-                {
-                    showLoader = true;
-                    //await js.InvokeVoidAsync("open", $"/Reports/Schedules/{LoanId}/{BranchId}/Exel", "_blank");
-                    var fileName = $"Loan_Schedule_{LoanId}.xlsx";
-                    var stream = _excelExportService.ScheduleExportAll(
-                        LoanSchedule,
-                        LoanSchedule?.Schedules
-                    );
+            Tracker.Show();
 
-                    var base64 = Convert.ToBase64String(stream!.ToArray());
-                    if (stream != null)
-                    {
-                        await js.InvokeVoidAsync("downloadFile", fileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", base64);
-                    }
-                }
-                catch (Exception ex)
+            if (string.IsNullOrEmpty(LoanId) || BranchId <= 0)
+            {
+                NotificationService.Notify(new NotificationMessage
                 {
-                    Console.WriteLine(ex.Message);
-                }
-                finally
-                {
-                    showLoader = false;
-                }
+                    Severity = NotificationSeverity.Warning,
+                    Summary = "Warning",
+                    Detail = "LoanId and BranchId are required to download the schedule as Excel.",
+                    Duration = 3000
+                });
+
+                Tracker.Hide();
+
+                return;
             }
+
+            var fileName = $"Loan_Schedule_{LoanId}.xlsx";
+
+            var stream = excelExportService.ScheduleExportAll(LoanSchedule, LoanSchedule?.Schedules);
+
+            var base64 = Convert.ToBase64String(stream!.ToArray());
+
+            if (string.IsNullOrEmpty(base64))
+            {
+
+                NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Error",
+                    Detail = "Failed to generate the Excel file.",
+                    Duration = 3000
+                });
+
+                Tracker.Hide();
+
+                return;
+            }
+
+            await js.InvokeVoidAsync("downloadFile", fileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", base64);
+           
+            await Task.Delay(1000);
+            
+            Tracker.Hide();
         }
 
         protected override async Task OnInitializedAsync()
@@ -92,18 +103,23 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 
         private async Task DownLoadScheduleAsPdf()
         {
-
-            if (LoanId.IsNotNullOrEmpty() && BranchId > 0)
+            if (string.IsNullOrEmpty(LoanId) || BranchId <= 0)
             {
-
-                var fileName = $"Loan_Schedule_{Guid.CreateVersion7()}.pdf";
-
-                await js.InvokeVoidAsync("open", $"/Reports/Schedules/{LoanId}/{BranchId}/{fileName}", "_blank");
-
-
-                //NavigationManager.NavigateTo($"/Reports/Schedules/{LoanId}/{BranchId}/{fileName}", true);
-
+                NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Warning,
+                    Summary = "Warning",
+                    Detail = "LoanId and BranchId are required to download the schedule as PDF.",
+                    Duration = 3000
+                });
+                return;
             }
+
+            var fileName = $"Loan_Schedule_{Guid.CreateVersion7()}.pdf";
+
+            await js.InvokeVoidAsync("open", $"/Reports/Schedules/{LoanId}/{BranchId}/{fileName}", "_blank");
+
+
         }
 
 

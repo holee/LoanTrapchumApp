@@ -1,8 +1,13 @@
+using Applications.Features.Loans.Queries.GetLoanById;
 using Applications.Features.Loans.Services;
+using Applications.Features.Schedules;
+using Applications.Features.Schedules.GetLoanScheduleBySchedule;
 using Applications.Services.Loans;
+using Applications.Utils;
 using Domains.Models.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using QuestPDF.Fluent;
 using System.Security.Claims;
 using System.Text.Json;
 
@@ -83,49 +88,84 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
 
         var reportGroup = endpoints.MapGroup("/Reports");
 
-        reportGroup.MapGet("/Schedules/{loanId}/{branchId:int}/{fileName}", async ([FromServices] IPrintPdfServiceImpl printer, string loanId, int branchId) =>
+        reportGroup.MapGet("/Schedules/{loanId}/{branchId:int}/{fileName}",
+            async ([FromServices] IPrintPdfServiceImpl printer,
+            string loanId, int branchId) =>
         {
-           
+
+            //var pdf = new ScheduleDocument();
+
+            //var stream = new MemoryStream(pdf.GeneratePdf());
+
+
             var rsp = await printer.DownLoadScheduleAsPdf(branchId, loanId);
 
-            if(rsp.IsSuccess == false)
+            if (rsp.IsError)
             {
                 return Results.Problem("Failed to generate PDF or no data returned.", statusCode: StatusCodes.Status500InternalServerError);
             }
 
-            return TypedResults.File(rsp.Data!, contentType: "application/pdf",null, enableRangeProcessing: true);
-
-            //, $"{Guid.CreateVersion7()}.pdf"
+            return TypedResults.File(rsp.Value, contentType: "application/pdf", null, enableRangeProcessing: true);
 
         });
 
-        reportGroup.MapGet("/Schedules/Pdf/{loanId}/{branchId:int}/{fileName}", async ([FromServices] SchedulePrintService pdf,
+        reportGroup.MapGet("/Schedules/Pdf/{loanId}/{branchId:int}/{fileName}",
+            async ([FromServices] SchedulePrintService pdf, IMediator mediator,
             [FromServices] IWebHostEnvironment env, string loanId, int branchId) =>
         {
 
-            var rsp = await pdf.DownLoadScheduleAsPdf(branchId, loanId);
+            //var rsp = await pdf.DownLoadScheduleAsPdf(branchId, loanId);
 
-            if (!rsp.IsSuccess) 
+            var command = new GetLoanByIdQuery(loanId, branchId, Applications.Enumerations.ScheduleStatus.All, true);
+
+            var rsp = await mediator.Send(command);
+
+            if (rsp.IsError)
             {
-                return Results.Problem("Failed to generate PDF or no data returned.", statusCode: StatusCodes.Status500InternalServerError);
+                return Results.Problem();
             }
 
-            return TypedResults.File(rsp.Data!, contentType: "application/pdf",null, enableRangeProcessing: true);
+            var doc = new ScheduleDocument(rsp.Value);
+
+            var stream = doc.GeneratePdf();
+
+            return TypedResults.File(stream, contentType: "application/pdf", null, enableRangeProcessing: true);
+
+
+
+            //if (!rsp.IsSuccess)
+            //{
+            //    return Results.Problem("Failed to generate PDF or no data returned.", statusCode: StatusCodes.Status500InternalServerError);
+            //}
+
+            //return TypedResults.File(rsp.Data!, contentType: "application/pdf", null, enableRangeProcessing: true);
+
 
         });
 
-        reportGroup.MapGet("/Schedules/Pdf/{loanId}/{branchId:int}/{scheduleId:int}", async ([FromServices] SchedulePrintService pdf,
-           [FromServices] IWebHostEnvironment env, string loanId, int branchId, int scheduleId) =>
+        reportGroup.MapGet("/schedules/pdf/{loanId}/{branchId:int}/{scheduleId:int}",
+            async ([FromServices] SchedulePrintService pdf,
+            [FromServices] IWebHostEnvironment env,
+            IMediator mediator,
+            string loanId, int branchId, int scheduleId) =>
         {
 
-            var rsp = await pdf.DownLoadScheduleAsPdf(branchId, loanId, scheduleId);
+            var command = new GetLoanScheduleByScheduleQuery(branchId, loanId, scheduleId);
 
-            if (!rsp.IsSuccess)
+            //var rsp = await pdf.DownLoadScheduleAsPdf(branchId, loanId, scheduleId);
+
+            var rsp = await mediator.Send(command);
+
+            if (rsp.IsError)
             {
                 return Results.NoContent();
             }
 
-            return TypedResults.File(rsp.Data!, contentType: "application/pdf", $"{Guid.CreateVersion7()}.pdf");
+            var doc = new ScheduleByScheduleDocument(rsp.Value);
+
+            var stream = doc.GeneratePdf();
+
+            return TypedResults.File(stream, contentType: "application/pdf", null, enableRangeProcessing: true);
 
         });
 

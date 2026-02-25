@@ -1,15 +1,14 @@
-﻿using Applications.Features.Loans.Requests;
-using Applications.Features.Loans.Responses;
+﻿using Applications.Features.Loans.Responses;
 using Applications.Interfaces;
-using Applications.Responses;
 using Dapper;
+using ErrorOr;
 using Infrastructures.Constants;
 using Infrastructures.DataAccess;
 using System.Data;
 
 namespace Infrastructures.Repository
 {
-    public sealed class LoanScheduleRepository : ILoanScheduleRepo
+    public sealed class LoanScheduleRepository : IScheduleService
     {
         private readonly IDbConnection db;
         public LoanScheduleRepository(IDapperConnectionFactory dapperConnectionFactory)
@@ -17,18 +16,18 @@ namespace Infrastructures.Repository
             db = dapperConnectionFactory.CreateConnection();
         }
 
-        public async Task<Result<IEnumerable<LoanScheduleResponse>>> GetLoanDisbursments(int? branchId, string? loanId, CancellationToken cancellation = default)
+        public async Task<ErrorOr<IEnumerable<LoanResponse>>> GetLoanDisbursments(int? branchId, string? loanId, CancellationToken cancellation = default)
         {
 
             var parameters = new { branchId, loanId };
 
             var queries = await db.QueryMultipleAsync(SqlConstant.GetLoanResponse, parameters);
 
-            var loanQuery = await queries.ReadFirstOrDefaultAsync<LoanScheduleResponse>();
+            var loanQuery = await queries.ReadFirstOrDefaultAsync<LoanResponse>();
 
             if (loanQuery is null)
             {
-                return Result.Failure<IEnumerable<LoanScheduleResponse>>(ErrorResponse.NotFound("No Loan Found."));
+                return Error.NotFound("No Loan Found.");
             }
 
             var scheduleQueries = (await queries.ReadAsync<ScheduleResponse>()).ToList();
@@ -38,7 +37,7 @@ namespace Infrastructures.Repository
                                             .GroupBy(x => x.ScheduleNum)
                                             .OrderBy(g => g.Key);
 
-            var loanSchedules = new List<LoanScheduleResponse>();
+            var loanSchedules = new List<LoanResponse>();
 
 
 
@@ -65,27 +64,52 @@ namespace Infrastructures.Repository
                 loanSchedules.Add(response);
             }
 
-            return Result.Success<IEnumerable<LoanScheduleResponse>>(loanSchedules);
+            return loanSchedules;
 
         }
 
 
-
-        public async Task<Result<IEnumerable<LoanScheduleResponse>>> GetLoanWithSchedules2(int? branchId, string? loanId, CancellationToken cancellation = default)
+        public async Task<ErrorOr<IEnumerable<LoanResponse>>> GetLoanWithSchedules2(int? branchId, string? loanId, CancellationToken cancellation = default)
         {
 
             var parameters = new { branchId, loanId };
 
-            var multiResult = await db.QueryMultipleAsync(SqlConstant.GetLoanResponse, parameters);
+            var loanDictionary = new Dictionary<string, LoanResponse>();
 
-            var loanQuery = await multiResult.ReadFirstOrDefaultAsync<LoanScheduleResponse>();
+            var result = await db.QueryAsync<LoanResponse, ScheduleResponse, LoanResponse>(
+                "spGetLoanWithScedules",
+                (loan, schedule) =>
+                {
+                    if (!loanDictionary.TryGetValue(loan.LoanId!, out var currentLoan))
+                    {
+                        currentLoan = loan;
+
+                        currentLoan.Schedules = [];
+
+                        loanDictionary.Add(currentLoan.LoanId!, currentLoan);
+
+                    }
+
+                    if (schedule != null)
+                    {
+                        currentLoan.Schedules.Add(schedule);
+                    }
+
+                    return currentLoan;
+                },
+                param: parameters,
+                splitOn: "LoanScheduleId",
+                commandType: CommandType.StoredProcedure
+            );
+
+            var loanQuery = loanDictionary.Values.FirstOrDefault();
 
             if (loanQuery is null)
             {
-                return Result.Failure<IEnumerable<LoanScheduleResponse>>(ErrorResponse.NotFound("No Loan Found."));
+                return ErrorOr.Error.NotFound("No Loan Found.");
             }
 
-            var scheduleQueries = (await multiResult.ReadAsync<ScheduleResponse>()).ToList();
+            var scheduleQueries = loanQuery.Schedules;
 
             var groups = scheduleQueries.Chunk(4)
                                 .Select((chunk, index) => new
@@ -95,7 +119,7 @@ namespace Infrastructures.Repository
                                 })
                                 .ToDictionary(x => x.Index, x => x.Group);
 
-            var loanSchedules = new List<LoanScheduleResponse>();
+            var loanSchedules = new List<LoanResponse>();
 
             int groupNum = 1;
 
@@ -120,35 +144,37 @@ namespace Infrastructures.Repository
                 groupNum++;
             }
 
-            return Result.Success<IEnumerable<LoanScheduleResponse>>(loanSchedules);
+            return loanSchedules;
         }
 
 
-        public async Task<Result<IEnumerable<LoanScheduleResponse>>> GetLoanWithSchedules(int? branchId, string? loanId, CancellationToken cancellation = default)
+        public async Task<ErrorOr<IEnumerable<LoanResponse>>> GetLoanWithSchedules(int? branchId, string? loanId, CancellationToken cancellation = default)
         {
             var parameters = new { branchId, loanId };
 
             using var multiResult = await db.QueryMultipleAsync(SqlConstant.GetLoanResponse, parameters);
 
-            var loan = await multiResult.ReadFirstOrDefaultAsync<LoanScheduleResponse>();
+            var loan = await multiResult.ReadFirstOrDefaultAsync<LoanResponse>();
 
             if (loan is null)
             {
-                return Result.Failure<IEnumerable<LoanScheduleResponse>>(
-                    ErrorResponse.NotFound("No Loan Found.")
-                );
+                return Error.NotFound("No Loan Found.");
             }
 
             var schedules = (await multiResult.ReadAsync<ScheduleResponse>())
                             .OrderBy(s => s.InstallmentNo) // ensure correct order first
                             .ToList();
 
-            var loanSchedules = new List<LoanScheduleResponse>();
+            var loanSchedules = new List<LoanResponse>();
 
             int installmentCounter = 1;
 
+            int scheduleNumCounter = 0;
+
             foreach (var chunk in schedules.Chunk(4))
             {
+                scheduleNumCounter++;
+
                 var response = DeepCopyWithoutSchedule(loan);
 
                 var groupedSchedules = BuildGroup(chunk);
@@ -162,36 +188,142 @@ namespace Infrastructures.Repository
 
                 response.Schedules.AddRange(groupedSchedules);
 
+                response.ScheduleNum = scheduleNumCounter;
+
                 loanSchedules.Add(response);
             }
 
-            return Result.Success<IEnumerable<LoanScheduleResponse>>(loanSchedules);
+            return loanSchedules;
         }
 
 
 
-        public async Task<Result<LoanScheduleResponse>> CreatdPdf(int? branchId, string? loanId, int? scheduleNum, CancellationToken cancellation = default)
+        public async Task<ErrorOr<LoanResponse>> GetLoanWithSchedules(int? branchId, string? loanId, int? scheduleNum, CancellationToken cancellation = default)
+        {
+            var parameters = new { branchId, loanId, scheduleNum };
+
+            using var multiResult = await db.QueryMultipleAsync(SqlConstant.GetLoanResponse, parameters);
+
+            var loan = await multiResult.ReadFirstOrDefaultAsync<LoanResponse>();
+
+            if (loan is null)
+            {
+                return Error.NotFound("No Loan Found.");
+            }
+
+            var schedules = (await multiResult.ReadAsync<ScheduleResponse>())
+                            .OrderBy(s => s.InstallmentNo) // ensure correct order first
+                            .ToList();
+
+            var loanSchedules = new List<LoanResponse>();
+
+            int installmentCounter = 1;
+
+            int scheduleNumCounter = 0;
+
+            foreach (var chunk in schedules.Chunk(4))
+            {
+                scheduleNumCounter++;
+
+                var response = DeepCopyWithoutSchedule(loan);
+
+                var groupedSchedules = BuildGroup(chunk);
+
+                for (int i = 0; i < groupedSchedules.Count; i++)
+                {
+                    groupedSchedules[i].RowNum = i + 1;
+
+                    groupedSchedules[i].InstallmentNo = installmentCounter++;
+                }
+
+                response.Schedules.AddRange(groupedSchedules);
+
+                response.ScheduleNum = scheduleNumCounter;
+
+                loanSchedules.Add(response);
+            }
+
+            var selectedLoan = loanSchedules
+                                    .FirstOrDefault(ls => ls.ScheduleNum == scheduleNum);
+
+            if ((selectedLoan is null))
+            {
+                return Error.NotFound("No Loan Found.");
+            }
+
+            return selectedLoan;
+        }
+
+
+
+
+
+
+        public async Task<ErrorOr<LoanResponse>> CreatePdf(int? branchId, string? loanId, CancellationToken cancellation = default)
+        {
+            var parameters = new { branchId, loanId };
+
+            var loanDictionary = new Dictionary<string, LoanResponse>();
+
+            var result = await db.QueryAsync<LoanResponse, ScheduleResponse, LoanResponse>(
+                "spGetLoanWithScedules",
+                (loan, schedule) =>
+                {
+                    if (!loanDictionary.TryGetValue(loan.LoanId!, out var currentLoan))
+                    {
+                        currentLoan = loan;
+
+                        currentLoan.Schedules = [];
+
+                        loanDictionary.Add(currentLoan.LoanId!, currentLoan);
+
+                    }
+
+                    if (schedule != null)
+                    {
+                        currentLoan.Schedules.Add(schedule);
+                    }
+
+                    return currentLoan;
+                },
+                param: parameters,
+                splitOn: "LoanScheduleId",
+                commandType: CommandType.StoredProcedure
+            );
+
+            var loanQuery = loanDictionary.Values.FirstOrDefault();
+
+            if (loanQuery is not null)
+                return loanQuery;
+
+            return Error.NotFound("No Schedule Found.");
+
+        }
+
+
+        public async Task<ErrorOr<LoanResponse>> CreatdPdf(int? branchId, string? loanId, int? scheduleNum, CancellationToken cancellation = default)
         {
 
             var parameters = new { branchId, loanId, scheduleNum };
 
             var multiResult = await db.QueryMultipleAsync(SqlConstant.GetLoanResponseByScheduleNum, parameters);
 
-            var loanInfo = await multiResult.ReadFirstOrDefaultAsync<LoanScheduleResponse>();
+            var loanInfo = await multiResult.ReadFirstOrDefaultAsync<LoanResponse>();
 
             if (loanInfo is null)
             {
-                return Result.Failure<LoanScheduleResponse>(ErrorResponse.NotFound("No Loan Found."));
+                return Error.NotFound("No Loan Found.");
             }
 
             var schedules = (await multiResult.ReadAsync<ScheduleResponse>()).ToList();
 
             if (!schedules.Any())
             {
-                return Result.Failure<LoanScheduleResponse>(ErrorResponse.NotFound("No Schedules Found."));
+                return Error.NotFound("No Schedules Found.");
             }
 
             // Reindex ScheduleNum starting from 1
+
             for (int i = 0; i < schedules.Count; i++)
             {
                 schedules[i].ScheduleNum = i + 1;
@@ -207,13 +339,13 @@ namespace Infrastructures.Repository
 
             response.ScheduleNum = firstSchedule.ScheduleNum;
 
-            return Result.Success(response);
+            return response;
         }
 
 
-        private static LoanScheduleResponse DeepCopyWithoutSchedule(LoanScheduleResponse source)
+        private static LoanResponse DeepCopyWithoutSchedule(LoanResponse source)
         {
-            return new LoanScheduleResponse
+            return new LoanResponse
             {
                 CurrencyId = source.CurrencyId,
                 ContractNumber = source.ContractNumber,
@@ -233,6 +365,7 @@ namespace Infrastructures.Repository
                 Address = source.Address,
                 Circle = source.Circle,
                 PeriodName = source.PeriodName,
+                ScheduleNum = source.ScheduleNum,
                 Schedules = []
             };
         }
@@ -267,12 +400,12 @@ namespace Infrastructures.Repository
             return new ScheduleResponse
             {
                 InstallmentNo = 0,
-                PaymentDate = first.PaymentDate,
-                TotalDay = 0,
-                Principle = 0,
-                Interest = 0,
-                CollectionFee = 0,
-                TotalPay = 0,
+                PaymentDate = null,
+                TotalDay = null,
+                Principle = null,
+                Interest = null,
+                CollectionFee = null,
+                TotalPay = null,
                 LoanOutstanding = first.LoanOutstanding + first.Principle
             };
         }
@@ -283,17 +416,105 @@ namespace Infrastructures.Repository
             {
                 InstallmentNo = last.InstallmentNo + 1,
                 PaymentDate = last.PaymentDate,
-                TotalDay = 0,
+                TotalDay = null,
                 Principle = last.LoanOutstanding,
                 Interest = 0,
-                CollectionFee = 0,
-                TotalPay = 0,
+                TotalFee = 0,
+                CollectionFee = null,
+                TotalPay = last.LoanOutstanding,
                 LoanOutstanding = 0
             };
         }
 
     }
 }
+
+
+
+//public async Task<ErrorOr.ErrorOr<IEnumerable<LoanResponse>>> GetLoanWithSchedules2(int? branchId, string? loanId, CancellationToken cancellation = default)
+//{
+
+//    var parameters = new { branchId, loanId };
+
+//    var loanDictionary = new Dictionary<string, LoanResponse>();
+
+//    var result = await db.QueryAsync<LoanResponse, ScheduleResponse, LoanResponse>(
+//        "spGetLoanWithScedules",
+//        (loan, schedule) =>
+//        {
+//            if (!loanDictionary.TryGetValue(loan.LoanId, out var currentLoan))
+//            {
+//                currentLoan = loan;
+
+//                currentLoan.Schedules = [];
+
+//                loanDictionary.Add(currentLoan.LoanId, currentLoan);
+
+//            }
+
+//            if (schedule != null)
+//            {
+//                currentLoan.Schedules.Add(schedule);
+//            }
+
+//            return currentLoan;
+//        },
+//        param: parameters,
+//        splitOn: "LoanScheduleId",
+//        commandType: CommandType.StoredProcedure
+//    );
+
+//    var loanQuery = loanDictionary.Values.FirstOrDefault();
+
+//    //var multiResult = await db.QueryMultipleAsync(SqlConstant.GetLoanResponse, parameters);
+
+//    //var loanQuery = await multiResult.ReadFirstOrDefaultAsync<LoanResponse>();
+
+//    if (loanQuery is null)
+//    {
+//        return ErrorOr.Error.NotFound("No Loan Found.");
+//    }
+
+//    var scheduleQueries = loanQuery.Schedules;    //(await multiResult.ReadAsync<ScheduleResponse>()).ToList();
+
+//    var groups = scheduleQueries.Chunk(4)
+//                        .Select((chunk, index) => new
+//                        {
+//                            Index = index,
+//                            Group = BuildGroup(chunk)
+//                        })
+//                        .ToDictionary(x => x.Index, x => x.Group);
+
+//    var loanSchedules = new List<LoanResponse>();
+
+//    int groupNum = 1;
+
+//    foreach (var group in groups.OrderBy(g => g.Key))
+//    {
+//        var response = DeepCopyWithoutSchedule(loanQuery);
+
+//        int? scheduleNum = 1;
+
+//        for (int i = 0; i < group.Value.Count; i++)
+//        {
+//            var schedule = group.Value[i];
+
+//            schedule.RowNum = i + 1;
+
+//            response.Schedules.Add(schedule);
+//        }
+//        response.ScheduleNum = scheduleNum;
+
+//        loanSchedules.Add(response);
+
+//        groupNum++;
+//    }
+
+//    return loanSchedules;
+//}
+
+
+
 
 //public async Task<Result<IEnumerable<LoanScheduleResponse>>> GetLoanWithSchedules(int? branchId, string? loanId, CancellationToken cancellation = default)
 //{

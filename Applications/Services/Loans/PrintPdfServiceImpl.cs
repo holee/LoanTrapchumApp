@@ -1,15 +1,15 @@
 ﻿using Applications.Features.Schedules;
-using Applications.Responses;
-using Applications.Services.Reports;
+using ErrorOr;
 using Microsoft.Extensions.Logging;
 using QuestPDF.Fluent;
 
 namespace Applications.Services.Loans
 {
-    public sealed class PrintPdfServiceImpl(ILoanReportServiceImpl loanService, ILogger<PrintPdfServiceImpl> logger) : IPrintPdfServiceImpl
+    public sealed class PrintPdfServiceImpl(ILoanReportServiceImpl loanService,
+            IMediator mediator,
+            ILogger<PrintPdfServiceImpl> logger) : IPrintPdfServiceImpl
     {
-
-        public async Task<Result<Stream>> DownLoadScheduleAsExcel(int? branchId,string? loanId)
+        public async Task<ErrorOr<Stream>> DownLoadScheduleAsExcel(int? branchId, string? loanId)
         {
 
             logger.LogInformation($"getting data from Loan:{loanId} and branch: {branchId}");
@@ -17,60 +17,21 @@ namespace Applications.Services.Loans
             try
             {
 
-                var data = await loanService.GetLoanScheduleAsync(branchId,loanId);
+                var data = await loanService.GetLoanScheduleAsync(branchId, loanId);
 
                 if (data is null)
                 {
-                    return Result.Failure<Stream>(ErrorResponse.NotFound("There is no any schedule to print"));
+                    return Error.NotFound("There is no any schedule to print");
                 }
 
-                var pdf = new SchedulePdfService(data);
-
-                var stream =new MemoryStream(pdf.GeneratePdf());
-
-
-                logger.LogInformation("gettign loan schedule successfull");
-
-                return Result.Success<Stream>(stream);
-
-
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex.Message, ex);
-
-                return Result.Failure<Stream>(ErrorResponse.NotFound($"Error due to: {ex.Message}"));
-            }
-        }
-
-        public async Task<Result<Stream>> DownLoadScheduleAsPdf(int? branchId,string? loanId)
-        {
-
-            logger.LogInformation($"getting data from Loan:{loanId} and branch: {branchId}");
-
-            try
-            {
-
-                //var data = await loanService.GetLoanScheduleAsync(branchId, loanId);
-
-                var data = await loanService.PrintLoanScheduleAsync(branchId, loanId);
-
-
-                if (data is null)
-                {
-                    return Result.Failure<Stream>(ErrorResponse.NotFound("There is no any schedule to print"));
-                }
-
-
-                var pdf = new SchedulePdfService(data);
-
+                var pdf = new ScheduleDocument(data);
 
                 var stream = new MemoryStream(pdf.GeneratePdf());
 
 
                 logger.LogInformation("gettign loan schedule successfull");
 
-                return Result.Success<Stream>(stream);
+                return stream;
 
 
             }
@@ -78,12 +39,50 @@ namespace Applications.Services.Loans
             {
                 logger.LogError(ex.Message, ex);
 
-                return Result.Failure<Stream>(ErrorResponse.NotFound($"Error due to: {ex.Message}"));
+                return Error.NotFound($"Error due to: {ex.Message}");
+            }
+        }
+
+        public async Task<ErrorOr<Stream>> DownLoadScheduleAsPdf(int? branchId, string? loanId)
+        {
+
+            logger.LogInformation($"getting data from Loan:{loanId} and branch: {branchId}");
+
+            try
+            {
+
+                //var data = await loanService.PrintLoanScheduleAsync(branchId, loanId);
+
+                var rsp = await mediator.Send(new GetLoanByIdQuery(loanId, branchId, Include: true));
+
+                if (rsp.IsError)
+                {
+                    return Error.NotFound("There is no any schedule to print");
+                }
+
+                var pdf = new ScheduleDocument(rsp.Value);
+
+                var stream = new MemoryStream(pdf.GeneratePdf());
+
+                stream.Position = 0;
+
+                logger.LogInformation("gettign loan schedule successfull");
+
+                return stream;
+
+
+            }
+            catch (Exception ex)
+            {
+
+                logger.LogError(ex.Message, ex);
+
+                return Error.NotFound($"Error due to: {ex.Message}");
             }
         }
 
 
-       
+
     }
 
 }

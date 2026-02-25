@@ -195,14 +195,16 @@
 
 @code {
 
-    [Parameter] public LoanScheduleResponse? LoanSchedule { get; set; } = new();
+    [Parameter] public LoanResponse? LoanSchedule { get; set; } = new();
     [Parameter] public int? BranchId { get; set; }
     [Parameter] public string? LoanId { get; set; }
-    [Parameter] public int? ScheduleNum { get; set; } = 1;
-    [Parameter] public int TotalScedules { get; set; } = 2;
+    [Parameter] public int? ScheduleNum { get; set; } = 0;
+    [Parameter] public int TotalScedules { get; set; } = 0;
     private int _currencyId = 0;
     private bool isProgess = false;
+    
     [Inject] ExcelExportService _excelExportService { get; set; } = default!;
+  
     protected override void OnParametersSet()
     {
         _currencyId = LoanSchedule?.CurrencyId ?? 0;
@@ -210,47 +212,87 @@
         base.OnParametersSet();
     }
 
-    async Task DownLoadScheduleAsPdf(int? schuduleNum = 1)
+    async Task DownLoadScheduleAsPdf(int? schuduleNum)
     {
-        if (LoanId.IsNotNullOrEmpty() && BranchId > 0)
+        Tracker.Show();
+
+        if (string.IsNullOrEmpty(LoanId) || BranchId <= 0 || schuduleNum <= 0)
         {
-            // await js.InvokeVoidAsync("open", $"/Reports/Schedules/Pdf/{LoanId}/{BranchId}/{schuduleNum}", "_blank");
-            NavigationManager.NavigateTo($"/Reports/Schedules/Pdf/{LoanId}/{BranchId}/{schuduleNum}", true);
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Warning,
+                Summary = "Warning",
+                Detail = "LoanId and BranchId are required to download the schedule as PDF.",
+                Duration = 3000
+            });
+
+            Tracker.Hide();
+
+            return;
         }
+
+        await js.InvokeVoidAsync("open", $"/reports/schedules/pdf/{LoanId}/{BranchId}/{schuduleNum}", "_blank");
+
+        await Task.Delay(1000); // Optional: Adjust the delay as needed to ensure the PDF is opened before hiding the tracker
+
+        Tracker.Hide();
     }
 
     async Task ExportToExcel(int? schuduleNum = 1)
     {
-        if (LoanId.IsNotNullOrEmpty() && BranchId > 0)
+        Tracker.Show();
+
+        if (string.IsNullOrEmpty(LoanId) || BranchId <= 0)
         {
-            try
+            NotificationService.Notify(new NotificationMessage
             {
-                isProgess = true;
-                var loanId = Guid.NewGuid().ToString("N");
-                var fileName = $"Loan_{loanId}_Schedule_{schuduleNum}.xlsx";
-                var sheetName = $"Schedule_{schuduleNum}";
-                var stream = _excelExportService.ScheduleExportAll(
-                    LoanSchedule.Adapt<VLoanDisbursments>(),
-                    LoanSchedule?.Schedules.Adapt<List<VSchedule>>(),
-                    sheetName
-                );
+                Severity = NotificationSeverity.Warning,
+                Summary = "Warning",
+                Detail = "LoanId and BranchId are required to download the schedule as PDF.",
+                Duration = 3000
+            });
 
-                var base64 = Convert.ToBase64String(stream!.ToArray());
+            Tracker.Hide();
 
-                if (stream != null)
-                {
-                    await js.InvokeVoidAsync("downloadFile", fileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", base64);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-            finally
-            {
-                isProgess = false;
-            }
+            return;
         }
+
+        isProgess = true;
+        var loanId = Guid.NewGuid().ToString("N");
+        var fileName = $"Loan_{loanId}_Schedule_{schuduleNum}.xlsx";
+        var sheetName = $"Schedule_{schuduleNum}";
+        var stream = _excelExportService.ScheduleExportAll(
+            LoanSchedule.Adapt<VLoanDisbursments>(),
+            LoanSchedule?.Schedules.Adapt<List<VSchedule>>(),
+            sheetName
+        );
+
+        if (stream == null)
+        {
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Error,
+                Summary = "Error",
+                Detail = "Failed to generate the Excel file.",
+                Duration = 3000
+            });
+
+            Tracker.Hide();
+
+            return;
+        }
+
+        var base64 = Convert.ToBase64String(stream!.ToArray());
+
+        if (!string.IsNullOrEmpty(base64))
+        {
+            await js.InvokeVoidAsync("downloadFile", fileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", base64);
+        }
+
+        await Task.Delay(1000); // Optional: Adjust the delay as needed to ensure the file is downloaded before hiding the tracker
+
+        Tracker.Hide();
+
     }
     void OnRowSelect(ScheduleResponse s)
     {

@@ -7,7 +7,7 @@ namespace Applications.Features.Currencies.Responses
 
         public string? TransactionsId { get; set; }
         public string? TransactionTypeName { get; set; }
-        public DateTime? TransactionDate { get; set; }
+        public DateTimeOffset? TransactionDate { get; set; }
         public string? UserRefId { get; set; }
         public long Id { get; set; }
         public int? BankRefId { get; set; }

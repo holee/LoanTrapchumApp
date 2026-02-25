@@ -1,7 +1,8 @@
 ﻿namespace Applications.Features.Loans.Responses;
 
-public sealed class LoanScheduleResponse
+public sealed class LoanResponse
 {
+    public string? LoanId { get; set; } 
     public int? CurrencyId { get; set; }
     public string? ContractNumber { get; set; }
     public string? LoanAccount { get; set; }=string.Empty;
@@ -20,6 +21,6 @@ public sealed class LoanScheduleResponse
     public string? Address { get; set; }
     public int? Circle { get; set; }
     public string? PeriodName { get; set; }
-    public int? ScheduleNum { get; set; } = 1;
+    public int? ScheduleNum { get; set; } = 0;
     public List<ScheduleResponse> Schedules { get; set; } = [];
 }

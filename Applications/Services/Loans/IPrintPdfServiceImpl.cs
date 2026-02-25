@@ -1,12 +1,11 @@
 ﻿using Applications.Responses;
+using ErrorOr;
 
-namespace Applications.Services.Loans
+namespace Applications.Services.Loans;
+
+public interface IPrintPdfServiceImpl
 {
-    public interface IPrintPdfServiceImpl
-    {
-        Task<Result<Stream>> DownLoadScheduleAsPdf(int? branchId, string? loanId);
-    }
-
+    Task<ErrorOr<Stream>> DownLoadScheduleAsPdf(int? branchId, string? loanId);
 }
 
 

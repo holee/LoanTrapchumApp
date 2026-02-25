@@ -224,14 +224,11 @@ namespace Applications.Extensions.Maths
 
         public static string Formats(this decimal? d, int? currencyId)
         {
-
-            //if (!d.HasValue || d == 0) return "-";
-
             return currencyId switch
             {
                 1 => string.Format(UserCulture(CurrenciesType.Khr), "{0:C}", d),
                 2 => string.Format(UserCulture(CurrenciesType.Usd), "{0:C}", d),
-                _ => string.Format(UserCulture(CurrenciesType.Khr), "{0:C}", d),
+                _ => string.Format(UserCulture(CurrenciesType.Usd), "{0:C}", d),
             };
         }
         public static string SetFormat(this decimal? d, int? currencyId)

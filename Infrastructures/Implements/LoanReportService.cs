@@ -114,6 +114,7 @@ namespace Infrastructures.Implements
                         ts.CurrencyId,
                         ts.Principle,
                         ts.Interest,
+                        ts.TotalFee,
                         ts.CollectionFee,
                         ts.TotalPay,
                         ts.LoanOutstanding,

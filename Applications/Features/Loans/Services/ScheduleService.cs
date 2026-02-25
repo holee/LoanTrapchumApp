@@ -1,52 +1,61 @@
-﻿using Applications.Features.Loans.Responses;
-using Applications.Interfaces;
-using Applications.Responses;
+﻿using Applications.Interfaces;
+using ErrorOr;
+using Microsoft.Extensions.Logging;
 
-namespace Applications.Features.Loans.Services
+namespace Applications.Features.Loans.Services;
+
+public sealed class ScheduleService
 {
-    public sealed class ScheduleService
+    private readonly Interfaces.IScheduleService _scheduleService;
+
+    private readonly ILogger<ScheduleService> _logger;
+    public ScheduleService(Interfaces.IScheduleService scheduleService, ILogger<ScheduleService> logger)
     {
-        private readonly ILoanScheduleRepo _scheduleService;
+        _scheduleService = scheduleService;
 
-        public ScheduleService(ILoanScheduleRepo scheduleService)
-        {
-            _scheduleService = scheduleService;
-        }
+        _logger = logger;
+    }
 
-        public async Task<Result<IEnumerable<LoanScheduleResponse>>> GetLoanSchedule2(int? branchId, string? loanId)
-        {
+    public async Task<ErrorOr<IEnumerable<LoanResponse>>> GetLoanSchedule2(int? branchId, string? loanId)
+    {
 
-            if (!branchId.HasValue || string.IsNullOrEmpty(loanId))
-            {
+        _logger.LogInformation("Fetching loan schedule for branchId: {BranchId} and loanId: {LoanId}", branchId, loanId);
 
-                return Result.Failure<IEnumerable<LoanScheduleResponse>>(ErrorResponse.Validation($"We need branchId and LoanId to fetch data."));
-            }
-
-            return await _scheduleService.GetLoanWithSchedules2(branchId, loanId); 
-        }
-
-        public async Task<Result<LoanScheduleResponse>> CreatePdf(int? branchId, string? loanId, int? scheduleId)
+        if (!branchId.HasValue || string.IsNullOrEmpty(loanId))
         {
 
-            if (!branchId.HasValue || string.IsNullOrEmpty(loanId))
-            {
-
-                return Result.Failure<LoanScheduleResponse>(ErrorResponse.Validation($"We need branchId and LoanId to fetch data."));
-            }
-
-            return await _scheduleService.CreatdPdf(branchId, loanId, scheduleId);
+            return Error.Validation($"We need branchId and LoanId to fetch data.");
         }
 
-        public async Task<Result<IEnumerable<LoanScheduleResponse>>> GetLoanSchedule(int? branchId, string? loanId)
+        return await _scheduleService.GetLoanWithSchedules2(branchId, loanId); 
+    }
+
+    public async Task<ErrorOr<LoanResponse>> CreatePdf(int? branchId, string? loanId, int? scheduleId)
+    {
+   
+        _logger.LogInformation("Creating PDF for loan schedule with branchId: {BranchId}, loanId: {LoanId}, and scheduleId: {ScheduleId}", branchId, loanId, scheduleId);
+
+
+        if (!branchId.HasValue || string.IsNullOrEmpty(loanId))
         {
 
-            if (!branchId.HasValue || string.IsNullOrEmpty(loanId))
-            {
-
-                return Result.Failure<IEnumerable<LoanScheduleResponse>>(ErrorResponse.Validation($"We need branchId and LoanId to fetch data."));
-            }
-
-            return await _scheduleService.GetLoanDisbursments(branchId, loanId);
+            return Error.Validation($"We need branchId and LoanId to fetch data.");
         }
+
+        return await _scheduleService.CreatdPdf(branchId, loanId, scheduleId);
+    }
+
+    public async Task<ErrorOr<IEnumerable<LoanResponse>>> GetLoanSchedule(int? branchId, string? loanId)
+    {
+
+        _logger.LogInformation("Fetching loan schedule for branchId: {BranchId} and loanId: {LoanId}", branchId, loanId);
+
+        if (!branchId.HasValue || string.IsNullOrEmpty(loanId))
+        {
+
+            return Error.Validation($"We need branchId and LoanId to fetch data.");
+        }
+
+        return await _scheduleService.GetLoanDisbursments(branchId, loanId);
     }
 }

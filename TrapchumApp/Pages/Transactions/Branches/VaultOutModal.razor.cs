@@ -311,13 +311,12 @@ namespace TrapchumApp.Pages.Transactions.Branches
 
         }
 
+        //void Calculate()
+        //{
+        //    total = cashMDList.Sum(x => x.TotalValue) ?? 0;
 
-        void Calculate()
-        {
-            total = cashMDList.Sum(x => x.TotalValue) ?? 0;
-
-            totalAmount = total;
-        }
+        //    totalAmount = total;
+        //}
 
     }
 }

@@ -1,10 +1,5 @@
 ﻿using Applications.Features.Schedules;
-using Applications.Responses;
-using Applications.Services.Loans;
-using Applications.Services.Reports;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
-using MiniExcelLibs;
 using QuestPDF.Fluent;
 
 namespace Applications.Features.Loans.Services
@@ -18,18 +13,14 @@ namespace Applications.Features.Loans.Services
 
             try
             {
-
-
                 var rsp = await loanService.GetLoanSchedule2(branchId, loanId);
 
-
-                if (!rsp.IsSuccess)
+                if (rsp.IsError)
                 {
                     return Result.Failure<Stream>(ErrorResponse.NotFound("There is no any schedule to print"));
                 }
 
-
-                var data = rsp.Data;
+                var data = rsp.Value;
 
                 if (data is null || !data.Any())
                 {
@@ -69,13 +60,13 @@ namespace Applications.Features.Loans.Services
                 var rsp = await loanService.CreatePdf(branchId, loanId,scheduleId);
 
 
-                if (!rsp.IsSuccess)
+                if (rsp.IsError)
                 {
                     return Result.Failure<Stream>(ErrorResponse.NotFound("There is no any schedule to print"));
                 }
 
 
-                var data = rsp.Data;
+                var data = rsp.Value;
 
                 if (data is null)
                 {
@@ -83,10 +74,10 @@ namespace Applications.Features.Loans.Services
                 }
 
 
-                var pdf = SchedulePdfPrintService.CreatePdf(data);
+                var pdf = new ScheduleByScheduleDocument(data);   //SchedulePdfPrintService.CreatePdf(data);
 
 
-                var stream = new MemoryStream(pdf);
+                var stream = new MemoryStream(pdf.GeneratePdf());
 
 
                 logger.LogInformation("gettign loan schedule successfull");

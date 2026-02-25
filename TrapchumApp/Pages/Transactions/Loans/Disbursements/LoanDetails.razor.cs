@@ -36,7 +36,7 @@ public partial class LoanDetails
 
     IEnumerable<VSchedule> Schedules = [];
 
-    IEnumerable<LoanScheduleResponse> _loanSchedules = [];
+    IEnumerable<LoanResponse> _loanSchedules = [];
 
     string receiptNo = "";
 
