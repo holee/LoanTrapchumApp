@@ -1,12 +1,8 @@
 ﻿
 using Applications.Commons.Mappers;
 using Applications.Features.Settings.Requests;
-using Applications.Features.Settings.Requests;
 using Applications.Interfaces.Lists;
-using Applications.Responses;
-using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels;
-using Domains.Models.Lists;
 using Domains.Shared.Enums;
 
 namespace Applications.Services.Lists

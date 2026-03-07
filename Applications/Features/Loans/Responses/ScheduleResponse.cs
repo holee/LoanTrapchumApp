@@ -15,4 +15,5 @@ public sealed class ScheduleResponse
     public decimal? TotalPay { get; set; }
     public decimal? LoanOutstanding { get; set; }
     public int? ScheduleNum { get; set; } = 1;
+    public int RowIndex { get; set; } = 1;
 }

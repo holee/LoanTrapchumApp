@@ -20,14 +20,15 @@ namespace Applications.Calculations
             _parameter = parameter;
         }
 
-        public static Calculators CreateBuilder(LoanDtoCreate parameter)
+        public static Calculators CalculatorBuilder(LoanDtoCreate parameter)
         {
             _parameter = parameter;
 
             return new Calculators(parameter);
         }
 
-        public static Calculators CreateBuilder(Action<LoanCreateConfiguration> config)
+
+        public static Calculators CalculatorBuilder(Action<LoanCreateConfiguration> config)
         {
             var parameter = new LoanCreateConfiguration();
 
@@ -50,14 +51,8 @@ namespace Applications.Calculations
         {
             return new(e);
         }
+
+      
+
     }
 }
-
-
-//public LoanBuilder Build(LoanInfo e)
-//{
-//    return new(_currencyId, e.PayEvery, _repaymentModeId, e.CollectionFeeModeId, e.InstallmentTypeId, e.CollectionFeeRate, e.FirstPayment, e.StartDate);
-//}
-//int? _repaymentModeId;
-
-//int? _currencyId;

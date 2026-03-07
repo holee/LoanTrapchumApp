@@ -1,9 +1,5 @@
 ﻿using Applications.Features.LoanPayments.Requests;
-using Applications.Features.LoanPayments.Requests;
-using Applications.Responses;
 using Applications.Responses.ViewModels.Loans.Payments;
-using Applications.Responses.ViewModels.Loans.Schedules;
-using Domains.Models.Lists;
 using Domains.Models.Transaction;
 
 namespace Applications.Interfaces.Loans;

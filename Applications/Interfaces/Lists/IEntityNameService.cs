@@ -1,8 +1,4 @@
 ﻿using Applications.Features.Entities;
-using Applications.Features.Entities;
-using Applications.Features.Guarantor.Dtos;
-using Applications.Responses.Paginations;
-using Domains.Models.Lists;
 
 namespace Applications.Interfaces.Lists
 {

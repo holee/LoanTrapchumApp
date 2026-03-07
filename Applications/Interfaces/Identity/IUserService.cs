@@ -1,8 +1,5 @@
 ﻿using Applications.Features.Identity.Users;
-using Applications.Features.Identity.Users;
-using Applications.Responses;
 using Applications.Responses.Auths;
-using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Auths;
 using Domains.Models.Files;
 
@@ -27,4 +24,5 @@ public interface IUserService
     Task<Result<string>> ChangePassword(ChangePasswordDto req, CancellationToken cancellation = default);
     Task<Result<FileModel>> ChangeProfile(string? userId, FileModel model, CancellationToken cancellation = default);
     Task<Result<UserProfileResponse>> GetUserProfile(string? userId, CancellationToken cancellation = default);
+    Task<ErrorOr.ErrorOr<VUser>> GetUserDetailById(string? userId, CancellationToken cancellation = default);
 }

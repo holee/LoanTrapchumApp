@@ -7,11 +7,23 @@ using Applications.Features.Addresses.Queries.GetCommunes;
 using Applications.Features.Addresses.Queries.GetDistricts;
 using Applications.Features.Addresses.Queries.GetProvinces;
 using Applications.Features.Addresses.Queries.GetVillages;
+using Applications.Features.Branches.Queries.GetBranchsByUser;
 using Applications.Features.CashManagements.Command.CreateCashVaultIn;
 using Applications.Features.CashManagements.Command.CreateCashVaultOut;
 using Applications.Features.Currencies.Queries.GetCurrencyById;
+using Applications.Features.Dashbaord.Accountants.Dtos;
+using Applications.Features.Dashbaord.Accountants.Queries.GetDbAccountLoanSummaery;
+using Applications.Features.Dashbaord.Accountants.Queries.GetDbApprovedLoanRequest;
+using Applications.Features.Dashbaord.CreditOfficers.Dtos;
+using Applications.Features.Dashbaord.CreditOfficers.Queries.GetDbCreditOfficeLoanSummary;
+using Applications.Features.Dashbaord.CreditOfficers.Queries.GetNumberLoanRequest;
+using Applications.Features.Dashbaord.Managers.Dto;
+using Applications.Features.Dashbaord.Managers.Queries.GetDbManagerLoanSummary;
+using Applications.Features.Identity.Queries.GetUserDetailById;
+using Applications.Features.Identity.Roles.Queries.GetRoles;
 using Applications.Features.Schedules.GetLoanScheduleBySchedule;
 using Applications.Features.Schedules.GetLoanWithSchedule;
+using Applications.Responses.ViewModels.Auths;
 using ErrorOr;
 namespace Applications;
 
@@ -19,10 +31,17 @@ public static class ApplicationServiceInjection
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
+
+        services.AddScoped<IRequestHandler<GetUserDetailsByIdQuery, ErrorOr<VUser>>, GetUserDetailsByIdQueryHandler>();
+        services.AddScoped<IRequestHandler<GetBranchByUserQuery, ErrorOr<VBranch>>, GetBranchByUserQueryHandler >();
+        services.AddScoped<IRequestHandler<GetDbManagerLoanSummaryQuery, ErrorOr<DbManagerLoanSummary>>, GetDbManagerLoanSummaryQueryHandler>();
+        services.AddScoped<IRequestHandler<GetNumberLoanRequestQuery, ErrorOr<NumerLoanRequest>>, GetNumberLoanRequestQueryHandler>();
+        services.AddScoped<IRequestHandler<GetDbCreditOfficeLoanSummaryQuery, Pager<DbCoLoanSummary>>, GetDbCreditOfficeLoanSummaryQueryHandler>();
+        services.AddScoped<IRequestHandler<GetDbApprovedRequestQuery, ErrorOr<int>>, GetDbApprovedRequestHandler>();
+        services.AddScoped<IRequestHandler<GetDbAccountLoanSummaryQuery, Pager<AccountantLoanSummary>>, GetDbAccountLoanSummaryQueryHandler>();
+        services.AddScoped<IRequestHandler<GetRolesQuery, IEnumerable<string>>, GetRolesQueryHandler>();
         services.AddScoped<IRequestHandler<GetLoanScheduleByScheduleQuery, ErrorOr<LoanResponse>>, GetLoanScheduleByScheduleQueryHandler>();
-
         services.AddScoped<IRequestHandler<GetLoanWithScheduleQuery, ErrorOr<LoanResponse>>, GetLoanWithScheduleQueryHandler>();
-
         services.AddScoped<IRequestHandler<GetCitiesQuery, PageMetaData<CityDto>>, GetCitiesQueryHandler>();
         services.AddScoped<IRequestHandler<GetCommunesQuery, PageMetaData<CommuneDto>>, GetCommunesQueryHandler>();
         services.AddScoped<IRequestHandler<GetDistrictsQuery, PageMetaData<DistrictDto>>, GetDistrictsQueryHandler>();
@@ -51,7 +70,7 @@ public static class ApplicationServiceInjection
         services.AddScoped<IRequestHandler<GetUpdateBranchQuery, ErrorOr<BranchDtoUpdate>>, GetUpdateBranchQueryHandler>();
         services.AddScoped<IRequestHandler<CreateBranchCommand, ErrorOr<VBranch>>, CreateBranchCommandHandler>();
         services.AddScoped<IRequestHandler<EditBranchCommand, ErrorOr<VBranch>>, EditBranchCommandHandler>();
-        services.AddScoped<IRequestHandler<GetBranchByUserQuery, ErrorOr<IEnumerable<VBranch>>>, GetBranchByUserQueryHandler>();
+        services.AddScoped<IRequestHandler<GetBranchsByUserQuery, ErrorOr<IEnumerable<VBranch>>>, GetBranchsByUserQueryHandler>();
         services.AddScoped<IRequestHandler<OpenBranchCommand, ErrorOr<BranchStatus>>, OpenBranchCommandHandler>();
         services.AddScoped<IRequestHandler<CloseBranchCommand, ErrorOr<BranchStatus>>, CloseBranchCommandHandler>();
         services.AddScoped<IRequestHandler<GetCashVaultBalanceQuery, ErrorOr<IEnumerable<VCashVaultBalance>>>, GetCashVaultBalanceQueryHandler>();

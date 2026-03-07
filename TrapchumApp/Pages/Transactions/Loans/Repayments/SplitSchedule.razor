@@ -258,12 +258,14 @@
         }
 
         isProgess = true;
+
         var loanId = Guid.NewGuid().ToString("N");
+
         var fileName = $"Loan_{loanId}_Schedule_{schuduleNum}.xlsx";
+
         var sheetName = $"Schedule_{schuduleNum}";
-        var stream = _excelExportService.ScheduleExportAll(
-            LoanSchedule.Adapt<VLoanDisbursments>(),
-            LoanSchedule?.Schedules.Adapt<List<VSchedule>>(),
+
+        var stream = _excelExportService.ScheduleExportAll(LoanSchedule.Adapt<VLoanDisbursments>(),LoanSchedule?.Schedules.Adapt<List<VSchedule>>(),
             sheetName
         );
 

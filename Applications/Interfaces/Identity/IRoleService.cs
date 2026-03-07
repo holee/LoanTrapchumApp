@@ -21,6 +21,7 @@ namespace Applications.Interfaces.Identity
         Task<Result<IEnumerable<RoleDto>>> GetRolesAsync(string roleId, string? name = null);
         Task<Result<IEnumerable<string>>> GetRolesAsync(string? name = null);
         Task<Pager<RoleDto>> GetRolesAsync(string? roleId, QueryParam param, CancellationToken cancellation = default);
+        Task<Pager<RoleDto>> GetRolesAsync(QueryParam param, CancellationToken cancellation = default);
         Task<Result<string>> UpdateAsync(RoleDtoUpdate role);
     }
 }

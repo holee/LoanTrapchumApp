@@ -207,7 +207,7 @@ public class BranchRepository(IDbContextFactory<DataContext> contextFactory,
 
         await using var context = await contextFactory.CreateDbContextAsync(cancellation);
 
-        IQueryable<VBranch> queries = ApplyFilters(param, context);
+        var queries = ApplyFilters(param, context);
 
         queries = ApplySorts(param, queries);
 
@@ -286,6 +286,31 @@ public class BranchRepository(IDbContextFactory<DataContext> contextFactory,
         //                    .AsNoTracking()
         //                    .ToListAsync(cancellation);
 
+
+
+    }
+
+    public async Task<ErrorOr<VBranch>> GetBranchByUser(string? userId, CancellationToken cancellation = default)
+    {
+        await using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+        var branche = await context
+                            .Set<VUser>()
+                            .Where(x => x.Id == userId)
+                            .AsNoTracking()
+                            .Select(b => new VBranch
+                            {
+                                BranchId = b.BranchId,
+                                BranchName = b.BranchName
+                            })
+                            .FirstOrDefaultAsync(cancellation);
+
+        if (branche is null)
+        {
+            return Error.NotFound("No User found in the branch.");
+        }
+
+        return branche;
 
 
     }

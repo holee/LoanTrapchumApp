@@ -7,7 +7,6 @@ namespace Applications.Features.Schedules;
 
 public sealed class ScheduleByScheduleDocument(LoanResponse item) : IDocument
 {
-    const string font = "Khmer Os Siemreap";
     private LoanResponse Item => item ?? new();
     public string ImageUrl { get; set; } = string.Empty;
     public void Compose(IDocumentContainer document)
@@ -38,14 +37,76 @@ public sealed class ScheduleByScheduleDocument(LoanResponse item) : IDocument
 
     private void ContentCompose(IContainer container)
     {
+
+        container.PaddingTop(10).Column(cols =>
+        {
+            cols.Item().Element(ComposeTable);
+
+            cols.Item().Row(r =>
+            {
+                r.RelativeItem().Column(col =>
+                {
+                    col.Item().PaddingTop(20).Row(r =>
+                    {
+                        r.RelativeItem()
+                                .AlignCenter()
+                                .Text(ScheduleHelpers.CUSTOMER_THUMB)
+                                .FontFamily(ScheduleHelpers.FONT).SemiBold();
+                        r.RelativeItem()
+                                .AlignCenter()
+                                .Text(ScheduleHelpers.AGENT_SIGNATURE)
+                                .FontFamily(ScheduleHelpers.FONT).SemiBold();
+                    });
+                    col.Item().PaddingTop(100).Row(r =>
+                    {
+                        r.RelativeItem()
+                          .AlignCenter()
+                          .Column(c =>
+                          {
+                              c.Item()
+                              .Width(120)
+                              .LineHorizontal(1)
+                              .LineDashPattern([1, 2])
+                              .LineColor(Colors.Black);
+                          });
+
+                        r.RelativeItem()
+                          .AlignCenter()
+                          .Column(c =>
+                          {
+                              c.Item()
+                              .Width(120)
+                              .LineHorizontal(1)
+                              .LineDashPattern([1, 2])
+                              .LineColor(Colors.Black);
+                          });
+                    });
+                    col.Item().PaddingTop(10).Row(r =>
+                    {
+                        r.RelativeItem().AlignCenter()
+                                .Text(DateTime.Now.ToLongDateString())
+                                .FontFamily(ScheduleHelpers.FONT).SemiBold();
+                        r.RelativeItem().AlignCenter()
+                                .Text(DateTime.Now.ToLongDateString())
+                                .FontFamily(ScheduleHelpers.FONT).SemiBold();
+                    });
+                });
+
+            });
+        });
+
+
+    }
+
+    private void ComposeTable(IContainer container)
+    {
         container.Table(table =>
         {
-
             table.ColumnsDefinition(columns =>
             {
                 columns.ConstantColumn(30);
-                columns.ConstantColumn(35);
                 columns.RelativeColumn();
+                columns.ConstantColumn(40);
                 columns.RelativeColumn();
                 columns.RelativeColumn();
                 columns.RelativeColumn();
@@ -55,8 +116,11 @@ public sealed class ScheduleByScheduleDocument(LoanResponse item) : IDocument
             table.Header(header =>
             {
                 header.Cell().Element(SetHeaderCellStyle).Text("#").AlignCenter();
-                header.Cell().Element(SetHeaderCellStyle).Text("Days").SemiBold().AlignCenter();
-                header.Cell().Element(SetHeaderCellStyle).Text("Payment Date").SemiBold().AlignCenter();
+                header.Cell().ColumnSpan(2)
+                            .Element(SetHeaderCellStyle)
+                            .Text("Due Date")
+                            .SemiBold()
+                            .AlignCenter();
                 header.Cell().Element(SetHeaderCellStyle).AlignRight().Text("Principle").SemiBold();
                 header.Cell().Element(SetHeaderCellStyle).AlignRight().Text("Interest").SemiBold();
                 header.Cell().Element(SetHeaderCellStyle).AlignRight().Text("Total").SemiBold();
@@ -66,8 +130,8 @@ public sealed class ScheduleByScheduleDocument(LoanResponse item) : IDocument
             foreach (var item in Item!.Schedules ?? [])
             {
                 table.Cell().Element(SetCellStyle).Text($"{item.InstallmentNo}").AlignCenter();
-                table.Cell().Element(SetCellStyle).Text($"{item.TotalDay}").AlignCenter();
                 table.Cell().Element(SetCellStyle).Text($"{item.PaymentDate.DayFirst()}").AlignCenter();
+                table.Cell().Element(SetCellStyle).Text($"{item.TotalDay}").AlignCenter();
                 table.Cell().Element(SetCellStyle).Text($"{item.Principle.Formats(item.CurrencyId)}").AlignRight();
                 table.Cell().Element(SetCellStyle).Text($"{item.TotalFee.Formats(item.CurrencyId)}").AlignRight();
                 table.Cell().Element(SetCellStyle).Text($"{item.TotalPay.Formats(item.CurrencyId)}").AlignRight();
@@ -83,42 +147,51 @@ public sealed class ScheduleByScheduleDocument(LoanResponse item) : IDocument
 
             row.RelativeItem().Column(col =>
             {
-
-                col.Item()
-                        .PaddingTop(10)
-                         .Height(80)
-                         .AlignCenter()
-                         .Width(80)
-                         .Image("wwwroot/assets/logo/tch_Logo.png");
-
-                col.Item()
-                        .PaddingBottom(5)
-                        .PaddingTop(5)
-                        .LineHorizontal(1)
-                        .LineColor(Colors.Black);
-
-                col.Item().Row(ro =>
+                col.Item().Row(r =>
                 {
-                    ro.RelativeItem().Column(co =>
+                    r.RelativeItem()
+                     .Width(80)
+                     .Image("wwwroot/assets/logo/trapchum.jpg");
+                    r.RelativeItem().AlignCenter().Column(col =>
                     {
-                        AddColumnHeader(co, font, "ឈ្មោះ", Item.AltName);
-                        AddColumnHeader(co, font, "រយៈពេល", Item.PeriodName);
-                        AddColumnHeader(co, font, "អត្រា", $"{Item.InterestRate}");
-                        AddColumnHeader(co, font, "មូលដ្ឋាន", $"{Item.OutStanding.Formats(Item.CurrencyId)}");
-                        AddColumnHeader(co, font, "សាខា", Item.BranchName);
-                    });
-                    ro.RelativeItem().PaddingTop(5).Column(co =>
-                    {
-                        AddColumnHeader(co, font, "ថ្ងៃបង់ចុងក្រោយ", Item.LastPaymentDate.DayFirst());
-                        AddColumnHeader(co, font, "អស៍យដ្ឋាន", Item.Address);
-                        AddColumnHeader(co, font, "ភ្ងាក់ងារ", Item.CreditAgentKhmer);
-                        AddColumnHeader(co, font, "ទូរស័ព្ទ", Item.AgentPhone);
+                        col.Item().Text(ScheduleHelpers.COMPANY_NAME)
+                        .AlignCenter()
+                            .FontFamily(ScheduleHelpers.TITLE_FONT);
+                        col.Item().AlignCenter()
+                        .Text(ScheduleHelpers.SCHEDULE_TITLE).FontFamily(ScheduleHelpers.FONT);
+                        col.Item().AlignCenter()
+                        .Text(ScheduleHelpers.SCHEDULE_TITLE_KH).FontFamily(ScheduleHelpers.FONT);
                     });
 
+                    r.RelativeItem().Text("");
                 });
 
+                col.Item().PaddingVertical(5).LineHorizontal(1).LineColor(Colors.Black);
+                CreateHeaderRow(col);
             });
 
+        });
+    }
+
+    private void CreateHeaderRow(ColumnDescriptor col)
+    {
+        col.Item().Row(ro =>
+        {
+            ro.RelativeItem().Column(co =>
+            {
+                AddColumnHeader(co, ScheduleHelpers.FONT, ScheduleHelpers.NAME, Item.AltName);
+                AddColumnHeader(co, ScheduleHelpers.FONT, ScheduleHelpers.PERIOD, Item.PeriodName);
+                AddColumnHeader(co, ScheduleHelpers.FONT, ScheduleHelpers.RATE, $"{Item.InterestRate.AsPercent()}");
+                AddColumnHeader(co, ScheduleHelpers.FONT, ScheduleHelpers.PRINCIPLE, $"{Item.OutStanding.Formats(Item.CurrencyId)}");
+                AddColumnHeader(co, ScheduleHelpers.FONT, ScheduleHelpers.BRANCH, Item.BranchName);
+            });
+            ro.RelativeItem().PaddingTop(5).Column(co =>
+            {
+                AddColumnHeader(co, ScheduleHelpers.FONT, ScheduleHelpers.LAST_DUE_DATE, Item.LastPaymentDate.DayFirst());
+                AddColumnHeader(co, ScheduleHelpers.FONT, ScheduleHelpers.ADDRESS, Item.Address);
+                AddColumnHeader(co, ScheduleHelpers.FONT, ScheduleHelpers.AGENT, Item.CreditAgentKhmer);
+                AddColumnHeader(co, ScheduleHelpers.FONT, ScheduleHelpers.PHONE, Item.AgentPhone);
+            });
 
         });
     }

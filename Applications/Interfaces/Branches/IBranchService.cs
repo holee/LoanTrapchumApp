@@ -21,5 +21,6 @@ namespace Applications.Interfaces.Branches
         Task<VBranch?> GetBranchDetailsById(int? branchId, CancellationToken cancellation = default, params string[] columns);
         Task<Pager<VBranch>> GetBranchesAsync(int? branchId, QueryParam param, CancellationToken cancellation = default, params string[] columns);
         Task<ErrorOr<BranchStatus>> GetBranchStatus(string? userId, CancellationToken cancellation = default);
+        Task<ErrorOr<VBranch>> GetBranchByUser(string? userId, CancellationToken cancellation = default);
     }
 }

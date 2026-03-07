@@ -1,10 +1,5 @@
 ﻿using Applications.Features.Transactions.Journals;
-using Applications.Features.Transactions.Journals;
-using Applications.Responses;
-using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Journals;
-using Domains.Models.Journals;
-using Domains.Models.Transaction;
 
 namespace Applications.Services.Transactions.Journals;
 

@@ -1,5 +1,6 @@
 using Applications.Features.Branches.Dtos;
 using Applications.Features.Branches.Queries.GetBranchByUser;
+using Applications.Features.Branches.Queries.GetBranchsByUser;
 using Applications.Features.CashManagements.Responses;
 using Applications.Features.Currencies.Dto;
 using Applications.Features.Currencies.Queries.GetCashVault;
@@ -64,7 +65,7 @@ public partial class CashVaultModalActions
 
     private async Task GetBranchByUser(string? userId)
     {
-        var command = new GetBranchByUserQuery(userId, 0);
+        var command = new GetBranchsByUserQuery(userId, 0);
 
         var bResponse = await mediator.Send(command);
 

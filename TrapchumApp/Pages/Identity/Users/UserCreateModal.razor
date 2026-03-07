@@ -7,6 +7,7 @@
 @using Applications.Features.Entities
 @using Applications.Features.LoanRequests.Interfaces
 @using TrapchumApp.Services
+<h2>fdfddfdf</h2>
 <EditForm Model="_model" @ref="_form">
     <FluentValidationValidator DisableAssemblyScanning="true" />
     <RadzenStack Gap="0.5rem;" Orientation="Orientation.Vertical">
@@ -17,7 +18,7 @@
                                 Data="@_branches"
                                 Style="width: 100%;"
                                 TextProperty="@(nameof(BranchDto.BranchName))"
-                                @bind-Value:after="SelectBranchChanged"
+                                SelectedItemChanged="SelectBranchChanged"
                                 ValueProperty="@(nameof(BranchDto.BranchId))"
                                 Disabled="@_showBranch"
                                 Name="DropDownBindValue" />

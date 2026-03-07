@@ -1,7 +1,7 @@
 ﻿namespace Domains.Enumerations
 {
 
-    public enum LoanTypeStatus 
+    public enum LoanSubTypeOption  
     {
         Standard=1,
         SubStandard=2,

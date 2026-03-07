@@ -10,7 +10,6 @@ namespace Applications.Interfaces.Lists
     public interface  IHolidayService
     {
         Task<Result<string>> CreateOrUpdateHoliday(Holiday enity);
-
         Task<Result<string>> BulkCreateHoliday(List<Holiday> enity);
         Task<Result<string>> DeleteHoliday(long id);
         Task<Result<string>> BulkDeleteHoliday(List<long> id);
@@ -28,5 +27,6 @@ namespace Applications.Interfaces.Lists
         Task<ErrorOr<DeleteResult>> DeleteHoliday(long? id, CancellationToken cancellation = default);
         Task<ErrorOr<IEnumerable<HolidayVm>>> CreateHolidays(List<Holiday> entities);
         Task<ErrorOr<long>> CreateOrUpdate(Holiday entities, CancellationToken cancellation = default);
+        Task<Pager<HolidayVm>> GetActiveHolidays(int? selectedYear, CancellationToken cancellation = default);
     }
 }

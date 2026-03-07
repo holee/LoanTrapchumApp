@@ -1,13 +1,7 @@
 ﻿using Applications.Commons.Mappers;
 using Applications.Features.Transactions.Journals;
-using Applications.Features.Transactions.Journals;
 using Applications.Interfaces.Transactions;
-using Applications.Responses;
-using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Journals;
-using Domains.Models.Journals;
-using Domains.Models.Transaction;
-using Mapster;
 
 namespace Applications.Services.Transactions.Journals;
 

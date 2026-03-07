@@ -1,25 +1,14 @@
+.dashboard-container {
+    color:#111111;
+}
 
-    @media print {
-        .btn {
-            display: none; /* Hide the print button when printing */
-        }
+.title {
+    margin-bottom: 20px;
+}
 
-        ::deep .rz-sidebar{
-            display: none;
-        }
+.cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+}
 
-        @page {
-            size: A5; /* Set paper size to A4 */
-            margin: 1cm; /* Optional: Set margins for the printed page */
-        }
-
-        body {
-            margin: 0; /* Remove default body margins for print */
-        }
-
-        .content {
-            width: 100%;
-            max-width: 100%;
-            padding: 0;
-        }
-    }

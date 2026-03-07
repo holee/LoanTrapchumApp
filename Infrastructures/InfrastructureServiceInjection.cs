@@ -123,6 +123,7 @@ namespace Infrastructures
             services.AddScoped<Applications.Interfaces.IScheduleService, LoanScheduleRepository>();
             services.AddScoped<INotificationService, NotificationRepository>();
             services.AddSingleton<IDapperConnectionFactory, DapperConnectionFactory>();
+            services.AddScoped<IDashboardService, DashboardRepository>();
             return services;
 
         }

@@ -371,28 +371,25 @@ namespace Infrastructures.Implements
         }
 
 
-        public async Task<IEnumerable<HolidayVm>> GetActiveHolidays(DateTime? selectedDate, int? selectedYear = 0)
+        public async Task<Pager<HolidayVm>> GetActiveHolidays(int? selectedYear, CancellationToken cancellation = default)
         {
             try
             {
-                using var db = _connectionFactory.CreateConnection();
+                await using var db = await _contextFactory.CreateDbContextAsync(cancellation);
 
-                var lastSelectedDate = selectedYear > 0 ? selectedDate!.Value.AddYears(selectedYear!.Value) : selectedDate;
+                var endDate = selectedYear switch
+                {
+                    > 0 => new DateTime(selectedYear.Value, 12, 31),
 
-                var parameters = new DynamicParameters();
+                    _ => DateTime.Now.AddYears(1)
+                };
 
-                parameters.Add("@selectedDate", selectedDate);
-
-                parameters.Add("@lastSelectedDate", lastSelectedDate);
-
-                var sql = @"SELECT Id, HolidayDt, HolidayName, HolidayName, HolidayNum, Status, Description
-                        FROM VHolidaysVm WHERE Status = CAST(1 AS BIT) AND 
-                        CAST(HolidayDt AS DATE) BETWEEN CAST(@selectedDate AS DATE) AND 
-                        CAST(@lastSelectedDate AS DATE);
-                       ";
-                var queries = await db.QueryAsync<HolidayVm>(sql, parameters);
-
-                return queries ?? [];
+                var queries = db.Set<HolidayVm>()
+                                .Where(x => x.HolidayDt >= DateTime.Now && x.HolidayDt <= endDate)
+                                .OrderBy(x => x.HolidayDt);
+                var counts = await queries.CountAsync(cancellation);
+                var items = await queries.AsNoTracking().ToListAsync(cancellation);
+                return PagerExtensions.Create(items, counts);
             }
             catch (Exception ex)
             {
@@ -559,6 +556,11 @@ namespace Infrastructures.Implements
             var isInUse = await ctx.LoanSchedules
                                  .AnyAsync(el => el.PaymentDate == result.HolidayDt, cancellation);
             return isInUse;
+        }
+
+        public Task<IEnumerable<HolidayVm>> GetActiveHolidays(DateTime? selectedDate, int? selectedYear = 0)
+        {
+            throw new NotImplementedException();
         }
     }
 }

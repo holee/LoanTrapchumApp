@@ -14,6 +14,7 @@ using Applications.Features.Loans.Responses;
 using Applications.Features.Branches.Dtos;
 using Applications.Features.Branches.Queries.GetBranchByUser;
 using TrapchumApp.Helpers.Extensions;
+using Applications.Features.Branches.Queries.GetBranchsByUser;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 {
@@ -83,7 +84,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 
             await GetCustomerPaymentSchedulesByLoanIdAsync(1);
 
-            var command = new GetBranchByUserQuery(_userId, null);
+            var command = new GetBranchsByUserQuery(_userId, null);
 
             var rsp = await mediator.Send(command);
 

@@ -231,6 +231,12 @@ namespace Applications.Extensions.Maths
                 _ => string.Format(UserCulture(CurrenciesType.Usd), "{0:C}", d),
             };
         }
+
+        public static string AsPercent(this decimal? d)
+        {
+            return $"{d}%";
+        }
+
         public static string SetFormat(this decimal? d, int? currencyId)
         {
             return currencyId switch

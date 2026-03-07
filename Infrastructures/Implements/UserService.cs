@@ -728,6 +728,35 @@ public sealed class UserService : IUserService
         return Result.Success(userResponse);
     }
 
+    public async Task<ErrorOr.ErrorOr<VUser>> GetUserDetailById(string? userId, CancellationToken cancellation = default)
+    {
+
+        await using var context = await _dbContextFactory.CreateDbContextAsync(cancellation);
+
+        var item = await context.Set<VUser>()
+                            .AsNoTracking()
+                            .Select(x => new VUser
+                            {
+                                Id = x.Id,
+                                UserName = x.UserName,
+                                BranchId = x.BranchId,
+                                EmployeeRefId = x.EmployeeRefId,
+                                FirstName = x.FirstName,
+                                LastName = x.LastName,
+                                BranchName = x.BranchName,
+                            })
+                            .FirstOrDefaultAsync(x => x.Id == userId, cancellation);
+
+        if (item is null) return ErrorOr.Error.NotFound("NotFound", Messages.DataNotFound);
+
+        return item;
+    }
+
+
+
+
+
+
     public async Task<Pager<PermissionsVm>> GetPermissionsAsync(QueryParam q)
     {
 

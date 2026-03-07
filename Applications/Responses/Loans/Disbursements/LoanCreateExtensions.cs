@@ -1,7 +1,5 @@
 ﻿using Applications.Calculations;
 using Applications.Features.Loans.Requests;
-using Applications.Features.Loans.Requests;
-using Domains.Models.Loans;
 
 namespace Applications.Responses.Loans.Disbursements;
 

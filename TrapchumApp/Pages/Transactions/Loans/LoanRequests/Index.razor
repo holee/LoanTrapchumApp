@@ -20,7 +20,12 @@
             <RadzenTabsItem Icon="list" Text="All">
                 <LoanRequestAll BranchId="@BranchId" UserId="@_userId" />
             </RadzenTabsItem>
-            <RadzenTabsItem Text="Requesting"
+        </Tabs>
+    </RadzenTabs>
+
+</Containers>
+
+@* <RadzenTabsItem Text="Requesting"
                             Visible="@IsCreditAgent"
                             Icon="pending_actions">
                 <LoanRequestRequesting BranchId="@BranchId" />
@@ -30,18 +35,12 @@
                             Icon="request_quote">
                 <LoanRequestRequested BranchId="@BranchId"
                                       UserId="@_userId" />
-            </RadzenTabsItem>
-            <RadzenTabsItem Text="Approved"
+            </RadzenTabsItem> *@
+@* <RadzenTabsItem Text="Approved"
                             Visible="@IsAccount"
                             Icon="@IconNames.Approval">
                 <LoanRequestApprove BranchId="@BranchId" UserId="@_userId" />
             </RadzenTabsItem>
             <RadzenTabsItem Text="Completed" Icon="@IconNames.Done">
                 <LoanRequestCompleted BranchId="@BranchId" CreditAgentId="@_userId" />
-            </RadzenTabsItem>
-        </Tabs>
-    </RadzenTabs>
-
-</Containers>
-
-
+            </RadzenTabsItem> *@

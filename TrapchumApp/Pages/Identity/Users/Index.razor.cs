@@ -91,7 +91,7 @@ public partial class Index
     private async Task GetBranches()
     {
 
-        var command = new GetBranchAsPagingQuery(0, new QueryParam(1, 0, ""));
+        var command = new GetBranchAsPagingQuery(0, new QueryParam(0, 0, ""));
 
         var rsp = await mediator.Send(command);
 
@@ -100,16 +100,16 @@ public partial class Index
             new VBranch
             {
                 BranchId=0,
+
                 BranchName="All"
             }
         };
 
-        if (rsp.IsSuccess)
-        {
-            var branches = rsp.Items.Union(unionBranches);
 
-            Branches = branches.OrderBy(x => x.BranchId).ToList();
-        }
+        var branches = rsp.Items.Union(unionBranches);
+
+        Branches = branches.OrderBy(x => x.BranchId).ToList();
+
     }
 
     async Task LoadAllUsers(string? userId = null, string? filter = null)
@@ -243,7 +243,7 @@ public partial class Index
 
         if (args is not null)
         {
-            selectedBranchId = ((BranchDto?)args)!.BranchId;
+            selectedBranchId = ((VBranch)args).BranchId!.Value;
 
             await LoadAllUsers(string.Empty);
         }

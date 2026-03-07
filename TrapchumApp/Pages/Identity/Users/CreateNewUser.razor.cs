@@ -1,5 +1,6 @@
 ﻿using Applications.Features.Branches.Dtos;
 using Applications.Features.Branches.Queries.GetBranchAsPaging;
+using Applications.Features.Identity.Roles.Queries.GetRoles;
 using Applications.Features.Identity.Users;
 using Applications.Interfaces.Identity;
 using Applications.Responses.Paginations;
@@ -30,19 +31,14 @@ public partial class CreateNewUser
     {
         try
         {
-            var roleResult = await _roleService.GetRolesAsync(string.Empty);
+            await GetRoles();
 
-            if (roleResult.IsSuccess)
-            {
-                roles = roleResult?.Data ?? [];
-            }
+            //var rsp = await _employeeService.GetEmployeesAsync(0, null, new(0, 0));
 
-            var rsp = await _employeeService.GetEmployeesAsync(0, null, new(0, 0));
-
-            if (rsp.Items.Any())
-            {
-                Employees = rsp.Items;
-            }
+            //if (rsp.Items.Any())
+            //{
+            //    Employees = rsp.Items;
+            //}
 
             var command = new GetBranchAsPagingQuery(0, new QueryParam(0, 0));
 
@@ -59,13 +55,26 @@ public partial class CreateNewUser
         await base.OnInitializedAsync();
     }
 
-    protected async Task SelectBranchChanged()
+    private async Task GetRoles()
     {
-        if (model.BranchRefId > 0)
-        {
-            var rsp = await _employeeService.GetEmployeesAsync(model.BranchRefId, string.Empty, new(0, 0));
+        var command = new GetRolesQuery(string.Empty);
 
-            bEmployees = rsp.Items ?? [];
+        var roleResult = await mediator.Send(command); //_roleService.GetRolesAsync(string.Empty);
+
+        roles = roleResult ?? [];
+
+    }
+
+    protected async Task SelectBranchChanged(object? arg)
+    {
+
+        if (arg is not null)
+        {
+            var branchId = ((BranchDto)arg).BranchId;
+
+            //var rsp = await _employeeService.GetEmployeesAsync(branchId, string.Empty, new(0, 0));
+
+            //bEmployees = rsp.Items ?? [];
         }
         else
         {

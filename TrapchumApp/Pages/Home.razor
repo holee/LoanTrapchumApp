@@ -1,50 +1,99 @@
 ﻿@page "/"
 @using Applications.Features.Addresses
 @using Applications.Features.Branches
+@using Applications.Features.Branches.Queries.GetBranchByUser
 @using Applications.Features.Currencies
 @using Applications.Features.Customers.Services
+@using Applications.Features.Dashbaord.Accountants.Dtos
+@using Applications.Features.Dashbaord.Accountants.Queries.GetDbAccountLoanSummaery
+@using Applications.Features.Dashbaord.Accountants.Queries.GetDbApprovedLoanRequest
+@using Applications.Features.Dashbaord.CreditOfficers.Dtos
+@using Applications.Features.Dashbaord.CreditOfficers.Queries.GetDbCreditOfficeLoanSummary
 @using Applications.Features.Employees
 @using Applications.Features.LoanRequests.Interfaces
+@using Domains.Models.Identity
+@using TrapchumApp.Helpers.Enums
+@using TrapchumApp.Helpers.Extensions
 <PageTitle>Home</PageTitle>
-<AuthorizeView Roles="@AppRoles.Co">
+
+
+<AuthorizeView Policy="@Policies.CreditOfficerOnly">
     <Authorized>
         <InfoBox Title="CO"
                  Subtitle="This Month"
                  Count="1250"
                  PercentageIncrease="15.5"
                  Icon="shopping_cart"
-                 GradientStart="#2196F3"
+                 GradientStart="#FFFFFF"
                  GradientEnd="#2196FA"
                  OnMoreInfoClick="@HandleMoreInfo">
-                 <ChildContent>
-                      <RadzenRow class="rz-my-2">
-        <RadzenColumn Size="2">
-            <RadzenPanelMenu Click="OnParentClicked" Multiple="@multiple">
-                <RadzenPanelMenuItem Text="Today" Path="buttons" Icon="account_circle"></RadzenPanelMenuItem>
-                <RadzenPanelMenuItem Text="This Week" Path="menu" Icon="line_weight"></RadzenPanelMenuItem>
-                <RadzenPanelMenuItem Text="This Month" Path="fileinput" Icon="attach_file"></RadzenPanelMenuItem>
-                <RadzenPanelMenuItem Text="This Quarter" Path="dialog" Icon="perm_media"></RadzenPanelMenuItem>
-                <RadzenPanelMenuItem Text="This Symester" Path="notification" Icon="announcement"></RadzenPanelMenuItem>
-                 <RadzenPanelMenuItem Text="This Year" Path="notification" Icon="announcement"></RadzenPanelMenuItem>
-                 <RadzenPanelMenuItem Text="Custom" Path="notification" Icon="announcement"></RadzenPanelMenuItem>
-            </RadzenPanelMenu>
-        </RadzenColumn>
-        <RadzenColumn Size="10">
-            <div style="background-color:aliceblue">
-                  <RadzenChart>
-                <RadzenColumnSeries Data="@revenue1" CategoryProperty="Quarter" LineType="LineType.Dashed"                               
-                                ValueProperty="Revenue" />
-                <RadzenColumnSeries Data="@revenue2" CategoryProperty="Quarter" 
-                                LineType="LineType.Dashed" 
-                                ValueProperty="Revenue" />
-            </RadzenChart>
-            </div>
-        </RadzenColumn>
-    </RadzenRow>
-                 </ChildContent>
-             </InfoBox>
+            <ChildContent>
+                <main class="dashboard-container">
+                    <section class="cards">
+                        @foreach (var item in CoSummaries ?? [])
+                        {
+                            <DashbordItem BackgroundColor="@GetGradientColor(item.CurrencyId)"
+                                          Icon="@IconNames.Customers"
+                                          Title="Due Customers">
+                                <ValueTemplete>
+                                    @item.TotalCustomer
+                                </ValueTemplete>
+                            </DashbordItem>
+                            <DashbordItem BackgroundColor="ColorEnum.Danger"
+                                          Icon="@IconNames.AccountBalanceWallet"
+                                          Title="@GetTitlePriciple(item.CurrencyId)">
+                                <ValueTemplete>
+                                    @item.TotalPrinciple.Format(item.CurrencyId)
+                                </ValueTemplete>
+                            </DashbordItem>
+                            <DashbordItem BackgroundColor="ColorEnum.Warning"
+                                          Icon="@IconNames.Paid"
+                                          Title="@GetTitleInterest(item.CurrencyId)">
+                                <ValueTemplete>
+                                    @item.TotalInterest.Format(item.CurrencyId)
+                                </ValueTemplete>
+                            </DashbordItem>
+                        }
+                        <DashbordItem BackgroundColor="ColorEnum.Success"
+                                      Icon="@IconNames.Group"
+                                      Title="Request">
+                            <ValueTemplete>
+                                1000
+                            </ValueTemplete>
+                        </DashbordItem>
+                    </section>
+                </main>
+                <RadzenRow class="rz-my-2">
+                    <RadzenColumn Size="2">
+                        <RadzenPanelMenu Click="OnParentClicked" Multiple="true">
+                            <RadzenPanelMenuItem Text="Today" Path="buttons" Icon="account_circle"></RadzenPanelMenuItem>
+                            <RadzenPanelMenuItem Text="This Week" Path="menu" Icon="line_weight"></RadzenPanelMenuItem>
+                            <RadzenPanelMenuItem Text="This Month" Path="fileinput" Icon="attach_file"></RadzenPanelMenuItem>
+                            <RadzenPanelMenuItem Text="This Quarter" Path="dialog" Icon="perm_media"></RadzenPanelMenuItem>
+                            <RadzenPanelMenuItem Text="This Symester" Path="notification" Icon="announcement"></RadzenPanelMenuItem>
+                            <RadzenPanelMenuItem Text="This Year" Path="notification" Icon="announcement"></RadzenPanelMenuItem>
+                            <RadzenPanelMenuItem Text="Custom" Path="notification" Icon="announcement"></RadzenPanelMenuItem>
+                        </RadzenPanelMenu>
+                    </RadzenColumn>
+                    <RadzenColumn Size="10">
+                        <div style="background-color:aliceblue">
+                            <RadzenChart>
+                                <RadzenColumnSeries Data="@revenue1" CategoryProperty="Quarter" LineType="LineType.Dashed"
+                                                    ValueProperty="Revenue" />
+                                <RadzenColumnSeries Data="@revenue2" CategoryProperty="Quarter"
+                                                    LineType="LineType.Dashed"
+                                                    ValueProperty="Revenue" />
+                            </RadzenChart>
+                        </div>
+                    </RadzenColumn>
+                </RadzenRow>
+
+            </ChildContent>
+        </InfoBox>
     </Authorized>
 </AuthorizeView>
+
+
 <AuthorizeView Roles="@AppRoles.Manager">
     <Authorized>
         <InfoBox Title="BM"
@@ -54,22 +103,75 @@
                  Icon="shopping_cart"
                  GradientStart="#2196F3"
                  GradientEnd="#64B5F6"
-                 OnMoreInfoClick="@HandleMoreInfo" />
+                 OnMoreInfoClick="@HandleMoreInfo">
+            <ChildContent>
+                <div style="background-color:aliceblue">
+                    <RadzenChart>
+                        <RadzenColumnSeries Data="@revenue1" CategoryProperty="Quarter" LineType="LineType.Dashed"
+                                            ValueProperty="Revenue" />
+                        <RadzenColumnSeries Data="@revenue2" CategoryProperty="Quarter" LineType="LineType.Dashed"
+                                            ValueProperty="Revenue" />
+                    </RadzenChart>
+                </div>
+
+            </ChildContent>
+        </InfoBox>
+
     </Authorized>
 </AuthorizeView>
-<AuthorizeView Roles="@($"{AppRoles.Account},{AppRoles.Teller}")">
+
+
+<AuthorizeView Policy="@Policies.AccountOnly">
     <Authorized>
         <InfoBox Title="Account,Teller"
                  Subtitle="This Month"
                  Count="1250"
                  PercentageIncrease="15.5"
                  Icon="shopping_cart"
-                 GradientStart="#2196F3"
-                 GradientEnd="#64B5F6"
-                 OnMoreInfoClick="@HandleMoreInfo" />
+                 GradientStart="#FFFFFF"
+                 GradientEnd="#2196FA"
+                 OnMoreInfoClick="@HandleMoreInfo">
+
+            <ChildContent>
+                <div class="dashboard-container">
+                    <div class="cards">
+                        @foreach (var item in AccSummaries ?? [])
+                        {
+                            <DashbordItem Title="@GetTitle(item.CurrencyId)"
+                                          BackgroundColor="@GetGradientColor(item.CurrencyId)">
+                                <ValueTemplete>
+                                    @item.TotalCustomer
+                                </ValueTemplete>
+                            </DashbordItem>
+                            <DashbordItem Title="@GetTitlePriciple(item.CurrencyId)"
+                                          Icon="@IconNames.AccountBalanceWallet"
+                                          BackgroundColor="@GetGradientColor(item.CurrencyId)">
+                                <ValueTemplete>
+                                    @item.TotalPrinciple.Format(item.CurrencyId)
+                                </ValueTemplete>
+                            </DashbordItem>
+                            <DashbordItem Title="@GetTitleInterest(item.CurrencyId)"
+                                          Icon="@IconNames.Paid"
+                                          BackgroundColor="@GetGradientColor(item.CurrencyId)">
+                                <ValueTemplete>
+                                    @item.TotalInterest.Format(item.CurrencyId)
+                                </ValueTemplete>
+                            </DashbordItem>
+
+                        }
+                        <DashbordItem Title="LoanRequest"
+                                      BackgroundColor="@ColorEnum.Info">
+                            <ValueTemplete>
+                                @_numberOfLoanRequest
+                            </ValueTemplete>
+                        </DashbordItem>
+                    </div>
+                </div>
+            </ChildContent>
+        </InfoBox>
     </Authorized>
 </AuthorizeView>
-<AuthorizeView Roles="@AppRoles.Rbm">
+<AuthorizeView Policy="@Policies.ManagerOnly">
     <Authorized>
         <InfoBox Title="RBM"
                  Subtitle="This Month"
@@ -78,100 +180,34 @@
                  Icon="shopping_cart"
                  GradientStart="#2196F3"
                  GradientEnd="#64B5F6"
-                 OnMoreInfoClick="@HandleMoreInfo" />
+                 OnMoreInfoClick="@HandleMoreInfo">
+
+            <ChildContent>
+                @if (ManagerSummaries is not null)
+                {
+                    <div class="dashboard-container">
+                        <div class="cards">
+                            <DashbordItem Title="sdshsjdsjdh"
+                                          BackgroundColor="ColorEnum.Primary">
+                                <ValueTemplete>
+                                    @ManagerSummaries.NewRequest
+                                </ValueTemplete>
+                            </DashbordItem>
+                            <DashbordItem Title="Number Approved Requests"
+                                          Icon="@IconNames.AccountBalanceWallet"
+                                          BackgroundColor="ColorEnum.Success">
+                                <ValueTemplete>
+                                    @ManagerSummaries.NumberApproved
+                                </ValueTemplete>
+                            </DashbordItem>
+
+                        </div>
+                    </div>
+                }
+            </ChildContent>
+
+        </InfoBox>
     </Authorized>
 </AuthorizeView>
 
-@code {
 
-    [CascadingParameter] Task<AuthenticationState> AuthState { get; set; }=default!;
-    [CascadingParameter] CascadingAppState bState { get; set; } = default!;
-
-    [Inject]
-    private IServiceProvider ServiceProvider { get; set; }
-    bool multiple = true;
-
-
-    protected override async Task OnInitializedAsync()
-    {
-
-        var auth = await AuthState;
-
-        // if(auth.User is not null)
-        // {
-        //     await bState.GetAuthenticatedUser(auth.User);
-
-        //     await bState.GetNotifications(new (0,15));
-
-        // }
-        await base.OnInitializedAsync();
-    }
-
-    void OnParentClicked(MenuItemEventArgs args)
-    {
-
-    }
-
-    void OnChildClicked(MenuItemEventArgs args)
-    {
-
-    }
-
-    private async Task PrintPage()
-    {
-        //await js.InvokeVoidAsync("printPage");
-
-        var logFactory = ServiceProvider.GetRequiredService<ILoggerFactory>();
-
-        var htmlRender = new HtmlRenderer(ServiceProvider, logFactory);
-
-        var htmlString =await htmlRender.Dispatcher.InvokeAsync(async () =>
-        {
-
-            var parameters = new Dictionary<string, object?>
-            {
-                {"Name","Mon Minh"}
-            };
-
-
-            var paraView = ParameterView.FromDictionary(parameters);
-
-            var output =await htmlRender.RenderComponentAsync<TestRazor>(paraView);
-
-            return output.ToHtmlString();
-
-        });
-
-        Console.WriteLine(htmlString);
-    }
-
-
-    private void HandleMoreInfo()
-    {
-        // Handle more info click
-    }
-    @code {
-        class DataItem
-        {
-            public string? Quarter { get; set; }
-            public double Revenue { get; set; }
-            public int Size{ get; set; }
-        }
-
-            DataItem[] revenue1 = new DataItem[]
-            {
-                new DataItem { Quarter = "Q1", Revenue = 234000,Size=4 },
-                new DataItem { Quarter = "Q2", Revenue = 284000,Size=5 },
-                new DataItem { Quarter = "Q3", Revenue = 274000,Size=10 },
-                new DataItem { Quarter = "Q4", Revenue = 294000,Size=1 }
-            };
-
-            DataItem[] revenue2 = new DataItem[]
-            {
-                new DataItem { Quarter = "Q1", Revenue = 324000 },
-                new DataItem { Quarter = "Q2", Revenue = 224000 },
-                new DataItem { Quarter = "Q3", Revenue = 444000 },
-                new DataItem { Quarter = "Q4", Revenue = 564000 }
-            };
-        }
-}

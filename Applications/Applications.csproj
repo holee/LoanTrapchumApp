@@ -9,6 +9,7 @@
   <ItemGroup>
     <Compile Remove="Features\Addresses\UseCases\**" />
     <Compile Remove="Features\Addresses\Validations\**" />
+    <Compile Remove="Features\Branches\Mappers\**" />
     <Compile Remove="Features\Currencies\Requests\**" />
     <Compile Remove="Features\Currencies\UseCases\**" />
     <Compile Remove="Features\Customers\Mappers\**" />
@@ -16,6 +17,7 @@
     <Compile Remove="Responses\Lists\Collaterals\**" />
     <EmbeddedResource Remove="Features\Addresses\UseCases\**" />
     <EmbeddedResource Remove="Features\Addresses\Validations\**" />
+    <EmbeddedResource Remove="Features\Branches\Mappers\**" />
     <EmbeddedResource Remove="Features\Currencies\Requests\**" />
     <EmbeddedResource Remove="Features\Currencies\UseCases\**" />
     <EmbeddedResource Remove="Features\Customers\Mappers\**" />
@@ -23,6 +25,7 @@
     <EmbeddedResource Remove="Responses\Lists\Collaterals\**" />
     <None Remove="Features\Addresses\UseCases\**" />
     <None Remove="Features\Addresses\Validations\**" />
+    <None Remove="Features\Branches\Mappers\**" />
     <None Remove="Features\Currencies\Requests\**" />
     <None Remove="Features\Currencies\UseCases\**" />
     <None Remove="Features\Customers\Mappers\**" />
@@ -40,7 +43,6 @@
     <Folder Include="Extensions\Identity\Constants\" />
     <Folder Include="Features\Addresses\Mappers\" />
     <Folder Include="Features\Addresses\Queries\GetCountries\" />
-    <Folder Include="Features\Branches\Mappers\" />
     <Folder Include="Features\CashManagements\Validations\" />
     <Folder Include="Features\CashManagements\Requests\" />
     <Folder Include="Features\Collaterals\Commands\CreateCollaterals\" />

@@ -16,6 +16,7 @@ using Applications.Responses.ViewModels.Loans.Requests;
 using Applications.Services.Lists;
 using Domains.Enumerations;
 using Domains.Models.Identity;
+using Domains.Models.Loans;
 using Radzen.Blazor;
 using TrapchumApp.Helpers.Extensions;
 
@@ -192,12 +193,13 @@ public partial class LoanCreate(IHolidayServiceImpl holidayService)
 
         model.BankRefId = 11;
         model.TermTypeId = 11;
-        model.LoanStatusRefId = (int)LoanStatuses.Active;
-        model.LoanSubTypeRefId = 1;
         model.BranchId = BranchId;
         model.UserRefId = _userId;
         model.PenaltyRate = penaltyRate;
-        var scheduleDto = model.GenerateSchedules();  //.CreateSchedules().MapToLoanSchedules();
+        model.LoanStatusRefId = (int)LoanStatuses.Active;
+        model.LoanSubTypeRefId = (int)LoanSubTypeOption.Standard;
+        model.LoanProductRefId = (int)ProductTypeOption.Mortgage;
+        var scheduleDto = model.GenerateSchedules();
         var lastDate = scheduleDto!.LastOrDefault()!.PaymentDate;
         model.LastPaymentDate = lastDate;
         try
@@ -210,7 +212,7 @@ public partial class LoanCreate(IHolidayServiceImpl holidayService)
 
             var command = new CreateLoanCommand(model);
 
-            var rsp = await mediator.Send(command); //await loanService.CreateLoanAsync(command);
+            var rsp = await mediator.Send(command);
 
             if (!rsp.IsSuccess())
             {

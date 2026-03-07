@@ -1,6 +1,6 @@
-﻿using Applications.Enumerations;
-using Applications.Features.Loans.Mappers;
+﻿using Applications.Features.Loans.Mappers;
 using Applications.Features.Loans.Requests;
+using Domains.Enumerations;
 using Domains.Models.Loans;
 
 namespace Applications.Calculations
@@ -9,7 +9,7 @@ namespace Applications.Calculations
     {
         public static IEnumerable<ScheduleLine> CreateSchedules(this LoanDtoCreate req)
         {
-            var app = Calculators.CreateBuilder(req).Build();
+            var app = Calculators.CalculatorBuilder(req).Build();
 
             return app.CreateSchedules(req);
 
@@ -17,13 +17,27 @@ namespace Applications.Calculations
 
         public static IEnumerable<LoanScheduleDtoCreate> GenerateSchedules(this LoanDtoCreate req)
         {
-            var app = Calculators.CreateBuilder(req).Build();
+            var app = Calculators.CalculatorBuilder(req).Build();
 
             var schedules = app.CreateSchedules(req);
 
             return schedules.MapToLoanSchedules();
 
         }
+
+
+        public static IEnumerable<LoanScheduleDtoCreate> GenerateSchedules(this LoanDtoCreate req, LoanRepaymentModes mode)
+        {
+            var app = Calculators.CalculatorBuilder(req).Build();
+
+            var schedules = app.CreateSchedules(req, mode);
+
+            return schedules.MapToLoanSchedules();
+
+        }
+
+
+
 
     }
 }

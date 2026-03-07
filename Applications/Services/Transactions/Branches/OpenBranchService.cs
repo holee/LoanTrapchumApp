@@ -1,15 +1,9 @@
-﻿using Applications.Features.CashManagements.Responses;
-using Applications.Features.Transactions.OpenBranches;
-using Applications.Features.Transactions.OpenBranches;
-using Applications.Interfaces.Transactions;
-using Applications.Responses;
-using Domains.Models.Transaction;
-using Mapster;
+﻿using Applications.Interfaces.Transactions;
 
 namespace Applications.Services.Transactions.Branches
 {
 
-    public sealed class OpenBranchService(IOpenBranchService obService) : IOpenBranchServiceImpl
+    public sealed class OpenBranchService() : IOpenBranchServiceImpl
     {
         //public async Task<Result<string>> CloseBranchAsync(TransactionCloseBranchDto transaction)
         //{

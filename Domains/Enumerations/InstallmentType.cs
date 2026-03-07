@@ -1,6 +1,6 @@
 ﻿namespace Domains.Enumerations;
 
-public enum InstallmentOptions 
+public enum InstallmentType
 {
     Daily = 1,
     Weekly = 2,

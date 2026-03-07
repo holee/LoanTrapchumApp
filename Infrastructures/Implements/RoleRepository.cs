@@ -13,8 +13,9 @@ using Microsoft.EntityFrameworkCore;
 using Applications.Features.Identity.Roles.Requests;
 using Applications.Features.Identity.Roles.Responses;
 using Applications.Features.Identity.Users;
+using Domains.Models.Paging;
 
-namespace Infrastructures.Implements; 
+namespace Infrastructures.Implements;
 
 public sealed class RoleRepository(
     RoleManager<ApplicationRole> roleManager,
@@ -263,6 +264,42 @@ public sealed class RoleRepository(
     }
 
 
+
+    public async Task<Pager<RoleDto>> GetRolesAsync(QueryParam param, CancellationToken cancellation = default)
+    {
+        var queries = roleManager.Roles.Where(x => x.IsActive);
+
+        if (!string.IsNullOrEmpty(param.Filter))
+        {
+            queries = queries.Where(x => EF.Functions.Like(x.Name!, $"%{param.Filter}%"));
+        }
+
+        var counts = await queries.CountAsync(cancellation);
+
+        if (param.PageSize > 0)
+        {
+            queries = queries.Skip(param.Page).Take(param.PageSize);
+        }
+
+        var roles = await queries
+                            .AsNoTracking()
+                            .Select(x => ProjectTo(x)).ToListAsync();
+
+
+        return PagerExtensions.Create(roles, counts);
+    }
+
+    private static RoleDto ProjectTo(ApplicationRole x)
+    {
+        return new RoleDto
+        {
+            Id = x.Id,
+            RoleName = x.Name,
+            IsActive = x.IsActive,
+            Description = x.Description
+        };
+    }
+
     public async Task<Result<RoleDto>> GetRoleByIdAsync(string id)
     {
         var role = await roleManager.Roles
@@ -292,7 +329,7 @@ public sealed class RoleRepository(
     }
 
     private async Task<Result<RolePermissions>> GetPermissionsByRoleInternalAsync(
-        string roleId,  IEnumerable<dynamic> allPermissions,Func<dynamic, string> groupSelector)
+        string roleId, IEnumerable<dynamic> allPermissions, Func<dynamic, string> groupSelector)
     {
         var roleInDb = await roleManager.FindByIdAsync(roleId);
 
@@ -302,13 +339,13 @@ public sealed class RoleRepository(
         }
 
         var roleClaimResponse = new RolePermissions(
-            new(roleId, roleInDb.Name!, roleInDb.Description!), 
+            new(roleId, roleInDb.Name!, roleInDb.Description!),
             new());
 
         var currentRoleClaims = await GetAllClaimsForRoleAsync(roleId);
 
         var assignedClaimValues = new HashSet<string>(
-                                        currentRoleClaims.Select(crc => crc.ClaimValue), 
+                                        currentRoleClaims.Select(crc => crc.ClaimValue),
                                         StringComparer.OrdinalIgnoreCase);
 
         foreach (var permission in allPermissions)

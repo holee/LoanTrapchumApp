@@ -152,14 +152,20 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
 
             var command = new GetLoanScheduleByScheduleQuery(branchId, loanId, scheduleId);
 
-            //var rsp = await pdf.DownLoadScheduleAsPdf(branchId, loanId, scheduleId);
-
             var rsp = await mediator.Send(command);
 
             if (rsp.IsError)
             {
-                return Results.NoContent();
+                return Results.NotFound();
             }
+            
+            int installmentNumber = 1;
+
+            rsp.Value.Schedules.ForEach(x =>
+            {
+                x.InstallmentNo = installmentNumber++;
+            });
+
 
             var doc = new ScheduleByScheduleDocument(rsp.Value);
 

@@ -92,7 +92,7 @@ namespace TrapchumApp.Pages.Identity.Users
         async Task GetBranches(int? branchId = 0)
         {
 
-            var command = new GetBranchAsPagingQuery(0, new QueryParam(0, 0, string.Empty));
+            var command = new GetBranchAsPagingQuery(branchId, new QueryParam(0, 0, string.Empty));
 
             var rsp = await mediator.Send(command);
 

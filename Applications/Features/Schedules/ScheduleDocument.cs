@@ -8,9 +8,6 @@ namespace Applications.Features.Schedules;
 
 public sealed class ScheduleDocument : IDocument
 {
-    private const string FONT = "Khmer Os Siemreap";
-    private const string TITLE_FONT = "Khmer Os Muol";
-
     public DisbursmentsRpt Item { get; }
     public VLoanDisbursments Value { get; }
     public ScheduleDocument(VLoanDisbursments value)
@@ -63,10 +60,11 @@ public sealed class ScheduleDocument : IDocument
         container.PaddingVertical(10F).Column(col =>
         {
             col.Item().Element(CompostTable);
+         
             col.Item().PaddingTop(20).Row(r =>
             {
-                r.RelativeItem().AlignCenter().Text("ស្នាមមេដៃអតិថិជន").FontFamily(FONT).SemiBold();
-                r.RelativeItem().AlignCenter().Text("ហត្ថលេខាអ្នករៀបចំ").FontFamily(FONT).SemiBold();
+                r.RelativeItem().AlignCenter().Text("ស្នាមមេដៃអតិថិជន").FontFamily(ScheduleHelpers.FONT).SemiBold();
+                r.RelativeItem().AlignCenter().Text("ហត្ថលេខាអ្នករៀបចំ").FontFamily(ScheduleHelpers.FONT).SemiBold();
             });
             col.Item().PaddingTop(100).Row(r =>
             {
@@ -92,11 +90,10 @@ public sealed class ScheduleDocument : IDocument
                       .LineColor(Colors.Black);
                   });
             });
-
             col.Item().PaddingTop(10).Row(r =>
             {
-                r.RelativeItem().AlignCenter().Text(DateTime.Now.ToLongDateString()).FontFamily(FONT).SemiBold();
-                r.RelativeItem().AlignCenter().Text(DateTime.Now.ToLongDateString()).FontFamily(FONT).SemiBold();
+                r.RelativeItem().AlignCenter().Text(DateTime.Now.ToLongDateString()).FontFamily(ScheduleHelpers.FONT).SemiBold();
+                r.RelativeItem().AlignCenter().Text(DateTime.Now.ToLongDateString()).FontFamily(ScheduleHelpers.FONT).SemiBold();
             });
         });
     }
@@ -167,13 +164,13 @@ public sealed class ScheduleDocument : IDocument
                      .Image("wwwroot/assets/logo/trapchum.jpg");
                     r.RelativeItem().AlignCenter().Column(col =>
                     {
-                        col.Item().Text("ទ្រព្យជុំ ឃែស ផន សប")
+                        col.Item().Text(ScheduleHelpers.SCHEDULE_TITLE)
                         .AlignCenter()
-                            .FontFamily(TITLE_FONT);
+                            .FontFamily(ScheduleHelpers.TITLE_FONT);
                         col.Item().AlignCenter()
-                        .Text("TRAP CHUM CASH PAWN SHOP").FontFamily(FONT);
+                        .Text(ScheduleHelpers.COMPANY_NAME).FontFamily(ScheduleHelpers.FONT);
                         col.Item().AlignCenter()
-                        .Text("តារាងកាលវិភាគសងប្រាក់").FontFamily(FONT);
+                        .Text(ScheduleHelpers.SCHEDULE_TITLE_KH).FontFamily(ScheduleHelpers.FONT);
                     });
 
                     r.RelativeItem().Text("");
@@ -183,7 +180,7 @@ public sealed class ScheduleDocument : IDocument
 
                 col.Item().Row(ro =>
                 {
-                    CreateHeaderRow(ro, FONT);
+                    CreateHeaderRow(ro, ScheduleHelpers.FONT);
                 });
 
             });
@@ -197,18 +194,18 @@ public sealed class ScheduleDocument : IDocument
 
         row.ConstantItem(250).PaddingTop(10).Column(col =>
         {
-            CreateColumn(col, "ឈ្មោះ", $"{Value.AltName}", font, 10);
-            CreateColumn(col, "រយៈពេល", $"{Value.PeriodName}", font, 10);
-            CreateColumn(col, "អត្រា", $"{Value.PaidInterest.Formats(Value.CurrencyId)}", font, 10);
-            CreateColumn(col, "មូលដ្ឋាន", $"{Value.Principle.Formats(Value.CurrencyId)}", font, 10);
-            CreateColumn(col, "សាខា", $"{Value.BranchName}", font, 10);
+            CreateColumn(col, ScheduleHelpers.NAME, $"{Value.AltName}", font, 10);
+            CreateColumn(col, ScheduleHelpers.PERIOD, $"{Value.PeriodName}", font, 10);
+            CreateColumn(col, ScheduleHelpers.RATE, $"{Value.PaidInterest.Formats(Value.CurrencyId)}", font, 10);
+            CreateColumn(col, ScheduleHelpers.PRINCIPLE, $"{Value.Principle.Formats(Value.CurrencyId)}", font, 10);
+            CreateColumn(col, ScheduleHelpers.BRANCH, $"{Value.BranchName}", font, 10);
         });
         row.RelativeItem().PaddingTop(10).Column(col =>
         {
-            CreateColumn(col, "ថ្ងៃបង់ចុងក្រោយ", $"{Value.LastPaymentDate.DayFirst()}", font);
-            CreateColumn(col, "អាសយដ្ឋាន", $"{Value.Address}", font);
-            CreateColumn(col, "ភ្ញាក់ងារ", $"{Value.AgentName}", font);
-            CreateColumn(col, "ទូរស័ព្ទ", $"{Value.AgentPhone}", font);
+            CreateColumn(col, ScheduleHelpers.LAST_DUE_DATE, $"{Value.LastPaymentDate.DayFirst()}", font);
+            CreateColumn(col, ScheduleHelpers.ADDRESS, $"{Value.Address}", font);
+            CreateColumn(col, ScheduleHelpers.AGENT, $"{Value.AgentName}", font);
+            CreateColumn(col, ScheduleHelpers.PHONE, $"{Value.AgentPhone}", font);
             CreateColumn(col, "", "", font);
         });
     }

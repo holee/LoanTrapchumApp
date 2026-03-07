@@ -1,9 +1,5 @@
-﻿using Applications.Features.CashManagements.Responses;
-using Applications.Features.Currencies.Responses;
-using Applications.Features.Transactions.CashManagements;
-using Applications.Features.Transactions.CashManagements;
+﻿using Applications.Features.Transactions.CashManagements;
 using Applications.Features.Transactions.LoanTransactions;
-using Applications.Responses;
 
 namespace Applications.Services.Transactions.Branches
 {

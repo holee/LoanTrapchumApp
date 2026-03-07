@@ -1,8 +1,5 @@
 ﻿using Applications.Features.LoanRequests.Requests;
 using Applications.Features.Loans.Requests;
-using Applications.Features.LoanRequests.Requests;
-using Applications.Features.Loans.Requests;
-using Applications.Responses.ViewModels.Loans.Requests;
 namespace Applications.Extensions.Loans
 {
     public static class LoanRequestExtension
