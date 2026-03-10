@@ -1,4 +1,4 @@
-﻿using Applications.Features.Holidays;
+﻿using Applications.Features.Holidays.Dtos;
 
 namespace Applications.Responses.ViewModels.Holidays
 {
@@ -30,6 +30,20 @@ namespace Applications.Responses.ViewModels.Holidays
                 Status = holiday.Status
             };
         }
+
+        public static HolidayDtoUpdate ToHolidayUpdate(this Holiday holiday)
+        {
+            return new HolidayDtoUpdate
+            {
+                Id = holiday.Id,
+                HolidayDt = holiday.HolidayDt,
+                HolidayName = holiday.HolidayName,
+                HolidayNum = holiday.HolidayNum,
+                Description = holiday.Description,
+                Status = holiday.Status
+            };
+        }
+
 
         public static IEnumerable<HolidayVm> ToHolidays(this IEnumerable<Holiday> holidays)
         {

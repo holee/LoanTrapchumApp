@@ -67,17 +67,20 @@
     <RadzenButton Text="Save"
                   Icon="add"
                   ButtonStyle="ButtonStyle.Success"
-                  Click="FormValidSubmit"
+                  Click="@FormValidSubmit"
                   IsBusy="@visibled"
                   BusyText="Creating..."
                   Size="ButtonSize.ExtraSmall" />
     <RadzenButton Text="Close"
                   Icon="close"
-                  Click="@(()=>DialogService.Close(false))"
+                  Click="OnCloseTab" 
                   ButtonStyle="ButtonStyle.Danger"
                   Size="ButtonSize.ExtraSmall" />
 </RadzenStack>
 @code {
 
-    
+    async Task OnCloseTab()
+    {
+        await Closed.InvokeAsync();
+    }    
 }

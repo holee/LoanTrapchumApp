@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using Applications.Features.Holidays.Dtos;
+using FluentValidation;
 
 namespace Applications.Features.Holidays.Command.CreateHolidays;
 

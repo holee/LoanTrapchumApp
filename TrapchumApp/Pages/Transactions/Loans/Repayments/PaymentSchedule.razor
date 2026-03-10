@@ -4,7 +4,7 @@
 @using TrapchumApp.Pages.Transactions.Exchanges
 @using TrapchumApp.Pages.Transactions.Loans.Disbursements
 @using TrapchumApp.Pages.Transactions.Loans.Menu
-<PageTitle>Repayment</PageTitle>
+<PageTitle>Repayment 2</PageTitle>
 <LoanInfos BranchId="@BranchId"
            LoanId="@LoanId"
            Currency="@CurrencyId"
@@ -21,7 +21,14 @@
 <div class="rz-background-color-base-200 rz-m-0 rz-mt-2">
     <RadzenTabs SelectedIndex="@selectedIndex">
         <Tabs>
-            <RadzenTabsItem Text="Loan Schedules" Icon="@IconNames.List">
+            <RadzenTabsItem Text="Due Schedules" Icon="@IconNames.List">
+                <RadzenFieldset class="rz-m-0 rz-background-color-base-200">
+                    <DueDateSchedules BranchId="@BranchId" LoanId="@LoanId"
+                                      CurrencyId="@CurrencyId"
+                                      CreditAgentId="@CreditAgentId" />
+                </RadzenFieldset>
+            </RadzenTabsItem>
+            <RadzenTabsItem Text="Schedules" Icon="@IconNames.List">
                 <RadzenFieldset class="rz-m-0 rz-background-color-base-200">
                     <div class="m-0 p-0 rz-background-color-base-200">
                         <RadzenStack Orientation="Orientation.Horizontal"
@@ -316,6 +323,7 @@
                     </RadzenStack>
                 </RadzenFieldset>
             </RadzenTabsItem>
+
             @foreach (var item in _tabs)
             {
                 <RadzenTabsItem @key="@item.Key" Icon="@item.Icon" Text="@item.Title">
@@ -415,7 +423,7 @@
 
     void ShowContextMenu(MouseEventArgs args, VSchedule schedule)
     {
-        ContextMenuService.Open(args,ds=>@<LoanDetailsMenu Schedule="@schedule" />);
+        ContextMenuService.Open(args, ds => @<LoanDetailsMenu Schedule="@schedule" />);
     }
 
 }

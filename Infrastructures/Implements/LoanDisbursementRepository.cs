@@ -614,6 +614,23 @@ namespace Infrastructures.Implements
         }
 
 
+        public async Task<Pager<VSchedule>> GetDueScheduleLoanByIdAsync(string? loanId, int? branchId, CancellationToken cancellation = default)
+        {
+
+            await using var _context = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+            var item1 = _context.Set<VSchedule>()
+                                        .Where(x => x.BranchId == branchId && x.LoanId == loanId && x.PaymentDate <= DateTime.UtcNow && x.ScheduleStatusId != (int)ScheduleStatus.Paid)
+                                        .OrderBy(x => x.InstallmentNo)
+                                        .ThenBy(x => x.PaymentDate);
+
+            var counts = await item1.CountAsync(cancellation);
+
+            var items = await item1.AsNoTracking().ToListAsync(cancellation);
+
+            return PagerExtensions.Create(items, counts);
+        }
+
 
 
         public async Task<IEnumerable<VSchedule>> GetLoanSchedulesAsync(string? loanId, int? branchId,

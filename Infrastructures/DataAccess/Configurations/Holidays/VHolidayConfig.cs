@@ -14,6 +14,6 @@ public class VHolidayConfig : IEntityTypeConfiguration<HolidayVm>
         builder.Property(x => x.Status).HasDefaultValue(true);
         builder.Property(x => x.Description).HasDefaultValue(null);
         builder.HasQueryFilter(nameof(HolidayVm.Status), x => x.Status == true);
-        builder.HasQueryFilter(nameof(HolidayVm.HolidayDt), x => x.HolidayDt >= DateTime.Today);
+       // builder.HasQueryFilter(nameof(HolidayVm.HolidayDt), x => x.HolidayDt >= DateTime.Today);
     }
 }

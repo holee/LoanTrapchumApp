@@ -1,10 +1,9 @@
-using Applications.Features.Holidays;
+using Applications.Features.Holidays.Command.UpdateHoliday;
+using Applications.Features.Holidays.Dtos;
+using Applications.Features.Holidays.Queries.GetUpdateHoliday;
 using Applications.Interfaces.Lists;
 using Applications.Responses.ViewModels.Holidays;
-using Applications.Services.Lists;
-using Domains.Models.Lists;
-using Microsoft.AspNetCore.Components;
-using Radzen;
+using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Lists.Holidays
 {
@@ -28,17 +27,6 @@ namespace TrapchumApp.Pages.Lists.Holidays
         }
         private async void SelectedDateChanged()
         {
-            if (selectedDates.Any())
-            {
-                // SelectedDate = selectedDates.OrderByDescending(x => x).FirstOrDefault();
-            }
-            else
-            {
-                // SelectedDate = null;
-            }
-
-            // await GetHolidays(SelectedDate);
-
             if (listvm.Any())
             {
                 selectedDates = listvm.Select(x => x.HolidayDt).ToList();
@@ -58,34 +46,26 @@ namespace TrapchumApp.Pages.Lists.Holidays
 
 
 
-        protected HolidayCreateDto model = new HolidayUpdatesDto();
+        protected HolidayDtoUpdate model = new HolidayDtoUpdate();
         private void Close() => DialogService.Close(false);
         protected async Task FormValidSubmit()
         {
             try
             {
-                var data=new Holiday
-                {
-                    Id = model.Id,
-                    HolidayDt = model.HolidayDt,
-                    HolidayNum = (int)model.HolidayNum,
-                    HolidayName = model.HolidayName,
-                    Description = model.Description,
-                    Status = model.Status
-                };
-                var response = await _holidayService.CreateOrUpdateHoliday(data);
 
-                if (response.IsSuccess)
+                var command = new UpdateHolidayCommand(model);
+
+                var rsp= await mediator.Send(command);
+
+                if (rsp.IsSuccess())
                 {
                     model = new();
-
-                    NotificationService.Notify(NotificationSeverity.Success, response.Data);
-
+                    NotificationService.Notify(NotificationSeverity.Success,"Holiday was updated successfully");
                     Close();
                 }
                 else
                 {
-                    NotificationService.Notify(NotificationSeverity.Error, response.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Error,rsp.GetMessage());
                 }
             }
             catch (Exception ex)
@@ -99,23 +79,23 @@ namespace TrapchumApp.Pages.Lists.Holidays
             if (arg != null)
             {
                 model.Id = arg.Id;
-                model.HolidayDt = arg!.HolidayDt;
-                model.HolidayNum = arg!.HolidayNum;
-                model.HolidayName = arg!.HolidayName;
-                model.Description = arg!.Description;
+                model.HolidayDt = arg.HolidayDt;
+                model.HolidayNum = arg.HolidayNum;
+                model.HolidayName = arg.HolidayName;
+                model.Description = arg.Description;
                 model.Status = arg.Status;
             }
         }
         protected override async Task OnInitializedAsync()
         {
 
-            var rsp = await _holidayService.GetHoliday(id);
+            var command = new GetUpdateHolidayByIdQuery(id);
 
+            var rsp = await mediator.Send(command);  //_holidayService.GetHoliday(id);
 
-
-            if (rsp.IsSuccess)
+            if (rsp.IsSuccess())
             {
-                model = rsp.Data!.ToHolidayCreateOrEdit();
+                model = rsp.Value;
 
                 listvm = await _holidayService.GetHolidays(model.HolidayDt);
 

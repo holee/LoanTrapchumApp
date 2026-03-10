@@ -1,19 +1,15 @@
-﻿using Applications.Interfaces.Lists;
-using ErrorOr;
+﻿using ErrorOr;
 
 namespace Applications.Features.Holidays.Queries.GetActiveHolidays;
 
-public record GetActiveHolidaysQuery(int? EndYear = 1) : IRequest<ErrorOr<Pager<HolidayVm>>>;
+public record GetActiveHolidaysQuery(int? EndYear = 1) : IRequest<Pager<HolidayVm>>;
 
-public sealed class GetActiveHolidaysQueryHandler : IRequestHandler<GetActiveHolidaysQuery, ErrorOr<Pager<HolidayVm>>>
+public sealed class GetActiveHolidaysQueryValidator : AbstractValidator<GetActiveHolidaysQuery>
 {
-    private readonly IHolidayService _holidayService;
-    public GetActiveHolidaysQueryHandler(IHolidayService holidayService)
+    public GetActiveHolidaysQueryValidator()
     {
-        _holidayService = holidayService;
-    }
-    public async Task<ErrorOr<Pager<HolidayVm>>> Handle(GetActiveHolidaysQuery request, CancellationToken cancellationToken)
-    {
-        return await _holidayService.GetActiveHolidays(request.EndYear, cancellationToken);
+        RuleFor(x => x.EndYear).Cascade(CascadeMode.Stop)
+            .NotNull().WithMessage("EndYear is required.")
+            .GreaterThan(0).WithMessage("EndYear must grater than zero.");
     }
 }

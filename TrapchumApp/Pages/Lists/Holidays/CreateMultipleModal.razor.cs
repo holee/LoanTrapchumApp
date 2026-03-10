@@ -1,14 +1,15 @@
 ﻿using Applications.Extensions.DateTimes;
-using Applications.Features.Holidays;
 using Applications.Features.Holidays.Command.CreateHolidays;
-using Applications.Services.Lists;
-using Radzen;
+using Applications.Features.Holidays.Dtos;
 using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Lists.Holidays
 {
     public partial class CreateMultipleModal
     {
+
+        [Parameter] public EventCallback Closed { get; set; }
+
 
         IReadOnlyList<int> years = [1, 5, 10, 15, 20];
 

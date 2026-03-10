@@ -1,6 +1,4 @@
-﻿using Domains.Models.Lists;
-
-namespace Applications.Features.Holidays
+﻿namespace Applications.Features.Holidays.Dtos
 {
 
     public static class HolidayCreateDtoExtensions
@@ -27,15 +25,5 @@ namespace Applications.Features.Holidays
         {
             return source.Select(x => x.ToHoliday()).ToList();
         }
-    }
-
-    public class HolidayCreateDto
-    {
-        public long Id { get; set; }
-        public DateTime? HolidayDt { get; set; }
-        public string? HolidayName { get; set; }
-        public int? HolidayNum { get; set; }
-        public bool? Status { get; set; } = true;
-        public string? Description { get; set; } = string.Empty;
     }
 }

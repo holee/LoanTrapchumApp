@@ -25,6 +25,13 @@
                      CloseDialogOnEsc = true,
 
                  });
+
+        if (comfirm == false)
+        {
+            NotificationService.Notify(NotificationSeverity.Warning, "Delete was cancel");
+            return;
+        }
+
         if (comfirm == true)
         {
 

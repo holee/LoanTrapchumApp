@@ -1,5 +1,9 @@
 ﻿@page "/App/Holidays"
+@using Applications.Bases
+@using Applications.Features.Holidays.Command.ActivateOrDeactivate
+@using Applications.Features.Holidays.Command.DeleteHoliday
 @using Applications.Responses.ViewModels.Holidays
+@using TrapchumApp.Helpers.Extensions
 <PageTitle>Holiday</PageTitle>
 <RadzenTabs @bind-SelectedIndex="SelectedIndex" RenderMode="TabRenderMode.Server">
     <Tabs>
@@ -7,10 +11,14 @@
             <GridToolbar>
                 <LeftChildren>
                     <RadzenButton Text="Add Holiday"
-                                  Click="DisplayModal"
+                                  Click="@DisplayModal"
                                   Icon="add"
                                   ButtonStyle="ButtonStyle.Success"
                                   Size="ButtonSize.Small" />
+                    <RadzenButton ButtonStyle="ButtonStyle.Secondary"
+                                  Icon="add" Size="ButtonSize.Small"
+                                  Click="ShowMultipleModal"
+                                  Text="Add Multiple" />
                 </LeftChildren>
                 <RightChildren>
                     <div class="rz-text-center">
@@ -35,11 +43,12 @@
                             PageSizeOptions="@StorageConstant.PageSizeOptions"
                             PageSizeChanged="@ChangedPageSize"
                             PagerPosition="@PagerPosition.Bottom"
+                            RowRender="@OnRowRedner"
                             Data="HolidaysList">
                 <Columns>
                     <RadzenDataGridColumn Title="#" Context="h" Width="4rem">
                         <Template>
-                            @(HolidaysList!.IndexOf(h) + 1)
+                            @h?.RowIndex
                         </Template>
                     </RadzenDataGridColumn>
                     <RadzenDataGridColumn Title="Holiday Date" Sortable="true"
@@ -67,7 +76,7 @@
                     <RadzenDataGridColumn Width="5rem" Title="Actions" Sortable="false" Context="h">
                         <Template>
                             <RadzenButton Size="ButtonSize.ExtraSmall"
-                                          Icon="more_vert"
+                                          Icon="@IconNames.MoreVert"
                                           Variant="Variant.Text"
                                           Click="@((args)=>ShowContextMenuWithContent(args,h.Id))" />
                         </Template>
@@ -105,13 +114,82 @@
 
     [Parameter] public int SelectedIndex { get; set; } = 0;
 
-
-
-
-    void ShowContextMenuWithContent(MouseEventArgs args, long id)
+    void ShowContextMenuWithContent(MouseEventArgs args, long? id)
     {
-        ContextMenuService.Open(args, ds => @<HolidayMenu Id="@id" />);
+        ContextMenuService.Open(args, ds =>
+            @<RadzenMenu Style="font-size:0.8rem;">
+    <RadzenMenuItem Click="@(() => Delete(id))" Icon="delete" Text="Delete" Value="@id" />
+</RadzenMenu>
+    );
     }
+
+    void ShowEdit(long? id)
+    {
+
+    }
+    protected async Task Delete(long? id)
+    {
+        ContextMenuService.Close();
+
+        var comfirm = await DialogService.Confirm("Holiday deleted will not be able to recover, would you like to continue?",
+            "Delete Holiday",
+                 new ConfirmOptions
+                 {
+                     OkButtonText = "OK",
+                     CancelButtonText = "Cancel",
+                     CloseDialogOnEsc = true,
+
+                 });
+
+
+        if (comfirm == false) return;
+
+        var command = new DeleteHolidayCommand(id);
+
+        var rsp = await mediator.Send(command);
+
+        if (!rsp.IsSuccess())
+        {
+            NotificationService.Notify(NotificationSeverity.Error, rsp.GetMessage());
+
+            return;
+        }
+
+        if (rsp.Value.Status == DeleteStatus.Success)
+        {
+            NotificationService.Notify(NotificationSeverity.Success, "Holiday was deleted successfully.");
+
+            return;
+        }
+
+
+        var confirm1 = await DialogService.Confirm(@"Holiday is used by other data, deleting it may cause data integrity issues, would you like to inactive?",
+            "Delete Holiday",
+                 new ConfirmOptions
+                 {
+                     OkButtonText = "OK",
+                     CancelButtonText = "Cancel",
+                     CloseDialogOnEsc = true,
+                 });
+
+
+        if (confirm1 == false) return;
+
+        var command1 = new ActivateOrDeactivateHolidayCommand(id);
+
+        var rsp1 = await mediator.Send(command1);
+
+        if (!rsp1.IsSuccess())
+        {
+            NotificationService.Notify(NotificationSeverity.Error, rsp1.GetMessage());
+
+            return;
+        }
+
+
+    }
+
+
     void CloseTab()
     {
         if (SelectedIndex == 1)
@@ -152,6 +230,37 @@
         pageIndex = 0;
         await GetsHolidays(searchField);
     }
+
+
+    private async Task ShowMultipleModal(MouseEventArgs args)
+    {
+
+        var newKey = Guid.NewGuid().ToString("N");
+
+        RenderFragment content = (builder) =>
+        {
+            builder.OpenComponent(0, typeof(CreateMultipleModal));
+
+            builder.AddAttribute(1, "Closed", EventCallback.Factory.Create(this, () =>
+            {
+                CloseAddTab(newKey);
+            }));
+
+            builder.SetKey(newKey);
+
+            builder.CloseComponent();
+        };
+
+        var newTab = new CustomTab(newKey, "Create Holidays", TabActions.Create, content);
+
+        _tabs.Add(newTab);
+
+        SelectedIndex = _tabs.Count;
+
+
+
+    }
+
 
 }
 

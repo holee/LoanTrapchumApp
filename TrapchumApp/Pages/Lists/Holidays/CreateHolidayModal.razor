@@ -8,11 +8,6 @@
 @using Applications.Responses.ViewModels.Holidays
 @using TrapchumApp.Services
 <PageTitle>New Holiday</PageTitle>
-<RadzenButton ButtonStyle="ButtonStyle.Secondary"
-              Icon="add" Size="ButtonSize.Small"
-              class="rz-mb-2"
-              Click="ShowMultipleModal"
-              Text="Add Multiple" />
 <RadzenFieldset>
     <HeaderTemplate>
         <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25">
@@ -24,7 +19,7 @@
             <RadzenColumn Size="6" SizeSM="12" SizeMD="6">
                 <RadzenStack Orientation="Orientation.Horizontal" class="w-100">
                     <RadzenDatePicker Inline
-                                      TValue="DateTime?"
+                                      TValue="DateTime ?"
                                       AllowInput="true"
                                       CurrentDateChanged="ChangedDate"
                                       DateFormat="dd/MM/yyyy"
@@ -44,9 +39,9 @@
                         Description
                     </RadzenColumn>
                     <RadzenColumn Size="10">
-                        <RadzenTextArea Placeholder="Enter event or holiday title..." 
+                        <RadzenTextArea Placeholder="Enter event or holiday title..."
                                         @bind-Value="modelDTO.Description"
-                                        class="h-100 w-100 form-control"
+                                        class="rz-h-100 rz-w-100"
                                         aria-label="TextArea with placeholder" />
                     </RadzenColumn>
                 </RadzenRow>
@@ -68,13 +63,15 @@
             <RadzenButton Text="Set"
                           Icon="add"
                           ButtonStyle="ButtonStyle.Success"
-                          Click="FormValidSubmit"
+                          Click="@FormValidSubmit"
                           Size="ButtonSize.Small" />
         </RadzenStack>
         <RadzenDataGrid Data="listvm"
                         Responsive="true"
                         TItem="HolidayVm"
                         RowSelect="RowSelectedChanged"
+                        RowRender="@OnRowRedner"
+                        @ref="@_gridHolidy"
                         Density="Density.Compact">
             <Columns>
                 <RadzenDataGridColumn Property="Id"
@@ -82,7 +79,7 @@
                                       Title="#"
                                       Width="50px">
                     <Template>
-                        @(listvm?.ToList().IndexOf(h) + 1)
+                        @h.RowIndex
                     </Template>
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn Property="@nameof(HolidayVm.HolidayDt)"
@@ -131,4 +128,10 @@
         </RadzenStack>
     </ChildContent>
 </RadzenFieldset>
+@code {
 
+    void OnRowRedner(RowRenderEventArgs<HolidayVm> args)
+    {
+        args.Data?.RowIndex = args.Index​ + 1;
+    }
+}

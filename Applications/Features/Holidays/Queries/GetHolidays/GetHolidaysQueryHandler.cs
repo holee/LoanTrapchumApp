@@ -1,6 +1,4 @@
 ﻿using Applications.Interfaces.Lists;
-using Applications.Responses.ViewModels.Holidays;
-using Applications.Utils;
 
 namespace Applications.Features.Holidays.Queries.GetHolidays;
 

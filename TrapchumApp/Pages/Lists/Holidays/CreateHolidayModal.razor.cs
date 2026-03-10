@@ -1,10 +1,10 @@
 using Applications.Extensions.DateTimes;
-using Applications.Features.Holidays;
 using Applications.Features.Holidays.Command.CreateHoliday;
 using Applications.Features.Holidays.Command.DeleteHoliday;
+using Applications.Features.Holidays.Dtos;
 using Applications.Features.Holidays.Queries.GetHolidays;
 using Applications.Responses.ViewModels.Holidays;
-using Applications.Services.Lists;
+using Radzen.Blazor;
 using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Lists.Holidays
@@ -12,6 +12,8 @@ namespace TrapchumApp.Pages.Lists.Holidays
     public partial class CreateHolidayModal
     {
         [Parameter] public EventCallback OnClose { get; set; }
+        [Parameter] public EventCallback Closed { get; set; }
+
         private List<HolidayCreateDto> model = new List<HolidayCreateDto>();
         private HolidayCreateDto modelDTO = new();
         private IEnumerable<HolidayVm> listvm = [];
@@ -19,12 +21,11 @@ namespace TrapchumApp.Pages.Lists.Holidays
         bool IsMultiYear = false;
         bool IsDisible = true;
         bool visibled = false;
-        //DateTime? selectedDates=DateTime.Now;
         protected DateTime? SelectedDate;
         protected List<DateTime?>? Years = [];
         protected DateTime Year = DateTime.Now;
         protected int? endYear = null;
-
+        private RadzenDataGrid<HolidayVm> _gridHolidy = default!;
 
         protected override async Task OnInitializedAsync()
         {
@@ -71,9 +72,11 @@ namespace TrapchumApp.Pages.Lists.Holidays
                 if (rsp.IsSuccess())
                 {
 
-                    await GetHolidays(modelDTO.HolidayDt);
-
+                    ///await GetHolidays(modelDTO.HolidayDt);
+                    
                     NotificationService.Notify(NotificationSeverity.Success, "Holiday were added.");
+
+                    await _gridHolidy.InsertRow(rsp.Value);
 
                     modelDTO = new();
 
@@ -161,9 +164,6 @@ namespace TrapchumApp.Pages.Lists.Holidays
 
             }
         }
-
-
-        [Parameter] public EventCallback Closed { get; set; }
 
         private async Task CloseTab()
         {

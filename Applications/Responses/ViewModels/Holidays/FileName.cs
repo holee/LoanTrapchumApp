@@ -1,4 +1,6 @@
-﻿namespace Applications.Responses.ViewModels.Holidays
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Applications.Responses.ViewModels.Holidays
 {
 
     public sealed class HolidayVm 
@@ -9,5 +11,6 @@
         public int HolidayNum { get; set; } = 0;
         public bool? Status { get; set; } = false;
         public string? Description { get; set; } = string.Empty;
+        [NotMapped]public int RowIndex { get; set; } = 1;
     }
 }

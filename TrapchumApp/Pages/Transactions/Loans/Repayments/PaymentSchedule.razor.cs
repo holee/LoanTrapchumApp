@@ -14,7 +14,6 @@ using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Services.Loans;
 using Domains.Models.Loans;
 using Radzen.Blazor;
-using System.Threading.Tasks;
 using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments;

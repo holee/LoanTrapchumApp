@@ -1,10 +1,8 @@
 using Applications.Features.Holidays.Command.DeleteHoliday;
 using Applications.Features.Holidays.Queries.GetHolidaysAsPaging;
-using Applications.Interfaces.Lists;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Holidays;
 using Domains.Models.Lists;
-using Radzen;
 using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Lists.Holidays
@@ -38,6 +36,12 @@ namespace TrapchumApp.Pages.Lists.Holidays
             await GetsHolidays(searchField);
         }
 
+
+        void OnRowRedner(RowRenderEventArgs<HolidayVm> args)
+        {
+            args.Data?.RowIndex = args.Index​ + 1;
+        }
+
         protected async override Task OnInitializedAsync()
         {
             await GetsHolidays(searchField);
@@ -62,18 +66,19 @@ namespace TrapchumApp.Pages.Lists.Holidays
         }
         protected void DisplayModal()
         {
-            // visibleAdd = true;
-            // SelectedIndex = 1;
             var newKey = Guid.NewGuid().ToString("N");
 
             RenderFragment content = (builder) =>
             {
                 builder.OpenComponent(0, typeof(CreateHolidayModal));
+
                 builder.AddAttribute(1, "Closed", EventCallback.Factory.Create(this, () =>
                 {
                     CloseAddTab(newKey);
                 }));
+
                 builder.SetKey(newKey);
+
                 builder.CloseComponent();
             };
 

@@ -1,6 +1,6 @@
 //using MiniExcelLibs;
 
-using Applications.Features.Holidays;
+using Applications.Features.Holidays.Dtos;
 
 namespace TrapchumApp.Pages.Lists.Holidays
 {

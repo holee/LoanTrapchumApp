@@ -1,29 +1,9 @@
-﻿using Applications.Commons;
-using Applications.Features.Addresses.Command.CreateCity;
-using Applications.Features.Addresses.Command.UpdateCity;
-using Applications.Features.Addresses.Dto;
-using Applications.Features.Addresses.Queries.GetCities;
-using Applications.Features.Addresses.Queries.GetCommunes;
-using Applications.Features.Addresses.Queries.GetDistricts;
-using Applications.Features.Addresses.Queries.GetProvinces;
-using Applications.Features.Addresses.Queries.GetVillages;
-using Applications.Features.Branches.Queries.GetBranchsByUser;
-using Applications.Features.CashManagements.Command.CreateCashVaultIn;
-using Applications.Features.CashManagements.Command.CreateCashVaultOut;
-using Applications.Features.Currencies.Queries.GetCurrencyById;
-using Applications.Features.Dashbaord.Accountants.Dtos;
-using Applications.Features.Dashbaord.Accountants.Queries.GetDbAccountLoanSummaery;
-using Applications.Features.Dashbaord.Accountants.Queries.GetDbApprovedLoanRequest;
-using Applications.Features.Dashbaord.CreditOfficers.Dtos;
-using Applications.Features.Dashbaord.CreditOfficers.Queries.GetDbCreditOfficeLoanSummary;
-using Applications.Features.Dashbaord.CreditOfficers.Queries.GetNumberLoanRequest;
-using Applications.Features.Dashbaord.Managers.Dto;
-using Applications.Features.Dashbaord.Managers.Queries.GetDbManagerLoanSummary;
-using Applications.Features.Identity.Queries.GetUserDetailById;
-using Applications.Features.Identity.Roles.Queries.GetRoles;
-using Applications.Features.Schedules.GetLoanScheduleBySchedule;
-using Applications.Features.Schedules.GetLoanWithSchedule;
-using Applications.Responses.ViewModels.Auths;
+﻿using Applications.Features.Holidays.Command.ActivateOrDeactivate;
+using Applications.Features.Holidays.Command.CreateHoliday;
+using Applications.Features.Holidays.Queries.GetActiveHolidays;
+using Applications.Features.Holidays.Queries.GetHolidayByDate;
+using Applications.Features.Holidays.Queries.GetHolidayById;
+using Applications.Features.Schedules.Queries.GetDueScheduleByLoanId;
 using ErrorOr;
 namespace Applications;
 
@@ -31,9 +11,19 @@ public static class ApplicationServiceInjection
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
-
+        services.AddScoped<IRequestHandler<GetDueScheduleByLoanIdQuery, Pager<VSchedule>>, GetDueScheduleByLoanIdQueryHandler>();
+        services.AddScoped<IRequestHandler<ActivateOrDeactivateHolidayCommand, ErrorOr<HolidayVm>>, ActivateOrDeactivateHolidayCommandHandler>();
+        services.AddScoped<IRequestHandler<GetHolidayByDateQuery, IEnumerable<HolidayVm>>, GetHolidayByDateQueryHandler>();
+        services.AddScoped<IRequestHandler<GetHolidayByIdQuery, ErrorOr<Holiday>>, GetHolidayByIdQueryHandler>();
+        services.AddScoped<IRequestHandler<GetActiveHolidaysQuery, Pager<HolidayVm>>, GetActiveHolidaysQueryHandler>();
+        services.AddScoped<IRequestHandler<CreateHolidaysCommand, ErrorOr<IEnumerable<HolidayVm>>>, CreateHolidaysCommandHandler>();
+        services.AddScoped<IRequestHandler<DeleteHolidayCommand, ErrorOr<DeleteResult>>, DeleteHolidayCommandHandler>();
+        services.AddScoped<IRequestHandler<GetHolidaysQuery, IEnumerable<HolidayVm>>, GetHolidaysQueryHandler>();
+        services.AddScoped<IRequestHandler<GetHolidaysAsPagingQuery, Pager<HolidayVm>>, GetHolidaysAsPagingQueryHandler>();
+        services.AddScoped<IRequestHandler<CreateHolidaysCommand, ErrorOr<IEnumerable<HolidayVm>>>, CreateHolidaysCommandHandler>();
+        services.AddScoped<IRequestHandler<CreateHolidayCommand, ErrorOr<HolidayVm>>, CreateHolidayCommandHandler>();
         services.AddScoped<IRequestHandler<GetUserDetailsByIdQuery, ErrorOr<VUser>>, GetUserDetailsByIdQueryHandler>();
-        services.AddScoped<IRequestHandler<GetBranchByUserQuery, ErrorOr<VBranch>>, GetBranchByUserQueryHandler >();
+        services.AddScoped<IRequestHandler<GetBranchByUserQuery, ErrorOr<VBranch>>, GetBranchByUserQueryHandler>();
         services.AddScoped<IRequestHandler<GetDbManagerLoanSummaryQuery, ErrorOr<DbManagerLoanSummary>>, GetDbManagerLoanSummaryQueryHandler>();
         services.AddScoped<IRequestHandler<GetNumberLoanRequestQuery, ErrorOr<NumerLoanRequest>>, GetNumberLoanRequestQueryHandler>();
         services.AddScoped<IRequestHandler<GetDbCreditOfficeLoanSummaryQuery, Pager<DbCoLoanSummary>>, GetDbCreditOfficeLoanSummaryQueryHandler>();
@@ -49,19 +39,12 @@ public static class ApplicationServiceInjection
         services.AddScoped<IRequestHandler<GetVillagesQuery, PageMetaData<VillageDto>>, GetVillagesQueryHandler>();
         services.AddScoped<IRequestHandler<CreateCityCommand, ErrorOr<CityDto>>, CreateCityCommandHandler>();
         services.AddScoped<IRequestHandler<UpdateCityCommand, ErrorOr<CityDto>>, UpdateCityCommandHandler>();
-
-
-
         services.AddScoped<IRequestHandler<CreateJournalCommand, ErrorOr<JournalEntry?>>, CreateJournalCommandHandler>();
-        
         services.AddScoped<IRequestHandler<GetJournalByIdQuery, ErrorOr<JournalEntry>>, GetJournalByIdQueryHandler>();
         services.AddScoped<IRequestHandler<GetJournalEntryDetailByIdQuery, ErrorOr<JournalEntryDto>>, GetJournalEntryDetailByIdHandler>();
         services.AddScoped<IRequestHandler<GetJournalTypesQuery, Pager<JournalTypeDto>>, GetJournalTypesQueryHandler>();
-
-
         services.AddScoped<IRequestHandler<GetBranchStateQuery, ErrorOr<BranchStatus>>, GetBranchStateQueryHandler>();
         services.AddScoped<IRequestHandler<GetCurrenciesDtoQuery, Pager<CurrencyDto>>, GetCurrenciesDtoQueryHandler>();
-
         services.AddScoped<IRequestHandler<GetBranchForVaultQuery, ErrorOr<VBranch>>, GetBranchForVaultQueryHandler>();
         services.AddScoped<IRequestHandler<GetBranchDetailsByIdQuery, ErrorOr<VBranch?>>, GetBranchDetailsByIdQueryHandler>();
         services.AddScoped<IRequestHandler<GetBranchByIdQuery, ErrorOr<Branch>>, GetBranchByIdQueryHandler>();
@@ -82,13 +65,6 @@ public static class ApplicationServiceInjection
         services.AddScoped<IRequestHandler<AddCurrencyNoteCommand, ErrorOr<VCurrencyCounter>>, AddCurrencyNoteCommandHandler>();
         services.AddScoped<IRequestHandler<StartCashVaultIn, ErrorOr<string>>, CreateCashVaultInHandler>();
         services.AddScoped<IRequestHandler<StartCashVaultOut, ErrorOr<string>>, StartCashVaultOutHandler>();
-
-
-
-
-
-
-
         services.AddScoped<IRequestHandler<GetDepartmentAsPagingQuery, Pager<VDepartment>>, GetDepartmentAsPagingQueryHandler>();
         services.AddScoped<IRequestHandler<GetDepartmentDetailsById, ErrorOr<VDepartment>>, GetDepartmentDetailsByIdHandler>();
         services.AddScoped<IRequestHandler<GetDepartmentById, ErrorOr<Department>>, GetDepartmentByIdHandler>();
@@ -96,22 +72,11 @@ public static class ApplicationServiceInjection
         services.AddScoped<IRequestHandler<EditDepartmentCommand, ErrorOr<VDepartment>>, EditDepartmentCommandHandler>();
         services.AddScoped<IRequestHandler<DeleteDepartmentCommand, ErrorOr<string>>, DeleteDepartmentCommandHandler>();
         services.AddScoped<IRequestHandler<ChangeDepartmentStateCommand, ErrorOr<VDepartment>>, ChangeDepartmentStateCommandHandler>();
-
-
-
-
         services.AddScoped<IRequestHandler<CreateGuarantorCommand, ErrorOr<VGuarantor>>, CreateGuarantorCommandHandler>();
-
         services.AddScoped<IRequestHandler<GetLoanRequestApprovedQuery, ErrorOr<ApprovedRequest>>, GetLoanRequestApprovedQueryHandler>();
-
         services.AddScoped<IRequestHandler<GetApprovedLoanRequestQuery, ErrorOr<VLoanRequests>>, GetApprovedLoanRequestQueryHandler>();
-
         services.AddScoped<IRequestHandler<CreateLoanCommand, ErrorOr<DisburseResult>>, CreateLoanCommandHandler>();
-
         services.AddScoped<IRequestHandler<GetLoanWithScedulesQuery, ErrorOr<IEnumerable<LoanResponse>>>, GetLoanWithScedulesQueryHandler>();
-
-
-
         services.AddScoped<IRequestHandler<GetEmployeeAsPagingQuery, Pager<VEmployeeList>>, GetEmployeeAsPagingQueryHandler>();
         services.AddScoped<IRequestHandler<ChangeEmployeeStateCommand, ErrorOr<VEmployeeList>>, ChangeEmployeeStateCommandHandler>();
         services.AddScoped<IRequestHandler<GetEmployeeDetailsByIdQuery, ErrorOr<VEmployeeList>>, GetEmployeeDetailsByIdQueryHandler>();
@@ -293,10 +258,7 @@ public static class ApplicationServiceInjection
 
 
 
-        services.AddScoped<IRequestHandler<CreateHolidaysCommand, ErrorOr<IEnumerable<HolidayVm>>>, CreateHolidaysCommandHandler>();
-        services.AddScoped<IRequestHandler<DeleteHolidayCommand, ErrorOr<DeleteResult>>, DeleteHolidayCommandHandler>();
-        services.AddScoped<IRequestHandler<GetHolidaysQuery, IEnumerable<HolidayVm>>, GetHolidaysQueryHandler>();
-        services.AddScoped<IRequestHandler<GetHolidaysAsPagingQuery, Pager<HolidayVm>>, GetHolidaysAsPagingQueryHandler>();
+
         services.AddScoped<IRequestHandler<CloseLoanDisbursementCommand, ErrorOr<string>>, CloseLoanDisbursementCommandHandler>();
 
 
