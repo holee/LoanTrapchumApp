@@ -6,14 +6,14 @@
         <RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal">
             <RadzenText TagName="TagName.Span" Text="Filter By:" TextStyle="TextStyle.Body2" />
             <RadzenFormField Text="From">
-                <RadzenDatePicker TValue="DateTime?" 
-                    Change="@DateFromChanged"
-                    DateFormat="dd/MM/yyyy" @bind-Value="@_from" />
+                <RadzenDatePicker TValue="DateTime?"
+                                  Change="@DateFromChanged"
+                                  DateFormat="dd/MM/yyyy" @bind-Value="@_from" />
             </RadzenFormField>
             <RadzenFormField Text="To">
-                <RadzenDatePicker TValue="DateTime?" 
-                    Change="@DateToChanged"
-                    DateFormat="dd/MM/yyyy" @bind-Value="@_to" />
+                <RadzenDatePicker TValue="DateTime?"
+                                  Change="@DateToChanged"
+                                  DateFormat="dd/MM/yyyy" @bind-Value="@_to" />
             </RadzenFormField>
         </RadzenStack>
     </LeftChildren>
@@ -133,17 +133,12 @@
                               TextAlign="TextAlign.Center"
                               Sortable="true">
             <Template>
-                @if (ChildMenu is not null)
-                {
-                    @ChildMenu
-                }
-                else
-                {
-                    <RadzenButton Size="ButtonSize.ExtraSmall"
-                                  Icon="more_vert"
-                                  Variant="Variant.Text"
-                                  Click="@((args)=>ShowContextMenuWithContent(args,p))" />
-                }
+
+                <RadzenButton Size="ButtonSize.ExtraSmall"
+                              Icon="more_vert"
+                              Variant="Variant.Text"
+                              Click="@((args)=>ShowContextMenuWithContent(args,p))" />
+
             </Template>
         </RadzenDataGridColumn>
     </Columns>
@@ -156,48 +151,125 @@
 
 @code {
 
-    [Parameter] public RenderFragment? ChildMenu { get; set; } = default!;
-
+    [Parameter]
+    public VLoanDisbursments? Data { get; set; }
     [CascadingParameter]
     Task<AuthenticationState> AuthState { get; set; } = default!;
-
     [Parameter]
     public EventCallback<VLoanDisbursments> OpenDetailTab { get; set; }
+
+    private string _getPaymentSchedulesUrl = "";
+    private string _getSchedulePayOffUrl = "";
+    private string _getChangeCreditAgentUrl = "";
+    private string _getLoanDetailsUrl = "";
+    private string _getLoanWriteOffUrl = "";
+
+
+    void GetLoanDetails(VLoanDisbursments item)
+    {
+        ContextMenuService.Close();
+        //NavigationManager.NavigateTo($"/App/Loan/{Data!.LoanId}/Branches/{Data!.BranchId}/Currencies/{Data.CurrencyId}");
+        // if (OpenDetailTab.HasDelegate)
+        // {
+        //     OpenDetailTab.InvokeAsync(item);
+        // };
+
+    }
+    void GetPaymentSchedules()
+    {
+        ContextMenuService.Close();
+        NavigationManager.NavigateTo($"/App/Loans/{Data!.BranchId}/Branches/{Data.LoanId}/Schedules?CreditAgentId={Data.CreditAgentRefId}&CurrencyId={Data.CurrencyId}");
+    }
+
+    void ChangeCreditAgent()
+    {
+        ContextMenuService.Close();
+        NavigationManager.NavigateTo($"/App/Loan/{Data!.LoanId}/CreditAgent/{Data.CreditAgentRefId}?CustomerId={Data.CustomerId}&BranchId={Data.BranchId}&CurrencyId={Data.CurrencyId}");
+    }
+    void CustomerPayOff()
+    {
+        ContextMenuService.Close();
+        NavigationManager.NavigateTo($"/Loan/CreditAgent/{Data!.LoanId}/{Data.CreditAgentRefId}?CustomerId={Data.CustomerId}&BranchId={Data.BranchId}&CurrencyId={Data.CurrencyId}");
+    }
+
+    async Task DownLoadScheduleAsExcel(VLoanDisbursments? p)
+    {
+        ContextMenuService.Close();
+
+        if (p is not null)
+        {
+            if (p.LoanId.IsNotNullOrEmpty() && p.BranchId > 0)
+            {
+                await js.InvokeVoidAsync("open", $"/Reports/Schedules/{p.LoanId}/{p.BranchId}/Exel", "_blank");
+            }
+        }
+    }
+    private async Task DownLoadScheduleAsPdf(VLoanDisbursments? p)
+    {
+        ContextMenuService.Close();
+
+        if (p is not null)
+        {
+            var fileName = $"Loan_Schedule_{Guid.CreateVersion7()}.pdf";
+
+            if (p.LoanId.IsNotNullOrEmpty() && p.BranchId > 0)
+            {
+                await js.InvokeVoidAsync("open", $"/Reports/Schedules/{p.LoanId}/{p.BranchId}/{fileName}", "_blank");
+            }
+        }
+    }
 
 
     void ShowContextMenuWithContent(MouseEventArgs args, VLoanDisbursments p)
     {
-        ContextMenuService.Open(args, ds =>@<LoanMenu Data="@p" OpenDetailTab="@OpenDetailTab" />);
-    }
+
+        _getSchedulePayOffUrl = $"/Loan/CreditAgent/{p.LoanId}/{p.CreditAgentRefId}?CustomerId={p.CustomerId}&BranchId={p.BranchId}&CurrencyId={p.CurrencyId}";
+
+        _getPaymentSchedulesUrl = $"/App/Loans/{p.BranchId}/Branches/{p.LoanId}/Schedules?CreditAgentId={p.CreditAgentRefId}&CurrencyId={p.CurrencyId}";
+
+        _getLoanDetailsUrl = $"/App/Loan/{p.LoanId}/Branches/{p.BranchId}/Currencies/{p.CurrencyId}";
+
+        _getChangeCreditAgentUrl = $"/App/Loan/{p.LoanId}/CreditAgent/{p.CreditAgentRefId}?CustomerId={p.CustomerId}&BranchId={p.BranchId}&CurrencyId={p.CurrencyId}";
+
+        ContextMenuService.Open(args, ds => @<RadzenMenu Style="font-size:0.8rem;">
+                <RadzenMenuItem Icon="money"
+                                Path="@_getPaymentSchedulesUrl"
+                                Visible="@bState.CanRecievePayment"
+                                Text="Recieve Payment"></RadzenMenuItem>
+                <RadzenMenuItem Icon="paid"
+                                Path="@_getSchedulePayOffUrl"
+                                Visible="@bState.CanPayOff"
+                                Text="Pay Off"></RadzenMenuItem>
+                <RadzenMenuItem Icon="paid"
+                                Path="@_getLoanWriteOffUrl"
+                                Visible="@bState.CanWriteOff"
+                                Text="Write Off"></RadzenMenuItem>
+                <RadzenMenuItem Icon="change_circle"
+                                Path="@_getChangeCreditAgentUrl"
+                                Visible="@bState.IsManager"
+                                Text="Change Credit Agent"></RadzenMenuItem>
+                <RadzenMenuItem Icon="info"
+                                Path="@_getLoanDetailsUrl"
+                                Text="Details"></RadzenMenuItem>
+                <RadzenMenuItem Icon="file_download"
+                                Click="@(()=>DownLoadScheduleAsExcel(p))"
+                                Text="Export Loan to Excel" />
+                <RadzenMenuItem Icon="picture_as_pdf"
+                                Click="@(()=>DownLoadScheduleAsPdf(p))"
+                                Text="Export Loan to Pdf" />
+            </RadzenMenu>);
+
+
+        }
 
     void OnRowSelected(VLoanDisbursments arg)
     {
 
+        }
+
+        void OnRowRender(RowRenderEventArgs<VLoanDisbursments> arg)
+        {
+            arg.Data!.RowIndex = arg.Index + 1;
+        }
     }
 
-    void OnRowRender(RowRenderEventArgs<VLoanDisbursments> arg)
-    {
-        arg.Data.RowIndex = arg.Index + 1;
-    }
-}
-
-@* <RadzenMenu Style="font-size:0.8rem;">
-    <RadzenMenuItem Icon="money"
-                    Click="@(()=>GetPaymentSchedules(p))"
-                    Text="Recieve Payment"></RadzenMenuItem>
-    <RadzenMenuItem Icon="paid"
-                    Click="@(()=>CustomerPayOff(p))"
-                    Text="PayOff"></RadzenMenuItem>
-    <RadzenMenuItem Icon="change_circle"
-                    Click="@(()=>ChangeCreditAgent(p))"
-                    Text="Change Credit Agent"></RadzenMenuItem>
-    <RadzenMenuItem Icon="info"
-                    Click="@(()=>GetLoanDetails(p))"
-                    Text="Details"></RadzenMenuItem>
-    <RadzenMenuItem Icon="file_download"
-                    Click="@(()=>DownLoadScheduleAsExcel(p.LoanId,p.BranchId!.Value))"
-                    Text="Export Loan to Excel" />
-    <RadzenMenuItem Icon="picture_as_pdf"
-                    Click="@(()=>DownLoadScheduleAsPdf(p.LoanId,p.BranchId!.Value))"
-                    Text="Export Loan to Pdf" />
-</RadzenMenu> *@

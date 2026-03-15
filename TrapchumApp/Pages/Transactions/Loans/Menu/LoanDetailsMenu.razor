@@ -27,8 +27,6 @@
                                 Text="Details"></RadzenMenuItem>
             </Authorized>   
         </AuthorizeView>
-
-       
     </RadzenMenu>
 }
 @code {
@@ -55,7 +53,7 @@
         if (Schedule is not null)
         {
             _getPaymentSchedulesUrl = $"/App/Loans/{Schedule.BranchId}/Branches/{Schedule.LoanId}/Schedules?CreditAgentId={CreditAgentId}&CurrencyId={Schedule.CurrencyId}";
-            _getPaymentSchedulesUrl = $"/App/Loans/{Schedule.BranchId}/Branches/{Schedule.LoanId}/Schedules?CreditAgentId={CreditAgentId}&CurrencyId={Schedule.CurrencyId}";
+            //_getPaymentSchedulesUrl = $"/App/Loans/{Schedule.BranchId}/Branches/{Schedule.LoanId}/Schedules?CreditAgentId={CreditAgentId}&CurrencyId={Schedule.CurrencyId}";
         }
 
         base.OnInitialized();

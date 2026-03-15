@@ -334,7 +334,7 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
 
             _isBusy = false;
 
-            NotificationService.Notify(NotificationSeverity.Success, result.Data);
+            NotificationService.Notify(NotificationSeverity.Success, result.Data!);
 
             if (!saveNew)
             {
@@ -344,7 +344,7 @@ namespace TrapchumApp.Pages.Transactions.Exchanges
         }
         private void ClosingSidebar(MouseEventArgs args)
         {
-            DialogService.CloseSide(false);
+            DialogService.Close(false);
         }
     }
 }

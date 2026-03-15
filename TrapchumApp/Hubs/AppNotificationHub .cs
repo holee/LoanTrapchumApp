@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace TrapchumApp.Hubs;
 
-public class NotificationHub : Hub
+public class AppNotificationHub : Hub
 {
     public const string HubUrl = "/notificationHub";
     public const string ReceiveNotification = "ReceiveNotification";
@@ -66,5 +66,20 @@ public class NotificationHub : Hub
     {
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupName);
     }
-}
 
+
+
+    // Clients join a personal group by userId so you can target individuals
+    public async Task JoinUserGroup(string userId)
+    {
+        await Groups.AddToGroupAsync(Context.ConnectionId, $"user_{userId}");
+    }
+
+    public async Task LeaveUserGroup(string userId)
+    {
+        await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"user_{userId}");
+    }
+
+
+
+}

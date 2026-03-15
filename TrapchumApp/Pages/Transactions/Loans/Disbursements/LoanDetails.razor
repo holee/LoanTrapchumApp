@@ -15,6 +15,7 @@
                             @bind-Value="SelectedSchedules"
                             ColumnWidth="15rem"
                             CellRender="CellRender"
+                            CellContextMenu="@OnCellContextMenu"
                             RowDoubleClick="@OnRowDoubleClick"
                             TItem="VSchedule">
                 <Columns>
@@ -144,11 +145,6 @@
         <RadzenTabsItem Text="Paid Schedule" Icon="paid">
             <SchedulesPaid BranchId="@BranchId" LoanId="@LoanId" CurrencyId="@CurrencyId" />
         </RadzenTabsItem>
-        <RadzenTabsItem Text="Payment" Icon="@IconNames.Paid" Visible="@_isPaymentTab">
-            <PaymentTab CurrencyId="@CurrencyId"
-                        LoanPaymentCreate="@_loanPayment"
-                        CloseTab="@CloseTab" />
-        </RadzenTabsItem>
         <RadzenTabsItem Text="Show By Schedule">
             <RadzenStack AlignItems="AlignItems.Center"
                          Orientation="Orientation.Horizontal"
@@ -178,6 +174,11 @@
             }
 
         </RadzenTabsItem>
+        <RadzenTabsItem Text="Payment" Icon="@IconNames.Paid" Visible="@_isPaymentTab">
+            <PaymentTab CurrencyId="@CurrencyId"
+                        LoanPaymentCreate="@_loanPayment"
+                        CloseTab="@CloseTab" />
+        </RadzenTabsItem>
     </Tabs>
 </RadzenTabs>
 <RadzenStack Orientation="Orientation.Horizontal"
@@ -206,18 +207,42 @@
 
     }
 
-
     void ShowContextMenu(MouseEventArgs args, VSchedule p)
     {
-        ContextMenuService.Open(args,
-                                ds => @<LoanDetailsMenu Schedule="@p"
-                 ScheduleChanged="@PayBySchedules"
-                 CreditAgentId="@_creditAgentId" />
-    );
-    }
+        _getPaymentSchedulesUrl = $"/App/Loans/{p.BranchId}/Branches/{p.LoanId}/Schedules?CreditAgentId={p.CreditAgentId}&CurrencyId={p.CurrencyId}";
+
+        ContextMenuService.Open(args, ds => @<RadzenMenu Style="font-size:0.8rem;">
+            <AuthorizeView Policy="@Policies.RecievePayment">
+                <Authorized>
+                    <RadzenMenuItem Icon="schedule"
+                                    Disabled="@(SetDisabled(p))"
+                                    Click="@(()=>PayBySchedules(p))"
+                                    Text="Paid By Schedule"></RadzenMenuItem>
+                    <RadzenMenuItem Icon="money"
+                                    Disabled="@(SetDisabled(p))"
+                                    Path="@_getPaymentSchedulesUrl"
+                                    Text="Recieve Payment"></RadzenMenuItem>
+                </Authorized>
+            </AuthorizeView>
+
+            <RadzenMenuItem Icon="paid"
+                            Disabled="@(!p.IsPaid)"
+                            Click="ShowPaidSchedules"
+                            Text="Payment History"></RadzenMenuItem>
+            <RadzenMenuItem Icon="paid"
+                            Click="@(()=>ShowScheduleDetails(p))"
+                            Text="Details"></RadzenMenuItem>
+                
+        </RadzenMenu>);
+                                    }
 
 
 }
+
+@* ContextMenuService.Open(args,
+                                ds => @<LoanDetailsMenu Schedule="@p"
+                                                            ScheduleChanged="@PayBySchedules"
+                                                          CreditAgentId="@_creditAgentId" />); *@
 
 @* <RadzenMenu Style="font-size:0.8rem;">
     <RadzenMenuItem Icon="schedule"
@@ -235,4 +260,4 @@
     <RadzenMenuItem Icon="paid"
                     Click="@(()=>ShowScheduleDetails(p))"
                     Text="Details"></RadzenMenuItem>
-</RadzenMenu> *@
+</RadzenMenu>*@

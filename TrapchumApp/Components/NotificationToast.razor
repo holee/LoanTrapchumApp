@@ -1,0 +1,80 @@
+﻿@using Microsoft.AspNetCore.SignalR.Client
+@using TrapchumApp.Hubs
+@implements IAsyncDisposable
+ddfdff
+<div class="notification-container">
+    @foreach (var n in _notifications)
+    {
+        <div class="toast toast-@n.Level.ToString().ToLower()" @key="n.Id">
+            <div class="toast-header">
+                <strong>@n.Title</strong>
+                <button @onclick="() => Dismiss(n.Id)">×</button>
+            </div>
+            <p class="toast-body">@n.Message</p>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string? UserId { get; set; }
+
+    private HubConnection? _hubConnection;
+
+    private readonly List<AppNotification> _notifications = new();
+
+    private readonly CancellationTokenSource _cts = new();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        _hubConnection = new HubConnectionBuilder()
+            .WithUrl(NavigationManager.ToAbsoluteUri("/hubs/notifications"))
+            .WithAutomaticReconnect()
+            .Build();
+
+        _hubConnection.On<AppNotification>("ReceiveNotification", async notification =>
+        {
+            _notifications.Insert(0, notification);
+
+            // Auto-dismiss after 5 seconds for non-error levels
+            if (notification.Level != AppNotificationLevel.Error)
+            {
+                _ = AutoDismiss(notification.Id, TimeSpan.FromSeconds(5));
+            }
+
+            await InvokeAsync(StateHasChanged);
+        });
+
+        await _hubConnection.StartAsync(_cts.Token);
+
+        // Join personal group if a userId was provided
+        if (!string.IsNullOrEmpty(UserId))
+        {
+            await _hubConnection.InvokeAsync("JoinUserGroup", UserId, _cts.Token);
+        }
+    }
+
+    private void Dismiss(string id)
+    {
+        _notifications.RemoveAll(n => n.Id == id);
+    }
+
+    private async Task AutoDismiss(string id, TimeSpan delay)
+    {
+        await Task.Delay(delay, _cts.Token);
+        _notifications.RemoveAll(n => n.Id == id);
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await _cts.CancelAsync();
+        if (_hubConnection is not null)
+        {
+            if (!string.IsNullOrEmpty(UserId))
+                await _hubConnection.InvokeAsync("LeaveUserGroup", UserId);
+            await _hubConnection.DisposeAsync();
+        }
+    }
+}

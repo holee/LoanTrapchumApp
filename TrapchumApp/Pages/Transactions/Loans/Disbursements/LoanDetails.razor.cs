@@ -45,15 +45,18 @@ public partial class LoanDetails
     {
         _selectedTabIndex = index;
 
-        if (index == 1)
+        if (index == 2)
         {
             await GetSplitSchedules();
         }
-
     }
 
     void CellRender(DataGridCellRenderEventArgs<VSchedule> args)
     {
+        if (args is null) return;
+
+        if (args.Data is null) return;
+
         if (args.Data.IsPaid)
         {
             args.Attributes.Add("style", "background-color:var(--rz-danger-lighter)");
@@ -63,23 +66,20 @@ public partial class LoanDetails
 
     async Task OnRowDoubleClick(DataGridRowMouseEventArgs<VSchedule> arg)
     {
+        if (arg is null) return;
+
+        if (arg.Data is null) return;
+
         await PayBySchedules(arg.Data);
     }
-
-
-    void ShowPaidSchedules()
-    {
-        ContextMenuService.Close();
-
-        _selectedTabIndex = 1;
-    }
-
 
     private bool _isPaymentTab = false;
 
     private int _selectedTabIndex = 0;
 
     private LoanPaymentDtoCreate? _loanPayment = new();
+    private string _getPaymentSchedulesUrl;
+
     void CloseTab()
     {
         _isPaymentTab = false;
@@ -91,23 +91,11 @@ public partial class LoanDetails
     {
         ContextMenuService.Close();
 
-        var schedulesList = loanSchedule?.Schedules?.ToList();
-
-        var firstSchedule = schedulesList?.First(x => x.IsPaid == false);
-
-        if (p != firstSchedule)
-        {
-            NotificationService.Notify(NotificationSeverity.Warning, "Cannot add new schedule due to previouse schedule not complete paid yet.");
+        if (!IsFirstScheduleSelected(p))
             return;
-        }
 
-        if (p.IsPaid)
-        {
-            NotificationService.Notify(NotificationSeverity.Warning, "This schedule is already paid.");
-
+        if (IsAlreadyPaidSchedule(p))
             return;
-        }
-
         decimal? total = p.SubTotal();
 
         List<LoanPaymentLineDtoCreate> loanRepaymentLines = [];
@@ -171,7 +159,7 @@ public partial class LoanDetails
 
             var message = $"Recieve Payment from {loanSchedule!.AltName}";
 
-            bool? confirm = await DialogService.OpenAsync<PaymentModal>(message, parameters, options);
+            bool? confirm = await DialogService.OpenAsync<PaymentModal>(message, parameters!, options);
 
             if (confirm is not null && confirm == true)
             {
@@ -181,6 +169,83 @@ public partial class LoanDetails
         }
 
     }
+
+    private bool SetDisabled(VSchedule schedule)
+    {
+        return (IsAlreadyPaidSchedule(schedule) || !IsFirstScheduleSelected(schedule));
+    }
+
+    private bool IsAlreadyPaidSchedule(VSchedule p)
+    {
+        if (p.IsPaid)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "This schedule is already paid.");
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private bool IsFirstScheduleSelected(VSchedule p)
+    {
+        var schedulesList = loanSchedule?.Schedules?.ToList();
+
+        var firstSchedule = schedulesList?.First(x => x.IsPaid == false);
+
+        if (p != firstSchedule)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Cannot add new schedule due to previouse schedule not complete paid yet.");
+            return false;
+        }
+
+        return true;
+    }
+
+    void OnCellContextMenu(DataGridCellMouseEventArgs<VSchedule> args)
+    {
+        if (args is null) return;
+
+        if (args.Data is null) return;
+
+        ContextMenuService.Open(args,
+            new List<ContextMenuItem> {
+                new ContextMenuItem(){ Text = "Recieve Payment", Value = 1, Icon = "save",Disabled = SetDisabled(args.Data) },
+                new ContextMenuItem(){ Text = "Receive By Schedule", Value = 2, Icon = "paid", Disabled = SetDisabled(args.Data) },
+                new ContextMenuItem(){ Text = "Show Details", Value = 3, Icon = "info" },
+            },
+            (e) =>
+            {
+
+                ContextMenuService.Close();
+
+                if (e.Value is not null && int.TryParse(e.Value!.ToString(), out int value))
+                {
+
+                    if (!IsFirstScheduleSelected(args.Data))
+                        return;
+
+                    if (IsAlreadyPaidSchedule(args.Data))
+                        return;
+
+                    switch (value)
+                    {
+                        case 1:
+                            GetPaymentSchedules();
+                            break;
+                        case 2:
+                            _ = PayBySchedules(args.Data!);
+                            break;
+                        case 3:
+                            _ = ShowScheduleDetails(args.Data!);
+                            break;
+                    }
+                }
+            }
+         );
+    }
+
+
     void GetPaymentSchedules()
     {
         ContextMenuService.Close();
@@ -194,6 +259,8 @@ public partial class LoanDetails
     async Task GetSplitSchedules()
     {
 
+        Tracker.Show();
+
         var query = new GetLoanWithScedulesQuery(BranchId, LoanId);
 
         var rsp = await mediator.Send(query);
@@ -202,6 +269,8 @@ public partial class LoanDetails
         {
             _loanSchedules = rsp.Value ?? [];
         }
+
+        Tracker.Hide();
 
         StateHasChanged();
     }
@@ -237,10 +306,21 @@ public partial class LoanDetails
         StateHasChanged();
     }
 
+
+    void ShowPaidSchedules()
+    {
+        ContextMenuService.Close();
+
+        //_selectedTabIndex = 1;
+    }
+
     async Task ShowScheduleDetails(VSchedule p)
     {
         //await popup.ToggleAsync(buttonItem.Element);
+
+
         ContextMenuService.Close();
+
         var param = new Dictionary<string, object?>
             {
                 {"LoanId",LoanId },
@@ -255,7 +335,7 @@ public partial class LoanDetails
             CloseDialogOnOverlayClick = true,
             Width = "60vw"
         };
-        await DialogService.OpenSideAsync<ScheduleDetails>($"Schedule-{p.LoanScheduleId}", parameters: param, options);
+        await DialogService.OpenSideAsync<ScheduleDetails>($"Schedule-{p.LoanScheduleId}", parameters: param!, options);
 
 
     }

@@ -78,6 +78,21 @@ namespace Infrastructures.Implements
             return Result.Success(schedule);
         }
 
+
+
+        public async Task<VSchedule?> GetScheduleByIdAsync(long? scheduleId, int? branchId, string? loanId, CancellationToken cancellation = default)
+        {
+            await using var db = await _contextFactory.CreateDbContextAsync(cancellation);
+
+            var schedule = await db.VSchedules
+                                    .AsNoTracking()
+                                    .Where(x => x.LoanScheduleId == scheduleId &&
+                                                x.BranchId == branchId &&
+                                                x.LoanId == loanId && x.ScheduleStatusId != (int)ScheduleStatus.Paid)
+                                    .FirstOrDefaultAsync(cancellation);
+            return schedule;
+        }
+
         public async Task<Result<LoanScheduleVm>> GetLoanSchedulesAsync(int? branchId, string? loanId, string? customerId)
         {
             var connection = _connectionFactory.CreateConnection();

@@ -13,7 +13,6 @@ using Applications.Features.Loans.Services;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Services.Loans;
 using Radzen.Blazor;
-using System.Threading.Tasks;
 using TrapchumApp.Helpers.Extensions;
 using TrapchumApp.Pages.Transactions.Loans.Repayments;
 namespace TrapchumApp.Pages.Transactions.RecievePayements;
@@ -246,7 +245,9 @@ public partial class RecievePayementSchesules
         };
 
         loanPayment.LoanPaymentLines.Add(_loanPaymentLine);
+       
         _loanPayment = loanPayment;
+       
         var parameters = new Dictionary<string, object?>{
                 {"CurrencyId" , CurrencyId},
                 {"LoanPaymentCreate",loanPayment },
@@ -254,7 +255,7 @@ public partial class RecievePayementSchesules
 
         var message = $"Recieve Payment from {LoanSchedule!.AltName}";
 
-        bool? confirm = await DialogService.OpenAsync<PaymentModal>(message, parameters, options);
+        bool? confirm = await DialogService.OpenAsync<PaymentModal>(message, parameters!, options);
 
 
         if (confirm == true)
@@ -385,13 +386,6 @@ public partial class RecievePayementSchesules
         if (total > 0)
         {
             _loanPaymentLine = SelectedSchedule.MapToLoanPaymentLine();
-
-            var rsp = await _addRecieptNumberUseCase.ExecuteAsync();
-
-            if (rsp.IsSuccess)
-            {
-                _loanPaymentLine.OfficialReceiptNo = rsp.Data!;
-            }
 
             btnDisabled = false;
         }

@@ -43,12 +43,12 @@ builder.Services.AddSingleton<IUserIdProvider, UserIdProvider>();
 builder.Services.AddScoped<NotificationServices>();
 builder.Services.AddScoped<NotificationHubService>();
 
-builder.Services.AddSignalR(options =>
-{
-    options.EnableDetailedErrors = builder.Environment.IsDevelopment();
-    options.KeepAliveInterval = TimeSpan.FromSeconds(15);
-    options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
-});
+
+
+builder.Services.AddSignalR();
+
+builder.Services.AddSingleton<IAppNotificationService, AppNotificationService>();
+
 
 var app = builder.Build();
 
@@ -72,8 +72,11 @@ app.MapStaticAssets();
 app.UseStaticFiles();
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
-// Add additional endpoints required by the Identity /Account Razor components.
 app.MapControllers();
+
 await app.MapAdditionalIdentityEndpoints();
-app.MapHub<NotificationHub>(NotificationHub.HubUrl);
+
+app.MapHub<AppNotificationHub>("/hubs/notifications");
+
+
 app.Run();

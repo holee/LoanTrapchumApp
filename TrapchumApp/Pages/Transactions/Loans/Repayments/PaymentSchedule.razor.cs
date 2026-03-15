@@ -25,14 +25,12 @@ public partial class PaymentSchedule
 
     private readonly ILoanScheduleServiceImpl _scheduleService;
 
-    private readonly IAddRecieptNumberUseCase _addRecieptNumberUseCase;
-    public PaymentSchedule(ILoanServiceImpl loanService, ILoanScheduleServiceImpl loanScheduleService, IAddRecieptNumberUseCase addRecieptNumberUseCase)
+    public PaymentSchedule(ILoanServiceImpl loanService, ILoanScheduleServiceImpl loanScheduleService)
     {
         _loanService = loanService;
 
         _scheduleService = loanScheduleService;
 
-        _addRecieptNumberUseCase = addRecieptNumberUseCase;
     }
 
     [Parameter] public string? LoanId { get; set; }
@@ -393,13 +391,6 @@ public partial class PaymentSchedule
         if (total > 0)
         {
             _loanPaymentLine = SelectedSchedule.MapToLoanPaymentLine();
-
-            var rsp = await _addRecieptNumberUseCase.ExecuteAsync();
-
-            if (rsp.IsSuccess)
-            {
-                _loanPaymentLine.OfficialReceiptNo = rsp.Data!;
-            }
 
             btnDisabled = false;
         }

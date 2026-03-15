@@ -14,9 +14,10 @@
 @using Domains.Models.Identity
 @using TrapchumApp.Helpers.Enums
 @using TrapchumApp.Helpers.Extensions
+@using Microsoft.AspNetCore.SignalR.Client
+
 <PageTitle>Home</PageTitle>
-
-
+<NotificationToast UserId="@UserId" />
 <AuthorizeView Policy="@Policies.CreditOfficerOnly">
     <Authorized>
         <InfoBox Title="CO"
@@ -92,8 +93,6 @@
         </InfoBox>
     </Authorized>
 </AuthorizeView>
-
-
 <AuthorizeView Roles="@AppRoles.Manager">
     <Authorized>
         <InfoBox Title="BM"
@@ -119,8 +118,6 @@
 
     </Authorized>
 </AuthorizeView>
-
-
 <AuthorizeView Policy="@Policies.AccountOnly">
     <Authorized>
         <InfoBox Title="Account,Teller"
@@ -209,5 +206,3 @@
         </InfoBox>
     </Authorized>
 </AuthorizeView>
-
-

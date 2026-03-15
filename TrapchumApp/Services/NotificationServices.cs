@@ -60,7 +60,7 @@ public sealed class NotificationServices : IAsyncDisposable
 
         _branchId = branchId;
 
-        var hubUrl = $"{baseUrl}{NotificationHub.HubUrl}?userId={userId}&branchId={branchId}";
+        var hubUrl = $"{baseUrl}{AppNotificationHub.HubUrl}?userId={userId}&branchId={branchId}";
 
         _hubConnection = new HubConnectionBuilder()
             .WithUrl(hubUrl, options =>
@@ -88,12 +88,12 @@ public sealed class NotificationServices : IAsyncDisposable
     {
         if (_hubConnection is null) return;
 
-        _hubConnection.On<NotificationDto>(NotificationHub.ReceiveNotification, notification =>
+        _hubConnection.On<NotificationDto>(AppNotificationHub.ReceiveNotification, notification =>
         {
             AddNotification(notification);
         });
 
-        _hubConnection.On<int>(NotificationHub.ReceiveNotificationCount, count =>
+        _hubConnection.On<int>(AppNotificationHub.ReceiveNotificationCount, count =>
         {
             UnReadCount = count;
         });

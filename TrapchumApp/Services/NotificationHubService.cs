@@ -7,7 +7,7 @@ namespace TrapchumApp.Services;
 /// <summary>
 /// Service for sending real-time notifications via SignalR hub
 /// </summary>
-public sealed class NotificationHubService(IHubContext<NotificationHub> hubContext)
+public sealed class NotificationHubService(IHubContext<AppNotificationHub> hubContext)
 {
     /// <summary>
     /// Sends a notification to a specific user
@@ -16,7 +16,7 @@ public sealed class NotificationHubService(IHubContext<NotificationHub> hubConte
     {
         await hubContext.Clients
             .Group($"user_{userId}")
-            .SendAsync(NotificationHub.ReceiveNotification, notification);
+            .SendAsync(AppNotificationHub.ReceiveNotification, notification);
     }
 
     /// <summary>
@@ -26,7 +26,7 @@ public sealed class NotificationHubService(IHubContext<NotificationHub> hubConte
     {
         await hubContext.Clients
             .Group($"branch_{branchId}")
-            .SendAsync(NotificationHub.ReceiveNotification, notification);
+            .SendAsync(AppNotificationHub.ReceiveNotification, notification);
     }
 
     /// <summary>
@@ -44,7 +44,7 @@ public sealed class NotificationHubService(IHubContext<NotificationHub> hubConte
     public async Task BroadcastAsync(NotificationDto notification)
     {
         await hubContext.Clients.All
-            .SendAsync(NotificationHub.ReceiveNotification, notification);
+            .SendAsync(AppNotificationHub.ReceiveNotification, notification);
     }
 
     /// <summary>
@@ -54,7 +54,7 @@ public sealed class NotificationHubService(IHubContext<NotificationHub> hubConte
     {
         await hubContext.Clients
             .Group($"user_{userId}")
-            .SendAsync(NotificationHub.ReceiveNotificationCount, count);
+            .SendAsync(AppNotificationHub.ReceiveNotificationCount, count);
     }
 
     /// <summary>
@@ -64,6 +64,6 @@ public sealed class NotificationHubService(IHubContext<NotificationHub> hubConte
     {
         await hubContext.Clients
             .Group(groupName)
-            .SendAsync(NotificationHub.ReceiveNotification, notification);
+            .SendAsync(AppNotificationHub.ReceiveNotification, notification);
     }
 }

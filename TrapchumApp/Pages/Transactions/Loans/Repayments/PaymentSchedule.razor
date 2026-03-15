@@ -4,7 +4,8 @@
 @using TrapchumApp.Pages.Transactions.Exchanges
 @using TrapchumApp.Pages.Transactions.Loans.Disbursements
 @using TrapchumApp.Pages.Transactions.Loans.Menu
-<PageTitle>Repayment 2</PageTitle>
+@using TrapchumApp.Pages.Transactions.RecievePayements
+<PageTitle>Recieve Payments</PageTitle>
 <LoanInfos BranchId="@BranchId"
            LoanId="@LoanId"
            Currency="@CurrencyId"
@@ -18,17 +19,23 @@
                       ButtonStyle="ButtonStyle.Secondary" />
     </ChildContent>
 </LoanInfos>
+<RadzenStack AlignItems="AlignItems.Center"
+             Orientation="Orientation.Horizontal"
+             JustifyContent="JustifyContent.Start" class="@Styles.M2">
+    <RadzenCheckBox TValue="bool" Name="CheckBox1" Change="OnShowScheduleChanged" />
+    <RadzenLabel Text="Show Schedule" Component="CheckBox1" class="rz-ms-1" />
+</RadzenStack>
 <div class="rz-background-color-base-200 rz-m-0 rz-mt-2">
     <RadzenTabs SelectedIndex="@selectedIndex">
         <Tabs>
-            <RadzenTabsItem Text="Due Schedules" Icon="@IconNames.List">
+            <RadzenTabsItem Text="Due Schedules" Icon="@IconNames.SendMoney">
                 <RadzenFieldset class="rz-m-0 rz-background-color-base-200">
                     <DueDateSchedules BranchId="@BranchId" LoanId="@LoanId"
                                       CurrencyId="@CurrencyId"
                                       CreditAgentId="@CreditAgentId" />
                 </RadzenFieldset>
             </RadzenTabsItem>
-            <RadzenTabsItem Text="Schedules" Icon="@IconNames.List">
+            <RadzenTabsItem Text="Schedules" Icon="@IconNames.List" Visible="@isAllowShowSchedule">
                 <RadzenFieldset class="rz-m-0 rz-background-color-base-200">
                     <div class="m-0 p-0 rz-background-color-base-200">
                         <RadzenStack Orientation="Orientation.Horizontal"
@@ -63,6 +70,7 @@
                                         @bind-Value="@_selectedSchedules"
                                         RowSelect="SelectedRowEvt"
                                         RowDeselect="DeSelectedRowEvt"
+                                        CellContextMenu="@OnCellContextMenu"
                                         AllowRowSelectOnRowClick="@allowRowSelected"
                                         IsLoading="isLoading"
                                         @ref="gridSchedule">
@@ -323,7 +331,6 @@
                     </RadzenStack>
                 </RadzenFieldset>
             </RadzenTabsItem>
-
             @foreach (var item in _tabs)
             {
                 <RadzenTabsItem @key="@item.Key" Icon="@item.Icon" Text="@item.Title">
@@ -341,6 +348,12 @@
 
 @code {
     private List<CustomTab> _tabs = [];
+    private bool isAllowShowSchedule = false;
+
+    void OnShowScheduleChanged(bool args)
+    {
+        isAllowShowSchedule = args;
+    }
 
     private void AddMultiplePaymentTab(IEnumerable<VSchedule>? Schedules, LoanPaymentDtoCreate? LoanPayment)
     {
@@ -419,35 +432,163 @@
 
     }
 
-
+    private string _getPaymentSchedulesUrl = "";
 
     void ShowContextMenu(MouseEventArgs args, VSchedule schedule)
     {
-        ContextMenuService.Open(args, ds => @<LoanDetailsMenu Schedule="@schedule" />);
+        ContextMenuService.Open(args, ds => @<RadzenMenu Style="font-size:0.8rem;">
+            <AuthorizeView Policy="@Policies.RecievePayment">
+                <Authorized>
+                    <RadzenMenuItem Icon="schedule"
+                                    Disabled="@(SetDisabled(schedule))"
+                                    Click="@(()=>PayBySchedules(schedule))"
+                                    Text="Payment By Schedule"></RadzenMenuItem>
+                       
+                </Authorized>
+            </AuthorizeView>
+            <RadzenMenuItem Icon="paid"
+                            Visible="@(schedule.IsPaid)"
+                            Click="@(()=>ShowPaidSchedules(schedule))"
+                            Text="Payment History"></RadzenMenuItem>
+        </RadzenMenu>);
+
+        }
+
+    void ShowPaidSchedules(VSchedule? p)
+    {
+        ContextMenuService.Close();
+
+        //_selectedTabIndex = 1;
     }
+
+    async Task ShowScheduleDetails(VSchedule? p)
+    {
+        //await popup.ToggleAsync(buttonItem.Element);
+        ContextMenuService.Close();
+        var param = new Dictionary<string, object?>
+            {
+                {"LoanId",p.LoanId },
+                {"CurrencyId",p.CurrencyId },
+                {"BranchId",p.BranchId },
+                {"ScheduleId",p.LoanScheduleId },
+            };
+        var options = new SideDialogOptions
+        {
+            Position = DialogPosition.Right,
+            ShowMask = true,
+            CloseDialogOnOverlayClick = true,
+            Width = "60vw"
+        };
+        await DialogService.OpenSideAsync<ScheduleDetails>($"Schedule-{p.LoanScheduleId}", parameters: param!, options);
+
+
+    }
+
+
+    async Task PayBySchedules(VSchedule p)
+    {
+        ContextMenuService.Close();
+
+        var options = new SideDialogOptions
+        {
+            Position = DialogPosition.Right,
+            ShowMask = true,
+            CloseDialogOnOverlayClick = false,
+            Width = "35rem"
+        };
+
+        var param = new Dictionary<string, object?>
+            {
+                {"LoanId",p.LoanId },
+                {"CurrencyId",p.CurrencyId },
+                {"BranchId",p.BranchId },
+                {"LoanScheduleId",p.LoanScheduleId },
+            };
+
+        await DialogService.OpenSideAsync<RecievePaymentSidebar>($"Schedule-{p.LoanScheduleId}", parameters: param!, options);
+
+    }
+
+
+    private IList<VSchedule>? selectedSchedule = null;
+
+    void OnCellContextMenu(DataGridCellMouseEventArgs<VSchedule> args)
+    {
+
+        if (args == null || args.Data == null)
+            return;
+
+        selectedSchedule = new List<VSchedule>() { args.Data };
+
+        ContextMenuService.Open(args,
+            new List<ContextMenuItem> {
+                new ContextMenuItem()
+                    {
+                      Text = "Recieve Payment",
+                      Value = 1,
+                      Icon = "paid",
+                      Disabled=SetDisabled(args.Data)
+                    },
+                new ContextMenuItem(){
+                    Text = "Show Details",
+                    Value = 2,
+                    Icon = "details"
+                },
+            },
+            (e) =>
+            {
+                ContextMenuService.Close();
+
+                var selected = (int)e?.Value!;
+
+                if (selected == 1)
+                {
+                    _ = PayBySchedules(args.Data);
+                }
+                else if (selected == 2)
+                {
+                    _ = ShowScheduleDetails(args.Data);
+                }
+                
+            }
+         );
+    }
+
+
+    private bool SetDisabled(VSchedule schedule)
+    {
+        return (IsAlreadyPaidSchedule(schedule) || !IsFirstScheduleSelected(schedule));
+    }
+
+    private bool IsAlreadyPaidSchedule(VSchedule p)
+    {
+        if (p.IsPaid)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "This schedule is already paid.");
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private bool IsFirstScheduleSelected(VSchedule p)
+    {
+        var schedulesList = schedules?.ToList();
+
+        var firstSchedule = schedulesList?.First(x => x.IsPaid == false);
+
+        if (p != firstSchedule)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Cannot add new schedule due to previouse schedule not complete paid yet.");
+           
+            return false;
+        }
+
+        return true;
+    }
+
 
 }
 
 
-
-@* <RadzenTabsItem Text="Payments" Icon="paid" Visible="@_isMultiplePaymentTab">
-                <PaymentMultiplesTab CurrencyId="@CurrencyId"
-                                     LoanPayment="@_loanPayment"
-                                     ClosedTab="@ClosedTab"
-                                     CreatePayment="@CreatePayment"
-                                     Schedules="@_selectedSchedules" />
-            </RadzenTabsItem> *@
-@* <RadzenTabsItem Text="Payments" Icon="paid"
-                            Visible="@_isPaymentTab">
-                <RadzenRow>
-                    <RadzenColumn Size="6" SizeMD="6" SizeSM="12">
-                        <PaymentTab CurrencyId="@CurrencyId"
-                                    CloseTab="@CloseTab"
-                                    LoanPaymentCreate="@_loanPayment" />
-                    </RadzenColumn>
-                    <RadzenColumn Size="6" SizeMD="6" SizeSM="12"
-                                  Visible="@_showExchanged">
-                        <ExchangesSidebar BranchId="@BranchId" UserId="@_userId" IsSideBar="false" />
-                    </RadzenColumn>
-                </RadzenRow>
-            </RadzenTabsItem> *@
