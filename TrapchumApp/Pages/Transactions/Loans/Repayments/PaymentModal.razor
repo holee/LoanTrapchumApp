@@ -7,6 +7,7 @@
 @using TrapchumApp.Helpers.Constants
 @using TrapchumApp.Pages.Transactions.Exchanges
 @using TrapchumApp.Services
+<PageTitle>Payment</PageTitle>
 <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
              JustifyContent="JustifyContent.End">
     <RadzenButton Size="ButtonSize.ExtraSmall" Click="OpenSide">Show Exchange</RadzenButton>
@@ -57,8 +58,13 @@
     <RadzenRow AlignItems="AlignItems.Center" class="rz-mt-2">
         <RadzenColumn Size="12">
             <RadzenFormField Text="Receipt No" AllowFloatingLabel="true" class="@Styles.W100">
-                <RadzenTextBox @bind-Value="LoanRepayment.OfficialReceiptNo"
-                               class="@Styles.W100" />
+                <ChildContent>
+                    <RadzenTextBox @bind-Value="LoanRepayment.OfficialReceiptNo"
+                                   class="@Styles.W100" />
+                </ChildContent>
+                <Helper>
+                    <ValidationMessage For="@(() => LoanRepayment.OfficialReceiptNo)" />
+                </Helper>
             </RadzenFormField>
         </RadzenColumn>
     </RadzenRow>
@@ -155,14 +161,15 @@
 </EditForm>
 @code {
 
-    SideDialogOptions options = new SideDialogOptions
+    DialogOptions options = new DialogOptions
     {
-        Width = "30rem",
+        Width = "40rem",
         CloseDialogOnOverlayClick = true,
+        Left = "0"
     };
 
     void OpenSide()
     {
-        DialogService.OpenSide<ExchangesSidebar>("Money Exchanged", options: options);
+        DialogService.Open<MoneyExchanges>("Money Exchanged", options: options);
     }
 }

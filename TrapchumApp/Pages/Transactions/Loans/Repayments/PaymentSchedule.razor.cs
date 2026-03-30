@@ -10,6 +10,7 @@ using Applications.Features.LoanPayments.Requests;
 using Applications.Features.Loans.Queries.GetLoanById;
 using Applications.Features.Loans.Responses;
 using Applications.Features.Loans.Services;
+using Applications.Features.Schedules.Queries.GetDueScheduleByLoanId;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Services.Loans;
 using Domains.Models.Loans;
@@ -465,12 +466,12 @@ public partial class PaymentSchedule
     }
 
 
-    async Task GetLoanWithSchedules(int? branchId, string? loanId)
+    async Task GetLoanWithSchedules(int? branchId, string? loanId, ScheduleStatus status = ScheduleStatus.Unpaid)
     {
 
         isLoading = true;
 
-        var query = new GetLoanByIdQuery(loanId, BranchId, ScheduleStatus.Unpaid, true);
+        var query = new GetLoanByIdQuery(loanId, BranchId, ScheduleStatus.Unpaid, false);
 
         var rsp = await mediator.Send(query);
 
@@ -508,6 +509,34 @@ public partial class PaymentSchedule
 
 
     }
+
+
+    async Task GetSchedules(int? branchId, string? loanId, ScheduleStatus status = ScheduleStatus.Unpaid)
+    {
+
+        isLoading = true;
+
+        var query = new GetDueScheduleByLoanIdQuery(branchId, loanId, status);
+
+        var rsp = await mediator.Send(query);
+
+        LoanSchedule = null;
+
+        schedules = rsp.Items;
+
+        _selectedSchedules = schedules.Take(1).ToList();
+
+        if (_selectedSchedules.Any() && !isAllowMultiplePayment)
+        {
+            SelectedSchedule = _selectedSchedules.First();
+
+            disableIsPaidNow = false;
+        }
+
+        isLoading = false;
+
+    }
+
 
     async Task GetSchedulesByLoanIdAsync(ScheduleStatus status)
     {

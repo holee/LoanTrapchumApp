@@ -619,8 +619,10 @@ namespace Infrastructures.Implements
 
             await using var _context = await dbContextFactory.CreateDbContextAsync(cancellation);
 
-            var item1 = _context.Set<VSchedule>()
-                                        .Where(x => x.BranchId == branchId && x.LoanId == loanId && x.PaymentDate <= DateTime.UtcNow && x.ScheduleStatusId != (int)ScheduleStatus.Paid)
+            var item1 = _context.Set<VSchedule>().Where(x => x.BranchId == branchId
+                                        && x.LoanId == loanId
+                                        && x.PaymentDate <= DateTime.UtcNow
+                                        && x.ScheduleStatusId != (int)ScheduleStatus.Paid)
                                         .OrderBy(x => x.InstallmentNo)
                                         .ThenBy(x => x.PaymentDate);
 
@@ -631,6 +633,31 @@ namespace Infrastructures.Implements
             return PagerExtensions.Create(items, counts);
         }
 
+
+
+        public async Task<Pager<VSchedule>> GetScheduleLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus state, CancellationToken cancellation = default)
+        {
+
+            await using var _context = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+            var baseQueries = _context.Set<VSchedule>().Where(x => x.BranchId == branchId && x.LoanId == loanId);
+
+            baseQueries = state switch
+            {
+                ScheduleStatus.Paid => baseQueries.Where(x => x.ScheduleStatusId == (int)ScheduleStatus.Paid),
+                ScheduleStatus.Unpaid => baseQueries.Where(x => x.ScheduleStatusId != (int)ScheduleStatus.Paid && x.PaymentDate <= DateTime.Now),
+                ScheduleStatus.All => baseQueries,
+                _ => baseQueries
+            };
+
+            baseQueries = baseQueries.OrderBy(x => x.InstallmentNo).ThenBy(x => x.PaymentDate);
+
+            var counts = await baseQueries.CountAsync(cancellation);
+
+            var items = await baseQueries.AsNoTracking().ToListAsync(cancellation);
+
+            return PagerExtensions.Create(items, counts);
+        }
 
 
         public async Task<IEnumerable<VSchedule>> GetLoanSchedulesAsync(string? loanId, int? branchId,

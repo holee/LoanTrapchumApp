@@ -13,24 +13,51 @@
     <Compile Remove="Features\Currencies\Requests\**" />
     <Compile Remove="Features\Currencies\UseCases\**" />
     <Compile Remove="Features\Customers\Mappers\**" />
+    <Compile Remove="Features\LoanPayments\Enums\**" />
+    <Compile Remove="Features\LoanPayments\Extensions\**" />
+    <Compile Remove="Features\LoanPayments\Mappers\**" />
     <Compile Remove="Features\NewFolder1\**" />
     <Compile Remove="Responses\Lists\Collaterals\**" />
+    <Compile Remove="Responses\Transactions\**" />
+    <Compile Remove="Responses\Vendors\**" />
+    <Compile Remove="Responses\ViewModels\Branches\**" />
+    <Compile Remove="Responses\ViewModels\Collaterals\**" />
+    <Compile Remove="Responses\ViewModels\Trans\**" />
+    <Compile Remove="Responses\ViewModels\Users\**" />
     <EmbeddedResource Remove="Features\Addresses\UseCases\**" />
     <EmbeddedResource Remove="Features\Addresses\Validations\**" />
     <EmbeddedResource Remove="Features\Branches\Mappers\**" />
     <EmbeddedResource Remove="Features\Currencies\Requests\**" />
     <EmbeddedResource Remove="Features\Currencies\UseCases\**" />
     <EmbeddedResource Remove="Features\Customers\Mappers\**" />
+    <EmbeddedResource Remove="Features\LoanPayments\Enums\**" />
+    <EmbeddedResource Remove="Features\LoanPayments\Extensions\**" />
+    <EmbeddedResource Remove="Features\LoanPayments\Mappers\**" />
     <EmbeddedResource Remove="Features\NewFolder1\**" />
     <EmbeddedResource Remove="Responses\Lists\Collaterals\**" />
+    <EmbeddedResource Remove="Responses\Transactions\**" />
+    <EmbeddedResource Remove="Responses\Vendors\**" />
+    <EmbeddedResource Remove="Responses\ViewModels\Branches\**" />
+    <EmbeddedResource Remove="Responses\ViewModels\Collaterals\**" />
+    <EmbeddedResource Remove="Responses\ViewModels\Trans\**" />
+    <EmbeddedResource Remove="Responses\ViewModels\Users\**" />
     <None Remove="Features\Addresses\UseCases\**" />
     <None Remove="Features\Addresses\Validations\**" />
     <None Remove="Features\Branches\Mappers\**" />
     <None Remove="Features\Currencies\Requests\**" />
     <None Remove="Features\Currencies\UseCases\**" />
     <None Remove="Features\Customers\Mappers\**" />
+    <None Remove="Features\LoanPayments\Enums\**" />
+    <None Remove="Features\LoanPayments\Extensions\**" />
+    <None Remove="Features\LoanPayments\Mappers\**" />
     <None Remove="Features\NewFolder1\**" />
     <None Remove="Responses\Lists\Collaterals\**" />
+    <None Remove="Responses\Transactions\**" />
+    <None Remove="Responses\Vendors\**" />
+    <None Remove="Responses\ViewModels\Branches\**" />
+    <None Remove="Responses\ViewModels\Collaterals\**" />
+    <None Remove="Responses\ViewModels\Trans\**" />
+    <None Remove="Responses\ViewModels\Users\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -55,9 +82,6 @@
     <Folder Include="Features\Identity\Users\Interfaces\" />
     <Folder Include="Features\Identity\Users\Mappers\" />
     <Folder Include="Features\Identity\Users\Validations\" />
-    <Folder Include="Features\LoanPayments\Enums\" />
-    <Folder Include="Features\LoanPayments\Extensions\" />
-    <Folder Include="Features\LoanPayments\Mappers\" />
     <Folder Include="Features\LoanRequests\Enums\" />
     <Folder Include="Features\LoanRequests\Extensions\" />
     <Folder Include="Features\LoanRequests\Mappers\" />
@@ -84,12 +108,7 @@
     <Folder Include="Features\Vendors\UseCases\" />
     <Folder Include="Requests\Identity\" />
     <Folder Include="Responses\Lists\Currency\" />
-    <Folder Include="Responses\Transactions\" />
-    <Folder Include="Responses\Vendors\" />
-    <Folder Include="Responses\ViewModels\Branches\" />
-    <Folder Include="Responses\ViewModels\Collaterals\" />
-    <Folder Include="Responses\ViewModels\Trans\" />
-    <Folder Include="Responses\ViewModels\Users\" />
+    <Folder Include="Responses\ViewModels\Loans\Payments\" />
     <Folder Include="Services\Customers\" />
     <Folder Include="Validations\Loans\" />
   </ItemGroup>

@@ -1,21 +1,18 @@
 ﻿using Applications.Enumerations;
 using Applications.Extensions;
+using Applications.Features.Schedules.Dto;
 using Applications.Interfaces.Identity;
 using Applications.Interfaces.Loans;
-using Applications.Responses;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Loans.Payments;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Dapper;
 using Domains.Enumerations;
 using Domains.Models;
 using Infrastructures.Constants.Procedures;
 using Infrastructures.DataAccess;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Data;
-using System.Security.Claims;
 
 namespace Infrastructures.Implements
 {
@@ -33,55 +30,11 @@ namespace Infrastructures.Implements
             _currentUser = currentUser;
         }
 
-
-        public async Task<Result<IEnumerable<VSchedule>>> GetLoanPaymentSchedules(DateTime paymentDate, int branchId, bool includeLateSchedule = true, string? filter = null)
-        {
-            using var db = _contextFactory.CreateDbContext().Database.GetDbConnection();
-
-            var schedules = await db.QueryAsync<VSchedule>("spGetCustomerPayementSchedules", new
-            {
-                paymentDate,
-                branchId,
-                includeLateSchedule,
-                filter
-            }, commandType: CommandType.StoredProcedure);
-            if (!schedules.Any())
-            {
-                return Result.Failure<IEnumerable<VSchedule>>(ErrorResponse.NotFound("No Payment schedule found."));
-            }
-            return Result.Success(schedules);
-        }
-
-        public async Task<Result<VSchedule>> GetSchedulesByIdAsync(string? loanId, int? branchId, long? scheduleId)
-        {
-            using var db = _contextFactory.CreateDbContext().Database.GetDbConnection();
-
-            var items = await db.QueryMultipleAsync(ProcedureConstant.GetLoanById,
-               new
-               {
-                   @LoanId = loanId,
-                   @BranchId = branchId,
-                   @ScheduleId = scheduleId
-               }, commandType: CommandType.StoredProcedure);
-
-
-            var schedule = await items.ReadFirstOrDefaultAsync<VSchedule>();
-
-            if (schedule is null)
-            {
-                return Result.Failure<VSchedule>(ErrorResponse.NotFound("No Schedule found."));
-            }
-            var lines = await items.ReadAsync<LoanPaymentLineVm>();
-
-            schedule.PaymentLines = lines.ToList() ?? [];
-
-            return Result.Success(schedule);
-        }
-
-
-
         public async Task<VSchedule?> GetScheduleByIdAsync(long? scheduleId, int? branchId, string? loanId, CancellationToken cancellation = default)
         {
+
+            _logger.LogInformation("Fetching schedule with ID {ScheduleId} for loan {LoanId} in branch {BranchId}", scheduleId, loanId, branchId);
+
             await using var db = await _contextFactory.CreateDbContextAsync(cancellation);
 
             var schedule = await db.VSchedules
@@ -92,51 +45,11 @@ namespace Infrastructures.Implements
                                     .FirstOrDefaultAsync(cancellation);
             return schedule;
         }
-
-        public async Task<Result<LoanScheduleVm>> GetLoanSchedulesAsync(int? branchId, string? loanId, string? customerId)
-        {
-            var connection = _connectionFactory.CreateConnection();
-
-            var lookupDictionary = new Dictionary<string, LoanScheduleVm>();
-
-            var items = await connection.QueryAsync<LoanScheduleVm, ScheduleViewModel, LoanScheduleVm>("getCustomerSchedules",
-                (customer, schedule) =>
-                {
-                    if (lookupDictionary.TryGetValue(customer.LoanId!, out var existingCustomer))
-                    {
-                        customer = existingCustomer!;
-                    }
-                    else
-                    {
-                        lookupDictionary.Add(customer.LoanId!, customer);
-                    }
-
-                    customer.LoanSchedules.Add(schedule);
-
-                    return customer;
-
-                }, new
-                {
-                    loanId,
-                    customerId,
-                    branchId
-                },
-                commandType: CommandType.StoredProcedure,
-                splitOn: "LoanScheduleId");
-
-            if (items.Any())
-            {
-                return Result.Failure<LoanScheduleVm>(ErrorResponse.NotFound("No Schedule to print."));
-            }
-
-            var item = lookupDictionary[loanId!];
-
-            return Result.Success(item);
-        }
-
-
         public async Task<Pager<VSchedule>> GetLoanScheduleByIdAsync(string? loanId, int? branchId, ScheduleStatus status = ScheduleStatus.All, QueryParam? param = null)
         {
+
+            _logger.LogInformation("Fetching schedules for loan {LoanId} in branch {BranchId} with status {Status}", loanId, branchId, status);
+
             var items = await _contextFactory.CreateDbContext().Database.SqlQuery<VSchedule>($"""
                                                                         EXEC spGetVSchedulesByLoanId
                                                                             {loanId},
@@ -153,12 +66,12 @@ namespace Infrastructures.Implements
 
             return new Pager<VSchedule>(items, counts);
         }
-
-
-        public async Task<Result<IEnumerable<VSchedule>>> GetLoanScheduleByIdAsync(string? loanId, int? branchId, ScheduleStatus status = ScheduleStatus.All)
+        public async Task<IEnumerable<VSchedule>> GetLoanScheduleByIdAsync(string? loanId, int? branchId, ScheduleStatus status = ScheduleStatus.All, CancellationToken cancellation = default)
         {
 
-            var db = _connectionFactory.CreateConnection();
+            _logger.LogInformation("Fetching schedules for loan {LoanId} in branch {BranchId} with status {Status}", loanId, branchId, status);
+
+            var db = await _connectionFactory.CreateConnectionAsync(cancellation);
 
             var parameters = new DynamicParameters();
 
@@ -170,15 +83,12 @@ namespace Infrastructures.Implements
 
             var items = await db.QueryAsync<VSchedule>(ProcedureConstant.SpGetSchedulesByLoanId, parameters, commandType: CommandType.StoredProcedure);
 
-            return Result.Success(items);
+            return items;
         }
-
-
-
-        //
-
         public async Task<Pager<VSchedule>> GetLoanSchedulesByPaymentDateAsync(DateTimeOffset? paymentDate, int? branchId, bool isIncludeLate = false, bool isLateOnly = false, QueryParam? param = null)
         {
+
+            _logger.LogInformation("Fetching schedules for payment date {PaymentDate} in branch {BranchId} with include late {IsIncludeLate} and late only {IsLateOnly}", paymentDate, branchId, isIncludeLate, isLateOnly);
 
             using var db = _connectionFactory.CreateConnection();
 
@@ -210,19 +120,14 @@ namespace Infrastructures.Implements
 
             var items = result.ToList();
 
-            if (items.Count > 0)
-            {
-                await AddNotifications(items, CancellationToken.None);
-            }
-
             return new Pager<VSchedule>(items, items.Count);
 
         }
-
-
-
         public async Task<Pager<VSchedule>> GetLoanSchedulesMonthToDateAsync(int? branchId, DateTimeOffset? startDate, DateTimeOffset? endDate, QueryParam? Param, CancellationToken token = default)
         {
+
+            _logger.LogInformation("Fetching month-to-date schedules for branch {BranchId} between {StartDate} and {EndDate}", branchId, startDate, endDate);
+
 
             Param ??= new QueryParam();
 
@@ -260,12 +165,12 @@ namespace Infrastructures.Implements
             return new Pager<VSchedule>(items, counts);
 
         }
-
-
-
-
         public async Task<Pager<VSchedule>> GetLateSchedulesAsync(int? branchId, string? loanId, DateTimeOffset? paymentDate, CancellationToken cancellation = default)
         {
+
+            _logger.LogInformation("Fetching late schedules for branch {BranchId} and loan {LoanId} with payment date {PaymentDate}", branchId, loanId, paymentDate);
+
+
             using var db = await _connectionFactory.CreateConnectionAsync(cancellation);
 
             var queries = await db.QueryAsync<VSchedule>(ProcedureConstant.SpGetLateVSchedules,
@@ -283,30 +188,46 @@ namespace Infrastructures.Implements
 
             return new Pager<VSchedule>(items, counts);
         }
-
-
-        public async Task<Result<IEnumerable<LoanPaymentLineVm>>> GetPayementScheduleLines(int branchId, long loanId, int installmentNo)
+        public async Task<ScheduleDetailsDto?> GetScheduleDetailsById(int? branchId, string? loanId, long? scheduleId, CancellationToken cancellation = default)
         {
 
-            var db = _connectionFactory.CreateConnection();
+            _logger.LogInformation("Fetching schedule details for branch {BranchId}, loan {LoanId}, and schedule ID {ScheduleId}", branchId, loanId, scheduleId);
 
-            var sql = @"SELECT * FROM VLoanPaymentLines WHERE 
-                                 BranchRefId=@branchId AND LoanRefId=@loanId AND 
-                                 InstallmentNo=@installmentNo";
-            var paymentLines = await db.QueryAsync<LoanPaymentLineVm>(sql, new
-            {
-                branchId,
-                loanId,
-                installmentNo
-            });
+            using var db = await _connectionFactory.CreateConnectionAsync(cancellation);
 
-            if (!paymentLines.Any())
-            {
-                return Result.Failure<IEnumerable<LoanPaymentLineVm>>(ErrorResponse.NotFound("No Payment schedule found."));
-            }
-            return Result.Success(paymentLines);
+            var lookup = new Dictionary<long, ScheduleDetailsDto>();
+
+            var result = await db.QueryAsync<ScheduleDetailsDto, PaymentLineDetailsDto, ScheduleDetailsDto>(
+                "spGetScheduleDetailsById",
+                (schedule, payment) =>
+                {
+                    if (!lookup.TryGetValue(schedule.LoanScheduleId, out var existing))
+                    {
+                        existing = schedule;
+
+                        existing.PaymentLines = new List<PaymentLineDetailsDto>();
+
+                        lookup.Add(existing.LoanScheduleId, existing);
+                    }
+
+                    if (payment != null && payment.Id != 0)
+                    {
+                        existing.PaymentLines.Add(payment);
+                    }
+
+                    return existing;
+                },
+                new
+                {
+                    BranchId = branchId,
+                    LoanId = loanId,
+                    LoanScheduleId = scheduleId
+                },
+                splitOn: "Id"
+            );
+
+            return lookup.Values.FirstOrDefault();
         }
-
         private async Task AddNotifications(IEnumerable<VSchedule> schedules, CancellationToken cancellationToken = default)
         {
 
@@ -362,6 +283,115 @@ namespace Infrastructures.Implements
 
     }
 }
+
+
+
+//public async Task<Result<LoanScheduleVm>> GetLoanSchedulesAsync(int? branchId, string? loanId, string? customerId)
+//{
+//    var connection = _connectionFactory.CreateConnection();
+
+//    var lookupDictionary = new Dictionary<string, LoanScheduleVm>();
+
+//    var items = await connection.QueryAsync<LoanScheduleVm, ScheduleViewModel, LoanScheduleVm>("getCustomerSchedules",
+//        (customer, schedule) =>
+//        {
+//            if (lookupDictionary.TryGetValue(customer.LoanId!, out var existingCustomer))
+//            {
+//                customer = existingCustomer!;
+//            }
+//            else
+//            {
+//                lookupDictionary.Add(customer.LoanId!, customer);
+//            }
+
+//            customer.LoanSchedules.Add(schedule);
+
+//            return customer;
+
+//        }, new
+//        {
+//            loanId,
+//            customerId,
+//            branchId
+//        },
+//        commandType: CommandType.StoredProcedure,
+//        splitOn: "LoanScheduleId");
+
+//    if (items.Any())
+//    {
+//        return Result.Failure<LoanScheduleVm>(ErrorResponse.NotFound("No Schedule to print."));
+//    }
+
+//    var item = lookupDictionary[loanId!];
+
+//    return Result.Success(item);
+//}
+
+
+//public async Task<VSchedule?> GetSchedulesByIdAsync(string? loanId, int? branchId, long? scheduleId)
+//{
+//    using var db = _contextFactory.CreateDbContext().Database.GetDbConnection();
+
+//    var items = await db.QueryMultipleAsync(ProcedureConstant.GetLoanById,
+//       new
+//       {
+//           @LoanId = loanId,
+//           @BranchId = branchId,
+//           @ScheduleId = scheduleId
+//       }, commandType: CommandType.StoredProcedure);
+
+
+//    var schedule = await items.ReadFirstOrDefaultAsync<VSchedule>();
+
+//    if (schedule is null) return null;
+
+//    var lines = await items.ReadAsync<PaymentLineDetailsDto>();
+
+//    schedule.PaymentLines = lines.ToList() ?? [];
+
+//    return schedule;
+//}
+
+
+//public async Task<Result<IEnumerable<VSchedule>>> GetLoanPaymentSchedules(DateTime paymentDate, int branchId, bool includeLateSchedule = true, string? filter = null)
+//{
+//    using var db = _contextFactory.CreateDbContext().Database.GetDbConnection();
+
+//    var schedules = await db.QueryAsync<VSchedule>("spGetCustomerPayementSchedules", new
+//    {
+//        paymentDate,
+//        branchId,
+//        includeLateSchedule,
+//        filter
+//    }, commandType: CommandType.StoredProcedure);
+//    if (!schedules.Any())
+//    {
+//        return Result.Failure<IEnumerable<VSchedule>>(ErrorResponse.NotFound("No Payment schedule found."));
+//    }
+//    return Result.Success(schedules);
+//}
+
+//public async Task<Result<IEnumerable<PaymentLineDetailsDto>>> GetPayementScheduleLines(int branchId, long loanId, int installmentNo)
+//{
+
+//    var db = _connectionFactory.CreateConnection();
+
+//    var sql = @"SELECT * FROM VLoanPaymentLines WHERE 
+//                         BranchRefId=@branchId AND LoanRefId=@loanId AND 
+//                         InstallmentNo=@installmentNo";
+//    var paymentLines = await db.QueryAsync<PaymentLineDetailsDto>(sql, new
+//    {
+//        branchId,
+//        loanId,
+//        installmentNo
+//    });
+
+//    if (!paymentLines.Any())
+//    {
+//        return Result.Failure<IEnumerable<PaymentLineDetailsDto>>(ErrorResponse.NotFound("No Payment schedule found."));
+//    }
+//    return Result.Success(paymentLines);
+//}
 
 
 //public async Task<Result<VSchedule>> GetLoanScheduleByIdAsync(long loanId, long loanScheduleId, int branchId, bool related)

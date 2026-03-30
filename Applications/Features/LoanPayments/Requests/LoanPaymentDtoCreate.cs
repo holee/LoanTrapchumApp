@@ -26,7 +26,7 @@ public sealed class LoanPaymentDtoCreate
     public decimal? PaidInterest => LoanPaymentLines.TotalPaidInterest();
     public decimal? PaidFeeAmount => LoanPaymentLines.TotalPaidCollectionFee();
     public decimal? PaidPenaltyAmount => LoanPaymentLines.TotalPaidPenalty();
-    public decimal? TotalAmount => AmountWithPenalty;
+    public decimal? TotalAmount => LoanPaymentLines.GetTotal(includePenalty: true);
     public decimal? RecieveAmount { get; set; } = 0;
     public decimal? ChangeAmount { get; set; } = 0;
     public ICollection<LoanPaymentLineDtoCreate> LoanPaymentLines { get; set; } = [];

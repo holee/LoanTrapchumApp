@@ -4,7 +4,7 @@
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
 @using Applications.Features.LoanRequests.Interfaces
-@using Applications.Responses.ViewModels.Loans.Payments
+@using Applications.Features.Schedules.Dto
 @using TrapchumApp.Services
 <table class="table-sm">
     <thead>
@@ -27,6 +27,12 @@
             </td>
         </tr>
         <tr>
+            <th class="rz-w-25">Total</th>
+            <td>
+                @Schedule.Total.Format(CurrencyId)
+            </td>
+        </tr>
+        <tr>
             <th class="rz-w-25">Payment Date</th>
             <td>
                 @Schedule.PaymentDate.DayFirst()
@@ -39,9 +45,9 @@
                 Density="Density.Compact"
                 GridLines="DataGridGridLines.Both"
                 AllowAlternatingRows="true"
-                TItem="LoanPaymentLineVm">
+                TItem="PaymentLineDetailsDto">
     <Columns>
-        <RadzenDataGridColumn Title="#" Context="c" Property="@nameof(LoanPaymentLineVm.Id)" Width="3rem">
+        <RadzenDataGridColumn Title="#" Context="c" Property="@nameof(PaymentLineDetailsDto.Id)" Width="3rem">
             <Template>
                 @{
                     var index = Schedule.PaymentLines.IndexOf(c) + 1;
@@ -50,7 +56,7 @@
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Title="Principle"
-                              Property="@nameof(LoanPaymentLineVm.PaidPrinciple)"
+                              Property="@nameof(PaymentLineDetailsDto.PaidPrinciple)"
                               Context="c"
                               Width="8rem">
             <Template>
@@ -62,7 +68,7 @@
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Title="Interest"
                               Context="c"
-                              Property="@nameof(LoanPaymentLineVm.PaidInterest)"
+                              Property="@nameof(PaymentLineDetailsDto.PaidInterest)"
                               TextAlign="TextAlign.Right"
                               Width="8rem">
             <Template>
@@ -75,7 +81,7 @@
         <RadzenDataGridColumn Title="CollectionFee"
                               Context="c"
                               TextAlign="TextAlign.Right"
-                              Property="@nameof(LoanPaymentLineVm.PaidCollectionFee)"
+                              Property="@nameof(PaymentLineDetailsDto.PaidCollectionFee)"
                               Width="8rem">
             <Template>
                 @c?.PaidCollectionFee
@@ -87,7 +93,7 @@
         <RadzenDataGridColumn Title="PenaltyAmount"
                               Context="c"
                               TextAlign="TextAlign.Right"
-                              Property="@nameof(LoanPaymentLineVm.PenaltyAmount)"
+                              Property="@nameof(PaymentLineDetailsDto.PenaltyAmount)"
                               Width="8rem">
             <Template>
                 @c?.PenaltyAmount
@@ -96,7 +102,7 @@
         <RadzenDataGridColumn Title="SubTotal"
                               Context="c"
                               TextAlign="TextAlign.Right"
-                              Property="@nameof(LoanPaymentLineVm.SubTotal)"
+                              Property="@nameof(PaymentLineDetailsDto.SubTotal)"
                               Width="8rem">
             <Template>
                 @c?.SubTotal
@@ -110,7 +116,7 @@
         <RadzenDataGridColumn Title="Recieve Date"
                               Context="c"
                               TextAlign="TextAlign.Right"
-                              Property="@nameof(LoanPaymentLineVm.Created)"
+                              Property="@nameof(PaymentLineDetailsDto.Created)"
                               Width="8rem">
             <Template>
                 @c?.Created.DayFirst()

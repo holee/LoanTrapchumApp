@@ -1,5 +1,4 @@
-﻿using Applications.Responses.ViewModels.Loans.Payments;
-using Domains.Models.Loans;
+﻿using Domains.Models.Loans;
 using Microsoft.VisualBasic;
 namespace Applications.Extensions.LoanCalculators;
 

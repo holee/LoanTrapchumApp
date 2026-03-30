@@ -1,20 +1,20 @@
 ﻿using Applications.Enumerations;
-using Applications.Responses;
-using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Loans.Schedules;
+using Applications.Features.Schedules.Dto;
 
 namespace Applications.Interfaces.Loans
 {
     public interface ILoanScheduleService
     {
-        Task<Result<VSchedule>> GetSchedulesByIdAsync(string? loanId, int? branchId, long? scheduleId);
+        //Task<VSchedule?> GetSchedulesByIdAsync(string? loanId, int? branchId, long? scheduleId);
         Task<Pager<VSchedule>> GetLoanScheduleByIdAsync(string? loanId, int? branchId, ScheduleStatus status = ScheduleStatus.All, QueryParam? param = null);
         Task<Pager<VSchedule>> GetLoanSchedulesByPaymentDateAsync(DateTimeOffset? paymentDate, int? branchId, bool isIncludeLate = false, bool isLateOnly = false, QueryParam? param = null);
-        Task<Result<LoanScheduleVm>> GetLoanSchedulesAsync(int? branchId,string? loanId, string? customerId);
-        Task<Result<IEnumerable<VSchedule>>> GetLoanScheduleByIdAsync(string? loanId, int? branchId, ScheduleStatus status = ScheduleStatus.All);
+        //Task<Result<LoanScheduleVm>> GetLoanSchedulesAsync(int? branchId,string? loanId, string? customerId);
+        //Task<Result<IEnumerable<VSchedule>>> GetLoanScheduleByIdAsync(string? loanId, int? branchId, ScheduleStatus status = ScheduleStatus.All);
         Task<Pager<VSchedule>> GetLateSchedulesAsync(int? branchId, string? loanId, DateTimeOffset? paymentDate, CancellationToken cancellation = default);
         Task<Pager<VSchedule>> GetLoanSchedulesMonthToDateAsync(int? branchId, DateTimeOffset? startDate, DateTimeOffset? endDate, QueryParam? Param, CancellationToken token = default);
         Task<VSchedule?> GetScheduleByIdAsync(long? scheduleId, int? branchId, string? loanId, CancellationToken cancellation = default);
+        Task<ScheduleDetailsDto?> GetScheduleDetailsById(int? branchId, string? loanId, long? scheduleId, CancellationToken cancellation = default);
+        Task<IEnumerable<VSchedule>> GetLoanScheduleByIdAsync(string? loanId, int? branchId, ScheduleStatus status = ScheduleStatus.All, CancellationToken cancellation = default);
     }
 
 }

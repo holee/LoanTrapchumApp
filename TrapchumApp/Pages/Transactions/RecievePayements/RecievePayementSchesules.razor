@@ -6,7 +6,7 @@
 <LoanInfos BranchId="@BranchId"
            LoanId="@LoanId"
            Currency="@CurrencyId"
-           LoanSchedule="@LoanSchedule" @key="@(Guid.NewGuid().ToString())">
+           @key="@(Guid.NewGuid().ToString())">
     <ChildContent>
         <RadzenButton Text="Exchange"
                       Visible="@_isPaymentTab"
@@ -22,19 +22,6 @@
                      JustifyContent="JustifyContent.End"
                      class="rz-mb-2"
                      AlignItems="AlignItems.Center">
-            <AuthorizeView Policy="@Policies.MultiplePayment">
-                <Authorized>
-                    <div class="input-group">
-                        <div class="input-group-text">
-                            <RadzenCheckBox @bind-Value="@isAllowMultiplePayment"
-                                            TValue="bool"
-                                            Name="isAllowMultiplePayment"
-                                            Change="MultipleCheckChanged" />
-                        </div>
-                        <RadzenLabel Text="Multiple Payments" Component="isAllowMultiplePayment" class="rz-ml-2 rz-mt-1" />
-                    </div>
-                </Authorized>
-            </AuthorizeView>
             <RadzenFormField AllowFloatingLabel="true" Text="Date">
                 <ChildContent>
                     <RadzenDatePicker @bind-Value="paymentDate" TValue="DateTime" disabled />
@@ -51,6 +38,7 @@
                         RowSelect="SelectedRowEvt"
                         RowDeselect="DeSelectedRowEvt"
                         AllowRowSelectOnRowClick="@allowRowSelected"
+                        CellContextMenu="@OnCellContextMenu"
                         IsLoading="isLoading"
                         @ref="gridSchedule">
             <Columns>
@@ -300,3 +288,82 @@
                       Text="Close" />
     </RadzenStack>
 </RadzenFieldset>
+
+@code {
+
+    private bool SetDisabled(VSchedule schedule)
+    {
+        return (IsAlreadyPaidSchedule(schedule) || !IsFirstScheduleSelected(schedule));
+    }
+
+    private bool IsAlreadyPaidSchedule(VSchedule p)
+    {
+        if (p.IsPaid)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "This schedule is already paid.");
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private bool IsFirstScheduleSelected(VSchedule p)
+    {
+        var schedulesList = schedules?.ToList();
+
+        var firstSchedule = schedulesList?.First(x => x.IsPaid == false);
+
+        if (p != firstSchedule)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Cannot add new schedule due to previouse schedule not complete paid yet.");
+
+            return false;
+        }
+
+        return true;
+    }
+
+
+    void OnCellContextMenu(DataGridCellMouseEventArgs<VSchedule> args)
+    {
+
+        if (args == null || args.Data == null)
+            return;
+
+        ContextMenuService.Open(args,
+            new List<ContextMenuItem> {
+                new ContextMenuItem()
+                    {
+                      Text = "Recieve Payment",
+                      Value = 1,
+                      Icon = "paid",
+                      Disabled=SetDisabled(args.Data)
+                    },
+                new ContextMenuItem(){
+                    Text = "Show Details",
+                    Value = 2,
+                    Icon = "details"
+                },
+            },
+            (e) =>
+            {
+                ContextMenuService.Close();
+
+                var selected = (int)e?.Value!;
+
+                if (selected == 1)
+                {
+                    //_ = PayBySchedules(args.Data);
+                }
+                else if (selected == 2)
+                {
+                    //_ = ShowScheduleDetails(args.Data);
+                }
+
+            }
+         );
+    }
+
+
+}

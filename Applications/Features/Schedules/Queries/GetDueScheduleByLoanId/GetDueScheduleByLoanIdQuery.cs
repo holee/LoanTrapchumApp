@@ -1,3 +1,5 @@
-﻿namespace Applications.Features.Schedules.Queries.GetDueScheduleByLoanId;
+﻿using Applications.Enumerations;
 
-public record GetDueScheduleByLoanIdQuery(int? BranchId, string? LoanId) : IRequest<Pager<VSchedule>>;
+namespace Applications.Features.Schedules.Queries.GetDueScheduleByLoanId;
+
+public record GetDueScheduleByLoanIdQuery(int? BranchId, string? LoanId, ScheduleStatus Status = ScheduleStatus.Unpaid) : IRequest<Pager<VSchedule>>;

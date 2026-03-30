@@ -1,4 +1,4 @@
-﻿namespace Applications.Responses.ViewModels.Loans.Payments;
+﻿namespace Applications.Features.Schedules.Dto;
 
 public sealed class PaymentStatus
 {

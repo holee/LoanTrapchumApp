@@ -227,7 +227,7 @@
 
             builder.AddAttribute(3, "CreditAgentId", schedule.CreditAgentId);
 
-            builder.AddAttribute(4, "CurrencyId", currencyId);
+            builder.AddAttribute(4, "CurrencyId", schedule.CurrencyId);
 
             builder.AddAttribute(5, "OnClose", EventCallback.Factory.Create(this, (string x) =>
             {
@@ -239,6 +239,8 @@
             {
                 refTabs.Reload();
             }));
+
+            builder.AddAttribute(7, "AltName", schedule.AltName);
 
             builder.SetKey(schedule.LoanId);
 
@@ -275,63 +277,9 @@
                          Schedule="@p" />);
     }
 
+
+   
+
+
 }
 
-@* <RadzenMenu Style="font-size:0.8rem;">
-    <RadzenMenuItem Icon="money"
-                    Visible="!p.IsPaid"
-                    Click="@(() => ShowCustomerPayment(p))"
-                    Text="Receive Payment" />
-    <RadzenMenuItem Icon="paid"
-                    Click="@(() => CustomerPayOff(p))"
-                    Text="PayOff" />
-    <RadzenMenuItem Icon="info"
-                    Click="@(() => GetCustomerLateSchedules(p))"
-                    Text="Show Late Schedule" />
-</RadzenMenu> *@
-
-
-@* <RadzenTabsItem Icon="@IconNames.MoneyBag">
-    <Template>
-        <span class="rz-ms-2">
-            Client Due Pay
-            <RadzenBadge BadgeStyle="BadgeStyle.Primary" IsPill="@true" Text="@DuePaymentCounts.ToString()"
-                         class="rz-ms-1" />
-        </span>
-    </Template>
-    <ChildContent>
-        <ClientDuePayTab BranchId="@BranchId" GetCounts="GetDueDateScheduleCount" />
-    </ChildContent>
-</RadzenTabsItem>
-
-
-<RadzenTabsItem>
-    <Template>
-        <span class="rz-ms-2">
-            Late Schedule
-            <RadzenBadge BadgeStyle="BadgeStyle.Primary"
-                         IsPill="@true" Text="@AllLateScheduleCounts.ToString()"
-                         class="rz-ms-1" />
-        </span>
-    </Template>
-    <ChildContent>
-        <ClientLateSchedules BranchId="@BranchId"
-                             GetScheduleChanged="@GetScheduleChanged"
-                             GetCounts="@GetLateScheduleCount" />
-    </ChildContent>
-</RadzenTabsItem>
-
-
-<RadzenTabsItem Text="Details"
-                Icon="@IconNames.SendMoney"
-                Visible="@_isLateTab">
-    <Template>
-        <CloseTabButton Closed="(() => Close())" Title="Details" />
-    </Template>
-    <ChildContent>
-        <LateScheduleDetail LoanId="@loanId"
-                            PaymentDate="@paymentDate"
-                            Close="@Close"
-                            BranchId="@BranchId" />
-    </ChildContent>
-</RadzenTabsItem> *@

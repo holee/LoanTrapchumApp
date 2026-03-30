@@ -61,8 +61,7 @@
                 <TrapchumApp.Pages.Lists.KhmerName AltName="@c.AltName" />
             </Template>
         </RadzenDataGridColumn>
-        <RadzenDataGridColumn 
-                              Property="@(nameof(VLoanRequests.BranchName))" Title="Branch Name" />
+        <RadzenDataGridColumn Property="@(nameof(VLoanRequests.BranchName))" Title="Branch Name" />
         <RadzenDataGridColumn Width="8rem"
                               Property="@(nameof(VLoanRequests.CurrencyName))" Title="Currency" />
         <RadzenDataGridColumn Property="@(nameof(VLoanRequests.AprovedAmount))"
@@ -127,10 +126,10 @@
         var requestLoanRequestUrl = $"/App/Loans/{Request?.LoanRequestId}/Requests/{Request?.BranchId}/Branches/{Request?.CustomerId}/Edit";
         var disburseRequestLoanUrl = $"/App/Loans/{Request?.LoanRequestId}/Disbursements/{Request?.BranchId}/Branches/CreateNew?CustomerId={Request?.CustomerId}";
 
-        ContextMenuService.Open(args, ds =>@<RadzenMenu Style="font-size:0.8rem;">
+        ContextMenuService.Open(args, ds => @<RadzenMenu Style="font-size:0.8rem;">
 
-        @if (bState.CanRequest && Request is not null)
-        {
+            @if (bState.CanRequest && Request is not null)
+            {
                 <RadzenMenuItem Path="@requestNowUrl"
                                 Visible="Request.StatusId == (int)RequestStatus.New"
                                 Icon="@IconNames.SendMoney" Text="Request Now" Value="@Request.CustomerId" />
@@ -142,30 +141,32 @@
                                 Path="@requestLoanRequestUrl"
                                 Icon="@IconNames.Edit"
                                 Text="Review Request" Value="@Request.CustomerId" />
-        }
+            }
 
-        @if (bState.CanApproved && Request is not null)
-        {
+            @if (bState.CanApproved && Request is not null)
+            {
                 <RadzenMenuItem Visible="Request.StatusId == (int)RequestStatus.Requested"
                                 Path="@checkloanRequestUrl"
                                 Icon="@IconNames.Info" Text="Approved Now" Value="@Request.CustomerId" />
-        }
+            }
 
-        @if (bState.CanDisbursed && Request is not null)
-        {
+            @if (bState.CanDisbursed && Request is not null)
+            {
                 <RadzenMenuItem Visible="Request.StatusId == (int)RequestStatus.Approved"
                                 Path="@disburseRequestLoanUrl"
-                                Icon="@IconNames.Info" Text="Disburse Now" Value="@Request.CustomerId" />
-        }
+                                Icon="@IconNames.Info"
+                                Text="Disburse Now"
+                                Value="@Request.CustomerId" />
+            }
 
-        @if (Request is not null)
-        {
+            @if (Request is not null)
+            {
                 <RadzenMenuItem Icon="@IconNames.Details"
                                 Path="@loanRequestDetailsUrl"
                                 Text="Request Details" Value="@Request.CustomerId" />
-        }
+            }
 
-</RadzenMenu>
+        </RadzenMenu>
     );
     }
 
@@ -233,9 +234,16 @@
 
         ContextMenuService.Close();
 
-        if (data is null) return;
+        if (data is null && args is null && args.Value is null) return;
 
         int selectedId = 0;
+
+        var requestNowUrl = $"/App/Loans/{data?.LoanRequestId}/Requests/{data?.BranchId}/Branches/{data?.CustomerId}/Details";
+        var checkloanRequestUrl = $"/App/Loans/{data?.LoanRequestId}/Requests/{data?.BranchId}/Branches/{data?.CustomerId}/Details";
+        var loanRequestDetailsUrl = $"/App/Loans/{data?.LoanRequestId}/Requests/{data?.BranchId}/Branches/{data?.CustomerId}/Details";
+        var requestLoanRequestUrl = $"/App/Loans/{data?.LoanRequestId}/Requests/{data?.BranchId}/Branches/{data?.CustomerId}/Edit";
+        var disburseRequestLoanUrl = $"/App/Loans/{data?.LoanRequestId}/Disbursements/{data?.BranchId}/Branches/CreateNew?CustomerId={data?.CustomerId}";
+
 
         if (Int32.TryParse(args.Value.ToString(), out selectedId))
         {

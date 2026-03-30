@@ -36,8 +36,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         bool IsManager = false;
         void SelectedIndexChanged(int selectedIndex)
         {
-
-
+            _selectedIndex=selectedIndex;
         }
 
         protected override async Task OnInitializedAsync()

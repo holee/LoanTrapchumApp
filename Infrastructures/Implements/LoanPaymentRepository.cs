@@ -2,7 +2,6 @@
 using Applications.Interfaces.Loans;
 using Applications.Responses;
 using Applications.Responses.Message;
-using Applications.Responses.ViewModels.Loans.Payments;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Dapper;
 using Domains.Models.Loans;
@@ -14,11 +13,13 @@ using System.Data;
 using Applications.Features.LoanPayments.Requests;
 using Domains.Models.Lists;
 using Applications.Commons.Messages.LoanPayments;
+using Applications.Features.Schedules.Dto;
 
 namespace Infrastructures.Implements;
 
 public class LoanPaymentRepository(IDbContextFactory<DataContext> dbContextFactory, IDapperConnectionFactory connectionFactory) : ILoanPaymentService
 {
+
     public async Task<Result<string>> RecievePayment(LoanPaymentDtoCreate req)
     {
         await using var db = await dbContextFactory.CreateDbContextAsync();
@@ -123,6 +124,11 @@ public class LoanPaymentRepository(IDbContextFactory<DataContext> dbContextFacto
     {
         await using var db = await dbContextFactory.CreateDbContextAsync(cancellation);
 
+        if (await IsOfficialInused(req, db, cancellation))
+        {
+            return ErrorOr.Error.Conflict("The official receipt number is already in use.");
+        }
+
         using var tranx = await db.Database.BeginTransactionAsync(cancellation);
 
         try
@@ -202,7 +208,7 @@ public class LoanPaymentRepository(IDbContextFactory<DataContext> dbContextFacto
         }
     }
 
-    public async Task<Result<IEnumerable<LoanPaymentLineVm>>> GetPaymentLinesAsync(int? branchId, string? loanId,
+    public async Task<Result<IEnumerable<PaymentLineDetailsDto>>> GetPaymentLinesAsync(int? branchId, string? loanId,
         int? installmentNo)
     {
 
@@ -210,7 +216,7 @@ public class LoanPaymentRepository(IDbContextFactory<DataContext> dbContextFacto
 
         using var db = context.Database.GetDbConnection();
 
-        var repaymentLines = await db.QueryAsync<LoanPaymentLineVm>("spGetPayementScheduleLines", new
+        var repaymentLines = await db.QueryAsync<PaymentLineDetailsDto>("spGetPayementScheduleLines", new
         {
             branchId,
             loanId,
@@ -219,7 +225,7 @@ public class LoanPaymentRepository(IDbContextFactory<DataContext> dbContextFacto
 
         if (!repaymentLines.Any())
         {
-            return Result.Failure<IEnumerable<LoanPaymentLineVm>>(ErrorResponse.NotFound("No Schedule Lines found"));
+            return Result.Failure<IEnumerable<PaymentLineDetailsDto>>(ErrorResponse.NotFound("No Schedule Lines found"));
         }
 
         return Result.Success(repaymentLines);
@@ -310,13 +316,20 @@ public class LoanPaymentRepository(IDbContextFactory<DataContext> dbContextFacto
         }
     }
 
-
-    private async Task<bool> IsLoanFullyPaidAsync(int? branchId, string? loanId)
+    private static async Task<bool> IsOfficialInused(LoanTransaction req, DataContext db, CancellationToken cancellation)
     {
-        await using var db = await dbContextFactory.CreateDbContextAsync();
+
+        var existingReciept = await db.LoanRepayments.AnyAsync(x => x.OfficialReceiptNo == req.LoanPayment!.OfficialReceiptNo, cancellation);
+
+        return existingReciept;
+    }
+
+    private async Task<bool> IsLoanFullyPaidAsync(int? branchId, string? loanId, CancellationToken cancellation = default)
+    {
+        await using var db = await dbContextFactory.CreateDbContextAsync(cancellation);
 
         var totalCounts = await db.LoanSchedules
-            .CountAsync(x => x.BranchId == branchId && x.LoanRefId == loanId);
+            .CountAsync(x => x.BranchId == branchId && x.LoanRefId == loanId, cancellation);
 
         var InstallmentNo = await db.LoanSchedules
             .Where(x => x.BranchId == branchId &&
@@ -325,14 +338,14 @@ public class LoanPaymentRepository(IDbContextFactory<DataContext> dbContextFacto
             .OrderByDescending(x => x.InstallmentNo)
             .AsNoTracking()
             .Select(x => x.InstallmentNo)
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(cancellation);
 
         return InstallmentNo != null && totalCounts == InstallmentNo;
     }
 
-    public async Task<Result<IEnumerable<VSchedule>>> GetPaidScheduleAsync(int? branchId, string? loanRefId)
+    public async Task<Result<IEnumerable<VSchedule>>> GetPaidScheduleAsync(int? branchId, string? loanRefId, CancellationToken cancellation = default)
     {
-        await using var db = await dbContextFactory.CreateDbContextAsync();
+        await using var db = await dbContextFactory.CreateDbContextAsync(cancellation);
 
         var queries = await db.VSchedules
             .Where(x => x.BranchId == branchId && x.LoanId == loanRefId &&
@@ -347,12 +360,12 @@ public class LoanPaymentRepository(IDbContextFactory<DataContext> dbContextFacto
                 Interest = x.Interest,
                 CollectionFee = x.CollectionFee,
                 TotalPay = x.TotalPay,
-            }).ToListAsync();
+            }).ToListAsync(cancellation);
 
         return Result.Success<IEnumerable<VSchedule>>(queries);
     }
 
-    public async Task<Result<ScheduleVm>> GetScheduleByIdAsync(long? loanScheduleId, int? branchId, string? loanId)
+    public async Task<Result<ScheduleDetailsDto>> GetScheduleByIdAsync(long? loanScheduleId, int? branchId, string? loanId)
     {
         using var db = await connectionFactory.CreateConnectionAsync();
 
@@ -388,9 +401,9 @@ public class LoanPaymentRepository(IDbContextFactory<DataContext> dbContextFacto
                 AND s.BranchId = @BranchId 
                 AND s.ScheduleStatusId IN (1);";
 
-        var lookup = new Dictionary<long, ScheduleVm>();
+        var lookup = new Dictionary<long, ScheduleDetailsDto>();
 
-        await db.QueryAsync<ScheduleVm, LoanPaymentLineVm, ScheduleVm>(sql,
+        await db.QueryAsync<ScheduleDetailsDto, PaymentLineDetailsDto, ScheduleDetailsDto>(sql,
             (schedule, paymentLine) =>
             {
                 if (!lookup.TryGetValue(schedule.LoanScheduleId, out var existing))
@@ -423,7 +436,7 @@ public class LoanPaymentRepository(IDbContextFactory<DataContext> dbContextFacto
             return Result.Success(schedule);
         }
 
-        return Result.Failure<ScheduleVm>(ErrorResponse.NotFound(Messages.DataNotFound));
+        return Result.Failure<ScheduleDetailsDto>(ErrorResponse.NotFound(Messages.DataNotFound));
     }
 
 

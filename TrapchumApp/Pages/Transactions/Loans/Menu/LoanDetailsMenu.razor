@@ -85,7 +85,7 @@
             CloseDialogOnOverlayClick = true,
             Width = "60vw"
         };
-        await DialogService.OpenSideAsync<ScheduleDetails>($"Schedule-{p.LoanScheduleId}", parameters: param, options);
+        await DialogService.OpenSideAsync<ScheduleDetailsPage>($"Schedule-{p.LoanScheduleId}", parameters: param, options);
 
 
     }

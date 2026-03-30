@@ -1,5 +1,5 @@
-﻿using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Loans.Payments;
+﻿using Applications.Features.Schedules.Dto;
+using Applications.Responses.Paginations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Applications.Responses.ViewModels.Loans.Schedules;
@@ -50,7 +50,7 @@ public sealed class VSchedule
     [NotMapped] public bool Selected { get; set; } = false;
     [NotMapped] public bool IsPaid => ScheduleStatusId == 1;
     [NotMapped] public bool IsPartialPaid => ScheduleStatusId == 4;
-    [NotMapped] public List<LoanPaymentLineVm> PaymentLines { get; set; } = [];
+    [NotMapped] public List<PaymentLineDetailsDto> PaymentLines { get; set; } = [];
 
 
 

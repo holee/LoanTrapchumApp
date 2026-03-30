@@ -103,17 +103,11 @@
                       IsBusy="isBusy"
                       ButtonStyle="ButtonStyle.Success"
                       Size="ButtonSize.Small" />
-
-        @if (ShowCloseButton)
-        {
-            <RadzenButton Icon="close"
-                          ButtonType="ButtonType.Button"
-                          Text="Close"
-                          Click="Close"
-                          BusyText="Please wait...."
-                          IsBusy="isBusy"
-                          ButtonStyle="ButtonStyle.Danger"
-                          Size="ButtonSize.Small" />
-        }
+        <RadzenButton Icon="close"
+                      ButtonType="ButtonType.Button"
+                      Text="Close"
+                      Click="Close"
+                      ButtonStyle="ButtonStyle.Danger"
+                      Size="ButtonSize.Small" />
     </RadzenStack>
 </EditForm>

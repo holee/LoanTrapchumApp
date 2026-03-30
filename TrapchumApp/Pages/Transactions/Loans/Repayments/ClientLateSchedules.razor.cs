@@ -38,6 +38,7 @@ public partial class ClientLateSchedules
     bool sortDescending = false;
 
     private string? _userId { get; set; } = string.Empty;
+    
     void GetPaymentSchedules(VSchedule p)
     {
         ContextMenuService.Close();

@@ -1,17 +1,14 @@
 using Applications.Calculations;
-using Applications.Calculations.Extensions;
 using Applications.Commons.Mappers;
 using Applications.Enumerations;
 using Applications.Extensions.NumberExtensions;
 using Applications.Features.Branches.Dtos;
-using Applications.Features.LoanPayments.Interfaces;
 using Applications.Features.LoanPayments.Queries.GetLoanSchedulesByLoanIdAsPaging;
 using Applications.Features.LoanPayments.Requests;
 using Applications.Features.Loans.Queries.GetLoanById;
 using Applications.Features.Loans.Responses;
-using Applications.Features.Loans.Services;
+using Applications.Features.Schedules.Queries.GetDueScheduleByLoanId;
 using Applications.Responses.ViewModels.Loans.Schedules;
-using Applications.Services.Loans;
 using Radzen.Blazor;
 using TrapchumApp.Helpers.Extensions;
 using TrapchumApp.Pages.Transactions.Loans.Repayments;
@@ -19,26 +16,13 @@ namespace TrapchumApp.Pages.Transactions.RecievePayements;
 
 public partial class RecievePayementSchesules
 {
-    private readonly ILoanServiceImpl _loanService;
-
-    private readonly ILoanScheduleServiceImpl _scheduleService;
-
-    private readonly IAddRecieptNumberUseCase _addRecieptNumberUseCase;
-    public RecievePayementSchesules(ILoanServiceImpl loanService, ILoanScheduleServiceImpl loanScheduleService, IAddRecieptNumberUseCase addRecieptNumberUseCase)
-    {
-        _loanService = loanService;
-
-        _scheduleService = loanScheduleService;
-
-        _addRecieptNumberUseCase = addRecieptNumberUseCase;
-    }
-
     [Parameter] public string? LoanId { get; set; }
     [Parameter] public int BranchId { get; set; } = 0;
     [Parameter] public EventCallback<string> OnClose { get; set; }
     [Parameter] public EventCallback ReloadTab { get; set; }
     [Parameter, SupplyParameterFromQuery] public string? CreditAgentId { get; set; }
     [Parameter, SupplyParameterFromQuery] public int CurrencyId { get; set; }
+    [Parameter] public string? AltName { get; set; } = "";
 
     private string? _userId = string.Empty;
     [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
@@ -108,6 +92,8 @@ public partial class RecievePayementSchesules
 
         await GetLoanWithSchedules(BranchId, LoanId);
 
+        await GetSchedules();
+
         _isSelectionLocked = !isAllowMultiplePayment;
 
         await base.OnInitializedAsync();
@@ -128,65 +114,6 @@ public partial class RecievePayementSchesules
         }
     }
 
-
-
-    async Task CloseTab()
-    {
-
-        if (isAllowMultiplePayment && _isMultiplePaymentTab)
-        {
-            _isPaymentTab = false;
-
-            _selectedIndexTab = 1;
-        }
-        if (!isAllowMultiplePayment && _isPaymentTab)
-        {
-            _isPaymentTab = false;
-
-            _selectedIndexTab = 0;
-
-            isPaidNow = false;
-        }
-
-        _showExchanged = false;
-
-        await GetLoanWithSchedules(BranchId, LoanId);
-
-        _loanPaymentLine = new();
-    }
-
-
-    void ClosedTab()
-    {
-
-        if ((isAllowMultiplePayment && _isMultiplePaymentTab) ||
-            (isAllowMultiplePayment && !_isPaymentTab))
-        {
-            _isMultiplePaymentTab = false;
-
-            _isPaymentTab = false;
-
-            _selectedIndexTab = 0;
-        }
-
-        _selectedSchedules?.Clear();
-
-    }
-
-
-    void CreatePayment(LoanPaymentDtoCreate? arg)
-    {
-        if (arg is null) return;
-
-        {
-            _isPaymentTab = true;
-
-            _selectedIndexTab = 2;
-
-            _loanPayment = arg;
-        }
-
-    }
 
     private async Task CloseOpenTab()
     {
@@ -221,14 +148,10 @@ public partial class RecievePayementSchesules
             return;
         }
 
-        PaymentCreate create = LoanPaymentLines.ToPaymentCreate(CurrencyId);
-
-        var options = new DialogOptions
+        var options = new SideDialogOptions
         {
-            Resizable = false,
-
-            Draggable = true,
-
+            Resizable = true,
+            Width = "35rem",
             CssClass = "rz-p-1 rz-m-0 rz-background-color-base-200"
         };
 
@@ -240,22 +163,22 @@ public partial class RecievePayementSchesules
             CurrencyRefId = CurrencyId,
             UserRefId = _userId,
             PayDate = DateTime.Now,
-            CustomerName = LoanSchedule!.AltName,
-            OfficialReceiptNo = _loanPaymentLine.OfficialReceiptNo
+            CustomerName = "",
+            OfficialReceiptNo = ""
         };
 
         loanPayment.LoanPaymentLines.Add(_loanPaymentLine);
-       
+
         _loanPayment = loanPayment;
-       
+
         var parameters = new Dictionary<string, object?>{
                 {"CurrencyId" , CurrencyId},
                 {"LoanPaymentCreate",loanPayment },
             };
 
-        var message = $"Recieve Payment from {LoanSchedule!.AltName}";
+        var message = $"Recieve Payment from {AltName}";
 
-        bool? confirm = await DialogService.OpenAsync<PaymentModal>(message, parameters!, options);
+        bool? confirm = await DialogService.OpenSideAsync<PaymentModal>(message, parameters!, options);
 
 
         if (confirm == true)
@@ -322,7 +245,7 @@ public partial class RecievePayementSchesules
 
         var options = new SideDialogOptions
         {
-            Width = "50vw",
+            Width = "55vw",
 
             CloseDialogOnOverlayClick = true,
 
@@ -408,36 +331,6 @@ public partial class RecievePayementSchesules
         isPaidNow = false;
         disableIsPaidNow = false;
     }
-    async void MultipleCheckChanged(bool arg)
-    {
-
-        isAllowMultiplePayment = arg;
-
-        if (arg)
-        {
-            gridSelectionMode = DataGridSelectionMode.Multiple;
-
-            allowRowSelected = false;
-        }
-        else
-        {
-            gridSelectionMode = DataGridSelectionMode.Single;
-
-            allowRowSelected = true;
-        }
-        _selectedSchedules = schedules.Take(1).ToList();
-        SelectedSchedule = new();
-        isPaidNow = false;
-        btnDisabled = true;
-        LoanPaymentLines.Clear();
-        Clear();
-        await gridSchedule.Reload();
-    }
-
-
-
-
-
 
     async Task CheckedChanged(bool arg, VSchedule schedule)
     {
@@ -459,6 +352,45 @@ public partial class RecievePayementSchesules
         StateHasChanged();
     }
 
+    private async Task GetSchedules()
+    {
+        //if (ShowOnScheduleOnly)
+        //{
+        await GetSchedules(BranchId, LoanId, ScheduleStatus.Unpaid);
+        //}
+        //else
+        //{
+        //    await GetSchedules(BranchId, LoanId, ScheduleStatus.All);
+        //}
+    }
+
+    async Task GetSchedules(int? branchId, string? loanId, ScheduleStatus status = ScheduleStatus.Unpaid)
+    {
+
+        isLoading = true;
+
+        var query = new GetDueScheduleByLoanIdQuery(branchId, loanId, status);
+
+        var rsp = await mediator.Send(query);
+
+        LoanSchedule = null;
+
+        schedules = rsp.Items;
+
+        _selectedSchedules = schedules.Take(1).ToList();
+
+        if (_selectedSchedules.Any() && !isAllowMultiplePayment)
+        {
+            SelectedSchedule = _selectedSchedules.First();
+
+            disableIsPaidNow = false;
+        }
+
+        isLoading = false;
+
+    }
+
+
 
     async Task GetLoanWithSchedules(int? branchId, string? loanId)
     {
@@ -466,7 +398,7 @@ public partial class RecievePayementSchesules
         isLoading = true;
 
 
-        var query = new GetLoanByIdQuery(LoanId, BranchId, ScheduleStatus.Unpaid, true);
+        var query = new GetLoanByIdQuery(LoanId, BranchId, ScheduleStatus.Unpaid, false);
 
         var rsp = await mediator.Send(query);  //_dService.GetLoanByIdAsync();
 

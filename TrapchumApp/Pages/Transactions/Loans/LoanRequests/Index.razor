@@ -8,22 +8,55 @@
 @using TrapchumApp.Services
 <PageTitle>Loan Request</PageTitle>
 @attribute [MustHasPermission(Modules.LoanRequest, Feature.Read)]
-<style>
-    .rz-grid-table td .rz-cell-data {
-        line-height: 1.5rem;
-        font-size: 0.8rem;
-    }
-</style>
 <Containers Fluid>
     <RadzenTabs SelectedIndexChanged="SelectedIndexChanged" RenderMode="TabRenderMode.Server">
         <Tabs>
             <RadzenTabsItem Icon="list" Text="All">
                 <LoanRequestAll BranchId="@BranchId" UserId="@_userId" />
             </RadzenTabsItem>
+
+            @foreach(var item in _tabs)
+            {
+                <RadzenTabsItem Icon="@item.Icon" Text="@item.Title" @key="@item.Key">
+                    <Template>
+                        <CloseTabButton Title="@item.Title"
+                                        Closed="(() => CloseTab(item.Key))" />
+                    </Template>
+                    <ChildContent>
+                        @item.Content
+                    </ChildContent>
+                </RadzenTabsItem>
+            }
         </Tabs>
     </RadzenTabs>
 
 </Containers>
+
+@code{
+
+    private List<CustomTab> _tabs = [];
+    private int _selectedIndex = 0;
+
+    private void ShowLoanDisbursementDetail(){
+
+    }
+
+    void CloseTab(string tabId)
+    {
+        var tabIndex = _tabs.FirstOrDefault(t => t.Key == tabId);
+
+        if (tabIndex is not null)
+        {
+            _tabs.Remove(tabIndex);
+
+            _selectedIndex = _tabs.Count;
+        }
+    }
+
+
+}
+
+
 
 @* <RadzenTabsItem Text="Requesting"
                             Visible="@IsCreditAgent"

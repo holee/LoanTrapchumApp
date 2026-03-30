@@ -21,7 +21,7 @@
             </RadzenFormField>
 
             @if (_selectedFilter == (int)ScheduleFilter.MonthToDate ||
-                        _selectedFilter == (int)ScheduleFilter.NextWeek)
+                                                                                                                                                _selectedFilter == (int)ScheduleFilter.NextWeek)
             {
                 <RadzenFormField Text="Start" AllowFloatingLabel="true">
                     <RadzenDatePicker TValue="DateTime?"
@@ -59,6 +59,7 @@
                 PageSizeOptions="@StorageConstant.PageSizeOptions"
                 PageSizeChanged="@ChangedPageSize"
                 RowRender="@OnRowRender"
+                CellContextMenu="@ContextMenuClick"
                 CellRender="@RowRenderChanged"
                 AllowPaging="true">
     <Columns>
@@ -179,10 +180,10 @@
 
     void ShowContextMenuWithContent(MouseEventArgs args, VSchedule p)
     {
-        ContextMenuService.Open(args, ds =>@<AllScheduleMenu ShowOnTab="true"
-                 ShowLateScheduleDetails="@ShowLateDetails"
-                 RecievePayment="@ShowRecievePayment"
-                 Schedule="@p" />
+        ContextMenuService.Open(args, ds => @<AllScheduleMenu ShowOnTab="true"
+                                                      ShowLateScheduleDetails="@ShowLateDetails"
+                                                      RecievePayment="@ShowRecievePayment"
+                                                      Schedule="@p" />
 
     );
     }
@@ -190,6 +191,10 @@
 
     private void RowRenderChanged(DataGridCellRenderEventArgs<VSchedule> args)
     {
+
+        if (args is null || args.Data is null)
+            return;
+
         switch (args.Data.DayArrea)
         {
             case >= 1 and <= 7:
@@ -228,6 +233,45 @@
         await RecievePayment.InvokeAsync(p);
 
         StateHasChanged();
+    }
+
+    void ContextMenuClick(DataGridCellMouseEventArgs<VSchedule> args)
+    {
+        if (args is null || args.Data is null)
+            return;
+
+        var p = args.Data;
+
+        ContextMenuService.Open(args, new List<ContextMenuItem>
+        {
+            new ContextMenuItem { Text = "Recieve Payment", Value="1",Icon="money_bag"},
+            new ContextMenuItem { Text = "Recieve By Schedule", Value="2",Icon="schedule",Disabled=p.IsLate},
+            new ContextMenuItem { Text = "Schedule Detials", Value="3",Icon="info"},
+            new ContextMenuItem { Text = "Show Late Schedule", Value="4", Icon="credit_card_clock"}
+        }, (e) =>
+        {
+            ContextMenuService.Close();
+
+            if (int.TryParse(e.Value!.ToString(), out var selectedId))
+            {
+                switch (selectedId)
+                {
+                    case 1:
+                        _ = ShowRecievePayment(args.Data);
+                        break;
+                    case 2:
+                        //GetLoanDetails(args.Data);
+                        break;
+                    case 3:
+                        //_ = DownLoadScheduleAsExcel(args.Data);
+                        break;
+                    case 4:
+                        _ = ShowLateDetails(p);
+                        break;
+                }
+                
+            }
+        });
     }
 
 

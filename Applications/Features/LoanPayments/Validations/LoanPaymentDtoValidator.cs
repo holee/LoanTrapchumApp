@@ -7,6 +7,11 @@ namespace Applications.Features.LoanPayments.Validations
     {
         public LoanPaymentDtoValidator()
         {
+
+            RuleFor(x => x.OfficialReceiptNo)
+                    .NotEmpty()
+                    .WithMessage("Official receipt number is required.");
+
             RuleFor(x => x.TotalAmount).Cascade(CascadeMode.Stop)
                     .NotNull().WithMessage("Total Amount is required.")
                     .GreaterThan(0).WithMessage("Total Amount must be greater than zero.");
@@ -21,7 +26,7 @@ namespace Applications.Features.LoanPayments.Validations
                            x.RecieveAmount.Value > x.TotalAmount.Value)
                 .WithMessage("ReceiveAmount must be greater than TotalAmount.")
                 .When(x => x.RecieveAmount.HasValue && x.TotalAmount.HasValue);
-            
+
             // Rule 2: If PenaltyAmount > 0, it must not be greater than OriginalPenaltyAmount
             RuleFor(x => x.PenaltyAmount)
                 .Must((model, penalty) =>

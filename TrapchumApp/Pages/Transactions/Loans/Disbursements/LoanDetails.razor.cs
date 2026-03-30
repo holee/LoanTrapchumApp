@@ -32,15 +32,15 @@ public partial class LoanDetails
 
     private VLoanDisbursments? loanSchedule = new();
 
-    IList<VSchedule> SelectedSchedules = [];
+    private IList<VSchedule> SelectedSchedules = [];
 
-    IEnumerable<VSchedule> Schedules = [];
+    private IEnumerable<VSchedule> Schedules = [];
 
-    IEnumerable<LoanResponse> _loanSchedules = [];
+    private IEnumerable<LoanResponse> _loanSchedules = [];
 
-    string receiptNo = "";
+    private string receiptNo = "";
 
-    bool isVible = false;
+    private bool isVible = false;
     async Task SelectedTabChanged(int index)
     {
         _selectedTabIndex = index;
@@ -78,7 +78,8 @@ public partial class LoanDetails
     private int _selectedTabIndex = 0;
 
     private LoanPaymentDtoCreate? _loanPayment = new();
-    private string _getPaymentSchedulesUrl;
+
+    private string _getPaymentSchedulesUrl = string.Empty;
 
     void CloseTab()
     {
@@ -120,12 +121,10 @@ public partial class LoanDetails
 
         var create = loanRepaymentLines.ToPaymentCreate(CurrencyId);
 
-        var options = new DialogOptions
+        var options = new SideDialogOptions
         {
-            Resizable = false,
-
-            Draggable = true,
-
+            Resizable = true,
+            Width = "35rem",
             CssClass = "rz-p-1 rz-m-0 rz-background-color-base-200"
         };
 
@@ -144,10 +143,6 @@ public partial class LoanDetails
         if (loanPayment is not null)
         {
             _loanPayment = loanPayment;
-
-            //_isPaymentTab = true;
-
-            //_selectedTabIndex = 2;
         }
 
         {
@@ -159,7 +154,7 @@ public partial class LoanDetails
 
             var message = $"Recieve Payment from {loanSchedule!.AltName}";
 
-            bool? confirm = await DialogService.OpenAsync<PaymentModal>(message, parameters!, options);
+            bool? confirm = await DialogService.OpenSideAsync<PaymentModal>(message, parameters!, options);
 
             if (confirm is not null && confirm == true)
             {
@@ -177,14 +172,18 @@ public partial class LoanDetails
 
     private bool IsAlreadyPaidSchedule(VSchedule p)
     {
-        if (p.IsPaid)
-        {
-            NotificationService.Notify(NotificationSeverity.Error, "This schedule is already paid.");
 
-            return true;
-        }
 
-        return false;
+        return p.IsPaid;
+
+        //if (p.IsPaid)
+        //{
+        //    NotificationService.Notify(NotificationSeverity.Error, "This schedule is already paid.");
+
+        //    return true;
+        //}
+
+        //return false;
     }
 
     private bool IsFirstScheduleSelected(VSchedule p)
@@ -193,13 +192,16 @@ public partial class LoanDetails
 
         var firstSchedule = schedulesList?.First(x => x.IsPaid == false);
 
-        if (p != firstSchedule)
-        {
-            NotificationService.Notify(NotificationSeverity.Error, "Cannot add new schedule due to previouse schedule not complete paid yet.");
-            return false;
-        }
+        return p == firstSchedule;
 
-        return true;
+        //{
+        //    return false;
+        //}
+
+        //return true;
+
+        // NotificationService.Notify(NotificationSeverity.Error, "Cannot add new schedule due to previouse schedule not complete paid yet.");
+
     }
 
     void OnCellContextMenu(DataGridCellMouseEventArgs<VSchedule> args)
@@ -222,11 +224,11 @@ public partial class LoanDetails
                 if (e.Value is not null && int.TryParse(e.Value!.ToString(), out int value))
                 {
 
-                    if (!IsFirstScheduleSelected(args.Data))
-                        return;
+                    //if (!IsFirstScheduleSelected(args.Data))
+                    //    return;
 
-                    if (IsAlreadyPaidSchedule(args.Data))
-                        return;
+                    //if (IsAlreadyPaidSchedule(args.Data))
+                    //    return;
 
                     switch (value)
                     {
@@ -335,7 +337,7 @@ public partial class LoanDetails
             CloseDialogOnOverlayClick = true,
             Width = "60vw"
         };
-        await DialogService.OpenSideAsync<ScheduleDetails>($"Schedule-{p.LoanScheduleId}", parameters: param!, options);
+        await DialogService.OpenSideAsync<ScheduleDetailsPage>($"Schedule-{p.LoanScheduleId}", parameters: param!, options);
 
 
     }
@@ -348,7 +350,7 @@ public partial class LoanDetails
 
         _userId = (await AuthenticationState).GetUserId();
 
-        await GetLoanSchedulesById(ScheduleStatus.Unpaid);
+        await GetLoanSchedulesById(ScheduleStatus.All);
 
         await base.OnInitializedAsync();
     }

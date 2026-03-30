@@ -1,4 +1,4 @@
-﻿using Applications.Responses.ViewModels.Loans.Payments;
+﻿using Applications.Features.Schedules.Dto;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

@@ -32,7 +32,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
         EditForm? editForm;
         void CloseModal()
         {
-            DialogService.Close(false);
+            DialogService.CloseSide(false);
         }
         string? UserId = string.Empty;
 
@@ -42,10 +42,13 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 
             UserId = auth.User.GetId();
 
+
+            OriginalCopy();
+
             await base.OnInitializedAsync();
         }
 
-        protected override void OnInitialized()
+        private void OriginalCopy()
         {
             OriginalLoanPayment = new LoanPaymentDtoCreate
             {
@@ -78,12 +81,10 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
                     PayDate = x.PayDate
                 }).ToList()
             };
-
+           
             DoCopyLoanPayment();
 
-            base.OnInitialized();
         }
-
 
         void DoCopyLoanPayment()
         {
@@ -126,18 +127,9 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
         async Task OnSaveChanges()
         {
 
-
             if (editForm?.EditContext?.Validate() == false)
-            {
                 return;
-            }
-
-            var confirmOption = new ConfirmOptions
-            {
-                CancelButtonText = "Cancel",
-
-                OkButtonText = "Yes",
-            };
+            var confirmOption = new ConfirmOptions { CancelButtonText = "Cancel", OkButtonText = "Yes" };
             try
             {
                 isBusy = true;
@@ -155,7 +147,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
                     TransactionsId = $"trx-{Guid.CreateVersion7()}",
                     TransactionDate = DateTime.Now,
                     TransactionTypeName = TransactionTypes.LP.GetDescription(),
-                    TranTypeRefId = 20,
+                    TranTypeRefId = (int)TransactionTypes.LP,//20
                     BranchRefId = LoanRepayment.BranchRefId,
                     UserRefId = LoanRepayment.UserRefId
                 };
@@ -165,7 +157,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
                     CurrencyRefId = CurrencyId,
                     TransactionDate = DateTime.Now,
                     BusinessDate = DateTime.Now,
-                    CashStatusRefId = 2,
+                    CashStatusRefId = (int)CashStatusEnum.OUT,//2
                     BranchRefId = LoanRepayment.BranchRefId,
                     BankRefId = 11,
                     Amount = LoanRepayment.SubTotal,
@@ -190,7 +182,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 
                 if (result.IsSuccess())
                 {
-                    DialogService.Close(true);
+                    DialogService.CloseSide(true);
                 }
                 else
                 {

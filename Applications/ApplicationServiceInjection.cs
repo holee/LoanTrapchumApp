@@ -3,8 +3,10 @@ using Applications.Features.Holidays.Command.CreateHoliday;
 using Applications.Features.Holidays.Queries.GetActiveHolidays;
 using Applications.Features.Holidays.Queries.GetHolidayByDate;
 using Applications.Features.Holidays.Queries.GetHolidayById;
+using Applications.Features.Schedules.Dto;
 using Applications.Features.Schedules.Queries.GetDueScheduleByLoanId;
 using Applications.Features.Schedules.Queries.GetScheduleById;
+using Applications.Features.Schedules.Queries.GetScheduleDetailById;
 using ErrorOr;
 namespace Applications;
 
@@ -12,7 +14,7 @@ public static class ApplicationServiceInjection
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
-
+        services.AddScoped<IRequestHandler<GetScheduleDetailByIdQuery, ErrorOr<ScheduleDetailsDto>>, GetScheduleDetailByIdQueryHandler>();
         services.AddScoped<IRequestHandler<GetScheduleByIdQuery, ErrorOr<VSchedule>>, GetScheduleByIdQueryHandler>();
         services.AddScoped<IRequestHandler<GetDueScheduleByLoanIdQuery, Pager<VSchedule>>, GetDueScheduleByLoanIdQueryHandler>();
         services.AddScoped<IRequestHandler<ActivateOrDeactivateHolidayCommand, ErrorOr<HolidayVm>>, ActivateOrDeactivateHolidayCommandHandler>();

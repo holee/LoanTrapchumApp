@@ -221,18 +221,18 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
                     return;
                 }
 
-                var resultResponse = await _paymentService.RecievePayment(LoanRepayment);
+                //var resultResponse = await _paymentService.RecievePayment(LoanRepayment);
 
-                if (resultResponse.IsSuccess)
-                {
-                    NotificationService.Notify(NotificationSeverity.Success, resultResponse.Data);
+                //if (resultResponse.IsSuccess)
+                //{
+                //    NotificationService.Notify(NotificationSeverity.Success, resultResponse.Data);
                    
-                    DialogService.Close(true);
-                }
-                else
-                {
-                    NotificationService.Notify(NotificationSeverity.Error, resultResponse.ErrMessage);
-                }
+                //    DialogService.Close(true);
+                //}
+                //else
+                //{
+                //    NotificationService.Notify(NotificationSeverity.Error, resultResponse.ErrMessage);
+                //}
 
             }
             catch (Exception ex)

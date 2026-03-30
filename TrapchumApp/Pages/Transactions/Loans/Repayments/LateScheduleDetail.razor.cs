@@ -254,11 +254,12 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 
         void RecievePayments()
         {
-            var options = new DialogOptions
+            var options = new SideDialogOptions
             {
-                Draggable = true,
-                Left="5rem",
-                CloseDialogOnEsc = true
+                Resizable = true,
+                Width = "35rem",
+                CloseDialogOnOverlayClick = false,
+                ResizeBarTitle = "Resize"
             };
             var loanPayment = new LoanPaymentDtoCreate
             {
@@ -282,7 +283,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
                 {"CurrencyId",LoanSchedule.CurrencyId }
             };
 
-            DialogService.OpenAsync<PaymentModal>($"{loanPayment.CustomerName}", parameters, options);
+            DialogService.OpenSideAsync<PaymentModal>($"{loanPayment.CustomerName}", parameters!, options);
 
 
         }

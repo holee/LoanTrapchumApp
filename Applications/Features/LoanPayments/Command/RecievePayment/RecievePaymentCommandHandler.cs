@@ -1,5 +1,4 @@
 ﻿using Applications.Commons.Mappers;
-using Applications.Interfaces.Loans;
 using ErrorOr;
 
 namespace Applications.Features.LoanPayments.Command.RecievePayment;

@@ -1,7 +1,4 @@
-﻿using Applications.Responses.ViewModels.Loans.Payments;
-using Applications.Responses.ViewModels.Loans.Schedules;
-
-namespace Applications.Features.Loans.Responses;
+﻿namespace Applications.Features.Loans.Responses;
 
 public static class VLoanDisbursmentExtensions
 {

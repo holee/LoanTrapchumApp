@@ -1,4 +1,4 @@
-using Applications.Responses.ViewModels.Loans.Payments;
+using Applications.Features.Schedules.Dto;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Services.Loans;
 using Microsoft.AspNetCore.Components;
@@ -19,7 +19,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
         [Parameter] public string? LoanId { get; set; } = string.Empty;
         int counts = 0;
         IEnumerable<VSchedule> _schedules = [];
-        ScheduleVm? _schedule = null;
+        Applications.Features.Schedules.Dto.ScheduleDetailsDto? _schedule = null;
         bool isLoading = false;
         int pageSize = 15;
         long ScheduleId = 0;
@@ -60,7 +60,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
                 Width = "55vw"
             };
 
-            await DialogService.OpenSideAsync<ScheduleDetails>($"Schedule-{p.LoanScheduleId}", parameters: param, options);
+            await DialogService.OpenSideAsync<ScheduleDetailsPage>($"Schedule-{p.LoanScheduleId}", parameters: param, options);
 
 
         }

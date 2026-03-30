@@ -149,14 +149,14 @@
     {
         ContextMenuService.Open(args, ds =>@<RadzenMenu Style="font-size:0.8rem;">
 
-    <RadzenMenuItem Icon="money"
-                    Click="@(()=>GetPaymentSchedules(p))"
-                    Text="Recieve Payment"></RadzenMenuItem>
-    <RadzenMenuItem Icon="paid"
-                    Click="@(()=>CustomerPayOff(p))"
-                    Text="PayOff"></RadzenMenuItem>
+                <RadzenMenuItem Icon="money"
+                                Click="@(()=>GetPaymentSchedules(p))"
+                                Text="Recieve Payment"></RadzenMenuItem>
+                <RadzenMenuItem Icon="paid"
+                                Click="@(()=>CustomerPayOff(p))"
+                                Text="PayOff"></RadzenMenuItem>
 
-</RadzenMenu>
+            </RadzenMenu>
 
     );
     }

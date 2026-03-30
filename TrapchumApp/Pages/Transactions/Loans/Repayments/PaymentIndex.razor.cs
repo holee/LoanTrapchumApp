@@ -110,21 +110,6 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
         void GetCustomerLateSchedules(VSchedule p)
         {
             ContextMenuService.Close();
-
-            //if (p is null) return;
-
-            //if (!isShowLateSchedule)
-            //{
-            //    isShowLateSchedule = true;
-
-            //    tabcounts.Add(1);
-            //}
-
-            //selectedTabIndex = 1;
-
-            //loanId = p.LoanId!;
-
-            //StateHasChanged();
         }
 
         void CustomerPayOff(VSchedule? p)

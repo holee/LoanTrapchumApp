@@ -238,26 +238,3 @@
 
 
 }
-
-@* ContextMenuService.Open(args,
-                                ds => @<LoanDetailsMenu Schedule="@p"
-                                                            ScheduleChanged="@PayBySchedules"
-                                                          CreditAgentId="@_creditAgentId" />); *@
-
-@* <RadzenMenu Style="font-size:0.8rem;">
-    <RadzenMenuItem Icon="schedule"
-                    Visible="@(!p.IsPaid || p.IsPartialPaid)"
-                    Click="@(()=>PayBySchedules(p))"
-                    Text="Payment By Schedule"></RadzenMenuItem>
-    <RadzenMenuItem Icon="money"
-                    Visible="@(!p.IsPaid || p.IsPartialPaid)"
-                    Click="GetPaymentSchedules"
-                    Text="Recieve Payment"></RadzenMenuItem>
-    <RadzenMenuItem Icon="paid"
-                    Visible="p.IsPaid"
-                    Click="ShowPaidSchedules"
-                    Text="Paid Schedule"></RadzenMenuItem>
-    <RadzenMenuItem Icon="paid"
-                    Click="@(()=>ShowScheduleDetails(p))"
-                    Text="Details"></RadzenMenuItem>
-</RadzenMenu>*@

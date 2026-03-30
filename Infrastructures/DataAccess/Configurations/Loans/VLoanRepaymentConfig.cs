@@ -1,8 +1,4 @@
-﻿using Applications.Responses.ViewModels.Loans.Payments;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-
-namespace Infrastructures.DataAccess.Configurations.Loans
+﻿namespace Infrastructures.DataAccess.Configurations.Loans
 {
     //public class VloanRepaymentConfig : IEntityTypeConfiguration<VSchedulePaid>
     //{

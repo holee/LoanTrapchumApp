@@ -1,12 +1,12 @@
-﻿using Applications.Responses.ViewModels.Loans.Payments;
+﻿using Applications.Features.Schedules.Dto;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructures.DataAccess.Configurations.Loans;
 
-public class LoanPaymentLineVmConfiguration : IEntityTypeConfiguration<LoanPaymentLineVm> 
+public class LoanPaymentLineVmConfiguration : IEntityTypeConfiguration<PaymentLineDetailsDto> 
 {
-    public void Configure(EntityTypeBuilder<LoanPaymentLineVm> builder)
+    public void Configure(EntityTypeBuilder<PaymentLineDetailsDto> builder)
     {
         builder.ToView("VLoanPaymentLines");
 

@@ -9,9 +9,6 @@ using Applications.Features.Transactions.ForiegnExchanges;
 using Applications.Features.Transactions.LoanTransactions;
 using Applications.Interfaces.Loans;
 using Domains.Models.Settings;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
-using Radzen;
 using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments
@@ -225,16 +222,17 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
                 model.TranTypeRefId = 67;
                 model.TransactionTypeName = "Currency Foreign Exchange";
                 //LoanRepayment.ForeignExchangeTrx = Model;
-                var result = await repaymentService.RecievePayment(LoanRepayment);
+                
+                //var result = await repaymentService.RecievePayment(LoanRepayment);
 
-                if (result.IsSuccess)
-                {
-                    DialogService.Close(true);
-                }
-                else
-                {
-                    NotificationService.Notify(NotificationSeverity.Error, result.Data);
-                }
+                //if (result.IsSuccess)
+                //{
+                //    DialogService.Close(true);
+                //}
+                //else
+                //{
+                //    NotificationService.Notify(NotificationSeverity.Error, result.Data);
+                //}
             }
             catch (Exception ex)
             {
