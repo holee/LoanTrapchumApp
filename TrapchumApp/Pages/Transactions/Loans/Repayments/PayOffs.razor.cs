@@ -137,7 +137,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 
             var message = $"Recieve Payment from {LoanSchedule!.AltName}";
 
-            bool confirm = await DialogService.OpenAsync<PaymentModal>(message, parameters, options);
+            bool confirm = await DialogService.OpenAsync<PaymentSideBar>(message, parameters, options);
 
             if (confirm == true)
             {

@@ -1,4 +1,5 @@
-﻿using Applications.Extensions;
+﻿using Applications.Bases;
+using Applications.Extensions;
 using Applications.Features.Collaterals.Dtos;
 using Applications.Features.Customers.Response;
 using Applications.Features.Loans.Responses;
@@ -33,7 +34,33 @@ public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFac
     {
         await using var cxt = await contextFactory.CreateDbContextAsync(cancellation);
 
-        var queries = BuildCustomerQueriesAsync(cxt, branchId, userId, cancellation);
+        var queries = BuildCustomerQueriesAsync(cxt, branchId, userId, false, cancellation);
+
+        if (!string.IsNullOrEmpty(customerId))
+        {
+            queries = queries.Where(x => x.CustomerId == customerId);
+        }
+
+        queries = ApplyFiltering(queries, param);
+
+        queries = ApplyOrdering(queries, param);
+
+        var countTask = await queries.CountAsync(cancellation);
+
+        var dataTask = await queries
+            .Skip(param.Page)
+            .Take(param.PageSize)
+            .ToListAsync(cancellation);
+
+        return new Pager<VCustomerList>(dataTask, countTask);
+
+    }
+
+    public async Task<Pager<VCustomerList>> GetCustomersAsync(int? branchId, string? userId, string? customerId, QueryParam param, bool isLoanActiveOnly = false, CancellationToken cancellation = default)
+    {
+        await using var cxt = await contextFactory.CreateDbContextAsync(cancellation);
+
+        var queries = BuildCustomerQueriesAsync(cxt, branchId, userId, isLoanActiveOnly, cancellation);
 
         if (!string.IsNullOrEmpty(customerId))
         {
@@ -266,6 +293,37 @@ public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFac
             return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
         }
     }
+
+    public async Task<DeleteResult> DeleteAsync(string? customerId, CancellationToken cancellation = default)
+    {
+        try
+        {
+            await using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+            var customer = await context.Customers.FindAsync(customerId, cancellation);
+
+            if (customer is null)
+            {
+                return DeleteResult.NotFound("There is no Customer in the List.");
+            }
+
+            if (await IsCustomerInUsed(customerId, cancellation))
+            {
+                return DeleteResult.InUse("This customer is being used by someone, you can't delete it.");
+            }
+
+            context.Customers.Remove(customer);
+
+            await context.SaveChangesAsync();
+
+            return DeleteResult.Success("Customer was removed");
+        }
+        catch (Exception ex)
+        {
+            return DeleteResult.Error($"{ex.InnerException!.Message}");
+        }
+    }
+
     public async Task<Result<string>> MakeCustomerInActiveAsync(string? customerId, bool state, CancellationToken cancellation = default)
     {
         try
@@ -293,6 +351,35 @@ public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFac
             return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
         }
     }
+
+    public async Task<ErrorOr.ErrorOr<bool>> MakeCustomerInActiveAsync(string? customerId, CancellationToken cancellation = default)
+    {
+        try
+        {
+
+            await using var _context = await contextFactory.CreateDbContextAsync(cancellation);
+
+            var existingCustomer = await _context.EntityNames
+                                                .Where(x => x.Id == customerId)
+                                                .Include(x => x.Customer)
+                                                .FirstOrDefaultAsync(cancellation);
+            if (existingCustomer is null)
+            {
+                return ErrorOr.Error.NotFound(Messages.DataNotFound);
+            }
+
+            existingCustomer.IsActive = false;
+
+            await _context.SaveChangesAsync(cancellation);
+
+            return true;
+        }
+        catch (SqlException ex)
+        {
+            return ErrorOr.Error.Unexpected($"{ex.InnerException!.Message}");
+        }
+    }
+
     public async Task<Result<string>> CreateAsync(EntityNames model, CancellationToken cancellation = default)
     {
         try
@@ -623,17 +710,17 @@ public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFac
         };
     }
 
-    private IQueryable<VCustomerList> BuildCustomerQueriesAsync(DataContext cxt, int? branchId, string? userId, CancellationToken cancellation)
+    private IQueryable<VCustomerList> BuildCustomerQueriesAsync(DataContext cxt, int? branchId, string? userId, bool activeLoanOnly = false, CancellationToken cancellation = default)
     {
         if (branchId > 0 || !string.IsNullOrEmpty(userId))
         {
-            return GetCustomersByBranchOrUserAsync(cxt, branchId, userId, cancellation);
+            return GetCustomersByBranchOrUserAsync(cxt, branchId, userId, activeLoanOnly, cancellation);
         }
 
-        return GetCustomersWithoutActiveLoan(cxt);
+        return GetCustomersWithoutActiveLoan(cxt, activeLoanOnly);
     }
 
-    private IQueryable<VCustomerList> GetCustomersByBranchOrUserAsync(DataContext cxt, int? branchId, string? userId, CancellationToken cancellation)
+    private IQueryable<VCustomerList> GetCustomersByBranchOrUserAsync(DataContext cxt, int? branchId, string? userId, bool activeLoanOnly = false, CancellationToken cancellation = default)
     {
         return cxt.Database.SqlQuery<VCustomerList>($@"
                     SELECT 
@@ -648,15 +735,16 @@ public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFac
                           AND 
                           (d.UserRequestId = {userId} OR {userId} IS NULL)
                     ")
+                .WhereIf(activeLoanOnly, x => x.IsLoanActive == true)
                 .Select(ProjectTo())
                 .AsQueryable();
     }
 
-    private IQueryable<VCustomerList> GetCustomersWithoutActiveLoan(DataContext cxt)
+    private IQueryable<VCustomerList> GetCustomersWithoutActiveLoan(DataContext cxt, bool isInlcudeActiveLoan = false)
     {
         return cxt.VCustomerLists
-        .Where(x => x.IsLoanActive == false)
-        .Select(ProjectToCustomerList());
+                    .WhereIf(isInlcudeActiveLoan, x => x.IsLoanActive == true)
+                    .Select(ProjectToCustomerList());
     }
 
 

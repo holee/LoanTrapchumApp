@@ -212,26 +212,17 @@
         _getPaymentSchedulesUrl = $"/App/Loans/{p.BranchId}/Branches/{p.LoanId}/Schedules?CreditAgentId={p.CreditAgentId}&CurrencyId={p.CurrencyId}";
 
         ContextMenuService.Open(args, ds => @<RadzenMenu Style="font-size:0.8rem;">
-            <AuthorizeView Policy="@Policies.RecievePayment">
-                <Authorized>
-                    <RadzenMenuItem Icon="schedule"
-                                    Disabled="@(SetDisabled(p))"
-                                    Click="@(()=>PayBySchedules(p))"
-                                    Text="Paid By Schedule"></RadzenMenuItem>
-                    <RadzenMenuItem Icon="money"
-                                    Disabled="@(SetDisabled(p))"
-                                    Path="@_getPaymentSchedulesUrl"
-                                    Text="Recieve Payment"></RadzenMenuItem>
-                </Authorized>
-            </AuthorizeView>
-
-            <RadzenMenuItem Icon="paid"
-                            Disabled="@(!p.IsPaid)"
-                            Click="ShowPaidSchedules"
-                            Text="Payment History"></RadzenMenuItem>
+            <RadzenMenuItem Icon="money"
+                            Disabled="@(SetDisabled(p) || !BState.CanRecievePayment)"
+                            Path="@_getPaymentSchedulesUrl"
+                            Text="Recieve Payment"></RadzenMenuItem>
+            <RadzenMenuItem Icon="schedule"
+                            Disabled="@(SetDisabled(p) || !BState.CanRecievePayment)"
+                            Click="@(()=>PayBySchedules(p))"
+                            Text="Paid By Schedule"></RadzenMenuItem>
             <RadzenMenuItem Icon="paid"
                             Click="@(()=>ShowScheduleDetails(p))"
-                            Text="Details"></RadzenMenuItem>
+                            Text="Show Details"></RadzenMenuItem>
                 
         </RadzenMenu>);
                                     }

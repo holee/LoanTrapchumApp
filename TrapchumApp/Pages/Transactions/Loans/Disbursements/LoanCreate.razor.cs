@@ -8,6 +8,7 @@ using Applications.Features.LoanRequests.Command.RecheckedLoanRequest;
 using Applications.Features.LoanRequests.Queryies.GetApprovedLoanRequest;
 using Applications.Features.LoanRequests.Requests;
 using Applications.Features.Loans.Command.CreateLoan;
+using Applications.Features.Loans.Command.SaveLoanDisbursemenent;
 using Applications.Features.Loans.Mappers;
 using Applications.Features.Loans.Requests;
 using Applications.Features.Loans.Services;
@@ -231,6 +232,43 @@ public partial class LoanCreate(IHolidayServiceImpl holidayService)
             NotificationService.Notify(NotificationSeverity.Error, ex.Message);
         }
     }
+
+
+    protected async Task SaveLoanDisbursement()
+    {
+        var confirm = await DialogService.Confirm("Do you want to save this loan request?", "Confirm");
+
+        if (confirm == false)
+        {
+            NotificationService.Notify(NotificationSeverity.Info, "loan save cancel.");
+            return;
+        }
+
+        var command = new SaveLoanDisbursementCommand(new SaveLoanDisbursementDtoCreate(BranchId, CustomerId, LoanRequestId, memo));
+
+        try
+        {
+            editForm.EditContext!.Validate();
+
+            var rsp = await mediator.Send(command);
+
+            if (!rsp.IsSuccess())
+            {
+                NotificationService.Notify(NotificationSeverity.Error, rsp.GetMessage());
+
+                return;
+            }
+
+            StateHasChanged();
+
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, ex.Message);
+        }
+    }
+
+
     private void OnStartDateChanged(DateTime? args)
     {
         int addedDays = model.InstallmentTypeId switch

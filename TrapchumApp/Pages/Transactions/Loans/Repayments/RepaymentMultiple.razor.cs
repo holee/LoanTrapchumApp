@@ -167,7 +167,7 @@ public partial class RepaymentMultiple
             };
 
         var message = $"Recieve Payment from Name";
-        var confirm = await DialogService.OpenAsync<PaymentModal>(message, parameters, options);
+        var confirm = await DialogService.OpenAsync<PaymentSideBar>(message, parameters, options);
         if ((bool)confirm == true)
         {
             await GetCustomerPaymentSchedulesByLoanIdAsync();

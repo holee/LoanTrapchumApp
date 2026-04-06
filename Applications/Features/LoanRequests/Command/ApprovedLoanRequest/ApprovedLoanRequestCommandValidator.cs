@@ -2,7 +2,7 @@
 
 namespace Applications.Features.LoanRequests.Command.ApprovedLoanRequest
 {
-    public sealed class ApprovedLoanRequestCommandValidator : AbstractValidator<ApprovedLoanRequestCommand>
+    public sealed class ApprovedLoanRequestCommandValidator : AbstractValidator<DisburseLoanRequestCommand>
     {
         public ApprovedLoanRequestCommandValidator()
         {

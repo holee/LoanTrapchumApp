@@ -14,10 +14,10 @@ namespace Applications.Features.Customers.UseCases
             _customerService = customerService;
         }
 
-        public async Task<Pager<VCustomerList>> ExecuteAsync(int? branchId, string? userId, string? customerId, QueryParam param)
-        {
-            return await _customerService.GetCustomersAsync(branchId, userId, customerId, param);
-        }
+        //public async Task<Pager<VCustomerList>> ExecuteAsync(int? branchId, string? userId, string? customerId, QueryParam param)
+        //{
+        //    return await _customerService.GetCustomersAsync(branchId, userId, customerId, param);
+        //}
 
     }
 }

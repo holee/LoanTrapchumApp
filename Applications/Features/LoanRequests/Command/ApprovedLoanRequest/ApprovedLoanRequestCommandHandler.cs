@@ -6,7 +6,7 @@ using ErrorOr;
 
 namespace Applications.Features.LoanRequests.Command.ApprovedLoanRequest
 {
-    public sealed class ApprovedLoanRequestCommandHandler : IRequestHandler<ApprovedLoanRequestCommand, ErrorOr<RequestResult>>
+    public sealed class ApprovedLoanRequestCommandHandler : IRequestHandler<DisburseLoanRequestCommand, ErrorOr<RequestResult>>
     {
 
         private readonly ILoanRequestService _loanRequestService;
@@ -15,9 +15,9 @@ namespace Applications.Features.LoanRequests.Command.ApprovedLoanRequest
         {
             _loanRequestService = loanRequestService;
         }
-        public async Task<ErrorOr<RequestResult>> Handle(ApprovedLoanRequestCommand request, CancellationToken cancellationToken)
+        public async Task<ErrorOr<RequestResult>> Handle(DisburseLoanRequestCommand request, CancellationToken cancellationToken)
         {                   
-            return await _loanRequestService.AprovedLoanRequestAsync(request.Request);
+            return await _loanRequestService.DisburseLoanRequestAsync(request.Request);
         }
     }
 }

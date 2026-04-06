@@ -18,7 +18,7 @@ public sealed class CreateLoanCommandHandler : IRequestHandler<CreateLoanCommand
 
         var model = request.Req.MapLoanCreate();
 
-        return await _loanService.CreateAsync(model);
+        return await _loanService.CreateLoanDisbursementAsync(model);
        
     }
 }

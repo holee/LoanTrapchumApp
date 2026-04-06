@@ -4,27 +4,16 @@ using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Services.Lists;
 using Domains.Models.Identity;
-using System.Threading.Tasks;
 using Applications.Features.CreditAgents.Requests;
 using Applications.Features.Loans.Responses;
 using Applications.Features.Branches.Dtos;
 using Applications.Features.Branches.Queries.GetBranchAsPaging;
+using TrapchumApp.Services;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 {
-    public partial class LoanChangedCreditAgents
+    public partial class LoanChangedCreditAgents(ILoanServiceImpl loanService, ICreditAgentServiceImpl creditAgentService)
     {
-
-        private readonly ILoanServiceImpl _loanService;
-
-        private readonly ICreditAgentServiceImpl _creditAgentService;
-        public LoanChangedCreditAgents(ILoanServiceImpl loanService, ICreditAgentServiceImpl creditAgentService)
-        {
-            _loanService = loanService;
-
-            _creditAgentService = creditAgentService;
-        }
-
         [Parameter] public int? BranchId { get; set; }
         [Parameter, SupplyParameterFromQuery] public string? CreditAgentId { get; set; }
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
@@ -59,7 +48,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 
             UserId = auth.User.GetId();
 
-            //await GetOldCreditAgents();
+            await GetOldCreditAgents();
 
             if (!string.IsNullOrWhiteSpace(CreditAgentId))
             {
@@ -69,7 +58,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
             }
 
 
-            await GetBranches();
+            await GetBranches(BranchId);
 
 
             await base.OnInitializedAsync();
@@ -88,6 +77,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 
             }
             _newCreditAgents = [];
+
             _items = [];
         }
 
@@ -98,12 +88,10 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 
             var command = new GetBranchAsPagingQuery(branchId, new QueryParam(0, 0));
 
-            var rsp = await mediator.Send(command); //_branchService.GetBranchesAsync<VBranch>(branchId, new QueryParam(0, 0));
+            var rsp = await mediator.Send(command);
 
-            if (rsp.IsSuccess)
-            {
-                _newBranches = rsp.Items ?? [];
-            }
+            _newBranches = rsp.Items ?? [];
+
         }
 
         async Task GetLoansByCreditAgents(object? arg)
@@ -129,7 +117,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 
             _isLoading = true;
 
-            var resp = await _loanService.GetLoanByCreditAgentsAsync(creditAgentId, BranchId);
+            var resp = await loanService.GetLoanByCreditAgentsAsync(creditAgentId, BranchId);
 
             _items = resp.Items;
 
@@ -146,7 +134,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 
             var param = new QueryParam(0, 0, nameof(VCreditAgent.AltName), false, false, filterText);
 
-            var rsp = await _creditAgentService.GetCreditAgents(BranchId, param);
+            var rsp = await creditAgentService.GetCreditAgents(BranchId, param);
 
             _oldCreditAgents = rsp.Items ?? [];
 
@@ -156,7 +144,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 
             var param = new QueryParam(0, 0, nameof(VCreditAgent.AltName), false, false, filterText);
 
-            var rsp = await _creditAgentService.GetCreditAgents(BranchId, param);
+            var rsp = await creditAgentService.GetCreditAgents(BranchId, param);
 
             if (rsp.Items.Any() && CreditAgentId.IsNotNullOrEmpty())
             {
@@ -184,7 +172,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
                 return;
             }
 
-            var resp = await _creditAgentService.ChangeCreditAgents(BranchId, models);
+            var resp = await creditAgentService.ChangeCreditAgents(BranchId, models);
 
             if (resp.IsSuccess)
             {
@@ -202,7 +190,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
         }
         void Back()
         {
-            NavigationManager.NavigateTo($"/Loans?BranchId={BranchId}&UserId={UserId}");
+            NavigationManager.NavigateTo(_navService.PreviousUrl!);
         }
 
     }

@@ -3,12 +3,12 @@
 public class AproveLoanDtoCreate : RequestDtoBaseCreate
 {
     public AproveLoanDtoCreate()
-        :base(0,string.Empty,string.Empty,string.Empty)
+        : base(0, string.Empty, string.Empty, string.Empty)
     {
-        
+
     }
-    public AproveLoanDtoCreate(int? branchId, string? customerId, 
-        string? loanRequestId, 
+    public AproveLoanDtoCreate(int? branchId, string? customerId,
+        string? loanRequestId,
         decimal? aprovedAmount,
         decimal? adminFeeAmount,
         DateTime? aprovedDate,

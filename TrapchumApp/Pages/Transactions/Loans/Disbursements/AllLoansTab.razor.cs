@@ -6,137 +6,136 @@ using Applications.Responses.Paginations;
 using TrapchumApp.Helpers.Extensions;
 using TrapchumApp.Shared;
 
-namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
+namespace TrapchumApp.Pages.Transactions.Loans.Disbursements;
+
+public partial class AllLoansTab
 {
-    public partial class AllLoansTab
+    [Parameter] public int BranchId { get; set; } = 0;
+    [Parameter] public string? UserId { get; set; }
+    [Parameter] public EventCallback<int> GetLoanChanged { get; set; }
+    [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+    [CascadingParameter] CascadingAppState bState { get; set; } = default!;
+
+    private List<VLoanDisbursments> LoanItems = [];
+
+    private IList<VLoanDisbursments> SelectedLoans = [];
+
+    private string? filter = string.Empty;
+
+    protected IEnumerable<VBranch> Branches = [];
+
+    int counts = 0;
+
+    int pageSize = 15;
+
+    bool isLoading = false;
+
+    bool isProgess = false;
+
+    bool includeInactive = false;
+
+    string sortField = "RegisterDate";
+
+    bool sortDescending = true;
+
+    int pageIndex = 0;
+
+    private DateTime? _from = null;
+
+    private DateTime? _to = null;
+    async Task ChangedPageSize(int page)
     {
-        [Parameter] public int BranchId { get; set; } = 0;
-        [Parameter] public string? UserId { get; set; }
-        [Parameter] public EventCallback<int> GetLoanChanged { get; set; }
-        [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
-        [CascadingParameter] CascadingAppState bState { get; set; } = default!;
+        pageSize = page;
+        pageIndex = 0;
+        await GetLoanDisbursements();
+    }
+    async void TextLoanSearchChanged(string filterText)
+    {
+        filter = filterText;
+        await GetLoanDisbursements();
+    }
+    async void CheckedIncludeChanged()
+    {
+        await GetLoanDisbursements();
+    }
 
-        private List<VLoanDisbursments> LoanItems = [];
+    protected override async Task OnInitializedAsync()
+    {
 
-        private IList<VLoanDisbursments> SelectedLoans = [];
+        var auth = await AuthenticationState;
 
-        private string? filter = string.Empty;
+        await bState.CheckedIsCreditAgent(auth.User);
 
-        protected IEnumerable<VBranch> Branches = [];
+        await GetLoanDisbursements();
 
-        int counts = 0;
+        await GetLoanCount();
 
-        int pageSize = 15;
+        await base.OnInitializedAsync();
+    }
 
-        bool isLoading = false;
+    private async Task LoadData(LoadDataArgs args)
+    {
+        pageIndex = args.Skip ?? 0;
 
-        bool isProgess = false;
+        (sortField, sortDescending) = args.PageInfo();
 
-        bool includeInactive = false;
+        await GetLoanDisbursements();
+    }
 
-        string sortField = "RegisterDate";
+    private async Task GetLoanDisbursements(DateTime? from = null, DateTime? to = null)
+    {
 
-        bool sortDescending = true;
+        isLoading = true;
 
-        int pageIndex = 0;
+        var param = new QueryParam(pageIndex, pageSize, sortField, false, sortDescending, filter);
 
-        private DateTime? _from = null;
+        var userId = bState.IsCreditAgent ? UserId : string.Empty;
 
-        private DateTime? _to = null;
-        async Task ChangedPageSize(int page)
-        {
-            pageSize = page;
-            pageIndex = 0;
-            await GetLoanDisbursements();
-        }
-        async void TextLoanSearchChanged(string filterText)
-        {
-            filter = filterText;
-            await GetLoanDisbursements();
-        }
-        async void CheckedIncludeChanged()
-        {
-            await GetLoanDisbursements();
-        }
+        var query = new GetLoanByBranchIdQuery(BranchId, userId, LoanStatuses.Active, from, to, param);
 
-        protected override async Task OnInitializedAsync()
-        {
+        var res = await mediator.Send(query); 
 
-            var auth = await AuthenticationState;
+        LoanItems = res.Items;
 
-            await bState.CheckedIsCreditAgent(auth.User);
+        counts = res.Count;
 
-            await GetLoanDisbursements();
+        isLoading = false;
 
-            await GetLoanCount();
-
-            await base.OnInitializedAsync();
-        }
-
-        private async Task LoadData(LoadDataArgs args)
-        {
-            pageIndex = args.Skip ?? 0;
-
-            (sortField, sortDescending) = args.PageInfo();
-
-            await GetLoanDisbursements();
-        }
-
-        private async Task GetLoanDisbursements(DateTime? from = null, DateTime? to = null)
-        {
-
-            isLoading = true;
-
-            var param = new QueryParam(pageIndex, pageSize, sortField, false, sortDescending, filter);
-
-            var userId = bState.IsCreditAgent ? UserId : string.Empty;
-
-            var query = new GetLoanByBranchIdQuery(BranchId, userId, LoanStatuses.Active, from, to, param);
-
-            var res = await mediator.Send(query); 
-
-            LoanItems = res.Items;
-
-            counts = res.Count;
-
-            isLoading = false;
-
-            StateHasChanged();
-
-        }
-
-
-        private async Task DateFromChanged(DateTime? from)
-        {
-            if (from.HasValue)
-            {
-                await GetLoanDisbursements(from, _to);
-            }
-            else
-            {
-                await GetLoanDisbursements(null, _to);
-            }
-        }
-
-
-        private async Task DateToChanged(DateTime? to)
-        {
-            if (to.HasValue)
-            {
-                await GetLoanDisbursements(_from, to);
-            }
-            else
-            {
-                await GetLoanDisbursements(_from, null);
-            }
-        }
-
-        async Task GetLoanCount()
-        {
-            await GetLoanChanged.InvokeAsync(counts);
-        }
+        StateHasChanged();
 
     }
+
+
+    private async Task DateFromChanged(DateTime? from)
+    {
+        if (from.HasValue)
+        {
+            await GetLoanDisbursements(from, _to);
+        }
+        else
+        {
+            await GetLoanDisbursements(null, _to);
+        }
+    }
+
+
+    private async Task DateToChanged(DateTime? to)
+    {
+        if (to.HasValue)
+        {
+            await GetLoanDisbursements(_from, to);
+        }
+        else
+        {
+            await GetLoanDisbursements(_from, null);
+        }
+    }
+
+    async Task GetLoanCount()
+    {
+        await GetLoanChanged.InvokeAsync(counts);
+    }
+
 }
 
 

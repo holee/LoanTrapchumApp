@@ -118,54 +118,54 @@
 
 @code {
 
-    void ShowLoanRequestMenu(MouseEventArgs args, VLoanRequests Request)
+    void ShowLoanRequestMenu(MouseEventArgs args, VLoanRequests? Request)
     {
-        var requestNowUrl = $"/App/Loans/{Request?.LoanRequestId}/Requests/{Request?.BranchId}/Branches/{Request?.CustomerId}/Details";
-        var checkloanRequestUrl = $"/App/Loans/{Request?.LoanRequestId}/Requests/{Request?.BranchId}/Branches/{Request?.CustomerId}/Details";
-        var loanRequestDetailsUrl = $"/App/Loans/{Request?.LoanRequestId}/Requests/{Request?.BranchId}/Branches/{Request?.CustomerId}/Details";
-        var requestLoanRequestUrl = $"/App/Loans/{Request?.LoanRequestId}/Requests/{Request?.BranchId}/Branches/{Request?.CustomerId}/Edit";
-        var disburseRequestLoanUrl = $"/App/Loans/{Request?.LoanRequestId}/Disbursements/{Request?.BranchId}/Branches/CreateNew?CustomerId={Request?.CustomerId}";
+
+        if (Request is null) return;
+        if (string.IsNullOrEmpty(Request.LoanRequestId)) return;
+        var requestNowUrl = $"/App/Loans/{Request.LoanRequestId}/Requests/{Request.BranchId}/Branches/{Request.CustomerId}/Details";
+        var checkloanRequestUrl = $"/App/Loans/{Request.LoanRequestId}/Requests/{Request.BranchId}/Branches/{Request.CustomerId}/Details";
+        var loanRequestDetailsUrl = $"/App/Loans/{Request.LoanRequestId}/Requests/{Request.BranchId}/Branches/{Request.CustomerId}/Details";
+        var requestLoanRequestUrl = $"/App/Loans/{Request.LoanRequestId}/Requests/{Request.BranchId}/Branches/{Request.CustomerId}/Edit";
+        var disburseRequestLoanUrl = $"/App/Loans/{Request.LoanRequestId}/Disbursements/{Request.BranchId}/Branches/CreateNew?CustomerId={Request.CustomerId}";
 
         ContextMenuService.Open(args, ds => @<RadzenMenu Style="font-size:0.8rem;">
 
-            @if (bState.CanRequest && Request is not null)
-            {
-                <RadzenMenuItem Path="@requestNowUrl"
-                                Visible="Request.StatusId == (int)RequestStatus.New"
-                                Icon="@IconNames.SendMoney" Text="Request Now" Value="@Request.CustomerId" />
-                <RadzenMenuItem Visible="Request.StatusId == (int)RequestStatus.New"
-                                Path="@requestLoanRequestUrl"
-                                Icon="@IconNames.Edit"
-                                Text="Edit Request" Value="@Request.CustomerId" />
-                <RadzenMenuItem Visible="Request.StatusId == (int)RequestStatus.Rechecked"
-                                Path="@requestLoanRequestUrl"
-                                Icon="@IconNames.Edit"
-                                Text="Review Request" Value="@Request.CustomerId" />
-            }
+           
+            <RadzenMenuItem Path="@requestNowUrl"
+                            Icon="@IconNames.SendMoney"
+                            Disabled="@(!bState.CanRequest || Request.StatusId != (int)RequestStatus.New)"
+                            Text="Request Now" Value="@Request.CustomerId" />
 
-            @if (bState.CanApproved && Request is not null)
-            {
-                <RadzenMenuItem Visible="Request.StatusId == (int)RequestStatus.Requested"
-                                Path="@checkloanRequestUrl"
-                                Icon="@IconNames.Info" Text="Approved Now" Value="@Request.CustomerId" />
-            }
+            <RadzenMenuItem Path="@requestLoanRequestUrl"
+                            Icon="@IconNames.Edit"
+                            Disabled="@(!bState.CanRequest || Request.StatusId != (int)RequestStatus.New)"
+                            Text="Edit Request" Value="@Request.CustomerId" />
+                                
+            <RadzenMenuItem Path="@requestLoanRequestUrl"
+                            Icon="@IconNames.Edit"
+                            Disabled="@(!bState.CanRequest || Request.StatusId != (int)RequestStatus.Rechecked)"
+                            Text="Review Request" Value="@Request.CustomerId" />
+            
+           
+            <RadzenMenuItem Path="@checkloanRequestUrl"
+                            Icon="@IconNames.Info"
+                            Disabled="@(!bState.CanApproved || Request.StatusId != (int)RequestStatus.Requested)"
+                            Text="Approved Now" Value="@Request.CustomerId" />
 
-            @if (bState.CanDisbursed && Request is not null)
-            {
-                <RadzenMenuItem Visible="Request.StatusId == (int)RequestStatus.Approved"
-                                Path="@disburseRequestLoanUrl"
-                                Icon="@IconNames.Info"
-                                Text="Disburse Now"
-                                Value="@Request.CustomerId" />
-            }
+         
+            <RadzenMenuItem Visible="Request.StatusId == (int)RequestStatus.Approved"
+                            Path="@disburseRequestLoanUrl"
+                            Icon="@IconNames.Info"
+                            Text="Disburse Now"
+                            Disabled="@(Request.StatusId != (int)RequestStatus.Approved || !bState.CanDisbursed)"
+                            Value="@Request.CustomerId" />
 
-            @if (Request is not null)
-            {
-                <RadzenMenuItem Icon="@IconNames.Details"
-                                Path="@loanRequestDetailsUrl"
-                                Text="Request Details" Value="@Request.CustomerId" />
-            }
-
+            <RadzenMenuItem Icon="@IconNames.Details"
+                            Path="@loanRequestDetailsUrl"
+                            Text="Request Details"
+                            Value="@Request.CustomerId" />
+          
         </RadzenMenu>
     );
     }
@@ -175,8 +175,126 @@
 
     void OnRowRender(RowRenderEventArgs<VLoanRequests> args)
     {
-        args.Data.RowIndex = args.Index + 1;
+        args.Data!.RowIndex = args.Index + 1;
     }
+
+    void OnCellContextMenu(DataGridCellMouseEventArgs<VLoanRequests> args)
+    {
+        var selectedRequest = args.Data as VLoanRequests;
+
+        if (selectedRequest is null) return;
+
+        List<ContextMenuItem> items = new();
+
+        items.Add(new ContextMenuItem()
+        {
+            Text = "Request Now",
+            Icon = "send_money",
+            Value = 1,
+            Disabled = (selectedRequest?.StatusId != (int)RequestStatus.New || !bState.CanRequest)
+        });
+            
+        items.Add(new ContextMenuItem()
+        {
+            Text = "Edit Request",
+            Icon = "edit",
+            Value = 2,
+            Disabled = (selectedRequest?.StatusId != (int)RequestStatus.New || !bState.CanRequest)
+        });
+        items.Add(new ContextMenuItem()
+        {
+            Text = "Review Request",
+            Icon = "reviews",
+            Value = 3,
+            Disabled = (selectedRequest?.StatusId != (int)RequestStatus.Rechecked || !bState.CanRequest)
+        });
+       
+        items.Add(new ContextMenuItem()
+        {
+            Text = "Approved Now",
+            Icon = "check_circle",
+            Value = 4,
+            Disabled = (selectedRequest?.StatusId != (int)RequestStatus.Requested || !bState.CanApproved)
+        });
+
+        items.Add(new ContextMenuItem()
+        {
+            Text = "Disburse Now",
+            Icon = "attach_money",
+            Value = 5,
+            Disabled = (selectedRequest?.StatusId != (int)RequestStatus.Approved || !bState.CanDisbursed)
+        });
+
+        items.Add(new ContextMenuItem()
+        {
+            Text = "Checking Now",
+            Icon = "rate_review",
+            Value = 5,
+            Disabled = (selectedRequest?.StatusId != (int)RequestStatus.Rechecking || !bState.CanDisbursed)
+        });
+
+        items.Add(new ContextMenuItem()
+        {
+            Text = "Request Details",
+            Icon = "info",
+            Value = 6,
+        });
+
+        ContextMenuService.Open(args, items, (e) => OpenMenuItemSelected(e, selectedRequest));
+    }
+
+    void OpenMenuItemSelected(MenuItemEventArgs args, VLoanRequests? data)
+    {
+
+        ContextMenuService.Close();
+
+        if (data is null && args is null) return;
+
+        if (args.Value is not null && Int32.TryParse(args.Value.ToString(), out var selectedId))
+        {
+
+            var navUrl = selectedId switch
+            {
+
+                1 => $"/App/Loans/{data?.LoanRequestId}/Requests/{data?.BranchId}/Branches/{data?.CustomerId}/Details",
+                2 => $"/App/Loans/{data?.LoanRequestId}/Requests/{data?.BranchId}/Branches/{data?.CustomerId}/Edit",
+                3 => $"/App/Loans/{data?.LoanRequestId}/Requests/{data?.BranchId}/Branches/{data?.CustomerId}/Edit",
+                4 => $"/App/Loans/{data?.LoanRequestId}/Requests/{data?.BranchId}/Branches/{data?.CustomerId}/Details",
+                5 => $"/App/Loans/{data?.LoanRequestId}/Disbursements/{data?.BranchId}/Branches/CreateNew?CustomerId={data?.CustomerId}",
+                _ => $"/App/Loans/{data?.LoanRequestId}/Requests/{data?.BranchId}/Branches/{data?.CustomerId}/Details"
+
+            };
+            NavigationManager.NavigateTo(navUrl);
+        }
+
+        // Handle menu item selection
+
+
+        // var requestNowUrl = $"/App/Loans/{data?.LoanRequestId}/Requests/{data?.BranchId}/Branches/{data?.CustomerId}/Details";
+        // var checkloanRequestUrl = $"/App/Loans/{data?.LoanRequestId}/Requests/{data?.BranchId}/Branches/{data?.CustomerId}/Details";
+        // var loanRequestDetailsUrl = $"/App/Loans/{data?.LoanRequestId}/Requests/{data?.BranchId}/Branches/{data?.CustomerId}/Details";
+        // var requestLoanRequestUrl = $"/App/Loans/{data?.LoanRequestId}/Requests/{data?.BranchId}/Branches/{data?.CustomerId}/Edit";
+        // var disburseRequestLoanUrl = $"/App/Loans/{data?.LoanRequestId}/Disbursements/{data?.BranchId}/Branches/CreateNew?CustomerId={data?.CustomerId}";
+        // switch (selectedId)
+        // {
+        //     case 1:
+        //         NavigationManager.NavigateTo($"/App/Loans/{data.LoanRequestId}/Requests/{BranchId}/Branches/{data.CustomerId}/Details");
+        //         break;
+        //     case 2:
+        //         NavigationManager.NavigateTo($"/App/Loans/{data.LoanRequestId}/Requests/{BranchId}/Branches/{data.CustomerId}/Edit");
+        //         break;
+        //     case 3:
+        //         NavigationManager.NavigateTo($"/App/Loans/{data.LoanRequestId}/Requests/{BranchId}/Branches/{data.CustomerId}/Edit");
+        //         break;
+        //     case 6:
+        //         NavigationManager.NavigateTo($"/App/Loans/{data.LoanRequestId}/Requests/{BranchId}/Branches/{data.CustomerId}/Details");
+        //         break;
+        //     default:
+        //         break;
+        // }
+
+    }
+
 
     BadgeStyle BadgeStyle = BadgeStyle.Primary;
 
@@ -191,83 +309,6 @@
             4 => BadgeStyle.Primary, // Rejected
             _ => BadgeStyle.Success,
         };
-    }
-
-
-    void OnCellContextMenu(DataGridCellMouseEventArgs<VLoanRequests> args)
-    {
-        var selectedRequest = args.Data as VLoanRequests;
-
-        List<ContextMenuItem> items = new();
-
-        if (bState.CanRequest && selectedRequest?.StatusId == (int)RequestStatus.New)
-        {
-            items.Add(new ContextMenuItem() { Text = "Request Now", Icon = "send_money", Value = 1, Disabled = selectedRequest?.StatusId != (int)RequestStatus.New });
-            items.Add(new ContextMenuItem() { Text = "Edit Request", Icon = "edit", Value = 2, Disabled = selectedRequest?.StatusId != (int)RequestStatus.New });
-        }
-        else if (bState.CanRequest && selectedRequest?.StatusId == (int)RequestStatus.Rechecked)
-        {
-            items.Add(new ContextMenuItem() { Text = "Review Request", Icon = "edit", Value = 3, Disabled = selectedRequest?.StatusId != (int)RequestStatus.Rechecked });
-        }
-
-        if (bState.CanApproved && selectedRequest?.StatusId == (int)RequestStatus.Requested)
-        {
-            items.Add(new ContextMenuItem() { Text = "Approved Now", Icon = "check_circle", Value = 4 });
-        }
-
-        if (bState.CanDisbursed && selectedRequest?.StatusId == (int)RequestStatus.Approved)
-        {
-            items.Add(new ContextMenuItem() { Text = "Disburse", Icon = "attach_money", Value = 5 });
-        }
-        else if (bState.CanDisbursed && selectedRequest?.StatusId == (int)RequestStatus.Rechecking)
-        {
-            items.Add(new ContextMenuItem() { Text = "Disburse", Icon = "attach_money", Value = 5 });
-        }
-
-        items.Add(new ContextMenuItem() { Text = "Details Request", Icon = "info", Value = 6 });
-
-        ContextMenuService.Open(args, items, (e) => OpenMenuItemSelected(e, selectedRequest));
-    }
-
-    void OpenMenuItemSelected(MenuItemEventArgs args, VLoanRequests? data)
-    {
-
-        ContextMenuService.Close();
-
-        if (data is null && args is null && args.Value is null) return;
-
-        int selectedId = 0;
-
-        var requestNowUrl = $"/App/Loans/{data?.LoanRequestId}/Requests/{data?.BranchId}/Branches/{data?.CustomerId}/Details";
-        var checkloanRequestUrl = $"/App/Loans/{data?.LoanRequestId}/Requests/{data?.BranchId}/Branches/{data?.CustomerId}/Details";
-        var loanRequestDetailsUrl = $"/App/Loans/{data?.LoanRequestId}/Requests/{data?.BranchId}/Branches/{data?.CustomerId}/Details";
-        var requestLoanRequestUrl = $"/App/Loans/{data?.LoanRequestId}/Requests/{data?.BranchId}/Branches/{data?.CustomerId}/Edit";
-        var disburseRequestLoanUrl = $"/App/Loans/{data?.LoanRequestId}/Disbursements/{data?.BranchId}/Branches/CreateNew?CustomerId={data?.CustomerId}";
-
-
-        if (Int32.TryParse(args.Value.ToString(), out selectedId))
-        {
-            switch (selectedId)
-            {
-                case 1:
-                    NavigationManager.NavigateTo($"/App/Loans/{data.LoanRequestId}/Requests/{BranchId}/Branches/{data.CustomerId}/Details");
-                    break;
-                case 2:
-                    NavigationManager.NavigateTo($"/App/Loans/{data.LoanRequestId}/Requests/{BranchId}/Branches/{data.CustomerId}/Edit");
-                    break;
-                case 3:
-                    NavigationManager.NavigateTo($"/App/Loans/{data.LoanRequestId}/Requests/{BranchId}/Branches/{data.CustomerId}/Edit");
-                    break;
-                case 6:
-                    NavigationManager.NavigateTo($"/App/Loans/{data.LoanRequestId}/Requests/{BranchId}/Branches/{data.CustomerId}/Details");
-                    break;
-                default:
-                    break;
-            }
-            return;
-        }
-
-        // Handle menu item selection
     }
 
 

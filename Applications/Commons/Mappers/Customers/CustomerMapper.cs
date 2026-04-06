@@ -1,5 +1,5 @@
-﻿using Applications.Features.Customers.Commands.Customers.CreateCustomer;
-using Applications.Features.Customers.Commands.Customers.EditCustomer;
+﻿using Applications.Features.Customers.Commands.CreateCustomer;
+using Applications.Features.Customers.Commands.EditCustomer;
 using Applications.Features.Customers.Dto;
 using Domains.Models.Lists;
 using Domains.Models.Lists.Customers;

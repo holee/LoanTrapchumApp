@@ -2,14 +2,12 @@ using Applications.Commons.Mappers;
 using Applications.Enumerations;
 using Applications.Extensions;
 using Applications.Features.LoanRequests.Command.AddDescription;
-using Applications.Features.LoanRequests.Command.CreateLoanRequest;
 using Applications.Features.LoanRequests.Command.DenyLoanRequest;
 using Applications.Features.LoanRequests.Command.RecheckedLoanRequest;
 using Applications.Features.LoanRequests.Command.SaveEditLoanRequest;
-using Applications.Features.LoanRequests.Command.SaveLoanRequest;
-using Applications.Features.LoanRequests.Command.VerifiedLoanRequest;
 using Applications.Features.LoanRequests.Queryies.GetLoanRequestDetailById;
 using Applications.Features.LoanRequests.Requests;
+using Applications.Features.Loans.Command.SaveLoanDisbursemenent;
 using Applications.Features.Loans.Responses;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Domains.Models.Identity;
@@ -52,11 +50,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
             aprovedUserId = user.GetId();
 
-            await AppState.CheckedCanApprved(user);
-
-            await AppState.CheckedCanDisbursemnt(user);
-
-            await AppState.CheckedCanRequest(user);
+            await AppState.GetAuthenticatedUser(user);
 
             await GetLoanRequestDetails(user);
 
@@ -141,7 +135,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
         private bool disableTextbox = false;
 
-        async Task AprovedLoanRequest()
+        async Task DisbruseLoanRequestNow()
         {
             var options = new DialogOptions
             {
@@ -153,7 +147,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
                 { "CustomerId", CustomerId }
             };
 
-            bool dialogueResult = await DialogService.OpenAsync<ConfirmModal>("Confirm", param, options);
+            bool dialogueResult = await DialogService.OpenAsync<ConfirmModal>("Confirm", param!, options);
 
             if (dialogueResult && user is not null)
             {
@@ -189,7 +183,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
                 await mediator.Send(cmd);
 
-                NotificationService.Notify(NotificationSeverity.Success, rsp.Value.Message);
+                NotificationService.Notify(NotificationSeverity.Success, rsp.Value.Message!);
             }
             else
             {
@@ -214,11 +208,11 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             var command = new RecheckedLoanRequestCommand(req);
 
 
-            var rsp = await mediator.Send(command);// _loanRequestService.RecheckedLoanRequestAsync(req);
+            var rsp = await mediator.Send(command);
 
-            if (!rsp.IsError)
+            if (rsp.IsSuccess())
             {
-                NotificationService.Notify(NotificationSeverity.Success, rsp.Value.Message);
+                NotificationService.Notify(NotificationSeverity.Success, rsp.Value.Message!);
             }
             else
             {
@@ -237,17 +231,15 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
                 return;
             }
 
-            var req = new RecheckedRequestDtoCreate(BranchId, CustomerId, LoanRequestId, DateTime.UtcNow, RequestStatus.Rechecked, memo);
+            var saveReq = new SaveLoanDisbursementDtoCreate(BranchId, CustomerId, LoanRequestId, memo);
 
-
-            var command = new VerifiedLoanRequestCommand(req);
-
+            var command = new SaveLoanDisbursementCommand(saveReq);
 
             var rsp = await mediator.Send(command);
 
             if (rsp.IsSuccess())
             {
-                NotificationService.Notify(NotificationSeverity.Success, rsp.Value.Message);
+                NotificationService.Notify(NotificationSeverity.Success, rsp.Value.Message!);
             }
             else
             {

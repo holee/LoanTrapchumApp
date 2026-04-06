@@ -23,7 +23,7 @@ namespace Applications.Features.LoanPayments.Validations
             // ReceiveAmount > TotalAmount
             RuleFor(x => x)
                 .Must(x => x.RecieveAmount.HasValue && x.TotalAmount.HasValue &&
-                           x.RecieveAmount.Value > x.TotalAmount.Value)
+                           x.RecieveAmount.Value >= x.TotalAmount.Value)
                 .WithMessage("ReceiveAmount must be greater than TotalAmount.")
                 .When(x => x.RecieveAmount.HasValue && x.TotalAmount.HasValue);
 

@@ -1,5 +1,5 @@
 ﻿using Applications.Enumerations;
-using Applications.Features.Customers.Commands.Customers.EditCustomer;
+using Applications.Features.Customers.Commands.EditCustomer;
 using Applications.Features.Customers.Dto;
 using Applications.Features.Customers.Response;
 using Applications.Interfaces.Lists;

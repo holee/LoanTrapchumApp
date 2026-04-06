@@ -10,6 +10,7 @@ using Domains.Models.Identity;
 using Microsoft.JSInterop;
 using TrapchumApp.Helpers.Extensions;
 using Applications.Commons.Mappers;
+using TrapchumApp.Pages.Transactions.Loans.Repayments;
 namespace TrapchumApp.Pages.Transactions.RecievePayements;
 
 public partial class RecievePaymentSidebar
@@ -54,9 +55,9 @@ public partial class RecievePaymentSidebar
     {
         var query = new GetScheduleByIdQuery(LoanScheduleId, BranchId, LoanId);
 
-        var rsp=await mediator.Send(query);
+        var rsp = await mediator.Send(query);
 
-        if(rsp.IsSuccess())
+        if (rsp.IsSuccess())
         {
             var schedule = rsp.Value.MapToLoanPaymentLine();
 
@@ -214,6 +215,18 @@ public partial class RecievePaymentSidebar
             var confirmPayment = await DialogService.Confirm(message, "Payment", confirmOption);
 
             if (confirmPayment == false) return;
+
+            var confirm = await DialogService.OpenAsync<ConfirmDialogue>("Confirm Payment", new Dictionary<string, object>
+            {
+                { "CustomerName",  LoanRepayment.CustomerName!},
+                { "Amount", LoanRepayment.AmountWithPenalty! },
+                { "CurrencyId", CurrencyId }
+            }, new DialogOptions
+            {
+                Left = "10%",
+                CloseDialogOnOverlayClick = false,
+                CloseDialogOnEsc = true,
+            });
 
             var command = new RecievePaymentCommand(tran);
 

@@ -13,7 +13,7 @@ using Radzen.Blazor;
 using TrapchumApp.Helpers.Extensions;
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments;
 
-public partial class DueDateSchedulesPage 
+public partial class DueDateSchedulesPage
 {
     [Parameter] public string? LoanId { get; set; }
     [Parameter] public int BranchId { get; set; }
@@ -130,6 +130,7 @@ public partial class DueDateSchedulesPage
         {
             Resizable = false,
             Width = "35rem",
+            ShowClose = false
         };
 
         var loanPayment = new LoanPaymentDtoCreate
@@ -141,7 +142,7 @@ public partial class DueDateSchedulesPage
             UserRefId = _userId,
             PayDate = DateTime.Now,
             CustomerName = CustomerName,
-            OfficialReceiptNo = ""
+            OfficialReceiptNo = _loanPaymentLine.OfficialReceiptNo
         };
 
         loanPayment.LoanPaymentLines.Add(_loanPaymentLine);
@@ -153,7 +154,7 @@ public partial class DueDateSchedulesPage
 
         var message = $"Recieve Payment from {CustomerName}";
 
-        bool? confirm = await DialogService.OpenSideAsync<PaymentModal>(message, parameters!, options);
+        bool? confirm = await DialogService.OpenSideAsync<PaymentSideBar>(message, parameters!, options);
 
         if (confirm is not null && confirm == true)
         {

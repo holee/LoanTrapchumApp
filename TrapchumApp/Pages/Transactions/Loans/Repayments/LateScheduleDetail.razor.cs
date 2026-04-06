@@ -283,7 +283,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
                 {"CurrencyId",LoanSchedule.CurrencyId }
             };
 
-            DialogService.OpenSideAsync<PaymentModal>($"{loanPayment.CustomerName}", parameters!, options);
+            DialogService.OpenSideAsync<PaymentSideBar>($"{loanPayment.CustomerName}", parameters!, options);
 
 
         }

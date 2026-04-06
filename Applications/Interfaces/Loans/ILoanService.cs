@@ -12,7 +12,7 @@ namespace Applications.Interfaces.Loans
 
     public interface ILoanService
     {
-        Task<Result<bool>> CreateLoanAsync(LoanDisbursment req, CancellationToken cancellation = default);
+        //Task<Result<bool>> CreateLoanAsync(LoanDisbursment req, CancellationToken cancellation = default);
         Task<ErrorOr.ErrorOr<DeleteResult>> DeleteAsync(string? loanId,int? branchId, CancellationToken cancellation = default);
         Task<Result<string>> UpdateAsync(LoanDisbursment disbursement);
         Task<Result<string>> ChangedCreditAgent(int? branchId, LoanChangedCaDtoCreate req);
@@ -29,7 +29,7 @@ namespace Applications.Interfaces.Loans
         Task<IEnumerable<VLoanDisbursementGuarantors>> GetRelatedGaurantors(string? loanId, int? branchId, CancellationToken cancellation = default);
         Task<IEnumerable<VLoanDisbursementGuarantors>> GetRelatedGaurantors(string? loanId, int? branchId, CancellationToken cancellation = default, params string[] columns);
         Task<IEnumerable<VLoanDisbursementDocuments>> GetRelatedDocuments(string? loanId, int? branchId, CancellationToken cancellation = default);
-        Task<ErrorOr<DisburseResult>> CreateAsync(LoanDisbursment req, CancellationToken cancellation = default);
+        Task<ErrorOr<DisburseResult>> CreateLoanDisbursementAsync(LoanDisbursment req, CancellationToken cancellation = default);
         Task<ErrorOr<string>> CloseLoanDisbursementAsync(int? branchId, string? loanId, string? customerId, CancellationToken cancellation = default);
         Task<Pager<VLoanDisbursments>> GetLoansByBranchId(int? branchId, string? userId, LoanStatuses status = LoanStatuses.Active, DateTime? start = null, DateTime? to = null, QueryParam? param = null, CancellationToken cancellation = default);
         Task<Pager<VSchedule>> GetDueScheduleLoanByIdAsync(string? loanId, int? branchId, CancellationToken cancellation = default);

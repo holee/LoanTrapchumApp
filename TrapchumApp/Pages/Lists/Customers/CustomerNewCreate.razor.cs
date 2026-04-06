@@ -1,6 +1,6 @@
 using Applications.Enumerations;
 using Applications.Features.Addresses.Dto;
-using Applications.Features.Customers.Commands.Customers.CreateCustomer;
+using Applications.Features.Customers.Commands.CreateCustomer;
 using Applications.Features.Customers.Dto;
 using Applications.Features.Customers.Response;
 using Applications.Responses.Lists.Entities;

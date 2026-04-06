@@ -59,6 +59,7 @@
         <RadzenColumn Size="12">
             <RadzenFormField Text="Receipt No" AllowFloatingLabel="true" class="@Styles.W100">
                 <RadzenTextBox @bind-Value="LoanRepayment.OfficialReceiptNo"
+                               Disabled="@isBusy"
                                class="@Styles.W100" />
             </RadzenFormField>
         </RadzenColumn>
@@ -73,6 +74,7 @@
                                class="@Styles.W100"
                                Format="@Defaults.DefaultCurrencyFormat"
                                Min="0"
+                               Disabled="@isBusy"
                                @oninput="CalculatePenaltyAmount"
                                ShowUpDown="false" />
             </RadzenFormField>
@@ -110,6 +112,7 @@
                                    Min="0"
                                    @oninput="@ReceivePaymentChanged"
                                    @onfocusout="ReceivePaymentFocus"
+                                   Disabled="@isBusy"
                                    TextAlign="TextAlign.End" />
                 </ChildContent>
                 <Helper>
@@ -138,29 +141,30 @@
                  class="@Styles.Mt2"
                  JustifyContent="JustifyContent.End"
                  Gap="1rem">
+        <RadzenButton ButtonStyle="ButtonStyle.Success"
+                      Size="ButtonSize.Small"
+                      Icon="@IconNames.Save"
+                      Text="Confirm"
+                      IsBusy="isBusy"
+                      BusyText="Recieving..."
+                      Click="@OnSaveChanges">
+        </RadzenButton>
         <RadzenButton Size="ButtonSize.Small"
                       ButtonStyle="ButtonStyle.Danger"
                       Icon="cancel"
                       Text="Close"
+                      Disabled="@isBusy"
                       Click="@CloseModal">
-        </RadzenButton>
-        <RadzenButton ButtonStyle="ButtonStyle.Success"
-                      Size="ButtonSize.Small"
-                      Icon="@IconNames.Save"
-                      Text="Recieve Payment"
-                      IsBusy="isBusy"
-                      BusyText="Recieving..."
-                      Click="@OnSaveChanges">
         </RadzenButton>
     </RadzenStack>
 </EditForm>
 @code {
 
-    DialogOptions options = new DialogOptions 
+    DialogOptions options = new DialogOptions
     {
         CloseDialogOnOverlayClick = true,
         Draggable = true,
-        Left="0rem"
+        Left = "0rem"
     };
 
     void OpenSide()

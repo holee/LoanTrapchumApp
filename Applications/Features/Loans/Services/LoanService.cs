@@ -1,13 +1,8 @@
 ﻿using Applications.Enumerations;
 using Applications.Features.CreditAgents.Requests;
-using Applications.Features.Loans.Command.CreateLoan;
 using Applications.Features.Loans.Mappers;
 using Applications.Features.Loans.Requests;
-using Applications.Features.Loans.Responses;
 using Applications.Interfaces.Lists;
-using Applications.Interfaces.Loans;
-using Applications.Responses;
-using Applications.Responses.Paginations;
 using Domains.Models.Lists.CreditAgents;
 using Domains.Models.Loans;
 using Domains.Models.Transaction;
@@ -29,51 +24,52 @@ namespace Applications.Features.Loans.Services
             return await creditAgentService.ChangedCreditAgents(branchId, model);
         }
         
-        public async Task<Result<bool>> CreateLoanAsync(LoanDtoCreate req)
-        {
+        //public async Task<Result<bool>> CreateLoanAsync(LoanDtoCreate req)
+        //{
 
-            var tranx = new LoanTransaction
-            {
-                TransactionsId = $"trx-{Guid.CreateVersion7()}",
-                UserRefId = req.UserRefId,
-                TransactionTypeName = "Loan Disbursement",
-                TranTypeRefId = 19,
-                IsActive = true
-            };
+        //    var tranx = new LoanTransaction
+        //    {
+        //        TransactionsId = $"trx-{Guid.CreateVersion7()}",
+        //        UserRefId = req.UserRefId,
+        //        TransactionTypeName = "Loan Disbursement",
+        //        TranTypeRefId = 19,
+        //        IsActive = true
+        //    };
 
-            var cashMgt = new CashManagement
-            {
-                Id = $"cash-{Guid.CreateVersion7()}",
+        //    var cashMgt = new CashManagement
+        //    {
+        //        Id = $"cash-{Guid.CreateVersion7()}",
 
-                BankRefId = req.BankRefId,
+        //        BankRefId = req.BankRefId,
 
-                BranchRefId = req.BranchId,
+        //        BranchRefId = req.BranchId,
 
-                Amount = req.PaidAmount,
+        //        Amount = req.PaidAmount,
 
-                CurrencyRefId = req.CurrencyRefId,
+        //        CurrencyRefId = req.CurrencyRefId,
 
-                CashStatusRefId = 2,
+        //        CashStatusRefId = 2,
 
-                Remark = "Cash goes through transaction",
+        //        Remark = "Cash goes through transaction",
 
-                TransactionDate = req.RegisterDate,
+        //        TransactionDate = req.RegisterDate,
 
-                BusinessDate = req.RegisterDate,
+        //        BusinessDate = req.RegisterDate,
 
-                Balance = 0,
+        //        Balance = 0,
 
-                EmployeeRefId = req.UserRefId
-            };
+        //        EmployeeRefId = req.UserRefId
+        //    };
 
-            tranx.CashManagements.Add(cashMgt);
+        //    tranx.CashManagements.Add(cashMgt);
 
-            var model = req.MapLoanCreate();
+        //    var model = req.MapLoanCreate();
 
-            model.LoanTransaction = tranx;
+        //    model.LoanTransaction = tranx;
 
-            return await loanService.CreateLoanAsync(model);
-        }
+        //    return await loanService.CreateLoanAsync(model);
+        //}
+     
         public async Task<DisburseResult> CreateAsync(LoanDtoCreate req)
         {
 
@@ -120,7 +116,7 @@ namespace Applications.Features.Loans.Services
             var command=new CreateLoanCommand(req);
 
 
-            var rsp = await  loanService.CreateAsync(model);
+            var rsp = await  loanService.CreateLoanDisbursementAsync(model);
 
             return rsp.Value;
 

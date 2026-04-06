@@ -18,9 +18,11 @@ public interface ICustomerService
     Task<Result<string>> UpdateAsync(EntityNames model, CancellationToken cancellation = default);
     Task<Result<IEnumerable<VCollateralLines>>> GetCustomerCollateralLines(string? customerId, bool includeInUsed = false);
     Task<Result<IEnumerable<VLoanDisbursments>>> GetCustomerLoanHistoryAsync(string? customerId);
-    Task<Result<Customer>> GetCustomerByIdAsync(string? customerId, params string[] includes); 
+    Task<Result<Customer>> GetCustomerByIdAsync(string? customerId, params string[] includes);
     Task<Result<EntityNames>> GetCustomerByIdAsync(string? customerId);
     Task<Pager<VCustomerList>> GetCustomersAsync(int? branchId, string? userId, string? customerId, QueryParam param, CancellationToken cancellation = default);
+    Task<Pager<VCustomerList>> GetCustomersAsync(int? branchId, string? userId, string? customerId, QueryParam param, bool isLoanActiveOnly = false, CancellationToken cancellation = default);
+
     Task<Result<VCustomerDetails>> GetCustomerForRequestLoanAsync(string? customerId, CancellationToken cancellation = default);
     Task<Result<IEnumerable<VLoanRequests>>> GetCustomerLoanRequestAsync(string? customerId, bool includeComplete = false, CancellationToken cancellation = default);
 
@@ -30,4 +32,6 @@ public interface ICustomerService
     Task<Result<IEnumerable<VLoanRequests>>> GetCustomerLoanRequestAsync(string? customerId, CancellationToken cancellation = default);
     Task<ErrorOr<VCustomerList>> UpdateCustomerAsync(EntityNames model, CancellationToken cancellation = default);
     Task<ErrorOr<VCustomerList>> CreateCustomerAsync(EntityNames model, CancellationToken cancellation = default);
-} 
+    Task<DeleteResult> DeleteAsync(string? customerId, CancellationToken cancellation = default);
+    Task<ErrorOr<bool>> MakeCustomerInActiveAsync(string? customerId, CancellationToken cancellation = default);
+}

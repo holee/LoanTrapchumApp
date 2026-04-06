@@ -123,7 +123,8 @@
                             <RadzenPanelMenuItem Text="Notifications"
                                                  Icon="notifications"
                                                  Path="/App/Notifications" />
-
+                            <RadzenPanelMenuItem Text="Active Customers" Icon="@IconNames.MoneyBag"
+                                                 Path="@($"/App/Customers/Loans/{branchId}/Branches")" />
                         </RadzenPanelMenuItem>
                     }
                     @if (bState.IsManager)

@@ -5,17 +5,14 @@ using Applications.Enumerations;
 using Applications.Extensions;
 using Applications.Features.Collaterals.Dtos;
 using Applications.Features.Customers.Extensions;
+using Applications.Features.Customers.Queries.GetCustomerAsPaging;
 using Applications.Features.Customers.Response;
-using Applications.Features.Customers.UseCases;
 using Applications.Features.Guarantor.Dtos;
 using Applications.Features.LoanRequests.Command.AddLoanRequestDocument;
-using Applications.Features.LoanRequests.Command.ApprovedLoanRequest;
-using Applications.Features.LoanRequests.Command.CreateLoanRequest;
 using Applications.Features.LoanRequests.Command.DeleteLoanRequestCollateral;
 using Applications.Features.LoanRequests.Command.DeleteLoanRequestDocument;
 using Applications.Features.LoanRequests.Command.DeleteLoanRequestGuarantor;
 using Applications.Features.LoanRequests.Command.SaveEditLoanRequest;
-using Applications.Features.LoanRequests.Command.SaveLoanRequest;
 using Applications.Features.LoanRequests.Queryies.GetLoanRequestDetailById;
 using Applications.Features.LoanRequests.Queryies.GetLoanRequestsDocuments;
 using Applications.Features.LoanRequests.Requests;
@@ -48,15 +45,13 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         private readonly IAppSettingService _settingsServiceImpl;
         private readonly IHolidayService _holidayService;
         private readonly ILogger<LoanRequestCreate> _logger;
-        private readonly GetCustomersUseCase _getCustomerUseCase;
         public LoanRequestEdit(ILoanSettingService loanSettingService, IAppSettingService settingService,
-            IHolidayService holidayService, ILogger<LoanRequestCreate> logger, GetCustomersUseCase getCustomerUseCase)
+            IHolidayService holidayService, ILogger<LoanRequestCreate> logger)
         {
             _loanSettingService = loanSettingService;
             _settingsServiceImpl = settingService;
             _holidayService = holidayService;
             _logger = logger;
-            _getCustomerUseCase = getCustomerUseCase;
         }
         [Parameter] public int? BranchId { get; set; } = 0;
         [Parameter] public string? CustomerId { get; set; }
@@ -349,7 +344,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
                 await GetCustomers(CustomerId, 1);
 
-                var query = new GetLoanRequestDetailByIdQuery(BranchId, CustomerId, LoanRequestId,true);
+                var query = new GetLoanRequestDetailByIdQuery(BranchId, CustomerId, LoanRequestId, true);
 
                 var reqResp = await mediator.Send(query);
 
@@ -392,16 +387,12 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         {
             var queryParam = new QueryParam(0, take, string.Empty, filter: filter);
 
-            var rsp = await _getCustomerUseCase.ExecuteAsync(null, null, customerId, queryParam);
+            var command = new GetCustomerAsPagingQuery(null, null, customerId, queryParam);
 
-            if (rsp.Items.Any())
-            {
-                _customers = rsp.Items;
-            }
-            else
-            {
-                _customers = [];
-            }
+            var rsp = await mediator.Send(command);
+
+            _customers = rsp.Items;
+
         }
 
 

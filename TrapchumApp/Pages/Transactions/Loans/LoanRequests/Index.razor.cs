@@ -6,6 +6,7 @@ using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Domains.Models.Identity;
 using Microsoft.AspNetCore.Authorization;
+using TrapchumApp.Shared;
 
 namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 {
@@ -14,8 +15,14 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
         [CascadingParameter]
         Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+
+        [CascadingParameter]
+        public CascadingAppState BState { get; set; } = default!;
+
         [Parameter] public int BranchId { get; set; } = 0;
+
         private string? _userId = string.Empty;
+
         IEnumerable<VLoanRequests> LoanRequests = [];
         int counts = 0;
         string uri = "";
@@ -36,56 +43,17 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         bool IsManager = false;
         void SelectedIndexChanged(int selectedIndex)
         {
-            _selectedIndex=selectedIndex;
+            _selectedIndex = selectedIndex;
         }
 
         protected override async Task OnInitializedAsync()
         {
             var auth = await AuthenticationState;
 
-            IsAccount = (await _authorizeService.AuthorizeAsync(auth.User, Policies.IsAccountOnly())).Succeeded;
-
-            IsCreditAgent = (await _authorizeService.AuthorizeAsync(auth.User, Policies.IsCreditOfficerOnly())).Succeeded;
-
-            IsManager = (await _authorizeService.AuthorizeAsync(auth.User, Policies.IsManagerOnly())).Succeeded;
-
-            CanRequestLoan = (await _authorizeService.AuthorizeAsync(auth.User, Policies.CanCreate())).Succeeded;
-            CanDisburseLoan = (await _authorizeService.AuthorizeAsync(auth.User, Policies.CanDisburseLoan())).Succeeded;
-            CanAprovedLoan = (await _authorizeService.AuthorizeAsync(auth.User, Policies.CanAproveRequest())).Succeeded;
+            await BState.GetAuthenticatedUser(auth.User);
 
             await base.OnInitializedAsync();
         }
-
-        protected override void OnParametersSet()
-        {
-            createRequestUrl = new Dictionary<string, object?>
-        {
-            {"BranchId",BranchId},
-            {"UserId",_userId},
-            { "ActionMode",ActionMode.Create}
-        }.AddQueryString($"/Loan/Customer/Request");
-            base.OnParametersSet();
-        }
-
-
-        async Task LoadLoanData(LoadDataArgs args)
-        {
-            pageIndex = args.Skip!.Value;
-
-            filtertext = args.Filter ?? string.Empty;
-
-            if (!string.IsNullOrEmpty(args.OrderBy))
-            {
-                sortColumn = args.OrderBy.Split(" ")[0];
-
-                string dir = args.OrderBy.Split(" ")[1];
-
-                sortDescending = dir.Contains("asc") ? false : true;
-            }
-            await GetLoanRequestAsync();
-        }
-
-
 
         async Task GetLoanRequestAsync()
         {
@@ -151,7 +119,6 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
         void RowSelectedChanged() { }
 
-
         void LoanRequestChecked(VLoanRequests param)
         {
             var baseURL = $"/Loan/Request/Review/{param.LoanRequestId}";
@@ -209,6 +176,18 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
                 _ => BadgeStyle.Dark
             };
         }
+
+
+        //protected override void OnParametersSet()
+        //{
+        //    createRequestUrl = new Dictionary<string, object?>
+        //{
+        //    {"BranchId",BranchId},
+        //    {"UserId",_userId},
+        //    { "ActionMode",ActionMode.Create}
+        //}.AddQueryString($"/Loan/Customer/Request");
+        //    base.OnParametersSet();
+        //}
 
 
     }

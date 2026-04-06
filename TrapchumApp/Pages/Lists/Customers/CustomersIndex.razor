@@ -49,6 +49,7 @@
                             CellRender="@OnCellRender"
                             RowDoubleClick="@OnRowDoubleClick"
                             @ref="@_gridCustomer"
+                            CellContextMenu="@ShowContextMenu"
                             Data="@VCustomers">
                 <HeaderTemplate>
                     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
@@ -207,18 +208,18 @@
     {
         ContextMenuService.Open(args, ds =>
     @<RadzenMenu Style="font-size:0.8rem;" Click="OnMenuItemClick">
-    <RadzenMenuItem Icon="add"
-                    Click="@(()=>AddLoanRequest(c.CustomerId))"
-                    Visible="@BState.CanRequest"
-                    Text="Request Loan"
-                    Value="@c.CustomerId"></RadzenMenuItem>
-    <RadzenMenuItem Click="@(() => AddCollateral(c.CustomerId))" Icon="add" Text="Add Collateral" Value="@c.CustomerId" />
-    <RadzenMenuItem Click="@(() => AddInComeModal(c.CustomerId))" Icon="money" Text="Add Income" Value="@c.CustomerId" />
-    <RadzenMenuItem Click="@(() => AddExpenseModal(c.CustomerId))" Icon="paid" Text="Add Expense" Value="@c.CustomerId" />
-    <RadzenMenuItem Click="@(() => AddDetails(c.CustomerId))" Icon="info" Text="Customer Details" Value="@c.CustomerId" />
-    <RadzenMenuItem Visible="@BState.IsAdmin" Click="@(() => AddEdit(c.CustomerId))" Icon="edit" Text="Edit" Value="@c.CustomerId" />
-    <RadzenMenuItem Visible="@BState.IsAdmin" Click="@(() => AddDelete(c.CustomerId))" Icon="delete" Text="Delete" Value="@c.CustomerId" />
-</RadzenMenu>
+        <RadzenMenuItem Icon="add"
+                        Click="@(()=>AddLoanRequest(c.CustomerId))"
+                        Visible="@BState.CanRequest"
+                        Text="Request Loan"
+                        Value="@c.CustomerId"></RadzenMenuItem>
+        <RadzenMenuItem Click="@(() => AddCollateral(c.CustomerId))" Icon="add" Text="Add Collateral" Value="@c.CustomerId" />
+        <RadzenMenuItem Click="@(() => AddInComeModal(c.CustomerId))" Icon="money" Text="Add Income" Value="@c.CustomerId" />
+        <RadzenMenuItem Click="@(() => AddExpenseModal(c.CustomerId))" Icon="paid" Text="Add Expense" Value="@c.CustomerId" />
+        <RadzenMenuItem Click="@(() => AddDetails(c.CustomerId))" Icon="info" Text="Customer Details" Value="@c.CustomerId" />
+        <RadzenMenuItem Visible="@BState.IsAdmin" Click="@(() => AddEdit(c.CustomerId))" Icon="edit" Text="Edit" Value="@c.CustomerId" />
+        <RadzenMenuItem Visible="@BState.IsAdmin" Click="@(() => AddDelete(c.CustomerId))" Icon="delete" Text="Delete" Value="@c.CustomerId" />
+    </RadzenMenu>
     );
     }
 
@@ -243,5 +244,124 @@
         await FIlterCustomers(selectedValue);
     }
 
+    private void ShowContextMenu(DataGridCellMouseEventArgs<VCustomerList> args)
+    {
+        if (args.Data is null) return;
+
+        ContextMenuService.Open(args, new List<ContextMenuItem>
+        {
+            new ContextMenuItem
+            {
+                Text = "Add Collateral",
+                Icon = "add",
+                Value = "1"
+            },
+            new ContextMenuItem
+            {
+                Text = "Request Loan",
+                Icon = "request_quote",
+                Value = "2",
+                Disabled = (!BState.CanRequest || args.Data.IsLoanActive)
+            },
+            new ContextMenuItem
+            {
+                Text = "Add Income",
+                Icon = "money",
+                Value = "3"
+            },
+             new ContextMenuItem
+            {
+                Text = "Add Expense",
+                Icon = "paid",
+                Value = "4"
+            },
+            new ContextMenuItem
+            {
+                Text = "Edit Customer",
+                Icon = "edit",
+                Value = "6",
+                Disabled = !BState.IsAdmin
+            },
+            new ContextMenuItem
+            {
+                Text = "Delete Customer",
+                Icon = "delete",
+                Value = "7",
+                Disabled = !BState.IsAdmin
+            },
+            new ContextMenuItem
+            {
+                Text = "Customer Details",
+                Icon = "info",
+                Value = "5"
+            }
+        }, (e) =>
+        {
+            ContextMenuService.Close();
+            DoShowCustomerActions(e, args);
+        });
+
+        
+    }
+
+    private void DoShowCustomerActions(MenuItemEventArgs e, DataGridCellMouseEventArgs<VCustomerList> args)
+    {
+        if (args.Data is null) return;
+
+          
+        if (int.TryParse(e.Value?.ToString(), out int value))
+        {
+            if (value == 1)
+            {
+                _ = AddCollateral(args.Data!.CustomerId);
+
+                return;
+            }
+            if (value == 2)
+            {
+                _ = AddLoanRequest(args.Data!.CustomerId);
+
+                return;
+            }
+
+            if (value == 3)
+            {
+                _ = AddInComeModal(args.Data!.CustomerId);
+
+                return;
+            }
+                
+            if (value == 4)
+            {
+                AddExpenseModal(args.Data!.CustomerId);
+
+                return;
+            }
+              
+            if (value == 5)
+            {
+                Details(args.Data!.CustomerId);
+
+                StateHasChanged();
+
+                return;
+            }
+            if (value == 6)
+            {
+                _ = AddEdit(args.Data!.CustomerId);
+
+                StateHasChanged();
+
+                return;
+            }
+
+            if (value == 7)
+            {
+                AddDelete(args.Data!.CustomerId);
+
+                return;
+            }
+        }
+    }
 
 }

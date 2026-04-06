@@ -8,7 +8,7 @@ namespace Domains.Enumerations
     public enum ProductTypeOption
     {
         [Description("Mortgage")]
-        Mortgage,
+        Mortgage = 1,
         [Description("Car Loan")]
         CarLoan,
         [Description("Student Loan")]

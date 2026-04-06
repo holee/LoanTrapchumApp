@@ -1,8 +1,15 @@
-﻿using Applications.Features.Holidays.Command.ActivateOrDeactivate;
+﻿using Applications.Features.Customers.Commands.CreateCustomer;
+using Applications.Features.Customers.Commands.DeactivateCustomer;
+using Applications.Features.Customers.Commands.DeleteCustomer;
+using Applications.Features.Customers.Commands.EditCustomer;
+using Applications.Features.Customers.Queries.GetActiveLoanCustomer;
+using Applications.Features.Customers.Queries.GetCustomerById;
+using Applications.Features.Holidays.Command.ActivateOrDeactivate;
 using Applications.Features.Holidays.Command.CreateHoliday;
 using Applications.Features.Holidays.Queries.GetActiveHolidays;
 using Applications.Features.Holidays.Queries.GetHolidayByDate;
 using Applications.Features.Holidays.Queries.GetHolidayById;
+using Applications.Features.Loans.Command.SaveLoanDisbursemenent;
 using Applications.Features.Schedules.Dto;
 using Applications.Features.Schedules.Queries.GetDueScheduleByLoanId;
 using Applications.Features.Schedules.Queries.GetScheduleById;
@@ -14,6 +21,7 @@ public static class ApplicationServiceInjection
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
+        services.AddScoped<IRequestHandler<SaveLoanDisbursementCommand, ErrorOr<RequestResult>>, SaveLoanDisbursementCommandHandler>();
         services.AddScoped<IRequestHandler<GetScheduleDetailByIdQuery, ErrorOr<ScheduleDetailsDto>>, GetScheduleDetailByIdQueryHandler>();
         services.AddScoped<IRequestHandler<GetScheduleByIdQuery, ErrorOr<VSchedule>>, GetScheduleByIdQueryHandler>();
         services.AddScoped<IRequestHandler<GetDueScheduleByLoanIdQuery, Pager<VSchedule>>, GetDueScheduleByLoanIdQueryHandler>();
@@ -101,7 +109,7 @@ public static class ApplicationServiceInjection
         services.AddScoped<GetCollateralDetailQueryHandler>();
         services.AddScoped<AddCustomerActivityUseCase>();
         services.AddScoped<GetCustomerActivityUseCase>();
-        services.AddScoped<GetCustomersUseCase>();
+        //services.AddScoped<GetCustomersUseCase>();
         services.AddScoped<GetIncomeByCustomerQueryHandler>();
         services.AddScoped<GetCustomerDetailByIdUseCase>();
         services.AddScoped<GetCustomerByIdCommand>();
@@ -214,14 +222,12 @@ public static class ApplicationServiceInjection
 
 
         services.AddScoped<IRequestHandler<GetCustomerByIdQuery, ErrorOr<EntityNames>>, GetCustomerByIdQueryHandler>();
-        services.AddScoped<IRequestHandler<GetCustomersQuery, Pager<VCustomerList>>, GetCustomersQueryHandler>();
-
-
-
-
         services.AddScoped<IRequestHandler<GetCustomerAsPagingQuery, Pager<VCustomerList>>, GetCustomerAsPagingQueryHandler>();
+        services.AddScoped<IRequestHandler<GetActiveLoanCustomerQuery, Pager<VCustomerList>>, GetActiveLoanCustomerQueryHandler>();
         services.AddScoped<IRequestHandler<CreateCustomerCommand, ErrorOr<VCustomerList>>, CreateCustomerCommandHandler>();
         services.AddScoped<IRequestHandler<EditCustomerCommand, ErrorOr<VCustomerList>>, EditCustomerCommandHandler>();
+        services.AddScoped<IRequestHandler<DeleteCustomerCommand, DeleteResult>, DeleteCustomerCommandHandler>();
+        services.AddScoped<IRequestHandler<DeactivateCustomerCommand, ErrorOr<bool>>, DeactivateCustomerCommandHandler>();
 
 
         services.AddScoped<IRequestHandler<CreateIncomeExpenseCommand, ErrorOr<int>>, CreateIncomeExpenseCommandHandler>();
@@ -237,7 +243,7 @@ public static class ApplicationServiceInjection
         services.AddScoped<IRequestHandler<DeleteLoanRequestCollateralCommand, ErrorOr<string>>, DeleteLoanRequestCollateralCommandHandler>();
         services.AddScoped<IRequestHandler<DeleteLoanRequestDocumentCommand, ErrorOr<string>>, DeleteLoanRequestDocumentCommandHandler>();
         services.AddScoped<IRequestHandler<DeleteLoanRequestGuarantorCommand, ErrorOr<string>>, DeleteLoanRequestGuarantorCommandHandler>();
-        services.AddScoped<IRequestHandler<ApprovedLoanRequestCommand, ErrorOr<RequestResult>>, ApprovedLoanRequestCommandHandler>();
+        services.AddScoped<IRequestHandler<DisburseLoanRequestCommand, ErrorOr<RequestResult>>, ApprovedLoanRequestCommandHandler>();
         services.AddScoped<IRequestHandler<AppliedLoanRequestCommand, ErrorOr<RequestResult>>, AppliedLoanRequestCommandHandler>();
         services.AddScoped<IRequestHandler<AddLoanRequestGuarantorCommand, ErrorOr<string>>, AddLoanRequestGuarantorCommandHandler>();
         services.AddScoped<IRequestHandler<AddLoanRequestDocumentsCommand, ErrorOr<string>>, AddLoanRequestDocumentsCommandHandler>();

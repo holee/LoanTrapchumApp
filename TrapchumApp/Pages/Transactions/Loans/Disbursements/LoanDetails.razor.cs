@@ -10,18 +10,14 @@ using Applications.Features.Loans.Services;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using TrapchumApp.Helpers.Extensions;
 using TrapchumApp.Pages.Transactions.Loans.Repayments;
+using TrapchumApp.Shared;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Disbursements;
 
-public partial class LoanDetails
+public partial class LoanDetails(ScheduleService scheduleService)
 {
-    private readonly ScheduleService _scheduleService;
-    public LoanDetails(ScheduleService scheduleService)
-    {
-        _scheduleService = scheduleService;
-    }
-
     [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+    [CascadingParameter] public CascadingAppState BState { get; set; } = default!;
     [Parameter] public int BranchId { get; set; }
     [Parameter] public string? LoanId { get; set; }
     [Parameter] public int CurrencyId { get; set; }
@@ -41,6 +37,7 @@ public partial class LoanDetails
     private string receiptNo = "";
 
     private bool isVible = false;
+
     async Task SelectedTabChanged(int index)
     {
         _selectedTabIndex = index;
@@ -123,9 +120,13 @@ public partial class LoanDetails
 
         var options = new SideDialogOptions
         {
-            Resizable = true,
+            Resizable = false,
             Width = "35rem",
-            CssClass = "rz-p-1 rz-m-0 rz-background-color-base-200"
+            CssClass = "rz-p-1 rz-m-0 rz-background-color-base-200",
+            ShowClose = false,
+            Position = DialogPosition.Right,
+            ShowMask = true,
+            CloseDialogOnOverlayClick = true
         };
 
 
@@ -152,9 +153,11 @@ public partial class LoanDetails
 
             parameters.Add("LoanPaymentCreate", loanPayment);
 
+            parameters.Add("CustomerName", loanSchedule!.AltName);
+
             var message = $"Recieve Payment from {loanSchedule!.AltName}";
 
-            bool? confirm = await DialogService.OpenSideAsync<PaymentModal>(message, parameters!, options);
+            bool? confirm = await DialogService.OpenSideAsync<PaymentSideBar>(message, parameters!, options);
 
             if (confirm is not null && confirm == true)
             {
@@ -172,18 +175,7 @@ public partial class LoanDetails
 
     private bool IsAlreadyPaidSchedule(VSchedule p)
     {
-
-
         return p.IsPaid;
-
-        //if (p.IsPaid)
-        //{
-        //    NotificationService.Notify(NotificationSeverity.Error, "This schedule is already paid.");
-
-        //    return true;
-        //}
-
-        //return false;
     }
 
     private bool IsFirstScheduleSelected(VSchedule p)
@@ -193,14 +185,6 @@ public partial class LoanDetails
         var firstSchedule = schedulesList?.First(x => x.IsPaid == false);
 
         return p == firstSchedule;
-
-        //{
-        //    return false;
-        //}
-
-        //return true;
-
-        // NotificationService.Notify(NotificationSeverity.Error, "Cannot add new schedule due to previouse schedule not complete paid yet.");
 
     }
 
@@ -212,41 +196,38 @@ public partial class LoanDetails
 
         ContextMenuService.Open(args,
             new List<ContextMenuItem> {
-                new ContextMenuItem(){ Text = "Recieve Payment", Value = 1, Icon = "save",Disabled = SetDisabled(args.Data) },
-                new ContextMenuItem(){ Text = "Receive By Schedule", Value = 2, Icon = "paid", Disabled = SetDisabled(args.Data) },
+                new ContextMenuItem(){ Text = "Recieve Payment", Value = 1, Icon = "save",Disabled = (SetDisabled(args.Data) || !BState.CanRecievePayment) },
+                new ContextMenuItem(){ Text = "Receive By Schedule", Value = 2, Icon = "paid", Disabled = (SetDisabled(args.Data) || !BState.CanRecievePayment) },
                 new ContextMenuItem(){ Text = "Show Details", Value = 3, Icon = "info" },
-            },
-            (e) =>
-            {
-
-                ContextMenuService.Close();
-
-                if (e.Value is not null && int.TryParse(e.Value!.ToString(), out int value))
-                {
-
-                    //if (!IsFirstScheduleSelected(args.Data))
-                    //    return;
-
-                    //if (IsAlreadyPaidSchedule(args.Data))
-                    //    return;
-
-                    switch (value)
-                    {
-                        case 1:
-                            GetPaymentSchedules();
-                            break;
-                        case 2:
-                            _ = PayBySchedules(args.Data!);
-                            break;
-                        case 3:
-                            _ = ShowScheduleDetails(args.Data!);
-                            break;
-                    }
-                }
-            }
-         );
+            }, DoShowContextMenuAction(args));
     }
 
+    private Action<MenuItemEventArgs> DoShowContextMenuAction(DataGridCellMouseEventArgs<VSchedule> args)
+    {
+        if (args.Data is null) return (e) => { };
+
+        return (e) =>
+        {
+
+            ContextMenuService.Close();
+
+            if (e.Value is not null && int.TryParse(e.Value!.ToString(), out int value))
+            {
+                switch (value)
+                {
+                    case 1:
+                        GetPaymentSchedules();
+                        break;
+                    case 2:
+                        _ = PayBySchedules(args.Data!);
+                        break;
+                    case 3:
+                        _ = ShowScheduleDetails(args.Data!);
+                        break;
+                }
+            }
+        };
+    }
 
     void GetPaymentSchedules()
     {
@@ -348,7 +329,11 @@ public partial class LoanDetails
     protected override async Task OnInitializedAsync()
     {
 
-        _userId = (await AuthenticationState).GetUserId();
+        var auth = await AuthenticationState;
+
+        await BState.GetAuthenticatedUser(auth.User);
+
+        _userId = auth.GetUserId();
 
         await GetLoanSchedulesById(ScheduleStatus.All);
 

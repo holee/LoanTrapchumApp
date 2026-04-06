@@ -48,11 +48,11 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             if (confirm == true && model is not null)
             {
 
-                var command = new ApprovedLoanRequestCommand(model);
+                var command = new DisburseLoanRequestCommand(model);
 
-                var resp = await mediator.Send(command);// _loanRequestService.AprovedRequestAsync(model);
+                var resp = await mediator.Send(command);
 
-                if (!resp.IsError)
+                if (resp.IsSuccess())
                 {
 
                     var description = new LoanDescriptionsDtoCreate(model.Memo, UserId, LoanRequestId);
@@ -61,7 +61,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
                     await mediator.Send(cmd);
 
-                    NotificationService.Notify(NotificationSeverity.Success, resp.Value.Message);
+                    NotificationService.Notify(NotificationSeverity.Success, resp.GetMessage());
 
                     DialogService.Close(true);
                 }

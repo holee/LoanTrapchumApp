@@ -2,7 +2,6 @@
 using Applications.Commons.Messages.LoanDisbursements;
 using Applications.Enumerations;
 using Applications.Extensions;
-using Applications.Features.Collaterals.Dtos;
 using Applications.Features.CreditAgents.Requests;
 using Applications.Features.Customers.Response;
 using Applications.Features.Loans.Responses;
@@ -39,54 +38,8 @@ namespace Infrastructures.Implements
             this.dbContextFactory = dbContextFactory;
         }
 
-        public async Task<Result<bool>> CreateLoanAsync(LoanDisbursment req, CancellationToken cancellation = default)
-        {
-
-            if (await CustomerAlreadyRequest(req.CustomerRefId))
-            {
-                return Result.Failure<bool>(ErrorResponse.Conflict("This Customer Is Already Requested"));
-            }
-
-            if (await CustomerInActiveLoan(req.CustomerRefId))
-            {
-                return Result.Failure<bool>(ErrorResponse.Conflict("This Customer Is Already disburse"));
-            }
-
-            await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);
-
-            await using var trans = await context.Database.BeginTransactionAsync(cancellation);
-
-            try
-            {
-                req.LoanAccountCode = await GetMaxLoanAccountCode(context);
-
-                context.LoanDisbursments.Add(req);
-
-                await context.SaveChangesAsync(cancellation);
-
-                await context.Customers
-                             .Where(x => x.CustomerId == req.CustomerRefId)
-                             .ExecuteUpdateAsync(p => p.SetProperty(x => x.IsLoanActive, true));
-
-                await context.LoanRequests.Where(x => x.LoanRequestId == req.LoanRequestId &&
-                                                      x.CustomerRefId == req.CustomerRefId)
-                    .ExecuteUpdateAsync(prop => prop
-                        .SetProperty(p => p.LoanRequestStatusRefId, (int)RequestStatus.Completed)
-                        .SetProperty(p => p.ModifiedDt, DateTime.UtcNow));
-
-                await trans.CommitAsync();
-
-                return Result.Success(true);
-            }
-            catch (DbUpdateException ex)
-            {
-                await trans.RollbackAsync(cancellation);
-
-                return Result.Failure<bool>(ErrorResponse.ServerError($"{ex.Message}"));
-            }
-        }
-
-        public async Task<ErrorOr.ErrorOr<DisburseResult>> CreateAsync(LoanDisbursment req, CancellationToken cancellation = default)
+   
+        public async Task<ErrorOr.ErrorOr<DisburseResult>> CreateLoanDisbursementAsync(LoanDisbursment req, CancellationToken cancellation = default)
         {
 
             if (await CustomerAlreadyRequest(req.CustomerRefId))
@@ -1120,3 +1073,49 @@ namespace Infrastructures.Implements
 //    return new Pager<VLoanDisbursments>(items, counts);
 //}
 
+//public async Task<Result<bool>> CreateLoanAsync(LoanDisbursment req, CancellationToken cancellation = default)
+//{
+
+//    if (await CustomerAlreadyRequest(req.CustomerRefId))
+//    {
+//        return Result.Failure<bool>(ErrorResponse.Conflict("This Customer Is Already Requested"));
+//    }
+
+//    if (await CustomerInActiveLoan(req.CustomerRefId))
+//    {
+//        return Result.Failure<bool>(ErrorResponse.Conflict("This Customer Is Already disburse"));
+//    }
+
+//    await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+//    await using var trans = await context.Database.BeginTransactionAsync(cancellation);
+
+//    try
+//    {
+//        req.LoanAccountCode = await GetMaxLoanAccountCode(context);
+
+//        context.LoanDisbursments.Add(req);
+
+//        await context.SaveChangesAsync(cancellation);
+
+//        await context.Customers
+//                     .Where(x => x.CustomerId == req.CustomerRefId)
+//                     .ExecuteUpdateAsync(p => p.SetProperty(x => x.IsLoanActive, true));
+
+//        await context.LoanRequests.Where(x => x.LoanRequestId == req.LoanRequestId &&
+//                                              x.CustomerRefId == req.CustomerRefId)
+//            .ExecuteUpdateAsync(prop => prop
+//                .SetProperty(p => p.LoanRequestStatusRefId, (int)RequestStatus.Completed)
+//                .SetProperty(p => p.ModifiedDt, DateTime.UtcNow));
+
+//        await trans.CommitAsync();
+
+//        return Result.Success(true);
+//    }
+//    catch (DbUpdateException ex)
+//    {
+//        await trans.RollbackAsync(cancellation);
+
+//        return Result.Failure<bool>(ErrorResponse.ServerError($"{ex.Message}"));
+//    }
+//}

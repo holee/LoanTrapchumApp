@@ -355,7 +355,7 @@ public sealed class LoanRequestRepository(
             : Error.Unexpected("Cannot changed loan request.");
     }
 
-    public async Task<ErrorOr<RequestResult>> AprovedLoanRequestAsync(AproveLoanDtoCreate req, CancellationToken cancellationToken = default)
+    public async Task<ErrorOr<RequestResult>> DisburseLoanRequestAsync(AproveLoanDtoCreate req, CancellationToken cancellationToken = default)
     {
 
         await using var cxt = await contextFactory.CreateDbContextAsync();
@@ -373,22 +373,67 @@ public sealed class LoanRequestRepository(
         {
             return Error.NotFound(LoanRequestMessage.REQUEST_NOT_FOUND);
         }
+
         using var transaction = await cxt.Database.BeginTransactionAsync(cancellationToken);
+
         try
         {
             existingLoanRequest.LoanRequestStatusRefId = (int)RequestStatus.Approved;
+
             existingLoanRequest.ModifiedDt = DateTime.UtcNow;
+
             existingLoanRequest.AprovedDate = req.AprovedDate;
+
             existingLoanRequest.AprovedAmount = req.AprovedAmount;
+
             existingLoanRequest.AdminFeeAmount = req.AdminFeeAmount;
+
             AddNotification(cxt, existingLoanRequest, NotificationType.Approved);
+
             await cxt.SaveChangesAsync(cancellationToken);
+
             await transaction.CommitAsync(cancellationToken);
+
             return new RequestResult(true, "Loan Request was Aproved");
         }
         catch (Exception ex)
         {
             await transaction.RollbackAsync(cancellationToken);
+
+            return Error.Unexpected($"{ex.Message}");
+        }
+    }
+
+
+    public async Task<ErrorOr<RequestResult>> SaveLoanDisbursementAsync(SaveLoanDisbursementDtoCreate req, CancellationToken cancellationToken = default)
+    {
+
+        await using var cxt = await contextFactory.CreateDbContextAsync();
+
+        var existingLoanRequest = await cxt.LoanRequests
+            .FirstOrDefaultAsync(x => x.LoanRequestId == req.LoanRequestId &&
+                        x.BranchRefId == req.BranchId &&
+                        x.CustomerRefId == req.CustomerId, cancellationToken);
+        if (existingLoanRequest is null)
+        {
+            return Error.NotFound(LoanRequestMessage.REQUEST_NOT_FOUND);
+        }
+
+        if (existingLoanRequest.EditSeq != existingLoanRequest.EditSeq)
+        {
+            return Error.NotFound(LoanRequestMessage.REQUEST_NOT_FOUND);
+        }
+
+        try
+        {
+            existingLoanRequest.LoanRequestStatusRefId = (int)RequestStatus.Requested;
+
+            await cxt.SaveChangesAsync(cancellationToken);
+
+            return new RequestResult(true, "Loan Request was saved successfully");
+        }
+        catch (Exception ex)
+        {
             return Error.Unexpected($"{ex.Message}");
         }
     }
@@ -1006,7 +1051,7 @@ public sealed class LoanRequestRepository(
             var documentsTask = GetLoanDocuments(loanRequestId, branchId);
             var descriptionsTask = GetLoanRequestDescriptions(loanRequestId);
             var customerTask = GetLoanCustomer(customerId);
-          
+
             await Task.WhenAll(guarantorsTask, collateralsTask, documentsTask, descriptionsTask, customerTask);
 
             resultQueries.Guarantors = guarantorsTask.Result.ToList();

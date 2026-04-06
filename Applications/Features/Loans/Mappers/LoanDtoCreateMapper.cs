@@ -1,6 +1,7 @@
 ﻿using Applications.Enumerations;
 using Applications.Extensions.Enums;
 using Applications.Features.Loans.Requests;
+using Domains.Enumerations;
 using Domains.Models.Loans;
 using Domains.Models.Transaction;
 
@@ -23,7 +24,7 @@ public static class LoanDtoCreateMapper
             UserRefId = dto.UserRefId,
             Principle = dto.Principle,
             CreditAgentRefId = dto.CreditAgentRefId,
-            LoanProductRefId = dto.LoanProductRefId,
+            LoanProductRefId = dto.LoanProductRefId ?? (int)ProductTypeOption.Mortgage,
             LoanAccountCode = dto.LoanAccountCode,
             Period = dto.Period,
             PeriodName = dto.PeriodName,

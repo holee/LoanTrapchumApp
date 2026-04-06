@@ -11,7 +11,7 @@ namespace Applications.Features.Loans.Services;
 public interface ILoanServiceImpl
 {
     Task<Result<string>> ChangedCreditAgent(int? branchId, List<LoanChangedCaDtoCreate> req);
-    Task<Result<bool>> CreateLoanAsync(LoanDtoCreate req);
+    //Task<Result<bool>> CreateLoanAsync(LoanDtoCreate req);
     Task<Result<string>> DeleteAsync(string? loanId, int? branchId);
     Task<Result<string>> UpdateAsync(LoanDisbursment disbursement);  
     Task<Pager<VLoanDisbursments>> GetLoansByBranchIdAsync(int? branchId, string? userId, LoanStatuses status = LoanStatuses.Active, QueryParam? param = null, CancellationToken cancellation = default);

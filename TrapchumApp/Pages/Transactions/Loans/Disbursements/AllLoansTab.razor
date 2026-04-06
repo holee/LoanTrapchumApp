@@ -238,7 +238,7 @@
 
         _getLoanDetailsUrl = $"/App/Loan/{p.LoanId}/Branches/{p.BranchId}/Currencies/{p.CurrencyId}";
 
-        _getChangeCreditAgentUrl = $"/App/Loan/{p.LoanId}/CreditAgent/{p.CreditAgentRefId}?CustomerId={p.CustomerId}&BranchId={p.BranchId}&CurrencyId={p.CurrencyId}";
+        _getChangeCreditAgentUrl = $"App/Loans/Disbursments/Credit-Agent/{p.BranchId}/Branches?CreditAgentId={p.CreditAgentRefId}";
 
         ContextMenuService.Open(args, ds => @<RadzenMenu Style="font-size:0.8rem;">
             <RadzenMenuItem Icon="money"
@@ -259,7 +259,7 @@
                             Text="Change Credit Agent"></RadzenMenuItem>
             <RadzenMenuItem Icon="info"
                             Path="@_getLoanDetailsUrl"
-                            Text="Details"></RadzenMenuItem>
+                            Text="Schedule Details"></RadzenMenuItem>
             <RadzenMenuItem Icon="file_download"
                             Click="@(()=>DownLoadScheduleAsExcel(p))"
                             Text="Export Loan to Excel" />
@@ -279,42 +279,80 @@
 
     void OnRowRender(RowRenderEventArgs<VLoanDisbursments> arg)
     {
-        arg.Data!.RowIndex = arg.Index + 1;
+
+        if (arg.Data is null) return;
+
+        arg.Data.RowIndex = arg.Index + 1;
     }
 
     void ContextMenuClick(DataGridCellMouseEventArgs<VLoanDisbursments> args)
     {
+
+        if (args.Data is null) return;
+
         ContextMenuService.Open(args, new List<ContextMenuItem>
         {
-            new ContextMenuItem { Text = "Recieve Payment", Value="1",Icon="money_bag"},
+            new ContextMenuItem { Text = "Recieve Payment", Value="1",Icon="money_bag",Disabled=!bState.CanRecievePayment},
             new ContextMenuItem { Text = "Schedule Detials", Value="2",Icon="info"},
+            new ContextMenuItem { Text = "Change Credit Agent", Value="5",Icon="find_replace",Disabled=!bState.IsManager},
             new ContextMenuItem { Text = "Export As Excel", Value="3", Icon="file_download"},
             new ContextMenuItem { Text = "Export As Pdf", Value="4", Icon="picture_as_pdf"},
-        }, (e) =>
-        {
-            ContextMenuService.Close();
-
-            if (int.TryParse(e.Value!.ToString(), out var selectedId))
-            {
-                switch (selectedId)
-                {
-                    case 1:
-                        GetPaymentSchedules(args.Data);
-                        break;
-                    case 2:
-                        GetLoanDetails(args.Data);
-                        break;
-                    case 3:
-                        _ = DownLoadScheduleAsExcel(args.Data);
-                        break;
-                    case 4:
-                        _ = DownLoadScheduleAsPdf(args.Data);
-                        break;
-                }
-                
-            }
-        });
+        }, (e) => DoContextMenuAction(e, args.Data));
     }
 
+    void DoContextMenuAction(MenuItemEventArgs e, VLoanDisbursments? data)
+    {
+        ContextMenuService.Close();
+
+        if (e.Value is null) return;
+
+        if (data is null) return;
+
+        switch (e.Value)
+        {
+            case "1":
+                GetPaymentSchedules(data);
+                break;
+            case "2":
+                GetLoanDetails(data);
+                break;
+            case "3":
+                _ = DownLoadScheduleAsExcel(data);
+                break;
+            case "4":
+                _ = DownLoadScheduleAsPdf(data);
+                break;
+            default:
+                NavigationManager.NavigateTo($"App/Loans/Disbursments/Credit-Agent/{data.BranchId}/Branches?CreditAgentId={data.CreditAgentRefId}");
+                break;
+        }
+    }
+
+    // {
+            
+
+    //     if (int.TryParse(e.Value!.ToString(), out var selectedId))
+    //     {
+    //         switch (selectedId)
+    //         {
+    //             case 1:
+    //                 GetPaymentSchedules(args.Data);
+    //                 break;
+    //             case 2:
+    //                 GetLoanDetails(args.Data);
+    //                 break;
+    //             case 3:
+    //                 _ = DownLoadScheduleAsExcel(args.Data);
+    //                 break;
+    //             case 4:
+    //                 _ = DownLoadScheduleAsPdf(args.Data);
+    //                 break;
+    //             default:
+    //                 NavigationManager.NavigateTo($"App/Loans/Disbursments/Credit-Agent/{args.Data.BranchId}/Branches?CreditAgentId={args.Data.CreditAgentRefId}");
+    //                 break;
+    //         }
+                
+    //     }
+    // });
 }
 

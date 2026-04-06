@@ -215,7 +215,7 @@ namespace TrapchumApp.Shared
 
         internal async Task CheckedIsAdmin(ClaimsPrincipal user)
         {
-            if (user is null && user?.Identity?.IsAuthenticated == false)
+            if (user is null || (user is not null && user?.Identity?.IsAuthenticated == false))
             {
                 _isAdmin = false;
 
@@ -255,7 +255,7 @@ namespace TrapchumApp.Shared
 
         internal async Task CheckedIsManager(ClaimsPrincipal user)
         {
-            if (user is null && user?.Identity?.IsAuthenticated == false)
+            if (user is null || (user is not null && user?.Identity?.IsAuthenticated == false))
             {
                 _isManager = false;
                 return;
@@ -292,7 +292,7 @@ namespace TrapchumApp.Shared
 
         internal async Task CheckedIsAccount(ClaimsPrincipal user)
         {
-            if (user is null && user?.Identity?.IsAuthenticated == false)
+            if (user is null || (user is not null && user?.Identity?.IsAuthenticated == false))
             {
                 _isAccount = false;
                 return;
@@ -303,7 +303,7 @@ namespace TrapchumApp.Shared
 
         internal async Task CheckedIsCreditAgent(ClaimsPrincipal user)
         {
-            if (user is null && user?.Identity?.IsAuthenticated == false)
+            if (user is null || (user is not null && user?.Identity?.IsAuthenticated == false))
             {
                 _isCreditAgent = false;
                 return;
@@ -314,7 +314,7 @@ namespace TrapchumApp.Shared
 
         internal async Task CheckedCanDisbursemnt(ClaimsPrincipal user)
         {
-            if (user is null && user?.Identity?.IsAuthenticated == false)
+            if (user is null || (user is not null && user?.Identity?.IsAuthenticated == false))
             {
                 _canDisbursed = false;
 
@@ -330,7 +330,7 @@ namespace TrapchumApp.Shared
 
         internal async Task CheckedCanVaultIn(ClaimsPrincipal user)
         {
-            if (user is null && user?.Identity?.IsAuthenticated == false)
+            if (user is null || (user is not null && user?.Identity?.IsAuthenticated == false))
             {
                 _vaultIn = false;
 
@@ -342,7 +342,7 @@ namespace TrapchumApp.Shared
 
         internal async Task CheckedCanVaultOut(ClaimsPrincipal user)
         {
-            if (user is null && user?.Identity?.IsAuthenticated == false)
+            if (user is null || (user is not null && user?.Identity?.IsAuthenticated == false))
             {
                 _vaultOut = false;
 
@@ -353,19 +353,16 @@ namespace TrapchumApp.Shared
         }
 
 
-        internal async Task CheckedCanApprved(ClaimsPrincipal user)
+        internal async Task CheckedCanApproved(ClaimsPrincipal? user)
         {
 
-            if (user is null && user?.Identity?.IsAuthenticated == false)
-            {
-
-                _canApproved = await _authorizeService.MustHasPermissionAsync(user!, Policies.ApproveLoanRequest);
-
-            }
-            else
+            if (user is null || (user is not null && user?.Identity?.IsAuthenticated == false))
             {
                 _canApproved = false;
+                return;
             }
+
+            _canApproved = await _authorizeService.MustHasPermissionAsync(user!, Policies.ApproveLoanRequest);
 
         }
 
@@ -381,7 +378,7 @@ namespace TrapchumApp.Shared
 
             //canVaultIn = await _authorizeService.MustHasPermissionAsync(auth.User, Policies.TranxVaultIn);
 
-            if (user is null && user?.Identity?.IsAuthenticated == false)
+            if (user is null || (user is not null && user?.Identity?.IsAuthenticated == false))
             {
                 _canOpenBranch = false;
             }
@@ -393,7 +390,7 @@ namespace TrapchumApp.Shared
 
         internal async Task CheckedCanRequest(ClaimsPrincipal user)
         {
-            if (user is null && user?.Identity?.IsAuthenticated == false)
+            if (user is null || (user is not null && user?.Identity?.IsAuthenticated == false))
             {
                 _canRequest = false;
 
@@ -406,7 +403,7 @@ namespace TrapchumApp.Shared
 
         public async Task GetAuthenticatedUser(ClaimsPrincipal user)
         {
-            await CheckedCanApprved(user);
+            await CheckedCanApproved(user);
             await CheckedCanDisbursemnt(user);
             await CheckedCanRequest(user);
             await CheckedIsAccount(user);
@@ -469,17 +466,6 @@ namespace TrapchumApp.Shared
             if (user is not null && user.Identity?.IsAuthenticated == true)
             {
                 _userId = user.GetId();
-
-                //var rsp = await _branchService.GetBranchesByUser(_userId);
-
-                //if (rsp.IsSuccess && rsp.Data is not null)
-                //{
-                //    _branchId = rsp.Data.BranchId;
-                //}
-                //else
-                //{
-                //    _branchId = 0;
-                //}
             }
             else
             {

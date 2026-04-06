@@ -28,6 +28,7 @@
                                     @bind-Value="@BranchId"
                                     Placeholder="Branch Name"
                                     Style="font-size:0.8rem;"
+                                    Disabled="@(BranchId != 0)"
                                     Data="@_newBranches">
                     </RadzenDropDown>
                 </RadzenFormField>
@@ -91,7 +92,7 @@
                         <Template Context="data">
                             <RadzenCheckBox TValue="bool" TabIndex="-1"
                                             Value="@(_selectedSchedules != null && _selectedSchedules.Contains(data))"
-                                            TriState="false" 
+                                            TriState="false"
                                             InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "Select an item" } })" />
                         </Template>
                     </RadzenDataGridColumn>

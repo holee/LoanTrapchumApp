@@ -37,10 +37,6 @@
     private List<CustomTab> _tabs = [];
     private int _selectedIndex = 0;
 
-    private void ShowLoanDisbursementDetail(){
-
-    }
-
     void CloseTab(string tabId)
     {
         var tabIndex = _tabs.FirstOrDefault(t => t.Key == tabId);
@@ -55,25 +51,3 @@
 
 
 }
-
-
-
-@* <RadzenTabsItem Text="Requesting"
-                            Visible="@IsCreditAgent"
-                            Icon="pending_actions">
-                <LoanRequestRequesting BranchId="@BranchId" />
-            </RadzenTabsItem>
-            <RadzenTabsItem Text="Requested"
-                            Visible="@IsManager"
-                            Icon="request_quote">
-                <LoanRequestRequested BranchId="@BranchId"
-                                      UserId="@_userId" />
-            </RadzenTabsItem> *@
-@* <RadzenTabsItem Text="Approved"
-                            Visible="@IsAccount"
-                            Icon="@IconNames.Approval">
-                <LoanRequestApprove BranchId="@BranchId" UserId="@_userId" />
-            </RadzenTabsItem>
-            <RadzenTabsItem Text="Completed" Icon="@IconNames.Done">
-                <LoanRequestCompleted BranchId="@BranchId" CreditAgentId="@_userId" />
-            </RadzenTabsItem> *@

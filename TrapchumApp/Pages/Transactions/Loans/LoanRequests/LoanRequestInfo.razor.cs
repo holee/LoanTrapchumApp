@@ -2,12 +2,11 @@ using Applications.Commons.Mappers;
 using Applications.Enumerations;
 using Applications.Extensions;
 using Applications.Extensions.Maths;
+using Applications.Features.Customers.Queries.GetCustomerAsPaging;
 using Applications.Features.Customers.Response;
-using Applications.Features.Customers.UseCases;
 using Applications.Features.LoanPayments.Requests;
 using Applications.Features.LoanRequests.Requests;
 using Applications.Features.Loans.Requests;
-using Applications.Features.Settings.UseCases;
 using Applications.Interfaces.Lists;
 using Applications.Responses.Loans.Disbursements;
 using Applications.Responses.Paginations;
@@ -15,19 +14,12 @@ using Applications.Responses.ViewModels.Loans.Requests;
 using Applications.Responses.ViewModels.Options;
 using Applications.Responses.ViewModels.Settings;
 using Applications.Services.Loans;
-using Microsoft.AspNetCore.Components;
 
 namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 {
-    public partial class LoanRequestInfo(
-        ILoanSettingServiceImpl loanSettingService,
-        ISettingServiceImpl settingsServiceImpl,
-        IHolidayService holidayService,
-        GetCustomersUseCase getCustomersUseCase,
-        ILogger<LoanRequestCreate> logger)
+    public partial class LoanRequestInfo(ILoanSettingServiceImpl loanSettingService, IHolidayService holidayService, ILogger<LoanRequestCreate> logger)
     {
         private readonly ILogger<LoanRequestCreate> _logger = logger;
-
         [Parameter] public LoanRequestDtoCreate Model { get; set; } = new();
         [Parameter] public string? UserId { get; set; }
         [Parameter] public int? BranchId { get; set; } = 0;
@@ -126,16 +118,12 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         {
             var queryParam = new QueryParam(0, take, string.Empty, filter: filter);
 
-            var rsp = await getCustomersUseCase.ExecuteAsync(0, null, customerId, queryParam);
+            var command = new GetCustomerAsPagingQuery(BranchId, null, customerId, queryParam);
 
-            if (rsp.Items.Any())
-            {
-                Customers = rsp.Items;
-            }
-            else
-            {
-                Customers = [];
-            }
+            var rsp = await mediator.Send(command);
+
+            Customers = rsp.Items;
+
         }
 
         async Task SetCustomerId(string? customerId)

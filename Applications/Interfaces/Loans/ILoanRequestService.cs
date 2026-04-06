@@ -15,7 +15,7 @@ namespace Applications.Interfaces.Loans
         Task<ErrorOr<string>> ChangedLoanRequestAsync(LoanChangeStatusDtoCreate req);
         Task<ErrorOr<RequestResult>> CreateNewLoanRequestAsync(LoanRequest request, CancellationToken cancellationToken = default);
         Task<ErrorOr<RequestResult>> SaveLoanRequestAsync(LoanRequest req, CancellationToken cancellationToken = default);
-        Task<ErrorOr<RequestResult>> AprovedLoanRequestAsync(AproveLoanDtoCreate req, CancellationToken cancellationToken = default);
+        Task<ErrorOr<RequestResult>> DisburseLoanRequestAsync(AproveLoanDtoCreate req, CancellationToken cancellationToken = default);
         Task<ErrorOr<RequestResult>> RecheckedLoanRequestAsync(RecheckedRequestDtoCreate req, CancellationToken cancellationToken = default);
         Task<ErrorOr<RequestResult>> DeniedLoanRequestAsync(DeniedRequestDtoCreate req, CancellationToken cancellationToken = default);
         Task<ErrorOr<RequestResult>> VerifiedLoanRequestAsync(RequestDtoBaseCreate req, CancellationToken cancellationToken = default);
@@ -41,5 +41,6 @@ namespace Applications.Interfaces.Loans
         Task<ErrorOr<string>> AddDescription(LoanDescriptions descriptions, CancellationToken cancellation = default);
         Task<ErrorOr<VLoanRequests>> GetApprovedLoanRequestAsync(int? branchId, string? customerId, string? loanRequestId, bool include);
         Task<ErrorOr<LoanRequest>> GetEditLoanRequestAsync(int? branchId, string? customerId, string? loanRequestId, CancellationToken cancellation = default);
+        Task<ErrorOr<RequestResult>> SaveLoanDisbursementAsync(SaveLoanDisbursementDtoCreate req, CancellationToken cancellationToken = default);
     }
 }

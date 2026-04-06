@@ -26,12 +26,8 @@ using TrapchumApp.Shared;
 
 namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 {
-    public partial class LoanRequestCreate
+    public partial class LoanRequestCreate(ILoanSettingService loanSettingService, IAppSettingService settingService, IHolidayService holidayService, ILogger<LoanRequestCreate> logger)
     {
-        private readonly ILoanSettingService _loanSettingService;
-        private readonly IAppSettingService _settingsServiceImpl;
-        private readonly IHolidayService _holidayService;
-        private readonly ILogger<LoanRequestCreate> _logger;
         [Parameter] public int? BranchId { get; set; } = 0;
         [Parameter] public string? CustomerId { get; set; } = string.Empty;
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
@@ -103,19 +99,6 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         IEnumerable<System.IO.FileInfo> UploadFiles = [];
 
         decimal? LoanRequestAmount = 0;
-
-        public LoanRequestCreate(
-            ILoanSettingService loanSettingService,
-            IAppSettingService settingService,
-            IHolidayService holidayService,
-            ILogger<LoanRequestCreate> logger,
-            GetCustomersUseCase getCustomersUseCase)
-        {
-            _holidayService = holidayService;
-            _logger = logger;
-            _loanSettingService = loanSettingService;
-            _settingsServiceImpl = settingService;
-        }
 
         void SelectTabIndexChanged(int tabIndex)
         {
@@ -427,7 +410,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
         private async Task HandleLoanRequest(RequestStatus state)
         {
-            _logger.LogInformation("get start loan requesting...");
+            logger.LogInformation("get start loan requesting...");
 
             var oldGuarantors = Guarantors.ToGuarantorDtoCreate(BranchId);
 
