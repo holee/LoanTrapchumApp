@@ -1,701 +1,284 @@
-﻿@using Applications.Features.Addresses
-@using Applications.Features.Branches
-@using Applications.Features.Currencies
-@using Applications.Features.Currencies.Dto
-@using Applications.Features.Customers.Services
-@using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Interfaces
+﻿@using Applications.Features.Currencies.Dto
 @using Applications.Features.Transactions.Journals
 @using Applications.Requests.Journals
 @using Applications.Responses.ViewModels.Journals
 @using Applications.Responses.ViewModels.Ledgers
-@using TrapchumApp.Services
 <PageTitle>Journal Entry</PageTitle>
-<style> 
-    .table-cell-edited {
-        position: relative;
+<style>
+    .journal-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.875rem;
     }
-
-        .table-cell-edited::after {
-            content: "";
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 0;
-            height: 0;
-            border-top: 10px solid red;
-            border-left: 10px solid transparent;
-        }
+    .journal-table th {
+        background: var(--rz-base-200);
+        padding: 6px 8px;
+        text-align: left;
+        font-weight: 600;
+        border: 1px solid var(--rz-base-300);
+        white-space: nowrap;
+    }
+    .journal-table td {
+        padding: 4px 6px;
+        border: 1px solid var(--rz-base-300);
+        vertical-align: middle;
+    }
+    .journal-table tfoot td {
+        background: var(--rz-base-200);
+        padding: 6px 8px;
+        font-weight: 600;
+        border: 1px solid var(--rz-base-300);
+    }
+    .journal-totals {
+        font-weight: 600;
+    }
+    .balance-ok {
+        color: var(--rz-success);
+    }
+    .balance-error {
+        color: var(--rz-danger);
+        font-weight: 700;
+    }
+    .text-center {
+        text-align: center;
+    }
+    .text-right {
+        text-align: right;
+    }
 </style>
-<RadzenFieldset AllowCollapse="false" Collapsed="false" Text="Journal Entry">
+<RadzenFieldset AllowCollapse="false" Text="Journal Entry">
     <RadzenAlert AlertStyle="AlertStyle.Danger" Visible="@_isMessage" ShowIcon="true"
                  Variant="Variant.Flat" Shade="Shade.Lighter">
-        <span>@_titleMessage: </span> @_messageAlert
+        <span>@_titleMessage</span> @_messageAlert
     </RadzenAlert>
-    <EditForm Model="JLe" @ref="@_editForm">
+    <EditForm  Model="JLe" OnValidSubmit="@HandleFormSave" FormName="JournalEntryForm">
         <DataAnnotationsValidator />
-        <ValidationSummary />
-        <RadzenRow AlignItems="AlignItems.Center" Gap="1rem">
-            <RadzenColumn Size="2">
-                <RadzenLabel Text="Currency" />
+        <FluentValidationValidator DisableAssemblyScanning="true" />
+        <RadzenRow class="rz-mb-4">
+            <RadzenColumn SizeMD="2">
+                <RadzenFormField AllowFloatingLabel="true" Text="Journal Date">
+                    <ChildContent>
+                         <RadzenDatePicker @bind-Value="JLe.JournalDate"
+                                      DateFormat="yyyy-MM-dd"
+                                      Change="@(_ => OnValidateDate())"
+                                      class="w-100" />
+                    </ChildContent>
+                    <Helper>
+                            <ValidationMessage For="@(() => JLe.JournalDate)" />
+                    </Helper>
+                </RadzenFormField>
             </RadzenColumn>
-            <RadzenColumn Size="3">
-                <RadzenDropDown @bind-Value="@JLe.CurrencyRefId"
-                                class="form-control"
-                                Data="@_currencies"
-                                TextProperty="@nameof(CurrencyDto.CurrencyCode)"
-                                ValueProperty="@nameof(CurrencyDto.CurrencyId)"
-                                SelectedItemChanged="SelectedCurrencyChanged"
-                                Name="DropDownBindValue" />
+            <RadzenColumn SizeMD="3">
+                <RadzenFormField AllowFloatingLabel="true" Text="Journal Type" Style="width:100%;">
+                    <ChildContent>
+                        <RadzenDropDown @bind-Value="@JLe.JournalType"
+                                    TValue="string"
+                                    class="rz-w-100"
+                                    Data="@_journalTypes"
+                                    Placeholder="Select type"
+                                    TextProperty="@nameof(JournalTypeDto.Description)"
+                                    ValueProperty="@nameof(JournalTypeDto.Code)"
+                                    Name="JournalType" />
+                    </ChildContent>
+                    <Helper>
+                        <ValidationMessage For="@(() => JLe.JournalType)" />
+                    </Helper>
+                </RadzenFormField>
             </RadzenColumn>
-            <RadzenColumn Size="3">
-                <div class="text-center">
-                    <RadzenCheckBox @bind-Value=@JLe.IsAdjustment Name="CheckBox1" />
-                    <RadzenLabel Component="CheckBox1">
-                        Adjustment Entry
-                    </RadzenLabel>
-                </div>
+            <RadzenColumn SizeMD="3">
+                <RadzenFormField AllowFloatingLabel="true" Text="Currency" class="rz-w-100">
+                    <ChildContent>
+                        <RadzenDropDown @bind-Value="@JLe.CurrencyRefId"
+                                        class="rz-w-100"
+                                        Data="@_currencies"
+                                        TextProperty="@nameof(CurrencyDto.CurrencyCode)"
+                                        ValueProperty="@nameof(CurrencyDto.CurrencyId)"
+                                        SelectedItemChanged="SelectedCurrencyChanged"
+                                        Name="Currency" />
+                    </ChildContent>
+                    <Helper>
+                        <ValidationMessage For="@(() => JLe.CurrencyRefId)" />
+                    </Helper>
+                </RadzenFormField>
             </RadzenColumn>
-            <RadzenColumn Size="1">
-                <RadzenLabel Text="Date" />
-            </RadzenColumn>
-            <RadzenColumn Size="2">
-                <input id="startDate"
-                       class="date form-control "
-                       type="date"
-                       @bind-value="JLe.JournalDate"
-                       @bind-value:after="@OnValidateDate" />
-            </RadzenColumn>
-        </RadzenRow>
-        <RadzenRow class="rz-my-2">
-            <RadzenColumn Size="2">
-                <RadzenLabel Text="Journal Type" />
-            </RadzenColumn>
-            <RadzenColumn Size="3">
-                <RadzenDropDown @bind-Value="@JLe.JournalType"
-                                TValue="string"
-                                class="form-control"
-                                Data="@_journalTypes"
-                                Placeholder="Select Journal type"
-                                TextProperty="@nameof(JournalTypeDto.Description)"
-                                ValueProperty="@nameof(JournalTypeDto.Code)"
-                                SelectedItemChanged="SelectedItemChanged"
-                                Name="DropDownBindValue" />
-            </RadzenColumn>
-            <RadzenColumn Size="1">
-                <RadzenLabel Text="Ref #" />
-            </RadzenColumn>
-            <RadzenColumn Size="3">
-                <RadzenTextBox @bind-Value="JLe.ReferrenceNum"
-                               Name="ReferrenceNum"
-                               Placeholder="Ref No "
-                               class="w-100" />
-            </RadzenColumn>
-        </RadzenRow>
-        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End"
-                     class="rz-my-2"
-                     AlignItems="AlignItems.Center">
-            <RadzenButton Text="Add New Line"
-                          Size="ButtonSize.ExtraSmall"
-                          Click="@AddLastRows"
-                          ButtonStyle="ButtonStyle.Secondary"
-                          Icon="@IconNames.AddTask"></RadzenButton>
-        </RadzenStack>
-        <RadzenDataGrid Responsive="true"
-                        @ref="gridJournalLines"
-                        GridLines="DataGridGridLines.Both"
-                        AllowAlternatingRows="true"
-                        RowUpdate="@OnUpdateRow"
-                        TItem="JournalLineDtoCreate"
-                        CellClick="@OnCellClick"
-                        RowSelect="@OnRowEditInitiated"
-                        Data="@JournalLines">
-            <Columns>
-                <RadzenDataGridColumn Title="#"
-                                      Width="5rem"
-                                      TextAlign="TextAlign.Center"
-                                      Property="@nameof(JournalLineDto.LineSeq)" />
-                <RadzenDataGridColumn Title="Account"
-                                      Context="jl"
-                                      TItem="JournalLineDtoCreate"
-                                      IsInEditMode="@IsEditing"
-                                      Property="@nameof(JournalLineDtoCreate.LedgerRefId)">
-                    <Template>
-                        @jl.LedgerName
-                    </Template>
-                    <EditTemplate>
-                        <RadzenDropDownDataGrid @bind-Value="jl.LedgerRefId"
-                                                @ref="editor"
-                                                Style="width:100%;"
-                                                Density="Density.Compact"
-                                                Data="@Ledgers"
-                                                LoadData="LoadDataLedger"
-                                                class="form-control"
-                                                ShowSearch="false"
-                                                ShowAdd="true"
-                                                @bind-SearchText="filter"
-                                                AllowSelectAll="true"
-                                                FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-                                                Placeholder="Ledger..."
-                                                ValueProperty="@nameof(VLedger.LedgerId)"
-                                                TextProperty="@nameof(VLedger.LedgerName)"
-                                                SelectedItemChanged="@((arg) => SelectedItemChanged(arg, jl))"
-                                                Name="LedgerName">
-                            <Template Context="c">
-                                <RadzenStack Orientation="Orientation.Horizontal"
-                                             JustifyContent="JustifyContent.SpaceBetween">
-                                    <span>
-                                        @((c as VLedger)?.LedgerName)
-                                    </span>
-                                    <i>
-                                        @((c as VLedger)?.LedgerTypeCode)
-                                    </i>
-                                </RadzenStack>
-                            </Template>
-                            <ValueTemplate Context="c2">
-                                <span>
-                                    @((c2 as VLedger)?.LedgerName)
-                                </span>
-                            </ValueTemplate>
-                        </RadzenDropDownDataGrid>
-                        <RadzenRequiredValidator Text="Account is required" Component="LedgerName" Popup="true" />
-                    </EditTemplate>
-                </RadzenDataGridColumn>
-                <RadzenDataGridColumn Title="Debit"
-                                      Context="jl"
-                                      TItem="JournalLineDtoCreate"
-                                      Property="@nameof(JournalLineDtoCreate.Debit)">
-                    <Template>
-                        @jl.Debit
-                    </Template>
-                    <EditTemplate>
-                        <RadzenNumeric TextAlign="TextAlign.Right"
-                                       @bind-Value="@jl.Debit"
-                                       class="rz-w-100"
-                                       @ref="editor"
-                                       Disabled="@(jl.IsCredit || jl.LedgerRefId == 0)"
-                                       ShowUpDown="false" />
-                    </EditTemplate>
-                    <FooterTemplate>
-                        <strong>
-                            @JournalLines.Sum(x => x.Debit)
-                        </strong>
-                    </FooterTemplate>
-                </RadzenDataGridColumn>
-                <RadzenDataGridColumn Title="Credit"
-                                      Context="jl"
-                                      TItem="JournalLineDtoCreate"
-                                      Property="@nameof(JournalLineDtoCreate.Credit)">
-                    <Template>
-                        @jl.Credit
-                    </Template>
-                    <EditTemplate>
-                        <RadzenNumeric TextAlign="TextAlign.Right"
-                                       @bind-Value="@jl.Credit"
-                                       @ref="editor"
-                                       class="rz-w-100"
-                                       Disabled="@(jl.IsDebit || jl.LedgerRefId == null)"
-                                       ShowUpDown="false" />
-                    </EditTemplate>
-                    <FooterTemplate>
-                        <strong>
-                            @JournalLines.Sum(x => x.Credit)
-                        </strong>
-                    </FooterTemplate>
-                </RadzenDataGridColumn>
-                <RadzenDataGridColumn Title="Description"
-                                      Context="jl"
-                                      TItem="JournalLineDtoCreate"
-                                      Property="@nameof(JournalLineDtoCreate.JournalLineDesc)">
-                    <Template>
-                        @jl.JournalLineDesc
-                    </Template>
-                    <EditTemplate>
-                        <RadzenTextBox @bind-Value="jl.JournalLineDesc"
-                                       @ref="editor"
-                                       Change="@(args => Update())"
-                                       @onfocusout="@(() => Update())"
-                                       Disabled="@(jl.LedgerRefId == 0)"
+            <RadzenColumn SizeMD="3">
+                <RadzenFormField AllowFloatingLabel="true" Text="Ref #" class="rz-w-100">
+                    <ChildContent>
+                        <RadzenTextBox @bind-Value="JLe.ReferrenceNum"
+                                       Placeholder="Reference"
                                        class="rz-w-100" />
-                    </EditTemplate>
-                </RadzenDataGridColumn>
-                <RadzenDataGridColumn Title="Name"
-                                      Context="jl"
-                                      TItem="JournalLineDtoCreate"
-                                      IsInEditMode="@IsEditing"
-                                      Property="@nameof(JournalLineDtoCreate.EntityNameRefId)">
-                    <Template>
-                        @jl.EntityName
-                    </Template>
-                    <EditTemplate>
-                        <RadzenDropDownDataGrid @bind-Value="jl.EntityNameRefId"
-                                                Density="Density.Compact"
-                                                Data="@NameLists"
-                                                @ref="editor"
-                                                LoadData="@LoadNamesList"
-                                                TextProperty="@nameof(VNameList.AltName)"
-                                                ValueProperty="@nameof(VNameList.Id)"
-                                                ShowSearch="false"
-                                                class="form-control"
-                                                SelectedItemsText="@jl.EntityName"
-                                                Placeholder="Name..."
-                                                AllowFilteringByAllStringColumns="true"
-                                                ShowPagingSummary="true"
-                                                Change="@(args => Update())"
-                                                SelectedItemChanged="@((arg) => SelectionChanged(arg, jl))"
-                                                Name="@($"EntityNameRefId-{Guid.NewGuid().ToString("N")}")"
-                                                FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive">
-                            <Columns>
-                                <RadzenDropDownDataGridColumn Property="@nameof(VNameList.AltName)" Title="Name" Width="100px" />
-                                <RadzenDropDownDataGridColumn Property="@nameof(VNameList.EntType)" Title="Type" Width="100px" />
-                            </Columns>
-                        </RadzenDropDownDataGrid>
-                    </EditTemplate>
-                </RadzenDataGridColumn>
-
-            </Columns>
-        </RadzenDataGrid>
-    </EditForm>
-</RadzenFieldset>
-
-<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
-             class="rz-my-2"
-             JustifyContent="JustifyContent.End">
-    <RadzenButton Size="ButtonSize.ExtraSmall"
-                  Icon="save"
-                  ButtonStyle="ButtonStyle.Success"
-                  Click="@OnSave"
-                  IsBusy="@_visibled"
-                  BusyText="Saving..."
-                  Text="Save" />
-    <RadzenButton Size="ButtonSize.ExtraSmall"
-                  Icon="cancel"
-                  ButtonStyle="ButtonStyle.Danger"
-                  Click="CloseSelectedTab"
-                  Text="Close" />
-</RadzenStack>
-
-
-@code {
-
-    RadzenDataGrid<JournalLineDtoCreate> gridJournalLines = default!;
-    string columnEditing;
-    List<KeyValuePair<int, string>> editedFields = new List<KeyValuePair<int, string>>();
-    List<JournalLineDtoCreate> lineToUpdate = new List<JournalLineDtoCreate>();
-    List<JournalLineDtoCreate> lineToInsert = new List<JournalLineDtoCreate>();
-
-    bool IsEditing(string columnName, JournalLineDtoCreate order)
-    {
-        return columnEditing == columnName && lineToUpdate.Contains(order);
-    }
-
-    string IsEdited(RadzenDataGridColumn<JournalLineDtoCreate> column, JournalLineDtoCreate arg)
-    {
-        return editedFields.Where(c => c.Key == arg.LineSeq && c.Value == column.Property)
-                           .Any() ? "table-cell-edited" : string.Empty;
-    }
-
-    async Task OnCellClick(DataGridCellMouseEventArgs<JournalLineDtoCreate> args)
-    {
-
-        if (args.Column?.Property == nameof(JournalLineDtoCreate.LineSeq))
-        {
-            return;
-        }
-
-
-        var selectedIndex = JournalLines.IndexOf(args.Data!);
-
-        if (selectedIndex > 0)
-        {
-            if (JournalLines[selectedIndex - 1].LedgerRefId == null ||
-                JournalLines[selectedIndex - 1].LedgerRefId == 0)
-            {
-                _isMessage = true;
-                _messageAlert = "Please select previous row first.";
-                return;
-            }
-
-            _isMessage =false;
-            _messageAlert = string.Empty;
-        }
-
-
-        if (!gridJournalLines.IsValid || (lineToUpdate.Contains(args.Data) && columnEditing == args.Column.Property)) return;
-
-        // Record the previous edited field, if you're not using IRevertibleChangeTracking to track object changes
-
-        if (lineToUpdate.Any())
-        {
-            editedFields.Add(new(lineToUpdate.First().LineSeq, columnEditing));
-
-            await Update();
-        }
-
-        // This sets which column is currently being edited.
-        columnEditing = args.Column.Property;
-
-        // Set the item to be edited
-        await EditRow(args.Data);
-
-    }
-
-    IRadzenFormComponent editor;
-
-    bool editorFocused;
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        await base.OnAfterRenderAsync(firstRender);
-
-        if (!editorFocused && editor != null)
-        {
-            editorFocused = true;
-        }
-    }
-
-    void Reset(JournalLineDtoCreate? order = null)
-    {
-        editorFocused = false;
-
-        if (order != null)
-        {
-            lineToUpdate.Remove(order);
-        }
-        else
-        {
-            lineToUpdate.Clear();
-        }
-    }
-
-    async Task Update()
-    {
-        editorFocused = false;
-
-        if (lineToUpdate.Any())
-        {
-            await gridJournalLines.UpdateRow(lineToUpdate.First());
-        }
-    }
-
-
-    void SelectionChanged(object? arg, JournalLineDtoCreate row)
-    {
-        if (arg is null) return;
-
-        row.EntityName = ((VNameList)arg).AltName;
-
-    }
-
-    async Task EditRow(JournalLineDtoCreate arg)
-    {
-        if (!gridJournalLines.IsValid) return;
-
-        Reset();
-
-        lineToUpdate.Add(arg);
-
-        await gridJournalLines.EditRow(arg);
-
-    }
-
-
-    void OnUpdateRow(JournalLineDtoCreate row)
-    {
-        Reset();
-
-        if (_editContext == null || !_editContext.Validate())
-        {
-            //ShowValidationMessage("Please fix validation errors before continuing.");
-            return;
-        }
-
-        int rowIndex = JournalLines.IndexOf(row);
-
-        if (rowIndex == _currentEditIndex)
-        {
-            _currentEditIndex++;
-        }
-
-        _editingRow = null;
-
-        _editContext = null;
-
-        //editedFields = editedFields.Where(c => c.Key != arg.LineSeq).ToList();
-    }
-
-
-
-    async Task InsertFirstRow()
-    {
-        if (!gridJournalLines.IsValid) return;
-
-        if (JournalLines.Count > 0) return;
-
-        var line = new JournalLineDtoCreate
-        {
-            LineSeq = 1
-        };
-
-        JournalLines.Add(line);
-
-        await gridJournalLines.InsertRow(line);
-    }
-
-
-
-    async Task InsertAfterRow(JournalLineDtoCreate row)
-    {
-        if (!gridJournalLines.IsValid) return;
-
-        if (JournalLines.Count < 1)
-        {
-            await InsertFirstRow();
-
-            return;
-        }
-
-        var seq = JournalLines.Count() + 1;
-
-        var line = new JournalLineDtoCreate
-        {
-            LineSeq = seq
-        };
-
-        JournalLines.Add(line);
-
-        await gridJournalLines.InsertAfterRow(line, row);
-
-    }
-
-
-    async Task InsertRow(JournalLineDtoCreate currentRow)
-    {
-        if (!gridJournalLines.IsValid) return;
-
-        var seq = JournalLines.Count() + 1;
-
-        var line = new JournalLineDtoCreate
-        {
-            LineSeq = seq
-        };
-
-        if (currentRow.IsDebit)
-        {
-            line.Credit = currentRow.Debit;
-        }
-        else
-        {
-            line.Debit = currentRow.Credit;
-        }
-
-        JournalLines.Add(line);
-
-        await gridJournalLines.InsertAfterRow(line, currentRow);
-
-    }
-
-
-    void OnCreateRow(JournalLineDtoCreate arg)
-    {
-
-    }
-
-    void ResetLineSequence()
-    {
-        for (int i = 0; i < JournalLines.Count; i++)
-        {
-            JournalLines[i].LineSeq = i + 1;
-        }
-    }
-
-
-    void OnAmountChanged(JournalLineDtoCreate currentRow)
-    {
-        if (currentRow == JournalLines.Last())
-        {
-            _ = InsertAfterRow(currentRow); // non-blocking
-        }
-    }
-
-
-    void OnKeyPressHandler(KeyboardEventArgs e, JournalLineDtoCreate row)
-    {
-        if (e.Key == "Enter" && row == JournalLines.Last())
-        {
-            _ = InsertAfterRow(row);
-        }
-    }
-
-    bool IsSameDebitAndCredit()
-    {
-        return JournalLines.Sum(x => x.Debit) == JournalLines.Sum(x => x.Credit);
-    }
-
-
-
-    private int _currentEditIndex = 0;
-    private EditContext? _editContext;
-    private JournalLineDtoCreate? _editingRow;
-
-    void OnRowEditInitiated(JournalLineDtoCreate row)
-    {
-        int rowIndex = JournalLines.IndexOf(row);
-
-        if (rowIndex > _currentEditIndex)
-        {
-            // Prevent editing future rows before previous ones are complete
-            //ShowValidationMessage("Please complete the previous row first.");
-            return;
-        }
-
-        if (_editingRow != null && _editContext != null && !_editContext.Validate())
-        {
-            //ShowValidationMessage("Current row has validation errors.");
-
-            return;
-        }
-
-        _editingRow = row;
-
-        _editContext = new EditContext(row);
-
-        gridJournalLines.EditRow(row);
-    }
-
-}
-
-
-
-
-
-
-
-@*  
-    
-// async Task SaveRow(JournalLineDtoCreate arg)
-    // {
-    //     await gridJournalLines.UpdateRow(arg);
-    // }
-
-    // void CancelEdit(JournalLineDtoCreate arg)
-    // {
-    //     Reset(arg);
-
-    //     gridJournalLines.CancelEditRow(arg);
-    // }
-
-
-    // async Task DeleteRow(JournalLineDtoCreate arg)
-    // {
-    //     Reset(arg);
-
-    //     if (JournalLines.Contains(arg))
-    //     {
-    //         await gridJournalLines.Reload();
-    //     }
-    //     else
-    //     {
-    //         gridJournalLines.CancelEditRow(arg);
-
-    //         await gridJournalLines.Reload();
-    //     }
-    // }
-    // await SaveRow(row);
-
-    // if (row != JournalLines.Last()) return;
-
-    // var confirm = await DialogService.Confirm("Add New Row");
-
-    // if (confirm == false) return;
-
-    // _ = InsertRow(row);
-
-<RadzenDataGridColumn Title="Action"
-                                          TextAlign="TextAlign.Center"
-                                          Width="5rem"
-                                          Context="jl"
-                                          Property="@nameof(JournalLineDto.LedgerRefId)">
-                        <Template>
-                            <RadzenButton Icon="@IconNames.Add"
-                                          Size="ButtonSize.ExtraDefaultSizeall"
-                                          ButtonStyle="ButtonStyle.Success"
-                                          Click="@(()=>InsertAfterRow(jl))"
-                                          Variant="Variant.Text" />
-                            <RadzenButton Icon="@IconNames.EditPen"
-                                          Size="ButtonSize.ExtraDefaultSizeall"
-                                          ButtonStyle="ButtonStyle.Secondary"
-                                          Click="@(args => EditRow(jl))"
-                                          @onclick:stopPropagation="true"
-                                          Variant="Variant.Text" />
-                        </Template>
-                        <EditTemplate>
-                            <RadzenButton Icon="@IconNames.Checked"
-                                          Size="ButtonSize.ExtraDefaultSizeall"
-                                          ButtonStyle="ButtonStyle.Success"
-                                          Click="@(() => SaveRow(jl))" aria-label="Save"
-                                          Variant="Variant.Text" />
-                            <RadzenButton Icon="@IconNames.Undo"
-                                          Size="ButtonSize.ExtraDefaultSizeall"
-                                          ButtonStyle="ButtonStyle.Primary"
-                                          Click="@((args) => CancelEdit(jl))"
-                                          aria-label="Cancel"
-                                          Variant="Variant.Text" />
-                            <RadzenButton Icon="@IconNames.Delete"
-                                          Size="ButtonSize.ExtraDefaultSizeall"
-                                          ButtonStyle="ButtonStyle.Danger"
-                                          Variant="Variant.Text" />
-                        </EditTemplate>
-                    </RadzenDataGridColumn> *@
-
-
-@* <div class="table-responsive rz-mt-2">
-    <table class="table table-sm table-bordered table-light">
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Account</th>
-                <th>Debit</th>
-                <th>Credit</th>
-                <th>Description</th>
-                <th>Name</th>
-                <th style="width:3rem">Action</th>
-            </tr>
-        </thead>
-        <tbody class="bg-info">
-            @if (JournalLines?.Count > 0)
-            {
-                @for (var x = 0; x < JournalLines?.Count; x++)
+                    </ChildContent>
+                    <Helper>
+                        <ValidationMessage For="@(() => JLe.ReferrenceNum)" />
+                    </Helper>
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn SizeMD="1">
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem" class="rz-pb-1">
+                    <RadzenCheckBox @bind-Value="@JLe.IsAdjustment" Name="IsAdjustment" />
+                    <RadzenLabel Component="IsAdjustment" Text="Adjustment" />
+                </RadzenStack>
+            </RadzenColumn>
+        </RadzenRow>
+        <table class="journal-table rz-mt-2">
+            <thead>
+                <tr>
+                    <th style="width:50px;" class="text-center">#</th>
+                    <th style="width:260px;">Account</th>
+                    <th style="width:140px;" class="text-right">Debit</th>
+                    <th style="width:140px;" class="text-right">Credit</th>
+                    <th>Description</th>
+                    <th style="width:200px;">Name</th>
+                    <th style="width:40px;"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var jl in JournalLines)
                 {
-                    var row = x;
-                    var currentRow = x + 1;
-                    <JournalEntryRowCreate JournalLine="JournalLines[row]"
-                                           RowIndex="@currentRow"
-                                           JournalLineSeq="@currentRow"
-                                           LedgerData="Ledgers"
-                                           JournalLineList="JournalLines"
-                                           AddRow="AddNewRow"
-                                           RemovedRow="DeleteEvent"
-                                           DebitValidated="DebitValidate"
-                                           CreditValidated="CreditValidate"
-                                           TotalValue="GetTotalValue"
-                                           @key="@Guid.NewGuid().ToString("N")"
-                                           Id="@Guid.NewGuid().ToString("N")"
-                                           ReCalculateTotal="@OnNextPerform" />
+                    <tr>
+                        <td class="text-center">@jl.LineSeq</td>
+                        <td>
+                            <RadzenDropDownDataGrid @bind-Value="jl.LedgerRefId"
+                                                    Style="width:100%;"
+                                                    Density="Density.Compact"
+                                                    Data="@Ledgers"
+                                                    LoadData="LoadDataLedger"
+                                                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                                    Placeholder="Select account..."
+                                                    ValueProperty="@nameof(VLedger.LedgerId)"
+                                                    TextProperty="@nameof(VLedger.LedgerName)"
+                                                    SelectedItemChanged="@((arg) => OnAccountSelected(arg, jl))"
+                                                    Name="@($"Account_{jl.LineSeq}")">
+                                <Template Context="c">
+                                    <RadzenStack Orientation="Orientation.Horizontal"
+                                                 JustifyContent="JustifyContent.SpaceBetween">
+                                        <span>@((c as VLedger)?.LedgerName)</span>
+                                        <i style="opacity:0.6">@((c as VLedger)?.LedgerTypeCode)</i>
+                                    </RadzenStack>
+                                </Template>
+                            </RadzenDropDownDataGrid>
+                            <span>
+                                <ValidationMessage For="@(() => jl.LedgerRefId)" />
+                            </span>
+                        </td>
+                        <td class="text-right">
+                            <RadzenNumeric @bind-Value="jl.Debit"
+                                           TextAlign="TextAlign.Right"
+                                           class="rz-w-100"
+                                           ShowUpDown="false"
+                                           Disabled="@(jl.IsCredit || jl.LedgerRefId is null or 0)"
+                                           Change="@((decimal? _) => OnAmountChanged(jl))" />
+                        </td>
+                        <td class="text-right">
+                            <RadzenNumeric @bind-Value="jl.Credit"
+                                           TextAlign="TextAlign.Right"
+                                           class="rz-w-100"
+                                           ShowUpDown="false"
+                                           Disabled="@(jl.IsDebit || jl.LedgerRefId is null or 0)"
+                                           Change="@((decimal? _) => OnAmountChanged(jl))" />
+                        </td>
+                        <td>
+                            <RadzenTextBox @bind-Value="jl.JournalLineDesc"
+                                           Disabled="@(jl.LedgerRefId is null or 0)"
+                                           class="rz-w-100" />
+                        </td>
+                        <td>
+                            <RadzenDropDownDataGrid @bind-Value="jl.EntityNameRefId"
+                                                    Density="Density.Compact"
+                                                    Data="@NameLists"
+                                                    LoadData="@LoadNamesList"
+                                                    TextProperty="@nameof(VNameList.AltName)"
+                                                    ValueProperty="@nameof(VNameList.Id)"
+                                                    Placeholder="Name..."
+                                                    AllowFilteringByAllStringColumns="true"
+                                                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                                    SelectedItemChanged="@((arg) => OnNameSelected(arg, jl))"
+                                                    Name="@($"Name_{jl.LineSeq}")"
+                                                    Disabled="@(jl.LedgerRefId is null or 0)">
+                                <Columns>
+                                    <RadzenDropDownDataGridColumn Property="@nameof(VNameList.AltName)" Title="Name" Width="100px" />
+                                    <RadzenDropDownDataGridColumn Property="@nameof(VNameList.EntType)" Title="Type" Width="80px" />
+                                </Columns>
+                            </RadzenDropDownDataGrid>
+                        </td>
+                        <td class="text-center">
+                            @if (JournalLines.Count > 1 && jl == JournalLines.Last())
+                            {
+                                <RadzenButton Icon="remove" Size="ButtonSize.ExtraSmall"
+                                              ButtonStyle="ButtonStyle.Danger"
+                                              Variant="Variant.Text"
+                                              Click="@(() => DeleteLine(jl))" />
+                            }
+                        </td>
+                    </tr>
                 }
-            }
-        </tbody>
-        <tbody>
-            <tr>
-                <td class="text-end" colspan="2">Totals</td>
-                <td class="text-end">
-                    @JLe?.TotalDr
-                </td>
-                <td class="text-end">
-                    @JLe?.TotalCr
-                </td>
-                <td colspan="3"></td>
-            </tr>
-        </tbody>
-    </table>
-</div> *@
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="2"></td>
+                    <td class="text-right"><strong class="journal-totals">@TotalDebit.Format(JLe.CurrencyRefId)</strong></td>
+                    <td class="text-right"><strong class="journal-totals">@TotalCredit.Format(JLe.CurrencyRefId)</strong></td>
+                    <td colspan="3"></td>
+                </tr>
+            </tfoot>
+        </table>
+            <RadzenRow class="rz-mt-4" AlignItems="AlignItems.Start">
+                <RadzenColumn SizeMD="6">
+                    <RadzenStack Gap="0.25rem">
+                        <RadzenLabel Text="Memo" />
+                        <RadzenTextArea @bind-Value="JLe.JournalDesc"
+                                        Rows="2"
+                                        Placeholder="Add a memo..."
+                                        Style="resize: none;"
+                                        class="w-100" />
+                    </RadzenStack>
+                </RadzenColumn>
+                <RadzenColumn SizeMD="6">
+                    <RadzenStack AlignItems="AlignItems.End" Gap="0.25rem" class="rz-mt-2">
+                        <RadzenStack Orientation="Orientation.Horizontal" Gap="1rem">
+                            <span>Total Debit:</span>
+                            <strong>@TotalDebit.Format(JLe.CurrencyRefId)</strong>
+                        </RadzenStack>
+                        <RadzenStack Orientation="Orientation.Horizontal" Gap="1rem">
+                            <span>Total Credit:</span>
+                            <strong>@TotalCredit.Format(JLe.CurrencyRefId)</strong>
+                        </RadzenStack>
+                        <RadzenStack Orientation="Orientation.Horizontal" Gap="1rem">
+                            <span>Difference:</span>
+                            <strong class="@(IsBalanced ? "balance-ok" : "balance-error")">
+                                @Difference.Format(JLe.CurrencyRefId)
+                            </strong>
+                        </RadzenStack>
+                    </RadzenStack>
+                </RadzenColumn>
+            </RadzenRow>
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
+                 class="rz-my-4" JustifyContent="JustifyContent.End" Gap="0.5rem">
+                    <RadzenButton Text="Add Line"
+                                  Size="ButtonSize.Small"
+                                  Icon="add"
+                                  ButtonStyle="ButtonStyle.Info"
+                                  Click="@AddLine" />
+                    <RadzenButton Text="Clear"
+                                  Size="ButtonSize.Small"
+                                  Icon="refresh"
+                                  ButtonStyle="ButtonStyle.Light"
+                                  Click="@ClearForm" />
+                    <RadzenButton Icon="save"
+                                  Size="ButtonSize.Small"
+                                  ButtonStyle="ButtonStyle.Success"
+                                  IsBusy="@_visibled"
+                                  BusyText="Saving..."
+                                  ButtonType="ButtonType.Submit"
+                                  Text="Save & Close" />
+                    <RadzenButton Size="ButtonSize.Small"
+                                  Icon="cancel"
+                                  ButtonStyle="ButtonStyle.Danger"
+                                  Variant="Variant.Outlined"
+                                  Click="CloseSelectedTab"
+                                  Text="Close" />
+             </RadzenStack>
+
+        </EditForm>
+    </RadzenFieldset>
+

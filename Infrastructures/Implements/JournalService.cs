@@ -353,7 +353,7 @@ public class JournalService(DataContext context, ILogger<JournalService> logger,
                 EF.Functions.Like(x.JournalType!, $"%{param.Filter}%") ||
                 EF.Functions.Like(x.TransactionTypeName!, $"%{param.Filter}%") ||
                 EF.Functions.Like(x.TransactionDate!.ToString(), $"%{param.Filter}%"))
-            .OrderByDescending(x => x.Updated);
+            .OrderByDescending(x => x.ModiFiedDT);
         if (param.SortDescending)
         {
             queries = queries.OrderByDescending(x => EF.Property<object>(x, param.SortColumn));

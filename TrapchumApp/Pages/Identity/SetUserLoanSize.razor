@@ -9,7 +9,7 @@
 @using TrapchumApp.Services
 <Containers Fluid CssClass="rz-background-color-base-200 rz-p-2">
     <EditForm Model="model" OnValidSubmit="HandleFormSubmit">
-        <FluentValidationValidator DisableAssemblyScanning="true"></FluentValidationValidator>  
+        <FluentValidationValidator DisableAssemblyScanning="true"></FluentValidationValidator>
         <ValidationSummary />
         <input type="hidden" @bind="@model.UserRefId" />
         <RadzenRow AlignItems="AlignItems.Center" class="rz-my-1">
@@ -23,7 +23,7 @@
                                Name="MinLoanSize"
                                TextAlign="TextAlign.End"
                                ShowUpDown="false" />
-                <ValidationMessage For="@(()=>model.MinUsdLoanSize)"></ValidationMessage>
+                <ValidationMessage For="@(() => model.MinUsdLoanSize)"></ValidationMessage>
             </RadzenColumn>
         </RadzenRow>
         <RadzenRow AlignItems="AlignItems.Center" class="rz-my-1">
@@ -37,7 +37,7 @@
                                TextAlign="TextAlign.End"
                                ShowUpDown="false"
                                Format="@Defaults.DefaultCurrencyFormat" />
-                <ValidationMessage For="@(()=>model.MaxUsdLoanSize)"></ValidationMessage>
+                <ValidationMessage For="@(() => model.MaxUsdLoanSize)"></ValidationMessage>
             </RadzenColumn>
         </RadzenRow>
 
@@ -76,10 +76,10 @@
             <RadzenColumn Size="9" SizeMD="9">
                 <RadzenDatePicker @bind-Value="model.StartDate"
                                   class="rz-w-100"
-                               Name="StartDate"
+                                  Name="StartDate"
                                   Change="StartDateChanged"
-                               DateFormat="@Defaults.DefaultDateFormat" />
-                <ValidationMessage For="@(()=>model.StartDate)"></ValidationMessage>
+                                  DateFormat="@Defaults.DefaultDateFormat" />
+                <ValidationMessage For="@(() => model.StartDate)"></ValidationMessage>
             </RadzenColumn>
         </RadzenRow>
         <RadzenRow AlignItems="AlignItems.Center" class="rz-my-1">
@@ -108,7 +108,7 @@
                      JustifyContent="JustifyContent.End"
                      Orientation="Orientation.Horizontal">
             <RadzenButton Icon="@IconNames.Save"
-                         ButtonType="ButtonType.Submit"
+                          ButtonType="ButtonType.Submit"
                           Size="ButtonSize.ExtraSmall"
                           Text="Save"
                           ButtonStyle="ButtonStyle.Success"></RadzenButton>

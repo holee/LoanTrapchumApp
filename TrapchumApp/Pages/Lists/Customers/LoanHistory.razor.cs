@@ -1,33 +1,27 @@
+using Applications.Features.Customers.Queries.GetLoanByCustomerId;
 using Applications.Features.Loans.Responses;
+using TrapchumApp.Shared;
 
-namespace TrapchumApp.Pages.Lists.Customers
+namespace TrapchumApp.Pages.Lists.Customers;
+
+public partial class LoanHistory
 {
-    public partial class LoanHistory
+    [CascadingParameter] public CascadingAppState bState { get; set; } = default!;
+
+    [Parameter] public string? CustomerId { get; set; }
+
+    [PersistentState]
+    public IEnumerable<VLoanDisbursments>? VLoanDisbursements { get; set; }
+
+    protected override async Task OnInitializedAsync()
     {
-        [Parameter] public string? CustomerId { get; set; }
-
-        IEnumerable<VLoanDisbursments> VLoanDisbursements = [];
-
-        async Task GetCustomerLoanHistory()
+        if (VLoanDisbursements is null)
         {
-            var rsp = await _customerService.GetCustomerLoanHistoryAsync(CustomerId);
-
-            if (rsp.IsSuccess)
-            {
-                VLoanDisbursements = rsp.Data!;
-            }
-            else
-            {
-                VLoanDisbursements = [];
-            }
+            var rsp = await mediator.Send(new GetLoanByCustomerIdQuery(CustomerId));
+            
+            VLoanDisbursements = rsp.Items;
         }
 
-        protected override async Task OnInitializedAsync()
-        {
-            await GetCustomerLoanHistory();
-
-            await base.OnInitializedAsync();
-        }
+        await base.OnInitializedAsync();
     }
-
 }

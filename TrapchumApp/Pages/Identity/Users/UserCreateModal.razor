@@ -7,8 +7,7 @@
 @using Applications.Features.Entities
 @using Applications.Features.LoanRequests.Interfaces
 @using TrapchumApp.Services
-<h2>fdfddfdf</h2>
-<EditForm Model="_model" @ref="_form">
+<EditForm Model="_model" OnValidSubmit="@SubmitForm" FormName="CreateNewUserForm">
     <FluentValidationValidator DisableAssemblyScanning="true" />
     <RadzenStack Gap="0.5rem;" Orientation="Orientation.Vertical">
         <RadzenRow AlignItems="AlignItems.Center">
@@ -86,9 +85,10 @@
                  JustifyContent="JustifyContent.End"
                  class="rz-my-3">
         <RadzenButton ButtonStyle="ButtonStyle.Success"
-                      Click="SubmitForm"
                       Icon="save"
                       Text="Save"
+                      ButtonType="ButtonType.Submit"
+                      IsBusy="@_isBusy"
                       Size="ButtonSize.Small" />
         <RadzenButton ButtonStyle="ButtonStyle.Danger"
                       Icon="close"

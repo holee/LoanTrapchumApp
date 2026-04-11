@@ -5,39 +5,85 @@
 @using Applications.Features.Employees
 @using Applications.Features.LoanRequests.Interfaces
 @using TrapchumApp.Services
-<RadzenBadge BadgeStyle="@(Model.IsAssignedToRole == true ? BadgeStyle.Info : BadgeStyle.Primary)"
-             Shade="Shade.Light"
-             Style="margin:0.25rem;width:100%;">
-    <input type="hidden" @bind="@Model.RoleId" />
-    <input type="hidden" @bind="@Model.ClaimType" />
-    <input type="hidden" @bind="@Model.ClaimValue" />
-    <RadzenStack Orientation="Orientation.Horizontal"
-                 AlignItems="AlignItems.Center"
-                 Style="padding:0.25rem 0; text-transform: none;">
-        <RadzenCheckBox TValue="bool"
-                        @bind-Value="@Model.IsAssignedToRole"
-                        Change="@(value => OnCheckChanged(Model, value))"
-                        Name="@(Model.ClaimValue)" />
-        <RadzenLabel Text="@(Model.Description)" Component="@(Model.ClaimValue)" />
-    </RadzenStack>
-</RadzenBadge>
-@code {
-    [Parameter]
-    public string? Id { get; set; } = Guid.NewGuid().ToString("N");
 
+<label class="role-chip @(Model.IsAssignedToRole ? "role-chip--active" : "")" @onclick="Toggle">
+    <span class="role-chip-indicator">
+        @if (Model.IsAssignedToRole)
+        {
+            <RadzenIcon Icon="check" Style="font-size:0.85rem;" />
+        }
+    </span>
+    <span class="role-chip-label">@Model.Description</span>
+</label>
+
+<style>
+    .role-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.35rem 0.75rem;
+        border-radius: 6px;
+        font-size: 0.82rem;
+        cursor: pointer;
+        user-select: none;
+        transition: all 0.2s ease;
+        background-color: #f1f3f5;
+        color: #495057;
+        border: 1px solid #dee2e6;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .role-chip:hover {
+        background-color: #e9ecef;
+        border-color: #ced4da;
+    }
+
+    .role-chip--active {
+        background-color: #d4edda;
+        color: #155724;
+        border-color: #a3d9b1;
+    }
+
+    .role-chip--active:hover {
+        background-color: #c3e6cb;
+        border-color: #8fd19e;
+    }
+
+    .role-chip-indicator {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.1rem;
+        height: 1.1rem;
+        border-radius: 4px;
+        flex-shrink: 0;
+        background-color: #dee2e6;
+        transition: all 0.2s ease;
+    }
+
+    .role-chip--active .role-chip-indicator {
+        background-color: #28a745;
+        color: #fff;
+    }
+
+    .role-chip-label {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+</style>
+
+@code {
     [Parameter]
     public RolePermissionsViewModel Model { get; set; } = new();
 
     [Parameter]
     public EventCallback<RolePermissionsViewModel> OnChange { get; set; }
 
-
-    void OnCheckChanged(RolePermissionsViewModel model, bool arg)
+    void Toggle()
     {
-        model.IsAssignedToRole = arg;
-
-        OnChange.InvokeAsync(model);
+        Model.IsAssignedToRole = !Model.IsAssignedToRole;
+        OnChange.InvokeAsync(Model);
     }
-
-
 }

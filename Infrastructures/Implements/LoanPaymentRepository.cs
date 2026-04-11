@@ -1,138 +1,39 @@
 ﻿using Applications.Enumerations;
 using Applications.Interfaces.Loans;
-using Applications.Responses;
 using Applications.Responses.Message;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Dapper;
-using Domains.Models.Loans;
 using Domains.Models.Transaction;
 using Infrastructures.DataAccess;
-using Mapster;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
-using Applications.Features.LoanPayments.Requests;
 using Domains.Models.Lists;
 using Applications.Commons.Messages.LoanPayments;
 using Applications.Features.Schedules.Dto;
+using ErrorOr;
+using Applications.Features.LoanPayments.Dtos;
 
 namespace Infrastructures.Implements;
 
 public class LoanPaymentRepository(IDbContextFactory<DataContext> dbContextFactory, IDapperConnectionFactory connectionFactory) : ILoanPaymentService
 {
 
-    public async Task<Result<string>> RecievePayment(LoanPaymentDtoCreate req)
-    {
-        await using var db = await dbContextFactory.CreateDbContextAsync();
 
-        using var tranx = db.StartTransaction();
-
-        try
-        {
-            var loanRepayment = req.Adapt<LoanPayment>();
-
-            var payment = db.LoanRepayments.Add(loanRepayment).Entity;
-
-            await db.SaveChangesAsync();
-
-            var schedules = payment.LoanRepaymentLines?.ToList();
-
-            schedules?.ForEach(async item =>
-            {
-                await SetLoanScheduleComplete(req.BranchRefId, req.LoanRefId, item.LoanScheduleRefId,
-                    item.InstallmentNo);
-            });
-
-            await CloseLoanSchedule(req.BranchRefId, req.LoanRefId);
-
-            tranx.Commit();
-
-            return Result.Success<string>(new("Payment successfully."));
-        }
-        catch (Exception ex)
-        {
-            tranx.Rollback();
-
-            return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}"));
-        }
-    }
-
-
-    public async Task<Result<string>> CreatePayment(LoanTransaction req, CancellationToken cancellation = default)
-    {
-        await using var db = await dbContextFactory.CreateDbContextAsync(cancellation);
-
-        await using var tranx = await db.Database.BeginTransactionAsync(cancellation);
-
-        try
-        {
-            var payment = db.LoanTransaction.Add(req).Entity;
-
-            await db.SaveChangesAsync(cancellation);
-
-            var schedules = payment.LoanPayment?.LoanRepaymentLines ?? [];
-
-            if (schedules.Any())
-            {
-                var scheduleIds = schedules.Select(x => x.LoanScheduleRefId).ToList();
-                var installmentNos = schedules.Select(x => x.InstallmentNo).ToList();
-
-                // Fetch related VSchedules in one go
-                var scheduleStatusMap = await db.VSchedules
-                    .Where(x =>
-                        x.BranchId == req.LoanPayment!.BranchRefId &&
-                        x.LoanId == req.LoanPayment.LoanRefId &&
-                        scheduleIds.Contains(x.LoanScheduleId ?? 0))
-                    .Select(x => new
-                    {
-                        x.LoanScheduleId,
-                        x.InstallmentNo,
-                        Status = x.LeftAmount == 0 ? ScheduleStatus.Paid : ScheduleStatus.Partial
-                    })
-                    .ToListAsync(cancellation);
-
-                // Bulk update LoanSchedules
-                foreach (var group in scheduleStatusMap.GroupBy(x => x.Status))
-                {
-                    var scheduleIdList = group.Select(x => x.LoanScheduleId).ToList();
-                    var installmentList = group.Select(x => x.InstallmentNo).ToList();
-
-                    await db.LoanSchedules
-                        .Where(x =>
-                            x.LoanRefId == req.LoanPayment!.LoanRefId &&
-                            x.BranchId == req.LoanPayment.BranchRefId &&
-                            scheduleIdList.Contains(x.LoanScheduleId) &&
-                            installmentList.Contains(x.InstallmentNo))
-                        .ExecuteUpdateAsync(x => x.SetProperty(p => p.ScheduleStatusRefId, (int)group.Key));
-                }
-            }
-
-            await CloseLoanSchedule(db, req.LoanPayment?.BranchRefId, req.LoanPayment?.LoanRefId);
-
-            await tranx.CommitAsync(cancellation);
-
-            return Result.Success<string>("Payment successfully.");
-        }
-        catch (Exception ex)
-        {
-            await tranx.RollbackAsync(cancellation);
-            return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}"));
-        }
-    }
-
-
-    public async Task<ErrorOr.ErrorOr<string>> RecievePayment(LoanTransaction req, CancellationToken cancellation = default)
+    public async Task<ErrorOr<string>> RecievePayment(LoanTransaction req, CancellationToken cancellation = default)
     {
         await using var db = await dbContextFactory.CreateDbContextAsync(cancellation);
 
         if (await IsOfficialInused(req, db, cancellation))
         {
-            return ErrorOr.Error.Conflict("The official receipt number is already in use.");
+            return ErrorOr.Error.Conflict("409", "The official receipt number is already in use.");
         }
 
         using var tranx = await db.Database.BeginTransactionAsync(cancellation);
 
         try
         {
+            req.LoanPayment?.OfficialReceiptNo = $"{DateTime.Now.Year}-{req.LoanPayment.OfficialReceiptNo}";
+
             var payment = db.LoanTransaction.Add(req).Entity;
 
             await db.SaveChangesAsync(cancellation);
@@ -141,11 +42,10 @@ public class LoanPaymentRepository(IDbContextFactory<DataContext> dbContextFacto
 
             if (schedules is not null && schedules.Any())
             {
-                foreach (var item in schedules)
-                {
-                    await SetLoanScheduleComplete(db, req.LoanPayment?.BranchRefId, req.LoanPayment?.LoanRefId,
-                        item.LoanScheduleRefId, item.InstallmentNo);
-                }
+
+                var paidSchedules = schedules.FirstOrDefault();
+
+                await SetLoanScheduleComplete(db, paidSchedules?.BranchRefId, paidSchedules?.LoanRefId, paidSchedules?.LoanScheduleRefId, paidSchedules?.InstallmentNo);
             }
 
 
@@ -159,57 +59,63 @@ public class LoanPaymentRepository(IDbContextFactory<DataContext> dbContextFacto
         {
             await tranx.RollbackAsync(cancellation);
 
-            return ErrorOr.Error.Unexpected($"{ex.Message}");
+            return Error.Unexpected($"{ex.Message}");
         }
     }
 
-
-    public async Task<Result<string>> PayOff(LoanPaymentDtoCreate req, CancellationToken cancellation = default)
+    public async Task<ErrorOr<PayOffResult>> PayOff(LoanTransaction trx, CancellationToken cancellation = default)
     {
+        if (trx.LoanPayment is null)
+        {
+            return Error.Validation(description: "Loan payment information is required.");
+        }
+
         await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);
 
-        using var tranx = context.StartTransaction();
+        if (await IsOfficialInused(trx, context, cancellation))
+        {
+            return Error.Conflict("409", "The official receipt number is already in use.");
+        }
+
+        var lastSchedule = await context.VSchedules
+            .AsNoTracking()
+            .Where(x => x.BranchId == trx.LoanPayment.BranchRefId &&
+                        x.LoanId == trx.LoanPayment.LoanRefId &&
+                        x.ScheduleStatusId != (int)ScheduleStatus.Paid)
+            .OrderBy(x => x.InstallmentNo)
+            .FirstOrDefaultAsync(cancellation);
+
+        await using var tranx = await context.Database.BeginTransactionAsync(cancellation);
 
         try
         {
-            // var tranXchange = req.ForeignExchangeTrx.Adapt<LoanTransaction>();
+            context.LoanTransaction.Add(trx);
 
-            // var tranLoan = req.LoanTransaction.Adapt<LoanTransaction>();
+            await CloseLoan(context, trx.LoanPayment.BranchRefId, trx.LoanPayment.LoanRefId);
 
-            var loanRepayment = req.Adapt<LoanPayment>();
+            await context.SaveChangesAsync(cancellation);
 
-            var payment = context.LoanRepayments.Add(loanRepayment).Entity;
+            await tranx.CommitAsync(cancellation);
 
-            // _context.LoanTransaction.Add(tranLoan);
-
-            // _context.LoanTransaction.Add(tranXchange);
-
-            await context.SaveChangesAsync();
-
-            var schedules = payment.LoanRepaymentLines?.ToList();
-
-            schedules?.ForEach(async item =>
+            return new PayOffResult
             {
-                await SetLoanScheduleComplete(req.BranchRefId, req.LoanRefId, item.LoanScheduleRefId,
-                    item.InstallmentNo);
-            });
-
-
-            await CloseLoanSchedule(req.BranchRefId, req.LoanRefId);
-
-            tranx.Commit();
-
-            return Result.Success<string>(new("Payment successfully."));
+                BranchId = trx.LoanPayment.BranchRefId,
+                LoanId = trx.LoanPayment.LoanRefId,
+                Principle = lastSchedule?.LeftPrinciple,
+                Interest = lastSchedule?.LeftInterestAmount,
+                CollectionFee = lastSchedule?.LeftCollectionFeeAmount,
+                Total = lastSchedule?.LeftAmount
+            };
         }
         catch (Exception ex)
         {
-            tranx.Rollback();
-            return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}"));
+            await tranx.RollbackAsync(cancellation);
+
+            return Error.Unexpected(description: ex.Message);
         }
     }
 
-    public async Task<Result<IEnumerable<PaymentLineDetailsDto>>> GetPaymentLinesAsync(int? branchId, string? loanId,
-        int? installmentNo)
+    public async Task<ErrorOr<IEnumerable<PaymentLineDetailsDto>>> GetPaymentLinesAsync(int? branchId, string? loanId, int? installmentNo)
     {
 
         await using var context = dbContextFactory.CreateDbContext();
@@ -225,125 +131,14 @@ public class LoanPaymentRepository(IDbContextFactory<DataContext> dbContextFacto
 
         if (!repaymentLines.Any())
         {
-            return Result.Failure<IEnumerable<PaymentLineDetailsDto>>(ErrorResponse.NotFound("No Schedule Lines found"));
+            return Error.NotFound("No Schedule Lines found");
         }
 
-        return Result.Success(repaymentLines);
+        return repaymentLines.ToList();
     }
 
-    private async Task SetLoanScheduleComplete(int? branchId, string? loanId, long? scheduleId, int? installmentId)
-    {
-        await using var db = await dbContextFactory.CreateDbContextAsync();
-        var leftAmount = await db.VSchedules
-            .Where(x => x.LoanScheduleId == scheduleId &&
-                        x.LoanId == loanId &&
-                        x.BranchId == branchId)
-            .Select(x => x.LeftAmount)
-            .FirstOrDefaultAsync();
 
-        var statusId = leftAmount == 0 ? (int)ScheduleStatus.Paid : (int)ScheduleStatus.Partial;
-
-        db.LoanSchedules
-            .Where(x => x.LoanScheduleId == scheduleId &&
-                        x.LoanRefId == loanId &&
-                        x.BranchId == branchId &&
-                        x.InstallmentNo == installmentId)
-            .ExecuteUpdate(x => x.SetProperty(p => p.ScheduleStatusRefId, statusId));
-    }
-
-    private async Task SetLoanScheduleComplete(DataContext db, int? branchId, string? loanId, long? scheduleId,
-        int? installmentId)
-    {
-        if (branchId == null || loanId == null || scheduleId == null || installmentId == null)
-        {
-            throw new ArgumentException("Invalid schedule parameters.");
-        }
-
-        // Use parameterized query to get LeftAmount
-        var leftAmount = await db.VSchedules
-            .Where(x => x.LoanScheduleId == scheduleId &&
-                        x.LoanId == loanId &&
-                        x.BranchId == branchId)
-            .Select(x => x.LeftAmount)
-            .FirstOrDefaultAsync();
-
-        var statusId = leftAmount == 0 ? ScheduleStatus.Paid : ScheduleStatus.Partial;
-
-        // Update schedule status
-        await db.LoanSchedules
-            .Where(x => x.LoanScheduleId == scheduleId &&
-                        x.LoanRefId == loanId &&
-                        x.BranchId == branchId &&
-                        x.InstallmentNo == installmentId)
-            .ExecuteUpdateAsync(x => x.SetProperty(p => p.ScheduleStatusRefId, (int)statusId));
-    }
-
-    private async Task CloseLoanSchedule(DataContext db, int? branchId, string? loanId)
-    {
-        if (!branchId.HasValue && !string.IsNullOrEmpty(loanId))
-        {
-            return; // Skip if parameters are invalid
-        }
-
-        await IsLoanFullyPaidAsync(branchId, loanId);
-
-        var existingLoans = await db.VLoanDisbursements
-            .AnyAsync(x => x.LoanId == loanId &&
-                           x.BranchId == branchId &&
-                           x.OutStanding == 0);
-        if (existingLoans)
-        {
-            await db.LoanDisbursments
-                .Where(x => x.LoanId == loanId & x.BranchRefId == branchId)
-                .ExecuteUpdateAsync(p => p.SetProperty(x => x.LoanStatusRefId, (int)LoanStatuses.Close)
-                    .SetProperty(x => x.ModifiedDt, DateTime.Now));
-        }
-    }
-
-    async Task CloseLoanSchedule(int? branchId, string? loanId)
-    {
-        await using var db = await dbContextFactory.CreateDbContextAsync();
-
-        var existingLoans = await db.VLoanDisbursements
-            .AnyAsync(x => x.LoanId == loanId &&
-                           x.BranchId == branchId &&
-                           x.OutStanding == 0);
-        if (existingLoans)
-        {
-            db.LoanDisbursments
-                .Where(x => x.LoanId == loanId & x.BranchRefId == branchId)
-                .ExecuteUpdate(p => p.SetProperty(x => x.LoanStatusRefId, (int)LoanStatuses.Close));
-        }
-    }
-
-    private static async Task<bool> IsOfficialInused(LoanTransaction req, DataContext db, CancellationToken cancellation)
-    {
-
-        var existingReciept = await db.LoanRepayments.AnyAsync(x => x.OfficialReceiptNo == req.LoanPayment!.OfficialReceiptNo, cancellation);
-
-        return existingReciept;
-    }
-
-    private async Task<bool> IsLoanFullyPaidAsync(int? branchId, string? loanId, CancellationToken cancellation = default)
-    {
-        await using var db = await dbContextFactory.CreateDbContextAsync(cancellation);
-
-        var totalCounts = await db.LoanSchedules
-            .CountAsync(x => x.BranchId == branchId && x.LoanRefId == loanId, cancellation);
-
-        var InstallmentNo = await db.LoanSchedules
-            .Where(x => x.BranchId == branchId &&
-                        x.LoanRefId == loanId &&
-                        x.ScheduleStatusRefId == (int)ScheduleStatus.Paid)
-            .OrderByDescending(x => x.InstallmentNo)
-            .AsNoTracking()
-            .Select(x => x.InstallmentNo)
-            .FirstOrDefaultAsync(cancellation);
-
-        return InstallmentNo != null && totalCounts == InstallmentNo;
-    }
-
-    public async Task<Result<IEnumerable<VSchedule>>> GetPaidScheduleAsync(int? branchId, string? loanRefId, CancellationToken cancellation = default)
+    public async Task<ErrorOr<IEnumerable<VSchedule>>> GetPaidScheduleAsync(int? branchId, string? loanRefId, CancellationToken cancellation = default)
     {
         await using var db = await dbContextFactory.CreateDbContextAsync(cancellation);
 
@@ -362,10 +157,10 @@ public class LoanPaymentRepository(IDbContextFactory<DataContext> dbContextFacto
                 TotalPay = x.TotalPay,
             }).ToListAsync(cancellation);
 
-        return Result.Success<IEnumerable<VSchedule>>(queries);
+        return queries;
     }
 
-    public async Task<Result<ScheduleDetailsDto>> GetScheduleByIdAsync(long? loanScheduleId, int? branchId, string? loanId)
+    public async Task<ErrorOr<ScheduleDetailsDto>> GetScheduleByIdAsync(long? loanScheduleId, int? branchId, string? loanId)
     {
         using var db = await connectionFactory.CreateConnectionAsync();
 
@@ -433,14 +228,14 @@ public class LoanPaymentRepository(IDbContextFactory<DataContext> dbContextFacto
 
         if (schedule is not null)
         {
-            return Result.Success(schedule);
+            return schedule;
         }
 
-        return Result.Failure<ScheduleDetailsDto>(ErrorResponse.NotFound(Messages.DataNotFound));
+        return Error.NotFound(Messages.DataNotFound);
     }
 
 
-    public async Task<Result<Reciept>> GenerateRecieptNumber(CancellationToken cancellation = default)
+    public async Task<ErrorOr<Reciept>> GenerateRecieptNumber(CancellationToken cancellation = default)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);
 
@@ -453,10 +248,160 @@ public class LoanPaymentRepository(IDbContextFactory<DataContext> dbContextFacto
 
         await context.SaveChangesAsync(cancellation);
 
-        return Result.Success(reciept);
+        return reciept;
     }
 
 
+    private static decimal CalculatePenalty(decimal overdueAmount, int overdueDays)
+    {
+        const decimal penaltyRatePerDay = 0.001m; // 0.1%
+
+        return overdueAmount * penaltyRatePerDay * overdueDays;
+    }
+
+    private static decimal CalculateInterest(decimal balance, decimal ratePerDay, DateTime fromDate, DateTime toDate)
+    {
+        var days = (toDate - fromDate).Days;
+
+        if (days < 0)
+            throw new ArgumentException("Invalid payoff date");
+
+        return balance * ratePerDay * days;
+    }
+
+    private async Task SetLoanScheduleComplete(int? branchId, string? loanId, long? scheduleId, int? installmentId)
+    {
+        await using var db = await dbContextFactory.CreateDbContextAsync();
+        var leftAmount = await db.VSchedules
+            .Where(x => x.LoanScheduleId == scheduleId &&
+                        x.LoanId == loanId &&
+                        x.BranchId == branchId)
+            .Select(x => x.LeftAmount)
+            .FirstOrDefaultAsync();
+
+        var statusId = leftAmount == 0 ? (int)ScheduleStatus.Paid : (int)ScheduleStatus.Partial;
+
+        db.LoanSchedules
+            .Where(x => x.LoanScheduleId == scheduleId &&
+                        x.LoanRefId == loanId &&
+                        x.BranchId == branchId &&
+                        x.InstallmentNo == installmentId)
+            .ExecuteUpdate(x => x.SetProperty(p => p.ScheduleStatusRefId, statusId));
+    }
+
+    private async Task SetLoanScheduleComplete(DataContext db, int? branchId, string? loanId, long? scheduleId, int? installmentId)
+    {
+        if (branchId == null || loanId == null || scheduleId == null || installmentId == null)
+        {
+            throw new ArgumentException("Invalid schedule parameters.");
+        }
+
+        // Use parameterized query to get LeftAmount
+        var leftAmount = await db.VSchedules
+            .Where(x => x.LoanScheduleId == scheduleId &&
+                        x.LoanId == loanId &&
+                        x.BranchId == branchId)
+            .Select(x => x.LeftAmount)
+            .FirstOrDefaultAsync();
+
+        var statusId = leftAmount == 0 ? ScheduleStatus.Paid : ScheduleStatus.Partial;
+
+        // Update schedule status
+        await db.LoanSchedules
+            .Where(x => x.LoanScheduleId == scheduleId &&
+                        x.LoanRefId == loanId &&
+                        x.BranchId == branchId &&
+                        x.InstallmentNo == installmentId)
+            .ExecuteUpdateAsync(x => x.SetProperty(p => p.ScheduleStatusRefId, (int)statusId));
+    }
+
+    private async Task CloseLoanSchedule(DataContext db, int? branchId, string? loanId)
+    {
+        if (!branchId.HasValue && !string.IsNullOrEmpty(loanId))
+        {
+            return; // Skip if parameters are invalid
+        }
+
+        await IsLoanFullyPaidAsync(branchId, loanId);
+
+        var existingLoans = await db.VLoanDisbursements
+            .AnyAsync(x => x.LoanId == loanId &&
+                           x.BranchId == branchId &&
+                           x.OutStanding == 0);
+        if (existingLoans)
+        {
+            await db.LoanDisbursments
+                .Where(x => x.LoanId == loanId & x.BranchRefId == branchId)
+                .ExecuteUpdateAsync(p => p.SetProperty(x => x.LoanStatusRefId, (int)LoanStatuses.Close)
+                    .SetProperty(x => x.ModifiedDt, DateTime.Now));
+        }
+    }
+
+    async Task CloseLoanSchedule(int? branchId, string? loanId)
+    {
+        await using var db = await dbContextFactory.CreateDbContextAsync();
+
+        var existingLoans = await db.VLoanDisbursements
+            .AnyAsync(x => x.LoanId == loanId &&
+                           x.BranchId == branchId &&
+                           x.OutStanding == 0);
+        if (existingLoans)
+        {
+            db.LoanDisbursments
+                .Where(x => x.LoanId == loanId & x.BranchRefId == branchId)
+                .ExecuteUpdate(p => p.SetProperty(x => x.LoanStatusRefId, (int)LoanStatuses.Close));
+        }
+    }
+
+    async Task CloseLoan(DataContext db, int? branchId, string? loanId, CancellationToken cancellation = default)
+    {
+
+        var existingLoans = await db.LoanDisbursments
+                            .FirstOrDefaultAsync(x => x.LoanId == loanId &&
+                                   x.BranchRefId == branchId &&
+                                   x.LoanStatusRefId != (int)LoanStatuses.Close, cancellation);
+
+        if (existingLoans != null)
+        {
+            existingLoans.LoanStatusRefId = (int)LoanStatuses.Close;
+
+            var customer = await db.EntityNames
+                                    .Include(x => x.Customer)
+                                    .FirstOrDefaultAsync(x => x.Id == existingLoans.CustomerRefId, cancellation);
+
+            if (customer is not null)
+            {
+                customer.Customer?.IsLoanActive = false;
+            }
+        }
+    }
+
+    private static async Task<bool> IsOfficialInused(LoanTransaction req, DataContext db, CancellationToken cancellation)
+    {
+
+        var existingReciept = await db.LoanRepayments.AnyAsync(x => x.OfficialReceiptNo == req.LoanPayment!.OfficialReceiptNo, cancellation);
+
+        return existingReciept;
+    }
+
+    private async Task<bool> IsLoanFullyPaidAsync(int? branchId, string? loanId, CancellationToken cancellation = default)
+    {
+        await using var db = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+        var totalCounts = await db.LoanSchedules
+            .CountAsync(x => x.BranchId == branchId && x.LoanRefId == loanId, cancellation);
+
+        var InstallmentNo = await db.LoanSchedules
+            .Where(x => x.BranchId == branchId &&
+                        x.LoanRefId == loanId &&
+                        x.ScheduleStatusRefId == (int)ScheduleStatus.Paid)
+            .OrderByDescending(x => x.InstallmentNo)
+            .AsNoTracking()
+            .Select(x => x.InstallmentNo)
+            .FirstOrDefaultAsync(cancellation);
+
+        return InstallmentNo != null && totalCounts == InstallmentNo;
+    }
 
     private async Task<string> GetMaxRecieptNumber(DataContext context)
     {
@@ -471,7 +416,107 @@ public class LoanPaymentRepository(IDbContextFactory<DataContext> dbContextFacto
 
         return nextNumber.ToString("D6"); // Always 6 digits padded with zeros
     }
+
 }
+
+
+//public async Task<Result<string>> CreatePayment(LoanTransaction req, CancellationToken cancellation = default)
+//{
+//    await using var db = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+//    await using var tranx = await db.Database.BeginTransactionAsync(cancellation);
+
+//    try
+//    {
+//        var payment = db.LoanTransaction.Add(req).Entity;
+
+//        await db.SaveChangesAsync(cancellation);
+
+//        var schedules = payment.LoanPayment?.LoanRepaymentLines ?? [];
+
+//        if (schedules.Any())
+//        {
+//            var scheduleIds = schedules.Select(x => x.LoanScheduleRefId).ToList();
+//            var installmentNos = schedules.Select(x => x.InstallmentNo).ToList();
+
+//            // Fetch related VSchedules in one go
+//            var scheduleStatusMap = await db.VSchedules
+//                .Where(x =>
+//                    x.BranchId == req.LoanPayment!.BranchRefId &&
+//                    x.LoanId == req.LoanPayment.LoanRefId &&
+//                    scheduleIds.Contains(x.LoanScheduleId ?? 0))
+//                .Select(x => new
+//                {
+//                    x.LoanScheduleId,
+//                    x.InstallmentNo,
+//                    Status = x.LeftAmount == 0 ? ScheduleStatus.Paid : ScheduleStatus.Partial
+//                })
+//                .ToListAsync(cancellation);
+
+//            // Bulk update LoanSchedules
+//            foreach (var group in scheduleStatusMap.GroupBy(x => x.Status))
+//            {
+//                var scheduleIdList = group.Select(x => x.LoanScheduleId).ToList();
+//                var installmentList = group.Select(x => x.InstallmentNo).ToList();
+
+//                await db.LoanSchedules
+//                    .Where(x =>
+//                        x.LoanRefId == req.LoanPayment!.LoanRefId &&
+//                        x.BranchId == req.LoanPayment.BranchRefId &&
+//                        scheduleIdList.Contains(x.LoanScheduleId) &&
+//                        installmentList.Contains(x.InstallmentNo))
+//                    .ExecuteUpdateAsync(x => x.SetProperty(p => p.ScheduleStatusRefId, (int)group.Key));
+//            }
+//        }
+
+//        await CloseLoanSchedule(db, req.LoanPayment?.BranchRefId, req.LoanPayment?.LoanRefId);
+
+//        await tranx.CommitAsync(cancellation);
+
+//        return Result.Success<string>("Payment successfully.");
+//    }
+//    catch (Exception ex)
+//    {
+//        await tranx.RollbackAsync(cancellation);
+//        return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}"));
+//    }
+//}
+
+//public async Task<Result<string>> RecievePayment(LoanPaymentDtoCreate req)
+//{
+//    await using var db = await dbContextFactory.CreateDbContextAsync();
+
+//    using var tranx = db.StartTransaction();
+
+//    try
+//    {
+//        var loanRepayment = req.Adapt<LoanPayment>();
+
+//        var payment = db.LoanRepayments.Add(loanRepayment).Entity;
+
+//        await db.SaveChangesAsync();
+
+//        var schedules = payment.LoanRepaymentLines?.ToList();
+
+//        schedules?.ForEach(async item =>
+//        {
+//            await SetLoanScheduleComplete(req.BranchRefId, req.LoanRefId, item.LoanScheduleRefId,
+//                item.InstallmentNo);
+//        });
+
+//        await CloseLoanSchedule(req.BranchRefId, req.LoanRefId);
+
+//        tranx.Commit();
+
+//        return Result.Success<string>(new("Payment successfully."));
+//    }
+//    catch (Exception ex)
+//    {
+//        tranx.Rollback();
+
+//        return Result.Failure<string>(ErrorResponse.ServerError($"{ex.Message}"));
+//    }
+//}
 
 
 //foreach (var item in schedules!)

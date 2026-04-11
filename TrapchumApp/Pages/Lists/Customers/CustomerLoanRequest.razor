@@ -87,60 +87,56 @@
 </RadzenDataGrid>
 @code {
 
+    [CascadingParameter]
+    public CascadingAppState AppState { get; set; } = default!;
+
+
     void OnRowRender(RowRenderEventArgs<VLoanRequests> arg)
     {
+        if (arg.Data is null) return;
+
         arg.Data.RowIndex = arg.Index + 1;
     }
 
-    void ShowContextMenu(MouseEventArgs args, VLoanRequests c)
+    void ShowContextMenu(MouseEventArgs args, VLoanRequests? c)
     {
-        ContextMenuService.Open(args, ds =>@<CustomerRequestMenu LoanRequest="@c" />);
+        if (c is null) return;
+
+
+        var requestNowUrl = $"/App/Loans/{c.LoanRequestId}/Requests/{c.BranchId}/Branches/{c.CustomerId}/Details";
+
+        var loanRequestDetailsUrl = $"/App/Loans/{c.LoanRequestId}/Requests/{c.BranchId}/Branches/{c.CustomerId}/Details";
+        
+        var requestLoanRequestUrl = $"/App/Loans/{c.LoanRequestId}/Requests/{c.BranchId}/Branches/{c.CustomerId}/Edit";
+
+        var disburseRequestLoanUrl = $"/App/Loans/{c.LoanRequestId}/Disbursements/{c.BranchId}/Branches/CreateNew?CustomerId={c.CustomerId}";
+
+
+        ContextMenuService.Open(args, ds => @<RadzenMenu Style="font-size:0.8rem;">
+            <RadzenMenuItem Visible="@AppState.CanRequest"
+                            Icon="@IconNames.Approval"
+                            Text="Request Now"
+                            Path="@requestNowUrl"
+                            Value="@c.CustomerId" />
+            <RadzenMenuItem Visible="@(AppState.CanRequest && c.StatusId == (int)RequestStatus.New)"
+                            Icon="@IconNames.Edit"
+                            Text="Edit Loan Request"
+                            Path="@requestLoanRequestUrl"
+                            Value="@c.CustomerId" />
+            <RadzenMenuItem Visible="@(AppState.CanDisbursed && c.StatusId == (int)RequestStatus.Approved)"
+                            Icon="@IconNames.Paid"
+                            Text="Disburse Now"
+                            Path="@disburseRequestLoanUrl"
+                            Value="@c.CustomerId" />
+            <RadzenMenuItem Icon="@IconNames.Info"
+                            Text="Request Details"
+                            Path="@loanRequestDetailsUrl"
+                            Value="@c.CustomerId" />
+        </RadzenMenu>);
+
+
     }
+
+
 }
 
-@*
-<RadzenMenu Style="font-size:0.8rem;">
-    <RadzenMenuItem Visible="@IsCanRequest"
-                    Icon="@IconNames.Approval"
-                    Text="Request Now"
-                    Path="@($"/app/loan/{c.LoanRequestId}/request/{c.BranchId}/branches/{c.CustomerId}/details")"
-                    Value="@c.CustomerId" />
-    <RadzenMenuItem Visible="@(IsCanRequest && c.StatusId == (int)RequestStatus.New)"
-                    Icon="@IconNames.Edit"
-                    Text="Edit Loan Request"
-                    Path="@($"/app/loan/{c.LoanRequestId}/request/{c.BranchId}/branches/{c.CustomerId}/edit")"
-                    Value="@c.CustomerId" />
-    <RadzenMenuItem Visible="@(IsAccountOnly && c.StatusId == (int)RequestStatus.Approved)"
-                    Icon="@IconNames.Paid"
-                    Text="Disburse Now"
-                    Value="@c.CustomerId" />
-    <RadzenMenuItem Visible="@IsAdminOnly"
-                    Icon="@IconNames.Info"
-                    Text="Details"
-                    Path="@($"/app/loan/{c.LoanRequestId}/request/{c.BranchId}/branches/{c.CustomerId}/details")"
-                    Value="@c.CustomerId" />
-</RadzenMenu>
- <AuthorizeView Policy="@RequestsPolicies.Request">
-                    <Authorized>
-                        <NavLink href="@($"/app/loan/{c.LoanRequestId}/request/{c.BranchId}/branches/{c.CustomerId}/details")">
-                            Request
-                        </NavLink>
-                    </Authorized>
-                    <NotAuthorized>
-                        <NavLink href="@($"/app/loan/{c.LoanRequestId}/request/{c.BranchId}/branches/{c.CustomerId}/details")">
-                            Details
-                        </NavLink>
-                    </NotAuthorized>
-                </AuthorizeView>
-                <AuthorizeView Policy="@RequestsPolicies.Disburse">
-                    <Authorized>
-                        <NavLink href="@($"/app/loan/{c.LoanRequestId}/request/{c.BranchId}/branches/{c.CustomerId}/details")">
-                            Details
-                        </NavLink>
-                    </Authorized>
-                    <NotAuthorized>
-                        <NavLink href="@($"/app/loan/{c.LoanRequestId}/request/{c.BranchId}/branches/{c.CustomerId}/details")">
-                            Details
-                        </NavLink>
-                    </NotAuthorized>
-                </AuthorizeView> *@

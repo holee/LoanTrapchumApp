@@ -8,85 +8,121 @@ using Applications.Responses.ViewModels.Journals;
 using Applications.Responses.ViewModels.Ledgers;
 using Applications.Services.Lists;
 using Applications.Services.Transactions.Journals;
-using System.Threading.Tasks;
 using Applications.Features.Transactions.Journals;
-using Applications.Features.Currencies.Queries.GetCurrencyDetails;
 using Applications.Features.Currencies.Queries.GetCurrencies;
 using Applications.Features.Journals.Command.CreateJournal;
 using TrapchumApp.Helpers.Extensions;
 using Applications.Features.Currencies.Dto;
 
 namespace TrapchumApp.Pages.Transactions.Journals;
-//ICurrencyServiceImpl currencyService,
-public partial class JournalEntryCreate(ILedgerServiceImpl ledgerService, IJournalServiceImpl journalService, IOtherNameServiceImpl nameService)
+
+public partial class JournalEntryCreate(
+    ILedgerServiceImpl ledgerService,
+    IJournalServiceImpl journalService,
+    IOtherNameServiceImpl nameService)
 {
-    protected JournalEntryDtoCreate JLe = new JournalEntryDtoCreate();
+    protected JournalEntryDtoCreate JLe = new();
     protected List<JournalLineDtoCreate> JournalLines = [];
     private IEnumerable<CurrencyDto>? _currencies = [];
     private IEnumerable<JournalTypeDto>? _journalTypes = [];
     protected IEnumerable<VLedger>? Ledgers = [];
     protected IEnumerable<VNameList> NameLists = [];
-    private VLedger? _ledger = new();
-    private bool _isMessage = false;
+    private bool _isMessage;
     private string _messageAlert = "";
     private string _titleMessage = "";
     private int? _selectedCurrencyId;
-    protected string SelectedJournalType = "";
     private EditForm? _editForm;
+    private bool _visibled;
+    private string _filter = "";
+
     [Parameter] public string? UserId { get; set; }
     [Parameter] public int BranchId { get; set; }
+
+    // Computed properties for balance display
+    protected decimal TotalDebit => JournalLines.Sum(x => x.Debit ?? 0);
+    protected decimal TotalCredit => JournalLines.Sum(x => x.Credit ?? 0);
+    protected decimal Difference => Math.Abs(TotalDebit - TotalCredit);
+    protected bool IsBalanced => TotalDebit == TotalCredit && TotalDebit > 0;
+
     protected override async Task OnInitializedAsync()
     {
         try
         {
             JLe.JournalType = JournalTypes.PV.ToString();
-
             JLe.JournalDate = DateTime.Now;
-
             JLe.CurrencyRefId = (int)CurrenciesType.Khr;
 
-            AddNewRow();
+            InitializeLines();
 
             await LoadRelatedData();
-
             await GetLedgerByCurrency((int)CurrenciesType.Khr);
 
             _selectedCurrencyId = (int)CurrenciesType.Khr;
 
             await GetNameLists(null);
-
             await base.OnInitializedAsync();
         }
         catch (Exception ex)
         {
-            NotificationService!.Notify(NotificationSeverity.Error, "Exception1", ex.Message);
+            NotificationService!.Notify(NotificationSeverity.Error, "Error", ex.Message);
+        }
+    }
+
+    private void InitializeLines()
+    {
+        JournalLines.Clear();
+        for (int i = 1; i <= 6; i++)
+        {
+            JournalLines.Add(new JournalLineDtoCreate { LineSeq = i });
         }
     }
 
     private async Task LoadRelatedData()
     {
-
         var command = new GetCurrenciesQuery(0, new QueryParam(0, 0));
-
         var rsp = await mediator.Send(command);
-
-        //var currenciesRsponse = await currencyService.GetCurrencies(0);
-
-        _currencies = rsp.Items.Maps<CurrencyDto>();//  Adapt<IEnumerable<CurrencyResponse>>();
+        _currencies = rsp.Items.Maps<CurrencyDto>();
 
         var journalTypes = await journalService.GetJournalTypesAsync(null);
-
         if (journalTypes.Any())
         {
             _journalTypes = journalTypes.Maps<JournalTypeDto>();
         }
     }
 
+    private async Task GetLedgerByCurrency(int? currencyId, string? searchText = null)
+    {
+        try
+        {
+            var res = await ledgerService.GetLedgersAsync(0, currencyId, searchText);
+            if (res.IsSuccess)
+            {
+                Ledgers = res.Data;
+            }
+            else
+            {
+                NotificationService.Notify(NotificationSeverity.Error, res.ErrMessage);
+            }
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Error", ex.Message);
+        }
+    }
 
+    async Task LoadDataLedger(LoadDataArgs arg)
+    {
+        if (arg is not null && !string.IsNullOrEmpty(arg.Filter))
+        {
+            _filter = arg.Filter;
+        }
+        await GetLedgerByCurrency(_selectedCurrencyId, _filter);
+    }
 
     async Task LoadNamesList(LoadDataArgs arg)
     {
-        await GetNameLists(arg.Filter ?? string.Empty);
+        await GetNameLists(null, arg.Filter ?? string.Empty);
     }
 
     private async Task GetNameLists(string? id = null, string? searchText = null)
@@ -101,97 +137,196 @@ public partial class JournalEntryCreate(ILedgerServiceImpl ledgerService, IJourn
         }
         catch (Exception ex)
         {
-            NotificationService!.Notify(NotificationSeverity.Error, "Exception", ex.Message);
+            NotificationService!.Notify(NotificationSeverity.Error, "Error", ex.Message);
         }
-
     }
 
-    protected void AddNewRow()
+    // Row management
+    protected void AddLine()
     {
-        if (JournalLines.Any(x => x.Debit == null && x.Credit == null))
-            return;
+        var seq = JournalLines.Count + 1;
 
-        for (int i = 1; i <= 8; i++)
+        JournalLines.Add(new JournalLineDtoCreate { LineSeq = seq });
+    }
+
+    protected void DeleteLine(JournalLineDtoCreate line)
+    {
+        JournalLines.Remove(line);
+
+        ResetLineSequence();
+
+        if (JournalLines.Count == 0)
         {
-            JournalLines!.Add(new JournalLineDtoCreate
+            JournalLines.Add(new JournalLineDtoCreate { LineSeq = 1 });
+        }
+    }
+
+    private void ResetLineSequence()
+    {
+        for (int i = 0; i < JournalLines.Count; i++)
+        {
+            JournalLines[i].LineSeq = i + 1;
+        }
+    }
+
+    private void AutoAddRowIfLast(JournalLineDtoCreate row)
+    {
+        if (row == JournalLines.Last())
+        {
+            AddLine();
+        }
+    }
+
+    // Selection handlers
+    private void OnAccountSelected(object? obj, JournalLineDtoCreate row)
+    {
+        if (obj is VLedger ledger)
+        {
+            row.LedgerName = ledger.LedgerName!;
+
+            row.LedgerRefId = ledger.LedgerId;
+
+            var rowIndex = JournalLines.IndexOf(row);
+
+            if (rowIndex >= 1)
             {
-                LineSeq = i
-            });
+                AutoBalanceLine(row);
+            }
 
+            AutoAddRowIfLast(row);
+
+            ClearAlert();
+        }
+    }
+
+    private void OnNameSelected(object? arg, JournalLineDtoCreate row)
+    {
+        if (arg is VNameList name)
+        {
+            row.EntityName = name.AltName;
+        }
+    }
+
+    private void OnAmountChanged(JournalLineDtoCreate row)
+    {
+        if (row.Debit > 0)
+        {
+            row.Credit = null;
+        }
+        else if (row.Credit > 0)
+        {
+            row.Debit = null;
         }
 
+        AutoAddRowIfLast(row);
+
+        StateHasChanged();
     }
 
-    protected async Task AddLastRows()
+    private void AutoBalanceLine(JournalLineDtoCreate row)
     {
+        row.Credit = null;
+        row.Debit = null;
 
-        if (!gridJournalLines.IsValid) return;
+        var otherDebit = JournalLines.Where(x => x != row).Sum(x => x.Debit ?? 0);
+        var otherCredit = JournalLines.Where(x => x != row).Sum(x => x.Credit ?? 0);
 
-        if (JournalLines.Any(x => x.Debit == null && x.Credit == null))
-            return;
-
-        var lastRow = JournalLines.Last();
-
-        var seq = JournalLines.Count() + 1;
-
-        var line = new JournalLineDtoCreate
+        if (otherDebit > otherCredit)
         {
-            LineSeq = seq
-        };
-
-        JournalLines.Add(line);
-
-        await gridJournalLines.InsertAfterRow(line, lastRow);
-
-
-        var lastRow2 = JournalLines.Last();
-
-        var seq2 = JournalLines.Count() + 1;
-
-        var line2 = new JournalLineDtoCreate
+            row.Credit = otherDebit - otherCredit;
+        }
+        else if (otherCredit > otherDebit)
         {
-            LineSeq = seq2
-        };
-
-        JournalLines.Add(line2);
-
-        await gridJournalLines.InsertAfterRow(line2, lastRow2);
-
-
-    }
-
-    protected void DeleteEvent(JournalLineDtoCreate journalEntryLine)
-    {
-        var removedIndex = JournalLines!.IndexOf(journalEntryLine);
-
-        var count = JournalLines.Count();
-
-        if (removedIndex != count - 1)
-        {
-            return;
+            row.Debit = otherCredit - otherDebit;
         }
 
-        JournalLines!.Remove(journalEntryLine);
-
-        GetTotalValue();
+        StateHasChanged();
     }
 
-    protected void GetTotalValue()
+    // Currency change
+    private async Task SelectedCurrencyChanged(object? obj)
     {
-        JLe.TotalDr = JournalLines?.Sum(x => x.Debit);
-        JLe.TotalCr = JournalLines?.Sum(x => x.Credit);
+        if (obj is CurrencyDto item)
+        {
+            await GetLedgerByCurrency(item.CurrencyId, _filter);
+            _selectedCurrencyId = item.CurrencyId;
+            JournalLines.Clear();
+        }
+
+        InitializeLines();
+        StateHasChanged();
     }
 
-    protected async Task OnSave()
+    // Date validation
+    private void OnValidateDate()
+    {
+        var day = (DateTime.Now - JLe.JournalDate!.Value).Days;
+
+        if (day > 30)
+        {
+            ShowAlert("Past Transaction", "This transaction is more than 30 days in the past.");
+        }
+        else if (day < -30)
+        {
+            ShowAlert("Future Transaction", "This transaction is more than 30 days in the future.");
+        }
+        else
+        {
+            ClearAlert();
+        }
+    }
+
+    // Save
+    protected async Task HandleFormSave()
     {
         _visibled = true;
 
-
-        if (!JournalLines.Any()) return;
-
+        if (!JournalLines.Any())
+        {
+            _visibled = false;
+            _messageAlert = "No journal lines to save.";
+            ShowAlert("No Journal Lines", _messageAlert);
+            return;
+        }
 
         try
         {
+            var validLines = JournalLines
+                .Where(x => x.LedgerRefId is not null and > 0 && (x.Credit > 0 || x.Debit > 0))
+                .ToList();
+
+            if (validLines.Count <= 1)
+            {
+                ShowAlert("Invalid JournalLine", "Cannot save this transaction with one journal line.");
+                _visibled = false;
+                return;
+            }
+
+            int accApCount = 0;
+
+            foreach (var line in validLines)
+            {
+                var result = await ValidateNameType(line, accApCount);
+
+                if (!result.IsValid)
+                {
+                    _visibled = false;
+
+                    return;
+                }
+
+                accApCount = result.AccApCount;
+            }
+
+            if (!IsBalanced)
+            {
+                ShowAlert("Not Balanced", "Total credit and debit is not balanced.");
+
+                _visibled = false;
+
+                return;
+            }
+
             var trx = new JournalTransactionDtoCreate
             {
                 TranTypeRefId = 33,
@@ -199,479 +334,148 @@ public partial class JournalEntryCreate(ILedgerServiceImpl ledgerService, IJourn
                 CurrencyRefId = JLe.CurrencyRefId,
                 UserRefId = UserId,
                 BranchRefId = BranchId
-
             };
 
             JLe.BranchRefId = BranchId;
-
             JLe.BankRefId = 11;
-
-            if (JournalLines.Count() <= 1)
-            {
-                _isMessage = true;
-
-                _messageAlert = "Cannot save this transaction with one journal line";
-
-                _titleMessage = "Invalid JournalLine: ";
-
-                _visibled = false;
-
-                return;
-            }
-
-            foreach (var value in JournalLines!.Where(x => x.LedgerRefId != null && x.LedgerRefId > 0) ?? [])
-            {
-                var isTrue = await ValidateNameType(value);
-
-                if (isTrue == false)
-                {
-                    _visibled = false;
-
-                    return;
-                }
-            }
-
-            if (!IsSameDebitAndCredit())
-            {
-                _isMessage = true;
-
-                _messageAlert = "Total credit and debit is not balance.";
-
-                _titleMessage = "Not Balance: ";
-
-                _visibled = false;
-
-                return;
-            }
-
-            JLe.TotalCr = JournalLines!.Sum(x => x.Credit);
-
-            JLe.TotalDr = JournalLines!.Sum(x => x.Debit);
-
-            JLe.JournalLineCount = JournalLines!.Count();
-
-            JLe.JournalEntryLines = JournalLines.Where(x => x.LedgerRefId != null &&
-                                                          x.LedgerRefId > 0 &&
-                                                          (x.Credit > 0 || x.Debit > 0))
-                                                .ToList();
-
+            JLe.TotalCr = TotalCredit;
+            JLe.TotalDr = TotalDebit;
+            JLe.JournalLineCount = validLines.Count;
+            JLe.JournalEntryLines = validLines;
             trx.JournalEntry = JLe;
 
-            if (_editForm?.EditContext?.Validate() == false)
+            var confirm = await DialogService.Confirm("Are you sure you want to save this journal entry?", "Confirm Save", new ConfirmOptions { OkButtonText = "Yes", CancelButtonText = "No" });
+
+            if(!confirm.HasValue || !confirm.Value)
             {
+                _visibled = false;
                 return;
             }
 
             var command = new CreateJournalCommand(trx);
 
-            var resp = await mediator.Send(command);  //journalService.CreateJournalAsync(trx);
+            var resp = await mediator.Send(command);
 
             if (resp.IsSuccess())
             {
-                NotificationService.Notify(NotificationSeverity.Success, "Journal", "Journal Entry created successful!");
+                NotificationService.Notify(NotificationSeverity.Success, "Journal", "Journal Entry created successfully!");
 
-                JLe = new();
-
-                JournalLines = [];
-
-                _isMessage = false;
-
-                _visibled = false;
+                ClearForm();
 
                 DialogService.Close(true);
-
-                StateHasChanged();
             }
             else
             {
                 NotificationService.Notify(NotificationSeverity.Warning, "Journal", resp.GetMessage());
-                _isMessage = false;
-                _visibled = false;
             }
         }
         catch
+        {
+            // Silently handle unexpected errors
+        }
+        finally
         {
             _visibled = false;
 
-            _isMessage = false;
-
+            ClearAlert();
         }
     }
 
-    protected void GetAmount(JournalLineDtoCreate journalLine)
-    {
-        journalLine.Amount = journalLine.Debit + journalLine.Credit;
-    }
-
-    decimal? _savedValue = 0;
-
-    protected void DebitValidate(JournalLineDtoCreate journalLine)
-    {
-        if (journalLine.Credit > 0)
-        {
-            journalLine.Debit = journalLine.Credit;
-
-            journalLine.Credit = null;
-        }
-
-        if (journalLine.LedgerRefId == null || journalLine.LedgerRefId <= 0)
-        {
-            _isMessage = true;
-
-            _messageAlert = "Please select any accounts first";
-
-            _titleMessage = "Missing Account: ";
-
-            return;
-        }
-        else
-        {
-            _isMessage = false;
-
-            _messageAlert = "";
-
-            _titleMessage = "";
-        }
-
-        GetTotalValue();
-
-        StateHasChanged();
-    }
-
-    protected void CreditValidate(JournalLineDtoCreate journalLine)
-    {
-        if (journalLine.Debit > 0)
-        {
-            journalLine.Credit = journalLine.Debit;
-
-            journalLine.Debit = null;
-        }
-
-        if (journalLine.LedgerRefId == null || journalLine.LedgerRefId == 0)
-        {
-            _isMessage = true;
-
-            _messageAlert = "Please select any accounts first";
-
-            _titleMessage = "Missing Account: ";
-
-            return;
-        }
-        else
-        {
-            _isMessage = false;
-
-            _messageAlert = "";
-
-            _titleMessage = "";
-        }
-
-        GetTotalValue();
-
-        StateHasChanged();
-    }
-
-    int _accApCount = 0;
-
-    protected void ValidateLedgerType(JournalLineDtoCreate journalLine)
-    {
-        _isFocusCredit = false;
-
-        _isFocusDebit = false;
-
-        if (_ledger == null) return;
-
-        _isMessage = false;
-
-        Console.WriteLine("LedgerID: " + journalLine.LedgerRefId);
-
-        if (_ledger!.LedgerTypeCode!.ToUpper() == "ACCOUNTS PAYABLE")
-        {
-            //check vendor
-            _accApCount++;
-
-            _isMessage = true;
-
-            _messageAlert = "Account that schoose is Accounts Payable, vendor name is required";
-
-            _titleMessage = "Required Name: ";
-        }
-
-        if (_ledger!.LedgerTypeCode?.ToUpper() == "ACCOUNTS RECEIVABLE")
-        {
-            //check customer
-            _accApCount++;
-
-            _isMessage = true;
-
-            _messageAlert = "Account that schoose is Accounts Receivable, customer name is required";
-
-            _titleMessage = "Required Name: ";
-        }
-
-        if (_accApCount > 1)
-        {
-            //You cannot use more than A/R or A/P account in the same transaction.
-            _isMessage = true;
-
-            _messageAlert = "You cannot use more than A/R or A/P account in the same transaction.";
-
-            _titleMessage = "Invalid Account: ";
-        }
-
-        StateHasChanged();
-    }
-
-    bool _isFocusDebit = false;
-
-    bool _isFocusCredit = false;
-
-    protected void OnNextPerform(JournalLineDtoCreate journalLine)
-    {
-        var index = JournalLines!.IndexOf(journalLine);
-
-        if (journalLine.LedgerRefId == 0 || journalLine.LedgerRefId == null) return;
-
-        if (index >= 1)
-        {
-            journalLine.Credit = null;
-
-            journalLine.Debit = null;
-
-            GetTotalValue();
-
-            if (JLe.TotalDr > JLe.TotalCr)
-            {
-                journalLine.Credit = JLe.TotalDr - JLe.TotalCr;
-            }
-            else if (JLe.TotalCr > JLe.TotalDr)
-            {
-                journalLine.Debit = JLe.TotalCr - JLe.TotalDr;
-            }
-
-            GetTotalValue();
-
-            StateHasChanged();
-        }
-    }
-
-    protected void OnGetSavedValue(JournalLineDtoCreate journalLine)
-    {
-        GetTotalValue();
-    }
-
-    VNameList? _nameList;
-
-
-    protected async Task<bool> ValidateNameType(JournalLineDtoCreate journalLine)
+    private async Task<(bool IsValid, int AccApCount)> ValidateNameType(JournalLineDtoCreate journalLine, int accApCount)
     {
         try
         {
-            if (journalLine.LedgerRefId == null || journalLine.LedgerRefId == 0)
+            if (journalLine.LedgerRefId is null or 0)
             {
-                _isMessage = true;
-                _messageAlert = "Some journal lines are missing account.";
-                _titleMessage = "Missing Account: ";
-                return false;
+                ShowAlert("Missing Account", "Some journal lines are missing an account.");
+                return (false, accApCount);
             }
 
+            VNameList? nameItem = null;
             await GetNameLists(journalLine.EntityNameRefId);
-
             if (NameLists.Any())
             {
-                _nameList = NameLists.FirstOrDefault();
-
-                journalLine.EntityName = _nameList?.FullName;
-            }
-            else
-            {
-                _nameList = null;
+                nameItem = NameLists.FirstOrDefault();
+                journalLine.EntityName = nameItem?.FullName;
             }
 
             var resp = await ledgerService!.FindLedgerByIdAsync(journalLine.LedgerRefId);
-
             if (resp.IsSuccess)
             {
                 var ledger = resp.Data;
+                var typeCode = ledger?.LedgerType?.LedgerTypeCode?.ToUpper();
 
-                if (ledger?.LedgerType?.LedgerTypeCode?.ToUpper() == "ACCOUNTS PAYABLE")
+                if (typeCode == "ACCOUNTS PAYABLE")
                 {
-                    _accApCount++;
-                    //check vendor
-                    if (_nameList?.EntType?.ToUpper() != "VENDOR" || journalLine.EntityNameRefId == null)
+                    accApCount++;
+                    if (nameItem?.EntType?.ToUpper() != "VENDOR" || journalLine.EntityNameRefId == null)
                     {
-                        _isMessage = true;
-                        _messageAlert = "Please choose a vendor when using an Accounts Payable account as a line.";
-                        _titleMessage = "Required Name: ";
-                        return false;
+                        ShowAlert("Required Name", "Please choose a vendor when using an Accounts Payable account.");
+                        return (false, accApCount);
                     }
                 }
 
-                if (ledger?.LedgerType?.LedgerTypeCode?.ToUpper() == "ACCOUNTS RECEIVABLE")
+                if (typeCode == "ACCOUNTS RECEIVABLE")
                 {
-                    //check customer
-                    _accApCount++;
-                    if (_nameList?.EntType?.ToUpper() != "CUSTOMER" || journalLine.EntityNameRefId == null)
+                    accApCount++;
+                    if (nameItem?.EntType?.ToUpper() != "CUSTOMER" || journalLine.EntityNameRefId == null)
                     {
-                        _isMessage = true;
-                        _messageAlert = "Please choose a customer when using an Accounts Payable account as a line.";
-                        _titleMessage = "Required Name: ";
-                        return false;
+                        ShowAlert("Required Name", "Please choose a customer when using an Accounts Receivable account.");
+                        return (false, accApCount);
                     }
                 }
             }
 
-            if (_accApCount > 1)
+            if (accApCount > 1)
             {
-                //You cannot use more than A/R or A/P account in the same transaction.
-                _isMessage = true;
-                _messageAlert = "You cannot use more than A/R or A/P account in the same transaction.";
-                _titleMessage = "Invalid Account: ";
-                return false;
+                ShowAlert("Invalid Account", "You cannot use more than one A/R or A/P account in the same transaction.");
+                return (false, accApCount);
             }
 
             await InvokeAsync(StateHasChanged);
-            return true;
+            return (true, accApCount);
         }
         catch
         {
-            return true;
+            return (true, accApCount);
         }
     }
 
-    int? _valueSize = 10;
-
-    bool _visibled = false;
-    [Parameter] public EventCallback<int> Close { get; set; }
-
-    protected void CloseSelectedTab()
+    // Clear & Close
+    protected void ClearForm()
     {
-        //await Close.InvokeAsync(0);
-        DialogService.Close(false);
-        //StateHasChanged();
-    }
-
-    private async Task SelectedCurrencyChanged(object? obj)
-    {
-        if (obj is not null)
+        JLe = new JournalEntryDtoCreate
         {
-
-            var item = (CurrencyDto)obj;
-
-            await GetLedgerByCurrency(item.CurrencyId, filter);
-
-            _selectedCurrencyId = item.CurrencyId;
-
-            JournalLines!.Clear();
-
-        }
-
-        AddNewRow();
-
-
-        await gridJournalLines.Reload();
-
-
+            JournalType = JournalTypes.PV.ToString(),
+            JournalDate = DateTime.Now,
+            CurrencyRefId = _selectedCurrencyId ?? (int)CurrenciesType.Khr
+        };
+        JournalLines.Clear();
+        InitializeLines();
+        ClearAlert();
+        _visibled = false;
         StateHasChanged();
     }
 
-    private void OnValidateDate()
+    protected void CloseSelectedTab()
     {
-        //Check date 
-        var day = (DateTime.Now - JLe.JournalDate!.Value).Days;
-
-        if (day > 30)
-        {
-            _isMessage = true;
-
-            _messageAlert = "This transaction is more than 30 days in the past.";
-
-            _titleMessage = "Past Transaction: ";
-        }
-        else if (day < -30)
-        {
-            _isMessage = true;
-
-            _messageAlert = "This transaction is more than 30 days in the future.";
-
-            _titleMessage = "Future Transaction: ";
-        }
-        else
-        {
-            _isMessage = false;
-
-            _messageAlert = "";
-
-            _titleMessage = "";
-        }
-
-        return;
+        DialogService.Close(false);
     }
 
-    private void SelectedItemChanged(object? obj)
+    // Alert helpers
+    private void ShowAlert(string title, string message)
     {
-        if (obj is not null)
-        {
-            var item = (JournalTypeDto)obj;
-            JLe.JournalType = item?.Code!;
-        }
+        _isMessage = true;
+        _titleMessage = $"{title}: ";
+        _messageAlert = message;
     }
 
-
-    private async Task GetLedgerByCurrency(int? currencyId, string? searchText = null)
+    private void ClearAlert()
     {
-        try
-        {
-            var res = await ledgerService.GetLedgersAsync(0, currencyId, searchText);
-
-            if (res.IsSuccess)
-            {
-                Ledgers = res.Data;
-            }
-            else
-            {
-                NotificationService.Notify(NotificationSeverity.Error, res.ErrMessage);
-            }
-
-            StateHasChanged();
-        }
-        catch (Exception ex)
-        {
-            NotificationService.Notify(NotificationSeverity.Error, "Exception", ex.Message);
-        }
-
+        _isMessage = false;
+        _titleMessage = "";
+        _messageAlert = "";
     }
 
-    string filter = "";
-
-    async Task LoadDataLedger(LoadDataArgs arg)
-    {
-        if (arg is not null && !string.IsNullOrEmpty(arg.Filter))
-        {
-            filter = arg.Filter;
-        }
-
-        await GetLedgerByCurrency(_selectedCurrencyId, filter);
-    }
-
-    private void SelectedItemChanged(object? obj, JournalLineDtoCreate row)
-    {
-        if (obj is not null)
-        {
-            var item = (VLedger)obj;
-
-            row.LedgerName = item?.LedgerName!;
-
-            row.LedgerRefId = item?.LedgerId;
-        }
-
-        var rowIndex = JournalLines.IndexOf(row);
-
-        if (rowIndex >= 1)
-        {
-            OnNextPerform(row);
-        }
-
-
-    }
+    [Parameter] public EventCallback<int> Close { get; set; }
 }

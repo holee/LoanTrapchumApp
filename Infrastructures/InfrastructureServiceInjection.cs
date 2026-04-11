@@ -54,10 +54,16 @@ namespace Infrastructures
             {
                 options.DefaultScheme = IdentityConstants.ApplicationScheme;
                 options.DefaultSignInScheme = IdentityConstants.ApplicationScheme;
-
             }).AddIdentityCookies();
 
-            services.AddIdentityCore<ApplicationUser>()
+            services.AddIdentityCore<ApplicationUser>(options =>
+            {
+                options.Password.RequireDigit = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequiredLength = 5;
+            })
                 .AddRoles<ApplicationRole>()
                 .AddEntityFrameworkStores<UserDataContext>()
                 .AddRoleManager<RoleManager<ApplicationRole>>()
@@ -90,7 +96,7 @@ namespace Infrastructures
             services.AddScoped<IBankService, BankRepository>();
             services.AddScoped<IDepartmentService, DepartmentService>();
             services.AddScoped<IEmployeeService, EmployeeRepository>();
-            services.AddScoped<IEntityNameService, EntityNameService>(); 
+            services.AddScoped<IEntityNameService, EntityNameService>();
             services.AddScoped<IAddressService, AddressService>();
             services.AddScoped<ICashVaultService, CashVaultService>();
             services.AddScoped<ICashVaultService, CashVaultService>();

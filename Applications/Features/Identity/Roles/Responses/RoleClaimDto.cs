@@ -13,6 +13,6 @@ public class RoleClaimDto
         IsSelected= isSelected;    
     }
 
-    public string ClaimType { get; set; } = string.Empty;
+    public string? ClaimType { get; set; } = string.Empty;
     public bool IsSelected { get; set; } = false;
 }

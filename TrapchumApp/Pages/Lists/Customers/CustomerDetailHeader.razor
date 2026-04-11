@@ -1,5 +1,7 @@
-﻿@using Applications.Features.Customers.Response
+﻿@using Applications.Features.Customers.Queries.GetCustomerDetailById
+@using Applications.Features.Customers.Response
 @using Applications.Features.LoanRequests.Interfaces
+@using TrapchumApp.Helpers.Extensions
 <RadzenRow>
     <RadzenColumn Size="2">
         <RadzenStack Orientation="Orientation.Vertical"
@@ -78,17 +80,19 @@
     [Parameter]
     public string? CustomerId { get; set; } = string.Empty;
 
-
     protected override async Task OnInitializedAsync()
     {
 
         if (Customer is null || !string.IsNullOrEmpty(CustomerId))
         {
-            var rsp = await _customerService.GetCustomerDetailsByIdAsync(CustomerId, false);
 
-            if (rsp.IsSuccess && rsp.Data is not null)
+            var query = new GetCustomerDetailByIdQuery(CustomerId, false);
+
+            var rsp = await mediator.Send(query); //_customerService.GetCustomerDetailsByIdAsync(CustomerId, false);
+
+            if (rsp.IsSuccess())
             {
-                Customer = rsp.Data;
+                Customer = rsp.Value;
             }
         }
 

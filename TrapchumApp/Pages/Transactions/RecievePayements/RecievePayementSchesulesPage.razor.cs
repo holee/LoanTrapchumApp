@@ -181,7 +181,7 @@ public partial class RecievePayementSchesulesPage
 
         var message = $"Recieve Payment from {AltName}";
 
-        bool? confirm = await DialogService.OpenSideAsync<PaymentSideBar>(message, parameters!, options);
+        bool? confirm = await DialogService.OpenSideAsync<PaymentOffSideBar>(message, parameters!, options);
 
 
         if (confirm == true)

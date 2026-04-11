@@ -31,6 +31,7 @@ namespace TrapchumApp.Shared
         private bool _canRefund;
         private bool _canOpenBranch;
         private int _unreadCount;
+        private bool _canRecieveMultiple;
         public bool CanPayOff
         {
             get { return _canPayOff; }
@@ -213,6 +214,30 @@ namespace TrapchumApp.Shared
             }
         }
 
+        public bool CanRecieveMultiple
+        {
+            get => _canRecieveMultiple;
+            set
+            {
+                _canRecieveMultiple = value;
+
+                StateHasChanged();
+            }
+        }
+
+        internal async Task CheckedCanMultipleRecieve(ClaimsPrincipal user)
+        {
+            if (user is null || (user is not null && user?.Identity?.IsAuthenticated == false))
+            {
+                _canRecieveMultiple = false;
+
+                return;
+            }
+
+            _isAdmin = await _authorizeService.MustHasPermissionAsync(user!, Policies.MultiplePayment);
+        }
+
+
         internal async Task CheckedIsAdmin(ClaimsPrincipal user)
         {
             if (user is null || (user is not null && user?.Identity?.IsAuthenticated == false))
@@ -228,27 +253,18 @@ namespace TrapchumApp.Shared
 
         internal async Task CheckedCanPayOff(ClaimsPrincipal user)
         {
-            if (user is not null && user?.Identity?.IsAuthenticated == false)
+            if (user is not null && user?.Identity?.IsAuthenticated == true)
             {
                 _canPayOff = await _authorizeService.MustHasPermissionAsync(user, Policies.PayOff);
             }
-            else
-            {
-                _canPayOff = false;
-            }
-
         }
 
 
         internal async Task CheckedCanWriteOff(ClaimsPrincipal user)
         {
-            if (user is not null && user?.Identity?.IsAuthenticated == false)
+            if (user is not null && user?.Identity?.IsAuthenticated == true)
             {
                 CanWriteOff = await _authorizeService.MustHasPermissionAsync(user, Policies.WriteOff);
-            }
-            else
-            {
-                CanWriteOff = false;
             }
 
         }
@@ -369,15 +385,6 @@ namespace TrapchumApp.Shared
 
         internal async Task CheckedCanOpenBranch(ClaimsPrincipal user)
         {
-
-            //canOpenBranch = await _authorizeService.MustHasPermissionAsync(auth.User, Policies.OpenBranch);
-
-            //canCloseBranch = await _authorizeService.MustHasPermissionAsync(auth.User, Policies.CloseBranch);
-
-            //canVaultOut = await _authorizeService.MustHasPermissionAsync(auth.User, Policies.TranxVaultOut);
-
-            //canVaultIn = await _authorizeService.MustHasPermissionAsync(auth.User, Policies.TranxVaultIn);
-
             if (user is null || (user is not null && user?.Identity?.IsAuthenticated == false))
             {
                 _canOpenBranch = false;
@@ -417,6 +424,8 @@ namespace TrapchumApp.Shared
             await CheckRecievePayment(user);
             await CheckedCanWriteOff(user);
             await CheckedCanOpenBranch(user);
+            await CheckedCanMultipleRecieve(user);
+            await CheckedCanPayOff(user);
         }
 
         internal async Task GetUserId()

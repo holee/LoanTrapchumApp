@@ -75,7 +75,7 @@
                                           Filterable="false"
                                           Sortable="false">
                         <Template>
-                            @(VCustomers?.IndexOf(c) + 1)
+                            @c.RowIndex
                         </Template>
                     </RadzenDataGridColumn>
                     <RadzenDataGridColumn Property="@nameof(VCustomerDetails.AltName)"
@@ -208,9 +208,9 @@
     {
         ContextMenuService.Open(args, ds =>
     @<RadzenMenu Style="font-size:0.8rem;" Click="OnMenuItemClick">
-        <RadzenMenuItem Icon="add"
+        <RadzenMenuItem Icon="request_quote"
                         Click="@(()=>AddLoanRequest(c.CustomerId))"
-                        Visible="@BState.CanRequest"
+                        Disabled="@(!BState.CanRequest || c.IsLoanActive)"
                         Text="Request Loan"
                         Value="@c.CustomerId"></RadzenMenuItem>
         <RadzenMenuItem Click="@(() => AddCollateral(c.CustomerId))" Icon="add" Text="Add Collateral" Value="@c.CustomerId" />
@@ -252,16 +252,16 @@
         {
             new ContextMenuItem
             {
-                Text = "Add Collateral",
-                Icon = "add",
-                Value = "1"
-            },
-            new ContextMenuItem
-            {
                 Text = "Request Loan",
                 Icon = "request_quote",
                 Value = "2",
                 Disabled = (!BState.CanRequest || args.Data.IsLoanActive)
+            },
+            new ContextMenuItem
+            {
+                Text = "Add Collateral",
+                Icon = "add",
+                Value = "1"
             },
             new ContextMenuItem
             {

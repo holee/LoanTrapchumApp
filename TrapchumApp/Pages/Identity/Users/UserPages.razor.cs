@@ -3,7 +3,6 @@ using Applications.Extensions.Identity.Policies;
 using Applications.Features.Branches.Dtos;
 using Applications.Features.Branches.Queries.GetBranchAsPaging;
 using Applications.Features.Employees.Queries.GetEmployeeAsPaging;
-using Applications.Features.Employees.Queries.GetEmployeeById;
 using Applications.Features.Identity.Users;
 using Applications.Interfaces.Employees;
 using Applications.Responses.Paginations;
@@ -11,15 +10,10 @@ using Applications.Responses.ViewModels.Auths;
 using Applications.Responses.ViewModels.Employees;
 using Applications.Services.Identity;
 using Domains.Models.Identity;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Components.Forms;
-using Radzen;
-using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Identity.Users;
 
-public partial class Index
+public partial class UserPages
 {
     protected IEnumerable<VUser>? AllUsers = [];
     protected bool IsLoading = true;
@@ -36,7 +30,7 @@ public partial class Index
     bool isLoading = false;
     int counts = 0;
     bool AdminOnly = false;
-    public Index(IUserServiceImpl authService, IEmployeeService empService)
+    public UserPages(IUserServiceImpl authService, IEmployeeService empService)
     {
         _authService = authService;
         _empService = empService;

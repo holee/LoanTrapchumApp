@@ -38,7 +38,7 @@ namespace Infrastructures.Implements
             this.dbContextFactory = dbContextFactory;
         }
 
-   
+
         public async Task<ErrorOr.ErrorOr<DisburseResult>> CreateLoanDisbursementAsync(LoanDisbursment req, CancellationToken cancellation = default)
         {
 
@@ -543,7 +543,7 @@ namespace Infrastructures.Implements
 
                 return loanDisbursement is not null
                     ? loanDisbursement
-                    : ErrorOr.Error.Validation("No loan disbursement found.");
+                    : ErrorOr.Error.NotFound("NotFound", "No loan disbursement found.");
 
             }
 
@@ -563,7 +563,7 @@ namespace Infrastructures.Implements
 
             return item1 is not null
                                 ? item1
-                                : ErrorOr.Error.NotFound("No loan disbursement found.");
+                                : ErrorOr.Error.NotFound("NotFound", "No loan disbursement found.");
         }
 
 

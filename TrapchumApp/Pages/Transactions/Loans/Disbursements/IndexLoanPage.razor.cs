@@ -4,13 +4,13 @@ using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 {
-    public partial class IndexLoan
+    public partial class IndexLoanPage
     {
 
 
         private readonly ILoanServiceImpl _dService;
 
-        public IndexLoan(ILoanServiceImpl dService)
+        public IndexLoanPage(ILoanServiceImpl dService)
         {
             _dService = dService;
         }

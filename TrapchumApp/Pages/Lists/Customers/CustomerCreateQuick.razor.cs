@@ -1,5 +1,6 @@
 using Applications.Enumerations;
 using Applications.Features.Addresses.Dto;
+using Applications.Features.Customers.Commands.CreateCustomer;
 using Applications.Features.Customers.Dto;
 using Applications.Responses.Lists.Entities;
 using Applications.Services.Files;
@@ -7,6 +8,7 @@ using Applications.Services.Lists;
 using Domains.Models.Addresses;
 using Domains.Models.Lists;
 using Radzen.Blazor;
+using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Lists.Customers
 {
@@ -101,9 +103,9 @@ namespace TrapchumApp.Pages.Lists.Customers
 
                 model.Photo ??= "/Profiles/profile.png";
 
-                var response = await _customerService.CreateAsync(model);
+                var response = await mediator.Send(new CreateCustomerCommand(model)); //_customerService.CreateAsync(model);
 
-                if (response.IsSuccess)
+                if (response.IsSuccess())
                 {
 
                     model = new();
@@ -112,8 +114,7 @@ namespace TrapchumApp.Pages.Lists.Customers
                 }
                 else
                 {
-
-                    NotificationService.Notify(NotificationSeverity.Error, response.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Error, response.GetMessage());
                 }
 
             }

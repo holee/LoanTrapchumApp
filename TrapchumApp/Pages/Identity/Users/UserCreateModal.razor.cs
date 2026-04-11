@@ -1,9 +1,11 @@
 using Applications.Features.Branches.Dtos;
 using Applications.Features.Branches.Queries.GetBranchAsPaging;
+using Applications.Features.Identity.Command.CreateNewUser;
 using Applications.Features.Identity.Users;
 using Applications.Interfaces.Identity;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Employees;
+using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Identity.Users
 {
@@ -34,6 +36,7 @@ namespace TrapchumApp.Pages.Identity.Users
 
         bool _showEmployee = false;
 
+        private bool _isBusy = false;
         protected override async Task OnInitializedAsync()
         {
             var selectedRoles = await _roleService.GetRolesAsync();
@@ -149,19 +152,20 @@ namespace TrapchumApp.Pages.Identity.Users
         {
             try
             {
-                _form.EditContext?.Validate();
 
-                var result = await _userService.CreateUserAsync(_model);
+                var command = new CreateNewUserCommand(_model);
 
-                if (result.IsSuccess)
+                var result = await mediator.Send(command);
+
+                if (result.IsSuccess())
                 {
-                    NotificationService.Notify(NotificationSeverity.Success, result.Data);
+                    NotificationService.Notify(NotificationSeverity.Success, result.Value);
 
                     DialogService.Close(true);
                 }
                 else
                 {
-                    NotificationService.Notify(NotificationSeverity.Error, result.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Error, result.GetMessage());
                 }
             }
             catch (Exception ex)

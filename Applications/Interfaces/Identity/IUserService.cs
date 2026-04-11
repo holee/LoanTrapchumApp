@@ -25,4 +25,5 @@ public interface IUserService
     Task<Result<FileModel>> ChangeProfile(string? userId, FileModel model, CancellationToken cancellation = default);
     Task<Result<UserProfileResponse>> GetUserProfile(string? userId, CancellationToken cancellation = default);
     Task<ErrorOr.ErrorOr<VUser>> GetUserDetailById(string? userId, CancellationToken cancellation = default);
+    Task<ErrorOr.ErrorOr<string>> CreateUserAsync(RegisterRequest model, CancellationToken cancellation = default);
 }

@@ -12,6 +12,7 @@
     <Content Remove="Pages\Lists\Bases\AddressBaseCreate.razor" />
     <Content Remove="Pages\Lists\OtherNames\GaurantorCreate.razor" />
     <Content Remove="Pages\Transactions\Loans\Disbursements\CustomersActiveLoanPage.razor" />
+    <Content Remove="Pages\Transactions\RecievePayements\PaymentOffSideBar.razor" />
   </ItemGroup>
 
   <ItemGroup>
@@ -78,7 +79,7 @@
     <AdditionalFiles Include="Pages\Identity\Shared\EmptyLayout.razor" />
     <AdditionalFiles Include="Pages\Identity\Users\CreateNewUser.razor" />
     <AdditionalFiles Include="Pages\Identity\Users\CreditAgentUserCreate.razor" />
-    <AdditionalFiles Include="Pages\Identity\Users\Index.razor" />
+    <AdditionalFiles Include="Pages\Identity\Users\UserPages.razor" />
     <AdditionalFiles Include="Pages\Identity\Users\ManageUserPermission.razor" />
     <AdditionalFiles Include="Pages\Identity\Users\ManageUserProfile.razor" />
     <AdditionalFiles Include="Pages\Identity\Users\MangeUserRoles.razor" />
@@ -185,7 +186,7 @@
     <AdditionalFiles Include="Pages\Transactions\Ledgers\LedgerIndex.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\AllLoansTab.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\CustomersActiveLoanPage.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\IndexLoan.razor" />
+    <AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\IndexLoanPage.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\LoanChangedCreditAgent.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\LoanChangedCreditAgents.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\LoanCreate.razor" />
@@ -248,6 +249,7 @@
     <AdditionalFiles Include="Pages\Transactions\Loans\Repayments\ScheduleNotPaid.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\Repayments\SchedulesPaid.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\WriteOffs\Index.razor" />
+    <AdditionalFiles Include="Pages\Transactions\RecievePayements\PaymentOffSideBar.razor" />
     <AdditionalFiles Include="Shared\CascadingAppState.razor" />
     <AdditionalFiles Include="Shared\CascadingAuthState.razor" />
     <AdditionalFiles Include="Shared\CascadingCurrency.razor" />

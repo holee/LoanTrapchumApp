@@ -64,7 +64,9 @@ public partial class AllLoansTab
 
         var auth = await AuthenticationState;
 
-        await bState.CheckedIsCreditAgent(auth.User);
+        //await bState.CheckedIsCreditAgent(auth.User);
+
+        await bState.GetAuthenticatedUser(auth.User);
 
         await GetLoanDisbursements();
 

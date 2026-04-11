@@ -1,27 +1,26 @@
+using Applications.Features.LoanPayments.Queries.GetPaidSchedule;
+using Applications.Features.LoanPayments.Queries.GetScheduleById;
 using Applications.Features.Schedules.Dto;
 using Applications.Responses.ViewModels.Loans.Schedules;
-using Applications.Services.Loans;
-using Microsoft.AspNetCore.Components;
-using Radzen;
+using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 {
     public partial class SchedulesPaid
     {
 
-        private readonly ILoanPaymentServiceImpl _loanPaymentService;
-        public SchedulesPaid(ILoanPaymentServiceImpl loanPaymentService)
-        {
-            _loanPaymentService = loanPaymentService;
-        }
         [Parameter] public int? CurrencyId { get; set; } = 1;
         [Parameter] public int BranchId { get; set; } = 0;
         [Parameter] public string? LoanId { get; set; } = string.Empty;
+
         int counts = 0;
+
         IEnumerable<VSchedule> _schedules = [];
-        Applications.Features.Schedules.Dto.ScheduleDetailsDto? _schedule = null;
-        bool isLoading = false;
+
+        ScheduleDetailsDto? _schedule = null;
+
         int pageSize = 15;
+
         long ScheduleId = 0;
         protected override async Task OnInitializedAsync()
         {
@@ -31,16 +30,19 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
         }
 
         void RowSelecting(VSchedule s) { }
+       
         async Task ShowScheduleDetails(VSchedule p)
         {
 
             ContextMenuService.Close();
 
-            var rsp = await _loanPaymentService.GetScheduleByIdAsync(p.LoanScheduleId, BranchId, LoanId);
+            var query=new GetScheduleByIdQuery(p.LoanScheduleId, BranchId, LoanId);
 
-            if (rsp is { IsSuccess: false, Data: null }) return;
+            var rsp = await mediator.Send(query);
 
-            _schedule = rsp.Data;
+            if (rsp.IsError) return;
+
+            _schedule = rsp.Value;
 
             var param = new Dictionary<string, object?>
             {
@@ -60,37 +62,28 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
                 Width = "55vw"
             };
 
-            await DialogService.OpenSideAsync<ScheduleDetailsPage>($"Schedule-{p.LoanScheduleId}", parameters: param, options);
+            await DialogService.OpenSideAsync<ScheduleDetailsPage>($"Schedule-{p.LoanScheduleId}", parameters: param!, options);
 
 
         }
         async Task GetCustomerSchedules()
         {
-            try
+
+            Tracker.Show();
+
+            var command = new GetPaidScheduleQuery(BranchId, LoanId);
+
+            var rsp = await mediator.Send(command);
+
+            if (rsp.IsSuccess())
             {
-                isLoading = true;
+                _schedules = rsp.Value;
 
-                var rsp = await _loanPaymentService.GetPaidedScheduleAsync(BranchId, LoanId);
-
-                if (rsp is { IsSuccess: true, Data: not null })
-                {
-                    _schedules = rsp.Data;
-
-                    counts = rsp.Data.Count();
-                }
-
-                isLoading = false;
+                counts = rsp.Value.Count();
             }
-            catch (Exception ex)
-            {
-                isLoading = false;
 
-                NotificationService.Notify(NotificationSeverity.Error, ex.Message);
-            }
-            finally
-            {
-                isLoading = false;
-            }
+            Tracker.Hide();
+            
             StateHasChanged();
         }
     }

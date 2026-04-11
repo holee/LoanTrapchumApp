@@ -16,4 +16,5 @@ public sealed class AppStateService : IAppStateService
     public int UnReadCount { get; set; }
     public bool CanOpenBranch { get; set; }
     public List<NotificationDto> Notifications { get; set; } = [];
+    public bool CanRecieveMultiple { get; set; }
 }

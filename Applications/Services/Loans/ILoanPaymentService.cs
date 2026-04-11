@@ -1,71 +1,65 @@
-﻿using Applications.Commons.Mappers;
-using Applications.Features.LoanPayments.Requests;
-using Applications.Features.Schedules.Dto;
-using Applications.Features.Transactions.LoanTransactions;
-using Applications.Interfaces.Loans;
-using Applications.Responses;
-using Applications.Responses.ViewModels.Loans.Schedules;
+﻿using Applications.Features.Schedules.Dto;
 
 namespace Applications.Services.Loans;
 
 
 public interface ILoanPaymentServiceImpl
 {
-    Task<Result<string>> CreatePayment(LoanPaymentTransactionDtoCreate req, CancellationToken cancellation = default);
-    Task<Result<IEnumerable<VSchedule>>> GetPaidedScheduleAsync(int? branchId, string? loanRefId);
+    //Task<Result<string>> CreatePayment(LoanPaymentTransactionDtoCreate req, CancellationToken cancellation = default);
+    //Task<Result<IEnumerable<VSchedule>>> GetPaidedScheduleAsync(int? branchId, string? loanRefId);
     //Task<Result<IEnumerable<LoanPaymentLineVm>>> GetPaymentLinesAsync(int? branchId, string? loanRefId, int? installmentNo);
-    Task<Result<ScheduleDetailsDto>> GetScheduleByIdAsync(long? scheduleId, int? branchId, string? loanRefId);
+    //Task<Result<ScheduleDetailsDto>> GetScheduleByIdAsync(long? scheduleId, int? branchId, string? loanRefId);
     //Task<Result<string>> RecievePayment(LoanPaymentDtoCreate req);
     //Task<Result<string>> RecievePayment(LoanPaymentTransactionDtoCreate req, int? brancId);
 }
 
 
 
-public sealed class LoanPaymentService(ILoanPaymentService lnService) : ILoanPaymentServiceImpl
-{
-    public async Task<Result<IEnumerable<VSchedule>>> GetPaidedScheduleAsync(int? branchId, string? loanRefId)
-    {
-        return await lnService.GetPaidScheduleAsync(branchId, loanRefId);
-    }
+//public sealed class LoanPaymentService(ILoanPaymentService lnService) : ILoanPaymentServiceImpl
+//{
+//    public async Task<Result<IEnumerable<VSchedule>>> GetPaidedScheduleAsync(int? branchId, string? loanRefId)
+//    {
+//        return await lnService.GetPaidScheduleAsync(branchId, loanRefId);
+//    }
 
-    public async Task<Result<ScheduleDetailsDto>> GetScheduleByIdAsync(long? scheduleId, int? branchId, string? loanRefId)
-    {
-        return await lnService.GetScheduleByIdAsync(scheduleId, branchId, loanRefId);
-    }
+//    public async Task<Result<ScheduleDetailsDto>> GetScheduleByIdAsync(long? scheduleId, int? branchId, string? loanRefId)
+//    {
+//        return await lnService.GetScheduleByIdAsync(scheduleId, branchId, loanRefId);
+//    }
 
 
 
-    public async Task<Result<IEnumerable<PaymentLineDetailsDto>>> GetPaymentLinesAsync(int? branchId, string? loanRefId, int? installmentNo)
-    {
-        return await lnService.GetPaymentLinesAsync(branchId, loanRefId, installmentNo);
-    }
+//    //public async Task<Result<IEnumerable<PaymentLineDetailsDto>>> GetPaymentLinesAsync(int? branchId, string? loanRefId, int? installmentNo)
+//    //{
+//    //    return await lnService.GetPaymentLinesAsync(branchId, loanRefId, installmentNo);
+//    //}
 
-    //public async Task<Result<string>> RecievePayment(LoanPaymentDtoCreate req)
-    //{
-    //    return await lnService.RecievePayment(req);
-    //}
+//    //public async Task<Result<string>> RecievePayment(LoanPaymentDtoCreate req)
+//    //{
+//    //    return await lnService.RecievePayment(req);
+//    //}
 
-    //public async Task<Result<string>> RecievePayment(LoanPaymentTransactionDtoCreate req, int? branchId)
-    //{
+//    //public async Task<Result<string>> RecievePayment(LoanPaymentTransactionDtoCreate req, int? branchId)
+//    //{
 
-    //    if (!branchId.HasValue)
-    //    {
-    //        return Result.Failure<string>(ErrorResponse.Validation("We required branch to do operation!."));
-    //    }
+//    //    if (!branchId.HasValue)
+//    //    {
+//    //        return Result.Failure<string>(ErrorResponse.Validation("We required branch to do operation!."));
+//    //    }
 
-    //    var model = req.ToLoanTransction(branchId);
+//    //    var model = req.ToLoanTransction(branchId);
 
-    //    return await lnService.RecievePayment(model);
+//    //    return await lnService.RecievePayment(model);
 
-    //}
+//    //}
 
-    public async Task<Result<string>> CreatePayment(LoanPaymentTransactionDtoCreate req, CancellationToken cancellation = default)
-    {
+//    //public async Task<Result<string>> CreatePayment(LoanPaymentTransactionDtoCreate req, CancellationToken cancellation = default)
+//    //{
 
-        var model = req.ToLoanTransction();
+//    //    var model = req.ToLoanTransction();
 
-        return await lnService.CreatePayment(model, cancellation);
+//    //    return await lnService.CreatePayment(model, cancellation);
 
-    }
+//    //}
 
-}
+//}

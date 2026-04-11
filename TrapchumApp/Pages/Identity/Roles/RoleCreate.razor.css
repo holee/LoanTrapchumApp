@@ -1,0 +1,106 @@
+.perm-card {
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.perm-selectall-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1.25rem;
+    border-bottom: 2px solid #e9ecef;
+    background: #fff;
+}
+
+.perm-selectall-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    user-select: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #495057;
+}
+
+.perm-selectall-check {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.2rem;
+    height: 1.2rem;
+    border-radius: 4px;
+    background-color: #dee2e6;
+    transition: all 0.2s ease;
+}
+
+.perm-selectall-check--active {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.perm-group {
+    border-bottom: 1px solid #e9ecef;
+}
+
+    .perm-group:last-child {
+        border-bottom: none;
+    }
+
+.perm-group-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.65rem 1.25rem;
+    background: #e9ecef;
+    border-bottom: 1px solid #f1f3f5;
+}
+
+.perm-group-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    user-select: none;
+}
+
+.perm-group-check {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.1rem;
+    height: 1.1rem;
+    border-radius: 4px;
+    background-color: #dee2e6;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.perm-group-check--active {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.perm-group-name {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #343a40;
+}
+
+.perm-group-count {
+    font-size: 0.75rem;
+    color: #868e96;
+    background: #e9ecef;
+    padding: 0.15rem 0.6rem;
+    border-radius: 10px;
+}
+
+.perm-group-body {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    background: #e9ece0;
+    padding: 0.85rem 1.25rem;
+}

@@ -6,7 +6,7 @@ namespace Applications.Responses.ViewModels.Journals
     {
         public string? JournalEntryId { get; set; }
         public string? TransactionsId { get; set; }
-        public DateTime? TransactionDate { get; set; }
+        public DateTimeOffset? TransactionDate { get; set; }
         public string? TransactionTypeName { get; set; }
         public string? JournalType { get; set; }
         public string? ReferrenceNum { get; set; }
@@ -33,7 +33,7 @@ namespace Applications.Responses.ViewModels.Journals
         public int? CurrencyId { get; set; }
         
         public string? CurrencyCode { get; set; }
-        public DateTime? Updated { get; set; }
+        public DateTime? ModiFiedDT { get; set; }
         [NotMapped]
         public ICollection<JournalEntryLineVm> JournalEntryLines { get; set; } = [];
     }

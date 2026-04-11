@@ -52,7 +52,4 @@ public sealed class VSchedule
     [NotMapped] public bool IsPartialPaid => ScheduleStatusId == 4;
     [NotMapped] public List<PaymentLineDetailsDto> PaymentLines { get; set; } = [];
 
-
-
-    
 }

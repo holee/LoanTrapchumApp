@@ -12,6 +12,7 @@ namespace Applications.Interfaces.Identity
     {
         Task<Result> AddRolePermissions(RolePermissionRequest permission);
         Task<Result> CreateAsync(RoleCreateDto role);
+        Task<ErrorOr.ErrorOr<RoleClaims>> CreateAsync(RoleCreateDto role, CancellationToken cancellationToken = default);
         Task<Result<RoleDtoUpdate>> EditAsync(string? roleId);
         List<RolePermissionsViewModel> GetAllPermisses();
         List<PermissionsDtoCreate> GetAllPermissions();

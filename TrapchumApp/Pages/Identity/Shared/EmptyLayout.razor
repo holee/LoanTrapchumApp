@@ -8,13 +8,13 @@
 @inherits LayoutComponentBase
 <style>
     body {
-        font-family: Arial, sans-serif;
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 100vh;
+        min-height: 100vh;
         margin: 0;
-        background-color: #2c3e50;
+        background: linear-gradient(135deg, #0a0a1a 0%, #0d1117 50%, #091228 100%);
     }
 
     .container {
@@ -22,70 +22,120 @@
     }
 
     .logo {
-        margin-bottom: 20px;
+        margin-bottom: 8px;
     }
 
     .login-box {
-        background-color: #95a5a6;
-        padding: 20px;
-        border-radius: 5px;
-        width: 300px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        background: #fff;
+        padding: 32px 36px 28px;
+        border-radius: 12px;
+        width: 380px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+    }
+
+    .login-heading {
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #1a1a2e;
+        margin: 0 0 4px;
+    }
+
+    .login-subtitle {
+        font-size: 0.82rem;
+        color: #6c757d;
+        margin: 0 0 20px;
     }
 
     .form-group {
-        margin-bottom: 15px;
+        margin-bottom: 14px;
         text-align: left;
-        position: relative;
     }
 
-        .form-group input {
-            width: 100%;
-            padding: 10px;
-            border: none;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-
-            .form-group input[type="password"] {
-                padding-right: 40px;
-            }
-
-    .toggle-password {
-        position: absolute;
-        right: 10px;
-        top: 50%;
-        transform: translateY(-50%);
-        cursor: pointer;
-        background-color:transparent;
-        border: none;
+    .form-group label {
+        display: block;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 5px;
     }
 
-    .remember-me {
+    .form-input {
+        width: 100%;
+        padding: 10px 12px;
+        font-size: 0.9rem;
+        border: 1px solid #ced4da;
+        border-radius: 8px;
+        background: #f8f9fa;
+        color: #212529;
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        box-sizing: border-box;
+    }
+
+    .form-input:focus {
+        border-color: #4a6cf7;
+        box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.15);
+        background: #fff;
+    }
+
+    .form-input::placeholder {
+        color: #adb5bd;
+    }
+
+    .form-group .validation-message {
+        font-size: 0.75rem;
+        color: #c0392b;
+        margin-top: 4px;
+    }
+
+    .remember-row {
         display: flex;
         align-items: center;
-        margin-bottom: 15px;
-        color: #fff;
+        gap: 6px;
+        margin: 8px 0 16px;
     }
 
-        .remember-me input {
-            margin-right: 10px;
-        }
-
-    .btn-login {
-        width: 100%;
-        padding: 10px;
-        background-color: #3498db;
-        border: none;
-        border-radius: 4px;
-        color: #fff;
-        font-size: 16px;
+    .remember-row label {
+        font-size: 0.82rem;
+        color: #495057;
         cursor: pointer;
+        user-select: none;
     }
 
-        .btn-login:hover {
-            background-color: #2980b9;
-        }
+    .btn-login-full {
+        width: 100%;
+        justify-content: center;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+    }
+
+    .login-footer {
+        margin-top: 20px;
+        padding-top: 16px;
+        border-top: 1px solid #e9ecef;
+        font-size: 0.78rem;
+        color: #adb5bd;
+    }
+
+    .status-alert {
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 0.82rem;
+        margin-bottom: 16px;
+        text-align: left;
+    }
+
+    .status-alert.danger {
+        background: #fff5f5;
+        color: #c0392b;
+        border: 1px solid #f5c6cb;
+    }
+
+    .status-alert.success {
+        background: #f0fff4;
+        color: #27ae60;
+        border: 1px solid #c3e6cb;
+    }
 </style>
 
 <div class="container">

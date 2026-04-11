@@ -1,24 +1,18 @@
 using Applications.Extensions;
-using Applications.Extensions.Identity.Authorizations.Extensions;
-using Applications.Extensions.Identity.Policies;
 using Applications.Features.LoanRequests.Command.IsCustomerBusy;
 using Applications.Responses.ViewModels.Loans.Requests;
+using TrapchumApp.Helpers.Extensions;
 namespace TrapchumApp.Pages.Lists.Customers
 {
     public partial class CustomerLoanRequest
     {
         [Parameter] public int? BranchId { get; set; } = 0;
-        [Parameter] public string? UserId { get; set; }
         [Parameter, EditorRequired] public string? CustomerId { get; set; }
         [CascadingParameter] Task<AuthenticationState> Auth { get; set; } = default!; 
 
         protected IEnumerable<VLoanRequests> _vLoanRequests = [];
-        bool IsAccountOnly = false;
-        bool IsAdminOnly = false;
-        bool IsCoOnly = true;
-        bool IsLoanCanDisburse = false;
-        bool IsCanRequest = false;
-        bool IsLoanCanReview = false;
+
+        private string? _userId { get; set; } = string.Empty;
         async Task GetCustomerLoanReuquests()
         {
 
@@ -33,12 +27,9 @@ namespace TrapchumApp.Pages.Lists.Customers
 
             var auth = await Auth;
 
-            IsCanRequest = await _authorizeService.MustHasPermissionAsync(auth.User, Policies.RequestLoanRequest);
+            await AppState.GetAuthenticatedUser(auth.User);
 
-            IsAccountOnly = await _authorizeService.MustHasPermissionAsync(auth.User, Policies.AccountOnly);
-
-            IsAdminOnly = await _authorizeService.MustHasPermissionAsync(auth.User, Policies.AdminOnly);
-
+            _userId = auth.GetUserId();
 
             if (CustomerId.IsNotNullOrEmpty())
             {
@@ -61,7 +52,7 @@ namespace TrapchumApp.Pages.Lists.Customers
                 return;
             }
 
-            var uri = $"app/loan/request/{BranchId}/Branches/CreateNew/{CustomerId}/customer";
+            var uri = $"/App/Loans/Requests/{BranchId}/Branches/CreateNew/{CustomerId}/Customers";
 
             NavigationManager.NavigateTo(uri);
 

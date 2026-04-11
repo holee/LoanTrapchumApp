@@ -17,7 +17,7 @@ public sealed class CreateCustomerCommandHandler : IRequestHandler<CreateCustome
 
         var customer = request.ToCustomerCreate(); 
 
-        return await _customerRepository.CreateCustomerAsync(customer, cancellationToken);
+        return await _customerRepository.CreateAsync(customer, cancellationToken);
 
     }
 }

@@ -58,7 +58,7 @@ public partial class CustomersActiveLoanPage
 
         await BState.GetAuthenticatedUser(user);
 
-        await LoadCustomerPageList(null, null, filterText);
+        await LoadCustomerPageList(BranchId, null, filterText);
 
         await base.OnInitializedAsync();
     }
@@ -74,14 +74,14 @@ public partial class CustomersActiveLoanPage
     {
         filterText = searchText ?? string.Empty;
 
-        await LoadCustomerPageList(null, null, filterText);
+        await LoadCustomerPageList(BranchId, null, filterText);
     }
 
     private async Task OnChanged(bool arg)
     {
         includeInactive = arg;
 
-        await LoadCustomerPageList(0, null, filterText);
+        await LoadCustomerPageList(BranchId, null, filterText);
     }
 
     protected async Task AddCollateral(string? customerId)
@@ -161,7 +161,7 @@ public partial class CustomersActiveLoanPage
         {
             NotificationService.Notify(NotificationSeverity.Success, rsp.Message);
 
-            await LoadCustomerPageList(null, null, filterText);
+            await LoadCustomerPageList(BranchId, null, filterText);
 
             return;
         }

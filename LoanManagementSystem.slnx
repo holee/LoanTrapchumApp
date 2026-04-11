@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="Applications/Applications.csproj" />
+    <Project Path="Domains/Domains.csproj" />
+    <Project Path="Infrastructures/Infrastructures.csproj" />
+    <Project Path="TrapchumApp/TrapchumApp.csproj" />
+  </Folder>
+</Solution>

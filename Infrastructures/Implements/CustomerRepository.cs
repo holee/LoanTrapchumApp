@@ -27,9 +27,6 @@ namespace Infrastructures.Implements;
 public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFactory, IDapperConnectionFactory dapperFactory, ILogger<CustomerRepository> logger) : ICustomerService
 {
 
-
-
-
     public async Task<Pager<VCustomerList>> GetCustomersAsync(int? branchId, string? userId, string? customerId, QueryParam param, CancellationToken cancellation = default)
     {
         await using var cxt = await contextFactory.CreateDbContextAsync(cancellation);
@@ -82,33 +79,9 @@ public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFac
 
     }
 
-    public async Task<Result<VCustomerDetails>> GetCustomerDetailByIdAsync(string? customerId, bool include = false, CancellationToken cancellationToken = default)
+    public async Task<ErrorOr.ErrorOr<VCustomerDetails>> GetCustomerDetailByIdAsync(string? customerId, bool include = false, CancellationToken cancellationToken = default)
     {
         return await GetCustomerDetailAsync(customerId, include, cancellationToken);
-    }
-
-    public async Task<Result<IEnumerable<VLoanRequests>>> GetCustomerLoanRequestAsync(string? customerId, bool onlyComplete = false, CancellationToken cancellation = default)
-    {
-        try
-        {
-            using var db = await dapperFactory.CreateConnectionAsync(cancellation);
-
-            var sql = @"SELECT *
-                            FROM VLoanRequests r 
-                        WHERE r.CustomerId=@customerId AND r.StatusId NOT IN (7)";
-            var parameters = new DynamicParameters();
-            parameters.Add("@customerId", customerId);
-            var rsp = await db.QueryAsync<VLoanRequests>(sql, parameters);
-            if (!rsp.Any())
-            {
-                return Result.Failure<IEnumerable<VLoanRequests>>(ErrorResponse.NotFound("No note found."));
-            }
-            return Result.Success(rsp);
-        }
-        catch (SqlException ex)
-        {
-            return Result.Failure<IEnumerable<VLoanRequests>>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
-        }
     }
 
     public async Task<Result<IEnumerable<VLoanRequests>>> GetCustomerLoanRequestAsync(string? customerId, CancellationToken cancellation = default)
@@ -178,38 +151,9 @@ public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFac
 
         return Result.Success(customer);
     }
-    public async Task<Result<Customer>> GetCustomerByIdAsync(string? customerId, params string[] includes)
-    {
 
-        await using var cxt = await contextFactory.CreateDbContextAsync();
 
-        var customersQuery = cxt.Customers
-                                     .AsNoTracking()
-                                      .Where(x => x.CustomerId == customerId);
-        if (includes.Any())
-        {
-            foreach (var includeProp in includes)
-            {
-                customersQuery = customersQuery.Include(includeProp);
-            }
-        }
 
-        if (!customersQuery.Any())
-        {
-            return Result.Failure<Customer>(ErrorResponse.ServerError($"no customer found"));
-        }
-
-        var customer = await customersQuery
-                            .AsNoTracking()
-                            .FirstOrDefaultAsync();
-
-        if (customer is null)
-        {
-            return Result.Failure<Customer>(ErrorResponse.ServerError($"no customer found"));
-        }
-
-        return Result.Success(customer);
-    }
     public async Task<Result<VCustomerDetails>> GetCustomerForRequestLoanAsync(string? customerId, CancellationToken cancellation = default)
     {
 
@@ -259,40 +203,19 @@ public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFac
 
         return Result.Success(loanHistories);
     }
-    public async Task<Result<string>> DeleteCustomerAsync(string? customerId, CancellationToken cancellation = default)
+
+
+    public async Task<Pager<VLoanDisbursments>> GetCustomerLoanHistoryAsync(string? customerId, CancellationToken cancellation = default)
     {
-        try
-        {
-            await using var context = await contextFactory.CreateDbContextAsync(cancellation);
+        await using var db = await contextFactory.CreateDbContextAsync(cancellation);
 
-            var customer = await context.Customers.FindAsync(customerId, cancellation);
+        var loanHistories = await db.Set<VLoanDisbursments>()
+                                    .Where(x => x.CustomerId == customerId)
+                                    .ToListAsync(cancellation);
 
-            if (customer is null)
-            {
-                return Result.Failure<string>(ErrorResponse.NotFound("There is no Customer in the List."));
-            }
-
-            if (await IsCustomerInUsed(customerId, cancellation))
-            {
-                var rsp = await MakeCustomerInActiveAsync(customerId, false, cancellation);
-
-                if (rsp.IsSuccess)
-                {
-                    return Result.Success("This customer was disable,because of is being used by someone.");
-                }
-            }
-
-            context.Customers.Remove(customer);
-
-            await context.SaveChangesAsync();
-
-            return Result.Success("Customer was removed");
-        }
-        catch (Exception ex)
-        {
-            return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
-        }
+        return PagerExtensions.Create(loanHistories, loanHistories.Count);
     }
+
 
     public async Task<DeleteResult> DeleteAsync(string? customerId, CancellationToken cancellation = default)
     {
@@ -324,33 +247,6 @@ public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFac
         }
     }
 
-    public async Task<Result<string>> MakeCustomerInActiveAsync(string? customerId, bool state, CancellationToken cancellation = default)
-    {
-        try
-        {
-
-            await using var _context = await contextFactory.CreateDbContextAsync(cancellation);
-
-            var existingCustomer = await _context.EntityNames
-                                                .Where(x => x.Id == customerId)
-                                                .Include(x => x.Customer)
-                                                .FirstOrDefaultAsync(cancellation);
-            if (existingCustomer is null)
-            {
-                return Result.Failure<string>(ErrorResponse.NotFound(Messages.DataNotFound));
-            }
-
-            existingCustomer.IsActive = state;
-
-            await _context.SaveChangesAsync(cancellation);
-
-            return Result.Success<string>("customer state was changed.");
-        }
-        catch (SqlException ex)
-        {
-            return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
-        }
-    }
 
     public async Task<ErrorOr.ErrorOr<bool>> MakeCustomerInActiveAsync(string? customerId, CancellationToken cancellation = default)
     {
@@ -380,44 +276,19 @@ public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFac
         }
     }
 
-    public async Task<Result<string>> CreateAsync(EntityNames model, CancellationToken cancellation = default)
+    public async Task<ErrorOr.ErrorOr<VCustomerList>> CreateAsync(EntityNames model, CancellationToken cancellation = default)
     {
         try
         {
-            if (await IsCustomerRegister(null, model.Phone, model.IdCard, cancellation))
+            if (await IsCustomerRegisterByPhone(model.Id, model.Phone, cancellation))
             {
-                return Result.Failure<string>(ErrorResponse.Conflict($"Customer With Name:{model.AltName} is already register."));
+                return ErrorOr.Error.Conflict(description: $"Phone Number:{model.Phone} is already registered.");
             }
 
-            await using var context = await contextFactory.CreateDbContextAsync(cancellation);
-
-            var customerSequence = await GetMaxSequenceNumber(context);
-
-            model.Customer!.CustomerInfId = customerSequence;
-
-            model.Customer.CustomerKey = CreateCustomerKey(customerSequence, model.FirstName, model.LastName);
-
-            context.EntityNames.Add(model);
-
-            await context.SaveChangesAsync(cancellation);
-
-            return Result.Success<string>($"New Customer was added.");
-        }
-        catch (DbUpdateConcurrencyException ex)
-        {
-            return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
-        }
-    }
-
-    public async Task<ErrorOr.ErrorOr<VCustomerList>> CreateCustomerAsync(EntityNames model, CancellationToken cancellation = default)
-    {
-        try
-        {
-            if (await IsCustomerRegister(null, model.Phone, model.IdCard, cancellation))
+            if (await IsCustomerRegisterIdCard(model.Id, model.IdCard, cancellation))
             {
-                return ErrorOr.Error.Conflict($"Customer With Name:{model.AltName} is already register.");
+                return ErrorOr.Error.Conflict(description: $"ID Card:{model.IdCard} is already registered.");
             }
-
             await using var context = await contextFactory.CreateDbContextAsync(cancellation);
 
             var customerSequence = await GetMaxSequenceNumber(context);
@@ -443,38 +314,24 @@ public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFac
         {
             return ErrorOr.Error.Conflict("Conflict", $"{ex.InnerException!.Message}");
         }
+        catch (Exception ex)
+        {
+            return ErrorOr.Error.Unexpected("Unexpected Error", $"{ex.Message}");
+        }
     }
 
-    public async Task<Result<string>> UpdateAsync(EntityNames model, CancellationToken cancellation = default)
+
+    public async Task<ErrorOr.ErrorOr<VCustomerList>> UpdateAsync(EntityNames model, CancellationToken cancellation = default)
     {
         try
         {
 
-            if (await IsCustomerRegister(model.Id, model.Phone, model.IdCard, cancellation))
+            if (await IsCustomerRegisterByPhone(model.Id, model.Phone, cancellation))
             {
-                return Result.Failure<string>(ErrorResponse.Conflict($"Customer With Name:{model.AltName} is already register."));
+                return ErrorOr.Error.Conflict($"Customer With Name:{model.AltName} is already register.");
             }
 
-            await using var cxt = await contextFactory.CreateDbContextAsync(cancellation);
-
-            cxt.EntityNames.Update(model);
-
-            await cxt.SaveChangesAsync(cancellation);
-
-            return Result.Success<string>("Customer update customer.");
-        }
-        catch (DbUpdateConcurrencyException ex)
-        {
-            return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
-        }
-    }
-
-    public async Task<ErrorOr.ErrorOr<VCustomerList>> UpdateCustomerAsync(EntityNames model, CancellationToken cancellation = default)
-    {
-        try
-        {
-
-            if (await IsCustomerRegister(model.Id, model.Phone, model.IdCard, cancellation))
+            if (await IsCustomerRegisterIdCard(model.Id, model.IdCard, cancellation))
             {
                 return ErrorOr.Error.Conflict($"Customer With Name:{model.AltName} is already register.");
             }
@@ -520,21 +377,29 @@ public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFac
                                    .AnyAsync(x => x.CustomerRefId == customerId, cancellation);
         return customerInUse;
     }
-    private async Task<bool> IsCustomerRegister(string? customerId, string? phoneNumber, string? idCard, CancellationToken cancellation = default)
-    {
-        if (string.IsNullOrWhiteSpace(phoneNumber))
-            throw new ArgumentException("Phone number is required", nameof(phoneNumber));
 
-        if (string.IsNullOrWhiteSpace(idCard))
-            throw new ArgumentException("ID Card is required", nameof(idCard));
+    private async Task<bool> IsCustomerRegisterByPhone(string? customerId, string? phoneNumber, CancellationToken cancellation = default)
+    {
+
+        if (string.IsNullOrWhiteSpace(phoneNumber)) throw new ArgumentException("Phone Number is required", nameof(phoneNumber));
 
         await using var context = await contextFactory.CreateDbContextAsync(cancellation);
 
         return await context.VCustomerLists
                             .AsNoTracking()
-                            .AnyAsync(x => (x.Phone == phoneNumber || x.IdCard == idCard) &&
-                                        (string.IsNullOrEmpty(x.CustomerId) || x.CustomerId != customerId),
-                                cancellation);
+                            .AnyAsync(x => (x.Phone == phoneNumber && (string.IsNullOrEmpty(x.CustomerId) || x.CustomerId != customerId)), cancellation);
+
+    }
+
+    private async Task<bool> IsCustomerRegisterIdCard(string? customerId, string? idCard, CancellationToken cancellation = default)
+    {
+        if (string.IsNullOrWhiteSpace(idCard)) throw new ArgumentException("ID Card is required", nameof(idCard));
+
+        await using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+        return await context.VCustomerLists
+                            .AsNoTracking()
+                            .AnyAsync(x => (x.IdCard == idCard && string.IsNullOrEmpty(x.CustomerId) || x.CustomerId != customerId), cancellation);
 
     }
     private async Task<long> GetMaxSequenceNumber(DataContext context)
@@ -595,7 +460,7 @@ public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFac
     }
 
 
-    private async Task<Result<VCustomerDetails>> GetCustomerDetailAsync(string? customerId, bool include = false, CancellationToken cancellationToken = default)
+    private async Task<ErrorOr.ErrorOr<VCustomerDetails>> GetCustomerDetailAsync(string? customerId, bool include = false, CancellationToken cancellationToken = default)
     {
         logger.LogInformation("Fetching customer details for ID {CustomerId} (Include Related: {Include})", customerId, include);
 
@@ -613,12 +478,12 @@ public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFac
 
         if (customer == null)
         {
-            return Result.Failure<VCustomerDetails>(ErrorResponse.NotFound("Customer not found."));
+            return ErrorOr.Error.NotFound("NotFound", "Customer not found.");
         }
 
         if (!include)
         {
-            return Result.Success(customer);
+            return customer;
         }
 
         customer.Loans = (await multi.ReadAsync<VLoanDisbursments>()).ToList();
@@ -628,7 +493,7 @@ public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFac
         customer.CustomerExpenses = (await multi.ReadAsync<VCustomerExpenses>()).ToList();
         customer.CustomerNotes = (await multi.ReadAsync<VCustomerNotes>()).ToList();
         customer.CustomerActivities = (await multi.ReadAsync<VCustomerActivities>()).ToList();
-        return Result.Success(customer);
+        return customer;
 
     }
 
@@ -774,6 +639,149 @@ public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFac
 
 }
 
+//public async Task<Result<string>> MakeCustomerInActiveAsync(string? customerId, bool state, CancellationToken cancellation = default)
+//{
+//    try
+//    {
+
+//        await using var _context = await contextFactory.CreateDbContextAsync(cancellation);
+
+//        var existingCustomer = await _context.EntityNames
+//                                            .Where(x => x.Id == customerId)
+//                                            .Include(x => x.Customer)
+//                                            .FirstOrDefaultAsync(cancellation);
+//        if (existingCustomer is null)
+//        {
+//            return Result.Failure<string>(ErrorResponse.NotFound(Messages.DataNotFound));
+//        }
+
+//        existingCustomer.IsActive = state;
+
+//        await _context.SaveChangesAsync(cancellation);
+
+//        return Result.Success<string>("customer state was changed.");
+//    }
+//    catch (SqlException ex)
+//    {
+//        return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
+//    }
+//}
+
+//public async Task<Result<string>> DeleteCustomerAsync(string? customerId, CancellationToken cancellation = default)
+//{
+//    try
+//    {
+//        await using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+//        var customer = await context.Customers.FindAsync(customerId, cancellation);
+
+//        if (customer is null)
+//        {
+//            return Result.Failure<string>(ErrorResponse.NotFound("There is no Customer in the List."));
+//        }
+
+//        if (await IsCustomerInUsed(customerId, cancellation))
+//        {
+//            var rsp = await MakeCustomerInActiveAsync(customerId, false, cancellation);
+
+//            if (rsp.IsSuccess)
+//            {
+//                return Result.Success("This customer was disable,because of is being used by someone.");
+//            }
+//        }
+
+//        context.Customers.Remove(customer);
+
+//        await context.SaveChangesAsync();
+
+//        return Result.Success("Customer was removed");
+//    }
+//    catch (Exception ex)
+//    {
+//        return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
+//    }
+//}
+
+
+//public async Task<Result<string>> UpdateAsync(EntityNames model, CancellationToken cancellation = default)
+//{
+//    try
+//    {
+
+//        if (await IsCustomerRegister(model.Id, model.Phone, model.IdCard, cancellation))
+//        {
+//            return Result.Failure<string>(ErrorResponse.Conflict($"Customer With Name:{model.AltName} is already register."));
+//        }
+
+//        await using var cxt = await contextFactory.CreateDbContextAsync(cancellation);
+
+//        cxt.EntityNames.Update(model);
+
+//        await cxt.SaveChangesAsync(cancellation);
+
+//        return Result.Success<string>("Customer update customer.");
+//    }
+//    catch (DbUpdateConcurrencyException ex)
+//    {
+//        return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
+//    }
+//}
+
+
+//public async Task<Result<IEnumerable<VLoanRequests>>> GetCustomerLoanRequestAsync(string? customerId, bool onlyComplete = false, CancellationToken cancellation = default)
+//{
+//    try
+//    {
+//        using var db = await dapperFactory.CreateConnectionAsync(cancellation);
+
+//        var sql = @"SELECT *
+//                        FROM VLoanRequests r 
+//                    WHERE r.CustomerId=@customerId AND r.StatusId NOT IN (7)";
+//        var parameters = new DynamicParameters();
+//        parameters.Add("@customerId", customerId);
+//        var rsp = await db.QueryAsync<VLoanRequests>(sql, parameters);
+//        if (!rsp.Any())
+//        {
+//            return Result.Failure<IEnumerable<VLoanRequests>>(ErrorResponse.NotFound("No note found."));
+//        }
+//        return Result.Success(rsp);
+//    }
+//    catch (SqlException ex)
+//    {
+//        return Result.Failure<IEnumerable<VLoanRequests>>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
+//    }
+//}
+
+
+//public async Task<Result<string>> CreateAsync(EntityNames model, CancellationToken cancellation = default)
+//{
+//    try
+//    {
+//        if (await IsCustomerRegister(null, model.Phone, model.IdCard, cancellation))
+//        {
+//            return Result.Failure<string>(ErrorResponse.Conflict($"Customer With Name:{model.AltName} is already register."));
+//        }
+
+//        await using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+//        var customerSequence = await GetMaxSequenceNumber(context);
+
+//        model.Customer!.CustomerInfId = customerSequence;
+
+//        model.Customer.CustomerKey = CreateCustomerKey(customerSequence, model.FirstName, model.LastName);
+
+//        context.EntityNames.Add(model);
+
+//        await context.SaveChangesAsync(cancellation);
+
+//        return Result.Success<string>($"New Customer was added.");
+//    }
+//    catch (DbUpdateConcurrencyException ex)
+//    {
+//        return Result.Failure<string>(ErrorResponse.ServerError($"{ex.InnerException!.Message}"));
+//    }
+//}
+
 
 //private IQueryable<VCustomerDetails> ApplyFiltering(IQueryable<VCustomerDetails> queries, QueryParam param)
 // {
@@ -860,6 +868,38 @@ public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFac
 //}
 
 
+//public async Task<Result<Customer>> GetCustomerByIdAsync(string? customerId, params string[] includes)
+//{
+
+//    await using var cxt = await contextFactory.CreateDbContextAsync();
+
+//    var customersQuery = cxt.Customers
+//                                 .AsNoTracking()
+//                                  .Where(x => x.CustomerId == customerId);
+//    if (includes.Any())
+//    {
+//        foreach (var includeProp in includes)
+//        {
+//            customersQuery = customersQuery.Include(includeProp);
+//        }
+//    }
+
+//    if (!customersQuery.Any())
+//    {
+//        return Result.Failure<Customer>(ErrorResponse.ServerError($"no customer found"));
+//    }
+
+//    var customer = await customersQuery
+//                        .AsNoTracking()
+//                        .FirstOrDefaultAsync();
+
+//    if (customer is null)
+//    {
+//        return Result.Failure<Customer>(ErrorResponse.ServerError($"no customer found"));
+//    }
+
+//    return Result.Success(customer);
+//}
 
 
 

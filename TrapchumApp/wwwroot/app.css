@@ -46,6 +46,12 @@ table.table th {
     background-color: #d4d5d6 !important;
 }
 
+.rz-grid-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
 .table-sm {
     width: 100%;
     border-collapse: collapse; /* Ensures no extra spacing between cells */

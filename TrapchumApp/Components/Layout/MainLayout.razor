@@ -6,6 +6,7 @@
 @using Applications.Features.LoanRequests.Interfaces
 @using Applications.Features.Notifications.Dto
 @using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Sections
 @using TrapchumApp.Helpers.Constants
 @using TrapchumApp.Pages.Transactions.Exchanges
 @using TrapchumApp.Services
@@ -37,7 +38,8 @@
                 <Profiles UserId="@userId" />
             </RadzenStack>
         </RadzenStack>
-    </RadzenHeader>
+    </RadzenHeader> 
+    <SectionOutlet SectionName="FabMenu"></SectionOutlet>
     <RadzenSidebar Responsive="false" Style="width: max-content;">
         <RadzenPanelMenu DisplayStyle="@(sidebarExpanded? MenuItemDisplayStyle.IconAndText: MenuItemDisplayStyle.Icon)">
             <RadzenPanelMenuItem Path="/" Text="សហគ្រាសបញ្ចាំទ្រព្យជុំ" Icon="dashboard" />
@@ -90,63 +92,53 @@
             </AuthorizeView>
             <AuthorizeView>
                 <Authorized>
-                    @if (bState.IsAdmin)
-                    {
-                        <RadzenPanelMenuItem Text="Loan Management" Icon="dataset">
-                            <RadzenPanelMenuItem Text="Credit Officer" Icon="switch_account"
-                                                 Path="/App/Employees/Credit-Agent" />
-                            <RadzenPanelMenuItem Text="Loan Product" Icon="inventory_2" Path="/App/Loans/Products" />
-                            <RadzenPanelMenuItem Text="Loan Category" Icon="lists" Path="/App/Loans/Categories" />
-                            <RadzenPanelMenuItem Text="Collaterals" Icon="invert_colors"
-                                                 Path="/App/Customer/Collaterals" />
-                            <RadzenPanelMenuItem Text="Holidays" Icon="calendar_add_on" Path="/App/Holidays" />
-                            <RadzenPanelMenuItem Text="Change Credit Agent" Icon="@IconNames.SwitchAccount"
-                                                 Path="@($"/App/Loans/Disbursments/Credit-Agent/{branchId}/Branches")" />
-                        </RadzenPanelMenuItem>
-                    }
+                    <RadzenPanelMenuItem Text="Loan Management" Icon="dataset" Visible="@bState.IsAdmin">
+                        <RadzenPanelMenuItem Text="Credit Officer" Icon="switch_account"
+                                             Path="/App/Employees/Credit-Agent" />
+                        <RadzenPanelMenuItem Text="Loan Product" Icon="inventory_2" Path="/App/Loans/Products" />
+                        <RadzenPanelMenuItem Text="Loan Category" Icon="lists" Path="/App/Loans/Categories" />
+                        <RadzenPanelMenuItem Text="Collaterals" Icon="invert_colors"
+                                             Path="/App/Customer/Collaterals" />
+                        <RadzenPanelMenuItem Text="Holidays" Icon="calendar_add_on" Path="/App/Holidays" />
+                        <RadzenPanelMenuItem Text="Change Credit Agent" Icon="@IconNames.SwitchAccount"
+                                             Path="@($"/App/Loans/Disbursments/Credit-Agent/{branchId}/Branches")" />
+                    </RadzenPanelMenuItem>
                     @if (bState is { IsAccount: true, State: true })
                     {
                         <LoanManagementItems BranchId="@branchId"
                                              BranchState="@bState.State" />
                     }
-                    @if (bState.IsCreditAgent)
-                    {
-                        <RadzenPanelMenuItem Text="Loan Management" Icon="dataset">
-                            <RadzenPanelMenuItem Text="Customers" Icon="group"
-                                                 Path="@($"/App/Customers/{branchId}/Branches")" />
-                            <RadzenPanelMenuItem Text="Collaterals" Icon="invert_colors"
-                                                 Path="/App/Customer/Collaterals" />
-                            <RadzenPanelMenuItem Text="Loan Request" Icon="request_quote"
-                                                 Path="@($"/App/Loans/Requests/{branchId}/Branches")" />
-                            <RadzenPanelMenuItem Text="Loans Disbursement" Icon="@IconNames.MoneyBag"
-                                                 Path="@($"/App/Loans/Disbursements/{branchId}/Branches")" />
-                            <RadzenPanelMenuItem Text="Notifications"
-                                                 Icon="notifications"
-                                                 Path="/App/Notifications" />
-                            <RadzenPanelMenuItem Text="Active Customers" Icon="@IconNames.MoneyBag"
-                                                 Path="@($"/App/Customers/Loans/{branchId}/Branches")" />
-                        </RadzenPanelMenuItem>
-                    }
-                    @if (bState.IsManager)
-                    {
-                        <RadzenPanelMenuItem Text="Loan Management" Icon="dataset">
-                            <RadzenPanelMenuItem Text="Loan Request" Icon="request_quote"
-                                                 Path="@($"/App/Loans/Requests/{branchId}/Branches")" />
-                            <RadzenPanelMenuItem Text="Loans Disbursement" Icon="@IconNames.MoneyBag"
-                                                 Path="@($"/App/Loans/Disbursements/{branchId}/Branches")" />
-                            <RadzenPanelMenuItem Text="Notifications"
-                                                 Icon="notifications"
-                                                 Path="/App/Notifications" />
-                        </RadzenPanelMenuItem>
-                    }
+                    <RadzenPanelMenuItem Text="Loan Management" Icon="dataset" Visible="@bState.IsCreditAgent">
+                        <RadzenPanelMenuItem Text="Customers" Icon="group"
+                                             Path="@($"/App/Customers/{branchId}/Branches")" />
+                        <RadzenPanelMenuItem Text="Collaterals" Icon="invert_colors"
+                                             Path="/App/Customer/Collaterals" />
+                        <RadzenPanelMenuItem Text="Loan Request" Icon="request_quote"
+                                             Path="@($"/App/Loans/Requests/{branchId}/Branches")" />
+                        <RadzenPanelMenuItem Text="Loans Disbursement" Icon="@IconNames.MoneyBag"
+                                             Path="@($"/App/Loans/Disbursements/{branchId}/Branches")" />
+                        <RadzenPanelMenuItem Text="Notifications"
+                                             Icon="notifications"
+                                             Path="/App/Notifications" />
+                        <RadzenPanelMenuItem Text="Active Customers" Icon="@IconNames.MoneyBag"
+                                             Path="@($"/App/Customers/Loans/{branchId}/Branches")" />
+                    </RadzenPanelMenuItem>
+
+                    <RadzenPanelMenuItem Text="Loan Management" Icon="dataset" Visible="@bState.IsManager">
+                        <RadzenPanelMenuItem Text="Loan Request" Icon="request_quote"
+                                             Path="@($"/App/Loans/Requests/{branchId}/Branches")" />
+                        <RadzenPanelMenuItem Text="Loans Disbursement" Icon="@IconNames.MoneyBag"
+                                             Path="@($"/App/Loans/Disbursements/{branchId}/Branches")" />
+                        <RadzenPanelMenuItem Text="Notifications"
+                                             Icon="notifications"
+                                             Path="/App/Notifications" />
+                    </RadzenPanelMenuItem>
+                    
                 </Authorized>
             </AuthorizeView>
-            <AuthorizeView>
+            <AuthorizeView Policy="@Policies.AccountOnly">
                 <Authorized>
-                    @if (bState.IsAccount)
-                    {
-                        <ReportsItems IsBranchOpen="@bState.State" />
-                    }
+                    <ReportsItems IsBranchOpen="@bState.State" />
                 </Authorized>
             </AuthorizeView>
             <AuthorizeView Policy="@Policies.AccountOnly">

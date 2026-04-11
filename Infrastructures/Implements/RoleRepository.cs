@@ -13,8 +13,6 @@ using Microsoft.EntityFrameworkCore;
 using Applications.Features.Identity.Roles.Requests;
 using Applications.Features.Identity.Roles.Responses;
 using Applications.Features.Identity.Users;
-using Domains.Models.Paging;
-
 namespace Infrastructures.Implements;
 
 public sealed class RoleRepository(
@@ -82,6 +80,56 @@ public sealed class RoleRepository(
         return Result.Success();
     }
 
+
+    public async Task<ErrorOr.ErrorOr<RoleClaims>> CreateAsync(RoleCreateDto role, CancellationToken cancellationToken = default)
+    {
+        var existingRole = await roleManager.FindByNameAsync(role.RoleName!);
+
+        if (existingRole is not null)
+            return ErrorOr.Error.Conflict("conflict",description: $"Role '{role.RoleName}' already exists.");
+
+        var newRole = new ApplicationRole
+        {
+            Name = role.RoleName,
+            Description = role.Description,
+            IsActive = true,
+        };
+
+        var result = await roleManager.CreateAsync(newRole);
+
+        if (!result.Succeeded)
+            return result.Errors
+                .Select(e => ErrorOr.Error.Validation(e.Code, e.Description))
+                .ToList();
+
+        if (role.Permissions.Count != 0)
+        {
+            var claimEntities = role.Permissions.Select(x => new ApplicationRoleClaim
+            {
+                RoleId = newRole.Id,          
+                ClaimType = x.ClaimType,
+                ClaimValue = x.ClaimValue,
+                Description = x.Description,
+            });
+
+            context.ApplicationRoleClaim.AddRange(claimEntities);
+            await context.SaveChangesAsync(cancellationToken);
+        }
+
+        var roleClaims = new RoleClaims(
+            newRole.Id,
+            newRole.Name!,
+            role.Permissions 
+                .Select(x => new RoleClaimDto
+                {
+                    ClaimType = x.ClaimType,
+                    IsSelected = true,
+                })
+                .ToList()
+        );
+
+        return roleClaims;
+    }
 
     public async Task<Result<string>> UpdateAsync(RoleDtoUpdate role)
     {

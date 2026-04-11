@@ -4,11 +4,17 @@ using Applications.Features.Customers.Commands.DeleteCustomer;
 using Applications.Features.Customers.Commands.EditCustomer;
 using Applications.Features.Customers.Queries.GetActiveLoanCustomer;
 using Applications.Features.Customers.Queries.GetCustomerById;
+using Applications.Features.Customers.Queries.GetCustomerDetailById;
+using Applications.Features.Customers.Queries.GetLoanByCustomerId;
 using Applications.Features.Holidays.Command.ActivateOrDeactivate;
 using Applications.Features.Holidays.Command.CreateHoliday;
 using Applications.Features.Holidays.Queries.GetActiveHolidays;
 using Applications.Features.Holidays.Queries.GetHolidayByDate;
 using Applications.Features.Holidays.Queries.GetHolidayById;
+using Applications.Features.Identity.Command.CreateNewUser;
+using Applications.Features.LoanPayments.Command.PayOff;
+using Applications.Features.LoanPayments.Dtos;
+using Applications.Features.LoanPayments.Queries.GetPaidSchedule;
 using Applications.Features.Loans.Command.SaveLoanDisbursemenent;
 using Applications.Features.Schedules.Dto;
 using Applications.Features.Schedules.Queries.GetDueScheduleByLoanId;
@@ -21,6 +27,10 @@ public static class ApplicationServiceInjection
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
+        services.AddScoped<IRequestHandler<GetPaidScheduleQuery, ErrorOr<IEnumerable<VSchedule>>>, GetPaidScheduleQueryHandler>();
+        services.AddScoped<IRequestHandler<GetScheduleByIdQuery, ErrorOr<VSchedule>>, GetScheduleByIdQueryHandler>();
+        services.AddScoped<IRequestHandler<PayOffCommand, ErrorOr<PayOffResult>>, PayOffCommandHandler>();
+
         services.AddScoped<IRequestHandler<SaveLoanDisbursementCommand, ErrorOr<RequestResult>>, SaveLoanDisbursementCommandHandler>();
         services.AddScoped<IRequestHandler<GetScheduleDetailByIdQuery, ErrorOr<ScheduleDetailsDto>>, GetScheduleDetailByIdQueryHandler>();
         services.AddScoped<IRequestHandler<GetScheduleByIdQuery, ErrorOr<VSchedule>>, GetScheduleByIdQueryHandler>();
@@ -100,7 +110,7 @@ public static class ApplicationServiceInjection
 
         //GetLoanRequestApprovedQuery
 
-        services.AddScoped<IAddRecieptNumberUseCase, AddRecieptNumberUseCase>();
+        services.AddScoped<IAddRecieptNumber, AddRecieptNumberUseCase>();
         services.AddScoped<IStartVaultInUseCase, StartVaultInUseCase>();
         services.AddScoped<IStartVaultOutUseCase, StartVaultOutUseCase>();
         services.AddScoped<IGetCashVaultUseCase, GetCashVaultUseCase>();
@@ -140,7 +150,7 @@ public static class ApplicationServiceInjection
         services.AddScoped<ILoanScheduleServiceImpl, LoanScheduleService>();
         services.AddScoped<ILoanCategoryServiceImpl, LoanCategoryService>();
         services.AddScoped<ILoanProductServiceImpl, LoanProductService>();
-        services.AddScoped<ILoanPaymentServiceImpl, LoanPaymentService>();
+        //services.AddScoped<ILoanPaymentServiceImpl, LoanPaymentService>();
         services.AddScoped<ILoanReportServiceImpl, LoanReportServiceImpl>();
         services.AddScoped<ILoanSettingServiceImpl, LoanSettingService>();
         services.AddScoped<INationalityServiceImpl, NationalityService>();
@@ -228,6 +238,8 @@ public static class ApplicationServiceInjection
         services.AddScoped<IRequestHandler<EditCustomerCommand, ErrorOr<VCustomerList>>, EditCustomerCommandHandler>();
         services.AddScoped<IRequestHandler<DeleteCustomerCommand, DeleteResult>, DeleteCustomerCommandHandler>();
         services.AddScoped<IRequestHandler<DeactivateCustomerCommand, ErrorOr<bool>>, DeactivateCustomerCommandHandler>();
+        services.AddScoped<IRequestHandler<GetCustomerDetailByIdQuery, ErrorOr<VCustomerDetails>>, GetCustomerDetailByIdQueryHandler>();
+        services.AddScoped<IRequestHandler<GetLoanByCustomerIdQuery, Pager<VLoanDisbursments>>, GetLoanByCustomerIdQueryHandler>(); 
 
 
         services.AddScoped<IRequestHandler<CreateIncomeExpenseCommand, ErrorOr<int>>, CreateIncomeExpenseCommandHandler>();
@@ -303,6 +315,11 @@ public static class ApplicationServiceInjection
         //Exchanged
         services.AddScoped<IRequestHandler<GetEditMoneyExchangeQuery, ErrorOr<ExchangeDtoEdit>>, GetEditMoneyExchangeQueryHandler>();
         services.AddScoped<IRequestHandler<GetMoneyExchangeAsPagingQuery, Pager<VttCurrencyExchanges>>, GetMoneyExchangeQueryAsPagingHandler>();
+
+
+        //User and Identity
+        services.AddScoped<IRequestHandler<CreateNewUserCommand, ErrorOr<string>>, CreateNewUserCommandHandler>();
+
 
         return services;
 

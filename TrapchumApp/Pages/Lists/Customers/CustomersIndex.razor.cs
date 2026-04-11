@@ -1,4 +1,6 @@
+using Applications.Bases;
 using Applications.Extensions.DateTimes;
+using Applications.Features.Customers.Commands.DeleteCustomer;
 using Applications.Features.Customers.Dto;
 using Applications.Features.Customers.Queries.GetCustomerAsPaging;
 using Applications.Features.Customers.Response;
@@ -150,17 +152,27 @@ namespace TrapchumApp.Pages.Lists.Customers
                 });
             if (confirm == false) return;
 
-            var rsp = await _customerService.DeleteCustomerAsync(customerId);
+            var rsp = await mediator.Send(new DeleteCustomerCommand(customerId));  //_customerService.DeleteCustomerAsync(customerId);
 
-            if (rsp.IsSuccess)
+            if (rsp.Status == DeleteStatus.Success)
             {
-                NotificationService.Notify(NotificationSeverity.Success, rsp.Data);
+                NotificationService.Notify(NotificationSeverity.Success, rsp.Message);
 
                 await LoadCustomerPageList(null, null, filterText);
+
+                return;
             }
-            else
+
+            if (rsp.Status == DeleteStatus.NotFound)
             {
-                NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
+                NotificationService.Notify(NotificationSeverity.Error, rsp.Message);
+                return;
+            }
+
+            if (rsp.Status == DeleteStatus.InUse)
+            {
+                NotificationService.Notify(NotificationSeverity.Error, rsp.Message);
+                return;
             }
 
         }
@@ -331,6 +343,10 @@ namespace TrapchumApp.Pages.Lists.Customers
 
         void OnRowRender(RowRenderEventArgs<VCustomerList> args)
         {
+            if (args.Data is null) return;
+
+            args.Data.RowIndex = args.Index + 1;
+
             if (args.Data!.IsLoanActive)
             {
                 args.Attributes.Add("style", "font-weight:bold;color:red;background-color:yellow;");
@@ -339,8 +355,9 @@ namespace TrapchumApp.Pages.Lists.Customers
             if (args.Data!.ModifiedDT.IsRecently())
             {
                 args.Attributes.Add("class", "rz-state-highlight rz-data-row recently-edited");
-
             }
+
+
         }
 
         void OnCellRender(RowRenderEventArgs<VCustomerList> e)

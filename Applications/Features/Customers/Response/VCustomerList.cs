@@ -1,4 +1,6 @@
-﻿namespace Applications.Features.Customers.Response;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Applications.Features.Customers.Response;
 
 public sealed class VCustomerList 
 {
@@ -51,5 +53,6 @@ public sealed class VCustomerList
     {
         return $"{ProInKhmer} {DisInKhmer} {ComInKhmer} {VilInKhmer}";
     }
+    [NotMapped] public int RowIndex { get; set; } = 0;
 
 }

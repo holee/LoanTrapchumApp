@@ -79,15 +79,88 @@
 
 @code {
 
+    private string _getPaymentSchedulesUrl = "";
+    private string _getSchedulePayOffUrl = "";
+    private string _getChangeCreditAgentUrl = "";
+    private string _getLoanDetailsUrl = "";
+    private string _getLoanWriteOffUrl = "";
+
     void ShowContextMenu(MouseEventArgs args, VLoanDisbursments b)
     {
-        ContextMenuService.Open(args, ds =>@<LoanMenu Data="@b" />
-    );
+        ContextMenuService.Open(args, ds =>@<LoanMenu Data="@b" />);
     }
+
+
+    async Task DownLoadScheduleAsExcel(VLoanDisbursments? p)
+    {
+        ContextMenuService.Close();
+
+        if (p is not null)
+        {
+            if (p.LoanId.IsNotNullOrEmpty() && p.BranchId > 0)
+            {
+                await js.InvokeVoidAsync("open", $"/Reports/Schedules/{p.LoanId}/{p.BranchId}/Exel", "_blank");
+            }
+        }
+    }
+    private async Task DownLoadScheduleAsPdf(VLoanDisbursments? p)
+    {
+        ContextMenuService.Close();
+
+        if (p is not null)
+        {
+            var fileName = $"Loan_Schedule_{Guid.CreateVersion7()}.pdf";
+
+            if (p.LoanId.IsNotNullOrEmpty() && p.BranchId > 0)
+            {
+                await js.InvokeVoidAsync("open", $"/Reports/Schedules/{p.LoanId}/{p.BranchId}/{fileName}", "_blank");
+            }
+        }
+    }
+
+
+    void ShowContextMenuWithContent(MouseEventArgs args, VLoanDisbursments p)
+    {
+
+        _getSchedulePayOffUrl = $"/Loan/CreditAgent/{p.LoanId}/{p.CreditAgentRefId}?CustomerId={p.CustomerId}&BranchId={p.BranchId}&CurrencyId={p.CurrencyId}";
+
+        _getPaymentSchedulesUrl = $"/App/Loans/{p.BranchId}/Branches/{p.LoanId}/Schedules?CreditAgentId={p.CreditAgentRefId}&CurrencyId={p.CurrencyId}";
+
+        _getLoanDetailsUrl = $"/App/Loan/{p.LoanId}/Branches/{p.BranchId}/Currencies/{p.CurrencyId}";
+
+        _getChangeCreditAgentUrl = $"App/Loans/Disbursments/Credit-Agent/{p.BranchId}/Branches?CreditAgentId={p.CreditAgentRefId}";
+
+        ContextMenuService.Open(args, ds => @<RadzenMenu Style="font-size:0.8rem;">
+            <RadzenMenuItem Icon="money"
+                            Path="@_getPaymentSchedulesUrl"
+                            Visible="@bState.CanRecievePayment"
+                            Text="Recieve Payment"></RadzenMenuItem>
+            <RadzenMenuItem Icon="paid"
+                            Path="@_getSchedulePayOffUrl"
+                            Visible="@bState.CanPayOff"
+                            Text="Pay Off"></RadzenMenuItem>
+            <RadzenMenuItem Icon="paid"
+                            Path="@_getLoanWriteOffUrl"
+                            Visible="@bState.CanWriteOff"
+                            Text="Write Off"></RadzenMenuItem>
+            <RadzenMenuItem Icon="change_circle"
+                            Path="@_getChangeCreditAgentUrl"
+                            Visible="@bState.IsManager"
+                            Text="Change Credit Agent"></RadzenMenuItem>
+            <RadzenMenuItem Icon="info"
+                            Path="@_getLoanDetailsUrl"
+                            Text="Schedule Details"></RadzenMenuItem>
+            <RadzenMenuItem Icon="file_download"
+                            Click="@(()=>DownLoadScheduleAsExcel(p))"
+                            Text="Export Loan to Excel" />
+            <RadzenMenuItem Icon="picture_as_pdf"
+                            Click="@(()=>DownLoadScheduleAsPdf(p))"
+                            Text="Export Loan to Pdf" />
+        </RadzenMenu>
+    );
+
+
+    }
+
 }
 
-@* <RadzenMenu Style="font-size:0.8rem;">
-    <RadzenMenuItem Icon="add" Text="Details" Value="@b.LoanId" Visible="false" />
-    <RadzenMenuItem Icon="money" Text="Recieve Payment" Value="@b.LoanId" />
-</RadzenMenu> *@
-@* <NavLink href="@($"/App/Loan/{c.LoanId}/Branches/{c.BranchId}/Currencies/{c.CurrencyId}")">Details</NavLink> *@

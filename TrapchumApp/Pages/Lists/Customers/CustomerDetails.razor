@@ -62,7 +62,7 @@
             <RadzenTabsItem Text="Loan Request">
                 <CustomerLoanRequest CustomerId="@CustomerId"
                                      BranchId="@BranchId"
-                                     UserId="@_userId" />
+                                     _userId="@_userId" />
             </RadzenTabsItem>
             <RadzenTabsItem Text="Activities">
                 <CustomerActivities CustomerId="@CustomerId" ShowAdd="true" ShowCommand="true" @key="@Guid.NewGuid().ToString("N")" />

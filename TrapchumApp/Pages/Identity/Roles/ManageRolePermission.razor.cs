@@ -29,6 +29,8 @@ public partial class ManageRolePermission
 
     private List<RolePermissionsDto>? _roleClaimsGrouped = [];
 
+    private Dictionary<string, bool> _originalPermissionStates = [];
+
     private List<string> groups = [];
     protected override async Task OnInitializedAsync()
     {
@@ -56,6 +58,9 @@ public partial class ManageRolePermission
                                         GroupCheck = x.All(y => y.IsAssignedToRole)
                                     }).ToList();
             UpdateGlobalSelectAll();
+
+            _originalPermissionStates = rolePermissions.Permissions!
+                .ToDictionary(p => $"{p.Group}_{p.ClaimValue}", p => p.IsAssignedToRole);
 
             groups = _roleClaimsGrouped?.Select(x => x.Group!).ToList() ?? [];
 
@@ -114,6 +119,48 @@ public partial class ManageRolePermission
 
         UpdateGlobalSelectAll();
 
+    }
+
+    private void RestoreDefaults()
+    {
+        foreach (var group in _roleClaimsGrouped ?? [])
+        {
+            foreach (var permission in group.Permissions)
+            {
+                var key = $"{permission.Group}_{permission.ClaimValue}";
+                if (_originalPermissionStates.TryGetValue(key, out var original))
+                    permission.IsAssignedToRole = original;
+            }
+            group.GroupCheck = group.Permissions.All(p => p.IsAssignedToRole);
+        }
+        UpdateGlobalSelectAll();
+    }
+
+    private void RestoreGroupDefaults(RolePermissionsDto group)
+    {
+        foreach (var permission in group.Permissions)
+        {
+            var key = $"{permission.Group}_{permission.ClaimValue}";
+            if (_originalPermissionStates.TryGetValue(key, out var original))
+                permission.IsAssignedToRole = original;
+        }
+        group.GroupCheck = group.Permissions.All(p => p.IsAssignedToRole);
+        UpdateGlobalSelectAll();
+    }
+
+    private bool HasChanges()
+    {
+        if (_roleClaimsGrouped is null) return false;
+        foreach (var group in _roleClaimsGrouped)
+        {
+            foreach (var permission in group.Permissions)
+            {
+                var key = $"{permission.Group}_{permission.ClaimValue}";
+                if (_originalPermissionStates.TryGetValue(key, out var original) && permission.IsAssignedToRole != original)
+                    return true;
+            }
+        }
+        return false;
     }
 
     protected async Task SubmitHandler()

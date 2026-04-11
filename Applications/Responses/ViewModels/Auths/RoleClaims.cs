@@ -2,14 +2,14 @@
 
 namespace Applications.Responses.ViewModels.Auths;
 
-public class RoleClaims(long roleId, string roleName, List<RoleClaimDto> permissions)
+public class RoleClaims(string? roleId, string? roleName, List<RoleClaimDto> permissions)
 {
 
-    public RoleClaims() : this(0, string.Empty, [])
+    public RoleClaims() : this(string.Empty, string.Empty, new List<RoleClaimDto>())
     {
             
     }
-    public long RoleId { get; set; } = roleId;
-    public string RoleName { get; set; }=roleName;
+    public string? RoleId { get; set; } = roleId;
+    public string? RoleName { get; set; }=roleName;
     public List<RoleClaimDto> Permissions { get; set; } = permissions;
 }

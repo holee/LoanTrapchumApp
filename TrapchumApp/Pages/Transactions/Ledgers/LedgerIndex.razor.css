@@ -1,0 +1,111 @@
+/* QuickBooks-inspired Chart of Accounts styling */
+
+.ledger-page {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+}
+
+/* Page header: title left, action button right */
+.ledger-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.ledger-title {
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+/* Toolbar row */
+.ledger-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 0.35rem 0;
+}
+
+.toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.toolbar-toggle {
+    display: flex;
+    align-items: center;
+}
+
+.toolbar-right {
+    display: flex;
+    align-items: center;
+}
+
+/* Grid overrides for clean QuickBooks look */
+::deep .ledger-grid {
+    background-color: #fff;
+}
+
+::deep .ledger-grid .rz-grid-table {
+    background-color: #fff;
+}
+
+::deep .ledger-grid .rz-grid-table thead th {
+    font-size: 0.72rem;
+    font-weight: 300;
+    letter-spacing: 0.04em;
+    color: #6b7280;
+    text-transform: capitalize;
+    background-color: #f9fafb;
+    border-bottom: 2px solid #e5e7eb;
+    padding: 0.5rem 0.5rem;
+}
+
+::deep .ledger-grid .rz-grid-table tbody td {
+    font-size: 0.85rem;
+    color: #1f2937;
+    padding: 0.45rem 0.75rem;
+    border-bottom: 1px solid #f0f0f0;
+    background-color: #fff;
+}
+
+::deep .ledger-grid .rz-grid-table tbody tr:hover td {
+    background-color: #f0fdf4;
+}
+
+::deep .ledger-grid .rz-datapager {
+    background-color: #fff;
+}
+
+/* Hierarchy indentation */
+.ledger-parent-name {
+    font-weight: 600;
+    color: #111827;
+}
+
+.ledger-child-indent {
+    padding-left: 1.5rem;
+    color: #374151;
+}
+
+/* Inline row actions: visible on hover */
+.row-actions {
+    display: flex;
+    gap: 0.15rem;
+    justify-content: flex-end;
+    opacity: 0.3;
+    transition: opacity 0.15s ease;
+}
+
+::deep .ledger-grid .rz-grid-table tbody tr:hover .row-actions {
+    opacity: 1;
+}

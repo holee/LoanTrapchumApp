@@ -1,14 +1,5 @@
 ﻿using Applications.Interfaces.Customers;
-using Applications.Responses;
-using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Loans.Requests;
 using Domains.Models.Lists.Customers;
-using System.Linq.Expressions;
-using Domains.Models.Lists;
-using Applications.Features.Customers.Response;
-using Applications.Features.Customers.Services;
-using Applications.Features.Collaterals.Dtos;
-using Applications.Features.Loans.Responses;
 using Applications.Commons.Mappers.Customers;
 using Applications.Features.Customers.Dto;
 
@@ -16,36 +7,38 @@ namespace Applications.Features.Customers.UseCases;
 
 public sealed class CustomerService(ICustomerService cusService) : ICustomerServiceImpl
 {
-    public async Task<Result<string>> UpdateAsync(EntityCustomerCreate customer, CancellationToken cancellation = default) 
-    {
+    //public async Task<Result<string>> UpdateAsync(EntityCustomerCreate customer, CancellationToken cancellation = default) 
+    //{
 
-        var cust = customer.ToCustomerUpdate();
+    //    var cust = customer.ToCustomerUpdate();
 
-        return await cusService.UpdateAsync(cust, cancellation);
-    }
+    //    return await cusService.UpdateAsync(cust, cancellation);
+    //}
 
-    public async Task<Result<string>> CreateAsync(EntityCustomerCreate entity, CancellationToken cancellation = default)
-    {
+    //public async Task<Result<string>> CreateAsync(EntityCustomerCreate entity, CancellationToken cancellation = default)
+    //{
       
-        var cust = entity.ToCustomerCreate();
+    //    var cust = entity.ToCustomerCreate();
 
-        return await cusService.CreateAsync(cust, cancellation);
-    }
+    //    return await cusService.CreateAsync(cust, cancellation);
+    //}
 
-    public async Task<Result<string>> DeleteCustomerAsync(string? customerId)
-    {
-        return await cusService.DeleteCustomerAsync(customerId);
-    }
+    //public async Task<Result<string>> DeleteCustomerAsync(string? customerId)
+    //{
+    //    //return await cusService.DeleteCustomerAsync(customerId);
 
-    public async Task<Result<Customer>> GetCustomerByIdAsync(string? customerId, params string[] includes)
-    {
-        return await cusService.GetCustomerByIdAsync(customerId, includes);
-    }
+    //    return Result.Failure<string>(ErrorResponse.NotFound("Customer information was changed successfuly"));
+    //}
 
-    public async Task<Result<EntityNames>> GetCustomerByIdAsync(string? customerId)
-    {
-        return await cusService.GetCustomerByIdAsync(customerId);
-    }
+    //public async Task<Result<Customer>> GetCustomerByIdAsync(string? customerId, params string[] includes)
+    //{
+    //    return await cusService.GetCustomerByIdAsync(customerId, includes);
+    //}
+
+    //public async Task<Result<EntityNames>> GetCustomerByIdAsync(string? customerId)
+    //{
+    //    return await cusService.GetCustomerByIdAsync(customerId);
+    //}
 
     public async Task<Result<IEnumerable<VCollateralLines>>> GetCustomerCollateralLines(string? customerId, bool includeInUsed = false)
     {
@@ -53,10 +46,10 @@ public sealed class CustomerService(ICustomerService cusService) : ICustomerServ
     }
 
 
-    public async Task<Result<VCustomerDetails>> GetCustomerDetailsByIdAsync(string? customerId, bool include = false, CancellationToken cancellation = default)
-    {
-        return await cusService.GetCustomerDetailByIdAsync(customerId, include, cancellation);
-    }
+    //public async Task<Result<VCustomerDetails>> GetCustomerDetailsByIdAsync(string? customerId, bool include = false, CancellationToken cancellation = default)
+    //{
+    //    return await cusService.GetCustomerDetailByIdAsync(customerId, include, cancellation);
+    //}
 
 
 

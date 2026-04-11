@@ -4,24 +4,9 @@
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
 @using Applications.Features.LoanRequests.Interfaces
+@using Microsoft.AspNetCore.Components.Sections
 @using TrapchumApp.Services
-<style>
-    table tr > th {
-        background-color: cornflowerblue;
-        color:white;
-    }
 
-    table tr > td.feature {
-        padding: 0 0.5rem;
-    }
-
-    table tr > th.group {
-        text-align: left;
-        padding-left: 0.9rem;
-        width: 8rem;
-        height: 2rem;
-    }
-</style>
 <EditForm Model="model" @ref="roleCreateForm">
     <FluentValidationValidator DisableAssemblyScanning="true" />
     <RadzenRow Gap="1rem" class="rz-my-1">
@@ -42,57 +27,71 @@
         </RadzenColumn>
     </RadzenRow>
 </EditForm>
-<RadzenFieldset AllowCollapse="false" Text="Select Permissions">
-    <table border="1" style="border-collapse:collapse;text-align:center;">
-        <tr>
-            <th class="group">Group</th>
-            <th style="width:5rem;">
-                <RadzenCheckBox TValue="bool"
-                                @bind-Value="@_selectAll"
-                                Change="@((arg) => OnSelectAllChanged(arg))" />
-            </th>
-            <th style="text-align:left;">Feature</th>
-        </tr>
+
+<div class="perm-card">
+    <div class="perm-selectall-row">
+        <label class="perm-selectall-label" @onclick="@(() => OnSelectAllChanged(!_selectAll))">
+            <span class="perm-selectall-check @(_selectAll ? "perm-selectall-check--active" : "")">
+                @if (_selectAll)
+                {
+                    <RadzenIcon Icon="check" Style="font-size:0.8rem;" />
+                }
+            </span>
+            <span>Select All Permissions</span>
+        </label>
+    </div>
+    <RadzenRow>
         @foreach (var group in RoleClaimsGrouped ?? [])
         {
-            <tr class="@group.Group">
-                <th style="font-weight:700;text-align:left;padding-left:0.9rem;">
-                    @group.Group
-                </th>
-                <td style="vertical-align:central;">
-                    <RadzenCheckBox TValue="bool"
-                                    @bind-Value="@group.GroupCheck"
-                                    Name="@group.Group"
-                                    Change="@((arg) => OnGroupSelectAllChanged(group, arg))" />
-                </td>
-                <td class="feature">
-                    <RadzenRow RowGap="0.1rem">
+            <RadzenColumn Size="6" SizeMD="6" SizeSM="12">
+                <div class="perm-group">
+                    <div class="perm-group-header">
+                        <label class="perm-group-toggle" @onclick="@(() => OnGroupSelectAllChanged(group, !group.GroupCheck))">
+                            <span class="perm-group-check @(group.GroupCheck ? "perm-group-check--active" : "")">
+                                @if (group.GroupCheck)
+                                {
+                                    <RadzenIcon Icon="check" Style="font-size:0.75rem;" />
+                                }
+                            </span>
+                            <span class="perm-group-name">@group.Group</span>
+                        </label>
+                        <span class="perm-group-count">
+                            @group.Permissions.Count(p => p.IsSelected) / @group.Permissions.Count
+                        </span>
+                    </div>
+                    <div class="perm-group-body">
                         @foreach (var item in group.Permissions)
                         {
-                            <RadzenColumn Size="3">
-                                <RoleCheckCreate Model="@item" @key="@Guid.NewGuid().ToString("N")"
-                                                 OnChange="((arg)=>OnCheckChanged(arg))" />
-                            </RadzenColumn>
-
+                            <RoleCheckCreate Model="@item" @key="@($"{group.Group}_{item.ClaimValue}")"
+                                             OnChange="((arg)=>OnCheckChanged(arg))" />
                         }
-                    </RadzenRow>
-                </td>
-            </tr>
+                    </div>
+                </div>
+            </RadzenColumn>
         }
-    </table>
-</RadzenFieldset>
+    </RadzenRow>
+</div>
+
 <RadzenStack Orientation="Orientation.Horizontal"
              class="rz-my-4"
              JustifyContent="JustifyContent.End">
     <RadzenButton Click="@CreateRole"
-                  Size="ButtonSize.ExtraSmall"
+                  Size="ButtonSize.Small"
                   Icon="@IconNames.Save"
                   Text="Save" ButtonStyle="ButtonStyle.Success" />
-    <RadzenButton Size="ButtonSize.ExtraSmall"
+    <RadzenButton Size="ButtonSize.Small"
                   Icon="@IconNames.Close"
                   Click="@(()=>DialogService.Close(false))"
                   Text="Close" ButtonStyle="ButtonStyle.Danger" />
 </RadzenStack>
+<SectionContent SectionName="FabMenu">
+    <!-- Place RadzenFabMenu component first or after the Header in RadzenLayout. -->
+    <RadzenFabMenu Direction="Radzen.FabMenuDirection.Top" Variant="Variant.Flat">
+        <RadzenFabMenuItem Size="ButtonSize.Small" Text="Folder" Icon="folder" Click=@(args => OnClick("New Folder.")) />
+        <RadzenFabMenuItem Size="ButtonSize.Small" Text="Message" Icon="chat" Click=@(args => OnClick("New Message.")) />
+        <RadzenFabMenuItem Size="ButtonSize.Small" Text="Article" Icon="article" Click=@(args => OnClick("New Article.")) />
+    </RadzenFabMenu>
+</SectionContent>
 @code {
 
     private List<string> groups = [];
@@ -171,5 +170,10 @@
         base.OnInitialized();
     }
 
-}
+    void OnClick(string message)
+    {
+        // Handle the click event for RadzenFabMenu items
+        Console.WriteLine(message);
+    }
 
+}

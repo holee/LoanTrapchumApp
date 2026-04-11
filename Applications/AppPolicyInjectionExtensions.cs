@@ -1,7 +1,6 @@
 ﻿using Applications.Constants.Authorizations;
 using Applications.Extensions.Identity.Policies;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.DependencyInjection;
 namespace Applications
 {
     public static class AppPolicyInjectionExtensions
@@ -44,6 +43,7 @@ namespace Applications
             }
 
             options.AddPolicy(Policies.PayOff, Policies.CanPayOff());
+            options.AddPolicy(Policies.WriteOff, Policies.CanWriteOff());
             options.AddPolicy(Policies.MultiplePayment, Policies.CanPayMultiple());
             options.AddPolicy(Policies.Create, Policies.CanCreate());
             options.AddPolicy(Policies.Read, Policies.CanRead());

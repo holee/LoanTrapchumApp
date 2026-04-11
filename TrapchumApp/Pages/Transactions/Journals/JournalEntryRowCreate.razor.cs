@@ -206,6 +206,7 @@ public partial class JournalEntryRowCreate(ILedgerServiceImpl ledgerService, IJo
     }
 
     IEnumerable<VNameList> NameLists = [];
+
     protected async Task<bool> ValidateNameType(JournalLineDtoCreate journalLine)
     {
         try

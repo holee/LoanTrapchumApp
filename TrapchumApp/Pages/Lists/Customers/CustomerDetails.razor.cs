@@ -1,11 +1,15 @@
-﻿using Applications.Extensions;
-using Radzen.Blazor;
-using TrapchumApp.Pages.Lists.Collaterals;
-using Domains.Models.Identity;
+﻿using Applications.Bases;
+using Applications.Extensions;
+using Applications.Features.Collaterals.Dtos;
+using Applications.Features.Customers.Commands.DeleteCustomer;
+using Applications.Features.Customers.Queries.GetCustomerDetailById;
+using Applications.Features.Customers.Response;
 using Applications.Features.Customers.Services;
 using Applications.Services.Lists;
-using Applications.Features.Customers.Response;
-using Applications.Features.Collaterals.Dtos;
+using Domains.Models.Identity;
+using Radzen.Blazor;
+using TrapchumApp.Helpers.Extensions;
+using TrapchumApp.Pages.Lists.Collaterals;
 using TrapchumApp.Pages.Lists.Customers.Expenses;
 using TrapchumApp.Pages.Lists.Customers.Incomes;
 
@@ -54,16 +58,23 @@ namespace TrapchumApp.Pages.Lists.Customers
 
         async Task DeleteCustomer()
         {
-            var rsp = await _customerService.DeleteCustomerAsync(CustomerId);
+            var rsp = await mediator.Send(new DeleteCustomerCommand(CustomerId));
 
-            if (rsp.IsSuccess)
+            if (rsp.Status == DeleteStatus.Success)
             {
+
                 NavigationManager.NavigateTo("/App/Customers");
 
                 return;
             }
 
-            NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
+            if (rsp.Status == DeleteStatus.InUse)
+            {
+                NotificationService.Notify(NotificationSeverity.Error, "Customer cannot be deleted because it has active loan or collateral");
+                return;
+            }
+
+
         }
 
         async Task ShowEditCustomer(string? customerId)
@@ -92,7 +103,7 @@ namespace TrapchumApp.Pages.Lists.Customers
             };
 
 
-            var result = await DialogService.OpenAsync<CollateralModalAdd>("Add Collateral", parameters, options);
+            var result = await DialogService.OpenAsync<CollateralModalAdd>("Add Collateral", parameters!, options);
 
             if (bool.TryParse(result, out bool success) && success)
             {
@@ -114,15 +125,15 @@ namespace TrapchumApp.Pages.Lists.Customers
                     _userId ??= auth.User.GetId();
                 }
 
-                var response = await _customerService.GetCustomerDetailsByIdAsync(CustomerId,true);
+                var response = await mediator.Send(new GetCustomerDetailByIdQuery(CustomerId, false)); //_customerService.GetCustomerDetailsByIdAsync(CustomerId,true);
 
-                if (response.IsSuccess && response.Data is not null)
+                if (response.IsSuccess())
                 {
-                    Customer = response.Data!;
+                    Customer = response.Value;
                 }
                 else
                 {
-                    NotificationService.Notify(NotificationSeverity.Error, response.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Error, response.GetMessage());
                 }
 
                 IsLoading = false;
@@ -148,7 +159,7 @@ namespace TrapchumApp.Pages.Lists.Customers
                 Draggable = true,
             }, parameters: new Dictionary<string, object?>
             {
-                { "CustomerId", CustomerId }
+                { "CustomerId", CustomerId! }
             });
         }
 
@@ -162,7 +173,7 @@ namespace TrapchumApp.Pages.Lists.Customers
                 Draggable = true,
             }, parameters: new Dictionary<string, object?>
             {
-                { "CustomerId", CustomerId }
+                { "CustomerId", CustomerId! }
             });
         }
 

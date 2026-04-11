@@ -48,7 +48,6 @@ public static class LoanTransactionMapper
         return req.Request.ToLoanTransction(req.Request.BranchRefId);
     }
 
-
     public static LoanPayment ToLoanPayment(this LoanPaymentDtoCreate req, int? branchId)
     {
         if (req == null) return new();
@@ -69,7 +68,6 @@ public static class LoanTransactionMapper
             Interest = req.PaidInterest,// req.Interest
             CollectionFeeAmount = req.PaidFeeAmount,// req.CollectionFeeAmount
             PenaltyAmount = req.PaidPenaltyAmount,// req.PenaltyAmount
-            //SubTotal = req.TotalAmount,// req.SubTotal
             LoanRepaymentLines = req.LoanPaymentLines.Select(x => x.ToLoanPaymentLines(branchId)).ToList(),
         };
     }

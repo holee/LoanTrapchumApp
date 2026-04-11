@@ -2,10 +2,11 @@
 using Applications.Features.LoanPayments.Interfaces;
 using Applications.Interfaces.Loans;
 using Applications.Responses;
+using ErrorOr;
 
 namespace Applications.Features.LoanPayments.UseCases
 {
-    public sealed class AddRecieptNumberUseCase : IAddRecieptNumberUseCase
+    public sealed class AddRecieptNumberUseCase : IAddRecieptNumber
     {
         private readonly ILoanPaymentService _loanPaymentService;
 
@@ -15,19 +16,19 @@ namespace Applications.Features.LoanPayments.UseCases
         }
 
 
-        public async Task<Result<string>> ExecuteAsync(CancellationToken cancellation = default)
+        public async Task<ErrorOr<string?>> ExecuteAsync(CancellationToken cancellation = default)
         {
             var rsp = await _loanPaymentService.GenerateRecieptNumber(cancellation);
 
-            if (rsp.IsSuccess && rsp.Data is not null)
+            if (!rsp.IsError)
             {
 
-                var reciept = rsp.Data.RecieptNumber;
+                var reciept = rsp.Value.RecieptNumber;
 
-                return Result.Success(reciept!);
+                return reciept;
             }
 
-            return Result.Failure<string>(ErrorResponse.ServerError(rsp.ErrMessage));
+            return string.Empty;
         }
     }
 }

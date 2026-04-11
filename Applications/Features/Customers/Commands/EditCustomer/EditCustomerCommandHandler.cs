@@ -17,6 +17,6 @@ public sealed class EditCustomerCommandHandler : IRequestHandler<EditCustomerCom
 
         var customer = request.ToCustomerEdit();
 
-        return await _customerRepository.UpdateCustomerAsync(customer, cancellationToken);
+        return await _customerRepository.UpdateAsync(customer, cancellationToken);
     }
 }

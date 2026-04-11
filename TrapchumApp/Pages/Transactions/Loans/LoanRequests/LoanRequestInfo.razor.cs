@@ -90,7 +90,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
                 await GetCustomers(CustomerId);
 
-                Model.FullName = Customers.First(x => x.CustomerId == CustomerId).AltName;
+                Model.FullName = Customers.FirstOrDefault(x => x.CustomerId == CustomerId)?.AltName ?? string.Empty;
             }
 
             await base.OnInitializedAsync();
@@ -118,7 +118,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         {
             var queryParam = new QueryParam(0, take, string.Empty, filter: filter);
 
-            var command = new GetCustomerAsPagingQuery(BranchId, null, customerId, queryParam);
+            var command = new GetCustomerAsPagingQuery(0, null, customerId, queryParam);
 
             var rsp = await mediator.Send(command);
 

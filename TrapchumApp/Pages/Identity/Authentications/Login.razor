@@ -14,47 +14,39 @@
 @inject NavigationManager NavigationManager
 <div class="login-box">
     <div class="logo">
-        <img src="/assets/logo/tch_Logo.png" alt="Trapchum Cash Pawn Shop Logo" style="width: 200px;">
+        <img src="/assets/logo/tch_Logo.png" alt="Trapchum Logo" style="width: 160px;">
     </div>
+    <h2 class="login-heading">Welcome Back</h2>
+    <p class="login-subtitle">Sign in to your account to continue</p>
     <StatusMessage Message="@errorMessage" />
     <EditForm Model="@Input" OnValidSubmit="@LoginUser" FormName="login" method="post">
         <DataAnnotationsValidator />
-        <RadzenFormField Text="Email Or UserName" class="@Styles.W100">
-            <ChildContent>
-                <RadzenTextBox class="@Styles.W100"
-                               Name="Input.Email"
-                               @bind-Value="@Input.Email"
-                               placeholder="abc@email.com" />
-            </ChildContent>
-            <Helper>
-                <ValidationMessage For="() => Input.Email" />
-            </Helper>
-        </RadzenFormField>
-        <PasswordInput Value="@Input.Password"
-                       @rendermode="InteractiveServer"
-                       Name="Input.Password">
-        </PasswordInput>
-        <RadzenStack Orientation="Orientation.Horizontal"
-                     JustifyContent="JustifyContent.Start"
-                     AlignItems="AlignItems.Center">
-            <InputCheckbox @bind-Value="Input.RememberMe" id="RememberMe" />
-            <label class="rz-ms-1" for="RememberMe">Remember me</label>
-        </RadzenStack>
+        <div class="form-group">
+            <label for="Input.Email">Your Email</label>
+            <InputText id="Input.Email"
+                       @bind-Value="@Input.Email"
+                       placeholder="abc@email.com"
+                       class="form-input" />
+            <ValidationMessage For="() => Input.Email" />
+        </div>
+        <div class="form-group">
+            <label for="Input.Password">Password</label>
+            <InputText id="Input.Password"
+                       @bind-Value="@Input.Password"
+                       type="password"
+                       placeholder="Enter password"
+                       class="form-input" />
+            <ValidationMessage For="() => Input.Password" />
+        </div>
         <RadzenButton ButtonType="ButtonType.Submit"
-                      Size="ButtonSize.Small"
-                      Text="Log in"
-                      class="@Styles.Mt2"
-                      Icon="@IconNames.LoginUser"
-                      ButtonStyle="ButtonStyle.Success" />
+                      Text="Sign In"
+                      Icon="login"
+                      ButtonStyle="ButtonStyle.Primary"
+                      IsBusy="@_isBusy"
+                      class="btn-login-full" />
     </EditForm>
+    <div class="login-footer">
+        &copy; @DateTime.Now.Year Trapchum Cash Pawn Shop
+    </div>
 </div>
 
-@code {
-    bool password = true;
-    void TogglePassword()
-    {
-        password = !password;
-        Console.WriteLine("Clicked");
-        StateHasChanged();
-    }
-}

@@ -47,6 +47,7 @@ namespace TrapchumApp.Pages.Identity.Authentications
         private Input Input { get; set; } = new();
         [SupplyParameterFromQuery] private string? ReturnUrl { get; set; }
 
+        private bool _isBusy = false;
         protected override async Task OnInitializedAsync()
         {
             if (HttpContext is not null && HttpMethods.IsGet(HttpContext!.Request.Method))
@@ -58,6 +59,7 @@ namespace TrapchumApp.Pages.Identity.Authentications
 
         public async Task LoginUser()
         {
+            _isBusy = true;
 
             var loginUser = await _userManager.FindByEmailAsync(Input.Email);
 
@@ -66,6 +68,9 @@ namespace TrapchumApp.Pages.Identity.Authentications
             if (loginUser is null)
             {
                 errorMessage = $"Error:{Input.Email} is not register yet.";
+
+                _isBusy = false;
+
                 return;
             }
 
@@ -73,6 +78,8 @@ namespace TrapchumApp.Pages.Identity.Authentications
             {
 
                 errorMessage = $"Error:User is already deactive....";
+
+                _isBusy = false;
 
                 return;
             }
@@ -83,6 +90,8 @@ namespace TrapchumApp.Pages.Identity.Authentications
             {
                 errorMessage = $"Error:Invalid Password...!";
 
+                _isBusy = false;
+
                 return;
             }
 
@@ -92,6 +101,9 @@ namespace TrapchumApp.Pages.Identity.Authentications
             if (loginResult.Succeeded)
             {
                 _logger.LogInformation("{UserName} has logged in.", Input.Email);
+
+
+                _isBusy = false;
 
                 NavigationManager.NavigateTo(ReturnUrl ?? "/", true);
             }

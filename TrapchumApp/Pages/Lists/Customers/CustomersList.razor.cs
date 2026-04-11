@@ -1,6 +1,8 @@
+using Applications.Bases;
 using Applications.Extensions.DateTimes;
 using Applications.Extensions.Identity.Authorizations.Extensions;
 using Applications.Extensions.Identity.Policies;
+using Applications.Features.Customers.Commands.DeleteCustomer;
 using Applications.Features.Customers.Queries.GetCustomerAsPaging;
 using Applications.Features.Customers.Response;
 using Applications.Features.Customers.UseCases;
@@ -13,6 +15,7 @@ using TrapchumApp.Helpers.Options;
 using TrapchumApp.Pages.Lists.Collaterals;
 using TrapchumApp.Pages.Lists.Customers.Expenses;
 using TrapchumApp.Pages.Lists.Customers.Incomes;
+using TrapchumApp.Shared;
 
 namespace TrapchumApp.Pages.Lists.Customers
 {
@@ -20,13 +23,14 @@ namespace TrapchumApp.Pages.Lists.Customers
     {
 
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+        [CascadingParameter] CascadingAppState BState { get; set; } = default!;
         [Parameter] public EventCallback<string?> ClickedDetails { get; set; }
         [Parameter] public EventCallback<int?> ClickedAdd { get; set; }
         [Parameter] public EventCallback<string?> ClickedEdit { get; set; }
         [Parameter] public EventCallback<int> EditIndex { get; set; }
         [Parameter] public EventCallback<string> ClickedDelete { get; set; }
         [Parameter] public EventCallback<string?> ClickedAddCollateral { get; set; }
-        [Parameter] public EventCallback UpdateStateChanged { get; set; }       
+        [Parameter] public EventCallback UpdateStateChanged { get; set; }
         [Parameter] public int? BranchId { get; set; } = 0;
         [Parameter] public EventCallback<VCustomerDetails> SelectedRowChanged { get; set; }
         [Parameter] public RenderFragment? ChildContent { get; set; } = default!;
@@ -135,7 +139,7 @@ namespace TrapchumApp.Pages.Lists.Customers
                 AutoFocusFirstElement = false
             };
 
-            await DialogService.OpenAsync<CustomerCollateralLineCreate>("Collateral", param, options);
+            await DialogService.OpenAsync<CustomerCollateralLineCreate>("Collateral", param!, options);
         }
 
         private async Task AddLoanRequest(string? customerId)
@@ -161,14 +165,18 @@ namespace TrapchumApp.Pages.Lists.Customers
 
         private async void AddExpenseModal(string? customerId)
         {
+
+
+            var param = new Dictionary<string, object?>
+            {
+                { "CustomerId", customerId }
+            };
+
             await DialogService.OpenAsync<CreateExpense>("Add Expense", options: new DialogOptions
             {
                 Resizable = false,
                 Draggable = true,
-            }, parameters: new Dictionary<string, object?>
-            {
-                { "CustomerId", customerId }
-            });
+            }, parameters: param!);
         }
 
         private async Task AddDetails(string? customerId)
@@ -199,17 +207,19 @@ namespace TrapchumApp.Pages.Lists.Customers
                 });
             if (confirm == false) return;
 
-            var rsp = await _customerService.DeleteCustomerAsync(customerId);
+            var rsp = await mediator.Send(new DeleteCustomerCommand(customerId));  //_customerService.DeleteCustomerAsync(customerId);
 
-            if (rsp.IsSuccess)
+            if (rsp.Status == DeleteStatus.Success)
             {
-                NotificationService.Notify(NotificationSeverity.Success, rsp.Data);
+                NotificationService.Notify(NotificationSeverity.Success, rsp.Message);
 
                 await LoadCustomerPageList(null, null, filterText);
             }
-            else
+
+            if (rsp.Status == DeleteStatus.InUse)
             {
-                NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
+                NotificationService.Notify(NotificationSeverity.Error, rsp.Message);
+                return;
             }
 
         }
@@ -227,11 +237,7 @@ namespace TrapchumApp.Pages.Lists.Customers
 
             _userId = auth.User.GetId();
 
-            CanRequestLoan = await _authorizeService.MustHasPermissionAsync(auth.User, Policies.RequestLoanRequest);
-
-            IsAccountOnly = await _authorizeService.MustHasPermissionAsync(auth.User, Policies.AccountOnly);
-
-            IsAdminOnly = await _authorizeService.MustHasPermissionAsync(auth.User, Policies.AdminOnly);
+            await BState.GetAuthenticatedUser(auth.User);
 
             await LoadCustomerPageList(null, null, filterText);
 
@@ -246,11 +252,11 @@ namespace TrapchumApp.Pages.Lists.Customers
 
             pageIndex = args.Skip ?? 0;
 
-            if (args.Sorts.Any())
+            if (args.Sorts!.Any())
             {
-                sortField = args.Sorts.First().Property;
+                sortField = args.Sorts!.First().Property!;
 
-                sortDescending = args.Sorts.First().SortOrder == SortOrder.Descending;
+                sortDescending = args.Sorts!.First().SortOrder == SortOrder.Descending;
             }
 
             var filterColumn = args.Filters?.FirstOrDefault(f => f.Property == nameof(VCustomerDetails.FullName) ||

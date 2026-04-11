@@ -164,7 +164,7 @@
     private string _getChangeCreditAgentUrl = "";
     private string _getLoanDetailsUrl = "";
     private string _getLoanWriteOffUrl = "";
-
+    private string _loanPayOffUrl = "";
 
     void GetLoanDetails(VLoanDisbursments? p)
     {
@@ -240,6 +240,9 @@
 
         _getChangeCreditAgentUrl = $"App/Loans/Disbursments/Credit-Agent/{p.BranchId}/Branches?CreditAgentId={p.CreditAgentRefId}";
 
+        _loanPayOffUrl = $"/App/Loan/{p.LoanId}/Branches/{p.BranchId}/loan-payoff?currencyId={p.CurrencyId}";
+
+        
         ContextMenuService.Open(args, ds => @<RadzenMenu Style="font-size:0.8rem;">
             <RadzenMenuItem Icon="money"
                             Path="@_getPaymentSchedulesUrl"
@@ -253,6 +256,10 @@
                             Path="@_getLoanWriteOffUrl"
                             Visible="@bState.CanWriteOff"
                             Text="Write Off"></RadzenMenuItem>
+            <RadzenMenuItem Icon="money"
+                            Path="@_loanPayOffUrl"
+                            Visible="@bState.CanPayOff"
+                            Text="Pay Off"></RadzenMenuItem>
             <RadzenMenuItem Icon="change_circle"
                             Path="@_getChangeCreditAgentUrl"
                             Visible="@bState.IsManager"
@@ -294,7 +301,9 @@
         {
             new ContextMenuItem { Text = "Recieve Payment", Value="1",Icon="money_bag",Disabled=!bState.CanRecievePayment},
             new ContextMenuItem { Text = "Schedule Detials", Value="2",Icon="info"},
+            new ContextMenuItem { Text = "Pay Off", Value="7",Icon="money",Disabled=!bState.CanPayOff},
             new ContextMenuItem { Text = "Change Credit Agent", Value="5",Icon="find_replace",Disabled=!bState.IsManager},
+            new ContextMenuItem { Text = "Pre Paid", Value="6",Icon="money",Disabled=!bState.CanRecievePayment},
             new ContextMenuItem { Text = "Export As Excel", Value="3", Icon="file_download"},
             new ContextMenuItem { Text = "Export As Pdf", Value="4", Icon="picture_as_pdf"},
         }, (e) => DoContextMenuAction(e, args.Data));
@@ -321,6 +330,12 @@
                 break;
             case "4":
                 _ = DownLoadScheduleAsPdf(data);
+                break;
+            case "6":
+                NavigationManager.NavigateTo($"App/Loans/{data.LoanId}/Branches/{data.BranchId}/Payments?CreditAgentId={data.CreditAgentRefId}");
+                break;
+            case "7":
+                NavigationManager.NavigateTo($"/App/Loans/{data.LoanId}/Branches/{data.BranchId}/loan-payoff?currencyId={data.CurrencyId}");
                 break;
             default:
                 NavigationManager.NavigateTo($"App/Loans/Disbursments/Credit-Agent/{data.BranchId}/Branches?CreditAgentId={data.CreditAgentRefId}");

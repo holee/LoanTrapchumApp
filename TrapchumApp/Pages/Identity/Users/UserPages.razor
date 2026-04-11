@@ -46,6 +46,7 @@
                                 PagerHorizontalAlign="HorizontalAlign.Right"
                                 PageSizeOptions="@StorageConstant.PageSizeOptions"
                                 PageSizeChanged="PageSizeChanged"
+                                Style="height: calc(100vh - 220px); overflow: auto;"
                                 TItem="VUser"
                                 Data="@AllUsers">
                     <Columns>
@@ -160,7 +161,7 @@
             {"UserId",userId}
         };
 
-        bool dialogueResult = await DialogService.OpenAsync<SetUserLoanSize>("Loan Size", param, options);
+        bool dialogueResult = await DialogService.OpenAsync<SetUserLoanSize>("Loan Size", param!, options);
 
     }
 

@@ -7,179 +7,100 @@
 @using Applications.Features.LoanRequests.Interfaces
 @using TrapchumApp.Services
 <PageTitle>Role-Permissions</PageTitle>
-<style>
-    table tr > th {
-        background-color: cornflowerblue;
-        color: white;
-    }
 
-        table tr > th.group {
-            width: 8rem;
-            height: 2rem;
-            text-align: left;
-            padding-left: 0.9rem;
-        }
-
-        table tr > th.feature {
-            padding:0 0.9rem;
-        }
-
-    table tr.Administrator {
-        background-color: cadetblue;
-    }
-
-    table tr.Operation {
-        background-color: aquamarine;
-    }
-
-    table tr.Accounting {
-        background-color: blueviolet;
-        color: white;
-    }
-
-    .grid-container {
-        display: grid;
-        grid-template-columns: repeat(6, 1fr); /* 2 columns */
-        gap: 10px; /* space between rows and columns */
-    }
-
-        .grid-container .grid-item {
-            width: 100%; /* Fills column */
-        }
-</style>
 <RadzenProgressBar ShowValue="false" Value="100" Mode="ProgressBarMode.Indeterminate"
-                   ProgressBarStyle="ProgressBarStyle.Primary" Visible="IsLoading"></RadzenProgressBar>
-<RadzenFieldset AllowCollapse="false">
-    <HeaderTemplate>
-        <RadzenBadge BadgeStyle="BadgeStyle.Info" Shade="Shade.Dark">
-            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem" Style="padding: 0 0.25rem 0 0; text-transform: none;">
-                <RadzenIcon Icon="@IconNames.AssignmentInd" />
-                <RadzenText TextStyle="TextStyle.DisplayH6"
-                            Text="@rolePermissions!.Role!.Name"
-                            TagName="TagName.H3"></RadzenText>
-            </RadzenStack>
-        </RadzenBadge>
-    </HeaderTemplate>
-    <ChildContent>
-        <table border="1" style="border-collapse:collapse;text-align:center;">
-            <tr>
-                <th class="group">Group</th>
-                <th style="width:5rem;">
-                    <RadzenCheckBox TValue="bool"
-                                    @bind-Value="@_selectAll"
-                                    Change="@((arg) => OnSelectAllChanged(arg))" />
-                </th>
-                <th style="text-align:left;">Feature</th>
-            </tr>
+                   ProgressBarStyle="ProgressBarStyle.Primary" Visible="IsLoading" />
+
+<div class="perm-page">
+    <div class="perm-header">
+        <div class="perm-header-left">
+            <RadzenIcon Icon="@IconNames.AssignmentInd" Style="font-size:1.5rem;color:#5a6acf;" />
+            <div>
+                <h2 class="perm-title">@rolePermissions!.Role!.Name</h2>
+                <span class="perm-subtitle">Manage permissions for this role</span>
+            </div>
+        </div>
+        <div class="perm-header-actions">
+            <RadzenButton ButtonStyle="ButtonStyle.Light"
+                          Variant="Variant.Flat"
+                          Click="@(() => NavigationManager.NavigateTo("/App/Account/Roles"))"
+                          Icon="arrow_back"
+                          Text="Back"
+                          Size="ButtonSize.Small" />
+            <RadzenButton ButtonStyle="ButtonStyle.Success"
+                          Click="SubmitHandler"
+                          Icon="save"
+                          Text="Save Changes"
+                          Size="ButtonSize.Small" />
+        </div>
+    </div>
+
+    <div class="perm-card">
+        <div class="perm-selectall-row">
+            <label class="perm-selectall-label" @onclick="@(() => OnSelectAllChanged(!_selectAll))">
+                <span class="perm-selectall-check @(_selectAll ? "perm-selectall-check--active" : "")">
+                    @if (_selectAll)
+                    {
+                        <RadzenIcon Icon="check" Style="font-size:0.8rem;" />
+                    }
+                </span>
+                <span>Select All Permissions</span>
+            </label>
+            <button type="button" class="perm-restore-btn" @onclick="RestoreDefaults" title="Restore all permissions to saved state">
+                <RadzenIcon Icon="restart_alt" Style="font-size:0.9rem;" />
+                Restore Default
+            </button>
+        </div>
+        <RadzenRow>
             @foreach (var group in _roleClaimsGrouped ?? [])
             {
-                <tr class="@group.Group">
-                    <th class="group">
-                        @group.Group
-                    </th>
-                    <td style="vertical-align:central;">
-                        <RadzenCheckBox TValue="bool"
-                                        @bind-Value="@group.GroupCheck"
-                                        Name="@group.Group"
-                                        Change="@((arg) => OnGroupSelectAllChanged(group, arg))" />
-                    </td>
-                    <td style="padding:0 0.5rem;">
-                        <RadzenRow Gap="0.5rem" RowGap="0.1rem">
+                <RadzenColumn Size="6" SizeMD="6" SizeSM="12">
+                    <div class="perm-group">
+                        <div class="perm-group-header">
+                            <label class="perm-group-toggle" @onclick="@(() => OnGroupSelectAllChanged(group, !group.GroupCheck))">
+                                <span class="perm-group-check @(group.GroupCheck ? "perm-group-check--active" : "")">
+                                    @if (group.GroupCheck)
+                                    {
+                                        <RadzenIcon Icon="check" Style="font-size:0.75rem;" />
+                                    }
+                                </span>
+                                <span class="perm-group-name">@group.Group</span>
+                            </label>
+                            <div class="perm-group-actions">
+                                <button type="button" class="perm-restore-btn perm-restore-btn--sm" @onclick="@(() => RestoreGroupDefaults(group))" title="Restore group to saved state">
+                                    <RadzenIcon Icon="restart_alt" Style="font-size:0.8rem;" />
+                                </button>
+                                <span class="perm-group-count">
+                                    @group.Permissions.Count(p => p.IsAssignedToRole) / @group.Permissions.Count
+                                </span>
+                            </div>
+                        </div>
+                        <div class="perm-group-body">
                             @foreach (var item in group.Permissions)
                             {
-                                <RadzenColumn Size="3">
-                                    <RoleCheck Model="@item" @key="@Guid.NewGuid().ToString("N")"
-                                               OnChange="((arg)=>OnCheckChanged(arg))" />
-
-                                </RadzenColumn>
+                                <RoleCheck Model="@item" @key="@($"{group.Group}_{item.ClaimValue}")"
+                                           OnChange="((arg)=>OnCheckChanged(arg))" />
                             }
-                        </RadzenRow>
-                    </td>
-                </tr>
+                        </div>
+                    </div>
+                </RadzenColumn>
+ 
             }
-        </table>
+        </RadzenRow>
+           
+    </div>
 
-    </ChildContent>
-</RadzenFieldset>
-<RadzenStack AlignItems="AlignItems.Center"
-             Gap="1rem"
-             Orientation="Orientation.Horizontal"
-             class="rz-mt-2"
-             JustifyContent="JustifyContent.End">
-    <RadzenButton ButtonStyle="ButtonStyle.Success"
-                  Click="SubmitHandler"
-                  Icon="save"
-                  Text="Save Changed"
-                  Size="ButtonSize.ExtraSmall" />
-    <RadzenLink Icon="cancel"
-                Text="Back"
-                Path="/App/Account/Roles">
-        Back
-    </RadzenLink>
-</RadzenStack>
-@code {
-    private string groupText = "";
-    int pageSize = 10;
-
-
-
-
-
-    void PageSizeChanged(int size)
-    {
-        pageSize = size;
-    }
-
-    void SearchGroup()
-    {
-        //groups = groups.Where(x => x.StartsWith(groupText)).ToList();
-    }
-
-    void OnChange(int index)
-    {
-        //console.Log($"Tab with index {index} was selected.");
-    }
-}
-
-
-
-@*   @foreach (var group in RoleClaimsGrouped.Keys)
-            {
-                var allClaimsInGroup = RoleClaimsGrouped[group].OrderBy(x => x.ClaimValue).ToList();
-                <RadzenTabsItem Text="@group">
-                    <Template>
-
-                    </Template>
-                    <ChildContent>
-                        <GridToolbar></GridToolbar>
-                        <RadzenDataGrid Density="Density.Compact"
-                                        Responsive
-                                        Style="min-height:25rem;height:25rem;max-height:40rem;"
-                                        ColumnWidth="15rem"
-                                        AllowPaging="true"
-                                        PagerHorizontalAlign="HorizontalAlign.Right"
-                                        ShowPagingSummary="true"
-                                        PageSize="@pageSize"
-                                        AllowAlternatingRows="true"
-                                        PageSizeChanged="@PageSizeChanged"
-                                        GridLines="DataGridGridLines.Both"
-                                        Data="allClaimsInGroup">
-                            <Columns>
-                                <RadzenDataGridColumn Width="10rem" Property="Group" Title="Group" />
-                                <RadzenDataGridColumn Width="8rem" Property="ClaimType" Title="Type" />
-                                <RadzenDataGridColumn Width="12rem" Property="ClaimValue" Title="Value" />
-                                <RadzenDataGridColumn Property="Description" Title="Description" />
-                                <RadzenDataGridColumn TextAlign="TextAlign.Center" Width="6rem" Property="Group" Title="Assigned" Context="item">
-                                    <Template>
-                                        <RadzenCheckBox TValue="bool"
-                                                        @bind-Value="@item.IsAssignedToRole"
-                                                        Name="CheckStatus" />
-                                    </Template>
-                                </RadzenDataGridColumn>
-                            </Columns>
-                        </RadzenDataGrid>
-                    </ChildContent>
-
-                </RadzenTabsItem>
-            }
-         *@
+    <div class="perm-bottom-bar">
+        <RadzenButton ButtonStyle="ButtonStyle.Light"
+                      Variant="Variant.Flat"
+                      Click="@(() => NavigationManager.NavigateTo("/App/Account/Roles"))"
+                      Icon="arrow_back"
+                      Text="Back"
+                      Size="ButtonSize.Small" />
+        <RadzenButton ButtonStyle="ButtonStyle.Success"
+                      Click="SubmitHandler"
+                      Icon="save"
+                      Text="Save Changes"
+                      Size="ButtonSize.Small" />
+    </div>
+</div>

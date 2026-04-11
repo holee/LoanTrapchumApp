@@ -4,7 +4,10 @@ namespace Applications.Features.Transactions.Journals
 {
     public class JournalLineDtoCreate
     {
+
         public string? EntityNameRefId { get; set; }
+
+
         public string? EntityName { get; set; } = string.Empty;
         [Required(ErrorMessage = "Ledger is required")]
         public int? LedgerRefId { get; set; }

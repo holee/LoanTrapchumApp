@@ -115,6 +115,65 @@ public sealed class UserService : IUserService
 
     }
 
+
+    public async Task<ErrorOr.ErrorOr<string>> CreateUserAsync(RegisterRequest model, CancellationToken cancellation = default)
+    {
+        if (string.IsNullOrWhiteSpace(model.EmployeeId))
+        {
+            return ErrorOr.Error.NotFound(description: "Employee is required.");
+        }
+
+        if (await IsExistEmployeeHasAccount(model.EmployeeId))
+        {
+            return ErrorOr.Error.Conflict(description: "Employee already registered.");
+        }
+
+        var existingUser = await GetUserByName(model.Username);
+
+        if (existingUser is not null)
+        {
+            return ErrorOr.Error.Conflict(description: $"{model.Username} already exists.");
+        }
+
+        var userWithSameEmail = await _userManager.FindByEmailAsync(model.Email);
+        if (userWithSameEmail is not null)
+        {
+            return ErrorOr.Error.Conflict(description: $"{model.Email} email already exists.");
+        }
+
+        var user = new ApplicationUser
+        {
+            UserName = model.Username ?? model.Email,
+            Email = model.Email,
+            BranchRefId = model.BranchRefId,
+            NameRefId = model.EmployeeId,
+            IsActive = true
+        };
+
+        var result = await _userManager.CreateAsync(user, model.Password);
+
+        if (!result.Succeeded)
+        {
+            return result.Errors
+                .Select(e => ErrorOr.Error.Validation(code: e.Code, description: e.Description))
+                .ToList();
+        }
+
+        if (!await _userManager.IsInRoleAsync(user, model.RoleName!))
+        {
+            var assignRole = await _userManager.AddToRoleAsync(user, model.RoleName!);
+            if (!assignRole.Succeeded)
+            {
+                return assignRole.Errors
+                    .Select(e => ErrorOr.Error.Validation(code: e.Code, description: e.Description))
+                    .ToList();
+            }
+        }
+
+        return "New User was added.";
+    }
+
+
     public async Task<Result<IEnumerable<VUser>>> GetUsersAsync(string? userId, string? filter = null)
     {
 
@@ -796,7 +855,6 @@ public sealed class UserService : IUserService
 
 
 }
-
 
 //public async Task<IEnumerable<Claim>> GetClaimsAsync(ApplicationUser user)
 //{

@@ -30,6 +30,7 @@ public partial class CustomerNewCreate
     [Parameter] public EventCallback<int> Closed { get; set; } = default!;
     [Parameter] public EventCallback<VCustomerList> UpdateState { get; set; }
     [Parameter] public EntityCustomerCreate CustomerModel { get; set; } = new();
+    [CascadingParameter] public Task<AuthenticationState> AuthState { get; set; } = default!;
     IEnumerable<string> Salutations = [];
     IEnumerable<ProvinceDto> Provinces = [];
     IEnumerable<string> Cities = [];
@@ -41,8 +42,12 @@ public partial class CustomerNewCreate
     protected EditForm? editForm;
     private bool IsLoading = true;
     protected string? newSalution = "";
+    private string? _userId = string.Empty;
     protected override async Task OnInitializedAsync()
     {
+        var authState = await AuthState;
+
+        _userId = authState.GetUserId();
 
         await GetAdditionalInformation();
 
@@ -55,6 +60,8 @@ public partial class CustomerNewCreate
         CustomerModel.MarritalStatus = "Single";
 
         CustomerModel.Nationality = "Khmer";
+
+        CustomerModel.CreatedBy = _userId;
 
         var rsp1 = await _salutationService.GetSalutions();
 
@@ -176,33 +183,3 @@ public partial class CustomerNewCreate
     }
 
 }
-
-
-//protected async void FormSubmit()
-//{
-
-//    CustomerModel.EntType = EntityTypes.Customer.ToString();
-
-//    CustomerModel.Photo ??= "/Profiles/profile.png";
-
-//    var rsp = await mediator.Send(new CreateCustomerCommand(CustomerModel));  //await _customerService.CreateAsync(model);
-
-//    if (rsp.IsSuccess())
-//    {
-
-//        await Close();
-
-//        CustomerModel = new();
-
-//        await UpdateState.InvokeAsync(rsp.Value);
-
-//        NotificationService.Notify(NotificationSeverity.Success, "Customer was created successfully!");
-//    }
-//    else
-//    {
-
-//        NotificationService.Notify(NotificationSeverity.Error, rsp.GetMessage());
-//    }
-
-//}
-

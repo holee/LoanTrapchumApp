@@ -28,7 +28,6 @@ public partial class RoleCreate
 
         if (roleCreateForm.EditContext!.Validate() == false) return;
 
-
         var permissions = RoleClaimsGrouped?
                     .SelectMany(x => x.Permissions)
                     .Where(x => x.IsSelected == true)
