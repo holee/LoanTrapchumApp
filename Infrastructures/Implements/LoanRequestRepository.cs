@@ -25,11 +25,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructures.Implements;
 
-public sealed class LoanRequestRepository(
-    DataContext context,
-    ILogger<LoanRequestRepository> logger,
-    IDapperConnectionFactory dapperFactory,
-    IDbContextFactory<DataContext> contextFactory) : ILoanRequestService
+public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger, IDapperConnectionFactory dapperFactory, IDbContextFactory<DataContext> contextFactory) : ILoanRequestService
 {
     public async Task<ErrorOr<RequestResult>> CreateNewLoanRequestAsync(LoanRequest req, CancellationToken cancellationToken = default)
     {
@@ -58,7 +54,7 @@ public sealed class LoanRequestRepository(
                         x.CustomerRefId == req.CustomerRefId &&
                         x.LoanRequestStatusRefId == (int)RequestStatus.New, cancellationToken);
 
-        using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
+        using var transaction = await cxt.Database.BeginTransactionAsync(cancellationToken);
 
         try
         {
@@ -171,7 +167,7 @@ public sealed class LoanRequestRepository(
                             (x.LoanRequestStatusRefId == (int)RequestStatus.New ||
                             x.LoanRequestStatusRefId == (int)RequestStatus.Rechecked), cancellationToken);
 
-            using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
+            using var transaction = await cxt.Database.BeginTransactionAsync(cancellationToken);
 
             try
             {
@@ -285,7 +281,7 @@ public sealed class LoanRequestRepository(
                             x.CustomerRefId == req.CustomerRefId &&
                             (x.LoanRequestStatusRefId == (int)RequestStatus.New ||
                             x.LoanRequestStatusRefId == (int)RequestStatus.Rechecked), cancellationToken);
-            using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
+            using var transaction = await cxt.Database.BeginTransactionAsync(cancellationToken);
 
             try
             {
@@ -333,9 +329,12 @@ public sealed class LoanRequestRepository(
 
     public async Task<ErrorOr<string>> ChangedLoanRequestAsync(LoanChangeStatusDtoCreate req)
     {
+
+        await using var context = await contextFactory.CreateDbContextAsync();
+
         var existingLoanRequest = await context.LoanRequests
-            .Where(x => x.LoanRequestId == req.LoanRequestId && x.BranchRefId == req.BranchId)
-            .FirstOrDefaultAsync();
+                                    .Where(x => x.LoanRequestId == req.LoanRequestId && x.BranchRefId == req.BranchId)
+                                    .FirstOrDefaultAsync();
 
         if (existingLoanRequest is null)
         {
@@ -355,15 +354,20 @@ public sealed class LoanRequestRepository(
             : Error.Unexpected("Cannot changed loan request.");
     }
 
-    public async Task<ErrorOr<RequestResult>> DisburseLoanRequestAsync(AproveLoanDtoCreate req, CancellationToken cancellationToken = default)
+    public async Task<ErrorOr<RequestResult>> ApprovedLoanRequestAsync(AproveLoanDtoCreate req, CancellationToken cancellationToken = default)
     {
+
+
+        logger.LogInformation("Approving loan request for LoanRequestId: {LoanRequestId}, BranchRefId: {BranchRefId}, CustomerRefId: {CustomerRefId}",
+            req.LoanRequestId, req.BranchId, req.CustomerId);
+
 
         await using var cxt = await contextFactory.CreateDbContextAsync();
 
         var existingLoanRequest = await cxt.LoanRequests
-            .FirstOrDefaultAsync(x => x.LoanRequestId == req.LoanRequestId &&
-                        x.BranchRefId == req.BranchId &&
-                        x.CustomerRefId == req.CustomerId, cancellationToken);
+                                            .FirstOrDefaultAsync(x => x.LoanRequestId == req.LoanRequestId &&
+                                                    x.BranchRefId == req.BranchId &&
+                                                    x.CustomerRefId == req.CustomerId, cancellationToken);
         if (existingLoanRequest is null)
         {
             return Error.NotFound(LoanRequestMessage.REQUEST_NOT_FOUND);
@@ -388,8 +392,6 @@ public sealed class LoanRequestRepository(
 
             existingLoanRequest.AdminFeeAmount = req.AdminFeeAmount;
 
-            AddNotification(cxt, existingLoanRequest, NotificationType.Approved);
-
             await cxt.SaveChangesAsync(cancellationToken);
 
             await transaction.CommitAsync(cancellationToken);
@@ -398,22 +400,24 @@ public sealed class LoanRequestRepository(
         }
         catch (Exception ex)
         {
+
+            logger.LogError(ex, "Failed to approve loan request for LoanRequestId: {LoanRequestId}, BranchRefId: {BranchRefId}, CustomerRefId: {CustomerRefId}", req.LoanRequestId, req.BranchId, req.CustomerId);
+
             await transaction.RollbackAsync(cancellationToken);
 
             return Error.Unexpected($"{ex.Message}");
         }
     }
 
-
-    public async Task<ErrorOr<RequestResult>> SaveLoanDisbursementAsync(SaveLoanDisbursementDtoCreate req, CancellationToken cancellationToken = default)
+    public async Task<ErrorOr<RequestResult>> SaveLoanRequestByManagerAsync(SaveLoanRequestDtoCreate req, CancellationToken cancellationToken = default)
     {
 
         await using var cxt = await contextFactory.CreateDbContextAsync();
 
         var existingLoanRequest = await cxt.LoanRequests
-            .FirstOrDefaultAsync(x => x.LoanRequestId == req.LoanRequestId &&
-                        x.BranchRefId == req.BranchId &&
-                        x.CustomerRefId == req.CustomerId, cancellationToken);
+                        .FirstOrDefaultAsync(x => x.LoanRequestId == req.LoanRequestId &&
+                                                x.BranchRefId == req.BranchId &&
+                                                x.CustomerRefId == req.CustomerId, cancellationToken);
         if (existingLoanRequest is null)
         {
             return Error.NotFound(LoanRequestMessage.REQUEST_NOT_FOUND);
@@ -438,6 +442,41 @@ public sealed class LoanRequestRepository(
         }
     }
 
+
+    public async Task<ErrorOr<RequestResult>> SaveLoanRequestAsync(SaveLoanRequestDtoCreate req, CancellationToken cancellationToken = default)
+    {
+
+        await using var cxt = await contextFactory.CreateDbContextAsync(); 
+
+        var existingLoanRequest = await cxt.LoanRequests
+                        .FirstOrDefaultAsync(x => x.LoanRequestId == req.LoanRequestId &&
+                                                x.BranchRefId == req.BranchId &&
+                                                x.CustomerRefId == req.CustomerId, cancellationToken);
+        if (existingLoanRequest is null)
+        {
+            return Error.NotFound(LoanRequestMessage.REQUEST_NOT_FOUND);
+        }
+
+        if (existingLoanRequest.EditSeq != existingLoanRequest.EditSeq)
+        {
+            return Error.NotFound(LoanRequestMessage.REQUEST_NOT_FOUND);
+        }
+
+        try
+        {
+            existingLoanRequest.LoanRequestStatusRefId = (int)req.RequestStatus;
+
+            await cxt.SaveChangesAsync(cancellationToken);
+
+            return new RequestResult(true, "Loan Request was saved successfully");
+        }
+        catch (Exception ex)
+        {
+            return Error.Unexpected($"{ex.Message}");
+        }
+    }
+
+
     public async Task<ErrorOr<RequestResult>> DeniedLoanRequestAsync(DeniedRequestDtoCreate req, CancellationToken cancellationToken = default)
     {
         await using var cxt = await contextFactory.CreateDbContextAsync(cancellationToken);
@@ -460,10 +499,13 @@ public sealed class LoanRequestRepository(
             }
 
             existingRequest.LoanRequestStatusRefId = (int)RequestStatus.Denied;
+
             existingRequest.ModifiedDt = DateTime.UtcNow;
-            existingRequest.AprovedDate = req.DeniedDate;
+
             existingRequest.Remark = req.Remark;
-            await context.SaveChangesAsync(cancellationToken);
+
+            await cxt.SaveChangesAsync(cancellationToken);
+
             return new RequestResult(true, "Loan Request was Denied");
         }
         catch (Exception ex)
@@ -497,7 +539,7 @@ public sealed class LoanRequestRepository(
             existingRequest.ModifiedDt = DateTime.UtcNow;
             existingRequest.AprovedDate = DateTime.Now;
             existingRequest.Remark = req.Remark;
-            await context.SaveChangesAsync(cancellationToken);
+            await cxt.SaveChangesAsync(cancellationToken);
             return new RequestResult(true, "Loan Request was Verified");
         }
         catch (Exception ex)
@@ -543,7 +585,7 @@ public sealed class LoanRequestRepository(
 
             updateResult.Remark = req.Remark;
 
-            await context.SaveChangesAsync(cancellationToken);
+            await cxt.SaveChangesAsync(cancellationToken);
 
             return new RequestResult
             {
@@ -567,7 +609,7 @@ public sealed class LoanRequestRepository(
         await using var cxt = await contextFactory.CreateDbContextAsync(cancellation);
 
         var existingLoanRequest = await cxt.LoanRequests
-            .FirstOrDefaultAsync(x => x.LoanRequestId == req.LoanRequestId &&
+                                    .FirstOrDefaultAsync(x => x.LoanRequestId == req.LoanRequestId &&
                                       x.BranchRefId == req.BranchId &&
                                       x.CustomerRefId == req.CustomerId, cancellation);
 
@@ -610,6 +652,8 @@ public sealed class LoanRequestRepository(
 
     public async Task<ErrorOr<string>> AddLoanRequestCollateralAsync(LoanCollateralRequest req, CancellationToken cancellation = default)
     {
+        await using var context = await contextFactory.CreateDbContextAsync();
+
         logger.LogInformation("Try to create new loan request collateral for LoanRequestId={LoanRequestId}", req.LoanRequestId);
         try
         {
@@ -687,8 +731,7 @@ public sealed class LoanRequestRepository(
         }
     }
 
-    public async Task<ErrorOr<string>> DeleteLoanRequestCollateralAsync(int? branchId, string? loanRequestId,
-        long? collateralLinkId)
+    public async Task<ErrorOr<string>> DeleteLoanRequestCollateralAsync(int? branchId, string? loanRequestId, long? collateralLinkId)
     {
         logger.LogInformation("try to delete guarantors");
         try
@@ -735,7 +778,11 @@ public sealed class LoanRequestRepository(
 
     public async Task<ErrorOr<string>> AddLoanRequestGuarantorAsync(LoanRequestGuarantors request, CancellationToken cancellation = default)
     {
+
+        await using var context = await contextFactory.CreateDbContextAsync();
+
         logger.LogInformation("try to create new loan request");
+
         try
         {
             var existingRequest = await context.LoanRequests
@@ -819,9 +866,12 @@ public sealed class LoanRequestRepository(
         }
     }
 
-    public async Task<ErrorOr<string>> DeleteLoanRequestGuarantorAsync(string? loanRequestId, int? branchId,
-        long? guarantorLinkId)
+    public async Task<ErrorOr<string>> DeleteLoanRequestGuarantorAsync(string? loanRequestId, int? branchId, long? guarantorLinkId)
     {
+
+        await using var context = await contextFactory.CreateDbContextAsync();
+
+
         logger.LogInformation("try to delete guarantors");
         try
         {
@@ -861,7 +911,10 @@ public sealed class LoanRequestRepository(
 
     public async Task<ErrorOr<string>> AddLoanRequestDocumentAsync(LoanDocuments request, CancellationToken cancellation = default)
     {
+        await using var context = await contextFactory.CreateDbContextAsync();
+
         logger.LogInformation("try to create new loan request");
+
         try
         {
             var existingRequest = await context.LoanRequests
@@ -956,7 +1009,11 @@ public sealed class LoanRequestRepository(
 
     public async Task<ErrorOr<string>> AddLoanRequestDocumentAsync(int? branchId, string? loanRequestId, List<LoanDocuments> documents, CancellationToken cancellation = default)
     {
+
+        await using var context = await contextFactory.CreateDbContextAsync();
+
         logger.LogInformation("try to create new loan request");
+
         try
         {
 
@@ -989,9 +1046,10 @@ public sealed class LoanRequestRepository(
         }
     }
 
-    public async Task<ErrorOr<string>> DeleteLoanRequestDocumentAsync(string? loanRequestId, int? branchId,
-        long? documentId)
+    public async Task<ErrorOr<string>> DeleteLoanRequestDocumentAsync(string? loanRequestId, int? branchId, long? documentId)
     {
+        await using var context = await contextFactory.CreateDbContextAsync();
+
         logger.LogInformation("try to delete documents");
         try
         {
@@ -1118,7 +1176,7 @@ public sealed class LoanRequestRepository(
     public async Task<ErrorOr<VLoanRequests>> GetApprovedLoanRequestAsync(int? branchId, string? customerId, string? loanRequestId, bool include)
     {
         logger.LogInformation("try to get approved loan request for LoanRequestId: {LoanRequestId}", loanRequestId);
-        
+
         try
         {
             using var db = await dapperFactory.CreateConnectionAsync();
@@ -1235,6 +1293,8 @@ public sealed class LoanRequestRepository(
 
     public async Task<ErrorOr<T>> GetLoanRequestAsync<T>(int? branchId, string? customerId, string? loanRequestId) where T : class
     {
+        await using var context = await contextFactory.CreateDbContextAsync();
+       
         try
         {
             var item = await context.VLoanRequests

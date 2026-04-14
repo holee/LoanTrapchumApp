@@ -208,7 +208,7 @@ public partial class LoanCreatePage(IHolidayServiceImpl holidayService)
             return;
         }
 
-        var command = new SaveLoanDisbursementCommand(new SaveLoanDisbursementDtoCreate(BranchId, CustomerId, LoanRequestId, memo));
+        var command = new SaveLoanRequestByManagerCommand(new SaveLoanRequestDtoCreate(BranchId, CustomerId, LoanRequestId, memo));
 
         try
         {

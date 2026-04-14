@@ -2,7 +2,7 @@
 
 namespace Applications.Features.Loans.Command.SaveLoanDisbursemenent;
 
-public class SaveLoanDisbursementDtoCreateValidator : AbstractValidator<SaveLoanDisbursementDtoCreate>
+public class SaveLoanDisbursementDtoCreateValidator : AbstractValidator<SaveLoanRequestDtoCreate>
 {
     public SaveLoanDisbursementDtoCreateValidator()
     {

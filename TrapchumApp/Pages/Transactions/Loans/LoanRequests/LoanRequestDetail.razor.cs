@@ -5,12 +5,11 @@ using Applications.Features.LoanRequests.Command.AddDescription;
 using Applications.Features.LoanRequests.Command.DenyLoanRequest;
 using Applications.Features.LoanRequests.Command.RecheckedLoanRequest;
 using Applications.Features.LoanRequests.Command.SaveEditLoanRequest;
+using Applications.Features.LoanRequests.Command.SaveLoanRequests;
 using Applications.Features.LoanRequests.Queryies.GetLoanRequestDetailById;
 using Applications.Features.LoanRequests.Requests;
-using Applications.Features.Loans.Command.SaveLoanDisbursemenent;
 using Applications.Features.Loans.Dtos.Responses;
 using Applications.Responses.ViewModels.Loans.Requests;
-using Azure.Core;
 using Domains.Models.Identity;
 using Infrastructures.Authorizations;
 using Microsoft.AspNetCore.Authorization;
@@ -225,14 +224,14 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             }
         }
 
-        async Task SaveLoanRequest()
+        async Task SaveLoanRequestAccount()
         {
             if (!await ConfirmActionAsync("Do you want to save this request?"))
                 return;
 
-            var saveReq = new SaveLoanDisbursementDtoCreate(BranchId, CustomerId, LoanRequestId, memo);
+            var saveReq = new SaveLoanRequestDtoCreate(BranchId, CustomerId, LoanRequestId, memo, RequestStatus.Approved);
 
-            var command = new SaveLoanDisbursementCommand(saveReq);
+            var command = new SaveLoanRequestsCommand(saveReq);
 
             var rsp = await mediator.Send(command);
 
@@ -247,6 +246,31 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
                 NotificationService.Notify(NotificationSeverity.Error, rsp.GetMessage());
             }
         }
+
+        async Task SaveLoanRequestManager() 
+        {
+            if (!await ConfirmActionAsync("Do you want to save this request?"))
+                return;
+
+            var saveReq = new SaveLoanRequestDtoCreate(BranchId, CustomerId, LoanRequestId, memo, RequestStatus.Requested);
+
+            var command = new SaveLoanRequestsCommand(saveReq);
+
+            var rsp = await mediator.Send(command);
+
+            if (rsp.IsSuccess())
+            {
+                NotificationService.Notify(NotificationSeverity.Success, rsp.Value.Message!);
+
+                await RefreshDataAsync();
+            }
+            else
+            {
+                NotificationService.Notify(NotificationSeverity.Error, rsp.GetMessage());
+            }
+        }
+
+
 
         private async Task RefreshDataAsync()
         {

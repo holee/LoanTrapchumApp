@@ -4,4 +4,4 @@ using ErrorOr;
 
 namespace Applications.Features.LoanRequests.Command.ApprovedLoanRequest;
 
-public record DisburseLoanRequestCommand(AproveLoanDtoCreate Request) : IRequest<ErrorOr<RequestResult>>;
+public record ApprovedRequestCommand(AproveLoanDtoCreate Request) : IRequest<ErrorOr<RequestResult>>;

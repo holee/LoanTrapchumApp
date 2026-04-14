@@ -1,9 +1,6 @@
 ﻿using Applications.Commons.Mappers.LoanRequests;
 using Applications.Enumerations;
 using Applications.Features.Loans.Dtos.Responses;
-using Applications.Interfaces.Loans;
-using Applications.Responses;
-using Applications.Utils;
 using ErrorOr;
 
 namespace Applications.Features.LoanRequests.Command.SaveLoanRequest;

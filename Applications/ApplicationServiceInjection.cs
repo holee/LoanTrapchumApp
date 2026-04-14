@@ -19,6 +19,7 @@ using Applications.Features.Identity.Command.CreateNewUser;
 using Applications.Features.LoanPayments.Command.PayOff;
 using Applications.Features.LoanPayments.Dtos;
 using Applications.Features.LoanPayments.Queries.GetPaidSchedule;
+using Applications.Features.LoanRequests.Command.SaveLoanRequests;
 using Applications.Features.Loans.Command.SaveLoanDisbursemenent;
 using Applications.Features.Loans.Dtos;
 using Applications.Features.Loans.Dtos.Responses;
@@ -42,7 +43,7 @@ public static class ApplicationServiceInjection
         services.AddScoped<IRequestHandler<GetScheduleByIdQuery, ErrorOr<VSchedule>>, GetScheduleByIdQueryHandler>();
         services.AddScoped<IRequestHandler<PayOffCommand, ErrorOr<PayOffResult>>, PayOffCommandHandler>();
 
-        services.AddScoped<IRequestHandler<SaveLoanDisbursementCommand, ErrorOr<RequestResult>>, SaveLoanDisbursementCommandHandler>();
+        services.AddScoped<IRequestHandler<SaveLoanRequestByManagerCommand, ErrorOr<RequestResult>>, SaveLoanRequestByManagerCommandHandler>();
         services.AddScoped<IRequestHandler<GetScheduleDetailByIdQuery, ErrorOr<ScheduleDetailsDto>>, GetScheduleDetailByIdQueryHandler>();
         services.AddScoped<IRequestHandler<GetScheduleByIdQuery, ErrorOr<VSchedule>>, GetScheduleByIdQueryHandler>();
         services.AddScoped<IRequestHandler<GetDueScheduleByLoanIdQuery, Pager<VSchedule>>, GetDueScheduleByLoanIdQueryHandler>();
@@ -271,7 +272,7 @@ public static class ApplicationServiceInjection
         services.AddScoped<IRequestHandler<DeleteLoanRequestCollateralCommand, ErrorOr<string>>, DeleteLoanRequestCollateralCommandHandler>();
         services.AddScoped<IRequestHandler<DeleteLoanRequestDocumentCommand, ErrorOr<string>>, DeleteLoanRequestDocumentCommandHandler>();
         services.AddScoped<IRequestHandler<DeleteLoanRequestGuarantorCommand, ErrorOr<string>>, DeleteLoanRequestGuarantorCommandHandler>();
-        services.AddScoped<IRequestHandler<DisburseLoanRequestCommand, ErrorOr<RequestResult>>, ApprovedLoanRequestCommandHandler>();
+        services.AddScoped<IRequestHandler<ApprovedRequestCommand, ErrorOr<RequestResult>>, ApprovedLoanRequestCommandHandler>();
         services.AddScoped<IRequestHandler<AppliedLoanRequestCommand, ErrorOr<RequestResult>>, AppliedLoanRequestCommandHandler>();
         services.AddScoped<IRequestHandler<AddLoanRequestGuarantorCommand, ErrorOr<string>>, AddLoanRequestGuarantorCommandHandler>();
         services.AddScoped<IRequestHandler<AddLoanRequestDocumentsCommand, ErrorOr<string>>, AddLoanRequestDocumentsCommandHandler>();
@@ -287,6 +288,7 @@ public static class ApplicationServiceInjection
         services.AddScoped<IRequestHandler<GetLoanRequestByIdQuery, ErrorOr<VLoanRequests>>, GetLoanRequestByIdQueryHandler>();
         services.AddScoped<IRequestHandler<GetLoanRequestsWithCanDisburseQuery, Pager<VLoanRequests>>, GetLoanRequestsWithCanDisburseQueryHandler>();
         services.AddScoped<IRequestHandler<GetLoanRequestDocumentQuery, ErrorOr<IEnumerable<VLoanRequestsDocuments>>>, GetLoanRequestDocumentQueryHandler>();
+        services.AddScoped<IRequestHandler<SaveLoanRequestsCommand, ErrorOr<RequestResult>>, SaveLoanRequestsCommandHandler>();
 
 
         //Commands for Loans disubursed

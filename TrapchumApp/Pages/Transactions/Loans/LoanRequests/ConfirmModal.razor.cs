@@ -49,7 +49,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             {
                 isSaving = true;
 
-                var command = new DisburseLoanRequestCommand(model);
+                var command = new ApprovedRequestCommand(model);
 
                 var resp = await mediator.Send(command);
 
