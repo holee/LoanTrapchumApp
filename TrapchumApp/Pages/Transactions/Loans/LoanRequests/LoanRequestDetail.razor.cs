@@ -271,6 +271,11 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         }
 
 
+        void ApproveLoanRequest()
+        {
+            CreateLoanRequest();
+        }
+
 
         private async Task RefreshDataAsync()
         {
