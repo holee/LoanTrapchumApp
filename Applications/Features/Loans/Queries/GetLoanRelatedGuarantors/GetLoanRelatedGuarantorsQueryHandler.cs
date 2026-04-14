@@ -1,4 +1,6 @@
-﻿namespace Applications.Features.Loans.Queries.GetLoanRelatedGuarantors;
+﻿using Applications.Features.Loans.Dtos.Responses;
+
+namespace Applications.Features.Loans.Queries.GetLoanRelatedGuarantors;
 
 public sealed class GetLoanRelatedGuarantorsQueryHandler(ILoanService loanService) : IRequestHandler<GetLoanRelatedGuarantorsQuery, IEnumerable<VLoanDisbursementGuarantors>>
 {

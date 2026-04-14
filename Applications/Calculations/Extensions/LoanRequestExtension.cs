@@ -1,5 +1,5 @@
 ﻿using Applications.Features.LoanRequests.Requests;
-using Applications.Features.Loans.Requests;
+using Applications.Features.Loans.Dtos.Requests;
 using Applications.Responses.ViewModels.Loans.Requests;
 
 namespace Applications.Calculations

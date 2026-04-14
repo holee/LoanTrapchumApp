@@ -1,7 +1,6 @@
 using Applications.Calculations;
 using Applications.Features.Branches.Dtos;
 using Applications.Features.LoanPayments.Requests;
-using Applications.Features.Loans.Responses;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Radzen.Blazor;
 using TrapchumApp.Helpers.Extensions;
@@ -15,6 +14,7 @@ using Applications.Features.Loans.Queries.GetLoanById;
 using Applications.Features.Loans.Services;
 using Applications.Services.Loans;
 using Domains.Models.Loans;
+using Applications.Features.Loans.Dtos.Responses;
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments;
 
 public partial class SchedulesPage

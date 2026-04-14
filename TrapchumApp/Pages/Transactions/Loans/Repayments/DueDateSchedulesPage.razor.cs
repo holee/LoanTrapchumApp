@@ -5,7 +5,7 @@ using Applications.Extensions.NumberExtensions;
 using Applications.Features.Branches.Dtos;
 using Applications.Features.LoanPayments.Queries.GetLoanSchedulesByLoanIdAsPaging;
 using Applications.Features.LoanPayments.Requests;
-using Applications.Features.Loans.Responses;
+using Applications.Features.Loans.Dtos.Responses;
 using Applications.Features.Schedules.Queries.GetDueScheduleByLoanId;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Domains.Models.Loans;

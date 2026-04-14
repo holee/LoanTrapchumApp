@@ -8,28 +8,27 @@ using Mapster;
 using TrapchumApp.Helpers.Extensions;
 namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 {
-    public partial class ConfirmModal
+    public partial class ConfirmModal(ILogger<ConfirmModal> logger)
     {
         [CascadingParameter] private Task<AuthenticationState> AuthenticationState { get; set; } = default!;
 
         [Parameter] public string? CustomerId { get; set; }
         [Parameter] public int BranchId { get; set; } = 0;
         [Parameter] public string? LoanRequestId { get; set; }
-        [Parameter] public string? UserId { get; set; } = string.Empty;
+        private string? _userId { get; set; } = string.Empty;
 
         ApprovedRequest? Data = new();
 
         AproveLoanDtoCreate? model = new();
 
-        EditForm? refEditForm;
-
-
         protected override async Task OnInitializedAsync()
         {
-            if (!string.IsNullOrWhiteSpace(UserId))
+            if (!string.IsNullOrWhiteSpace(_userId))
             {
-                UserId = (await AuthenticationState).GetUserId();
+                _userId = (await AuthenticationState).GetUserId();
             }
+
+            logger.LogInformation("Initializing ConfirmModal for loan request with id {LoanRequestId} by user {UserId}", LoanRequestId, _userId);
 
             await base.OnInitializedAsync();
         }
@@ -38,15 +37,17 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
         async Task HandleFormRequest()
         {
-
-
-            if (!refEditForm!.EditContext!.Validate())
-                return;
+            if (model is null) return;
 
             var confirm = await DialogService.Confirm("Are you sure to aprove this loan request", "Loan Request");
 
-            if (confirm == true && model is not null)
+            if (confirm == false) return;
+
+            logger.LogInformation("Start to aprove loan request with id {LoanRequestId} by user {UserId}", LoanRequestId, _userId);
+
+            try
             {
+                isSaving = true;
 
                 var command = new DisburseLoanRequestCommand(model);
 
@@ -54,8 +55,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
                 if (resp.IsSuccess())
                 {
-
-                    var description = new LoanDescriptionsDtoCreate(model.Memo, UserId, LoanRequestId);
+                    var description = new LoanDescriptionsDtoCreate(model.Memo, _userId, LoanRequestId);
 
                     var cmd = new AddDescriptionCommand(description);
 
@@ -63,14 +63,30 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
                     NotificationService.Notify(NotificationSeverity.Success, resp.GetMessage());
 
+                    isSaving = false;
+
+                    logger.LogInformation("Successfully approved loan request with id {LoanRequestId} by user {UserId}", LoanRequestId, _userId);
+
                     DialogService.Close(true);
                 }
                 else
                 {
-
+                    
+                    logger.LogInformation("Failed to approve loan request with id {LoanRequestId} by user {UserId}. Error: {ErrorDescription}", LoanRequestId, _userId, resp.FirstError.Description);
+                   
                     NotificationService.Notify(NotificationSeverity.Error, resp.FirstError.Description);
                 }
             }
+            catch (Exception ex)
+            {
+                isSaving = false;
+                logger.LogError(ex, "Error while approving loan request with id {LoanRequestId} by user {UserId}", LoanRequestId, _userId);
+            }
+            finally
+            {
+                isSaving = false;
+            }
+
         }
 
         protected override async Task OnParametersSetAsync()

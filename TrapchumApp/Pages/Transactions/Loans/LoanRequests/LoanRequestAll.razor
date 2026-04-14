@@ -26,6 +26,7 @@
                 RowRender="@OnRowRender"
                 AllowColumnPicking="true"
                 CellContextMenu="@OnCellContextMenu"
+                Style="height:30rem;max-height:50rem;overflow:auto;margin:0;padding:0;"
                 ShowPagingSummary="true">
     <HeaderTemplate>
         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
@@ -122,7 +123,9 @@
     {
 
         if (Request is null) return;
+
         if (string.IsNullOrEmpty(Request.LoanRequestId)) return;
+
         var requestNowUrl = $"/App/Loans/{Request.LoanRequestId}/Requests/{Request.BranchId}/Branches/{Request.CustomerId}/Details";
         var checkloanRequestUrl = $"/App/Loans/{Request.LoanRequestId}/Requests/{Request.BranchId}/Branches/{Request.CustomerId}/Details";
         var loanRequestDetailsUrl = $"/App/Loans/{Request.LoanRequestId}/Requests/{Request.BranchId}/Branches/{Request.CustomerId}/Details";

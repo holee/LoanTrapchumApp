@@ -1,17 +1,5 @@
-﻿using Applications.Commons.Messages.Collaterals;
-using Applications.Features.Collaterals.Dtos;
-using Applications.Features.Loans.Responses;
-using Dapper;
-using Domains.Models.Collaterals;
-using ErrorOr;
-using System;
-using System.Collections.Generic;
+﻿using Dapper;
 using System.Data;
-using System.Linq;
-using System.Reactive.Joins;
-using System.Text;
-using System.Threading.Tasks;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Infrastructures.Implements.Extensions;
 

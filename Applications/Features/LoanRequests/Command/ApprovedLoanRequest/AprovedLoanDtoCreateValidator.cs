@@ -13,13 +13,18 @@ namespace Applications.Features.LoanRequests.Command.ApprovedLoanRequest
         public AprovedLoanDtoCreateValidator()
         {
             RuleFor(x => x.AprovedAmount).Cascade(CascadeMode.Stop)
-                                       .NotEmpty().WithMessage("Approved Amount is needed.")
-                                       .GreaterThan(0).WithMessage("Approved Amount is bigger than 0.");
+                                       .NotEmpty()
+                                            .WithMessage("Approved Amount is needed.")
+                                       .GreaterThan(0)
+                                            .WithMessage("Approved Amount is bigger than 0.");
             RuleFor(x => x.LoanRequestId).Cascade(CascadeMode.Stop)
-                                      .NotEmpty().WithMessage("Approved Amount is needed.");
+                                      .NotEmpty()
+                                        .WithMessage("Loan Request ID is needed.")
+                                       .NotNull()
+                                        .WithMessage("Loan Request ID cannot be null.");
             RuleFor(x => x.BranchId).Cascade(CascadeMode.Stop)
-                                      .NotEmpty().WithMessage("Approved Amount is needed.")
-                                      .GreaterThan(0).WithMessage("Approved Amount is bigger than 0.");
+                                      .NotEmpty().WithMessage("Branch ID is needed.")
+                                      .GreaterThan(0).WithMessage("Branch ID must be greater than 0.");
         }
 
     }

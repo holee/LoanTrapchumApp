@@ -2,13 +2,6 @@
 @using TrapchumApp.Helpers.Enums
 @using TrapchumApp.Helpers.Options
 @attribute [MustHasPermission(Modules.Customers, Feature.Read)]
-<style>
-    .rz-grid-table td .rz-cell-data {
-        line-height: 1.5rem;
-        font-size: 0.8rem;
-    }
-
-</style>
 <input type="hidden" @bind="@filterText" />
 <GridToolbar SearchChanged="SearchCustomer"
              CommandText="Add Customer"

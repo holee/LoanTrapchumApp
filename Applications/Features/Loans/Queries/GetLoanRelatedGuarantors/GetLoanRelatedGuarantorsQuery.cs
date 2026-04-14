@@ -1,5 +1,5 @@
 ﻿using Applications.Enumerations;
-using Applications.Features.Loans.Responses;
+using Applications.Features.Loans.Dtos.Responses;
 using Applications.Utils;
 
 namespace Applications.Features.Loans.Queries.GetLoanRelatedGuarantors;

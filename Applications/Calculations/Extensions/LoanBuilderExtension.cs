@@ -1,5 +1,5 @@
-﻿using Applications.Features.Loans.Mappers;
-using Applications.Features.Loans.Requests;
+﻿using Applications.Features.Loans.Dtos.Requests;
+using Applications.Features.Loans.Mappers;
 using Domains.Enumerations;
 using Domains.Models.Loans;
 

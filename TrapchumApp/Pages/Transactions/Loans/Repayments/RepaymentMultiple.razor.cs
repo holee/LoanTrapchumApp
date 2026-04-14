@@ -9,8 +9,8 @@ using Radzen;
 using Microsoft.AspNetCore.Components.Authorization;
 using Radzen.Blazor;
 using Applications.Features.Currencies.Responses;
-using Applications.Features.Loans.Responses;
 using Applications.Features.Branches.Dtos;
+using Applications.Features.Loans.Dtos.Responses;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments;
 

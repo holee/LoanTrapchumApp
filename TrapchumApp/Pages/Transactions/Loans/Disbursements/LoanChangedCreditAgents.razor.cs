@@ -5,10 +5,10 @@ using Applications.Responses.ViewModels.Customers;
 using Applications.Services.Lists;
 using Domains.Models.Identity;
 using Applications.Features.CreditAgents.Requests;
-using Applications.Features.Loans.Responses;
 using Applications.Features.Branches.Dtos;
 using Applications.Features.Branches.Queries.GetBranchAsPaging;
 using TrapchumApp.Services;
+using Applications.Features.Loans.Dtos.Responses;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 {

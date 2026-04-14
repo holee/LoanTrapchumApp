@@ -2,7 +2,7 @@
 using Applications.Commons.Messages.Collaterals;
 using Applications.Features.Collaterals.Dtos;
 using Applications.Features.Customers.Response;
-using Applications.Features.Loans.Responses;
+using Applications.Features.Loans.Dtos.Responses;
 using Applications.Interfaces.Customers;
 using Applications.Responses.Paginations;
 using Dapper;

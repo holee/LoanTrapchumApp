@@ -8,8 +8,9 @@ using Applications.Features.LoanRequests.Command.SaveEditLoanRequest;
 using Applications.Features.LoanRequests.Queryies.GetLoanRequestDetailById;
 using Applications.Features.LoanRequests.Requests;
 using Applications.Features.Loans.Command.SaveLoanDisbursemenent;
-using Applications.Features.Loans.Responses;
+using Applications.Features.Loans.Dtos.Responses;
 using Applications.Responses.ViewModels.Loans.Requests;
+using Azure.Core;
 using Domains.Models.Identity;
 using Infrastructures.Authorizations;
 using Microsoft.AspNetCore.Authorization;
@@ -28,7 +29,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         [Parameter] public string? CustomerId { get; set; }
         [Parameter, SupplyParameterFromQuery] public string? CreditAgentId { get; set; } = string.Empty;
 
-        VLoanRequests? data = new();
+        VLoanRequests? data;
 
         private RequestResult _result = new();
 
@@ -36,13 +37,26 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
         string? aprovedUserId = string.Empty;
 
-        bool success = false;
-
         bool canApprove = false;
 
         bool canAllow = false;
 
+        bool _isLoading = true;
+
+        int _dataVersion;
+
         ClaimsPrincipal? user;
+
+        private bool disableTextbox = false;
+
+        BadgeStyle StatusBadgeStyle => data?.StatusId switch
+        {
+            (int)RequestStatus.Approved => BadgeStyle.Success,
+            (int)RequestStatus.Completed => BadgeStyle.Info,
+            (int)RequestStatus.Denied => BadgeStyle.Danger,
+            (int)RequestStatus.Rechecked or (int)RequestStatus.Rechecking => BadgeStyle.Warning,
+            _ => BadgeStyle.Light
+        };
 
         protected override async Task OnInitializedAsync()
         {
@@ -52,55 +66,72 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
             await AppState.GetAuthenticatedUser(user);
 
-            await GetLoanRequestDetails(user);
+            await LoadDataAsync();
 
             await base.OnInitializedAsync();
         }
 
-        async Task CreateLoanRequest()
+        private async Task LoadDataAsync()
         {
-            var confirm = await DialogService.Confirm("Do you want to aprove this request?", "Loan Request");
+            _isLoading = true;
+
+            try
+            {
+                await GetLoanRequestDetails(user!);
+            }
+            finally
+            {
+                _isLoading = false;
+            }
+        }
+
+        private async Task<bool> ConfirmActionAsync(string message, string title = "Loan Request")
+        {
+            var confirm = await DialogService.Confirm(message, title);
 
             if (confirm == false)
             {
-                NotificationService.Notify(NotificationSeverity.Info, "Reuqest wa cancel.");
-
-                return;
+                NotificationService.Notify(NotificationSeverity.Info, "Request was cancelled.");
+                return false;
             }
 
+            return true;
+        }
+
+        async Task CreateLoanRequest()
+        {
+            if (!await ConfirmActionAsync("Do you want to approve this request?"))
+                return;
 
             var model = data?.MapToLoanRequestCreate();
-
-            model!.LoanRequestStatusRefId = (int)RequestStatus.Requested;
-
-            if (memo.IsNotNullOrEmpty() && model is not null)
-            {
-                var description = new LoanDescriptionsDtoCreate(memo, aprovedUserId, LoanRequestId);
-
-                model.LoanDescriptions.Add(description);
-            }
 
             if (model is null)
             {
                 NotificationService.Notify(NotificationSeverity.Error, "Loan request data is null.");
-
                 return;
+            }
+
+            model.LoanRequestStatusRefId = (int)RequestStatus.Requested;
+
+            if (memo.IsNotNullOrEmpty())
+            {
+                var description = new LoanDescriptionsDtoCreate(memo, aprovedUserId, LoanRequestId);
+                model.LoanDescriptions.Add(description);
             }
 
             var command = new SaveEditLoanRequestCommand(model);
 
             var rsp = await mediator.Send(command);
 
-            _result = rsp.Value with
-            {
-                Message = rsp.Value.Message,
-                Success = rsp.Value.Success
-            };
-
             if (!rsp.IsError)
             {
-                NotificationService.Notify(NotificationSeverity.Success, "Success");
+                _result = rsp.Value with
+                {
+                    Message = rsp.Value.Message,
+                    Success = rsp.Value.Success
+                };
 
+                NotificationService.Notify(NotificationSeverity.Success, "Success");
                 StateHasChanged();
             }
             else
@@ -109,10 +140,8 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             }
         }
 
-
         async Task GetLoanRequestDetails(ClaimsPrincipal user, bool include = true)
         {
-
             var query = new GetLoanRequestDetailByIdQuery(BranchId, CustomerId, LoanRequestId, include);
 
             var resp = await mediator.Send(query);
@@ -127,47 +156,27 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
                 canApprove = (await _authorizeService.AuthorizeAsync(user, data, new SameUserApprovedRequirement()))
                     .Succeeded;
 
-                success = data?.StatusId == (int)RequestStatus.Requested ? false : true;
+                disableTextbox = data?.StatusId == (int)RequestStatus.Approved;
 
-                disableTextbox = data?.StatusId == (int)RequestStatus.Approved ? true : false;
+                _dataVersion++;
             }
         }
 
-        private bool disableTextbox = false;
-
         async Task DisbruseLoanRequestNow()
         {
-            var options = new DialogOptions
-            {
-            };
-            var param = new Dictionary<string, object?>
-            {
-                { "LoanRequestId", LoanRequestId },
-                { "BranchId", BranchId },
-                { "CustomerId", CustomerId }
-            };
 
-            bool dialogueResult = await DialogService.OpenAsync<ConfirmModal>("Confirm", param!, options);
+            if (data is null) return;
 
-            if (dialogueResult && user is not null)
-            {
-                await GetLoanRequestDetails(user, true);
+            var disburseRequestLoanUrl = $"/App/Loans/{LoanRequestId}/Disbursements/{BranchId}/Branches/CreateNew?CustomerId={CustomerId}";
 
-                disableTextbox = true;
+            NavigationManager.NavigateTo(disburseRequestLoanUrl);
 
-                StateHasChanged();
-            }
         }
 
         async Task DeniedLoanRequest()
         {
-            var confirm = await DialogService.Confirm("Do you want to reject this request?", "Loan Request");
-
-            if (confirm == false)
-            {
-                NotificationService.Notify(NotificationSeverity.Info, "Reuqest wa cancel.");
+            if (!await ConfirmActionAsync("Do you want to reject this request?"))
                 return;
-            }
 
             var req = new DeniedRequestDtoCreate(BranchId, CustomerId, LoanRequestId, DateTime.UtcNow, memo);
 
@@ -184,6 +193,8 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
                 await mediator.Send(cmd);
 
                 NotificationService.Notify(NotificationSeverity.Success, rsp.Value.Message!);
+
+                await RefreshDataAsync();
             }
             else
             {
@@ -193,26 +204,20 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
         async Task RecheckedLoanRequest()
         {
-            var confirm = await DialogService.Confirm("Do you want to return back this request?", "Loan Request");
-
-            if (confirm == false)
-            {
-                NotificationService.Notify(NotificationSeverity.Info, "Reuqest wa cancel.");
-
+            if (!await ConfirmActionAsync("Do you want to return back this request?"))
                 return;
-            }
 
             var req = new RecheckedRequestDtoCreate(BranchId, CustomerId, LoanRequestId, DateTime.UtcNow, RequestStatus.Rechecked, memo);
 
-
             var command = new RecheckedLoanRequestCommand(req);
-
 
             var rsp = await mediator.Send(command);
 
             if (rsp.IsSuccess())
             {
                 NotificationService.Notify(NotificationSeverity.Success, rsp.Value.Message!);
+
+                await RefreshDataAsync();
             }
             else
             {
@@ -222,14 +227,8 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
         async Task SaveLoanRequest()
         {
-            var confirm = await DialogService.Confirm("Do you want to save this request?", "Loan Request");
-
-            if (confirm == false)
-            {
-                NotificationService.Notify(NotificationSeverity.Info, "Reuqest wa cancel.");
-
+            if (!await ConfirmActionAsync("Do you want to save this request?"))
                 return;
-            }
 
             var saveReq = new SaveLoanDisbursementDtoCreate(BranchId, CustomerId, LoanRequestId, memo);
 
@@ -240,10 +239,21 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             if (rsp.IsSuccess())
             {
                 NotificationService.Notify(NotificationSeverity.Success, rsp.Value.Message!);
+
+                await RefreshDataAsync();
             }
             else
             {
                 NotificationService.Notify(NotificationSeverity.Error, rsp.GetMessage());
+            }
+        }
+
+        private async Task RefreshDataAsync()
+        {
+            if (user is not null)
+            {
+                await GetLoanRequestDetails(user, true);
+                StateHasChanged();
             }
         }
     }

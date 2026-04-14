@@ -18,11 +18,11 @@ namespace Infrastructures.Implements
 {
     public class LoanScheduleService : ILoanScheduleService
     {
-        private readonly ILogger<LoanDisbursementRepository> _logger;
+        private readonly ILogger<LoanRepository> _logger;
         private readonly IDapperConnectionFactory _connectionFactory;
         private readonly IDbContextFactory<DataContext> _contextFactory;
         private readonly ICurrentUserService _currentUser;
-        public LoanScheduleService(ILogger<LoanDisbursementRepository> logger, IDapperConnectionFactory connectionFactory, IDbContextFactory<DataContext> contextFactory, ICurrentUserService currentUser)
+        public LoanScheduleService(ILogger<LoanRepository> logger, IDapperConnectionFactory connectionFactory, IDbContextFactory<DataContext> contextFactory, ICurrentUserService currentUser)
         {
             _logger = logger;
             _connectionFactory = connectionFactory;

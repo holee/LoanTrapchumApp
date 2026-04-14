@@ -10,75 +10,90 @@
 @using TrapchumApp.Pages.Lists.Customers.Activties
 @using TrapchumApp.Pages.Lists.Customers.Notes
 @using TrapchumApp.Services
-<PageTitle>Customer</PageTitle>
-<RadzenFieldset AllowCollapse="true" Collapsed="false">
-    <HeaderTemplate>
-        <RadzenIcon Icon="people" />
-    </HeaderTemplate>
-    <ChildContent>
-        <CustomerInfo Customer="@Customer" />
-        <RadzenStack AlignItems="AlignItems.Center"
-                     class="rz-my-2"
-                     Orientation="Orientation.Horizontal"
-                     JustifyContent="JustifyContent.Normal" Gap="1rem">
-            <AuthorizeView Policy="@Policies.UpdateCustomer">
-                <Authorized>
-                    <RadzenButton ButtonType="ButtonType.Button"
-                                  Size="ButtonSize.ExtraSmall"
-                                  Text="Edit"
-                                  Icon="edit"
-                                  Click="(()=>ShowEditCustomer(CustomerId))"
-                                  ButtonStyle="ButtonStyle.Success" />
-                </Authorized>
-            </AuthorizeView>
-            <AuthorizeView Policy="@Policies.DeleteCustomer">
-                <Authorized>
-                    <RadzenButton ButtonType="ButtonType.Button"
-                                  Size="ButtonSize.ExtraSmall"
-                                  Text="Delete"
-                                  Icon="delete"
-                                  Click="DeleteCustomer"
-                                  ButtonStyle="ButtonStyle.Danger">
-                    </RadzenButton>
-                </Authorized>
-            </AuthorizeView>
-        </RadzenStack>
-    </ChildContent>
-</RadzenFieldset>
-<RadzenCard class="rz-mt-2">
-    <RadzenTabs RenderMode="TabRenderMode.Server">
-        <Tabs>
-            <RadzenTabsItem Text="Loan History">
-                <LoanHistory CustomerId="@CustomerId" @key="@Guid.NewGuid().ToString("N")" />
-            </RadzenTabsItem>
-            <RadzenTabsItem Text="Income & Expense">
-                <CustomerProfit CustomerId="@CustomerId" />
-            </RadzenTabsItem>
-            <RadzenTabsItem Text="Collaterals">
-                <CollateralsCustomer ShowCommand="true"
-                                     ShowAcction="true"
-                                     CustomerId="@CustomerId" ShowAdd="true" @key="@Guid.NewGuid().ToString("N")" />
-            </RadzenTabsItem>
-            <RadzenTabsItem Text="Loan Request">
-                <CustomerLoanRequest CustomerId="@CustomerId"
-                                     BranchId="@BranchId"
-                                     _userId="@_userId" />
-            </RadzenTabsItem>
-            <RadzenTabsItem Text="Activities">
-                <CustomerActivities CustomerId="@CustomerId" ShowAdd="true" ShowCommand="true" @key="@Guid.NewGuid().ToString("N")" />
-            </RadzenTabsItem>
-            <RadzenTabsItem Text="Notes">
-                <CustomerNotes CustomerId="@CustomerId" ShowCommand="true" ShowAdd="true" @key="@Guid.NewGuid().ToString("N")"></CustomerNotes>
-            </RadzenTabsItem>
-        </Tabs>
-    </RadzenTabs>
-</RadzenCard>
-<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
-             Gap="1rem"
-             class="rz-p-1 rz-my-2"
-             JustifyContent="JustifyContent.End">
-    <RadzenButton Icon="@IconNames.Close"
-                  Click="CloseTab"
-                  Text="Close"
-                  ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.ExtraSmall" />
-</RadzenStack>
+<PageTitle>Customer Details</PageTitle>
+@attribute [StreamRendering]
+@if (_isLoading)
+{
+    <RadzenStack AlignItems="AlignItems.Center"
+                 JustifyContent="JustifyContent.Center"
+                 Style="min-height:20rem;">
+        <RadzenProgressBarCircular ShowValue="false"
+                                   Mode="ProgressBarMode.Indeterminate"
+                                   Size="ProgressBarCircularSize.Medium" />
+        <RadzenText TextStyle="TextStyle.Body2"
+                    class="rz-color-base-600">Loading customer...</RadzenText>
+    </RadzenStack>
+}
+else
+{
+    <RadzenFieldset AllowCollapse="true" Collapsed="false">
+        <HeaderTemplate>
+            <RadzenIcon Icon="people" />
+        </HeaderTemplate>
+        <ChildContent>
+            <CustomerInfo Customer="@Customer" />
+            <RadzenStack AlignItems="AlignItems.Center"
+                         class="rz-p-2 rz-border-radius-2"
+                         Style="background: linear-gradient(135deg, var(--rz-base-200), var(--rz-base-300)); border: 1px solid var(--rz-base-400); box-shadow: 0 1px 3px rgba(0,0,0,0.08);"
+                         Orientation="Orientation.Horizontal"
+                         JustifyContent="JustifyContent.Normal" Gap="1rem">
+                <AuthorizeView Policy="@Policies.UpdateCustomer">
+                    <Authorized>
+                        <RadzenButton ButtonType="ButtonType.Button"
+                                      Size="ButtonSize.ExtraSmall"
+                                      Text="Edit"
+                                      Icon="edit"
+                                      Click="(()=>ShowEditCustomer(CustomerId))"
+                                      ButtonStyle="ButtonStyle.Success" />
+                    </Authorized>
+                </AuthorizeView>
+                <AuthorizeView Policy="@Policies.DeleteCustomer">
+                    <Authorized>
+                        <RadzenButton ButtonType="ButtonType.Button"
+                                      Size="ButtonSize.ExtraSmall"
+                                      Text="Delete"
+                                      Icon="delete"
+                                      Click="DeleteCustomer"
+                                      ButtonStyle="ButtonStyle.Danger">
+                        </RadzenButton>
+                    </Authorized>
+                </AuthorizeView>
+            </RadzenStack>
+        </ChildContent>
+    </RadzenFieldset>
+    <RadzenCard class="rz-mt-2">
+        <RadzenTabs RenderMode="TabRenderMode.Server">
+            <Tabs>
+                <RadzenTabsItem Text="Loan History">
+                    <LoanHistory CustomerId="@CustomerId" @key="@Guid.NewGuid().ToString("N")" />
+                </RadzenTabsItem>
+                <RadzenTabsItem Text="Income & Expense">
+                    <CustomerProfit CustomerId="@CustomerId" />
+                </RadzenTabsItem>
+                <RadzenTabsItem Text="Collaterals">
+                    <CollateralsCustomer ShowCommand="true"
+                                         ShowAcction="true"
+                                         CustomerId="@CustomerId" ShowAdd="true" @key="@Guid.NewGuid().ToString("N")" />
+                </RadzenTabsItem>
+                <RadzenTabsItem Text="Loan Request">
+                    <CustomerLoanRequest CustomerId="@CustomerId" BranchId="@BranchId" />
+                </RadzenTabsItem>
+                <RadzenTabsItem Text="Activities">
+                    <CustomerActivities CustomerId="@CustomerId" ShowAdd="true" ShowCommand="true" @key="@Guid.NewGuid().ToString("N")" />
+                </RadzenTabsItem>
+                <RadzenTabsItem Text="Notes">
+                    <CustomerNotes CustomerId="@CustomerId" ShowCommand="true" ShowAdd="true" @key="@Guid.NewGuid().ToString("N")"></CustomerNotes>
+                </RadzenTabsItem>
+            </Tabs>
+        </RadzenTabs>
+    </RadzenCard>
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
+                 Gap="1rem"
+                 class="rz-p-1 rz-my-2"
+                 JustifyContent="JustifyContent.End">
+        <RadzenButton Icon="@IconNames.Close"
+                      Click="CloseTab"
+                      Text="Close"
+                      ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.ExtraSmall" />
+    </RadzenStack>
+}

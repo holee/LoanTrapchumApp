@@ -1,5 +1,5 @@
 using Applications.Features.Guarantor.Dtos;
-using Applications.Features.Loans.Responses;
+using Applications.Features.Loans.Dtos.Responses;
 using Applications.Responses.ViewModels.Loans.Disbursements;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Applications.Services.Lists;

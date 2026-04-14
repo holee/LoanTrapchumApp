@@ -6,12 +6,9 @@ using Applications.Extensions.NumberExtensions;
 using Applications.Features.Branches.Dtos;
 using Applications.Features.LoanPayments.Queries.GetLoanSchedulesByLoanIdAsPaging;
 using Applications.Features.LoanPayments.Requests;
+using Applications.Features.Loans.Dtos.Responses;
 using Applications.Features.Loans.Queries.GetLoanById;
-using Applications.Features.Loans.Responses;
-using Applications.Features.Loans.Services;
-using Applications.Features.Schedules.Queries.GetDueScheduleByLoanId;
 using Applications.Responses.ViewModels.Loans.Schedules;
-using Applications.Services.Loans;
 using Domains.Models.Loans;
 using Radzen.Blazor;
 using TrapchumApp.Helpers.Extensions;
@@ -20,19 +17,6 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments;
 
 public partial class RecievePaymentPage
 {
-
-    private readonly ILoanServiceImpl _loanService;
-
-    private readonly ILoanScheduleServiceImpl _scheduleService;
-
-    public RecievePaymentPage(ILoanServiceImpl loanService, ILoanScheduleServiceImpl loanScheduleService)
-    {
-        _loanService = loanService;
-
-        _scheduleService = loanScheduleService;
-
-    }
-
     [Parameter] public string? LoanId { get; set; }
     [Parameter] public int BranchId { get; set; }
     [Parameter, SupplyParameterFromQuery] public string? CreditAgentId { get; set; }

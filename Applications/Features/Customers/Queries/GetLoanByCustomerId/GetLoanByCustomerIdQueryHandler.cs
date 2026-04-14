@@ -1,4 +1,5 @@
-﻿using Applications.Interfaces.Customers;
+﻿using Applications.Features.Loans.Dtos.Responses;
+using Applications.Interfaces.Customers;
 
 namespace Applications.Features.Customers.Queries.GetLoanByCustomerId;
 

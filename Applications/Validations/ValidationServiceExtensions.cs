@@ -16,7 +16,7 @@ using Applications.Features.Identity.Roles.Requests;
 using Applications.Features.Identity.Users;
 using Applications.Features.Ledgers.Dto;
 using Applications.Features.LoanRequests.Requests;
-using Applications.Features.Loans.Requests;
+using Applications.Features.Loans.Dtos.Requests;
 using Applications.Features.Settings.Requests;
 using Applications.Features.Settings.Validations;
 using Applications.Requests.Validations.Auths;

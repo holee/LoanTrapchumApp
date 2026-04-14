@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
 using QuestPDF.Infrastructure;
+using TrapchumApp;
 using TrapchumApp.Components;
 using TrapchumApp.Hubs;
 using TrapchumApp.Services;
@@ -75,6 +76,8 @@ app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 app.MapControllers();
 
 await app.MapAdditionalIdentityEndpoints();
+
+app.MapUploadFileEndpoints();
 
 app.MapHub<AppNotificationHub>("/hubs/notifications");
 

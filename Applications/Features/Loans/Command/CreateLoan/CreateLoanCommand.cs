@@ -1,5 +1,5 @@
-﻿using Applications.Features.Loans.Requests;
-using Applications.Features.Loans.Responses;
+﻿using Applications.Features.Loans.Dtos.Requests;
+using Applications.Features.Loans.Dtos.Responses;
 using Applications.Utils;
 using ErrorOr;
 

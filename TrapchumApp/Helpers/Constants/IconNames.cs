@@ -97,5 +97,12 @@
         public const string AssignmentInd = "assignment_ind";
         public const string Pdf = "picture_as_pdf";
         public const string Excel = "picture_as_pdf";
+        public const string SelectAll = "select_all"; 
+        public const string Deselect = "deselect";
+         public const string Warning = "warning";
+         public const string Error = "error";
+         public const string Success = "success";
+         public const string InfoOutline = "info_outline";
+         public const string HelpOutline = "help_outline";
     }
 }

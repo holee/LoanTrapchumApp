@@ -10,11 +10,11 @@ using Radzen;
 using Microsoft.AspNetCore.Components.Authorization;
 using Radzen.Blazor;
 using Applications.Features.Currencies.Responses;
-using Applications.Features.Loans.Responses;
 using Applications.Features.Branches.Dtos;
 using Applications.Features.Branches.Queries.GetBranchByUser;
 using TrapchumApp.Helpers.Extensions;
 using Applications.Features.Branches.Queries.GetBranchsByUser;
+using Applications.Features.Loans.Dtos.Responses;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 {

@@ -1,6 +1,7 @@
-﻿@using Applications.Features.Loans.Responses
+﻿@using Applications.Features.Loans.Dtos.Responses
 @using Applications.Responses.ViewModels.Loans
 @using TrapchumApp.Pages.Transactions.Loans.Menu
+<PageTitle>All Loans</PageTitle>
 <GridToolbar SearchChanged="@TextLoanSearchChanged">
     <LeftChildren>
         <RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal">
@@ -47,6 +48,7 @@
                 RowRender="@OnRowRender"
                 CellContextMenu="@ContextMenuClick"
                 PageSizeOptions="@StorageConstant.PageSizeOptions"
+                Style="height:30rem;max-height:40rem;overflow:auto;margin:0;padding:0;"
                 AllowPaging="true">
     <Columns>
         <RadzenDataGridColumn Context="p"
@@ -165,6 +167,7 @@
     private string _getLoanDetailsUrl = "";
     private string _getLoanWriteOffUrl = "";
     private string _loanPayOffUrl = "";
+    private string _loanCollateralWidthrawUrl = "";
 
     void GetLoanDetails(VLoanDisbursments? p)
     {
@@ -242,7 +245,8 @@
 
         _loanPayOffUrl = $"/App/Loan/{p.LoanId}/Branches/{p.BranchId}/loan-payoff?currencyId={p.CurrencyId}";
 
-        
+        _loanCollateralWidthrawUrl = $"/App/Loans/{p.LoanId}/WidthrwalCollateral/{p.BranchId}/Branches";
+
         ContextMenuService.Open(args, ds => @<RadzenMenu Style="font-size:0.8rem;">
             <RadzenMenuItem Icon="money"
                             Path="@_getPaymentSchedulesUrl"
@@ -267,6 +271,9 @@
             <RadzenMenuItem Icon="info"
                             Path="@_getLoanDetailsUrl"
                             Text="Schedule Details"></RadzenMenuItem>
+            <RadzenMenuItem Icon="info"
+                            Path="@_loanCollateralWidthrawUrl"
+                            Text="Widtraw Collaterals"></RadzenMenuItem>
             <RadzenMenuItem Icon="file_download"
                             Click="@(()=>DownLoadScheduleAsExcel(p))"
                             Text="Export Loan to Excel" />
@@ -304,6 +311,7 @@
             new ContextMenuItem { Text = "Pay Off", Value="7",Icon="money",Disabled=!bState.CanPayOff},
             new ContextMenuItem { Text = "Change Credit Agent", Value="5",Icon="find_replace",Disabled=!bState.IsManager},
             new ContextMenuItem { Text = "Pre Paid", Value="6",Icon="money",Disabled=!bState.CanRecievePayment},
+            new ContextMenuItem { Text = "Widthraw Collaterals", Value="8",Icon="remove"},
             new ContextMenuItem { Text = "Export As Excel", Value="3", Icon="file_download"},
             new ContextMenuItem { Text = "Export As Pdf", Value="4", Icon="picture_as_pdf"},
         }, (e) => DoContextMenuAction(e, args.Data));
@@ -316,6 +324,8 @@
         if (e.Value is null) return;
 
         if (data is null) return;
+
+        _loanCollateralWidthrawUrl = $"/App/Loans/{data.LoanId}/WidthrwalCollateral/{data.BranchId}/Branches";
 
         switch (e.Value)
         {
@@ -337,37 +347,15 @@
             case "7":
                 NavigationManager.NavigateTo($"/App/Loans/{data.LoanId}/Branches/{data.BranchId}/loan-payoff?currencyId={data.CurrencyId}");
                 break;
+            case "8":
+                NavigationManager.NavigateTo(_loanCollateralWidthrawUrl);
+                break;
             default:
                 NavigationManager.NavigateTo($"App/Loans/Disbursments/Credit-Agent/{data.BranchId}/Branches?CreditAgentId={data.CreditAgentRefId}");
                 break;
         }
     }
 
-    // {
-            
-
-    //     if (int.TryParse(e.Value!.ToString(), out var selectedId))
-    //     {
-    //         switch (selectedId)
-    //         {
-    //             case 1:
-    //                 GetPaymentSchedules(args.Data);
-    //                 break;
-    //             case 2:
-    //                 GetLoanDetails(args.Data);
-    //                 break;
-    //             case 3:
-    //                 _ = DownLoadScheduleAsExcel(args.Data);
-    //                 break;
-    //             case 4:
-    //                 _ = DownLoadScheduleAsPdf(args.Data);
-    //                 break;
-    //             default:
-    //                 NavigationManager.NavigateTo($"App/Loans/Disbursments/Credit-Agent/{args.Data.BranchId}/Branches?CreditAgentId={args.Data.CreditAgentRefId}");
-    //                 break;
-    //         }
-                
-    //     }
-    // });
+   
 }
 

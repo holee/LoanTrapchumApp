@@ -4,7 +4,7 @@
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
 @using Applications.Features.LoanRequests.Interfaces
-@using Applications.Features.Loans.Responses
+@using Applications.Features.Loans.Dtos.Responses
 @using Applications.Responses.ViewModels.Loans
 @using TrapchumApp.Services
 <table class="table table-sm table-bordered">
@@ -43,7 +43,7 @@
             <th></th>
             <th class="text-end">
                 @SelectedRepayment?.LeftPrinciple!.Value.Format(CurrencyId)
-             </th>
+            </th>
             <th class="text-end">
                 @SelectedRepayment?.LeftInterestAmount!.Value.Format(CurrencyId)
             </th>
@@ -58,35 +58,13 @@
 
 @code {
     [Parameter] public long LoanId { get; set; } = 0;
-    [Parameter] public int  BranchId { get; set; } = 0; 
+    [Parameter] public int BranchId { get; set; } = 0;
     [Parameter] public int InstallmentNo { get; set; }
     [Parameter] public int CurrencyId { get; set; } = 1;
     VSchedule SelectedRepayment { get; set; } = new();
     IEnumerable<VLoanRepaymentLine> VLoanRepaymentLines = [];
     protected override async Task OnInitializedAsync()
     {
-        try
-        {
-            // var responseResult = await _scheduleService.GetCustomerPayementScheduleLines(LoanId, InstallmentNo);
-
-            // if (responseResult.IsSuccess)
-            // {
-            //     VLoanRepaymentLines = responseResult.Data!;
-            // }
-
-            // var scheduleResponse = await _scheduleService.GetLoanScheduleByIdAsync(LoanId, BranchId, InstallmentNo);
-
-            // if (scheduleResponse.IsSuccess)
-            // {
-            //     SelectedRepayment = scheduleResponse.Data!;
-            // }
-
-            await base.OnInitializedAsync();
-        }
-        catch (Exception ex)
-        {
-            NotificationService.Notify(NotificationSeverity.Error, ex.Message);
-        }
-
+        await base.OnInitializedAsync();
     }
 }

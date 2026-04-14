@@ -2,10 +2,14 @@
 using Applications.Features.Customers.Commands.DeactivateCustomer;
 using Applications.Features.Customers.Commands.DeleteCustomer;
 using Applications.Features.Customers.Commands.EditCustomer;
+using Applications.Features.Customers.Dto;
 using Applications.Features.Customers.Queries.GetActiveLoanCustomer;
 using Applications.Features.Customers.Queries.GetCustomerById;
+using Applications.Features.Customers.Queries.GetCustomerCollateralLine;
 using Applications.Features.Customers.Queries.GetCustomerDetailById;
 using Applications.Features.Customers.Queries.GetLoanByCustomerId;
+using Applications.Features.Customers.Queries.GetRequestByCustomerId;
+using Applications.Features.Customers.Queries.GetUpdateCustomerById;
 using Applications.Features.Holidays.Command.ActivateOrDeactivate;
 using Applications.Features.Holidays.Command.CreateHoliday;
 using Applications.Features.Holidays.Queries.GetActiveHolidays;
@@ -16,6 +20,9 @@ using Applications.Features.LoanPayments.Command.PayOff;
 using Applications.Features.LoanPayments.Dtos;
 using Applications.Features.LoanPayments.Queries.GetPaidSchedule;
 using Applications.Features.Loans.Command.SaveLoanDisbursemenent;
+using Applications.Features.Loans.Dtos;
+using Applications.Features.Loans.Dtos.Responses;
+using Applications.Features.Loans.Queries.GetLoanCollaterals;
 using Applications.Features.Schedules.Dto;
 using Applications.Features.Schedules.Queries.GetDueScheduleByLoanId;
 using Applications.Features.Schedules.Queries.GetScheduleById;
@@ -27,6 +34,10 @@ public static class ApplicationServiceInjection
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
+        services.AddValidatorsFromAssemblyContaining<GetCollateralLineDetailQueryValidator>();
+        services.AddScoped<IMediator, SimpleMediator>();
+
+
         services.AddScoped<IRequestHandler<GetPaidScheduleQuery, ErrorOr<IEnumerable<VSchedule>>>, GetPaidScheduleQueryHandler>();
         services.AddScoped<IRequestHandler<GetScheduleByIdQuery, ErrorOr<VSchedule>>, GetScheduleByIdQueryHandler>();
         services.AddScoped<IRequestHandler<PayOffCommand, ErrorOr<PayOffResult>>, PayOffCommandHandler>();
@@ -170,8 +181,7 @@ public static class ApplicationServiceInjection
 
 
 
-        services.AddValidatorsFromAssemblyContaining<GetCollateralLineDetailQueryValidator>();
-        services.AddScoped<IMediator, SimpleMediator>();
+
 
 
         services.AddScoped<IRequestHandler<GetCurrencyDetailsByIdQuery, ErrorOr<VCurrenciesList>>, GetCurrencyDetailsByIdQueryHandler>();
@@ -189,6 +199,10 @@ public static class ApplicationServiceInjection
         services.AddScoped<IRequestHandler<GetCollateralDetailQuery, ErrorOr<VCustomerCollaterals>>, GetCollateralDetailQueryHandler>();
         services.AddScoped<IRequestHandler<GetCollateralLineByIdEditQuery, ErrorOr<CollateralLineDtoCreate>>, GetCollateralLineByIdQueryEditHandler>();
         services.AddScoped<IRequestHandler<GetCollateralLineAsPagingQuery, Pager<VCollateralLines>>, GetColleralLineAsPagingQueryHandler>();
+        services.AddScoped<IRequestHandler<GetCustomerCollateralLinesQuery, Pager<VCollateralLines>>, GetCustomerCollateralLinesQueryHandler>();
+
+
+
 
         ///Activities
         services.AddScoped<IRequestHandler<DeleteActivityCommand, ErrorOr<bool>>, DeleteActivityCommandHandler>();
@@ -239,7 +253,9 @@ public static class ApplicationServiceInjection
         services.AddScoped<IRequestHandler<DeleteCustomerCommand, DeleteResult>, DeleteCustomerCommandHandler>();
         services.AddScoped<IRequestHandler<DeactivateCustomerCommand, ErrorOr<bool>>, DeactivateCustomerCommandHandler>();
         services.AddScoped<IRequestHandler<GetCustomerDetailByIdQuery, ErrorOr<VCustomerDetails>>, GetCustomerDetailByIdQueryHandler>();
-        services.AddScoped<IRequestHandler<GetLoanByCustomerIdQuery, Pager<VLoanDisbursments>>, GetLoanByCustomerIdQueryHandler>(); 
+        services.AddScoped<IRequestHandler<GetLoanByCustomerIdQuery, Pager<VLoanDisbursments>>, GetLoanByCustomerIdQueryHandler>();
+        services.AddScoped<IRequestHandler<GetUpdateCustomerByIdQuery, ErrorOr<EntityCustomerCreate>>, GetUpdateCustomerByIdQueryHandler>();
+        services.AddScoped<IRequestHandler<GetRequestByCustomerIdQuery, Pager<VLoanRequests>>, GetRequestByCustomerIdQueryHandler>();
 
 
         services.AddScoped<IRequestHandler<CreateIncomeExpenseCommand, ErrorOr<int>>, CreateIncomeExpenseCommandHandler>();
@@ -277,6 +293,7 @@ public static class ApplicationServiceInjection
         services.AddScoped<IRequestHandler<GetLoanRelatedGuarantorsQuery, IEnumerable<VLoanDisbursementGuarantors>>, GetLoanRelatedGuarantorsQueryHandler>();
         services.AddScoped<IRequestHandler<GetLoanRelatedDocumentsQuery, IEnumerable<VLoanDisbursementDocuments>>, GetLoanRelatedDocumentsQueryHandler>();
         services.AddScoped<IRequestHandler<GetLoanRelatedCollateralsQuery, IEnumerable<VLoanDisbursementCollateral>>, GetLoanRelatedCollateralsQueryHandler>();
+        services.AddScoped<IRequestHandler<GetLoanCollateralsQuery, Pager<VLoanCollateral>>, GetLoanCollateralsQueryHandler>();
 
 
 

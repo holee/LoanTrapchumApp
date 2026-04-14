@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using Applications.Features.Loans.Dtos.Responses;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Applications.Responses.ViewModels.Employees;
 

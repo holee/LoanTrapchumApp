@@ -1,14 +1,11 @@
 ﻿using Applications.Features.Branches.Dtos;
+using Applications.Features.Loans.Dtos.Responses;
 using Applications.Features.Loans.Queries.GetLoanSchedulesByPaymentDate;
-using Applications.Features.Loans.Responses;
 using Applications.Features.Loans.Services;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Services.Loans;
 using Domains.Models.Identity;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
-using Radzen;
 using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments

@@ -1,4 +1,6 @@
-﻿namespace Applications.Features.Loans.Queries.GetLoanRelatedDocuments;
+﻿using Applications.Features.Loans.Dtos.Responses;
+
+namespace Applications.Features.Loans.Queries.GetLoanRelatedDocuments;
 
 public sealed class GetLoanRelatedDocumentsQueryHandler(ILoanService loanService) : IRequestHandler<GetLoanRelatedDocumentsQuery, IEnumerable<VLoanDisbursementDocuments>>
 {

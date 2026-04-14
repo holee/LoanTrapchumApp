@@ -114,13 +114,13 @@ namespace Infrastructures
             services.AddScoped<ILoanProductService, LoanProductService>();
             services.AddScoped<ILoanPaymentService, LoanPaymentRepository>();
             services.AddScoped<Applications.Interfaces.Loans.ILoanScheduleService, LoanScheduleService>();
-            services.AddScoped<ILoanService, LoanDisbursementRepository>();
+            services.AddScoped<ILoanService, LoanRepository>();
             services.AddScoped<ILoanCategoryService, LoanCategoryService>();
             services.AddScoped<ILoanRequestService, LoanRequestRepository>();
             services.AddScoped<ILoanReportService, LoanReportService>();
             services.AddScoped<ISalutationService, SalutaionService>();
             services.AddScoped<INationalityService, NationalityService>();
-            services.AddScoped<IFileUploadService, FileUploadService>();
+            services.AddScoped<IFileUploadService, FileUploadRepository>();
             services.AddScoped<IVendorService, VendorService>();
             services.AddScoped<IProvinceService, ProvinceService>();
             services.AddScoped<IDistrictService, DistrictService>();

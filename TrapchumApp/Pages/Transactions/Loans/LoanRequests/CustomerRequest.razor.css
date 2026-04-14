@@ -1,0 +1,53 @@
+::deep .customer-info {
+    font-family: kh_siemreap, 'Khmer OS Siemreap', sans-serif;
+}
+
+::deep .info-section {
+    padding: 0.75rem 0;
+}
+
+::deep .info-section + .info-section {
+    border-top: 1px solid var(--rz-base-200);
+}
+
+::deep .info-section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--rz-text-color);
+    margin-bottom: 0.75rem;
+}
+
+::deep .info-section-title .rzi {
+    font-size: 1rem;
+    color: var(--rz-primary);
+}
+
+::deep .info-label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--rz-text-secondary-color);
+    margin-bottom: 0.15rem;
+    font-family: kh_siemreap, 'Khmer OS Siemreap', sans-serif;
+}
+
+::deep .info-value {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--rz-text-color);
+    min-height: 1.25rem;
+}
+
+::deep .info-value.income {
+    color: var(--rz-success);
+    font-weight: 600;
+}
+
+::deep .info-value.expense {
+    color: var(--rz-danger);
+    font-weight: 600;
+}

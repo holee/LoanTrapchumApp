@@ -1,6 +1,6 @@
 ﻿using Applications.Enumerations;
 using Applications.Extensions.Enums;
-using Applications.Features.Loans.Requests;
+using Applications.Features.Loans.Dtos.Requests;
 using Domains.Enumerations;
 using Domains.Models.Loans;
 using Domains.Models.Transaction;

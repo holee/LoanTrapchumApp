@@ -1,6 +1,6 @@
 ﻿using Applications.Enumerations;
 using Applications.Extensions.DateTimes;
-using Applications.Features.Loans.Requests;
+using Applications.Features.Loans.Dtos.Requests;
 using Domains.Enumerations;
 using Domains.Models.Loans;
 

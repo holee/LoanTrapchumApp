@@ -1,4 +1,5 @@
 ﻿using Applications.Enumerations;
+using Applications.Features.Loans.Dtos.Responses;
 
 namespace Applications.Features.Loans.Queries.GetLoanByBranchId;
 

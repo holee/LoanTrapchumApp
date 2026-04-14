@@ -2,6 +2,10 @@
 {
     public sealed class FileModel
     {
+        public FileModel()
+        {
+            
+        }
         public FileModel(string originalName, string? fileName, string? fileUrl)
         {
             OriginalName = originalName;

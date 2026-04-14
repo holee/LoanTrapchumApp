@@ -1,7 +1,8 @@
 ﻿using Applications.Enumerations;
 using Applications.Features.CreditAgents.Requests;
+using Applications.Features.Loans.Dtos.Requests;
+using Applications.Features.Loans.Dtos.Responses;
 using Applications.Features.Loans.Mappers;
-using Applications.Features.Loans.Requests;
 using Applications.Interfaces.Lists;
 using Domains.Models.Lists.CreditAgents;
 using Domains.Models.Loans;

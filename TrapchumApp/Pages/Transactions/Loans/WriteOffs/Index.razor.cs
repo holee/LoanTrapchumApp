@@ -1,10 +1,7 @@
 using Applications.Features.Branches.Dtos;
-using Applications.Features.Loans.Responses;
+using Applications.Features.Loans.Dtos.Responses;
 using Applications.Features.Loans.Services;
 using Applications.Responses.Paginations;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
-using Radzen;
 
 namespace TrapchumApp.Pages.Transactions.Loans.WriteOffs
 {

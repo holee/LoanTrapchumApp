@@ -5,77 +5,104 @@
 @using Applications.Features.Employees
 @using Applications.Features.LoanRequests.Interfaces
 @using TrapchumApp.Services
-<div class="table-responsive rz-background-color-base-200 rz-p-2 rz-m-0">
-    <EditForm @ref="@refEditForm" Model="@model">
-        <FluentValidationValidator />
-        <table class="table-sm">
-            <tbody>
-                <tr>
-                    <th>
-                        <input type="hidden" @bind="model!.CustomerId" />
-                        <input type="hidden" @bind="model!.LoanRequestId" />
-                        <input type="hidden" @bind="model!.BranchId" />
-                        <input type="hidden" @bind="model!.AdminFeeAmount" />
-                        Request Amount
-                    </th>
-                    <td>
-                        <RadzenText TextAlign="TextAlign.Right"
-                                    Text="@($"{Data?.RequestAmount}")" TagName="TagName.P" />
-                    </td>
-                </tr>
-                <tr>
-                    <th>Approve Amount</th>
-                    <td>
-                        <TCNumbers @bind-Value="model!.AprovedAmount" Min="0" Format="@currencyFormat" />
-                        <ValidationMessage For="() => model.AprovedAmount" />
-                    </td>
-                </tr>
-                <tr>
-                    <th>Admin Fee</th>
-                    <td>
-                        <RadzenText TextAlign="TextAlign.Right"
-                                    Text="@($"{Data?.AdminFeeAmount}")"
-                                    TagName="TagName.P" />
-                    </td>
-                </tr>
-                <tr>
-                    <th>Customer</th>
-                    <td>@Data?.AltName</td>
-                </tr>
-                <tr>
-                    <th>Request By</th>
-                    <td>@Data?.Summiter</td>
-                </tr>
-                <tr>
-                    <th>Branch</th>
-                    <td>@Data?.BranchName</td>
-                </tr>
-                <tr>
-                    <th>Accept By</th>
-                    <td>@Data?.AprovedBy</td>
-                </tr>
-                <tr>
-                    <th> Note</th>
-                    <td>
-                        <RadzenTextArea Style="resize:none;" class="rz-w-100" @bind-Value="model.Memo" />
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-        <RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End"
-                     Orientation="Orientation.Horizontal">
-            <RadzenButton Text="Save"
-                          ButtonStyle="ButtonStyle.Success"
-                          Click="HandleFormRequest"
-                          Size="ButtonSize.ExtraSmall"
-                          Icon="@IconNames.Save"></RadzenButton>
-            <RadzenButton Text="Close"
-                          ButtonStyle="ButtonStyle.Danger"
-                          Size="ButtonSize.ExtraSmall"
-                          Variant="Variant.Filled"
-                          Click="@(()=>DialogService.Close(false))"
-                          Icon="@IconNames.Cancel"></RadzenButton>
-        </RadzenStack>
-    </EditForm>
-</div>
 
+<EditForm Model="@model" OnValidSubmit="@HandleFormRequest">
+    <FluentValidationValidator />
+    <input type="hidden" @bind="model!.CustomerId" />
+    <input type="hidden" @bind="model!.LoanRequestId" />
+    <input type="hidden" @bind="model!.BranchId" />
+    <input type="hidden" @bind="model!.AdminFeeAmount" />
+
+    <RadzenCard Variant="Variant.Outlined" class="rz-p-2 rz-background-color-base-150">
+        <RadzenRow RowGap="0.75rem">
+            @* ── Amounts ── *@
+            @ReadOnlyField("request_quote", "Request Amount", $"{Data?.RequestAmount:N2}")
+            @ReadOnlyField("paid", "Admin Fee", $"{Data?.AdminFeeAmount:N2}")
+
+            <RadzenColumn Size="6" SizeSM="4">
+                <RadzenStack Orientation="Orientation.Horizontal"
+                             class="rz-mb-3"
+                             AlignItems="AlignItems.Center" Gap="0.5rem">
+                    <RadzenIcon Icon="approval" Style="font-size:1rem;color:var(--rz-success);" />
+                    <RadzenText TextStyle="TextStyle.Overline" class="rz-mb-0 rz-color-base-600">Approve Amount</RadzenText>
+                </RadzenStack>
+                <TCNumbers @bind-Value="model!.AprovedAmount"
+                           Min="0"
+                           OnChanged="@OnChanged"
+                           Format="@currencyFormat" />
+                <ValidationMessage For="() => model.AprovedAmount" />
+            </RadzenColumn>
+
+            @* ── Details ── *@
+            @ReadOnlyField("person", "Customer", Data?.AltName, khmerFont: true)
+            @ReadOnlyField("business", "Branch", Data?.BranchName, khmerFont: true)
+            @ReadOnlyField("upload", "Request By", Data?.Summiter)
+            @ReadOnlyField("verified_user", "Accept By", Data?.AprovedBy)
+
+            @* ── Note ── *@
+            <RadzenColumn Size="12">
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem" class="rz-mb-1">
+                    <RadzenIcon Icon="notes" Style="font-size:1rem;color:var(--rz-base-600);" />
+                    <RadzenText TextStyle="TextStyle.Overline" class="rz-mb-0 rz-color-base-600">Note</RadzenText>
+                </RadzenStack>
+                <RadzenTextArea Style="resize:none;min-height:3.5rem;" class="rz-w-100" @bind-Value="model.Memo" />
+            </RadzenColumn>
+        </RadzenRow>
+    </RadzenCard>
+
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 AlignItems="AlignItems.Center"
+                 JustifyContent="JustifyContent.End"
+                 Gap="0.5rem"
+                 class="rz-mt-3">
+        <RadzenButton Text="Approve"
+                      ButtonStyle="ButtonStyle.Success"
+                      Size="ButtonSize.Small"
+                      ButtonType="ButtonType.Submit"
+                      IsBusy="isSaving"
+                      BusyText="Saving..."
+                      Icon="@IconNames.Save" />
+        <RadzenButton Text="Close"
+                      ButtonStyle="ButtonStyle.Danger"
+                      Size="ButtonSize.Small"
+                      Click="@(() => DialogService.Close(false))"
+                      Disabled="isSaving"
+                      Icon="@IconNames.Cancel" />
+    </RadzenStack>
+</EditForm>
+
+@code {
+    private bool isSaving;
+
+    void OnChanged(decimal? value)
+    {
+        if (!value.HasValue) return;
+
+        if (value > Data!.RequestAmount)
+        {
+            model!.AprovedAmount = Data.RequestAmount;
+        }
+
+        var amount = model!.AprovedAmount ?? value.Value;
+        Data!.AdminFeeAmount = amount * Data.AdminFeeRate / 100;
+
+        StateHasChanged();
+    }
+
+    static RenderFragment ReadOnlyField(string icon, string label, string? value, int sizeSM = 4, bool khmerFont = false) => __builder =>
+    {
+        var style = khmerFont
+            ? "min-height:1.25rem;font-family:'Khmer OS Siemreap',kh_siemreap,sans-serif;"
+            : "min-height:1.25rem;";
+
+        <RadzenColumn Size="6" SizeSM="@sizeSM">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenIcon Icon="@icon" Style="font-size:1rem;color:var(--rz-base-600);" />
+                <RadzenText TextStyle="TextStyle.Overline" class="rz-mb-0 rz-color-base-600">@label</RadzenText>
+            </RadzenStack>
+            <RadzenText TextStyle="TextStyle.Body2" class="rz-m-3" Style="@style">
+                @(string.IsNullOrWhiteSpace(value) ? "—" : value)
+            </RadzenText>
+        </RadzenColumn>
+    };
+}

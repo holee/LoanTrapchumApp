@@ -1,4 +1,5 @@
-﻿using ErrorOr;
+﻿using Applications.Features.Loans.Dtos.Responses;
+using ErrorOr;
 
 namespace Applications.Features.Schedules.GetLoanScheduleBySchedule;
 

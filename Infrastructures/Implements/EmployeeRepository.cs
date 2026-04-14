@@ -1,7 +1,7 @@
 ﻿using Applications.Bases;
 using Applications.Commons.Messages.Employees;
 using Applications.Extensions;
-using Applications.Features.Loans.Responses;
+using Applications.Features.Loans.Dtos.Responses;
 using Applications.Interfaces.Employees;
 using Applications.Responses;
 using Applications.Responses.Paginations;

@@ -5,7 +5,7 @@ using Applications.Extensions;
 using Applications.Features.CreditAgents.Requests;
 using Applications.Features.Customers.Response;
 using Applications.Features.LoanRequests.Requests;
-using Applications.Features.Loans.Responses;
+using Applications.Features.Loans.Dtos.Responses;
 using Applications.Interfaces.Loans;
 using Applications.Responses.Message;
 using Applications.Responses.Paginations;
@@ -508,6 +508,9 @@ public sealed class LoanRequestRepository(
 
     public async Task<ErrorOr<RequestResult>> RecheckedLoanRequestAsync(RecheckedRequestDtoCreate req, CancellationToken cancellationToken = default)
     {
+
+        logger.LogInformation("Rechecking loan request for LoanRequestId: {LoanRequestId}", req.LoanRequestId);
+
         await using var cxt = await contextFactory.CreateDbContextAsync(cancellationToken);
 
         try
@@ -520,24 +523,28 @@ public sealed class LoanRequestRepository(
 
             if (existingLoanRequest is null)
             {
-                return ErrorOr.Error.NotFound(Messages.DataNotFound);
+                return Error.NotFound(Messages.DataNotFound);
             }
 
             var updateResult = await cxt.LoanRequests
-                .FirstOrDefaultAsync(x => x.LoanRequestId == req.LoanRequestId &&
-                            x.BranchRefId == req.BranchId &&
-                            x.EditSeq == existingLoanRequest.EditSeq &&
-                            x.CustomerRefId == req.CustomerId, cancellationToken);
+                                .FirstOrDefaultAsync(x => x.LoanRequestId == req.LoanRequestId &&
+                                            x.BranchRefId == req.BranchId &&
+                                            x.EditSeq == existingLoanRequest.EditSeq &&
+                                            x.CustomerRefId == req.CustomerId, cancellationToken);
 
             if (updateResult is null)
             {
-                return ErrorOr.Error.NotFound(Messages.DataNotFound);
+                return Error.NotFound(Messages.DataNotFound);
             }
+
             updateResult.LoanRequestStatusRefId = (int)RequestStatus.Rechecked;
+
             updateResult.ModifiedDt = DateTime.UtcNow;
-            updateResult.AprovedDate = req.CheckedDate;
+
             updateResult.Remark = req.Remark;
+
             await context.SaveChangesAsync(cancellationToken);
+
             return new RequestResult
             {
                 Success = true,
@@ -547,7 +554,10 @@ public sealed class LoanRequestRepository(
         }
         catch (Exception ex)
         {
-            return ErrorOr.Error.Unexpected(($"Error due to : {ex.Message}"));
+
+            logger.LogError(ex, "Failed to recheck loan request for LoanRequestId: {LoanRequestId}", req.LoanRequestId);
+
+            return Error.Unexpected($"Error due to : {ex.Message}");
         }
     }
 
@@ -1107,6 +1117,8 @@ public sealed class LoanRequestRepository(
 
     public async Task<ErrorOr<VLoanRequests>> GetApprovedLoanRequestAsync(int? branchId, string? customerId, string? loanRequestId, bool include)
     {
+        logger.LogInformation("try to get approved loan request for LoanRequestId: {LoanRequestId}", loanRequestId);
+        
         try
         {
             using var db = await dapperFactory.CreateConnectionAsync();
@@ -1116,7 +1128,6 @@ public sealed class LoanRequestRepository(
                                     CustomerId=@customerId AND  
                                     LoanRequestId=@loanRequestId AND
                                     StatusId IN (4)";
-
             var resultQueries = await db.QueryFirstOrDefaultAsync<VLoanRequests>(sql, new
             {
                 branchId,
@@ -1165,6 +1176,7 @@ public sealed class LoanRequestRepository(
         }
         catch (Exception ex)
         {
+            logger.LogError(ex, "Failed to get approved loan request for LoanRequestId: {LoanRequestId}", loanRequestId);
             return Error.Unexpected($"{ex.Message}");
         }
     }

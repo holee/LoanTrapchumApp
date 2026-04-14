@@ -1,5 +1,7 @@
 ﻿using Applications.Enumerations;
 using Applications.Features.CreditAgents.Requests;
+using Applications.Features.Loans.Dtos;
+using Applications.Features.Loans.Dtos.Responses;
 using Applications.Responses;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Domains.Models.Lists.CreditAgents;
@@ -13,10 +15,10 @@ namespace Applications.Interfaces.Loans
     public interface ILoanService
     {
         //Task<Result<bool>> CreateLoanAsync(LoanDisbursment req, CancellationToken cancellation = default);
-        Task<ErrorOr.ErrorOr<DeleteResult>> DeleteAsync(string? loanId,int? branchId, CancellationToken cancellation = default);
-        Task<Result<string>> UpdateAsync(LoanDisbursment disbursement);
-        Task<Result<string>> ChangedCreditAgent(int? branchId, LoanChangedCaDtoCreate req);
-        Task<Result<string>> ChangedCreditAgents(int? branchId, List<LoanChangedCa> req);
+        //Task<ErrorOr.ErrorOr<DeleteResult>> DeleteAsync(string? loanId,int? branchId, CancellationToken cancellation = default);
+        //Task<Result<string>> UpdateAsync(LoanDisbursment disbursement);
+        //Task<Result<string>> ChangedCreditAgent(int? branchId, LoanChangedCaDtoCreate req);
+        //Task<Result<string>> ChangedCreditAgents(int? branchId, List<LoanChangedCa> req);
         Task<ErrorOr.ErrorOr<VLoanDisbursments>> GetLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus status, bool include = false);
        
         Task<Pager<VLoanDisbursments>> GetLoansByBranchId(int? branchId, string? creditAgentId, LoanStatuses status = LoanStatuses.Active, QueryParam? param = null, CancellationToken cancellation = default);
@@ -34,6 +36,7 @@ namespace Applications.Interfaces.Loans
         Task<Pager<VLoanDisbursments>> GetLoansByBranchId(int? branchId, string? userId, LoanStatuses status = LoanStatuses.Active, DateTime? start = null, DateTime? to = null, QueryParam? param = null, CancellationToken cancellation = default);
         Task<Pager<VSchedule>> GetDueScheduleLoanByIdAsync(string? loanId, int? branchId, CancellationToken cancellation = default);
         Task<Pager<VSchedule>> GetScheduleLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus state, CancellationToken cancellation = default);
+        Task<Pager<VLoanCollateral>> GetLoanCollaterals(string? loanId, int? branchId, CancellationToken cancellation = default);
     }
 
 }

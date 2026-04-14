@@ -1,0 +1,116 @@
+﻿@page "/App/Loans/{LoanId}/WidthrwalCollateral/{BranchId:int}/Branches"
+@using Applications.Features.Loans.Dtos
+@using Applications.Features.Loans.Queries.GetLoanCollaterals
+<RadzenCard Variant="Variant.Outlined">
+    <RadzenStack AlignItems="AlignItems.Center"
+                 Orientation="Orientation.Horizontal"
+                 class="rz-my-3"
+                 JustifyContent="JustifyContent.End">
+        <RadzenButton Text="Select All"
+                      Size="ButtonSize.ExtraSmall"
+                      Icon="@IconNames.SelectAll"
+                      ButtonStyle="ButtonStyle.Secondary"
+                      Click="@(args => selectedCollaterals = _loanColleterals?.ToList() ?? [])" />
+        <RadzenButton Text="Deselect All"
+                      Size="ButtonSize.ExtraSmall"
+                      Icon="@IconNames.Deselect"
+                      Click="@(args => selectedCollaterals = [])" />
+    </RadzenStack>
+    <RadzenDataGrid @ref="grid"
+                    TItem="VLoanCollateral"
+                    Data="@_loanColleterals"
+                    Density="Density.Compact"
+                    GridLines="DataGridGridLines.Both"
+                    Responsive
+                    ColumnWidth="10rem"
+                    AllowPaging="true"
+                    AllowSorting="true"
+                    PageSize="10"
+                    ShowPagingSummary="true"
+                    SelectionMode="DataGridSelectionMode.Multiple"
+                    AllowRowSelectOnRowClick="@allowRowSelectOnRowClick"
+                    Style="min-height:20rem;height:30rem;max-height:50rem;overflow:auto;"
+                    @bind-Value="@selectedCollaterals">
+        <Columns>
+            <RadzenDataGridColumn Title="#"
+                                  TextAlign="TextAlign.Center"
+                                  Context="g"
+                                  Width="3rem"
+                                  Sortable="false"
+                                  Property="@nameof(VLoanCollateral.Id)">
+                <HeaderTemplate>
+                    <RadzenCheckBox TValue="bool"
+                                    TriState="false"
+                                    Value="@headerChecked"
+                                    InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "Select all items" } })"
+                                    Change="@(args => selectedCollaterals = args == true ? _loanColleterals?.ToList() ?? [] : [])" />
+                </HeaderTemplate>
+                <Template>
+                    <RadzenCheckBox TValue="bool"
+                                    TriState="false"
+                                    InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "Select item" } })"
+                                    Value="@(selectedCollaterals.Any() && selectedCollaterals.Contains(g))"
+                                    Change="@(args => { if (!allowRowSelectOnRowClick) { grid.SelectRow(g); } })" />
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn Property="@nameof(VLoanCollateral.CollateralNo)" Title="Collateral No" Width="8rem" />
+            <RadzenDataGridColumn Property="@nameof(VLoanCollateral.ReferenceNo)"
+                                  Visible="false"
+                                  Title="Reference No" Width="8rem" />
+            <RadzenDataGridColumn Property="@nameof(VLoanCollateral.TypeName)" Title="Type" Visible="false" />
+            <RadzenDataGridColumn Property="@nameof(VLoanCollateral.SubTypeName)" Title="Sub Type" />
+            <RadzenDataGridColumn Property="@nameof(VLoanCollateral.OwnerName)" Title="Owner" />
+            <RadzenDataGridColumn Property="@nameof(VLoanCollateral.Location)" Title="Location"
+                                  Visible="false" />
+            <RadzenDataGridColumn Property="@nameof(VLoanCollateral.Quantity)" Title="Qty"
+                                  Width="4rem" TextAlign="TextAlign.Center" />
+            <RadzenDataGridColumn Property="@nameof(VLoanCollateral.MarketPrice)" Title="Market Price" Width="8rem" TextAlign="TextAlign.End" FormatString="{0:#,##0.00}" />
+            <RadzenDataGridColumn Property="@nameof(VLoanCollateral.HotPrice)" Title="Hot Price" Width="8rem" TextAlign="TextAlign.End" FormatString="{0:#,##0.00}" />
+            <RadzenDataGridColumn Property="@nameof(VLoanCollateral.PawnPrice)" Title="Pawn Price" Width="8rem" TextAlign="TextAlign.End" FormatString="{0:#,##0.00}" />
+        </Columns>
+    </RadzenDataGrid>
+    <RadzenStack AlignItems="AlignItems.Center"
+                 Orientation="Orientation.Horizontal"
+                 class="rz-my-3"
+                 JustifyContent="JustifyContent.End">
+        <RadzenButton Text="Widtraw Now"
+                      Icon="@IconNames.Save"
+                      Size="ButtonSize.ExtraSmall"
+                      ButtonStyle="ButtonStyle.Success"
+                      Click="@(args => selectedCollaterals = _loanColleterals?.ToList() ?? [])" />
+        <RadzenButton Text="Cancel"
+                      Size="ButtonSize.ExtraSmall"
+                      ButtonStyle="ButtonStyle.Danger"
+                      Icon="@IconNames.Close"
+                      Click="@(args => selectedCollaterals = [])" />
+    </RadzenStack>
+</RadzenCard>
+
+@code {
+    [Parameter] public string? LoanId { get; set; } = string.Empty;
+
+    [Parameter] public int BranchId { get; set; }
+
+    [PersistentState]
+    public IEnumerable<VLoanCollateral>? _loanColleterals { get; set; }
+
+    private IList<VLoanCollateral> selectedCollaterals = [];
+
+    private RadzenDataGrid<VLoanCollateral> grid = default!;
+
+    private bool allowRowSelectOnRowClick = false;
+
+    private bool headerChecked => selectedCollaterals.Any()
+                                    && _loanColleterals is not null
+                                    && selectedCollaterals.Count == _loanColleterals.Count();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (_loanColleterals == null)
+        {
+            var result = await mediator.Send(new GetLoanCollateralsQuery(LoanId, BranchId));
+
+            _loanColleterals = result.Items;
+        }
+    }
+}

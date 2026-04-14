@@ -1,114 +1,132 @@
 ﻿@using Applications.Features.Collaterals.Dtos
+@using Domains.Models.Files
+@using System.Text.Json
 <EditForm Model="@baseModel" FormName="collateralLineCreate" OnValidSubmit="@HandleFormSubmit">
-    <DataAnnotationsValidator />
     <FluentValidationValidator DisableAssemblyScanning="true" />
-    <ValidationSummary />
     <RadzenFieldset Text="Customer Info">
-        <RadzenRow class="rz-mb-2">
+        <RadzenRow class="rz-mb-1">
             <RadzenColumn Size="6">
-                <RadzenFormField Text="Customer" class="rz-w-100">
-                    <RadzenTextBox class="rz-w-100" Disabled
-                                   @bind-Value="@baseModel.CustomerName"></RadzenTextBox>
+                <RadzenFormField Text="Customer" class="@Defaults.W100">
+                    <RadzenTextBox class="@Defaults.W100" Disabled
+                                   @bind-Value="@baseModel.CustomerName" />
                 </RadzenFormField>
             </RadzenColumn>
             <RadzenColumn Size="6">
                 <RadzenFormField Text="Register Date" class="@Defaults.W100">
-                    <RadzenDatePicker class="rz-w-100"
+                    <RadzenDatePicker class="@Defaults.W100"
                                       @bind-Value="@baseModel.RegisterDate" />
                 </RadzenFormField>
             </RadzenColumn>
         </RadzenRow>
-        <RadzenRow class="rz-mb-2">
+        <RadzenRow class="rz-mb-1">
             <RadzenColumn Size="6">
-                <RadzenFormField Text="Remark" class="rz-w-100">
-                    <RadzenTextBox class="rz-w-100"
-                                   @bind-Value="@baseModel.Remark"></RadzenTextBox>
+                <RadzenFormField Text="Remark" class="@Defaults.W100">
+                    <RadzenTextBox class="@Defaults.W100"
+                                   @bind-Value="@baseModel.Remark" />
                 </RadzenFormField>
             </RadzenColumn>
             <RadzenColumn Size="6">
-                <RadzenFormField Text="Document Keeping" class="rz-w-100">
-                    <RadzenTextBox class="rz-w-100"
-                                   @bind-Value="@baseModel.DocumentKeeping"></RadzenTextBox>
+                <RadzenFormField Text="Document Keeping" class="@Defaults.W100">
+                    <RadzenTextBox class="@Defaults.W100"
+                                   @bind-Value="@baseModel.DocumentKeeping" />
                 </RadzenFormField>
             </RadzenColumn>
         </RadzenRow>
-
     </RadzenFieldset>
     <RadzenFieldset Text="Collateral Info">
-        <RadzenRow class="rz-mb-2">
+        <RadzenRow class="rz-mb-1">
+            <RadzenColumn Size="12">
+                <RadzenCard Variant="Variant.Outlined" class="rz-p-2">
+                    <RadzenUpload @ref="radzenUpload"
+                                  ChooseText="Select PDF file to upload"
+                                  Auto="true"
+                                  Accept=".pdf"
+                                  Url="Upload/File"
+                                  Style="width: 100%"
+                                  Complete="@UploadComplete"
+                                  Progress="@UploadProgress"
+                                  Change="@OnFileChanged"
+                                  Error="@OnError"
+                                  InputAttributes="@(new Dictionary<string,object>{ { "aria-label", "select file" }})" />
+                    <RadzenProgressBar Value="@progress" class="rz-mt-2" Visible="@showProgress" />
+                    <RadzenLabel Visible="@showComplete"
+                                 class="rz-mx-2"
+                                 Text="@completionMessage" />
+                </RadzenCard>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow class="rz-mb-1">
             <RadzenColumn Size="6">
-                <RadzenFormField Text="Type" class="rz-w-100">
+                <RadzenFormField Text="Type" class="@Defaults.W100">
                     <RadzenDropDown TValue="int?"
-                                    class="rz-w-100"
+                                    class="@Defaults.W100"
                                     Data="collateralTypes"
                                     TextProperty="@nameof(CollateralTypeResponse.CollateralTypeCode)"
                                     ValueProperty="@nameof(CollateralTypeResponse.CollateralTypeId)"
                                     SelectedItemChanged="@GetCollateralSubTypes"
-                                    @bind-Value="@model!.CategoryRefId">
-                    </RadzenDropDown>
+                                    @bind-Value="@model!.CategoryRefId" />
                 </RadzenFormField>
             </RadzenColumn>
             <RadzenColumn Size="6">
-                <RadzenFormField Text="SubTypeName" class="rz-w-100">
+                <RadzenFormField Text="SubTypeName" class="@Defaults.W100">
                     <RadzenDropDown TValue="int?"
-                                    class="rz-w-100"
+                                    class="@Defaults.W100"
                                     Data="@allSubTypes"
                                     TextProperty="@nameof(CollateralSubTypeResponse.CollateralSubTypeName)"
                                     ValueProperty="@nameof(CollateralSubTypeResponse.Id)"
-                                    @bind-Value="@model.SubCategoryRefId">
-                    </RadzenDropDown>
+                                    @bind-Value="@model.SubCategoryRefId" />
                 </RadzenFormField>
             </RadzenColumn>
         </RadzenRow>
-        <RadzenRow class="rz-mb-2">
+        <RadzenRow class="rz-mb-1">
             <RadzenColumn Size="6">
-                <RadzenFormField Text="Owner Name" class="rz-w-100">
-                    <RadzenTextBox class="rz-w-100"
-                                   @bind-Value="@model.OwnerName"></RadzenTextBox>
+                <RadzenFormField Text="Owner Name" class="@Defaults.W100">
+                    <RadzenTextBox class="@Defaults.W100"
+                                   @bind-Value="@model.OwnerName" />
                 </RadzenFormField>
             </RadzenColumn>
             <RadzenColumn Size="6">
-                <RadzenFormField Text="CollateralNo" class="rz-w-100">
-                    <RadzenTextBox class="rz-w-100"
-                                   @bind-Value="@model.CollateralNo"></RadzenTextBox>
-                </RadzenFormField>
-            </RadzenColumn>
-        </RadzenRow>
-        <RadzenRow class="rz-mb-2">
-            <RadzenColumn Size="6">
-                <RadzenFormField Text="Location" class="rz-w-100">
-                    <RadzenTextBox class="rz-w-100"
-                                   @bind-Value="@model.Location"></RadzenTextBox>
-                </RadzenFormField>
-            </RadzenColumn>
-            <RadzenColumn Size="6">
-                <RadzenFormField Text="Size" class="rz-w-100">
-                    <RadzenTextBox class="rz-w-100"
-                                   @bind-Value="@model.Size"></RadzenTextBox>
+                <RadzenFormField Text="CollateralNo" class="@Defaults.W100">
+                    <RadzenTextBox class="@Defaults.W100"
+                                   @bind-Value="@model.CollateralNo" />
                 </RadzenFormField>
             </RadzenColumn>
         </RadzenRow>
-        <RadzenRow class="rz-mb-2">
+        <RadzenRow class="rz-mb-1">
             <RadzenColumn Size="6">
-                <RadzenFormField Text="Quantity" class="rz-w-100">
+                <RadzenFormField Text="Location" class="@Defaults.W100">
+                    <RadzenTextBox class="@Defaults.W100"
+                                   @bind-Value="@model.Location" />
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="6">
+                <RadzenFormField Text="Size" class="@Defaults.W100">
+                    <RadzenTextBox class="@Defaults.W100"
+                                   @bind-Value="@model.Size" />
+                </RadzenFormField>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow class="rz-mb-1">
+            <RadzenColumn Size="6">
+                <RadzenFormField Text="Quantity" class="@Defaults.W100">
                     <RadzenNumeric ShowUpDown="false"
                                    Min="0"
                                    ReadOnly
                                    Placeholder="Quantity"
-                                   class="rz-w-100"
+                                   class="@Defaults.W100"
                                    TextAlign="TextAlign.End"
                                    @bind-Value="@model!.Quantity" />
                 </RadzenFormField>
             </RadzenColumn>
             <RadzenColumn Size="6">
-                <RadzenFormField Text="Market Price" class="rz-w-100">
+                <RadzenFormField Text="Market Price" class="@Defaults.W100">
                     <TCNumbers Placeholder="Market Price"
-                               OnValueChanged="@((arg)=>OnMarketPriceChanged(arg,model!))"
+                               OnValueChanged="@((arg) => OnMarketPriceChanged(arg, model!))"
                                @bind-Value="@model!.MarketPrice" />
                 </RadzenFormField>
             </RadzenColumn>
         </RadzenRow>
-        <RadzenRow class="rz-mb-2">
+        <RadzenRow class="rz-mb-1">
             <RadzenColumn Size="6">
                 <TCNumbers Label="Hot Price" IsFloatLabel="true"
                            Placeholder="Hot Price"
@@ -124,10 +142,11 @@
         </RadzenRow>
         <RadzenRow>
             <RadzenColumn Size="12">
-                <RadzenFormField Text="Description" class="rz-w-100">
-                    <RadzenTextArea class="rz-w-100"
+                <RadzenFormField Text="Description" class="@Defaults.W100">
+                    <RadzenTextArea class="@Defaults.W100"
                                     Rows="3"
-                                    @bind-Value="@model!.Description"></RadzenTextArea>
+                                    Style="resize:none;"
+                                    @bind-Value="@model!.Description" />
                 </RadzenFormField>
             </RadzenColumn>
         </RadzenRow>
@@ -139,13 +158,135 @@
                       ButtonStyle="@Defaults.Save"
                       ButtonType="ButtonType.Submit"
                       Text="Save"
-                      Size="@Defaults.DefaultButton">
-        </RadzenButton>
+                      IsBusy="@isSaving"
+                      BusyText="Saving..."
+                      Size="@Defaults.DefaultButton" />
         <RadzenButton Icon="@IconNames.Close"
                       ButtonStyle="@Defaults.Cancel"
                       Text="Close"
-                      Click="()=>DialogService.Close(success)"
-                      Size="@Defaults.DefaultButton">
-        </RadzenButton>
+                      Disabled="@isSaving"
+                      Click="() => DialogService.Close(success)"
+                      Size="@Defaults.DefaultButton" />
     </RadzenStack>
 </EditForm>
+@code {
+
+    int progress;
+    bool showProgress;
+    bool showComplete;
+    string completionMessage = string.Empty;
+    bool cancelUpload = false;
+
+    void UploadComplete(UploadCompleteEventArgs args)
+    {
+
+        showProgress = false;
+
+        showComplete = true;
+
+        if (string.IsNullOrEmpty(args.RawResponse))
+        {
+            completionMessage = "Upload failed: empty response.";
+
+            model.FileUrl = string.Empty;
+
+            return;
+        }
+
+        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+
+        var fileModel = JsonSerializer.Deserialize<FileModel>(args.RawResponse!, options);
+
+        if (fileModel is not null)
+        {
+
+            completionMessage = "Upload complete!";
+
+            model.FileUrl = fileModel.FileUrl;
+        }
+        else
+        {
+            completionMessage = "Upload failed: unable to parse response.";
+        }
+    }
+
+    void UploadProgress(UploadProgressArgs args)
+    {
+
+        showProgress = true;
+
+        showComplete = false;
+
+        progress = args.Progress;
+
+        if (args.Progress == 100)
+        {
+            showProgress = false;
+        }
+    }
+
+
+    void OnError(UploadErrorEventArgs args)
+    {
+        showProgress = false;
+
+        showComplete = true;
+
+        completionMessage = $"Upload error: {args.Message}";
+
+        model.FileUrl = string.Empty;
+
+    }
+
+    void OnCancel()
+    {
+        cancelUpload = true;
+    }
+
+    void OnFileChanged(UploadChangeEventArgs args)
+    {
+
+        if (args.Files is null)
+        {
+            Console.WriteLine("No files selected.");
+
+            showComplete = false;
+
+            showProgress = false;
+
+            return;
+        }
+
+        var file = args.Files.FirstOrDefault();
+
+        if (file is null)
+        {
+            Console.WriteLine("No file found in the selection.");
+
+            Console.WriteLine("No files selected.");
+
+            showComplete = false;
+
+            showProgress = false;
+
+            return;
+        }
+        ;
+
+        if (file.Size > MaxFileSize)
+        {
+            Console.WriteLine("File size exceeds the maximum limit of {0} bytes.", MaxFileSize);
+
+            Console.WriteLine("No files selected.");
+
+            showComplete = false;
+
+            showProgress = false;
+
+            return;
+        }
+
+
+        Console.WriteLine("File changed: {0} files selected", args.Files.Count());
+    }
+}

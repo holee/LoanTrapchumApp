@@ -3,185 +3,205 @@
 @using Applications.Features.LoanRequests.Interfaces
 @using TrapchumApp.Pages.Lists.Customers
 @attribute [MustHasPermission(Modules.LoanRequest, Feature.Read)]
-<PageTitle>Details</PageTitle>
-<RadzenFieldset>
-    <HeaderTemplate>
-        <RadzenStack Gap="0.25rem" AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal">
-            <RadzenIcon Icon="@IconNames.Info" /><strong>Loan Request</strong>
-        </RadzenStack>
-    </HeaderTemplate>
-    <ChildContent>
-        <table class="table-sm">
-            <tbody>
-                <tr>
-                    <th class="rz-w-25">ចំនួនទឹកប្រាក់ស្នើរសុំ</th>
-                    <td class="text-end">
-                        @data?.RequestAmount.Format(data.CurrencyId)
-                    </td>
-                    <th class="rz-w-25">ប្រភេទបង់រំលោះ</th>
-                    <td>
-                        @data?.RepaymentMode
-                    </td>
-                </tr>
-                <tr>
-                    <th class="rz-w-25">ខ្ចីលើកទី</th>
-                    <td class="text-end">
-                        @data?.Circle
-                    </td>
-                    <th class="rz-w-25">រយៈពេលខ្ចីប្រាក់</th>
-                    <td>
-                        @data?.Installments @data?.InstallmentType
-                    </td>
-                </tr>
-                <tr>
-                    <th class="rz-w-25">ប្រាក់ប្រសិទ្ធិភាព</th>
-                    <td class="text-end">
-                        @data?.CollectionFeeRate (%)
-                    </td>
-                    <th class="rz-w-25">ប្រភេទកម្ចី</th>
-                    <td>
-                        @data?.LoanCategoryName
-                    </td>
-                </tr>
-                <tr>
-                    <th class="rz-w-25">អត្រាការប្រាក់</th>
-                    <td class="text-end">
-                        @data?.InterestRate (%)
-                    </td>
-                    <th class="rz-w-25">ថ្ងៃខ្ចីប្រាក់</th>
-                    <td>
-                        @data?.RequestDate.DayFirst()
-                    </td>
-                </tr>
-                <tr>
-                    <th class="rz-w-25">សេវារដ្ឋបាល</th>
-                    <td class="text-end">
-                        @data?.AdminFeeAmount.Format(data?.CurrencyId)
-                    </td>
-                    <th class="rz-w-25">ថ្ងៃបង់ប្រាក់លើកដំបូង</th>
-                    <td>
-                        @data?.FirstPaymentDate.DayFirst()
-                    </td>
-                </tr>
-                <tr>
-                    <th class="rz-w-25">ស្ថានភាព</th>
-                    <td class="text-end">
-                        @data?.Status
-                    </td>
-                    <th class="rz-w-25">ថ្ងៃពិនិត្យ</th>
-                    <td>
-                        @data?.AprovedDate.DayFirst()
-                    </td>
-                </tr>
-                <tr>
-                    <th class="rz-w-25">មន្ត្រីស្នើរសុំ</th>
-                    <td class="text-end">
-                        @data?.Summiter
-                    </td>
-                    <th class="rz-w-25">អ្នកអនុម័ត្ត</th>
-                    <td>
-                        @data?.AprovedBy
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+@attribute [StreamRendering]
+<PageTitle>ព័ត៌មានលម្អិត</PageTitle>
+
+@if (_isLoading)
+{
+    <RadzenStack AlignItems="AlignItems.Center"
+                 JustifyContent="JustifyContent.Center"
+                 Style="min-height:20rem;">
+        <RadzenProgressBarCircular ShowValue="false"
+                                   Mode="ProgressBarMode.Indeterminate"
+                                   Size="ProgressBarCircularSize.Medium" />
+        <RadzenText TextStyle="TextStyle.Body2"
+                    class="rz-color-base-600">កំពុងផ្ទុកសំណើរកម្ចី...</RadzenText>
+    </RadzenStack>
+}
+else if (data is not null)
+{
+    <RadzenFieldset AllowCollapse="true" Collapsed="false">
+        <HeaderTemplate>
+            <RadzenStack Gap="0.5rem" AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal">
+                <RadzenIcon Icon="@IconNames.Info" />
+                <strong>សំណើរកម្ចី</strong>
+                <RadzenBadge BadgeStyle="@StatusBadgeStyle"
+                             Text="@data.Status"
+                             IsPill="true" />
+            </RadzenStack>
+        </HeaderTemplate>
+        <ChildContent>
+            <RadzenRow Gap="0.5rem" class="rz-py-2">
+                <RadzenColumn SizeSM="6" SizeMD="3">
+                    <RadzenText TextStyle="TextStyle.Caption" class="rz-text-caption rz-color-base-600">ចំនួនទឹកប្រាក់ស្នើរសុំ</RadzenText>
+                    <RadzenText TextStyle="TextStyle.Body1"><strong>@data.RequestAmount.Format(data.CurrencyId)</strong></RadzenText>
+                </RadzenColumn>
+                <RadzenColumn SizeSM="6" SizeMD="3">
+                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">ប្រភេទបង់រំលោះ</RadzenText>
+                    <RadzenText TextStyle="TextStyle.Body1">@data.RepaymentMode</RadzenText>
+                </RadzenColumn>
+                <RadzenColumn SizeSM="6" SizeMD="3">
+                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">ខ្ចីលើកទី</RadzenText>
+                    <RadzenText TextStyle="TextStyle.Body1">@data.Circle</RadzenText>
+                </RadzenColumn>
+                <RadzenColumn SizeSM="6" SizeMD="3">
+                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">រយៈពេលខ្ចីប្រាក់</RadzenText>
+                    <RadzenText TextStyle="TextStyle.Body1">@data.Installments @data.InstallmentType</RadzenText>
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow Gap="0.5rem" class="rz-py-2">
+                <RadzenColumn SizeSM="6" SizeMD="3">
+                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">ប្រាក់ប្រសិទ្ធិភាព</RadzenText>
+                    <RadzenText TextStyle="TextStyle.Body1">@data.CollectionFeeRate (%)</RadzenText>
+                </RadzenColumn>
+                <RadzenColumn SizeSM="6" SizeMD="3">
+                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">ប្រភេទកម្ចី</RadzenText>
+                    <RadzenText TextStyle="TextStyle.Body1">@data.LoanCategoryName</RadzenText>
+                </RadzenColumn>
+                <RadzenColumn SizeSM="6" SizeMD="3">
+                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">អត្រាការប្រាក់</RadzenText>
+                    <RadzenText TextStyle="TextStyle.Body1">@data.InterestRate (%)</RadzenText>
+                </RadzenColumn>
+                <RadzenColumn SizeSM="6" SizeMD="3">
+                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">ថ្ងៃខ្ចីប្រាក់</RadzenText>
+                    <RadzenText TextStyle="TextStyle.Body1">@data.RequestDate.DayFirst()</RadzenText>
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow Gap="0.5rem" class="rz-py-2">
+                <RadzenColumn SizeSM="6" SizeMD="3">
+                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">សេវារដ្ឋបាល</RadzenText>
+                    <RadzenText TextStyle="TextStyle.Body1">@data.AdminFeeAmount.Format(data.CurrencyId)</RadzenText>
+                </RadzenColumn>
+                <RadzenColumn SizeSM="6" SizeMD="3">
+                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">ថ្ងៃបង់ប្រាក់លើកដំបូង</RadzenText>
+                    <RadzenText TextStyle="TextStyle.Body1">@data.FirstPaymentDate.DayFirst()</RadzenText>
+                </RadzenColumn>
+                <RadzenColumn SizeSM="6" SizeMD="3">
+                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">មន្ត្រីស្នើរសុំ</RadzenText>
+                    <RadzenText TextStyle="TextStyle.Body1">@data.Summiter</RadzenText>
+                </RadzenColumn>
+                <RadzenColumn SizeSM="6" SizeMD="3">
+                    <RadzenText TextStyle="TextStyle.Caption" class="rz-color-base-600">អ្នកអនុម័ត្ត</RadzenText>
+                    <RadzenText TextStyle="TextStyle.Body1">@data.AprovedBy</RadzenText>
+                </RadzenColumn>
+            </RadzenRow>
+        </ChildContent>
+    </RadzenFieldset>
+
+    <RadzenCard class="rz-mt-2">
         <RadzenTabs RenderMode="TabRenderMode.Client">
             <Tabs>
                 <RadzenTabsItem Text="ព័ត៌មានអតិថិជន" Icon="@IconNames.Priority">
-                    <CustomerInfo Customer="@data?.Customer" @key="@(Guid.NewGuid().ToString("N"))" />
+                    <CustomerInfo Customer="@data.Customer" @key="@CustomerId" />
                 </RadzenTabsItem>
                 <RadzenTabsItem Text="ទ្រព្យបញ្ចាំនិងអ្នកធានា" Icon="@IconNames.Collaterals">
                     <LoanRequestCollaterals CustomerId="@CustomerId"
                                             ShowAdd="false"
                                             ShowCommand="false"
-                                            Collaterals="@data?.Collaterals.ToList()">
+                                            Collaterals="@data.Collaterals.ToList()">
                         <SearchBoxTemplate>
                             <CollateralSearchList CustomerId="@CustomerId" />
                         </SearchBoxTemplate>
                     </LoanRequestCollaterals>
                     <LoanRequestGaurantor ShowAdd="false"
                                           ShowCommand="false"
-                                          Guarantors="@data?.Guarantors" @key="@(Guid.NewGuid().ToString("N"))">
-                    </LoanRequestGaurantor>
+                                          Guarantors="@data.Guarantors"
+                                          @key="@LoanRequestId" />
                 </RadzenTabsItem>
                 <RadzenTabsItem Text="ចំណូលនិងចំណាយ" Icon="@IconNames.MoneyBag">
                     <CustomerProfit CustomerId="@CustomerId" ShowAction="false" ShowCommand="false" />
                 </RadzenTabsItem>
                 <RadzenTabsItem Text="ឯកសារផ្សេងៗ" Icon="@IconNames.AttachFile">
-                    <LoanRequestDocument Documents="@data?.Documents.ToList()"
+                    <LoanRequestDocument Documents="@data.Documents.ToList()"
                                          ShowUpload="false"
-                                         @key="@(Guid.NewGuid().ToString("N"))" />
+                                         @key="@LoanRequestId" />
                 </RadzenTabsItem>
-                <RadzenTabsItem Text="Note" Icon="@IconNames.Comment">
-                    <RadzenRow AlignItems="AlignItems.Center" Visible="!data!.IsCompleted">
-                        <RadzenColumn Size="12">
-                            <RadzenTextArea Rows="5" class="rz-w-100" @bind-Value="memo">
-
-                            </RadzenTextArea>
-                        </RadzenColumn>
-                    </RadzenRow>
-                    <LoanRequestNotes Data="@data?.Descriptions" @key="@(Guid.NewGuid().ToString("N"))" />
+                <RadzenTabsItem Text="កំណត់សម្គាល់" Icon="@IconNames.Comment">
+                    @if (!data.IsCompleted)
+                    {
+                        <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-4">
+                            <RadzenColumn Size="12">
+                                <RadzenTextArea Rows="4"
+                                                class="rz-w-100"
+                                                Disabled="@disableTextbox"
+                                                Placeholder="បន្ថែមកំណត់សម្គាល់..."
+                                                @bind-Value="memo" />
+                            </RadzenColumn>
+                        </RadzenRow>
+                    }
+                    <LoanRequestNotes Data="@data.Descriptions" @key="@_dataVersion" />
                 </RadzenTabsItem>
             </Tabs>
         </RadzenTabs>
-    </ChildContent>
-</RadzenFieldset>
-<RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal"
-             class="rz-m-2"
-             JustifyContent="JustifyContent.End">
-    <AuthorizeView Policy="@Policies.RequestLoanRequest">
-        <Authorized>
-            @if (data!.IsRequesting && _result.Success == false)
-            {
-                <RadzenButton ButtonStyle="@Styles.Save"
-                              Icon="request_quote" Size="ButtonSize.ExtraSmall"
-                              Click="@CreateLoanRequest"
-                              Text="Request Now"></RadzenButton>
-                <EditLinkButton Href="@($"/App/Loans/{LoanRequestId}/Requests/{BranchId}/Branches/{CustomerId}/Edit")" />
-            }
-        </Authorized>
-    </AuthorizeView>
+    </RadzenCard>
 
-    <AuthorizeView Policy="@Policies.ApproveLoanRequest">
-        <Authorized>
-            @if (data!.IsRequested)
-            {
-                <RadzenButton ButtonStyle="ButtonStyle.Primary"
-                              Icon="@IconNames.Save" Size="ButtonSize.ExtraSmall"
-                              Click="SaveLoanRequest"
-                              Text="Save"></RadzenButton>
-                <RadzenButton ButtonStyle="ButtonStyle.Success"
-                              Icon="request_quote" Size="ButtonSize.ExtraSmall"
-                              Click="DisbruseLoanRequestNow"
-                              Text="Approved"></RadzenButton>
-                <RadzenButton ButtonStyle="ButtonStyle.Secondary"
-                              Icon="@IconNames.Block" Size="ButtonSize.ExtraSmall"
-                              Click="DeniedLoanRequest"
-                              Text="Denied"></RadzenButton>
-                <RadzenButton ButtonStyle="ButtonStyle.Primary"
-                              Icon="@IconNames.Undo" Size="ButtonSize.Small"
-                              Click="RecheckedLoanRequest"
-                              Text="Rechecked"></RadzenButton>
-            }
-        </Authorized>
-    </AuthorizeView>
+    <RadzenStack AlignItems="AlignItems.Center"
+                 Orientation="Orientation.Horizontal"
+                 class="rz-p-2 rz-my-2 rz-border-radius-2"
+                 Style="background: linear-gradient(135deg, var(--rz-base-200), var(--rz-base-300)); border: 1px solid var(--rz-base-400); box-shadow: 0 1px 3px rgba(0,0,0,0.08);"
+                 JustifyContent="JustifyContent.End"
+                 Gap="0.5rem">
 
-    <AuthorizeView Policy="@Policies.Disburse">
-        <Authorized>
-            @if (data!.IsApproved)
-            {
-                <RadzenButton ButtonStyle="ButtonStyle.Primary"
-                              Icon="request_quote" Size="ButtonSize.ExtraSmall"
-                              Click="SaveLoanRequest"
-                              Text="Save"></RadzenButton>
-                <RadzenButton ButtonStyle="ButtonStyle.Success"
-                              Icon="request_quote" Size="ButtonSize.ExtraSmall"
-                              Click="DisbruseLoanRequestNow"
-                              Text="Disburse Now"></RadzenButton>
-            }
-        </Authorized>
-    </AuthorizeView>
-    <BackButton Href="@_navService.PreviousUrl" />
-</RadzenStack>
+        <AuthorizeView Policy="@Policies.RequestLoanRequest">
+            <Authorized>
+                @if (data.IsRequesting && !_result.Success)
+                {
+                    <RadzenButton ButtonStyle="@Styles.Save"
+                                  Icon="@IconNames.RequestQuote"
+                                  Size="@Styles.DefaultSize"
+                                  Click="@CreateLoanRequest"
+                                  Text="ស្នើរសុំឥឡូវ" />
+                    <EditLinkButton Href="@($"/App/Loans/{LoanRequestId}/Requests/{BranchId}/Branches/{CustomerId}/Edit")" />
+                }
+            </Authorized>
+        </AuthorizeView>
 
+        <AuthorizeView Policy="@Policies.ApproveLoanRequest">
+            <Authorized>
+                @if (data.IsRequested)
+                {
+                    <RadzenButton ButtonStyle="ButtonStyle.Primary"
+                                  Icon="@IconNames.Save"
+                                  Size="@Styles.DefaultSize"
+                                  Click="SaveLoanRequest"
+                                  Text="រក្សាទុក" />
+                    <RadzenButton ButtonStyle="ButtonStyle.Success"
+                                  Icon="@IconNames.RequestQuote"
+                                  Size="@Styles.DefaultSize"
+                                  Click="DisbruseLoanRequestNow"
+                                  Text="អនុម័ត" />
+                    <RadzenButton ButtonStyle="ButtonStyle.Secondary"
+                                  Icon="@IconNames.Block"
+                                  Size="@Styles.DefaultSize"
+                                  Click="DeniedLoanRequest"
+                                  Text="បដិសេធ" />
+                    <RadzenButton ButtonStyle="ButtonStyle.Primary"
+                                  Icon="@IconNames.Undo"
+                                  Size="@Styles.DefaultSize"
+                                  Click="RecheckedLoanRequest"
+                                  Text="ពិនិត្យឡើងវិញ" />
+                }
+            </Authorized>
+        </AuthorizeView>
 
+        <AuthorizeView Policy="@Policies.Disburse">
+            <Authorized>
+                @if (data.IsApproved)
+                {
+                    <RadzenButton ButtonStyle="ButtonStyle.Primary"
+                                  Icon="@IconNames.Save"
+                                  Size="@Styles.DefaultSize"
+                                  Click="SaveLoanRequest"
+                                  Text="រក្សាទុក" />
+                    <RadzenButton ButtonStyle="ButtonStyle.Success"
+                                  Icon="@IconNames.RequestQuote"
+                                  Size="@Styles.DefaultSize"
+                                  Click="DisbruseLoanRequestNow"
+                                  Text="បញ្ចេញប្រាក់" />
+                }
+            </Authorized>
+        </AuthorizeView>
+
+        <BackButton Href="@_navService.PreviousUrl" />
+    </RadzenStack>
+}

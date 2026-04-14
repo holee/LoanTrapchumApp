@@ -1,9 +1,8 @@
-using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
-using Microsoft.AspNetCore.Components.Web;
 using Radzen.Blazor;
 using Radzen.Blazor.Rendering;
 using Applications.Features.Collaterals.Dtos;
+using Applications.Features.Customers.Queries.GetCustomerCollateralLine;
 
 namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 {
@@ -95,7 +94,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             if (!_collateralLines.Any()) return;
 
             var isShiftKey = args.ShiftKey;
-            
+
             var arrowDownKey = args.Code == "ArrowDown" || args.Key == "ArrowDown";
 
             var arrowUpKey = args.Code == "ArrowUp" || args.Key == "ArrowUp";
@@ -178,17 +177,11 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
         async Task GetCustomerCollaterals()
         {
-            var resp = await _customerService.GetCustomerCollateralLines(CustomerId);
+            var resp = await mediator.Send(new GetCustomerCollateralLinesQuery(CustomerId));
 
-            if (resp.IsSuccess)
-            {
-                _collateralLines = resp.Data!;
-            }
-            else
-            {
-                _collateralLines = [];
-            }
-                StateHasChanged();
+            _collateralLines = resp.Items;
+
+            StateHasChanged();
         }
 
         private async Task ToggleRowSelection(VCollateralLines item)

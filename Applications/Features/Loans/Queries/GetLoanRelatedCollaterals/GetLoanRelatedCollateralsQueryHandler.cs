@@ -1,4 +1,6 @@
-﻿namespace Applications.Features.Loans.Queries.GetLoanRelatedCollaterals;
+﻿using Applications.Features.Loans.Dtos.Responses;
+
+namespace Applications.Features.Loans.Queries.GetLoanRelatedCollaterals;
 
 public sealed class GetLoanRelatedCollateralsQueryHandler(ILoanService loanService) : IRequestHandler<GetLoanRelatedCollateralsQuery, IEnumerable<VLoanDisbursementCollateral>>
 {

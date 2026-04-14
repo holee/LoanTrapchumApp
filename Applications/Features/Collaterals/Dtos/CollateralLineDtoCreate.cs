@@ -32,5 +32,6 @@ public sealed class CollateralLineDtoCreate
     public decimal? HotPrice { get; set; } = 0.00M;
     public decimal? PawnPrice { get; set; } = 0.00M;
     public string? CollateralSubTypeName { get; set; }
+    public string? FileUrl { get; set; } = string.Empty;
     public bool IsUsed { get; set; } = false;
 }

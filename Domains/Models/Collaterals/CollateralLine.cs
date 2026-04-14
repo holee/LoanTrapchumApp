@@ -31,5 +31,5 @@ public sealed class CollateralLine
     public DateTime? ModifiedDt { get; set; } = DateTime.UtcNow;
     public List<CollateralLink> CollateralLinesLink { get; set; } = [];
     public Collateral? Collateral { get; set; }
-
+    public string? FileUrl { get; set; }=string.Empty;
 }

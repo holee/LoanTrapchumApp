@@ -1,4 +1,5 @@
 using Applications.Extensions;
+using Applications.Features.Customers.Queries.GetRequestByCustomerId;
 using Applications.Features.LoanRequests.Command.IsCustomerBusy;
 using Applications.Responses.ViewModels.Loans.Requests;
 using TrapchumApp.Helpers.Extensions;
@@ -8,17 +9,18 @@ namespace TrapchumApp.Pages.Lists.Customers
     {
         [Parameter] public int? BranchId { get; set; } = 0;
         [Parameter, EditorRequired] public string? CustomerId { get; set; }
-        [CascadingParameter] Task<AuthenticationState> Auth { get; set; } = default!; 
+        [CascadingParameter] Task<AuthenticationState> Auth { get; set; } = default!;
 
         protected IEnumerable<VLoanRequests> _vLoanRequests = [];
 
         private string? _userId { get; set; } = string.Empty;
+       
         async Task GetCustomerLoanReuquests()
         {
 
-            var rsp = await _customerService.GetCustomerLoanRequestAsync(BranchId, CustomerId,false);
+            var rsp = await mediator.Send(new GetRequestByCustomerIdQuery(CustomerId, null));//_customerService.GetCustomerLoanRequestAsync(BranchId, CustomerId,false);
 
-            _vLoanRequests = rsp.Data ?? [];
+            _vLoanRequests = rsp.Items;
         }
 
 
@@ -27,9 +29,9 @@ namespace TrapchumApp.Pages.Lists.Customers
 
             var auth = await Auth;
 
-            await AppState.GetAuthenticatedUser(auth.User);
-
             _userId = auth.GetUserId();
+
+            await AppState.GetAuthenticatedUser(auth.User);
 
             if (CustomerId.IsNotNullOrEmpty())
             {
@@ -48,7 +50,7 @@ namespace TrapchumApp.Pages.Lists.Customers
             if (rsp.IsError == false && rsp.Value)
             {
                 NotificationService.Notify(NotificationSeverity.Error, "This customer cannot request loan again.");
-               
+
                 return;
             }
 

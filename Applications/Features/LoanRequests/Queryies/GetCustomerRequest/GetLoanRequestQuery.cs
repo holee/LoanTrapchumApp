@@ -6,9 +6,9 @@ using ErrorOr;
 
 namespace Applications.Features.LoanRequests.Queryies.GetCustomerRequest;
 
-public record GetCustomerRequestQuery(string CustomerId) : IRequest<ErrorOr<IEnumerable<VLoanRequests>>>;
+public record GetCustomerRequestQuery(string CustomerId) : IRequest<Pager<VLoanRequests>>;
 
-public sealed class GetCustomerRequestQueryHandler : IRequestHandler<GetCustomerRequestQuery, ErrorOr<IEnumerable<VLoanRequests>>>
+public sealed class GetCustomerRequestQueryHandler : IRequestHandler<GetCustomerRequestQuery, Pager<VLoanRequests>>
 {
 
     private readonly ICustomerService _customerService;
@@ -18,16 +18,9 @@ public sealed class GetCustomerRequestQueryHandler : IRequestHandler<GetCustomer
         _customerService = customerService;
     }
 
-    public async Task<ErrorOr<IEnumerable<VLoanRequests>>> Handle(GetCustomerRequestQuery request, CancellationToken cancellationToken)
+    public async Task<Pager<VLoanRequests>> Handle(GetCustomerRequestQuery request, CancellationToken cancellationToken)
     {
-        var rsp = await _customerService.GetCustomerLoanRequestAsync(request.CustomerId, cancellationToken);
-
-        if (rsp.IsSuccess && rsp.Data is not null)
-        {
-            return ErrorOrFactory.From(rsp.Data);
-        }
-
-        return Error.NotFound("LoanRequest.NotFound", "Loan request not found for the specified customer.");
+        return await _customerService.GetCustomerLoanRequestAsync(request.CustomerId, cancellationToken);
 
     }
 }

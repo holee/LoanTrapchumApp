@@ -1,4 +1,4 @@
-﻿using Applications.Features.Loans.Responses;
+﻿using Applications.Features.Loans.Dtos.Responses;
 using Applications.Responses.ViewModels.Reports;
 
 namespace Applications.Interfaces.Loans

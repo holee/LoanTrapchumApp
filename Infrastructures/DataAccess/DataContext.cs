@@ -5,7 +5,7 @@ using Applications.Features.Customers.Dto;
 using Applications.Features.Customers.Response;
 using Applications.Features.Departments.Dto;
 using Applications.Features.Guarantor.Dtos;
-using Applications.Features.Loans.Responses;
+using Applications.Features.Loans.Dtos.Responses;
 using Applications.Responses.ViewModels.Addresses;
 using Applications.Responses.ViewModels.Auths;
 using Applications.Responses.ViewModels.Customers;

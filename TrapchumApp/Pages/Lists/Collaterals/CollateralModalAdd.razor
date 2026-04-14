@@ -7,7 +7,6 @@
 @using TrapchumApp.Services
 <EditForm @ref="editForm" EditContext="@editContext">
     <DataAnnotationsValidator />
-    <ValidationSummary />
     <input type="hidden" @bind="model.CollateralId" />
     <RadzenFieldset Text="Summary Information">
         <RadzenRow AlignItems="AlignItems.Center" class="rz-my-2">
@@ -21,7 +20,7 @@
                     <RadzenDatePicker Type="InputDateType.Date"
                                       @bind-Value="model.RegisterDate"
                                       @bind-Value:format="dd/MM/yyyy"
-                                      TValue="DateTime ?"
+                                      TValue="DateTime?"
                                       class="rz-w-100" />
                 </RadzenFormField>
             </RadzenColumn>
@@ -388,20 +387,20 @@
             </RadzenTabsItem>
         </Tabs>
     </RadzenTabs>
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
+                 class="rz-mt-2"
+                 Style="position:absolute;bottom:0.75rem;right:1rem;"
+                 JustifyContent="JustifyContent.End">
+        <RadzenButton Text="Save"
+                      Icon="save"
+                      ButtonStyle="ButtonStyle.Success"
+                      Size="ButtonSize.Small"
+                      Visible="false"
+                      Click="@FormValidate" />
+        <RadzenButton Text="Close"
+                      Icon="close"
+                      ButtonStyle="ButtonStyle.Danger"
+                      Size="ButtonSize.Small"
+                      Click="@CloseDialogue" />
+    </RadzenStack>
 </EditForm>
-<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
-             class="rz-mt-2"
-             Style="position:absolute;bottom:0.75rem;right:1rem;"
-             JustifyContent="JustifyContent.End">
-    <RadzenButton Text="Save"
-                  Icon="save"
-                  ButtonStyle="ButtonStyle.Success"
-                  Size="ButtonSize.Small"
-                  Visible="false"
-                  Click="@FormValidate" />
-    <RadzenButton Text="Close"
-                  Icon="close"
-                  ButtonStyle="ButtonStyle.Danger"
-                  Size="ButtonSize.Small"
-                  Click="@CloseDialogue" />
-</RadzenStack>

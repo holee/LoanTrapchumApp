@@ -1,6 +1,6 @@
 :root {
     --rz-numeric-input-padding-block: 0.25rem;
-    --rz-tabs-padding:0.45rem !important;
+    --rz-tabs-padding: 0.45rem !important;
     --rz-lookup-search: 2rem !important;
     --rz-panel-menu-item-background-color: #25476a !important;
     --rz-panel-menu-item-hover-background-color: #94d1b8 !important;
@@ -31,6 +31,7 @@
     --rz-progressbar-height: 0.15rem !important;
     --rz-dialog-title-background-color: var(--rz-base-200) !important;
     --rz-dialog-background-color: var(--rz-base-200) !important;
+    --rz-layout-body-padding: 0.5rem !important;
 }
 
 table.table th {
@@ -418,6 +419,11 @@ h1:focus {
 
 .validation-message {
     color: #e50000;
+}
+
+
+.rz-text-caption {
+    font-family: kh_siemreap, 'Khmer OS Siemreap', sans-serif !important;
 }
 
 .blazor-error-boundary {

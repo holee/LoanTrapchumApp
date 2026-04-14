@@ -40,10 +40,10 @@ public sealed class CustomerService(ICustomerService cusService) : ICustomerServ
     //    return await cusService.GetCustomerByIdAsync(customerId);
     //}
 
-    public async Task<Result<IEnumerable<VCollateralLines>>> GetCustomerCollateralLines(string? customerId, bool includeInUsed = false)
-    {
-        return await cusService.GetCustomerCollateralLines(customerId, includeInUsed);
-    }
+    //public async Task<Result<IEnumerable<VCollateralLines>>> GetCustomerCollateralLines(string? customerId, bool includeInUsed = false)
+    //{
+    //    return await cusService.GetCustomerCollateralLines(customerId, includeInUsed);
+    //}
 
 
     //public async Task<Result<VCustomerDetails>> GetCustomerDetailsByIdAsync(string? customerId, bool include = false, CancellationToken cancellation = default)
@@ -53,15 +53,15 @@ public sealed class CustomerService(ICustomerService cusService) : ICustomerServ
 
 
 
-    public async Task<Result<VCustomerDetails>> GetCustomerForRequestLoanAsync(string? customerId)
-    {
-        return await cusService.GetCustomerForRequestLoanAsync(customerId);
-    }
+    //public async Task<Result<VCustomerDetails>> GetCustomerForRequestLoanAsync(string? customerId)
+    //{
+    //    return await cusService.GetCustomerForRequestLoanAsync(customerId);
+    //}
 
-    public async Task<Result<IEnumerable<VLoanDisbursments>>> GetCustomerLoanHistoryAsync(string? customerId)
-    {
-        return await cusService.GetCustomerLoanHistoryAsync(customerId);
-    }
+    //public async Task<Result<IEnumerable<VLoanDisbursments>>> GetCustomerLoanHistoryAsync(string? customerId)
+    //{
+    //    return await cusService.GetCustomerLoanHistoryAsync(customerId);
+    //}
 
 
 
@@ -71,28 +71,28 @@ public sealed class CustomerService(ICustomerService cusService) : ICustomerServ
         throw new NotImplementedException();
     }
 
-    public async Task<Result<EntityCustomerCreate>> GetCustomerUpdateAsync(string? customerId)
-    {
-        var updateCustomer = await cusService.GetCustomerByIdAsync(customerId);
+    //public async Task<Result<EntityCustomerCreate>> GetCustomerUpdateAsync(string? customerId)
+    //{
+    //    var updateCustomer = await  cusService.GetCustomerByIdAsync(customerId);
 
-        if (!updateCustomer.IsSuccess)
-        {
-            return Result.Failure<EntityCustomerCreate>(ErrorResponse.NotFound(updateCustomer.ErrMessage));
-        }
+    //    if (!updateCustomer.IsSuccess)
+    //    {
+    //        return Result.Failure<EntityCustomerCreate>(ErrorResponse.NotFound(updateCustomer.ErrMessage));
+    //    }
 
-        var req = updateCustomer.Data?.ToCustomer();
+    //    var req = updateCustomer.Data?.ToCustomer();
 
-        if (req is null)
-        {
-            return Result.Failure<EntityCustomerCreate>(ErrorResponse.NotFound("Customer information was changed successfuly"));
-        }
+    //    if (req is null)
+    //    {
+    //        return Result.Failure<EntityCustomerCreate>(ErrorResponse.NotFound("Customer information was changed successfuly"));
+    //    }
 
-        return Result.Success(req!);
-    }
+    //    return Result.Success(req!);
+    //}
 
-    public async Task<Result<IEnumerable<VLoanRequests>>> GetCustomerLoanRequestAsync(int? branchId, string? customerId, bool include = false, CancellationToken cancellation = default)
-    {
-        return await cusService.GetCustomerLoanRequestAsync(customerId,cancellation);
-    }
+    //public async Task<Result<IEnumerable<VLoanRequests>>> GetCustomerLoanRequestAsync(int? branchId, string? customerId, bool include = false, CancellationToken cancellation = default)
+    //{
+    //    return await cusService.GetCustomerLoanRequestAsync(customerId,cancellation);
+    //}
 
 }

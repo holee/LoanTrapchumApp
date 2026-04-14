@@ -6,7 +6,7 @@ using Applications.Features.Customers.Queries.GetCustomerAsPaging;
 using Applications.Features.Customers.Response;
 using Applications.Features.LoanPayments.Requests;
 using Applications.Features.LoanRequests.Requests;
-using Applications.Features.Loans.Requests;
+using Applications.Features.Loans.Dtos.Requests;
 using Applications.Interfaces.Lists;
 using Applications.Responses.Loans.Disbursements;
 using Applications.Responses.Paginations;

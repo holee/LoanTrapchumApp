@@ -1,4 +1,4 @@
-﻿using Applications.Features.Loans.Responses;
+﻿using Applications.Features.Loans.Dtos.Responses;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using ClosedXML.Excel;
 namespace TrapchumApp.Services;

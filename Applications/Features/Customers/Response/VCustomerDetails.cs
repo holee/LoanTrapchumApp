@@ -1,4 +1,6 @@
-﻿namespace Applications.Features.Customers.Response;
+﻿using Applications.Features.Loans.Dtos.Responses;
+
+namespace Applications.Features.Customers.Response;
 
 public sealed class VCustomerDetails
 {

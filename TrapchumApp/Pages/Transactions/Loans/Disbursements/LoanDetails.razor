@@ -3,185 +3,187 @@
 @using TrapchumApp.Pages.Transactions.Loans.Repayments
 <PageTitle>Loan Details</PageTitle>
 <LoanInfos LoanSchedule="@loanSchedule" Currency="@CurrencyId" LoanId="@LoanId" BranchId="@BranchId" />
-<RadzenTabs Change="SelectedTabChanged" RenderMode="TabRenderMode.Server" @bind-SelectedIndex="@_selectedTabIndex">
-    <Tabs>
-        <RadzenTabsItem Text="Schedule" Icon="schedule">
-            <RadzenDataGrid Data="@Schedules"
-                            Density="Density.Compact"
-                            Responsive
-                            AllowAlternatingRows="true"
-                            GridLines="DataGridGridLines.Both"
-                            SelectionMode="DataGridSelectionMode.Single"
-                            @bind-Value="SelectedSchedules"
-                            ColumnWidth="15rem"
-                            CellRender="CellRender"
-                            CellContextMenu="@OnCellContextMenu"
-                            RowDoubleClick="@OnRowDoubleClick"
-                            TItem="VSchedule">
-                <Columns>
-                    <RadzenDataGridColumn Property="@(nameof(VSchedule.InstallmentNo))"
-                                          Title="#"
-                                          Width="2rem"
-                                          Sortable="false" />
-                    <RadzenDataGridColumn Property="@(nameof(VSchedule.PaymentDate))"
-                                          Title="Date"
-                                          Width="5rem"
-                                          Sortable="false">
-                        <Template>
-                            @context.PaymentDate.DayFirst()
-                        </Template>
-                    </RadzenDataGridColumn>
-                    <RadzenDataGridColumn Property="@(nameof(VSchedule.TotalDay))"
-                                          Title="Days"
-                                          Width="3rem"
-                                          Context="c"
-                                          TextAlign="TextAlign.Center"
-                                          Sortable="false">
-                        <Template>
-                            @c.TotalDay
-                        </Template>
-                        <FooterTemplate>
-                            @(loanSchedule!.Schedules.Sum(x => x.TotalDay))
-                        </FooterTemplate>
-                    </RadzenDataGridColumn>
-                    <RadzenDataGridColumn Property="@(nameof(VSchedule.Principle))"
-                                          Title="Principal"
-                                          TextAlign="TextAlign.Right"
-                                          Width="6rem"
-                                          Context="c"
-                                          Sortable="false">
-                        <Template>
-                            @c.Principle.Format(CurrencyId)
-                        </Template>
-                        <FooterTemplate>
-                            <strong>
-                                @(loanSchedule!.Schedules.Sum(x => x.Principle).Format(CurrencyId))
-                            </strong>
-                        </FooterTemplate>
-                    </RadzenDataGridColumn>
-                    <RadzenDataGridColumn Property="@(nameof(VSchedule.Interest))"
-                                          Title="Interest"
-                                          TextAlign="TextAlign.Right"
-                                          Width="6rem"
-                                          Sortable="false">
-                        <Template>
-                            @context.Interest.Format(CurrencyId)
-                        </Template>
-                        <FooterTemplate>
-                            <strong>
-                                @(loanSchedule!.Schedules.Sum(x => x.Interest).Format(CurrencyId))
-                            </strong>
-                        </FooterTemplate>
-                    </RadzenDataGridColumn>
-                    <RadzenDataGridColumn Property="@(nameof(VSchedule.CollectionFee))"
-                                          Title="Collection Fee"
-                                          Width="6rem"
-                                          TextAlign="TextAlign.Right"
-                                          Sortable="false">
-                        <Template>
-                            @context.CollectionFee.Format(CurrencyId)
-                        </Template>
-                        <FooterTemplate>
-                            <strong>
-                                @(loanSchedule!.Schedules.Sum(x => x.CollectionFee).Format(CurrencyId))
-                            </strong>
-                        </FooterTemplate>
-                    </RadzenDataGridColumn>
-                    <RadzenDataGridColumn Property="@(nameof(VSchedule.CollectionFee))"
-                                          Title="Penalty"
-                                          Width="6rem"
-                                          TextAlign="TextAlign.Right"
-                                          Sortable="false">
-                        <Template>
-                            @context.PenaltyAmount.Format(CurrencyId)
-                        </Template>
-                    </RadzenDataGridColumn>
-                    <RadzenDataGridColumn Property="@(nameof(VSchedule.TotalPay))"
-                                          Title="Amount"
-                                          TextAlign="TextAlign.Right"
-                                          Width="6rem"
-                                          Context="c"
-                                          Sortable="false">
-                        <Template>
-                            @c.TotalPay.Format(CurrencyId)
-                        </Template>
-                        <FooterTemplate>
-                            <strong>
-                                @(loanSchedule!.Schedules.Sum(x => x.TotalPay).Format(CurrencyId))
-                            </strong>
-                        </FooterTemplate>
-                    </RadzenDataGridColumn>
-                    <RadzenDataGridColumn Property="@(nameof(VSchedule.LoanOutstanding))"
-                                          Title="OutStanding"
-                                          Width="7rem"
-                                          TextAlign="TextAlign.Right"
-                                          Sortable="false">
-                        <Template>
-                            @context.LoanOutstanding.Format(CurrencyId)
-                        </Template>
-                    </RadzenDataGridColumn>
-                    <RadzenDataGridColumn Property="@(nameof(VScheduleVm.ScheduleStatus))"
-                                          Title="Status"
-                                          Width="4rem"
-                                          TextAlign="TextAlign.Center"
-                                          Sortable="false">
-                    </RadzenDataGridColumn>
-                    <RadzenDataGridColumn Property="@(nameof(VScheduleVm.ScheduleStatus))"
-                                          Title="Action"
-                                          Context="s"
-                                          Width="3rem"
-                                          TextAlign="TextAlign.Center"
-                                          Sortable="false">
-                        <Template>
-                            <RadzenButton Size="ButtonSize.ExtraSmall"
-                                          Icon="more_vert"
-                                          Variant="Variant.Text"
-                                          Click="@((args)=>ShowContextMenu(args,s))" />
-                        </Template>
-                    </RadzenDataGridColumn>
-                </Columns>
-            </RadzenDataGrid>
-        </RadzenTabsItem>
+<RadzenCard Variant="Variant.Outlined">
+    <RadzenTabs Change="SelectedTabChanged" RenderMode="TabRenderMode.Server" @bind-SelectedIndex="@_selectedTabIndex">
+        <Tabs>
+            <RadzenTabsItem Text="Schedule" Icon="schedule">
+                <RadzenDataGrid Data="@Schedules"
+                                Density="Density.Compact"
+                                Responsive
+                                AllowAlternatingRows="true"
+                                GridLines="DataGridGridLines.Both"
+                                SelectionMode="DataGridSelectionMode.Single"
+                                @bind-Value="SelectedSchedules"
+                                ColumnWidth="15rem"
+                                CellRender="CellRender"
+                                CellContextMenu="@OnCellContextMenu"
+                                RowDoubleClick="@OnRowDoubleClick"
+                                Style="height:30rem;max-height:40rem;overflow:auto;"
+                                TItem="VSchedule">
+                    <Columns>
+                        <RadzenDataGridColumn Property="@(nameof(VSchedule.InstallmentNo))"
+                                              Title="#"
+                                              Width="2rem"
+                                              Sortable="false" />
+                        <RadzenDataGridColumn Property="@(nameof(VSchedule.PaymentDate))"
+                                              Title="Date"
+                                              Width="5rem"
+                                              Sortable="false">
+                            <Template>
+                                @context.PaymentDate.DayFirst()
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Property="@(nameof(VSchedule.TotalDay))"
+                                              Title="Days"
+                                              Width="3rem"
+                                              Context="c"
+                                              TextAlign="TextAlign.Center"
+                                              Sortable="false">
+                            <Template>
+                                @c.TotalDay
+                            </Template>
+                            <FooterTemplate>
+                                @(loanSchedule!.Schedules.Sum(x => x.TotalDay))
+                            </FooterTemplate>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Property="@(nameof(VSchedule.Principle))"
+                                              Title="Principal"
+                                              TextAlign="TextAlign.Right"
+                                              Width="6rem"
+                                              Context="c"
+                                              Sortable="false">
+                            <Template>
+                                @c.Principle.Format(CurrencyId)
+                            </Template>
+                            <FooterTemplate>
+                                <strong>
+                                    @(loanSchedule!.Schedules.Sum(x => x.Principle).Format(CurrencyId))
+                                </strong>
+                            </FooterTemplate>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Property="@(nameof(VSchedule.Interest))"
+                                              Title="Interest"
+                                              TextAlign="TextAlign.Right"
+                                              Width="6rem"
+                                              Sortable="false">
+                            <Template>
+                                @context.Interest.Format(CurrencyId)
+                            </Template>
+                            <FooterTemplate>
+                                <strong>
+                                    @(loanSchedule!.Schedules.Sum(x => x.Interest).Format(CurrencyId))
+                                </strong>
+                            </FooterTemplate>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Property="@(nameof(VSchedule.CollectionFee))"
+                                              Title="Collection Fee"
+                                              Width="6rem"
+                                              TextAlign="TextAlign.Right"
+                                              Sortable="false">
+                            <Template>
+                                @context.CollectionFee.Format(CurrencyId)
+                            </Template>
+                            <FooterTemplate>
+                                <strong>
+                                    @(loanSchedule!.Schedules.Sum(x => x.CollectionFee).Format(CurrencyId))
+                                </strong>
+                            </FooterTemplate>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Property="@(nameof(VSchedule.CollectionFee))"
+                                              Title="Penalty"
+                                              Width="6rem"
+                                              TextAlign="TextAlign.Right"
+                                              Sortable="false">
+                            <Template>
+                                @context.PenaltyAmount.Format(CurrencyId)
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Property="@(nameof(VSchedule.TotalPay))"
+                                              Title="Amount"
+                                              TextAlign="TextAlign.Right"
+                                              Width="6rem"
+                                              Context="c"
+                                              Sortable="false">
+                            <Template>
+                                @c.TotalPay.Format(CurrencyId)
+                            </Template>
+                            <FooterTemplate>
+                                <strong>
+                                    @(loanSchedule!.Schedules.Sum(x => x.TotalPay).Format(CurrencyId))
+                                </strong>
+                            </FooterTemplate>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Property="@(nameof(VSchedule.LoanOutstanding))"
+                                              Title="OutStanding"
+                                              Width="7rem"
+                                              TextAlign="TextAlign.Right"
+                                              Sortable="false">
+                            <Template>
+                                @context.LoanOutstanding.Format(CurrencyId)
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Property="@(nameof(VScheduleVm.ScheduleStatus))"
+                                              Title="Status"
+                                              Width="4rem"
+                                              TextAlign="TextAlign.Center"
+                                              Sortable="false">
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Property="@(nameof(VScheduleVm.ScheduleStatus))"
+                                              Title="Action"
+                                              Context="s"
+                                              Width="3rem"
+                                              TextAlign="TextAlign.Center"
+                                              Sortable="false">
+                            <Template>
+                                <RadzenButton Size="ButtonSize.ExtraSmall"
+                                              Icon="more_vert"
+                                              Variant="Variant.Text"
+                                              Click="@((args)=>ShowContextMenu(args,s))" />
+                            </Template>
+                        </RadzenDataGridColumn>
+                    </Columns>
+                </RadzenDataGrid>
+            </RadzenTabsItem>
        
-        <RadzenTabsItem Text="Paid Schedule" Icon="paid">
-            <SchedulesPaid BranchId="@BranchId" LoanId="@LoanId" CurrencyId="@CurrencyId" />
-        </RadzenTabsItem>
-        <RadzenTabsItem Text="Show By Schedule">
-            <RadzenStack AlignItems="AlignItems.Center"
-                         Orientation="Orientation.Horizontal"
-                         JustifyContent="JustifyContent.End">
-                <RadzenButton Click="@DownLoadScheduleAsPdf"
-                              Size="ButtonSize.ExtraSmall"
-                              ButtonStyle="ButtonStyle.Secondary"
-                              Variant="Variant.Text"
-                              Text="Export All"
-                              IconColor="@Colors.Danger"
-                              Icon="@IconNames.Pdf" />
-            </RadzenStack>
+            <RadzenTabsItem Text="Paid Schedule" Icon="paid">
+                <SchedulesPaid BranchId="@BranchId" LoanId="@LoanId" CurrencyId="@CurrencyId" />
+            </RadzenTabsItem>
+            <RadzenTabsItem Text="Show By Schedule">
+                <RadzenStack AlignItems="AlignItems.Center"
+                             Orientation="Orientation.Horizontal"
+                             JustifyContent="JustifyContent.End">
+                    <RadzenButton Click="@DownLoadScheduleAsPdf"
+                                  Size="ButtonSize.ExtraSmall"
+                                  ButtonStyle="ButtonStyle.Secondary"
+                                  Variant="Variant.Text"
+                                  Text="Export All"
+                                  IconColor="@Colors.Danger"
+                                  Icon="@IconNames.Pdf" />
+                </RadzenStack>
+                <div style="height:30rem;max-height:40rem;overflow:auto;margin:0;padding:0">
+                    @foreach (var s in _loanSchedules ?? [])
+                    {
+                        int x = 1;
+                        <RadzenCard Variant="Variant.Outlined" class="rz-my-2">
+                            <SplitSchedule LoanSchedule="@s"
+                                           BranchId="@BranchId"
+                                           LoanId="@LoanId"
+                                           TotalScedules="@_loanSchedules!.Count()"
+                                           ScheduleNum="@s.ScheduleNum" />
+                        </RadzenCard>
 
-            @foreach (var s in _loanSchedules ?? [])
-            {
-                int x = 1;
-
-                <RadzenCard Variant="Variant.Outlined" class="rz-my-2">
-                    <SplitSchedule LoanSchedule="@s"
-                                   BranchId="@BranchId"
-                                   LoanId="@LoanId"
-                                   TotalScedules="@_loanSchedules!.Count()"
-                                   ScheduleNum="@s.ScheduleNum" />
-                </RadzenCard>
-
-                x++;
-            }
-
-        </RadzenTabsItem>
-        <RadzenTabsItem Text="Payment" Icon="@IconNames.Paid" Visible="@_isPaymentTab">
-            <PaymentTab CurrencyId="@CurrencyId"
-                        LoanPaymentCreate="@_loanPayment"
-                        CloseTab="@CloseTab" />
-        </RadzenTabsItem>
-    </Tabs>
-</RadzenTabs>
+                        x++;
+                    }
+                </div>
+            </RadzenTabsItem>
+            <RadzenTabsItem Text="Payment" Icon="@IconNames.Paid" Visible="@_isPaymentTab">
+                <PaymentTab CurrencyId="@CurrencyId"
+                            LoanPaymentCreate="@_loanPayment"
+                            CloseTab="@CloseTab" />
+            </RadzenTabsItem>
+        </Tabs>
+    </RadzenTabs>
+</RadzenCard>
 <RadzenStack Orientation="Orientation.Horizontal"
              AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
     <RadzenLink Path="@_navService.PreviousUrl" Text="Back" />

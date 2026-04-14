@@ -5,7 +5,7 @@
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
 @using Applications.Features.LoanRequests.Interfaces
-@using Applications.Features.Loans.Requests
+@using Applications.Features.Loans.Dtos.Requests
 @using TrapchumApp.Services
 @foreach (var item in groupedSchedules)
 {
@@ -102,45 +102,6 @@
     protected override void OnInitialized()
     {
 
-        // var groups = Schedules.Chunk(4).ToList();
-
-        // for (int i = 0; i < groups.Count; i++)
-        // {
-        //     var group = groups[i].ToList();
-
-        //     var firstGroup = group.First();
-        //     var lastGroup = group.Last();
-
-        //     var addNewFirst = new LoanScheduleDtoCreate
-        //     {
-        //         InstallmentNo = 0,
-        //         PaymentDate = null,
-        //         TotalDay = 0,
-        //         Principal = 0,
-        //         Interest = 0,
-        //         CollectionFee = 0,
-        //         TotalPay = 0,
-        //         LoanOutstanding = (firstGroup.LoanOutstanding + firstGroup.Principal)
-        //     };
-
-        //     var addNewLast = new LoanScheduleDtoCreate
-        //     {
-        //         InstallmentNo = lastGroup.InstallmentNo + 1,
-        //         PaymentDate = null,
-        //         TotalDay = 0,
-        //         Principal = lastGroup.LoanOutstanding,
-        //         Interest = 0,
-        //         CollectionFee = 0,
-        //         TotalPay = 0,
-        //         LoanOutstanding = 0
-        //     };
-        //     group.Add(addNewFirst);
-        //     group.Add(addNewLast);
-        //     group = group.OrderBy(x => x.InstallmentNo).ToList();
-        //     groupedSchedules.Add(i, group);
-        // }
-
-
         CreateGroupedSchedules();
 
         base.OnInitialized();
@@ -148,7 +109,7 @@
 
     void OnRowRender(RowRenderEventArgs<LoanScheduleDtoCreate> arg)
     {
-        if (arg.Data.InstallmentNo % 5 == 0)
+        if (arg.Data!.InstallmentNo % 5 == 0)
         {
             //arg.Attributes.Add("class", "rz-state-highlight rz-data-row recently-edited");
         }

@@ -1,5 +1,5 @@
 ﻿using Applications.Enumerations;
-using Applications.Features.Loans.Responses;
+using Applications.Features.Loans.Dtos.Responses;
 using Applications.Responses.Paginations;
 using Microsoft.EntityFrameworkCore;
 using System.Data;

@@ -3,9 +3,9 @@ using Applications.Calculations.Extensions;
 using Applications.Commons.Mappers;
 using Applications.Enumerations;
 using Applications.Features.LoanPayments.Requests;
+using Applications.Features.Loans.Dtos.Responses;
 using Applications.Features.Loans.Queries.GetLoanById;
 using Applications.Features.Loans.Queries.GetLoanWithScedules;
-using Applications.Features.Loans.Responses;
 using Applications.Features.Loans.Services;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using TrapchumApp.Helpers.Extensions;
@@ -14,7 +14,7 @@ using TrapchumApp.Shared;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Disbursements;
 
-public partial class LoanDetails(ScheduleService scheduleService)
+public partial class LoanDetails
 {
     [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
     [CascadingParameter] public CascadingAppState BState { get; set; } = default!;

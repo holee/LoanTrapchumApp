@@ -16,7 +16,7 @@ using Applications.Features.LoanRequests.Command.SaveEditLoanRequest;
 using Applications.Features.LoanRequests.Queryies.GetLoanRequestDetailById;
 using Applications.Features.LoanRequests.Queryies.GetLoanRequestsDocuments;
 using Applications.Features.LoanRequests.Requests;
-using Applications.Features.Loans.Requests;
+using Applications.Features.Loans.Dtos.Requests;
 using Applications.Features.Notifications.Command.CreateNotification;
 using Applications.Features.Notifications.Dto;
 using Applications.Interfaces.Lists;

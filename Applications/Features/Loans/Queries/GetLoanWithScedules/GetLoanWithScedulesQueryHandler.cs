@@ -1,4 +1,5 @@
-﻿using Applications.Interfaces;
+﻿using Applications.Features.Loans.Dtos.Responses;
+using Applications.Interfaces;
 using ErrorOr;
 
 namespace Applications.Features.Loans.Queries.GetLoanWithScedules;

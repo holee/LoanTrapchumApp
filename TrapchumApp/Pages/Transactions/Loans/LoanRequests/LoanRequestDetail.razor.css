@@ -1,0 +1,23 @@
+::deep .rz-text {
+    font-family: kh_siemreap, 'Khmer OS Siemreap', sans-serif;
+}
+
+::deep .rz-fieldset-content-wrapper {
+    font-family: kh_siemreap, 'Khmer OS Siemreap', sans-serif;
+}
+
+::deep .rz-button {
+    font-family: kh_siemreap, 'Khmer OS Siemreap', sans-serif;
+}
+
+::deep .rz-tabview-nav .rz-tabview-title {
+    font-family: kh_siemreap, 'Khmer OS Siemreap', sans-serif;
+}
+
+::deep .rz-textarea {
+    font-family: kh_siemreap, 'Khmer OS Siemreap', sans-serif;
+}
+
+::deep .rz-text-caption {
+    font-family: kh_siemreap, 'Khmer OS Siemreap', sans-serif !important;
+}

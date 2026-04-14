@@ -1,4 +1,5 @@
-﻿using Applications.Interfaces;
+﻿using Applications.Features.Loans.Dtos.Responses;
+using Applications.Interfaces;
 using ErrorOr;
 using Microsoft.Extensions.Logging;
 

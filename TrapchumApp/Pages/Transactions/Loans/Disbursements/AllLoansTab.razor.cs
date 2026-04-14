@@ -1,7 +1,7 @@
 ﻿using Applications.Enumerations;
 using Applications.Features.Branches.Dtos;
+using Applications.Features.Loans.Dtos.Responses;
 using Applications.Features.Loans.Queries.GetLoanByBranchId;
-using Applications.Features.Loans.Responses;
 using Applications.Responses.Paginations;
 using TrapchumApp.Helpers.Extensions;
 using TrapchumApp.Shared;

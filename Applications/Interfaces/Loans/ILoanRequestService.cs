@@ -1,7 +1,7 @@
 ﻿using Applications.Enumerations;
 using Applications.Features.CreditAgents.Requests;
 using Applications.Features.LoanRequests.Requests;
-using Applications.Features.Loans.Responses;
+using Applications.Features.Loans.Dtos.Responses;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Requests;

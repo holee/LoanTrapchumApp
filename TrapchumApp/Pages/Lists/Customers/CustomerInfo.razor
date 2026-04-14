@@ -2,91 +2,73 @@
 @using Applications.Features.Customers.Response
 @using Applications.Features.LoanRequests.Interfaces
 @using TrapchumApp.Helpers.Extensions
-<RadzenRow>
-    <RadzenColumn Size="2">
-        <RadzenStack Orientation="Orientation.Vertical"
-                     AlignItems="AlignItems.Center"
-                     Wrap="FlexWrap.Wrap"
-                     class="rz-mx-auto"
-                     JustifyContent="JustifyContent.Center">
-            <RadzenImage Path="@Customer?.Photo"
-                         Style="width:10rem;height:10rem;border-radius:50%;object-fit:cover;"
-                         AlternateText="Customer">
-            </RadzenImage>
-        </RadzenStack>
-    </RadzenColumn>
-    <RadzenColumn Size="10">
-        <table class="table-sm">
-            <tbody>
-                <tr>
-                    <th class="rz-w-max-25">Name</th>
-                    <td>
-                        @Customer?.AltName
-                    </td>
-                    <th class="rz-w-max-25">En-Name</th>
-                    <td>
-                        @Customer?.FullName
-                    </td>
-                </tr>
-                <tr>
-                    <th class="rz-w-max-25">Salutation</th>
-                    <td>
-                        @Customer?.Salutation
-                    </td>
-                    <th class="rz-w-max-25">Spouse Name</th>
-                    <td>
-                        @Customer?.SpouseName
-                    </td>
-                </tr>
-                <tr>
-                    <th class="rz-w-max-25">Phone</th>
-                    <td>
-                        @Customer?.Phone
-                    </td>
-                    <th class="rz-w-max-25">Children</th>
-                    <td>
-                        @Customer?.NoOfChildren
-                    </td>
-                </tr>
-                <tr>
-                    <th class="rz-w-max-25">Circle</th>
-                    <td>
-                        @Customer?.Circle
-                    </td>
-                    <th class="rz-w-max-25">Occupation</th>
-                    <td>
-                        @Customer?.Occupation
-                    </td>
-                </tr>
-                <tr>
-                    <th class="rz-w-max-25">Email</th>
-                    <td>
-                        @Customer?.EmailAddress
-                    </td>
-                    <th class="rz-w-max-25">Address</th>
-                    <td>
-                        @Customer?.ToString()
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </RadzenColumn>
-</RadzenRow>
+
+<RadzenCard Variant="Variant.Flat" class="rz-p-1 rz-background-color-base-200">
+    <RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal"
+                 JustifyContent="JustifyContent.End">
+        @if (Customer?.IsLoanActive == true)
+        {
+            <RadzenBadge BadgeStyle="BadgeStyle.Danger" Text="Active Loan" />
+        }
+        else
+        {
+            <RadzenBadge BadgeStyle="BadgeStyle.Success" Text="No Active Loan" />
+        }
+    </RadzenStack>
+    <RadzenRow AlignItems="AlignItems.Start" Gap="1.5rem">
+        <RadzenColumn Size="12" SizeMD="2">
+            <RadzenStack Orientation="Orientation.Vertical"
+                         AlignItems="AlignItems.Center"
+                         JustifyContent="JustifyContent.Center"
+                         class="rz-pt-2">
+                <RadzenImage Path="@Customer?.Photo"
+                             Style="width:9rem;height:9rem;border-radius:50%;object-fit:cover;border:3px solid var(--rz-base-300);box-shadow:0 2px 8px rgba(0,0,0,0.10);"
+                             AlternateText="Customer" />
+                <RadzenText TextStyle="TextStyle.Subtitle2"
+                            class="rz-mt-2 rz-text-align-center"
+                            Style="max-width:10rem;word-break:break-word;font-family:'Khmer OS Siemreap',kh_siemreap,sans-serif;">
+                    @Customer?.AltName
+                </RadzenText>
+            </RadzenStack>
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeMD="10">
+            <RadzenRow RowGap="0.75rem" class="rz-mt-1">
+                @* Personal Information *@
+                @InfoField("badge", "Name", Customer?.AltName, khmerFont: true)
+                @InfoField("translate", "En-Name", Customer?.FullName)
+                @InfoField("person", "Salutation", Customer?.Salutation)
+                @InfoField("cake", "Date of Birth", Customer?.DateOfBirth?.ToShortDateString())
+
+                @* Contact *@
+                @InfoField("phone", "Phone", Customer?.Phone)
+                @InfoField("phone_android", "Alt Phone", Customer?.AltPhone)
+                @InfoField("email", "Email", Customer?.EmailAddress)
+                @InfoField("work", "Occupation", Customer?.Occupation)
+
+                @* Family *@
+                @InfoField("favorite", "Spouse Name", Customer?.SpouseName, khmerFont: true)
+                @InfoField("wc", "Marital Status", Customer?.MarritalStatus)
+                @InfoField("child_care", "Children", Customer?.NoOfChildren?.ToString())
+                @InfoField("group", "Circle", Customer?.Circle?.ToString())
+
+                @* Address *@
+                @InfoField("credit_card", "ID Card", Customer?.IdCard, 6)
+                @InfoField("location_on", "Address", Customer?.ToString(), 6)
+            </RadzenRow>
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
 
 @code
 {
-    [Parameter]
-    public VCustomerDetails? Customer { get; set; }
-    [Parameter]
-    public string? CustomerId { get; set; } = string.Empty;
-
+    [Parameter] public VCustomerDetails? Customer { get; set; }
+    [Parameter] public string? CustomerId { get; set; } = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
-
-        if (Customer is null || !string.IsNullOrEmpty(CustomerId))
+        if (Customer is null && !string.IsNullOrEmpty(CustomerId))
         {
-            var rsp = await mediator.Send(new GetCustomerDetailByIdQuery(CustomerId, false)); //_customerService.GetCustomerDetailsByIdAsync(CustomerId, false);
+            var rsp = await mediator.Send(new GetCustomerDetailByIdQuery(CustomerId, false));
 
             if (rsp.IsSuccess())
             {
@@ -97,5 +79,20 @@
         await base.OnInitializedAsync();
     }
 
- 
+    static RenderFragment InfoField(string icon, string label, string? value, int sizeSM = 3, bool khmerFont = false) => __builder =>
+    {
+        var valueStyle = khmerFont
+            ? "min-height:1.25rem;font-family:'Khmer OS Siemreap',kh_siemreap,sans-serif;"
+            : "min-height:1.25rem;";
+
+        <RadzenColumn Size="6" SizeSM="@sizeSM">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+                <RadzenIcon Icon="@icon" Style="font-size:1rem;color:var(--rz-base-600);" />
+                <RadzenText TextStyle="TextStyle.Overline" class="rz-mb-0 rz-color-base-600">@label</RadzenText>
+            </RadzenStack>
+            <RadzenText TextStyle="TextStyle.Body2" class="rz-mb-0" Style="@valueStyle">
+                @(string.IsNullOrWhiteSpace(value) ? "—" : value)
+            </RadzenText>
+        </RadzenColumn>
+    };
 }

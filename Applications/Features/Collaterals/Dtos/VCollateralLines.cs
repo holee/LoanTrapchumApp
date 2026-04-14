@@ -1,4 +1,4 @@
-﻿using Applications.Features.Loans.Responses;
+﻿using Applications.Features.Loans.Dtos.Responses;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Applications.Features.Collaterals.Dtos;
@@ -29,6 +29,7 @@ public sealed class VCollateralLines
     public decimal ValueRate { get; set; }
     public string? LoanStatus { get; set; }=string.Empty;
     public DateTime? RegisterDate { get; set; }
+    public string? FileUrl { get; set; } = string.Empty;
 
     [NotMapped]
     public int RowIndex { get; set; } = 1;

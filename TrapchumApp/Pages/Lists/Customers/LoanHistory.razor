@@ -1,4 +1,4 @@
-@using Applications.Features.Loans.Responses
+@using Applications.Features.Loans.Dtos.Responses
 @using Applications.Responses.ViewModels.Loans
 @using TrapchumApp.Pages.Transactions.Loans.Menu
 <RadzenDataGrid GridLines="DataGridGridLines.Both"
@@ -8,6 +8,11 @@
                 AllowPaging="true"
                 PageSize="10"
                 AllowSorting="false"
+                RowRender="@OnRowRender"
+                RowSelect="@OnRowSelect"
+                TItem="VLoanDisbursments"
+                CellContextMenu="@ContextMenuClick"
+                Style="max-height:10rem;overflow:auto;padding:0;margin:0;"
                 Data="VLoanDisbursements">
     <Columns>
         <RadzenDataGridColumn Property="LoanDate"
@@ -17,7 +22,7 @@
                               TextAlign="TextAlign.Center"
                               Sortable="false">
             <Template>
-                @(VLoanDisbursements.ToList().IndexOf(l) + 1)
+                @l.RowIndex
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Title="LoanDate"
@@ -32,7 +37,7 @@
                               Context="c"
                               Sortable="false">
             <Template>
-                @c.Amount.Format(c.CurrencyId)
+                @c.Principle.Format(c.CurrencyId)
             </Template>
 
         </RadzenDataGridColumn>
@@ -47,6 +52,28 @@
                               Sortable="false">
             <Template>
                 @c.CollectionFeeRate
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="Paid Principle"
+                              Context="c"
+                              Sortable="false">
+            <Template>
+                @c.PaidPrinciple
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="Paid Interest"
+                              Context="c"
+                              Sortable="false">
+            <Template>
+                @c.PaidInterest
+            </Template>
+        </RadzenDataGridColumn>
+
+        <RadzenDataGridColumn Title="OutStanding"
+                              Context="c"
+                              Sortable="false">
+            <Template>
+                @c.OutStanding
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Title="Last Payment"
@@ -69,7 +96,7 @@
             <Template>
                 <RadzenButton Icon="@IconNames.MoreVert"
                               Size="ButtonSize.Small"
-                              Click="((arg)=>ShowContextMenu(arg,c))"
+                              Click="((arg)=>ShowContextMenuWithContent(arg,c))"
                               Variant="Variant.Text">
                 </RadzenButton>
             </Template>
@@ -84,12 +111,6 @@
     private string _getChangeCreditAgentUrl = "";
     private string _getLoanDetailsUrl = "";
     private string _getLoanWriteOffUrl = "";
-
-    void ShowContextMenu(MouseEventArgs args, VLoanDisbursments b)
-    {
-        ContextMenuService.Open(args, ds =>@<LoanMenu Data="@b" />);
-    }
-
 
     async Task DownLoadScheduleAsExcel(VLoanDisbursments? p)
     {
@@ -133,19 +154,19 @@
         ContextMenuService.Open(args, ds => @<RadzenMenu Style="font-size:0.8rem;">
             <RadzenMenuItem Icon="money"
                             Path="@_getPaymentSchedulesUrl"
-                            Visible="@bState.CanRecievePayment"
+                            Disabled="@(!bState.CanRecievePayment)"
                             Text="Recieve Payment"></RadzenMenuItem>
             <RadzenMenuItem Icon="paid"
                             Path="@_getSchedulePayOffUrl"
-                            Visible="@bState.CanPayOff"
+                            Disabled="@(!bState.CanPayOff)"
                             Text="Pay Off"></RadzenMenuItem>
             <RadzenMenuItem Icon="paid"
                             Path="@_getLoanWriteOffUrl"
-                            Visible="@bState.CanWriteOff"
+                            Disabled="@(!bState.CanWriteOff)"
                             Text="Write Off"></RadzenMenuItem>
             <RadzenMenuItem Icon="change_circle"
                             Path="@_getChangeCreditAgentUrl"
-                            Visible="@bState.IsManager"
+                            Disabled="@(!bState.IsManager)"
                             Text="Change Credit Agent"></RadzenMenuItem>
             <RadzenMenuItem Icon="info"
                             Path="@_getLoanDetailsUrl"
@@ -162,5 +183,96 @@
 
     }
 
+
+    void OnRowRender(RowRenderEventArgs<VLoanDisbursments> args)
+    {
+        if (args.Data is null) return;
+
+        args.Data.RowIndex = args.Index + 1;
+
+        if (args.Data.LoanStatus == "Closed")
+        {
+            args.Attributes.Add("style", "background-color: rgba(0, 128, 0, 0.1);");
+        }
+        else if (args.Data.LoanStatus == "Defaulted")
+        {
+            args.Attributes.Add("style", "background-color: rgba(255, 0, 0, 0.1);");
+        }
+    }
+
+    void OnRowSelect(VLoanDisbursments args)
+    {
+       
+    }
+
+    void ContextMenuClick(DataGridCellMouseEventArgs<VLoanDisbursments> args)
+    {
+
+        if (args.Data is null) return;
+
+        ContextMenuService.Open(args, new List<ContextMenuItem>
+        {
+            new ContextMenuItem { Text = "Recieve Payment", Value="1",Icon="money_bag",Disabled=!bState.CanRecievePayment},
+            new ContextMenuItem { Text = "Schedule Detials", Value="2",Icon="info"},
+            new ContextMenuItem { Text = "Pay Off", Value="7",Icon="money",Disabled=!bState.CanPayOff},
+            new ContextMenuItem { Text = "Change Credit Agent", Value="5",Icon="find_replace",Disabled=!bState.IsManager},
+            new ContextMenuItem { Text = "Pre Paid", Value="6",Icon="money",Disabled=!bState.CanRecievePayment},
+            new ContextMenuItem { Text = "Export As Excel", Value="3", Icon="file_download"},
+            new ContextMenuItem { Text = "Export As Pdf", Value="4", Icon="picture_as_pdf"},
+        }, (e) => DoContextMenuAction(e, args.Data));
+    }
+
+    void DoContextMenuAction(MenuItemEventArgs e, VLoanDisbursments? data)
+    {
+        ContextMenuService.Close();
+
+        if (e.Value is null) return;
+
+        if (data is null) return;
+
+        switch (e.Value)
+        {
+            case "1":
+                GetPaymentSchedules(data);
+                break;
+            case "2":
+                GetLoanDetails(data);
+                break;
+            case "3":
+                _ = DownLoadScheduleAsExcel(data);
+                break;
+            case "4":
+                _ = DownLoadScheduleAsPdf(data);
+                break;
+            case "6":
+                NavigationManager.NavigateTo($"App/Loans/{data.LoanId}/Branches/{data.BranchId}/Payments?CreditAgentId={data.CreditAgentRefId}");
+                break;
+            case "7":
+                NavigationManager.NavigateTo($"/App/Loans/{data.LoanId}/Branches/{data.BranchId}/loan-payoff?currencyId={data.CurrencyId}");
+                break;
+            default:
+                NavigationManager.NavigateTo($"App/Loans/Disbursments/Credit-Agent/{data.BranchId}/Branches?CreditAgentId={data.CreditAgentRefId}");
+                break;
+        }
+    }
+
+    void GetPaymentSchedules(VLoanDisbursments? p)
+    {
+        if (p is null) return;
+
+        _getPaymentSchedulesUrl = $"/App/Loans/{p.BranchId}/Branches/{p.LoanId}/Schedules?CreditAgentId={p.CreditAgentRefId}&CurrencyId={p.CurrencyId}";
+
+        NavigationManager.NavigateTo(_getPaymentSchedulesUrl);
+    }
+
+    void GetLoanDetails(VLoanDisbursments? p)
+    {
+
+        if (p is null) return;
+
+        _getLoanDetailsUrl = $"/App/Loan/{p.LoanId}/Branches/{p.BranchId}/Currencies/{p.CurrencyId}";
+
+        NavigationManager.NavigateTo(_getLoanDetailsUrl);
+    }
 }
 

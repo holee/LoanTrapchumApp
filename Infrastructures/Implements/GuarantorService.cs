@@ -13,8 +13,8 @@ using Microsoft.EntityFrameworkCore;
 using System.Data;
 using Applications.Features.Entities;
 using Domains.Models.Lists;
-using Applications.Features.Loans.Responses;
 using Applications.Features.Guarantor.Dtos;
+using Applications.Features.Loans.Dtos.Responses;
 
 namespace Infrastructures.Implements;
 

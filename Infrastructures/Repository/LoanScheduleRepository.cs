@@ -1,4 +1,4 @@
-﻿using Applications.Features.Loans.Responses;
+﻿using Applications.Features.Loans.Dtos.Responses;
 using Applications.Interfaces;
 using Dapper;
 using ErrorOr;

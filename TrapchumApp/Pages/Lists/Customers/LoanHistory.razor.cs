@@ -1,5 +1,5 @@
 using Applications.Features.Customers.Queries.GetLoanByCustomerId;
-using Applications.Features.Loans.Responses;
+using Applications.Features.Loans.Dtos.Responses;
 using TrapchumApp.Shared;
 
 namespace TrapchumApp.Pages.Lists.Customers;

@@ -1,6 +1,6 @@
 ﻿using Applications.Enumerations;
 using Domains.Models.Loans;
-using Applications.Features.Loans.Requests;
+using Applications.Features.Loans.Dtos.Requests;
 
 namespace Applications.Features.Loans.Mappers
 {

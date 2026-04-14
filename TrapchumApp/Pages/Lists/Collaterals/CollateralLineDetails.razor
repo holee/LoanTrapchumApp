@@ -1,6 +1,6 @@
 ﻿@using Applications.Features.Collaterals.Dtos
 @using Applications.Features.Collaterals.Queries.GetCollateralLineDetails
-@using Applications.Features.Loans.Responses
+@using Applications.Features.Loans.Dtos.Responses
 @using Applications.Utils
 @attribute [StreamRendering]
 <RadzenStack Orientation="Orientation.Horizontal" class="@Styles.Mb2" AlignItems="AlignItems.Center">
@@ -102,6 +102,8 @@
 
     void OnRowRenderChanged(RowRenderEventArgs<VLoanDisbursments> args)
     {
+        if (args.Data is null) return;
+
         args.Data.RowIndex = args.Index + 1;
     }
 }

@@ -1,6 +1,6 @@
 ﻿using Applications.Enumerations;
 using Applications.Extensions;
-using Applications.Features.Loans.Responses;
+using Applications.Features.Loans.Dtos.Responses;
 using Applications.Interfaces.Lists;
 using Applications.Responses;
 using Applications.Responses.Message;

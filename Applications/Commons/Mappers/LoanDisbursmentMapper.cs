@@ -1,6 +1,5 @@
 ﻿using Applications.Features.LoanPayments.Requests;
-using Applications.Features.Loans.Responses;
-
+using Applications.Features.Loans.Dtos.Responses;
 
 namespace Applications.Commons.Mappers
 {

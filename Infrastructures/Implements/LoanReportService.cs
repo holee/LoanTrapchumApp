@@ -1,5 +1,5 @@
 ﻿using Applications.Enumerations;
-using Applications.Features.Loans.Responses;
+using Applications.Features.Loans.Dtos.Responses;
 using Applications.Interfaces.Loans;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Responses.ViewModels.Reports;
@@ -11,7 +11,7 @@ using System.Data;
 
 namespace Infrastructures.Implements
 {
-    public sealed class LoanReportService(ILogger<LoanDisbursementRepository> logger, IDapperConnectionFactory connectionFactory, IDbContextFactory<DataContext> contextFactory) : ILoanReportService
+    public sealed class LoanReportService(ILogger<LoanRepository> logger, IDapperConnectionFactory connectionFactory, IDbContextFactory<DataContext> contextFactory) : ILoanReportService
     {
 
         public async Task<DisbursmentsRpt?> GetLoanScheduleAsync(int? branchId, string? loanId)

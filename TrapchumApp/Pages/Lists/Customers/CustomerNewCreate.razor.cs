@@ -159,6 +159,7 @@ public partial class CustomerNewCreate
             {
                 Title = newSalution
             });
+
             await GetSalutations();
         }
     }

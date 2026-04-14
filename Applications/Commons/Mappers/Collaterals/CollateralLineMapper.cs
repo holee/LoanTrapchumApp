@@ -25,6 +25,7 @@ public static class CollateralLineMapper
             HotPrice = dto.HotPrice,
             PawnPrice = dto.PawnPrice,
             Description = dto.Description,
+            FileUrl = dto.FileUrl,
         };
 
     }
@@ -53,33 +54,6 @@ public static class CollateralLineMapper
 
     }
 
-
-
-    public static CollateralLine MapCollateralLine(this CollateralLineDtoUpdate dto)
-    {
-        return new CollateralLine
-        {
-            Id = dto.Id,
-            CollateralRefId = dto.CollateralRefId,
-            CategoryRefId = dto.CategoryRefId,
-            TypeName = dto.TypeName,
-            SubCategoryRefId = dto.SubCategoryRefId,
-            SubTypeName = dto.SubTypeName,
-            CollateralNo = dto.CollateralNo,
-            OwnerName = dto.OwnerName,
-            WareHouse = dto.WareHouse,
-            Location = dto.Location,
-            Size = dto.Size,
-            Quantity = dto.Quantity,
-            MarketPrice = dto.MarketPrice,
-            HotPrice = dto.HotPrice,
-            PawnPrice = dto.PawnPrice,
-            Description = dto.Description,
-        };
-
-    }
-
-
     public static CollateralLineDtoCreate MapCollateralLineCreate(this VCollateralLines? source)
     {
 
@@ -103,6 +77,7 @@ public static class CollateralLineMapper
             HotPrice = source.HotPrice,
             PawnPrice = source.PawnPrice,
             Description = source.Description,
+            FileUrl = source.FileUrl,
         };
 
     }

@@ -1,82 +1,49 @@
 ﻿@page "/Customers/{CustomerId}/Update"
+@using TrapchumApp.Helpers.Constants
 <PageTitle>Edit Customer</PageTitle>
 @attribute [StreamRendering]
-<EditForm Model="model" @ref="editForm">
-    <input type="hidden" @bind="model.CustomerId" />
-    <FluentValidationValidator DisableAssemblyScanning="true"></FluentValidationValidator>
-    <CreateCustomerInfo Model="@model" />
-    <CustomerAddress model="@model" Cities="@Cities" Countries="@Countries" />
-    <RadzenStack Orientation="Orientation.Horizontal"
-                 AlignItems="AlignItems.Center"
-                 Gap="1rem"
-                 class="rz-mt-2"
-                 JustifyContent="JustifyContent.End">
-        <RadzenButton Click="FormSubmit"
-                      Size="ButtonSize.Small"
-                      ButtonStyle="ButtonStyle.Success"
-                      Text="Save"
-                      Icon="save" />
-        <RadzenButton Click="ClickCloseTab"
-                      Size="ButtonSize.Small"
-                      Text="Close"
-                      ButtonStyle="ButtonStyle.Danger"
-                      Icon="cancel" />
 
+@if (IsLoading)
+{
+    <RadzenStack AlignItems="AlignItems.Center"
+                 JustifyContent="JustifyContent.Center"
+                 Style="min-height:20rem;">
+        <RadzenProgressBarCircular ShowValue="false"
+                                   Mode="ProgressBarMode.Indeterminate"
+                                   Size="ProgressBarCircularSize.Medium" />
+        <RadzenText TextStyle="TextStyle.Body2"
+                    class="rz-color-base-600">Loading customer...</RadzenText>
     </RadzenStack>
-</EditForm>
-@code {
-    // const long maxFileSize = 2L * 1024 * 1024 * 1024;
-    // private async Task OnFileUpload(UploadChangeEventArgs args)
-    // {
-    //     try
-    //     {
-    //         if (!args.Files.Any())
-    //         {
-    //             Model.Photo = string.Empty;
-
-    //             return;
-    //         }
-
-    //         var file = args.Files.FirstOrDefault();
-
-    //         if (file is null || (file is not null && file.Size > maxFileSize))
-    //         {
-    //             NotificationService.Notify(new NotificationMessage
-    //             {
-    //                 Severity = NotificationSeverity.Error,
-    //                 Summary = "File upload error",
-    //                 Detail = "File is too large or not selected."
-    //             });
-    //             return;
-    //         }
-    //         var ext = Path.GetExtension(file!.Name);
-
-    //         var originalName = file.Name;
-
-    //         using var stream = new MemoryStream();
-
-    //         using var fileStream = file.OpenReadStream(maxFileSize);// 30 MB limit
-
-    //         await fileStream.CopyToAsync(stream); // ✅ Read the file content
-
-    //         var fileModel = new FileModel(originalName, file.Name, file.Size, stream.ToArray());
-
-    //         var rsp = await _fileUploadService.UploadFile(fileModel);
-
-    //         if (rsp.IsSuccess)
-    //         {
-    //             Model.Photo = rsp.Data?.FileUrl ?? string.Empty;
-    //         }
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         Console.WriteLine($"Error uploading files: {ex.Message}");
-    //         // Handle error (e.g., show notification)
-    //     }
-    // }
-
-
 }
+else
+{
+    <EditForm Model="model" @ref="editForm">
+        <input type="hidden" @bind="model.CustomerId" />
+        <FluentValidationValidator DisableAssemblyScanning="true" />
 
+        <CreateCustomerInfo Model="@model" />
+        <CustomerAddress model="@model" Cities="@Cities" Countries="@Countries" />
 
-
+        <RadzenCard Variant="Variant.Flat"
+                    class="@($"rz-mt-4 rz-p-3 {Styles.Bg200}")">
+            <RadzenStack Orientation="Orientation.Horizontal"
+                         AlignItems="AlignItems.Center"
+                         JustifyContent="JustifyContent.End"
+                         Gap="0.75rem">
+                <RadzenButton Click="FormSubmit"
+                              Size="ButtonSize.Small"
+                              ButtonStyle="ButtonStyle.Success"
+                              Text="Save"
+                              Icon="@IconNames.Save"
+                              IsBusy="isSaving"
+                              BusyText="Saving..." />
+                <RadzenButton Click="ClickCloseTab"
+                              Size="ButtonSize.Small"
+                              Text="Close"
+                              ButtonStyle="ButtonStyle.Danger"
+                              Icon="@IconNames.Cancel"
+                              Disabled="isSaving" />
+            </RadzenStack>
+        </RadzenCard>
+    </EditForm>
+}

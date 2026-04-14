@@ -13,6 +13,7 @@ public sealed class ApprovedRequest
     public string? AprovedBy { get; set; }
     public decimal? RequestAmount { get; set; } = 0;
     public decimal? AprovedAmount { get; set; } = 0;
+    public decimal? AdminFeeRate { get; set; } = 0;
     public decimal? AdminFeeAmount { get; set; } = 0;
 
 }

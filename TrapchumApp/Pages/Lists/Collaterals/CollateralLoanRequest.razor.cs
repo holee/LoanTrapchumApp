@@ -1,5 +1,6 @@
 using Applications.Extensions;
 using Applications.Features.Collaterals.Dtos;
+using Applications.Features.Customers.Queries.GetCustomerCollateralLine;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 using Radzen.Blazor;
@@ -45,7 +46,7 @@ namespace TrapchumApp.Pages.Lists.Collaterals
             };
 
 
-            bool result = await DialogService.OpenAsync<CollateralModalAdd>("Add Collateral", parameters, options);
+            bool result = await DialogService.OpenAsync<CollateralModalAdd>("Add Collateral", parameters!, options);
 
             if (bool.TryParse(result.ToString(), out bool success) && success)
             {
@@ -55,12 +56,10 @@ namespace TrapchumApp.Pages.Lists.Collaterals
 
         async Task GetCustomerCollaterals()
         {
-            var resp = await _customerService.GetCustomerCollateralLines(CustomerId);
+            var resp = await mediator.Send(new GetCustomerCollateralLinesQuery(CustomerId));
 
-            if (resp.IsSuccess)
-            {
-                CollateralLines = resp.Data!;
-            }
+            CollateralLines = resp.Items;
+
             StateHasChanged();
         }
 

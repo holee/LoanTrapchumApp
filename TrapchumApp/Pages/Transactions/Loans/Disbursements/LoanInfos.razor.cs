@@ -1,7 +1,7 @@
 using Applications.Enumerations;
 using Applications.Extensions;
+using Applications.Features.Loans.Dtos.Responses;
 using Applications.Features.Loans.Queries.GetLoanById;
-using Applications.Features.Loans.Responses;
 using Microsoft.JSInterop;
 using TrapchumApp.Helpers.Extensions;
 using TrapchumApp.Pages.Transactions.Loans.Repayments;

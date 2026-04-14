@@ -1,4 +1,5 @@
 ﻿using Applications.Commons.Mappers.LoanRequests;
+using Applications.Features.Loans.Dtos.Responses;
 using ErrorOr;
 
 namespace Applications.Features.LoanRequests.Command.CreateLoanRequest;

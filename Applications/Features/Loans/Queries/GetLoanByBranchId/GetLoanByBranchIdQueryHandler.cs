@@ -1,4 +1,6 @@
-﻿namespace Applications.Features.Loans.Queries.GetLoanByBranchId;
+﻿using Applications.Features.Loans.Dtos.Responses;
+
+namespace Applications.Features.Loans.Queries.GetLoanByBranchId;
 
 public sealed class GetLoanByBranchIdQueryHandler(ILoanService loanService) : IRequestHandler<GetLoanByBranchIdQuery, Pager<VLoanDisbursments>>
 {

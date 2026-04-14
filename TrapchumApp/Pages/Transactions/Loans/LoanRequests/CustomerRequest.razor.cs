@@ -1,5 +1,7 @@
 using Applications.Extensions;
+using Applications.Features.Customers.Queries.GetCustomerDetailById;
 using Applications.Features.Customers.Response;
+using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 {
@@ -19,11 +21,11 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
         async Task GetCustomerLoanReuqest(string? customerId)
         {
-            var resp = await _customerService.GetCustomerForRequestLoanAsync(customerId);
+            var resp = await mediator.Send(new GetCustomerDetailByIdQuery(customerId)); //_customerService.GetCustomerForRequestLoanAsync(customerId);
 
-            if (resp.IsSuccess)
+            if (resp.IsSuccess())
             {
-                Customer = resp.Data!;
+                Customer = resp.Value;
             }
         }
 

@@ -9,6 +9,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="wwwroot\uploads\**" />
+    <Content Remove="wwwroot\uploads\**" />
+    <EmbeddedResource Remove="wwwroot\uploads\**" />
+    <None Remove="wwwroot\uploads\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Remove="Pages\Lists\Bases\AddressBaseCreate.razor" />
     <Content Remove="Pages\Lists\OtherNames\GaurantorCreate.razor" />
     <Content Remove="Pages\Transactions\Loans\Disbursements\CustomersActiveLoanPage.razor" />
@@ -46,9 +53,9 @@
   <ItemGroup>
     <Folder Include="Helpers\Filters\" />
     <Folder Include="Views\" />
+    <Folder Include="wwwroot\assets\docs\" />
     <Folder Include="wwwroot\documents\files\" />
     <Folder Include="wwwroot\schedules\" />
-    <Folder Include="wwwroot\uploads\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -98,7 +105,6 @@
     <AdditionalFiles Include="Pages\Lists\Collaterals\CollateralsCustomer.razor" />
     <AdditionalFiles Include="Pages\Lists\Collaterals\CollateralsPerson.razor" />
     <AdditionalFiles Include="Pages\Lists\Collaterals\CollateralsProperties.razor" />
-    <AdditionalFiles Include="Pages\Lists\Collaterals\CreateCollateralModal.razor" />
     <AdditionalFiles Include="Pages\Lists\CreditAgents\AgentIndex.razor" />
     <AdditionalFiles Include="Pages\Lists\CreditAgents\CreditAgentDialog.razor" />
     <AdditionalFiles Include="Pages\Lists\CreditAgents\CreditAgentSwitch.razor" />
@@ -189,7 +195,7 @@
     <AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\IndexLoanPage.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\LoanChangedCreditAgent.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\LoanChangedCreditAgents.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\LoanCreate.razor" />
+    <AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\LoanCreatePage.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\LoanInfos.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\LoanSchedules.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\Disbursements\PaidSchedules.razor" />

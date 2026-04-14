@@ -75,7 +75,6 @@ global using Applications.Features.LoanRequests.Queryies.GetLoanRequestsWithCanD
 global using Applications.Features.Loans.Queries.GetLoanRelatedCollaterals;
 global using Applications.Features.Loans.Queries.GetLoanRelatedDocuments;
 global using Applications.Features.Loans.Queries.GetLoanRelatedGuarantors;
-global using Applications.Features.Loans.Responses;
 global using Applications.Features.Loans.Services;
 global using Applications.Features.Notes.Command.CreateNote;
 global using Applications.Features.Notes.Command.DeleteNote;
