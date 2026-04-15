@@ -1,7 +1,9 @@
 ﻿using Applications.Extensions.Identity.Authorizations.Extensions;
 using Applications.Extensions.Identity.Policies;
+using Applications.Responses.ViewModels.Loans.Requests;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Domains.Models.Identity;
+using Infrastructures.Authorizations;
 using System.Security.Claims;
 using System.Text.Json;
 
@@ -32,6 +34,20 @@ namespace TrapchumApp.Shared
         private bool _canOpenBranch;
         private int _unreadCount;
         private bool _canRecieveMultiple;
+        private bool _isSameUser;
+
+        public bool IsSameUser
+        {
+            get => _isSameUser;
+
+            set
+            {
+                _isSameUser = value;
+
+                StateHasChanged();
+            }
+        }
+
         public bool CanPayOff
         {
             get { return _canPayOff; }
@@ -187,6 +203,8 @@ namespace TrapchumApp.Shared
                 StateHasChanged();
             }
         }
+
+
 
 
         public bool IsCEO
@@ -407,6 +425,18 @@ namespace TrapchumApp.Shared
             _canRequest = await _authorizeService.MustHasPermissionAsync(user!, Policies.RequestLoanRequest);
         }
 
+
+        internal async Task CheckedIsSameUser(ClaimsPrincipal? user, object? requests)
+        {
+            if (user is null || user.Identity?.IsAuthenticated != true)
+            {
+                _isSameUser = false;
+
+                return;
+            }
+
+            _isSameUser = (await _authorizeService.AuthorizeAsync(user, requests, Policies.SameUser)).Succeeded;
+        }
 
         public async Task GetAuthenticatedUser(ClaimsPrincipal user)
         {

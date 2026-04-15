@@ -4,29 +4,81 @@
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
 @using Applications.Features.LoanRequests.Interfaces
+@using Domains.Models.Files
 @using TrapchumApp.Services
-<RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Drag and drop files to upload</RadzenText>
-<RadzenUpload ChooseText="Drag and drop here or click to choose files"
-              Multiple="true"
-              Auto="false"
-              @ref="@radzenUpload"
-              Accept=".jpg,.jpeg,.png,.doc,.docx,.pdf,.xls,.xlsx"
-              Change="OnFileUpload"
-              InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "select file" }})"
-              Progress=@(args => OnProgress(args, "Drag and drop files to upload"))
-              Style="width: 100%" />
-<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End">
-    <RadzenButton Size="ButtonSize.Small"
-                  Icon="@IconNames.Cancel"
-                  Text="Close"
-                  ButtonStyle="ButtonStyle.Danger"
-                  Click="@CloseModal"
-                  class="rz-mt-8" />
-    <RadzenButton Size="ButtonSize.Small"
-                  Icon="upload"
-                  Text="Upload"
-                  ButtonStyle="ButtonStyle.Success"
-                  Click="@HandleUploadFiles"
-                  class="rz-mt-8" />
-</RadzenStack>
+@using Radzen
+@attribute [StreamRendering]
+<RadzenCard Style="max-width:720px; margin:auto;">
+    <div class="dropzone-wrapper">
+        <div class="dropzone @((_dz_isDragOver) ? "dropzone-active" : "")"
+             @ondragenter="Dz_OnDragEnter"
+             @ondragover="Dz_OnDragOver"
+             @ondragleave="Dz_OnDragLeave"
+             @ondrop="Dz_OnDrop">
+            <div class="dropzone-content">
+                <RadzenIcon Icon="cloud_upload" Style="font-size:48px; color:#1976d2;" />
+                <div class="dropzone-text">
+                    <h3>Drop files here or click to browse</h3>
+                    <p class="muted">Supported: .pdf</p>
+                </div>
+                <RadzenUpload ChooseText="Browse files"
+                              Multiple="true"
+                              Auto="true"
+                              Url="Upload/Files"
+                              @ref="_dz_radzenUpload"
+                              Accept=".pdf"
+                              Complete="@Dz_UploadComplete"
+                              Error="@Dz_OnError"
+                              Progress="@Dz_UploadProgress"
+                              InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "select file" } })"
+                              Style="position:absolute; inset:0; opacity:0; cursor:pointer;" />
+            </div>
+        </div>
+
+        @if (_dz_selectedFiles != null && _dz_selectedFiles.Count > 0)
+        {
+            <div class="files-preview">
+                @foreach (var file in _dz_selectedFiles)
+                {
+                    <div class="file-item">
+                        <RadzenIcon Icon="insert_drive_file" Style="color:#1976d2;" />
+                        <div class="file-meta">
+                            <div class="file-name">@file.FileName</div>
+                            <div class="file-size">@Dz_FormatSize(file.FileSize)</div>
+                        </div>
+                        <RadzenButton Icon="close" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Danger" Click="@(async ()=> Dz_RemoveFile(file))" />
+                    </div>
+                }
+            </div>
+        }
+
+        <div class="actions">
+            <RadzenButton Icon="upload" Text="Upload" 
+                    ButtonStyle="ButtonStyle.Success" 
+                    Size="ButtonSize.ExtraSmall"
+                    Disabled="@(_dz_selectedFiles == null || _dz_selectedFiles.Count == 0)" 
+                    Click="Dz_HandleUploadFiles" />
+            <RadzenButton Icon="cancel" Text="Close" 
+                ButtonStyle="ButtonStyle.Danger" 
+                Size="ButtonSize.ExtraSmall"
+                Click="Dz_CloseModal" Style="margin-left:8px;" />
+        </div>
+    </div>
+</RadzenCard>
+
+<style>
+    .dropzone-wrapper { padding: 1rem; }
+    .dropzone { position: relative; border: 2px dashed #cfcfcf; border-radius: 8px; background:#fff; padding: 2.5rem; text-align:center; transition: border-color .15s, background .15s, box-shadow .15s; }
+    .dropzone-active { border-color: #1976d2; background: #f4f8ff; box-shadow: 0 4px 12px rgba(25,118,210,0.08); }
+    .dropzone-content { display:flex; flex-direction:column; align-items:center; gap:8px; position:relative; }
+    .dropzone-text h3 { margin:0; font-size:1.1rem; }
+    .dropzone-text .muted { margin:0; color:#666; font-size:0.9rem; }
+    .files-preview { margin-top:1rem; max-height:220px; overflow:auto; display:flex; flex-direction:column; gap:8px; }
+    .file-item { display:flex; align-items:center; gap:12px; padding:8px; border:1px solid #eee; border-radius:6px; }
+    .file-meta { flex:1; display:flex; flex-direction:column; }
+    .file-name { font-weight:500; }
+    .file-size { color:#666; font-size:0.85rem; }
+    .actions { display:flex; justify-content:flex-end; margin-top:12px; }
+</style>
+
 

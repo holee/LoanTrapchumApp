@@ -17,4 +17,5 @@ public sealed class AppStateService : IAppStateService
     public bool CanOpenBranch { get; set; }
     public List<NotificationDto> Notifications { get; set; } = [];
     public bool CanRecieveMultiple { get; set; }
+    public bool IsSameUser { get; set; } 
 }

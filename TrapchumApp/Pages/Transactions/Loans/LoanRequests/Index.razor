@@ -8,14 +8,13 @@
 @using TrapchumApp.Services
 <PageTitle>Loan Request</PageTitle>
 @attribute [MustHasPermission(Modules.LoanRequest, Feature.Read)]
-<Containers Fluid>
+<RadzenCard class="rz-background-color-base-200">
     <RadzenTabs SelectedIndexChanged="SelectedIndexChanged" RenderMode="TabRenderMode.Server">
         <Tabs>
             <RadzenTabsItem Icon="list" Text="All">
                 <LoanRequestAll BranchId="@BranchId" UserId="@_userId" />
             </RadzenTabsItem>
-
-            @foreach(var item in _tabs)
+            @foreach (var item in _tabs)
             {
                 <RadzenTabsItem Icon="@item.Icon" Text="@item.Title" @key="@item.Key">
                     <Template>
@@ -29,12 +28,12 @@
             }
         </Tabs>
     </RadzenTabs>
+</RadzenCard>
 
-</Containers>
-
-@code{
+@code {
 
     private List<CustomTab> _tabs = [];
+
     private int _selectedIndex = 0;
 
     void CloseTab(string tabId)

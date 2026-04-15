@@ -1,0 +1,352 @@
+﻿@typeparam TItem
+
+<CascadingValue Value="this" IsFixed="true">
+    @* Hidden: column definitions register themselves *@
+    <div style="display:none">@Columns</div>
+</CascadingValue>
+
+@{
+    var colSpan = ColumnDefinitions.Count(c => c.Visible) + (EditMode == BlabTableEditMode.Row ? 1 : 0);
+}
+
+<div class="blab-dt @(Bordered ? "blab-dt--bordered" : "") @(Compact ? "blab-dt--compact" : "") @(Responsive ? "blab-dt--responsive" : "")"
+     @attributes="AdditionalAttributes">
+
+    @* ── Top bar: page-size selector + search + optional top pagination ── *@
+    <div class="blab-dt__header">
+        <div class="blab-dt__header-left">
+            @if (ShowPageSizeSelector)
+            {
+                <label class="blab-dt__length-label">
+                    Show
+                    <select class="blab-dt__length-select" @onchange="OnPageSizeChanged">
+                        @foreach (var opt in PageSizeOptions)
+                        {
+                            if (opt == _pageSize)
+                            {
+                                <option value="@opt" selected>@opt</option>
+                            }
+                            else
+                            {
+                                <option value="@opt">@opt</option>
+                            }
+                        }
+                    </select>
+                    entries
+                </label>
+            }
+            @if (ToolbarContent is not null)
+            {
+                @ToolbarContent
+            }
+            @if (ShowColumnFilterPicker)
+            {
+                <div class="blab-dt__col-picker">
+                    <button class="blab-dt__col-picker-btn" type="button" @onclick="ToggleColumnPicker" @onclick:stopPropagation="true"
+                            title="Show/Hide Columns">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+                            <path d="M1.5 2A1.5 1.5 0 0 0 0 3.5v2A1.5 1.5 0 0 0 1.5 7h4A1.5 1.5 0 0 0 7 5.5v-2A1.5 1.5 0 0 0 5.5 2h-4ZM1 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5h-4a.5.5 0 0 1-.5-.5v-2ZM10.5 2A1.5 1.5 0 0 0 9 3.5v2A1.5 1.5 0 0 0 10.5 7h4A1.5 1.5 0 0 0 16 5.5v-2A1.5 1.5 0 0 0 14.5 2h-4Zm-.5 1.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5h-4a.5.5 0 0 1-.5-.5v-2ZM1.5 9A1.5 1.5 0 0 0 0 10.5v2A1.5 1.5 0 0 0 1.5 14h4A1.5 1.5 0 0 0 7 12.5v-2A1.5 1.5 0 0 0 5.5 9h-4ZM1 10.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5h-4a.5.5 0 0 1-.5-.5v-2ZM10.5 9A1.5 1.5 0 0 0 9 10.5v2a1.5 1.5 0 0 0 1.5 1.5h4a1.5 1.5 0 0 0 1.5-1.5v-2A1.5 1.5 0 0 0 14.5 9h-4Zm-.5 1.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5h-4a.5.5 0 0 1-.5-.5v-2Z"/>
+                        </svg>
+                        Columns
+                    </button>
+                    @if (_columnPickerOpen)
+                    {
+                        <div class="blab-dt__col-picker-dropdown">
+                            @foreach (var col in ColumnDefinitions)
+                            {
+                                <label class="blab-dt__col-picker-item">
+                                    <input type="checkbox" checked="@col.Visible"
+                                           @onchange="() => ToggleColumnVisibility(col)" />
+                                    <span>@(string.IsNullOrEmpty(col.Title) ? col.Property ?? "Column" : col.Title)</span>
+                                </label>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+        <div class="blab-dt__header-right">
+            @if (ShowTopPagination)
+            {
+                @RenderPagination()
+            }
+            @if (ShowSearchBox)
+            {
+                <label class="blab-dt__search-label">
+                    Search:
+                    <input type="text"
+                           class="blab-dt__search-input"
+                           placeholder="@SearchPlaceholder"
+                           value="@_searchText"
+                           @oninput="OnSearchInput" />
+                </label>
+            }
+        </div>
+    </div>
+
+    @* ── Table ── *@
+    <div class="blab-dt__scroll @(StickyHeader ? "blab-dt__scroll--sticky" : "")"
+         style="@(Height is not null ? $"max-height:{Height};overflow-y:auto;" : "")">
+
+        @* ── Loading overlay (shown on top of existing data) ── *@
+        @if (_isLoading && _items.Any())
+        {
+            <div class="blab-dt__loading-overlay">
+                <div class="blab-dt__loading-spinner"></div>
+                <span class="blab-dt__loading-text">Loading…</span>
+            </div>
+        }
+
+        <table class="blab-dt__table @(Striped ? "blab-dt__table--striped" : "") @(Hoverable ? "blab-dt__table--hover" : "")">
+            <thead>
+                <tr>
+                    @if (EditMode == BlabTableEditMode.Row)
+                    {
+                        <th style="width:5rem;text-align:center;">Actions</th>
+                    }
+                    @foreach (var col in ColumnDefinitions)
+                    {
+                        if (!col.Visible) continue;
+
+                        <th class="@GetSortCss(col) @col.CssClass"
+                            style="@(col.Width is not null ? $"width:{col.Width};" : "") text-align:@col.TextAlign;"
+                            @onclick="() => OnSort(col)">
+                            @if (col.HeaderTemplate is not null)
+                            {
+                                @col.HeaderTemplate
+                            }
+                            else
+                            {
+                                <span class="blab-dt__th-content">
+                                    <span class="blab-dt__th-text">@col.Title</span>
+                                    @if (col.Sortable && !string.IsNullOrEmpty(col.Property))
+                                    {
+                                        @RenderSortIcon(col)
+                                    }
+                                </span>
+                            }
+                        </th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @if (_isLoading && !_items.Any())
+                {
+                    @* Skeleton loading rows when table is empty *@
+                    @for (int s = 0; s < Math.Min(_pageSize, 5); s++)
+                    {
+                        <tr class="blab-dt__skeleton-row">
+                            @if (EditMode == BlabTableEditMode.Row)
+                            {
+                                <td><div class="blab-dt__skeleton-bar" style="width:60%"></div></td>
+                            }
+                            @foreach (var col in ColumnDefinitions)
+                            {
+                                if (!col.Visible) continue;
+                                <td><div class="blab-dt__skeleton-bar" style="width:@(Random.Shared.Next(40, 90))%"></div></td>
+                            }
+                        </tr>
+                    }
+                }
+                else if (!_items.Any())
+                {
+                    <tr>
+                        <td colspan="@colSpan" class="blab-dt__empty-cell">
+                            <span class="blab-dt__empty-icon">📋</span>
+                            No data available
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var item in _items)
+                    {
+                        var isRowEditing = IsRowEditing(item);
+                        var rowClassExtra = RowClass?.Invoke(item);
+                        var rowStyleExtra = RowStyle?.Invoke(item);
+
+                        <tr class="blab-dt__row @(isRowEditing ? "blab-dt__row--editing" : "") @rowClassExtra"
+                            style="@rowStyleExtra"
+                            @onclick="() => OnRowClick(item)"
+                            @ondblclick="() => OnRowDoubleClick(item)">
+
+                            @* ── Row edit action column ── *@
+                            @if (EditMode == BlabTableEditMode.Row)
+                            {
+                                <td style="text-align:center;">
+                                    @if (isRowEditing)
+                                    {
+                                        <div class="blab-dt__edit-actions">
+                                            <button class="blab-dt__edit-btn blab-dt__edit-btn--save"
+                                                    title="Save"
+                                                    @onclick="SaveEditRow"
+                                                    @onclick:stopPropagation="true">
+                                                ✓
+                                            </button>
+                                            <button class="blab-dt__edit-btn blab-dt__edit-btn--cancel"
+                                                    title="Cancel"
+                                                    @onclick="CancelEditRow"
+                                                    @onclick:stopPropagation="true">
+                                                ✕
+                                            </button>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <button class="blab-dt__edit-btn blab-dt__edit-btn--edit"
+                                                title="Edit"
+                                                @onclick="() => BeginEditRow(item)"
+                                                @onclick:stopPropagation="true">
+                                            ✎
+                                        </button>
+                                    }
+                                </td>
+                            }
+
+                            @* ── Data columns ── *@
+                            @foreach (var col in ColumnDefinitions)
+                            {
+                                if (!col.Visible) continue;
+
+                                var isCellEditing = IsCellEditing(item, col);
+                                var isCellEditable = EditMode == BlabTableEditMode.Cell && col.Editable;
+                                var cellCss = col.CssClass ?? "";
+                                if (isCellEditing) cellCss += " blab-dt__cell--editing";
+                                else if (isCellEditable) cellCss += " blab-dt__cell--editable";
+                                var cellClassExtra = CellClass?.Invoke(item, col);
+                                if (!string.IsNullOrEmpty(cellClassExtra)) cellCss += " " + cellClassExtra;
+                                var cellStyleExtra = CellStyle?.Invoke(item, col);
+                                var combinedCellStyle = $"text-align:{col.TextAlign};{cellStyleExtra}";
+
+                                <td class="@cellCss"
+                                    style="@combinedCellStyle"
+                                    data-label="@col.Title"
+                                    @onclick="() => { if (isCellEditable && !isCellEditing) BeginEditCell(item, col); }"
+                                    @onclick:stopPropagation="@isCellEditable">
+
+                                    @if (isCellEditing)
+                                    {
+                                        @if (col.EditTemplate is not null)
+                                        {
+                                            @col.EditTemplate(item)
+                                        }
+                                        else
+                                        {
+                                            <input type="text" class="blab-dt__search-input" style="width:100%;"
+                                                   value="@GetPropertyValue(item, col.Property ?? "")"
+                                                   @onblur="SaveEditCell" />
+                                        }
+                                    }
+                                    else if (isRowEditing && col.Editable)
+                                    {
+                                        @if (col.EditTemplate is not null)
+                                        {
+                                            @col.EditTemplate(item)
+                                        }
+                                        else
+                                        {
+                                            <input type="text" class="blab-dt__search-input" style="width:100%;"
+                                                   value="@GetPropertyValue(item, col.Property ?? "")" />
+                                        }
+                                    }
+                                    else if (col.Template is not null)
+                                    {
+                                        @col.Template(item)
+                                    }
+                                    else if (!string.IsNullOrEmpty(col.Property))
+                                    {
+                                        @GetPropertyValue(item, col.Property)
+                                    }
+                                </td>
+                            }
+                        </tr>
+                    }
+                }
+            </tbody>
+
+            @* ── Footer summary row (tfoot) ── *@
+            @if (FooterSummary is not null && _items.Any())
+            {
+                <tfoot class="blab-dt__tfoot">
+                    @FooterSummary(_items)
+                </tfoot>
+            }
+        </table>
+    </div>
+
+    @* ── Footer: info + pagination ── *@
+    <div class="blab-dt__footer">
+        <div class="blab-dt__footer-left">
+            <span class="blab-dt__info">
+                Showing @ShowingFrom to @ShowingTo of @TotalCount entries
+            </span>
+        </div>
+        @if (ShowBottomPagination)
+        {
+            <div class="blab-dt__footer-right">
+                @RenderPagination()
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private static string? GetPropertyValue(TItem item, string propertyName)
+    {
+        if (item is null) return null;
+        var prop = typeof(TItem).GetProperty(propertyName);
+        return prop?.GetValue(item)?.ToString();
+    }
+
+    /// <summary>Renders a clean SVG-based sort indicator.</summary>
+    private RenderFragment RenderSortIcon(BlabTableColumn<TItem> col) => __builder =>
+    {
+        var state = GetSortState(col);
+        var upColor   = state == "asc"  ? "#1e293b" : "#cbd5e1";
+        var downColor = state == "desc" ? "#1e293b" : "#cbd5e1";
+
+        <span class="blab-dt__sort-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14" fill="none">
+                <path d="M7 1.5L10.5 6H3.5L7 1.5Z" fill="@upColor"/>
+                <path d="M7 12.5L3.5 8H10.5L7 12.5Z" fill="@downColor"/>
+            </svg>
+        </span>
+    };
+
+    /// <summary>Reusable pagination nav block (rendered in top and/or bottom).</summary>
+    private RenderFragment RenderPagination() => __builder =>
+    {
+        <nav class="blab-dt__paging">
+            <button class="blab-dt__page-btn"
+                    disabled="@(_pageIndex == 0)"
+                    @onclick="() => GoToPage(0)">
+                First
+            </button>
+            <button class="blab-dt__page-btn"
+                    disabled="@(_pageIndex == 0)"
+                    @onclick="() => GoToPage(_pageIndex - 1)">
+                ‹
+            </button>
+
+            @foreach (var p in GetPageNumbers())
+            {
+                var page = p;
+                <button class="blab-dt__page-btn @(page == _pageIndex ? "blab-dt__page-btn--active" : "")"
+                        @onclick="() => GoToPage(page)">
+                    @(page + 1)
+                </button>
+            }
+
+            <button class="blab-dt__page-btn"
+                    disabled="@(_pageIndex >= TotalPages - 1)"
+                    @onclick="() => GoToPage(_pageIndex + 1)">
+                ›
+            </button>
+            <button class="blab-dt__page-btn"
+                    disabled="@(_pageIndex >= TotalPages - 1)"
+                    @onclick="() => GoToPage(TotalPages - 1)">
+                Last
+            </button>
+        </nav>
+    };
+}

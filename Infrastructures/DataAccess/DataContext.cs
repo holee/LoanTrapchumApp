@@ -246,5 +246,6 @@ namespace Infrastructures.DataAccess
         public DbSet<VCommunes> VCommunes => Set<VCommunes>();
         public DbSet<VVillages> VVillages => Set<VVillages>();
         public DbSet<Notification> Notifications => Set<Notification>();
+        public DbSet<LtDocument> LtDocuments => Set<LtDocument>();
     }
 }

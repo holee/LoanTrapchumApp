@@ -1,9 +1,8 @@
 using Applications;
+using Applications.Commons.Authorizations;
 using Applications.Validations;
-using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 using Domains.Models.Identity;
 using Infrastructures;
-using Infrastructures.Authorizations;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -11,6 +10,7 @@ using Microsoft.AspNetCore.SignalR;
 using QuestPDF.Infrastructure;
 using TrapchumApp;
 using TrapchumApp.Components;
+using TrapchumApp.Components.Toasts;
 using TrapchumApp.Hubs;
 using TrapchumApp.Services;
 var builder = WebApplication.CreateBuilder(args);
@@ -39,13 +39,17 @@ builder.Services.AddControllers();
 builder.Services.AddScoped<IAuthorizationHandler, SameUserRequestAuthorizationHandler>();
 builder.Services.AddScoped<IAuthorizationHandler, SameUserApprovedAuthorizationHandler>();
 builder.Services.AddSingleton<IUserIdProvider, UserIdProvider>();
-
-
 builder.Services.AddScoped<NotificationServices>();
 builder.Services.AddScoped<NotificationHubService>();
-
-
-
+builder.Services.AddToastService(options =>
+{
+    options.Position = ToastPosition.BottomLeft;
+    options.ShowCloseButton = true;
+    options.ShowProgressBar = true;
+    options.NewestOnTop = true;
+    options.CloseOnHover = true;
+    options.PreventDuplicates = false;
+});
 builder.Services.AddSignalR();
 
 builder.Services.AddSingleton<IAppNotificationService, AppNotificationService>();

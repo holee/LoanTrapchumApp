@@ -75,6 +75,7 @@
     <Folder Include="Features\Collaterals\Commands\CreateCollaterals\" />
     <Folder Include="Features\Collaterals\Commands\DeleteCollaterals\" />
     <Folder Include="Features\CreditAgents\UseCases\" />
+    <Folder Include="Features\Documents\Dtos\" />
     <Folder Include="Features\Employees\Extensions\" />
     <Folder Include="Features\Employees\Mappers\" />
     <Folder Include="Features\Employees\Responses\" />
@@ -130,7 +131,6 @@
     <PackageReference Include="Mapster.EFCore" Version="5.1.1" />
     <PackageReference Include="MemoryPack" Version="1.21.4" />
     <PackageReference Include="MessagePack" Version="3.1.4" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.3.9" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.3.9" />
     <PackageReference Include="QuestPDF" Version="2025.12.3" />

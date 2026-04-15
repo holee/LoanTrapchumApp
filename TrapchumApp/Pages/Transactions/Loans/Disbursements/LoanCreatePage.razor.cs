@@ -4,6 +4,8 @@ using Applications.Extensions;
 using Applications.Features.Customers.Response;
 using Applications.Features.LoanRequests.Command.AddDescription;
 using Applications.Features.LoanRequests.Command.RecheckedLoanRequest;
+using Applications.Features.LoanRequests.Command.SaveLoanRequest;
+using Applications.Features.LoanRequests.Command.SaveLoanRequests;
 using Applications.Features.LoanRequests.Queryies.GetApprovedLoanRequest;
 using Applications.Features.LoanRequests.Requests;
 using Applications.Features.Loans.Command.CreateLoan;
@@ -81,7 +83,7 @@ public partial class LoanCreatePage(IHolidayServiceImpl holidayService)
         IsLoading = true;
 
         var query = new GetApprovedLoanRequestQuery(BranchId, CustomerId, LoanRequestId, true);
-       
+
         var request = await mediator.Send(query);
 
         if (!request.IsError)
@@ -205,10 +207,16 @@ public partial class LoanCreatePage(IHolidayServiceImpl holidayService)
         if (!await ConfirmActionAsync("Do you want to save this loan request?"))
         {
             NotificationService.Notify(NotificationSeverity.Info, "Loan save was cancelled.");
+
             return;
         }
 
-        var command = new SaveLoanRequestByManagerCommand(new SaveLoanRequestDtoCreate(BranchId, CustomerId, LoanRequestId, memo));
+
+        var mod = new SaveLoanRequestDtoCreate(BranchId, CustomerId, LoanRequestId, memo, RequestStatus.Approved);
+
+        mod.Remark = this.model.Remark;
+
+        var command = new SaveLoanRequestsCommand(mod);
 
         try
         {
@@ -219,7 +227,12 @@ public partial class LoanCreatePage(IHolidayServiceImpl holidayService)
             if (!rsp.IsSuccess())
             {
                 NotificationService.Notify(NotificationSeverity.Error, rsp.GetMessage());
+
                 return;
+            }
+            else
+            {
+                NotificationService.Notify(NotificationSeverity.Success, rsp.Value.Message!);
             }
 
             StateHasChanged();
@@ -232,21 +245,20 @@ public partial class LoanCreatePage(IHolidayServiceImpl holidayService)
 
     private async Task SendRechecked()
     {
-        var recheckedReq = new RecheckedRequestDtoCreate(BranchId, CustomerId, LoanRequestId, DateTime.Now, RequestStatus.Rechecked, memo);
 
-        var command = new RecheckedLoanRequestCommand(recheckedReq);
-        
+        var mod = new SaveLoanRequestDtoCreate(BranchId, CustomerId, LoanRequestId, memo, RequestStatus.Rechecked);
+
+        mod.Remark = this.model.Remark;
+
+        var command = new SaveLoanRequestsCommand(mod);
+
         var rsp = await mediator.Send(command);
 
-        if (!rsp.IsError)
+        if (rsp.IsSuccess())
         {
-            
-            var description = new LoanDescriptionsDtoCreate(memo, _userId, LoanRequestId);
-            
-            await mediator.Send(new AddDescriptionCommand(description));
 
-            NotificationService.Notify(NotificationSeverity.Success, "Request was sent successfully.");
-           
+            NotificationService.Notify(NotificationSeverity.Success, rsp.Value.Message!);
+
             StateHasChanged();
         }
         else

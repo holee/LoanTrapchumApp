@@ -14,4 +14,5 @@ public partial class Policies
     public const string CreditOfficerOnly = nameof(CreditOfficerOnly);
     public const string ManagerOnly = nameof(ManagerOnly);
     public const string CEOOnly = nameof(CEOOnly);
+    public const string SameUser = nameof(SameUser);
 }

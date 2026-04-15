@@ -1,0 +1,163 @@
+﻿@typeparam TItem
+@typeparam TValue
+
+<div class="@ContainerCssClass"
+     id="@_containerId"
+     @ref="_containerRef"
+     @attributes="AdditionalAttributes">
+
+    @* ── Selection area (clickable to open) ── *@
+    <div class="blab-select2__control" @onclick="ToggleDropdown">
+
+        @if (Multiple)
+        {
+            @* ── Multi-select: tags + inline search ── *@
+            <div class="blab-select2__tags">
+                @foreach (var val in _selectedValues)
+                {
+                    var item = GetItemByValue(val);
+                    <span class="blab-select2__tag">
+                        @if (SelectionTemplate is not null && item is not null)
+                        {
+                            @SelectionTemplate(item)
+                        }
+                        else
+                        {
+                            <span class="blab-select2__tag-text">@GetTextByValue(val)</span>
+                        }
+                        <span class="blab-select2__tag-remove"
+                              @onclick="() => UnselectValue(val)"
+                              @onclick:stopPropagation="true">×</span>
+                    </span>
+                }
+
+                @if (_isOpen)
+                {
+                    <input class="blab-select2__search blab-select2__search--inline"
+                           type="text"
+                           @ref="_searchInputRef"
+                           value="@_searchText"
+                           @oninput="OnSearchInput"
+                           @onkeydown="OnKeyDown"
+                           @onkeydown:preventDefault="@(_highlightedIndex >= 0)"
+                           placeholder="@(!HasSelection ? Placeholder : "")"
+                           autocomplete="off" />
+                }
+                else if (!HasSelection)
+                {
+                    <span class="blab-select2__placeholder">@Placeholder</span>
+                }
+            </div>
+        }
+        else
+        {
+            @* ── Single-select: selected value display ── *@
+            <div class="blab-select2__rendered">
+                @if (HasSelection)
+                {
+                    var selectedItem = GetItemByValue(Value!);
+                    if (SelectionTemplate is not null && selectedItem is not null)
+                    {
+                        @SelectionTemplate(selectedItem)
+                    }
+                    else
+                    {
+                        <span class="blab-select2__selected-text">@GetSelectedText()</span>
+                    }
+                }
+                else
+                {
+                    <span class="blab-select2__placeholder">@Placeholder</span>
+                }
+            </div>
+        }
+
+        @* ── Indicators (clear + arrow) ── *@
+        <div class="blab-select2__indicators">
+            @if (AllowClear && HasSelection && !Disabled)
+            {
+                <span class="blab-select2__clear"
+                      @onclick="ClearSelection"
+                      @onclick:stopPropagation="true"
+                      title="Clear">×</span>
+            }
+            <span class="blab-select2__arrow">
+                <b></b>
+            </span>
+        </div>
+    </div>
+
+    @* ── Dropdown ── *@
+    @if (_isOpen)
+    {
+        <div class="blab-select2__dropdown">
+            @if (!Multiple)
+            {
+                <div class="blab-select2__search-container">
+                    <input class="blab-select2__search"
+                           type="text"
+                           @ref="_searchInputRef"
+                           value="@_searchText"
+                           @oninput="OnSearchInput"
+                           @onkeydown="OnKeyDown"
+                           @onkeydown:preventDefault="@(_highlightedIndex >= 0)"
+                           placeholder="Search..."
+                           autocomplete="off" />
+                </div>
+            }
+
+            <div class="blab-select2__results" style="max-height: @(MaxDropdownHeight)px;">
+                @if (_isLoading)
+                {
+                    <div class="blab-select2__message blab-select2__loading">
+                        <span class="blab-select2__spinner"></span>
+                        Searching...
+                    </div>
+                }
+                else if (ShowMinLengthHint)
+                {
+                    <div class="blab-select2__message">
+                        @MinLengthHintText
+                    </div>
+                }
+                else if (ShowTypeToSearchHint)
+                {
+                    <div class="blab-select2__message">
+                        Type to search...
+                    </div>
+                }
+                else if (_filteredItems.Count == 0)
+                {
+                    <div class="blab-select2__message">
+                        @NoResultsText
+                    </div>
+                }
+                else
+                {
+                    @for (var i = 0; i < _filteredItems.Count; i++)
+                    {
+                        var index = i;
+                        var item = _filteredItems[index];
+                        <div class="@GetItemCssClass(index, item)"
+                             @onclick="() => SelectItem(item)"
+                             @onmouseenter="() => _highlightedIndex = index">
+                            @if (ItemTemplate is not null)
+                            {
+                                @ItemTemplate(item)
+                            }
+                            else
+                            {
+                                @TextSelector(item)
+                            }
+                            @if (IsSelected(item))
+                            {
+                                <span class="blab-select2__option-check">✓</span>
+                            }
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    }
+</div>
+

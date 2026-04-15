@@ -10,7 +10,9 @@
 @using TrapchumApp.Helpers.Constants
 @using TrapchumApp.Pages.Transactions.Exchanges
 @using TrapchumApp.Services
+@using TrapchumApp.Components.Toasts
 @inherits LayoutComponentBase
+<Toastr />
 <RadzenComponents @rendermode="InteractiveServer" />
 <RadzenProgressBar Visible="@isLoading"
                    Mode="ProgressBarMode.Indeterminate"

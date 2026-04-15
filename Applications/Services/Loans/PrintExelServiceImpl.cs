@@ -1,61 +1,56 @@
 ﻿using Applications.Extensions.DateTimes;
 using Applications.Extensions.Maths;
-using Applications.Responses;
-using Applications.Services.Reports;
 using MiniExcelLibs;
-using Microsoft.AspNetCore.Hosting;
-namespace Applications.Services.Loans
+namespace Applications.Services.Loans;
+
+public sealed class PrintExelServiceImpl(IHostingEnvironment env, ILoanReportServiceImpl loanService) : IPrintExelServiceImpl
 {
-    public sealed class PrintExelServiceImpl(IHostingEnvironment env, ILoanReportServiceImpl loanService) : IPrintExelServiceImpl
+    public async Task<Result<Stream>> DownLoadScheduleAsExcel(string? loanId, int? branchId)
     {
-        public async Task<Result<Stream>> DownLoadScheduleAsExcel(string? loanId, int? branchId)
+
+
+        var rsp = await loanService.PrintLoanScheduleAsync(branchId, loanId);
+
+        MemoryStream ms = new MemoryStream();
+
+        var item = rsp!.Schedules;
+
+        var templatePath = Path.Combine(env.WebRootPath, "Reports/Schedule.xlsx");
+
+        var dataTemplate = new
         {
+            name = rsp.AltName,
 
+            period = rsp.PeriodName,
 
-            var rsp = await loanService.PrintLoanScheduleAsync(branchId, loanId);
+            address = rsp.Address,
 
-            MemoryStream ms = new MemoryStream();
+            circle = rsp.Circle,
 
-            var item = rsp!.Schedules;
+            agent = rsp.AgentName,
 
-            var templatePath = Path.Combine(env.WebRootPath, "Reports/Schedule.xlsx");
+            agentPhone = rsp.AgentPhone,
 
-            var dataTemplate = new
-            {
-                name = rsp.AltName,
+            lastDate = rsp.LastPaymentDate,
 
-                period = rsp.PeriodName,
+            phone = rsp.Phone,
 
-                address = rsp.Address,
+            date = rsp.RegisterDate.DayFirst(),
 
-                circle = rsp.Circle,
+            l = rsp.Schedules,
 
-                agent = rsp.AgentName,
+            totalDay = rsp.Circle,
 
-                agentPhone = rsp.AgentPhone,
+            principle = rsp.OutStanding.SetFormat(rsp.CurrencyId),
 
-                lastDate = rsp.LastPaymentDate,
+            interest = rsp.PaidInterest.SetFormat(rsp.CurrencyId)
+        };
 
-                phone = rsp.Phone,
+        await ms.SaveAsByTemplateAsync(templatePath, dataTemplate);
 
-                date = rsp.RegisterDate.DayFirst(),
+        ms.Seek(0, SeekOrigin.Begin);
 
-                l = rsp.Schedules,
-
-                totalDay = rsp.Circle,
-
-                principle = rsp.OutStanding.SetFormat(rsp.CurrencyId),
-
-                interest = rsp.PaidInterest.SetFormat(rsp.CurrencyId)
-            };
-
-            await ms.SaveAsByTemplateAsync(templatePath, dataTemplate);
-
-            ms.Seek(0, SeekOrigin.Begin);
-
-            return Result.Success<Stream>(ms);
-        }
-
+        return Result.Success<Stream>(ms);
     }
 
 }

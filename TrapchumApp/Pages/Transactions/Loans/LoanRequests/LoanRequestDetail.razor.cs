@@ -1,9 +1,7 @@
+using Applications.Commons.Authorizations;
 using Applications.Commons.Mappers;
 using Applications.Enumerations;
 using Applications.Extensions;
-using Applications.Features.LoanRequests.Command.AddDescription;
-using Applications.Features.LoanRequests.Command.DenyLoanRequest;
-using Applications.Features.LoanRequests.Command.RecheckedLoanRequest;
 using Applications.Features.LoanRequests.Command.SaveEditLoanRequest;
 using Applications.Features.LoanRequests.Command.SaveLoanRequests;
 using Applications.Features.LoanRequests.Queryies.GetLoanRequestDetailById;
@@ -11,7 +9,6 @@ using Applications.Features.LoanRequests.Requests;
 using Applications.Features.Loans.Dtos.Responses;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Domains.Models.Identity;
-using Infrastructures.Authorizations;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using TrapchumApp.Helpers.Extensions;
@@ -177,19 +174,14 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             if (!await ConfirmActionAsync("Do you want to reject this request?"))
                 return;
 
-            var req = new DeniedRequestDtoCreate(BranchId, CustomerId, LoanRequestId, DateTime.UtcNow, memo);
+            var req = new SaveLoanRequestDtoCreate(BranchId, CustomerId, LoanRequestId, memo, RequestStatus.Denied);
 
-            var command = new DeniedLoanRequestCommand(req);
+            var command = new SaveLoanRequestsCommand(req);
 
             var rsp = await mediator.Send(command);
 
             if (!rsp.IsError)
             {
-                var description = new LoanDescriptionsDtoCreate(memo, aprovedUserId, LoanRequestId);
-
-                var cmd = new AddDescriptionCommand(description);
-
-                await mediator.Send(cmd);
 
                 NotificationService.Notify(NotificationSeverity.Success, rsp.Value.Message!);
 
@@ -206,9 +198,9 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             if (!await ConfirmActionAsync("Do you want to return back this request?"))
                 return;
 
-            var req = new RecheckedRequestDtoCreate(BranchId, CustomerId, LoanRequestId, DateTime.UtcNow, RequestStatus.Rechecked, memo);
+            var req = new SaveLoanRequestDtoCreate(BranchId, CustomerId, LoanRequestId, memo, RequestStatus.Rechecked);
 
-            var command = new RecheckedLoanRequestCommand(req);
+            var command = new SaveLoanRequestsCommand(req);
 
             var rsp = await mediator.Send(command);
 
@@ -247,7 +239,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             }
         }
 
-        async Task SaveLoanRequestManager() 
+        async Task SaveLoanRequestManager()
         {
             if (!await ConfirmActionAsync("Do you want to save this request?"))
                 return;
@@ -271,9 +263,28 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         }
 
 
-        void ApproveLoanRequest()
+        async Task ApproveLoanRequest()
         {
-            CreateLoanRequest();
+            var options = new DialogOptions
+            {
+            };
+            var param = new Dictionary<string, object?>
+            {
+                { "LoanRequestId", LoanRequestId },
+                { "BranchId", BranchId },
+                { "CustomerId", CustomerId }
+            };
+
+            bool dialogueResult = await DialogService.OpenAsync<ConfirmModal>("Confirm", param!, options);
+
+            if (dialogueResult && user is not null)
+            {
+                await GetLoanRequestDetails(user, true);
+
+                disableTextbox = true;
+
+                StateHasChanged();
+            }
         }
 
 

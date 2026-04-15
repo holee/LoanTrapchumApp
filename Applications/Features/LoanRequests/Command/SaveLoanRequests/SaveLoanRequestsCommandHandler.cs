@@ -12,6 +12,6 @@ public class SaveLoanRequestsCommandHandler : IRequestHandler<SaveLoanRequestsCo
     }
     public async Task<ErrorOr<RequestResult>> Handle(SaveLoanRequestsCommand request, CancellationToken cancellationToken)
     {
-        return await _loanService.SaveLoanRequestByManagerAsync(request.Request);
+        return await _loanService.SaveLoanRequestAsync(request.Request);
     }
 }

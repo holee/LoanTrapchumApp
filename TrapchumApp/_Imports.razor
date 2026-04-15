@@ -42,6 +42,9 @@
 @using TrapchumApp.Components.Comps
 @using TrapchumApp.Components.Comps.Cards
 @using TrapchumApp.Components.Comps.Controls
+@using TrapchumApp.Components.Toasts
+@using TrapchumApp.Components.Select2
+@using TrapchumApp.Components.Datatabes
 @using TrapchumApp.Helpers.Constants
 @using TrapchumApp.Pages.Transactions.Loans.LoanRequests.Links
 @using TrapchumApp.Services
@@ -68,4 +71,5 @@
 @inject IMediator mediator
 @inject LoadingTrackerService Tracker
 @inject NotificationServices _notiService
+@inject ToastService _toastService
 @using Applications.Enumerations

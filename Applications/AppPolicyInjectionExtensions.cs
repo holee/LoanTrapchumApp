@@ -1,4 +1,5 @@
-﻿using Applications.Constants.Authorizations;
+﻿using Applications.Commons.Authorizations;
+using Applications.Constants.Authorizations;
 using Applications.Extensions.Identity.Policies;
 using Microsoft.AspNetCore.Authorization;
 namespace Applications
@@ -94,7 +95,7 @@ namespace Applications
             options.AddPolicy(Policies.OpenBranch, Policies.CanOpenBranch());
             options.AddPolicy(Policies.CloseBranch, Policies.CanClosedBranch());
             options.AddPolicy(Policies.CanExchanged, Policies.CanExchangeMoney());
-
+            options.AddPolicy(Policies.SameUser, policy => policy.Requirements.Add(new SameUserRequestRequirement()));
         }
 
         public static IServiceCollection AddPolicyServices(this IServiceCollection services)

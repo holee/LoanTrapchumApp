@@ -113,7 +113,7 @@ namespace Infrastructures
             services.AddScoped<ILoanSettingService, LoanSettingService>();
             services.AddScoped<ILoanProductService, LoanProductService>();
             services.AddScoped<ILoanPaymentService, LoanPaymentRepository>();
-            services.AddScoped<Applications.Interfaces.Loans.ILoanScheduleService, LoanScheduleService>();
+            services.AddScoped<ILoanScheduleService, LoanScheduleService>();
             services.AddScoped<ILoanService, LoanRepository>();
             services.AddScoped<ILoanCategoryService, LoanCategoryService>();
             services.AddScoped<ILoanRequestService, LoanRequestRepository>();
@@ -126,7 +126,7 @@ namespace Infrastructures
             services.AddScoped<IDistrictService, DistrictService>();
             services.AddScoped<ICommuneService, CommuneService>();
             services.AddScoped<IVillageServer, VillageService>();
-            services.AddScoped<Applications.Interfaces.IScheduleService, LoanScheduleRepository>();
+            services.AddScoped<IScheduleService, LoanScheduleRepository>();
             services.AddScoped<INotificationService, NotificationRepository>();
             services.AddSingleton<IDapperConnectionFactory, DapperConnectionFactory>();
             services.AddScoped<IDashboardService, DashboardRepository>();

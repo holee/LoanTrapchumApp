@@ -1,0 +1,684 @@
+/* ═══════════════════════════════════════════════════════════
+   BlabTable – Modern clean DataTable theme
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Container ───────────────────────────────────────────── */
+.blab-dt {
+    box-sizing: border-box;
+    width: 100%;
+    font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 14px;
+    color: #1e293b;
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+}
+
+/* ── Header (page-size + search + optional top pagination) ── */
+.blab-dt__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 12px 16px;
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.blab-dt__header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.blab-dt__header-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.blab-dt__length-label {
+    font-size: 13px;
+    color: #64748b;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.blab-dt__length-select {
+    display: inline-block;
+    width: auto;
+    padding: 6px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 13px;
+    background: #fff;
+    color: #334155;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.blab-dt__length-select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.blab-dt__search-label {
+    font-size: 13px;
+    color: #64748b;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.blab-dt__search-input {
+    display: inline-block;
+    width: 220px;
+    padding: 6px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 13px;
+    color: #334155;
+    background: #fff;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.blab-dt__search-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.blab-dt__search-input::placeholder {
+    color: #94a3b8;
+}
+
+/* ── Table wrapper ───────────────────────────────────────── */
+.blab-dt__scroll {
+    overflow-x: auto;
+    position: relative;
+}
+
+.blab-dt__table {
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+/* ── Thead ────────────────────────────────────────────────── */
+.blab-dt__table thead th {
+    background: #f1f5f9;
+    border-bottom: 2px solid #e2e8f0;
+    padding: 10px 14px;
+    font-weight: 600;
+    font-size: 12px;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    cursor: default;
+    user-select: none;
+    position: relative;
+    transition: background-color 0.15s;
+}
+
+.blab-dt--bordered .blab-dt__table thead th {
+    border-right: 1px solid #e2e8f0;
+}
+
+.blab-dt--bordered .blab-dt__table thead th:last-child {
+    border-right: none;
+}
+
+.blab-dt--compact .blab-dt__table thead th {
+    padding: 6px 10px;
+    font-size: 11px;
+}
+
+/* ── Sticky header ───────────────────────────────────────── */
+.blab-dt__scroll--sticky .blab-dt__table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+}
+
+/* ── Sort icons (SVG-based) ──────────────────────────────── */
+.blab-dt__sortable {
+    cursor: pointer !important;
+}
+
+.blab-dt__sortable:hover {
+    background: #e2e8f0;
+}
+
+.blab-dt__th-content {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.blab-dt__sort-icon {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+}
+
+.blab-dt__sort-icon svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* ── Tbody ────────────────────────────────────────────────── */
+.blab-dt__table tbody td {
+    padding: 10px 14px;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+    font-size: 13px;
+    color: #334155;
+    transition: background-color 0.1s;
+}
+
+.blab-dt--bordered .blab-dt__table tbody td {
+    border: 1px solid #e2e8f0;
+}
+
+.blab-dt--compact .blab-dt__table tbody td {
+    padding: 6px 10px;
+    font-size: 12px;
+}
+
+/* Striped rows */
+.blab-dt__table--striped tbody tr:nth-child(even) {
+    background-color: #f8fafc;
+}
+
+.blab-dt__table--striped tbody tr:nth-child(odd) {
+    background-color: #fff;
+}
+
+/* Hover rows */
+.blab-dt__table--hover tbody tr:hover {
+    background-color: #eff6ff;
+}
+
+/* Row clickable cursor */
+.blab-dt__row {
+    cursor: pointer;
+    transition: background-color 0.15s;
+}
+
+/* ── Editing row highlight ───────────────────────────────── */
+.blab-dt__row--editing {
+    background-color: #fefce8 !important;
+    box-shadow: inset 0 1px 0 #fde68a, inset 0 -1px 0 #fde68a;
+}
+
+.blab-dt__row--editing td {
+    border-bottom-color: #fde68a;
+}
+
+/* ── Cell edit ───────────────────────────────────────────── */
+.blab-dt__cell--editable {
+    position: relative;
+    cursor: text;
+}
+
+.blab-dt__cell--editable:hover {
+    background-color: #eff6ff;
+    outline: 2px solid #bfdbfe;
+    outline-offset: -2px;
+    border-radius: 2px;
+}
+
+.blab-dt__cell--editing {
+    padding: 4px 6px !important;
+    background-color: #fffbeb !important;
+    outline: 2px solid #f59e0b !important;
+    outline-offset: -2px;
+    border-radius: 2px;
+}
+
+/* ── Row edit action buttons ─────────────────────────────── */
+.blab-dt__edit-actions {
+    display: inline-flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.blab-dt__edit-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: transparent;
+    color: #64748b;
+    font-size: 16px;
+    line-height: 1;
+}
+
+.blab-dt__edit-btn:hover {
+    background: #f1f5f9;
+    color: #334155;
+}
+
+.blab-dt__edit-btn--save {
+    color: #16a34a;
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+}
+
+.blab-dt__edit-btn--save:hover {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.blab-dt__edit-btn--cancel {
+    color: #dc2626;
+    background: #fef2f2;
+    border-color: #fecaca;
+}
+
+.blab-dt__edit-btn--cancel:hover {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.blab-dt__edit-btn--edit {
+    color: #2563eb;
+    background: #eff6ff;
+    border-color: #bfdbfe;
+}
+
+.blab-dt__edit-btn--edit:hover {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+/* ── Empty state ─────────────────────────────────────────── */
+.blab-dt__empty-cell {
+    text-align: center;
+    padding: 40px 16px;
+    color: #94a3b8;
+    font-size: 14px;
+}
+
+.blab-dt__empty-icon {
+    display: block;
+    font-size: 32px;
+    margin-bottom: 8px;
+    opacity: 0.5;
+}
+
+/* ── Loading overlay ─────────────────────────────────────── */
+.blab-dt__loading-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.75);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    z-index: 10;
+    backdrop-filter: blur(1px);
+    border-radius: 0;
+    transition: opacity 0.2s;
+}
+
+.blab-dt__loading-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #e2e8f0;
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: blab-dt-spin 0.65s linear infinite;
+}
+
+.blab-dt__loading-text {
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+}
+
+@keyframes blab-dt-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Skeleton rows (shown when no data yet but loading) */
+.blab-dt__skeleton-row td {
+    padding: 10px 14px;
+}
+
+.blab-dt__skeleton-bar {
+    height: 14px;
+    background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+    background-size: 200% 100%;
+    border-radius: 4px;
+    animation: blab-dt-shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes blab-dt-shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* ── Footer summary (tfoot) ──────────────────────────────── */
+
+/* ── Column filter picker ────────────────────────────────── */
+.blab-dt__col-picker {
+    position: relative;
+    display: inline-block;
+}
+
+.blab-dt__col-picker-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #475569;
+    background: #fff;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+}
+
+.blab-dt__col-picker-btn:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+    color: #1e293b;
+}
+
+.blab-dt__col-picker-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    z-index: 20;
+    min-width: 180px;
+    max-height: 280px;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.06);
+    padding: 6px 0;
+}
+
+.blab-dt__col-picker-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    font-size: 13px;
+    color: #334155;
+    cursor: pointer;
+    transition: background-color 0.1s;
+    white-space: nowrap;
+}
+
+.blab-dt__col-picker-item:hover {
+    background: #f1f5f9;
+}
+
+.blab-dt__col-picker-item input[type="checkbox"] {
+    accent-color: #3b82f6;
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+}
+
+/* ── Footer summary (tfoot) ──────────────────────────────── */
+.blab-dt__tfoot {
+    background: #f8fafc;
+    border-top: 2px solid #e2e8f0;
+}
+
+.blab-dt__tfoot td,
+.blab-dt__tfoot th {
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #1e293b;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.blab-dt--bordered .blab-dt__tfoot td,
+.blab-dt--bordered .blab-dt__tfoot th {
+    border: 1px solid #e2e8f0;
+}
+
+.blab-dt--compact .blab-dt__tfoot td,
+.blab-dt--compact .blab-dt__tfoot th {
+    padding: 6px 10px;
+    font-size: 12px;
+}
+
+/* ── Footer (info + pagination) ──────────────────────────── */
+.blab-dt__footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 12px 16px;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+}
+
+.blab-dt__footer-left {
+    display: flex;
+    align-items: center;
+}
+
+.blab-dt__footer-right {
+    display: flex;
+    align-items: center;
+}
+
+.blab-dt__info {
+    font-size: 13px;
+    color: #64748b;
+}
+
+/* ── Pagination ──────────────────────────────────────────── */
+.blab-dt__paging {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.blab-dt__page-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 10px;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1;
+    color: #475569;
+    background-color: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+    user-select: none;
+    transition: all 0.15s;
+}
+
+.blab-dt__page-btn:hover:not(:disabled):not(.blab-dt__page-btn--active) {
+    background-color: #f1f5f9;
+    border-color: #cbd5e1;
+    color: #1e293b;
+}
+
+.blab-dt__page-btn--active {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 1px 2px rgba(59, 130, 246, 0.3);
+}
+
+.blab-dt__page-btn--active:hover {
+    background-color: #2563eb;
+    border-color: #2563eb;
+    color: #fff;
+}
+
+.blab-dt__page-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background: #f8fafc;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Responsive – card/stacked layout on small screens
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+    .blab-dt__header,
+    .blab-dt__footer {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .blab-dt__header-right {
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+        gap: 0.5rem;
+    }
+
+    .blab-dt__search-input {
+        width: 100%;
+        min-width: 160px;
+    }
+
+    .blab-dt__paging {
+        flex-wrap: wrap;
+    }
+
+    /* ── Responsive card view ── */
+    .blab-dt--responsive .blab-dt__table thead {
+        display: none;
+    }
+
+    .blab-dt--responsive .blab-dt__table,
+    .blab-dt--responsive .blab-dt__table tbody,
+    .blab-dt--responsive .blab-dt__table tr,
+    .blab-dt--responsive .blab-dt__table td {
+        display: block;
+        width: 100%;
+    }
+
+    .blab-dt--responsive .blab-dt__table tbody tr {
+        margin-bottom: 12px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+
+    .blab-dt--responsive .blab-dt__table tbody td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 14px;
+        border-bottom: 1px solid #f1f5f9;
+        text-align: right !important;
+    }
+
+    .blab-dt--responsive .blab-dt__table tbody td:last-child {
+        border-bottom: none;
+    }
+
+    .blab-dt--responsive .blab-dt__table tbody td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        font-size: 12px;
+        color: #475569;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        text-align: left;
+        margin-right: 1rem;
+        flex-shrink: 0;
+    }
+
+    /* Skeleton rows in responsive mode */
+    .blab-dt--responsive .blab-dt__skeleton-row {
+        display: block;
+        margin-bottom: 12px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .blab-dt--responsive .blab-dt__skeleton-row td {
+        display: block;
+        padding: 10px 14px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .blab-dt--responsive .blab-dt__skeleton-row td:last-child {
+        border-bottom: none;
+    }
+
+    /* tfoot in responsive */
+    .blab-dt--responsive .blab-dt__tfoot {
+        display: block;
+    }
+
+    .blab-dt--responsive .blab-dt__tfoot tr {
+        display: block;
+        margin-bottom: 12px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        overflow: hidden;
+        background: #f8fafc;
+    }
+
+    .blab-dt--responsive .blab-dt__tfoot td,
+    .blab-dt--responsive .blab-dt__tfoot th {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 14px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .blab-dt--responsive .blab-dt__tfoot td:last-child,
+    .blab-dt--responsive .blab-dt__tfoot th:last-child {
+        border-bottom: none;
+    }
+
+    /* Empty and loading cells in responsive */
+    .blab-dt--responsive .blab-dt__empty-cell,
+    .blab-dt--responsive .blab-dt__loading-cell {
+        text-align: center !important;
+    }
+
+    .blab-dt--responsive .blab-dt__empty-cell::before,
+    .blab-dt--responsive .blab-dt__loading-cell::before {
+        display: none;
+    }
+}

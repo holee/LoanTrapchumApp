@@ -6,6 +6,7 @@ using Applications.Features.CreditAgents.Requests;
 using Applications.Features.Customers.Response;
 using Applications.Features.LoanRequests.Requests;
 using Applications.Features.Loans.Dtos.Responses;
+using Applications.Interfaces.Identity;
 using Applications.Interfaces.Loans;
 using Applications.Responses.Message;
 using Applications.Responses.Paginations;
@@ -25,7 +26,10 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructures.Implements;
 
-public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger, IDapperConnectionFactory dapperFactory, IDbContextFactory<DataContext> contextFactory) : ILoanRequestService
+public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
+        IDapperConnectionFactory dapperFactory,
+        IDbContextFactory<DataContext> contextFactory,
+        ICurrentUserService currentUserService) : ILoanRequestService
 {
     public async Task<ErrorOr<RequestResult>> CreateNewLoanRequestAsync(LoanRequest req, CancellationToken cancellationToken = default)
     {
@@ -446,9 +450,10 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
     public async Task<ErrorOr<RequestResult>> SaveLoanRequestAsync(SaveLoanRequestDtoCreate req, CancellationToken cancellationToken = default)
     {
 
-        await using var cxt = await contextFactory.CreateDbContextAsync(); 
+        await using var cxt = await contextFactory.CreateDbContextAsync();
 
         var existingLoanRequest = await cxt.LoanRequests
+                        .Include(x => x.LoanDescriptions)
                         .FirstOrDefaultAsync(x => x.LoanRequestId == req.LoanRequestId &&
                                                 x.BranchRefId == req.BranchId &&
                                                 x.CustomerRefId == req.CustomerId, cancellationToken);
@@ -465,6 +470,14 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
         try
         {
             existingLoanRequest.LoanRequestStatusRefId = (int)req.RequestStatus;
+
+            existingLoanRequest.Remark = req.Remark;
+
+            existingLoanRequest.LoanDescriptions.Add(new LoanDescriptions
+            {
+                Memo = req.Memo,
+                UserRefId = currentUserService.UserId,
+            });
 
             await cxt.SaveChangesAsync(cancellationToken);
 
@@ -1294,7 +1307,7 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
     public async Task<ErrorOr<T>> GetLoanRequestAsync<T>(int? branchId, string? customerId, string? loanRequestId) where T : class
     {
         await using var context = await contextFactory.CreateDbContextAsync();
-       
+
         try
         {
             var item = await context.VLoanRequests

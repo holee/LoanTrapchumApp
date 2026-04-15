@@ -1,11 +1,8 @@
 using Applications.Enumerations;
-using Applications.Extensions.Identity.Policies;
 using Applications.Extensions.Web;
 using Applications.Features.LoanRequests.Queryies.GetLoanRequestAsPaging;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Requests;
-using Domains.Models.Identity;
-using Microsoft.AspNetCore.Authorization;
 using TrapchumApp.Shared;
 
 namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
@@ -41,6 +38,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         bool IsAccount = false;
         bool IsCreditAgent = false;
         bool IsManager = false;
+        private bool _isPageLoading = false; 
         void SelectedIndexChanged(int selectedIndex)
         {
             _selectedIndex = selectedIndex;
@@ -176,19 +174,6 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
                 _ => BadgeStyle.Dark
             };
         }
-
-
-        //protected override void OnParametersSet()
-        //{
-        //    createRequestUrl = new Dictionary<string, object?>
-        //{
-        //    {"BranchId",BranchId},
-        //    {"UserId",_userId},
-        //    { "ActionMode",ActionMode.Create}
-        //}.AddQueryString($"/Loan/Customer/Request");
-        //    base.OnParametersSet();
-        //}
-
 
     }
 }

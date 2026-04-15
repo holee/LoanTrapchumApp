@@ -13,10 +13,13 @@ namespace Infrastructures.Implements
     public class LoanProductService : ILoanProductService
     {
         private readonly DataContext _context;
+
         private readonly IDbContextFactory<DataContext> contextFactory;
+
         public LoanProductService(DataContext context, IDbContextFactory<DataContext> contextFactory)
         {
             this._context = context;
+
             this.contextFactory = contextFactory;
         }
 
@@ -25,7 +28,9 @@ namespace Infrastructures.Implements
             try
             {
                 _context.LoanProducts.Add(model);
+
                 await SaveAsync();
+
                 return Result.Success("Loan Product was Added");
             }
             catch (DbUpdateConcurrencyException ex)

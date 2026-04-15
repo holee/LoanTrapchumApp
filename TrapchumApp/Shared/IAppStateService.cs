@@ -15,4 +15,5 @@ public interface IAppStateService
     bool CanWriteOff { get; protected set; }
     bool CanOpenBranch { get; protected set; }
     bool CanRecieveMultiple { get; set; }
+    bool IsSameUser { get; protected set; }
 }

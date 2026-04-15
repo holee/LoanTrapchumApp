@@ -67,7 +67,8 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
         async Task GetLoanRequestAsync()
         {
-            isLoading = true;
+
+            Tracker.Show();
 
             string? userId = string.Empty;
 
@@ -80,6 +81,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             else
             {
                 await bState.GetUserId();
+
                 userId = bState.UserId;
             }
 
@@ -92,6 +94,8 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             counts = rsp.Count;
 
             isLoading = false;
+
+            Tracker.Hide();
 
             StateHasChanged();
         }
