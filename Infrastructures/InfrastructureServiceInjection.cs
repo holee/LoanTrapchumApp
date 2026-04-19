@@ -89,15 +89,15 @@ namespace Infrastructures
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IRoleService, RoleRepository>();
             services.AddScoped<IOpenBranchService, OpenBranchService>();
-            services.AddScoped<IOccupationService, OccupationService>();
-            services.AddScoped<IOtherNameService, OtherNameService>();
+            services.AddScoped<IOccupationService, OccupationRepository>();
+            services.AddScoped<IOtherNameService, OtherNameRepository>();
             services.AddScoped<ILoginService, LoginService>();
             services.AddScoped<IBranchService, BranchRepository>();
             services.AddScoped<IBankService, BankRepository>();
             services.AddScoped<IDepartmentService, DepartmentService>();
             services.AddScoped<IEmployeeService, EmployeeRepository>();
             services.AddScoped<IEntityNameService, EntityNameService>();
-            services.AddScoped<IAddressService, AddressService>();
+            services.AddScoped<IAddressService, AddressRepository>();
             services.AddScoped<ICashVaultService, CashVaultService>();
             services.AddScoped<ICashVaultService, CashVaultService>();
             services.AddScoped<ICurrencyService, CurrencyRepository>();
@@ -119,17 +119,14 @@ namespace Infrastructures
             services.AddScoped<ILoanRequestService, LoanRequestRepository>();
             services.AddScoped<ILoanReportService, LoanReportService>();
             services.AddScoped<ISalutationService, SalutaionService>();
-            services.AddScoped<INationalityService, NationalityService>();
+            services.AddScoped<INationalityService, NationalityRepository>();
             services.AddScoped<IFileUploadService, FileUploadRepository>();
-            services.AddScoped<IVendorService, VendorService>();
-            services.AddScoped<IProvinceService, ProvinceService>();
-            services.AddScoped<IDistrictService, DistrictService>();
-            services.AddScoped<ICommuneService, CommuneService>();
-            services.AddScoped<IVillageServer, VillageService>();
+            services.AddScoped<IVendorService, VendorRepository>();
             services.AddScoped<IScheduleService, LoanScheduleRepository>();
             services.AddScoped<INotificationService, NotificationRepository>();
             services.AddSingleton<IDapperConnectionFactory, DapperConnectionFactory>();
             services.AddScoped<IDashboardService, DashboardRepository>();
+            services.AddScoped<IDocumentServices, DocumentRepository>();
             return services;
 
         }

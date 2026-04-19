@@ -1,4 +1,6 @@
 ﻿@page "/App/Setting/Occupations"
+@using Applications.Features.AdditionalInformations.Dto
+@using Applications.Features.AdditionalInformations.Queries.GetOccupations
 @using Applications.Features.Addresses
 @using Applications.Features.Branches
 @using Applications.Features.Currencies
@@ -26,7 +28,7 @@
                 AllowAlternatingRows="true"
                 AllowSorting="true"
                 @ref="@gridRef"
-                TItem="OccupationVm"
+                TItem="OccupationDto"
                 LoadData="@LoadOccupation"
                 IsLoading="@Tracker.IsLoading"
                 Count="@_counts"
@@ -38,7 +40,7 @@
                 Data="@_occupations">
     <Columns>
         <RadzenDataGridColumn Title="#"
-                              Property="@nameof(OccupationVm.OccupationId)"
+                              Property="@nameof(OccupationDto.OccupationId)"
                               Sortable="false"
                               Filterable="false"
                               Width="5rem"
@@ -49,35 +51,29 @@
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Title="Title"
-                              Property="@nameof(OccupationVm.OccupationTitle)"
+                              Property="@nameof(OccupationDto.OccupationTitle)"
                               TextAlign="TextAlign.Left">
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Title="Khmer"
-                              Property="@nameof(OccupationVm.Khmer)"
+                              Property="@nameof(OccupationDto.Khmer)"
                               TextAlign="TextAlign.Left">
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Title="TypeOf"
-                              Property="@nameof(OccupationVm.TypeOf)"
+                              Property="@nameof(OccupationDto.TypeOf)"
                               TextAlign="TextAlign.Left">
         </RadzenDataGridColumn>
     </Columns>
 </RadzenDataGrid>
 @code {
-    private List<OccupationVm> _occupations = [];
-    RadzenDataGrid<OccupationVm> gridRef = default!;
+    private List<OccupationDto> _occupations = [];
+    RadzenDataGrid<OccupationDto> gridRef = default!;
     private int pageIndex = 0;
     private int pageSize = 15;
     private int _counts = 0;
     private string? _filter = string.Empty;
-    private string sortField = nameof(OccupationVm.OccupationId);
+    private string sortField = nameof(OccupationDto.OccupationId);
     private bool sortDescending = false;
     private bool isIncludeInActive = false;
-    private readonly IOccupationServiceImpl _occService;
-    public OccupationList(IOccupationServiceImpl occService)
-    {
-        _occService = occService;
-    }
-
 
     protected override async Task OnInitializedAsync()
     {
@@ -94,7 +90,7 @@
 
         var param = new QueryParam(pageIndex, pageSize, sortField, isIncludeInActive, sortDescending, filter);
 
-        var rsp = await _occService.GetOccupationsAsync(0, param);
+        var rsp = await mediator.Send(new GetOccupationsQuery(0, param)); 
 
         _occupations = rsp.Items ?? [];
 
@@ -112,10 +108,10 @@
         (sortField, sortDescending) = args.PageInfo();
 
         var filterColumn = args.Filters?
-                                .FirstOrDefault(prop => prop.Property == nameof(OccupationVm.OccupationTitle) ||
-                                                        prop.Property == nameof(OccupationVm.Khmer) ||
-                                                        prop.Property == nameof(OccupationVm.TypeOf)
-                                    )?.FilterValue.ToString() ?? string.Empty;
+                                .FirstOrDefault(prop => prop.Property == nameof(OccupationDto.OccupationTitle) ||
+                                                        prop.Property == nameof(OccupationDto.Khmer) ||
+                                                        prop.Property == nameof(OccupationDto.TypeOf)
+                                    )?.FilterValue!.ToString() ?? string.Empty;
 
         _filter = filterColumn ?? string.Empty;
 
@@ -135,9 +131,8 @@
     {
         var dia = await DialogService.OpenAsync<OccupationCreate>("Occupations");
 
-        if (dia is OccupationVm result && result is not null)
+        if (dia is OccupationDto result && result is not null)
         {
-            //await GetOccupations(_filter);
 
             await gridRef.InsertRow(result);
 

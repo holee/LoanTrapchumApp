@@ -5,11 +5,12 @@ using Domains.Models.Identity;
 using Microsoft.AspNetCore.Identity;
 namespace Infrastructures.Implements;
 
-public class LoginService(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signinManager) : ILoginService
+public class LoginService(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signinManager) :
+    ILoginService
 {
     public async Task<Result<string>> LoginUser(LoginRequest request)
     {
-        try 
+        try
         {
             var user = await userManager.FindByEmailAsync(request.Email);
 

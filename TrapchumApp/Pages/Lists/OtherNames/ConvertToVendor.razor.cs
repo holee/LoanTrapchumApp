@@ -1,8 +1,6 @@
-using Applications.Features.OtherNames;
+using Applications.Features.OtherNames.Dto;
 using Applications.Responses.ViewModels.OtherNames;
 using Applications.Services.Lists;
-using Microsoft.AspNetCore.Components;
-using Radzen;
 
 namespace TrapchumApp.Pages.Lists.OtherNames
 {

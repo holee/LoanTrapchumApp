@@ -8,8 +8,8 @@ namespace TrapchumApp.Pages.Lists.Operations.Villages
     public partial class VillageDetailsPage
     {
 
-        private readonly IVillageServer villageServer;
-        public VillageDetailsPage(IVillageServer villageServer)
+        private readonly IAddressService villageServer;
+        public VillageDetailsPage(IAddressService villageServer)
         {
             this.villageServer = villageServer;
             // Constructor logic if needed
@@ -20,14 +20,14 @@ namespace TrapchumApp.Pages.Lists.Operations.Villages
         {
             try
             {
-                var result = await villageServer.GetDettailsAsync(Id);
-                if (result.IsSuccess && result.Data != null)
+                var result = await villageServer.GetVillageDetailsAsync(Id);
+                if (!result.IsError)
                 {
-                    model = result.Data;
+                    model = result.Value;
                 }
                 else
                 {
-                    throw new Exception(result.ErrMessage ?? "Failed to load village details.");
+                    throw new Exception(result.FirstError.Description);
                 }
             }
             catch(Exception ex)

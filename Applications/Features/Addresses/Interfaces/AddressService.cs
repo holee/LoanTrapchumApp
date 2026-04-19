@@ -1,22 +1,23 @@
 ﻿using Applications.Features.Addresses.Dto;
 using Applications.Interfaces.Addresses;
 using Domains.Models.Addresses;
+using ErrorOr;
 using Mapster;
 
 namespace Applications.Features.Addresses.Interfaces
 {
     public interface IAddressServiceImpl
     {
-        Task<Result> AddCity(CityDtoCreate city);
+        Task<ErrorOr<string>> AddCity(CityDtoCreate city);
         Task<IEnumerable<string>> GetCities(string? filter = null);
         Task<IEnumerable<CommuneDto>> GetCommunesByDistrictId(int? districtId);
-        Task<Result<IEnumerable<Country>>> GetCountries(int? countryId = 105);
+        Task<ErrorOr<IEnumerable<Country>>> GetCountries(int? countryId = 105);
         Task<IEnumerable<Country>> GetCountries(string? filter = null);
         Task<IEnumerable<DistrictDto>> GetDistrictsByProvinceId(int? provinceId);
         Task<Province?> GetsProvinceById(int? id);
         Task<IEnumerable<ProvinceDto>> GetsProvinces(string? filter = null);
         Task<IEnumerable<VillageDto>> GetVillagesByCommuneId(int? communeId);
-        Task<Result> UpdateCity(CityDtoUpdate city);
+        Task<ErrorOr<string>> UpdateCity(CityDtoUpdate city);
 
         Task<IEnumerable<T>> GetsProvinces<T>(string? expression)
             where T : class;
@@ -37,7 +38,7 @@ namespace Applications.Features.Addresses.Interfaces
 
     public sealed class AddressService(IAddressService addressService) : IAddressServiceImpl
     {
-        public async Task<Result> AddCity(CityDtoCreate city)
+        public async Task<ErrorOr<string>> AddCity(CityDtoCreate city)
         {
             var req = city.Adapt<City>();
 
@@ -59,7 +60,7 @@ namespace Applications.Features.Addresses.Interfaces
             return await addressService.GetCountries(filter);
         }
 
-        public async Task<Result<IEnumerable<Country>>> GetCountries(int? countryId = 105)
+        public async Task<ErrorOr<IEnumerable<Country>>> GetCountries(int? countryId = 105)
         {
             return await addressService.GetCountries(countryId);
         }
@@ -84,7 +85,7 @@ namespace Applications.Features.Addresses.Interfaces
             return await addressService.GetVillagesByCommuneId(communeId);
         }
 
-        public async Task<Result> UpdateCity(CityDtoUpdate city)
+        public async Task<ErrorOr<string>> UpdateCity(CityDtoUpdate city)
         {
             var req = city.Adapt<City>();
 

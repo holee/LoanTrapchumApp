@@ -1,5 +1,6 @@
 using Applications.Features.Branches.Dtos;
 using Applications.Features.Branches.Queries.GetBranchAsPaging;
+using Applications.Features.Employees.Queries.GetEmployeeAsPaging;
 using Applications.Features.Identity.Command.CreateNewUser;
 using Applications.Features.Identity.Users;
 using Applications.Interfaces.Identity;
@@ -124,7 +125,9 @@ namespace TrapchumApp.Pages.Identity.Users
         }
         private async Task GetEmployees(string? employeeId, int branchId = 0)
         {
-            var rsp = await _employeeService.GetEmployeesAsync(branchId, employeeId, new QueryParam(0, 0));
+            var command = new GetEmployeeAsPagingQuery(branchId, employeeId, new QueryParam(0, 0));
+
+            var rsp = await mediator.Send(command); //_employeeService.GetEmployeesAsync(branchId, employeeId, new QueryParam(0, 0));
 
             _bEmployees = rsp.Items ?? [];
 

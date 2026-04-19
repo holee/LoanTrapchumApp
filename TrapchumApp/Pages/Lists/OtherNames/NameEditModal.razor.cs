@@ -1,10 +1,7 @@
 using Applications.Features.Addresses.Dto;
-using Applications.Features.OtherNames;
+using Applications.Features.OtherNames.Dto;
 using Applications.Services.Lists;
 using Domains.Models.Lists;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
-using Radzen;
 
 namespace TrapchumApp.Pages.Lists.OtherNames
 {

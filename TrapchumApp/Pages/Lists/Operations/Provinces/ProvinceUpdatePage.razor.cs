@@ -11,13 +11,13 @@ namespace TrapchumApp.Pages.Lists.Operations.Provinces
 {
     public partial class ProvinceUpdatePage
     {
-        private readonly IProvinceService proService;
+        private readonly IAddressService proService;
         private readonly IAddressService addressService;
 
-        public ProvinceUpdatePage(IProvinceService ser, IAddressService addressService)
+        public ProvinceUpdatePage(IAddressService ser)
         {
             proService = ser;
-            this.addressService = addressService;
+            this.addressService = ser;
         }
         protected IEnumerable<Country> Countries = [];
         private ProvinceDtoUpdate Req = new ProvinceDtoUpdate();
@@ -27,17 +27,17 @@ namespace TrapchumApp.Pages.Lists.Operations.Provinces
             try
             {
                 var results = await addressService.GetCountries(105);
-                Countries = results.Data;
+                if (!results.IsError) Countries = results.Value;
 
-                var response = await proService.GetById(Id);
+                var response = await proService.GetProvinceByIdAsync(Id);
 
-                if (response.IsSuccess)
+                if (!response.IsError)
                 {
-                    Req = response.Data!.Adapt<ProvinceDtoUpdate>();
+                    Req = response.Value.Adapt<ProvinceDtoUpdate>();
                 }
                 else
                 {
-                    NotificationService.Notify(NotificationSeverity.Error, "Province", response.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Error, "Province", response.FirstError.Description);
                 }
 
             }
@@ -54,8 +54,8 @@ namespace TrapchumApp.Pages.Lists.Operations.Provinces
             {
                 var req = Req.Adapt<Province>();
                 //Console.WriteLine(req);
-                var response = await proService.UpdateAsync(req);
-                if (response!.IsSuccess)
+                var response = await proService.UpdateProvinceAsync(req);
+                if (!response.IsError)
                 {
                     NotificationService.Notify(NotificationSeverity.Success,"Provice Updated", Messages.DataCreated);
 
@@ -63,7 +63,7 @@ namespace TrapchumApp.Pages.Lists.Operations.Provinces
                 }
                 else
                 {
-                    NotificationService.Notify(NotificationSeverity.Error, response.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Error, response.FirstError.Description);
                 }
             }
             catch (Exception ex)

@@ -1,10 +1,12 @@
+using Applications.Commons.Mappers;
+using Applications.Features.Documents.Dto;
 using Applications.Interfaces;
-using Applications.Utils;
 using Domains.Models;
+using ErrorOr;
 
 namespace Applications.Features.Documents.Command.AddDocument;
 
-public sealed class AddDocumentCommandHandler : IRequestHandler<AddDocumentCommand, LtDocument>
+public sealed class AddDocumentCommandHandler : IRequestHandler<AddDocumentCommand, ErrorOr<DocumentDto>>
 {
     private readonly IDocumentServices _documentServices;
 
@@ -13,9 +15,17 @@ public sealed class AddDocumentCommandHandler : IRequestHandler<AddDocumentComma
         _documentServices = documentServices;
     }
 
-    public async Task<LtDocument> Handle(AddDocumentCommand request, CancellationToken cancellationToken = default)
+    public async Task<ErrorOr<DocumentDto>> Handle(AddDocumentCommand request, CancellationToken cancellationToken = default)
     {
-        var result = await _documentServices.AddDocumentAsync(request.Document, cancellationToken);
-        return result;
+        LtDocument document = request.Document.ToDocument();
+
+        var result = await _documentServices.AddDocumentAsync(document, cancellationToken);
+
+        if (result is null)
+            return Error.Failure(description: "Failed to add document.");
+
+        var dataMapper = result.ToDocumentDto();
+
+        return dataMapper;
     }
 }

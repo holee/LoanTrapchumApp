@@ -6,6 +6,8 @@
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
 @using Applications.Features.LoanRequests.Interfaces
+@using TrapchumApp.Components.Actionbars
+@using TrapchumApp.Components.Indicatros
 @using TrapchumApp.Pages.Lists.Collaterals
 @using TrapchumApp.Pages.Lists.Customers.Activties
 @using TrapchumApp.Pages.Lists.Customers.Notes
@@ -14,15 +16,7 @@
 @attribute [StreamRendering]
 @if (_isLoading)
 {
-    <RadzenStack AlignItems="AlignItems.Center"
-                 JustifyContent="JustifyContent.Center"
-                 Style="min-height:20rem;">
-        <RadzenProgressBarCircular ShowValue="false"
-                                   Mode="ProgressBarMode.Indeterminate"
-                                   Size="ProgressBarCircularSize.Medium" />
-        <RadzenText TextStyle="TextStyle.Body2"
-                    class="rz-color-base-600">Loading customer...</RadzenText>
-    </RadzenStack>
+   <Loading Text="កំពុងផ្ទុកអតិថិជន..." />
 }
 else
 {
@@ -32,11 +26,7 @@ else
         </HeaderTemplate>
         <ChildContent>
             <CustomerInfo Customer="@Customer" />
-            <RadzenStack AlignItems="AlignItems.Center"
-                         class="rz-p-2 rz-border-radius-2"
-                         Style="background: linear-gradient(135deg, var(--rz-base-200), var(--rz-base-300)); border: 1px solid var(--rz-base-400); box-shadow: 0 1px 3px rgba(0,0,0,0.08);"
-                         Orientation="Orientation.Horizontal"
-                         JustifyContent="JustifyContent.Normal" Gap="1rem">
+            <AppActions>
                 <AuthorizeView Policy="@Policies.UpdateCustomer">
                     <Authorized>
                         <RadzenButton ButtonType="ButtonType.Button"
@@ -58,7 +48,7 @@ else
                         </RadzenButton>
                     </Authorized>
                 </AuthorizeView>
-            </RadzenStack>
+            </AppActions>
         </ChildContent>
     </RadzenFieldset>
     <RadzenCard class="rz-mt-2">

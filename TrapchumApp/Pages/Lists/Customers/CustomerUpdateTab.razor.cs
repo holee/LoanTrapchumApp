@@ -1,11 +1,11 @@
 ﻿using Applications.Enumerations;
+using Applications.Features.AdditionalInformations.Dto;
 using Applications.Features.Customers.Commands.EditCustomer;
 using Applications.Features.Customers.Dto;
 using Applications.Features.Customers.Queries.GetUpdateCustomerById;
 using Applications.Features.Customers.Response;
-using Applications.Interfaces.Lists;
 using Applications.Responses.Lists.Entities;
-using Applications.Services.Files;
+using Applications.Responses.Paginations;
 using Applications.Services.Lists;
 using Domains.Models.Addresses;
 using Domains.Models.Lists;
@@ -13,37 +13,32 @@ using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Lists.Customers;
 
-public partial class CustomerUpdateTab
+public partial class CustomerUpdateTab(ISalutationServiceImpl salutationService)
 {
-    private readonly INationalityService _nationalityService;
-    private readonly IFileUploadServiceImp _fileUploadService;
-    private readonly ISalutationServiceImpl _salutationService;
-
-    public CustomerUpdateTab(
-        INationalityService nationalityService,
-        IFileUploadServiceImp fileUploadService,
-        ISalutationServiceImpl salutationService)
-    {
-        _nationalityService = nationalityService;
-        _fileUploadService = fileUploadService;
-        _salutationService = salutationService;
-    }
-
     [Parameter] public EventCallback<int> Closed { get; set; }
     [Parameter] public EventCallback<VCustomerList> UpdateChanged { get; set; }
     [Parameter] public string? CustomerId { get; set; }
 
     private EntityCustomerCreate model = new();
+
     private EditForm? editForm;
+
     private bool IsLoading = true;
+
     private bool isSaving;
+
     private string? newSalution = "";
 
     private IEnumerable<string> Salutations = [];
+
     private IEnumerable<string> Cities = [];
+
     private IEnumerable<OcupationResponse> Occupations = [];
+
     private IEnumerable<Country> Countries = [];
-    private IEnumerable<Nationality> Nationalities = [];
+
+    private IEnumerable<NationalityDto> _nationalities = [];
+
     private IEnumerable<string> Statuses = ["Single", "Married", "Divorced", "Widow", "Others"];
     protected override async Task OnInitializedAsync()
     {
@@ -76,6 +71,8 @@ public partial class CustomerUpdateTab
 
         await base.OnInitializedAsync();
     }
+
+
     private async Task FormSubmit()
     {
         if (editForm?.EditContext?.Validate() == false) return;
@@ -87,12 +84,15 @@ public partial class CustomerUpdateTab
             model.EntType = EntityTypes.Customer.ToString();
 
             var command = new EditCustomerCommand(model);
+
             var rsp = await mediator.Send(command);
 
             if (rsp.IsSuccess())
             {
                 await UpdateChanged.InvokeAsync(rsp.Value);
+
                 await CloseTab(3);
+
                 NotificationService.Notify(NotificationSeverity.Success, "Customer was edited successfully!");
             }
             else
@@ -116,27 +116,39 @@ public partial class CustomerUpdateTab
 
     private async Task GetAdditionalInformation()
     {
-        Nationalities = await _nationalityService.GetNationalities();
-        Occupations = await _employeeService!.GetOccupationsAsync("Position");
+        //await GetNationalities();
 
-        var rsp = await _addressService.GetCountries(105);
-        if (rsp.IsSuccess)
-        {
-            Countries = rsp.Data ?? [];
-        }
+        //Occupations = await _employeeService!.GetOccupationsAsync("Position");
+
+        //await GetCountries();
 
         Cities = await _addressService.GetCities();
 
-        var rsp1 = await _salutationService.GetSalutions();
-        if (rsp1.IsSuccess)
-        {
-            Salutations = rsp1.Data!.Select(x => x.Title!).ToList();
-        }
+        await GetSalutations();
     }
+
+    //private async Task GetCountries()
+    //{
+    //    var rsp = await _addressService.GetCountries(105);
+
+    //    if (rsp.IsSuccess)
+    //    {
+    //        Countries = rsp.Data ?? [];
+    //    }
+    //}
+
+    //private async Task GetNationalities()
+    //{
+    //    var command = new GetNationalitiesQuery(0, new QueryParam());
+
+    //    var resp = await mediator.Send(command);
+
+    //    _nationalities = resp.Items;  //await _nationalityService.GetNationalities();
+    //}
 
     private async Task GetSalutations()
     {
-        var salutations = await _salutationService.GetSalutions();
+        var salutations = await salutationService.GetSalutions();
 
         if (salutations.IsSuccess)
         {
@@ -144,7 +156,7 @@ public partial class CustomerUpdateTab
         }
         else
         {
-            Salutations = [];
+            Salutations = new List<string>();
         }
     }
 
@@ -152,7 +164,8 @@ public partial class CustomerUpdateTab
     {
         if (e.Code == "Enter")
         {
-            await _salutationService.AddSalution(new Salutation { Title = newSalution });
+            await salutationService.AddSalution(new Salutation { Title = newSalution });
+
             await GetSalutations();
         }
     }

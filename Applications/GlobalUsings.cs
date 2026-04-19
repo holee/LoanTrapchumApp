@@ -24,8 +24,6 @@ global using Applications.Features.Customers.Queries.GetCustomerAsPaging;
 global using Applications.Features.Customers.Response;
 global using Applications.Features.Customers.Services;
 global using Applications.Features.Customers.UseCases;
-global using Applications.Features.Employees.Interfaces;
-global using Applications.Features.Employees.UseCases;
 global using Applications.Features.Expenses.CreateExpenseCommands;
 global using Applications.Features.Expenses.CreateExpensesCommands;
 global using Applications.Features.Expenses.DeleteExpenseCommand;

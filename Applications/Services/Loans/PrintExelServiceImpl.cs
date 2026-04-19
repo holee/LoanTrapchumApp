@@ -3,7 +3,7 @@ using Applications.Extensions.Maths;
 using MiniExcelLibs;
 namespace Applications.Services.Loans;
 
-public sealed class PrintExelServiceImpl(IHostingEnvironment env, ILoanReportServiceImpl loanService) : IPrintExelServiceImpl
+public sealed class PrintExelServiceImpl(ILoanReportServiceImpl loanService) : IPrintExelServiceImpl
 {
     public async Task<Result<Stream>> DownLoadScheduleAsExcel(string? loanId, int? branchId)
     {
@@ -15,7 +15,7 @@ public sealed class PrintExelServiceImpl(IHostingEnvironment env, ILoanReportSer
 
         var item = rsp!.Schedules;
 
-        var templatePath = Path.Combine(env.WebRootPath, "Reports/Schedule.xlsx");
+        var templatePath = Path.Combine("/", "Reports/Schedule.xlsx");
 
         var dataTemplate = new
         {

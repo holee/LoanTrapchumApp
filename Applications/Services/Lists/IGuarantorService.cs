@@ -1,5 +1,5 @@
 using Applications.Features.Guarantor.Dtos;
-using Applications.Features.OtherNames;
+using Applications.Features.OtherNames.Dto;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Domains.Models.Lists;

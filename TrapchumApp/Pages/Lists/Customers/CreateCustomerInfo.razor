@@ -1,12 +1,15 @@
 @using Applications.Enumerations
+@using Applications.Features.AdditionalInformations.Dto
 @using Applications.Features.Addresses
 @using Applications.Features.Branches
 @using Applications.Features.Currencies
 @using Applications.Features.Customers.Services
+@using Applications.Features.Documents.Dto
 @using Applications.Features.Employees
 @using Applications.Features.LoanRequests.Interfaces
 @using Applications.Responses.Lists.Entities
 @using Domains.Models.Files
+@using System.Text.Json
 @using TrapchumApp.Services
 <RadzenFieldset AllowCollapse="true" Collapsed="false" class="rz-mb-2">
     <HeaderTemplate>
@@ -18,23 +21,25 @@
             <RadzenColumn Size="12" SizeMD="2">
                 <RadzenCard Style="height:100%; display:flex; align-items:center; justify-content:center; padding:0.75rem;">
                     <RadzenStack AlignItems="AlignItems.Center" Gap="0.5rem">
-                        <input type="hidden" value="@tempUrl" />
+                        <input type="hidden" @bind="@tempUrl" />
                         <RadzenImage Path="@Model.Photo"
                                      Style="width:8rem;height:8rem;object-fit:cover;border-radius:50%;border:3px solid var(--rz-primary);" />
-                        <RadzenUpload Change="@OnFileUpload"
-                                      Auto="false"
+                        <RadzenUpload Auto="true"
                                       Multiple="false"
-                                      Accept=".jpg,.jpeg,.png"
-                                      Progress=@(args => OnProgress(args, "Single file upload"))
+                                      Accept=".jpg,.png"
+                                      Url="upload/customers/profiles"
+                                      Complete="@OnFileUploadComplete"
+                                      Progress="@UploadProgress"
+                                      Error="@OnUploadError"
                                       Style="width:100%"
                                       ChooseText="@(Model.Photo == null ? "Upload Photo" : "Change Photo")"
                                       InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "select file" }})">
-                                <ChildContent>
+                            <ChildContent>
                                 <RadzenText TextStyle="TextStyle.Caption" TextAlign="TextAlign.Center"
                                             Style="color:var(--rz-text-tertiary-color);">
-                                    .jpg / .png only
+                                    .jpg /.png only
                                 </RadzenText>
-                                </ChildContent>
+                            </ChildContent>
                         </RadzenUpload>
                     </RadzenStack>
                 </RadzenCard>
@@ -115,10 +120,10 @@
                                     <RadzenLabel Text="Nationality" />
                                 </RadzenColumn>
                                 <RadzenColumn Size="12" SizeMD="9">
-                                    <RadzenDropDown Data="Nationalities"
+                                    <RadzenDropDown Data="_nationalities"
                                                     class="rz-w-100"
-                                                    TextProperty="@nameof(Nationality.NationalityName)"
-                                                    ValueProperty="@nameof(Nationality.NationalityName)"
+                                                    TextProperty="@nameof(NationalityDto.NationalityName)"
+                                                    ValueProperty="@nameof(NationalityDto.NationalityName)"
                                                     @bind-Value="Model.Nationality" />
                                 </RadzenColumn>
                             </RadzenRow>
@@ -149,8 +154,8 @@
                                         <RadzenCheckBox TValue="bool?" @bind-Value="Model.IsActive" />
                                         <RadzenLabel Text="@(Model.IsActive == true ? "Active" : "Inactive")"
                                                      Style="@(Model.IsActive == true
-                                                                                                                                                      ? "color:var(--rz-success);"
-                                                                                                                                                      : "color:var(--rz-danger);")" />
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            ? "color:var(--rz-success);"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            : "color:var(--rz-danger);")" />
                                     </RadzenStack>
                                 </RadzenColumn>
                             </RadzenRow>
@@ -219,7 +224,69 @@
 
 @if (Model.MarritalStatus != MarritalStateEnum.Single.ToString())
 {
-    <SpouseInfo model="@Model"
-                Nationalities="@Nationalities"
-                Occupations="@Occupations" />
+    <SpouseInfo model="@Model" Nationalities="@_nationalities" Occupations="@Occupations" />
+}
+
+@code {
+
+    private string _errorMessage = string.Empty;
+    private bool _isError = false;
+    private int _progress = 0;
+    private bool _isUploading = false;
+
+    void OnFileUploadComplete(UploadCompleteEventArgs args)
+    {
+        if (string.IsNullOrEmpty(args.RawResponse))
+        {
+            Model.Photo = tempUrl;
+            return;
+        }
+
+        try
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+
+            var fileModels = JsonSerializer.Deserialize<DocumentDto>(args.RawResponse!, options);
+
+            if (fileModels is not null)
+            {
+                Model.Photo = fileModels.FileUrl;
+            }
+            else
+            {
+                _isError = true;
+                Model.Photo = tempUrl;
+                _errorMessage = "Failed to parse upload response.";
+
+            }
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Error parsing upload response: {ex.Message}";
+
+            logger.LogError(ex, "Error parsing upload response: {Message}", ex.Message);
+        }
+
+
+
+    }
+
+    void OnUploadError(UploadErrorEventArgs args)
+    {
+        _isError = true;
+
+        _errorMessage = $"Upload failed: {args.Message}";
+
+        logger.LogError("Upload failed: {Message}", args.Message);
+
+    }
+
+    void UploadProgress(UploadProgressArgs args)
+    {
+        _isUploading = true;
+
+        _progress = args.Progress;
+
+        logger.LogInformation("Upload progress: {Progress}%", args.Progress);
+    }
 }

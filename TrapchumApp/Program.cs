@@ -73,8 +73,8 @@ else
 //await app.SeedSystemData();
 app.UseHttpsRedirection();
 app.UseAntiforgery();
-app.MapStaticAssets();
 app.UseStaticFiles();
+app.MapStaticAssets();
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
 app.MapControllers();

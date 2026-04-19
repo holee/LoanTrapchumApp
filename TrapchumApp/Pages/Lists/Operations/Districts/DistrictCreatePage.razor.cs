@@ -6,17 +6,17 @@ namespace TrapchumApp.Pages.Lists.Operations.Districts
 {
     public partial class DistrictCreatePage
     {
-        private readonly IDistrictService districtService;
+        private readonly IAddressService districtService;
 
         private readonly IAddressService addressService;
 
         [Parameter] public int? ProvinceCode { get; set; } = 0;
 
-        public DistrictCreatePage(IDistrictService districtService, IAddressService addressService)
+        public DistrictCreatePage(IAddressService districtService)
         {
             this.districtService = districtService;
 
-            this.addressService = addressService;
+            this.addressService = districtService;
         }
         protected List<ProvinceDto> provinces = [];
 
@@ -54,16 +54,16 @@ namespace TrapchumApp.Pages.Lists.Operations.Districts
             {
                 var data = model.MapCreate();
 
-                var response = await districtService.CreateAsync(data);
+                var response = await districtService.CreateDistrictAsync(data);
 
-                if (response!.IsSuccess)
+                if (!response.IsError)
                 {
                     NotificationService.Notify(NotificationSeverity.Success, "District new record was created successful.");
                     DialogService.Close(true);
                 }
                 else
                 {
-                    NotificationService.Notify(NotificationSeverity.Warning, response.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Warning, response.FirstError.Description);
                 }
             }
             catch (Exception ex)

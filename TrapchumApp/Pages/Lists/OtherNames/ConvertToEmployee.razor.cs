@@ -2,13 +2,10 @@ using Applications.Features.Branches.Dtos;
 using Applications.Features.Branches.Queries.GetBranchAsPaging;
 using Applications.Features.Departments.Dto;
 using Applications.Features.Departments.Queries.GetDepartmentAsPaging;
-using Applications.Features.OtherNames;
+using Applications.Features.OtherNames.Dto;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.OtherNames;
 using Applications.Services.Lists;
-using Domains.Models.Lists;
-using Microsoft.AspNetCore.Components;
-using Radzen;
 
 namespace TrapchumApp.Pages.Lists.OtherNames
 {

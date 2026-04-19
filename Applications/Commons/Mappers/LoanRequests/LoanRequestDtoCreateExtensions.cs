@@ -20,7 +20,8 @@ public static class LoanRequestDtoCreateExtensions
             BranchId = req.BranchId,
             LoanRequestId = req.LoanRequestId,
             OriginalName = req.OriginalName,
-            NewFileName = req.NewFileName
+            NewFileName = req.NewFileName,
+            DocumentId = req.DocumentId,
         };
     }
 

@@ -6,86 +6,94 @@
 @using Applications.Features.LoanRequests.Interfaces
 @using Applications.Responses.ViewModels.OtherNames
 @using TrapchumApp.Services
-<Card>
-    <CardHeader>
-        <RadzenStack Orientation="Orientation.Horizontal"
-        AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-            <span class="rz-p-0 rz-text-align-center">
-                Name Details:<strong>@model!.Gender @model?.Name</strong>
-            </span>
-            <span class="rz-p-0 rz-text-align-center">
-                <RadzenCheckBox Value="@model!.IsActive" ReadOnly />
-                <RadzenLabel Text="@(model.IsActive ? "Active" : "Inactive")" Component="IsActive" class="rz-ms-2" />
-            </span>
-        </RadzenStack>
-    </CardHeader>
-    <CardBody BodyCssClass="rz-background-color-base-100">
-        <div>
-            <div class="table-responsive">
-                <table class="table">
-                    <tbody>
-                        <tr>
-                            <th class="w-25">Alternative Name</th>
-                            <td>
-                                @model!.AltName
-                            </td>
-                        </tr>
-                        <tr>
-                            <th class="w-25">First Name</th>
-                            <td>
-                                @model.FirstName
-                            </td>
-                        </tr>
-                        <tr>
-                            <th class="w-25">Last Name</th>
-                            <td>
-                                @model.LastName
-                            </td>
-                        </tr>
-                        <tr>
-                            <th class="w-25">Phone</th>
-                            <td>
-                                @model.Phone / @model.AltPhone (Alt Phone)
-                            </td>
-                        </tr>
-                        <tr>
-                            <th class="w-25">Email</th>
-                            <td>
-                                @model.EmailAddress
-                            </td>
-                        </tr>
-                        <tr>
-                            <th class="w-25">Note</th>
-                            <td>
-                                @model.Description
-                            </td>
-                        </tr>
+<PageTitle>Name Details</PageTitle>
+<RadzenCard Variant="Variant.Outlined" 
+    class="rz-background-color-base-200"
+    Style="border-radius: 14px; box-shadow: 0 2px 12px rgba(0,0,0,0.06);">
 
-                        <tr>
-                            <th class="w-25">Address In Khmer</th>
-                            <td>
-                                @model.ToString()
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+    @* ── Header ── *@
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween"
+                 Style="padding-bottom: 14px; border-bottom: 1px solid var(--rz-border-color);">
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="12px">
+            <div style="width:44px;height:44px;border-radius:50%;background:var(--rz-primary);display:flex;align-items:center;justify-content:center;">
+                <RadzenIcon Icon="person" Style="color:#fff;font-size:22px;" />
             </div>
-        </div>
-    </CardBody>
-    <CardFooter>
-        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
-                     JustifyContent="JustifyContent.End">
-            <RadzenButton ButtonStyle="ButtonStyle.Success"
-                          Click="OnClickEdit"
-                          Size="ButtonSize.Small"
-                          Text="Edit" Icon="save" />
-            <RadzenButton ButtonStyle="ButtonStyle.Danger"
-                          Click="CloseTabs"
-                          Size="ButtonSize.Small"
-                          Text="Close" Icon="cancel" />
+            <div>
+                <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-mb-0" Style="font-weight:600;">@model?.Gender @model?.Name</RadzenText>
+                <RadzenText TextStyle="TextStyle.Caption" class="rz-mb-0" Style="color:var(--rz-text-secondary-color);">@model?.EmailAddress</RadzenText>
+            </div>
         </RadzenStack>
-    </CardFooter>
-</Card>
+        <RadzenBadge Text="@(model?.IsActive == true ? "Active" : "Inactive")"
+                     BadgeStyle="@(model!.IsActive ? BadgeStyle.Success : BadgeStyle.Danger)"
+                     IsPill="true" />
+    </RadzenStack>
 
+    @* ── Personal Info ── *@
+    <RadzenStack Gap="0" class="rz-mt-4">
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="6px" class="rz-mb-2">
+            <RadzenIcon Icon="badge" Style="color: var(--rz-primary); font-size:18px;" />
+            <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-mb-0" Style="font-weight:600;">Personal Info</RadzenText>
+        </RadzenStack>
 
+        <RadzenRow Gap="0.75rem">
+            <RadzenColumn SizeMD="4" Size="12">
+                <div class="rz-text-caption rz-text-secondary">Alternative Name</div>
+                <div style="font-weight:500;">@(model?.AltName ?? "—")</div>
+            </RadzenColumn>
+            <RadzenColumn SizeMD="4" Size="12">
+                <div class="rz-text-caption rz-text-secondary">First Name</div>
+                <div style="font-weight:500;">@(model?.FirstName ?? "—")</div>
+            </RadzenColumn>
+            <RadzenColumn SizeMD="4" Size="12">
+                <div class="rz-text-caption rz-text-secondary">Last Name</div>
+                <div style="font-weight:500;">@(model?.LastName ?? "—")</div>
+            </RadzenColumn>
+        </RadzenRow>
+    </RadzenStack>
 
+    @* ── Contact ── *@
+    <RadzenStack Gap="0" class="rz-mt-4">
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="6px" class="rz-mb-2">
+            <RadzenIcon Icon="contact_phone" Style="color: var(--rz-primary); font-size:18px;" />
+            <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-mb-0" Style="font-weight:600;">Contact</RadzenText>
+        </RadzenStack>
+
+        <RadzenRow Gap="0.75rem">
+            <RadzenColumn SizeMD="6" Size="12">
+                <div class="rz-text-caption rz-text-secondary"><RadzenIcon Icon="phone" Style="font-size:14px;vertical-align:middle;" /> Phone</div>
+                <div style="font-weight:500;">@(model?.Phone ?? "—")</div>
+            </RadzenColumn>
+            <RadzenColumn SizeMD="6" Size="12">
+                <div class="rz-text-caption rz-text-secondary"><RadzenIcon Icon="phone_forwarded" Style="font-size:14px;vertical-align:middle;" /> Alt Phone</div>
+                <div style="font-weight:500;">@(model?.AltPhone ?? "—")</div>
+            </RadzenColumn>
+        </RadzenRow>
+    </RadzenStack>
+
+    @* ── Notes & Address ── *@
+    <RadzenStack Gap="0" class="rz-mt-4">
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="6px" class="rz-mb-2">
+            <RadzenIcon Icon="description" Style="color: var(--rz-primary); font-size:18px;" />
+            <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-mb-0" Style="font-weight:600;">Notes &amp; Address</RadzenText>
+        </RadzenStack>
+
+        <RadzenRow Gap="0.75rem">
+            <RadzenColumn SizeMD="6" Size="12">
+                <div class="rz-text-caption rz-text-secondary"><RadzenIcon Icon="notes" Style="font-size:14px;vertical-align:middle;" /> Note</div>
+                <div style="font-weight:500;">@(model?.Description ?? "—")</div>
+            </RadzenColumn>
+            <RadzenColumn SizeMD="6" Size="12">
+                <div class="rz-text-caption rz-text-secondary"><RadzenIcon Icon="location_on" Style="font-size:14px;vertical-align:middle;" /> Address (Khmer)</div>
+                <div style="font-weight:500;">@(model?.ToString() ?? "—")</div>
+            </RadzenColumn>
+        </RadzenRow>
+    </RadzenStack>
+
+    @* ── Actions ── *@
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.5rem" class="rz-mt-4"
+                 Style="padding-top:14px; border-top:1px solid var(--rz-border-color);">
+        <RadzenButton ButtonStyle="ButtonStyle.Success" Click="OnClickEdit" Size="ButtonSize.Small" Text="Edit" Icon="edit" />
+        <RadzenButton ButtonStyle="ButtonStyle.Danger" Click="CloseTabs" Size="ButtonSize.Small" Text="Close" Icon="close" Variant="Variant.Outlined" />
+    </RadzenStack>
+
+</RadzenCard>

@@ -1,6 +1,6 @@
 ﻿using Domains.Models.Lists.Vendors;
-using Applications.Features.OtherNames;
 using Domains.Models.Lists;
+using Applications.Features.OtherNames.Dto;
 
 
 namespace Applications.Commons.Mappers

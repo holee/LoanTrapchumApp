@@ -1,0 +1,161 @@
+﻿@page "/App/Vendors"
+@using Applications.Responses.ViewModels.Vendors
+<PageTitle>Vendors</PageTitle>
+<style>
+    .rz-grid-table td .rz-cell-data {
+        line-height: 1.5rem;
+        font-size: 0.8rem;
+    }
+</style>
+<RadzenTabs @bind-SelectedIndex="@selectedIndex" RenderMode="TabRenderMode.Server">
+    <Tabs>
+        <RadzenTabsItem Text="Vendors" Icon="list">
+            <GridToolbar SearchChanged="@SearchChanged">
+                <LeftChildren>
+                    <RadzenButton Icon="@IconNames.AddNew"
+                                  Size="ButtonSize.Small"
+                                  Text="Vendor"
+                                  Click="AddNewTab"
+                                  ButtonStyle="ButtonStyle.Primary" />
+                </LeftChildren>
+                <RightChildren>
+                    <div>
+                        <RadzenCheckBox TValue="bool" @bind-Value="@includeInactive"
+                                        Change="ex => IncludeInActiveChanged(ex)"
+                                        Name="CheckBox1" />
+                        <RadzenLabel Text="Include InActive" Component="CheckBox1" Style="margin-left: 8px; vertical-align: middle;" />
+                    </div>
+                </RightChildren>
+            </GridToolbar>
+            <RadzenDataGrid TItem="VendorVm"
+                            Density="Density.Compact"
+                            Responsive
+                            Count="@counts"
+                            PageSize="@pageSize"
+                            LoadData="@LoadData"
+                            ColumnWidth="15rem"
+                            AllowPaging="true"
+                            AllowFiltering="true"
+                            AllowSorting="true"
+                            PageSizeOptions="@StorageConstant.PageSizeOptions"
+                            PagerHorizontalAlign="HorizontalAlign.Right"
+                            ShowPagingSummary="true"
+                            GridLines="DataGridGridLines.Both"
+                            IsLoading="@isLoading"
+                            FilterMode="FilterMode.Advanced"
+                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                            PagerPosition="PagerPosition.Bottom"
+                            PageSizeChanged="@PageSizeChanged"
+                            AllowColumnPicking="true"
+                            Data="@Vendors">
+                <HeaderTemplate></HeaderTemplate>
+                <Columns>
+                    <RadzenDataGridColumn Width="5rem"
+                                          TextAlign="TextAlign.Center"
+                                          Context="v"
+                                          Title="#"
+                                          Filterable="false"
+                                          Sortable="false"
+                                          Property="@(nameof(VendorVm.VendorId))">
+                        <Template>
+                            @(Vendors.IndexOf(v) + 1)
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Context="c" Width="10rem" Title="Name" Property="@(nameof(VendorVm.AltName))">
+                        <Template>
+                            <KhmerName AltName="@c.AltName" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Width="6rem" Title="Title" Property="@(nameof(VendorVm.Salutation))" />
+                    <RadzenDataGridColumn Width="8rem" Title="Phone" Property="@(nameof(VendorVm.Phone))" />
+                    <RadzenDataGridColumn Width="15rem" Title="Email" Property="@(nameof(VendorVm.EmailAddress))" Visible="false" />
+                    <RadzenDataGridColumn Sortable="false"
+                                          Filterable="false"
+                                          Title="Address" Property="@(nameof(VendorVm.Description))" Context="v">
+                        <Template>
+                            <AddressInfo ProInKhmer="@v.ProInKhmer"
+                                         DisInKhmer="@v.DisInKhmer"
+                                         ComInKhmer="@v.ComInKhmer"
+                                         VilInKhmer="@v.VilInKhmer" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Sortable="false"
+                                          Width="6rem"
+                                          Filterable="false"
+                                          TextAlign="TextAlign.Center"
+                                          Title="Status" Property="@(nameof(VendorVm.VendorId))" Context="v">
+                        <Template>
+                            <RadzenCheckBox TValue="bool"
+                                            Change="@(arg=>DeactiveOrActive(arg,v.VendorId!))"
+                                            Value="@v.IsActive" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Width="5rem"
+                                          Filterable="false"
+                                          Sortable="false"
+                                          Title="Actions"
+                                          TextAlign="TextAlign.Center"
+                                          Property="@(nameof(VendorVm.VendorId))" Context="v">
+                        <Template>
+                            <RadzenButton Size="ButtonSize.ExtraSmall"
+                                          Icon="more_vert"
+                                          Variant="Variant.Text"
+                                          Click="@(args=>ShowContextMenuWithContent(args,v))" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+                <LoadingTemplate>
+                    <RadzenProgressBarCircular ProgressBarStyle="ProgressBarStyle.Primary" Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+                </LoadingTemplate>
+            </RadzenDataGrid>
+        </RadzenTabsItem>
+
+        @foreach (var tab in _dynamicTabs)
+        {
+            <RadzenTabsItem @key="tab.Id">
+                <Template>
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="4px" Style="padding: 0 2px;">
+                        <RadzenIcon Icon="@tab.Icon" Style="font-size: 15px;" />
+                        <span style="font-size: 0.82rem; max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">@tab.Title</span>
+                        <RadzenButton Icon="close"
+                                      Size="ButtonSize.ExtraSmall"
+                                      Variant="Variant.Text"
+                                      ButtonStyle="ButtonStyle.Light"
+                                      Style="padding: 1px; min-width: 0; margin-left: 2px;"
+                                      Click="@(() => CloseTab(tab.Id))"
+                                      Click.StopPropagation="true" />
+                    </RadzenStack>
+                </Template>
+                <ChildContent>
+                    @switch (tab.Type)
+                    {
+                        case VendorTabType.Create:
+                            <VendorCreatePage Closed="@((e) => CloseTab(tab.Id))" SelectIndex="0" />
+                            break;
+                        case VendorTabType.Edit:
+                            <VendorEditPage Id="@tab.EntityId" Closed="@(async (edited) => await OnDynamicEditClose(tab.Id, edited))" />
+                            break;
+                        case VendorTabType.Detail:
+                            <VendorDetailPage OnEdit="@((id) => OpenEditTab(id))"
+                                               Closed="@((e) => CloseTab(tab.Id))"
+                                               Id="@tab.EntityId" />
+                            break;
+                    }
+                </ChildContent>
+            </RadzenTabsItem>
+        }
+    </Tabs>
+</RadzenTabs>
+
+@code {
+    void ShowContextMenuWithContent(MouseEventArgs args, VendorVm e)
+    {
+        ContextMenuService.Open(args, ds =>
+    @<RadzenMenu Style="font-size:0.8rem;">
+        <RadzenMenuItem Click="@(() => OpenDetailTab(e.VendorId, e.AltName))" Icon="info"   Text="Details" Value="@e.VendorId" />
+        <RadzenMenuItem Click="@(() => OpenEditTab(e.VendorId,   e.AltName))" Icon="edit"   Text="Edit"    Value="@e.VendorId" />
+        <RadzenMenuItem Click="@(() => OnDelete(e.VendorId))"                  Icon="delete" Text="Delete"  Value="@e.VendorId" />
+    </RadzenMenu>
+    );
+    }
+}

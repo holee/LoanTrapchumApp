@@ -10,9 +10,9 @@ namespace TrapchumApp.Pages.Lists.Operations.Districts
 {
     public partial class DistrictIndex
     {
-        private readonly IDistrictService districtService;
+        private readonly IAddressService districtService;
 
-        public DistrictIndex(IDistrictService districtService) {
+        public DistrictIndex(IAddressService districtService) {
             this.districtService = districtService;
         }
         protected string? searchText = string.Empty;
@@ -33,7 +33,7 @@ namespace TrapchumApp.Pages.Lists.Operations.Districts
             try
             {
                 var param = new QueryParam(pageIndex, pageSize, sortField, sortDescending, includeInactive, text);
-                var results = await districtService.GetAllPagerAsync(param);
+                var results = await districtService.GetAllDistrictsPagerAsync(param);
                 if (results.Count > 0)
                 {
                     counts=results.Count;
@@ -76,7 +76,7 @@ namespace TrapchumApp.Pages.Lists.Operations.Districts
 
                 var param = new QueryParam(pageIndex, pageSize, sortField, includeInactive, sortDescending, filter);
 
-                var res = await districtService.GetAllPagerAsync(param);
+                var res = await districtService.GetAllDistrictsPagerAsync(param);
 
                 VDistrictList = res.Items;
                 counts = res.Count;
@@ -161,16 +161,16 @@ namespace TrapchumApp.Pages.Lists.Operations.Districts
                     NotificationService.Notify(NotificationSeverity.Warning, "This district's record in used with other tables, cannot delete it.");
                     return;
                 }
-                var result = await districtService.DeleteAsync(proId);
+                var result = await districtService.DeleteDistrictAsync(proId);
 
-                if (result.IsSuccess)
+                if (!result.IsError)
                 {
                     NotificationService.Notify(NotificationSeverity.Success, "District one record deleted successful.");
                     await GetDistricts(searchText);
                 }
                 else
                 {
-                    NotificationService.Notify(NotificationSeverity.Success, result.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Success, result.FirstError.Description);
                 }
             }
 

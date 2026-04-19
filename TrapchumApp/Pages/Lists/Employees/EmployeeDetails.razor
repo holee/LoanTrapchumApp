@@ -1,4 +1,4 @@
-﻿@using Applications.Features.Addresses
+@using Applications.Features.Addresses
 @using Applications.Features.Branches
 @using Applications.Features.Currencies
 @using Applications.Features.Customers.Services
@@ -7,168 +7,134 @@
 @using Applications.Features.LoanRequests.Interfaces
 @using Applications.Responses.ViewModels.Loans
 @using Applications.Responses.ViewModels.Loans.Requests
+@using TrapchumApp.Components.Actionbars
+@using TrapchumApp.Components.Indicatros
 @using TrapchumApp.Pages.Identity.Users
 @using TrapchumApp.Services
-<RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal" class="rz-p-2">
-    <AuthorizeView Policy="@Policies.AdminOnly">
-        <Authorized>
-            <RadzenButton Text="Create New User"
-                          ButtonStyle="ButtonStyle.Secondary"
-                          ButtonType="ButtonType.Button"
-                          Click="CreateNewUser"
-                          Size="ButtonSize.ExtraSmall" />
-        </Authorized>
-    </AuthorizeView>
-
-</RadzenStack>
-<table class="table table-sm table-bordered">
-    <tbody>
-        <tr>
-            <th class="w-25">Name</th>
-            <td>
-                @Model?.FullName
-            </td>
-            <td rowspan="5">
-                <RadzenStack Orientation="Orientation.Horizontal"
-                             AlignItems="AlignItems.Center"
-                             JustifyContent="JustifyContent.End"
-                             class="rz-mx-auto rz-my-auto">
-                    <RadzenImage Path="@Model!.Photo"
-                                 Style="width:10rem;height:10rem;"
-                                 AlternateText="Employee Image" />
+@attribute [StreamRendering]
+@if (_isLoading)
+{
+    <Loading Text="កំពុងផ្ទុកបុគ្គលិក..." />
+}
+else
+{
+    <RadzenFieldset AllowCollapse="true" Collapsed="false">
+        <HeaderTemplate>
+            <RadzenIcon Icon="person" />
+        </HeaderTemplate>
+        <ChildContent>
+            <RadzenCard Variant="Variant.Flat" class="rz-p-1 rz-background-color-base-200">
+                <RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal"
+                             JustifyContent="JustifyContent.End">
+                    <RadzenBadge BadgeStyle="@(Model?.IsActive == true ? BadgeStyle.Success : BadgeStyle.Danger)"
+                                 Text="@(Model?.IsActive == true ? "Active" : "Inactive")"
+                                 IsPill="true" />
                 </RadzenStack>
-            </td>
-        </tr>
-        <tr>
-            <th class="w-25">Date Of Birth</th>
-            <td colspan="2">
-                @string.Format("{0:dd-MMM-yyyy}", Model?.DateOfBirth)
-            </td>
-        </tr>
-        <tr>
-            <th class="w-25">Gender</th>
-            <td colspan="2">
-                @Model?.Gender
-            </td>
-        </tr>
-        <tr>
-            <th class="w-25">Marrital Status</th>
-            <td colspan="2">
-                @Model?.MarritalStatus
-            </td>
-        </tr>
-        <tr>
-            <th class="w-25">Nationality</th>
-            <td colspan="2">
-                @Model?.Nationality
-            </td>
-        </tr>
-        <tr>
-            <th class="w-25">Phone</th>
-            <td colspan="2">
-                @Model?.Phone / @Model?.AltPhone
-            </td>
-        </tr>
-        <tr>
-            <th class="w-25"> Email</th>
-            <td colspan="2">
-                @Model?.EmailAddress
-            </td>
-        </tr>
-        <tr>
-            <th class="w-25">Address</th>
-            <td colspan="2">
-                @Model?.ToString()
-            </td>
-        </tr>
-        <tr>
-            <th class="w-25">Hire Date</th>
-            <td colspan="2">
-                @string.Format("{0:dd MMM yyyy}", Model?.HireDate)
-            </td>
-        </tr>
-        <tr>
-            <th class="w-25">End Date</th>
-            <td colspan="2">
-                @string.Format("{0:dd MMM yyyy}", Model?.EndDate)
-            </td>
-        </tr>
-        <tr>
-            <th class="w-25">Job Title</th>
-            <td colspan="2">
-                @Model?.Occupation
-            </td>
-        </tr>
-        <tr>
-            <th class="w-25">Department</th>
-            <td colspan="2">
-                @Model?.DepartmentName
-            </td>
-        </tr>
-        <tr>
-            <th class="w-25">Branch</th>
-            <td colspan="2">
-                @Model?.BranchName
-            </td>
-        </tr>
-        <tr>
-            <th class="w-25">Description</th>
-            <td colspan="2">
-                @Model?.Description
-            </td>
-        </tr>
-    </tbody>
-</table>
-<RadzenTabs>
-    <Tabs>
-        <RadzenTabsItem Text="Loan Request">
-            <EmployeeLoanRequest LoanRequests="@LoanRequests.ToList()" EmployeeId="@EmployeeId" />
-        </RadzenTabsItem>
-        <RadzenTabsItem Text="Loans">
-            <EmployeeLoanDisburment LoanDisbursments="@LoanDisbursments.ToList()" EmployeeId="@EmployeeId" />
-        </RadzenTabsItem>
+                <RadzenRow AlignItems="AlignItems.Start" Gap="1.5rem">
+                    <RadzenColumn Size="12" SizeMD="2">
+                        <RadzenStack Orientation="Orientation.Vertical"
+                                     AlignItems="AlignItems.Center"
+                                     JustifyContent="JustifyContent.Center"
+                                     class="rz-pt-2">
+                            <RadzenImage Path="@Model?.Photo"
+                                         Style="width:9rem;height:9rem;border-radius:50%;object-fit:cover;border:3px solid var(--rz-base-300);box-shadow:0 2px 8px rgba(0,0,0,0.10);"
+                                         AlternateText="Employee" />
+                            <RadzenText TextStyle="TextStyle.Subtitle2"
+                                        class="rz-mt-2 rz-text-align-center"
+                                        Style="max-width:10rem;word-break:break-word;font-family:'Khmer OS Siemreap',kh_siemreap,sans-serif;">
+                                @Model?.AltName
+                            </RadzenText>
+                        </RadzenStack>
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeMD="10">
+                        <RadzenRow RowGap="0.75rem" class="rz-mt-1">
+                            @* Personal Information *@
+                            @InfoField("badge", "Name", Model?.AltName, khmerFont: true)
+                            @InfoField("translate", "En-Name", Model?.FullName)
+                            @InfoField("person", "Gender", Model?.Gender)
+                            @InfoField("cake", "Date of Birth", Model?.DateOfBirth?.ToShortDateString())
 
-    </Tabs>
-</RadzenTabs>
-<RadzenStack AlignItems="AlignItems.Center"
-             Orientation="Orientation.Horizontal"
-             class="rz-p-2"
-             JustifyContent="JustifyContent.End">
-    <RadzenButton Text="Edit"
-                  Icon="edit"
-                  Click="EditTab"
-                  Size="ButtonSize.ExtraSmall"
-                  ButtonStyle="ButtonStyle.Success"
-                  ButtonType="ButtonType.Button" />
-    <RadzenButton Text="Cancel"
-                  Icon="close"
-                  Click="CloseTab"
-                  Size="ButtonSize.ExtraSmall"
-                  ButtonStyle="ButtonStyle.Danger"
-                  ButtonType="ButtonType.Button" />
-</RadzenStack>
+                            @* Contact *@
+                            @InfoField("phone", "Phone", Model?.Phone)
+                            @InfoField("phone_android", "Alt Phone", Model?.AltPhone)
+                            @InfoField("email", "Email", Model?.EmailAddress)
+                            @InfoField("work", "Occupation", Model?.Occupation)
+
+                            @* Employment *@
+                            @InfoField("wc", "Marital Status", Model?.MarritalStatus)
+                            @InfoField("credit_card", "ID Card", Model?.IdCard)
+
+                            @* Address *@
+                            @InfoField("location_on", "Address", Model?.ToString(), 6)
+                        </RadzenRow>
+                    </RadzenColumn>
+                </RadzenRow>
+            </RadzenCard>
+            <AppActions>
+                <AuthorizeView Policy="@Policies.AdminOnly">
+                    <Authorized>
+                        <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.ExtraSmall" Click="EditTab" Text="Edit" />
+                        <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.ExtraSmall" Text="Delete" />
+                    </Authorized>
+                </AuthorizeView>
+            </AppActions>
+        </ChildContent>
+    </RadzenFieldset>
+
+    <RadzenCard class="rz-mt-2">
+        <RadzenTabs RenderMode="TabRenderMode.Server">
+            <Tabs>
+                <RadzenTabsItem Text="Loan Requests">
+                    <EmployeeLoanRequest LoanRequests="@LoanRequests.ToList()" EmployeeId="@EmployeeId" />
+                </RadzenTabsItem>
+                <RadzenTabsItem Text="Loans">
+                    <EmployeeLoanDisburment LoanDisbursments="@LoanDisbursments.ToList()" EmployeeId="@EmployeeId" />
+                </RadzenTabsItem>
+            </Tabs>
+        </RadzenTabs>
+    </RadzenCard>
+
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
+                 Gap="1rem"
+                 class="rz-p-1 rz-my-2"
+                 JustifyContent="JustifyContent.End">
+        <RadzenButton Icon="@IconNames.Close"
+                      Click="CloseTab"
+                      Text="Close"
+                      ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.ExtraSmall" />
+    </RadzenStack>
+}
+
 @code
 {
     async Task CreateNewUser()
     {
-
-        var query = new GetEmployeeDetailsByIdQuery(EmployeeId, null, false);
-
-        var emp = await mediator.Send(query);
-
         var options = new DialogOptions
         {
             ContentCssClass = "rz-mt-3 rz-background-color-base-100"
         };
-
         var parameters = new Dictionary<string, object?>
         {
             { "EmployeeId", EmployeeId },
-
-             { "BranchId", 0 }
+            { "BranchId", 0 }
         };
-
         var dialogue = DialogService.OpenAsync<UserCreateModal>("New User", parameters: parameters!, options: options);
     }
 
+    static RenderFragment InfoField(string icon, string label, string? value, int sizeSM = 3, bool khmerFont = false) => __builder =>
+    {
+        var valueStyle = khmerFont
+            ? "min-height:1.25rem;font-family:'Khmer OS Siemreap',kh_siemreap,sans-serif;"
+            : "min-height:1.25rem;";
+
+        <RadzenColumn Size="6" SizeSM="@sizeSM">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+                <RadzenIcon Icon="@icon" Style="font-size:1rem;color:var(--rz-base-600);" />
+                <RadzenText TextStyle="TextStyle.Overline" class="rz-mb-0 rz-color-base-600">@label</RadzenText>
+            </RadzenStack>
+            <RadzenText TextStyle="TextStyle.Body2" class="rz-mb-0" Style="@valueStyle">
+                @(string.IsNullOrWhiteSpace(value) ? "—" : value)
+            </RadzenText>
+        </RadzenColumn>
+    };
 }

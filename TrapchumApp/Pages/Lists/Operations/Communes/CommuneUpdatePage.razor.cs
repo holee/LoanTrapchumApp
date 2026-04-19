@@ -11,12 +11,12 @@ namespace TrapchumApp.Pages.Lists.Operations.Communes
     public partial class CommuneUpdatePage
     {
         [Parameter] public int Id { get; set; }
-        private readonly IDistrictService districtService;
-        private readonly ICommuneService communeService;
+        private readonly IAddressService districtService;
+        private readonly IAddressService communeService;
 
-        public CommuneUpdatePage(IDistrictService districtService, ICommuneService communeService)
+        public CommuneUpdatePage(IAddressService communeService)
         {
-            this.districtService = districtService;
+            this.districtService = communeService;
             this.communeService = communeService;
         }
         protected List<District> districts = [];
@@ -25,21 +25,21 @@ namespace TrapchumApp.Pages.Lists.Operations.Communes
         {
             try
             {
-                var results = await districtService.GetAllAsync(null);
-                if (results.IsSuccess)
+                var results = await districtService.GetAllDistrictsAsync(null);
+                if (!results.IsError)
                 {
 
-                    districts = results.Data!.ToList();
+                    districts = results.Value.ToList();
                 }
-                var response = await communeService.GetByIdAsync(Id);
+                var response = await communeService.GetCommuneByIdAsync(Id);
 
-                if (response.IsSuccess)
+                if (!response.IsError)
                 {
-                    model = response.Data!.Adapt<CommuneDtoUpdate>();
+                    model = response.Value.Adapt<CommuneDtoUpdate>();
                 }
                 else
                 {
-                    NotificationService.Notify(NotificationSeverity.Error, "Commune", response.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Error, "Commune", response.FirstError.Description);
                 }
             }
             catch (Exception ex)
@@ -55,8 +55,8 @@ namespace TrapchumApp.Pages.Lists.Operations.Communes
             {
 
                 //Console.WriteLine(req);
-                var response = await communeService.UpdateAsync(model);
-                if (response!.IsSuccess)
+                var response = await communeService.UpdateCommuneAsync(model);
+                if (!response.IsError)
                 {
                     NotificationService.Notify(NotificationSeverity.Success, "Commune Updated", Messages.DataUpdated);
 
@@ -64,7 +64,7 @@ namespace TrapchumApp.Pages.Lists.Operations.Communes
                 }
                 else
                 {
-                    NotificationService.Notify(NotificationSeverity.Error, response.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Error, response.FirstError.Description);
                 }
             }
             catch (Exception ex)

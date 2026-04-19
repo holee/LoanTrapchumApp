@@ -250,11 +250,11 @@ namespace TrapchumApp.Pages
             new(10, "Canada",       "🇨🇦"),
         ];
 
-        private async Task<IEnumerable<Nationality>> SearchNationalitiesAsync(
-            string query, CancellationToken ct)
-        {
-            return await NationalityService.GetNationalities(query);
-        }
+        //private async Task<IEnumerable<Nationality>> SearchNationalitiesAsync(
+        //    string query, CancellationToken ct)
+        //{
+        //    return await NationalityService.GetNationalities(query);
+        //}
 
         private sealed record DemoItem(int Id, string Name, string Flag = "");
 

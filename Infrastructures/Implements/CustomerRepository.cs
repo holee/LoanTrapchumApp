@@ -100,8 +100,6 @@ public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFac
         return customer;
     }
 
-
-
     public async Task<VCustomerDetails?> GetCustomerForRequestLoanAsync(string? customerId, CancellationToken cancellation = default)
     {
 

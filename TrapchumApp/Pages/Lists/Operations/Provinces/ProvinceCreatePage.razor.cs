@@ -10,13 +10,13 @@ namespace TrapchumApp.Pages.Lists.Operations.Provinces
 {
     public partial class ProvinceCreatePage
     {
-        private readonly IProvinceService proService;
+        private readonly IAddressService proService;
         private readonly IAddressService addressService;
         private readonly ILogger<ProvinceCreatePage> logger;
-        public ProvinceCreatePage(IProvinceService ser, IAddressService addressService, ILogger<ProvinceCreatePage> logger)
+        public ProvinceCreatePage(IAddressService ser, ILogger<ProvinceCreatePage> logger)
         {
             proService = ser;
-            this.addressService = addressService;
+            this.addressService = ser;
             this.logger = logger;
         }
         protected IEnumerable<Country> Countries = [];
@@ -24,7 +24,7 @@ namespace TrapchumApp.Pages.Lists.Operations.Provinces
         protected override async Task OnInitializedAsync()
         {
             var results = await addressService.GetCountries(105);
-            Countries = results.Data;
+            if (!results.IsError) Countries = results.Value;
             Req.CountryId = 105;
         }
         protected async Task Create()
@@ -33,17 +33,17 @@ namespace TrapchumApp.Pages.Lists.Operations.Provinces
             {
                 var model = Req.MapTo();
 
-                var response = await proService.CreateAsync(model);
+                var response = await proService.CreateProvinceAsync(model);
 
-                if (response!.IsSuccess)
+                if (!response.IsError)
                 {
                     NotificationService.Notify(NotificationSeverity.Success, "Province new record was created successful.");
-                  
+
                     DialogService.Close(true);
                 }
                 else
                 {
-                    NotificationService.Notify(NotificationSeverity.Warning, response.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Warning, response.FirstError.Description);
                 }
             }
             catch (Exception ex)

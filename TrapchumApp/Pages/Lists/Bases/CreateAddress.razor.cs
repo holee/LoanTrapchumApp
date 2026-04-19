@@ -88,7 +88,7 @@ public partial class CreateAddress : ComponentBase
 
         var message = await _addressService.AddCity(city);
 
-        if (message!.IsSuccess)
+        if (!message.IsError)
         {
             await GetCities();
             //StateHasChanged();
@@ -165,9 +165,9 @@ public partial class CreateAddress : ComponentBase
         {
             var rsp = await _addressService.GetCountries(105);
 
-            if (rsp.IsSuccess)
+            if (!rsp.IsError)
             {
-                Countries = rsp.Data ?? [];
+                Countries = rsp.Value;
             }
         }
 

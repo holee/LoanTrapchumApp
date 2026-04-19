@@ -8,12 +8,12 @@ namespace TrapchumApp.Pages.Lists.Operations.Villages
 {
     public partial class VillageUpdatePage
     {
-        private readonly ICommuneService communeService;
-        private readonly IVillageServer villageServer;
+        private readonly IAddressService communeService;
+        private readonly IAddressService villageServer;
         [Parameter] public int Id { get; set; }
-        public VillageUpdatePage(ICommuneService communeService, IVillageServer villageServer)
+        public VillageUpdatePage(IAddressService villageServer)
         {
-            this.communeService = communeService;
+            this.communeService = villageServer;
             this.villageServer = villageServer;
         }
         protected List<Commune> communelist = [];
@@ -22,21 +22,21 @@ namespace TrapchumApp.Pages.Lists.Operations.Villages
         {
             try
             {
-                var results = await communeService.GetAllAsync(null);
-                if (results.IsSuccess)
+                var results = await communeService.GetAllCommunesAsync(null);
+                if (!results.IsError)
                 {
 
-                    communelist = results.Data!.ToList();
+                    communelist = results.Value.ToList();
                 }
-                var response = await villageServer.GetByIdAsync(Id);
+                var response = await villageServer.GetVillageByIdAsync(Id);
 
-                if (response.IsSuccess)
+                if (!response.IsError)
                 {
-                    model = response.Data!.Adapt<VillageDtoUpdate>();
+                    model = response.Value.Adapt<VillageDtoUpdate>();
                 }
                 else
                 {
-                    NotificationService.Notify(NotificationSeverity.Error, "Village", response.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Error, "Village", response.FirstError.Description);
                 }
             } catch (Exception ex) {
                 throw new Exception();
@@ -49,16 +49,16 @@ namespace TrapchumApp.Pages.Lists.Operations.Villages
             try
             {
 
-                var response = await villageServer.UpdateAsync(model);
+                var response = await villageServer.UpdateVillageAsync(model);
 
-                if (response!.IsSuccess)
+                if (!response.IsError)
                 {
                     NotificationService.Notify(NotificationSeverity.Success, "Village record was updated successful.");
                     DialogService.Close(true);
                 }
                 else
                 {
-                    NotificationService.Notify(NotificationSeverity.Warning, response.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Warning, response.FirstError.Description);
                 }
             }
             catch (Exception ex)

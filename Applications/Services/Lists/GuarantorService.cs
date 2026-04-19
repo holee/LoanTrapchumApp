@@ -1,6 +1,6 @@
 using Applications.Commons.Mappers;
 using Applications.Features.Guarantor.Dtos;
-using Applications.Features.OtherNames;
+using Applications.Features.OtherNames.Dto;
 using Applications.Interfaces.Lists;
 using Applications.Responses;
 using Applications.Responses.Paginations;

@@ -1,11 +1,5 @@
-@using Applications.Features.Addresses
-@using Applications.Features.Branches
-@using Applications.Features.Currencies
+@using Applications.Features.AdditionalInformations.Dto
 @using Applications.Features.Customers.Dto
-@using Applications.Features.Customers.Services
-@using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Interfaces
-@using Applications.Features.OtherNames
 @using Applications.Responses.Lists.Entities
 
 <RadzenFieldset AllowCollapse="true" Collapsed="false" class="rz-mb-2">
@@ -32,8 +26,8 @@
                     <RadzenColumn Size="9">
                         <RadzenDropDown Data="Nationalities"
                                         class="rz-w-100"
-                                        TextProperty="@nameof(Nationality.NationalityName)"
-                                        ValueProperty="@nameof(Nationality.NationalityName)"
+                                        TextProperty="@nameof(NationalityDto.NationalityName)"
+                                        ValueProperty="@nameof(NationalityDto.NationalityName)"
                                         @bind-Value="model.SpouseNationality">
                         </RadzenDropDown>
                     </RadzenColumn>
@@ -122,6 +116,6 @@
 </RadzenFieldset>
 @code {
     [Parameter] public EntityCustomerCreate model { get; set; } = new();
-    [Parameter] public IEnumerable<OcupationResponse> Occupations { get; set; } = [];
-    [Parameter] public IEnumerable<Nationality> Nationalities { set; get; } = [];
+    [Parameter] public IEnumerable<OccupationDto> Occupations { get; set; } = [];
+    [Parameter] public IEnumerable<NationalityDto> Nationalities { set; get; } = []; 
 }

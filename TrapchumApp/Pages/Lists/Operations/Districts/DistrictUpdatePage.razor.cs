@@ -10,13 +10,13 @@ namespace TrapchumApp.Pages.Lists.Operations.Districts
 {
     public partial class DistrictUpdatePage
     {
-        private readonly IDistrictService districtService;
+        private readonly IAddressService districtService;
         private readonly IAddressService addressService;
 
-        public DistrictUpdatePage(IDistrictService districtService, IAddressService addressService)
+        public DistrictUpdatePage(IAddressService districtService)
         {
             this.districtService = districtService;
-            this.addressService = addressService;
+            this.addressService = districtService;
         }
         protected List<ProvinceDto> provinces = [];
         protected DistrictDtoUpdate model = new DistrictDtoUpdate();
@@ -34,15 +34,15 @@ namespace TrapchumApp.Pages.Lists.Operations.Districts
                     provinces = results.ToList();
                 }
 
-                var response = await districtService.GetByIdAsync(Id);
+                var response = await districtService.GetDistrictByIdAsync(Id);
 
-                if (response.IsSuccess)
+                if (!response.IsError)
                 {
-                    model = response.Data!.Adapt<DistrictDtoUpdate>();
+                    model = response.Value.Adapt<DistrictDtoUpdate>();
                 }
                 else
                 {
-                    NotificationService.Notify(NotificationSeverity.Error, "District", response.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Error, "District", response.FirstError.Description);
                 }
 
             }
@@ -59,8 +59,8 @@ namespace TrapchumApp.Pages.Lists.Operations.Districts
             {
                 var req = model.Adapt<District>();
                 //Console.WriteLine(req);
-                var response = await districtService.UpdateAsync(req);
-                if (response!.IsSuccess)
+                var response = await districtService.UpdateDistrictAsync(req);
+                if (!response.IsError)
                 {
                     NotificationService.Notify(NotificationSeverity.Success, "District Updated", Messages.DataCreated);
 
@@ -68,7 +68,7 @@ namespace TrapchumApp.Pages.Lists.Operations.Districts
                 }
                 else
                 {
-                    NotificationService.Notify(NotificationSeverity.Error, response.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Error, response.FirstError.Description);
                 }
             }
             catch (Exception ex)

@@ -1,0 +1,13 @@
+.info-item .label {
+    font-size: 12px;
+    color: #888;
+}
+
+.info-item .value {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.info-item.full {
+    grid-column: span 2;
+}

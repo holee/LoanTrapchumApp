@@ -59,7 +59,7 @@ namespace TrapchumApp.Pages.Lists.Employees
         private IEnumerable<string> supervisors = new List<string> { "Supervisor", "Manager", "CEO" };
         private IEnumerable<string> genders = new List<string> { "Male", "Female", "Other" };
         private IEnumerable<string> maritalStatuses = new List<string> { "Single", "Married", "Divorced", "Widowed" };
-
+        private bool _isPageLoading = false;
         async void Reload()
         {
             await Reloaded.InvokeAsync();
@@ -104,7 +104,7 @@ namespace TrapchumApp.Pages.Lists.Employees
 
         protected override async Task OnInitializedAsync()
         {
-            await GetAdditionalInformation();
+            //await GetAdditionalInformation();
 
             await GetEditEmployee();
 
@@ -115,6 +115,8 @@ namespace TrapchumApp.Pages.Lists.Employees
         async Task GetEditEmployee()
         {
 
+            _isPageLoading = true;
+
             var query = new GetEditEmployeeQuery(EmployeeId);
 
             var rsp = await mediator.Send(query);
@@ -122,18 +124,23 @@ namespace TrapchumApp.Pages.Lists.Employees
             if (rsp.IsSuccess())
             {
                 model = rsp.Value;
+
+                model.Photo ??= "/assets/profiles/profile.png";
             }
 
-            Districts = model is not null && model.ProvinceRefId == 0 ? [] : await _addressService.GetDistrictsByProvinceId(model?.ProvinceRefId);
-            Communes = model is not null && model.DistrictRefId == 0 ? [] : await _addressService.GetCommunesByDistrictId(model?.DistrictRefId);
-            Villages = model is not null && model.CommuneRefId == 0 ? [] : await _addressService.GetVillagesByCommuneId(model?.CommuneRefId);
+            _isPageLoading = false;
 
+            StateHasChanged();
         }
+
+        //Districts = model is not null && model.ProvinceRefId == 0 ? [] : await _addressService.GetDistrictsByProvinceId(model?.ProvinceRefId);
+        //Communes = model is not null && model.DistrictRefId == 0 ? [] : await _addressService.GetCommunesByDistrictId(model?.DistrictRefId);
+        //Villages = model is not null && model.CommuneRefId == 0 ? [] : await _addressService.GetVillagesByCommuneId(model?.CommuneRefId);
 
         async Task GetAdditionalInformation()
         {
 
-            var command=new GetBranchAsPagingQuery(0, new QueryParam(0, 0, string.Empty));
+            var command = new GetBranchAsPagingQuery(0, new QueryParam(0, 0, string.Empty));
 
             var results = await mediator.Send(command); //_branchService.GetBranchesAsync<BranchDto>(0, new QueryParam(0, 25, string.Empty));
 
@@ -152,13 +159,13 @@ namespace TrapchumApp.Pages.Lists.Employees
 
             Provinces = await _addressService.GetsProvinces();
 
-            Occuptions = await _employeeService!.GetOccupationsAsync("Position");
+            //Occuptions = await _employeeService!.GetOccupationsAsync("Position");
 
             var rsp = await _addressService.GetCountries(105);
 
-            if (rsp.IsSuccess)
+            if (!rsp.IsError)
             {
-                Countries = rsp.Data ?? [];
+                Countries = rsp.Value;
             }
 
             Cities = await _addressService.GetCities();

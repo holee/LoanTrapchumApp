@@ -263,7 +263,7 @@
         </RadzenColumn>
 
         @* ── 4. Async remote search (live from server) ── *@
-        <RadzenColumn Size="6">
+        @* <RadzenColumn Size="6">
             <label class="rz-mb-1 d-block"><strong>Async Search – Server (min 2 chars)</strong></label>
             <BlabSelect2 TItem="Nationality" TValue="int"
                          ValueSelector="x => x.NationalityId"
@@ -273,7 +273,7 @@
                          @bind-Value="_asyncNationalityId"
                          Placeholder="Search nationalities..." />
             <small class="rz-mt-1 d-block text-muted">Selected: @_asyncNationalityId</small>
-        </RadzenColumn>
+        </RadzenColumn> *@
     </RadzenRow>
 </RadzenCard>
 

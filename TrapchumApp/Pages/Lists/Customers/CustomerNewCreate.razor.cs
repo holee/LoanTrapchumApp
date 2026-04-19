@@ -17,13 +17,11 @@ public partial class CustomerNewCreate
 {
     private readonly IFileUploadServiceImp _fileUploadService;
     private readonly INationalityServiceImpl _nationalityService;
-    private readonly IOccupationServiceImpl _occupationService;
     private readonly ISalutationServiceImpl _salutationService;
-    public CustomerNewCreate(IFileUploadServiceImp fileUploadService, INationalityServiceImpl ationalityService, IOccupationServiceImpl occupationService, ISalutationServiceImpl salutationService)
+    public CustomerNewCreate(IFileUploadServiceImp fileUploadService, INationalityServiceImpl ationalityService, ISalutationServiceImpl salutationService)
     {
         _fileUploadService = fileUploadService;
         _nationalityService = ationalityService;
-        _occupationService = occupationService;
         _salutationService = salutationService;
     }
 
@@ -49,7 +47,7 @@ public partial class CustomerNewCreate
 
         _userId = authState.GetUserId();
 
-        await GetAdditionalInformation();
+        //await GetAdditionalInformation();
 
         CustomerModel.City = "Siem Reap";
 
@@ -63,12 +61,12 @@ public partial class CustomerNewCreate
 
         CustomerModel.CreatedBy = _userId;
 
-        var rsp1 = await _salutationService.GetSalutions();
+        //var rsp1 = await _salutationService.GetSalutions();
 
-        if (rsp1.IsSuccess)
-        {
-            Salutations = rsp1.Data!.Select(x => x.Title!).ToList();
-        }
+        //if (rsp1.IsSuccess)
+        //{
+        //    Salutations = rsp1.Data!.Select(x => x.Title!).ToList();
+        //}
 
         CustomerModel.Photo = "/Profiles/profile.png";
 
@@ -85,19 +83,19 @@ public partial class CustomerNewCreate
 
     async Task GetAdditionalInformation()
     {
-        Nationalities = await _nationalityService.GetNationalities();
+        //Nationalities = await _nationalityService.GetNationalities();
 
-        Provinces = await _addressService.GetsProvinces();
+        //Provinces = await _addressService.GetsProvinces();
 
-        Occupations = await _employeeService!.GetOccupationsAsync("Position");
+        //Occupations = await _employeeService!.GetOccupationsAsync("Position");
 
-        var rsp = await _addressService.GetCountries(105);
+        //var rsp = await _addressService.GetCountries(105);
 
-        if (rsp.IsSuccess)
-        {
-            Countries = rsp.Data ?? [];
-        }
-        Cities = await _addressService.GetCities();
+        //if (rsp.IsSuccess)
+        //{
+        //    Countries = rsp.Data ?? [];
+        //}
+        //Cities = await _addressService.GetCities();
     }
     private async Task GetSalutations()
     {

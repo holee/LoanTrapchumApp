@@ -1,4 +1,4 @@
-﻿using Applications.Features.OtherNames;
+﻿using Applications.Features.OtherNames.Dto;
 
 namespace Applications.Features.Customers.Dto;
 
@@ -16,5 +16,5 @@ public sealed class EntityCustomerCreate : BaseEntityNamesCreate
     public string? SpousePassport { get; set; }
     public string? SpousePhoneNo { get; set; }
     public string? SpouseOccupation { get; set; }
-    public string? Photo { get; set; }
+    public string? Photo { get; set; } = "/assets/profiles/profile.png";
 }

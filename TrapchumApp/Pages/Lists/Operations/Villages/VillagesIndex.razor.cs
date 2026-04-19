@@ -8,9 +8,9 @@ namespace TrapchumApp.Pages.Lists.Operations.Villages
 {
     public partial class VillagesIndex
     {
-        private readonly IVillageServer villageServer;
+        private readonly IAddressService villageServer;
 
-        public VillagesIndex(IVillageServer villageServer)
+        public VillagesIndex(IAddressService villageServer)
         {
             this.villageServer = villageServer;
         }
@@ -35,7 +35,7 @@ namespace TrapchumApp.Pages.Lists.Operations.Villages
             {
 
                 var param = new QueryParam(pageIndex, pageSize, sortField, sortDescending, includeInactive, text);
-                var results = await villageServer.GetAllPagerAsync(param);
+                var results = await villageServer.GetAllVillagesPagerAsync(param);
                 if (results.Count > 0)
                 {
                     
@@ -81,7 +81,7 @@ namespace TrapchumApp.Pages.Lists.Operations.Villages
 
                 var param = new QueryParam(pageIndex, pageSize, sortField, includeInactive, sortDescending,  filter);
 
-                var res = await villageServer.GetAllPagerAsync(param);
+                var res = await villageServer.GetAllVillagesPagerAsync(param);
 
                 vVillageList = res.Items;
                 counts = res.Count;
@@ -159,16 +159,16 @@ namespace TrapchumApp.Pages.Lists.Operations.Villages
                 if (confirm == true)
                 {
 
-                    var result = await villageServer.DeleteAsync(id);
+                    var result = await villageServer.DeleteVillageAsync(id);
 
-                    if (result.IsSuccess)
+                    if (!result.IsError)
                     {
                         NotificationService.Notify(NotificationSeverity.Success, "Village one record deleted successful.");
                         await GetVillages(searchText);
                     }
                     else
                     {
-                        NotificationService.Notify(NotificationSeverity.Success, result.ErrMessage);
+                        NotificationService.Notify(NotificationSeverity.Success, result.FirstError.Description);
                     }
                 }
             }

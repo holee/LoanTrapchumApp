@@ -2,4 +2,4 @@
 using ErrorOr;
 namespace Applications.Features.Employees.Commands.DeleteEmployee;
 
-public record DeleteEmployeeCommand(string EmployeeId) : IRequest<ErrorOr<string>>;
+public record DeleteEmployeeCommand(string? EmployeeId) : IRequest<ErrorOr<string>>;

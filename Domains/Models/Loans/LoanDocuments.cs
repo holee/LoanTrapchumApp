@@ -11,6 +11,7 @@ public sealed class LoanDocuments
     public string? AltText { get; set; }
     public long? FileSize { get; set; }
     public string? Description { get; set; }
-    public DateTime? Created { get; set; } = DateTime.Now; 
+    public DateTime? Created { get; set; } = DateTime.UtcNow; 
+    public Guid? DocumentId { get; set; }
     public LoanRequest? LoanRequest { get; set; }
 }

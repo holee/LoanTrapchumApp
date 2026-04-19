@@ -1,5 +1,6 @@
-﻿using Applications.Commons.Mappers;
+using Applications.Commons.Mappers;
 using Applications.Features.OtherNames;
+using Applications.Features.OtherNames.Dto;
 using Applications.Interfaces.Lists;
 using Applications.Responses;
 using Applications.Responses.Paginations;
@@ -30,107 +31,119 @@ namespace Applications.Services.Lists
         Task<Pager<T>> GetNameAsync<T>(string? nameId, QueryParam q, CancellationToken cancellation = default) where T : class, new();
     }
 
-
     public sealed class OtherNameService(IOtherNameService oName) : IOtherNameServiceImpl
     {
         public async Task<Result<string>> ConvertToCustomerAsync(string? id, ConvertCreateCustomer customer)
         {
             var req = customer.Adapt<Customer>();
-
-            return await oName.ConvertToCustomerAsync(id, req);
+            var result = await oName.ConvertToCustomerAsync(id, req);
+            return result.IsError
+                ? Result.Failure<string>(ErrorResponse.Conflict(result.FirstError.Description))
+                : Result.Success("Name was converted to customer.");
         }
 
         public async Task<Result<string>> ConvertToEmployeeAsync(string? id, ConvertCreateEmployee employee)
         {
             var req = employee.Adapt<Employee>();
-
-            return await oName.ConvertToEmployeeAsync(id, req);
+            var result = await oName.ConvertToEmployeeAsync(id, req);
+            return result.IsError
+                ? Result.Failure<string>(ErrorResponse.Conflict(result.FirstError.Description))
+                : Result.Success("Name was converted to employee.");
         }
 
         public async Task<Result<string>> ConvertToVendorAsync(string? id, ConvertCreateVendor vendor)
         {
             var req = vendor.Adapt<Vendor>();
-
-            return await oName.ConvertToVendorAsync(id, req);
+            var result = await oName.ConvertToVendorAsync(id, req);
+            return result.IsError
+                ? Result.Failure<string>(ErrorResponse.Conflict(result.FirstError.Description))
+                : Result.Success("Name was converted to vendor.");
         }
 
         public async Task<Result<string>> CreateAsync(EntityNamesCreate othername)
         {
             var req = othername.Adapt<EntityNames>();
-
-            return await oName.CreateAsync(req);
+            var result = await oName.CreateAsync(req);
+            return result.IsError
+                ? Result.Failure<string>(ErrorResponse.ServerError(result.FirstError.Description))
+                : Result.Success("A new name was created.");
         }
-
 
         public async Task<Result<string>> CreateGaurantorAsync(EntityNamesCreate othername)
         {
             var req = othername.Adapt<EntityNames>();
-
-            return await oName.CreateGaurantorAsync(req);
+            var result = await oName.CreateGaurantorAsync(req);
+            return result.IsError
+                ? Result.Failure<string>(ErrorResponse.ServerError(result.FirstError.Description))
+                : Result.Success("A new guarantor was created.");
         }
 
         public async Task<Result<string>> DeleteAsync(string? id)
         {
-            return await oName.DeleteAsync(id);
+            var result = await oName.DeleteAsync(id);
+            return result.IsError
+                ? Result.Failure<string>(ErrorResponse.NotFound(result.FirstError.Description))
+                : Result.Success("Name was deleted.");
         }
 
         public async Task<Result<EntityNames>> GetByIdAsync(string? id)
         {
-            return await oName.GetByIdAsync(id);
+            var result = await oName.GetByIdAsync(id);
+            return result.IsError
+                ? Result.Failure<EntityNames>(ErrorResponse.NotFound(result.FirstError.Description))
+                : Result.Success(result.Value);
         }
 
         public async Task<Result<EntityNamesCreate>> GetEditNameByIdAsync(string? id)
         {
-            var rsp = await oName.GetByIdAsync(id);
+            var result = await oName.GetByIdAsync(id);
+            if (result.IsError)
+                return Result.Failure<EntityNamesCreate>(ErrorResponse.NotFound(result.FirstError.Description));
 
-            if (rsp.IsSuccess)
-            {
-                var model = rsp.Data!.ToNamesCreate();
-
-                return Result.Success(model);
-            }
-
-            return Result.Failure<EntityNamesCreate>(ErrorResponse.NotFound(rsp.ErrMessage));
+            var model = result.Value.ToNamesCreate();
+            return Result.Success(model);
         }
-
 
         public async Task<Result<T>> GetDetailAsync<T>(string? id) where T : class
         {
-            return await oName.GetDetailAsync<T>(id);
+            var result = await oName.GetDetailAsync<T>(id);
+            return result.IsError
+                ? Result.Failure<T>(ErrorResponse.NotFound(result.FirstError.Description))
+                : Result.Success(result.Value);
         }
 
         public async Task<Pager<VOtherNames>> GetNamesAsync(QueryParam q, CancellationToken cancellation = default)
-        {
-            return await oName.GetNamesAsync(q, cancellation);
-        }
+            => await oName.GetNamesAsync(q, cancellation);
 
-        public async Task<IEnumerable<T>> GetNameLists<T>(string? nameId, QueryParam q)
-            where T : class, new()
-        {
-            return await oName.GetNameLists<T>(nameId, q);
-        }
+        public async Task<IEnumerable<T>> GetNameLists<T>(string? nameId, QueryParam q) where T : class, new()
+            => await oName.GetNameListsAsync<T>(nameId, q);
 
-        public async Task<Pager<T>> GetNameAsync<T>(string? nameId, QueryParam q, CancellationToken cancellation = default)
-           where T : class, new()
-        {
-            return await oName.GetNameAsync<T>(nameId, q, cancellation); 
-        }
+        public async Task<Pager<T>> GetNameAsync<T>(string? nameId, QueryParam q, CancellationToken cancellation = default) where T : class, new()
+            => await oName.GetNameAsync<T>(nameId, q, cancellation);
 
         public async Task<Result<string>> UpdateAsync(EntityNamesCreate othername)
         {
             var model = othername.MapNamesEdit();
-
-            return await oName.UpdateAsync(model);
+            var result = await oName.UpdateAsync(model);
+            return result.IsError
+                ? Result.Failure<string>(ErrorResponse.ServerError(result.FirstError.Description))
+                : Result.Success("Name was updated.");
         }
 
         public async Task<Result<string>> UpdateStatusAsync(string? id)
         {
-            return await oName.UpdateStatusAsync(id);
+            var result = await oName.UpdateStatusAsync(id);
+            return result.IsError
+                ? Result.Failure<string>(ErrorResponse.ServerError(result.FirstError.Description))
+                : Result.Success("Status was updated.");
         }
 
         public async Task<Result<VOtherNames>> UpdateStatusAsync(string? id, bool state)
         {
-            return await oName.UpdateStatusAsync(id, state);
+            var result = await oName.UpdateStatusAsync(id, state);
+            return result.IsError
+                ? Result.Failure<VOtherNames>(ErrorResponse.ServerError(result.FirstError.Description))
+                : Result.Success(result.Value);
         }
     }
 }

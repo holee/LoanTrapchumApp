@@ -7,6 +7,7 @@ using Applications.Features.Collaterals.Dtos;
 using Applications.Features.Customers.Extensions;
 using Applications.Features.Customers.Queries.GetCustomerAsPaging;
 using Applications.Features.Customers.Response;
+using Applications.Features.Documents.Dto;
 using Applications.Features.Guarantor.Dtos;
 using Applications.Features.LoanRequests.Command.AddLoanRequestDocument;
 using Applications.Features.LoanRequests.Command.DeleteLoanRequestCollateral;
@@ -110,7 +111,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             {
             };
 
-            IEnumerable<FileModel>? uploadedFiles = await DialogService.OpenAsync<FileUploadDialogue>("Upload", options: options);
+            IEnumerable<DocumentDto>? uploadedFiles = await DialogService.OpenAsync<FileUploadDialogue>("Upload", options: options);
 
 
             if (uploadedFiles is null || !uploadedFiles.Any())
@@ -127,11 +128,12 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
                         BranchRefId = BranchId,
                         LoanRequestId = LoanRequestId,
                         OriginalName = f.OriginalName,
-                        NewFileName = f.FileName,
+                        NewFileName = f.NewFileName,
                         FileUrl = f.FileUrl,
                         FileSize = f.FileSize,
                         AltText = f.OriginalName,
-                        Description = f.OriginalName
+                        Description = f.OriginalName,
+                        DocumentId = f.Id
                     });
                 }
 
@@ -327,11 +329,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
             _userId = auth.GetUserId();
 
-            if (user is not null)
-            {
-
-                await GetLoanRequestInfo(user);
-            }
+            await GetLoanRequestInfo(user);
 
             await base.OnInitializedAsync();
         }
@@ -341,7 +339,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             try
             {
                 isLoading = true;
-
+                
                 await GetCustomers(CustomerId, 1);
 
                 var query = new GetLoanRequestDetailByIdQuery(BranchId, CustomerId, LoanRequestId, true);
@@ -376,6 +374,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
                 model = data!.ToLoanRequestDtoCreate();
 
                 isLoading = false;
+
             }
             catch (Exception ex)
             {

@@ -1,16 +1,15 @@
-﻿using Applications.Responses.ViewModels;
-using Domains.Models.Lists;
-using Applications.Features.Settings.Requests;
+﻿using Domains.Models.Lists;
+using Applications.Features.AdditionalInformations.Dto;
 
 
 namespace Applications.Commons.Mappers
 {
     public static class OccupationMapper
     {
-        public static OccupationVm Map(this Occupation source)
+        public static OccupationDto Map(this Occupation source)
         {
 
-            return new OccupationVm
+            return new OccupationDto
             {
                 OccupationId = source.OccupationId,
                 OccupationTitle = source.OccupationTitle,
@@ -41,7 +40,7 @@ namespace Applications.Commons.Mappers
             };
         }
 
-        public static Occupation MapEdit(this OccupationVm source)
+        public static Occupation MapEdit(this OccupationDto source)
         {
             return new Occupation
             {

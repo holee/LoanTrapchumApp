@@ -4,21 +4,17 @@
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
 @using Applications.Features.LoanRequests.Interfaces
+@using TrapchumApp.Pages.Lists.Bases
 @using TrapchumApp.Services
 
 <EditForm Model="model" OnValidSubmit="OnSaveChanges">
     <FluentValidationValidator DisableAssemblyScanning="true" />
     <input type="hidden" @bind="model!.Id" />
     <NameCreateInfo model="model" />
-    <AddressBaseCreate model="model" />
+    <AddressCreate model="model" />
     <RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal"
                  JustifyContent="JustifyContent.End" Gap="1rem">
-
-        <RadzenButton ButtonStyle="ButtonStyle.Success"
-                      Size="ButtonSize.ExtraSmall"
-                      Icon="save"
-                      ButtonType="ButtonType.Submit"
-                      Text="Save" />
+        <SaveButton ButtonType="ButtonType.Submit" />
         <RadzenButton ButtonStyle="ButtonStyle.Danger"
                       Size="ButtonSize.ExtraSmall"
                       Icon="cancel"

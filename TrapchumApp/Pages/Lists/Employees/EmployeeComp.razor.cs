@@ -1,12 +1,13 @@
 using Applications.Extensions;
+using Applications.Features.AdditionalInformations.Command.CreateOccupation;
+using Applications.Features.AdditionalInformations.Dto;
+using Applications.Features.AdditionalInformations.Queries.GetOccupations;
 using Applications.Features.Addresses.Dto;
 using Applications.Features.Branches.Dtos;
 using Applications.Features.Branches.Queries.GetBranchAsPaging;
 using Applications.Features.Departments.Dto;
 using Applications.Features.Departments.Queries.GetDepartmentAsPaging;
 using Applications.Features.Employees.Dto;
-using Applications.Features.Settings.Requests;
-using Applications.Responses.Lists.Entities;
 using Applications.Responses.Paginations;
 using Applications.Services.Files;
 using Applications.Services.Lists;
@@ -14,213 +15,209 @@ using Domains.Models.Files;
 using Domains.Models.Lists;
 using Domains.Shared.Enums;
 
-namespace TrapchumApp.Pages.Lists.Employees
+namespace TrapchumApp.Pages.Lists.Employees;
+
+public partial class EmployeeComp(ISalutationServiceImpl salutationService, 
+    INationalityServiceImpl nationalityService, 
+    IFileUploadServiceImp fileUploadService,
+    ILogger<EmployeeComp> logger)
 {
-    public partial class EmployeeComp
+    [Parameter, EditorRequired] public EntityEmployeeCreate model { get; set; } = new();
+    [Parameter] public EventCallback<bool> OnClose { get; set; }
+
+    long? fileSize;
+    IEnumerable<int> relations = new List<int> { 1, 2, 3, 4 };
+    IEnumerable<string> supervisors = new List<string> { "Supervisor", "Manager", "CEO" };
+    IEnumerable<string> genders = new List<string> { "Male", "Female", "Other" };
+    IEnumerable<string> maritalStatuses = new List<string> { "Single", "Married", "Divorced", "Widowed" };
+    IEnumerable<VillageDto> Villages = [];
+    IEnumerable<ProvinceDto> Provinces = [];
+    IEnumerable<VBranch> Branches = [];
+    IEnumerable<VDepartment> Departments = [];
+    IEnumerable<Nationality> Nationalities = [];
+    IEnumerable<OccupationDto> _occupations = [];
+    IEnumerable<string> Cities = [];
+    protected FileModel? fileModelDTO;
+    protected EditForm? editForm;
+    protected string? strText = "";
+    protected bool IsActive = false;
+    private string tempPath = "/assets/profiles/profile.png";
+
+    protected override async Task OnInitializedAsync()
     {
-        [Parameter, EditorRequired] public EntityEmployeeCreate model { get; set; } = new();
-        [Parameter] public EventCallback<bool> OnClose { get; set; }
+        await GetAdditionalInformation();
 
-        private readonly ISalutationServiceImpl _salutationService;
-        private readonly INationalityServiceImpl _nationalityService;
-        private readonly IOccupationServiceImpl _occupationService;
-        public EmployeeComp(ISalutationServiceImpl salutationService, INationalityServiceImpl nationalityService, IFileUploadServiceImp fileUploadService, IOccupationServiceImpl occupationService)
+        if (model.Photo.IsNotNullOrEmpty())
         {
-            _salutationService = salutationService;
-            _nationalityService = nationalityService;
-            _fileUploadService = fileUploadService;
-            _occupationService = occupationService;
+            tempPath = model.Photo ?? "/assets/profiles/profile.png";
         }
-        long? fileSize;
-        IEnumerable<int> relations = new List<int> { 1, 2, 3, 4 };
-        IEnumerable<string> supervisors = new List<string> { "Supervisor", "Manager", "CEO" };
-        IEnumerable<string> genders = new List<string> { "Male", "Female", "Other" };
-        IEnumerable<string> maritalStatuses = new List<string> { "Single", "Married", "Divorced", "Widowed" };
-        IEnumerable<VillageDto> Villages = [];
-        IEnumerable<ProvinceDto> Provinces = [];
-        IEnumerable<VBranch> Branches = [];
-        IEnumerable<VDepartment> Departments = [];
-        IEnumerable<Nationality> Nationalities = [];
-        IEnumerable<OcupationResponse> Occupations = [];
-        IEnumerable<string> Cities = [];
-        protected FileModel? fileModelDTO;
-        protected EditForm? editForm;
-        protected string? strText = "";
-        protected bool IsActive = false;
-        private string tempPath = string.Empty;
-        protected override async Task OnInitializedAsync()
-        {
-            await GetAdditionalInformation();
 
-            if (model.Photo.IsNotNullOrEmpty())
+        await base.OnInitializedAsync();
+    }
+
+
+    async Task GetAdditionalInformation()
+    {
+
+        var command = new GetBranchAsPagingQuery(null, new QueryParam(0, 0));
+
+        var results = await mediator.Send(command);  
+
+        Branches = results.Items;
+
+        var query = new GetDepartmentAsPagingQuery(null, new QueryParam(0, 0));
+
+        var rsp1 = await mediator.Send(query);
+
+        Departments = rsp1.Items;
+
+        Nationalities = await nationalityService!.GetNationalities();
+
+        await GetOccupations();
+
+        await GetSalutations();
+
+        StateHasChanged();
+    }
+
+
+    async Task AddOccupation()
+    {
+        if (!string.IsNullOrEmpty(model.Occupation))
+        {
+            var occupation = new OccupationDtoCreate
             {
-                tempPath = model.Photo ?? string.Empty;
-            }
+                OccupationTitle = model.Occupation,
 
-            await base.OnInitializedAsync();
-        }
+                Khmer = string.Empty,
 
+                TypeOf = TypeOfEnum.Position.ToString()
+            };
 
-        async Task GetAdditionalInformation()
-        {
+            var rsp = await mediator.Send(new CreateOccupationCommand(occupation));
 
-            var command = new GetBranchAsPagingQuery(null, new QueryParam(0, 0));
-
-            var results = await mediator.Send(command);  //_branchService.GetBranchesAsync<BranchDto>(0, new QueryParam(0, 25, string.Empty));
-
-            Branches = results.Items;
-
-            var query = new GetDepartmentAsPagingQuery(null, new QueryParam(0,0));
-
-            var rsp1 = await mediator.Send(query);
-
-            Departments = rsp1.Items;
-
-            Nationalities = await _nationalityService!.GetNationalities();
-
-            var rsp = await _occupationService.GetOccupations<OcupationResponse>(0, TypeOfEnum.Position.ToString());
-
-            Occupations = rsp.Items ?? [];
-
-            await GetSalutations();
-
-            StateHasChanged();
-        }
-        async Task AddOccupation()
-        {
-            if (!string.IsNullOrEmpty(model.Occupation))
+            if (rsp.IsError)
             {
-                var occupation = new OccupationDtoCreate
-                {
-                    OccupationTitle = model.Occupation,
-
-                    Khmer = string.Empty,
-
-                    TypeOf = TypeOfEnum.Position.ToString()
-                };
-
-                var rsp = await _occupationService.CreateAsync(occupation);
-
-                if (!rsp.IsSuccess)
-                {
-                    model.Occupation = string.Empty;
-                }
-                else
-                {
-                    await GetOccupations();
-                }
-            }
-        }
-
-
-        private async Task GetOccupations(string? filter = "Job")
-        {
-            Occupations = await _employeeService.GetOccupationsAsync(filter);
-        }
-
-        IEnumerable<string> Salutations { get; set; } = [];
-
-        protected string? newSalution = "";
-
-        protected async Task AddNewSalutation(KeyboardEventArgs e)
-        {
-            if (e.Code == "Enter")
-            {
-                await _salutationService.AddSalution(new Salutation
-                {
-                    Title = newSalution
-                });
-                await GetSalutations();
-            }
-        }
-
-        private async Task GetSalutations()
-        {
-            var rsp = await _salutationService.GetsSalutions();
-
-            if (rsp.IsSuccess)
-            {
-                Salutations = rsp!.Data ?? [];
+                model.Occupation = string.Empty;
             }
             else
             {
-                Salutations = [];
+                await GetOccupations();
             }
-
         }
-        void OnProgress(UploadProgressArgs args, string name)
+    }
+
+
+    private async Task GetOccupations(string? filter = "Job")
+    {
+        var command = new GetOccupationsQuery(0, null);
+
+        var rsp = await mediator.Send(command);
+
+        _occupations = rsp.Items;
+
+    }
+
+    IEnumerable<string> Salutations { get; set; } = [];
+
+    protected string? newSalution = "";
+
+    protected async Task AddNewSalutation(KeyboardEventArgs e)
+    {
+        if (e.Code == "Enter")
         {
-            if (args.Progress == 100)
+            await salutationService.AddSalution(new Salutation
             {
-                foreach (var file in args.Files)
-                {
-
-                }
-            }
+                Title = newSalution
+            });
+            await GetSalutations();
         }
+    }
 
-        private readonly IFileUploadServiceImp _fileUploadService;
+    private async Task GetSalutations()
+    {
+        var rsp = await salutationService.GetsSalutions();
 
-        const long maxFileSize = 2L * 1024 * 1024 * 1024;
-        private async Task OnFileUpload(UploadChangeEventArgs args)
+        if (rsp.IsSuccess)
         {
-            try
-            {
-                if (!args.Files!.Any())
-                {
-                    if (tempPath.IsNotNullOrEmpty())
-                    {
-                        model.Photo = tempPath;
-                    }
-                    else
-                    {
-                        model.Photo = string.Empty;
-                    }
-
-                    return;
-                }
-
-                var file = args.Files!.FirstOrDefault();
-
-                if (file is null || (file is not null && file.Size > maxFileSize))
-                {
-                    NotificationService.Notify(new NotificationMessage
-                    {
-                        Severity = NotificationSeverity.Error,
-                        Summary = "File upload error",
-                        Detail = "File is too large or not selected."
-                    });
-                    return;
-                }
-                var ext = Path.GetExtension(file!.Name);
-
-                var originalName = file.Name;
-
-                using var stream = new MemoryStream();
-
-                using var fileStream = file.OpenReadStream(maxFileSize);// 30 MB limit
-
-                await fileStream.CopyToAsync(stream); // ✅ Read the file content
-
-                var fileModel = new FileModel(originalName, file.Name, file.Size, stream.ToArray());
-
-                var rsp = await _fileUploadService.UploadFile(fileModel);
-
-                if (rsp.IsSuccess)
-                {
-                    model.Photo = rsp.Data?.FileUrl ?? string.Empty;
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error uploading files: {ex.Message}");
-                // Handle error (e.g., show notification)
-            }
+            Salutations = rsp!.Data ?? [];
         }
-
-        void SetFirstNameToName()
+        else
         {
-            model.Name = model.FirstName;
+            Salutations = [];
         }
+
+    }
+    void OnProgress(UploadProgressArgs args, string name)
+    {
+        if (args.Progress == 100)
+        {
+            foreach (var file in args.Files)
+            {
+
+            }
+        }
+    }
+
+    const long maxFileSize = 2L * 1024 * 1024 * 1024;
+    private async Task OnFileUpload(UploadChangeEventArgs args)
+    {
+        try
+        {
+            if (!args.Files!.Any())
+            {
+                if (tempPath.IsNotNullOrEmpty())
+                {
+                    model.Photo = tempPath;
+                }
+                else
+                {
+                    model.Photo = string.Empty;
+                }
+
+                return;
+            }
+
+            var file = args.Files!.FirstOrDefault();
+
+            if (file is null || (file is not null && file.Size > maxFileSize))
+            {
+                NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "File upload error",
+                    Detail = "File is too large or not selected."
+                });
+                return;
+            }
+            var ext = Path.GetExtension(file!.Name);
+
+            var originalName = file.Name;
+
+            using var stream = new MemoryStream();
+
+            using var fileStream = file.OpenReadStream(maxFileSize);// 30 MB limit
+
+            await fileStream.CopyToAsync(stream); // ✅ Read the file content
+
+            var fileModel = new FileModel(originalName, file.Name, file.Size, stream.ToArray());
+
+            var rsp = await fileUploadService.UploadFile(fileModel);
+
+            if (rsp.IsSuccess)
+            {
+                model.Photo = rsp.Data?.FileUrl ?? string.Empty;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error uploading files: {ex.Message}");
+            // Handle error (e.g., show notification)
+        }
+    }
+
+    void SetFirstNameToName()
+    {
+        model.Name = model.FirstName;
     }
 }

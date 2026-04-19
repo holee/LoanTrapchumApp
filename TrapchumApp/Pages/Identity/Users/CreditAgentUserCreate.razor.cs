@@ -33,7 +33,7 @@ namespace TrapchumApp.Pages.Identity.Users
         {
             await base.OnInitializedAsync();
 
-            var empRsp = await _employeeService.GetEmployeesAsync(BranchId, EmployeeId, new(0, 0));
+            //var empRsp = await _employeeService.GetEmployeesAsync(BranchId, EmployeeId, new(0, 0));
 
             var getRoles = await _roleService.GetRolesAsync(null);
 
@@ -42,12 +42,12 @@ namespace TrapchumApp.Pages.Identity.Users
 
             model.RoleName = roles.First()!;
 
-            if (empRsp.Items.Any())
-            {
-                Employees = empRsp.Items ?? [];
+            //if (empRsp.Items.Any())
+            //{
+            //    Employees = empRsp.Items ?? [];
 
-                SelectedEmployeeChanged(Employees.First());
-            }
+            //    SelectedEmployeeChanged(Employees.First());
+            //}
 
             await GetBranches();
 

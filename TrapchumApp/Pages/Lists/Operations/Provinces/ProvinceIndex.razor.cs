@@ -8,13 +8,13 @@ namespace TrapchumApp.Pages.Lists.Operations.Provinces
 {
     public partial class ProvinceIndex
     {
-        private readonly IProvinceService _proService;
-        private readonly IDistrictService districtService;
+        private readonly IAddressService _proService;
+        private readonly IAddressService districtService;
 
-        public ProvinceIndex(IProvinceService proService, IDistrictService districtService)
+        public ProvinceIndex(IAddressService proService)
         {
             _proService = proService;
-            this.districtService = districtService;
+            this.districtService = proService;
         }
         protected string? searchText = string.Empty;
 
@@ -48,7 +48,7 @@ namespace TrapchumApp.Pages.Lists.Operations.Provinces
             try
             {
                 var param = new QueryParam(pageIndex, pageSize, sortField, sortDescending, includeInactive, filter);
-                var resultResponse = await _proService.GetAllAsync(param);
+                var resultResponse = await _proService.GetAllProvincesAsync(param);
                 counts = resultResponse.Count;
                 ProvincesList = resultResponse.Items ?? [];
             }
@@ -88,7 +88,7 @@ namespace TrapchumApp.Pages.Lists.Operations.Provinces
             {
                 var param = new QueryParam(pageIndex, pageSize, sortField, includeInactive, sortDescending, filter);
 
-                var res = await _proService.GetAllAsync(param);
+                var res = await _proService.GetAllProvincesAsync(param);
 
                 ProvincesList = res.Items;
 
@@ -170,23 +170,23 @@ namespace TrapchumApp.Pages.Lists.Operations.Provinces
                 });
                 if (confirm == true)
                 {
-                    var datas = await districtService.GetAllAsync();
-                    districtList = datas.Data.Where(x => x.ProvinceRefId == proId).ToList();
+                    var datas = await districtService.GetAllDistrictsAsync();
+                    if (!datas.IsError) districtList = datas.Value.Where(x => x.ProvinceRefId == proId).ToList();
                     if (districtList.Count() > 0)
                     {
                         NotificationService.Notify(NotificationSeverity.Warning, "This province's record in used with other tables, cannot delete it.");
                         return;
                     }
-                    var result = await _proService.DeleteAsync(proId);
+                    var result = await _proService.DeleteProvinceAsync(proId);
 
-                    if (result.IsSuccess)
+                    if (!result.IsError)
                     {
                         NotificationService.Notify(NotificationSeverity.Success, "Province one record deleted successful.");
                         await GetProvinces(searchText);
                     }
                     else
                     {
-                        NotificationService.Notify(NotificationSeverity.Warning, result.ErrMessage);
+                        NotificationService.Notify(NotificationSeverity.Warning, result.FirstError.Description);
                     }
                 }
             }

@@ -2,7 +2,7 @@ using Applications.Features.LoanRequests.Requests;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Domains.Models.Loans;
 
-namespace Applications.Features.Customers.Extensions; 
+namespace Applications.Features.Customers.Extensions;
 
 public static class LoanDocumentsExtensions
 {
@@ -13,44 +13,37 @@ public static class LoanDocumentsExtensions
             CustomerRefId = customerId,
             BranchRefId = branchId,
             LoanRequestId = loanRequestId,
-            // LoanDocuments = doc.Select(x => new LoanDocumentDtoCreate
-            // {
-            //     BranchId = branchId,
-            //     LoanRequestId = loanRequestId,
-            //     OriginalName = x.OriginalName,
-            //     NewFileName = x.NewFileName,
-            //     FileUrl = x.FileUrl,
-            //     Description = x.Description
-            // }).ToList(),
         };
     }
 
     public static List<LoanDocumentDtoCreate> ToLoanDocumentsCreate(string? customerId, string? loanRequestId, int? branchId, IEnumerable<VLoanRequestsDocuments> doc)
     {
-        return doc.Select(x => new LoanDocumentDtoCreate 
+        return doc.Select(x => new LoanDocumentDtoCreate
         {
             BranchId = branchId,
             LoanRequestId = loanRequestId,
             OriginalName = x.OriginalName,
             NewFileName = x.NewFileName,
             FileUrl = x.FileUrl,
-            Description = x.Description
+            Description = x.Description,
+            DocumentId= x.DocumentId
 
         }).ToList();
     }
 
     public static List<LoanDocumentDtoCreate> ToLoanDocumentsEdit(this IEnumerable<VLoanRequestsDocuments> doc)
     {
-        return doc.Select(x => new LoanDocumentDtoCreate 
+        return doc.Select(x => new LoanDocumentDtoCreate
         {
             Id = x.Id,
-            BranchId =x.BranchRefId,
+            BranchId = x.BranchRefId,
             LoanRequestId = x.LoanRequestId,
             OriginalName = x.OriginalName,
             NewFileName = x.NewFileName,
             FileUrl = x.FileUrl,
-            FileSize=x.FileSize,
+            FileSize = x.FileSize,
             Description = x.Description,
+            DocumentId = x.DocumentId,
         }).ToList();
     }
 

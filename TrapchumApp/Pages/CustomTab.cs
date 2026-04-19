@@ -31,7 +31,6 @@ namespace TrapchumApp.Pages
         {
             Key = key;
             Title = title;
-            Icon = icon;
             TabAction = tabAction;
             Content = content;
         }
@@ -40,27 +39,17 @@ namespace TrapchumApp.Pages
         public string Title { get; set; } = string.Empty;
         public string Icon
         {
-            get => _icon;
-            set
+            get
             {
-                if (string.IsNullOrEmpty(value))
+                return TabAction switch
                 {
-                    _icon = TabAction switch
-                    {
-                        TabActions.List => IconNames.List,
-                        TabActions.Create => IconNames.Add,
-                        TabActions.Details => IconNames.Info,
-                        TabActions.Edit => IconNames.Edit,
-                        TabActions.Delete => IconNames.Delete,
-                        _ => IconNames.Undo
-                    };
-                }
-                else
-                {
-                    _icon = value;
-                }
-
-
+                    TabActions.List => IconNames.List,
+                    TabActions.Create => IconNames.Add,
+                    TabActions.Details => IconNames.Info,
+                    TabActions.Edit => IconNames.Edit,
+                    TabActions.Delete => IconNames.Delete,
+                    _ => IconNames.Undo
+                };
             }
         }
         public TabActions TabAction { get; set; } = TabActions.Unknown;

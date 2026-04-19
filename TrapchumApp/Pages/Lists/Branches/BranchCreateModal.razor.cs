@@ -35,9 +35,9 @@ namespace TrapchumApp.Pages.Lists.Branches
 
             var rsp = await _addressService!.GetCountries(105);
 
-            if (rsp.IsSuccess)
+            if (!rsp.IsError)
             {
-                Countries = rsp.Data ?? [];
+                Countries = rsp.Value;
             }
 
             provinceList = await _addressService.GetsProvinces(string.Empty);
@@ -88,7 +88,7 @@ namespace TrapchumApp.Pages.Lists.Branches
 
             var message = await _addressService.AddCity(city);
 
-            if (message.IsSuccess)
+            if (!message.IsError)
             {
                 await GetCities();
 

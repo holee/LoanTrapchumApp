@@ -8,12 +8,12 @@ namespace TrapchumApp.Pages.Lists.Operations.Villages
     public partial class VillageCreatePage
     {
 
-        private readonly ICommuneService communeService;
-        private readonly IVillageServer villageServer;
+        private readonly IAddressService communeService;
+        private readonly IAddressService villageServer;
 
-        public VillageCreatePage( ICommuneService communeService, IVillageServer villageServer)
+        public VillageCreatePage(IAddressService villageServer)
         {
-            this.communeService = communeService;
+            this.communeService = villageServer;
             this.villageServer = villageServer;
         }
         [Parameter] public int? Id { get; set; }
@@ -23,11 +23,12 @@ namespace TrapchumApp.Pages.Lists.Operations.Villages
         {
             try
             {
-                var results = await communeService.GetAllAsync(null);
-                if (results.IsSuccess)
+                var results = await communeService.GetAllCommunesAsync(null);
+
+                if (!results.IsError)
                 {
 
-                    communelist = results.Data!.ToList();
+                    communelist = results.Value.ToList();
                     model.CommuneRefId = Id ?? 0;
                 }
             }
@@ -47,16 +48,16 @@ namespace TrapchumApp.Pages.Lists.Operations.Villages
                     NotificationService.Notify(NotificationSeverity.Warning, "Commune is empty! please select any commune.");
                     return;
                 }
-                var response = await villageServer.CreateAsync(model);
+                var response = await villageServer.CreateVillageAsync(model);
 
-                if (response!.IsSuccess)
+                if (!response.IsError)
                 {
                     NotificationService.Notify(NotificationSeverity.Success, "Village new record was created successful.");
                     DialogService.Close(true);
                 }
                 else
                 {
-                    NotificationService.Notify(NotificationSeverity.Warning, response.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Warning, response.FirstError.Description);
                 }
             }
             catch (Exception ex)

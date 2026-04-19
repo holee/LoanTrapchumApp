@@ -1,4 +1,10 @@
-﻿using Applications.Features.Customers.Commands.CreateCustomer;
+﻿using Applications.Features.AdditionalInformations.Command.CreateOccupation;
+using Applications.Features.AdditionalInformations.Command.CreateSalutation;
+using Applications.Features.AdditionalInformations.Dto;
+using Applications.Features.AdditionalInformations.Queries.GetNationalities;
+using Applications.Features.AdditionalInformations.Queries.GetOccupations;
+using Applications.Features.AdditionalInformations.Queries.GetSalutaions;
+using Applications.Features.Customers.Commands.CreateCustomer;
 using Applications.Features.Customers.Commands.DeactivateCustomer;
 using Applications.Features.Customers.Commands.DeleteCustomer;
 using Applications.Features.Customers.Commands.EditCustomer;
@@ -10,6 +16,12 @@ using Applications.Features.Customers.Queries.GetCustomerDetailById;
 using Applications.Features.Customers.Queries.GetLoanByCustomerId;
 using Applications.Features.Customers.Queries.GetRequestByCustomerId;
 using Applications.Features.Customers.Queries.GetUpdateCustomerById;
+using Applications.Features.Documents.Command.AddDocument;
+using Applications.Features.Documents.Command.AddDocuments;
+using Applications.Features.Documents.Command.DeleteDocument;
+using Applications.Features.Documents.Dto;
+using Applications.Features.Documents.Queries.GetDocumentById;
+using Applications.Features.Documents.Queries.GetDocuments;
 using Applications.Features.Holidays.Command.ActivateOrDeactivate;
 using Applications.Features.Holidays.Command.CreateHoliday;
 using Applications.Features.Holidays.Queries.GetActiveHolidays;
@@ -37,6 +49,20 @@ public static class ApplicationServiceInjection
     {
         services.AddValidatorsFromAssemblyContaining<GetCollateralLineDetailQueryValidator>();
         services.AddScoped<IMediator, SimpleMediator>();
+       
+        services.AddScoped<IRequestHandler<GetOccupationsQuery, Pager<OccupationDto>>, GetOccupationsQueryHandler>();
+        services.AddScoped<IRequestHandler<CreateOccupationCommand, ErrorOr<OccupationDto>>, CreateOccupationCommandHandler>();
+        services.AddScoped<IRequestHandler<GetNationalitiesQuery, Pager<NationalityDto>>, GetNationalitiesQueryHandler>();
+        services.AddScoped<IRequestHandler<GetSalutationsQuery, Pager<SalutationDto>>, GetSalutationsQueryHandler>();
+        services.AddScoped<IRequestHandler<CreateSalutationCommand, ErrorOr<SalutationDto>>, CreateSalutationCommandHandler>();
+
+
+        services.AddScoped<IRequestHandler<AddDocumentCommand, ErrorOr<DocumentDto>>, AddDocumentCommandHandler>();
+        services.AddScoped<IRequestHandler<AddDocumentsCommand, IEnumerable<DocumentDto>>, AddDocumentsCommandHandler>();
+        services.AddScoped<IRequestHandler<DeleteDocumentCommand, bool>, DeleteDocumentCommandHandler>();
+        services.AddScoped<IRequestHandler<GetDocumentByIdQuery, ErrorOr<DocumentDto>>, GetDocumentByIdQueryHandler>(); 
+        services.AddScoped<IRequestHandler<GetDocumentsQuery, IEnumerable<DocumentDto>>, GetDocumentsQueryHandler>();
+
 
 
         services.AddScoped<IRequestHandler<GetPaidScheduleQuery, ErrorOr<IEnumerable<VSchedule>>>, GetPaidScheduleQueryHandler>();
@@ -131,13 +157,11 @@ public static class ApplicationServiceInjection
         services.AddScoped<GetCollateralDetailQueryHandler>();
         services.AddScoped<AddCustomerActivityUseCase>();
         services.AddScoped<GetCustomerActivityUseCase>();
-        //services.AddScoped<GetCustomersUseCase>();
         services.AddScoped<GetIncomeByCustomerQueryHandler>();
         services.AddScoped<GetCustomerDetailByIdUseCase>();
         services.AddScoped<GetCustomerByIdCommand>();
         services.AddScoped<SchedulePrintService>();
         services.AddScoped<IAddressServiceImpl, AddressService>();
-        //services.AddScoped<IBranchServiceImpl, BranchService>();
         services.AddScoped<IBankServiceImpl, BankService>();
         services.AddScoped<IOpenBranchServiceImpl, OpenBranchService>();
         services.AddScoped<ICurrencyServiceImpl, CurrencyService>();
@@ -147,7 +171,6 @@ public static class ApplicationServiceInjection
         services.AddScoped<IHolidayServiceImpl, HolidayService>();
         services.AddScoped<ICreditAgentServiceImpl, CreditAgentService>();
         services.AddScoped<ICollateralsServiceImpl, CollateralsService>();
-        services.AddScoped<IEmployeeServiceImpl, EmployeeService>();
         services.AddScoped<IFileUploadServiceImp, FileUploadService>();
         services.AddScoped<IDepartmentServiceImpl, DepartmentService>();
         services.AddScoped<IEntityNameServiceImpl, EntityNameService>();
@@ -157,16 +180,13 @@ public static class ApplicationServiceInjection
         services.AddScoped<IForiegnCurrencyExchangeImpl, ForiegnCurrencyExchange>();
         services.AddScoped<IJournalServiceImpl, JournalService>();
         services.AddScoped<ILedgerServiceImpl, LedgerService>();
-        //services.AddScoped<ILoanRequestServiceImpl, LoanRequestService>();
         services.AddScoped<ILoanServiceImpl, LoanService>();
         services.AddScoped<ILoanScheduleServiceImpl, LoanScheduleService>();
         services.AddScoped<ILoanCategoryServiceImpl, LoanCategoryService>();
         services.AddScoped<ILoanProductServiceImpl, LoanProductService>();
-        //services.AddScoped<ILoanPaymentServiceImpl, LoanPaymentService>();
         services.AddScoped<ILoanReportServiceImpl, LoanReportServiceImpl>();
         services.AddScoped<ILoanSettingServiceImpl, LoanSettingService>();
         services.AddScoped<INationalityServiceImpl, NationalityService>();
-        services.AddScoped<IOccupationServiceImpl, OccupationService>();
         services.AddScoped<IOtherNameServiceImpl, OtherNameService>();
         services.AddScoped<IPrintPdfServiceImpl, PrintPdfServiceImpl>();
         services.AddScoped<IGuarantorServiceImpl, GuarantorService>();

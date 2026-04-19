@@ -20,12 +20,9 @@ else
     <EditForm Model="model" @ref="editForm">
         <input type="hidden" @bind="model.CustomerId" />
         <FluentValidationValidator DisableAssemblyScanning="true" />
-
         <CreateCustomerInfo Model="@model" />
-        <CustomerAddress model="@model" Cities="@Cities" Countries="@Countries" />
-
-        <RadzenCard Variant="Variant.Flat"
-                    class="@($"rz-mt-4 rz-p-3 {Styles.Bg200}")">
+        <CustomerAddress model="@model" />
+        <RadzenCard Variant="Variant.Flat" class="@($"rz-mt-4 rz-p-3 {Styles.Bg200}")">
             <RadzenStack Orientation="Orientation.Horizontal"
                          AlignItems="AlignItems.Center"
                          JustifyContent="JustifyContent.End"

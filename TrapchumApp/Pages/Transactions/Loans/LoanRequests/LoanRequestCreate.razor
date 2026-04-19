@@ -4,9 +4,25 @@
 @using Applications.Features.Customers.Response
 @using Applications.Features.Guarantor.Dtos
 @using Applications.Features.LoanRequests.Interfaces
+@using TrapchumApp.Components.Actionbars
 @attribute [MustHasPermission(Modules.LoanRequest, Feature.Read)]
 <PageTitle>Create New</PageTitle>
-
+<AppActions>
+    <RadzenButton Size="@Styles.DefaultSize"
+                  Click="@HandleCreateNew"
+                  Text="Save"
+                  Icon="@IconNames.Save"
+                  ButtonStyle="ButtonStyle.Primary" />
+    <RadzenButton Size="@Styles.DefaultSize"
+                  Click="HandleCreateRequest"
+                  Text="Request Now"
+                  Icon="@IconNames.RequestQuote"
+                  ButtonStyle="ButtonStyle.Success" />
+    <RadzenLink Path="@_navService.PreviousUrl"
+                Icon="@IconNames.ArrowCircleLeft"
+                IconColor="@Colors.Danger"
+                Text="Back" />
+</AppActions>
 <EditForm Model="model" @ref="editForm">
     <FluentValidationValidator DisableAssemblyScanning="true" />
     <input type="hidden" @bind="model.CreditAgentRefId" />

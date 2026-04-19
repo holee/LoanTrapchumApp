@@ -1,13 +1,12 @@
 using Applications.Enumerations;
 using Applications.Features.Collaterals.Dtos;
+using Applications.Features.Documents.Dto;
 using Applications.Features.Guarantor.Dtos;
 using Applications.Features.Identity.Queries.GetUserDetailById;
 using Applications.Features.LoanRequests.Command.CreateLoanRequest;
 using Applications.Features.LoanRequests.Requests;
-using Applications.Responses.Loans.Disbursements;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Domains.Enumerations;
-using Domains.Models.Files;
 using TrapchumApp.Helpers.Extensions;
 using TrapchumApp.Pages.Lists.Collaterals;
 using TrapchumApp.Pages.Lists.OtherNames;
@@ -82,7 +81,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
         async Task HandleFileDialogue()
         {
-            IEnumerable<FileModel> uploadedFiles = await DialogService.OpenAsync<FileUploadDialogue>("Upload");
+            IEnumerable<DocumentDto> uploadedFiles = await DialogService.OpenAsync<FileUploadDialogue>("Upload");
 
             if (uploadedFiles is null || !uploadedFiles.Any())
             {
@@ -94,11 +93,12 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
                 Documents.Add(new VLoanRequestsDocuments
                 {
                     OriginalName = f.OriginalName,
-                    NewFileName = f.FileName,
+                    NewFileName = f.NewFileName,
                     FileUrl = f.FileUrl,
                     FileSize = f.FileSize,
                     AltText = f.OriginalName,
-                    Description = f.OriginalName
+                    Description = f.OriginalName,
+                    DocumentId = f.Id
                 });
             }
 
@@ -279,10 +279,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
         protected async Task HandleCreateNew()
         {
-            if (editForm.EditContext?.Validate() == false)
-            {
-                return;
-            }
+            if (editForm.EditContext?.Validate() == false) return;
 
             if (!await ConfirmActionAsync("Do you want to save this loan request?"))
                 return;
@@ -312,15 +309,18 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             if (!string.IsNullOrEmpty(model.Memo))
             {
                 var descriptions = new LoanDescriptionsDtoCreate(model.Memo, _userId);
+
                 model.LoanDescriptions.Add(descriptions);
             }
 
             model.GuarantorsLink.AddRange(oldGuarantors);
 
             var oldCollaterals = requestCollateralLines.ToCollateralLinkDtoCreate(BranchId);
+
             model.CollateralLinesLink.AddRange(oldCollaterals);
 
             var documents = Documents.LoanDocumentDtoCreate();
+
             model.LoanDocuments.AddRange(documents);
 
             if (editForm.EditContext!.Validate() == false)
@@ -344,7 +344,8 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
             if (!resp.IsError)
             {
-                NotificationService.Notify(NotificationSeverity.Success, resp.Value.Message);
+                NotificationService.Notify(NotificationSeverity.Success, resp.Value.Message!);
+
                 NavigationManager.NavigateTo($"/App/Loans/Requests/{BranchId}/Branches");
             }
             else

@@ -1,4 +1,4 @@
-﻿using Applications.Features.OtherNames;
+﻿using Applications.Features.OtherNames.Dto;
 
 namespace Applications.Features.Guarantor.Dtos;
 

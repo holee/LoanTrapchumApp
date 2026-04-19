@@ -1,322 +1,251 @@
 @using Applications.Features.Branches.Dtos
 @using Applications.Features.Departments.Dto
+@using Applications.Features.Documents.Dto
 @using Applications.Features.Entities
 @using Applications.Features.LoanRequests.Interfaces
 @using Applications.Responses.Lists.Entities
 @using Domains.Shared.Enums
-<RadzenFieldset>
-    <HeaderTemplate>
-        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
-            <RadzenIcon Icon="account_box" /><b>General</b>
+@using System.Text.Json
+
+@* ── General Information ── *@
+<RadzenCard Variant="Variant.Outlined" class="rz-mb-4 rz-p-4">
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween" class="rz-mb-4">
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+            <RadzenIcon Icon="badge" Style="color: var(--rz-primary);" />
+            <RadzenText TextStyle="TextStyle.H6" class="rz-mb-0"><strong>General Information</strong></RadzenText>
         </RadzenStack>
-    </HeaderTemplate>
-    <ChildContent>
-        <RadzenRow class="rz-my-2">
-            <RadzenColumn Size="2" SizeMD="2" Style="display:flex;align-items:center;">
-                <RadzenLabel>Legal Name(*)</RadzenLabel>
-            </RadzenColumn>
-            <RadzenColumn Size="10" SizeMD="10">
-                <RadzenRow>
-                    <RadzenColumn Size="12" SizeMD="2">
-                        <RadzenFormField Text="Salutation" AllowFloatingLabel="false" class="rz-w-100">
-                            <RadzenDropDown Name="DropDownSalutions"
-                                            Data="@Salutations"
-                                            TValue="string"
-                                            class="rz-w-100"
-                                            Placeholder="Salutation"
-                                            @bind-Value="model.Salutation">
-                            </RadzenDropDown>
-                        </RadzenFormField>
-                    </RadzenColumn>
-                    <RadzenColumn Size="8" SizeMD="8">
-                        <RadzenFormField Text="Khmer Name" class="rz-w-100" AllowFloatingLabel="false">
-                            <ChildContent>
-                                <RadzenTextBox Name="AltName"
-                                               @bind-Value="model.AltName"
-                                               Placeholder="Khmer Name"
-                                               class="rz-w-100" />
-                            </ChildContent>
-                            <Helper>
-                                <ValidationMessage For="() => model.AltName"></ValidationMessage>
-                            </Helper>
-                        </RadzenFormField>
-                    </RadzenColumn>
-                    <RadzenColumn Size="2" SizeMD="2">
-                        <div class="text-center">
-                            <RadzenCheckBox TValue="bool?" @bind-Value=model.IsActive Name="CheckBox1" />
-                            @(model.IsActive == true ? " Is Active" : " Is Inactive")
-                        </div>
-                    </RadzenColumn>
-                </RadzenRow>
-                <RadzenRow class="rz-mt-2">
-                    <RadzenColumn Size="12" SizeMD="4">
-                        <RadzenFormField Text="First Name" class="rz-w-100" AllowFloatingLabel="false">
-                            <ChildContent>
-                                <RadzenTextBox @bind-Value="model.FirstName"
-                                               class="rz-w-100"
-                                               Name="FirstName"
-                                               Placeholder="First Name (required)" />
-                            </ChildContent>
-                            <Helper>
-                                <ValidationMessage For="() => model.FirstName"></ValidationMessage>
-                            </Helper>
-                        </RadzenFormField>
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+            <RadzenSwitch Value="@isActiveSwitch" Change="@OnIsActiveChanged" Name="StatusSwitch" />
+            <RadzenBadge BadgeStyle="@(isActiveSwitch ? BadgeStyle.Success : BadgeStyle.Light)"
+                         Text="@(isActiveSwitch ? "Active" : "Inactive")"
+                         IsPill="true" />
+        </RadzenStack>
+    </RadzenStack>
 
-                    </RadzenColumn>
-                    <RadzenColumn Size="12" SizeMD="4">
-                        <RadzenFormField Text="Middle Name" class="rz-w-100" AllowFloatingLabel="false">
-                            <RadzenTextBox class="rz-w-100"
-                                           Name="MiddleName"
-                                           Placeholder="Middle name (optional)"
-                                           @bind-Value="model.MiddleName" />
-                        </RadzenFormField>
-                    </RadzenColumn>
-                    <RadzenColumn Size="12" SizeMD="4">
-                        <RadzenFormField Text="LastName" class="rz-w-100" AllowFloatingLabel="false">
-                            <ChildContent>
-                                <RadzenTextBox Name="LastName"
-                                               @bind-Value="model.LastName"
-                                               Placeholder="Last name (required)"
-                                               class="rz-w-100"></RadzenTextBox>
-                            </ChildContent>
-                            <Helper>
-                                <ValidationMessage For="() => model.LastName"></ValidationMessage>
-                            </Helper>
-                        </RadzenFormField>
+    <RadzenRow Gap="0.75rem">
+        <RadzenColumn SizeMD="2" Size="12">
+            <RadzenFormField Text="Salutation" Variant="Variant.Outlined" Style="width: 100%;">
+                <RadzenDropDown Name="DropDownSalutions"
+                                Data="@Salutations"
+                                TValue="string"
+                                Placeholder="Select..."
+                                @bind-Value="model.Salutation" />
+            </RadzenFormField>
+        </RadzenColumn>
+        <RadzenColumn SizeMD="5" Size="12">
+            <RadzenFormField Text="Khmer Name" Variant="Variant.Outlined" Style="width: 100%;">
+                <ChildContent>
+                    <RadzenTextBox Name="AltName"
+                                   @bind-Value="model.AltName"
+                                   Placeholder="ឈ្មោះជាខ្មែរ..." />
+                </ChildContent>
+                <Helper>
+                    <ValidationMessage For="() => model.AltName" />
+                </Helper>
+            </RadzenFormField>
+        </RadzenColumn>
+        <RadzenColumn SizeMD="5" Size="12">
+            <RadzenFormField Text="Photo" Variant="Variant.Outlined" Style="width: 100%;">
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem" Style="padding: 4px;">
+                    <RadzenImage Path="@model.Photo" Style="width:40px;height:40px;border-radius:50%;object-fit:cover;" />
+                    <RadzenUpload Auto="true"
+                                  Multiple="false"
+                                  Accept=".jpg,.png"
+                                  Url="upload/customers/profiles"
+                                  Complete="@OnFileUploadComplete"
+                                  Progress="@UploadProgress"
+                                  Error="@OnUploadError"
+                                  Style="flex:1;"
+                                  InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "select file" }})" />
+                </RadzenStack>
+            </RadzenFormField>
+        </RadzenColumn>
+    </RadzenRow>
 
-                    </RadzenColumn>
-                </RadzenRow>
-            </RadzenColumn>
-        </RadzenRow>
-        <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
-            <RadzenColumn Size="2" SizeMD="2" SizeSM="12">
-                <RadzenLabel Component="DateOfBirth">
-                    <span>Date of Birth</span>
-                </RadzenLabel>
-            </RadzenColumn>
-            <RadzenColumn Size="4" SizeMD="4" SizeSM="12">
-                <RadzenDatePicker @bind-Value="model.DateOfBirth"
-                                  Placeholder="Date of Birth (required)"
-                                  class="rz-w-100"
-                                  Name="DateOfBirth"
-                                  DateFormat="dd/MM/yyyy">
-                </RadzenDatePicker>
-            </RadzenColumn>
-            <RadzenColumn Size="2" SizeMD="2" SizeSM="12">
-                <RadzenLabel Text="Gender" Component="Gender" />
-            </RadzenColumn>
-            <RadzenColumn Size="4" SizeMD="4" SizeSM="12">
-                <GenderDrowDown @bind-Value="model.Gender"
-                                Placeholder="Choose"
-                                Name="Gender">
-                </GenderDrowDown>
-            </RadzenColumn>
-        </RadzenRow>
-        <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
-            <RadzenColumn Size="12" SizeMD="2">
-                <RadzenLabel Text="Marital Status" Component="MaritalStatus" />
-            </RadzenColumn>
-            <RadzenColumn Size="12" SizeMD="4">
-                <MarritalDropDown @bind-Value="model.MarritalStatus"
-                                  Placeholder="Select marital status">
-                </MarritalDropDown>
-            </RadzenColumn>
-            <RadzenColumn Size="12" SizeMD="2">
-                <RadzenLabel Text="Nationality" Component="Nationality" />
-            </RadzenColumn>
-            <RadzenColumn Size="12" SizeMD="4">
+    <RadzenRow Gap="0.75rem" class="rz-mt-2">
+        <RadzenColumn SizeMD="4" Size="12">
+            <RadzenFormField Text="First Name" Variant="Variant.Outlined" Style="width: 100%;">
+                <ChildContent>
+                    <RadzenTextBox @bind-Value="model.FirstName" Placeholder="First name (required)" Name="FirstName" />
+                </ChildContent>
+                <Helper>
+                    <ValidationMessage For="() => model.FirstName" />
+                </Helper>
+            </RadzenFormField>
+        </RadzenColumn>
+        <RadzenColumn SizeMD="4" Size="12">
+            <RadzenFormField Text="Middle Name" Variant="Variant.Outlined" Style="width: 100%;">
+                <RadzenTextBox @bind-Value="model.MiddleName" Placeholder="Optional" Name="MiddleName" />
+            </RadzenFormField>
+        </RadzenColumn>
+        <RadzenColumn SizeMD="4" Size="12">
+            <RadzenFormField Text="Last Name" Variant="Variant.Outlined" Style="width: 100%;">
+                <ChildContent>
+                    <RadzenTextBox @bind-Value="model.LastName" Placeholder="Last name (required)" Name="LastName" />
+                </ChildContent>
+                <Helper>
+                    <ValidationMessage For="() => model.LastName" />
+                </Helper>
+            </RadzenFormField>
+        </RadzenColumn>
+    </RadzenRow>
+
+    <RadzenRow Gap="0.75rem" class="rz-mt-2">
+        <RadzenColumn SizeMD="3" Size="12">
+            <RadzenFormField Text="Date of Birth" Variant="Variant.Outlined" Style="width: 100%;">
+                <RadzenDatePicker @bind-Value="model.DateOfBirth" Placeholder="dd/MM/yyyy" Name="DateOfBirth" DateFormat="dd/MM/yyyy" />
+            </RadzenFormField>
+        </RadzenColumn>
+        <RadzenColumn SizeMD="3" Size="12">
+            <RadzenFormField Text="Gender" Variant="Variant.Outlined" Style="width: 100%;">
+                <GenderDrowDown @bind-Value="model.Gender" Placeholder="Select..." Name="Gender" />
+            </RadzenFormField>
+        </RadzenColumn>
+        <RadzenColumn SizeMD="3" Size="12">
+            <RadzenFormField Text="Marital Status" Variant="Variant.Outlined" Style="width: 100%;">
+                <MarritalDropDown @bind-Value="model.MarritalStatus" Placeholder="Select..." />
+            </RadzenFormField>
+        </RadzenColumn>
+        <RadzenColumn SizeMD="3" Size="12">
+            <RadzenFormField Text="Nationality" Variant="Variant.Outlined" Style="width: 100%;">
                 <NationalityDropDown Name="Nationality" Nationalities="@Nationalities" @bind-Value="model.Nationality" />
-            </RadzenColumn>
-        </RadzenRow>
-        <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
-            <RadzenColumn Size="12" SizeMD="2">
-                <RadzenLabel Text="Note" Component="Note" />
-            </RadzenColumn>
-            <RadzenColumn Size="12" SizeMD="10">
-                <RadzenTextArea @bind-Value="model.Description"
-                                Placeholder="Note..."
-                                Style="width: 100%;"
-                                Name="Description">
-                </RadzenTextArea>
-            </RadzenColumn>
-        </RadzenRow>
-    </ChildContent>
-</RadzenFieldset>
-<RadzenFieldset class="rz-my-2">
-    <HeaderTemplate>
-        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
-            <RadzenIcon Icon="call" /><b>Contact Information</b>
-        </RadzenStack>
-    </HeaderTemplate>
-    <ChildContent>
-        <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
-            <RadzenColumn Size="4" SizeMD="4" SizeSM="12">
-                <RadzenFormField Text="Phone" class="rz-w-100">
-                    <RadzenTextBox @bind-Value="model.Phone"
-                                   Placeholder="Phone No"
-                                   class="rz-w-100"
-                                   Name="Phone">
-                    </RadzenTextBox>
-                </RadzenFormField>
-            </RadzenColumn>
-            <RadzenColumn Size="4" SizeMD="4" SizeSM="12">
-                <RadzenFormField Text="Alt Phone" class="rz-w-100">
-                    <RadzenTextBox @bind-Value="model.AltPhone"
-                                   Placeholder="Alt Phone No"
-                                   class="rz-w-100"
-                                   Name="AltPhone">
-                    </RadzenTextBox>
-                </RadzenFormField>
-            </RadzenColumn>
-            <RadzenColumn Size="4" SizeMD="4" SizeSM="12">
-                <RadzenFormField Text="Email Address" class="rz-w-100">
-                    <RadzenTextBox @bind-Value="model.EmailAddress"
-                                   Placeholder="Email"
-                                   class="rz-w-100"
-                                   Name="Email">
-                    </RadzenTextBox>
-                </RadzenFormField>
-            </RadzenColumn>
-        </RadzenRow>
-    </ChildContent>
-</RadzenFieldset>
-<RadzenFieldset AllowCollapse="false" Collapsed="false" class="rz-my-2">
-    <HeaderTemplate>
-        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
-            <RadzenIcon Icon="account_box" /><b>Employment</b>
-        </RadzenStack>
-    </HeaderTemplate>
-    <ChildContent>
-        <RadzenFieldset Text="Job Details">
-            <RadzenStack Gap="1rem">
-                <RadzenRow AlignItems="AlignItems.Start">
-                    <RadzenColumn Size="12" SizeMD="6">
-                        <RadzenRow AlignItems="AlignItems.Center">
-                            <RadzenColumn Size="12" SizeMD="2">
-                                <RadzenLabel Text="Job Title" Component="JobTitle" />
-                            </RadzenColumn>
-                            <RadzenColumn Size="12" SizeMD="10">
-                                <OccupationDropDown @bind-Value="model.Occupation"
-                                                    TypeOf="TypeOfEnum.Position" ShowAdd="true" />
-                            </RadzenColumn>
-                        </RadzenRow>
-                        <RadzenRow AlignItems="AlignItems.Center" Style="margin-top:15px">
-                            <RadzenColumn Size="12" SizeMD="2">
-                                <RadzenLabel Text="Department" Component="Department" />
-                            </RadzenColumn>
-                            <RadzenColumn Size="12" SizeMD="10">
-                                <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-                                                FilterOperator="StringFilterOperator.Contains"
-                                                AllowFiltering="true"
-                                                Data="@Departments"
-                                                AllowClear="false"
-                                                TextProperty="@nameof(VDepartment.DepartmentName)"
-                                                ValueProperty="@nameof(VDepartment.DepartmentId)"
-                                                Style="width: 100%;"
-                                                Name="Department"
-                                                @bind-Value="model.DepartmentRefId"
-                                                Placeholder="Select department">
-                                </RadzenDropDown>
-                            </RadzenColumn>
-                        </RadzenRow>
-                    </RadzenColumn>
-                    <RadzenColumn Size="12" SizeMD="6">
-                        <RadzenRow AlignItems="AlignItems.Center">
-                            <RadzenColumn Size="12" SizeMD="2">
-                                <RadzenLabel Text="Branch" Component="Branch" />
-                            </RadzenColumn>
-                            <RadzenColumn Size="12" SizeMD="10">
-                                <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-                                                FilterOperator="StringFilterOperator.Contains"
-                                                AllowFiltering="true"
-                                                Data="@Branches"
-                                                AllowClear="false"
-                                                TextProperty="@nameof(VBranch.BranchName)"
-                                                ValueProperty="@nameof(VBranch.BranchId)"
-                                                class="rz-w-100"
-                                                @bind-Value="model.BranchRefId"
-                                                Name="Branch"
-                                                Placeholder="Select branch">
-                                </RadzenDropDown>
-                            </RadzenColumn>
-                        </RadzenRow>
-                        <RadzenRow AlignItems="AlignItems.Center" Style="margin-top:15px">
-                            <RadzenColumn Size="12" SizeMD="2">
-                                <RadzenLabel Text="Supervisor" Component="Supervisor" />
-                            </RadzenColumn>
-                            <RadzenColumn Size="12" SizeMD="10">
-                                <RadzenDropDown Disabled @bind-Value="model.EntType"
-                                                Placeholder="Choose"
-                                                Data="@supervisors"
-                                                Style="width: 100%;"
-                                                Name="Supervisor">
-                                </RadzenDropDown>
-                            </RadzenColumn>
-                        </RadzenRow>
-                    </RadzenColumn>
-                </RadzenRow>
-                <RadzenRow AlignItems="AlignItems.Center">
-                    <RadzenColumn Size="12" SizeMD="1">
-                        <RadzenLabel Text="Note" Component="Note" />
-                    </RadzenColumn>
-                    <RadzenColumn Size="12" SizeMD="11">
-                        <RadzenTextArea @bind-Value="model.Description"
-                                        Placeholder="Say something here..."
-                                        class="rz-w-100"
-                                        Name="Note">
-                        </RadzenTextArea>
-                    </RadzenColumn>
-                </RadzenRow>
-            </RadzenStack>
-        </RadzenFieldset>
-        <RadzenRow AlignItems="AlignItems.Center">
-            <RadzenColumn Size="6" SizeMD="6" SizeSM="12">
-                <RadzenFieldset Text="Employment Date" class="rz-w-100">
-                    <RadzenFormField Text="Hire Date" class="rz-w-100">
-                        <RadzenDatePicker @bind-Value="model.HireDate"
-                                          Placeholder="Hire Date"
-                                          Style="width: 100%;"
-                                          Name="HireDate"
-                                          DateFormat="dd/MM/yyyy">
-                        </RadzenDatePicker>
-                    </RadzenFormField>
-                    <RadzenFormField Text="End Date" class="rz-w-100">
-                        <RadzenDatePicker @bind-Value="model.EndDate"
-                                          Placeholder="End Date"
-                                          Style="width: 100%;"
-                                          Name="EndDate"
-                                          DateFormat="dd/MM/yyyy">
-                        </RadzenDatePicker>
-                    </RadzenFormField>
-                </RadzenFieldset>
-            </RadzenColumn>
-            <RadzenColumn Size="6" SizeMD="6" SizeSM="12">
-                <RadzenFieldset Text="Photo">
-                    <RadzenCard class="rz-w-100">
-                        <RadzenRow AlignItems="AlignItems.Center">
-                            <input type="hidden" value="@tempPath" />
-                            <RadzenColumn Size="3">
-                                <RadzenImage Path="@model.Photo"
-                                             class="rz-p-0 rz-m-0"
-                                             Style="width:4.5rem;height:4.5rem;" />
-                            </RadzenColumn>
-                            <RadzenColumn Size="9">
-                                <RadzenUpload Change="@OnFileUpload"
-                                              Auto="false"
-                                              Multiple="false"
-                                              Accept=".jpg,.jpeg,.png"
-                                              Progress=@(args => OnProgress(args, "Single file upload"))
-                                              Style="width: 100%"
-                                              InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "select file" }})">
-                                </RadzenUpload>
-                            </RadzenColumn>
-                        </RadzenRow>
-                    </RadzenCard>
-                </RadzenFieldset>
-            </RadzenColumn>
-        </RadzenRow>
-    </ChildContent>
-</RadzenFieldset>
+            </RadzenFormField>
+        </RadzenColumn>
+    </RadzenRow>
+
+    <RadzenRow Gap="0.75rem" class="rz-mt-2">
+        <RadzenColumn Size="12">
+            <RadzenFormField Text="Note" Variant="Variant.Outlined" Style="width: 100%;">
+                <RadzenTextArea @bind-Value="model.Description" Rows="2" Placeholder="Additional notes..." Name="Description" />
+            </RadzenFormField>
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+
+@* ── Contact Information ── *@
+<RadzenCard Variant="Variant.Outlined" class="rz-mb-4 rz-p-4">
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem" class="rz-mb-4">
+        <RadzenIcon Icon="contact_phone" Style="color: var(--rz-primary);" />
+        <RadzenText TextStyle="TextStyle.H6" class="rz-mb-0"><strong>Contact Information</strong></RadzenText>
+    </RadzenStack>
+
+    <RadzenRow Gap="0.75rem">
+        <RadzenColumn SizeMD="4" Size="12">
+            <RadzenFormField Text="Phone" Variant="Variant.Outlined" Style="width: 100%;">
+                <Start>
+                    <RadzenIcon Icon="phone" />
+                </Start>
+                <ChildContent>
+                    <RadzenTextBox @bind-Value="model.Phone" Placeholder="Phone number" Name="Phone" />
+                </ChildContent>
+            </RadzenFormField>
+        </RadzenColumn>
+        <RadzenColumn SizeMD="4" Size="12">
+            <RadzenFormField Text="Alt Phone" Variant="Variant.Outlined" Style="width: 100%;">
+                <Start>
+                    <RadzenIcon Icon="phone_forwarded" />
+                </Start>
+                <ChildContent>
+                    <RadzenTextBox @bind-Value="model.AltPhone" Placeholder="Alternative phone" Name="AltPhone" />
+                </ChildContent>
+            </RadzenFormField>
+        </RadzenColumn>
+        <RadzenColumn SizeMD="4" Size="12">
+            <RadzenFormField Text="Email" Variant="Variant.Outlined" Style="width: 100%;">
+                <Start>
+                    <RadzenIcon Icon="email" />
+                </Start>
+                <ChildContent>
+                    <RadzenTextBox @bind-Value="model.EmailAddress" Placeholder="email@example.com" Name="Email" />
+                </ChildContent>
+            </RadzenFormField>
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+
+@* ── Employment ── *@
+<RadzenCard Variant="Variant.Outlined" class="rz-mb-4 rz-p-4">
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem" class="rz-mb-4">
+        <RadzenIcon Icon="work" Style="color: var(--rz-primary);" />
+        <RadzenText TextStyle="TextStyle.H6" class="rz-mb-0"><strong>Employment</strong></RadzenText>
+    </RadzenStack>
+
+    <RadzenRow Gap="0.75rem">
+        <RadzenColumn SizeMD="6" Size="12">
+            <RadzenFormField Text="Job Title" Variant="Variant.Outlined" Style="width: 100%;">
+                <OccupationDropDown @bind-Value="model.Occupation" TypeOf="TypeOfEnum.Position" ShowAdd="true" />
+            </RadzenFormField>
+        </RadzenColumn>
+        <RadzenColumn SizeMD="6" Size="12">
+            <RadzenFormField Text="Branch" Variant="Variant.Outlined" Style="width: 100%;">
+                <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                FilterOperator="StringFilterOperator.Contains"
+                                AllowFiltering="true"
+                                Data="@Branches"
+                                AllowClear="false"
+                                TextProperty="@nameof(VBranch.BranchName)"
+                                ValueProperty="@nameof(VBranch.BranchId)"
+                                @bind-Value="model.BranchRefId"
+                                Name="Branch"
+                                Placeholder="Select branch" />
+            </RadzenFormField>
+        </RadzenColumn>
+    </RadzenRow>
+
+    <RadzenRow Gap="0.75rem" class="rz-mt-2">
+        <RadzenColumn SizeMD="6" Size="12">
+            <RadzenFormField Text="Department" Variant="Variant.Outlined" Style="width: 100%;">
+                <RadzenDropDown FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                FilterOperator="StringFilterOperator.Contains"
+                                AllowFiltering="true"
+                                Data="@Departments"
+                                AllowClear="false"
+                                TextProperty="@nameof(VDepartment.DepartmentName)"
+                                ValueProperty="@nameof(VDepartment.DepartmentId)"
+                                @bind-Value="model.DepartmentRefId"
+                                Name="Department"
+                                Placeholder="Select department" />
+            </RadzenFormField>
+        </RadzenColumn>
+        <RadzenColumn SizeMD="6" Size="12">
+            <RadzenFormField Text="Supervisor" Variant="Variant.Outlined" Style="width: 100%;">
+                <RadzenDropDown Disabled @bind-Value="model.EntType"
+                                Placeholder="Select supervisor"
+                                Data="@supervisors"
+                                Name="Supervisor" />
+            </RadzenFormField>
+        </RadzenColumn>
+    </RadzenRow>
+
+    <RadzenRow Gap="0.75rem" class="rz-mt-2">
+        <RadzenColumn SizeMD="3" Size="12">
+            <RadzenFormField Text="Hire Date" Variant="Variant.Outlined" Style="width: 100%;">
+                <Start>
+                    <RadzenIcon Icon="event_available" />
+                </Start>
+                <ChildContent>
+                    <RadzenDatePicker @bind-Value="model.HireDate" Placeholder="dd/MM/yyyy" Name="HireDate" DateFormat="dd/MM/yyyy" />
+                </ChildContent>
+            </RadzenFormField>
+        </RadzenColumn>
+        <RadzenColumn SizeMD="3" Size="12">
+            <RadzenFormField Text="End Date" Variant="Variant.Outlined" Style="width: 100%;">
+                <Start>
+                    <RadzenIcon Icon="event_busy" />
+                </Start>
+                <ChildContent>
+                    <RadzenDatePicker @bind-Value="model.EndDate" Placeholder="dd/MM/yyyy" Name="EndDate" DateFormat="dd/MM/yyyy" />
+                </ChildContent>
+            </RadzenFormField>
+        </RadzenColumn>
+        <RadzenColumn SizeMD="6" Size="12">
+            <RadzenFormField Text="Employment Note" Variant="Variant.Outlined" Style="width: 100%;">
+                <RadzenTextArea @bind-Value="model.Description" Rows="2" Placeholder="Employment notes..." Name="Note" />
+            </RadzenFormField>
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+
 <AddressCreate model="model" />
 <ContactRelation />
 
@@ -329,4 +258,61 @@
     public int Relation { get; set; } = 1;
     [Parameter]
     public string? ContactPhone { get; set; }
+    private string _errorMessage = string.Empty;
+    private bool _isError = false;
+    private int _progress = 0;
+    private bool _isUploading = false;
+
+    bool isActiveSwitch => model.IsActive ?? false;
+
+    void OnIsActiveChanged(bool value)
+    {
+        model.IsActive = value;
+    }
+
+    void OnFileUploadComplete(UploadCompleteEventArgs args)
+    {
+        if (string.IsNullOrEmpty(args.RawResponse))
+        {
+            model.Photo = tempPath;
+            return;
+        }
+
+        try
+        {
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+
+            var fileModels = JsonSerializer.Deserialize<DocumentDto>(args.RawResponse!, options);
+
+            if (fileModels is not null)
+            {
+                model.Photo = fileModels.FileUrl;
+            }
+            else
+            {
+                _isError = true;
+                model.Photo = tempPath;
+                _errorMessage = "Failed to parse upload response.";
+            }
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Error parsing upload response: {ex.Message}";
+            logger.LogError(ex, "Error parsing upload response: {Message}", ex.Message);
+        }
+    }
+
+    void OnUploadError(UploadErrorEventArgs args)
+    {
+        _isError = true;
+        _errorMessage = $"Upload failed: {args.Message}";
+        logger.LogError("Upload failed: {Message}", args.Message);
+    }
+
+    void UploadProgress(UploadProgressArgs args)
+    {
+        _isUploading = true;
+        _progress = args.Progress;
+        logger.LogInformation("Upload progress: {Progress}%", args.Progress);
+    }
 }

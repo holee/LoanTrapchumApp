@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Applications.Features.OtherNames;
+using Applications.Features.OtherNames.Dto;
 
 namespace Applications.Validations.NameEntities
 {

@@ -1,0 +1,112 @@
+﻿@using Applications.Features.Addresses
+@using Applications.Features.Branches
+@using Applications.Features.Currencies
+@using Applications.Features.Customers.Services
+@using Applications.Features.Employees
+@using Applications.Features.LoanRequests.Interfaces
+@using TrapchumApp.Services
+
+<RadzenFieldset AllowCollapse="true" Collapsed="false">
+    <HeaderTemplate>
+        <RadzenIcon Icon="storefront" />
+    </HeaderTemplate>
+    <ChildContent>
+
+        <RadzenCard Variant="Variant.Flat" class="rz-p-1 rz-background-color-base-200">
+
+            @* ── Status badge ── *@
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
+                         JustifyContent="JustifyContent.End" class="rz-mb-2">
+                <RadzenBadge BadgeStyle="@(model?.IsActive == true ? BadgeStyle.Success : BadgeStyle.Danger)"
+                             Text="@(model?.IsActive == true ? "Active" : "Inactive")"
+                             IsPill="true" />
+            </RadzenStack>
+
+            <RadzenRow AlignItems="AlignItems.Start" Gap="1.5rem">
+
+                @* ── Avatar column ── *@
+                <RadzenColumn Size="12" SizeMD="2">
+                    <RadzenStack Orientation="Orientation.Vertical"
+                                 AlignItems="AlignItems.Center"
+                                 JustifyContent="JustifyContent.Center"
+                                 class="rz-pt-2">
+                        <div style="width:9rem;height:9rem;border-radius:50%;
+                                    background:var(--rz-primary);
+                                    display:flex;align-items:center;justify-content:center;
+                                    border:3px solid var(--rz-base-300);
+                                    box-shadow:0 2px 8px rgba(0,0,0,0.10);">
+                            <RadzenIcon Icon="storefront" Style="font-size:4rem;color:#fff;" />
+                        </div>
+                        <RadzenText TextStyle="TextStyle.Subtitle2"
+                                    class="rz-mt-2 rz-text-align-center"
+                                    Style="max-width:10rem;word-break:break-word;
+                                           font-family:'Khmer OS Siemreap',kh_siemreap,sans-serif;">
+                            @model?.AltName
+                        </RadzenText>
+                    </RadzenStack>
+                </RadzenColumn>
+
+                @* ── Info fields ── *@
+                <RadzenColumn Size="12" SizeMD="10">
+                    <RadzenRow RowGap="0.75rem" class="rz-mt-1">
+
+                        @* Personal *@
+                        @InfoField("badge",       "Khmer Name",      model?.AltName,        khmerFont: true)
+                        @InfoField("person",       "Full Name",       model?.Name)
+                        @InfoField("person_pin",   "First Name",      model?.FirstName)
+                        @InfoField("person_pin",   "Last Name",       model?.LastName)
+
+                        @* Company *@
+                        @InfoField("business",     "Company",         model?.CompanyName)
+                        @InfoField("location_city","Company Address", model?.CompanyAddress)
+                        @InfoField("work",         "Job Title",       model?.JobTitle)
+                        @InfoField("engineering",  "Occupation",      model?.Occupation)
+
+                        @* Contact *@
+                        @InfoField("phone",        "Phone",           model?.Phone)
+                        @InfoField("phone_forwarded","Alt Phone",     model?.AltPhone)
+                        @InfoField("email",        "Email",           model?.EmailAddress)
+
+                        @* Address & Note *@
+                        @InfoField("location_on",  "Address (KH)",   model?.ToString(), sizeSM: 6)
+                        @InfoField("notes",        "Description",     model?.Description,  sizeSM: 6)
+
+                    </RadzenRow>
+                </RadzenColumn>
+            </RadzenRow>
+        </RadzenCard>
+
+        @* ── Actions ── *@
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
+                     JustifyContent="JustifyContent.End" Gap="0.5rem" class="rz-mt-3">
+            <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="edit"  Text="Edit"  Size="ButtonSize.Small" Click="@ClickEdit" />
+            <RadzenButton ButtonStyle="ButtonStyle.Danger"  Icon="close" Text="Close" Size="ButtonSize.Small" Click="@CloseTab" Variant="Variant.Outlined" />
+        </RadzenStack>
+
+    </ChildContent>
+</RadzenFieldset>
+
+@code {
+    static RenderFragment InfoField(string icon, string label, string? value,
+                                    int sizeSM = 3, bool khmerFont = false) => __builder =>
+    {
+        var style = khmerFont
+            ? "min-height:1.25rem;font-family:'Khmer OS Siemreap',kh_siemreap,sans-serif;"
+            : "min-height:1.25rem;";
+
+        <RadzenColumn Size="6" SizeSM="@sizeSM">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+                <RadzenIcon Icon="@icon" Style="font-size:1rem;color:var(--rz-base-600);" />
+                <RadzenText TextStyle="TextStyle.Overline" class="rz-mb-0 rz-color-base-600">@label</RadzenText>
+            </RadzenStack>
+            <RadzenText TextStyle="TextStyle.Body2" class="rz-mb-0" Style="@style">
+                @(string.IsNullOrWhiteSpace(value) ? "—" : value)
+            </RadzenText>
+        </RadzenColumn>
+    };
+}
+
+
+
+
+

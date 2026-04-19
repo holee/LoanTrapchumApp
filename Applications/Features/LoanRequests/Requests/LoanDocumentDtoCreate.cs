@@ -11,4 +11,5 @@ public sealed class LoanDocumentDtoCreate
     public long? FileSize { get; set; }=0;
     public string? FileUrl { get; set; }
     public string? Description { get; set; }
+    public Guid? DocumentId { get; set; } = null;
 }

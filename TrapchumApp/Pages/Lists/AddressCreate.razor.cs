@@ -1,5 +1,5 @@
 using Applications.Features.Addresses.Dto;
-using Applications.Features.OtherNames;
+using Applications.Features.OtherNames.Dto;
 using Domains.Models.Addresses;
 namespace TrapchumApp.Pages.Lists
 {
@@ -42,7 +42,7 @@ namespace TrapchumApp.Pages.Lists
 
             var message = await _addressService!.AddCity(city);
 
-            if (message!.IsSuccess)
+            if (!message.IsError)
             {
                 await GetCities();
                 StateHasChanged();
@@ -119,9 +119,9 @@ namespace TrapchumApp.Pages.Lists
             {
                 var rsp = await _addressService.GetCountries(105);
 
-                if (rsp.IsSuccess)
+                if (!rsp.IsError)
                 {
-                    Countries = rsp.Data ?? [];
+                    Countries = rsp.Value;
                 }
             }
 

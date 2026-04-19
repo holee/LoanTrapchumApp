@@ -1,0 +1,16 @@
+﻿<RadzenStack class="rz-border-radius-2 rz-p-2 rz-mb-2"
+             Orientation="Orientation.Horizontal"
+             JustifyContent="JustifyContent.End"
+             Style="background: linear-gradient(90deg,var(--rz-primary-lighter), var(--rz-primary-lighter));"
+             Gap="0.5rem"
+             AlignItems="AlignItems.Center">
+    @if(ChildContent is not null)
+    {
+        @ChildContent
+    }
+
+</RadzenStack>
+@code {
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; } = default!;
+}

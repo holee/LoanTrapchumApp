@@ -1,8 +1,9 @@
-using Applications.Responses.Lists.Entities;
-using Applications.Services.Lists;
 using Domains.Shared.Enums;
 using System.Linq.Expressions;
-using Applications.Features.Settings.Requests;
+using Applications.Features.AdditionalInformations.Dto;
+using Applications.Features.AdditionalInformations.Command.CreateOccupation;
+using Applications.Features.AdditionalInformations.Queries.GetOccupations;
+using Applications.Responses.Paginations;
 
 namespace TrapchumApp.Pages.Lists
 {
@@ -17,12 +18,7 @@ namespace TrapchumApp.Pages.Lists
         [Parameter] public EventCallback<string> ValueChanged { get; set; }
         [Parameter] public Expression<Func<string>> ValueExpression { get; set; } = default!;
 
-        private readonly IOccupationServiceImpl _occupationService;
-        IEnumerable<OcupationResponse> Occuptions { get; set; } = [];
-        public OccupationDropDown(IOccupationServiceImpl occupationService)
-        {
-            _occupationService = occupationService;
-        }
+        IEnumerable<OccupationDto> Occuptions { get; set; } = [];
 
         protected override async Task OnInitializedAsync()
         {
@@ -54,9 +50,9 @@ namespace TrapchumApp.Pages.Lists
                 TypeOf = TypeOfEnum.Position.ToString()
             };
 
-            var rsp = await _occupationService.CreateAsync(occupation);
+            var rsp = await mediator.Send(new CreateOccupationCommand(occupation)); 
 
-            if (!rsp.IsSuccess)
+            if (!rsp.IsError)
             {
                 Value = string.Empty;
             }
@@ -69,9 +65,14 @@ namespace TrapchumApp.Pages.Lists
 
         private async Task GetOccupations(string? filter = null)
         {
-            var rsp = await _occupationService.GetOccupations<OcupationResponse>(0, TypeOf, filter);
 
-            Occuptions = rsp.Items ?? [];
+            Tracker.Show();
+
+            var rsp = await mediator.Send(new GetOccupationsQuery(0, new QueryParam(0, 0, string.Empty, filter), TypeOf)); 
+
+            Occuptions = rsp.Items;
+
+            Tracker.Hide();
         }
 
     }

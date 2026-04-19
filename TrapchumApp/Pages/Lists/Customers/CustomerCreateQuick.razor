@@ -8,7 +8,7 @@
 @using Domains.Models.Files
 @using TrapchumApp.Services
 <EditForm Model="model" @ref="editForm" OnValidSubmit="@FormSubmit">
-    <FluentValidationValidator DisableAssemblyScanning="true"></FluentValidationValidator>
+    <Blazilla.FluentValidator />
     <RadzenFieldset AllowCollapse="true" Collapsed="false" class="rz-mb-2">
         <HeaderTemplate>
             <RadzenIcon Icon="person" /><strong>Customer</strong>

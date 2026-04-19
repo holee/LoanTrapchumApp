@@ -9,8 +9,8 @@ namespace TrapchumApp.Pages.Lists.Operations.Communes
 {
     public partial class CommuneIndex
     {
-        private readonly ICommuneService communeService;
-        public CommuneIndex(ICommuneService communeService)
+        private readonly IAddressService communeService;
+        public CommuneIndex(IAddressService communeService)
         {
             this.communeService = communeService;
         }
@@ -32,7 +32,7 @@ namespace TrapchumApp.Pages.Lists.Operations.Communes
         protected async Task GetCommunes(string? text = null)
         {
             var param = new QueryParam(pageIndex, pageSize, sortField, includeInactive, sortDescending, text);
-            var results = await communeService.GetAllPagerAsync(param);
+            var results = await communeService.GetAllCommunesPagerAsync(param);
             counts = results.Count;
             vCommunelistt = results.Items;
         }
@@ -62,7 +62,7 @@ namespace TrapchumApp.Pages.Lists.Operations.Communes
         async Task LoadDistrictPageList(int pageIndex = 0, string sortField = "CommuneId", bool sortDescending = false,string? filter=null)
         {
             var param = new QueryParam(pageIndex, pageSize, sortField, includeInactive, sortDescending, filter);
-            var res = await communeService.GetAllPagerAsync(param);
+            var res = await communeService.GetAllCommunesPagerAsync(param);
             vCommunelistt = res.Items;
             counts = res.Count;
             StateHasChanged();
@@ -141,16 +141,16 @@ namespace TrapchumApp.Pages.Lists.Operations.Communes
                         NotificationService.Notify(NotificationSeverity.Warning, "This commune's record in used with other tables, cannot delete it.");
                         return;
                     }
-                    var result = await communeService.DeleteAsync(id);
+                    var result = await communeService.DeleteCommuneAsync(id);
 
-                    if (result.IsSuccess)
+                    if (!result.IsError)
                     {
                         NotificationService.Notify(NotificationSeverity.Success, "Commune one record deleted successful.");
                         await GetCommunes(searchText);
                     }
                     else
                     {
-                        NotificationService.Notify(NotificationSeverity.Error, result.ErrMessage);
+                        NotificationService.Notify(NotificationSeverity.Error, result.FirstError.Description);
                     }
                 }
             }

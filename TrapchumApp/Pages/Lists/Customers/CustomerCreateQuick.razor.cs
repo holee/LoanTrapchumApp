@@ -12,25 +12,14 @@ using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Lists.Customers
 {
-    public partial class CustomerCreateQuick
+    public partial class CustomerCreateQuick(INationalityServiceImpl ationalityService,ISalutationServiceImpl salutationService)
     {
-        private readonly IFileUploadServiceImp _fileUploadService;
-        private readonly INationalityServiceImpl _nationalityService;
-        private readonly IOccupationServiceImpl _occupationService;
-        private readonly ISalutationServiceImpl _salutationService; 
-        public CustomerCreateQuick(IFileUploadServiceImp fileUploadService, INationalityServiceImpl ationalityService, IOccupationServiceImpl occupationService, ISalutationServiceImpl salutationService)
-        {
-            _fileUploadService = fileUploadService;
-            _nationalityService = ationalityService;
-            _occupationService = occupationService;
-            _salutationService = salutationService;
-        }
         IEnumerable<string> Salutations = [];
         IEnumerable<ProvinceDto> Provinces = [];
         IEnumerable<string> Cities = [];
         IEnumerable<OcupationResponse> Occupations = [];
         IEnumerable<Country> Countries = [];
-        protected EntityCustomerCreate model = new();   
+        protected EntityCustomerCreate model = new();
         protected IEnumerable<DistrictDto> Districts = [];
         protected IEnumerable<CommuneDto> Communes = [];
         protected IEnumerable<VillageDto> Villages = [];
@@ -47,7 +36,7 @@ namespace TrapchumApp.Pages.Lists.Customers
             model.MarritalStatus = "Single";
             model.Nationality = "Khmer";
 
-            var rsp1 = await _salutationService.GetSalutions();
+            var rsp1 = await salutationService.GetSalutions();
 
             if (rsp1.IsSuccess)
             {
@@ -67,23 +56,23 @@ namespace TrapchumApp.Pages.Lists.Customers
 
         async Task GetAdditionalInformation()
         {
-            Nationalities = await _nationalityService.GetNationalities();
+            Nationalities = await ationalityService.GetNationalities();
 
             Provinces = await _addressService.GetsProvinces();
 
-            Occupations = await _employeeService!.GetOccupationsAsync("Position");
+            // Occupations = await _employeeService!.GetOccupationsAsync("Position");
 
             var rsp = await _addressService.GetCountries(105);
 
-            if (rsp.IsSuccess)
+            if (!rsp.IsError)
             {
-                Countries = rsp.Data ?? [];
+                Countries = rsp.Value;
             }
             Cities = await _addressService.GetCities();
         }
         private async Task GetSalutations()
         {
-            var salutations = await _salutationService.GetSalutions();
+            var salutations = await salutationService.GetSalutions();
 
             if (salutations.IsSuccess)
             {
@@ -130,7 +119,7 @@ namespace TrapchumApp.Pages.Lists.Customers
         {
             if (e.Code == "Enter")
             {
-                await _salutationService.AddSalution(new Salutation
+                await salutationService.AddSalution(new Salutation
                 {
                     Title = newSalution
                 });

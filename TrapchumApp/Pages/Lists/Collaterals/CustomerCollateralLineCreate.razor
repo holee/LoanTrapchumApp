@@ -1,4 +1,6 @@
 ﻿@using Applications.Features.Collaterals.Dtos
+@using Applications.Features.Documents.Command.AddDocument
+@using Applications.Features.Documents.Dto
 @using Domains.Models.Files
 @using System.Text.Json
 <EditForm Model="@baseModel" FormName="collateralLineCreate" OnValidSubmit="@HandleFormSubmit">
@@ -195,7 +197,7 @@
 
         var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
 
-        var fileModel = JsonSerializer.Deserialize<FileModel>(args.RawResponse!, options);
+        var fileModel = JsonSerializer.Deserialize<DocumentDto>(args.RawResponse!, options);
 
         if (fileModel is not null)
         {
@@ -203,6 +205,16 @@
             completionMessage = "Upload complete!";
 
             model.FileUrl = fileModel.FileUrl;
+
+            // var command = new AddDocumentCommand(new DocumentDtoCreate
+            // {
+            //     OriginalName = fileModel.OriginalName,
+            //     FileUrl = fileModel.FileUrl,
+            //     FileSize = fileModel.FileSize,
+            //     NewFileName = fileModel.FileName
+            // });
+
+            // _ = mediator.Send(command);
         }
         else
         {

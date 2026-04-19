@@ -31,7 +31,7 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
         IDbContextFactory<DataContext> contextFactory,
         ICurrentUserService currentUserService) : ILoanRequestService
 {
-    public async Task<ErrorOr<RequestResult>> CreateNewLoanRequestAsync(LoanRequest req, CancellationToken cancellationToken = default)
+    public async Task<ErrorOr<RequestResult>> CreateNewOrSaveLoanRequestAsync(LoanRequest req, CancellationToken cancellationToken = default)
     {
         logger.LogInformation("Creating loan request for CustomerRefId: {CustomerRefId}", req.CustomerRefId);
 
@@ -122,7 +122,7 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
 
             }
 
-            AddNotification(cxt, req, NotificationType.Request);
+            //AddNotification(cxt, req, NotificationType.Request);
 
             await cxt.SaveChangesAsync(cancellationToken);
 

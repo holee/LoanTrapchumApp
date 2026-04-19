@@ -7,16 +7,26 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Commons\Mappers\activities\**" />
+    <Compile Remove="Commons\Mappers\Employees\**" />
+    <Compile Remove="Commons\Mappers\LoanDisbursements\**" />
+    <Compile Remove="Commons\Mappers\NewFolder\**" />
+    <Compile Remove="Features\Addresses\Mappers\**" />
     <Compile Remove="Features\Addresses\UseCases\**" />
     <Compile Remove="Features\Addresses\Validations\**" />
     <Compile Remove="Features\Branches\Mappers\**" />
     <Compile Remove="Features\Currencies\Requests\**" />
     <Compile Remove="Features\Currencies\UseCases\**" />
     <Compile Remove="Features\Customers\Mappers\**" />
+    <Compile Remove="Features\Employees\Extensions\**" />
+    <Compile Remove="Features\Employees\Mappers\**" />
+    <Compile Remove="Features\Employees\Responses\**" />
     <Compile Remove="Features\LoanPayments\Enums\**" />
     <Compile Remove="Features\LoanPayments\Extensions\**" />
     <Compile Remove="Features\LoanPayments\Mappers\**" />
     <Compile Remove="Features\NewFolder1\**" />
+    <Compile Remove="Features\Vendors\Mapperes\**" />
+    <Compile Remove="Features\Vendors\UseCases\**" />
     <Compile Remove="Responses\Lists\Collaterals\**" />
     <Compile Remove="Responses\Transactions\**" />
     <Compile Remove="Responses\Vendors\**" />
@@ -24,16 +34,27 @@
     <Compile Remove="Responses\ViewModels\Collaterals\**" />
     <Compile Remove="Responses\ViewModels\Trans\**" />
     <Compile Remove="Responses\ViewModels\Users\**" />
+    <Compile Remove="Services\Customers\**" />
+    <EmbeddedResource Remove="Commons\Mappers\activities\**" />
+    <EmbeddedResource Remove="Commons\Mappers\Employees\**" />
+    <EmbeddedResource Remove="Commons\Mappers\LoanDisbursements\**" />
+    <EmbeddedResource Remove="Commons\Mappers\NewFolder\**" />
+    <EmbeddedResource Remove="Features\Addresses\Mappers\**" />
     <EmbeddedResource Remove="Features\Addresses\UseCases\**" />
     <EmbeddedResource Remove="Features\Addresses\Validations\**" />
     <EmbeddedResource Remove="Features\Branches\Mappers\**" />
     <EmbeddedResource Remove="Features\Currencies\Requests\**" />
     <EmbeddedResource Remove="Features\Currencies\UseCases\**" />
     <EmbeddedResource Remove="Features\Customers\Mappers\**" />
+    <EmbeddedResource Remove="Features\Employees\Extensions\**" />
+    <EmbeddedResource Remove="Features\Employees\Mappers\**" />
+    <EmbeddedResource Remove="Features\Employees\Responses\**" />
     <EmbeddedResource Remove="Features\LoanPayments\Enums\**" />
     <EmbeddedResource Remove="Features\LoanPayments\Extensions\**" />
     <EmbeddedResource Remove="Features\LoanPayments\Mappers\**" />
     <EmbeddedResource Remove="Features\NewFolder1\**" />
+    <EmbeddedResource Remove="Features\Vendors\Mapperes\**" />
+    <EmbeddedResource Remove="Features\Vendors\UseCases\**" />
     <EmbeddedResource Remove="Responses\Lists\Collaterals\**" />
     <EmbeddedResource Remove="Responses\Transactions\**" />
     <EmbeddedResource Remove="Responses\Vendors\**" />
@@ -41,16 +62,27 @@
     <EmbeddedResource Remove="Responses\ViewModels\Collaterals\**" />
     <EmbeddedResource Remove="Responses\ViewModels\Trans\**" />
     <EmbeddedResource Remove="Responses\ViewModels\Users\**" />
+    <EmbeddedResource Remove="Services\Customers\**" />
+    <None Remove="Commons\Mappers\activities\**" />
+    <None Remove="Commons\Mappers\Employees\**" />
+    <None Remove="Commons\Mappers\LoanDisbursements\**" />
+    <None Remove="Commons\Mappers\NewFolder\**" />
+    <None Remove="Features\Addresses\Mappers\**" />
     <None Remove="Features\Addresses\UseCases\**" />
     <None Remove="Features\Addresses\Validations\**" />
     <None Remove="Features\Branches\Mappers\**" />
     <None Remove="Features\Currencies\Requests\**" />
     <None Remove="Features\Currencies\UseCases\**" />
     <None Remove="Features\Customers\Mappers\**" />
+    <None Remove="Features\Employees\Extensions\**" />
+    <None Remove="Features\Employees\Mappers\**" />
+    <None Remove="Features\Employees\Responses\**" />
     <None Remove="Features\LoanPayments\Enums\**" />
     <None Remove="Features\LoanPayments\Extensions\**" />
     <None Remove="Features\LoanPayments\Mappers\**" />
     <None Remove="Features\NewFolder1\**" />
+    <None Remove="Features\Vendors\Mapperes\**" />
+    <None Remove="Features\Vendors\UseCases\**" />
     <None Remove="Responses\Lists\Collaterals\**" />
     <None Remove="Responses\Transactions\**" />
     <None Remove="Responses\Vendors\**" />
@@ -58,27 +90,19 @@
     <None Remove="Responses\ViewModels\Collaterals\**" />
     <None Remove="Responses\ViewModels\Trans\**" />
     <None Remove="Responses\ViewModels\Users\**" />
+    <None Remove="Services\Customers\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Commons\Mappers\activities\" />
-    <Folder Include="Commons\Mappers\Employees\" />
-    <Folder Include="Commons\Mappers\LoanDisbursements\" />
-    <Folder Include="Commons\Mappers\NewFolder\" />
     <Folder Include="Commons\Messages\Journals\" />
     <Folder Include="Commons\Messages\Leadgers\" />
     <Folder Include="Extensions\Identity\Constants\" />
-    <Folder Include="Features\Addresses\Mappers\" />
     <Folder Include="Features\Addresses\Queries\GetCountries\" />
     <Folder Include="Features\CashManagements\Validations\" />
     <Folder Include="Features\CashManagements\Requests\" />
     <Folder Include="Features\Collaterals\Commands\CreateCollaterals\" />
     <Folder Include="Features\Collaterals\Commands\DeleteCollaterals\" />
     <Folder Include="Features\CreditAgents\UseCases\" />
-    <Folder Include="Features\Documents\Dtos\" />
-    <Folder Include="Features\Employees\Extensions\" />
-    <Folder Include="Features\Employees\Mappers\" />
-    <Folder Include="Features\Employees\Responses\" />
     <Folder Include="Features\Expenses\Mapper\" />
     <Folder Include="Features\Identity\Users\Interfaces\" />
     <Folder Include="Features\Identity\Users\Mappers\" />
@@ -104,13 +128,9 @@
     <Folder Include="Features\Products\UseCases\" />
     <Folder Include="Features\Products\Validations\" />
     <Folder Include="Features\Settings\Responses\" />
-    <Folder Include="Features\Vendors\Interfaces\" />
-    <Folder Include="Features\Vendors\Mapperes\" />
-    <Folder Include="Features\Vendors\UseCases\" />
     <Folder Include="Requests\Identity\" />
     <Folder Include="Responses\Lists\Currency\" />
     <Folder Include="Responses\ViewModels\Loans\Payments\" />
-    <Folder Include="Services\Customers\" />
     <Folder Include="Validations\Loans\" />
   </ItemGroup>
 
@@ -119,22 +139,22 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="ActualLab.Fusion.Blazor" Version="12.0.59" />
+    <PackageReference Include="ActualLab.Fusion.Blazor" Version="12.3.25" />
     <PackageReference Include="Ardalis.Specification" Version="9.3.1" />
     <PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="9.3.1" />
     <PackageReference Include="ErrorOr" Version="2.0.1" />
     <PackageReference Include="FluentValidation" Version="12.1.1" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
-    <PackageReference Include="Humanizer.Core" Version="3.0.1" />
-    <PackageReference Include="Mapster" Version="7.4.0" />
-    <PackageReference Include="Mapster.DependencyInjection" Version="1.0.1" />
-    <PackageReference Include="Mapster.EFCore" Version="5.1.1" />
+    <PackageReference Include="Humanizer.Core" Version="3.0.10" />
+    <PackageReference Include="Mapster" Version="10.0.7" />
+    <PackageReference Include="Mapster.DependencyInjection" Version="10.0.7" />
+    <PackageReference Include="Mapster.EFCore" Version="10.0.7" />
     <PackageReference Include="MemoryPack" Version="1.21.4" />
     <PackageReference Include="MessagePack" Version="3.1.4" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.3.9" />
-    <PackageReference Include="QuestPDF" Version="2025.12.3" />
-    <PackageReference Include="ZiggyCreatures.FusionCache" Version="2.5.0" />
+    <PackageReference Include="QuestPDF" Version="2026.2.4" />
+    <PackageReference Include="ZiggyCreatures.FusionCache" Version="2.6.0" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,4 +1,8 @@
-﻿using Applications.Services.Files;
+﻿using Applications.Features.Documents.Command.AddDocument;
+using Applications.Features.Documents.Command.AddDocuments;
+using Applications.Features.Documents.Dto;
+using Applications.Services.Files;
+using Applications.Utils;
 using Domains.Models.Files;
 
 namespace TrapchumApp;
@@ -11,7 +15,9 @@ internal static class MapAdditinalEndpoints
 
         var uploadGroup = endpoints.MapGroup("/Upload");
 
-        uploadGroup.MapPost("/File", async (IFormFile file, IFileUploadServiceImp fileUploadService, IWebHostEnvironment env) =>
+        uploadGroup.MapPost("/File", async (IFormFile file,
+            IMediator mediator,
+            IWebHostEnvironment env) =>
         {
             if (file is null || file.Length == 0)
                 return Results.BadRequest("No file uploaded.");
@@ -42,9 +48,20 @@ internal static class MapAdditinalEndpoints
 
                 var fileUrl = $"/assets/docs/{newFileName}";
 
-                var fileModel = new FileModel(file.FileName, newFileName, file.Length, fileUrl);
+                var fileModel = new DocumentDtoCreate
+                {
+                    OriginalName = file.FileName,
+                    NewFileName = newFileName,
+                    FileSize = file.Length,
+                    FileUrl = fileUrl
+                };
 
-                return Results.Ok(fileModel);
+                var command = new AddDocumentCommand(fileModel);
+
+                var result = await mediator.Send(command);
+
+                return Results.Ok(result.Value);
+
             }
             catch (Exception ex)
             {
@@ -55,10 +72,15 @@ internal static class MapAdditinalEndpoints
         }).DisableAntiforgery();
 
 
-        uploadGroup.MapPost("/Files", async (IFormFileCollection files,IWebHostEnvironment env) =>
+        uploadGroup.MapPost("/Files", async (IFormFileCollection files,
+            IWebHostEnvironment env,
+            IMediator mediator,
+            ILogger<Program> logger) =>
         {
 
-            List<FileModel> uploadedFiles = new List<FileModel>();
+            logger.LogInformation("Received {FileCount} files for upload.", files?.Count ?? 0);
+
+            List<DocumentDtoCreate> uploadedFiles = new List<DocumentDtoCreate>();
 
             if (files is null || files.Count == 0)
                 return Results.BadRequest("No file uploaded.");
@@ -88,18 +110,97 @@ internal static class MapAdditinalEndpoints
 
                     var fileUrl = $"/assets/docs/{newFileName}";
 
-                    var fileModel = new FileModel(file.FileName, newFileName, file.Length, fileUrl);
+                    var fileModel = new DocumentDtoCreate
+                    {
+                        OriginalName = file.FileName,
+                        NewFileName = newFileName,
+                        FileSize = file.Length,
+                        FileUrl = fileUrl
+                    };
 
                     uploadedFiles.Add(fileModel);
                 }
 
-                return Results.Ok(uploadedFiles);
+                var command = new AddDocumentsCommand(uploadedFiles);
+
+                var result = await mediator.Send(command);
+
+                logger.LogInformation("Successfully uploaded {UploadedCount} files.", uploadedFiles.Count);
+
+                return Results.Ok(result);
             }
             catch (Exception ex)
             {
+
+                logger.LogError(ex, "Error uploading files: {ErrorMessage}", ex.Message);
+
                 return Results.Problem(
                     detail: $"Error uploading file: {ex.Message}",
                     statusCode: 500);
+            }
+        }).DisableAntiforgery();
+
+
+
+
+
+        uploadGroup.MapPost("/Customers/Profiles", async (IFormFile file,
+            IMediator mediator,
+            IWebHostEnvironment env,
+            ILogger<Program> logger) =>
+        {
+            if (file is null || file.Length == 0)
+            {
+                logger.LogWarning("No file uploaded.");
+                return Results.BadRequest("No file uploaded.");
+            }
+            const long maxFileSize = 10L * 1024 * 1024; // 10 MB
+
+            if (file.Length > maxFileSize)
+                return Results.BadRequest("File size exceeds 10 MB.");
+
+            logger.LogInformation("Received file {FileName} for upload.", file.FileName);
+
+            try
+            {
+
+                var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+
+                var permittedExtensions = new[] { ".jpg", ".png" };
+
+                if (!permittedExtensions.Contains(extension))
+                    return Results.BadRequest("Invalid file type. Only JPG and PNG files are allowed.");
+
+                var newFileName = $"{Guid.NewGuid()}{extension}";
+
+                var destinationPath = Path.Combine(env.WebRootPath, "assets/profiles");
+
+                using var fileStream = new FileStream(Path.Combine(destinationPath, newFileName), FileMode.Create);
+
+                await file.CopyToAsync(fileStream);
+
+                var fileUrl = $"/assets/profiles/{newFileName}";
+
+                var fileModel = new DocumentDtoCreate
+                {
+                    OriginalName = file.FileName,
+                    NewFileName = newFileName,
+                    FileSize = file.Length,
+                    FileUrl = fileUrl
+                };
+
+                var command = new AddDocumentCommand(fileModel);
+
+                var result = await mediator.Send(command);
+
+                return Results.Ok(result.Value);
+
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error uploading file: {ErrorMessage}", ex.Message);
+
+                return Results.Problem(detail: $"Error uploading file: {ex.Message}", statusCode: 500);
             }
         }).DisableAntiforgery();
 

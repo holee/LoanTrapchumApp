@@ -1,0 +1,13 @@
+﻿<RadzenStack AlignItems="AlignItems.Center"
+             JustifyContent="JustifyContent.Center"
+             Style="min-height:20rem;">
+    <RadzenProgressBarCircular ShowValue="false"
+                               Mode="ProgressBarMode.Indeterminate"
+                               Size="ProgressBarCircularSize.Medium" />
+    <RadzenText TextStyle="TextStyle.Body2"
+                Style="font-family:'Khmer OS Siemreap'"
+                class="rz-color-base-600">@Text</RadzenText>
+</RadzenStack>
+@code {
+    [Parameter] public string? Text { get; set; } = "កំពុងផ្ទុកសំណើរកម្ចី...";
+}

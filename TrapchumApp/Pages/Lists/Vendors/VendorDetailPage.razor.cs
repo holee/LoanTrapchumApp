@@ -1,0 +1,52 @@
+using Applications.Responses.ViewModels.Vendors;
+using Applications.Services.Lists;
+using Applications.Services.Lists;
+using Microsoft.AspNetCore.Components;
+
+namespace TrapchumApp.Pages.Lists.Vendors
+{
+    public partial class VendorDetailPage
+    {
+        private readonly IVendorServiceImpl VendorService;
+
+        public VendorDetailPage(IVendorServiceImpl vendorService)
+        {
+            VendorService = vendorService;
+        }
+
+        VendorVm? model { get; set; } = new();
+        [Parameter] public string? Id { get; set; }
+        [Parameter] public EventCallback<int> Closed { get; set; }
+        [Parameter] public EventCallback<string> OnEdit { get; set; } 
+        protected async Task CloseTab()
+        {
+            await Closed.InvokeAsync(3);
+        }
+        async Task ClickEdit()
+        {
+            await OnEdit.InvokeAsync(Id);
+        }
+
+        protected override async Task OnInitializedAsync()
+        {
+            await GetVendorById(Id);
+
+            await base.OnInitializedAsync();
+        }
+
+
+        async Task GetVendorById(string? id)
+        {
+            var rsp =await VendorService.GetVendorByIdAsync(id);
+
+            if (rsp.IsSuccess)
+            {
+                model = rsp.Data;
+            }
+            else
+            {
+                model = new();
+            }
+        }
+    }
+}

@@ -47,6 +47,7 @@ public partial class CustomerDetails(ILogger<CustomerDetails> logger)
         catch (Exception ex)
         {
             logger.LogError(ex, ex.Message);
+
             _isLoading = false;
         }
         finally

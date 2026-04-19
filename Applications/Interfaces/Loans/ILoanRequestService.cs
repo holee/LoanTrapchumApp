@@ -13,7 +13,7 @@ namespace Applications.Interfaces.Loans
     public interface ILoanRequestService
     {
         Task<ErrorOr<string>> ChangedLoanRequestAsync(LoanChangeStatusDtoCreate req);
-        Task<ErrorOr<RequestResult>> CreateNewLoanRequestAsync(LoanRequest request, CancellationToken cancellationToken = default);
+        Task<ErrorOr<RequestResult>> CreateNewOrSaveLoanRequestAsync(LoanRequest request, CancellationToken cancellationToken = default);
         Task<ErrorOr<RequestResult>> SaveLoanRequestAsync(LoanRequest req, CancellationToken cancellationToken = default);
         Task<ErrorOr<RequestResult>> ApprovedLoanRequestAsync(AproveLoanDtoCreate req, CancellationToken cancellationToken = default);
         Task<ErrorOr<RequestResult>> RecheckedLoanRequestAsync(RecheckedRequestDtoCreate req, CancellationToken cancellationToken = default);

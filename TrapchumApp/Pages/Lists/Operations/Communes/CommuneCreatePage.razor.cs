@@ -9,12 +9,12 @@ namespace TrapchumApp.Pages.Lists.Operations.Communes
     public partial class CommuneCreatePage
     {
 
-        private readonly IDistrictService districtService;
-        private readonly ICommuneService communeService;
+        private readonly IAddressService districtService;
+        private readonly IAddressService communeService;
 
-        public CommuneCreatePage(IDistrictService districtService, ICommuneService communeService)
+        public CommuneCreatePage(IAddressService communeService)
         {
-            this.districtService = districtService;
+            this.districtService = communeService;
             this.communeService = communeService;
         }
         [Parameter] public int? Id { get; set; } 
@@ -24,11 +24,11 @@ namespace TrapchumApp.Pages.Lists.Operations.Communes
         {
             try
             {
-                var results = await districtService.GetAllAsync(null);
-                if (results.IsSuccess)
+                var results = await districtService.GetAllDistrictsAsync(null);
+                if (!results.IsError)
                 {
 
-                    districts = results.Data!.ToList();
+                    districts = results.Value.ToList();
                     model.DistrictRefId = Id ?? 0;
                 }
             }
@@ -44,16 +44,16 @@ namespace TrapchumApp.Pages.Lists.Operations.Communes
             try
             {
 
-                var response = await communeService.CreateAsync(model);
+                var response = await communeService.CreateCommuneAsync(model);
 
-                if (response!.IsSuccess)
+                if (!response.IsError)
                 {
                     NotificationService.Notify(NotificationSeverity.Success, "Commune new record was created successful.");
                     DialogService.Close(true);
                 }
                 else
                 {
-                    NotificationService.Notify(NotificationSeverity.Warning, response.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Warning, response.FirstError.Description);
                 }
             }
             catch (Exception ex)

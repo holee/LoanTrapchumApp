@@ -1,4 +1,4 @@
-﻿using Applications.Features.OtherNames;
+﻿using Applications.Features.OtherNames.Dto;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Vendors;

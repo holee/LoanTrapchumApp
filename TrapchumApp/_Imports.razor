@@ -16,7 +16,6 @@
 @using Applications.Features.Currencies
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
-@using Applications.Features.Employees.Interfaces
 @using Applications.Features.LoanRequests.Interfaces
 @using Applications.Features.LoanRequests.UseCases
 @using Applications.Responses.ViewModels.Auths
@@ -64,12 +63,10 @@
 @inject TooltipService tooltipService
 @inject IdentityRedirectManager RedirectManager
 @inject IAddressServiceImpl _addressService
-@inject IEmployeeServiceImpl _employeeService
 @inject ICustomerServiceImpl _customerService
 @inject ICurrencyServiceImpl _curService
 @inject IUserServiceImpl _userService
 @inject IMediator mediator
-@inject LoadingTrackerService Tracker
 @inject NotificationServices _notiService
 @inject ToastService _toastService
 @using Applications.Enumerations

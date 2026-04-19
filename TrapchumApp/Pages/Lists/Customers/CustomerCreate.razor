@@ -1,37 +1,35 @@
 ﻿@page "/App/Customers/CreateNew"
 @using Applications.Features.LoanRequests.Interfaces
-<Containers Fluid>
-    <EditForm Model="model" @ref="@editForm">
-        <FluentValidationValidator DisableAssemblyScanning="true"></FluentValidationValidator>
-        <CreateCustomerInfo Model="@model" />
-        <CustomerAddress Cities="@Cities"
-                         model="@model"
-                         Countries="@Countries" />
-        <RadzenStack Orientation="Orientation.Horizontal"
-                     AlignItems="AlignItems.Center"
-                     Gap="1rem"
-                     class="rz-mt-2"
-                     JustifyContent="JustifyContent.End">
-            <RadzenButton Size="ButtonSize.ExtraSmall"
-                          ButtonStyle="ButtonStyle.Primary"
-                          ButtonType="ButtonType.Button"
-                          Text="Save & New"
-                          Click="@SaveAndNew"
-                          Icon="save" />
-            <RadzenButton Size="ButtonSize.ExtraSmall"
-                          ButtonStyle="ButtonStyle.Success"
-                          ButtonType="ButtonType.Button"
-                          Text="Save & Close"
-                          Click="@SaveAndClose"
-                          Icon="save" />
-            <RadzenButton Click="Close"
-                          Size="ButtonSize.ExtraSmall"
-                          Text="Close"
-                          ButtonStyle="ButtonStyle.Danger"
-                          Icon="cancel" />
-        </RadzenStack>
-    </EditForm>
-</Containers>
+@attribute [StreamRendering]
+
+<EditForm Model="model" @ref="@editForm">
+    <FluentValidationValidator DisableAssemblyScanning="true"></FluentValidationValidator>
+    <CreateCustomerInfo Model="@model" />
+    <CustomerAddress model="@model"/>
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 AlignItems="AlignItems.Center"
+                 Gap="1rem"
+                 class="rz-mt-2"
+                 JustifyContent="JustifyContent.End">
+        <RadzenButton Size="ButtonSize.ExtraSmall"
+                      ButtonStyle="ButtonStyle.Primary"
+                      ButtonType="ButtonType.Button"
+                      Text="Save & New"
+                      Click="@SaveAndNew"
+                      Icon="save" />
+        <RadzenButton Size="ButtonSize.ExtraSmall"
+                      ButtonStyle="ButtonStyle.Success"
+                      ButtonType="ButtonType.Button"
+                      Text="Save & Close"
+                      Click="@SaveAndClose"
+                      Icon="save" />
+        <RadzenButton Click="Close"
+                      Size="ButtonSize.ExtraSmall"
+                      Text="Close"
+                      ButtonStyle="ButtonStyle.Danger"
+                      Icon="cancel" />
+    </RadzenStack>
+</EditForm>
 
 @code {
 

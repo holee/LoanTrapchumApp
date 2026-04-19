@@ -1,5 +1,5 @@
 using Applications.Features.Employees.Dto;
-using Applications.Features.OtherNames;
+using Applications.Features.OtherNames.Dto;
 using Domains.Models.Lists;
 using Mapster;
 
