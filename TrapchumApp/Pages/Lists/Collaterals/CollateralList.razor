@@ -1,11 +1,14 @@
-﻿@attribute [Authorize]
-<PageTitle>Collateral</PageTitle>
+﻿@using Applications.Features.Collaterals.Dtos
+@attribute [Authorize]
+<PageTitle>Collaterals</PageTitle>
 <RadzenProgressBar Value="100" Visible="IsProgress" ProgressBarStyle="ProgressBarStyle.Info" Style="height:1px" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
-<RadzenTabs @ref="tabs" RenderMode="TabRenderMode.Server" Change="IndexChanged" @bind-SelectedIndex="selectedIndex">
+<RadzenTabs @ref="tabs" RenderMode="TabRenderMode.Client" SelectedIndex="@selectedIndex" SelectedIndexChanged="IndexChanged">
     <Tabs>
         <RadzenTabsItem Text="Collaterals" Icon="reorder">
             <GridToolbar SearchChanged="OnSearch">
-
+                <LeftChildren>
+                    <AddButton OnClick="@CreateCollateralTab" Title="Add Collateral" Icon="@IconNames.Add" />
+                </LeftChildren>
             </GridToolbar>
             <RadzenDataGrid Responsive
                             GridLines="DataGridGridLines.Horizontal"
@@ -20,6 +23,8 @@
                             PageSizeOptions="@StorageConstant.PageSizeOptions"
                             PagerHorizontalAlign="HorizontalAlign.Right"
                             PageSizeChanged="@PageSizeChanged"
+                            TItem="VCollateral"
+                            CellContextMenu="@ShowContextMenu"
                             Data="@Collaterals">
                 <Columns>
                     <RadzenDataGridColumn Width="5rem" TextAlign="TextAlign.Center" Title="#" Property="CustomerId" Context="c">
@@ -39,32 +44,81 @@
                             <RadzenButton Size="ButtonSize.ExtraSmall"
                                           Icon="more_vert"
                                           Variant="Variant.Text"
-                                          Click="@((args)=>ShowContextMenuWithContent(args,c.CustomerId))" />
+                                          Click="@((args)=>ShowContextMenuWithContent(args, c))" />
                         </Template>
                     </RadzenDataGridColumn>
                 </Columns>
             </RadzenDataGrid>
         </RadzenTabsItem>
-        <RadzenTabsItem Text="Details" Visible="IsShowDetails" Icon="info">
-            <Template>
-                <CloseTabButton Title="Details" Closed="()=>CloseDetails(1)" />
-            </Template>
-            <ChildContent>
-                <CollateralDetail CustomerId="@CustomerId" Close="()=>CloseDetails(1)" />
-            </ChildContent>
-        </RadzenTabsItem>
+        @foreach (var tab in _tabs)
+        {
+            <RadzenTabsItem Icon="@tab.Icon" Text="@tab.Title" @key="@tab.Key">
+                <Template>
+                    <ClosedTab Title="@tab.Title"
+                               TabId="@tab.Key"
+                               Closed="(() => CloseTab(tab.Key))" />
+                </Template>
+                <ChildContent>
+                    @tab.Content
+                </ChildContent>
+            </RadzenTabsItem>
+        }
     </Tabs>
 </RadzenTabs>
 @code {
-    void ShowContextMenuWithContent(MouseEventArgs args, string? id)
-    { 
-        ContextMenuService.Open(args, ds =>
-    @<RadzenMenu Style="font-size:0.8rem;"> 
-        <RadzenMenuItem Click="@(() => AddDetailsTab(id))" Icon="info" Text="Details" Value="@id"></RadzenMenuItem>
-        <RadzenMenuItem Click="@(() => Delete(id))" Icon="delete" Text="Delete" Value="@id"></RadzenMenuItem>
-    </RadzenMenu>
-    );
+    void ShowContextMenuWithContent(MouseEventArgs args, VCollateral c)
+    {
+        ContextMenuService.Open(args, new List<ContextMenuItem>
+        {
+            new ContextMenuItem { Text = "Details", Icon = "info", Value = "1" },
+            new ContextMenuItem { Text = "Add Collateral", Icon = "add", Value = "2" },
+            new ContextMenuItem { Text = "Delete", Icon = "delete", Value = "3" }
+        }, (e) =>
+        {
+            ContextMenuService.Close();
+            HandleMenuAction(e, c.CustomerId);
+        });
     }
 
+    void ShowContextMenu(DataGridCellMouseEventArgs<VCollateral> args)
+    {
+        if (args.Data is null) return;
 
+        ContextMenuService.Open(args, new List<ContextMenuItem>
+        {
+            new ContextMenuItem { Text = "Details", Icon = "info", Value = "1" },
+            new ContextMenuItem { Text = "Add Collateral", Icon = "add", Value = "2" },
+            new ContextMenuItem { Text = "Delete", Icon = "delete", Value = "3" }
+        }, (e) =>
+        {
+            ContextMenuService.Close();
+
+            HandleMenuAction(e, args.Data.CustomerId);
+        });
+    }
+
+    void HandleMenuAction(MenuItemEventArgs e, string? customerId)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int value))
+        {
+            if (value == 1)
+            {
+                AddDetailsTab(customerId);
+
+                return;
+            }
+            if (value == 2)
+            {
+                CreateCollateralTabForCustomer(customerId);
+
+                return;
+            }
+            if (value == 3)
+            {
+                Delete(customerId);
+
+                return;
+            }
+        }
+    }
 }

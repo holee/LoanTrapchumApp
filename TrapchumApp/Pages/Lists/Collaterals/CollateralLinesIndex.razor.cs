@@ -1,8 +1,10 @@
+using Applications.Features.Collaterals.Commands.DeleteCollateralLines;
 using Applications.Features.Collaterals.Dtos;
 using Applications.Features.Collaterals.Queries.GetCollateralLinesAsPaging;
 using Applications.Features.Customers.Queries.GetCustomerAsPaging;
 using Applications.Features.Customers.Response;
 using Applications.Responses.Paginations;
+using TrapchumApp.Pages;
 
 namespace TrapchumApp.Pages.Lists.Collaterals;
 
@@ -18,9 +20,9 @@ public partial class CollateralLinesIndex
     private string _customerId = string.Empty;
     private string _sortColumn = nameof(VCollateralLines.LoanStatus);
     private bool _sortDescending = false;
+
     protected override async Task OnInitializedAsync()
     {
-
         await GetCollateralLines(string.Empty, _filterText);
         await GetCustomers(string.Empty);
         await base.OnInitializedAsync();
@@ -41,7 +43,6 @@ public partial class CollateralLinesIndex
         {
             await GetCollateralLines(_customerId, _filterText);
         }
-
     }
 
     async Task OnCustomerChange(object? arg)
@@ -51,6 +52,7 @@ public partial class CollateralLinesIndex
             await GetCollateralLines(string.Empty, _filterText);
         }
     }
+
     async Task SelectedItemChanged(object? arg)
     {
         if (arg is not null)
@@ -70,9 +72,7 @@ public partial class CollateralLinesIndex
         _filterText = e;
 
         await GetCollateralLines(e);
-
     }
-
 
     void PageSizeChanged(int page)
     {
@@ -80,30 +80,27 @@ public partial class CollateralLinesIndex
         _skip = 0;
     }
 
-    async void AddCollateral()
+    void AddCollateralTab()
     {
         if (string.IsNullOrEmpty(_customerId))
         {
-            NotificationService.Notify(NotificationSeverity.Error, "Please selected customer first");
+            NotificationService.Notify(NotificationSeverity.Error, "Please select a customer first");
             return;
         }
 
-        var parameters = new Dictionary<string, object?> {
+        var tabKey = $"create_{_customerId}_{Guid.NewGuid():N}";
 
-            {"CollateralId", _customerId }
+        RenderFragment content = builder =>
+        {
+            builder.OpenComponent<CustomerCollateralLineCreate>(0);
+            builder.AddAttribute(1, "CollateralId", _customerId);
+            builder.SetKey(tabKey);
+            builder.CloseComponent();
         };
 
-        var options = new DialogOptions
-        {
-            Width = "50vw"
-        };
-
-        var dia = await DialogService.OpenAsync<CustomerCollateralLineCreate>("Add Collateral", parameters, options);
-
-        if (dia is bool result && result == true)
-        {
-            await GetCollateralLines(_customerId, _filterText);
-        }
+        _tabs.Add(new CustomTab(tabKey, "Add Collateral", TabActions.Create, content));
+        selectedIndex = _tabs.Count;
+        StateHasChanged();
     }
 
     private async Task GetCustomers(string? filter)
@@ -115,7 +112,6 @@ public partial class CollateralLinesIndex
         var rsp = await mediator.Send(query);
 
         _customers = rsp.Items ?? [];
-
     }
 
     protected async Task GetCollateralLines(string? customerId = null, string? filter = null)
@@ -146,7 +142,4 @@ public partial class CollateralLinesIndex
             Console.WriteLine(ex.Message);
         }
     }
-
-
-
 }

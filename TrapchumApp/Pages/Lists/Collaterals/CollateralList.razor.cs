@@ -22,12 +22,8 @@ public partial class CollateralList
     List<int> SelectedRow = [10, 20, 50, 100];
     bool CustomerInActive = false;
     private bool IsLoading = true;
-    bool IsShowDetails = false;
-    bool IsShowAdd = false;
     bool IsProgress = false;
     RadzenTabs? tabs;
-    List<TabItems> tabItems = [];
-    int tabIndex = 1;
     int selectedIndex = 0;
     string CustomerId = string.Empty;
     VCustomerCollaterals? Collateral { get; set; } = new();
@@ -42,6 +38,8 @@ public partial class CollateralList
     IEnumerable<CollateralSubTypeResponse> collateralProperties = [];
     IEnumerable<CollateralSubTypeResponse> collateralPersonals = [];
 
+    private List<CustomTab> _tabs = [];
+
     public CollateralList(ICollateralsServiceImpl collateralNewService, ICustomerServiceImpl customerService)
     {
         _colService = collateralNewService;
@@ -51,8 +49,6 @@ public partial class CollateralList
     async Task SearchCollateral()
     {
         await GetCollaterals();
-
-        
     }
 
     void PageSizeChanged(int page)
@@ -62,50 +58,94 @@ public partial class CollateralList
         pageIndex = 0;
     }
 
-
     void Delete(string? customerId) { }
 
-
-    void CloseDetails(int index)
-    {
-        if (index == 1 && IsShowDetails)
-        {
-            selectedIndex = 0;
-            
-            IsShowDetails = false;
-        }
-    }
     void AddDetailsTab(string? customerId)
     {
-
         ContextMenuService.Close();
 
-        try
+        if (string.IsNullOrEmpty(customerId)) return;
+
+        var existingTabIndex = _tabs.FindIndex(t => t.Key == customerId);
+
+        if (existingTabIndex != -1)
         {
-            CustomerId = customerId!;
-
-            IsShowDetails = true;
-
-            selectedIndex = 1;
-
-        }
-        catch (Exception ex)
-        {
-            NotificationService.Notify(NotificationSeverity.Error, "", ex.InnerException!.Message);
-
+            selectedIndex = existingTabIndex + 1;
+            return;
         }
 
+        RenderFragment childContent = builder =>
+        {
+            builder.OpenComponent(0, typeof(CollateralDetail));
+            builder.AddAttribute(1, "CustomerId", customerId);
+            builder.AddAttribute(2, "Close", EventCallback.Factory.Create(this, () =>
+            {
+                CloseTab(customerId);
+            }));
+            builder.CloseComponent();
+        };
+
+        var newTab = new CustomTab(customerId, "Details", TabActions.Details, childContent);
+
+        _tabs.Add(newTab);
+
+        selectedIndex = _tabs.Count;
+
+        StateHasChanged();
     }
+
+    void CreateCollateralTab()
+    {
+        CreateCollateralTabForCustomer(null);
+    }
+
+    void CreateCollateralTabForCustomer(string? customerId = null)
+    {
+        ContextMenuService.Close();
+
+        var newTabId = Guid.NewGuid().ToString("N");
+
+        RenderFragment childContent = builder =>
+        {
+            builder.OpenComponent(0, typeof(CustomerCollateralLineCreate));
+
+            if (!string.IsNullOrEmpty(customerId))
+            {
+                builder.AddAttribute(1, "CollateralId", customerId);
+            }
+            builder.SetKey(newTabId);
+
+            builder.CloseComponent();
+        };
+
+        var newTab = new CustomTab(newTabId, "Add Collateral", TabActions.Create, childContent);
+
+        _tabs.Add(newTab);
+
+        selectedIndex = _tabs.Count;
+
+        StateHasChanged();
+    }
+
+    void CloseTab(string? id)
+    {
+        var tab = _tabs.FirstOrDefault(t => t.Key == id);
+
+        if (tab != null)
+        {
+            var idx = _tabs.IndexOf(tab);
+
+            _tabs.Remove(tab);
+
+            selectedIndex = Math.Max(0, idx);
+
+            StateHasChanged();
+        }
+    }
+
     void IndexChanged(int index)
     {
         selectedIndex = index;
-    }
-
-    void RemoveTab()
-    {
-        IsShowAdd = false;
-        selectedIndex = 0;
-        StateHasChanged();
     }
 
     int pageIndex = 0;

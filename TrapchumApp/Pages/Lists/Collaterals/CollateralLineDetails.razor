@@ -2,70 +2,91 @@
 @using Applications.Features.Collaterals.Queries.GetCollateralLineDetails
 @using Applications.Features.Loans.Dtos.Responses
 @using Applications.Utils
-@attribute [StreamRendering]
-<RadzenStack Orientation="Orientation.Horizontal" class="@Styles.Mb2" AlignItems="AlignItems.Center">
-    <table class="table table-sm">
-        <tr>
-            <th class="rz-w-25">Reference No</th>
-            <td>@_collateralLine?.ReferenceNo</td>
-        </tr>
-        <tr>
-            <th class="rz-w-25">Type Name</th>
-            <td>@_collateralLine?.TypeName</td>
-        </tr>
-        <tr>
-            <th class="rz-w-25">Owner Name</th>
-            <td>@_collateralLine?.OwnerName</td>
-        </tr>
-        <tr>
-            <th class="rz-w-25">Location</th>
-            <td>@_collateralLine?.Location</td>
-        </tr>
-        <tr>
-            <th class="rz-w-25">Quantity</th>
-            <td class="rz-text-end">@_collateralLine?.Quantity</td>
-        </tr>
-        <tr>
-            <th class="rz-w-25">Market Price</th>
-            <td class="rz-text-end">@_collateralLine?.MarketPrice.Format()</td>
-        </tr>
-        <tr>
-            <th class="w-25">Hot Price</th>
-            <td class="rz-text-end">@_collateralLine?.HotPrice.Format()</td>
-        </tr>
-        <tr>
-            <th class="rz-w-25">Pawn Price</th>
-            <td class="rz-text-end">@_collateralLine?.PawnPrice.Format()</td>
-        </tr>
-        <tr>
-            <th class="rz-w-25">Description</th>
-            <td class="rz-text-end">@_collateralLine?.Description</td>
-        </tr>
-    </table>
+<PageTitle>Collateral Details</PageTitle>
+<RadzenCard Variant="Variant.Outlined" class="@Styles.Mb2">
+    <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-mb-1">
+        <RadzenIcon Icon="info" /> Collateral Information
+    </RadzenText>
+    <RadzenRow Gap="1rem" RowGap="0.5rem">
+        <RadzenColumn SizeMD="6">
+            <RadzenStack Gap="0.25rem">
+                <RadzenRow AlignItems="AlignItems.Center">
+                    <RadzenColumn Size="5"><RadzenText TextStyle="TextStyle.Body2" class="rz-text-secondary-color"><strong>Reference No</strong></RadzenText></RadzenColumn>
+                    <RadzenColumn Size="7"><RadzenText TextStyle="TextStyle.Body2">@_collateralLine?.ReferenceNo</RadzenText></RadzenColumn>
+                </RadzenRow>
+                <RadzenRow AlignItems="AlignItems.Center">
+                    <RadzenColumn Size="5"><RadzenText TextStyle="TextStyle.Body2" class="rz-text-secondary-color"><strong>Type Name</strong></RadzenText></RadzenColumn>
+                    <RadzenColumn Size="7"><RadzenText TextStyle="TextStyle.Body2">@_collateralLine?.TypeName</RadzenText></RadzenColumn>
+                </RadzenRow>
+                <RadzenRow AlignItems="AlignItems.Center">
+                    <RadzenColumn Size="5"><RadzenText TextStyle="TextStyle.Body2" class="rz-text-secondary-color"><strong>Owner Name</strong></RadzenText></RadzenColumn>
+                    <RadzenColumn Size="7"><RadzenText TextStyle="TextStyle.Body2">@_collateralLine?.OwnerName</RadzenText></RadzenColumn>
+                </RadzenRow>
+                <RadzenRow AlignItems="AlignItems.Center">
+                    <RadzenColumn Size="5"><RadzenText TextStyle="TextStyle.Body2" class="rz-text-secondary-color"><strong>Location</strong></RadzenText></RadzenColumn>
+                    <RadzenColumn Size="7"><RadzenText TextStyle="TextStyle.Body2">@_collateralLine?.Location</RadzenText></RadzenColumn>
+                </RadzenRow>
+                <RadzenRow AlignItems="AlignItems.Center">
+                    <RadzenColumn Size="5"><RadzenText TextStyle="TextStyle.Body2" class="rz-text-secondary-color"><strong>Quantity</strong></RadzenText></RadzenColumn>
+                    <RadzenColumn Size="7"><RadzenText TextStyle="TextStyle.Body2">@_collateralLine?.Quantity</RadzenText></RadzenColumn>
+                </RadzenRow>
+            </RadzenStack>
+        </RadzenColumn>
+        <RadzenColumn SizeMD="6">
+            <RadzenStack Gap="0.25rem">
+                <RadzenRow AlignItems="AlignItems.Center">
+                    <RadzenColumn Size="5"><RadzenText TextStyle="TextStyle.Body2" class="rz-text-secondary-color"><strong>Market Price</strong></RadzenText></RadzenColumn>
+                    <RadzenColumn Size="7"><RadzenText TextStyle="TextStyle.Body2" class="rz-text-align-right">@_collateralLine?.MarketPrice.Format()</RadzenText></RadzenColumn>
+                </RadzenRow>
+                <RadzenRow AlignItems="AlignItems.Center">
+                    <RadzenColumn Size="5"><RadzenText TextStyle="TextStyle.Body2" class="rz-text-secondary-color"><strong>Hot Price</strong></RadzenText></RadzenColumn>
+                    <RadzenColumn Size="7"><RadzenText TextStyle="TextStyle.Body2" class="rz-text-align-right">@_collateralLine?.HotPrice.Format()</RadzenText></RadzenColumn>
+                </RadzenRow>
+                <RadzenRow AlignItems="AlignItems.Center">
+                    <RadzenColumn Size="5"><RadzenText TextStyle="TextStyle.Body2" class="rz-text-secondary-color"><strong>Pawn Price</strong></RadzenText></RadzenColumn>
+                    <RadzenColumn Size="7"><RadzenText TextStyle="TextStyle.Body2" class="rz-text-align-right">@_collateralLine?.PawnPrice.Format()</RadzenText></RadzenColumn>
+                </RadzenRow>
+                <RadzenRow AlignItems="AlignItems.Center">
+                    <RadzenColumn Size="5"><RadzenText TextStyle="TextStyle.Body2" class="rz-text-secondary-color"><strong>Description</strong></RadzenText></RadzenColumn>
+                    <RadzenColumn Size="7"><RadzenText TextStyle="TextStyle.Body2">@_collateralLine?.Description</RadzenText></RadzenColumn>
+                </RadzenRow>
+            </RadzenStack>
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
 
-</RadzenStack>
+<RadzenText TextStyle="TextStyle.Subtitle1" class="rz-mb-1">
+    <RadzenIcon Icon="account_balance" /> Linked Loans
+</RadzenText>
 <RadzenDataGrid Data="@_items"
                 Responsive="true"
                 GridLines="DataGridGridLines.Both"
                 AllowAlternatingRows="true"
                 Density="Density.Compact"
                 RowRender="@OnRowRenderChanged"
+                EmptyText="No linked loans found."
                 TItem="VLoanDisbursments">
     <Columns>
         <RadzenDataGridColumn TextAlign="TextAlign.Center"
                               Width="4rem"
-                              Property="@nameof(VLoanDisbursments.Principle)" Title="#">
+                              Sortable="false"
+                              Filterable="false"
+                              Title="#">
             <Template>
                 @context.RowIndex
             </Template>
         </RadzenDataGridColumn>
-        <RadzenDataGridColumn TextAlign="TextAlign.Right" Property="@nameof(VLoanDisbursments.Principle)" Title="Principle" />
-        <RadzenDataGridColumn TextAlign="TextAlign.Right" Property="@nameof(VLoanDisbursments.InterestRate)" Title="Interest Rate" />
-        <RadzenDataGridColumn TextAlign="TextAlign.Right" Property="@nameof(VLoanDisbursments.PaidPrinciple)" Title="Paid Principle" />
-        <RadzenDataGridColumn TextAlign="TextAlign.Right" Property="@nameof(VLoanDisbursments.PaidInterest)" Title="Paid Interest" />
-        <RadzenDataGridColumn TextAlign="TextAlign.Right" Property="@nameof(VLoanDisbursments.OutStanding)" Title="OutStanding" />
-        <RadzenDataGridColumn TextAlign="TextAlign.Center" Property="@nameof(VLoanDisbursments.LoanStatus)" Title="Status" />
-        <RadzenDataGridColumn TextAlign="TextAlign.Center" Property="@nameof(VLoanDisbursments.LoanStatus)" Width="5rem" Title="Action">
+        <RadzenDataGridColumn TextAlign="TextAlign.Right" FormatString="{0:N2}" Property="@nameof(VLoanDisbursments.Principle)" Title="Principle" />
+        <RadzenDataGridColumn TextAlign="TextAlign.Right" FormatString="{0:N2}" Property="@nameof(VLoanDisbursments.InterestRate)" Title="Interest Rate" />
+        <RadzenDataGridColumn TextAlign="TextAlign.Right" FormatString="{0:N2}" Property="@nameof(VLoanDisbursments.PaidPrinciple)" Title="Paid Principle" />
+        <RadzenDataGridColumn TextAlign="TextAlign.Right" FormatString="{0:N2}" Property="@nameof(VLoanDisbursments.PaidInterest)" Title="Paid Interest" />
+        <RadzenDataGridColumn TextAlign="TextAlign.Right" FormatString="{0:N2}" Property="@nameof(VLoanDisbursments.OutStanding)" Title="Outstanding" />
+        <RadzenDataGridColumn TextAlign="TextAlign.Center" Property="@nameof(VLoanDisbursments.LoanStatus)" Title="Status">
+            <Template>
+                <RadzenBadge BadgeStyle="@GetStatusStyle(context.LoanStatus)" Text="@context.LoanStatus" />
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TextAlign="TextAlign.Center" Width="5rem" Sortable="false" Filterable="false" Title="Action">
             <Template>
                 <RadzenButton Size="ButtonSize.ExtraSmall" Variant="Variant.Text"
                               Icon="@IconNames.MoreVert" />
@@ -106,4 +127,12 @@
 
         args.Data.RowIndex = args.Index + 1;
     }
+
+    static BadgeStyle GetStatusStyle(string? status) => status switch
+    {
+        "Active" => BadgeStyle.Success,
+        "Closed" => BadgeStyle.Light,
+        "Overdue" => BadgeStyle.Danger,
+        _ => BadgeStyle.Info
+    };
 }
