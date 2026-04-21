@@ -10,6 +10,7 @@ public sealed class AddLoanRequestGuarantorCommandHandler(ILoanRequestService lo
     public async Task<ErrorOr<string>> Handle(AddLoanRequestGuarantorCommand command, CancellationToken cancellationToken)
     {
         var req = command.Request.MapTo();
+
         return await loanRequestService.AddLoanRequestGuarantorAsync(req);
     }
 }
