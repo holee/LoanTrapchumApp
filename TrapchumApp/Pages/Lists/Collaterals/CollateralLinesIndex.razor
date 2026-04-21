@@ -54,6 +54,8 @@
                             LoadData="@OnLoadData"
                             AllowColumnPicking="true"
                             CellContextMenu="@OnCellContextMenu"
+                            RowSelect="@OnRowSelection"
+                            Style="min-height:20rem;height:30rem;max-height:50rem;overflow:auto;"
                             Data="@_CollateralLines">
                 <HeaderTemplate>
                 </HeaderTemplate>
@@ -75,9 +77,12 @@
                     </RadzenDataGridColumn>
                     <RadzenDataGridColumn Visible="false"
                                           Property="@nameof(VCollateralLines.Description)" Title="Remark" />
-                    <RadzenDataGridColumn Property="@nameof(VCollateralLines.IsUsed)" Title="Used">
+                    <RadzenDataGridColumn Property="@nameof(VCollateralLines.IsUsed)" Title="Used"
+                                          Width="6rem" TextAlign="TextAlign.Center">
                         <Template Context="c">
-                            <RadzenCheckBox Value="@c.IsUsed" ReadOnly />
+                            <RadzenBadge BadgeStyle="@(c.IsUsed ? BadgeStyle.Danger : BadgeStyle.Success)"
+                                         Text="@(c.IsUsed ? "In Use" : "Free")"
+                                         Style="font-size:0.7rem;" />
                         </Template>
                     </RadzenDataGridColumn>
                     <RadzenDataGridColumn TextAlign="TextAlign.Right"
@@ -86,8 +91,24 @@
                                           Property="@nameof(VCollateralLines.HotPrice)" Title="Hot Price" />
                     <RadzenDataGridColumn TextAlign="TextAlign.Right"
                                           Property="@nameof(VCollateralLines.PawnPrice)" Title="Pawn Price" />
-                    <RadzenDataGridColumn TextAlign="TextAlign.Right"
-                                          Property="@nameof(VCollateralLines.LoanStatus)" Title="Loan" />
+                    <RadzenDataGridColumn Width="7rem" TextAlign="TextAlign.Center"
+                                          Sortable="false" Filterable="false"
+                                          Property="@nameof(VCollateralLines.LoanStatus)" Title="Loan">
+                        <Template Context="c">
+                            @if (!string.IsNullOrWhiteSpace(c.LoanStatus) && c.LoanStatus == "Active")
+                            {
+                                <RadzenBadge BadgeStyle="BadgeStyle.Danger"
+                                             Text="@c.LoanStatus"
+                                             Style="font-size:0.7rem;" />
+                            }
+                            else
+                            {
+                                <RadzenBadge BadgeStyle="BadgeStyle.Success"
+                                             Text="Closed"
+                                             Style="font-size:0.7rem;" />
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
                     <RadzenDataGridColumn Width="6rem"
                                           TextAlign="TextAlign.Center"
                                           Property="@nameof(VCollateralLines.CollateralId)" Title="Action" Context="c">
@@ -250,8 +271,17 @@
             return;
         }
 
-        NotificationService.Notify(NotificationSeverity.Success, "Deleted successfully");
+        //NotificationService.Notify(NotificationSeverity.Success, "Deleted successfully");
+
+        _toastService.ShowSuccess("Confirm","Deleted successfully");
+
         await GetCollateralLines(_customerId, _filterText);
+    }
+
+
+    void OnRowSelection(VCollateralLines line)
+    {
+       
     }
 }
 

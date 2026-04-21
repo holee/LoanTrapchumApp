@@ -17,12 +17,12 @@ public enum VendorTabType { Create, Edit, Detail }
 
 public record VendorTab(string Id, string Title, string Icon, VendorTabType Type, string? EntityId = null);
 
-public partial class IndexPage
+public partial class VendorIndexPage
 {
     readonly IVendorServiceImpl _vendorService;
     readonly IOtherNameService _otherNameService;
 
-    public IndexPage(IVendorServiceImpl vendorService, IOtherNameService otherNameService)
+    public VendorIndexPage(IVendorServiceImpl vendorService, IOtherNameService otherNameService)
     {
         _vendorService = vendorService;
         _otherNameService = otherNameService;

@@ -6,7 +6,7 @@ using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Identity.Roles
 {
-    public partial class Index
+    public partial class RoleIndexPage
     {
         private readonly IRoleService _roleService;
         private int pageIndex = 0;
@@ -19,7 +19,7 @@ namespace TrapchumApp.Pages.Identity.Roles
         private string sortField = "Name";
         private bool sortDescending = false;
         protected IEnumerable<RoleDto>? Roles = Enumerable.Empty<RoleDto>();
-        public Index(IRoleService roleService)
+        public RoleIndexPage(IRoleService roleService)
         {
             _roleService = roleService;
         }

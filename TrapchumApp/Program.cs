@@ -43,7 +43,7 @@ builder.Services.AddScoped<NotificationServices>();
 builder.Services.AddScoped<NotificationHubService>();
 builder.Services.AddToastService(options =>
 {
-    options.Position = ToastPosition.BottomLeft;
+    options.Position = ToastPosition.TopRight;
     options.ShowCloseButton = true;
     options.ShowProgressBar = true;
     options.NewestOnTop = true;
@@ -51,7 +51,7 @@ builder.Services.AddToastService(options =>
     options.PreventDuplicates = false;
 });
 builder.Services.AddSignalR();
-
+builder.Services.AddScoped<TrapchumApp.Components.Messageboxes.MessageBoxService>();
 builder.Services.AddSingleton<IAppNotificationService, AppNotificationService>();
 
 

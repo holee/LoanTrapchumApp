@@ -108,7 +108,7 @@ namespace TrapchumApp.Pages.Lists.Customers
             {
                 Resizable = false,
                 Draggable = true,
-            }, parameters: new Dictionary<string, object>
+            }, parameters: new Dictionary<string, object?>
             {
                 { "CustomerId", customerId! }
             });
@@ -121,7 +121,7 @@ namespace TrapchumApp.Pages.Lists.Customers
             {
                 Resizable = false,
                 Draggable = true,
-            }, parameters: new Dictionary<string, object>
+            }, parameters: new Dictionary<string, object?>
             {
                 { "CustomerId", customerId! }
             });
@@ -244,7 +244,9 @@ namespace TrapchumApp.Pages.Lists.Customers
             RenderFragment childContent = builer =>
             {
                 builer.OpenComponent(0, typeof(CustomerUpdateTab));
+
                 builer.AddAttribute(1, "CustomerId", id);
+
                 builer.AddAttribute(2, "Closed", EventCallback.Factory.Create(this, (int x) =>
                 {
                     CloseTab(editTabId);
@@ -295,27 +297,32 @@ namespace TrapchumApp.Pages.Lists.Customers
             RenderFragment childContent = builer =>
             {
                 builer.OpenComponent(0, typeof(CustomerNewCreate));
-                builer.AddAttribute(1, "CustomerModel", new EntityCustomerCreate());
-                builer.AddAttribute(2, "Closed", EventCallback.Factory.Create(this, (int x) =>
+
+                builer.AddAttribute(1, "Closed", EventCallback.Factory.Create(this, (int x) =>
                  {
                      CloseTab(newTabId);
                  }));
-                builer.AddAttribute(3, "UpdateState", EventCallback.Factory.Create(this, async (VCustomerList x) =>
+                builer.AddAttribute(2, "UpdateState", EventCallback.Factory.Create(this, async (VCustomerList x) =>
                 {
                     _lastRowId = x.CustomerId;
 
                     await _gridCustomer.Reload();
 
                 }));
+
                 builer.SetKey(newTabId);
+
                 builer.CloseComponent();
             };
 
             var newTab = new CustomerTab
             {
                 TabId = newTabId,
+
                 Title = "New Customer",
+
                 CustomerAction = CustomerAction.Create,
+
                 ChildContent = childContent,
             };
 

@@ -5,14 +5,14 @@ using Domains.Models.Lists;
 
 namespace TrapchumApp.Pages.Lists.OtherNames
 {
-    public partial class GuarantorEdit
+    public partial class GuarantorEditPage
     {
 
 
         private readonly IGuarantorServiceImpl _gService;
 
         private readonly ISalutationServiceImpl _salutationService;
-        public GuarantorEdit(IGuarantorServiceImpl gService, ISalutationServiceImpl salutationService)
+        public GuarantorEditPage(IGuarantorServiceImpl gService, ISalutationServiceImpl salutationService)
         {
             _gService = gService;
 

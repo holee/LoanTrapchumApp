@@ -10,12 +10,12 @@ using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Transactions.Loans.LoanProducts
 {
-    public partial class LoanProductList
+    public partial class LoanProductPage
     {
 
         private readonly ILoanProductServiceImpl _loanProductService;
 
-        public LoanProductList(ILoanProductServiceImpl loanProductService)
+        public LoanProductPage(ILoanProductServiceImpl loanProductService)
         {
             _loanProductService = loanProductService;
         }

@@ -1,14 +1,81 @@
-.dashboard-container {
-    color:#111111;
+/* ── Dashboard page wrapper ── */
+.db-page {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding: 0.5rem 0;
 }
 
-.title {
-    margin-bottom: 20px;
+/* ── Header ── */
+.db-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--rz-base-300, #e9ecef);
 }
 
-.cards {
+.db-header-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.db-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--rz-text-color, #111);
+}
+
+.db-subtitle {
+    font-size: 0.83rem;
+    color: var(--rz-text-secondary-color, #6c757d);
+}
+
+/* ── Stat cards grid ── */
+.db-cards {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 15px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.9rem;
+}
+
+/* ── Chart card ── */
+.db-chart-card {
+    padding: 1rem 1.25rem !important;
+    border-radius: 0.75rem !important;
+}
+
+.db-chart-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 0.75rem;
+    color: var(--rz-text-color, #222);
+}
+
+.db-chart-icon {
+    color: var(--rz-primary);
+}
+
+/* ── Period list ── */
+.db-period-list {
+    width: 100%;
+    border: none !important;
+    font-size: 0.85rem;
+}
+
+/* ── Responsive ── */
+@media (max-width: 1200px) {
+    .db-cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .db-cards {
+        grid-template-columns: 1fr;
+    }
 }
 

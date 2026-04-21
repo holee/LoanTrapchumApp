@@ -66,6 +66,7 @@
                                                         Data="@Salutations" />
                                         <RadzenTextBox @bind-Value="Model.AltName"
                                                        Style="flex:1;"
+                                                       AutoCompleteType="AutoCompleteType.Off"
                                                        Placeholder="ឈ្មោះខ្មែរ..." />
                                     </RadzenStack>
                                     <ValidationMessage For="@(() => Model.AltName)" />
@@ -79,6 +80,7 @@
                                 <RadzenColumn Size="12" SizeMD="9">
                                     <RadzenTextBox @bind-Value="Model.FirstName"
                                                    class="rz-w-100"
+                                                   AutoCompleteType="AutoCompleteType.Off"
                                                    Placeholder="First name..." />
                                     <ValidationMessage For="@(() => Model.FirstName)" />
                                 </RadzenColumn>
@@ -92,9 +94,11 @@
                                     <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
                                         <RadzenTextBox @bind-Value="Model.MiddleName"
                                                        Style="flex:1;"
+                                                       AutoCompleteType="AutoCompleteType.Off"
                                                        Placeholder="Middle..." />
                                         <RadzenTextBox @bind-Value="Model.LastName"
                                                        Style="flex:1;"
+                                                       AutoCompleteType="AutoCompleteType.Off"
                                                        Placeholder="Last Name..." />
                                     </RadzenStack>
                                     <ValidationMessage For="@(() => Model.LastName)" />
@@ -154,8 +158,8 @@
                                         <RadzenCheckBox TValue="bool?" @bind-Value="Model.IsActive" />
                                         <RadzenLabel Text="@(Model.IsActive == true ? "Active" : "Inactive")"
                                                      Style="@(Model.IsActive == true
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            ? "color:var(--rz-success);"
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            : "color:var(--rz-danger);")" />
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         ? "color:var(--rz-success);"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         : "color:var(--rz-danger);")" />
                                     </RadzenStack>
                                 </RadzenColumn>
                             </RadzenRow>
@@ -167,6 +171,7 @@
                                 <RadzenColumn Size="12" SizeMD="8">
                                     <RadzenTextBox @bind-Value="Model.Phone"
                                                    class="rz-w-100"
+                                                   AutoCompleteType="AutoCompleteType.Off"
                                                    Placeholder="Mobile phone..." />
                                 </RadzenColumn>
                             </RadzenRow>
@@ -178,6 +183,7 @@
                                 <RadzenColumn Size="12" SizeMD="8">
                                     <RadzenTextBox @bind-Value="Model.EmailAddress"
                                                    class="rz-w-100"
+                                                   AutoCompleteType="AutoCompleteType.Off"
                                                    Placeholder="Email address..." />
                                 </RadzenColumn>
                             </RadzenRow>
@@ -189,6 +195,7 @@
                                 <RadzenColumn Size="12" SizeMD="8">
                                     <RadzenTextBox @bind-Value="Model.IdCard"
                                                    class="rz-w-100"
+                                                   AutoCompleteType="AutoCompleteType.Off"
                                                    Placeholder="ID Card..." />
                                 </RadzenColumn>
                             </RadzenRow>
@@ -200,6 +207,7 @@
                                 <RadzenColumn Size="12" SizeMD="8">
                                     <RadzenTextBox @bind-Value="Model.PassportId"
                                                    class="rz-w-100"
+                                                   AutoCompleteType="AutoCompleteType.Off"
                                                    Placeholder="Passport..." />
                                 </RadzenColumn>
                             </RadzenRow>

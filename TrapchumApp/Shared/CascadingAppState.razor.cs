@@ -1,9 +1,7 @@
 ﻿using Applications.Extensions.Identity.Authorizations.Extensions;
 using Applications.Extensions.Identity.Policies;
-using Applications.Responses.ViewModels.Loans.Requests;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Domains.Models.Identity;
-using Infrastructures.Authorizations;
 using System.Security.Claims;
 using System.Text.Json;
 
@@ -245,27 +243,21 @@ namespace TrapchumApp.Shared
 
         internal async Task CheckedCanMultipleRecieve(ClaimsPrincipal user)
         {
-            if (user is null || (user is not null && user?.Identity?.IsAuthenticated == false))
+            if (user is not null && user?.Identity?.IsAuthenticated == true)
             {
-                _canRecieveMultiple = false;
+                _canRecieveMultiple = await _authorizeService.MustHasPermissionAsync(user!, Policies.MultiplePayment);
 
                 return;
             }
-
-            _isAdmin = await _authorizeService.MustHasPermissionAsync(user!, Policies.MultiplePayment);
         }
 
 
         internal async Task CheckedIsAdmin(ClaimsPrincipal user)
         {
-            if (user is null || (user is not null && user?.Identity?.IsAuthenticated == false))
+            if (user is not null && user?.Identity?.IsAuthenticated == true)
             {
-                _isAdmin = false;
-
-                return;
+                _isAdmin = await _authorizeService.MustHasPermissionAsync(user, Policies.AdminOnly);
             }
-
-            _isAdmin = await _authorizeService.MustHasPermissionAsync(user!, Policies.AdminOnly);
         }
 
 
@@ -289,12 +281,13 @@ namespace TrapchumApp.Shared
 
         internal async Task CheckedIsManager(ClaimsPrincipal user)
         {
-            if (user is null || (user is not null && user?.Identity?.IsAuthenticated == false))
+            if (user is not null && user?.Identity?.IsAuthenticated == true)
             {
-                _isManager = false;
+                _isManager = await _authorizeService.MustHasPermissionAsync(user!, Policies.ManagerOnly);
+
                 return;
             }
-            _isManager = await _authorizeService.MustHasPermissionAsync(user!, Policies.ManagerOnly);
+
         }
 
         internal async Task CheckedIsCEO(ClaimsPrincipal user)
@@ -305,9 +298,6 @@ namespace TrapchumApp.Shared
 
                 return;
             }
-
-            _isManager = false;
-
         }
 
 
@@ -316,46 +306,46 @@ namespace TrapchumApp.Shared
             if (user is not null && user?.Identity?.IsAuthenticated == true)
             {
                 _canRecievePayment = await _authorizeService.MustHasPermissionAsync(user, Policies.RecievePayment);
-            }
-            else
-            {
-                _canRecievePayment = false;
+
+                return;
             }
         }
 
 
         internal async Task CheckedIsAccount(ClaimsPrincipal user)
         {
-            if (user is null || (user is not null && user?.Identity?.IsAuthenticated == false))
+            if (user is not null && user?.Identity?.IsAuthenticated == true)
             {
-                _isAccount = false;
+                _isAccount = await _authorizeService.MustHasPermissionAsync(user, Policies.AccountOnly);
+
                 return;
             }
 
-            _isAccount = await _authorizeService.MustHasPermissionAsync(user!, Policies.AccountOnly);
+
         }
 
         internal async Task CheckedIsCreditAgent(ClaimsPrincipal user)
         {
-            if (user is null || (user is not null && user?.Identity?.IsAuthenticated == false))
+            if (user is not null && user?.Identity?.IsAuthenticated == true)
             {
-                _isCreditAgent = false;
+                _isCreditAgent = await _authorizeService.MustHasPermissionAsync(user, Policies.CreditOfficerOnly);
+
                 return;
             }
 
-            _isCreditAgent = await _authorizeService.MustHasPermissionAsync(user!, Policies.CreditOfficerOnly);
+
         }
 
         internal async Task CheckedCanDisbursemnt(ClaimsPrincipal user)
         {
-            if (user is null || (user is not null && user?.Identity?.IsAuthenticated == false))
+            if (user is not null && user?.Identity?.IsAuthenticated == true)
             {
-                _canDisbursed = false;
+                _canDisbursed = await _authorizeService.MustHasPermissionAsync(user, Policies.Disburse);
 
                 return;
             }
 
-            _canDisbursed = await _authorizeService.MustHasPermissionAsync(user!, Policies.Disburse);
+
         }
 
 
@@ -364,78 +354,76 @@ namespace TrapchumApp.Shared
 
         internal async Task CheckedCanVaultIn(ClaimsPrincipal user)
         {
-            if (user is null || (user is not null && user?.Identity?.IsAuthenticated == false))
+            if (user is not null && user?.Identity?.IsAuthenticated == true)
             {
-                _vaultIn = false;
-
+                _vaultIn = await _authorizeService.MustHasPermissionAsync(user, Policies.TranxVaultIn);
                 return;
             }
 
-            _vaultIn = await _authorizeService.MustHasPermissionAsync(user!, Policies.TranxVaultIn);
+
         }
 
         internal async Task CheckedCanVaultOut(ClaimsPrincipal user)
         {
-            if (user is null || (user is not null && user?.Identity?.IsAuthenticated == false))
+            if (user is not null && user?.Identity?.IsAuthenticated == true)
             {
-                _vaultOut = false;
+                _vaultOut = await _authorizeService.MustHasPermissionAsync(user!, Policies.TranxVaultOut);
 
                 return;
             }
 
-            _vaultOut = await _authorizeService.MustHasPermissionAsync(user!, Policies.TranxVaultOut);
+
         }
 
 
         internal async Task CheckedCanApproved(ClaimsPrincipal? user)
         {
 
-            if (user is null || (user is not null && user?.Identity?.IsAuthenticated == false))
+            if (user is not null && user?.Identity?.IsAuthenticated == true)
             {
-                _canApproved = false;
+                _canApproved = await _authorizeService.MustHasPermissionAsync(user!, Policies.ApproveLoanRequest);
+
                 return;
             }
 
-            _canApproved = await _authorizeService.MustHasPermissionAsync(user!, Policies.ApproveLoanRequest);
+
 
         }
 
 
         internal async Task CheckedCanOpenBranch(ClaimsPrincipal user)
         {
-            if (user is null || (user is not null && user?.Identity?.IsAuthenticated == false))
-            {
-                _canOpenBranch = false;
-            }
-            else
+            if (user is not null && user?.Identity?.IsAuthenticated == true)
             {
                 _canOpenBranch = await _authorizeService.MustHasPermissionAsync(user!, Policies.OpenBranch);
+
+                return;
             }
         }
 
         internal async Task CheckedCanRequest(ClaimsPrincipal user)
         {
-            if (user is null || (user is not null && user?.Identity?.IsAuthenticated == false))
+            if (user is not null && user?.Identity?.IsAuthenticated == true)
             {
-                _canRequest = false;
+                _canRequest = await _authorizeService.MustHasPermissionAsync(user!, Policies.RequestLoanRequest);
 
                 return;
             }
 
-            _canRequest = await _authorizeService.MustHasPermissionAsync(user!, Policies.RequestLoanRequest);
+
         }
 
 
         internal async Task CheckedIsSameUser(ClaimsPrincipal? user, object? requests)
         {
-            if (user is null || user.Identity?.IsAuthenticated != true)
+            if (user is not null && user.Identity?.IsAuthenticated == true)
             {
-                _isSameUser = false;
+                _isSameUser = (await _authorizeService.AuthorizeAsync(user, requests, Policies.SameUser)).Succeeded;
 
                 return;
             }
 
-            _isSameUser = (await _authorizeService.AuthorizeAsync(user, requests, Policies.SameUser)).Succeeded;
+
         }
 
         public async Task GetAuthenticatedUser(ClaimsPrincipal user)

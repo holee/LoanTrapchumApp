@@ -10,10 +10,11 @@ using Applications.Responses.ViewModels.Auths;
 using Applications.Responses.ViewModels.Employees;
 using Applications.Services.Identity;
 using Domains.Models.Identity;
+using TrapchumApp.Shared;
 
 namespace TrapchumApp.Pages.Identity.Users;
 
-public partial class UserPages
+public partial class UserIndexPages
 {
     protected IEnumerable<VUser>? AllUsers = [];
     protected bool IsLoading = true;
@@ -24,13 +25,13 @@ public partial class UserPages
     private readonly IEmployeeService _empService;
     private LoadDataArgs? dataGridArgs;
     [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+    [CascadingParameter] private CascadingAppState AppState { get; set; } = default!;
     protected int selectedTabIndex = 0;
     IList<VUser>? Users = [];
     string? authenticatedUserId = string.Empty;
     bool isLoading = false;
     int counts = 0;
-    bool AdminOnly = false;
-    public UserPages(IUserServiceImpl authService, IEmployeeService empService)
+    public UserIndexPages(IUserServiceImpl authService, IEmployeeService empService)
     {
         _authService = authService;
         _empService = empService;
@@ -57,19 +58,17 @@ public partial class UserPages
     {
         try
         {
+            var user = (await AuthenticationState).User;
+
+            await AppState.GetAuthenticatedUser(user);
+
+            authenticatedUserId = user.GetId();
+
             await GetBranches();
 
             await LoadAllUsers();
 
-            var user = (await AuthenticationState).User;
-
-            AdminOnly = await _authorizeService.MustHasPermissionAsync(user, Policies.AdminOnly);
-
-            if (user is not null && user.Identity!.IsAuthenticated)
-            {
-                authenticatedUserId = user.GetId();
-            }
-
+          
         }
         catch (Exception ex)
         {

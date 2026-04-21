@@ -1,0 +1,20 @@
+@using Applications.Features.Documents.Dto
+<BlabUpload Url="Upload/Files"
+            Accept=".pdf"
+            Multiple="true"
+            Title="Drop PDF files here"
+            HintText="Only PDF, up to 10 MB"
+            OnFilesUploaded="HandleUploaded"
+            OnError="HandleError" />
+
+@code {
+    private void HandleUploaded(List<DocumentDto> files)
+    {
+        NotificationService.Notify(NotificationSeverity.Success, $"{files.Count} file(s) uploaded");
+    }
+
+    private void HandleError(string message)
+    {
+        NotificationService.Notify(NotificationSeverity.Error, message);
+    }
+}

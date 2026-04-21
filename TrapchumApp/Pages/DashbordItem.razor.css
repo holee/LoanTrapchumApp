@@ -1,51 +1,89 @@
-.card {
-    background: #dfe1e1;
-    border-radius: 8px;
+.stat-card {
     display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border-radius: 0.75rem;
+    background: #ffffff;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    border-left: 4px solid transparent;
+    min-height: 5rem;
+    transition: box-shadow 0.2s;
 }
 
-.icon {
-    width: 100%;
-    height: 100%;
+    .stat-card:hover {
+        box-shadow: 0 4px 14px rgba(0,0,0,0.13);
+        transform: translateY(-1px);
+        transition: box-shadow 0.2s, transform 0.2s;
+    }
+
+.stat-icon {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 30px;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+    .stat-icon .rzi {
+        font-size: 1.5rem;
+    }
+
+.stat-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
     flex: 1;
 }
 
-.content {
-    padding-inline-start: 1rem;
-    display: flex;
-    flex-direction:column;
-    gap:0.5rem;
-    flex: 3;
+.stat-label {
+    font-size: 0.75rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-    .content .label {
-        margin-top:0;
-        top:0.5rem;
-        font-size: 16px;
-    }
-
-    .content .value {
-        font-size: 18px;
-        font-weight: bold;
-    }
-
-.bg-blue {
-    background: #17a2b8;
+.stat-value {
+    font-size: 1.4rem;
+    font-weight: 700;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #1a1a2e;
 }
 
-.bg-red {
-    background: #dc3545;
+.stat-subtitle {
+    font-size: 0.72rem;
+    color: #9ca3af;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.bg-green {
-    background: #28a745;
-}
+/* ── Color variants ── */
+.stat-card.bg-blue { border-left-color: #2196f3; }
+.stat-card.bg-blue .stat-icon { background: #e3f2fd; color: #1565c0; }
 
-.bg-yellow {
-    background: #ffc107;
-    color: black;
-}
+.stat-card.bg-green { border-left-color: #43a047; }
+.stat-card.bg-green .stat-icon { background: #e8f5e9; color: #2e7d32; }
+
+.stat-card.bg-red { border-left-color: #e53935; }
+.stat-card.bg-red .stat-icon { background: #ffebee; color: #b71c1c; }
+
+.stat-card.bg-yellow { border-left-color: #f9a825; }
+.stat-card.bg-yellow .stat-icon { background: #fffde7; color: #f57f17; }
+
+.stat-card.bg-cyan,
+.stat-card.bg-info { border-left-color: #00acc1; }
+.stat-card.bg-cyan .stat-icon,
+.stat-card.bg-info .stat-icon { background: #e0f7fa; color: #00838f; }
+
+.stat-card.bg-secondary { border-left-color: #757575; }
+.stat-card.bg-secondary .stat-icon { background: #f5f5f5; color: #424242; }

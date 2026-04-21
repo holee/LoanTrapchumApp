@@ -47,6 +47,7 @@
                             PagerPosition="PagerPosition.Bottom"
                             PageSizeChanged="@PageSizeChanged"
                             AllowColumnPicking="true"
+                            CellContextMenu="@ShowCellContextMenu"
                             Data="@Vendors">
                 <HeaderTemplate></HeaderTemplate>
                 <Columns>
@@ -150,12 +151,38 @@
 @code {
     void ShowContextMenuWithContent(MouseEventArgs args, VendorVm e)
     {
-        ContextMenuService.Open(args, ds =>
-    @<RadzenMenu Style="font-size:0.8rem;">
-        <RadzenMenuItem Click="@(() => OpenDetailTab(e.VendorId, e.AltName))" Icon="info"   Text="Details" Value="@e.VendorId" />
-        <RadzenMenuItem Click="@(() => OpenEditTab(e.VendorId,   e.AltName))" Icon="edit"   Text="Edit"    Value="@e.VendorId" />
-        <RadzenMenuItem Click="@(() => OnDelete(e.VendorId))"                  Icon="delete" Text="Delete"  Value="@e.VendorId" />
-    </RadzenMenu>
-    );
+        ContextMenuService.Open(args, BuildVendorMenuItems(), me =>
+        {
+            ContextMenuService.Close();
+            HandleVendorAction(me.Value?.ToString(), e);
+        });
+    }
+
+    void ShowCellContextMenu(DataGridCellMouseEventArgs<VendorVm> args)
+    {
+        if (args.Data is null) return;
+
+        ContextMenuService.Open(args, BuildVendorMenuItems(), me =>
+        {
+            ContextMenuService.Close();
+            HandleVendorAction(me.Value?.ToString(), args.Data);
+        });
+    }
+
+    List<ContextMenuItem> BuildVendorMenuItems() =>
+    [
+        new ContextMenuItem { Text = "Details", Icon = "info",   Value = "1" },
+        new ContextMenuItem { Text = "Edit",    Icon = "edit",   Value = "2" },
+        new ContextMenuItem { Text = "Delete",  Icon = "delete", Value = "3" },
+    ];
+
+    void HandleVendorAction(string? value, VendorVm e)
+    {
+        switch (value)
+        {
+            case "1": OpenDetailTab(e.VendorId, e.AltName); break;
+            case "2": OpenEditTab(e.VendorId,   e.AltName); break;
+            case "3": _ = OnDelete(e.VendorId);             break;
+        }
     }
 }

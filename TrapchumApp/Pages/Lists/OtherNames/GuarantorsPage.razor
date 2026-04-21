@@ -72,7 +72,7 @@
 
         RenderFragment content = builder =>
         {
-            builder.OpenComponent(0, typeof(GuarantorEdit));
+            builder.OpenComponent(0, typeof(GuarantorEditPage));
             builder.AddAttribute(1, "NameId", key);
             builder.AddAttribute(2, "ClosedTab", EventCallback.Factory.Create(this, () =>
             {

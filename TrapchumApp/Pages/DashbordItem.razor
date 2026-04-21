@@ -1,30 +1,29 @@
 @using TrapchumApp.Helpers.Enums
 @using TrapchumApp.Helpers.Extensions
-<div class="card">
-    <div class="icon @BackgroundCss">
-        <a href="#">
-        <RadzenIcon Icon="@Icon"></RadzenIcon>
-        </a>
+<div class="stat-card @ColorCss">
+    <div class="stat-icon">
+        <RadzenIcon Icon="@Icon" />
     </div>
-    <div class="content">
-        <div class="label">@Title</div>
-        <div class="value">
+    <div class="stat-body">
+        <div class="stat-label">@Title</div>
+        <div class="stat-value">
             @if (ValueTemplete is not null)
             {
                 @ValueTemplete
             }
         </div>
+        @if (!string.IsNullOrEmpty(Subtitle))
+        {
+            <div class="stat-subtitle">@Subtitle</div>
+        }
     </div>
 </div>
 
 @code {
-    [Parameter]
-    public string Title { get; set; } = string.Empty;
-    [Parameter]
-    public RenderFragment ValueTemplete { get; set; } = default!;
-    [Parameter]
-    public string Icon { get; set; } = IconNames.Customers;
-    [Parameter]
-    public ColorEnum BackgroundColor { get; set; } = ColorEnum.Warning;
-    private string BackgroundCss => BackgroundColor.ToBootstrapColor();
+    [Parameter] public string Title { get; set; } = string.Empty;
+    [Parameter] public RenderFragment ValueTemplete { get; set; } = default!;
+    [Parameter] public string Icon { get; set; } = IconNames.Customers;
+    [Parameter] public ColorEnum BackgroundColor { get; set; } = ColorEnum.Warning;
+    [Parameter] public string? Subtitle { get; set; }
+    private string ColorCss => BackgroundColor.ToBootstrapColor();
 }

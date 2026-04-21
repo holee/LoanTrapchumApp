@@ -1,9 +1,9 @@
 ﻿<PageTitle>New Customer</PageTitle>
 @using Applications.Features.LoanRequests.Interfaces
-<EditForm Model="CustomerModel" @ref="@editForm">
+<EditForm Model="CustomerModel" @ref="@editForm" autocomplete="off">
     <FluentValidationValidator DisableAssemblyScanning="true"></FluentValidationValidator>
-    <CreateCustomerInfo Model="@CustomerModel" />
-    <CustomerAddress model="@CustomerModel"/>
+    <CreateCustomerInfo Model="@CustomerModel" @key="Guid.NewGuid().ToString()" />
+    <CustomerAddress model="@CustomerModel" @key="Guid.NewGuid().ToString()" />
     <RadzenStack Orientation="Orientation.Horizontal"
                  AlignItems="AlignItems.Center"
                  Gap="1rem"

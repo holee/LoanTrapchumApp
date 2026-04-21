@@ -179,7 +179,7 @@ public partial class EmployeesIndex
         var newTab = new CustomTab
         {
             Key = newTabId,
-            Title = "New Customer",
+            Title = "New Employee",
             TabAction = TabActions.Create,
             Content = childContent,
         };
@@ -188,7 +188,7 @@ public partial class EmployeesIndex
 
         selectedIndex = _tabs.Count;
 
-
+        StateHasChanged();
     }
 
 
@@ -253,7 +253,7 @@ public partial class EmployeesIndex
 
         selectedIndex = _tabs.Count;
 
-
+        StateHasChanged();
     }
 
 
@@ -305,6 +305,8 @@ public partial class EmployeesIndex
         _tabs.Add(newTab);
 
         selectedIndex = _tabs.Count;
+
+        StateHasChanged();
     }
 
 

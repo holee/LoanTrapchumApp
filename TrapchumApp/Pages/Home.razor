@@ -1,406 +1,206 @@
 ﻿@page "/"
-@using Applications.Features.Addresses
-@using Applications.Features.Branches
-@using Applications.Features.Branches.Queries.GetBranchByUser
-@using Applications.Features.Currencies
-@using Applications.Features.Customers.Services
-@using Applications.Features.Dashbaord.Accountants.Dtos
-@using Applications.Features.Dashbaord.Accountants.Queries.GetDbAccountLoanSummaery
-@using Applications.Features.Dashbaord.Accountants.Queries.GetDbApprovedLoanRequest
-@using Applications.Features.Dashbaord.CreditOfficers.Dtos
-@using Applications.Features.Dashbaord.CreditOfficers.Queries.GetDbCreditOfficeLoanSummary
-@using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Interfaces
-@using Domains.Models.Identity
+@using Applications.Features.Documents.Dto
 @using TrapchumApp.Helpers.Enums
-@using TrapchumApp.Helpers.Extensions
-@using Microsoft.AspNetCore.SignalR.Client
-@using Domains.Models.Lists
-
+@using TrapchumApp.Components.FileUploads
 <PageTitle>Home</PageTitle>
+
 <AuthorizeView Policy="@Policies.CreditOfficerOnly">
     <Authorized>
-        <InfoBox Title="CO"
-                 Subtitle="This Month"
-                 Count="1250"
-                 PercentageIncrease="15.5"
-                 Icon="shopping_cart"
-                 GradientStart="#FFFFFF"
-                 GradientEnd="#2196FA"
-                 OnMoreInfoClick="@HandleMoreInfo">
-            <ChildContent>
-                <main class="dashboard-container">
-                    <section class="cards">
-                        @foreach (var item in CoSummaries ?? [])
-                        {
-                            <DashbordItem BackgroundColor="@GetGradientColor(item.CurrencyId)"
-                                          Icon="@IconNames.Customers"
-                                          Title="Due Customers">
-                                <ValueTemplete>
-                                    @item.TotalCustomer
-                                </ValueTemplete>
-                            </DashbordItem>
-                            <DashbordItem BackgroundColor="ColorEnum.Danger"
-                                          Icon="@IconNames.AccountBalanceWallet"
-                                          Title="@GetTitlePriciple(item.CurrencyId)">
-                                <ValueTemplete>
-                                    @item.TotalPrinciple.Format(item.CurrencyId)
-                                </ValueTemplete>
-                            </DashbordItem>
-                            <DashbordItem BackgroundColor="ColorEnum.Warning"
-                                          Icon="@IconNames.Paid"
-                                          Title="@GetTitleInterest(item.CurrencyId)">
-                                <ValueTemplete>
-                                    @item.TotalInterest.Format(item.CurrencyId)
-                                </ValueTemplete>
-                            </DashbordItem>
-                        }
-                        <DashbordItem BackgroundColor="ColorEnum.Success"
-                                      Icon="@IconNames.Group"
-                                      Title="Request">
-                            <ValueTemplete>
-                                1000
-                            </ValueTemplete>
-                        </DashbordItem>
-                    </section>
-                </main>
-                <RadzenRow class="rz-my-2">
-                    <RadzenColumn Size="2">
-                        <RadzenPanelMenu Click="OnParentClicked" Multiple="true">
-                            <RadzenPanelMenuItem Text="Today" Path="buttons" Icon="account_circle"></RadzenPanelMenuItem>
-                            <RadzenPanelMenuItem Text="This Week" Path="menu" Icon="line_weight"></RadzenPanelMenuItem>
-                            <RadzenPanelMenuItem Text="This Month" Path="fileinput" Icon="attach_file"></RadzenPanelMenuItem>
-                            <RadzenPanelMenuItem Text="This Quarter" Path="dialog" Icon="perm_media"></RadzenPanelMenuItem>
-                            <RadzenPanelMenuItem Text="This Symester" Path="notification" Icon="announcement"></RadzenPanelMenuItem>
-                            <RadzenPanelMenuItem Text="This Year" Path="notification" Icon="announcement"></RadzenPanelMenuItem>
-                            <RadzenPanelMenuItem Text="Custom" Path="notification" Icon="announcement"></RadzenPanelMenuItem>
-                        </RadzenPanelMenu>
+        <div class="db-page">
+            <div class="db-header">
+                <div class="db-header-text">
+                    <span class="db-title">Credit Officer</span>
+                    <span class="db-subtitle">Dashboard overview — due customers and performance</span>
+                </div>
+                <RadzenBadge Text="CO" BadgeStyle="BadgeStyle.Primary" IsPill="true" />
+            </div>
+
+            <div class="db-cards">
+                @foreach (var item in CoSummaries ?? [])
+                {
+                    <DashbordItem BackgroundColor="@GetGradientColor(item.CurrencyId)"
+                                  Icon="@IconNames.Customers"
+                                  Title="Due Customers">
+                        <ValueTemplete>@item.TotalCustomer</ValueTemplete>
+                    </DashbordItem>
+                    <DashbordItem BackgroundColor="ColorEnum.Danger"
+                                  Icon="@IconNames.AccountBalanceWallet"
+                                  Title="@GetTitlePriciple(item.CurrencyId)">
+                        <ValueTemplete>@item.TotalPrinciple.Format(item.CurrencyId)</ValueTemplete>
+                    </DashbordItem>
+                    <DashbordItem BackgroundColor="ColorEnum.Warning"
+                                  Icon="@IconNames.Paid"
+                                  Title="@GetTitleInterest(item.CurrencyId)">
+                        <ValueTemplete>@item.TotalInterest.Format(item.CurrencyId)</ValueTemplete>
+                    </DashbordItem>
+                }
+                <DashbordItem BackgroundColor="ColorEnum.Success"
+                              Icon="@IconNames.Group"
+                              Title="Pending Requests">
+                    <ValueTemplete>1000</ValueTemplete>
+                </DashbordItem>
+            </div>
+
+            <RadzenCard class="db-chart-card" Variant="Variant.Outlined">
+                <div class="db-chart-header">
+                    <RadzenIcon Icon="bar_chart" class="db-chart-icon" />
+                    <span>Performance Overview</span>
+                </div>
+                <RadzenRow>
+                    <RadzenColumn Size="12" SizeMD="2">
+                        <RadzenListBox class="db-period-list"
+                                       Data="@_periods"
+                                       TextProperty="Label"
+                                       ValueProperty="Key"
+                                       @bind-Value="@_selectedPeriod"
+                                       Change="@((v) => OnParentClicked(v))"
+                                       TValue="string" />
                     </RadzenColumn>
-                    <RadzenColumn Size="10">
-                        <div style="background-color:aliceblue">
-                            <RadzenChart>
-                                <RadzenColumnSeries Data="@revenue1" CategoryProperty="Quarter" LineType="LineType.Dashed"
-                                                    ValueProperty="Revenue" />
-                                <RadzenColumnSeries Data="@revenue2" CategoryProperty="Quarter"
-                                                    LineType="LineType.Dashed"
-                                                    ValueProperty="Revenue" />
-                            </RadzenChart>
-                        </div>
+                    <RadzenColumn Size="12" SizeMD="10">
+                        <RadzenChart>
+                            <RadzenColumnSeries Data="@revenue1" CategoryProperty="Quarter" ValueProperty="Revenue" Title="Principal" />
+                            <RadzenColumnSeries Data="@revenue2" CategoryProperty="Quarter" ValueProperty="Revenue" Title="Interest" />
+                            <RadzenLegend Position="LegendPosition.Bottom" />
+                        </RadzenChart>
                     </RadzenColumn>
                 </RadzenRow>
-
-            </ChildContent>
-        </InfoBox>
+            </RadzenCard>
+        </div>
     </Authorized>
 </AuthorizeView>
+
 <AuthorizeView Roles="@AppRoles.Manager">
     <Authorized>
-        <InfoBox Title="BM"
-                 Subtitle="This Month"
-                 Count="1250"
-                 PercentageIncrease="15.5"
-                 Icon="shopping_cart"
-                 GradientStart="#2196F3"
-                 GradientEnd="#64B5F6"
-                 OnMoreInfoClick="@HandleMoreInfo">
-            <ChildContent>
-                <div style="background-color:aliceblue">
-                    <RadzenChart>
-                        <RadzenColumnSeries Data="@revenue1" CategoryProperty="Quarter" LineType="LineType.Dashed"
-                                            ValueProperty="Revenue" />
-                        <RadzenColumnSeries Data="@revenue2" CategoryProperty="Quarter" LineType="LineType.Dashed"
-                                            ValueProperty="Revenue" />
-                    </RadzenChart>
+        <div class="db-page">
+            <div class="db-header">
+                <div class="db-header-text">
+                    <span class="db-title">Branch Manager</span>
+                    <span class="db-subtitle">Monitor branch performance and lending activities</span>
                 </div>
+                <RadzenBadge Text="BM" BadgeStyle="BadgeStyle.Info" IsPill="true" />
+            </div>
 
-            </ChildContent>
-        </InfoBox>
-
-    </Authorized>
-</AuthorizeView>
-<AuthorizeView Policy="@Policies.AccountOnly">
-    <Authorized>
-        <InfoBox Title="Account,Teller"
-                 Subtitle="This Month"
-                 Count="1250"
-                 PercentageIncrease="15.5"
-                 Icon="shopping_cart"
-                 GradientStart="#FFFFFF"
-                 GradientEnd="#2196FA"
-                 OnMoreInfoClick="@HandleMoreInfo">
-
-            <ChildContent>
-                <div class="dashboard-container">
-                    <div class="cards">
-                        @foreach (var item in AccSummaries ?? [])
-                        {
-                            <DashbordItem Title="@GetTitle(item.CurrencyId)"
-                                          BackgroundColor="@GetGradientColor(item.CurrencyId)">
-                                <ValueTemplete>
-                                    @item.TotalCustomer
-                                </ValueTemplete>
-                            </DashbordItem>
-                            <DashbordItem Title="@GetTitlePriciple(item.CurrencyId)"
-                                          Icon="@IconNames.AccountBalanceWallet"
-                                          BackgroundColor="@GetGradientColor(item.CurrencyId)">
-                                <ValueTemplete>
-                                    @item.TotalPrinciple.Format(item.CurrencyId)
-                                </ValueTemplete>
-                            </DashbordItem>
-                            <DashbordItem Title="@GetTitleInterest(item.CurrencyId)"
-                                          Icon="@IconNames.Paid"
-                                          BackgroundColor="@GetGradientColor(item.CurrencyId)">
-                                <ValueTemplete>
-                                    @item.TotalInterest.Format(item.CurrencyId)
-                                </ValueTemplete>
-                            </DashbordItem>
-
-                        }
-                        <DashbordItem Title="LoanRequest"
-                                      BackgroundColor="@ColorEnum.Info">
-                            <ValueTemplete>
-                                @_numberOfLoanRequest
-                            </ValueTemplete>
-                        </DashbordItem>
-                    </div>
-                </div>
-            </ChildContent>
-        </InfoBox>
-    </Authorized>
-</AuthorizeView>
-<AuthorizeView Policy="@Policies.ManagerOnly">
-    <Authorized>
-        <InfoBox Title="RBM"
-                 Subtitle="This Month"
-                 Count="1250"
-                 PercentageIncrease="15.5"
-                 Icon="shopping_cart"
-                 GradientStart="#2196F3"
-                 GradientEnd="#64B5F6"
-                 OnMoreInfoClick="@HandleMoreInfo">
-
-            <ChildContent>
+            <div class="db-cards">
                 @if (ManagerSummaries is not null)
                 {
-                    <div class="dashboard-container">
-                        <div class="cards">
-                            <DashbordItem Title="sdshsjdsjdh"
-                                          BackgroundColor="ColorEnum.Primary">
-                                <ValueTemplete>
-                                    @ManagerSummaries.NewRequest
-                                </ValueTemplete>
-                            </DashbordItem>
-                            <DashbordItem Title="Number Approved Requests"
-                                          Icon="@IconNames.AccountBalanceWallet"
-                                          BackgroundColor="ColorEnum.Success">
-                                <ValueTemplete>
-                                    @ManagerSummaries.NumberApproved
-                                </ValueTemplete>
-                            </DashbordItem>
-
-                        </div>
-                    </div>
+                    <DashbordItem Title="New Requests"
+                                  Icon="@IconNames.Group"
+                                  BackgroundColor="ColorEnum.Primary">
+                        <ValueTemplete>@ManagerSummaries.NewRequest</ValueTemplete>
+                    </DashbordItem>
+                    <DashbordItem Title="Approved Requests"
+                                  Icon="@IconNames.AccountBalanceWallet"
+                                  BackgroundColor="ColorEnum.Success">
+                        <ValueTemplete>@ManagerSummaries.NumberApproved</ValueTemplete>
+                    </DashbordItem>
                 }
-            </ChildContent>
+            </div>
 
-        </InfoBox>
+            <RadzenCard class="db-chart-card" Variant="Variant.Outlined">
+                <div class="db-chart-header">
+                    <RadzenIcon Icon="bar_chart" class="db-chart-icon" />
+                    <span>Branch Lending Performance</span>
+                </div>
+                <RadzenChart>
+                    <RadzenColumnSeries Data="@revenue1" CategoryProperty="Quarter" ValueProperty="Revenue" Title="Principal" />
+                    <RadzenColumnSeries Data="@revenue2" CategoryProperty="Quarter" ValueProperty="Revenue" Title="Interest" />
+                    <RadzenLegend Position="LegendPosition.Bottom" />
+                </RadzenChart>
+            </RadzenCard>
+        </div>
     </Authorized>
 </AuthorizeView>
 
-@* ══════════════════════════════════════════════════════════════
-   BlabSelect2 Demo
-   ══════════════════════════════════════════════════════════════ *@
-<RadzenCard class="rz-my-4">
-    <h4 class="rz-mb-4">BlabSelect2 Demo</h4>
+<AuthorizeView Policy="@Policies.AccountOnly">
+    <Authorized>
+        <div class="db-page">
+            <div class="db-header">
+                <div class="db-header-text">
+                    <span class="db-title">Account &amp; Teller</span>
+                    <span class="db-subtitle">Track due customers and daily approved loan requests</span>
+                </div>
+                <RadzenBadge Text="ACC" BadgeStyle="BadgeStyle.Warning" IsPill="true" />
+            </div>
 
-    <RadzenRow Gap="1rem">
-        @* ── 1. Single select ── *@
-        <RadzenColumn Size="6">
-            <label class="rz-mb-1 d-block"><strong>Single Select</strong></label>
-            <BlabSelect2 TItem="DemoItem" TValue="int"
-                         Data="_demoItems"
-                         ValueSelector="x => x.Id"
-                         TextSelector="x => x.Name"
-                         @bind-Value="_selectedItemId"
-                         Placeholder="Choose a country..."
-                         AllowClear="true" />
-            <small class="rz-mt-1 d-block text-muted">Selected: @_selectedItemId</small>
-        </RadzenColumn>
+            <div class="db-cards">
+                @foreach (var item in AccSummaries ?? [])
+                {
+                    <DashbordItem Title="@GetTitle(item.CurrencyId)"
+                                  BackgroundColor="@GetGradientColor(item.CurrencyId)">
+                        <ValueTemplete>@item.TotalCustomer</ValueTemplete>
+                    </DashbordItem>
+                    <DashbordItem Title="@GetTitlePriciple(item.CurrencyId)"
+                                  Icon="@IconNames.AccountBalanceWallet"
+                                  BackgroundColor="@GetGradientColor(item.CurrencyId)">
+                        <ValueTemplete>@item.TotalPrinciple.Format(item.CurrencyId)</ValueTemplete>
+                    </DashbordItem>
+                    <DashbordItem Title="@GetTitleInterest(item.CurrencyId)"
+                                  Icon="@IconNames.Paid"
+                                  BackgroundColor="@GetGradientColor(item.CurrencyId)">
+                        <ValueTemplete>@item.TotalInterest.Format(item.CurrencyId)</ValueTemplete>
+                    </DashbordItem>
+                }
+                <DashbordItem Title="Approved Requests"
+                              Icon="@IconNames.Group"
+                              BackgroundColor="@ColorEnum.Info">
+                    <ValueTemplete>@_numberOfLoanRequest</ValueTemplete>
+                </DashbordItem>
+            </div>
 
-        @* ── 2. Multi select ── *@
-        <RadzenColumn Size="6">
-            <label class="rz-mb-1 d-block"><strong>Multiple Select</strong></label>
-            <BlabSelect2 TItem="DemoItem" TValue="int"
-                         Data="_demoItems"
-                         ValueSelector="x => x.Id"
-                         TextSelector="x => x.Name"
-                         @bind-Values="_selectedItemIds"
-                         Multiple="true"
-                         Placeholder="Pick countries..."
-                         AllowClear="true" />
-            <small class="rz-mt-1 d-block text-muted">Selected: @string.Join(", ", _selectedItemIds ?? [])</small>
-        </RadzenColumn>
-    </RadzenRow>
+            <RadzenCard class="db-chart-card" Variant="Variant.Outlined">
+                <div class="db-chart-header">
+                    <RadzenIcon Icon="bar_chart" class="db-chart-icon" />
+                    <span>Loan Portfolio Overview</span>
+                </div>
+                <RadzenChart>
+                    <RadzenColumnSeries Data="@revenue1" CategoryProperty="Quarter" ValueProperty="Revenue" Title="Principal" />
+                    <RadzenColumnSeries Data="@revenue2" CategoryProperty="Quarter" ValueProperty="Revenue" Title="Interest" />
+                    <RadzenLegend Position="LegendPosition.Bottom" />
+                </RadzenChart>
+            </RadzenCard>
+        </div>
+    </Authorized>
+</AuthorizeView>
 
-    <RadzenRow Gap="1rem" class="rz-mt-4">
-        @* ── 3. Custom template ── *@
-        <RadzenColumn Size="6">
-            <label class="rz-mb-1 d-block"><strong>Custom Item Template</strong></label>
-            <BlabSelect2 TItem="DemoItem" TValue="int"
-                         Data="_demoItems"
-                         ValueSelector="x => x.Id"
-                         TextSelector="x => x.Name"
-                         @bind-Value="_templateItemId"
-                         Placeholder="Select with flag..."
-                         AllowClear="true">
-                <ItemTemplate>
-                    <span>@context.Flag @context.Name</span>
-                </ItemTemplate>
-                <SelectionTemplate>
-                    <span>@context.Flag @context.Name</span>
-                </SelectionTemplate>
-            </BlabSelect2>
-        </RadzenColumn>
+<AuthorizeView Policy="@Policies.ManagerOnly">
+    <Authorized>
+        <div class="db-page">
+            <div class="db-header">
+                <div class="db-header-text">
+                    <span class="db-title">Regional Branch Manager</span>
+                    <span class="db-subtitle">Review requests and approvals across the assigned branch</span>
+                </div>
+                <RadzenBadge Text="RBM" BadgeStyle="BadgeStyle.Danger" IsPill="true" />
+            </div>
 
-        @* ── 4. Async remote search (live from server) ── *@
-        @* <RadzenColumn Size="6">
-            <label class="rz-mb-1 d-block"><strong>Async Search – Server (min 2 chars)</strong></label>
-            <BlabSelect2 TItem="Nationality" TValue="int"
-                         ValueSelector="x => x.NationalityId"
-                         TextSelector="x => x.NationalityName ?? string.Empty"
-                         SearchAsync="SearchNationalitiesAsync"
-                         MinimumInputLength="2"
-                         @bind-Value="_asyncNationalityId"
-                         Placeholder="Search nationalities..." />
-            <small class="rz-mt-1 d-block text-muted">Selected: @_asyncNationalityId</small>
-        </RadzenColumn> *@
-    </RadzenRow>
-</RadzenCard>
+            <div class="db-cards">
+                @if (ManagerSummaries is not null)
+                {
+                    <DashbordItem Title="New Requests"
+                                  Icon="@IconNames.Group"
+                                  BackgroundColor="ColorEnum.Primary">
+                        <ValueTemplete>@ManagerSummaries.NewRequest</ValueTemplete>
+                    </DashbordItem>
+                    <DashbordItem Title="Approved Requests"
+                                  Icon="@IconNames.AccountBalanceWallet"
+                                  BackgroundColor="ColorEnum.Success">
+                        <ValueTemplete>@ManagerSummaries.NumberApproved</ValueTemplete>
+                    </DashbordItem>
+                }
+            </div>
 
-@* ══════════════════════════════════════════════════════════════
-   BlabTable Demo
-   ══════════════════════════════════════════════════════════════ *@
-<RadzenCard class="rz-my-4">
-    <h4 class="rz-mb-4">BlabTable Demo</h4>
+            <RadzenCard class="db-chart-card" Variant="Variant.Outlined">
+                <div class="db-chart-header">
+                    <RadzenIcon Icon="bar_chart" class="db-chart-icon" />
+                    <span>Regional Performance Overview</span>
+                </div>
+                <RadzenChart>
+                    <RadzenColumnSeries Data="@revenue1" CategoryProperty="Quarter" ValueProperty="Revenue" Title="Principal" />
+                    <RadzenColumnSeries Data="@revenue2" CategoryProperty="Quarter" ValueProperty="Revenue" Title="Interest" />
+                    <RadzenLegend Position="LegendPosition.Bottom" />
+                </RadzenChart>
+            </RadzenCard>
+        </div>
+    </Authorized>
+</AuthorizeView>
 
-    <RadzenRow Gap="1rem">
-        @* ── 1. Row-edit mode with footer summary, sticky header, top pagination ── *@
-        <RadzenColumn Size="12">
-            <label class="rz-mb-2 d-block">
-                <strong>Row Edit + Footer Summary + Top Pagination + Sticky Header</strong>
-            </label>
-            <BlabTable TItem="EmployeeDemo"
-                       Data="_tableData"
-                       TotalCount="_tableTotalCount"
-                       LoadData="OnTableLoadData"
-                       PageSize="5"
-                       Striped="true"
-                       Bordered="true"
-                       Hoverable="true"
-                       Compact="true"
-                       Height="380px"
-                       StickyHeader="true"
-                       ShowColumnFilterPicker="true"
-                       ShowSearchBox="true"
-                       Responsive="true"
-                       
-                       SearchPlaceholder="Search employees..."
-                       PaginationPosition="BlabTablePaginationPosition.Top"
-                       EditMode="BlabTableEditMode.Row"
-                       RowEditSave="OnRowEditSave"
-                       RowEditCancel="OnRowEditCancel"
-                       RowClick="OnTableRowClick">
-                <Columns>
-                    <BlabTableColumn TItem="EmployeeDemo" Property="Id" Title="#" Width="4rem" TextAlign="center" />
-                    <BlabTableColumn TItem="EmployeeDemo" Property="FullName" Title="Full Name" Editable="true">
-                        <EditTemplate>
-                            <input type="text" class="blab-dt__search-input" style="width:100%"
-                                   value="@context.FullName"
-                                   @onchange="(e) => context.FullName = e.Value?.ToString() ?? string.Empty" />
-                        </EditTemplate>
-                    </BlabTableColumn>
-                    <BlabTableColumn TItem="EmployeeDemo" Property="Position" Title="Position" Editable="true">
-                        <EditTemplate>
-                            <input type="text" class="blab-dt__search-input" style="width:100%"
-                                   value="@context.Position"
-                                   @onchange="(e) => context.Position = e.Value?.ToString() ?? string.Empty" />
-                        </EditTemplate>
-                    </BlabTableColumn>
-                    <BlabTableColumn TItem="EmployeeDemo" Property="Department" Title="Department" Editable="true">
-                        <EditTemplate>
-                            <select class="blab-dt__length-select" style="width:100%"
-                                    value="@context.Department"
-                                    @onchange="(e) => context.Department = e.Value?.ToString() ?? string.Empty">
-                                <option value="IT">IT</option>
-                                <option value="HR">HR</option>
-                                <option value="Finance">Finance</option>
-                                <option value="Marketing">Marketing</option>
-                                <option value="Loan">Loan</option>
-                                <option value="Admin">Admin</option>
-                                <option value="Operation">Operation</option>
-                            </select>
-                        </EditTemplate>
-                    </BlabTableColumn>
-                    <BlabTableColumn TItem="EmployeeDemo" Property="Salary" Title="Salary" TextAlign="right" Editable="true">
-                        <Template>
-                            <span>@context.Salary.ToString("N2") $</span>
-                        </Template>
-                        <EditTemplate>
-                            <input type="number" class="blab-dt__search-input" style="width:100%;text-align:right"
-                                   value="@context.Salary"
-                                   @onchange="(e) => { if (decimal.TryParse(e.Value?.ToString(), out var v)) context.Salary = v; }" />
-                        </EditTemplate>
-                    </BlabTableColumn>
-                    <BlabTableColumn TItem="EmployeeDemo" Property="JoinDate" Title="Join Date" TextAlign="center">
-                        <Template>
-                            <span>@context.JoinDate.ToString("dd-MMM-yyyy")</span>
-                        </Template>
-                    </BlabTableColumn>
-                </Columns>
-                <FooterSummary>
-                    <tr>
-                        <td style="text-align:center" colspan="2"></td>
-                        <td><strong>Page Total</strong></td>
-                        <td>@context.Select(e => e.Department).Distinct().Count() depts</td>
-                        <td style="text-align:right"><strong>@context.Sum(e => e.Salary).ToString("N2") $</strong></td>
-                        <td style="text-align:center">@context.Count() rows</td>
-                    </tr>
-                </FooterSummary>
-            </BlabTable>
-            <small class="rz-mt-1 d-block text-muted">Selected: @_selectedEmployee &nbsp;|&nbsp; Last edit: @_lastEditAction</small>
-        </RadzenColumn>
-    </RadzenRow>
-
-    <RadzenRow Gap="1rem" class="rz-mt-4">
-        @* ── 2. Cell-edit mode with pagination at top only ── *@
-        <RadzenColumn Size="12">
-            <label class="rz-mb-2 d-block"><strong>Cell Edit + Pagination Top Only</strong></label>
-            <BlabTable TItem="EmployeeDemo"
-                       Data="_tableData2"
-                       TotalCount="_tableTotalCount2"
-                       LoadData="OnTableLoadData2"
-                       PageSize="5"
-                       Striped="true"
-                       Bordered="true"
-                       Hoverable="true"
-                       Responsive="true"
-                       SearchPlaceholder="Search..."
-                       PaginationPosition="BlabTablePaginationPosition.Top"
-                       EditMode="BlabTableEditMode.Cell"
-                       CellEditSave="OnCellEditSave">
-                <Columns>
-                    <BlabTableColumn TItem="EmployeeDemo" Property="Id" Title="#" Width="4rem" TextAlign="center" />
-                    <BlabTableColumn TItem="EmployeeDemo" Property="FullName" Title="Full Name" Editable="true" />
-                    <BlabTableColumn TItem="EmployeeDemo" Property="Position" Title="Position" Editable="true" />
-                    <BlabTableColumn TItem="EmployeeDemo" Property="Department" Title="Department" />
-                    <BlabTableColumn TItem="EmployeeDemo" Property="Salary" Title="Salary" TextAlign="right">
-                        <Template>
-                            <span>@context.Salary.ToString("N2") $</span>
-                        </Template>
-                    </BlabTableColumn>
-                </Columns>
-            </BlabTable>
-            <small class="rz-mt-1 d-block text-muted">Last cell edit: @_lastCellEdit</small>
-        </RadzenColumn>
-    </RadzenRow>
-</RadzenCard>

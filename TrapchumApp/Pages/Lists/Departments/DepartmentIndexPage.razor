@@ -41,6 +41,7 @@
                             RowRender="@OnRowRender"
                             RowSelect="@OnRowSelect"
                             @ref="@_depRef"
+                            CellContextMenu="@ShowCellContextMenu"
                             Data="@Departments">
                 <Columns>
                     <RadzenDataGridColumn Width="5rem" Title="#"
@@ -97,13 +98,39 @@
 
     void ShowContextMenuWithContent(MouseEventArgs args, int id)
     {
-        ContextMenuService.Open(args, ds =>
-    @<RadzenMenu>
-    <RadzenMenuItem Click="@(() => Details(id))" Icon="info" Text="Details" Value="@id"></RadzenMenuItem>
-    <RadzenMenuItem Click="@(() => Edit(id))" Icon="edit" Text="Edit" Value="@id"></RadzenMenuItem>
-    <RadzenMenuItem Click="@(() => Delete(id))" Icon="delete" Text="Delete" Value="@id"></RadzenMenuItem>
-</RadzenMenu>
-    );
+        ContextMenuService.Open(args, BuildDepartmentMenuItems(), me =>
+        {
+            ContextMenuService.Close();
+            HandleDepartmentAction(me.Value?.ToString(), id);
+        });
+    }
+
+    void ShowCellContextMenu(DataGridCellMouseEventArgs<VDepartment> args)
+    {
+        if (args.Data is null) return;
+
+        ContextMenuService.Open(args, BuildDepartmentMenuItems(), me =>
+        {
+            ContextMenuService.Close();
+            HandleDepartmentAction(me.Value?.ToString(), args.Data.DepartmentId);
+        });
+    }
+
+    List<ContextMenuItem> BuildDepartmentMenuItems() =>
+    [
+        new ContextMenuItem { Text = "Details", Icon = "info",   Value = "1" },
+        new ContextMenuItem { Text = "Edit",    Icon = "edit",   Value = "2" },
+        new ContextMenuItem { Text = "Delete",  Icon = "delete", Value = "3" },
+    ];
+
+    void HandleDepartmentAction(string? value, int id)
+    {
+        switch (value)
+        {
+            case "1": _ = Details(id); break;
+            case "2": _ = Edit(id);    break;
+            case "3": _ = Delete(id);  break;
+        }
     }
 
   

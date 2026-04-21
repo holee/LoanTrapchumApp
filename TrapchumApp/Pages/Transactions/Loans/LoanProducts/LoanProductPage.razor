@@ -36,6 +36,8 @@
                             AllowPaging="true"
                             IsLoading="isLoading"
                             LoadData="@LoadData"
+                            TItem="VlProductList"
+                            CellContextMenu="@ShowCellContextMenu"
                             Data="@VLProducts">
                 <Columns>
                     <RadzenDataGridColumn Width="5rem"
@@ -95,14 +97,38 @@
 @code {
     void ShowContextMenuWithContent(MouseEventArgs args, VlProductList e)
     {
-        ContextMenuService.Open(args, ds =>
-    @<RadzenMenu Style="font-size:0.8rem;">
-    <RadzenMenuItem Click="@(() => LPDetails(e.LoanProductId))" Icon="info" Text="Details" Value="@e"></RadzenMenuItem>
-    <RadzenMenuItem Click="@(() => OnEdit(e))" Disabled Icon="edit" Text="Edit" Value="@e"></RadzenMenuItem>
-    <RadzenMenuItem Click="@(() => OnDelete(e))" Icon="delete" Text="Delete" Value="@e"></RadzenMenuItem>
-</RadzenMenu>
-    );
+        ContextMenuService.Open(args, BuildProductMenuItems(e), me =>
+        {
+            ContextMenuService.Close();
+            HandleProductAction(me.Value?.ToString(), e);
+        });
     }
 
+    void ShowCellContextMenu(DataGridCellMouseEventArgs<VlProductList> args)
+    {
+        if (args.Data is null) return;
 
+        ContextMenuService.Open(args, BuildProductMenuItems(args.Data), me =>
+        {
+            ContextMenuService.Close();
+            HandleProductAction(me.Value?.ToString(), args.Data);
+        });
+    }
+
+    List<ContextMenuItem> BuildProductMenuItems(VlProductList e) =>
+    [
+        new ContextMenuItem { Text = "Details", Icon = "info",   Value = "1" },
+        new ContextMenuItem { Text = "Edit",    Icon = "edit",   Value = "2", Disabled = true },
+        new ContextMenuItem { Text = "Delete",  Icon = "delete", Value = "3" },
+    ];
+
+    void HandleProductAction(string? value, VlProductList e)
+    {
+        switch (value)
+        {
+            case "1": LPDetails(e.LoanProductId); break;
+            case "2": _ = OnEdit(e);              break;
+            case "3": _ = OnDelete(e);            break;
+        }
+    }
 }

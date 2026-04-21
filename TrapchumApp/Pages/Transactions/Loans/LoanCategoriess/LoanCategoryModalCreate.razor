@@ -5,81 +5,97 @@
 @using Applications.Features.Employees
 @using Applications.Features.LoanRequests.Interfaces
 @using TrapchumApp.Services
+
 <EditForm Model="model" OnValidSubmit="OnSaveNew">
     <DataAnnotationsValidator />
-    <RadzenRow>
-        <RadzenColumn Size="3">
-            <RadzenLabel Component="Name">Loan Category<span class="text-danger">*</span></RadzenLabel>
-        </RadzenColumn>
-        <RadzenColumn Size="9">
-            <RadzenTextBox @bind-Value="model.LoanCategoryCode"
-                           Style="width:100%;height:33px;font-size:14px"
-                           AutoComplete="true"
-                           Placeholder="Enter Category Name..."
-                           Name="Name" />
-            <ValidationMessage For="@(() => model.LoanCategoryCode)"></ValidationMessage>
-            <span>@messageName</span>
-        </RadzenColumn>
-        <RadzenColumn Size="3">
-            <RadzenLabel>Status</RadzenLabel>
-        </RadzenColumn>
-        <RadzenColumn Size="9">
-            <RadzenCheckBox @bind-Value=@model.IsActive Name="CheckBox1" />
-            <RadzenLabel Component="CheckBox1" Style="margin-left: 8px; vertical-align: middle;">
-                @(model.IsActive!.Value ? "Is Active" : "Is Inactive")
-            </RadzenLabel>
+
+    <RadzenRow Gap="0.75rem">
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenStack Gap="0.25rem">
+                <RadzenLabel Component="LoanCategoryCode">
+                    Category Name <span class="text-danger">*</span>
+                </RadzenLabel>
+                <RadzenTextBox @bind-Value="model.LoanCategoryCode"
+                               Style="width:100%;"
+                               Placeholder="Enter Category Name..."
+                               Name="LoanCategoryCode" />
+                <ValidationMessage For="@(() => model.LoanCategoryCode)" />
+                @if (!string.IsNullOrEmpty(messageName))
+                {
+                    <small class="text-danger">@messageName</small>
+                }
+            </RadzenStack>
         </RadzenColumn>
 
-        <RadzenColumn Size="3">
-            <RadzenLabel>Description-Khmer</RadzenLabel>
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenStack Gap="0.25rem">
+                <RadzenLabel Component="Code">Code</RadzenLabel>
+                <RadzenTextBox @bind-Value="model.Code"
+                               Style="width:100%;"
+                               Placeholder="Enter Code..."
+                               Name="Code" />
+                <ValidationMessage For="@(() => model.Code)" />
+                @if (!string.IsNullOrEmpty(messageCode))
+                {
+                    <small class="text-danger">@messageCode</small>
+                }
+            </RadzenStack>
         </RadzenColumn>
-        <RadzenColumn Size="9">
-            <RadzenTextBox @bind-Value="model.DesInKhmer"
-                           Style="width:100%;height:33px;font-size:14px"
-                           AutoComplete="true"
-                           Placeholder="Enter Description in Khmer..."
-                           Name="DesInKhmer" />
-            <ValidationMessage For="@(() => model.DesInKhmer)"></ValidationMessage>
+
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenStack Gap="0.25rem">
+                <RadzenLabel Component="DesInKhmer">Description (Khmer)</RadzenLabel>
+                <RadzenTextBox @bind-Value="model.DesInKhmer"
+                               Style="width:100%;"
+                               Placeholder="Enter Description in Khmer..."
+                               Name="DesInKhmer" />
+                <ValidationMessage For="@(() => model.DesInKhmer)" />
+            </RadzenStack>
         </RadzenColumn>
-        <RadzenColumn Size="3">
-            <RadzenLabel>Code</RadzenLabel>
+
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenStack Gap="0.25rem">
+                <RadzenLabel>Status</RadzenLabel>
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                    <RadzenCheckBox @bind-Value="model.IsActive" Name="IsActive" />
+                    <RadzenLabel Component="IsActive">
+                        @(model.IsActive == true ? "Active" : "Inactive")
+                    </RadzenLabel>
+                </RadzenStack>
+            </RadzenStack>
         </RadzenColumn>
-        <RadzenColumn Size="9">
-            <RadzenTextBox @bind-Value="model.Code"
-                           Style="width:100%;height:33px;font-size:14px"
-                           AutoComplete="true"
-                           Placeholder="Enter Code..."
-                           Name="Code" />
-            <ValidationMessage For="@(() => model.Code)"></ValidationMessage>
-            <span>@messageCode</span>
-        </RadzenColumn>
-        <RadzenColumn Size="3">
-            <RadzenLabel>Description</RadzenLabel>
-        </RadzenColumn>
-        <RadzenColumn Size="9">
-            <RadzenTextArea @bind-Value="model.Description"
-                            Placeholder="Enter Description..."
-                            class="@Styles.W100"
-                            Style="resize:none;"
-                            Name="Description"></RadzenTextArea>
-            <ValidationMessage For="@(() => model.Description)"></ValidationMessage>
+
+        <RadzenColumn Size="12">
+            <RadzenStack Gap="0.25rem">
+                <RadzenLabel Component="Description">Description</RadzenLabel>
+                <RadzenTextArea @bind-Value="model.Description"
+                                Placeholder="Enter Description..."
+                                Style="width:100%;resize:none;"
+                                Rows="3"
+                                Name="Description" />
+                <ValidationMessage For="@(() => model.Description)" />
+            </RadzenStack>
         </RadzenColumn>
     </RadzenRow>
-    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
-                 JustifyContent="JustifyContent.End">
+
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 AlignItems="AlignItems.Center"
+                 JustifyContent="JustifyContent.End"
+                 Gap="0.5rem"
+                 class="rz-mt-3">
         <RadzenButton ButtonStyle="ButtonStyle.Success"
                       Icon="save"
                       Text="Save"
                       Size="ButtonSize.Small"
                       ButtonType="ButtonType.Submit" />
         <RadzenButton ButtonStyle="ButtonStyle.Danger"
-                      Icon="cancel"
+                      Icon="close"
                       Text="Cancel"
                       Click="@ClosedTab"
                       Size="ButtonSize.Small" />
     </RadzenStack>
-
 </EditForm>
+
 @code {
     [Parameter] public EventCallback<int> CloseTab { get; set; }
 

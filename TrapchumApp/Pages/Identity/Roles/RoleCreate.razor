@@ -39,9 +39,13 @@
             </span>
             <span>Select All Permissions</span>
         </label>
+        <RadzenTextBox @bind-Value="_groupFilter"
+                       Placeholder="Filter by group..."
+                       Style="width:16rem;"
+                       @oninput="@((e) => _groupFilter = e.Value?.ToString() ?? string.Empty)" />
     </div>
     <RadzenRow>
-        @foreach (var group in RoleClaimsGrouped ?? [])
+        @foreach (var group in FilteredGroups)
         {
             <RadzenColumn Size="6" SizeMD="6" SizeSM="12">
                 <div class="perm-group">
@@ -97,6 +101,12 @@
     private List<string> groups = [];
 
     bool _selectAll = false;
+    private string _groupFilter = string.Empty;
+
+    private IEnumerable<RolePermissionsDtoCreate> FilteredGroups =>
+        string.IsNullOrWhiteSpace(_groupFilter)
+            ? RoleClaimsGrouped ?? []
+            : (RoleClaimsGrouped ?? []).Where(g => g.Group.Contains(_groupFilter, StringComparison.OrdinalIgnoreCase));
 
     private void OnSelectAllChanged(bool isChecked)
     {

@@ -1,0 +1,98 @@
+﻿@using TrapchumApp.Components.Messageboxes
+
+<div class="msgbox">
+    @* ─── Title bar (drag handle) ─── *@
+    <div class="msgbox-titlebar">
+        <span class="msgbox-titlebar-text">@Title</span>
+        <button class="msgbox-close-btn" @onclick="() => Close(DefaultCloseResult)">✕</button>
+    </div>
+
+    @* ─── Body ─── *@
+    <div class="msgbox-body">
+        @if (Icon != MessageBoxIcon.None)
+        {
+            <RadzenIcon Icon="@IconName" Style="@IconStyle" />
+        }
+        <span class="msgbox-text">@Message</span>
+    </div>
+
+    @* ─── Button bar ─── *@
+    <div class="msgbox-btnbar">
+        @foreach (var btn in GetButtons())
+        {
+            <button class="msgbox-btn" style="@GetButtonStyle(btn.Result)" @onclick="() => Close(btn.Result)">@btn.Label</button>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public string Message { get; set; } = string.Empty;
+    [Parameter] public string Title { get; set; } = "Message";
+    [Parameter] public MessageBoxButtons Buttons { get; set; } = MessageBoxButtons.OK;
+    [Parameter] public MessageBoxIcon Icon { get; set; } = MessageBoxIcon.None;
+    [Parameter] public Dictionary<MessageBoxResult, MessageBoxButtonColor> ButtonColors { get; set; } = [];
+
+    void Close(MessageBoxResult result) => DialogService.Close(result);
+
+    string GetButtonStyle(MessageBoxResult result)
+    {
+        if (ButtonColors.TryGetValue(result, out var color))
+            return color.ToCss();
+        return DefaultButtonColor(result).ToCss();
+    }
+
+    static MessageBoxButtonColor DefaultButtonColor(MessageBoxResult result) => result switch
+    {
+        MessageBoxResult.OK     => MessageBoxButtonColor.Primary,
+        MessageBoxResult.Yes    => MessageBoxButtonColor.Success,
+        MessageBoxResult.No     => MessageBoxButtonColor.Danger,
+        MessageBoxResult.Cancel => MessageBoxButtonColor.Default,
+        MessageBoxResult.Retry  => MessageBoxButtonColor.Warning,
+        MessageBoxResult.Abort  => MessageBoxButtonColor.Danger,
+        MessageBoxResult.Ignore => MessageBoxButtonColor.Dark,
+        _                       => MessageBoxButtonColor.Default
+    };
+
+    MessageBoxResult DefaultCloseResult => Buttons switch
+    {
+        MessageBoxButtons.YesNo => MessageBoxResult.No,
+        MessageBoxButtons.YesNoCancel => MessageBoxResult.Cancel,
+        MessageBoxButtons.OKCancel => MessageBoxResult.Cancel,
+        MessageBoxButtons.RetryCancel => MessageBoxResult.Cancel,
+        MessageBoxButtons.AbortRetryIgnore => MessageBoxResult.Ignore,
+        _ => MessageBoxResult.OK
+    };
+
+    string IconName => Icon switch
+    {
+        MessageBoxIcon.Error       => "error",
+        MessageBoxIcon.Warning     => "warning",
+        MessageBoxIcon.Question    => "help",
+        MessageBoxIcon.Success     => "check_circle",
+        MessageBoxIcon.Information => "info",
+        _                          => "info"
+    };
+
+    string IconStyle => Icon switch
+    {
+        MessageBoxIcon.Error       => "font-size:2rem;color:#d32f2f;flex-shrink:0;",
+        MessageBoxIcon.Warning     => "font-size:2rem;color:#ed6c02;flex-shrink:0;",
+        MessageBoxIcon.Question    => "font-size:2rem;color:#0288d1;flex-shrink:0;",
+        MessageBoxIcon.Success     => "font-size:2rem;color:#2e7d32;flex-shrink:0;",
+        MessageBoxIcon.Information => "font-size:2rem;color:#0288d1;flex-shrink:0;",
+        _                          => "font-size:2rem;color:#757575;flex-shrink:0;"
+    };
+
+    record ButtonDef(string Label, MessageBoxResult Result);
+
+    List<ButtonDef> GetButtons() => Buttons switch
+    {
+        MessageBoxButtons.OK              => [new("OK", MessageBoxResult.OK)],
+        MessageBoxButtons.OKCancel        => [new("OK", MessageBoxResult.OK), new("Cancel", MessageBoxResult.Cancel)],
+        MessageBoxButtons.YesNo           => [new("Yes", MessageBoxResult.Yes), new("No", MessageBoxResult.No)],
+        MessageBoxButtons.YesNoCancel     => [new("Yes", MessageBoxResult.Yes), new("No", MessageBoxResult.No), new("Cancel", MessageBoxResult.Cancel)],
+        MessageBoxButtons.RetryCancel     => [new("Retry", MessageBoxResult.Retry), new("Cancel", MessageBoxResult.Cancel)],
+        MessageBoxButtons.AbortRetryIgnore=> [new("Abort", MessageBoxResult.Abort), new("Retry", MessageBoxResult.Retry), new("Ignore", MessageBoxResult.Ignore)],
+        _                                 => [new("OK", MessageBoxResult.OK)]
+    };
+}

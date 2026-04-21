@@ -103,14 +103,15 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanCategoriess
                 {
                     detailsModel = result.Data.Adapt<LoanCategoryResponse>();
 
-                    IsDetails = true;
+                    var parameters = new Dictionary<string, object?>
+                    {
+                        { "category", detailsModel }
+                    };
 
-                    SelectIndex = 3;
+                    var options = new DialogOptions { Draggable = true, Width = "600px" };
 
-                    tabs!.Reload();
+                    await DialogService.OpenAsync<LCDetailModal>("Category Details", parameters, options);
                 }
-
-                ContextMenuService.Close();
 
                 StateHasChanged();
             }

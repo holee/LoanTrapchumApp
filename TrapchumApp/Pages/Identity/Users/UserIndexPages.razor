@@ -47,6 +47,7 @@
                                 PageSizeOptions="@StorageConstant.PageSizeOptions"
                                 PageSizeChanged="PageSizeChanged"
                                 Style="height: calc(100vh - 220px); overflow: auto;"
+                                CellContextMenu="@OnCellContextMenu"
                                 TItem="VUser"
                                 Data="@AllUsers">
                     <Columns>
@@ -92,17 +93,17 @@
         <RadzenMenuItem Icon="manage_accounts"
                         Click="@(()=>ManageAccount(userId))"
                         Text="Manage User"
-                        Visible="@AdminOnly"
+                        Visible="@AppState.IsAdmin"
                         Value="@userId" />
         <RadzenMenuItem Icon="manage_accounts"
-                        Visible="@AdminOnly"
+                        Visible="@AppState.IsAdmin"
                         Click="@(()=>ManageUserLoanSize(userId))"
                         Text="Set User Loan Size"
                         Value="@userId" />
     <RadzenMenuItem Icon="manage_accounts"
                     Click="@(()=>ChangAccountPassword(userId))"
                     Text="Change Password"
-                    Visible="@AdminOnly"
+                    Visible="@AppState.IsAdmin"
                     Value="@userId" />
     </RadzenMenu>
     );
@@ -208,6 +209,64 @@
         if (result is not null && result==true)
         {
             await LoadAllUsers(filter:filterText);
+        }
+    }
+
+    private void OnCellContextMenu(DataGridCellMouseEventArgs<VUser> args)
+    {
+        if (args.Data is null) return;
+
+        ContextMenuService.Open(args, new List<ContextMenuItem>
+        {
+            new ContextMenuItem
+            {
+                Text = "Manage User",
+                Icon = "manage_accounts",
+                Value = "1",
+                Disabled = !AppState.IsAdmin
+            },
+            new ContextMenuItem
+            {
+                Text = "Set User Loan Size",
+                Icon = "manage_accounts",
+                Value = "2",
+                Disabled = !AppState.IsAdmin
+            },
+            new ContextMenuItem
+            {
+                Text = "Change Password",
+                Icon = "manage_accounts",
+                Value = "3",
+                Disabled = !AppState.IsAdmin
+            }
+        }, (e) =>
+        {
+            ContextMenuService.Close();
+            DoUserAction(e, args);
+        });
+    }
+
+    private void DoUserAction(MenuItemEventArgs e, DataGridCellMouseEventArgs<VUser> args)
+    {
+        if (args.Data is null) return;
+
+        if (int.TryParse(e.Value?.ToString(), out int value))
+        {
+            if (value == 1)
+            {
+                ManageAccount(args.Data.Id);
+                return;
+            }
+            if (value == 2)
+            {
+                ManageUserLoanSize(args.Data.Id);
+                return;
+            }
+            if (value == 3)
+            {
+                ChangAccountPassword(args.Data.Id);
+                return;
+            }
         }
     }
 }

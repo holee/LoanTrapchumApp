@@ -41,6 +41,7 @@
                             PageSizeChanged="@PageSizeChanged"
                             RowSelect="@OnRowSelected"
                             LoadData="@LoadRoleData"
+                            CellContextMenu="@OnCellContextMenu"
                             Data="Roles">
                 <Columns>
                     <RadzenDataGridColumn Property="Id" Title="#"
@@ -149,4 +150,48 @@
 
 
     void OnRowSelected(RoleDto arg) { }
+
+    private void OnCellContextMenu(DataGridCellMouseEventArgs<RoleDto> args)
+    {
+        if (args.Data is null) return;
+
+        ContextMenuService.Open(args, new List<ContextMenuItem>
+        {
+            new ContextMenuItem
+            {
+                Text = "Manage Role",
+                Icon = "manage_accounts",
+                Value = "1"
+            },
+            new ContextMenuItem
+            {
+                Text = "Edit Role",
+                Icon = "edit",
+                Value = "2"
+            }
+        }, (e) =>
+        {
+            ContextMenuService.Close();
+            DoRoleAction(e, args);
+        });
+    }
+
+    private void DoRoleAction(MenuItemEventArgs e, DataGridCellMouseEventArgs<RoleDto> args)
+    {
+        if (args.Data is null) return;
+
+        if (int.TryParse(e.Value?.ToString(), out int value))
+        {
+            if (value == 1)
+            {
+                ManageRolePermissions(args.Data.Id);
+                return;
+            }
+            if (value == 2)
+            {
+                _ = UpdateRole(args.Data.Id);
+                return;
+            }
+        }
+    }
 }

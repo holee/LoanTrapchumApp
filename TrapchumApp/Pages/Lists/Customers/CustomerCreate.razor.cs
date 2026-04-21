@@ -11,9 +11,7 @@ using Applications.Features.Customers.Commands.CreateCustomer;
 
 namespace TrapchumApp.Pages.Lists.Customers;
 
-public partial class CustomerCreate(ILogger<CustomerCreate> logger,
-    INationalityServiceImpl ationalityService,
-    ISalutationServiceImpl salutationService)
+public partial class CustomerCreate(ILogger<CustomerCreate> logger)
 {
     [Parameter] public EventCallback<int> Closed { get; set; } = default!;
 
@@ -32,7 +30,7 @@ public partial class CustomerCreate(ILogger<CustomerCreate> logger,
     protected override async Task OnInitializedAsync()
     {
 
-        await GetAdditionalInformation();
+       // await GetAdditionalInformation();
 
         model.City = "Siem Reap";
 
@@ -44,12 +42,12 @@ public partial class CustomerCreate(ILogger<CustomerCreate> logger,
 
         model.Nationality = "Khmer";
 
-        var rsp1 = await salutationService.GetSalutions();
+        //var rsp1 = await salutationService.GetSalutions();
 
-        if (rsp1.IsSuccess)
-        {
-            Salutations = rsp1.Data!.Select(x => x.Title!).ToList();
-        }
+        //if (rsp1.IsSuccess)
+        //{
+        //    Salutations = rsp1.Data!.Select(x => x.Title!).ToList();
+        //}
 
         model.Photo = "/assets/profiles/profile.png";
 
@@ -84,19 +82,19 @@ public partial class CustomerCreate(ILogger<CustomerCreate> logger,
 
         //Cities = await _addressService.GetCities();
     }
-    private async Task GetSalutations()
-    {
-        var salutations = await salutationService.GetSalutions();
+    //private async Task GetSalutations()
+    //{
+    //    var salutations = await salutationService.GetSalutions();
 
-        if (salutations.IsSuccess)
-        {
-            Salutations = salutations!.Data!.Select(x => x.Title!).ToList();
-        }
-        else
-        {
-            Salutations = [];
-        }
-    }
+    //    if (salutations.IsSuccess)
+    //    {
+    //        Salutations = salutations!.Data!.Select(x => x.Title!).ToList();
+    //    }
+    //    else
+    //    {
+    //        Salutations = [];
+    //    }
+    //}
 
     protected async void FormSubmit()
     {
@@ -175,36 +173,36 @@ public partial class CustomerCreate(ILogger<CustomerCreate> logger,
 
 
 
-    protected async Task AddNewSalutation(KeyboardEventArgs e)
-    {
-        if (e.Code == "Enter")
-        {
-            await salutationService.AddSalution(new Salutation
-            {
-                Title = newSalution
-            });
-            await GetSalutations();
-        }
-    }
-    protected void OnTextChangedSalution(ChangeEventArgs e)
-    {
-        newSalution = e?.Value?.ToString();
-    }
-    protected async Task<IEnumerable<string>?> SearchSalutaions(string searchText = "")
-    {
-        var salution = Salutations?.Where(x => x.StartsWith(searchText, StringComparison.InvariantCultureIgnoreCase))
-                                 .ToList();
-        return await Task.FromResult(salution);
-    }
+    //protected async Task AddNewSalutation(KeyboardEventArgs e)
+    //{
+    //    if (e.Code == "Enter")
+    //    {
+    //        await salutationService.AddSalution(new Salutation
+    //        {
+    //            Title = newSalution
+    //        });
+    //        //await GetSalutations();
+    //    }
+    //}
+    //protected void OnTextChangedSalution(ChangeEventArgs e)
+    //{
+    //    newSalution = e?.Value?.ToString();
+    //}
+    //protected async Task<IEnumerable<string>?> SearchSalutaions(string searchText = "")
+    //{
+    //    var salution = Salutations?.Where(x => x.StartsWith(searchText, StringComparison.InvariantCultureIgnoreCase))
+    //                             .ToList();
+    //    return await Task.FromResult(salution);
+    //}
     protected async Task Close()
     {
         await Closed.InvokeAsync(1);
     }
 
-    protected async Task CloseTab()
-    {
-        await Closed.InvokeAsync();
-    }
+    //protected async Task CloseTab()
+    //{
+    //    await Closed.InvokeAsync();
+    //}
 
 
 }

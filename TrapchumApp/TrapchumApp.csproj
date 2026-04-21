@@ -82,7 +82,7 @@
     <AdditionalFiles Include="Pages\Identity\Shared\_Imports.razor" />
     <AdditionalFiles Include="Pages\Identity\ManageUserLoanSize.razor" />
     <AdditionalFiles Include="Pages\Identity\Permissions.razor" />
-    <AdditionalFiles Include="Pages\Identity\Roles\Index.razor" />
+    <AdditionalFiles Include="Pages\Identity\Roles\RoleIndexPage.razor" />
     <AdditionalFiles Include="Pages\Identity\Roles\ManageRolePermission.razor" />
     <AdditionalFiles Include="Pages\Identity\Roles\RoleCreate.razor" />
     <AdditionalFiles Include="Pages\Identity\SetUserLoanSize.razor" />
@@ -90,7 +90,7 @@
     <AdditionalFiles Include="Pages\Identity\Shared\EmptyLayout.razor" />
     <AdditionalFiles Include="Pages\Identity\Users\CreateNewUser.razor" />
     <AdditionalFiles Include="Pages\Identity\Users\CreditAgentUserCreate.razor" />
-    <AdditionalFiles Include="Pages\Identity\Users\UserPages.razor" />
+    <AdditionalFiles Include="Pages\Identity\Users\UserIndexPages.razor" />
     <AdditionalFiles Include="Pages\Identity\Users\ManageUserPermission.razor" />
     <AdditionalFiles Include="Pages\Identity\Users\ManageUserProfile.razor" />
     <AdditionalFiles Include="Pages\Identity\Users\MangeUserRoles.razor" />
@@ -133,7 +133,7 @@
     <AdditionalFiles Include="Pages\Lists\Departments\DepartmentDetailModal.razor" />
     <AdditionalFiles Include="Pages\Lists\Departments\DepartmentModalCreate.razor" />
     <AdditionalFiles Include="Pages\Lists\Departments\DepartmentModalUpdate.razor" />
-    <AdditionalFiles Include="Pages\Lists\Departments\Index.razor" />
+    <AdditionalFiles Include="Pages\Lists\Departments\DepartmentIndexPage.razor" />
     <AdditionalFiles Include="Pages\Lists\Employees\CreateEmployee.razor" />
     <AdditionalFiles Include="Pages\Lists\Employees\EmployeeComp.razor" />
     <AdditionalFiles Include="Pages\Lists\Employees\EmployeeDetails.razor" />
@@ -156,8 +156,8 @@
     <AdditionalFiles Include="Pages\Lists\OtherNames\GaurantorCreateComp.razor" />
     <AdditionalFiles Include="Pages\Lists\OtherNames\GuarantorAddModal.razor" />
     <AdditionalFiles Include="Pages\Lists\OtherNames\GuarantorDetails.razor" />
-    <AdditionalFiles Include="Pages\Lists\OtherNames\GuarantorEdit.razor" />
-    <AdditionalFiles Include="Pages\Lists\OtherNames\Guarantors.razor" />
+    <AdditionalFiles Include="Pages\Lists\OtherNames\GuarantorEditPage.razor" />
+    <AdditionalFiles Include="Pages\Lists\OtherNames\GuarantorsPage.razor" />
     <AdditionalFiles Include="Pages\Lists\OtherNames\GuarantorsList.razor" />
     <AdditionalFiles Include="Pages\Lists\OtherNames\NamesPage.razor" />
     <AdditionalFiles Include="Pages\Lists\OtherNames\List.razor" />
@@ -167,7 +167,7 @@
     <AdditionalFiles Include="Pages\Lists\OtherNames\NameEditModal.razor" />
     <AdditionalFiles Include="Pages\Lists\SalutationDropDown.razor" />
     <AdditionalFiles Include="Pages\Lists\Vendors\CreateComp.razor" />
-    <AdditionalFiles Include="Pages\Lists\Vendors\IndexPage.razor" />
+    <AdditionalFiles Include="Pages\Lists\Vendors\VendorIndexPage.razor" />
     <AdditionalFiles Include="Pages\Lists\Vendors\VendorCreatePage.razor" />
     <AdditionalFiles Include="Pages\Lists\Vendors\VendorDetailPage.razor" />
     <AdditionalFiles Include="Pages\Lists\Vendors\VendorEditPage.razor" />
@@ -208,7 +208,7 @@
     <AdditionalFiles Include="Pages\Transactions\Loans\LoanCategoriess\LoanCategoryModalCreate.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\LoanCategoriess\LoanCategoryModalEdit.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\LoanCategoriess\LoanCategoryIndex.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\LoanProducts\LoanProductList.razor" />
+    <AdditionalFiles Include="Pages\Transactions\Loans\LoanProducts\LoanProductPage.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\LoanProducts\LoanProductModalCreate.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\LoanProducts\LoanProductModalEdit.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\LoanProducts\LPModalDetail.razor" />

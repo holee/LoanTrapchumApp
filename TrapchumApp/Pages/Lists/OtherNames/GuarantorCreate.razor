@@ -6,6 +6,7 @@
 @using Applications.Features.LoanRequests.Interfaces
 @using Domains.Models.Bases
 @using TrapchumApp.Services
+<PageTitle>Create New Guarantor</PageTitle>
 <EditForm Model="@model" OnValidSubmit="OnSaveChanges">
     <FluentValidationValidator DisableAssemblyScanning="false" />
     <GaurantorCreateComp Model="model" />

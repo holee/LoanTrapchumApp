@@ -7,6 +7,7 @@ using Applications.Features.AdditionalInformations.Command.CreateOccupation;
 using TrapchumApp.Helpers.Extensions;
 using Applications.Features.AdditionalInformations.Queries.GetNationalities;
 using Applications.Responses.Paginations;
+using Applications.Features.AdditionalInformations.Queries.GetSalutaions;
 
 namespace TrapchumApp.Pages.Lists.Customers;
 
@@ -140,7 +141,7 @@ public partial class CreateCustomerInfo(ILogger<CreateCustomerInfo> logger)
 
     private async Task GetNationalities()
     {
-        var command = new GetNationalitiesQuery(0, new QueryParam(0,0));
+        var command = new GetNationalitiesQuery(0, new QueryParam(0, 0));
 
         var rsp = await mediator.Send(command);
 
@@ -150,12 +151,12 @@ public partial class CreateCustomerInfo(ILogger<CreateCustomerInfo> logger)
     private async Task GetSalutations(string? filter = null)
     {
 
-        await Task.CompletedTask;
-        //var rsp = await salutationService.GetSalutions(filter);
 
-        //Salutations = rsp!.Data!.Select(x => x.Title!) ?? [];
+        var comamnd = new GetSalutationsQuery(0, new QueryParam(0, 0));
 
-        //OriginalSalutations = Salutations.Select(x => x) ?? [];
+        var rsp = await mediator.Send(comamnd);
+
+        Salutations = rsp.Items.Select(x=>x.Title!).ToList();
 
     }
 

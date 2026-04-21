@@ -5,77 +5,87 @@
 @using Applications.Features.Employees
 @using Applications.Features.LoanRequests.Interfaces
 @using TrapchumApp.Services
+
 <EditForm Model="model" OnValidSubmit="OnSaveChanges">
     <DataAnnotationsValidator />
-    <div class="row">
-        <div class="col-md-3 text-md-end">
-            <RadzenLabel Component="Name">Loan Category Name <span class="text-danger">*</span></RadzenLabel>
-        </div>
-        <div class="col-md-9">
-            @*   <RadzenFormField> *@
-            <RadzenTextBox @bind-Value="model.LoanCategoryCode"
-                           Style="width:100%;height:33px;font-size:14px"
-                           AutoComplete="true"
-                           Placeholder="Enter Category Name..."
-                           Name="Name" />
-            <ValidationMessage For="@(() => model.LoanCategoryCode)"></ValidationMessage>
-            @*  </RadzenFormField> *@
 
-        </div>
-        <div class="col-md-3 text-md-end mt-3">
-            <RadzenLabel>Status</RadzenLabel>
-        </div>
-        <div class="col-md-9 mt-3">
-            <RadzenCheckBox @bind-Value=@model.IsActive Name="CheckBox1" />
-            <RadzenLabel Component="CheckBox1" Style="margin-left: 8px; vertical-align: middle;">
-                @(model.IsActive == true ? "Is Active" : "Is Inactive")
-            </RadzenLabel>
-        </div>
-        <div class="col-md-3 text-md-end mt-3">
-            <RadzenLabel>Description</RadzenLabel>
-        </div>
-        <div class="col-md-9 mt-3">
-            <RadzenTextBox @bind-Value="model.Description"
-                           Style="width:100%;height:33px;font-size:14px"
-                           AutoComplete="true"
-                           Placeholder="Enter Description..."
-                           Name="Name" />
-            <ValidationMessage For="@(() => model.Description)"></ValidationMessage>
-        </div>
-        <div class="col-md-3 text-md-end mt-3">
-            <RadzenLabel>Description-InKhmer</RadzenLabel>
-        </div>
-        <div class="col-md-9 mt-3">
-            <RadzenTextBox @bind-Value="model.DesInKhmer"
-                           Style="width:100%;height:33px;font-size:14px"
-                           AutoComplete="true"
-                           Placeholder="Enter Description in Khmer..."
-                           Name="Name" />
-            <ValidationMessage For="@(() => model.DesInKhmer)"></ValidationMessage>
-        </div>
-        <div class="col-md-3 text-md-end mt-3">
-            <RadzenLabel>Code</RadzenLabel>
-        </div>
-        <div class="col-md-9 mt-3">
-            <RadzenTextBox @bind-Value="model.Code"
-                           Style="width:100%;height:33px;font-size:14px"
-                           AutoComplete="true"
-                           Placeholder="Enter Code..."
-                           Name="Name" />
-            <ValidationMessage For="@(() => model.Code)"></ValidationMessage>
-        </div>
-    </div>
-    <div class="d-flex justify-content-end gap-3 mt-3">
+    <RadzenRow Gap="0.75rem">
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenStack Gap="0.25rem">
+                <RadzenLabel Component="LoanCategoryCode">
+                    Category Name <span class="text-danger">*</span>
+                </RadzenLabel>
+                <RadzenTextBox @bind-Value="model.LoanCategoryCode"
+                               Style="width:100%;"
+                               Placeholder="Enter Category Name..."
+                               Name="LoanCategoryCode" />
+                <ValidationMessage For="@(() => model.LoanCategoryCode)" />
+            </RadzenStack>
+        </RadzenColumn>
+
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenStack Gap="0.25rem">
+                <RadzenLabel Component="Code">Code</RadzenLabel>
+                <RadzenTextBox @bind-Value="model.Code"
+                               Style="width:100%;"
+                               Placeholder="Enter Code..."
+                               Name="Code" />
+                <ValidationMessage For="@(() => model.Code)" />
+            </RadzenStack>
+        </RadzenColumn>
+
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenStack Gap="0.25rem">
+                <RadzenLabel Component="DesInKhmer">Description (Khmer)</RadzenLabel>
+                <RadzenTextBox @bind-Value="model.DesInKhmer"
+                               Style="width:100%;"
+                               Placeholder="Enter Description in Khmer..."
+                               Name="DesInKhmer" />
+                <ValidationMessage For="@(() => model.DesInKhmer)" />
+            </RadzenStack>
+        </RadzenColumn>
+
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenStack Gap="0.25rem">
+                <RadzenLabel>Status</RadzenLabel>
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                    <RadzenCheckBox @bind-Value="model.IsActive" Name="IsActive" />
+                    <RadzenLabel Component="IsActive">
+                        @(model.IsActive == true ? "Active" : "Inactive")
+                    </RadzenLabel>
+                </RadzenStack>
+            </RadzenStack>
+        </RadzenColumn>
+
+        <RadzenColumn Size="12">
+            <RadzenStack Gap="0.25rem">
+                <RadzenLabel Component="Description">Description</RadzenLabel>
+                <RadzenTextArea @bind-Value="model.Description"
+                                Placeholder="Enter Description..."
+                                Style="width:100%;resize:none;"
+                                Rows="3"
+                                Name="Description" />
+                <ValidationMessage For="@(() => model.Description)" />
+            </RadzenStack>
+        </RadzenColumn>
+    </RadzenRow>
+
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 AlignItems="AlignItems.Center"
+                 JustifyContent="JustifyContent.End"
+                 Gap="0.5rem"
+                 class="rz-mt-3">
         <RadzenButton ButtonStyle="ButtonStyle.Success"
-                      Icon="BtnIconType.Save"
+                      Icon="save"
                       Text="Save"
                       Size="ButtonSize.Small"
                       ButtonType="ButtonType.Submit" />
         <RadzenButton ButtonStyle="ButtonStyle.Danger"
-                      Icon="BtnIconType.Close"
+                      Icon="close"
                       Text="Cancel"
+                      Click="@Cancel"
                       Size="ButtonSize.Small" />
-    </div>
+    </RadzenStack>
 </EditForm>
 
 

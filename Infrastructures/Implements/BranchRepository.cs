@@ -169,7 +169,7 @@ public class BranchRepository(IDbContextFactory<DataContext> contextFactory,
 
         var columnList = SqlColumnHelper.BuildSafeColumnList<VBranch>(columns);
 
-        var sql = $"SELECT {columnList} FROM VBranchs WHERE BranchId = @BranchId";
+        var sql = $"SELECT {columnList} FROM VBranches WHERE BranchId = @BranchId";
 
         return await db.QueryFirstOrDefaultAsync<VBranch>(sql, new { BranchId = branchId });
     }

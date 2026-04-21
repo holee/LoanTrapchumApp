@@ -42,20 +42,6 @@
                             CellContextMenu="@ShowContextMenu"
                             @ref="@_gridCustomer"
                             Data="@VCustomers">
-                <HeaderTemplate>
-                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
-                        <RadzenLabel id="DropDownEditLabel" Text="Filter" Component="DropDownEdit" />
-                        <RadzenDropDown @bind-Value="selectedValue"
-                                        Placeholder="Filter by"
-                                        TValue="int"
-                                        Data="@Filters.CustomerFilters"
-                                        TextProperty="@nameof(ListItem.Name)"
-                                        ValueProperty="@nameof(ListItem.Id)"
-                                        SelectedItemChanged="@SelectedItemChanged"
-                                        Name="DropDownEdit">
-                        </RadzenDropDown>
-                    </RadzenStack>
-                </HeaderTemplate>
                 <Columns>
                     <RadzenDataGridColumn Title="#"
                                           Width="4rem"
@@ -302,3 +288,18 @@
 
 
 }
+
+@* <HeaderTemplate>
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+                        <RadzenLabel id="DropDownEditLabel" Text="Filter" Component="DropDownEdit" />
+                        <RadzenDropDown @bind-Value="selectedValue"
+                                        Placeholder="Filter by"
+                                        TValue="int"
+                                        Data="@Filters.CustomerFilters"
+                                        TextProperty="@nameof(ListItem.Name)"
+                                        ValueProperty="@nameof(ListItem.Id)"
+                                        SelectedItemChanged="@SelectedItemChanged"
+                                        Name="DropDownEdit">
+                        </RadzenDropDown>
+                    </RadzenStack>
+                </HeaderTemplate> *@

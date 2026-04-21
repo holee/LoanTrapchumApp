@@ -60,6 +60,7 @@
                             AllowSorting="true"
                             RowDoubleClick="@OnRowDoubleClick"
                             @ref="@_gridEmployee"
+                            CellContextMenu="@ShowCellContextMenu"
                             TItem="VEmployeeList">
                 <Columns>
                     <RadzenDataGridColumn Context="c"
@@ -147,14 +148,39 @@
 
     void ShowContextMenuWithContent(MouseEventArgs args, string? id)
     {
-        ContextMenuService.Open(args, ds =>
-            @<RadzenMenu Style="font-size:0.8rem;">
-    <RadzenMenuItem Click="@(() => AddDetailsTab(id))" Icon="info" Text="Details"
-                    Value="@id"></RadzenMenuItem>
-    <RadzenMenuItem Click="@(() => AddEditTab(id))" Icon="edit" Text="Edit" Value="@id"></RadzenMenuItem>
-    <RadzenMenuItem Click="@(() => Delete(id))" Icon="delete" Text="Delete" Value="@id"></RadzenMenuItem>
-</RadzenMenu>
-        );
+        ContextMenuService.Open(args, BuildEmployeeMenuItems(), me =>
+        {
+            ContextMenuService.Close();
+            HandleEmployeeAction(me.Value?.ToString(), id);
+        });
+    }
+
+    void ShowCellContextMenu(DataGridCellMouseEventArgs<VEmployeeList> args)
+    {
+        if (args.Data is null) return;
+
+        ContextMenuService.Open(args, BuildEmployeeMenuItems(), me =>
+        {
+            ContextMenuService.Close();
+            HandleEmployeeAction(me.Value?.ToString(), args.Data.EmployeeId);
+        });
+    }
+
+    List<ContextMenuItem> BuildEmployeeMenuItems() =>
+    [
+        new ContextMenuItem { Text = "Details", Icon = "info",   Value = "1" },
+        new ContextMenuItem { Text = "Edit",    Icon = "edit",   Value = "2" },
+        new ContextMenuItem { Text = "Delete",  Icon = "delete", Value = "3" },
+    ];
+
+    void HandleEmployeeAction(string? value, string? id)
+    {
+        switch (value)
+        {
+            case "1": AddDetailsTab(id); break;
+            case "2": AddEditTab(id);    break;
+            case "3": _ = Delete(id);   break;
+        }
     }
 
 }

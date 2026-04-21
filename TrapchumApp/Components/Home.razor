@@ -3,8 +3,10 @@
 @using Applications.Features.Branches
 @using Applications.Features.Currencies
 @using Applications.Features.Customers.Services
+@using Applications.Features.Documents.Dto
 @using Applications.Features.Employees
 @using Applications.Features.LoanRequests.Interfaces
+@using TrapchumApp.Components.FileUploads
 @using TrapchumApp.Services
 @inject IServiceProvider ServiceProvider
 @inject IWebHostEnvironment  Env
@@ -15,3 +17,317 @@
 
 
 <RadzenButton Click="Print">Print</RadzenButton>
+@* ══════════════════════════════════════════════════════════════
+   BlabSelect2 Demo
+   ══════════════════════════════════════════════════════════════ *@
+
+<BlabFileUploader Url="upload/customers/profiles"></BlabFileUploader>
+
+<RadzenCard class="rz-my-4">
+    <h4 class="rz-mb-4">BlabSelect2 Demo</h4>
+
+    <RadzenRow Gap="1rem">
+        @* ── 1. Single select ── *@
+        <RadzenColumn Size="6">
+            <label class="rz-mb-1 d-block"><strong>Single Select</strong></label>
+            <BlabSelect2 TItem="DemoItem" TValue="int"
+                         Data="_demoItems"
+                         ValueSelector="x => x.Id"
+                         TextSelector="x => x.Name"
+                         @bind-Value="_selectedItemId"
+                         Placeholder="Choose a country..."
+                         AllowClear="true" />
+            <small class="rz-mt-1 d-block text-muted">Selected: @_selectedItemId</small>
+        </RadzenColumn>
+
+        @* ── 2. Multi select ── *@
+        <RadzenColumn Size="6">
+            <label class="rz-mb-1 d-block"><strong>Multiple Select</strong></label>
+            <BlabSelect2 TItem="DemoItem" TValue="int"
+                         Data="_demoItems"
+                         ValueSelector="x => x.Id"
+                         TextSelector="x => x.Name"
+                         @bind-Values="_selectedItemIds"
+                         Multiple="true"
+                         Placeholder="Pick countries..."
+                         AllowClear="true" />
+            <small class="rz-mt-1 d-block text-muted">Selected: @string.Join(", ", _selectedItemIds ?? [])</small>
+        </RadzenColumn>
+    </RadzenRow>
+
+    <RadzenRow Gap="1rem" class="rz-mt-4">
+        @* ── 3. Custom template ── *@
+        <RadzenColumn Size="6">
+            <label class="rz-mb-1 d-block"><strong>Custom Item Template</strong></label>
+            <BlabSelect2 TItem="DemoItem" TValue="int"
+                         Data="_demoItems"
+                         ValueSelector="x => x.Id"
+                         TextSelector="x => x.Name"
+                         @bind-Value="_templateItemId"
+                         Placeholder="Select with flag..."
+                         AllowClear="true">
+                <ItemTemplate>
+                    <span>@context.Flag @context.Name</span>
+                </ItemTemplate>
+                <SelectionTemplate>
+                    <span>@context.Flag @context.Name</span>
+                </SelectionTemplate>
+            </BlabSelect2>
+        </RadzenColumn>
+
+        @* ── 4. Async remote search (live from server) ── *@
+        @* <RadzenColumn Size="6">
+            <label class="rz-mb-1 d-block"><strong>Async Search – Server (min 2 chars)</strong></label>
+            <BlabSelect2 TItem="Nationality" TValue="int"
+                         ValueSelector="x => x.NationalityId"
+                         TextSelector="x => x.NationalityName ?? string.Empty"
+                         SearchAsync="SearchNationalitiesAsync"
+                         MinimumInputLength="2"
+                         @bind-Value="_asyncNationalityId"
+                         Placeholder="Search nationalities..." />
+            <small class="rz-mt-1 d-block text-muted">Selected: @_asyncNationalityId</small>
+        </RadzenColumn> *@
+    </RadzenRow>
+</RadzenCard>
+
+@* ══════════════════════════════════════════════════════════════
+   BlabTable Demo
+   ══════════════════════════════════════════════════════════════ *@
+<RadzenCard class="rz-my-4">
+    <h4 class="rz-mb-4">BlabTable Demo</h4>
+
+    <RadzenRow Gap="1rem">
+        @* ── 1. Row-edit mode with footer summary, sticky header, top pagination ── *@
+        <RadzenColumn Size="12">
+            <label class="rz-mb-2 d-block">
+                <strong>Row Edit + Footer Summary + Top Pagination + Sticky Header</strong>
+            </label>
+            <BlabTable TItem="EmployeeDemo"
+                       Data="_tableData"
+                       TotalCount="_tableTotalCount"
+                       LoadData="OnTableLoadData"
+                       PageSize="5"
+                       Striped="true"
+                       Bordered="true"
+                       Hoverable="true"
+                       Compact="true"
+                       Height="380px"
+                       StickyHeader="true"
+                       ShowColumnFilterPicker="true"
+                       ShowSearchBox="true"
+                       Responsive="true"
+                       
+                       SearchPlaceholder="Search employees..."
+                       PaginationPosition="BlabTablePaginationPosition.Top"
+                       EditMode="BlabTableEditMode.Row"
+                       RowEditSave="OnRowEditSave"
+                       RowEditCancel="OnRowEditCancel"
+                       RowClick="OnTableRowClick">
+                <Columns>
+                    <BlabTableColumn TItem="EmployeeDemo" Property="Id" Title="#" Width="4rem" TextAlign="center" />
+                    <BlabTableColumn TItem="EmployeeDemo" Property="FullName" Title="Full Name" Editable="true">
+                        <EditTemplate>
+                            <input type="text" class="blab-dt__search-input" style="width:100%"
+                                   value="@context.FullName"
+                                   @onchange="(e) => context.FullName = e.Value?.ToString() ?? string.Empty" />
+                        </EditTemplate>
+                    </BlabTableColumn>
+                    <BlabTableColumn TItem="EmployeeDemo" Property="Position" Title="Position" Editable="true">
+                        <EditTemplate>
+                            <input type="text" class="blab-dt__search-input" style="width:100%"
+                                   value="@context.Position"
+                                   @onchange="(e) => context.Position = e.Value?.ToString() ?? string.Empty" />
+                        </EditTemplate>
+                    </BlabTableColumn>
+                    <BlabTableColumn TItem="EmployeeDemo" Property="Department" Title="Department" Editable="true">
+                        <EditTemplate>
+                            <select class="blab-dt__length-select" style="width:100%"
+                                    value="@context.Department"
+                                    @onchange="(e) => context.Department = e.Value?.ToString() ?? string.Empty">
+                                <option value="IT">IT</option>
+                                <option value="HR">HR</option>
+                                <option value="Finance">Finance</option>
+                                <option value="Marketing">Marketing</option>
+                                <option value="Loan">Loan</option>
+                                <option value="Admin">Admin</option>
+                                <option value="Operation">Operation</option>
+                            </select>
+                        </EditTemplate>
+                    </BlabTableColumn>
+                    <BlabTableColumn TItem="EmployeeDemo" Property="Salary" Title="Salary" TextAlign="right" Editable="true">
+                        <Template>
+                            <span>@context.Salary.ToString("N2") $</span>
+                        </Template>
+                        <EditTemplate>
+                            <input type="number" class="blab-dt__search-input" style="width:100%;text-align:right"
+                                   value="@context.Salary"
+                                   @onchange="(e) => { if (decimal.TryParse(e.Value?.ToString(), out var v)) context.Salary = v; }" />
+                        </EditTemplate>
+                    </BlabTableColumn>
+                    <BlabTableColumn TItem="EmployeeDemo" Property="JoinDate" Title="Join Date" TextAlign="center">
+                        <Template>
+                            <span>@context.JoinDate.ToString("dd-MMM-yyyy")</span>
+                        </Template>
+                    </BlabTableColumn>
+                </Columns>
+                <FooterSummary>
+                    <tr>
+                        <td style="text-align:center" colspan="2"></td>
+                        <td><strong>Page Total</strong></td>
+                        <td>@context.Select(e => e.Department).Distinct().Count() depts</td>
+                        <td style="text-align:right"><strong>@context.Sum(e => e.Salary).ToString("N2") $</strong></td>
+                        <td style="text-align:center">@context.Count() rows</td>
+                    </tr>
+                </FooterSummary>
+            </BlabTable>
+            <small class="rz-mt-1 d-block text-muted">Selected: @_selectedEmployee &nbsp;|&nbsp; Last edit: @_lastEditAction</small>
+        </RadzenColumn>
+    </RadzenRow>
+
+    <RadzenRow Gap="1rem" class="rz-mt-4">
+        @* ── 2. Cell-edit mode with pagination at top only ── *@
+        <RadzenColumn Size="12">
+            <label class="rz-mb-2 d-block"><strong>Cell Edit + Pagination Top Only</strong></label>
+            <BlabTable TItem="EmployeeDemo"
+                       Data="_tableData2"
+                       TotalCount="_tableTotalCount2"
+                       LoadData="OnTableLoadData2"
+                       PageSize="5"
+                       Striped="true"
+                       Bordered="true"
+                       Hoverable="true"
+                       Responsive="true"
+                       SearchPlaceholder="Search..."
+                       PaginationPosition="BlabTablePaginationPosition.Top"
+                       EditMode="BlabTableEditMode.Cell"
+                       CellEditSave="OnCellEditSave">
+                <Columns>
+                    <BlabTableColumn TItem="EmployeeDemo" Property="Id" Title="#" Width="4rem" TextAlign="center" />
+                    <BlabTableColumn TItem="EmployeeDemo" Property="FullName" Title="Full Name" Editable="true" />
+                    <BlabTableColumn TItem="EmployeeDemo" Property="Position" Title="Position" Editable="true" />
+                    <BlabTableColumn TItem="EmployeeDemo" Property="Department" Title="Department" />
+                    <BlabTableColumn TItem="EmployeeDemo" Property="Salary" Title="Salary" TextAlign="right">
+                        <Template>
+                            <span>@context.Salary.ToString("N2") $</span>
+                        </Template>
+                    </BlabTableColumn>
+                </Columns>
+            </BlabTable>
+            <small class="rz-mt-1 d-block text-muted">Last cell edit: @_lastCellEdit</small>
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+
+@code {
+    // ── BlabUpload demo state ─────────────────────────────
+    private BlabUpload? _profileUpload;
+    private int _blabUploadedCount;
+    private string? _blabLastUploadedName;
+    private string? _blabUploadError;
+
+    private void OnBlabFilesUploaded(List<DocumentDto> files)
+    {
+        _blabUploadedCount = files.Count;
+        _blabLastUploadedName = files.LastOrDefault()?.OriginalName;
+        _blabUploadError = null;
+
+        NotificationService.Notify(
+            NotificationSeverity.Success,
+            "Upload complete",
+            $"{files.Count} file(s) uploaded successfully.");
+    }
+
+    private void OnBlabFileRemoved(DocumentDto file)
+    {
+        _blabUploadedCount = Math.Max(0, _blabUploadedCount - 1);
+
+        NotificationService.Notify(
+            NotificationSeverity.Info,
+            "File removed",
+            file.OriginalName ?? "(unnamed)");
+    }
+
+    private void OnProfileUploaded(List<DocumentDto> files)
+    {
+        var file = files.LastOrDefault();
+        if (file is null) return;
+
+        NotificationService.Notify(
+            NotificationSeverity.Success,
+            "Profile uploaded",
+            file.OriginalName ?? file.NewFileName ?? "(saved)");
+    }
+
+    private void OnBlabUploadError(string message)
+    {
+        _blabUploadError = message;
+
+        NotificationService.Notify(
+            NotificationSeverity.Error,
+            "Upload failed",
+            message);
+    }
+}
+
+@* ══════════════════════════════════════════════════════════════
+   MessageBox Demo
+   ══════════════════════════════════════════════════════════════ *@
+<RadzenCard class="rz-my-4">
+    <h4 class="rz-mb-4">MessageBox Demo</h4>
+    <RadzenRow Gap="0.75rem">
+        <RadzenColumn Size="12" SizeMD="4">
+            <RadzenStack Gap="0.5rem">
+                <label><strong>Basic</strong></label>
+                <RadzenButton Text="Information" Icon="info"
+                              ButtonStyle="ButtonStyle.Info"
+                              Size="ButtonSize.Small"
+                              Click="@MsgDemo_Info" />
+                <RadzenButton Text="Success" Icon="check_circle"
+                              ButtonStyle="ButtonStyle.Success"
+                              Size="ButtonSize.Small"
+                              Click="@MsgDemo_Success" />
+                <RadzenButton Text="Warning" Icon="warning"
+                              ButtonStyle="ButtonStyle.Warning"
+                              Size="ButtonSize.Small"
+                              Click="@MsgDemo_Warning" />
+                <RadzenButton Text="Error" Icon="error"
+                              ButtonStyle="ButtonStyle.Danger"
+                              Size="ButtonSize.Small"
+                              Click="@MsgDemo_Error" />
+            </RadzenStack>
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeMD="4">
+            <RadzenStack Gap="0.5rem">
+                <label><strong>Confirm Dialogs</strong></label>
+                <RadzenButton Text="Yes / No" Icon="help"
+                              ButtonStyle="ButtonStyle.Primary"
+                              Size="ButtonSize.Small"
+                              Click="@MsgDemo_YesNo" />
+                <RadzenButton Text="Yes / No / Cancel" Icon="help_outline"
+                              ButtonStyle="ButtonStyle.Secondary"
+                              Size="ButtonSize.Small"
+                              Click="@MsgDemo_YesNoCancel" />
+                <RadzenButton Text="OK / Cancel" Icon="task_alt"
+                              ButtonStyle="ButtonStyle.Light"
+                              Size="ButtonSize.Small"
+                              Click="@MsgDemo_OKCancel" />
+            </RadzenStack>
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeMD="4">
+            <RadzenStack Gap="0.5rem">
+                <label><strong>Advanced</strong></label>
+                <RadzenButton Text="Retry / Cancel" Icon="refresh"
+                              ButtonStyle="ButtonStyle.Warning"
+                              Size="ButtonSize.Small"
+                              Click="@MsgDemo_RetryCancel" />
+                <RadzenButton Text="Abort / Retry / Ignore" Icon="report_problem"
+                              ButtonStyle="ButtonStyle.Danger"
+                              Size="ButtonSize.Small"
+                              Click="@MsgDemo_AbortRetryIgnore" />
+            </RadzenStack>
+        </RadzenColumn>
+    </RadzenRow>
+    <div class="rz-mt-3">
+        <small class="text-muted">Last result: <strong>@_msgBoxLastResult</strong></small>
+    </div>
+</RadzenCard>

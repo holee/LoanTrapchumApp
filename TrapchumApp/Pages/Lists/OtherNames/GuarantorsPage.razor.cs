@@ -6,10 +6,10 @@ using Radzen.Blazor;
 
 namespace TrapchumApp.Pages.Lists.OtherNames
 {
-    public partial class Guarantors
+    public partial class GuarantorsPage
     {
         private readonly IGuarantorServiceImpl _gService;
-        public Guarantors(IGuarantorServiceImpl gService)
+        public GuarantorsPage(IGuarantorServiceImpl gService)
         {
             _gService = gService;
         }

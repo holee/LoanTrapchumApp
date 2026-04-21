@@ -40,13 +40,13 @@
                 <Profiles UserId="@userId" />
             </RadzenStack>
         </RadzenStack>
-    </RadzenHeader> 
+    </RadzenHeader>
     <SectionOutlet SectionName="FabMenu"></SectionOutlet>
     <RadzenSidebar Responsive="false" Style="width: max-content;">
-        <RadzenPanelMenu DisplayStyle="@(sidebarExpanded? MenuItemDisplayStyle.IconAndText: MenuItemDisplayStyle.Icon)">
+        <RadzenPanelMenu DisplayStyle="@(sidebarExpanded ? MenuItemDisplayStyle.IconAndText : MenuItemDisplayStyle.Icon)">
             <RadzenPanelMenuItem Path="/" Text="សហគ្រាសបញ្ចាំទ្រព្យជុំ" Icon="dashboard" />
         </RadzenPanelMenu>
-        <RadzenPanelMenu DisplayStyle="@(sidebarExpanded? MenuItemDisplayStyle.IconAndText: MenuItemDisplayStyle.Icon)"
+        <RadzenPanelMenu DisplayStyle="@(sidebarExpanded ? MenuItemDisplayStyle.IconAndText : MenuItemDisplayStyle.Icon)"
                          ShowArrow="sidebarExpanded">
             <AuthorizeView>
                 <Authorized>
@@ -77,7 +77,6 @@
                     <RadzenPanelMenuItem Text="Branches" Icon="auto_awesome">
                         <RadzenPanelMenuItem Text="Branches List"
                                              Icon="color_lens"
-                                             Visible="@bState.IsAdmin"
                                              Path="/App/Branches" />
                     </RadzenPanelMenuItem>
                 </Authorized>
@@ -105,11 +104,13 @@
                         <RadzenPanelMenuItem Text="Change Credit Agent" Icon="@IconNames.SwitchAccount"
                                              Path="@($"/App/Loans/Disbursments/Credit-Agent/{branchId}/Branches")" />
                     </RadzenPanelMenuItem>
-                    @if (bState is { IsAccount: true, State: true })
+
+                    @if (bState.IsAccount && bState.State)
                     {
                         <LoanManagementItems BranchId="@branchId"
                                              BranchState="@bState.State" />
                     }
+
                     <RadzenPanelMenuItem Text="Loan Management" Icon="dataset" Visible="@bState.IsCreditAgent">
                         <RadzenPanelMenuItem Text="Customers" Icon="group"
                                              Path="@($"/App/Customers/{branchId}/Branches")" />

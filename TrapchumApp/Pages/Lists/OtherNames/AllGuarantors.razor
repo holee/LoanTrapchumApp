@@ -36,7 +36,8 @@
                 PageSizeChanged="@ChangedPageSize"
                 PagerPosition="PagerPosition.Bottom"
                 RowSelect="@OnRowSelected"
-                LoadData="@LoadGuarantors">
+                LoadData="@LoadGuarantors"
+                CellContextMenu="@ShowCellContextMenu">
     <HeaderTemplate>
     
     </HeaderTemplate>
@@ -133,19 +134,39 @@
 @code {
     void ShowContextMenuWithContent(MouseEventArgs args, string? id)
     {
-        ContextMenuService.Open(args, ds =>
-    @<RadzenMenu Style="font-size:0.8rem;">
-    <RadzenMenuItem Icon="info"
-                    Click="@(()=>GetGuarantorDetails(id))"
-                    Text="Guarantor Details" Value="@id"></RadzenMenuItem>
-    <RadzenMenuItem Icon="edit"
-                    Click="@(()=>GetEditGuarantor(id))"
-                    Text="Edit" Value="@id"></RadzenMenuItem>
-    <RadzenMenuItem Icon="delete"
-                    Click="@(()=>DeleteGuarantorAsync(id))"
-                    Text="Delete" Value="@id"></RadzenMenuItem>
-</RadzenMenu>
-    );
+        ContextMenuService.Open(args, BuildGuarantorMenuItems(), me =>
+        {
+            ContextMenuService.Close();
+            HandleGuarantorAction(me.Value?.ToString(), id);
+        });
+    }
+
+    void ShowCellContextMenu(DataGridCellMouseEventArgs<VGuarantor> args)
+    {
+        if (args.Data is null) return;
+
+        ContextMenuService.Open(args, BuildGuarantorMenuItems(), me =>
+        {
+            ContextMenuService.Close();
+            HandleGuarantorAction(me.Value?.ToString(), args.Data.Id);
+        });
+    }
+
+    List<ContextMenuItem> BuildGuarantorMenuItems() =>
+    [
+        new ContextMenuItem { Text = "Details", Icon = "info",   Value = "1" },
+        new ContextMenuItem { Text = "Edit",    Icon = "edit",   Value = "2" },
+        new ContextMenuItem { Text = "Delete",  Icon = "delete", Value = "3" },
+    ];
+
+    void HandleGuarantorAction(string? value, string? id)
+    {
+        switch (value)
+        {
+            case "1": _ = GetGuarantorDetails(id); break;
+            case "2": _ = GetEditGuarantor(id);    break;
+            case "3": _ = DeleteGuarantorAsync(id); break;
+        }
     }
 
     void OnRowSelected(VGuarantor arg) { }

@@ -8,6 +8,9 @@ namespace TrapchumApp.Pages.Identity
     public partial class SetUserLoanSize
     {
         private readonly ISettingServiceImpl _settingService;
+        [Parameter, EditorRequired] public string UserId { get; set; } = string.Empty;
+
+        private UserLoanSizeDtoCreate model = new UserLoanSizeDtoCreate();
 
         public SetUserLoanSize(ISettingServiceImpl settingService)
         {
@@ -20,9 +23,7 @@ namespace TrapchumApp.Pages.Identity
             model.StartDate = DateTime.Now;
             base.OnInitialized();
         }
-        [Parameter, EditorRequired] public string UserId { get; set; } = string.Empty;
 
-        UserLoanSizeDtoCreate model = new UserLoanSizeDtoCreate();
 
         async Task HandleFormSubmit()
         {
@@ -32,13 +33,16 @@ namespace TrapchumApp.Pages.Identity
             if (!resp.IsSuccess)
             {
                 NotificationService.Notify(NotificationSeverity.Error, resp.ErrMessage);
+
+                _toastService.ShowError("Loan Size", "Failed to set loan size");
+
                 return;
             }
-            else
-            {
-                NotificationService.Notify(NotificationSeverity.Success, "Loan Size was seeting");
-                DialogService.Close(true);
-            }
+
+            _toastService.ShowSuccess("Loan Size", "Loan Size was seeting");
+
+            DialogService.Close(true);
+
         }
         private void StartDateChanged(DateTime? args)
         {

@@ -11,12 +11,12 @@ using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Lists.Departments
 {
-    public partial class Index
+    public partial class DepartmentIndexPage
     {
 
         private readonly IDepartmentService _depService;
 
-        public Index(IDepartmentService departmentService)
+        public DepartmentIndexPage(IDepartmentService departmentService)
         {
             _depService = departmentService;
         }

@@ -21,7 +21,9 @@ public partial class CustomerNewCreate
     public CustomerNewCreate(IFileUploadServiceImp fileUploadService, INationalityServiceImpl ationalityService, ISalutationServiceImpl salutationService)
     {
         _fileUploadService = fileUploadService;
+
         _nationalityService = ationalityService;
+
         _salutationService = salutationService;
     }
 
@@ -61,14 +63,8 @@ public partial class CustomerNewCreate
 
         CustomerModel.CreatedBy = _userId;
 
-        //var rsp1 = await _salutationService.GetSalutions();
 
-        //if (rsp1.IsSuccess)
-        //{
-        //    Salutations = rsp1.Data!.Select(x => x.Title!).ToList();
-        //}
-
-        CustomerModel.Photo = "/Profiles/profile.png";
+        CustomerModel.Photo = "/assets/profiles/profile.png";
 
         await base.OnInitializedAsync();
     }
@@ -118,7 +114,7 @@ public partial class CustomerNewCreate
 
         CustomerModel.EntType = EntityTypes.Customer.ToString();
 
-        CustomerModel.Photo ??= "/Profiles/profile.png";
+        CustomerModel.Photo ??= "/assets/profiles/profile.png";
 
         var rsp = await mediator.Send(new CreateCustomerCommand(CustomerModel));
 

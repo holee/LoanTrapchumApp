@@ -19,7 +19,7 @@ namespace TrapchumApp.Pages.Lists.Employees
         protected override void OnInitialized()
         {
 
-            model.Photo = "/Profiles/Profile.png";
+            model.Photo = "/assets/profiles/profile.png";
 
             base.OnInitialized();
         }
@@ -36,14 +36,16 @@ namespace TrapchumApp.Pages.Lists.Employees
 
             if (rsp.IsSuccess())
             {
-                NotificationService.Notify(NotificationSeverity.Success, "New Employee was Created");
+                _toastService.ShowSuccess("Employee","New Employee was Created");
+
                 await OnClose.InvokeAsync();
+
                 await UpdateStateChanged.InvokeAsync(rsp.Value);
 
             }
             else
             {
-                NotificationService.Notify(NotificationSeverity.Error, rsp.GetMessage());
+                _toastService.ShowError("Employee", rsp.GetMessage());
             }
         }
 

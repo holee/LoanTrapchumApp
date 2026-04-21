@@ -40,6 +40,7 @@
                             AllowSorting="true"
                             PageSizeOptions="@StorageConstant.PageSizeOptions"
                             PageSizeChanged="@PageSizeChanged"
+                            CellContextMenu="@ShowCellContextMenu"
                             Data="@Names">
                 <Columns>
                     <RadzenDataGridColumn Title="#"
@@ -145,16 +146,45 @@
 @code {
     void ShowContextMenuWithContent(MouseEventArgs args, VOtherNames e)
     {
-        ContextMenuService.Open(args, ds =>
-    @<RadzenMenu Style="font-size:0.8rem;">
-        <RadzenMenuItem Click="@(() => OpenDetailTab(e.Id, e.AltName))" Icon="info" Text="Details" Value="@e.Id"></RadzenMenuItem>
-        <RadzenMenuItem Click="@(() => OpenEditTab(e.Id, e.AltName))" Icon="edit" Text="Edit" Value="@e.Id"></RadzenMenuItem>
-        <RadzenMenuItem Click="@(() => OnDelete(e.Id))" Icon="delete" Text="Delete" Value="@e.Id"></RadzenMenuItem>
-        <RadzenMenuItem Click="@(() => ConvertToEmployee(e.Id))" Icon="subdirectory_arrow_right" Text="To Employee" Value="@e"></RadzenMenuItem>
-        <RadzenMenuItem Click="@(() => ConvertToCustomer(e.Id))" Icon="subdirectory_arrow_right" Text="To Customer" Value="@e"></RadzenMenuItem>
-        <RadzenMenuItem Click="@(() => ConvertToVedor(e.Id))" Icon="subdirectory_arrow_right" Text="To Vendor" Value="@e"></RadzenMenuItem>
-    </RadzenMenu>
-    );
+        ContextMenuService.Open(args, BuildNamesMenuItems(e), me =>
+        {
+            ContextMenuService.Close();
+            HandleNameAction(me.Value?.ToString(), e);
+        });
+    }
+
+    void ShowCellContextMenu(DataGridCellMouseEventArgs<VOtherNames> args)
+    {
+        if (args.Data is null) return;
+
+        ContextMenuService.Open(args, BuildNamesMenuItems(args.Data), me =>
+        {
+            ContextMenuService.Close();
+            HandleNameAction(me.Value?.ToString(), args.Data);
+        });
+    }
+
+    List<ContextMenuItem> BuildNamesMenuItems(VOtherNames e) =>
+    [
+        new ContextMenuItem { Text = "Details",     Icon = "info",                    Value = "1" },
+        new ContextMenuItem { Text = "Edit",         Icon = "edit",                    Value = "2" },
+        new ContextMenuItem { Text = "Delete",       Icon = "delete",                  Value = "3" },
+        new ContextMenuItem { Text = "To Employee",  Icon = "subdirectory_arrow_right", Value = "4" },
+        new ContextMenuItem { Text = "To Customer",  Icon = "subdirectory_arrow_right", Value = "5" },
+        new ContextMenuItem { Text = "To Vendor",    Icon = "subdirectory_arrow_right", Value = "6" },
+    ];
+
+    void HandleNameAction(string? value, VOtherNames e)
+    {
+        switch (value)
+        {
+            case "1": OpenDetailTab(e.Id, e.AltName); break;
+            case "2": OpenEditTab(e.Id, e.AltName);   break;
+            case "3": _ = OnDelete(e.Id);             break;
+            case "4": _ = ConvertToEmployee(e.Id);    break;
+            case "5": _ = ConvertToCustomer(e.Id);    break;
+            case "6": _ = ConvertToVedor(e.Id);       break;
+        }
     }
 }
 

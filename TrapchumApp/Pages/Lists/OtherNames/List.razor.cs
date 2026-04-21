@@ -124,7 +124,7 @@ public partial class List
             Draggable = true
         };
 
-        var result = await DialogService.OpenAsync<GuarantorEdit>($"Edit Guarantor #{id}", param, options);
+        var result = await DialogService.OpenAsync<GuarantorEditPage>($"Edit Guarantor #{id}", param, options);
 
         if (((bool)result) == true)
         {

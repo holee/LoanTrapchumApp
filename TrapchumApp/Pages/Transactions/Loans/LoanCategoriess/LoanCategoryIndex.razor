@@ -41,6 +41,9 @@
                             PageSizeChanged="@PageChanged"
                             LoadData="@LoadData"
                             IsLoading="@isLoading"
+                            TItem="VlCategoryList"
+                            CellContextMenu="@OnCellContextMenu"
+                            RowRender="@OnRowRender"
                             Data="@vLCategories">
                 <Columns>
                     <RadzenDataGridColumn Width="5rem"
@@ -48,7 +51,7 @@
                                           Filterable="false"
                                           Title="#" Context="h">
                         <Template>
-                            @(vLCategories.IndexOf(h) + 1)
+                            @h.RowIndex
                         </Template>
                     </RadzenDataGridColumn>
                     <RadzenDataGridColumn Title="Category"
@@ -61,16 +64,19 @@
                     <RadzenDataGridColumn Title="Description-Khmer"
                                           Filterable="false"
                                           Property="@nameof(VlCategoryList.DesInKhmer)" />
-                    <RadzenDataGridColumn Width="5rem"
+                    <RadzenDataGridColumn Width="7rem"
                                           Title="Status"
                                           Sortable="false"
                                           Filterable="false"
                                           TextAlign="TextAlign.Center"
                                           Context="h">
                         <Template>
-                            <RadzenCheckBox TValue="bool?"
-                                            Value="@h.IsActive"
-                                            Change="@((arg)=>DeactiveOrActive(arg,h))" />
+                            <span @onclick="@(() => DeactiveOrActive(h.IsActive != true, h))"
+                                  style="cursor:pointer;">
+                                <RadzenBadge BadgeStyle="@(h.IsActive == true ? BadgeStyle.Success : BadgeStyle.Danger)"
+                                             Text="@(h.IsActive == true ? "Active" : "Inactive")"
+                                             Style="font-size:0.7rem;" />
+                            </span>
                         </Template>
                     </RadzenDataGridColumn>
                     <RadzenDataGridColumn Width="5rem"
@@ -95,11 +101,53 @@
     {
         ContextMenuService.Open(args, ds =>
     @<RadzenMenu Style="font-size:0.8rem;">
-    <RadzenMenuItem Click="@(() => Details(loanCategory.LoanCategoryId))" Icon="info" Text="Details" Value="@loanCategory"></RadzenMenuItem>
-    <RadzenMenuItem Click="@(() => EditCategory(loanCategory.LoanCategoryId))" Icon="edit" Text="Edit" Value="@loanCategory"></RadzenMenuItem>
-    <RadzenMenuItem Click="@(() => OnDelete(loanCategory))" Icon="delete" Text="Delete" Value="@loanCategory"></RadzenMenuItem>
+    <RadzenMenuItem Click="@(() => Details(loanCategory.LoanCategoryId))" Icon="info" Text="Details" Value="@loanCategory" />
+    <RadzenMenuItem Click="@(() => EditCategory(loanCategory.LoanCategoryId))" Icon="edit" Text="Edit" Value="@loanCategory" />
+    <RadzenMenuItem Click="@(() => OnDelete(loanCategory))" Icon="delete" Text="Delete" Value="@loanCategory" />
 </RadzenMenu>
     );
+    }
+
+    void OnCellContextMenu(DataGridCellMouseEventArgs<VlCategoryList> args)
+    {
+        if (args.Data is null) return;
+
+        ContextMenuService.Open(args, new List<ContextMenuItem>
+        {
+            new ContextMenuItem { Text = "Details",  Icon = "info",   Value = "1" },
+            new ContextMenuItem { Text = "Edit",     Icon = "edit",   Value = "2" },
+            new ContextMenuItem { Text = "Delete",   Icon = "delete", Value = "3" },
+        }, e =>
+        {
+            ContextMenuService.Close();
+            DoCategoryAction(e, args);
+        });
+    }
+
+    void DoCategoryAction(MenuItemEventArgs e, DataGridCellMouseEventArgs<VlCategoryList> args)
+    {
+        if (args.Data is null) return;
+
+        if (int.TryParse(e.Value?.ToString(), out int value))
+        {
+            if (value == 1) { _ = Details(args.Data.LoanCategoryId);   return; }
+            if (value == 2) { _ = EditCategory(args.Data.LoanCategoryId); return; }
+            if (value == 3) { _ = OnDelete(args.Data);                 return; }
+        }
+    }
+
+    void OnRowRender(RowRenderEventArgs<VlCategoryList> args)
+    {
+
+        if (args.Data is null) return;
+
+        if (args.Data.IsActive == false)
+        {
+            args.Attributes.Add("style", "color:var(--rz-color-text-disabled)");
+        }
+
+        args.Data.RowIndex = args.Index + 1;
+
     }
 }
 

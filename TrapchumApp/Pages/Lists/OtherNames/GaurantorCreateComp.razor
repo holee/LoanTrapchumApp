@@ -7,110 +7,159 @@
 @using Applications.Features.LoanRequests.Interfaces
 @using Domains.Models.Bases
 @using TrapchumApp.Services
-<RadzenFieldset>
+
+<style>
+    .guarantor-label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--rz-text-secondary-color);
+    }
+    .status-badge {
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 2px 10px;
+        border-radius: 12px;
+    }
+    .status-active   { background-color: var(--rz-success-lighter); color: var(--rz-success-dark); }
+    .status-inactive { background-color: var(--rz-danger-lighter);  color: var(--rz-danger-dark);  }
+</style>
+
+<RadzenFieldset AllowCollapse="false">
     <HeaderTemplate>
-        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
-            <RadzenIcon Icon="contacts"/>
-            <strong>Contact</strong>
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.4rem">
+            <RadzenIcon Icon="contacts" Style="color:var(--rz-primary)" />
+            <strong>Contact Information</strong>
         </RadzenStack>
     </HeaderTemplate>
     <ChildContent>
-        <RadzenRow class="rz-my-2">
-            <RadzenColumn Size="2">
-                <RadzenLabel>Contact Name</RadzenLabel>
+
+        @* ── Row 1: Khmer Name / Latin Name / Status ── *@
+        <RadzenRow AlignItems="AlignItems.Start" class="rz-mb-3">
+            <RadzenColumn Size="12" SizeMD="5">
+                <RadzenStack Gap="0.25rem">
+                    <RadzenLabel Text="Khmer Name *" class="guarantor-label" />
+                    <RadzenTextBox @bind-Value="Model.AltName"
+                                   class="rz-w-100"
+                                   Placeholder="ឈ្មោះជាភាសាខ្មែរ..." />
+                    <ValidationMessage For="@(() => Model.AltName)" />
+                </RadzenStack>
             </RadzenColumn>
-            <RadzenColumn Size="10">
-                <RadzenRow>
-                    <RadzenColumn Size="5">
-                        <RadzenTextBox @bind-Value="Model.AltName"
-                                       class="rz-w-100"
-                                       Placeholder="Khmer Name"/>
-                        <ValidationMessage For="@(() => Model.AltName)"></ValidationMessage>
-                    </RadzenColumn>
-                    <RadzenColumn Size="5">
-                        <RadzenTextBox @bind-Value="Model.Name"
-                                       class="rz-w-100"
-                                       Change="SetFirstName"
-                                       Placeholder="Your Name"/>
-                    </RadzenColumn>
-                    <RadzenColumn Size="2">
-                        <div class="text-start">
-                            <RadzenCheckBox TValue="bool?" @bind-Value="Model.IsActive" Name="IsActive"/>
-                            <RadzenLabel Component="IsActive"
-                                         Text="@(Model.IsActive == true ? "Active" : "In Active")"/>
-                        </div>
-                    </RadzenColumn>
-                </RadzenRow>
+            <RadzenColumn Size="12" SizeMD="5">
+                <RadzenStack Gap="0.25rem">
+                    <RadzenLabel Text="Latin Name" class="guarantor-label" />
+                    <RadzenTextBox @bind-Value="Model.Name"
+                                   class="rz-w-100"
+                                   Change="SetFirstName"
+                                   Placeholder="Full name in Latin..." />
+                </RadzenStack>
             </RadzenColumn>
-        </RadzenRow>
-        <RadzenRow class="rz-my-2">
-            <RadzenColumn Size="2">
-                <RadzenLabel>Contact Name</RadzenLabel>
-            </RadzenColumn>
-            <RadzenColumn Size="10">
-                <RadzenRow>
-                    <RadzenColumn Size="2">
-                        <RadzenDropDown TValue="string"
-                                        Data="StorageConstant.Salutations"
-                                        TextProperty="@nameof(Salutations.label)"
-                                        ValueProperty="@nameof(Salutations.value)"
-                                        class="rz-w-100"
-                                        @bind-Value="Model.Gender">
-                        </RadzenDropDown>
-                        <ValidationMessage For="@(() => Model.Gender)"/>
-                    </RadzenColumn>
-                    <RadzenColumn Size="4">
-                        <RadzenTextBox Placeholder="First Name..."
-                                       class="rz-w-100"
-                                       @bind-Value="Model.FirstName"/>
-                        <ValidationMessage For="@(() => Model.FirstName)"/>
-                    </RadzenColumn>
-                    <RadzenColumn Size="2">
-                        <RadzenTextBox class="rz-w-100"
-                                       Placeholder="Middle Name..."
-                                       @bind-Value="Model.MiddleName"/>
-                    </RadzenColumn>
-                    <RadzenColumn Size="4">
-                        <RadzenTextBox class="rz-w-100"
-                                       Placeholder="Last Name"
-                                       @bind-Value="Model.LastName"/>
-                    </RadzenColumn>
-                </RadzenRow>
+            <RadzenColumn Size="12" SizeMD="2">
+                <RadzenStack Gap="0.25rem">
+                    <RadzenLabel Text="Status" class="guarantor-label" />
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.4rem">
+                        <RadzenCheckBox TValue="bool?" @bind-Value="Model.IsActive" Name="IsActive" />
+                        <span class="status-badge @(Model.IsActive == true ? "status-active" : "status-inactive")">
+                            <RadzenIcon Icon="@(Model.IsActive == true ? "check_circle" : "cancel")"
+                                        Style="font-size:0.72rem;vertical-align:middle" />
+                            @(Model.IsActive == true ? "Active" : "Inactive")
+                        </span>
+                    </RadzenStack>
+                </RadzenStack>
             </RadzenColumn>
         </RadzenRow>
-        <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
-            <RadzenColumn Size="2">
-                <RadzenLabel>Contact Number</RadzenLabel>
+
+        @* ── Row 2: Title / First / Middle / Last ── *@
+        <RadzenRow AlignItems="AlignItems.Start" class="rz-mb-3">
+            <RadzenColumn Size="12" SizeMD="2">
+                <RadzenStack Gap="0.25rem">
+                    <RadzenLabel Text="Title" class="guarantor-label" />
+                    <RadzenDropDown TValue="string"
+                                    Data="StorageConstant.Salutations"
+                                    TextProperty="@nameof(Salutations.label)"
+                                    ValueProperty="@nameof(Salutations.value)"
+                                    class="rz-w-100"
+                                    Placeholder="Mr/Ms..."
+                                    @bind-Value="Model.Gender" />
+                    <ValidationMessage For="@(() => Model.Gender)" />
+                </RadzenStack>
             </RadzenColumn>
-            <RadzenColumn Size="10">
-                <RadzenRow AlignItems="AlignItems.Center">
-                    <RadzenColumn Size="4">
-                        <RadzenTextBox Placeholder="Phone Number"
-                                       class="w-100"
-                                       @bind-Value="Model.Phone"/>
-                    </RadzenColumn>
-                    <RadzenColumn Size="4">
-                        <RadzenTextBox Placeholder="Alternate Phone"
-                                       class="rz-w-100"
-                                       @bind-Value="Model.AltPhone"/>
-                    </RadzenColumn>
-                    <RadzenColumn Size="4">
-                        <RadzenTextBox Placeholder="Email..."
-                                       class="rz-w-100"
-                                       @bind-Value="Model.EmailAddress"/>
-                    </RadzenColumn>
-                </RadzenRow>
+            <RadzenColumn Size="12" SizeMD="4">
+                <RadzenStack Gap="0.25rem">
+                    <RadzenLabel Text="First Name *" class="guarantor-label" />
+                    <RadzenTextBox Placeholder="First name..."
+                                   class="rz-w-100"
+                                   @bind-Value="Model.FirstName" />
+                    <ValidationMessage For="@(() => Model.FirstName)" />
+                </RadzenStack>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="2">
+                <RadzenStack Gap="0.25rem">
+                    <RadzenLabel Text="Middle" class="guarantor-label" />
+                    <RadzenTextBox class="rz-w-100"
+                                   Placeholder="Middle..."
+                                   @bind-Value="Model.MiddleName" />
+                </RadzenStack>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="4">
+                <RadzenStack Gap="0.25rem">
+                    <RadzenLabel Text="Last Name" class="guarantor-label" />
+                    <RadzenTextBox class="rz-w-100"
+                                   Placeholder="Last name..."
+                                   @bind-Value="Model.LastName" />
+                </RadzenStack>
             </RadzenColumn>
         </RadzenRow>
-        <RadzenRow AlignItems="AlignItems.Center" class="rz-mb-2">
-            <RadzenColumn Size="2">
-                <RadzenLabel>Note</RadzenLabel>
+
+        @* ── Row 3: Phone / Alt Phone / Email ── *@
+        <RadzenRow AlignItems="AlignItems.Start" class="rz-mb-3">
+            <RadzenColumn Size="12" SizeMD="4">
+                <RadzenStack Gap="0.25rem">
+                    <RadzenLabel Text="Phone Number" class="guarantor-label" />
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+                        <RadzenIcon Icon="phone" Style="color:var(--rz-success);font-size:1rem" />
+                        <RadzenTextBox Placeholder="e.g. 012 345 678"
+                                       class="rz-w-100"
+                                       @bind-Value="Model.Phone" />
+                    </RadzenStack>
+                </RadzenStack>
             </RadzenColumn>
-            <RadzenColumn Size="10">
-                <RadzenTextArea class="rz-w-100"
-                                @bind-Value="Model.Description"></RadzenTextArea>
+            <RadzenColumn Size="12" SizeMD="4">
+                <RadzenStack Gap="0.25rem">
+                    <RadzenLabel Text="Alternate Phone" class="guarantor-label" />
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+                        <RadzenIcon Icon="phone_forwarded" Style="color:var(--rz-info);font-size:1rem" />
+                        <RadzenTextBox Placeholder="Alternate number..."
+                                       class="rz-w-100"
+                                       @bind-Value="Model.AltPhone" />
+                    </RadzenStack>
+                </RadzenStack>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="4">
+                <RadzenStack Gap="0.25rem">
+                    <RadzenLabel Text="Email" class="guarantor-label" />
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.25rem">
+                        <RadzenIcon Icon="email" Style="color:var(--rz-warning);font-size:1rem" />
+                        <RadzenTextBox Placeholder="email@example.com"
+                                       class="rz-w-100"
+                                       @bind-Value="Model.EmailAddress" />
+                    </RadzenStack>
+                </RadzenStack>
             </RadzenColumn>
         </RadzenRow>
+
+        @* ── Row 4: Note ── *@
+        <RadzenRow>
+            <RadzenColumn Size="12">
+                <RadzenStack Gap="0.25rem">
+                    <RadzenLabel Text="Note / Remark" class="guarantor-label" />
+                    <RadzenTextArea class="rz-w-100"
+                                    Rows="3"
+                                    Placeholder="Additional notes..."
+                                    @bind-Value="Model.Description" />
+                </RadzenStack>
+            </RadzenColumn>
+        </RadzenRow>
+
     </ChildContent>
 </RadzenFieldset>
 
