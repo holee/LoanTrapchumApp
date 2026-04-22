@@ -47,6 +47,7 @@ using Applications.Features.Holidays.Queries.GetActiveHolidays;
 using Applications.Features.Holidays.Queries.GetHolidayByDate;
 using Applications.Features.Holidays.Queries.GetHolidayById;
 using Applications.Features.Identity.Command.CreateNewUser;
+using Applications.Features.Incomes.Command.DeleteIncomeExpense;
 using Applications.Features.LoanPayments.Command.PayOff;
 using Applications.Features.LoanPayments.Dtos;
 using Applications.Features.LoanPayments.Queries.GetPaidSchedule;
@@ -69,7 +70,7 @@ public static class ApplicationServiceInjection
     {
         services.AddValidatorsFromAssemblyContaining<GetCollateralLineDetailQueryValidator>();
         services.AddScoped<IMediator, SimpleMediator>();
-       
+
         services.AddScoped<IRequestHandler<GetOccupationsQuery, Pager<OccupationDto>>, GetOccupationsQueryHandler>();
         services.AddScoped<IRequestHandler<CreateOccupationCommand, ErrorOr<OccupationDto>>, CreateOccupationCommandHandler>();
         services.AddScoped<IRequestHandler<UpdateOccupationCommand, ErrorOr<OccupationDto>>, UpdateOccupationCommandHandler>();
@@ -87,7 +88,7 @@ public static class ApplicationServiceInjection
         services.AddScoped<IRequestHandler<AddDocumentCommand, ErrorOr<DocumentDto>>, AddDocumentCommandHandler>();
         services.AddScoped<IRequestHandler<AddDocumentsCommand, IEnumerable<DocumentDto>>, AddDocumentsCommandHandler>();
         services.AddScoped<IRequestHandler<DeleteDocumentCommand, bool>, DeleteDocumentCommandHandler>();
-        services.AddScoped<IRequestHandler<GetDocumentByIdQuery, ErrorOr<DocumentDto>>, GetDocumentByIdQueryHandler>(); 
+        services.AddScoped<IRequestHandler<GetDocumentByIdQuery, ErrorOr<DocumentDto>>, GetDocumentByIdQueryHandler>();
         services.AddScoped<IRequestHandler<GetDocumentsQuery, IEnumerable<DocumentDto>>, GetDocumentsQueryHandler>();
 
 
@@ -274,6 +275,8 @@ public static class ApplicationServiceInjection
         services.AddScoped<IRequestHandler<DeleteIncomeCommand, ErrorOr<bool>>, DeleteIncomeCommandHandler>();
         services.AddScoped<IRequestHandler<EditIncomeCommand, ErrorOr<long>>, EditIncomeCommandHandler>();
         services.AddScoped<IRequestHandler<GetIncomeExpenseQuery, Pager<IncomeExpenseDto>>, GetIncomeExpenseAsPagingQuery>();
+        services.AddScoped<IRequestHandler<DeleteIncomeExpenseCommand, ErrorOr<string>>, DeleteIncomeExpenseCommandHandler>();
+
 
 
 

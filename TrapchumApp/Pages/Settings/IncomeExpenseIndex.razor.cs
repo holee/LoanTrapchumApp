@@ -1,3 +1,4 @@
+using Applications.Features.Incomes.Command.DeleteIncomeExpense;
 using Applications.Features.Incomes.Dto;
 using Applications.Features.Incomes.Queries.GetIncomeExpense;
 using Applications.Responses.Paginations;
@@ -24,7 +25,7 @@ namespace TrapchumApp.Pages.Settings
 
             await base.OnInitializedAsync();
         }
-        
+
         async Task OnLoadData(LoadDataArgs args)
         {
             _skip = args.Skip ?? 0;
@@ -41,8 +42,8 @@ namespace TrapchumApp.Pages.Settings
         {
 
             var dialogResult = await DialogService.OpenAsync<IncomeExpenseCreate>("Add Income/Expense");
-        
-            if(dialogResult is bool  success && success)
+
+            if (dialogResult is bool success && success)
             {
                 await GetIncomeExpenses(_filter);
             }
@@ -80,19 +81,46 @@ namespace TrapchumApp.Pages.Settings
         }
 
 
-        private Task ClickEdit(int? arg)
+        private async Task ClickEdit(int? arg)
         {
-            throw new NotImplementedException();
+            Console.WriteLine("ClickEdit called with arg: " + arg);
+            if (arg == null) return;
+            var parameter = new Dictionary<string, object>
+            {
+                { "Id", arg! }
+            };
+            var dialogResult = await DialogService.OpenAsync<IncomeExpenseCreate>("Edit Income/Expense", parameter!);
+
+            if (dialogResult is bool success && success)
+            {
+                await GetIncomeExpenses(_filter);
+            }
         }
 
-        private Task ClickDelete(int? arg)
+        private async Task ClickDelete(int? arg)
         {
-            throw new NotImplementedException();
+            if (arg == null) return;
+            bool? confirmed = await DialogService.Confirm($"Are you sure you want to delete this record?", "Delete Confirmation");
+            if (confirmed == true)
+            {
+                var result = await mediator.Send(new DeleteIncomeExpenseCommand(arg.Value));
+                if (result.IsError)
+                {
+                    await DialogService.Alert(result.FirstError.Description, "Error");
+                }
+                else
+                {
+                    NotificationService.Notify(NotificationSeverity.Success, "Deleted successfully");
+                    await GetIncomeExpenses(_filter);
+                }
+            }
         }
 
-        private Task ClickDetails(int? arg)
+        private async Task ClickDetails(int? arg)
         {
-            throw new NotImplementedException();
+            if (arg == null) return;
+            var parameters = new Dictionary<string, object> { { "Id", arg } };
+            await DialogService.OpenAsync<IncomeExpenseDetails>("Income/Expense Details", parameters!);
         }
     }
 }

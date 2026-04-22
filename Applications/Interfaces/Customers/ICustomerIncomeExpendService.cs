@@ -1,9 +1,4 @@
-﻿using Applications.Features.Expenses.Dto;
-using Applications.Features.Incomes.Dto;
-using Applications.Responses;
-using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Customers;
-using Domains.Enumerations;
+﻿using Domains.Enumerations;
 using Domains.Models.Lists.Customers;
 using ErrorOr;
 
@@ -42,6 +37,9 @@ namespace Applications.Interfaces.Customers
 
         Task<ErrorOr<IncomeExpenseDto>> GetEditIncomeExpenseAsync(int? id, CancellationToken cancellation = default);
         Task<ErrorOr<IncomeExpense>> GetIncomeExpenseAsync(int? requestId, CancellationToken cancellationToken = default);
+
+        Task<ErrorOr<string>> UpdateIncomeExpenseAsync(int? id, IncomeExpense incomeExpense, CancellationToken cancellationToken = default);
+        Task<ErrorOr<string>> DeleteIncomeExpenseAsync(int? id, CancellationToken cancellationToken = default);
     }
 }
 
