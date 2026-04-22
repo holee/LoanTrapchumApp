@@ -1,5 +1,4 @@
-﻿using Applications.Features.Incomes.Dto;
-using Domains.Enumerations;
+﻿using Domains.Enumerations;
 using Domains.Models.Lists.Customers;
 
 namespace Applications.Commons.Mappers.Incomes;
@@ -41,10 +40,19 @@ public static class IncomeExpenseMapper
             Types = source.Types.ToString(),
         };
     }
-    
+
     public static CreateIncomeExpenseDto ToIncomeExpenseEdit(this IncomeExpenseDto source)
     {
         return new CreateIncomeExpenseDto
+        {
+            Id = source.Id,
+            Description = source.Description,
+            Types = source.Types.ToString(),
+        };
+    }
+    public static IncomeExpenseDto ToIncomeExpenseDetails(this CreateIncomeExpenseDto source)
+    {
+        return new IncomeExpenseDto
         {
             Id = source.Id,
             Description = source.Description,

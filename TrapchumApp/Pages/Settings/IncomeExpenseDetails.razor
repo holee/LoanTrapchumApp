@@ -1,0 +1,112 @@
+@page "/App/Settings/Income-Expense/Details"
+@using Applications.Features.Incomes.Command.GetEditIncomeExpenseSource
+@using Applications.Features.Incomes.Dto
+@using Applications.Commons.Mappers.Incomes
+@using Applications.Features.Incomes.Queries.GetEditIncomeExpenseSource
+@inject DialogService DialogService
+@implements IDisposable
+
+<div class="rz-p-4">
+    @if (isLoading)
+    {
+        <div class="rz-m-10 rz-text-align-center">
+            <RadzenProgressBar Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+            <RadzenText TextStyle="TextStyle.Caption" Class="rz-mt-4">Loading details...</RadzenText>
+        </div>
+    }
+    else if (_details != null)
+    {
+        <RadzenStack Gap="1.5rem">
+            @* Information Grid *@
+            <RadzenCard Variant="Variant.Flat" Style="background: var(--rz-grid-stripe-background-color);">
+                <RadzenStack Gap="1rem">
+                    <div class="rz-display-flex rz-flex-column">
+                        <RadzenText TextStyle="TextStyle.Overline" TagName="TagName.P" Class="rz-mb-0 rz-color-series-1">Description</RadzenText>
+                        <RadzenText TextStyle="TextStyle.Body1"><b>@_details.Description</b></RadzenText>
+                    </div>
+
+                    <RadzenSplitter Orientation="Orientation.Horizontal" Style="height: 1px; border: none; background: var(--rz-divider-color);" />
+
+                    <div class="rz-display-flex rz-flex-column">
+                        <RadzenText TextStyle="TextStyle.Overline" TagName="TagName.P" Class="rz-mb-0 rz-color-series-1">Transaction Type</RadzenText>
+                        <RadzenBadge BadgeStyle="@(GetBadgeStyle(_details.Types.ToString()))"
+                                     Text="@_details.Types.ToString()"
+                                     IsPill="true"
+                                     Style="width: fit-content;" />
+                    </div>
+                </RadzenStack>
+            </RadzenCard>
+
+            @* Footer Actions *@
+            <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem">
+                <RadzenButton Text="Close"
+                              Click="@(() => DialogService.Close())"
+                              ButtonStyle="ButtonStyle.Light"
+                              Icon="close" />
+            </RadzenStack>
+        </RadzenStack>
+    }
+    else
+    {
+        <RadzenAlert AlertStyle="AlertStyle.Info" ShowIcon="true" Variant="Variant.Flat" Shade="Shade.Lighter">
+            No details were found for this record.
+        </RadzenAlert>
+    }
+</div>
+
+@code {
+    [Parameter] public int? Id { get; set; }
+
+    private CreateIncomeExpenseDto? _details;
+    private bool isLoading = true;
+    private readonly CancellationTokenSource _cts = new();
+    private bool _isDisposed = false;
+
+    // CRITICAL: This stops the renderer from touching the component after Dispose is called
+    protected override bool ShouldRender() => !_isDisposed;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            if (Id.HasValue)
+            {
+                var query = new GetEditIncomeExpenseQuery(Id.Value);
+                
+                // Ensure your mediator/handler actually supports CancellationToken
+                var handler = await mediator.Send(query, _cts.Token);
+
+                if (!_isDisposed && !handler.IsError)
+                {
+                    _details = handler.Value.ToIncomeExpenseEdit();
+                }
+            }
+        }
+        catch (Exception ex) when (ex is OperationCanceledException or ObjectDisposedException)
+        {
+            // Expected during navigation/dialog close
+        }
+        finally
+        {
+            if (!_isDisposed)
+            {
+                isLoading = false;
+                StateHasChanged();
+            }
+        }
+    }
+
+    private BadgeStyle GetBadgeStyle(string type)
+    {
+        return type.Contains("Income", StringComparison.OrdinalIgnoreCase)
+               ? BadgeStyle.Success
+               : BadgeStyle.Danger;
+    }
+
+    public void Dispose()
+    {
+        _isDisposed = true;
+        _cts.Cancel();
+        _cts.Dispose();
+    }
+}

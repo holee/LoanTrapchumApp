@@ -50,35 +50,30 @@ namespace TrapchumApp.Pages.Settings
         
         private async Task CreateOrUpdate(bool isUpdated)
         {
-
             if (isUpdated)
             {
-                var command = new CreateIncomeExpenseCommand(_model);
-
+                // Use Edit command when editing
+                var command = new EditIncomeExpenseCommand(_model);
                 var handler = await mediator.Send(command);
-
                 if (handler.IsError)
                 {
                     await DialogService.Alert(handler.FirstError.Description, "Error", new() { OkButtonText = "OK" });
+                    return;
                 }
-
-                NotificationService.Notify(NotificationSeverity.Success, IncomeExpenseMessages.Created);
-
+                NotificationService.Notify(NotificationSeverity.Success, IncomeExpenseMessages.Updated);
                 DialogService.Close(true);
             }
             else
             {
-                var command = new EditIncomeExpenseCommand(_model);
-
+                // Use Create command when creating
+                var command = new CreateIncomeExpenseCommand(_model);
                 var handler = await mediator.Send(command);
-
                 if (handler.IsError)
                 {
                     await DialogService.Alert(handler.FirstError.Description, "Error", new() { OkButtonText = "OK" });
+                    return;
                 }
-
                 NotificationService.Notify(NotificationSeverity.Success, IncomeExpenseMessages.Created);
-
                 DialogService.Close(true);
             }
         }

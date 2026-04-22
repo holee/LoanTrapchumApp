@@ -567,6 +567,63 @@ namespace Infrastructures.Implements
             IncomeAmount = x.Amount,
             InDescription = x.Description
         };
+
+        public async Task<ErrorOr<string>> UpdateIncomeExpenseAsync(int? id, IncomeExpense incomeExpense, CancellationToken cancellationToken = default)
+        {
+            if (id == null || incomeExpense == null)
+            {
+                return Error.NotFound(IncomeExpenseMessages.Required);
+            }
+
+            try
+            {
+                var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
+                var existing = await context.IncomeExpenses.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+                if (existing == null)
+                {
+                    return Error.NotFound(IncomeExpenseMessages.NotFound);
+                }
+
+                existing.Description = incomeExpense.Description;
+                existing.Types = incomeExpense.Types;
+
+                context.IncomeExpenses.Update(existing);
+                await context.SaveChangesAsync(cancellationToken);
+                return IncomeExpenseMessages.Updated;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating IncomeExpense with id {Id}", id);
+                return Error.Unexpected($"{IncomeExpenseMessages.Unexpected} {ex.Message}");
+            }
+        }
+
+        public async Task<ErrorOr<string>> DeleteIncomeExpenseAsync(int? id, CancellationToken cancellationToken = default)
+        {
+            if (id == null)
+            {
+                return Error.NotFound(IncomeExpenseMessages.Required);
+            }
+
+            try
+            {
+                var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
+                var existing = await context.IncomeExpenses.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+                if (existing == null)
+                {
+                    return Error.NotFound(IncomeExpenseMessages.NotFound);
+                }
+
+                context.IncomeExpenses.Remove(existing);
+                await context.SaveChangesAsync(cancellationToken);
+                return IncomeExpenseMessages.Deleted;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting IncomeExpense with id {Id}", id);
+                return Error.Unexpected($"{IncomeExpenseMessages.Unexpected} {ex.Message}");
+            }
+        }
     }
 }
 
@@ -676,6 +733,7 @@ namespace Infrastructures.Implements
 //    {
 //        _logger.LogInformation("Adding income...");
 
+///
 //        var context = await _contextFactory.CreateDbContextAsync();
 
 //        if (req.Id > 0)

@@ -1,20 +1,19 @@
 using Applications.Extensions;
+using Applications.Features.Guarantor.Dtos;
+using Applications.Features.Loans.Dtos.Responses;
 using Applications.Interfaces.Lists;
 using Applications.Responses;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Disbursements;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Dapper;
+using Domains.Models.Lists;
 using FluentValidation;
 using Infrastructures.Constants.Procedures;
 using Infrastructures.DataAccess;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
-using Applications.Features.Entities;
-using Domains.Models.Lists;
-using Applications.Features.Guarantor.Dtos;
-using Applications.Features.Loans.Dtos.Responses;
 
 namespace Infrastructures.Implements;
 
@@ -171,6 +170,9 @@ public class GuarantorService : IGuarantorService
 
         var guarantors = context.VGuarantors
                                 .WhereIf(!string.IsNullOrEmpty(q), x => EF.Functions.Like(x.GuarantorName!, $"%{q}%") ||
+                                                                        EF.Functions.Like(x.FullName!, $"%{q}%") ||
+                                                                        EF.Functions.Like(x.Gender!, $"%{q}%") ||
+
                                                                        EF.Functions.Like(x.Phone!, $"%{q}%"))
                                 .WhereIf(!string.IsNullOrEmpty(id), x => x.Id == id)
                                 .WhereIf(!allGuarantors, x => x.IsActive == false);
