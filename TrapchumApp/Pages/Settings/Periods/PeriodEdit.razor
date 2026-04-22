@@ -1,0 +1,34 @@
+@using Applications.Features.Periods.Commands.UpdatePeriod
+@using Applications.Features.Periods.Dto
+
+<RadzenTemplateForm TItem="PeriodDtoUpdate" Data="@_model" Submit="@OnSubmit">
+    <RadzenRow class="rz-my-2">
+        <RadzenColumn Size="12">
+            <RadzenFormField Text="Period (Months) *" Variant="Variant.Outlined" class="rz-w-100">
+                <RadzenNumeric class="rz-w-100"
+                               @bind-Value="@_model.Period"
+                               Name="Period"
+                               Min="1"
+                               ShowUpDown="false"
+                               TextAlign="TextAlign.End" />
+                <RadzenRequiredValidator Component="Period" Text="Period is required" />
+            </RadzenFormField>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 JustifyContent="JustifyContent.End"
+                 AlignItems="AlignItems.Center"
+                 Gap="0.5rem">
+        <RadzenButton ButtonType="ButtonType.Submit"
+                      Text="Save"
+                      ButtonStyle="ButtonStyle.Success"
+                      Icon="@IconNames.Save"
+                      Size="ButtonSize.ExtraSmall" />
+        <RadzenButton ButtonType="ButtonType.Button"
+                      Size="ButtonSize.ExtraSmall"
+                      Text="Cancel"
+                      Icon="@IconNames.Cancel"
+                      ButtonStyle="ButtonStyle.Danger"
+                      Click="@(() => DialogService.Close(false))" />
+    </RadzenStack>
+</RadzenTemplateForm>

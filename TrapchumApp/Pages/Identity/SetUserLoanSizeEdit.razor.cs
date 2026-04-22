@@ -1,5 +1,6 @@
-using Applications.Features.Settings.Requests;
-using Applications.Features.Settings.UseCases; 
+using Applications.Features.Settings.Commands.UserLoanSizes.UpdateUserLoanSize;
+using Applications.Features.Settings.Dto;
+using Applications.Responses.ViewModels.Settings;
 using Microsoft.AspNetCore.Components;
 using Radzen;
 
@@ -7,67 +8,47 @@ namespace TrapchumApp.Pages.Identity
 {
     public partial class SetUserLoanSizeEdit
     {
-        [Parameter] public long Id { get; set; } = 0;
-        [Parameter] public string? UserId { get; set; }
+        [Parameter] public VUserLoanSizes Item { get; set; } = default!;
 
-        private readonly ISettingServiceImpl _settingService;
+        private UserLoanSizeDtoUpdate model = default!;
 
-        public SetUserLoanSizeEdit(ISettingServiceImpl settingService)
+        protected override void OnParametersSet()
         {
-            _settingService = settingService;
-        }
-
-        protected override async Task OnInitializedAsync()
-        {
-            await GetUserLoanSize(Id, UserId);
-
-            await base.OnInitializedAsync();
-        }
-
-        UserLoanSizeDtoCreate model = new UserLoanSizeDtoCreate();
-
-        async Task HandleFormSubmit()
-        {
-
-            var resp = await _settingService.EditUserLoanSizeAsync(model);
-
-            if (!resp.IsSuccess)
+            model = new UserLoanSizeDtoUpdate
             {
-                NotificationService.Notify(NotificationSeverity.Error, resp.ErrMessage);
+                Id             = Item.Id!.Value,
+                UserRefId      = Item.UserRefId,
+                MinUsdLoanSize = Item.MinUsdLoanSize,
+                MaxUsdLoanSize = Item.MaxUsdLoanSize,
+                MinKhrLoanSize = Item.MinKhrLoanSize,
+                MaxKhrLoanSize = Item.MaxKhrLoanSize,
+                StartDate      = Item.StartDate,
+                EndDate        = Item.EndDate,
+                Description    = Item.Description,
+                IsActive       = Item.IsActive,
+                EditSeq        = Item.EditSeq
+            };
+        }
+
+        private void StartDateChanged(DateTime? date)
+        {
+            if (date.HasValue && (model.EndDate is null || model.EndDate < date))
+                model.EndDate = date.Value.AddYears(1);
+        }
+
+        private async Task HandleFormSubmit()
+        {
+            var rsp = await mediator.Send(new UpdateUserLoanSizeCommand(model));
+
+            if (rsp.IsError)
+            {
+                await DialogService.Alert(rsp.FirstError.Description, "Error",
+                    new ConfirmOptions { OkButtonText = "OK" });
                 return;
             }
-            else
-            {
-                NotificationService.Notify(NotificationSeverity.Success, "Loan Size was seeting");
-                DialogService.Close(true);
-            }
-        }
-        private void StartDateChanged(DateTime? args)
-        {
-            if (args is not null && args.HasValue)
-            {
 
-                var newDate = model.EndDate ?? DateTime.Now;
-
-                model.EndDate = newDate.AddYears(1);
-            }
-        }
-
-
-        private async Task GetUserLoanSize(long id,string? userId)
-        {
-            if (id <=0 ) return;
-
-            var rsp = await _settingService.GetEditLoanSizeByUserId(id,userId);
-
-            if (rsp.IsSuccess && rsp.Data is not null)
-            {
-                model = rsp.Data;
-            }
-            else
-            {
-                NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
-            }
+            NotificationService.Notify(NotificationSeverity.Success, "Updated", "Loan size updated.");
+            DialogService.Close(true);
         }
     }
 }

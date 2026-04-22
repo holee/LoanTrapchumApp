@@ -1,0 +1,165 @@
+@page "/App/Settings/Periods"
+@using Applications.Features.Periods.Commands.DeletePeriod
+@using Applications.Features.Periods.Dto
+@using Applications.Features.Periods.Queries.GetPeriods
+@using TrapchumApp.Helpers.Extensions
+<PageTitle>Periods</PageTitle>
+<GridToolbar SearchChanged="@TextChanged">
+    <LeftChildren>
+        <RadzenButton Size="ButtonSize.ExtraSmall"
+                      ButtonStyle="ButtonStyle.Primary"
+                      Text="Add New"
+                      Click="@AddPeriod"
+                      Icon="@IconNames.Add" />
+    </LeftChildren>
+</GridToolbar>
+<RadzenDataGrid Responsive="true"
+                GridLines="DataGridGridLines.Both"
+                Density="Density.Compact"
+                AllowPaging="true"
+                AllowFiltering="false"
+                AllowAlternatingRows="true"
+                AllowSorting="true"
+                @ref="@_gridRef"
+                TItem="PeriodDto"
+                LoadData="@LoadData"
+                IsLoading="@Tracker.IsLoading"
+                Count="@_counts"
+                PageSize="@_pageSize"
+                PageSizeOptions="@StorageConstant.PageSizeOptions"
+                PagerPosition="PagerPosition.Bottom"
+                PageSizeChanged="@PageSizeChanged"
+                PagerHorizontalAlign="HorizontalAlign.Right"
+                Data="@_periods">
+    <Columns>
+        <RadzenDataGridColumn Title="#"
+                              Property="@nameof(PeriodDto.Id)"
+                              Sortable="false"
+                              Filterable="false"
+                              Width="4rem"
+                              Context="c"
+                              TextAlign="TextAlign.Center">
+            <Template>
+                <span>@(_periods.IndexOf(c) + 1)</span>
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="Period (Months)"
+                              Property="@nameof(PeriodDto.Period)"
+                              TextAlign="TextAlign.Left" />
+        <RadzenDataGridColumn Title="Actions"
+                              Sortable="false"
+                              Filterable="false"
+                              Width="5rem"
+                              TextAlign="TextAlign.Center"
+                              Context="row">
+            <Template>
+                <RadzenButton Size="ButtonSize.ExtraSmall"
+                              Icon="more_vert"
+                              Variant="Variant.Text"
+                              Click="@((args) => ShowContextMenu(args, row))" />
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+    private List<PeriodDto> _periods = [];
+    RadzenDataGrid<PeriodDto> _gridRef = default!;
+    private int _pageIndex = 0;
+    private int _pageSize = 15;
+    private int _counts = 0;
+    private string? _filter = string.Empty;
+    private string _sortField = nameof(PeriodDto.Id);
+    private bool _sortDescending = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetPeriods();
+        await base.OnInitializedAsync();
+    }
+
+    private async Task GetPeriods(string? filter = null)
+    {
+        Tracker.Show();
+        var param = new QueryParam(_pageIndex, _pageSize, _sortField, false, _sortDescending, filter);
+        var rsp = await mediator.Send(new GetPeriodsQuery(param));
+        _periods = rsp.Items ?? [];
+        _counts = rsp.Count;
+        Tracker.Hide();
+        StateHasChanged();
+    }
+
+    private async Task LoadData(LoadDataArgs args)
+    {
+        _pageIndex = args.Skip ?? 0;
+        (_sortField, _sortDescending) = args.PageInfo();
+        await GetPeriods(_filter);
+    }
+
+    async Task PageSizeChanged(int page)
+    {
+        _pageSize = page;
+        _pageIndex = 0;
+        await GetPeriods(_filter);
+    }
+
+    async Task TextChanged(string? searchText = null)
+    {
+        _filter = searchText ?? string.Empty;
+        await GetPeriods(_filter);
+    }
+
+    async Task AddPeriod()
+    {
+        var result = await DialogService.OpenAsync<PeriodCreate>("Add Period");
+
+        if (result is PeriodDto)
+        {
+            await GetPeriods(_filter);
+        }
+    }
+
+    async Task EditPeriod(PeriodDto item)
+    {
+        var result = await DialogService.OpenAsync<PeriodEdit>(
+            "Edit Period",
+            new Dictionary<string, object?> { { nameof(PeriodEdit.Id), item.Id } });
+
+        if (result is PeriodDto)
+        {
+            await GetPeriods(_filter);
+        }
+    }
+
+    async Task DeletePeriod(PeriodDto item)
+    {
+        var confirm = await DialogService.Confirm(
+            $"Are you sure you want to delete Period \"{item.Period}\"?",
+            "Confirm Delete",
+            new ConfirmOptions { OkButtonText = "Delete", CancelButtonText = "Cancel" });
+
+        if (confirm != true) return;
+
+        var rsp = await mediator.Send(new DeletePeriodCommand(item.Id));
+
+        if (rsp.IsError)
+        {
+            await DialogService.Alert(rsp.FirstError.Description, "Error", new ConfirmOptions { OkButtonText = "OK" });
+            return;
+        }
+
+        NotificationService.Notify(NotificationSeverity.Success, "Deleted", $"Period {item.Period} deleted successfully.");
+
+        await GetPeriods(_filter);
+    }
+
+    void ShowContextMenu(MouseEventArgs args, PeriodDto item)
+    {
+        ContextMenuService.Open(args, ds =>
+    @<RadzenMenu>
+    <RadzenMenuItem Icon="@IconNames.Edit" Click="@(() => EditPeriod(item))" Text="Edit" />
+    <RadzenMenuItem Icon="@IconNames.Delete" Click="@(() => DeletePeriod(item))" Text="Delete" />
+</RadzenMenu>
+        );
+    }
+}

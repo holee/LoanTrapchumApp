@@ -12,8 +12,8 @@ namespace Applications.Requests.Validations.Loans
             RuleFor(c => c.MinUsdLoanSize).Cascade(CascadeMode.Stop)
                     .NotEmpty()
                         .WithMessage("Please privide Min Loan Sise.")
-                    .GreaterThan(0)
-                        .WithMessage("Max Loan size must be greater than 0.");
+                    .GreaterThanOrEqualTo(0)
+                        .WithMessage("Min Loan size must be greater than or equal to 0.");
 
             RuleFor(c => c.MaxUsdLoanSize).Cascade(CascadeMode.Stop)
                                     .NotEmpty()
@@ -26,8 +26,8 @@ namespace Applications.Requests.Validations.Loans
             RuleFor(c => c.MinKhrLoanSize).Cascade(CascadeMode.Stop)
                                     .NotEmpty()
                                         .WithMessage("Please privide Min Khr Loan Sise.")
-                                    .GreaterThan(0)
-                                        .WithMessage("Min Khr Loan size must be greater than 0.");
+                                    .GreaterThanOrEqualTo(0)
+                                        .WithMessage("Min Khr Loan size must be greater than or equal to 0.");
 
             RuleFor(c => c.MaxKhrLoanSize).Cascade(CascadeMode.Stop)
                                     .NotEmpty()

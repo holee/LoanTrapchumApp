@@ -2,7 +2,7 @@
 
 namespace Domains.Models.Loans
 {
-    public class UserLoanSize:BaseEntity
+    public sealed class UserLoanSize:BaseEntity
     {
         public long Id { get; set; }
         public string? UserRefId { get; set; }

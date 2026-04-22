@@ -1,6 +1,9 @@
-﻿@using Applications.Features.Collaterals.Dtos
+@using Applications.Features.Collaterals.Dtos
+@using Applications.Features.Settings.Queries.CollateralSubTypes.GetCollateralSubTypes
+@using Applications.Interfaces.Lists
 @using Domains.Models.Collaterals
 @using TrapchumApp.Pages.Lists.Collaterals
+@inject ICollateralsService _collateralService
 <style>
     .rz-grid-table td .rz-cell-data {
         line-height: 1.5rem;
@@ -134,7 +137,8 @@
                               TextAlign="TextAlign.Center"
                               Context="c">
             <Template>
-                <RadzenCheckBox TValue="bool?" Value="@c.IsActive" ReadOnly />
+                <RadzenBadge BadgeStyle="@(c.IsActive == true ? BadgeStyle.Success : BadgeStyle.Danger)"
+                             Text="@(c.IsActive == true ? "Active" : "Inactive")" />
             </Template>
             <EditTemplate>
                 <RadzenCheckBox TValue="bool?" @bind-Value="@c.IsActive" />
@@ -175,19 +179,3 @@
                                    ProgressBarStyle="ProgressBarStyle.Danger"></RadzenProgressBarCircular>
     </LoadingTemplate>
 </RadzenDataGrid>
-@code {
-    private bool _isLoading = false;
-    async Task ClickAdd()
-    {
-        var options = new DialogOptions
-        {
-            AutoFocusFirstElement=false,
-        };
-        var dia= await DialogService.OpenAsync<SubTypeCollateralCreate>("Add", options: options);
-
-        if (dia is bool result && result == true)
-        {
-            await GetCollateralSubTypes();
-        } 
-    }
-}

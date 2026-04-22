@@ -25,6 +25,7 @@
     <Compile Remove="Features\LoanPayments\Extensions\**" />
     <Compile Remove="Features\LoanPayments\Mappers\**" />
     <Compile Remove="Features\NewFolder1\**" />
+    <Compile Remove="Features\Settings\Responses\**" />
     <Compile Remove="Features\Vendors\Mapperes\**" />
     <Compile Remove="Features\Vendors\UseCases\**" />
     <Compile Remove="Responses\Lists\Collaterals\**" />
@@ -53,6 +54,7 @@
     <EmbeddedResource Remove="Features\LoanPayments\Extensions\**" />
     <EmbeddedResource Remove="Features\LoanPayments\Mappers\**" />
     <EmbeddedResource Remove="Features\NewFolder1\**" />
+    <EmbeddedResource Remove="Features\Settings\Responses\**" />
     <EmbeddedResource Remove="Features\Vendors\Mapperes\**" />
     <EmbeddedResource Remove="Features\Vendors\UseCases\**" />
     <EmbeddedResource Remove="Responses\Lists\Collaterals\**" />
@@ -81,6 +83,7 @@
     <None Remove="Features\LoanPayments\Extensions\**" />
     <None Remove="Features\LoanPayments\Mappers\**" />
     <None Remove="Features\NewFolder1\**" />
+    <None Remove="Features\Settings\Responses\**" />
     <None Remove="Features\Vendors\Mapperes\**" />
     <None Remove="Features\Vendors\UseCases\**" />
     <None Remove="Responses\Lists\Collaterals\**" />
@@ -127,7 +130,6 @@
     <Folder Include="Features\Products\Responses\" />
     <Folder Include="Features\Products\UseCases\" />
     <Folder Include="Features\Products\Validations\" />
-    <Folder Include="Features\Settings\Responses\" />
     <Folder Include="Requests\Identity\" />
     <Folder Include="Responses\Lists\Currency\" />
     <Folder Include="Responses\ViewModels\Loans\Payments\" />

@@ -65,7 +65,8 @@
                                               TextAlign="TextAlign.Center"
                                               Property="@(nameof(VUser.Id))" Title="Status" Context="u">
                             <Template>
-                                <RadzenCheckBox Value="@u.IsActive" ReadOnly />
+                                <RadzenBadge BadgeStyle="@(u.IsActive == true ? BadgeStyle.Success : BadgeStyle.Danger)"
+                                             Text="@(u.IsActive == true ? "Active" : "Inactive")" />
                             </Template>
                         </RadzenDataGridColumn>
                         <RadzenDataGridColumn Width="5rem" Sortable="false"

@@ -13,5 +13,6 @@ namespace Applications.Interfaces.Lists
         Task<IEnumerable<Occupation>> GetOccupationsAsync(string? expression = null);
         Task<Pager<OccupationDto>> GetOccupationsAsync(int? id, QueryParam? param, TypeOfEnum ofOption = TypeOfEnum.Position, CancellationToken cancellation = default);
         Task<ErrorOr<OccupationDto>> CreateAsync(Occupation occupation, CancellationToken cancellation = default);
+        Task<ErrorOr<OccupationDto>> UpdateAsync(OccupationDtoUpate request, CancellationToken cancellation = default);
     }
 }
