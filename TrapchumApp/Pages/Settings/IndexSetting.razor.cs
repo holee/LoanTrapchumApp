@@ -1,89 +1,86 @@
-using Applications.Features.Settings.Requests;
-using Applications.Features.Settings.UseCases;
-using Applications.Responses.ViewModels.Settings;
-using Mapster;
-using Radzen;
+using Applications.Features.Settings.Commands.AppSettings.DeleteAppSetting;
+using Applications.Features.Settings.Dto;
+using Applications.Features.Settings.Queries.AppSettings.GetAppSettings;
 using Radzen.Blazor;
+using TrapchumApp.Pages.Settings.AppSettings;
 
 namespace TrapchumApp.Pages.Settings
 {
     public partial class IndexSetting
     {
+        private List<AppSettingDto> _settings = [];
 
-        IEnumerable<AppSettingVms> Settings = [];
-        List<AppSettingDtoCreate> SysSettingsToUpdate = [];
-        RadzenDataGrid<AppSettingVms> settingsGrid = default!;
-        DataGridEditMode editMode = DataGridEditMode.Single;
-        private readonly ISettingServiceImpl _settingServiceImpl;
-        public IndexSetting(ISettingServiceImpl settingServiceImpl)
-        {
-            _settingServiceImpl = settingServiceImpl;
-        }
+        private RadzenDataGrid<AppSettingDto> _settingsGrid = default!;
 
+        private string? _filter;
+
+        private bool _isLoading = false;
         protected override async Task OnInitializedAsync()
         {
-            await GetSettings();
+            await LoadSettings();
+
             await base.OnInitializedAsync();
         }
 
-
-        void Reset()
+        private async Task LoadSettings(string? filter = null)
         {
-            SysSettingsToUpdate.Clear();
+            Tracker.Show();
+
+            _isLoading = true;
+
+            var rsp = await mediator.Send(new GetAppSettingsQuery(filter));
+
+            _settings = rsp.IsError ? [] : rsp.Value.ToList();
+
+            Tracker.Hide();
+
+            _isLoading = false;
+
+            StateHasChanged();
         }
 
-        void Reset(AppSettingDtoCreate order)
+        private async Task TextChanged(string? filter)
         {
-            SysSettingsToUpdate.Remove(order);
+            _filter = filter;
+
+            await LoadSettings(filter);
         }
 
-
-        async Task GetSettings(string? filterValue = null)
+        private async Task AddAppSetting()
         {
-            var response = await _settingServiceImpl.GetSysSettings(filterValue);
+            var result = await DialogService.OpenAsync<AppSettingCreate>("Add Setting",
+                options: new DialogOptions { AutoFocusFirstElement = false });
 
-            if (response.IsSuccess)
+            if (result is AppSettingDto)
+                await LoadSettings(_filter);
+        }
+
+        private async Task EditAppSetting(AppSettingDto item)
+        {
+            var result = await DialogService.OpenAsync<AppSettingEdit>("Edit Setting",
+                new Dictionary<string, object?> { { nameof(AppSettingEdit.Item), item } },
+                options: new DialogOptions { AutoFocusFirstElement = false });
+
+            if (result is AppSettingDto)
+                await LoadSettings(_filter);
+        }
+
+        private async Task DeleteAppSetting(AppSettingDto item)
+        {
+            var confirm = await DialogService.Confirm($"Delete setting '{item.Code}'?", "Confirm Delete",
+                new ConfirmOptions { OkButtonText = "Delete", CancelButtonText = "Cancel" });
+
+            if (confirm != true) return;
+
+            var rsp = await mediator.Send(new DeleteAppSettingCommand(item.Id));
+
+            if (rsp.IsError)
+                await DialogService.Alert(rsp.FirstError.Description, "Error");
+            else
             {
-                Settings = response.Data!.Adapt<IEnumerable<AppSettingVms>>();
+                NotificationService.Notify(NotificationSeverity.Success, "Deleted", $"Setting '{item.Code}' removed.");
+                await LoadSettings(_filter);
             }
         }
-
-        async void EditRow(AppSettingVms e)
-        {
-            if (editMode == DataGridEditMode.Single)
-            {
-                Reset();
-            }
-            //SysSettingsToUpdate.Add(e);
-            //await settingsGrid.EditRow(e);
-        }
-        void OnUpdateRow(AppSettingVms e)
-        {
-            //Reset(e);
-
-            // dbContext.Update(order);
-
-            // dbContext.SaveChanges();
-        }
-        void CancelEdit(AppSettingVms e)
-        {
-            
-            
-            
-            
-            
-            //Reset(e);
-
-            //settingsGrid.CancelEditRow(e);
-
-            // var orderEntry = dbContext.Entry(order);
-
-            // if (orderEntry.State == EntityState.Modified)
-            // {
-            //     orderEntry.CurrentValues.SetValues(orderEntry.OriginalValues);
-            //     orderEntry.State = EntityState.Unchanged;
-            // }
-        }
-
     }
 }

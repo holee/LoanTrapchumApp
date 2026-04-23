@@ -54,7 +54,7 @@
     private async Task OnSubmit(OccupationDtoCreate model)
     {
 
-        var rsp = await mediator.Send(new CreateOccupationCommand(occupation)); //_occupationService.CreateAsync(occupation);
+        var rsp = await mediator.Send(new CreateOccupationCommand(occupation));
 
         if (rsp.IsSuccess())
         {

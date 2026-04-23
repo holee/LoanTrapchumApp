@@ -9,7 +9,7 @@ namespace Infrastructures.DataAccess.Configurations.SystemSettings
         public void Configure(EntityTypeBuilder<UserLoanSize> builder)
         {
             builder.ToTable("lt_LoanSizes");
-            builder.HasKey(x => new { x.Id,x.UserRefId });
+            builder.HasKey(x => x.Id);
             builder.Property(p => p.Id).ValueGeneratedOnAdd();
             builder.Property(p => p.UserRefId).HasMaxLength(250);
             builder.Property(p => p.MinUsdLoanSize).HasPrecision(18,3);

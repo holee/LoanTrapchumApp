@@ -82,7 +82,7 @@ else
                     <RadzenTabsItem Icon="@IconNames.Group" Text="Guarantors">
                         <LoanRequestGaurantor Guarantors="Guarantors"
                                               ShowAdd="true"
-                                              Add="AddGuarantors"
+                                              Add="@AddGuarantors"
                                               ShowRemove="true"
                                               ShowCommand="true"
                                               Remove="RemoveGaurantor"
@@ -225,7 +225,7 @@ else
 
         var command = new AddLoanRequestGuarantorCommand(gLinks);
 
-        var rsp = await mediator.Send(command);// _loanRequestService.AddLoanRequestGuarantorAsync(gLinks);
+        var rsp = await mediator.Send(command);
 
         if (rsp.IsSuccess())
         {

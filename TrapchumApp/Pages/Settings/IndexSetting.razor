@@ -1,11 +1,10 @@
 ﻿@page "/App/Settings"
-@using Applications.Features.Addresses
-@using Applications.Features.Branches
-@using Applications.Features.Currencies
-@using Applications.Features.Customers.Services
-@using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Interfaces
-@using Applications.Responses.ViewModels.Settings
+@using Applications.Features.Settings.Commands.AppSettings.DeleteAppSetting
+@using Applications.Features.Settings.Dto
+@using Applications.Features.Settings.Queries.AppSettings.GetAppSettings
+@using TrapchumApp.Pages.Settings.LoanPurposes
+@using TrapchumApp.Pages.Settings.AppSettings
+@using TrapchumApp.Pages.Settings.Periods
 <PageTitle>Settings</PageTitle>
 <RadzenFieldset>
     <HeaderTemplate>
@@ -14,84 +13,92 @@
         </RadzenStack>
     </HeaderTemplate>
     <ChildContent>
+        <GridToolbar SearchChanged="@TextChanged">
+            <LeftChildren>
+                <RadzenButton Size="ButtonSize.ExtraSmall"
+                              ButtonStyle="ButtonStyle.Primary"
+                              Text="Add New"
+                              Icon="@IconNames.Add"
+                              Click="@AddAppSetting" />
+            </LeftChildren>
+        </GridToolbar>
         <RadzenDataGrid AllowAlternatingRows="true"
                         AllowFiltering="false"
-                        ColumnWidth="200px"
                         Density="Density.Compact"
-                        SelectionMode="DataGridSelectionMode.Single"
                         GridLines="DataGridGridLines.Both"
-                        EditMode="editMode"
-                        @ref="@settingsGrid"
-                        Responsive
-                        Data="Settings">
-            <HeaderTemplate>
-                <RadzenButton ButtonStyle="ButtonStyle.Primary"
-                              Size="ButtonSize.Small"
-                              Text="Add" Icon="add" />
-            </HeaderTemplate>
+                        @ref="@_settingsGrid"
+                        IsLoading="@_isLoading"
+                        Responsive="true"
+                        TItem="AppSettingDto"
+                        Data="@_settings">
             <Columns>
-                <RadzenDataGridColumn Property="@nameof(AppSettingVms.Id)"
+                <RadzenDataGridColumn Title="#"
                                       Filterable="false"
-                                      Title="ID" Frozen="true"
+                                      Sortable="false"
                                       Width="3rem"
-                                      TextAlign="TextAlign.Center" />
-                <RadzenDataGridColumn Property="@nameof(AppSettingVms.Code)" Title="Code" Frozen="true" Width="8rem" />
-                <RadzenDataGridColumn Property="@nameof(AppSettingVms.Value)"
-                                      Context="s"
-                                      Title="Value"
-                                      Width="5rem">
-                    <Template>
-                        @s.Value
-                    </Template>
-                    <EditTemplate>
-                        <RadzenTextBox @bind-Value="s.Value"
-                                       class="w-100"
-                                       Style="height:2rem;line-height:1rem;" />
-                    </EditTemplate>
+                                      TextAlign="TextAlign.Center"
+                                      Context="s">
+                    <Template>@(_settings.IndexOf(s) + 1)</Template>
                 </RadzenDataGridColumn>
-                <RadzenDataGridColumn Property="@nameof(AppSettingVms.Description)" Title="Description" Width="12rem" />
+                <RadzenDataGridColumn Property="@nameof(AppSettingDto.Code)" Title="Code" Width="10rem" />
+                <RadzenDataGridColumn Property="@nameof(AppSettingDto.Value)" Title="Value" Width="10rem" />
+                <RadzenDataGridColumn Property="@nameof(AppSettingDto.Description)" Title="Description" />
                 <RadzenDataGridColumn TextAlign="TextAlign.Center" Title="Status" Width="6rem" Context="s">
                     <Template>
-                        <RadzenCheckBox @bind-Value="s.IsActive" />
+                        <RadzenBadge BadgeStyle="@(s.IsActive ? BadgeStyle.Success : BadgeStyle.Danger)"
+                                     Text="@(s.IsActive ? "Active" : "Inactive")" />
                     </Template>
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn Title="Action" Width="4rem" TextAlign="TextAlign.Center" Context="s">
                     <Template>
                         <RadzenButton Size="ButtonSize.ExtraSmall"
-                                      Icon="@IconNames.Edit"
-                                      Click="@(()=>EditRow(s))"
+                                      Icon="more_vert"
                                       Variant="Variant.Text"
-                                      @onclick:stopPropagation="true">
-                        </RadzenButton>
+                                      Click="@((args) => ShowContextMenu(args, s))"
+                                      @onclick:stopPropagation="true" />
                     </Template>
-                    <EditTemplate>
-                        <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success"
-                                      Variant="Variant.Text"
-                                      Size="ButtonSize.ExtraSmall"
-                                      aria-label="Save">
-                        </RadzenButton>
-                        <RadzenButton Icon="close"
-                                      ButtonStyle="ButtonStyle.Primary"
-                                      Variant="Variant.Text"
-                                      Click="@(()=>CancelEdit(s))"
-                                      Size="ButtonSize.ExtraSmall"
-                                      class="rz-my-1 rz-ms-1"
-                                      aria-label="Cancel">
-                        </RadzenButton>
-                    </EditTemplate>
                 </RadzenDataGridColumn>
             </Columns>
         </RadzenDataGrid>
     </ChildContent>
 </RadzenFieldset>
-
 <RadzenFieldset>
     <HeaderTemplate>
         <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
-            <RadzenIcon Icon="settings" /><b>Colleral Settings</b>
+            <RadzenIcon Icon="settings" /><b>Collateral Settings</b>
         </RadzenStack>
     </HeaderTemplate>
     <ChildContent>
         <CollateralSetting />
     </ChildContent>
 </RadzenFieldset>
+<RadzenFieldset>
+    <HeaderTemplate>
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
+            <RadzenIcon Icon="@IconNames.Alarm" /><b>Period Settings</b>
+        </RadzenStack>
+    </HeaderTemplate>
+    <ChildContent>
+        <PeriodList />
+    </ChildContent>
+</RadzenFieldset>
+<RadzenFieldset>
+    <HeaderTemplate>
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
+            <RadzenIcon Icon="@IconNames.Edit" /><b>Loan Purpose Settings</b>
+        </RadzenStack>
+    </HeaderTemplate>
+    <ChildContent>
+        <LoanPurposeList />
+    </ChildContent>
+</RadzenFieldset>
+@code {
+    private void ShowContextMenu(MouseEventArgs args, AppSettingDto item)
+    {
+        ContextMenuService.Open(args, ds => @<RadzenMenu>
+            <RadzenMenuItem Click="@(async () => await EditAppSetting(item))" Text="Edit" Icon="@IconNames.Edit" />
+            <RadzenMenuItem Click="@(async () => await DeleteAppSetting(item))" Text="Delete" Icon="@IconNames.Delete" />
+        </RadzenMenu>);
+    }
+}
+

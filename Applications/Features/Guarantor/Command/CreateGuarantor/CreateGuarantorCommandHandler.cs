@@ -14,11 +14,6 @@ public sealed class CreateGuarantorCommandHandler(IGuarantorService _guarantorSe
 
         var result = await _guarantorService.CreateGuarantorAsync(model);
 
-        if (result is null)
-        {
-            return Error.Failure("Failed to create guarantor.");
-        }
-
         return result;
     }
 }

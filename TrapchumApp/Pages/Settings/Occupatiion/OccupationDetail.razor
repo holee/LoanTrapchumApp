@@ -1,0 +1,70 @@
+@using Applications.Features.AdditionalInformations.Dto
+@using TrapchumApp.Helpers.Extensions
+
+<RadzenStack Gap="1rem">
+
+    <RadzenFieldset>
+        <HeaderTemplate>
+            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem" AlignItems="AlignItems.Center">
+                <RadzenIcon Icon="info" />
+                <strong>Occupation Details</strong>
+            </RadzenStack>
+        </HeaderTemplate>
+        <ChildContent>
+            @if (_occupation is null)
+            {
+                <RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="min-height:120px">
+                    <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Medium" />
+                    <RadzenText TextStyle="TextStyle.Body2">Loading...</RadzenText>
+                </RadzenStack>
+            }
+            else
+            {
+                <RadzenRow Gap="0.75rem">
+                    <RadzenColumn Size="12" SizeMD="6">
+                        <RadzenStack Gap="0.25rem">
+                            <RadzenText TextStyle="TextStyle.Overline" class="rz-color-secondary">Occupation Title</RadzenText>
+                            <RadzenText TextStyle="TextStyle.Body1"><strong>@_occupation.OccupationTitle</strong></RadzenText>
+                        </RadzenStack>
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeMD="6">
+                        <RadzenStack Gap="0.25rem">
+                            <RadzenText TextStyle="TextStyle.Overline" class="rz-color-secondary">Khmer</RadzenText>
+                            <RadzenText TextStyle="TextStyle.Body1">@(_occupation.Khmer ?? "—")</RadzenText>
+                        </RadzenStack>
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeMD="6">
+                        <RadzenStack Gap="0.25rem">
+                            <RadzenText TextStyle="TextStyle.Overline" class="rz-color-secondary">Type Of</RadzenText>
+                            <RadzenBadge BadgeStyle="BadgeStyle.Info" Text="@(_occupation.TypeOf ?? "—")" />
+                        </RadzenStack>
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeMD="6">
+                        <RadzenStack Gap="0.25rem">
+                            <RadzenText TextStyle="TextStyle.Overline" class="rz-color-secondary">ID</RadzenText>
+                            <RadzenText TextStyle="TextStyle.Body2">@_occupation.OccupationId</RadzenText>
+                        </RadzenStack>
+                    </RadzenColumn>
+                </RadzenRow>
+            }
+        </ChildContent>
+    </RadzenFieldset>
+
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 JustifyContent="JustifyContent.End"
+                 Gap="0.5rem">
+        <RadzenButton ButtonType="ButtonType.Button"
+                      Text="Edit"
+                      Icon="@IconNames.Edit"
+                      ButtonStyle="ButtonStyle.Success"
+                      Size="ButtonSize.ExtraSmall"
+                      Click="@OnEditClick" />
+        <RadzenButton ButtonType="ButtonType.Button"
+                      Text="Close"
+                      Icon="@IconNames.Cancel"
+                      ButtonStyle="ButtonStyle.Danger"
+                      Size="ButtonSize.ExtraSmall"
+                      Click="@(() => DialogService.Close(false))" />
+    </RadzenStack>
+
+</RadzenStack>

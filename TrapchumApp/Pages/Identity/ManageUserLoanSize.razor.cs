@@ -1,122 +1,132 @@
-using Applications.Extensions;
-using Applications.Features.Settings.UseCases;
+using Applications.Features.Settings.Commands.UserLoanSizes.DeleteUserLoanSize;
+using Applications.Features.Settings.Commands.UserLoanSizes.ToggleUserLoanSize;
+using Applications.Features.Settings.Dto;
+using Applications.Features.Settings.Queries.UserLoanSizes.GetUserLoanSizes;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Settings;
 using Radzen;
 
 namespace TrapchumApp.Pages.Identity;
+
 public partial class ManageUserLoanSize
 {
-    private readonly ISettingServiceImpl _settingService;
-
-    public ManageUserLoanSize(ISettingServiceImpl settingService)
-    {
-        _settingService = settingService;
-    }
-
-    private IEnumerable<VUserLoanSizes> _loanSizes = [];
-
-    private int pageNumber=0;
-
-    private int pageSize=10;
-
-    private string sortField="Id";
-
-    private bool isIncludeInActive=false;
-
-    private bool sortDescending=false;
-
+    private List<VUserLoanSizes> _loanSizes = [];
     private int _counts = 0;
-
+    private int pageSize = 15;
+    private int _pageIndex = 0;
+    private string _sortField = nameof(VUserLoanSizes.Id);
+    private bool _sortDescending = false;
+    private string? _filter;
+    private bool isIncludeInActive = false;
     private bool isLoading = false;
 
-    private string _filter = "";
     protected override async Task OnInitializedAsync()
     {
-        await GetUserLoanSizesAsync();
+        await GetUserLoanSizes();
 
         await base.OnInitializedAsync();
     }
 
-
-    async Task GetUserLoanSizesAsync(string? userRefId=null,string? filter=null)
+    private async Task GetUserLoanSizes()
     {
+        isLoading = true;
 
-        isLoading = true;   
+        var param = new QueryParam(_pageIndex, pageSize, _sortField, isIncludeInActive, _sortDescending, _filter);
 
-        var q = new QueryParam(pageNumber, pageSize, sortField, isIncludeInActive, sortDescending, filter);
+        var rsp = await mediator.Send(new GetUserLoanSizesQuery(null, param));
 
-        var rsp =await _settingService.GetUserLoanSizes(userRefId, q);
+        _loanSizes = rsp.Items ?? [];
 
-        _loanSizes = rsp.Items;
-
-        _counts=rsp.Count;
+        _counts = rsp.Count;
 
         isLoading = false;
 
+        StateHasChanged();
     }
 
-    async Task ManageLoanSize(long? id,string? userId) 
+    private async Task LoadData(LoadDataArgs args)
     {
+        _pageIndex = args.Skip ?? 0;
 
-        if(id<=0 || userId.IsNullOrEmpty())
+        if (args.Sorts?.Any() == true)
         {
+            _sortField = args.Sorts.First().Property ?? nameof(UserLoanSizeDto.Id);
+
+            _sortDescending = args.Sorts.First().SortOrder == SortOrder.Descending;
+        }
+        await GetUserLoanSizes();
+    }
+
+    private async Task SearchTextChanged(string? filter)
+    {
+        _filter = filter;
+
+        await GetUserLoanSizes();
+    }
+
+    private async Task CheckedChanged(bool value)
+    {
+        isIncludeInActive = value;
+        await GetUserLoanSizes();
+    }
+
+    private async Task PageSizeChanged(int size)
+    {
+        pageSize = size;
+
+        await GetUserLoanSizes();
+    }
+
+    private async Task EditLoanSize(VUserLoanSizes item)
+    {
+        var result = await DialogService.OpenAsync<SetUserLoanSizeEdit>("Edit Loan Size",
+            new Dictionary<string, object?> { { nameof(SetUserLoanSizeEdit.Item), item } },
+            options: new DialogOptions { AutoFocusFirstElement = false });
+
+        if (result is bool b && b)
+            await GetUserLoanSizes();
+    }
+
+    private async Task ToggleActive(VUserLoanSizes item)
+    {
+        if (item.Id is null || item.UserRefId is null)
+        {
+
+            _toastService.ShowError("Invalid data", "Error");
+
             return;
         }
 
-        var options = new DialogOptions { };
+        var rsp = await mediator.Send(new ToggleUserLoanSizeCommand(item.Id.Value, item.UserRefId!));
 
-        var param = new Dictionary<string, object?>
+        if (rsp.IsError)
+            await DialogService.Alert(rsp.FirstError.Description, "Error");
+        else
         {
-            {"UserId",userId},
-            {"Id",id}
-        };
-
-        bool? dialogueResult = await DialogService.OpenAsync<SetUserLoanSizeEdit>("Loan Size", param, options);
-
-        if (dialogueResult is not null && dialogueResult==true)
-        {
-            await GetUserLoanSizesAsync();
+            NotificationService.Notify(NotificationSeverity.Success, "Updated", "Loan size status changed.");
+            await GetUserLoanSizes();
         }
     }
 
-    private async Task PageSizeChanged(int args)
+    private async Task DeleteLoanSize(VUserLoanSizes item)
     {
-        pageNumber = args;
+        if (item.Id is null) return;
 
-        pageNumber = 0;
+        var confirm = await DialogService.Confirm(
+            $"Delete loan size for '{item.FullName}'?",
+            "Confirm Delete",
+            new ConfirmOptions { OkButtonText = "Delete", CancelButtonText = "Cancel" });
 
-        await GetUserLoanSizesAsync();
+        if (confirm != true) return;
 
-    }
-    private async Task LoadData(LoadDataArgs args)
-    {
-        pageNumber = args.Skip ?? 0;
+        var rsp = await mediator.Send(new DeleteUserLoanSizeCommand(item.Id.Value));
 
-        if (args.OrderBy.Any()) 
+        if (rsp.IsError)
+            await DialogService.Alert(rsp.FirstError.Description, "Error");
+        else
         {
-            var sort = args.Sorts;
-
-            sortField = sort.First().Property ?? "Id";
-
-            sortDescending = sort.First().SortOrder == SortOrder.Descending;
-
+            NotificationService.Notify(NotificationSeverity.Success, "Deleted", $"Loan size for '{item.FullName}' removed.");
+            await GetUserLoanSizes();
         }
-
-        await GetUserLoanSizesAsync();
     }
-    private async Task CheckedChanged(bool args)
-    {
-        isIncludeInActive = args;
-
-        await GetUserLoanSizesAsync(filter: _filter);
-    }
-    private async Task SearchTextChanged(string args)
-    {
-        _filter = args;
-
-        await GetUserLoanSizesAsync(filter: _filter);
-    }
-    private void SelectedRowChanged(VUserLoanSizes args)
-    {}
 }

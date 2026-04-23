@@ -1,350 +1,459 @@
-using Applications.Extensions;
-using Applications.Interfaces.setting;
-using Applications.Responses;
-using Applications.Responses.Auths;
-using Applications.Responses.Message;
+using Applications.Features.Settings.Dto;
+using Applications.Interfaces.Settings;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Settings;
 using Domains.Models.Collaterals;
 using Domains.Models.Loans;
 using Domains.Models.Settings;
+using ErrorOr;
 using Infrastructures.DataAccess;
-using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Infrastructures.Implements;
 
-public sealed class AppSettingService(IDbContextFactory<DataContext> dbContextFactory, ILogger<AppSettingService> logger) : IAppSettingService
+public sealed class AppSettingService(
+    IDbContextFactory<DataContext> dbContextFactory,
+    ILogger<AppSettingService> logger) : IAppSettingRepository
 {
-    public async Task<Result<string>> Delete(long? id, CancellationToken cancellation = default)
-    {
-        await using var cxt = await dbContextFactory.CreateDbContextAsync();
+    // ── AppSettings ────────────────────────────────────────────────────────────
 
-        var existing = await cxt.AppSettings.FindAsync(id);
-
-        if (existing is null)
-        {
-            return Result.Failure<string>(ErrorResponse.NotFound(Messages.DataNotFound));
-        }
-
-        cxt.AppSettings.Remove(existing);
-
-        await cxt.SaveChangesAsync(cancellation);
-
-        return Result.Success("Setting was removed.");
-    }
-
-    public async Task<Result<string>> Save(AppSettings entity, CancellationToken cancellation = default)
-    {
-        await using var cxt = await dbContextFactory.CreateDbContextAsync();
-
-        cxt.AppSettings.Add(entity);
-
-        await cxt.SaveChangesAsync(cancellation);
-
-        return Result.Success(Messages.DataCreated);
-    }
-
-    public Task<Result<string>> Update(AppSettings entity)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<Result<AppSettings>> GetSysSettingByCode(string code)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<Result<AppSettings>> GetSysSettingByCode(int? id)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<Result<IEnumerable<AppSettings>>> GetSysSettings(string? filter = null)
-    {
-
-        await using var cxt = await dbContextFactory.CreateDbContextAsync();
-
-        var queries = cxt.AppSettings
-                            .WhereIf(filter.IsNotNullOrEmpty(),
-                                         x => x.Description!.Contains(filter!) ||
-                                         x.Code.Contains(filter!) ||
-                                         x.Value.Contains(filter!));
-
-        var items = await queries.AsNoTracking().ToListAsync();
-
-        return Result.Success<IEnumerable<AppSettings>>(items);
-    }
-
-    public async Task<Result<IEnumerable<T>>> GetSysSettings<T>(string? filterValue = null)
-        where T : class
-    {
-        await using var cxt = await dbContextFactory.CreateDbContextAsync();
-
-        IQueryable<AppSettings> queries = cxt.AppSettings;
-
-        if (!string.IsNullOrEmpty(filterValue))
-        {
-            queries = queries.Where(x => x.Description!.Contains(filterValue) ||
-                                         x.Code.Contains(filterValue) ||
-                                         x.Value.Contains(filterValue));
-        }
-
-        var items = await queries
-                                    .ProjectToType<T>()
-                                    .AsNoTracking()
-                                    .ToListAsync();
-
-        return Result.Success<IEnumerable<T>>(items);
-    }
-
-    public async Task<Result<string>> CreateUserLoanSizeAsync(UserLoanSize model, CancellationToken cancellation = default)
+    public async Task<ErrorOr<IEnumerable<AppSettingDto>>> GetAppSettingsAsync(
+        string? filter = null, CancellationToken cancellation = default)
     {
         try
         {
-            logger.LogInformation("inserting new user loan size......");
-
             await using var cxt = await dbContextFactory.CreateDbContextAsync(cancellation);
 
-            var existings = await cxt.UserLoanSizes.AnyAsync(x => x.UserRefId == model.UserRefId);
+            var query = cxt.AppSettings.AsNoTracking();
 
-            if (existings)
+            if (!string.IsNullOrWhiteSpace(filter))
+                query = query.Where(x =>
+                    x.Description!.Contains(filter) ||
+                    x.Code.Contains(filter) ||
+                    x.Value.Contains(filter));
+
+            var items = await query.Select(x => new AppSettingDto
             {
-                Result.Failure(ErrorResponse.Conflict(Messages.DataExist));
-            }
+                Id = x.Id,
+                Code = x.Code,
+                Value = x.Value,
+                Description = x.Description,
+                IsActive = x.IsActive
+            }).ToListAsync(cancellation);
 
-            cxt.UserLoanSizes.Add(model);
-
-            await cxt.SaveChangesAsync(cancellation);
-
-            return Result.Success<string>(Messages.DataCreated);
+            return items;
         }
         catch (Exception ex)
         {
-
-            logger.LogError(ex.Message, ex);
-
-            return Result.Failure<string>(ErrorResponse.ServerError(ex.Message));
+            logger.LogError(ex, ex.Message);
+            return Error.Failure(description: ex.Message);
         }
-
     }
 
-    public async Task<Result<string>> EditUserLoanSizeAsync(UserLoanSize model, CancellationToken cancellation = default)
-    {
-        try
-        {
-            logger.LogInformation("inserting new user loan size......");
-
-            await using var cxt = await dbContextFactory.CreateDbContextAsync(cancellation);
-
-            var existings = await cxt.UserLoanSizes.AnyAsync(x => x.Id == model.Id &&
-                                                                  x.UserRefId == model.UserRefId &&
-                                                                  x.EditSeq == model.EditSeq);
-
-            if (!existings)
-            {
-                return Result.Failure<string>(ErrorResponse.Conflict(Messages.DataNotFound));
-            }
-
-            cxt.UserLoanSizes.Update(model);
-
-            await cxt.SaveChangesAsync(cancellation);
-
-            return Result.Success<string>(Messages.DataCreated);
-        }
-        catch (Exception ex)
-        {
-
-            logger.LogError(ex.Message, ex);
-
-            return Result.Failure<string>(ErrorResponse.ServerError(ex.Message));
-        }
-
-    }
-
-
-    public async Task<Result<VUserLoanSizes>> GetLoanSizeByUserId(string? userRefId, CancellationToken cancellation = default)
+    public async Task<ErrorOr<AppSettingDto>> GetAppSettingByIdAsync(
+        int id, CancellationToken cancellation = default)
     {
         try
         {
             await using var cxt = await dbContextFactory.CreateDbContextAsync(cancellation);
 
-            var item = await cxt.Database
-                                  .SqlQuery<VUserLoanSizes>($"SELECT * FROM VUserLoanSizes WHERE UserRefId={userRefId}")
-                                  .AsNoTracking()
-                                  .FirstOrDefaultAsync(cancellation);
+            var item = await cxt.AppSettings
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == id, cancellation);
 
             if (item is null)
+                return Error.NotFound(description: "App setting not found.");
+
+            return new AppSettingDto
             {
-                return Result.Failure<VUserLoanSizes>(ErrorResponse.NotFound(Messages.DataNotFound));
-            }
-
-            return Result.Success(item);
-
+                Id = item.Id,
+                Code = item.Code,
+                Value = item.Value,
+                Description = item.Description,
+                IsActive = item.IsActive
+            };
         }
         catch (Exception ex)
         {
-            logger.LogError(ex.Message, ex);
-
-            return Result.Failure<VUserLoanSizes>(ErrorResponse.ServerError(ex.Message));
+            logger.LogError(ex, ex.Message);
+            return Error.Failure(description: ex.Message);
         }
-
     }
 
-    public async Task<Result<UserLoanSize>> GetLoanSizeById(long? id, string? userId, CancellationToken cancellation = default)
+    public async Task<ErrorOr<AppSettingDto>> CreateAppSettingAsync(
+        AppSettingDtoCreate request, CancellationToken cancellation = default)
+    {
+        try
+        {
+            await using var cxt = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+            var exists = await cxt.AppSettings.AnyAsync(x => x.Code == request.Code, cancellation);
+            if (exists)
+                return Error.Conflict(description: $"App setting with code '{request.Code}' already exists.");
+
+            var entity = new AppSettings
+            {
+                Code = request.Code,
+                Value = request.Value,
+                Description = request.Description,
+                IsActive = request.IsActive
+            };
+
+            cxt.AppSettings.Add(entity);
+            await cxt.SaveChangesAsync(cancellation);
+
+            return new AppSettingDto
+            {
+                Id = entity.Id,
+                Code = entity.Code,
+                Value = entity.Value,
+                Description = entity.Description,
+                IsActive = entity.IsActive
+            };
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, ex.Message);
+            return Error.Failure(description: ex.Message);
+        }
+    }
+
+    public async Task<ErrorOr<AppSettingDto>> UpdateAppSettingAsync(
+        AppSettingDtoUpdate request, CancellationToken cancellation = default)
+    {
+        try
+        {
+            await using var cxt = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+            var entity = await cxt.AppSettings.FindAsync([request.Id], cancellation);
+            if (entity is null)
+                return Error.NotFound(description: "App setting not found.");
+
+            var duplicate = await cxt.AppSettings
+                .AnyAsync(x => x.Code == request.Code && x.Id != request.Id, cancellation);
+            if (duplicate)
+                return Error.Conflict(description: $"Another app setting with code '{request.Code}' already exists.");
+
+            entity.Code = request.Code;
+            entity.Value = request.Value;
+            entity.Description = request.Description;
+            entity.IsActive = request.IsActive;
+
+            await cxt.SaveChangesAsync(cancellation);
+
+            return new AppSettingDto
+            {
+                Id = entity.Id,
+                Code = entity.Code,
+                Value = entity.Value,
+                Description = entity.Description,
+                IsActive = entity.IsActive
+            };
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, ex.Message);
+            return Error.Failure(description: ex.Message);
+        }
+    }
+
+    public async Task<ErrorOr<bool>> DeleteAppSettingAsync(int id, CancellationToken cancellation = default)
+    {
+        try
+        {
+            await using var cxt = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+            var entity = await cxt.AppSettings.FindAsync(id, cancellation);
+
+            if (entity is null)
+                return Error.NotFound(description: "App setting not found.");
+
+            cxt.AppSettings.Remove(entity);
+
+            await cxt.SaveChangesAsync(cancellation);
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, ex.Message);
+            return Error.Failure(description: ex.Message);
+        }
+    }
+
+    // ── UserLoanSize ───────────────────────────────────────────────────────────
+
+    public async Task<Pager<VUserLoanSizes>> GetUserLoanSizesAsync(string? userRefId, QueryParam param, CancellationToken cancellation = default)
+    {
+        try
+        {
+            await using var cxt = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+            var query = cxt.Set<VUserLoanSizes>().AsNoTracking();
+
+            if (!string.IsNullOrWhiteSpace(userRefId))
+                query = query.Where(x => x.UserRefId == userRefId);
+
+            if (!param.IncludeInActive)
+                query = query.Where(x => x.IsActive);
+
+            if (!string.IsNullOrWhiteSpace(param.Filter))
+                query = query.Where(x =>
+                    EF.Functions.Like(x.UserRefId!, $"%{param.Filter}%") ||
+                    EF.Functions.Like(x.Description!, $"%{param.Filter}%"));
+
+            if (param.SortDescending)
+                query = query.OrderByDescending(x => EF.Property<object>(x, param.SortColumn!));
+
+            var count = await query.CountAsync(cancellation);
+
+            if (param.PageSize > 0)
+                query = query.Skip(param.Page).Take(param.PageSize);
+
+            var items = await query.AsNoTracking().ToListAsync(cancellation);
+
+            return PagerExtensions.Create(items, count);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, ex.Message);
+
+            return PagerExtensions.Create<VUserLoanSizes>([], 0);
+        }
+    }
+
+    public async Task<ErrorOr<UserLoanSizeDto>> GetUserLoanSizeByIdAsync(
+        long id, CancellationToken cancellation = default)
     {
         try
         {
             await using var cxt = await dbContextFactory.CreateDbContextAsync(cancellation);
 
             var item = await cxt.UserLoanSizes
-                                .FirstOrDefaultAsync(x => x.Id == id && x.UserRefId == userId);
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == id, cancellation);
 
             if (item is null)
+                return Error.NotFound(description: "User loan size not found.");
+
+            return new UserLoanSizeDto
             {
-                return Result.Failure<UserLoanSize>(ErrorResponse.NotFound(Messages.DataNotFound));
-            }
-
-            return Result.Success(item);
-
+                Id = item.Id,
+                UserRefId = item.UserRefId,
+                MinUsdLoanSize = item.MinUsdLoanSize,
+                MaxUsdLoanSize = item.MaxUsdLoanSize,
+                MinKhrLoanSize = item.MinKhrLoanSize,
+                MaxKhrLoanSize = item.MaxKhrLoanSize,
+                StartDate = item.StartDate,
+                EndDate = item.EndDate,
+                Description = item.Description,
+                IsActive = item.IsActive,
+                EditSeq = item.EditSeq
+            };
         }
         catch (Exception ex)
         {
-            logger.LogError(ex.Message, ex);
-
-            return Result.Failure<UserLoanSize>(ErrorResponse.ServerError(ex.Message));
+            logger.LogError(ex, ex.Message);
+            return Error.Failure(description: ex.Message);
         }
-
     }
 
-
-
-
-    public async Task<Pager<VUserLoanSizes>> GetUserLoanSizes(string? userRefId, QueryParam q, CancellationToken cancellation = default)
+    public async Task<ErrorOr<UserLoanSizeDto>> CreateUserLoanSizeAsync(
+        UserLoanSizeDtoCreate request, CancellationToken cancellation = default)
     {
         try
         {
-            logger.LogInformation("getting user loan size.....");
-
             await using var cxt = await dbContextFactory.CreateDbContextAsync(cancellation);
 
-            var queries = cxt.Database
-                                  .SqlQuery<VUserLoanSizes>($"SELECT * FROM VUserLoanSizes")
-                                  .WhereIf(userRefId.IsNotNullOrEmpty(), u => u.UserRefId == userRefId)
-                                  .WhereIf(!q.IncludeInActive, x => x.IsActive == true);
+            var exists = await cxt.UserLoanSizes.AnyAsync(x => x.UserRefId == request.UserRefId, cancellation);
+            if (exists)
+                return Error.Conflict(description: "A loan size record already exists for this user.");
 
-            if (q.Filter.IsNotNullOrEmpty())
+            var entity = new UserLoanSize
             {
-                Console.WriteLine(q.Filter);
+                UserRefId = request.UserRefId,
+                MinUsdLoanSize = request.MinUsdLoanSize,
+                MaxUsdLoanSize = request.MaxUsdLoanSize,
+                MinKhrLoanSize = request.MinKhrLoanSize,
+                MaxKhrLoanSize = request.MaxKhrLoanSize,
+                StartDate = request.StartDate,
+                EndDate = request.EndDate,
+                Description = request.Description,
+                IsActive = request.IsActive
+            };
 
-                logger.LogInformation($"filter with {q.Filter}");
+            cxt.UserLoanSizes.Add(entity);
+            await cxt.SaveChangesAsync(cancellation);
 
-                queries = queries.Where(x => EF.Functions.Like(x.FullName, $"%{q.Filter}%") ||
-                                             EF.Functions.Like(x.MinKhrLoanSize.ToString(), $"%{q.Filter}%") ||
-                                             EF.Functions.Like(x.MaxKhrLoanSize.ToString(), $"%{q.Filter}%") ||
-                                             EF.Functions.Like(x.MinUsdLoanSize.ToString(), $"%{q.Filter}%") ||
-                                             EF.Functions.Like(x.MaxUsdLoanSize.ToString(), $"%{q.Filter}%") ||
-                                             EF.Functions.Like(x.BranchName, $"%{q.Filter}%"));
-            }
-
-            if (q.SortDescending)
+            return new UserLoanSizeDto
             {
-                queries = queries.OrderByDescending(x => EF.Property<object>(x, q.SortColumn));
-            }
-            var counts = await queries.CountAsync(cancellation);
-
-            if (q.PageSize > 0)
-            {
-                queries = queries.Skip(q.Page).Take(q.PageSize);
-            }
-
-            var items = await queries.AsNoTracking().ToListAsync(cancellation);
-
-
-            return new Pager<VUserLoanSizes>(items, counts);
-
+                Id = entity.Id,
+                UserRefId = entity.UserRefId,
+                MinUsdLoanSize = entity.MinUsdLoanSize,
+                MaxUsdLoanSize = entity.MaxUsdLoanSize,
+                MinKhrLoanSize = entity.MinKhrLoanSize,
+                MaxKhrLoanSize = entity.MaxKhrLoanSize,
+                StartDate = entity.StartDate,
+                EndDate = entity.EndDate,
+                Description = entity.Description,
+                IsActive = entity.IsActive,
+                EditSeq = entity.EditSeq
+            };
         }
         catch (Exception ex)
         {
-            logger.LogError(ex.Message, ex);
-
-            return new Pager<VUserLoanSizes>([], 0);
+            logger.LogError(ex, ex.Message);
+            return Error.Failure(description: ex.Message);
         }
-
     }
 
-
-
-    public async Task<Result<string>> DeActivateUserLoanSizeAsync(long? id, string? userRefId, CancellationToken cancellation = default)
+    public async Task<ErrorOr<UserLoanSizeDto>> UpdateUserLoanSizeAsync(
+        UserLoanSizeDtoUpdate request, CancellationToken cancellation = default)
     {
-        await using var cxt = await dbContextFactory.CreateDbContextAsync(cancellation);
-
-        var existing = await cxt.UserLoanSizes
-                        .AsNoTracking()
-                        .FirstOrDefaultAsync(x => x.Id == id &&
-                                             x.UserRefId == userRefId);
-
-        if (existing is null)
+        try
         {
-            return Result.Failure<string>(ErrorResponse.NotFound(Messages.DataNotFound));
+            await using var cxt = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+            var entity = await cxt.UserLoanSizes
+                .FirstOrDefaultAsync(x => x.Id == request.Id && x.EditSeq == request.EditSeq, cancellation);
+
+            if (entity is null)
+                return Error.NotFound(description: "User loan size not found or has been modified by another user.");
+
+            entity.MinUsdLoanSize = request.MinUsdLoanSize;
+            entity.MaxUsdLoanSize = request.MaxUsdLoanSize;
+            entity.MinKhrLoanSize = request.MinKhrLoanSize;
+            entity.MaxKhrLoanSize = request.MaxKhrLoanSize;
+            entity.StartDate = request.StartDate;
+            entity.EndDate = request.EndDate;
+            entity.Description = request.Description;
+            entity.IsActive = request.IsActive;
+            entity.EditSeq = request.EditSeq + 1;
+
+            await cxt.SaveChangesAsync(cancellation);
+
+            return new UserLoanSizeDto
+            {
+                Id = entity.Id,
+                UserRefId = entity.UserRefId,
+                MinUsdLoanSize = entity.MinUsdLoanSize,
+                MaxUsdLoanSize = entity.MaxUsdLoanSize,
+                MinKhrLoanSize = entity.MinKhrLoanSize,
+                MaxKhrLoanSize = entity.MaxKhrLoanSize,
+                StartDate = entity.StartDate,
+                EndDate = entity.EndDate,
+                Description = entity.Description,
+                IsActive = entity.IsActive,
+                EditSeq = entity.EditSeq
+            };
         }
-
-        var newValue = !existing.IsActive;
-        var editSeq = existing.EditSeq + 1;
-        var updated = await cxt.UserLoanSizes
-                        .Where(x => x.Id == id &&
-                                    x.UserRefId == userRefId &&
-                                    x.EditSeq == existing.EditSeq)
-                        .ExecuteUpdateAsync(props => props.SetProperty(x => x.IsActive, newValue)
-                                                       .SetProperty(x => x.EditSeq, editSeq));
-
-        return updated > 0 ?
-               Result.Success<string>(new("Data was changed")) :
-               Result.Failure<string>(ErrorResponse.ServerError(Messages.DataNotFound));
+        catch (Exception ex)
+        {
+            logger.LogError(ex, ex.Message);
+            return Error.Failure(description: ex.Message);
+        }
     }
 
-
-    public async Task<Pager<CollateralSubType>> GetCollateralSubTypes(QueryParam param, CancellationToken cancellation = default)
+    public async Task<ErrorOr<bool>> DeleteUserLoanSizeAsync(long? id, CancellationToken cancellation = default)
     {
-        await using var cxt = await dbContextFactory.CreateDbContextAsync(cancellation);
-
-        var queries = cxt.CollateralSubTypes.AsNoTracking();
-
-
-        if (!param.IncludeInActive)
+        try
         {
-            queries = queries.Where(x => x.IsActive == true);
-        }
+            await using var cxt = await dbContextFactory.CreateDbContextAsync(cancellation);
 
-        if (param.Filter.IsNotNullOrEmpty())
+            var entity = await cxt.UserLoanSizes.FindAsync(id, cancellation);
+
+            if (entity is null)
+                return Error.NotFound(description: "User loan size not found.");
+
+            cxt.UserLoanSizes.Remove(entity);
+
+            await cxt.SaveChangesAsync(cancellation);
+
+            return true;
+        }
+        catch (Exception ex)
         {
-            queries = queries.Where(x => EF.Functions.Like(x.CollateralSubTypeName!, $"%{param.Filter}%") ||
-                                         EF.Functions.Like(x.CollateralSubTypeNameInKhmer!, $"%{param.Filter}%"));
+            logger.LogError(ex, ex.Message);
+            return Error.Failure(description: ex.Message);
         }
-
-
-        if (param.SortDescending)
-        {
-            queries = queries.OrderByDescending(x => EF.Property<object>(x, param.SortColumn));
-        }
-
-        var counts = await queries.CountAsync(cancellation);
-
-        var items = await queries.Skip(param.Page)
-                                    .Take(param.PageSize)
-                                    .AsNoTracking()
-                                    .ToListAsync(cancellation);
-
-
-
-
-        return new Pager<CollateralSubType>(items, counts);
-
-
     }
 
+    public async Task<ErrorOr<bool>> ToggleUserLoanSizeActiveAsync(long id, string userRefId, CancellationToken cancellation = default)
+    {
+        try
+        {
+            await using var cxt = await dbContextFactory.CreateDbContextAsync(cancellation);
 
+            var entity = await cxt.UserLoanSizes
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == id && x.UserRefId == userRefId, cancellation);
 
+            if (entity is null)
+                return Error.NotFound(description: "User loan size not found.");
 
+            var updated = await cxt.UserLoanSizes
+                .Where(x => x.Id == id && x.UserRefId == userRefId && x.EditSeq == entity.EditSeq)
+                .ExecuteUpdateAsync(props => props
+                    .SetProperty(x => x.IsActive, !entity.IsActive)
+                    .SetProperty(x => x.EditSeq, entity.EditSeq + 1), cancellation);
+
+            return updated > 0
+                ? true
+                : Error.Conflict(description: "Update failed — record may have been modified concurrently.");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, ex.Message);
+            return Error.Failure(description: ex.Message);
+        }
+    }
+
+    // ── CollateralSubType ──────────────────────────────────────────────────────
+
+    public async Task<Pager<CollateralSubTypeDto>> GetCollateralSubTypesAsync(
+        QueryParam param, CancellationToken cancellation = default)
+    {
+        try
+        {
+            await using var cxt = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+            var query = cxt.CollateralSubTypes.AsNoTracking();
+
+            if (!param.IncludeInActive)
+                query = query.Where(x => x.IsActive == true);
+
+            if (!string.IsNullOrWhiteSpace(param.Filter))
+                query = query.Where(x =>
+                    EF.Functions.Like(x.CollateralSubTypeName!, $"%{param.Filter}%") ||
+                    EF.Functions.Like(x.CollateralSubTypeNameInKhmer!, $"%{param.Filter}%"));
+
+            if (param.SortDescending)
+                query = query.OrderByDescending(x => EF.Property<object>(x, param.SortColumn!));
+
+            var count = await query.CountAsync(cancellation);
+
+            var items = await query
+                .Skip(param.Page)
+                .Take(param.PageSize)
+                .Select(x => new CollateralSubTypeDto
+                {
+                    Id = x.Id,
+                    CollateralSubTypeName = x.CollateralSubTypeName,
+                    CollateralSubTypeNameInKhmer = x.CollateralSubTypeNameInKhmer,
+                    CollateralTypeRefId = x.CollateralTypeRefId,
+                    ValueRate = x.ValueRate,
+                    LoanSizeAmuntMin = x.LoanSizeAmuntMin,
+                    LoanSizeAmuntMax = x.LoanSizeAmuntMax,
+                    IsActive = x.IsActive
+                }).ToListAsync(cancellation);
+
+            return new Pager<CollateralSubTypeDto>(items, count);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, ex.Message);
+            return new Pager<CollateralSubTypeDto>([], 0);
+        }
+    }
 }

@@ -79,12 +79,14 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             if (!string.IsNullOrEmpty(args.Value!.ToString()))
             {
                 await GetCustomerCollaterals();
+
                 await _collateralPopup.ToggleAsync(_collateralSearchText.Element);
             }
             else
             {
                 await _collateralPopup.CloseAsync();
             }
+
             await _gridCollaterals.Reload();
         }
 

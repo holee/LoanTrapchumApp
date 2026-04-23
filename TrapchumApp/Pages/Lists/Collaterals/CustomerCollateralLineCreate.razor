@@ -37,8 +37,8 @@
     </RadzenFieldset>
     <RadzenFieldset Text="Collateral Info">
         <RadzenRow class="rz-mb-1">
-            <RadzenColumn Size="12">
-                <RadzenCard Variant="Variant.Outlined" class="rz-p-2">
+            <RadzenColumn Size="6">
+                <RadzenCard Variant="Variant.Outlined">
                     <RadzenUpload @ref="radzenUpload"
                                   ChooseText="Select PDF file to upload"
                                   Auto="true"
@@ -49,11 +49,35 @@
                                   Progress="@UploadProgress"
                                   Change="@OnFileChanged"
                                   Error="@OnError"
-                                  InputAttributes="@(new Dictionary<string,object>{ { "aria-label", "select file" }})" />
-                    <RadzenProgressBar Value="@progress" class="rz-mt-2" Visible="@showProgress" />
-                    <RadzenLabel Visible="@showComplete"
-                                 class="rz-mx-2"
-                                 Text="@completionMessage" />
+                                  InputAttributes="@(new Dictionary<string, object> { { "aria-label", "select file" } })" />
+
+                    @if (isUploading)
+                    {
+                        <RadzenLabel class="rz-mt-2 rz-mb-1" Text="Uploading file..." />
+                        <RadzenProgressBar Mode="ProgressBarMode.Indeterminate"
+                                           ShowValue="false"
+                                           class="rz-mb-2" />
+                    }
+
+                    <RadzenProgressBar Value="@progress"
+                                       class="rz-mt-2"
+                                       Visible="@showProgress" />
+                </RadzenCard>
+            </RadzenColumn>
+
+            <RadzenColumn Size="6">
+                <RadzenCard Variant="Variant.Outlined">
+                    @if (!string.IsNullOrWhiteSpace(model?.FileUrl))
+                    {
+                        <RadzenLink Path="@model.FileUrl"
+                                    Target="_blank"
+                                    Text="Open full file"
+                                    class="rz-mt-1" />
+                    }
+                    else
+                    {
+                        <RadzenLabel Text="No file uploaded yet." />
+                    }
                 </RadzenCard>
             </RadzenColumn>
         </RadzenRow>
@@ -176,59 +200,43 @@
     int progress;
     bool showProgress;
     bool showComplete;
+    bool isUploading;
     string completionMessage = string.Empty;
     bool cancelUpload = false;
 
     void UploadComplete(UploadCompleteEventArgs args)
     {
-
+        isUploading = false;
         showProgress = false;
-
         showComplete = true;
 
         if (string.IsNullOrEmpty(args.RawResponse))
         {
             completionMessage = "Upload failed: empty response.";
-
             model.FileUrl = string.Empty;
-
             return;
         }
 
         var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-
         var fileModel = JsonSerializer.Deserialize<DocumentDto>(args.RawResponse!, options);
 
         if (fileModel is not null)
         {
-
             completionMessage = "Upload complete!";
-
             model.FileUrl = fileModel.FileUrl;
-
-            // var command = new AddDocumentCommand(new DocumentDtoCreate
-            // {
-            //     OriginalName = fileModel.OriginalName,
-            //     FileUrl = fileModel.FileUrl,
-            //     FileSize = fileModel.FileSize,
-            //     NewFileName = fileModel.FileName
-            // });
-
-            // _ = mediator.Send(command);
         }
         else
         {
             completionMessage = "Upload failed: unable to parse response.";
+            model.FileUrl = string.Empty;
         }
     }
 
     void UploadProgress(UploadProgressArgs args)
     {
-
+        isUploading = args.Progress < 100;
         showProgress = true;
-
         showComplete = false;
-
         progress = args.Progress;
 
         if (args.Progress == 100)
@@ -239,33 +247,27 @@
 
     void OnError(UploadErrorEventArgs args)
     {
+        isUploading = false;
         showProgress = false;
-
         showComplete = true;
-
         completionMessage = $"Upload error: {args.Message}";
-
         model.FileUrl = string.Empty;
-
     }
-
 
     void OnCancel()
     {
         cancelUpload = true;
+        isUploading = false;
     }
 
     void OnFileChanged(UploadChangeEventArgs args)
     {
-
         if (args.Files is null)
         {
             Console.WriteLine("No files selected.");
-
+            isUploading = false;
             showComplete = false;
-
             showProgress = false;
-
             return;
         }
 
@@ -274,30 +276,27 @@
         if (file is null)
         {
             Console.WriteLine("No file found in the selection.");
-
-            Console.WriteLine("No files selected.");
-
+            isUploading = false;
             showComplete = false;
-
             showProgress = false;
-
             return;
         }
-        ;
 
         if (file.Size > MaxFileSize)
         {
             Console.WriteLine("File size exceeds the maximum limit of {0} bytes.", MaxFileSize);
-
-            Console.WriteLine("No files selected.");
-
+            isUploading = false;
             showComplete = false;
-
             showProgress = false;
-
             return;
         }
 
+        isUploading = true;
+        progress = 0;
+        showProgress = true;
+        showComplete = false;
+        completionMessage = string.Empty;
+        model.FileUrl = string.Empty;
 
         Console.WriteLine("File changed: {0} files selected", args.Files.Count());
     }

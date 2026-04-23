@@ -72,7 +72,16 @@
                     <div class="file-item">
                         <RadzenIcon Icon="insert_drive_file" Style="color:#1976d2;" />
                         <div class="file-meta">
-                            <div class="file-name">@file.NewFileName</div>
+                            <div class="file-name">
+                                @if (!string.IsNullOrEmpty(file.FileUrl))
+                                {
+                                    <a href="@file.FileUrl" target="_blank" title="Preview @file.OriginalName">@file.NewFileName</a>
+                                }
+                                else
+                                {
+                                    @file.NewFileName
+                                }
+                            </div>
                             <div class="file-size">@Dz_FormatSize(file.FileSize)</div>
                         </div>
                         <RadzenButton Icon="close" 

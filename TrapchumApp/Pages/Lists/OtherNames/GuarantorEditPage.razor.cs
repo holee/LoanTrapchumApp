@@ -35,9 +35,9 @@ namespace TrapchumApp.Pages.Lists.OtherNames
             {
                 var resp = await _gService.GetGuarantorEditAsync(NameId);
 
-                if (resp.IsSuccess)
+                if (!resp.IsError)
                 {
-                    model = resp.Data!;
+                    model = resp.Value;
                 }
             }
 
@@ -50,15 +50,15 @@ namespace TrapchumApp.Pages.Lists.OtherNames
             {
                 var resultResponse = await _gService.UpdateAsync(model);
 
-                if (resultResponse.IsSuccess)
+                if (!resultResponse.IsError)
                 {
-                    NotificationService.Notify(NotificationSeverity.Success, resultResponse.Data);
+                    NotificationService.Notify(NotificationSeverity.Success, "Guarantor was updated.");
                    
                     await TabClosing();
                 }
                 else
                 {
-                    NotificationService.Notify(NotificationSeverity.Error, resultResponse.ErrMessage);
+                    NotificationService.Notify(NotificationSeverity.Error, resultResponse.FirstError.Description);
                 }
             }
             catch (Exception ex)

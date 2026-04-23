@@ -1,18 +1,20 @@
-﻿<RadzenButton Size="ButtonSize.ExtraSmall"
-              Text="@Title"
+﻿<RadzenButton Size="@Size"
+              Text="@Text"
               Click="@HandleClick"
-              ButtonStyle="ButtonStyle.Success"
+              ButtonStyle="ButtonStyle.Danger"
               ButtonType="@ButtonType"
               Icon="@Icon"></RadzenButton>
 @code {
     [Parameter]
-    public string Title { get; set; } = "Save";
+    public string Text { get; set; } = "Cancel";
     [Parameter]
     public EventCallback OnClick { get; set; }
     [Parameter]
-    public string Icon { get; set; } = "save";
+    public string Icon { get; set; } = "cancel";
     [Parameter]
     public ButtonType ButtonType { get; set; } = ButtonType.Button;
+    [Parameter]
+    public ButtonSize Size { get; set; } = ButtonSize.ExtraSmall;
 
     private void HandleClick()
     {

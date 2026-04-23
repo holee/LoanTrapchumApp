@@ -152,6 +152,28 @@ namespace Infrastructures.Implements
                                  .AnyAsync(x => x.OccupationTitle!.ToLower() == occupationTitle.ToLower(), cancellation);
         }
 
+        public async Task<ErrorOr<OccupationDto>> UpdateAsync(OccupationDtoUpate request, CancellationToken cancellation = default)
+        {
+            logger.LogInformation("Updating occupation with ID: {OccupationId}", request.OccupationId);
+
+            await using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+            var existing = await context.Occupations.FirstOrDefaultAsync(x => x.OccupationId == request.OccupationId, cancellation);
+
+            if (existing is null)
+            {
+                return Error.NotFound(description: $"Occupation with ID {request.OccupationId} was not found.");
+            }
+
+            existing.OccupationTitle = request.OccupationTitle;
+            existing.Khmer = request.Khmer;
+            existing.TypeOf = request.TypeOf;
+
+            await context.SaveChangesAsync(cancellation);
+
+            return existing.Map();
+        }
+
     }
 }
 

@@ -56,11 +56,12 @@
                     <RadzenDataGridColumn Width="8rem" Property="RoleName" Title="Name" />
                     <RadzenDataGridColumn Property="Description" Title="Description" Sortable="false" />
                     <RadzenDataGridColumn TextAlign="TextAlign.Center"
-                                          Width="3rem"
+                                          Width="5rem"
                                           Property="IsActive"
                                           Title="Status" Context="r" Sortable="false">
                         <Template>
-                            <RadzenCheckBox TValue="bool" Value="@r.IsActive" />
+                            <RadzenBadge BadgeStyle="@(r.IsActive ? BadgeStyle.Success : BadgeStyle.Danger)"
+                                         Text="@(r.IsActive ? "Active" : "Inactive")" />
                         </Template>
                     </RadzenDataGridColumn>
 

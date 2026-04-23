@@ -1,0 +1,38 @@
+@using Applications.Features.AdditionalInformations.Dto
+@using TrapchumApp.Components.Buttons
+@using TrapchumApp.Helpers.Extensions
+
+<RadzenTemplateForm TItem="OccupationDtoUpate" Data="@model" Submit="@OnSubmit">
+    <RadzenRow class="rz-my-2">
+        <RadzenColumn Size="12">
+            <RadzenFormField Text="Occupation Title" Variant="Variant.Outlined" class="rz-w-100">
+                <RadzenTextBox class="rz-w-100"
+                               @bind-Value="@model.OccupationTitle"
+                               Name="OccupationTitle" />
+                <RadzenRequiredValidator Component="OccupationTitle"
+                                         Text="Occupation Title is required" />
+            </RadzenFormField>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow class="rz-my-2">
+        <RadzenColumn Size="12">
+            <RadzenFormField Text="Khmer" Variant="Variant.Outlined" class="rz-w-100">
+                <RadzenTextBox @bind-Value="@model.Khmer" Name="Khmer" class="rz-w-100" />
+            </RadzenFormField>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow class="rz-my-2">
+        <RadzenFormField class="rz-w-100" Text="Type Of" Variant="Variant.Outlined" AllowFloatingLabel="false">
+            <RadzenDropDown Data="@StorageConstant.TypeOfOptions"
+                            class="rz-w-100"
+                            @bind-Value="@model.TypeOf">
+            </RadzenDropDown>
+        </RadzenFormField>
+    </RadzenRow>
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 JustifyContent="JustifyContent.End"
+                 AlignItems="AlignItems.Center">
+        <SaveButton />
+        <CancelButton OnClick="@(() => DialogService.Close(false))" />
+    </RadzenStack>
+</RadzenTemplateForm>

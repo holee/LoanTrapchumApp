@@ -11,7 +11,7 @@
 @using Applications.Responses.ViewModels
 @using TrapchumApp.Helpers.Extensions
 <PageTitle>Occupations</PageTitle>
-<GridToolbar>
+<GridToolbar SearchChanged="@TextChanged">
     <LeftChildren>
         <RadzenButton Size="ButtonSize.ExtraSmall"
                       ButtonStyle="ButtonStyle.Primary"
@@ -61,6 +61,19 @@
         <RadzenDataGridColumn Title="TypeOf"
                               Property="@nameof(OccupationDto.TypeOf)"
                               TextAlign="TextAlign.Left">
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn Title="Actions"
+                              Sortable="false"
+                              Filterable="false"
+                              Width="5rem"
+                              TextAlign="TextAlign.Center"
+                              Context="row">
+            <Template>
+                <RadzenButton Size="ButtonSize.ExtraSmall"
+                              Icon="more_vert"
+                              Variant="Variant.Text"
+                              Click="@((args) => ShowContextMenu(args, row))" />
+            </Template>
         </RadzenDataGridColumn>
     </Columns>
 </RadzenDataGrid>
@@ -129,17 +142,50 @@
 
     async Task AddOccupations()
     {
-        var dia = await DialogService.OpenAsync<OccupationCreate>("Occupations");
+        var dia = await DialogService.OpenAsync<OccupationCreate>("Add Occupation");
 
         if (dia is OccupationDto result && result is not null)
         {
-
             await gridRef.InsertRow(result);
-
             await gridRef.Reload();
-
         }
     }
 
+    async Task EditOccupation(OccupationDto item)
+    {
+        var dia = await DialogService.OpenAsync<OccupationEdit>(
+            "Edit Occupation",
+            new Dictionary<string, object> { { nameof(OccupationEdit.Id), item.OccupationId } });
+
+        if (dia is OccupationDto updated && updated is not null)
+        {
+            await GetOccupations(_filter);
+        }
+    }
+
+    async Task ViewDetail(OccupationDto item)
+    {
+        await DialogService.OpenAsync<OccupationDetail>(
+            "Occupation Details",
+            new Dictionary<string, object> { { nameof(OccupationDetail.Id), item.OccupationId } });
+
+        await GetOccupations(_filter);
+    }
+
+    void ShowContextMenu(MouseEventArgs args, OccupationDto item)
+    {
+        ContextMenuService.Open(args, ds =>
+    @<RadzenMenu>
+    <RadzenMenuItem Icon="@IconNames.Info" Click="@(() => ViewDetail(item))" Text="View Details" />
+    <RadzenMenuItem Icon="@IconNames.Edit" Click="@(() => EditOccupation(item))" Text="Edit" />
+</RadzenMenu>
+        );
+    }
+
+    async Task TextChanged(string? searchText = null)
+    {
+        _filter = searchText ?? string.Empty;
+        await GetOccupations(_filter);
+    }
 
 }

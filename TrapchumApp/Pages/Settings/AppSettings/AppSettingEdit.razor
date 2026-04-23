@@ -1,0 +1,80 @@
+@using Applications.Features.Settings.Commands.AppSettings.UpdateAppSetting
+@using Applications.Features.Settings.Dto
+
+<RadzenTemplateForm TItem="AppSettingDtoUpdate" Data="@_model" Submit="@OnSubmit">
+    <RadzenRow class="rz-my-2">
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenFormField Text="Code *" Variant="Variant.Outlined" class="rz-w-100">
+                <RadzenTextBox @bind-Value="@_model.Code" Name="Code" class="rz-w-100" />
+                <RadzenRequiredValidator Component="Code" Text="Code is required" />
+            </RadzenFormField>
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenFormField Text="Value *" Variant="Variant.Outlined" class="rz-w-100">
+                <RadzenTextBox @bind-Value="@_model.Value" Name="Value" class="rz-w-100" />
+                <RadzenRequiredValidator Component="Value" Text="Value is required" />
+            </RadzenFormField>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow class="rz-my-2">
+        <RadzenColumn Size="12">
+            <RadzenFormField Text="Description" Variant="Variant.Outlined" class="rz-w-100">
+                <RadzenTextArea @bind-Value="@_model.Description" Name="Description" class="rz-w-100" Rows="3" />
+            </RadzenFormField>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow class="rz-my-2">
+        <RadzenColumn Size="12">
+            <RadzenCheckBox @bind-Value="@_model.IsActive" Name="IsActive" />
+            <RadzenLabel Text="Active" Component="IsActive" class="rz-ms-2" />
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 JustifyContent="JustifyContent.End"
+                 AlignItems="AlignItems.Center"
+                 Gap="0.5rem">
+        <RadzenButton ButtonType="ButtonType.Submit"
+                      Text="Save"
+                      ButtonStyle="ButtonStyle.Success"
+                      Icon="@IconNames.Save"
+                      Size="ButtonSize.ExtraSmall" />
+        <RadzenButton ButtonType="ButtonType.Button"
+                      Size="ButtonSize.ExtraSmall"
+                      Text="Cancel"
+                      Icon="@IconNames.Cancel"
+                      ButtonStyle="ButtonStyle.Danger"
+                      Click="@(() => DialogService.Close(false))" />
+    </RadzenStack>
+</RadzenTemplateForm>
+
+@code {
+    [Parameter] public AppSettingDto Item { get; set; } = default!;
+
+    private AppSettingDtoUpdate _model = default!;
+
+    protected override void OnParametersSet()
+    {
+        _model = new AppSettingDtoUpdate
+        {
+            Id          = Item.Id,
+            Code        = Item.Code ?? string.Empty,
+            Value       = Item.Value ?? string.Empty,
+            Description = Item.Description,
+            IsActive    = Item.IsActive
+        };
+    }
+
+    private async Task OnSubmit(AppSettingDtoUpdate model)
+    {
+        var rsp = await mediator.Send(new UpdateAppSettingCommand(model));
+
+        if (rsp.IsError)
+        {
+            await DialogService.Alert(rsp.FirstError.Description, "Error", new ConfirmOptions { OkButtonText = "OK" });
+            return;
+        }
+
+        NotificationService.Notify(NotificationSeverity.Success, "Updated", $"Setting '{rsp.Value.Code}' updated.");
+        DialogService.Close(rsp.Value);
+    }
+}

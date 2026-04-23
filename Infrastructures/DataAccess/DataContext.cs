@@ -15,6 +15,7 @@ using Applications.Responses.ViewModels.Ledgers;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Responses.ViewModels.OtherNames;
+using Applications.Responses.ViewModels.Settings;
 using Applications.Responses.ViewModels.Vendors;
 using Domains.Models;
 using Domains.Models.Addresses;
@@ -159,6 +160,8 @@ namespace Infrastructures.DataAccess
         public DbSet<IncomeExpense> IncomeExpenses => Set<IncomeExpense>();
         public DbSet<EntityNames> EntityNames => Set<EntityNames>();
         public DbSet<Occupation> Occupations => Set<Occupation>();
+        public DbSet<LtPeriod> LtPeriods => Set<LtPeriod>();
+        public DbSet<LtPurpose> LtPurposes => Set<LtPurpose>();
         public DbSet<Address> Addresses => Set<Address>();
         public DbSet<City> Cities => Set<City>();
         public DbSet<Country> Countries => Set<Country>();
@@ -214,6 +217,7 @@ namespace Infrastructures.DataAccess
         public DbSet<LoanDescriptions> LoanDescriptions => Set<LoanDescriptions>();
         public DbSet<LoanChangedCa> LoanChangedCa => Set<LoanChangedCa>();
         public DbSet<AppSettings> AppSettings => Set<AppSettings>();
+        public DbSet<VUserLoanSizes> VUserLoanSizes => Set<VUserLoanSizes>();
         public DbSet<VUser> VUsers => Set<VUser>();
         public DbSet<VCurrenciesList> VCurrenciesList => Set<VCurrenciesList>();
         public DbSet<VCurrencyCounter> VCurrencyNotes => Set<VCurrencyCounter>();

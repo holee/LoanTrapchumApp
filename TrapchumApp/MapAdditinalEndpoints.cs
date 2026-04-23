@@ -22,7 +22,7 @@ internal static class MapAdditinalEndpoints
             if (file is null || file.Length == 0)
                 return Results.BadRequest("No file uploaded.");
 
-            const long maxFileSize = 10L * 1024 * 1024; // 10 MB
+            const long maxFileSize = 50L * 1024 * 1024; // 50 MB
 
             if (file.Length > maxFileSize)
                 return Results.BadRequest("File size exceeds 10 MB.");
@@ -85,7 +85,7 @@ internal static class MapAdditinalEndpoints
             if (files is null || files.Count == 0)
                 return Results.BadRequest("No file uploaded.");
 
-            const long maxFileSize = 10L * 1024 * 1024; // 10 MB
+            const long maxFileSize = 50L * 1024 * 1024; // 10 MB
 
             try
             {
@@ -154,7 +154,7 @@ internal static class MapAdditinalEndpoints
                 logger.LogWarning("No file uploaded.");
                 return Results.BadRequest("No file uploaded.");
             }
-            const long maxFileSize = 10L * 1024 * 1024; // 10 MB
+            const long maxFileSize = 50L * 1024 * 1024; // 50 MB
 
             if (file.Length > maxFileSize)
                 return Results.BadRequest("File size exceeds 10 MB.");

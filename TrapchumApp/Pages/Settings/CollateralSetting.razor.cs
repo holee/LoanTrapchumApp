@@ -1,194 +1,97 @@
-using Applications.Features.Settings.UseCases;
+using Applications.Features.Settings.Queries.CollateralSubTypes.GetCollateralSubTypes;
+using Applications.Features.Collaterals.Dtos;
+using Applications.Interfaces.Lists;
 using Applications.Responses.Paginations;
 using Domains.Models.Collaterals;
-using Microsoft.EntityFrameworkCore;
 using Radzen.Blazor;
-using System.Threading.Tasks;
-using Applications.Services.Lists;
-using Applications.Features.Collaterals.Dtos;
+using TrapchumApp.Pages.Lists.Collaterals;
 
 namespace TrapchumApp.Pages.Settings
 {
     public partial class CollateralSetting
     {
-        private readonly ISettingServiceImpl _settingService;
-        private readonly ICollateralsServiceImpl _collateralsService;
+
+        private bool _isLoading = false;
         private int pageIndex = 0;
         private int pageSize = 15;
         private int _counts = 0;
         private string sortField = "Id";
         private bool sortDescending = false;
-        private bool includeInactive = false;
-        private string filterText = string.Empty;
         private RadzenDataGrid<CollateralSubType> refGrid = default!;
         private List<CollateralSubType> _collateralSubTypes = [];
         private List<CollateralTypeResponse> _colleralTypes = [];
-        List<CollateralSubType> subTypeToUpdate = new List<CollateralSubType>();
-        public CollateralSetting(ISettingServiceImpl settingServiceImpl, ICollateralsServiceImpl collateralsServiceImpl)
-        {
-            _settingService = settingServiceImpl;
-            _collateralsService = collateralsServiceImpl;
-        }
 
 
         protected override async Task OnInitializedAsync()
         {
-
-            await GetCollateralTypes();
-
+            _colleralTypes = (await _collateralService.GetCollateralTypes(null)).ToList();
             await GetCollateralSubTypes();
-
             await base.OnInitializedAsync();
         }
 
         private async Task GetCollateralSubTypes()
         {
             _isLoading = true;
-            var param = new QueryParam(pageIndex, pageSize, sortField, includeInactive, sortDescending, filterText);
-
-            var rsp = await _settingService.GetColleralSubTypes(param);
-
-            _collateralSubTypes = rsp.Items.ToList() ?? [];
-
+            var param = new QueryParam(pageIndex, pageSize, sortField, true, sortDescending, null);
+            var rsp = await mediator.Send(new GetCollateralSubTypesQuery(param));
+            _collateralSubTypes = rsp.Items?.Select(x => new CollateralSubType
+            {
+                Id = x.Id,
+                CollateralSubTypeName = x.CollateralSubTypeName,
+                CollateralSubTypeNameInKhmer = x.CollateralSubTypeNameInKhmer,
+                CollateralTypeRefId = x.CollateralTypeRefId,
+                ValueRate = x.ValueRate,
+                LoanSizeAmuntMin = x.LoanSizeAmuntMin,
+                LoanSizeAmuntMax = x.LoanSizeAmuntMax,
+                IsActive = x.IsActive
+            }).ToList() ?? [];
             _counts = rsp.Count;
-
             _isLoading = false;
-            
             StateHasChanged();
-
         }
 
-        private async Task GetCollateralTypes()
-        {
-            var rsp = await _collateralsService.GetCollateralTypes();
-
-            _colleralTypes = rsp.ToList() ?? [];
-
-        }
         private async Task LoadData(LoadDataArgs args)
         {
             pageIndex = args.Skip ?? 0;
             pageSize = args.Top ?? 15;
+            if (args.Sorts?.Any() == true)
+            {
+                sortField = args.Sorts.First().Property ?? "Id";
+                sortDescending = args.Sorts.First().SortOrder == SortOrder.Descending;
+            }
             await GetCollateralSubTypes();
         }
 
-
-        void Reset()
-        {
-            subTypeToUpdate.Clear();
-        }
-
-        void Reset(CollateralSubType order)
-        {
-            subTypeToUpdate.Remove(order);
-        }
-
+        void Reset() { }
 
         async Task EditRow(CollateralSubType order)
         {
             if (!refGrid.IsValid) return;
-
-            subTypeToUpdate.Add(order);
-
             await refGrid.EditRow(order);
         }
 
-        async Task OnUpdateRow(CollateralSubType type)
+        async Task SaveRow(CollateralSubType order) => await refGrid.UpdateRow(order);
+
+        void CancelEdit(CollateralSubType order) => refGrid.CancelEditRow(order);
+
+        async Task OnUpdateRow(CollateralSubType item)
         {
-            Reset(type);
-
-            var rsp = await _collateralsService.UpdateAsync(type);
-
+            var rsp = await _collateralService.Upsert(item);
             if (rsp.IsSuccess)
-            {
-                NotificationService.Notify(NotificationSeverity.Success, rsp.Data);
-            }
+                NotificationService.Notify(NotificationSeverity.Success, "Saved", "Collateral sub-type saved.");
+            else
+                await DialogService.Alert(rsp.Errors.ErrMessage, "Error");
         }
 
-        async Task SaveRow(CollateralSubType order)
+        void OnCreateRow(CollateralSubType item) { }
+
+        async Task ClickAdd()
         {
-            await refGrid.UpdateRow(order);
+            var result = await DialogService.OpenAsync<SubTypeCollateralCreate>("Add",
+                options: new DialogOptions { AutoFocusFirstElement = false });
+
+            if (result is bool b && b)
+                await GetCollateralSubTypes();
         }
-
-        void CancelEdit(CollateralSubType order)
-        {
-            Reset(order);
-
-            refGrid.CancelEditRow(order);
-
-            //var orderEntry = dbContext.Entry(order);
-
-            //if (orderEntry.State == EntityState.Modified)
-            //{
-            //    orderEntry.CurrentValues.SetValues(orderEntry.OriginalValues);
-            //    orderEntry.State = EntityState.Unchanged;
-            //}
-
-        }
-
-
-        async Task DeleteRow(CollateralSubType order)
-        {
-            Reset(order);
-
-            //if (orders.Contains(order))
-            //{
-            //    dbContext.Remove<Order>(order);
-
-            //    dbContext.SaveChanges();
-
-            //    await ordersGrid.Reload();
-            //}
-            //else
-            //{
-            //    ordersGrid.CancelEditRow(order);
-            //    await ordersGrid.Reload();
-            //}
-
-            await Task.CompletedTask; // Placeholder for actual delete logic
-        }
-
-        async Task InsertRow()
-        {
-            //if (!ordersGrid.IsValid) return;
-
-            //if (editMode == DataGridEditMode.Single)
-            //{
-            //    Reset();
-            //}
-
-            //var order = new Order();
-            //ordersToInsert.Add(order);
-            //await ordersGrid.InsertRow(order);
-
-            await Task.CompletedTask; // Placeholder for actual insert logic
-        }
-
-        async Task InsertAfterRow(CollateralSubType row)
-        {
-            //if (!ordersGrid.IsValid) return;
-
-            //if (editMode == DataGridEditMode.Single)
-            //{
-            //    Reset();
-            //}
-
-            //var order = new Order();
-            //ordersToInsert.Add(order);
-            //await ordersGrid.InsertAfterRow(order, row);
-
-
-            await Task.CompletedTask; // Placeholder for actual insert logic
-        }
-
-        void OnCreateRow(CollateralSubType order)
-        {
-            //dbContext.Add(order);
-
-            //dbContext.SaveChanges();
-
-            //ordersToInsert.Remove(order);
-        }
-
     }
 }

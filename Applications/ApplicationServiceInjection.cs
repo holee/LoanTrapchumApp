@@ -1,5 +1,6 @@
 ﻿using Applications.Features.AdditionalInformations.Command.CreateOccupation;
 using Applications.Features.AdditionalInformations.Command.CreateSalutation;
+using Applications.Features.AdditionalInformations.Command.UpdateOccupation;
 using Applications.Features.AdditionalInformations.Dto;
 using Applications.Features.AdditionalInformations.Queries.GetNationalities;
 using Applications.Features.AdditionalInformations.Queries.GetOccupations;
@@ -22,6 +23,7 @@ using Applications.Features.Documents.Command.DeleteDocument;
 using Applications.Features.Documents.Dto;
 using Applications.Features.Documents.Queries.GetDocumentById;
 using Applications.Features.Documents.Queries.GetDocuments;
+using Applications.Features.Guarantor.Queries.GetGuarantorsAsPaging;
 using Applications.Features.Holidays.Command.ActivateOrDeactivate;
 using Applications.Features.Holidays.Command.CreateHoliday;
 using Applications.Features.Holidays.Queries.GetActiveHolidays;
@@ -32,15 +34,40 @@ using Applications.Features.Incomes.Command.DeleteIncomeExpense;
 using Applications.Features.LoanPayments.Command.PayOff;
 using Applications.Features.LoanPayments.Dtos;
 using Applications.Features.LoanPayments.Queries.GetPaidSchedule;
+using Applications.Features.LoanPurposes;
+using Applications.Features.LoanPurposes.Commands.CreateLoanPurpose;
+using Applications.Features.LoanPurposes.Commands.DeleteLoanPurpose;
+using Applications.Features.LoanPurposes.Commands.UpdateLoanPurpose;
+using Applications.Features.LoanPurposes.Queries.GetLoanPurposeById;
+using Applications.Features.LoanPurposes.Queries.GetLoanPurposes;
 using Applications.Features.LoanRequests.Command.SaveLoanRequests;
 using Applications.Features.Loans.Command.SaveLoanDisbursemenent;
 using Applications.Features.Loans.Dtos;
 using Applications.Features.Loans.Dtos.Responses;
 using Applications.Features.Loans.Queries.GetLoanCollaterals;
+using Applications.Features.Periods.Commands.CreatePeriod;
+using Applications.Features.Periods.Commands.DeletePeriod;
+using Applications.Features.Periods.Commands.UpdatePeriod;
+using Applications.Features.Periods.Dto;
+using Applications.Features.Periods.Queries.GetPeriods;
 using Applications.Features.Schedules.Dto;
 using Applications.Features.Schedules.Queries.GetDueScheduleByLoanId;
 using Applications.Features.Schedules.Queries.GetScheduleById;
 using Applications.Features.Schedules.Queries.GetScheduleDetailById;
+using Applications.Features.Settings.Commands.AppSettings.CreateAppSetting;
+using Applications.Features.Settings.Commands.AppSettings.DeleteAppSetting;
+using Applications.Features.Settings.Commands.AppSettings.UpdateAppSetting;
+using Applications.Features.Settings.Commands.UserLoanSizes.CreateUserLoanSize;
+using Applications.Features.Settings.Commands.UserLoanSizes.DeleteUserLoanSize;
+using Applications.Features.Settings.Commands.UserLoanSizes.ToggleUserLoanSize;
+using Applications.Features.Settings.Commands.UserLoanSizes.UpdateUserLoanSize;
+using Applications.Features.Settings.Dto;
+using Applications.Features.Settings.Queries.AppSettings.GetAppSettingById;
+using Applications.Features.Settings.Queries.AppSettings.GetAppSettings;
+using Applications.Features.Settings.Queries.CollateralSubTypes.GetCollateralSubTypes;
+using Applications.Features.Settings.Queries.UserLoanSizes.GetUserLoanSizeById;
+using Applications.Features.Settings.Queries.UserLoanSizes.GetUserLoanSizes;
+using Applications.Responses.ViewModels.Settings;
 using ErrorOr;
 namespace Applications;
 
@@ -51,8 +78,24 @@ public static class ApplicationServiceInjection
         services.AddValidatorsFromAssemblyContaining<GetCollateralLineDetailQueryValidator>();
         services.AddScoped<IMediator, SimpleMediator>();
 
+        //Guarantors
+        services.AddScoped<IRequestHandler<GetGuarantorsAsPagingQuery, Pager<VGuarantor>>, GetGuarantorsAsPagingQueryHandler>();
+
+
         services.AddScoped<IRequestHandler<GetOccupationsQuery, Pager<OccupationDto>>, GetOccupationsQueryHandler>();
         services.AddScoped<IRequestHandler<CreateOccupationCommand, ErrorOr<OccupationDto>>, CreateOccupationCommandHandler>();
+        services.AddScoped<IRequestHandler<UpdateOccupationCommand, ErrorOr<OccupationDto>>, UpdateOccupationCommandHandler>();
+
+        // Periods
+        services.AddScoped<IRequestHandler<GetPeriodsQuery, Pager<PeriodDto>>, GetPeriodsQueryHandler>();
+        services.AddScoped<IRequestHandler<CreatePeriodCommand, ErrorOr<PeriodDto>>, CreatePeriodCommandHandler>();
+        services.AddScoped<IRequestHandler<UpdatePeriodCommand, ErrorOr<PeriodDto>>, UpdatePeriodCommandHandler>();
+        services.AddScoped<IRequestHandler<DeletePeriodCommand, ErrorOr<bool>>, DeletePeriodCommandHandler>();
+        services.AddScoped<IRequestHandler<GetLoanPurposesQuery, Pager<LoanPurposeDto>>, GetLoanPurposesQueryHandler>();
+        services.AddScoped<IRequestHandler<GetLoanPurposeByIdQuery, LoanPurposeDto?>, GetLoanPurposeByIdQueryHandler>();
+        services.AddScoped<IRequestHandler<CreateLoanPurposeCommand, ErrorOr<LoanPurposeDto>>, CreateLoanPurposeCommandHandler>();
+        services.AddScoped<IRequestHandler<UpdateLoanPurposeCommand, ErrorOr<LoanPurposeDto>>, UpdateLoanPurposeCommandHandler>();
+        services.AddScoped<IRequestHandler<DeleteLoanPurposeCommand, ErrorOr<bool>>, DeleteLoanPurposeCommandHandler>();
         services.AddScoped<IRequestHandler<GetNationalitiesQuery, Pager<NationalityDto>>, GetNationalitiesQueryHandler>();
         services.AddScoped<IRequestHandler<GetSalutationsQuery, Pager<SalutationDto>>, GetSalutationsQueryHandler>();
         services.AddScoped<IRequestHandler<CreateSalutationCommand, ErrorOr<SalutationDto>>, CreateSalutationCommandHandler>();
@@ -361,6 +404,24 @@ public static class ApplicationServiceInjection
 
         //User and Identity
         services.AddScoped<IRequestHandler<CreateNewUserCommand, ErrorOr<string>>, CreateNewUserCommandHandler>();
+
+        // Settings — AppSettings
+        services.AddScoped<IRequestHandler<GetAppSettingsQuery, ErrorOr<IEnumerable<AppSettingDto>>>, GetAppSettingsQueryHandler>();
+        services.AddScoped<IRequestHandler<GetAppSettingByIdQuery, ErrorOr<AppSettingDto>>, GetAppSettingByIdQueryHandler>();
+        services.AddScoped<IRequestHandler<CreateAppSettingCommand, ErrorOr<AppSettingDto>>, CreateAppSettingCommandHandler>();
+        services.AddScoped<IRequestHandler<UpdateAppSettingCommand, ErrorOr<AppSettingDto>>, UpdateAppSettingCommandHandler>();
+        services.AddScoped<IRequestHandler<DeleteAppSettingCommand, ErrorOr<bool>>, DeleteAppSettingCommandHandler>();
+
+        // Settings — UserLoanSizes
+        services.AddScoped<IRequestHandler<GetUserLoanSizesQuery, Pager<VUserLoanSizes>>, GetUserLoanSizesQueryHandler>();
+        services.AddScoped<IRequestHandler<GetUserLoanSizeByIdQuery, ErrorOr<UserLoanSizeDto>>, GetUserLoanSizeByIdQueryHandler>();
+        services.AddScoped<IRequestHandler<CreateUserLoanSizeCommand, ErrorOr<UserLoanSizeDto>>, CreateUserLoanSizeCommandHandler>();
+        services.AddScoped<IRequestHandler<UpdateUserLoanSizeCommand, ErrorOr<UserLoanSizeDto>>, UpdateUserLoanSizeCommandHandler>();
+        services.AddScoped<IRequestHandler<DeleteUserLoanSizeCommand, ErrorOr<bool>>, DeleteUserLoanSizeCommandHandler>();
+        services.AddScoped<IRequestHandler<ToggleUserLoanSizeCommand, ErrorOr<bool>>, ToggleUserLoanSizeCommandHandler>();
+
+        // Settings — CollateralSubTypes
+        services.AddScoped<IRequestHandler<GetCollateralSubTypesQuery, Pager<CollateralSubTypeDto>>, GetCollateralSubTypesQueryHandler>();
 
 
         return services;

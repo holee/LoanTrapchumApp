@@ -12,6 +12,7 @@ using Applications.Interfaces.Identity;
 using Applications.Interfaces.Lists;
 using Applications.Interfaces.Loans;
 using Applications.Interfaces.setting;
+using Applications.Interfaces.Settings;
 using Applications.Interfaces.Transactions;
 using Applications.Interfaces.Vendors;
 using Domains.Models.Identity;
@@ -80,7 +81,8 @@ namespace Infrastructures
             services.AddSingleton<ICurrentUserService, CurrentUserService>();
             services.AddSingleton<ICurrentUserServices, CurrentUserRepository>();
             services.AddScoped<IAuditReadService, AuditReadService>();
-            services.AddScoped<IAppSettingService, AppSettingService>();
+            services.AddScoped<IAppSettingRepository, AppSettingService>();
+            services.AddScoped<IAppSettingService, LegacyAppSettingService>();
             services.AddScoped<ILoanSettingService, LoanSettingService>();
             services.AddScoped<IForiegnCurrencyExchange, ForiegnCurrencyExchange>();
             services.AddScoped<IJournalService, JournalService>();
@@ -90,6 +92,8 @@ namespace Infrastructures
             services.AddScoped<IRoleService, RoleRepository>();
             services.AddScoped<IOpenBranchService, OpenBranchService>();
             services.AddScoped<IOccupationService, OccupationRepository>();
+            services.AddScoped<IPeriodService, PeriodRepository>();
+            services.AddScoped<ILoanPurposeService, LoanPurposeRepository>();
             services.AddScoped<IOtherNameService, OtherNameRepository>();
             services.AddScoped<ILoginService, LoginService>();
             services.AddScoped<IBranchService, BranchRepository>();
@@ -109,7 +113,7 @@ namespace Infrastructures
             services.AddScoped<ICustomerActivityService, CustomerActivityRepository>();
             services.AddScoped<ICollateralService, CollateralRepository>();
             services.AddScoped<IHolidayService, HolidayRepository>();
-            services.AddScoped<IGuarantorService, GuarantorService>();
+            services.AddScoped<IGuarantorService, GuarantorRepository>();
             services.AddScoped<ILoanSettingService, LoanSettingService>();
             services.AddScoped<ILoanProductService, LoanProductService>();
             services.AddScoped<ILoanPaymentService, LoanPaymentRepository>();

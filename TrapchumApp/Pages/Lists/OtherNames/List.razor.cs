@@ -2,6 +2,7 @@ using Applications.Extensions;
 using Applications.Features.Guarantor.Dtos;
 using Applications.Responses.Paginations;
 using Applications.Services.Lists;
+using ErrorOr;
 using Radzen;
 using Radzen.Blazor;
 
@@ -96,9 +97,9 @@ public partial class List
 
         var rsp = await _gService.DeleteAsync(id);
 
-        if (rsp.IsSuccess)
+        if (!rsp.IsError)
         {
-            NotificationService.Notify(NotificationSeverity.Success, rsp.Data);
+            NotificationService.Notify(NotificationSeverity.Success, "A guarantor was removed");
             ShowAddTab = false;
             selectedTabIndex = 0;
             await GetGuarantors();
@@ -106,7 +107,7 @@ public partial class List
         }
         else
         {
-            NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
+            NotificationService.Notify(NotificationSeverity.Error, rsp.FirstError.Description);
         }
     }
 
