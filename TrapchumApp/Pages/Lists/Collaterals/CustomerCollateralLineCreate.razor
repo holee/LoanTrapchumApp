@@ -50,28 +50,20 @@
                                   Change="@OnFileChanged"
                                   Error="@OnError"
                                   InputAttributes="@(new Dictionary<string, object> { { "aria-label", "select file" } })" />
-
-                    @if (isUploading)
-                    {
-                        <RadzenLabel class="rz-mt-2 rz-mb-1" Text="Uploading file..." />
-                        <RadzenProgressBar Mode="ProgressBarMode.Indeterminate"
-                                           ShowValue="false"
-                                           class="rz-mb-2" />
-                    }
-
                     <RadzenProgressBar Value="@progress"
                                        class="rz-mt-2"
+                                       Style="height:0.5rem;"
                                        Visible="@showProgress" />
                 </RadzenCard>
             </RadzenColumn>
 
             <RadzenColumn Size="6">
-                <RadzenCard Variant="Variant.Outlined">
+                <RadzenCard Variant="Variant.Outlined" class="rz-mt-2">
                     @if (!string.IsNullOrWhiteSpace(model?.FileUrl))
                     {
                         <RadzenLink Path="@model.FileUrl"
                                     Target="_blank"
-                                    Text="Open full file"
+                                    Text="Preview file"
                                     class="rz-mt-1" />
                     }
                     else
@@ -218,16 +210,21 @@
         }
 
         var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+
         var fileModel = JsonSerializer.Deserialize<DocumentDto>(args.RawResponse!, options);
 
         if (fileModel is not null)
         {
             completionMessage = "Upload complete!";
+
             model.FileUrl = fileModel.FileUrl;
+
+            _toastService.ShowSuccess("", "File uploaded successfully.");
         }
         else
         {
             completionMessage = "Upload failed: unable to parse response.";
+
             model.FileUrl = string.Empty;
         }
     }
@@ -248,9 +245,13 @@
     void OnError(UploadErrorEventArgs args)
     {
         isUploading = false;
+
         showProgress = false;
+
         showComplete = true;
-        completionMessage = $"Upload error: {args.Message}";
+
+        _toastService.ShowError("", $"{args.Message}");
+
         model.FileUrl = string.Empty;
     }
 

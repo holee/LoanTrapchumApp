@@ -44,6 +44,7 @@ public sealed class LoanRequestDtoCreate
     public decimal? PenaltyRate { get; set; }
     public string? Remark { get; set; }
     public string? Memo { get; set; }
+    public string? LoanPurpose { get; set; } = string.Empty;
     public List<LoanGuarantorDtoCreate> GuarantorsLink { get; set; } = [];
     public List<CollateralLinkDtoCreate> CollateralLinesLink { get; set; } = [];
     public List<LoanDocumentDtoCreate> LoanDocuments { get; set; } = [];

@@ -44,7 +44,7 @@ else
             <input type="hidden" @bind="model.RequestUserRefId" />
             <input type="hidden" @bind="model.CustomerRefId" />
             <FluentValidationValidator DisableAssemblyScanning="true" />
-            <RadzenTabs SelectedIndexChanged="SelectTabIndexChanged" RenderMode="TabRenderMode.Client">
+            <RadzenTabs SelectedIndexChanged="SelectTabIndexChanged" RenderMode="TabRenderMode.Client" aria-hidden="true">
                 <Tabs>
                     <RadzenTabsItem Text="សំណើរ" Icon="@IconNames.RequestQuote">
                         <LoanRequestInfo Model="@model"

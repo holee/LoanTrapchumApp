@@ -117,6 +117,7 @@ public static class LoanRequestDtoCreateExtensions
             AdminFeeAmount = req.AdminFeeAmount,
             PenaltyRate = req.PenaltyRate,
             Remark = req.Remark,
+            LoanPurpose=req.LoanPurpose,
             CollectionFeeModeId = req.CollectionFeeModeId ?? 1,
             CollectionFeeModeName = req.CollectionFeeModeName ?? string.Empty,
             LoanDocuments = req.LoanDocuments.Select(d => d.MapToLoanDocument()).ToList() ?? [],
@@ -167,6 +168,7 @@ public static class LoanRequestDtoCreateExtensions
             AdminFeeAmount = req.AdminFeeAmount,
             PenaltyRate = req.PenaltyRate,
             Remark = req.Remark,
+            LoanPurpose=req.LoanPurpose,
             CollectionFeeModeId = req.CollectionFeeModeId ?? 1,
             CollectionFeeModeName = req.CollectionFeeModeName ?? string.Empty,
             LoanDescriptions = req.LoanDescriptions.Select(ld => ld.MapToLoanDescription()).ToList() ?? []

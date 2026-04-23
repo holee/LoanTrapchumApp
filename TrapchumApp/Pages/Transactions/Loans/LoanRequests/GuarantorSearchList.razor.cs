@@ -34,6 +34,10 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
         private bool _popupOpen = false;
 
+        private int selectedIndex;
+
+        private string? guarantorId;
+
         // ── Data loading ─────────────────────────────────────────────────────
         private async Task LoadGuarantorsAsync()
         {
@@ -65,21 +69,22 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
             await LoadGuarantorsAsync();
 
-            await EnsurePopupOpenAsync();
+            await _guarantorPopup.ToggleAsync(_guarantorSearchText.Element);
         }
 
         /// <summary>Fires on every keystroke in the textbox — debounces & searches.</summary>
         private async Task OnGuarantorSearchText(ChangeEventArgs args)
         {
 
+            selectedIndex = 0;
+
             _filterText = args.Value?.ToString() ?? string.Empty;
 
-            Console.WriteLine(_filterText);
+            await LoadGuarantorsAsync();
 
-            //await LoadGuarantorsAsync();
+            await _guarantorPopup.ToggleAsync(_guarantorSearchText.Element);
 
-            // Ensure popup is open (it may have been closed by Escape or a previous click)
-            await EnsurePopupOpenAsync();
+            await _gridGuarantors.Reload();
         }
 
         /// <summary>Keyboard navigation inside the textbox.</summary>
@@ -108,7 +113,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
                 if (popupOpened && (key == "Enter" || key == "NumpadEnter"))
                 {
 
-                    customerId = items.ElementAtOrDefault(selectedIndex)?.Id;
+                    guarantorId = items.ElementAtOrDefault(selectedIndex)?.Id;
 
                 }
 
@@ -119,25 +124,6 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             {
                 await _guarantorPopup.CloseAsync();
             }
-
-            //var key = args.Code ?? args.Key;
-
-            //switch (key)
-            //{
-            //    case "Escape":
-            //    case "Tab":
-            //        await ClosePopup();
-            //        break;
-
-            //    case "Enter":
-            //    case "NumpadEnter":
-            //        // Accept first item if nothing is explicitly selected
-            //        if (!SelectedGuarantors.Any() && _guarantors.Any())
-            //            await GetSelectedGuarantor(_guarantors.First());
-            //        else if (SelectedGuarantors.Any())
-            //            await GetSelectedGuarantors(SelectedGuarantors);
-            //        break;
-            //}
         }
 
         /// <summary>Accepts a single guarantor (add-button or row double-click).</summary>
@@ -149,7 +135,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
             await OnSelected.InvokeAsync(g);
 
-            await ClosePopup();
+            await _guarantorPopup.CloseAsync();
         }
 
         /// <summary>Accepts all checked guarantors (Accept Selected button).</summary>
@@ -161,31 +147,16 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
             await SelectMany.InvokeAsync(selected);
 
-            await ClosePopup();
+            await _guarantorPopup.CloseAsync();
         }
 
-        private async Task EnsurePopupOpenAsync()
-        {
-            if (!_popupOpen)
-            {
-                _popupOpen = true;
-
-                await _guarantorPopup.ToggleAsync(_guarantorSearchText.Element);
-            }
-        }
 
         private async Task ClosePopup()
         {
             SelectedGuarantors = [];
 
-            if (_popupOpen)
-            {
-                _popupOpen = false;
+            await _guarantorPopup.CloseAsync();
 
-                await js.InvokeVoidAsync("eval", "document.activeElement instanceof HTMLElement && document.activeElement.blur()");
-
-                await _guarantorPopup.CloseAsync();
-            }
         }
     }
 }

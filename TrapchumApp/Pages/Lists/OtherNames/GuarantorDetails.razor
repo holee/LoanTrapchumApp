@@ -1,124 +1,157 @@
-﻿@page "/App/Customers/Guarantors/{Id:long}/Details"
+@page "/App/Customers/Guarantors/{Id:long}/Details"
 @using Applications.Features.LoanRequests.Interfaces
 @using Applications.Responses.ViewModels.Loans.Disbursements
 @using Applications.Responses.ViewModels.Loans.Requests
-<PageTitle>Guarantor</PageTitle>
-<Containers Fluid>
-    <table class="table table-sm">
-        <tbody>
-            <tr>
-                <th class="rz-background-color-base-100 w-25">Name</th>
-                <td>
-                    @Guarantor?.GuarantorName
-                </td>
-            </tr>
-            <tr>
-                <th class="rz-background-color-base-100 w-25">Sex</th>
-                <td>
-                    @Guarantor?.Gender
-                </td>
-            </tr>
-            <tr>
-                <th class="rz-background-color-base-100 w-25">Phone</th>
-                <td>
-                    @Guarantor?.Phone
-                </td>
-            </tr>
-            <tr>
-                <th class="rz-background-color-base-100 w-25">NumberOfLoan</th>
-                <td>
-                    @Guarantor?.NumberOfLoan
-                </td>
-            </tr>
-            <tr>
-                <th class="rz-background-color-base-100 w-25 w-25">Address</th>
-                <td>
-                    @Guarantor?.ToString()
-                </td>
-            </tr>
-            <tr>
-                <th class="rz-background-color-base-100">Status</th>
-                <td>
-                    <RadzenCheckBox TValue="bool?" Value="@Guarantor?.IsActive" ReadOnly />
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    <RadzenTabs>
-        <Tabs>
-            <RadzenTabsItem Text="Loans">
+<PageTitle>Guarantor Details</PageTitle>
+<RadzenCard class="rz-mb-4 rz-p-4" Variant="Variant.Outlined">
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="1rem" class="rz-mb-3">
+        <RadzenIcon Icon="person" Style="font-size:2rem;color:var(--rz-primary)" />
+        <RadzenText TextStyle="TextStyle.H5" class="rz-m-0">@Guarantor?.GuarantorName</RadzenText>
+        @if (Guarantor is not null)
+        {
+            <RadzenBadge BadgeStyle="@(Guarantor.IsActive ? BadgeStyle.Success : BadgeStyle.Danger)"
+                         Text="@(Guarantor.IsActive ? "Active" : "Inactive")"
+                         IsPill />
+        }
+    </RadzenStack>
+
+    <RadzenRow Gap="1rem">
+        <RadzenColumn SizeMD="3" SizeSM="6" Size="12">
+            <RadzenStack Gap="0.25rem">
+                <RadzenText TextStyle="TextStyle.Caption" class="rz-color-secondary">Sex</RadzenText>
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.35rem">
+                    <RadzenIcon Icon="wc" Style="font-size:1rem;color:var(--rz-text-secondary-color)" />
+                    <RadzenText TextStyle="TextStyle.Body1">@(Guarantor?.Gender ?? "—")</RadzenText>
+                </RadzenStack>
+            </RadzenStack>
+        </RadzenColumn>
+
+        <RadzenColumn SizeMD="3" SizeSM="6" Size="12">
+            <RadzenStack Gap="0.25rem">
+                <RadzenText TextStyle="TextStyle.Caption" class="rz-color-secondary">Phone</RadzenText>
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.35rem">
+                    <RadzenIcon Icon="phone" Style="font-size:1rem;color:var(--rz-text-secondary-color)" />
+                    <RadzenText TextStyle="TextStyle.Body1">@(Guarantor?.Phone ?? "—")</RadzenText>
+                </RadzenStack>
+            </RadzenStack>
+        </RadzenColumn>
+
+        <RadzenColumn SizeMD="3" SizeSM="6" Size="12">
+            <RadzenStack Gap="0.25rem">
+                <RadzenText TextStyle="TextStyle.Caption" class="rz-color-secondary">Active Loans</RadzenText>
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.35rem">
+                    <RadzenIcon Icon="account_balance" Style="font-size:1rem;color:var(--rz-text-secondary-color)" />
+                    <RadzenBadge BadgeStyle="BadgeStyle.Info" Text="@(Guarantor?.NumberOfLoan.ToString() ?? "0")" IsPill />
+                </RadzenStack>
+            </RadzenStack>
+        </RadzenColumn>
+
+        <RadzenColumn SizeMD="3" SizeSM="6" Size="12">
+            <RadzenStack Gap="0.25rem">
+                <RadzenText TextStyle="TextStyle.Caption" class="rz-color-secondary">Address</RadzenText>
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Start" Gap="0.35rem">
+                    <RadzenIcon Icon="location_on" Style="font-size:1rem;color:var(--rz-text-secondary-color);margin-top:2px" />
+                    <RadzenText TextStyle="TextStyle.Body2">@(Guarantor?.ToString() ?? "—")</RadzenText>
+                </RadzenStack>
+            </RadzenStack>
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenCard>
+<RadzenTabs>
+    <Tabs>
+        <RadzenTabsItem>
+            <Template>
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.4rem">
+                    <RadzenIcon Icon="account_balance" />
+                    <span>Loans</span>
+                    <RadzenBadge BadgeStyle="BadgeStyle.Primary" Text="@Loans.Count.ToString()" IsPill />
+                </RadzenStack>
+            </Template>
+            <ChildContent>
                 <RadzenDataGrid Responsive
                                 AllowAlternatingRows
                                 GridLines="DataGridGridLines.Both"
                                 TItem="VGuarantorLoan"
                                 Density="Density.Compact"
                                 ColumnWidth="10rem"
-                                AllowColumnPicking="true"
-                                Data="@Loans">
-                                <HeaderTemplate>
-
-                                </HeaderTemplate>
+                                Data="@Loans"
+                                EmptyText="No loans found.">
                     <Columns>
                         <RadzenDataGridColumn Title="#"
                                               Property="@nameof(VGuarantorLoan.LoanId)"
-                                              Width="5rem"
+                                              Width="4rem"
+                                              Sortable="false"
+                                              Filterable="false"
                                               TextAlign="TextAlign.Center"
                                               Context="g">
-                            <Template>
-                                @(Loans.IndexOf(g) + 1)
-                            </Template>
+                            <Template>@(Loans.IndexOf(g) + 1)</Template>
                         </RadzenDataGridColumn>
-                        <RadzenDataGridColumn Title="CustomerName" Property="@(nameof(VGuarantorLoan.CustomerName))" />
-                        <RadzenDataGridColumn Title="Branch" Property="@(nameof(VGuarantorLoan.BranchName))" />
-                        <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                        <RadzenDataGridColumn Title="Customer" Property="@nameof(VGuarantorLoan.CustomerName)" />
+                        <RadzenDataGridColumn Title="Branch" Property="@nameof(VGuarantorLoan.BranchName)" />
+                        <RadzenDataGridColumn Title="Agent" Property="@nameof(VGuarantorLoan.AgentName)" />
+                        <RadzenDataGridColumn Title="Currency"
+                                              TextAlign="TextAlign.Center"
+                                              Width="7rem"
+                                              Property="@nameof(VGuarantorLoan.CurrencyName)" />
+                        <RadzenDataGridColumn Title="Installments"
+                                              TextAlign="TextAlign.Center"
                                               Visible="false"
-                                              Title="Installments" Property="@(nameof(VGuarantorLoan.PeriodName))" />
-                        <RadzenDataGridColumn Title="InterestRate"
+                                              Property="@nameof(VGuarantorLoan.PeriodName)" />
+                        <RadzenDataGridColumn Title="Interest Rate"
                                               TextAlign="TextAlign.Right"
                                               Visible="false"
-                                              Property="@(nameof(VGuarantorLoan.InterestRate))" Context="g">
-                            <Template>
-                                @g.InterestRate
-                            </Template>
+                                              Width="8rem"
+                                              Property="@nameof(VGuarantorLoan.InterestRate)"
+                                              Context="g">
+                            <Template>@g.InterestRate</Template>
                         </RadzenDataGridColumn>
-                        <RadzenDataGridColumn TextAlign="TextAlign.Left"
+                        <RadzenDataGridColumn Title="Admin Fee"
+                                              TextAlign="TextAlign.Right"
                                               Visible="false"
-                                              Title="Currency" 
-                                              Property="@(nameof(VGuarantorLoan.CurrencyName))" />
-                        <RadzenDataGridColumn TextAlign="TextAlign.Right"
+                                              Width="8rem"
+                                              Property="@nameof(VGuarantorLoan.AdminFeeRate)" />
+                        <RadzenDataGridColumn Title="Collection Fee"
+                                              TextAlign="TextAlign.Right"
                                               Visible="false"
-                                              Title="Admin Fee Rate" Property="@(nameof(VGuarantorLoan.AdminFeeRate))" />
-                        <RadzenDataGridColumn TextAlign="TextAlign.Right"
-                                              Visible="false"
-                                              Title="Collection Fee Rate" Property="@(nameof(VGuarantorLoan.CollectionFeeRate))" />
-                        <RadzenDataGridColumn Title="Principle" 
-                                    Context="g"
-                                    TextAlign="TextAlign.Right"
-                                    Property="@(nameof(VGuarantorLoan.Principle))">
-                                <Template>
-                                    @g.Principle
-                                </Template>
+                                              Width="9rem"
+                                              Property="@nameof(VGuarantorLoan.CollectionFeeRate)" />
+                        <RadzenDataGridColumn Title="Principle"
+                                              Context="g"
+                                              TextAlign="TextAlign.Right"
+                                              Property="@nameof(VGuarantorLoan.Principle)">
+                            <Template>@g.Principle</Template>
                         </RadzenDataGridColumn>
                         <RadzenDataGridColumn Title="Paid Principle"
                                               Context="g"
                                               TextAlign="TextAlign.Right"
-                                              Property="@(nameof(VGuarantorLoan.PaidPrinciple))">
-                            <Template>
-                                @g.PaidPrinciple
-                            </Template>
+                                              Property="@nameof(VGuarantorLoan.PaidPrinciple)">
+                            <Template>@g.PaidPrinciple</Template>
                         </RadzenDataGridColumn>
-                        <RadzenDataGridColumn Title="OutStanding"
+                        <RadzenDataGridColumn Title="Outstanding"
                                               Context="g"
                                               TextAlign="TextAlign.Right"
-                                              Property="@(nameof(VGuarantorLoan.OutStanding))">
+                                              Property="@nameof(VGuarantorLoan.OutStanding)">
                             <Template>
-                                @g.OutStanding
+                                <RadzenText TextStyle="TextStyle.Body2">
+                                    @g.OutStanding
+                                </RadzenText>
                             </Template>
                         </RadzenDataGridColumn>
                     </Columns>
                 </RadzenDataGrid>
-            </RadzenTabsItem>
-            <RadzenTabsItem Text="Loans Request">
+            </ChildContent>
+        </RadzenTabsItem>
+
+            
+        <RadzenTabsItem>
+            <Template>
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.4rem">
+                    <RadzenIcon Icon="request_page" />
+                    <span>Loan Requests</span>
+                    <RadzenBadge BadgeStyle="BadgeStyle.Primary" Text="@LoanRequest.Count.ToString()" IsPill />
+                </RadzenStack>
+            </Template>
+            <ChildContent>
                 <RadzenDataGrid Responsive
                                 AllowAlternatingRows
                                 GridLines="DataGridGridLines.Both"
@@ -126,64 +159,86 @@
                                 Density="Density.Compact"
                                 ColumnWidth="10rem"
                                 AllowColumnPicking="true"
-                                Data="@LoanRequest">
-                                <HeaderTemplate>
-
-                                </HeaderTemplate>
+                                Data="@LoanRequest"
+                                EmptyText="No loan requests found.">
                     <Columns>
                         <RadzenDataGridColumn Title="#"
-                                              Width="5rem"
-                                              Property="@(nameof(VLoanRequestGuarantor.Id))"
+                                              Width="4rem"
+                                              Property="@nameof(VGuarantorsLoanRequest.Id)"
+                                              Sortable="false"
+                                              Filterable="false"
                                               TextAlign="TextAlign.Center"
                                               Context="g">
-                            <Template>
-                                @(LoanRequest.IndexOf(g) + 1)
-                            </Template>
+                            <Template>@(LoanRequest.IndexOf(g) + 1)</Template>
                         </RadzenDataGridColumn>
-                        <RadzenDataGridColumn Title="Agent" Property="@(nameof(VGuarantorsLoanRequest.CreditAgentName))" />
-                        <RadzenDataGridColumn Title="Customer" Property="@(nameof(VGuarantorsLoanRequest.CustomerName))" />
+                        <RadzenDataGridColumn Title="Date"
+                                              Width="8rem"
+                                              Property="@nameof(VGuarantorsLoanRequest.RequestDate)"
+                                              Context="g">
+                            <Template>@g.RequestDate?.ToString("dd/MM/yyyy")</Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Title="Agent" Property="@nameof(VGuarantorsLoanRequest.CreditAgentName)" />
+                        <RadzenDataGridColumn Title="Customer" Property="@nameof(VGuarantorsLoanRequest.CustomerName)" />
+                        <RadzenDataGridColumn Title="Currency"
+                                              TextAlign="TextAlign.Center"
+                                              Width="7rem"
+                                              Visible="false"
+                                              Property="@nameof(VGuarantorsLoanRequest.CurrencyName)" />
                         <RadzenDataGridColumn Title="Request Amount"
                                               TextAlign="TextAlign.Right"
                                               Context="g"
-                                              Property="@(nameof(VGuarantorsLoanRequest.RequestAmount))">
-                            <Template>
-                                @g.AprovedAmount.Format(g.CurrencyId)
-                            </Template>
+                                              Visible="false"
+                                              Property="@nameof(VGuarantorsLoanRequest.RequestAmount)">
+                            <Template>@g.RequestAmount.Format(g.CurrencyId)</Template>
                         </RadzenDataGridColumn>
-                        <RadzenDataGridColumn Title="Aproved Amount"
+                        <RadzenDataGridColumn Title="Approved Amount"
                                               TextAlign="TextAlign.Right"
                                               Property="@nameof(VGuarantorsLoanRequest.AprovedAmount)"
                                               Context="g">
+                            <Template>@g.AprovedAmount.Format(g.CurrencyId)</Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Title="Rate"
+                                              TextAlign="TextAlign.Right"
+                                              Width="6rem"
+                                              Property="@nameof(VGuarantorsLoanRequest.InterestRate)" />
+                        <RadzenDataGridColumn Title="Admin Fee"
+                                              TextAlign="TextAlign.Right"
+                                              Width="7rem"
+                                              Visible="false"
+                                              Property="@nameof(VGuarantorsLoanRequest.AdminFeeRate)" />
+                        <RadzenDataGridColumn Title="Collection Fee"
+                                              TextAlign="TextAlign.Right"
+                                              Width="9rem"
+                                              Visible="false"
+                                              Property="@nameof(VGuarantorsLoanRequest.CollectionFeeRate)" />
+                        <RadzenDataGridColumn Title="Status"
+                                              TextAlign="TextAlign.Center"
+                                              Width="7rem"
+                                              Filterable="false"
+                                              Property="@nameof(VGuarantorsLoanRequest.Status)"
+                                              Context="g">
                             <Template>
-                                @g.AprovedAmount.Format(g.CurrencyId)
+                                <RadzenBadge Text="@(g.Status ?? "—")"
+                                             BadgeStyle="@(g.Status == "Approved" ? BadgeStyle.Success
+                                                                                                                                                                                                                            : g.Status == "Rejected" ? BadgeStyle.Danger
+                                                                                                                                                                                                                            : BadgeStyle.Warning)"
+                                             IsPill />
                             </Template>
                         </RadzenDataGridColumn>
-                        <RadzenDataGridColumn TextAlign="TextAlign.Right"
-                                              Title="Currency" Property="@(nameof(VGuarantorsLoanRequest.CurrencyName))" />
-                        <RadzenDataGridColumn TextAlign="TextAlign.Right"
-                                              Title="Rate" Property="@(nameof(VGuarantorsLoanRequest.InterestRate))" />
-                        <RadzenDataGridColumn TextAlign="TextAlign.Right"
-                                              Title="Admin Fee" Property="@(nameof(VGuarantorsLoanRequest.AdminFeeRate))" />
-                        <RadzenDataGridColumn TextAlign="TextAlign.Right"
-                                              Title="Collection Fee" Property="@(nameof(VGuarantorsLoanRequest.CollectionFeeRate))" />
-                        <RadzenDataGridColumn TextAlign="TextAlign.Center"
-                                              Width="5rem"
-                                              Title="Status"
-                                              Property="@(nameof(VGuarantorsLoanRequest.Status))" />
-
                     </Columns>
                 </RadzenDataGrid>
-            </RadzenTabsItem>
-        </Tabs>
-    </RadzenTabs>
-    <RadzenStack AlignItems="AlignItems.Center"
-                 class="rz-mt-2"
-                 Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End">
-        <RadzenButton ButtonStyle="ButtonStyle.Danger"
-                      Icon="cancel"
-                      Text="Close"
-                      Click="CloseGuarantorTab"
-                      Size="ButtonSize.Small" />
-    </RadzenStack>
-</Containers>
+            </ChildContent>
+        </RadzenTabsItem>
 
+    </Tabs>
+</RadzenTabs>
+<RadzenStack Orientation="Orientation.Horizontal"
+             JustifyContent="JustifyContent.End"
+             class="rz-mt-3">
+    <RadzenButton ButtonStyle="ButtonStyle.Light"
+                  Variant="Variant.Outlined"
+                  Icon="close"
+                  Text="Close"
+                  Click="CloseGuarantorTab"
+                  Size="ButtonSize.Small" />
+</RadzenStack>

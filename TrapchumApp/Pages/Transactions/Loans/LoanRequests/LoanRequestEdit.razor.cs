@@ -40,20 +40,8 @@ using TrapchumApp.Shared;
 
 namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 {
-    public partial class LoanRequestEdit
+    public partial class LoanRequestEdit(ILogger<LoanRequestEdit> logger)
     {
-        private readonly ILoanSettingService _loanSettingService;
-        private readonly IAppSettingService _settingsServiceImpl;
-        private readonly IHolidayService _holidayService;
-        private readonly ILogger<LoanRequestCreate> _logger;
-        public LoanRequestEdit(ILoanSettingService loanSettingService, IAppSettingService settingService,
-            IHolidayService holidayService, ILogger<LoanRequestCreate> logger)
-        {
-            _loanSettingService = loanSettingService;
-            _settingsServiceImpl = settingService;
-            _holidayService = holidayService;
-            _logger = logger;
-        }
         [Parameter] public int? BranchId { get; set; } = 0;
         [Parameter] public string? CustomerId { get; set; }
         [Parameter] public string? LoanRequestId { get; set; }
@@ -435,7 +423,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
         protected async Task HandleLoanRequest(RequestStatus state)
         {
-            _logger.LogInformation("get start loan requesting...");
+            logger.LogInformation("get start loan requesting...");
 
             if (editForm.EditContext!.Validate() == false)
             {
@@ -511,7 +499,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             {
                 NotificationService.Notify(NotificationSeverity.Error, ex.Message);
 
-                _logger.LogError(ex, ex.Message);
+                logger.LogError(ex, ex.Message);
             }
         }
 

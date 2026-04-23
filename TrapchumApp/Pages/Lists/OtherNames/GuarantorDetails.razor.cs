@@ -1,10 +1,12 @@
 using Applications.Features.Guarantor.Dtos;
+using Applications.Features.Guarantor.Queries.GetGuarantorDetailById;
 using Applications.Features.Loans.Dtos.Responses;
 using Applications.Responses.ViewModels.Loans.Disbursements;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Applications.Services.Lists;
 using Microsoft.AspNetCore.Components;
 using Radzen;
+using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Lists.OtherNames
 {
@@ -30,27 +32,42 @@ namespace TrapchumApp.Pages.Lists.OtherNames
         protected override async Task OnInitializedAsync()
         {
             await GetGuarantorByIdAsync();
+
             await base.OnInitializedAsync();
         }
 
         private async Task GetGuarantorByIdAsync()
         {
 
-            var rsp = await _gService.GetGuarantorByIdAsync(Id, default);
-
-            if (!rsp.IsError)
+            try
             {
-                Guarantor = rsp.Value;
+                Tracker.Show();
 
-                LoanRequest = Guarantor.LoanRequests.ToList();
+                var command = new GetGuarantorDetailByIdQuery(Id);
 
-                Loans = Guarantor.GuarantorLoans.ToList();
+                var rsp = await mediator.Send(command);
+
+                if (!rsp.IsError)
+                {
+                    Guarantor = rsp.Value;
+
+                    LoanRequest = Guarantor.LoanRequests.ToList();
+
+                    Loans = Guarantor.GuarantorLoans.ToList();
+                }
+                else
+                {
+                    _toastService.ShowError("Guarantor", rsp.GetMessage());
+                }
+
+                Tracker.Hide();
             }
-            else
+            finally
             {
-                NotificationService.Notify(NotificationSeverity.Error, rsp.FirstError.Description);
+                Tracker.Hide();
             }
 
+            StateHasChanged();
         }
 
         async Task CloseGuarantorTab()
