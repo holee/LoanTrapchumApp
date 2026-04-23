@@ -1,5 +1,6 @@
 using Applications.Extensions;
 using Applications.Features.Guarantor.Dtos;
+using Applications.Features.Guarantor.Queries.GetGuarantorsAsPaging;
 using Applications.Responses.Paginations;
 using Applications.Services.Lists;
 using Radzen.Blazor;
@@ -41,7 +42,7 @@ namespace TrapchumApp.Pages.Lists.OtherNames
         string? SelectedGuarantorId = string.Empty;
 
         List<VGuarantor> guarantors = [];
-        [Parameter] public EventCallback<string> ShowDetails { get; set; } 
+        [Parameter] public EventCallback<string> ShowDetails { get; set; }
         [Parameter] public EventCallback<string> ShowEdit { get; set; }
         [Parameter] public RenderFragment? ChildContent { get; set; }
         async Task LoadGuarantors(LoadDataArgs e)
@@ -99,7 +100,9 @@ namespace TrapchumApp.Pages.Lists.OtherNames
 
             var param = new QueryParam(pageIndex, pageSize, sortColumn, includeInactive, sortDescending, filter);
 
-            var rsp = await _gService.GetGuarantorsAsync(param);
+            var command = new GetGuarantorsAsPagingQuery(null, param);
+
+            var rsp = await mediator.Send(command);// _gService.GetGuarantorsAsync(param);
 
             guarantors = rsp.Items;
 
@@ -128,7 +131,7 @@ namespace TrapchumApp.Pages.Lists.OtherNames
             {
                 await ShowEdit.InvokeAsync(id);
             }
-           
+
         }
 
         protected async Task DeleteGuarantorAsync(string? id)

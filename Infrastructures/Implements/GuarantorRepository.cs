@@ -274,7 +274,7 @@ public class GuarantorRepository(IDbContextFactory<DataContext> contextFactory, 
 
         parameters.Add("@AllGuarantors", allGuarantors);
 
-        parameters.Add("@IncludeRequest", includeRequest);
+        //parameters.Add("@IncludeRequest", includeRequest);
 
         using var db = dapperConnection.CreateConnection();
 

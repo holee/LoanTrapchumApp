@@ -5,6 +5,7 @@ using Domains.Models.Identity;
 using Infrastructures;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
 using QuestPDF.Infrastructure;
@@ -54,6 +55,14 @@ builder.Services.AddSignalR();
 builder.Services.AddScoped<TrapchumApp.Components.Messageboxes.MessageBoxService>();
 builder.Services.AddSingleton<IAppNotificationService, AppNotificationService>();
 
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = 104857600; // 100 MB
+});
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 104857600; // 100 MB
+});
 
 var app = builder.Build();
 

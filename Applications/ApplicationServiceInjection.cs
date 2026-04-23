@@ -23,6 +23,8 @@ using Applications.Features.Documents.Command.DeleteDocument;
 using Applications.Features.Documents.Dto;
 using Applications.Features.Documents.Queries.GetDocumentById;
 using Applications.Features.Documents.Queries.GetDocuments;
+using Applications.Features.Guarantor.Queries.GetGuarantorById;
+using Applications.Features.Guarantor.Queries.GetGuarantorDetailById;
 using Applications.Features.Guarantor.Queries.GetGuarantorsAsPaging;
 using Applications.Features.Holidays.Command.ActivateOrDeactivate;
 using Applications.Features.Holidays.Command.CreateHoliday;
@@ -80,6 +82,8 @@ public static class ApplicationServiceInjection
 
         //Guarantors
         services.AddScoped<IRequestHandler<GetGuarantorsAsPagingQuery, Pager<VGuarantor>>, GetGuarantorsAsPagingQueryHandler>();
+        services.AddScoped<IRequestHandler<GetGuarantorDetailByIdQuery, ErrorOr<VGuarantor>>, GetGuarantorDetailByIdQueryHandler>();
+        services.AddScoped<IRequestHandler<GetGuarantorByIdQuery, ErrorOr<VGuarantor>>, GetGuarantorByIdQueryHandler>();
 
 
         services.AddScoped<IRequestHandler<GetOccupationsQuery, Pager<OccupationDto>>, GetOccupationsQueryHandler>();

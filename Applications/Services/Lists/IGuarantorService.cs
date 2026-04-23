@@ -19,6 +19,6 @@ public interface IGuarantorServiceImpl
     Task<Pager<VGuarantor>> GetGuarantorsAsync(string? id, QueryParam q);
     Task<Pager<VGuarantor>> GetGuarantorsAsync(QueryParam param, CancellationToken cancellation = default);
     Task<ErrorOr<VGuarantor>> UpdateAsync(EntityGuarantorCreate othername);
-    Task<ErrorOr<VGuarantor>> GetGuarantorWithByIdAsync(string? id);
-    Task<ErrorOr<VGuarantor>> GetGuarantorByIdAsync(string? id, CancellationToken cancellation = default);
+   // Task<ErrorOr<VGuarantor>> GetGuarantorWithByIdAsync(string? id);
+    //Task<ErrorOr<VGuarantor>> GetGuarantorByIdAsync(string? id, CancellationToken cancellation = default);
 }
