@@ -38,9 +38,9 @@ namespace TrapchumApp.Pages.Lists.OtherNames
 
             var rsp = await _gService.GetGuarantorByIdAsync(Id, default);
 
-            if (rsp.IsSuccess && rsp.Data is not null)
+            if (!rsp.IsError)
             {
-                Guarantor = rsp.Data;
+                Guarantor = rsp.Value;
 
                 LoanRequest = Guarantor.LoanRequests.ToList();
 
@@ -48,7 +48,7 @@ namespace TrapchumApp.Pages.Lists.OtherNames
             }
             else
             {
-                NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
+                NotificationService.Notify(NotificationSeverity.Error, rsp.FirstError.Description);
             }
 
         }

@@ -93,6 +93,7 @@ namespace Infrastructures
             services.AddScoped<IOpenBranchService, OpenBranchService>();
             services.AddScoped<IOccupationService, OccupationRepository>();
             services.AddScoped<IPeriodService, PeriodRepository>();
+            services.AddScoped<ILoanPurposeService, LoanPurposeRepository>();
             services.AddScoped<IOtherNameService, OtherNameRepository>();
             services.AddScoped<ILoginService, LoginService>();
             services.AddScoped<IBranchService, BranchRepository>();
@@ -112,7 +113,7 @@ namespace Infrastructures
             services.AddScoped<ICustomerActivityService, CustomerActivityRepository>();
             services.AddScoped<ICollateralService, CollateralRepository>();
             services.AddScoped<IHolidayService, HolidayRepository>();
-            services.AddScoped<IGuarantorService, GuarantorService>();
+            services.AddScoped<IGuarantorService, GuarantorRepository>();
             services.AddScoped<ILoanSettingService, LoanSettingService>();
             services.AddScoped<ILoanProductService, LoanProductService>();
             services.AddScoped<ILoanPaymentService, LoanPaymentRepository>();

@@ -44,9 +44,9 @@ namespace TrapchumApp.Pages.Lists.OtherNames
 
             var guarantorResp = await _gService.GetGuarantorsAsync(null, true, filterText);
 
-            if (guarantorResp.IsSuccess)
+            if (!guarantorResp.IsError)
             {
-                Guarantors = guarantorResp.Data!;
+                Guarantors = guarantorResp.Value;
             }
 
             isLoading = false;

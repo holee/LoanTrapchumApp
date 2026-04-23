@@ -32,8 +32,7 @@
     <RadzenStack Orientation="Orientation.Horizontal"
                  JustifyContent="JustifyContent.End"
                  AlignItems="AlignItems.Center">
-        <SaveButton ButtonType="ButtonType.Submit" />
-        <CancelButton ButtonType="ButtonType.Button"
-                      OnClick="@(() => DialogService.Close(false))" />
+        <SaveButton />
+        <CancelButton OnClick="@(() => DialogService.Close(false))" />
     </RadzenStack>
 </RadzenTemplateForm>

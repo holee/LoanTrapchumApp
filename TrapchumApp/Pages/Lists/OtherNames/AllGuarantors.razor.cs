@@ -150,9 +150,9 @@ namespace TrapchumApp.Pages.Lists.OtherNames
 
             var rsp = await _gService.DeleteAsync(id);
 
-            if (rsp.IsSuccess)
+            if (!rsp.IsError)
             {
-                NotificationService.Notify(NotificationSeverity.Success, rsp.Data);
+                NotificationService.Notify(NotificationSeverity.Success, "A guarantor was removed");
 
                 ShowAddTab = false;
 
@@ -162,7 +162,7 @@ namespace TrapchumApp.Pages.Lists.OtherNames
             }
             else
             {
-                NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
+                NotificationService.Notify(NotificationSeverity.Error, rsp.FirstError.Description);
             }
         }
 

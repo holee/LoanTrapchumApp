@@ -1,149 +1,157 @@
+using Applications.Features.Guarantor.Dtos;
+using Applications.Features.Guarantor.Queries.GetGuarantorsAsPaging;
 using Applications.Responses.Paginations;
 using Applications.Services.Lists;
-using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
-using Microsoft.AspNetCore.Components.Web;
 using Radzen.Blazor;
 using Radzen.Blazor.Rendering;
-using Applications.Features.Guarantor.Dtos;
 
 namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 {
     public partial class GuarantorSearchList
     {
-        private readonly IGuarantorServiceImpl _gService;
-        public GuarantorSearchList(IGuarantorServiceImpl gService)
-        {
-            _gService = gService;
-        }
         [Parameter] public EventCallback<VGuarantor> OnSelected { get; set; }
         [Parameter] public EventCallback<IEnumerable<VGuarantor>> SelectMany { get; set; }
-        RadzenTextBox _guarantorSearchText = default!;
-        Popup _guarantorPopup = default!;
-        IEnumerable<VGuarantor> _guarantors = [];
-        IEnumerable<VGuarantor> _selectGuarantors = [];
-        IList<VGuarantor> SelectedGuarantors { get; set; } = [];
-        RadzenDataGrid<VGuarantor> _gridGuarantors = default!;
-        VGuarantor? _selectedGuarantor = new();
-        string? customerId = string.Empty;
-        string? FullName = "";
-        string? filterText = "";
-        int pageSize = 10;
-        string sortColumn = "Name";
-        int counts = 0;
-        bool isLoading = false;
-        int selectedIndex = 0;
-        bool allowRowSelectOnRowClick = false;
-        async Task GetGuarantors()
+
+        private RadzenTextBox _guarantorSearchText = default!;
+
+        private Popup _guarantorPopup = default!;
+
+        private RadzenDataGrid<VGuarantor> _gridGuarantors = default!;
+
+        private IEnumerable<VGuarantor> _guarantors = [];
+        private IList<VGuarantor> SelectedGuarantors { get; set; } = [];
+
+        private string? FullName = string.Empty;
+
+        private string? _filterText = string.Empty;
+
+        private int counts = 0;
+
+        private bool isLoading = false;
+
+        private const int pageSize = 10;
+
+        private bool _popupOpen = false;
+
+        // ── Data loading ─────────────────────────────────────────────────────
+        private async Task LoadGuarantorsAsync()
         {
-            isLoading = true;
 
-            var param = new QueryParam(1, 10, string.Empty, true, true, filterText);
+            Tracker.Show();
 
-            var guarantorResp = await _gService.GetGuarantorsAsync(null, param);
+            var param = new QueryParam(0, 0, nameof(VGuarantor.FullName), false, false, _filterText);
 
-            counts = guarantorResp.Count;
+            var command = new GetGuarantorsAsPagingQuery(null, param);
 
-            _guarantors = guarantorResp.Items;
+            var result = await mediator.Send(command);
 
-            isLoading = false;
+            counts = result.Count;
 
-            StateHasChanged();
+            _guarantors = result.Items;
+
+            Tracker.Hide();
+
         }
-        async Task OnRowGuarantorSelect(VGuarantor g)
-        {
-            if (g == null) return;
 
-            FullName = "";
+        // ── Event handlers ───────────────────────────────────────────────────
+
+        /// <summary>Opens popup and loads all guarantors when the textbox is clicked.</summary>
+        private async Task OpenPopup(MouseEventArgs _)
+        {
+            SelectedGuarantors = [];
+
+            _filterText = string.Empty;
+
+            await LoadGuarantorsAsync();
+
+            await EnsurePopupOpenAsync();
+        }
+
+        /// <summary>Fires on every keystroke in the textbox — debounces & searches.</summary>
+        private async Task OnGuarantorSearchText(ChangeEventArgs args)
+        {
+
+            _filterText = args.Value?.ToString() ?? string.Empty;
+
+            Console.WriteLine(_filterText);
+
+            //await LoadGuarantorsAsync();
+
+            // Ensure popup is open (it may have been closed by Escape or a previous click)
+            await EnsurePopupOpenAsync();
+        }
+
+        /// <summary>Keyboard navigation inside the textbox.</summary>
+        private async Task OnKeyDown(KeyboardEventArgs args)
+        {
+            var key = args.Code ?? args.Key;
+
+            switch (key)
+            {
+                case "Escape":
+                case "Tab":
+                    await ClosePopup();
+                    break;
+
+                case "Enter":
+                case "NumpadEnter":
+                    // Accept first item if nothing is explicitly selected
+                    if (!SelectedGuarantors.Any() && _guarantors.Any())
+                        await GetSelectedGuarantor(_guarantors.First());
+                    else if (SelectedGuarantors.Any())
+                        await GetSelectedGuarantors(SelectedGuarantors);
+                    break;
+            }
+        }
+
+        /// <summary>Accepts a single guarantor (add-button or row double-click).</summary>
+        private async Task GetSelectedGuarantor(VGuarantor? g)
+        {
+            if (g is null) return;
 
             FullName = g.FullName;
 
             await OnSelected.InvokeAsync(g);
 
-            await _guarantorPopup.CloseAsync();
-
+            await ClosePopup();
         }
 
-        async Task OnGuarantorSearchText(ChangeEventArgs args)
+        /// <summary>Accepts all checked guarantors (Accept Selected button).</summary>
+        private async Task GetSelectedGuarantors(IEnumerable<VGuarantor> selected)
         {
-            selectedIndex = 0;
+            if (!selected.Any()) return;
 
-            filterText = args.Value!.ToString();
+            FullName = string.Join(", ", selected.Select(x => x.FullName));
 
-            await GetGuarantors();
+            await SelectMany.InvokeAsync(selected);
 
-            if (!string.IsNullOrEmpty(filterText))
-            {
-                await _guarantorPopup.ToggleAsync(_guarantorSearchText.Element);
-            }
-            await _gridGuarantors.Reload();
+            await ClosePopup();
         }
 
-        async Task OnKeyDown(KeyboardEventArgs args)
+        private async Task EnsurePopupOpenAsync()
         {
-
-            if (!_guarantors.Any()) return;
-
-
-            var items = _guarantors;
-
-            var popupOpened = await js.InvokeAsync<bool>("Radzen.popupOpened", "_guarantorPopup");
-
-            var key = args.Code != null ? args.Code : args.Key;
-
-            if (!args.AltKey && (key == "ArrowDown" || key == "ArrowUp"))
+            if (!_popupOpen)
             {
 
-                var result = await js.InvokeAsync<int[]>("Radzen.focusTableRow", "gridGuarantors", key, selectedIndex, null, false);
-
-                selectedIndex = result.First();
-
-            }
-            else if (args.AltKey && key == "ArrowDown" || key == "Enter" || key == "NumpadEnter")
-            {
-
-                if (popupOpened && (key == "Enter" || key == "NumpadEnter"))
-                {
-
-                    customerId = items.ElementAtOrDefault(selectedIndex)?.Id;
-
-                }
+                _popupOpen = true;
 
                 await _guarantorPopup.ToggleAsync(_guarantorSearchText.Element);
-
             }
-            else if (key == "Escape" || key == "Tab")
+        }
+
+        private async Task ClosePopup()
+        {
+            SelectedGuarantors = [];
+
+            if (_popupOpen)
             {
+                _popupOpen = false;
+
+                await js.InvokeVoidAsync("eval", "document.activeElement instanceof HTMLElement && document.activeElement.blur()");
+
                 await _guarantorPopup.CloseAsync();
             }
         }
-
-        async Task OpenPopup(MouseEventArgs arg)
-        {
-            SelectedGuarantors = [];
-            await GetGuarantors();
-
-            await _guarantorPopup.ToggleAsync(_guarantorSearchText.Element);
-        }
-
-        async Task GetSelectedGuarantor(VGuarantor? arg)
-        {
-            if (arg == null) return;
-
-            await OnSelected.InvokeAsync(arg);
-
-            await _guarantorPopup.CloseAsync();
-        }
-
-        async Task GetSelectedGuarantors(IEnumerable<VGuarantor> args)
-        {
-
-            if (!args.Any()) return;
-
-            await SelectMany.InvokeAsync(args);
-
-            await _guarantorPopup.CloseAsync();
-        }
-
     }
 }

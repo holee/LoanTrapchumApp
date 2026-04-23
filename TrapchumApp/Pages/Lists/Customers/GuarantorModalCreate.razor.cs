@@ -26,9 +26,9 @@ namespace TrapchumApp.Pages.Lists.Customers
         {
             var gResponse = await _gService.GetGuarantorsAsync(string.Empty); //_customerService.GetGuarantorsAsync();
 
-            if (gResponse.IsSuccess)
+            if (!gResponse.IsError)
             {
-                Guarantors = gResponse.Data!;
+                Guarantors = gResponse.Value;
             }
             else
             {

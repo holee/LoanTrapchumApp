@@ -1,100 +1,113 @@
-@using Applications.Features.Addresses
-@using Applications.Features.Branches
-@using Applications.Features.Currencies
-@using Applications.Features.Customers.Services
-@using Applications.Features.Employees
 @using Applications.Features.Guarantor.Dtos
-@using Applications.Features.LoanRequests.Interfaces
-@using Applications.Responses.ViewModels.Loans.Requests
-@using Applications.Responses.ViewModels.OtherNames
 @using Radzen.Blazor.Rendering
-@using TrapchumApp.Services
-<style type="text/css">
-    .my-popup2 {
+@using TrapchumApp.Components.Buttons
+
+<style>
+    .guarantor-popup {
         display: none;
         position: absolute;
         overflow: hidden;
-        height: 300px;
-        width: 50%;
+        height: 340px;
+        width: 560px;
         border: var(--rz-panel-border);
         background-color: var(--rz-panel-background-color);
         box-shadow: var(--rz-panel-shadow);
-        border-radius: var(--rz-border-radius)
+        border-radius: var(--rz-border-radius);
+        z-index: 1000;
     }
 </style>
-<RadzenStack AlignItems="AlignItems.Center"
-             Orientation="Orientation.Horizontal" class="rz-my-1">
-    <RadzenTextBox @onclick="@OpenPopup"
-                   @ref="@_guarantorSearchText"
-                   @bind-Value="@FullName"
+
+<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="4px" class="rz-my-1">
+    <RadzenTextBox @ref="@_guarantorSearchText"
+                   @oninput="@OnGuarantorSearchText"
                    @onkeydown="@OnKeyDown"
-                   Placeholder="Search Guarantor...."
-                   @oninput="@OnGuarantorSearchText" />
-    <Popup @ref="@_guarantorPopup" id="pGuarantorSearchText"
-           autoFocusFirstElement="false"
-           class="my-popup2">
+                   @onclick="@OpenPopup"
+                   Placeholder="Search guarantor by name or phone..."
+                   Style="width:300px;" />
+  
+</RadzenStack>
+
+<Popup @ref="@_guarantorPopup"
+       id="guarantorPopup"
+       autoFocusFirstElement="false"
+       class="guarantor-popup">
+    <RadzenStack Style="height:100%;width:100%;" Gap="0">
         <RadzenDataGrid @ref="@_gridGuarantors"
-                        id="grid1GuarantorSearchText"
                         TItem="VGuarantor"
                         Data="@_guarantors"
+                        Count="@counts"
+                        IsLoading="@isLoading"
                         Density="Density.Compact"
                         AllowAlternatingRows="true"
                         GridLines="DataGridGridLines.Both"
-                        Responsive="true"
                         AllowSorting="true"
-                        ColumnWidth="10rem"
                         AllowPaging="true"
-                        AllowRowSelectOnRowClick="@allowRowSelectOnRowClick"
-                        SelectionMode="DataGridSelectionMode.Multiple"
+                        PageSize="@pageSize"
                         ShowPagingSummary="true"
+                        AllowRowSelectOnRowClick="true"
+                        SelectionMode="DataGridSelectionMode.Multiple"
                         @bind-Value="@SelectedGuarantors"
-                        Count="@counts"
-                        PageSize="10"
-                        Style="height:100%;width:100%;">
+                        RowDoubleClick="@(args => GetSelectedGuarantor(args.Data))"
+                        Style="height:290px;width:100%;">
+            <EmptyTemplate>
+                <RadzenStack AlignItems="AlignItems.Center" class="rz-p-4" Gap="4px">
+                    <RadzenIcon Icon="search_off" Style="font-size:2rem;color:var(--rz-text-disabled-color);" />
+                    <RadzenText TextStyle="TextStyle.Caption" style="color:var(--rz-text-disabled-color);">
+                        No guarantors found. Try a different search term.
+                    </RadzenText>
+                </RadzenStack>
+            </EmptyTemplate>
             <Columns>
-                <RadzenDataGridColumn Title="#"
+                <RadzenDataGridColumn Title="#" Width="3rem" Sortable="false"
                                       TextAlign="TextAlign.Center"
-                                      Context="g"
-                                      Width="3rem"
-                                      Sortable="false"
-                                      Property="@(nameof(VGuarantor.Id))">
+                                      Property="@nameof(VGuarantor.Id)"
+                                      Context="g">
                     <Template>
-                        <RadzenCheckBox InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Select item" }})"
+                        <RadzenCheckBox TValue="bool"
                                         TriState="false"
-                                        Value="@(SelectedGuarantors.Any() && SelectedGuarantors.Contains(g))"
-                                        Change=@(args => { if(!allowRowSelectOnRowClick) { _gridGuarantors.SelectRow(g); }})
-                                        TValue="bool" />
+                                        InputAttributes="@(new Dictionary<string,object>{ {"aria-label","Select item"} })"
+                                        Value="@(SelectedGuarantors.Contains(g))"
+                                        Change="@(_ => _gridGuarantors.SelectRow(g))" />
                     </Template>
                 </RadzenDataGridColumn>
-                <RadzenDataGridColumn Property="@nameof(VGuarantor.FullName)" Title="FullName" />
-                <RadzenDataGridColumn Width="8rem" Property="@nameof(VGuarantor.Gender)" Title="Salutation" />
-                <RadzenDataGridColumn Width="8rem" Property="@nameof(VGuarantor.Phone)" Title="Phone" />
-                <RadzenDataGridColumn Width="8rem"
-                                      TextAlign="TextAlign.Center"
-                                      Property="@nameof(VGuarantor.NumberOfLoan)" Title="Loans" />
-                <RadzenDataGridColumn Width="5rem"
-                                      TextAlign="TextAlign.Center"
-                                      Context="g" Property="@nameof(VGuarantor.Id)" Title="Action">
+                <RadzenDataGridColumn Property="@nameof(VGuarantor.FullName)" Title="Full Name" />
+                <RadzenDataGridColumn Property="@nameof(VGuarantor.Gender)" Title="Salutation" Width="7rem" />
+                <RadzenDataGridColumn Property="@nameof(VGuarantor.Phone)" Title="Phone" Width="8rem" />
+                <RadzenDataGridColumn Property="@nameof(VGuarantor.NumberOfLoan)" Title="Loans"
+                                      Width="5rem" TextAlign="TextAlign.Center" />
+                <RadzenDataGridColumn Property="@nameof(VGuarantor.Id)" Title="" Width="4rem"
+                                      TextAlign="TextAlign.Center" Sortable="false" Context="g">
                     <Template>
                         <RadzenButton Icon="@IconNames.Add"
-                                      Click="@(()=>GetSelectedGuarantor(g))"
+                                      ButtonStyle="ButtonStyle.Success"
                                       Size="ButtonSize.ExtraSmall"
-                                      Variant="Variant.Outlined" />
+                                      Variant="Variant.Outlined"
+                                      Click="@(() => GetSelectedGuarantor(g))" />
                     </Template>
                 </RadzenDataGridColumn>
             </Columns>
             <FooterTemplate>
-                <RadzenStack AlignItems="AlignItems.Center"
-                             Orientation="Orientation.Horizontal"
-                             class="rz-m-2"
-                             JustifyContent="JustifyContent.End">
-                    <RadzenButton Icon="done_all"
-                                  Text="Accept"
-                                  Click="@(()=>GetSelectedGuarantors(SelectedGuarantors))"
-                                  Size="ButtonSize.ExtraSmall" />
+                <RadzenStack Orientation="Orientation.Horizontal"
+                             AlignItems="AlignItems.Center"
+                             JustifyContent="JustifyContent.End"
+                             class="rz-px-2 rz-py-1">
+                    <RadzenText TextStyle="TextStyle.Caption">
+                        @(SelectedGuarantors.Count) selected
+                    </RadzenText>
                 </RadzenStack>
             </FooterTemplate>
         </RadzenDataGrid>
-
-    </Popup>
-</RadzenStack>
+        <RadzenStack Orientation="Orientation.Horizontal"
+                     Gap="0.5rem"
+                     class="rz-mt-2 rz-mr-2"
+                     JustifyContent="JustifyContent.End">
+            <RadzenButton Icon="done_all"
+                          Text="Accept Selected"
+                          ButtonStyle="ButtonStyle.Primary"
+                          Size="ButtonSize.ExtraSmall"
+                          Disabled="@(!SelectedGuarantors.Any())"
+                          Click="@(() => GetSelectedGuarantors(SelectedGuarantors))" />
+            <CancelButton OnClick="@ClosePopup" />
+        </RadzenStack>
+    </RadzenStack>
+</Popup>

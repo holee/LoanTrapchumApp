@@ -1,0 +1,49 @@
+@using Applications.Features.LoanPurposes
+@using Applications.Features.LoanPurposes.Commands.CreateLoanPurpose
+
+<RadzenTemplateForm TItem="LoanPurposeDtoCreate" Data="@_model" Submit="@OnSubmit">
+    <RadzenRow class="rz-my-2">
+        <RadzenColumn Size="12">
+            <RadzenFormField Text="Title *" Variant="Variant.Outlined" class="rz-w-100">
+                <RadzenTextBox class="rz-w-100"
+                               @bind-Value="@_model.Title"
+                               Name="Title" />
+                <RadzenRequiredValidator Component="Title" Text="Title is required" />
+            </RadzenFormField>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 JustifyContent="JustifyContent.End"
+                 AlignItems="AlignItems.Center"
+                 Gap="0.5rem">
+        <RadzenButton ButtonType="ButtonType.Submit"
+                      Text="Save"
+                      ButtonStyle="ButtonStyle.Success"
+                      Icon="@IconNames.Save"
+                      Size="ButtonSize.ExtraSmall" />
+        <RadzenButton ButtonType="ButtonType.Button"
+                      Size="ButtonSize.ExtraSmall"
+                      Text="Cancel"
+                      Icon="@IconNames.Cancel"
+                      ButtonStyle="ButtonStyle.Danger"
+                      Click="@(() => DialogService.Close(false))" />
+    </RadzenStack>
+</RadzenTemplateForm>
+
+@code {
+    private LoanPurposeDtoCreate _model = new();
+
+    private async Task OnSubmit(LoanPurposeDtoCreate model)
+    {
+        var rsp = await mediator.Send(new CreateLoanPurposeCommand(_model));
+
+        if (rsp.IsError)
+        {
+            await DialogService.Alert(rsp.FirstError.Description, "Error", new ConfirmOptions { OkButtonText = "OK" });
+            return;
+        }
+
+        NotificationService.Notify(NotificationSeverity.Success, "Created", $"Loan Purpose '{rsp.Value.Title}' created successfully.");
+        DialogService.Close(rsp.Value);
+    }
+}

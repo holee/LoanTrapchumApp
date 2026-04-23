@@ -1,0 +1,67 @@
+@using Applications.Features.LoanPurposes
+@using Applications.Features.LoanPurposes.Commands.UpdateLoanPurpose
+@using Applications.Features.LoanPurposes.Queries.GetLoanPurposeById
+
+<RadzenTemplateForm TItem="LoanPurposeDtoUpdate" Data="@_model" Submit="@OnSubmit">
+    <RadzenRow class="rz-my-2">
+        <RadzenColumn Size="12">
+            <RadzenFormField Text="Title *" Variant="Variant.Outlined" class="rz-w-100">
+                <RadzenTextBox class="rz-w-100"
+                               @bind-Value="@_model.Title"
+                               Name="Title" />
+                <RadzenRequiredValidator Component="Title" Text="Title is required" />
+            </RadzenFormField>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 JustifyContent="JustifyContent.End"
+                 AlignItems="AlignItems.Center"
+                 Gap="0.5rem">
+        <RadzenButton ButtonType="ButtonType.Submit"
+                      Text="Save"
+                      ButtonStyle="ButtonStyle.Success"
+                      Icon="@IconNames.Save"
+                      Size="ButtonSize.ExtraSmall" />
+        <RadzenButton ButtonType="ButtonType.Button"
+                      Size="ButtonSize.ExtraSmall"
+                      Text="Cancel"
+                      Icon="@IconNames.Cancel"
+                      ButtonStyle="ButtonStyle.Danger"
+                      Click="@(() => DialogService.Close(false))" />
+    </RadzenStack>
+</RadzenTemplateForm>
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private LoanPurposeDtoUpdate _model = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadLoanPurpose();
+        await base.OnInitializedAsync();
+    }
+
+    private async Task LoadLoanPurpose()
+    {
+        var item = await mediator.Send(new GetLoanPurposeByIdQuery(Id));
+        if (item is not null)
+        {
+            _model = new LoanPurposeDtoUpdate { Id = item.Id, Title = item.Title };
+        }
+    }
+
+    private async Task OnSubmit(LoanPurposeDtoUpdate model)
+    {
+        var rsp = await mediator.Send(new UpdateLoanPurposeCommand(_model));
+
+        if (rsp.IsError)
+        {
+            await DialogService.Alert(rsp.FirstError.Description, "Error", new ConfirmOptions { OkButtonText = "OK" });
+            return;
+        }
+
+        NotificationService.Notify(NotificationSeverity.Success, "Updated", $"Loan Purpose '{rsp.Value.Title}' updated successfully.");
+        DialogService.Close(rsp.Value);
+    }
+}

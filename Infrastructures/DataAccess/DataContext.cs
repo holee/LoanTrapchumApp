@@ -161,6 +161,7 @@ namespace Infrastructures.DataAccess
         public DbSet<EntityNames> EntityNames => Set<EntityNames>();
         public DbSet<Occupation> Occupations => Set<Occupation>();
         public DbSet<LtPeriod> LtPeriods => Set<LtPeriod>();
+        public DbSet<LtPurpose> LtPurposes => Set<LtPurpose>();
         public DbSet<Address> Addresses => Set<Address>();
         public DbSet<City> Cities => Set<City>();
         public DbSet<Country> Countries => Set<Country>();

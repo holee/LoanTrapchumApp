@@ -2,6 +2,7 @@
 @using Applications.Features.Settings.Commands.AppSettings.DeleteAppSetting
 @using Applications.Features.Settings.Dto
 @using Applications.Features.Settings.Queries.AppSettings.GetAppSettings
+@using TrapchumApp.Pages.Settings.LoanPurposes
 @using TrapchumApp.Pages.Settings.AppSettings
 @using TrapchumApp.Pages.Settings.Periods
 <PageTitle>Settings</PageTitle>
@@ -79,6 +80,16 @@
     </HeaderTemplate>
     <ChildContent>
         <PeriodList />
+    </ChildContent>
+</RadzenFieldset>
+<RadzenFieldset>
+    <HeaderTemplate>
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
+            <RadzenIcon Icon="@IconNames.Edit" /><b>Loan Purpose Settings</b>
+        </RadzenStack>
+    </HeaderTemplate>
+    <ChildContent>
+        <LoanPurposeList />
     </ChildContent>
 </RadzenFieldset>
 @code {

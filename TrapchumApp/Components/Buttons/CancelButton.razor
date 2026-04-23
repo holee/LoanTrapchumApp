@@ -1,12 +1,12 @@
 ﻿<RadzenButton Size="@Size"
-              Text="@Title"
+              Text="@Text"
               Click="@HandleClick"
-              ButtonStyle="ButtonStyle.Success"
+              ButtonStyle="ButtonStyle.Danger"
               ButtonType="@ButtonType"
               Icon="@Icon"></RadzenButton>
 @code {
     [Parameter]
-    public string Title { get; set; } = "Cancel";
+    public string Text { get; set; } = "Cancel";
     [Parameter]
     public EventCallback OnClick { get; set; }
     [Parameter]
