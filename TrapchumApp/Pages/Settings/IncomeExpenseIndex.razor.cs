@@ -36,7 +36,12 @@ namespace TrapchumApp.Pages.Settings
 
             await GetIncomeExpenses(_filter);
         }
-
+        async Task PageSizeChanged(int page)
+        {
+            _take = page;
+            _skip = 0; // Reset to first page when page size changes
+            await GetIncomeExpenses(_filter);
+        }
 
         async Task OnAddClick()
         {

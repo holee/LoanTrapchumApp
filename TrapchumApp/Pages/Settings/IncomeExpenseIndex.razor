@@ -15,14 +15,17 @@
                 Density="Density.Compact"
                 SelectionMode="DataGridSelectionMode.Single"
                 GridLines="DataGridGridLines.Both"
-                Responsive
+                Responsive="true"
                 TItem="IncomeExpenseDto"
                 RowRender="@OnRowRender"
+                AllowPaging="true"
+                PageSize="_take"
                 LoadData="@OnLoadData"
                 Count="@_counts"
                 PageSizeOptions="@StorageConstant.PageSizeOptions"
                 PagerPosition="PagerPosition.Bottom"
                 PagerHorizontalAlign="HorizontalAlign.Right"
+                PageSizeChanged="PageSizeChanged"
                 Data="@_incomeExpense">
     <Columns>
         <RadzenDataGridColumn Property="@nameof(IncomeExpenseDto.Id)"
