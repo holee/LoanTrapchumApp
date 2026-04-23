@@ -1,7 +1,6 @@
 using Applications.Features.Guarantor.Dtos;
 using Applications.Features.Guarantor.Queries.GetGuarantorsAsPaging;
 using Applications.Responses.Paginations;
-using Applications.Services.Lists;
 using Microsoft.JSInterop;
 using Radzen.Blazor;
 using Radzen.Blazor.Rendering;
@@ -25,6 +24,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         private string? FullName = string.Empty;
 
         private string? _filterText = string.Empty;
+        private string? selectedIndex = string.Empty;
 
         private int counts = 0;
 
@@ -34,9 +34,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
         private bool _popupOpen = false;
 
-        private int selectedIndex;
-
-        private string? guarantorId;
+        private string? customerId = null;
 
         // ── Data loading ─────────────────────────────────────────────────────
         private async Task LoadGuarantorsAsync()
@@ -104,7 +102,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
                 var result = await js.InvokeAsync<int[]>("Radzen.focusTableRow", "gridGuarantors", key, selectedIndex, null, false);
 
-                selectedIndex = result.First();
+                selectedIndex = result.First().ToString();
 
             }
             else if (args.AltKey && key == "ArrowDown" || key == "Enter" || key == "NumpadEnter")
@@ -113,12 +111,14 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
                 if (popupOpened && (key == "Enter" || key == "NumpadEnter"))
                 {
 
-                    guarantorId = items.ElementAtOrDefault(selectedIndex)?.Id;
+                    if (int.TryParse(selectedIndex, out int idx))
+                    {
+                        customerId = items.ElementAtOrDefault(idx)?.Id;
+                    }
 
                 }
 
                 await _guarantorPopup.ToggleAsync(_guarantorSearchText.Element);
-
             }
             else if (key == "Escape" || key == "Tab")
             {
