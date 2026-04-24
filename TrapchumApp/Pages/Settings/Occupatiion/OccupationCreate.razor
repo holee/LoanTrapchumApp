@@ -59,6 +59,9 @@
         if (rsp.IsSuccess())
         {
             DialogService.Close(rsp.Value);
+        }else
+        {
+            await DialogService.Alert("Failed to create occupation: " + rsp.Errors.First().Description, "Error", new AlertOptions() { OkButtonText = "Close" });
         }
     }
 

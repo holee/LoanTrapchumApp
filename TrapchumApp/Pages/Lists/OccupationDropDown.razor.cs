@@ -1,9 +1,9 @@
-using Domains.Shared.Enums;
-using System.Linq.Expressions;
-using Applications.Features.AdditionalInformations.Dto;
 using Applications.Features.AdditionalInformations.Command.CreateOccupation;
+using Applications.Features.AdditionalInformations.Dto;
 using Applications.Features.AdditionalInformations.Queries.GetOccupations;
 using Applications.Responses.Paginations;
+using Domains.Shared.Enums;
+using System.Linq.Expressions;
 
 namespace TrapchumApp.Pages.Lists
 {
@@ -50,14 +50,19 @@ namespace TrapchumApp.Pages.Lists
                 TypeOf = TypeOfEnum.Position.ToString()
             };
 
-            var rsp = await mediator.Send(new CreateOccupationCommand(occupation)); 
+            var rsp = await mediator.Send(new CreateOccupationCommand(occupation));
 
             if (!rsp.IsError)
             {
-                Value = string.Empty;
+                await GetOccupations();
+
+                Value = rsp.Value.OccupationTitle;
+                NotificationService.Notify(NotificationSeverity.Success, "Success", "Occupation added successfully.");
+
             }
             else
             {
+                NotificationService.Notify(NotificationSeverity.Error, "Error", rsp.FirstError.Description);
                 await GetOccupations();
             }
 
@@ -68,7 +73,7 @@ namespace TrapchumApp.Pages.Lists
 
             Tracker.Show();
 
-            var rsp = await mediator.Send(new GetOccupationsQuery(0, new QueryParam(0, 0, string.Empty, filter), TypeOf)); 
+            var rsp = await mediator.Send(new GetOccupationsQuery(0, new QueryParam(0, 0, string.Empty, filter), TypeOf));
 
             Occuptions = rsp.Items;
 
