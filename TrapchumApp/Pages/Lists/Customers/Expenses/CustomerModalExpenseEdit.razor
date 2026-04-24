@@ -2,7 +2,7 @@
 @using Applications.Features.Incomes.Command.CreateIncomeExpenseSource
 @using Domains.Enumerations
 <EditForm Model="@model" OnValidSubmit="@HandleFormSubmit">
-    <FluentValidationValidator DisableAssemblyScanning="true" />
+    <Blazilla.FluentValidator/>
     <RadzenRow>
         <RadzenColumn Size="6">
             <RadzenFormField class="rz-w-100 rz-mt-2" Text="Expense Title" AllowFloatingLabel="true">

@@ -121,7 +121,6 @@
     <AdditionalFiles Include="Pages\Lists\Customers\Expenses\CustomerExp.razor" />
     <AdditionalFiles Include="Pages\Lists\Customers\Incomes\CustomerInc.razor" />
     <AdditionalFiles Include="Pages\Lists\Customers\CustomerLoanRequest.razor" />
-    <AdditionalFiles Include="Pages\Lists\Customers\Expenses\CustomerModalExpense.razor" />
     <AdditionalFiles Include="Pages\Lists\Customers\Incomes\CustomerModalIncome.razor" />
     <AdditionalFiles Include="Pages\Lists\Customers\Notes\CustomerNoteAdd.razor" />
     <AdditionalFiles Include="Pages\Lists\Customers\Notes\CustomerNotes.razor" />

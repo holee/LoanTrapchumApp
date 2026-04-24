@@ -1,7 +1,4 @@
-﻿using Applications.Features.Incomes.Dto;
-using Applications.Interfaces.Customers;
-using Applications.Responses.Paginations;
-using Applications.Utils;
+﻿using Applications.Interfaces.Customers;
 
 namespace Applications.Features.Incomes.Queries.GetIncomeExpense;
 

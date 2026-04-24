@@ -21,16 +21,11 @@ public partial class CreateExpense
     {
         _filter = arg.Filter ?? String.Empty;
 
-        await GetIncomeExpenses(_filter);
+        await GetExpenses(_filter);
     }
-    private async Task GetIncomeExpenses(string? filter = null)
+    private async Task GetExpenses(string? filter = null)
     {
-        var query = new GetIncomeExpenseQuery(0, IncomeExpenseTypes.Expense, new QueryParam
-        {
-            Page = 0,
-            PageSize = 10,
-            Filter = filter
-        });
+        var query = new GetIncomeExpenseQuery(0, IncomeExpenseTypes.Expense, new QueryParam(0, 0, string.Empty, _filter));
 
         var result = await mediator.Send(query);
 
@@ -44,7 +39,7 @@ public partial class CreateExpense
 
         model.CustomerRefId = CustomerId;
 
-        await GetIncomeExpenses(_filter);
+        await GetExpenses(_filter);
 
         await base.OnInitializedAsync();
     }
@@ -54,15 +49,14 @@ public partial class CreateExpense
     async Task HandleFormSubmit()
     {
 
-        await AddIfNotExists(model.ExpenseTitle);
-
         var comamnd = new AddExpenseCommand(model);
 
         var rsp = await mediator.Send(comamnd);
 
         if (rsp.IsError)
         {
-            NotificationService.Notify(NotificationSeverity.Error, rsp.FirstError.Description);
+            _toastService.ShowError("Expense", rsp.FirstError.Description);
+
             return;
         }
 

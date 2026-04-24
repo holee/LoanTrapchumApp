@@ -27,12 +27,7 @@ public partial class CustomerModalExpenseEdit
     }
     private async Task GetIncomeExpenses(string? filter = null)
     {
-        var query = new GetIncomeExpenseQuery(0, IncomeExpenseTypes.Expense, new QueryParam
-        {
-            Page = 0,
-            PageSize = 10,
-            Filter = filter
-        });
+        var query = new GetIncomeExpenseQuery(0, IncomeExpenseTypes.Expense, new QueryParam(0, 0, string.Empty, _filter));
 
         var result = await mediator.Send(query);
 
@@ -70,8 +65,6 @@ public partial class CustomerModalExpenseEdit
 
     async Task HandleFormSubmit()
     {
-
-        await AddIfNotExists(model.ExpenseTitle);
 
         var comamnd = new EditExpenseCommand(model);
 
