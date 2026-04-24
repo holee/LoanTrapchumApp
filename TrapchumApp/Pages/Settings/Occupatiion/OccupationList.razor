@@ -24,6 +24,7 @@
                 GridLines="DataGridGridLines.Both"
                 Density="Density.Compact"
                 AllowPaging="true"
+                ShowPagingSummary="true"
                 AllowFiltering="true"
                 AllowAlternatingRows="true"
                 AllowSorting="true"
@@ -147,6 +148,7 @@
         if (dia is OccupationDto result && result is not null)
         {
             await gridRef.InsertRow(result);
+            NotificationService.Notify(NotificationSeverity.Success, "Success", $"Occupation {result.OccupationTitle} has been created.");
             await gridRef.Reload();
         }
     }
