@@ -1,4 +1,5 @@
 ﻿@using Applications.Features.Incomes.Dto
+@using Applications.Features.Incomes.Command.CreateIncomeExpenseSource
 <EditForm Model="@model" OnValidSubmit="HandleFormSubmit">
     <FluentValidationValidator DisableAssemblyScanning="true" />
     <input type="hidden" @bind="model.CustomerId" />
@@ -6,17 +7,14 @@
         <RadzenColumn Size="6">
             <RadzenFormField class="rz-w-100" Text="Income Source" AllowFloatingLabel="true">
                 <ChildContent>
-                    <RadzenDropDown Data="@_incomeExpenses"
-                                    TextProperty="@nameof(IncomeExpenseDto.Description)"
-                                    ValueProperty="@nameof(IncomeExpenseDto.Description)"
-                                    AllowFiltering="true"
-                                    LoadData="@LoadData"
-                                    class="rz-w-100"
-                                    Close="ClosedDropDown"
-                                    @bind-SearchText="@SearchText"
-                                    @bind-Value="model.IncomeSource">
-
-                    </RadzenDropDown>
+                    <RadzenAutoComplete Data="@_incomeExpenses"
+                                        TextProperty="@nameof(IncomeExpenseDto.Description)"
+                                        LoadData="@LoadData"
+                                        class="rz-w-100"
+                                        Placeholder="Type to search or add new…"
+                                        MinLength="0"
+                                        @bind-Value="model.IncomeSource"
+                                        OpenOnFocus="true"/>
                 </ChildContent>
                 <Helper>
                     <ValidationMessage For="() => model.IncomeSource" />
@@ -60,48 +58,42 @@
 </EditForm>
 @code {
 
-    private string? searchText = string.Empty;
-
-    public string? SearchText
+    private async Task OnIncomeSourceChange(object value)
     {
-        get => searchText;
+        var text = value?.ToString() ?? string.Empty;
 
-        set
-        {
-            if (searchText != value)
-            {
-                searchText = value;
-            }
-        }
+        await AddIfNotExists(text);
     }
 
-    void ClosedDropDown()
-    {
-        _ = AddIfNotExists(SearchText ?? "");
-    }
-
-    private async Task AddIfNotExists(string text)
+    private async Task AddIfNotExists(string? text)
     {
         if (string.IsNullOrWhiteSpace(text))
             return;
 
-        model.IncomeSource = text;
-
         var exists = _incomeExpenses
-                    .Any(x => x.Description
-                        .Equals(text, StringComparison.OrdinalIgnoreCase));
+            .Any(x => x.Description.Equals(text, StringComparison.OrdinalIgnoreCase));
 
         if (!exists)
         {
-            var newItem = new IncomeExpenseDto
+            var command = new CreateIncomeExpenseCommand(new CreateIncomeExpenseDto
             {
-                Description = text
-            };
+                Description = text,
+                Types = nameof(Domains.Enumerations.IncomeExpenseTypes.Income)
+            });
 
-            _incomeExpenses.Insert(0, newItem);
+            var result = await mediator.Send(command);
+
+            if (!result.IsError)
+            {
+                _incomeExpenses.Insert(0, new IncomeExpenseDto { Description = text });
+                NotificationService.Notify(NotificationSeverity.Success, $"'{text}' added to income sources.");
+                StateHasChanged();
+            }
+            else
+            {
+                NotificationService.Notify(NotificationSeverity.Error, result.FirstError.Description);
+            }
         }
-
-        StateHasChanged();
     }
 
 }

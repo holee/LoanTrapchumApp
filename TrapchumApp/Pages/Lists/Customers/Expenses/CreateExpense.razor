@@ -1,20 +1,19 @@
 ﻿@using Applications.Features.Incomes.Dto
+@using Applications.Features.Incomes.Command.CreateIncomeExpenseSource
 <EditForm Model="@model" OnValidSubmit="@HandleFormSubmit">
     <FluentValidationValidator DisableAssemblyScanning="false" />
     <RadzenRow>
         <RadzenColumn Size="6">
             <RadzenFormField class="rz-w-100" Text="Expense Title" AllowFloatingLabel="true">
                 <ChildContent>
-                    <RadzenDropDown Data="@_incomeExpenses"
-                                    class="rz-w-100"
-                                    TextProperty="@nameof(IncomeExpenseDto.Description)"
-                                    ValueProperty="@nameof(IncomeExpenseDto.Description)"
-                                    LoadData="@LoadData"
-                                    AllowFiltering="true"
-                                    Close="@ClosedDropDown"
-                                    @bind-SearchText="@searchText"
-                                    @bind-Value="model.ExpenseTitle">
-                    </RadzenDropDown>
+                    <RadzenAutoComplete Data="@_incomeExpenses"
+                                        TextProperty="@nameof(IncomeExpenseDto.Description)"
+                                        LoadData="@LoadData"
+                                        class="rz-w-100"
+                                        Placeholder="Type to search or add new…"
+                                        MinLength="0"
+                                        OpenOnFocus="true"
+                                        @bind-Value="model.ExpenseTitle"/>
                 </ChildContent>
                 <Helper>
                     <ValidationMessage For="() => model.ExpenseTitle" />
@@ -60,47 +59,34 @@
 
 @code {
 
-    private string? searchText = string.Empty;
-
-    public string? SearchText
-    {
-        get => searchText;
-
-        set
-        {
-            if (searchText != value)
-            {
-                searchText = value;
-            }
-        }
-    }
-
-    void ClosedDropDown()
-    {
-        _ = AddIfNotExists(SearchText ?? "");
-    }
-
-    private async Task AddIfNotExists(string text)
+    private async Task AddIfNotExists(string? text)
     {
         if (string.IsNullOrWhiteSpace(text))
             return;
 
-        model.ExpenseTitle = text;
-
         var exists = _incomeExpenses
-                    .Any(x => x.Description
-                        .Equals(text, StringComparison.OrdinalIgnoreCase));
+            .Any(x => x.Description.Equals(text, StringComparison.OrdinalIgnoreCase));
 
         if (!exists)
         {
-            var newItem = new IncomeExpenseDto
+            var command = new CreateIncomeExpenseCommand(new CreateIncomeExpenseDto
             {
-                Description = text
-            };
+                Description = text,
+                Types = nameof(Domains.Enumerations.IncomeExpenseTypes.Expense)
+            });
 
-            _incomeExpenses.Insert(0, newItem);
+            var result = await mediator.Send(command);
+
+            if (!result.IsError)
+            {
+                _incomeExpenses.Insert(0, new IncomeExpenseDto { Description = text });
+                NotificationService.Notify(NotificationSeverity.Success, $"'{text}' added to expense titles.");
+                StateHasChanged();
+            }
+            else
+            {
+                NotificationService.Notify(NotificationSeverity.Error, result.FirstError.Description);
+            }
         }
-
-        StateHasChanged();
     }
 }

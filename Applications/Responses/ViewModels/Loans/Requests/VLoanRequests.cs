@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using Applications.Enumerations;
-using Applications.Features.Customers.Response;
 using Applications.Responses.ViewModels.Loans.LoanRequests;
 
 namespace Applications.Responses.ViewModels.Loans.Requests;
@@ -48,7 +47,7 @@ public sealed class VLoanRequests
     public int? CollectionFeeModeId { get; set; } = 1;
     public string? CollectionFeeModeName { get; set; } = string.Empty;
     public string? AprovedBy { get; set; } = string.Empty;
-
+    public string? LoanPurpose { get; set; }= string.Empty;
     [NotMapped] public bool IsCompleted => StatusId == (int)RequestStatus.Completed;
     [NotMapped] public bool IsApproved => StatusId == (int)RequestStatus.Approved;
     [NotMapped]

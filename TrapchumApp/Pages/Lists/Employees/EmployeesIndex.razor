@@ -2,6 +2,7 @@
 @using Applications.Features.Branches.Dtos
 @using Applications.Features.Entities
 @using Applications.Responses.ViewModels.Employees
+@using TrapchumApp.Components.Buttons
 @attribute [StreamRendering]
 <PageTitle>Employees</PageTitle>
 <RadzenTabs RenderMode="TabRenderMode.Client" Change="TabChanged" @bind-SelectedIndex="@selectedIndex">
@@ -9,7 +10,7 @@
         <RadzenTabsItem Text="Employees" Icon="group">
             <GridToolbar SearchChanged="PerformSearch">
                 <LeftChildren>
-                    <AddButton OnClick="@CreateNewEmployeeTab" Title="Add Employee" />
+                    <AddButton OnClick="@CreateNewEmployeeTab" Text="Add Employee" />
                     
                     <div class="rz-p-1">
                         <RadzenCheckBox @bind-Value="includeInActive"

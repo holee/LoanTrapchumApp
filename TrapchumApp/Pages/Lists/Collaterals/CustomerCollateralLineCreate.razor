@@ -16,6 +16,8 @@
             <RadzenColumn Size="6">
                 <RadzenFormField Text="Register Date" class="@Defaults.W100">
                     <RadzenDatePicker class="@Defaults.W100"
+                               DateFormat="dd/MM/yyyy"
+                               @bind-Value:format="yyyy/MM/dd"
                                       @bind-Value="@baseModel.RegisterDate" />
                 </RadzenFormField>
             </RadzenColumn>
@@ -52,19 +54,29 @@
                                   InputAttributes="@(new Dictionary<string, object> { { "aria-label", "select file" } })" />
                     <RadzenProgressBar Value="@progress"
                                        class="rz-mt-2"
-                                       Style="height:0.5rem;"
+                                       Style="height:0.7rem;"
                                        Visible="@showProgress" />
                 </RadzenCard>
             </RadzenColumn>
 
             <RadzenColumn Size="6">
                 <RadzenCard Variant="Variant.Outlined" class="rz-mt-2">
+                    @if(showComplete){
+                      <div class="upload-indicator upload-complete">
+                        <RadzenIcon Icon="check_circle" Style="color:green;vertical-align:middle;" />
+                        <span style="color:green;">Upload complete</span>
+                    </div>
+                    }
+
                     @if (!string.IsNullOrWhiteSpace(model?.FileUrl))
                     {
-                        <RadzenLink Path="@model.FileUrl"
-                                    Target="_blank"
-                                    Text="Preview file"
-                                    class="rz-mt-1" />
+                        <NavLink href="@model.FileUrl" target="_blank" class="rz-mt-1">
+                            preview file
+                        </NavLink>
+                        <RadzenButton Variant="Variant.Text"
+                                      class="rz-ml-3"
+                                      Click="@DeleteFile"
+                                      Icon="@IconNames.Delete" Size="ButtonSize.ExtraSmall" />
                     }
                     else
                     {
@@ -189,116 +201,128 @@
 </EditForm>
 @code {
 
-    int progress;
-    bool showProgress;
-    bool showComplete;
-    bool isUploading;
-    string completionMessage = string.Empty;
-    bool cancelUpload = false;
+        int progress;
+        bool showProgress;
+        bool showComplete;
+        bool isUploading;
+        string completionMessage = string.Empty;
+        bool cancelUpload = false;
 
-    void UploadComplete(UploadCompleteEventArgs args)
-    {
-        isUploading = false;
-        showProgress = false;
-        showComplete = true;
-
-        if (string.IsNullOrEmpty(args.RawResponse))
+        void UploadComplete(UploadCompleteEventArgs args)
         {
-            completionMessage = "Upload failed: empty response.";
+            isUploading = false;
+            showProgress = false;
+            showComplete = true;
+
+            if (string.IsNullOrEmpty(args.RawResponse))
+            {
+                completionMessage = "Upload failed: empty response.";
+                model.FileUrl = string.Empty;
+                return;
+            }
+
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+
+            var fileModel = JsonSerializer.Deserialize<DocumentDto>(args.RawResponse!, options);
+
+            if (fileModel is not null)
+            {
+                completionMessage = "Upload complete!";
+
+                model.FileUrl = fileModel.FileUrl;
+
+                _toastService.ShowSuccess("", "File uploaded successfully.");
+            }
+            else
+            {
+                completionMessage = "Upload failed: unable to parse response.";
+
+                model.FileUrl = string.Empty;
+            }
+        }
+
+        void UploadProgress(UploadProgressArgs args)
+        {
+            isUploading = args.Progress < 100;
+            showProgress = true;
+            showComplete = false;
+            progress = args.Progress;
+
+            if (args.Progress == 100)
+            {
+                showProgress = false;
+            }
+        }
+
+        void OnError(UploadErrorEventArgs args)
+        {
+            isUploading = false;
+
+            showProgress = false;
+
+            showComplete = true;
+
+            _toastService.ShowError("", $"{args.Message}");
+
             model.FileUrl = string.Empty;
-            return;
         }
 
-        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-
-        var fileModel = JsonSerializer.Deserialize<DocumentDto>(args.RawResponse!, options);
-
-        if (fileModel is not null)
+        void OnCancel()
         {
-            completionMessage = "Upload complete!";
-
-            model.FileUrl = fileModel.FileUrl;
-
-            _toastService.ShowSuccess("", "File uploaded successfully.");
+            cancelUpload = true;
+            isUploading = false;
         }
-        else
-        {
-            completionMessage = "Upload failed: unable to parse response.";
 
+        void OnFileChanged(UploadChangeEventArgs args)
+        {
+            if (args.Files is null)
+            {
+                Console.WriteLine("No files selected.");
+                isUploading = false;
+                showComplete = false;
+                showProgress = false;
+                return;
+            }
+
+            var file = args.Files.FirstOrDefault();
+
+            if (file is null)
+            {
+                Console.WriteLine("No file found in the selection.");
+                isUploading = false;
+                showComplete = false;
+                showProgress = false;
+                return;
+            }
+
+            if (file.Size > MaxFileSize)
+            {
+                Console.WriteLine("File size exceeds the maximum limit of {0} bytes.", MaxFileSize);
+                isUploading = false;
+                showComplete = false;
+                showProgress = false;
+                return;
+            }
+
+            isUploading = true;
+            progress = 0;
+            showProgress = true;
+            showComplete = false;
+            completionMessage = string.Empty;
             model.FileUrl = string.Empty;
+
+            Console.WriteLine("File changed: {0} files selected", args.Files.Count());
         }
-    }
 
-    void UploadProgress(UploadProgressArgs args)
-    {
-        isUploading = args.Progress < 100;
-        showProgress = true;
-        showComplete = false;
-        progress = args.Progress;
-
-        if (args.Progress == 100)
+        void DeleteFile()
         {
-            showProgress = false;
-        }
-    }
-
-    void OnError(UploadErrorEventArgs args)
-    {
-        isUploading = false;
-
-        showProgress = false;
-
-        showComplete = true;
-
-        _toastService.ShowError("", $"{args.Message}");
-
-        model.FileUrl = string.Empty;
-    }
-
-    void OnCancel()
-    {
-        cancelUpload = true;
-        isUploading = false;
-    }
-
-    void OnFileChanged(UploadChangeEventArgs args)
-    {
-        if (args.Files is null)
-        {
-            Console.WriteLine("No files selected.");
-            isUploading = false;
+            model.FileUrl = string.Empty;
             showComplete = false;
-            showProgress = false;
-            return;
+            _toastService.ShowSuccess("", "File reference removed.");
         }
-
-        var file = args.Files.FirstOrDefault();
-
-        if (file is null)
-        {
-            Console.WriteLine("No file found in the selection.");
-            isUploading = false;
-            showComplete = false;
-            showProgress = false;
-            return;
-        }
-
-        if (file.Size > MaxFileSize)
-        {
-            Console.WriteLine("File size exceeds the maximum limit of {0} bytes.", MaxFileSize);
-            isUploading = false;
-            showComplete = false;
-            showProgress = false;
-            return;
-        }
-
-        isUploading = true;
-        progress = 0;
-        showProgress = true;
-        showComplete = false;
-        completionMessage = string.Empty;
-        model.FileUrl = string.Empty;
-
-        Console.WriteLine("File changed: {0} files selected", args.Files.Count());
-    }
 }
+
+<style>
+    .upload-indicator { display:flex;	align-items:center; gap:0.5rem; margin:4px 0; justify-content:center; }
+    .upload-complete { color:green; }
+</style>

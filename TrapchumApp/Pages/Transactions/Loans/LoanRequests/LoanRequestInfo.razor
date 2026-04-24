@@ -1,5 +1,7 @@
 @using Applications.Features.Customers.Response
+@using Applications.Features.LoanPurposes
 @using Applications.Features.LoanRequests.Interfaces
+@using Applications.Features.Periods.Dto
 @using Applications.Responses.Loans.Disbursements
 @using Applications.Responses.ViewModels.Loans.Requests
 @using Applications.Responses.ViewModels.Settings
@@ -85,8 +87,14 @@
             </RadzenColumn>
             <RadzenColumn SizeSM="12" SizeMD="4" Size="4">
                 <label class="field-label">គោលបំណងនៃការខ្ចី</label>
-                <RadzenTextBox class="rz-w-100"
-                               @bind-Value="Model.LoanPurpose" />
+                <RadzenAutoComplete Data="@_loanPurposes"
+                                    TextProperty="@nameof(LoanPurposeDto.Title)"
+                                    OpenOnFocus="true" 
+                                    Style="width:100%;"
+                                    @bind-Value="@Model.LoanPurpose"
+                                    InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "Loan Purpose" } })">
+
+                </RadzenAutoComplete>
             </RadzenColumn>
         </RadzenRow>
     </div>
@@ -168,7 +176,9 @@
                     <RadzenDropDown @bind-Value="Model.Installments"
                                     class="rz-w-100"
                                     Multiple="false"
-                                    Data="StorageConstant.InstallemntOptions" />
+                                    TextProperty="@nameof(PeriodDto.Period)"
+                                    ValueProperty="@nameof(PeriodDto.Period)"
+                                    Data="@_periods" />
                 }
                 else
                 {
@@ -225,3 +235,7 @@
         </RadzenRow>
     </div>
 </div>
+
+@code{
+
+}

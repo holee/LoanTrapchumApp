@@ -31,7 +31,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Blazilla" Version="2.3.0" />
+    <PackageReference Include="Blazilla" Version="2.3.1" />
     <PackageReference Include="Blazored.FluentValidation" Version="2.2.0" />
     <PackageReference Include="ClosedXML" Version="0.105.0" />
     <PackageReference Include="FluentValidation" Version="12.1.1" />
@@ -46,7 +46,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Playwright" Version="1.59.0" />
     <PackageReference Include="QuestPDF" Version="2026.2.4" />
-    <PackageReference Include="Radzen.Blazor" Version="10.2.3" />
+    <PackageReference Include="Radzen.Blazor" Version="10.3.1" />
     <PackageReference Include="Razor.Templating.Core" Version="3.1.0" />
   </ItemGroup>
 
@@ -58,6 +58,7 @@
   <ItemGroup>
     <Folder Include="Helpers\Filters\" />
     <Folder Include="Views\" />
+    <Folder Include="wwwroot\assets\docs\" />
     <Folder Include="wwwroot\assets\docs\" />
     <Folder Include="wwwroot\schedules\" />
   </ItemGroup>

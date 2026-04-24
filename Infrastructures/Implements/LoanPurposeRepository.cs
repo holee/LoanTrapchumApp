@@ -85,18 +85,24 @@ public sealed class LoanPurposeRepository(
         await using var context = await contextFactory.CreateDbContextAsync(cancellation);
 
         var entity = await context.LtPurposes.FirstOrDefaultAsync(x => x.Id == request.Id, cancellation);
+
         if (entity is null)
         {
             return Error.NotFound(description: $"Loan purpose with ID {request.Id} was not found.");
         }
 
-        var duplicate = await context.LtPurposes.AnyAsync(x => x.Title == request.Title && x.Id != request.Id, cancellation);
+        var duplicate = await context
+                                .LtPurposes
+                                .AnyAsync(x => x.Title!.Contains(request.Title!, StringComparison.InvariantCultureIgnoreCase) &&
+                                               x.Id != request.Id, cancellation);
+
         if (duplicate)
         {
             return Error.Conflict(description: $"Loan purpose '{request.Title}' already exists.");
         }
 
         entity.Title = request.Title;
+
         await context.SaveChangesAsync(cancellation);
 
         return new LoanPurposeDto { Id = entity.Id, Title = entity.Title };
@@ -115,6 +121,7 @@ public sealed class LoanPurposeRepository(
         }
 
         context.LtPurposes.Remove(entity);
+
         await context.SaveChangesAsync(cancellation);
 
         return true;

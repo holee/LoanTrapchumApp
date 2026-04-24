@@ -24,7 +24,8 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         private string? FullName = string.Empty;
 
         private string? _filterText = string.Empty;
-        private string? selectedIndex = string.Empty;
+
+        private int selectedIndex = 0;
 
         private int counts = 0;
 
@@ -102,7 +103,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
                 var result = await js.InvokeAsync<int[]>("Radzen.focusTableRow", "gridGuarantors", key, selectedIndex, null, false);
 
-                selectedIndex = result.First().ToString();
+                selectedIndex = result.First();
 
             }
             else if (args.AltKey && key == "ArrowDown" || key == "Enter" || key == "NumpadEnter")
@@ -110,12 +111,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
                 if (popupOpened && (key == "Enter" || key == "NumpadEnter"))
                 {
-
-                    if (int.TryParse(selectedIndex, out int idx))
-                    {
-                        customerId = items.ElementAtOrDefault(idx)?.Id;
-                    }
-
+                    customerId = items.ElementAtOrDefault(selectedIndex)?.Id;
                 }
 
                 await _guarantorPopup.ToggleAsync(_guarantorSearchText.Element);

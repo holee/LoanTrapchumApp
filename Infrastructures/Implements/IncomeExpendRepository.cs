@@ -45,8 +45,7 @@ namespace Infrastructures.Implements
             using var db = _connectionFactory.CreateConnection();
 
             var expenses =
-                await db.QueryAsync<VCustomerExpenses>(
-                    @"SELECT * FROM VCustomerExpenses 
+                await db.QueryAsync<VCustomerExpenses>(@"SELECT * FROM VCustomerExpenses 
                             WHERE CustomerRefId=@customerId", new { customerId });
 
             if (expenses is null)
@@ -105,7 +104,6 @@ namespace Infrastructures.Implements
                 return Error.Unexpected(ex.Message);
             }
         }
-
 
         public async Task<ErrorOr<ExpenseDtoUpdate>> GetEditExpensesAsync(long? id, string? customerId, CancellationToken cancellation = default)
         {
@@ -200,7 +198,6 @@ namespace Infrastructures.Implements
 
                 var incomeSource = req.ExpenseTitle?.Trim();
 
-                // ✅ normalize early
                 if (!string.IsNullOrWhiteSpace(incomeSource))
                 {
                     var exists = await context.IncomeExpenses
@@ -238,7 +235,6 @@ namespace Infrastructures.Implements
                 return Error.Unexpected(ex.Message);
             }
         }
-
 
         public async Task<ErrorOr<string>> AddOrUpdateIncomesAsync(string? customerId, List<CustomerIncome> req)
         {

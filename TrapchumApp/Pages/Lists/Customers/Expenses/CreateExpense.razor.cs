@@ -53,6 +53,9 @@ public partial class CreateExpense
 
     async Task HandleFormSubmit()
     {
+
+        await AddIfNotExists(model.ExpenseTitle);
+
         var comamnd = new AddExpenseCommand(model);
 
         var rsp = await mediator.Send(comamnd);

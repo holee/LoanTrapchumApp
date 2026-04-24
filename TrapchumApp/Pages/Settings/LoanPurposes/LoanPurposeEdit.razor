@@ -61,7 +61,8 @@
             return;
         }
 
-        NotificationService.Notify(NotificationSeverity.Success, "Updated", $"Loan Purpose '{rsp.Value.Title}' updated successfully.");
+        _toastService.ShowSuccess("", $"Loan Purpose '{rsp.Value.Title}' updated successfully.");
+
         DialogService.Close(rsp.Value);
     }
 }

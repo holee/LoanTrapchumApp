@@ -70,6 +70,9 @@ public partial class CustomerModalExpenseEdit
 
     async Task HandleFormSubmit()
     {
+
+        await AddIfNotExists(model.ExpenseTitle);
+
         var comamnd = new EditExpenseCommand(model);
 
         var rsp = await mediator.Send(comamnd);
@@ -77,6 +80,7 @@ public partial class CustomerModalExpenseEdit
         if (rsp.IsError)
         {
             NotificationService.Notify(NotificationSeverity.Error, rsp.FirstError.Description);
+
             return;
         }
 

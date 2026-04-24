@@ -42,6 +42,12 @@ internal static class MapAdditinalEndpoints
 
                 var destinationPath = Path.Combine(env.WebRootPath, "assets/docs");
 
+
+                if (!Directory.Exists(destinationPath))
+                {
+                    Directory.CreateDirectory(destinationPath);
+                }
+
                 using var fileStream = new FileStream(Path.Combine(destinationPath, newFileName), FileMode.Create);
 
                 await file.CopyToAsync(fileStream);
@@ -92,6 +98,13 @@ internal static class MapAdditinalEndpoints
 
                 var permittedExtensions = new[] { ".pdf" };
 
+                var destinationPath = Path.Combine(env.WebRootPath, "assets/docs");
+
+                if (!Directory.Exists(destinationPath))
+                {
+                    Directory.CreateDirectory(destinationPath);
+                }
+
                 foreach (var file in files)
                 {
                     var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
@@ -101,8 +114,6 @@ internal static class MapAdditinalEndpoints
                     if (files.Any(f => f.Length > maxFileSize)) continue;
 
                     var newFileName = $"{Guid.NewGuid()}{extension}";
-
-                    var destinationPath = Path.Combine(env.WebRootPath, "assets/docs");
 
                     using var fileStream = new FileStream(Path.Combine(destinationPath, newFileName), FileMode.Create);
 
@@ -134,9 +145,7 @@ internal static class MapAdditinalEndpoints
 
                 logger.LogError(ex, "Error uploading files: {ErrorMessage}", ex.Message);
 
-                return Results.Problem(
-                    detail: $"Error uploading file: {ex.Message}",
-                    statusCode: 500);
+                return Results.Problem(detail: $"Error uploading file: {ex.Message}", statusCode: 500);
             }
         }).DisableAntiforgery();
 
@@ -174,6 +183,11 @@ internal static class MapAdditinalEndpoints
                 var newFileName = $"{Guid.NewGuid()}{extension}";
 
                 var destinationPath = Path.Combine(env.WebRootPath, "assets/profiles");
+
+                if (!Directory.Exists(destinationPath))
+                {
+                    Directory.CreateDirectory(destinationPath);
+                }
 
                 using var fileStream = new FileStream(Path.Combine(destinationPath, newFileName), FileMode.Create);
 

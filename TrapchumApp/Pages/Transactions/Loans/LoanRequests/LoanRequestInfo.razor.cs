@@ -5,8 +5,12 @@ using Applications.Extensions.Maths;
 using Applications.Features.Customers.Queries.GetCustomerAsPaging;
 using Applications.Features.Customers.Response;
 using Applications.Features.LoanPayments.Requests;
+using Applications.Features.LoanPurposes;
+using Applications.Features.LoanPurposes.Queries.GetLoanPurposes;
 using Applications.Features.LoanRequests.Requests;
 using Applications.Features.Loans.Dtos.Requests;
+using Applications.Features.Periods.Dto;
+using Applications.Features.Periods.Queries.GetPeriods;
 using Applications.Interfaces.Lists;
 using Applications.Responses.Loans.Disbursements;
 using Applications.Responses.Paginations;
@@ -29,38 +33,39 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
 
-        IEnumerable<LoanScheduleDtoCreate> previewSchedule = [];
+        private IEnumerable<LoanScheduleDtoCreate> previewSchedule = [];
 
-        IEnumerable<VUserLoanSizes> AprovedUsers = [];
+        private IEnumerable<VUserLoanSizes> AprovedUsers = [];
 
-        IEnumerable<VCustomerList> Customers = [];
+        private IEnumerable<VCustomerList> Customers = [];
 
-        IEnumerable<LoanRepaymentModeDto>? LoanRepaymentModes = [];
+        private IEnumerable<LoanRepaymentModeDto>? LoanRepaymentModes = [];
 
-        IEnumerable<LoanScheduleStatusDto>? LoanScheduleStatus = [];
+        private IEnumerable<LoanScheduleStatusDto>? LoanScheduleStatus = [];
 
-        IEnumerable<LoanStatusDto>? LoanStatuses = [];
+        private IEnumerable<LoanStatusDto>? LoanStatuses = [];
 
-        IEnumerable<LoanCategoryResponse>? loanCategories = [];
+        private IEnumerable<LoanCategoryResponse>? loanCategories = [];
 
-        IEnumerable<VCustomerDetails>? CustomersList = [];
+        private IEnumerable<VCustomerDetails>? CustomersList = [];
 
-        IEnumerable<LoanInstallmentTypeDto>? LoanInstallments = [];
+        private IEnumerable<LoanInstallmentTypeDto>? LoanInstallments = [];
 
-        List<VLoanRequestGuarantors> Guarantors = [];
+        private IEnumerable<PeriodDto>? _periods = [];
 
-        List<VLoanRequestCollateralLines> CollateralLines = [];
+        private List<VLoanRequestGuarantors> Guarantors = [];
 
-        List<VLoanRequestsDocuments> Documents = [];
+        private List<VLoanRequestCollateralLines> CollateralLines = [];
 
-        IEnumerable<LoanRequestDocumentsDtoCreate> _documents = [];
+        private List<VLoanRequestsDocuments> Documents = [];
 
-        VCustomerDetails? selectedCustomer = new();
+        private IEnumerable<LoanRequestDocumentsDtoCreate> _documents = [];
 
-        DateTime firstPayment;
+        private VCustomerDetails? selectedCustomer = new();
 
-        LoanCategoryResponse? SelectedLoanCategory;
+        private DateTime firstPayment;
 
+        private LoanCategoryResponse? SelectedLoanCategory;
         long? size = 0;
         int counts = 0;
         bool isVible = false;
@@ -73,16 +78,15 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
         int installmentType = 1;
         int selectedTabIndex = 0;
         string? filterText = "";
+        private List<LoanPurposeDto> _loanPurposes = [];
         protected override async Task OnInitializedAsync()
         {
-            var cat = await loanSettingService.GetLoanCategories();
 
-            if (cat!.Any())
-            {
-                loanCategories = cat.Maps();
+            await GetLoanPurposes();
 
-                SelectedLoanCategory = loanCategories!.FirstOrDefault();
-            }
+            await GetLoanCategories();
+
+            await GetPeriods();
 
             if (CustomerId.IsNotNullOrEmpty() && Model.CustomerRefId.IsNullOrEmpty())
             {
@@ -95,6 +99,40 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
             await base.OnInitializedAsync();
         }
+
+        private async Task GetLoanCategories()
+        {
+            var cat = await loanSettingService.GetLoanCategories();
+
+            if (cat!.Any())
+            {
+                loanCategories = cat.Maps();
+
+                SelectedLoanCategory = loanCategories!.FirstOrDefault();
+            }
+        }
+
+
+        private async Task GetPeriods()
+        {
+            var command = new GetPeriodsQuery(new QueryParam(0, 0, string.Empty, filter: filterText));
+
+            var rsp = await mediator.Send(command);
+
+            _periods = rsp.Items;
+
+        }
+
+        async Task GetLoanPurposes()
+        {
+            var command = new GetLoanPurposesQuery(new QueryParam(0, 0, string.Empty, filter: filterText));
+
+            var rsp = await mediator.Send(command);
+
+            _loanPurposes = rsp.Items;
+
+        }
+
 
 
         protected override async Task OnParametersSetAsync()

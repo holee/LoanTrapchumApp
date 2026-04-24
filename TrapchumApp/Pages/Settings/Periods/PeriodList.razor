@@ -23,7 +23,6 @@
                 @ref="@_gridRef"
                 TItem="PeriodDto"
                 LoadData="@LoadData"
-                IsLoading="@Tracker.IsLoading"
                 Count="@_counts"
                 PageSize="@_pageSize"
                 PageSizeOptions="@StorageConstant.PageSizeOptions"
@@ -64,13 +63,22 @@
 
 @code {
     private List<PeriodDto> _periods = [];
+
     RadzenDataGrid<PeriodDto> _gridRef = default!;
+
     private int _pageIndex = 0;
+
     private int _pageSize = 15;
+
     private int _counts = 0;
+
     private string? _filter = string.Empty;
+
     private string _sortField = nameof(PeriodDto.Id);
+
     private bool _sortDescending = false;
+
+    private bool _isLoading = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -80,12 +88,18 @@
 
     private async Task GetPeriods(string? filter = null)
     {
-        Tracker.Show();
+        _isLoading = true;
+
         var param = new QueryParam(_pageIndex, _pageSize, _sortField, false, _sortDescending, filter);
+
         var rsp = await mediator.Send(new GetPeriodsQuery(param));
+
         _periods = rsp.Items ?? [];
+
         _counts = rsp.Count;
-        Tracker.Hide();
+
+        _isLoading = false;
+
         StateHasChanged();
     }
 

@@ -301,14 +301,13 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
                     existingRequest.LoanDescriptions.AddRange(req.LoanDescriptions);
                 }
 
-                var type = req.LoanRequestStatusRefId switch
-                {
-                    (int)RequestStatus.New => NotificationType.New,
-                    (int)RequestStatus.Requested => NotificationType.Request,
-                    _ => NotificationType.Request
-                };
+                //var type = req.LoanRequestStatusRefId switch
+                //{
+                //    (int)RequestStatus.New => NotificationType.New,
+                //    (int)RequestStatus.Requested => NotificationType.Request,
+                //    _ => NotificationType.Request
+                //};
 
-                AddNotification(cxt, req, type);
 
                 await cxt.SaveChangesAsync(cancellationToken);
 

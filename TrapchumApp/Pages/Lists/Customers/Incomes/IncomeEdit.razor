@@ -1,21 +1,20 @@
 ﻿@using Applications.Features.Incomes.Dto
+@using Applications.Features.Incomes.Command.CreateIncomeExpenseSource
 <EditForm Model="@model" OnValidSubmit="HandleFormSubmit">
     <FluentValidationValidator DisableAssemblyScanning="true" />
-    <input type="hidden" @bind="model.CustomerId"/>
+    <input type="hidden" @bind="model.CustomerId" />
     <RadzenRow>
         <RadzenColumn Size="6">
             <RadzenFormField class="rz-w-100" Text="Income Source" AllowFloatingLabel="true">
                 <ChildContent>
-                    <RadzenDropDown Data="@_incomeExpenses"
-                                    TextProperty="@nameof(IncomeExpenseDto.Description)"
-                                    ValueProperty="@nameof(IncomeExpenseDto.Description)"
-                                    AllowFiltering="true"
-                                    LoadData="@LoadData"
-                                    class="rz-w-100"
-                                    Close="@ClosedDropDown"
-                                    @bind-SearchText="@SearchText"
-                                    @bind-Value="model.IncomeSource">
-                    </RadzenDropDown>
+                    <RadzenAutoComplete Data="@_incomeExpenses"
+                                        TextProperty="@nameof(IncomeExpenseDto.Description)"
+                                        LoadData="@LoadData"
+                                        class="rz-w-100"
+                                        Placeholder="Type to search or add new…"
+                                        MinLength="0"
+                                        OpenOnFocus="true"
+                                        @bind-Value="model.IncomeSource" />
                 </ChildContent>
                 <Helper>
                     <ValidationMessage For="() => model.IncomeSource" />
@@ -47,60 +46,50 @@
         <RadzenButton Size="ButtonSize.ExtraSmall"
                       ButtonStyle="ButtonStyle.Success"
                       ButtonType="ButtonType.Submit"
-                      Text="Save" Icon="@IconNames.Save"/>
+                      Text="Save" Icon="@IconNames.Save" />
 
         <RadzenButton Size="ButtonSize.ExtraSmall"
                       ButtonStyle="ButtonStyle.Danger"
                       Text="Close"
                       Click="CloseModal"
-                      Icon="@IconNames.Close"/>
+                      Icon="@IconNames.Close" />
     </RadzenStack>
 </EditForm>
 
 
 @code {
 
-    private string? searchText = string.Empty;
-
-    public string? SearchText
-    {
-        get => searchText;
-
-        set
-        {
-            if (searchText != value)
-            {
-                searchText = value;
-            }
-        }
-    }
-
-    void ClosedDropDown()
-    {
-        _ = AddIfNotExists(SearchText ?? "");
-    }
-
-    private async Task AddIfNotExists(string text)
+    private async Task AddIfNotExists(string? text)
     {
         if (string.IsNullOrWhiteSpace(text))
             return;
 
-        model.IncomeSource = text;
-
         var exists = _incomeExpenses
-                    .Any(x => x.Description
-                        .Equals(text, StringComparison.OrdinalIgnoreCase));
+            .Any(x => x.Description.Equals(text, StringComparison.OrdinalIgnoreCase));
 
         if (!exists)
         {
-            var newItem = new IncomeExpenseDto
+            var command = new CreateIncomeExpenseCommand(new CreateIncomeExpenseDto
             {
-                Description = text
-            };
+                Description = text,
+                Types = nameof(Domains.Enumerations.IncomeExpenseTypes.Income)
+            });
 
-            _incomeExpenses.Insert(0, newItem);
+            var result = await mediator.Send(command);
+
+            if (!result.IsError)
+            {
+                _incomeExpenses.Insert(0, new IncomeExpenseDto { Description = text });
+
+                _toastService.ShowSuccess("", $"'{text}' added to income sources.");
+
+                StateHasChanged();
+            }
+            else
+            {
+                _toastService.ShowError("", result.FirstError.Description);
+            }
         }
-
-        StateHasChanged();
     }
+
 }

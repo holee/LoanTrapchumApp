@@ -1,5 +1,4 @@
 using Domains.Models;
-using Infrastructures.DataAccess.Configurations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -12,6 +11,9 @@ public sealed class LtPurposeConfiguration : IBaseEntityTypeConfigurations<LtPur
         builder.ToTable("lt_purposes");
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Id).ValueGeneratedOnAdd();
-        builder.Property(x => x.Title).HasMaxLength(255).IsRequired(false);
+        builder.Property(x => x.Title)
+                .UseCollation("Khmer_100_CI_AI_SC_UTF8")
+                .HasMaxLength(255)
+                .IsRequired(false);
     }
 }

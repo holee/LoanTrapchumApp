@@ -1,11 +1,11 @@
 ﻿<RadzenButton Size="ButtonSize.Small"
-              Text="@Title"
+              Text="@Text"
               Click="@HandleClick"
               ButtonStyle="ButtonStyle.Primary"
               Icon="@Icon"></RadzenButton>
 @code {
     [Parameter]
-    public string Title { get; set; } = "Add";
+    public string Text { get; set; } = "Add";
     [Parameter]
     public EventCallback OnClick { get; set; }
     [Parameter]

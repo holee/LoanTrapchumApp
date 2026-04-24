@@ -49,6 +49,9 @@ namespace TrapchumApp.Pages.Lists.Customers.Incomes
 
         async Task HandleFormSubmit()
         {
+
+            await AddIfNotExists(model.IncomeSource);
+
             var command = new CreateIncomeCommand(model);
 
             var rsp = await mediator.Send(command);
