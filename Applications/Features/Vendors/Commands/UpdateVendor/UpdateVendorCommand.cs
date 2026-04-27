@@ -1,7 +1,8 @@
+using Applications.Features.OtherNames.Dto;
 using Applications.Features.Vendors.Dto.Requests;
-using Applications.Responses.ViewModels.Vendors;
+using Applications.Features.Vendors.Dto.Responses;
 using ErrorOr;
 
 namespace Applications.Features.Vendors.Commands.UpdateVendor;
 
-public record UpdateVendorCommand(VendorDtoUpdate Dto) : IRequest<ErrorOr<VendorVm>>;
+public record UpdateVendorCommand(EntityVendorCreate Dto) : IRequest<ErrorOr<VendorDto>>;

@@ -1,22 +1,14 @@
 ﻿@page "/App/Vendor/CreateNew"
-<EditForm Model="model" OnValidSubmit="FormSubmit">
+@using TrapchumApp.Components.Buttons
+<EditForm Model="model" OnValidSubmit="FormSubmit" FormName="FormVendorCreate">
     <Blazilla.FluentValidator />
     <CreateComp model="model" />
-    <AddressCreate model="model" />
     <RadzenStack Orientation="Orientation.Horizontal"
                  AlignItems="AlignItems.Center"
                  Gap="1rem"
                  class="rz-mt-2"
                  JustifyContent="JustifyContent.End">
-        <RadzenButton Size="ButtonSize.ExtraSmall"
-                      ButtonStyle="ButtonStyle.Success"
-                      ButtonType="ButtonType.Submit"
-                      Text="Save"
-                      Icon="save" />
-        <RadzenButton Click="@Close"
-                      Size="ButtonSize.ExtraSmall"
-                      Text="Close"
-                      ButtonStyle="ButtonStyle.Danger"
-                      Icon="cancel" />
+        <SaveButton />
+        <CancelButton OnClick="@Close" />
     </RadzenStack>
 </EditForm>

@@ -1,11 +1,8 @@
 ﻿using Applications.Responses.Lists.Entities;
-using Applications.Services.Lists;
 using Domains.Models.Addresses;
 using Domains.Models.Lists;
 using Radzen.Blazor;
-using Applications.Enumerations;
 using Applications.Features.Customers.Dto;
-using TrapchumApp.Helpers.Extensions;
 using Applications.Features.Addresses.Dto;
 using Applications.Features.Customers.Commands.CreateCustomer;
 
@@ -30,8 +27,6 @@ public partial class CustomerCreate(ILogger<CustomerCreate> logger)
     protected override async Task OnInitializedAsync()
     {
 
-       // await GetAdditionalInformation();
-
         model.City = "Siem Reap";
 
         model.CountryName = "ប្រទេសកម្ពុជា";
@@ -42,13 +37,6 @@ public partial class CustomerCreate(ILogger<CustomerCreate> logger)
 
         model.Nationality = "Khmer";
 
-        //var rsp1 = await salutationService.GetSalutions();
-
-        //if (rsp1.IsSuccess)
-        //{
-        //    Salutations = rsp1.Data!.Select(x => x.Title!).ToList();
-        //}
-
         model.Photo = "/assets/profiles/profile.png";
 
         await base.OnInitializedAsync();
@@ -57,44 +45,6 @@ public partial class CustomerCreate(ILogger<CustomerCreate> logger)
     IEnumerable<Nationality> Nationalities { get; set; } = [];
 
     RadzenFileInput<string> fileUpload = default!;
-
-    string selectedTab = "info";
-
-    string city = "";
-
-    async Task GetAdditionalInformation()
-    {
-
-        logger.LogInformation("Getting additional information for customer creation.");
-
-        //Nationalities = await ationalityService.GetNationalities();
-
-        //Provinces = await _addressService.GetsProvinces();
-
-        // Occupations = await _employeeService!.GetOccupationsAsync("Position");
-
-        //var rsp = await _addressService.GetCountries(105);
-
-        //if (rsp.IsSuccess)
-        //{
-        //    Countries = rsp.Data ?? [];
-        //}
-
-        //Cities = await _addressService.GetCities();
-    }
-    //private async Task GetSalutations()
-    //{
-    //    var salutations = await salutationService.GetSalutions();
-
-    //    if (salutations.IsSuccess)
-    //    {
-    //        Salutations = salutations!.Data!.Select(x => x.Title!).ToList();
-    //    }
-    //    else
-    //    {
-    //        Salutations = [];
-    //    }
-    //}
 
     protected async void FormSubmit()
     {
@@ -172,37 +122,10 @@ public partial class CustomerCreate(ILogger<CustomerCreate> logger)
     }
 
 
-
-    //protected async Task AddNewSalutation(KeyboardEventArgs e)
-    //{
-    //    if (e.Code == "Enter")
-    //    {
-    //        await salutationService.AddSalution(new Salutation
-    //        {
-    //            Title = newSalution
-    //        });
-    //        //await GetSalutations();
-    //    }
-    //}
-    //protected void OnTextChangedSalution(ChangeEventArgs e)
-    //{
-    //    newSalution = e?.Value?.ToString();
-    //}
-    //protected async Task<IEnumerable<string>?> SearchSalutaions(string searchText = "")
-    //{
-    //    var salution = Salutations?.Where(x => x.StartsWith(searchText, StringComparison.InvariantCultureIgnoreCase))
-    //                             .ToList();
-    //    return await Task.FromResult(salution);
-    //}
     protected async Task Close()
     {
         await Closed.InvokeAsync(1);
     }
-
-    //protected async Task CloseTab()
-    //{
-    //    await Closed.InvokeAsync();
-    //}
 
 
 }

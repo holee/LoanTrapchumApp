@@ -40,13 +40,13 @@ public sealed class ToastService(ToastOptions options)
     public void ShowInfo(string title, string message, int durationMs = 1000)
         => Show(title, message, ToastLevel.Info, durationMs);
 
-    public void ShowSuccess(string title, string message, int durationMs = 1000)
+    public void ShowSuccess(string message, string title = "", int durationMs = 1000)
         => Show(title, message, ToastLevel.Success, durationMs);
 
-    public void ShowWarning(string title, string message, int durationMs = 1000)
+    public void ShowWarning(string message, string title = "", int durationMs = 1000)
         => Show(title, message, ToastLevel.Warning, durationMs);
 
-    public void ShowError(string title, string message, int durationMs = 1000)
+    public void ShowError(string message, string title = "", int durationMs = 1000)
         => Show(title, message, ToastLevel.Error, durationMs);
 
     public void Show(string title, string message, ToastLevel level, int durationMs)

@@ -6,14 +6,8 @@ namespace Applications.Interfaces.Lists
 {
     public interface ISalutationService
     {
-        Task<Result<string>> AddSalution(Salutation salutation);
-        Task<Result<string>> DeleteSalution(int id);
-        Task<Result<IEnumerable<Salutation>>> GetSalutions(string? q = null);
-        Task<Result<IEnumerable<string>>> GetsSalutions(string? q = null);
-
-        Task<Pager<SalutationDto>> GetsSalutions(int? id, QueryParam? param,
-            CancellationToken ct = default);
-
-        Task<SalutationDto?> AddSalution(Salutation salutation, CancellationToken ct = default);
+        Task<Result<bool>> DeleteAsync(int? id, CancellationToken cancellation = default);
+        Task<Pager<SalutationDto>> GetsSalutions(int? id, QueryParam? param, CancellationToken ct = default);
+        Task<SalutationDto?> AddOrUpdateAsync(Salutation salutation, CancellationToken ct = default);
     }
 }

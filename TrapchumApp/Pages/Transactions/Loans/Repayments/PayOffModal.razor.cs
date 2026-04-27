@@ -4,6 +4,8 @@ using Applications.Extensions.NumberExtensions;
 using Applications.Features.Currencies.Queries.GetCurrencyDetails;
 using Applications.Features.Currencies.Responses;
 using Applications.Features.LoanPayments.Requests;
+using Applications.Features.Settings.Dto;
+using Applications.Features.Settings.Queries.AppSettings.GetAppSettings;
 using Applications.Features.Settings.UseCases;
 using Applications.Features.Transactions.ForiegnExchanges;
 using Applications.Features.Transactions.LoanTransactions;
@@ -13,7 +15,7 @@ using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 {
-    public partial class PayOffModal(ISettingServiceImpl settingService, ILoanPaymentService repaymentService)
+    public partial class PayOffModal
     {
         [Parameter] public int CurrencyId { get; set; }
         [Parameter] public string? CreditAgentId { get; set; }
@@ -29,7 +31,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
         ForeignExchangeDtoCreate c = new ForeignExchangeDtoCreate();
         LoanPaymentDtoCreate LoanRepayment { get; set; } = new();
         IEnumerable<VCurrenciesList> Currencies = [];
-        IEnumerable<AppSettings> settings = [];
+        IEnumerable<AppSettingDto> settings = [];
         decimal? receiveAmountUsd = 0;
         decimal? receiveAmountKhr = 0;
         decimal? changedAmountUSD = 0;
@@ -86,11 +88,13 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
                 spotRate = rsp.Value.SpotRate;
             }
 
-            var resultSetting = await settingService.GetSysSettings();
+            var command1 = new GetAppSettingsQuery(null);
 
-            if (resultSetting.IsSuccess)
+            var rsp1 = await mediator.Send(command1);
+
+            if (rsp1.IsSuccess())
             {
-                settings = resultSetting.Data!;
+                settings = rsp1.Value;
                 gainLedgerRefId = settings.FirstOrDefault(p => p.Code == "FXGAIN-KHR")!.Value.ToNumer<int>();
                 lostLedgerRefId = settings.FirstOrDefault(p => p.Code == "FXLOSS-KHR")!.Value.ToNumer<int>();
                 buyLedgerRefId = settings.FirstOrDefault(p => p.Code == "FXEPA-USD")!.Value.ToNumer<int>();
@@ -222,7 +226,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.Repayments
                 model.TranTypeRefId = 67;
                 model.TransactionTypeName = "Currency Foreign Exchange";
                 //LoanRepayment.ForeignExchangeTrx = Model;
-                
+
                 //var result = await repaymentService.RecievePayment(LoanRepayment);
 
                 //if (result.IsSuccess)

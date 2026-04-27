@@ -1,6 +1,6 @@
+using Applications.Features.Vendors.Dto.Responses;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Vendors;
 
 namespace Applications.Features.Vendors.Queries.GetVendorsAsPaging;
 
-public record GetVendorsAsPagingQuery(QueryParam Param) : IRequest<Pager<VendorVm>>;
+public record GetVendorsAsPagingQuery(QueryParam Param) : IRequest<Pager<VendorDto>>;

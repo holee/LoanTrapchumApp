@@ -11,59 +11,59 @@ namespace Applications.Services.Lists;
 
 public sealed class GuarantorService(IGuarantorService gService) : IGuarantorServiceImpl
 {
-    public async Task<ErrorOr<Created>> CreateAsync(EntityNamesCreate othername)
-    {
+    //public async Task<ErrorOr<Created>> CreateAsync(EntityNamesCreate othername)
+    //{
 
-        var req = othername.ToGuarantorCreate();
+    //    var req = othername.ToGuarantorCreate();
 
-        return await gService.CreateAsync(req);
-    }
+    //    return await gService.CreateAsync(req);
+    //}
 
-    public async Task<ErrorOr<VGuarantor>> CreateAsync(EntityGuarantorCreate othername)
-    {
+    //public async Task<ErrorOr<VGuarantor>> CreateAsync(EntityGuarantorCreate othername)
+    //{
 
-        var req = othername.MapGuarantorCreate();
+    //    var req = othername.MapGuarantorCreate();
 
-        return await gService.CreateGuarantorAsync(req);
-    }
+    //    return await gService.CreateGuarantorAsync(req);
+    //}
 
-    public async Task<ErrorOr<Updated>> UpdateAsync(EntityNamesCreate othername)
-    {
+    //public async Task<ErrorOr<Updated>> UpdateAsync(EntityNamesCreate othername)
+    //{
 
-        var req = othername.ToGuarantorEdit();
+    //    var req = othername.ToGuarantorEdit();
 
-        return await gService.UpdateAsync(req);
-    }
+    //    return await gService.UpdateAsync(req);
+    //}
 
-    public async Task<ErrorOr<VGuarantor>> UpdateAsync(EntityGuarantorCreate othername)
-    {
+    //public async Task<ErrorOr<VGuarantor>> UpdateAsync(EntityGuarantorCreate othername)
+    //{
 
-        var req = othername.MapGuarantorEdit();
+    //    var req = othername.MapGuarantorEdit();
 
-        var updateResult = await gService.UpdateAsync(req);
+    //    var updateResult = await gService.UpdateAsync(req);
 
-        if (updateResult.IsError)
-        {
-            return updateResult.Errors;
-        }
+    //    if (updateResult.IsError)
+    //    {
+    //        return updateResult.Errors;
+    //    }
 
-        return await gService.GetGuarantorByIdAsync(req.Id, allGuarantors: false, include: true);
-    }
+    //    return await gService.GetGuarantorByIdAsync(req.Id, allGuarantors: false, include: true);
+    //}
 
     public async Task<ErrorOr<Deleted>> DeleteAsync(string? id)
     {
         return await gService.DeleteAsync(id);
     }
 
-    public async Task<ErrorOr<EntityNames>> GetGuarantorByIdAsync(string? id)
-    {
-        return await gService.GetGuarantorByIdAsync(id);
-    }
+    //public async Task<ErrorOr<EntityNames>> GetGuarantorByIdAsync(string? id)
+    //{
+    //    return await gService.GetGuarantorByIdAsync(id);
+    //}
 
-    public async Task<ErrorOr<VGuarantor>> GetGuarantorByIdAsync(string? id, bool allGuarantors = false, bool include = true)
-    {
-        return await gService.GetGuarantorByIdAsync(id, allGuarantors, include);
-    }
+    //public async Task<ErrorOr<VGuarantor>> GetGuarantorByIdAsync(string? id, bool allGuarantors = false, bool include = true)
+    //{
+    //    return await gService.GetGuarantorByIdAsync(id, allGuarantors, include);
+    //}
 
     //public async Task<ErrorOr<VGuarantor>> GetGuarantorWithByIdAsync(string? id)
     //{
@@ -76,22 +76,22 @@ public sealed class GuarantorService(IGuarantorService gService) : IGuarantorSer
     //}
 
 
-    public async Task<Pager<VGuarantor>> GetGuarantorsAsync(QueryParam param,CancellationToken cancellation=default)
-    {
-        return await gService.GetGuarantorsAsync(param,cancellation);
-    }
-    public async Task<ErrorOr<IEnumerable<VGuarantor>>> GetGuarantorsAsync(string? id, bool allGuarantors = true, string? q = null)
-    {
-        return await gService.GetGuarantorsAsync(id, allGuarantors, q);
-    }
-    public async Task<Pager<VGuarantor>> GetGuarantorsAsync(string? id, QueryParam q)
-    {
-        return await gService.GetGuarantorsAsync(id, q);
-    }
+    //public async Task<Pager<VGuarantor>> GetGuarantorsAsync(QueryParam param,CancellationToken cancellation=default)
+    //{
+    //    return await gService.GetGuarantorsAsync(param,cancellation);
+    //}
+    //public async Task<ErrorOr<IEnumerable<VGuarantor>>> GetGuarantorsAsync(string? id, bool allGuarantors = true, string? q = null)
+    //{
+    //    return await gService.GetGuarantorsAsync(id, allGuarantors, q);
+    //}
+    //public async Task<Pager<VGuarantor>> GetGuarantorsAsync(string? id, QueryParam q)
+    //{
+    //    return await gService.GetGuarantorsAsync(id, q);
+    //}
     public async Task<ErrorOr<EntityGuarantorCreate>> GetGuarantorEditAsync(string? id)
     {
 
-        var rsp = await gService.GetGuarantorByIdAsync(id);
+        var rsp = await gService.GetByIdAsync(id);
 
         if (!rsp.IsError)
         {

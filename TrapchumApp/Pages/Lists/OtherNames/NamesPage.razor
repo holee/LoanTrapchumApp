@@ -1,6 +1,6 @@
 ﻿@page "/App/Names"
+@using Applications.Features.Vendors.Dto.Responses
 @using Applications.Responses.ViewModels.OtherNames
-@using Applications.Responses.ViewModels.Vendors
 <PageTitle>Names</PageTitle>
 <RadzenTabs @bind-SelectedIndex="@selectedIndex" @ref="tabs" RenderMode="TabRenderMode.Server">
     <Tabs>
@@ -58,7 +58,7 @@
                             <KhmerName AltName="@x.AltName" />
                         </Template>
                     </RadzenDataGridColumn>
-                    <RadzenDataGridColumn Width="8rem" Title="Gender" Property="@(nameof(VendorVm.Gender))" />
+                    <RadzenDataGridColumn Width="8rem" Title="Gender" Property="@(nameof(VOtherNames.Gender))" />
                     <RadzenDataGridColumn Sortable="false" Width="8rem" Title="Phone" Property="@(nameof(VOtherNames.Phone))" />
                     <RadzenDataGridColumn Sortable="false" Title="Email" Property="@(nameof(VOtherNames.EmailAddress))" />
                     <RadzenDataGridColumn Sortable="false" Filterable="false" Title="Address" Property="@(nameof(VOtherNames.Description))" Context="v">

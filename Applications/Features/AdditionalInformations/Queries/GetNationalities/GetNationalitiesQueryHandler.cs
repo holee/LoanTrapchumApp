@@ -7,7 +7,10 @@ public sealed class GetNationalitiesQueryHandler(INationalityService nationality
 {
     public async Task<Pager<NationalityDto>> Handle(GetNationalitiesQuery request, CancellationToken cancellationToken)
     {
-        var result = await nationalityService.GetNationalities(request.Id, request.Param, cancellationToken);
+
+        var param = request.Param ?? new QueryParam();
+
+        var result = await nationalityService.GetNationalities(request.Id, param, cancellationToken);
 
         return result;
     }

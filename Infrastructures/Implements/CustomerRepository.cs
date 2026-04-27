@@ -10,6 +10,7 @@ using Applications.Responses.ViewModels.Customers;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Dapper;
 using Domains.Models.Lists;
+using Domains.Shared.Enums;
 using ErrorOr;
 using Infrastructures.Constants.Procedures;
 using Infrastructures.DataAccess;
@@ -87,6 +88,7 @@ public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFac
 
         return PagerExtensions.Create(rsp, rsp.Count());
     }
+
     public async Task<EntityNames?> GetCustomerByIdAsync(string? customerId, CancellationToken cancellation = default)
     {
 
@@ -211,14 +213,24 @@ public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFac
         {
             if (await IsCustomerRegisterByPhone(null, model.Phone, cancellation))
             {
-                return ErrorOr.Error.Conflict(description: $"Phone Number:{model.Phone} is already registered.");
+                return Error.Conflict(description: $"Phone Number:{model.Phone} is already registered.");
             }
 
             if (await IsCustomerRegisterIdCard(null, model.IdCard, cancellation))
             {
-                return ErrorOr.Error.Conflict(description: $"ID Card:{model.IdCard} is already registered.");
+                return Error.Conflict(description: $"ID Card:{model.IdCard} is already registered.");
             }
+
+            if (await IsCustomerRegisterByPassport(null, model.PassportId, cancellation))
+            {
+                return Error.Conflict(description: $"Passport ID:{model.PassportId} is already registered.");
+            }
+
             await using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+            await AddNewIfNotExistJob(model, context, cancellation);
+
+            await AddJobSpouseIfNotExistJob(model, context, cancellation);
 
             var customerSequence = await GetMaxSequenceNumber(context);
 
@@ -249,7 +261,6 @@ public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFac
         }
     }
 
-
     public async Task<ErrorOr<VCustomerList>> UpdateAsync(EntityNames model, CancellationToken cancellation = default)
     {
         try
@@ -265,9 +276,20 @@ public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFac
                 return ErrorOr.Error.Conflict(description: $"Customer With Name:{model.AltName} is already register.");
             }
 
+            if (await IsCustomerRegisterByPassport(model.Id, model.PassportId, cancellation))
+            {
+                return ErrorOr.Error.Conflict(description: $"Customer With Name:{model.AltName} is already register.");
+            }
+
             await using var cxt = await contextFactory.CreateDbContextAsync(cancellation);
 
+
+            await AddNewIfNotExistJob(model, cxt, cancellation);
+
+            await AddJobSpouseIfNotExistJob(model, cxt, cancellation);
+
             cxt.EntityNames.Update(model);
+
 
             await cxt.SaveChangesAsync(cancellation);
 
@@ -317,6 +339,20 @@ public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFac
         return await context.VCustomerLists
                             .AsNoTracking()
                             .AnyAsync(x => (x.Phone == phoneNumber && (string.IsNullOrEmpty(x.CustomerId) || x.CustomerId != customerId)), cancellation);
+
+    }
+
+
+    private async Task<bool> IsCustomerRegisterByPassport(string? customerId, string? passport, CancellationToken cancellation = default)
+    {
+
+        if (string.IsNullOrWhiteSpace(passport)) return false;
+
+        await using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+        return await context.VCustomerLists
+                            .AsNoTracking()
+                            .AnyAsync(x => (x.PassportId == passport && (string.IsNullOrEmpty(x.CustomerId) || x.CustomerId != customerId)), cancellation);
 
     }
 
@@ -516,29 +552,20 @@ public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFac
 
     private IQueryable<VCustomerList> GetCustomersByBranchOrUserAsync(DataContext cxt, int? branchId, string? userId, bool activeLoanOnly = false, CancellationToken cancellation = default)
     {
-        return cxt.Database.SqlQuery<VCustomerList>($@"
-                    SELECT 
-                        c.*,
-                        d.BranchId,
-                        d.BranchName,
-                        d.UserRequestId
-                    FROM [VCustomerList] c
-                    INNER JOIN VLoanRequests d 
-                    ON c.CustomerId = d.CustomerId
-                    WHERE (d.BranchId = {branchId} OR {branchId} IS NULL)
-                          AND 
-                          (d.UserRequestId = {userId} OR {userId} IS NULL)
-                    ")
-                .WhereIf(activeLoanOnly, x => x.IsLoanActive == true)
-                .Select(ProjectTo())
-                .AsQueryable();
+        return cxt.Set<VCustomerDetails>()
+                                .WhereIf(branchId > 0, x => x.BranchId == branchId)
+                                .WhereIf(!string.IsNullOrEmpty(userId), x => x.CreatedBy == userId)
+                                .WhereIf(activeLoanOnly, x => x.IsLoanActive == true)
+                                .Select(ProjectToCustomerList())
+                                .AsQueryable();
     }
 
     private IQueryable<VCustomerList> GetCustomersWithoutActiveLoan(DataContext cxt, bool isInlcudeActiveLoan = false)
     {
-        return cxt.VCustomerLists
+        return cxt.Set<VCustomerDetails>()
                     .WhereIf(isInlcudeActiveLoan, x => x.IsLoanActive == true)
-                    .Select(ProjectToCustomerList());
+                    .Select(ProjectToCustomerList())
+                    .AsQueryable();
     }
 
 
@@ -565,6 +592,53 @@ public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFac
         return customer;
 
     }
+
+    private static async Task AddNewIfNotExistJob(EntityNames model, DataContext context, CancellationToken cancellation)
+    {
+        if (!string.IsNullOrEmpty(model.Occupation))
+        {
+
+            var duplicate = await context.Occupations
+                                    .AnyAsync(x => x.OccupationTitle.Equals(model.Occupation), cancellation);
+
+            if (duplicate) return;
+
+            context.Occupations.Add(new Occupation
+            {
+                OccupationTitle = model.Occupation,
+                Khmer = model.Occupation,
+                TypeOf = TypeOfEnum.Job.ToString()
+            });
+
+            await context.SaveChangesAsync(cancellation);
+
+        }
+    }
+
+
+    private static async Task AddJobSpouseIfNotExistJob(EntityNames model, DataContext context, CancellationToken cancellation)
+    {
+        if (model.Customer is not null && !string.IsNullOrEmpty(model.Customer.SpouseOccupation))
+        {
+
+            var duplicate = await context.Occupations
+                                    .AnyAsync(x => x.OccupationTitle.Equals(model.Customer.SpouseOccupation), cancellation);
+
+            if (duplicate) return;
+
+            context.Occupations.Add(new Occupation
+            {
+                OccupationTitle = model.Customer.SpouseOccupation,
+                Khmer = model.Customer.SpouseOccupation,
+                TypeOf = TypeOfEnum.Job.ToString()
+            });
+
+            await context.SaveChangesAsync(cancellation);
+
+        }
+    }
+
+
 
 }
 

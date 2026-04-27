@@ -15,7 +15,7 @@ public sealed class CreateSalutationCommandHandler(ISalutationService salutation
             Title = request.Request.Title
         };
 
-        var result =await salutationService.AddSalution(model,cancellationToken);
+        var result =await salutationService.AddOrUpdateAsync(model,cancellationToken);
 
         if (result is null) return Error.Failure(description: "Salutation create not created");
 

@@ -57,10 +57,13 @@ public static class CustomerMapper
             NoOfChildren = dto.Customer?.NoOfChildren,
             SpouseDateOfBirth = dto.Customer?.SpouseDateOfBirth,
             SpouseName = dto.Customer?.SpouseName,
+            SpouseGender = dto.Customer?.SpouseGender ?? string.Empty,
             SpouseNationality = dto.Customer?.SpouseNationality,
             SpouseOccupation = dto.Customer?.SpouseOccupation,
             SpousePassport = dto.Customer?.SpousePassport,
             SpousePhoneNo = dto.Customer?.SpousePhoneNo,
+            CreatedBy = dto.CreatedBy,
+            BranchId = dto.BranchId,
 
         };
 
@@ -110,6 +113,7 @@ public static class CustomerMapper
             Description = dto.Description,
             Converted = false,
             CreatedBy = dto.CreatedBy,
+            BranchId = dto.BranchId,
             Customer = new Customer
             {
                 CustomerKey = dto.CustomerKey,
@@ -121,6 +125,7 @@ public static class CustomerMapper
                 Occupation = dto.Occupation,
                 SpouseDateOfBirth = dto.SpouseDateOfBirth,
                 SpouseName = dto.SpouseName,
+                SpouseGender = dto.SpouseGender,
                 SpouseNationality = dto.SpouseNationality,
                 SpouseOccupation = dto.SpouseOccupation,
                 SpousePassport = dto.SpousePassport,
@@ -174,6 +179,8 @@ public static class CustomerMapper
             VillDescription = dto.VillDescription,
             VilInKhmer = dto.VilInKhmer,
             Description = dto.Description,
+            CreatedBy = dto.CreatedBy,
+            BranchId = dto.BranchId,
             Customer = new Customer
             {
                 CustomerId = dto.Id,
@@ -186,6 +193,7 @@ public static class CustomerMapper
                 Occupation = dto.Occupation,
                 SpouseDateOfBirth = dto.SpouseDateOfBirth,
                 SpouseName = dto.SpouseName,
+                SpouseGender = dto.SpouseGender,
                 SpouseNationality = dto.SpouseNationality,
                 SpouseOccupation = dto.SpouseOccupation,
                 SpousePassport = dto.SpousePassport,

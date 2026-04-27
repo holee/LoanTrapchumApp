@@ -56,7 +56,7 @@ public static class IncomeExpenseMapper
         {
             Id = source.Id,
             Description = source.Description,
-            Types = source.Types.ToString(),
+            Types = source.Types!.ToString(),
         };
     }
 }

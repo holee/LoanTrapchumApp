@@ -12,7 +12,7 @@ public sealed class CreateGuarantorCommandHandler(IGuarantorService _guarantorSe
 
         var model = request.Request.MapGuarantorCreate();
 
-        var result = await _guarantorService.CreateGuarantorAsync(model);
+        var result = await _guarantorService.CreateAsync(model);
 
         return result;
     }

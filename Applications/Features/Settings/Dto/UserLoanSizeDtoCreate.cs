@@ -1,7 +1,8 @@
-namespace Applications.Features.Settings.Dto;
+﻿namespace Applications.Features.Settings.Dto;
 
 public sealed class UserLoanSizeDtoCreate
 {
+    public long Id { get; set; }    
     public string? UserRefId { get; set; }
     public decimal? MinUsdLoanSize { get; set; } = 0.00M;
     public decimal? MaxUsdLoanSize { get; set; } = 0.00M;
@@ -11,4 +12,7 @@ public sealed class UserLoanSizeDtoCreate
     public DateTime? EndDate { get; set; }
     public string? Description { get; set; }
     public bool IsActive { get; set; } = true;
+    public int EditSeq { get; set; } = 0;
+
+   
 }

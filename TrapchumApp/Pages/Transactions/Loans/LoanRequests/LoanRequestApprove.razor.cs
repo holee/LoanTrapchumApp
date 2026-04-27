@@ -164,7 +164,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             {"LoanRequestId",req.LoanRequestId}
         };
 
-            var result = await DialogService.OpenAsync<LoanRequestModal>("Loan Request", param, options: options);
+            //var result = await DialogService.OpenAsync<LoanRequestModal>("Loan Request", param, options: options);
         }
 
 

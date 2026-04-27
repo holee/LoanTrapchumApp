@@ -156,7 +156,7 @@ public partial class EmployeesIndex
 
         RenderFragment childContent = builer =>
         {
-            builer.OpenComponent(0, typeof(CreateEmployee));
+            builer.OpenComponent(0, typeof(EmployeeCreatePage));
 
             builer.AddAttribute(1, "OnClose", EventCallback.Factory.Create(this, () =>
             {
@@ -209,7 +209,7 @@ public partial class EmployeesIndex
 
         RenderFragment childContent = builer =>
         {
-            builer.OpenComponent(0, typeof(EmployeeEdit));
+            builer.OpenComponent(0, typeof(EmployeeEditPage));
 
             builer.AddAttribute(1, "EmployeeId", id);
 

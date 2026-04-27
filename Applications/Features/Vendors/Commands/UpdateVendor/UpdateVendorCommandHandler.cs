@@ -1,17 +1,17 @@
+using Applications.Features.Vendors.Dto.Responses;
 using Applications.Interfaces.Vendors;
-using Applications.Responses.ViewModels.Vendors;
-using Domains.Models.Lists;
 using ErrorOr;
 using Mapster;
 
 namespace Applications.Features.Vendors.Commands.UpdateVendor;
 
 public sealed class UpdateVendorCommandHandler(IVendorService vendorService)
-    : IRequestHandler<UpdateVendorCommand, ErrorOr<VendorVm>>
+    : IRequestHandler<UpdateVendorCommand, ErrorOr<VendorDto>>
 {
-    public async Task<ErrorOr<VendorVm>> Handle(UpdateVendorCommand request, CancellationToken cancellationToken)
+    public async Task<ErrorOr<VendorDto>> Handle(UpdateVendorCommand request, CancellationToken cancellationToken)
     {
         var entity = request.Dto.Adapt<EntityNames>();
+
         return await vendorService.UpdateAsync(entity, cancellationToken);
     }
 }

@@ -56,7 +56,7 @@ public class EntityNamesConfiguration : IBaseEntityTypeConfigurations<Domains.Mo
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(x => x.Vendor)
-            .WithOne(x => x.EntityNames)
+            .WithOne()
             .HasForeignKey<Vendor>(x => x.VendorId)
             .OnDelete(DeleteBehavior.Cascade);
 

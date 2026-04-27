@@ -1,0 +1,49 @@
+﻿<PageTitle>Create New Customer</PageTitle>
+@using Applications.Features.LoanRequests.Interfaces
+<EditForm Model="CustomerModel" @ref="@editForm" >
+    <Blazilla.FluentValidator />
+    <CreateCustomerInfo Model="@CustomerModel" @key="Guid.NewGuid().ToString()" />
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 AlignItems="AlignItems.Center"
+                 Gap="1rem"
+                 class="rz-mt-2"
+                 JustifyContent="JustifyContent.End">
+        <RadzenButton Size="ButtonSize.ExtraSmall"
+                      ButtonStyle="ButtonStyle.Primary"
+                      ButtonType="ButtonType.Button"
+                      Text="Save & New"
+                      Click="@SaveAndNew"
+                      Icon="save" />
+        <RadzenButton Size="ButtonSize.ExtraSmall"
+                      ButtonStyle="ButtonStyle.Success"
+                      ButtonType="ButtonType.Button"
+                      Text="Save & Close"
+                      Click="@SaveAndClose"
+                      Icon="save" />
+        <RadzenButton Click="Close"
+                      Size="ButtonSize.ExtraSmall"
+                      Text="Close"
+                      ButtonStyle="ButtonStyle.Danger"
+                      Icon="cancel" />
+    </RadzenStack>
+</EditForm>
+@code {
+
+    async Task SaveAndClose()
+    {
+        if (editForm?.EditContext?.Validate() == false)
+        {
+            return;
+        }
+        await CreateAsync(true);
+    }
+
+    async Task SaveAndNew()
+    {
+        if (editForm?.EditContext?.Validate() == false)
+        {
+            return;
+        }
+        await CreateAsync(false);
+    }
+}

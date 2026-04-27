@@ -4,6 +4,7 @@
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
 @using Applications.Features.LoanRequests.Interfaces
+@using TrapchumApp.Components.Buttons
 @using TrapchumApp.Services
 
 <RadzenFieldset AllowCollapse="true" Collapsed="false">
@@ -79,8 +80,8 @@
         @* ── Actions ── *@
         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
                      JustifyContent="JustifyContent.End" Gap="0.5rem" class="rz-mt-3">
-            <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="edit"  Text="Edit"  Size="ButtonSize.Small" Click="@ClickEdit" />
-            <RadzenButton ButtonStyle="ButtonStyle.Danger"  Icon="close" Text="Close" Size="ButtonSize.Small" Click="@CloseTab" Variant="Variant.Outlined" />
+            <EditButton OnClick="@ClickEdit" ButtonType="ButtonType.Button" />
+            <CancelButton OnClick="@CloseTab" ButtonType="ButtonType.Button"/>
         </RadzenStack>
 
     </ChildContent>

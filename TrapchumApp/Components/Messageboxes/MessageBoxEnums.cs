@@ -6,10 +6,10 @@ namespace TrapchumApp.Components.Messageboxes;
 public sealed class MessageBoxOptions
 {
     /// <summary>
-    /// Per-button color preset keyed by <see cref="MessageBoxResult"/>.
+    /// Per-button color preset keyed by <see cref="MsgBoxResult"/>.
     /// Buttons not listed keep the default gray style.
     /// </summary>
-    public Dictionary<MessageBoxResult, MessageBoxButtonColor> ButtonColors { get; set; } = [];
+    public Dictionary<MsgBoxResult, MessageBoxButtonColor> ButtonColors { get; set; } = [];
 
     /// <summary>Allow user to drag/move the dialog. Default <c>true</c>.</summary>
     public bool Draggable { get; set; } = true;

@@ -1,84 +1,65 @@
 using Applications.Extensions;
 using Applications.Features.Addresses.Dto;
 using Applications.Features.OtherNames.Dto;
-using Applications.Interfaces.Lists;
-using Applications.Interfaces.Vendors;
-using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Vendors;
-using Applications.Services.Lists;
-using Microsoft.AspNetCore.Components;
-using Radzen;
-using Radzen.Blazor;
-using TrapchumApp.Helpers.Extensions;
+using Applications.Features.Vendors.Commands.ChangeVendorStatus;
+using Applications.Features.Vendors.Commands.DeleteVendor;
+using Applications.Features.Vendors.Dto.Responses;
+using Applications.Features.Vendors.Queries.GetVendorsAsPaging;
+using TrapchumApp.Components.Messageboxes;
 
 namespace TrapchumApp.Pages.Lists.Vendors;
 
-public enum VendorTabType { Create, Edit, Detail }
-
-public record VendorTab(string Id, string Title, string Icon, VendorTabType Type, string? EntityId = null);
-
 public partial class VendorIndexPage
 {
-    readonly IVendorServiceImpl _vendorService;
-    readonly IOtherNameService _otherNameService;
-
-    public VendorIndexPage(IVendorServiceImpl vendorService, IOtherNameService otherNameService)
-    {
-        _vendorService = vendorService;
-        _otherNameService = otherNameService;
-    }
-
     [Parameter] public int selectedIndex { get; set; } = 0;
-
-    string? filter;
-    IEnumerable<ProvinceDto>? ProvinceList = [];
-    EntNameDtoUpdate? model = new();
-    EntNameDto? OtherNames = new();
-    List<VendorVm> Vendors = [];
-    int pageIndex = 0;
-    int pageSize = 15;
-    int counts = 0;
-    string sortField = "VendorId";
-    bool sortDescending = false;
-    bool includeInactive = false;
-    bool isLoading = false;
-
-    List<VendorTab> _dynamicTabs = [];
-
+    private string? filter;
+    private List<VendorDto> Vendors = [];
+    private int pageIndex = 0;
+    private int pageSize = 15;
+    private int counts = 0;
+    private string sortField = "VendorId";
+    private bool sortDescending = false;
+    private bool includeInactive = false;
+    private bool isLoading = false;
+    private List<CustomTab> _dynamicTabs = [];
     protected override async Task OnInitializedAsync()
     {
-        try
-        {
-            await GetVendors();
-        }
-        catch (Exception ex)
-        {
-            await DialogService.Alert(ex.Message, "Exception");
-        }
+
+        await GetVendors();
+
         await base.OnInitializedAsync();
     }
 
     protected async Task SearchChanged(string filter)
     {
         this.filter = filter;
+
         await GetVendors(filter);
     }
 
     async Task PageSizeChanged(int page)
     {
         pageSize = page;
+
         pageIndex = 0;
+
         await GetVendors(filter);
     }
 
     async Task GetVendors(string? filterText = "")
     {
         isLoading = true;
+
         var param = new QueryParam(pageIndex, pageSize, sortField, includeInactive, sortDescending, filterText);
-        var resp = await _vendorService.GetVendorsAsync(param);
+
+        var resp = await mediator.Send(new GetVendorsAsPagingQuery(param));
+
         counts = resp.Count;
+
         Vendors = resp.Items;
+
         isLoading = false;
+
         StateHasChanged();
     }
 
@@ -89,15 +70,16 @@ public partial class VendorIndexPage
         (sortField, sortDescending) = e.PageInfo();
 
         var filterColumn = e.Filters?.FirstOrDefault(pr =>
-                               pr.Property == nameof(VendorVm.AltName) ||
-                               pr.Property == nameof(VendorVm.VendorId) ||
-                               pr.Property == nameof(VendorVm.FirstName) ||
-                               pr.Property == nameof(VendorVm.Salutation) ||
-                               pr.Property == nameof(VendorVm.LastName) ||
-                               pr.Property == nameof(VendorVm.Phone) ||
-                               pr.Property == nameof(VendorVm.EmailAddress))?.FilterValue.ToString() ?? string.Empty;
+                               pr.Property == nameof(VendorDto.AltName) ||
+                               pr.Property == nameof(VendorDto.VendorId) ||
+                               pr.Property == nameof(VendorDto.FirstName) ||
+                               pr.Property == nameof(VendorDto.Salutation) ||
+                               pr.Property == nameof(VendorDto.LastName) ||
+                               pr.Property == nameof(VendorDto.Phone) ||
+                               pr.Property == nameof(VendorDto.EmailAddress))?.FilterValue!.ToString() ?? string.Empty;
 
         filter = filterColumn ?? string.Empty;
+
         await GetVendors(filter);
     }
 
@@ -111,125 +93,156 @@ public partial class VendorIndexPage
 
     void AddNewTab()
     {
-        var tab = new VendorTab(
-            Id: Guid.NewGuid().ToString("N"),
-            Title: "New Vendor",
-            Icon: "person_add",
-            Type: VendorTabType.Create);
+        var tabId = Guid.NewGuid().ToString("N");
+
+        RenderFragment content = builder =>
+        {
+            builder.OpenComponent(0, typeof(VendorCreatePage));
+            builder.AddAttribute(1, "Closed", EventCallback.Factory.Create(this, _ => CloseTab(tabId)));
+            builder.SetKey(tabId);
+            builder.CloseComponent();
+        };
+
+        var tab = new CustomTab(tabId, "New Vendor", TabActions.Create, content);
 
         _dynamicTabs.Add(tab);
+
         selectedIndex = _dynamicTabs.Count;
+
         StateHasChanged();
     }
 
     void OpenDetailTab(string? id, string? name = null)
     {
         ContextMenuService.Close();
+
+        string newKey = $"details_{id}";
+
         if (!id.IsNotNullOrEmpty()) return;
 
-        var existing = _dynamicTabs.FindIndex(t => t.EntityId == id && t.Type == VendorTabType.Detail);
+        var existing = _dynamicTabs.FindIndex(t => t.Key == newKey && t.TabAction == TabActions.Details);
+
         if (existing >= 0)
         {
             selectedIndex = existing + 1;
+
             StateHasChanged();
+
             return;
         }
 
-        var tab = new VendorTab(
-            Id: Guid.NewGuid().ToString("N"),
-            Title: name ?? "Details",
-            Icon: "info",
-            Type: VendorTabType.Detail,
-            EntityId: id);
+        RenderFragment content = builder =>
+        {
+            builder.OpenComponent(0, typeof(VendorDetailPage));
+            builder.AddAttribute(1, "Id", id);
+            builder.AddAttribute(2, "Closed", EventCallback.Factory.Create(this, _ => CloseTab(newKey)));
+            builder.AddAttribute(3, "OnEdit", EventCallback.Factory.Create<string>(this, editId => OpenEditTab(editId)));
+            builder.SetKey(newKey);
+            builder.CloseComponent();
+        };
+
+        var tab = new CustomTab(newKey, name ?? "Details", TabActions.Details, content);
 
         _dynamicTabs.Add(tab);
+
         selectedIndex = _dynamicTabs.Count;
+
         StateHasChanged();
     }
 
     void OpenEditTab(string? id, string? name = null)
     {
         ContextMenuService.Close();
+
         if (!id.IsNotNullOrEmpty()) return;
 
-        var existing = _dynamicTabs.FindIndex(t => t.EntityId == id && t.Type == VendorTabType.Edit);
+        string newKey = $"edit_{id}";
+
+        var existing = _dynamicTabs.FindIndex(t => t.Key == newKey && t.TabAction == TabActions.Edit);
+
         if (existing >= 0)
         {
             selectedIndex = existing + 1;
+
             StateHasChanged();
+
             return;
         }
 
-        var tab = new VendorTab(
-            Id: Guid.NewGuid().ToString("N"),
-            Title: $"Edit {name ?? ""}".Trim(),
-            Icon: "edit",
-            Type: VendorTabType.Edit,
-            EntityId: id);
+        RenderFragment content = builder =>
+        {
+            builder.OpenComponent(0, typeof(VendorEditPage));
+            builder.AddAttribute(1, "Id", id);
+            builder.AddAttribute(2, "Closed", EventCallback.Factory.Create(this, async () => CloseTab(newKey)));
+            builder.SetKey(newKey);
+            builder.CloseComponent();
+        };
+
+        var tab = new CustomTab(newKey, $"Edit {name ?? ""}".Trim(), TabActions.Edit, content);
 
         _dynamicTabs.Add(tab);
+
         selectedIndex = _dynamicTabs.Count;
+
         StateHasChanged();
     }
 
-    void CloseTab(string tabId)
+    void CloseTab(string? tabId)
     {
-        var idx = _dynamicTabs.FindIndex(t => t.Id == tabId);
-        if (idx < 0) return;
+        var tab = _dynamicTabs.FirstOrDefault(t => t.Key == tabId);
 
-        _dynamicTabs.RemoveAt(idx);
-        selectedIndex = 0;
+        if (tab is null) return;
+
+        var idx = _dynamicTabs.IndexOf(tab);
+
+        _dynamicTabs.Remove(tab);
+
+        selectedIndex = Math.Max(0, idx);
+
         StateHasChanged();
     }
 
-    async Task OnDynamicEditClose(string tabId, bool isEdited)
-    {
-        CloseTab(tabId);
-        if (isEdited)
-        {
-            await GetVendors(filter);
-        }
-    }
 
     // ── Delete & Status ──
 
     async Task OnDelete(string? id)
     {
         ContextMenuService.Close();
-        var confirm = (bool)await DialogService.Confirm(
-            "Vendor deleted will not be able to recover, would you like to continue?",
-            "Delete Vendor",
-            new ConfirmOptions { OkButtonText = "Yes", CancelButtonText = "No" });
 
-        if (!confirm) return;
+        var dia = await MsgBox.ShowAsync("Vendor deleted will not be able to recover, would you like to continue?", "Confirm", MsgBoxButtons.YesNo, MessageBoxIcon.Question);
 
-        var result = await _otherNameService!.DeleteAsync(id);
+        if (dia == MsgBoxResult.No) return;
+
+        var command = new DeleteVendorCommand(id);
+
+        var result = await mediator.Send(command); //_otherNameService!.DeleteAsync(id);
 
         if (result.IsSuccess())
         {
             NotificationService.Notify(NotificationSeverity.Success, "Delete Vendor", "Vendor was deleted successfully!");
+
             await GetVendors(filter);
         }
     }
 
     protected async Task DeactiveOrActive(bool arg, string vendorId)
     {
-        var confirm = await DialogService.Confirm(
-            $"Do you want to change vendor ID #{vendorId} status?", "Confirm",
-            options: new ConfirmOptions { CancelButtonText = "Cancel", OkButtonText = "Yes" });
 
-        if (confirm == false) return;
+        var dia = await MsgBox.ShowAsync($"Do you want to change vendor ID #{vendorId} status?", "Confirm", MsgBoxButtons.YesNo, MessageBoxIcon.Question);
 
-        var rsp = await _vendorService.ChangeVendorStatus(vendorId, arg);
+        if (dia == MsgBoxResult.No) return;
 
-        if (rsp.IsSuccess)
+        var rsp = await mediator.Send(new ChangeVendorStatusCommand(vendorId, arg));
+
+        if (rsp.IsSuccess())
         {
-            NotificationService.Notify(NotificationSeverity.Success, rsp.Data);
+            _toastService.ShowSuccess("Vendor status changed successfully!");
+
             await GetVendors(filter);
         }
         else
         {
-            NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
+            _toastService.ShowError(rsp.GetMessage());
         }
     }
 }

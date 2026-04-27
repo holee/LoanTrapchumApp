@@ -9,7 +9,7 @@ using Applications.Responses.ViewModels.Loans.Requests;
 using Domains.Enumerations;
 using TrapchumApp.Helpers.Extensions;
 using TrapchumApp.Pages.Lists.Collaterals;
-using TrapchumApp.Pages.Lists.OtherNames;
+using TrapchumApp.Pages.Lists.OtherNames.Guarantors;
 using TrapchumApp.Shared;
 
 namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests

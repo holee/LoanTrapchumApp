@@ -1,8 +1,9 @@
 using Applications.Features.Guarantor.Dtos;
+using Applications.Features.Guarantor.Queries.GetGuarantorsAsPaging;
+using Applications.Features.Vendors.Dto.Responses;
 using Applications.Interfaces.Lists;
-using Applications.Responses.ViewModels.Vendors;
 using Microsoft.AspNetCore.Components;
-using TrapchumApp.Pages.Lists.OtherNames;
+using TrapchumApp.Pages.Lists.OtherNames.Guarantors;
 
 namespace TrapchumApp.Pages.Lists.Customers
 {
@@ -24,19 +25,20 @@ namespace TrapchumApp.Pages.Lists.Customers
 
         protected override async Task OnInitializedAsync()
         {
-            var gResponse = await _gService.GetGuarantorsAsync(string.Empty); //_customerService.GetGuarantorsAsync();
-
-            if (!gResponse.IsError)
-            {
-                Guarantors = gResponse.Value;
-            }
-            else
-            {
-                Guarantors = [];
-            }
+            await GetGuarantors();
 
             await base.OnInitializedAsync();
         }
+
+        private async Task GetGuarantors()
+        {
+            var command = new GetGuarantorsAsPagingQuery(null, new QueryParam(0, 0));
+
+            var rsp = await mediator.Send(command);  //_gService.GetGuarantorsAsync(string.Empty); //_customerService.GetGuarantorsAsync();
+
+            Guarantors = rsp.Items;
+        }
+
         Task<IEnumerable<VGuarantor>> SearchGuarantors(string? filter = null)
         {
             var guarantors = Guarantors.Where(x => x.GuarantorName!.ToLower().Contains(filter!.ToLower()));

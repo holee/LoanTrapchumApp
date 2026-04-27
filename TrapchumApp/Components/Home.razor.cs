@@ -259,7 +259,7 @@ namespace TrapchumApp.Components
             var r = await MsgBox.ShowAsync(
                 "This action will reset all settings to default.",
                 "Reset Settings",
-                MessageBoxButtons.OKCancel,
+                MsgBoxButtons.OKCancel,
                 MessageBoxIcon.Warning);
             _msgBoxLastResult = r.ToString();
         }
@@ -269,7 +269,7 @@ namespace TrapchumApp.Components
             var r = await MsgBox.ShowAsync(
                 "The file could not be uploaded. Would you like to retry?",
                 "Upload Failed",
-                MessageBoxButtons.RetryCancel,
+                MsgBoxButtons.RetryCancel,
                 MessageBoxIcon.Error);
             _msgBoxLastResult = r.ToString();
         }
@@ -279,7 +279,7 @@ namespace TrapchumApp.Components
             var r = await MsgBox.ShowAsync(
                 "A critical error occurred during data processing.",
                 "Critical Error",
-                MessageBoxButtons.AbortRetryIgnore,
+                MsgBoxButtons.AbortRetryIgnore,
                 MessageBoxIcon.Error
                 );
             _msgBoxLastResult = r.ToString();

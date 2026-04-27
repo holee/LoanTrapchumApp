@@ -1,14 +1,11 @@
 using Applications.Bases;
 using Applications.Extensions.DateTimes;
 using Applications.Features.Customers.Commands.DeleteCustomer;
-using Applications.Features.Customers.Dto;
 using Applications.Features.Customers.Queries.GetCustomerAsPaging;
 using Applications.Features.Customers.Response;
 using Applications.Features.LoanRequests.Command.IsCustomerBusy;
 using Applications.Responses.Lists.Customers;
-using Applications.Responses.Paginations;
 using Domains.Models.Identity;
-using Radzen.Blazor;
 using TrapchumApp.Helpers.Enums;
 using TrapchumApp.Helpers.Options;
 using TrapchumApp.Pages.Lists.Collaterals;
@@ -195,19 +192,11 @@ namespace TrapchumApp.Pages.Lists.Customers
 
             RenderFragment childContent = builer =>
             {
-                builer.OpenComponent(0, typeof(CustomerDetails));
+                builer.OpenComponent(0, typeof(CustomerDetailsPage));
                 builer.AddAttribute(1, "BranchId", BranchId);
                 builer.AddAttribute(2, "CustomerId", id);
-                builer.AddAttribute(3, "Closed", EventCallback.Factory.Create(this, (int x) =>
-                {
-                    CloseTab(id);
-                }));
-
-                builer.AddAttribute(4, "EditClick", EventCallback.Factory.Create(this, async (string x) =>
-                {
-                    AddEditTab(id);
-                }));
-
+                builer.AddAttribute(3, "Closed", EventCallback.Factory.Create(this, () => CloseTab(id)));
+                builer.AddAttribute(4, "EditClick", EventCallback.Factory.Create(this, async (string x) => AddEditTab(id)));
                 builer.CloseComponent();
 
             };
@@ -243,11 +232,11 @@ namespace TrapchumApp.Pages.Lists.Customers
 
             RenderFragment childContent = builer =>
             {
-                builer.OpenComponent(0, typeof(CustomerUpdateTab));
+                builer.OpenComponent(0, typeof(CustomerUpdatePage));
 
                 builer.AddAttribute(1, "CustomerId", id);
 
-                builer.AddAttribute(2, "Closed", EventCallback.Factory.Create(this, (int x) =>
+                builer.AddAttribute(2, "Closed", EventCallback.Factory.Create(this, () =>
                 {
                     CloseTab(editTabId);
                 }));
@@ -296,9 +285,9 @@ namespace TrapchumApp.Pages.Lists.Customers
 
             RenderFragment childContent = builer =>
             {
-                builer.OpenComponent(0, typeof(CustomerNewCreate));
+                builer.OpenComponent(0, typeof(CustomerCreatePage));
 
-                builer.AddAttribute(1, "Closed", EventCallback.Factory.Create(this, (int x) =>
+                builer.AddAttribute(1, "Closed", EventCallback.Factory.Create(this, () =>
                  {
                      CloseTab(newTabId);
                  }));
@@ -309,6 +298,8 @@ namespace TrapchumApp.Pages.Lists.Customers
                     await _gridCustomer.Reload();
 
                 }));
+
+                builer.AddAttribute(3, "BranchId", BranchId);
 
                 builer.SetKey(newTabId);
 
@@ -395,6 +386,8 @@ namespace TrapchumApp.Pages.Lists.Customers
         {
             try
             {
+                Tracker.Show();
+
                 isLoading = true;
 
                 var param = new QueryParam(pageIndex, pageSize, sortField, includeInactive, sortDescending, filter);
@@ -409,11 +402,15 @@ namespace TrapchumApp.Pages.Lists.Customers
 
                 isLoading = false;
 
+                Tracker.Hide();
+
                 StateHasChanged();
             }
             catch
             {
                 isLoading = false;
+
+                Tracker.Hide();
             }
         }
 
@@ -446,11 +443,11 @@ namespace TrapchumApp.Pages.Lists.Customers
         {
             pageIndex = args.Skip ?? 0;
 
-            if (args.Sorts.Any())
+            if (args.Sorts!.Any())
             {
-                sortField = args.Sorts.First().Property;
+                sortField = args.Sorts!.First().Property!;
 
-                sortDescending = args.Sorts.First().SortOrder == SortOrder.Descending;
+                sortDescending = args.Sorts!.First().SortOrder == SortOrder.Descending;
             }
 
             var filterColumn = args.Filters?.FirstOrDefault(f => f.Property == nameof(VCustomerDetails.FullName) ||

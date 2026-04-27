@@ -12,7 +12,8 @@ public sealed class Customer
     public int? NoOfChildren { get; set; }
     public decimal? Income { get; set; }
     public decimal? Expenditure { get; set; }
-    public string? SpouseName { get; set; }
+    public string? SpouseName { get; set; } = string.Empty;
+    public string? SpouseGender { get; set; }=string.Empty;
     public DateTime? SpouseDateOfBirth { get; set; }
     public string? SpouseNationality { get; set; }
     public string? SpousePassport { get; set; }

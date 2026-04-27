@@ -1,7 +1,7 @@
 ﻿using Applications.Features.OtherNames.Dto;
+using Applications.Features.Vendors.Dto.Responses;
 using Applications.Responses;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Vendors;
 using Domains.Models.Lists;
 
 namespace Applications.Services.Lists
@@ -12,9 +12,9 @@ namespace Applications.Services.Lists
         Task<Result<string>> CreateAsync(EntityVendorCreate vendor);
         Task<Result<string>> UpdateAsync(EntityVendorCreate vendor);
         Task<Result<string>> DeleteAsync(string? vendorId);
-        Task<Result<VendorVm>> GetVendorByIdAsync(string? vendorId);
+        Task<Result<VendorDto>> GetVendorByIdAsync(string? vendorId);
         Task<Result<EntityNames>> GetVendorByIdAsync(string? vendorId, bool include);
-        Task<Pager<VendorVm>> GetVendorsAsync(QueryParam q);
+        Task<Pager<VendorDto>> GetVendorsAsync(QueryParam q);
         Task<Result<EntityVendorCreate>> GetEditVendorAsync(string? vendorId);
     }
 }

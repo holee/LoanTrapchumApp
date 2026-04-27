@@ -1,3 +1,4 @@
+@using Applications.Features.AdditionalInformations.Dto
 @using Applications.Features.Addresses
 @using Applications.Features.Branches
 @using Applications.Features.Currencies
@@ -22,16 +23,7 @@
                         <RadzenLabel>Name</RadzenLabel>
                     </RadzenColumn>
                     <RadzenColumn Size="6">
-                        <RadzenDropDown Chips="true"
-                                        AllowFiltering="true"
-                                        Name="DropDownSalutions"
-                                        Style="width: 100%;"
-                                        TValue="string"
-                                        FilterOperator="StringFilterOperator.Contains"
-                                        Placeholder="Salutation"
-                                        @bind-Value="model.Salutation"
-                                        Data="Salutations">
-                        </RadzenDropDown>
+                        <BlaSalutation @bind-Value="model.Salutation" />
                     </RadzenColumn>
                 </RadzenRow>
             </RadzenColumn>
@@ -97,15 +89,7 @@
                 <RadzenRow AlignItems="AlignItems.Center">
                     <RadzenColumn Size="3">Occupation</RadzenColumn>
                     <RadzenColumn Size="9">
-                        <RadzenDropDown class="rz-w-100"
-                                        Data="Occupations"
-                                        AllowFiltering="true"
-                                        FilterOperator="StringFilterOperator.Contains"
-                                        TextProperty="OccupationTitle"
-                                        FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-                                        ValueProperty="OccupationTitle"
-                                        @bind-Value="model.Occupation">
-                        </RadzenDropDown>
+                        <BlaOccupation @bind-Value="model.Occupation" />
                     </RadzenColumn>
                 </RadzenRow>
             </RadzenColumn>
@@ -174,7 +158,7 @@
                     </RadzenColumn>
                 </RadzenRow>
             </RadzenColumn>
-        </RadzenRow> 
+        </RadzenRow>
         <RadzenRow AlignItems="AlignItems.Center" class="rz-mt-2">
             <RadzenColumn Size="6" SizeMD="6" SizeSM="12">
                 <RadzenRow AlignItems="AlignItems.Center">
@@ -227,3 +211,4 @@
         </RadzenRow>
     </ChildContent>
 </RadzenFieldset>
+<AddressCreate model="model" />

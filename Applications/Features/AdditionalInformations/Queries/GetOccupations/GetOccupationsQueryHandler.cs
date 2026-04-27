@@ -12,8 +12,9 @@ public sealed record GetOccupationsQueryHandler : IRequestHandler<GetOccupations
     }
     public async Task<Pager<OccupationDto>> Handle(GetOccupationsQuery request, CancellationToken cancellationToken)
     {
+        var param = request.Param ?? new QueryParam();
 
-        var rsp = await _occupationService.GetOccupationsAsync(request.Id, request.Param, request.Type, cancellationToken);
+        var rsp = await _occupationService.GetOccupationsAsync(request.Id, param, request.Type, cancellationToken);
 
         return rsp;
     }

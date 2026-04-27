@@ -5,9 +5,10 @@
 @using Applications.Features.Customers.Services
 @using Applications.Features.Employees
 @using Applications.Features.LoanRequests.Interfaces
+@using TrapchumApp.Components.Buttons
 @using TrapchumApp.Components.Indicatros
 @using TrapchumApp.Services
-<PageTitle>Vendor</PageTitle>
+<PageTitle>Edit Vendor</PageTitle>
 @attribute [StreamRendering]
 @if (_isLoading)
 {
@@ -16,25 +17,16 @@
 else
 {
     <EditForm Model="model" OnValidSubmit="HandleFormSubmit">
-        <FluentValidationValidator DisableAssemblyScanning="true"></FluentValidationValidator>
+        <Blazilla.FluentValidator />
         <input type="hidden" @bind="model.Id" />
         <CreateComp model="model" @key="@(Guid.NewGuid().ToString("N"))" />
-        <AddressCreate model="model" @key="@(Guid.NewGuid().ToString("N"))" />
         <RadzenStack Orientation="Orientation.Horizontal"
                      AlignItems="AlignItems.Center"
                      Gap="1rem"
                      class="rz-mt-2"
                      JustifyContent="JustifyContent.End">
-            <RadzenButton Size="ButtonSize.ExtraSmall"
-                          ButtonStyle="ButtonStyle.Success"
-                          ButtonType="ButtonType.Submit"
-                          Text="Save"
-                          Icon="save" />
-            <RadzenButton Click="Close"
-                          Size="ButtonSize.ExtraSmall"
-                          Text="Close"
-                          ButtonStyle="ButtonStyle.Danger"
-                          Icon="cancel" />
+            <SaveButton />
+            <CancelButton OnClick="@Close" />
         </RadzenStack>
     </EditForm>
 }

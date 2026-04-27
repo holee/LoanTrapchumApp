@@ -1,5 +1,6 @@
 using Applications.Features.AdditionalInformations.Dto;
 using Applications.Features.AdditionalInformations.Queries.GetOccupations;
+using Applications.Features.AdditionalInformations.Queries.GetSalutaions;
 using Applications.Features.OtherNames.Dto;
 using Applications.Responses.Paginations;
 using Applications.Services.Lists;
@@ -8,7 +9,7 @@ using Domains.Models.Lists;
 
 namespace TrapchumApp.Pages.Lists.Vendors
 {
-    public partial class CreateComp(INationalityServiceImpl nationalityService, ISalutationServiceImpl salutationService)
+    public partial class CreateComp(INationalityServiceImpl nationalityService)
     {
         [Parameter] public EntityVendorCreate model { get; set; } = new();
 
@@ -21,11 +22,12 @@ namespace TrapchumApp.Pages.Lists.Vendors
 
         IEnumerable<Country> Countries = [];
 
-        IEnumerable<string> Salutations = [];
+        IEnumerable<SalutationDto> _salutations = [];
 
         protected override async Task OnInitializedAsync()
         {
             await GetAdditionalInformation();
+
             await base.OnInitializedAsync();
         }
 
@@ -45,14 +47,11 @@ namespace TrapchumApp.Pages.Lists.Vendors
                 Countries = rsp.Value;
             }
 
-            //Cities = await _addressService.GetCities();
+            var rsp2 = await mediator.Send(new GetSalutationsQuery(null, new QueryParam(0, 0)));
 
-            //var rsp1 = await salutationService.GetSalutions();
+            _salutations = rsp2.Items;
 
-            //if (rsp1.IsSuccess)
-            //{
-            //    Salutations = rsp1.Data!.Select(x => x.Title!).ToList();
-            //}
+
         }
     }
 }

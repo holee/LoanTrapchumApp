@@ -2,4 +2,4 @@
 
 namespace Applications.Features.AdditionalInformations.Queries.GetNationalities;
 
-public record GetNationalitiesQuery(int? Id, QueryParam Param) : IRequest<Pager<NationalityDto>>;
+public record GetNationalitiesQuery(int? Id, QueryParam? Param) : IRequest<Pager<NationalityDto>>;

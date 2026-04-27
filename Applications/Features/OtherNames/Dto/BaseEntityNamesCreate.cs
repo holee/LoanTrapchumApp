@@ -41,5 +41,6 @@ public abstract class BaseEntityNamesCreate
     public string? Description { get; set; }
     public bool Converted { get; set; } = false;
     public string? CreatedBy { get; set; }=string.Empty;
+    public int? BranchId { get; set; } = 0;
 
 }

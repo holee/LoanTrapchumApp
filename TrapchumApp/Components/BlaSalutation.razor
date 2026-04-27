@@ -1,0 +1,81 @@
+﻿@using Applications.Features.AdditionalInformations.Dto
+@using Applications.Features.AdditionalInformations.Queries.GetSalutaions
+@using System.Linq.Expressions
+<RadzenDropDown TValue="string"
+                Data="@_filteredSalutations"
+                TextProperty="@nameof(SalutationDto.Title)"
+                ValueProperty="@nameof(SalutationDto.Title)"
+                FilterAsYouType="true"
+                AllowFiltering="true"
+                class="rz-w-100"
+                SearchTextChanged="SalutaionSearchChanged"
+                Placeholder="Mr/Ms..."
+                ValueExpression="@ValueExpression"
+                ValueChanged="@ValueChanged"
+                Value="@Value" />
+
+@code {
+
+    [Parameter] public string? Value { get; set; } = string.Empty;
+    [Parameter] public EventCallback<string?> ValueChanged { get; set; }
+    [Parameter] public Expression<Func<string?>>? ValueExpression { get; set; }
+    private IEnumerable<SalutationDto> _salutations = [];
+    private IEnumerable<SalutationDto> _filteredSalutations = [];
+    protected override async Task OnInitializedAsync()
+    {
+
+        await GetSalutations();
+
+        await base.OnInitializedAsync();
+    }
+
+
+    private async Task GetSalutations()
+    {
+        var command = new GetSalutationsQuery(null, new QueryParam(0, 0, string.Empty));
+
+        var rsp = await mediator.Send(command);
+
+        _salutations = rsp.Items;
+
+        _filteredSalutations = rsp.Items;
+    }
+    void SalutaionSearchChanged(string? args)
+    {
+
+        if (string.IsNullOrEmpty(args))
+        {
+            _filteredSalutations = _salutations;
+
+            StateHasChanged();
+
+            return;
+        }
+
+        var matches = _salutations
+                        .Where(x => x.Title!.Contains(args, StringComparison.OrdinalIgnoreCase))
+                        .ToList();
+
+        if (matches.Count == 0)
+        {
+            _filteredSalutations = new List<SalutationDto>
+            {
+                new SalutationDto
+                {
+                      Id = -1,
+                      Title = args,
+                }
+            };
+
+            Value = args;
+        }
+        else
+        {
+            _filteredSalutations = matches;
+        }
+
+        StateHasChanged();
+    }
+
+}
+

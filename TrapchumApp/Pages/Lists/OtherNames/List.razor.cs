@@ -1,12 +1,15 @@
 using Applications.Extensions;
 using Applications.Features.Guarantor.Dtos;
+using Applications.Features.Guarantor.Queries.GetGuarantorsAsPaging;
 using Applications.Responses.Paginations;
 using Applications.Services.Lists;
 using ErrorOr;
 using Radzen;
 using Radzen.Blazor;
+using TrapchumApp.Pages.Lists.OtherNames.Guarantors;
 
 namespace TrapchumApp.Pages.Lists.OtherNames;
+
 public partial class List
 {
     private readonly IGuarantorServiceImpl _gService;
@@ -147,13 +150,15 @@ public partial class List
     async Task GetGuarantors()
     {
         isLoading = true;
-        
+
         var param = new QueryParam(pageIndex, pageSize, sortColumn, sortDescending, includeInactive, filterText);
-        
-        var guarantorResp = await _gService.GetGuarantorsAsync(param);
+
+        var command = new GetGuarantorsAsPagingQuery(null, param);
+
+        var guarantorResp = await mediator.Send(command);
 
         guarantors = guarantorResp.Items;
-       
+
         counts = guarantorResp.Count;
 
         isLoading = false;

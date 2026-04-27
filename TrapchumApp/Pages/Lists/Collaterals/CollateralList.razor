@@ -1,4 +1,5 @@
 ﻿@using Applications.Features.Collaterals.Dtos
+@using TrapchumApp.Components.Buttons
 @attribute [Authorize]
 <PageTitle>Collaterals</PageTitle>
 <RadzenProgressBar Value="100" Visible="IsProgress" ProgressBarStyle="ProgressBarStyle.Info" Style="height:1px" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
@@ -7,7 +8,7 @@
         <RadzenTabsItem Text="Collaterals" Icon="reorder">
             <GridToolbar SearchChanged="OnSearch">
                 <LeftChildren>
-                    <AddButton OnClick="@CreateCollateralTab" Title="Add Collateral" Icon="@IconNames.Add" />
+                    <AddButton OnClick="@CreateCollateralTab" Text="Add Collateral" Icon="@IconNames.Add" />
                 </LeftChildren>
             </GridToolbar>
             <RadzenDataGrid Responsive

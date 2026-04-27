@@ -5,7 +5,7 @@ public sealed class QueryParam
     public QueryParam()
     {
         Page = 0;
-        PageSize = 15;
+        PageSize = 0;
         SortColumn = string.Empty;
         SortDescending = false;
         IncludeInActive = false;

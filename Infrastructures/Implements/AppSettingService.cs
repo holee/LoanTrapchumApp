@@ -97,7 +97,7 @@ public sealed class AppSettingService(
                 Code = request.Code,
                 Value = request.Value,
                 Description = request.Description,
-                IsActive = request.IsActive
+                IsActive = request.IsActive!.Value
             };
 
             cxt.AppSettings.Add(entity);

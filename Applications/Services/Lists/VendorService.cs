@@ -1,11 +1,8 @@
 ﻿using Applications.Commons.Mappers;
 using Applications.Features.OtherNames.Dto;
+using Applications.Features.Vendors.Dto.Responses;
 using Applications.Interfaces.Vendors;
-using Applications.Responses;
-using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Vendors;
 using Domains.Models.Bases;
-using Domains.Models.Lists;
 
 namespace Applications.Services.Lists;
 
@@ -54,19 +51,19 @@ public sealed class VendorService(IVendorService vService) : IVendorServiceImpl
         if (result.IsError)
             return Result.Failure<EntityVendorCreate>(ErrorResponse.NotFound(result.FirstError.Description));
 
-        var model = result.Value.ToVendor();
+        var model = result.Value.ToEntityVendorCreate();
         return Result.Success(model);
     }
 
-    public async Task<Result<VendorVm>> GetVendorByIdAsync(string? vendorId)
+    public async Task<Result<VendorDto>> GetVendorByIdAsync(string? vendorId)
     {
         var result = await vService.GetVendorByIdAsync(vendorId);
         return result.IsError
-            ? Result.Failure<VendorVm>(ErrorResponse.NotFound(result.FirstError.Description))
+            ? Result.Failure<VendorDto>(ErrorResponse.NotFound(result.FirstError.Description))
             : Result.Success(result.Value);
     }
 
-    public async Task<Pager<VendorVm>> GetVendorsAsync(QueryParam q)
+    public async Task<Pager<VendorDto>> GetVendorsAsync(QueryParam q)
     {
         return await vService.GetVendorsAsync(q);
     }

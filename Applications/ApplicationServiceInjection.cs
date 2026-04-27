@@ -1,75 +1,13 @@
-﻿using Applications.Features.AdditionalInformations.Command.CreateOccupation;
-using Applications.Features.AdditionalInformations.Command.CreateSalutation;
-using Applications.Features.AdditionalInformations.Command.UpdateOccupation;
-using Applications.Features.AdditionalInformations.Dto;
-using Applications.Features.AdditionalInformations.Queries.GetNationalities;
-using Applications.Features.AdditionalInformations.Queries.GetOccupations;
-using Applications.Features.AdditionalInformations.Queries.GetSalutaions;
-using Applications.Features.Customers.Commands.CreateCustomer;
-using Applications.Features.Customers.Commands.DeactivateCustomer;
-using Applications.Features.Customers.Commands.DeleteCustomer;
-using Applications.Features.Customers.Commands.EditCustomer;
-using Applications.Features.Customers.Dto;
-using Applications.Features.Customers.Queries.GetActiveLoanCustomer;
-using Applications.Features.Customers.Queries.GetCustomerById;
-using Applications.Features.Customers.Queries.GetCustomerCollateralLine;
-using Applications.Features.Customers.Queries.GetCustomerDetailById;
-using Applications.Features.Customers.Queries.GetLoanByCustomerId;
-using Applications.Features.Customers.Queries.GetRequestByCustomerId;
-using Applications.Features.Customers.Queries.GetUpdateCustomerById;
-using Applications.Features.Documents.Command.AddDocument;
-using Applications.Features.Documents.Command.AddDocuments;
-using Applications.Features.Documents.Command.DeleteDocument;
-using Applications.Features.Documents.Dto;
-using Applications.Features.Documents.Queries.GetDocumentById;
-using Applications.Features.Documents.Queries.GetDocuments;
-using Applications.Features.Guarantor.Queries.GetGuarantorById;
-using Applications.Features.Guarantor.Queries.GetGuarantorDetailById;
-using Applications.Features.Guarantor.Queries.GetGuarantorsAsPaging;
-using Applications.Features.Holidays.Command.ActivateOrDeactivate;
-using Applications.Features.Holidays.Command.CreateHoliday;
-using Applications.Features.Holidays.Queries.GetActiveHolidays;
-using Applications.Features.Holidays.Queries.GetHolidayByDate;
-using Applications.Features.Holidays.Queries.GetHolidayById;
-using Applications.Features.Identity.Command.CreateNewUser;
-using Applications.Features.Incomes.Command.DeleteIncomeExpense;
-using Applications.Features.LoanPayments.Command.PayOff;
-using Applications.Features.LoanPayments.Dtos;
-using Applications.Features.LoanPayments.Queries.GetPaidSchedule;
-using Applications.Features.LoanPurposes;
-using Applications.Features.LoanPurposes.Commands.CreateLoanPurpose;
-using Applications.Features.LoanPurposes.Commands.DeleteLoanPurpose;
-using Applications.Features.LoanPurposes.Commands.UpdateLoanPurpose;
-using Applications.Features.LoanPurposes.Queries.GetLoanPurposeById;
-using Applications.Features.LoanPurposes.Queries.GetLoanPurposes;
-using Applications.Features.LoanRequests.Command.SaveLoanRequests;
-using Applications.Features.Loans.Command.SaveLoanDisbursemenent;
-using Applications.Features.Loans.Dtos;
-using Applications.Features.Loans.Dtos.Responses;
-using Applications.Features.Loans.Queries.GetLoanCollaterals;
-using Applications.Features.Periods.Commands.CreatePeriod;
-using Applications.Features.Periods.Commands.DeletePeriod;
-using Applications.Features.Periods.Commands.UpdatePeriod;
-using Applications.Features.Periods.Dto;
-using Applications.Features.Periods.Queries.GetPeriods;
-using Applications.Features.Schedules.Dto;
-using Applications.Features.Schedules.Queries.GetDueScheduleByLoanId;
-using Applications.Features.Schedules.Queries.GetScheduleById;
-using Applications.Features.Schedules.Queries.GetScheduleDetailById;
-using Applications.Features.Settings.Commands.AppSettings.CreateAppSetting;
-using Applications.Features.Settings.Commands.AppSettings.DeleteAppSetting;
-using Applications.Features.Settings.Commands.AppSettings.UpdateAppSetting;
-using Applications.Features.Settings.Commands.UserLoanSizes.CreateUserLoanSize;
-using Applications.Features.Settings.Commands.UserLoanSizes.DeleteUserLoanSize;
-using Applications.Features.Settings.Commands.UserLoanSizes.ToggleUserLoanSize;
-using Applications.Features.Settings.Commands.UserLoanSizes.UpdateUserLoanSize;
-using Applications.Features.Settings.Dto;
-using Applications.Features.Settings.Queries.AppSettings.GetAppSettingById;
-using Applications.Features.Settings.Queries.AppSettings.GetAppSettings;
-using Applications.Features.Settings.Queries.CollateralSubTypes.GetCollateralSubTypes;
-using Applications.Features.Settings.Queries.UserLoanSizes.GetUserLoanSizeById;
-using Applications.Features.Settings.Queries.UserLoanSizes.GetUserLoanSizes;
-using Applications.Responses.ViewModels.Settings;
+﻿
+using Applications.Features.OtherNames.Dto;
+using Applications.Features.Vendors.Commands.ChangeVendorStatus;
+using Applications.Features.Vendors.Commands.CreateVendor;
+using Applications.Features.Vendors.Commands.DeleteVendor;
+using Applications.Features.Vendors.Commands.UpdateVendor;
+using Applications.Features.Vendors.Dto.Responses;
+using Applications.Features.Vendors.Queries.GetUpdateVendorById;
+using Applications.Features.Vendors.Queries.GetVendorById;
+using Applications.Features.Vendors.Queries.GetVendorsAsPaging;
 using ErrorOr;
 namespace Applications;
 
@@ -80,10 +18,22 @@ public static class ApplicationServiceInjection
         services.AddValidatorsFromAssemblyContaining<GetCollateralLineDetailQueryValidator>();
         services.AddScoped<IMediator, SimpleMediator>();
 
+        //Vendor Services
+        services.AddScoped<IRequestHandler<GetUpdateVendorByIdQuery, ErrorOr<EntityVendorCreate>>, GetUpdateVendorByIdQueryHandler>();
+        services.AddScoped<IRequestHandler<CreateVendorCommand, ErrorOr<VendorDto>>, CreateVendorCommandHandler>();
+        services.AddScoped<IRequestHandler<UpdateVendorCommand, ErrorOr<VendorDto>>, UpdateVendorCommandHandler>();
+        services.AddScoped<IRequestHandler<ChangeVendorStatusCommand, ErrorOr<Updated>>, ChangeVendorStatusCommandHandler>();
+        services.AddScoped<IRequestHandler<DeleteVendorCommand, ErrorOr<Deleted>>, DeleteVendorCommandHandler>();
+        services.AddScoped<IRequestHandler<GetVendorsAsPagingQuery, Pager<VendorDto>>, GetVendorsAsPagingQueryHandler>();
+        services.AddScoped<IRequestHandler<GetVendorByIdQuery, ErrorOr<VendorDto>>, GetVendorByIdQueryHandler>();
+
+
         //Guarantors
         services.AddScoped<IRequestHandler<GetGuarantorsAsPagingQuery, Pager<VGuarantor>>, GetGuarantorsAsPagingQueryHandler>();
         services.AddScoped<IRequestHandler<GetGuarantorDetailByIdQuery, ErrorOr<VGuarantor>>, GetGuarantorDetailByIdQueryHandler>();
         services.AddScoped<IRequestHandler<GetGuarantorByIdQuery, ErrorOr<VGuarantor>>, GetGuarantorByIdQueryHandler>();
+        services.AddScoped<IRequestHandler<GetUpdateGuarantorByIdQuery, ErrorOr<EntityGuarantorCreate>>, GetUpdateGuarantorByIdQueryHandler>();
+        services.AddScoped<IRequestHandler<UpdateGuarantorCommand, ErrorOr<VGuarantor>>, UpdateGuarantorCommandHandler>();
 
 
         services.AddScoped<IRequestHandler<GetOccupationsQuery, Pager<OccupationDto>>, GetOccupationsQueryHandler>();
@@ -104,7 +54,7 @@ public static class ApplicationServiceInjection
         services.AddScoped<IRequestHandler<GetSalutationsQuery, Pager<SalutationDto>>, GetSalutationsQueryHandler>();
         services.AddScoped<IRequestHandler<CreateSalutationCommand, ErrorOr<SalutationDto>>, CreateSalutationCommandHandler>();
 
-
+        // Documents Injection
         services.AddScoped<IRequestHandler<AddDocumentCommand, ErrorOr<DocumentDto>>, AddDocumentCommandHandler>();
         services.AddScoped<IRequestHandler<AddDocumentsCommand, IEnumerable<DocumentDto>>, AddDocumentsCommandHandler>();
         services.AddScoped<IRequestHandler<DeleteDocumentCommand, bool>, DeleteDocumentCommandHandler>();
@@ -214,13 +164,10 @@ public static class ApplicationServiceInjection
         services.AddScoped<IOpenBranchServiceImpl, OpenBranchService>();
         services.AddScoped<ICurrencyServiceImpl, CurrencyService>();
         services.AddScoped<ICashVaultServiceImpl, CashVaultService>();
-        services.AddScoped<ICustomerServiceImpl, CustomerService>();
-        services.AddScoped<IIncomeExpendServiceImpl, CustomerIncomeExpendService>();
         services.AddScoped<IHolidayServiceImpl, HolidayService>();
         services.AddScoped<ICreditAgentServiceImpl, CreditAgentService>();
         services.AddScoped<ICollateralsServiceImpl, CollateralsService>();
         services.AddScoped<IFileUploadServiceImp, FileUploadService>();
-        services.AddScoped<IDepartmentServiceImpl, DepartmentService>();
         services.AddScoped<IEntityNameServiceImpl, EntityNameService>();
         services.AddScoped<ICreditAgentServiceImpl, CreditAgentService>();
         services.AddScoped<ILoginServiceImpl, LoginService>();
@@ -241,7 +188,6 @@ public static class ApplicationServiceInjection
         services.AddScoped<IRoleServiceImpl, RoleService>();
         services.AddScoped<ISpotRateServiceImpl, SpotRateService>();
         services.AddScoped<ISettingServiceImpl, SettingService>();
-        services.AddScoped<ISalutationServiceImpl, SalutationService>();
         services.AddScoped<IVendorServiceImpl, VendorService>();
         services.AddScoped<IFileUploadServiceImp, FileUploadService>();
         services.AddScoped<IPrintExelServiceImpl, PrintExelServiceImpl>();

@@ -121,12 +121,12 @@ namespace TrapchumApp.Pages.Lists.Branches
         }
         protected async Task OnDetail(VBranch? branch)
         {
-            await DialogService!.OpenAsync<BranchDetailModal>("Branch Details", new Dictionary<string, object> { { "Id", branch!.BranchId } });
+            await DialogService!.OpenAsync<BranchDetailModal>("Branch Details", new Dictionary<string, object?> { { "Id", branch!.BranchId } });
         }
         protected async Task OnEdit(VBranch? branch)
         {
 
-            var resultModal = await DialogService!.OpenAsync<BranchUpdateModal>("Edit Branch", new Dictionary<string, object> { { "Id", branch!.BranchId } });
+            var resultModal = await DialogService!.OpenAsync<BranchUpdateModal>("Edit Branch", new Dictionary<string, object?> { { "Id", branch!.BranchId } });
             if (resultModal != null)
             {
                 await GetBranches(searchText);

@@ -122,7 +122,7 @@ namespace Infrastructures
             services.AddScoped<ILoanCategoryService, LoanCategoryService>();
             services.AddScoped<ILoanRequestService, LoanRequestRepository>();
             services.AddScoped<ILoanReportService, LoanReportService>();
-            services.AddScoped<ISalutationService, SalutaionService>();
+            services.AddScoped<ISalutationService, SalutaionRepository>();
             services.AddScoped<INationalityService, NationalityRepository>();
             services.AddScoped<IFileUploadService, FileUploadRepository>();
             services.AddScoped<IVendorService, VendorRepository>();

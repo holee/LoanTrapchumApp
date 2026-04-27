@@ -1,26 +1,18 @@
-using Applications.Responses.ViewModels.Vendors;
+using Applications.Features.Vendors.Dto.Responses;
+using Applications.Features.Vendors.Queries.GetVendorById;
 using Applications.Services.Lists;
-using Applications.Services.Lists;
-using Microsoft.AspNetCore.Components;
 
 namespace TrapchumApp.Pages.Lists.Vendors
 {
     public partial class VendorDetailPage
     {
-        private readonly IVendorServiceImpl VendorService;
-
-        public VendorDetailPage(IVendorServiceImpl vendorService)
-        {
-            VendorService = vendorService;
-        }
-
-        VendorVm? model { get; set; } = new();
+        VendorDto? model { get; set; } = new();
         [Parameter] public string? Id { get; set; }
-        [Parameter] public EventCallback<int> Closed { get; set; }
+        [Parameter] public EventCallback Closed { get; set; }
         [Parameter] public EventCallback<string> OnEdit { get; set; } 
         protected async Task CloseTab()
         {
-            await Closed.InvokeAsync(3);
+            await Closed.InvokeAsync();
         }
         async Task ClickEdit()
         {
@@ -37,11 +29,14 @@ namespace TrapchumApp.Pages.Lists.Vendors
 
         async Task GetVendorById(string? id)
         {
-            var rsp =await VendorService.GetVendorByIdAsync(id);
 
-            if (rsp.IsSuccess)
+            var command = new GetVendorByIdQuery(id);
+
+            var rsp =await mediator.Send(command); //VendorService.GetVendorByIdAsync(id);
+
+            if (rsp.IsSuccess())
             {
-                model = rsp.Data;
+                model = rsp.Value;
             }
             else
             {

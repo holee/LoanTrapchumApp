@@ -9,12 +9,6 @@ namespace TrapchumApp.Pages.Lists.Customers.Incomes
 {
     public partial class CustomerInc
     {
-        private readonly IIncomeExpendServiceImpl _incomeExpendServiceImpl;
-        public CustomerInc(IIncomeExpendServiceImpl customerService)
-        {
-            _incomeExpendServiceImpl = customerService;
-        }
-
         [Parameter] public string? CustomerId { get; set; }
         [Parameter] public bool ShowAdd { get; set; } = true;
         [Parameter] public bool ShowReload { get; set; } = false;

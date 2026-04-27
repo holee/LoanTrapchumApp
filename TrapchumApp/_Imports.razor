@@ -51,7 +51,8 @@
 @using TrapchumApp.Shared
 @using Applications.Utils
 @using static Microsoft.AspNetCore.Components.Web.RenderMode
-@using Applications.Responses.Paginations 
+@using Applications.Enumerations
+@using Applications.Responses.Paginations
 @attribute [Authorize]
 @inject IJSRuntime js
 @inject NavigationService _navService
@@ -64,11 +65,9 @@
 @inject TooltipService tooltipService
 @inject IdentityRedirectManager RedirectManager
 @inject IAddressServiceImpl _addressService
-@inject ICustomerServiceImpl _customerService
 @inject ICurrencyServiceImpl _curService
 @inject IUserServiceImpl _userService
 @inject IMediator mediator
 @inject NotificationServices _notiService
 @inject ToastService _toastService
 @inject MessageBoxService MsgBox
-@using Applications.Enumerations

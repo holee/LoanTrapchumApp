@@ -1,4 +1,5 @@
 ﻿using Applications.Features.Loans.Dtos.Responses;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Applications.Features.Customers.Response;
 
@@ -8,7 +9,7 @@ public sealed class VCustomerDetails
     public string? FirstName { get; set; }
     public string? MiddleName { get; set; }
     public string? LastName { get; set; }
-    public string? CustomerKey { get; set; } 
+    public string? CustomerKey { get; set; }
     public string? FullName { get; set; }
     public string? AltName { get; set; }
     public string? EntType { get; set; }
@@ -45,20 +46,22 @@ public sealed class VCustomerDetails
     public bool IsActive { get; set; } = true;
     public bool IsLoanActive { get; set; } = false;
     public int? Circle { get; set; }
-    public string? Photo { get; set; }=string.Empty;
+    public string? Photo { get; set; } = string.Empty;
     public DateTimeOffset? ModifiedDT { get; set; }
     public int? LoanCounts { get; set; } = 0;
     public int? LoanRequestCounts { get; set; } = 0;
+    public int? BranchId { get; set; } = 0;
+    public string? CreatedBy { get; set; } = string.Empty;   
     public override string ToString()
     {
         return $"{ProInKhmer} {DisInKhmer} {ComInKhmer} {VilInKhmer}";
     }
 
-    public List<VCustomerExpenses> CustomerExpenses { get; set; } = [];
-    public List<VCustomerIncomes> CustomerIncomes { get; set; } = [];
-    public List<VCollateralLines> CollateralLines { get; set; } = [];
-    public List<VLoanRequests> LoanRequests { get; set; } = [];
-    public List<VLoanDisbursments> Loans { get; set; } = [];
-    public List<VCustomerNotes> CustomerNotes { get; set; } = [];
-    public List<VCustomerActivities> CustomerActivities { get; set; } = [];
+    [NotMapped] public List<VCustomerExpenses> CustomerExpenses { get; set; } = [];
+    [NotMapped] public List<VCustomerIncomes> CustomerIncomes { get; set; } = [];
+    [NotMapped] public List<VCollateralLines> CollateralLines { get; set; } = [];
+    [NotMapped] public List<VLoanRequests> LoanRequests { get; set; } = [];
+    [NotMapped] public List<VLoanDisbursments> Loans { get; set; } = [];
+    [NotMapped] public List<VCustomerNotes> CustomerNotes { get; set; } = [];
+    [NotMapped] public List<VCustomerActivities> CustomerActivities { get; set; } = [];
 }

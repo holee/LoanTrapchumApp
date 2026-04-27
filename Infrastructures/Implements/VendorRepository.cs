@@ -1,7 +1,9 @@
+using Applications.Commons.Mappers;
 using Applications.Features.Loans.Dtos.Responses;
+using Applications.Features.OtherNames.Dto;
+using Applications.Features.Vendors.Dto.Responses;
 using Applications.Interfaces.Vendors;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Vendors;
 using Domains.Models.Lists;
 using ErrorOr;
 using Infrastructures.DataAccess;
@@ -14,7 +16,7 @@ public sealed class VendorRepository(
     IDbContextFactory<DataContext> dbContextFactory,
     ILogger<VendorRepository> logger) : IVendorService
 {
-    public async Task<ErrorOr<VendorVm>> CreateAsync(EntityNames vendor, CancellationToken cancellation = default)
+    public async Task<ErrorOr<VendorDto>> CreateAsync(EntityNames vendor, CancellationToken cancellation = default)
     {
         try
         {
@@ -24,7 +26,7 @@ public sealed class VendorRepository(
             await context.SaveChangesAsync(cancellation);
 
             var created = await context.Database
-                .SqlQuery<VendorVm>($"SELECT * FROM VVendors WHERE VendorId={vendor.Id}")
+                .SqlQuery<VendorDto>($"SELECT * FROM VVendors WHERE VendorId={vendor.Id}")
                 .AsNoTracking()
                 .FirstOrDefaultAsync(cancellation);
 
@@ -39,7 +41,7 @@ public sealed class VendorRepository(
         }
     }
 
-    public async Task<ErrorOr<VendorVm>> UpdateAsync(EntityNames vendor, CancellationToken cancellation = default)
+    public async Task<ErrorOr<VendorDto>> UpdateAsync(EntityNames vendor, CancellationToken cancellation = default)
     {
         try
         {
@@ -49,7 +51,7 @@ public sealed class VendorRepository(
             await context.SaveChangesAsync(cancellation);
 
             var updated = await context.Database
-                .SqlQuery<VendorVm>($"SELECT * FROM VVendors WHERE VendorId={vendor.Id}")
+                .SqlQuery<VendorDto>($"SELECT * FROM VVendors WHERE VendorId={vendor.Id}")
                 .AsNoTracking()
                 .FirstOrDefaultAsync(cancellation);
 
@@ -125,22 +127,38 @@ public sealed class VendorRepository(
         await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);
 
         var vendor = await context.EntityNames
-            .Where(x => x.Id == vendorId)
             .Include(x => x.Vendor)
             .AsNoTracking()
-            .FirstOrDefaultAsync(cancellation);
+            .FirstOrDefaultAsync(x => x.Id == vendorId, cancellation);
 
         return vendor is null
             ? Error.NotFound(description: $"Vendor with id '{vendorId}' was not found.")
             : vendor;
     }
 
-    public async Task<ErrorOr<VendorVm>> GetVendorByIdAsync(string? vendorId, CancellationToken cancellation = default)
+
+    public async Task<ErrorOr<EntityVendorCreate>> GetEditVendorByIdAsync(string? vendorId, CancellationToken cancellation = default)
+    {
+        await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);
+
+        var vendor = await context.EntityNames
+                            .Include(x => x.Vendor)
+                            .Where(x => x.Id == vendorId)
+                            .Select(x => x.ToEntityVendorCreate())
+                            .AsNoTracking()
+                            .FirstOrDefaultAsync(cancellation);
+
+        return vendor is null
+            ? Error.NotFound(description: $"Vendor with id '{vendorId}' was not found.")
+            : vendor;
+    }
+
+    public async Task<ErrorOr<VendorDto>> GetVendorByIdAsync(string? vendorId, CancellationToken cancellation = default)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);
 
         var vendor = await context.Database
-            .SqlQuery<VendorVm>($"SELECT * FROM VVendors WHERE VendorId={vendorId}")
+            .SqlQuery<VendorDto>($"SELECT * FROM VVendors WHERE VendorId={vendorId}")
             .AsNoTracking()
             .FirstOrDefaultAsync(cancellation);
 
@@ -149,7 +167,7 @@ public sealed class VendorRepository(
             : vendor;
     }
 
-    public async Task<Pager<VendorVm>> GetVendorsAsync(QueryParam q, CancellationToken cancellation = default)
+    public async Task<Pager<VendorDto>> GetVendorsAsync(QueryParam q, CancellationToken cancellation = default)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);
 
@@ -180,6 +198,6 @@ public sealed class VendorRepository(
 
         var items = await query.ToListAsync(cancellation);
 
-        return new Pager<VendorVm>(items, totalCount);
+        return new Pager<VendorDto>(items, totalCount);
     }
 }
