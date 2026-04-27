@@ -88,7 +88,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
             await GetPeriods();
 
-            if (CustomerId.IsNotNullOrEmpty() && Model.CustomerRefId.IsNullOrEmpty())
+            if (CustomerId.IsNotNullOrEmpty() && Model.CustomerRefId.IsNotNullOrEmpty())
             {
                 Model.CustomerRefId = CustomerId;
 
@@ -154,9 +154,9 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
 
         private async Task GetCustomers(string? customerId, int take = 25, string? filter = null)
         {
-            var queryParam = new QueryParam(0, take, string.Empty, filter: filter);
+            var queryParam = new QueryParam(0, take);
 
-            var command = new GetCustomerAsPagingQuery(0, null, customerId, queryParam);
+            var command = new GetCustomerAsPagingQuery(null, null, customerId, queryParam);
 
             var rsp = await mediator.Send(command);
 

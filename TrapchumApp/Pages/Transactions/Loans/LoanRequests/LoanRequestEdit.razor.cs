@@ -328,7 +328,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanRequests
             {
                 isLoading = true;
                 
-                await GetCustomers(CustomerId, 1);
+                //await GetCustomers(CustomerId, 1);
 
                 var query = new GetLoanRequestDetailByIdQuery(BranchId, CustomerId, LoanRequestId, true);
 
