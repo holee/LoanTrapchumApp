@@ -18,6 +18,7 @@ public partial class CustomerUpdatePage
     [Parameter] public EventCallback Closed { get; set; }
     [Parameter] public EventCallback<VCustomerList> UpdateChanged { get; set; }
     [Parameter] public string? CustomerId { get; set; }
+    [Parameter] public int? BranchId { get; set; } = 0;
 
     private EntityCustomerCreate model = new();
 
@@ -51,6 +52,8 @@ public partial class CustomerUpdatePage
             if (rsp.IsSuccess())
             {
                 model = rsp.Value;
+
+                model.BranchId = BranchId;
             }
             else
             {

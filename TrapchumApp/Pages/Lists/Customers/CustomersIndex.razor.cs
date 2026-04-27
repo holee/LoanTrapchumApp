@@ -255,6 +255,8 @@ namespace TrapchumApp.Pages.Lists.Customers
 
                 }));
 
+                builer.AddAttribute(4, "BranchId", BranchId);
+
                 builer.SetKey(editTabId);
 
                 builer.CloseComponent();
