@@ -197,8 +197,7 @@ public sealed class CollateralRepository : ICollateralService
         return col;
     }
 
-    public async Task<ErrorOr<string>> InsertOrUpdate(Collateral req, bool detarching,
-        CancellationToken cancellation = default)
+    public async Task<ErrorOr<string>> AddOrUpdateAsync(Collateral req, bool detarching, CancellationToken cancellation = default)
     {
         try
         {

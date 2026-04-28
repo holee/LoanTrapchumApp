@@ -17,6 +17,6 @@ public sealed class AddOrUpdateCollateralCommandHandler : IRequestHandler<AddOrU
 
         var model = request.Request.MapCollateral();
 
-        return await _cusCollateralService.InsertOrUpdate(model, request.Detaching, cancellationToken);
+        return await _cusCollateralService.AddOrUpdateAsync(model, request.Detaching, cancellationToken);
     }
 }

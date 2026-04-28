@@ -113,6 +113,7 @@ namespace Infrastructures
             services.AddScoped<ICustomerActivityService, CustomerActivityRepository>();
             services.AddScoped<ICollateralService, CollateralRepository>();
             services.AddScoped<IHolidayService, HolidayRepository>();
+            services.AddScoped<ILocationService, LocationRepository>();
             services.AddScoped<IGuarantorService, GuarantorRepository>();
             services.AddScoped<ILoanSettingService, LoanSettingService>();
             services.AddScoped<ILoanProductService, LoanProductService>();

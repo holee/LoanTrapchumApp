@@ -1,4 +1,7 @@
 :root {
+    --min-height: 25rem;
+    --normal-height: 40rem;
+    --max-height: 50rem;
     --rz-numeric-input-padding-block: 0.25rem;
     --rz-tabs-padding: 0.45rem !important;
     --rz-lookup-search: 2rem !important;
@@ -86,7 +89,7 @@ a,
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-family:'Khmer OS Siemreap'
+    font-family: 'Khmer OS Siemreap'
 }
 
     .wellNameFormat .first {
@@ -147,8 +150,7 @@ rz-data-grid {
     min-height: 30rem;
 }
 
-.rz-tabview-panel{
-
+.rz-tabview-panel {
 }
 
 .btn-primary {
@@ -275,11 +277,11 @@ rz-data-grid {
     transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
-.input-group .form-select:focus {
-    border-color: #86b7fe;
-    outline: 0;
-    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-}
+    .input-group .form-select:focus {
+        border-color: #86b7fe;
+        outline: 0;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
 
 /* Form Select Sizes */
 .input-group-sm .form-select {

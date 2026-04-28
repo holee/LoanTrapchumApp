@@ -5,7 +5,7 @@
     <input type="hidden" @bind="model.CustomerId" />
     <RadzenRow>
         <RadzenColumn Size="6">
-            <RadzenFormField class="rz-w-100" Text="Income Source" AllowFloatingLabel="true">
+            <RadzenFormField class="rz-w-100" Text="Income Source($)" AllowFloatingLabel="true">
                 <ChildContent>
                     <RadzenAutoComplete Data="@_incomeExpenses"
                                         TextProperty="@nameof(IncomeExpenseDto.Description)"

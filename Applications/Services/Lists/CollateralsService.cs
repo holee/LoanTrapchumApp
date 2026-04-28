@@ -55,7 +55,7 @@ public sealed class CollateralsService : ICollateralsServiceImpl
 
         var insertModel = entity.MapCollateral();
 
-        return await cuscollateralsService.InsertOrUpdate(insertModel, detarching);
+        return await cuscollateralsService.AddOrUpdateAsync(insertModel, detarching);
 
     }
 

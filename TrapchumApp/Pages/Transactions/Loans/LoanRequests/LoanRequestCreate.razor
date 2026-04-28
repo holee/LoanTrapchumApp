@@ -50,9 +50,9 @@
                         </RadzenRow>
                     </RadzenCard>
                 </RadzenTabsItem>
-
-                <RadzenTabsItem Text="Collaterals" Icon="@IconNames.Collaterals">
-                    <LoanRequestCollaterals CustomerId="CustomerId"
+                <RadzenTabsItem Text="ទ្រព្យសម្បត្តិបញ្ចាំ" Icon="@IconNames.Collaterals">
+                    <LoanRequestCollaterals @key="@Guid.NewGuid().ToString("N")"
+                        CustomerId="CustomerId"
                                             ShowCommand="true"
                                             ShowAdd="true"
                                             ShowRemove="true"
@@ -69,31 +69,52 @@
                     </LoanRequestCollaterals>
                 </RadzenTabsItem>
 
-                <RadzenTabsItem Text="Guarantors" Icon="@IconNames.Group">
+                <RadzenTabsItem Text="អ្នករួមខ្ខី" Icon="@IconNames.Group">
                     <LoanRequestGaurantor Guarantors="Guarantors"
                                           ShowAdd="true"
                                           Add="AddGuarantors"
                                           ShowRemove="true"
                                           ShowCommand="true"
+                                          @key="@Guid.NewGuid().ToString("N")"
                                           Remove="RemoveGuarantor"
                                           @ref="GuarantorRef">
                         <SearchBoxTemplate>
                             <GuarantorSearchList OnSelected="SelectedGuarantors"
+                                                 @key="@Guid.NewGuid().ToString("N")"
                                                  SelectMany="SelectMany" />
                         </SearchBoxTemplate>
                     </LoanRequestGaurantor>
                 </RadzenTabsItem>
 
-                <RadzenTabsItem Text="Attachment" Icon="@IconNames.AttachFile">
+
+                <RadzenTabsItem Text="អ្នកធានា" Icon="@IconNames.Group">
+                    <LoanRequestGaurantor Guarantors="Guarantors"
+                                          ShowAdd="true"
+                                          Add="AddGuarantors"
+                                          ShowRemove="true"
+                                          ShowCommand="true"
+                                          @key="@Guid.NewGuid().ToString("N")"
+                                          Remove="RemoveGuarantor"
+                                          @ref="GuarantorRef">
+                        <SearchBoxTemplate>
+                            <GuarantorSearchList OnSelected="SelectedGuarantors"
+                                                 @key="@Guid.NewGuid().ToString("N")"
+                                                 SelectMany="SelectMany" />
+                        </SearchBoxTemplate>
+                    </LoanRequestGaurantor>
+                </RadzenTabsItem>
+
+                <RadzenTabsItem Text="ឯកសារភ្ជាប់" Icon="@IconNames.AttachFile">
                     <LoanRequestDocument Documents="@Documents"
                                          UploadDocument="@HandleFileDialogue"
                                          RemoveDocument="@RemoveFile"
                                          @ref="DocumentRef"
+                                         @key="@Guid.NewGuid().ToString("N")"
                                          ShowDelete="true" />
                 </RadzenTabsItem>
 
                 <RadzenTabsItem Text="អតិថិជន" Icon="@IconNames.Customers">
-                    <CustomerRequest CustomerId="@CustomerId" ShowAdditionalInfo="true" />
+                    <CustomerRequest CustomerId="@CustomerId" ShowAdditionalInfo="true" @key="@Guid.NewGuid().ToString("N")" />
                 </RadzenTabsItem>
             </Tabs>
         </RadzenTabs>

@@ -52,6 +52,7 @@
                                 RowDoubleClick="@OnRowDoubleClick"
                                 @ref="@_gridCustomer"
                                 CellContextMenu="@ShowContextMenu"
+                                Style="min-height: var(--min-height);height: var(--normal-height); max-height: var(--max-height);overflow: auto;"
                                 Data="@VCustomers">
                     <HeaderTemplate>
                         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">

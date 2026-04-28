@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-
-namespace Domains.Models.Collaterals;
+﻿namespace Domains.Models.Collaterals;
 
 public sealed class CollateralLine
 {
@@ -25,7 +23,6 @@ public sealed class CollateralLine
     public decimal? PawnPrice { get; set; }
     public bool IsUsed { get; set; } = false;
     public decimal? ValueRate { get; set; } = 0;
-    [NotMapped]
     public string? ReferenceNo { get; set; }
     public DateTime? CreatedDt { get; set; } = DateTime.UtcNow;
     public DateTime? ModifiedDt { get; set; } = DateTime.UtcNow;

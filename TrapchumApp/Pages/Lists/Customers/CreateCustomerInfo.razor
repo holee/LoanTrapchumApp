@@ -68,12 +68,12 @@
                     <RadzenColumn Size="10">
                         <RadzenRow Gap="1rem">
                             <RadzenColumn Size="12" SizeMD="4">
-                                <RadzenFormField Text="នាមខ្លួន" class="rz-w-100">
+                                <RadzenFormField Text="នាមខ្លួនជាឡាតាំង" class="rz-w-100">
                                     <ChildContent>
                                         <RadzenTextBox @bind-Value="Model.FirstName"
                                                        class="rz-w-100"
                                                        AutoCompleteType="AutoCompleteType.Off"
-                                                       Placeholder="នាមខ្លួន..." />
+                                                       Placeholder="នាមខ្លួនជាឡាតាំង..." />
                                     </ChildContent>
                                     <Helper>
                                         <ValidationMessage For="@(() => Model.FirstName)" />
@@ -82,19 +82,19 @@
                    
                             </RadzenColumn>
                             <RadzenColumn Size="12" SizeMD="4">
-                                <RadzenFormField Text="នាមកណ្តាល" class="rz-w-100">
+                                <RadzenFormField Text="នាមកណ្តាលជាឡាតាំង" class="rz-w-100">
                                     <RadzenTextBox @bind-Value="Model.MiddleName"
                                                    class="rz-w-100"
                                                    AutoCompleteType="AutoCompleteType.Off"
-                                                   Placeholder="នាមកណ្តាល..." />
+                                                   Placeholder="នាមកណ្តាលជាឡាតាំង..." />
                                 </RadzenFormField>
                             </RadzenColumn>
                             <RadzenColumn Size="12" SizeMD="4">
-                                <RadzenFormField Text="នាមត្រកូល" class="rz-w-100">
+                                <RadzenFormField Text="នាមត្រកូលជាឡាតាំង" class="rz-w-100">
                                     <RadzenTextBox @bind-Value="Model.LastName"
                                                    class="rz-w-100"
                                                    AutoCompleteType="AutoCompleteType.Off"
-                                                   Placeholder="នាមត្រកូល..." />
+                                                   Placeholder="នាមត្រកូលជាឡាតាំង..." />
                                 </RadzenFormField>
                                 <ValidationMessage For="@(() => Model.LastName)" />
                             </RadzenColumn>

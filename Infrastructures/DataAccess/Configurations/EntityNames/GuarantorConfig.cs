@@ -17,6 +17,7 @@ namespace Infrastructures.DataAccess.Configurations.EntityNames
             builder.Property(x => x.IsActive).HasDefaultValue(true);
             builder.Property(x => x.EntityNameRefId).HasMaxLength(250);
             builder.Property(x => x.LoanRequestRefId).HasMaxLength(250);
+
             builder.HasOne(x => x.Guarantor)
                             .WithMany(x=>x.GuarantorsLink)
                             .HasForeignKey(fk => fk.EntityNameRefId);

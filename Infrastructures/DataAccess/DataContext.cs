@@ -213,6 +213,8 @@ namespace Infrastructures.DataAccess
         public DbSet<MarritalStatus> MarritalStatuses => Set<MarritalStatus>();
         public DbSet<LoanDisbursment> LoanDisbursementRequests => Set<LoanDisbursment>();
         public DbSet<LoanRequest> LoanRequests => Set<LoanRequest>();
+        public DbSet<CoLoanRequest> CoLoanRequests => Set<CoLoanRequest>();
+        public DbSet<LtLocation> Locations => Set<LtLocation>();
         public DbSet<LoanDocuments> LoanDocuments => Set<LoanDocuments>();
         public DbSet<LoanDescriptions> LoanDescriptions => Set<LoanDescriptions>();
         public DbSet<LoanChangedCa> LoanChangedCa => Set<LoanChangedCa>();

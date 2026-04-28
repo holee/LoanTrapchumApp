@@ -22,7 +22,7 @@ public interface ICollateralService
     Task<ErrorOr<VCollateralLines>> GetCollateralLineDetailAsync(long? id, string? collateralId,
         CancellationToken cancellation = default);
 
-    Task<ErrorOr<string>> InsertOrUpdate(Collateral req, bool detarching, CancellationToken cancellation = default);
+    Task<ErrorOr<string>> AddOrUpdateAsync(Collateral req, bool detarching, CancellationToken cancellation = default);
 
     Task<ErrorOr<string>> InsertOrUpdateCollateralLineAsync(CollateralLine model,
         CancellationToken cancellation = default);

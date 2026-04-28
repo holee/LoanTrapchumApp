@@ -17,10 +17,11 @@
     [Parameter] public string? Value { get; set; } = string.Empty;
     [Parameter] public EventCallback<string?> ValueChanged { get; set; }
     [Parameter] public Expression<Func<string?>>? ValueExpression { get; set; }
+    [Parameter] public TypeOfEnum TypeOf { get; set; } = TypeOfEnum.Position;
     private IEnumerable<OccupationDto> _occupations = [];
-    private async Task GetOccupations(string? filter = "Job")
+    private async Task GetOccupations()
     {
-        var command = new GetOccupationsQuery(0, null, TypeOfEnum.Position);
+        var command = new GetOccupationsQuery(0, null, TypeOf);
 
         var rsp = await mediator.Send(command);
 
@@ -31,6 +32,7 @@
     protected override async Task OnInitializedAsync()
     {
         await GetOccupations();
+
         await base.OnInitializedAsync();
     }
 

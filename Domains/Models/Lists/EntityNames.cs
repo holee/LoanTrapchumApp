@@ -2,6 +2,7 @@ using Domains.Models.Bases;
 using Domains.Models.Lists.Customers;
 using Domains.Models.Lists.Employees;
 using Domains.Models.Lists.Vendors;
+using Domains.Models.Loans;
 
 namespace Domains.Models.Lists;
 
@@ -50,4 +51,5 @@ public sealed class EntityNames : BaseEntity
     public Employee? Employee { get; set; }
     public Vendor? Vendor { get; set; }
     public List<LoanGuarantorLink> GuarantorsLink { get; set; } = [];
+    public List<CoLoanRequest> CoLoanRequests { get; set; } = [];
 }

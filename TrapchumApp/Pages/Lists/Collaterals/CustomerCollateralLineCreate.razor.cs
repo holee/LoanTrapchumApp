@@ -22,10 +22,6 @@ public partial class CustomerCollateralLineCreate
 
     private readonly ICollateralsServiceImpl _service;
 
-    private readonly GetCollateralDetailQueryHandler _cusCollateralServices;
-
-    private readonly IFileUploadServiceImp _fileUploadService;
-
     private bool success;
 
     private bool isSaving;
@@ -38,11 +34,11 @@ public partial class CustomerCollateralLineCreate
 
     [Parameter] public string? CollateralId { get; set; }
 
-    public CustomerCollateralLineCreate(ICollateralsServiceImpl service, GetCollateralDetailQueryHandler collateralServices, IFileUploadServiceImp fileUploadService)
+    public CustomerCollateralLineCreate(ICollateralsServiceImpl service)
     {
         _service = service;
-        _cusCollateralServices = collateralServices;
-        _fileUploadService = fileUploadService;
+        //_cusCollateralServices = collateralServices;
+        //_fileUploadService = fileUploadService;
     }
 
     protected override async Task OnInitializedAsync()
@@ -136,68 +132,12 @@ public partial class CustomerCollateralLineCreate
         StateHasChanged();
     }
 
-    private async Task OnFileUpload(UploadChangeEventArgs args)
-    {
-        try
-        {
-            if (args.Files is null) return;
-
-            var file = args.Files.FirstOrDefault();
-
-            if (file is null) return;
-
-            if (file.Size > MaxFileSize)
-            {
-                NotificationService.Notify(NotificationSeverity.Warning, "File size exceeds 10 MB limit.");
-
-                return;
-            }
-
-            using var stream = new MemoryStream();
-
-            using (var fileStream = file.OpenReadStream(MaxFileSize))
-            {
-                await fileStream.CopyToAsync(stream);
-            }
-
-            uploadedFile = new FileModel(file.Name, file.Name, file.Size, stream.ToArray());
-        }
-        catch (Exception ex)
-        {
-            NotificationService.Notify(NotificationSeverity.Error, $"File upload error: {ex.Message}");
-        }
-    }
-
-    private void RemoveUploadedFile()
-    {
-        uploadedFile = null;
-    }
-
-    private static string FormatFileSize(long bytes) => bytes switch
-    {
-        < 1024 => $"{bytes} B",
-        < 1024 * 1024 => $"{bytes / 1024.0:F1} KB",
-        _ => $"{bytes / (1024.0 * 1024.0):F1} MB"
-    };
-
     private async Task HandleFormSubmit()
     {
         isSaving = true;
 
         try
         {
-            //if (uploadedFile is not null)
-            //{
-            //    var uploadRsp = await _fileUploadService.UploadFile(uploadedFile);
-
-            //    if (!uploadRsp.IsSuccess)
-            //    {
-            //        NotificationService.Notify(NotificationSeverity.Error,
-            //            "Failed to upload file.");
-            //        return;
-            //    }
-            //}
-
             var command = new AddOrUpdateCollateralCommand(baseModel);
 
             var rsp = await mediator.Send(command);

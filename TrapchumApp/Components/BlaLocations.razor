@@ -1,0 +1,43 @@
+﻿@using System.Linq.Expressions
+@using Applications.Features.Locations.Dtos
+@using Applications.Features.Locations.Queries.GetLocationsAsPaging
+<RadzenAutoComplete class="rz-w-100"
+                    Data="@_locations"
+                    FilterOperator="StringFilterOperator.Contains"
+                    TextProperty="@nameof(LocationDto.LocationName)"
+                    FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                    Placeholder="Search Locations"
+                    OpenOnFocus="true"
+                    ValueChanged="@ValueChanged"
+                    ValueExpression="@ValueExpression"
+                    Value="@Value">
+</RadzenAutoComplete>
+@code {
+
+    [Parameter] public string? Value { get; set; } = string.Empty;
+
+    [Parameter] public EventCallback<string?> ValueChanged { get; set; }
+
+    [Parameter] public Expression<Func<string?>>? ValueExpression { get; set; }
+
+    private IEnumerable<LocationDto> _locations = [];
+
+    private async Task GetLocations()
+    {
+        var command = new GetLocationsAsPagingQuery(new QueryParam(0,0));
+
+        var rsp = await mediator.Send(command);
+
+        _locations = rsp.Items;
+
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetLocations();
+
+        await base.OnInitializedAsync();
+    }
+
+
+}

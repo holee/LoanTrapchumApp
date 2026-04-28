@@ -8,12 +8,12 @@
 @using TrapchumApp.Services
 <PageTitle>Create Guarantor</PageTitle>
 <EditForm Model="@model" OnValidSubmit="OnSaveChanges">
-    <FluentValidationValidator DisableAssemblyScanning="false" />
+    <Blazilla.FluentValidator />
     <GaurantorCreateComp Model="model" />
-    <AddressCreate model="model" />
     <RadzenStack Orientation="Orientation.Horizontal"
                  AlignItems="AlignItems.Center"
                  Gap="1rem"
+                 class="rz-mt-2"
                  JustifyContent="JustifyContent.End">
         <RadzenButton ButtonStyle="ButtonStyle.Success"
                       Icon="save"

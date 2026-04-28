@@ -15,12 +15,12 @@
             <RadzenColumn Size="12" SizeMD="9">
                 <RadzenRow class="rz-mb-2">
                     <RadzenColumn Size="12" SizeMD="2">
-                        <RadzenFormField Text="ភេទ" class="rz-w-100">
+                        <RadzenFormField Text="Salutation" class="rz-w-100">
                             <BlaSalutation @bind-Value="model.Salutation" />
                         </RadzenFormField>
                     </RadzenColumn>
                     <RadzenColumn Size="12" SizeMD="6">
-                        <RadzenFormField Text="ឈ្មោះខ្មែរ" class="rz-w-100">
+                        <RadzenFormField Text="ឈ្មោះជាខ្មែរ" class="rz-w-100">
                             <ChildContent>
                                 <RadzenTextBox @bind-Value="model.AltName"
                                                Style="flex:1;"
@@ -42,11 +42,11 @@
                 </RadzenRow>
                 <RadzenRow class="rz-mb-2">
                     <RadzenColumn Size="4">
-                        <RadzenFormField Text="នាមខ្លួន" class="rz-w-100">
+                        <RadzenFormField Text="នាមខ្លួនជាឡាតាំង" class="rz-w-100">
                             <ChildContent>
                                 <RadzenTextBox @bind-Value="model.FirstName"
                                                class="rz-w-100"
-                                               Placeholder="First name..." />
+                                               Placeholder="នាមខ្លួនជាឡាតាំង..." />
                             </ChildContent>
                             <Helper>
                                 <ValidationMessage For="@(() => model.FirstName)" />
@@ -54,40 +54,27 @@
                         </RadzenFormField>
                     </RadzenColumn>
                     <RadzenColumn Size="4">
-                        <RadzenFormField Text="ឈ្មោះមធ្យម" class="rz-w-100">
+                        <RadzenFormField Text="ឈ្មោះមធ្យមជាឡាតាំង" class="rz-w-100">
                             <ChildContent>
-                                <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
-                                    <RadzenTextBox @bind-Value="model.MiddleName"
-                                                   Style="flex:1;"
-                                                   Placeholder="Middle..." />
-                                    <RadzenTextBox @bind-Value="model.MiddleName"
-                                                   Style="flex:1;"
-                                                   Placeholder="Last name..." />
-                                </RadzenStack>
+                                <RadzenTextBox @bind-Value="model.MiddleName"
+                                               Style="flex:1;"
+                                               Placeholder="ឈ្មោះមធ្យមជាឡាតាំង..." />
                             </ChildContent>
-                            <Helper>
-                                <ValidationMessage For="@(() => model.LastName)" />
-                            </Helper>
                         </RadzenFormField>
                     </RadzenColumn>
                     <RadzenColumn Size="4">
-                        <RadzenFormField Text="នាមត្រកូល" class="rz-w-100">
+                        <RadzenFormField Text="នាមត្រកូលជាឡាតាំង" class="rz-w-100">
                             <ChildContent>
-                                <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
-                                    <RadzenTextBox @bind-Value="model.MiddleName"
-                                                   Style="flex:1;"
-                                                   Placeholder="Middle..." />
-                                    <RadzenTextBox @bind-Value="model.LastName"
-                                                   Style="flex:1;"
-                                                   Placeholder="Last name..." />
-                                </RadzenStack>
+                                <RadzenTextBox @bind-Value="model.LastName"
+                                               Style="flex:1;"
+                                               Placeholder="នាមត្រកូលជាឡាតាំង..." />
                             </ChildContent>
                             <Helper>
                                 <ValidationMessage For="@(() => model.LastName)" />
                             </Helper>
                         </RadzenFormField>
                     </RadzenColumn>
-                </RadzenRow>          
+                </RadzenRow>
                 <RadzenRow class="rz-mb-2">
                     <RadzenColumn Size="4">
                         <RadzenFormField Text="លេខទូរស័ព្ទ" class="rz-w-100">
@@ -154,28 +141,28 @@
                 </RadzenRow>
             </RadzenColumn>
             <RadzenColumn Size="12" SizeMD="3">
-                    <RadzenCard Style="display:flex; align-items:center; justify-content:center; padding:0rem;">
-                        <RadzenStack AlignItems="AlignItems.Center" Gap="0.5rem">
-                            <RadzenImage Path="@model.Photo"
-                                         Style="width:8rem;height:8rem;object-fit:cover;border-radius:50%;border:3px solid var(--rz-primary);" />
-                            <RadzenUpload Auto="true"
-                                          Multiple="false"
-                                          Accept=".jpg,.png"
-                                          Url="upload/customers/profiles"
-                                          Complete="@OnFileUploadComplete"
-                                          Progress="@UploadProgress"
-                                          Error="@OnUploadError"
-                                          Style="width:100%;background-color:transparent;"
-                                          InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "select file" }})">
-                                <ChildContent>
-                                    <RadzenText TextStyle="TextStyle.Caption" TextAlign="TextAlign.Center"
-                                                Style="color:var(--rz-text-tertiary-color);">
-                                        .jpg / .png only
-                                    </RadzenText>
-                                </ChildContent>
-                            </RadzenUpload>
-                        </RadzenStack>
-                    </RadzenCard>
+                <RadzenCard Style="display:flex; align-items:center; justify-content:center; padding:0rem;">
+                    <RadzenStack AlignItems="AlignItems.Center" Gap="0.5rem">
+                        <RadzenImage Path="@model.Photo"
+                                     Style="width:8rem;height:8rem;object-fit:cover;border-radius:50%;border:3px solid var(--rz-primary);" />
+                        <RadzenUpload Auto="true"
+                                      Multiple="false"
+                                      Accept=".jpg,.png"
+                                      Url="upload/customers/profiles"
+                                      Complete="@OnFileUploadComplete"
+                                      Progress="@UploadProgress"
+                                      Error="@OnUploadError"
+                                      Style="width:100%;background-color:transparent;"
+                                      InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "select file" }})">
+                            <ChildContent>
+                                <RadzenText TextStyle="TextStyle.Caption" TextAlign="TextAlign.Center"
+                                            Style="color:var(--rz-text-tertiary-color);">
+                                    .jpg / .png only
+                                </RadzenText>
+                            </ChildContent>
+                        </RadzenUpload>
+                    </RadzenStack>
+                </RadzenCard>
             </RadzenColumn>
         </RadzenRow>
         <RadzenRow Style="margin-top:0.2rem;">
@@ -203,9 +190,7 @@
                 <RadzenColumn Size="12" SizeMD="6">
                     <RadzenFormField Text="តួនាទី" class="rz-w-100">
                         <ChildContent>
-                            <OccupationDropDown @bind-Value="model.Occupation"
-                                                TypeOf="TypeOfEnum.Position"
-                                                ShowAdd="true" />
+                            <BlaOccupation TypeOf="TypeOfEnum.Position" />
                         </ChildContent>
                     </RadzenFormField>
                 </RadzenColumn>
