@@ -33,12 +33,12 @@ public sealed class CollateralsService : ICollateralsServiceImpl
         return await collateralsService.GetCollateralsAysnc(param);
     }
 
-    public async Task<IEnumerable<CollateralSubTypeResponse>> GetCollateralSubTypes(int? id = 0, string? searchText = null)
+    public async Task<IEnumerable<Features.Collaterals.Dtos.CollateralSubTypeDto>> GetCollateralSubTypes(int? id = 0, string? searchText = null)
     {
         return await collateralsService.GetCollateralSubTypes(id, searchText);
     }
 
-    public async Task<IEnumerable<CollateralTypeResponse>> GetCollateralTypes(int? collateralId = 0, string? q = null)
+    public async Task<IEnumerable<CollateralTypeDto>> GetCollateralTypes(int? collateralId = 0, string? q = null)
     {
         return await collateralsService.GetCollateralTypes(collateralId, q);
     }

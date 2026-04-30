@@ -7,7 +7,7 @@ public partial class SubTypeCollateralCreate
 {
     private readonly ICollateralsServiceImpl _collateralService;
     private CollateralSubTypeDtoCreate model = new();
-    private List<CollateralTypeResponse> _collateralTypes = [];
+    private List<CollateralTypeDto> _collateralTypes = [];
     public SubTypeCollateralCreate(ICollateralsServiceImpl collateralService)
     {
         _collateralService = collateralService;

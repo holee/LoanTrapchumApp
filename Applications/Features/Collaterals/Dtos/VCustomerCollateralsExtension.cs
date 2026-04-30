@@ -1,4 +1,6 @@
-﻿namespace Applications.Features.Collaterals.Dtos;
+﻿using Domains.Models.Collaterals;
+
+namespace Applications.Features.Collaterals.Dtos;
 
 public static class VCustomerCollateralsExtension
 {
@@ -15,5 +17,25 @@ public static class VCustomerCollateralsExtension
         };
 
     }
+
+    public static CollateralLineDtoCreate ToCollateralLineDtoCreate(this CollateralLine collateralLine)
+    {
+        return new CollateralLineDtoCreate
+        {
+            Id = collateralLine.Id,
+            CategoryRefId = collateralLine.CategoryRefId,
+            TypeName = collateralLine.TypeName,
+            CollateralNo = collateralLine.CollateralNo,
+            SubCategoryRefId = collateralLine.SubCategoryRefId,
+            MarketPrice = collateralLine.MarketPrice,
+            HotPrice = collateralLine.HotPrice,
+            PawnPrice = collateralLine.PawnPrice,
+            ReferenceNo = collateralLine.ReferenceNo,
+            CollateralRefId = collateralLine.CollateralRefId,
+            Description = collateralLine.Description,
+        };
+    }
+
+
 
 }

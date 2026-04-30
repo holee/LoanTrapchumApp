@@ -1,3 +1,4 @@
+using Applications.Features.Collaterals.Dtos;
 using Applications.Features.Settings.Dto;
 using Applications.Interfaces.Settings;
 using Applications.Responses.Paginations;
@@ -51,8 +52,7 @@ public sealed class AppSettingService(
         }
     }
 
-    public async Task<ErrorOr<AppSettingDto>> GetAppSettingByIdAsync(
-        int id, CancellationToken cancellation = default)
+    public async Task<ErrorOr<AppSettingDto>> GetAppSettingByIdAsync(int id, CancellationToken cancellation = default)
     {
         try
         {
@@ -81,8 +81,7 @@ public sealed class AppSettingService(
         }
     }
 
-    public async Task<ErrorOr<AppSettingDto>> CreateAppSettingAsync(
-        AppSettingDtoCreate request, CancellationToken cancellation = default)
+    public async Task<ErrorOr<AppSettingDto>> CreateAppSettingAsync(AppSettingDtoCreate request, CancellationToken cancellation = default)
     {
         try
         {
@@ -94,8 +93,8 @@ public sealed class AppSettingService(
 
             var entity = new AppSettings
             {
-                Code = request.Code,
-                Value = request.Value,
+                Code = request.Code!,
+                Value = request.Value!,
                 Description = request.Description,
                 IsActive = request.IsActive!.Value
             };
@@ -119,8 +118,7 @@ public sealed class AppSettingService(
         }
     }
 
-    public async Task<ErrorOr<AppSettingDto>> UpdateAppSettingAsync(
-        AppSettingDtoUpdate request, CancellationToken cancellation = default)
+    public async Task<ErrorOr<AppSettingDto>> UpdateAppSettingAsync(AppSettingDtoUpdate request, CancellationToken cancellation = default)
     {
         try
         {
@@ -411,8 +409,7 @@ public sealed class AppSettingService(
 
     // ── CollateralSubType ──────────────────────────────────────────────────────
 
-    public async Task<Pager<CollateralSubTypeDto>> GetCollateralSubTypesAsync(
-        QueryParam param, CancellationToken cancellation = default)
+    public async Task<Pager<CollateralSubTypeDto>> GetCollateralSubTypesAsync(QueryParam param, CancellationToken cancellation = default)
     {
         try
         {
@@ -453,7 +450,9 @@ public sealed class AppSettingService(
         catch (Exception ex)
         {
             logger.LogError(ex, ex.Message);
+
             return new Pager<CollateralSubTypeDto>([], 0);
         }
     }
+
 }

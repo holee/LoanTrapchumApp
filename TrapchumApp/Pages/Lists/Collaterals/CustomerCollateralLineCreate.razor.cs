@@ -2,19 +2,19 @@ using Applications.Extensions;
 using Applications.Features.Collaterals.Commands.AddOrUpdateCollaterals;
 using Applications.Features.Collaterals.Dtos;
 using Applications.Features.Collaterals.Queries.GetCollateralDetails;
-using Applications.Services.Files;
+using Applications.Features.Collaterals.Queries.GetCollateralLineById;
+using Applications.Features.Collaterals.Queries.GetCollateralSubTypesById;
+using Applications.Features.Collaterals.Queries.GetCollateralTypes;
 using Applications.Services.Lists;
-using Domains.Models.Files;
-using Radzen;
 using Radzen.Blazor;
 
 namespace TrapchumApp.Pages.Lists.Collaterals;
 
 public partial class CustomerCollateralLineCreate
 {
-    private IEnumerable<CollateralTypeResponse> collateralTypes = [];
+    private IEnumerable<CollateralTypeDto> collateralTypes = [];
 
-    private IEnumerable<CollateralSubTypeResponse> allSubTypes = [];
+    private IEnumerable<CollateralSubTypeDto> allSubTypes = [];
 
     private CollateralDtoCreate baseModel = new();
 
@@ -26,19 +26,16 @@ public partial class CustomerCollateralLineCreate
 
     private bool isSaving;
 
-    private FileModel? uploadedFile;
-
     private RadzenUpload radzenUpload = default!;
 
-    private const long MaxFileSize = 10L * 1024 * 1024 * 1024; // 10 GB
-
+    private long maxFileSize = 1024 * 1024 * 50L; // 50 MB
     [Parameter] public string? CollateralId { get; set; }
-
+    [Parameter] public long CollateralLineId { get; set; } = 0;
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback<VCollateralLines> OnCollateralChanged { get; set; }
     public CustomerCollateralLineCreate(ICollateralsServiceImpl service)
     {
         _service = service;
-        //_cusCollateralServices = collateralServices;
-        //_fileUploadService = fileUploadService;
     }
 
     protected override async Task OnInitializedAsync()
@@ -54,21 +51,23 @@ public partial class CustomerCollateralLineCreate
 
     private async Task GetCollateralTypes()
     {
-        collateralTypes = await _service.GetCollateralTypes();
+        collateralTypes = await mediator.Send(new GetCollateralTypeQuery(null, null));
     }
 
     private async Task GetCollateralSubTypes(object? arg)
     {
         if (arg is null) return;
 
-        var id = ((CollateralTypeResponse)arg).CollateralTypeId;
+        var id = ((CollateralTypeDto)arg).CollateralTypeId;
+
+        model.TypeName = ((CollateralTypeDto)arg).CollateralTypeCode;
 
         await GetCollateralSubTypes(id);
     }
 
     private async Task GetCollateralSubTypes(int? id)
     {
-        allSubTypes = await _service.GetCollateralSubTypes(id);
+        allSubTypes = await mediator.Send(new GetCollateralSubTypesByIdQuery(id, null)); ///_service.GetCollateralSubTypes(id);
     }
 
     private async Task GetCustomerCollaterals(string? collateralId)
@@ -79,16 +78,48 @@ public partial class CustomerCollateralLineCreate
 
         var rsp = await mediator.Send(query);
 
-        if (!rsp.IsError)
+        if (rsp.IsError)
         {
-            var collateral = rsp.Value;
+            _toastService.ShowError(rsp.FirstError.Description);
 
-            CollateralId = collateralId;
-
-            baseModel = collateral.ToCollateralDtoCreate();
-
-            baseModel.CollateralLines.Add(model!);
+            return;
         }
+
+        var collateral = rsp.Value;
+
+        CollateralId = collateralId;
+
+        baseModel = collateral.ToCollateralDtoCreate();
+
+        await GetCollaralLine();
+
+    }
+
+    private async Task GetCollaralLine()
+    {
+        if (CollateralLineId == 0)
+        {
+            model = new CollateralLineDtoCreate(CollateralId);
+
+            return;
+        }
+
+
+        var command = new GetCollateralLineByIdQuery(CollateralLineId, CollateralId);
+
+        var lineRsp = await mediator.Send(command);
+
+        if (lineRsp.IsError)
+        {
+            _toastService.ShowError(lineRsp.GetMessage());
+
+            return;
+        }
+
+        model = lineRsp.Value.ToCollateralLineDtoCreate();
+
+        await GetCollateralSubTypes(model.CategoryRefId);
+
     }
 
     private void OnMarketPriceChanged(decimal? arg, CollateralLineDtoCreate line)
@@ -111,7 +142,7 @@ public partial class CustomerCollateralLineCreate
 
         if (maxPrice > 0 && arg > maxPrice)
         {
-            NotificationService.Notify(NotificationSeverity.Warning,$"Market Price must be less than {maxPrice}");
+            NotificationService.Notify(NotificationSeverity.Warning, $"Market Price must be less than {maxPrice}");
             model.MarketPrice = maxPrice ?? 0;
             model.HotPrice = maxPrice * valueRate;
             model.PawnPrice = line.HotPrice * valueRate;
@@ -132,12 +163,19 @@ public partial class CustomerCollateralLineCreate
         StateHasChanged();
     }
 
+    private async Task OnCloseTab()
+    {
+        await OnClose.InvokeAsync();
+    }
+
     private async Task HandleFormSubmit()
     {
         isSaving = true;
 
         try
         {
+            baseModel.CollateralLines.Add(model);
+
             var command = new AddOrUpdateCollateralCommand(baseModel);
 
             var rsp = await mediator.Send(command);
@@ -146,15 +184,14 @@ public partial class CustomerCollateralLineCreate
             {
                 success = true;
 
-                NotificationService.Notify(NotificationSeverity.Success, rsp.Value);
+                _toastService.ShowSuccess(rsp.Value);
 
-                DialogService.Close(success);
             }
             else
             {
                 success = false;
 
-                NotificationService.Notify(NotificationSeverity.Error, rsp.FirstError.Description);
+                _toastService.ShowError(rsp.GetMessage());
             }
         }
         finally

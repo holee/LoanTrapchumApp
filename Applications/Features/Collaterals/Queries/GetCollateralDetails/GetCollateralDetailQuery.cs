@@ -1,6 +1,4 @@
-﻿using Applications.Features.Collaterals.Dtos;
-using Applications.Utils;
-using ErrorOr;
+﻿using ErrorOr;
 
 namespace Applications.Features.Collaterals.Queries.GetCollateralDetails;
 

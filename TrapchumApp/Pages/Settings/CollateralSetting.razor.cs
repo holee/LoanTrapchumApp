@@ -19,7 +19,7 @@ namespace TrapchumApp.Pages.Settings
         private bool sortDescending = false;
         private RadzenDataGrid<CollateralSubType> refGrid = default!;
         private List<CollateralSubType> _collateralSubTypes = [];
-        private List<CollateralTypeResponse> _colleralTypes = [];
+        private List<CollateralTypeDto> _colleralTypes = [];
 
 
         protected override async Task OnInitializedAsync()

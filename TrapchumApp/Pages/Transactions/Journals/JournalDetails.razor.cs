@@ -53,8 +53,8 @@ namespace TrapchumApp.Pages.Transactions.Journals
             if (!string.IsNullOrEmpty(journalId) || JournalEntry is null)
             {
                 var resp = await journalService.GetJournalByIdAsync(journalId, true);
-                JournalEntry = resp.Data!;
-                _journalEntryLines = resp.Data?.JournalEntryLines ?? [];
+                JournalEntry = resp.IsError ? null! : resp.Value;
+                _journalEntryLines = resp.IsError ? [] : resp.Value?.JournalEntryLines ?? [];
             }
         }
     }

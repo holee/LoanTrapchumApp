@@ -1,6 +1,4 @@
-using Applications.Features.Guarantor.Dtos;
 using Applications.Interfaces.Lists;
-using Applications.Responses.Paginations;
 
 namespace Applications.Features.Guarantor.Queries.GetGuarantorsAsPaging;
 

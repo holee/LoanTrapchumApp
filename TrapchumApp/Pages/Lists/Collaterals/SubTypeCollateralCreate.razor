@@ -17,8 +17,8 @@ lications.Responses.Lists.Collaterals
                 <RadzenFormField Text="Collateral Type" class="rz-w-100">
                     <RadzenDropDown @bind-Value="@model.CollateralTypeRefId"
                                     Data="@_collateralTypes"
-                                    TextProperty="@nameof(CollateralTypeResponse.CollateralTypeCode)"
-                                    ValueProperty="@nameof(CollateralTypeResponse.CollateralTypeId)"
+                                    TextProperty="@nameof(CollateralTypeDto.CollateralTypeCode)"
+                                    ValueProperty="@nameof(CollateralTypeDto.CollateralTypeId)"
                                     class="rz-w-100"
                                     Placeholder="Select collateral type..."
                                     AllowClear="true"

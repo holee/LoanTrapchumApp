@@ -1,0 +1,124 @@
+﻿@using Applications.Features.Customers.Response
+@using Applications.Features.Guarantor.Dtos
+@using Radzen.Blazor.Rendering
+@using TrapchumApp.Components.Buttons
+
+<style>
+    .guarantor-popup {
+        display: none;
+        position: absolute;
+        overflow: hidden;
+        height: 340px;
+        width: 35vw;
+        border: var(--rz-panel-border);
+        background-color: var(--rz-panel-background-color);
+        box-shadow: var(--rz-panel-shadow);
+        border-radius: var(--rz-border-radius);
+        z-index: 1000;
+    }
+</style>
+
+<RadzenStack Orientation="Orientation.Horizontal"
+             AlignItems="AlignItems.Center" Gap="4px"
+             class="rz-my-1">
+    <RadzenTextBox @ref="@_customerSearchText"
+                   @oninput="@OnCustomerSearchText"
+                   @onkeydown="@OnKeyDown"
+                   @onclick="@OpenPopup"
+                   Placeholder="Search guarantor by name or phone..."
+                   Style="width:300px;" />
+  
+</RadzenStack>
+<Popup @ref="@_coRequestPopup"
+       id="coLoanRequestPopup"
+       autoFocusFirstElement="false"
+       class="guarantor-popup">
+    <RadzenStack Style="height:100%;width:100%;" Gap="0">
+        <RadzenDataGrid @ref="@_gridCoLoanRequest"
+                        id="gridCoLoanRequest"
+                        TItem="VCustomerList"
+                        Data="@_customers"
+                        Count="@counts"
+                        IsLoading="@isLoading"
+                        Density="Density.Compact"
+                        AllowAlternatingRows="true"
+                        GridLines="DataGridGridLines.Both"
+                        AllowSorting="true"
+                        AllowPaging="true"
+                        PageSize="@pageSize"
+                        ShowPagingSummary="true"
+                        AllowRowSelectOnRowClick="true"
+                        ColumnWidth="10rem"
+                        SelectionMode="DataGridSelectionMode.Multiple"
+                        @bind-Value="@_selectedCustomers"
+                        RowDoubleClick="@(args => GetSelectedGuarantor(args.Data))"
+                        Style="height:290px;width:100%;">
+            <EmptyTemplate>
+                <RadzenStack AlignItems="AlignItems.Center" class="rz-p-2" Gap="4px">
+                    <RadzenIcon Icon="search_off" Style="font-size:2rem;color:var(--rz-text-disabled-color);" />
+                    <RadzenText TextStyle="TextStyle.Caption" style="color:var(--rz-text-disabled-color);">
+                        No guarantors found. Try a different search term.
+                    </RadzenText>
+                </RadzenStack>
+            </EmptyTemplate>
+            <Columns>
+                <RadzenDataGridColumn Title="#" Width="3rem" Sortable="false"
+                                      TextAlign="TextAlign.Center"
+                                      Property="@nameof(VGuarantor.Id)"
+                                      Context="g">
+                    <Template>
+                        <RadzenCheckBox TValue="bool"
+                                        TriState="false"
+                                        InputAttributes="@(new Dictionary<string,object>{ {"aria-label","Select item"} })"
+                                        Value="@(_selectedCustomers.Contains(g))"
+                                        Change="@(_ => _gridCoLoanRequest.SelectRow(g))" />
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Property="@nameof(VCustomerList.AltName)" Title="ឈ្មោះ" />
+                <RadzenDataGridColumn Property="@nameof(VCustomerList.IdCard)"
+                                      Title="លេខអត្តសញ្ញាណប័ណ្ណ" Width="8rem"
+                                      TextAlign="TextAlign.Center" />
+                <RadzenDataGridColumn Property="@nameof(VCustomerList.Phone)"
+                                      Title="ទូរស័ព្ទ" Width="8rem" />
+                <RadzenDataGridColumn Property="@nameof(VCustomerList.CustomerId)" Title="អាសយដ្ឋាន"
+                                      Width="10rem">
+                    <Template>
+                        @context.ToString()
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Property="@nameof(VCustomerList.CustomerId)" Title="" Width="4rem"
+                                      TextAlign="TextAlign.Center" Sortable="false" Context="g">
+                    <Template>
+                        <RadzenButton Icon="@IconNames.Add"
+                                      ButtonStyle="ButtonStyle.Success"
+                                      Size="ButtonSize.ExtraSmall"
+                                      Variant="Variant.Outlined"
+                                      Click="@(() => GetSelectedGuarantor(g))" />
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+            <FooterTemplate>
+                <RadzenStack Orientation="Orientation.Horizontal"
+                             AlignItems="AlignItems.Center"
+                             JustifyContent="JustifyContent.End"
+                             class="rz-px-2 rz-py-1">
+                    <RadzenText TextStyle="TextStyle.Caption">
+                        @(_selectedCustomers.Count) selected
+                    </RadzenText>
+                </RadzenStack>
+            </FooterTemplate>
+        </RadzenDataGrid>
+        <RadzenStack Orientation="Orientation.Horizontal"
+                     Gap="0.5rem"
+                     class="rz-mt-2 rz-mr-2"
+                     JustifyContent="JustifyContent.End">
+            <RadzenButton Icon="done_all"
+                          Text="Accept Selected"
+                          ButtonStyle="ButtonStyle.Primary"
+                          Size="ButtonSize.ExtraSmall"
+                          Disabled="@(!_selectedCustomers.Any())"
+                          Click="@(() => GetSelectedGuarantors(_selectedCustomers))" />
+            <CancelButton OnClick="@ClosePopup" />
+        </RadzenStack>
+    </RadzenStack>
+</Popup>

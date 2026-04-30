@@ -64,7 +64,7 @@
                                 @(_properties.IndexOf(c) + 1)
                             </Template>
                         </RadzenDataGridColumn>
-                        <RadzenDataGridColumn Property="@nameof(CollateralSubTypeResponse.CollateralSubTypeName)"
+                        <RadzenDataGridColumn Property="@nameof(CollateralSubTypeDto.CollateralSubTypeName)"
                                               Title="Category"
                                               Context="c">
                             <Template>
@@ -79,8 +79,8 @@
                                 <RadzenDropDown TValue="int?"
                                                 class="rz-w-100"
                                                 Data="@CollateralProperties"
-                                                TextProperty="@nameof(CollateralSubTypeResponse.CollateralSubTypeName)"
-                                                ValueProperty="@nameof(CollateralSubTypeResponse.Id)"
+                                                TextProperty="@nameof(CollateralSubTypeDto.CollateralSubTypeName)"
+                                                ValueProperty="@nameof(CollateralSubTypeDto.Id)"
                                                 Style="height:2rem;line-height:1rem;"
                                                 SelectedItemChanged="@((arg)=>PropSelectedItemChanged(arg,c))"
                                                 InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Select Sub Collateral" }})"
@@ -244,7 +244,7 @@
                                 @(_personals.IndexOf(c) + 1)
                             </Template>
                         </RadzenDataGridColumn>
-                        <RadzenDataGridColumn Property="@nameof(CollateralSubTypeResponse.CollateralSubTypeName)"
+                        <RadzenDataGridColumn Property="@nameof(CollateralSubTypeDto.CollateralSubTypeName)"
                                               Title="Category"
                                               Context="c">
                             <Template>
@@ -257,8 +257,8 @@
                                 <RadzenDropDown TValue="int?"
                                                 class="rz-w-100"
                                                 Data="@CollateralPersonals"
-                                                TextProperty="@nameof(CollateralSubTypeResponse.CollateralSubTypeName)"
-                                                ValueProperty="@nameof(CollateralSubTypeResponse.Id)"
+                                                TextProperty="@nameof(CollateralSubTypeDto.CollateralSubTypeName)"
+                                                ValueProperty="@nameof(CollateralSubTypeDto.Id)"
                                                 Style="height:2rem;line-height:1rem;"
                                                 SelectedItemChanged="@((arg)=>PropSelectedItemChanged(arg,c))"
                                                 InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "Select Sub Collateral" }})"

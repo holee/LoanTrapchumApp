@@ -1,9 +1,0 @@
-﻿table.tbl th{
-    vertical-align:middle;
-    text-align:end;
-    padding:0.4rem 0.5rem 0.4rem 0;
-}
-table.tbl td {
-    vertical-align: middle;
-    text-align: start;
-}

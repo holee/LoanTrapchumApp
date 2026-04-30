@@ -1,7 +1,7 @@
 ﻿@using Applications.Features.Collaterals.Dtos
+<PageTitle>Update Collateral</PageTitle>
 <EditForm Model="@model" FormName="collateralLineCreate" OnValidSubmit="@HandleFormSubmit">
-    <DataAnnotationsValidator />
-    <FluentValidationValidator DisableAssemblyScanning="true" />
+    <Blazilla.FluentValidator />
     <ValidationSummary />
     <RadzenFieldset Text="Customer Info">
         <RadzenRow class="rz-mb-2">
@@ -32,7 +32,6 @@
                 </RadzenFormField>
             </RadzenColumn>
         </RadzenRow>
-
     </RadzenFieldset>
     <RadzenFieldset Text="Collateral Info">
         <RadzenRow class="rz-mb-2">
@@ -41,8 +40,8 @@
                     <RadzenDropDown TValue="int?"
                                     class="rz-w-100"
                                     Data="collateralTypes"
-                                    TextProperty="@nameof(CollateralTypeResponse.CollateralTypeCode)"
-                                    ValueProperty="@nameof(CollateralTypeResponse.CollateralTypeId)"
+                                    TextProperty="@nameof(CollateralTypeDto.CollateralTypeCode)"
+                                    ValueProperty="@nameof(CollateralTypeDto.CollateralTypeId)"
                                     SelectedItemChanged="@GetCollateralSubTypes"
                                     @bind-Value="@collateralLineDto.CategoryRefId">
                     </RadzenDropDown>
@@ -53,8 +52,8 @@
                     <RadzenDropDown TValue="int?"
                                     class="rz-w-100"
                                     Data="@allSubTypes"
-                                    TextProperty="@nameof(CollateralSubTypeResponse.CollateralSubTypeName)"
-                                    ValueProperty="@nameof(CollateralSubTypeResponse.Id)"
+                                    TextProperty="@nameof(CollateralSubTypeDto.CollateralSubTypeName)"
+                                    ValueProperty="@nameof(CollateralSubTypeDto.Id)"
                                     @bind-Value="@collateralLineDto.SubCategoryRefId">
                     </RadzenDropDown>
                 </RadzenFormField>

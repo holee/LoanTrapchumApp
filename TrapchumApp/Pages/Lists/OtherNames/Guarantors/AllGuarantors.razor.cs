@@ -17,7 +17,7 @@ namespace TrapchumApp.Pages.Lists.OtherNames.Guarantors
             _gService = gService;
         }
 
-        bool includeInactive = true;
+        bool includeInactive = false;
 
         string? filterText = "";
 

@@ -13,6 +13,8 @@ public sealed class CoLoanRequest
     public DateTimeOffset? CreatedDT { get; set; }
     public DateTimeOffset? ModifiedDT { get; set; }
     public string? Description { get; set; }
-    public LoanRequest? LoanRequest { get; set; }
-    public EntityNames? Customer { get; set; }
+
 }
+
+//public LoanRequest? LoanRequest { get; set; }
+//public EntityNames? Customer { get; set; }

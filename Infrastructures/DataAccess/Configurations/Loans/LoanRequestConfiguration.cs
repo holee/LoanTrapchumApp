@@ -32,6 +32,12 @@ namespace Infrastructures.DataAccess.Configurations.Loans
             builder.HasMany(x => x.LoanDescriptions)
                 .WithOne()
                 .HasForeignKey(fk => fk.LoanRequestRefId);
+
+
+            builder.HasMany(x=>x.CoLoanRequest)
+                .WithOne()
+                .HasPrincipalKey(x=>x.LoanRequestId);
+                   
         }
     }
 

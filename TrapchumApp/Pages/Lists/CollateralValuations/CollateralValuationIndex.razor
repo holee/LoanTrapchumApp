@@ -1,0 +1,113 @@
+@page "/App/CollateralValuations"
+@using Applications.Features.CollateralValuations.Dtos
+@using Applications.Constants
+
+<PageTitle>Collateral Valuations</PageTitle>
+
+<RadzenTabs @bind-SelectedIndex="@_selectedIndex" RenderMode="TabRenderMode.Server">
+    <Tabs>
+        <RadzenTabsItem Text="Collateral Valuations" Icon="list">
+            <GridToolbar SearchChanged="OnSearch">
+                <LeftChildren>
+                    <RadzenButton Text="New Valuation"
+                                  Click="AddCreateTab"
+                                  ButtonStyle="ButtonStyle.Primary"
+                                  Size="ButtonSize.Small"
+                                  Icon="add" />
+                </LeftChildren>
+            </GridToolbar>
+            <RadzenDataGrid Responsive="true"
+                            TItem="CollateralValuationDto"
+                            Density="Density.Compact"
+                            LoadData="LoadData"
+                            PageSize="@_pageSize"
+                            Count="@_count"
+                            AllowPaging="true"
+                            ShowPagingSummary="true"
+                            PagerPosition="PagerPosition.Bottom"
+                            PagerHorizontalAlign="HorizontalAlign.Right"
+                            AllowFiltering="true"
+                            AllowSorting="true"
+                            IsLoading="@_isLoading"
+                            PageSizeOptions="@StorageConstant.PageSizeOptions"
+                            CellContextMenu="@ShowCellContextMenu"
+                            @ref="@_gridRef"
+                            Data="@_items">
+                <Columns>
+                    <RadzenDataGridColumn Width="4rem" Title="#" Sortable="false" Filterable="false">
+                        <Template Context="c">
+                            @(_items?.ToList().IndexOf(c) + 1 + _skip)
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Property="@nameof(CollateralValuationDto.CollateralRefId)"
+                                          Title="Collateral Ref" />
+                    <RadzenDataGridColumn Property="@nameof(CollateralValuationDto.CollateralLineRefId)"
+                                          Title="Line Ref" Width="8rem" />
+                    <RadzenDataGridColumn Property="@nameof(CollateralValuationDto.ValueDate)"
+                                          Title="Value Date" Width="8rem">
+                        <Template Context="c">
+                            @c.ValueDate?.ToString("dd/MM/yyyy")
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Property="@nameof(CollateralValuationDto.ValueBy)"
+                                          Title="Valued By" />
+                    <RadzenDataGridColumn Property="@nameof(CollateralValuationDto.ValueAmount)"
+                                          Title="Value Amount" Width="10rem">
+                        <Template Context="c">
+                            @c.ValueAmount?.ToString("N2")
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Property="@nameof(CollateralValuationDto.CurrencyRefId)"
+                                          Title="Currency" Width="6rem" />
+                    <RadzenDataGridColumn Property="@nameof(CollateralValuationDto.CreatedBy)"
+                                          Title="Created By" />
+                    <RadzenDataGridColumn Filterable="false" Sortable="false" Title="Actions" Width="5rem"
+                                          TextAlign="TextAlign.Center" Context="c">
+                        <Template>
+                            <RadzenButton Size="ButtonSize.ExtraSmall"
+                                          Icon="more_vert"
+                                          Variant="Variant.Text"
+                                          Click="@((args) => ShowContextMenuWithItems(args, c))" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+                <LoadingTemplate>
+                    <RadzenProgressBarCircular Mode="ProgressBarMode.Indeterminate"
+                                               ProgressBarStyle="ProgressBarStyle.Danger"
+                                               Value="100" ShowValue="false" />
+                </LoadingTemplate>
+            </RadzenDataGrid>
+        </RadzenTabsItem>
+
+        @foreach (var tab in _dynamicTabs)
+        {
+            <RadzenTabsItem @key="tab.Id">
+                <Template>
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="6px">
+                        <RadzenIcon Icon="@tab.Icon" Style="font-size:16px;" />
+                        <span>@tab.Title</span>
+                        <RadzenButton Icon="close"
+                                      Size="ButtonSize.ExtraSmall"
+                                      Variant="Variant.Text"
+                                      ButtonStyle="ButtonStyle.Light"
+                                      Style="padding:2px;min-width:0;"
+                                      Click="@(() => CloseTab(tab.Id))"
+                                      Click.StopPropagation="true" />
+                    </RadzenStack>
+                </Template>
+                <ChildContent>
+                    @switch (tab.Type)
+                    {
+                        case DynamicTabType.Create:
+                            <CollateralValuationCreateModal OnClose="@(async (saved) => await OnTabClose(tab.Id, saved))" />
+                            break;
+                        case DynamicTabType.Edit:
+                            <CollateralValuationEditModal Id="@tab.EntityId!.Value"
+                                                          OnClose="@(async (saved) => await OnTabClose(tab.Id, saved))" />
+                            break;
+                    }
+                </ChildContent>
+            </RadzenTabsItem>
+        }
+    </Tabs>
+</RadzenTabs>

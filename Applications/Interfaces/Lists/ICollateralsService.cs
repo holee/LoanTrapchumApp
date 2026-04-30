@@ -7,8 +7,8 @@ namespace Applications.Interfaces.Lists;
 
 public interface ICollateralsService
 {
-    Task<IEnumerable<CollateralTypeResponse>> GetCollateralTypes(int? id, string? q = null);
-    Task<IEnumerable<CollateralSubTypeResponse>> GetCollateralSubTypes(int? id, string? searchText = null);
+    Task<IEnumerable<CollateralTypeDto>> GetCollateralTypes(int? id, string? q = null);
+    Task<IEnumerable<Features.Collaterals.Dtos.CollateralSubTypeDto>> GetCollateralSubTypes(int? id, string? searchText = null);
     Task<IEnumerable<VCollateral>> GetsCollateralAysnc(string? q = null);
     Task<Pager<VCollateral>> GetCollateralsAysnc(QueryParam param,CancellationToken cancellation=default);
     Task<Result<string>> InsertOrUpdateAsync(CollateralSubType req, CancellationToken cancellation = default);
@@ -16,4 +16,5 @@ public interface ICollateralsService
     Task<Result<string>> UpdateAsync(CollateralLine req, CancellationToken cancellation = default);
     Task<Result<string>> UpSertAsync(CollateralLine req, CancellationToken cancellation = default);
     Task<Result<string>> Upsert(CollateralSubType req,CancellationToken cancellation=default);
+    Task<IEnumerable<CollateralSubTypeDto>> GetCollateralSubTypes(int? id, string? searchText = null, CancellationToken cancellationToken = default);
 }

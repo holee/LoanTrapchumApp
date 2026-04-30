@@ -134,10 +134,10 @@ public sealed class GuarantorRepository(IDbContextFactory<DataContext> contextFa
         {
 
             baseQuery = baseQuery.Where(x =>
-                                            EF.Functions.Like(x.GuarantorName!, $"%{param.Filter}") ||
-                                            EF.Functions.Like(x.FullName!, $"%{param.Filter}") ||
-                                            EF.Functions.Like(x.Gender!, $"%{param.Filter}") ||
-                                            EF.Functions.Like(x.Phone!, $"%{param.Filter}"));
+                                            EF.Functions.Like(x.GuarantorName!, $"{param.Filter}%") ||
+                                            EF.Functions.Like(x.FullName!, $"{param.Filter}%") ||
+                                            EF.Functions.Like(x.Gender!, $"{param.Filter}%") ||
+                                            EF.Functions.Like(x.Phone!, $"{param.Filter}%"));
         }
 
         if (!param.IncludeInActive)

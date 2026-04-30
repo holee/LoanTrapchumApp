@@ -24,12 +24,16 @@ public partial class CollateralLinesIndex
     protected override async Task OnInitializedAsync()
     {
         await GetCollateralLines(string.Empty, _filterText);
+
         await GetCustomers(string.Empty);
+
         await base.OnInitializedAsync();
     }
 
     void OnRowRender(RowRenderEventArgs<VCollateralLines> args)
     {
+        if(args.Data is null) return;
+   
         args.Data.RowIndex = args.Index + 1;
     }
 
@@ -93,8 +97,16 @@ public partial class CollateralLinesIndex
         RenderFragment content = builder =>
         {
             builder.OpenComponent<CustomerCollateralLineCreate>(0);
+
             builder.AddAttribute(1, "CollateralId", _customerId);
+
+            builder.AddAttribute(2, "OnClose", EventCallback.Factory.Create(this, () =>
+            {
+                CloseTab(tabKey);
+            }));
+
             builder.SetKey(tabKey);
+
             builder.CloseComponent();
         };
 

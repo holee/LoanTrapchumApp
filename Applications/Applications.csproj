@@ -15,6 +15,8 @@
     <Compile Remove="Features\Addresses\UseCases\**" />
     <Compile Remove="Features\Addresses\Validations\**" />
     <Compile Remove="Features\Branches\Mappers\**" />
+    <Compile Remove="Features\Collaterals\Commands\CreateCollaterals\**" />
+    <Compile Remove="Features\Collaterals\Commands\DeleteCollaterals\**" />
     <Compile Remove="Features\Currencies\Requests\**" />
     <Compile Remove="Features\Currencies\UseCases\**" />
     <Compile Remove="Features\Customers\Mappers\**" />
@@ -44,6 +46,8 @@
     <EmbeddedResource Remove="Features\Addresses\UseCases\**" />
     <EmbeddedResource Remove="Features\Addresses\Validations\**" />
     <EmbeddedResource Remove="Features\Branches\Mappers\**" />
+    <EmbeddedResource Remove="Features\Collaterals\Commands\CreateCollaterals\**" />
+    <EmbeddedResource Remove="Features\Collaterals\Commands\DeleteCollaterals\**" />
     <EmbeddedResource Remove="Features\Currencies\Requests\**" />
     <EmbeddedResource Remove="Features\Currencies\UseCases\**" />
     <EmbeddedResource Remove="Features\Customers\Mappers\**" />
@@ -73,6 +77,8 @@
     <None Remove="Features\Addresses\UseCases\**" />
     <None Remove="Features\Addresses\Validations\**" />
     <None Remove="Features\Branches\Mappers\**" />
+    <None Remove="Features\Collaterals\Commands\CreateCollaterals\**" />
+    <None Remove="Features\Collaterals\Commands\DeleteCollaterals\**" />
     <None Remove="Features\Currencies\Requests\**" />
     <None Remove="Features\Currencies\UseCases\**" />
     <None Remove="Features\Customers\Mappers\**" />
@@ -103,8 +109,6 @@
     <Folder Include="Features\Addresses\Queries\GetCountries\" />
     <Folder Include="Features\CashManagements\Validations\" />
     <Folder Include="Features\CashManagements\Requests\" />
-    <Folder Include="Features\Collaterals\Commands\CreateCollaterals\" />
-    <Folder Include="Features\Collaterals\Commands\DeleteCollaterals\" />
     <Folder Include="Features\CreditAgents\UseCases\" />
     <Folder Include="Features\Expenses\Mapper\" />
     <Folder Include="Features\Identity\Users\Interfaces\" />

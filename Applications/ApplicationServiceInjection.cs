@@ -1,4 +1,13 @@
 ﻿
+using Applications.Features.Collaterals.Queries.GetCollateralSubTypesById;
+using Applications.Features.Collaterals.Queries.GetCollateralTypes;
+using Applications.Features.Locations.Command.CreateLocation;
+using Applications.Features.Locations.Command.DeleteLocation;
+using Applications.Features.Locations.Command.UpdateLocation;
+using Applications.Features.Locations.Dtos;
+using Applications.Features.Locations.Queries.GetAllLocations;
+using Applications.Features.Locations.Queries.GetLocationById;
+using Applications.Features.Locations.Queries.GetLocationsAsPaging;
 using Applications.Features.OtherNames.Dto;
 using Applications.Features.Vendors.Commands.ChangeVendorStatus;
 using Applications.Features.Vendors.Commands.CreateVendor;
@@ -8,6 +17,8 @@ using Applications.Features.Vendors.Dto.Responses;
 using Applications.Features.Vendors.Queries.GetUpdateVendorById;
 using Applications.Features.Vendors.Queries.GetVendorById;
 using Applications.Features.Vendors.Queries.GetVendorsAsPaging;
+using Applications.Responses.ViewModels.Ledgers;
+using Domains.Models.Collaterals;
 using ErrorOr;
 namespace Applications;
 
@@ -17,6 +28,17 @@ public static class ApplicationServiceInjection
     {
         services.AddValidatorsFromAssemblyContaining<GetCollateralLineDetailQueryValidator>();
         services.AddScoped<IMediator, SimpleMediator>();
+
+        //Locations Services
+        services.AddScoped<IRequestHandler<GetLocationsAsPagingQuery, Pager<LocationDto>>, GetLocationsAsPagingQueryHandler>();
+        services.AddScoped<IRequestHandler<GetLocationByIdQuery, ErrorOr<LocationDto>>, GetLocationByIdQueryHandler>();
+        services.AddScoped<IRequestHandler<GetAllLocationsQuery, IEnumerable<LocationDto>>, GetAllLocationsQueryHandler>();
+        services.AddScoped<IRequestHandler<CreateLocationCommand, ErrorOr<LocationDto>>, CreateLocationCommandHandler>();
+        services.AddScoped<IRequestHandler<UpdateLocationCommand, ErrorOr<LocationDto>>, UpdateLocationCommandHandler>();
+        services.AddScoped<IRequestHandler<DeleteLocationCommand, ErrorOr<string>>, DeleteLocationCommandHandler>();
+        services.AddScoped<IRequestHandler<GetCollateralTypeQuery, IEnumerable<CollateralTypeDto>>, GetCollateralTypeQueryHandler>();
+
+
 
         //Vendor Services
         services.AddScoped<IRequestHandler<GetUpdateVendorByIdQuery, ErrorOr<EntityVendorCreate>>, GetUpdateVendorByIdQueryHandler>();
@@ -205,7 +227,7 @@ public static class ApplicationServiceInjection
         services.AddScoped<IRequestHandler<EditMoneyExchangeCommand, ErrorOr<VttCurrencyExchanges>>, EditMoneyExchangeCommandHandler>();
 
 
-
+        ///Collateral Services
         services.AddScoped<IRequestHandler<AddOrUpdateCollateralLineCommand, ErrorOr<string>>, AddOrUpdateCollateralLineCommandHandler>();
         services.AddScoped<IRequestHandler<AddOrUpdateCollateralCommand, ErrorOr<string>>, AddOrUpdateCollateralCommandHandler>();
         services.AddScoped<IRequestHandler<DeleteCollateralLineCommand, ErrorOr<DeleteResult>>, DeleteCollateralLineCommandHandler>();
@@ -215,6 +237,8 @@ public static class ApplicationServiceInjection
         services.AddScoped<IRequestHandler<GetCollateralLineByIdEditQuery, ErrorOr<CollateralLineDtoCreate>>, GetCollateralLineByIdQueryEditHandler>();
         services.AddScoped<IRequestHandler<GetCollateralLineAsPagingQuery, Pager<VCollateralLines>>, GetColleralLineAsPagingQueryHandler>();
         services.AddScoped<IRequestHandler<GetCustomerCollateralLinesQuery, Pager<VCollateralLines>>, GetCustomerCollateralLinesQueryHandler>();
+        services.AddScoped<IRequestHandler<GetCollateralLineByIdQuery, ErrorOr<CollateralLine>>, GetCollateralLineByIdQueryHandler>();
+        services.AddScoped<IRequestHandler<GetCollateralSubTypesByIdQuery, IEnumerable<CollateralSubTypeDto>>, GetCollateralSubTypesByIdQueryHandler>();
 
 
 
@@ -373,6 +397,31 @@ public static class ApplicationServiceInjection
         // Settings — CollateralSubTypes
         services.AddScoped<IRequestHandler<GetCollateralSubTypesQuery, Pager<CollateralSubTypeDto>>, GetCollateralSubTypesQueryHandler>();
 
+        // Ledger Commands
+        services.AddScoped<IRequestHandler<CreateOrUpdateLedgerCommand, ErrorOr<string>>, CreateOrUpdateLedgerCommandHandler>();
+        services.AddScoped<IRequestHandler<DeleteLedgerCommand, ErrorOr<string>>, DeleteLedgerCommandHandler>();
+        services.AddScoped<IRequestHandler<ChangeLedgerStatusCommand, ErrorOr<string>>, ChangeLedgerStatusCommandHandler>();
+
+        // Ledger Queries
+        services.AddScoped<IRequestHandler<GetLedgerByIdQuery, ErrorOr<Ledger>>, GetLedgerByIdQueryHandler>();
+        services.AddScoped<IRequestHandler<GetLedgersQuery, ErrorOr<IEnumerable<VLedger>>>, GetLedgersQueryHandler>();
+        services.AddScoped<IRequestHandler<GetLedgersPaginatedQuery, Pager<VLedger>>, GetLedgersPaginatedQueryHandler>();
+        services.AddScoped<IRequestHandler<GetLedgerTypesQuery, ErrorOr<IEnumerable<LedgerType>>>, GetLedgerTypesQueryHandler>();
+        services.AddScoped<IRequestHandler<GetLedgerTypeByIdQuery, ErrorOr<LedgerType>>, GetLedgerTypeByIdQueryHandler>();
+
+        // OtherName Commands
+        services.AddScoped<IRequestHandler<CreateOtherNameCommand, ErrorOr<VOtherNames>>, CreateOtherNameCommandHandler>();
+        services.AddScoped<IRequestHandler<CreateOtherNameGuarantorCommand, ErrorOr<VGuarantor>>, CreateOtherNameGuarantorCommandHandler>();
+        services.AddScoped<IRequestHandler<UpdateOtherNameCommand, ErrorOr<VOtherNames>>, UpdateOtherNameCommandHandler>();
+        services.AddScoped<IRequestHandler<DeleteOtherNameCommand, ErrorOr<bool>>, DeleteOtherNameCommandHandler>();
+        services.AddScoped<IRequestHandler<UpdateOtherNameStatusCommand, ErrorOr<VOtherNames>>, UpdateOtherNameStatusCommandHandler>();
+        services.AddScoped<IRequestHandler<ConvertToCustomerCommand, ErrorOr<bool>>, ConvertToCustomerCommandHandler>();
+        services.AddScoped<IRequestHandler<ConvertToVendorCommand, ErrorOr<bool>>, ConvertToVendorCommandHandler>();
+        services.AddScoped<IRequestHandler<ConvertToEmployeeCommand, ErrorOr<bool>>, ConvertToEmployeeCommandHandler>();
+
+        // OtherName Queries
+        services.AddScoped<IRequestHandler<GetOtherNameByIdQuery, ErrorOr<EntityNames>>, GetOtherNameByIdQueryHandler>();
+        services.AddScoped<IRequestHandler<GetOtherNamesAsPagingQuery, Pager<VOtherNames>>, GetOtherNamesAsPagingQueryHandler>();
 
         return services;
 

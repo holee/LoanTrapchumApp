@@ -52,7 +52,7 @@
                 <input type="hidden" @bind="c.Id" />
             </Template>
         </RadzenDataGridColumn>
-        <RadzenDataGridColumn Property="@nameof(CollateralTypeResponse.CollateralTypeCode)"
+        <RadzenDataGridColumn Property="@nameof(CollateralTypeDto.CollateralTypeCode)"
                               Title="Category"
                               Width="10rem"
                               Context="c"
@@ -63,8 +63,8 @@
             <EditTemplate Context="c">
                 <RadzenDropDown @bind-Value="c.CollateralTypeRefId"
                                 Data="@_colleralTypes"
-                                TextProperty="@nameof(CollateralTypeResponse.CollateralTypeCode)"
-                                ValueProperty="@nameof(CollateralTypeResponse.CollateralTypeId)"
+                                TextProperty="@nameof(CollateralTypeDto.CollateralTypeCode)"
+                                ValueProperty="@nameof(CollateralTypeDto.CollateralTypeId)"
                                 Style="width:100%; display: block;"
                                 InputAttributes="@(new Dictionary<string, object>() { { "aria-label", "Select customer" } })" />
             </EditTemplate>

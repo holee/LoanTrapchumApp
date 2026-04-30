@@ -1,4 +1,5 @@
 ﻿@using Applications.Features.Collaterals.Dtos
+<PageTitle>Edit Collateral</PageTitle>
 <EditForm Model="@model" FormName="collateralLineEdt" OnValidSubmit="@HandleFormSubmit">
     <DataAnnotationsValidator />
     <FluentValidationValidator DisableAssemblyScanning="true" />
@@ -23,8 +24,8 @@
                 <RadzenDropDown TValue="int?"
                                 class="@Defaults.W100"
                                 Data="collateralTypes"
-                                TextProperty="@nameof(CollateralTypeResponse.CollateralTypeCode)"
-                                ValueProperty="@nameof(CollateralTypeResponse.CollateralTypeId)"
+                                TextProperty="@nameof(CollateralTypeDto.CollateralTypeCode)"
+                                ValueProperty="@nameof(CollateralTypeDto.CollateralTypeId)"
                                 SelectedItemChanged="@GetCollateralSubTypes"
                                 @bind-Value="@model.CategoryRefId">
                 </RadzenDropDown>
@@ -37,8 +38,8 @@
                 <RadzenDropDown TValue="int?"
                                 class="@Defaults.W100"
                                 Data="@allSubTypes"
-                                TextProperty="@nameof(CollateralSubTypeResponse.CollateralSubTypeName)"
-                                ValueProperty="@nameof(CollateralSubTypeResponse.Id)"
+                                TextProperty="@nameof(CollateralSubTypeDto.CollateralSubTypeName)"
+                                ValueProperty="@nameof(CollateralSubTypeDto.Id)"
                                 @bind-Value="@model.SubCategoryRefId">
                 </RadzenDropDown>
             </RadzenFormField>

@@ -13,7 +13,7 @@ namespace Infrastructures.Implements;
 
 public sealed class CollateralsRepository(ILogger<CollateralsRepository> logger, IDapperConnectionFactory connectionFactory, IDbContextFactory<DataContext> dbContextFactory) : ICollateralsService
 {
-    public async Task<IEnumerable<CollateralSubTypeResponse>> GetCollateralSubTypes(int? id, string? searchText = null)
+    public async Task<IEnumerable<CollateralSubTypeDto>> GetCollateralSubTypes(int? id, string? searchText = null)
     {
 
 
@@ -33,9 +33,35 @@ public sealed class CollateralsRepository(ILogger<CollateralsRepository> logger,
             queries = queries.Where(x => EF.Functions.Like(x.CollateralSubTypeName!, $"%{searchText}%") ||
                                      EF.Functions.Like(x.Id.ToString()!, $"%{searchText}$"));
         }
-        return await queries.ProjectToType<CollateralSubTypeResponse>().AsNoTracking().ToListAsync();
+        return await queries.ProjectToType<CollateralSubTypeDto>().AsNoTracking().ToListAsync();
     }
-    public async Task<IEnumerable<CollateralTypeResponse>> GetCollateralTypes(int? collateralTypeId = 0, string? q = null)
+
+
+    public async Task<IEnumerable<CollateralSubTypeDto>> GetCollateralSubTypes(int? id, string? searchText = null, CancellationToken cancellationToken = default)
+    {
+
+
+        logger.LogInformation("GetCollateralSubTypes called with id: {Id} and searchText: {SearchText}", id, searchText);
+
+        await using var context = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        IQueryable<CollateralSubType> queries = context.CollateralSubTypes;
+
+        if (id > 0)
+        {
+            queries = queries.Where(x => x.CollateralTypeRefId == id);
+        }
+
+        if (!string.IsNullOrEmpty(searchText))
+        {
+            queries = queries.Where(x => EF.Functions.Like(x.CollateralSubTypeName!, $"%{searchText}%") ||
+                                     EF.Functions.Like(x.Id.ToString()!, $"%{searchText}$"));
+        }
+        return await queries.ProjectToType<CollateralSubTypeDto>().AsNoTracking().ToListAsync(cancellationToken);
+    }
+
+
+    public async Task<IEnumerable<CollateralTypeDto>> GetCollateralTypes(int? collateralTypeId = 0, string? q = null)
     {
 
         logger.LogInformation("GetCollateralTypes called with collateralTypeId: {CollateralTypeId} and q: {Q}", collateralTypeId, q);
@@ -53,7 +79,7 @@ public sealed class CollateralsRepository(ILogger<CollateralsRepository> logger,
         {
             query = query.Where(x => EF.Functions.Like(x.CollateralTypeCode!, $"%{q}%"));
         }
-        return await query.ProjectToType<CollateralTypeResponse>().AsNoTracking().ToListAsync();
+        return await query.ProjectToType<CollateralTypeDto>().AsNoTracking().ToListAsync();
     }
     public async Task<IEnumerable<VCollateral>> GetsCollateralAysnc(string? q = null)
     {
@@ -73,12 +99,12 @@ public sealed class CollateralsRepository(ILogger<CollateralsRepository> logger,
         return await queries.AsNoTracking().ToListAsync();
 
     }
-    public async Task<Pager<VCollateral>> GetCollateralsAysnc(QueryParam param,CancellationToken cancellation=default)
+    public async Task<Pager<VCollateral>> GetCollateralsAysnc(QueryParam param, CancellationToken cancellation = default)
     {
 
         logger.LogInformation("GetCollateralsAysnc called with QueryParam: {QueryParam}", param);
 
-        await using var context =await dbContextFactory.CreateDbContextAsync(cancellation);
+        await using var context = await dbContextFactory.CreateDbContextAsync(cancellation);
 
         IQueryable<VCollateral> queries = context.VCollaterals;
 
@@ -230,6 +256,6 @@ public sealed class CollateralsRepository(ILogger<CollateralsRepository> logger,
 
     }
 
-    
+
 }
 

@@ -46,7 +46,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Playwright" Version="1.59.0" />
     <PackageReference Include="QuestPDF" Version="2026.2.4" />
-    <PackageReference Include="Radzen.Blazor" Version="10.3.1" />
+    <PackageReference Include="Radzen.Blazor" Version="10.3.2" />
     <PackageReference Include="Razor.Templating.Core" Version="3.1.0" />
   </ItemGroup>
 
@@ -103,8 +103,6 @@
     <AdditionalFiles Include="Pages\Lists\Branches\BranchDetailModal.razor" />
     <AdditionalFiles Include="Pages\Lists\Branches\BranchList.razor" />
     <AdditionalFiles Include="Pages\Lists\Branches\BranchUpdateModal.razor" />
-    <AdditionalFiles Include="Pages\Lists\Collaterals\CollateralDetail.razor" />
-    <AdditionalFiles Include="Pages\Lists\Collaterals\CollateralList.razor" />
     <AdditionalFiles Include="Pages\Lists\Collaterals\CollateralLoanRequest.razor" />
     <AdditionalFiles Include="Pages\Lists\Collaterals\CollateralModalAdd.razor" />
     <AdditionalFiles Include="Pages\Lists\Collaterals\CollateralsCustomer.razor" />
@@ -212,30 +210,23 @@
     <AdditionalFiles Include="Pages\Transactions\Loans\LoanProducts\LoanProductModalCreate.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\LoanProducts\LoanProductModalEdit.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\LoanProducts\LPModalDetail.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\LoanRequests\CollateralSearchList.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\LoanRequests\ConfirmModal.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\LoanRequests\CustomerRequest.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\LoanRequests\FileUploadDialogue.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\LoanRequests\GuarantorSearchList.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\LoanRequests\Index.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\LoanRequests\Links\LinkRequestApproved.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\LoanRequests\Links\LinkRequestDisbursment.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\LoanRequests\Links\LinkRequestLoan.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\LoanRequests\LoanCollateralLine.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\LoanRequests\LoanRequestAll.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\LoanRequests\LoanRequestApprove.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\LoanRequests\LoanRequestCollaterals.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\LoanRequests\LoanRequestComplete.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\LoanRequests\LoanRequestCompleted.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\LoanRequests\LoanRequestCreate.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\LoanRequests\LoanRequestCustomer.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\LoanRequests\LoanRequestDetail.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\LoanRequests\LoanRequestDocument.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\LoanRequests\LoanRequestEdit.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\LoanRequests\LoanRequestGaurantor.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\LoanRequests\LoanRequestInfo.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\LoanRequests\LoanRequestNotes.razor" />
-    <AdditionalFiles Include="Pages\Transactions\Loans\LoanRequests\LoanRequestPending.razor" />
+    <AdditionalFiles Include="Pages\Transactions\LoanRequests\CollateralSearchList.razor" />
+    <AdditionalFiles Include="Pages\Transactions\LoanRequests\ConfirmModal.razor" />
+    <AdditionalFiles Include="Pages\Transactions\LoanRequests\CustomerRequest.razor" />
+    <AdditionalFiles Include="Pages\Transactions\LoanRequests\FileUploadDialogue.razor" />
+    <AdditionalFiles Include="Pages\Transactions\LoanRequests\GuarantorSearchList.razor" />
+    <AdditionalFiles Include="Pages\Transactions\LoanRequests\Index.razor" />
+    <AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanCollateralLine.razor" />
+    <AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanRequestAll.razor" />
+    <AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanRequestCollaterals.razor" />
+    <AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanRequestCreate.razor" />
+    <AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanRequestCustomer.razor" />
+    <AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanRequestDetail.razor" />
+    <AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanRequestDocument.razor" />
+    <AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanRequestEdit.razor" />
+    <AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanRequestGaurantor.razor" />
+    <AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanRequestInfo.razor" />
+    <AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanRequestNotes.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\Repayments\ClientAllPayTab.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\Repayments\ClientDuePayTab.razor" />
     <AdditionalFiles Include="Pages\Transactions\Loans\Repayments\ClientLateSchedules.razor" />

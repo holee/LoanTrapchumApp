@@ -2,6 +2,8 @@
 @using Applications.Features.Collaterals.Queries.GetCollateralLineDetails
 @using Applications.Features.Loans.Dtos.Responses
 @using Applications.Utils
+@using TrapchumApp.Components.Actionbars
+@using TrapchumApp.Components.Buttons
 <PageTitle>Collateral Details</PageTitle>
 <RadzenCard Variant="Variant.Outlined" class="@Styles.Mb2">
     <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-mb-1">
@@ -54,7 +56,9 @@
         </RadzenColumn>
     </RadzenRow>
 </RadzenCard>
-
+<AppActions>
+    <EditButton ButtonType="ButtonType.Button" OnClick="@OnUpdateClick" />
+</AppActions>
 <RadzenText TextStyle="TextStyle.Subtitle1" class="rz-mb-1">
     <RadzenIcon Icon="account_balance" /> Linked Loans
 </RadzenText>
@@ -94,16 +98,29 @@
         </RadzenDataGridColumn>
     </Columns>
 </RadzenDataGrid>
+
+<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" class="rz-mt-2">
+    <CancelButton OnClick="@OnCloseClicked" Text="Close"/>
+</RadzenStack>
 @code {
 
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback OnUpdate { get; set; } 
     [Parameter] public long Id { get; set; } = 0;
-
     [Parameter] public string CollateralId { get; set; } = string.Empty;
-
     VCollateralLines? _collateralLine = null;
 
     IEnumerable<VLoanDisbursments> _items = [];
 
+    async Task OnCloseClicked()
+    {
+        await OnClose.InvokeAsync();
+    }
+
+    async Task OnUpdateClick()
+    {
+        await OnUpdate.InvokeAsync();
+    }
     protected override async Task OnInitializedAsync()
     {
 
@@ -135,4 +152,6 @@
         "Overdue" => BadgeStyle.Danger,
         _ => BadgeStyle.Info
     };
+
+    
 }

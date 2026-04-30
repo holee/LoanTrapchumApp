@@ -2,26 +2,26 @@
 using Applications.Features.Transactions.Journals;
 using Applications.Interfaces.Transactions;
 using Applications.Responses.ViewModels.Journals;
+using ErrorOr;
 
 namespace Applications.Services.Transactions.Journals;
 
 public sealed class JournalService(IJournalService jService) : IJournalServiceImpl
 {
 
-    public async Task<Result<string>> CreateJournalAsync(JournalTransactionDtoCreate req,CancellationToken cancellation=default)
+    public async Task<ErrorOr<string>> CreateJournalAsync(JournalTransactionDtoCreate req, CancellationToken cancellation = default)
     {
         var model = req.MapTransactionCreate();
 
-        return await jService.CreateJournalAsync(model,cancellation);
+        return await jService.CreateJournalAsync(model, cancellation);
     }
 
-    //
-    public async Task<Result<string>> CreateOrUpdateJournalAsync(string? journalId, Domains.Models.Journals.JournalEntry journalEntry)
+    public async Task<ErrorOr<string>> CreateOrUpdateJournalAsync(string? journalId, Domains.Models.Journals.JournalEntry journalEntry)
     {
         return await jService.UpdateJournalAsync(journalId, journalEntry);
     }
 
-    public async Task<Result<string>> DeleteJournalAsync(string? id)
+    public async Task<ErrorOr<string>> DeleteJournalAsync(string? id)
     {
         return await jService.DeleteJournalAsync(id);
     }
@@ -31,9 +31,9 @@ public sealed class JournalService(IJournalService jService) : IJournalServiceIm
         return await jService.GetJournalByIdAsync(id);
     }
 
-    public async Task<Result<JournalEntryVm>> GetJournalByIdAsync(string? id, bool include)
+    public async Task<ErrorOr<JournalEntryVm>> GetJournalByIdAsync(string? id, bool include)
     {
-        return await jService.GetJournalByIdAsync(id, include);;
+        return await jService.GetJournalByIdAsync(id, include);
     }
 
     public async Task<Pager<JournalEntryVm>> GetJournalsAsync(int pageIndex, int pageSize, string sortColumn,
@@ -52,14 +52,14 @@ public sealed class JournalService(IJournalService jService) : IJournalServiceIm
         return await jService.GetJournalTypesAsync(expression);
     }
 
-    public async Task<Pager<JournalEntryVm>> GetJournalsAsync(int? branchId,QueryParam param)
+    public async Task<Pager<JournalEntryVm>> GetJournalsAsync(int? branchId, QueryParam param)
     {
-        return await jService.GetJournalsAsync(branchId,param);
+        return await jService.GetJournalsAsync(branchId, param);
     }
 
     public async Task<IEnumerable<VNameList>> GetNamesList(long? id = 0, int takeRows = 0, string? q = null)
     {
         return await jService.GetNameLists(id, takeRows, q);
     }
-    
+
 }

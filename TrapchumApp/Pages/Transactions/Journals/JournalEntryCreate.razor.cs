@@ -95,13 +95,13 @@ public partial class JournalEntryCreate(
         try
         {
             var res = await ledgerService.GetLedgersAsync(0, currencyId, searchText);
-            if (res.IsSuccess)
+            if (res.IsSuccess())
             {
-                Ledgers = res.Data;
+                Ledgers = res.Value;
             }
             else
             {
-                NotificationService.Notify(NotificationSeverity.Error, res.ErrMessage);
+                NotificationService.Notify(NotificationSeverity.Error, res.GetMessage());
             }
             StateHasChanged();
         }
@@ -400,9 +400,9 @@ public partial class JournalEntryCreate(
             }
 
             var resp = await ledgerService!.FindLedgerByIdAsync(journalLine.LedgerRefId);
-            if (resp.IsSuccess)
+            if (resp.IsSuccess())
             {
-                var ledger = resp.Data;
+                var ledger = resp.Value;
                 var typeCode = ledger?.LedgerType?.LedgerTypeCode?.ToUpper();
 
                 if (typeCode == "ACCOUNTS PAYABLE")

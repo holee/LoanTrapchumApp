@@ -4,225 +4,220 @@ using Applications.Features.Currencies.Queries.GetCurrencies;
 using Applications.Features.Ledgers.Dto;
 using Applications.Interfaces.Currencies;
 using Applications.Interfaces.Transactions;
-using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Ledgers;
 using Domains.Models.Journals;
 using Mapster;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Forms;
-using Radzen;
 
-namespace TrapchumApp.Pages.Transactions.Ledgers
+namespace TrapchumApp.Pages.Transactions.Ledgers;
+
+public partial class EditLedgerModal
 {
-    public partial class EditLedgerModal
+    private readonly ILedgerService _ledgService;
+    private readonly ICurrencyService _currencyService;
+    public EditLedgerModal(ILedgerService ledgerService, ICurrencyService currencyService)
     {
-        private readonly ILedgerService _ledgService;
-        private readonly ICurrencyService _currencyService;
-        public EditLedgerModal(ILedgerService ledgerService, ICurrencyService currencyService)
+        _ledgService = ledgerService;
+        _currencyService = currencyService;
+    }
+
+    [Parameter] public int Id { get; set; }
+    IEnumerable<LedgerTypeDto>? LedgerTypes = [];
+    IEnumerable<CurrencyDto>? Currencies = [];
+    IEnumerable<VLedger>? FilterLedgers = [];
+    LedgerUpdateDto model = new LedgerUpdateDto();
+    EditForm? editForm;
+    private bool isValid = true;
+    int? tempParentRefIdId = 0;
+    int? tempCurrencyId = 0;
+    string filterText = "";
+    string filterTypeText = "";
+    bool tempIsSubTypeOf = false;
+    async Task LoadDataTextChanged(LoadDataArgs e)
+    {
+        filterText = e.Filter ?? string.Empty;
+        await GetLedgers(model.CurrencyRefId, filterText);
+    }
+
+    async Task LoadDataLedgerTypeChanged(LoadDataArgs e)
+    {
+        filterTypeText = e.Filter ?? string.Empty;
+        var resp = await _ledgService.FindLedgerTypes(0, filterTypeText);
+        if (resp.IsSuccess())
         {
-            _ledgService = ledgerService;
-            _currencyService = currencyService;
+            LedgerTypes = resp.Value.Adapt<IEnumerable<LedgerTypeDto>>();
+        }
+        else
+        {
+            LedgerTypes = [];
+            NotificationService.Notify(NotificationSeverity.Error, resp.GetMessage());
+        }
+    }
+
+
+    protected async Task GetLedgers(int? currencyId = 1, string? searchText = null)
+    {
+        var resp = await _ledgService.GetLedgersAsync(0, currencyId, null);
+        if (resp.IsSuccess())
+        {
+            FilterLedgers = resp.Value.Adapt<IEnumerable<VLedger>>();
+        }
+        else
+        {
+            NotificationService.Notify(NotificationSeverity.Error, resp.GetMessage());
+        }
+    }
+
+    void Close(bool IsSuccess = false) => DialogService.Close(IsSuccess);
+
+    protected async Task FormValidSubmit()
+    {
+        if (editForm?.EditContext?.Validate() == false) return;
+
+        if (model.IsSubTypeOf && model.ParentRefId <= 0)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Please select ledger name.");
+            return;
         }
 
-        [Parameter] public int Id { get; set; }
-        IEnumerable<LedgerTypeDto>? LedgerTypes = [];
-        IEnumerable<CurrencyDto>? Currencies = [];
-        IEnumerable<VLedger>? FilterLedgers = [];
-        LedgerUpdateDto model = new LedgerUpdateDto();
-        EditForm? editForm;
-        private bool isValid = true;
-        int? tempParentRefIdId = 0;
-        int? tempCurrencyId = 0;
-        string filterText = "";
-        string filterTypeText = "";
-        bool tempIsSubTypeOf = false;
-        async Task LoadDataTextChanged(LoadDataArgs e)
+        if (model.LedgerTypeRefId == 1 && string.IsNullOrEmpty(model.BankNumber))
         {
-            filterText = e.Filter ?? string.Empty;
-            await GetLedgers(model.CurrencyRefId, filterText);
+            NotificationService.Notify(NotificationSeverity.Error, "please input bank acoount number.");
+            return;
         }
 
-        async Task LoadDataLedgerTypeChanged(LoadDataArgs e)
+        var req = model.Adapt<Ledger>();
+
+        var result = await _ledgService.CreateOrUpdateLedger(req);
+
+        if (result.IsSuccess())
         {
-            filterTypeText = e.Filter ?? string.Empty;
-            var resp = await _ledgService.FindLedgerTypes(0, filterTypeText);
-            if (resp.IsSuccess)
-            {
-                LedgerTypes = resp.Data!.Adapt<IEnumerable<LedgerTypeDto>>();
-            }
-            else
-            {
-                LedgerTypes = [];
-                NotificationService.Notify(NotificationSeverity.Error, resp.ErrMessage);
-            }
+            NotificationService.Notify(NotificationSeverity.Success, result.Value);
+            model = new();
+            Close(true);
+        }
+        else
+        {
+            NotificationService.Notify(NotificationSeverity.Error, result.GetMessage());
+        }
+    }
+    protected override async Task OnParametersSetAsync()
+    {
+        var resp = await _ledgService.FindLedgerTypes();
+
+        if ((resp.IsSuccess()))
+        {
+            LedgerTypes = resp.Value.Adapt<IEnumerable<LedgerTypeDto>>();
+        }
+        else
+        {
+            NotificationService.Notify(NotificationSeverity.Error, resp.GetMessage());
         }
 
 
-        protected async Task GetLedgers(int? currencyId = 1, string? searchText = null)
+        var command = new GetCurrenciesQuery(null, new QueryParam(0, 0));
+
+        var rsp = await mediator.Send(command); //_currencyService.GetCurrencies(0);
+
+        //var currenciesRsponse = await _currencyService.GetCurrencies(0);
+
+        Currencies = rsp.Items.Maps<CurrencyDto>();
+
+        await base.OnParametersSetAsync();
+    }
+    protected override async Task OnInitializedAsync()
+    {
+
+        var res = await _ledgService.GetLedgerByIdAsync(Id);
+
+        if (!res.IsError)
         {
-            var resp = await _ledgService.GetLedgersAsync(0, currencyId, null);
-            if (resp.IsSuccess)
+            model = res.Value.Adapt<LedgerUpdateDto>();
+
+            if (model is not null && model!.ParentRefId > 0)
             {
-                FilterLedgers = resp.Data!;
+                model.IsSubTypeOf = true;
+                tempIsSubTypeOf = true;
+                tempParentRefIdId = model!.ParentRefId;
             }
-            else
-            {
-                NotificationService.Notify(NotificationSeverity.Error, resp.ErrMessage);
-            }
+            tempCurrencyId = model?.CurrencyRefId;
+            await GetLedgers(model?.CurrencyRefId);
         }
 
-        void Close(bool IsSuccess = false) => DialogService.Close(IsSuccess);
 
-        protected async Task FormValidSubmit()
+
+        await base.OnInitializedAsync();
+    }
+
+    protected async Task CurrencySelectedChanged(object param)
+    {
+        var currencyId = ((CurrencyDto)param).CurrencyId;
+
+        if (!model.IsMainGl && currencyId == tempCurrencyId)
         {
-            if (editForm?.EditContext?.Validate() == false) return;
+            model.IsSubTypeOf = tempIsSubTypeOf;
+            model.ParentRefId = tempParentRefIdId;
+            await GetLedgers(currencyId, filterText);
 
-            if (model.IsSubTypeOf && model.ParentRefId <= 0)
-            {
-                NotificationService.Notify(NotificationSeverity.Error, "Please select ledger name.");
-                return;
-            }
-
-            if (model.LedgerTypeRefId == 1 && string.IsNullOrEmpty(model.BankNumber))
-            {
-                NotificationService.Notify(NotificationSeverity.Error, "please input bank acoount number.");
-                return;
-            }
-
-            var req = model.Adapt<Ledger>();
-
-            var result = await _ledgService.CreateOrUpdateLedger(req);
-
-            if (result.IsSuccess)
-            {
-                NotificationService.Notify(NotificationSeverity.Success, result.Data);
-                model = new();
-                Close(true);
-            }
-            else
-            {
-                NotificationService.Notify(NotificationSeverity.Error, result.ErrMessage);
-            }
-        }
-        protected override async Task OnParametersSetAsync()
-        {
-            var resp = await _ledgService.FindLedgerTypes();
-
-            if ((resp.IsSuccess))
-            {
-                LedgerTypes = resp.Data!.Maps<LedgerTypeDto>();
-            }
-            else
-            {
-                NotificationService.Notify(NotificationSeverity.Error, resp.ErrMessage);
-            }
-
-
-            var command = new GetCurrenciesQuery(null, new QueryParam(0, 0));
-
-            var rsp = await mediator.Send(command); //_currencyService.GetCurrencies(0);
-
-            //var currenciesRsponse = await _currencyService.GetCurrencies(0);
-
-            Currencies = rsp.Items.Maps<CurrencyDto>();
-
-            await base.OnParametersSetAsync();
-        }
-        protected override async Task OnInitializedAsync()
-        {
-
-            var res = await _ledgService.FindLedgerByIdAsync(Id);
-
-            if (res.IsSuccess)
-            {
-                model = res.Data!.Adapt<LedgerUpdateDto>();
-
-                if (model is not null && model!.ParentRefId > 0)
-                {
-                    model.IsSubTypeOf = true;
-                    tempIsSubTypeOf = true;
-                    tempParentRefIdId = model!.ParentRefId;
-                }
-                tempCurrencyId = model?.CurrencyRefId;
-                await GetLedgers(model?.CurrencyRefId);
-            }
-
-
-
-            await base.OnInitializedAsync();
         }
 
-        protected async Task CurrencySelectedChanged(object param)
+        if (!model.IsMainGl && currencyId != tempCurrencyId)
         {
-            var currencyId = ((CurrencyDto)param).CurrencyId;
+            model.IsSubTypeOf = tempIsSubTypeOf;
+            model.ParentRefId = null;
+            await GetLedgers(currencyId, filterText);
 
-            if (!model.IsMainGl && currencyId == tempCurrencyId)
-            {
-                model.IsSubTypeOf = tempIsSubTypeOf;
-                model.ParentRefId = tempParentRefIdId;
-                await GetLedgers(currencyId, filterText);
+        }
 
-            }
-
-            if (!model.IsMainGl && currencyId != tempCurrencyId)
-            {
-                model.IsSubTypeOf = tempIsSubTypeOf;
-                model.ParentRefId = null;
-                await GetLedgers(currencyId, filterText);
-
-            }
-
-            Console.WriteLine(tempCurrencyId);
+        Console.WriteLine(tempCurrencyId);
 
 
-            // if (Model.IsSubTypeOf && Model.ParentRefId != 0)
-            // {
-            //     Model.ParentRefId = null;
-            // }
-            // if (tempCurrencyId != 0 && tempCurrencyId == currencyId)
-            // {
-            //     Model.ParentRefId = tempParentRefIdId;
-            // }
+        // if (Model.IsSubTypeOf && Model.ParentRefId != 0)
+        // {
+        //     Model.ParentRefId = null;
+        // }
+        // if (tempCurrencyId != 0 && tempCurrencyId == currencyId)
+        // {
+        //     Model.ParentRefId = tempParentRefIdId;
+        // }
 
 
+        StateHasChanged();
+    }
+
+    protected void SelectedChangedLedgerType(object p)
+    {
+        //Model.LedgerTypeRefId = SelectedLedgerType!.LedgerTypeId;
+    }
+    private void SelectCheckedChanged(bool isMain)
+    {
+        if (isMain)
+        {
+            model.IsSubTypeOf = false;
+            model.ParentRefId = null;
+            return;
+        }
+        if (!isMain && Id > 0)
+        {
+            model.IsSubTypeOf = tempIsSubTypeOf;
+            model.ParentRefId = tempParentRefIdId;
             StateHasChanged();
         }
 
-        protected void SelectedChangedLedgerType(object p)
-        {
-            //Model.LedgerTypeRefId = SelectedLedgerType!.LedgerTypeId;
-        }
-        private void SelectCheckedChanged(bool isMain)
-        {
-            if (isMain)
-            {
-                model.IsSubTypeOf = false;
-                model.ParentRefId = null;
-                return;
-            }
-            if (!isMain && Id > 0)
-            {
-                model.IsSubTypeOf = tempIsSubTypeOf;
-                model.ParentRefId = tempParentRefIdId;
-                StateHasChanged();
-            }
-
-        }
-
-        async void SubTypeChanged(bool isSubTypeOf)
-        {
-            if (!isSubTypeOf)
-            {
-                model.ParentRefId = null;
-                return;
-            }
-            else
-            {
-                model.ParentRefId = tempParentRefIdId;
-                // StateHasChanged();
-            }
-            await GetLedgers(model.CurrencyRefId, filterText);
-        }
-
     }
+
+    async void SubTypeChanged(bool isSubTypeOf)
+    {
+        if (!isSubTypeOf)
+        {
+            model.ParentRefId = null;
+            return;
+        }
+        else
+        {
+            model.ParentRefId = tempParentRefIdId;
+            // StateHasChanged();
+        }
+        await GetLedgers(model.CurrencyRefId, filterText);
+    }
+
 }

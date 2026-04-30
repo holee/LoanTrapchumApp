@@ -4,15 +4,16 @@ using Applications.Features.Collaterals.Queries.GetCollateralDetails;
 using Applications.Services.Lists;
 
 namespace TrapchumApp.Pages.Lists.Collaterals;
-public partial class CustomerCollateralLineUpdate 
-{
-    private IEnumerable<CollateralTypeResponse> collateralTypes = [];
 
-    private IEnumerable<CollateralSubTypeResponse> allSubTypes = [];
+public partial class CustomerCollateralLineUpdate
+{
+    private IEnumerable<CollateralTypeDto> collateralTypes = [];
+
+    private IEnumerable<CollateralSubTypeDto> allSubTypes = [];
 
     CollateralDtoCreate model = new();
 
-    CollateralLineDtoCreate collateralLineDto=new();
+    CollateralLineDtoCreate collateralLineDto = new();
 
     private readonly ICollateralsServiceImpl _service;
 
@@ -40,11 +41,14 @@ public partial class CustomerCollateralLineUpdate
     void OnMarketPriceChanged(decimal? arg, CollateralLineDtoCreate line)
     {
 
-        if(!line.SubCategoryRefId.HasValue || line.SubCategoryRefId == 0)
+        if (!line.SubCategoryRefId.HasValue || line.SubCategoryRefId == 0)
         {
             collateralLineDto.MarketPrice = 0.00M;
+
             collateralLineDto.HotPrice = 0.00M;
+
             collateralLineDto.PawnPrice = 0.00M;
+
             return;
         }
 
@@ -94,7 +98,7 @@ public partial class CustomerCollateralLineUpdate
             return;
         }
 
-        var id = ((CollateralTypeResponse)arg).CollateralTypeId;
+        var id = ((CollateralTypeDto)arg).CollateralTypeId;
 
         await GetCollateralSubTypes(id);
     }
@@ -124,7 +128,7 @@ public partial class CustomerCollateralLineUpdate
             return;
         }
 
-        var query=new GetCollateralDetailQuery(collateralId!);
+        var query = new GetCollateralDetailQuery(collateralId!);
 
 
         var rsp = await mediator.Send(query);
@@ -147,7 +151,7 @@ public partial class CustomerCollateralLineUpdate
     async Task HandleFormSubmit()
     {
 
- 
+
 
         var rsp = await _service.CreateAsync(model);
 

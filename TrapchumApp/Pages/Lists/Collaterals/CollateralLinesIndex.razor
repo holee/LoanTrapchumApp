@@ -5,7 +5,7 @@
 @using TrapchumApp.Helpers.Extensions
 @using TrapchumApp.Pages.Lists.Collaterals.Menu
 @using TrapchumApp.Pages
-<PageTitle>Collaterals</PageTitle>
+<PageTitle>All Collaterals</PageTitle>
 <RadzenTabs RenderMode="TabRenderMode.Client"
             @ref="@tabs"
             SelectedIndex="@selectedIndex"
@@ -172,10 +172,10 @@
             new ContextMenuItem { Text = "Delete",  Icon = "delete", Value = "3" },
             new ContextMenuItem { Text = "Withdraw",Icon = "undo",   Value = "4", Disabled = !args.Data.IsUsed }
         }, async (e) =>
-        {
-            ContextMenuService.Close();
-            await HandleContextMenuAction(e, args.Data);
-        });
+    {
+        ContextMenuService.Close();
+        await HandleContextMenuAction(e, args.Data);
+    });
     }
 
     void ShowContextMenuWithContent(MouseEventArgs args, VCollateralLines line)
@@ -187,10 +187,10 @@
             new ContextMenuItem { Text = "Delete",  Icon = "delete", Value = "3" },
             new ContextMenuItem { Text = "Withdraw",Icon = "undo",   Value = "4", Disabled = !line.IsUsed }
         }, async (e) =>
-        {
-            ContextMenuService.Close();
-            await HandleContextMenuAction(e, line);
-        });
+    {
+        ContextMenuService.Close();
+        await HandleContextMenuAction(e, line);
+    });
     }
 
     private async Task HandleContextMenuAction(MenuItemEventArgs e, VCollateralLines item)
@@ -198,7 +198,7 @@
         if (!int.TryParse(e.Value?.ToString(), out int value)) return;
 
         if (value == 1) { AddDetailsTab(item); return; }
-        if (value == 2) { AddEditTab(item);    return; }
+        if (value == 2) { AddEditTab(item); return; }
         if (value == 3) { await DeleteCollateralLine(item); return; }
     }
 
@@ -207,6 +207,7 @@
         var tabKey = $"details_{item.Id}";
 
         var existingIndex = _tabs.FindIndex(t => t.Key == tabKey);
+
         if (existingIndex != -1) { selectedIndex = existingIndex + 1; StateHasChanged(); return; }
 
         RenderFragment content = builder =>
@@ -214,6 +215,11 @@
             builder.OpenComponent<CollateralLineDetails>(0);
             builder.AddAttribute(1, "Id", item.Id);
             builder.AddAttribute(2, "CollateralId", item.CollateralId);
+            builder.AddAttribute(3, "OnClose", EventCallback.Factory.Create(this, () => CloseTab(tabKey)));
+            builder.AddAttribute(4, "OnUpdate", EventCallback.Factory.Create(this, () =>
+           {
+               AddEditTab(item);
+           }));
             builder.SetKey(tabKey);
             builder.CloseComponent();
         };
@@ -228,37 +234,46 @@
         var tabKey = $"edit_{item.Id}";
 
         var existingIndex = _tabs.FindIndex(t => t.Key == tabKey);
+
         if (existingIndex != -1) { selectedIndex = existingIndex + 1; StateHasChanged(); return; }
 
         RenderFragment content = builder =>
         {
             builder.OpenComponent<CustomerCollateralLineCreate>(0);
             builder.AddAttribute(1, "CollateralId", item.CollateralId);
+            builder.AddAttribute(2, "OnClose", EventCallback.Factory.Create(this, () => CloseTab(tabKey)));
+            builder.AddAttribute(3, "CollateralLineId", item.Id);
             builder.SetKey(tabKey);
             builder.CloseComponent();
         };
 
         _tabs.Add(new CustomTab(tabKey, item.OwnerName ?? "Edit", TabActions.Edit, content));
+
         selectedIndex = _tabs.Count;
+
         StateHasChanged();
     }
 
     private void CloseTab(string? key)
     {
         var tab = _tabs.FirstOrDefault(t => t.Key == key);
+
         if (tab is null) return;
 
         var idx = _tabs.IndexOf(tab);
+
         _tabs.Remove(tab);
+
         selectedIndex = Math.Max(0, idx);
+
         StateHasChanged();
     }
 
     private async Task DeleteCollateralLine(VCollateralLines item)
     {
         var confirm = await DialogService.Confirm(
-            "Are you sure you want to delete this collateral line?", "Confirm Delete",
-            new ConfirmOptions { OkButtonText = "Yes", CancelButtonText = "No" });
+        "Are you sure you want to delete this collateral line?", "Confirm Delete",
+        new ConfirmOptions { OkButtonText = "Yes", CancelButtonText = "No" });
 
         if (confirm != true) return;
 
@@ -273,7 +288,7 @@
 
         //NotificationService.Notify(NotificationSeverity.Success, "Deleted successfully");
 
-        _toastService.ShowSuccess("Confirm","Deleted successfully");
+        _toastService.ShowSuccess("Confirm", "Deleted successfully");
 
         await GetCollateralLines(_customerId, _filterText);
     }

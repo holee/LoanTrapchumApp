@@ -2,15 +2,11 @@
 using Applications.Extensions;
 using Applications.Features.Currencies.Dto;
 using Applications.Features.Currencies.Responses;
-using Applications.Features.Ledgers.Dto;
 using Applications.Interfaces.Currencies;
 using Applications.Responses.Message;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Options;
-using Dapper;
 using Domains.Models.Currencies;
 using ErrorOr;
-using Infrastructures.Constants.Procedures;
 using Infrastructures.DataAccess;
 using Infrastructures.Implements.Extensions;
 using Microsoft.EntityFrameworkCore;

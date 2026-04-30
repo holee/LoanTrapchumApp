@@ -4,7 +4,7 @@
 @using Domains.Models.Files
 @using System.Text.Json
 <EditForm Model="@baseModel" FormName="collateralLineCreate" OnValidSubmit="@HandleFormSubmit">
-    <FluentValidationValidator DisableAssemblyScanning="true" />
+   <Blazilla.FluentValidator/>
     <RadzenFieldset Text="Customer Info">
         <RadzenRow class="rz-mb-1">
             <RadzenColumn Size="6">
@@ -90,9 +90,9 @@
                 <RadzenFormField Text="Type" class="@Defaults.W100">
                     <RadzenDropDown TValue="int?"
                                     class="@Defaults.W100"
-                                    Data="collateralTypes"
-                                    TextProperty="@nameof(CollateralTypeResponse.CollateralTypeCode)"
-                                    ValueProperty="@nameof(CollateralTypeResponse.CollateralTypeId)"
+                                    Data="@collateralTypes"
+                                    TextProperty="@nameof(CollateralTypeDto.CollateralTypeCode)"
+                                    ValueProperty="@nameof(CollateralTypeDto.CollateralTypeId)"
                                     SelectedItemChanged="@GetCollateralSubTypes"
                                     @bind-Value="@model!.CategoryRefId" />
                 </RadzenFormField>
@@ -102,8 +102,8 @@
                     <RadzenDropDown TValue="int?"
                                     class="@Defaults.W100"
                                     Data="@allSubTypes"
-                                    TextProperty="@nameof(CollateralSubTypeResponse.CollateralSubTypeName)"
-                                    ValueProperty="@nameof(CollateralSubTypeResponse.Id)"
+                                    TextProperty="@nameof(CollateralSubTypeDto.CollateralSubTypeName)"
+                                    ValueProperty="@nameof(CollateralSubTypeDto.Id)"
                                     @bind-Value="@model.SubCategoryRefId" />
                 </RadzenFormField>
             </RadzenColumn>
@@ -125,8 +125,7 @@
         <RadzenRow class="rz-mb-1">
             <RadzenColumn Size="6">
                 <RadzenFormField Text="Location" class="@Defaults.W100">
-                    <RadzenTextBox class="@Defaults.W100"
-                                   @bind-Value="@model.Location" />
+                    <BlaLocations @bind-Value="@model.Location"/>
                 </RadzenFormField>
             </RadzenColumn>
             <RadzenColumn Size="6">
@@ -195,7 +194,7 @@
                       ButtonStyle="@Defaults.Cancel"
                       Text="Close"
                       Disabled="@isSaving"
-                      Click="() => DialogService.Close(success)"
+                      Click="OnCloseTab"
                       Size="@Defaults.DefaultButton" />
     </RadzenStack>
 </EditForm>
@@ -295,9 +294,9 @@
                 return;
             }
 
-            if (file.Size > MaxFileSize)
+            if (file.Size > maxFileSize)
             {
-                Console.WriteLine("File size exceeds the maximum limit of {0} bytes.", MaxFileSize);
+                Console.WriteLine("File size exceeds the maximum limit of {0} bytes.", maxFileSize);
                 isUploading = false;
                 showComplete = false;
                 showProgress = false;

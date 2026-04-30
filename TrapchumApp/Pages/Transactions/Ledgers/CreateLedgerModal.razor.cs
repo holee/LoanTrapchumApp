@@ -1,27 +1,20 @@
 using Applications.Features.Currencies.Dto;
 using Applications.Features.Currencies.Queries.GetCurrencies;
+using Applications.Features.Ledgers.Commands.CreateOrUpdateLedger;
 using Applications.Features.Ledgers.Dto;
+using Applications.Features.Ledgers.Queries.GetLedgers;
+using Applications.Features.Ledgers.Queries.GetLedgerTypes;
 using Applications.Interfaces.Currencies;
 using Applications.Interfaces.Transactions;
-using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Ledgers;
 using Domains.Enumerations;
 using Domains.Models.Journals;
 using Mapster;
-using Microsoft.AspNetCore.Components.Forms;
-using Radzen;
 
 namespace TrapchumApp.Pages.Transactions.Ledgers
 {
     public partial class CreateLedgerModal
     {
-        private readonly ILedgerService _ledgerService;
-        private readonly ICurrencyService _currencyService;
-        public CreateLedgerModal(ILedgerService ledgerService, ICurrencyService currencyService)
-        {
-            _ledgerService = ledgerService;
-            _currencyService = currencyService;
-        }
 
         EditForm editForm = default!;
         IEnumerable<LedgerTypeDto>? LedgerTypes = [];
@@ -54,22 +47,6 @@ namespace TrapchumApp.Pages.Transactions.Ledgers
             }
             await GetLedgers(model.CurrencyRefId, ledgerSearchText);
         }
-        //async Task LoadDataLedgerTypeChanged(LoadDataArgs e)
-        //{
-        //    //ledgerTypeSearchText = e.Filter ?? string.Empty;
-        //    //var resp = await _ledgerService.FindLedgerTypes(0, ledgerTypeSearchText);
-        //    //if (resp.IsSuccess)
-        //    //{
-        //    //    LedgerTypes = resp.Data!.Adapt<IEnumerable<LedgerTypeDto>>();
-        //    //    counts = resp.Data!.Count();
-        //    //}
-        //    //else
-        //    //{
-        //    //    LedgerTypes = [];
-        //    //    counts = 0;
-        //    //    NotificationService.Notify(NotificationSeverity.Error, resp.ErrMessage);
-        //    //}
-        //}
 
         async Task LoadDataTextChanged(LoadDataArgs e)
         {
@@ -118,37 +95,38 @@ namespace TrapchumApp.Pages.Transactions.Ledgers
 
             var req = model.Adapt<Ledger>();
 
-            var response = await _ledgerService.CreateOrUpdateLedger(req);
+            var command = new CreateOrUpdateLedgerCommand(req);
 
-            if (response.IsSuccess)
+            var response = await mediator.Send(command); //_ledgerService.CreateOrUpdateLedger(req);
+
+            if (response.IsSuccess())
             {
-                NotificationService.Notify(NotificationSeverity.Success, response.Data);
+                NotificationService.Notify(NotificationSeverity.Success, response.Value);
+
                 model = new();
+
                 Close(true);
             }
             else
             {
-                NotificationService.Notify(NotificationSeverity.Error, response.ErrMessage);
+                NotificationService.Notify(NotificationSeverity.Error, response.GetMessage());
             }
         }
         void Close(bool IsSuccess = false) => DialogService.Close(IsSuccess);
 
         protected override async Task OnInitializedAsync()
         {
+            await GetLedgerTypes();
 
-            var resp = await _ledgerService.FindLedgerTypes();
+            await GetCurrencies();
 
-            if (resp.IsSuccess)
-            {
-                LedgerTypes = resp.Data!.Adapt<IEnumerable<LedgerTypeDto>>();
-                counts = resp.Data!.Count();
-            }
-            else
-            {
-                counts = 0;
-                NotificationService.Notify(NotificationSeverity.Error, resp.ErrMessage);
-            }
+            await GetLedgers(selectedCurrencyId);
 
+            await base.OnInitializedAsync();
+        }
+
+        private async Task GetCurrencies()
+        {
             var command = new GetCurrenciesQuery(0, new QueryParam(0, 0));
 
             var rsp = await mediator.Send(command); //_currencyService.GetCurrencies(0);
@@ -156,24 +134,45 @@ namespace TrapchumApp.Pages.Transactions.Ledgers
             model.CurrencyRefId = (int)CurrencyEnum.KHR;
 
             Currencies = rsp.Items.Adapt<IEnumerable<CurrencyDto>>();
+        }
 
-            await GetLedgers(selectedCurrencyId);
+        private async Task GetLedgerTypes()
+        {
+            var command = new GetLedgerTypesQuery(null, string.Empty);
 
-            await base.OnInitializedAsync();
+            var resp = await mediator.Send(command);  //_ledgerService.FindLedgerTypes();
+
+            if (resp.IsSuccess())
+            {
+                LedgerTypes = resp.Value.Adapt<IEnumerable<LedgerTypeDto>>();
+
+                counts = resp.Value.Count();
+            }
+            else
+            {
+                counts = 0;
+
+                NotificationService.Notify(NotificationSeverity.Error, resp.GetMessage());
+            }
+
         }
 
         async Task GetLedgers(int? currencyId = 1, string? searchText = null)
         {
-            var resp = await _ledgerService.GetLedgersAsync(0, currencyId, searchText);
 
-            if (resp.IsSuccess)
+            var command = new GetLedgersQuery(null, currencyId, searchText);
+
+            var resp = await mediator.Send(command);  //_ledgerService.GetLedgersAsync(0, currencyId, searchText);
+
+            if (resp.IsSuccess())
             {
-                FilterLedgers = resp.Data!;
+                FilterLedgers = resp.Value!;
             }
             else
             {
                 FilterLedgers = [];
-                NotificationService.Notify(NotificationSeverity.Error, resp.ErrMessage);
+
+                NotificationService.Notify(NotificationSeverity.Error, resp.GetMessage());
             }
         }
         void SelectedChangedLedgerType(object p)

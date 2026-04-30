@@ -21,7 +21,7 @@ namespace TrapchumApp.Pages.Lists.Collaterals
 
         RadzenDataGrid<VCollateralLines> personalGrid = default!;
         DataGridEditMode editMode = DataGridEditMode.Multiple;
-        IEnumerable<CollateralSubTypeResponse> CollateralPersonals { get; set; } = [];
+        IEnumerable<CollateralSubTypeDto> CollateralPersonals { get; set; } = [];
         protected override async Task OnInitializedAsync()
         {
             CollateralPersonals = await _collateralsService.GetCollateralSubTypes(3);

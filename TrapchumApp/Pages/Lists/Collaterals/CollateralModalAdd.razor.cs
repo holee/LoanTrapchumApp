@@ -21,16 +21,16 @@ namespace TrapchumApp.Pages.Lists.Collaterals
         [Parameter] public string CustomerId { get; set; } = string.Empty;
         [Parameter] public string? CustomerName { get; set; } = string.Empty;
 
-        IEnumerable<CollateralTypeResponse> CollateralTypes = [];
+        IEnumerable<CollateralTypeDto> CollateralTypes = [];
 
-        IEnumerable<CollateralSubTypeResponse> CollateralProperties = [];
+        IEnumerable<CollateralSubTypeDto> CollateralProperties = [];
 
-        IEnumerable<CollateralSubTypeResponse> CollateralPersonals = [];
+        IEnumerable<CollateralSubTypeDto> CollateralPersonals = [];
 
-        IEnumerable<CollateralSubTypeResponse> allSubTypes = [];
+        IEnumerable<CollateralSubTypeDto> allSubTypes = [];
         EditForm editForm { get; set; } = default!;
 
-        CollateralTypeResponse? SelectCollateralType;
+        CollateralTypeDto? SelectCollateralType;
 
         CollateralDtoCreate model { get; set; } = new();
 
@@ -92,7 +92,7 @@ namespace TrapchumApp.Pages.Lists.Collaterals
         {
             if (arg is not null)
             {
-                line.ValueRate = ((CollateralSubTypeResponse)arg).ValueRate ?? 0;
+                line.ValueRate = ((CollateralSubTypeDto)arg).ValueRate ?? 0;
             }
         }
         void OnMarketPriceChanged(decimal? arg, VCollateralLines line)

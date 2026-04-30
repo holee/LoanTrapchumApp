@@ -127,9 +127,9 @@ public partial class LedgerIndex
     {
         var result = await _ledgerService!.ChangeLedgerStatus(new(ledgerId, arg!.Value));
 
-        if (result.IsSuccess)
+        if (!result.IsError)
         {
-            NotificationService.Notify(NotificationSeverity.Success, result.Data);
+            NotificationService.Notify(NotificationSeverity.Success, result.Value);
             if (!includeInactive)
             {
                 await LoadLedgerPageList();
@@ -137,7 +137,7 @@ public partial class LedgerIndex
         }
         else
         {
-            NotificationService.Notify(NotificationSeverity.Error, result.ErrMessage);
+            NotificationService.Notify(NotificationSeverity.Error, result.FirstError.Description);
         }
     }
     protected async Task OnIncludeInActive()
@@ -182,13 +182,13 @@ public partial class LedgerIndex
 
         if (cmf == false) return;
         var isDe = await _ledgerService!.DeleteLedger(ledgerId);
-        if (isDe.IsSuccess)
+        if (!isDe.IsError)
         {
-            NotificationService.Notify(NotificationSeverity.Success, isDe.Data);
+            NotificationService.Notify(NotificationSeverity.Success, isDe.Value);
             await LoadLedgerPageList(searchField);
             return;
         }
-        var messageErr = isDe.ErrMessage;
+        var messageErr = isDe.FirstError.Description;
 
         var used = messageErr.Contains("used");
 
@@ -204,13 +204,13 @@ public partial class LedgerIndex
         });
         if (confirm == false) return;
         var resp = await _ledgerService.ChangeLedgerStatus(new(ledgerId, false));
-        if (resp.IsSuccess)
+        if (!resp.IsError)
         {
             await LoadLedgerPageList(searchField);
         }
         else
         {
-            NotificationService.Notify(NotificationSeverity.Error, resp.ErrMessage);
+            NotificationService.Notify(NotificationSeverity.Error, resp.FirstError.Description);
         }
 
     }

@@ -8,9 +8,9 @@ namespace TrapchumApp.Pages.Lists.Collaterals;
 
 public partial class CustomerCollateralLineEdit
 {
-    private IEnumerable<CollateralTypeResponse> collateralTypes = [];
+    private IEnumerable<CollateralTypeDto> collateralTypes = [];
 
-    private IEnumerable<CollateralSubTypeResponse> allSubTypes = [];
+    private IEnumerable<CollateralSubTypeDto> allSubTypes = [];
 
     CollateralLineDtoCreate model = new();
 
@@ -84,7 +84,7 @@ public partial class CustomerCollateralLineEdit
             return;
         }
 
-        var id = ((CollateralTypeResponse)arg).CollateralTypeId;
+        var id = ((CollateralTypeDto)arg).CollateralTypeId;
 
         await GetCollateralSubTypes(id);
     }

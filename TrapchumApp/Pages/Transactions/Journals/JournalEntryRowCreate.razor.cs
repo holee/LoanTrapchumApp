@@ -7,7 +7,8 @@ using Microsoft.JSInterop;
 
 namespace TrapchumApp.Pages.Transactions.Journals;
 
-public partial class JournalEntryRowCreate(ILedgerServiceImpl ledgerService, IOtherNameServiceImpl nameService)
+public partial class JournalEntryRowCreate(ILedgerServiceImpl ledgerService,
+    IOtherNameServiceImpl nameService)
 {
     [Parameter] public JournalLineDtoCreate JournalLine { get; set; } = new();
     [Parameter] public IEnumerable<VNameList> NameData { get; set; } = [];
@@ -229,9 +230,9 @@ public partial class JournalEntryRowCreate(ILedgerServiceImpl ledgerService, IOt
                 _nameList = null;
             }
 
-            if (ledgerResp.IsSuccess)
+            if (ledgerResp.IsSuccess())
             {
-                var ledger = ledgerResp.Data;
+                var ledger = ledgerResp.Value;
 
                 if (ledger?.LedgerType?.LedgerTypeCode?.ToUpper() == "ACCOUNTS PAYABLE")
                 {
