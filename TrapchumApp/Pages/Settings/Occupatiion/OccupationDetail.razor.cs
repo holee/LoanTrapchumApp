@@ -1,7 +1,5 @@
 using Applications.Features.AdditionalInformations.Dto;
 using Applications.Features.AdditionalInformations.Queries.GetOccupations;
-using Applications.Responses.Paginations;
-using Radzen;
 
 namespace TrapchumApp.Pages.Settings.Occupatiion
 {

@@ -1,6 +1,5 @@
 using Applications.Features.Loans.Dtos.Responses;
 using Applications.Responses.ViewModels.Loans.Schedules;
-using Radzen;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 {

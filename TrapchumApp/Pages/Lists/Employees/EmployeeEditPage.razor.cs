@@ -1,17 +1,7 @@
-using Applications.Features.Addresses.Dto;
-using Applications.Features.Branches.Dtos;
-using Applications.Features.Branches.Queries.GetBranchAsPaging;
-using Applications.Features.Departments.Dto;
-using Applications.Features.Departments.Queries.GetDepartmentAsPaging;
 using Applications.Features.Employees.Commands.EditEmployee;
 using Applications.Features.Employees.Dto;
 using Applications.Features.Employees.Queries.GetEditEmployee;
-using Applications.Responses.Lists.Entities;
 using Applications.Responses.ViewModels.Employees;
-using Applications.Services.Lists;
-using Domains.Models.Addresses;
-using Domains.Models.Files;
-using Domains.Models.Lists;
 
 namespace TrapchumApp.Pages.Lists.Employees
 {

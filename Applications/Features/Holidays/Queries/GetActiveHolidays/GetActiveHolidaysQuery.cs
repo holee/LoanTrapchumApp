@@ -1,8 +1,9 @@
-﻿using ErrorOr;
+﻿using Applications.Features.Holidays.Dtos;
+using ErrorOr;
 
 namespace Applications.Features.Holidays.Queries.GetActiveHolidays;
 
-public record GetActiveHolidaysQuery(int? EndYear = 1) : IRequest<Pager<HolidayVm>>;
+public record GetActiveHolidaysQuery(int? EndYear = 1) : IRequest<Pager<HolidayDto>>;
 
 public sealed class GetActiveHolidaysQueryValidator : AbstractValidator<GetActiveHolidaysQuery>
 {

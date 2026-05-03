@@ -1,6 +1,5 @@
 using Applications.Calculations;
 using Applications.Commons.Mappers;
-using Applications.Enumerations;
 using Applications.Extensions.NumberExtensions;
 using Applications.Features.Branches.Dtos;
 using Applications.Features.LoanPayments.Queries.GetLoanSchedulesByLoanIdAsPaging;
@@ -8,9 +7,8 @@ using Applications.Features.LoanPayments.Requests;
 using Applications.Features.Loans.Dtos.Responses;
 using Applications.Features.Schedules.Queries.GetDueScheduleByLoanId;
 using Applications.Responses.ViewModels.Loans.Schedules;
-using Domains.Models.Loans;
 using Radzen.Blazor;
-using TrapchumApp.Helpers.Extensions;
+
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments;
 
 public partial class DueDateSchedulesPage

@@ -1,11 +1,4 @@
 ﻿@page "/Administrator/Users/{Id:long}/Roles"
-@using Applications.Features.Addresses
-@using Applications.Features.Branches
-@using Applications.Features.Currencies
-@using Applications.Features.Customers.Services
-@using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Interfaces
-@using TrapchumApp.Services
 @attribute [Authorize(Roles = "SuperAdmin,Admin")]
 <div class="container-fluid">
     <div class="card">

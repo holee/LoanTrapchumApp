@@ -3,8 +3,6 @@ using Applications.Features.Currencies.Queries.GetCurrencies;
 using Applications.Extensions.mappers;
 using Applications.Features.Products.Requests;
 using Applications.Interfaces.Loans;
-using Applications.Responses.Paginations;
-using Microsoft.AspNetCore.Components;
 
 namespace TrapchumApp.Pages.Transactions.Loans.LoanProducts
 {

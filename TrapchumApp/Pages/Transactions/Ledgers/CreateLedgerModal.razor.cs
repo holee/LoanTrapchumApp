@@ -4,8 +4,6 @@ using Applications.Features.Ledgers.Commands.CreateOrUpdateLedger;
 using Applications.Features.Ledgers.Dto;
 using Applications.Features.Ledgers.Queries.GetLedgers;
 using Applications.Features.Ledgers.Queries.GetLedgerTypes;
-using Applications.Interfaces.Currencies;
-using Applications.Interfaces.Transactions;
 using Applications.Responses.ViewModels.Ledgers;
 using Domains.Enumerations;
 using Domains.Models.Journals;

@@ -30,11 +30,11 @@ public sealed class PeriodRepository(
 
         var count = await query.CountAsync(cancellation);
 
-        if (param.PageSize > 0)
+        if (param.Take > 0)
         {
             query = query.OrderBy(x => x.Period)
                          .Skip(param.Page)
-                         .Take(param.PageSize);
+                         .Take(param.Take);
         }
 
         var items = await query

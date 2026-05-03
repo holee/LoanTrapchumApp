@@ -1,14 +1,10 @@
 using Applications.Bases;
 using Applications.Extensions.DateTimes;
-using Applications.Extensions.Identity.Authorizations.Extensions;
-using Applications.Extensions.Identity.Policies;
 using Applications.Features.Customers.Commands.DeleteCustomer;
 using Applications.Features.Customers.Queries.GetCustomerAsPaging;
 using Applications.Features.Customers.Response;
-using Applications.Features.Customers.UseCases;
 using Applications.Features.LoanRequests.Command.IsCustomerBusy;
 using Applications.Responses.Lists.Customers;
-using Applications.Responses.Paginations;
 using Domains.Models.Identity;
 using TrapchumApp.Helpers.Enums;
 using TrapchumApp.Helpers.Options;

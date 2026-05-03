@@ -2,8 +2,6 @@ using Applications.Features.CreditAgents.Requests;
 using Applications.Responses.Lists.Entities;
 using Applications.Responses.ViewModels.Employees;
 using Applications.Services.Lists;
-using Microsoft.AspNetCore.Components;
-using Radzen;
 
 namespace TrapchumApp.Pages.Lists.CreditAgents
 {

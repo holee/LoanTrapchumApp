@@ -4,8 +4,7 @@ using Applications.Features.LoanRequests.Command.ApprovedLoanRequest;
 using Applications.Features.LoanRequests.Queryies.GetLoanRequestBy;
 using Applications.Features.LoanRequests.Requests;
 using Applications.Responses.ViewModels.Loans.Requests;
-using Mapster;
-using TrapchumApp.Helpers.Extensions;
+
 namespace TrapchumApp.Pages.Transactions.LoanRequests
 {
     public partial class ConfirmModal(ILogger<ConfirmModal> logger)

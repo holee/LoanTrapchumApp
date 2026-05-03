@@ -1,7 +1,6 @@
 using Applications.Features.Branches.Dtos;
 using Applications.Features.Loans.Dtos.Responses;
 using Applications.Features.Loans.Services;
-using Applications.Responses.Paginations;
 
 namespace TrapchumApp.Pages.Transactions.Loans.WriteOffs
 {

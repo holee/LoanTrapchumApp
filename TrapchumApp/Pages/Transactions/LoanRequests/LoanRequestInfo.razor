@@ -1,14 +1,8 @@
 @using Applications.Features.Customers.Response
 @using Applications.Features.LoanPurposes
-@using Applications.Features.LoanRequests.Interfaces
 @using Applications.Features.Periods.Dto
+@using Applications.Features.Settings.Dto
 @using Applications.Responses.Loans.Disbursements
-@using Applications.Responses.ViewModels.Loans.Requests
-@using Applications.Responses.ViewModels.Settings
-@using Domains.Models.Loans
-@using Radzen.Blazor
-@using TrapchumApp.Services
-
 <div class="loan-form">
     @* ── Section 1: អតិថិជន និង ទឹកប្រាក់ ── *@
     <div class="form-section">
@@ -85,8 +79,8 @@
             <RadzenColumn SizeSM="12" SizeMD="4" Size="4">
                 <RadzenFormField Text="ប្រភេទកម្ចី" class="rz-w-100">
                     <RadzenDropDown @bind-Value="Model.LoanCategoryRefId"
-                                    TextProperty="@nameof(LoanCategoryResponse.LoanCategoryCode)"
-                                    ValueProperty="@nameof(LoanCategoryResponse.LoanCategoryId)"
+                                    TextProperty="@nameof(LoanCategoryDto.LoanCategoryCode)"
+                                    ValueProperty="@nameof(LoanCategoryDto.LoanCategoryId)"
                                     AllowFiltering="true"
                                     class="rz-w-100"
                                     Data="loanCategories" />

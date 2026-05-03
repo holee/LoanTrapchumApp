@@ -158,7 +158,7 @@ public sealed class AddressRepository : IAddressService
 
         var page = await queries.AsNoTracking()
                                 .ProjectToType<CountryDto>()
-                                .ToPagedAsync(param.Page, param.PageSize, cancellation);
+                                .ToPagedAsync(param.Page, param.Take, cancellation);
         return page;
     }
 
@@ -172,7 +172,7 @@ public sealed class AddressRepository : IAddressService
         var pages = await queries
                 .ProjectToType<ProvinceDto>()
                 .AsNoTracking()
-                .ToPagedAsync(param.Page, param.PageSize, cancellation);
+                .ToPagedAsync(param.Page, param.Take, cancellation);
         return pages;
 
     }
@@ -188,7 +188,7 @@ public sealed class AddressRepository : IAddressService
 
         var page = queries.ProjectToType<DistrictDto>()
                           .AsNoTracking()
-                          .ToPagedAsync(param.Page, param.PageSize, cancellation);
+                          .ToPagedAsync(param.Page, param.Take, cancellation);
         return await page;
     }
 
@@ -205,7 +205,7 @@ public sealed class AddressRepository : IAddressService
         var page = await queries
                         .ProjectToType<CommuneDto>()
                         .AsNoTracking()
-                        .ToPagedAsync(param.Page, param.PageSize, cancellation);
+                        .ToPagedAsync(param.Page, param.Take, cancellation);
 
         return page;
     }
@@ -224,7 +224,7 @@ public sealed class AddressRepository : IAddressService
         var page = await queries
                            .ProjectToType<VillageDto>()
                            .AsNoTracking()
-                           .ToPagedAsync(param.Page, param.PageSize, cancellation);
+                           .ToPagedAsync(param.Page, param.Take, cancellation);
         return page;
     }
 
@@ -242,7 +242,7 @@ public sealed class AddressRepository : IAddressService
         var page = await queries
                                 .ProjectToType<CityDto>()
                                 .AsNoTracking()
-                                .ToPagedAsync(param.Page, param.PageSize, cancellation);
+                                .ToPagedAsync(param.Page, param.Take, cancellation);
 
         return page;
     }
@@ -460,7 +460,7 @@ public sealed class AddressRepository : IAddressService
             query = query.OrderByDescending(x => EF.Property<object>(x, param.SortColumn!));
 
         var counts = await query.CountAsync(cancellation);
-        var data = await query.Skip(param.Page).Take(param.PageSize)
+        var data = await query.Skip(param.Page).Take(param.Take)
                         .Select(x => new ProvinceViewModel
                         {
                             ProvinceId = x.ProvinceId,
@@ -579,7 +579,7 @@ public sealed class AddressRepository : IAddressService
             query = query.OrderByDescending(x => EF.Property<object>(x, param.SortColumn!));
 
         var counts = await query.CountAsync();
-        var data = await query.Skip(param.Page).Take(param.PageSize).AsNoTracking().ToListAsync();
+        var data = await query.Skip(param.Page).Take(param.Take).AsNoTracking().ToListAsync();
         return new Pager<VDistricts>(data, counts);
     }
 
@@ -687,7 +687,7 @@ public sealed class AddressRepository : IAddressService
             query = query.OrderByDescending(x => EF.Property<object>(x, param.SortColumn!));
 
         var counts = await query.CountAsync();
-        var data = await query.Skip(param.Page).Take(param.PageSize).AsNoTracking().ToListAsync();
+        var data = await query.Skip(param.Page).Take(param.Take).AsNoTracking().ToListAsync();
         return new Pager<VCommunes>(data, counts);
     }
 
@@ -815,7 +815,7 @@ public sealed class AddressRepository : IAddressService
             query = query.OrderByDescending(x => EF.Property<object>(x, param.SortColumn!));
 
         var counts = await query.CountAsync();
-        var data = await query.Skip(param.Page).Take(param.PageSize).AsNoTracking().ToListAsync();
+        var data = await query.Skip(param.Page).Take(param.Take).AsNoTracking().ToListAsync();
         return new Pager<VVillages>(data, counts);
     }
 

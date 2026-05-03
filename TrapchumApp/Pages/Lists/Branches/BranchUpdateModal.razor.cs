@@ -5,7 +5,6 @@ using Applications.Features.Branches.Queries.GetUpdateBranch;
 using Applications.Features.Currencies.Dto;
 using Applications.Interfaces.Banks;
 using Domains.Models.Addresses;
-using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Lists.Branches
 {

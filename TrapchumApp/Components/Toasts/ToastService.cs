@@ -37,16 +37,16 @@ public sealed class ToastService(ToastOptions options)
     /// <summary>Configuration options supplied at registration time.</summary>
     public ToastOptions Options { get; } = options;
 
-    public void ShowInfo(string title, string message, int durationMs = 1000)
+    public void ShowInfo(string title, string message, int durationMs = 5000)
         => Show(title, message, ToastLevel.Info, durationMs);
 
-    public void ShowSuccess(string message, string title = "", int durationMs = 1000)
+    public void ShowSuccess(string message, string title = "", int durationMs = 5000)
         => Show(title, message, ToastLevel.Success, durationMs);
 
-    public void ShowWarning(string message, string title = "", int durationMs = 1000)
+    public void ShowWarning(string message, string title = "", int durationMs = 5000)
         => Show(title, message, ToastLevel.Warning, durationMs);
 
-    public void ShowError(string message, string title = "", int durationMs = 1000)
+    public void ShowError(string message, string title = "", int durationMs = 5000)
         => Show(title, message, ToastLevel.Error, durationMs);
 
     public void Show(string title, string message, ToastLevel level, int durationMs)

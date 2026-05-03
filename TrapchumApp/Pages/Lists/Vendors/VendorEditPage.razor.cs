@@ -1,8 +1,6 @@
-using Applications.Features.Addresses.Dto;
 using Applications.Features.OtherNames.Dto;
 using Applications.Features.Vendors.Commands.UpdateVendor;
 using Applications.Features.Vendors.Queries.GetUpdateVendorById;
-using Applications.Services.Lists;
 
 namespace TrapchumApp.Pages.Lists.Vendors
 {

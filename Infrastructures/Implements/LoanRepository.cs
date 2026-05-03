@@ -330,7 +330,7 @@ namespace Infrastructures.Implements
 
             var counts = await queries.CountAsync(cancellation);
 
-            var items = await queries.Skip(param.Page).Take(param.PageSize)
+            var items = await queries.Skip(param.Page).Take(param.Take)
                             .AsNoTracking()
                             .ToListAsync(cancellation);
 
@@ -376,7 +376,7 @@ namespace Infrastructures.Implements
 
             var counts = await queries.CountAsync(cancellation);
 
-            var items = await queries.Skip(param.Page).Take(param.PageSize)
+            var items = await queries.Skip(param.Page).Take(param.Take)
                             .AsNoTracking()
                             .ToListAsync(cancellation);
 
@@ -411,7 +411,7 @@ namespace Infrastructures.Implements
 
             var counts = await queries.CountAsync(cancellation);
 
-            var items = await queries.Skip(param.Page).Take(param.PageSize)
+            var items = await queries.Skip(param.Page).Take(param.Take)
                             .AsNoTracking()
                             .ToListAsync(cancellation);
 
@@ -596,9 +596,9 @@ namespace Infrastructures.Implements
                                                  filter.Contains(x.ScheduleStatusId))
                                      .OrderBy(x => x.InstallmentNo)
                                      .AsNoTracking();
-            if (param?.PageSize > 0)
+            if (param?.Take > 0)
             {
-                queries = queries.Take(param.PageSize);
+                queries = queries.Take(param.Take);
             }
 
             var item1 = await queries.AsNoTracking().ToListAsync(cancellation);

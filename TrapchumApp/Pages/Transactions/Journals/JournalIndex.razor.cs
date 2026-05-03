@@ -1,6 +1,5 @@
 ﻿using Applications.Extensions.mappers;
 using Applications.Requests.Journals;
-using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Journals;
 using Applications.Services.Transactions.Journals;
 using Radzen.Blazor;

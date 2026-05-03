@@ -8,8 +8,8 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests;
 
 public partial class CoLoanRequestSearchList
 {
-    [Parameter] public EventCallback<VCustomerList> OnSelected { get; set; }
-    [Parameter] public EventCallback<IEnumerable<VCustomerList>> SelectMany { get; set; } 
+    [Parameter] public EventCallback<VCustomerList> OnSelected { get; set; } 
+    [Parameter] public EventCallback<IEnumerable<VCustomerList>> OnSelecteds { get; set; }  
 
     private RadzenTextBox _customerSearchText = default!;
 
@@ -77,6 +77,14 @@ public partial class CoLoanRequestSearchList
         await _gridCoLoanRequest.Reload();
     }
 
+    void OnRowRender(RowRenderEventArgs<VCustomerList> args)
+    {
+
+        if (args.Data is null) return;
+
+        args.Data.RowIndex = args.Index + 1;
+    }
+
     private async Task OnKeyDown(KeyboardEventArgs args)
     {
 
@@ -111,11 +119,21 @@ public partial class CoLoanRequestSearchList
     }
 
 
-    private async Task GetSelectedGuarantor(VCustomerList? g) 
+    private void OnRowSelectLimited(VCustomerList g)
+    {
+        if (_selectedCustomers.Contains(g))
+        {
+            _selectedCustomers.Remove(g);
+        }
+        else if (_selectedCustomers.Count < 3)
+        {
+            _selectedCustomers.Add(g);
+        }
+    }
+
+    private async Task GetSelectedCustomer(VCustomerList? g) 
     {
         if (g is null) return;
-
-        FullName = g.FullName;
 
         await OnSelected.InvokeAsync(g);
 
@@ -123,18 +141,18 @@ public partial class CoLoanRequestSearchList
     }
 
     /// <summary>Accepts all checked guarantors (Accept Selected button).</summary>
-    private async Task GetSelectedGuarantors(IEnumerable<VCustomerList> selected)
+    private async Task GetSelectedCustomer(IEnumerable<VCustomerList> selected)
     {
         if (!selected.Any()) return;
 
-        FullName = string.Join(", ", selected.Select(x => x.FullName));
+        if (selected.Count() > 3) return;
 
-        await SelectMany.InvokeAsync(selected);
+        await OnSelecteds.InvokeAsync(selected);
 
         await _coRequestPopup.CloseAsync();
     }
 
-
+        /// <summary>Closes the popup and clears the selected customers.</summary>
     private async Task ClosePopup()
     {
         _selectedCustomers = [];

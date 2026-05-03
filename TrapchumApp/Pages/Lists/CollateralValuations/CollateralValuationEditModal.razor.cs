@@ -1,7 +1,6 @@
 using Applications.Features.CollateralValuations.Commands.UpdateCollateralValuation;
 using Applications.Features.CollateralValuations.Dtos;
 using Applications.Interfaces;
-using Microsoft.AspNetCore.Components;
 
 namespace TrapchumApp.Pages.Lists.CollateralValuations;
 

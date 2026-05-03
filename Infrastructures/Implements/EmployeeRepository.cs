@@ -176,9 +176,9 @@ public sealed class EmployeeRepository(IDapperConnectionFactory connectionFactor
 
         var counts = queries.Count();
 
-        if (q.PageSize > 0)
+        if (q.Take > 0)
         {
-            queries = queries.Skip(q.Page).Take(q.PageSize);
+            queries = queries.Skip(q.Page).Take(q.Take);
         }
 
         var items = await queries.AsNoTracking()
@@ -203,7 +203,7 @@ public sealed class EmployeeRepository(IDapperConnectionFactory connectionFactor
             SortDescending = q.SortDescending,
             SelectColumns = selectColumns,
             Skip = q.Page,
-            PageSize = q.PageSize
+            PageSize = q.Take
         };
 
         using var multi = await connection.QueryMultipleAsync("dbo.spGetEmployees_Dynamic",

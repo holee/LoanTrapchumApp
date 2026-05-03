@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using Applications.Enumerations;
+using Applications.Features.LoanRequests.Dtos;
 using Applications.Responses.ViewModels.Loans.LoanRequests;
 
 namespace Applications.Responses.ViewModels.Loans.Requests;
@@ -88,5 +89,6 @@ public sealed class VLoanRequests
     [NotMapped] public IEnumerable<VLoanRequestCollateralLines> Collaterals { get; set; } = [];
     [NotMapped] public IEnumerable<VLoanRequestsDocuments> Documents { get; set; } = [];
     [NotMapped] public IEnumerable<VLoanRequestDescription> Descriptions { get; set; } = [];
+    [NotMapped] public IEnumerable<CoPawnCustomerDto> CoPawnRequests { get; set; } = [];
     [NotMapped] public VCustomerDetails Customer { get; set; } = new();
 }

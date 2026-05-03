@@ -1,4 +1,3 @@
-using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Services.Loans;
 using Domains.Models.Identity;

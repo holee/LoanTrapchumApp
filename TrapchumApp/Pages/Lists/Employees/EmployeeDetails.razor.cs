@@ -2,7 +2,6 @@ using Applications.Features.Employees.Queries.GetEmployeeById;
 using Applications.Features.Loans.Dtos.Responses;
 using Applications.Responses.ViewModels.Employees;
 using Applications.Responses.ViewModels.Loans.Requests;
-using TrapchumApp.Helpers.Extensions;
 using System.Globalization;
 
 namespace TrapchumApp.Pages.Lists.Employees;

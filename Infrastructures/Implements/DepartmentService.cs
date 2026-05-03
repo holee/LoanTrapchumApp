@@ -202,7 +202,7 @@ public class DepartmentService : IDepartmentService
     public async Task<Pager<VDepartment>> GetDepartments(int? departmentId, QueryParam param, CancellationToken cancellation = default)
     {
 
-        _logger.LogInformation("Fetching paginated departments with parameters - Skip: {Skip}, PageSize: {PageSize}, Filter: {Filter}, SortColumn: {SortColumn}, SortDescending: {SortDescending}, IsIncludeInActive: {IsIncludeInActive}", param.Page, param.PageSize, param.Filter, param.SortColumn, param.SortDescending, param.IncludeInActive);
+        _logger.LogInformation("Fetching paginated departments with parameters - Skip: {Skip}, PageSize: {PageSize}, Filter: {Filter}, SortColumn: {SortColumn}, SortDescending: {SortDescending}, IsIncludeInActive: {IsIncludeInActive}", param.Page, param.Take, param.Filter, param.SortColumn, param.SortDescending, param.IncludeInActive);
 
         await using var context = await _contextFactory.CreateDbContextAsync(cancellation);
 
@@ -214,7 +214,7 @@ public class DepartmentService : IDepartmentService
 
         if (param.Page > 0)
         {
-            query = query.Skip(param.Page).Take(param.PageSize);
+            query = query.Skip(param.Page).Take(param.Take);
         }
 
         var data = await query.AsNoTracking().ToListAsync(cancellation);

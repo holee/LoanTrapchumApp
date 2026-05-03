@@ -1,10 +1,7 @@
 
 using Applications.Interfaces.Addresses;
-using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Addresses;
-using Radzen;
 using TrapchumApp.Pages.Lists.Operations.Communes;
-using TrapchumApp.Pages.Lists.Operations.Provinces;
 
 namespace TrapchumApp.Pages.Lists.Operations.Districts
 {

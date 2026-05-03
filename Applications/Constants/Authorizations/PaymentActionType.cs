@@ -1,8 +1,8 @@
 ﻿namespace Applications.Constants.Authorizations
 {
-    public class PaymentActionType : Feature 
-    {
+    //public class PaymentActionType : Actions 
+    //{
        
 
-    }
+    //}
 }

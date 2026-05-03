@@ -51,5 +51,5 @@ public sealed class EntityNames : BaseEntity
     public Employee? Employee { get; set; }
     public Vendor? Vendor { get; set; }
     public List<LoanGuarantorLink> GuarantorsLink { get; set; } = [];
-    public List<CoLoanRequest> CoLoanRequests { get; set; } = [];
+    //public List<CoPawnRequest> CoLoanRequests { get; set; } = [];
 }

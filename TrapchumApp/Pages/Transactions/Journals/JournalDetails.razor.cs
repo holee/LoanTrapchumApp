@@ -1,8 +1,6 @@
 using Applications.Features.Transactions.Journals;
 using Applications.Responses.ViewModels.Journals;
 using Applications.Services.Transactions.Journals;
-using Microsoft.AspNetCore.Components;
-using Radzen;
 
 namespace TrapchumApp.Pages.Transactions.Journals
 {

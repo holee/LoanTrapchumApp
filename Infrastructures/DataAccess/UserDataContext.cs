@@ -6,7 +6,15 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 namespace Infrastructures.DataAccess
 {
-    public class UserDataContext : IdentityDbContext<ApplicationUser, ApplicationRole, string>
+    public sealed class UserDataContext : IdentityDbContext<
+        ApplicationUser,
+        ApplicationRole,
+        string,
+        ApplicationUserClaim,
+        IdentityUserRole<string>,
+        IdentityUserLogin<string>,
+        ApplicationRoleClaim,
+        IdentityUserToken<string>>
     {
         public UserDataContext(DbContextOptions<UserDataContext> options)
             : base(options)
@@ -16,6 +24,7 @@ namespace Infrastructures.DataAccess
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
             builder.Entity<ApplicationUser>().ToTable("Users", SchemaNames.Security);
             builder.Entity<UserProfiles>().ToTable("UserProfiles", SchemaNames.Security);
             builder.Entity<ApplicationRole>().ToTable("Roles", SchemaNames.Security);
@@ -26,8 +35,6 @@ namespace Infrastructures.DataAccess
             builder.Entity<IdentityUserToken<string>>().ToTable("UserTokens", SchemaNames.Security);
             builder.ApplyConfiguration(new PermissionsConfigurations());
 
-
-
             builder.Entity<UserProfiles>()
                 .HasKey(x => new { x.UserRefId });
 
@@ -36,11 +43,6 @@ namespace Infrastructures.DataAccess
                 .WithOne()
                 .HasForeignKey<UserProfiles>(u => u.UserRefId);
 
-            //builder.Entity<ApplicationUser>()
-            //    .HasOne<UserLoanSize>()
-            //    .WithOne()
-            //    .HasForeignKey<UserLoanSize>(uc => uc.UserRefId)
-            //    .IsRequired(false);
         }
 
         public DbSet<ApplicationRoleClaim> ApplicationRoleClaim { get; set; }

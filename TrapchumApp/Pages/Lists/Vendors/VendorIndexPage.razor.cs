@@ -1,6 +1,4 @@
 using Applications.Extensions;
-using Applications.Features.Addresses.Dto;
-using Applications.Features.OtherNames.Dto;
 using Applications.Features.Vendors.Commands.ChangeVendorStatus;
 using Applications.Features.Vendors.Commands.DeleteVendor;
 using Applications.Features.Vendors.Dto.Responses;

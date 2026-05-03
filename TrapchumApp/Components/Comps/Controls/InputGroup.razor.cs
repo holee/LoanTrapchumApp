@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Components;
-
 namespace TrapchumApp.Components.Comps.Controls
 {
     public partial class InputGroup

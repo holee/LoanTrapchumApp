@@ -2,7 +2,6 @@ using Applications.Features.Collaterals.Dtos;
 using Applications.Features.Settings.Dto;
 using Applications.Interfaces.Settings;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Settings;
 using Domains.Models.Collaterals;
 using Domains.Models.Loans;
 using Domains.Models.Settings;
@@ -206,8 +205,8 @@ public sealed class AppSettingService(
 
             var count = await query.CountAsync(cancellation);
 
-            if (param.PageSize > 0)
-                query = query.Skip(param.Page).Take(param.PageSize);
+            if (param.Take > 0)
+                query = query.Skip(param.Page).Take(param.Take);
 
             var items = await query.AsNoTracking().ToListAsync(cancellation);
 
@@ -432,7 +431,7 @@ public sealed class AppSettingService(
 
             var items = await query
                 .Skip(param.Page)
-                .Take(param.PageSize)
+                .Take(param.Take)
                 .Select(x => new CollateralSubTypeDto
                 {
                     Id = x.Id,

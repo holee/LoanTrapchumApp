@@ -1,11 +1,8 @@
 using Applications.Bases;
-using Applications.Enumerations;
 using Applications.Features.Branches.Command.ChangeBranchState;
 using Applications.Features.Branches.Command.DeleteBranch;
 using Applications.Features.Branches.Dtos;
 using Applications.Features.Branches.Queries.GetBranchAsPaging;
-using Applications.Responses.Paginations;
-using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Lists.Branches
 {

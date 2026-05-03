@@ -56,7 +56,7 @@ namespace Infrastructures.Implements
                                                                             {branchId},
                                                                             {(int)status},
                                                                             {param?.Page},
-                                                                            {param?.PageSize},
+                                                                            {param?.Take},
                                                                             {param?.Filter}
                                                                       """)
                                            .AsNoTracking()
@@ -94,7 +94,7 @@ namespace Infrastructures.Implements
 
             param ??= new QueryParam();
 
-            var pageNumber = (int)Math.Floor((param.Page) / (double)(param.PageSize)) + 1;
+            var pageNumber = (int)Math.Floor((param.Page) / (double)(param.Take)) + 1;
 
             var parameters = new DynamicParameters();
 
@@ -108,7 +108,7 @@ namespace Infrastructures.Implements
 
             parameters.Add("@PageNumber", pageNumber, DbType.Int32);
 
-            parameters.Add("@PageSize", param.PageSize, DbType.Int32);
+            parameters.Add("@PageSize", param.Take, DbType.Int32);
 
             parameters.Add("@Filter", param.Filter ?? string.Empty, DbType.String);
 
@@ -159,7 +159,7 @@ namespace Infrastructures.Implements
             var items = await baseQueries
                                     .AsNoTracking()
                                     .Skip(Param.Page)
-                                    .Take(Param.PageSize)
+                                    .Take(Param.Take)
                                     .ToListAsync(token);
 
             return new Pager<VSchedule>(items, counts);

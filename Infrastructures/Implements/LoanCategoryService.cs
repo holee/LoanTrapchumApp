@@ -61,9 +61,9 @@ namespace Infrastructures.Implements
             }
 
 
-            if (param.PageSize > 0)
+            if (param.Take > 0)
             {
-                query = query.Skip(param.Page).Take(param.PageSize);
+                query = query.Skip(param.Page).Take(param.Take);
             }
 
             var items = await query.AsNoTracking().ToListAsync();

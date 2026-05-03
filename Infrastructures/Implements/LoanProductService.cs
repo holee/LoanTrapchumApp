@@ -154,13 +154,13 @@ namespace Infrastructures.Implements
 
             var counts = queries.Count();
 
-            if (param.PageSize > 0)
+            if (param.Take > 0)
             {
-                queries = queries.Skip(param.Page).Take(param.PageSize);
+                queries = queries.Skip(param.Page).Take(param.Take);
             }
 
             var items = await queries.Skip(param.Page)
-                                        .Take(param.PageSize)
+                                        .Take(param.Take)
                                         .ProjectToType<T>()
                                         .AsNoTracking()
                                         .ToListAsync();
@@ -188,9 +188,9 @@ namespace Infrastructures.Implements
 
             var counts = queries.Count();
 
-            if (param.PageSize > 0)
+            if (param.Take > 0)
             {
-                queries = queries.Skip(param.Page).Take(param.PageSize);
+                queries = queries.Skip(param.Page).Take(param.Take);
             }
 
             var items = await queries.AsNoTracking()

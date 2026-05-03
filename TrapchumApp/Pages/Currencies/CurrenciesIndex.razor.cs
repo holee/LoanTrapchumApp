@@ -1,7 +1,5 @@
 using Applications.Features.Currencies.Responses;
 using Applications.Interfaces.Currencies;
-using Applications.Responses.Paginations;
-using Radzen;
 
 namespace TrapchumApp.Pages.Currencies
 {
@@ -48,7 +46,7 @@ namespace TrapchumApp.Pages.Currencies
                 var param = new QueryParam
                 {
                     Page = pageIndex,
-                    PageSize = pageSize,
+                    Take = pageSize,
                     SortColumn = "CurrencyCode",
                     SortDescending = false,
                     Filter = filter

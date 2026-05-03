@@ -1,7 +1,5 @@
 using Applications.Features.Settings.Queries.CollateralSubTypes.GetCollateralSubTypes;
 using Applications.Features.Collaterals.Dtos;
-using Applications.Interfaces.Lists;
-using Applications.Responses.Paginations;
 using Domains.Models.Collaterals;
 using Radzen.Blazor;
 using TrapchumApp.Pages.Lists.Collaterals;

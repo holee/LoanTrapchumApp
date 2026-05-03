@@ -257,7 +257,7 @@ public sealed class OtherNameRepository(
 
         var counts = await queries.CountAsync(cancellation);
 
-        var items = await queries.Skip(q.Page).Take(q.PageSize).ToListAsync(cancellation);
+        var items = await queries.Skip(q.Page).Take(q.Take).ToListAsync(cancellation);
 
         return new Pager<VOtherNames>(items, counts);
     }
@@ -291,8 +291,8 @@ public sealed class OtherNameRepository(
 
         var counts = await queries.CountAsync(cancellation);
 
-        if (q.PageSize > 0)
-            queries = queries.Skip(q.Page).Take(q.PageSize);
+        if (q.Take > 0)
+            queries = queries.Skip(q.Page).Take(q.Take);
 
         var items = await queries.AsNoTracking().ToListAsync(cancellation);
         return new Pager<VOtherNames>(items, counts);
@@ -313,9 +313,9 @@ public sealed class OtherNameRepository(
                 EF.Functions.Like(x.AltName!, $"%{param.Filter}%"))
             .WhereIf(!string.IsNullOrEmpty(nameId), x => x.Id.Contains(nameId!));
 
-        if (param.PageSize > 0)
+        if (param.Take > 0)
         {
-            queries = queries.Take(param.PageSize)
+            queries = queries.Take(param.Take)
                 .OrderByDescending(x => x.FirstName)
                 .ThenByDescending(x => x.LastName);
         }
@@ -341,9 +341,9 @@ public sealed class OtherNameRepository(
 
         var counts = await queries.CountAsync(cancellation);
 
-        if (param.PageSize > 0)
+        if (param.Take > 0)
         {
-            queries = queries.Take(param.PageSize)
+            queries = queries.Take(param.Take)
                 .OrderByDescending(x => x.FirstName)
                 .ThenByDescending(x => x.LastName);
         }

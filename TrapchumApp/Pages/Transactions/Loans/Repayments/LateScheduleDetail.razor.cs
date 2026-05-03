@@ -1,5 +1,4 @@
 using Applications.Commons.Mappers;
-using Applications.Enumerations;
 using Applications.Features.LoanPayments.Requests;
 using Applications.Features.Loans.Dtos.Responses;
 using Applications.Features.Loans.Queries.GetLoanById;
@@ -8,7 +7,6 @@ using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Services.Loans;
 using Domains.Models.Identity;
 using Radzen.Blazor;
-using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 {

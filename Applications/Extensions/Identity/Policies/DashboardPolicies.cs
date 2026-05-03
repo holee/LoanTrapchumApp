@@ -15,7 +15,7 @@ public partial class Policies
     {
         return new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
-                    .RequireClaim(AppClaim.Permission, AppPermission.RuleFor(Modules.BranchesDashboard, Feature.Read))
+                    .RequireClaim(AppClaim.Permission, AppPermission.RuleFor(Modules.BranchesDashboard, Actions.Read))
                     .Build();
     }
 
@@ -23,7 +23,7 @@ public partial class Policies
     {
         return new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
-                    .RequireClaim(AppClaim.Permission, AppPermission.RuleFor(Modules.LoansDashboard,  Feature.Read))
+                    .RequireClaim(AppClaim.Permission, AppPermission.RuleFor(Modules.LoansDashboard,  Actions.Read))
                     .Build();
     }
 
@@ -31,7 +31,7 @@ public partial class Policies
     {
         return new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
-                    .RequireClaim(AppClaim.Permission, AppPermission.RuleFor(Modules.AccountsDashboard, Feature.Read))
+                    .RequireClaim(AppClaim.Permission, AppPermission.RuleFor(Modules.AccountsDashboard, Actions.Read))
                     .Build();
     }
 
@@ -40,7 +40,7 @@ public partial class Policies
     {
         return new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
-                    .RequireClaim(AppClaim.Permission, AppPermission.RuleFor(Modules.ReportsDashboard, Feature.Read))
+                    .RequireClaim(AppClaim.Permission, AppPermission.RuleFor(Modules.ReportsDashboard, Actions.Read))
                     .Build();
     }
 
@@ -48,7 +48,7 @@ public partial class Policies
     {
         return new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
-                    .RequireClaim(AppClaim.Permission, AppPermission.RuleFor(Modules.AdministratorsDashboard, Feature.Read))
+                    .RequireClaim(AppClaim.Permission, AppPermission.RuleFor(Modules.AdministratorsDashboard, Actions.Read))
                     .Build();
     }
 

@@ -1,15 +1,10 @@
 using Applications.Responses.Loans.Disbursements;
-using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Categories;
 using Applications.Services.Loans;
 using Domains.Models.Bases;
 using Mapster;
-using Microsoft.AspNetCore.Components;
-using Radzen;
 using Radzen.Blazor;
-using System.Threading.Tasks;
 using Applications.Features.Categories.Requests;
-using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Transactions.Loans.LoanCategoriess
 {
@@ -44,7 +39,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanCategoriess
         private bool IsEdit = false;
         private bool IsDetails = false;
         protected LoanCategoryDtoUpdate? modelEdit = new();
-        protected LoanCategoryResponse? detailsModel = new();
+        protected LoanCategoryDto? detailsModel = new();
 
         void TabChanged(int e)
         {
@@ -101,7 +96,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanCategoriess
 
                 if (result is not null)
                 {
-                    detailsModel = result.Data.Adapt<LoanCategoryResponse>();
+                    detailsModel = result.Data.Adapt<LoanCategoryDto>();
 
                     var parameters = new Dictionary<string, object?>
                     {
@@ -225,7 +220,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanCategoriess
                 var param = new QueryParam
                 {
                     Page = pageIndex,
-                    PageSize = pageSize,
+                    Take = pageSize,
                     Filter = filter,
                     SortColumn = sortColumn,
                     IncludeInActive = InActive,

@@ -1,7 +1,5 @@
-using Applications.Features.Settings.Dto;
 using Applications.Interfaces.Settings;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Settings;
 
 namespace Applications.Features.Settings.Queries.UserLoanSizes.GetUserLoanSizes;
 

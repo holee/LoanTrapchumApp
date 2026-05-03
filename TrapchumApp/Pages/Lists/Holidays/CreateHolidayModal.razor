@@ -1,12 +1,4 @@
-﻿@using Applications.Features.Addresses
-@using Applications.Features.Branches
-@using Applications.Features.Currencies
-@using Applications.Features.Customers.Services
-@using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Interfaces
-@using Applications.Responses.Lists.Holidays
-@using Applications.Responses.ViewModels.Holidays
-@using TrapchumApp.Services
+﻿@using Applications.Features.Holidays.Dtos
 <PageTitle>New Holiday</PageTitle>
 <RadzenFieldset>
     <HeaderTemplate>
@@ -68,7 +60,7 @@
         </RadzenStack>
         <RadzenDataGrid Data="listvm"
                         Responsive="true"
-                        TItem="HolidayVm"
+                        TItem="HolidayDto"
                         RowSelect="RowSelectedChanged"
                         RowRender="@OnRowRedner"
                         @ref="@_gridHolidy"
@@ -82,7 +74,7 @@
                         @h.RowIndex
                     </Template>
                 </RadzenDataGridColumn>
-                <RadzenDataGridColumn Property="@nameof(HolidayVm.HolidayDt)"
+                <RadzenDataGridColumn Property="@nameof(HolidayDto.HolidayDt)"
                                       Title="Date"
                                       Context="h"
                                       Width="100px">
@@ -90,11 +82,11 @@
                         @h.HolidayDt.DayFirst()
                     </Template>
                 </RadzenDataGridColumn>
-                <RadzenDataGridColumn Property="@nameof(HolidayVm.HolidayName)"
+                <RadzenDataGridColumn Property="@nameof(HolidayDto.HolidayName)"
                                       Title="Holiday" />
-                <RadzenDataGridColumn Property="@nameof(HolidayVm.Description)"
+                <RadzenDataGridColumn Property="@nameof(HolidayDto.Description)"
                                       Title="Description" />
-                <RadzenDataGridColumn Property="@nameof(HolidayVm.Status)"
+                <RadzenDataGridColumn Property="@nameof(HolidayDto.Status)"
                                       Context="h"
                                       Title="Status">
                     <Template>
@@ -130,7 +122,7 @@
 </RadzenFieldset>
 @code {
 
-    void OnRowRedner(RowRenderEventArgs<HolidayVm> args)
+    void OnRowRedner(RowRenderEventArgs<HolidayDto> args)
     {
         args.Data?.RowIndex = args.Index​ + 1;
     }

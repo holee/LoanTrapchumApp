@@ -3,4 +3,4 @@ using ErrorOr;
 
 namespace Applications.Features.Holidays.Command.ActivateOrDeactivate; 
 
-public record ActivateOrDeactivateHolidayCommand(long? Id) : IRequest<ErrorOr<HolidayVm>>; 
+public record ActivateOrDeactivateHolidayCommand(long? Id) : IRequest<ErrorOr<HolidayDto>>; 

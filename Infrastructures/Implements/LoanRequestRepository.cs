@@ -1,9 +1,11 @@
-﻿using Applications.Commons.Mappers;
+﻿using Applications.Commons.ExceptionHandlers;
+using Applications.Commons.Mappers;
 using Applications.Commons.Messages.Loanrequests;
 using Applications.Enumerations;
 using Applications.Extensions;
 using Applications.Features.CreditAgents.Requests;
 using Applications.Features.Customers.Response;
+using Applications.Features.LoanRequests.Dtos;
 using Applications.Features.LoanRequests.Requests;
 using Applications.Features.Loans.Dtos.Responses;
 using Applications.Interfaces.Identity;
@@ -31,18 +33,25 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
         IDbContextFactory<DataContext> contextFactory,
         ICurrentUserService currentUserService) : ILoanRequestService
 {
+
     public async Task<ErrorOr<RequestResult>> CreateNewOrSaveLoanRequestAsync(LoanRequest req, CancellationToken cancellationToken = default)
     {
         logger.LogInformation("Creating loan request for CustomerRefId: {CustomerRefId}", req.CustomerRefId);
 
-        await using var cxt = await contextFactory.CreateDbContextAsync();
+        await using var cxt = await contextFactory.CreateDbContextAsync(cancellationToken);
 
-        if (await CheckExistingLoanRequest(req.CustomerRefId))
+        var hasExistingRequestTask = CheckExistingLoanRequest(req.CustomerRefId);
+
+        var hasActiveLoanTask = CheckExistingHasLoan(req.CustomerRefId);
+
+        await Task.WhenAll(hasExistingRequestTask, hasActiveLoanTask);
+
+        if (hasExistingRequestTask.Result)
         {
             return Error.Conflict("Loan Request already exists.");
         }
 
-        if (await CheckExistingHasLoan(req.CustomerRefId))
+        if (hasActiveLoanTask.Result)
         {
             return Error.Conflict("Customer has active loan.");
         }
@@ -54,11 +63,12 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
                 .ThenInclude(x => x.Guarantor)
             .Include(x => x.LoanDocuments)
             .Include(x => x.LoanDescriptions)
+            .Include(x => x.CoPawnRequests)
             .FirstOrDefaultAsync(x => x.LoanRequestId == req.LoanRequestId &&
                         x.CustomerRefId == req.CustomerRefId &&
                         x.LoanRequestStatusRefId == (int)RequestStatus.New, cancellationToken);
 
-        using var transaction = await cxt.Database.BeginTransactionAsync(cancellationToken);
+        await using var transaction = await cxt.Database.BeginTransactionAsync(cancellationToken);
 
         try
         {
@@ -68,61 +78,8 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
             }
             else
             {
-                cxt.Entry(existingRequest).CurrentValues.SetValues(req);
-
-                if (req.LoanDescriptions.Any())
-                {
-                    existingRequest.LoanDescriptions.AddRange(req.LoanDescriptions);
-                }
-
-                foreach (var item in req.GuarantorsLink)
-                {
-                    var existingGuarantor = existingRequest.GuarantorsLink.FirstOrDefault(x => x.Id == item.Id);
-
-                    if (existingGuarantor is null || existingGuarantor.Id == 0)
-                    {
-                        existingRequest.GuarantorsLink.Add(item);
-                    }
-                    else
-                    {
-                        cxt.Entry(existingGuarantor).CurrentValues.SetValues(item);
-                    }
-                }
-
-                foreach (var item in req.CollateralLinesLink)
-                {
-                    var existingCollateralLine =
-                        existingRequest.CollateralLinesLink.FirstOrDefault(x => x.Id == item.Id);
-
-                    if (existingCollateralLine is null || existingCollateralLine.Id == 0)
-                    {
-                        existingRequest.CollateralLinesLink.Add(item);
-                    }
-                    else
-                    {
-                        cxt.Entry(existingCollateralLine).CurrentValues.SetValues(item);
-                    }
-                }
-
-                foreach (var item in existingRequest.CollateralLinesLink)
-                {
-                    if (!(req.CollateralLinesLink.Any(x => x.Id == item.Id)))
-                    {
-                        cxt.Remove(item);
-                    }
-                }
-
-                foreach (var item in existingRequest.GuarantorsLink)
-                {
-                    if (!(req.GuarantorsLink.Any(x => x.Id == item.Id)))
-                    {
-                        cxt.Remove(item);
-                    }
-                }
-
+                MergeLoanRequestForCreateOrSave(cxt, existingRequest, req);
             }
-
-            //AddNotification(cxt, req, NotificationType.Request);
 
             await cxt.SaveChangesAsync(cancellationToken);
 
@@ -132,15 +89,14 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
         }
         catch (Exception ex)
         {
-
             logger.LogError(ex, "Failed to create loan request for CustomerRefId: {CustomerRefId}", req.CustomerRefId);
 
             await transaction.RollbackAsync(cancellationToken);
 
             return Error.Unexpected(ex.Message);
         }
-
     }
+
 
     public async Task<ErrorOr<RequestResult>> SaveLoanRequestAsync(LoanRequest req, CancellationToken cancellationToken = default)
     {
@@ -220,6 +176,7 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
                     foreach (var item in existingRequest.CollateralLinesLink)
                     {
                         if (!(req.CollateralLinesLink.Any(x => x.Id == item.Id)))
+                        //context.Remove(item);
                         {
                             cxt.Remove(item);
                         }
@@ -228,6 +185,7 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
                     foreach (var item in existingRequest.GuarantorsLink)
                     {
                         if (!(req.GuarantorsLink.Any(x => x.Id == item.Id)))
+                        //context.Remove(item);
                         {
                             cxt.Remove(item);
                         }
@@ -301,14 +259,6 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
                     existingRequest.LoanDescriptions.AddRange(req.LoanDescriptions);
                 }
 
-                //var type = req.LoanRequestStatusRefId switch
-                //{
-                //    (int)RequestStatus.New => NotificationType.New,
-                //    (int)RequestStatus.Requested => NotificationType.Request,
-                //    _ => NotificationType.Request
-                //};
-
-
                 await cxt.SaveChangesAsync(cancellationToken);
 
                 await transaction.CommitAsync(cancellationToken);
@@ -326,6 +276,7 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to create loan request for CustomerRefId: {CustomerRefId}", req.CustomerRefId);
+
             return Error.Unexpected(ex.Message);
         }
     }
@@ -361,7 +312,7 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
     {
 
 
-        logger.LogInformation("Approving loan request for LoanRequestId: {LoanRequestId}, BranchRefId: {BranchRefId}, CustomerRefId: {CustomerRefId}",
+        logger.LogInformation("Approving loan request for LoanRequestId: {LoanRequestId}, BranchRefId: {BranchRefId}, CustomerRefId: {CustomerId}",
             req.LoanRequestId, req.BranchId, req.CustomerId);
 
 
@@ -404,7 +355,7 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
         catch (Exception ex)
         {
 
-            logger.LogError(ex, "Failed to approve loan request for LoanRequestId: {LoanRequestId}, BranchRefId: {BranchRefId}, CustomerRefId: {CustomerRefId}", req.LoanRequestId, req.BranchId, req.CustomerId);
+            logger.LogError(ex, "Failed to approve loan request for LoanRequestId: {LoanRequestId}, BranchRefId: {BranchRefId}, CustomerRefId: {CustomerId}", req.LoanRequestId, req.BranchId, req.CustomerId);
 
             await transaction.RollbackAsync(cancellationToken);
 
@@ -711,6 +662,301 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
         }
     }
 
+
+    public async Task<CoPawnCustomerDto?> AddCoPawnCustomerAsync(CoPawnCustomer req, CancellationToken cancellation = default)
+    {
+        logger.LogInformation("Try to add co-pawn customer for LoanRequestId={LoanRequestId}", req.RequestId);
+
+        await using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+        try
+        {
+
+            var existLoan = await context.EntityNames
+                                    .Include(x => x.Customer)
+                                    .AnyAsync(x => x.Id == req.CustomerId &&
+                                                   x.Customer!.IsLoanActive == true, cancellation);
+            if (existLoan)
+                throw new DuplicateException("Customer has active loan and cannot be added as co-pawn.");
+
+            var customerRequest = await context.LoanRequests
+                                    .AnyAsync(x => x.CustomerRefId == req.CustomerId &&
+                                                   (x.LoanRequestStatusRefId == (int)RequestStatus.New ||
+                                                    x.LoanRequestStatusRefId == (int)RequestStatus.Checking ||
+                                                    x.LoanRequestStatusRefId == (int)RequestStatus.Rechecking ||
+                                                    x.LoanRequestStatusRefId == (int)RequestStatus.Approved), cancellation);
+
+            if (customerRequest)
+            {
+                throw new DuplicateException("Customer has an active loan request and cannot be added as co-pawn.");
+            }
+
+            var existingRequest = await context.LoanRequests
+                .Include(c => c.CoPawnRequests)
+                .FirstOrDefaultAsync(x =>
+                    x.LoanRequestId == req.RequestId &&
+                    x.BranchRefId == req.BranchId, cancellation);
+
+            if (existingRequest is null)
+                throw new NotFoundException("Loan Request does not exist.");
+
+            var isDuplicate = existingRequest.CoPawnRequests
+                .Any(r => r.CustomerId == req.CustomerId && r.Status == true);
+
+            if (isDuplicate)
+                throw new DuplicateException("Co-Pawn customer already exists for this loan request.");
+
+            var countsCoPawn = existingRequest.CoPawnRequests.Count();
+
+            if (countsCoPawn > 3)
+                throw new MaximumException("Cannot add more than 3 co-pawn customers for this loan request.");
+
+
+            context.CoPawnCustomers.Add(req);
+
+            await context.SaveChangesAsync(cancellation);
+
+            return await GetCoPawnCustomer(req.Id, req.CustomerId, req.BranchId);
+
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to add co-pawn customer for LoanRequestId={LoanRequestId}", req.RequestId);
+
+            throw;
+        }
+    }
+
+    public async Task<IEnumerable<CoPawnCustomerDto?>> AddCoPawnCustomersAsync(int? branchId, string? requestId, IEnumerable<CoPawnCustomer> reqs, CancellationToken cancellation = default)
+    {
+        logger.LogInformation("Try to add co-pawn customers");
+
+        await using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+        try
+        {
+            var existingRequest = await context.LoanRequests
+               .Include(c => c.CoPawnRequests)
+               .FirstOrDefaultAsync(x =>
+                   x.LoanRequestId == requestId &&
+                   x.BranchRefId == branchId, cancellation);
+
+            if (existingRequest is null)
+                throw new NotFoundException("Loan Request does not exist.");
+
+
+            var activeCoPawns = existingRequest.CoPawnRequests
+                                             .Where(x => x.Status == true)
+                                             .ToList();
+
+            var totalCoPawn = activeCoPawns.Count + reqs.Count();
+
+            if (totalCoPawn > 3)
+                throw new MaximumException("Cannot add more than 3 co-pawn customers for this loan request.");
+
+
+            foreach (var req in reqs)
+            {
+                var existLoan = await context.EntityNames
+                                    .Include(x => x.Customer)
+                                    .AnyAsync(x => x.Id == req.CustomerId &&
+                                                   x.Customer!.IsLoanActive == true, cancellation);
+                if (existLoan)
+                    throw new DuplicateException($"Customer {req.CustomerId} has active loan and cannot be added as co-pawn.");
+
+                var customerRequest = await context.LoanRequests
+                                    .AnyAsync(x => x.CustomerRefId == req.CustomerId &&
+                                                   (x.LoanRequestStatusRefId == (int)RequestStatus.New ||
+                                                    x.LoanRequestStatusRefId == (int)RequestStatus.Checking ||
+                                                    x.LoanRequestStatusRefId == (int)RequestStatus.Rechecking ||
+                                                    x.LoanRequestStatusRefId == (int)RequestStatus.Approved), cancellation);
+
+                if (customerRequest)
+                    throw new DuplicateException($"Customer {req.CustomerId} has an active loan request and cannot be added as co-pawn.");
+
+
+
+                var isDuplicate = existingRequest.CoPawnRequests
+                             .Any(r => r.CustomerId == req.CustomerId && r.Status == true);
+
+                if (isDuplicate)
+                    throw new DuplicateException($"Co-Pawn customer {req.CustomerId} already exists for this loan request.");
+
+
+            }
+
+
+            context.CoPawnCustomers.AddRange(reqs);
+
+            await context.SaveChangesAsync(cancellation);
+
+            return await GetCoPawnCustomers(branchId, requestId, cancellation);
+
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to add co-pawn customers");
+
+            throw;
+        }
+    }
+
+
+    public async Task<IEnumerable<CoPawnCustomerDto?>> AddCoPawnCustomers2Async(int? branchId, string? requestId,
+    IEnumerable<CoPawnCustomer> reqs, CancellationToken cancellation = default)
+    {
+        logger.LogInformation("Try to add co-pawn customers");
+
+        await using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+        try
+        {
+            var requests = reqs.ToList();
+
+            if (!requests.Any())
+                return Enumerable.Empty<CoPawnCustomerDto?>();
+
+            // Get loan request with existing co-pawn customers
+            var existingRequest = await context.LoanRequests
+                .Include(x => x.CoPawnRequests)
+                .FirstOrDefaultAsync(x =>
+                    x.LoanRequestId == requestId &&
+                    x.BranchRefId == branchId,
+                    cancellation);
+
+            if (existingRequest is null)
+                throw new NotFoundException("Loan Request does not exist.");
+
+            // Active existing co-pawn customers
+            var existingCustomerIds = existingRequest.CoPawnRequests
+                .Where(x => x.Status == true)
+                .Select(x => x.CustomerId)
+                .ToHashSet();
+
+            // Incoming customer ids
+            var requestCustomerIds = requests
+                                    .Select(x => x.CustomerId)
+                                    .ToList();
+
+            // Prevent duplicate customers in request payload
+            var duplicateInRequest = requestCustomerIds
+                                    .GroupBy(x => x)
+                                    .Where(g => g.Count() > 1)
+                                    .Select(g => g.Key)
+                                    .FirstOrDefault();
+
+            if (duplicateInRequest is not null)
+                throw new DuplicateException(
+                    $"Duplicate customer {duplicateInRequest} found in request.");
+
+            // Prevent existing duplicate co-pawn
+            var existingDuplicate = requestCustomerIds
+                .FirstOrDefault(id => existingCustomerIds.Contains(id));
+
+            if (existingDuplicate is not null)
+                throw new DuplicateException(
+                    $"Co-Pawn customer {existingDuplicate} already exists for this loan request.");
+
+            // Maximum validation
+            var totalCoPawn = existingCustomerIds.Count + requestCustomerIds.Count;
+
+            if (totalCoPawn > 3)
+                throw new MaximumException(
+                    "Cannot add more than 3 co-pawn customers for this loan request.");
+
+            // Query customers with active loan in ONE query
+            var activeLoanCustomerIds = await context.EntityNames
+                                            .Include(x => x.Customer)
+                                            .Where(x =>
+                                                requestCustomerIds.Contains(x.Id) &&
+                                                x.Customer!.IsLoanActive == true)
+                                            .Select(x => x.Id)
+                                            .ToListAsync(cancellation);
+
+            if (activeLoanCustomerIds.Any())
+                throw new DuplicateException(
+                    $"Customer {activeLoanCustomerIds.First()} has active loan and cannot be added as co-pawn.");
+
+            // Query customers with active loan request in ONE query
+            var activeRequestCustomerIds = await context.LoanRequests
+                .Where(x =>
+                    requestCustomerIds.Contains(x.CustomerRefId) &&
+                    (
+                        x.LoanRequestStatusRefId == (int)RequestStatus.New ||
+                        x.LoanRequestStatusRefId == (int)RequestStatus.Checking ||
+                        x.LoanRequestStatusRefId == (int)RequestStatus.Rechecking ||
+                        x.LoanRequestStatusRefId == (int)RequestStatus.Approved
+                    ))
+                .Select(x => x.CustomerRefId)
+                .Distinct()
+                .ToListAsync(cancellation);
+
+            if (activeRequestCustomerIds.Any())
+                throw new DuplicateException(
+                    $"Customer {activeRequestCustomerIds.First()} has an active loan request and cannot be added as co-pawn.");
+
+            context.CoPawnCustomers.AddRange(requests);
+
+            await context.SaveChangesAsync(cancellation);
+
+            return await GetCoPawnCustomers(branchId, requestId, cancellation);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to add co-pawn customers");
+            throw;
+        }
+    }
+
+
+    public async Task<bool> DeleteCoPawnCustomersAsync(CoPawnCustomer req, CancellationToken cancellation = default)
+    {
+        logger.LogInformation("Try to delete co-pawn customers {BranchId},{RequestId},{CustomerId}", req.BranchId, req.RequestId, req.CustomerId);
+
+        await using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+        try
+        {
+            var existingRequest = await context.CoPawnCustomers
+               .FirstOrDefaultAsync(x =>
+                   x.RequestId == req.RequestId &&
+                   x.BranchId == req.BranchId &&
+                   x.CustomerId == req.CustomerId, cancellation);
+
+            if (existingRequest is null)
+                throw new NotFoundException("Co-Pawn customer does not exist for this loan request.");
+
+            context.CoPawnCustomers.Remove(existingRequest);
+
+            await context.SaveChangesAsync(cancellation);
+
+            return true;
+
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to add co-pawn customers");
+
+            throw;
+        }
+    }
+
+
+    public async Task<bool> IsCoPawnExistAsync(int? branchId, string? customerId, CancellationToken cancellation = default)
+    {
+
+        logger.LogInformation("Checking if co-pawn customer exists for CustomerId={CustomerId}", customerId);
+
+        await using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+        var existingCoPawn = await context.CoPawnCustomers
+            .FirstOrDefaultAsync(x => x.CustomerId == customerId &&
+                                      x.BranchId == branchId &&
+                                      x.Status == true, cancellation);
+
+        return existingCoPawn is not null;
+    }
+
     public async Task<ErrorOr<IEnumerable<VLoanRequestCollateralLines>>> GetLoanRequestCollateralAsync(int? branchId,
         string? loanRequestId)
     {
@@ -826,15 +1072,6 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
                     context.Entry(existingGuarantor).CurrentValues.SetValues(item);
                 }
             }
-
-            //foreach (var item in existingRequest.GuarantorsLink)
-            //{
-            //    if (!(collateralLinks.Any(x => x.Id == item.Id)))
-            //    {
-            //        context.Remove(item);
-            //    }
-            //}
-
 
             await context.SaveChangesAsync(cancellation);
 
@@ -1131,8 +1368,8 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
             var documentsTask = GetLoanDocuments(loanRequestId, branchId);
             var descriptionsTask = GetLoanRequestDescriptions(loanRequestId);
             var customerTask = GetLoanCustomer(customerId);
-
-            await Task.WhenAll(guarantorsTask, collateralsTask, documentsTask, descriptionsTask, customerTask);
+            var copawnTask = GetCoPawnCustomers(loanRequestId, branchId);
+            await Task.WhenAll(guarantorsTask, collateralsTask, documentsTask, descriptionsTask, customerTask, copawnTask);
 
             resultQueries.Guarantors = guarantorsTask.Result.ToList();
 
@@ -1141,6 +1378,8 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
             resultQueries.Documents = documentsTask.Result.ToList();
 
             resultQueries.Descriptions = descriptionsTask.Result.ToList();
+
+            resultQueries.CoPawnRequests = copawnTask.Result.ToList();
 
             if (customerTask.Result is { IsError: false, Value: not null })
             {
@@ -1413,9 +1652,9 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
         // Paging
         var totalCount = await baseQuery.CountAsync();
 
-        var skip = (param.Page - 1) * param.PageSize;
+        var skip = (param.Page - 1) * param.Take;
 
-        var items = await baseQuery.Skip(param.Page).Take(param.PageSize).AsNoTracking().ToListAsync();
+        var items = await baseQuery.Skip(param.Page).Take(param.Take).AsNoTracking().ToListAsync();
 
         return new Pager<VLoanRequests>(items, totalCount);
     }
@@ -1427,9 +1666,9 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
         IQueryable<VLoanRequests> query = context.VLoanRequests
             .Where(x => x.BranchId == branchId)
             .WhereIf(!string.IsNullOrEmpty(param.Filter),
-                x => EF.Functions.Like(x.BranchName!, $"%{param.Filter}%") ||
-                     EF.Functions.Like(x.AltName!, $"%{param.Filter}%") ||
-                     EF.Functions.Like(x.FullName!, $"%{param.Filter}%"));
+                x => EF.Functions.Like(x.BranchName!, $"{param.Filter}%") ||
+                     EF.Functions.Like(x.AltName!, $"{param.Filter}%") ||
+                     EF.Functions.Like(x.FullName!, $"{param.Filter}%"));
 
         // --- CASE 1: Anonymous (no userId)
         if (string.IsNullOrEmpty(userId))
@@ -1467,13 +1706,14 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
 
         // --- Sorting
         if (param.SortDescending)
-            query = query.OrderByDescending(x => EF.Property<object>(x, param.SortColumn));
+            query = query.OrderByDescending(x => EF.Property<object>(x, param.SortColumn!));
         else
-            query = query.OrderBy(x => EF.Property<object>(x, param.SortColumn));
+            query = query.OrderBy(x => EF.Property<object>(x, param.SortColumn!));
 
         // --- Paging
         var totalCount = await query.CountAsync();
-        var items = await query.Skip(param.Page).Take(param.PageSize).AsNoTracking().ToListAsync();
+
+        var items = await query.Skip(param.Page).Take(param.Take).AsNoTracking().ToListAsync();
 
         return new Pager<VLoanRequests>(items, totalCount);
     }
@@ -1498,6 +1738,54 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
     }
 
 
+    private async Task<CoPawnCustomerDto?> GetCoPawnCustomer(Guid id, string? customerId, int? branchId, CancellationToken cancellation = default)
+    {
+        await using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+        const string sql = @"
+        SELECT  co.Id,
+                co.BranchId, 
+                co.RequestId, 
+                co.LoanId, 
+                co.CustomerId,
+                e.AltName AS CustomerName,
+                e.Phone AS CustomerPhone,
+                CONCAT(e.ProInKhmer, ' ', e.DisInKhmer, ' ', e.ComInKhmer, ' ', e.VilInKhmer) AS CustomerAddress,
+                co.Status, 
+                co.Description
+        FROM dbo.lt_entityNames e
+            LEFT JOIN dbo.tt_CoLoanRequest co ON e.Id = co.CustomerId
+        WHERE co.Id={0} AND co.BranchId = {1} AND co.CustomerId = {2}";
+
+        return await context.Database
+            .SqlQueryRaw<CoPawnCustomerDto>(sql, id!, branchId!, customerId!)
+            .FirstOrDefaultAsync(cancellation);
+    }
+
+
+    private async Task<IEnumerable<CoPawnCustomerDto?>> GetCoPawnCustomers(int? branchId, string? requestId, CancellationToken cancellation = default)
+    {
+        await using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+        const string sql = @"
+        SELECT  co.Id,
+                co.BranchId, 
+                co.RequestId, 
+                co.LoanId, 
+                co.CustomerId,
+                e.AltName AS CustomerName,
+                e.Phone AS CustomerPhone,
+                CONCAT(e.ProInKhmer, ' ', e.DisInKhmer, ' ', e.ComInKhmer, ' ', e.VilInKhmer) AS CustomerAddress,
+                co.Status, 
+                co.Description
+        FROM dbo.lt_entityNames e
+            LEFT JOIN dbo.tt_CoLoanRequest co ON e.Id = co.CustomerId
+        WHERE co.RequestId={0} AND co.BranchId = {1}";
+
+        return await context.Database
+            .SqlQueryRaw<CoPawnCustomerDto>(sql, requestId!, branchId!)
+            .ToListAsync(cancellation);
+    }
 
     private async Task<bool> CheckExistingHasLoan(string? customerId)
     {
@@ -1549,7 +1837,6 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
 
         return existingLoanRequest.Any();
     }
-
 
     private async Task<IEnumerable<VLoanRequestGuarantor>> GetLoanGuarantors(string? loanRequestId, int? branchId)
     {
@@ -1633,6 +1920,31 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
             new { LoanRequestId = loanRequestId, BranchId = branchId }
         );
     }
+
+    private async Task<IEnumerable<CoPawnCustomerDto>> GetCoPawnCustomers(string? loanRequestId, int? branchId, CancellationToken cancellation = default)
+    {
+        await using var context = await contextFactory.CreateDbContextAsync(cancellation);
+
+        const string sql = @"
+                    SELECT  co.Id,
+                            co.BranchId, 
+                            co.RequestId, 
+                            co.LoanId, 
+                            co.CustomerId,
+                            e.AltName AS CustomerName,
+                            e.Phone AS CustomerPhone,
+                            CONCAT(e.ProInKhmer, ' ', e.DisInKhmer, ' ', e.ComInKhmer, ' ', e.VilInKhmer) AS CustomerAddress,
+                            co.Status, 
+                            co.Description
+                    FROM dbo.lt_entityNames e
+                        LEFT JOIN dbo.tt_CoLoanRequest co ON e.Id = co.CustomerId
+                    WHERE co.RequestId={0} AND co.BranchId = {1}";
+
+        return await context.Database
+            .SqlQueryRaw<CoPawnCustomerDto>(sql, loanRequestId!, branchId!)
+            .ToListAsync(cancellation);
+    }
+
     private async Task<ErrorOr<VCustomerDetails>> GetLoanCustomer(string? customerId)
     {
         if (string.IsNullOrWhiteSpace(customerId))
@@ -1729,72 +2041,23 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
             context,
             existingRequest.GuarantorsLink,
             req.GuarantorsLink,
-            (existing, newItem) => existing.Id == newItem.Id);
+            (existing, incoming) => existing.Id == incoming.Id);
 
         // Update Collateral Lines
         UpdateCollectionAsync(
             context,
             existingRequest.CollateralLinesLink,
             req.CollateralLinesLink,
-            (existing, newItem) => existing.Id == newItem.Id);
+            (existing, incoming) => existing.Id == incoming.Id);
+
+        // Update CoPawn Requests
+        UpdateCollectionAsync(
+            context,
+            existingRequest.CoPawnRequests,
+            req.CoPawnRequests,
+            (existing, incoming) => existing.Id == incoming.Id);
     }
 
-    public async Task<Pager<VLoanRequests>> GetLoanRequestsAsync(string? userId, string? userRole, int? branchId, RequestStatus requestStatus, QueryParam param)
-    {
-        await using var context = await contextFactory.CreateDbContextAsync();
-
-        IQueryable<VLoanRequests> query = context.VLoanRequests
-            .Where(x => x.BranchId == branchId)
-            .WhereIf(!string.IsNullOrEmpty(param.Filter),
-                x => EF.Functions.Like(x.BranchName!, $"%{param.Filter}%") ||
-                     EF.Functions.Like(x.AltName!, $"%{param.Filter}%") ||
-                     EF.Functions.Like(x.FullName!, $"%{param.Filter}%"));
-
-        // CASE 1: Anonymous user
-        if (string.IsNullOrEmpty(userId))
-        {
-            query = query.Where(x => x.StatusId == (int)RequestStatus.Approved);
-        }
-        else
-        {
-            // CASE 2: Authenticated user — filter based on role
-            switch (userRole?.ToLower())
-            {
-                case "admin":
-                case "manager":
-                    // Admin or manager can view all loan requests for the branch
-                    query = ApplyStatusFilter(query, requestStatus);
-                    break;
-
-                case "loanofficer":
-                    // Loan officer sees only their own requests
-                    query = ApplyStatusFilter(query.Where(x => x.UserRequestId == userId), requestStatus);
-                    break;
-
-                case "approver":
-                case "checker":
-                    // Approvers/checkers see requests assigned to them
-                    query = ApplyStatusFilter(query.Where(x => x.AprovedUserId == userId), requestStatus);
-                    break;
-
-                default:
-                    // Default fallback: treat as normal user
-                    query = ApplyStatusFilter(query.Where(x => x.UserRequestId == userId), requestStatus);
-                    break;
-            }
-        }
-
-        // Sorting
-        query = param.SortDescending
-            ? query.OrderByDescending(x => EF.Property<object>(x, param.SortColumn))
-            : query.OrderBy(x => EF.Property<object>(x, param.SortColumn));
-
-        // Paging
-        var totalCount = await query.CountAsync();
-        var items = await query.Skip(param.Page).Take(param.PageSize).AsNoTracking().ToListAsync();
-
-        return new Pager<VLoanRequests>(items, totalCount);
-    }
 
     private static IQueryable<VLoanRequests> ApplyStatusFilter(IQueryable<VLoanRequests> query, RequestStatus requestStatus)
     {
@@ -1836,6 +2099,148 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
         context.Notifications.Add(notification);
     }
 
+
+    private void MergeLoanRequestForCreateOrSave(DataContext context, LoanRequest existingRequest, LoanRequest req)
+    {
+        context.Entry(existingRequest).CurrentValues.SetValues(req);
+
+        if (req.LoanDescriptions?.Any() == true)
+        {
+            existingRequest.LoanDescriptions.AddRange(req.LoanDescriptions);
+        }
+
+        UpdateCollectionAsync(
+            context,
+            existingRequest.GuarantorsLink,
+            req.GuarantorsLink,
+            (existing, incoming) => existing.Id == incoming.Id);
+
+        UpdateCollectionAsync(
+            context,
+            existingRequest.CollateralLinesLink,
+            req.CollateralLinesLink,
+            (existing, incoming) => existing.Id == incoming.Id);
+
+        UpdateCollectionAsync(
+            context,
+            existingRequest.CoPawnRequests,
+            req.CoPawnRequests,
+            (existing, incoming) => existing.Id == incoming.Id);
+    }
+
 }
 
 
+
+//public async Task<Pager<VLoanRequests>> GetLoanRequestsAsync(string? userId, string? userRole, int? branchId, RequestStatus requestStatus, QueryParam param)
+//{
+//    await using var context = await contextFactory.CreateDbContextAsync();
+
+//    IQueryable<VLoanRequests> query = context.VLoanRequests
+//        .Where(x => x.BranchId == branchId)
+//        .WhereIf(!string.IsNullOrEmpty(param.Filter),
+//            x => EF.Functions.Like(x.BranchName!, $"%{param.Filter}%") ||
+//                 EF.Functions.Like(x.AltName!, $"%{param.Filter}%") ||
+//                 EF.Functions.Like(x.FullName!, $"%{param.Filter}%"));
+
+//    // CASE 1: Anonymous user
+//    if (string.IsNullOrEmpty(userId))
+//    {
+//        query = query.Where(x => x.StatusId == (int)RequestStatus.Approved);
+//    }
+//    else
+//    {
+//        // CASE 2: Authenticated user — filter based on role
+//        switch (userRole?.ToLower())
+//        {
+//            case "admin":
+//            case "manager":
+//                // Admin or manager can view all loan requests for the branch
+//                query = ApplyStatusFilter(query, requestStatus);
+//                break;
+
+//            case "loanofficer":
+//                // Loan officer sees only their own requests
+//                query = ApplyStatusFilter(query.Where(x => x.UserRequestId == userId), requestStatus);
+//                break;
+
+//            case "approver":
+//            case "checker":
+//                // Approvers/checkers see requests assigned to them
+//                query = ApplyStatusFilter(query.Where(x => x.AprovedUserId == userId), requestStatus);
+//                break;
+
+//            default:
+//                // Default fallback: treat as normal user
+//                query = ApplyStatusFilter(query.Where(x => x.UserRequestId == userId), requestStatus);
+//                break;
+//        }
+//    }
+
+//    // Sorting
+//    query = param.SortDescending
+//        ? query.OrderByDescending(x => EF.Property<object>(x, param.SortColumn!))
+//        : query.OrderBy(x => EF.Property<object>(x, param.SortColumn!));
+
+//    // Paging
+//    var totalCount = await query.CountAsync();
+//    var items = await query.Skip(param.Page).Take(param.PageSize).AsNoTracking().ToListAsync();
+
+//    return new Pager<VLoanRequests>(items, totalCount);
+//}
+//public async Task<ErrorOr<RequestResult>> CreateNewOrSaveLoanRequestAsync(LoanRequest req, CancellationToken cancellationToken = default)
+//{
+//    logger.LogInformation("Creating loan request for CustomerRefId: {CustomerRefId}", req.CustomerRefId);
+
+//    if (await CheckExistingLoanRequest(req.CustomerRefId))
+//        return Error.Conflict("Loan Request already exists.");
+
+//    if (await CheckExistingHasLoan(req.CustomerRefId))
+//        return Error.Conflict("Customer has active loan.");
+//
+//    await using var cxt = await contextFactory.CreateDbContextAsync(cancellationToken);
+//
+//    var existingRequest = await cxt.LoanRequests
+//        .Include(c => c.CollateralLinesLink)
+//        .Include(g => g.GuarantorsLink)
+//        .Include(x => x.LoanDocuments)
+//        .Include(x => x.LoanDescriptions)
+//        .Include(x => x.CoPawnRequests)
+//        .FirstOrDefaultAsync(x => x.LoanRequestId == req.LoanRequestId &&
+//                                  x.CustomerRefId == req.CustomerRefId &&
+//                                  x.LoanRequestStatusRefId == (int)RequestStatus.New, cancellationToken);
+//
+//    await using var transaction = await cxt.Database.BeginTransactionAsync(cancellationToken);
+//
+//    try
+//    {
+//        if (existingRequest is null)
+//        {
+//            cxt.LoanRequests.Add(req);
+//        }
+//        else
+//        {
+//            cxt.Entry(existingRequest).CurrentValues.SetValues(req);
+
+//            if (req.LoanDescriptions.Count != 0)
+//                existingRequest.LoanDescriptions.AddRange(req.LoanDescriptions);
+
+//            MergeCollection(cxt, existingRequest.GuarantorsLink, req.GuarantorsLink, x => x.Id);
+//            MergeCollection(cxt, existingRequest.CollateralLinesLink, req.CollateralLinesLink, x => x.Id);
+//            MergeCollection(cxt, existingRequest.CoPawnRequests, req.CoPawnRequests, x => x.Id);
+//        }
+
+//        await cxt.SaveChangesAsync(cancellationToken);
+
+//        await transaction.CommitAsync(cancellationToken);
+
+//        return new RequestResult(true, "New Loan Request was created.");
+//    }
+//    catch (Exception ex)
+//    {
+//        logger.LogError(ex, "Failed to create loan request for CustomerRefId: {CustomerRefId}", req.CustomerRefId);
+//        await transaction.RollbackAsync(cancellationToken);
+//        return Error.Unexpected(ex.Message);
+//    }
+
+//}

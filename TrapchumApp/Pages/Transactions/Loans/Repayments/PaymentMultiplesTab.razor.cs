@@ -1,8 +1,6 @@
 using Applications.Commons.Mappers;
-using Applications.Enumerations;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Radzen.Blazor;
-using System.Threading.Tasks;
 using Applications.Features.LoanPayments.Requests;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments;

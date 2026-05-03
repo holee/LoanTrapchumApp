@@ -1,8 +1,6 @@
 using Applications.Features.Guarantor.Command.CreateGuarantor;
 using Applications.Features.Guarantor.Dtos;
-using Applications.Services.Lists;
 using Domains.Models.Bases;
-using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Lists.OtherNames.Guarantors;
 

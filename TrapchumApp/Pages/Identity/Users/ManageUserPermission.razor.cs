@@ -1,6 +1,4 @@
 ﻿using Applications.Responses.ViewModels.Auths;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Forms;
 
 namespace TrapchumApp.Pages.Identity.Users
 {

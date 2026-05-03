@@ -1,9 +1,5 @@
 ﻿using Applications.Interfaces.Transactions;
-using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Ledgers;
-using Microsoft.AspNetCore.Components;
-using Radzen;
-using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Transactions.Ledgers;
 

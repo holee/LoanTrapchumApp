@@ -14,14 +14,14 @@ public partial class Policies
     public const string TranxVaultOut = $"tranx.{nameof(TranxVaultOut)}";
     public const string OpenBranch = $"tranx.{nameof(OpenBranch)}";
     public const string CloseBranch = $"tranx.{nameof(CloseBranch)}";
-    private static string tranx_read = AppPermission.RuleFor(Modules.Transactions, Feature.Read);
-    private static string tranx_update = AppPermission.RuleFor(Modules.Transactions, Feature.Update);
-    private static string tranx_create = AppPermission.RuleFor(Modules.Repayments, Feature.Create);
-    private static string tranx_delete = AppPermission.RuleFor(Modules.Transactions, Feature.Delete);
-    private static string tranx_vualtIn = AppPermission.RuleFor(Modules.Transactions, Feature.VaultIn);
-    private static string tranx_vualtOut = AppPermission.RuleFor(Modules.Transactions, Feature.VaultOut);
-    private static string tranx_closedBranch = AppPermission.RuleFor(Modules.Transactions, Feature.CloseBranch);
-    private static string tranx_openedBranch = AppPermission.RuleFor(Modules.Transactions, Feature.OpenBranch);
+    private static string tranx_read = AppPermission.RuleFor(Modules.Transactions, Actions.Read);
+    private static string tranx_update = AppPermission.RuleFor(Modules.Transactions, Actions.Update);
+    private static string tranx_create = AppPermission.RuleFor(Modules.Repayments, Actions.Create);
+    private static string tranx_delete = AppPermission.RuleFor(Modules.Transactions, Actions.Delete);
+    private static string tranx_vualtIn = AppPermission.RuleFor(Modules.Transactions, Actions.VaultIn);
+    private static string tranx_vualtOut = AppPermission.RuleFor(Modules.Transactions, Actions.VaultOut);
+    private static string tranx_closedBranch = AppPermission.RuleFor(Modules.Transactions, Actions.CloseBranch);
+    private static string tranx_openedBranch = AppPermission.RuleFor(Modules.Transactions, Actions.OpenBranch);
     public static AuthorizationPolicy TranxCanCreate()  
     {
         return new AuthorizationPolicyBuilder()

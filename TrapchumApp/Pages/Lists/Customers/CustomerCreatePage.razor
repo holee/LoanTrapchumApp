@@ -1,5 +1,4 @@
 ﻿<PageTitle>Create New Customer</PageTitle>
-@using Applications.Features.LoanRequests.Interfaces
 <EditForm Model="CustomerModel" @ref="@editForm" >
     <Blazilla.FluentValidator />
     <CreateCustomerInfo Model="@CustomerModel" @key="Guid.NewGuid().ToString()" />

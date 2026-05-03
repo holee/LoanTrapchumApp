@@ -244,7 +244,7 @@ public sealed class LedgerRepository : ILedgerService
 
         var counts = await queries.CountAsync();
         var items = await queries.Skip(q.Page)
-                                    .Take(q.PageSize)
+                                    .Take(q.Take)
                                     .AsNoTracking()
                                     .ToListAsync();
         return new Pager<VLedger>

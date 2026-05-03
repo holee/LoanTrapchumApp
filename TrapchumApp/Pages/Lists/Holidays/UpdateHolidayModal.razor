@@ -1,11 +1,4 @@
-﻿@using Applications.Features.Addresses
-@using Applications.Features.Branches
-@using Applications.Features.Currencies
-@using Applications.Features.Customers.Services
-@using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Interfaces
-@using Applications.Responses.ViewModels.Holidays
-@using TrapchumApp.Services
+﻿@using Applications.Features.Holidays.Dtos
 <RadzenFieldset>
     <HeaderTemplate>
         <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25">
@@ -56,7 +49,7 @@
         </RadzenRow>
         <RadzenDataGrid Data="listvm"
                         Responsive="true"
-                        TItem="HolidayVm"
+                        TItem="HolidayDto"
                         RowSelect="RowSelectedChanged"
                         Density="Density.Compact">
             <Columns>
@@ -68,7 +61,7 @@
                         @(listvm?.ToList().IndexOf(h) + 1)
                     </Template>
                 </RadzenDataGridColumn>
-                <RadzenDataGridColumn Property="@nameof(HolidayVm.HolidayDt)"
+                <RadzenDataGridColumn Property="@nameof(HolidayDto.HolidayDt)"
                                       Title="Date"
                                       Context="h"
                                       Width="100px">
@@ -76,11 +69,11 @@
                         @h.HolidayDt.DayFirst()
                     </Template>
                 </RadzenDataGridColumn>
-                <RadzenDataGridColumn Property="@nameof(HolidayVm.HolidayName)"
+                <RadzenDataGridColumn Property="@nameof(HolidayDto.HolidayName)"
                                       Title="Holiday" />
-                <RadzenDataGridColumn Property="@nameof(HolidayVm.Description)"
+                <RadzenDataGridColumn Property="@nameof(HolidayDto.Description)"
                                       Title="Description" />
-                <RadzenDataGridColumn Property="@nameof(HolidayVm.Status)"
+                <RadzenDataGridColumn Property="@nameof(HolidayDto.Status)"
                                       Context="h"
                                       Title="Status">
                     <Template>

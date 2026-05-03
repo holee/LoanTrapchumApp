@@ -41,8 +41,7 @@ public partial class ManageRolePermission
 
     private async Task GetPermissions()
     {
-        IsLoading = true;
-
+       Tracker.Show();
         var rsp = await _roleService.GetPermissionsByRoleByIdAsync(Id);
 
         if (rsp.IsSuccess && rsp.Data is not null)
@@ -71,7 +70,7 @@ public partial class ManageRolePermission
             NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
         }
 
-        IsLoading = false;
+        Tracker.Hide();
     }
 
 
@@ -169,9 +168,9 @@ public partial class ManageRolePermission
 
         formEdit?.EditContext?.Validate();
 
-        var responseResult = await _roleService.AddRolePermissions(request);//.AssignPermissionAsync(request);
+        var rsp = await _roleService.AddRolePermissions(request);
 
-        if (responseResult!.IsSuccess)
+        if (rsp!.IsSuccess)
         {
             NotificationService.Notify(NotificationSeverity.Success, "Permissions were assigned.");
 
@@ -179,7 +178,7 @@ public partial class ManageRolePermission
         }
         else
         {
-            NotificationService.Notify(NotificationSeverity.Error, responseResult.ErrMessage);
+            NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
         }
     }
 

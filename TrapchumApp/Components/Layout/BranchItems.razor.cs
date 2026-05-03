@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Components;
-
 namespace TrapchumApp.Components.Layout
 {
     public partial class BranchItems

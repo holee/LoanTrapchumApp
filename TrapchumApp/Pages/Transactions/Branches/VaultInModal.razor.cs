@@ -1,6 +1,4 @@
 using Applications.Commons.Extensions;
-using Applications.Enumerations;
-using Applications.Extensions.Enums;
 using Applications.Features.Branches.Dtos;
 using Applications.Features.CashManagements.Command.CreateCashVaultIn;
 using Applications.Features.CashManagements.Extensions;
@@ -13,9 +11,7 @@ using Applications.Features.Currencies.Queries.GetCurrencyDetails;
 using Applications.Features.Currencies.Queries.GetCurrencyNotes;
 using Applications.Features.Currencies.Responses;
 using Applications.Features.Transactions.CashManagements;
-using Applications.Responses.Paginations;
 using Domains.Enumerations;
-using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Transactions.Branches
 {

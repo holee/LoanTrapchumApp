@@ -12,10 +12,10 @@ public partial class Policies
     public const string BranchDelete = $"{br_prefix}.{nameof(BranchDelete)}";
     public const string BranchShowBranch = $"{br_prefix}.{nameof(BranchShowBranch)}";
 
-    private static string br_read = AppPermission.RuleFor(Modules.BranchesDashboard, Feature.Read);
-    private static string br_update = AppPermission.RuleFor(Modules.BranchesDashboard, Feature.Update);
-    private static string br_create = AppPermission.RuleFor(Modules.BranchesDashboard, Feature.Create);
-    private static string br_delete = AppPermission.RuleFor(Modules.BranchesDashboard, Feature.Delete);
+    private static string br_read = AppPermission.RuleFor(Modules.BranchesDashboard, Actions.Read);
+    private static string br_update = AppPermission.RuleFor(Modules.BranchesDashboard, Actions.Update);
+    private static string br_create = AppPermission.RuleFor(Modules.BranchesDashboard, Actions.Create);
+    private static string br_delete = AppPermission.RuleFor(Modules.BranchesDashboard, Actions.Delete);
 
     public static AuthorizationPolicy CanCreateBranch()
     {

@@ -2,10 +2,8 @@ using Applications.Features.Branches.Dtos;
 using Applications.Features.Branches.Queries.GetBranchAsPaging;
 using Applications.Features.Departments.Commands.CreateDepartment;
 using Applications.Features.Departments.Dto;
-using Applications.Responses.Paginations;
 using Domains.Models.Lists;
 using Mapster;
-using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Lists.Departments
 {

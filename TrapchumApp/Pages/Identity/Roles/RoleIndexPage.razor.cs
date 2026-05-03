@@ -1,8 +1,5 @@
 using Applications.Interfaces.Identity;
-using Applications.Responses.Paginations;
-using System.Threading.Tasks;
 using Applications.Features.Identity.Roles.Responses;
-using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Identity.Roles
 {

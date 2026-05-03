@@ -3,17 +3,14 @@ using Applications.Features.Branches.Dtos;
 using Applications.Features.LoanPayments.Requests;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Radzen.Blazor;
-using TrapchumApp.Helpers.Extensions;
 using TrapchumApp.Pages.Transactions.RecievePayements;
 using Applications.Calculations.Extensions;
 using Applications.Commons.Mappers;
-using Applications.Enumerations;
 using Applications.Extensions.NumberExtensions;
 using Applications.Features.LoanPayments.Queries.GetLoanSchedulesByLoanIdAsPaging;
 using Applications.Features.Loans.Queries.GetLoanById;
 using Applications.Features.Loans.Services;
 using Applications.Services.Loans;
-using Domains.Models.Loans;
 using Applications.Features.Loans.Dtos.Responses;
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments;
 

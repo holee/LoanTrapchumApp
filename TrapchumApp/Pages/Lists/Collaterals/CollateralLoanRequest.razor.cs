@@ -1,8 +1,6 @@
 using Applications.Extensions;
 using Applications.Features.Collaterals.Dtos;
 using Applications.Features.Customers.Queries.GetCustomerCollateralLine;
-using Microsoft.AspNetCore.Components;
-using Radzen;
 using Radzen.Blazor;
 
 namespace TrapchumApp.Pages.Lists.Collaterals

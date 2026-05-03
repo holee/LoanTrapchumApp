@@ -3,6 +3,7 @@ using Applications.Commons.Authorizations;
 using Applications.Validations;
 using Domains.Models.Identity;
 using Infrastructures;
+using Infrastructures.DependencyInjects;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Features;
@@ -65,6 +66,9 @@ builder.Services.Configure<FormOptions>(options =>
 });
 
 var app = builder.Build();
+
+await app.SeedSystemData();
+
 
 if (app.Environment.IsDevelopment())
 {

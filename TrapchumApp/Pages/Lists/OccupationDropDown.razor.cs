@@ -1,8 +1,6 @@
 using Applications.Features.AdditionalInformations.Command.CreateOccupation;
 using Applications.Features.AdditionalInformations.Dto;
 using Applications.Features.AdditionalInformations.Queries.GetOccupations;
-using Applications.Responses.Paginations;
-using Domains.Shared.Enums;
 using System.Linq.Expressions;
 
 namespace TrapchumApp.Pages.Lists

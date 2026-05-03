@@ -1,8 +1,6 @@
 using Applications.Features.Currencies.Responses;
 using Applications.Interfaces.Transactions;
-using Applications.Responses.Paginations;
 using Radzen.Blazor;
-using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Transactions.Exchanges
 {

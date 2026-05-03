@@ -1,8 +1,6 @@
 using Applications.Features.Currencies.Queries.GetCurrencyCounter;
 using Applications.Features.Currencies.Responses;
 using Applications.Interfaces.Currencies;
-using Applications.Responses.Paginations;
-using Microsoft.AspNetCore.Components;
 
 namespace TrapchumApp.Pages.Currencies
 {

@@ -1,17 +1,9 @@
 ﻿@page "/App/Customers/{CustomerId}/Details"
-@using Applications.Features.Addresses
-@using Applications.Features.Branches
-@using Applications.Features.Currencies
-@using Applications.Features.Customers.Response
-@using Applications.Features.Customers.Services
-@using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Interfaces
 @using TrapchumApp.Components.Actionbars
 @using TrapchumApp.Components.Indicatros
 @using TrapchumApp.Pages.Lists.Collaterals
 @using TrapchumApp.Pages.Lists.Customers.Activties
 @using TrapchumApp.Pages.Lists.Customers.Notes
-@using TrapchumApp.Services
 <PageTitle>Customer Details</PageTitle>
 @attribute [StreamRendering]
 @if (_isLoading)

@@ -7,11 +7,7 @@ using Applications.Features.Dashbaord.CreditOfficers.Queries.GetDbCreditOfficeLo
 using Applications.Features.Dashbaord.Managers.Dto;
 using Applications.Features.Dashbaord.Managers.Queries.GetDbManagerLoanSummary;
 using Applications.Interfaces.Lists;
-using Domains.Models.Lists;
-using TrapchumApp.Components.Datatabes;
 using TrapchumApp.Helpers.Enums;
-using TrapchumApp.Helpers.Extensions;
-using TrapchumApp.Components.Messageboxes;
 using TrapchumApp.Shared;
 
 namespace TrapchumApp.Pages

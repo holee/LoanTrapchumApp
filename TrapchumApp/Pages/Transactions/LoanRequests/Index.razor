@@ -1,13 +1,6 @@
 ﻿@page "/App/Loans/Requests/{BranchId:int}/Branches"
-@using Applications.Features.Addresses
-@using Applications.Features.Branches
-@using Applications.Features.Currencies
-@using Applications.Features.Customers.Services
-@using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Interfaces
-@using TrapchumApp.Services
 <PageTitle>Loan Request</PageTitle>
-@attribute [MustHasPermission(Modules.LoanRequest, Feature.Read)]
+@attribute [MustHasPermission(Modules.LoanRequest, Actions.Read)]
 <RadzenCard class="rz-background-color-base-200">
     <RadzenTabs SelectedIndexChanged="SelectedIndexChanged" RenderMode="TabRenderMode.Server">
         <Tabs>

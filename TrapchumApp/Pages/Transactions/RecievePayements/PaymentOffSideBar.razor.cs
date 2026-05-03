@@ -1,14 +1,10 @@
 using Applications.Commons.Extensions;
-using Applications.Enumerations;
-using Applications.Extensions.Enums;
 using Applications.Extensions.NumberExtensions;
 using Applications.Features.LoanPayments.Command.PayOff;
-using Applications.Features.LoanPayments.Command.RecievePayment;
 using Applications.Features.LoanPayments.Requests;
 using Applications.Features.Transactions.LoanTransactions;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Domains.Models.Identity;
-using TrapchumApp.Helpers.Extensions;
 using TrapchumApp.Pages.Transactions.Loans.Repayments;
 
 namespace TrapchumApp.Pages.Transactions.RecievePayements;      

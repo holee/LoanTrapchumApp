@@ -1,5 +1,4 @@
 ﻿@using Applications.Extensions.Identity.Authorizations.Extensions
-@using Applications.Features.LoanRequests.Interfaces
 @using TrapchumApp.Helpers.Extensions
 <RadzenPanelMenuItem Text="Loan Management" Icon="dataset">
     <RadzenPanelMenuItem Text="Loans Disbursement" Icon="lists" Path="@($"/App/Loans/Disbursements/{BranchId}/Branches")" Visible="@_canShowLoan" />
@@ -57,7 +56,7 @@
 
         _isManagerOnly = await _authorizeService.MustHasPermissionAsync(user, Policies.ManagerOnly);
 
-        _canReadLoanRequest = await _authorizeService.MustHasPermissionAsync(user, AppPermission.RuleFor(Modules.LoanRequest, Feature.Read));
+        _canReadLoanRequest = await _authorizeService.MustHasPermissionAsync(user, AppPermission.RuleFor(Modules.LoanRequest, Actions.Read));
 
         _isAccountOnly = await _authorizeService.MustHasPermissionAsync(user, Policies.AccountOnly);
 

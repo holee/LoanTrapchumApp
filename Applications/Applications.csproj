@@ -26,6 +26,9 @@
     <Compile Remove="Features\LoanPayments\Enums\**" />
     <Compile Remove="Features\LoanPayments\Extensions\**" />
     <Compile Remove="Features\LoanPayments\Mappers\**" />
+    <Compile Remove="Features\LoanRequests\Enums\**" />
+    <Compile Remove="Features\LoanRequests\Extensions\**" />
+    <Compile Remove="Features\LoanRequests\Mappers\**" />
     <Compile Remove="Features\NewFolder1\**" />
     <Compile Remove="Features\Settings\Responses\**" />
     <Compile Remove="Features\Vendors\Mapperes\**" />
@@ -37,6 +40,7 @@
     <Compile Remove="Responses\ViewModels\Collaterals\**" />
     <Compile Remove="Responses\ViewModels\Trans\**" />
     <Compile Remove="Responses\ViewModels\Users\**" />
+    <Compile Remove="Responses\ViewModels\Vendors\**" />
     <Compile Remove="Services\Customers\**" />
     <EmbeddedResource Remove="Commons\Mappers\activities\**" />
     <EmbeddedResource Remove="Commons\Mappers\Employees\**" />
@@ -57,6 +61,9 @@
     <EmbeddedResource Remove="Features\LoanPayments\Enums\**" />
     <EmbeddedResource Remove="Features\LoanPayments\Extensions\**" />
     <EmbeddedResource Remove="Features\LoanPayments\Mappers\**" />
+    <EmbeddedResource Remove="Features\LoanRequests\Enums\**" />
+    <EmbeddedResource Remove="Features\LoanRequests\Extensions\**" />
+    <EmbeddedResource Remove="Features\LoanRequests\Mappers\**" />
     <EmbeddedResource Remove="Features\NewFolder1\**" />
     <EmbeddedResource Remove="Features\Settings\Responses\**" />
     <EmbeddedResource Remove="Features\Vendors\Mapperes\**" />
@@ -68,6 +75,7 @@
     <EmbeddedResource Remove="Responses\ViewModels\Collaterals\**" />
     <EmbeddedResource Remove="Responses\ViewModels\Trans\**" />
     <EmbeddedResource Remove="Responses\ViewModels\Users\**" />
+    <EmbeddedResource Remove="Responses\ViewModels\Vendors\**" />
     <EmbeddedResource Remove="Services\Customers\**" />
     <None Remove="Commons\Mappers\activities\**" />
     <None Remove="Commons\Mappers\Employees\**" />
@@ -88,6 +96,9 @@
     <None Remove="Features\LoanPayments\Enums\**" />
     <None Remove="Features\LoanPayments\Extensions\**" />
     <None Remove="Features\LoanPayments\Mappers\**" />
+    <None Remove="Features\LoanRequests\Enums\**" />
+    <None Remove="Features\LoanRequests\Extensions\**" />
+    <None Remove="Features\LoanRequests\Mappers\**" />
     <None Remove="Features\NewFolder1\**" />
     <None Remove="Features\Settings\Responses\**" />
     <None Remove="Features\Vendors\Mapperes\**" />
@@ -99,6 +110,7 @@
     <None Remove="Responses\ViewModels\Collaterals\**" />
     <None Remove="Responses\ViewModels\Trans\**" />
     <None Remove="Responses\ViewModels\Users\**" />
+    <None Remove="Responses\ViewModels\Vendors\**" />
     <None Remove="Services\Customers\**" />
   </ItemGroup>
 
@@ -114,9 +126,6 @@
     <Folder Include="Features\Identity\Users\Interfaces\" />
     <Folder Include="Features\Identity\Users\Mappers\" />
     <Folder Include="Features\Identity\Users\Validations\" />
-    <Folder Include="Features\LoanRequests\Enums\" />
-    <Folder Include="Features\LoanRequests\Extensions\" />
-    <Folder Include="Features\LoanRequests\Mappers\" />
     <Folder Include="Features\Loans\Command\UpdateLoan\" />
     <Folder Include="Features\LoanTransactions\Journals\Extensions\" />
     <Folder Include="Features\LoanTransactions\Journals\Mappers\" />
@@ -136,9 +145,9 @@
     <Folder Include="Features\Products\Validations\" />
     <Folder Include="Requests\Identity\" />
     <Folder Include="Responses\Lists\Currency\" />
+    <Folder Include="Responses\ViewModels\Holidays\" />
     <Folder Include="Responses\ViewModels\Loans\Payments\" />
     <Folder Include="Responses\ViewModels\Locations\" />
-    <Folder Include="Responses\ViewModels\Vendors\" />
     <Folder Include="Validations\Loans\" />
   </ItemGroup>
 

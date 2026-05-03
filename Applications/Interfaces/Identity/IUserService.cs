@@ -1,29 +1,28 @@
 ﻿using Applications.Features.Identity.Users;
 using Applications.Responses.Auths;
-using Applications.Responses.ViewModels.Auths;
 using Domains.Models.Files;
+using ErrorOr;
 
 namespace Applications.Interfaces.Identity;
 
-public interface IUserService 
+public interface IUserService
 {
-    Task<Result<string>> CreateUserAsync(RegisterRequest model);
-    Task<Result> EditUserAsync(string userId, EditUserDto model);
-    Task<Result<UserDto>> GetUserDetailsById(string? userId);
-    Task<Result<UserPermissions>> GetUserPermissionsAsync(string? userId);
-    Task<Result<string>> AddOrRemovedUserPermissionsAsync(string? userId, UserPermissionRequest permission);
-    Task<Result<UserViewModel>> GetUserRolesAsync(string? userId);
-    Task<Result<string>> AddOrRemovedUserRolesAsync(List<UserRolesViewModel> useroles, string userId);
-    Task<Result<Pager<VUser>>> GetUsersAsync(QueryParam param, string? userId = null);
-    Task<Result<IEnumerable<VUser>>> GetUsersAsync(string? userId, string? filter = null);
-    Task<Result> UpdateUserRoleAsync(UserRoleDtoUpdate req);
-    Task<Pager<PermissionsVm>> GetPermissionsAsync(QueryParam q);
-    Task<Result<Pager<VUser>>> GetUsersAsync(int? branchId, string? userId, QueryParam param);
-    Task<Result<VUser>> GetUserByIdAsync(string? userId, CancellationToken cancellation = default, params IEnumerable<string> columns);
-    Task<Result<VUser>> GetUserByIdAsync(string? userId, CancellationToken cancellation = default);
-    Task<Result<string>> ChangePassword(ChangePasswordDto req, CancellationToken cancellation = default);
-    Task<Result<FileModel>> ChangeProfile(string? userId, FileModel model, CancellationToken cancellation = default);
-    Task<Result<UserProfileResponse>> GetUserProfile(string? userId, CancellationToken cancellation = default);
-    Task<ErrorOr.ErrorOr<VUser>> GetUserDetailById(string? userId, CancellationToken cancellation = default);
-    Task<ErrorOr.ErrorOr<string>> CreateUserAsync(RegisterRequest model, CancellationToken cancellation = default);
+    Task<ErrorOr<string>> CreateUserAsync(RegisterRequest model, CancellationToken cancellation = default);
+    Task<ErrorOr<Updated>> EditUserAsync(string userId, EditUserDto model, CancellationToken cancellation = default);
+    Task<ErrorOr<UserDto>> GetUserDetailsById(string? userId, CancellationToken cancellation = default);
+    Task<ErrorOr<UserPermissions>> GetUserPermissionsAsync(string? userId, CancellationToken cancellation = default);
+    Task<ErrorOr<string>> AddOrRemovedUserPermissionsAsync(string? userId, UserPermissionRequest permission, CancellationToken cancellation = default);
+    Task<ErrorOr<UserViewModel>> GetUserRolesAsync(string? userId, CancellationToken cancellation = default);
+    Task<ErrorOr<string>> AddOrRemovedUserRolesAsync(List<UserRolesViewModel> useroles, string userId, CancellationToken cancellation = default);
+    Task<ErrorOr<Pager<VUser>>> GetUsersAsync(QueryParam param, string? userId = null, CancellationToken cancellation = default);
+    //Task<ErrorOr<List<VUser>>> GetUsersAsync(string? userId, string? filter = null, CancellationToken cancellation = default);
+    Task<ErrorOr<Updated>> UpdateUserRoleAsync(UserRoleDtoUpdate req, CancellationToken cancellation = default);
+    Task<Pager<PermissionsVm>> GetPermissionsAsync(QueryParam q, CancellationToken cancellation = default);
+    Task<ErrorOr<Pager<VUser>>> GetUsersAsync(int? branchId, string? userId, QueryParam param, CancellationToken cancellation = default);
+    Task<ErrorOr<VUser>> GetUserByIdAsync(string? userId, CancellationToken cancellation = default);
+    //Task<ErrorOr<VUser>> GetUserByIdAsync(string? userId, CancellationToken cancellation = default, params IEnumerable<string> columns);
+    Task<ErrorOr<string>> ChangePassword(ChangePasswordDto req, CancellationToken cancellation = default);
+    Task<ErrorOr<FileModel>> ChangeProfile(string? userId, FileModel model, CancellationToken cancellation = default);
+    Task<ErrorOr<UserProfileResponse>> GetUserProfile(string? userId, CancellationToken cancellation = default);
+    Task<ErrorOr<VUser>> GetUserDetailById(string? userId, CancellationToken cancellation = default);
 }

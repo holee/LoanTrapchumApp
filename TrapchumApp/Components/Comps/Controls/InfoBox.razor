@@ -1,13 +1,4 @@
-﻿@using Applications.Features.Addresses
-@using Applications.Features.Branches
-@using Applications.Features.Currencies
-@using Applications.Features.Customers.Services
-@using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Interfaces
-@using Radzen
-@using Radzen.Blazor
-
-<RadzenCard class="info-card" Style="@($"background: linear-gradient(135deg, {@GradientStart}, {@GradientEnd}); border-radius: 8px; padding: 16px; margin-bottom: 16px;")">
+﻿<RadzenCard class="info-card" Style="@($"background: linear-gradient(135deg, {@GradientStart}, {@GradientEnd}); border-radius: 8px; padding: 16px; margin-bottom: 16px;")">
     @if (ChildContent is not null)
     {
         @ChildContent

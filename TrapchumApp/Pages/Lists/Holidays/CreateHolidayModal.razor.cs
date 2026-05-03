@@ -3,9 +3,7 @@ using Applications.Features.Holidays.Command.CreateHoliday;
 using Applications.Features.Holidays.Command.DeleteHoliday;
 using Applications.Features.Holidays.Dtos;
 using Applications.Features.Holidays.Queries.GetHolidays;
-using Applications.Responses.ViewModels.Holidays;
 using Radzen.Blazor;
-using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Lists.Holidays
 {
@@ -16,7 +14,7 @@ namespace TrapchumApp.Pages.Lists.Holidays
 
         private List<HolidayCreateDto> model = new List<HolidayCreateDto>();
         private HolidayCreateDto modelDTO = new();
-        private IEnumerable<HolidayVm> listvm = [];
+        private IEnumerable<HolidayDto> listvm = [];
         DateTime currentdt = DateTime.Now;
         bool IsMultiYear = false;
         bool IsDisible = true;
@@ -25,7 +23,7 @@ namespace TrapchumApp.Pages.Lists.Holidays
         protected List<DateTime?>? Years = [];
         protected DateTime Year = DateTime.Now;
         protected int? endYear = null;
-        private RadzenDataGrid<HolidayVm> _gridHolidy = default!;
+        private RadzenDataGrid<HolidayDto> _gridHolidy = default!;
 
         protected override async Task OnInitializedAsync()
         {
@@ -175,7 +173,7 @@ namespace TrapchumApp.Pages.Lists.Holidays
             await GetHolidays(dt);
             StateHasChanged();
         }
-        private void RowSelectedChanged(HolidayVm arg)
+        private void RowSelectedChanged(HolidayDto arg)
         {
             if (arg != null)
             {

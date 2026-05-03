@@ -1,12 +1,6 @@
-using Applications.Features.Collaterals.Dtos;
-using Applications.Features.Guarantor.Dtos;
-using Applications.Features.LoanRequests.Command.CreateLoanRequest;
-using Applications.Features.LoanRequests.Command.SaveEditLoanRequest;
-using Applications.Features.LoanRequests.Command.SaveLoanRequest;
+using Applications.Features.LoanRequests.Dtos;
 using Applications.Features.LoanRequests.Requests;
-using Applications.Responses.ViewModels.Loans.Requests;
 using Domains.Models.Collaterals;
-using Domains.Models.Lists;
 using Domains.Models.Loans;
 
 namespace Applications.Commons.Mappers.LoanRequests;
@@ -81,8 +75,20 @@ public static class LoanRequestDtoCreateExtensions
     }
 
 
-    public static LoanRequest MapToLoanCreateNew(this LoanRequestDtoCreate req)
+    public static LoanRequest MapToLoanCreateNew(this LoanRequestDtoCreate? req)
     {
+        if (req == null) throw new ArgumentNullException(nameof(req));
+
+        var coPawnRequests = req.CoPawnRequests.Select(CoPawnMapper()).ToList() ?? [];
+
+        var documents = req.LoanDocuments.Select(d => d.MapToLoanDocument()).ToList() ?? [];
+
+        var guarantors = req.GuarantorsLink.Select(g => g.MapToLoanGuarantorLink()).ToList() ?? [];
+
+        var collaterals = req.CollateralLinesLink.Select(c => c.MapToCollateralLinesLink()).ToList() ?? [];
+
+        var descriptions = req.LoanDescriptions.Select(ld => ld.MapToLoanDescription()).ToList() ?? [];
+
         return new LoanRequest
         {
             LoanRequestId = req.LoanRequestId ?? $"req-{Guid.CreateVersion7()}",
@@ -117,13 +123,58 @@ public static class LoanRequestDtoCreateExtensions
             AdminFeeAmount = req.AdminFeeAmount,
             PenaltyRate = req.PenaltyRate,
             Remark = req.Remark,
-            LoanPurpose=req.LoanPurpose,
+            LoanPurpose = req.LoanPurpose,
             CollectionFeeModeId = req.CollectionFeeModeId ?? 1,
             CollectionFeeModeName = req.CollectionFeeModeName ?? string.Empty,
-            LoanDocuments = req.LoanDocuments.Select(d => d.MapToLoanDocument()).ToList() ?? [],
-            GuarantorsLink = req.GuarantorsLink.Select(g => g.MapToLoanGuarantorLink()).ToList() ?? [],
-            CollateralLinesLink = req.CollateralLinesLink.Select(c => c.MapToCollateralLinesLink()).ToList() ?? [],
-            LoanDescriptions = req.LoanDescriptions.Select(ld => ld.MapToLoanDescription()).ToList() ?? []
+            LoanDocuments = documents,
+            GuarantorsLink = guarantors,
+            CollateralLinesLink = collaterals,
+            LoanDescriptions = descriptions,
+            CoPawnRequests = coPawnRequests
+        };
+    }
+
+
+    public static Domains.Models.Loans.CoPawnCustomer MapFromCoPawnDtoCreate(this CoPawnRequestsDtoCreate? req)
+    {
+        if (req == null) throw new ArgumentNullException(nameof(req));
+
+        return new Domains.Models.Loans.CoPawnCustomer
+        {
+            CustomerId = req.CustomerId,
+            RequestId = req.LoanRequestId,
+            LoanId = req.LoanId,
+            Status = req.Status ?? true,
+            Description = req.Description,
+            BranchId = req.BranchId
+        };
+    }
+
+    public static IEnumerable<Domains.Models.Loans.CoPawnCustomer> MapFromCoPawnsDtoCreate(this IEnumerable<CoPawnRequestsDtoCreate>? reqs)
+    {
+        if (reqs == null) throw new ArgumentNullException(nameof(reqs));
+
+        return reqs.Select(req => new Domains.Models.Loans.CoPawnCustomer
+        {
+            CustomerId = req.CustomerId,
+            RequestId = req.LoanRequestId,
+            LoanId = req.LoanId,
+            Status = req.Status ?? true,
+            Description = req.Description,
+            BranchId = req.BranchId
+        });
+    }
+
+
+    private static Func<CoPawnRequestsDtoCreate, Domains.Models.Loans.CoPawnCustomer> CoPawnMapper()
+    {
+        return cp => new Domains.Models.Loans.CoPawnCustomer
+        {
+            BranchId = cp.BranchId,
+            CustomerId = cp.CustomerId,
+            RequestId = cp.LoanRequestId,
+            Description = cp.Description,
+            Status = cp.Status,
         };
     }
 
@@ -132,8 +183,9 @@ public static class LoanRequestDtoCreateExtensions
         return req.Request.MapToLoanCreateNew();
     }
 
-    public static LoanRequest MapToLoanRequestSave(this LoanRequestDtoCreate req)
+    public static LoanRequest MapToLoanRequestSave(this LoanRequestDtoCreate? req)
     {
+        if (req == null) throw new ArgumentNullException(nameof(req));
         return new LoanRequest
         {
             LoanRequestId = req.LoanRequestId ?? $"req-{Guid.CreateVersion7()}",
@@ -168,7 +220,7 @@ public static class LoanRequestDtoCreateExtensions
             AdminFeeAmount = req.AdminFeeAmount,
             PenaltyRate = req.PenaltyRate,
             Remark = req.Remark,
-            LoanPurpose=req.LoanPurpose,
+            LoanPurpose = req.LoanPurpose,
             CollectionFeeModeId = req.CollectionFeeModeId ?? 1,
             CollectionFeeModeName = req.CollectionFeeModeName ?? string.Empty,
             LoanDescriptions = req.LoanDescriptions.Select(ld => ld.MapToLoanDescription()).ToList() ?? []
@@ -186,7 +238,6 @@ public static class LoanRequestDtoCreateExtensions
     }
 
 
-
     public static AproveLoanDtoCreate ApprovedLoanRequestDtoCreate(this ApprovedRequest req)
     {
         return new AproveLoanDtoCreate
@@ -201,5 +252,31 @@ public static class LoanRequestDtoCreateExtensions
     }
 
 
+
+    public static CoPawnRequestsDtoCreate Map(this CoPawnCustomerDto? source)
+    {
+        if (source == null) throw new ArgumentNullException(nameof(source));
+
+        return new CoPawnRequestsDtoCreate
+        {
+            Id = source.Id,
+            BranchId = source.BranchId,
+            CustomerId = source.CustomerId,
+            LoanRequestId = source.RequestId,
+            LoanId = source.LoanId,
+            Status = source.Status,
+            CustomerName = source.CustomerName,
+            CustomerPhone = source.CustomerPhone,
+            CustomerAddress = source.CustomerAddress,
+            Description = source.Description
+        };
+    }
+
+    public static List<CoPawnRequestsDtoCreate> Maps(this IEnumerable<CoPawnCustomerDto>? source)
+    {
+        if (source == null) throw new ArgumentNullException(nameof(source));
+
+        return source.Select(x => x.Map()).ToList();
+    }
 
 }

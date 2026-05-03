@@ -25,13 +25,13 @@ namespace Applications.Commons.Mappers
             };
         }
 
-        public static LoanCategoryResponse Map(this LoanCategory entity) 
+        public static LoanCategoryDto Map(this LoanCategory entity) 
         {
             if (entity == null)
             {
                 throw new ArgumentNullException(nameof(entity));
             }
-            return new LoanCategoryResponse
+            return new LoanCategoryDto
             {
                 LoanCategoryId = entity.LoanCategoryId,
                 LoanCategoryCode = entity.LoanCategoryCode ?? string.Empty,
@@ -43,11 +43,11 @@ namespace Applications.Commons.Mappers
             };
         }
 
-        public static IEnumerable<LoanCategoryResponse> Maps(this IEnumerable<LoanCategory> source)
+        public static IEnumerable<LoanCategoryDto> Maps(this IEnumerable<LoanCategory> source)
         {
             return source.Select(x => x.Map()).ToList();
         }
-        public static LoanCategory MapEdit(this LoanCategoryResponse response) 
+        public static LoanCategory MapEdit(this LoanCategoryDto response) 
         {
             if (response == null)
             {

@@ -3,9 +3,7 @@ using Applications.Features.Currencies.Dto;
 using Applications.Features.Currencies.Queries.GetCurrencies;
 using Applications.Features.Currencies.Queries.GetCurrencyCounter;
 using Applications.Features.Currencies.Responses;
-using Applications.Responses.Paginations;
 using Domains.Models.Currencies;
-using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Currencies
 {

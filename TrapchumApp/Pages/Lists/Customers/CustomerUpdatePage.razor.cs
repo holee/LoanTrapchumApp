@@ -1,15 +1,10 @@
-﻿using Applications.Enumerations;
-using Applications.Features.AdditionalInformations.Dto;
+﻿using Applications.Features.AdditionalInformations.Dto;
 using Applications.Features.Customers.Commands.EditCustomer;
 using Applications.Features.Customers.Dto;
 using Applications.Features.Customers.Queries.GetUpdateCustomerById;
 using Applications.Features.Customers.Response;
 using Applications.Responses.Lists.Entities;
-using Applications.Responses.Paginations;
-using Applications.Services.Lists;
 using Domains.Models.Addresses;
-using Domains.Models.Lists;
-using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Lists.Customers;
 

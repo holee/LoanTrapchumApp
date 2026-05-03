@@ -1,11 +1,9 @@
 using Applications.Features.Branches.Dtos;
-using Applications.Features.Branches.Queries.GetBranchByUser;
 using Applications.Features.Branches.Queries.GetBranchsByUser;
 using Applications.Features.CashManagements.Responses;
 using Applications.Features.Currencies.Dto;
 using Applications.Features.Currencies.Queries.GetCashVault;
 using Domains.Models.Identity;
-using TrapchumApp.Helpers.Extensions;
 using TrapchumApp.Shared;
 
 namespace TrapchumApp.Pages.Transactions.Branches;

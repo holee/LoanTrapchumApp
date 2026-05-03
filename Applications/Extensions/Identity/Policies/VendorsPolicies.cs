@@ -11,10 +11,10 @@ public static class VendorsPolicies
     public const string Update = $"{prefix}.{nameof(Update)}";
     public const string Delete = $"{prefix}.{nameof(Delete)}";
 
-    private static string read = AppPermission.RuleFor(Modules.Vendors, Feature.Read);
-    private static string update = AppPermission.RuleFor(Modules.Vendors, Feature.Update);
-    private static string create = AppPermission.RuleFor(Modules.Vendors, Feature.Create);
-    private static string delete = AppPermission.RuleFor(Modules.Vendors, Feature.Delete);
+    private static string read = AppPermission.RuleFor(Modules.Vendors, Actions.Read);
+    private static string update = AppPermission.RuleFor(Modules.Vendors, Actions.Update);
+    private static string create = AppPermission.RuleFor(Modules.Vendors, Actions.Create);
+    private static string delete = AppPermission.RuleFor(Modules.Vendors, Actions.Delete);
     public static AuthorizationPolicy CanCreate()
     {
         return new AuthorizationPolicyBuilder()

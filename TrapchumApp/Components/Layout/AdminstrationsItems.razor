@@ -1,12 +1,4 @@
-﻿@using Applications.Features.Addresses
-@using Applications.Features.Branches
-@using Applications.Features.Currencies
-@using Applications.Features.Customers.Services
-@using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Interfaces
-@using TrapchumApp.Helpers.Constants
-@using TrapchumApp.Services
-<RadzenPanelMenuItem Text="Adminstrations" Icon="manage_accounts">
+﻿<RadzenPanelMenuItem Text="Adminstrations" Icon="manage_accounts">
     <RadzenPanelMenuItem Text="Manage Users" Icon="account_circle" Path="/App/Account/Users" />
     <RadzenPanelMenuItem Text="Manage Roles" Icon="admin_panel_settings" Path="/App/Account/Roles" />
     <RadzenPanelMenuItem Text="Manage Permissions" Icon="lock_person" Path="/App/Account/Permissions" />
@@ -23,6 +15,8 @@
     <RadzenPanelMenuItem Text="Communes" Icon="@IconNames.LocationHome" Path="/App/Operation-Area/Communes" />
     <RadzenPanelMenuItem Text="Villages" Icon="@IconNames.LocationOn" Path="/App/Operation-Area/Villages" />
     <RadzenPanelMenuItem Text="Income & Expense" Icon="@IconNames.MoneyBag" Path="/App/Settings/Income-Expense" />
+    <RadzenPanelMenuItem Text="Items" Icon="@IconNames.Accessibility" Path="/App/Items" />
+    <RadzenPanelMenuItem Text="Collaterals" Icon="@IconNames.MoneyOffCsred" Path="/App/Collaterals/Valuations" />
 </RadzenPanelMenuItem>
 @code {
 

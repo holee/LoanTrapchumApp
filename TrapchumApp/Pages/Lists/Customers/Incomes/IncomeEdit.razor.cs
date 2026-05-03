@@ -1,10 +1,8 @@
-using Applications.Commons.Mappers.Incomes;
 using Applications.Commons.Messages.Incomes;
 using Applications.Features.Incomes.Command.EditIncome;
 using Applications.Features.Incomes.Dto;
 using Applications.Features.Incomes.Queries.GetEditIncome;
 using Applications.Features.Incomes.Queries.GetIncomeExpense;
-using Applications.Responses.Paginations;
 using Domains.Enumerations;
 
 namespace TrapchumApp.Pages.Lists.Customers.Incomes
@@ -30,7 +28,7 @@ namespace TrapchumApp.Pages.Lists.Customers.Incomes
             var query = new GetIncomeExpenseQuery(0, IncomeExpenseTypes.Income, new QueryParam
             {
                 Page = 0,
-                PageSize = 10,
+                Take = 10,
                 Filter = filter
             });
 

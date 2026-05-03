@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using Applications.Features.Identity.Roles.Requests;
 using Applications.Features.Identity.Roles.Responses;
 using Applications.Features.Identity.Users;
+using Applications.Commons.ExceptionHandlers;
 namespace Infrastructures.Implements;
 
 public sealed class RoleRepository(
@@ -86,7 +87,7 @@ public sealed class RoleRepository(
         var existingRole = await roleManager.FindByNameAsync(role.RoleName!);
 
         if (existingRole is not null)
-            return ErrorOr.Error.Conflict("conflict",description: $"Role '{role.RoleName}' already exists.");
+            return ErrorOr.Error.Conflict("conflict", description: $"Role '{role.RoleName}' already exists.");
 
         var newRole = new ApplicationRole
         {
@@ -106,7 +107,7 @@ public sealed class RoleRepository(
         {
             var claimEntities = role.Permissions.Select(x => new ApplicationRoleClaim
             {
-                RoleId = newRole.Id,          
+                RoleId = newRole.Id,
                 ClaimType = x.ClaimType,
                 ClaimValue = x.ClaimValue,
                 Description = x.Description,
@@ -119,7 +120,7 @@ public sealed class RoleRepository(
         var roleClaims = new RoleClaims(
             newRole.Id,
             newRole.Name!,
-            role.Permissions 
+            role.Permissions
                 .Select(x => new RoleClaimDto
                 {
                     ClaimType = x.ClaimType,
@@ -220,6 +221,48 @@ public sealed class RoleRepository(
         return Result.Success("Role permissions updated successfully.");
     }
 
+
+    public async Task AddRolePermissions(string? roleId, RolePermissionRequest permission)
+    {
+        if(string.IsNullOrEmpty(roleId))
+        {
+           throw new ArgumentException("RoleId is required.", nameof(roleId));
+        }
+
+
+        var roleInDb = await roleManager.FindByIdAsync(roleId);
+
+        if (roleInDb is null)
+        {
+            throw new NotFoundException($"No Role Found with Id: {roleId}");
+        }
+
+        var permissionsToBeAssigned = permission!.RoleClaims!
+            .Where(rc => rc.IsAssignedToRole == true)
+            .ToList();
+        var currentlyAssignedClaims = await roleManager.GetClaimsAsync(roleInDb);
+
+        //// Drop
+        //foreach (var claim in currentlyAssignedClaims)
+        //{
+        //    await roleManager.RemoveClaimAsync(roleInDb, claim);
+        //}
+
+        // Add
+        //foreach (var claim in permissionsToBeAssigned)
+        //{
+        //var mappedRoleClaim = claim.Adapt<ApplicationRoleClaim>();
+
+        //    await context.RoleClaims.AddAsync(mappedRoleClaim);
+        //}
+
+        await context.SaveChangesAsync();
+
+        //return Result.Success("Role permissions updated successfully.");
+    }
+
+
+
     public async Task<Result<IEnumerable<RoleDto>>> GetRolesAsync(string? roleId = null, string? name = null)
     {
         var queries = roleManager.Roles
@@ -278,9 +321,9 @@ public sealed class RoleRepository(
         var counts = await queries.CountAsync(cancellation);
 
 
-        if (param.PageSize > 0)
+        if (param.Take > 0)
         {
-            queries = queries.Skip(param.Page).Take(param.PageSize);
+            queries = queries.Skip(param.Page).Take(param.Take);
         }
         var items = await queries.AsNoTracking().ToListAsync(cancellation);
 
@@ -324,9 +367,9 @@ public sealed class RoleRepository(
 
         var counts = await queries.CountAsync(cancellation);
 
-        if (param.PageSize > 0)
+        if (param.Take > 0)
         {
-            queries = queries.Skip(param.Page).Take(param.PageSize);
+            queries = queries.Skip(param.Page).Take(param.Take);
         }
 
         var roles = await queries

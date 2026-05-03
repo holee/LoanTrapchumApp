@@ -1,7 +1,6 @@
 ﻿using Applications.Extensions.DateTimes;
 using Applications.Features.Holidays.Command.CreateHolidays;
 using Applications.Features.Holidays.Dtos;
-using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Lists.Holidays
 {

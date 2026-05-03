@@ -1,7 +1,6 @@
 using Applications.Features.Departments.Dto;
 using Applications.Features.Departments.Queries.GetDepartmentById;
 using Applications.Interfaces.Lists;
-using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Lists.Departments
 {

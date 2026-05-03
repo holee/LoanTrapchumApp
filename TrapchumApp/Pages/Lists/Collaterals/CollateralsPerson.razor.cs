@@ -1,7 +1,5 @@
 using Applications.Features.Collaterals.Dtos;
 using Applications.Services.Lists;
-using Microsoft.AspNetCore.Components;
-using Radzen;
 using Radzen.Blazor;
 
 namespace TrapchumApp.Pages.Lists.Collaterals

@@ -3,4 +3,4 @@ using ErrorOr;
 
 namespace Applications.Features.Holidays.Command.CreateHolidays;
 
-public record CreateHolidaysCommand(List<HolidayCreateDto> Request) : IRequest<ErrorOr<IEnumerable<HolidayVm>>>;
+public record CreateHolidaysCommand(List<HolidayCreateDto> Request) : IRequest<ErrorOr<IEnumerable<HolidayDto>>>;

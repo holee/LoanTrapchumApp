@@ -1,4 +1,3 @@
-using Applications.Enumerations;
 using Applications.Extensions.Enums;
 using Applications.Extensions.Maths;
 using Applications.Extensions.NumberExtensions;
@@ -13,10 +12,8 @@ using Applications.Interfaces.setting;
 using Applications.Responses.ViewModels.Options;
 using Domains.Enumerations;
 using Domains.Models.Settings;
-using Domains.Models.Transaction;
-using Mapster;
 using TrapchumApp.Helpers.Constants;
-using TrapchumApp.Helpers.Extensions;
+
 namespace TrapchumApp.Pages.Transactions.Exchanges;
 
 public partial class MoneyExchangesEdit

@@ -1,6 +1,5 @@
 using Applications.Calculations;
 using Applications.Commons.Mappers;
-using Applications.Enumerations;
 using Applications.Extensions.NumberExtensions;
 using Applications.Features.Branches.Dtos;
 using Applications.Features.LoanPayments.Queries.GetLoanSchedulesByLoanIdAsPaging;
@@ -10,7 +9,6 @@ using Applications.Features.Loans.Queries.GetLoanById;
 using Applications.Features.Schedules.Queries.GetDueScheduleByLoanId;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Radzen.Blazor;
-using TrapchumApp.Helpers.Extensions;
 using TrapchumApp.Pages.Transactions.Loans.Repayments;
 namespace TrapchumApp.Pages.Transactions.RecievePayements;
 

@@ -1,11 +1,8 @@
 using Applications.Extensions;
-using Applications.Features.Branches.Queries.GetUpdateBranch;
 using Applications.Features.Guarantor.Command.UpdateGuarantor;
 using Applications.Features.Guarantor.Dtos;
 using Applications.Features.Guarantor.Queries.GetUpdateGuarantorById;
 using Applications.Services.Lists;
-using Domains.Models.Lists;
-using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Lists.OtherNames.Guarantors
 {

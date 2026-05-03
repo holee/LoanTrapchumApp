@@ -1,14 +1,7 @@
 ﻿@page "/Branches/{BranchId:int?}/OpenBranch"
-@using Applications.Features.Addresses
-@using Applications.Features.Branches
-@using Applications.Features.Currencies
-@using Applications.Features.Customers.Services
-@using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Interfaces
-@using TrapchumApp.Services
 <PageTitle>Open Branch</PageTitle>
 @implements IDisposable
-@attribute [MustHasPermission(Modules.Transactions, Feature.OpenBranch)]
+@attribute [MustHasPermission(Modules.Transactions, Actions.OpenBranch)]
 <RadzenCard class="rz-mx-auto" Style="width:100%;">
     <RadzenAlert AlertStyle="AlertStyle.Warning"
                  ShowIcon="true"

@@ -6,110 +6,131 @@ using Domains.Models.Files;
 
 namespace Applications.Services.Identity;
 
-
 public sealed class UserService(IUserService userService, IValidator<ChangePasswordDto> validator) : IUserServiceImpl
 {
-
     public async Task<Result<string>> AddOrRemovedUserPermissionsAsync(string? userId, UserPermissionRequest permission)
     {
-        return await userService.AddOrRemovedUserPermissionsAsync(userId, permission);
+        var result = await userService.AddOrRemovedUserPermissionsAsync(userId, permission);
+        return result.IsError
+            ? Result.Failure<string>(ErrorResponse.Failure(result.FirstError.Description))
+            : Result.Success(result.Value);
     }
 
     public async Task<Result<string>> AddOrRemovedUserRolesAsync(List<UserRolesViewModel> useroles, string userId)
     {
-        return await userService.AddOrRemovedUserRolesAsync(useroles, userId);
+        var result = await userService.AddOrRemovedUserRolesAsync(useroles, userId);
+        return result.IsError
+            ? Result.Failure<string>(ErrorResponse.Failure(result.FirstError.Description))
+            : Result.Success(result.Value);
     }
 
     public async Task<Result<string>> ChangePassword(ChangePasswordDto req, CancellationToken cancellation = default)
     {
-
         var valid = validator.Validate(req);
-
         if (!valid.IsValid)
-        {
+            return Result.Failure<string>(ErrorResponse.Validation(valid.ToDictionary()));
 
-            var errors = valid.ToDictionary();
-
-            return Result.Failure<string>(ErrorResponse.Validation(errors));
-        }
-
-        return await userService.ChangePassword(req, cancellation);
+        var result = await userService.ChangePassword(req, cancellation);
+        return result.IsError
+            ? Result.Failure<string>(ErrorResponse.Failure(result.FirstError.Description))
+            : Result.Success(result.Value);
     }
-
 
     public async Task<Result<FileModel>> ChangeProfile(string? userId, ProfileDtoCreate req)
     {
-
         var model = new FileModel(req.FileName, req.FileName, req.FileSize, req.FileContent);
-
-        return await userService.ChangeProfile(userId, model);
-
+        var result = await userService.ChangeProfile(userId, model);
+        return result.IsError
+            ? Result.Failure<FileModel>(ErrorResponse.Failure(result.FirstError.Description))
+            : Result.Success(result.Value);
     }
 
     public async Task<Result<string>> CreateUserAsync(RegisterRequest model)
     {
-        return await userService.CreateUserAsync(model);
+        var result = await userService.CreateUserAsync(model);
+        return result.IsError
+            ? Result.Failure<string>(ErrorResponse.Failure(result.FirstError.Description))
+            : Result.Success(result.Value);
     }
 
     public async Task<Result> EditUserAsync(string userId, EditUserDto model)
     {
-        return await userService.EditUserAsync(userId, model);
+        var result = await userService.EditUserAsync(userId, model);
+        return result.IsError
+            ? Result.Failure(ErrorResponse.Failure(result.FirstError.Description))
+            : Result.Success();
     }
 
     public async Task<Result<UserPermissions>> GetUserPermissionsAsync(string? userId)
     {
-        return await userService.GetUserPermissionsAsync(userId);
+        var result = await userService.GetUserPermissionsAsync(userId);
+        return result.IsError
+            ? Result.Failure<UserPermissions>(ErrorResponse.Failure(result.FirstError.Description))
+            : Result.Success(result.Value);
     }
 
     public async Task<Result<UserViewModel>> GetUserRolesAsync(string? userId)
     {
-        return await userService.GetUserRolesAsync(userId);
+        var result = await userService.GetUserRolesAsync(userId);
+        return result.IsError
+            ? Result.Failure<UserViewModel>(ErrorResponse.Failure(result.FirstError.Description))
+            : Result.Success(result.Value);
     }
 
-    public async Task<Pager<UserDto>> GetUsersAsync(int pageIndex, int pageSize, string sortColumn, bool includeInactive = false, string? filter = null)
-    {
-        return await GetUsersAsync(pageIndex, pageSize, sortColumn, includeInactive, filter);
-    }
+    public Task<Pager<UserDto>> GetUsersAsync(int pageIndex, int pageSize, string sortColumn, bool includeInactive = false, string? filter = null)
+        => Task.FromResult(new Pager<UserDto>([], 0));
 
     public async Task<Result<Pager<VUser>>> GetUsersAsync(QueryParam param, string? userId = null)
     {
-        return await userService.GetUsersAsync(param, userId);
+        var result = await userService.GetUsersAsync(param, userId);
+        return result.IsError
+            ? Result.Failure<Pager<VUser>>(ErrorResponse.Failure(result.FirstError.Description))
+            : Result.Success(result.Value);
     }
 
     public async Task<Result<Pager<VUser>>> GetUsersAsync(int? branchId, string? userId, QueryParam param)
     {
-        return await userService.GetUsersAsync(branchId, userId, param);
-    }
-
-    public async Task<Result<IEnumerable<VUser>>> GetUsersAsync(string? userId, string? filter = null)
-    {
-        return await userService.GetUsersAsync(userId, filter);
+        var result = await userService.GetUsersAsync(branchId, userId, param);
+        return result.IsError
+            ? Result.Failure<Pager<VUser>>(ErrorResponse.Failure(result.FirstError.Description))
+            : Result.Success(result.Value);
     }
 
     public async Task<Result<VUser>> GetUserByIdAsync(string? userId, CancellationToken cancellation = default)
     {
-        return await userService.GetUserByIdAsync(userId, cancellation);
+        var result = await userService.GetUserByIdAsync(userId, cancellation);
+        return result.IsError
+            ? Result.Failure<VUser>(ErrorResponse.NotFound(result.FirstError.Description))
+            : Result.Success(result.Value);
     }
-    public async Task<Result<VUser>> GetUserByIdAsync(string? userId, CancellationToken cancellation = default, params IEnumerable<string> columns)
+
+    public async Task<Result<UserDto>> GetUserDetailsById(string? userId)
     {
-        return await userService.GetUserByIdAsync(userId, cancellation, columns);
+        var result = await userService.GetUserDetailsById(userId);
+        return result.IsError
+            ? Result.Failure<UserDto>(ErrorResponse.NotFound(result.FirstError.Description))
+            : Result.Success(result.Value);
     }
 
-    public async Task<Result<UserDto>> GetUserDetailsById(string? userId) => await userService.GetUserDetailsById(userId);
+    public async Task<Result> UpdateUserRoleAsync(UserRoleDtoUpdate req)
+    {
+        var result = await userService.UpdateUserRoleAsync(req);
+        return result.IsError
+            ? Result.Failure(ErrorResponse.Failure(result.FirstError.Description))
+            : Result.Success();
+    }
 
-    public async Task<Result> UpdateUserRoleAsync(UserRoleDtoUpdate req) => await userService.UpdateUserRoleAsync(req);
-
-    public async Task<Pager<PermissionsVm>> GetPermissionsAsync(QueryParam req) => await userService.GetPermissionsAsync(req);
-
+    public async Task<Pager<PermissionsVm>> GetPermissionsAsync(QueryParam req)
+        => await userService.GetPermissionsAsync(req);
 
     public async Task<Result<UserProfileResponse>> GetUserProfile(string? userId, CancellationToken cancellation = default)
     {
         if (string.IsNullOrEmpty(userId))
-        {
             return Result.Failure<UserProfileResponse>(ErrorResponse.Validation("No UserId"));
-        }
 
-        return await userService.GetUserProfile(userId);
-
+        var result = await userService.GetUserProfile(userId, cancellation);
+        return result.IsError
+            ? Result.Failure<UserProfileResponse>(ErrorResponse.NotFound(result.FirstError.Description))
+            : Result.Success(result.Value);
     }
 }

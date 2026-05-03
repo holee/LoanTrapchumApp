@@ -1,7 +1,4 @@
-using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Auths;
-using Radzen;
-using System.Threading.Tasks;
 
 namespace TrapchumApp.Pages.Identity
 {

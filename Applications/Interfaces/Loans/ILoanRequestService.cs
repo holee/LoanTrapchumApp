@@ -1,5 +1,6 @@
 ﻿using Applications.Enumerations;
 using Applications.Features.CreditAgents.Requests;
+using Applications.Features.LoanRequests.Dtos;
 using Applications.Features.LoanRequests.Requests;
 using Applications.Features.Loans.Dtos.Responses;
 using Applications.Responses;
@@ -21,7 +22,7 @@ namespace Applications.Interfaces.Loans
         Task<ErrorOr<RequestResult>> VerifiedLoanRequestAsync(RequestDtoBaseCreate req, CancellationToken cancellationToken = default);
         Task<ErrorOr<RequestResult>> AppliedLoanRequestAsync(RequestDtoBaseCreate req, CancellationToken cancellationToken = default);
         Task<ErrorOr<RequestResult>> EditLoanRequestAsync(LoanRequest request, CancellationToken cancellation = default);
-        Task<ErrorOr<string>> AddLoanRequestDocumentAsync(LoanDocuments request, CancellationToken cancellationToken = default); 
+        Task<ErrorOr<string>> AddLoanRequestDocumentAsync(LoanDocuments request, CancellationToken cancellationToken = default);
         Task<ErrorOr<string>> AddLoanRequestGuarantorAsync(LoanRequestGuarantors request, CancellationToken cancellationToken = default);
         Task<ErrorOr<string>> AddLoanRequestCollateralAsync(LoanCollateralRequest req, CancellationToken cancellationToken = default);
         Task<ErrorOr<IEnumerable<VLoanRequestGuarantors>>> GetLoanRequestGuarantorAsync(int? branchId, string? loanRequestId, string? customerId);
@@ -36,12 +37,17 @@ namespace Applications.Interfaces.Loans
         Task<ErrorOr<VLoanRequests>> GetLoanRequestAsync(int? branchId, string? userId, string? customerId, string? loanRequestId, bool include);
         Task<Pager<VLoanRequests>> GetLoanRequestsAsync(string? userId, bool canDisburse, int? branchId, RequestStatus requestStatus, QueryParam param);
         Task<Pager<VLoanRequests>> GetLoanRequestsAsync(string? userId, int? branchId, RequestStatus requestStatus, QueryParam param);
-        Task<ErrorOr<string>> AddLoanRequestDocumentAsync(int? branchId, string? loanRequestId, List<LoanDocuments> documents,CancellationToken cancellation = default);
+        Task<ErrorOr<string>> AddLoanRequestDocumentAsync(int? branchId, string? loanRequestId, List<LoanDocuments> documents, CancellationToken cancellation = default);
         Task<ErrorOr<bool>> IsCustomerBusy(string? customerId, CancellationToken cancellation = default);
         Task<ErrorOr<string>> AddDescription(LoanDescriptions descriptions, CancellationToken cancellation = default);
         Task<ErrorOr<VLoanRequests>> GetApprovedLoanRequestAsync(int? branchId, string? customerId, string? loanRequestId, bool include);
         Task<ErrorOr<LoanRequest>> GetEditLoanRequestAsync(int? branchId, string? customerId, string? loanRequestId, CancellationToken cancellation = default);
         Task<ErrorOr<RequestResult>> SaveLoanRequestByManagerAsync(SaveLoanRequestDtoCreate req, CancellationToken cancellationToken = default);
         Task<ErrorOr<RequestResult>> SaveLoanRequestAsync(SaveLoanRequestDtoCreate req, CancellationToken cancellationToken = default);
+        Task<CoPawnCustomerDto?> AddCoPawnCustomerAsync(CoPawnCustomer req, CancellationToken cancellation = default);
+        Task<IEnumerable<CoPawnCustomerDto?>> AddCoPawnCustomersAsync(int? branchId, string? requestId, IEnumerable<CoPawnCustomer> reqs, CancellationToken cancellation = default);
+        Task<bool> DeleteCoPawnCustomersAsync(CoPawnCustomer req, CancellationToken cancellation = default);
+        Task<IEnumerable<CoPawnCustomerDto?>> AddCoPawnCustomers2Async(int? branchId, string? requestId, IEnumerable<CoPawnCustomer> reqs, CancellationToken cancellation = default);
+        Task<bool> IsCoPawnExistAsync(int? branchId, string? customerId, CancellationToken cancellationToken);
     }
 }

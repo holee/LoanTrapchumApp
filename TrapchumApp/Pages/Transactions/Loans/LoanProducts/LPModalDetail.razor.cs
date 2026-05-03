@@ -1,6 +1,5 @@
 using Applications.Responses.ViewModels.Loans.Products;
 using Applications.Services.Loans;
-using Microsoft.AspNetCore.Components;
 
 namespace TrapchumApp.Pages.Transactions.Loans.LoanProducts
 {

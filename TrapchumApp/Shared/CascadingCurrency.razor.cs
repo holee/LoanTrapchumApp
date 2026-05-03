@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Components;
-
 namespace TrapchumApp.Shared;
 public partial class CascadingCurrency : ComponentBase
 {

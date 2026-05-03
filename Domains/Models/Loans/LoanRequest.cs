@@ -47,5 +47,5 @@ public sealed class LoanRequest : BaseEntity
     public List<LoanGuarantorLink> GuarantorsLink { get; set; } = [];
     public List<CollateralLink> CollateralLinesLink { get; set; } = [];
     public List<LoanDescriptions> LoanDescriptions { get; set; } = [];
-    public List<CoLoanRequest> CoLoanRequest { get; set; } = [];
+    public List<CoPawnCustomer> CoPawnRequests { get; set; } = [];
 }

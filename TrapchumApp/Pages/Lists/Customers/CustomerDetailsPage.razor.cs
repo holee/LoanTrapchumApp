@@ -3,7 +3,6 @@ using Applications.Features.Customers.Commands.DeleteCustomer;
 using Applications.Features.Customers.Queries.GetCustomerDetailById;
 using Applications.Features.Customers.Response;
 using Domains.Models.Identity;
-using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Lists.Customers;
 

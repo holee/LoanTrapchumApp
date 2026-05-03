@@ -1,9 +1,7 @@
 using Applications.Features.Holidays.Command.DeleteHoliday;
+using Applications.Features.Holidays.Dtos;
 using Applications.Features.Holidays.Queries.GetHolidaysAsPaging;
-using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Holidays;
 using Domains.Models.Lists;
-using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Lists.Holidays
 {
@@ -17,7 +15,7 @@ namespace TrapchumApp.Pages.Lists.Holidays
 
         public bool IsPreviousSelected = false;
 
-        protected List<HolidayVm>? HolidaysList = [];
+        protected List<HolidayDto>? HolidaysList = [];
 
         int pageIndex = 0;
 
@@ -37,7 +35,7 @@ namespace TrapchumApp.Pages.Lists.Holidays
         }
 
 
-        void OnRowRedner(RowRenderEventArgs<HolidayVm> args)
+        void OnRowRedner(RowRenderEventArgs<HolidayDto> args)
         {
             args.Data?.RowIndex = args.Index​ + 1;
         }

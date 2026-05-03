@@ -1,6 +1,5 @@
 using Applications.Commons.Authorizations;
 using Applications.Commons.Mappers;
-using Applications.Enumerations;
 using Applications.Extensions;
 using Applications.Features.LoanRequests.Command.SaveEditLoanRequest;
 using Applications.Features.LoanRequests.Command.SaveLoanRequests;
@@ -11,7 +10,6 @@ using Applications.Responses.ViewModels.Loans.Requests;
 using Domains.Models.Identity;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
-using TrapchumApp.Helpers.Extensions;
 using TrapchumApp.Shared;
 
 namespace TrapchumApp.Pages.Transactions.LoanRequests

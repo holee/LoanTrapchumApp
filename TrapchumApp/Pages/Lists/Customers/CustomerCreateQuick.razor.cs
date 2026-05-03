@@ -1,14 +1,11 @@
-using Applications.Enumerations;
 using Applications.Features.Addresses.Dto;
 using Applications.Features.Customers.Commands.CreateCustomer;
 using Applications.Features.Customers.Dto;
 using Applications.Responses.Lists.Entities;
-using Applications.Services.Files;
 using Applications.Services.Lists;
 using Domains.Models.Addresses;
 using Domains.Models.Lists;
 using Radzen.Blazor;
-using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Lists.Customers
 {

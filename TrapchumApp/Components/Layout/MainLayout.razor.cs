@@ -3,7 +3,6 @@ using TrapchumApp.Shared;
 using Domains.Models.Identity;
 using Applications.Features.Notifications.Queries.GetNotification;
 using Domains.Enumerations;
-using TrapchumApp.Helpers.Extensions;
 using Applications.Features.Branches.Queries.GetBranchState;
 
 namespace TrapchumApp.Components.Layout

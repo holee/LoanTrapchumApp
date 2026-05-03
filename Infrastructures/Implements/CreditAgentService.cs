@@ -166,9 +166,9 @@ namespace Infrastructures.Implements
 
             var counts = await queries.CountAsync(cancellation);
 
-            if (param.PageSize > 0)
+            if (param.Take > 0)
             {
-                queries = queries.Skip(param.Page).Take(param.PageSize);
+                queries = queries.Skip(param.Page).Take(param.Take);
 
             }
 
@@ -221,7 +221,7 @@ namespace Infrastructures.Implements
 
             var items = await queries
                             .Skip(param.Page)
-                            .Take(param.PageSize)
+                            .Take(param.Take)
                             .AsNoTracking().ToListAsync(cancellation);
 
             return new Pager<VEmployeeCreditAgent>(items, counts);

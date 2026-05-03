@@ -1,23 +1,17 @@
 using Applications.Calculations;
-using Applications.Enumerations;
 using Applications.Extensions;
 using Applications.Features.Customers.Response;
-using Applications.Features.LoanRequests.Command.AddDescription;
-using Applications.Features.LoanRequests.Command.RecheckedLoanRequest;
-using Applications.Features.LoanRequests.Command.SaveLoanRequest;
+using Applications.Features.Holidays.Dtos;
 using Applications.Features.LoanRequests.Command.SaveLoanRequests;
 using Applications.Features.LoanRequests.Queryies.GetApprovedLoanRequest;
 using Applications.Features.LoanRequests.Requests;
 using Applications.Features.Loans.Command.CreateLoan;
-using Applications.Features.Loans.Command.SaveLoanDisbursemenent;
 using Applications.Features.Loans.Dtos.Requests;
 using Applications.Features.Loans.Mappers;
-using Applications.Responses.ViewModels.Holidays;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Applications.Services.Lists;
 using Domains.Enumerations;
 using Domains.Models.Identity;
-using TrapchumApp.Helpers.Extensions;
 using TrapchumApp.Pages.Lists.Customers;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Disbursements;
@@ -33,7 +27,7 @@ public partial class LoanCreatePage(IHolidayServiceImpl holidayService)
     private string memo = string.Empty;
     private string? _userId = string.Empty;
     private decimal penaltyRate;
-    private IEnumerable<HolidayVm> holidays = [];
+    private IEnumerable<HolidayDto> holidays = [];
     private List<CustomTab> _tabs = [];
 
     protected LoanDtoCreate model = new();

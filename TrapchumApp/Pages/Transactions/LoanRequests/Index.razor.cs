@@ -1,7 +1,5 @@
-using Applications.Enumerations;
 using Applications.Extensions.Web;
 using Applications.Features.LoanRequests.Queryies.GetLoanRequestAsPaging;
-using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Requests;
 using TrapchumApp.Shared;
 

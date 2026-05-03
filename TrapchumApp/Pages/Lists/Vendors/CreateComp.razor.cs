@@ -2,7 +2,6 @@ using Applications.Features.AdditionalInformations.Dto;
 using Applications.Features.AdditionalInformations.Queries.GetOccupations;
 using Applications.Features.AdditionalInformations.Queries.GetSalutaions;
 using Applications.Features.OtherNames.Dto;
-using Applications.Responses.Paginations;
 using Applications.Services.Lists;
 using Domains.Models.Addresses;
 using Domains.Models.Lists;

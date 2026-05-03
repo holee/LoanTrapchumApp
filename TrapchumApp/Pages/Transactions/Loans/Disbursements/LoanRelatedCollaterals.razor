@@ -1,10 +1,5 @@
-﻿@using Applications.Features.Collaterals.Dtos
-@using Applications.Features.Loans.Dtos.Responses
+﻿@using Applications.Features.Loans.Dtos.Responses
 @using Applications.Features.Loans.Queries.GetLoanRelatedCollaterals
-@using Applications.Features.Loans.Queries.GetLoanRelatedDocuments
-@using Applications.Features.Loans.Queries.GetLoanRelatedGuarantors
-@using Applications.Responses.ViewModels.Loans.Requests
-@using System.Threading.Tasks
 <RadzenDataGrid Data="@_loanCollaterals"
                 TItem="VLoanDisbursementCollateral"
                 AllowAlternatingRows="true"

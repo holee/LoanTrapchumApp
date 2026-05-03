@@ -1,7 +1,6 @@
 using Applications.Features.Branches.Dtos;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Radzen.Blazor;
-using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 {

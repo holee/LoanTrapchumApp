@@ -1,6 +1,5 @@
 using Applications.Features.Schedules.Dto;
 using Applications.Features.Schedules.Queries.GetScheduleDetailById;
-using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments;
 

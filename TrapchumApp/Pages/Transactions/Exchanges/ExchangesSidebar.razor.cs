@@ -1,5 +1,4 @@
 using Applications.Commons.Extensions;
-using Applications.Enumerations;
 using Applications.Extensions.Maths;
 using Applications.Extensions.NumberExtensions;
 using Applications.Features.Currencies.Dto;
@@ -13,7 +12,6 @@ using Domains.Models.Settings;
 using Domains.Models.Transaction;
 using Mapster;
 using TrapchumApp.Helpers.Constants;
-using TrapchumApp.Helpers.Extensions;
 using TrapchumApp.Shared;
 
 namespace TrapchumApp.Pages.Transactions.Exchanges

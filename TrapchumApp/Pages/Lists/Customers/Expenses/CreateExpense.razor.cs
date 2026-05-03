@@ -3,7 +3,6 @@ using Applications.Features.Expenses.CreateExpenseCommands;
 using Applications.Features.Expenses.Dto;
 using Applications.Features.Incomes.Dto;
 using Applications.Features.Incomes.Queries.GetIncomeExpense;
-using Applications.Responses.Paginations;
 using Domains.Enumerations;
 namespace TrapchumApp.Pages.Lists.Customers.Expenses;
 

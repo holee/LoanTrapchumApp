@@ -1,9 +1,7 @@
 ﻿using Applications.Features.Documents.Command.AddDocument;
 using Applications.Features.Documents.Command.AddDocuments;
 using Applications.Features.Documents.Dto;
-using Applications.Services.Files;
 using Applications.Utils;
-using Domains.Models.Files;
 
 namespace TrapchumApp;
 

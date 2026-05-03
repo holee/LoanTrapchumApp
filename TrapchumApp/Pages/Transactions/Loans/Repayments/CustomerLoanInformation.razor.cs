@@ -1,6 +1,4 @@
 using Applications.Features.Loans.Dtos.Responses;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 {

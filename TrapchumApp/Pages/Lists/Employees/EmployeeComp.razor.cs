@@ -1,7 +1,5 @@
 using Applications.Extensions;
-using Applications.Features.AdditionalInformations.Command.CreateOccupation;
 using Applications.Features.AdditionalInformations.Dto;
-using Applications.Features.AdditionalInformations.Queries.GetOccupations;
 using Applications.Features.Addresses.Dto;
 using Applications.Features.Branches.Dtos;
 using Applications.Features.Branches.Queries.GetBranchAsPaging;

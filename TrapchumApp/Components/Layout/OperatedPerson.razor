@@ -1,12 +1,4 @@
-﻿@using Applications.Features.Addresses
-@using Applications.Features.Branches
-@using Applications.Features.Currencies
-@using Applications.Features.Customers.Services
-@using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Interfaces
-@using TrapchumApp.Helpers.Constants
-@using TrapchumApp.Services
-<RadzenPanelMenuItem Text="Operated Person" Icon="@IconNames.PersonBook">
+﻿<RadzenPanelMenuItem Text="Operated Person" Icon="@IconNames.PersonBook">
     <RadzenPanelMenuItem Text="Customers" Icon="group" Path="@($"/App/Customers/{BranchId}/Branches")" />
     <RadzenPanelMenuItem Text="Employees" Icon="person" Path="@($"/App/Employees")" />
     <RadzenPanelMenuItem Text="Vendors" Icon="supervisor_account" Path="@($"/App/Vendors")" />

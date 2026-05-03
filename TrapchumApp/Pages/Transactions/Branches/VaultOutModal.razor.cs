@@ -1,15 +1,12 @@
 using Applications.Commons.Extensions;
-using Applications.Enumerations;
 using Applications.Features.CashManagements.Extensions;
 using Applications.Features.CashManagements.Responses;
 using Applications.Features.Currencies.Responses;
 using Applications.Features.Transactions.CashManagements;
 using Domains.Enumerations;
-using TrapchumApp.Helpers.Extensions;
 using Applications.Features.Currencies.Extensions;
 using Applications.Features.Branches.Dtos;
 using Applications.Features.Currencies.Queries.GetCurrencies;
-using Applications.Responses.Paginations;
 using Mapster;
 using Applications.Features.Currencies.Queries.GetCurrencyDetails;
 using Applications.Features.Currencies.Queries.GetCurrencyNotes;

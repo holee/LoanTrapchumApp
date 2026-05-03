@@ -1,11 +1,4 @@
-﻿@using Applications.Features.Addresses
-@using Applications.Features.Branches
-@using Applications.Features.Currencies
-@using Applications.Features.Customers.Services
-@using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Interfaces
-@using TrapchumApp.Services
-@page "/App/Employees/CreateNewUser"
+﻿@page "/App/Employees/CreateNewUser"
 <PageTitle>New Employee</PageTitle>
 <EditForm Model="@model" OnValidSubmit="@FormValidSubmit">
     <FluentValidationValidator DisableAssemblyScanning="false" />

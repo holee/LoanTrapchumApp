@@ -46,7 +46,7 @@ public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFac
 
         var dataTask = await queries
             .Skip(param.Page)
-            .Take(param.PageSize)
+            .Take(param.Take)
             .ToListAsync(cancellation);
 
         return new Pager<VCustomerList>(dataTask, countTask);

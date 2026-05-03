@@ -5,14 +5,9 @@ using Applications.Features.Transactions.ForiegnExchanges;
 using Applications.Interfaces.Currencies;
 using Applications.Interfaces.Loans;
 using Applications.Responses.ViewModels.Loans.Schedules;
-using Microsoft.AspNetCore.Components;
-using Radzen;
-using Microsoft.AspNetCore.Components.Authorization;
 using Radzen.Blazor;
 using Applications.Features.Currencies.Responses;
 using Applications.Features.Branches.Dtos;
-using Applications.Features.Branches.Queries.GetBranchByUser;
-using TrapchumApp.Helpers.Extensions;
 using Applications.Features.Branches.Queries.GetBranchsByUser;
 using Applications.Features.Loans.Dtos.Responses;
 

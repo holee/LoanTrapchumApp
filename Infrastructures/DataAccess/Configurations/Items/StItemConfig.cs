@@ -9,6 +9,10 @@ namespace Infrastructures.DataAccess.Configurations.Items
         public void Configure(EntityTypeBuilder<Item> builder)
         {
             builder.ToTable("st_items");
+            builder.HasKey(x => x.Id);
+            builder.Property(x => x.Id).UseIdentityColumn(1, 1);
+            builder.Property(x => x.ItemName).HasMaxLength(250).IsRequired();
+            builder.Property(x => x.Description).HasMaxLength(400).IsRequired();
             builder.Property(x => x.IsActive).HasDefaultValue(true);
             builder.HasData(new Item[]
             {

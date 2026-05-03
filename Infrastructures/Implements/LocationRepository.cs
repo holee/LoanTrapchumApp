@@ -105,11 +105,11 @@ public sealed class LocationRepository(
 
             var count = await baseQuery.CountAsync(cancellation);
 
-            if (q.PageSize > 0)
+            if (q.Take > 0)
             {
-                var page = q.Page > 0 ? (q.Page - 1) * q.PageSize : 0;
+                var page = q.Page > 0 ? (q.Page - 1) * q.Take : 0;
 
-                baseQuery = baseQuery.Skip(page).Take(q.PageSize);
+                baseQuery = baseQuery.Skip(page).Take(q.Take);
 
             }
 

@@ -147,11 +147,11 @@
         public static IQueryable<T> ApplyPaging<T>(this IQueryable<T> query, QueryParam param)
         {
             if (param.Page <= 0)
-                return query.Take(param.PageSize);
+                return query.Take(param.Take);
 
             return query
                 .Skip(param.Page)
-                .Take(param.PageSize);
+                .Take(param.Take);
         }
 
 

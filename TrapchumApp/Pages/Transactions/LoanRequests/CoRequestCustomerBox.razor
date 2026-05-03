@@ -1,0 +1,84 @@
+﻿@using Applications.Features.LoanRequests.Dtos
+<RadzenFieldset>
+    <HeaderTemplate>
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
+            <RadzenIcon Icon="house" /><b>Collateral Information</b>
+        </RadzenStack>
+    </HeaderTemplate>
+    <ChildContent>
+        <RadzenRow Visible="@ShowCommand" AlignItems="AlignItems.Center">
+            <RadzenColumn Size="8">
+                @if (SearchBoxTemplate is not null)
+                {
+                    @SearchBoxTemplate
+                }
+            </RadzenColumn>
+            <RadzenColumn Size="4">
+                <RadzenStack Orientation="Orientation.Horizontal"
+                             JustifyContent="JustifyContent.End">
+                    <RadzenButton Text="Add New"
+                                  ButtonStyle="ButtonStyle.Primary"
+                                  Icon="add"
+                                  Click="@ClickedAdd"
+                                  Size="ButtonSize.Small"
+                                  Visible="@(ShowAdd && ShowCommand)"
+                                  ButtonType="ButtonType.Button"></RadzenButton>
+                </RadzenStack>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenDataGrid GridLines="DataGridGridLines.Both"
+                        Responsive
+                        TItem="CoPawnCustomerDto"
+                        Density="Density.Compact"
+                        @ref="gridCustomers"
+                        Style="min-height:15rem;height:15rem;max-height:15rem;"
+                        RowRender="@OnRowRender"
+                        Data="@Customers">
+            <Columns>
+                <RadzenDataGridColumn Title="#"
+                                      TextAlign="TextAlign.Center"
+                                      Property="@(nameof(CoPawnCustomerDto.Id))"
+                                      Width="3rem" Context="g">
+                    <Template>
+                        <input type="hidden" @bind="@g.CustomerId" />
+                        @g.RowIndex
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Title="ឈ្មោះ" Property="@(nameof(CoPawnCustomerDto.CustomerName))" Context="c" />
+                <RadzenDataGridColumn Title="លេខទូរស័ព្ទ" Property="@(nameof(CoPawnCustomerDto.CustomerPhone))" Context="c" />
+                <RadzenDataGridColumn Title="អាសយដ្ឋាន" Property="@(nameof(CoPawnCustomerDto.CustomerAddress))" Context="c">
+                    <Template>
+                        @c.CustomerAddress
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Context="g" TextAlign="TextAlign.Center"
+                                      Width="4rem"
+                                      Property="@(nameof(CoPawnCustomerDto.CustomerId))"
+                                      Visible="@ShowRemove"
+                                      Title="Action">
+                    <Template>
+                        <RadzenButton Icon="delete"
+                                      Visible="@ShowRemove"
+                                      Size="ButtonSize.ExtraSmall"
+                                      Click="()=>ClickedRevmove(g)"
+                                      Variant="Variant.Text" />
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
+    </ChildContent>
+</RadzenFieldset>
+@code {
+    [Parameter] public RenderFragment? SearchBoxTemplate { get; set; }
+
+    void OnRowRender(RowRenderEventArgs<CoPawnCustomerDto> args)
+    {
+
+        if(args.Data is null) return;
+
+        args.Data.RowIndex = args.Index + 1;
+    }
+
+}
+
+

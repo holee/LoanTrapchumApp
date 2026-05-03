@@ -6,6 +6,7 @@ using Applications.Features.Customers.Response;
 using Applications.Features.Departments.Dto;
 using Applications.Features.Guarantor.Dtos;
 using Applications.Features.Loans.Dtos.Responses;
+using Applications.Features.Settings.Dto;
 using Applications.Features.Vendors.Dto.Responses;
 using Applications.Responses.ViewModels.Addresses;
 using Applications.Responses.ViewModels.Auths;
@@ -16,7 +17,6 @@ using Applications.Responses.ViewModels.Ledgers;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Responses.ViewModels.OtherNames;
-using Applications.Responses.ViewModels.Settings;
 using Domains.Models;
 using Domains.Models.Addresses;
 using Domains.Models.Audits;
@@ -53,14 +53,14 @@ namespace Infrastructures.DataAccess
         {
             base.OnModelCreating(builder);
 
+            builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+
             foreach (var property in builder.Model.GetEntityTypes()
                .SelectMany(t => t.GetProperties())
                .Where(p => p.ClrType == typeof(decimal) || p.ClrType == typeof(decimal?)))
             {
                 property.SetColumnType("decimal(18,3)");
             }
-
-            builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
         }
 
@@ -201,7 +201,7 @@ namespace Infrastructures.DataAccess
         public DbSet<LoanTypeStatus> LoanSubTypeStatuses => Set<LoanTypeStatus>();
         public DbSet<LoanSubTypeStatus> LoanSubTypeNoAcc => Set<LoanSubTypeStatus>();
         public DbSet<LoanGuarantorLink> Guarantors => Set<LoanGuarantorLink>();
-        public DbSet<CoPawnCustomer> CoPawnCustomers => Set<CoPawnCustomer>();
+        public DbSet<Domains.Models.Loans.CoPawnCustomer> CoPawnCustomers => Set<Domains.Models.Loans.CoPawnCustomer>();
         public DbSet<AppStatus> AppStatuses => Set<AppStatus>();
         public DbSet<CurrencySpotRate> SpotRates => Set<CurrencySpotRate>();
         public DbSet<ActivitiesStatus> ActivitiesStatuses => Set<ActivitiesStatus>();
@@ -213,11 +213,12 @@ namespace Infrastructures.DataAccess
         public DbSet<MarritalStatus> MarritalStatuses => Set<MarritalStatus>();
         public DbSet<LoanDisbursment> LoanDisbursementRequests => Set<LoanDisbursment>();
         public DbSet<LoanRequest> LoanRequests => Set<LoanRequest>();
-        public DbSet<CoLoanRequest> CoLoanRequests => Set<CoLoanRequest>();
+        public DbSet<Domains.Models.Loans.CoPawnCustomer> CoLoanRequests => Set<Domains.Models.Loans.CoPawnCustomer>();
         public DbSet<LtLocation> Locations => Set<LtLocation>();
         public DbSet<LoanDocuments> LoanDocuments => Set<LoanDocuments>();
         public DbSet<LoanDescriptions> LoanDescriptions => Set<LoanDescriptions>();
         public DbSet<LoanChangedCa> LoanChangedCa => Set<LoanChangedCa>();
+        public DbSet<Item> Items => Set<Item>();
         public DbSet<AppSettings> AppSettings => Set<AppSettings>();
         public DbSet<VUserLoanSizes> VUserLoanSizes => Set<VUserLoanSizes>();
         public DbSet<VUser> VUsers => Set<VUser>();

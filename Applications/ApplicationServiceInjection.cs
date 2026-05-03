@@ -1,6 +1,12 @@
 ﻿
 using Applications.Features.Collaterals.Queries.GetCollateralSubTypesById;
 using Applications.Features.Collaterals.Queries.GetCollateralTypes;
+using Applications.Features.Holidays.Dtos;
+using Applications.Features.LoanRequests.Command.AddCoPawnCustomer;
+using Applications.Features.LoanRequests.Command.AddCoPawnCustomers;
+using Applications.Features.LoanRequests.Command.DeleteCoPawnCustomer;
+using Applications.Features.LoanRequests.Dtos;
+using Applications.Features.LoanRequests.Queryies.IsCoPawnExist;
 using Applications.Features.Locations.Command.CreateLocation;
 using Applications.Features.Locations.Command.DeleteLocation;
 using Applications.Features.Locations.Command.UpdateLocation;
@@ -9,6 +15,8 @@ using Applications.Features.Locations.Queries.GetAllLocations;
 using Applications.Features.Locations.Queries.GetLocationById;
 using Applications.Features.Locations.Queries.GetLocationsAsPaging;
 using Applications.Features.OtherNames.Dto;
+using Applications.Features.Settings.Queries.GetApprovedUsers;
+using Applications.Features.Settings.Queries.GetLoanCategories;
 using Applications.Features.Vendors.Commands.ChangeVendorStatus;
 using Applications.Features.Vendors.Commands.CreateVendor;
 using Applications.Features.Vendors.Commands.DeleteVendor;
@@ -17,6 +25,7 @@ using Applications.Features.Vendors.Dto.Responses;
 using Applications.Features.Vendors.Queries.GetUpdateVendorById;
 using Applications.Features.Vendors.Queries.GetVendorById;
 using Applications.Features.Vendors.Queries.GetVendorsAsPaging;
+using Applications.Responses.Loans.Disbursements;
 using Applications.Responses.ViewModels.Ledgers;
 using Domains.Models.Collaterals;
 using ErrorOr;
@@ -93,16 +102,16 @@ public static class ApplicationServiceInjection
         services.AddScoped<IRequestHandler<GetScheduleDetailByIdQuery, ErrorOr<ScheduleDetailsDto>>, GetScheduleDetailByIdQueryHandler>();
         services.AddScoped<IRequestHandler<GetScheduleByIdQuery, ErrorOr<VSchedule>>, GetScheduleByIdQueryHandler>();
         services.AddScoped<IRequestHandler<GetDueScheduleByLoanIdQuery, Pager<VSchedule>>, GetDueScheduleByLoanIdQueryHandler>();
-        services.AddScoped<IRequestHandler<ActivateOrDeactivateHolidayCommand, ErrorOr<HolidayVm>>, ActivateOrDeactivateHolidayCommandHandler>();
-        services.AddScoped<IRequestHandler<GetHolidayByDateQuery, IEnumerable<HolidayVm>>, GetHolidayByDateQueryHandler>();
+        services.AddScoped<IRequestHandler<ActivateOrDeactivateHolidayCommand, ErrorOr<HolidayDto>>, ActivateOrDeactivateHolidayCommandHandler>();
+        services.AddScoped<IRequestHandler<GetHolidayByDateQuery, IEnumerable<HolidayDto>>, GetHolidayByDateQueryHandler>();
         services.AddScoped<IRequestHandler<GetHolidayByIdQuery, ErrorOr<Holiday>>, GetHolidayByIdQueryHandler>();
-        services.AddScoped<IRequestHandler<GetActiveHolidaysQuery, Pager<HolidayVm>>, GetActiveHolidaysQueryHandler>();
-        services.AddScoped<IRequestHandler<CreateHolidaysCommand, ErrorOr<IEnumerable<HolidayVm>>>, CreateHolidaysCommandHandler>();
+        services.AddScoped<IRequestHandler<GetActiveHolidaysQuery, Pager<HolidayDto>>, GetActiveHolidaysQueryHandler>();
+        services.AddScoped<IRequestHandler<CreateHolidaysCommand, ErrorOr<IEnumerable<HolidayDto>>>, CreateHolidaysCommandHandler>();
         services.AddScoped<IRequestHandler<DeleteHolidayCommand, ErrorOr<DeleteResult>>, DeleteHolidayCommandHandler>();
-        services.AddScoped<IRequestHandler<GetHolidaysQuery, IEnumerable<HolidayVm>>, GetHolidaysQueryHandler>();
-        services.AddScoped<IRequestHandler<GetHolidaysAsPagingQuery, Pager<HolidayVm>>, GetHolidaysAsPagingQueryHandler>();
-        services.AddScoped<IRequestHandler<CreateHolidaysCommand, ErrorOr<IEnumerable<HolidayVm>>>, CreateHolidaysCommandHandler>();
-        services.AddScoped<IRequestHandler<CreateHolidayCommand, ErrorOr<HolidayVm>>, CreateHolidayCommandHandler>();
+        services.AddScoped<IRequestHandler<GetHolidaysQuery, IEnumerable<HolidayDto>>, GetHolidaysQueryHandler>();
+        services.AddScoped<IRequestHandler<GetHolidaysAsPagingQuery, Pager<HolidayDto>>, GetHolidaysAsPagingQueryHandler>();
+        services.AddScoped<IRequestHandler<CreateHolidaysCommand, ErrorOr<IEnumerable<HolidayDto>>>, CreateHolidaysCommandHandler>();
+        services.AddScoped<IRequestHandler<CreateHolidayCommand, ErrorOr<HolidayDto>>, CreateHolidayCommandHandler>();
         services.AddScoped<IRequestHandler<GetUserDetailsByIdQuery, ErrorOr<VUser>>, GetUserDetailsByIdQueryHandler>();
         services.AddScoped<IRequestHandler<GetBranchByUserQuery, ErrorOr<VBranch>>, GetBranchByUserQueryHandler>();
         services.AddScoped<IRequestHandler<GetDbManagerLoanSummaryQuery, ErrorOr<DbManagerLoanSummary>>, GetDbManagerLoanSummaryQueryHandler>();
@@ -169,17 +178,17 @@ public static class ApplicationServiceInjection
         //GetLoanRequestApprovedQuery
 
         services.AddScoped<IAddRecieptNumber, AddRecieptNumberUseCase>();
-        services.AddScoped<IStartVaultInUseCase, StartVaultInUseCase>();
-        services.AddScoped<IStartVaultOutUseCase, StartVaultOutUseCase>();
-        services.AddScoped<IGetCashVaultUseCase, GetCashVaultUseCase>();
+        //services.AddScoped<IStartVaultInUseCase, StartVaultInUseCase>();
+        //services.AddScoped<IStartVaultOutUseCase, StartVaultOutUseCase>();
+        //services.AddScoped<IGetCashVaultUseCase, GetCashVaultUseCase>();
         services.AddScoped<IGetCustomersByUseCase, GetCustomersByUseCase>();
         services.AddScoped<ScheduleService>();
-        services.AddScoped<GetCollateralDetailQueryHandler>();
-        services.AddScoped<AddCustomerActivityUseCase>();
-        services.AddScoped<GetCustomerActivityUseCase>();
-        services.AddScoped<GetIncomeByCustomerQueryHandler>();
-        services.AddScoped<GetCustomerDetailByIdUseCase>();
-        services.AddScoped<GetCustomerByIdCommand>();
+        //services.AddScoped<GetCollateralDetailQueryHandler>();
+        //services.AddScoped<AddCustomerActivityUseCase>();
+        //services.AddScoped<GetCustomerActivityUseCase>();
+        //services.AddScoped<GetIncomeByCustomerQueryHandler>();
+        //services.AddScoped<GetCustomerDetailByIdUseCase>();
+        //services.AddScoped<GetCustomerByIdCommand>();
         services.AddScoped<SchedulePrintService>();
         services.AddScoped<IAddressServiceImpl, AddressService>();
         services.AddScoped<IBankServiceImpl, BankService>();
@@ -202,7 +211,7 @@ public static class ApplicationServiceInjection
         services.AddScoped<ILoanCategoryServiceImpl, LoanCategoryService>();
         services.AddScoped<ILoanProductServiceImpl, LoanProductService>();
         services.AddScoped<ILoanReportServiceImpl, LoanReportServiceImpl>();
-        services.AddScoped<ILoanSettingServiceImpl, LoanSettingService>();
+        //services.AddScoped<ILoanSettingServiceImpl, LoanSettingService>();
         services.AddScoped<INationalityServiceImpl, NationalityService>();
         services.AddScoped<IOtherNameServiceImpl, OtherNameService>();
         services.AddScoped<IPrintPdfServiceImpl, PrintPdfServiceImpl>();
@@ -329,6 +338,10 @@ public static class ApplicationServiceInjection
         services.AddScoped<IRequestHandler<GetLoanRequestsWithCanDisburseQuery, Pager<VLoanRequests>>, GetLoanRequestsWithCanDisburseQueryHandler>();
         services.AddScoped<IRequestHandler<GetLoanRequestDocumentQuery, ErrorOr<IEnumerable<VLoanRequestsDocuments>>>, GetLoanRequestDocumentQueryHandler>();
         services.AddScoped<IRequestHandler<SaveLoanRequestsCommand, ErrorOr<RequestResult>>, SaveLoanRequestsCommandHandler>();
+        services.AddScoped<IRequestHandler<AddCoPawnCustomerCommand, ErrorOr<CoPawnCustomerDto?>>, AddCoPawnCustomerCommandHandler>();
+        services.AddScoped<IRequestHandler<AddCoPawnCustomersCommand, ErrorOr<IEnumerable<CoPawnCustomerDto?>>>, AddCoPawnCustomersCommandHandler>();
+        services.AddScoped<IRequestHandler<DeleteCoPawnCustomerCommand, ErrorOr<bool>>, DeleteCoPawnCustomerCommandHandler>();
+        services.AddScoped<IRequestHandler<IsCoPawnExistQuery, ErrorOr<bool>>, IsCoPawnExistQueryHandler>();
 
 
         //Commands for Loans disubursed
@@ -386,6 +399,10 @@ public static class ApplicationServiceInjection
         services.AddScoped<IRequestHandler<UpdateAppSettingCommand, ErrorOr<AppSettingDto>>, UpdateAppSettingCommandHandler>();
         services.AddScoped<IRequestHandler<DeleteAppSettingCommand, ErrorOr<bool>>, DeleteAppSettingCommandHandler>();
 
+        services.AddScoped<IRequestHandler<GetLoanCategoriesQuery, Pager<LoanCategoryDto>>, GetLoanCategoriesQueryHandler>();
+
+
+
         // Settings — UserLoanSizes
         services.AddScoped<IRequestHandler<GetUserLoanSizesQuery, Pager<VUserLoanSizes>>, GetUserLoanSizesQueryHandler>();
         services.AddScoped<IRequestHandler<GetUserLoanSizeByIdQuery, ErrorOr<UserLoanSizeDto>>, GetUserLoanSizeByIdQueryHandler>();
@@ -393,6 +410,7 @@ public static class ApplicationServiceInjection
         services.AddScoped<IRequestHandler<UpdateUserLoanSizeCommand, ErrorOr<UserLoanSizeDto>>, UpdateUserLoanSizeCommandHandler>();
         services.AddScoped<IRequestHandler<DeleteUserLoanSizeCommand, ErrorOr<bool>>, DeleteUserLoanSizeCommandHandler>();
         services.AddScoped<IRequestHandler<ToggleUserLoanSizeCommand, ErrorOr<bool>>, ToggleUserLoanSizeCommandHandler>();
+        services.AddScoped<IRequestHandler<GetApprovedUserQuery, ErrorOr<IEnumerable<VUserLoanSizes>>>, GetApprovedUserQueryHandler>();
 
         // Settings — CollateralSubTypes
         services.AddScoped<IRequestHandler<GetCollateralSubTypesQuery, Pager<CollateralSubTypeDto>>, GetCollateralSubTypesQueryHandler>();

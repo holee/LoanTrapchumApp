@@ -1,0 +1,38 @@
+@using Applications.Features.Items.Dto
+
+<PageTitle>Item Details</PageTitle>
+<div class="container-fluid">
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
+        <table class="table table-sm">
+            <tbody>
+                <tr>
+                    <th class="table-light">Name</th>
+                    <td>@item?.ItemName</td>
+                </tr>
+                <tr>
+                    <th class="table-light">Description</th>
+                    <td>@item?.Description</td>
+                </tr>
+                <tr>
+                    <th class="table-light">Ledger Ref Id</th>
+                    <td>@item?.LedgerRefId</td>
+                </tr>
+                <tr>
+                    <th class="table-light">Is Active</th>
+                    <td>
+                        <RadzenCheckBox TValue="bool" Value="@(item?.IsActive ?? false)" ReadOnly />
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </RadzenStack>
+
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+        <RadzenButton ButtonStyle="ButtonStyle.Danger"
+                      Icon="cancel"
+                      Text="Close"
+                      Click="@(()=>DialogService.Close(null))"
+                      Variant="Variant.Flat"
+                      Size="ButtonSize.Small" />
+    </RadzenStack>
+</div>

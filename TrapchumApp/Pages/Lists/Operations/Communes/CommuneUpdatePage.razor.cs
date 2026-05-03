@@ -1,10 +1,8 @@
 using Applications.Features.Addresses.Dto;
 using Applications.Interfaces.Addresses;
 using Applications.Responses.Message;
-using Azure;
 using Domains.Models.Addresses;
 using Mapster;
-using Microsoft.AspNetCore.Components;
 
 namespace TrapchumApp.Pages.Lists.Operations.Communes
 {

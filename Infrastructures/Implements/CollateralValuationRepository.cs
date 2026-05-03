@@ -48,8 +48,8 @@ public sealed class CollateralValuationRepository(
 
         var totalCount = await query.CountAsync(cancellationToken);
 
-        var skip = param.Page * param.PageSize;
-        var take = param.PageSize > 0 ? param.PageSize : 15;
+        var skip = param.Page * param.Take;
+        var take = param.Take > 0 ? param.Take : 15;
 
         var items = await query
             .OrderByDescending(x => x.ModifiedDT)

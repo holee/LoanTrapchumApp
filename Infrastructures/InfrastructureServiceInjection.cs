@@ -1,6 +1,5 @@
 ﻿using ActualLab.DependencyInjection;
 using Applications.Interfaces;
-using Applications.Interfaces;
 using Applications.Interfaces.Addresses;
 using Applications.Interfaces.Audits;
 using Applications.Interfaces.Banks;
@@ -52,13 +51,13 @@ public static class InfrastructureServiceInjection
         services.AddScoped<Seeds.DatabaseSeeder>();
 
 
-        services.AddAuthentication(options =>
-        {
-            options.DefaultScheme = IdentityConstants.ApplicationScheme;
-            options.DefaultSignInScheme = IdentityConstants.ApplicationScheme;
-        }).AddIdentityCookies();
+        //services.AddAuthentication(options =>
+        //{
+        //    options.DefaultScheme = IdentityConstants.ApplicationScheme;
+        //    options.DefaultSignInScheme = IdentityConstants.ApplicationScheme;
+        //}).AddIdentityCookies();
 
-        services.AddIdentityCore<ApplicationUser>(options =>
+        services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
         {
             options.Password.RequireDigit = false;
             options.Password.RequireLowercase = false;
@@ -66,10 +65,10 @@ public static class InfrastructureServiceInjection
             options.Password.RequireUppercase = false;
             options.Password.RequiredLength = 5;
         })
-            .AddRoles<ApplicationRole>()
+            //.AddRoles<ApplicationRole>()
             .AddEntityFrameworkStores<UserDataContext>()
-            .AddRoleManager<RoleManager<ApplicationRole>>()
-            .AddSignInManager()
+            //.AddRoleManager<RoleManager<ApplicationRole>>()
+            //.AddSignInManager<SignInManager<ApplicationUser>>()
             .AddDefaultTokenProviders();
 
         services.ConfigureApplicationCookie(options =>
@@ -79,17 +78,17 @@ public static class InfrastructureServiceInjection
         });
         services.AddHttpContextAccessor();
         services.AddSingleton<AuditingSaveChangesInterceptor>();
-        services.AddSingleton<ICurrentUserService, CurrentUserService>();
+        services.AddSingleton<ICurrentUserService, CurrentUserReposity>();
         services.AddSingleton<ICurrentUserServices, CurrentUserRepository>();
         services.AddScoped<IAuditReadService, AuditReadService>();
         services.AddScoped<IAppSettingRepository, AppSettingService>();
         services.AddScoped<IAppSettingService, LegacyAppSettingService>();
-        services.AddScoped<ILoanSettingService, LoanSettingService>();
+        services.AddScoped<ILoanSettingService, LoanSettingRepository>();
         services.AddScoped<IForiegnCurrencyExchange, ForiegnCurrencyExchange>();
         services.AddScoped<IJournalService, JournalRepository>();
         services.AddScoped<ISpotRateService, SpotRateService>();
         services.AddScoped<ILedgerService, LedgerRepository>();
-        services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IUserService, UserRepository>();
         services.AddScoped<IRoleService, RoleRepository>();
         services.AddScoped<IOpenBranchService, OpenBranchService>();
         services.AddScoped<IOccupationService, OccupationRepository>();
@@ -100,6 +99,7 @@ public static class InfrastructureServiceInjection
         services.AddScoped<IBranchService, BranchRepository>();
         services.AddScoped<IBankService, BankRepository>();
         services.AddScoped<IDepartmentService, DepartmentService>();
+        services.AddScoped<IItemService, ItemRepository>();
         services.AddScoped<IEmployeeService, EmployeeRepository>();
         services.AddScoped<IEntityNameService, EntityNameService>();
         services.AddScoped<IAddressService, AddressRepository>();
@@ -116,7 +116,7 @@ public static class InfrastructureServiceInjection
         services.AddScoped<IHolidayService, HolidayRepository>();
         services.AddScoped<ILocationService, LocationRepository>();
         services.AddScoped<IGuarantorService, GuarantorRepository>();
-        services.AddScoped<ILoanSettingService, LoanSettingService>();
+        services.AddScoped<ILoanSettingService, LoanSettingRepository>();
         services.AddScoped<ILoanProductService, LoanProductService>();
         services.AddScoped<ILoanPaymentService, LoanPaymentRepository>();
         services.AddScoped<ILoanScheduleService, LoanScheduleService>();

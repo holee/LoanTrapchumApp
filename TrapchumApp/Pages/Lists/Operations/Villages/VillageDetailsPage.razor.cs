@@ -1,7 +1,5 @@
 using Applications.Interfaces.Addresses;
 using Applications.Responses.ViewModels.Addresses;
-using Microsoft.AspNetCore.Components;
-using System.Runtime.InteropServices;
 
 namespace TrapchumApp.Pages.Lists.Operations.Villages
 {

@@ -353,7 +353,7 @@ public sealed class JournalRepository(DataContext context, ILogger<JournalReposi
 
         var pageCount = await queries.CountAsync();
 
-        var pageItems = await queries.Skip(param.Page).Take(param.PageSize)
+        var pageItems = await queries.Skip(param.Page).Take(param.Take)
             .AsNoTracking()
             .ToListAsync();
 
@@ -402,7 +402,7 @@ public sealed class JournalRepository(DataContext context, ILogger<JournalReposi
                 : queries.OrderBy(x => EF.Property<object>(x, param.SortColumn));
         }
 
-        return await queries.ToPagedAsync(param.Page, param.PageSize, cancellation);
+        return await queries.ToPagedAsync(param.Page, param.Take, cancellation);
     }
 
     public async Task<ErrorOr<JournalEntryVm>> GetJournalByIdAsync(string? journalId, bool include)
@@ -537,10 +537,10 @@ public sealed class JournalRepository(DataContext context, ILogger<JournalReposi
 
         var counts = await queries.CountAsync(cancellation);
 
-        if (param.PageSize > 0)
+        if (param.Take > 0)
         {
             queries = queries.Skip(param.Page)
-                             .Take(param.PageSize);
+                             .Take(param.Take);
         }
 
         var items = await queries.OrderByDescending(x => x.Id)
@@ -590,9 +590,9 @@ public sealed class JournalRepository(DataContext context, ILogger<JournalReposi
             .WhereIf(!string.IsNullOrEmpty(nameId), x => x.Id.Contains(nameId!))
             .OrderByDescendingIf(param.SortDescending, x => EF.Property<object>(x, param.SortColumn));
 
-        if (param.PageSize > 0)
+        if (param.Take > 0)
         {
-            queries = queries.Take(param.PageSize).OrderByDescending(x => x.FullName);
+            queries = queries.Take(param.Take).OrderByDescending(x => x.FullName);
         }
 
         var items = await queries

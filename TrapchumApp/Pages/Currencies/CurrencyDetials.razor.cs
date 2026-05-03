@@ -3,10 +3,8 @@ using Applications.Features.Currencies.Dto;
 using Applications.Features.Currencies.Queries.GetCurrencyDetails;
 using Applications.Interfaces.Currencies;
 using Applications.Interfaces.Transactions;
-using Applications.Responses.Paginations;
 using Domains.Models.Currencies;
 using Mapster;
-using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Currencies
 {
@@ -125,7 +123,7 @@ namespace TrapchumApp.Pages.Currencies
             var qparam = new QueryParam
             {
                 Page = pageIndex,
-                PageSize = pageSize
+                Take = pageSize
             };
             CurrencyPaginatedList = await spotRateService.GetSpotRates(Id, qparam);
             currencySpotRates = CurrencyPaginatedList.Items;

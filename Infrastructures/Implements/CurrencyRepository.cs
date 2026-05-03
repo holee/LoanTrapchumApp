@@ -109,7 +109,7 @@ public sealed class CurrencyRepository(IDbContextFactory<DataContext> contextFac
 
         if (param.Page > 0)
         {
-            queries = queries.Skip(param.Page).Take(param.PageSize);
+            queries = queries.Skip(param.Page).Take(param.Take);
         }
 
         var items = await queries.AsNoTracking()
@@ -293,9 +293,9 @@ public sealed class CurrencyRepository(IDbContextFactory<DataContext> contextFac
 
         var counts = await queries.CountAsync(ca);
 
-        if (param.PageSize > 0)
+        if (param.Take > 0)
         {
-            queries = queries.Skip(param.Page).Take(param.PageSize);
+            queries = queries.Skip(param.Page).Take(param.Take);
         }
 
         var items = await queries.AsNoTracking().ToListAsync(ca);
@@ -335,7 +335,7 @@ public sealed class CurrencyRepository(IDbContextFactory<DataContext> contextFac
 
         if (param.Page > 0)
         {
-            queries = queries.Skip(param.Page).Take(param.PageSize);
+            queries = queries.Skip(param.Page).Take(param.Take);
 
         }
 
@@ -374,9 +374,9 @@ public sealed class CurrencyRepository(IDbContextFactory<DataContext> contextFac
 
         var counts = await baseQueries.CountAsync(cancellation);
 
-        if (param.PageSize > 0)
+        if (param.Take > 0)
         {
-            baseQueries = baseQueries.Skip(param.Page).Take(param.PageSize);
+            baseQueries = baseQueries.Skip(param.Page).Take(param.Take);
         }
 
         var items = await baseQueries
@@ -402,9 +402,9 @@ public sealed class CurrencyRepository(IDbContextFactory<DataContext> contextFac
 
         var counts = await baseQueries.CountAsync(cancellation);
 
-        if (param.PageSize > 0)
+        if (param.Take > 0)
         {
-            baseQueries = baseQueries.Skip(param.Page).Take(param.PageSize);
+            baseQueries = baseQueries.Skip(param.Page).Take(param.Take);
         }
 
         var items = await baseQueries

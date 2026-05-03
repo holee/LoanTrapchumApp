@@ -1,6 +1,4 @@
-﻿using Applications.Responses.ViewModels.Loans.Requests;
-using Applications.Utils;
-using ErrorOr;
+﻿using ErrorOr;
 
 namespace Applications.Features.LoanRequests.Queryies.GetLoanRequestDetailById;
 

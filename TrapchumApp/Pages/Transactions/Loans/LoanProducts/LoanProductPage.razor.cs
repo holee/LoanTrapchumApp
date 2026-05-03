@@ -1,12 +1,7 @@
 using Applications.Responses.Loans.Disbursements;
-using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Products;
 using Applications.Services.Loans;
-using Microsoft.AspNetCore.Components;
-using Radzen;
 using Radzen.Blazor;
-using System.Threading.Tasks;
-using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Transactions.Loans.LoanProducts
 {

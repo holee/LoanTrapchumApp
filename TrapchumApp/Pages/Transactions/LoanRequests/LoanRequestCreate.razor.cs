@@ -1,13 +1,15 @@
-using Applications.Enumerations;
+using Applications.Commons.Mappers.LoanRequests;
 using Applications.Features.Collaterals.Dtos;
+using Applications.Features.Customers.Response;
 using Applications.Features.Documents.Dto;
 using Applications.Features.Guarantor.Dtos;
 using Applications.Features.Identity.Queries.GetUserDetailById;
 using Applications.Features.LoanRequests.Command.CreateLoanRequest;
+using Applications.Features.LoanRequests.Dtos;
 using Applications.Features.LoanRequests.Requests;
+using Applications.Responses.ViewModels.Auths;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Domains.Enumerations;
-using TrapchumApp.Helpers.Extensions;
 using TrapchumApp.Pages.Lists.Collaterals;
 using TrapchumApp.Pages.Lists.OtherNames.Guarantors;
 using TrapchumApp.Shared;
@@ -21,28 +23,30 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
         [CascadingParameter] CascadingAppState BState { get; set; } = default!;
 
-        LoanRequestDtoCreate model = new();
+        private LoanRequestDtoCreate model = new();
 
-        EditForm editForm = default!;
+        private EditForm editForm = default!;
 
-        LoanRequestDocument DocumentRef = default!;
+        private LoanRequestDocument DocumentRef = default!;
 
-        LoanRequestGaurantor GuarantorRef = default!;
+        private LoanRequestGaurantor GuarantorRef = default!;
 
-        LoanRequestCollaterals CollateralRef = default!;
+        private LoanRequestCollaterals CollateralRef = default!;
 
-        List<VLoanRequestGuarantor> Guarantors = [];
+        private List<VLoanRequestGuarantor> Guarantors = [];
 
-        List<VLoanRequestCollateralLines> requestCollateralLines = [];
+        private List<VLoanRequestCollateralLines> requestCollateralLines = [];
 
-        List<VLoanRequestsDocuments> Documents = [];
+        private List<VLoanRequestsDocuments> Documents = [];
 
-        Applications.Responses.ViewModels.Auths.VUser _user = new();
+        private VUser _user = new();
 
-        int selectedTabIndex = 0;
+        private int selectedTabIndex = 0;
 
         private string? _userId = string.Empty;
 
+        private List<CoPawnCustomerDto> CoCustomers = [];
+        private CoRequestCustomerBox CoCustomerRef = default!;
         protected override async Task OnInitializedAsync()
         {
             _userId = (await AuthenticationState).GetUserId();
@@ -56,10 +60,81 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
                 model.CreditAgentRefId = _user.EmployeeRefId;
             }
 
+
+            model.CustomerRefId = CustomerId;
+
             SetDefault();
 
             await base.OnInitializedAsync();
         }
+
+
+        private async Task OnSelectedCoCustomers(IEnumerable<VCustomerList> args)
+        {
+            if (!args.Any()) return;
+
+            if (args.Count() > 3)
+            {
+                _toastService.ShowWarning("You can only select up to 3 co-customers.");
+                return;
+            }
+
+            var newCustomers = args.Where(c => CoCustomers.All(existing => existing.CustomerId != c.CustomerId));
+
+            if (newCustomers.Count() > 0)
+            {
+                var newCoPawnCustomers = newCustomers.Select(c => new CoPawnCustomerDto
+                {
+                    CustomerId = c.CustomerId,
+                    CustomerPhone = c.Phone,
+                    CustomerAddress = c.ToString(),
+                    CustomerName = c.AltName,
+                    BranchId = BranchId ?? 0
+                }).ToList();
+
+                CoCustomers.AddRange(newCoPawnCustomers);
+
+                await CoCustomerRef.CustomerReload();
+            }
+        }
+
+        private async Task OnSelectedCoCustomer(VCustomerList args)
+        {
+            if (CoCustomers.Count >= 3)
+            {
+                _toastService.ShowWarning("You can only select up to 3 co-customers.");
+                return;
+            }
+
+            if (CoCustomers.Any(c => c.CustomerId == args.CustomerId))
+            {
+                _toastService.ShowWarning("This co-customer is already selected.");
+                return;
+            }
+
+            var newCoPawnCustomer = new CoPawnCustomerDto
+            {
+                CustomerId = args.CustomerId,
+                CustomerPhone = args.Phone,
+                CustomerName = args.AltName,
+                CustomerAddress = args.ToString(),
+                BranchId = BranchId ?? 0
+            };
+
+
+            //var command=new 
+
+
+
+            if (newCoPawnCustomer is not null)
+            {
+                CoCustomers.Add(newCoPawnCustomer);
+
+                await CoCustomerRef.CustomerReload();
+            }
+        }
+
+
 
         void SelectTabIndexChanged(int tabIndex)
         {
@@ -81,7 +156,7 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
 
         async Task HandleFileDialogue()
         {
-            IEnumerable<DocumentDto> uploadedFiles = await DialogService.OpenAsync<FileUploadDialogue>("Upload");
+            IEnumerable<DocumentDto>? uploadedFiles = await DialogService.OpenAsync<FileUploadDialogue>("Upload");
 
             if (uploadedFiles is null || !uploadedFiles.Any())
             {
@@ -322,6 +397,11 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
             var documents = Documents.LoanDocumentDtoCreate();
 
             model.LoanDocuments.AddRange(documents);
+
+            var coPawnCustomers = CoCustomers.Maps();
+
+            model.CoPawnRequests.AddRange(coPawnCustomers);
+
 
             if (editForm.EditContext!.Validate() == false)
             {

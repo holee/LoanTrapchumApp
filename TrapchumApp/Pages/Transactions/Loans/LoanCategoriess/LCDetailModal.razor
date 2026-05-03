@@ -1,12 +1,4 @@
-﻿@using Applications.Features.Addresses
-@using Applications.Features.Branches
-@using Applications.Features.Currencies
-@using Applications.Features.Customers.Services
-@using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Interfaces
-@using TrapchumApp.Services
-
-<div class="rz-shadow-3" style="border-radius:8px;overflow:hidden;">
+﻿<div class="rz-shadow-3" style="border-radius:8px;overflow:hidden;">
     <div class="rz-background-color-primary-dark rz-color-white px-4 py-3 d-flex align-items-center justify-content-between">
         <div class="d-flex align-items-center gap-2">
             <RadzenIcon Icon="info" Style="font-size:1.2rem;" />
@@ -49,11 +41,6 @@
 
     <div class="px-4 py-2 d-flex align-items-center justify-content-between"
          style="background:#f8f9fa;border-top:1px solid #dee2e6;">
-        <small class="text-muted">
-            Created: <strong>@string.Format("{0:dd MMM yyyy hh:mm tt}", category?.CreatedDt)</strong>
-            &nbsp;|&nbsp;
-            Modified: <strong>@string.Format("{0:dd MMM yyyy hh:mm tt}", category?.ModifiedDt)</strong>
-        </small>
         <RadzenButton ButtonStyle="ButtonStyle.Light"
                       Icon="close"
                       Text="Close"

@@ -1,5 +1,6 @@
 ﻿using Applications.Calculations;
 using Applications.Enumerations;
+using Applications.Features.Holidays.Dtos;
 using Domains.Enumerations;
 
 namespace Applications.Features.Loans.Dtos.Requests;
@@ -96,7 +97,7 @@ public sealed class LoanDtoCreate : CalculatorBase, ICalculatorBase
     public decimal? PaidAmount => Principle - AdminFeeAmount;
     public int PayementSechuleModeId { get; set; } = 2;
     public AdjustmentOption ScheduleMode { get; set; } = AdjustmentOption.After;
-    public List<HolidayVm> Holidays { get; set; } = [];
+    public List<HolidayDto> Holidays { get; set; } = [];
     public List<LoanScheduleDtoCreate>? LoanSchedules { get; set; } = [];
 }
 

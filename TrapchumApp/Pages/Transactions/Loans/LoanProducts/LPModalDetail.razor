@@ -1,12 +1,4 @@
-﻿@using Applications.Features.Addresses
-@using Applications.Features.Branches
-@using Applications.Features.Currencies
-@using Applications.Features.Customers.Services
-@using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Interfaces
-@using TrapchumApp.Services
-
-<Card>
+﻿<Card>
     <CardHeader>
         <div class="d-flex justify-content-between">
             <span>Product Details: @model?.LoanProductName <span><RadzenCheckBox ReadOnly @bind-Value="model!.IsActive" /></span></span>

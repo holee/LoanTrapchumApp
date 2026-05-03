@@ -1,11 +1,9 @@
 ﻿using Applications.Responses.Lists.Entities;
-using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Customers;
 using Applications.Responses.ViewModels.Employees;
 using Applications.Services.Lists;
 using Radzen.Blazor;
 using TrapchumApp.Pages.Identity.Users;
-using TrapchumApp.Helpers.Extensions;
 using Applications.Features.CreditAgents.Requests;
 using Applications.Features.Branches.Dtos;
 using Applications.Features.Branches.Queries.GetBranchAsPaging;

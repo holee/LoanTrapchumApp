@@ -1,6 +1,5 @@
 using Applications.Commons.Messages.Expenses;
 using Applications.Extensions;
-using Applications.Features.Customers.Services;
 using Applications.Features.Expenses.DeleteExpenseCommand;
 using Applications.Features.Expenses.Queries.GetExpenseByCustomerId;
 using Applications.Features.Expenses.Queries.GetExpenseById;

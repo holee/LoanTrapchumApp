@@ -2,7 +2,7 @@
 @using Applications.Bases
 @using Applications.Features.Holidays.Command.ActivateOrDeactivate
 @using Applications.Features.Holidays.Command.DeleteHoliday
-@using Applications.Responses.ViewModels.Holidays
+@using Applications.Features.Holidays.Dtos
 @using TrapchumApp.Helpers.Extensions
 <PageTitle>Holiday</PageTitle>
 <RadzenTabs @bind-SelectedIndex="SelectedIndex" RenderMode="TabRenderMode.Server">
@@ -39,7 +39,7 @@
                             AllowSorting="true"
                             LoadData="LoadData"
                             IsLoading="isLoading"
-                            TItem="HolidayVm"
+                            TItem="HolidayDto"
                             PageSizeOptions="@StorageConstant.PageSizeOptions"
                             PageSizeChanged="@ChangedPageSize"
                             PagerPosition="@PagerPosition.Bottom"
@@ -61,7 +61,7 @@
                     <RadzenDataGridColumn TextAlign="TextAlign.Left"
                                           Title="Day Name"
                                           Width="8rem"
-                                          Property="@nameof(HolidayVm.HolidayName)" />
+                                          Property="@nameof(HolidayDto.HolidayName)" />
                     <RadzenDataGridColumn TextAlign="TextAlign.Center"
                                           Title="DayInNumber"
                                           Property="HolidayNum" />

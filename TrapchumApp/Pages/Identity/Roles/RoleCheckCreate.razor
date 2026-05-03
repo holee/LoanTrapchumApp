@@ -1,11 +1,3 @@
-@using Applications.Features.Addresses
-@using Applications.Features.Branches
-@using Applications.Features.Currencies
-@using Applications.Features.Customers.Services
-@using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Interfaces
-@using TrapchumApp.Services
-
 <label class="role-chip @(Model.IsSelected ? "role-chip--active" : "")" @onclick="Toggle">
     <span class="role-chip-indicator">
         @if (Model.IsSelected)

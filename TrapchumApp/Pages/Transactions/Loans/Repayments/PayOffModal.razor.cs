@@ -6,12 +6,8 @@ using Applications.Features.Currencies.Responses;
 using Applications.Features.LoanPayments.Requests;
 using Applications.Features.Settings.Dto;
 using Applications.Features.Settings.Queries.AppSettings.GetAppSettings;
-using Applications.Features.Settings.UseCases;
 using Applications.Features.Transactions.ForiegnExchanges;
 using Applications.Features.Transactions.LoanTransactions;
-using Applications.Interfaces.Loans;
-using Domains.Models.Settings;
-using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 {

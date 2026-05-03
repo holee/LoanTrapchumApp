@@ -1,6 +1,5 @@
 using Applications.Features.Vendors.Dto.Responses;
 using Applications.Features.Vendors.Queries.GetVendorById;
-using Applications.Services.Lists;
 
 namespace TrapchumApp.Pages.Lists.Vendors
 {

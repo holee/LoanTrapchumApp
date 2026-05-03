@@ -2,9 +2,6 @@ using Applications.Features.Settings.Commands.UserLoanSizes.DeleteUserLoanSize;
 using Applications.Features.Settings.Commands.UserLoanSizes.ToggleUserLoanSize;
 using Applications.Features.Settings.Dto;
 using Applications.Features.Settings.Queries.UserLoanSizes.GetUserLoanSizes;
-using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Settings;
-using Radzen;
 
 namespace TrapchumApp.Pages.Identity;
 

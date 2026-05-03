@@ -2,7 +2,6 @@ using Applications.Features.LoanPayments.Queries.GetPaidSchedule;
 using Applications.Features.LoanPayments.Queries.GetScheduleById;
 using Applications.Features.Schedules.Dto;
 using Applications.Responses.ViewModels.Loans.Schedules;
-using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 {

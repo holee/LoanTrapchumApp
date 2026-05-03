@@ -1,5 +1,3 @@
-using Microsoft.Extensions.DependencyInjection;
-
 namespace TrapchumApp.Components.Toasts;
 
 public static class ToastServiceExtensions

@@ -3,7 +3,6 @@ using Applications.Features.Guarantor.Queries.GetGuarantorDetailById;
 using Applications.Features.Loans.Dtos.Responses;
 using Applications.Responses.ViewModels.Loans.Disbursements;
 using Applications.Responses.ViewModels.Loans.Requests;
-using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Lists.OtherNames.Guarantors;
 

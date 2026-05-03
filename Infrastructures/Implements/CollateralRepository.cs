@@ -286,7 +286,7 @@ public sealed class CollateralRepository : ICollateralService
 
         var items = await baseQuery
             .Skip(query.Page)
-            .Take(query.PageSize)
+            .Take(query.Take)
             .AsNoTracking()
             .ToListAsync(cancellation);
 

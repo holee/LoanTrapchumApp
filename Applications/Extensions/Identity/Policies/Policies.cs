@@ -6,7 +6,7 @@ namespace Applications.Extensions.Identity.Policies;
 
 public partial class Policies
 {
-    private static string _canExchanged = AppPermission.RuleFor(Modules.Transactions, Feature.ExchangeMoney);
+    private static string _canExchanged = AppPermission.RuleFor(Modules.Transactions, Actions.ExchangeMoney);
 
     public const string CanExchanged = $"tranx.{nameof(CanExchanged)}";
     public static AuthorizationPolicy CanExchangeMoney()
@@ -73,14 +73,14 @@ public partial class Policies
     public const string PayOff = $"{prefix}.{nameof(PayOff)}";
     public const string RecievePayment = $"{prefix}:{nameof(RecievePayment)}";
     public const string WriteOff = $"{prefix}:{nameof(WriteOff)}";
-    private static string read = AppPermission.RuleFor(Modules.Repayments, Feature.Read);
-    private static string update = AppPermission.RuleFor(Modules.Repayments, Feature.Update);
-    private static string create = AppPermission.RuleFor(Modules.Repayments, Feature.Create);
-    private static string delete = AppPermission.RuleFor(Modules.Repayments, Feature.Delete);
-    private static string multiple = AppPermission.RuleFor(Modules.Repayments, Feature.MultiplePayment);
-    private static string payoff = AppPermission.RuleFor(Modules.Repayments, Feature.PayOff);
-    private static string recievePayment = AppPermission.RuleFor(Modules.Repayments, Feature.RecievePayment);
-    private static string writeOff = AppPermission.RuleFor(Modules.Repayments, Feature.WriteOff);
+    private static string read = AppPermission.RuleFor(Modules.Repayments, Actions.Read);
+    private static string update = AppPermission.RuleFor(Modules.Repayments, Actions.Update);
+    private static string create = AppPermission.RuleFor(Modules.Repayments, Actions.Create);
+    private static string delete = AppPermission.RuleFor(Modules.Repayments, Actions.Delete);
+    private static string multiple = AppPermission.RuleFor(Modules.Repayments, Actions.MultiplePayment);
+    private static string payoff = AppPermission.RuleFor(Modules.Repayments, Actions.PayOff);
+    private static string recievePayment = AppPermission.RuleFor(Modules.Repayments, Actions.RecievePayment);
+    private static string writeOff = AppPermission.RuleFor(Modules.Repayments, Actions.WriteOff);
     public static AuthorizationPolicy CanCreate()
     {
         return new AuthorizationPolicyBuilder()

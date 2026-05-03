@@ -35,6 +35,7 @@
 
   <ItemGroup>
     <Folder Include="Implements\Addresses\" />
+    <Folder Include="Migrations\" />
   </ItemGroup>
 
 </Project>

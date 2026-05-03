@@ -2,7 +2,6 @@
 using Applications.Features.Loans.Dtos.Responses;
 using Applications.Features.Loans.Queries.GetLoanSchedulesByPaymentDate;
 using Applications.Features.Loans.Services;
-using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Schedules;
 using Applications.Services.Loans;
 using Domains.Models.Identity;

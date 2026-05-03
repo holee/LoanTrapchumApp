@@ -1,10 +1,8 @@
 using Applications.Commons.Messages.Activities;
 using Applications.Exceptions;
-using Applications.Extensions;
 using Applications.Features.Activities.ActitvityQuery.GetActivityById;
 using Applications.Features.Activities.Command.CreateActivity;
 using Applications.Features.Activities.Command.EditActivity;
-using Applications.Utils;
 
 namespace TrapchumApp.Pages.Lists.Customers.Activties
 {

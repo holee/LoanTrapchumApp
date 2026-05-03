@@ -1,7 +1,5 @@
 using Applications.Responses.Lists.Holidays;
 using Applications.Responses.Loans.Disbursements;
-using Microsoft.AspNetCore.Components;
-using Radzen;
 
 namespace TrapchumApp.Pages.Transactions.Loans.LoanCategoriess
 {
@@ -43,7 +41,7 @@ namespace TrapchumApp.Pages.Transactions.Loans.LoanCategoriess
         }
         [Parameter] public int Id { get; set; }
         //[Inject] private ILoanCategoryService? service { get; set; }
-        [Parameter] public LoanCategoryResponse? category { get; set; } = new();
+        [Parameter] public LoanCategoryDto? category { get; set; } = new();
 
     }
 }

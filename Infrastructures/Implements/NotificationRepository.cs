@@ -74,7 +74,7 @@ namespace Infrastructures.Implements
             {
                 queries = queries
                              .Skip(Param.Page)
-                             .Take(Param.PageSize);
+                             .Take(Param.Take);
             }
 
             var items = await queries

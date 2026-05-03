@@ -433,9 +433,9 @@ public sealed class IncomeExpendRepository(IDbContextFactory<DataContext> contex
 
         var counts = await source.CountAsync(cancellation);
       
-        if (query.PageSize > 0)
+        if (query.Take > 0)
         {
-            source = source.Skip(query.Page).Take(query.PageSize);
+            source = source.Skip(query.Page).Take(query.Take);
         }
         
         var items = await source.Select(ProjectToIncomeExpense()).ToListAsync(cancellation);

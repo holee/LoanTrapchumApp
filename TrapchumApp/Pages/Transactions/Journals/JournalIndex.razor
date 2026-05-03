@@ -1,14 +1,6 @@
 ﻿@page "/App/Account/Journals/{BranchId:int}/Branches"
 @attribute [Authorize(Policy = "AccountOnly")]
-@using Applications.Features.Addresses
-@using Applications.Features.Branches
-@using Applications.Features.Currencies
-@using Applications.Features.Customers.Services
-@using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Interfaces
 @using Applications.Responses.ViewModels.Journals
-@using Microsoft.AspNetCore.Components.Web
-@using TrapchumApp.Services
 <PageTitle>Journal list</PageTitle>
 <RadzenTabs RenderMode="TabRenderMode.Server" @bind-SelectedIndex="@selectedIndex" Change="e=>TabChanged(e)" @ref="tb">
     <Tabs>

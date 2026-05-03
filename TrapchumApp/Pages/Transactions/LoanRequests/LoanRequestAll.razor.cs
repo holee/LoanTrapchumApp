@@ -1,10 +1,7 @@
-using Applications.Enumerations;
 using Applications.Features.LoanRequests.Queryies.GetLoanRequestAsPaging;
-using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Domains.Models.Identity;
 using System.Security.Claims;
-using TrapchumApp.Helpers.Extensions;
 using TrapchumApp.Shared;
 
 namespace TrapchumApp.Pages.Transactions.LoanRequests

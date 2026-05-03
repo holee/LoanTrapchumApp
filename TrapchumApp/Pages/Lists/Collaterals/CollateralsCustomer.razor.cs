@@ -1,7 +1,6 @@
 using Applications.Extensions;
 using Radzen.Blazor;
 using Applications.Services.Lists;
-using Applications.Utils;
 using Applications.Features.Collaterals.Dtos;
 using Applications.Features.Collaterals.Queries.GetCollateralLineByCollateralId;
 

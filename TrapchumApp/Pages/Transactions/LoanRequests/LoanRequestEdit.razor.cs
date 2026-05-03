@@ -1,30 +1,28 @@
 using Applications.Calculations;
 using Applications.Commons.Mappers;
 using Applications.Commons.Mappers.Notifications;
-using Applications.Enumerations;
 using Applications.Extensions;
 using Applications.Features.Collaterals.Dtos;
 using Applications.Features.Customers.Extensions;
-using Applications.Features.Customers.Queries.GetCustomerAsPaging;
 using Applications.Features.Customers.Response;
 using Applications.Features.Documents.Dto;
 using Applications.Features.Guarantor.Dtos;
+using Applications.Features.LoanRequests.Command.AddCoPawnCustomer;
+using Applications.Features.LoanRequests.Command.AddCoPawnCustomers;
 using Applications.Features.LoanRequests.Command.AddLoanRequestDocument;
+using Applications.Features.LoanRequests.Command.DeleteCoPawnCustomer;
 using Applications.Features.LoanRequests.Command.DeleteLoanRequestCollateral;
 using Applications.Features.LoanRequests.Command.DeleteLoanRequestDocument;
 using Applications.Features.LoanRequests.Command.DeleteLoanRequestGuarantor;
 using Applications.Features.LoanRequests.Command.SaveEditLoanRequest;
+using Applications.Features.LoanRequests.Dtos;
 using Applications.Features.LoanRequests.Queryies.GetLoanRequestDetailById;
 using Applications.Features.LoanRequests.Queryies.GetLoanRequestsDocuments;
 using Applications.Features.LoanRequests.Requests;
 using Applications.Features.Loans.Dtos.Requests;
 using Applications.Features.Notifications.Command.CreateNotification;
 using Applications.Features.Notifications.Dto;
-using Applications.Interfaces.Lists;
-using Applications.Interfaces.Loans;
-using Applications.Interfaces.setting;
 using Applications.Responses.Loans.Disbursements;
-using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Auths;
 using Applications.Responses.ViewModels.Loans.LoanRequests;
 using Applications.Responses.ViewModels.Loans.Requests;
@@ -33,7 +31,7 @@ using Domains.Models.Files;
 using Infrastructures.Authorizations;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
-using TrapchumApp.Helpers.Extensions;
+using TrapchumApp.Components.Messageboxes;
 using TrapchumApp.Pages.Lists.Collaterals;
 using TrapchumApp.Pages.Lists.OtherNames.Guarantors;
 using TrapchumApp.Shared;
@@ -47,45 +45,47 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
         [Parameter] public string? LoanRequestId { get; set; }
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
         [CascadingParameter] CascadingAppState bState { get; set; } = default!;
-        IEnumerable<LoanScheduleDtoCreate> previewSchedule = [];
-        IEnumerable<VCustomerList> _customers = [];
-        IEnumerable<VCustomerDetails>? CustomersList = [];
-        List<VLoanRequestGuarantor> Guarantors = [];
-        List<VLoanRequestCollateralLines> CollateralLines = [];
-        List<VLoanRequestsDocuments> Documents = [];
-        List<VLoanRequestDescription> _loanDescriptions = [];
-        IEnumerable<LoanRequestDocumentsDtoCreate> _documents = [];
-        List<DateTime> Holidays = [];
-        LoanRequestDtoCreate model = new();
-        DateTime? RegisterDate = DateTime.Now;
-        EditForm editForm = default!;
-        VCustomerDetails? SelectedCustomer = new();
-        LoanRequestDocument DocumentRef = default!;
-        LoanRequestGaurantor GuarantorRef = default!;
-        LoanRequestCollaterals CollateralRef = default!;
-        List<VCollateralLines> _collateralLines = [];
-        VCustomerDetails? selectedCustomer = new();
-        DateTime firstPayment;
-        LoanCategoryResponse? SelectedLoanCategory;
-        VUser _user = new();
-        long? size = 0;
-        int counts = 0;
-        bool isVible = false;
-        bool isCustomerSelected = false;
-        bool isLoading = false;
-        bool isProgressing = false;
-        bool isAllow = false;
-        int SelectedCollectionFee = 1;
-        decimal? TotalAdminFee = 0;
-        decimal? LoanRequestAmount = 0;
-        int SelectedPeriodName = 1;
-        int installmentType = 1;
-        int selectedTabIndex = 0;
-        string? filterText = "";
+        private IEnumerable<LoanScheduleDtoCreate> previewSchedule = [];
+        private IEnumerable<VCustomerList> _customers = [];
+        private IEnumerable<VCustomerDetails>? CustomersList = [];
+        private List<CoPawnCustomerDto> CoCustomers = [];
+        private List<VLoanRequestGuarantor> Guarantors = [];
+        private List<VLoanRequestCollateralLines> CollateralLines = [];
+        private List<VLoanRequestsDocuments> Documents = [];
+        private List<VLoanRequestDescription> _loanDescriptions = [];
+        private IEnumerable<LoanRequestDocumentsDtoCreate> _documents = [];
+        private List<DateTime> Holidays = [];
+        private LoanRequestDtoCreate model = new();
+        private DateTime? RegisterDate = DateTime.Now;
+        private EditForm editForm = default!;
+        private VCustomerDetails? SelectedCustomer = new();
+        private LoanRequestDocument DocumentRef = default!;
+        private LoanRequestGaurantor GuarantorRef = default!;
+        private CoRequestCustomerBox CoCustomerRef = default!;
+        private LoanRequestCollaterals CollateralRef = default!;
+        private List<VCollateralLines> _collateralLines = [];
+        private VCustomerDetails? selectedCustomer = new();
+        private DateTime firstPayment;
+        private LoanCategoryDto? SelectedLoanCategory;
+        private VUser _user = new();
+        private long? size = 0;
+        private int counts = 0;
+        private bool isVible = false;
+        private bool isCustomerSelected = false;
+        private bool isLoading = false;
+        private bool isProgressing = false;
+        private bool isAllow = false;
+        private int SelectedCollectionFee = 1;
+        private decimal? TotalAdminFee = 0;
+        private decimal? LoanRequestAmount = 0;
+        private int SelectedPeriodName = 1;
+        private int installmentType = 1;
+        private int selectedTabIndex = 0;
+        private string? filterText = "";
         private string? _userId = string.Empty;
-        IEnumerable<FileModel>? files = [];
-        IEnumerable<System.IO.FileInfo> UploadFiles = [];
-        void SelectTabIndexChanged(int tabIndex)
+        private IEnumerable<FileModel>? files = [];
+        private IEnumerable<System.IO.FileInfo> UploadFiles = [];
+        private void SelectTabIndexChanged(int tabIndex)
         {
             if (tabIndex == 1 && selectedCustomer?.CustomerId == string.Empty)
             {
@@ -327,8 +327,6 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
             try
             {
                 isLoading = true;
-                
-                //await GetCustomers(CustomerId, 1);
 
                 var query = new GetLoanRequestDetailByIdQuery(BranchId, CustomerId, LoanRequestId, true);
 
@@ -359,7 +357,12 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
 
                 _loanDescriptions = data!.ToLoanRequestDecriptions();
 
+                CoCustomers = data.CoPawnRequests.ToList();
+
+
                 model = data!.ToLoanRequestDtoCreate();
+
+
 
                 isLoading = false;
 
@@ -369,19 +372,6 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
                 NotificationService.Notify(NotificationSeverity.Error, ex.Message);
             }
         }
-
-        private async Task GetCustomers(string? customerId, int take = 25, string? filter = null)
-        {
-            var queryParam = new QueryParam(0, take, string.Empty, filter: filter);
-
-            var command = new GetCustomerAsPagingQuery(null, null, customerId, queryParam);
-
-            var rsp = await mediator.Send(command);
-
-            _customers = rsp.Items;
-
-        }
-
 
         protected async Task HandleSaveLoanRequest()
         {
@@ -490,7 +480,7 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
                     _notiService.AddNotification(notificationCreate.ToDtoAddNotification());
                 }
 
-                NotificationService.Notify(NotificationSeverity.Success, resp.Value.Message);
+                NotificationService.Notify(NotificationSeverity.Success, resp.Value.Message!);
 
                 NavigationManager.NavigateTo($"/App/Loans/Requests/{BranchId}/Branches");
 
@@ -505,5 +495,109 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
 
 
 
+        private async Task OnSelectedCoCustomers(IEnumerable<VCustomerList> args)
+        {
+            if (!args.Any()) return;
+
+            if (args.Count() > 3)
+            {
+                _toastService.ShowWarning("You can only select up to 3 co-customers.");
+
+                return;
+            }
+
+            var newCustomers = args.Where(c => CoCustomers.All(existing => existing.CustomerId != c.CustomerId));
+
+
+            var coPawnCustomers = newCustomers.Select(x => new CoPawnRequestsDtoCreate
+            {
+                CustomerId = x.CustomerId,
+                BranchId = BranchId,
+                LoanRequestId = LoanRequestId
+
+            }).ToList();
+
+
+            var command = new AddCoPawnCustomersCommand(BranchId, LoanRequestId, coPawnCustomers);
+
+            var rsp = await mediator.Send(command);
+
+            if (rsp.IsSuccess())
+            {
+                CoCustomers.AddRange(rsp.Value);
+
+                await CoCustomerRef.CustomerReload();
+            }
+            else
+            {
+                _toastService.ShowError(rsp.GetMessage());
+            }
+
+        }
+
+
+        async Task OnRemoveCoPawnCustomer(CoPawnCustomerDto? arg)
+        {
+            if (arg is null) return;
+
+            var dia = await MsgBox.ShowAsync("Do you want to remove this co-customer?", "Remove Co-Customer", MsgBoxButtons.YesNo, MessageBoxIcon.Question);
+
+            if (dia == MsgBoxResult.No) return;
+
+
+            var command = new DeleteCoPawnCustomerCommand(arg);
+
+            var rsp = await mediator.Send(command);
+
+            if (rsp.IsSuccess())
+            {
+
+                CoCustomers.Remove(arg);
+
+                await CoCustomerRef.CustomerReload();
+
+                _toastService.ShowSuccess("Co-customer was removed successfully.");
+            }
+            else
+            {
+                _toastService.ShowError(rsp.GetMessage());
+            }
+        }
+
+        private async Task OnSelectedCoCustomer(VCustomerList args)
+        {
+            if (CoCustomers.Count >= 3)
+            {
+                _toastService.ShowWarning("You can only select up to 3 co-customers.");
+                return;
+            }
+
+            if (CoCustomers.Any(c => c.CustomerId == args.CustomerId))
+            {
+                _toastService.ShowWarning("This co-customer is already selected.");
+                return;
+            }
+
+            var command = new AddCoPawnCustomerCommand(new CoPawnRequestsDtoCreate
+            {
+                BranchId = BranchId,
+                CustomerId = args.CustomerId,
+                LoanRequestId = LoanRequestId,
+            });
+
+            var rsp = await mediator.Send(command);
+
+            if (rsp.IsSuccess())
+            {
+
+                CoCustomers.Add(rsp.Value);
+
+                await CoCustomerRef.CustomerReload();
+            }
+            else
+            {
+                _toastService.ShowError(rsp.GetMessage());
+            }
+        }
     }
 }

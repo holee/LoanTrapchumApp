@@ -1,7 +1,6 @@
 using Applications.Extensions;
 using Applications.Features.Customers.Queries.GetCustomerDetailById;
 using Applications.Features.Customers.Response;
-using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Transactions.LoanRequests
 {

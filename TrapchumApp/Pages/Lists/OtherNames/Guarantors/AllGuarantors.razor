@@ -1,5 +1,4 @@
 @using Applications.Features.Guarantor.Dtos
-@using Applications.Responses.ViewModels.OtherNames
 <GridToolbar SearchChanged="SearchTextChanged">
     <LeftChildren>
         @if(ChildContent is not null)
@@ -112,7 +111,9 @@
                               Sortable="false"
                               Title="Loan Active">
             <Template>
-                <RadzenCheckBox Value="@g.IsActive" ReadOnly />
+                <RadzenBadge BadgeStyle="@(g.IsActive ? BadgeStyle.Success : BadgeStyle.Danger)"
+                             Text="@(g.IsActive ? "Active" : "Inactive")"
+                             IsPill="true" />
             </Template>
         </RadzenDataGridColumn>
         <RadzenDataGridColumn Width="5rem"

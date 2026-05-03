@@ -1,12 +1,4 @@
-﻿@using Applications.Features.Addresses
-@using Applications.Features.Branches
-@using Applications.Features.Currencies
-@using Applications.Features.Customers.Services
-@using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Interfaces
-@using TrapchumApp.Services
-
-<EditForm Model="@model" OnValidSubmit="@HandleFormRequest">
+﻿<EditForm Model="@model" OnValidSubmit="@HandleFormRequest">
     <FluentValidationValidator />
     <input type="hidden" @bind="model!.CustomerId" />
     <input type="hidden" @bind="model!.LoanRequestId" />

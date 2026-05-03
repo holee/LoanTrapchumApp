@@ -5,10 +5,10 @@ namespace Applications.Extensions.Identity.Policies;
 
 public static class OtherNamesPolicies
 {
-    private static string read = AppPermission.RuleFor(Modules.OtherNames, Feature.Read);
-    private static string update = AppPermission.RuleFor(Modules.OtherNames, Feature.Update);
-    private static string create = AppPermission.RuleFor(Modules.OtherNames, Feature.Create);
-    private static string delete = AppPermission.RuleFor(Modules.OtherNames, Feature.Delete);
+    private static string read = AppPermission.RuleFor(Modules.OtherNames, Actions.Read);
+    private static string update = AppPermission.RuleFor(Modules.OtherNames, Actions.Update);
+    private static string create = AppPermission.RuleFor(Modules.OtherNames, Actions.Create);
+    private static string delete = AppPermission.RuleFor(Modules.OtherNames, Actions.Delete);
     public static AuthorizationPolicy CanCreate()
     {
         return new AuthorizationPolicyBuilder()

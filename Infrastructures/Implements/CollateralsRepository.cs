@@ -122,9 +122,9 @@ public sealed class CollateralsRepository(ILogger<CollateralsRepository> logger,
 
         var count = queries.Count();
 
-        if (param.PageSize > 0)
+        if (param.Take > 0)
         {
-            queries = queries.Skip(param.Page).Take(param.PageSize);
+            queries = queries.Skip(param.Page).Take(param.Take);
         }
 
         var collaterals = await queries.AsNoTracking().ToListAsync(cancellation);

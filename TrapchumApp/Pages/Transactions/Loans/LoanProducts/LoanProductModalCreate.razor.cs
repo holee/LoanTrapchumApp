@@ -3,9 +3,7 @@ using Applications.Features.Currencies.Dto;
 using Applications.Features.Currencies.Queries.GetCurrencies;
 using Applications.Features.Products.Requests;
 using Applications.Interfaces.Currencies;
-using Applications.Responses.Paginations;
 using Applications.Services.Loans;
-using Radzen;
 
 namespace TrapchumApp.Pages.Transactions.Loans.LoanProducts
 {

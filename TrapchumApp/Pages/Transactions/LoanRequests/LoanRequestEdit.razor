@@ -4,10 +4,8 @@
 @using Applications.Features.Guarantor.Dtos
 @using Applications.Features.LoanRequests.Command.AddLoanRequestCollateral
 @using Applications.Features.LoanRequests.Command.AddLoanRequestGuarantor
-@using Applications.Features.LoanRequests.Interfaces
 @using Applications.Features.LoanRequests.Requests
 @using Applications.Responses.ViewModels.Loans.Requests
-@using Applications.Responses.ViewModels.OtherNames
 @using Domains.Models.Collaterals
 @using Domains.Models.Loans
 @using Radzen.Blazor.Rendering
@@ -66,7 +64,19 @@ else
                     </RadzenTabsItem>
 
                     <RadzenTabsItem Text="អ្នករួមខ្ខី" Icon="@IconNames.Group">
-                       <CoLoanRequestSearchList />
+                        <CoRequestCustomerBox Customers="@CoCustomers"
+                                ShowCommand="true" 
+                                ShowAdd="true" 
+                                @ref="CoCustomerRef"
+                                Remove="@OnRemoveCoPawnCustomer"
+                                ShowRemove="true">
+                            <SearchBoxTemplate>
+                                <CoLoanRequestSearchList 
+                                    OnSelected="@OnSelectedCoCustomer" 
+                                    OnSelecteds="@OnSelectedCoCustomers"/>
+                            </SearchBoxTemplate>
+                        </CoRequestCustomerBox>
+
                     </RadzenTabsItem>
 
                     <RadzenTabsItem Icon="@IconNames.Collaterals" Text="ទ្រព្យសម្បត្តិបញ្ចាំ">
@@ -77,7 +87,6 @@ else
                                                 @ref="CollateralRef"
                                                 Add="AddCollaterals"
                                                 RemoveCollateral="@RemovedCollateral"
-                                                
                                                 Collaterals="CollateralLines">
                             <SearchBoxTemplate>
                                 <CollateralSearchList CustomerId="@CustomerId"
@@ -96,8 +105,8 @@ else
                                               Remove="RemoveGaurantor"
                                               @ref="GuarantorRef">
                             <SearchBoxTemplate>
-                                <GuarantorSearchList OnSelected="SelectedGuarantors" 
-                                        SelectMany="SelectMany" />
+                                <GuarantorSearchList OnSelected="SelectedGuarantors"
+                                                     SelectMany="SelectMany" />
                             </SearchBoxTemplate>
                         </LoanRequestGaurantor>
                     </RadzenTabsItem>

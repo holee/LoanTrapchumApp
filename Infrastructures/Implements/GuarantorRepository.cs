@@ -157,9 +157,9 @@ public sealed class GuarantorRepository(IDbContextFactory<DataContext> contextFa
 
         var counts = await baseQuery.CountAsync(cancellation);
 
-        if (param.PageSize > 0)
+        if (param.Take > 0)
         {
-            baseQuery = baseQuery.Skip(param.Page).Take(param.PageSize);
+            baseQuery = baseQuery.Skip(param.Page).Take(param.Take);
         }
 
         var items = await baseQuery.AsNoTracking()

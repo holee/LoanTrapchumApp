@@ -1,5 +1,7 @@
 ﻿using Applications.Features.Collaterals.Dtos;
 using Applications.Features.Guarantor.Dtos;
+using Applications.Features.LoanRequests.Dtos;
+using Domains.Models.Loans;
 
 namespace Applications.Features.LoanRequests.Requests;
 
@@ -49,4 +51,6 @@ public sealed class LoanRequestDtoCreate
     public List<CollateralLinkDtoCreate> CollateralLinesLink { get; set; } = [];
     public List<LoanDocumentDtoCreate> LoanDocuments { get; set; } = [];
     public List<LoanDescriptionsDtoCreate> LoanDescriptions { get; set; } = [];
+    public List<CoPawnRequestsDtoCreate> CoPawnRequests { get; set; } = [];
+
 } 

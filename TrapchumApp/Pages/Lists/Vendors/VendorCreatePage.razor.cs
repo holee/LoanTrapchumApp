@@ -1,6 +1,5 @@
 ﻿using Applications.Features.OtherNames.Dto;
 using Applications.Features.Vendors.Commands.CreateVendor;
-using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Lists.Vendors;
 

@@ -1,18 +1,12 @@
-using Applications.Enumerations;
 using Applications.Features.Branches.Command.CloseBranch;
 using Applications.Features.Branches.Command.OpenBranch;
 using Applications.Features.Branches.Queries.GetBranchState;
 using Applications.Features.Branches.Queries.GetCashVaultBalance;
 using Applications.Features.CashManagements.Responses;
-using Applications.Features.Currencies;
 using Applications.Features.Currencies.Queries.GetCurrencyCounter;
 using Applications.Features.Currencies.Queries.GetCurrencyDetails;
-using Applications.Features.Currencies.Queries.GetCurrencyNotes;
 using Applications.Features.Currencies.Responses;
 using Applications.Features.Transactions.OpenBranches;
-using Applications.Responses.Paginations;
-using Applications.Services.Transactions.Branches;
-using TrapchumApp.Helpers.Extensions;
 using TrapchumApp.Shared;
 
 namespace TrapchumApp.Pages.Transactions.Branches

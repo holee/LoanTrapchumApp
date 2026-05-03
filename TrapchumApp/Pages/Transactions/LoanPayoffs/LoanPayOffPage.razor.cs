@@ -1,8 +1,6 @@
-using Applications.Enumerations;
 using Applications.Features.Loans.Dtos.Responses;
 using Applications.Features.Loans.Queries.GetLoanById;
 using Applications.Responses.ViewModels.Loans.Schedules;
-using TrapchumApp.Helpers.Extensions;
 using TrapchumApp.Pages.Transactions.RecievePayements;
 using TrapchumApp.Shared;
 

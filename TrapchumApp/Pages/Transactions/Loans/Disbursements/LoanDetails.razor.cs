@@ -1,14 +1,11 @@
 using Applications.Calculations;
 using Applications.Calculations.Extensions;
 using Applications.Commons.Mappers;
-using Applications.Enumerations;
 using Applications.Features.LoanPayments.Requests;
 using Applications.Features.Loans.Dtos.Responses;
 using Applications.Features.Loans.Queries.GetLoanById;
 using Applications.Features.Loans.Queries.GetLoanWithScedules;
-using Applications.Features.Loans.Services;
 using Applications.Responses.ViewModels.Loans.Schedules;
-using TrapchumApp.Helpers.Extensions;
 using TrapchumApp.Pages.Transactions.Loans.Repayments;
 using TrapchumApp.Shared;
 

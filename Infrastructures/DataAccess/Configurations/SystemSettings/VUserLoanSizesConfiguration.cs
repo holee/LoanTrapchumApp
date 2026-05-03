@@ -1,4 +1,4 @@
-using Applications.Responses.ViewModels.Settings;
+using Applications.Features.Settings.Dto;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

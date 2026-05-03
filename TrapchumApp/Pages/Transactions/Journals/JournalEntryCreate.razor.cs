@@ -1,9 +1,6 @@
-﻿using Applications.Enumerations;
-using Applications.Extensions.mappers;
-using Applications.Features.Currencies;
+﻿using Applications.Extensions.mappers;
 using Applications.Helpers;
 using Applications.Requests.Journals;
-using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Journals;
 using Applications.Responses.ViewModels.Ledgers;
 using Applications.Services.Lists;
@@ -11,7 +8,6 @@ using Applications.Services.Transactions.Journals;
 using Applications.Features.Transactions.Journals;
 using Applications.Features.Currencies.Queries.GetCurrencies;
 using Applications.Features.Journals.Command.CreateJournal;
-using TrapchumApp.Helpers.Extensions;
 using Applications.Features.Currencies.Dto;
 
 namespace TrapchumApp.Pages.Transactions.Journals;

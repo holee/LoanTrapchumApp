@@ -1,5 +1,6 @@
 ﻿using Applications.Enumerations;
 using Applications.Extensions.DateTimes;
+using Applications.Features.Holidays.Dtos;
 using Applications.Features.Loans.Dtos.Requests;
 using Domains.Enumerations;
 using Domains.Models.Loans;
@@ -19,7 +20,7 @@ public sealed class LoanCalculatorBuiler
            decimal? collectionFeeRate,
            DateTime? firstPayment,
            DateTime? startDate,
-           IEnumerable<HolidayVm> holidays)
+           IEnumerable<HolidayDto> holidays)
     {
         CurrencyId = currencyId;
         PayEvery = payEvery;
@@ -51,7 +52,7 @@ public sealed class LoanCalculatorBuiler
 
     public DateTime? StartDate { get; set; } = DateTime.UtcNow;
 
-    public IEnumerable<HolidayVm> Holidays { get; set; } = [];
+    public IEnumerable<HolidayDto> Holidays { get; set; } = [];
 
     public static LoanCalculatorBuiler Create(LoanCalculatorBuiler req)
     {

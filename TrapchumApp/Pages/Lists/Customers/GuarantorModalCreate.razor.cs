@@ -2,7 +2,6 @@ using Applications.Features.Guarantor.Dtos;
 using Applications.Features.Guarantor.Queries.GetGuarantorsAsPaging;
 using Applications.Features.Vendors.Dto.Responses;
 using Applications.Interfaces.Lists;
-using Microsoft.AspNetCore.Components;
 using TrapchumApp.Pages.Lists.OtherNames.Guarantors;
 
 namespace TrapchumApp.Pages.Lists.Customers

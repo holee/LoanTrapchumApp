@@ -1,4 +1,4 @@
-﻿using Applications.Responses.ViewModels.Holidays;
+﻿using Applications.Features.Holidays.Dtos;
 using Applications.Utils;
 using System;
 using System.Collections.Generic;
@@ -8,6 +8,6 @@ using System.Threading.Tasks;
 
 namespace Applications.Features.Holidays.Queries.GetHolidays;
 
-public record GetHolidaysQuery(DateTime dt) : IRequest<IEnumerable<HolidayVm>>
+public record GetHolidaysQuery(DateTime dt) : IRequest<IEnumerable<HolidayDto>>
 {
 }

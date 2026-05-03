@@ -1,6 +1,4 @@
 using Applications.Commons.Extensions;
-using Applications.Enumerations;
-using Applications.Extensions.Enums;
 using Applications.Extensions.NumberExtensions;
 using Applications.Features.LoanPayments.Command.RecievePayment;
 using Applications.Features.LoanPayments.Requests;
@@ -8,7 +6,6 @@ using Applications.Features.Settings.UseCases;
 using Applications.Features.Transactions.LoanTransactions;
 using Domains.Models.Identity;
 using Microsoft.JSInterop;
-using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments
 {

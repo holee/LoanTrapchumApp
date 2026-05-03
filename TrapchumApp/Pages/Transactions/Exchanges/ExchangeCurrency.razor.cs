@@ -1,4 +1,3 @@
-using Applications.Enumerations;
 using Applications.Features.Currencies.Responses;
 using Applications.Interfaces.Currencies;
 

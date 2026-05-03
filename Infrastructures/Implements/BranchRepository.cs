@@ -12,8 +12,8 @@ using Dapper;
 using Domains.Models.Lists;
 using ErrorOr;
 using Infrastructures.DataAccess;
-using Infrastructures.DataAccess.Extensions;
 using Infrastructures.Implements.Extensions;
+using Infrastructures.Utils;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -213,9 +213,9 @@ public class BranchRepository(IDbContextFactory<DataContext> contextFactory,
 
         int counts = queries.Count();
 
-        if (param.PageSize > 0)
+        if (param.Take > 0)
         {
-            queries = queries.Skip(param.Page).Take(param.PageSize);
+            queries = queries.Skip(param.Page).Take(param.Take);
         }
 
         var items = await queries.AsNoTracking().ToListAsync(cancellation);
@@ -234,9 +234,9 @@ public class BranchRepository(IDbContextFactory<DataContext> contextFactory,
 
         int counts = queries.Count();
 
-        if (param.PageSize > 0)
+        if (param.Take > 0)
         {
-            queries = queries.Skip(param.Page).Take(param.PageSize);
+            queries = queries.Skip(param.Page).Take(param.Take);
         }
 
         var items = await queries

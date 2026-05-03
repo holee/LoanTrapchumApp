@@ -1,7 +1,5 @@
 using Applications.Responses.ViewModels.OtherNames;
 using Applications.Services.Lists;
-using Microsoft.AspNetCore.Components;
-using Radzen;
 
 namespace TrapchumApp.Pages.Lists.OtherNames
 {

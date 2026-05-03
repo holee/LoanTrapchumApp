@@ -1,9 +1,7 @@
 using Applications.Features.Incomes.Command.DeleteIncomeExpense;
 using Applications.Features.Incomes.Dto;
 using Applications.Features.Incomes.Queries.GetIncomeExpense;
-using Applications.Responses.Paginations;
 using Domains.Enumerations;
-using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Settings
 {

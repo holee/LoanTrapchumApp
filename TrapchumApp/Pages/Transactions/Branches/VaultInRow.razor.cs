@@ -1,5 +1,4 @@
-﻿using Applications.Enumerations;
-using Applications.Features.Transactions.CashManagements;
+﻿using Applications.Features.Transactions.CashManagements;
 
 namespace TrapchumApp.Pages.Transactions.Branches
 {

@@ -1,8 +1,5 @@
 using Applications.Features.Branches.Dtos;
 using Applications.Features.Branches.Queries.GetBranchDetailsById;
-using Applications.Features.Loans.Queries.GetLoanByBranchId;
-using Microsoft.AspNetCore.Components;
-using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Lists.Branches;
 

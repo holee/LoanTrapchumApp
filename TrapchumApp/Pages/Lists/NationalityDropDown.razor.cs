@@ -1,7 +1,6 @@
 using System.Linq.Expressions;
 using Domains.Models.Lists;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
+
 namespace TrapchumApp.Pages.Lists
 {
     public partial class NationalityDropDown

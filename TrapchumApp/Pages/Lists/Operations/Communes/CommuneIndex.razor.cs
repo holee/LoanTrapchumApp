@@ -1,8 +1,5 @@
 using Applications.Interfaces.Addresses;
-using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Addresses;
-using Infrastructures.Implements;
-using TrapchumApp.Pages.Lists.Operations.Districts;
 using TrapchumApp.Pages.Lists.Operations.Villages;
 
 namespace TrapchumApp.Pages.Lists.Operations.Communes

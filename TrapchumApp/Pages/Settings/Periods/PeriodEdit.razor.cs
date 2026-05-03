@@ -1,8 +1,6 @@
 using Applications.Features.Periods.Commands.UpdatePeriod;
 using Applications.Features.Periods.Dto;
 using Applications.Features.Periods.Queries.GetPeriods;
-using Applications.Responses.Paginations;
-using Radzen;
 
 namespace TrapchumApp.Pages.Settings.Periods
 {

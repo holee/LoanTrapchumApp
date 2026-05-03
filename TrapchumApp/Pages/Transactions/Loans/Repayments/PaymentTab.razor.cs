@@ -1,5 +1,4 @@
 using Applications.Commons.Extensions;
-using Applications.Enumerations;
 using Applications.Extensions.NumberExtensions;
 using Applications.Features.LoanPayments.Command.RecievePayment;
 using Applications.Features.LoanPayments.Requests;
@@ -8,8 +7,6 @@ using Applications.Features.Transactions.LoanTransactions;
 using Applications.Services.Loans;
 using Domains.Models.Identity;
 using Microsoft.JSInterop;
-using System.Threading.Tasks;
-using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Repayments;
 public partial class PaymentTab

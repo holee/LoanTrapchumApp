@@ -1,6 +1,5 @@
 using Applications.Commons.Mappers.Incomes;
 using Applications.Commons.Messages.Incomes;
-using Applications.Enumerations;
 using Applications.Features.Incomes.Command.CreateIncomeExpenseSource;
 using Applications.Features.Incomes.Command.EditIncomeExpenseSource;
 using Applications.Features.Incomes.Command.GetEditIncomeExpenseSource;

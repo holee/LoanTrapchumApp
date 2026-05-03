@@ -3,7 +3,6 @@ using Applications.Features.Holidays.Dtos;
 using Applications.Interfaces.Lists;
 using Applications.Responses;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Holidays;
 using Domains.Models.Lists;
 using Mapster;
 
@@ -23,7 +22,7 @@ namespace Applications.Services.Lists
         Task<IEnumerable<Holiday>> GetHolidays(bool isSelectedPrevious, DateTime? startFrom = null, DateTime? end = null);
         //Task<IEnumerable<HolidayVm>> GetHolidays(DateTime? selectedDate);
         //Task<Pager<Holiday>> GetHolidays(int pageNumber, int pageSize, string sortColumn = "HolidayName", bool isSelectedPrevious = false, bool sortDescending = false, string? q = null);
-        Task<IEnumerable<HolidayVm>> GetActiveHolidays(DateTime? startFrom, int? selectedYear);
+        Task<IEnumerable<HolidayDto>> GetActiveHolidays(DateTime? startFrom, int? selectedYear);
         //Task<Result<string>> ModifyHolidate(long id, HolidayCreateDto model);
     }
 
@@ -97,7 +96,7 @@ namespace Applications.Services.Lists
         }
 
 
-        public async Task<IEnumerable<HolidayVm>> GetActiveHolidays(DateTime? startFrom, int? selectedYear)
+        public async Task<IEnumerable<HolidayDto>> GetActiveHolidays(DateTime? startFrom, int? selectedYear)
         {
             var startDate = startFrom < DateTime.Now ? DateTime.Now : startFrom;
 

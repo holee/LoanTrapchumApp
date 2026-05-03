@@ -1,8 +1,8 @@
 ﻿namespace Applications.Constants.Authorizations
 {
-    public class BranchActionType : Feature 
-    {
+    //public class BranchActionType : Actions 
+    //{
       
         
-    }
+    //}
 }

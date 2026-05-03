@@ -2,7 +2,7 @@ using Applications.Extensions;
 using Applications.Features.Customers.Queries.GetRequestByCustomerId;
 using Applications.Features.LoanRequests.Command.IsCustomerBusy;
 using Applications.Responses.ViewModels.Loans.Requests;
-using TrapchumApp.Helpers.Extensions;
+
 namespace TrapchumApp.Pages.Lists.Customers
 {
     public partial class CustomerLoanRequest

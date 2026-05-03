@@ -1,12 +1,4 @@
-﻿@using Applications.Features.Addresses
-@using Applications.Features.Branches
-@using Applications.Features.Currencies
-@using Applications.Features.Customers.Services
-@using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Interfaces
-@using Domains.Models.Bases
-@using TrapchumApp.Services
-<PageTitle>Create Guarantor</PageTitle>
+﻿<PageTitle>Create Guarantor</PageTitle>
 <EditForm Model="@model" OnValidSubmit="OnSaveChanges">
     <Blazilla.FluentValidator />
     <GaurantorCreateComp Model="model" />

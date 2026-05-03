@@ -1,5 +1,7 @@
-﻿namespace Applications.Features.Holidays.Queries.GetHolidaysAsPaging;
+﻿using Applications.Features.Holidays.Dtos;
 
-public record GetHolidaysAsPagingQuery(QueryParam Request) : IRequest<Pager<HolidayVm>>
+namespace Applications.Features.Holidays.Queries.GetHolidaysAsPaging;
+
+public record GetHolidaysAsPagingQuery(QueryParam Request) : IRequest<Pager<HolidayDto>>
 {
 }

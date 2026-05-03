@@ -1,10 +1,7 @@
 using Applications.Extensions;
 using Applications.Features.Guarantor.Dtos;
 using Applications.Features.Guarantor.Queries.GetGuarantorsAsPaging;
-using Applications.Responses.Paginations;
 using Applications.Services.Lists;
-using ErrorOr;
-using Radzen;
 using Radzen.Blazor;
 using TrapchumApp.Pages.Lists.OtherNames.Guarantors;
 

@@ -4,9 +4,9 @@ using ErrorOr;
 
 namespace Applications.Features.Holidays.Command.CreateHoliday;
 
-public sealed class CreateHolidayCommandHandler(IHolidayService holidayRepository) : IRequestHandler<CreateHolidayCommand, ErrorOr<HolidayVm>>
+public sealed class CreateHolidayCommandHandler(IHolidayService holidayRepository) : IRequestHandler<CreateHolidayCommand, ErrorOr<HolidayDto>>
 {
-    public async Task<ErrorOr<HolidayVm>> Handle(CreateHolidayCommand request, CancellationToken cancellationToken)
+    public async Task<ErrorOr<HolidayDto>> Handle(CreateHolidayCommand request, CancellationToken cancellationToken)
     {
 
         var req = request.Request.ToHoliday();

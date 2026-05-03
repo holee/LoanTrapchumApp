@@ -1,10 +1,7 @@
-using Applications.Features.Collaterals.Commands.DeleteCollateralLines;
 using Applications.Features.Collaterals.Dtos;
 using Applications.Features.Collaterals.Queries.GetCollateralLinesAsPaging;
 using Applications.Features.Customers.Queries.GetCustomerAsPaging;
 using Applications.Features.Customers.Response;
-using Applications.Responses.Paginations;
-using TrapchumApp.Pages;
 
 namespace TrapchumApp.Pages.Lists.Collaterals;
 
@@ -133,7 +130,7 @@ public partial class CollateralLinesIndex
             var param = new QueryParam
             {
                 Page = _skip,
-                PageSize = _pageSize,
+                Take = _pageSize,
                 SortColumn = _sortColumn,
                 SortDescending = _sortDescending,
                 Filter = filter

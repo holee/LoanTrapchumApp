@@ -4,7 +4,6 @@ using Applications.Features.Departments.Queries.GetDepartmentById;
 using Applications.Interfaces.Lists;
 using Domains.Models.Lists;
 using Mapster;
-using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Lists.Departments
 {

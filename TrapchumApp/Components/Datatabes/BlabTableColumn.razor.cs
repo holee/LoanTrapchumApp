@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Components;
-
 namespace TrapchumApp.Components.Datatabes;
 
 public partial class BlabTableColumn<TItem> : ComponentBase, IDisposable

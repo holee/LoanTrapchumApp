@@ -2,8 +2,6 @@ using Applications.Features.CollateralValuations.Commands.DeleteCollateralValuat
 using Applications.Features.CollateralValuations.Dtos;
 using Applications.Features.CollateralValuations.Queries.GetCollateralValuationsAsPaging;
 using Applications.Interfaces;
-using Microsoft.AspNetCore.Components;
-using Radzen;
 using Radzen.Blazor;
 
 namespace TrapchumApp.Pages.Lists.CollateralValuations;

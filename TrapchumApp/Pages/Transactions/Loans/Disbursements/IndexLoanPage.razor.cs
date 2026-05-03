@@ -1,6 +1,4 @@
 using Applications.Features.Loans.Dtos.Responses;
-using Applications.Features.Loans.Services;
-using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 {

@@ -1,7 +1,5 @@
 using Applications.Features.Settings.Commands.UserLoanSizes.CreateUserLoanSize;
 using Applications.Features.Settings.Dto;
-using Microsoft.AspNetCore.Components;
-using Radzen;
 
 namespace TrapchumApp.Pages.Identity
 {

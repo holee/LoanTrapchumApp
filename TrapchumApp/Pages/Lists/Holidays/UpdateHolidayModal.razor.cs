@@ -2,8 +2,6 @@ using Applications.Features.Holidays.Command.UpdateHoliday;
 using Applications.Features.Holidays.Dtos;
 using Applications.Features.Holidays.Queries.GetUpdateHoliday;
 using Applications.Interfaces.Lists;
-using Applications.Responses.ViewModels.Holidays;
-using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Lists.Holidays
 {
@@ -17,7 +15,7 @@ namespace TrapchumApp.Pages.Lists.Holidays
 
         private HolidayCreateDto modelDTO = new();
 
-        private IEnumerable<HolidayVm> listvm = [];
+        private IEnumerable<HolidayDto> listvm = [];
 
 
         void ChangedDate(DateTime dt)
@@ -74,7 +72,7 @@ namespace TrapchumApp.Pages.Lists.Holidays
             }
         }
 
-        private void RowSelectedChanged(HolidayVm arg)
+        private void RowSelectedChanged(HolidayDto arg)
         {
             if (arg != null)
             {

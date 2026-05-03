@@ -3,9 +3,8 @@ using Applications.Features.Expenses.EditExpenseCommands;
 using Applications.Features.Expenses.Queries.GetExpenseById;
 using Applications.Features.Incomes.Dto;
 using Applications.Features.Incomes.Queries.GetIncomeExpense;
-using Applications.Responses.Paginations;
 using Domains.Enumerations;
-using Domains.Models.Lists.Customers;
+
 namespace TrapchumApp.Pages.Lists.Customers.Expenses;
 
 public partial class CustomerModalExpenseEdit

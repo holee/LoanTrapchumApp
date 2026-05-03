@@ -6,10 +6,8 @@ using Applications.Features.Employees.Commands.DeleteEmployee;
 using Applications.Features.Employees.Queries.GetEmployeeAsPaging;
 using Applications.Interfaces.Lists;
 using Applications.Responses.Lists.Employees;
-using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Employees;
 using Radzen.Blazor;
-using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Lists.Employees;
 

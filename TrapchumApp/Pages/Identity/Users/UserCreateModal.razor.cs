@@ -4,9 +4,7 @@ using Applications.Features.Employees.Queries.GetEmployeeAsPaging;
 using Applications.Features.Identity.Command.CreateNewUser;
 using Applications.Features.Identity.Users;
 using Applications.Interfaces.Identity;
-using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Employees;
-using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Identity.Users
 {

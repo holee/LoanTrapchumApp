@@ -1,6 +1,5 @@
 using Applications.Responses.ViewModels.Loans.Requests;
 using Applications.Services.Lists;
-using Microsoft.AspNetCore.Components;
 using Radzen.Blazor;
 
 namespace TrapchumApp.Pages.Transactions.LoanRequests

@@ -1,7 +1,7 @@
+using Applications.Features.Settings.Dto;
 using Applications.Interfaces.setting;
 using Applications.Responses;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Settings;
 using Dapper;
 using Domains.Models.Collaterals;
 using Domains.Models.Loans;
@@ -218,7 +218,7 @@ public sealed class LegacyAppSettingService(
             p.Add("@userRefId", userRefId);
             p.Add("@filter", filter);
             p.Add("@skip", q.Page);
-            p.Add("@take", q.PageSize > 0 ? q.PageSize : 15);
+            p.Add("@take", q.Take > 0 ? q.Take : 15);
 
             using var multi = await db.QueryMultipleAsync(sql, p);
             var items = (await multi.ReadAsync<VUserLoanSizes>()).ToList();
@@ -275,8 +275,8 @@ public sealed class LegacyAppSettingService(
             await using var cxt = await dbContextFactory.CreateDbContextAsync(cancellation);
             var query = cxt.CollateralSubTypes.AsNoTracking();
             var count = await query.CountAsync(cancellation);
-            if (param.PageSize > 0)
-                query = query.Skip(param.Page).Take(param.PageSize);
+            if (param.Take > 0)
+                query = query.Skip(param.Page).Take(param.Take);
             var items = await query.ToListAsync(cancellation);
             return new Pager<CollateralSubType>(items, count);
         }

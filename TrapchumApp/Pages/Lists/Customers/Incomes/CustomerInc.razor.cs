@@ -1,6 +1,5 @@
 using Applications.Commons.Messages.Incomes;
 using Applications.Extensions;
-using Applications.Features.Customers.Services;
 using Applications.Features.Incomes.Command.DeleteIncome;
 using Applications.Features.Incomes.Queries.GetIncomeByCustomerId;
 using Applications.Responses.ViewModels.Customers;

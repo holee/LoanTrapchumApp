@@ -1,6 +1,4 @@
 using Applications.Responses.ViewModels.Loans.Schedules;
-using Microsoft.AspNetCore.Components;
-using Radzen;
 
 namespace TrapchumApp.Pages.Transactions.Loans.Disbursements
 {

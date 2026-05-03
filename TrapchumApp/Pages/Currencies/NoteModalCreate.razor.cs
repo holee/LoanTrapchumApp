@@ -2,10 +2,8 @@ using Applications.Extensions.mappers;
 using Applications.Features.Currencies.Command.AddCurrencyNote;
 using Applications.Features.Currencies.Dto;
 using Applications.Features.Currencies.Queries.GetCurrencies;
-using Applications.Responses.Paginations;
 using Domains.Models.Currencies;
 using Mapster;
-using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Currencies
 {

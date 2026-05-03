@@ -5,7 +5,7 @@ public sealed class QueryParam
     public QueryParam()
     {
         Page = 0;
-        PageSize = 0;
+        Take = 0;
         SortColumn = string.Empty;
         SortDescending = false;
         IncludeInActive = false;
@@ -14,7 +14,7 @@ public sealed class QueryParam
     public QueryParam(int page, int pageSize)
     {
         Page = page;
-        PageSize = pageSize;
+        Take = pageSize;
     }
     public QueryParam(int page, int pageSize, string sortField)
         : this(page, pageSize)
@@ -49,7 +49,7 @@ public sealed class QueryParam
         FilterColumn = filterColumn;
     }
     public int Page { get; set; } = 0;
-    public int PageSize { get; set; } = 15;
+    public int Take { get; set; } = 15;
     public string? SortColumn { get; set; } = string.Empty;
     public bool SortDescending { get; set; } = false;
     public bool IncludeInActive { get; set; } = false;

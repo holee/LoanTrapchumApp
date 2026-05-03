@@ -16,14 +16,14 @@ public partial class Policies
     public const string RequestLoanRequest = $"{req_prefix}.{nameof(RequestLoanRequest)}";
     public const string RejectLoanRequest = $"{req_prefix}.{nameof(RejectLoanRequest)}";
 
-    private static string read_loanRequest = AppPermission.RuleFor(Modules.LoanRequest, Feature.Read);
-    private static string update_loanRequest = AppPermission.RuleFor(Modules.LoanRequest, Feature.Update);
-    private static string create_loanRequest = AppPermission.RuleFor(Modules.LoanRequest, Feature.Create);
-    private static string delete_loanRequest = AppPermission.RuleFor(Modules.LoanRequest, Feature.Delete);
-    private static string approve_loanRequest = AppPermission.RuleFor(Modules.LoanRequest, Feature.ApproveRequest);
-    private static string reject_loanRequest = AppPermission.RuleFor(Modules.LoanRequest, Feature.RejectRequest);
-    private static string request_loanRequest = AppPermission.RuleFor(Modules.LoanRequest, Feature.Request);
-    private static string disburse_loanRequest = AppPermission.RuleFor(Modules.LoanRequest, Feature.Disburse);
+    private static string read_loanRequest = AppPermission.RuleFor(Modules.LoanRequest, Actions.Read);
+    private static string update_loanRequest = AppPermission.RuleFor(Modules.LoanRequest, Actions.Update);
+    private static string create_loanRequest = AppPermission.RuleFor(Modules.LoanRequest, Actions.Create);
+    private static string delete_loanRequest = AppPermission.RuleFor(Modules.LoanRequest, Actions.Delete);
+    private static string approve_loanRequest = AppPermission.RuleFor(Modules.LoanRequest, Actions.ApproveRequest);
+    private static string reject_loanRequest = AppPermission.RuleFor(Modules.LoanRequest, Actions.RejectRequest);
+    private static string request_loanRequest = AppPermission.RuleFor(Modules.LoanRequest, Actions.Request);
+    private static string disburse_loanRequest = AppPermission.RuleFor(Modules.LoanRequest, Actions.Disburse);
      
     public static AuthorizationPolicy CanDisburseLoan()  
     {

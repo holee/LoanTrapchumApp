@@ -1,13 +1,8 @@
-﻿using Applications.Features.Collaterals.Commands.AddOrUpdateCollaterals;
-using Applications.Features.Collaterals.Dtos;
-using Applications.Features.Identity.Roles.Requests;
+﻿using Applications.Features.Identity.Roles.Requests;
 using Applications.Features.Identity.Roles.Validation;
 using Applications.Features.LoanPayments.Requests;
 using Applications.Features.LoanPayments.Validations;
-using Applications.Features.LoanRequests.Command.ApprovedLoanRequest;
 using Applications.Features.LoanRequests.Requests;
-using FluentValidation;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Applications
 {

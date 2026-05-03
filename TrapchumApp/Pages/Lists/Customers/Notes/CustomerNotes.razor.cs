@@ -4,7 +4,6 @@ using Applications.Features.Notes.Command.DeleteNote;
 using Applications.Features.Notes.Queries.GetNoteByCustomerId;
 using Applications.Features.Notes.Queries.GetNoteById;
 using Applications.Responses.ViewModels.Customers;
-using Applications.Utils;
 using Domains.Models.Identity;
 
 namespace TrapchumApp.Pages.Lists.Customers.Notes

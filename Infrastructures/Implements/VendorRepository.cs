@@ -193,8 +193,8 @@ public sealed class VendorRepository(
 
         var totalCount = await query.CountAsync(cancellation);
 
-        if (q.PageSize > 0)
-            query = query.Skip(q.Page).Take(q.PageSize);
+        if (q.Take > 0)
+            query = query.Skip(q.Page).Take(q.Take);
 
         var items = await query.ToListAsync(cancellation);
 

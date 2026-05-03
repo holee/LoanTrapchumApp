@@ -1,13 +1,4 @@
-﻿@using Applications.Enumerations
-@using Applications.Features.Addresses
-@using Applications.Features.Branches
-@using Applications.Features.Currencies
-@using Applications.Features.Customers.Services
-@using Applications.Features.Employees
-@using Applications.Features.LoanRequests.Interfaces
-@using Domains.Models.Files
-@using TrapchumApp.Services
-<EditForm Model="model" @ref="editForm" OnValidSubmit="@FormSubmit">
+﻿<EditForm Model="model" @ref="editForm" OnValidSubmit="@FormSubmit">
     <Blazilla.FluentValidator />
     <RadzenFieldset AllowCollapse="true" Collapsed="false" class="rz-mb-2">
         <HeaderTemplate>

@@ -34,10 +34,10 @@ namespace Infrastructures.DataAccess.Configurations.Loans
                 .HasForeignKey(fk => fk.LoanRequestRefId);
 
 
-            builder.HasMany(x=>x.CoLoanRequest)
-                .WithOne()
-                .HasPrincipalKey(x=>x.LoanRequestId);
-                   
+            builder.HasMany(x => x.CoPawnRequests)
+                .WithOne(x => x.LoanRequest)
+                .HasForeignKey(x => x.RequestId);
+
         }
     }
 

@@ -36,9 +36,9 @@ public sealed class AuditReadService : IAuditReadService
 
         var counts = await query.CountAsync(ct);
 
-        if (param.PageSize > 0)
+        if (param.Take > 0)
         {
-            query = query.Skip(param.Page).Take(param.PageSize);
+            query = query.Skip(param.Page).Take(param.Take);
         }
 
         var projection = await query

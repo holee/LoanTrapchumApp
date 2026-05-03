@@ -4,10 +4,7 @@ using Applications.Features.Departments.Commands.DeleteDepartment;
 using Applications.Features.Departments.Dto;
 using Applications.Features.Departments.Queries.GetDepartmentAsPaging;
 using Applications.Interfaces.Lists;
-using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Employees;
 using Radzen.Blazor;
-using TrapchumApp.Helpers.Extensions;
 
 namespace TrapchumApp.Pages.Lists.Departments
 {

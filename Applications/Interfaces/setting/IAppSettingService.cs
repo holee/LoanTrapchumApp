@@ -1,6 +1,5 @@
 ﻿using Applications.Responses;
 using Applications.Responses.Paginations;
-using Applications.Responses.ViewModels.Settings;
 using Domains.Models.Collaterals;
 using Domains.Models.Loans;
 using Domains.Models.Settings;

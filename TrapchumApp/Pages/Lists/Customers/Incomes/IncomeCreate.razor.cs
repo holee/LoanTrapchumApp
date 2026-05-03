@@ -2,9 +2,7 @@ using Applications.Commons.Messages.Incomes;
 using Applications.Features.Incomes.Command.CreateIncome;
 using Applications.Features.Incomes.Dto;
 using Applications.Features.Incomes.Queries.GetIncomeExpense;
-using Applications.Responses.Paginations;
 using Domains.Enumerations;
-using System.Threading.Tasks;
 
 namespace TrapchumApp.Pages.Lists.Customers.Incomes
 {
@@ -38,7 +36,7 @@ namespace TrapchumApp.Pages.Lists.Customers.Incomes
             var query = new GetIncomeExpenseQuery(0, IncomeExpenseTypes.Income, new QueryParam
             {
                 Page = 0,
-                PageSize = 10,
+                Take = 10,
                 Filter = filter
             });
 
