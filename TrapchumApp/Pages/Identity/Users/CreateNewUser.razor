@@ -1,91 +1,131 @@
 ﻿@using Applications.Features.Branches.Dtos
-<RadzenCard class="rz-background-color-base-100">
-    <EditForm Model="model" @ref="form">
-        <FluentValidationValidator DisableAssemblyScanning="true" />
-        <RadzenStack Gap="0.5rem;"
-                     Orientation="Orientation.Vertical">
-            <div class="row">
-                <div class="col-sm-2 col-form-label">Branch</div>
-                <div class="col-sm-10">
-                    <RadzenDropDown @bind-Value="model.BranchRefId"
-                                    Data="Branches"
-                                    Style="width: 100%;"
-                                    TextProperty="@nameof(VBranch.BranchName)"
-                                    ValueProperty="@nameof(VBranch.BranchId)"
-                                    SelectedItemChanged="SelectBranchChanged"
-                                    Name="DropDownBindValue" />
-                    <ValidationMessage For="@(()=>model.BranchRefId)" />
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-sm-2 col-form-label">Employee</div>
-                <div class="col-sm-10">
-                    <RadzenDropDown @bind-Value="model.EmployeeId"
-                                    Data="bEmployees"
-                                    Style="width: 100%;"
-                                    TextProperty="AltName"
-                                    @bind-Value:after="SelectedEmployeeChanged"
-                                    AllowFiltering="true"
-                                    ValueProperty="EmployeeId"
-                                    Name="DropDownEmployee" />
-                    <ValidationMessage For="@(()=>model.EmployeeId)" />
-                </div>
-            </div>
-            <div class="row">
-                <label class="col-sm-2 col-form-label">User Name</label>
-                <div class="col-sm-10">
-                    <InputText @bind-Value="model.Username" class="form-control" />
-                    <ValidationMessage For="@(()=>model.Username)" />
-                </div>
-            </div>
-            <div class="row">
-                <label class="col-sm-2 col-form-label">Email</label>
-                <div class="col-sm-10">
-                    <InputText type="email" @bind-Value="model.Email" class="form-control" />
-                    <ValidationMessage For="@(()=>model.Email)" />
-                </div>
-            </div>
-            <div class="row">
-                <label class="col-sm-2 col-form-label">Role</label>
-                <div class="col-sm-10">
-                    <RadzenDropDown @bind-Value="model.RoleName"
-                                    Data="roles"
-                                    Style="width: 100%;"
-                                    Name="DropDownRoleName" />
-                    <ValidationMessage For="@(()=>model.RoleName)" />
-                </div>
-            </div>
-            <div class="row">
-                <label class="col-sm-2 col-form-label">Password</label>
-                <div class="col-sm-10">
-                    <RadzenPassword Style="width:100%;"
-                                    @bind-Value="model.Password" />
-                    <ValidationMessage For="@(()=>model.Password)" />
-                </div>
-            </div>
-            <div class="row">
-                <label class="col-sm-2 col-form-label">Confirm Password</label>
-                <div class="col-sm-10">
-                    <RadzenPassword Style="width:100%;"
-                                    @bind-Value="model.ConfirmPassword" />
-                    <ValidationMessage For="@(()=>model.ConfirmPassword)" />
-                </div>
-            </div>
-        </RadzenStack>
+@using TrapchumApp.Components.Buttons
+<style>
+    .cu-avatar {
+        width: 56px;
+        height: 2rem;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--rz-primary), var(--rz-secondary));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 1.6rem;
+        flex-shrink: 0;
+    }
+</style>
+
+<RadzenCard class="rz-background-color-base-100 rz-p-0"
+            Variant="Variant.Outlined"
+            style="border-radius: 12px; overflow: hidden; min-width: 480px;">
+    <div style="background: linear-gradient(135deg, var(--rz-primary), var(--rz-secondary)); padding: 1.25rem 1.5rem; display: flex; align-items: center; gap: 1rem;">
+        <div class="cu-avatar">
+            <RadzenIcon Icon="person_add" />
+        </div>
+        <div>
+            <div style="color:#fff; font-size:1.1rem; font-weight:700; line-height:1.2;">New User Account</div>
+            <div style="color:rgba(255,255,255,0.8); font-size:0.82rem; margin-top:0.2rem;">Fill in the details below to create a system user.</div>
+        </div>
+    </div>
+    <EditForm Model="model" OnValidSubmit="@HanldeSubmitForm">
+        <Blazilla.FluentValidator />
+
+        @* ── Employee & Role ── *@
+        <RadzenFieldset AllowCollapse="false" class="rz-mb-3">
+            <HeaderTemplate>
+                <RadzenIcon Icon="badge" /><strong>Employee &amp; Role</strong>
+            </HeaderTemplate>
+            <ChildContent>
+                <RadzenStack Gap="0.75rem">
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="12" SizeMD="3">
+                            <RadzenLabel Text="Employee" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="9">
+                            <RadzenDropDown @bind-Value="model.EmployeeId"
+                                            Data="bEmployees"
+                                            class="rz-w-100"
+                                            TextProperty="AltName"
+                                            @bind-Value:after="SelectedEmployeeChanged"
+                                            AllowFiltering="true"
+                                            FilterPlaceholder="Search employee..."
+                                            ValueProperty="EmployeeId"
+                                            Placeholder="Select employee..."
+                                            Name="DropDownEmployee" />
+                            <ValidationMessage For="@(() => model.EmployeeId)" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="12" SizeMD="3">
+                            <RadzenLabel Text="Role" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="9">
+                            <RadzenDropDown @bind-Value="model.RoleName"
+                                            Data="roles"
+                                            class="rz-w-100"
+                                            Placeholder="Select role..."
+                                            Name="DropDownRoleName" />
+                            <ValidationMessage For="@(() => model.RoleName)" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                </RadzenStack>
+            </ChildContent>
+        </RadzenFieldset>
+
+        @* ── Account ── *@
+        <RadzenFieldset AllowCollapse="false" class="rz-mb-3">
+            <HeaderTemplate>
+                <RadzenIcon Icon="manage_accounts" /><strong>Account</strong>
+            </HeaderTemplate>
+            <ChildContent>
+                <RadzenStack Gap="0.75rem">
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="12" SizeMD="3">
+                            <RadzenLabel Text="Username" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="9">
+                            <RadzenTextBox @bind-Value="model.Username" class="rz-w-100" Placeholder="Enter username..." />
+                            <ValidationMessage For="@(() => model.Username)" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="12" SizeMD="3">
+                            <RadzenLabel Text="Email" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="9">
+                            <RadzenTextBox type="email" @bind-Value="model.Email" class="rz-w-100" Placeholder="email@example.com" />
+                            <ValidationMessage For="@(() => model.Email)" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="12" SizeMD="3">
+                            <RadzenLabel Text="Password" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="9">
+                            <RadzenPassword class="rz-w-100" @bind-Value="model.Password" Placeholder="Enter password..." />
+                            <ValidationMessage For="@(() => model.Password)" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                    <RadzenRow AlignItems="AlignItems.Center">
+                        <RadzenColumn Size="12" SizeMD="3">
+                            <RadzenLabel Text="Confirm" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="9">
+                            <RadzenPassword class="rz-w-100" @bind-Value="model.ConfirmPassword" Placeholder="Confirm password..." />
+                            <ValidationMessage For="@(() => model.ConfirmPassword)" />
+                        </RadzenColumn>
+                    </RadzenRow>
+                </RadzenStack>
+            </ChildContent>
+        </RadzenFieldset>
+
         <RadzenStack AlignItems="AlignItems.Center"
                      Orientation="Orientation.Horizontal"
                      JustifyContent="JustifyContent.End"
-                     class="rz-my-3">
-            <RadzenButton ButtonStyle="ButtonStyle.Success"
-                          Click="SubmitForm"
-                          Icon="save"
-                          Text="Save"
-                          Size="ButtonSize.Small" />
-            <RadzenButton ButtonStyle="ButtonStyle.Danger"
-                          Icon="close"
-                          Text="Cancel"
-                          Click="@(()=>DialogService.Close(false))"
-                          Size="ButtonSize.Small" />
+                     class="rz-m-2"
+                     Gap="0.5rem">
+            <SaveButton IsBusy="@_isBusty" />
+            <CancelButton OnClick="@(() => DialogService.Close(false))" />
         </RadzenStack>
     </EditForm>
 </RadzenCard>

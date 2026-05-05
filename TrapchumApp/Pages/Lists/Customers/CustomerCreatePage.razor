@@ -1,6 +1,7 @@
 ﻿<PageTitle>Create New Customer</PageTitle>
-<EditForm Model="CustomerModel" @ref="@editForm" >
+<EditForm Model="CustomerModel" @ref="@editForm">
     <Blazilla.FluentValidator />
+    <ValidationSummary />
     <CreateCustomerInfo Model="@CustomerModel" @key="Guid.NewGuid().ToString()" />
     <RadzenStack Orientation="Orientation.Horizontal"
                  AlignItems="AlignItems.Center"

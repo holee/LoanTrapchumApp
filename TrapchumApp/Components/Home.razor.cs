@@ -260,7 +260,7 @@ namespace TrapchumApp.Components
                 "This action will reset all settings to default.",
                 "Reset Settings",
                 MsgBoxButtons.OKCancel,
-                MessageBoxIcon.Warning);
+                MsgBoxBoxIcon.Warning);
             _msgBoxLastResult = r.ToString();
         }
 
@@ -270,7 +270,7 @@ namespace TrapchumApp.Components
                 "The file could not be uploaded. Would you like to retry?",
                 "Upload Failed",
                 MsgBoxButtons.RetryCancel,
-                MessageBoxIcon.Error);
+                MsgBoxBoxIcon.Error);
             _msgBoxLastResult = r.ToString();
         }
 
@@ -280,7 +280,7 @@ namespace TrapchumApp.Components
                 "A critical error occurred during data processing.",
                 "Critical Error",
                 MsgBoxButtons.AbortRetryIgnore,
-                MessageBoxIcon.Error
+                MsgBoxBoxIcon.Error
                 );
             _msgBoxLastResult = r.ToString();
         }

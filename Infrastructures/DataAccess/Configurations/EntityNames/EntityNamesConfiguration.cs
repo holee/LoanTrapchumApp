@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructures.DataAccess.Configurations.EntityNames;
 
-public class EntityNamesConfiguration : IBaseEntityTypeConfigurations<Domains.Models.Lists.EntityNames>
+public sealed class EntityNamesConfiguration : IBaseEntityTypeConfigurations<Domains.Models.Lists.EntityNames>
 {
     public void Configure(EntityTypeBuilder<Domains.Models.Lists.EntityNames> builder)
     {

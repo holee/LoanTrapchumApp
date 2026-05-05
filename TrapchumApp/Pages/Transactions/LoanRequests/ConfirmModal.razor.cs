@@ -38,9 +38,13 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
         {
             if (model is null) return;
 
-            var confirm = await DialogService.Confirm("Are you sure to aprove this loan request", "Loan Request");
+            var dia = await MsgBox.ShowAsync("Processing your request. Please wait...", "Loan Request", MsgBoxButtons.YesNo, MsgBoxBoxIcon.Information);
 
-            if (confirm == false) return;
+            if (dia == MsgBoxResult.No)
+            {
+                _toastService.ShowInfo("Request was cancelled.");
+                return;
+            }
 
             logger.LogInformation("Start to aprove loan request with id {LoanRequestId} by user {UserId}", LoanRequestId, _userId);
 
@@ -70,16 +74,22 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
                 }
                 else
                 {
-                    
+
                     logger.LogInformation("Failed to approve loan request with id {LoanRequestId} by user {UserId}. Error: {ErrorDescription}", LoanRequestId, _userId, resp.FirstError.Description);
-                   
-                    NotificationService.Notify(NotificationSeverity.Error, resp.FirstError.Description);
+
+                    isSaving = false;
+
+                    _toastService.ShowError(resp.GetMessage());
                 }
             }
             catch (Exception ex)
             {
                 isSaving = false;
+
                 logger.LogError(ex, "Error while approving loan request with id {LoanRequestId} by user {UserId}", LoanRequestId, _userId);
+                
+                _toastService.ShowError("An error occurred while approving the loan request.");
+
             }
             finally
             {

@@ -12,4 +12,5 @@ public sealed class EntityEmployeeCreate :BaseEntityNamesCreate
     public int? DepartmentRefId { get; set; }
     public int? BranchRefId { get; set; }
     public string? Photo { get; set; }
+    public EmergencyContactDtoCreate Contact { get; set; } = new();
 }

@@ -1,4 +1,5 @@
-﻿using Domains.Models.Lists.Employees;
+﻿using Domains.Models;
+using Domains.Models.Lists.Employees;
 using Domains.Models.Loans;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -25,16 +26,23 @@ namespace Infrastructures.DataAccess.Configurations.Employees
                             .HasForeignKey(x => x.DepartmentRefId)
                         .OnDelete(DeleteBehavior.Restrict);
 
+            builder.HasOne(x => x.Contact)
+                        .WithOne()
+                            .HasForeignKey<EmergencyContact>(x => x.ContactId)
+                         .IsRequired(false);
+
             builder.HasOne(x => x.Branch)
                       .WithMany(x => x.Employees)
                           .HasForeignKey(x => x.BranchRefId);
 
             builder.HasOne(x => x.LoanCreditAgent)
-                        .WithOne(x=>x.Employee)
-                            .HasForeignKey<LoanCreditAgent>(x => x.EmployeeRefId);
+                        .WithOne(x => x.Employee)
+                            .HasForeignKey<LoanCreditAgent>(x => x.EmployeeRefId)
+                        .IsRequired(false);
 
             builder.Navigation(d => d.Department).AutoInclude();
             builder.Navigation(d => d.Branch).AutoInclude();
+            builder.Navigation(d => d.Contact).AutoInclude();
         }
 
     }

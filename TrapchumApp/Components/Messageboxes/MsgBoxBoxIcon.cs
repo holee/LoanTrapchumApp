@@ -1,6 +1,6 @@
 namespace TrapchumApp.Components.Messageboxes;
 
-public enum MessageBoxIcon
+public enum MsgBoxBoxIcon
 {
     None,
     Information,

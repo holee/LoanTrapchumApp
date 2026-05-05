@@ -14,5 +14,6 @@
         Completed = 7,
         ReApproved = 8,
         Rechecking = 9,
+        Sending = 10,
     }
 }

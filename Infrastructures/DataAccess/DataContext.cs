@@ -201,7 +201,7 @@ namespace Infrastructures.DataAccess
         public DbSet<LoanTypeStatus> LoanSubTypeStatuses => Set<LoanTypeStatus>();
         public DbSet<LoanSubTypeStatus> LoanSubTypeNoAcc => Set<LoanSubTypeStatus>();
         public DbSet<LoanGuarantorLink> Guarantors => Set<LoanGuarantorLink>();
-        public DbSet<Domains.Models.Loans.CoPawnCustomer> CoPawnCustomers => Set<Domains.Models.Loans.CoPawnCustomer>();
+        public DbSet<CoPawnCustomer> CoPawnCustomers => Set<CoPawnCustomer>();
         public DbSet<AppStatus> AppStatuses => Set<AppStatus>();
         public DbSet<CurrencySpotRate> SpotRates => Set<CurrencySpotRate>();
         public DbSet<ActivitiesStatus> ActivitiesStatuses => Set<ActivitiesStatus>();

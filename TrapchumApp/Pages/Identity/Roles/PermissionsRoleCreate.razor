@@ -64,13 +64,6 @@
     [Parameter]
     public List<RolePermissionsDto>? RoleClaimsGrouped { get; set; } = [];
 
-    private readonly IRoleServiceImpl _roleService;
-
-    public PermissionsRoleCreate(IRoleServiceImpl roleService)
-    {
-        _roleService = roleService;
-    }
-
 
     private List<string> groups = [];
 
@@ -126,24 +119,11 @@
 
     private void GetPermissions()
     {
-        var rsp = _roleService.GetPermissions();
-
-        if (rsp.Any())
-        {
-            RoleClaimsGrouped = rsp.GroupBy(g => g.Group)
-                                    .Select(x => new RolePermissionsDto
-                                    {
-                                        Group = x.Key,
-                                        Permissions = x.ToList(),
-                                        GroupCheck = x.All(y => y.IsAssignedToRole)
-                                    }).ToList();
-        }
-
+        // Permissions are provided via the RoleClaimsGrouped parameter
     }
 
     protected override void OnInitialized()
     {
-        GetPermissions();
         base.OnInitialized();
     }
 

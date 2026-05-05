@@ -37,7 +37,7 @@ namespace TrapchumApp.Pages.Identity.Users
             var getRoles = await _roleService.GetRolesAsync(null);
 
 
-            roles = getRoles?.Data?.Where(x => x.Contains(AppRoles.Co)).ToList() ?? [];
+            roles = getRoles.IsError ? [] : getRoles.Value.Where(x => x.Contains(AppRoles.Co)).ToList();
 
             model.RoleName = roles.First()!;
 

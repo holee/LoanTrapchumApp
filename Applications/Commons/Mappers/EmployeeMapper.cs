@@ -1,5 +1,4 @@
-﻿using Applications.Features.Employees.Dto;
-using Domains.Models.Lists;
+﻿using Domains.Models;
 using Domains.Models.Lists.Employees;
 
 namespace Applications.Commons.Mappers
@@ -52,14 +51,21 @@ namespace Applications.Commons.Mappers
                 BranchRefId = dto.Employee?.BranchRefId,
                 DepartmentRefId = dto.Employee?.DepartmentRefId,
                 HireDate = dto.Employee?.HireDate,
-                EndDate = dto.Employee?.EndDate
+                EndDate = dto.Employee?.EndDate,
+                Contact = new EmergencyContactDtoCreate
+                {
+                    ContactName = dto.Employee?.Contact?.ContactName,
+                    ContactNumber = dto.Employee?.Contact?.ContactNumber,
+                    Description = dto.Employee?.Contact?.Description,
+                    Relationship = dto.Employee?.Contact?.Relationship
+                }
             };
 
         }
 
 
         public static EntityNames ToEmployeeCreate(this EntityEmployeeCreate dto)
-        { 
+        {
 
             return new EntityNames
             {
@@ -105,7 +111,14 @@ namespace Applications.Commons.Mappers
                     BranchRefId = dto.BranchRefId,
                     DepartmentRefId = dto.DepartmentRefId,
                     HireDate = dto.HireDate,
-                    EndDate = dto.EndDate
+                    EndDate = dto.EndDate,
+                    Contact = new EmergencyContact
+                    {
+                        ContactName = dto.Contact?.ContactName,
+                        ContactNumber = dto.Contact?.ContactNumber,
+                        Description = dto.Contact?.Description,
+                        Relationship = dto.Contact?.Relationship
+                    }
                 }
             };
 
@@ -159,7 +172,14 @@ namespace Applications.Commons.Mappers
                     BranchRefId = dto.BranchRefId,
                     DepartmentRefId = dto.DepartmentRefId,
                     HireDate = dto.HireDate,
-                    EndDate = dto.EndDate
+                    EndDate = dto.EndDate,
+                    Contact = new EmergencyContact
+                    {
+                        ContactName = dto.Contact?.ContactName,
+                        ContactNumber = dto.Contact?.ContactNumber,
+                        Description = dto.Contact?.Description,
+                        Relationship = dto.Contact?.Relationship
+                    }
                 }
             };
 

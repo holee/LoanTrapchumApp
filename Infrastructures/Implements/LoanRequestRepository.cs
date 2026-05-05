@@ -801,7 +801,6 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
         }
     }
 
-
     public async Task<IEnumerable<CoPawnCustomerDto?>> AddCoPawnCustomers2Async(int? branchId, string? requestId,
     IEnumerable<CoPawnCustomer> reqs, CancellationToken cancellation = default)
     {
@@ -1754,7 +1753,7 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
                 co.Status, 
                 co.Description
         FROM dbo.lt_entityNames e
-            LEFT JOIN dbo.tt_CoLoanRequest co ON e.Id = co.CustomerId
+            LEFT JOIN dbo.lt_CoPawnCustomers co ON e.Id = co.CustomerId
         WHERE co.Id={0} AND co.BranchId = {1} AND co.CustomerId = {2}";
 
         return await context.Database
@@ -1779,7 +1778,7 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
                 co.Status, 
                 co.Description
         FROM dbo.lt_entityNames e
-            LEFT JOIN dbo.tt_CoLoanRequest co ON e.Id = co.CustomerId
+            LEFT JOIN dbo.lt_CoPawnCustomers co ON e.Id = co.CustomerId
         WHERE co.RequestId={0} AND co.BranchId = {1}";
 
         return await context.Database
@@ -1937,7 +1936,7 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
                             co.Status, 
                             co.Description
                     FROM dbo.lt_entityNames e
-                        LEFT JOIN dbo.tt_CoLoanRequest co ON e.Id = co.CustomerId
+                        LEFT JOIN dbo.lt_CoPawnCustomers co ON e.Id = co.CustomerId
                     WHERE co.RequestId={0} AND co.BranchId = {1}";
 
         return await context.Database

@@ -37,7 +37,7 @@ public sealed class ToastService(ToastOptions options)
     /// <summary>Configuration options supplied at registration time.</summary>
     public ToastOptions Options { get; } = options;
 
-    public void ShowInfo(string title, string message, int durationMs = 5000)
+    public void ShowInfo(string message, string title = "", int durationMs = 5000)
         => Show(title, message, ToastLevel.Info, durationMs);
 
     public void ShowSuccess(string message, string title = "", int durationMs = 5000)

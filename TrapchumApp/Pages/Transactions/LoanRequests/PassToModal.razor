@@ -1,0 +1,71 @@
+﻿<EditForm Model="@model" OnValidSubmit="@HandleFormRequest">
+    <FluentValidationValidator />
+    <input type="hidden" @bind="model!.CustomerId" />
+    <input type="hidden" @bind="model!.LoanRequestId" />
+    <input type="hidden" @bind="model!.BranchId" />
+    <input type="hidden" @bind="model!.AdminFeeAmount" />
+
+    <RadzenCard Variant="Variant.Outlined" class="rz-p-2 rz-background-color-base-150">
+        <RadzenRow RowGap="1rem">
+            @* ── Amounts ── *@
+            @ReadOnlyField("request_quote", "ចំនួនស្នើរសុំ", $"{Data?.RequestAmount:N2}")
+            @ReadOnlyField("paid", "សេវារដ្ឋបាល", $"{Data?.AdminFeeAmount:N2}")
+            @* ── Details ── *@
+            @ReadOnlyField("person", "អតិថិជន", Data?.AltName, khmerFont: true)
+            @ReadOnlyField("business", "សាខា", Data?.BranchName, khmerFont: true)
+            @ReadOnlyField("upload", "ស្នើរសុំដោយ", Data?.Summiter)
+            @ReadOnlyField("verified_user", "អនុម័តដោយ", Data?.AprovedBy)
+
+            @* ── Note ── *@
+            <RadzenColumn Size="12">
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem" class="rz-mb-1">
+                    <RadzenIcon Icon="notes" Style="font-size:1rem;color:var(--rz-base-600);" />
+                    <RadzenText TextStyle="TextStyle.Overline" class="rz-mb-0 rz-color-base-600">Note</RadzenText>
+                </RadzenStack>
+                <RadzenTextArea Style="resize:none;min-height:3.5rem;" class="rz-w-100" @bind-Value="model.Memo" />
+            </RadzenColumn>
+        </RadzenRow>
+    </RadzenCard>
+
+    <RadzenStack Orientation="Orientation.Horizontal"
+                 AlignItems="AlignItems.Center"
+                 JustifyContent="JustifyContent.End"
+                 Gap="0.5rem"
+                 class="rz-mt-3">
+        <RadzenButton Text="បញ្ជូន"
+                      ButtonStyle="ButtonStyle.Success"
+                      Size="ButtonSize.Small"
+                      ButtonType="ButtonType.Submit"
+                      IsBusy="isSaving"
+                      BusyText="Saving..."
+                      Icon="@IconNames.Save" />
+        <RadzenButton Text="បិទ"
+                      ButtonStyle="ButtonStyle.Danger"
+                      Size="ButtonSize.Small"
+                      Click="@(() => DialogService.Close(false))"
+                      Disabled="isSaving"
+                      Icon="@IconNames.Cancel" />
+    </RadzenStack>
+</EditForm>
+
+@code {
+    private bool isSaving;
+
+    static RenderFragment ReadOnlyField(string icon, string label, string? value, int sizeSM = 4, bool khmerFont = false) => __builder =>
+    {
+        var style = khmerFont
+            ? "min-height:1.25rem;font-family:'Khmer OS Siemreap',kh_siemreap,sans-serif;font-weight:bold;"
+            : "min-height:1.25rem;";
+
+        <RadzenColumn Size="6" SizeSM="@sizeSM">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenIcon Icon="@icon" Style="font-size:1rem;color:var(--rz-base-600);" />
+                <RadzenText Style="font-family:'Khmer OS Siemreap',kh_siemreap,sans-serif;font-size:0.9rem;font-weight:bold;"
+                            TextStyle="TextStyle.Overline" class="rz-mb-0 rz-color-base-600">@label</RadzenText>
+            </RadzenStack>
+            <RadzenText TextStyle="TextStyle.Body2" class="rz-m-3" Style="@style">
+                @(string.IsNullOrWhiteSpace(value) ? "—" : value)
+            </RadzenText>
+        </RadzenColumn>
+    };
+}

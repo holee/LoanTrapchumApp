@@ -7,7 +7,7 @@
 
     @* ─── Body ─── *@
     <div class="msgbox-body">
-        @if (Icon != MessageBoxIcon.None)
+        @if (Icon != MsgBoxBoxIcon.None)
         {
             <RadzenIcon Icon="@IconName" Style="@IconStyle" />
         }
@@ -27,7 +27,7 @@
     [Parameter] public string Message { get; set; } = string.Empty;
     [Parameter] public string Title { get; set; } = "Message";
     [Parameter] public MsgBoxButtons Buttons { get; set; } = MsgBoxButtons.OK;
-    [Parameter] public MessageBoxIcon Icon { get; set; } = MessageBoxIcon.None;
+    [Parameter] public MsgBoxBoxIcon Icon { get; set; } = MsgBoxBoxIcon.None;
     [Parameter] public Dictionary<MsgBoxResult, MessageBoxButtonColor> ButtonColors { get; set; } = [];
 
     void Close(MsgBoxResult result) => DialogService.Close(result);
@@ -63,21 +63,21 @@
 
     string IconName => Icon switch
     {
-        MessageBoxIcon.Error       => "error",
-        MessageBoxIcon.Warning     => "warning",
-        MessageBoxIcon.Question    => "help",
-        MessageBoxIcon.Success     => "check_circle",
-        MessageBoxIcon.Information => "info",
+        MsgBoxBoxIcon.Error       => "error",
+        MsgBoxBoxIcon.Warning     => "warning",
+        MsgBoxBoxIcon.Question    => "help",
+        MsgBoxBoxIcon.Success     => "check_circle",
+        MsgBoxBoxIcon.Information => "info",
         _                          => "info"
     };
 
     string IconStyle => Icon switch
     {
-        MessageBoxIcon.Error       => "font-size:2rem;color:#d32f2f;flex-shrink:0;",
-        MessageBoxIcon.Warning     => "font-size:2rem;color:#ed6c02;flex-shrink:0;",
-        MessageBoxIcon.Question    => "font-size:2rem;color:#0288d1;flex-shrink:0;",
-        MessageBoxIcon.Success     => "font-size:2rem;color:#2e7d32;flex-shrink:0;",
-        MessageBoxIcon.Information => "font-size:2rem;color:#0288d1;flex-shrink:0;",
+        MsgBoxBoxIcon.Error       => "font-size:2rem;color:#d32f2f;flex-shrink:0;",
+        MsgBoxBoxIcon.Warning     => "font-size:2rem;color:#ed6c02;flex-shrink:0;",
+        MsgBoxBoxIcon.Question    => "font-size:2rem;color:#0288d1;flex-shrink:0;",
+        MsgBoxBoxIcon.Success     => "font-size:2rem;color:#2e7d32;flex-shrink:0;",
+        MsgBoxBoxIcon.Information => "font-size:2rem;color:#0288d1;flex-shrink:0;",
         _                          => "font-size:2rem;color:#757575;flex-shrink:0;"
     };
 

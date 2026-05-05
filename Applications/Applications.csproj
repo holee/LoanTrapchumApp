@@ -123,6 +123,7 @@
     <Folder Include="Features\CashManagements\Requests\" />
     <Folder Include="Features\CreditAgents\UseCases\" />
     <Folder Include="Features\Expenses\Mapper\" />
+    <Folder Include="Features\Identity\Roles\Service\" />
     <Folder Include="Features\Identity\Users\Interfaces\" />
     <Folder Include="Features\Identity\Users\Mappers\" />
     <Folder Include="Features\Identity\Users\Validations\" />

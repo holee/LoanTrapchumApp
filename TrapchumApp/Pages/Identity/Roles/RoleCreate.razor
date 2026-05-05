@@ -148,31 +148,6 @@
         _selectAll = RoleClaimsGrouped!.All(g => g.Permissions.All(p => p.IsSelected));
     }
 
-
-    private void GetPermissions()
-    {
-        var rsp = roleServiceImpl.GetAllPermissions();
-
-        if (rsp.Any())
-        {
-            RoleClaimsGrouped = rsp.GroupBy(g => g.Group)
-                                    .Select(x => new RolePermissionsDtoCreate
-                                    {
-                                        Group = x.Key,
-                                        Permissions = x.ToList(),
-                                        GroupCheck = x.All(y => y.IsSelected)
-                                    }).ToList();
-        }
-
-    }
-
-    protected override void OnInitialized()
-    {
-        GetPermissions();
-
-        base.OnInitialized();
-    }
-
     void OnClick(string message)
     {
         // Handle the click event for RadzenFabMenu items

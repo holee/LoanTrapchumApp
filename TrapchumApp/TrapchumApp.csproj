@@ -215,7 +215,7 @@
     <AdditionalFiles Include="Pages\Transactions\LoanRequests\CustomerRequest.razor" />
     <AdditionalFiles Include="Pages\Transactions\LoanRequests\FileUploadDialogue.razor" />
     <AdditionalFiles Include="Pages\Transactions\LoanRequests\GuarantorSearchList.razor" />
-    <AdditionalFiles Include="Pages\Transactions\LoanRequests\Index.razor" />
+    <AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanRequestIndexPage.razor" />
     <AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanCollateralLine.razor" />
     <AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanRequestAll.razor" />
     <AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanRequestCollaterals.razor" />

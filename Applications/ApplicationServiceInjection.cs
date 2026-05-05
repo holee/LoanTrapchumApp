@@ -2,6 +2,19 @@
 using Applications.Features.Collaterals.Queries.GetCollateralSubTypesById;
 using Applications.Features.Collaterals.Queries.GetCollateralTypes;
 using Applications.Features.Holidays.Dtos;
+using Applications.Features.Identity.Roles.Commands.AddRolePermissions;
+using Applications.Features.Identity.Roles.Commands.CreateRole;
+using Applications.Features.Identity.Roles.Commands.DeleteRole;
+using Applications.Features.Identity.Roles.Commands.UpdateRole;
+using Applications.Features.Identity.Roles.Queries.EditRole;
+using Applications.Features.Identity.Roles.Queries.GetAllPermissions;
+using Applications.Features.Identity.Roles.Queries.GetPermissionsByRole;
+using Applications.Features.Identity.Roles.Queries.GetRoles;
+using Applications.Features.Identity.Roles.Queries.GetRolesAsPaging;
+using Applications.Features.Identity.Roles.Requests;
+using Applications.Features.Identity.Roles.Responses;
+using Applications.Responses.Auths;
+using Applications.Responses.ViewModels.Auths;
 using Applications.Features.LoanRequests.Command.AddCoPawnCustomer;
 using Applications.Features.LoanRequests.Command.AddCoPawnCustomers;
 using Applications.Features.LoanRequests.Command.DeleteCoPawnCustomer;
@@ -216,7 +229,6 @@ public static class ApplicationServiceInjection
         services.AddScoped<IOtherNameServiceImpl, OtherNameService>();
         services.AddScoped<IPrintPdfServiceImpl, PrintPdfServiceImpl>();
         services.AddScoped<IGuarantorServiceImpl, GuarantorService>();
-        services.AddScoped<IRoleServiceImpl, RoleService>();
         services.AddScoped<ISpotRateServiceImpl, SpotRateService>();
         services.AddScoped<ISettingServiceImpl, SettingService>();
         services.AddScoped<IVendorServiceImpl, VendorService>();
@@ -440,6 +452,19 @@ public static class ApplicationServiceInjection
         // OtherName Queries
         services.AddScoped<IRequestHandler<GetOtherNameByIdQuery, ErrorOr<EntityNames>>, GetOtherNameByIdQueryHandler>();
         services.AddScoped<IRequestHandler<GetOtherNamesAsPagingQuery, Pager<VOtherNames>>, GetOtherNamesAsPagingQueryHandler>();
+
+        // Role Commands
+        services.AddScoped<IRequestHandler<CreateRoleCommand, ErrorOr<RoleClaims>>, CreateRoleCommandHandler>();
+        services.AddScoped<IRequestHandler<UpdateRoleCommand, ErrorOr<string>>, UpdateRoleCommandHandler>();
+        services.AddScoped<IRequestHandler<DeleteRoleCommand, ErrorOr<Deleted>>, DeleteRoleCommandHandler>();
+        services.AddScoped<IRequestHandler<AddRolePermissionsCommand, ErrorOr<Success>>, AddRolePermissionsCommandHandler>();
+
+        // Role Queries
+        services.AddScoped<IRequestHandler<GetRolesQuery, IEnumerable<string>>, GetRolesQueryHandler>();
+        services.AddScoped<IRequestHandler<GetRolesAsPagingQuery, Pager<RoleDto>>, GetRolesAsPagingQueryHandler>();
+        services.AddScoped<IRequestHandler<EditRoleQuery, ErrorOr<RoleDtoUpdate>>, EditRoleQueryHandler>();
+        services.AddScoped<IRequestHandler<GetPermissionsByRoleQuery, ErrorOr<RolePermissions>>, GetPermissionsByRoleQueryHandler>();
+        services.AddScoped<IRequestHandler<GetAllPermissionsQuery, List<PermissionsDtoCreate>>, GetAllPermissionsQueryHandler>();
 
         return services;
 

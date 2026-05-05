@@ -36,6 +36,14 @@ public partial class Policies
                     .Build();
     }
 
+    public static AuthorizationPolicy IsBranchManagerOnly()
+    {
+        return new AuthorizationPolicyBuilder()
+                    .RequireAuthenticatedUser()
+                    .RequireRole(AppRoles.Bm, AppRoles.Rbm)
+                    .Build();
+    }
+
     public static AuthorizationPolicy IsCreditOfficerOnly()
     {
         return new AuthorizationPolicyBuilder()
@@ -48,7 +56,7 @@ public partial class Policies
     {
         return new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
-                    .RequireRole(AppRoles.Manager, AppRoles.ChiefBm, AppRoles.Dbm, AppRoles.Rbm, AppRoles.Bm)
+                    .RequireRole(AppRoles.Manager)
                     .Build();
     }
 

@@ -1,0 +1,42 @@
+@using Applications.Features.AdditionalInformations.Dto
+@using Applications.Features.Customers.Dto
+@using Applications.Features.Documents.Dto
+@using System.Text.Json
+<RadzenFieldset AllowCollapse="true" Collapsed="false" class="rz-mb-2">
+    <HeaderTemplate>
+        <RadzenIcon Icon="family_restroom" /><strong>ទំនាក់ទំនងបន្ទាន់</strong>
+    </HeaderTemplate>
+    <ChildContent>
+        <RadzenRow AlignItems="AlignItems.Center" Gap="0.5rem">
+            <RadzenColumn Size="12" SizeMD="4">
+                <RadzenFormField Text="ឈ្មោះទំនាក់ទំនង" class="rz-w-100">
+                    <RadzenTextBox @bind-Value="model.ContactName"
+                                   class="rz-w-100"
+                                   Placeholder="បញ្ចូលឈ្មោះ..." />
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="4">
+                <RadzenFormField Text="លេខទំនាក់ទំនង" class="rz-w-100">
+                    <RadzenTextBox @bind-Value="model.ContactNumber" class="rz-w-100" />
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="4">
+                <RadzenFormField Text="ត្រូវជា" class="rz-w-100">
+                    <RadzenTextBox @bind-Value="model.Relationship" class="rz-w-100" />
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="12" SizeSM="12">
+                <RadzenFormField Text="កំណត់ចាំណាំផ្សេងៗ" class="rz-w-100">
+                    <RadzenTextArea @bind-Value="model.Description"
+                                   class="rz-w-100"
+                                   Style="resize:none;"
+                                   Placeholder="បញ្ចូលកំណត់ចាំណាំផ្សេងៗ..." />
+                </RadzenFormField>
+            </RadzenColumn>       
+        </RadzenRow>
+    </ChildContent>
+</RadzenFieldset>
+
+@code {
+    [Parameter] public EmergencyContactDtoCreate model { get; set; } = new();
+}

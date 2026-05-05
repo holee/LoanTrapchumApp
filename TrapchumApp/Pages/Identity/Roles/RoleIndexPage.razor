@@ -72,34 +72,27 @@
         </RadzenTabsItem>
     </Tabs>
 </RadzenTabs>
-
-@*    //string returnUrl ="";
-
-        //returnUrl = _navigationManager.ToBaseRelativePath(_navigationManager.Uri);
-        //Console.WriteLine(returnUrl);
-        //Console.WriteLine(index);
-
-    // Popup popup;
-    // string selectedTab = "home";
-    // async Task OnOpen()
-    // {
-    //     //await _js.InvokeVoidAsync("eval", "setTimeout(function(){ document.getElementById('search').focus(); }, 200)");
-    // } *@
-
 @code {
     void ShowContextMenu(MouseEventArgs args, string userId)
     {
         ContextMenuService.Open(args, ds =>
     @<RadzenMenu Style="font-size:0.8rem;">
-    <RadzenMenuItem Icon="manage_accounts"
-                    Click="@(()=>ManageRolePermissions(userId))"
-                    Text="Manage Role"
-                    Value="@userId" />
-    <RadzenMenuItem Icon="@IconNames.Edit"
-                    Click="@(()=>UpdateRole(userId))"
-                    Text="Edit Role"
-                    Value="@userId" />
-</RadzenMenu>
+        <RadzenMenuItem Icon="manage_accounts"
+                        Click="@(()=>ManageRolePermissions(userId))"
+                        Text="Manage Role"
+                        Value="@userId" />
+        <RadzenMenuItem Icon="@IconNames.Edit"
+                        Click="@(()=>UpdateRole(userId))"
+                        Text="Edit Role"
+                        Value="@userId" />
+        @if (_canDeleteRole)
+        {
+            <RadzenMenuItem Icon="delete"
+                            Click="@(()=>DeleteRole(userId))"
+                            Text="Delete Role"
+                            Value="@userId" />
+        }
+    </RadzenMenu>
 
     );
     }
@@ -126,8 +119,10 @@
     {
         var options = new DialogOptions
         {
-            ShowClose = false,
-            Draggable = true
+            Width = "100vw",
+            ShowClose = true,
+            Resizable = false,
+            Draggable = false
         };
         var parameters = new Dictionary<string, object?>
         {
@@ -148,7 +143,7 @@
     {
         if (args.Data is null) return;
 
-        ContextMenuService.Open(args, new List<ContextMenuItem>
+        var items = new List<ContextMenuItem>
         {
             new ContextMenuItem
             {
@@ -162,7 +157,19 @@
                 Icon = "edit",
                 Value = "2"
             }
-        }, (e) =>
+        };
+
+        if (_canDeleteRole)
+        {
+            items.Add(new ContextMenuItem
+            {
+                Text = "Delete Role",
+                Icon = "delete",
+                Value = "3"
+            });
+        }
+
+        ContextMenuService.Open(args, items, (e) =>
         {
             ContextMenuService.Close();
             DoRoleAction(e, args);
@@ -183,6 +190,11 @@
             if (value == 2)
             {
                 _ = UpdateRole(args.Data.Id);
+                return;
+            }
+            if (value == 3)
+            {
+                _ = DeleteRole(args.Data.Id);
                 return;
             }
         }

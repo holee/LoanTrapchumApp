@@ -6,7 +6,7 @@ public sealed class MessageBoxService(DialogService dialogService)
         string message,
         string title = "Message",
         MsgBoxButtons buttons = MsgBoxButtons.OK,
-        MessageBoxIcon icon = MessageBoxIcon.None,
+        MsgBoxBoxIcon icon = MsgBoxBoxIcon.None,
         MessageBoxOptions? options = null)
     {
         options ??= new();
@@ -37,20 +37,20 @@ public sealed class MessageBoxService(DialogService dialogService)
     }
 
     public Task<MsgBoxResult> InfoAsync(string message, string title = "Information", MessageBoxOptions? options = null)
-        => ShowAsync(message, title, MsgBoxButtons.OK, MessageBoxIcon.Information, options);
+        => ShowAsync(message, title, MsgBoxButtons.OK, MsgBoxBoxIcon.Information, options);
 
     public Task<MsgBoxResult> WarningAsync(string message, string title = "Warning", MessageBoxOptions? options = null)
-        => ShowAsync(message, title, MsgBoxButtons.OK, MessageBoxIcon.Warning, options);
+        => ShowAsync(message, title, MsgBoxButtons.OK, MsgBoxBoxIcon.Warning, options);
 
     public Task<MsgBoxResult> ErrorAsync(string message, string title = "Error", MessageBoxOptions? options = null)
-        => ShowAsync(message, title, MsgBoxButtons.OK, MessageBoxIcon.Error, options);
+        => ShowAsync(message, title, MsgBoxButtons.OK, MsgBoxBoxIcon.Error, options);
 
     public Task<MsgBoxResult> SuccessAsync(string message, string title = "Success", MessageBoxOptions? options = null)
-        => ShowAsync(message, title, MsgBoxButtons.OK, MessageBoxIcon.Success, options);
+        => ShowAsync(message, title, MsgBoxButtons.OK, MsgBoxBoxIcon.Success, options);
 
     public Task<MsgBoxResult> ConfirmAsync(string message, string title = "Confirm", MessageBoxOptions? options = null)
-        => ShowAsync(message, title, MsgBoxButtons.YesNo, MessageBoxIcon.Question, options);
+        => ShowAsync(message, title, MsgBoxButtons.YesNo, MsgBoxBoxIcon.Question, options);
 
     public Task<MsgBoxResult> ConfirmCancelAsync(string message, string title = "Confirm", MessageBoxOptions? options = null)
-        => ShowAsync(message, title, MsgBoxButtons.YesNoCancel, MessageBoxIcon.Question, options);
+        => ShowAsync(message, title, MsgBoxButtons.YesNoCancel, MsgBoxBoxIcon.Question, options);
 }

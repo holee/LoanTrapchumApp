@@ -1,7 +1,8 @@
-﻿using Applications.Features.Identity.Roles.Requests;
-using Applications.Interfaces.Identity;
+﻿using Applications.Features.Identity.Roles.Commands.CreateRole;
+using Applications.Features.Identity.Roles.Queries.GetAllPermissions;
+using Applications.Features.Identity.Roles.Requests;
 using Applications.Responses.ViewModels.Auths;
-using Applications.Services.Identity;
+using Applications.Utils;
 
 namespace TrapchumApp.Pages.Identity.Roles;
 
@@ -14,13 +15,26 @@ public partial class RoleCreate
 
     private bool visible = false;
 
-    private readonly IRoleService roleService;
+    private readonly IMediator _mediator;
 
-    private readonly IRoleServiceImpl roleServiceImpl;
-    public RoleCreate(IRoleService roleService, IRoleServiceImpl roleServiceImpl)
+    public RoleCreate(IMediator mediator)
     {
-        this.roleService = roleService;
-        this.roleServiceImpl = roleServiceImpl;
+        _mediator = mediator;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var permissions = await _mediator.Send(new GetAllPermissionsQuery());
+
+        RoleClaimsGrouped = permissions
+            .GroupBy(p => p.Group)
+            .Select(g => new RolePermissionsDtoCreate
+            {
+                Group = g.Key,
+                Permissions = g.ToList()
+            }).ToList();
+
+        await base.OnInitializedAsync();
     }
 
     protected async Task CreateRole()
@@ -43,12 +57,15 @@ public partial class RoleCreate
 
         model.Permissions = permissions ?? [];
 
-        var result = await roleService.CreateAsync(model);
+        var result = await _mediator.Send(new CreateRoleCommand(model));
 
-        if (!result.IsSuccess)
+        if (result.IsError)
         {
-            NotificationService.Notify(NotificationSeverity.Success, "New Role was added.");
+            NotificationService.Notify(NotificationSeverity.Error, result.FirstError.Description);
+            return;
         }
+
+        NotificationService.Notify(NotificationSeverity.Success, "New Role was added.");
 
     }
 

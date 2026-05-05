@@ -14,31 +14,80 @@
 </head>
 
 <body>
+    <div id="app-loading">
+        <div class="app-loading-card">
+            <div class="app-loading-logo">
+                <img src="/assets/logo/tch_Logo.ico" alt="Logo" />
+            </div>
+            <div class="app-loading-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <p class="app-loading-text">Loading, please wait…</p>
+        </div>
+    </div>
     <Routes @rendermode="@PageRenderMode" />
     <script src="@Assets["_framework/blazor.web.js"]"></script>
     <script src="@Assets["_content/Radzen.Blazor/Radzen.Blazor.js?v=@(typeof(Radzen.Colors).Assembly.GetName().Version)"]"></script>
     <script src="@Assets["assets/js/printer.js"]"></script>
     <script src="@Assets["assets/js/toggle.js"]"></script>
     <script src="@Assets["assets/js/dropdownoutsideclick.js"]"></script>
+
     <script>
-       // document.addEventListener('visibilitychange', () => {
-       //  if (document.hidden) {
-       //         console.debug("Document hidden - pausing Blazor");
-       //         Blazor.pauseCircuit();
-       //     } else {
-       //         console.debug("Document visible - resuming Blazor");
-       //         Blazor.resumeCircuit();
-       //     }
-       // });
+        // Mark logout navigations so the loading overlay is suppressed
+        document.addEventListener("submit", (e) => {
+            const form = e.target;
+            if (form && form.action && form.action.includes("Account/Logout")) {
+                sessionStorage.setItem("skipAppLoading", "1");
+            }
+        });
+
+        window.addEventListener("DOMContentLoaded", () => {
+            const loading = document.getElementById("app-loading");
+
+            // Skip overlay entirely when coming from a logout
+            if (sessionStorage.getItem("skipAppLoading") === "1") {
+                sessionStorage.removeItem("skipAppLoading");
+                loading?.remove();
+                return;
+            }
+
+            const removeLoading = () => {
+                if (loading) {
+                    loading.classList.add("app-loading-fade-out");
+                    setTimeout(() => loading.remove(), 2000);
+                }
+            };
+
+            if (document.querySelector("main")) {
+                removeLoading();
+                return;
+            }
+
+            const observer = new MutationObserver(() => {
+                if (document.querySelector("main")) {
+                    removeLoading();
+                    observer.disconnect();
+                }
+            });
+
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+
+            // Fallback: remove loading after 5 seconds regardless
+            setTimeout(removeLoading, 5000);
+        });
     </script>
     <script>
         window.setCaretToStart = () => {
             setTimeout(() => {
-                const input = document.querySelector('.rz-numeric-input input');
+            const input = document.querySelector('.rz-numeric-input input');
                 if (input) {
                     input.focus();
                     input.setSelectionRange(0, 0);
-                    console.log("select");
                 }
             }, 0.50);
         };
@@ -57,5 +106,5 @@
        ? null
        : new InteractiveServerRenderMode(false);
 
-    private IComponentRenderMode? PageRenderMode => HttpContext.AcceptsInteractiveRouting() ? new InteractiveServerRenderMode(prerender:false) : null;
+    private IComponentRenderMode? PageRenderMode => HttpContext.AcceptsInteractiveRouting() ? new InteractiveServerRenderMode(prerender: false) : null;
 }

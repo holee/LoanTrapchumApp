@@ -14,8 +14,11 @@ public sealed class EntityCustomerCreate : BaseEntityNamesCreate
     public DateTime? SpouseDateOfBirth { get; set; }
     public string? SpouseNationality { get; set; }
     public string? SpousePassport { get; set; }
+    public string? SpouseIdCard { get; set; }
     public string? SpousePhoneNo { get; set; }
     public string? SpouseOccupation { get; set; }
     public string? Photo { get; set; } = "/assets/profiles/profile.png";
     public string? SpouseGender { get; set; } = string.Empty;
+
+    public EmergencyContactDtoCreate EmergencyContact { get; set; } = new();
 }

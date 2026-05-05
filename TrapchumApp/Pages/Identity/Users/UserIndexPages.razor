@@ -15,6 +15,11 @@
                                               Size="ButtonSize.Small"
                                               Click="AddUserAccount"
                                               Text="Add New User" />
+                                <RadzenButton Icon="@IconNames.PersonAdd"
+                                              ButtonStyle="ButtonStyle.Secondary"
+                                              Size="ButtonSize.Small"
+                                              Click="@AddManagerAccount"
+                                              Text="Add New User" />
                             </Authorized>
                         </AuthorizeView>
                     </LeftChildren>
@@ -195,16 +200,30 @@
     async Task AddUserAccount()
     {
 
-        var options = new DialogOptions
-        {
-            ContentCssClass = "rz-mt-3 rz-background-color-base-100"
-        };
+        var options = new DialogOptions{};
 
         var parameters = new Dictionary<string, object?>
         {
             {"BranchId",selectedBranchId}
         };
         bool? result = await DialogService.OpenAsync<UserCreateModal>("New User", parameters, options: options);
+
+        if (result is not null && result == true)
+        {
+            await LoadAllUsers(filter: filterText);
+        }
+    }
+
+
+    async Task AddManagerAccount() 
+    {
+
+        var options = new DialogOptions
+        {
+            
+        };
+
+        bool? result = await DialogService.OpenAsync<CreateNewUser>("New User",options: options);
 
         if (result is not null && result == true)
         {

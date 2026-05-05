@@ -153,80 +153,81 @@ public partial class UserIndexPages
 
     }
 
-    protected async void SubmitForm()
-    {
-        try
-        {
-            form.EditContext?.Validate();
+    //protected async void SubmitForm()
+    //{
+    //    try
+    //    {
+    //        form.EditContext?.Validate();
 
-            var result = await _authService.CreateUserAsync(model);
+    //        var result = await _authService.CreateUserAsync(model);
 
-            if (result.IsSuccess)
-            {
-                IsSuccess = true;
-                NotificationService.Notify(NotificationSeverity.Success, "New user was created.");
-                model = new();
-                StateHasChanged();
-            }
-            else
-            {
-                NotificationService.Notify(NotificationSeverity.Error, result.ErrMessage);
-            }
+    //        if (result.IsSuccess)
+    //        {
+    //            IsSuccess = true;
+    //            NotificationService.Notify(NotificationSeverity.Success, "New user was created.");
+    //            model = new();
+    //            StateHasChanged();
+    //        }
+    //        else
+    //        {
+    //            NotificationService.Notify(NotificationSeverity.Error, result.ErrMessage);
+    //        }
 
-        }
-        catch (Exception ex)
-        {
-            IsSuccess = false;
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        IsSuccess = false;
 
-            NotificationService.Notify(NotificationSeverity.Error, ex.Message);
-        }
+    //        NotificationService.Notify(NotificationSeverity.Error, ex.Message);
+    //    }
 
 
-    }
+    //}
 
-    protected async Task SelectBranchChanged()
-    {
-        if (model.BranchRefId > 0)
-        {
+    //protected async Task SelectBranchChanged()
+    //{
+    //    if (model.BranchRefId > 0)
+    //    {
 
-            var query = new GetEmployeeAsPagingQuery(model.BranchRefId, string.Empty, new QueryParam(0, 15));
+    //        var query = new GetEmployeeAsPagingQuery(model.BranchRefId, string.Empty, new QueryParam(0, 15));
 
-            var rsp = await mediator.Send(query);  //_empService.GetEmployeesAsync(string.Empty, model.BranchRefId);
+    //        var rsp = await mediator.Send(query);  //_empService.GetEmployeesAsync(string.Empty, model.BranchRefId);
 
-            bEmployees = rsp.Items;
+    //        bEmployees = rsp.Items;
 
-        }
-        else
-        {
-            model.BranchRefId = 0;
-        }
-        model.Username = "";
-        model.Email = "";
-        model.EmployeeId = string.Empty;
-    }
-    protected void SelectedEmployeeChanged()
-    {
+    //    }
+    //    else
+    //    {
+    //        model.BranchRefId = 0;
+    //    }
+    //    model.Username = "";
+    //    model.Email = "";
+    //    model.EmployeeId = string.Empty;
+    //}
+    //protected void SelectedEmployeeChanged()
+    //{
 
-        var selectedEmployee = bEmployees.FirstOrDefault(x => x.EmployeeId == model.EmployeeId);
+    //    var selectedEmployee = bEmployees.FirstOrDefault(x => x.EmployeeId == model.EmployeeId);
 
-        if (selectedEmployee is not null)
-        {
-            var username = selectedEmployee.FullName!.Split(" ");
+    //    if (selectedEmployee is not null)
+    //    {
+    //        var username = selectedEmployee.FullName!.Split(" ");
 
-            model.Username = $"{username[0]}{username[1]}".ToLower();
+    //        model.Username = $"{username[0]}{username[1]}".ToLower();
 
-            model.Email = $"{username[0]}{username[1]}@gmail.com".ToLower();
+    //        model.Email = $"{username[0]}{username[1]}@gmail.com".ToLower();
 
-            model.EmployeeId = selectedEmployee.EmployeeId;
-        }
-        else
-        {
-            model.Username = "";
-            model.Email = "";
-            model.EmployeeId = string.Empty;
-        }
-        Console.WriteLine(selectedEmployee!.EmployeeId);
-    }
+    //        model.EmployeeId = selectedEmployee.EmployeeId;
+    //    }
+    //    else
+    //    {
+    //        model.Username = "";
+    //        model.Email = "";
+    //        model.EmployeeId = string.Empty;
+    //    }
+    //    Console.WriteLine(selectedEmployee!.EmployeeId);
+    //}
+   
     private async Task SelectedBranchChanged(object? args)
     {
         pageIndex = 0;

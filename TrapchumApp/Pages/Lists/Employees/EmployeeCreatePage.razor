@@ -1,8 +1,9 @@
 ﻿@page "/App/Employees/CreateNewUser"
 <PageTitle>New Employee</PageTitle>
 <EditForm Model="@model" OnValidSubmit="@FormValidSubmit">
-    <FluentValidationValidator DisableAssemblyScanning="false" />
+    <Blazilla.FluentValidator />
     <EmployeeComp model="model" />
+
     <RadzenStack Orientation="Orientation.Horizontal"
                  JustifyContent="JustifyContent.End"
                  class="rz-mt-2"

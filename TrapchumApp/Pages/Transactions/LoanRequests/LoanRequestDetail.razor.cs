@@ -239,8 +239,15 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
 
         async Task SaveLoanRequestManager()
         {
-            if (!await ConfirmActionAsync("Do you want to save this request?"))
+
+            var dia = await MsgBox.ShowAsync("Do you want to save this request?", "Loan Request", MsgBoxButtons.YesNo, MsgBoxBoxIcon.Question);
+
+            if(dia == MsgBoxResult.No)
+            {
+                _toastService.ShowInfo("Request was cancelled.");
+
                 return;
+            }
 
             var saveReq = new SaveLoanRequestDtoCreate(BranchId, CustomerId, LoanRequestId, memo, RequestStatus.Requested);
 
@@ -250,7 +257,7 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
 
             if (rsp.IsSuccess())
             {
-                NotificationService.Notify(NotificationSeverity.Success, rsp.Value.Message!);
+                _toastService.ShowSuccess(rsp.Value.Message!);
 
                 await RefreshDataAsync();
             }
@@ -284,6 +291,34 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
                 StateHasChanged();
             }
         }
+
+
+
+
+        async Task SendLoanRequest() 
+        {
+            var options = new DialogOptions
+            {
+            };
+            var param = new Dictionary<string, object?>
+            {
+                { "LoanRequestId", LoanRequestId },
+                { "BranchId", BranchId },
+                { "CustomerId", CustomerId }
+            };
+
+            bool dialogueResult = await DialogService.OpenAsync<PassToModal>("Confirm", param!, options);
+
+            if (dialogueResult && user is not null)
+            {
+                await GetLoanRequestDetails(user, true);
+
+                disableTextbox = true;
+
+                StateHasChanged();
+            }
+        }
+
 
 
         private async Task RefreshDataAsync()

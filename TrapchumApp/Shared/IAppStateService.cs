@@ -14,4 +14,5 @@ public interface IAppStateService
     bool CanOpenBranch { get; protected set; }
     bool CanRecieveMultiple { get; set; }
     bool IsSameUser { get; protected set; }
+    bool IsBranchManager { get; set; }
 }

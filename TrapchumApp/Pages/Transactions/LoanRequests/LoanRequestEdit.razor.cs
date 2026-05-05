@@ -359,7 +359,6 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
 
                 CoCustomers = data.CoPawnRequests.ToList();
 
-
                 model = data!.ToLoanRequestDtoCreate();
 
 
@@ -540,7 +539,7 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
         {
             if (arg is null) return;
 
-            var dia = await MsgBox.ShowAsync("Do you want to remove this co-customer?", "Remove Co-Customer", MsgBoxButtons.YesNo, MessageBoxIcon.Question);
+            var dia = await MsgBox.ShowAsync("Do you want to remove this co-customer?", "Remove Co-Customer", MsgBoxButtons.YesNo, MsgBoxBoxIcon.Question);
 
             if (dia == MsgBoxResult.No) return;
 

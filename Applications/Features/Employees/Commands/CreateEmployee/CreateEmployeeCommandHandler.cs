@@ -1,7 +1,6 @@
 ﻿using Applications.Interfaces.Employees;
 using ErrorOr;
 using Applications.Commons.Mappers;
-using Applications.Responses.ViewModels.Employees;
 namespace Applications.Features.Employees.Commands.CreateEmployee;
 
 public sealed class CreateEmployeeCommandHandler(IEmployeeService empService) : IRequestHandler<CreateEmployeeCommand, ErrorOr<VEmployeeList>>

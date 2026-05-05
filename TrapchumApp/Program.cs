@@ -82,8 +82,6 @@ else
     app.UseHsts();
 }
 
-
-//await app.SeedSystemData();
 app.UseHttpsRedirection();
 app.UseAntiforgery();
 app.UseStaticFiles();

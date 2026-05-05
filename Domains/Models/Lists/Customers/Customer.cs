@@ -17,6 +17,7 @@ public sealed class Customer
     public DateTime? SpouseDateOfBirth { get; set; }
     public string? SpouseNationality { get; set; }
     public string? SpousePassport { get; set; }
+    public string? SpouseIdCard { get; set; } 
     public string? SpousePhoneNo { get; set; }
     public string? SpouseOccupation { get; set; }
     public string? Occupation { get; set; } 
@@ -24,6 +25,7 @@ public sealed class Customer
     public bool? IsLoanActive { get; set; } = false;
     public Collateral? Collateral { get; set; }
     public EntityNames? EntityNames { get; set; }
+    public EmergencyContact? EmergencyContact { get; set; } = new();
     public ICollection<CustomerExpense> CustomerExpenses { get; set; } = [];
     public ICollection<CustomerIncome> CustomerIncomes { get; set; } = [];
     public ICollection<LoanRequest> LoanRequests { get; set; } = [];

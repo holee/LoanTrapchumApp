@@ -1,4 +1,5 @@
 ﻿@page "/App/Loans/{LoanRequestId}/Requests/{BranchId:int}/Branches/{CustomerId}/Details"
+@using Domains.Enumerations
 @using TrapchumApp.Pages.Lists.Customers
 @attribute [MustHasPermission(Modules.LoanRequest, Actions.Read)]
 @attribute [StreamRendering]
@@ -163,11 +164,25 @@ else if (data is not null)
                                   Size="@Styles.DefaultSize"
                                   Click="SaveLoanRequestManager"
                                   Text="រក្សាទុក" />
-                    <RadzenButton ButtonStyle="ButtonStyle.Success"
-                                  Icon="@IconNames.RequestQuote"
-                                  Size="@Styles.DefaultSize"
-                                  Click="ApproveLoanRequest"
-                                  Text="អនុម័ត" />
+
+                    @if ((data.CurrencyId == (int)CurrencyEnum.KHR && data.RequestAmount < MaxRequestAmountKHR) ||
+                          (data.CurrencyId == (int)CurrencyEnum.USD && data.RequestAmount < MaxRequestAmountUSD))
+                    {
+                        <RadzenButton ButtonStyle="ButtonStyle.Success"
+                                      Icon="@IconNames.RequestQuote"
+                                      Size="@Styles.DefaultSize"
+                                      Click="ApproveLoanRequest"
+                                      Text="អនុម័ត" />
+                    }
+                    else
+                    {
+                        <RadzenButton ButtonStyle="ButtonStyle.Success"
+                                      Icon="@IconNames.RequestQuote"
+                                      Size="@Styles.DefaultSize"
+                                      Click="SendLoanRequest"
+                                      Text="បញ្ជូនបន្ត" />
+                    }
+                   
                     <RadzenButton ButtonStyle="ButtonStyle.Secondary"
                                   Icon="@IconNames.Block"
                                   Size="@Styles.DefaultSize"
@@ -202,4 +217,8 @@ else if (data is not null)
 
         <BackButton Href="@_navService.PreviousUrl" />
     </RadzenStack>
+}
+@code {
+    private const decimal MaxRequestAmountKHR = 1_000_000M;
+    private const decimal MaxRequestAmountUSD = 250M;
 }

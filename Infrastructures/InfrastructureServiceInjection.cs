@@ -51,13 +51,13 @@ public static class InfrastructureServiceInjection
         services.AddScoped<Seeds.DatabaseSeeder>();
 
 
-        //services.AddAuthentication(options =>
-        //{
-        //    options.DefaultScheme = IdentityConstants.ApplicationScheme;
-        //    options.DefaultSignInScheme = IdentityConstants.ApplicationScheme;
-        //}).AddIdentityCookies();
+        services.AddAuthentication(options =>
+        {
+            options.DefaultScheme = IdentityConstants.ApplicationScheme;
+            options.DefaultSignInScheme = IdentityConstants.ApplicationScheme;
+        }).AddIdentityCookies();
 
-        services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
+        services.AddIdentityCore<ApplicationUser>(options =>
         {
             options.Password.RequireDigit = false;
             options.Password.RequireLowercase = false;
@@ -65,10 +65,10 @@ public static class InfrastructureServiceInjection
             options.Password.RequireUppercase = false;
             options.Password.RequiredLength = 5;
         })
-            //.AddRoles<ApplicationRole>()
+            .AddRoles<ApplicationRole>()
             .AddEntityFrameworkStores<UserDataContext>()
-            //.AddRoleManager<RoleManager<ApplicationRole>>()
-            //.AddSignInManager<SignInManager<ApplicationUser>>()
+            .AddRoleManager<RoleManager<ApplicationRole>>()
+            .AddSignInManager<SignInManager<ApplicationUser>>()
             .AddDefaultTokenProviders();
 
         services.ConfigureApplicationCookie(options =>

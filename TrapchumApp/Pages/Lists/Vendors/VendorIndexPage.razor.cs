@@ -207,7 +207,7 @@ public partial class VendorIndexPage
     {
         ContextMenuService.Close();
 
-        var dia = await MsgBox.ShowAsync("Vendor deleted will not be able to recover, would you like to continue?", "Confirm", MsgBoxButtons.YesNo, MessageBoxIcon.Question);
+        var dia = await MsgBox.ShowAsync("Vendor deleted will not be able to recover, would you like to continue?", "Confirm", MsgBoxButtons.YesNo, MsgBoxBoxIcon.Question);
 
         if (dia == MsgBoxResult.No) return;
 
@@ -226,7 +226,7 @@ public partial class VendorIndexPage
     protected async Task DeactiveOrActive(bool arg, string vendorId)
     {
 
-        var dia = await MsgBox.ShowAsync($"Do you want to change vendor ID #{vendorId} status?", "Confirm", MsgBoxButtons.YesNo, MessageBoxIcon.Question);
+        var dia = await MsgBox.ShowAsync($"Do you want to change vendor ID #{vendorId} status?", "Confirm", MsgBoxButtons.YesNo, MsgBoxBoxIcon.Question);
 
         if (dia == MsgBoxResult.No) return;
 

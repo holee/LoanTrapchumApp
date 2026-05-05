@@ -1,4 +1,5 @@
-﻿using Domains.Models.Collaterals;
+﻿using Domains.Models;
+using Domains.Models.Collaterals;
 using Domains.Models.Lists.Customers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -29,14 +30,20 @@ public class CustomerConfiguration : IEntityTypeConfiguration<Customer>
                  .WithOne(x => x.Customer)
                     .HasForeignKey<Collateral>(x => x.CollateralId);
 
+        builder.HasOne(x => x.EmergencyContact)
+                 .WithOne()
+                    .HasForeignKey<EmergencyContact>(x => x.ContactId)
+                    .IsRequired(false);
+
         builder.HasMany(x => x.CustomerExpenses)
                .WithOne(x => x.Customer)
-                  .HasForeignKey(x => x.CustomerRefId);
+                  .HasForeignKey(x => x.CustomerRefId)
+                  .IsRequired(false);
 
         builder.HasMany(x => x.CustomerIncomes)
                .WithOne(x => x.Customer)
-                  .HasForeignKey(x => x.CustomerRefId);
-
+                  .HasForeignKey(x => x.CustomerRefId)
+                  .IsRequired(false);
 
         builder.HasMany(x => x.LoanRequests)
             .WithOne(x => x.Customer)
@@ -47,5 +54,9 @@ public class CustomerConfiguration : IEntityTypeConfiguration<Customer>
         builder.HasMany(x => x.LoanDisbursments)
             .WithOne()
             .HasForeignKey(fk => fk.CustomerRefId);
+
+
+
+        builder.Navigation(x => x.EmergencyContact).AutoInclude();
     }
 }

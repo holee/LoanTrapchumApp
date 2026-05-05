@@ -1,18 +1,20 @@
-﻿using Applications.Features.Identity.Users;
-using Applications.Interfaces.Identity;
+﻿using Applications.Features.Identity.Roles.Commands.AddRolePermissions;
+using Applications.Features.Identity.Roles.Queries.GetPermissionsByRole;
+using Applications.Features.Identity.Users;
 using Applications.Responses.Auths;
 using Applications.Responses.ViewModels.Auths;
+using Applications.Utils;
 
 namespace TrapchumApp.Pages.Identity.Roles;
 
 public partial class ManageRolePermission
 {
 
-    private readonly IRoleService _roleService;
+    private readonly IMediator _mediator;
 
-    public ManageRolePermission(IRoleService roleService)
+    public ManageRolePermission(IMediator mediator)
     {
-        _roleService = roleService;
+        _mediator = mediator;
     }
 
     [Parameter, EditorRequired] public string Id { get; set; } = string.Empty;
@@ -42,33 +44,32 @@ public partial class ManageRolePermission
     private async Task GetPermissions()
     {
        Tracker.Show();
-        var rsp = await _roleService.GetPermissionsByRoleByIdAsync(Id);
+        var rsp = await _mediator.Send(new GetPermissionsByRoleQuery(Id));
 
-        if (rsp.IsSuccess && rsp.Data is not null)
+        if (rsp.IsError)
         {
-            rolePermissions = rsp.Data;
-
-            _roleClaimsGrouped = rolePermissions.Permissions?
-                                    .GroupBy(g => g.Group)
-                                    .Select(x => new RolePermissionsDto
-                                    {
-                                        Group = x.Key,
-                                        Permissions = x.ToList(),
-                                        GroupCheck = x.All(y => y.IsAssignedToRole)
-                                    }).ToList();
-            UpdateGlobalSelectAll();
-
-            _originalPermissionStates = rolePermissions.Permissions!
-                .ToDictionary(p => $"{p.Group}_{p.ClaimValue}", p => p.IsAssignedToRole);
-
-            groups = _roleClaimsGrouped?.Select(x => x.Group!).ToList() ?? [];
-
-            groups.Add("All");
+            NotificationService.Notify(NotificationSeverity.Error, rsp.FirstError.Description);
+            return;
         }
-        else
-        {
-            NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
-        }
+
+        rolePermissions = rsp.Value;
+
+        _roleClaimsGrouped = rolePermissions.Permissions?
+                                .GroupBy(g => g.Group)
+                                .Select(x => new RolePermissionsDto
+                                {
+                                    Group = x.Key,
+                                    Permissions = x.ToList(),
+                                    GroupCheck = x.All(y => y.IsAssignedToRole)
+                                }).ToList();
+        UpdateGlobalSelectAll();
+
+        _originalPermissionStates = rolePermissions.Permissions!
+            .ToDictionary(p => $"{p.Group}_{p.ClaimValue}", p => p.IsAssignedToRole);
+
+        groups = _roleClaimsGrouped?.Select(x => x.Group!).ToList() ?? [];
+
+        groups.Add("All");
 
         Tracker.Hide();
     }
@@ -168,18 +169,16 @@ public partial class ManageRolePermission
 
         formEdit?.EditContext?.Validate();
 
-        var rsp = await _roleService.AddRolePermissions(request);
+        var rsp = await _mediator.Send(new AddRolePermissionsCommand(request));
 
-        if (rsp!.IsSuccess)
+        if (rsp.IsError)
         {
-            NotificationService.Notify(NotificationSeverity.Success, "Permissions were assigned.");
+            NotificationService.Notify(NotificationSeverity.Error, rsp.FirstError.Description);
+            return;
+        }
 
-            NavigationManager.NavigateTo("/App/Account/Roles");
-        }
-        else
-        {
-            NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
-        }
+        NotificationService.Notify(NotificationSeverity.Success, "Permissions were assigned.");
+        NavigationManager.NavigateTo("/App/Account/Roles");
     }
 
 

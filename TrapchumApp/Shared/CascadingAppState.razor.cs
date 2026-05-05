@@ -33,6 +33,7 @@ namespace TrapchumApp.Shared
         private bool _canRecieveMultiple;
         private bool _isSameUser;
 
+        private bool _isBranchManager;
         public bool IsSameUser
         {
             get => _isSameUser;
@@ -240,6 +241,16 @@ namespace TrapchumApp.Shared
             }
         }
 
+        public bool IsBranchManager
+        {
+            get => _isBranchManager;
+            set
+            {
+                _isBranchManager = value;
+                StateHasChanged();
+            }
+        }
+
         internal async Task CheckedCanMultipleRecieve(ClaimsPrincipal user)
         {
             if (user is not null && user?.Identity?.IsAuthenticated == true)
@@ -250,6 +261,13 @@ namespace TrapchumApp.Shared
             }
         }
 
+        internal async Task CheckedIsBranchManager(ClaimsPrincipal user)
+        {
+            if (user is not null && user?.Identity?.IsAuthenticated == true)
+            {
+                _isBranchManager = await _authorizeService.MustHasPermissionAsync(user, Policies.BMOnly);
+            }
+        }
 
         internal async Task CheckedIsAdmin(ClaimsPrincipal user)
         {
@@ -282,7 +300,7 @@ namespace TrapchumApp.Shared
         {
             if (user is not null && user?.Identity?.IsAuthenticated == true)
             {
-                _isManager = await _authorizeService.MustHasPermissionAsync(user!, Policies.ManagerOnly);
+                _isManager = await _authorizeService.MustHasPermissionAsync(user, Policies.ManagerOnly);
 
                 return;
             }
@@ -443,6 +461,7 @@ namespace TrapchumApp.Shared
             await CheckedCanOpenBranch(user);
             await CheckedCanMultipleRecieve(user);
             await CheckedCanPayOff(user);
+            await CheckedIsBranchManager(user);
         }
 
         internal async Task GetUserId()

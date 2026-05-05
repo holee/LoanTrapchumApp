@@ -5,7 +5,7 @@ using TrapchumApp.Shared;
 
 namespace TrapchumApp.Pages.Transactions.LoanRequests
 {
-    public partial class Index
+    public partial class LoanRequestIndexPage
     {
 
         [CascadingParameter]

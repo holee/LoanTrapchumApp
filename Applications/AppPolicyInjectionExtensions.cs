@@ -69,6 +69,7 @@ namespace Applications
             options.AddPolicy(Policies.ShowReportDashboard, Policies.CanShowReportDashboard());
             options.AddPolicy(Policies.ShowAdminDashboard, Policies.CanShowAdminDashboard());
             options.AddPolicy(Policies.AdminOnly, Policies.IsAdminOnly());
+            options.AddPolicy(Policies.BMOnly, Policies.IsBranchManagerOnly()); 
             options.AddPolicy(Policies.AccountOnly, Policies.IsAccountOnly());
             options.AddPolicy(Policies.CEOOnly, Policies.IsCEOOnly());
             options.AddPolicy(Policies.CreditOfficerOnly, Policies.IsCreditOfficerOnly());

@@ -1,6 +1,5 @@
-﻿using Applications.Constants.Authorizations;
+using Applications.Constants.Authorizations;
 using Applications.Interfaces.Identity;
-using Applications.Responses;
 using Applications.Responses.Auths;
 using Applications.Responses.Paginations;
 using Applications.Responses.ViewModels.Auths;
@@ -14,6 +13,7 @@ using Applications.Features.Identity.Roles.Requests;
 using Applications.Features.Identity.Roles.Responses;
 using Applications.Features.Identity.Users;
 using Applications.Commons.ExceptionHandlers;
+using ErrorOr;
 namespace Infrastructures.Implements;
 
 public sealed class RoleRepository(
@@ -21,25 +21,22 @@ public sealed class RoleRepository(
     UserDataContext context,
     IValidator<RoleCreateDto> validator) : IRoleService
 {
-    public async Task<Result> CreateAsync(RoleCreateDto role)
+    public async Task<ErrorOr<Success>> CreateAsync(RoleCreateDto role)
     {
         var validationResult = await validator.ValidateAsync(role);
 
         if (!validationResult.IsValid)
         {
-            var errors = validationResult.Errors.Select(err => err.ErrorMessage).ToList();
-
-            var errString = string.Join(Environment.NewLine, errors);
-
-            return Result.Failure(ErrorResponse.Validation(errString));
+            var errors = validationResult.Errors
+                .Select(e => Error.Validation(e.PropertyName, e.ErrorMessage))
+                .ToList();
+            return errors;
         }
 
         var existingRole = await roleManager.FindByNameAsync(role.RoleName!);
 
         if (existingRole is not null)
-        {
-            return Result.Failure(ErrorResponse.Conflict($"{role.RoleName} Role already existing!"));
-        }
+            return Error.Conflict("Role.Conflict", $"{role.RoleName} Role already existing!");
 
         var newRole = new ApplicationRole
         {
@@ -51,20 +48,14 @@ public sealed class RoleRepository(
         var result = await roleManager.CreateAsync(newRole);
 
         if (!result.Succeeded)
-        {
-            var errors = result.Errors.Select(x => x.Description).ToList();
-
-            var errString = string.Join(Environment.NewLine, errors);
-
-            return Result.Failure(ErrorResponse.Validation(errString));
-        }
+            return result.Errors
+                .Select(e => Error.Validation(e.Code, e.Description))
+                .ToList();
 
         var addedRole = await roleManager.FindByNameAsync(role.RoleName!);
 
-
         if (role.Permissions.Any() && addedRole is not null)
         {
-
             var claims = role.Permissions.Select(x => new ApplicationRoleClaim
             {
                 RoleId = addedRole.Id,
@@ -74,20 +65,18 @@ public sealed class RoleRepository(
             });
 
             context.ApplicationRoleClaim.AddRange(claims);
-
             await context.SaveChangesAsync();
         }
 
-        return Result.Success();
+        return Result.Success;
     }
 
-
-    public async Task<ErrorOr.ErrorOr<RoleClaims>> CreateAsync(RoleCreateDto role, CancellationToken cancellationToken = default)
+    public async Task<ErrorOr<RoleClaims>> CreateAsync(RoleCreateDto role, CancellationToken cancellationToken = default)
     {
         var existingRole = await roleManager.FindByNameAsync(role.RoleName!);
 
         if (existingRole is not null)
-            return ErrorOr.Error.Conflict("conflict", description: $"Role '{role.RoleName}' already exists.");
+            return Error.Conflict("Role.Conflict", $"Role '{role.RoleName}' already exists.");
 
         var newRole = new ApplicationRole
         {
@@ -100,7 +89,7 @@ public sealed class RoleRepository(
 
         if (!result.Succeeded)
             return result.Errors
-                .Select(e => ErrorOr.Error.Validation(e.Code, e.Description))
+                .Select(e => Error.Validation(e.Code, e.Description))
                 .ToList();
 
         if (role.Permissions.Count != 0)
@@ -132,138 +121,124 @@ public sealed class RoleRepository(
         return roleClaims;
     }
 
-    public async Task<Result<string>> UpdateAsync(RoleDtoUpdate role)
+    public async Task<ErrorOr<string>> UpdateAsync(RoleDtoUpdate role)
     {
-
         var existingRole = await roleManager.FindByIdAsync(role.RoleId);
 
         if (existingRole is null)
-        {
-            return Result.Failure<string>(ErrorResponse.NotFound($"{role.RoleId} Not Found."));
-        }
+            return Error.NotFound("Role.NotFound", $"{role.RoleId} Not Found.");
 
         existingRole.Name = role.RoleName;
-
         existingRole.Description = role.Description;
 
         var result = await roleManager.UpdateAsync(existingRole);
 
         if (!result.Succeeded)
-        {
-            var errors = result.Errors.Select(x => x.Description).ToList();
+            return result.Errors
+                .Select(e => Error.Validation(e.Code, e.Description))
+                .ToList();
 
-            var errString = string.Join(Environment.NewLine, errors);
-
-            return Result.Failure<string>(ErrorResponse.Validation(errString));
-        }
-
-        return Result.Success("Role was updated.");
+        return "Role was updated.";
     }
 
-    public async Task<Result<RoleDtoUpdate>> EditAsync(string? roleId)
+    public async Task<ErrorOr<Deleted>> DeleteRoleAsync(string roleId)
     {
+        var role = await roleManager.FindByIdAsync(roleId);
 
-        if (roleId == null)
-        {
-            return Result.Failure<RoleDtoUpdate>(ErrorResponse.Validation($"{roleId} Is Required."));
-        }
+        if (role is null)
+            return Error.NotFound("Role.NotFound", $"Role with Id '{roleId}' not found.");
+
+        var isInUse = await context.UserRoles.AnyAsync(ur => ur.RoleId == roleId);
+
+        if (isInUse)
+            return Error.Conflict("Role.Conflict", "Cannot delete this role because it is assigned to one or more users.");
+
+        role.IsActive = false;
+
+        var result = await roleManager.UpdateAsync(role);
+
+        if (!result.Succeeded)
+            return result.Errors
+                .Select(e => Error.Validation(e.Code, e.Description))
+                .ToList();
+
+        return Result.Deleted;
+    }
+
+    public async Task<ErrorOr<RoleDtoUpdate>> EditAsync(string? roleId)
+    {
+        if (roleId is null)
+            return Error.Validation("Role.Validation", "RoleId Is Required.");
 
         var existingRole = await roleManager.FindByIdAsync(roleId);
 
         if (existingRole is null)
-        {
-            return Result.Failure<RoleDtoUpdate>(ErrorResponse.NotFound($"{roleId} Not Found."));
-        }
+            return Error.NotFound("Role.NotFound", $"{roleId} Not Found.");
 
-        var editRole = new RoleDtoUpdate
+        return new RoleDtoUpdate
         {
             RoleId = roleId,
             RoleName = existingRole.Name!,
             Description = existingRole.Description!
         };
-
-        return Result.Success<RoleDtoUpdate>(editRole);
-
     }
 
-
-
-    public async Task<Result> AddRolePermissions(RolePermissionRequest permission)
+    public async Task<ErrorOr<Success>> AddRolePermissions(RolePermissionRequest permission)
     {
         var roleInDb = await roleManager.FindByIdAsync(permission.RoleId.ToString());
 
         if (roleInDb is null)
-        {
-            return Result.Failure(ErrorResponse.NotFound("No Role Found."));
-        }
+            return Error.NotFound("Role.NotFound", "No Role Found.");
 
-        var permissionsToBeAssigned = permission!.RoleClaims!
+        var permissionsToBeAssigned = permission.RoleClaims!
             .Where(rc => rc.IsAssignedToRole == true)
             .ToList();
+
         var currentlyAssignedClaims = await roleManager.GetClaimsAsync(roleInDb);
 
-        // Drop
         foreach (var claim in currentlyAssignedClaims)
-        {
             await roleManager.RemoveClaimAsync(roleInDb, claim);
-        }
 
-        // Add
         foreach (var claim in permissionsToBeAssigned)
         {
             var mappedRoleClaim = claim.Adapt<ApplicationRoleClaim>();
-
             await context.RoleClaims.AddAsync(mappedRoleClaim);
         }
 
         await context.SaveChangesAsync();
 
-        return Result.Success("Role permissions updated successfully.");
+        return Result.Success;
     }
-
 
     public async Task AddRolePermissions(string? roleId, RolePermissionRequest permission)
     {
-        if(string.IsNullOrEmpty(roleId))
-        {
-           throw new ArgumentException("RoleId is required.", nameof(roleId));
-        }
-
+        if (string.IsNullOrEmpty(roleId))
+            throw new ArgumentException("RoleId is required.", nameof(roleId));
 
         var roleInDb = await roleManager.FindByIdAsync(roleId);
 
         if (roleInDb is null)
-        {
             throw new NotFoundException($"No Role Found with Id: {roleId}");
-        }
 
-        var permissionsToBeAssigned = permission!.RoleClaims!
+        var permissionsToBeAssigned = permission.RoleClaims!
             .Where(rc => rc.IsAssignedToRole == true)
             .ToList();
+
         var currentlyAssignedClaims = await roleManager.GetClaimsAsync(roleInDb);
 
-        //// Drop
-        //foreach (var claim in currentlyAssignedClaims)
-        //{
-        //    await roleManager.RemoveClaimAsync(roleInDb, claim);
-        //}
+        foreach (var claim in currentlyAssignedClaims)
+            await roleManager.RemoveClaimAsync(roleInDb, claim);
 
-        // Add
-        //foreach (var claim in permissionsToBeAssigned)
-        //{
-        //var mappedRoleClaim = claim.Adapt<ApplicationRoleClaim>();
-
-        //    await context.RoleClaims.AddAsync(mappedRoleClaim);
-        //}
+        foreach (var claim in permissionsToBeAssigned)
+        {
+            var mappedRoleClaim = claim.Adapt<ApplicationRoleClaim>();
+            await context.RoleClaims.AddAsync(mappedRoleClaim);
+        }
 
         await context.SaveChangesAsync();
-
-        //return Result.Success("Role permissions updated successfully.");
     }
 
-
-
-    public async Task<Result<IEnumerable<RoleDto>>> GetRolesAsync(string? roleId = null, string? name = null)
+    public async Task<ErrorOr<IEnumerable<RoleDto>>> GetRolesAsync(string? roleId = null, string? name = null)
     {
         var queries = roleManager.Roles
             .OrderBy(r => r.Name)
@@ -277,121 +252,89 @@ public sealed class RoleRepository(
             });
 
         if (!string.IsNullOrEmpty(roleId))
-        {
             queries = queries.Where(x => x.Id == roleId);
-        }
 
         if (!string.IsNullOrEmpty(name))
-        {
             queries = queries.Where(x => EF.Functions.Like(x.RoleName, $"%{name}%"));
-        }
 
-        return Result.Success<IEnumerable<RoleDto>>(await queries.AsNoTracking().ToListAsync());
+        return (await queries.AsNoTracking().ToListAsync()).AsEnumerable().ToErrorOr();
     }
-
 
     public async Task<Pager<RoleDto>> GetRolesAsync(string? roleId, QueryParam param, CancellationToken cancellation = default)
     {
         var queries = roleManager.Roles
-                                    .OrderBy(r => r.Name)
-                                    .Where(x => x.IsActive)
-                                    .Select(x => new RoleDto
-                                    {
-                                        Id = x.Id,
-                                        RoleName = x.Name,
-                                        IsActive = x.IsActive,
-                                        Description = x.Description
-                                    });
+            .OrderBy(r => r.Name)
+            .Where(x => x.IsActive)
+            .Select(x => new RoleDto
+            {
+                Id = x.Id,
+                RoleName = x.Name,
+                IsActive = x.IsActive,
+                Description = x.Description
+            });
 
         if (!string.IsNullOrEmpty(roleId))
-        {
             queries = queries.Where(x => x.Id == roleId);
-        }
 
         if (!string.IsNullOrEmpty(param.Filter))
-        {
             queries = queries.Where(x => EF.Functions.Like(x.RoleName, $"%{param.Filter}%"));
-        }
 
         if (param.SortDescending)
-        {
             queries = queries.OrderByDescending(x => EF.Property<object>(x, param.SortColumn));
-        }
 
         var counts = await queries.CountAsync(cancellation);
 
-
         if (param.Take > 0)
-        {
             queries = queries.Skip(param.Page).Take(param.Take);
-        }
+
         var items = await queries.AsNoTracking().ToListAsync(cancellation);
 
         return new Pager<RoleDto>(items, counts);
     }
 
-
-
-    public async Task<Result<IEnumerable<string>>> GetRolesAsync(string? name = null)
+    public async Task<ErrorOr<IEnumerable<string>>> GetRolesAsync(string? name = null)
     {
         var queries = roleManager.Roles.Where(x => x.IsActive);
 
         if (!string.IsNullOrEmpty(name))
-        {
             queries = queries.Where(x => EF.Functions.Like(x.Name!, $"%{name}%"));
-        }
 
         var roles = await queries
-                            .AsNoTracking()
-                            .Select(x => x.Name)
-                            .ToListAsync();
+            .AsNoTracking()
+            .Select(x => x.Name)
+            .ToListAsync();
 
-        if (!roles.Any())
-        {
-            return Result.Success<IEnumerable<string>>([]);
-        }
-
-        return Result.Success<IEnumerable<string>>(roles!);
+        return roles.OfType<string>().AsEnumerable().ToErrorOr();
     }
-
-
 
     public async Task<Pager<RoleDto>> GetRolesAsync(QueryParam param, CancellationToken cancellation = default)
     {
         var queries = roleManager.Roles.Where(x => x.IsActive);
 
         if (!string.IsNullOrEmpty(param.Filter))
-        {
             queries = queries.Where(x => EF.Functions.Like(x.Name!, $"%{param.Filter}%"));
-        }
 
         var counts = await queries.CountAsync(cancellation);
 
         if (param.Take > 0)
-        {
             queries = queries.Skip(param.Page).Take(param.Take);
-        }
 
         var roles = await queries
-                            .AsNoTracking()
-                            .Select(x => ProjectTo(x)).ToListAsync();
-
+            .AsNoTracking()
+            .Select(x => ProjectTo(x)).ToListAsync();
 
         return PagerExtensions.Create(roles, counts);
     }
 
-    private static RoleDto ProjectTo(ApplicationRole x)
+    private static RoleDto ProjectTo(ApplicationRole x) => new()
     {
-        return new RoleDto
-        {
-            Id = x.Id,
-            RoleName = x.Name,
-            IsActive = x.IsActive,
-            Description = x.Description
-        };
-    }
+        Id = x.Id,
+        RoleName = x.Name,
+        IsActive = x.IsActive,
+        Description = x.Description
+    };
 
-    public async Task<Result<RoleDto>> GetRoleByIdAsync(string id)
+    public async Task<ErrorOr<RoleDto>> GetRoleByIdAsync(string id)
     {
         var role = await roleManager.Roles
             .Where(x => x.IsActive)
@@ -401,33 +344,31 @@ public sealed class RoleRepository(
                 RoleName = x.Name,
                 IsActive = x.IsActive
             }).AsNoTracking()
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(x => x.Id == id);
 
-        if (role is null) return Result.Failure<RoleDto>(ErrorResponse.NotFound("No role found."));
+        if (role is null)
+            return Error.NotFound("Role.NotFound", "No role found.");
 
-        return Result.Success<RoleDto>(role);
+        return role;
     }
 
-
-    public async Task<Result<RolePermissions>> GetPermissionsByRoleAsync(string roleId)
+    public async Task<ErrorOr<RolePermissions>> GetPermissionsByRoleAsync(string roleId)
     {
         return await GetPermissionsByRoleInternalAsync(roleId, ApplicationPermissions.AllPermissions, p => p.Group);
     }
 
-    public async Task<Result<RolePermissions>> GetPermissionsByRoleByIdAsync(string roleId)
+    public async Task<ErrorOr<RolePermissions>> GetPermissionsByRoleByIdAsync(string roleId)
     {
         return await GetPermissionsByRoleInternalAsync(roleId, AppPermissions.AllPermissions, p => p.Module);
     }
 
-    private async Task<Result<RolePermissions>> GetPermissionsByRoleInternalAsync(
+    private async Task<ErrorOr<RolePermissions>> GetPermissionsByRoleInternalAsync(
         string roleId, IEnumerable<dynamic> allPermissions, Func<dynamic, string> groupSelector)
     {
         var roleInDb = await roleManager.FindByIdAsync(roleId);
 
         if (roleInDb is null)
-        {
-            return Result.Failure<RolePermissions>(ErrorResponse.NotFound("Role not found in the system."));
-        }
+            return Error.NotFound("Role.NotFound", "Role not found in the system.");
 
         var roleClaimResponse = new RolePermissions(
             new(roleId, roleInDb.Name!, roleInDb.Description!),
@@ -436,8 +377,8 @@ public sealed class RoleRepository(
         var currentRoleClaims = await GetAllClaimsForRoleAsync(roleId);
 
         var assignedClaimValues = new HashSet<string>(
-                                        currentRoleClaims.Select(crc => crc.ClaimValue),
-                                        StringComparer.OrdinalIgnoreCase);
+            currentRoleClaims.Select(crc => crc.ClaimValue),
+            StringComparer.OrdinalIgnoreCase);
 
         foreach (var permission in allPermissions)
         {
@@ -452,9 +393,8 @@ public sealed class RoleRepository(
             });
         }
 
-        return Result.Success(roleClaimResponse);
+        return roleClaimResponse;
     }
-
 
     public List<RolePermissionsViewModel> GetAllPermisses()
     {
@@ -462,27 +402,21 @@ public sealed class RoleRepository(
 
         List<RolePermissionsViewModel> permissionsViewModels = new();
 
-        if (allPermissions.Any())
+        foreach (var permission in allPermissions)
         {
-            foreach (var permission in allPermissions)
+            permissionsViewModels.Add(new RolePermissionsViewModel
             {
-                permissionsViewModels.Add(new RolePermissionsViewModel
-                {
-                    RoleId = string.Empty,
-                    ClaimType = AppClaim.Permission,
-                    ClaimValue = permission.For,
-                    Description = permission.Description,
-                    Group = permission.Group,
-                    IsAssignedToRole = false
-                });
-
-            }
+                RoleId = string.Empty,
+                ClaimType = AppClaim.Permission,
+                ClaimValue = permission.For,
+                Description = permission.Description,
+                Group = permission.Group,
+                IsAssignedToRole = false
+            });
         }
 
         return permissionsViewModels;
     }
-
-
 
     public List<PermissionsDtoCreate> GetAllPermissions()
     {
@@ -490,40 +424,30 @@ public sealed class RoleRepository(
 
         List<PermissionsDtoCreate> permissionsViewModels = new();
 
-        if (allPermissions.Any())
+        foreach (var permission in allPermissions)
         {
-            foreach (var permission in allPermissions)
+            permissionsViewModels.Add(new PermissionsDtoCreate
             {
-                permissionsViewModels.Add(new PermissionsDtoCreate
-                {
-                    ClaimType = AppClaim.Permission,
-                    ClaimValue = permission.For,
-                    Description = permission.Description,
-                    Group = permission.Module,
-                    IsSelected = false
-                });
-
-            }
+                ClaimType = AppClaim.Permission,
+                ClaimValue = permission.For,
+                Description = permission.Description,
+                Group = permission.Module,
+                IsSelected = false
+            });
         }
 
         return permissionsViewModels;
     }
-
-
 
     private async Task<List<RolePermissionsViewModel>> GetAllClaimsForRoleAsync(string roleId)
     {
         var roleClaims = await context.RoleClaims
             .Where(rc => rc.RoleId == roleId)
             .ToListAsync();
+
         if (roleClaims.Any())
-        {
-            var mappedRolePermissions = roleClaims.Adapt<List<RolePermissionsViewModel>>();
-            return mappedRolePermissions;
-        }
+            return roleClaims.Adapt<List<RolePermissionsViewModel>>();
 
-        return new List<RolePermissionsViewModel>();
+        return [];
     }
-
-
 }

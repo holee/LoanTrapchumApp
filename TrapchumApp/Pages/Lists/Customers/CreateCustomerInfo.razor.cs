@@ -2,6 +2,7 @@ using Applications.Extensions;
 using Applications.Features.Customers.Dto;
 using Applications.Features.AdditionalInformations.Dto;
 using Applications.Features.AdditionalInformations.Queries.GetNationalities;
+using Applications.Features.AdditionalInformations.Queries.GetOccupations;
 using Applications.Features.AdditionalInformations.Queries.GetSalutaions;
 
 namespace TrapchumApp.Pages.Lists.Customers;
@@ -16,17 +17,9 @@ public partial class CreateCustomerInfo(ILogger<CreateCustomerInfo> logger)
 
     IEnumerable<OccupationDto> _occupations = [];
 
-    IEnumerable<OccupationDto> OriginalOccupations = [];
     IEnumerable<NationalityDto> _nationalities { get; set; } = [];
 
-    IEnumerable<string> Salutations = [];
-
-    IEnumerable<string> OriginalSalutations = [];
-
-    string occupationFilter = string.Empty;
-
-    string _salFilter = string.Empty;
-
+    IEnumerable<SalutationDto> _salutations = [];
 
     protected override async Task OnInitializedAsync()
     {
@@ -47,9 +40,10 @@ public partial class CreateCustomerInfo(ILogger<CreateCustomerInfo> logger)
     async Task GetAdditionalInformation()
     {
         await GetNationalities();
-
         await GetSalutations();
+        await GetOccupations();
     }
+
     private async Task GetNationalities()
     {
         var command = new GetNationalitiesQuery(0, new QueryParam(0, 0));
@@ -59,17 +53,27 @@ public partial class CreateCustomerInfo(ILogger<CreateCustomerInfo> logger)
         _nationalities = rsp.Items ?? [];
     }
 
-    private async Task GetSalutations(string? filter = null)
+    private async Task GetSalutations()
     {
-        var comamnd = new GetSalutationsQuery(0, new QueryParam(0, 0));
+        var command = new GetSalutationsQuery(0, new QueryParam(0, 0));
 
-        var rsp = await mediator.Send(comamnd);
+        var rsp = await mediator.Send(command);
 
-        Salutations = rsp.Items.Select(x => x.Title!).ToList();
+        _salutations = rsp.Items;
 
+        _filteredSalutations = rsp.Items;
     }
 
+    private async Task GetOccupations()
+    {
+        var command = new GetOccupationsQuery(0, new QueryParam(0, 0, string.Empty), TypeOfEnum.Job);
+
+        var rsp = await mediator.Send(command);
+
+        _occupations = rsp.Items;
+    }
 }
+
 
 
 

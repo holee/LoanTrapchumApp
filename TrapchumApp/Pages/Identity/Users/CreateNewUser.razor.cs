@@ -1,21 +1,12 @@
 ﻿using Applications.Features.Branches.Dtos;
-using Applications.Features.Branches.Queries.GetBranchAsPaging;
 using Applications.Features.Identity.Roles.Queries.GetRoles;
 using Applications.Features.Identity.Users;
-using Applications.Interfaces.Identity;
 using Applications.Responses.ViewModels.Employees;
 
 namespace TrapchumApp.Pages.Identity.Users;
 
-public partial class CreateNewUser
+public partial class CreateNewUser(ILogger<CreateNewUser> logger)
 {
-    private readonly IRoleService _roleService;
-
-    public CreateNewUser(IRoleService roleService)
-    {
-        _roleService = roleService;
-    }
-
     RegisterRequest model = new RegisterRequest();
     bool IsSuccess = false;
     bool IsVisible = false;
@@ -26,30 +17,10 @@ public partial class CreateNewUser
     IEnumerable<VBranch> Branches = [];
     IEnumerable<VEmployeeList> bEmployees = [];
     BranchDto SelectedBranch = default!;
+    private bool _isBusty = false;
     protected override async Task OnInitializedAsync()
     {
-        try
-        {
-            await GetRoles();
-
-            //var rsp = await _employeeService.GetEmployeesAsync(0, null, new(0, 0));
-
-            //if (rsp.Items.Any())
-            //{
-            //    Employees = rsp.Items;
-            //}
-
-            var command = new GetBranchAsPagingQuery(0, new QueryParam(0, 0));
-
-            var bRsp = await mediator.Send(command);
-
-            Branches = bRsp.Items;
-
-        }
-        catch (Exception ex)
-        {
-            NotificationService.Notify(NotificationSeverity.Error, ex.Message);
-        }
+        await GetRoles();
 
         await base.OnInitializedAsync();
     }
@@ -64,29 +35,11 @@ public partial class CreateNewUser
 
     }
 
-    protected async Task SelectBranchChanged(object? arg)
-    {
-
-        if (arg is not null)
-        {
-            var branchId = ((BranchDto)arg).BranchId;
-
-            //var rsp = await _employeeService.GetEmployeesAsync(branchId, string.Empty, new(0, 0));
-
-            //bEmployees = rsp.Items ?? [];
-        }
-        else
-        {
-            model.BranchRefId = 0;
-        }
-
-        model.Username = "";
-        model.Email = "";
-        model.EmployeeId = string.Empty;
-    }
-
     protected void SelectedEmployeeChanged()
     {
+
+        logger.LogInformation("Selected Employee: {EmployeeId}", model.EmployeeId);
+
         var selectedEmployee = bEmployees.FirstOrDefault(x => x.EmployeeId == model.EmployeeId);
 
         if (selectedEmployee is not null)
@@ -105,33 +58,33 @@ public partial class CreateNewUser
             model.Email = "";
             model.EmployeeId = string.Empty;
         }
-
-        Console.WriteLine(selectedEmployee!.EmployeeId);
     }
-
-    protected async void SubmitForm()
+    protected async void HanldeSubmitForm()
     {
         try
         {
-            form.EditContext?.Validate();
+            logger.LogInformation("Creating new user with username: {Username}", model.Username);
+
+            _isBusty = true;
 
             var result = await _userService.CreateUserAsync(model);
 
             if (result.IsSuccess)
             {
-                IsSuccess = true;
-                NotificationService.Notify(NotificationSeverity.Success, "New user was created.");
+                _toastService.ShowSuccess("New user was created.");
+
                 model = new();
+
                 StateHasChanged();
             }
-            else
-            {
-            }
+
+            _isBusty = false;
         }
         catch (Exception ex)
         {
-            IsSuccess = false;
-            NotificationService.Notify(NotificationSeverity.Error, ex.Message);
+            _isBusty = false;
+
+            logger.LogError(ex, "Error creating new user.");
         }
     }
 }

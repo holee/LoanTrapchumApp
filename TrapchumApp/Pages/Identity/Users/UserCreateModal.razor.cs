@@ -2,8 +2,8 @@ using Applications.Features.Branches.Dtos;
 using Applications.Features.Branches.Queries.GetBranchAsPaging;
 using Applications.Features.Employees.Queries.GetEmployeeAsPaging;
 using Applications.Features.Identity.Command.CreateNewUser;
+using Applications.Features.Identity.Roles.Queries.GetRoles;
 using Applications.Features.Identity.Users;
-using Applications.Interfaces.Identity;
 using Applications.Responses.ViewModels.Employees;
 
 namespace TrapchumApp.Pages.Identity.Users
@@ -13,13 +13,6 @@ namespace TrapchumApp.Pages.Identity.Users
         [Parameter] public string? EmployeeId { get; set; } = string.Empty;
 
         [Parameter] public int BranchId { get; set; } = 0;
-
-        private readonly IRoleService _roleService;
-
-        public UserCreateModal(IRoleService roleService)
-        {
-            _roleService = roleService;
-        }
 
         RegisterRequest _model = new RegisterRequest();
 
@@ -38,9 +31,7 @@ namespace TrapchumApp.Pages.Identity.Users
         private bool _isBusy = false;
         protected override async Task OnInitializedAsync()
         {
-            var selectedRoles = await _roleService.GetRolesAsync();
-
-            _roles = selectedRoles?.Data ?? [];
+            await GetRoles();
 
             if (!string.IsNullOrEmpty(EmployeeId) && BranchId <= 0)
             {
@@ -90,8 +81,14 @@ namespace TrapchumApp.Pages.Identity.Users
 
         }
 
+        private async Task GetRoles()
+        {
+            var rsp = await mediator.Send(new GetRolesQuery(null));
 
-        async Task GetBranches(int? branchId = 0)
+            _roles = rsp.ToList();
+        }
+
+        private async Task GetBranches(int? branchId = 0)
         {
 
             var command = new GetBranchAsPagingQuery(branchId, new QueryParam(0, 0, string.Empty));
@@ -125,7 +122,7 @@ namespace TrapchumApp.Pages.Identity.Users
         {
             var command = new GetEmployeeAsPagingQuery(branchId, employeeId, new QueryParam(0, 0));
 
-            var rsp = await mediator.Send(command); //_employeeService.GetEmployeesAsync(branchId, employeeId, new QueryParam(0, 0));
+            var rsp = await mediator.Send(command); 
 
             _bEmployees = rsp.Items ?? [];
 
