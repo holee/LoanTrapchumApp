@@ -18,7 +18,7 @@ namespace Infrastructures.Implements;
 
 public sealed class RoleRepository(
     RoleManager<ApplicationRole> roleManager,
-    UserDataContext context,
+    IDbContextFactory<UserDataContext> contextFactory,
     IValidator<RoleCreateDto> validator) : IRoleService
 {
     public async Task<ErrorOr<Success>> CreateAsync(RoleCreateDto role)
@@ -64,6 +64,7 @@ public sealed class RoleRepository(
                 Description = x.Description,
             });
 
+            await using var context = await contextFactory.CreateDbContextAsync();
             context.ApplicationRoleClaim.AddRange(claims);
             await context.SaveChangesAsync();
         }
@@ -102,6 +103,7 @@ public sealed class RoleRepository(
                 Description = x.Description,
             });
 
+            await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
             context.ApplicationRoleClaim.AddRange(claimEntities);
             await context.SaveChangesAsync(cancellationToken);
         }
@@ -148,6 +150,7 @@ public sealed class RoleRepository(
         if (role is null)
             return Error.NotFound("Role.NotFound", $"Role with Id '{roleId}' not found.");
 
+        await using var context = await contextFactory.CreateDbContextAsync();
         var isInUse = await context.UserRoles.AnyAsync(ur => ur.RoleId == roleId);
 
         if (isInUse)
@@ -199,6 +202,7 @@ public sealed class RoleRepository(
         foreach (var claim in currentlyAssignedClaims)
             await roleManager.RemoveClaimAsync(roleInDb, claim);
 
+        await using var context = await contextFactory.CreateDbContextAsync();
         foreach (var claim in permissionsToBeAssigned)
         {
             var mappedRoleClaim = claim.Adapt<ApplicationRoleClaim>();
@@ -229,6 +233,7 @@ public sealed class RoleRepository(
         foreach (var claim in currentlyAssignedClaims)
             await roleManager.RemoveClaimAsync(roleInDb, claim);
 
+        await using var context = await contextFactory.CreateDbContextAsync();
         foreach (var claim in permissionsToBeAssigned)
         {
             var mappedRoleClaim = claim.Adapt<ApplicationRoleClaim>();
@@ -240,7 +245,8 @@ public sealed class RoleRepository(
 
     public async Task<ErrorOr<IEnumerable<RoleDto>>> GetRolesAsync(string? roleId = null, string? name = null)
     {
-        var queries = roleManager.Roles
+        await using var context = await contextFactory.CreateDbContextAsync();
+        var queries = context.Roles
             .OrderBy(r => r.Name)
             .Where(x => x.IsActive)
             .Select(x => new RoleDto
@@ -262,7 +268,8 @@ public sealed class RoleRepository(
 
     public async Task<Pager<RoleDto>> GetRolesAsync(string? roleId, QueryParam param, CancellationToken cancellation = default)
     {
-        var queries = roleManager.Roles
+        await using var context = await contextFactory.CreateDbContextAsync(cancellation);
+        var queries = context.Roles
             .OrderBy(r => r.Name)
             .Where(x => x.IsActive)
             .Select(x => new RoleDto
@@ -294,7 +301,8 @@ public sealed class RoleRepository(
 
     public async Task<ErrorOr<IEnumerable<string>>> GetRolesAsync(string? name = null)
     {
-        var queries = roleManager.Roles.Where(x => x.IsActive);
+        await using var context = await contextFactory.CreateDbContextAsync();
+        var queries = context.Roles.Where(x => x.IsActive);
 
         if (!string.IsNullOrEmpty(name))
             queries = queries.Where(x => EF.Functions.Like(x.Name!, $"%{name}%"));
@@ -309,7 +317,8 @@ public sealed class RoleRepository(
 
     public async Task<Pager<RoleDto>> GetRolesAsync(QueryParam param, CancellationToken cancellation = default)
     {
-        var queries = roleManager.Roles.Where(x => x.IsActive);
+        await using var context = await contextFactory.CreateDbContextAsync(cancellation);
+        var queries = context.Roles.Where(x => x.IsActive);
 
         if (!string.IsNullOrEmpty(param.Filter))
             queries = queries.Where(x => EF.Functions.Like(x.Name!, $"%{param.Filter}%"));
@@ -336,7 +345,8 @@ public sealed class RoleRepository(
 
     public async Task<ErrorOr<RoleDto>> GetRoleByIdAsync(string id)
     {
-        var role = await roleManager.Roles
+        await using var context = await contextFactory.CreateDbContextAsync();
+        var role = await context.Roles
             .Where(x => x.IsActive)
             .Select(x => new RoleDto
             {
@@ -441,6 +451,7 @@ public sealed class RoleRepository(
 
     private async Task<List<RolePermissionsViewModel>> GetAllClaimsForRoleAsync(string roleId)
     {
+        await using var context = await contextFactory.CreateDbContextAsync();
         var roleClaims = await context.RoleClaims
             .Where(rc => rc.RoleId == roleId)
             .ToListAsync();

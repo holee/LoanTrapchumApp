@@ -129,9 +129,9 @@
                     
                     <RadzenPanelMenuItem Text="Loan Management" Icon="@IconNames.AccountBalance" Visible="@bState.IsManager">
                         <RadzenPanelMenuItem Text="Loan Request" Icon="request_quote"
-                                             Path="@($"/App/Loans/Requests/{branchId}/Branches")" />
+                                             Path="@($"/App/Loans/Managers/Requests/{branchId}/Branches")" />
                         <RadzenPanelMenuItem Text="Loans Disbursement" Icon="@IconNames.MoneyBag"
-                                             Path="@($"/App/Loans/Disbursements/{branchId}/Branches")" />
+                                             Path="@($"/App/Loans/Managers/Disbursments/{branchId}/Branches")" />
                     </RadzenPanelMenuItem>
 
                 </Authorized>
@@ -162,8 +162,8 @@
         </RadzenPanelMenu>
     </RadzenSidebar>
     <RadzenBody>
-        <main>
-            @Body
+        <main class="page-animate" @key="currentUrl">
+                @Body
         </main>
     </RadzenBody>
 </RadzenLayout>

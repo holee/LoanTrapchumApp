@@ -1,7 +1,45 @@
-﻿@page "/Account/AccessDenied"
-<PageTitle>Access denied</PageTitle>
-<RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Vertical"
-             JustifyContent="JustifyContent.Center">
-    <h1 class="rz-color-danger">Access denied</h1>
-    <p class="rz-color-danger">You do not have access to this resource.</p>
-</RadzenStack>
+﻿@page "/app/access-denied"
+@attribute [AllowAnonymous]
+<PageTitle>Access Denied</PageTitle>
+
+<div class="access-denied-container">
+    <div class="access-denied-card">
+        <div class="access-denied-icon">
+            <RadzenIcon Icon="lock" style="font-size: 4rem; color: #e74c3c;" />
+        </div>
+        <h2 style="color: #e74c3c; margin: 8px 0 4px;">Access Denied</h2>
+        <p style="color: #555; margin: 0 0 8px;">You do not have permission to view this page.</p>
+        <p class="access-denied-detail">
+            If you believe this is a mistake, please contact your system administrator.
+        </p>
+    </div>
+</div>
+
+<style>
+    .access-denied-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 60vh;
+    }
+
+    .access-denied-card {
+        text-align: center;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+        padding: 48px 56px;
+        max-width: 420px;
+        width: 100%;
+    }
+
+    .access-denied-icon {
+        margin-bottom: 12px;
+    }
+
+    .access-denied-detail {
+        font-size: 0.82rem;
+        color: #6c757d;
+        margin: 0 0 24px;
+    }
+</style>

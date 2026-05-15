@@ -40,7 +40,7 @@
     <RadzenRow>
         @foreach (var group in FilteredGroups)
         {
-            <RadzenColumn Size="6" SizeMD="6" SizeSM="12">
+            <RadzenColumn Size="3" SizeMD="3" SizeSM="12">
                 <div class="perm-group">
                     <div class="perm-group-header">
                         <label class="perm-group-toggle" @onclick="@(() => OnGroupSelectAllChanged(group, !group.GroupCheck))">

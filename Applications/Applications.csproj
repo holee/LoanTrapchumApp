@@ -140,6 +140,7 @@
     <Folder Include="Features\LoanTransactions\Transactions\Mappers\" />
     <Folder Include="Features\LoanTransactions\Transactions\Requests\" />
     <Folder Include="Features\LoanTransactions\Transactions\Responses\" />
+    <Folder Include="Features\Manager\Queries\" />
     <Folder Include="Features\Products\Mappers\" />
     <Folder Include="Features\Products\Responses\" />
     <Folder Include="Features\Products\UseCases\" />

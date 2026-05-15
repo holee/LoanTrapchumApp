@@ -6,7 +6,7 @@ using Radzen.Blazor.Rendering;
 
 namespace TrapchumApp.Pages.Transactions.LoanRequests;
 
-public partial class CoLoanRequestSearchList
+public partial class CoRequestSearchList
 {
     [Parameter] public EventCallback<VCustomerList> OnSelected { get; set; } 
     [Parameter] public EventCallback<IEnumerable<VCustomerList>> OnSelecteds { get; set; }  

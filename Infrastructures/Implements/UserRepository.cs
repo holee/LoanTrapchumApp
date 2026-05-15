@@ -20,7 +20,7 @@ namespace Infrastructures.Implements;
 
 public sealed class UserRepository : IUserService
 {
-    private readonly UserDataContext _userContext;
+    private readonly IDbContextFactory<UserDataContext> _userContextFactory;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signinManager;
     private readonly RoleManager<ApplicationRole> _roleManager;
@@ -29,7 +29,7 @@ public sealed class UserRepository : IUserService
     private readonly IDapperConnectionFactory connectionFactory;
     public UserRepository(UserManager<ApplicationUser> userManager,
          RoleManager<ApplicationRole> roleManager,
-         UserDataContext userContext,
+         IDbContextFactory<UserDataContext> userContextFactory,
          IHostingEnvironment env,
          SignInManager<ApplicationUser> signinManager,
          IDbContextFactory<DataContext> dbContextFactory,
@@ -37,7 +37,7 @@ public sealed class UserRepository : IUserService
     {
         _userManager = userManager;
         _roleManager = roleManager;
-        _userContext = userContext;
+        _userContextFactory = userContextFactory;
         _env = env;
         _signinManager = signinManager;
         _dbContextFactory = dbContextFactory;
@@ -213,7 +213,8 @@ public sealed class UserRepository : IUserService
         if (model is null)
             return Error.Validation(description: "No file was provided.");
 
-        var existingProfile = await _userContext.UserProfiles
+        await using var userContext = await _userContextFactory.CreateDbContextAsync(cancellation);
+        var existingProfile = await userContext.UserProfiles
                                             .AsNoTracking()
                                             .FirstOrDefaultAsync(x => x.UserRefId == userId, cancellation);
 
@@ -232,13 +233,13 @@ public sealed class UserRepository : IUserService
         };
 
         if (existingProfile is null)
-            _userContext.UserProfiles.Add(userProfile);
+            userContext.UserProfiles.Add(userProfile);
         else
-            _userContext.UserProfiles.Update(userProfile);
+            userContext.UserProfiles.Update(userProfile);
 
         DeleteOldProfileFile(existingProfile?.FileName);
 
-        await _userContext.SaveChangesAsync(cancellation);
+        await userContext.SaveChangesAsync(cancellation);
 
         return fileResult;
     }
@@ -333,13 +334,14 @@ public sealed class UserRepository : IUserService
         foreach (var claim in currentlyAssignedClaims)
             await _userManager.RemoveClaimAsync(userInDb, claim);
 
+        await using var userContext = await _userContextFactory.CreateDbContextAsync(cancellation);
         foreach (var claim in permissionsToBeAssigned)
         {
             var mappedUserClaim = claim.Adapt<ApplicationUserClaim>();
-            await _userContext.UserClaims.AddAsync(mappedUserClaim, cancellation);
+            await userContext.UserClaims.AddAsync(mappedUserClaim, cancellation);
         }
 
-        await _userContext.SaveChangesAsync(cancellation);
+        await userContext.SaveChangesAsync(cancellation);
 
         return "Permissions were updated successfully.";
     }
@@ -404,7 +406,8 @@ public sealed class UserRepository : IUserService
     }
     private async Task<IList<UserPermissionViewModel>> GetUserClaimssAsync(string userId)
     {
-        var userClaims = await _userContext.UserClaims
+        await using var userContext = await _userContextFactory.CreateDbContextAsync();
+        var userClaims = await userContext.UserClaims
                                      .Where(x => x.UserId == userId)
                                      .AsNoTracking()
                                      .ToListAsync();
@@ -515,7 +518,8 @@ public sealed class UserRepository : IUserService
             userResponse.Roles.AddRange(roles);
         }
 
-        var profile = await _userContext.UserProfiles
+        await using var userContext = await _userContextFactory.CreateDbContextAsync(cancellation);
+        var profile = await userContext.UserProfiles
                                   .Where(x => x.UserRefId == userId && x.IsActive == true)
                                   .FirstOrDefaultAsync(cancellation);
 

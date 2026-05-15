@@ -31,13 +31,13 @@
         <Blazilla.FluentValidator />
 
         @* ── Employee & Role ── *@
-        <RadzenFieldset AllowCollapse="false" class="rz-mb-3">
+        <RadzenFieldset AllowCollapse="false">
             <HeaderTemplate>
                 <RadzenIcon Icon="badge" /><strong>Employee &amp; Role</strong>
             </HeaderTemplate>
             <ChildContent>
-                <RadzenStack Gap="0.75rem">
-                    <RadzenRow AlignItems="AlignItems.Center">
+                <RadzenStack class="rz-mb-2">
+                    <RadzenRow class="rz-py-1">
                         <RadzenColumn Size="12" SizeMD="3">
                             <RadzenLabel Text="Employee" />
                         </RadzenColumn>
@@ -55,7 +55,7 @@
                             <ValidationMessage For="@(() => model.EmployeeId)" />
                         </RadzenColumn>
                     </RadzenRow>
-                    <RadzenRow AlignItems="AlignItems.Center">
+                    <RadzenRow>
                         <RadzenColumn Size="12" SizeMD="3">
                             <RadzenLabel Text="Role" />
                         </RadzenColumn>
@@ -78,8 +78,8 @@
                 <RadzenIcon Icon="manage_accounts" /><strong>Account</strong>
             </HeaderTemplate>
             <ChildContent>
-                <RadzenStack Gap="0.75rem">
-                    <RadzenRow AlignItems="AlignItems.Center">
+                <RadzenStack>
+                    <RadzenRow>
                         <RadzenColumn Size="12" SizeMD="3">
                             <RadzenLabel Text="Username" />
                         </RadzenColumn>
@@ -118,7 +118,6 @@
                 </RadzenStack>
             </ChildContent>
         </RadzenFieldset>
-
         <RadzenStack AlignItems="AlignItems.Center"
                      Orientation="Orientation.Horizontal"
                      JustifyContent="JustifyContent.End"

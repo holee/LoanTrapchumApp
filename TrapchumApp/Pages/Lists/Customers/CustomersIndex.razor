@@ -3,6 +3,7 @@
 @using Applications.Features.Customers.Response
 @using TrapchumApp.Components.Buttons
 @using TrapchumApp.Helpers.Options
+@attribute [StreamRendering]
 <PageTitle>Customers</PageTitle>
 <RadzenCard class="rz-background-color-base-200" Variant="Variant.Outlined">
     <RadzenTabs RenderMode="TabRenderMode.Client" SelectedIndex="@selectedIndex" SelectedIndexChanged="SelectedTabChanged">
@@ -26,7 +27,6 @@
                 <RadzenDataGrid Count="@counts"
                                 AllowColumnPicking="true"
                                 Responsive
-                                IsLoading="@isLoading"
                                 GridLines="DataGridGridLines.Both"
                                 Density="Density.Compact"
                                 AllowAlternatingRows="true"
@@ -130,7 +130,10 @@
                                               Property="@nameof(VCustomerDetails.IsLoanActive)"
                                               Title="Loan Active">
                             <Template>
-                                <RadzenCheckBox Value="@c.IsLoanActive" Disabled />
+                                <RadzenBadge Text="@(c.IsLoanActive ? "Active" : "None")"
+                                             BadgeStyle="@(c.IsLoanActive ? BadgeStyle.Success : BadgeStyle.Light)"
+                                             Shade="Shade.Default"
+                                             IsPill="true" />
                             </Template>
                         </RadzenDataGridColumn>
                         <RadzenDataGridColumn Context="c"
@@ -141,9 +144,10 @@
                                               Property="@nameof(VCustomerDetails.IsActive)"
                                               Title="Is Active">
                             <Template>
-                                <RadzenCheckBox @bind-Value="@c.IsActive"
-                                                Change="ChangedCustomerStatus"
-                                                TValue="bool" />
+                                <RadzenBadge Text="@(c.IsActive ? "Active" : "Inactive")"
+                                             BadgeStyle="@(c.IsActive ? BadgeStyle.Primary : BadgeStyle.Danger)"
+                                             Shade="Shade.Default"
+                                             IsPill="true" />
                             </Template>
                         </RadzenDataGridColumn>
                         <RadzenDataGridColumn Context="c"

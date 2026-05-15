@@ -9,12 +9,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Views\**" />
     <Compile Remove="wwwroot\documents\**" />
     <Compile Remove="wwwroot\uploads\**" />
+    <Content Remove="Views\**" />
     <Content Remove="wwwroot\documents\**" />
     <Content Remove="wwwroot\uploads\**" />
+    <EmbeddedResource Remove="Views\**" />
     <EmbeddedResource Remove="wwwroot\documents\**" />
     <EmbeddedResource Remove="wwwroot\uploads\**" />
+    <None Remove="Views\**" />
     <None Remove="wwwroot\documents\**" />
     <None Remove="wwwroot\uploads\**" />
   </ItemGroup>
@@ -22,6 +26,12 @@
   <ItemGroup>
     <Content Remove="Pages\Lists\Bases\AddressBaseCreate.razor" />
     <Content Remove="Pages\Lists\OtherNames\GaurantorCreate.razor" />
+    <Content Remove="Pages\Managers\AllLoansDisbursementTab.razor" />
+    <Content Remove="Pages\Managers\LoanRequestAllTab.razor" />
+    <Content Remove="Pages\Managers\ManagerIndexLoanPage.razor" />
+    <Content Remove="Pages\Managers\ManagerLoanRequestDetail.razor" />
+    <Content Remove="Pages\Managers\ManagerLoanRequestEdit.razor" />
+    <Content Remove="Pages\Managers\ManagerRequestIndexPage.razor" />
     <Content Remove="Pages\Transactions\Loans\Disbursements\CustomersActiveLoanPage.razor" />
     <Content Remove="Pages\Transactions\RecievePayements\PaymentOffSideBar.razor" />
   </ItemGroup>
@@ -57,7 +67,6 @@
 
   <ItemGroup>
     <Folder Include="Helpers\Filters\" />
-    <Folder Include="Views\" />
     <Folder Include="wwwroot\assets\docs\" />
     <Folder Include="wwwroot\assets\docs\" />
     <Folder Include="wwwroot\schedules\" />
@@ -169,6 +178,11 @@
     <AdditionalFiles Include="Pages\Lists\Vendors\VendorCreatePage.razor" />
     <AdditionalFiles Include="Pages\Lists\Vendors\VendorDetailPage.razor" />
     <AdditionalFiles Include="Pages\Lists\Vendors\VendorEditPage.razor" />
+    <AdditionalFiles Include="Pages\Managers\AllLoansDisbursementTab.razor" />
+    <AdditionalFiles Include="Pages\Managers\LoanRequestAllTab.razor" />
+    <AdditionalFiles Include="Pages\Managers\ManagerLoanRequestDetail.razor" />
+    <AdditionalFiles Include="Pages\Managers\ManagerIndexLoanPage.razor" />
+    <AdditionalFiles Include="Pages\Managers\ManagerRequestIndexPage.razor" />
     <AdditionalFiles Include="Pages\Settings\IndexSetting.razor" />
     <AdditionalFiles Include="Pages\Transactions\Branches\CashVaultModalActions.razor" />
     <AdditionalFiles Include="Pages\Transactions\Branches\CashVaultSummary.razor" />

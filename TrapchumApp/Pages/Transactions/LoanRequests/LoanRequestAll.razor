@@ -1,6 +1,6 @@
 ﻿@using Applications.Responses.ViewModels.Loans.Requests
 @attribute [StreamRendering]
-<RadzenCard class="rx-background-color-base-700">
+<RadzenCard Variant="Variant.Outlined">
     <GridToolbar SearchChanged="@FilterTextChanged"
                  @bind-Value="@filtertext"
                  Placeholder="Type something to search........">
@@ -16,7 +16,6 @@
                     Count="@counts"
                     PageSize="@pageSize"
                     Density="Density.Compact"
-                    IsLoading="@Tracker.IsLoading"
                     GridLines="DataGridGridLines.Both"
                     AllowPaging="true"
                     PageSizeOptions="StorageConstant.PageSizeOptions"
@@ -85,7 +84,7 @@
                                   Sortable="false"
                                   Title="State">
                 <Template>
-                    <RadzenBadge Variant="Variant.Text" BadgeStyle="@ChangeBadgeStyle(x.StatusId)">
+                    <RadzenBadge Variant="Variant.Filled" BadgeStyle="@ChangeBadgeStyle(x.StatusId)">
                         @x.Status
                     </RadzenBadge>
                 </Template>
@@ -269,33 +268,6 @@
             };
             NavigationManager.NavigateTo(navUrl);
         }
-
-        // Handle menu item selection
-
-
-        // var requestNowUrl = $"/App/Loans/{data?.LoanRequestId}/Requests/{data?.BranchId}/Branches/{data?.CustomerId}/Details";
-        // var checkloanRequestUrl = $"/App/Loans/{data?.LoanRequestId}/Requests/{data?.BranchId}/Branches/{data?.CustomerId}/Details";
-        // var loanRequestDetailsUrl = $"/App/Loans/{data?.LoanRequestId}/Requests/{data?.BranchId}/Branches/{data?.CustomerId}/Details";
-        // var requestLoanRequestUrl = $"/App/Loans/{data?.LoanRequestId}/Requests/{data?.BranchId}/Branches/{data?.CustomerId}/Edit";
-        // var disburseRequestLoanUrl = $"/App/Loans/{data?.LoanRequestId}/Disbursements/{data?.BranchId}/Branches/CreateNew?CustomerId={data?.CustomerId}";
-        // switch (selectedId)
-        // {
-        //     case 1:
-        //         NavigationManager.NavigateTo($"/App/Loans/{data.LoanRequestId}/Requests/{BranchId}/Branches/{data.CustomerId}/Details");
-        //         break;
-        //     case 2:
-        //         NavigationManager.NavigateTo($"/App/Loans/{data.LoanRequestId}/Requests/{BranchId}/Branches/{data.CustomerId}/Edit");
-        //         break;
-        //     case 3:
-        //         NavigationManager.NavigateTo($"/App/Loans/{data.LoanRequestId}/Requests/{BranchId}/Branches/{data.CustomerId}/Edit");
-        //         break;
-        //     case 6:
-        //         NavigationManager.NavigateTo($"/App/Loans/{data.LoanRequestId}/Requests/{BranchId}/Branches/{data.CustomerId}/Details");
-        //         break;
-        //     default:
-        //         break;
-        // }
-
     }
 
 
@@ -309,8 +281,9 @@
             1 => BadgeStyle.Danger, // Pending
             2 => BadgeStyle.Secondary, // Approved
             3 => BadgeStyle.Info, // Disbursed
-            4 => BadgeStyle.Primary, // Rejected
-            _ => BadgeStyle.Success,
+            4 => BadgeStyle.Primary, // Rejected,
+            7 => BadgeStyle.Success, // Rejected
+            _ => BadgeStyle.Info,
         };
     }
 

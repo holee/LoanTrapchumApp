@@ -96,128 +96,6 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
             return Error.Unexpected(ex.Message);
         }
     }
-
-
-    public async Task<ErrorOr<RequestResult>> SaveLoanRequestAsync(LoanRequest req, CancellationToken cancellationToken = default)
-    {
-        logger.LogInformation("Creating loan request for CustomerRefId: {CustomerRefId}", req.CustomerRefId);
-        try
-        {
-            await using var cxt = await contextFactory.CreateDbContextAsync(cancellationToken);
-
-            if (await CheckExistingLoanRequestNotRequested(req.CustomerRefId))
-            {
-                return Error.Conflict("Loan Request already exists.");
-            }
-
-            if (await CheckExistingHasLoan(req.CustomerRefId))
-            {
-                return Error.Conflict("Customer has active loan.");
-            }
-
-            var existingRequest = await cxt.LoanRequests
-                .Include(c => c.CollateralLinesLink)
-                    .ThenInclude(x => x.CollateralLine)
-                .Include(g => g.GuarantorsLink)
-                    .ThenInclude(x => x.Guarantor)
-                .Include(x => x.LoanDocuments)
-                .Include(x => x.LoanDescriptions)
-                .FirstOrDefaultAsync(x => x.LoanRequestId == req.LoanRequestId &&
-                            x.CustomerRefId == req.CustomerRefId &&
-                            (x.LoanRequestStatusRefId == (int)RequestStatus.New ||
-                            x.LoanRequestStatusRefId == (int)RequestStatus.Rechecked), cancellationToken);
-
-            using var transaction = await cxt.Database.BeginTransactionAsync(cancellationToken);
-
-            try
-            {
-                if (existingRequest is null)
-                {
-                    cxt.LoanRequests.Add(req);
-                }
-                else
-                {
-                    cxt.Entry(existingRequest).CurrentValues.SetValues(req);
-
-                    if (req.LoanDescriptions.Any())
-                    {
-                        existingRequest.LoanDescriptions.AddRange(req.LoanDescriptions);
-                    }
-
-                    foreach (var item in req.GuarantorsLink)
-                    {
-                        var existingGuarantor = existingRequest.GuarantorsLink.FirstOrDefault(x => x.Id == item.Id);
-
-                        if (existingGuarantor is null || existingGuarantor.Id == 0)
-                        {
-                            existingRequest.GuarantorsLink.Add(item);
-                        }
-                        else
-                        {
-                            cxt.Entry(existingGuarantor).CurrentValues.SetValues(item);
-                        }
-                    }
-
-                    foreach (var item in req.CollateralLinesLink)
-                    {
-                        var existingCollateralLine =
-                            existingRequest.CollateralLinesLink.FirstOrDefault(x => x.Id == item.Id);
-
-                        if (existingCollateralLine is null || existingCollateralLine.Id == 0)
-                        {
-                            existingRequest.CollateralLinesLink.Add(item);
-                        }
-                        else
-                        {
-                            cxt.Entry(existingCollateralLine).CurrentValues.SetValues(item);
-                        }
-                    }
-
-                    foreach (var item in existingRequest.CollateralLinesLink)
-                    {
-                        if (!(req.CollateralLinesLink.Any(x => x.Id == item.Id)))
-                        //context.Remove(item);
-                        {
-                            cxt.Remove(item);
-                        }
-                    }
-
-                    foreach (var item in existingRequest.GuarantorsLink)
-                    {
-                        if (!(req.GuarantorsLink.Any(x => x.Id == item.Id)))
-                        //context.Remove(item);
-                        {
-                            cxt.Remove(item);
-                        }
-                    }
-
-
-                }
-
-                AddNotification(cxt, req, NotificationType.New);
-
-                await cxt.SaveChangesAsync(cancellationToken);
-
-                await transaction.CommitAsync(cancellationToken);
-
-                return new RequestResult(true, "New Loan Request was created.");
-            }
-            catch (Exception ex)
-            {
-                await transaction.RollbackAsync(cancellationToken);
-
-                return Error.Unexpected(ex.Message);
-            }
-
-        }
-
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Failed to create loan request for CustomerRefId: {CustomerRefId}", req.CustomerRefId);
-            return Error.Unexpected(ex.Message);
-        }
-    }
-
     public async Task<ErrorOr<RequestResult>> EditLoanRequestAsync(LoanRequest req, CancellationToken cancellationToken = default)
     {
 
@@ -280,34 +158,6 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
             return Error.Unexpected(ex.Message);
         }
     }
-
-    public async Task<ErrorOr<string>> ChangedLoanRequestAsync(LoanChangeStatusDtoCreate req)
-    {
-
-        await using var context = await contextFactory.CreateDbContextAsync();
-
-        var existingLoanRequest = await context.LoanRequests
-                                    .Where(x => x.LoanRequestId == req.LoanRequestId && x.BranchRefId == req.BranchId)
-                                    .FirstOrDefaultAsync();
-
-        if (existingLoanRequest is null)
-        {
-            return Error.NotFound(LoanRequestMessage.REQUEST_NOT_FOUND);
-        }
-
-        var lastEditSequent = existingLoanRequest.EditSeq + 1;
-
-        var updateResult = await context.LoanRequests
-            .Where(x => x.LoanRequestId == req.LoanRequestId && x.BranchRefId == req.BranchId)
-            .ExecuteUpdateAsync(prop => prop.SetProperty(p => p.LoanRequestStatusRefId, req.StatusId)
-                .SetProperty(p => p.ModifiedDt, DateTime.UtcNow)
-                .SetProperty(p => p.EditSeq, lastEditSequent));
-
-        return updateResult > 0
-            ? "Loan Request status was changed"
-            : Error.Unexpected("Cannot changed loan request.");
-    }
-
     public async Task<ErrorOr<RequestResult>> ApprovedLoanRequestAsync(AproveLoanDtoCreate req, CancellationToken cancellationToken = default)
     {
 
@@ -362,7 +212,7 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
             return Error.Unexpected($"{ex.Message}");
         }
     }
-
+    
     public async Task<ErrorOr<RequestResult>> SaveLoanRequestByManagerAsync(SaveLoanRequestDtoCreate req, CancellationToken cancellationToken = default)
     {
 
@@ -395,12 +245,10 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
             return Error.Unexpected($"{ex.Message}");
         }
     }
-
-
     public async Task<ErrorOr<RequestResult>> SaveLoanRequestAsync(SaveLoanRequestDtoCreate req, CancellationToken cancellationToken = default)
     {
 
-        await using var cxt = await contextFactory.CreateDbContextAsync();
+        await using var cxt = await contextFactory.CreateDbContextAsync(cancellationToken);
 
         var existingLoanRequest = await cxt.LoanRequests
                         .Include(x => x.LoanDescriptions)
@@ -438,8 +286,6 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
             return Error.Unexpected($"{ex.Message}");
         }
     }
-
-
     public async Task<ErrorOr<RequestResult>> DeniedLoanRequestAsync(DeniedRequestDtoCreate req, CancellationToken cancellationToken = default)
     {
         await using var cxt = await contextFactory.CreateDbContextAsync(cancellationToken);
@@ -476,7 +322,6 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
             return Error.Unexpected($"{ex.Message}");
         }
     }
-
     public async Task<ErrorOr<RequestResult>> VerifiedLoanRequestAsync(RequestDtoBaseCreate req, CancellationToken cancellationToken = default)
     {
         await using var cxt = await contextFactory.CreateDbContextAsync(cancellationToken);
@@ -510,7 +355,6 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
             return Error.Unexpected($"{ex.Message}");
         }
     }
-
     public async Task<ErrorOr<RequestResult>> RecheckedLoanRequestAsync(RecheckedRequestDtoCreate req, CancellationToken cancellationToken = default)
     {
 
@@ -565,8 +409,6 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
             return Error.Unexpected($"Error due to : {ex.Message}");
         }
     }
-
-
     public async Task<ErrorOr<RequestResult>> AppliedLoanRequestAsync(RequestDtoBaseCreate req, CancellationToken cancellation = default)
     {
         await using var cxt = await contextFactory.CreateDbContextAsync(cancellation);
@@ -594,6 +436,55 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
         return updateResult > 0
             ? new RequestResult(true, "Loan Request was Approved")
             : Error.Unexpected("cannot be approved the loan Request.");
+    }
+
+    public async Task<ErrorOr<RequestResult>> PassLoanRequestAsync(PassRequestDtoCreate req, CancellationToken cancellationToken = default)
+    {
+
+
+        logger.LogInformation("Approving loan request for LoanRequestId: {LoanRequestId}, BranchRefId: {BranchRefId}, CustomerRefId: {CustomerId}",
+            req.LoanRequestId, req.BranchId, req.CustomerId);
+
+
+        await using var cxt = await contextFactory.CreateDbContextAsync();
+
+        var existingLoanRequest = await cxt.LoanRequests
+                                            .FirstOrDefaultAsync(x => x.LoanRequestId == req.LoanRequestId &&
+                                                    x.BranchRefId == req.BranchId &&
+                                                    x.CustomerRefId == req.CustomerId, cancellationToken);
+        if (existingLoanRequest is null)
+        {
+            return Error.NotFound(LoanRequestMessage.REQUEST_NOT_FOUND);
+        }
+
+        if (existingLoanRequest.EditSeq != existingLoanRequest.EditSeq)
+        {
+            return Error.NotFound(LoanRequestMessage.REQUEST_NOT_FOUND);
+        }
+
+        using var transaction = await cxt.Database.BeginTransactionAsync(cancellationToken);
+
+        try
+        {
+            existingLoanRequest.LoanRequestStatusRefId = (int)RequestStatus.InProgress;
+
+            existingLoanRequest.ModifiedDt = DateTime.UtcNow;
+
+            await cxt.SaveChangesAsync(cancellationToken);
+
+            await transaction.CommitAsync(cancellationToken);
+
+            return new RequestResult(true, "Loan Request was send");
+        }
+        catch (Exception ex)
+        {
+
+            logger.LogError(ex, "Failed to approve loan request for LoanRequestId: {LoanRequestId}, BranchRefId: {BranchRefId}, CustomerRefId: {CustomerId}", req.LoanRequestId, req.BranchId, req.CustomerId);
+
+            await transaction.RollbackAsync(cancellationToken);
+
+            return Error.Unexpected($"{ex.Message}");
+        }
     }
 
 
@@ -1658,26 +1549,21 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
         return new Pager<VLoanRequests>(items, totalCount);
     }
 
-    public async Task<Pager<VLoanRequests>> GetLoanRequestsAsync(string? userId, int? branchId, RequestStatus requestStatus, QueryParam param)
+    public async Task<Pager<VLoanRequests>> GetLoanRequestsAsync(string? userId, int? branchId,
+           RequestStatus requestStatus,
+           QueryParam param,
+           CancellationToken cancellationToken = default)
     {
-        await using var context = await contextFactory.CreateDbContextAsync();
+        await using var context = await contextFactory.CreateDbContextAsync(cancellationToken);
 
         IQueryable<VLoanRequests> query = context.VLoanRequests
-            .Where(x => x.BranchId == branchId)
+            .WhereIf(branchId is not null && branchId > 0, x => x.BranchId == branchId)
             .WhereIf(!string.IsNullOrEmpty(param.Filter),
                 x => EF.Functions.Like(x.BranchName!, $"{param.Filter}%") ||
                      EF.Functions.Like(x.AltName!, $"{param.Filter}%") ||
                      EF.Functions.Like(x.FullName!, $"{param.Filter}%"));
-
-        // --- CASE 1: Anonymous (no userId)
-        if (string.IsNullOrEmpty(userId))
+        if (!string.IsNullOrEmpty(userId))
         {
-            query = query.Where(x => x.StatusId == (int)RequestStatus.Approved &&
-                                     x.BranchId == branchId);
-        }
-        else
-        {
-            // --- CASE 2: Authenticated user (has userId)
             query = requestStatus switch
             {
                 RequestStatus.All
@@ -1702,17 +1588,27 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
                 _ => query.Where(x => x.StatusId == (int)requestStatus)
             };
         }
-
-        // --- Sorting
-        if (param.SortDescending)
-            query = query.OrderByDescending(x => EF.Property<object>(x, param.SortColumn!));
         else
-            query = query.OrderBy(x => EF.Property<object>(x, param.SortColumn!));
+        {
+            query = requestStatus switch
+            {
+                RequestStatus.All => query,
+                _ => query.Where(x => x.StatusId == (int)requestStatus)
+            };
+        }
+        // --- Sorting
+        if (param.SortDescending && !string.IsNullOrEmpty(param.SortColumn))
+            query = query.OrderByDescending(x => EF.Property<object>(x, param.SortColumn));
+        else if (!string.IsNullOrEmpty(param.SortColumn))
+            query = query.OrderBy(x => EF.Property<object>(x, param.SortColumn));
 
         // --- Paging
         var totalCount = await query.CountAsync();
 
-        var items = await query.Skip(param.Page).Take(param.Take).AsNoTracking().ToListAsync();
+        var items = await query.Skip(param.Page)
+                    .Take(param.Take)
+                    .AsNoTracking()
+                    .ToListAsync(cancellationToken);
 
         return new Pager<VLoanRequests>(items, totalCount);
     }
@@ -2129,117 +2025,122 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
 
 }
 
-
-
-//public async Task<Pager<VLoanRequests>> GetLoanRequestsAsync(string? userId, string? userRole, int? branchId, RequestStatus requestStatus, QueryParam param)
-//{
-//    await using var context = await contextFactory.CreateDbContextAsync();
-
-//    IQueryable<VLoanRequests> query = context.VLoanRequests
-//        .Where(x => x.BranchId == branchId)
-//        .WhereIf(!string.IsNullOrEmpty(param.Filter),
-//            x => EF.Functions.Like(x.BranchName!, $"%{param.Filter}%") ||
-//                 EF.Functions.Like(x.AltName!, $"%{param.Filter}%") ||
-//                 EF.Functions.Like(x.FullName!, $"%{param.Filter}%"));
-
-//    // CASE 1: Anonymous user
-//    if (string.IsNullOrEmpty(userId))
-//    {
-//        query = query.Where(x => x.StatusId == (int)RequestStatus.Approved);
-//    }
-//    else
-//    {
-//        // CASE 2: Authenticated user — filter based on role
-//        switch (userRole?.ToLower())
-//        {
-//            case "admin":
-//            case "manager":
-//                // Admin or manager can view all loan requests for the branch
-//                query = ApplyStatusFilter(query, requestStatus);
-//                break;
-
-//            case "loanofficer":
-//                // Loan officer sees only their own requests
-//                query = ApplyStatusFilter(query.Where(x => x.UserRequestId == userId), requestStatus);
-//                break;
-
-//            case "approver":
-//            case "checker":
-//                // Approvers/checkers see requests assigned to them
-//                query = ApplyStatusFilter(query.Where(x => x.AprovedUserId == userId), requestStatus);
-//                break;
-
-//            default:
-//                // Default fallback: treat as normal user
-//                query = ApplyStatusFilter(query.Where(x => x.UserRequestId == userId), requestStatus);
-//                break;
-//        }
-//    }
-
-//    // Sorting
-//    query = param.SortDescending
-//        ? query.OrderByDescending(x => EF.Property<object>(x, param.SortColumn!))
-//        : query.OrderBy(x => EF.Property<object>(x, param.SortColumn!));
-
-//    // Paging
-//    var totalCount = await query.CountAsync();
-//    var items = await query.Skip(param.Page).Take(param.PageSize).AsNoTracking().ToListAsync();
-
-//    return new Pager<VLoanRequests>(items, totalCount);
-//}
-//public async Task<ErrorOr<RequestResult>> CreateNewOrSaveLoanRequestAsync(LoanRequest req, CancellationToken cancellationToken = default)
+//public async Task<ErrorOr<RequestResult>> SaveLoanRequestAsync(LoanRequest req, CancellationToken cancellationToken = default)
 //{
 //    logger.LogInformation("Creating loan request for CustomerRefId: {CustomerRefId}", req.CustomerRefId);
-
-//    if (await CheckExistingLoanRequest(req.CustomerRefId))
-//        return Error.Conflict("Loan Request already exists.");
-
-//    if (await CheckExistingHasLoan(req.CustomerRefId))
-//        return Error.Conflict("Customer has active loan.");
-//
-//    await using var cxt = await contextFactory.CreateDbContextAsync(cancellationToken);
-//
-//    var existingRequest = await cxt.LoanRequests
-//        .Include(c => c.CollateralLinesLink)
-//        .Include(g => g.GuarantorsLink)
-//        .Include(x => x.LoanDocuments)
-//        .Include(x => x.LoanDescriptions)
-//        .Include(x => x.CoPawnRequests)
-//        .FirstOrDefaultAsync(x => x.LoanRequestId == req.LoanRequestId &&
-//                                  x.CustomerRefId == req.CustomerRefId &&
-//                                  x.LoanRequestStatusRefId == (int)RequestStatus.New, cancellationToken);
-//
-//    await using var transaction = await cxt.Database.BeginTransactionAsync(cancellationToken);
-//
 //    try
 //    {
-//        if (existingRequest is null)
-//        {
-//            cxt.LoanRequests.Add(req);
-//        }
-//        else
-//        {
-//            cxt.Entry(existingRequest).CurrentValues.SetValues(req);
+//        await using var cxt = await contextFactory.CreateDbContextAsync(cancellationToken);
 
-//            if (req.LoanDescriptions.Count != 0)
-//                existingRequest.LoanDescriptions.AddRange(req.LoanDescriptions);
-
-//            MergeCollection(cxt, existingRequest.GuarantorsLink, req.GuarantorsLink, x => x.Id);
-//            MergeCollection(cxt, existingRequest.CollateralLinesLink, req.CollateralLinesLink, x => x.Id);
-//            MergeCollection(cxt, existingRequest.CoPawnRequests, req.CoPawnRequests, x => x.Id);
+//        if (await CheckExistingLoanRequestNotRequested(req.CustomerRefId))
+//        {
+//            return Error.Conflict("Loan Request already exists.");
 //        }
 
-//        await cxt.SaveChangesAsync(cancellationToken);
+//        if (await CheckExistingHasLoan(req.CustomerRefId))
+//        {
+//            return Error.Conflict("Customer has active loan.");
+//        }
 
-//        await transaction.CommitAsync(cancellationToken);
+//        var existingRequest = await cxt.LoanRequests
+//            .Include(c => c.CollateralLinesLink)
+//                .ThenInclude(x => x.CollateralLine)
+//            .Include(g => g.GuarantorsLink)
+//                .ThenInclude(x => x.Guarantor)
+//            .Include(x => x.LoanDocuments)
+//            .Include(x => x.LoanDescriptions)
+//            .FirstOrDefaultAsync(x => x.LoanRequestId == req.LoanRequestId &&
+//                        x.CustomerRefId == req.CustomerRefId &&
+//                        (x.LoanRequestStatusRefId == (int)RequestStatus.New ||
+//                        x.LoanRequestStatusRefId == (int)RequestStatus.Rechecked), cancellationToken);
 
-//        return new RequestResult(true, "New Loan Request was created.");
+//        using var transaction = await cxt.Database.BeginTransactionAsync(cancellationToken);
+
+//        try
+//        {
+//            if (existingRequest is null)
+//            {
+//                cxt.LoanRequests.Add(req);
+//            }
+//            else
+//            {
+//                cxt.Entry(existingRequest).CurrentValues.SetValues(req);
+
+//                if (req.LoanDescriptions.Any())
+//                {
+//                    existingRequest.LoanDescriptions.AddRange(req.LoanDescriptions);
+//                }
+
+//                foreach (var item in req.GuarantorsLink)
+//                {
+//                    var existingGuarantor = existingRequest.GuarantorsLink.FirstOrDefault(x => x.Id == item.Id);
+
+//                    if (existingGuarantor is null || existingGuarantor.Id == 0)
+//                    {
+//                        existingRequest.GuarantorsLink.Add(item);
+//                    }
+//                    else
+//                    {
+//                        cxt.Entry(existingGuarantor).CurrentValues.SetValues(item);
+//                    }
+//                }
+
+//                foreach (var item in req.CollateralLinesLink)
+//                {
+//                    var existingCollateralLine =
+//                        existingRequest.CollateralLinesLink.FirstOrDefault(x => x.Id == item.Id);
+
+//                    if (existingCollateralLine is null || existingCollateralLine.Id == 0)
+//                    {
+//                        existingRequest.CollateralLinesLink.Add(item);
+//                    }
+//                    else
+//                    {
+//                        cxt.Entry(existingCollateralLine).CurrentValues.SetValues(item);
+//                    }
+//                }
+
+//                foreach (var item in existingRequest.CollateralLinesLink)
+//                {
+//                    if (!(req.CollateralLinesLink.Any(x => x.Id == item.Id)))
+//                    //context.Remove(item);
+//                    {
+//                        cxt.Remove(item);
+//                    }
+//                }
+
+//                foreach (var item in existingRequest.GuarantorsLink)
+//                {
+//                    if (!(req.GuarantorsLink.Any(x => x.Id == item.Id)))
+//                    //context.Remove(item);
+//                    {
+//                        cxt.Remove(item);
+//                    }
+//                }
+
+
+//            }
+
+//            AddNotification(cxt, req, NotificationType.New);
+
+//            await cxt.SaveChangesAsync(cancellationToken);
+
+//            await transaction.CommitAsync(cancellationToken);
+
+//            return new RequestResult(true, "New Loan Request was created.");
+//        }
+//        catch (Exception ex)
+//        {
+//            await transaction.RollbackAsync(cancellationToken);
+
+//            return Error.Unexpected(ex.Message);
+//        }
+
 //    }
+
 //    catch (Exception ex)
 //    {
 //        logger.LogError(ex, "Failed to create loan request for CustomerRefId: {CustomerRefId}", req.CustomerRefId);
-//        await transaction.RollbackAsync(cancellationToken);
 //        return Error.Unexpected(ex.Message);
 //    }
-
 //}

@@ -1,0 +1,450 @@
+﻿@page "/App/Loans/Managers/Disbursments/{BranchId:int}/Branches"
+@using Applications.Features.Loans.Dtos.Responses
+@using TrapchumApp.Pages.Transactions.Loans.Disbursements
+@using TrapchumApp.Pages.Transactions.Loans.LoanTabs
+<PageTitle>All</PageTitle>
+<GridToolbar SearchChanged="@TextLoanSearchChanged">
+    <LeftChildren>
+        <RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal">
+            <RadzenText TagName="TagName.Span" Text="Filter By:" TextStyle="TextStyle.Body2" />
+            <RadzenFormField Text="From">
+                <RadzenDatePicker TValue="DateTime?"
+                                  Change="@DateFromChanged"
+                                  DateFormat="dd/MM/yyyy" @bind-Value="@_from" />
+            </RadzenFormField>
+            <RadzenFormField Text="To">
+                <RadzenDatePicker TValue="DateTime?"
+                                  Change="@DateToChanged"
+                                  DateFormat="dd/MM/yyyy" @bind-Value="@_to" />
+            </RadzenFormField>
+        </RadzenStack>
+    </LeftChildren>
+    <RightChildren>
+        <RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal">
+            <RadzenCheckBox TValue="bool"
+                            @bind-Value="includeInactive"
+                            @bind-Value:after="CheckedIncludeChanged"
+                            Name="IncludeInactive" />
+            <RadzenLabel Text="Include Inactive"
+                         Component="IncludeInactive" class="rz-ms-2" />
+        </RadzenStack>
+    </RightChildren>
+</GridToolbar>
+
+<RadzenTabs TabPosition="TabPosition.Top" RenderMode="TabRenderMode.Server" SelectedIndex="@_selectedIndex">
+    <Tabs>
+        <RadzenTabsItem Text="All Loans">
+            <Template>
+                <span class="rz-ms-2">
+                    All Loans
+                    <RadzenBadge BadgeStyle="BadgeStyle.Secondary" IsPill="@true" Text="@counts.ToString()" class="rz-ms-1" />
+                </span>
+            </Template>
+            <ChildContent>
+                <RadzenDataGrid Data="LoanItems"
+                                TItem="VLoanDisbursments"
+                                Count="@counts"
+                                PageSize="pageSize"
+                                Density="Density.Compact"
+                                GridLines="DataGridGridLines.Both"
+                                LoadData="@LoadData"
+                                AllowSorting="true"
+                                Responsive="true"
+                                PagerPosition="PagerPosition.Bottom"
+                                ShowPagingSummary="true"
+                                PagerHorizontalAlign="HorizontalAlign.Right"
+                                AllowRowSelectOnRowClick="true"
+                                PageSizeChanged="@ChangedPageSize"
+                                RowSelect="@OnRowSelected"
+                                RowRender="@OnRowRender"
+                                CellContextMenu="@ContextMenuClick"
+                                PageSizeOptions="@StorageConstant.PageSizeOptions"
+                                Style="height:30rem;max-height:40rem;overflow:auto;margin:0;padding:0;"
+                                AllowPaging="true">
+                    <Columns>
+                        <RadzenDataGridColumn Context="p"
+                                              Width="3rem"
+                                              Title="#"
+                                              Sortable="false">
+                            <Template>
+                                @p.RowIndex
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Property="RegisterDate"
+                                              Context="p"
+                                              Title="Date"
+                                              Sortable="true">
+                            <Template>
+                                @p.RegisterDate!.Value.ToShortDateString()
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Context="p"
+                                              Property="AltName"
+                                              Title="Name"
+                                              Sortable="true">
+                            <Template>
+                                <TrapchumApp.Pages.Lists.KhmerName AltName="@p.AltName" />
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Context="p"
+                                              Title="Principle"
+                                              Property="Principle"
+                                              TextAlign="TextAlign.Right"
+                                              Sortable="true">
+                            <Template>
+                                @p.Principle.Format(p.CurrencyId)
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Context="p"
+                                              Title="Interest"
+                                              Property="InterestRate"
+                                              TextAlign="TextAlign.Right"
+                                              Sortable="true">
+                            <Template>
+                                @p.InterestRate (%) / @p.PeriodName
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Context="p"
+                                              Title="Paid Principle"
+                                              Property="PaidPrinciple"
+                                              TextAlign="TextAlign.Right"
+                                              Sortable="true">
+                            <Template>
+                                @p.PaidPrinciple.Format(p.CurrencyId)
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Context="p"
+                                              Title="OutStanding"
+                                              Property="OutStanding"
+                                              TextAlign="TextAlign.Right"
+                                              Sortable="true">
+                            <Template>
+                                @p.OutStanding.Format(p.CurrencyId)
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Context="p"
+                                              Title="Agent"
+                                              Property="AgentName"
+                                              TextAlign="TextAlign.Start"
+                                              Sortable="true">
+                            <Template>
+                                @p.AgentName
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Context="p"
+                                              Title="Status"
+                                              Property="LoanStatus"
+                                              Width="8rem"
+                                              TextAlign="TextAlign.Center"
+                                              Sortable="true">
+                            <Template>
+                                <RadzenBadge Text="@p.LoanStatus"
+                                             IsPill="true"
+                                             Variant="Variant.Filled"
+                                             BadgeStyle="@GetLoanStatusBadgeStyle(p.LoanstatusId)"
+                                             Style="font-size:0.7rem;" />
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Context="p"
+                                              Title="Actions"
+                                              Width="6rem"
+                                              TextAlign="TextAlign.Center"
+                                              Sortable="true">
+                            <Template>
+
+                                <RadzenButton Size="ButtonSize.ExtraSmall"
+                                              Icon="more_vert"
+                                              Variant="Variant.Text"
+                                              Click="@((args)=>ShowContextMenuWithContent(args,p))" />
+
+                            </Template>
+                        </RadzenDataGridColumn>
+                    </Columns>
+                </RadzenDataGrid>
+            </ChildContent>
+        </RadzenTabsItem>
+
+        @foreach (var item in _loanTabs)
+        {
+            <RadzenTabsItem Text="@item.Title" @key="@item.TabId">
+                <Template>
+                    <ClosedTab Closed="@CloseTab" Title="@item.Title" TabId="@item.TabId" />
+                </Template>
+                <ChildContent>
+                    @item.ChildContent
+                </ChildContent>
+            </RadzenTabsItem>
+
+        }
+
+    </Tabs>
+</RadzenTabs>
+
+@code {
+
+    private List<LoanTab> _loanTabs = [];
+    private int _selectedIndex = 0;
+
+    void OpenDetailsTab(VLoanDisbursments item)
+    {
+
+        var existingIndex = _loanTabs.FindIndex(x => x.TabId == item.LoanId);
+
+        if (existingIndex != -1)
+        {
+            _selectedIndex = existingIndex + 1;
+            StateHasChanged();
+            return;
+        }
+
+        RenderFragment content = builder =>
+       {
+           builder.OpenComponent<LoanDetails>(0);
+           builder.AddAttribute(1, "LoanId", item.LoanId);
+           builder.AddAttribute(2, "BranchId", item.BranchId);
+           builder.AddAttribute(3, "CurrencyId", item.CurrencyId);
+           builder.SetKey(item.LoanId);
+           builder.CloseComponent();
+       };
+
+        var newTab = new LoanTab
+        {
+            TabId = item.LoanId ?? string.Empty,
+            Title = item.AltName ?? string.Empty,
+            ChildContent = content
+        };
+
+
+        _loanTabs.Add(newTab);
+
+        _selectedIndex = _loanTabs.Count; // Select the newly added tab
+
+    }
+
+
+    private void CloseTab(string id)
+    {
+        var tab = _loanTabs.FirstOrDefault(t => t.TabId == id);
+
+        if (tab != null)
+        {
+            var idx = _loanTabs.IndexOf(tab);
+
+            _loanTabs.Remove(tab);
+
+            _selectedIndex = Math.Max(0, idx);
+        }
+    }
+
+
+    [Parameter]
+    public VLoanDisbursments? Data { get; set; }
+    [CascadingParameter]
+    Task<AuthenticationState> AuthState { get; set; } = default!;
+    [Parameter]
+    public EventCallback<VLoanDisbursments> OpenDetailTab { get; set; }
+
+    private string _getPaymentSchedulesUrl = "";
+    private string _getSchedulePayOffUrl = "";
+    private string _getChangeCreditAgentUrl = "";
+    private string _getLoanDetailsUrl = "";
+    private string _getLoanWriteOffUrl = "";
+    private string _loanPayOffUrl = "";
+    private string _loanCollateralWidthrawUrl = "";
+
+    void GetLoanDetails(VLoanDisbursments? p)
+    {
+        ContextMenuService.Close();
+
+        if (p is null) return;
+
+        _getLoanDetailsUrl = $"/App/Loans/Managers/{p.LoanId}/Requests/{p.BranchId}/Branches/{p.CustomerId}/Details";
+
+        NavigationManager.NavigateTo(_getLoanDetailsUrl);
+    }
+
+    void GetPaymentSchedules(VLoanDisbursments? p)
+    {
+        ContextMenuService.Close();
+
+        if (p is null) return;
+
+        _getPaymentSchedulesUrl = $"/App/Loans/{p.BranchId}/Branches/{p.LoanId}/Schedules?CreditAgentId={p.CreditAgentRefId}&CurrencyId={p.CurrencyId}";
+
+        NavigationManager.NavigateTo(_getPaymentSchedulesUrl);
+    }
+
+    void ChangeCreditAgent()
+    {
+        ContextMenuService.Close();
+
+        NavigationManager.NavigateTo($"/App/Loan/{Data!.LoanId}/CreditAgent/{Data.CreditAgentRefId}?CustomerId={Data.CustomerId}&BranchId={Data.BranchId}&CurrencyId={Data.CurrencyId}");
+    }
+    void CustomerPayOff()
+    {
+        ContextMenuService.Close();
+
+        NavigationManager.NavigateTo($"/Loan/CreditAgent/{Data!.LoanId}/{Data.CreditAgentRefId}?CustomerId={Data.CustomerId}&BranchId={Data.BranchId}&CurrencyId={Data.CurrencyId}");
+    }
+
+    async Task DownLoadScheduleAsExcel(VLoanDisbursments? p)
+    {
+        ContextMenuService.Close();
+
+        if (p is not null)
+        {
+            if (p.LoanId.IsNotNullOrEmpty() && p.BranchId > 0)
+            {
+                await js.InvokeVoidAsync("open", $"/Reports/Schedules/{p.LoanId}/{p.BranchId}/Exel", "_blank");
+            }
+        }
+    }
+    private async Task DownLoadScheduleAsPdf(VLoanDisbursments? p)
+    {
+        ContextMenuService.Close();
+
+        if (p is not null)
+        {
+            var fileName = $"Loan_Schedule_{Guid.CreateVersion7()}.pdf";
+
+            if (p.LoanId.IsNotNullOrEmpty() && p.BranchId > 0)
+            {
+                await js.InvokeVoidAsync("open", $"/Reports/Schedules/{p.LoanId}/{p.BranchId}/{fileName}", "_blank");
+            }
+        }
+    }
+
+
+    void ShowContextMenuWithContent(MouseEventArgs args, VLoanDisbursments p)
+    {
+
+        _getSchedulePayOffUrl = $"/Loan/CreditAgent/{p.LoanId}/{p.CreditAgentRefId}?CustomerId={p.CustomerId}&BranchId={p.BranchId}&CurrencyId={p.CurrencyId}";
+
+        _getPaymentSchedulesUrl = $"/App/Loans/{p.BranchId}/Branches/{p.LoanId}/Schedules?CreditAgentId={p.CreditAgentRefId}&CurrencyId={p.CurrencyId}";
+
+        _getLoanDetailsUrl = $"/App/Loans/Managers/{p.LoanId}/Requests/{p.BranchId}/Branches/{p.CustomerId}/Details"; ;
+
+        _getChangeCreditAgentUrl = $"App/Loans/Disbursments/Credit-Agent/{p.BranchId}/Branches?CreditAgentId={p.CreditAgentRefId}";
+
+        _loanPayOffUrl = $"/App/Loan/{p.LoanId}/Branches/{p.BranchId}/loan-payoff?currencyId={p.CurrencyId}";
+
+        _loanCollateralWidthrawUrl = $"/App/Loans/{p.LoanId}/WidthrwalCollateral/{p.BranchId}/Branches";
+
+        ContextMenuService.Open(args, ds => @<RadzenMenu Style="font-size:0.8rem;">
+            <RadzenMenuItem Icon="money"
+                            Path="@_getPaymentSchedulesUrl"
+                            Visible="@bState.CanRecievePayment"
+                            Text="Recieve Payment"></RadzenMenuItem>
+            <RadzenMenuItem Icon="paid"
+                            Path="@_getSchedulePayOffUrl"
+                            Visible="@bState.CanPayOff"
+                            Text="Pay Off"></RadzenMenuItem>
+            <RadzenMenuItem Icon="paid"
+                            Path="@_getLoanWriteOffUrl"
+                            Visible="@bState.CanWriteOff"
+                            Text="Write Off"></RadzenMenuItem>
+            <RadzenMenuItem Icon="money"
+                            Path="@_loanPayOffUrl"
+                            Visible="@bState.CanPayOff"
+                            Text="Pay Off"></RadzenMenuItem>
+            <RadzenMenuItem Icon="change_circle"
+                            Path="@_getChangeCreditAgentUrl"
+                            Visible="@bState.IsManager"
+                            Text="Change Credit Agent"></RadzenMenuItem>
+            <RadzenMenuItem Icon="info"
+                            Path="@_getLoanDetailsUrl"
+                            Text="Schedule Details"></RadzenMenuItem>
+            <RadzenMenuItem Icon="info"
+                            Path="@_loanCollateralWidthrawUrl"
+                            Text="Widtraw Collaterals"></RadzenMenuItem>
+            <RadzenMenuItem Icon="file_download"
+                            Click="@(()=>DownLoadScheduleAsExcel(p))"
+                            Text="Export Loan to Excel" />
+            <RadzenMenuItem Icon="picture_as_pdf"
+                            Click="@(()=>DownLoadScheduleAsPdf(p))"
+                            Text="Export Loan to Pdf" />
+        </RadzenMenu>
+    );
+
+
+    }
+
+    static BadgeStyle GetLoanStatusBadgeStyle(int statusId) => statusId switch
+    {
+        1 => BadgeStyle.Success,   // Active
+        2 => BadgeStyle.Warning,   // Overdue
+        3 => BadgeStyle.Danger,    // Written-off
+        4 => BadgeStyle.Success,      // Closed / Paid-off
+        _ => BadgeStyle.Secondary
+    };
+
+    void OnRowSelected(VLoanDisbursments arg) { }
+
+    void OnRowRender(RowRenderEventArgs<VLoanDisbursments> arg)
+    {
+
+        if (arg.Data is null) return;
+
+        arg.Data.RowIndex = arg.Index + 1;
+    }
+
+    void ContextMenuClick(DataGridCellMouseEventArgs<VLoanDisbursments> args)
+    {
+
+        if (args.Data is null) return;
+
+        ContextMenuService.Open(args, new List<ContextMenuItem>
+        {
+            new ContextMenuItem { Text = "Recieve Payment", Value="1",Icon="money_bag",Disabled=!bState.CanRecievePayment},
+            new ContextMenuItem { Text = "Schedule Detials", Value="2",Icon="info"},
+            new ContextMenuItem { Text = "Pay Off", Value="7",Icon="money",Disabled=!bState.CanPayOff},
+            new ContextMenuItem { Text = "Change Credit Agent", Value="5",Icon="find_replace",Disabled=!bState.IsManager},
+            new ContextMenuItem { Text = "Pre Paid", Value="6",Icon="money",Disabled=!bState.CanRecievePayment},
+            new ContextMenuItem { Text = "Widthraw Collaterals", Value="8",Icon="remove"},
+            new ContextMenuItem { Text = "Export As Excel", Value="3", Icon="file_download"},
+            new ContextMenuItem { Text = "Export As Pdf", Value="4", Icon="picture_as_pdf"},
+        }, (e) => DoContextMenuAction(e, args.Data));
+    }
+
+    void DoContextMenuAction(MenuItemEventArgs e, VLoanDisbursments? data)
+    {
+        ContextMenuService.Close();
+
+        if (e.Value is null) return;
+
+        if (data is null) return;
+
+        _loanCollateralWidthrawUrl = $"/App/Loans/{data.LoanId}/WidthrwalCollateral/{data.BranchId}/Branches";
+
+        switch (e.Value)
+        {
+            case "1":
+                GetPaymentSchedules(data);
+                break;
+            case "2":
+                GetLoanDetails(data);
+                break;
+            case "3":
+                _ = DownLoadScheduleAsExcel(data);
+                break;
+            case "4":
+                _ = DownLoadScheduleAsPdf(data);
+                break;
+            case "6":
+                NavigationManager.NavigateTo($"App/Loans/{data.LoanId}/Branches/{data.BranchId}/Payments?CreditAgentId={data.CreditAgentRefId}");
+                break;
+            case "7":
+                NavigationManager.NavigateTo($"/App/Loans/{data.LoanId}/Branches/{data.BranchId}/loan-payoff?currencyId={data.CurrencyId}");
+                break;
+            case "8":
+                NavigationManager.NavigateTo(_loanCollateralWidthrawUrl);
+                break;
+            default:
+                NavigationManager.NavigateTo($"App/Loans/Disbursments/Credit-Agent/{data.BranchId}/Branches?CreditAgentId={data.CreditAgentRefId}");
+                break;
+        }
+    }
+
+
+
+}

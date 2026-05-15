@@ -14,7 +14,7 @@
 </head>
 
 <body>
-    <div id="app-loading">
+    <div id="app-loading" style="display:none">
         <div class="app-loading-card">
             <div class="app-loading-logo">
                 <img src="/assets/logo/tch_Logo.ico" alt="Logo" />
@@ -24,7 +24,7 @@
                 <span></span>
                 <span></span>
             </div>
-            <p class="app-loading-text">Loading, please wait…</p>
+            <p class="app-loading-text">កំពុងផ្ទុក, សូមរងចាំ…………</p>
         </div>
     </div>
     <Routes @rendermode="@PageRenderMode" />
@@ -35,28 +35,25 @@
     <script src="@Assets["assets/js/dropdownoutsideclick.js"]"></script>
 
     <script>
-        // Mark logout navigations so the loading overlay is suppressed
-        document.addEventListener("submit", (e) => {
-            const form = e.target;
-            if (form && form.action && form.action.includes("Account/Logout")) {
-                sessionStorage.setItem("skipAppLoading", "1");
-            }
-        });
-
         window.addEventListener("DOMContentLoaded", () => {
+           
             const loading = document.getElementById("app-loading");
 
-            // Skip overlay entirely when coming from a logout
-            if (sessionStorage.getItem("skipAppLoading") === "1") {
-                sessionStorage.removeItem("skipAppLoading");
+            // Only show overlay after a successful login (flag set via cookie by server)
+            const hasCookie = document.cookie.split(';').some(c => c.trim() === 'showAppLoading=1');
+            if (!hasCookie) {
                 loading?.remove();
                 return;
             }
 
+            // Consume the cookie immediately so it only fires once
+            document.cookie = 'showAppLoading=; Max-Age=0; path=/';
+            loading.style.display = "";
+
             const removeLoading = () => {
                 if (loading) {
                     loading.classList.add("app-loading-fade-out");
-                    setTimeout(() => loading.remove(), 2000);
+                    setTimeout(() => loading.remove(), 1000);
                 }
             };
 

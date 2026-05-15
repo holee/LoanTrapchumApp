@@ -3,6 +3,7 @@ using Applications.Constants.Authorizations;
 using Applications.Extensions.Identity.Enumerations;
 using Applications.Helpers;
 using Domains.Models.Identity;
+using Domains.Models.Lists;
 using Infrastructures.DataAccess;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -14,14 +15,17 @@ namespace Infrastructures.Seeds
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly UserDataContext _context;
+        private readonly IDbContextFactory<DataContext> _dataContextFactory;
 
         public DatabaseSeeder(UserDataContext context,
             UserManager<ApplicationUser> userManager,
-            RoleManager<ApplicationRole> roleManager)
+            RoleManager<ApplicationRole> roleManager,
+            IDbContextFactory<DataContext> dataContextFactory)
         {
             _context = context;
             _userManager = userManager;
             _roleManager = roleManager;
+            _dataContextFactory = dataContextFactory;
         }
 
         public async Task DatabaseSeederAsync()
@@ -31,6 +35,7 @@ namespace Infrastructures.Seeds
             await SeedSystemUser();
             await SeedAdminUser();
             await SeedPermission();
+            await SeedBranchAsync();
         }
 
         private async Task CheckDatabaseMigrationAsync()
@@ -167,8 +172,11 @@ namespace Infrastructures.Seeds
             if (!await _userManager.Users.AnyAsync(u => u.Email == adminUser.Email))
             {
                 var password = new PasswordHasher<ApplicationUser>();
+
                 adminUser.PasswordHash = password.HashPassword(adminUser, SystemUser.Password);
+
                 await _userManager.CreateAsync(adminUser);
+
                 if (!await _userManager.IsInRoleAsync(adminUser, SystemRole.Admin))
                 {
                     await _userManager.AddToRoleAsync(adminUser, SystemRole.Admin);
@@ -184,17 +192,17 @@ namespace Infrastructures.Seeds
             var exsitingPersmissions = await _context.Permissions.ToListAsync();
 
             List<Permissions> ps = new();
-            
+
             foreach (var per in permissions)
             {
                 if (exsitingPersmissions.Any(x =>
-                        x.Module == per.Module && 
-                        x.Action == per.Action && 
+                        x.Module == per.Module &&
+                        x.Action == per.Action &&
                         x.Group == per.Group))
                 {
                     continue;
                 }
-                
+
                 ps.Add(new Permissions
                 {
                     Description = per.Description,
@@ -203,10 +211,36 @@ namespace Infrastructures.Seeds
                     Action = per.Action,
                     Module = per.Module,
                 });
-                
+
             }
             _context.Permissions.AddRange(ps);
+
             await _context.SaveChangesAsync();
+        }
+
+        private async Task SeedBranchAsync()
+        {
+            await using var dataContext = await _dataContextFactory.CreateDbContextAsync();
+
+            if (await dataContext.Branches.AnyAsync(x => x.BranchName == "Head Office" ||
+                                                       x.BranchName == "ការិយាល័យកណ្តាល" ||
+                                                       x.BranchName == "ការិយាល័យមេ"))
+            {
+                return;
+            }
+
+            var mainBranch = new Branch
+            {
+                BranchName = "Head Office",
+                Description = "Default main branch",
+                BankRefId = 11,
+                IsActive = true,
+            };
+
+            await dataContext.Branches.AddAsync(mainBranch);
+
+            await dataContext.SaveChangesAsync();
+
         }
 
         private async Task AssignPermissionsToRoleAsync(ApplicationRole role, IReadOnlyList<AppPermission> permissions)
@@ -231,6 +265,8 @@ namespace Infrastructures.Seeds
                 }
             }
         }
+
+
     }
 }
 

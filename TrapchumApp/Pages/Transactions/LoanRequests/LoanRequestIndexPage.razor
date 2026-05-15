@@ -5,7 +5,7 @@
     <RadzenTabs SelectedIndexChanged="SelectedIndexChanged" RenderMode="TabRenderMode.Server">
         <Tabs>
             <RadzenTabsItem Icon="list" Text="All">
-                <LoanRequestAll BranchId="@BranchId" UserId="@_userId" />
+                <LoanRequestAll BranchId="@BranchId" />
             </RadzenTabsItem>
             @foreach (var item in _tabs)
             {

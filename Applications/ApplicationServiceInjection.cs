@@ -13,11 +13,10 @@ using Applications.Features.Identity.Roles.Queries.GetRoles;
 using Applications.Features.Identity.Roles.Queries.GetRolesAsPaging;
 using Applications.Features.Identity.Roles.Requests;
 using Applications.Features.Identity.Roles.Responses;
-using Applications.Responses.Auths;
-using Applications.Responses.ViewModels.Auths;
 using Applications.Features.LoanRequests.Command.AddCoPawnCustomer;
 using Applications.Features.LoanRequests.Command.AddCoPawnCustomers;
 using Applications.Features.LoanRequests.Command.DeleteCoPawnCustomer;
+using Applications.Features.LoanRequests.Command.PassRequest;
 using Applications.Features.LoanRequests.Dtos;
 using Applications.Features.LoanRequests.Queryies.IsCoPawnExist;
 using Applications.Features.Locations.Command.CreateLocation;
@@ -38,7 +37,9 @@ using Applications.Features.Vendors.Dto.Responses;
 using Applications.Features.Vendors.Queries.GetUpdateVendorById;
 using Applications.Features.Vendors.Queries.GetVendorById;
 using Applications.Features.Vendors.Queries.GetVendorsAsPaging;
+using Applications.Responses.Auths;
 using Applications.Responses.Loans.Disbursements;
+using Applications.Responses.ViewModels.Auths;
 using Applications.Responses.ViewModels.Ledgers;
 using Domains.Models.Collaterals;
 using ErrorOr;
@@ -50,6 +51,11 @@ public static class ApplicationServiceInjection
     {
         services.AddValidatorsFromAssemblyContaining<GetCollateralLineDetailQueryValidator>();
         services.AddScoped<IMediator, SimpleMediator>();
+
+
+        services.AddScoped<IRequestHandler<PassRequestCommand, ErrorOr<RequestResult>>, PassRequestCommandHandler>();
+
+
 
         //Locations Services
         services.AddScoped<IRequestHandler<GetLocationsAsPagingQuery, Pager<LocationDto>>, GetLocationsAsPagingQueryHandler>();

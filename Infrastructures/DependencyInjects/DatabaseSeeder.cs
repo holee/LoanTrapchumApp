@@ -8,8 +8,13 @@ namespace Infrastructures.DependencyInjects
         public static async Task SeedSystemData(this IHost builder)
         {
             using var scope = builder.Services.CreateScope();
+
             var seeder = scope.ServiceProvider.GetService<Seeds.DatabaseSeeder>();
-            await seeder!.DatabaseSeederAsync();
+
+            if (seeder is not null)
+            {
+                await seeder.DatabaseSeederAsync();
+            }
         }
     }
 }

@@ -4,7 +4,9 @@ using Applications.Features.LoanRequests.Queryies.GetLoanRequestBy;
 using Applications.Features.LoanRequests.Requests;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Applications.Commons.Mappers.LoanRequests;
+using Applications.Features.LoanRequests.Command.PassRequest;
 namespace TrapchumApp.Pages.Transactions.LoanRequests;
+
 public partial class PassToModal(ILogger<ConfirmModal> logger)
 {
     [CascadingParameter] private Task<AuthenticationState> AuthenticationState { get; set; } = default!;
@@ -50,7 +52,12 @@ public partial class PassToModal(ILogger<ConfirmModal> logger)
         {
             isSaving = true;
 
-            var command = new ApprovedRequestCommand(model);
+            var command = new PassRequestCommand(new PassRequestDtoCreate
+            {
+                BranchId = BranchId,
+                LoanRequestId = LoanRequestId,
+                CustomerId = CustomerId,
+            });
 
             var resp = await mediator.Send(command);
 

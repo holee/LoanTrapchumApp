@@ -27,3 +27,11 @@ public class AproveLoanDtoCreate : RequestDtoBaseCreate
     public decimal? AprovedAmount { get; set; } = 0;
     public decimal? AdminFeeAmount { get; set; } = 0;
 }
+
+
+public sealed class PassRequestDtoCreate
+{
+    public string? CustomerId { get; set; }
+    public string? LoanRequestId { get; set; }
+    public int? BranchId { get; set; }
+}

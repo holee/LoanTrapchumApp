@@ -18,6 +18,7 @@ using ErrorOr;
 using Infrastructures.Constants;
 using Infrastructures.Constants.Procedures;
 using Infrastructures.DataAccess;
+using Infrastructures.Implements.Extensions;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -102,11 +103,11 @@ namespace Infrastructures.Implements
             }
         }
 
-      
-        
-        
-        
-        
+
+
+
+
+
         public async Task<ErrorOr<DisburseResult>> WidthrawalLoanCollateralsAsync(LoanDisbursment req, CancellationToken cancellation = default)
         {
 
@@ -340,12 +341,12 @@ namespace Infrastructures.Implements
         public async Task<Pager<VLoanDisbursments>> GetLoansByBranchId(int? branchId, string? userId, LoanStatuses status = LoanStatuses.Active, DateTime? start = null, DateTime? to = null, QueryParam? param = null, CancellationToken cancellation = default)
         {
 
-            param ??= new QueryParam();
+            param ??= new QueryParam(0, 15);
 
             await using var _context = await dbContextFactory.CreateDbContextAsync(cancellation);
 
             var queries = _context.VLoanDisbursements
-                                 .Where(x => x.BranchId == branchId)
+                                 .WhereIf(branchId.HasValue && branchId > 0, x => x.BranchId == branchId)
                                  .WhereIf((int)status > 0, x => x.LoanstatusId == (int)status)
                                  .WhereIf(!string.IsNullOrEmpty(userId), x => x.CreditAgentRefId == userId ||
                                                                                      x.AprovedUserId == userId ||
@@ -359,14 +360,11 @@ namespace Infrastructures.Implements
 
             if (!string.IsNullOrEmpty(param?.Filter))
             {
-                queries = queries.Where(x => EF.Functions.Like(x.CustomerName!, $"{param!.Filter}%") ||
-                                             EF.Functions.Like(x.AgentName!, $"{param!.Filter}%") ||
-                                             EF.Functions.Like(x.Phone!, $"{param!.Filter}%") ||
-                                             EF.Functions.Like(x.AltName!, $"{param!.Filter}%"));
+
+                string[] props = ["CustomerName", "AgentName", "Phone", "AltName"]; 
+                queries = queries.WhereMatchesFilter(param.Filter, props);
             }
 
-
-            // 🔹 Sorting
             if (!string.IsNullOrWhiteSpace(param!.SortColumn))
             {
                 queries = param.SortDescending

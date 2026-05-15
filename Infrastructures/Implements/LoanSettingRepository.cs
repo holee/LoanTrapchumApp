@@ -149,8 +149,12 @@ namespace Infrastructures.Implements
                                 {param.Filter} IS NULL 
                                 OR {param.Filter} = N'' 
                                 OR FullName LIKE  {param.Filter} + N'%'
-                                OR BranchName LIKE  {param.Filter} + N'%'
-                            )").AsNoTracking()
+                                OR BranchName LIKE  {param.Filter} + N'%')
+                           UNION
+                        SELECT *    
+                            FROM VUserLoanSizes
+                            WHERE IsActive = CAST(1 AS BIT) AND BranchName='Head Office'
+                            ").AsNoTracking()
                             .ToListAsync(cancellation);
 
             return items;

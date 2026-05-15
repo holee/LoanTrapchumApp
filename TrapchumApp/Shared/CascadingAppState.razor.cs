@@ -247,6 +247,7 @@ namespace TrapchumApp.Shared
             set
             {
                 _isBranchManager = value;
+
                 StateHasChanged();
             }
         }

@@ -4,19 +4,14 @@
     <input type="hidden" @bind="model!.LoanRequestId" />
     <input type="hidden" @bind="model!.BranchId" />
     <input type="hidden" @bind="model!.AdminFeeAmount" />
-
     <RadzenCard Variant="Variant.Outlined" class="rz-p-2 rz-background-color-base-150">
         <RadzenRow RowGap="1rem">
-            @* ── Amounts ── *@
             @ReadOnlyField("request_quote", "ចំនួនស្នើរសុំ", $"{Data?.RequestAmount:N2}")
             @ReadOnlyField("paid", "សេវារដ្ឋបាល", $"{Data?.AdminFeeAmount:N2}")
-            @* ── Details ── *@
             @ReadOnlyField("person", "អតិថិជន", Data?.AltName, khmerFont: true)
             @ReadOnlyField("business", "សាខា", Data?.BranchName, khmerFont: true)
             @ReadOnlyField("upload", "ស្នើរសុំដោយ", Data?.Summiter)
             @ReadOnlyField("verified_user", "អនុម័តដោយ", Data?.AprovedBy)
-
-            @* ── Note ── *@
             <RadzenColumn Size="12">
                 <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem" class="rz-mb-1">
                     <RadzenIcon Icon="notes" Style="font-size:1rem;color:var(--rz-base-600);" />

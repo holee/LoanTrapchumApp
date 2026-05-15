@@ -42,7 +42,7 @@ public static class InfrastructureServiceInjection
             options.UseSqlServer(connectionString);
         });
 
-        services.AddDbContext<UserDataContext>(options =>
+        services.AddDbContextFactory<UserDataContext>(options =>
         {
             options.UseSqlServer(connectionString);
         });

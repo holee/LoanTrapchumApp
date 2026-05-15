@@ -206,7 +206,9 @@ public partial class LoanRequestInfo(ILogger<LoanRequestCreate> logger)
         if (!principle.HasValue || principle < 0)
         {
             NotificationService.Notify(NotificationSeverity.Warning, "Invalid principle input");
+
             Model.RequestAmount = 0.00M;
+
             return;
         }
 

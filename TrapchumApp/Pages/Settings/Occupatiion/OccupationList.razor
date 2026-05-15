@@ -102,9 +102,9 @@
 
         _counts = rsp.Count;
 
-        Tracker.Hide();
-
         StateHasChanged();
+
+        Tracker.Hide();
     }
 
     private async Task LoadOccupation(LoadDataArgs args)

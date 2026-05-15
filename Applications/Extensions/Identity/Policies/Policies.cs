@@ -56,7 +56,7 @@ public partial class Policies
     {
         return new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
-                    .RequireRole(AppRoles.Manager)
+                    .RequireRole(AppRoles.Manager,AppRoles.Ceo)
                     .Build();
     }
 

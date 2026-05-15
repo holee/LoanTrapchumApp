@@ -102,8 +102,14 @@ namespace TrapchumApp.Pages.Identity.Authentications
             {
                 _logger.LogInformation("{UserName} has logged in.", Input.Email);
 
-
                 _isBusy = false;
+
+                HttpContext.Response.Cookies.Append("showAppLoading", "1", new CookieOptions
+                {
+                    HttpOnly = false,
+                    SameSite = SameSiteMode.Strict,
+                    MaxAge = TimeSpan.FromSeconds(30)
+                });
 
                 NavigationManager.NavigateTo(ReturnUrl ?? "/", true);
             }

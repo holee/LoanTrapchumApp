@@ -25,9 +25,8 @@ namespace TrapchumApp.Pages.Lists.Customers
         protected int totalCstomers;
         private int selectedIndex = 0;
         private string? customerId = string.Empty;
-        private bool isLoading = false;
-        private CustomerResponse? Customer;
-        private List<VCustomerList>? VCustomers = [];
+        [PersistentState] public List<VCustomerList>? VCustomers { get; set; }
+
         private bool includeInactive = false;
 
         private string filterText = string.Empty;
@@ -57,7 +56,10 @@ namespace TrapchumApp.Pages.Lists.Customers
 
             await BState.GetAuthenticatedUser(user);
 
-            await LoadCustomerPageList(null, null, filterText);
+            if (VCustomers is null)
+            {
+                await LoadCustomerPageList(null, null, filterText);
+            }
 
             await base.OnInitializedAsync();
         }
@@ -67,7 +69,6 @@ namespace TrapchumApp.Pages.Lists.Customers
         {
             selectedIndex = index;
         }
-
 
         async Task SearchCustomer(string? searchText = null)
         {
@@ -390,8 +391,6 @@ namespace TrapchumApp.Pages.Lists.Customers
             {
                 Tracker.Show();
 
-                isLoading = true;
-
                 var param = new QueryParam(pageIndex, pageSize, sortField, includeInactive, sortDescending, filter);
 
                 var command = new GetCustomerAsPagingQuery(branchId, userId, string.Empty, param);
@@ -402,16 +401,12 @@ namespace TrapchumApp.Pages.Lists.Customers
 
                 counts = rsp.Count;
 
-                isLoading = false;
-
                 Tracker.Hide();
 
                 StateHasChanged();
             }
             catch
             {
-                isLoading = false;
-
                 Tracker.Hide();
             }
         }

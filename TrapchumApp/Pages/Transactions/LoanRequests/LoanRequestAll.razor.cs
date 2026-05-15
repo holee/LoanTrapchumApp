@@ -11,9 +11,8 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
         [CascadingParameter] Task<AuthenticationState> AuthenticationState { get; set; } = default!;
         [CascadingParameter] private CascadingAppState bState { get; set; } = default!;
         [Parameter] public int BranchId { get; set; }
-        [Parameter] public string? UserId { get; set; }
 
-        ClaimsPrincipal? _user;
+        private ClaimsPrincipal? _user;
 
         IEnumerable<VLoanRequests> LoanRequests = [];
 
@@ -37,8 +36,6 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
             var auth = await AuthenticationState;
 
             _user = auth.User;
-
-            UserId = _user.GetId();
 
             _dropDownItrem = default(RequestStatus).ToEnumArray();
 
@@ -89,8 +86,6 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
             LoanRequests = rsp.Items;
 
             counts = rsp.Count;
-
-            isLoading = false;
 
             Tracker.Hide();
 
