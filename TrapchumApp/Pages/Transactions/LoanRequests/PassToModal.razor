@@ -1,4 +1,5 @@
-﻿<EditForm Model="@model" OnValidSubmit="@HandleFormRequest">
+﻿@using Applications.Features.Settings.Dto
+<EditForm Model="@model" OnValidSubmit="@HandleFormRequest">
     <FluentValidationValidator />
     <input type="hidden" @bind="model!.CustomerId" />
     <input type="hidden" @bind="model!.LoanRequestId" />
@@ -44,7 +45,10 @@
 </EditForm>
 
 @code {
+
     private bool isSaving;
+
+    private IEnumerable<VUserLoanSizes> AprovedUsers = [];
 
     static RenderFragment ReadOnlyField(string icon, string label, string? value, int sizeSM = 4, bool khmerFont = false) => __builder =>
     {

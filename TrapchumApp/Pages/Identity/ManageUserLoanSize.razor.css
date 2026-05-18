@@ -1,0 +1,8 @@
+::deep .rz-grid-table .rz-data-row:hover {
+    background-color: var(--rz-primary-lighter) !important;
+    cursor: context-menu;
+}
+
+::deep .rz-grid-table .rz-state-highlight {
+    cursor: context-menu;
+}

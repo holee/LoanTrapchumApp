@@ -15,7 +15,7 @@ using System.Linq.Expressions;
 
 namespace Infrastructures.Implements;
 
-public sealed class CurrencyRepository(IDbContextFactory<DataContext> contextFactory, IDapperConnectionFactory connectionFactory) : ICurrencyService
+public sealed class CurrencyRepository(IDbContextFactory<DataContext> contextFactory) : ICurrencyService
 {
 
     public async Task<ErrorOr<Currency>> GetCurrencyByIdAsync(int? currencyId, CancellationToken cancellationToken = default, params Expression<Func<Currency, object>>[] includes)

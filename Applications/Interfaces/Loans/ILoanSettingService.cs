@@ -13,5 +13,6 @@ namespace Applications.Interfaces.Loans
         Task<IEnumerable<LoanTypeStatus>> GetSubTypeStatus(string? q = null);
         Task<IEnumerable<VUserLoanSizes>> GetAprovedUserAsync(int? branchId, int? currencyId, decimal? amount, QueryParam param, CancellationToken cancellation = default);
         Task<Pager<LoanCategoryDto>> GetLoanCategories(int? id, QueryParam param, CancellationToken cancellation = default);
+        Task<Pager<VUserLoanSizes>> GetAprovedUsersAsync(int? branchId, int? currencyId, decimal? amount, QueryParam param, CancellationToken cancellation = default);
     }
 }

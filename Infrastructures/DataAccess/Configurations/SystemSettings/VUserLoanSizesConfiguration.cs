@@ -24,5 +24,6 @@ public class VUserLoanSizesConfiguration : IEntityTypeConfiguration<VUserLoanSiz
         builder.Property(x => x.Description).HasMaxLength(400);
         builder.Property(x => x.IsActive).HasDefaultValue(true);
         builder.Property(x => x.EditSeq).HasDefaultValue(0);
+        builder.HasQueryFilter(x => x.IsActive);
     }
 }

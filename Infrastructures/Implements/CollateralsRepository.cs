@@ -11,7 +11,7 @@ using System.Data;
 
 namespace Infrastructures.Implements;
 
-public sealed class CollateralsRepository(ILogger<CollateralsRepository> logger, IDapperConnectionFactory connectionFactory, IDbContextFactory<DataContext> dbContextFactory) : ICollateralsService
+public sealed class CollateralsRepository(ILogger<CollateralsRepository> logger, IDbContextFactory<DataContext> dbContextFactory) : ICollateralsService
 {
     public async Task<IEnumerable<CollateralSubTypeDto>> GetCollateralSubTypes(int? id, string? searchText = null)
     {

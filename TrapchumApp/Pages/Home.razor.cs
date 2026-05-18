@@ -14,7 +14,7 @@ namespace TrapchumApp.Pages
 {
     public partial class Home
     {
-
+        private bool _isPageLoading = true;     
         [Inject] private INationalityService NationalityService { get; set; } = default!;
 
         [CascadingParameter] Task<AuthenticationState> AuthState { get; set; } = default!;
@@ -49,17 +49,19 @@ namespace TrapchumApp.Pages
         private record PeriodItem(string Key, string Label);
         protected override async Task OnInitializedAsync()
         {
-
             var auth = await AuthState;
 
-            if (auth.User is not null && string.IsNullOrEmpty(UserId))
+            await bState.GetAuthenticatedUser(auth.User);
+
+            UserId = auth.GetUserId();
+
+            if (AccSummaries is null && CoSummaries is null && ManagerSummaries is null)
             {
-                await bState.GetAuthenticatedUser(auth.User);
-
-                UserId = auth.GetUserId();
-
                 await ShowDashboard();
-
+            }
+            else
+            {
+                _isPageLoading = false;
             }
 
             await base.OnInitializedAsync();
@@ -73,11 +75,13 @@ namespace TrapchumApp.Pages
         private async Task ShowDashboard()
         {
 
+            _isPageLoading = true;
+
             var command1 = new GetBranchByUserQuery(UserId);
 
             var rsp1 = await mediator.Send(command1);
 
-            if(rsp1.IsError)
+            if (rsp1.IsError)
             {
                 return;
             }
@@ -90,7 +94,7 @@ namespace TrapchumApp.Pages
 
                 var rsp2 = await mediator.Send(command2);
 
-                AccSummaries = rsp2.Items;
+                AccSummaries ??= rsp2.Items;
 
                 var command3 = new GetDbApprovedRequestQuery(branchId);
 
@@ -117,10 +121,10 @@ namespace TrapchumApp.Pages
 
                 var rsp4 = await mediator.Send(command4);
 
-                ManagerSummaries ??= rsp4.Value; 
+                ManagerSummaries ??= rsp4.Value;
             }
 
-
+            _isPageLoading = false;
 
         }
 
@@ -241,6 +245,6 @@ namespace TrapchumApp.Pages
             new DataItem { Quarter = "Q4", Revenue = 564000 }
         };
 
-       
+
     }
 }

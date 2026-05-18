@@ -37,6 +37,7 @@ namespace Applications.Interfaces.Loans
         Task<Pager<VSchedule>> GetDueScheduleLoanByIdAsync(string? loanId, int? branchId, CancellationToken cancellation = default);
         Task<Pager<VSchedule>> GetScheduleLoanByIdAsync(string? loanId, int? branchId, ScheduleStatus state, CancellationToken cancellation = default);
         Task<Pager<VLoanCollateral>> GetLoanCollaterals(string? loanId, int? branchId, CancellationToken cancellation = default);
+        Task<bool> WidthrawalLoanCollateralsAsync(IEnumerable<WidthrawCollateralDtoCreate> req, CancellationToken cancellation = default);
     }
 
 }

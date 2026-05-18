@@ -1,10 +1,11 @@
+using Applications.Commons.Mappers.LoanRequests;
 using Applications.Features.LoanRequests.Command.AddDescription;
 using Applications.Features.LoanRequests.Command.ApprovedLoanRequest;
+using Applications.Features.LoanRequests.Command.PassRequest;
 using Applications.Features.LoanRequests.Queryies.GetLoanRequestBy;
 using Applications.Features.LoanRequests.Requests;
+using Applications.Features.Settings.Queries.GetApprovedUsers;
 using Applications.Responses.ViewModels.Loans.Requests;
-using Applications.Commons.Mappers.LoanRequests;
-using Applications.Features.LoanRequests.Command.PassRequest;
 namespace TrapchumApp.Pages.Transactions.LoanRequests;
 
 public partial class PassToModal(ILogger<ConfirmModal> logger)
@@ -28,6 +29,8 @@ public partial class PassToModal(ILogger<ConfirmModal> logger)
         }
 
         logger.LogInformation("Initializing ConfirmModal for loan request with id {LoanRequestId} by user {UserId}", LoanRequestId, _userId);
+
+        //await GetApprovedUser();
 
         await base.OnInitializedAsync();
     }
@@ -111,6 +114,16 @@ public partial class PassToModal(ILogger<ConfirmModal> logger)
     }
 
     string currencyFormat = "N2";
+
+    private async Task GetApprovedUser()
+    {
+
+        var command = new GetApprovedUserQuery(4003, null, null, null);
+
+        var rsp = await mediator.Send(command); 
+
+        AprovedUsers = rsp.Value ?? [];
+    }
 
     async Task GetLoanRequest()
     {

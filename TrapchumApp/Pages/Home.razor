@@ -1,69 +1,79 @@
 ﻿@page "/"
+@using TrapchumApp.Components.Indicatros
 @using TrapchumApp.Helpers.Enums
 <PageTitle>Home</PageTitle>
-
+@attribute [Authorize]
+@attribute [StreamRendering]
 <AuthorizeView Policy="@Policies.CreditOfficerOnly">
     <Authorized>
-        <div class="db-page">
-            <div class="db-header">
-                <div class="db-header-text">
-                    <span class="db-title">Credit Officer</span>
-                    <span class="db-subtitle">Dashboard overview — due customers and performance</span>
+        @if (_isPageLoading)
+        {
+            <Loading Text="កំពុងផ្ទុកទិន្នន័យ..." />
+        }
+        else
+        {
+            <div class="db-page">
+                <div class="db-header">
+                    <div class="db-header-text">
+                        <span class="db-title">Credit Officer</span>
+                        <span class="db-subtitle">Dashboard overview — due customers and performance</span>
+                    </div>
+                    <RadzenBadge Text="CO" BadgeStyle="BadgeStyle.Primary" IsPill="true" />
                 </div>
-                <RadzenBadge Text="CO" BadgeStyle="BadgeStyle.Primary" IsPill="true" />
-            </div>
 
-            <div class="db-cards">
-                @foreach (var item in CoSummaries ?? [])
-                {
-                    <DashbordItem BackgroundColor="@GetGradientColor(item.CurrencyId)"
-                                  Icon="@IconNames.Customers"
-                                  Title="Due Customers">
-                        <ValueTemplete>@item.TotalCustomer</ValueTemplete>
+                <div class="db-cards">
+                    @foreach (var item in CoSummaries ?? [])
+                    {
+                        <DashbordItem BackgroundColor="@GetGradientColor(item.CurrencyId)"
+                                      Icon="@IconNames.Customers"
+                                      Title="Due Customers">
+                            <ValueTemplete>@item.TotalCustomer</ValueTemplete>
+                        </DashbordItem>
+                        <DashbordItem BackgroundColor="ColorEnum.Danger"
+                                      Icon="@IconNames.AccountBalanceWallet"
+                                      Title="@GetTitlePriciple(item.CurrencyId)">
+                            <ValueTemplete>@item.TotalPrinciple.Format(item.CurrencyId)</ValueTemplete>
+                        </DashbordItem>
+                        <DashbordItem BackgroundColor="ColorEnum.Warning"
+                                      Icon="@IconNames.Paid"
+                                      Title="@GetTitleInterest(item.CurrencyId)">
+                            <ValueTemplete>@item.TotalInterest.Format(item.CurrencyId)</ValueTemplete>
+                        </DashbordItem>
+                    }
+                    <DashbordItem BackgroundColor="ColorEnum.Success"
+                                  Icon="@IconNames.Group"
+                                  Title="Pending Requests">
+                        <ValueTemplete>1000</ValueTemplete>
                     </DashbordItem>
-                    <DashbordItem BackgroundColor="ColorEnum.Danger"
-                                  Icon="@IconNames.AccountBalanceWallet"
-                                  Title="@GetTitlePriciple(item.CurrencyId)">
-                        <ValueTemplete>@item.TotalPrinciple.Format(item.CurrencyId)</ValueTemplete>
-                    </DashbordItem>
-                    <DashbordItem BackgroundColor="ColorEnum.Warning"
-                                  Icon="@IconNames.Paid"
-                                  Title="@GetTitleInterest(item.CurrencyId)">
-                        <ValueTemplete>@item.TotalInterest.Format(item.CurrencyId)</ValueTemplete>
-                    </DashbordItem>
-                }
-                <DashbordItem BackgroundColor="ColorEnum.Success"
-                              Icon="@IconNames.Group"
-                              Title="Pending Requests">
-                    <ValueTemplete>1000</ValueTemplete>
-                </DashbordItem>
-            </div>
-
-            <RadzenCard class="db-chart-card" Variant="Variant.Outlined">
-                <div class="db-chart-header">
-                    <RadzenIcon Icon="bar_chart" class="db-chart-icon" />
-                    <span>Performance Overview</span>
                 </div>
-                <RadzenRow>
-                    <RadzenColumn Size="12" SizeMD="2">
-                        <RadzenListBox class="db-period-list"
-                                       Data="@_periods"
-                                       TextProperty="Label"
-                                       ValueProperty="Key"
-                                       @bind-Value="@_selectedPeriod"
-                                       Change="@((v) => OnParentClicked(v))"
-                                       TValue="string" />
-                    </RadzenColumn>
-                    <RadzenColumn Size="12" SizeMD="10">
-                        <RadzenChart>
-                            <RadzenColumnSeries Data="@revenue1" CategoryProperty="Quarter" ValueProperty="Revenue" Title="Principal" />
-                            <RadzenColumnSeries Data="@revenue2" CategoryProperty="Quarter" ValueProperty="Revenue" Title="Interest" />
-                            <RadzenLegend Position="LegendPosition.Bottom" />
-                        </RadzenChart>
-                    </RadzenColumn>
-                </RadzenRow>
-            </RadzenCard>
-        </div>
+
+                <RadzenCard class="db-chart-card" Variant="Variant.Outlined">
+                    <div class="db-chart-header">
+                        <RadzenIcon Icon="bar_chart" class="db-chart-icon" />
+                        <span>Performance Overview</span>
+                    </div>
+                    <RadzenRow>
+                        <RadzenColumn Size="12" SizeMD="2">
+                            <RadzenListBox class="db-period-list"
+                                           Data="@_periods"
+                                           TextProperty="Label"
+                                           ValueProperty="Key"
+                                           @bind-Value="@_selectedPeriod"
+                                           Change="@((v) => OnParentClicked(v))"
+                                           TValue="string" />
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="10">
+                            <RadzenChart>
+                                <RadzenColumnSeries Data="@revenue1" CategoryProperty="Quarter" ValueProperty="Revenue" Title="Principal" />
+                                <RadzenColumnSeries Data="@revenue2" CategoryProperty="Quarter" ValueProperty="Revenue" Title="Interest" />
+                                <RadzenLegend Position="LegendPosition.Bottom" />
+                            </RadzenChart>
+                        </RadzenColumn>
+                    </RadzenRow>
+                </RadzenCard>
+            </div>
+        }
+       
     </Authorized>
 </AuthorizeView>
 

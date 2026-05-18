@@ -19,6 +19,7 @@ using Applications.Features.LoanRequests.Command.DeleteCoPawnCustomer;
 using Applications.Features.LoanRequests.Command.PassRequest;
 using Applications.Features.LoanRequests.Dtos;
 using Applications.Features.LoanRequests.Queryies.IsCoPawnExist;
+using Applications.Features.Loans.Command.WidrawCollateral;
 using Applications.Features.Locations.Command.CreateLocation;
 using Applications.Features.Locations.Command.DeleteLocation;
 using Applications.Features.Locations.Command.UpdateLocation;
@@ -194,20 +195,9 @@ public static class ApplicationServiceInjection
         services.AddScoped<IRequestHandler<GetEmployeeByIdQuery, ErrorOr<EntityNames>>, GetEmployeeByIdQueryHandler>();
         services.AddScoped<IRequestHandler<GetEditEmployeeQuery, ErrorOr<EntityEmployeeCreate>>, GetEditEmployeeQueryHandler>();
 
-        //GetLoanRequestApprovedQuery
-
         services.AddScoped<IAddRecieptNumber, AddRecieptNumberUseCase>();
-        //services.AddScoped<IStartVaultInUseCase, StartVaultInUseCase>();
-        //services.AddScoped<IStartVaultOutUseCase, StartVaultOutUseCase>();
-        //services.AddScoped<IGetCashVaultUseCase, GetCashVaultUseCase>();
         services.AddScoped<IGetCustomersByUseCase, GetCustomersByUseCase>();
         services.AddScoped<ScheduleService>();
-        //services.AddScoped<GetCollateralDetailQueryHandler>();
-        //services.AddScoped<AddCustomerActivityUseCase>();
-        //services.AddScoped<GetCustomerActivityUseCase>();
-        //services.AddScoped<GetIncomeByCustomerQueryHandler>();
-        //services.AddScoped<GetCustomerDetailByIdUseCase>();
-        //services.AddScoped<GetCustomerByIdCommand>();
         services.AddScoped<SchedulePrintService>();
         services.AddScoped<IAddressServiceImpl, AddressService>();
         services.AddScoped<IBankServiceImpl, BankService>();
@@ -230,7 +220,6 @@ public static class ApplicationServiceInjection
         services.AddScoped<ILoanCategoryServiceImpl, LoanCategoryService>();
         services.AddScoped<ILoanProductServiceImpl, LoanProductService>();
         services.AddScoped<ILoanReportServiceImpl, LoanReportServiceImpl>();
-        //services.AddScoped<ILoanSettingServiceImpl, LoanSettingService>();
         services.AddScoped<INationalityServiceImpl, NationalityService>();
         services.AddScoped<IOtherNameServiceImpl, OtherNameService>();
         services.AddScoped<IPrintPdfServiceImpl, PrintPdfServiceImpl>();
@@ -367,19 +356,12 @@ public static class ApplicationServiceInjection
         services.AddScoped<IRequestHandler<GetLoanRelatedDocumentsQuery, IEnumerable<VLoanDisbursementDocuments>>, GetLoanRelatedDocumentsQueryHandler>();
         services.AddScoped<IRequestHandler<GetLoanRelatedCollateralsQuery, IEnumerable<VLoanDisbursementCollateral>>, GetLoanRelatedCollateralsQueryHandler>();
         services.AddScoped<IRequestHandler<GetLoanCollateralsQuery, Pager<VLoanCollateral>>, GetLoanCollateralsQueryHandler>();
-
-
-
-
-
+        services.AddScoped<IRequestHandler<WidrawalCollateralCommand, ErrorOr<bool>>, WidrawalCollateralCommandHandler>();
         services.AddScoped<IRequestHandler<CloseLoanDisbursementCommand, ErrorOr<string>>, CloseLoanDisbursementCommandHandler>();
 
-
+        //commands and queries for loan schedules
 
         services.AddScoped<IRequestHandler<RecievePaymentCommand, ErrorOr<string>>, RecievePaymentCommandHandler>();
-
-
-
         services.AddScoped<IRequestHandler<GetLoanSchedulesByLoanIdQuery, ErrorOr<IEnumerable<VSchedule>>>, GetLoanSchedulesByLoanIdQueryHandler>();
         services.AddScoped<IRequestHandler<GetLoanByIdQuery, ErrorOr<VLoanDisbursments>>, GetLoanByIdQueryHandler>();
         services.AddScoped<IRequestHandler<GetLoanByBranchIdQuery, Pager<VLoanDisbursments>>, GetLoanByBranchIdQueryHandler>();

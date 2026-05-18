@@ -5,6 +5,7 @@ using Applications.Responses.Loans.Disbursements;
 using Applications.Responses.Paginations;
 using Domains.Models.Loans;
 using Infrastructures.DataAccess;
+using Infrastructures.DataAccess.Paging;
 using Infrastructures.Implements.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -16,6 +17,7 @@ namespace Infrastructures.Implements
         private readonly IDapperConnectionFactory _db;
         private readonly IDbContextFactory<DataContext> _contextFactory;
         private readonly ILogger<LoanSettingRepository> _logger;
+        private const int _mainOffice = 1;
         public LoanSettingRepository(IDapperConnectionFactory db,
             IDbContextFactory<DataContext> contextFactory,
             ILogger<LoanSettingRepository> logger)
@@ -134,36 +136,110 @@ namespace Infrastructures.Implements
 
             await using var context = await _contextFactory.CreateDbContextAsync(cancellation);
 
-            var items = await context.Database
-                .SqlQuery<VUserLoanSizes>($@"
-                        SELECT *
-                        FROM VUserLoanSizes
-                        WHERE 
-                            IsActive = CAST(1 AS BIT)
-                            AND ({branchId} IS NULL  OR BranchId = {branchId})
-                            AND (
-                                ({currencyId} = 1 AND {amount} BETWEEN MinKhrLoanSize AND MaxKhrLoanSize)
-                                OR
-                                ({currencyId} = 2 AND {amount} BETWEEN MinUsdLoanSize AND MaxUsdLoanSize)
-                            ) AND (
-                                {param.Filter} IS NULL 
-                                OR {param.Filter} = N'' 
-                                OR FullName LIKE  {param.Filter} + N'%'
-                                OR BranchName LIKE  {param.Filter} + N'%')
-                           UNION
-                        SELECT *    
-                            FROM VUserLoanSizes
-                            WHERE IsActive = CAST(1 AS BIT) AND BranchName='Head Office'
-                            ").AsNoTracking()
-                            .ToListAsync(cancellation);
+            var baseQuery = context.Set<VUserLoanSizes>()
+                                   .WhereIf(branchId.HasValue && branchId > 0,
+                                            x => (x.BranchId == branchId || x.BranchId == _mainOffice))
+                                   .WhereIf(((amount.HasValue && amount > 0) &&
+                                            (currencyId.HasValue && currencyId > 0)),
+                                             x => ((currencyId == 1 && amount >= x.MinKhrLoanSize && amount <= x.MaxKhrLoanSize) ||
+                                                  (currencyId == 2 && amount >= x.MinUsdLoanSize && amount <= x.MaxUsdLoanSize)) || x.BranchId == _mainOffice);
 
-            return items;
+
+            if (!string.IsNullOrEmpty(param.Filter))
+            {
+
+                string filter = param.Filter.Trim();
+
+                string[] columns = [nameof(VUserLoanSizes.FullName), nameof(VUserLoanSizes.BranchName)];
+
+                baseQuery = baseQuery.WhereMatchesFilter(filter, columns);
+
+            }
+
+            return await baseQuery.AsNoTracking().ToListAsync(cancellation);
+
         }
 
+
+
+
+
+        public async Task<Pager<VUserLoanSizes>> GetAprovedUsersAsync(int? branchId, int? currencyId,
+             decimal? amount, QueryParam param, CancellationToken cancellation = default)
+        {
+            _logger.LogInformation(
+                "GetAprovedUserAsync called with branchId: {BranchId}, currencyId: {CurrencyId}, amount: {Amount}",
+                branchId,
+                currencyId,
+                amount);
+
+            await using var context = await _contextFactory.CreateDbContextAsync(cancellation);
+
+            var baseQuery = context.Set<VUserLoanSizes>()
+                                   .WhereIf(branchId.HasValue && branchId > 0, x => x.BranchId == branchId)
+                                   .WhereIf((amount.HasValue && amount > 0) &&
+                                             (currencyId.HasValue && currencyId > 0),
+                                             x => (currencyId == 1 && amount >= x.MinKhrLoanSize && amount <= x.MaxKhrLoanSize) ||
+                                                  (currencyId == 2 && amount >= x.MinUsdLoanSize && amount <= x.MaxUsdLoanSize))
+                                   .OrderByDescending(x => x.MaxKhrLoanSize)
+                                   .ThenByDescending(x => x.MaxUsdLoanSize)
+                                   .AsQueryable();
+
+
+            if (!string.IsNullOrEmpty(param.Filter))
+            {
+
+                string filter = param.Filter.Trim();
+
+                string[] columns = [nameof(VUserLoanSizes.FullName), nameof(VUserLoanSizes.BranchName)];
+
+                baseQuery = baseQuery.WhereMatchesFilter(filter, columns);
+            }
+
+
+            var counts = await baseQuery.CountAsync(cancellation);
+
+
+            if (param.Take > 0 && param.Page > 0)
+            {
+
+                var skip = (param.Page - 1) * param.Take;
+
+                baseQuery = baseQuery.Skip(skip).Take(param.Take);
+            }
+
+            var items = await baseQuery.AsNoTracking().ToListAsync(cancellation);
+
+            return PagerExtensions.Create(items, counts);
+
+
+        }
 
     }
 
 }
+
+//var items = await context.Database
+//    .SqlQuery<VUserLoanSizes>($@"
+//            SELECT *
+//            FROM VUserLoanSizes
+//            WHERE 
+//                IsActive = CAST(1 AS BIT)
+//                AND ({branchId} IS NULL  OR BranchId = {branchId})
+//                AND (
+//                    ({currencyId} = 1 AND {amount} BETWEEN MinKhrLoanSize AND MaxKhrLoanSize)
+//                    OR
+//                    ({currencyId} = 2 AND {amount} BETWEEN MinUsdLoanSize AND MaxUsdLoanSize)
+//                ) AND (
+//                    {param.Filter} IS NULL 
+//                    OR {param.Filter} = N'' 
+//                    OR FullName LIKE  {param.Filter} + N'%'
+//                    OR BranchName LIKE  {param.Filter} + N'%')
+//                   UNION
+//            SELECT *  FROM VUserLoanSizes WHERE IsActive = CAST(1 AS BIT) AND CanAppRoved = CAST(1 AS BIT) AND BranchId = 123
+//                ").AsNoTracking()
+//                .ToListAsync(cancellation);
+
 
 //public async Task<IEnumerable<LoanCategory>> GetLoanCategories(string? q = null)
 //{

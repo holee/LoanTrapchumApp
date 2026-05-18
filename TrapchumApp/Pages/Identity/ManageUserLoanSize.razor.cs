@@ -20,7 +20,6 @@ public partial class ManageUserLoanSize
     protected override async Task OnInitializedAsync()
     {
         await GetUserLoanSizes();
-
         await base.OnInitializedAsync();
     }
 
@@ -37,8 +36,6 @@ public partial class ManageUserLoanSize
         _counts = rsp.Count;
 
         isLoading = false;
-
-        StateHasChanged();
     }
 
     private async Task LoadData(LoadDataArgs args)
@@ -67,6 +64,11 @@ public partial class ManageUserLoanSize
         await GetUserLoanSizes();
     }
 
+
+    private void OnRowSelected(VUserLoanSizes args)
+    {
+
+    }
     private async Task PageSizeChanged(int size)
     {
         pageSize = size;

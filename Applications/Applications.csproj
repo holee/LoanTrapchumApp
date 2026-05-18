@@ -29,6 +29,7 @@
     <Compile Remove="Features\LoanRequests\Enums\**" />
     <Compile Remove="Features\LoanRequests\Extensions\**" />
     <Compile Remove="Features\LoanRequests\Mappers\**" />
+    <Compile Remove="Features\Loans\Command\UpdateLoan\**" />
     <Compile Remove="Features\NewFolder1\**" />
     <Compile Remove="Features\Settings\Responses\**" />
     <Compile Remove="Features\Vendors\Mapperes\**" />
@@ -64,6 +65,7 @@
     <EmbeddedResource Remove="Features\LoanRequests\Enums\**" />
     <EmbeddedResource Remove="Features\LoanRequests\Extensions\**" />
     <EmbeddedResource Remove="Features\LoanRequests\Mappers\**" />
+    <EmbeddedResource Remove="Features\Loans\Command\UpdateLoan\**" />
     <EmbeddedResource Remove="Features\NewFolder1\**" />
     <EmbeddedResource Remove="Features\Settings\Responses\**" />
     <EmbeddedResource Remove="Features\Vendors\Mapperes\**" />
@@ -99,6 +101,7 @@
     <None Remove="Features\LoanRequests\Enums\**" />
     <None Remove="Features\LoanRequests\Extensions\**" />
     <None Remove="Features\LoanRequests\Mappers\**" />
+    <None Remove="Features\Loans\Command\UpdateLoan\**" />
     <None Remove="Features\NewFolder1\**" />
     <None Remove="Features\Settings\Responses\**" />
     <None Remove="Features\Vendors\Mapperes\**" />
@@ -127,7 +130,6 @@
     <Folder Include="Features\Identity\Users\Interfaces\" />
     <Folder Include="Features\Identity\Users\Mappers\" />
     <Folder Include="Features\Identity\Users\Validations\" />
-    <Folder Include="Features\Loans\Command\UpdateLoan\" />
     <Folder Include="Features\LoanTransactions\Journals\Extensions\" />
     <Folder Include="Features\LoanTransactions\Journals\Mappers\" />
     <Folder Include="Features\LoanTransactions\Journals\UseCases\" />

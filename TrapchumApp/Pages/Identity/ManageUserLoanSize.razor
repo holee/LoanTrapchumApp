@@ -4,7 +4,7 @@
 <RadzenFieldset>
     <HeaderTemplate>
         <RadzenStack AlignItems="AlignItems.Center" Gap="0.25rem" Orientation="Orientation.Horizontal">
-            <RadzenIcon class="fa" Icon="@("\ue529")" Style="font-size:1rem;" /><strong>Loan Size</strong>
+            <RadzenIcon class="fa" Icon="@IconNames.Money" Style="font-size:1rem;" /><strong>Loan Size</strong>
         </RadzenStack>
     </HeaderTemplate>
     <ChildContent>
@@ -36,8 +36,18 @@
                         PagerHorizontalAlign="HorizontalAlign.Right"
                         PagerPosition="PagerPosition.Bottom"
                         ShowPagingSummary="true"
-                        LoadData="@LoadData">
+                        LoadData="@LoadData"
+                        RowRender="@RowRender"
+                        RowSelect="@OnRowSelected"
+                        CellContextMenu="@OnCellContextMenu">
             <Columns>
+                <RadzenDataGridColumn Title="#"
+                                      Width="3rem"
+                                      Property="@nameof(VUserLoanSizes.Id)">
+                    <Template>
+                        @context.RowIndex
+                    </Template>
+                </RadzenDataGridColumn>
                 <RadzenDataGridColumn Title="Name"
                                       Property="@nameof(VUserLoanSizes.FullName)">
                 </RadzenDataGridColumn>
@@ -73,13 +83,14 @@
                         @c.MaxUsdLoanSize.Format(2)
                     </Template>
                 </RadzenDataGridColumn>
-                <RadzenDataGridColumn Title="IsActive"
+                <RadzenDataGridColumn Title="Status"
                                       TextAlign="TextAlign.Center"
                                       Context="c"
-                                      Width="5rem"
+                                      Width="6rem"
                                       Property="@nameof(VUserLoanSizes.IsActive)">
                     <Template>
-                        <RadzenCheckBox TValue="bool" Value="@c.IsActive" />
+                        <RadzenBadge BadgeStyle="@(c.IsActive ? BadgeStyle.Success : BadgeStyle.Danger)"
+                                     Text="@(c.IsActive ? "Active" : "Inactive")" />
                     </Template>
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn Title="Description"
@@ -105,12 +116,34 @@
     </ChildContent>
 </RadzenFieldset>
 @code {
+    private void RowRender(RowRenderEventArgs<VUserLoanSizes> args)
+    {
+        if (args.Data is null) return;
+        args.Data.RowIndex = args.Index + 1;
+    }
+
+    private void OnCellContextMenu(DataGridCellMouseEventArgs<VUserLoanSizes> args)
+    {
+        if (args.Data is null) return;
+        OpenContextMenu(args, args.Data);
+    }
+
     private void ShowContextMenu(MouseEventArgs args, VUserLoanSizes item)
     {
-        ContextMenuService.Open(args, ds => @<RadzenMenu>
+        OpenContextMenu(args, item);
+    }
+
+    private void OpenContextMenu(MouseEventArgs args, VUserLoanSizes item)
+    {
+        ContextMenuService.Open(args, ds => @<RadzenMenu Style="font-size:0.8rem;" Click="OnMenuItemClick">
             <RadzenMenuItem Click="@(async () => await EditLoanSize(item))" Text="Edit" Icon="@IconNames.Edit" />
             <RadzenMenuItem Click="@(async () => await ToggleActive(item))" Text="@(item.IsActive ? "Deactivate" : "Activate")" Icon="@(item.IsActive ? IconNames.Block : IconNames.Check)" />
             <RadzenMenuItem Click="@(async () => await DeleteLoanSize(item))" Text="Delete" Icon="@IconNames.Delete" />
         </RadzenMenu>);
+    }
+
+    private void OnMenuItemClick(MenuItemEventArgs args)
+    {
+        ContextMenuService.Close();
     }
 }
