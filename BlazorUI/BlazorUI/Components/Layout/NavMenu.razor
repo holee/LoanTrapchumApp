@@ -1,0 +1,121 @@
+﻿@inject NavigationManager NavigationManager
+
+<nav class="lms-nav">
+
+    <!-- ── Main ─────────────────────── -->
+    <div class="lms-nav-section">
+        @if (SidebarOpen) { <span class="lms-nav-label">Main</span> }
+
+        <NavLink class="lms-nav-item" href="" Match="NavLinkMatch.All">
+            <span class="lms-nav-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M8.354 1.146a.5.5 0 0 0-.708 0l-6 6A.5.5 0 0 0 2 8h1v6.5a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5V11h2v3.5a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5V8h1a.5.5 0 0 0 .354-.854l-6-6z"/>
+                </svg>
+            </span>
+            @if (SidebarOpen) { <span class="lms-nav-text">Dashboard</span> }
+        </NavLink>
+    </div>
+
+    <!-- ── Loan Management ───────────── -->
+    <div class="lms-nav-section">
+        @if (SidebarOpen) { <span class="lms-nav-label">Loan Management</span> }
+
+        <NavLink class="lms-nav-item" href="loans">
+            <span class="lms-nav-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M4 10.781c.148 1.667 1.513 2.9 3.219 2.9 2.215 0 3.781-1.679 3.781-4.230V8.5h1.5v.95c0 3.134-1.75 5.05-4.281 5.05-2.443 0-4.25-1.9-4.25-4.469v-.031H4zm8-7.781a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM4 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm9.196 4.096A5.45 5.45 0 0 0 8 5.5a5.45 5.45 0 0 0-5.196 1.596A4.5 4.5 0 0 0 1.5 9.5 3.5 3.5 0 0 0 5 13h6a3.5 3.5 0 0 0 3.5-3.5 4.5 4.5 0 0 0-1.304-2.404z"/>
+                </svg>
+            </span>
+            @if (SidebarOpen) { <span class="lms-nav-text">All Loans</span> }
+        </NavLink>
+
+        <NavLink class="lms-nav-item" href="loans/apply">
+            <span class="lms-nav-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8.5-4.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3a.5.5 0 0 1 1 0z"/>
+                </svg>
+            </span>
+            @if (SidebarOpen) { <span class="lms-nav-text">Apply for Loan</span> }
+        </NavLink>
+
+        <NavLink class="lms-nav-item" href="loans/repayments">
+            <span class="lms-nav-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1H0V4zm0 3h16v5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V7zm3 2a.5.5 0 0 0 0 1h1a.5.5 0 0 0 0-1H3zm2.5 0a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5z"/>
+                </svg>
+            </span>
+            @if (SidebarOpen) { <span class="lms-nav-text">Repayments</span> }
+        </NavLink>
+    </div>
+
+    <!-- ── Customers ─────────────────── -->
+    <div class="lms-nav-section">
+        @if (SidebarOpen) { <span class="lms-nav-label">Customers</span> }
+
+        <NavLink class="lms-nav-item" href="customers">
+            <span class="lms-nav-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+                    <path fill-rule="evenodd" d="M5.216 14A2.238 2.238 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.325 6.325 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1h4.216z"/>
+                    <path d="M4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/>
+                </svg>
+            </span>
+            @if (SidebarOpen) { <span class="lms-nav-text">Customers</span> }
+        </NavLink>
+
+        <NavLink class="lms-nav-item" href="customers/new">
+            <span class="lms-nav-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M12.5 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zm.5-5v1h1a.5.5 0 0 1 0 1h-1v1a.5.5 0 0 1-1 0v-1h-1a.5.5 0 0 1 0-1h1v-1a.5.5 0 0 1 1 0zm-2-6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+                    <path d="M2 13c0 1 1 1 1 1h5.256A4.493 4.493 0 0 1 8 12.5a4.49 4.49 0 0 1 1.544-3.393Q8.844 9.002 8 9c-5 0-6 3-6 4z"/>
+                </svg>
+            </span>
+            @if (SidebarOpen) { <span class="lms-nav-text">Add Customer</span> }
+        </NavLink>
+    </div>
+
+    <!-- ── Reports ───────────────────── -->
+    <div class="lms-nav-section">
+        @if (SidebarOpen) { <span class="lms-nav-label">Reports</span> }
+
+        <NavLink class="lms-nav-item" href="reports">
+            <span class="lms-nav-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M11 2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v12h.5a.5.5 0 0 1 0 1H.5a.5.5 0 0 1 0-1H1v-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3h1V7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7h1V2z"/>
+                </svg>
+            </span>
+            @if (SidebarOpen) { <span class="lms-nav-text">Analytics</span> }
+        </NavLink>
+
+        <NavLink class="lms-nav-item" href="weather">
+            <span class="lms-nav-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
+                    <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/>
+                </svg>
+            </span>
+            @if (SidebarOpen) { <span class="lms-nav-text">Weather</span> }
+        </NavLink>
+    </div>
+
+    <!-- ── Settings ──────────────────── -->
+    <div class="lms-nav-section">
+        @if (SidebarOpen) { <span class="lms-nav-label">System</span> }
+
+        <NavLink class="lms-nav-item" href="settings">
+            <span class="lms-nav-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z"/>
+                    <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.892 3.433-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.892-1.64-.901-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52l-.094-.319zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.474l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115l.094-.319z"/>
+                </svg>
+            </span>
+            @if (SidebarOpen) { <span class="lms-nav-text">Settings</span> }
+        </NavLink>
+    </div>
+
+</nav>
+
+@code {
+    [Parameter] public bool SidebarOpen { get; set; } = true;
+}
+

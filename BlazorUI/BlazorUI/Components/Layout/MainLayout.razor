@@ -1,0 +1,159 @@
+﻿@inherits LayoutComponentBase
+@inject NavigationManager NavigationManager
+@implements IDisposable
+
+<div class="@ShellClass">
+
+    <!-- ══════════════ SIDEBAR ══════════════ -->
+    <aside class="@SidebarClass">
+
+        <!-- Brand -->
+        <div class="lms-brand">
+            <div class="lms-brand-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="20" height="20">
+                    <path d="M4 10v7h3v-7H4zm6 0v7h3v-7h-3zM2 22h19v-3H2v3zm14-12v7h3v-7h-3zM11.5 1 2 6v2h19V6z"/>
+                </svg>
+            </div>
+            @if (sidebarOpen)
+            {
+                <div class="lms-brand-text">
+                    <span class="lms-brand-name">LoanManager</span>
+                    <span class="lms-brand-sub">Admin Panel</span>
+                </div>
+            }
+        </div>
+
+        <!-- Navigation -->
+        <div class="lms-nav-scroll">
+            <NavMenu SidebarOpen="sidebarOpen" />
+        </div>
+
+        <!-- Sidebar user strip -->
+        <div class="lms-sidebar-user">
+            <div class="lms-su-avatar">A</div>
+            @if (sidebarOpen)
+            {
+                <div class="lms-su-info">
+                    <span class="lms-su-name">Admin User</span>
+                    <span class="lms-su-role">Administrator</span>
+                </div>
+            }
+        </div>
+
+    </aside>
+
+    <!-- ══════════════ MAIN ══════════════ -->
+    <div class="lms-main">
+
+        <!-- Top Header -->
+        <header class="lms-header">
+            <div class="lms-header-left">
+                <!-- Hamburger -->
+                <button class="lms-hdr-btn" @onclick="ToggleSidebar" title="Toggle menu">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/>
+                    </svg>
+                </button>
+
+                <!-- Breadcrumb -->
+                <nav class="lms-breadcrumb" aria-label="breadcrumb">
+                    <span class="lms-bc-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M8.354 1.146a.5.5 0 0 0-.708 0l-6 6A.5.5 0 0 0 2 8h1v6.5a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5V11h2v3.5a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5V8h1a.5.5 0 0 0 .354-.854l-6-6z"/>
+                        </svg>
+                    </span>
+                    <span class="lms-bc-sep">/</span>
+                    <span class="lms-bc-page">@PageTitle</span>
+                </nav>
+            </div>
+
+            <div class="lms-header-right">
+                <!-- Search -->
+                <div class="lms-search">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" class="lms-search-ico" viewBox="0 0 16 16">
+                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.099zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                    </svg>
+                    <input type="text" class="lms-search-input" placeholder="Search…" />
+                </div>
+
+                <!-- Bell -->
+                <button class="lms-hdr-btn lms-bell" title="Notifications">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2zm.995-14.901a1 1 0 1 0-1.99 0A5 5 0 0 0 3 6c0 1.098-.5 6-2 7h14c-1.5-1-2-5.902-2-7a5 5 0 0 0-4.005-4.901z"/>
+                    </svg>
+                    <span class="lms-bell-dot"></span>
+                </button>
+
+                <div class="lms-hdr-sep"></div>
+
+                <!-- User -->
+                <button class="lms-user-chip" title="Account">
+                    <div class="lms-uc-avatar">A</div>
+                    <div class="lms-uc-info">
+                        <span class="lms-uc-name">Admin User</span>
+                        <span class="lms-uc-role">Administrator</span>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Content -->
+        <main class="lms-content">
+            @Body
+        </main>
+
+        <!-- Footer -->
+        <footer class="lms-footer">
+            <span>&copy; @DateTime.Now.Year <strong>LoanManager</strong> — Loan Management System</span>
+            <span class="lms-footer-ver">v1.0.0</span>
+        </footer>
+
+    </div>
+</div>
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">&#x2715;</span>
+</div>
+
+@code {
+    private bool sidebarOpen = true;
+    private string currentUrl = string.Empty;
+
+    private string ShellClass => "lms-shell" + (sidebarOpen ? " sb-open" : " sb-closed");
+    private string SidebarClass => sidebarOpen ? "lms-sidebar" : "lms-sidebar sb-collapsed";
+
+    private string PageTitle
+    {
+        get
+        {
+            var raw = currentUrl.Split('?', '#')[0].Trim('/');
+            var segments = raw.Split('/', StringSplitOptions.RemoveEmptyEntries);
+            return segments.Length == 0 ? "Dashboard" : segments[^1];
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    private void ToggleSidebar() => sidebarOpen = !sidebarOpen;
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        var newUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        if (!string.Equals(currentUrl, newUrl, StringComparison.Ordinal))
+        {
+            currentUrl = newUrl;
+            InvokeAsync(StateHasChanged);
+        }
+    }
+
+    public void Dispose() => NavigationManager.LocationChanged -= OnLocationChanged;
+}

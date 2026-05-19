@@ -1,6 +1,8 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="Applications/Applications.csproj" />
+    <Project Path="BlazorUI/BlazorUI.Client/BlazorUI.Client.csproj" Id="e8f5da1c-9966-4b83-a840-821044306349" />
+    <Project Path="BlazorUI/BlazorUI/BlazorUI.csproj" Id="5b5990c0-c2ac-49d7-a2ce-45543eaeab23" />
     <Project Path="Domains/Domains.csproj" />
     <Project Path="Infrastructures/Infrastructures.csproj" />
     <Project Path="TrapchumApp/TrapchumApp.csproj" />
