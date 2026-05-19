@@ -11,7 +11,7 @@
     font-family: "Inter", "Segoe UI", system-ui, sans-serif;
 }
 
-/* ── Sidebar — structure only (width/collapse in app.css globally) ── */
+/* ── Sidebar — structure only; width set via inline style in .razor ── */
 .lms-sidebar {
     min-height: 100vh;
     background: var(--sb-bg);
@@ -21,6 +21,7 @@
     top: 0;
     height: 100vh;
     overflow: hidden;
+    transition: width .22s ease;   /* animate the inline-style width change */
     flex-shrink: 0;
     z-index: 200;
     box-shadow: 2px 0 16px rgba(0,0,0,.18);

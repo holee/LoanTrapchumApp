@@ -5,10 +5,10 @@
 <div class="@ShellClass">
 
     <!-- ══════════════ SIDEBAR ══════════════ -->
-    <aside class="@SidebarClass">
+    <aside class="lms-sidebar" style="@SidebarStyle">
 
         <!-- Brand -->
-        <div class="lms-brand">
+        <div class="lms-brand" style="@BrandStyle">
             <div class="lms-brand-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="20" height="20">
                     <path d="M4 10v7h3v-7H4zm6 0v7h3v-7h-3zM2 22h19v-3H2v3zm14-12v7h3v-7h-3zM11.5 1 2 6v2h19V6z"/>
@@ -29,7 +29,7 @@
         </div>
 
         <!-- Sidebar user strip -->
-        <div class="lms-sidebar-user">
+        <div class="lms-sidebar-user" style="@UserStripStyle">
             <div class="lms-su-avatar">A</div>
             @if (sidebarOpen)
             {
@@ -124,8 +124,10 @@
     private bool sidebarOpen = true;
     private string currentUrl = string.Empty;
 
-    private string ShellClass => "lms-shell" + (sidebarOpen ? " sb-open" : " sb-closed");
-    private string SidebarClass => sidebarOpen ? "lms-sidebar" : "lms-sidebar sb-collapsed";
+    private string ShellClass => "lms-shell";
+    private string SidebarStyle   => sidebarOpen ? "width:240px;" : "width:64px;";
+    private string BrandStyle      => sidebarOpen ? "" : "justify-content:center;padding:0;";
+    private string UserStripStyle  => sidebarOpen ? "" : "justify-content:center;padding:12px 0;";
 
     private string PageTitle
     {
