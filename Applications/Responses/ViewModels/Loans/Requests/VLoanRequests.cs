@@ -49,8 +49,11 @@ public sealed class VLoanRequests
     public string? CollectionFeeModeName { get; set; } = string.Empty;
     public string? AprovedBy { get; set; } = string.Empty;
     public string? LoanPurpose { get; set; }= string.Empty;
+
+    public bool? IsSubmitted { get; set; } = false;
     [NotMapped] public bool IsCompleted => StatusId == (int)RequestStatus.Completed;
     [NotMapped] public bool IsApproved => StatusId == (int)RequestStatus.Approved;
+
     [NotMapped]
     public bool IsRequested
     {

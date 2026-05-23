@@ -526,12 +526,12 @@ public sealed class HolidayRepository(IDbContextFactory<DataContext> contextFact
 
         if (string.IsNullOrEmpty(q.FilterColumn))
         {
-            return queries.WhereMatchesFilter(filter, AllowedFilterColumns.ToArray());
+            return queries.StartWiths(filter, AllowedFilterColumns.ToArray());
         }
 
         if (AllowedFilterColumns.Contains(q.FilterColumn))
         {
-            return queries.WhereMatchesFilter(filter, q.FilterColumn);
+            return queries.StartWiths(filter, q.FilterColumn);
         }
 
         return queries;

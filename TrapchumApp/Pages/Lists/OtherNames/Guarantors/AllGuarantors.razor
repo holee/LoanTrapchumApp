@@ -23,7 +23,6 @@
                 Density="Density.Compact"
                 ShowPagingSummary="true"
                 AllowAlternatingRows="true"
-                IsLoading="isLoading"
                 AllowPaging="true"
                 AllowFiltering="true"
                 AllowSorting="true"
@@ -111,8 +110,8 @@
                               Sortable="false"
                               Title="Loan Active">
             <Template>
-                <RadzenBadge BadgeStyle="@(g.IsActive ? BadgeStyle.Success : BadgeStyle.Danger)"
-                             Text="@(g.IsActive ? "Active" : "Inactive")"
+                <RadzenBadge BadgeStyle="@(g.IsActive ? BadgeStyle.Success : BadgeStyle.Light)"
+                             Text="@(g.IsActive ? "Active" : "None")"
                              IsPill="true" />
             </Template>
         </RadzenDataGridColumn>

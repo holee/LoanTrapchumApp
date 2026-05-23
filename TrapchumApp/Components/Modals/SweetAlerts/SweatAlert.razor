@@ -1,0 +1,191 @@
+﻿@implements IDisposable
+@inject DialogService DialogService
+
+<div class="swal-popup @(Options.Animation ? "swal-animate" : "")" style="width:@Options.Width">
+
+    @* ── Close button ── *@
+    @if (Options.ShowCloseButton)
+    {
+        <button class="swal-close-btn" @onclick="CloseWithEsc" title="Close">×</button>
+    }
+
+    @* ── Icon ── *@
+    @if (Options.Icon != SwalIcon.None)
+    {
+        <div class="swal-icon swal-icon--@Options.Icon.ToString().ToLower()">
+            @if (Options.Icon == SwalIcon.Success)
+            {
+                <span class="swal-icon__checkmark">✓</span>
+            }
+            else if (Options.Icon == SwalIcon.Error)
+            {
+                <span class="swal-icon__x">✕</span>
+            }
+            else if (Options.Icon == SwalIcon.Warning)
+            {
+                <span class="swal-icon__exclamation">!</span>
+            }
+            else if (Options.Icon == SwalIcon.Info)
+            {
+                <span class="swal-icon__i">i</span>
+            }
+            else if (Options.Icon == SwalIcon.Question)
+            {
+                <span class="swal-icon__q">?</span>
+            }
+        </div>
+    }
+
+    @* ── Title ── *@
+    @if (!string.IsNullOrWhiteSpace(Options.Title))
+    {
+        <h2 class="swal-title">@((MarkupString)Options.Title)</h2>
+    }
+
+    @* ── Body ── *@
+    <div class="swal-body">
+        @if (!string.IsNullOrWhiteSpace(Options.Html))
+        {
+            <div class="swal-html">@((MarkupString)Options.Html)</div>
+        }
+        else if (!string.IsNullOrWhiteSpace(Options.Text))
+        {
+            <p class="swal-text">@Options.Text</p>
+        }
+    </div>
+
+    @* ── Input ── *@
+    @if (Options.InputType.HasValue)
+    {
+        <div class="swal-input-wrap">
+            @if (Options.InputType == SwalInputType.Textarea)
+            {
+                <textarea class="swal-input"
+                          placeholder="@Options.InputPlaceholder"
+                          @bind="_inputValue"
+                          rows="3"></textarea>
+            }
+            else
+            {
+                <input class="swal-input"
+                       type="@GetInputTypeString()"
+                       placeholder="@Options.InputPlaceholder"
+                       value="@_inputValue"
+                       @oninput="e => _inputValue = e.Value?.ToString() ?? string.Empty" />
+            }
+            @if (!string.IsNullOrEmpty(_validationMessage))
+            {
+                <div class="swal-validation-msg">@_validationMessage</div>
+            }
+        </div>
+    }
+
+    @* ── Buttons ── *@
+    <div class="swal-actions @(Options.ReverseButtons ? "swal-actions--reversed" : "")">
+        @if (Options.DenyButtonText is not null)
+        {
+            <button class="swal-btn swal-btn--deny"
+                    style="background:@Options.DenyButtonColor"
+                    @onclick="Deny">
+                @Options.DenyButtonText
+            </button>
+        }
+        @if (Options.CancelButtonText is not null)
+        {
+            <button class="swal-btn swal-btn--cancel"
+                    style="background:@Options.CancelButtonColor"
+                    @onclick="Cancel">
+                @Options.CancelButtonText
+            </button>
+        }
+        @if (Options.ConfirmButtonText is not null)
+        {
+            <button class="swal-btn swal-btn--confirm"
+                    style="background:@Options.ConfirmButtonColor"
+                    @onclick="Confirm">
+                @Options.ConfirmButtonText
+            </button>
+        }
+    </div>
+
+    @* ── Footer ── *@
+    @if (!string.IsNullOrWhiteSpace(Options.Footer))
+    {
+        <div class="swal-footer">@((MarkupString)Options.Footer)</div>
+    }
+
+    @* ── Timer progress bar ── *@
+    @if (Options.TimerMs > 0 && Options.ShowTimerProgressBar)
+    {
+        <div class="swal-timer-bar">
+            <div class="swal-timer-bar__fill"
+                 style="animation-duration:@(Options.TimerMs)ms"></div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public SwalOptions Options { get; set; } = new();
+
+    private string _inputValue = string.Empty;
+    private string _validationMessage = string.Empty;
+    private System.Threading.CancellationTokenSource? _timerCts;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _inputValue = Options.InputValue;
+
+        if (Options.TimerMs > 0)
+        {
+            _timerCts = new System.Threading.CancellationTokenSource();
+            try
+            {
+                await Task.Delay(Options.TimerMs, _timerCts.Token);
+                DialogService.Close(SwalResult.Dismissed(SwalDismissReason.Timer));
+            }
+            catch (TaskCanceledException) { }
+        }
+    }
+
+    void Confirm()
+    {
+        if (Options.InputType.HasValue && Options.InputRequired && string.IsNullOrWhiteSpace(_inputValue))
+        {
+            _validationMessage = Options.InputValidationMessage;
+            StateHasChanged();
+            return;
+        }
+        _timerCts?.Cancel();
+        DialogService.Close(SwalResult.Confirmed(_inputValue.Length > 0 ? _inputValue : null));
+    }
+
+    void Deny()
+    {
+        _timerCts?.Cancel();
+        DialogService.Close(SwalResult.Denied());
+    }
+
+    void Cancel()
+    {
+        _timerCts?.Cancel();
+        DialogService.Close(SwalResult.Dismissed(SwalDismissReason.Cancel));
+    }
+
+    void CloseWithEsc()
+    {
+        _timerCts?.Cancel();
+        DialogService.Close(SwalResult.Dismissed(SwalDismissReason.Esc));
+    }
+
+    string GetInputTypeString() => Options.InputType switch
+    {
+        SwalInputType.Email    => "email",
+        SwalInputType.Password => "password",
+        SwalInputType.Number   => "number",
+        SwalInputType.Tel      => "tel",
+        _                      => "text"
+    };
+
+    public void Dispose() => _timerCts?.Cancel();
+}
+

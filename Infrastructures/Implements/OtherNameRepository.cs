@@ -13,6 +13,7 @@ using Domains.Models.Lists.Employees;
 using Domains.Models.Lists.Vendors;
 using ErrorOr;
 using Infrastructures.DataAccess;
+using Infrastructures.Implements.Extensions;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -210,7 +211,7 @@ public sealed class OtherNameRepository(
                                     .AsNoTracking()
                                     .FirstOrDefaultAsync(cancellation);
 
-        if(entity is null)
+        if (entity is null)
             return Error.NotFound(description: Messages.DataNotFound);
 
         return entity;
@@ -274,13 +275,11 @@ public sealed class OtherNameRepository(
 
         if (!string.IsNullOrEmpty(q.Filter))
         {
-            queries = queries.Where(e =>
-                EF.Functions.Like(e.FirstName, $"%{q.Filter}%") ||
-                EF.Functions.Like(e.LastName, $"%{q.Filter}%") ||
-                EF.Functions.Like(e.EmailAddress, $"%{q.Filter}%") ||
-                EF.Functions.Like(e.Gender, $"%{q.Filter}%") ||
-                EF.Functions.Like(e.Phone, $"%{q.Filter}%") ||
-                EF.Functions.Like(e.AltName, $"%{q.Filter}%"));
+            var filter = q.Filter.Trim();
+
+            string[] filterColumns = ["FirstName", "LastName", "EmailAddress", "Gender", "Phone", "AltName"];
+
+            queries = queries.StartWiths(filter, filterColumns);
         }
 
         if (!q.IncludeInActive)
@@ -295,7 +294,8 @@ public sealed class OtherNameRepository(
             queries = queries.Skip(q.Page).Take(q.Take);
 
         var items = await queries.AsNoTracking().ToListAsync(cancellation);
-        return new Pager<VOtherNames>(items, counts);
+
+        return PagerExtensions.Create(items, counts);
     }
 
     public async Task<IEnumerable<T>> GetNameListsAsync<T>(string? nameId, QueryParam param, CancellationToken cancellation = default) where T : class, new()

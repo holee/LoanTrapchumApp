@@ -7,5 +7,6 @@
         var returnUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
 
         NavigationManager.NavigateTo($"/app/access-denied?returnUrl={Uri.EscapeDataString(returnUrl)}");
+    
     }
 }

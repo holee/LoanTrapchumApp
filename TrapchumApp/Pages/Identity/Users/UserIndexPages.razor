@@ -10,15 +10,10 @@
                     <LeftChildren>
                         <AuthorizeView Policy="@Policies.AdminOnly">
                             <Authorized>
-                                <RadzenButton Icon="@IconNames.PersonAdd"
+                                <RadzenButton Icon="@IconNames.LoginUser"
                                               ButtonStyle="ButtonStyle.Primary"
                                               Size="ButtonSize.Small"
                                               Click="AddUserAccount"
-                                              Text="Add New User" />
-                                <RadzenButton Icon="@IconNames.PersonAdd"
-                                              ButtonStyle="ButtonStyle.Secondary"
-                                              Size="ButtonSize.Small"
-                                              Click="@AddManagerAccount"
                                               Text="Add New User" />
                             </Authorized>
                         </AuthorizeView>
@@ -44,7 +39,6 @@
                                 ColumnWidth="10rem"
                                 Count="@counts"
                                 PageSize="@pageSize"
-                                IsLoading="isLoading"
                                 LoadData="@LoadAllUsers"
                                 ShowPagingSummary="true"
                                 PagerHorizontalAlign="HorizontalAlign.Right"
@@ -80,7 +74,7 @@
                                 <RadzenButton Size="ButtonSize.ExtraSmall"
                                               Icon="@IconNames.MoreVert"
                                               Variant="Variant.Text"
-                                              Click="@((args)=>ShowContextMenu(args,u.Id))" />
+                                              Click="@((args)=>ShowContextMenu(args, u.Id, u.IsActive == true))" />
                             </Template>
                         </RadzenDataGridColumn>
                     </Columns>
@@ -92,7 +86,7 @@
 
 @code {
 
-    void ShowContextMenu(MouseEventArgs args, string? userId)
+    void ShowContextMenu(MouseEventArgs args, string? userId, bool isActive = false)
     {
         ContextMenuService.Open(args, ds => @<RadzenMenu Style="font-size:0.8rem;">
             <RadzenMenuItem Icon="manage_accounts"
@@ -109,6 +103,18 @@
                             Click="@(()=>ChangAccountPassword(userId))"
                             Text="Change Password"
                             Visible="@AppState.IsAdmin"
+                            Value="@userId" />
+            <RadzenMenuItem Icon="@(isActive ? "person_off" : "person")"
+                            Click="@(()=>ToggleUserActive(userId, isActive))"
+                            Text="@(isActive ? "Deactivate" : "Activate")"
+                            Visible="@AppState.IsAdmin"
+                            Disabled="@(!canUpdateUser || userId == authenticatedUserId)"
+                            Value="@userId" />
+            <RadzenMenuItem Icon="delete"
+                            Click="@(()=>DeleteUser(userId))"
+                            Text="Delete User"
+                            Visible="@AppState.IsAdmin"
+                            Disabled="@(!canDeleteUser || userId == authenticatedUserId)"
                             Value="@userId" />
         </RadzenMenu>
     );
@@ -257,6 +263,20 @@
                 Icon = "manage_accounts",
                 Value = "3",
                 Disabled = !AppState.IsAdmin
+            },
+            new ContextMenuItem
+            {
+                Text = "Delete User",
+                Icon = "delete",
+                Value = "4",
+                Disabled = !canDeleteUser || args.Data.Id == authenticatedUserId
+            },
+            new ContextMenuItem
+            {
+                Text = args.Data.IsActive == true ? "Deactivate" : "Activate",
+                Icon = args.Data.IsActive == true ? "person_off" : "person",
+                Value = "5",
+                Disabled = !canUpdateUser || args.Data.Id == authenticatedUserId
             }
         }, (e) =>
         {
@@ -284,6 +304,16 @@
             if (value == 3)
             {
                 ChangAccountPassword(args.Data.Id);
+                return;
+            }
+            if (value == 4)
+            {
+                _ = DeleteUser(args.Data.Id);
+                return;
+            }
+            if (value == 5)
+            {
+                _ = ToggleUserActive(args.Data.Id, args.Data.IsActive == true);
                 return;
             }
         }

@@ -1,0 +1,81 @@
+@using Applications.Responses.ViewModels.Auths
+@using TrapchumApp.Components.Indicatros
+
+<div class="perm-panel">
+    @if (IsLoading)
+    {
+        <Loading Text="Loading permissions..." />
+    }
+    else
+    {
+        <div class="perm-card">
+            <div class="perm-selectall-row">
+                <label class="perm-selectall-label" @onclick="@(() => OnSelectAllClicked(!PermSelectAll))">
+                    <span class="perm-selectall-check @(PermSelectAll ? "perm-selectall-check--active" : "")">
+                        @if (PermSelectAll)
+                        {
+                            <RadzenIcon Icon="check" Style="font-size:0.8rem;" />
+                        }
+                    </span>
+                    <span>Select All Permissions</span>
+                </label>
+                <RadzenTextBox Value="@GroupFilter"
+                               Placeholder="Filter by group..."
+                               Style="width:16rem;"
+                               @oninput="@((e) => OnFilterInput(e.Value?.ToString() ?? string.Empty))" />
+            </div>
+            <div class="perm-panel-scroll">
+                <RadzenRow>
+                    @foreach (var kvp in FilteredGroups)
+                    {
+                        var groupName = kvp.Key;
+                        var permissions = kvp.Value;
+                        <RadzenColumn Size="4" SizeMD="4" SizeSM="12">
+                            <div class="perm-group">
+                                <div class="perm-group-header">
+                                    <label class="perm-group-toggle" @onclick="@(() => OnGroupToggle(groupName, !permissions.All(p => p.IsAssignedToRole)))">
+                                        <span class="perm-group-check @(permissions.All(p => p.IsAssignedToRole) ? "perm-group-check--active" : "")">
+                                            @if (permissions.All(p => p.IsAssignedToRole))
+                                            {
+                                                <RadzenIcon Icon="check" Style="font-size:0.75rem;" />
+                                            }
+                                        </span>
+                                        <span class="perm-group-name">@groupName</span>
+                                    </label>
+                                    <span class="perm-group-count">
+                                        @permissions.Count(p => p.IsAssignedToRole) / @permissions.Count
+                                    </span>
+                                </div>
+                                <div class="perm-group-body">
+                                    @foreach (var item in permissions)
+                                    {
+                                        <label class="perm-item @(item.IsAssignedToRole ? "perm-item--active" : "")">
+                                            <input type="checkbox"
+                                                   class="perm-item-check"
+                                                   checked="@item.IsAssignedToRole"
+                                                   @onchange="@((e) => OnPermCheck(item, (bool)(e.Value ?? false)))" />
+                                            <span class="perm-item-label">@item.ClaimValue</span>
+                                        </label>
+                                    }
+                                </div>
+                            </div>
+                        </RadzenColumn>
+                    }
+                </RadzenRow>
+            </div>
+        </div>
+        <RadzenStack JustifyContent="JustifyContent.End"
+                     AlignItems="AlignItems.Center"
+                     class="rz-my-2"
+                     Orientation="Orientation.Horizontal">
+            <RadzenButton Icon="save"
+                          ButtonStyle="ButtonStyle.Primary"
+                          Size="ButtonSize.Small"
+                          Click="SavePermissions"
+                          IsBusy="IsBusy"
+                          Text="Save"></RadzenButton>
+        </RadzenStack>
+    }
+</div>
+
+

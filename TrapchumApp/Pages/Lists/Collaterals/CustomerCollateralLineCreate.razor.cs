@@ -20,8 +20,6 @@ public partial class CustomerCollateralLineCreate
 
     private CollateralLineDtoCreate model = new();
 
-    private readonly ICollateralsServiceImpl _service;
-
     private bool success;
 
     private bool isSaving;
@@ -32,12 +30,8 @@ public partial class CustomerCollateralLineCreate
     [Parameter] public string? CollateralId { get; set; }
     [Parameter] public long CollateralLineId { get; set; } = 0;
     [Parameter] public EventCallback OnClose { get; set; }
-    [Parameter] public EventCallback<VCollateralLines> OnCollateralChanged { get; set; }
-    public CustomerCollateralLineCreate(ICollateralsServiceImpl service)
-    {
-        _service = service;
-    }
-
+    [Parameter] public EventCallback<VCollateralLines> OnCollateralAdd { get; set; }
+    [Parameter] public PageType PageType { get; set; } = PageType.Tab;
     protected override async Task OnInitializedAsync()
     {
         model ??= new CollateralLineDtoCreate(CollateralId);
@@ -90,6 +84,8 @@ public partial class CustomerCollateralLineCreate
         CollateralId = collateralId;
 
         baseModel = collateral.ToCollateralDtoCreate();
+
+        model.OwnerName = baseModel.CustomerName;
 
         await GetCollaralLine();
 
@@ -165,7 +161,15 @@ public partial class CustomerCollateralLineCreate
 
     private async Task OnCloseTab()
     {
-        await OnClose.InvokeAsync();
+        if (PageType == PageType.Tab)
+        {
+            await OnClose.InvokeAsync();
+        }
+        else
+        {
+            DialogService.Close();
+        }
+
     }
 
     private async Task HandleFormSubmit()
@@ -185,6 +189,8 @@ public partial class CustomerCollateralLineCreate
                 success = true;
 
                 _toastService.ShowSuccess(rsp.Value);
+
+                await OnClose.InvokeAsync();
 
             }
             else

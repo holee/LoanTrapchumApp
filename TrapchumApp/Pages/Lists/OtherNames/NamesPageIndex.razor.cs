@@ -1,9 +1,10 @@
 using Applications.Extensions;
 using Applications.Responses.ViewModels.OtherNames;
-using Applications.Services.Lists;
 using Radzen.Blazor;
 using Applications.Features.Addresses.Dto;
 using Applications.Features.OtherNames.Dto;
+using Applications.Features.OtherNames.Commands.DeleteOtherName;
+using Applications.Features.OtherNames.Queries.GetOtherNamesAsPaging;
 
 namespace TrapchumApp.Pages.Lists.OtherNames;
 
@@ -11,15 +12,8 @@ public enum DynamicTabType { Create, Edit, Detail }
 
 public record DynamicTab(string Id, string Title, string Icon, DynamicTabType Type, string? EntityId = null);
 
-public partial class NamesPage
+public partial class NamesPageIndex
 {
-    private readonly IOtherNameServiceImpl _otherNameService;
-    private readonly ISalutationServiceImpl _salutationService;
-    public NamesPage(IOtherNameServiceImpl otherNameService, ISalutationServiceImpl salutationService)
-    {
-        _otherNameService = otherNameService;
-        _salutationService = salutationService;
-    }
 
     List<VOtherNames> Names = [];
     int pageIndex = 0;
@@ -34,30 +28,14 @@ public partial class NamesPage
     string? q;
     protected IEnumerable<ProvinceDto>? ProvinceList = [];
     protected EntityNamesCreate? modelEdit = new();
-    protected IEnumerable<CommuneDto>? CommuneList = [];
-    protected IEnumerable<DistrictDto>? DistrictList = [];
-    protected IEnumerable<VillageDto>? VillageList = [];
-    protected ProvinceDto? SelectedProvince;
-    protected DistrictDto? SelectedDistrict;
-    protected CommuneDto? SelectedCommune;
-    protected VillageDto? SelectedVillage;
     bool isLoading = false;
 
     List<DynamicTab> _dynamicTabs = [];
-
     protected override async Task OnInitializedAsync()
     {
-        try
-        {
-            await GetOtherNames();
-            await GetSalutations();
-            ProvinceList = await _addressService!.GetsProvinces();
-            StateHasChanged();
-        }
-        catch (Exception ex)
-        {
-            await DialogService.Alert(ex.Message, "Exception");
-        }
+
+        await GetOtherNames();
+
         await base.OnInitializedAsync();
     }
 
@@ -76,11 +54,19 @@ public partial class NamesPage
     async Task GetOtherNames(string? filterText = "")
     {
         isLoading = true;
+
         var param = new QueryParam(pageIndex, pageSize, sortField, includeInactive, sortDescending, filterText);
-        var resp = await _otherNameService.GetNamesAsync(param);
+
+        var command = new GetOtherNamesAsPagingQuery(param, null);
+
+        var resp = await mediator.Send(command);   //_otherNameService.GetNamesAsync(param);
+
         counts = resp.Count;
+
         Names = resp.Items;
+
         isLoading = false;
+
         StateHasChanged();
     }
 
@@ -96,7 +82,7 @@ public partial class NamesPage
                                 p.Property == nameof(VOtherNames.FirstName) ||
                                 p.Property == nameof(VOtherNames.Gender) ||
                                 p.Property == nameof(VOtherNames.LastName)
-                            )?.FilterValue.ToString() ?? string.Empty;
+                            )?.FilterValue!.ToString() ?? string.Empty;
 
         q = filterColunm ?? string.Empty;
         await GetOtherNames(q);
@@ -108,18 +94,18 @@ public partial class NamesPage
         await GetOtherNames(q);
     }
 
-    private async Task GetSalutations()
-    {
-        var salutations = await _salutationService.GetSalutions();
-        if (salutations.IsSuccess)
-        {
-            Salutations = salutations!.Data!.Select(x => x.Title!).ToList();
-        }
-        else
-        {
-            Salutations = [];
-        }
-    }
+    //private async Task GetSalutations()
+    //{
+    //    var salutations = await _salutationService.GetSalutions();
+    //    if (salutations.IsSuccess)
+    //    {
+    //        Salutations = salutations!.Data!.Select(x => x.Title!).ToList();
+    //    }
+    //    else
+    //    {
+    //        Salutations = [];
+    //    }
+    //}
 
     // ── Dynamic Tab Management ──
 
@@ -244,22 +230,30 @@ public partial class NamesPage
 
     async Task OnDelete(string? id)
     {
-        var confirm = (bool)await DialogService.Confirm("Other Name deleted will not be able to recover, would you like to continue?", "Delete Other Name",
-            new ConfirmOptions { OkButtonText = "Yes", CancelButtonText = "No" });
-        if (confirm)
+
+        var confirm = await MsgBox.ShowAsync("Other Name deleted will not be able to recover, would you like to continue?", "Delete Other Name", MsgBoxButtons.YesNo, MsgBoxBoxIcon.Question);
+
+        if (confirm == MsgBoxResult.Yes)
         {
-            var result = await _otherNameService!.DeleteAsync(id);
-            if (result.IsSuccess)
+
+            var command = new DeleteOtherNameCommand(id);
+
+            var result = await mediator.Send(command); //   _otherNameService!.DeleteAsync(id);
+
+            if (result.IsSuccess())
             {
-                NotificationService.Notify(NotificationSeverity.Success, "Delete Other Name", "Other Name was deleted successful!");
-                await OnInitializedAsync();
+
+                _toastService.ShowSuccess("Other Name was deleted successful!");
+
                 ContextMenuService.Close();
+
                 return;
             }
         }
         else
         {
             Console.WriteLine("Canceled");
+
             ContextMenuService.Close();
         }
     }
@@ -274,13 +268,15 @@ public partial class NamesPage
 
         if (confirm == false) return;
 
-        var rsp = await _otherNameService.UpdateStatusAsync(id, args);
-        if (rsp.IsSuccess)
-        {
-            await GetOtherNames(q);
-            return;
-        }
+        //var rsp = await _otherNameService.UpdateStatusAsync(id, args);
 
-        NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
+        //if (rsp.IsSuccess)
+        //{
+        await GetOtherNames(q);
+
+        return;
+        // }
+
+        //NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
     }
 }

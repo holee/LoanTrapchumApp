@@ -1,4 +1,5 @@
-﻿using Applications.Constants.Authorizations;
+﻿using Applications.Bases;
+using Applications.Constants.Authorizations;
 using Applications.Extensions;
 using Applications.Features.Identity.Users;
 using Applications.Interfaces.Identity;
@@ -25,7 +26,7 @@ public sealed class UserRepository : IUserService
     private readonly SignInManager<ApplicationUser> _signinManager;
     private readonly RoleManager<ApplicationRole> _roleManager;
     private readonly IHostingEnvironment _env;
-    private readonly IDbContextFactory<DataContext> _dbContextFactory;
+    private readonly IDbContextFactory<DataContext> _cxtFactory;
     private readonly IDapperConnectionFactory connectionFactory;
     public UserRepository(UserManager<ApplicationUser> userManager,
          RoleManager<ApplicationRole> roleManager,
@@ -40,10 +41,10 @@ public sealed class UserRepository : IUserService
         _userContextFactory = userContextFactory;
         _env = env;
         _signinManager = signinManager;
-        _dbContextFactory = dbContextFactory;
+        _cxtFactory = dbContextFactory;
         this.connectionFactory = connectionFactory;
     }
-    public async Task<ErrorOr<string>> CreateUserAsync(RegisterRequest model, CancellationToken cancellation = default)
+    public async Task<ErrorOr<string>> CreateAsync(RegisterRequest model, CancellationToken cancellation = default)
     {
         if (string.IsNullOrWhiteSpace(model.EmployeeId))
             return Error.Validation(description: "Employee is required.");
@@ -95,6 +96,57 @@ public sealed class UserRepository : IUserService
     }
 
 
+    public async Task<ErrorOr<DeleteResult>> DeleteAsync(string userId, CancellationToken cancellation = default)
+    {
+        if (string.IsNullOrWhiteSpace(userId))
+            return Error.Validation(description: "UserId is required.");
+
+        var user = await _userManager.FindByIdAsync(userId);
+
+        if (user is null)
+            return Error.NotFound(description: "No user found with the provided userId.");
+
+        if (await IsUserHasLoanRequest(userId, cancellation) ||
+           await IsUserHasLoanDisbursment(userId, cancellation) ||
+           await IsUserHasProfile(userId, cancellation))
+        {
+            return DeleteResult.InUse("User cannot be deleted because it is associated with existing loan requests, disbursements, or profiles.");
+        }
+
+        var result = await _userManager.DeleteAsync(user);
+
+        if (!result.Succeeded)
+        {
+            return result.Errors
+                .Select(e => Error.Validation(code: e.Code, description: e.Description))
+                .ToList();
+        }
+
+        return DeleteResult.Success("User was deleted successfully.");
+    }
+
+    public async Task<ErrorOr<Updated>> ToggleUserActiveAsync(string userId, CancellationToken cancellation = default)
+    {
+        if (string.IsNullOrWhiteSpace(userId))
+            return Error.Validation(description: "UserId is required.");
+
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user is null)
+            return Error.NotFound(description: "No user found with the provided userId.");
+
+        user.IsActive = !user.IsActive;
+
+        var result = await _userManager.UpdateAsync(user);
+        if (!result.Succeeded)
+        {
+            return result.Errors
+                .Select(e => Error.Validation(code: e.Code, description: e.Description))
+                .ToList();
+        }
+
+        return Result.Updated;
+    }
+
 
     public async Task<ErrorOr<VUser>> GetUserByIdAsync(string? userId, CancellationToken cancellation = default)
     {
@@ -117,7 +169,7 @@ public sealed class UserRepository : IUserService
 
     public async Task<ErrorOr<Pager<VUser>>> GetUsersAsync(QueryParam param, string? userId = null, CancellationToken cancellation = default)
     {
-        await using var context = await _dbContextFactory.CreateDbContextAsync(cancellation);
+        await using var context = await _cxtFactory.CreateDbContextAsync(cancellation);
 
         var queries = context.Database
                             .SqlQuery<VUser>($"SELECT * FROM vUsers")
@@ -145,7 +197,7 @@ public sealed class UserRepository : IUserService
 
     public async Task<ErrorOr<Pager<VUser>>> GetUsersAsync(int? branchId, string? userId, QueryParam param, CancellationToken cancellation = default)
     {
-        await using var context = await _dbContextFactory.CreateDbContextAsync(cancellation);
+        await using var context = await _cxtFactory.CreateDbContextAsync(cancellation);
 
         var queries = context.Database
                             .SqlQuery<VUser>($"SELECT * FROM vUsers")
@@ -170,10 +222,12 @@ public sealed class UserRepository : IUserService
     public async Task<ErrorOr<string>> ChangePassword(ChangePasswordDto req, CancellationToken cancellation = default)
     {
         var existingUser = await _userManager.FindByIdAsync(req.UserId);
+
         if (existingUser is null)
             return Error.NotFound(description: "There is no any user in the system.");
 
         var changePasswordResult = await _userManager.ChangePasswordAsync(existingUser, req.CurrentPassword, req.NewPassword);
+
         if (!changePasswordResult.Succeeded)
         {
             return changePasswordResult.Errors
@@ -219,6 +273,7 @@ public sealed class UserRepository : IUserService
                                             .FirstOrDefaultAsync(x => x.UserRefId == userId, cancellation);
 
         var uploadResult = await UploadFile(model);
+
         if (!uploadResult.Success || uploadResult.Model is null)
             return Error.Validation(description: "Error during file upload.");
 
@@ -244,8 +299,6 @@ public sealed class UserRepository : IUserService
         return fileResult;
     }
 
-
-
     public async Task<ErrorOr<UserProfileResponse>> GetUserProfile(string? userId, CancellationToken cancellation = default)
     {
         using var db = await connectionFactory.CreateConnectionAsync(cancellation);
@@ -268,7 +321,6 @@ public sealed class UserRepository : IUserService
             ? Error.NotFound(description: "No user found.")
             : item;
     }
-
 
     public async Task<ErrorOr<Updated>> EditUserAsync(string userId, EditUserDto model, CancellationToken cancellation = default)
     {
@@ -442,7 +494,7 @@ public sealed class UserRepository : IUserService
             return new UploadResult(false, "File Extension is valid.", null);
         }
 
-        var destination = Path.Combine(_env.WebRootPath, "Profiles");
+        var destination = Path.Combine(_env.WebRootPath, "assets/profiles");
 
         if (!Directory.Exists(destination))
         {
@@ -453,7 +505,7 @@ public sealed class UserRepository : IUserService
 
         string newFileName = $"{Guid.CreateVersion7()}{extension}";
 
-        var uploadPath = Path.Combine("Profiles", newFileName);
+        var uploadPath = Path.Combine("assets/profiles", newFileName);
 
         var filePath = Path.Combine(destination, newFileName);
 
@@ -531,7 +583,7 @@ public sealed class UserRepository : IUserService
 
     public async Task<ErrorOr<VUser>> GetUserDetailById(string? userId, CancellationToken cancellation = default)
     {
-        await using var context = await _dbContextFactory.CreateDbContextAsync(cancellation);
+        await using var context = await _cxtFactory.CreateDbContextAsync(cancellation);
 
         var item = await context.Set<VUser>()
                             .AsNoTracking()
@@ -559,7 +611,7 @@ public sealed class UserRepository : IUserService
 
     public async Task<Pager<PermissionsVm>> GetPermissionsAsync(QueryParam q, CancellationToken cancellation = default)
     {
-        await using var context = await _dbContextFactory.CreateDbContextAsync(cancellation);
+        await using var context = await _cxtFactory.CreateDbContextAsync(cancellation);
 
         var queries = context.Database
                             .SqlQuery<PermissionsVm>($"SELECT * FROM [Security].[VPermessions]")
@@ -585,7 +637,7 @@ public sealed class UserRepository : IUserService
 
     public async Task<bool> IsExistEmployeeHasAccount(string employeeId)
     {
-        await using var context = await _dbContextFactory.CreateDbContextAsync();
+        await using var context = await _cxtFactory.CreateDbContextAsync();
 
         return await context.Database
                             .SqlQuery<VUser>($@"SELECT * FROM vUsers WHERE EmployeeRefId={employeeId}")
@@ -594,8 +646,41 @@ public sealed class UserRepository : IUserService
     }
 
 
-}
+    private async Task<bool> IsUserHasLoanRequest(string userId, CancellationToken cancellation = default)
+    {
+        await using var context = await _cxtFactory.CreateDbContextAsync();
 
+        return await context.LoanRequests
+                            .Where(lr => lr.RequestUserRefId == userId || lr.AprovedUserId == userId)
+                            .Select(_ => 1)
+                            .AnyAsync(cancellation);
+
+    }
+
+
+    private async Task<bool> IsUserHasLoanDisbursment(string userId, CancellationToken cancellation = default)
+    {
+        await using var context = await _cxtFactory.CreateDbContextAsync(cancellation);
+
+        return await context.LoanDisbursments
+                            .Where(ld => ld.UserRefId == userId)
+                            .Select(_ => 1)
+                            .AnyAsync(cancellation);
+    }
+
+    private async Task<bool> IsUserHasProfile(string userId, CancellationToken cancellation = default)
+    {
+        await using var context = await _cxtFactory.CreateDbContextAsync(cancellation);
+
+        return await context.UserProfiles
+                            .Where(up => up.UserRefId == userId)
+                            .Select(_ => 1)
+                            .AnyAsync(cancellation);
+
+    }
+
+
+}
 
 //public async Task<ErrorOr<VUser>> GetUserByIdAsync(string? userId, CancellationToken cancellation = default, params IEnumerable<string> columns)
 //{

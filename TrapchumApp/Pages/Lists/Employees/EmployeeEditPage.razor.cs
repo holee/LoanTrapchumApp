@@ -58,28 +58,21 @@ namespace TrapchumApp.Pages.Lists.Employees
 
         protected async Task FormValidSubmit()
         {
-            try
+            var command = new EditEmployeeCommand(model);
+
+            var rsp = await mediator.Send(command);
+
+            if (rsp.IsSuccess())
             {
+                _toastService.ShowSuccess("Employee was updated successfully.", "Success");
 
-                var command = new EditEmployeeCommand(model);
+                await UpdateChanged.InvokeAsync(rsp.Value);
 
-                var rsp = await mediator.Send(command);
-
-                if (rsp.IsSuccess())
-                {
-                    NotificationService.Notify(NotificationSeverity.Success, "Employee was updated successfully.");
-
-                }
-                else
-                {
-                    NotificationService.Notify(NotificationSeverity.Error, rsp.GetMessage());
-                }
             }
-            catch (Exception ex)
+            else
             {
-                NotificationService.Notify(NotificationSeverity.Error, ex.Message);
+                _toastService.ShowError(rsp.GetMessage(), "Error");
             }
-
         }
     }
 }

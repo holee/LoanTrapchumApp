@@ -263,6 +263,77 @@
 }
 
 @* ══════════════════════════════════════════════════════════════
+   SweetAlert Demo
+   ══════════════════════════════════════════════════════════════ *@
+<RadzenCard class="rz-my-4">
+    <h4 class="rz-mb-4">SweetAlert Demo</h4>
+    <RadzenRow Gap="0.75rem">
+        <RadzenColumn Size="12" SizeMD="4">
+            <RadzenStack Gap="0.5rem">
+                <label><strong>Basic Alerts</strong></label>
+                <RadzenButton Text="Success" Icon="check_circle"
+                              ButtonStyle="ButtonStyle.Success"
+                              Size="ButtonSize.Small"
+                              Click="@SwalDemo_Success" />
+                <RadzenButton Text="Error" Icon="error"
+                              ButtonStyle="ButtonStyle.Danger"
+                              Size="ButtonSize.Small"
+                              Click="@SwalDemo_Error" />
+                <RadzenButton Text="Warning" Icon="warning"
+                              ButtonStyle="ButtonStyle.Warning"
+                              Size="ButtonSize.Small"
+                              Click="@SwalDemo_Warning" />
+                <RadzenButton Text="Info" Icon="info"
+                              ButtonStyle="ButtonStyle.Info"
+                              Size="ButtonSize.Small"
+                              Click="@SwalDemo_Info" />
+                <RadzenButton Text="Question" Icon="help"
+                              ButtonStyle="ButtonStyle.Secondary"
+                              Size="ButtonSize.Small"
+                              Click="@SwalDemo_Question" />
+            </RadzenStack>
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeMD="4">
+            <RadzenStack Gap="0.5rem">
+                <label><strong>Confirm Dialogs</strong></label>
+                <RadzenButton Text="Confirm (Yes / Cancel)" Icon="task_alt"
+                              ButtonStyle="ButtonStyle.Primary"
+                              Size="ButtonSize.Small"
+                              Click="@SwalDemo_Confirm" />
+                <RadzenButton Text="Confirm / Deny / Cancel" Icon="help_outline"
+                              ButtonStyle="ButtonStyle.Secondary"
+                              Size="ButtonSize.Small"
+                              Click="@SwalDemo_ConfirmDeny" />
+                <RadzenButton Text="Input Text" Icon="edit"
+                              ButtonStyle="ButtonStyle.Light"
+                              Size="ButtonSize.Small"
+                              Click="@SwalDemo_Input" />
+            </RadzenStack>
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeMD="4">
+            <RadzenStack Gap="0.5rem">
+                <label><strong>Advanced</strong></label>
+                <RadzenButton Text="HTML Content" Icon="code"
+                              ButtonStyle="ButtonStyle.Info"
+                              Size="ButtonSize.Small"
+                              Click="@SwalDemo_Html" />
+                <RadzenButton Text="Auto-close (3 s)" Icon="timer"
+                              ButtonStyle="ButtonStyle.Warning"
+                              Size="ButtonSize.Small"
+                              Click="@SwalDemo_Timed" />
+                <RadzenButton Text="Custom Width + Footer" Icon="open_in_full"
+                              ButtonStyle="ButtonStyle.Light"
+                              Size="ButtonSize.Small"
+                              Click="@SwalDemo_CustomFooter" />
+            </RadzenStack>
+        </RadzenColumn>
+    </RadzenRow>
+    <div class="rz-mt-3">
+        <small class="text-muted">Last result: <strong>@_swalLastResult</strong></small>
+    </div>
+</RadzenCard>
+
+@* ══════════════════════════════════════════════════════════════
    MessageBox Demo
    ══════════════════════════════════════════════════════════════ *@
 <RadzenCard class="rz-my-4">

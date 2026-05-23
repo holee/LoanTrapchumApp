@@ -1,6 +1,6 @@
 ﻿@using System.Linq.Expressions
 <RadzenDropDown Value="@Value"
-                Data="@Items"
+                Data="@_items"
                 Style="width: 100%;"
                 AllowClear="@AllowClear"
                 TValue="string"
@@ -10,7 +10,7 @@
                 Name="@Name">
 </RadzenDropDown>
 @code {
-    [Parameter] public IEnumerable<string> Items { get; set; } = [];
+    private IEnumerable<string> _items { get; set; } = [];
     [Parameter] public string Value { get; set; } = string.Empty;
     [Parameter] public string Name { get; set; } = "Genders";
     [Parameter] public EventCallback<string> ValueChanged { get; set; }
@@ -20,10 +20,8 @@
 
     protected override void OnInitialized()
     {
-        if (!Items.Any())
-        {
-            Items = ["F", "Female", "M", "Male", "Other"];
-        }
+
+        _items = ["F", "Female", "M", "Male", "Other"];
 
         base.OnInitialized();
     }

@@ -7,7 +7,7 @@ namespace Applications.Interfaces.Identity;
 
 public interface IUserService
 {
-    Task<ErrorOr<string>> CreateUserAsync(RegisterRequest model, CancellationToken cancellation = default);
+    Task<ErrorOr<string>> CreateAsync(RegisterRequest model, CancellationToken cancellation = default);
     Task<ErrorOr<Updated>> EditUserAsync(string userId, EditUserDto model, CancellationToken cancellation = default);
     Task<ErrorOr<UserDto>> GetUserDetailsById(string? userId, CancellationToken cancellation = default);
     Task<ErrorOr<UserPermissions>> GetUserPermissionsAsync(string? userId, CancellationToken cancellation = default);
@@ -25,4 +25,6 @@ public interface IUserService
     Task<ErrorOr<FileModel>> ChangeProfile(string? userId, FileModel model, CancellationToken cancellation = default);
     Task<ErrorOr<UserProfileResponse>> GetUserProfile(string? userId, CancellationToken cancellation = default);
     Task<ErrorOr<VUser>> GetUserDetailById(string? userId, CancellationToken cancellation = default);
+    Task<ErrorOr<DeleteResult>> DeleteAsync(string userId, CancellationToken cancellation = default);
+    Task<ErrorOr<Updated>> ToggleUserActiveAsync(string userId, CancellationToken cancellation = default);
 }

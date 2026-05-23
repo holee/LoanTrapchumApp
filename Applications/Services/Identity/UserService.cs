@@ -47,7 +47,7 @@ public sealed class UserService(IUserService userService, IValidator<ChangePassw
 
     public async Task<Result<string>> CreateUserAsync(RegisterRequest model)
     {
-        var result = await userService.CreateUserAsync(model);
+        var result = await userService.CreateAsync(model);
         return result.IsError
             ? Result.Failure<string>(ErrorResponse.Failure(result.FirstError.Description))
             : Result.Success(result.Value);

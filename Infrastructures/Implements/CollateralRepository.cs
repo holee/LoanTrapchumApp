@@ -380,7 +380,7 @@ public sealed class CollateralRepository : ICollateralService
                 nameof(VCollateralLines.OwnerName),
                 nameof(VCollateralLines.CollateralNo)
             ];
-            return baseQuery.WhereMatchesFilter(pattern, defaultColumns);
+            return baseQuery.StartWiths(pattern, defaultColumns);
         }
 
         if (!string.IsNullOrEmpty(query.FilterColumn) &&

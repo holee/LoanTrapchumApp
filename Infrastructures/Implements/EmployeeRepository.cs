@@ -1,5 +1,7 @@
 ﻿using Applications.Bases;
 using Applications.Commons.Messages.Employees;
+using Applications.Enumerations;
+using Applications.Exceptions;
 using Applications.Extensions;
 using Applications.Features.Loans.Dtos.Responses;
 using Applications.Interfaces.Employees;
@@ -9,6 +11,7 @@ using Applications.Responses.ViewModels.Employees;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Dapper;
 using Domains.Models.Lists;
+using Domains.Models;
 using ErrorOr;
 using Infrastructures.Constants.Procedures;
 using Infrastructures.DataAccess;
@@ -17,10 +20,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Data;
 using System.Linq.Expressions;
+using Applications.Responses.ViewModels.Auths;
 
 namespace Infrastructures.Implements;
 
-public sealed class EmployeeRepository(IDapperConnectionFactory connectionFactory, IDbContextFactory<DataContext> dbContextFactory, ILogger<EmployeeRepository> logger) : IEmployeeService
+public sealed class EmployeeRepository(IDapperConnectionFactory connectionFactory,
+    IDbContextFactory<DataContext> dbContextFactory,
+    ILogger<EmployeeRepository> logger) : IEmployeeService
 {
     private readonly IDapperConnectionFactory _connectionFactory = connectionFactory;
     private readonly IDbContextFactory<DataContext> _dbContextFactory = dbContextFactory;
@@ -50,49 +56,37 @@ public sealed class EmployeeRepository(IDapperConnectionFactory connectionFactor
     {
         try
         {
-
             await using var context = await _dbContextFactory.CreateDbContextAsync(cancellation);
+
+            var contact = employee.Employee?.Contact;
+
+            if (employee.Employee is not null)
+
+                employee.Employee.Contact = null;
 
             context.EntityNames.Update(employee);
 
+            if (contact is not null && !string.IsNullOrEmpty(contact.ContactId))
+            {
+                var exists = await context.Set<EmergencyContact>()
+                    .AsNoTracking()
+                    .AnyAsync(x => x.ContactId == contact.ContactId, cancellation);
+
+                if (exists)
+                    context.Set<EmergencyContact>().Update(contact);
+                else
+                    context.Set<EmergencyContact>().Add(contact);
+            }
+
             await context.SaveChangesAsync(cancellation);
 
-            var emp = await GetEmployeeDetailsByIdAsync(employee.Id, null, true);
+            var emp = await GetEmployeeDetailsByIdAsync(employee.Id, null, false);
 
             return emp;
         }
-        catch (Exception ex)
+        catch (DbUpdateConcurrencyException ex)
         {
-            return Error.Failure("ServerError", ex.InnerException!.Message);
-        }
-    }
-
-
-    public async Task<Result<string>> DeleteAsync(string? id, CancellationToken cancellation = default)
-    {
-        try
-        {
-            await using var _context = await _dbContextFactory.CreateDbContextAsync(cancellation);
-
-            var employee = await _context.EntityNames
-                                            .Where(x => x.Id == id)
-                                            .Include(x => x.Employee)
-                                            .FirstOrDefaultAsync();
-            if (employee is null)
-            {
-                return Applications.Responses.Result.Failure<string>(ErrorResponse.NotFound("There is no Employee in then context."));
-            }
-
-            _context.EntityNames.Remove(employee);
-
-            await _context.SaveChangesAsync();
-
-            return Applications.Responses.Result.Success("One Employee was delete from database.");
-        }
-
-        catch (Exception ex)
-        {
-            return Applications.Responses.Result.Failure<string>(ErrorResponse.NotFound($"{ex.InnerException!.Message}"));
+            return Error.Failure("ServerError", ex.Message);
         }
     }
 
@@ -187,38 +181,6 @@ public sealed class EmployeeRepository(IDapperConnectionFactory connectionFactor
         return new Pager<VEmployeeList>(items, counts);
     }
 
-    public async Task<Pager<VEmployeeList>> GetEmployeesAsync(int? branchId, string? employeeId, QueryParam q, CancellationToken cancellation = default, params string[] columns)
-    {
-        using var connection = await _connectionFactory.CreateConnectionAsync(cancellation);
-
-        var selectColumns = SqlColumnHelper.BuildSafeColumnList<VEmployeeList>(columns);
-
-        var parameters = new
-        {
-            BranchId = branchId,
-            EmployeeId = employeeId,
-            Filter = q.Filter,
-            FilterColumn = q.FilterColumn,
-            SortColumn = q.SortColumn,
-            SortDescending = q.SortDescending,
-            SelectColumns = selectColumns,
-            Skip = q.Page,
-            PageSize = q.Take
-        };
-
-        using var multi = await connection.QueryMultipleAsync("dbo.spGetEmployees_Dynamic",
-                                            parameters,
-                                            commandType: CommandType.StoredProcedure);
-
-        var totalCount = await multi.ReadSingleAsync<int>();
-
-        var items = (await multi.ReadAsync<VEmployeeList>()).ToList();
-
-        return new Pager<VEmployeeList>(items, totalCount);
-
-
-
-    }
 
     public async Task<ErrorOr<EntityNames>> GetByIdAsync(string? id, int? branchId, CancellationToken cancellation = default)
     {
@@ -278,7 +240,7 @@ public sealed class EmployeeRepository(IDapperConnectionFactory connectionFactor
 
             if (existingItem is null)
             {
-                return Error.NotFound("No Employee Found.");
+                return Error.NotFound(description: "No Employee Found.");
             }
 
             existingItem.LoanRequests = (await multiMap.ReadAsync<VLoanRequests>()).ToList();
@@ -296,33 +258,34 @@ public sealed class EmployeeRepository(IDapperConnectionFactory connectionFactor
 
     public async Task<ErrorOr<DeleteResult>> DeleteAsync(string? id, int? branchId, CancellationToken cancellation = default)
     {
+
+
+        _logger.LogInformation("Deleting employee with ID #{0} from branch #{1}", id, branchId);
+
         await using var context = await _dbContextFactory.CreateDbContextAsync(cancellation);
 
-        //chekc employee is exist
+        if (await IsEmployeeHasLoanRequest(id, context, cancellation))
+        {
+            return DeleteResult.InUse(EmployeeMessage.InUsed);
+        }
+
+        if (await IsEmployeeHasLoanDisbursement(id, context, cancellation))
+        {
+            return DeleteResult.InUse(EmployeeMessage.InUsed);
+        }
+
+        if(await IsEmployeeAssignAsUser(id,context, cancellation))
+        {
+            return DeleteResult.InUse(EmployeeMessage.InUsed);
+        }
+
 
         var employee = await context.EntityNames
-                                     .Include(x => x.Employee)
-                                     .FirstOrDefaultAsync(x => x.Id == id
-                                                          && x.Employee!.BranchRefId == branchId, cancellation);
+                               .Include(x => x.Employee)
+                               .FirstOrDefaultAsync(x => x.Id == id, cancellation);
         if (employee is null)
         {
             return Error.NotFound(EmployeeMessage.NotFound);
-        }
-
-        //check if employee has loans request
-
-        bool hasLoanRequests = await IsEmployeeHasLoanRequest(id, context, cancellation);
-
-        if (hasLoanRequests)
-        {
-            return DeleteResult.InUse(EmployeeMessage.InUsed);
-        }
-
-        bool hasLoanDisbursments = await IsEmployeeHasLoanDisbursement(id, context, cancellation);
-
-        if (hasLoanDisbursments)
-        {
-            return DeleteResult.InUse(EmployeeMessage.InUsed);
         }
 
         try
@@ -333,7 +296,7 @@ public sealed class EmployeeRepository(IDapperConnectionFactory connectionFactor
 
             return DeleteResult.Success(EmployeeMessage.Deleted);
         }
-        catch (DbUpdateException ex)
+        catch (Exception ex)
         {
             _logger.LogError(ex, ex.Message);
 
@@ -356,6 +319,15 @@ public sealed class EmployeeRepository(IDapperConnectionFactory connectionFactor
                                        .AnyAsync(lr => lr.CreditAgentRefId == id, cancellation);
     }
 
+
+    private static async Task<bool> IsEmployeeAssignAsUser(string? id, DataContext context, CancellationToken cancellation)
+    {
+        return await context.Set<VUser>()
+                                       .AsNoTracking()
+                                       .AnyAsync(u => u.EmployeeRefId == id, cancellation);
+    }
+
+
     private IQueryable<VEmployeeList> ApplyFiltering(IQueryable<VEmployeeList> queries, int? branchId, string? employeeId, QueryParam param)
     {
         var filter = param.Filter?.Trim();
@@ -373,17 +345,16 @@ public sealed class EmployeeRepository(IDapperConnectionFactory connectionFactor
 
             var props = new[] { "FirstName", "LastName", "BranchName", "DepartmentName", "Phone", "AltName" };
 
-            queries = queries.WhereMatchesFilter(filter, props);
+            queries = queries.StartWiths(filter, props);
         }
 
         if (!string.IsNullOrEmpty(param.Filter) && !string.IsNullOrEmpty(param.FilterColumn))
         {
-            var property = typeof(VEmployeeList).GetProperty(param.FilterColumn);
+            var property = typeof(VEmployeeList).MapField(param.FilterColumn); //  .GetProperty(param.FilterColumn);
 
             if (property != null)
             {
-                queries = queries.Where(e =>
-                    EF.Functions.Like(EF.Property<string>(e, param.FilterColumn), $"{param.Filter}%"));
+                queries = queries.StartWiths(param.Filter, param.FilterColumn);
             }
         }
 
@@ -392,9 +363,11 @@ public sealed class EmployeeRepository(IDapperConnectionFactory connectionFactor
 
     private IQueryable<VEmployeeList> ApplyOrdering(IQueryable<VEmployeeList> query, QueryParam param)
     {
+
+        var isDescending = param.SortDescending;
+
         if (!string.IsNullOrWhiteSpace(param.SortColumn))
         {
-            var isDescending = param.SortDescending;
 
             var property = typeof(VEmployeeList).GetProperty(param.SortColumn);
 
@@ -408,13 +381,14 @@ public sealed class EmployeeRepository(IDapperConnectionFactory connectionFactor
                             .OrderBy(x => x.ModifiedDT)
                             .ThenBy(e => EF.Property<object>(e, param.SortColumn));
             }
+
+            return query;
         }
-        else
-        {
-            query = query.OrderByDescending(x => x.ModifiedDT)
-                        .ThenByDescending(x => x.FirstName)
-                        .ThenByDescending(x => x.LastName);
-        }
+
+        query = isDescending ? query.OrderByDescending(x => x.ModifiedDT)
+                    .ThenByDescending(x => x.FirstName)
+                    .ThenByDescending(x => x.LastName) : query.OrderBy(x => x.ModifiedDT)
+                    .ThenBy(e => e.FirstName).ThenBy(e => e.LastName);
 
         return query;
     }
@@ -458,6 +432,109 @@ public sealed class EmployeeRepository(IDapperConnectionFactory connectionFactor
 }
 
 #region commented code
+
+//public async Task<Result<string>> DeleteAsync(string? id, CancellationToken cancellation = default)
+//{
+//    try
+//    {
+//        await using var _context = await _dbContextFactory.CreateDbContextAsync(cancellation);
+
+//        var employee = await _context.EntityNames
+//                                        .Where(x => x.Id == id)
+//                                        .Include(x => x.Employee)
+//                                        .FirstOrDefaultAsync();
+//        if (employee is null)
+//        {
+//            return Applications.Responses.Result.Failure<string>(ErrorResponse.NotFound("There is no Employee in then context."));
+//        }
+
+//        _context.EntityNames.Remove(employee);
+
+//        await _context.SaveChangesAsync();
+
+//        return Applications.Responses.Result.Success("One Employee was delete from database.");
+//    }
+
+//    catch (Exception ex)
+//    {
+//        return Applications.Responses.Result.Failure<string>(ErrorResponse.NotFound($"{ex.InnerException!.Message}"));
+//    }
+//}
+
+
+//public async Task<DeleteResult> DeleteAsync(string? id, CancellationToken cancellation = default)
+//{
+//    try
+//    {
+//        await using var _context = await _dbContextFactory.CreateDbContextAsync(cancellation);
+
+
+//        var usedEmployee = await _context.LoanRequests
+//                                       .AsNoTracking()
+//                                       .AnyAsync(lr => lr.CreditAgentRefId == id, cancellation);
+
+
+//        if (usedEmployee)
+//        {
+//            return DeleteResult.InUse("Cannot delete employee who has associated loan requests.");
+//        }
+
+//        var employee = await _context.EntityNames
+//                                        .Where(x => x.Id == id)
+//                                        .Include(x => x.Employee)
+//                                        .FirstOrDefaultAsync();
+//        if (employee is null)
+//        {
+//            throw new NotFoundExceptions("No found employee to delete.");
+//        }
+
+//        _context.EntityNames.Remove(employee);
+
+//        await _context.SaveChangesAsync();
+
+//        return DeleteResult.Success("Employee was deleted.");
+//    }
+
+//    catch (Exception ex)
+//    {
+//        throw new Exception(ex.Message, ex);
+//    }
+//}
+
+
+//public async Task<Pager<VEmployeeList>> GetEmployeesAsync(int? branchId, string? employeeId, QueryParam q, CancellationToken cancellation = default, params string[] columns)
+//{
+//    using var connection = await _connectionFactory.CreateConnectionAsync(cancellation);
+
+//    var selectColumns = SqlColumnHelper.BuildSafeColumnList<VEmployeeList>(columns);
+
+//    var parameters = new
+//    {
+//        BranchId = branchId,
+//        EmployeeId = employeeId,
+//        Filter = q.Filter,
+//        FilterColumn = q.FilterColumn,
+//        SortColumn = q.SortColumn,
+//        SortDescending = q.SortDescending,
+//        SelectColumns = selectColumns,
+//        Skip = q.Page,
+//        PageSize = q.Take
+//    };
+
+//    using var multi = await connection.QueryMultipleAsync("dbo.spGetEmployees_Dynamic",
+//                                        parameters,
+//                                        commandType: CommandType.StoredProcedure);
+
+//    var totalCount = await multi.ReadSingleAsync<int>();
+
+//    var items = (await multi.ReadAsync<VEmployeeList>()).ToList();
+
+//    return new Pager<VEmployeeList>(items, totalCount);
+
+
+
+//}
+
 //public async Task<Result<VEmployeeList>> GetEmployeeByIdAsync(string? employeeId, CancellationToken cancellation = default)
 //{
 

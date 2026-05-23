@@ -9,15 +9,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Helpers\Filters\**" />
     <Compile Remove="Views\**" />
     <Compile Remove="wwwroot\documents\**" />
     <Compile Remove="wwwroot\uploads\**" />
+    <Content Remove="Helpers\Filters\**" />
     <Content Remove="Views\**" />
     <Content Remove="wwwroot\documents\**" />
     <Content Remove="wwwroot\uploads\**" />
+    <EmbeddedResource Remove="Helpers\Filters\**" />
     <EmbeddedResource Remove="Views\**" />
     <EmbeddedResource Remove="wwwroot\documents\**" />
     <EmbeddedResource Remove="wwwroot\uploads\**" />
+    <None Remove="Helpers\Filters\**" />
     <None Remove="Views\**" />
     <None Remove="wwwroot\documents\**" />
     <None Remove="wwwroot\uploads\**" />
@@ -66,7 +70,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Helpers\Filters\" />
     <Folder Include="wwwroot\assets\docs\" />
     <Folder Include="wwwroot\assets\docs\" />
     <Folder Include="wwwroot\schedules\" />
@@ -166,7 +169,7 @@
     <AdditionalFiles Include="Pages\Lists\OtherNames\Guarantors\GuarantorEditPage.razor" />
     <AdditionalFiles Include="Pages\Lists\OtherNames\Guarantors\GuarantorsPage.razor" />
     <AdditionalFiles Include="Pages\Lists\OtherNames\Guarantors\GuarantorsList.razor" />
-    <AdditionalFiles Include="Pages\Lists\OtherNames\NamesPage.razor" />
+    <AdditionalFiles Include="Pages\Lists\OtherNames\NamesPageIndex.razor" />
     <AdditionalFiles Include="Pages\Lists\OtherNames\List.razor" />
     <AdditionalFiles Include="Pages\Lists\OtherNames\NameCreateInfo.razor" />
     <AdditionalFiles Include="Pages\Lists\OtherNames\NameCreateModal.razor" />
@@ -237,7 +240,7 @@
     <AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanRequestCustomer.razor" />
     <AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanRequestDetail.razor" />
     <AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanRequestDocument.razor" />
-    <AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanRequestEdit.razor" />
+    <AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanRequestEditPage.razor" />
     <AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanRequestGaurantor.razor" />
     <AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanRequestInfo.razor" />
     <AdditionalFiles Include="Pages\Transactions\LoanRequests\LoanRequestNotes.razor" />

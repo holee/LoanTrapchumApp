@@ -7,6 +7,7 @@ using Domains.Models.Loans;
 using Domains.Models.Settings;
 using ErrorOr;
 using Infrastructures.DataAccess;
+using Infrastructures.Implements.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -187,28 +188,25 @@ public sealed class AppSettingService(
         {
             await using var cxt = await dbContextFactory.CreateDbContextAsync(cancellation);
 
-            var query = cxt.Set<VUserLoanSizes>().AsNoTracking();
+            var queries = cxt.Set<VUserLoanSizes>().AsNoTracking();
 
             if (!string.IsNullOrWhiteSpace(userRefId))
-                query = query.Where(x => x.UserRefId == userRefId);
+                queries = queries.Where(x => x.UserRefId == userRefId);
 
-            if (!param.IncludeInActive)
-                query = query.Where(x => x.IsActive);
+            if (param.IncludeInActive)
+            {
+                queries = queries.IgnoreQueryFilters();
+            }
+            queries = ApplyFilters(param, queries);
 
-            if (!string.IsNullOrWhiteSpace(param.Filter))
-                query = query.Where(x =>
-                    EF.Functions.Like(x.UserRefId!, $"%{param.Filter}%") ||
-                    EF.Functions.Like(x.Description!, $"%{param.Filter}%"));
+            queries = ApplyOrder(param, queries);
 
-            if (param.SortDescending)
-                query = query.OrderByDescending(x => EF.Property<object>(x, param.SortColumn!));
-
-            var count = await query.CountAsync(cancellation);
+            var count = await queries.CountAsync(cancellation);
 
             if (param.Take > 0)
-                query = query.Skip(param.Page).Take(param.Take);
+                queries = queries.Skip(param.Page).Take(param.Take);
 
-            var items = await query.AsNoTracking().ToListAsync(cancellation);
+            var items = await queries.AsNoTracking().ToListAsync(cancellation);
 
             return PagerExtensions.Create(items, count);
         }
@@ -218,6 +216,61 @@ public sealed class AppSettingService(
 
             return PagerExtensions.Create<VUserLoanSizes>([], 0);
         }
+    }
+
+    private static IQueryable<VUserLoanSizes> ApplyFilters(QueryParam param, IQueryable<VUserLoanSizes> queries)
+    {
+        if (string.IsNullOrWhiteSpace(param.Filter)) return queries;
+
+        var filterValue = param.Filter.Trim();
+
+        if (string.IsNullOrWhiteSpace(param.FilterColumn))
+        {
+
+            var columnsToSearch = new[]
+            {
+                    nameof(VUserLoanSizes.Description),
+                    nameof(VUserLoanSizes.MinUsdLoanSize),
+                    nameof(VUserLoanSizes.MaxUsdLoanSize),
+                    nameof(VUserLoanSizes.MinKhrLoanSize),
+                    nameof(VUserLoanSizes.MaxKhrLoanSize)
+                };
+
+            queries = queries.StartWiths(filterValue, columnsToSearch);
+
+
+            return queries;
+        }
+
+        var property = typeof(VUserLoanSizes).MapField(param.FilterColumn);
+
+        if (property != null)
+        {
+            queries = queries.StartWith(filterValue, property);
+        }
+
+        return queries;
+    }
+
+    private static IQueryable<VUserLoanSizes> ApplyOrder(QueryParam param, IQueryable<VUserLoanSizes> queries)
+    {
+        var isDescending = param.SortDescending;
+
+        if (!string.IsNullOrWhiteSpace(param.SortColumn))
+        {
+            queries = isDescending ? queries.OrderByDescending(x => EF.Property<object>(x, param.SortColumn))
+                                   : queries.OrderBy(x => EF.Property<object>(x, param.SortColumn!));
+        }
+        else
+        {
+            queries = isDescending ? queries.OrderByDescending(x => x.MaxKhrLoanSize)
+                                                .ThenByDescending(x => x.MaxUsdLoanSize)
+                                   : queries.OrderBy(x => x.MinKhrLoanSize)
+                                            .ThenBy(x => x.MinUsdLoanSize);
+
+        }
+
+        return queries;
     }
 
     public async Task<ErrorOr<UserLoanSizeDto>> GetUserLoanSizeByIdAsync(
@@ -263,7 +316,9 @@ public sealed class AppSettingService(
         {
             await using var cxt = await dbContextFactory.CreateDbContextAsync(cancellation);
 
-            var exists = await cxt.UserLoanSizes.AnyAsync(x => x.UserRefId == request.UserRefId, cancellation);
+            var exists = await cxt.UserLoanSizes
+                        .IgnoreQueryFilters()
+                        .AnyAsync(x => x.UserRefId == request.UserRefId, cancellation);
             if (exists)
                 return Error.Conflict(description: "A loan size record already exists for this user.");
 
@@ -281,6 +336,7 @@ public sealed class AppSettingService(
             };
 
             cxt.UserLoanSizes.Add(entity);
+
             await cxt.SaveChangesAsync(cancellation);
 
             return new UserLoanSizeDto
@@ -313,6 +369,7 @@ public sealed class AppSettingService(
             await using var cxt = await dbContextFactory.CreateDbContextAsync(cancellation);
 
             var entity = await cxt.UserLoanSizes
+                .IgnoreQueryFilters()
                 .FirstOrDefaultAsync(x => x.Id == request.Id && x.EditSeq == request.EditSeq, cancellation);
 
             if (entity is null)
@@ -384,12 +441,14 @@ public sealed class AppSettingService(
 
             var entity = await cxt.UserLoanSizes
                 .AsNoTracking()
+                .IgnoreQueryFilters()
                 .FirstOrDefaultAsync(x => x.Id == id && x.UserRefId == userRefId, cancellation);
 
             if (entity is null)
                 return Error.NotFound(description: "User loan size not found.");
 
             var updated = await cxt.UserLoanSizes
+                .IgnoreQueryFilters()
                 .Where(x => x.Id == id && x.UserRefId == userRefId && x.EditSeq == entity.EditSeq)
                 .ExecuteUpdateAsync(props => props
                     .SetProperty(x => x.IsActive, !entity.IsActive)

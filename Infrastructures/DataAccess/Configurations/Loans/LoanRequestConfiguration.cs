@@ -22,7 +22,8 @@ namespace Infrastructures.DataAccess.Configurations.Loans
             builder.Property(x => x.CreatedDt).HasDefaultValueSql("GETDATE()");
             builder.Property(x => x.ModifiedDt).HasDefaultValueSql("GETDATE()");
             builder.Property(x => x.Remark).HasMaxLength(400);
-
+            builder.Property(x => x.LoanPurpose).HasMaxLength(400);
+            builder.Property(x => x.IsSubmitted).HasDefaultValue(false);
 
 
             builder.HasMany(x => x.LoanDocuments)

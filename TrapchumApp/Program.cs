@@ -2,6 +2,7 @@ using Applications;
 using Applications.Commons.Authorizations;
 using Applications.Validations;
 using Domains.Models.Identity;
+using Domains.Models.Loans;
 using Infrastructures;
 using Infrastructures.DependencyInjects;
 using Mapster;
@@ -12,7 +13,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
 using QuestPDF.Infrastructure;
 using TrapchumApp;
+using TrapchumApp.Authorizations.Handlers;
+using TrapchumApp.Authorizations.Rquirements;
 using TrapchumApp.Components;
+using TrapchumApp.Components.Modals.SweetAlerts;
 using TrapchumApp.Components.Toasts;
 using TrapchumApp.Hubs;
 using TrapchumApp.Services;
@@ -41,6 +45,8 @@ builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSe
 builder.Services.AddControllers();
 builder.Services.AddScoped<IAuthorizationHandler, SameUserRequestAuthorizationHandler>();
 builder.Services.AddScoped<IAuthorizationHandler, SameUserApprovedAuthorizationHandler>();
+builder.Services.AddScoped<IAuthorizationHandler, IsCanApprovedNormalAmountHandler>();
+builder.Services.AddScoped<IAuthorizationHandler, IsCanApprovedMaximumAmountHandler>();
 builder.Services.AddSingleton<IUserIdProvider, UserIdProvider>();
 builder.Services.AddScoped<NotificationServices>();
 builder.Services.AddScoped<NotificationHubService>();
@@ -55,6 +61,8 @@ builder.Services.AddToastService(options =>
 });
 builder.Services.AddSignalR();
 builder.Services.AddScoped<TrapchumApp.Components.Messageboxes.MessageBoxService>();
+builder.Services.AddScoped<SwalService>();
+builder.Services.AddScoped<TrapchumApp.Components.Modals.Dialoques.ModalService>();
 builder.Services.AddSingleton<IAppNotificationService, AppNotificationService>();
 
 builder.WebHost.ConfigureKestrel(options =>
@@ -106,3 +114,12 @@ app.MapHub<AppNotificationHub>("/hubs/notifications");
 
 
 app.Run();
+
+
+
+//// Inject IAuthorizationService
+//var result = await AuthorizationService.AuthorizeAsync(
+//    user, loanRequest, new IsCanApprovedNormalAmountRequirement());
+//// or for large amounts:
+//var result = await AuthorizationService.AuthorizeAsync(
+//    user, loanRequest, new IsCanApprovedMaximumAmountRequirement());

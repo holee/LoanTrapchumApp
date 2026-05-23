@@ -1,6 +1,7 @@
 ﻿@page "/App/Account/ManageLoanSize"
 @using Applications.Features.Settings.Dto
 <PageTitle>Manage Loan Size</PageTitle>
+@attribute [StreamRendering]
 <RadzenFieldset>
     <HeaderTemplate>
         <RadzenStack AlignItems="AlignItems.Center" Gap="0.25rem" Orientation="Orientation.Horizontal">
@@ -24,7 +25,6 @@
                         Density="Density.Compact"
                         AllowAlternatingRows="true"
                         AllowPaging="true"
-                        IsLoading="@isLoading"
                         Count="@_counts"
                         ColumnWidth="10rem"
                         AllowSorting="true"

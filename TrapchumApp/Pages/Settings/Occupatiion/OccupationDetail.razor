@@ -1,3 +1,4 @@
+@using TrapchumApp.Components.Indicatros
 <RadzenStack Gap="1rem">
 
     <RadzenFieldset>
@@ -8,12 +9,9 @@
             </RadzenStack>
         </HeaderTemplate>
         <ChildContent>
-            @if (_occupation is null)
+            @if (_isPageLoading)
             {
-                <RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="min-height:120px">
-                    <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Medium" />
-                    <RadzenText TextStyle="TextStyle.Body2">Loading...</RadzenText>
-                </RadzenStack>
+                <Loading Text="កំពុងផ្ទុក....." />
             }
             else
             {

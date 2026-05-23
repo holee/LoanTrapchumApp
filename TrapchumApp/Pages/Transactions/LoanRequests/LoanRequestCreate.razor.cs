@@ -6,11 +6,14 @@ using Applications.Features.Guarantor.Dtos;
 using Applications.Features.Identity.Queries.GetUserDetailById;
 using Applications.Features.LoanRequests.Command.CreateLoanRequest;
 using Applications.Features.LoanRequests.Dtos;
+using Applications.Features.LoanRequests.Queryies.IsCoPawnExist;
 using Applications.Features.LoanRequests.Requests;
 using Applications.Responses.ViewModels.Auths;
 using Applications.Responses.ViewModels.Loans.Requests;
 using Domains.Enumerations;
+using TrapchumApp.Pages.Lists;
 using TrapchumApp.Pages.Lists.Collaterals;
+using TrapchumApp.Pages.Lists.Customers;
 using TrapchumApp.Pages.Lists.OtherNames.Guarantors;
 using TrapchumApp.Shared;
 
@@ -46,6 +49,7 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
         private string? _userId = string.Empty;
 
         private List<CoPawnCustomerDto> CoCustomers = [];
+
         private CoRequestCustomerBox CoCustomerRef = default!;
         protected override async Task OnInitializedAsync()
         {
@@ -68,35 +72,106 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
             await base.OnInitializedAsync();
         }
 
-
-        private async Task OnSelectedCoCustomers(IEnumerable<VCustomerList> args)
+        async Task RemoveCoCustomer(CoPawnCustomerDto? c)
         {
-            if (!args.Any()) return;
+            if (c is null) return;
 
-            if (args.Count() > 3)
+            var confirm = await MsgBox.ConfirmAsync("Do you want to remove this co-customer?", "Remove Co-Customer");
+
+            if (confirm == MsgBoxResult.No) return;
+
+            if (CoCustomers.Remove(c))
             {
-                _toastService.ShowWarning("You can only select up to 3 co-customers.");
-                return;
-            }
-
-            var newCustomers = args.Where(c => CoCustomers.All(existing => existing.CustomerId != c.CustomerId));
-
-            if (newCustomers.Count() > 0)
-            {
-                var newCoPawnCustomers = newCustomers.Select(c => new CoPawnCustomerDto
-                {
-                    CustomerId = c.CustomerId,
-                    CustomerPhone = c.Phone,
-                    CustomerAddress = c.ToString(),
-                    CustomerName = c.AltName,
-                    BranchId = BranchId ?? 0
-                }).ToList();
-
-                CoCustomers.AddRange(newCoPawnCustomers);
-
                 await CoCustomerRef.CustomerReload();
             }
         }
+
+
+        void AddCoCustomer()
+        {
+            var options = new DialogOptions
+            {
+                Width = "100vw"
+            };
+
+            var param = new Dictionary<string, object?>
+            {
+                { "BranchId", BranchId },
+
+                { "PageType", PageType.Modal }
+            };
+
+            DialogService.OpenAsync<CustomerCreatePage>("Add Customer", param, options: options);
+        }
+
+   
+
+
+
+     private async Task OnSelectedCoCustomers(IEnumerable<VCustomerList> args)
+         {
+             var candidates = args as ICollection<VCustomerList> ?? args.ToList();
+
+             if (candidates.Count == 0) return;
+
+             if (candidates.Count > 3)
+             {
+                 _toastService.ShowWarning("You can only select up to 3 co-customers.");
+                 return;
+             }
+
+             int slots = 3 - CoCustomers.Count;
+
+             if (slots <= 0 || candidates.Count > slots)
+             {
+                 _toastService.ShowWarning($"You can only select {slots} more co-customer(s).");
+                 return;
+             }
+
+             var newCustomers = candidates
+                 .Where(c => CoCustomers.All(existing => existing.CustomerId != c.CustomerId))
+                 .ToList();
+
+             if (newCustomers.Count == 0) return;
+
+             // Check all candidates in parallel
+             var checks = await Task.WhenAll(
+                 newCustomers.Select(c => mediator
+                     .Send(new IsCoPawnExistQuery(BranchId, c.CustomerId))
+                     .ContinueWith(t => (Customer: c, Result: t.Result), TaskScheduler.Default)));
+
+             var newCoPawnCustomers = new List<CoPawnCustomerDto>(newCustomers.Count);
+
+             foreach (var (customer, result) in checks)
+             {
+                 if (result.IsError)
+                 {
+                     _toastService.ShowError($"Could not verify co-customer {customer.AltName}.");
+                     continue;
+                 }
+
+                 if (result.Value)
+                 {
+                     _toastService.ShowWarning($"{customer.AltName} is already a co-customer in an active loan request or loan disbursement.");
+                     continue;
+                 }
+
+                 newCoPawnCustomers.Add(new CoPawnCustomerDto
+                 {
+                     CustomerId = customer.CustomerId,
+                     CustomerPhone = customer.Phone,
+                     CustomerAddress = customer.ToString(),
+                     CustomerName = customer.AltName,
+                     BranchId = BranchId ?? 0
+                 });
+             }
+
+             if (newCoPawnCustomers.Count == 0) return;
+
+             CoCustomers.AddRange(newCoPawnCustomers);
+
+             await CoCustomerRef.CustomerReload();
+         }
 
         private async Task OnSelectedCoCustomer(VCustomerList args)
         {
@@ -121,17 +196,23 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
                 BranchId = BranchId ?? 0
             };
 
+            if (newCoPawnCustomer is null) return;
 
-            //var command=new 
+            var coPawnExist = new IsCoPawnExistQuery(BranchId, newCoPawnCustomer.CustomerId);
 
+            var rsp = await mediator.Send(coPawnExist);
 
-
-            if (newCoPawnCustomer is not null)
+            if (rsp.IsSuccess())
             {
-                CoCustomers.Add(newCoPawnCustomer);
+                _toastService.ShowWarning("This co-customer is already selected.");
 
-                await CoCustomerRef.CustomerReload();
+                return;
             }
+
+            CoCustomers.Add(newCoPawnCustomer);
+
+            await CoCustomerRef.CustomerReload();
+
         }
 
 

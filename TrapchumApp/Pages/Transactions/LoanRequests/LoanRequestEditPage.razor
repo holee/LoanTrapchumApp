@@ -68,6 +68,7 @@ else
                                 ShowAdd="true" 
                                 @ref="CoCustomerRef"
                                 Remove="@OnRemoveCoPawnCustomer"
+                                Add="@AddCoPawnCustomer"
                                 ShowRemove="true">
                             <SearchBoxTemplate>
                                 <CoRequestSearchList 
@@ -155,6 +156,8 @@ else
     string? FullName = "";
     Popup popup = default!;
     RadzenDataGrid<VCustomerDetails> grid = default!;
+
+ 
 
     async Task SelectMany(IEnumerable<VGuarantor> gs)
     {

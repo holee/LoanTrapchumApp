@@ -15,12 +15,6 @@ namespace Infrastructures.DataAccess.Configurations.SystemSettings
             builder.Property(p => p.Khmer).HasMaxLength(100).IsRequired(false)
                 .UseCollation("Khmer_100_CI_AI_SC_UTF8");
             builder.Property(p => p.TypeOf).HasMaxLength(50).IsRequired(false);
-
-            builder.HasData(new Occupation[]
-            {
-
-            });
-
         }
     }
 }

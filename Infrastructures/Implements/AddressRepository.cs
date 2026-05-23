@@ -890,11 +890,11 @@ public sealed class AddressRepository : IAddressService
 
         if (string.IsNullOrEmpty(param.FilterColumn))
         {
-            queries = queries.WhereMatchesFilter(filter, AllowedCitiesFilter.ToArray());
+            queries = queries.StartWiths(filter, AllowedCitiesFilter.ToArray());
         }
         else if (AllowedCitiesFilter.Contains(param.FilterColumn))
         {
-            queries = queries.WhereMatchesFilter(filter, param.FilterColumn.Trim());
+            queries = queries.StartWiths(filter, param.FilterColumn.Trim());
         }
 
         return queries;
@@ -951,11 +951,11 @@ public sealed class AddressRepository : IAddressService
 
         if (string.IsNullOrEmpty(param.FilterColumn))
         {
-            queries = queries.WhereMatchesFilter(filter, AllowedCountriesFilter.ToArray());
+            queries = queries.StartWiths(filter, AllowedCountriesFilter.ToArray());
         }
         else if (AllowedCountriesFilter.Contains(param.FilterColumn))
         {
-            queries = queries.WhereMatchesFilter(filter, param.FilterColumn.Trim());
+            queries = queries.StartWiths(filter, param.FilterColumn.Trim());
         }
 
         return queries;
@@ -970,11 +970,11 @@ public sealed class AddressRepository : IAddressService
 
         if (string.IsNullOrEmpty(param.FilterColumn))
         {
-            queries = queries.WhereMatchesFilter(filter, AllowedVillagesFilter.ToArray());
+            queries = queries.StartWiths(filter, AllowedVillagesFilter.ToArray());
         }
         else if (AllowedVillagesFilter.Contains(param.FilterColumn))
         {
-            queries = queries.WhereMatchesFilter(filter, param.FilterColumn.Trim());
+            queries = queries.StartWiths(filter, param.FilterColumn.Trim());
         }
 
         return queries;
@@ -991,11 +991,11 @@ public sealed class AddressRepository : IAddressService
 
         if (string.IsNullOrEmpty(param.FilterColumn))
         {
-            queries = queries.WhereMatchesFilter(filter, AllowedCommunesFilter.ToArray());
+            queries = queries.StartWiths(filter, AllowedCommunesFilter.ToArray());
         }
         else if (AllowedCommunesFilter.Contains(param.FilterColumn))
         {
-            queries = queries.WhereMatchesFilter(filter, param.FilterColumn.Trim());
+            queries = queries.StartWiths(filter, param.FilterColumn.Trim());
         }
 
         return queries;
@@ -1011,14 +1011,13 @@ public sealed class AddressRepository : IAddressService
         if (string.IsNullOrWhiteSpace(filter))
             return queries;
 
-        if (!string.IsNullOrEmpty(param.FilterColumn) &&
-            AllowedDistrcitsFilter.Contains(param.FilterColumn))
+        if (!string.IsNullOrEmpty(param.FilterColumn) && AllowedDistrcitsFilter.Contains(param.FilterColumn))
         {
-            queries = queries.WhereMatchesFilter(filter, param.FilterColumn.Trim());
+            queries = queries.StartWiths(filter, param.FilterColumn.Trim());
         }
         else
         {
-            queries = queries.WhereMatchesFilter(filter, AllowedDistrcitsFilter.ToArray());
+            queries = queries.StartWiths(filter, AllowedDistrcitsFilter.ToArray());
         }
 
         return queries;
@@ -1050,11 +1049,11 @@ public sealed class AddressRepository : IAddressService
 
         if (string.IsNullOrEmpty(param.FilterColumn))
         {
-            queries = queries.WhereMatchesFilter(filter, AllowedProvincesFilter.ToArray());
+            queries = queries.StartWiths(filter, AllowedProvincesFilter.ToArray());
         }
         else if (AllowedProvincesFilter.Contains(param.FilterColumn))
         {
-            queries = queries.WhereMatchesFilter(filter, param.FilterColumn.Trim());
+            queries = queries.StartWiths(filter, param.FilterColumn.Trim());
 
         }
 

@@ -2,7 +2,7 @@
 @page "/App/Loans/Requests/{BranchId:int}/Branches/CreateNew/{CustomerId}/Customers"
 @using Applications.Features.Collaterals.Dtos
 @using TrapchumApp.Components.Actionbars
-@attribute [MustHasPermission(Modules.LoanRequest, Actions.Read)]
+@attribute [MustHasPermission(Modules.LoanRequest, Actions.Create)]
 <PageTitle>Create New</PageTitle>
 <AppActions>
     <RadzenButton Size="@Styles.DefaultSize"
@@ -52,17 +52,18 @@
                                           ShowCommand="true"
                                           ShowAdd="true"
                                           @ref="CoCustomerRef"
+                                          Remove="@RemoveCoCustomer"
+                                          Add="@AddCoCustomer"
                                           ShowRemove="true">
                         <SearchBoxTemplate>
                             <CoRequestSearchList OnSelected="OnSelectedCoCustomer"
-                                                     OnSelecteds="OnSelectedCoCustomers" />
+                                                 OnSelecteds="OnSelectedCoCustomers" />
                         </SearchBoxTemplate>
                     </CoRequestCustomerBox>
 
                 </RadzenTabsItem>
                 <RadzenTabsItem Text="ទ្រព្យសម្បត្តិបញ្ចាំ" Icon="@IconNames.Collaterals">
-                    <LoanRequestCollaterals @key="@Guid.NewGuid().ToString("N")"
-                        CustomerId="CustomerId"
+                    <LoanRequestCollaterals CustomerId="CustomerId"
                                             ShowCommand="true"
                                             ShowAdd="true"
                                             ShowRemove="true"
@@ -133,3 +134,4 @@
                     Text="Back" />
     </RadzenStack>
 </EditForm>
+

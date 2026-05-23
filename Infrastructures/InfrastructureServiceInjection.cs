@@ -23,6 +23,8 @@ using Infrastructures.Implements.Audits;
 using Infrastructures.Implements.Identity;
 using Infrastructures.Persistence.Interceptors;
 using Infrastructures.Repository;
+using Mapster;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -73,9 +75,11 @@ public static class InfrastructureServiceInjection
 
         services.ConfigureApplicationCookie(options =>
         {
-            options.ExpireTimeSpan = TimeSpan.FromDays(15);
+            options.ExpireTimeSpan = TimeSpan.FromHours(24);
             options.SlidingExpiration = true;
+            //options.AccessDeniedPath = new PathString("/app/access-denied");
         });
+
         services.AddHttpContextAccessor();
         services.AddSingleton<AuditingSaveChangesInterceptor>();
         services.AddSingleton<ICurrentUserService, CurrentUserReposity>();

@@ -2,6 +2,7 @@ using Microsoft.JSInterop;
 using Microsoft.Playwright;
 using TrapchumApp.Components.Datatabes;
 using TrapchumApp.Components.Messageboxes;
+using TrapchumApp.Components.Modals.SweetAlerts;
 
 namespace TrapchumApp.Components
 {
@@ -213,6 +214,89 @@ namespace TrapchumApp.Components
             public string Department { get; set; } = string.Empty;
             public decimal Salary { get; set; }
             public DateOnly JoinDate { get; set; }
+        }
+
+        // ── SweetAlert Demo ───────────────────────────────────────
+        private string _swalLastResult = "—";
+
+        private async Task SwalDemo_Success()
+        {
+            var r = await Swal.SuccessAsync("Saved!", "Your record has been saved successfully.");
+            _swalLastResult = r.ToString();
+        }
+
+        private async Task SwalDemo_Error()
+        {
+            var r = await Swal.ErrorAsync("Oops!", "Something went wrong. Please try again.");
+            _swalLastResult = r.ToString();
+        }
+
+        private async Task SwalDemo_Warning()
+        {
+            var r = await Swal.WarningAsync("Warning", "You have unsaved changes.");
+            _swalLastResult = r.ToString();
+        }
+
+        private async Task SwalDemo_Info()
+        {
+            var r = await Swal.InfoAsync("Did you know?", "SweetAlert2 is fully customisable.");
+            _swalLastResult = r.ToString();
+        }
+
+        private async Task SwalDemo_Question()
+        {
+            var r = await Swal.QuestionAsync("Are you sure?", "This action cannot be undone.");
+            _swalLastResult = r.ToString();
+        }
+
+        private async Task SwalDemo_Confirm()
+        {
+            var confirmed = await Swal.ConfirmAsync("Delete record?", "This will permanently remove the item.");
+            _swalLastResult = confirmed ? "Confirmed" : "Cancelled";
+        }
+
+        private async Task SwalDemo_ConfirmDeny()
+        {
+            var r = await Swal.ConfirmDenyAsync("Save changes?", "Choose an action below.", SwalIcon.Question, "Save", "Discard", "Cancel");
+            _swalLastResult = r.ToString();
+        }
+
+        private async Task SwalDemo_Input()
+        {
+            var value = await Swal.InputAsync("Enter your name", "We'll use this to greet you.", placeholder: "Full name", required: true);
+            _swalLastResult = value is null ? "Cancelled" : $"Input: {value}";
+        }
+
+        private async Task SwalDemo_Html()
+        {
+            var r = await Swal.FireAsync(new SwalOptions
+            {
+                Title = "HTML <u>Content</u>",
+                Html  = "You can use <strong>bold</strong>, <em>italic</em>, and even <a href='#'>links</a>.",
+                Icon  = SwalIcon.Info
+            });
+            _swalLastResult = r.ToString();
+        }
+
+        private async Task SwalDemo_Timed()
+        {
+            var r = await Swal.TimedAsync("Auto-closing!", "This dialog closes in 3 seconds.", timerMs: 3000);
+            _swalLastResult = r.ToString();
+        }
+
+        private async Task SwalDemo_CustomFooter()
+        {
+            var r = await Swal.FireAsync(new SwalOptions
+            {
+                Title             = "Custom Dialog",
+                Text              = "This dialog has a footer and a wider width.",
+                Icon              = SwalIcon.Success,
+                Width             = "42em",
+                Footer            = "<a href='#'>Why do I have this issue?</a>",
+                ShowCloseButton   = true,
+                AllowOutsideClick = true
+            });
+            _swalLastResult = r.ToString();
         }
 
         // ── MessageBox Demo ────────────────────────────────────────

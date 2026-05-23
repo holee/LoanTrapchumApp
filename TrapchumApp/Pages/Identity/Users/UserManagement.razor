@@ -1,33 +1,99 @@
 ﻿@page "/App/Account/{Id}/Users"
+@using TrapchumApp.Components.Indicatros
 <PageTitle>User Management</PageTitle>
 <div class="rz-background-color-base-200">
     <RadzenTabs class="rz-background-color-base-100" RenderMode="TabRenderMode.Client">
         <Tabs>
             <RadzenTabsItem Text="User Information" Icon="info">
-                <RadzenRow AlignItems="AlignItems.Center" class="rz-p-1">
-                    <RadzenColumn Size="3">
-                        <RadzenLabel>Name</RadzenLabel>
-                    </RadzenColumn>
-                    <RadzenColumn Size="9">
-                        <RadzenText Text="@userModel?.UserName" TagName="TagName.Span" TextStyle="TextStyle.Subtitle2" />
-                    </RadzenColumn>
-                </RadzenRow>
-                <RadzenRow AlignItems="AlignItems.Center" class="rz-p-1">
-                    <RadzenColumn Size="3">
-                        <RadzenLabel>Email</RadzenLabel>
-                    </RadzenColumn>
-                    <RadzenColumn Size="9">
-                        <RadzenText Text="@userModel?.Email" TagName="TagName.Span" TextStyle="TextStyle.Subtitle2" />
-                    </RadzenColumn>
-                </RadzenRow>
-                <RadzenRow AlignItems="AlignItems.Center" class="rz-p-1">
-                    <RadzenColumn Size="3">
-                        <RadzenLabel>Role</RadzenLabel>
-                    </RadzenColumn>
-                    <RadzenColumn Size="9">
-                        <RadzenText Text="@userModel?.Role" TagName="TagName.Span" TextStyle="TextStyle.Subtitle2" />
-                    </RadzenColumn>
-                </RadzenRow>
+                <div class="profile-card">
+                    <div class="profile-card__header">
+                        <div class="profile-avatar">
+                            @if (!string.IsNullOrEmpty(_profilePreviewUrl ?? userModel?.Profile?.FileUrl))
+                            {
+                                <img src="@(_profilePreviewUrl ?? userModel!.Profile!.FileUrl)" alt="Profile Photo" class="profile-avatar__img" />
+                            }
+                            else
+                            {
+                                <div class="profile-avatar__initials">
+                                    @(string.IsNullOrEmpty(userModel?.UserName) ? "?" : userModel.UserName[0].ToString().ToUpper())
+                                </div>
+                            }
+                            <span class="profile-avatar__status @(userModel?.IsActive == true ? "profile-avatar__status--active" : "profile-avatar__status--inactive")"></span>
+                            <label class="profile-avatar__upload-btn" title="Change profile photo">
+                                <RadzenIcon Icon="photo_camera" Style="font-size:1rem;color:#fff;" />
+                                <InputFile OnChange="HandleProfileFileSelected" accept="image/*" style="display:none;" />
+                            </label>
+                        </div>
+                        <div class="profile-card__title">
+                            <RadzenText Text="@userModel?.UserName" TagName="TagName.H3" TextStyle="TextStyle.H5" class="rz-mb-0" />
+                            <RadzenText Text="@userModel?.Email" TagName="TagName.Span" TextStyle="TextStyle.Body2" class="profile-card__email" />
+                        </div>
+                        <div class="profile-card__badge">
+                            <RadzenBadge Text="@userModel?.Role" BadgeStyle="BadgeStyle.Info" IsPill="true" />
+                            @if (userModel?.IsActive == true)
+                            {
+                                <RadzenBadge Text="Active" BadgeStyle="BadgeStyle.Success" IsPill="true" />
+                            }
+                            else
+                            {
+                                <RadzenBadge Text="Inactive" BadgeStyle="BadgeStyle.Danger" IsPill="true" />
+                            }
+                        </div>
+                    </div>
+                    <div class="profile-card__body">
+                        <div class="profile-info-row">
+                            <span class="profile-info-row__icon"><RadzenIcon Icon="person" /></span>
+                            <span class="profile-info-row__label">Username</span>
+                            <span class="profile-info-row__value">@userModel?.UserName</span>
+                        </div>
+                        <div class="profile-info-row">
+                            <span class="profile-info-row__icon"><RadzenIcon Icon="email" /></span>
+                            <span class="profile-info-row__label">Email</span>
+                            <span class="profile-info-row__value">@userModel?.Email</span>
+                        </div>
+                        <div class="profile-info-row">
+                            <span class="profile-info-row__icon"><RadzenIcon Icon="badge" /></span>
+                            <span class="profile-info-row__label">Role</span>
+                            <span class="profile-info-row__value">@userModel?.Role</span>
+                        </div>
+                        <div class="profile-info-row">
+                            <span class="profile-info-row__icon"><RadzenIcon Icon="verified_user" /></span>
+                            <span class="profile-info-row__label">Status</span>
+                            <span class="profile-info-row__value @(userModel?.IsActive == true ? "profile-status--active" : "profile-status--inactive")">
+                                @(userModel?.IsActive == true ? "Active" : "Inactive")
+                            </span>
+                        </div>
+                        @if (userModel?.Profile?.Created is not null)
+                        {
+                            <div class="profile-info-row">
+                                <span class="profile-info-row__icon"><RadzenIcon Icon="calendar_today" /></span>
+                                <span class="profile-info-row__label">Member Since</span>
+                                <span class="profile-info-row__value">@userModel.Profile.Created?.ToString("dd MMM yyyy")</span>
+                            </div>
+                        }
+                        @if (_profileUploadModel.FileContent is not null)
+                        {
+                            <div class="profile-info-row profile-info-row--action">
+                                <span class="profile-info-row__icon"><RadzenIcon Icon="image" /></span>
+                                <span class="profile-info-row__label">New Photo</span>
+                                <span class="profile-info-row__value profile-upload-filename">@_profileUploadModel.FileName</span>
+                                <RadzenStack Orientation="Orientation.Horizontal" Gap="6px" class="rz-ml-auto">
+                                    <RadzenButton Icon="save"
+                                                  Text="Save"
+                                                  ButtonStyle="ButtonStyle.Primary"
+                                                  Size="ButtonSize.ExtraSmall"
+                                                  IsBusy="_profileBusy"
+                                                  BusyText="Saving..."
+                                                  Click="SaveProfilePhoto" />
+                                    <RadzenButton Icon="close"
+                                                  ButtonStyle="ButtonStyle.Light"
+                                                  Size="ButtonSize.ExtraSmall"
+                                                  Click="CancelProfileUpload" />
+                                </RadzenStack>
+                            </div>
+                        }
+                    </div>
+                </div>
             </RadzenTabsItem>
             <RadzenTabsItem Text="Change Password" Icon="password">
                 <EditForm Model="model" OnValidSubmit="@SubmitOnValid">
@@ -117,44 +183,16 @@
                 </EditForm>
             </RadzenTabsItem>
             <RadzenTabsItem Text="Permissions" Icon="admin_panel_settings">
-                <RadzenDataGrid Data="userPermission!.Permissions"
-                                GridLines="DataGridGridLines.Horizontal"
-                                AllowSorting="false"
-                                AllowAlternatingRows="true"
-                                ColumnWidth="15rem"
-                                IsLoading="IsLoading"
-                                Style="height:30rem;"
-                                Density="Density.Compact">
-                    <Columns>
-                        <RadzenDataGridColumn Width="6rem"
-                                              Property="@(nameof(UserPermissionViewModel.Group))"
-                                              Title="Group" />
-                        <RadzenDataGridColumn Property="@(nameof(UserPermissionViewModel.ClaimType))"
-                                              Title="Type" />
-                        <RadzenDataGridColumn Property="@(nameof(UserPermissionViewModel.ClaimValue))"
-                                              Title="Value" />
-                        <RadzenDataGridColumn Context="c"
-                                              Width="5rem"
-                                              TextAlign="TextAlign.Center"
-                                              Property="@(nameof(UserPermissionViewModel.UserId))"
-                                              Title="Assigned">
-                            <Template>
-                                <RadzenCheckBox @bind-Value="c.IsAssignedToRole"></RadzenCheckBox>
-                            </Template>
-                        </RadzenDataGridColumn>
-                    </Columns>
-                </RadzenDataGrid>
-                <RadzenStack JustifyContent="JustifyContent.End"
-                             AlignItems="AlignItems.Center"
-                             class="my-2"
-                             Orientation="Orientation.Horizontal">
-                    <RadzenButton Icon="save"
-                                  ButtonStyle="ButtonStyle.Primary"
-                                  Size="ButtonSize.Small"
-                                  Click="AddUserPermissions"
-                                  IsBusy="isBusy"
-                                  Text="Save"></RadzenButton>
-                </RadzenStack>
+                <UserPermissionsPanel IsLoading="IsLoading"
+                                      IsBusy="isBusy"
+                                      PermSelectAll="_permSelectAll"
+                                      GroupFilter="_permGroupFilter"
+                                      FilteredGroups="FilteredUserGroups"
+                                      SelectAllChanged="OnSelectAllPermissionsChanged"
+                                      GroupFilterChanged="@((v) => { _permGroupFilter = v; StateHasChanged(); })"
+                                      GroupSelectAllChanged="@((a) => OnUserGroupSelectAllChanged(a.GroupName, a.IsChecked))"
+                                      PermissionChanged="@((a) => OnUserPermissionChanged(a.Item, a.IsChecked))"
+                                      SavePermissions="AddUserPermissions" />
             </RadzenTabsItem>
 
         </Tabs>

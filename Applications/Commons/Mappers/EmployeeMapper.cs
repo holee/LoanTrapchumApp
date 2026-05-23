@@ -54,6 +54,7 @@ namespace Applications.Commons.Mappers
                 EndDate = dto.Employee?.EndDate,
                 Contact = new EmergencyContactDtoCreate
                 {
+                    ContactId = dto.Employee?.Contact?.ContactId,
                     ContactName = dto.Employee?.Contact?.ContactName,
                     ContactNumber = dto.Employee?.Contact?.ContactNumber,
                     Description = dto.Employee?.Contact?.Description,
@@ -66,10 +67,11 @@ namespace Applications.Commons.Mappers
 
         public static EntityNames ToEmployeeCreate(this EntityEmployeeCreate dto)
         {
+            var newId = $"ent-{Guid.CreateVersion7()}";
 
             return new EntityNames
             {
-                Id = $"ent-{Guid.CreateVersion7()}",
+                Id = newId,
                 FirstName = dto.FirstName,
                 MiddleName = dto.MiddleName,
                 LastName = dto.LastName,
@@ -107,17 +109,19 @@ namespace Applications.Commons.Mappers
                 Description = dto.Description,
                 Employee = new Employee
                 {
+                    EmployeeId = newId,
                     Photo = dto.Photo,
                     BranchRefId = dto.BranchRefId,
                     DepartmentRefId = dto.DepartmentRefId,
                     HireDate = dto.HireDate,
                     EndDate = dto.EndDate,
-                    Contact = new EmergencyContact
+                    Contact = dto.Contact is null ? null : new EmergencyContact
                     {
-                        ContactName = dto.Contact?.ContactName,
-                        ContactNumber = dto.Contact?.ContactNumber,
-                        Description = dto.Contact?.Description,
-                        Relationship = dto.Contact?.Relationship
+                        ContactId = newId,
+                        ContactName = dto.Contact.ContactName,
+                        ContactNumber = dto.Contact.ContactNumber,
+                        Description = dto.Contact.Description,
+                        Relationship = dto.Contact.Relationship
                     }
                 }
             };
@@ -173,12 +177,13 @@ namespace Applications.Commons.Mappers
                     DepartmentRefId = dto.DepartmentRefId,
                     HireDate = dto.HireDate,
                     EndDate = dto.EndDate,
-                    Contact = new EmergencyContact
+                    Contact = dto.Contact is null ? null : new EmergencyContact
                     {
-                        ContactName = dto.Contact?.ContactName,
-                        ContactNumber = dto.Contact?.ContactNumber,
-                        Description = dto.Contact?.Description,
-                        Relationship = dto.Contact?.Relationship
+                        ContactId = dto.Contact.ContactId ?? dto.EmployeeId,
+                        ContactName = dto.Contact.ContactName,
+                        ContactNumber = dto.Contact.ContactNumber,
+                        Description = dto.Contact.Description,
+                        Relationship = dto.Contact.Relationship
                     }
                 }
             };

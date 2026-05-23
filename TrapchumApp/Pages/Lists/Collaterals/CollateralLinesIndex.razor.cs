@@ -29,8 +29,8 @@ public partial class CollateralLinesIndex
 
     void OnRowRender(RowRenderEventArgs<VCollateralLines> args)
     {
-        if(args.Data is null) return;
-   
+        if (args.Data is null) return;
+
         args.Data.RowIndex = args.Index + 1;
     }
 
@@ -97,9 +97,12 @@ public partial class CollateralLinesIndex
 
             builder.AddAttribute(1, "CollateralId", _customerId);
 
-            builder.AddAttribute(2, "OnClose", EventCallback.Factory.Create(this, () =>
+            builder.AddAttribute(2, "OnClose", EventCallback.Factory.Create(this, async () =>
             {
                 CloseTab(tabKey);
+
+                await GetCollateralLines(_customerId);
+
             }));
 
             builder.SetKey(tabKey);

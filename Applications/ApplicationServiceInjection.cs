@@ -1,7 +1,10 @@
 ﻿
+using Applications.Features.AdditionalInformations.Queries.GetOccupationDetailsById;
 using Applications.Features.Collaterals.Queries.GetCollateralSubTypesById;
 using Applications.Features.Collaterals.Queries.GetCollateralTypes;
+using Applications.Features.Employees.Commands.DeleteEmployee;
 using Applications.Features.Holidays.Dtos;
+using Applications.Features.Identity.Command.DeleteUser;
 using Applications.Features.Identity.Roles.Commands.AddRolePermissions;
 using Applications.Features.Identity.Roles.Commands.CreateRole;
 using Applications.Features.Identity.Roles.Commands.DeleteRole;
@@ -187,6 +190,8 @@ public static class ApplicationServiceInjection
         services.AddScoped<IRequestHandler<GetApprovedLoanRequestQuery, ErrorOr<VLoanRequests>>, GetApprovedLoanRequestQueryHandler>();
         services.AddScoped<IRequestHandler<CreateLoanCommand, ErrorOr<DisburseResult>>, CreateLoanCommandHandler>();
         services.AddScoped<IRequestHandler<GetLoanWithScedulesQuery, ErrorOr<IEnumerable<LoanResponse>>>, GetLoanWithScedulesQueryHandler>();
+        
+        ///Employee
         services.AddScoped<IRequestHandler<GetEmployeeAsPagingQuery, Pager<VEmployeeList>>, GetEmployeeAsPagingQueryHandler>();
         services.AddScoped<IRequestHandler<ChangeEmployeeStateCommand, ErrorOr<VEmployeeList>>, ChangeEmployeeStateCommandHandler>();
         services.AddScoped<IRequestHandler<GetEmployeeDetailsByIdQuery, ErrorOr<VEmployeeList>>, GetEmployeeDetailsByIdQueryHandler>();
@@ -194,6 +199,9 @@ public static class ApplicationServiceInjection
         services.AddScoped<IRequestHandler<CreateEmployeeCommand, ErrorOr<VEmployeeList>>, CreateEmployeeCommandHandler>();
         services.AddScoped<IRequestHandler<GetEmployeeByIdQuery, ErrorOr<EntityNames>>, GetEmployeeByIdQueryHandler>();
         services.AddScoped<IRequestHandler<GetEditEmployeeQuery, ErrorOr<EntityEmployeeCreate>>, GetEditEmployeeQueryHandler>();
+        services.AddScoped<IRequestHandler<DeleteEmployeeCommand, ErrorOr<DeleteResult>>, DeleteEmployeeCommandHandler>();
+
+
 
         services.AddScoped<IAddRecieptNumber, AddRecieptNumberUseCase>();
         services.AddScoped<IGetCustomersByUseCase, GetCustomersByUseCase>();
@@ -230,6 +238,9 @@ public static class ApplicationServiceInjection
         services.AddScoped<IFileUploadServiceImp, FileUploadService>();
         services.AddScoped<IPrintExelServiceImpl, PrintExelServiceImpl>();
 
+
+        ///Occuptions
+        services.AddScoped<IRequestHandler<GetOccupationDetailsByIdQuery, ErrorOr<OccupationDto>>, GetOccupationByIdQueryHandler>();
 
 
 
@@ -391,6 +402,7 @@ public static class ApplicationServiceInjection
 
         //User and Identity
         services.AddScoped<IRequestHandler<CreateNewUserCommand, ErrorOr<string>>, CreateNewUserCommandHandler>();
+        services.AddScoped<IRequestHandler<DeleteUserCommand, ErrorOr<DeleteResult>>, DeleteUserCommandHandler>();
 
         // Settings — AppSettings
         services.AddScoped<IRequestHandler<GetAppSettingsQuery, ErrorOr<IEnumerable<AppSettingDto>>>, GetAppSettingsQueryHandler>();

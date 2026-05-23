@@ -6,59 +6,72 @@
 @using TrapchumApp.Helpers.Extensions
 @implements IAsyncDisposable
 
-<div class="notification-wrapper" @ref="@WrapperRef">
-    <a class="nav-link" @onclick="@Toggle" @onclick:preventDefault>
-        <i class="far fa-comments"></i>
-        <span class="navbar-badge badge-@(_notiService.UnReadCount > 0 ? "danger" : "secondary")">
-            @_notiService.UnReadCount
-        </span>
-    </a>
+<div class="nb-wrap" @ref="@WrapperRef">
+
+    @* ── Bell trigger ── *@
+    <button class="nb-trigger" @onclick="Toggle" type="button" aria-label="Notifications">
+        <RadzenIcon Icon="notifications" Style="font-size:1.4rem;color:#fff;" />
+        @if (_notiService.UnReadCount > 0)
+        {
+            <span class="nb-badge">@(_notiService.UnReadCount > 99 ? "99+" : _notiService.UnReadCount.ToString())</span>
+        }
+    </button>
+
+    @* ── Dropdown panel ── *@
     @if (IsOpen)
     {
-        <div class="dropdown-menu dropdown-menu-lg show">
-            @if (_notiService.Notifications.Count <= 0)
+        <div class="nb-panel">
+
+            @* header *@
+            <div class="nb-panel__head">
+                <span class="nb-panel__title">Notifications</span>
+                @if (_notiService.UnReadCount > 0)
+                {
+                    <span class="nb-panel__count">@_notiService.UnReadCount new</span>
+                }
+            </div>
+
+            @* list *@
+            @if (_notiService.Notifications.Count == 0)
             {
-                <div class="dropdown-item empty-state">
-                    <i class="far fa-bell-slash"></i>
+                <div class="nb-empty">
+                    <RadzenIcon Icon="notifications_off" Style="font-size:2rem;color:var(--rz-text-secondary-color);" />
                     <span>No new notifications</span>
                 </div>
             }
             else
             {
-                <div class="notification-list">
+                <div class="nb-list">
                     @foreach (var msg in _notiService.Notifications)
                     {
-                        <a href="#" class="dropdown-item @(msg.IsRead ? "" : "unread")" @onclick="() => OpenMessage(msg)" >
-                            <div class="media">
-                                <div class="media-left">
-                                    <span class="notification-icon @GetIconBackground(msg)">
-                                        <i class="@GetNotificationIcon(msg)"></i>
-                                    </span>
-                                </div>
-                                <div class="media-body">
-                                    <h3 class="dropdown-item-title">
-                                        @msg.Type
-                                        <span class="float-right">
-                                            <i class="fas fa-star @GetStarClass(msg)"></i>
-                                        </span>
-                                    </h3>
-                                    <p class="text-sm">@msg.Title</p>
-                                    <p class="text-sm text-muted">
-                                        <i class="far fa-clock"></i> @msg.CreatedAt.Humanize()
-                                    </p>
-                                </div>
+                        <button class="nb-item @(msg.IsRead ? "" : "nb-item--unread")"
+                                type="button"
+                                @onclick="() => OpenMessage(msg)">
+                            <span class="nb-item__icon nb-item__icon--@GetIconColor(msg)">
+                                <RadzenIcon Icon="@GetNotificationIcon(msg)" />
+                            </span>
+                            <div class="nb-item__body">
+                                <span class="nb-item__type">@msg.Type</span>
+                                <span class="nb-item__title">@msg.Title</span>
+                                <span class="nb-item__time">@msg.CreatedAt.Humanize()</span>
                             </div>
-                        </a>
-                        <div class="dropdown-divider"></div>
+                            @if (!msg.IsRead)
+                            {
+                                <span class="nb-item__dot"></span>
+                            }
+                        </button>
                     }
                 </div>
             }
 
-            <a href="#" class="dropdown-item dropdown-footer" @onclick="@ViewAll" @onclick:preventDefault>
-                See All Messages
-            </a>
+            @* footer *@
+            <button class="nb-footer" type="button" @onclick="ViewAll">
+                See all notifications
+            </button>
+
         </div>
     }
+
 </div>
 
 @code {
@@ -111,12 +124,10 @@
 
     async Task OpenMessage(NotificationDto arg)
     {
-        // Prevent double-click
         if (_isNavigating) return;
 
         _isNavigating = true;
 
-        // Close dropdown first
         IsOpen = false;
 
         var targetUrl = GetNavigationUrl(arg);
@@ -130,22 +141,17 @@
 
         try
         {
-            // Mark as read in database and wait for completion
             var result = await mediator.Send(new MarkUnreadNotificationCommand(arg.Id, arg.BranchId));
 
             if (result.IsSuccess())
             {
-                // Update local state immediately (in case we stay on the same circuit)
                 _notiService.MarkAsRead(arg);
 
-                // Small delay to ensure database transaction is committed
                 await Task.Delay(50);
 
-                // Navigate with forceLoad to ensure page content refreshes
                 NavigationManager.NavigateTo(targetUrl, false);
 
                 StateHasChanged();
-
             }
         }
         finally
@@ -202,29 +208,23 @@
         NavigationManager.NavigateTo("/App/Notifications");
     }
 
-    string GetNotificationIcon(NotificationDto msg)
+    string GetNotificationIcon(NotificationDto msg) => msg.Type switch
     {
-        return msg.Type switch
-        {
-            nameof(NotificationType.New) => "fas fa-file",
-            nameof(NotificationType.Request) => "fas fa-paper-plane",
-            nameof(NotificationType.Disbursement) => "fas fa-money-bill-wave",
-            nameof(NotificationType.Payment) => "fas fa-dollar-sign",
-            _ => "fas fa-bell"
-        };
-    }
+        nameof(NotificationType.New)          => "description",
+        nameof(NotificationType.Request)      => "send",
+        nameof(NotificationType.Disbursement) => "payments",
+        nameof(NotificationType.Payment)      => "attach_money",
+        _                                     => "notifications"
+    };
 
-    string GetIconBackground(NotificationDto msg)
+    string GetIconColor(NotificationDto msg) => msg.Type switch
     {
-        return msg.Type switch
-        {
-            nameof(NotificationType.New) => "bg-info",
-            nameof(NotificationType.Request) => "bg-primary",
-            nameof(NotificationType.Disbursement) => "bg-success",
-            nameof(NotificationType.Payment) => "bg-warning",
-            _ => "bg-secondary"
-        };
-    }
+        nameof(NotificationType.New)          => "info",
+        nameof(NotificationType.Request)      => "primary",
+        nameof(NotificationType.Disbursement) => "success",
+        nameof(NotificationType.Payment)      => "warning",
+        _                                     => "secondary"
+    };
 
     string GetStarClass(NotificationDto msg) => msg.IsRead ? "text-muted" : "text-warning";
 

@@ -615,11 +615,11 @@ public sealed class JournalRepository(DataContext context, ILogger<JournalReposi
 
         if (string.IsNullOrEmpty(param.FilterColumn))
         {
-            queries = queries.WhereMatchesFilter(like, AllowJournalEntryColumns.ToArray());
+            queries = queries.StartWiths(like, AllowJournalEntryColumns.ToArray());
         }
         else if (AllowJournalEntryColumns.Contains(param.FilterColumn))
         {
-            queries = queries.WhereMatchesFilter(like, param.FilterColumn);
+            queries = queries.StartWiths(like, param.FilterColumn);
         }
 
         return queries;
@@ -675,13 +675,13 @@ public sealed class JournalRepository(DataContext context, ILogger<JournalReposi
 
         if (string.IsNullOrEmpty(param.FilterColumn))
         {
-            queries = queries.WhereMatchesFilter(filter, AllowJournalTypeColumns.ToArray());
+            queries = queries.StartWiths(filter, AllowJournalTypeColumns.ToArray());
         }
         else
         {
             if (AllowJournalTypeColumns.Contains(param.FilterColumn))
             {
-                queries = queries.WhereMatchesFilter(filter, param.FilterColumn);
+                queries = queries.StartWiths(filter, param.FilterColumn);
             }
         }
 

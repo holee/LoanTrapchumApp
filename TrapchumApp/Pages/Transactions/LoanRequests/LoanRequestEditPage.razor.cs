@@ -32,13 +32,15 @@ using Infrastructures.Authorizations;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using TrapchumApp.Components.Messageboxes;
+using TrapchumApp.Pages.Lists;
 using TrapchumApp.Pages.Lists.Collaterals;
+using TrapchumApp.Pages.Lists.Customers;
 using TrapchumApp.Pages.Lists.OtherNames.Guarantors;
 using TrapchumApp.Shared;
 
 namespace TrapchumApp.Pages.Transactions.LoanRequests;
 
-public partial class LoanRequestEdit(ILogger<LoanRequestEdit> logger)
+public partial class LoanRequestEditPage(ILogger<LoanRequestEditPage> logger)
 {
     [Parameter] public int? BranchId { get; set; } = 0;
     [Parameter] public string? CustomerId { get; set; }
@@ -263,15 +265,28 @@ public partial class LoanRequestEdit(ILogger<LoanRequestEdit> logger)
         }
     }
 
+    void AddCoPawnCustomer()
+    {
+
+        var options=new DialogOptions
+        {
+            Width = "100vw"
+        };
+
+        DialogService.OpenAsync<CustomerCreatePage>("Add Customer", options: options);
+    }
+
+
     async void AddCollaterals()
     {
         var param = new Dictionary<string, object?>
         {
-            { "CollateralId", model.CustomerRefId }
+            { "CollateralId", model.CustomerRefId },
+            { "PageType", PageType.Modal },
         };
         var options = new DialogOptions
         {
-
+            Width = "100vw"
         };
 
         await DialogService.OpenAsync<CustomerCollateralLineCreate>("Collateral", param, options);
@@ -521,9 +536,11 @@ public partial class LoanRequestEdit(ILogger<LoanRequestEdit> logger)
 
         var rsp = await mediator.Send(command);
 
-        if (rsp.IsSuccess())
+        if (rsp.IsSuccess() && rsp.Value is not null)
         {
-            CoCustomers.AddRange(rsp.Value);
+            CoCustomers.AddRange(rsp.Value!);
+
+            _toastService.ShowSuccess("Co-Customers were added.");
 
             await CoCustomerRef.CustomerReload();
         }
@@ -586,7 +603,7 @@ public partial class LoanRequestEdit(ILogger<LoanRequestEdit> logger)
 
         var rsp = await mediator.Send(command);
 
-        if (rsp.IsSuccess())
+        if (rsp.IsSuccess() && rsp.Value is not null)
         {
 
             CoCustomers.Add(rsp.Value);

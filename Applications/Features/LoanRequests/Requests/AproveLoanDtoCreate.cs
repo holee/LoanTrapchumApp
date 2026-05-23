@@ -34,4 +34,5 @@ public sealed class PassRequestDtoCreate
     public string? CustomerId { get; set; }
     public string? LoanRequestId { get; set; }
     public int? BranchId { get; set; }
+    public string? Description { get; set; } = string.Empty;
 }

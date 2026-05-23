@@ -11,7 +11,7 @@ public sealed class PassRequestCommandHandler : IRequestHandler<PassRequestComma
     }
     public async Task<ErrorOr<RequestResult>> Handle(PassRequestCommand request, CancellationToken cancellationToken)
     {                   
-        return await _loanRequestService.PassLoanRequestAsync(request.Request);
+        return await _loanRequestService.PassLoanRequestAsync(request.Request,cancellationToken);
     }
 }
 

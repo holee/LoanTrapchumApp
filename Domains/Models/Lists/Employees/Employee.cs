@@ -16,5 +16,5 @@ public sealed class Employee
     public Branch? Branch { get; set; }
     public Department? Department { get; set; }
     public EntityNames? EntityNames { get; set; }
-    public EmergencyContact Contact { get; set; } = new();
+    public EmergencyContact? Contact { get; set; }
 }

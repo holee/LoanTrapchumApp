@@ -533,7 +533,7 @@ public sealed class IncomeExpendRepository(IDbContextFactory<DataContext> contex
         {
             string[] filterColums = [nameof(IncomeExpense.Description), nameof(IncomeExpense.Types)];
 
-            source = source.WhereMatchesFilter(pattern, filterColums);
+            source = source.StartWiths(pattern, filterColums);
         }
 
 

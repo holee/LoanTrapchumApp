@@ -150,6 +150,18 @@
                                              IsPill="true" />
                             </Template>
                         </RadzenDataGridColumn>
+                        <RadzenDataGridColumn Title="FirstName"
+                                              Context="c"
+                                              Width="10rem"
+                                              Property="@nameof(VCustomerDetails.FirstName)"
+                                              Visible="false"
+                                              Sortable="false" />
+                        <RadzenDataGridColumn Title="LastName"
+                                              Context="c"
+                                              Width="10rem"
+                                              Property="@nameof(VCustomerDetails.LastName)"
+                                              Visible="false"
+                                              Sortable="false" />
                         <RadzenDataGridColumn Context="c"
                                               Width="5rem"
                                               Sortable="false"
@@ -337,14 +349,14 @@
 
                 return;
             }
-                
+
             if (value == 4)
             {
                 AddExpenseModal(args.Data!.CustomerId);
 
                 return;
             }
-              
+
             if (value == 5)
             {
                 Details(args.Data!.CustomerId);

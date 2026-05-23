@@ -1,0 +1,163 @@
+.perm-panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.perm-card {
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+
+.perm-selectall-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1.25rem;
+    border-bottom: 2px solid #e9ecef;
+    background: #fff;
+    flex-shrink: 0;
+}
+
+.perm-panel-scroll {
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+    max-height: 35rem;
+    padding: 0.5rem 0;
+}
+
+.perm-selectall-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    user-select: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #495057;
+}
+
+.perm-selectall-check {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.2rem;
+    height: 1.2rem;
+    border-radius: 4px;
+    background-color: #dee2e6;
+    transition: all 0.2s ease;
+}
+
+.perm-selectall-check--active {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.perm-group {
+    border-bottom: 1px solid #e9ecef;
+}
+
+    .perm-group:last-child {
+        border-bottom: none;
+    }
+
+.perm-group-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.65rem 1.25rem;
+    background: #e9ecef;
+    border-bottom: 1px solid #f1f3f5;
+}
+
+.perm-group-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    user-select: none;
+}
+
+.perm-group-check {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.1rem;
+    height: 1.1rem;
+    border-radius: 4px;
+    background-color: #dee2e6;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.perm-group-check--active {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.perm-group-name {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #343a40;
+}
+
+.perm-group-count {
+    font-size: 0.75rem;
+    color: #868e96;
+    background: #e9ecef;
+    padding: 0.15rem 0.6rem;
+    border-radius: 10px;
+}
+
+.perm-group-body {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    background: #e9ece0;
+    padding: 0.85rem 1.25rem;
+}
+
+.perm-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.2rem 0.65rem;
+    border-radius: 20px;
+    border: 1px solid #ced4da;
+    background: #fff;
+    cursor: pointer;
+    user-select: none;
+    font-size: 0.78rem;
+    color: #495057;
+    transition: all 0.15s ease;
+}
+
+    .perm-item:hover {
+        border-color: #28a745;
+        background: #f0fff4;
+    }
+
+    .perm-item--active {
+        background: #d4edda;
+        border-color: #28a745;
+        color: #155724;
+        font-weight: 600;
+    }
+
+.perm-item-check {
+    accent-color: #28a745;
+    width: 0.85rem;
+    height: 0.85rem;
+    cursor: pointer;
+}
+
+.perm-item-label {
+    line-height: 1.2;
+}

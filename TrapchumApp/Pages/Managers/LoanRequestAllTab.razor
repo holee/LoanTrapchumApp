@@ -116,7 +116,7 @@
 
         var requestNowUrl = $"/App/Loans/{Request.LoanRequestId}/Requests/{Request.BranchId}/Branches/{Request.CustomerId}/Details";
         var checkloanRequestUrl = $"/App/Loans/{Request.LoanRequestId}/Requests/{Request.BranchId}/Branches/{Request.CustomerId}/Details";
-        var loanRequestDetailsUrl = $"/App/Loans/{Request.LoanRequestId}/Requests/{Request.BranchId}/Branches/{Request.CustomerId}/Details";
+        var loanRequestDetailsUrl = $"/App/Loans/Managers/{Request.LoanRequestId}/Requests/{Request.BranchId}/Branches/{Request.CustomerId}/Details";
         var requestLoanRequestUrl = $"/App/Loans/{Request.LoanRequestId}/Requests/{Request.BranchId}/Branches/{Request.CustomerId}/Edit";
         var disburseRequestLoanUrl = $"/App/Loans/{Request.LoanRequestId}/Disbursements/{Request.BranchId}/Branches/CreateNew?CustomerId={Request.CustomerId}";
 

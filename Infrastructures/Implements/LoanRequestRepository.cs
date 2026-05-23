@@ -212,7 +212,7 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
             return Error.Unexpected($"{ex.Message}");
         }
     }
-    
+
     public async Task<ErrorOr<RequestResult>> SaveLoanRequestByManagerAsync(SaveLoanRequestDtoCreate req, CancellationToken cancellationToken = default)
     {
 
@@ -449,6 +449,7 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
         await using var cxt = await contextFactory.CreateDbContextAsync();
 
         var existingLoanRequest = await cxt.LoanRequests
+                                            .Include(x => x.LoanDescriptions)
                                             .FirstOrDefaultAsync(x => x.LoanRequestId == req.LoanRequestId &&
                                                     x.BranchRefId == req.BranchId &&
                                                     x.CustomerRefId == req.CustomerId, cancellationToken);
@@ -466,10 +467,17 @@ public sealed class LoanRequestRepository(ILogger<LoanRequestRepository> logger,
 
         try
         {
-            existingLoanRequest.LoanRequestStatusRefId = (int)RequestStatus.InProgress;
 
+            existingLoanRequest.LoanDescriptions.Add(new LoanDescriptions
+            {
+                LoanRequestRefId = req.LoanRequestId,
+                Memo = req.Description,
+                UserRefId = currentUserService.UserId
+            });
+
+            existingLoanRequest.LoanRequestStatusRefId = (int)RequestStatus.Requested;
+            existingLoanRequest.IsSubmitted = true;
             existingLoanRequest.ModifiedDt = DateTime.UtcNow;
-
             await cxt.SaveChangesAsync(cancellationToken);
 
             await transaction.CommitAsync(cancellationToken);

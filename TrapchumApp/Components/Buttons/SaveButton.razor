@@ -4,6 +4,7 @@
               ButtonStyle="ButtonStyle.Success"
               ButtonType="@ButtonType"
               IsBusy="@IsBusy"
+              BusyText="@BusyText"
               Icon="@Icon"></RadzenButton>
 @code {
     [Parameter]
@@ -15,8 +16,9 @@
     [Parameter]
     public ButtonType ButtonType { get; set; } = ButtonType.Submit;
     [Parameter]
-    public bool IsBusy { get; set; } = true;
-
+    public bool IsBusy { get; set; } = false;
+    [Parameter]
+    public string BusyText { get; set; } = "Saving...";
 
     private void HandleClick()
     {
