@@ -23,6 +23,7 @@ using Domains.Models.Audits;
 using Domains.Models.Bases;
 using Domains.Models.Collaterals;
 using Domains.Models.Currencies;
+using Domains.Models.Identity;
 using Domains.Models.Journals;
 using Domains.Models.Lists;
 using Domains.Models.Lists.CreditAgents;
@@ -254,5 +255,6 @@ namespace Infrastructures.DataAccess
         public DbSet<VVillages> VVillages => Set<VVillages>();
         public DbSet<Notification> Notifications => Set<Notification>();
         public DbSet<LtDocument> LtDocuments => Set<LtDocument>();
+        public DbSet<UserProfiles> UserProfiles { get;  set; }
     }
 }

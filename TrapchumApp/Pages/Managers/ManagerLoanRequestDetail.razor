@@ -151,64 +151,29 @@ else if (data is not null)
 
         <AuthorizeView Policy="@Policies.ApproveLoanRequest">
             <Authorized>
-                @if (data.IsRequested)
-                {
-                    <RadzenButton ButtonStyle="ButtonStyle.Primary"
-                                  Icon="@IconNames.Save"
-                                  Size="@Styles.DefaultSize"
-                                  Click="SaveLoanRequestManager"
-                                  Text="រក្សាទុក" />
+                <RadzenButton ButtonStyle="ButtonStyle.Primary"
+                              Icon="@IconNames.Save"
+                              Size="@Styles.DefaultSize"
+                              Click="SaveLoanRequestManager"
+                              Text="រក្សាទុក" />
+                <RadzenButton ButtonStyle="ButtonStyle.Success"
+                              Icon="@IconNames.RequestQuote"
+                              Size="@Styles.DefaultSize"
+                              Click="ApproveLoanRequest"
+                              Text="អនុម័ត" />
+                <RadzenButton ButtonStyle="ButtonStyle.Secondary"
+                              Icon="@IconNames.Block"
+                              Size="@Styles.DefaultSize"
+                              Click="DeniedLoanRequest"
+                              Text="បដិសេធ" />
+                <RadzenButton ButtonStyle="ButtonStyle.Primary"
+                              Icon="@IconNames.Undo"
+                              Size="@Styles.DefaultSize"
+                              Click="RecheckedLoanRequest"
+                              Text="ពិនិត្យឡើងវិញ" />
 
-                    @if ((data.CurrencyId == (int)CurrencyEnum.KHR && data.RequestAmount < MaxRequestAmountKHR) ||
-                          (data.CurrencyId == (int)CurrencyEnum.USD && data.RequestAmount < MaxRequestAmountUSD))
-                    {
-                        <RadzenButton ButtonStyle="ButtonStyle.Success"
-                                      Icon="@IconNames.RequestQuote"
-                                      Size="@Styles.DefaultSize"
-                                      Click="ApproveLoanRequest"
-                                      Text="អនុម័ត" />
-                    }
-                    else
-                    {
-                        <RadzenButton ButtonStyle="ButtonStyle.Success"
-                                      Icon="@IconNames.RequestQuote"
-                                      Size="@Styles.DefaultSize"
-                                      Click="SendLoanRequest"
-                                      Text="បញ្ជូនបន្ត" />
-                    }
-                   
-                    <RadzenButton ButtonStyle="ButtonStyle.Secondary"
-                                  Icon="@IconNames.Block"
-                                  Size="@Styles.DefaultSize"
-                                  Click="DeniedLoanRequest"
-                                  Text="បដិសេធ" />
-                    <RadzenButton ButtonStyle="ButtonStyle.Primary"
-                                  Icon="@IconNames.Undo"
-                                  Size="@Styles.DefaultSize"
-                                  Click="RecheckedLoanRequest"
-                                  Text="ពិនិត្យឡើងវិញ" />
-                }
             </Authorized>
         </AuthorizeView>
-
-        <AuthorizeView Policy="@Policies.Disburse">
-            <Authorized>
-                @if (data.IsApproved)
-                {
-                    <RadzenButton ButtonStyle="ButtonStyle.Primary"
-                                  Icon="@IconNames.Save"
-                                  Size="@Styles.DefaultSize"
-                                  Click="SaveLoanRequestAccount"
-                                  Text="រក្សាទុក" />
-                    <RadzenButton ButtonStyle="ButtonStyle.Success"
-                                  Icon="@IconNames.RequestQuote"
-                                  Size="@Styles.DefaultSize"
-                                  Click="DisbruseLoanRequestNow"
-                                  Text="បញ្ចេញប្រាក់" />
-                }
-            </Authorized>
-        </AuthorizeView>
-
         <BackButton Href="@_navService.PreviousUrl" />
     </RadzenStack>
 }

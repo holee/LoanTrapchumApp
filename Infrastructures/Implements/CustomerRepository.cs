@@ -472,25 +472,26 @@ public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFac
             queries = queries.IgnoreQueryFilters();
         }
 
-        if (!string.IsNullOrEmpty(filter) && string.IsNullOrEmpty(param.FilterColumn))
+        if (string.IsNullOrEmpty(filter)) { return queries; }
+
+        if (string.IsNullOrEmpty(param.FilterColumn))
         {
             var props = new[] { "FullName", "AltName", "Phone", "FirstName", "LastName" };
 
-            queries = queries.WhereMatchesFilter(filter, props);
+            queries = queries.StartWiths(filter, props);
+
+            return queries;
         }
 
-        if (!string.IsNullOrEmpty(param.Filter) && !string.IsNullOrEmpty(param.FilterColumn))
-        {
-            var property = typeof(VCustomerList).GetProperty(param.FilterColumn);
+        var property = typeof(VCustomerList).MapField(param.FilterColumn);
 
-            if (property != null)
-            {
-                queries = queries.Where(e =>
-                    EF.Functions.Like(EF.Property<string>(e, param.FilterColumn), $"{param.Filter}%"));
-            }
+        if (property != null)
+        {
+            queries = queries.StartWiths(filter, property);
         }
 
         return queries;
+
     }
 
 
@@ -544,7 +545,7 @@ public sealed class CustomerRepository(IDbContextFactory<DataContext> contextFac
     {
         //if (branchId > 0 || !string.IsNullOrEmpty(userId))
         //{
-            return GetCustomersByBranchOrUserAsync(cxt, branchId, userId, activeLoanOnly, cancellation);
+        return GetCustomersByBranchOrUserAsync(cxt, branchId, userId, activeLoanOnly, cancellation);
         //}
 
         //return GetCustomersWithoutActiveLoan(cxt, activeLoanOnly);

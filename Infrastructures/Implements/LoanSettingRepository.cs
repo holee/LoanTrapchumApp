@@ -97,7 +97,7 @@ namespace Infrastructures.Implements
                             nameof(LoanCategoryDto.LoanCategoryCode)
                     ];
 
-                baseQueries = baseQueries.AndWhereEndWith(param.Filter, filterColums);
+                baseQueries = baseQueries.AndEndWith(param.Filter, filterColums);
             }
 
             baseQueries = baseQueries.WhereIf(id > 0, x => x.LoanCategoryId == id);
@@ -138,11 +138,11 @@ namespace Infrastructures.Implements
 
             var baseQuery = context.Set<VUserLoanSizes>()
                                    .WhereIf(branchId.HasValue && branchId > 0,
-                                            x => (x.BranchId == branchId || x.BranchId == _mainOffice))
+                                            x => (x.BranchId == branchId))
                                    .WhereIf(((amount.HasValue && amount > 0) &&
                                             (currencyId.HasValue && currencyId > 0)),
                                              x => ((currencyId == 1 && amount >= x.MinKhrLoanSize && amount <= x.MaxKhrLoanSize) ||
-                                                  (currencyId == 2 && amount >= x.MinUsdLoanSize && amount <= x.MaxUsdLoanSize)) || x.BranchId == _mainOffice);
+                                                  (currencyId == 2 && amount >= x.MinUsdLoanSize && amount <= x.MaxUsdLoanSize)));
 
 
             if (!string.IsNullOrEmpty(param.Filter))
@@ -152,7 +152,7 @@ namespace Infrastructures.Implements
 
                 string[] columns = [nameof(VUserLoanSizes.FullName), nameof(VUserLoanSizes.BranchName)];
 
-                baseQuery = baseQuery.WhereMatchesFilter(filter, columns);
+                baseQuery = baseQuery.StartWiths(filter, columns);
 
             }
 
@@ -193,7 +193,7 @@ namespace Infrastructures.Implements
 
                 string[] columns = [nameof(VUserLoanSizes.FullName), nameof(VUserLoanSizes.BranchName)];
 
-                baseQuery = baseQuery.WhereMatchesFilter(filter, columns);
+                baseQuery = baseQuery.StartWiths(filter, columns);
             }
 
 

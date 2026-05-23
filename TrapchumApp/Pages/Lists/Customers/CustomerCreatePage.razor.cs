@@ -10,7 +10,9 @@ public partial class CustomerCreatePage
     [Parameter] public EventCallback<VCustomerList> UpdateState { get; set; }
     [Parameter] public int BranchId { get; set; } = 0;
     [Parameter] public EntityCustomerCreate CustomerModel { get; set; } = new();
+    [Parameter] public PageType PageType { get; set; } = PageType.Tab;
     [CascadingParameter] public Task<AuthenticationState> AuthState { get; set; } = default!;
+
     protected EditForm? editForm;
     private bool IsLoading = true;
     private string? _userId = string.Empty;
@@ -77,7 +79,17 @@ public partial class CustomerCreatePage
 
     protected async Task Close()
     {
-        await Closed.InvokeAsync();
+
+        if(PageType == PageType.Tab)
+        {
+            await Closed.InvokeAsync();
+        }
+        else
+        {
+            DialogService.Close(false);
+        }
+
+        
     }
 
 }

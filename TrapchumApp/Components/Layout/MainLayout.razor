@@ -10,12 +10,10 @@
                    ProgressBarStyle="ProgressBarStyle.Danger"
                    Style="height: 2px; position: fixed; top: 0; left: 0; width: 100%; z-index: 9999;" />
 <RadzenLayout>
-    <RadzenHeader>
+    <RadzenHeader Style="background:var(--rz-success);">
         <RadzenStack Orientation="Orientation.Horizontal"
                      JustifyContent="JustifyContent.SpaceBetween"
                      AlignItems="AlignItems.Center" Gap="0">
-
-
             <RadzenStack Orientation="Orientation.Horizontal"
                          JustifyContent="JustifyContent.SpaceBetween"
                          AlignItems="AlignItems.Center">
@@ -26,7 +24,7 @@
                          AlignItems="AlignItems.Center">
                 <NotificationBell />
                 <TopMenus IsBranchOpen="true" ShowDialogue="ShowCurrencyDialogue" />
-                <Profiles UserId="@userId" />
+                <Profiles />
             </RadzenStack>
         </RadzenStack>
     </RadzenHeader>
@@ -203,7 +201,7 @@
 
     async Task ShowCurrencyDialogue()
     {
-        var param = new Dictionary<string, object> { { "BranchId", branchId } };
+        var param = new Dictionary<string, object?> { { "BranchId", branchId } };
 
         var options = new SideDialogOptions
         {

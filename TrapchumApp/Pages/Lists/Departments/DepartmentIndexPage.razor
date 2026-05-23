@@ -61,13 +61,14 @@
                                           Sortable="false" />
                     <RadzenDataGridColumn Context="c"
                                           Title="Active"
-                                          Width="4rem"
+                                          Width="5rem"
                                           Filterable="false"
                                           Sortable="false">
                         <Template>
-                            <RadzenCheckBox TValue="bool"
-                                            Value="@c.IsActive"
-                                            Change="@((arg)=>OnCheckChanged(c.DepartmentId,arg))" />
+                            <RadzenBadge Text="@(c.IsActive ? "Active" : "Inactive")"
+                                         BadgeStyle="@(c.IsActive ? BadgeStyle.Success : BadgeStyle.Danger)"
+                                         Shade="Shade.Light"
+                                         IsPill="true" />
                         </Template>
 
                     </RadzenDataGridColumn>

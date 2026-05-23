@@ -1,16 +1,13 @@
 ﻿@page "/App/Names"
 @using Applications.Responses.ViewModels.OtherNames
+@using TrapchumApp.Components.Buttons
 <PageTitle>Names</PageTitle>
 <RadzenTabs @bind-SelectedIndex="@selectedIndex" @ref="tabs" RenderMode="TabRenderMode.Server">
     <Tabs>
         <RadzenTabsItem Text="Names" Icon="patient_list">
             <GridToolbar SearchChanged="@SearchChanged">
                 <LeftChildren>
-                    <RadzenButton Icon="add"
-                                  Size="ButtonSize.ExtraSmall"
-                                  Text="New Name"
-                                  Click="AddTabOtherName"
-                                  ButtonStyle="ButtonStyle.Primary" />
+                    <AddButton OnClick="@AddTabOtherName" Text="Add New Name" />
                 </LeftChildren>
                 <RightChildren>
                     <div class="text-center">
@@ -76,9 +73,9 @@
                                           Property="@(nameof(VOtherNames.Id))"
                                           Context="v">
                         <Template>
-                            <RadzenCheckBox TValue="bool"
-                                            Value="@v.IsActive"
-                                            Change="@((arg)=>OnChanged(arg,v.Id))" />
+                            <RadzenBadge Text="@(v.IsActive ? "Active" : "Inactive")"
+                                         BadgeStyle="@(v.IsActive ? BadgeStyle.Success : BadgeStyle.Danger)"
+                                         Shade="Shade.Default" />
                         </Template>
                     </RadzenDataGridColumn>
                     <RadzenDataGridColumn Width="5rem" Sortable="false"

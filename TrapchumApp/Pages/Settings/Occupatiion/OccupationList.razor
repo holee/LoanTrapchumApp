@@ -96,7 +96,7 @@
 
         var param = new QueryParam(pageIndex, pageSize, sortField, isIncludeInActive, sortDescending, filter);
 
-        var rsp = await mediator.Send(new GetOccupationsQuery(0, param)); 
+        var rsp = await mediator.Send(new GetOccupationsQuery(0, param, TypeOfEnum.All));
 
         _occupations = rsp.Items ?? [];
 
@@ -170,9 +170,9 @@
     {
         ContextMenuService.Open(args, ds =>
     @<RadzenMenu>
-    <RadzenMenuItem Icon="@IconNames.Info" Click="@(() => ViewDetail(item))" Text="View Details" />
-    <RadzenMenuItem Icon="@IconNames.Edit" Click="@(() => EditOccupation(item))" Text="Edit" />
-</RadzenMenu>
+        <RadzenMenuItem Icon="@IconNames.Info" Click="@(() => ViewDetail(item))" Text="View Details" />
+        <RadzenMenuItem Icon="@IconNames.Edit" Click="@(() => EditOccupation(item))" Text="Edit" />
+    </RadzenMenu>
         );
     }
 

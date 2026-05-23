@@ -1,8 +1,11 @@
 ﻿using Applications.Extensions.Identity.Authorizations.Extensions;
 using Applications.Extensions.Identity.Policies;
+using Applications.Responses.ViewModels.Loans.Requests;
 using Domains.Models.Identity;
+using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using System.Text.Json;
+using TrapchumApp.Authorizations.Rquirements;
 
 namespace TrapchumApp.Shared
 {
@@ -34,6 +37,36 @@ namespace TrapchumApp.Shared
         private bool _isSameUser;
 
         private bool _isBranchManager;
+
+        private bool _normalAmountApproved;
+
+        private bool _maximumAmountApproved;
+
+        public bool NormalAmountApproved
+        {
+            get => _normalAmountApproved;
+
+            set
+            {
+                _normalAmountApproved = value;
+
+                StateHasChanged();
+            }
+        }
+
+        public bool MaximumAmountApproved
+        {
+            get => _maximumAmountApproved;
+
+            set
+            {
+                _maximumAmountApproved = value;
+
+                StateHasChanged();
+            }
+        }
+
+
         public bool IsSameUser
         {
             get => _isSameUser;
@@ -442,6 +475,27 @@ namespace TrapchumApp.Shared
             }
 
 
+        }
+
+        internal async Task CheckedNormalApproved(ClaimsPrincipal user, VLoanRequests? resource)
+        {
+            if (user is not null && user?.Identity?.IsAuthenticated == true)
+            {
+                var result = await _authorizeService.AuthorizeAsync(user, resource, new IsCanApprovedNormalAmountRequirement());
+               
+                _normalAmountApproved = result.Succeeded;
+            }
+        }
+
+        internal async Task CheckedMaximumApproved(ClaimsPrincipal user, VLoanRequests? resource)
+        {
+            if (user is not null && user?.Identity?.IsAuthenticated == true)
+            {
+                var result = await _authorizeService.AuthorizeAsync(user, resource, new IsCanApprovedMaximumAmountRequirement());
+
+                _maximumAmountApproved = result.Succeeded;
+
+            }
         }
 
         public async Task GetAuthenticatedUser(ClaimsPrincipal user)

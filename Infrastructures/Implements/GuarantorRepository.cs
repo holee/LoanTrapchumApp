@@ -7,6 +7,7 @@ using Domains.Models.Lists;
 using ErrorOr;
 using FluentValidation;
 using Infrastructures.DataAccess;
+using Infrastructures.Implements.Extensions;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -130,30 +131,20 @@ public sealed class GuarantorRepository(IDbContextFactory<DataContext> contextFa
 
         var baseQuery = context.VGuarantors.AsQueryable();
 
-        if (!string.IsNullOrEmpty(param.Filter))
-        {
+        baseQuery = ApplyFilters(param, baseQuery);
 
-            baseQuery = baseQuery.Where(x =>
-                                            EF.Functions.Like(x.GuarantorName!, $"{param.Filter}%") ||
-                                            EF.Functions.Like(x.FullName!, $"{param.Filter}%") ||
-                                            EF.Functions.Like(x.Gender!, $"{param.Filter}%") ||
-                                            EF.Functions.Like(x.Phone!, $"{param.Filter}%"));
-        }
-
-        if (!param.IncludeInActive)
+        if (param.IncludeInActive)
         {
             baseQuery = baseQuery.IgnoreQueryFilters();
         }
+
 
         if (!string.IsNullOrEmpty(id))
         {
             baseQuery = baseQuery.Where(x => x.Id == id);
         }
 
-        if (param.SortDescending && !string.IsNullOrEmpty(param.SortColumn))
-        {
-            baseQuery = baseQuery.OrderByDescending(x => EF.Property<object>(x, param.SortColumn));
-        }
+        baseQuery = ApplyOrder(param, baseQuery);
 
         var counts = await baseQuery.CountAsync(cancellation);
 
@@ -168,6 +159,58 @@ public sealed class GuarantorRepository(IDbContextFactory<DataContext> contextFa
         return new Pager<VGuarantor>(items, counts);
 
     }
+
+    private static IQueryable<VGuarantor> ApplyOrder(QueryParam param, IQueryable<VGuarantor> baseQuery)
+    {
+
+        var isDesending = param.SortDescending;
+
+        if (!string.IsNullOrEmpty(param.SortColumn))
+        {
+            baseQuery = isDesending ? baseQuery.OrderByDescending(x => EF.Property<object>(x, param.SortColumn))
+                                    : baseQuery.OrderBy(x => EF.Property<object>(x, param.SortColumn));
+
+            return baseQuery;
+        }
+
+        baseQuery = isDesending ? baseQuery.OrderByDescending(x => x.GuarantorName)
+                                            .ThenByDescending(x => x.FullName)
+                                : baseQuery.OrderBy(x => x.GuarantorName)
+                                           .ThenBy(x => x.FullName);
+        return baseQuery;
+    }
+
+    private static IQueryable<VGuarantor> ApplyFilters(QueryParam param, IQueryable<VGuarantor> baseQuery)
+    {
+
+        if (string.IsNullOrEmpty(param.Filter))
+        {
+            return baseQuery;
+        }
+
+        var filter = param.Filter?.Trim();
+
+       
+        if (string.IsNullOrEmpty(param.FilterColumn))
+        {
+
+            var filterableColumns = new[] { nameof(VGuarantor.GuarantorName), nameof(VGuarantor.FullName), nameof(VGuarantor.Gender), nameof(VGuarantor.Phone) };
+
+            baseQuery = baseQuery.StartWiths(filter, filterableColumns);
+
+            return baseQuery;
+        }
+
+        var propertyInfo = typeof(VGuarantor).MapField(param.FilterColumn);
+
+        if (propertyInfo is not null)
+        {
+            baseQuery = baseQuery.StartWiths(filter, propertyInfo);
+        }
+
+        return baseQuery;
+    }
+
     public async Task<ErrorOr<VGuarantor>> GetGuarantorByIdAsync(string? id, CancellationToken cancellation = default)
     {
 

@@ -15,4 +15,6 @@ public interface IAppStateService
     bool CanRecieveMultiple { get; set; }
     bool IsSameUser { get; protected set; }
     bool IsBranchManager { get; set; }
+    bool MaximumAmountApproved { get; set; }
+    bool NormalAmountApproved { get; set; }
 }

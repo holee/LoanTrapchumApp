@@ -1,0 +1,61 @@
+﻿@inject DialogService DialogService
+
+<div class="modal-shell modal-shell--@Size.ToString().ToLower()">
+
+    @* ── Header ── *@
+    <div class="modal-shell__header">
+        <span class="modal-shell__title">@Title</span>
+        <div class="modal-shell__header-actions">
+            @if (HeaderActions is not null)
+            {
+                @HeaderActions
+            }
+            @if (ShowCloseButton)
+            {
+                <button class="modal-shell__close" @onclick="Close" title="Close">✕</button>
+            }
+        </div>
+    </div>
+
+    @* ── Body ── *@
+    <div class="modal-shell__body">
+        @ChildContent
+    </div>
+
+    @* ── Footer ── *@
+    @if (FooterContent is not null)
+    {
+        <div class="modal-shell__footer">
+            @FooterContent
+        </div>
+    }
+
+</div>
+
+@code {
+    /// <summary>Text displayed in the header title area.</summary>
+    [Parameter] public string Title { get; set; } = string.Empty;
+
+    /// <summary>Main content of the modal.</summary>
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>Optional footer content (e.g. action buttons).</summary>
+    [Parameter] public RenderFragment? FooterContent { get; set; }
+
+    /// <summary>Optional extra content rendered in the header row (e.g. a badge or menu).</summary>
+    [Parameter] public RenderFragment? HeaderActions { get; set; }
+
+    /// <summary>Size variant – controls the CSS modifier class. Cosmetic only; actual dialog
+    /// width is set by <see cref="ModalService"/> via Radzen.</summary>
+    [Parameter] public ModalSize Size { get; set; } = ModalSize.Medium;
+
+    /// <summary>Whether to show the × close button in the header.</summary>
+    [Parameter] public bool ShowCloseButton { get; set; } = true;
+
+    /// <summary>Optional value passed back to the caller when the header × is clicked.
+    /// If null the dialog is closed with no value.</summary>
+    [Parameter] public object? CloseValue { get; set; }
+
+    void Close() => DialogService.Close(CloseValue);
+}
+

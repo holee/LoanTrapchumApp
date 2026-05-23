@@ -102,7 +102,9 @@ namespace Applications
         public static IServiceCollection AddPolicyServices(this IServiceCollection services)
         {
             services.AddTransientServices();
+
             services.AddAuthorizationCore(option => RegisterPermissionClaims(option));
+
             return services;
         }
     }

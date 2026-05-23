@@ -287,7 +287,7 @@ public class DepartmentService : IDepartmentService
         {
             string[] filterColumns = ["DepartmentName", "Description"];
 
-            query = query.WhereMatchesFilter(param.Filter, filterColumns);
+            query = query.StartWiths(param.Filter, filterColumns);
         }
 
         return query;

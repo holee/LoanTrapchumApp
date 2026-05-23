@@ -42,6 +42,7 @@ public sealed class LoanRequest : BaseEntity
     public string? LoanPurpose { get; set; } = string.Empty;
     public int? CollectionFeeModeId { get; set; } = 1;
     public string? CollectionFeeModeName { get; set; } = string.Empty;
+    public bool? IsSubmitted { get; set; }=false;
     public Customer? Customer { get; set; }
     public List<LoanDocuments> LoanDocuments { get; set; } = [];
     public List<LoanGuarantorLink> GuarantorsLink { get; set; } = [];

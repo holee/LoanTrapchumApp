@@ -60,23 +60,19 @@ public partial class PassToModal(ILogger<ConfirmModal> logger)
                 BranchId = BranchId,
                 LoanRequestId = LoanRequestId,
                 CustomerId = CustomerId,
+                Description = model.Memo,
             });
 
             var resp = await mediator.Send(command);
 
             if (resp.IsSuccess())
             {
-                var description = new LoanDescriptionsDtoCreate(model.Memo, _userId, LoanRequestId);
 
-                var cmd = new AddDescriptionCommand(description);
-
-                await mediator.Send(cmd);
-
-                NotificationService.Notify(NotificationSeverity.Success, resp.GetMessage());
-
-                isSaving = false;
+                _toastService.ShowSuccess(resp.Value.Message!);
 
                 logger.LogInformation("Successfully approved loan request with id {LoanRequestId} by user {UserId}", LoanRequestId, _userId);
+
+                isSaving = false;
 
                 DialogService.Close(true);
             }

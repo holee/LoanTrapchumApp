@@ -12,6 +12,6 @@ public sealed class CreateNewUserCommandHandler : IRequestHandler<CreateNewUserC
     }
     public async Task<ErrorOr<string>> Handle(CreateNewUserCommand command, CancellationToken cancellationToken)
     {
-        return await _userService.CreateUserAsync(command.Request, cancellationToken);
+        return await _userService.CreateAsync(command.Request, cancellationToken);
     }
 }

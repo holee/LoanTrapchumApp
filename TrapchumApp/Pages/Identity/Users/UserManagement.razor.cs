@@ -2,6 +2,7 @@
 using Applications.Interfaces.Identity;
 using Applications.Responses.Auths;
 using Applications.Responses.ViewModels.Auths;
+using Microsoft.AspNetCore.Components.Forms;
 
 namespace TrapchumApp.Pages.Identity.Users;
 
@@ -169,6 +170,96 @@ public partial class UserManagement
         }
         isBusy = false;
 
+    }
+
+    bool _permSelectAll = false;
+    private string _permGroupFilter = string.Empty;
+    ProfileDtoCreate _profileUploadModel = new();
+    string? _profilePreviewUrl = null;
+    bool _profileBusy = false;
+    const long _maxProfileFileSize = 10 * 1024 * 1024;
+
+    private IEnumerable<KeyValuePair<string, List<UserPermissionViewModel>>> FilteredUserGroups =>
+        UserClaimsGrouped
+            .Where(kvp => kvp.Key != "All" &&
+                (string.IsNullOrWhiteSpace(_permGroupFilter) ||
+                 kvp.Key.Contains(_permGroupFilter, StringComparison.OrdinalIgnoreCase)));
+
+    private void OnSelectAllPermissionsChanged(bool isChecked)
+    {
+        _permSelectAll = isChecked;
+        foreach (var perm in userPermission?.Permissions ?? [])
+            perm.IsAssignedToRole = isChecked;
+    }
+
+    private void OnUserGroupSelectAllChanged(string groupName, bool isChecked)
+    {
+        if (UserClaimsGrouped.TryGetValue(groupName, out var perms))
+            foreach (var perm in perms)
+                perm.IsAssignedToRole = isChecked;
+
+        _permSelectAll = userPermission?.Permissions?.All(p => p.IsAssignedToRole) ?? false;
+    }
+
+    private void OnUserPermissionChanged(UserPermissionViewModel item, bool isChecked)
+    {
+        item.IsAssignedToRole = isChecked;
+        _permSelectAll = userPermission?.Permissions?.All(p => p.IsAssignedToRole) ?? false;
+    }
+
+    private async Task HandleProfileFileSelected(InputFileChangeEventArgs e)
+    {
+        if (e.FileCount == 0) return;
+
+        var file = e.File;
+
+        using var stream = new MemoryStream();
+
+        using var fileStream = file.OpenReadStream(_maxProfileFileSize);
+
+        await fileStream.CopyToAsync(stream);
+
+        _profileUploadModel.FileName = file.Name;
+
+        _profileUploadModel.FileSize = file.Size;
+
+        _profileUploadModel.FileContent = stream.ToArray();
+
+        var base64 = Convert.ToBase64String(_profileUploadModel.FileContent);
+
+        _profilePreviewUrl = $"data:{file.ContentType};base64,{base64}";
+    }
+
+    private async Task SaveProfilePhoto()
+    {
+        if (_profileUploadModel.FileContent is null) return;
+
+        _profileBusy = true;
+
+        var rsp = await _userService.ChangeProfile(Id, _profileUploadModel);
+
+        if (rsp.IsSuccess)
+        {
+            if (userModel.Profile is null)
+                userModel.Profile = new();
+
+            userModel.Profile.FileUrl = _profilePreviewUrl;
+
+            NotificationService.Notify(NotificationSeverity.Success, "Profile photo updated.");
+
+            CancelProfileUpload();
+        }
+        else
+        {
+            NotificationService.Notify(NotificationSeverity.Error, rsp.ErrMessage);
+        }
+        _profileBusy = false;
+    }
+
+    private void CancelProfileUpload()
+    {
+        _profileUploadModel = new();
+        _profilePreviewUrl = null;
     }
 
 }

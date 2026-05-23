@@ -42,12 +42,13 @@
 @using TrapchumApp.Components.Toasts
 @using TrapchumApp.Components.Select2
 @using TrapchumApp.Components.Datatabes
+@using TrapchumApp.Components.Identity
 @using TrapchumApp.Components.Messageboxes
 @using TrapchumApp.Helpers.Constants
 @using TrapchumApp.Services
 @using TrapchumApp.Shared
 @using Applications.Utils
-@using TrapchumApp.Components.Messageboxes;
+@using TrapchumApp.Components.Modals.SweetAlerts
 @using static Microsoft.AspNetCore.Components.Web.RenderMode
 @using Applications.Enumerations
 @using Applications.Responses.Paginations
@@ -69,3 +70,4 @@
 @inject NotificationServices _notiService
 @inject ToastService _toastService
 @inject MessageBoxService MsgBox
+@inject SwalService Swal

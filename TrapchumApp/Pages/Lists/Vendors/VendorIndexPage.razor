@@ -1,12 +1,7 @@
 ﻿@page "/App/Vendors"
 @using Applications.Features.Vendors.Dto.Responses
 <PageTitle>Vendors</PageTitle>
-<style>
-    .rz-grid-table td .rz-cell-data {
-        line-height: 1.5rem;
-        font-size: 0.8rem;
-    }
-</style>
+@attribute [StreamRendering]
 <RadzenTabs @bind-SelectedIndex="@selectedIndex" RenderMode="TabRenderMode.Server">
     <Tabs>
         <RadzenTabsItem Text="Vendors" Icon="list">
@@ -86,9 +81,8 @@
                                           TextAlign="TextAlign.Center"
                                           Title="Status" Property="@(nameof(VendorDto.VendorId))" Context="v">
                         <Template>
-                            <RadzenCheckBox TValue="bool"
-                                            Change="@(arg=>DeactiveOrActive(arg,v.VendorId!))"
-                                            Value="@v.IsActive" />
+                            <RadzenBadge Text="@GetVendorStatusText(v.IsActive)"
+                                         BadgeStyle="@GetVendorStatusStyle(v.IsActive)" />
                         </Template>
                     </RadzenDataGridColumn>
                     <RadzenDataGridColumn Width="5rem"
@@ -166,4 +160,8 @@
             case "3": _ = OnDelete(e.VendorId);             break;
         }
     }
+
+    string GetVendorStatusText(bool isActive) => isActive ? "Active" : "Inactive";
+
+    BadgeStyle GetVendorStatusStyle(bool isActive) => isActive ? BadgeStyle.Success : BadgeStyle.Danger;
 }

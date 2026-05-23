@@ -445,13 +445,13 @@ public class BranchRepository(IDbContextFactory<DataContext> contextFactory,
         {
             string[] props = { "BranchName" };
 
-            queries = queries.WhereMatchesFilter(param.Filter, props);
+            queries = queries.StartWiths(param.Filter, props);
 
         }
 
         if (!string.IsNullOrEmpty(param.Filter) && !string.IsNullOrEmpty(param.FilterColumn))
         {
-            queries = queries.WhereMatchesFilter(param.Filter, param.FilterColumn);
+            queries = queries.StartWiths(param.Filter, param.FilterColumn);
         }
 
 

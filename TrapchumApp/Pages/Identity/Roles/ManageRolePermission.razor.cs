@@ -34,6 +34,14 @@ public partial class ManageRolePermission
     private Dictionary<string, bool> _originalPermissionStates = [];
 
     private List<string> groups = [];
+
+    private string _permGroupFilter = string.Empty;
+
+    private IEnumerable<RolePermissionsDto> FilteredRoleGroups =>
+        (_roleClaimsGrouped ?? [])
+            .Where(g => string.IsNullOrWhiteSpace(_permGroupFilter) ||
+                        g.Group!.Contains(_permGroupFilter, StringComparison.OrdinalIgnoreCase));
+
     protected override async Task OnInitializedAsync()
     {
         await GetPermissions();

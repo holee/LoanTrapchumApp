@@ -1,3 +1,4 @@
+using Applications.Bases;
 using Applications.Extensions.DateTimes;
 using Applications.Features.Branches.Dtos;
 using Applications.Features.Branches.Queries.GetBranchAsPaging;
@@ -11,18 +12,18 @@ using Radzen.Blazor;
 
 namespace TrapchumApp.Pages.Lists.Employees;
 
-public partial class EmployeesIndex
+public partial class EmployeesIndex(ILogger<EmployeesIndex> logger)
 {
 
+    [PersistentState] public List<VEmployeeList>? Employees { get; set; }
+
     private int selectedIndex = 0;
-    private readonly INationalityService _nationalityService;
-    private readonly ILogger<EmployeesIndex> _logger;
     private string? _lastEmployeeId = string.Empty;
     List<VBranch> Branches = [];
     int pageSize = 15;
     int counts = 0;
-    int pageIndex = 1;
-    string sortField = nameof(VEmployeeList.ModifiedDT);
+    int pageIndex = 0;
+    string sortField = nameof(VEmployeeList.FirstName);
     bool sortDescending = true;
     string? _empId = string.Empty;
     int? branchId = 0;
@@ -30,19 +31,13 @@ public partial class EmployeesIndex
 
     string searchText = string.Empty;
 
-    [PersistentState(AllowUpdates = true)]
-    public List<VEmployeeList>? Employees { get; set; }
-
     protected bool includeInActive = false;
 
     bool isLoading = false;
+    bool _pendingReload = false;
 
     private RadzenDataGrid<VEmployeeList> _gridEmployee = default!;
-    public EmployeesIndex(INationalityService nationalityService, ILogger<EmployeesIndex> logger)
-    {
-        _nationalityService = nationalityService;
-        _logger = logger;
-    }
+
     private List<CustomTab> _tabs = [];
 
     string? filter = string.Empty;
@@ -66,11 +61,25 @@ public partial class EmployeesIndex
 
     void OnRowRender(RowRenderEventArgs<VEmployeeList> args)
     {
+        if(args.Data is null) return;
 
-        if (args.Data!.ModifiedDT.IsRecently())
+        var isSearchMatch = !string.IsNullOrWhiteSpace(searchText) &&
+            (args.Data!.AltName?.Contains(searchText, StringComparison.OrdinalIgnoreCase) == true ||
+             args.Data!.FirstName?.Contains(searchText, StringComparison.OrdinalIgnoreCase) == true ||
+              args.Data!.LastName?.Contains(searchText, StringComparison.OrdinalIgnoreCase) == true ||
+             args.Data!.Phone?.Contains(searchText, StringComparison.OrdinalIgnoreCase) == true ||
+             args.Data!.EmailAddress?.Contains(searchText, StringComparison.OrdinalIgnoreCase) == true ||
+             args.Data!.DepartmentName?.Contains(searchText, StringComparison.OrdinalIgnoreCase) == true ||
+             args.Data!.Occupation?.Contains(searchText, StringComparison.OrdinalIgnoreCase) == true ||
+             args.Data!.BranchName?.Contains(searchText, StringComparison.OrdinalIgnoreCase) == true);
+
+        if (isSearchMatch)
         {
             args.Attributes.Add("class", "rz-state-highlight rz-data-row recently-edited");
-
+        }
+        else if (args.Data!.ModifiedDT.IsRecently())
+        {
+            args.Attributes.Add("class", "rz-state-highlight rz-data-row recently-edited");
         }
 
         args.Data.RowIndex = args.Index + 1; // store 1-based index
@@ -82,7 +91,9 @@ public partial class EmployeesIndex
 
         pageIndex = 0;
 
-        await GetEmployees(branchId, filter);
+        _pendingReload = true;
+
+        await _gridEmployee.Reload();
     }
 
 
@@ -164,13 +175,12 @@ public partial class EmployeesIndex
 
             builer.AddAttribute(3, "UpdateStateChanged", EventCallback.Factory.Create(this, async (VEmployeeList x) =>
             {
-                _lastEmployeeId = x.EmployeeId;
-                Employees?.Insert(0, x);
-                await _gridEmployee.Reload();
+                await ReloadAfterChange(x.EmployeeId);
             }));
 
 
             builer.SetKey(newTabId);
+
             builer.CloseComponent();
         };
 
@@ -219,14 +229,9 @@ public partial class EmployeesIndex
             builer.AddAttribute(4, "UpdateChanged", EventCallback.Factory.Create(this, async (VEmployeeList x) =>
             {
 
-                var foundIndex = Employees?.FindIndex(c => c.EmployeeId == x.EmployeeId) ?? -1;
+                CloseTab(editTabId);
 
-                if (foundIndex != -1)
-                {
-                    Employees![foundIndex] = x;
-                }
-
-                await _gridEmployee.Reload();
+                await ReloadAfterChange(x.EmployeeId);
 
             }));
 
@@ -285,6 +290,9 @@ public partial class EmployeesIndex
                 AddEditTab(x);
             }));
 
+
+            builer.SetKey(id);
+
             builer.CloseComponent();
 
         };
@@ -328,6 +336,7 @@ public partial class EmployeesIndex
     void TabChanged(int e)
     {
         selectedIndex = e;
+
         StateHasChanged();
     }
 
@@ -350,6 +359,8 @@ public partial class EmployeesIndex
 
     protected override async Task OnInitializedAsync()
     {
+        Employees = null;
+        _lastEmployeeId = null;
 
         await GetBranches();
 
@@ -357,49 +368,70 @@ public partial class EmployeesIndex
 
     }
 
-    async Task Delete(string? employeeId)
+    async Task DeleteEmployee(string? employeeId)
     {
         ContextMenuService.Close();
 
-        var confitm = await DialogService!.Confirm(
-            "Employee deleted will not be able to recover, would you like to continue?",
-            "Delete Employee",
-            new ConfirmOptions
-            {
-                CancelButtonText = "Cancel",
-                OkButtonText = "OK"
-            });
+        var dia = await MsgBox.ConfirmAsync("Deleted Employee will not be able to recover, would you like to continue?", "Confirm Delete");
 
+        if (dia == MsgBoxResult.No) return;
 
         try
         {
-            if (confitm == false) return;
 
-            var command = new DeleteEmployeeCommand(employeeId);
+            var command = new DeleteEmployeeCommand(employeeId, branchId);
 
-            var deleteResponse = await mediator.Send(command);// _employeeService!.DeleteAsync(employeeId);
+            var rsp = await mediator.Send(command);// _employeeService!.DeleteAsync(employeeId);
 
-            if (deleteResponse.IsSuccess())
+            if (rsp.Value.Status == DeleteStatus.Success)
             {
                 await GetEmployees(branchId, searchText);
+
+                _toastService.ShowSuccess("Employee was deleted successfully");
+
+                return;
             }
-            else
+
+            if (rsp.Value.Status == DeleteStatus.InUse)
             {
-                NotificationService.Notify(NotificationSeverity.Error, "Can not delete");
+
+                var confirm = await MsgBox.ConfirmAsync("This employee is currently in use. Do you want to deactivate this employee instead?", "Employee In Use");
+
+                if (confirm == MsgBoxResult.Yes)
+                {
+                    var changeStateCommand = new ChangeEmployeeStateCommand(employeeId, false);
+
+                    var changeStateRsp = await mediator.Send(changeStateCommand);
+
+                    if (changeStateRsp.IsSuccess())
+                    {
+                        await GetEmployees(branchId, searchText);
+
+                        _toastService.ShowSuccess("Employee was deactivated successfully");
+
+                        return;
+                    }
+
+                    _toastService.ShowError($"An error occurred while deactivating employee : {changeStateRsp.GetMessage()}");
+
+                }
+
             }
+
         }
         catch (Exception ex)
         {
-            NotificationService.Notify(NotificationSeverity.Error, ex.InnerException!.Message);
+            _toastService.ShowError($"An error occurred while deleting employee : {ex.Message}");
         }
     }
 
 
     async Task GetEmployees(int? branchId, string? q = null)
     {
-        isLoading = true;
+
         Tracker.Show();
-        _logger.LogInformation("try to getting employee information");
+
+        logger.LogInformation("try to getting employee information");
 
         try
         {
@@ -419,18 +451,28 @@ public partial class EmployeesIndex
         }
         catch (Exception ex)
         {
-            isLoading = false;
 
             Tracker.Hide();
 
-            _logger.LogError(ex, "Error while getting employee information {error}", ex.Message);
-        }
-        finally
-        {
-            isLoading = false;
+            logger.LogError(ex, "Error while getting employee information {error}", ex.Message);
         }
 
         StateHasChanged();
+    }
+
+    private async Task ReloadAfterChange(string? employeeId)
+    {
+        _lastEmployeeId = employeeId;
+
+        _pendingReload = true;
+
+        pageIndex = 0;
+
+        sortField = nameof(VEmployeeList.ModifiedDT);
+
+        sortDescending = true;
+
+        await _gridEmployee.FirstPage(true);
     }
 
     async Task LoadData(LoadDataArgs e)
@@ -440,10 +482,16 @@ public partial class EmployeesIndex
 
         pageSize = e.Top ?? 15;
 
-        (sortField, sortDescending) = e.PageInfo(nameof(VEmployeeList.ModifiedDT));
+        if (_pendingReload)
+        {
+            _pendingReload = false;
+        }
+        else
+        {
+            (sortField, sortDescending) = e.PageInfo(nameof(VEmployeeList.FirstName));
+        }
 
-        var filterValue = e.GetFilterValue(nameof(VEmployeeList.AltName),
-                                           nameof(VEmployeeList.Phone),
+        var filterValue =e.GetFilterValue(nameof(VEmployeeList.Phone),
                                            nameof(VEmployeeList.EmailAddress),
                                            nameof(VEmployeeList.DepartmentName),
                                            nameof(VEmployeeList.Occupation),
@@ -469,6 +517,7 @@ public partial class EmployeesIndex
     private void OnRowDoubleClick(DataGridRowMouseEventArgs<VEmployeeList> args)
     {
         AddDetailsTab(args.Data?.EmployeeId);
+        
         tabCount++;
     }
 }

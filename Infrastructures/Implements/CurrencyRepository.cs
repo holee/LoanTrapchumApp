@@ -363,12 +363,12 @@ public sealed class CurrencyRepository(IDbContextFactory<DataContext> contextFac
             {
                 string[] props = { nameof(Currency.CurrencyCode), nameof(Currency.Description) };
 
-                baseQueries = baseQueries.WhereMatchesFilter(filter, props);
+                baseQueries = baseQueries.StartWiths(filter, props);
             }
             else
             {
 
-                baseQueries = baseQueries.WhereLike(filter, param.FilterColumn);
+                baseQueries = baseQueries.Contains(filter, param.FilterColumn);
             }
         }
 
@@ -480,12 +480,12 @@ public sealed class CurrencyRepository(IDbContextFactory<DataContext> contextFac
         {
             string[] props = { nameof(Currency.CurrencyCode), nameof(Currency.Description) };
 
-            baseQueries = baseQueries.WhereMatchesFilter(filter, props);
+            baseQueries = baseQueries.StartWiths(filter, props);
         }
         else
         {
 
-            baseQueries = baseQueries.WhereLike(filter, param.FilterColumn);
+            baseQueries = baseQueries.Contains(filter, param.FilterColumn);
         }
 
         return baseQueries;
@@ -505,7 +505,7 @@ public sealed class CurrencyRepository(IDbContextFactory<DataContext> contextFac
 
             string[] props = ["CurrencyCode", "CurrencyName"];
 
-            queries = queries.WhereMatchesFilter(filterParam, props);
+            queries = queries.StartWiths(filterParam, props);
         }
 
         return queries;
@@ -547,7 +547,7 @@ public sealed class CurrencyRepository(IDbContextFactory<DataContext> contextFac
 
             string[] props = { "CurrencyName", "CurrencyCode" };
 
-            queries = queries.WhereMatchesFilter(filter, props);
+            queries = queries.StartWiths(filter, props);
         }
 
         if (!string.IsNullOrEmpty(param.Filter) && !string.IsNullOrEmpty(param.FilterColumn))
@@ -631,13 +631,13 @@ public sealed class CurrencyRepository(IDbContextFactory<DataContext> contextFac
 
         if (string.IsNullOrEmpty(param.FilterColumn))
         {
-            queries = queries.WhereMatchesFilter(filter, AllowProps.ToArray());
+            queries = queries.StartWiths(filter, AllowProps.ToArray());
         }
         else
         {
             if (AllowProps.Contains(param.FilterColumn))
             {
-                queries = queries.WhereLike(filter, param.FilterColumn);
+                queries = queries.Contains(filter, param.FilterColumn);
             }
         }
 

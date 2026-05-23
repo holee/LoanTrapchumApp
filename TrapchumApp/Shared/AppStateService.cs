@@ -23,4 +23,6 @@ public sealed class AppStateService : IAppStateService
         get;
         set;
     }
+    public bool MaximumAmountApproved { get; set; }
+    public bool NormalAmountApproved { get; set; }
 }

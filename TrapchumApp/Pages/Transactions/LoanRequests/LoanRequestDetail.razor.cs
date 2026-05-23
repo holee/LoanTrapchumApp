@@ -23,7 +23,7 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
         [Parameter] public string? CustomerId { get; set; }
         [Parameter, SupplyParameterFromQuery] public string? CreditAgentId { get; set; } = string.Empty;
 
-        VLoanRequests? data;
+        VLoanRequests? _request;
 
         private RequestResult _result = new();
 
@@ -43,7 +43,7 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
 
         private bool disableTextbox = false;
 
-        BadgeStyle StatusBadgeStyle => data?.StatusId switch
+        BadgeStyle StatusBadgeStyle => _request?.StatusId switch
         {
             (int)RequestStatus.Approved => BadgeStyle.Success,
             (int)RequestStatus.Completed => BadgeStyle.Info,
@@ -61,6 +61,13 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
             await AppState.GetAuthenticatedUser(user);
 
             await LoadDataAsync();
+
+            if (_request is not null)
+            {
+                await AppState.CheckedNormalApproved(user, _request);
+
+                await AppState.CheckedMaximumApproved(user, _request);
+            }
 
             await base.OnInitializedAsync();
         }
@@ -97,7 +104,7 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
             if (!await ConfirmActionAsync("Do you want to approve this request?"))
                 return;
 
-            var model = data?.MapToLoanRequestCreate();
+            var model = _request?.MapToLoanRequestCreate();
 
             if (model is null)
             {
@@ -142,15 +149,15 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
 
             if (!resp.IsError)
             {
-                data = resp.Value;
+                _request = resp.Value;
 
-                canAllow = (await _authorizeService.AuthorizeAsync(user, data, new SameUserRequestRequirement()))
+                canAllow = (await _authorizeService.AuthorizeAsync(user, _request, new SameUserRequestRequirement()))
                     .Succeeded;
 
-                canApprove = (await _authorizeService.AuthorizeAsync(user, data, new SameUserApprovedRequirement()))
+                canApprove = (await _authorizeService.AuthorizeAsync(user, _request, new SameUserApprovedRequirement()))
                     .Succeeded;
 
-                disableTextbox = data?.StatusId == (int)RequestStatus.Approved;
+                disableTextbox = _request?.StatusId == (int)RequestStatus.Approved;
 
                 _dataVersion++;
             }
@@ -159,7 +166,7 @@ namespace TrapchumApp.Pages.Transactions.LoanRequests
         async Task DisbruseLoanRequestNow()
         {
 
-            if (data is null) return;
+            if (_request is null) return;
 
             var disburseRequestLoanUrl = $"/App/Loans/{LoanRequestId}/Disbursements/{BranchId}/Branches/CreateNew?CustomerId={CustomerId}";
 

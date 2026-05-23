@@ -1,6 +1,11 @@
-﻿using Applications.Features.Branches.Dtos;
+﻿using Applications.Bases;
+using Applications.Constants.Authorizations;
+using Applications.Extensions.Identity.Authorizations.Extensions;
+using Applications.Features.Branches.Dtos;
 using Applications.Features.Branches.Queries.GetBranchAsPaging;
 using Applications.Features.Employees.Queries.GetEmployeeAsPaging;
+using Applications.Features.Identity.Command.DeleteUser;
+using Applications.Features.Identity.Command.ToggleUserActive;
 using Applications.Features.Identity.Users;
 using Applications.Interfaces.Employees;
 using Applications.Responses.ViewModels.Auths;
@@ -28,6 +33,8 @@ public partial class UserIndexPages
     string? authenticatedUserId = string.Empty;
     bool isLoading = false;
     int counts = 0;
+    bool canDeleteUser = false;
+    bool canUpdateUser = false;
     public UserIndexPages(IUserServiceImpl authService, IEmployeeService empService)
     {
         _authService = authService;
@@ -61,11 +68,15 @@ public partial class UserIndexPages
 
             authenticatedUserId = user.GetId();
 
+            canDeleteUser = await _authorizeService.MustHasPermissionAsync(user, Modules.Users, Actions.Delete);
+
+            canUpdateUser = await _authorizeService.MustHasPermissionAsync(user, Modules.Users, Actions.Update);
+
             await GetBranches();
 
             await LoadAllUsers();
 
-          
+
         }
         catch (Exception ex)
         {
@@ -104,33 +115,28 @@ public partial class UserIndexPages
 
     async Task LoadAllUsers(string? userId = null, string? filter = null)
     {
-        try
+
+        Tracker.Show();
+
+        var param = new QueryParam(pageIndex, pageSize, sortField, sortDescending, includeInactive, filter);
+
+        var resp = await _authService.GetUsersAsync(selectedBranchId, userId, param);
+
+        if (resp.IsSuccess)
         {
-            isLoading = true;
+            counts = resp.Data.Count;
 
-            var param = new QueryParam(pageIndex, pageSize, sortField, sortDescending, includeInactive, filter);
-
-            var resp = await _authService.GetUsersAsync(selectedBranchId, userId, param);
-
-            if (resp.IsSuccess)
-            {
-                counts = resp.Data.Count;
-
-                AllUsers = resp.Data.Items;
-            }
-            else
-            {
-                NotificationService.Notify(NotificationSeverity.Error, "Error");
-            }
-
-            isLoading = false;
-
-            StateHasChanged();
+            AllUsers = resp.Data.Items;
         }
-        catch (Exception ex)
+        else
         {
-            await Console.Out.WriteLineAsync(ex.Message);
+            NotificationService.Notify(NotificationSeverity.Error, "Error");
         }
+
+        Tracker.Hide();
+
+        StateHasChanged();
+
     }
 
 
@@ -152,82 +158,6 @@ public partial class UserIndexPages
         await LoadAllUsers(string.Empty, filterText);
 
     }
-
-    //protected async void SubmitForm()
-    //{
-    //    try
-    //    {
-    //        form.EditContext?.Validate();
-
-    //        var result = await _authService.CreateUserAsync(model);
-
-    //        if (result.IsSuccess)
-    //        {
-    //            IsSuccess = true;
-    //            NotificationService.Notify(NotificationSeverity.Success, "New user was created.");
-    //            model = new();
-    //            StateHasChanged();
-    //        }
-    //        else
-    //        {
-    //            NotificationService.Notify(NotificationSeverity.Error, result.ErrMessage);
-    //        }
-
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        IsSuccess = false;
-
-    //        NotificationService.Notify(NotificationSeverity.Error, ex.Message);
-    //    }
-
-
-    //}
-
-    //protected async Task SelectBranchChanged()
-    //{
-    //    if (model.BranchRefId > 0)
-    //    {
-
-    //        var query = new GetEmployeeAsPagingQuery(model.BranchRefId, string.Empty, new QueryParam(0, 15));
-
-    //        var rsp = await mediator.Send(query);  //_empService.GetEmployeesAsync(string.Empty, model.BranchRefId);
-
-    //        bEmployees = rsp.Items;
-
-    //    }
-    //    else
-    //    {
-    //        model.BranchRefId = 0;
-    //    }
-    //    model.Username = "";
-    //    model.Email = "";
-    //    model.EmployeeId = string.Empty;
-    //}
-    //protected void SelectedEmployeeChanged()
-    //{
-
-    //    var selectedEmployee = bEmployees.FirstOrDefault(x => x.EmployeeId == model.EmployeeId);
-
-    //    if (selectedEmployee is not null)
-    //    {
-    //        var username = selectedEmployee.FullName!.Split(" ");
-
-    //        model.Username = $"{username[0]}{username[1]}".ToLower();
-
-    //        model.Email = $"{username[0]}{username[1]}@gmail.com".ToLower();
-
-    //        model.EmployeeId = selectedEmployee.EmployeeId;
-    //    }
-    //    else
-    //    {
-    //        model.Username = "";
-    //        model.Email = "";
-    //        model.EmployeeId = string.Empty;
-    //    }
-    //    Console.WriteLine(selectedEmployee!.EmployeeId);
-    //}
-   
     private async Task SelectedBranchChanged(object? args)
     {
         pageIndex = 0;
@@ -237,6 +167,98 @@ public partial class UserIndexPages
             selectedBranchId = ((VBranch)args).BranchId!.Value;
 
             await LoadAllUsers(string.Empty);
+        }
+    }
+
+    private async Task DeleteUser(string? userId)
+    {
+        ContextMenuService.Close();
+
+        if (string.IsNullOrWhiteSpace(userId)) return;
+
+        if (!canDeleteUser)
+        {
+            NotificationService.Notify(NotificationSeverity.Warning, "Access Denied", "You do not have permission to delete users.");
+            return;
+        }
+
+        if (userId == authenticatedUserId)
+        {
+            NotificationService.Notify(NotificationSeverity.Warning, "Not Allowed", "You cannot delete your own account.");
+            return;
+        }
+
+        var confirm = await MsgBox.ShowAsync("Deleting this user cannot be undone. Would you like to continue?",
+            "Confirm Delete",
+            MsgBoxButtons.YesNo,
+            MsgBoxBoxIcon.Question);
+
+        if (confirm == MsgBoxResult.No) return;
+
+        var command = new DeleteUserCommand(userId);
+
+        var result = await mediator.Send(command);
+
+        if (result.Value.Status == DeleteStatus.Success)
+        {
+            _toastService.ShowSuccess("User was deleted successfully!");
+
+            await LoadAllUsers(filter: filterText);
+
+            return;
+        }
+
+
+
+
+        _toastService.ShowError("Failed to delete user.", "Delete user");
+
+    }
+
+    private async Task ToggleUserActive(string? userId, bool isCurrentlyActive)
+    {
+        ContextMenuService.Close();
+
+        if (string.IsNullOrWhiteSpace(userId)) return;
+
+        if (!canUpdateUser)
+        {
+            NotificationService.Notify(NotificationSeverity.Warning, "Access Denied", "You do not have permission to activate/deactivate users.");
+
+            return;
+        }
+
+        if (userId == authenticatedUserId)
+        {
+            NotificationService.Notify(NotificationSeverity.Warning, "Not Allowed", "You cannot change the status of your own account.");
+            return;
+        }
+
+        var action = isCurrentlyActive ? "deactivate" : "activate";
+
+        var confirm = await MsgBox.ShowAsync(
+            $"Are you sure you want to {action} this user?",
+            "Confirm",
+            MsgBoxButtons.YesNo,
+            MsgBoxBoxIcon.Question);
+
+        if (confirm == MsgBoxResult.No) return;
+
+        var command = new ToggleUserActiveCommand(userId);
+
+        var result = await mediator.Send(command);
+
+        if (result.IsSuccess())
+        {
+            var label = isCurrentlyActive ? "deactivated" : "activated";
+
+            NotificationService.Notify(NotificationSeverity.Success, "User Status", $"User was {label} successfully!");
+
+            await LoadAllUsers(filter: filterText);
+        }
+        else
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "User Status", result.FirstError.Description);
         }
     }
 

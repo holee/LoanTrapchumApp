@@ -36,13 +36,20 @@
                 </span>
                 <span>Select All Permissions</span>
             </label>
-            <button type="button" class="perm-restore-btn" @onclick="RestoreDefaults" title="Restore all permissions to saved state">
-                <RadzenIcon Icon="restart_alt" Style="font-size:0.9rem;" />
-                Restore Default
-            </button>
+            <div class="perm-selectall-actions">
+                <RadzenTextBox @bind-Value="_permGroupFilter"
+                               Placeholder="Search group..."
+                               Style="width:16rem;"
+                               @oninput="@((e) => _permGroupFilter = e.Value?.ToString() ?? string.Empty)" />
+                <button type="button" class="perm-restore-btn" @onclick="RestoreDefaults" title="Restore all permissions to saved state">
+                    <RadzenIcon Icon="restart_alt" Style="font-size:0.9rem;" />
+                    Restore Default
+                </button>
+            </div>
         </div>
+        <div class="perm-scroll">
         <RadzenRow>
-            @foreach (var group in _roleClaimsGrouped ?? [])
+            @foreach (var group in FilteredRoleGroups)
             {
                 <RadzenColumn Size="3" SizeMD="3" SizeSM="12">
                     <div class="perm-group">
@@ -77,6 +84,7 @@
  
             }
         </RadzenRow>
+        </div>
            
     </div>
 

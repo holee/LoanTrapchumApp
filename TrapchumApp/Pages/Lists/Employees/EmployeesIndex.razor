@@ -10,7 +10,7 @@
             <GridToolbar SearchChanged="PerformSearch">
                 <LeftChildren>
                     <AddButton OnClick="@CreateNewEmployeeTab" Text="Add Employee" />
-                    
+
                     <div class="rz-p-1">
                         <RadzenCheckBox @bind-Value="includeInActive"
                                         @bind-Value:after="GetIncludeInactive"
@@ -45,7 +45,6 @@
                             LoadData="@LoadData"
                             Responsive="true"
                             Density="Density.Compact"
-                            IsLoading="@isLoading"
                             Count="@counts"
                             PagerPosition="PagerPosition.Bottom"
                             PagerHorizontalAlign="HorizontalAlign.Right"
@@ -61,7 +60,13 @@
                             RowDoubleClick="@OnRowDoubleClick"
                             @ref="@_gridEmployee"
                             CellContextMenu="@ShowCellContextMenu"
+                            ShowHeader="true"
+                            AllowPickAllColumns="true"
+                            AllowColumnPicking="true"
                             TItem="VEmployeeList">
+                <HeaderTemplate>
+
+                </HeaderTemplate>
                 <Columns>
                     <RadzenDataGridColumn Context="c"
                                           Width="5rem"
@@ -79,6 +84,8 @@
                             <KhmerName AltName="@e.AltName" />
                         </Template>
                     </RadzenDataGridColumn>
+                    <RadzenDataGridColumn Title="FirstName" Property="@nameof(VEmployeeList.FirstName)" Visible="false" />
+                    <RadzenDataGridColumn Title="LastName" Property="@nameof(VEmployeeList.LastName)" Visible="false" />
                     <RadzenDataGridColumn Title="Phone" Property="@nameof(VEmployeeList.Phone)" />
                     <RadzenDataGridColumn Title="Department"
                                           Property="@nameof(VEmployeeList.DepartmentName)" />
@@ -97,9 +104,9 @@
                                           Filterable="false"
                                           Context="c">
                         <Template>
-                            <RadzenCheckBox TValue="bool" Value="c.IsActive"
-                                            Name="chkStatus"
-                                            Change="@((arg) => OnCheckChanged(c.EmployeeId,arg))" />
+                            <RadzenBadge Text="@(c.IsActive ? "Active" : "Inactive")"
+                                         BadgeStyle="@(c.IsActive ? BadgeStyle.Success : BadgeStyle.Danger)"
+                                         Shade="Shade.Default" />
                         </Template>
                     </RadzenDataGridColumn>
                     <RadzenDataGridColumn Width="5rem"
@@ -151,7 +158,9 @@
         ContextMenuService.Open(args, BuildEmployeeMenuItems(), me =>
         {
             ContextMenuService.Close();
+
             HandleEmployeeAction(me.Value?.ToString(), id);
+
         });
     }
 
@@ -178,8 +187,8 @@
         switch (value)
         {
             case "1": AddDetailsTab(id); break;
-            case "2": AddEditTab(id);    break;
-            case "3": _ = Delete(id);   break;
+            case "2": AddEditTab(id); break;
+            case "3": _ = DeleteEmployee(id); break;
         }
     }
 

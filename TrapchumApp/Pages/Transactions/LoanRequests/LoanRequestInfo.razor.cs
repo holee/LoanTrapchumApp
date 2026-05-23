@@ -35,7 +35,7 @@ public partial class LoanRequestInfo(ILogger<LoanRequestCreate> logger)
     private IEnumerable<LoanScheduleDtoCreate> previewSchedule = [];
 
     private IEnumerable<VUserLoanSizes> AprovedUsers = [];
-
+    private string? defaultUserId;
     private IEnumerable<VCustomerList> Customers = [];
 
     private IEnumerable<LoanRepaymentModeDto>? LoanRepaymentModes = [];
@@ -81,11 +81,19 @@ public partial class LoanRequestInfo(ILogger<LoanRequestCreate> logger)
     protected override async Task OnInitializedAsync()
     {
 
+
+        await GetApprovedUser(BranchId, null, null);
+
         await GetLoanPurposes();
 
         await GetLoanCategories();
 
         await GetPeriods();
+
+        if (string.IsNullOrEmpty(Model.AprovedUserId))
+        {
+            Model.AprovedUserId = defaultUserId;
+        }
 
         if (CustomerId.IsNotNullOrEmpty() || Model.CustomerRefId.IsNotNullOrEmpty())
         {
@@ -95,6 +103,7 @@ public partial class LoanRequestInfo(ILogger<LoanRequestCreate> logger)
 
             Model.FullName = Customers.FirstOrDefault(x => x.CustomerId == CustomerId)?.AltName ?? string.Empty;
         }
+
 
         await base.OnInitializedAsync();
     }
@@ -149,9 +158,15 @@ public partial class LoanRequestInfo(ILogger<LoanRequestCreate> logger)
 
         var command = new GetApprovedUserQuery(branchId, currencyId, amount, null);
 
-        var rsp = await mediator.Send(command); //loanSettingService.GetAprovedUserAsync(branchId, currencyId, amount);
+        var rsp = await mediator.Send(command);
 
         AprovedUsers = rsp.Value ?? [];
+
+        defaultUserId = AprovedUsers
+                            .Where(x => x.IsDefault == true)
+                            .Select(x => x.UserRefId)
+                            .FirstOrDefault();
+
     }
 
     private async Task GetCustomers(string? customerId, int take = 25, string? filter = null)

@@ -17,8 +17,9 @@
     [Parameter] public string? Value { get; set; } = string.Empty;
     [Parameter] public EventCallback<string?> ValueChanged { get; set; }
     [Parameter] public Expression<Func<string?>>? ValueExpression { get; set; }
-    [Parameter] public TypeOfEnum TypeOf { get; set; } = TypeOfEnum.Position;
+    [Parameter] public TypeOfEnum TypeOf { get; set; } = TypeOfEnum.Job;
     private IEnumerable<OccupationDto> _occupations = [];
+   
     private async Task GetOccupations()
     {
         var command = new GetOccupationsQuery(0, null, TypeOf);

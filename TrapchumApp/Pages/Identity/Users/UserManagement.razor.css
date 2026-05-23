@@ -1,0 +1,324 @@
+.perm-card {
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.perm-selectall-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1.25rem;
+    border-bottom: 2px solid #e9ecef;
+    background: #fff;
+}
+
+.perm-selectall-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    user-select: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #495057;
+}
+
+.perm-selectall-check {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.2rem;
+    height: 1.2rem;
+    border-radius: 4px;
+    background-color: #dee2e6;
+    transition: all 0.2s ease;
+}
+
+.perm-selectall-check--active {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.perm-group {
+    border-bottom: 1px solid #e9ecef;
+}
+
+    .perm-group:last-child {
+        border-bottom: none;
+    }
+
+.perm-group-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.65rem 1.25rem;
+    background: #e9ecef;
+    border-bottom: 1px solid #f1f3f5;
+}
+
+.perm-group-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    user-select: none;
+}
+
+.perm-group-check {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.1rem;
+    height: 1.1rem;
+    border-radius: 4px;
+    background-color: #dee2e6;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.perm-group-check--active {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.perm-group-name {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #343a40;
+}
+
+.perm-group-count {
+    font-size: 0.75rem;
+    color: #868e96;
+    background: #e9ecef;
+    padding: 0.15rem 0.6rem;
+    border-radius: 10px;
+}
+
+.perm-group-body {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    background: #e9ece0;
+    padding: 0.85rem 1.25rem;
+}
+
+/* Permission item pill (checkbox + label) */
+.perm-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.2rem 0.65rem;
+    border-radius: 20px;
+    border: 1px solid #ced4da;
+    background: #fff;
+    cursor: pointer;
+    user-select: none;
+    font-size: 0.78rem;
+    color: #495057;
+    transition: all 0.15s ease;
+}
+
+    .perm-item:hover {
+        border-color: #28a745;
+        background: #f0fff4;
+    }
+
+    .perm-item--active {
+        background: #d4edda;
+        border-color: #28a745;
+        color: #155724;
+        font-weight: 600;
+    }
+
+.perm-item-check {
+    accent-color: #28a745;
+    width: 0.85rem;
+    height: 0.85rem;
+    cursor: pointer;
+}
+
+.perm-item-label {
+    line-height: 1.2;
+}
+
+/* ── Profile Card ─────────────────────────────────────────── */
+.profile-card {
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    overflow: hidden;
+    max-width: 100%;
+    margin: 1.25rem auto;
+    box-shadow: 0 2px 12px rgba(0,0,0,.07);
+}
+
+.profile-card__header {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 1.5rem 1.75rem;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-bottom: 1px solid #dee2e6;
+}
+
+.profile-card__title {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: .15rem;
+}
+
+.profile-card__email {
+    color: #6c757d !important;
+    font-size: .85rem;
+}
+
+.profile-card__badge {
+    display: flex;
+    flex-direction: column;
+    gap: .4rem;
+    align-items: flex-end;
+}
+
+/* Avatar */
+.profile-avatar {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.profile-avatar__img {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,.15);
+}
+
+.profile-avatar__initials {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4f86f7 0%, #1a56db 100%);
+    color: #fff;
+    font-size: 1.75rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,.15);
+    user-select: none;
+}
+
+.profile-avatar__status {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+}
+
+.profile-avatar__status--active {
+    background: #28a745;
+}
+
+.profile-avatar__status--inactive {
+    background: #adb5bd;
+}
+
+/* Body rows */
+.profile-card__body {
+    padding: 1rem 1.75rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
+}
+
+.profile-info-row {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    padding: .55rem .5rem;
+    border-radius: 6px;
+    transition: background .15s;
+}
+
+.profile-info-row:hover {
+    background: #f8f9fa;
+}
+
+.profile-info-row__icon {
+    color: #6c757d;
+    width: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.profile-info-row__label {
+    width: 110px;
+    font-size: .82rem;
+    color: #6c757d;
+    font-weight: 500;
+    flex-shrink: 0;
+}
+
+.profile-info-row__value {
+    font-size: .92rem;
+    color: #212529;
+    font-weight: 500;
+}
+
+.profile-status--active {
+    color: #28a745;
+}
+
+.profile-status--inactive {
+    color: #adb5bd;
+}
+
+/* Camera overlay on avatar */
+.profile-avatar__upload-btn {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: rgba(0,0,0,.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: 2px solid #fff;
+    transition: background .15s;
+}
+
+.profile-avatar__upload-btn:hover {
+    background: rgba(0,0,0,.75);
+}
+
+/* Action row (pending upload) */
+.profile-info-row--action {
+    background: #f0f7ff;
+    border: 1px dashed #4f86f7;
+    border-radius: 6px;
+    flex-wrap: wrap;
+    gap: .5rem;
+}
+
+.profile-upload-filename {
+    color: #1a56db;
+    font-size: .82rem;
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

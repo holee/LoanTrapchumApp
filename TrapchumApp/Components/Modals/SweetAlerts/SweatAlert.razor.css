@@ -1,0 +1,291 @@
+/* ═══════════════════════════════════════════════════════════════
+   SweatAlert – SweetAlert2-style popup
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Popup container ── */
+.swal-popup {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #fff;
+    border-radius: 0.625em;
+    padding: 1.25em 1.875em 1.875em;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    box-shadow: 0 0 0 1px rgba(0,0,0,.04), 0 8px 40px rgba(0,0,0,.18);
+    max-width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+/* ── Entrance animation ── */
+@keyframes swal-in {
+    0%   { transform: scale(0.7); opacity: 0; }
+    45%  { transform: scale(1.05); opacity: 1; }
+    80%  { transform: scale(0.97); }
+    100% { transform: scale(1); }
+}
+
+.swal-animate {
+    animation: swal-in 0.3s ease-out both;
+}
+
+/* ── Close button ── */
+.swal-close-btn {
+    position: absolute;
+    top: 0.625em;
+    right: 0.625em;
+    width: 1.6em;
+    height: 1.6em;
+    background: transparent;
+    border: none;
+    font-size: 1.5em;
+    line-height: 1;
+    cursor: pointer;
+    color: #ccc;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: color .15s, background .15s;
+}
+
+.swal-close-btn:hover {
+    background: rgba(0,0,0,.06);
+    color: #777;
+}
+
+/* ══════════════════════════
+   Icons
+══════════════════════════ */
+.swal-icon {
+    width: 5em;
+    height: 5em;
+    border-radius: 50%;
+    border: 4px solid;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0.625em auto 1.25em;
+    font-size: 1em;
+    flex-shrink: 0;
+}
+
+/* Success */
+.swal-icon--success {
+    border-color: #a5dc86;
+    color: #a5dc86;
+    animation: swal-success-ring 0.35s ease both;
+}
+
+@keyframes swal-success-ring {
+    0%   { transform: scale(0); opacity: 0; }
+    50%  { transform: scale(1.1); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.swal-icon__checkmark {
+    font-size: 2.8em;
+    font-weight: 700;
+    color: #a5dc86;
+    animation: swal-checkmark 0.3s 0.2s ease both;
+    transform-origin: center;
+}
+
+@keyframes swal-checkmark {
+    0%   { transform: scale(0) rotate(-45deg); opacity: 0; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+/* Error */
+.swal-icon--error {
+    border-color: #f27474;
+    color: #f27474;
+    animation: swal-in 0.3s ease both;
+}
+
+.swal-icon__x {
+    font-size: 2.5em;
+    font-weight: 700;
+    color: #f27474;
+}
+
+/* Warning */
+.swal-icon--warning {
+    border-color: #facea8;
+    color: #f8bb86;
+    animation: swal-in 0.3s ease both;
+}
+
+.swal-icon__exclamation {
+    font-size: 2.5em;
+    font-weight: 700;
+    color: #f8bb86;
+}
+
+/* Info */
+.swal-icon--info {
+    border-color: #9de0f6;
+    color: #3fc3ee;
+    animation: swal-in 0.3s ease both;
+}
+
+.swal-icon__i {
+    font-size: 2.2em;
+    font-weight: 700;
+    color: #3fc3ee;
+    font-style: italic;
+}
+
+/* Question */
+.swal-icon--question {
+    border-color: #c9dae1;
+    color: #87adbd;
+    animation: swal-in 0.3s ease both;
+}
+
+.swal-icon__q {
+    font-size: 2.5em;
+    font-weight: 700;
+    color: #87adbd;
+}
+
+/* ── Title ── */
+.swal-title {
+    font-size: 1.4em;
+    font-weight: 600;
+    color: #595959;
+    text-align: center;
+    margin: 0 0 0.4em;
+    line-height: 1.4;
+    padding: 0;
+    word-break: break-word;
+}
+
+/* ── Body ── */
+.swal-body {
+    width: 100%;
+    text-align: center;
+}
+
+.swal-text {
+    font-size: 1em;
+    color: #545454;
+    line-height: 1.5;
+    margin: 0;
+    word-break: break-word;
+    white-space: pre-line;
+}
+
+.swal-html {
+    font-size: 1em;
+    color: #545454;
+    line-height: 1.5;
+    word-break: break-word;
+}
+
+/* ── Input field ── */
+.swal-input-wrap {
+    width: 100%;
+    margin-top: 1em;
+}
+
+.swal-input {
+    width: 100%;
+    border: 1px solid #d9d9d9;
+    border-radius: 0.375em;
+    padding: 0.5em 0.75em;
+    font-size: 1em;
+    color: #545454;
+    background: #fff;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color .2s, box-shadow .2s;
+    font-family: inherit;
+    resize: vertical;
+}
+
+.swal-input:focus {
+    border-color: #3fc3ee;
+    box-shadow: 0 0 0 3px rgba(63, 195, 238, .25);
+}
+
+.swal-validation-msg {
+    margin-top: 0.4em;
+    font-size: 0.85em;
+    color: #f27474;
+    text-align: left;
+}
+
+/* ── Action buttons ── */
+.swal-actions {
+    display: flex;
+    justify-content: center;
+    gap: 0.625em;
+    flex-wrap: wrap;
+    margin-top: 1.5em;
+    width: 100%;
+}
+
+.swal-actions--reversed {
+    flex-direction: row-reverse;
+}
+
+.swal-btn {
+    padding: 0.5625em 1.5em;
+    font-size: 1em;
+    font-weight: 500;
+    font-family: inherit;
+    border: none;
+    border-radius: 0.25em;
+    cursor: pointer;
+    color: #fff;
+    transition: filter .15s, box-shadow .15s;
+    min-width: 6em;
+}
+
+.swal-btn:hover {
+    filter: brightness(0.9);
+    box-shadow: 0 3px 8px rgba(0,0,0,.2);
+}
+
+.swal-btn:active {
+    filter: brightness(0.8);
+}
+
+/* ── Footer ── */
+.swal-footer {
+    margin-top: 1.25em;
+    padding-top: 0.75em;
+    border-top: 1px solid #eee;
+    font-size: 0.85em;
+    color: #8c8c8c;
+    text-align: center;
+    width: 100%;
+}
+
+/* ── Timer progress bar ── */
+.swal-timer-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: rgba(0,0,0,.08);
+    overflow: hidden;
+    border-radius: 0 0 0.625em 0.625em;
+}
+
+.swal-timer-bar__fill {
+    height: 100%;
+    background: #3fc3ee;
+    width: 100%;
+    animation: swal-timer linear forwards;
+    transform-origin: left;
+}
+
+@keyframes swal-timer {
+    0%   { width: 100%; }
+    100% { width: 0%; }
+}

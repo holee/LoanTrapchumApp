@@ -80,7 +80,7 @@
                                 @b.ToString()
                             </Template>
                         </RadzenDataGridColumn>
-                        <RadzenDataGridColumn Width="5rem"
+                        <RadzenDataGridColumn Width="6rem"
                                               Title="Status"
                                               TextAlign="TextAlign.Center"
                                               Filterable="false"
@@ -88,9 +88,10 @@
                                               Sortable="false"
                                               Context="c">
                             <Template>
-                                <RadzenCheckBox TValue="bool?"
-                                                Value="@c.IsActive"
-                                                Change="@((arg) => OnCheckChanged(c.BranchId, arg!.Value))" />
+                                <RadzenBadge Text="@(c.IsActive == true ? "Active" : "Inactive")"
+                                             BadgeStyle="@(c.IsActive == true ? BadgeStyle.Success : BadgeStyle.Danger)"
+                                             Shade="Shade.Light"
+                                             IsPill="true" />
                             </Template>
                         </RadzenDataGridColumn>
                         <AuthorizeView>

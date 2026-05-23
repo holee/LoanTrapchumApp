@@ -327,7 +327,7 @@ public sealed class LoanRepository(ILogger<LoanRepository> logger,
         {
 
             string[] props = ["CustomerName", "AgentName", "Phone", "AltName"];
-            queries = queries.WhereMatchesFilter(param.Filter, props);
+            queries = queries.StartWiths(param.Filter, props);
         }
 
         if (!string.IsNullOrWhiteSpace(param!.SortColumn))

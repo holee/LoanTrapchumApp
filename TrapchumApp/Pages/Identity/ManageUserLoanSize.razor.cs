@@ -25,7 +25,7 @@ public partial class ManageUserLoanSize
 
     private async Task GetUserLoanSizes()
     {
-        isLoading = true;
+        Tracker.Show();
 
         var param = new QueryParam(_pageIndex, pageSize, _sortField, isIncludeInActive, _sortDescending, _filter);
 
@@ -35,7 +35,9 @@ public partial class ManageUserLoanSize
 
         _counts = rsp.Count;
 
-        isLoading = false;
+        Tracker.Hide();
+
+        StateHasChanged();
     }
 
     private async Task LoadData(LoadDataArgs args)
@@ -88,6 +90,13 @@ public partial class ManageUserLoanSize
 
     private async Task ToggleActive(VUserLoanSizes item)
     {
+
+        var text = item.IsActive ? $"Deactivate loan size for '{item.FullName}'?" : $"Activate loan size for '{item.FullName}'?";
+
+        var confirm = await MsgBox.ConfirmAsync(text);
+
+        if(confirm==MsgBoxResult.No) return;
+
         if (item.Id is null || item.UserRefId is null)
         {
 

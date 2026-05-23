@@ -94,7 +94,7 @@ namespace TrapchumApp.Pages.Lists.OtherNames.Guarantors
 
         async Task GetGuarantors(string? filter = null)
         {
-            isLoading = true;
+            Tracker.Show();
 
             var param = new QueryParam(pageIndex, pageSize, sortColumn, includeInactive, sortDescending, filter);
 
@@ -106,7 +106,7 @@ namespace TrapchumApp.Pages.Lists.OtherNames.Guarantors
 
             counts = rsp.Count;
 
-            isLoading = false;
+            Tracker.Hide();
 
             StateHasChanged();
         }

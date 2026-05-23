@@ -105,7 +105,7 @@
                     <RadzenColumn Size="2">
                         <RadzenFormField Text="ភេទ" class="rz-w-100">
                             <ChildContent>
-                                <BlaSalutation @bind-Value="model.Gender" />
+                                <GenderDrowDown @bind-Value="model.Gender" />
                             </ChildContent>
                         </RadzenFormField>
                     </RadzenColumn>
@@ -187,7 +187,7 @@
                 <RadzenColumn Size="12" SizeMD="6">
                     <RadzenFormField Text="តួនាទី" class="rz-w-100">
                         <ChildContent>
-                            <BlaOccupation TypeOf="TypeOfEnum.Position" />
+                            <BlaOccupation TypeOf="TypeOfEnum.Position" @bind-Value="model.Occupation" />
                         </ChildContent>
                     </RadzenFormField>
                 </RadzenColumn>

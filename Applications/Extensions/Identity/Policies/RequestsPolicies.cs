@@ -80,7 +80,6 @@ public partial class Policies
     {
         return new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
-                    .RequireRole(AppRoles.Manager,AppRoles.ChiefBm, AppRoles.Bm, AppRoles.Rbm, AppRoles.Dbm)
                     .RequireClaim(AppClaim.Permission, approve_loanRequest)
                     .Build();
     }

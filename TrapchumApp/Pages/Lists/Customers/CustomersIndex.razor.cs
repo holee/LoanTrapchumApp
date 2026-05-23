@@ -346,11 +346,23 @@ namespace TrapchumApp.Pages.Lists.Customers
         {
             if (args.Data is null) return;
 
+            var searchMatching = !string.IsNullOrEmpty(filterText) &&
+                                 (args.Data!.FullName?.Contains(filterText, StringComparison.OrdinalIgnoreCase) == true ||
+                                  args.Data!.AltName?.Contains(filterText, StringComparison.OrdinalIgnoreCase) == true ||
+                                  args.Data!.FirstName?.Contains(filterText, StringComparison.OrdinalIgnoreCase) == true ||
+                                  args.Data!.LastName?.Contains(filterText, StringComparison.OrdinalIgnoreCase) == true ||
+                                  args.Data!.Phone?.Contains(filterText, StringComparison.OrdinalIgnoreCase) == true);
+
             args.Data.RowIndex = args.Index + 1;
 
             if (args.Data!.IsLoanActive)
             {
                 args.Attributes.Add("style", "font-weight:bold;color:red;background-color:yellow;");
+            }
+
+            if (searchMatching)
+            {
+                args.Attributes.Add("class", "rz-state-highlight rz-data-row recently-edited");
             }
 
             if (args.Data!.ModifiedDT.IsRecently())
