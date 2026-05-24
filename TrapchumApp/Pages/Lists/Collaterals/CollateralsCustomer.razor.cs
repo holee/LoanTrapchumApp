@@ -97,7 +97,8 @@ namespace TrapchumApp.Pages.Lists.Collaterals
                 CollateralLines = resp.Value;
             }
 
-            await refGrid.Reload();
+            if (refGrid is not null)
+                await refGrid.Reload();
 
             StateHasChanged();
         }

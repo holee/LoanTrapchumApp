@@ -4,31 +4,17 @@
 @using TrapchumApp.Components.Actionbars
 @attribute [MustHasPermission(Modules.LoanRequest, Actions.Create)]
 <PageTitle>Create New</PageTitle>
-<AppActions>
-    <RadzenButton Size="@Styles.DefaultSize"
-                  Click="@HandleCreateNew"
-                  Text="Save"
-                  Icon="@IconNames.Save"
-                  ButtonStyle="ButtonStyle.Primary" />
-    <RadzenButton Size="@Styles.DefaultSize"
-                  Click="HandleCreateRequest"
-                  Text="Request Now"
-                  Icon="@IconNames.RequestQuote"
-                  ButtonStyle="ButtonStyle.Success" />
-    <RadzenLink Path="@_navService.PreviousUrl"
-                Icon="@IconNames.ArrowCircleLeft"
-                IconColor="@Colors.Danger"
-                Text="Back" />
-</AppActions>
 <EditForm Model="model" @ref="editForm">
     <Blazilla.FluentValidator />
     <input type="hidden" @bind="model.CreditAgentRefId" />
-    <RadzenCard Variant="Variant.Outlined" class="rz-background-color-base-300">
-        <RadzenTabs RenderMode="TabRenderMode.Client"
-                    SelectedIndex="@selectedTabIndex"
-                    Change="@SelectTabIndexChanged">
-            <Tabs>
-                <RadzenTabsItem Text="សំណើរ" Icon="@IconNames.RequestQuote">
+    <RadzenCard class="rz-px-2 rz-shadow-2 rz-border-radius-2 rz-overflow-hidden">
+        <RadzenSteps SelectedIndex="@selectedTabIndex"
+                     Change="@SelectTabIndexChanged"
+                     Transition="StepsTransition.Fade"
+                     Style="background:var(--rz-light);"
+                     class="loan-steps">
+            <Steps>
+                <RadzenStepsItem Text="សំណើរ" Icon="@IconNames.RequestQuote">
                     <RadzenCard class="rz-shadow-0 rz-mt-2 rz-background-color-base-200">
                         <LoanRequestInfo CustomerId="@CustomerId" BranchId="@BranchId" Model="@model" />
                     </RadzenCard>
@@ -46,8 +32,8 @@
                             </RadzenColumn>
                         </RadzenRow>
                     </RadzenCard>
-                </RadzenTabsItem>
-                <RadzenTabsItem Text="អ្នករួមខ្ខី" Icon="@IconNames.Group">
+                </RadzenStepsItem>
+                <RadzenStepsItem Text="អ្នករួមខ្ខី" Icon="@IconNames.Group">
                     <CoRequestCustomerBox Customers="@CoCustomers"
                                           ShowCommand="true"
                                           ShowAdd="true"
@@ -61,8 +47,8 @@
                         </SearchBoxTemplate>
                     </CoRequestCustomerBox>
 
-                </RadzenTabsItem>
-                <RadzenTabsItem Text="ទ្រព្យសម្បត្តិបញ្ចាំ" Icon="@IconNames.Collaterals">
+                </RadzenStepsItem>
+                <RadzenStepsItem Text="ទ្រព្យសម្បត្តិបញ្ចាំ" Icon="@IconNames.Collaterals">
                     <LoanRequestCollaterals CustomerId="CustomerId"
                                             ShowCommand="true"
                                             ShowAdd="true"
@@ -78,8 +64,8 @@
                                                   SingleSelected="SingleSelected" />
                         </SearchBoxTemplate>
                     </LoanRequestCollaterals>
-                </RadzenTabsItem>
-                <RadzenTabsItem Text="អ្នកធានា" Icon="@IconNames.Group">
+                </RadzenStepsItem>
+                <RadzenStepsItem Text="អ្នកធានា" Icon="@IconNames.Group">
                     <LoanRequestGaurantor Guarantors="Guarantors"
                                           ShowAdd="true"
                                           Add="AddGuarantors"
@@ -94,30 +80,31 @@
                                                  SelectMany="SelectMany" />
                         </SearchBoxTemplate>
                     </LoanRequestGaurantor>
-                </RadzenTabsItem>
+                </RadzenStepsItem>
 
-                <RadzenTabsItem Text="ឯកសារភ្ជាប់" Icon="@IconNames.AttachFile">
+                <RadzenStepsItem Text="ឯកសារភ្ជាប់" Icon="@IconNames.AttachFile">
                     <LoanRequestDocument Documents="@Documents"
                                          UploadDocument="@HandleFileDialogue"
                                          RemoveDocument="@RemoveFile"
                                          @ref="DocumentRef"
                                          @key="@Guid.NewGuid().ToString("N")"
                                          ShowDelete="true" />
-                </RadzenTabsItem>
+                </RadzenStepsItem>
 
-                <RadzenTabsItem Text="អតិថិជន" Icon="@IconNames.Customers">
-                    <CustomerRequest CustomerId="@CustomerId" ShowAdditionalInfo="true" @key="@Guid.NewGuid().ToString("N")" />
-                </RadzenTabsItem>
-            </Tabs>
-        </RadzenTabs>
+                <RadzenStepsItem Text="អតិថិជន" Icon="@IconNames.Customers">
+                    <CustomerRequest CustomerId="@CustomerId"
+                                     ShowAdditionalInfo="true"
+                                     @key="@Guid.NewGuid().ToString("N")" />
+                </RadzenStepsItem>
+            </Steps>
+        </RadzenSteps>
     </RadzenCard>
 
     <RadzenStack Orientation="Orientation.Horizontal"
                  JustifyContent="JustifyContent.End"
                  AlignItems="AlignItems.Center"
                  Gap="0.5rem"
-                 class="rz-p-2 rz-my-2 rz-border-radius-2"
-                 Style="background: linear-gradient(135deg, var(--rz-base-200), var(--rz-base-300)); border: 1px solid var(--rz-base-400); box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+                 class="action-bar rz-mt-2 rz-p-3 rz-border-radius-2">
         <RadzenButton Size="@Styles.DefaultSize"
                       Click="@HandleCreateNew"
                       Text="Save"
@@ -125,7 +112,7 @@
                       ButtonStyle="ButtonStyle.Primary" />
         <RadzenButton Size="@Styles.DefaultSize"
                       Click="HandleCreateRequest"
-                      Text="Request"
+                      Text="Request Now"
                       Icon="@IconNames.RequestQuote"
                       ButtonStyle="ButtonStyle.Success" />
         <RadzenLink Path="@_navService.PreviousUrl"

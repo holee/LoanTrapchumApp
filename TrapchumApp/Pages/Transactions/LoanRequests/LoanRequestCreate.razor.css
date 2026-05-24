@@ -1,3 +1,33 @@
-﻿::deep .rz-tabview-panels {
-    padding: 0.75rem 0;
+﻿/* Step wizard header */
+::deep .loan-steps .rz-steps {
+    padding: 1rem 1.25rem 0;
+    background-color: var(--rz-base-100);
+    border-bottom: 1px solid var(--rz-base-300);
+}
+
+/* Step number circles */
+::deep .loan-steps .rz-steps-item .rz-steps-number {
+    width: 2rem;
+    height: 2rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+/* Step content panel */
+::deep .loan-steps .rz-steps-content {
+    padding: 1.25rem;
+    background-color: var(--rz-base-background-color);
+}
+
+/* Remove default inner card borders inside steps */
+::deep .loan-steps .rz-card {
+    border: none;
+    box-shadow: none;
+}
+
+/* Bottom action bar */
+.action-bar {
+    background: var(--rz-base-100);
+    border: 1px solid var(--rz-base-300);
+    box-shadow: 0 -1px 4px rgba(0, 0, 0, 0.06);
 }
